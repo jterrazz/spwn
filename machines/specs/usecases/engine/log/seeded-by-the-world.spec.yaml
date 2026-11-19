@@ -1,0 +1,15 @@
+description: 'engine.log answers the lines the world gives this Mac, a secret withheld'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'world engine-log macbook-pro ''engine started'''
+      exit: 0
+    - command: 'world engine-log macbook-pro ''ping https://u:hunter2@example.com/x ok'''
+      exit: 0
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out else .error | {code, message} end'''
+      stdin: |
+          {"v":2,"id":"1","call":"engine.log","in":{}}
+      exit: 0
+      stdout: |
+          {"Lines":["engine started","ping https://withheld@example.com/x ok"]}

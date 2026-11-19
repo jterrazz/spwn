@@ -128,6 +128,9 @@ type Mac struct {
 	// value: the programs a need of station is provided by that this Mac has
 	// not installed (tailscale, studio); its hypervisor is Hypervisor's.
 	Absent []string `json:"absent,omitempty"`
+	// value: the lines station wrote in this Mac's engine log, the oldest
+	// first, read in place of the file of the run's own state folder.
+	EngineLog []string `json:"engine_log,omitempty"`
 	// value: the station version this Mac runs; empty, the spec binary's.
 	Station string `json:"station,omitempty"`
 	// value: the calls that older station does not serve, until an upgrade.

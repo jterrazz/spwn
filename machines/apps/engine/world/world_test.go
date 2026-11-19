@@ -161,3 +161,18 @@ func TestTwoMacsHoldingOneVMNameAnswerTheFirstByName(t *testing.T) {
 		}
 	}
 }
+
+func TestAnEngineLogEventAppendsALineToItsMacsLog(t *testing.T) {
+	w := seeded(t, laptop)
+	for _, line := range []string{"engine started", "vm linux-1 up"} {
+		if err := apply(t, w, "engine-log", "mini", line); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if got := w.Macs["mini"].EngineLog; strings.Join(got, "|") != "engine started|vm linux-1 up" || len(w.Macs["mbp"].EngineLog) != 0 {
+		t.Errorf("logs = %q on mini, %q on mbp; want the two lines on mini alone", got, w.Macs["mbp"].EngineLog)
+	}
+	if err := apply(t, w, "engine-log", "nowhere", "x"); err == nil {
+		t.Error("a line for a Mac the world does not know was taken")
+	}
+}

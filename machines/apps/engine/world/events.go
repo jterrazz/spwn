@@ -36,6 +36,7 @@ func events() []event {
 		{"offline", []string{"<mac>"}, offline(true)},
 		{"online", []string{"<mac>"}, offline(false)},
 		{"engine-crash", []string{"<mac>"}, engineCrash},
+		{"engine-log", []string{"<mac>", "<line>"}, writeEngineLog},
 		{"crash", []string{"<vm>"}, ended(machines.RunEnd{Reason: machines.Crashed, ExitCode: 1})},
 		{"poweroff-inside", []string{"<vm>"}, ended(machines.RunEnd{Reason: machines.GuestPoweroff})},
 		{"reboot-inside", []string{"<vm>"}, ended(machines.RunEnd{Reason: machines.GuestReboot})},
@@ -221,6 +222,15 @@ func writeConsole(w *World, args []string) error {
 		return err
 	}
 	v.Console = append(v.Console, args[1])
+	return nil
+}
+
+func writeEngineLog(w *World, args []string) error {
+	m, err := w.known(args[0])
+	if err != nil {
+		return err
+	}
+	m.EngineLog = append(m.EngineLog, args[1])
 	return nil
 }
 

@@ -111,6 +111,8 @@ type worldRun struct {
 type worldMac struct {
 	run  *worldRun
 	name string
+	// value: where this Mac's engine log is, as its paths say.
+	logPath string
 
 	// invariant: serving guards start and served: a far Mac is served by the
 	// first caller that needs it, from any of the engines' goroutines.
@@ -273,6 +275,8 @@ func (m *worldMac) system(h local.System, cat catalog.Catalog) local.System {
 	h.Sockets = worldSockets{Sockets: h.Sockets, m: m}
 	return h
 }
+
+func (m *worldMac) logAt(state string) { m.logPath = engine.LogPath(state) }
 
 func (m *worldMac) hypervisor(name string, install catalog.Install) contract.Hypervisor {
 	return machinesfake.HypervisorOf(m.run.w, m.name, name, install)
@@ -528,6 +532,9 @@ type worldFS struct {
 }
 
 func (f worldFS) Stat(p string) (fs.FileInfo, error) {
+	if text, ok := f.engineLog(p); ok {
+		return plistInfo{name: filepath.Base(p), size: int64(len(text))}, nil
+	}
 	if p != f.plist {
 		info, err := f.FS.Stat(p)
 		if err != nil && f.files.Has(p) {
@@ -544,6 +551,35 @@ func (f worldFS) Stat(p string) (fs.FileInfo, error) {
 	}
 	return plistInfo{name: filepath.Base(p)}, nil
 }
+
+// invariant: the lines the world gives a Mac's engine log are its file, read
+// whole as one, whatever the run's own state folder holds.
+func (f worldFS) engineLog(p string) (string, bool) {
+	if p != f.m.logPath {
+		return "", false
+	}
+	lines := f.m.slice().EngineLog
+	if len(lines) == 0 {
+		return "", false
+	}
+	return strings.Join(lines, "\n") + "\n", true
+}
+
+func (f worldFS) Open(p string) (fs.File, error) {
+	text, ok := f.engineLog(p)
+	if !ok {
+		return f.FS.Open(p)
+	}
+	return &logFile{Reader: bytes.NewReader([]byte(text)), info: plistInfo{name: filepath.Base(p), size: int64(len(text))}}, nil
+}
+
+type logFile struct {
+	*bytes.Reader
+	info plistInfo
+}
+
+func (f *logFile) Stat() (fs.FileInfo, error) { return f.info, nil }
+func (*logFile) Close() error                 { return nil }
 
 func (f worldFS) Glob(pattern string) ([]string, error) {
 	found, err := f.FS.Glob(pattern)
@@ -607,10 +643,11 @@ func (f worldFS) RemoveAll(p string) error {
 type plistInfo struct {
 	name string
 	dir  bool
+	size int64
 }
 
 func (i plistInfo) Name() string { return i.name }
-func (plistInfo) Size() int64    { return 0 }
+func (i plistInfo) Size() int64  { return i.size }
 func (i plistInfo) Mode() fs.FileMode {
 	if i.dir {
 		return fs.ModeDir | 0o755

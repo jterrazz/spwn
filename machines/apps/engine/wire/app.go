@@ -322,6 +322,7 @@ func resolve(raw local.System, door darwin.Door, vars map[string]string, world *
 	paths := pathsOf(h.Env.Home(), vars)
 	st := newStores(h.FS, paths)
 	if world != nil {
+		world.logAt(paths.State)
 		world.stores(st)
 	}
 	registered, _ := st.name().Get()
