@@ -42,7 +42,6 @@ export const ON_DISK: readonly Row[] = [
 ];
 
 export const STARTING: readonly Row[] = [
-    { key: 'Names this Mac', value: "From the Mac's own name" },
     { key: 'Runs at login', value: 'From now on the engine starts with the Mac' },
     { key: 'Asks once', value: 'macOS asks to let station reach the local network' },
 ];

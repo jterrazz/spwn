@@ -20,6 +20,7 @@ export const OWN_STATE_TONES: Tones<OwnState> = {
     'no-answer': 'plain',
     'not-given': 'plain',
     'not-measured': 'plain',
+    'not-started': 'plain',
     'not-wired': 'plain',
     reading: 'new',
     unknown: 'warn',

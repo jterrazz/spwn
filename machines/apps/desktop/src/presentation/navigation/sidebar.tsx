@@ -56,7 +56,9 @@ function QuietFoot() {
     const { state } = useCore();
     return (
         <div className={styles.foot}>
-            <StateDot {...coreState(state.kind)} />
+            <StateDot
+                {...(state.kind === 'installed' ? ownState('not-started') : coreState(state.kind))}
+            />
             <span className={styles.footText}>{CORE_FOOT_WORDS[state.kind]}</span>
         </div>
     );

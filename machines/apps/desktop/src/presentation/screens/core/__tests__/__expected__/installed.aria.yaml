@@ -13,7 +13,7 @@
     - button "Skills" [disabled]
     - button "Settings" [disabled]
   - button "Storage" [disabled]
-  - img "installed"
+  - img "not started"
   - text: Engine not started
 - main:
   - button "Show or hide the sidebar"
@@ -30,7 +30,6 @@
       - listitem: spwn The agents ~/.local/bin
     - paragraph: Starting the engine
     - list "Starting the engine":
-      - listitem: Names this Mac From the Mac's own name
       - listitem: Runs at login From now on the engine starts with the Mac
       - listitem: Asks once macOS asks to let station reach the local network
     - button "Start the engine"

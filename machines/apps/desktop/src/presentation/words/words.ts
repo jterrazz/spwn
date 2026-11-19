@@ -27,6 +27,7 @@ export const OWN_STATE_WORDS = {
     'no-answer': 'no answer',
     'not-given': 'not given yet',
     'not-measured': 'not measured',
+    'not-started': 'not started',
     'not-wired': 'not wired',
     reading: 'reading',
     unknown: 'unknown',
