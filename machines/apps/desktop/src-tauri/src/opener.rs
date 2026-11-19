@@ -17,7 +17,7 @@ pub const NOT_OPENED: &str = "opener.not-opened";
 pub const URL_LIMIT: usize = 2048;
 pub const COMMAND_LIMIT: usize = 1024;
 
-const FOLDER: &str = "station-window-open";
+const FOLDER: &str = "spwn-window-open";
 const SUFFIX: &str = ".command";
 
 #[derive(Debug, PartialEq, Serialize)]

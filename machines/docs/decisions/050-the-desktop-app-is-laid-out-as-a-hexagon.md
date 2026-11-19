@@ -18,3 +18,7 @@ The owner decided on 2026-11-15 ("parfait ton idée", after seeing the tree).
 3. **Imports point inward**, and `composition/compose.ts` is the only importer of infrastructure.
 4. **The move is behaviour-neutral** and lands in several commits after the rename.
 5. **The Cargo crate name `station-window` and the Tauri identifier stay**: they name the installed app, and changing them would change what is installed.
+
+## Amended
+
+Decision 5 is superseded on the owner's word of 2026-11-18 (Proposed until the owner accepts this amendment): the window is named spwn, its crate `spwn-window` and its identifier `com.jterrazz.spwn`, with no migration of what the old identifier stored ([the window's page](../../apps/desktop/README.md#its-name)).

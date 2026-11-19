@@ -26,11 +26,11 @@ tauri_open() {
     mkdir -p "$window/.artifacts"
     (cd "$window" && npm run build) >"$window/.artifacts/tauri-vite.log" 2>&1
     tauri_inputs_dated
-    # hazard: the binary cargo leaves at debug/station-window is the last copy's to build, whichever folder it
+    # hazard: the binary cargo leaves at debug/spwn-window is the last copy's to build, whichever folder it
     # hazard: is: each copy builds and takes its own under one lock, and opens that one.
     (cd "$window/src-tauri" && flock "$CARGO_TARGET_DIR/.window-binary.lock" sh -c \
-        'cargo build -j "$1" --features tauri/custom-protocol && cp "$CARGO_TARGET_DIR/debug/station-window" "$2"' \
-        build "${TAURI_JOBS:-6}" "$window/.artifacts/station-window") >"$window/.artifacts/tauri-cargo.log" 2>&1
+        'cargo build -j "$1" --features tauri/custom-protocol && cp "$CARGO_TARGET_DIR/debug/spwn-window" "$2"' \
+        build "${TAURI_JOBS:-6}" "$window/.artifacts/spwn-window") >"$window/.artifacts/tauri-cargo.log" 2>&1
     sandbox=$(mktemp -d)
     local socket=$sandbox/engine.sock
     mkdir -p "$sandbox/config" "$sandbox/data" "$sandbox/state" "$sandbox/cache" "$sandbox/runtime"
@@ -54,15 +54,15 @@ tauri_open() {
 tauri_launch() {
     HOME=$sandbox XDG_CONFIG_HOME=$sandbox/config XDG_DATA_HOME=$sandbox/data XDG_STATE_HOME=$sandbox/state \
         XDG_CACHE_HOME=$sandbox/cache XDG_RUNTIME_DIR=$sandbox/runtime STATION_ENGINE_SOCKET=$sandbox/engine.sock \
-        "$window/.artifacts/station-window" >>"$window/.artifacts/tauri-window.log" 2>&1 &
+        "$window/.artifacts/spwn-window" >>"$window/.artifacts/tauri-window.log" 2>&1 &
     app=$!
     win=
     for _ in $(seq 1 120); do
-        win=$(xdotool search --onlyvisible --pid "$app" --name '^Station$' 2>/dev/null | head -1 || true)
+        win=$(xdotool search --onlyvisible --pid "$app" --name '^spwn$' 2>/dev/null | head -1 || true)
         [ -n "$win" ] && break
         sleep 0.5
     done
-    [ -n "$win" ] || { echo "no Station window of pid $app appeared on $DISPLAY" >&2; return 1; }
+    [ -n "$win" ] || { echo "no spwn window of pid $app appeared on $DISPLAY" >&2; return 1; }
     xdotool windowsize "$win" "${TAURI_WIDTH:-1440}" "${TAURI_HEIGHT:-1000}"
     xdotool windowmove "$win" 0 0
     sleep 8

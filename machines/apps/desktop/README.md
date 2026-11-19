@@ -1,6 +1,6 @@
-# Station's window
+# spwn, the desktop window
 
-The desktop window of station: a Tauri 2 shell around a React page set, and a client of the engine's socket. It shows what a Mac's engine answers through `station.api/v2` and decides nothing itself.
+The desktop window of station, named spwn: a Tauri 2 shell around a React page set, and a client of the engine's socket. It shows what a Mac's engine answers through `station.api/v2` and decides nothing itself.
 
 | Folder                           | Holds                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 | -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -262,6 +262,14 @@ In the world build the only door is `station guest serve --stdio`, which on a Ma
 - A button takes one of five looks, named once in `BUTTON_VARIANTS` (`src/presentation/ui/button.tsx`): `primary` leads a screen, `plain` is any other gesture, `link` reads as a sentence, `danger` opens a destruction, and `destroy`, the filled danger, only confirms one. `destroy` is drawn by `ConfirmDialog` alone, and the button spec fails a page that names it.
 - A component's states are its stories: a plain array of `{ name, props }` (`Story`, `src/presentation/ui/story.ts`) in `<component>.stories.ts(x)` beside it, covering each variant and the data states it can meet (empty, long text, missing, withheld, disabled). The gallery renders one entry per component, grouped by layer, from `src/presentation/screens/gallery/entries.ts`, and its spec fails a component `src/presentation/ui/index.ts` exports without an entry. A kit component a page draws in states of its own has its stories beside it too: `OpenButton`'s, drawn on an engine of its own whose opener is `NO_OPENER` (`OpenButtonSample`), so the gallery opens nothing.
 - A read asked again draws nothing: no refreshing mark, no `Reading` over an answer already shown, proved by the engine's react spec. A link still connecting is the sidebar foot's `Engine connecting`, its word `OWN_STATE_WORDS.connecting`, never a read under way.
+
+## Its name
+
+The window names itself spwn, on the owner's word of 2026-11-18; the engine, the CLI and the menu bar app keep station's name.
+
+- `src-tauri/tauri.conf.json` gives the product name `spwn`, so a bundle is `spwn.app`, the window's title `spwn` and the identifier `com.jterrazz.spwn`; `index.html`'s title is `spwn` too.
+- The binary is the crate's name, `spwn-window` (`src-tauri/Cargo.toml`), never `spwn`, which is the CLI's name on a PATH.
+- What the window reads of the engine keeps its words: the socket (`…/station/engine.sock`), `STATION_ENGINE_SOCKET` and `@jterrazz/station-api`. The window's own `STATION_WINDOW_OPENED`, the npm member `station-desktop` and the route's storage key `station.window.route` keep theirs too: no person reads them.
 
 ## The window's chrome on a Mac
 
