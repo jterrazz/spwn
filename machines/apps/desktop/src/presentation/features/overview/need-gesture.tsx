@@ -2,6 +2,7 @@ import type {
     AccountsProgram,
     CallName,
     MachinesMacView,
+    MachinesStartInput,
     OverviewNeed,
     Target,
 } from '@jterrazz/station-api';
@@ -27,6 +28,7 @@ import {
     removeInputOf,
     restartInputOf,
     startInputOf,
+    startVmInputOf,
     updateInputOf,
 } from '../../words/provisional';
 import type { NeedCall } from '../../words/provisional';
@@ -125,8 +127,30 @@ function Lifecycle(props: Props) {
     return <Said {...props} />;
 }
 
+function Retry(props: Props & { input: MachinesStartInput }) {
+    const { need, macs, input } = props;
+    const found = findMachine(macs, need.Machine);
+    if (found?.vm) {
+        return (
+            <Fix
+                {...props}
+                call="machines.start"
+                input={input}
+                kind={machineKindOf(found.vm)}
+                rereads={LIFECYCLE_REREADS}
+                subject={input.VM}
+            />
+        );
+    }
+    return <Said {...props} />;
+}
+
 function Call(props: Props) {
     const { need } = props;
+    const retry = startVmInputOf(need);
+    if (retry) {
+        return <Retry {...props} input={retry} />;
+    }
     if (restartInputOf(need)) {
         return <Lifecycle {...props} />;
     }

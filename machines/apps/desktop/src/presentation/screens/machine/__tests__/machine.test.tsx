@@ -1,8 +1,10 @@
-import { clock, component, content, file, heading } from '@jterrazz/test';
+import { button, clock, component, content, enabled, file, heading } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { pageOver } from '../../../../composition/__tests__/page-over';
 import { recordingsOf } from '../../../../infrastructure/outbound/engine-replay/recordings';
+import { recordingOf } from '../../../../infrastructure/outbound/engine-replay/replay';
+import type { Recording } from '../../../../infrastructure/outbound/engine-replay/replay';
 
 const recordingFor = await recordingsOf(
     'creating',
@@ -16,7 +18,27 @@ function overviewOver(world: string, machine = 'macbook-pro') {
     return pageOver(recordingFor(world), { machine, page: 'machine', tab: 'Overview' });
 }
 
+function notCreated(recording: Recording): Recording {
+    const said = JSON.stringify(recording).replaceAll(
+        '"Gestures":["start"]',
+        '"Gestures":["try-again"]',
+    );
+    return recordingOf(JSON.parse(said));
+}
+
 describe('machine', () => {
+    test("a machine whose create failed offers Try again in its header, the engine's word, and no Start", async () => {
+        // Given - api's page over two-macs, its engine offering the gesture try-again where it offered start
+        const failed = notCreated(recordingFor('two-macs'));
+        const route = { machine: 'api', page: 'machine', tab: 'Overview' } as const;
+        const result = await component.render(pageOver(failed, route), async (visitor) => {
+            // Then - its header offers Try again, never Start
+            await visitor.see(enabled(button('Try again')));
+            await visitor.gone(button('Start'));
+        });
+        expect(result.errors.text).toBe('');
+    });
+
     test('a machine being created reads Creating, then its step, its position and how many there are', async () => {
         // Given - This Mac's Overview over creating, linux-4 booting and linux-5 building its image
         const result = await component.render(overviewOver('creating'), async (visitor) => {

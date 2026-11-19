@@ -9,6 +9,7 @@ import type {
     MachinefileLine,
     MachinesFit,
     MachinesRestartInput,
+    MachinesStartInput,
     MachinesVM,
     OverviewNeed,
     PortsPort,
@@ -82,6 +83,11 @@ export function restartInputOf(need: OverviewNeed): MachinesRestartInput | undef
     return need.Call !== 'machines.restart' || name === '' ? undefined : { Name: name };
 }
 
+export function startVmInputOf(need: OverviewNeed): MachinesStartInput | undefined {
+    const name = need.Args?.VM ?? '';
+    return need.Call !== 'machines.start' || name === '' ? undefined : { VM: name };
+}
+
 export function startInputOf(need: OverviewNeed): EngineStartInput | undefined {
     return need.Call === 'engine.start' ? {} : undefined;
 }
@@ -91,7 +97,8 @@ export type NeedCall =
     | 'background.remove'
     | 'disk.move'
     | 'engine.start'
-    | 'machines.restart';
+    | 'machines.restart'
+    | 'machines.start';
 
 // outside: a listening port carries no field saying it is shared (apps/engine/ports/exposure.go, Port).
 export function isPortShared(port: PortsPort, shares: readonly PortsSharedPort[]): boolean {

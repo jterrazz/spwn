@@ -6,6 +6,7 @@ import { targetOf } from '../../../domain/machines/machines';
 import { useGesture } from '../../dependencies/use-gesture';
 import { GestureButton, GestureOutcome, marked } from '../../kit/gestures';
 import type { Route } from '../../navigation/route';
+import { wordOf } from '../../words/engine-words';
 import { machineKindOf } from '../../words/provisional';
 import { holdAgainst, verdictShown } from '../../words/shown';
 
@@ -15,17 +16,11 @@ const LIFECYCLE_REREADS: readonly CallName[] = ['machines.list', 'overview.read'
 
 type VmProps = { mac: MachinesMacView; vm: MachinesVM };
 
-type Lifecycle = 'restart' | 'start' | 'stop';
+type Lifecycle = 'restart' | 'start' | 'stop' | 'try-again';
 
 // invariant: the header is drawn again when machines.list is read again, so the gesture it shows the outcome of is
 // invariant: found again in the store, which outlives it.
-const LIFECYCLES: readonly Lifecycle[] = ['restart', 'start', 'stop'];
-
-const LABELS: Readonly<Record<Lifecycle, string>> = {
-    restart: 'Restart',
-    start: 'Start',
-    stop: 'Stop',
-};
+const LIFECYCLES: readonly Lifecycle[] = ['restart', 'start', 'stop', 'try-again'];
 
 function useLifecycle({ mac, vm }: VmProps) {
     const target = targetOf({ mac });
@@ -39,6 +34,7 @@ function useLifecycle({ mac, vm }: VmProps) {
         restart: useGesture('machines.restart', { ...spec, input: { Name: vm.Name } }),
         start: useGesture('machines.start', { ...spec, input: { VM: vm.Name } }),
         stop: useGesture('machines.stop', { ...spec, input: { VM: vm.Name } }),
+        'try-again': useGesture('machines.start', { ...spec, input: { VM: vm.Name } }),
     };
 }
 
@@ -51,7 +47,7 @@ export function LifecycleGestures({ mac, vm, terminal }: VmProps & { terminal?: 
     const done = shown.state.kind === 'done';
     const leads = vm.Health !== undefined && verdictShown(vm.Health).tone === 'bad';
     const button = (which: Lifecycle) => {
-        const label = LABELS[which];
+        const label = wordOf('MachinesGesture', which).Word;
         const primary = which === 'restart' && leads;
         return (
             <GestureButton

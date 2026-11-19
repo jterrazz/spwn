@@ -35,6 +35,24 @@ const RESTART = {
     Verb: 'restart',
 };
 
+const TRY_AGAIN = {
+    Args: { VM: 'api' },
+    Broken: true,
+    Call: 'machines.start',
+    Command: 'station machines start api',
+    Confirm: '',
+    Machine: 'api',
+    Noun: 'Overview',
+    On: 'macbook-pro',
+    Path: '',
+    Section: 'overview',
+    Severity: 'broken',
+    Subject: 'api',
+    Text: 'api was not created: it failed at boot',
+    Upkeep: 'needs-you',
+    Verb: 'try-again',
+};
+
 function recordOf(value: unknown): Record<string, unknown> | undefined {
     return typeof value === 'object' && value !== null
         ? Object.fromEntries(Object.entries(value))
@@ -190,6 +208,20 @@ describe('NeedLine', () => {
 
         // Then - and only this button was drawn primary
         expect(bright).toStrictEqual(['Restart infra']);
+        expect(result.errors.text).toBe('');
+    });
+
+    test('a VM whose create failed is started again from its need, worded as the engine words it', async () => {
+        // Given - the Inbox over two-macs, its one need api, whose create failed
+        const recording = withNeeds(recordingFor('two-macs'), [TRY_AGAIN]);
+        const result = await component.render(
+            pageOver(recording, { page: 'inbox' }),
+            async (visitor) => {
+                // Then - its button wears Try again, never Start
+                await visitor.see(within(needs, button('Try again api')));
+                await visitor.gone(within(needs, button('Start api')));
+            },
+        );
         expect(result.errors.text).toBe('');
     });
 
