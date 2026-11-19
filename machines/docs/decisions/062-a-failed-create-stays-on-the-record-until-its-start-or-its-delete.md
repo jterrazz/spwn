@@ -44,7 +44,7 @@ it had been made.
   draws the new standing through words.json.
 - The roll-up counts a VM that was not created, by ADR-054's rule at each level: `RollUpState` gains
   `not-created`, bad, right after `down` (`1 machine not created`, N counting the VMs), so a header
-  never reads `all running` while one VM shows not created. A VM of a Mac that does not answer still
+  never reads `all running` while one VM shows not created, a VM stopped beside it included. A VM of a Mac that does not answer still
   counts through its Mac.
 - A VM blocked by Local Network that later connects keeps its failure until a start, its first boot
   never having run. The create's hint says so, worded by the engine: `approve station on <mac>'s
