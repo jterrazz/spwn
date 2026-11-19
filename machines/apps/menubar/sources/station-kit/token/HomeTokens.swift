@@ -70,6 +70,7 @@ extension Token {
         public static let valueGap: CGFloat = 6
         public static let verb = EdgeInsets(top: 0, leading: 12, bottom: 0, trailing: 12)
         public static let verbHeight: CGFloat = 24
+        public static let verbInk = Color.white
     }
 }
 

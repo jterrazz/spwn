@@ -383,7 +383,7 @@ struct HomeVerb: View {
     var body: some View {
         let h = Token.HomeRow.self
         Button(action: action) {
-            Text(title).font(Token.Role.homeVerb.font).foregroundStyle(Color.white).lineLimit(1)
+            Text(title).font(Token.Role.homeVerb.font).foregroundStyle(Token.HomeRow.verbInk).lineLimit(1)
                 .padding(h.verb)
                 .frame(height: h.verbHeight)
                 .background(Capsule().fill(tokens.color.accent))

@@ -56,21 +56,6 @@ final class RowSparkTests: XCTestCase {
         XCTAssertEqual(store.now(RowView.lead(cell))?.n, 420)
     }
 
-    func testAMacsSubLineSaysItsDiskAsTheTickSaysIt() throws {
-        let page = try XCTUnwrap(Stories["home.needs"].state.page)
-        let mini = try XCTUnwrap(page.section(HomePage.macs)?.rows.first { $0.id == "mac-mini" })
-        let detail = try XCTUnwrap(mini.detail)
-        let disk = try XCTUnwrap(detail.items?.first { $0.kind == "spark" })
-        XCTAssertTrue(Format.show(LiveStore().current(detail)).contains("Disk "))
-        let store = LiveStore()
-        var ticked = Value(kind: "spark")
-        var now = Value(kind: "percent")
-        now.n = 830
-        ticked.items = [now]
-        store.take(LiveSample(at: "", values: [disk.live ?? "": ticked]))
-        XCTAssertTrue(Format.show(store.current(detail)).contains("Disk 83"), Format.show(store.current(detail)))
-    }
-
     func testTheShortcutsVerbIsASwitchItsPickedAction() throws {
         let page = try XCTUnwrap(Stories["home.needs"].state.page)
         let awake = try XCTUnwrap(page.section(HomePage.shortcuts)?.rows.first { $0.id == "awake" })

@@ -9,7 +9,7 @@ final class KeyboardTests: XCTestCase {
 
     func testHomeWalksItsRowsAndControlsInReadingOrder() {
         let rows: [PanelFocus] = [
-            .row("infra"),
+            .row("exposed:macbook-pro:5000"), .row("infra"),
             .row("linux-1"), .row("agent-7f"), .row("linux-3"), .row("review-bot"), .row("api"),
             .row("macbook-pro"), .row("mac-mini"), .row("macbook-air"),
             .row("awake"), .row("ports"), .row("accounts"),
@@ -54,14 +54,14 @@ final class KeyboardTests: XCTestCase {
         let walk = PanelOrder.walk(home)
         XCTAssertEqual(PanelOrder.walked(nil, by: 1, in: walk), .control("new-vm"))
         XCTAssertEqual(PanelOrder.walked(nil, by: -1, in: walk), .row("accounts"))
-        XCTAssertEqual(PanelOrder.walked(.find, by: 1, in: walk), .row("infra"))
+        XCTAssertEqual(PanelOrder.walked(.find, by: 1, in: walk), .row("exposed:macbook-pro:5000"))
         XCTAssertEqual(PanelOrder.walked(.row("accounts"), by: 1, in: walk), .control("new-vm"))
         XCTAssertEqual(PanelOrder.walked(.control("new-vm"), by: -1, in: walk), .row("accounts"))
         let arrows = PanelOrder.arrows(home)
-        XCTAssertEqual(PanelOrder.moved(nil, by: 1, in: arrows), .row("infra"))
+        XCTAssertEqual(PanelOrder.moved(nil, by: 1, in: arrows), .row("exposed:macbook-pro:5000"))
         XCTAssertEqual(PanelOrder.moved(.row("infra"), by: 1, in: arrows), .row("linux-1"))
         XCTAssertEqual(PanelOrder.moved(.row("accounts"), by: 1, in: arrows), .row("accounts"))
-        XCTAssertEqual(PanelOrder.moved(.row("infra"), by: -1, in: arrows), .row("infra"))
+        XCTAssertEqual(PanelOrder.moved(.row("exposed:macbook-pro:5000"), by: -1, in: arrows), .row("exposed:macbook-pro:5000"))
     }
 
     func testTheHighlightFollowsItsRowByIdentityAndGoesWithIt() {
