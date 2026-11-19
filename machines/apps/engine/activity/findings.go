@@ -25,9 +25,10 @@ func DiskFreeTold(name string, last Sample) string {
 	return name + ": " + strconv.Itoa(int(float64(last.DiskFree)/float64(last.DiskTotal)*100)) + " % of its disk is free"
 }
 
-func Findings(m machine.Ref, kind machine.Kind, s *Series) []finding.Finding {
+func Findings(m machine.Ref, kind machine.Kind, s *Series, busiest []Process) []finding.Finding {
 	// invariant: SPEC §6.5, read from the series alone: what holds now is
-	// judged on the last sample, what must last on the points that span it.
+	// judged on the last sample, what must last on the points that span it;
+	// a busy CPU names the busiest process of the reading beside it.
 	last, ok := s.Last()
 	if !ok {
 		return nil
@@ -86,6 +87,16 @@ func Findings(m machine.Ref, kind machine.Kind, s *Series) []finding.Finding {
 		}
 		mean := Between(first, newest).CPU
 		add(finding.NeedsALook, "cpu", m.Name+" busy: "+strconv.Itoa(int(mean+0.5))+" % for "+strconv.Itoa(int(held.Minutes()))+" min", "station activity"+on)
+		if len(busiest) > 0 {
+			top := busiest[0]
+			holds := top.Name + " holds " + strconv.Itoa(int(top.Value+0.5)) + " % of "
+			if newest.CPUs > 0 {
+				holds += "its " + strconv.Itoa(newest.CPUs) + " CPUs"
+			} else {
+				holds += "its CPU"
+			}
+			out[len(out)-1].Detail = holds
+		}
 	}
 	return out
 }

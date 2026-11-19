@@ -46,7 +46,7 @@ func lines(fs []finding.Finding) []line {
 
 func TestACalmMachineNeedsNothing(t *testing.T) {
 	s := series(2*time.Second, 400, func(int, *activity.Sample) {})
-	if got := activity.Findings(here, machine.Computer, s); len(got) != 0 {
+	if got := activity.Findings(here, machine.Computer, s, nil); len(got) != 0 {
 		t.Errorf("Findings() = %+v; want none", got)
 	}
 }
@@ -67,7 +67,7 @@ func TestADiskAlmostFullNeedsALookUnderTenPercentAndIsBrokenUnderFive(t *testing
 		{here, machine.Computer, 11e9, []line{}},
 	}
 	for _, c := range cases {
-		if got := lines(activity.Findings(c.m, c.kind, free(c.free))); !slices.Equal(got, c.want) {
+		if got := lines(activity.Findings(c.m, c.kind, free(c.free), nil)); !slices.Equal(got, c.want) {
 			t.Errorf("%s with %d bytes free of 100 GB: Findings() = %v; want %v", c.m.Name, c.free, got, c.want)
 		}
 	}
@@ -84,10 +84,10 @@ func TestMemoryPressureIsBrokenOnceCriticalForAMinute(t *testing.T) {
 	held := series(2*time.Second, 100, critical(69))
 	brief := series(2*time.Second, 100, critical(70))
 
-	if got := lines(activity.Findings(here, machine.Computer, held)); !slices.Equal(got, []line{{finding.Broken, "memory", "station activity"}}) {
+	if got := lines(activity.Findings(here, machine.Computer, held, nil)); !slices.Equal(got, []line{{finding.Broken, "memory", "station activity"}}) {
 		t.Errorf("critical for 60 s: Findings() = %v; want memory broken", got)
 	}
-	if got := activity.Findings(here, machine.Computer, brief); len(got) != 0 {
+	if got := activity.Findings(here, machine.Computer, brief, nil); len(got) != 0 {
 		t.Errorf("critical for 58 s: Findings() = %v; want none", got)
 	}
 }
@@ -97,10 +97,10 @@ func TestSwapGrowingForTenMinutesStraightNeedsALook(t *testing.T) {
 		return series(time.Minute, 12, func(i int, s *activity.Sample) { s.SwapUsed = int64(max(i, 11-minutes)) * 100e6 })
 	}
 
-	if got := lines(activity.Findings(linux1, machine.Workspace, growingFor(10))); !slices.Equal(got, []line{{finding.NeedsALook, "swap", "station activity --on linux-1"}}) {
+	if got := lines(activity.Findings(linux1, machine.Workspace, growingFor(10), nil)); !slices.Equal(got, []line{{finding.NeedsALook, "swap", "station activity --on linux-1"}}) {
 		t.Errorf("swap grew 10 min: Findings() = %v; want swap growing", got)
 	}
-	if got := activity.Findings(linux1, machine.Workspace, growingFor(9)); len(got) != 0 {
+	if got := activity.Findings(linux1, machine.Workspace, growingFor(9), nil); len(got) != 0 {
 		t.Errorf("swap grew 9 min: Findings() = %v; want none", got)
 	}
 }
@@ -113,7 +113,7 @@ func TestRunningHotNeedsALookWhenSeriousAndIsBrokenWhenCritical(t *testing.T) {
 		activity.ThermalUnknown:  {},
 	} {
 		s := series(2*time.Second, 1, func(_ int, s *activity.Sample) { s.Thermal = level })
-		if got := lines(activity.Findings(here, machine.Computer, s)); !slices.Equal(got, want) {
+		if got := lines(activity.Findings(here, machine.Computer, s, nil)); !slices.Equal(got, want) {
 			t.Errorf("thermal %d: Findings() = %v; want %v", level, got, want)
 		}
 	}
@@ -123,10 +123,10 @@ func TestABatteryAtTwentyPercentOnBatteryNeedsALook(t *testing.T) {
 	low := series(2*time.Second, 1, func(_ int, s *activity.Sample) { s.Battery = &activity.Battery{Percent: 20, OnBattery: true} })
 	charging := series(2*time.Second, 1, func(_ int, s *activity.Sample) { s.Battery = &activity.Battery{Percent: 12, Charging: true} })
 
-	if got := lines(activity.Findings(here, machine.Computer, low)); !slices.Equal(got, []line{{finding.NeedsALook, "battery", "plug in"}}) {
+	if got := lines(activity.Findings(here, machine.Computer, low, nil)); !slices.Equal(got, []line{{finding.NeedsALook, "battery", "plug in"}}) {
 		t.Errorf("20 %% on battery: Findings() = %v; want battery low", got)
 	}
-	if got := activity.Findings(here, machine.Computer, charging); len(got) != 0 {
+	if got := activity.Findings(here, machine.Computer, charging, nil); len(got) != 0 {
 		t.Errorf("12 %% charging: Findings() = %v; want none", got)
 	}
 }
@@ -141,23 +141,29 @@ func TestAServerBusyForTenMinutesNeedsALookAWorkspaceNever(t *testing.T) {
 					busy += percent - 10
 				}
 			}
-			s.CPUBusy, s.CPUTotal = busy, uint64(i)*100 //nolint:gosec // value: i counts up from zero.
+			s.CPUBusy, s.CPUTotal, s.CPUs = busy, uint64(i)*100, 4 //nolint:gosec // value: i counts up from zero.
 		})
 	}
 
-	got := activity.Findings(infra, machine.Server, busyFor(96, 10))
+	got := activity.Findings(infra, machine.Server, busyFor(96, 10), []activity.Process{{Name: "go test", Value: 97}})
 	if !slices.Equal(lines(got), []line{{finding.NeedsALook, "cpu", "station activity --on infra"}}) || got[0].Text != "infra busy: 96 % for 10 min" {
 		t.Errorf("server at 96 %% for 10 min: Findings() = %+v; want infra busy: 96 %% for 10 min", got)
+	}
+	if got[0].Detail != "go test holds 97 % of its 4 CPUs" {
+		t.Errorf("detail = %q; want the busiest process named with its share of the CPUs", got[0].Detail)
+	}
+	if quiet := activity.Findings(infra, machine.Server, busyFor(96, 10), nil); quiet[0].Detail != "" {
+		t.Errorf("detail = %q with no process read; want none", quiet[0].Detail)
 	}
 	for _, c := range []struct {
 		percent uint64
 		minutes int
 	}{{94, 10}, {96, 9}} {
-		if got := activity.Findings(infra, machine.Server, busyFor(c.percent, c.minutes)); len(got) != 0 {
+		if got := activity.Findings(infra, machine.Server, busyFor(c.percent, c.minutes), nil); len(got) != 0 {
 			t.Errorf("server at %d %% for %d min: Findings() = %v; want none", c.percent, c.minutes, got)
 		}
 	}
-	if got := activity.Findings(linux1, machine.Workspace, busyFor(96, 11)); len(got) != 0 {
+	if got := activity.Findings(linux1, machine.Workspace, busyFor(96, 11), nil); len(got) != 0 {
 		t.Errorf("workspace at 96 %% for 11 min: Findings() = %v; want none", got)
 	}
 }

@@ -65,7 +65,7 @@ func (d Deps) read(ctx context.Context, in ReadIn) activity.Report {
 	if d.Kept != nil {
 		if k, at, ok, err := d.Kept(ctx, name); err == nil && ok {
 			if r, usable := fromHistory(k, at, in, d.Now()); usable {
-				r.Findings = findings(ref, kind, &k.Series)
+				r.Findings = findings(ref, kind, &k.Series, k.Last.Top)
 				return graphed(r, &k.Series, in, d.Now())
 			}
 			kept, since = &k, at
@@ -78,10 +78,10 @@ func (d Deps) read(ctx context.Context, in ReadIn) activity.Report {
 	case in.Run:
 		r = d.run(ctx, in.Of)
 		if kept != nil {
-			r.Findings = findings(ref, kind, &kept.Series)
+			r.Findings = findings(ref, kind, &kept.Series, kept.Last.Top)
 		}
 	case kept != nil:
-		r.Findings = findings(ref, kind, &kept.Series)
+		r.Findings = findings(ref, kind, &kept.Series, kept.Last.Top)
 	}
 	if kept != nil {
 		r.Since = since
@@ -143,7 +143,7 @@ func (d Deps) direct(ctx context.Context, ref machine.Ref, kind machine.Kind, qu
 	for _, x := range points {
 		s.Add(x)
 	}
-	r.Findings = findings(ref, kind, &s)
+	r.Findings = findings(ref, kind, &s, r.Last.Top)
 	return r
 }
 
@@ -186,8 +186,8 @@ func (d Deps) budgeted(ctx context.Context) (activity.Reading, error) {
 	return compose(ctx, d)
 }
 
-func findings(ref machine.Ref, kind machine.Kind, s *activity.Series) []finding.Finding {
-	out := activity.Findings(ref, kind, s)
+func findings(ref machine.Ref, kind machine.Kind, s *activity.Series, top activity.Busiest) []finding.Finding {
+	out := activity.Findings(ref, kind, s, top.CPU)
 	if out == nil {
 		return []finding.Finding{}
 	}

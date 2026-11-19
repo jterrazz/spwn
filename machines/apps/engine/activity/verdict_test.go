@@ -20,6 +20,7 @@ func TestVerdictOfAReport(t *testing.T) {
 		{"read now and calm", activity.Report{}, verdict.Verdict{Tone: verdict.OK, Sentence: activity.SentenceCalm}},
 		{"the first finding leads", activity.Report{Since: start, Findings: []finding.Finding{broken, look}}, verdict.Verdict{Tone: verdict.Bad, Sentence: broken.Text, Line: "disk"}},
 		{"a need of a look is a warning", activity.Report{Findings: []finding.Finding{look}}, verdict.Verdict{Tone: verdict.Warn, Sentence: look.Text, Line: "memory"}},
+		{"a finding with a detail says it under its sentence", activity.Report{Findings: []finding.Finding{{Severity: finding.NeedsALook, Subject: "cpu", Text: "infra busy: 96 % for 10 min", Detail: "go test holds 97 % of its 4 CPUs"}}}, verdict.Verdict{Tone: verdict.Warn, Sentence: "infra busy: 96 % for 10 min", Line: "go test holds 97 % of its 4 CPUs"}},
 		{"a silent Meter is never calm", activity.Report{Silent: true}, verdict.Verdict{Tone: verdict.Warn, Sentence: activity.SentenceSilent}},
 	} {
 		if got := activity.VerdictOf(tc.r); got != tc.want {

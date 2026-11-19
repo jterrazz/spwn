@@ -125,7 +125,7 @@ func (s *Sample) Run(ctx context.Context) {
 		}
 		h.Add(m.Ref.Name, r)
 		kept, _ := h.Of(m.Ref.Name)
-		s.judge(h, m, activity.Findings(m.Ref, m.Kind, &kept.Series), r.Sample)
+		s.judge(h, m, activity.Findings(m.Ref, m.Kind, &kept.Series, r.Top.CPU), r.Sample)
 	}
 }
 

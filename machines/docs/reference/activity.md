@@ -37,7 +37,7 @@ A measure the Meter could not count is `?`, never a zero. A read calls no third-
 
 ## The history
 
-The engine's `sample` job keeps it, in memory only, for This Mac and every VM it runs: a point every 2 s while a surface watches the machine (the menu bar's, `station activity` itself through `engine.watch`), every 60 s otherwise, 24 hours kept. The rates `station activity` prints are the mean of the last 10 s of it; a CPU busy for 10 minutes, swap growing, and what else must last to be a finding are read from it. An engine restart starts it again from nothing. `--json --history` prints the 24 h series in 60 s points.
+The engine's `sample` job keeps it, in memory only, for This Mac and every VM it runs: a point every 2 s while a surface watches the machine (the menu bar's, `station activity` itself through `engine.watch`), every 60 s otherwise, 24 hours kept. The rates `station activity` prints are the mean of the last 10 s of it; a CPU busy for 10 minutes, swap growing, and what else must last to be a finding are read from it. A server's busy CPU names the busiest process of the reading beside it, in the finding's `Detail` and so under the verdict's sentence (`go test holds 97 % of its 4 CPUs`); a workspace's never raises it. An engine restart starts it again from nothing. `--json --history` prints the 24 h series in 60 s points.
 
 ## Graphs
 

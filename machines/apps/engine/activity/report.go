@@ -1,6 +1,7 @@
 package activity
 
 import (
+	"cmp"
 	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/core/finding"
@@ -79,7 +80,7 @@ func VerdictOf(r Report) verdict.Verdict {
 		if f.Severity == finding.Broken {
 			tone = verdict.Bad
 		}
-		return verdict.Verdict{Tone: tone, Sentence: f.Text, Line: f.Subject}
+		return verdict.Verdict{Tone: tone, Sentence: f.Text, Line: cmp.Or(f.Detail, f.Subject)}
 	}
 	v := verdict.Verdict{Tone: verdict.OK, Sentence: SentenceCalm}
 	if !r.Since.IsZero() {
