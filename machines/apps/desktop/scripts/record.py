@@ -32,7 +32,7 @@ birth: its summary answers once per part (each section, the machines, the other 
 parts arrive, and the engine ends the watch once every part is in (apps/engine/overview/calls/compose.go), so the
 answer before its done is the whole Overview, which the recorder waits for, never letting go of it on silence; a
 gesture's reads in the world's order of asks, judged changed by `compared`, never by the clock; no read of TIMED after
-a gesture; and, as the file's last recording holds them, the NOISE field of a gesture (the process number the host
+a gesture, but the activity of the VM a gesture of MEASURED stopped, which measures nothing; and, as the file's last recording holds them, the NOISE field of a gesture (the process number the host
 gave) and the CLOCKED field of an answer (the world's clock: settings.matrix's Read, awake.read's Now).
 
 In a world run that door is a Mac's engine socket: a frame for another Mac, or for a VM of another Mac, rides the
@@ -62,6 +62,7 @@ out_root = ROOT / "apps" / "desktop" / "src" / "fixtures" / "worlds"
 GRAPHS = (360 * 10**9, 3600 * 10**9, 86400 * 10**9)
 SETTLED = {"apps.list", "settings.list", "disk.read"}
 TIMED = {"activity.read", "engine.watch"}
+MEASURED = {"machines.stop"}
 NOISE = {"engine.start": "PID"}
 CLOCKED = {"settings.matrix": "Read", "awake.read": "Now"}
 MACHINES = {"watch": "machines.list", "in": {}}
@@ -242,6 +243,7 @@ ALSO = {
     "stories": [
         {"call": "machinefile.explain", "in": {"Machinefile": "linux-dev"}},
         {"watch": "machines.new", "in": {"From": "linux-dev"}},
+        {"watch": "machines.new", "in": {"From": "base-ubuntu"}},
     ],
 }
 
@@ -277,9 +279,12 @@ def asked(seed, requests, fixture):
         return list(pool.map(lambda request: serve(seed, [request], fixture)[1][0], requests))
 
 
+STOP_LINUX_1 = {"call": "machines.stop", "in": {"VM": "linux-1", "Confirm": "yes"}}
+
 GESTURES = {
     "two-macs": [
-        {"call": "machines.stop", "in": {"VM": "linux-1", "Confirm": "yes"}},
+        STOP_LINUX_1,
+        {"call": "machines.start", "in": {"VM": "linux-1"}, "following": STOP_LINUX_1},
         {"call": "machines.start", "in": {"VM": "api"}},
         {"call": "machines.delete", "in": {"VM": "api", "Confirm": "api"}},
         {"call": "machines.restart", "in": {"Name": "infra", "Confirm": "infra"}, **at("mac-mini")},
@@ -304,6 +309,7 @@ GESTURES = {
         {"call": "machines.create-workspace", "in": {"Request": {"Name": "gate5", "From": "base-ubuntu", "Lifetime": "ephemeral", "Size": {"MemoryBytes": 4294967296}}, "Confirm": "yes"}},
         {"call": "machines.create-workspace", "in": {"Request": {"Name": "infra", "From": "base-ubuntu", "Lifetime": "ephemeral"}, "Confirm": "yes"}, **at("mac-mini")},
         {"call": "machines.create-workspace", "in": {"Request": {"Name": "linux-2", "From": "base-ubuntu", "Lifetime": "ephemeral", "Purpose": "x" * 121}, "Confirm": "yes"}, **at("mac-mini")},
+        {"call": "machines.create-workspace", "in": {"Request": {"Name": "linux-2", "From": "base-ubuntu", "Lifetime": "ephemeral", "Purpose": "Lot shell"}, "Confirm": "yes"}, **at("mac-mini")},
         {"call": "machines.create-server", "in": {"Name": "web", "Image": "base-ubuntu", "Size": {"MemoryBytes": 4294967296}, "Confirm": "yes"}},
         {"call": "machines.add", "in": {"Name": "mac-mini"}},
         {"call": "vault.remove", "in": {"ID": "pw-2", "Confirm": "yes"}},
@@ -330,6 +336,7 @@ GESTURES = {
         {"call": "ports.share", "in": {"VM": "linux-1", "Port": "4321"}},
         {"call": "ports.share", "in": {"VM": "linux-3", "Port": "5432"}, **at("mac-mini")},
         {"call": "ports.declare", "in": {"Machine": "macbook-pro", "Port": "5000", "Via": "lan"}},
+        {"call": "machines.restart", "in": {"Name": "infra", "Confirm": "infra"}, **at("mac-mini")},
     ],
     "sign-ins": [
         {"watch": "accounts.login", "in": {"Program": "claude", "Machine": "linux-1"}},
@@ -479,17 +486,42 @@ def compared(request, frames):
     return unclocked(request, settled(frames) if "watch" in request else frames)
 
 
+def measured(request, read):
+    """Whether a read of TIMED is asked after a gesture all the same: the activity of the VM a gesture of MEASURED
+    stopped, which measures nothing, so its answer moves with no clock."""
+    return (callOf(request) in MEASURED and callOf(read) == "activity.read"
+            and read["in"].get("of") == request["in"].get("VM"))
+
+
+def based(door, world, reads, before):
+    """What every read answers in `door` once the gesture it follows is made: the world a gesture `following` another
+    is judged against, as the window holds it once that one has played."""
+    [listed] = door.ask([MACHINES])
+    answered = dict(before)
+    for read in [*reads, *[one for one in asked_in(world, listed) if keyOf(one) not in before]]:
+        if callOf(read) not in TIMED:
+            [frames] = door.ask([read])
+            answered[keyOf(read)] = kept(read, frames)
+    return answered
+
+
 def gesture(world, seed, fixture, request, reads, before):
     """The gesture in a fresh world, then every read in that same world, kept when its answer changed: a watch by
     its settled answer, the one a window shows once it has read again. A read the world did not ask before, of a
-    machine the gesture made, is kept whatever it answers."""
+    machine the gesture made, is kept whatever it answers. A gesture `following` another is made once that one is,
+    in the same world, and judged against what the reads answer then."""
     door = Door(seed, fixture)
+    following = request.get("following")
+    request = {key: value for key, value in request.items() if key != "following"}
+    if following:
+        door.ask([following])
+        before = based(door, world, reads, before)
     [answers] = door.ask([request])
     [listed] = door.ask([MACHINES])
     born = [read for read in asked_in(world, listed) if keyOf(read) not in before]
     changed = []
     for read in [*reads, *born]:
-        if callOf(read) in TIMED:
+        if callOf(read) in TIMED and not measured(request, read):
             continue
         [frames] = door.ask([read])
         frames, was = kept(read, frames), before.get(keyOf(read))
