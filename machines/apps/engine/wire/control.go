@@ -59,6 +59,35 @@ func (f fileMarks) Write(m engine.StopMark) error {
 	return f.fs.WriteFile(f.file, append(data, '\n'), 0o600)
 }
 
+func (m machine) engineRecords() engine.Records {
+	if m.world != nil {
+		return m.world.records()
+	}
+	return fileRecord{fs: m.sys.FS, file: path.Join(m.paths.State, "engine.json")}
+}
+
+// invariant: the binary the engine started from, written whole beside its
+// socket by a temporary file then a rename, so the window never reads half.
+type fileRecord struct {
+	fs   local.FS
+	file string
+}
+
+func (f fileRecord) Write(r engine.Record) error {
+	data, err := json.MarshalIndent(r, "", "  ")
+	if err != nil {
+		return err
+	}
+	if err := f.fs.MkdirAll(path.Dir(f.file), 0o700); err != nil && !errors.Is(err, fs.ErrExist) {
+		return err
+	}
+	tmp := f.file + ".tmp"
+	if err := f.fs.WriteFile(tmp, append(data, '\n'), 0o600); err != nil {
+		return err
+	}
+	return f.fs.Rename(tmp, f.file)
+}
+
 func engineCommands(env kit.Env, m machine) []*cobra.Command {
 	return []*cobra.Command{
 		enginestart.Command(enginestart.Deps{ThisMachine: m.where}, env),

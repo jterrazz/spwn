@@ -168,6 +168,7 @@ var StationDisk = Disk{
 		noted(data("{state}/station/known_hosts/*"), "pins: deleting them downgrades to trust-on-first-use, never cleaned"),
 		noted(data("{state}/station/consoles/*"), "live while a VM or a build runs: `consoles/<vm>`, `consoles/station-build-<image>`"),
 		noted(data("{state}/station/engine.sock"), "the engine's socket, live while it runs"),
+		noted(data("{state}/station/engine.json"), "the binary the engine last started from and its version, rewritten at each engine start: the window finds station by it"),
 		noted(data("{state}/station/children/*"), "the engine's `tailscale` calls in flight, `<pid>` holding its start: the next engine start kills what a killed one left"),
 		noted(data("{state}/station/runs/*"), "each running VM's `<vm>.pid` and `<vm>.exit`"),
 		noted(data("{state}/station/uptime.json"), "each server's last 30 days, written by its Mac's engine: deleting it starts every record again"),

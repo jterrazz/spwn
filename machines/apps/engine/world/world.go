@@ -325,6 +325,9 @@ type Engine struct {
 	Stopped   bool      `json:"stopped,omitempty"`
 	StoppedAt time.Time `json:"stopped_at,omitzero"`
 	StoppedBy string    `json:"stopped_by,omitempty"`
+	// value: the binary the engine last started from, as it kept it beside
+	// its socket.
+	Recorded *engine.Record `json:"recorded,omitempty"`
 	// value: what the engine knows of its VMs between two commands.
 	Memory engine.Memory `json:"memory,omitempty"`
 	// value: what the engine holds of Awake between two commands.

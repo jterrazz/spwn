@@ -1,0 +1,15 @@
+description: 'each engine start keeps the binary it started from and its version, for the window'
+env:
+    - fresh
+    - engine
+runs:
+    - command: 'init --name macbook-pro >/dev/null'
+      exit: 0
+    - command: 'engine start'
+      exit: 0
+      stdout: |
+          ●	engine	installed, running · {{string}}
+    - command: '--version >/dev/null; /usr/bin/jq -c --arg bin "$STATION" ''.macs["macbook-pro"].engine.recorded | [.v, .executable == $bin, (.version | length > 0)]'' world.json'
+      exit: 0
+      stdout: |
+          [1,true,true]

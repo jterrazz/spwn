@@ -99,6 +99,9 @@ type Options struct {
 	Sample engine.Sampler
 	// value: the station binary hello names, the one a terminal opens.
 	Executable string
+	// value: where the engine keeps the binary it started from, at each
+	// start; nil keeps none.
+	Records engine.Records
 	// value: this engine as a client sees it: a second engine asks it first.
 	Peer Peer
 	// value: the grant removals a VM could not receive, retried here; nil
@@ -355,6 +358,7 @@ func (d *Engine) Begin(ctx context.Context, note func(line string)) error {
 	if !d.o.StartedAt.IsZero() {
 		d.started = d.o.StartedAt.UTC().Truncate(time.Second)
 	}
+	d.keepRecord()
 	d.mu.Lock()
 	d.history = activity.NewHistory(d.started)
 	d.mu.Unlock()

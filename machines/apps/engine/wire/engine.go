@@ -105,7 +105,7 @@ func (m machine) engine(env kit.Env) *process.Engine {
 			return portscalls.Remember(m.stores.ports(), vm, port, stopped)
 		},
 		State: m.paths.State, ThisMachine: m.kind, Ports: m.cat.Ports(), Rights: m.portRights, Mounts: m.vmMounts, Version: m.engineVersion(), Abilities: m.engineAbilities(), Page: page.Revision, StartedAt: m.engineStarted(), PID: os.Getpid(), GuestPort: m.guestPort(),
-		Power: m.powerPort, KeepAwakePage: m.keepAwakePage, Executable: m.sys.Env.Executable(),
+		Power: m.powerPort, KeepAwakePage: m.keepAwakePage, Executable: m.sys.Env.Executable(), Records: m.engineRecords(),
 		NeverSleeps: func() bool { on, _ := m.stores.neverSleeps().Get(); return on },
 		GrantsOwed:  owed, Peer: m.engineAPI(),
 		Feeds: map[string]engine.Feed{engine.PageMenubar: menubar.Feed(), engine.PageMachine: menubar.Machine(),

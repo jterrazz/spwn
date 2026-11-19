@@ -494,6 +494,21 @@ func (w worldMarks) Write(mark engine.StopMark) error {
 	return nil
 }
 
+// invariant: the binary the engine started from is kept on the Mac's engine
+// of the world, as the real one keeps it beside its socket.
+func (m *worldMac) records() engine.Records { return worldRecords{m: m} }
+
+type worldRecords struct{ m *worldMac }
+
+func (w worldRecords) Write(r engine.Record) error {
+	w.m.run.w.Lock()
+	defer w.m.run.w.Unlock()
+	if e := w.m.run.w.Mac(w.m.name).Engine; e != nil {
+		e.Recorded = &r
+	}
+	return nil
+}
+
 // invariant: the engine's job definition is the job manager's file; in a
 // world it is there while the Mac's engine is set up, whatever the run's
 // home holds.
