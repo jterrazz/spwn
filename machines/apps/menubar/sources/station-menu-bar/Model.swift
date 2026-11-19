@@ -351,7 +351,7 @@ final class Model: ObservableObject {
         let center = UNUserNotificationCenter.current()
         let post = {
             let content = UNMutableNotificationContent()
-            content.title = "station"
+            content.title = "Spwn Menu"
             content.body = text
             center.add(UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil))
         }

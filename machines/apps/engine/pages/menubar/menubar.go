@@ -71,7 +71,7 @@ func Page(r Reading, thisMac page.Context) page.Page {
 	if r.All != nil {
 		sections, actions := homeSections(r, thisMac.Machine)
 		p.Sections = append(sections, p.Sections...)
-		p.Header = &page.Header{Title: "Station", Search: searchPrompt}
+		p.Header = &page.Header{Title: "Spwn Menu", Search: searchPrompt}
 		if s := staleMac(r, thisMac.Machine); s != "" {
 			v := page.Text("checking " + s)
 			v.Signal = page.SignalStale

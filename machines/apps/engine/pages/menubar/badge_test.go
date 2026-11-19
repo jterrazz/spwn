@@ -32,11 +32,11 @@ func TestTheStatusItemSaysItsOneSignalAndCountsNothing(t *testing.T) {
 	}{
 		{"nothing read yet", Reading{Home: upkeep}, nil},
 		{"only upkeep", Reading{Home: upkeep, All: fleet(server(model.Running, false))}, &page.Badge{Label: "all machines are fine"}},
-		{"a server down", Reading{All: fleet(server(model.Running, true))}, &page.Badge{Down: true, Label: "station, infra down"}},
-		{"a server down and a port exposed", Reading{All: fleet(server(model.Running, true)), Ports: exposed}, &page.Badge{Down: true, Label: "station, infra down"}},
-		{"a port exposed that answers", Reading{All: fleet(), Ports: exposed}, &page.Badge{Down: true, Label: "station, port 5000 exposed"}},
+		{"a server down", Reading{All: fleet(server(model.Running, true))}, &page.Badge{Down: true, Label: "Spwn Menu, infra down"}},
+		{"a server down and a port exposed", Reading{All: fleet(server(model.Running, true)), Ports: exposed}, &page.Badge{Down: true, Label: "Spwn Menu, infra down"}},
+		{"a port exposed that answers", Reading{All: fleet(), Ports: exposed}, &page.Badge{Down: true, Label: "Spwn Menu, port 5000 exposed"}},
 		{"a server restarting", Reading{All: fleet(restarting)}, &page.Badge{Restarting: true, Label: "infra restarting, 2 of 4 checks"}},
-		{"red wins over a restart", Reading{All: fleet(restarting), Ports: exposed}, &page.Badge{Down: true, Label: "station, port 5000 exposed"}},
+		{"red wins over a restart", Reading{All: fleet(restarting), Ports: exposed}, &page.Badge{Down: true, Label: "Spwn Menu, port 5000 exposed"}},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {

@@ -44,9 +44,9 @@ public struct MenuBarIcon: Equatable, Sendable {
     public var label: String {
         if let said { return said }
         switch mark {
-        case .stopped: return "station: engine stopped"
-        case .connecting: return "station: connecting"
-        case .plain, .down, .restarting: return "station"
+        case .stopped: return "Spwn Menu: engine stopped"
+        case .connecting: return "Spwn Menu: connecting"
+        case .plain, .down, .restarting: return "Spwn Menu"
         }
     }
 

@@ -64,7 +64,7 @@ final class HomeTests: XCTestCase {
     func testHomeLayout() throws {
         let page = try Tree.page("menubar.home.two-macs")
         XCTAssertEqual(page.sections?.compactMap(\.id), ["this-mac", "servers", "vms", "macs", "shortcuts", "needs-you", "machines"])
-        XCTAssertEqual(page.header?.title, "Station")
+        XCTAssertEqual(page.header?.title, "Spwn Menu")
         XCTAssertEqual(page.header?.search, "Find a machine, a port, an action")
         XCTAssertEqual(page.header?.buttons, ["new-vm"])
         let strip = try XCTUnwrap(page.strip)

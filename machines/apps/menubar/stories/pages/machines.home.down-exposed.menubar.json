@@ -4309,10 +4309,10 @@
   ],
   "badge": {
     "down": true,
-    "label": "station, infra down"
+    "label": "Spwn Menu, infra down"
   },
   "header": {
-    "title": "Station",
+    "title": "Spwn Menu",
     "search": "Find a machine, a port, an action",
     "buttons": [
       "new-vm"

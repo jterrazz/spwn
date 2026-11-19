@@ -41,7 +41,7 @@ func badge(r Reading) *page.Badge {
 	b := page.Badge{Down: len(reds) > 0}
 	switch {
 	case b.Down:
-		b.Label = "station, " + reds[0]
+		b.Label = "Spwn Menu, " + reds[0]
 	case restarting != nil:
 		b.Restarting = true
 		b.Label = restarting.Name + " restarting, " + restarting.Restart.Counted() + " checks"

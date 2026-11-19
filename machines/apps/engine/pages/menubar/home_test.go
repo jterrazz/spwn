@@ -114,8 +114,8 @@ func TestHomeListsOneKindPerSectionUnderItsTitleAndSearch(t *testing.T) {
 	if got, want := sectionIDs(p), []string{SectionThisMac, SectionServers, SectionVMs, SectionMacs, SectionShortcuts}; !reflect.DeepEqual(got[:5], want) {
 		t.Fatalf("sections %v, want %v first", got, want)
 	}
-	if h := p.Header; h == nil || h.Title != "Station" || h.Search != searchPrompt || !slices.Equal(h.Buttons, []string{ActionNewVM}) {
-		t.Fatalf("header %+v, want Station, the prompt and New VM", h)
+	if h := p.Header; h == nil || h.Title != "Spwn Menu" || h.Search != searchPrompt || !slices.Equal(h.Buttons, []string{ActionNewVM}) {
+		t.Fatalf("header %+v, want Spwn Menu, the prompt and New VM", h)
 	}
 	p = homeOf(t, newHeroWorld().exposed())
 	if got := sectionIDs(p)[:2]; !reflect.DeepEqual(got, []string{SectionNeedsRows, SectionThisMac}) {

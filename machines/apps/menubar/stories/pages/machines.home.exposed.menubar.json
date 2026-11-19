@@ -4463,10 +4463,10 @@
   ],
   "badge": {
     "down": true,
-    "label": "station, port 5000 exposed"
+    "label": "Spwn Menu, port 5000 exposed"
   },
   "header": {
-    "title": "Station",
+    "title": "Spwn Menu",
     "search": "Find a machine, a port, an action",
     "buttons": [
       "new-vm"

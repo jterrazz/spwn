@@ -5030,7 +5030,7 @@
     "label": "infra restarting, 2 of 4 checks"
   },
   "header": {
-    "title": "Station",
+    "title": "Spwn Menu",
     "search": "Find a machine, a port, an action",
     "buttons": [
       "new-vm"

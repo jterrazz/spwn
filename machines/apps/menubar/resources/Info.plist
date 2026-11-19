@@ -12,8 +12,10 @@
 	<string>com.jterrazz.station.menubar</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
+	<key>CFBundleDisplayName</key>
+	<string>Spwn Menu</string>
 	<key>CFBundleName</key>
-	<string>Station</string>
+	<string>Spwn Menu</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>

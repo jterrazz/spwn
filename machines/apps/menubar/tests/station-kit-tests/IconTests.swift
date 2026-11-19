@@ -82,7 +82,7 @@ final class IconTests: XCTestCase {
     // never red, and the label names the server.
     func testIconServerDownIsSlashed() throws {
         let icon = try icon("menubar.home.infra-down")
-        XCTAssertEqual(icon, MenuBarIcon(.down, said: "station, infra down"))
+        XCTAssertEqual(icon, MenuBarIcon(.down, said: "Spwn Menu, infra down"))
         XCTAssertEqual(icon.face, .slashed)
         XCTAssertTrue(icon.nsImage().isTemplate)
         try drawn("slashed", icon)
@@ -93,7 +93,7 @@ final class IconTests: XCTestCase {
         let exposed = try icon(story: "home.exposed")
         XCTAssertEqual(exposed.mark, .down)
         XCTAssertEqual(exposed.face, .slashed)
-        XCTAssertEqual(exposed.label, "station, port 5000 exposed")
+        XCTAssertEqual(exposed.label, "Spwn Menu, port 5000 exposed")
     }
 
     // invariant: the slash is one line from the top left to the bottom
@@ -162,7 +162,7 @@ final class IconTests: XCTestCase {
     func testIconEngineStopped() throws {
         let stopped = try icon("menubar.home.engine-stopped", .stopped)
         XCTAssertEqual(stopped, MenuBarIcon(.stopped))
-        XCTAssertEqual(stopped.label, "station: engine stopped")
+        XCTAssertEqual(stopped.label, "Spwn Menu: engine stopped")
         XCTAssertEqual(stopped.face, .away)
         XCTAssertNotEqual(stopped.face, MenuBarIcon(.plain).face)
         XCTAssertEqual(try icon("menubar.home.two-macs", .notInstalled), MenuBarIcon(.stopped))
@@ -182,7 +182,7 @@ final class IconTests: XCTestCase {
     func testIconConnecting() throws {
         let connecting = try icon("menubar.home.two-macs", .connecting)
         XCTAssertEqual(connecting, MenuBarIcon(.connecting))
-        XCTAssertEqual(connecting.label, "station: connecting")
+        XCTAssertEqual(connecting.label, "Spwn Menu: connecting")
         XCTAssertEqual(connecting.face, .connecting)
         for scale in [1, 2] as [CGFloat] {
             let drawing = connecting

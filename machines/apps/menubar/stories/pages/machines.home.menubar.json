@@ -4417,7 +4417,7 @@
     "label": "all machines are fine"
   },
   "header": {
-    "title": "Station",
+    "title": "Spwn Menu",
     "search": "Find a machine, a port, an action",
     "buttons": [
       "new-vm"
