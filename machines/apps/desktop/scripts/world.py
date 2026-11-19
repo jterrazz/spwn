@@ -9,7 +9,7 @@ WORLDS is the one list of the worlds the window records, each a world of specs/u
 needs that it lacks: machinefiles on This Mac, the fake binaries of a fixture of specs/usecases/__fixtures__/, and
 edits of its machines (a sign-in in progress, a program signed out or broken, an accounts switch the fake reads in
 apps/engine/world/accounts.go, as the presence check a grant asks, a failed sign-in or a failing background task
-dropped, what a Mac's engine keeps of Awake, a VM working hard on every core of its Mac); a world of WORLDS may be a world of specs/usecases/worlds/ under another name, seeded otherwise. A world no
+dropped, what a Mac's engine keeps of Awake, a VM working hard on every core of its Mac, a workspace whose create failed at its boot); a world of WORLDS may be a world of specs/usecases/worlds/ under another name, seeded otherwise. A world no
 entry names is served as specs/usecases/worlds/ holds it.
 
 Every folder a sandbox or a seed makes is removed when the process exits, by its end, an exception or SIGTERM.
@@ -175,6 +175,52 @@ def leftover(name, vm, size):
     return edit
 
 
+BOOT_CONSOLE = [
+    "[    0.000000] Linux version 6.8.0-49-generic",
+    "[    1.842113] EXT4-fs (vda1): mounted filesystem",
+    "[    2.371005] cloud-init[498]: running init-local",
+    "[    4.102771] Kernel panic - not syncing: VFS: unable to mount root fs",
+]
+
+
+def failed_at_boot(name, vm):
+    """A workspace whose create failed at its boot, kept on the record: what `world fault Hypervisor.Boot 1` then
+    `machines create --memory 4G` left in world.json over two-macs, its VM's console holding BOOT_CONSOLE beforehand,
+    copied from that run in the bench's world sandbox (2026-11-19): the VM's disk and its record with its failed
+    birth, the console's last lines the engine kept in it, its clone, and the ports its rights reserved."""
+    def edit(content):
+        held = content["macs"][name]
+        held["vms"][vm] = {
+            "console": BOOT_CONSOLE,
+            "kept": {
+                "image": "base-ubuntu", "version": "2026.11.01", "lifetime": "ephemeral", "network": "nat",
+                "env": {
+                    "EXPO_PACKAGER_PROXY_URL": "https://macbook-pro.tail1234.ts.net:40000",
+                    "STATION_PUBLIC_HOST": "macbook-pro.tail1234.ts.net",
+                    "__VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS": "macbook-pro.tail1234.ts.net",
+                },
+                "created_at": "2026-11-04T10:00:19Z",
+                "birth": {
+                    "progress": 400, "step": "booting", "position": 2, "steps": 4, "at": "2026-11-04T10:00:19Z",
+                    "sentence": "Failed at boot 2 of 4", "failed": True,
+                    "cause": f"{vm} did not boot: the hypervisor refused to boot it, as the world scripted it",
+                    "last_lines": BOOT_CONSOLE[1:],
+                },
+            },
+            "disk": True, "born": 1, "made": True,
+            "size": {"CPUs": 4, "Memory": 4294967296, "Disk": 20000000000},
+            "guest": {"fresh": True},
+        }
+        held["cloned"] = {**held.get("cloned", {}), vm: 1}
+        held["stores"]["reservations"] += [
+            {"vm": vm, "guest_port": 8081, "host_port": 40000, "by": "rights", "http": True,
+             "reserved_at": "2026-11-04T10:00:19Z"},
+            {"vm": vm, "guest_port": 5173, "host_port": 40003, "by": "rights", "http": True,
+             "reserved_at": "2026-11-04T10:00:19Z"},
+        ]
+    return edit
+
+
 def holds_file(name, path, size):
     def edit(content):
         content["macs"][name]["disk"]["files"][path] = size
@@ -326,6 +372,7 @@ WORLDS = {
                                                  holds_file("macbook-pro", STATION_VM, 1000000),
                                                  unreadable("macbook-pro", "api")]),
     "share-local": ("two-macs", None, {}, [kept_local("macbook-pro", "linux-1", 5173)]),
+    "create-failed": ("two-macs", None, {}, [failed_at_boot("macbook-pro", "linux-2")]),
     "range-full": ("range-full", None, {}, [listens("macbook-pro", "linux-1", 9000, "node")]),
     "kept-four-hours": ("two-macs", None, {}, [kept_awake("macbook-pro", session={
         "lid": False, "battery": False, "started_at": "2026-11-04T10:00:00Z", "until": "2026-11-04T14:00:00Z",
