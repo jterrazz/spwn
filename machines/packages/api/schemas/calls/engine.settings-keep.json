@@ -296,9 +296,10 @@
             "applied",
             "changed-since",
             "not-applied",
-            "not-for-this-machine",
             "off-here",
-            "reading"
+            "not-for-this-machine",
+            "reading",
+            "checked"
           ],
           "type": "string"
         },

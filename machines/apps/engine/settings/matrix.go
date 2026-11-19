@@ -98,6 +98,20 @@ const (
 	CellUnknown Standing = "unknown"
 )
 
+func (Standing) Enum() []string {
+	// invariant: a cell's standing is a closed enum of its own, so a cell never
+	// carries a word a client cannot say: it reads as a row's state or, for a
+	// checked setting, as its checked state, or unknown where the machine was
+	// not read.
+	var out []string
+	for _, v := range append(State("").Enum(), string(AsExpected), string(NeedsFix), string(CheckedUnknown), string(CellUnknown)) {
+		if !slices.Contains(out, v) {
+			out = append(out, v)
+		}
+	}
+	return out
+}
+
 type Cell struct {
 	State Standing
 	// value: the machine holds the setting: station set it there, or it is

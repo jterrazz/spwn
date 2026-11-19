@@ -61,7 +61,7 @@ func JudgeChecked(it catalog.CheckedSetting, lives bool, facts map[catalog.Fact]
 	// owner's Off here and the facts macOS answered: a fact it could not read
 	// is Unknown, never Needs a fix; a fix is where the owner changes it,
 	// never a station command.
-	row := Row{Name: it.Name, Group: Checked}
+	row := Row{Name: it.Name, Group: Checked, State: StateChecked}
 	switch {
 	case !lives:
 		row.Checked, row.Why = CheckedNotForThisMachine, LivesOnReason(it.Kinds)

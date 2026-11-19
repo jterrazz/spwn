@@ -3117,7 +3117,7 @@ export type SettingsCallsZshIn = {
 
 export type SettingsCell = {
     Holds: boolean;
-    State: string;
+    State: '' | 'applied' | 'changed-since' | 'not-applied' | 'off-here' | 'not-for-this-machine' | 'reading' | 'checked' | 'as-expected' | 'needs-fix' | 'unknown';
 };
 
 export type SettingsChange = {
@@ -3205,7 +3205,7 @@ export type SettingsRow = {
     Origin: MachinefileOrigin;
     Package: CatalogSetting;
     Since: string;
-    State: '' | 'applied' | 'changed-since' | 'not-applied' | 'not-for-this-machine' | 'off-here' | 'reading';
+    State: 'applied' | 'changed-since' | 'not-applied' | 'off-here' | 'not-for-this-machine' | 'reading' | 'checked';
     Value: string;
     Where: string;
     Why: string;
@@ -3221,7 +3221,7 @@ export type SettingsRowInput = {
     Origin?: MachinefileOriginInput;
     Package?: CatalogSettingInput;
     Since?: string;
-    State?: 'applied' | 'changed-since' | 'not-applied' | 'not-for-this-machine' | 'off-here' | 'reading';
+    State?: 'applied' | 'changed-since' | 'not-applied' | 'off-here' | 'not-for-this-machine' | 'reading' | 'checked';
     Value?: string;
     Where?: string;
     Why?: string;
@@ -3739,6 +3739,8 @@ export type OverviewVerb = 'review' | 'restart' | 'start' | 'try-again' | 'updat
 
 export type PageNoun = 'machine' | 'skill' | 'listener' | 'quiet-listener' | 'restart' | 'line' | 'package' | 'app' | 'setting' | 'password' | 'grant';
 
+export type SettingsState = 'applied' | 'changed-since' | 'not-applied' | 'off-here' | 'not-for-this-machine' | 'reading' | 'checked';
+
 export type StationWord = {
     Detail?: string;
     Heading?: string;
@@ -3807,4 +3809,5 @@ export type StationWords = {
     OverviewUpkeep: Record<OverviewUpkeep, StationWord>;
     OverviewVerb: Record<OverviewVerb, StationWord>;
     PageNoun: Record<PageNoun, StationWord>;
+    SettingsState: Record<SettingsState, StationWord>;
 };

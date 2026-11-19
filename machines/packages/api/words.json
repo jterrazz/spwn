@@ -1921,5 +1921,35 @@
       "Other": "skills",
       "Tone": "plain"
     }
+  },
+  "SettingsState": {
+    "applied": {
+      "Word": "applied",
+      "Tone": "ok"
+    },
+    "changed-since": {
+      "Word": "changed since",
+      "Tone": "warn"
+    },
+    "checked": {
+      "Word": "checked",
+      "Tone": "plain"
+    },
+    "not-applied": {
+      "Word": "not applied",
+      "Tone": "plain"
+    },
+    "not-for-this-machine": {
+      "Word": "not for this machine",
+      "Tone": "plain"
+    },
+    "off-here": {
+      "Word": "off here",
+      "Tone": "plain"
+    },
+    "reading": {
+      "Word": "reading",
+      "Tone": "plain"
+    }
   }
 }

@@ -30,7 +30,30 @@ const (
 	StateNotForThisMachine State = "not-for-this-machine"
 	// value: the row is still being read.
 	StateReading State = "reading"
+	// value: a read-only row: its verdict is the row's Checked, never a state of applying.
+	StateChecked State = "checked"
 )
+
+func (State) Enum() []string {
+	return []string{string(StateApplied), string(StateChangedSince), string(StateNotApplied), string(StateOffThisMac), string(StateNotForThisMachine), string(StateReading), string(StateChecked)}
+}
+
+func (s State) Word() string {
+	// value: a setting's state as a client says it, a lowercase fragment;
+	// changed since reads before how long ago.
+	switch s {
+	case StateChangedSince:
+		return "changed since"
+	case StateNotApplied:
+		return "not applied"
+	case StateOffThisMac:
+		return "off here"
+	case StateNotForThisMachine:
+		return "not for this machine"
+	case StateApplied, StateReading, StateChecked:
+	}
+	return string(s)
+}
 
 type Observation struct {
 	// value: what the setting reads now on this machine, as the overview

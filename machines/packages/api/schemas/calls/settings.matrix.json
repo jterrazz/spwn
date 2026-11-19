@@ -368,6 +368,19 @@
           "type": "boolean"
         },
         "State": {
+          "enum": [
+            "",
+            "applied",
+            "changed-since",
+            "not-applied",
+            "off-here",
+            "not-for-this-machine",
+            "reading",
+            "checked",
+            "as-expected",
+            "needs-fix",
+            "unknown"
+          ],
           "type": "string"
         }
       },
@@ -573,13 +586,13 @@
         },
         "State": {
           "enum": [
-            "",
             "applied",
             "changed-since",
             "not-applied",
-            "not-for-this-machine",
             "off-here",
-            "reading"
+            "not-for-this-machine",
+            "reading",
+            "checked"
           ],
           "type": "string"
         },

@@ -178,7 +178,7 @@ func SettingsRead(rows []settings.Row, m machine.Ref) Read {
 			off++
 		case settings.StateReading:
 			pending = true
-		case settings.StateNotApplied, settings.StateNotForThisMachine:
+		case settings.StateNotApplied, settings.StateNotForThisMachine, settings.StateChecked:
 		}
 	}
 	appliedState := catalog.StateOK

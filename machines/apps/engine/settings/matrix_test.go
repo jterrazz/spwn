@@ -1,6 +1,7 @@
 package settings_test
 
 import (
+	"slices"
 	"testing"
 
 	"github.com/jterrazz/studio-station/apps/engine/settings"
@@ -31,5 +32,22 @@ func TestTheSettingsShelfCountsWhatSomeMachineHoldsAndLeavesOutChecks(t *testing
 	}
 	if got, want := one.Verdict.Catalog.Sentence, "1 setting is in the catalog"; got != want {
 		t.Errorf("one catalog %q, want %q", got, want)
+	}
+}
+
+func TestACellReadsAsAnyStateAStandingCanTake(t *testing.T) {
+	enum := settings.Standing("").Enum()
+	standings := make([]settings.Standing, 0, 12)
+	for _, s := range settings.State("").Enum() {
+		standings = append(standings, settings.Standing(s))
+	}
+	for _, c := range []settings.CheckedState{settings.AsExpected, settings.NeedsFix, settings.CheckedOffThisMac, settings.CheckedNotForThisMachine, settings.CheckedUnknown} {
+		standings = append(standings, settings.Standing(c))
+	}
+	standings = append(standings, settings.CellUnknown)
+	for _, s := range standings {
+		if !slices.Contains(enum, string(s)) {
+			t.Errorf("%q is a standing a cell takes, and the enum %v lacks it", s, enum)
+		}
 	}
 }

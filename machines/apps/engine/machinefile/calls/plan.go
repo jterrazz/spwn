@@ -335,7 +335,7 @@ func settingSeen(r settings.Row) machinefile.Seen {
 		s.Condition, s.State = machinefile.Absent, catalog.StateAbsent
 	case settings.StateOffThisMac:
 		s.Condition, s.State, s.Detail = machinefile.Absent, catalog.StateDegraded, "off here, your choice"
-	case settings.StateNotForThisMachine, settings.StateReading:
+	case settings.StateNotForThisMachine, settings.StateReading, settings.StateChecked:
 		s.Condition, s.State = machinefile.Unknown, catalog.StateUnknown
 	}
 	return s

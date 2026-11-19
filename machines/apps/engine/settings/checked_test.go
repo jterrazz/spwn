@@ -67,8 +67,8 @@ func TestJudgeCheckedHoldsEachMacToWhatItShouldHave(t *testing.T) {
 			if row.Checked != c.want || row.Value != c.value {
 				t.Fatalf("judged %s %q, want %s %q", row.Checked, row.Value, c.want, c.value)
 			}
-			if row.Group != settings.Checked || row.State != "" {
-				t.Errorf("a checked row is in the Checked group with no Set by station state, got %s %q", row.Group, row.State)
+			if row.Group != settings.Checked || row.State != settings.StateChecked {
+				t.Errorf("a checked row is in the Checked group in the checked state, never a Set by station one, got %s %q", row.Group, row.State)
 			}
 			if (row.Checked == settings.NeedsFix) != (row.Fix.Path == it.Fix) || row.Fix.Call != "" || row.Fix.Command != "" {
 				t.Errorf("fix = %+v; a needs-fix row is fixed where macOS sets it, never by a station call", row.Fix)

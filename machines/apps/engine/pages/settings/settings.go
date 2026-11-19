@@ -49,25 +49,26 @@ func Row(r settings.Row, now time.Time) page.Row {
 	}
 	switch r.State {
 	case settings.StateApplied:
-		row.Mark, row.Cells = page.OK, []page.Value{page.Texts("applied", r.Where)}
+		row.Mark, row.Cells = page.OK, []page.Value{page.Texts(settings.StateApplied.Word(), r.Where)}
 	case settings.StateChangedSince:
 		row.Mark, row.Reason = page.Attention, page.Differs
-		row.Cells = []page.Value{page.Text("changed since " + ago(r.Since, now))}
+		row.Cells = []page.Value{page.Text(settings.StateChangedSince.Word() + " " + ago(r.Since, now))}
 		row.Hint = page.Cmd("station settings diff " + name)
 	case settings.StateNotApplied:
-		row.Mark, row.Cells = page.Absent, []page.Value{page.Text("not applied")}
+		row.Mark, row.Cells = page.Absent, []page.Value{page.Text(settings.StateNotApplied.Word())}
 		row.Hint = page.Cmd("station settings apply " + name)
 		if r.Needs != "" {
 			row.Reason = page.Missing
-			row.Cells = []page.Value{page.Texts("not applied", "needs "+r.Package.NeedsSaid())}
+			row.Cells = []page.Value{page.Texts(settings.StateNotApplied.Word(), "needs "+r.Package.NeedsSaid())}
 			row.Hint = page.Cmd("station apps install " + r.Needs)
 		}
 	case settings.StateOffThisMac:
-		row.Mark, row.Cells = page.OffHere, []page.Value{page.Text("off here")}
+		row.Mark, row.Cells = page.OffHere, []page.Value{page.Text(settings.StateOffThisMac.Word())}
 	case settings.StateNotForThisMachine:
-		row.Mark, row.Cells = page.NotForThisMachine, []page.Value{page.Texts("not for this machine", r.Why)}
+		row.Mark, row.Cells = page.NotForThisMachine, []page.Value{page.Texts(settings.StateNotForThisMachine.Word(), r.Why)}
 	case settings.StateReading:
 		row.Mark, row.Detail = page.Awaiting, page.Pending()
+	case settings.StateChecked:
 	}
 	return row
 }
@@ -120,8 +121,10 @@ func order(s settings.State) int {
 		return 4
 	case settings.StateNotForThisMachine:
 		return 5
+	case settings.StateChecked:
+		return 6
 	}
-	return 6
+	return 7
 }
 
 func rank(r settings.Row) int {

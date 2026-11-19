@@ -19,6 +19,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/overview"
 	"github.com/jterrazz/studio-station/apps/engine/page"
+	"github.com/jterrazz/studio-station/apps/engine/settings"
 	"github.com/jterrazz/studio-station/apps/engine/surface/cli/words"
 )
 
@@ -54,6 +55,23 @@ func standingWords() map[string]word {
 	for _, v := range machines.VMStanding("").Enum() {
 		s := machines.VMStanding(v)
 		out[v] = toned(s.Tone(), s.Word())
+	}
+	return out
+}
+
+func settingStateWords() map[string]word {
+	out := map[string]word{}
+	for _, v := range settings.State("").Enum() {
+		s := settings.State(v)
+		tone := verdict.Plain
+		switch s {
+		case settings.StateApplied:
+			tone = verdict.OK
+		case settings.StateChangedSince:
+			tone = verdict.Warn
+		case settings.StateNotApplied, settings.StateOffThisMac, settings.StateNotForThisMachine, settings.StateReading, settings.StateChecked:
+		}
+		out[v] = toned(tone, s.Word())
 	}
 	return out
 }
@@ -245,6 +263,7 @@ func wordedEnums() []worded {
 			string(disk.HolderThisMac):      plain("The Mac itself"),
 			string(disk.HolderFree):         plain("Free"),
 		}},
+		{settings.State(""), settingStateWords()},
 		{machines.VMStanding(""), standingWords()},
 		{machines.MacStanding(""), macStandingWords()},
 		{machines.RollUpState(""), rollUpWords()},
