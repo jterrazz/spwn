@@ -19,6 +19,10 @@
     border-radius: var(--radius-panel);
 }
 
+.wide {
+    max-width: none;
+}
+
 .mark {
     width: 30px;
     height: 28px;

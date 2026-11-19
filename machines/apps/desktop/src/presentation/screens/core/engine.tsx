@@ -119,7 +119,7 @@ function Release() {
     return (
         <>
             <VerdictHead size="page" verdict={release.Head} />
-            {state.kind === 'idle' ? null : <UpdatePanel flow={flow} state={state} />}
+            {state.kind === 'idle' ? null : <UpdatePanel flow={flow} state={state} wide />}
             {state.kind === 'idle' && release.Behind ? <Offer release={release} /> : null}
             <Latest release={release} />
         </>

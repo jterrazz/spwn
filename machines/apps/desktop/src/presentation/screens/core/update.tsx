@@ -101,11 +101,22 @@ function Running({ flow, state }: { flow: UpdateFlow; state: Shown }) {
     );
 }
 
-export function UpdatePanel({ flow, state }: { flow: UpdateFlow; state: Shown }) {
+export function UpdatePanel({
+    flow,
+    state,
+    wide = false,
+}: {
+    flow: UpdateFlow;
+    state: Shown;
+    wide?: boolean;
+}) {
     const { title, lead } = headOf(state);
     const { install, start } = state.lines;
     return (
-        <section aria-label="Update" className={styles.panel}>
+        <section
+            aria-label="Update"
+            className={wide ? `${styles.panel} ${styles.wide}` : styles.panel}
+        >
             <span className={styles.pill}>
                 <StatePill {...updateState(state.kind)} />
             </span>
