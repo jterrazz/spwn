@@ -1,4 +1,4 @@
-import { button, content, heading, region, within } from '@jterrazz/test';
+import { button, content, dialog, field, heading, region, within } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { website } from '../website.specification.js';
@@ -77,9 +77,26 @@ describe('machine files', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test.todo(
-        'D3 waits for a recording of machines.new from a file that makes a workspace with an image, which names the file the VM follows',
-    );
+    test('D3 a file that makes a workspace opens the New machine sheet, which names the file the VM follows', async () => {
+        // Given - the window on the shipped file base-ubuntu over stories, a file that makes a workspace
+        const result = await website.visit(
+            '/?world=stories&page=machine-files&file=base-ubuntu',
+            async (visitor) => {
+                // When - its New machine is pressed
+                await visitor.click(
+                    within(region('base-ubuntu.machine.yaml'), button('New machine')),
+                );
+
+                // Then - the sheet opens on the Mac the engine names, and says the file the VM will follow
+                const sheet = dialog('New machine on mac-mini');
+                await visitor.see(
+                    within(sheet, content('It will follow the machine file base-ubuntu')),
+                );
+                await visitor.see(within(sheet, field('Name')));
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
 
     test.todo(
         'D7 waits for a recording of a change applied from the window, and of the file it wrote',
