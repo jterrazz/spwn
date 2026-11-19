@@ -131,9 +131,31 @@ describe('workspace', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test.todo(
-        'W4 waits for a recording of activity.read after a Stop, and of a Start after it on the same machine',
-    );
+    test('W4 a stopped workspace measures nothing, and Start brings the same one back', async () => {
+        // Given - the window on linux-1's Activity over two-macs, linux-1 running
+        const result = await website.visit(
+            '/?world=two-macs&machine=linux-1&tab=Activity',
+            async (visitor) => {
+                await visitor.see(heading('linux-1 running'));
+
+                // When - Stop is pressed and confirmed
+                await visitor.click(button('Stop'));
+                await visitor.click(within(dialog('Stop linux-1?'), button('Stop')));
+
+                // Then - it reads stopped, and its Activity says nothing is measured
+                await visitor.see(heading('linux-1 stopped'));
+                await visitor.see(content('Nothing to look at.'));
+
+                // When - Start is pressed
+                await visitor.click(button('Start'));
+
+                // Then - the same machine reads running again
+                await visitor.see(heading('linux-1 running'));
+                await visitor.see(within(sidebar, button('linux-1 running')));
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
 
     test('W5 a VM being created reads Creating, with its step', async () => {
         // Given - the window on linux-4 over creating, which is booting
@@ -150,7 +172,9 @@ describe('workspace', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test.todo('W5 waits for a recording of a failed creation, its step and its log');
+    test.todo(
+        "W5 waits for the engine to keep a failed creation: a create whose boot fails leaves its VM stopped, with no birth and no LastLines, the create's end taking its birth off (apps/engine/machines/calls/create.go:445)",
+    );
 
     test('W6 a password granted to a VM is listed among its grants', async () => {
         // Given - GitHub deploy's page over two-macs, granted nowhere, linux-1 signed out of gh
