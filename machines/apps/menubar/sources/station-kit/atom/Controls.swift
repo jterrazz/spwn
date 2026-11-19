@@ -178,27 +178,35 @@ public struct PanelButton: View {
 }
 
 public struct VerbButton: View {
+    // value: the pill's two sizes: the row's verb, and the board's Share,
+    // a row's own button, a little taller with its words at the row's name.
+    public enum Size: Sendable { case regular, share }
+
     let title: String
     let busy: Bool
+    let size: Size
     let action: () -> Void
     @Environment(\.stationTokens) private var tokens
     @State private var hovering = false
 
-    public init(_ title: String, busy: Bool = false, action: @escaping () -> Void = {}) {
+    public init(_ title: String, busy: Bool = false, size: Size = .regular, action: @escaping () -> Void = {}) {
         self.title = title
         self.busy = busy
+        self.size = size
         self.action = action
     }
 
     public var body: some View {
         let c = Token.Metric.Control.self
-        let shape = RoundedRectangle(cornerRadius: c.verb.radius, style: .continuous)
+        let share = size == .share
+        let box = share ? c.share : c.verb
+        let shape = RoundedRectangle(cornerRadius: box.radius, style: .continuous)
         Button(action: action) {
-            Text(title).font(Token.Role.verb.font).lineLimit(1)
+            Text(title).font((share ? Token.Role.rowName : Token.Role.verb).font).lineLimit(1)
                 .foregroundStyle(busy ? tokens.color.t3 : tokens.color.t1)
-                .padding(.horizontal, c.verbPadding)
-                .frame(minWidth: c.verbMinWidth)
-                .frame(height: c.verb.height)
+                .padding(.horizontal, share ? box.padding : c.verbPadding)
+                .frame(minWidth: share ? c.shareMinWidth : c.verbMinWidth)
+                .frame(height: box.height)
                 .background(shape.fill(hovering ? tokens.color.qq : tokens.color.q))
                 .overlay { if tokens.increased { shape.strokeBorder(tokens.color.hair, lineWidth: c.contrastRim) } }
                 .contentShape(shape)

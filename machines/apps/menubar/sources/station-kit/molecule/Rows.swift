@@ -203,7 +203,7 @@ public struct PortRow: View {
                     .foregroundStyle(lit ? tokens.color.t1 : tokens.color.t3)
                     .frame(width: Token.Metric.Port.pointer)
             } else if let verb = RowView.action(row.verb, in: actions) {
-                VerbButton(verb.label ?? "") { run(verb) }
+                VerbButton(verb.label ?? "", size: .share) { run(verb) }
             } else if row.nav != nil {
                 Image(systemName: Token.Symbol.outward)
                     .font(.system(size: Token.Metric.Port.pointerGlyph, weight: .medium))

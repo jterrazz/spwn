@@ -652,6 +652,8 @@ extension Token {
             public static let big = Control(height: 28, radius: 14, padding: 14)
             public static let verb = Control(height: 22, radius: 11, padding: 0)
             public static let verbMinWidth: CGFloat = 64
+            public static let share = Control(height: 24, radius: 12, padding: 10)
+            public static let shareMinWidth: CGFloat = 60
             public static let round: CGFloat = 24
             public static let roundSmall: CGFloat = 20
             public static let icon: CGFloat = 24

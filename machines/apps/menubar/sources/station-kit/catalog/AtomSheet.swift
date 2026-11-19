@@ -168,6 +168,7 @@ public struct AtomSheet: View {
             line {
                 VerbButton("Review")
                 VerbButton("Share")
+                VerbButton("Share", size: .share)
                 VerbButton("Waiting", busy: true)
             }
             line {
