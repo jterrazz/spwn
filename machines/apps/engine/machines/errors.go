@@ -152,6 +152,13 @@ func (e *UnhealthyError) Error() string {
 	return e.Name + " is kept, failing " + e.Step + ": " + e.Detail
 }
 
+func (e *UnhealthyError) BlockedFix() string {
+	// value: what lifts a Local Network block and what follows: its VM's
+	// first boot never ran, so it is started once approved, never left to
+	// connect by itself.
+	return LocalNetworkFix(e.BlockedOn) + "; start " + e.Name + " once approved"
+}
+
 var ErrEngineDown = errors.New("the engine is not running")
 
 type NothingToChangeError struct{ Name string }

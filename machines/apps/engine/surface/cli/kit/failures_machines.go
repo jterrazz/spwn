@@ -110,7 +110,7 @@ func vmFailure(err error) (*fail.Error, bool) {
 	case errors.As(err, &noBoot):
 		return failed(noBoot.Error(), keptFix(noBoot.Name), err), true
 	case errors.As(err, &unhealthy) && unhealthy.BlockedOn != "":
-		return failed(unhealthy.Error(), model.LocalNetworkFix(unhealthy.BlockedOn)+"; "+unhealthy.Name+" connects by itself once approved", err), true
+		return failed(unhealthy.Error(), unhealthy.BlockedFix(), err), true
 	case errors.As(err, &unhealthy):
 		return failed(unhealthy.Error(), keptFix(unhealthy.Name), err), true
 	case errors.As(err, &created):

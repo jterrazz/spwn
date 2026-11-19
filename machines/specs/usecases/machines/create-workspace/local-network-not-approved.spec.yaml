@@ -7,7 +7,7 @@ runs:
       exit: 1
       stderr: |
           Error: linux-2 is kept, failing SSH answers: macbook-pro has not approved station for Local Network
-          Hint: approve station on macbook-pro's screen, or in System Settings > Privacy & Security > Local Network; linux-2 connects by itself once approved
+          Hint: approve station on macbook-pro's screen, or in System Settings > Privacy & Security > Local Network; start linux-2 once approved
     - command: 'machines --this-mac'
       exit: 0
       stdout: |

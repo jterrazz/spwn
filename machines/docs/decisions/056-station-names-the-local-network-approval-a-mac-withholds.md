@@ -31,7 +31,7 @@ The engine reads the approval itself and every surface names the Mac:
 - A guest dial a Mac refuses with `EHOSTUNREACH` is the block, on a Mac only. The engine keeps the VM `blocked:
 local-network` until a dial connects or its run ends, and answers a run it cannot reach `local_network`.
 - `station engine start` exits 0 with the row `◐ local network needs you · approve station on <mac>'s screen, or in
-System Settings > Privacy & Security > Local Network`: the engine runs, and a VM connects by itself once approved.
+System Settings > Privacy & Security > Local Network`: the engine runs, and a VM created meanwhile is started once approved, its first boot never having run ([ADR-062](062-a-failed-create-stays-on-the-record-until-its-start-or-its-delete.md)).
 - `machines create` says `<vm> is kept, failing SSH answers: <mac> has not approved station for Local Network`, its
   hint the same fix; `machines` lists the VM unreachable and the Mac as needing a look, both with that fix.
 
