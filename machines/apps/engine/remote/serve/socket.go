@@ -40,6 +40,9 @@ type Server struct {
 	// value: where a call frame for another machine runs: that machine's
 	// engine, over this run's connections; nil runs every frame on this machine.
 	Far call.Router
+	// value: where a gesture this server runs on this machine is kept; nil
+	// keeps none.
+	Kept call.Keeper
 }
 
 func (s Server) Conn(ctx context.Context, conn io.ReadWriteCloser) {
@@ -58,11 +61,18 @@ func (s Server) Conn(ctx context.Context, conn io.ReadWriteCloser) {
 			}
 			continue
 		}
+		if err := call.FrameBy(f.Call+f.Watch, f.By); err != nil {
+			if w.frame(api.Frame{ID: f.ID, Error: s.fault(err)}) != nil {
+				return
+			}
+			continue
+		}
+		fctx := call.WithBy(ctx, f.By)
 		if f.Watch != "" {
-			s.watch(ctx, conn, scanner, w, f)
+			s.watch(fctx, conn, scanner, w, f)
 			return
 		}
-		if w.frame(s.call(ctx, w, f)) != nil {
+		if w.frame(s.call(fctx, w, f)) != nil {
 			return
 		}
 	}
@@ -96,6 +106,7 @@ func (s Server) call(ctx context.Context, w *writer, f api.Frame) api.Frame {
 		return api.Frame{ID: f.ID, Error: s.fault(err)}
 	}
 	out, err := h.Invoke(ctx, s.ThisMachine, f.In, progress{id: f.ID, out: w, word: s.wording})
+	s.Kept.Keep(ctx, s.ThisMachine, s.ThisMachine.Ref, h.Meta(), f.In, out, err)
 	if err != nil {
 		return api.Frame{ID: f.ID, Error: s.fault(err)}
 	}

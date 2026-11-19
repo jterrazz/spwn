@@ -22,6 +22,10 @@
     "CallFrame": {
       "additionalProperties": false,
       "properties": {
+        "by": {
+          "pattern": "^[a-z0-9-]{1,40}$",
+          "type": "string"
+        },
         "call": {
           "type": "string"
         },
@@ -244,6 +248,10 @@
     "WatchFrame": {
       "additionalProperties": false,
       "properties": {
+        "by": {
+          "pattern": "^[a-z0-9-]{1,40}$",
+          "type": "string"
+        },
         "id": {
           "type": "string"
         },

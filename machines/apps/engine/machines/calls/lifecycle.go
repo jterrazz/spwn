@@ -21,7 +21,7 @@ type StartOut struct {
 }
 
 var Start = call.Call[Deps, VMIn, StartOut]{
-	Name: "machines.start", Where: call.InEngine, Applies: machine.Anywhere, Needs: machines.VMNeeds(),
+	Name: "machines.start", Where: call.InEngine, Applies: machine.Anywhere, Needs: machines.VMNeeds(), Journal: keptStart,
 	Run: func(ctx context.Context, d Deps, in VMIn, _ call.Progress) (StartOut, error) {
 		if err := d.Machines.CheckStart(in.VM); err != nil {
 			return StartOut{}, err
@@ -54,7 +54,7 @@ var Stop = call.Call[Deps, StopIn, StopOut]{
 	// (SP-5); a workspace asks yes or no first, a server its name typed, and
 	// the rule is checked here, on the VM's own Mac, whoever sent the call.
 	// One already stopped asks nothing.
-	Name: "machines.stop", Where: call.InEngine, Applies: machine.Anywhere, Confirm: confirm.Stop,
+	Name: "machines.stop", Where: call.InEngine, Applies: machine.Anywhere, Confirm: confirm.Stop, Journal: keptStop,
 	Errors: []fail.Code{confirm.YesNeeded, confirm.Needed, confirm.Mismatch},
 	Run: func(ctx context.Context, d Deps, in StopIn, _ call.Progress) (StopOut, error) {
 		if err := d.Machines.CheckStop(in.VM); err != nil {
@@ -80,7 +80,7 @@ type DeleteIn struct {
 }
 
 var Delete = call.Call[Deps, DeleteIn, machines.DeleteReport]{
-	Name: "machines.delete", Where: call.InEngine, Applies: machine.Anywhere, Confirm: confirm.Delete,
+	Name: "machines.delete", Where: call.InEngine, Applies: machine.Anywhere, Confirm: confirm.Delete, Journal: keptDelete,
 	Errors: []fail.Code{confirm.Needed, confirm.Mismatch, BeingCreated},
 	Run: func(ctx context.Context, d Deps, in DeleteIn, _ call.Progress) (machines.DeleteReport, error) {
 		if err := d.Machines.CheckDelete(in.VM); err != nil {
@@ -119,7 +119,7 @@ type RestartIn struct {
 var Restart = call.Call[Deps, RestartIn, machines.RestartReport]{
 	Name: "machines.restart", Where: call.AtTarget, Applies: machine.Anywhere, Confirm: confirm.RestartMac,
 	ConfirmBy: map[machine.Kind]confirm.Action{machine.Server: RestartConfirm(machine.Server), machine.Workspace: RestartConfirm(machine.Workspace)},
-	Errors:    []fail.Code{confirm.YesNeeded, confirm.Needed, confirm.Mismatch},
+	Errors:    []fail.Code{confirm.YesNeeded, confirm.Needed, confirm.Mismatch}, Journal: keptRestart,
 	Run: func(ctx context.Context, d Deps, in RestartIn, _ call.Progress) (machines.RestartReport, error) {
 		if err := d.Machines.CheckMac(); err != nil {
 			return machines.RestartReport{}, err

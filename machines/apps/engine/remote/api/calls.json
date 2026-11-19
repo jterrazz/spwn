@@ -166,7 +166,8 @@
         "apps.not-installed",
         "apps.unknown"
       ],
-      "in": "UpdateIn"
+      "in": "UpdateIn",
+      "journal": true
     },
     {
       "name": "awake.keep",
@@ -242,7 +243,8 @@
         "disk.nothing-to-free",
         "disk.unknown"
       ],
-      "in": "FreeIn"
+      "in": "FreeIn",
+      "journal": true
     },
     {
       "name": "disk.free-unused",
@@ -258,7 +260,8 @@
         "disk.not-freeable",
         "disk.record-unreadable"
       ],
-      "in": "FreeUnusedIn"
+      "in": "FreeUnusedIn",
+      "journal": true
     },
     {
       "name": "disk.move",
@@ -634,7 +637,8 @@
         "machinefile.not-found"
       ],
       "in": "ApplyIn",
-      "out": "Applied"
+      "out": "Applied",
+      "journal": true
     },
     {
       "name": "machinefile.drift",
@@ -710,7 +714,8 @@
         "machinefile.not-found"
       ],
       "in": "UpgradeIn",
-      "out": "Upgraded"
+      "out": "Upgraded",
+      "journal": true
     },
     {
       "name": "machines.add",
@@ -762,7 +767,8 @@
         "machines.unknown-image"
       ],
       "in": "CreateServerIn",
-      "out": "Created"
+      "out": "Created",
+      "journal": true
     },
     {
       "name": "machines.create-workspace",
@@ -788,7 +794,8 @@
         "machines.unknown-image"
       ],
       "in": "CreateIn",
-      "out": "Created"
+      "out": "Created",
+      "journal": true
     },
     {
       "name": "machines.delete",
@@ -802,7 +809,8 @@
         "machines.being-created"
       ],
       "in": "DeleteIn",
-      "out": "DeleteReport"
+      "out": "DeleteReport",
+      "journal": true
     },
     {
       "name": "machines.edit",
@@ -876,7 +884,8 @@
         "confirm.yes-needed"
       ],
       "in": "RestartIn",
-      "out": "RestartReport"
+      "out": "RestartReport",
+      "journal": true
     },
     {
       "name": "machines.restart-mac",
@@ -902,7 +911,8 @@
       "schema": "station.machines.start/v1",
       "where": "in-engine",
       "in": "VMIn",
-      "out": "StartOut"
+      "out": "StartOut",
+      "journal": true
     },
     {
       "name": "machines.stop",
@@ -916,7 +926,8 @@
         "confirm.yes-needed"
       ],
       "in": "StopIn",
-      "out": "StopOut"
+      "out": "StopOut",
+      "journal": true
     },
     {
       "name": "machines.unlock",

@@ -2,6 +2,7 @@ package wire
 
 import (
 	"context"
+	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	"io"
 	"os"
 	"path/filepath"
@@ -153,7 +154,7 @@ func Run(args, env []string, stdin, stdout, stderr *os.File) int {
 	root.SetOut(stdout)
 	root.SetErr(stderr)
 
-	err := fang.Execute(context.Background(), root,
+	err := fang.Execute(call.WithBy(context.Background(), vars["STATION_SESSION"]), root,
 		fang.WithVersion(Version()),
 		fang.WithCommit(Commit()),
 		fang.WithErrorHandler(func(_ io.Writer, _ fang.Styles, err error) {

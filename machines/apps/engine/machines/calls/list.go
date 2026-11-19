@@ -74,7 +74,7 @@ type CreateIn struct {
 var CreateWorkspace = call.Call[Deps, CreateIn, machines.Created]{
 	// invariant: a workspace, ephemeral or persistent; always on is a server's.
 	Name: "machines.create-workspace", Where: call.InEngine, Applies: machines.CanCreate, Needs: machines.VMNeeds(), Confirm: confirm.BuildImage,
-	Errors: workspaceRefusals(),
+	Errors: workspaceRefusals(), Journal: keptWorkspace,
 	Run: func(ctx context.Context, d Deps, in CreateIn, p call.Progress) (machines.Created, error) {
 		r := in.Request
 		r.Server = false
@@ -107,7 +107,7 @@ var CreateServer = call.Call[Deps, CreateServerIn, machines.Created]{
 	// invariant: a server is always on, behind its Mac, and named; station
 	// sets up nothing inside it (SPEC §7.1).
 	Name: "machines.create-server", Where: call.InEngine, Applies: machines.CanCreate, Needs: machines.VMNeeds(), Confirm: confirm.BuildImage,
-	Errors: serverRefusals(),
+	Errors: serverRefusals(), Journal: keptServer,
 	Run: func(ctx context.Context, d Deps, in CreateServerIn, p call.Progress) (machines.Created, error) {
 		r := machines.CreateRequest{Image: in.Image, Name: in.Name, Server: true, Network: in.Network, Size: in.Size, Check: in.Check, Purpose: in.Purpose, Creator: in.Creator}
 		var b ImageBuild

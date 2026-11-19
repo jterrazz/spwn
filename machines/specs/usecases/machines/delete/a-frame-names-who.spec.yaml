@@ -1,0 +1,23 @@
+description: 'a frame names the session it is done for, kept by the Mac that serves it; a job''s name is refused'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.error // {} | {code, message}'''
+      stdin: |
+          {"v":2,"id":"1","call":"machines.delete","in":{"VM":"linux-1","Confirm":"linux-1"},"by":"the night"}
+      exit: 0
+      stdout: |
+          {"code":"call.bad-input","message":"machines.delete cannot read its input"}
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.out.Name'''
+      stdin: |
+          {"v":2,"id":"1","call":"machines.delete","in":{"VM":"linux-1","Confirm":"linux-1"},"by":"review-bot"}
+      exit: 0
+      stdout: |
+          "linux-1"
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.out.Lines // [] | .[] | {Machine, Call, Text, By, Outcome}'''
+      stdin: |
+          {"v":2,"id":"1","call":"journal.kept","in":{}}
+      exit: 0
+      stdout: |
+          {"Machine":"linux-1","Call":"machines.delete","Text":"linux-1 deleted","By":"review-bot","Outcome":"done"}

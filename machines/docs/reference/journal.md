@@ -52,7 +52,22 @@ A Mac that does not answer, or whose station keeps no journal yet, is an `Unhear
 
 ## What writes it
 
-No call writes a line yet: the read path lands first, and the recording of each gesture where its machine lives follows. Until then a journal holds only the lines a world seeds.
+A gesture declares the lines it keeps (`journal: true` in [calls.json](api.md#callsjson)), and the Router of the Mac that holds its machine keeps them once the call ends ([ADR-063](../decisions/063-a-gesture-is-kept-by-the-router-of-its-mac.md), a proposal):
+
+- **Where.** A call this Mac runs, for itself, from the CLI, a frame or its engine's socket, is kept here; so is a call it hands to one of its VMs. A call it hands to another Mac is kept by that Mac's own server, and a VM keeps none.
+- **What.** A gesture that ran is kept, `done`, or `failed` with its error worded as the CLI words it when it ended in a failure or was interrupted. One refused before any effect (refused, asked for a confirmation, not for this machine, declined) keeps no line. A start or a stop that found the VM as asked keeps none, and so does a gesture run inside another (the `apps.update` of a `machinefile.upgrade`): the outer one's lines say what was done.
+- **Who.** `By` is the session `STATION_SESSION` names in the CLI's environment, or the frame's `by`, else `you`; a create's line is its creator's. The nightly upgrade's lines are `the night`'s, each carrying its night's instant in `Night`. A name that is no session's is refused before the gesture runs (`call.bad-input`, `by`). A far binary from before `by` reads a session's call as yours.
+
+The gestures that keep lines today:
+
+| Call                                                                     | Line                                                                                                         |
+| ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
+| `machines.create-workspace`, `machines.create-server`                    | `<vm> created`, with its purpose and its creator                                                             |
+| `machines.delete`, `machines.restart`, `machines.start`, `machines.stop` | `<machine> deleted` (`restarted`, `started`, `stopped`), `<machine> not deleted` when it failed              |
+| `disk.free`, `disk.free-unused`                                          | `<row> freed` per row it freed, with its sentence; `<row> not freed` and its reason for a row that broke     |
+| `apps.update`                                                            | one per app it updated or failed to, a failed one with `apps.update` as its `Retry`                          |
+| `machinefile.apply`                                                      | `<file> applied`, what it installed and removed counted                                                      |
+| `machinefile.upgrade`                                                    | one per app it moved (`Upgrade`), left waiting (`held`) or failed to move; `<file> upgraded` when none moved |
 
 ## Related
 

@@ -1,0 +1,27 @@
+description: 'an upgrade keeps a line per app it moved or left waiting, with the versions moved'
+fixture: ../../__fixtures__/homebrew/
+env: versions
+runs:
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [gh, { name: node, version: '22.11' }]
+      exit: 0
+    - command: 'apply'
+      exit: 0
+      stdout: |
+          ●	homebrew	5.0.1	script	the manager of gh
+          ◐	gh	2.97.0	brew	outdated
+          ●	mise	2026.10.1	brew	the manager of node
+          ◐	node	22.11.0	mise	outdated
+    - command: 'upgrade >/dev/null'
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs["macbook-pro"].stores.journal[] | {Call, Text, By, Outcome, Upgrade, Detail}] | sort_by(.Call, .Text, .Outcome) | .[]'' world.json'
+      exit: 0
+      stdout: |
+          {"Call":"machinefile.apply","Text":"macbook-pro applied","By":"you","Outcome":"done","Upgrade":null,"Detail":""}
+          {"Call":"machinefile.upgrade","Text":"gh","By":"you","Outcome":"done","Upgrade":{"From":"2.97.0","To":"2.98.0"},"Detail":""}
+          {"Call":"machinefile.upgrade","Text":"node","By":"you","Outcome":"done","Upgrade":{"From":"22.11.0","To":"22.11.5"},"Detail":""}
+          {"Call":"machinefile.upgrade","Text":"node","By":"you","Outcome":"held","Upgrade":null,"Detail":"25.1.0 available: change '22.11' to '25.1' in ~/.config/station/machinefiles/macbook-pro.machine.yaml"}

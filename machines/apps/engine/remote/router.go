@@ -37,6 +37,9 @@ type Reach struct {
 	// takes from this Mac's own record, its guest never asked; false sends
 	// the call to its guest, which refuses it as stopped.
 	Stopped func(ctx context.Context, vm, call string, in json.RawMessage) (any, bool)
+	// value: where this Mac keeps a gesture it was the last to run or
+	// hand on, handed the machine it ran on; nil keeps none.
+	Kept call.Keeper
 }
 
 type Router struct {
@@ -78,11 +81,15 @@ func (r *Router) Invoke(ctx context.Context, target machine.Ref, name string, in
 	if err != nil {
 		return err
 	}
+	if refused := r.author(ctx, name); refused != nil {
+		return refused
+	}
 	if r.local(t) && r.inEngine(name) {
 		return r.engine.Invoke(ctx, target, name, in, out, p)
 	}
 	if r.local(t) {
 		v, ran := r.registry.Run(ctx, r.thisMac, name, in, p)
+		r.keep(ctx, r.thisMac.Ref, name, in, v, ran)
 		call.Set(out, v)
 		return ran
 	}
@@ -100,6 +107,9 @@ func (r *Router) Invoke(ctx context.Context, target machine.Ref, name string, in
 	}
 	defer r.release(l)
 	answer, err := l.ep.Invoke(ctx, t, name, raw, p)
+	if t.On == r.thisMac.Ref.Name {
+		r.keep(ctx, t, name, raw, answer, err)
+	}
 	if err != nil {
 		r.broke(t.Mac(), l, err)
 		return r.named(t, r.labeled(t.Mac(), err))
@@ -193,6 +203,23 @@ func (r *Router) resolve(ctx context.Context, target machine.Ref) (machine.Ref, 
 }
 
 func (r *Router) local(t machine.Ref) bool { return t == (machine.Ref{}) }
+
+// invariant: a gesture is kept once, by the Router of the Mac that holds
+// its machine, where it runs the call or hands it to one of its VMs; a
+// Router that hands it to this Mac's engine or to another Mac keeps
+// nothing, and a Router inside a VM keeps nothing at all.
+func (r *Router) keep(ctx context.Context, target machine.Ref, name string, in, out any, err error) {
+	if h, ok := r.registry.Lookup(name); ok {
+		r.reach.Kept.Keep(ctx, r.thisMac, target, h.Meta(), in, out, err)
+	}
+}
+
+func (r *Router) author(ctx context.Context, name string) error {
+	if h, ok := r.registry.Lookup(name); !ok || h.Meta().Journal == nil {
+		return nil
+	}
+	return call.Author(ctx, name)
+}
 
 func (r *Router) inEngine(name string) bool {
 	if r.engine == nil {
@@ -364,9 +391,14 @@ func (r *Router) Serve(ctx context.Context, target machine.Ref, name string, in 
 	// invariant: a server answers for its own machine and for its VMs alone: a
 	// frame for this machine runs here, one for one of its VMs rides its
 	// engine's connection to that VM, and nothing hops to a third machine.
+	if err := r.author(ctx, name); err != nil {
+		return nil, err
+	}
 	vm, ok := r.vm(target)
 	if !ok {
-		return serve.Local(r.registry, r.thisMac, r.reach.Version).Invoke(ctx, target, name, in, p)
+		v, err := serve.Local(r.registry, r.thisMac, r.reach.Version).Invoke(ctx, target, name, in, p)
+		r.keep(ctx, r.thisMac.Ref, name, in, v, err)
+		return v, err
 	}
 	if v, ok := r.stopped(ctx, vm, name, in); ok {
 		return v, nil
@@ -377,6 +409,7 @@ func (r *Router) Serve(ctx context.Context, target machine.Ref, name string, in 
 	}
 	defer r.release(l)
 	out, err := l.ep.Invoke(ctx, vm, name, in, p)
+	r.keep(ctx, vm, name, in, out, err)
 	if err != nil {
 		r.broke(vm.Mac(), l, err)
 	}

@@ -62,6 +62,7 @@ func (m machine) router(env kit.Env) *remote.Router {
 		Label:   m.label,
 		Unborn:  m.unborn,
 		Stopped: m.stopped,
+		Kept:    m.kept(),
 	})
 	m.far.router = r
 	return r

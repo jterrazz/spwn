@@ -28,6 +28,9 @@ type Mac struct {
 	// value: that Mac's own routing, for a call addressed to one of its VMs;
 	// nil runs every call on the Mac itself.
 	Relay Relay
+	// value: where that Mac keeps a gesture it runs on itself, as its
+	// serving keeps it; nil keeps none.
+	Kept call.Keeper
 }
 
 type Relay interface {
@@ -129,6 +132,9 @@ func (e endpoint) Invoke(ctx context.Context, target machine.Ref, name string, i
 		return nil, e.over(err)
 	}
 	out, err := e.m.Registry.Run(ctx, e.m.Profile, name, v, p)
+	if h, ok := e.m.Registry.Lookup(name); ok {
+		e.m.Kept.Keep(ctx, e.m.Profile, e.m.Profile.Ref, h.Meta(), v, out, err)
+	}
 	if err != nil {
 		return nil, e.over(err)
 	}

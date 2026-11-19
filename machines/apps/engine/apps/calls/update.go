@@ -29,7 +29,7 @@ func keys(words []string) []catalog.ManagerKey {
 }
 
 var Update = call.Call[Deps, UpdateIn, []apps.Outcome]{
-	Name: "apps.update", Section: section.Apps, Where: call.AtTarget, Applies: apps.Applies,
+	Name: "apps.update", Section: section.Apps, Where: call.AtTarget, Applies: apps.Applies, Journal: keptUpdate,
 	Errors: []fail.Code{Unknown, Elsewhere, NotInstalled},
 	Run: func(ctx context.Context, d Deps, in UpdateIn, p call.Progress) ([]apps.Outcome, error) {
 		if len(in.Names) > 0 {

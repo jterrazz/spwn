@@ -40,6 +40,10 @@ const (
 	DayForm = "2006-01-02"
 	// value: who a line was done by when no session or job names itself.
 	ByYou = "you"
+	// value: who an engine job's line was done by: the nightly upgrade, and
+	// the engine itself for what it saw of a server.
+	ByNight   = "the night"
+	ByStation = "station"
 )
 
 type Subject struct {

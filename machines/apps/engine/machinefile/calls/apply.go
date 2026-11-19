@@ -57,7 +57,7 @@ var Apply = call.Call[Deps, ApplyIn, machinefile.Applied]{
 	// by the method and at the version its step chose, or set by
 	// settings.apply, one at a time in the plan's order; then the owner's
 	// lines of its phase.
-	Name: "machinefile.apply", Document: 2, Where: call.AtTarget, Applies: machine.Anywhere, Confirm: confirm.Remove,
+	Name: "machinefile.apply", Document: 2, Where: call.AtTarget, Applies: machine.Anywhere, Confirm: confirm.Remove, Journal: keptApply,
 	Errors: []fail.Code{NotFound, NeedsTerminal, NameTaken, BadPhase, confirm.YesNeeded, Busy},
 	Run: func(ctx context.Context, d Deps, in ApplyIn, p call.Progress) (answer machinefile.Applied, err error) {
 		defer func() { answer = answer.Answered() }()

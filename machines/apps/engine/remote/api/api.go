@@ -46,12 +46,15 @@ type Frame struct {
 	// (or hello); its answers carry the same id: progress frames, then one
 	// out or error for a call, out frames then done for a watch. A cancel
 	// carries the id of a request still answering and ends it.
-	V        int             `json:"v"`
-	ID       string          `json:"id"`
-	Hello    *Hello          `json:"hello,omitempty"`
-	Call     string          `json:"call,omitempty"`
-	Watch    string          `json:"watch,omitempty"`
-	Target   *Target         `json:"target,omitempty"`
+	V      int     `json:"v"`
+	ID     string  `json:"id"`
+	Hello  *Hello  `json:"hello,omitempty"`
+	Call   string  `json:"call,omitempty"`
+	Watch  string  `json:"watch,omitempty"`
+	Target *Target `json:"target,omitempty"`
+	// value: the session a request is done for, by its name; absent is the
+	// owner.
+	By       string          `json:"by,omitempty"`
 	In       json.RawMessage `json:"in,omitempty"`
 	Progress *Progress       `json:"progress,omitempty"`
 	Out      json.RawMessage `json:"out,omitempty"`

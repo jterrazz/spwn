@@ -1,0 +1,56 @@
+package calls
+
+import (
+	"strconv"
+	"strings"
+	"time"
+
+	"github.com/jterrazz/studio-station/apps/engine/core/finding"
+	"github.com/jterrazz/studio-station/apps/engine/core/journal"
+	"github.com/jterrazz/studio-station/apps/engine/machinefile"
+)
+
+// invariant: an apply keeps one line, the file it applied and what it
+// installed and removed, counted.
+func keptApply(in ApplyIn, out machinefile.Applied, _ error) []journal.Line {
+	file := out.Plan.Name
+	if file == "" {
+		file = in.Machinefile
+	}
+	installed := 0
+	for _, d := range out.Done {
+		if d.Installed {
+			installed++
+		}
+	}
+	var said []string
+	if installed > 0 {
+		said = append(said, strconv.Itoa(installed)+" installed")
+	}
+	if n := len(out.Removed); n > 0 {
+		said = append(said, strconv.Itoa(n)+" removed")
+	}
+	return []journal.Line{{Text: file + " applied", Detail: strings.Join(said, ", ")}}
+}
+
+// invariant: an upgrade keeps one line per app it moved, held or failed
+// to move, a failed one with the update that tries it again; one that
+// moved nothing keeps one line that says so.
+func keptUpgrade(in UpgradeIn, out machinefile.Upgraded, err error) []journal.Line {
+	n := machinefile.NightOf(out, err, in.Machinefile, time.Time{})
+	app := func(name string) *journal.Subject { return &journal.Subject{Kind: journal.App, Name: name} }
+	var lines []journal.Line
+	for _, m := range n.Moved {
+		lines = append(lines, journal.Line{Text: m.App, Subject: app(m.App), Outcome: journal.Done, Upgrade: &journal.Upgrade{From: m.Was, To: m.Now}})
+	}
+	for _, w := range n.Waiting {
+		lines = append(lines, journal.Line{Text: w.App, Subject: app(w.App), Outcome: journal.Held, Detail: w.Words()})
+	}
+	for _, name := range n.Failed {
+		lines = append(lines, journal.Line{Text: name, Subject: app(name), Outcome: journal.Failed, Retry: &finding.Fix{Call: "apps.update", Args: map[string]string{"Names": name}}})
+	}
+	if len(lines) == 0 {
+		lines = append(lines, journal.Line{Text: n.Machinefile + " upgraded", Detail: "nothing moved"})
+	}
+	return lines
+}

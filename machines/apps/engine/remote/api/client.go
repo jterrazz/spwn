@@ -41,6 +41,15 @@ func (c Client) open(ctx context.Context, f Frame) (io.ReadWriteCloser, *bufio.R
 	return conn, bufio.NewReaderSize(conn, 64*1024), nil
 }
 
+// invariant: a frame names a session alone: an engine job's author stays
+// in its own process.
+func byOf(ctx context.Context) string {
+	if by := call.By(ctx); call.Session(by) {
+		return by
+	}
+	return ""
+}
+
 func encodeIn(in any) (json.RawMessage, error) {
 	if in == nil {
 		return nil, nil
@@ -53,7 +62,7 @@ func (c Client) Call(ctx context.Context, name string, target machine.Ref, in, o
 	if err != nil {
 		return err
 	}
-	conn, r, err := c.open(ctx, Frame{Call: name, Target: TargetOf(target), In: raw})
+	conn, r, err := c.open(ctx, Frame{Call: name, Target: TargetOf(target), In: raw, By: byOf(ctx)})
 	if err != nil {
 		return err
 	}
@@ -118,7 +127,7 @@ func (c Client) Watch(ctx context.Context, name string, in any) (<-chan json.Raw
 	if err != nil {
 		return nil, err
 	}
-	conn, r, err := c.open(ctx, Frame{Watch: name, In: raw})
+	conn, r, err := c.open(ctx, Frame{Watch: name, In: raw, By: byOf(ctx)})
 	if err != nil {
 		return nil, err
 	}

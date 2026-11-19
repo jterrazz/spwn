@@ -104,6 +104,13 @@ func answer(ctx context.Context, f api.Frame, out *writer, calls Calls, word cal
 		out.write(r)
 	}
 	p := progress{id: f.ID, out: out, word: word}
+	if f.Hello == nil {
+		if err := call.FrameBy(f.Call+f.Watch, f.By); err != nil {
+			reply(api.Frame{Error: call.ToWire(err, word)})
+			return
+		}
+		ctx = call.WithBy(ctx, f.By)
+	}
 	switch {
 	case f.Hello != nil:
 		h := calls.Hello()

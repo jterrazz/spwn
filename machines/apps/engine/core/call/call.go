@@ -10,6 +10,7 @@ import (
 
 	"github.com/jterrazz/studio-station/apps/engine/core/confirm"
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
+	"github.com/jterrazz/studio-station/apps/engine/core/journal"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/core/section"
 )
@@ -62,6 +63,9 @@ type Call[D, In, Out any] struct {
 	// whose Asks names one is sent only to a binary that lists it.
 	Abilities []string
 	Run       func(ctx context.Context, d D, in In, p Progress) (Out, error)
+	// value: the lines a gesture that ran keeps in its Mac's journal, err
+	// nil or the failure it ended on; nil for a call that keeps none.
+	Journal func(in In, out Out, err error) []journal.Line
 }
 
 type Asker interface {
@@ -112,6 +116,9 @@ type Meta struct {
 	Watch     bool
 	Document  int
 	Abilities []string
+	// value: the call's Journal over its In and Out, each its Go value or
+	// its wire form; nil for a call that keeps no line.
+	Journal func(in, out any, err error) []journal.Line
 }
 
 type Handler interface {
@@ -172,6 +179,10 @@ func valueOf[Out any](name string, v any) (Out, error) {
 			return out, e
 		}
 		return out, nil
+	case *Out:
+		if v != nil {
+			return *v, nil
+		}
 	case Out:
 		return v, nil
 	}
@@ -183,8 +194,19 @@ func Bind[D, In, Out any](c Call[D, In, Out], d D) Handler {
 	return bound[D, In, Out]{meta: Meta{
 		Name: c.Name, Section: c.Section, Where: c.Where, Applies: c.Applies, Needs: c.Needs, Confirm: c.Confirm, ConfirmBy: c.ConfirmBy, Errors: c.Errors,
 		In: reflect.TypeFor[In]().Name(), Out: reflect.TypeFor[Out]().Name(), InType: reflect.TypeFor[In](), OutType: reflect.TypeFor[Out](),
-		Document: c.Document, Abilities: c.Abilities,
+		Document: c.Document, Abilities: c.Abilities, Journal: lifted(c.Journal),
 	}, runFn: c.Run, deps: d}
+}
+
+func lifted[In, Out any](j func(In, Out, error) []journal.Line) func(in, out any, err error) []journal.Line {
+	if j == nil {
+		return nil
+	}
+	return func(in, out any, err error) []journal.Line {
+		i, _ := valueOf[In]("", in)
+		o, _ := valueOf[Out]("", out)
+		return j(i, o, err)
+	}
 }
 
 func BindWatch[D, In, Out any](w Watch[D, In, Out], d D) Handler {
@@ -208,7 +230,7 @@ func (b bound[D, In, Out]) Invoke(ctx context.Context, target machine.Profile, r
 	if err != nil {
 		return nil, err
 	}
-	out, err := b.runFn(ctx, b.deps, in, orSilent(p))
+	out, err := b.runFn(inside(ctx, b.meta), b.deps, in, orSilent(p))
 	if err != nil {
 		return nil, err
 	}

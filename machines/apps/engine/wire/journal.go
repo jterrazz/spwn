@@ -6,8 +6,10 @@ import (
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
+	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 	corejournal "github.com/jterrazz/studio-station/apps/engine/core/journal"
 	coremachine "github.com/jterrazz/studio-station/apps/engine/core/machine"
+	"github.com/jterrazz/studio-station/apps/engine/core/secret"
 	journalcalls "github.com/jterrazz/studio-station/apps/engine/journal/calls"
 	"github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/remote/each"
@@ -23,6 +25,23 @@ func journalCommand(env kit.Env, m machine) *cobra.Command {
 
 func (m machine) journalDeps() journalcalls.Deps {
 	return journalcalls.Deps{Journal: m.stores.journal, Now: m.sys.Clock.Now, Macs: journalMacs{m}, Known: knownTo(m.cat)}
+}
+
+// invariant: a gesture that ran is kept on This Mac's journal: one that
+// ended in a failure is kept failed, worded as the CLI words it, its
+// secrets withheld, and one refused before any effect is not kept at all.
+func (m machine) kept() call.Keeper {
+	return func(ctx context.Context, target coremachine.Ref, meta call.Meta, in, out any, err error) {
+		ran := journalcalls.Ran{Call: meta.Name, Machine: target.Name, By: call.By(ctx)}
+		if err != nil {
+			worded := kit.Translate(err, "")
+			if t := worded.Type; t != fail.Failed && t != fail.Interrupted && (t != "" || worded.Exit == fail.ExitUsage) {
+				return
+			}
+			ran.Failed = secret.Kept(worded.Message)
+		}
+		_ = journalcalls.Keep(context.WithoutCancel(ctx), m.journalDeps(), ran, meta.Journal(in, out, err)...)
+	}
 }
 
 // value: the journal's reach: every Mac as This Mac lists it, each Mac's

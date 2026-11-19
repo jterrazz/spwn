@@ -311,9 +311,10 @@ func frameSchema(w *wireRules) map[string]any {
 	}
 	ref := func(key string) map[string]any { return map[string]any{"$ref": "#/$defs/" + key} }
 	name := map[string]any{"type": "string"}
+	by := map[string]any{"type": "string", "pattern": "^[a-z0-9-]{1,40}$"}
 	r.defs["HelloFrame"] = head(map[string]any{"hello": ref("Hello")}, "hello")
-	r.defs["CallFrame"] = head(map[string]any{"call": name, "target": ref("Target"), "in": map[string]any{}}, "call")
-	r.defs["WatchFrame"] = head(map[string]any{"watch": name, "target": ref("Target"), "in": map[string]any{}}, "watch")
+	r.defs["CallFrame"] = head(map[string]any{"call": name, "target": ref("Target"), "in": map[string]any{}, "by": by}, "call")
+	r.defs["WatchFrame"] = head(map[string]any{"watch": name, "target": ref("Target"), "in": map[string]any{}, "by": by}, "watch")
 	r.defs["ProgressFrame"] = head(map[string]any{"progress": ref("Progress")}, "progress")
 	r.defs["OutFrame"] = head(map[string]any{"out": map[string]any{}}, "out")
 	r.defs["ErrorFrame"] = head(map[string]any{"error": wireError}, "error")

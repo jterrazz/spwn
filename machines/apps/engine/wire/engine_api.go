@@ -75,7 +75,7 @@ func word(e *fail.Error) (message, hint string) {
 // gated by this machine's profile and worded by this binary's table; a call
 // for another machine rides far, the run's Router.
 func (m machine) engineServer(d *process.Engine, registry *call.Registry, far call.Router) func(ctx context.Context, conn process.Stream, guest string) {
-	serving := process.Serving{Registry: registry, ThisMachine: m.profile, Word: word, Sleep: m.sys.Clock.Sleep, Far: far}
+	serving := process.Serving{Registry: registry, ThisMachine: m.profile, Word: word, Sleep: m.sys.Clock.Sleep, Far: far, Kept: m.kept()}
 	s := process.Server(d, serving)
 	return func(ctx context.Context, conn process.Stream, guest string) {
 		if guest == "" {

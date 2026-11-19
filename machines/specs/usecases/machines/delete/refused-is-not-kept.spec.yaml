@@ -1,0 +1,16 @@
+description: 'a delete refused before it runs keeps no line'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'machines delete api --confirm=ap'
+      exit: 2
+      stderr: |
+          Error: not deleted: you typed "ap", not "api"
+          Hint: in a script: --confirm=api
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.out.Lines // [] | length'''
+      stdin: |
+          {"v":2,"id":"1","call":"journal.kept","in":{}}
+      exit: 0
+      stdout: |
+          0

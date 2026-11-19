@@ -14,6 +14,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/machines/contract"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
+	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	"github.com/jterrazz/studio-station/apps/engine/core/secret"
 	"github.com/jterrazz/studio-station/apps/engine/core/store"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
@@ -143,7 +144,7 @@ func (s *Machinist) checkCreate(ctx context.Context, r model.CreateRequest) (mod
 		return r, claims{}, CheckForServersRule
 	case r.Check != "" && !validCheck(r.Check):
 		return r, claims{}, &model.BadCheckError{Value: r.Check}
-	case r.Creator != "" && (!validName(r.Creator) || r.Creator == model.ByOwner):
+	case r.Creator != "" && !call.Session(r.Creator):
 		return r, claims{}, &model.BadCreatorError{Session: r.Creator}
 	case !validPurpose(r.Purpose):
 		return r, claims{}, &model.BadPurposeError{Purpose: r.Purpose}

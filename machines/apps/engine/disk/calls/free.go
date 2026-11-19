@@ -15,7 +15,7 @@ type FreeIn struct {
 }
 
 var Free = call.Call[Deps, FreeIn, []disk.Outcome]{
-	Name: "disk.free", Section: section.Disk, Where: call.AtTarget, Applies: disk.Applies,
+	Name: "disk.free", Section: section.Disk, Where: call.AtTarget, Applies: disk.Applies, Journal: keptFree,
 	Errors: []fail.Code{Unknown, Elsewhere, NothingToFree},
 	Run: func(ctx context.Context, d Deps, in FreeIn, _ call.Progress) ([]disk.Outcome, error) {
 		out, err := d.Disk.Free(ctx, in.Apps)

@@ -1,0 +1,24 @@
+description: 'a free on another Mac is kept in that Mac''s journal, and a free in a VM in its Mac''s'
+env: two-macs
+runs:
+    - command: 'disk free homebrew --on mac-mini'
+      exit: 0
+      stdout: |
+          	On mac-mini:
+          ●	homebrew	1.1 GB freed
+          ●	Freed	1.1 GB	nothing is lost
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs | {mini: [.["mac-mini"].stores.journal[]? | {Machine, Call, Text, By, Outcome}], here: .["macbook-pro"].stores.journal}'' world.json'
+      exit: 0
+      stdout: |
+          {"mini":[{"Machine":"mac-mini","Call":"disk.free","Text":"homebrew freed","By":"you","Outcome":"done"}],"here":null}
+    - command: 'disk free --on linux-1'
+      exit: 0
+      stdout: |
+          	On linux-1:
+          ●	go	1.2 GB freed
+          ●	node	300 MB freed
+          ●	Freed	1.5 GB	nothing is lost
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs["macbook-pro"].stores.journal[]? | {Machine, Call, By, Outcome}] | unique'' world.json'
+      exit: 0
+      stdout: |
+          [{"Machine":"linux-1","Call":"disk.free","By":"you","Outcome":"done"}]

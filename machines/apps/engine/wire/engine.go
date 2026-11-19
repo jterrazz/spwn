@@ -17,6 +17,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/accounts/adapter/keychain"
 	"github.com/jterrazz/studio-station/apps/engine/activity"
 	appscalls "github.com/jterrazz/studio-station/apps/engine/apps/calls"
+	corejournal "github.com/jterrazz/studio-station/apps/engine/core/journal"
 	coremachine "github.com/jterrazz/studio-station/apps/engine/core/machine"
 	enginejobs "github.com/jterrazz/studio-station/apps/engine/engine/jobs"
 	"github.com/jterrazz/studio-station/apps/engine/machinefile"
@@ -194,7 +195,7 @@ func (m machine) nightly(calls call.Router) *enginejobs.Nightly {
 			return out.Night, out.Ran, err
 		},
 		Upgrade: func(ctx context.Context, name string) error {
-			_, err := call.Invoke(ctx, calls, coremachine.Ref{}, machinefilecalls.Upgrade, machinefilecalls.UpgradeIn{Machinefile: name, Unattended: true}, nil)
+			_, err := call.Invoke(call.WithBy(ctx, corejournal.ByNight), calls, coremachine.Ref{}, machinefilecalls.Upgrade, machinefilecalls.UpgradeIn{Machinefile: name, Unattended: true}, nil)
 			return err
 		},
 	}

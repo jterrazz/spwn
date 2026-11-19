@@ -26,7 +26,7 @@ var FreeUnused = call.Call[Deps, FreeUnusedIn, []disk.Outcome]{
 	// Mac that asked it, and its answer binds the set it named. Each name is
 	// read again here, and refused before anything goes when nothing-uses
 	// no longer holds it.
-	Name: "disk.free-unused", Section: section.Disk, Where: call.AtTarget, Applies: AppliesOnAMac, Confirm: confirm.FreeUnused,
+	Name: "disk.free-unused", Section: section.Disk, Where: call.AtTarget, Applies: AppliesOnAMac, Confirm: confirm.FreeUnused, Journal: keptFreeUnused,
 	Errors: []fail.Code{NamesNeeded, NotFreeable, RecordUnreadable, confirm.Needed, confirm.Mismatch},
 	Run: func(ctx context.Context, d Deps, in FreeUnusedIn, _ call.Progress) ([]disk.Outcome, error) {
 		var names []string

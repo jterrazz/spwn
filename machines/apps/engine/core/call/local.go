@@ -130,8 +130,7 @@ func (b bound[D, In, Out]) run(ctx context.Context, target machine.Profile, in a
 	if err != nil {
 		return nil, err
 	}
-	out, err := b.runFn(ctx, b.deps, v, p)
-	return out, err
+	return b.runFn(inside(ctx, b.meta), b.deps, v, p)
 }
 
 func (b bound[D, In, Out]) stream(ctx context.Context, target machine.Profile, in any, p Progress) (<-chan Update[any], error) {

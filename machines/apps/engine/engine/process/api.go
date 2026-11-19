@@ -115,6 +115,8 @@ type Serving struct {
 	Sleep       func(ctx context.Context, d time.Duration) error
 	// value: the Router a call for another machine rides.
 	Far call.Router
+	// value: where a gesture the engine runs for this Mac is kept.
+	Kept call.Keeper
 	// value: the VM whose guest socket this server is: its guest's calls
 	// (engine.ports, engine.reserve, engine.release)
 	// are answered as the engine answers that guest; empty serves this
@@ -169,7 +171,7 @@ func Server(d *Engine, h Serving) serve.Server {
 			}
 			return d.Watch(ctx, in.Machines, send)
 		}},
-		ThisMachine: h.ThisMachine, Word: h.Word, Hint: "station machines", Sleep: h.Sleep, Far: h.Far,
+		ThisMachine: h.ThisMachine, Word: h.Word, Hint: "station machines", Sleep: h.Sleep, Far: h.Far, Kept: h.Kept,
 	}
 }
 
