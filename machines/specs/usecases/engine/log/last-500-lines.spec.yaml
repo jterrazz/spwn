@@ -1,0 +1,11 @@
+description: 'engine.log keeps the last 500 lines of a longer log, and drops a line cut by the tail'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; /bin/mkdir -p .local/state/station/logs; /usr/bin/seq 1 40000 | /usr/bin/sed ''s/^/line /'' > .local/state/station/logs/engine.log; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out | [(.Lines | length), .Lines[0], .Lines[-1]] else .error | {code, message} end'''
+      stdin: |
+          {"v":2,"id":"1","call":"engine.log","in":{}}
+      exit: 0
+      stdout: |
+          [500,"line 39501","line 40000"]

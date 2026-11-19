@@ -3,6 +3,7 @@ package wire
 import (
 	"context"
 	"errors"
+	"io"
 	"io/fs"
 	"time"
 
@@ -20,10 +21,37 @@ func (m engineMac) Now() time.Time                                   { return m.
 func (m engineMac) Sleep(ctx context.Context, d time.Duration) error { return m.Clock.Sleep(ctx, d) }
 func (m engineMac) Home() string                                     { return m.Env.Home() }
 func (m engineMac) ReadFile(path string) ([]byte, error)             { return m.FS.ReadFile(path) }
-func (m engineMac) MkdirAll(path string) error                       { return m.FS.MkdirAll(path, 0o700) }
-func (m engineMac) Remove(path string) error                         { return m.FS.Remove(path) }
-func (m engineMac) Join(a, b process.Stream)                         { m.Sockets.Join(a, b) }
-func (m engineMac) Reap(dir string) int                              { return m.Run.Reap(dir) }
+func (m engineMac) Tail(path string, limit int64) (tail []byte, cut bool, err error) {
+	f, err := m.FS.Open(path)
+	if err != nil {
+		return nil, false, err
+	}
+	defer func() { _ = f.Close() }()
+	seek, ok := f.(io.Seeker)
+	var data []byte
+	if !ok {
+		data, err = io.ReadAll(f)
+		if int64(len(data)) > limit {
+			return data[int64(len(data))-limit:], true, err
+		}
+		return data, false, err
+	}
+	size, err := seek.Seek(0, io.SeekEnd)
+	if err != nil {
+		return nil, false, err
+	}
+	from := max(0, size-limit)
+	if _, err = seek.Seek(from, io.SeekStart); err != nil {
+		return nil, false, err
+	}
+	data, err = io.ReadAll(f)
+	return data, from > 0, err
+}
+
+func (m engineMac) MkdirAll(path string) error { return m.FS.MkdirAll(path, 0o700) }
+func (m engineMac) Remove(path string) error   { return m.FS.Remove(path) }
+func (m engineMac) Join(a, b process.Stream)   { m.Sockets.Join(a, b) }
+func (m engineMac) Reap(dir string) int        { return m.Run.Reap(dir) }
 
 func (m engineMac) Exists(path string) bool {
 	_, err := m.FS.Stat(path)

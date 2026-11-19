@@ -334,6 +334,13 @@
       "own": true
     },
     {
+      "name": "engine.log",
+      "schema": "station.engine.log/v1",
+      "where": "at-target",
+      "in": "LogIn",
+      "out": "Log"
+    },
+    {
       "name": "engine.ports",
       "schema": "station.engine.ports/v1",
       "where": "in-engine",

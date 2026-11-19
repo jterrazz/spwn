@@ -1068,6 +1068,8 @@ export type EngineAwakeOff = {
     ended: boolean;
 };
 
+export type EngineCallsLogIn = Record<string, never>;
+
 export type EngineCallsReadIn = Record<string, never>;
 
 export type EngineCallsReleaseIn = Record<string, never>;
@@ -1129,6 +1131,11 @@ export type EngineKept = {
 export type EngineLastSettingsOut = {
     kept: boolean;
     read: SettingsLastRead;
+};
+
+export type EngineLog = {
+    Empty?: string;
+    Lines: string[] | null;
 };
 
 export type EngineNotice = {
@@ -3325,6 +3332,8 @@ export type EngineGuestExecInput = EngineExecIn;
 export type EngineGuestExecOutput = EngineExecOut;
 export type EngineHelloInput = Record<string, never>;
 export type EngineHelloOutput = EngineHello;
+export type EngineLogInput = EngineCallsLogIn;
+export type EngineLogOutput = EngineLog;
 export type EnginePortsInput = EngineVMIn;
 export type EnginePortsOutput = PortsMacPorts;
 export type EngineReadInput = EngineCallsReadIn;
@@ -3512,6 +3521,7 @@ export interface Calls {
     'engine.events': { in: EngineEventsInput; out: EngineEventsOutput; watch: true; own: true };
     'engine.guest-exec': { in: EngineGuestExecInput; out: EngineGuestExecOutput; watch: false; own: true };
     'engine.hello': { in: EngineHelloInput; out: EngineHelloOutput; watch: false; own: true };
+    'engine.log': { in: EngineLogInput; out: EngineLogOutput; watch: false };
     'engine.ports': { in: EnginePortsInput; out: EnginePortsOutput; watch: false; own: true };
     'engine.read': { in: EngineReadInput; out: EngineReadOutput; watch: false };
     'engine.read-release': { in: EngineReadReleaseInput; out: EngineReadReleaseOutput; watch: false };

@@ -2,6 +2,7 @@ package engine
 
 import (
 	"path"
+	"strings"
 	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
@@ -63,6 +64,44 @@ type VMView struct {
 func SocketPath(state string) string { return path.Join(state, "engine.sock") }
 
 func LogPath(state string) string { return path.Join(state, "logs", "engine.log") }
+
+const (
+	// value: what a read of the engine's log keeps: its last lines, from the
+	// last bytes of its file, which launchd's output only grows.
+	LogLines = 500
+	LogBytes = 256 * 1024
+	// value: what the engine says when its log holds no line.
+	LogEmpty = "The engine has written no line here yet."
+)
+
+type Log struct {
+	Lines []string
+	// value: why Lines is empty, in the engine's words; absent otherwise.
+	Empty string `json:",omitempty"`
+}
+
+func LogOf(tail []byte, cut bool) Log {
+	// invariant: the last LogLines non-blank lines of the tail; a tail cut
+	// inside a line (the file is longer than LogBytes) drops its first,
+	// partial line.
+	lines := strings.Split(string(tail), "\n")
+	if cut && len(lines) > 0 {
+		lines = lines[1:]
+	}
+	kept := make([]string, 0, min(len(lines), LogLines))
+	for _, line := range lines {
+		if line = strings.TrimRight(line, "\r"); strings.TrimSpace(line) != "" {
+			kept = append(kept, line)
+		}
+	}
+	if len(kept) > LogLines {
+		kept = kept[len(kept)-LogLines:]
+	}
+	if len(kept) == 0 {
+		return Log{Lines: []string{}, Empty: LogEmpty}
+	}
+	return Log{Lines: kept}
+}
 
 func ChildrenDir(state string) string { return path.Join(state, "children") }
 

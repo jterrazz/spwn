@@ -50,6 +50,8 @@ The release reading is two calls of the Registry, so a window finds it in a hell
 
 The journal is two calls of the Registry: `journal.kept`, at the target, answers one Mac's `Lines`, newest first, from `Since` to `Before`; `journal.read`, in this process, asks each Mac and answers `Groups` (each `Day`, `Title`, `Sum`, `Night` and its `Lines`), `Unheard`, `Next` and `Empty`, narrowed by `Mac`, `Machine` or `Subject`, paged by `Before` and `Days`, or `Night` alone. A line's `At` is an RFC 3339 instant, and its `Outcome` and a subject's `Kind` are closed enums with their words ([Journal](journal.md)).
 
+`engine.log`, at-target and applied on a Mac, answers what station wrote on it: the last 500 lines of the engine's log (`~/.local/state/station/logs/engine.log`, read from its last 256 KiB, so a log of any size answers in one read), each line with its secrets withheld ([ADR-048](../decisions/048-the-engine-withholds-a-secret-before-any-answer.md)), and `Empty`, the engine's sentence, when there is none. It is the window's reading of what station did on a Mac; `machines.log` stays a VM's.
+
 ## The engine's own calls
 
 Beside the Registry, the engine serves calls of its own, which the CLI's reads and the VMs' guests ask of its live state; `calls.json` lists them with `own`, and a hello's `calls` never names them:

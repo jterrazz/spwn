@@ -107,6 +107,19 @@ func (c *Control) Read(ctx context.Context) (engine.Reading, error) {
 	return r, nil
 }
 
+func (c *Control) Log(_ context.Context) (engine.Log, error) {
+	// invariant: a log not written yet is an empty one, not a failure.
+	file := engine.LogPath(c.o.State)
+	if !c.h.Exists(file) {
+		return engine.LogOf(nil, false), nil
+	}
+	tail, cut, err := c.h.Tail(file, engine.LogBytes)
+	if err != nil {
+		return engine.Log{}, err
+	}
+	return engine.LogOf(tail, cut), nil
+}
+
 func (c *Control) Plan(ctx context.Context) (engine.Work, error) {
 	// invariant: what a stop ends is every VM that runs, whatever its lifetime:
 	// a stop keeps every disk, and only a delete destroys.

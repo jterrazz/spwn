@@ -35,6 +35,9 @@ type Mac interface {
 	Sleep(ctx context.Context, d time.Duration) error
 	Home() string
 	ReadFile(path string) ([]byte, error)
+	// invariant: the last max bytes of a file, and whether the file held
+	// more: the engine's log grows without bound, and is never read whole.
+	Tail(path string, limit int64) (tail []byte, cut bool, err error)
 	Exists(path string) bool
 	MkdirAll(path string) error
 	Remove(path string) error

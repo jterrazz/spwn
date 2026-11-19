@@ -1,0 +1,11 @@
+description: 'engine.log reads the lines station wrote on this Mac, a secret withheld'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; /bin/mkdir -p .local/state/station/logs; /usr/bin/printf ''engine started\n\nping https://u:hunter2@example.com/x ok\nvm infra up\n'' > .local/state/station/logs/engine.log; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out else .error | {code, message} end'''
+      stdin: |
+          {"v":2,"id":"1","call":"engine.log","in":{}}
+      exit: 0
+      stdout: |
+          {"Lines":["engine started","ping https://withheld@example.com/x ok","vm infra up"]}

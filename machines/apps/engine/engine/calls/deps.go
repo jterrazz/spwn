@@ -39,6 +39,7 @@ type Control interface {
 	Check() error
 	Read(ctx context.Context) (engine.Reading, error)
 	Plan(ctx context.Context) (engine.Work, error)
+	Log(ctx context.Context) (engine.Log, error)
 	Stop(ctx context.Context, w engine.Work, by string) (engine.StopReport, error)
 	Start(ctx context.Context) (engine.StartReport, error)
 }
@@ -57,5 +58,5 @@ var Applies machine.Applies = func(p machine.Profile) machine.Verdict {
 }
 
 func All(d Deps) []call.Handler {
-	return []call.Handler{call.Bind(Read, d), call.Bind(Start, d), call.Bind(Stop, d), call.Bind(ReadRelease, d), call.Bind(RefreshRelease, d)}
+	return []call.Handler{call.Bind(Read, d), call.Bind(Start, d), call.Bind(Stop, d), call.Bind(ReadRelease, d), call.Bind(RefreshRelease, d), call.Bind(ReadLog, d)}
 }

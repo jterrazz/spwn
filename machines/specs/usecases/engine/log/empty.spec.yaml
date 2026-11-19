@@ -1,0 +1,11 @@
+description: 'engine.log says so when station has written no line on this Mac'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out else .error | {code, message} end'''
+      stdin: |
+          {"v":2,"id":"1","call":"engine.log","in":{}}
+      exit: 0
+      stdout: |
+          {"Lines":[],"Empty":"The engine has written no line here yet."}
