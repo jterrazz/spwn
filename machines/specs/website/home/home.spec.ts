@@ -114,7 +114,7 @@ describe('home', () => {
     });
 
     test.todo(
-        'H6 waits for a recording whose activity.read answers twice apart, so the figure moves and its line stays',
+        'H6 waits for a world whose activity moves: its meter grows each counter at one rate (apps/engine/world/past.go), so two activity.read of working-hard in one door answer the same bytes (probe.py), and the figure has nothing to move to',
     );
 
     test.todo("H9 waits for the engine's kept journal (drawn on a provisional copy)");

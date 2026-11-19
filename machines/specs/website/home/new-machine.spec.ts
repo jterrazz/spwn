@@ -92,5 +92,7 @@ describe('new machine', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test.todo('H8 waits for a verb that drags across the free squares of a grid');
+    test.todo(
+        "H8 waits for a drag verb of @jterrazz/test's visitor (its verbs are check, click, fill, gone, hover, press, see, select), and for the memory grid to take a drag: MemoryPick draws its squares as one image, with no pointer handler",
+    );
 });

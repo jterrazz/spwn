@@ -4,6 +4,6 @@ import '../website.specification.js';
 
 describe('live', () => {
     test.todo(
-        'A2 waits for a recording of a watch that answers changed values every 2 s, and for a verb that lets the visit wait on the clock',
+        'A2 waits for a world whose activity moves: its meter grows each counter at one rate (apps/engine/world/past.go), so two activity.read of working-hard in one door answer the same bytes (probe.py), and no recording holds a value that changes',
     );
 });
