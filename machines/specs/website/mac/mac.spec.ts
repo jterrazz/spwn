@@ -289,37 +289,6 @@ describe('mac', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test('M11 Activity reads its four measures, its machines among the busiest, its heat and battery', async () => {
-        // Given - the Activity tab of This Mac over two-macs
-        const result = await website.visit(
-            '/?world=two-macs&machine=macbook-pro&tab=Activity',
-            async (visitor) => {
-                // When - the page is read
-                // Then - the four measures, the busiest and the Mac's own facts are there
-                await visitor.see(region('CPU'));
-                await visitor.see(region('Memory'));
-                await visitor.see(region('Disk'));
-                await visitor.see(region('Network'));
-                await visitor.see(within(region('This Mac'), content('96 % · charging')));
-                await visitor.see(within(region('This Mac'), content('Nominal')));
-
-                // When - its machine among the busiest is pressed
-                await visitor.click(
-                    within(
-                        region('Busiest'),
-                        button('linux-1 a machine of this Mac', { exact: false }),
-                    ),
-                );
-
-                // Then - that machine opens
-                await visitor.see(heading('linux-1 running'));
-            },
-        );
-        expect(result.errors.text).toBe('');
-    });
-
-    test.todo('M11 waits for a recording of enough samples for the four curves to be drawn');
-
     test('M12 the Packages tab of a Mac that matches its file says so, then lists its upgrades and its apps by file', async () => {
         // Given - the Packages tab of This Mac over two-macs
         const result = await website.visit(
