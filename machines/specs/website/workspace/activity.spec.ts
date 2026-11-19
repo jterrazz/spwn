@@ -85,7 +85,9 @@ describe('activity', () => {
 
     test.todo("W25 waits for a call reading the last run's lines");
 
-    test.todo('W26 waits for a machines.log watch that streams each new line');
+    test.todo(
+        'W26 not in this version (decisions 2026-11-12, Logs tab: a reading, not a live feed)',
+    );
 
     test('W27 Activity reads its four measures over a window of 6 min, 1 h or 24 h', async () => {
         // Given - linux-1's Activity over two-macs, a running workspace

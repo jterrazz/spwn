@@ -203,7 +203,7 @@ describe('machine files', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test.todo("D23 waits for a call that opens the owner's file to edit");
+    test.todo('D23 not in this version');
 
     test("D24 the file's text is read only, and a second tab shows the Mac's own changes file", async () => {
         // Given - the window on the file macbook-pro over stories-file
