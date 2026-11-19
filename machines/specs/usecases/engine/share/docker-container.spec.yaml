@@ -15,4 +15,4 @@ runs:
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"] | {reserved: [(.stores.reservations // [])[] | select(.guest_port >= 8080) | [.vm, .guest_port, .host_port]], shared: [(.tailnet.shares // [])[] | .Reserved]}'' world.json'
       exit: 0
       stdout: |
-          {"reserved":[["linux-1",8080,40000],["linux-1",8081,40003]],"shared":[40001,40002,40000,40003]}
+          {"reserved":[["linux-1",8080,40000],["linux-1",8081,40003]],"shared":[40000,40001,40002,40003]}

@@ -1,6 +1,7 @@
 package fake
 
 import (
+	"cmp"
 	"context"
 	"slices"
 	"strconv"
@@ -50,6 +51,10 @@ func same(a, b ports.Share) bool {
 	return a.Port == b.Port && a.Scheme == b.Scheme && (a.Path == b.Path || !a.Mounted() && !b.Mounted())
 }
 
+func byPortPath(a, b ports.Share) int {
+	return cmp.Or(cmp.Compare(a.Port, b.Port), cmp.Compare(a.Path, b.Path), cmp.Compare(a.Scheme, b.Scheme))
+}
+
 func (t *Tailnet) Share(_ context.Context, s ports.Share) (string, error) {
 	// invariant: the fake Tailnet is also the fake Audience: a private share
 	// is one of its node's shares, a public one a share its Funnel opens,
@@ -78,8 +83,10 @@ func (t *Tailnet) Share(_ context.Context, s ports.Share) (string, error) {
 		}
 	}
 	n.Shares = append(slices.DeleteFunc(n.Shares, func(o ports.Share) bool { return same(o, s) }), s)
+	slices.SortFunc(n.Shares, byPortPath)
 	if s.Public() && !slices.Contains(n.Funnel, s.Port) {
 		n.Funnel = append(n.Funnel, s.Port)
+		slices.Sort(n.Funnel)
 	}
 	name := n.Self.Sharing.DNSName
 	switch {
@@ -107,18 +114,6 @@ func (t *Tailnet) Shared(context.Context) ([]ports.Share, error) {
 	t.w.Lock()
 	defer t.w.Unlock()
 	out := slices.Clone(t.node().Shares)
-	slices.SortFunc(out, func(a, b ports.Share) int {
-		if a.Port != b.Port {
-			return a.Port - b.Port
-		}
-		if a.Path < b.Path {
-			return -1
-		}
-		if a.Path > b.Path {
-			return 1
-		}
-		return 0
-	})
 	return out, nil
 }
 
