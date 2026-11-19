@@ -41,6 +41,8 @@ esac
 
 repo=$(cd "$(dirname "$0")/../../.." && pwd)
 suite="$repo/specs/machine"
+vm_root="~/station/$(git -C "$repo" rev-parse --show-prefix)"
+vm_root=${vm_root%/}
 out="$repo/.artifacts/e2e"
 log="$out/menubar-$label.log"
 work="$out/menubar-$label"
@@ -150,10 +152,10 @@ if [ $capture -eq 1 ]; then
   [ -x "$venv/bin/python" ] || { python3 -m venv "$venv" && "$venv/bin/pip" install -q vncdotool pillow numpy scipy; } >> "$log" 2>&1 || fail "the capture's venv"
   "$venv/bin/python" -I "$suite/menubar/capture/measure_test.py" >> "$log" 2>&1 || fail "the measures' own test (capture/measure_test.py), see $log"
   t=$SECONDS
-  in_vm "zsh -lc 'cd ~/station && make menubar'" >> "$log" 2>&1 || fail "make menubar in the VM"
+  in_vm "zsh -lc 'cd $vm_root && make menubar'" >> "$log" 2>&1 || fail "make menubar in the VM"
   say "-- built Station.app in $((SECONDS - t)) s"
   shots="$work/capture"
-  "$venv/bin/python" -I "$suite/menubar/capture/drive.py" "$ip" "$ssh_key" "$url" "$repo" "$shots" \
+  STATION_VM_ROOT="$vm_root" "$venv/bin/python" -I "$suite/menubar/capture/drive.py" "$ip" "$ssh_key" "$url" "$repo" "$shots" \
     "${STATION_CAPTURE_SET:-walls,behave,trial}" "${STATION_CAPTURE_ITEM:-}" 2>&1 | tee -a "$log"
   code=${PIPESTATUS[0]}
   in_vm 'cat ~/cap/replay.log' >> "$log" 2>&1
@@ -177,7 +179,7 @@ if [ -n "$expect" ]; then
   ssh "${ssh_opts[@]}" -i "$ssh_key" "$user@$ip" 'cat > /tmp/station-expect-goldens.txt' < "$expected" || fail "copy the golden list into the VM"
   env_line="$env_line STATION_EXPECT_GOLDENS=/tmp/station-expect-goldens.txt"
 fi
-ssh -n "${ssh_opts[@]}" -i "$ssh_key" "$user@$ip" "zsh -lc 'cd ~/station && $env_line make menubar-check'" >> "$log" 2>&1
+ssh -n "${ssh_opts[@]}" -i "$ssh_key" "$user@$ip" "zsh -lc 'cd $vm_root && $env_line make menubar-check'" >> "$log" 2>&1
 code=$?
 say "-- make menubar-check exit $code in $((SECONDS - t)) s"
 
@@ -185,7 +187,7 @@ say "-- make menubar-check exit $code in $((SECONDS - t)) s"
 # INDEX) comes back as one tar, whatever the verdict: the .actual.png are gitignored,
 # so the listing takes the ignored untracked files too, but not the symbols the
 # build regenerates.
-in_vm "cd ~/station && git ls-files -m -o apps/menubar | grep -v '/symbols.xcassets/' | tar -cf - -T -" > "$work/changes.tar" 2>> "$log"
+in_vm "cd $vm_root && git ls-files -m -o apps/menubar | grep -v '/symbols.xcassets/' | tar -cf - -T -" > "$work/changes.tar" 2>> "$log"
 tar -xf "$work/changes.tar" -C "$work/changes" 2>> "$log"
 changed=$(tar -tf "$work/changes.tar" 2> /dev/null | grep -c . || true)
 say "-- $changed files came back to $work/changes"
@@ -199,7 +201,7 @@ fi
 if [ -n "$expect" ]; then
   # invariant: the goldens the run rewrote are exactly the listed ones: a listed path
   # no story draws, or one drawn from another folder, is a failure, not a no-op.
-  in_vm "cd ~/station && git ls-files -m -o apps/menubar | grep '[.]png\$' | grep -v -e '[.]actual[.]png\$' -e '/symbols.xcassets/'" > "$work/rewritten.txt" 2>> "$log"
+  in_vm "cd $vm_root && git ls-files -m -o apps/menubar | grep '[.]png\$' | grep -v -e '[.]actual[.]png\$' -e '/symbols.xcassets/'" > "$work/rewritten.txt" 2>> "$log"
   sort -u -o "$work/rewritten.txt" "$work/rewritten.txt"
   if ! diff "$expected" "$work/rewritten.txt" >> "$log" 2>&1; then
     say "listed, not rewritten: $(comm -23 "$expected" "$work/rewritten.txt" | tr '\n' ' ')"

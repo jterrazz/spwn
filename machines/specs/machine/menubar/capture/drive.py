@@ -23,12 +23,13 @@ from vncdotool import api
 
 WALLS = ["dark", "light", "color"]
 SCHEMES = ["dark", "light"]
-APP = "~/station/.artifacts/menubar/Station.app"
-CAPTURE = "~/station/specs/machine/menubar/capture"
+ROOT = os.environ.get("STATION_VM_ROOT", "~/station")
+APP = f"{ROOT}/.artifacts/menubar/Station.app"
+CAPTURE = f"{ROOT}/specs/machine/menubar/capture"
 # value: STATION_CAPTURE_PAGE names the home story served, home.exposed by
 # default; home.empty is shorter than the cap on any screen.
 STORY = os.environ.get("STATION_CAPTURE_PAGE", "home.exposed")
-PAGE = f"~/station/apps/menubar/stories/pages/machines.{STORY}.menubar.json"
+PAGE = f"{ROOT}/apps/menubar/stories/pages/machines.{STORY}.menubar.json"
 # value: the panel's top-left in M1's scene, from the item, as StatusPanel
 # places it: its right edge under the item's, 5 pt under it.
 DROP, MARGIN, WIDTH = 5, 8, 322
