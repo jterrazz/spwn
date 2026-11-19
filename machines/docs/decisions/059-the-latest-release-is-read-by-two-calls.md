@@ -1,6 +1,6 @@
 # ADR-059: The latest release is read by two calls: one reads what the engine kept, one asks GitHub
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-11-19
 
 ## Context

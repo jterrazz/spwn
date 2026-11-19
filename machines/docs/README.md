@@ -110,7 +110,7 @@ The records of decisions this repository alone took go in [`decisions/`](decisio
 - [056 Station names the Local Network approval a Mac withholds](decisions/056-station-names-the-local-network-approval-a-mac-withholds.md) (Proposed)
 - [057 Init moves an app's whole old home, and says so and asks before it moves](decisions/057-init-moves-whole-homes-and-asks-first.md) (Proposed)
 - [058 The window installs and starts the core itself](decisions/058-the-window-installs-and-starts-the-core-itself.md) (Accepted)
-- [059 The latest release is read by two calls: one reads what the engine kept, one asks GitHub](decisions/059-the-latest-release-is-read-by-two-calls.md) (Proposed)
+- [059 The latest release is read by two calls: one reads what the engine kept, one asks GitHub](decisions/059-the-latest-release-is-read-by-two-calls.md) (Accepted)
 - [060 The window offers the engine's release and updates on a press](decisions/060-the-window-offers-the-engines-release-and-updates-on-a-press.md) (Accepted)
 
 A decision spanning several repositories is recorded by the corpus that spans them. What was left for later is `TODO.md` at the repository root.
