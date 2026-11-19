@@ -1804,6 +1804,10 @@
     "needs-you": {
       "Word": "Needs you",
       "Tone": "warn"
+    },
+    "not-created": {
+      "Word": "Not created",
+      "Tone": "bad"
     }
   },
   "OverviewUpkeep": {

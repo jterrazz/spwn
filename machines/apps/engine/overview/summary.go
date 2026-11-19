@@ -86,7 +86,7 @@ type Need struct {
 	Upkeep Upkeep
 	Verb   Verb
 	// value: the word its line wears: Exposed for a port, Down for a
-	// server, else its Upkeep's.
+	// server, Not created for a VM whose create failed, else its Upkeep's.
 	Mark Mark
 	// value: the sentence under its title, from its finding; empty when
 	// the finding tells none.

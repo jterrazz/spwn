@@ -156,20 +156,22 @@ func TestAMacsMachinesAreCountedRunningThenStopped(t *testing.T) {
 	}
 }
 
-func TestANeedWearsExposedForAPortDownForAServerElseItsUpkeepWord(t *testing.T) {
+func TestANeedWearsExposedForAPortDownForAServerNotCreatedForAFailedBirthElseItsUpkeepWord(t *testing.T) {
 	ref := machine.Ref{Name: "macbook"}
 	exposed := finding.Finding{Machine: ref, Section: section.Ports, Severity: finding.Broken, Subject: "macbook:5000", Fix: finding.Fix{Path: "System Settings > General"}, Detail: "macbook. ControlCenter. Not declared public."}
 	down := finding.Finding{Machine: machine.Ref{Name: "infra", On: "macbook"}, Section: section.Overview, Severity: finding.Broken, Subject: "infra"}
 	macDown := finding.Finding{Machine: ref, Section: section.Overview, Severity: finding.Broken, Subject: "mini"}
+	unborn := finding.Finding{Machine: ref, Section: section.Overview, Severity: finding.Broken, Subject: "linux-2", Again: true}
 	expiring := finding.Finding{Machine: ref, Section: section.Accounts, Urgency: finding.Expiring, Subject: "token"}
 	update := finding.Finding{Machine: ref, Section: section.Apps, Severity: finding.NeedsALook, Subject: "lazygit"}
 	got := map[string]overview.Need{}
-	for _, n := range overview.Summarize(mac, overview.EngineRunning, []finding.Finding{exposed, down, macDown, expiring, update}, nil, []overview.VM{{Name: "infra", Running: true}}, notAsked).Needs {
+	for _, n := range overview.Summarize(mac, overview.EngineRunning, []finding.Finding{exposed, down, unborn, macDown, expiring, update}, nil, []overview.VM{{Name: "infra", Running: true}, {Name: "linux-2"}}, notAsked).Needs {
 		got[n.Subject] = n
 	}
 	for subject, want := range map[string]overview.Mark{
 		"macbook:5000": overview.MarkExposed,
 		"infra":        overview.MarkDown,
+		"linux-2":      overview.MarkNotCreated,
 		"mini":         overview.Mark(overview.NeedsYou),
 		"token":        overview.Mark(overview.NeedsYou),
 		"lazygit":      overview.Mark(overview.CanWait),

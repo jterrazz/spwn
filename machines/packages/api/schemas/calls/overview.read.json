@@ -1833,6 +1833,7 @@
           "enum": [
             "exposed",
             "down",
+            "not-created",
             "needs-you",
             "can-wait"
           ],

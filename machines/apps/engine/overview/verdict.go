@@ -42,20 +42,24 @@ func (Verb) Enum() []string {
 type Mark string
 
 const (
-	MarkExposed Mark = "exposed"
-	MarkDown    Mark = "down"
+	MarkExposed    Mark = "exposed"
+	MarkDown       Mark = "down"
+	MarkNotCreated Mark = "not-created"
 )
 
 func (Mark) Enum() []string {
-	return []string{string(MarkExposed), string(MarkDown), string(NeedsYou), string(CanWait)}
+	return []string{string(MarkExposed), string(MarkDown), string(MarkNotCreated), string(NeedsYou), string(CanWait)}
 }
 
 func MarkOf(f finding.Finding, vms []VM) Mark {
 	// invariant: a port reachable outside is Exposed and a server that is
-	// down is Down, both red; any other need wears its Upkeep's word.
+	// down is Down and a VM whose create failed is Not created, all red; any
+	// other need wears its Upkeep's word.
 	switch {
 	case f.Severity == finding.Broken && f.Section == section.Ports:
 		return MarkExposed
+	case f.Severity == finding.Broken && f.Section == section.Overview && f.Again && slices.ContainsFunc(vms, func(vm VM) bool { return vm.Name == f.Subject }):
+		return MarkNotCreated
 	case f.Severity == finding.Broken && f.Section == section.Overview && slices.ContainsFunc(vms, func(vm VM) bool { return vm.Name == f.Subject }):
 		return MarkDown
 	}
@@ -194,7 +198,7 @@ func VerdictOf(s Summary, elsewhere *machines.RollUp) verdict.Verdict {
 
 func serverDown(urgent []Need) (Need, bool) {
 	for _, n := range urgent {
-		if n.Mark == MarkDown {
+		if n.Mark == MarkDown || n.Mark == MarkNotCreated {
 			return n, true
 		}
 	}

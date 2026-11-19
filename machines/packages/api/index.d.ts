@@ -2348,7 +2348,7 @@ export type OverviewNeed = {
     Confirm: string;
     Detail: string;
     Machine: string;
-    Mark: 'exposed' | 'down' | 'needs-you' | 'can-wait';
+    Mark: 'exposed' | 'down' | 'not-created' | 'needs-you' | 'can-wait';
     Noun: string;
     On: string;
     Path: string;
@@ -3731,7 +3731,7 @@ export type MachinesRoomFor = 'small' | 'workspace' | 'gate' | 'none';
 
 export type MachinesVMStanding = 'not-seen' | 'restarting' | 'creating' | 'not-created' | 'down' | 'stopped' | 'suspended' | 'healthy' | 'running';
 
-export type OverviewMark = 'exposed' | 'down' | 'needs-you' | 'can-wait';
+export type OverviewMark = 'exposed' | 'down' | 'not-created' | 'needs-you' | 'can-wait';
 
 export type OverviewUpkeep = 'needs-you' | 'can-wait';
 
