@@ -12,7 +12,9 @@ world's spec alone makes it) and records again the worlds its specs use.
 A gesture of GESTURES is recorded in a fresh world of its own: the gesture, then every read of that world asked
 again in the same door, one after the other, with the reads of a machine the gesture created, and written to
 <world>/gestures/<call>.json with the reads whose answer it changed; the replay transport plays it, then answers
-those reads as they were after it.
+those reads as they were after it. The reads a gesture names `during` are asked in that door once its first frame is
+in, while it runs, and written under `during` as they answered; the replay answers them so while it plays the
+gesture (scripts/door.py, `ask`).
 
 One path records every world, one world or one call: a world is always asked whole, and `--call=<call>` writes only
 that call's files, <world>/<call>.json and <world>/gestures/<call>.json, in the worlds named or every one. A world
@@ -50,13 +52,13 @@ import hashlib
 import json
 import os
 import pathlib
-import queue
 import shutil
 import subprocess
 import sys
-import threading
 
-from world import ROOT, WORLDS, build_digest, sandbox, seeded, world_binary
+import door as doors
+from door import UNENDED, Door, born, callOf
+from world import ROOT, WORLDS, build_digest, seeded, world_binary
 
 out_root = ROOT / "apps" / "desktop" / "src" / "fixtures" / "worlds"
 GRAPHS = (360 * 10**9, 3600 * 10**9, 86400 * 10**9)
@@ -66,89 +68,8 @@ MEASURED = {"machines.stop"}
 NOISE = {"engine.start": "PID"}
 CLOCKED = {"settings.matrix": "Read", "awake.read": "Now"}
 MACHINES = {"watch": "machines.list", "in": {}}
-QUIET = 10
-UNENDED = {"overview.read"}
-WHOLE = 30
 STAMP = ROOT / ".artifacts" / "window-record.stamp"
 FORCE = "WINDOW_RECORD_FORCE"
-
-
-class Door:
-    """One `station guest serve --stdio` over a fresh copy of a world: what one request changes, the next sees."""
-
-    def __init__(self, seed, fixture):
-        self.home, env = sandbox(seed, fixture)
-        # invariant: the world's engines take one turn before the door opens, as a Mac's engine has run before
-        # the window does: what an engine keeps beside its loop (a VM's drift) is kept when it is asked. That turn
-        # is the engine's life before the story, so the story's clock is given back as the seed holds it: the
-        # turn's ticks move it, and the history the seed holds would read stale at the moment the window asks.
-        subprocess.run([str(binary), "--version"], cwd=self.home, env=env, stdout=subprocess.DEVNULL, check=True)
-        world = self.home / "world.json"
-        kept = json.loads(world.read_text())
-        kept["now"] = json.loads(pathlib.Path(seed).read_text())["now"]
-        world.write_text(json.dumps(kept, indent=2) + "\n")
-        self.process = subprocess.Popen(
-            [str(binary), "guest", "serve", "--stdio"], cwd=self.home, env=env,
-            stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True,
-        )
-        self.lines = queue.Queue()
-        threading.Thread(target=self.pump, daemon=True).start()
-        self.next = 0
-        self.station = self.ask([{"hello": {"version": "dev", "calls": None}}])[0][0]["hello"]["version"]
-
-    def pump(self):
-        for line in self.process.stdout:
-            self.lines.put(line)
-        self.lines.put("")
-
-    def send(self, frames):
-        self.process.stdin.write("".join(json.dumps(frame) + "\n" for frame in frames))
-        self.process.stdin.flush()
-
-    def ask(self, requests):
-        """Sends every request at once and returns, in their order, the answers of each, once all have ended. A watch
-        of UNENDED the engine holds open, a VM's Overview through its birth (its last answer a `Creating`), is let go
-        of after QUIET seconds of silence by a cancel frame, as the window lets go of it, and its answers end on the
-        engine's done; any other is waited for to its end, as a watch that settles (disk.read) or an Overview whose
-        slowest part has not answered may be silent longer than QUIET. A request still open after WHOLE silences in a
-        row stops the run, so no part-read answer is ever written."""
-        ids = [str(self.next + index) for index in range(len(requests))]
-        self.next += len(requests)
-        self.send([{"v": 2, "id": id, **request} for id, request in zip(ids, requests)])
-        watches = {id for id, request in zip(ids, requests) if "watch" in request}
-        unended = {id for id, request in zip(ids, requests) if "watch" in request and callOf(request) in UNENDED}
-        answers, ended, cancelled, silences = {}, set(), set(), 0
-        while len(ended) < len(ids):
-            try:
-                line = self.lines.get(timeout=QUIET)
-            except queue.Empty:
-                held = {id for id in unended - ended - cancelled if born(answers.get(id, [])[-1:])}
-                if held:
-                    self.send([{"v": 2, "id": id, "cancel": True} for id in sorted(held)])
-                    cancelled |= held
-                silences += 1
-                if silences >= WHOLE:
-                    self.close()
-                    sys.exit(f"{len(ended)} of {len(ids)} requests ended after {WHOLE * QUIET} s of silence")
-                continue
-            silences = 0
-            if not line:
-                break
-            frame = json.loads(line)
-            ended_now = "hello" in frame or "error" in frame or "done" in frame
-            ended_now = ended_now or ("out" in frame and frame["id"] not in watches)
-            if ended_now:
-                ended.add(frame["id"])
-            answers.setdefault(frame["id"], []).append({key: value for key, value in frame.items() if key != "id"})
-        if len(ended) < len(ids):
-            self.close()
-            sys.exit(f"{len(ended)} of {len(ids)} requests answered")
-        return [answers[id] for id in ids]
-
-    def close(self):
-        self.process.stdin.close()
-        self.process.wait(timeout=60)
-        shutil.rmtree(self.home, ignore_errors=True)
 
 
 def serve(seed, requests, fixture=None):
@@ -270,10 +191,6 @@ def follows(requests, answered):
     return [request for request in more if keyOf(request) not in asked_already]
 
 
-def callOf(request):
-    return request.get("watch") or request.get("call")
-
-
 def asked(seed, requests, fixture):
     with concurrent.futures.ThreadPoolExecutor(max_workers=2) as pool:
         return list(pool.map(lambda request: serve(seed, [request], fixture)[1][0], requests))
@@ -309,7 +226,8 @@ GESTURES = {
         {"call": "machines.create-workspace", "in": {"Request": {"Name": "gate5", "From": "base-ubuntu", "Lifetime": "ephemeral", "Size": {"MemoryBytes": 4294967296}}, "Confirm": "yes"}},
         {"call": "machines.create-workspace", "in": {"Request": {"Name": "infra", "From": "base-ubuntu", "Lifetime": "ephemeral"}, "Confirm": "yes"}, **at("mac-mini")},
         {"call": "machines.create-workspace", "in": {"Request": {"Name": "linux-2", "From": "base-ubuntu", "Lifetime": "ephemeral", "Purpose": "x" * 121}, "Confirm": "yes"}, **at("mac-mini")},
-        {"call": "machines.create-workspace", "in": {"Request": {"Name": "linux-2", "From": "base-ubuntu", "Lifetime": "ephemeral", "Purpose": "Lot shell"}, "Confirm": "yes"}, **at("mac-mini")},
+        {"call": "machines.create-workspace", "in": {"Request": {"Name": "linux-2", "From": "base-ubuntu", "Lifetime": "ephemeral", "Purpose": "Lot shell"}, "Confirm": "yes"}, **at("mac-mini"),
+         "during": [MACHINES, {"watch": "overview.read", "in": {}, **at("linux-2")}]},
         {"call": "machines.create-server", "in": {"Name": "web", "Image": "base-ubuntu", "Size": {"MemoryBytes": 4294967296}, "Confirm": "yes"}},
         {"call": "machines.add", "in": {"Name": "mac-mini"}},
         {"call": "vault.remove", "in": {"ID": "pw-2", "Confirm": "yes"}},
@@ -393,11 +311,6 @@ def bounded(frames):
     return [frame for index, frame in enumerate(frames) if "out" not in frame or index in ends]
 
 
-def born(frames):
-    """Whether a frame of an Overview is a birth's: a VM whose create still runs, answered from its Mac's record."""
-    return any((frame.get("out") or {}).get("Creating") for frame in frames)
-
-
 def kept(request, frames):
     if "watch" not in request:
         return frames
@@ -460,11 +373,12 @@ def steadied(was, key, items):
         field = CLOCKED.get(callOf(item["request"]))
         if field:
             carry(item["answers"], before["answers"], field)
-        reads = {keyOf(read["request"]): read for read in before.get("after", [])}
-        for read in item.get("after", []):
-            field, one = CLOCKED.get(callOf(read["request"])), reads.get(keyOf(read["request"]))
-            if field and one:
-                carry(read["answers"], one["answers"], field)
+        for part in ("during", "after"):
+            reads = {keyOf(read["request"]): read for read in before.get(part, [])}
+            for read in item.get(part, []):
+                field, one = CLOCKED.get(callOf(read["request"])), reads.get(keyOf(read["request"]))
+                if field and one:
+                    carry(read["answers"], one["answers"], field)
 
 
 def write(path, world, station, key, items, was):
@@ -509,14 +423,16 @@ def gesture(world, seed, fixture, request, reads, before):
     """The gesture in a fresh world, then every read in that same world, kept when its answer changed: a watch by
     its settled answer, the one a window shows once it has read again. A read the world did not ask before, of a
     machine the gesture made, is kept whatever it answers. A gesture `following` another is made once that one is,
-    in the same world, and judged against what the reads answer then."""
+    in the same world, and judged against what the reads answer then. The reads it names `during` are asked once its
+    first frame is in, while it still runs, and kept as it answers them, changed or not."""
     door = Door(seed, fixture)
-    following = request.get("following")
-    request = {key: value for key, value in request.items() if key != "following"}
+    following, during = request.get("following"), request.get("during", [])
+    request = {key: value for key, value in request.items() if key not in ("following", "during")}
     if following:
         door.ask([following])
         before = based(door, world, reads, before)
-    [answers] = door.ask([request])
+    [answers, *heard] = door.ask([request], lambda count: during if count == 1 else [])
+    running = [{"request": read, "answers": kept(read, frames)} for read, frames in zip(during, heard)]
     [listed] = door.ask([MACHINES])
     born = [read for read in asked_in(world, listed) if keyOf(read) not in before]
     changed = []
@@ -528,7 +444,7 @@ def gesture(world, seed, fixture, request, reads, before):
         if was is None or compared(read, frames) != compared(read, was):
             changed.append({"request": read, "answers": frames})
     door.close()
-    return {"request": request, "answers": answers, "after": changed}
+    return {"request": request, "answers": answers, **({"during": running} if running else {}), "after": changed}
 
 
 def steady(item, was):
@@ -633,8 +549,8 @@ if __name__ == "__main__":
             print(f"recordings: skipped, nothing they read or hold moved since the run of key {now} ({FORCE}=1 records)")
             sys.exit(0)
         STAMP.unlink(missing_ok=True)
-    binary = world_binary()
-    print("world build:", binary)
+    doors.binary = world_binary()
+    print("world build:", doors.binary)
     if not named and not calls and out_root.is_dir():
         for folder in sorted(out_root.iterdir()):
             if folder.is_dir() and folder.name not in WORLDS:
