@@ -1,6 +1,6 @@
 # ADR-058: The window installs and starts the core itself
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-11-19
 
 ## Context

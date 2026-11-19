@@ -21,4 +21,4 @@ The owner decided on 2026-11-15 ("parfait ton idée", after seeing the tree).
 
 ## Amended
 
-Decision 5 is superseded on the owner's word of 2026-11-18 (Proposed until the owner accepts this amendment): the window is named spwn, its crate `spwn-window` and its identifier `com.jterrazz.spwn`, with no migration of what the old identifier stored ([the window's page](../../apps/desktop/README.md#its-name)).
+Decision 5 is superseded on the owner's word of 2026-11-18, accepted on 2026-11-19: the window is named spwn, its crate `spwn-window` and its identifier `com.jterrazz.spwn`, with no migration of what the old identifier stored ([the window's page](../../apps/desktop/README.md#its-name)).

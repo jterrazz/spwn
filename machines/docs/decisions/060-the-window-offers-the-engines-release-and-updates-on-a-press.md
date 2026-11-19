@@ -1,6 +1,6 @@
 # ADR-060: The window offers the engine's release and updates on a press
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-11-19
 
 ## Context
