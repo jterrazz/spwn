@@ -63,15 +63,16 @@ uses the default `GITHUB_TOKEN`.
 
 ### 1. Decide the version
 
-Follow semver: `vMAJOR.MINOR.PATCH`. One tag versions both products, so a
-number never goes below the newest of either: spwn's `v1.0.0-rc1` and
-station's `v3.1.0` (tagged in its former repository, `jterrazz/studio-station`)
-would put it above `v3.1.0`, but there are no real users and no backward
-compatibility to keep: the one version line restarts at `v0.1.0-alpha.1`
-for everything, and the two installed station hosts are reinstalled by hand.
-A host still on `v1.0.0-rc1` is never offered it: `spwn upgrade` compares
-`1.0.0-rc1` with `0.1.0-alpha.1` by major first
-(`packages/upgrade/version.go:84`) and reports no update.
+Follow semver: `vMAJOR.MINOR.PATCH`. One tag versions both products, and the
+line continues after spwn's last release, `v0.20.0`: the first unified release
+is `v0.21.0-alpha.1`. Station's own last release was `v3.1.0` (tagged in its
+former repository, `jterrazz/studio-station`); station accepts any version from
+`v0.1.0`, so `v0.21.0-alpha.1` passes.
+
+A host on `v0.20.0` is offered it: `spwn upgrade` compares the minor first
+(`packages/upgrade/version.go:84`, 20 < 21), so `0.20.0 < 0.21.0-alpha.1` and
+`UpdateAvail` is true (`packages/upgrade/update.go:62`). The release is not
+marked a pre-release, so the stable channel's `releases/latest` returns it.
 
 - **Patch** (`v0.11.0 → v0.11.1`): bug fixes, no API changes.
 - **Minor** (`v0.11.0 → v0.12.0`): new features, backward compatible.
@@ -151,18 +152,7 @@ spwn upgrade                   # should download, verify, swap
 spwn --version                 # should print v1.2.3
 ```
 
-### 5. Retitle the legacy releases (first unified release only)
-
-The old spwn releases stay, with their tags: only their titles change, so
-the release list reads as before and after the single repository.
-
-```bash
-gh release edit v1.0.0-rc1 --title "Legacy · spwn 1.0.0-rc1, before the single repository"
-```
-
-Repeat for each `v1.0.0-beta*` release.
-
-### 6. Announce
+### 5. Announce
 
 Nothing to do here - users running the CLI or web UI will be notified
 automatically via the background check / Tauri updater.
