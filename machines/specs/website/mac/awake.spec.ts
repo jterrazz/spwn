@@ -21,7 +21,7 @@ describe('awake', () => {
                 // Then - the sheet closes, and Home's Awake tile says On, until when
                 await visitor.gone(sheet);
                 await visitor.click(within(sidebar, button('Home')));
-                await visitor.see(content('On'));
+                await visitor.see(content('on'));
                 await visitor.see(content('until', { exact: false }));
             },
         );
@@ -41,8 +41,8 @@ describe('awake', () => {
                 // Then - the sheet closes, and Home's Awake tile no longer says On
                 await visitor.gone(sheet);
                 await visitor.click(within(sidebar, button('Home')));
-                await visitor.see(content('Off'));
-                await visitor.gone(content('On'));
+                await visitor.see(content('off'));
+                await visitor.gone(content('on'));
             },
         );
         expect(result.errors.text).toBe('');

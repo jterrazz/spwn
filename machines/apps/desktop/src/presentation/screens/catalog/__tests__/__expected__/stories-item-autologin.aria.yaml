@@ -4,7 +4,7 @@
   - button "Add to a machine" [disabled]
   - region "How it is applied":
     - heading "How it is applied" [level=2]
-    - text: Can be undone
+    - text: can be undone
     - term: "On"
     - definition: Mac
     - term: Asks you for

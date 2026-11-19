@@ -107,8 +107,8 @@ export const MACHINE_KIND_WORDS: WordsOfAnOpenCode = {
 
 export const AWAKE_WORDS = {
     neverSleeps: 'never sleeps',
-    off: 'Off',
-    on: 'On',
+    off: 'off',
+    on: 'on',
 } as const;
 
 export const AWAKE_GESTURE_WORDS = {
@@ -145,7 +145,7 @@ export const APP_WHY_WORDS: Words<AppsReport['Why']> = {
     unmanaged: 'not managed',
 };
 
-export const REVERSIBLE_WORD = 'Can be undone';
+export const REVERSIBLE_WORD = 'can be undone';
 
 export function newestOutWord(newest: string): string {
     return `${newest} is out`;
@@ -216,4 +216,4 @@ export const SHARE_STATE_WORDS: Words<PortsSharedPort['state']> = {
 
 // outside: machinefile.drift words a port's audience and an account's side, and leaves the side of what it does not
 // outside: hold empty: this is the word of that nothing.
-export const NOT_SHARED_WORD = 'Not shared';
+export const NOT_SHARED_WORD = 'not shared';

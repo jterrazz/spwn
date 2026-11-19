@@ -41,7 +41,7 @@
     - text: The rest is fine. 2 machines on macbook-pro
   - text: Memory free 40GB
   - img "Memory each machine holds, and what is free"
-  - text: of 80 CPU, this Mac 34% 10 CPUs Awake, this Mac Off on power Disk free, this Mac 388GB
+  - text: of 80 CPU, this Mac 34% 10 CPUs Awake, this Mac off on power Disk free, this Mac 388GB
   - 'meter "Disk free, this Mac: used of its total"'
   - text: of 994 GB · machines hold 100 GB
   - region "Needs you":

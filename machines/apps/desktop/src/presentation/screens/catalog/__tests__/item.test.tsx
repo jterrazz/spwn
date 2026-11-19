@@ -55,7 +55,7 @@ describe('item', () => {
             },
         );
 
-        // Then - Can be undone, the two files it writes, the machine that holds it
+        // Then - can be undone, the two files it writes, the machine that holds it
         await expect(result.tree).toMatch(file('./__expected__/stories-item-autologin.aria.yaml'));
     });
 

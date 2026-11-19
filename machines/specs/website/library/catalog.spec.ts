@@ -121,7 +121,7 @@ describe('catalog', () => {
                 await visitor.see(heading('autologin setting'));
 
                 // Then - it can be undone, and each file says which part is station's
-                await visitor.see(within(applied, content('Can be undone')));
+                await visitor.see(within(applied, content('can be undone')));
                 await visitor.see(
                     within(changes, content("the agent user's login password", { exact: false })),
                 );
