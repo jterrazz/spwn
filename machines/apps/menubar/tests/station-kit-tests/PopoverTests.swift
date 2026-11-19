@@ -62,9 +62,6 @@ final class PopoverTests: XCTestCase {
         let qr = PopoverLayout.spot(card, of: CGRect(x: 20, y: 400, width: 300, height: 40), in: panel, side: .above)
         XCTAssertFalse(qr.below, "a QR sits over its row when it fits there")
         XCTAssertTrue(PopoverLayout.spot(card, of: CGRect(x: 20, y: 60, width: 300, height: 40), in: panel, side: .above).below, "and under it when it does not")
-        let tip = PopoverLayout.spot(CGSize(width: 90, height: 20), of: CGRect(x: 20, y: 200, width: 100, height: 56), in: panel, side: .tooltip)
-        XCTAssertEqual(tip.card.minY, 256 + Token.Metric.Tooltip.gap)
-        XCTAssertNil(tip.arrow)
     }
 
     func testEveryHUDStoryDrawsTheWordsItsPageGivesTheGesture() throws {

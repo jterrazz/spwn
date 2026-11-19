@@ -24,6 +24,7 @@ public struct MotionSheet: View {
         "M13": "a number rolls by contentTransition, which draws its end state",
         "M14": "a symbol flips by contentTransition, which draws its end state",
         "M16": "Spinner turns on a TimelineView, still at a fixed angle",
+        "M26": "the tile's +1 is retired with Home's tiles: no page draws a tile",
         "M29": "StatusItem draws the status item's frames at a progress",
     ]
 
@@ -177,9 +178,6 @@ public struct MotionSheet: View {
                 symbol(Token.Symbol.copy, tint: .t2).modifier(HoverReveal(progress: HoverReveal.frozen(t, reduce: r)))
             }.padding(.horizontal, Token.Motion.Sheet.inset))
         },
-        Cell(id: "M26", title: "tile plus one") { t, r in
-            AnyView(Sample().overlay { Text(verbatim: "+1").font(Token.Role.tileNumber.font).modifier(PlusOne(progress: PlusOne.frozen(t, reduce: r))) })
-        },
         Cell(id: "M27", title: "chart regrows") { t, r in
             AnyView(HStack(alignment: .bottom, spacing: Token.Motion.Sheet.gap) {
                 ForEach(Array(Token.Motion.Sheet.bars.enumerated()), id: \.offset) { _, share in
@@ -230,8 +228,8 @@ public struct MotionSheet: View {
 
     public var body: some View {
         let s = Token.Motion.Sheet.self
-        let columns = Array(repeating: GridItem(.fixed(s.stage.width), spacing: Token.Metric.Tiles.gap, alignment: .top), count: s.columns)
-        LazyVGrid(columns: columns, alignment: .leading, spacing: Token.Metric.Tiles.gap) {
+        let columns = Array(repeating: GridItem(.fixed(s.stage.width), spacing: Token.Metric.Gauges.gap, alignment: .top), count: s.columns)
+        LazyVGrid(columns: columns, alignment: .leading, spacing: Token.Metric.Gauges.gap) {
             ForEach(Self.cells) { cell in
                 VStack(alignment: .leading, spacing: s.gap) {
                     cell.draw(moment, reduce)

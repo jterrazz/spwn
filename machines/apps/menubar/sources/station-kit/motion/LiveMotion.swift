@@ -110,35 +110,6 @@ public struct Skeleton: Movement {
     }
 }
 
-// value: M26, a tile's "+1" over its one second: it rises from 6 pt below
-// into view by a quarter, then on to 12 pt above as it fades.
-public struct PlusOne: Movement {
-    public var progress: Double
-    @Environment(\.stationTokens) private var tokens
-
-    public init(progress: Double) { self.progress = progress }
-
-    public static func look(_ progress: Double, reduce: Bool) -> Look {
-        let m = Token.Motion.self
-        var look = Look()
-        if progress < m.plusOnePeak {
-            let s = progress / m.plusOnePeak
-            look.opacity = s
-            look.y = m.plusOneRise * CGFloat(1 - s)
-        } else {
-            let s = (progress - m.plusOnePeak) / (1 - m.plusOnePeak)
-            look.opacity = 1 - s
-            look.y = -m.plusOneLift * CGFloat(s)
-        }
-        if reduce { look.y = 0 }
-        return look
-    }
-
-    public func body(content: Content) -> some View {
-        content.moved(Self.look(progress, reduce: tokens.reduceMotion))
-    }
-}
-
 // value: M27, a chart re-growing from its base when its window changes.
 public struct ChartRegrow: Movement {
     public var progress: Double

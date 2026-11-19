@@ -572,9 +572,6 @@ extension Token {
         public static let rowSub = Role(11, .regular, .t2)
         public static let rowValue = Role(12, .regular, .t2)
         public static let facts = Role(12, .regular, .t2)
-        public static let tileCaption = Role(11, .medium, .t2)
-        public static let tileNumber = Role(17, .semibold, .t1, design: .rounded)
-        public static let tileUnit = Role(11, .regular, .t2)
         public static let gaugeTitle = Role(11, .medium, .t2)
         public static let gaugeValue = Role(15, .semibold, .t1, design: .rounded)
         public static let gaugeUnit = Role(11, .medium, .t2)
@@ -589,16 +586,14 @@ extension Token {
         public static let alertBody = Role(11, .regular, .t2)
         public static let keyCap = Role(11, .medium, .t2)
         public static let hud = Role(12, .medium, .hud)
-        public static let tooltip = Role(11, .regular, .t1)
 
         public static let all: [(String, Role)] = [
             ("hero title", heroTitle), ("page title", pageTitle), ("home title", homeTitle), ("section label", sectionLabel),
             ("section value", sectionValue), ("row name", rowName), ("row suffix", rowSuffix), ("row sub", rowSub),
-            ("row value", rowValue), ("facts", facts), ("tile caption", tileCaption), ("tile number", tileNumber),
-            ("tile unit", tileUnit), ("gauge title", gaugeTitle), ("gauge value", gaugeValue), ("gauge unit", gaugeUnit),
+            ("row value", rowValue), ("facts", facts), ("gauge title", gaugeTitle), ("gauge value", gaugeValue), ("gauge unit", gaugeUnit),
             ("button", button), ("verb", verb), ("address", address), ("find group", findGroup), ("find result", findResult),
             ("sheet title", sheetTitle), ("sheet body", sheetBody), ("alert title", alertTitle), ("alert body", alertBody),
-            ("key cap", keyCap), ("hud", hud), ("tooltip", tooltip),
+            ("key cap", keyCap), ("hud", hud),
         ]
     }
 
@@ -638,14 +633,6 @@ extension Token {
             public static let insetGlyph: CGFloat = 40
             public static let insetRing: CGFloat = 44
             public static let insetEnd: CGFloat = 8
-        }
-
-        public enum Tiles {
-            public static let columns = 3
-            public static let gap: CGFloat = 6
-            public static let height: CGFloat = 56
-            public static let padding = EdgeInsets(top: 7, leading: 10, bottom: 8, trailing: 10)
-            public static let radius: CGFloat = 12
         }
 
         public enum Gauges {
@@ -769,13 +756,6 @@ extension Token {
             public static let icon: CGFloat = 16
         }
 
-        public enum Tooltip {
-            public static let maxWidth: CGFloat = 280
-            public static let padding = EdgeInsets(top: 4, leading: 8, bottom: 4, trailing: 8)
-            public static let radius: CGFloat = 6
-            public static let size: CGFloat = 11
-            public static let wait: Double = 1
-        }
     }
 
     // value: the prototype's three curves, its tint, and what each becomes

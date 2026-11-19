@@ -17,7 +17,7 @@ final class MotionTests: XCTestCase {
         XCTAssertEqual(Set(drawn).count, drawn.count)
         XCTAssertTrue(exempt.isDisjoint(with: drawn))
         XCTAssertEqual(exempt.union(drawn), Set((1...31).map { "M\($0)" }))
-        XCTAssertEqual(exempt, ["M1", "M8", "M13", "M14", "M16", "M29"])
+        XCTAssertEqual(exempt, ["M1", "M8", "M13", "M14", "M16", "M26", "M29"])
     }
 
     @MainActor
@@ -265,17 +265,6 @@ final class MotionTests: XCTestCase {
         }
     }
 
-    func testATilesPlusOneRisesIntoViewThenLiftsAway() {
-        let rest = PlusOne.look(0, reduce: false), peak = PlusOne.look(0.25, reduce: false), gone = PlusOne.look(1, reduce: false)
-        XCTAssertEqual(rest.opacity, 0)
-        XCTAssertEqual(rest.y, 6)
-        XCTAssertEqual(peak.opacity, 1)
-        XCTAssertEqual(peak.y, 0)
-        XCTAssertEqual(gone.opacity, 0)
-        XCTAssertEqual(gone.y, -12)
-        let p = Self.smooth(0.35), s = (p - 0.25) / 0.75
-        near(PlusOne.look(PlusOne.frozen(0.35), reduce: false).opacity, 1 - s, "at a third")
-    }
 
     func testAChartRegrowsFromItsBaseAndTheFooterRises() {
         for t in Self.moments {
@@ -316,7 +305,6 @@ final class MotionTests: XCTestCase {
             ("alert", PopAppear.look(t, kind: .alert, reduce: true)),
             ("find", FindAppear.look(t, field: true, reduce: true)),
             ("hover", HoverReveal.look(t, reduce: true)),
-            ("plus one", PlusOne.look(t, reduce: true)),
             ("chart", ChartRegrow.look(t, reduce: true)),
             ("footer", FooterRise.look(t, reduce: true)),
             ("hud", HUDReveal.look(t, reduce: true)),

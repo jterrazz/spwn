@@ -127,7 +127,7 @@ public struct StoryView: View {
     // menu opens, over the page it opens on; a transition leaves its HUD
     // and its menu to the pages it moves.
     var staged: some View {
-        tipped.overlayPreferenceValue(MenuAnchors.self) { anchors in
+        drawn.overlayPreferenceValue(MenuAnchors.self) { anchors in
             if motion == nil, let open = story.ui.menu, let model = story.menu {
                 GeometryReader { proxy in
                     let sheet = story.ui.sheet != nil ? open.id : nil
@@ -139,8 +139,6 @@ public struct StoryView: View {
             }
         }
     }
-
-    var tipped: some View { drawn.environment(\.stationTooltip, story.ui.tooltip) }
 
     // value: the measure a CPU's live key starts with (`cpu:`, `cpuh:`).
     static let cpu = "cpu"

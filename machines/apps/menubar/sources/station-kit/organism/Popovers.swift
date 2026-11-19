@@ -87,24 +87,3 @@ public struct InfoPopover: View {
             .frame(width: m.width, alignment: .leading)
     }
 }
-
-public struct TooltipPreview: View {
-    let words: String
-    @Environment(\.stationTokens) private var tokens
-
-    public init(_ words: String) { self.words = words }
-
-    public var body: some View {
-        let m = Token.Metric.Tooltip.self
-        let shape = RoundedRectangle(cornerRadius: m.radius, style: .continuous)
-        Text(words)
-            .font(Token.Role.tooltip.font)
-            .foregroundStyle(tokens.tone(Token.Role.tooltip.tone))
-            .fixedSize(horizontal: false, vertical: true)
-            .padding(m.padding)
-            .background(shape.fill(tokens.color.panelSolid))
-            .overlay(shape.strokeBorder(tokens.color.hair, lineWidth: Token.Metric.Row.hairline))
-            .frame(maxWidth: m.maxWidth, alignment: .leading)
-            .fixedSize()
-    }
-}

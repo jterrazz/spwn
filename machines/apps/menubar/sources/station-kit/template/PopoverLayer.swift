@@ -3,7 +3,6 @@ import SwiftUI
 public enum PopoverSide: Sendable {
     case above
     case below
-    case tooltip
 }
 
 public struct PopoverPin {
@@ -16,17 +15,6 @@ public struct PopoverPin {
 public struct PopoverPins: PreferenceKey {
     public static let defaultValue: [PopoverPin] = []
     public static func reduce(value: inout [PopoverPin], nextValue: () -> [PopoverPin]) { value += nextValue() }
-}
-
-private struct StationTooltipKey: EnvironmentKey {
-    static let defaultValue: String? = nil
-}
-
-extension EnvironmentValues {
-    public var stationTooltip: String? {
-        get { self[StationTooltipKey.self] }
-        set { self[StationTooltipKey.self] = newValue }
-    }
 }
 
 extension View {
@@ -46,11 +34,7 @@ struct PopoverLayer: View {
         GeometryReader { proxy in
             ForEach(Array(pins.enumerated()), id: \.offset) { _, pin in
                 PopoverLayout(rect: proxy[pin.anchor], side: pin.side, width: pin.width) {
-                    if pin.side != .tooltip {
-                        PopoverCard { pin.content }
-                    } else {
-                        pin.content
-                    }
+                    PopoverCard { pin.content }
                     PopoverArrow(up: true).fill(tokens.color.sheetSolid)
                     PopoverArrow(up: false).fill(tokens.color.sheetSolid)
                 }
@@ -106,10 +90,6 @@ public struct PopoverLayout: SwiftUI.Layout {
     public static func spot(_ card: CGSize, of rect: CGRect, in bounds: CGSize, side: PopoverSide) -> Spot {
         let m = Token.Metric.Popover.self
         let clamp = { (x: CGFloat) in min(max(x, m.margin), max(bounds.width - m.margin - card.width, m.margin)) }
-        if side == .tooltip {
-            let x = clamp(rect.midX - Token.Metric.Tooltip.lead)
-            return Spot(card: CGRect(origin: CGPoint(x: x, y: rect.maxY + Token.Metric.Tooltip.gap), size: card), arrow: nil, below: true)
-        }
         let fitsBelow = rect.maxY + m.arrowDepth + card.height + m.margin <= bounds.height
         let fitsAbove = rect.minY - m.arrowDepth - card.height >= m.margin
         let below = side == .below ? fitsBelow || !fitsAbove : !fitsAbove && fitsBelow

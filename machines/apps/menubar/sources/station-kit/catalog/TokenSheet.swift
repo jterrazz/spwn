@@ -19,9 +19,9 @@ public struct TokenSheet: View {
     public var body: some View {
         let c = tokens.color
         let inner = Token.Metric.Panel.width - Token.Metric.Panel.body.leading - Token.Metric.Panel.body.trailing
-        let columns = Array(repeating: GridItem(.fixed((inner - Token.Metric.Tiles.gap) / 2), spacing: Token.Metric.Tiles.gap, alignment: .leading), count: 2)
+        let columns = Array(repeating: GridItem(.fixed((inner - Token.Metric.Gauges.gap) / 2), spacing: Token.Metric.Gauges.gap, alignment: .leading), count: 2)
         VStack(alignment: .leading, spacing: Token.Metric.Panel.blocks) {
-            LazyVGrid(columns: columns, alignment: .leading, spacing: Token.Metric.Tiles.gap) {
+            LazyVGrid(columns: columns, alignment: .leading, spacing: Token.Metric.Gauges.gap) {
                 ForEach(Array(Self.swatches(c).enumerated()), id: \.offset) { _, swatch in
                     HStack(spacing: Token.Metric.Row.gap) {
                         RoundedRectangle(cornerRadius: Token.Metric.Marks.logoRadius, style: .continuous)
@@ -32,7 +32,7 @@ public struct TokenSheet: View {
                     }
                 }
             }
-            LazyVGrid(columns: Array(repeating: GridItem(.fixed(Token.Metric.Marks.logoChip), spacing: Token.Metric.Tiles.gap), count: Token.Metric.Chart.uptimeCells / Token.Metric.Tiles.columns), alignment: .leading, spacing: Token.Metric.Tiles.gap) {
+            LazyVGrid(columns: Array(repeating: GridItem(.fixed(Token.Metric.Marks.logoChip), spacing: Token.Metric.Gauges.gap), count: Token.Metric.Chart.uptimeCells / Token.Metric.Gauges.columns), alignment: .leading, spacing: Token.Metric.Gauges.gap) {
                 ForEach(Token.Brand.allCases, id: \.self) { brand in
                     let chip = brand.chip(tokens.scheme)
                     RoundedRectangle(cornerRadius: Token.Metric.Marks.logoRadius, style: .continuous)

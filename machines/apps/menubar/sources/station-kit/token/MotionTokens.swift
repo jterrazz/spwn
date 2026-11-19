@@ -42,10 +42,6 @@ extension Token.Motion {
     public static let freshHold = 0.35
     public static let freshShare = 0.16
 
-    public static let plusOne = Animation.timingCurve(smoothCurve, duration: 1)
-    public static let plusOneRise: CGFloat = 6
-    public static let plusOneLift: CGFloat = 12
-    public static let plusOnePeak = 0.25
 
     public static let hud = Animation.timingCurve(smoothCurve, duration: freshDuration)
     public static let hudOpen = 0.1
