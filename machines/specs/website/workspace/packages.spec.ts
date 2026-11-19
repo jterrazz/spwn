@@ -74,7 +74,23 @@ describe('packages', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test.todo('W13 waits for a recording of an app no file lists');
+    test('W13 an app installed that no file lists stays out of the plan, which removes nothing', async () => {
+        // Given - the plan of This Mac over machinefile-differs, where brew holds gh and mise and no file lists either
+        const result = await website.visit(DIFFERS, async (visitor) => {
+            // When - Plan is pressed with nothing chosen
+            await visitor.click(within(region('Differs from its file'), button('Plan')));
+
+            // Then - the engine says nothing is removed, and the plan names neither app
+            await visitor.see(content('Nothing is removed. 4 apps stay as they are.'));
+            await visitor.gone(content('gh'));
+            await visitor.gone(content('mise'));
+        });
+        expect(result.errors.text).toBe('');
+    });
+
+    test.todo(
+        "W13 waits for machinefile.drift's Apply to count an extra as the window's Apply leaves it: an app station installed for the file and the file dropped reads 1 removed, while machinefile.apply removes only with Remove",
+    );
 
     test('W14 the apps are grouped by file, each with its count', async () => {
         // Given - the Packages tab of This Mac over machinefile-differs
@@ -151,7 +167,21 @@ describe('packages', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test.todo(
-        'W17 waits for a recording of a last night of the file, which the world cannot seed: the ledger is state',
-    );
+    test("W17 Upgrades gives the last night's run, its day and what it left", async () => {
+        // Given - the Packages tab of This Mac over stories, whose engine kept a night of macbook-pro at 03:00 on 7 Nov
+        const result = await website.visit(
+            '/?world=stories&machine=macbook-pro&tab=Packages',
+            async (visitor) => {
+                const upgrades = region('Upgrades');
+
+                // When - the tab is read
+                // Then - the last run's verdict, its line, and when it ran
+                await visitor.see(within(upgrades, content('Last run')));
+                await visitor.see(within(upgrades, content('1 app moved.')));
+                await visitor.see(within(upgrades, content('1 app waits for you.')));
+                await visitor.see(within(upgrades, content('7 Nov · 03:00')));
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
 });
