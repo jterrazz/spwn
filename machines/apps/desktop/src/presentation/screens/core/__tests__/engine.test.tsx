@@ -1,4 +1,3 @@
-import type { MachinesRelease } from '@jterrazz/station-api';
 import { button, component, content, file, heading, navigation, within } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
@@ -17,7 +16,13 @@ import { EngineProvider } from '../../../dependencies/dependencies';
 import { Window } from '../../../navigation/window';
 import { PAGES } from '../../registry';
 
-const recordingFor = await recordingsOf('release-behind', 'release-unreachable', 'stories');
+const recordingFor = await recordingsOf(
+    'release-behind',
+    'release-first-refused',
+    'release-never-asked',
+    'release-unreachable',
+    'stories',
+);
 
 const sidebar = navigation('Sidebar');
 const BEHIND = heading('spwn v0.22.0 is out.');
@@ -49,20 +54,6 @@ function engineOver(recording: Recording, { script, link }: Over = {}) {
         </EngineProvider>
     );
 }
-
-function answering(release: MachinesRelease): Recording {
-    const base = recordingFor('release-behind');
-    const read = { call: 'engine.read-release', in: {} };
-    return {
-        ...base,
-        exchanges: [
-            ...base.exchanges.filter((exchange) => exchange.request.call !== read.call),
-            { answers: [{ out: release, v: 2 }], request: read },
-        ],
-    };
-}
-
-const NOT_KNOWN = { Sentence: 'The latest release is not known yet.', Tone: 'plain' } as const;
 
 describe('EnginePage', () => {
     test('a Mac behind the latest release is offered the update, and its sidebar foot says so', async () => {
@@ -131,25 +122,22 @@ describe('EnginePage', () => {
     });
 
     test('a reading refused before any answer draws no checked time, and one never asked draws neither', async () => {
-        // Given - a first ask refused, then a Mac that never asked
-        const refused = answering({
-            Behind: false,
-            Head: NOT_KNOWN,
-            Installed: 'v0.21.0',
-            Refused: {
-                At: '2026-11-04T09:50:00Z',
-                Message: 'GitHub: dial tcp: connection refused',
-            },
-        });
-        const unasked = answering({ Behind: false, Head: NOT_KNOWN, Installed: 'v0.21.0' });
-
+        // Given - a world whose first ask was refused, then a world that never asked
         // When - each page has read the release
-        const first = await component.render(engineOver(refused), async (visitor) => {
-            await visitor.see(content('GitHub: dial tcp: connection refused', { exact: false }));
-        });
-        const never = await component.render(engineOver(unasked), async (visitor) => {
-            await visitor.see(heading('The latest release is not known yet.'));
-        });
+        const first = await component.render(
+            engineOver(recordingFor('release-first-refused')),
+            async (visitor) => {
+                await visitor.see(
+                    content('GitHub: dial tcp: connection refused', { exact: false }),
+                );
+            },
+        );
+        const never = await component.render(
+            engineOver(recordingFor('release-never-asked')),
+            async (visitor) => {
+                await visitor.see(heading('The latest release is not known yet.'));
+            },
+        );
 
         // Then - no Checked line in either, and no What changed without notes
         await expect(first.tree).toMatch(file('./__expected__/engine-first-refused.aria.yaml'));

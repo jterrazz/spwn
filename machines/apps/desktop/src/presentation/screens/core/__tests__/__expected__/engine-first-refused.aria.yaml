@@ -37,5 +37,5 @@
   - heading "The latest release is not known yet." [level=1]
   - region "Engine":
     - heading "Engine" [level=2]
-    - text: "Latest release GitHub: dial tcp: connection refused (4 Nov, 09:50)"
+    - text: "Latest release GitHub: dial tcp: connection refused (4 Nov, 10:00)"
     - button "Check now"
