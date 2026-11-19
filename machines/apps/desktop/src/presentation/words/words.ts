@@ -4,6 +4,7 @@ import type {
     DiskOutcome,
     PortsPort,
     PortsSharedPort,
+    SettingsRow,
 } from '@jterrazz/station-api';
 
 import type { CoreKind } from '../../application/use-cases/core-flow';
@@ -143,6 +144,16 @@ export const APP_WHY_WORDS: Words<AppsReport['Why']> = {
     outdated: 'update waiting',
     partial: 'partial',
     unmanaged: 'not managed',
+};
+
+export const SETTING_STATE_WORDS: Words<SettingsRow['State']> = {
+    '': NO_STATE_WORD,
+    applied: 'applied',
+    'changed-since': 'changed since',
+    'not-applied': 'not applied',
+    'not-for-this-machine': 'not for this machine',
+    'off-here': 'off here',
+    reading: 'reading',
 };
 
 export const REVERSIBLE_WORD = 'can be undone';

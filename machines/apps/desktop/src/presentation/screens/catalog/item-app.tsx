@@ -5,7 +5,7 @@ import { useRead } from '../../dependencies/dependencies';
 import { AppIcon, Button, Facts, MissingMark, Panel, Row, StatePill, Value } from '../../ui/index';
 import { countOf, detailOf, wordOf } from '../../words/engine-words';
 import type { PlanLine } from '../../words/provisional';
-import { appUpdate, kindChipWord } from '../../words/shown';
+import { appUpdate, kindChipWord, settingState } from '../../words/shown';
 import { APP_STATE_TONES } from '../../words/tones';
 import { APP_STATE_WORDS } from '../../words/words';
 import { installLinesOf, usedBy } from './item-model';
@@ -127,6 +127,11 @@ function ComesWith({
                             }}
                             sentence={row?.Package.Description}
                             size="slim"
+                            state={
+                                row === undefined
+                                    ? null
+                                    : { ...settingState(row.State), calm: 'pill' }
+                            }
                             tag={kindChipWord('setting')}
                             tagLook="type"
                             title={name}
