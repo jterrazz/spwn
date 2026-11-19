@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"strings"
 	"time"
 
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
@@ -33,6 +34,8 @@ type ReleaseRefusal struct {
 	Message string
 }
 
+const notesRoot = "https://github.com/"
+
 func ReleaseAsset(arch string) string {
 	// value: the name of the binary a release carries for a Mac of arch.
 	return "station-darwin-" + arch
@@ -54,10 +57,14 @@ func (p Tagged) Carries(arch string) bool {
 
 func (k ReleaseKept) Answered(now time.Time, p Tagged, arch string) ReleaseKept {
 	// invariant: an answer of GitHub moves the latest release only to one
-	// that carries this Mac's binary; the previous one stays otherwise.
+	// that carries this Mac's binary and whose tag Newer reads; the previous
+	// one stays otherwise. Its notes are kept only as a page of GitHub.
 	out := ReleaseKept{Read: now, Latest: k.Latest}
-	if p.Carries(arch) {
-		out.Latest = &Tagged{Tag: p.Tag, URL: p.URL}
+	if p.Carries(arch) && model.Released(p.Tag) {
+		out.Latest = &Tagged{Tag: p.Tag}
+		if strings.HasPrefix(p.URL, notesRoot) {
+			out.Latest.URL = p.URL
+		}
 	}
 	return out
 }

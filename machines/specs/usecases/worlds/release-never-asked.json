@@ -1,0 +1,40 @@
+{
+    "now": "2026-11-04T10:00:00Z",
+    "this_mac": "macbook-pro",
+    "user": "you",
+    "releases": [
+        {
+            "tag": "v0.22.0",
+            "url": "https://github.com/jterrazz/spwn/releases/tag/v0.22.0",
+            "assets": [
+                "station-linux-amd64",
+                "station-linux-arm64",
+                "station-darwin-amd64",
+                "station-darwin-arm64",
+                "Station.app.zip"
+            ]
+        }
+    ],
+    "macs": {
+        "macbook-pro": {
+            "engine": {
+                "started_at": "2026-11-01T10:00:00Z",
+                "version": "v0.21.0",
+                "stopped": true,
+                "stopped_at": "2026-11-04T09:40:00Z",
+                "stopped_by": "the menu bar"
+            },
+            "preferences": {
+                "name": "macbook-pro",
+                "vm_user": "admin"
+            },
+            "power": {
+                "Lid": "open",
+                "Source": "ac",
+                "HasBattery": true,
+                "Percent": 96,
+                "Charging": true
+            }
+        }
+    }
+}

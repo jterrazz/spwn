@@ -1,0 +1,19 @@
+description: 'an engine asks again 6 h after GitHub last answered, not before'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'world release v0.22.0'
+      exit: 0
+    - command: 'world advance 5h'
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].stores.release | {asked_again: (.Read != "2026-11-04T10:00:00Z"), latest: .Latest.Tag}'' world.json'
+      exit: 0
+      stdout: |
+          {"asked_again":false,"latest":null}
+    - command: 'world advance 1h'
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].stores.release | {asked_again: (.Read != "2026-11-04T10:00:00Z"), latest: .Latest.Tag}'' world.json'
+      exit: 0
+      stdout: |
+          {"asked_again":true,"latest":"v0.22.0"}

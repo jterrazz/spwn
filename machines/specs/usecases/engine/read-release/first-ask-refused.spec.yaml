@@ -1,0 +1,11 @@
+description: 'a first ask GitHub refused is read with no answer to stand beside, nothing taken'
+env:
+    - release-first-refused
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out | {Installed, Latest, Behind, Head, Notes, Checked: (.Checked != null), Refused: .Refused.Message} else .error | {code, message} end'''
+      stdin: |
+          {"v":2,"id":"1","call":"engine.read-release","in":{}}
+      exit: 0
+      stdout: |
+          {"Installed":"v0.21.0","Latest":null,"Behind":false,"Head":{"Tone":"plain","Sentence":"The latest release is not known yet."},"Notes":null,"Checked":false,"Refused":"GitHub: dial tcp: connection refused"}
