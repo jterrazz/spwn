@@ -1,7 +1,7 @@
-# spwn cookie sync: Chrome extension
+# Spwn cookie sync: Chrome extension
 
 A tiny browser extension that syncs your logged-in-session cookies to
-a locally-running [spwn-gate](../gate). Lets spwn agents act as you
+a locally-running [spwn-gate](../gate). Lets Spwn agents act as you
 on sites where the agent UX would otherwise need OAuth, scraper-cookie
 juggling, or per-container login.
 

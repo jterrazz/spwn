@@ -16,7 +16,7 @@ The `Adapter` value in `adapter.go` bundles all three and self-registers with `p
 
 [Claude Code](https://www.anthropic.com/claude-code) reads a `CLAUDE.md` from the working directory on startup, treats `@path/to/file.md` as `#include`-style imports, and uses the composed text as the session's system prompt. Native skill discovery walks `$HOME/.claude/skills/<name>/SKILL.md`.
 
-This package is the only place in spwn that encodes those conventions. Everything user-authored under `spwn/` uses the neutral name `AGENTS.md`; the rename to `CLAUDE.md` happens here.
+This package is the only place in Spwn that encodes those conventions. Everything user-authored under `spwn/` uses the neutral name `AGENTS.md`; the rename to `CLAUDE.md` happens here.
 
 ## One self-contained prompt per agent
 

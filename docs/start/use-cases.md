@@ -1,6 +1,6 @@
 # Use cases
 
-Four sessions that show what spwn is for, each a few commands from an empty directory. The ideas behind them are [Getting started](getting-started.md).
+Four sessions that show what Spwn is for, each a few commands from an empty directory. The ideas behind them are [Getting started](getting-started.md).
 
 ## Compose a scientist from blocks
 

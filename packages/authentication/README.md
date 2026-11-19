@@ -4,7 +4,7 @@ Credential resolution and container-side auth injection.
 
 ## Role
 
-Resolves host-side AI-provider credentials (Anthropic, OpenAI, Google) from their canonical locations (env vars, `~/.claude/.credentials.json`, `~/.codex/auth.json`, `~/.config/google-genai/credentials`) into a uniform `Credential` value. Then syncs them into the bind-mountable `/credentials/` directory that every spwn container reads at startup, so the user never copies API keys into worlds by hand. Keeps host and container auth surfaces decoupled: runtimes only ever see `/credentials/`.
+Resolves host-side AI-provider credentials (Anthropic, OpenAI, Google) from their canonical locations (env vars, `~/.claude/.credentials.json`, `~/.codex/auth.json`, `~/.config/google-genai/credentials`) into a uniform `Credential` value. Then syncs them into the bind-mountable `/credentials/` directory that every Spwn container reads at startup, so the user never copies API keys into worlds by hand. Keeps host and container auth surfaces decoupled: runtimes only ever see `/credentials/`.
 
 ## Key types
 

@@ -1,6 +1,6 @@
 # Domain model
 
-spwn is the **operating system for autonomous agent worlds**. You compose tools, skills, and identity into agents, then spawn them into isolated worlds where they wake up, find their tools, and get to work.
+Spwn is the **operating system for autonomous agent worlds**. You compose tools, skills, and identity into agents, then spawn them into isolated worlds where they wake up, find their tools, and get to work.
 
 ## The three abstractions
 
@@ -57,7 +57,7 @@ Generated with `crypto/rand`.
 
 ## Development methodology: spec-first
 
-spwn is built spec-first: the test suite is the living specification. [Test](../guides/test.md) says what proves a change, and how to run it.
+Spwn is built spec-first: the test suite is the living specification. [Test](../guides/test.md) says what proves a change, and how to run it.
 
 ## Related
 

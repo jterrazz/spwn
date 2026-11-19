@@ -5,7 +5,7 @@
 
 ## Context
 
-The window, named spwn, is a client of the engine's socket: until now a Mac with no engine showed it every page's
+The window, named Spwn, is a client of the engine's socket: until now a Mac with no engine showed it every page's
 "No engine answers", and nothing in the window could change that. On a Mac where the core was never installed, that
 left the window useless on its own. The owner decided on 2026-11-19 that the app must work on its own: opened on a Mac
 without the core, it takes the owner from nothing to a running engine.

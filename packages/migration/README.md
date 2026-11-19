@@ -68,7 +68,7 @@ invariants_.
 ## History
 
 Migrations 001-008 were deleted in the pre-1.0 migration squash.
-They targeted file formats spwn no longer emits (legacy `state.json`,
+They targeted file formats Spwn no longer emits (legacy `state.json`,
 pre-SOUL.md agent profiles, `universes/`) and silently no-op'd on
 any install that had already passed through the labels-as-truth cut.
 Live migrations start at 010.

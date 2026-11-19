@@ -1,6 +1,6 @@
 # Test architecture
 
-Where every suite of spwn lives, what each one proves, and what it stands on. How to run them and how to add one is [Test](../guides/test.md).
+Where every suite of Spwn lives, what each one proves, and what it stands on. How to run them and how to add one is [Test](../guides/test.md).
 
 ## The layers
 
@@ -35,7 +35,7 @@ The runner's defaults isolate every run: `SPWN_HOME` is a folder of the run's wo
 The UI is the run's, the API is each file's:
 
 - the UI, built once per run by the project's global setup (`__setup__/ui.global-setup.ts`): `next build` in `apps/web` with `NEXT_PUBLIC_API_URL` set to a free loopback port, then `next start`, the production server `spwn web` itself starts;
-- the API, `spwn web --no-open`, started by `specs/website/website.specification.ts` for each file on that port, serving a fresh project that `__setup__/project.ts` writes to a temporary directory: the `matrix` and `startup` worlds, their agents copied from `catalog/`, a spwn home past the onboarding wizard. The client reads its API address from the build, so the files take turns on it.
+- the API, `spwn web --no-open`, started by `specs/website/website.specification.ts` for each file on that port, serving a fresh project that `__setup__/project.ts` writes to a temporary directory: the `matrix` and `startup` worlds, their agents copied from `catalog/`, a Spwn home past the onboarding wizard. The client reads its API address from the build, so the files take turns on it.
 
 One folder per area of the UI (`worlds/`, `agents/`, `navigation/`), one file per page. A page is read whole through its accessibility tree, the Docker version a `{{semver}}` token. The page calls the API on a port of its own, so cross-origin requests are allowed.
 
@@ -52,7 +52,7 @@ A spec pins the image with `SPWN_BASE_IMAGE=spwn-test:latest`. The scripts are c
 
 `packages/world/tests/e2e/setup/` is their harness:
 
-- `NewTestContext(t)` gives each test a spwn home in `t.TempDir()`, a unique label, and a cleanup that destroys every world it spawned.
+- `NewTestContext(t)` gives each test a Spwn home in `t.TempDir()`, a unique label, and a cleanup that destroys every world it spawned.
 - `NewSpawnBuilder(t)` spawns a world fluently and returns an assertion chain (`ExpectState`, `ExpectContainer`, `ExpectMock`), one assertion type per observable surface.
 - `WaitFor(t, timeout, interval, desc, condition)` polls a condition; no test sleeps.
 - `FixturesDir()` is the folder of seed projects beside the suite, `__tests__/__fixtures__/`.

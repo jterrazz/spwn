@@ -11,7 +11,7 @@ A monolithic architecture that hard-codes these integrations becomes unmaintaina
 
 ## Decision
 
-**Every layer of spwn that touches an external system is defined as a port (Go interface) with swappable adapters (implementations).**
+**Every layer of Spwn that touches an external system is defined as a port (Go interface) with swappable adapters (implementations).**
 
 We adopt a strict ports & adapters architecture with 8 ports:
 

@@ -1,10 +1,10 @@
 # Manual pass: agent behaviour
 
 > **Human-driven QA:** every scenario requires a real Anthropic-authenticated
-> Claude session running inside a spwn world. The scenarios probe whether the
+> Claude session running inside a Spwn world. The scenarios probe whether the
 > host-side setup (CLAUDE.md, playbooks, skills, hooks, tools, knowledge,
 > roster, messaging) is **correctly injected** into the agent's perception:
-> i.e. the agent actually sees, reads, and acts on what spwn claims to have
+> i.e. the agent actually sees, reads, and acts on what Spwn claims to have
 > configured.
 >
 > These cannot be run by the script harness, `scripts/manual-harness.sh` (which
@@ -301,7 +301,7 @@ being regenerated without the `@SOUL.md` import.
 **Prompt:**
 
 > read your CLAUDE.md top to bottom. Does it anywhere mention "Claude Code"
-> by name? or "Anthropic"? It shouldn't: per spwn's runtime-neutral design,
+> by name? or "Anthropic"? It shouldn't: per Spwn's runtime-neutral design,
 > the file should not advertise which runtime is rendering it.
 
 **Expect:** agent reports "no mention of 'Claude Code' or 'Anthropic' in
@@ -314,7 +314,7 @@ runtime binary, not the prompt.)
 
 ## Group B: Filesystem perception (11-20)
 
-Goal: does the agent see the paths spwn claims to have mounted? Does it see
+Goal: does the agent see the paths Spwn claims to have mounted? Does it see
 them with the correct permissions?
 
 ### Scenario 11: `/agents/<name>/` is readable + writable
@@ -497,8 +497,8 @@ Goal: every declared tool's binary is actually present, verified, and usable.
 1. `run 'which greet' — what's the path?`
 2. `execute greet and tell me what it output.`
 
-**Expect:** `/usr/local/bin/greet` and a greeting line like "hello from spwn,
-spwn, it is HH:MM:SS".
+**Expect:** `/usr/local/bin/greet` and a greeting line like "hello from Spwn,
+Spwn, it is HH:MM:SS".
 
 ---
 
@@ -1037,7 +1037,7 @@ the workspace mount (not /agents/).
   That's intentional (so agents can install things mid-session if needed).
 - #4: works (outbound network allowed by default).
 
-**Document these explicitly**: they're the spwn security posture.
+**Document these explicitly**: they're the Spwn security posture.
 
 ---
 
@@ -1096,10 +1096,10 @@ description: [not a string but a list
 
 ### Scoring
 
-- **50/50 pass:** spwn's agent-integration surface is correctly injected.
+- **50/50 pass:** Spwn's agent-integration surface is correctly injected.
 - **Any fail:** categorise by group; a failure in Group A (identity) or
   Group D (skills) is CRITICAL: the agent literally doesn't know what
-  spwn says it knows. Failures in Group J are documentation items, not
+  Spwn says it knows. Failures in Group J are documentation items, not
   bugs.
 
 ### Typical session length

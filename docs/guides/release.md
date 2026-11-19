@@ -1,6 +1,6 @@
 # Release
 
-spwn is not deployed: it is released. This chapter is everything needed to cut
+Spwn is not deployed: it is released. This chapter is everything needed to cut
 one: the keys a clone signs with, the tag that starts the pipeline, how to
 verify what came out, and how to undo it. The machinery underneath (the
 GitHub-only distribution channel, the updater manifest, the checksum
@@ -92,7 +92,7 @@ The first real proof is then a dry run on `main`, `gh workflow run publish.yaml 
 ### 1. Decide the version
 
 Follow semver: `vMAJOR.MINOR.PATCH`. One tag versions both products, and the
-line continues after spwn's last release, `v0.20.0`: the first unified release
+line continues after Spwn's last release, `v0.20.0`: the first unified release
 is `v0.21.0-alpha.1`. Station's own last release was `v3.1.0` (tagged in its
 former repository, `jterrazz/studio-station`); station accepts any version from
 `v0.1.0`, so `v0.21.0-alpha.1` passes.
@@ -131,7 +131,7 @@ git push origin v1.2.3
 ```
 
 That's it. The `Publish` workflow runs automatically, and one tag releases
-both products of the repository, spwn and station (`machines/`):
+both products of the repository, Spwn and the engine (`machines/`):
 
 ```text
 .github/workflows/publish.yaml

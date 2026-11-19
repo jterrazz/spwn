@@ -11,7 +11,7 @@
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/_assets/readme/hero-dark.png">
-  <img src="docs/_assets/readme/hero-light.png" alt="Stay you, at scale. Doing more is easy now. Still knowing what you’re doing isn’t. spwn is the set of abstractions, rules and controls that gets you there. Machines, agents, teams: one file each. Beside it, Station: one file, one machine, ready for the job." width="830">
+  <img src="docs/_assets/readme/hero-light.png" alt="Stay you, at scale. Doing more is easy now. Still knowing what you’re doing isn’t. Spwn is the set of abstractions, rules and controls that gets you there. Machines, agents, teams: one file each. Beside it, Station: one file, one machine, ready for the job." width="830">
 </picture>
 
 ```sh

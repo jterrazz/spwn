@@ -1,10 +1,10 @@
 # Observatory
 
-The Observatory is the web face of spwn: every active world and agent at a glance, chat with them, and lifecycle actions from the interface. Where the CLI is the scripting surface, this is the monitoring and interactive one. Open it with `spwn web`.
+The Observatory is the web face of Spwn: every active world and agent at a glance, chat with them, and lifecycle actions from the interface. Where the CLI is the scripting surface, this is the monitoring and interactive one. Open it with `spwn web`.
 
 ## Shape
 
-A Next.js application ([`apps/web`](../../apps/web)) backed by a Go API server ([`apps/api`](../../apps/api)) that reads and writes the spwn filesystem directly and calls the same domain packages the CLI consumes, behind HTTP. Where those two sit in the layer graph is [Architecture](architecture.md).
+A Next.js application ([`apps/web`](../../apps/web)) backed by a Go API server ([`apps/api`](../../apps/api)) that reads and writes the Spwn filesystem directly and calls the same domain packages the CLI consumes, behind HTTP. Where those two sit in the layer graph is [Architecture](architecture.md).
 
 ## Design principles
 

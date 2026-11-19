@@ -1,6 +1,6 @@
 # Test
 
-What proves a change, and how to run each proof. The test suite is the specification of what spwn does: a test that fails says the code is wrong, never the test. Where every suite lives and how each is built is [Test architecture](../reference/test-architecture.md); the conventions every TypeScript test follows are `@jterrazz/test`'s, whose manual the toolchain carries into a session.
+What proves a change, and how to run each proof. The test suite is the specification of what Spwn does: a test that fails says the code is wrong, never the test. Where every suite lives and how each is built is [Test architecture](../reference/test-architecture.md); the conventions every TypeScript test follows are `@jterrazz/test`'s, whose manual the toolchain carries into a session.
 
 ## Running the suites
 

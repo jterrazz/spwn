@@ -4,7 +4,7 @@ Paths, IDs, and host-platform constants.
 
 ## Role
 
-The foundation layer: every other package asks `platform` for "where does this thing live on disk?" and "what should I call a new world/agent?". Centralises `~/.spwn/` layout, container-side paths, random name/ID generation, and mind-layer definitions. Zero external dependencies: everything that might need these primitives imports from here, and `platform` never imports any other spwn package, so it's import-cycle-proof.
+The foundation layer: every other package asks `platform` for "where does this thing live on disk?" and "what should I call a new world/agent?". Centralises `~/.spwn/` layout, container-side paths, random name/ID generation, and mind-layer definitions. Zero external dependencies: everything that might need these primitives imports from here, and `platform` never imports any other Spwn package, so it's import-cycle-proof.
 
 ## Key types
 

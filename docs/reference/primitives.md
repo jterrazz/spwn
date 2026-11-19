@@ -4,7 +4,7 @@ Everything an agent is made of is a declarative file, reviewed in PRs and pinned
 
 ## The project on disk
 
-A spwn project is per-repo: everything an agent is made of is committed beside the code it works on. `~/.spwn/` holds only user-level credentials and daemon state, and nothing a teammate needs to reproduce the project.
+A Spwn project is per-repo: everything an agent is made of is committed beside the code it works on. `~/.spwn/` holds only user-level credentials and daemon state, and nothing a teammate needs to reproduce the project.
 
 ```text
 my-project/
@@ -113,7 +113,7 @@ dependencies: # unioned with spwn.yaml's project-wide deps
     - spwn:git
 ```
 
-At build time spwn renders each agent's entry file (`CLAUDE.md` for Claude Code, `AGENTS.md` for codex) with world-shared context (physics, faculties, roster) plus the agent's role inlined, so the runtime boots fully loaded, with no `@-imports` to chase.
+At build time Spwn renders each agent's entry file (`CLAUDE.md` for Claude Code, `AGENTS.md` for codex) with world-shared context (physics, faculties, roster) plus the agent's role inlined, so the runtime boots fully loaded, with no `@-imports` to chase.
 
 ## Tools: `spwn/tools/<name>/tool.yaml`
 

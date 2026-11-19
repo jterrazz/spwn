@@ -1,6 +1,6 @@
 # Update system
 
-This document describes how spwn ships and updates itself. The goal is a
+This document describes how Spwn ships and updates itself. The goal is a
 **GitHub-only** distribution channel: no custom servers, no external
 infrastructure. Every artifact lives in a GitHub Release.
 
@@ -13,7 +13,7 @@ Two things are distributed:
 | Artifact          | Channel                   | Auto-update mechanism                       |
 | ----------------- | ------------------------- | ------------------------------------------- |
 | `spwn` CLI binary | GitHub Releases (tar.gz)  | `spwn upgrade` + background version check   |
-| spwn spwn.app     | GitHub Releases (bundles) | Tauri updater plugin, reading `latest.json` |
+| Spwn spwn.app     | GitHub Releases (bundles) | Tauri updater plugin, reading `latest.json` |
 
 Both are built from the same git tag (`vX.Y.Z`). A single `git push --tags`
 triggers the entire pipeline.

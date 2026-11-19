@@ -5,7 +5,7 @@
 
 ## Context
 
-As spwn scales from a single developer to teams and universes, several needs emerge:
+As Spwn scales from a single developer to teams and universes, several needs emerge:
 
 1. **Shared defaults.** Every world and agent in a universe should share the same provider, backend, and physics defaults without repeating them in every manifest.
 2. **Governance.** Universes need to enforce limits (max worlds, cost caps, allowed providers) and audit agent activity.
@@ -45,7 +45,7 @@ Each level inherits all settings from the level above and can override any of th
 
 ### Why Config Sync to Git
 
-Architect manages itself using spwn (dogfooding). The `claw.sync` section configures auto-sync of `~/.spwn/` to a git repository:
+Architect manages itself using Spwn (dogfooding). The `claw.sync` section configures auto-sync of `~/.spwn/` to a git repository:
 
 - **User changes flow in.** A user edits `org.yaml` on GitHub. Architect pulls the change. Adapters reconfigure.
 - **Architect changes flow out.** Architect promotes a citizen, updates a profile.yaml. The change is pushed. Visible in git history.

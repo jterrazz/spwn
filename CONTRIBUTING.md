@@ -1,4 +1,4 @@
-# Contributing to spwn
+# Contributing to Spwn
 
 Everything a contributor needs is a chapter of the corpus, mapped by [`docs/README.md`](docs/README.md). This page routes; it holds no manual of its own.
 

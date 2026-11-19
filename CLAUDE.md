@@ -1,4 +1,4 @@
-# spwn: agent brief
+# Spwn: agent brief
 
 The operating system for autonomous agent worlds: compose tools, skills, and identity into **agents**, then spawn them into isolated Docker **worlds**. This file is a map, not the territory: it routes into the corpus and repeats none of it.
 
@@ -10,7 +10,7 @@ Three abstractions, each owning one concern:
 - **Backend** (`packages/container`): where worlds run (Docker; labels are the source of truth).
 - **Mind** (`packages/agent`): how an agent persists across worlds (`SOUL.md` + `playbooks/` + `journal/`).
 
-Knowledge is world-scoped, not held in the Mind. A spwn project lives **in the repo** (`./spwn/`), not in `~/.spwn/`.
+Knowledge is world-scoped, not held in the Mind. A Spwn project lives **in the repo** (`./spwn/`), not in `~/.spwn/`.
 
 ## Where knowledge lives
 

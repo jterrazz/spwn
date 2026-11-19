@@ -1,6 +1,6 @@
 # Dependency catalog
 
-The built-in dependencies shipped with the spwn CLI. Install any of
+The built-in dependencies shipped with the Spwn CLI. Install any of
 these with `spwn install spwn:<name>` (or with `--agent <name>` to
 scope to one agent). Refs get pinned in `spwn.lock`.
 
@@ -22,7 +22,7 @@ Status: 🟢 working · 🟡 installed but rough · 🔴 planned.
 | `spwn:claude-code` | Claude Code CLI + pre-configured auth                                                  | You want Anthropic's agent runtime (default)                        | 🟢                                     |
 | `spwn:codex`       | Codex CLI installed in the image                                                       | You want OpenAI-style models                                        | 🟡 installed, no runtime adapter wired |
 | `spwn:aider`       | Aider CLI                                                                              | You want an open-source code-focused runtime                        | 🔴 planned                             |
-| `spwn:cli`         | spwn CLI inside the world                                                              | The agent needs to manage its own identity, messages, or sub-worlds | 🟢                                     |
+| `spwn:cli`         | Spwn CLI inside the world                                                              | The agent needs to manage its own identity, messages, or sub-worlds | 🟢                                     |
 | `spwn:architect`   | Full orchestration daemon (includes `spwn:cli`, `spwn:claude-code`, `spwn:docker-cli`) | You're running the always-on Architect                              | 🟡 architect mode is in dev            |
 
 ## Authoring your own

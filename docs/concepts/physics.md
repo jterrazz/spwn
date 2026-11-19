@@ -21,7 +21,7 @@ Both are rendered as plain markdown into the world context at build time, so any
 
 Every agent wakes up with an entry file assembled at build time from the world's shared context (physics, faculties, roster) plus its own identity and role. The build renders it to the convention of each runtime (`CLAUDE.md` for Claude Code, `AGENTS.md` for codex-style runtimes), so the runtime boots fully loaded with nothing to chase at startup.
 
-Platform instructions travel the same way. Rather than teaching every runtime adapter how spwn works, the build ships standardised markdown into every world; any runtime that reads files bootstraps itself from it. Two kinds of skill coexist, and the split is the point:
+Platform instructions travel the same way. Rather than teaching every runtime adapter how Spwn works, the build ships standardised markdown into every world; any runtime that reads files bootstraps itself from it. Two kinds of skill coexist, and the split is the point:
 
 |          | System skills            | Agent skills                 |
 | -------- | ------------------------ | ---------------------------- |

@@ -1,6 +1,6 @@
 # Getting started
 
-What a spwn project holds, and the four ideas the rest of the manual builds on. The front page is the [README](../../README.md); worked sessions are [Use cases](use-cases.md).
+What a Spwn project holds, and the four ideas the rest of the manual builds on. The front page is the [README](../../README.md); worked sessions are [Use cases](use-cases.md).
 
 ## Quickstart
 
@@ -37,7 +37,7 @@ my-project/
 
 ## Four ideas
 
-spwn turns your repo into a **portable agent artifact**, consumed by the spwn CLI today, and by web UIs, apps, and embedded SDKs on the roadmap. One bundle format, many future surfaces.
+Spwn turns your repo into a **portable agent artifact**, consumed by the Spwn CLI today, and by web UIs, apps, and embedded SDKs on the roadmap. One bundle format, many future surfaces.
 
 ```text
    repo  ──▶  spwn build  ──▶  artifact  ──▶  anywhere
@@ -123,7 +123,7 @@ worlds:
 
 ### Runtime-agnostic
 
-Think of spwn the way you think of `tsc` or `babel`. You write in one clean, provider-neutral source; a transpiler adapts it to whatever runtime you target and emits exactly what that runtime expects. You never touch the output by hand.
+Think of Spwn the way you think of `tsc` or `babel`. You write in one clean, provider-neutral source; a transpiler adapts it to whatever runtime you target and emits exactly what that runtime expects. You never touch the output by hand.
 
 ```text
    YOUR REPO             BUILD                ARTIFACT

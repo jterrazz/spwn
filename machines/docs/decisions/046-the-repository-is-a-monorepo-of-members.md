@@ -5,7 +5,7 @@
 
 ## Context
 
-The repository grew from one Go module with an engine at `src/`, a Swift app at `apps/menubar`, a catalog embedded from inside the engine's package, the specs at `specs/`, and a root that declares a `cli` kind. The engine's folder is called nothing but `src`, the data the engine embeds lives under the code that reads it, and the next members (the window, the file-format schemas, the API's package) have no place that says what they are. [ADR-001](001-station-mirrors-the-studio-cli-layers.md) and [ADR-014](014-families-and-contracts.md) cut the code into layers and families inside one tree; neither says what a member of the repository is. The estate's other repository that spans Go and Node, spwn, has a shape for it.
+The repository grew from one Go module with an engine at `src/`, a Swift app at `apps/menubar`, a catalog embedded from inside the engine's package, the specs at `specs/`, and a root that declares a `cli` kind. The engine's folder is called nothing but `src`, the data the engine embeds lives under the code that reads it, and the next members (the window, the file-format schemas, the API's package) have no place that says what they are. [ADR-001](001-station-mirrors-the-studio-cli-layers.md) and [ADR-014](014-families-and-contracts.md) cut the code into layers and families inside one tree; neither says what a member of the repository is. The estate's other repository that spans Go and Node, Spwn, has a shape for it.
 
 ## Decision
 
@@ -14,7 +14,7 @@ The repository grew from one Go module with an engine at `src/`, a Swift app at 
 - **The engine's Go module path is `github.com/jterrazz/studio-station/apps/engine`**, the catalog's `.../catalog`, the specs' `.../specs`. Each module requires its siblings and carries a `replace` to their folder, so a build works with or without `go.work`.
 - **The toolchain is npm workspaces, `go.work` and Turborepo.** Turborepo carries what is per-module and cacheable: Go `lint` and `test` per module and the specs' test. Version-stamped builds, `generate` and the passes whose result depends on the machine stay direct Makefile lines, since a version read from `git describe` is not a content hash.
 - **A Go member has no `package.json`.** Only a node member (the specs, the window, the API package) carries one and a `studio.config.ts`.
-- **A move to pnpm is the owner's.** spwn runs pnpm workspaces under Turborepo; the stack doctrine here says `npm` only, never pnpm (`docs/concepts/stack.md`). This record keeps npm until the owner changes that doctrine in its own decision, so no page says what the repository does not.
+- **A move to pnpm is the owner's.** Spwn runs pnpm workspaces under Turborepo; the stack doctrine here says `npm` only, never pnpm (`docs/concepts/stack.md`). This record keeps npm until the owner changes that doctrine in its own decision, so no page says what the repository does not.
 
 ## Consequences
 

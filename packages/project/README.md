@@ -1,10 +1,10 @@
 # packages/project
 
-The spwn project manifest: parsing, scaffolding, discovery, validation.
+The Spwn project manifest: parsing, scaffolding, discovery, validation.
 
 ## Role
 
-A spwn project is a directory tree with a top-level `spwn.yaml`, one or more agents under `spwn/agents/`, and optional `spwn/tools/`, `spwn/skills/`, `spwn/hooks/`. This package owns the lifecycle of that tree: `spwn init` scaffolds it, `Find` walks up from any subdirectory to locate the nearest `spwn.yaml`, `Load` parses it, and `Validate` runs every static rule (refs exist, lockfile consistent, world/agent cross-refs resolve, no version conflicts across multi-agent worlds). Everything downstream (build, compile, spawn) starts from a `*Project` produced here.
+A Spwn project is a directory tree with a top-level `spwn.yaml`, one or more agents under `spwn/agents/`, and optional `spwn/tools/`, `spwn/skills/`, `spwn/hooks/`. This package owns the lifecycle of that tree: `spwn init` scaffolds it, `Find` walks up from any subdirectory to locate the nearest `spwn.yaml`, `Load` parses it, and `Validate` runs every static rule (refs exist, lockfile consistent, world/agent cross-refs resolve, no version conflicts across multi-agent worlds). Everything downstream (build, compile, spawn) starts from a `*Project` produced here.
 
 ## Key types
 

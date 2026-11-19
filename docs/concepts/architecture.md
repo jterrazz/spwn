@@ -1,6 +1,6 @@
 # Architecture
 
-spwn is a polyglot monorepo (Go domain modules plus a Next.js/Tauri web UI) wired together with Go workspaces (`go.work`), pnpm (`pnpm-workspace.yaml`), and a top-level `Makefile` that is the single entry point for both toolchains. CI calls the Makefile's gestures directly, one per job of [`.github/workflows/check.yaml`](../../.github/workflows/check.yaml).
+Spwn is a polyglot monorepo (Go domain modules plus a Next.js/Tauri web UI) wired together with Go workspaces (`go.work`), pnpm (`pnpm-workspace.yaml`), and a top-level `Makefile` that is the single entry point for both toolchains. CI calls the Makefile's gestures directly, one per job of [`.github/workflows/check.yaml`](../../.github/workflows/check.yaml).
 
 ## Repository layout
 
@@ -79,7 +79,7 @@ compile.Tree           →  world.Spawn        →  running container + synced a
 
 ## Container architecture: Docker-outside-of-Docker (DooD)
 
-spwn uses **DooD**, not DinD ([ADR-012](../decisions/012-dood-over-dind.md)). The host's Docker daemon is shared via socket mount (`/var/run/docker.sock`); every container is a **sibling** on the same daemon: no nesting, no privilege escalation, no performance overhead.
+Spwn uses **DooD**, not DinD ([ADR-012](../decisions/012-dood-over-dind.md)). The host's Docker daemon is shared via socket mount (`/var/run/docker.sock`); every container is a **sibling** on the same daemon: no nesting, no privilege escalation, no performance overhead.
 
 ```text
 Host machine
@@ -111,7 +111,7 @@ The [gate](gate.md) is a separate long-running host container that owns cookie-b
 
 The boundaries are as load-bearing as the layers:
 
-- **It does not implement agent reasoning.** The runtime does the thinking, planning, and tool use; spwn creates the reality it operates in.
+- **It does not implement agent reasoning.** The runtime does the thinking, planning, and tool use; Spwn creates the reality it operates in.
 - **It does not run inference.** No model call happens in the machinery; the runtime manages its own.
 - **It does not schedule work.** Worlds are created on demand, by an operator or by a declared trigger ([Automations](../guides/automations.md)).
 - **It does not network worlds together.** Each world is isolated; anything between two worlds goes through the host.

@@ -1,6 +1,6 @@
-# spwn: the manual
+# Spwn: the manual
 
-Everything this repository knows about itself, by what the reader came to do. What spwn is, why it exists, and its quickstart, is the README at the root of the repository; new here, [Getting started](start/getting-started.md) comes next.
+Everything this repository knows about itself, by what the reader came to do. What Spwn is, why it exists, and its quickstart, is the README at the root of the repository; new here, [Getting started](start/getting-started.md) comes next.
 
 ## Start
 
@@ -31,7 +31,7 @@ Everything this repository knows about itself, by what the reader came to do. Wh
 | [The Mind](concepts/mind.md)               | Identity, skills, memory; Dream, Sleep, and versioning a Mind                |
 | [Gate](concepts/gate.md)                   | The host-side broker: cookies, MCP routing, the browser sidecar              |
 | [Observatory](concepts/observatory.md)     | The web UI and the API behind it                                             |
-| [Update system](concepts/update-system.md) | How spwn ships and updates itself, from the git tag to the binary swap       |
+| [Update system](concepts/update-system.md) | How Spwn ships and updates itself, from the git tag to the binary swap       |
 
 ## Reference
 
@@ -48,7 +48,7 @@ Everything this repository knows about itself, by what the reader came to do. Wh
 
 ## Machines
 
-This repository holds a second product: station, under `machines/`, which keeps its own manual, mapped by `machines/docs/README.md`. This manual covers spwn and the repository as a whole; how station is built, tested and designed is that manual's. Why the two share one repository is [ADR-017](decisions/017-one-repository-station-moves-in-under-machines.md).
+This repository holds a second product: the engine, under `machines/`, which keeps its own manual, mapped by `machines/docs/README.md`. This manual covers Spwn and the repository as a whole; how the engine is built, tested and designed is that manual's. Why the two share one repository is [ADR-017](decisions/017-one-repository-station-moves-in-under-machines.md).
 
 ## Decisions
 

@@ -4,7 +4,7 @@ These are the **complicated** scenarios the prior two suites
 (CLI-harness + agent-behavior) miss by design. They probe:
 
 - **Concurrency**: two processes fighting over the same state.
-- **Partial failure**: spwn aborts mid-pipeline; what's left behind?
+- **Partial failure**: Spwn aborts mid-pipeline; what's left behind?
 - **State-machine holes**: world in unexpected / impossible states.
 - **Filesystem edges**: special chars, permissions, large files,
   symlinks, binary content, case-insensitive FS.
@@ -158,7 +158,7 @@ labels detects + marks stopped.
 
 **Hypothesis:** clean error "world not running, run spwn up first".
 
-### C21. Orphan container (world-xxx exists but spwn doesn't know)
+### C21. Orphan container (world-xxx exists but Spwn doesn't know)
 
 **Hypothesis:** `spwn ls` shows orphan or ignores silently.
 
@@ -283,7 +283,7 @@ breakable today.
 
 **Probe:** local `skill:review` (Claude Code has a built-in
 `review`).
-**Hypothesis:** spwn's version takes precedence via the
+**Hypothesis:** Spwn's version takes precedence via the
 symlinked skills dir, or Claude Code prefers its own; either way
 document.
 
@@ -325,7 +325,7 @@ with hook's stderr. **Verified in the fix commit 73212cfa**.
 
 ### G52. Pre-spawn hook hangs forever
 
-**Hypothesis:** spwn hangs? Should have a timeout; doesn't today.
+**Hypothesis:** Spwn hangs? Should have a timeout; doesn't today.
 **Probe:** `hook: sleep 999`; observe spawn.
 
 ### G53. Hook that `rm -rf /`-like destructive
@@ -362,7 +362,7 @@ token). Error clear.
 
 ### H59. API key provider mismatch (openai token claimed as anthropic)
 
-**Hypothesis:** spwn's auth layer surfaces a provider mismatch.
+**Hypothesis:** Spwn's auth layer surfaces a provider mismatch.
 
 ### H60. Corrupted `.credentials.json` (invalid JSON)
 
@@ -446,7 +446,7 @@ new world has stale role.md but otherwise fine.
 ## Out of scope (still)
 
 - DoS / adversarial workloads (testing against a malicious agent).
-- Cross-platform (Windows/Linux divergence: spwn is macOS-first
+- Cross-platform (Windows/Linux divergence: Spwn is macOS-first
   today).
 - HTTP API auth edges (apps/api is same-machine only).
 - Web UI specifics (Playwright suite).
