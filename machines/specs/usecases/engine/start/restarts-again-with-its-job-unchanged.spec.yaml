@@ -1,0 +1,19 @@
+description: 'an engine of another version is restarted by its version alone, its job already written'
+env: two-macs
+runs:
+    - command: 'world upgrade macbook-pro v3.0.0'
+      exit: 0
+    - command: 'engine start'
+      exit: 0
+      stdout: |
+          ●	engine	restarted · v3.0.0 to {{string}}
+    - command: 'world upgrade macbook-pro v2.0.0'
+      exit: 0
+    - command: 'engine start'
+      exit: 0
+      stdout: |
+          ●	engine	restarted · v2.0.0 to {{string}}
+    - command: 'engine start'
+      exit: 0
+      stdout: |
+          ●	engine	already running · {{string}}
