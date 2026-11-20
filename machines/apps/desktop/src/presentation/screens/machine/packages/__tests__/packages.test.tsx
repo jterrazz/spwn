@@ -22,6 +22,7 @@ import { PlanSteps, unitOf } from '../plan';
 
 const recordingFor = await recordingsOf(
     'machinefile-differs',
+    'machinefile-extra',
     'machinefile-kept',
     'mini-offline',
     'one-mac',
@@ -84,6 +85,35 @@ describe('Packages', () => {
         // Then - the first has no differences panel, the second lists ripgrep and fd to install
         await expect(kept.tree).toMatch(file('./__expected__/machinefile-kept.aria.yaml'));
         await expect(differs.tree).toMatch(file('./__expected__/machinefile-differs.aria.yaml'));
+    });
+
+    test('the differences panel names the extras Apply leaves under its sentence, and says none when there are none', async () => {
+        // Given - This Mac's Packages over machinefile-extra, whose file no longer lists bat
+        const extra = await component.render(
+            windowOver('machinefile-extra', 'macbook-pro'),
+            async (visitor) => {
+                // Then - the foot carries the engine's sentence of the extra
+                await visitor.see(
+                    within(
+                        region('Differs from its file'),
+                        content('bat stays: Apply leaves extras.'),
+                    ),
+                );
+            },
+        );
+        expect(extra.errors.text).toBe('');
+
+        // Given - This Mac's Packages over machinefile-differs, which has no extra
+        const differs = await component.render(
+            windowOver('machinefile-differs', 'macbook-pro'),
+            async (visitor) => {
+                await visitor.see(heading('Differs from its file 2'));
+
+                // Then - no extras sentence is drawn
+                await visitor.gone(content('Apply leaves extras.', { exact: false }));
+            },
+        );
+        expect(differs.errors.text).toBe('');
     });
 
     test("the head is the apps chapter's verdict, the whole file's being Its file's", async () => {

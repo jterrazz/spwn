@@ -88,9 +88,24 @@ describe('packages', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test.todo(
-        "W13 waits for machinefile.drift's Apply to count an extra as the window's Apply leaves it: an app station installed for the file and the file dropped reads 1 removed, while machinefile.apply removes only with Remove",
-    );
+    test('W13 the plan names the extra an app station installed and the file dropped, which Apply leaves', async () => {
+        // Given - the Packages tab of This Mac over machinefile-extra, which no longer lists bat
+        const result = await website.visit(
+            '/?world=machinefile-extra&machine=macbook-pro&tab=Packages',
+            async (visitor) => {
+                // When - the tab is read, then Plan is pressed
+                const differs = region('Differs from its file');
+                await visitor.see(within(differs, content('bat stays: Apply leaves extras.')));
+                await visitor.click(within(differs, button('Plan')));
+
+                // Then - the plan says the engine's sentence beside what stays, and removes nothing
+                await visitor.see(content('bat stays: Apply leaves extras.'));
+                await visitor.see(content('Nothing is removed. 3 apps stay as they are.'));
+                await visitor.gone(region('To remove'));
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
 
     test('W14 the apps are grouped by file, each with its count', async () => {
         // Given - the Packages tab of This Mac over machinefile-differs

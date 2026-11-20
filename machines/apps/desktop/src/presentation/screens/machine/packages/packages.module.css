@@ -34,6 +34,12 @@
     display: flex;
     justify-content: flex-end;
 }
+.said {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    min-width: 0;
+}
 .foot {
     display: flex;
     align-items: center;

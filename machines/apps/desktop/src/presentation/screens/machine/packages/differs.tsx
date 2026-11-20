@@ -79,10 +79,12 @@ function DiffFoot({
     toFile,
     onPlan,
     apply,
+    left,
 }: {
     toFile: boolean;
     onPlan: () => void;
     apply: string;
+    left: string;
 }) {
     if (toFile) {
         return (
@@ -96,7 +98,10 @@ function DiffFoot({
     }
     return (
         <div className={styles.foot}>
-            <span>{apply}</span>
+            <span className={styles.said}>
+                <span>{apply}</span>
+                {left === '' ? null : <span className={styles.muted}>{left}</span>}
+            </span>
             <Button onClick={onPlan} variant="primary">
                 Plan
             </Button>
@@ -152,7 +157,12 @@ export function Differs({ drift, onPlan }: { drift: MachinefileDrift; onPlan: ()
                     />
                 );
             })}
-            <DiffFoot apply={drift.Apply.Sentence} onPlan={onPlan} toFile={toFile} />
+            <DiffFoot
+                apply={drift.Apply.Sentence}
+                left={drift.Apply.Left}
+                onPlan={onPlan}
+                toFile={toFile}
+            />
         </Panel>
     );
 }

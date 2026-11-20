@@ -37,8 +37,14 @@ export function kindsOf(reports: readonly AppsReport[]): Kinds {
     return new Map(reports.map((report) => [report.App.Name, report.App.AppKind]));
 }
 
+// outside: the step of an extra (an install station made for the file, which the file no longer lists) names no
+// outside: chapter, and the engine counts every extra in its apps chapter (drift.go), so it is shelved there.
 export function shelfOf(line: PlanLine, kinds: Kinds): string {
-    return kinds.get(line.Step.Package) === 'skill' ? 'Skills' : shelfWord(line.Step.Chapter);
+    if (kinds.get(line.Step.Package) === 'skill') {
+        return 'Skills';
+    }
+    const said: string = line.Step.Chapter;
+    return shelfWord(said === '' ? 'apps' : line.Step.Chapter);
 }
 
 export function planFilesOf(plan: MachinefilePlan): readonly PlanFile[] {

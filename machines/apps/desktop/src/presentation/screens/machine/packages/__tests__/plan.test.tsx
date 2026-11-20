@@ -10,7 +10,11 @@ import { GestureConfirm } from '../../../../kit/gestures';
 import { Screen } from '../../../../ui/index';
 import { PlanView } from '../plan';
 
-const recordingFor = await recordingsOf('machinefile-differs', 'machinefile-kept');
+const recordingFor = await recordingsOf(
+    'machinefile-differs',
+    'machinefile-extra',
+    'machinefile-kept',
+);
 
 const MAC = 'macbook-pro';
 
@@ -73,6 +77,28 @@ describe('Plan', () => {
             },
         );
         expect(result.errors.text).toBe('');
+    });
+
+    test('the closing bar names the extras an apply leaves, only when the engine says some', async () => {
+        // Given - the plan of This Mac over machinefile-extra, whose file no longer lists bat
+        const extra = await component.render(
+            planOver('machinefile-extra', MAC),
+            async (visitor) => {
+                // Then - the bar says which extra stays, beside what stays
+                await visitor.see(content('bat stays: Apply leaves extras.'));
+                await visitor.see(content('Nothing is removed. 3 apps stay as they are.'));
+            },
+        );
+        expect(extra.errors.text).toBe('');
+
+        // Given - the plan of This Mac over machinefile-kept, which leaves none
+        const kept = await component.render(planOver('machinefile-kept', MAC), async (visitor) => {
+            await visitor.see(content('Nothing is removed.', { exact: false }));
+
+            // Then - no extras sentence is drawn
+            await visitor.gone(content('Apply leaves extras.', { exact: false }));
+        });
+        expect(kept.errors.text).toBe('');
     });
 
     test('a plan with nothing to do is applied the same way', async () => {

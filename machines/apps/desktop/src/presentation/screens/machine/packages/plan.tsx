@@ -130,10 +130,12 @@ function PlanBar({ target, name, asked, back }: PlanProps) {
     });
     const drift = useRead('machinefile.drift', asked);
     const stays = drift.kind === 'read' ? drift.out.Apply.Stays : '';
+    const left = drift.kind === 'read' ? drift.out.Apply.Left : '';
     return (
         <div className={styles.foot}>
             <span className={styles.item}>
                 {stays === '' ? null : <span className={styles.muted}>{stays}</span>}
+                {left === '' ? null : <span className={styles.muted}>{left}</span>}
                 <GestureOutcome gesture={apply} />
             </span>
             <span className={styles.item}>
