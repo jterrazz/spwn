@@ -35,7 +35,7 @@ jobs:
             - if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
               uses: ./.github/actions/signing-secrets
               with:
-                  names: APPLE_CERTIFICATE APPLE_CERTIFICATE_PASSWORD APPLE_SIGNING_IDENTITY APPLE_ID APPLE_PASSWORD APPLE_TEAM_ID
+                  names: APPLE_CERTIFICATE APPLE_CERTIFICATE_PASSWORD APPLE_SIGNING_IDENTITY APPLE_ID APPLE_PASSWORD APPLE_TEAM_ID TAURI_SIGNING_PRIVATE_KEY
                   project: ${{ env.SIGNING_SECRETS_PROJECT }}
                   path: ${{ env.SIGNING_SECRETS_PATH }}
             - id: require
@@ -122,7 +122,7 @@ jobs:
               if: needs.signing.outputs.signed == 'true'
               uses: ./.github/actions/signing-secrets
               with:
-                  names: APPLE_CERTIFICATE APPLE_CERTIFICATE_PASSWORD APPLE_SIGNING_IDENTITY APPLE_ID APPLE_PASSWORD APPLE_TEAM_ID
+                  names: APPLE_CERTIFICATE APPLE_CERTIFICATE_PASSWORD APPLE_SIGNING_IDENTITY APPLE_ID APPLE_PASSWORD APPLE_TEAM_ID TAURI_SIGNING_PRIVATE_KEY TAURI_SIGNING_PRIVATE_KEY_PASSWORD
                   project: ${{ env.SIGNING_SECRETS_PROJECT }}
                   path: ${{ env.SIGNING_SECRETS_PATH }}
             - name: Import the signing identity
@@ -170,6 +170,21 @@ jobs:
                   ditto -c -k --keepParent .artifacts/window/Spwn.app "$RUNNER_TEMP/notary/Spwn.app.zip"
                   ../scripts/sign-macos.sh notarize "$RUNNER_TEMP/notary/Station.app.zip" "$RUNNER_TEMP/notary/Spwn.app.zip"
                   ../scripts/sign-macos.sh staple .artifacts/menubar/Station.app .artifacts/window/Spwn.app
+            # value: the minisign verifier the update's check runs, pinned, built from crates.io by the cargo the job already holds
+            - name: Install rsign
+              if: needs.signing.outputs.signed == 'true'
+              run: |
+                  set -euo pipefail
+                  cargo install rsign2 --version 0.6.7 --locked --root "$RUNNER_TEMP/rsign"
+                  echo "$RUNNER_TEMP/rsign/bin" >> "$GITHUB_PATH"
+            # invariant: the update is packed from the stapled app, and its signature verifies against the public key every window carries, before anything is uploaded
+            - name: Pack, sign and verify Spwn.app's update
+              if: needs.signing.outputs.signed == 'true'
+              run: |
+                  set -euo pipefail
+                  ../scripts/window-update.sh archive .artifacts/window/Spwn.app "$RUNNER_TEMP/station"
+                  ../scripts/window-update.sh sign "$RUNNER_TEMP/station/Spwn.app.tar.gz"
+                  ../scripts/window-update.sh manifest .artifacts/window/Spwn.app "$RUNNER_TEMP/station"
             # invariant: the shipped zips are made after the staple, so the apps they carry hold their ticket offline
             - name: Zip Station.app and Spwn.app
               run: |
@@ -187,7 +202,7 @@ jobs:
                   path: ${{ runner.temp }}/station/*
                   if-no-files-found: error
 
-    # value: one release per tag, opened once by goreleaser: spwn's archives, plus station's binaries, Station.app.zip and Spwn_darwin_arm64.zip as extra files, every asset listed in the one checksums.txt
+    # value: one release per tag, opened once by goreleaser: spwn's archives, plus station's binaries, Station.app.zip, Spwn_darwin_arm64.zip and, on a signed run, the window's update (Spwn.app.tar.gz, its .sig, latest.json) as extra files, every asset listed in the one checksums.txt
     # invariant: the release opens only once both station jobs are built, so a failed station leaves no spwn-only release
     # value: on macOS, because GoReleaser's post-build hook signs and notarizes spwn's darwin binaries with codesign and notarytool before it archives them
     publish:

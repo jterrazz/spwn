@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-secrets=(APPLE_CERTIFICATE APPLE_CERTIFICATE_PASSWORD APPLE_SIGNING_IDENTITY APPLE_ID APPLE_PASSWORD APPLE_TEAM_ID)
+secrets=(APPLE_CERTIFICATE APPLE_CERTIFICATE_PASSWORD APPLE_SIGNING_IDENTITY APPLE_ID APPLE_PASSWORD APPLE_TEAM_ID TAURI_SIGNING_PRIVATE_KEY)
 
 usage() {
     cat >&2 <<'EOF'
@@ -17,6 +17,8 @@ usage: sign-macos.sh <step> [paths...]
   cleanup                 delete the keychain and the files of this run
 
 env:
+  the secrets require checks: the six APPLE_* ones and TAURI_SIGNING_PRIVATE_KEY, which signs the window's update
+  (scripts/window-update.sh); TAURI_SIGNING_PRIVATE_KEY_PASSWORD is not checked, since a key may have none
   APPLE_SIGNING_IDENTITY  the Developer ID Application identity, its name or its SHA-1; `-` signs ad hoc, with no keychain and no timestamp
   MACOS_NOTARIZE=skip     notarize and staple print what they skip and succeed: the dry run of a signing
   MACOS_SIGN=true         `binary` signs; any other value passes the binary through untouched
