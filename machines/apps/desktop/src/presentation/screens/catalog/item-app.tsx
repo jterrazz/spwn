@@ -16,6 +16,7 @@ import {
     ItemChips,
     ItemHead,
     MachineChips,
+    originFact,
     Rail,
     Two,
 } from './item-parts';
@@ -245,7 +246,7 @@ export function AppItem({
                             ...(users.length === 0
                                 ? []
                                 : [factOf('Used by', <ItemChips {...props} names={users} />)]),
-                            factOf('Comes from', null),
+                            originFact(report.Origin),
                         ]}
                         name={App.Name}
                     />

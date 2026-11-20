@@ -4,7 +4,7 @@
   - button "Add to a machine" [disabled]
   - region "How it is installed":
     - heading "How it is installed" [level=2]
-    - text: Mac, macOS VM brew gh Linux apt gh
+    - text: macOS brew gh Ubuntu apt gh
     - term: Puts on your path
     - definition: gh
   - region "Version":
@@ -39,4 +39,4 @@
       - button "agent-7f"
       - button "linux-1"
     - term: Comes from
-    - definition: not given yet
+    - definition: built into station built-in/catalog/git/gh.yaml

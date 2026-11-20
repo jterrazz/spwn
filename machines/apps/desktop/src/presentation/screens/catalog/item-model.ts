@@ -7,8 +7,6 @@ import type {
     MachinefileFileView,
 } from '@jterrazz/station-api';
 
-import { SEPARATOR } from '../../../domain/separator';
-
 export function rowOf(matrix: AppsMatrix | undefined, name: string): AppsMatrixRow | undefined {
     return (matrix?.Rows ?? []).find((row) => row.Name === name);
 }
@@ -37,41 +35,19 @@ export function declaredIn(
 
 export type System = NonNullable<CatalogLivesOn['Kinds']>[number];
 
-export type InstallLine = { systems: System[]; method: string; target: string };
-
-function textOf(value: unknown): string {
-    if (typeof value === 'string') {
-        return value;
-    }
-    return Array.isArray(value)
-        ? value.filter((one): one is string => typeof one === 'string').join(' ')
-        : '';
-}
-
-// outside: CatalogLivesOn.Install is typed unknown, its shape the method's: its text values are drawn as sent, in
-// outside: the order sent, until the engine words what an install fetches.
-export function targetOf(install: unknown): string {
-    if (typeof install !== 'object' || install === null) {
-        return textOf(install);
-    }
-    const values: unknown[] = Object.values(install);
-    return values
-        .map(textOf)
-        .filter((text) => text !== '')
-        .join(SEPARATOR);
-}
+export type InstallLine = { fetches: string; method: string; systems: string[] };
 
 export function installLinesOf(installs: null | readonly CatalogLivesOn[]): InstallLine[] {
     const lines: InstallLine[] = [];
     for (const one of installs ?? []) {
         const method = one.Method ?? '';
-        const target = targetOf(one.Install);
-        const systems = one.Kinds ?? [];
-        const same = lines.find((line) => line.method === method && line.target === target);
+        const fetches = one.Fetches ?? '';
+        const systems = one.System === undefined || one.System === '' ? [] : [one.System];
+        const same = lines.find((line) => line.method === method && line.fetches === fetches);
         if (same) {
             same.systems.push(...systems.filter((system) => !same.systems.includes(system)));
         } else {
-            lines.push({ method, systems: [...systems], target });
+            lines.push({ fetches, method, systems });
         }
     }
     return lines;

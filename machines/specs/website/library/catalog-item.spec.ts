@@ -79,9 +79,23 @@ describe('catalog item', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test.todo(
-        'D14 waits for the system each install runs on (macOS, Ubuntu, Debian) and what it fetches, worded, on CatalogLivesOn',
-    );
+    test('D14 an app page says, per system, the manager and what it fetches', async () => {
+        // Given - the window on gh's page over stories, installed by brew on macOS and by apt on Ubuntu
+        const result = await website.visit(
+            '/?world=stories&page=catalog-apps&item=gh',
+            async (visitor) => {
+                // When - the page is read
+                const installed = region('How it is installed');
+
+                // Then - each system, with its manager
+                await visitor.see(within(installed, content('macOS')));
+                await visitor.see(within(installed, content('brew')));
+                await visitor.see(within(installed, content('Ubuntu')));
+                await visitor.see(within(installed, content('apt')));
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
 
     test('D15 a setting page reads each file it writes, and that it can be undone', async () => {
         // Given - the window on autologin's page over stories, a setting that writes two files

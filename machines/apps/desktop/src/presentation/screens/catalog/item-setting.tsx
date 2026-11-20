@@ -10,6 +10,7 @@ import {
     ItemChips,
     ItemHead,
     MachineChips,
+    originFact,
     Rail,
     systemsWord,
     Two,
@@ -143,7 +144,7 @@ export function SettingItem({
                                     <MachineChips go={props.go} macs={props.macs} names={on} />
                                 ),
                             ),
-                            factOf('Comes from', null),
+                            originFact(row.Origin),
                         ]}
                         name={row.Name}
                     />

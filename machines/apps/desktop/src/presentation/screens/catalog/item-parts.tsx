@@ -1,4 +1,4 @@
-import type { MachinesMacView } from '@jterrazz/station-api';
+import type { MachinefileOrigin, MachinesMacView } from '@jterrazz/station-api';
 import type { ReactNode } from 'react';
 
 import { findMachine, machineNamesOf } from '../../../domain/machines/machines';
@@ -73,10 +73,10 @@ export function Installs({ lines }: { lines: readonly InstallLine[] }) {
     return (
         <div className={styles.installs}>
             {lines.map((line) => (
-                <div className={styles.install} key={`${line.method} ${line.target}`}>
-                    <span className={styles.systems}>{systemsWord(line.systems)}</span>
+                <div className={styles.install} key={`${line.method} ${line.fetches}`}>
+                    <span className={styles.systems}>{line.systems.join(', ')}</span>
                     {line.method === '' ? <span /> : <Value look="raised">{line.method}</Value>}
-                    <span className={styles.target}>{line.target}</span>
+                    <span className={styles.target}>{line.fetches}</span>
                 </div>
             ))}
         </div>
@@ -159,6 +159,16 @@ export function FileLinks({ names, go }: Pick<ItemProps, 'go'> & { names: readon
 
 export function factOf(label: string, value: ReactNode): Fact {
     return { label, value: value ?? <MissingMark /> };
+}
+
+export function originFact(origin: MachinefileOrigin): Fact {
+    return factOf(
+        'Comes from',
+        <span className={styles.chips}>
+            {wordOf('MachinefileOriginKind', origin.Kind).Word}
+            {origin.File === '' ? null : <Value>{origin.File}</Value>}
+        </span>,
+    );
 }
 
 export function Rail({ name, facts }: { name: string; facts: readonly Fact[] }) {

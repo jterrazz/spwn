@@ -1,37 +1,29 @@
-import type { CatalogLivesOn } from '@jterrazz/station-api';
 import { describe, expect, test } from 'vitest';
 
-import { installLinesOf, targetOf } from '../item-model';
-
-const mise: CatalogLivesOn['Install'] = { App: 'node', Version: 'lts' };
+import { installLinesOf } from '../item-model';
 
 describe('item model', () => {
-    test("an install's target is its text values, as sent, in the order sent", () => {
-        // Given - the shapes three methods send
-        const script = targetOf({ Args: null, Check: '', URL: 'https://claude.ai/install.sh' });
-        const brew = targetOf({ Formula: 'cocoapods', Trusted: false });
-        const apt = targetOf({ Packages: ['git', 'curl'] });
+    test('installs alike on several systems are one line naming each system as sent', () => {
+        // Given - node by mise on two systems, a line by another method, and a system sent twice
+        const lines = installLinesOf([
+            { Fetches: 'node lts', Kinds: ['mac'], Method: 'mise', System: 'macOS' },
+            { Fetches: 'node lts', Kinds: ['linux'], Method: 'mise', System: 'Ubuntu' },
+            { Fetches: 'node', Kinds: ['macos'], Method: 'brew', System: 'macOS' },
+            { Fetches: 'node lts', Kinds: ['macos'], Method: 'mise', System: 'macOS' },
+        ]);
 
-        // Then - each its text, the empty and the non-text values left out
-        expect(targetOf(mise)).toBe('node · lts');
-        expect(script).toBe('https://claude.ai/install.sh');
-        expect(brew).toBe('cocoapods');
-        expect(apt).toBe('git curl');
+        // Then - two lines, in the engine's order, each system once and what is fetched as sent
+        expect(lines).toStrictEqual([
+            { fetches: 'node lts', method: 'mise', systems: ['macOS', 'Ubuntu'] },
+            { fetches: 'node', method: 'brew', systems: ['macOS'] },
+        ]);
     });
 
-    test('installs alike on several systems are one line naming each system', () => {
-        // Given - node by mise on three systems, and a mac-only line by another method
-        const lines = installLinesOf([
-            { Install: mise, Kinds: ['mac'], Method: 'mise' },
-            { Install: mise, Kinds: ['linux'], Method: 'mise' },
-            { Install: { Formula: 'node' }, Kinds: ['macos'], Method: 'brew' },
-            { Install: mise, Kinds: ['macos', 'mac'], Method: 'mise' },
-        ]);
+    test('an install the engine gives no system, fetch or method is a line with those left empty', () => {
+        // Given - an install carrying its kinds alone
+        const lines = installLinesOf([{ Kinds: ['mac'] }]);
 
-        // Then - two lines, in the engine's order, each system once
-        expect(lines).toStrictEqual([
-            { method: 'mise', systems: ['mac', 'linux', 'macos'], target: 'node · lts' },
-            { method: 'brew', systems: ['macos'], target: 'node' },
-        ]);
+        // Then - nothing is guessed in their place
+        expect(lines).toStrictEqual([{ fetches: '', method: '', systems: [] }]);
     });
 });

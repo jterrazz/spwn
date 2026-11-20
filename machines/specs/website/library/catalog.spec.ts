@@ -49,7 +49,22 @@ describe('catalog', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test.todo("D5 waits for a package's source, which no call carries");
+    test('D5 an item says where its package comes from', async () => {
+        // Given - the window on gh's page over stories, a package built into station
+        const result = await website.visit(
+            '/?world=stories&page=catalog-apps&item=gh',
+            async (visitor) => {
+                const rail = region('gh in the catalog');
+
+                // When - its rail is read
+                // Then - where it comes from, and the file that holds it
+                await visitor.see(within(rail, content('Comes from')));
+                await visitor.see(within(rail, content('built into station')));
+                await visitor.see(within(rail, content('built-in/catalog/git/gh.yaml')));
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
 
     test('D13 the search narrows the list as I type, and says when nothing matches', async () => {
         // Given - the window on Apps over two-macs
