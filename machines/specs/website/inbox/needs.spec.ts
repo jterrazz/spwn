@@ -55,7 +55,7 @@ describe('needs', () => {
 
     test("N3 a port reached outside Tailscale opens its Mac's Ports, where declaring it public settles its line", async () => {
         // Given - the Inbox over stories, where ControlCenter listens on macbook-pro's port 5000, reached outside Tailscale and declared by no one
-        const line = button('broken port 5000 is reachable outside Tailscale macbook-pro · Ports');
+        const line = button('Exposed port 5000 is reachable outside Tailscale macbook-pro · Ports');
         const result = await website.visit('/?world=stories&page=inbox', async (visitor) => {
             await visitor.see(within(needs, line));
             await visitor.see(within(needs, content('Review')));

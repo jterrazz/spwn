@@ -165,10 +165,7 @@ describe('mac', () => {
             // Then - the sidebar's foot says so, and the line of Needs you offers to start it
             await visitor.see(within(sidebar, content('Engine stopped')));
             await visitor.see(
-                within(
-                    region('Needs you'),
-                    button('needs a look Engine stopped', { exact: false }),
-                ),
+                within(region('Needs you'), button('Needs you Engine stopped', { exact: false })),
             );
             await visitor.see(within(region('Needs you'), button('Start the engine engine')));
         });
