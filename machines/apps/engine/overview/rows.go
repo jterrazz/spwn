@@ -18,10 +18,11 @@ func FactRow(name string, f settings.Fact) Check {
 func GitValue(name string, f settings.Fact, expected string) Check {
 	// invariant: a global git value that is set but is not the one the owner's
 	// preferences expect is degraded, not ok: commits would carry the wrong author.
+	// An expectation the preferences leave empty accepts any set value.
 	switch {
 	case f.State != catalog.StateOK || f.Value == "":
 		return Check{Name: name, State: catalog.StateAbsent}
-	case f.Value != expected:
+	case expected != "" && f.Value != expected:
 		return Check{Name: name, State: catalog.StateDegraded, Value: f.Value, Detail: "expected " + expected}
 	}
 	return Check{Name: name, State: catalog.StateOK, Value: f.Value}

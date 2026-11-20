@@ -57,6 +57,9 @@ func (s *Signing) Apply(ctx context.Context, _ catalog.Setting, _ map[string]str
 		return settings.Change{}, err
 	}
 	email := person.Email()
+	if email == "" {
+		return settings.Change{}, errors.New("user_email is not set in the preferences")
+	}
 	if _, ok := s.run.LookPath("gpg"); !ok {
 		return settings.Change{}, errors.New("gpg is not installed: station apps install gpg")
 	}

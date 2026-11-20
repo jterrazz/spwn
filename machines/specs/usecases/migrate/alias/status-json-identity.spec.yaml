@@ -6,4 +6,4 @@ runs:
     - command: 'status --json | /usr/bin/jq -c ''.identity | map([.name, .state, .value, .detail])'''
       exit: 0
       stdout: |
-          [["git-email","degraded","you@example.com","expected admin@jterrazz.com"],["git-name","degraded","Someone Else","expected Jean-Baptiste Terrazzoni"],["git-signing","ok","on",""],["gpg-key","ok","present","~/.gnupg"],["github","ok","octo",""],["ssh-key","ok","present","~/.ssh/id_ed25519"]]
+          [["git-email","ok","you@example.com",""],["git-name","degraded","Someone Else","expected Jean-Baptiste Terrazzoni"],["git-signing","ok","on",""],["gpg-key","ok","present","~/.gnupg"],["github","ok","octo",""],["ssh-key","ok","present","~/.ssh/id_ed25519"]]

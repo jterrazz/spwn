@@ -11,6 +11,7 @@ runs:
       files:
           .calls:
               contains:
+                  - 'gpg --list-secret-keys --keyid-format long you@example.com'
                   - 'git config --global user.signingkey 3AA5C34371567BD2'
                   - 'git config --global commit.gpgsign true'
                   - 'git config --global gpg.program gpg'

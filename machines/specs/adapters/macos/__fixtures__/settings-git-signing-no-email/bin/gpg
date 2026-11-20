@@ -1,0 +1,13 @@
+#!/bin/sh
+# gpg holding one ed25519 key for any address, with an armored public key to export.
+printf 'gpg %s\n' "$*" >> "$HOME/.calls"
+case "$*" in
+    "--list-secret-keys --keyid-format long "*)
+        printf 'sec   ed25519/3AA5C34371567BD2 2026-10-31 [SC]\n      FINGERPRINT\nuid           [ultimate] Someone <%s>\n' "$4"
+        ;;
+    "--armor --export "*) echo "-----BEGIN PGP PUBLIC KEY BLOCK-----" ;;
+    *)
+        echo "stub gpg: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac
