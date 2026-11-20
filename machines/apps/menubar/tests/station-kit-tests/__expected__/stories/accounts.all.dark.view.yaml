@@ -1,0 +1,97 @@
+canvas: { scheme: dark, scale: 2, unit: pt, still: true, ground: FlatDesk }
+tokens:
+  color.plate: rgba(32 32 34 / 0.6)
+  Glass.window: 18
+  Pane.shades: [rgba(0 0 0 / 0.45) 30 24, rgba(0 0 0 / 0.3) 9 6]
+  Pane.ring: rgba(0 0 0 / 0.7)
+  Pane.outline: 0.5
+  Pane.rim: rgba(255 255 255 / 0.09)
+  Pane.rimWidth: 1
+  Metric.Panel.header: [10, 14, 8, 14]
+  Role.back: system 13 regular t2
+  Role.facts: system 12 regular t2
+  Metric.Panel.body: [2, 12, 12, 12]
+  Role.sectionLabel: system 12 semibold section
+  Role.rowSub: system 11 regular t2
+  Metric.Panel.footer: [6, 12, 12, 12]
+  Role.button: system 12 semibold t1
+tree:
+- group [kit=AccountsPage] [at=24,24] [size=322x801]:
+  - group [kit=Panel] [at=0,0] [size=322x801] [fill=color.plate] [corner=Glass.window] [shadow=Pane.shades] [ring=Pane.ring] [rim=Pane.rim]:
+    - group [kit=Panel.header] [at=0,0] [size=322x89]:
+      - group [kit=MachineHeader] [at=14,10] [size=294x71]:
+        - text "Back" [at=11.5,0] [size=30x16] [font=Role.back]
+        - text [kit=FactsLine] [at=0,56] [size=195.5x15] [font=Role.facts]
+    - group [kit=Panel.content] [at=0,89] [size=322x666]:
+      - region "Needs you" [kit=AccountsSection] [at=12,2] [size=298x60]:
+        - heading "Needs you" [kit=CardLabel] [at=0,0] [size=298x16]:
+          - text "Needs you" [at=4,0.5] [size=62.5x15] [font=Role.sectionLabel]
+        - group [kit=Card] [at=0,20] [size=298x40]:
+          - listitem "This Mac" [kit=NeedRow] [at=4,4] [size=290x32]:
+            - img "symbol:key" [kit=GlyphView] [at=6,4] [size=24x24]
+            - button "Sign in" [kit=VerbButton] [at=220,5] [size=64x22]
+      - region "On This Mac" [kit=AccountsSection] [at=12,70] [size=298x142]:
+        - heading "On This Mac" [kit=CardLabel] [at=0,0] [size=298x16]:
+          - text "On This Mac" [at=4,0.5] [size=73x15] [font=Role.sectionLabel]
+        - group [kit=Card] [at=0,20] [size=298x122]:
+          - listitem "GitHub" [kit=AccountRow] [at=4,4] [size=290x38]:
+            - img "account:github" [kit=GlyphView] [at=9,8] [size=22x22]:
+              - img "github" [kit=LogoChip] [at=0,0] [size=22x22]
+            - text [kit=FactsLine] [at=40,20.5] [size=106x14] [font=Role.rowSub]
+          - listitem "Claude" [kit=AccountRow] [at=4,42] [size=290x38]:
+            - img "account:claude" [kit=GlyphView] [at=9,8] [size=22x22]:
+              - img "claude" [kit=LogoChip] [at=0,0] [size=22x22]
+            - text [kit=FactsLine] [at=40,20.5] [size=130x14] [font=Role.rowSub]
+          - listitem "Cloudflare" [kit=AccountRow] [at=4,80] [size=290x38]:
+            - img "account:cloudflare" [kit=GlyphView] [at=9,8] [size=22x22]:
+              - img "cloudflare" [kit=LogoChip] [at=0,0] [size=22x22]
+            - text [kit=FactsLine] [at=40,20.5] [size=69.5x14] [font=Role.rowSub]
+      - region "On linux-1" [kit=AccountsSection] [at=12,220] [size=298x104]:
+        - heading "On linux-1" [kit=CardLabel] [at=0,0] [size=298x16]:
+          - text "On linux-1" [at=4,0.5] [size=61.5x15] [font=Role.sectionLabel]
+        - group [kit=Card] [at=0,20] [size=298x84]:
+          - listitem "Claude" [kit=AccountRow] [at=4,4] [size=290x38]:
+            - img "account:claude" [kit=GlyphView] [at=9,8] [size=22x22]:
+              - img "claude" [kit=LogoChip] [at=0,0] [size=22x22]
+            - text [kit=FactsLine] [at=40,20.5] [size=170x14] [font=Role.rowSub]
+          - listitem "GitHub" [kit=AccountRow] [at=4,42] [size=290x38]:
+            - img "account:github" [kit=GlyphView] [at=9,8] [size=22x22]:
+              - img "github" [kit=LogoChip] [at=0,0] [size=22x22]
+            - text [kit=FactsLine] [at=40,20.5] [size=170x14] [font=Role.rowSub]
+      - region "On mac-mini" [kit=AccountsSection] [at=12,332] [size=298x104]:
+        - heading "On mac-mini" [kit=CardLabel] [at=0,0] [size=298x16]:
+          - text "On mac-mini" [at=4,0.5] [size=75.5x15] [font=Role.sectionLabel]
+        - group [kit=Card] [at=0,20] [size=298x84]:
+          - listitem "GitHub" [kit=AccountRow] [at=4,4] [size=290x38]:
+            - img "account:github" [kit=GlyphView] [at=9,8] [size=22x22]:
+              - img "github" [kit=LogoChip] [at=0,0] [size=22x22]
+            - text [kit=FactsLine] [at=40,20.5] [size=65.5x14] [font=Role.rowSub]
+          - listitem "Claude" [kit=AccountRow] [at=4,42] [size=290x38]:
+            - img "account:claude" [kit=GlyphView] [at=9,8] [size=22x22]:
+              - img "claude" [kit=LogoChip] [at=0,0] [size=22x22]
+            - text [kit=FactsLine] [at=40,20.5] [size=130x14] [font=Role.rowSub]
+      - region "On linux-3" [kit=AccountsSection] [at=12,444] [size=298x66]:
+        - heading "On linux-3" [kit=CardLabel] [at=0,0] [size=298x16]:
+          - text "On linux-3" [at=4,0.5] [size=61.5x15] [font=Role.sectionLabel]
+        - group [kit=Card] [at=0,20] [size=298x46]:
+          - listitem "GitHub" [kit=AccountRow] [at=4,4] [size=290x38]:
+            - img "account:github" [kit=GlyphView] [at=9,8] [size=22x22]:
+              - img "github" [kit=LogoChip] [at=0,0] [size=22x22]
+            - text [kit=FactsLine] [at=40,20.5] [size=170x14] [font=Role.rowSub]
+      - region "On review-bot" [kit=AccountsSection] [at=12,518] [size=298x66]:
+        - heading "On review-bot" [kit=CardLabel] [at=0,0] [size=298x16]:
+          - text "On review-bot" [at=4,0.5] [size=84x15] [font=Role.sectionLabel]
+        - group [kit=Card] [at=0,20] [size=298x46]:
+          - listitem "Claude" [kit=AccountRow] [at=4,4] [size=290x38]:
+            - img "account:claude" [kit=GlyphView] [at=9,8] [size=22x22]:
+              - img "claude" [kit=LogoChip] [at=0,0] [size=22x22]
+            - text [kit=FactsLine] [at=40,20.5] [size=170x14] [font=Role.rowSub]
+      - region "Not read" [kit=AccountsSection] [at=12,592] [size=298x62]:
+        - heading "Not read" [kit=CardLabel] [at=0,0] [size=298x16]:
+          - text "Not read" [at=4,0.5] [size=51x15] [font=Role.sectionLabel]
+        - group [kit=Card] [at=0,20] [size=298x42]:
+          - listitem "macbook-air" [kit=AccountRow] [at=4,4] [size=290x34]
+    - group [kit=Panel.footer] [at=0,755] [size=322x46]:
+      - group [kit=ListFooter] [at=12,6] [size=298x28]:
+        - button "Grant a password…" [kit=PanelButton] [at=137,0] [size=161x28]:
+          - text "Grant a password…" [at=33,6.5] [size=114x15] [font=Role.button]

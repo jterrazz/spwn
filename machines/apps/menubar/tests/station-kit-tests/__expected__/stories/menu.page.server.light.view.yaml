@@ -1,0 +1,11 @@
+canvas: { scheme: light, scale: 2, unit: pt, still: true, ground: FlatDesk }
+base: ./server.healthy.light.view.yaml
+added:
+- in root:
+  - menu [kit=MenuStage] [at=24,24] [size=322x674.5]:
+    - menu [kit=MenuPreview] [at=108,64] [size=200x113]:
+      - text "infra on mac-mini" [kit=MenuPreview.header] [at=5,5] [size=112x20]
+      - menuitem "Restart…" [kit=MenuPreview.item] [at=5,25] [size=190x24] [icon=arrow.clockwise] [state=danger]
+      - menuitem "Stop…" [kit=MenuPreview.item] [at=5,49] [size=190x24] [icon=stop] [state=danger]
+      - separator [kit=MenuPreview.line] [at=5,73] [size=190x11]
+      - menuitem "Delete…" [kit=MenuPreview.item] [at=5,84] [size=190x24] [icon=trash] [state=danger]

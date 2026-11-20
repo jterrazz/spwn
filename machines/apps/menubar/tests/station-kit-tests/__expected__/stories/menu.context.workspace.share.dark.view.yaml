@@ -1,0 +1,21 @@
+canvas: { scheme: dark, scale: 2, unit: pt, still: true, ground: FlatDesk }
+base: ./mac.this.upkeep.dark.view.yaml
+added:
+- in root:
+  - menu [kit=MenuStage] [at=24,24] [size=322x628]:
+    - menu [kit=MenuPreview] [at=20,231] [size=205.5x255]:
+      - text "linux-1 on This Mac" [kit=MenuPreview.header] [at=5,5] [size=123x20]
+      - menuitem "Open" [kit=MenuPreview.item] [at=5,25] [size=195.5x24] [icon=arrow.up.forward.square] [key=↩]
+      - menuitem "Open in Terminal" [kit=MenuPreview.item] [at=5,49] [size=195.5x24] [icon=terminal] [key=⌘↩]
+      - menuitem "Open Vite" [kit=MenuPreview.item] [at=5,73] [size=195.5x24] [icon=safari]
+      - separator [kit=MenuPreview.line] [at=5,97] [size=195.5x11]
+      - menuitem "Copy" [kit=MenuPreview.item] [at=5,108] [size=195.5x24] [icon=doc.on.doc] [submenu]
+      - menuitem "Share" [kit=MenuPreview.item] [at=5,132] [size=195.5x24] [icon=square.and.arrow.up] [submenu] [state=lit]
+      - menuitem "Grant a password…" [kit=MenuPreview.item] [at=5,156] [size=195.5x24] [icon=key]
+      - separator [kit=MenuPreview.line] [at=5,180] [size=195.5x11]
+      - menuitem "Stop…" [kit=MenuPreview.item] [at=5,191] [size=195.5x24] [icon=stop]
+      - separator [kit=MenuPreview.line] [at=5,215] [size=195.5x11]
+      - menuitem "Delete…" [kit=MenuPreview.item] [at=5,226] [size=195.5x24] [icon=trash] [state=danger]
+    - menu [kit=MenuPreview] [at=118,358] [size=200x58]:
+      - menuitem "Show QR…" [kit=MenuPreview.item] [at=5,5] [size=190x24] [icon=qrcode]
+      - menuitem "A port…" [kit=MenuPreview.item] [at=5,29] [size=190x24] [icon=point.3.connected.trianglepath.dotted]

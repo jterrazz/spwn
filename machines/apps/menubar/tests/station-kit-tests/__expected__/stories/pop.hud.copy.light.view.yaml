@@ -1,0 +1,64 @@
+canvas: { scheme: light, scale: 2, unit: pt, still: true, ground: FlatDesk }
+tokens:
+  Role.hud: system 12 medium hud
+  color.plate: rgba(244 244 244 / 0.64)
+  Glass.window: 18
+  Pane.shades: [rgba(20 20 30 / 0.2) 30 24, rgba(20 20 30 / 0.1) 9 6]
+  Pane.ring: rgba(0 0 0 / 0.18)
+  Pane.outline: 0.5
+  Pane.rim: rgba(255 255 255 / 0.55)
+  Pane.rimWidth: 1
+  Metric.Panel.header: [10, 14, 8, 14]
+  Role.back: system 13 regular t2
+  Role.facts: system 12 regular t2
+  Metric.Panel.body: [2, 12, 12, 12]
+  Role.sectionLabel: system 12 semibold section
+  Role.footnote: system 12 regular t3
+  Metric.Panel.footer: [6, 12, 12, 12]
+  Role.button: system 12 semibold t1
+tree:
+- status "Copied ssh linux-1" [kit=HUDCapsule] [at=101.5,24] [size=167x34]:
+  - text "Copied ssh linux-1" [at=42.5,9.5] [size=108.5x15] [font=Role.hud]
+- group [kit=Popover] [at=24,66] [size=322x437]:
+  - group [kit=WorkspacePage] [at=0,0] [size=322x437]:
+    - group [kit=Panel] [at=0,0] [size=322x437] [fill=color.plate] [corner=Glass.window] [shadow=Pane.shades] [ring=Pane.ring] [rim=Pane.rim]:
+      - group [kit=Panel.header] [at=0,0] [size=322x123]:
+        - group [kit=MachineHeader] [at=14,10] [size=294x105]:
+          - text "Back" [at=11.5,0] [size=30x16] [font=Role.back]
+          - button "ellipsis" [kit=IconButton] [at=270,26] [size=24x24]
+          - text [kit=FactsLine] [at=0,56] [size=251x15] [font=Role.facts]
+          - tablist [kit=Segmented] [at=0,81] [size=294x24]
+      - group [kit=Panel.content] [at=0,123] [size=322x268]:
+        - region "Gauges" [kit=MacOverview] [at=12,2] [size=298x62]:
+          - region "Gauges" [kit=GaugeStrip] [at=0,0] [size=298x62]:
+            - group "CPU" [kit=GaugeTile] [at=0,0] [size=95.5x62]:
+              - img [kit=Spark] [at=9,41] [size=77.5x14]
+            - group "Memory" [kit=GaugeTile] [at=101.5,0] [size=95x62]
+            - group "Network" [kit=GaugeTile] [at=202.5,0] [size=95.5x62]:
+              - img [kit=Spark] [at=9,41] [size=77.5x14]
+        - region "Ports" [kit=MacPorts] [at=12,72] [size=298x142]:
+          - region "Ports" [kit=PortsSection] [at=0,0] [size=298x142]:
+            - heading "Ports" [kit=CardLabel] [at=0,0] [size=298x16]:
+              - text "Ports" [at=4,0.5] [size=31.5x15] [font=Role.sectionLabel]
+            - group [kit=Card] [at=0,20] [size=298x122]:
+              - listitem "Vite" [kit=PortRow] [at=4,4] [size=290x38]:
+                - img "port:vite" [kit=GlyphView] [at=9,8] [size=22x22]:
+                  - img "vite" [kit=LogoChip] [at=0,0] [size=22x22]
+                - button "Show QR for Vite" [kit=QuickSlot] [at=234,9] [size=20x20]:
+                  - button "qrcode" [kit=RoundButton] [at=4,0] [size=20x20]
+              - listitem "Port 3000" [kit=PortRow] [at=4,42] [size=290x38]:
+                - img "port:web" [kit=GlyphView] [at=9,8] [size=22x22]:
+                  - img "web" [kit=LogoChip] [at=0,0] [size=22x22]
+                - button "Show QR for Port 3000" [kit=QuickSlot] [at=234,9] [size=20x20]:
+                  - button "qrcode" [kit=RoundButton] [at=4,0] [size=20x20]
+              - listitem "Astro" [kit=PortRow] [at=4,80] [size=290x38]:
+                - img "port:astro" [kit=GlyphView] [at=9,8] [size=22x22]:
+                  - img "astro" [kit=LogoChip] [at=0,0] [size=22x22]
+                - button "Share" [kit=VerbButton] [at=222,7] [size=60x24]
+        - region "Life" [kit=MacOverview] [at=12,222] [size=298x34]:
+          - text "Ephemeral: deleted when it powers off from inside; pauses when This Mac sleeps." [at=4,2] [size=290x32] [font=Role.footnote] [lines=2]
+      - group [kit=Panel.footer] [at=0,391] [size=322x46]:
+        - group [kit=PageFooter] [at=12,6] [size=298x28]:
+          - group [kit=CopyFooter] [at=0,0] [size=298x28]:
+            - button "Open in Terminal" [kit=PanelButton] [at=147.5,0] [size=150.5x28]:
+              - text "Open in Terminal" [at=37.5,6.5] [size=99x15] [font=Role.button]

@@ -1,0 +1,12 @@
+canvas: { scheme: light, scale: 2, unit: pt, still: true, ground: FlatDesk }
+base: ./ports.all.light.view.yaml
+changes:
+- in group [kit=PortsPage] › group [kit=AllPorts] › group [kit=Panel] › group [kit=Panel.content]:
+  - region "On your tailnet" [kit=PortsSection] [at=12,76] [size=298x180] [state=expanded]
+- in group [kit=PortsPage] › group [kit=AllPorts] › group [kit=Panel] › group [kit=Panel.content] › region "On your tailnet" [kit=PortsSection]:
+  - heading "On your tailnet" [kit=CardLabel] [at=0,0] [size=298x16] [state=expanded]
+added:
+- in group [kit=PortsPage] › group [kit=AllPorts] › group [kit=Panel]:
+  - group [kit=PopoverLayer] [at=0,0] [size=322x553]:
+    - dialog [kit=PopoverCard] [at=8,186.5] [size=236x90]:
+      - dialog "Private links open only on devices signed in to your tailnet; Public routes are a Cloudflare Tunnel or a Funnel you declared." [kit=InfoPopover] [at=0,0] [size=236x90]

@@ -1,0 +1,12 @@
+canvas: { scheme: dark, scale: 2, unit: pt, still: true, ground: FlatDesk }
+base: ./mac.this.overview.dark.view.yaml
+added:
+- in root:
+  - menu [kit=MenuStage] [at=24,24] [size=322x437.5]:
+    - menu [kit=MenuPreview] [at=20,307] [size=200x124]:
+      - text "api on This Mac" [kit=MenuPreview.header] [at=5,5] [size=101x20]
+      - menuitem "Open" [kit=MenuPreview.item] [at=5,25] [size=190x24] [icon=arrow.up.forward.square] [key=↩]
+      - separator [kit=MenuPreview.line] [at=5,49] [size=190x11]
+      - menuitem "Start" [kit=MenuPreview.item] [at=5,60] [size=190x24] [icon=play]
+      - separator [kit=MenuPreview.line] [at=5,84] [size=190x11]
+      - menuitem "Delete…" [kit=MenuPreview.item] [at=5,95] [size=190x24] [icon=trash] [state=danger]

@@ -1,0 +1,87 @@
+canvas: { scheme: dark, scale: 2, unit: pt, still: true, ground: FlatDesk }
+tokens:
+  color.plate: rgba(32 32 34 / 0.6)
+  Glass.window: 18
+  Pane.shades: [rgba(0 0 0 / 0.45) 30 24, rgba(0 0 0 / 0.3) 9 6]
+  Pane.ring: rgba(0 0 0 / 0.7)
+  Pane.outline: 0.5
+  Pane.rim: rgba(255 255 255 / 0.09)
+  Pane.rimWidth: 1
+  Metric.Panel.header: [10, 14, 8, 14]
+  Metric.Panel.body: [2, 12, 12, 12]
+  Role.emptyGrey: system 12 regular t2
+  Role.button: system 12 semibold t1
+  Role.rowSub: system 11 regular t2
+  Role.homeValue: system 13 regular t2
+  Metric.Panel.footer: [6, 12, 12, 12]
+  Role.sheetTitle: system 15 semibold t1
+  Role.sheetBody: system 12 regular t2
+  Role.formLabel: system 12 regular t2
+  Role.formValue: system 13 regular t1
+  Role.formNote: system 13 regular t3
+  Role.formCaption: system 11 regular t3
+tree:
+- group [kit=Popover] [at=24,24] [size=322x602]:
+  - group [kit=Panel] [at=0,0] [size=322x602] [fill=color.plate] [corner=Glass.window] [shadow=Pane.shades] [ring=Pane.ring] [rim=Pane.rim]:
+    - group [kit=Panel.header] [at=0,0] [size=322x76]:
+      - group [kit=HomeHeaderBar] [at=14,10] [size=294x58]:
+        - button "ellipsis" [kit=RoundButton] [at=262,-4] [size=28x28]
+        - textbox "Find a machine, a port, an action" [kit=FindField] [at=-2,30] [size=298x28]
+    - group [kit=Panel.content] [at=0,76] [size=322x526]:
+      - group [kit=HomePage] [at=12,2] [size=298x512]:
+        - heading "This Mac" [kit=HomeHead] [at=0,2] [size=298x28]
+        - group [kit=HomeStrip] [at=0,30] [size=298x70]:
+          - group "CPU" [kit=HomeMeasure] [at=16,8] [size=72x52]:
+            - img [kit=RowSpark] [at=0,36] [size=72x16]
+          - group "Memory" [kit=HomeMeasure] [at=115.5,8] [size=72x52]:
+            - img [kit=RowSpark] [at=0,36] [size=72x16]
+          - group "Network" [kit=HomeMeasure] [at=206.5,8] [size=72x52]:
+            - img [kit=RowSpark] [at=0,36] [size=72x16]
+        - heading "No VMs yet" [kit=HomeHead] [at=0,112] [size=298x28]
+        - group [kit=Card] [at=0,140] [size=298x152]:
+          - group [kit=EmptyState] [at=12,10] [size=274x132]:
+            - text "44 GB free on This Mac" [at=70.5,73] [size=133.5x15] [font=Role.emptyGrey]
+            - button "New VM" [kit=PanelButton] [at=103,98] [size=68.5x24]:
+              - text "New VM" [at=10,4.5] [size=48.5x15] [font=Role.button]
+        - region "Macs" [kit=HomeSection] [at=0,304] [size=298x100]:
+          - heading "Macs" [kit=HomeHead] [at=0,0] [size=298x28]
+          - group [kit=Card] [at=0,28] [size=298x72]:
+            - list [kit=RowStack] [at=4,0] [size=290x40]:
+              - listitem "This Mac" [kit=RowView] [at=0,0] [size=290x40]:
+                - img "laptop" [kit=HomeLead] [at=8,6] [size=28x28]
+                - text [kit=FactsLine] [at=44,21.5] [size=94.5x14] [font=Role.rowSub]
+                - button "plus" [kit=RoundButton] [at=159.5,8] [size=24x24]
+                - img [kit=RowSpark] [at=187.5,13] [size=40x14]
+                - text "34 %" [kit=LiveText] [at=233.5,12] [size=32x16] [font=Role.homeValue]
+        - region "Shortcuts" [kit=HomeSection] [at=0,416] [size=298x96]:
+          - group [kit=Card] [at=0,0] [size=298x96]:
+            - list [kit=RowStack] [at=4,0] [size=290x96]:
+              - listitem "Keep awake" [kit=RowView] [at=0,0] [size=290x32]:
+                - img "symbol:sun.max" [kit=HomeLead] [at=12,6.5] [size=20x19]
+                - text "until 18:00" [kit=LiveText] [at=176,8] [size=66x16] [font=Role.homeValue]
+                - switch [kit=StationSwitch] [at=250,7] [size=32x18] [state=on]
+              - listitem "Ports" [kit=RowView] [at=0,32] [size=290x32]:
+                - img "symbol:network" [kit=HomeLead] [at=12.5,7] [size=19x18]
+                - text "0 shared" [kit=LiveText] [at=183.5,8] [size=53.5x16] [font=Role.homeValue]
+              - listitem "Accounts" [kit=RowView] [at=0,64] [size=290x32]:
+                - img "symbol:key" [kit=HomeLead] [at=15,5] [size=14.5x22]
+                - text "0 granted" [kit=LiveText] [at=177,8] [size=59x16] [font=Role.homeValue]
+    - group [kit=Panel.footer] [at=0,602] [size=0x0]
+    - dialog "New VM" [kit=NewVMSheet] [at=0,0] [size=322x227.5]:
+      - group "New VM" [kit=SheetCard] [at=0,0] [size=322x227.5]:
+        - text "New VM" [at=24,20] [size=59.5x19] [font=Role.sheetTitle]
+        - text "On This Mac, the Mac with the most free memory. Ready in about a minute." [at=24,41] [size=233x30] [font=Role.sheetBody] [lines=2]
+        - group "On" [kit=FormRow] [at=24,83] [size=274x26]:
+          - text "On" [kit=RoleText] [at=41.5,5.5] [size=16.5x15] [font=Role.formLabel]
+          - button "On" [kit=PopupField] [at=68,0] [size=155x26]:
+            - text "This Mac" [kit=RoleText] [at=8,5] [size=55x16] [font=Role.formValue]
+            - text "44 GB free" [kit=RoleText] [at=68,5] [size=65.5x16] [font=Role.formNote]
+        - group "Options" [kit=FormRow] [at=24,119] [size=274x44]:
+          - text "Options" [kit=RoleText] [at=13.5,5.5] [size=44.5x15] [font=Role.formLabel]
+          - button "Ephemeral · Linux · 8 GB" [kit=DisclosureRow] [at=68,0] [size=206x26]:
+            - text "Ephemeral · Linux · 8 GB" [kit=RoleText] [at=8,5] [size=148.5x16] [font=Role.formValue]
+          - text "linux-1" [at=68,30] [size=36.5x14] [font=Role.formCaption]
+        - button "Cancel" [kit=PanelButton] [at=20,183.5] [size=60.5x24]:
+          - text "Cancel" [at=10,4.5] [size=40.5x15] [font=Role.button]
+        - button "Create" [kit=SplitButton] [at=215.5,183.5] [size=86.5x24]:
+          - text "Create" [at=10,4.5] [size=39.5x15] [font=Role.button]

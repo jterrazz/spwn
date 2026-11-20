@@ -8,7 +8,7 @@ enum Tree {
     static let pages = root.appendingPathComponent("apps/engine/ui/testdata/pages")
     static let stream = root.appendingPathComponent("apps/engine/ui/testdata/stream/menubar.jsonl")
     static let events = root.appendingPathComponent("apps/engine/ui/testdata/stream/events.jsonl")
-    static let goldens = URL(fileURLWithPath: #filePath).deletingLastPathComponent().appendingPathComponent("testdata")
+    static let goldens = URL(fileURLWithPath: #filePath).deletingLastPathComponent().appendingPathComponent("__expected__")
     static let sources = root.appendingPathComponent("apps/menubar/sources/station-kit")
     static let app = root.appendingPathComponent("apps/menubar/sources/station-menu-bar")
     static let calls = root.appendingPathComponent("apps/engine/remote/api/calls.json")

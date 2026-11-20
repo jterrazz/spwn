@@ -1,0 +1,9 @@
+canvas: { scheme: dark, scale: 2, unit: pt, still: true, ground: FlatDesk }
+base: ./mac.air.asleep.dark.view.yaml
+added:
+- in group [kit=Popover] › group [kit=MacPage] › group [kit=Panel]:
+  - dialog "Forget macbook-air?" [kit=AlertCard] [at=27,80.5] [size=268x166]:
+    - button "Cancel" [kit=PanelButton] [at=16,124] [size=83.5x28]:
+      - text "Cancel" [at=21.5,6.5] [size=40.5x15] [font=Role.button]
+    - button "Forget macbook-air" [kit=PanelButton] [at=107.5,124] [size=144.5x28]:
+      - text "Forget macbook-air" [at=14,6.5] [size=116.5x15] [font=Role.button]

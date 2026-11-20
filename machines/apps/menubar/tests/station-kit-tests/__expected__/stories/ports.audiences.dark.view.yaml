@@ -1,0 +1,94 @@
+canvas: { scheme: dark, scale: 2, unit: pt, still: true, ground: FlatDesk }
+tokens:
+  color.plate: rgba(32 32 34 / 0.6)
+  Glass.window: 18
+  Pane.shades: [rgba(0 0 0 / 0.45) 30 24, rgba(0 0 0 / 0.3) 9 6]
+  Pane.ring: rgba(0 0 0 / 0.7)
+  Pane.outline: 0.5
+  Pane.rim: rgba(255 255 255 / 0.09)
+  Pane.rimWidth: 1
+  Metric.Panel.header: [10, 14, 8, 14]
+  Role.back: system 13 regular t2
+  Role.facts: system 12 regular t2
+  Metric.Panel.body: [2, 12, 12, 12]
+  Role.sectionLabel: system 12 semibold section
+  Metric.Panel.footer: [6, 12, 12, 12]
+  Role.button: system 12 semibold t1
+tree:
+- group [kit=PortsPage] [at=24,24] [size=322x703]:
+  - group [kit=AllPorts] [at=0,0] [size=322x703]:
+    - group [kit=Panel] [at=0,0] [size=322x703] [fill=color.plate] [corner=Glass.window] [shadow=Pane.shades] [ring=Pane.ring] [rim=Pane.rim]:
+      - group [kit=Panel.header] [at=0,0] [size=322x89]:
+        - group [kit=MachineHeader] [at=14,10] [size=294x71]:
+          - text "Back" [at=11.5,0] [size=30x16] [font=Role.back]
+          - button "ellipsis" [kit=IconButton] [at=270,26] [size=24x24]
+          - text [kit=FactsLine] [at=0,56] [size=229.5x15] [font=Role.facts]
+      - group [kit=Panel.content] [at=0,89] [size=322x568]:
+        - region "Public" [kit=PortsSection] [at=12,2] [size=298x104]:
+          - heading "Public" [kit=CardLabel] [at=0,0] [size=298x16]:
+            - text "Public" [at=4,0.5] [size=36.5x15] [font=Role.sectionLabel]
+          - group [kit=Card] [at=0,20] [size=298x84]:
+            - listitem "Port 3001" [kit=PortRow] [at=4,4] [size=290x38]:
+              - img "port:web" [kit=GlyphView] [at=9,8] [size=22x22]:
+                - img "web" [kit=LogoChip] [at=0,0] [size=22x22]
+              - button "Show QR for Port 3001" [kit=QuickSlot] [at=234,9] [size=20x20]:
+                - button "qrcode" [kit=RoundButton] [at=4,0] [size=20x20]
+            - listitem "Traefik" [kit=PortRow] [at=4,42] [size=290x38]:
+              - img "port:traefik" [kit=GlyphView] [at=9,8] [size=22x22]:
+                - img "traefik" [kit=LogoChip] [at=0,0] [size=22x22]
+              - button "Show QR for Traefik" [kit=QuickSlot] [at=234,9] [size=20x20]:
+                - button "qrcode" [kit=RoundButton] [at=4,0] [size=20x20]
+        - region "On your tailnet" [kit=PortsSection] [at=12,114] [size=298x180]:
+          - heading "On your tailnet" [kit=CardLabel] [at=0,0] [size=298x16]:
+            - text "On your tailnet" [at=4,0.5] [size=87x15] [font=Role.sectionLabel]
+          - group [kit=Card] [at=0,20] [size=298x160]:
+            - listitem "Vite" [kit=PortRow] [at=4,4] [size=290x38]:
+              - img "port:vite" [kit=GlyphView] [at=9,8] [size=22x22]:
+                - img "vite" [kit=LogoChip] [at=0,0] [size=22x22]
+              - button "Show QR for Vite" [kit=QuickSlot] [at=234,9] [size=20x20]:
+                - button "qrcode" [kit=RoundButton] [at=4,0] [size=20x20]
+            - listitem "Port 3000" [kit=PortRow] [at=4,42] [size=290x38]:
+              - img "port:web" [kit=GlyphView] [at=9,8] [size=22x22]:
+                - img "web" [kit=LogoChip] [at=0,0] [size=22x22]
+              - button "Show QR for Port 3000" [kit=QuickSlot] [at=234,9] [size=20x20]:
+                - button "qrcode" [kit=RoundButton] [at=4,0] [size=20x20]
+            - listitem "Kubernetes API" [kit=PortRow] [at=4,80] [size=290x38]:
+              - img "port:kubernetes" [kit=GlyphView] [at=9,8] [size=22x22]:
+                - img "kubernetes" [kit=LogoChip] [at=0,0] [size=22x22]
+            - listitem "Port 8080" [kit=PortRow] [at=4,118] [size=290x38]:
+              - img "port:web" [kit=GlyphView] [at=9,8] [size=22x22]:
+                - img "web" [kit=LogoChip] [at=0,0] [size=22x22]
+              - button "Show QR for Port 8080" [kit=QuickSlot] [at=234,9] [size=20x20]:
+                - button "qrcode" [kit=RoundButton] [at=4,0] [size=20x20]
+        - region "This Mac only" [kit=PortsSection] [at=12,302] [size=298x66]:
+          - heading "This Mac only" [kit=CardLabel] [at=0,0] [size=298x16]:
+            - text "This Mac only" [at=4,0.5] [size=81x15] [font=Role.sectionLabel]
+          - group [kit=Card] [at=0,20] [size=298x46]:
+            - listitem "Port 4000" [kit=PortRow] [at=4,4] [size=290x38]:
+              - img "port:web" [kit=GlyphView] [at=9,8] [size=22x22]:
+                - img "web" [kit=LogoChip] [at=0,0] [size=22x22]
+              - button "Show QR for Port 4000" [kit=QuickSlot] [at=234,9] [size=20x20]:
+                - button "qrcode" [kit=RoundButton] [at=4,0] [size=20x20]
+        - region "Listening, not shared" [kit=PortsSection] [at=12,376] [size=298x180]:
+          - heading "Listening, not shared" [kit=CardLabel] [at=0,0] [size=298x16]:
+            - text "Listening, not shared" [at=4,0.5] [size=124.5x15] [font=Role.sectionLabel]
+          - group [kit=Card] [at=0,20] [size=298x160]:
+            - listitem "Port 8443" [kit=PortRow] [at=4,4] [size=290x38]:
+              - img "port:web" [kit=GlyphView] [at=9,8] [size=22x22]:
+                - img "web" [kit=LogoChip] [at=0,0] [size=22x22]
+              - button "Share" [kit=VerbButton] [at=222,7] [size=60x24]
+            - listitem "Astro" [kit=PortRow] [at=4,42] [size=290x38]:
+              - img "port:astro" [kit=GlyphView] [at=9,8] [size=22x22]:
+                - img "astro" [kit=LogoChip] [at=0,0] [size=22x22]
+              - button "Share" [kit=VerbButton] [at=222,7] [size=60x24]
+            - listitem "Node inspector" [kit=PortRow] [at=4,80] [size=290x38]:
+              - img "port:node" [kit=GlyphView] [at=9,8] [size=22x22]:
+                - img "node" [kit=LogoChip] [at=0,0] [size=22x22]
+              - button "Share" [kit=VerbButton] [at=222,7] [size=60x24]
+            - listitem "Postgres" [kit=PortRow] [at=4,118] [size=290x38]:
+              - img "port:postgres" [kit=GlyphView] [at=9,8] [size=22x22]:
+                - img "postgres" [kit=LogoChip] [at=0,0] [size=22x22]
+              - button "Share" [kit=VerbButton] [at=222,7] [size=60x24]
+      - group [kit=Panel.footer] [at=0,657] [size=322x46]:
+        - button "Share a port…" [kit=PanelButton] [at=180,6] [size=130x28]:
+          - text "Share a port…" [at=33,6.5] [size=83x15] [font=Role.button]

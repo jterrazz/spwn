@@ -1,0 +1,20 @@
+canvas: { scheme: dark, scale: 2, unit: pt, still: true, ground: FlatDesk }
+base: ./home.loaded.dark.view.yaml
+tokens:
+  Role.sheetTitle: system 15 semibold t1
+  Role.sheetBody: system 12 regular t2
+  Role.listLabel: system 12 regular t2
+  Role.button: system 12 semibold t1
+added:
+- in group [kit=Popover] › group [kit=Panel]:
+  - dialog [kit=HintSheet] [at=0,0] [size=322x310.5]:
+    - group "Add a Mac" [kit=SheetCard] [at=0,0] [size=322x310.5]:
+      - text "Add a Mac" [at=24,20] [size=75x19] [font=Role.sheetTitle]
+      - text "Install station on the new Mac, then add it from This Mac by its Tailscale name. It appears here once its ssh and its station answer." [at=24,41] [size=269x45] [font=Role.sheetBody] [lines=3]
+      - group [kit=CommandBox] [at=24,98] [size=274x71]:
+        - text "On the new Mac" [kit=RoleText] [at=0,0] [size=92x15] [font=Role.listLabel]
+      - group [kit=CommandBox] [at=24,179] [size=274x67]:
+        - text "Then on This Mac" [kit=RoleText] [at=0,0] [size=100.5x15] [font=Role.listLabel]
+      - button [kit=SheetPrimary] [at=251,266.5] [size=51x24]:
+        - button "Done" [kit=PanelButton] [at=0,0] [size=51x24]:
+          - text "Done" [at=10,4.5] [size=31x15] [font=Role.button]

@@ -3,7 +3,7 @@ import StationKit
 
 enum Paths {
     static let stories = Stories.root
-    static let goldens = stories.deletingLastPathComponent().appendingPathComponent("tests/station-kit-tests/testdata/stories")
+    static let goldens = stories.deletingLastPathComponent().appendingPathComponent("tests/station-kit-tests/__expected__/stories")
     static let schemes = ["dark", "light"]
 
     static var design: URL? {

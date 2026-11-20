@@ -1,0 +1,10 @@
+canvas: { scheme: dark, scale: 2, unit: pt, still: true, ground: FlatDesk }
+base: ./mac.air.asleep.dark.view.yaml
+added:
+- in root:
+  - menu [kit=MenuStage] [at=24,24] [size=322x326.5]:
+    - menu [kit=MenuPreview] [at=108,64] [size=200x89]:
+      - text "macbook-air" [kit=MenuPreview.header] [at=5,5] [size=85x20]
+      - menuitem "Wake macbook-air" [kit=MenuPreview.item] [at=5,25] [size=190x24] [icon=alarm]
+      - separator [kit=MenuPreview.line] [at=5,49] [size=190x11]
+      - menuitem "Forget…" [kit=MenuPreview.item] [at=5,60] [size=190x24] [icon=trash] [state=danger]

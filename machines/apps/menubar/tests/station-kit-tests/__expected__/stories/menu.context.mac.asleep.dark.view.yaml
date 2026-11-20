@@ -1,0 +1,9 @@
+canvas: { scheme: dark, scale: 2, unit: pt, still: true, ground: FlatDesk }
+base: ./home.loaded.dark.view.yaml
+added:
+- in root:
+  - menu [kit=MenuStage] [at=24,24] [size=322x778]:
+    - menu [kit=MenuPreview] [at=20,630] [size=200x78]:
+      - text "macbook-air" [kit=MenuPreview.header] [at=5,5] [size=85x20]
+      - menuitem "Open" [kit=MenuPreview.item] [at=5,25] [size=190x24] [icon=arrow.up.forward.square] [key=↩]
+      - menuitem "Wake macbook-air" [kit=MenuPreview.item] [at=5,49] [size=190x24] [icon=alarm]

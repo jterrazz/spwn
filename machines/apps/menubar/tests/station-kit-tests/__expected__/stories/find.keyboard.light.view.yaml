@@ -1,0 +1,32 @@
+canvas: { scheme: light, scale: 2, unit: pt, still: true, ground: FlatDesk }
+tokens:
+  color.plate: rgba(244 244 244 / 0.64)
+  Glass.window: 18
+  Pane.shades: [rgba(20 20 30 / 0.2) 30 24, rgba(20 20 30 / 0.1) 9 6]
+  Pane.ring: rgba(0 0 0 / 0.18)
+  Pane.outline: 0.5
+  Pane.rim: rgba(255 255 255 / 0.55)
+  Pane.rimWidth: 1
+tree:
+- group [kit=Popover] [at=24,24] [size=322x460]:
+  - group [kit=FindPanel] [at=0,0] [size=322x460]:
+    - group [kit=Panel] [at=0,0] [size=322x460] [fill=color.plate] [corner=Glass.window] [shadow=Pane.shades] [ring=Pane.ring] [rim=Pane.rim]:
+      - group [kit=Panel.header] [at=0,0] [size=322x46]:
+        - textbox "Find a machine, a port, an action…" [kit=FindField] [at=12,12] [size=298x30]
+      - group [kit=Panel.content] [at=0,46] [size=322x380]:
+        - listitem "linux-1" [kit=FindResult] [at=12,28] [size=298x30]
+        - listitem "linux-3" [kit=FindResult] [at=12,58] [size=298x30]
+        - listitem "Vite" [kit=FindResult] [at=12,112] [size=298x30] [state=lit]:
+          - img "vite" [kit=LogoChip] [at=9,4] [size=22x22]
+        - listitem "Port 3000" [kit=FindResult] [at=12,142] [size=298x30]
+        - listitem "Port 8080" [kit=FindResult] [at=12,172] [size=298x30]
+        - button [kit=FindMore] [at=12,202] [size=298x30]
+        - listitem "Open linux-1 in Terminal" [kit=FindResult] [at=12,256] [size=298x30]
+        - listitem "Share a port of linux-1" [kit=FindResult] [at=12,286] [size=298x30]
+        - listitem "Grant a password to linux-1" [kit=FindResult] [at=12,316] [size=298x30]
+        - button [kit=FindMore] [at=12,346] [size=298x30]
+      - group [kit=Panel.footer] [at=0,426] [size=322x34]:
+        - group [kit=FindFooter] [at=0,0] [size=322x34]:
+          - text "esc" [kit=KeyCap] [at=14,11] [size=29.5x16]
+          - text "enter" [kit=KeyCap] [at=179,11] [size=21.5x16]
+          - text "cmd+enter" [kit=KeyCap] [at=276,11] [size=32x16]

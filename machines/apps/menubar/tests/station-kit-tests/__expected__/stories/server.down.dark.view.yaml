@@ -1,0 +1,61 @@
+canvas: { scheme: dark, scale: 2, unit: pt, still: true, ground: FlatDesk }
+tokens:
+  color.plate: rgba(32 32 34 / 0.6)
+  Glass.window: 18
+  Pane.shades: [rgba(0 0 0 / 0.45) 30 24, rgba(0 0 0 / 0.3) 9 6]
+  Pane.ring: rgba(0 0 0 / 0.7)
+  Pane.outline: 0.5
+  Pane.rim: rgba(255 255 255 / 0.09)
+  Pane.rimWidth: 1
+  Metric.Panel.header: [10, 14, 8, 14]
+  Role.back: system 13 regular t2
+  Role.facts: system 12 regular t2
+  Metric.Panel.body: [2, 12, 12, 12]
+  Role.healthSub: system 11 regular t2
+  Role.button: system 12 semibold t1
+  Role.sectionLabel: system 12 semibold section
+  Role.toolingNote: system 11 regular t3
+  Metric.Panel.footer: [6, 12, 12, 12]
+  Role.footerNote: system 12 regular t3
+tree:
+- group [kit=Popover] [at=24,24] [size=322x681.5]:
+  - group [kit=ServerPage] [at=0,0] [size=322x681.5]:
+    - group [kit=Panel] [at=0,0] [size=322x681.5] [fill=color.plate] [corner=Glass.window] [shadow=Pane.shades] [ring=Pane.ring] [rim=Pane.rim]:
+      - group [kit=Panel.header] [at=0,0] [size=322x123]:
+        - group [kit=MachineHeader] [at=14,10] [size=294x105]:
+          - text "Back" [at=11.5,0] [size=30x16] [font=Role.back]
+          - button "ellipsis" [kit=IconButton] [at=270,26] [size=24x24]
+          - text [kit=FactsLine] [at=0,56] [size=243x15] [font=Role.facts]
+          - tablist [kit=Segmented] [at=0,81] [size=294x24]
+      - group [kit=Panel.content] [at=0,123] [size=322x512.5]:
+        - region "Health" [kit=HealthCard] [at=12,2] [size=298x72]:
+          - group [kit=Card] [at=0,0] [size=298x72]:
+            - text [kit=FactsLine] [at=44,39] [size=79x14] [font=Role.healthSub]
+            - button "Restart" [kit=PanelButton] [at=222.5,24] [size=63.5x24]:
+              - text "Restart" [at=10,4.5] [size=43.5x15] [font=Role.button]
+        - region "Last lines before it went down" [kit=LogCard] [at=12,82] [size=298x106]:
+          - group [kit=Card] [at=0,0] [size=298x106]:
+            - group [kit=LogLines] [at=12,32] [size=274x64]
+        - region "Last 30 days" [kit=UptimeCard] [at=12,196] [size=298x82]:
+          - group [kit=Card] [at=0,0] [size=298x82]:
+            - img [kit=UptimeCells] [at=12,36] [size=274x16]
+        - region "Gauges" [kit=GaugeStrip] [at=12,286] [size=298x62]:
+          - group "CPU" [kit=GaugeTile] [at=0,0] [size=95.5x62] [state=stale]
+          - group "Memory" [kit=GaugeTile] [at=101.5,0] [size=95x62] [state=stale]
+          - group "Last seen" [kit=GaugeTile] [at=202.5,0] [size=95.5x62] [state=stale]
+        - heading "Ports" [kit=CardLabel] [at=12,356] [size=298x16]:
+          - text "Ports" [at=4,0.5] [size=31.5x15] [font=Role.sectionLabel]
+        - group [kit=Card] [at=12,376] [size=298x84.5]:
+          - listitem "Traefik" [kit=PortRow] [at=4,4] [size=290x38] [state=dimmed]:
+            - img "port:traefik" [kit=GlyphView] [at=9,8] [size=22x22]:
+              - img "traefik" [kit=LogoChip] [at=0,0] [size=22x22]
+          - separator [kit=RowSeparator] [at=4,42] [size=290x0.5]
+          - listitem "Kubernetes API" [kit=PortRow] [at=4,42.5] [size=290x38] [state=dimmed]:
+            - img "port:kubernetes" [kit=GlyphView] [at=9,8] [size=22x22]:
+              - img "kubernetes" [kit=LogoChip] [at=0,0] [size=22x22]
+        - text "Apps, settings and accounts: your own tooling (Ansible)." [at=16,470.5] [size=246x30] [font=Role.toolingNote] [lines=2]
+      - group [kit=Panel.footer] [at=0,635.5] [size=322x46]:
+        - group [kit=SSHFooter] [at=12,6] [size=298x28]:
+          - text "Needs infra running" [at=0,6.5] [size=111.5x15] [font=Role.footerNote]
+          - button "Open in Terminal" [kit=PanelButton] [at=147.5,0] [size=150.5x28]:
+            - text "Open in Terminal" [at=37.5,6.5] [size=99x15] [font=Role.button]

@@ -1,0 +1,26 @@
+canvas: { scheme: light, scale: 2, unit: pt, still: true, ground: FlatDesk }
+base: ./workspace.waiting.ports.light.view.yaml
+tokens:
+  Role.sheetTitle: system 15 semibold t1
+  Role.sheetBody: system 12 regular t2
+  Role.formLabel: system 12 regular t2
+  Role.formValue: system 13 regular t1
+  Role.formNote: system 13 regular t3
+  Role.listLabel: system 12 regular t2
+added:
+- in group [kit=Popover] › group [kit=WorkspacePage] › group [kit=Panel]:
+  - dialog [kit=SharePortSheet] [at=0,0] [size=322x204.5]:
+    - group "Share a port" [kit=SheetCard] [at=0,0] [size=322x204.5]:
+      - text "Share a port" [at=24,20] [size=87.5x19] [font=Role.sheetTitle]
+      - text "Private on your tailnet. Pick a listener, no typing." [at=24,41] [size=272.5x15] [font=Role.sheetBody]
+      - group "Of" [kit=FormRow] [at=24,68] [size=274x26]:
+        - text "Of" [kit=RoleText] [at=44,5.5] [size=14x15] [font=Role.formLabel]
+        - text [kit=FixedValue] [at=68,0] [size=167x26]:
+          - img "workspace" [kit=OptionGlyph] [at=0,5] [size=16x16.5]
+          - text "review-bot" [kit=RoleText] [at=21,5] [size=65.5x16] [font=Role.formValue]
+          - text "on mac-mini" [kit=RoleText] [at=91.5,5] [size=75.5x16] [font=Role.formNote]
+      - list "Listening now in review-bot" [kit=ListenerRows] [at=24,104] [size=221.5x36]:
+        - text "Listening now in review-bot" [kit=RoleText] [at=0,0] [size=156x15] [font=Role.listLabel]
+        - text "Nothing listens in review-bot right now." [kit=SheetLine] [at=0,21] [size=221.5x15] [font=Role.listLabel]
+      - button "Cancel" [kit=PanelButton] [at=241.5,160.5] [size=60.5x24]:
+        - text "Cancel" [at=10,4.5] [size=40.5x15] [font=Role.button]

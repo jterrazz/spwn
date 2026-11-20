@@ -1,0 +1,15 @@
+canvas: { scheme: light, scale: 2, unit: pt, still: true, ground: FlatDesk }
+base: ./server.healthy.light.view.yaml
+tokens:
+  Role.alertLabel: system 12 medium t2
+  Role.alertName: system 12 bold monospaced t1
+added:
+- in group [kit=Popover] › group [kit=ServerPage] › group [kit=Panel]:
+  - dialog "Restart infra on mac-mini?" [kit=AlertCard] [at=27,219.5] [size=268x236]:
+    - text "Type" [at=16,136] [size=28.5x15] [font=Role.alertLabel]
+    - text "infra" [at=99.5,136] [size=37.5x15] [font=Role.alertName]
+    - text "to confirm" [at=192,136] [size=60x15] [font=Role.alertLabel]
+    - button "Cancel" [kit=PanelButton] [at=16,194] [size=114x28]:
+      - text "Cancel" [at=37,6.5] [size=40.5x15] [font=Role.button]
+    - button "Restart infra" [kit=PanelButton] [at=138,194] [size=114x28]:
+      - text "Restart infra" [at=20.5,6.5] [size=73.5x15] [font=Role.button]

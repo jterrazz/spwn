@@ -1,0 +1,10 @@
+canvas: { scheme: dark, scale: 2, unit: pt, still: true, ground: FlatDesk }
+base: ./home.loaded.dark.view.yaml
+added:
+- in root:
+  - menu [kit=MenuStage] [at=24,24] [size=322x778]:
+    - menu [kit=MenuPreview] [at=20,590] [size=241x102]:
+      - text "mac-mini" [kit=MenuPreview.header] [at=5,5] [size=67.5x20]
+      - menuitem "Open" [kit=MenuPreview.item] [at=5,25] [size=231x24] [icon=arrow.up.forward.square] [key=↩]
+      - menuitem "New VM on mac-mini…" [kit=MenuPreview.item] [at=5,49] [size=231x24] [icon=plus] [key=⌘N]
+      - menuitem "Open in Terminal" [kit=MenuPreview.item] [at=5,73] [size=231x24] [icon=terminal] [key=⌘T]

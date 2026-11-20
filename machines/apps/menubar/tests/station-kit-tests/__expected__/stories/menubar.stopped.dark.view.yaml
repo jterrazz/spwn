@@ -1,0 +1,3 @@
+canvas: { scheme: dark, scale: 2, unit: pt, still: true, ground: FlatDesk }
+tree:
+- img "Spwn Menu: engine stopped" [kit=StatusItem] [at=456,30] [size=17.5x16]

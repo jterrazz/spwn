@@ -1,0 +1,33 @@
+canvas: { scheme: light, scale: 2, unit: pt, still: true, ground: FlatDesk }
+tokens:
+  color.plate: rgba(244 244 244 / 0.64)
+  Glass.window: 18
+  Pane.shades: [rgba(20 20 30 / 0.2) 30 24, rgba(20 20 30 / 0.1) 9 6]
+  Pane.ring: rgba(0 0 0 / 0.18)
+  Pane.outline: 0.5
+  Pane.rim: rgba(255 255 255 / 0.55)
+  Pane.rimWidth: 1
+  Metric.Panel.header: [10, 14, 8, 14]
+  Role.back: system 13 regular t2
+  Role.facts: system 12 regular t2
+  Metric.Panel.body: [2, 12, 12, 12]
+  Role.emptyGrey: system 12 regular t2
+  Role.button: system 12 semibold t1
+  Metric.Panel.footer: [6, 12, 12, 12]
+tree:
+- group [kit=Popover] [at=24,24] [size=322x273]:
+  - group [kit=WorkspacePage] [at=0,0] [size=322x273]:
+    - group [kit=Panel] [at=0,0] [size=322x273] [fill=color.plate] [corner=Glass.window] [shadow=Pane.shades] [ring=Pane.ring] [rim=Pane.rim]:
+      - group [kit=Panel.header] [at=0,0] [size=322x89]:
+        - group [kit=MachineHeader] [at=14,10] [size=294x71]:
+          - text "Back" [at=11.5,0] [size=30x16] [font=Role.back]
+          - button "ellipsis" [kit=IconButton] [at=270,26] [size=24x24]
+          - text [kit=FactsLine] [at=0,56] [size=201x15] [font=Role.facts]
+      - group [kit=Panel.content] [at=0,89] [size=322x166]:
+        - group [kit=Card] [at=12,2] [size=298x152]:
+          - group [kit=EmptyState] [at=12,10] [size=274x132]:
+            - text "Disk kept, starts with 8 GB" [at=62,73] [size=150.5x15] [font=Role.emptyGrey]
+            - button "Start api" [kit=PanelButton] [at=102,98] [size=70.5x24]:
+              - text "Start api" [at=10,4.5] [size=50.5x15] [font=Role.button]
+      - group [kit=Panel.footer] [at=0,255] [size=322x18]:
+        - group [kit=PageFooter] [at=12,6] [size=0x0]

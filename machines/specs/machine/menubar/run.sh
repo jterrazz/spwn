@@ -165,7 +165,7 @@ if [ $capture -eq 1 ]; then
     "${STATION_CAPTURE_SET:-walls,behave,trial}" "${STATION_CAPTURE_ITEM:-}" 2>&1 | tee -a "$log"
   code=${PIPESTATUS[0]}
   in_vm 'cat ~/cap/replay.log' >> "$log" 2>&1
-  "$venv/bin/python" -I "$suite/menubar/capture/measure.py" "$shots" "$repo/apps/menubar/tests/station-kit-tests/testdata/stories" \
+  "$venv/bin/python" -I "$suite/menubar/capture/measure.py" "$shots" "$repo/apps/menubar/tests/station-kit-tests/__expected__/stories" \
     ${STATION_CAPTURE_M1:+"$STATION_CAPTURE_M1"} 2>&1 | tee -a "$log"
   measured=${PIPESTATUS[0]}
   [ $code -eq 0 ] || fail "capture: drive.py exit $code"

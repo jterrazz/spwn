@@ -1,0 +1,10 @@
+canvas: { scheme: dark, scale: 2, unit: pt, still: true, ground: FlatDesk }
+base: ./mac.this.overview.dark.view.yaml
+added:
+- in root:
+  - menu [kit=MenuStage] [at=24,24] [size=322x437.5]:
+    - menu [kit=MenuPreview] [at=106.5,64] [size=201.5x89]:
+      - text "This Mac" [kit=MenuPreview.header] [at=5,5] [size=65x20]
+      - menuitem "Open in Terminal" [kit=MenuPreview.item] [at=5,25] [size=191.5x24] [icon=terminal] [key=⌘T]
+      - separator [kit=MenuPreview.line] [at=5,49] [size=191.5x11]
+      - menuitem "Stop everything…" [kit=MenuPreview.item] [at=5,60] [size=191.5x24] [icon=stop] [state=danger]

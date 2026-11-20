@@ -1,0 +1,8 @@
+canvas: { scheme: dark, scale: 2, unit: pt, still: true, ground: FlatDesk }
+base: ./ports.all.dark.view.yaml
+added:
+- in root:
+  - menu [kit=MenuStage] [at=24,24] [size=322x553]:
+    - menu [kit=MenuPreview] [at=97.5,64] [size=210.5x58]:
+      - menuitem "Share a port…" [kit=MenuPreview.item] [at=5,5] [size=200.5x24] [icon=point.3.connected.trianglepath.dotted]
+      - menuitem "Declare a port public…" [kit=MenuPreview.item] [at=5,29] [size=200.5x24] [icon=globe]

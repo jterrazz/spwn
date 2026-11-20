@@ -1,0 +1,13 @@
+canvas: { scheme: light, scale: 2, unit: pt, still: true, ground: FlatDesk }
+base: ./home.loaded.light.view.yaml
+added:
+- in root:
+  - menu [kit=MenuStage] [at=24,24] [size=322x778]:
+    - menu [kit=MenuPreview] [at=20,613] [size=227x161]:
+      - text "Keep This Mac awake" [kit=MenuPreview.header] [at=5,5] [size=132.5x20]
+      - menuitem "For 1 h" [kit=MenuPreview.item] [at=5,25] [size=217x24]
+      - menuitem "For 4 h" [kit=MenuPreview.item] [at=5,49] [size=217x24]
+      - menuitem "Until 18:00" [kit=MenuPreview.item] [at=5,73] [size=217x24] [state=checked]
+      - separator [kit=MenuPreview.line] [at=5,97] [size=217x11]
+      - menuitem "Let it sleep" [kit=MenuPreview.item] [at=5,108] [size=217x24] [icon=moon]
+      - menuitem "Awake of all Macs" [kit=MenuPreview.item] [at=5,132] [size=217x24] [icon=sun.max] [key=⌘E]

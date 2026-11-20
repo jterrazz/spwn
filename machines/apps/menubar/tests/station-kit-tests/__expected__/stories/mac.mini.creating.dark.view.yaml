@@ -1,0 +1,73 @@
+canvas: { scheme: dark, scale: 2, unit: pt, still: true, ground: FlatDesk }
+tokens:
+  color.plate: rgba(32 32 34 / 0.6)
+  Glass.window: 18
+  Pane.shades: [rgba(0 0 0 / 0.45) 30 24, rgba(0 0 0 / 0.3) 9 6]
+  Pane.ring: rgba(0 0 0 / 0.7)
+  Pane.outline: 0.5
+  Pane.rim: rgba(255 255 255 / 0.09)
+  Pane.rimWidth: 1
+  Metric.Panel.header: [10, 14, 8, 14]
+  Role.back: system 13 regular t2
+  Role.button: system 12 semibold t1
+  Role.facts: system 12 regular t2
+  Metric.Panel.body: [2, 12, 12, 12]
+  Role.sectionLabel: system 12 semibold section
+  Role.rowSub: system 11 regular t2
+  Role.rowValue: system 12 regular t2
+  Metric.Panel.footer: [6, 12, 12, 12]
+tree:
+- group [kit=Popover] [at=24,24] [size=322x475.5]:
+  - group [kit=MacPage] [at=0,0] [size=322x475.5]:
+    - group [kit=Panel] [at=0,0] [size=322x475.5] [fill=color.plate] [corner=Glass.window] [shadow=Pane.shades] [ring=Pane.ring] [rim=Pane.rim]:
+      - group [kit=Panel.header] [at=0,0] [size=322x123]:
+        - group [kit=MachineHeader] [at=14,10] [size=294x105]:
+          - text "Back" [at=11.5,0] [size=30x16] [font=Role.back]
+          - button "New VM" [kit=PanelButton] [at=176.5,26] [size=87.5x24]:
+            - text "New VM" [at=29,4.5] [size=48.5x15] [font=Role.button]
+          - button "ellipsis" [kit=IconButton] [at=270,26] [size=24x24]
+          - text [kit=FactsLine] [at=0,56] [size=264.5x15] [font=Role.facts]
+          - tablist [kit=Segmented] [at=0,81] [size=294x24]
+      - group [kit=Panel.content] [at=0,123] [size=322x352.5]:
+        - region "Gauges" [kit=MacOverview] [at=12,2] [size=298x62]:
+          - region "Gauges" [kit=GaugeStrip] [at=0,0] [size=298x62]:
+            - group "CPU" [kit=GaugeTile] [at=0,0] [size=95.5x62]:
+              - img [kit=Spark] [at=9,41] [size=77.5x14]
+            - group "Memory" [kit=GaugeTile] [at=101.5,0] [size=95x62]
+            - group "Network" [kit=GaugeTile] [at=202.5,0] [size=95.5x62]:
+              - img [kit=Spark] [at=9,41] [size=77.5x14]
+        - region "VMs" [kit=MacOverview] [at=12,72] [size=298x180]:
+          - region "VMs" [kit=VMsCard] [at=0,0] [size=298x180]:
+            - heading "VMs" [kit=CardLabel] [at=0,0] [size=298x16]:
+              - text "VMs" [at=4,0.5] [size=26x15] [font=Role.sectionLabel]
+            - group [kit=Card] [at=0,20] [size=298x160]:
+              - list [kit=RowStack] [at=4,4] [size=290x152]:
+                - listitem "infra" [kit=RowView] [at=0,0] [size=290x38]:
+                  - img "well" [kit=StatusDot] [at=16.5,15.5] [size=7x7]
+                  - text [kit=FactsLine] [at=40,20.5] [size=106x14] [font=Role.rowSub]
+                  - button "terminal" [kit=RoundButton] [at=207.5,7] [size=24x24]
+                  - text "17 %" [kit=LiveText] [at=235.5,11.5] [size=30x15] [font=Role.rowValue]
+                - listitem "linux-3" [kit=RowView] [at=0,38] [size=290x38]:
+                  - img "well" [kit=StatusDot] [at=16.5,15.5] [size=7x7]
+                  - text [kit=FactsLine] [at=40,20.5] [size=105x14] [font=Role.rowSub]
+                  - button "terminal" [kit=RoundButton] [at=207.5,7] [size=24x24]
+                  - text "70 %" [kit=LiveText] [at=235.5,11.5] [size=30x15] [font=Role.rowValue]
+                - listitem "review-bot" [kit=RowView] [at=0,76] [size=290x38]:
+                  - img "well" [kit=StatusDot] [at=16.5,15.5] [size=7x7]
+                  - text [kit=FactsLine] [at=40,20.5] [size=102x14] [font=Role.rowSub]
+                  - button "terminal" [kit=RoundButton] [at=215,7] [size=24x24]
+                  - text "2 %" [kit=LiveText] [at=243,11.5] [size=22.5x15] [font=Role.rowValue]
+                - listitem "linux-4" [kit=RowView] [at=0,114] [size=290x38]:
+                  - progressbar [kit=ProgressRing] [at=13,12] [size=14x14]
+                  - text [kit=FactsLine] [at=40,20.5] [size=111x14] [font=Role.rowSub]
+                  - button "terminal" [kit=RoundButton] [at=245.5,7] [size=24x24]
+                  - progressbar [kit=BirthBar] [at=0,34] [size=290x4]
+        - region "Care" [kit=MacOverview] [at=12,260] [size=298x80.5]:
+          - region "Care" [kit=CareCard] [at=0,0] [size=298x80.5]:
+            - group [kit=Card] [at=0,0] [size=298x80.5]:
+              - img "symbol:sun.max" [kit=GlyphView] [at=12,11] [size=24x24]
+              - text [kit=FactsLine] [at=44,24.5] [size=190.5x14] [font=Role.rowSub]
+              - switch [kit=Switch] [at=254,14] [size=30x18] [state=on]
+              - img "symbol:wrench.adjustable" [kit=GlyphView] [at=12,47.5] [size=24x24]
+              - text "all fine" [kit=LiveText] [at=227.5,52] [size=37.5x15] [font=Role.rowValue]
+      - group [kit=Panel.footer] [at=0,475.5] [size=0x0]

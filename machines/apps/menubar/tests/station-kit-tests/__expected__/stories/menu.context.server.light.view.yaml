@@ -1,0 +1,17 @@
+canvas: { scheme: light, scale: 2, unit: pt, still: true, ground: FlatDesk }
+base: ./home.loaded.light.view.yaml
+added:
+- in root:
+  - menu [kit=MenuStage] [at=24,24] [size=322x778]:
+    - menu [kit=MenuPreview] [at=20,230] [size=205.5x231]:
+      - text "infra on mac-mini" [kit=MenuPreview.header] [at=5,5] [size=112x20]
+      - menuitem "Open" [kit=MenuPreview.item] [at=5,25] [size=195.5x24] [icon=arrow.up.forward.square] [key=↩]
+      - menuitem "Open in Terminal" [kit=MenuPreview.item] [at=5,49] [size=195.5x24] [icon=terminal] [key=⌘↩]
+      - menuitem "Open Traefik" [kit=MenuPreview.item] [at=5,73] [size=195.5x24] [icon=safari]
+      - separator [kit=MenuPreview.line] [at=5,97] [size=195.5x11]
+      - menuitem "Copy" [kit=MenuPreview.item] [at=5,108] [size=195.5x24] [icon=doc.on.doc] [submenu]
+      - separator [kit=MenuPreview.line] [at=5,132] [size=195.5x11]
+      - menuitem "Restart…" [kit=MenuPreview.item] [at=5,143] [size=195.5x24] [icon=arrow.clockwise] [state=danger]
+      - menuitem "Stop…" [kit=MenuPreview.item] [at=5,167] [size=195.5x24] [icon=stop]
+      - separator [kit=MenuPreview.line] [at=5,191] [size=195.5x11]
+      - menuitem "Delete…" [kit=MenuPreview.item] [at=5,202] [size=195.5x24] [icon=trash] [state=danger]

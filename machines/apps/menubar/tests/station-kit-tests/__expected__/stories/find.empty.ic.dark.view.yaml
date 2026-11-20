@@ -1,0 +1,9 @@
+canvas: { scheme: dark, scale: 2, unit: pt, still: true, ground: FlatDesk, contrast: increased }
+base: ./find.empty.dark.view.yaml
+tokens:
+  color.plateSolid: rgba(16 16 20 / 1)
+  color.hair: rgba(255 255 255 / 0.3)
+  Pane.solidEdge: 0.5
+changes:
+- in group [kit=Popover] › group [kit=FindPanel]:
+  - group [kit=Panel] [at=0,0] [size=322x316] [fill=color.plateSolid] [corner=Glass.window] [shadow=Pane.shades] [ring=Pane.ring] [stroke=color.hair]

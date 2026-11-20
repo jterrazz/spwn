@@ -1,0 +1,9 @@
+canvas: { scheme: light, scale: 2, unit: pt, still: true, ground: FlatDesk }
+base: ./workspace.working.accounts.light.view.yaml
+added:
+- in group [kit=Popover] › group [kit=WorkspacePage] › group [kit=Panel]:
+  - dialog "Remove GitHub? The grant ends here; the token stays yours." [kit=AlertCard] [at=27,105.5] [size=268x148]:
+    - button "Cancel" [kit=PanelButton] [at=16,106] [size=114x28]:
+      - text "Cancel" [at=37,6.5] [size=40.5x15] [font=Role.button]
+    - button "Remove" [kit=PanelButton] [at=138,106] [size=114x28]:
+      - text "Remove" [at=33.5,6.5] [size=47x15] [font=Role.button]

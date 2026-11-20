@@ -1,0 +1,8 @@
+canvas: { scheme: light, scale: 2, unit: pt, still: true, ground: FlatDesk }
+base: ./accounts.all.light.view.yaml
+added:
+- in root:
+  - menu [kit=MenuStage] [at=24,24] [size=322x801]:
+    - menu [kit=MenuPreview] [at=20,383] [size=200x54]:
+      - text "GitHub granted to linux-1" [kit=MenuPreview.header] [at=5,5] [size=155.5x20]
+      - menuitem "Remove…" [kit=MenuPreview.item] [at=5,25] [size=190x24] [icon=stop] [state=danger]

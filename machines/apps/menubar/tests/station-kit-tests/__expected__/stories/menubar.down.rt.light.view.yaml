@@ -1,0 +1,2 @@
+canvas: { scheme: light, scale: 2, unit: pt, still: true, ground: FlatDesk, transparency: reduced }
+base: ./menubar.down.light.view.yaml

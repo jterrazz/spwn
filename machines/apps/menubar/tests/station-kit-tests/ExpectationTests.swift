@@ -13,7 +13,7 @@ final class ExpectationTests: XCTestCase {
 
     func testOnlyAGoldenOfTheListIsListed() {
         let listed = Tree.storyGoldens.appendingPathComponent("home.fine.dark.png")
-        let set: Set<String> = ["apps/menubar/tests/station-kit-tests/testdata/stories/home.fine.dark.png"]
+        let set: Set<String> = ["apps/menubar/tests/station-kit-tests/__expected__/stories/home.fine.dark.png"]
         XCTAssertTrue(Expectation.listed(listed, in: set))
         XCTAssertFalse(Expectation.listed(Tree.storyGoldens.appendingPathComponent("home.fine.light.png"), in: set))
         XCTAssertFalse(Expectation.listed(listed, in: []))

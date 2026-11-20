@@ -1,0 +1,9 @@
+canvas: { scheme: dark, scale: 2, unit: pt, still: true, ground: FlatDesk }
+base: ./workspace.overview.dark.view.yaml
+added:
+- in group [kit=Popover] › group [kit=WorkspacePage] › group [kit=Panel]:
+  - dialog "Stop linux-1 on This Mac?" [kit=AlertCard] [at=27,135.5] [size=268x166]:
+    - button "Cancel" [kit=PanelButton] [at=16,124] [size=114x28]:
+      - text "Cancel" [at=37,6.5] [size=40.5x15] [font=Role.button]
+    - button "Stop linux-1" [kit=PanelButton] [at=138,124] [size=114x28]:
+      - text "Stop linux-1" [at=21,6.5] [size=72.5x15] [font=Role.button]

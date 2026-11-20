@@ -1,0 +1,22 @@
+canvas: { scheme: light, scale: 2, unit: pt, still: true, ground: FlatDesk }
+tokens:
+  color.plate: rgba(244 244 244 / 0.64)
+  Glass.window: 18
+  Pane.shades: [rgba(20 20 30 / 0.2) 30 24, rgba(20 20 30 / 0.1) 9 6]
+  Pane.ring: rgba(0 0 0 / 0.18)
+  Pane.outline: 0.5
+  Pane.rim: rgba(255 255 255 / 0.55)
+  Pane.rimWidth: 1
+tree:
+- group [kit=Popover] [at=24,24] [size=322x196]:
+  - group [kit=FindPanel] [at=0,0] [size=322x196]:
+    - group [kit=Panel] [at=0,0] [size=322x196] [fill=color.plate] [corner=Glass.window] [shadow=Pane.shades] [ring=Pane.ring] [rim=Pane.rim]:
+      - group [kit=Panel.header] [at=0,0] [size=322x46]:
+        - textbox "Find a machine, a port, an action…" [kit=FindField] [at=12,12] [size=298x30]
+      - group [kit=Panel.content] [at=0,46] [size=322x116]:
+        - listitem "Keep This Mac awake 4 h" [kit=FindResult] [at=12,28] [size=298x30] [state=lit]
+        - listitem "Awake · All Macs" [kit=FindResult] [at=12,82] [size=298x30]
+      - group [kit=Panel.footer] [at=0,162] [size=322x34]:
+        - group [kit=FindFooter] [at=0,0] [size=322x34]:
+          - text "esc" [kit=KeyCap] [at=14,11] [size=29.5x16]
+          - text "enter" [kit=KeyCap] [at=286.5,11] [size=21.5x16]

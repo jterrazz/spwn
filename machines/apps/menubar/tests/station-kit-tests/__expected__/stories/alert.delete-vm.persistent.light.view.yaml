@@ -1,0 +1,15 @@
+canvas: { scheme: light, scale: 2, unit: pt, still: true, ground: FlatDesk }
+base: ./workspace.stopped.light.view.yaml
+tokens:
+  Role.alertLabel: system 12 medium t2
+  Role.alertName: system 12 bold monospaced t1
+added:
+- in group [kit=Popover] › group [kit=WorkspacePage] › group [kit=Panel]:
+  - dialog "Delete api?" [kit=AlertCard] [at=27,26.5] [size=268x220]:
+    - text "Type" [at=16,120] [size=28.5x15] [font=Role.alertLabel]
+    - text "api" [at=107,120] [size=22.5x15] [font=Role.alertName]
+    - text "to confirm" [at=192,120] [size=60x15] [font=Role.alertLabel]
+    - button "Cancel" [kit=PanelButton] [at=16,178] [size=114x28]:
+      - text "Cancel" [at=37,6.5] [size=40.5x15] [font=Role.button]
+    - button "Delete api" [kit=PanelButton] [at=138,178] [size=114x28]:
+      - text "Delete api" [at=27.5,6.5] [size=59.5x15] [font=Role.button]

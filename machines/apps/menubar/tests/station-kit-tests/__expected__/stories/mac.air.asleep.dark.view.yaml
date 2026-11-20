@@ -1,0 +1,38 @@
+canvas: { scheme: dark, scale: 2, unit: pt, still: true, ground: FlatDesk }
+tokens:
+  color.plate: rgba(32 32 34 / 0.6)
+  Glass.window: 18
+  Pane.shades: [rgba(0 0 0 / 0.45) 30 24, rgba(0 0 0 / 0.3) 9 6]
+  Pane.ring: rgba(0 0 0 / 0.7)
+  Pane.outline: 0.5
+  Pane.rim: rgba(255 255 255 / 0.09)
+  Pane.rimWidth: 1
+  Metric.Panel.header: [10, 14, 8, 14]
+  Role.back: system 13 regular t2
+  Role.facts: system 12 regular t2
+  Metric.Panel.body: [2, 12, 12, 12]
+  Role.emptyGrey: system 12 regular t2
+  Role.button: system 12 semibold t1
+  Role.footnote: system 12 regular t3
+  Metric.Panel.footer: [6, 12, 12, 12]
+tree:
+- group [kit=Popover] [at=24,24] [size=322x326.5]:
+  - group [kit=MacPage] [at=0,0] [size=322x326.5]:
+    - group [kit=Panel] [at=0,0] [size=322x326.5] [fill=color.plate] [corner=Glass.window] [shadow=Pane.shades] [ring=Pane.ring] [rim=Pane.rim]:
+      - group [kit=Panel.header] [at=0,0] [size=322x89]:
+        - group [kit=MachineHeader] [at=14,10] [size=294x71]:
+          - text "Back" [at=11.5,0] [size=30x16] [font=Role.back]
+          - button "ellipsis" [kit=IconButton] [at=270,26] [size=24x24]
+          - text [kit=FactsLine] [at=0,56] [size=280.5x15] [font=Role.facts]
+      - group [kit=Panel.content] [at=0,89] [size=322x237.5]:
+        - region "macbook-air is asleep" [kit=MacOverview] [at=12,2] [size=298x164.5]:
+          - group [kit=Card] [at=0,0] [size=298x164.5]:
+            - group [kit=EmptyState] [at=12,10] [size=274x144.5]:
+              - text "A laptop that sleeps is not down. Its VMs are not known while it sleeps." [at=9.5,70.5] [size=255x30] [font=Role.emptyGrey] [lines=2]
+              - button "Wake" [kit=PanelButton] [at=14.5,110.5] [size=71.5x24]:
+                - text "Wake" [at=29.5,4.5] [size=32x15] [font=Role.button]
+              - button "Tell me when it wakes" [kit=PanelButton] [at=92,110.5] [size=168x24]:
+                - text "Tell me when it wakes" [at=30,4.5] [size=128x15] [font=Role.button]
+        - region "Wake" [kit=MacOverview] [at=12,174.5] [size=287x51]:
+          - text "Wake sends a Wake-on-LAN packet from This Mac. It works when macbook-air is on power and on the same network." [at=4,2] [size=279x49] [font=Role.footnote] [lines=3]
+      - group [kit=Panel.footer] [at=0,326.5] [size=0x0]

@@ -1,0 +1,24 @@
+canvas: { scheme: light, scale: 2, unit: pt, still: true, ground: FlatDesk }
+base: ./server.healthy.light.view.yaml
+tokens:
+  Role.popoverTitle: system 13 semibold t1
+  Role.popoverReach: system 11 regular t3
+changes:
+- in group [kit=Popover] › group [kit=ServerPage] › group [kit=Panel] › group [kit=Panel.content] › group [kit=Card]:
+  - listitem "Traefik" [kit=PortRow] [at=4,4] [size=290x38] [state=lit]
+- in group [kit=Popover] › group [kit=ServerPage] › group [kit=Panel] › group [kit=Panel.content] › group [kit=Card] › listitem "Traefik" [kit=PortRow]:
+  - button "Show QR for Traefik" [kit=QuickSlot] [at=234,9] [size=20x20] [state=lit]
+- in group [kit=Popover] › group [kit=ServerPage] › group [kit=Panel] › group [kit=Panel.content] › group [kit=Card] › listitem "Traefik" [kit=PortRow] › button "Show QR for Traefik" [kit=QuickSlot]:
+  - button "qrcode" [kit=RoundButton] [at=0,0] [size=20x20]
+added:
+- in group [kit=Popover] › group [kit=ServerPage] › group [kit=Panel]:
+  - group [kit=PopoverLayer] [at=0,0] [size=322x674.5]:
+    - dialog [kit=PopoverCard] [at=9,342] [size=304x148]:
+      - dialog "Traefik" [kit=QRPopover] [at=0,0] [size=304x148]:
+        - img "https://example.com" [kit=QRView] [at=17.5,18] [size=112x112]
+        - text "Scan with your phone" [at=149.5,10] [size=136.5x16] [font=Role.popoverTitle]
+        - text "Anyone can open it · Cloudflare Tunnel" [at=149.5,45] [size=110x28] [font=Role.popoverReach] [lines=2]
+        - button "Copy" [kit=PanelButton] [at=149.5,83] [size=72.5x24]:
+          - text "Copy" [at=32,4.5] [size=30.5x15] [font=Role.button]
+        - button "Open ↗" [kit=PanelButton] [at=230,83] [size=64.5x24]:
+          - text "Open ↗" [at=10,4.5] [size=44.5x15] [font=Role.button]

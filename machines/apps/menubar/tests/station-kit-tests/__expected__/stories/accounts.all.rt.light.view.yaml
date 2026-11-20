@@ -1,0 +1,9 @@
+canvas: { scheme: light, scale: 2, unit: pt, still: true, ground: FlatDesk, transparency: reduced }
+base: ./accounts.all.light.view.yaml
+tokens:
+  color.plateSolid: rgba(250 250 252 / 1)
+  color.hair: rgba(0 0 0 / 0.1)
+  Pane.solidEdge: 0.5
+changes:
+- in group [kit=AccountsPage]:
+  - group [kit=Panel] [at=0,0] [size=322x801] [fill=color.plateSolid] [corner=Glass.window] [shadow=Pane.shades] [ring=Pane.ring] [stroke=color.hair]

@@ -1,0 +1,60 @@
+canvas: { scheme: light, scale: 2, unit: pt, still: true, ground: FlatDesk }
+tokens:
+  color.plate: rgba(244 244 244 / 0.64)
+  Glass.window: 18
+  Pane.shades: [rgba(20 20 30 / 0.2) 30 24, rgba(20 20 30 / 0.1) 9 6]
+  Pane.ring: rgba(0 0 0 / 0.18)
+  Pane.outline: 0.5
+  Pane.rim: rgba(255 255 255 / 0.55)
+  Pane.rimWidth: 1
+  Metric.Panel.header: [10, 14, 8, 14]
+  Role.back: system 13 regular t2
+  Role.facts: system 12 regular t2
+  Metric.Panel.body: [2, 12, 12, 12]
+  Role.chartValue: system 13 regular t2
+  Role.legend: system 11 regular t2
+  Role.sectionLabel: system 12 semibold section
+  Role.rowValue: system 12 regular t2
+  Role.footnote: system 12 regular t3
+  Metric.Panel.footer: [6, 12, 12, 12]
+  Role.button: system 12 semibold t1
+tree:
+- group [kit=Popover] [at=24,24] [size=322x795]:
+  - group [kit=ServerPage] [at=0,0] [size=322x795]:
+    - group [kit=Panel] [at=0,0] [size=322x795] [fill=color.plate] [corner=Glass.window] [shadow=Pane.shades] [ring=Pane.ring] [rim=Pane.rim]:
+      - group [kit=Panel.header] [at=0,0] [size=322x123]:
+        - group [kit=MachineHeader] [at=14,10] [size=294x105]:
+          - text "Back" [at=11.5,0] [size=30x16] [font=Role.back]
+          - button "ellipsis" [kit=IconButton] [at=270,26] [size=24x24]
+          - text [kit=FactsLine] [at=0,56] [size=249.5x15] [font=Role.facts]
+          - tablist [kit=Segmented] [at=0,81] [size=294x24]
+      - group [kit=Panel.content] [at=0,123] [size=322x626]:
+        - group "1h" [kit=MachineActivity] [at=12,2] [size=298x612]:
+          - tablist [kit=Segmented] [at=144,0] [size=150x24]
+          - group [kit=Card] [at=0,28] [size=298x158]:
+            - text "18 %" [kit=LiveText] [at=225.5,10] [size=32x16] [font=Role.chartValue]
+            - img "bars" [kit=ActivityCharts] [at=12,32] [size=274x116]
+          - group [kit=Card] [at=0,194] [size=298x162]:
+            - img "mirror" [kit=ActivityCharts] [at=12,32] [size=274x100]
+            - text "received" [at=22,138] [size=45x14] [font=Role.legend]
+            - text "sent" [at=89,138] [size=23x14] [font=Role.legend]
+          - group [kit=Card] [at=0,364] [size=298x67]:
+            - text "5 GB free" [kit=LiveText] [at=228.5,10] [size=57.5x16] [font=Role.chartValue]
+            - progressbar [kit=Bar] [at=12,32] [size=274x5]
+            - text "used 19 GB" [at=22,43] [size=61.5x14] [font=Role.legend]
+            - text "free 5 GB" [at=105.5,43] [size=50x14] [font=Role.legend]
+            - text "of 24 GB" [at=167.5,43] [size=46.5x14] [font=Role.legend]
+          - heading "Top processes" [kit=CardLabel] [at=0,439] [size=298x16]:
+            - text "Top processes" [at=4,0.5] [size=85.5x15] [font=Role.sectionLabel]
+          - region "Top processes" [kit=TopProcesses] [at=0,459] [size=298x111]:
+            - img "symbol:cpu" [kit=GlyphView] [at=8,9] [size=24x24]
+            - text "9 %" [kit=LiveText] [at=251,13.5] [size=22.5x15] [font=Role.rowValue]
+            - img "symbol:cpu" [kit=GlyphView] [at=8,43.5] [size=24x24]
+            - text "4 %" [kit=LiveText] [at=251,48] [size=22.5x15] [font=Role.rowValue]
+            - img "symbol:cpu" [kit=GlyphView] [at=8,78] [size=24x24]
+            - text "1 %" [kit=LiveText] [at=251,82.5] [size=22.5x15] [font=Role.rowValue]
+          - text "Measured inside the guest. If infra stops answering, this shows what mac-mini sees of it." [at=4,580] [size=270x32] [font=Role.footnote] [lines=2]
+      - group [kit=Panel.footer] [at=0,749] [size=322x46]:
+        - group [kit=SSHFooter] [at=12,6] [size=298x28]:
+          - button "Open in Terminal" [kit=PanelButton] [at=147.5,0] [size=150.5x28]:
+            - text "Open in Terminal" [at=37.5,6.5] [size=99x15] [font=Role.button]

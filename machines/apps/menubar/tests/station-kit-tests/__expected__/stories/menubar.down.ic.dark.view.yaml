@@ -1,0 +1,2 @@
+canvas: { scheme: dark, scale: 2, unit: pt, still: true, ground: FlatDesk, contrast: increased }
+base: ./menubar.down.dark.view.yaml

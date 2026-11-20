@@ -1,0 +1,35 @@
+canvas: { scheme: dark, scale: 2, unit: pt, still: true, ground: desk }
+tokens:
+  color.plate: rgba(32 32 34 / 0.6)
+  Glass.window: 18
+  Pane.shades: [rgba(0 0 0 / 0.45) 30 24, rgba(0 0 0 / 0.3) 9 6]
+  Pane.ring: rgba(0 0 0 / 0.7)
+  Pane.outline: 0.5
+  Pane.rim: rgba(255 255 255 / 0.09)
+  Pane.rimWidth: 1
+  Metric.Panel.header: [10, 14, 8, 14]
+  Role.homeTitle: system 15 bold t1
+  Metric.Panel.body: [2, 12, 12, 12]
+  Pane.fade: 14
+  Role.rowName: system 13 medium t1
+  Metric.Panel.footer: [6, 12, 12, 12]
+  Role.findResult: system 13 regular t1
+tree:
+- group [kit=Panel] [at=24,24] [size=322x300] [fill=color.plate] [corner=Glass.window] [shadow=Pane.shades] [ring=Pane.ring] [rim=Pane.rim] [room=300]:
+  - group [kit=Panel.header] [at=0,0] [size=322x37]:
+    - heading "All machines" [at=14,10] [size=93.5x19] [font=Role.homeTitle]
+  - group [kit=Panel.content] [at=0,37] [size=322x229] [scroll] [fade=bottom Pane.fade]:
+    - text "linux-1" [at=12,2] [size=298x34] [font=Role.rowName]
+    - text "linux-2" [at=12,44] [size=298x34] [font=Role.rowName]
+    - text "linux-3" [at=12,86] [size=298x34] [font=Role.rowName]
+    - text "linux-4" [at=12,128] [size=298x34] [font=Role.rowName]
+    - text "linux-5" [at=12,170] [size=298x34] [font=Role.rowName]
+    - text "linux-6" [at=12,212] [size=298x34] [font=Role.rowName] [visible=17] [under=fade]
+    - text "linux-7" [at=12,254] [size=298x34] [font=Role.rowName] [hidden=scrolled]
+    - text "linux-8" [at=12,296] [size=298x34] [font=Role.rowName] [hidden=scrolled]
+    - text "linux-9" [at=12,338] [size=298x34] [font=Role.rowName] [hidden=scrolled]
+    - text "linux-10" [at=12,380] [size=298x34] [font=Role.rowName] [hidden=scrolled]
+    - text "linux-11" [at=12,422] [size=298x34] [font=Role.rowName] [hidden=scrolled]
+    - text "linux-12" [at=12,464] [size=298x34] [font=Role.rowName] [hidden=scrolled]
+  - group [kit=Panel.footer] [at=0,266] [size=322x34]:
+    - text "Find a machine, a port, an action…" [at=12,6] [size=208x16] [font=Role.findResult]
