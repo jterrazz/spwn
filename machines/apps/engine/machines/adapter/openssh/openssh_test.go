@@ -1,8 +1,10 @@
 package openssh
 
 import (
+	"context"
 	"errors"
 	"io/fs"
+	"strings"
 	"testing"
 
 	"github.com/jterrazz/studio-station/apps/engine/machines/contract"
@@ -85,5 +87,36 @@ func TestTheOwnersOwnLinesComeBackByteForByteOnceStationsBlockGoes(t *testing.T)
 
 	if got := string(read(t, disk)); got != mine {
 		t.Errorf("the owner's file came back as\n%s\nwant\n%s", got, mine)
+	}
+}
+
+func TestABlockOnAMacOffersTheDeviceKeyThroughStationsAgentThenTheOwnersKeyAndNothingElse(t *testing.T) {
+	f := files{}
+	c := New(f, Options{
+		Home: home, KnownHosts: home + "/.local/state/station/known_hosts", Executable: "/bin/station",
+		Agent: home + "/.local/state/station/agent.sock", DeviceKey: home + "/.local/state/station/device-key.pub",
+	})
+	if err := c.Put(context.Background(), []contract.MachineBlock{{Name: "mac-mini"}, {Name: "linux-1", Key: "~/.ssh/agent_key"}}); err != nil {
+		t.Fatal(err)
+	}
+	got := string(read(t, f))
+	for _, want := range []string{
+		"Host mac-mini\n  HostName mac-mini\n  IdentityAgent ~/.local/state/station/agent.sock\n  IdentityFile ~/.local/state/station/device-key.pub\n  IdentityFile ~/.ssh/id_ed25519\n  IdentitiesOnly yes\n",
+		"Host linux-1\n  HostName linux-1\n  IdentityAgent ~/.local/state/station/agent.sock\n  IdentityFile ~/.local/state/station/device-key.pub\n  IdentityFile ~/.ssh/agent_key\n  IdentitiesOnly yes\n",
+	} {
+		if !strings.Contains(got, want) {
+			t.Errorf("the block lacks\n%s\nin\n%s", want, got)
+		}
+	}
+}
+
+func TestABlockOffTheMacNamesNoAgent(t *testing.T) {
+	f := files{}
+	if err := adapter(f).Put(context.Background(), []contract.MachineBlock{{Name: "mac-mini"}}); err != nil {
+		t.Fatal(err)
+	}
+	got := string(read(t, f))
+	if strings.Contains(got, "IdentityAgent") || strings.Contains(got, "device-key") || !strings.Contains(got, "  IdentityFile ~/.ssh/id_ed25519\n  IdentitiesOnly yes\n") {
+		t.Errorf("block:\n%s", got)
 	}
 }

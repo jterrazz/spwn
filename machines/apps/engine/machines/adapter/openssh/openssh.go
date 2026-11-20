@@ -32,6 +32,9 @@ type Options struct {
 	KnownHosts string
 	// value: this station binary, the ProxyCommand of a VM of this Mac.
 	Executable string
+	// value: on a Mac, station's agent socket and the public file of the
+	// device key it serves; empty elsewhere, where a block names no agent.
+	Agent, DeviceKey string
 }
 
 // invariant: the owner's own ssh to a VM of another Mac hops through that
@@ -73,15 +76,18 @@ func (c *sshFile) block(b contract.MachineBlock) string {
 	if b.User != "" {
 		lines = append(lines, "  User "+b.User)
 	}
-	key := b.Key
-	identity := []string{"  IdentityFile " + defaultKey}
-	if key != "" {
-		// invariant: a key the owner named is the only one offered, so an agent
-		// holding many keys never exhausts the server's attempts before it.
-		identity = []string{"  IdentityFile " + key, "  IdentitiesOnly yes"}
+	if c.o.Agent != "" {
+		lines = append(lines, "  IdentityAgent "+c.tilde(c.o.Agent), "  IdentityFile "+c.tilde(c.o.DeviceKey))
 	}
-	lines = append(lines, identity...)
+	key := b.Key
+	if key == "" {
+		key = defaultKey
+	}
+	// invariant: only the keys the block names are offered, so an agent
+	// holding many keys never exhausts the server's attempts before them.
 	lines = append(lines,
+		"  IdentityFile "+key,
+		"  IdentitiesOnly yes",
 		"  ServerAliveInterval 30",
 		"  ServerAliveCountMax 3",
 		"  UserKnownHostsFile "+c.tilde(path.Join(c.o.KnownHosts, b.Name)),

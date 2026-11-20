@@ -149,13 +149,16 @@ With the App Store app, the setting `tailscale-cli`, which `apps install tailsca
 
 ## SSH
 
-Station writes one managed block per machine in `~/.ssh/config` on every Mac, refreshed by a bare `machines` and after every change, so `ssh api` works on every machine. A block carries `IdentitiesOnly yes` beside its `IdentityFile` when `machines add --key` named the key, so an ssh agent holding many keys offers that one first and never runs out of attempts; without `--key` the block names `~/.ssh/id_ed25519` and nothing else. Every block pins its host key in `~/.local/state/station/known_hosts/<name>` (`StrictHostKeyChecking accept-new`). The three shapes:
+Station writes one managed block per machine in `~/.ssh/config` on every Mac, refreshed by a bare `machines` and after every change, so `ssh api` works on every machine. On a Mac, a block offers this Mac's [device key](../concepts/glossary.md) first, through station's agent (`IdentityAgent ~/.local/state/station/agent.sock` and `IdentityFile ~/.local/state/station/device-key.pub`, the agent of [the commands](commands.md#plumbing)), then the key `machines add --key` named, else `~/.ssh/id_ed25519`; `IdentitiesOnly yes` keeps ssh to those, so an agent holding many keys never runs out of attempts. The agent signs with the device key, which never leaves the Secure Enclave, and relays every other key to the session's own agent: until a machine accepts the device key, the second key is the one it takes. Off a Mac, a block names its one key and `IdentitiesOnly yes`. Every block pins its host key in `~/.local/state/station/known_hosts/<name>` (`StrictHostKeyChecking accept-new`). The three shapes:
 
 ```text
 Host mac-mini # a host: its sshd, reached by its MagicDNS name
  HostName mac-mini
  User jterrazz.agent
+ IdentityAgent ~/.local/state/station/agent.sock
+ IdentityFile ~/.local/state/station/device-key.pub
  IdentityFile ~/.ssh/id_ed25519
+ IdentitiesOnly yes
 
 Host linux-1 # a VM of this host: no hop
  ProxyCommand /Users/you/.local/bin/station machines pipe linux-1

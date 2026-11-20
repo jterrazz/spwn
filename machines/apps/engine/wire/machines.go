@@ -198,9 +198,11 @@ func (m machine) sshConfig(knownHosts string) contract.SSHConfig {
 	if m.world != nil {
 		return m.world.sshConfig()
 	}
-	return openssh.New(m.sys.FS, openssh.Options{
-		Home: m.sys.Env.Home(), KnownHosts: knownHosts, Executable: m.sys.Env.Executable(),
-	})
+	o := openssh.Options{Home: m.sys.Env.Home(), KnownHosts: knownHosts, Executable: m.sys.Env.Executable()}
+	if m.profile.Kind == coremachine.Computer {
+		o.Agent, o.DeviceKey = AgentSocket(m.paths.State), DeviceKeyFile(m.paths.State)
+	}
+	return openssh.New(m.sys.FS, o)
 }
 
 func (m machine) port(fallback int, names ...string) int {

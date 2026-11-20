@@ -1,4 +1,4 @@
-description: 'a Mac added with a key offers only that key; one added without a key offers the default'
+description: 'a Mac added with a key offers only that key; one added without a key only the default'
 fixture:
     - ../../__fixtures__/far-mac/
 env: engine
@@ -8,6 +8,6 @@ runs:
       stdout: |
           1
     - command: 'machines forget mac-mini --yes >/dev/null; "$STATION" machines add mac-mini >/dev/null; /usr/bin/grep -c "IdentitiesOnly" .ssh/config'
-      exit: 1
+      exit: 0
       stdout: |
-          0
+          1

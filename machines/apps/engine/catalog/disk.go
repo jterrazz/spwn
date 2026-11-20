@@ -169,7 +169,7 @@ var StationDisk = Disk{
 		noted(data("{state}/station/known_hosts/*"), "pins: deleting them downgrades to trust-on-first-use, never cleaned"),
 		noted(data("{state}/station/consoles/*"), "live while a VM or a build runs: `consoles/<vm>`, `consoles/station-build-<image>`"),
 		noted(data("{state}/station/engine.sock"), "the engine's socket, live while it runs"),
-		noted(data("{state}/station/agent.sock", Mac), "the agent's socket, live while it runs"),
+		noted(data("{state}/station/agent.sock", Mac), "the agent's socket, live while it runs: the IdentityAgent of every machine's block on this Mac"),
 		noted(data("{state}/station/device-key.pub", Mac), "this Mac's device key, its public half, written at each agent start: the private half never leaves the Secure Enclave"),
 		noted(data("{state}/station/device-key.enclave", Mac), "this Mac's device key as its Secure Enclave wrapped it, mode 0600, made on the agent's first start: only this Mac's Enclave can use it, and deleting it loses the key: the next start makes another"),
 		noted(data("{state}/station/engine.json"), "the binary the engine last started from and its version, rewritten at each engine start: the window finds station by it"),

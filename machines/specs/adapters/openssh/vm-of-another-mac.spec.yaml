@@ -15,7 +15,10 @@ runs:
                   Host y
                     HostName y
                     User u
+                    IdentityAgent ~/.local/state/station/agent.sock
+                    IdentityFile ~/.local/state/station/device-key.pub
                     IdentityFile ~/.ssh/id_ed25519
+                    IdentitiesOnly yes
                     ServerAliveInterval 30
                     ServerAliveCountMax 3
                     UserKnownHostsFile ~/.local/state/station/known_hosts/y
@@ -26,7 +29,10 @@ runs:
                   Host w
                     HostName w
                     User u
+                    IdentityAgent ~/.local/state/station/agent.sock
+                    IdentityFile ~/.local/state/station/device-key.pub
                     IdentityFile ~/.ssh/id_ed25519
+                    IdentitiesOnly yes
                     ServerAliveInterval 30
                     ServerAliveCountMax 3
                     UserKnownHostsFile ~/.local/state/station/known_hosts/w
