@@ -2,6 +2,50 @@
 
 Decided with the owner and left for later, each with what starts it.
 
+## Station becomes Machines, past the display name
+The owner's ask (2026-11-20): rename station to machines everywhere, now
+that Machines is the app's name. The display name ("Station" in the UI, the
+docs and the site) changes first; what goes past it waits for one design
+talk with the owner on what it does to the commands.
+
+- **The command grammar**: today `station machines start linux-2`. A binary
+  named `machines` reads `machines machines start linux-2`, so the rename
+  forces a choice: drop the `machines` noun level (`machines start linux-2`,
+  `machines create qa`, and what bare `machines` shows, the fleet or this
+  Mac), or one umbrella command (`spwn machines start linux-2`,
+  `spwn agents ...`). Either one rewrites the CLI goldens and `words.json`.
+- **The identities**, in the same breaking version: the state, config, data
+  and cache folders (`station/`), the launchd labels
+  (`com.jterrazz.station.*`), the menu bar's bundle id, the Keychain
+  service, the schema ids (`station.*/v1`), the `STATION_*` variables, the
+  hello, the zsh and hosts block markers, the release assets and the Go
+  module path. No compat code: an installed host takes one written
+  migration (stop the old launchd jobs, move the folders, re-add the Keychain
+  items, re-tag the guests), proved on a VM before it is handed over.
+- **Starts** after the joint publication, never mid-programme: without the
+  migration the new engine orphans every existing VM, the development VMs
+  included.
+
+## The history rewrite: the old goldens leave the repository
+The owner's call (2026-11-20): after the joint publication of v0.21.0-alpha.2,
+never before it. The goldens lots S1 to S4 moved the menu bar's and the
+window's goldens to their small form; S5 rewrites jterrazz/spwn's history so
+the old goldens' blobs leave every clone. It is its own lot with its own
+owner go, since it rewrites a tagged public history: every session's clone
+and worktree is recut from the rewritten main, and nothing unpushed may be
+left on a branch when it runs.
+
+## A world's user on a Linux host whose uid is not 1001
+Found 2026-11-20 on the development VM (uid 1002): a world's `spwn` user is
+uid 1001 (`docker/spwn-test/Dockerfile:15`,
+`packages/compile/baseimages/world.Dockerfile:2,9`), and a bind-mounted
+workspace keeps the host's owner and its 0700 mode, so the agent cannot
+write into its own workspace. The stories open their workdir to the world's
+user (`specs/cli/cli.specification.ts`, `writableByTheWorld`); the product
+does not. Linux hosts are out of scope today
+(`docs/reference/manual-edge-cases.md`); the owner decides, after the
+publication, whether the world's user follows the host's uid.
+
 ## Blueprints: each machine's install, declared (the next major project)
 The owner's goal (2026-11-10): a folder of configuration files says what
 every machine of the fleet installs, the MacBook, the Mac mini and each kind of
