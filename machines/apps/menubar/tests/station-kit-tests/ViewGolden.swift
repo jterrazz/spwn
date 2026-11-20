@@ -21,6 +21,12 @@ struct ViewLine: Equatable {
     }
 }
 
+struct ViewNode: Equatable {
+    let key: String
+    let line: String
+    let children: [ViewNode]
+}
+
 final class ViewSink {
     var lines: [ViewLine] = []
 
@@ -48,25 +54,32 @@ enum ViewGolden {
         return sink.lines
     }
 
-    // value: the view golden: the canvas, every token the drawing read with
-    // its value once, then the tree, each line's frame relative to its
-    // parent's.
-    static func text(_ lines: [ViewLine], canvas: [String]) -> String {
+    static func reads(_ lines: [ViewLine]) -> [TokenRead] {
         var reads: [TokenRead] = []
         func collect(_ line: ViewLine) {
             for read in line.mark.reads where !reads.contains(where: { $0.name == read.name }) { reads.append(read) }
             line.children.forEach(collect)
         }
         lines.forEach(collect)
-        var out = ["canvas: { " + canvas.joined(separator: ", ") + " }"]
-        if !reads.isEmpty { out += ["tokens:"] + reads.map { "  \($0.name): \($0.value)" } }
-        out.append("tree:")
+        return reads
+    }
+
+    // value: the recorded views as the lines a view golden writes, each
+    // with its frame relative to its parent's, its states, its lines of
+    // words and what of it a scrolled parent hides.
+    static func nodes(_ lines: [ViewLine]) -> [ViewNode] {
         func descendants(_ line: ViewLine) -> [ViewLine] { line.children + line.children.flatMap(descendants) }
-        func write(_ line: ViewLine, parent: CGPoint, depth: Int, clip: (rect: CGRect, fade: CGFloat)?) {
+        func node(_ line: ViewLine, parent: CGPoint, clip: (rect: CGRect, fade: CGFloat)?) -> ViewNode {
             let n = ViewNumber.text
-            var attrs = line.mark.kit.map { ["kit=" + $0] } ?? []
-            attrs += ["at=\(n(line.frame.minX - parent.x)),\(n(line.frame.minY - parent.y))", "size=\(n(line.frame.width))x\(n(line.frame.height))"]
+            let name = line.mark.name.map { " \"" + $0.replacingOccurrences(of: "\"", with: "\\\"") + "\"" } ?? ""
+            let key = line.mark.role.rawValue + name + (line.mark.kit.map { " [kit=\($0)]" } ?? "")
+            var attrs = ["at=\(n(line.frame.minX - parent.x)),\(n(line.frame.minY - parent.y))", "size=\(n(line.frame.width))x\(n(line.frame.height))"]
             attrs += line.mark.attrs
+            attrs += line.mark.states.map { "state=" + $0.rawValue }
+            if let pitch = line.mark.pitch, pitch > 0 {
+                let count = Int((line.frame.height / pitch).rounded())
+                if count > 1 { attrs.append("lines=\(count)") }
+            }
             var inner = clip
             if let own = line.mark.clip {
                 let overflows = descendants(line).contains { $0.frame.maxY > line.frame.maxY + Token.Measure.grid }
@@ -81,12 +94,91 @@ enum ViewGolden {
                     if clip.fade > 0 && line.frame.maxY > clip.rect.maxY - clip.fade { attrs.append("under=fade") }
                 }
             }
-            let name = line.mark.name.map { " \"" + $0.replacingOccurrences(of: "\"", with: "\\\"") + "\"" } ?? ""
-            let head = String(repeating: "  ", count: depth) + "- " + line.mark.role.rawValue + name + attrs.map { " [\($0)]" }.joined()
-            out.append(head + (line.children.isEmpty ? "" : ":"))
-            for child in line.children { write(child, parent: line.frame.origin, depth: depth + 1, clip: inner) }
+            return ViewNode(key: key, line: key + attrs.map { " [\($0)]" }.joined(),
+                            children: line.children.map { node($0, parent: line.frame.origin, clip: inner) })
         }
-        for line in lines { write(line, parent: .zero, depth: 0, clip: nil) }
+        return lines.map { node($0, parent: .zero, clip: nil) }
+    }
+
+    static func tree(_ nodes: [ViewNode], depth: Int = 0) -> [String] {
+        nodes.flatMap { node in
+            [String(repeating: "  ", count: depth) + "- " + node.line + (node.children.isEmpty ? "" : ":")] + tree(node.children, depth: depth + 1)
+        }
+    }
+
+    // value: the view golden: the canvas, every token the drawing read with
+    // its value once, then the tree, each line's frame relative to its
+    // parent's.
+    static func text(_ lines: [ViewLine], canvas: [String]) -> String {
+        let reads = Self.reads(lines)
+        var out = ["canvas: { " + canvas.joined(separator: ", ") + " }"]
+        if !reads.isEmpty { out += ["tokens:"] + reads.map { "  \($0.name): \($0.value)" } }
+        out.append("tree:")
+        out += tree(nodes(lines))
+        return out.joined(separator: "\n") + "\n"
+    }
+
+    // value: what an overlay owns over its base, each entry under the path
+    // of its parent: a line of the base drawn otherwise (changes), a view
+    // the base does not draw (added), a view of the base the overlay hides
+    // (removed). Siblings are paired by their role, words and kit, in order.
+    static func delta(base: [ViewNode], over: [ViewNode]) -> (changes: [String], added: [String], removed: [String]) {
+        var changes: [String] = [], added: [String] = [], removed: [String] = []
+        func paths(_ nodes: [ViewNode]) -> [String] {
+            nodes.enumerated().map { i, node in
+                let same = nodes.filter { $0.key == node.key }.count
+                return same > 1 ? node.key + " #\(nodes[..<i].filter { $0.key == node.key }.count + 1)" : node.key
+            }
+        }
+        func under(_ entries: inout [String], _ parent: String, _ lines: [String]) {
+            guard !lines.isEmpty else { return }
+            entries.append("- in " + parent + ":")
+            entries += lines.map { "  " + $0 }
+        }
+        func walk(_ a: [ViewNode], _ b: [ViewNode], parent: String) {
+            var common = Array(repeating: Array(repeating: 0, count: b.count + 1), count: a.count + 1)
+            for i in stride(from: a.count - 1, through: 0, by: -1) {
+                for j in stride(from: b.count - 1, through: 0, by: -1) {
+                    common[i][j] = a[i].key == b[j].key ? common[i + 1][j + 1] + 1 : max(common[i + 1][j], common[i][j + 1])
+                }
+            }
+            let named = paths(b), was = paths(a)
+            var changed: [String] = [], new: [String] = [], gone: [String] = [], pairs: [(ViewNode, ViewNode, String)] = []
+            var i = 0, j = 0
+            while i < a.count || j < b.count {
+                if i < a.count, j < b.count, a[i].key == b[j].key {
+                    if a[i].line != b[j].line { changed.append("- " + b[j].line) }
+                    pairs.append((a[i], b[j], named[j]))
+                    i += 1
+                    j += 1
+                } else if j < b.count, i == a.count || common[i][j + 1] >= common[i + 1][j] {
+                    new += tree([b[j]])
+                    j += 1
+                } else {
+                    gone.append("- " + was[i])
+                    i += 1
+                }
+            }
+            under(&changes, parent, changed)
+            under(&added, parent, new)
+            under(&removed, parent, gone)
+            for (x, y, path) in pairs { walk(x.children, y.children, parent: parent == "root" ? path : parent + " › " + path) }
+        }
+        walk(base, over, parent: "root")
+        return (changes, added, removed)
+    }
+
+    // value: an overlay's view golden: its canvas, the base it is drawn
+    // over, the tokens it reads that the base does not, and its delta.
+    static func text(_ lines: [ViewLine], canvas: [String], base: String, over baseLines: [ViewLine]) -> String {
+        let held = Self.reads(baseLines)
+        let reads = Self.reads(lines).filter { !held.contains($0) }
+        var out = ["canvas: { " + canvas.joined(separator: ", ") + " }", "base: ./" + base + ".view.yaml"]
+        if !reads.isEmpty { out += ["tokens:"] + reads.map { "  \($0.name): \($0.value)" } }
+        let delta = Self.delta(base: nodes(baseLines), over: nodes(lines))
+        for (title, entries) in [("changes", delta.changes), ("added", delta.added), ("removed", delta.removed)] where !entries.isEmpty {
+            out += [title + ":"] + entries
+        }
         return out.joined(separator: "\n") + "\n"
     }
 
@@ -117,24 +209,37 @@ enum ViewGolden {
         return out
     }
 
-    // invariant: a view is proved by its view golden, compared whole as
-    // text: nil when it is the same string, else the lines that differ,
-    // its drawing written beside it as `<name>.actual.view.yaml`.
-    @MainActor
-    static func check(_ name: String, _ view: AnyView, scheme: ColorScheme, desk: Bool = true,
-                      contrast: ColorSchemeContrast = .standard, reduceTransparency: Bool = false) throws -> String? {
-        let file = "\(name).\(scheme == .dark ? "dark" : "light")"
-        var canvas = ["scheme: \(scheme == .dark ? "dark" : "light")", "scale: 2", "unit: pt", "still: true", "ground: \(desk ? "desk" : "none")"]
+    static func canvas(_ scheme: ColorScheme, ground: String, contrast: ColorSchemeContrast, reduceTransparency: Bool) -> [String] {
+        var canvas = ["scheme: \(scheme == .dark ? "dark" : "light")", "scale: 2", "unit: pt", "still: true", "ground: \(ground)"]
         if contrast == .increased { canvas.append("contrast: increased") }
         if reduceTransparency { canvas.append("transparency: reduced") }
-        let lines = record(view, scheme: scheme, desk: desk)
-        if lines.isEmpty { return "\(file): the recorder read no view" }
-        return try match(text(lines, canvas: canvas), file: file)
+        return canvas
     }
 
-    static func match(_ text: String, file: String) throws -> String? {
-        let golden = Tree.goldens.appendingPathComponent(file + ".view.yaml")
-        let actual = Tree.goldens.appendingPathComponent(file + ".actual.view.yaml")
+    // invariant: a view is proved by its view golden, compared whole as
+    // text: nil when it is the same string, else the lines that differ,
+    // its drawing written beside it as `<name>.actual.view.yaml`. A view
+    // drawn over a base is written as its delta over the base's drawing:
+    // with the base's own golden proved beside it, the pair holds the
+    // whole drawing, each fact once.
+    @MainActor
+    static func check(_ name: String, _ view: AnyView, scheme: ColorScheme, desk: Bool = true, ground: String? = nil,
+                      contrast: ColorSchemeContrast = .standard, reduceTransparency: Bool = false,
+                      in folder: URL = Tree.goldens, over base: (name: String, view: AnyView)? = nil) throws -> String? {
+        let suffix = scheme == .dark ? "dark" : "light"
+        let file = "\(name).\(suffix)"
+        let canvas = Self.canvas(scheme, ground: ground ?? (desk ? "desk" : "none"), contrast: contrast, reduceTransparency: reduceTransparency)
+        let lines = record(view, scheme: scheme, desk: desk)
+        if lines.isEmpty { return "\(file): the recorder read no view" }
+        guard let base else { return try match(text(lines, canvas: canvas), file: file, in: folder) }
+        let under = record(base.view, scheme: scheme, desk: desk)
+        if under.isEmpty { return "\(file): the recorder read no view of its base \(base.name)" }
+        return try match(text(lines, canvas: canvas, base: "\(base.name).\(suffix)", over: under), file: file, in: folder)
+    }
+
+    static func match(_ text: String, file: String, in folder: URL = Tree.goldens) throws -> String? {
+        let golden = folder.appendingPathComponent(file + ".view.yaml")
+        let actual = folder.appendingPathComponent(file + ".actual.view.yaml")
         let want = try? String(contentsOf: golden, encoding: .utf8)
         let listed = Expectation.listed(golden, in: Golden.expected)
         if want == text {

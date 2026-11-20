@@ -1,9 +1,50 @@
+import CoreText
 import SwiftUI
 
 public enum ViewRole: String, Sendable {
+    case button
+    case checkbox
+    case dialog
     case group
     case heading
+    case img
+    case link
+    case list
+    case listitem
+    case menu
+    case menuitem
+    case progressbar
+    case region
+    case separator
+    case slider
+    case status
+    case `switch`
+    case tablist
     case text
+    case textbox
+}
+
+// invariant: a state is what the pixels show as a look and a view golden
+// says as a word: a lit row, an open card, a switch on.
+public enum ViewState: String, Sendable {
+    case active
+    case asleep
+    case busy
+    case checked
+    case danger
+    case dimmed
+    case disabled
+    case expanded
+    case failed
+    case lit
+    case low
+    case on
+    case picked
+    case pinging
+    case stale
+    case waiting
+
+    public static func of(_ pairs: KeyValuePairs<ViewState, Bool>) -> [ViewState] { pairs.filter(\.value).map(\.key) }
 }
 
 public struct ViewClip: Equatable, Sendable {
@@ -61,14 +102,23 @@ public struct ViewMark: Equatable, Sendable {
     public let attrs: [String]
     public let reads: [TokenRead]
     public let clip: ViewClip?
+    public let states: [ViewState]
+    public let pitch: CGFloat?
 
-    public init(_ role: ViewRole, _ name: String? = nil, kit: String? = nil, attrs: [String] = [], reads: [TokenRead] = [], clip: ViewClip? = nil) {
+    public init(_ role: ViewRole, _ name: String? = nil, kit: String? = nil, attrs: [String] = [], reads: [TokenRead] = [], clip: ViewClip? = nil,
+                states: [ViewState] = [], pitch: CGFloat? = nil) {
         self.role = role
         self.name = name
         self.kit = kit
         self.attrs = attrs
         self.reads = reads
         self.clip = clip
+        self.states = states
+        self.pitch = pitch
+    }
+
+    public static func font(_ role: ViewRole, _ name: String? = nil, kit: String, _ font: Token.Role, states: [ViewState] = []) -> ViewMark {
+        ViewMark(role, name, kit: kit, attrs: ["font=Role." + font.name], reads: [TokenRead(font)], states: states)
     }
 
     public static func text(_ words: String, _ role: Token.Role, heading: Bool = false) -> ViewMark {
@@ -85,6 +135,25 @@ public struct RecordedView {
 public struct RecordedViews: PreferenceKey {
     public static let defaultValue: [RecordedView] = []
     public static func reduce(value: inout [RecordedView], nextValue: () -> [RecordedView]) { value += nextValue() }
+}
+
+extension Token.Role {
+    // value: the height of one line of the role's words, what a text's
+    // height is a whole number of.
+    public var pitch: CGFloat {
+        guard let font = CTFontCreateUIFontForLanguage(.system, size, nil) else { return size }
+        return CTFontGetAscent(font) + CTFontGetDescent(font) + CTFontGetLeading(font)
+    }
+}
+
+extension Text {
+    // invariant: a text records its words where it is laid out, before
+    // any frame of its view's, so its frame is the words' own and its
+    // lines are its height over its role's pitch.
+    public func recorded(_ words: some StringProtocol, _ role: Token.Role, kit: String? = nil, heading: Bool = false, states: [ViewState] = []) -> some View {
+        font(role.font).recorded(ViewMark(heading ? .heading : .text, String(words), kit: kit, attrs: ["font=Role." + role.name], reads: [TokenRead(role)],
+                                          states: states, pitch: role.pitch))
+    }
 }
 
 extension View {
