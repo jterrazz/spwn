@@ -387,6 +387,38 @@ fn a_call_the_window_does_not_send_is_refused_by_name_and_never_sent() {
 }
 
 #[test]
+fn a_request_that_names_who_acts_is_refused_and_never_sent() {
+    // Given - an engine listening, and a restart that names a session in its by, which the window never sends
+    let (listener, path) = listening();
+    listener
+        .set_nonblocking(true)
+        .expect("the listener turns non-blocking");
+    let exchanges = Arc::new(Exchanges::default());
+    let (sink, received, _) = heard();
+    let restart = json!({
+        "v": 2,
+        "id": "4",
+        "call": "machines.restart",
+        "by": "studio-os-fe",
+        "in": { "Name": "infra" },
+    });
+
+    // When - the window opens it
+    let handle = exchanges.open(&path, "main", restart, sink, LIMITS);
+
+    // Then - it is refused under its id as a frame outside the envelope, and the engine was never reached
+    assert_eq!(handle, Ok(0));
+    let messages = drained(&received);
+    assert_eq!(
+        error_of(&messages[0]),
+        Some(("4".into(), "refused".into(), "call.bad-frame".into()))
+    );
+    assert_eq!(messages[1], Message::End("answered".into()));
+    assert!(listener.accept().is_err());
+    let _ = std::fs::remove_file(path);
+}
+
+#[test]
 fn a_code_answered_reaches_the_engine_in_its_one_frame_and_never_the_window() {
     // Given - an engine listening, and a call the bridge forwards carrying a sign-in's code
     let (listener, path) = listening();
