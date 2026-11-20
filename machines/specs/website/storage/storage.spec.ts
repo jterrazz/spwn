@@ -1,4 +1,13 @@
-import { button, content, dialog, field, heading, region, within } from '@jterrazz/test';
+import {
+    button,
+    content,
+    dialog,
+    field,
+    heading,
+    navigation,
+    region,
+    within,
+} from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { website } from '../website.specification.js';
@@ -60,7 +69,25 @@ describe('storage', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test.todo("D9 waits for a gesture's line kept in its Mac's journal");
+    test('D9 what nothing uses, once freed, is recorded in the History, one line per name', async () => {
+        // Given - Storage over leftovers, whose History holds no day
+        const subject = 'base-ubuntu@2026.10.20, old-vm';
+        const result = await website.visit('/?world=leftovers&page=storage', async (visitor) => {
+            // When - Free 12 GB is pressed and confirmed with the names, then the Inbox opened
+            await visitor.click(within(region('Disk'), button('Free 12 GB')));
+            const asked = dialog('Free 12 GB on macbook-pro?');
+            await visitor.fill(within(asked, field(`Type ${subject} to confirm`)), subject);
+            await visitor.click(within(asked, button('Free')));
+            await visitor.see(heading('Nothing to free.'));
+            await visitor.click(within(navigation('Sidebar'), button('Inbox', { exact: false })));
+
+            // Then - a Today group holds the engine's line of each name it freed
+            const today = region('Today');
+            await visitor.see(within(today, content('base-ubuntu@2026.10.20 freed')));
+            await visitor.see(within(today, content('old-vm freed')));
+        });
+        expect(result.errors.text).toBe('');
+    });
 
     test('D10 choosing the other Mac at the top shows its own disk and its verdict', async () => {
         // Given - Storage over two-macs, where mac-mini's disk.read is recorded and has nothing to free

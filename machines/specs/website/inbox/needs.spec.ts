@@ -133,7 +133,25 @@ describe('needs', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test.todo("N9 waits for a gesture's line kept in its Mac's journal");
+    test('N9 a line settled by its verb leaves the top, and its line appears in the History below, by me', async () => {
+        // Given - the Inbox over two-macs, where mise waits for an update and the History holds no day but last night
+        const today = within(region('History'), region('Today'));
+        const result = await website.visit('/?world=two-macs&page=inbox', async (visitor) => {
+            await visitor.see(within(canWait, content('1 mise update waiting')));
+
+            // When - its verb, Update, is pressed
+            await visitor.click(within(canWait, button('Update mise')));
+
+            // Then - the line has left, and the History's Today holds the engine's line of the update, by me
+            await visitor.gone(within(canWait, content('1 mise update waiting')));
+            await visitor.see(within(today, button('10:00 node by you')));
+        });
+        expect(result.errors.text).toBe('');
+    });
+
+    test.todo(
+        "N9 waits for a verb in a gesture's journal line: apps.update's reads `node` alone, with no Upgrade and no Detail",
+    );
 
     test("N10 a Mac chosen above the list keeps only that Mac's needs, and All brings them back", async () => {
         // Given - the Inbox over two-macs, where every need is on the first Mac

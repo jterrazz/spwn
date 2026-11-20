@@ -231,7 +231,22 @@ describe('mac', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test.todo("M7 waits for a gesture's line kept in its Mac's journal");
+    test('M7 a cache freed is recorded in the History, by me', async () => {
+        // Given - the Storage tab of This Mac over two-macs, whose History holds no day but last night
+        const result = await website.visit(
+            '/?world=two-macs&machine=macbook-pro&tab=Storage',
+            async (visitor) => {
+                // When - Free is pressed on go, then the Inbox opened
+                await visitor.click(within(region('By app'), button('Free go')));
+                await visitor.see(within(region('Done here'), content('19.4 GB freed')));
+                await visitor.click(within(sidebar, button('Inbox', { exact: false })));
+
+                // Then - a Today group holds the engine's line of the free, its time first
+                await visitor.see(within(region('Today'), button('10:00 go freed by you')));
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
 
     test('M8 the Packages tab names the file the Mac follows, and says it matches', async () => {
         // Given - the Packages tab of This Mac over two-macs

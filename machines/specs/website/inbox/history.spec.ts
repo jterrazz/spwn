@@ -1,4 +1,14 @@
-import { button, content, heading, main, region, within } from '@jterrazz/test';
+import {
+    button,
+    content,
+    dialog,
+    field,
+    heading,
+    main,
+    navigation,
+    region,
+    within,
+} from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { website } from '../website.specification.js';
@@ -71,7 +81,27 @@ describe('history', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test.todo("C4 waits for a gesture's line kept in its Mac's journal");
+    test('C4 a server I restarted is a line of Today in the History, with its time and by me', async () => {
+        // Given - infra's page over two-macs, whose History holds no day but last night
+        const result = await website.visit(
+            '/?world=two-macs&machine=infra&tab=Overview',
+            async (visitor) => {
+                // When - infra is restarted, its name typed, and the Inbox opened
+                await visitor.click(button('Restart'));
+                const confirm = dialog('Restart infra?');
+                await visitor.fill(within(confirm, field('Type infra to confirm')), 'infra');
+                await visitor.click(within(confirm, button('Restart')));
+                await visitor.gone(confirm);
+                await visitor.click(
+                    within(navigation('Sidebar'), button('Inbox', { exact: false })),
+                );
+
+                // Then - a Today group holds the engine's line of the restart, its time first
+                await visitor.see(within(region('Today'), button('10:01 infra restarted by you')));
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
 
     test("C5 a Mac chosen keeps only its own lines and its machines', and All machines brings back the rest", async () => {
         // Given - the Inbox over stories, gh moved on macbook-pro alone

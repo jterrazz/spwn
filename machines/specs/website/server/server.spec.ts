@@ -6,6 +6,7 @@ import {
     enabled,
     field,
     main,
+    navigation,
     region,
     within,
 } from '@jterrazz/test';
@@ -98,7 +99,32 @@ describe('server', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test.todo("S3 waits for a gesture's line kept in its Mac's journal");
+    test('S3 the restart of a server down is recorded in the History, by me', async () => {
+        // Given - mac-mini's page over stories, whose server infra fails its check
+        const result = await website.visit(
+            '/?world=stories&machine=mac-mini&tab=Overview',
+            async (visitor) => {
+                const needs = region('Needs you, on this Mac');
+                const line = content('infra check failing since 10:18', { exact: false });
+
+                // When - its Restart is pressed and confirmed, then the Inbox opened
+                await visitor.click(within(needs, button('Restart infra', { exact: false })));
+                const confirm = dialog('Restart infra?');
+                await visitor.fill(within(confirm, field('Type infra to confirm')), 'infra');
+                await visitor.click(within(confirm, button('Restart')));
+                await visitor.gone(within(needs, line));
+                await visitor.click(
+                    within(navigation('Sidebar'), button('Inbox', { exact: false })),
+                );
+
+                // Then - Today holds the engine's line of this restart, beside the one of the morning
+                const today = region('Today');
+                await visitor.see(within(today, button('10:31 infra restarted by you')));
+                await visitor.see(within(today, button('09:05 infra restarted by you')));
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
 
     test('S4 Delete asks for the name typed, and stays off until it matches', async () => {
         // Given - the window on infra's page over two-macs
