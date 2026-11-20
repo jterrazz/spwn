@@ -1,0 +1,5 @@
+{"world": "bare-mac", "station": "dev", "exchanges": [
+{"request":{"call":"journal.read","in":{}},"answers":[{"v":2,"out":{"Groups":[],"Unheard":null,"Next":"","Empty":"Nothing was done in the last 7 days."}}]},
+{"request":{"call":"journal.read","in":{"Night":true}},"answers":[{"v":2,"out":{"Groups":[],"Unheard":null,"Next":"","Empty":"No night upgrade ran in the last 30 days."}}]},
+{"request":{"call":"journal.read","in":{"Mac":"macbook-pro"}},"answers":[{"v":2,"out":{"Groups":[],"Unheard":null,"Next":"","Empty":"Nothing was done in the last 7 days."}}]}
+]}

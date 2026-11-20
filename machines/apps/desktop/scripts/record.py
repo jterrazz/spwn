@@ -110,7 +110,8 @@ def asks(listed):
     (src/domain/machines/machines.ts) sends it; a read two pages ask is asked once. A drift names its machine in its
     input and no target, as driftAsked sends it. A VM's activity and its log are asked at its Mac, as useActivity
     and VmLog send them. A Mac's Awake sheet watches its awake.read, of This Mac's engine for This Mac and named for a
-    far one. The New machine sheet watches machines.new of the socket's engine, opened anywhere or on one
+    far one. The journal is read of the socket's engine, which asks every Mac: whole for the Inbox's History, its
+    newest night for Home's Last night, and for each Mac the Inbox chooses. The New machine sheet watches machines.new of the socket's engine, opened anywhere or on one
     Mac machines.list lists, as askedOf sends it; a sheet opened from a machine file names it in From, a request of
     ALSO."""
     here = thisMac(listed)
@@ -155,6 +156,9 @@ def asks(listed):
         *[{"watch": "vault.list", "in": {}} for _ in here],
         *[{"watch": "vault.new", "in": {}} for _ in here],
         *[{"watch": "awake.read", "in": {}, **onMac(mac)} for mac in macs],
+        {"call": "journal.read", "in": {}},
+        {"call": "journal.read", "in": {"Night": True}},
+        *[{"call": "journal.read", "in": {"Mac": mac}} for mac in macsOf(listed)],
         {"watch": "machines.new", "in": {}},
         *[{"watch": "machines.new", "in": {"On": mac}} for mac in macsOf(listed)],
     ]}.values())

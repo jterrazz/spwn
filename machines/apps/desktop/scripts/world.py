@@ -9,7 +9,7 @@ WORLDS is the one list of the worlds the window records, each a world of specs/u
 needs that it lacks: machinefiles on This Mac, the fake binaries of a fixture of specs/usecases/__fixtures__/, and
 edits of its machines (a sign-in in progress, a program signed out or broken, an accounts switch the fake reads in
 apps/engine/world/accounts.go, as the presence check a grant asks, a failed sign-in or a failing background task
-dropped, what a Mac's engine keeps of Awake, a VM working hard on every core of its Mac, a workspace whose create failed at its boot); a world of WORLDS may be a world of specs/usecases/worlds/ under another name, seeded otherwise. A world no
+dropped, what a Mac's engine keeps of Awake, what a Mac's journal keeps, a VM working hard on every core of its Mac, a workspace whose create failed at its boot); a world of WORLDS may be a world of specs/usecases/worlds/ under another name, seeded otherwise. A world no
 entry names is served as specs/usecases/worlds/ holds it.
 
 Every folder a sandbox or a seed makes is removed when the process exits, by its end, an exception or SIGTERM.
@@ -270,6 +270,80 @@ def kept_awake(name, **kept):
     return edit
 
 
+def journaled(mac, lines):
+    """What a Mac's journal keeps, as the engine's own stories seed it (specs/usecases/journal/read/): each line a
+    `journal.Line` (apps/engine/core/journal/journal.go) about the Mac or one of its VMs, a gone machine's kept by the
+    Mac that held it."""
+    def edit(content):
+        content["macs"][mac].setdefault("stores", {})["journal"] = lines
+    return edit
+
+
+def kept_line(at, on, text, **fields):
+    """A line done by you, as the engine words it ("gate-2 deleted"), about `on`, the Mac or one of its VMs."""
+    return {"At": at, "Machine": on, "Text": text, "Detail": "", "By": "you", "Outcome": "done", **fields}
+
+
+def about(kind, name):
+    return {"Kind": kind, "Name": name}
+
+
+def night_line(night, at, on, package, **fields):
+    """A line of the night run started at `night`, about the app `package` on `on`."""
+    return kept_line(at, on, package, By="the night", Subject=about("app", package), Night=night, **fields)
+
+
+def moved(night, at, on, package, versions):
+    return night_line(night, at, on, package, Upgrade={"From": versions[0], "To": versions[1]})
+
+
+def failed(night, at, on, package, args):
+    """A night's update that failed on `on`, its Retry the apps.update `args` name, sent at that machine."""
+    return night_line(night, at, on, package, Detail="download timed out", Outcome="failed",
+                      Retry={"Call": "apps.update", "Args": args, "On": on})
+
+
+STORIES_NIGHT = "2026-11-07T03:00:00Z"
+NODE = ("24.11.0", "24.11.1")
+UV = ("0.9.7", "0.9.9")
+
+
+def stories_night(machines, package, versions, minute):
+    return [moved(STORIES_NIGHT, f"2026-11-07T03:{minute}:00Z", on, package, versions) for on in machines]
+
+
+STORIES_JOURNAL = [
+    journaled("macbook-pro", [
+        *stories_night(["macbook-pro", "agent-7f", "api", "linux-1"], "node", NODE, 12),
+        moved(STORIES_NIGHT, "2026-11-07T03:12:00Z", "macbook-pro", "gh", ("2.97.0", "2.98.0")),
+        *stories_night(["agent-7f", "api", "linux-1"], "uv", UV, 13),
+        night_line(STORIES_NIGHT, "2026-11-07T03:14:00Z", "macbook-pro", "orbstack", Detail="updates itself",
+                   Outcome="held"),
+        failed(STORIES_NIGHT, "2026-11-07T03:15:00Z", "linux-1", "ripgrep", {"Names": "ripgrep"}),
+    ]),
+    journaled("mac-mini", [
+        kept_line("2026-11-07T09:12:00Z", "gate-2", "gate-2 deleted", Call="machines.delete", Detail="8 GB freed",
+                  Subject=about("machine", "gate-2")),
+        kept_line("2026-11-07T09:05:00Z", "infra", "infra restarted", Call="machines.restart",
+                  Subject=about("machine", "infra")),
+        *stories_night(["mac-mini", "infra"], "node", NODE, 12),
+        *stories_night(["infra", "review-bot"], "uv", UV, 13),
+        kept_line("2026-11-06T18:02:00Z", "linux-3", "linux-3 created", Call="machines.create-workspace",
+                  By="agent-7f", Purpose="review the docs lot", Subject=about("machine", "linux-3")),
+    ]),
+]
+
+TWO_MACS_NIGHT = "2026-11-04T03:00:00Z"
+
+TWO_MACS_JOURNAL = [
+    journaled("macbook-pro", [
+        moved(TWO_MACS_NIGHT, "2026-11-04T03:12:00Z", "macbook-pro", "node", NODE),
+        moved(TWO_MACS_NIGHT, "2026-11-04T03:12:00Z", "linux-1", "node", NODE),
+        failed(TWO_MACS_NIGHT, "2026-11-04T03:15:00Z", "macbook-pro", "mise", {"Managers": "mise"}),
+    ]),
+]
+
+
 def released(name, installed, tag, kept):
     """station's release `tag` on GitHub with every binary attached, a Mac's engine at version `installed`, and what
     that engine kept of its last asks (when GitHub last answered, the refusal since), so its job asks nothing at the
@@ -342,11 +416,12 @@ STATION_VM = "~/.local/share/station/vms/vms/linux-1/disk.img"
 WORLDS = {
     **{name: plain(name) for name in (
         "bare-mac", "creating", "disk-low", "engine-stopped", "mini-offline", "mini-workspace", "one-mac", "standings",
-        "stories",
     )},
+    "stories": ("stories", None, {}, STORIES_JOURNAL),
     "two-macs":("two-macs", "homebrew", machine("macbook-pro", ["lazygit", "bat"]),
                  [exchange("linux-1", "ex-1", "gh", "device-code", "github.com"),
-                  broken("macbook-pro", "npm", "you", "The token is refused by registry.npmjs.org")]),
+                  broken("macbook-pro", "npm", "you", "The token is refused by registry.npmjs.org"),
+                  *TWO_MACS_JOURNAL]),
     "sign-ins": ("two-macs", "homebrew", machine("macbook-pro", ["lazygit", "bat"]),
                  [signed_out("linux-1", "claude"), exchange("linux-1", "ex-1", "claude", "paste", "claude.com", asking=True)]),
     "calm": ("two-macs", "homebrew", machine("macbook-pro", ["lazygit", "bat"]),

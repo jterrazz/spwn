@@ -1,0 +1,4 @@
+{"world": "record-unreadable", "station": "dev", "exchanges": [
+{"request":{"call":"journal.read","in":{}},"answers":[{"v":2,"error":{"message":"cannot read the VM record ~/.local/state/station/vms/api.json: unexpected end of JSON input","hint":"repair or move away \"~/.local/state/station/vms/api.json\"","exit":1}}]},
+{"request":{"call":"journal.read","in":{"Night":true}},"answers":[{"v":2,"error":{"message":"cannot read the VM record ~/.local/state/station/vms/api.json: unexpected end of JSON input","hint":"repair or move away \"~/.local/state/station/vms/api.json\"","exit":1}}]}
+]}
