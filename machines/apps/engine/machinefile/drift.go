@@ -284,7 +284,7 @@ func (a *Applying) count(act Action) {
 		a.Adopt++
 	case Leave:
 		a.Leave++
-	case Keep, Remove:
+	case Keep, LeaveExtra, Remove:
 	}
 }
 

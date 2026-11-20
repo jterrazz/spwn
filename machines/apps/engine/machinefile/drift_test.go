@@ -43,7 +43,7 @@ func TestDriftCountsEachChapterAndWordsItsVerdicts(t *testing.T) {
 		{Package: "zoxide", ID: "zoxide", Condition: machinefile.Changed, Action: machinefile.Leave},
 		{Package: "apppa", ID: "apppa", Condition: machinefile.Present, Action: machinefile.Keep},
 	}
-	p.Extra = []machinefile.ExtraLine{{Line: machinefile.Line{Step: machinefile.Step{Package: "jq", Kind: catalog.KindApp}, Seen: machinefile.Seen{Condition: machinefile.Present}, Action: machinefile.Leave}}}
+	p.Extra = []machinefile.ExtraLine{{Line: machinefile.Line{Step: machinefile.Step{Package: "jq", Kind: catalog.KindApp}, Seen: machinefile.Seen{Condition: machinefile.Present}, Action: machinefile.LeaveExtra}}}
 	d := machinefile.DriftOf(p, nil)
 	apps := chapter(t, d, machinefile.ChapterApps)
 	if apps.Listed != 43 || apps.Matching != 40 || len(apps.Differing) != 4 {
@@ -93,7 +93,7 @@ func TestDriftSaysWhatApplyWouldDo(t *testing.T) {
 			line("ripgrep", catalog.KindApp, machinefile.Absent, machinefile.Install),
 			line("tree", catalog.KindApp, machinefile.NotManaged, machinefile.Adopt),
 			line("node", catalog.KindApp, machinefile.Changed, machinefile.Leave),
-		}, Extra: []machinefile.ExtraLine{{Installed: machinefile.Installed{Method: "pkg"}, Line: machinefile.Line{Step: machinefile.Step{Package: "jq"}, Seen: machinefile.Seen{Condition: machinefile.Present, Method: "pkg"}, Action: machinefile.Remove}}}},
+		}, Extra: []machinefile.ExtraLine{{Installed: machinefile.Installed{Method: "pkg"}, Line: machinefile.Line{Step: machinefile.Step{Package: "jq"}, Seen: machinefile.Seen{Condition: machinefile.Present, Method: "pkg"}, Action: machinefile.LeaveExtra}}}},
 			"Apply will install 1, adopt 1 and leave 1."},
 		{"only what is left", machinefile.Plan{Lines: []machinefile.Line{line("node", catalog.KindApp, machinefile.Changed, machinefile.Leave)}}, "Nothing to apply."},
 		{"none", machinefile.Plan{}, "Nothing to apply."},
@@ -107,7 +107,7 @@ func TestDriftSaysWhatApplyWouldDo(t *testing.T) {
 }
 
 func TestDriftSaysWhatApplyLeaves(t *testing.T) {
-	removing := machinefile.ExtraLine{Installed: machinefile.Installed{Method: "pkg"}, Line: machinefile.Line{Step: machinefile.Step{Package: "jq"}, Seen: machinefile.Seen{Condition: machinefile.Present, Method: "pkg"}, Action: machinefile.Remove}}
+	removing := machinefile.ExtraLine{Installed: machinefile.Installed{Method: "pkg"}, Line: machinefile.Line{Step: machinefile.Step{Package: "jq"}, Seen: machinefile.Seen{Condition: machinefile.Present, Method: "pkg"}, Action: machinefile.LeaveExtra}}
 	for _, c := range []struct {
 		name  string
 		plan  machinefile.Plan
@@ -133,7 +133,7 @@ func TestDriftSaysWhatApplyLeaves(t *testing.T) {
 
 func TestDriftNamesTheExtrasApplyLeaves(t *testing.T) {
 	extra := func(name string) machinefile.ExtraLine {
-		return machinefile.ExtraLine{Installed: machinefile.Installed{Method: "pkg"}, Line: machinefile.Line{Step: machinefile.Step{Package: name}, Seen: machinefile.Seen{Condition: machinefile.Present, Method: "pkg"}, Action: machinefile.Remove}}
+		return machinefile.ExtraLine{Installed: machinefile.Installed{Method: "pkg"}, Line: machinefile.Line{Step: machinefile.Step{Package: name}, Seen: machinefile.Seen{Condition: machinefile.Present, Method: "pkg"}, Action: machinefile.LeaveExtra}}
 	}
 	for _, c := range []struct {
 		extras []string

@@ -466,6 +466,7 @@ func (r *run) remove(ctx context.Context, p machinefile.Plan) ([]machinefile.Don
 	}
 	for _, e := range p.Extra {
 		done := machinefile.Done{Line: e.Line, State: e.Seen.State, Version: e.Seen.Version}
+		done.Line.Action = e.Removal()
 		end := appGoes
 		switch e.Fate() {
 		case machinefile.KeptRequired:

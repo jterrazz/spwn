@@ -109,7 +109,7 @@ func PlanContract(schema string, p machinefile.Plan) PlanJSON {
 		out.Lines = append(out.Lines, lineJSON(l, "", l.Seen.Detail))
 	}
 	for _, e := range p.Extra {
-		out.Extra = append(out.Extra, ExtraJSON{Package: e.Step.Package, Method: e.Step.Method, Machinefile: e.Installed.Machinefile, Condition: string(e.Seen.Condition), Action: string(e.Action)})
+		out.Extra = append(out.Extra, ExtraJSON{Package: e.Step.Package, Method: e.Step.Method, Machinefile: e.Installed.Machinefile, Condition: string(e.Seen.Condition), Action: string(e.Removal())})
 	}
 	for _, b := range p.Blocks {
 		out.Blocks = append(out.Blocks, BlockJSON{Package: b.Package, ID: b.ID, Condition: string(b.Condition), Action: string(b.Action)})

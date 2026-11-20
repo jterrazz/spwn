@@ -187,8 +187,11 @@ func TestJudgeGivesEveryExtraOneFateWhetherAnAppNeedsIt(t *testing.T) {
 			if asked != (want == machinefile.Taken) || len(p.Needs) > 0 {
 				t.Errorf("lib %s, needed %v: --remove asks %v, plan asks %v; want asked only when taken back", c.reads, needed, p.Interactive(true), p.Needs)
 			}
-			if removes := e.Action == machinefile.Remove; removes != (want == machinefile.Taken || want == machinefile.Gone) {
-				t.Errorf("lib %s, needed %v: %s; want remove only when taken back or gone", c.reads, needed, e.Action)
+			if removes := e.Removes(); removes != (want == machinefile.Taken || want == machinefile.Gone) {
+				t.Errorf("lib %s, needed %v: --remove removes %v; want only when taken back or gone", c.reads, needed, removes)
+			}
+			if e.Action != machinefile.LeaveExtra {
+				t.Errorf("lib %s, needed %v: the plan's action %s; want extra, whatever --remove does", c.reads, needed, e.Action)
 			}
 			if forgets := slices.Contains([]machinefile.Fate{machinefile.Taken, machinefile.Gone, machinefile.KeptIrreversible, machinefile.KeptAnotherWay}, want); p.Calm() == forgets {
 				t.Errorf("lib %s, needed %v: calm %v; want calm only when --remove changes nothing", c.reads, needed, p.Calm())

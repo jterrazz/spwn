@@ -109,10 +109,10 @@ func TestAnExtraThatDidNotUninstallKeepsWhatItLeansOn(t *testing.T) {
 	l := &ledger{}
 	r := run{d: Deps{Calls: c, Ledger: l, Now: epoch}, name: "laptop", ended: map[string]catalog.State{}}
 	extra := func(pkg string, waits ...string) machinefile.ExtraLine {
-		return machinefile.ExtraLine{Line: machinefile.Line{
+		return machinefile.ExtraLine{Installed: machinefile.Installed{Package: pkg, Method: "pkg"}, Line: machinefile.Line{
 			Step:   machinefile.Step{Package: pkg, Kind: catalog.KindApp, Method: "pkg", Waits: waits},
 			Seen:   machinefile.Seen{Condition: machinefile.Present, Method: "pkg"},
-			Action: machinefile.Remove,
+			Action: machinefile.LeaveExtra,
 		}}
 	}
 	out, _ := r.remove(context.Background(), machinefile.Plan{Extra: []machinefile.ExtraLine{extra("browsers", "runtime"), extra("runtime", "base"), extra("base"), extra("other")}})

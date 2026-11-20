@@ -1387,6 +1387,11 @@
       "Heading": "To adopt",
       "Tone": "new"
     },
+    "extra": {
+      "Word": "stays",
+      "Heading": "Extra",
+      "Tone": "plain"
+    },
     "install": {
       "Word": "install it",
       "Heading": "To install",

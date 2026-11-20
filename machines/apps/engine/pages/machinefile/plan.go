@@ -236,7 +236,7 @@ func Plan(p machinefile.Plan, thisMac page.Context) page.Page {
 	switch {
 	case !p.Calm():
 		mark = page.Absent
-		removes := p.RemovesBlocks() || slices.ContainsFunc(p.Extra, func(e machinefile.ExtraLine) bool { return e.Action == machinefile.Remove })
+		removes := p.RemovesBlocks() || slices.ContainsFunc(p.Extra, machinefile.ExtraLine.Removes)
 		_, runs := p.Script()
 		if p.WritesBlocks() || runs || slices.ContainsFunc(p.Lines, machinefile.Line.Acts) {
 			hints = append(hints, page.Hint{Command: "station apply", Text: "carries it out"})

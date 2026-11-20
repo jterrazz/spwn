@@ -707,6 +707,7 @@
             "adopt",
             "keep",
             "leave",
+            "extra",
             "remove"
           ],
           "type": "string"
@@ -772,6 +773,7 @@
             "adopt",
             "keep",
             "leave",
+            "extra",
             "remove"
           ],
           "type": "string"
@@ -919,6 +921,7 @@
             "adopt",
             "keep",
             "leave",
+            "extra",
             "remove"
           ],
           "type": "string"
@@ -990,6 +993,7 @@
             "adopt",
             "keep",
             "leave",
+            "extra",
             "remove"
           ],
           "type": "string"

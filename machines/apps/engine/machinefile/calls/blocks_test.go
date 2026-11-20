@@ -127,19 +127,19 @@ func TestAnOptionWithNoValueIsAPlanErrorNeverAnEmptyString(t *testing.T) {
 
 // value: an extra of the plan whose app reads as seen, by the method the
 // ledger recorded, "pkg".
-func extraSeen(pkg string, seen machinefile.Seen, action machinefile.Action, requiredBy ...string) machinefile.ExtraLine {
+func extraSeen(pkg string, seen machinefile.Seen, requiredBy ...string) machinefile.ExtraLine {
 	return machinefile.ExtraLine{
 		Installed:  machinefile.Installed{Package: pkg, Method: "pkg", Machinefile: "laptop"},
-		Line:       machinefile.Line{Step: machinefile.Step{Package: pkg, Kind: catalog.KindApp, Method: "pkg"}, Seen: seen, Action: action},
+		Line:       machinefile.Line{Step: machinefile.Step{Package: pkg, Kind: catalog.KindApp, Method: "pkg"}, Seen: seen, Action: machinefile.LeaveExtra},
 		RequiredBy: requiredBy,
 	}
 }
 
 var (
-	soloTaken     = extraSeen("solo", machinefile.Seen{Condition: machinefile.Present, Method: "pkg"}, machinefile.Remove)
-	soloGone      = extraSeen("solo", machinefile.Seen{Condition: machinefile.Absent}, machinefile.Remove)
-	soloYours     = extraSeen("solo", machinefile.Seen{Condition: machinefile.Present, Method: "other"}, machinefile.Leave)
-	soloRequired  = extraSeen("solo", machinefile.Seen{Condition: machinefile.Present, Method: "pkg"}, machinefile.Remove, "app")
+	soloTaken     = extraSeen("solo", machinefile.Seen{Condition: machinefile.Present, Method: "pkg"})
+	soloGone      = extraSeen("solo", machinefile.Seen{Condition: machinefile.Absent})
+	soloYours     = extraSeen("solo", machinefile.Seen{Condition: machinefile.Present, Method: "other"})
+	soloRequired  = extraSeen("solo", machinefile.Seen{Condition: machinefile.Present, Method: "pkg"}, "app")
 	soloRecord    = machinefile.Written{ID: "station:solo", Package: "solo", Digest: machinefile.BlockDigest("export SOLO=1\n")}
 	soloFile      = func(body string) string { return "mine\n# >>> station:solo >>>\n" + body + "# <<< station:solo <<<\n" }
 	soloUntouched = soloFile("export SOLO=1\n")

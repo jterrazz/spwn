@@ -1396,7 +1396,7 @@ export type MachinefileAsked = {
 };
 
 export type MachinefileBlock = {
-    Action: 'install' | 'set' | 'adopt' | 'keep' | 'leave' | 'remove';
+    Action: 'install' | 'set' | 'adopt' | 'keep' | 'leave' | 'extra' | 'remove';
     Condition: 'present' | 'absent' | 'outdated' | 'changed' | 'not-managed' | 'extra' | 'unknown';
     Diff: string;
     Fate: '' | 'gone' | 'kept-another-way' | 'kept-edited' | 'kept-holding' | 'kept-irreversible' | 'kept-manager-missing' | 'kept-required' | 'kept-unread' | 'taken';
@@ -1406,7 +1406,7 @@ export type MachinefileBlock = {
 };
 
 export type MachinefileBlockDone = {
-    Action: 'install' | 'set' | 'adopt' | 'keep' | 'leave' | 'remove';
+    Action: 'install' | 'set' | 'adopt' | 'keep' | 'leave' | 'extra' | 'remove';
     Condition: 'present' | 'absent' | 'outdated' | 'changed' | 'not-managed' | 'extra' | 'unknown';
     Detail: string;
     Diff: string;
@@ -1514,7 +1514,7 @@ export type MachinefileDrift = {
 };
 
 export type MachinefileExtraLine = {
-    Action: 'install' | 'set' | 'adopt' | 'keep' | 'leave' | 'remove';
+    Action: 'install' | 'set' | 'adopt' | 'keep' | 'leave' | 'extra' | 'remove';
     Installed: MachinefileInstalled;
     RequiredBy: string[] | null;
     Seen: MachinefileSeen;
@@ -1580,7 +1580,7 @@ export type MachinefileLastRun = {
 };
 
 export type MachinefileLine = {
-    Action: 'install' | 'set' | 'adopt' | 'keep' | 'leave' | 'remove';
+    Action: 'install' | 'set' | 'adopt' | 'keep' | 'leave' | 'extra' | 'remove';
     Seen: MachinefileSeen;
     Step: MachinefileStep;
     Waiting: string;
@@ -3693,7 +3693,7 @@ export type ImagesBuildState = 'done' | 'now' | 'next';
 
 export type ImagesBuildStep = 'base-system' | 'packages' | 'settings' | 'seal';
 
-export type MachinefileAction = 'install' | 'set' | 'adopt' | 'keep' | 'leave' | 'remove';
+export type MachinefileAction = 'install' | 'set' | 'adopt' | 'keep' | 'leave' | 'extra' | 'remove';
 
 export type MachinefileChapter = 'apps' | 'settings' | 'ports' | 'accounts';
 

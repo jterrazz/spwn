@@ -33,22 +33,25 @@ func (Condition) Enum() []string {
 
 // value: what apply does with a package: install it, set it, adopt it as
 // it is (never reinstalled), keep it (already there), leave it as it is
-// (the owner's change, a read that did not answer), or remove it (an extra,
-// with --remove alone).
+// (the owner's change, a read that did not answer), leave it an extra (what
+// station installed that the Machinefile lists no longer: a plan never
+// removes it, and `apply --remove` alone takes it back, as its Removes
+// says), or remove it (a run of `apply --remove`, an extra's block).
 
 type Action string
 
 const (
-	Install Action = "install"
-	Set     Action = "set"
-	Adopt   Action = "adopt"
-	Keep    Action = "keep"
-	Leave   Action = "leave"
-	Remove  Action = "remove"
+	Install    Action = "install"
+	Set        Action = "set"
+	Adopt      Action = "adopt"
+	Keep       Action = "keep"
+	Leave      Action = "leave"
+	LeaveExtra Action = "extra"
+	Remove     Action = "remove"
 )
 
 func (Action) Enum() []string {
-	return []string{string(Install), string(Set), string(Adopt), string(Keep), string(Leave), string(Remove)}
+	return []string{string(Install), string(Set), string(Adopt), string(Keep), string(Leave), string(LeaveExtra), string(Remove)}
 }
 
 // value: what a package reads on the machine, as its family read it: its
@@ -98,9 +101,9 @@ type Installed struct {
 }
 
 // value: an install of the ledger the Machinefile lists no longer, as a
-// line: its step is the package by the ledger's method, with what its removal
-// asks of the owner and the extras it waits on, what it reads now, and
-// what `apply --remove` does with it: remove it, or leave it.
+// line: its step is the package by the ledger's method, with what its removal asks of the owner and the extras it waits
+// on, what it reads now, and its action, an extra's, whatever `apply
+// --remove` would do with it (Removes, Fate).
 
 type ExtraLine struct {
 	Line
@@ -254,21 +257,10 @@ func Judge(r Resolved, cat catalog.Catalog, seen map[string]Seen, ledger []Insta
 func extras(sys catalog.System, cat catalog.Catalog, seen map[string]Seen, extra []Installed) []ExtraLine {
 	out := make([]ExtraLine, 0, len(extra))
 	for _, in := range extra {
-		s := ExtraLine{Installed: in, Line: Line{Step: Step{Package: in.Package, Kind: catalog.KindApp, Method: in.Method, Phase: catalog.PhaseApply}, Seen: seen[in.Package]}}
+		step := Step{Package: in.Package, Kind: catalog.KindApp, Method: in.Method, Phase: catalog.PhaseApply}
+		s := ExtraLine{Installed: in, Line: Line{Step: step, Seen: seen[in.Package], Action: LeaveExtra}}
 		if s.Seen.Condition == "" {
 			s.Seen.Condition = Unknown
-		}
-		s.Action = Leave
-		switch s.Seen.Condition {
-		case Present, Outdated:
-			if s.Seen.Method == in.Method && !s.Seen.Irreversible && !s.Seen.holding() {
-				s.Action = Remove
-			}
-		case Absent:
-			if s.Seen.Lacks == "" {
-				s.Action = Remove
-			}
-		case Changed, NotManaged, Extra, Unknown:
 		}
 		if it, ok := cat.Package(in.Package); ok {
 			s.Step.Needs = removalNeeds(it.Package, in.Method, sys)
@@ -306,7 +298,7 @@ func required(sys catalog.System, cat catalog.Catalog, seen map[string]Seen, ext
 	}
 	for i := range extra {
 		if s := &extra[i]; held[s.Step.Package] || s.Fate() == KeptIrreversible || s.Fate() == KeptHolding {
-			s.Action, s.RequiredBy = Leave, needing(sys, cat, seen, taken, s.Step.Package)
+			s.RequiredBy = needing(sys, cat, seen, taken, s.Step.Package)
 		}
 	}
 	return extra
@@ -433,11 +425,39 @@ func (l Line) Acts() bool {
 	return l.Action == Install || l.Action == Set
 }
 
+func (s ExtraLine) Removes() bool {
+	// invariant: `apply --remove` takes back an extra that reads there by
+	// the method that installed it, that station can uninstall here, that
+	// holds none of the owner's packages and that no app there needs, and
+	// lets go of the record of one already gone whose manager is here;
+	// any other is left.
+	if len(s.RequiredBy) > 0 {
+		return false
+	}
+	switch s.Seen.Condition {
+	case Present, Outdated:
+		return s.Seen.Method == s.Installed.Method && !s.Seen.Irreversible && !s.Seen.holding()
+	case Absent:
+		return s.Seen.Lacks == ""
+	case Changed, NotManaged, Extra, Unknown:
+	}
+	return false
+}
+
+func (s ExtraLine) Removal() Action {
+	// value: what `apply --remove` does with the extra, as its run says it:
+	// remove it, or leave it.
+	if s.Removes() {
+		return Remove
+	}
+	return Leave
+}
+
 func (s ExtraLine) Takes() bool {
 	// value: whether `apply --remove` uninstalls the extra: it reads there
 	// by the method that installed it; one already gone only leaves the
 	// ledger.
-	return s.Action == Remove && s.Seen.Condition != Absent
+	return s.Removes() && s.Seen.Condition != Absent
 }
 
 // value: what `apply --remove` does with an extra: takes it back, lets
@@ -470,7 +490,7 @@ func (s ExtraLine) Fate() Fate {
 		return KeptRequired
 	case s.Takes():
 		return Taken
-	case s.Action == Remove:
+	case s.Removes():
 		return Gone
 	case s.Seen.Lacks != "":
 		return KeptManagerMissing
