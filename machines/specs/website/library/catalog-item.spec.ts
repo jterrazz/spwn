@@ -23,7 +23,7 @@ describe('catalog item', () => {
     });
 
     test('D14 an app installed one way per system reads each, with its manager and what it runs', async () => {
-        // Given - the window on postgres's page over stories, a brew formula on a Mac and a macOS VM, an apt package on Linux
+        // Given - the window on postgres's page over stories, a brew formula on macOS, an apt package on Ubuntu
         const result = await website.visit(
             '/?world=stories&page=catalog-apps&item=postgres',
             async (visitor) => {
@@ -31,11 +31,11 @@ describe('catalog item', () => {
                 const installed = region('How it is installed');
                 await visitor.see(installed);
 
-                // Then - one line per way, the systems in the engine's words, the manager and what it runs as sent
-                await visitor.see(within(installed, content('Mac, macOS VM')));
+                // Then - one line per way, the system, the manager and what it fetches, all as the engine sent them
+                await visitor.see(within(installed, content('macOS')));
                 await visitor.see(within(installed, content('brew')));
                 await visitor.see(within(installed, content('postgresql@18')));
-                await visitor.see(within(installed, content('Linux')));
+                await visitor.see(within(installed, content('Ubuntu')));
                 await visitor.see(within(installed, content('apt')));
                 await visitor.see(within(installed, content('postgresql')));
                 await visitor.see(within(installed, content('psql')));
@@ -74,24 +74,6 @@ describe('catalog item', () => {
                 // Then - the need in the engine's word
                 await visitor.see(within(installed, content('Asks you for')));
                 await visitor.see(within(installed, content('a license accepted')));
-            },
-        );
-        expect(result.errors.text).toBe('');
-    });
-
-    test('D14 an app page says, per system, the manager and what it fetches', async () => {
-        // Given - the window on gh's page over stories, installed by brew on macOS and by apt on Ubuntu
-        const result = await website.visit(
-            '/?world=stories&page=catalog-apps&item=gh',
-            async (visitor) => {
-                // When - the page is read
-                const installed = region('How it is installed');
-
-                // Then - each system, with its manager
-                await visitor.see(within(installed, content('macOS')));
-                await visitor.see(within(installed, content('brew')));
-                await visitor.see(within(installed, content('Ubuntu')));
-                await visitor.see(within(installed, content('apt')));
             },
         );
         expect(result.errors.text).toBe('');

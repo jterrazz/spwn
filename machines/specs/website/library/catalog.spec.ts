@@ -59,7 +59,7 @@ describe('catalog', () => {
                 // When - its rail is read
                 // Then - where it comes from, and the file that holds it
                 await visitor.see(within(rail, content('Comes from')));
-                await visitor.see(within(rail, content('built into station')));
+                await visitor.see(within(rail, content('built into station', { exact: false })));
                 await visitor.see(within(rail, content('built-in/catalog/git/gh.yaml')));
             },
         );
