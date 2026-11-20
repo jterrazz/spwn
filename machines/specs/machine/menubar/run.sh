@@ -7,12 +7,12 @@
 # like tier 3's image. The VM runs headless: nothing opens a window on the Mac.
 # usage: run.sh <label> [--update-goldens | --capture | --expect-goldens <file>]
 #   --expect-goldens <file> lists, one repo-relative path per line, the goldens this
-#   change is expected to redraw. The run compares every story as without it, fails
+#   change is expected to redraw, PNG or view golden (.view.yaml). The run compares every story as without it, fails
 #   on any golden that differs and is not listed, and on any listed one that did not
 #   change; only then are the listed ones rewritten, in one pass.
 #   the log is .artifacts/e2e/menubar-<label>.log; what the run wrote under
-#   apps/menubar (an .actual.png, or with --update-goldens the rewritten goldens and
-#   INDEX) comes back to .artifacts/e2e/menubar-<label>/changes/, the tree untouched.
+#   apps/menubar (an .actual.png or .actual.view.yaml, or with --update-goldens the
+#   rewritten goldens and INDEX) comes back to .artifacts/e2e/menubar-<label>/changes/, the tree untouched.
 #   STATION_XCODE_IMAGE picks another image (default below, pinned by digest);
 #   STATION_VM_DISPLAY=<W>x<H>[pt|px] sets the guest's display.
 #   --capture builds Station.app instead of the gate and reads its live panel
@@ -201,7 +201,7 @@ fi
 if [ -n "$expect" ]; then
   # invariant: the goldens the run rewrote are exactly the listed ones: a listed path
   # no story draws, or one drawn from another folder, is a failure, not a no-op.
-  in_vm "cd $vm_root && git ls-files -m -o apps/menubar | grep '[.]png\$' | grep -v -e '[.]actual[.]png\$' -e '/symbols.xcassets/'" > "$work/rewritten.txt" 2>> "$log"
+  in_vm "cd $vm_root && git ls-files -m -o apps/menubar | grep -e '[.]png\$' -e '[.]view[.]yaml\$' | grep -v -e '[.]actual[.]' -e '/symbols.xcassets/'" > "$work/rewritten.txt" 2>> "$log"
   sort -u -o "$work/rewritten.txt" "$work/rewritten.txt"
   if ! diff "$expected" "$work/rewritten.txt" >> "$log" 2>&1; then
     say "listed, not rewritten: $(comm -23 "$expected" "$work/rewritten.txt" | tr '\n' ' ')"
