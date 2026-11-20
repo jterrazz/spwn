@@ -1,11 +1,42 @@
+import type { OverviewNeed } from '@jterrazz/station-api';
 import { describe, expect, test } from 'vitest';
 
 import type { Out } from '../../../application/ports/engine.port';
 import { keyOf } from '../../../domain/request-key';
 import { recordingsOf } from '../../../infrastructure/outbound/engine-replay/recordings';
-import { followerState, holdAgainst, macCardState, macState, rollUpState, vmState } from '../shown';
+import {
+    followerState,
+    holdAgainst,
+    macCardState,
+    macState,
+    needState,
+    rollUpState,
+    vmState,
+} from '../shown';
 
 const recordingFor = await recordingsOf('standings', 'two-macs');
+
+function needMarked(Mark: OverviewNeed['Mark']): OverviewNeed {
+    return {
+        Args: null,
+        Broken: true,
+        Call: '',
+        Command: '',
+        Confirm: '',
+        Detail: '',
+        Machine: 'macbook-pro',
+        Mark,
+        Noun: 'Overview',
+        On: '',
+        Path: '',
+        Section: 'overview',
+        Severity: 'broken',
+        Subject: '',
+        Text: '',
+        Upkeep: 'needs-you',
+        Verb: 'fix',
+    };
+}
 
 function macsOf(world: string) {
     const asked = keyOf({ in: {}, watch: 'machines.list' });
@@ -53,6 +84,22 @@ describe('shown', () => {
             { tone: 'warn', word: '2 Macs not seen' },
             { tone: 'plain', word: 'no machine yet' },
             { tone: 'ok', word: 'all running' },
+        ]);
+    });
+
+    test("a need's pill is its Mark's word and tone, whatever its severity says", () => {
+        // Given - one need per Mark, each with the severity the engine orders it by
+        // When - each is shown
+        const shown = (['exposed', 'down', 'needs-you', 'can-wait'] as const).map((mark) =>
+            needState(needMarked(mark)),
+        );
+
+        // Then - words.json's OverviewMark, never the severity's
+        expect(shown).toStrictEqual([
+            { tone: 'bad', word: 'Exposed' },
+            { tone: 'bad', word: 'Down' },
+            { tone: 'warn', word: 'Needs you' },
+            { tone: 'plain', word: 'Upkeep' },
         ]);
     });
 

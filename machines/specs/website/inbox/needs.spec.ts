@@ -38,6 +38,17 @@ describe('needs', () => {
             await visitor.gone(
                 within(canWait, content('com.example.brain.x-snapshot is failing, last exit 2')),
             );
+
+            // Then - each line's pill is its Mark's word: Needs you for the failing task, Upkeep for the update
+            await visitor.see(
+                within(
+                    needs,
+                    button('Needs you com.example.brain.x-snapshot is failing', { exact: false }),
+                ),
+            );
+            await visitor.see(
+                within(canWait, button('Upkeep 1 mise update waiting', { exact: false })),
+            );
         });
         expect(result.errors.text).toBe('');
     });

@@ -12,9 +12,9 @@
   - text: of 994 GB · machines hold 120 GB
   - region "Needs you":
     - heading "Needs you 2" [level=2]
-    - button "broken port 5000 is reachable outside Tailscale macbook-pro · Ports"
+    - button "Exposed port 5000 is reachable outside Tailscale macbook-pro · Ports"
     - text: Review
-    - button "broken com.example.brain.x-snapshot is failing, last exit 2 macbook-pro · Background"
+    - button "Needs you com.example.brain.x-snapshot is failing, last exit 2 macbook-pro · Background"
     - button "Remove com.example.brain.x-snapshot": Remove
   - region "Machines":
     - heading "Machines 7" [level=2]

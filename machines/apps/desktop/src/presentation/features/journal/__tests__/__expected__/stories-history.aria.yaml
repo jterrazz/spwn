@@ -10,18 +10,18 @@
     - button "macbook-air"
   - region "Needs you":
     - heading "Needs you a gesture is due" [level=2]
-    - button "broken port 5000 is reachable outside Tailscale macbook-pro · Ports"
+    - button "Exposed port 5000 is reachable outside Tailscale macbook-pro · Ports"
     - text: Review
-    - button "broken com.example.brain.x-snapshot is failing, last exit 2 macbook-pro · Background"
+    - button "Needs you com.example.brain.x-snapshot is failing, last exit 2 macbook-pro · Background"
     - button "Remove com.example.brain.x-snapshot": Remove
   - region "Upkeep":
     - heading "Upkeep 3" [level=2]
-    - button "needs a look 2 brew updates waiting macbook-pro · Apps"
+    - button "Upkeep 2 brew updates waiting macbook-pro · Apps"
     - button "Update brew": Update
-    - 'button "needs a look node 25.1.0 available: change ''24'' to ''25'' macbook-pro · Apps"'
+    - 'button "Upkeep node 25.1.0 available: change ''24'' to ''25'' macbook-pro · Apps"'
     - text: ~/.config/station/machinefiles/macbook-pro.machine.yaml
     - button "Copy ~/.config/station/machinefiles/macbook-pro.machine.yaml": Copy
-    - 'button "needs a look Firewall: off macbook-pro · Settings"'
+    - 'button "Upkeep Firewall: off macbook-pro · Settings"'
     - text: System Settings > Network > Firewall
     - button "Copy System Settings > Network > Firewall": Copy
   - region "History":

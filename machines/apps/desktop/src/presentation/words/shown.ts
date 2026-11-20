@@ -115,7 +115,7 @@ export function macCardState(mac: MachinesMacView): Shown {
 }
 
 export function needState(need: OverviewNeed): Shown {
-    return engineShown('CoreFindingSeverity', need.Severity);
+    return engineShown('OverviewMark', need.Mark);
 }
 
 export function engineState(reading: EngineReading): Shown {
