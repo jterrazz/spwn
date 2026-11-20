@@ -47,16 +47,19 @@ fn one_line(install: &serde_json::Value, pointer: &str) -> String {
 fn install() -> String {
     let source = fs::read_to_string(INSTALL).expect("install.json is readable");
     let install: serde_json::Value = serde_json::from_str(&source).expect("install.json is JSON");
-    assert_eq!(
-        one_line(&install, "/record/root"),
-        "state",
-        "the engine record lives under the state root"
-    );
+    for record in ["/record/root", "/installed/root"] {
+        assert_eq!(
+            one_line(&install, record),
+            "state",
+            "install.json's {record} is the state root"
+        );
+    }
     [
         ("INSTALL_LINE", "/line"),
         ("INSTALL_DIR", "/dir"),
         ("CORE_BINARY", "/binary"),
         ("RECORD_PATH", "/record/path"),
+        ("INSTALLED_PATH", "/installed/path"),
     ]
     .map(|(name, pointer)| {
         format!(

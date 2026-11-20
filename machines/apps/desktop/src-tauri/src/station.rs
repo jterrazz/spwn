@@ -48,10 +48,11 @@ pub fn station_of(at: Where<'_>) -> Option<PathBuf> {
     if let Some(dir) = at.faked {
         return Some(dir.join(CORE_BINARY)).filter(|path| usable(path));
     }
-    let record = state_root(at.home, at.xdg_state).join(RECORD_PATH);
+    let state = state_root(at.home, at.xdg_state);
     [
         at.said.map(Path::to_path_buf),
-        recorded(&record),
+        recorded(&state.join(RECORD_PATH)),
+        recorded(&state.join(INSTALLED_PATH)),
         Some(under_home(INSTALL_DIR, at.home).join(CORE_BINARY)),
     ]
     .into_iter()

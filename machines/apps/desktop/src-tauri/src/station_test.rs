@@ -5,8 +5,8 @@ use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicUsize, Ordering};
 
 use super::{
-    recorded, state_root, station_of, under_home, usable, Where, CORE_BINARY, INSTALL_DIR,
-    INSTALL_LINE, RECORD_PATH,
+    recorded, state_root, station_of, under_home, usable, Where, CORE_BINARY, INSTALLED_PATH,
+    INSTALL_DIR, INSTALL_LINE, RECORD_PATH,
 };
 
 fn scratch() -> PathBuf {
@@ -24,14 +24,25 @@ fn executable(path: &Path, mode: u32) {
     fs::set_permissions(path, fs::Permissions::from_mode(mode)).expect("its mode is set");
 }
 
-fn record(home: &Path, executable: &Path) {
-    let file = home.join(".local/state").join(RECORD_PATH);
+fn written(file: &Path, text: &str) {
     fs::create_dir_all(file.parent().expect("the record has a folder")).expect("it is made");
+    fs::write(file, text).expect("the record is written");
+}
+
+fn record_at(file: &Path, executable: &Path) {
     let text = format!(
         "{{\"v\":1,\"executable\":{:?},\"version\":\"v0.21.0\",\"at\":\"2026-11-19T09:00:00Z\"}}",
         executable.display().to_string()
     );
-    fs::write(file, text).expect("the record is written");
+    written(file, &text);
+}
+
+fn record(home: &Path, executable: &Path) {
+    record_at(&home.join(".local/state").join(RECORD_PATH), executable);
+}
+
+fn installed_record(home: &Path) -> PathBuf {
+    home.join(".local/state").join(INSTALLED_PATH)
 }
 
 fn looked(home: &Path, said: Option<&Path>) -> Option<PathBuf> {
@@ -49,11 +60,12 @@ fn the_install_constants_are_the_packages_install_json() {
 
     // When - they are read
 
-    // Then - they are the public installer's line, folder and binary, and the engine's record
+    // Then - they are the public installer's line, folder and binary, the engine's record and the installer's
     assert_eq!(INSTALL_LINE, "curl -fsSL https://spwn.sh/install.sh | bash");
     assert_eq!(INSTALL_DIR, "~/.local/bin");
     assert_eq!(CORE_BINARY, "station");
     assert_eq!(RECORD_PATH, "station/engine.json");
+    assert_eq!(INSTALLED_PATH, "station/installed.json");
 }
 
 #[test]
@@ -96,27 +108,114 @@ fn the_folder_and_the_state_root_are_under_home_never_a_path_lookup() {
 }
 
 #[test]
-fn the_engine_said_wins_then_its_record_then_the_install_folder() {
-    // Given - a home with a station in each of the three places
+fn the_engine_said_wins_then_its_record_then_the_install_record_then_the_install_folder() {
+    // Given - a home with a station in each of the four places
     let home = scratch();
     let said = home.join("said/station");
     let kept = home.join("kept/station");
+    let landed = home.join("landed/station");
     let installed = home.join(".local/bin/station");
-    for path in [&said, &kept, &installed] {
+    for path in [&said, &kept, &landed, &installed] {
         executable(path, 0o755);
     }
     record(&home, &kept);
+    record_at(&installed_record(&home), &landed);
 
-    // When - station is looked for with what the engine said, then without, then with its record gone
+    // When - station is looked for with what the engine said, then without, then with each record gone
     let first = looked(&home, Some(&said));
     let second = looked(&home, None);
     fs::remove_file(home.join(".local/state").join(RECORD_PATH)).expect("the record goes");
     let third = looked(&home, None);
+    fs::remove_file(installed_record(&home)).expect("the install record goes");
+    let fourth = looked(&home, None);
 
     // Then - each place in that order
     assert_eq!(first, Some(said));
     assert_eq!(second, Some(kept));
-    assert_eq!(third, Some(installed));
+    assert_eq!(third, Some(landed));
+    assert_eq!(fourth, Some(installed));
+}
+
+#[test]
+fn the_install_record_is_read_under_xdg_state_home_when_it_is_absolute() {
+    // Given - a state root of its own holding the install record, and no engine record
+    let [home, state] = [scratch(), scratch()];
+    let landed = home.join("landed/station");
+    executable(&landed, 0o755);
+    record_at(&state.join(INSTALLED_PATH), &landed);
+
+    // When - station is looked for with XDG_STATE_HOME naming that root
+    let found = station_of(Where {
+        faked: None,
+        said: None,
+        home: &home,
+        xdg_state: Some(state.into_os_string()),
+    });
+
+    // Then - it is the station the install record names
+    assert_eq!(found, Some(landed));
+}
+
+#[test]
+fn an_install_record_naming_no_usable_station_falls_to_the_install_folder() {
+    // Given - a station in the install folder, and install records naming a relative path or a gone one
+    let home = scratch();
+    let installed = home.join(".local/bin/station");
+    executable(&installed, 0o755);
+    let records = [
+        "{\"v\":1,\"executable\":\"station\",\"version\":\"v0.21.0\",\"at\":\"2026-11-19T09:00:00Z\"}"
+            .to_owned(),
+        format!(
+            "{{\"v\":1,\"executable\":{:?},\"version\":\"v0.21.0\",\"at\":\"2026-11-19T09:00:00Z\"}}",
+            home.join("gone/station").display().to_string()
+        ),
+    ];
+
+    // When - station is looked for over each record
+    let seen = records.map(|text| {
+        written(&installed_record(&home), &text);
+        looked(&home, None)
+    });
+
+    // Then - both times the install folder's
+    assert_eq!(seen, [Some(installed.clone()), Some(installed)]);
+}
+
+#[test]
+fn an_install_record_missing_malformed_of_another_version_or_unreadable_is_ignored() {
+    // Given - a station in the install folder, another one an install record of version 2 names
+    let home = scratch();
+    let landed = home.join("landed/station");
+    let installed = home.join(".local/bin/station");
+    for path in [&landed, &installed] {
+        executable(path, 0o755);
+    }
+    let file = installed_record(&home);
+    let newer = format!(
+        "{{\"v\":2,\"executable\":{:?},\"version\":\"v0.22.0\",\"at\":\"2026-11-19T09:00:00Z\"}}",
+        landed.display().to_string()
+    );
+
+    // When - station is looked for with no record, a malformed one, one of version 2, then a folder no read opens
+    let missing = looked(&home, None);
+    written(&file, "{\"v\":1,\"executable\":");
+    let malformed = looked(&home, None);
+    written(&file, &newer);
+    let other = looked(&home, None);
+    fs::remove_file(&file).expect("the record goes");
+    fs::create_dir(&file).expect("a folder takes its place");
+    let unreadable = looked(&home, None);
+
+    // Then - each time the install folder's
+    assert_eq!(
+        [missing, malformed, other, unreadable],
+        [
+            Some(installed.clone()),
+            Some(installed.clone()),
+            Some(installed.clone()),
+            Some(installed)
+        ]
+    );
 }
 
 #[test]

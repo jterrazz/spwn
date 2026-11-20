@@ -2,6 +2,7 @@
 
 **Status:** Accepted
 **Date:** 2026-11-19
+**Amended 2026-11-20:** the installer's record, `station/installed.json` (`station.install-record/v1`), is a fourth place, read before the install folder: an installer told to write elsewhere than `~/.local/bin` leaves the only trace of where `station` is.
 
 ## Context
 
@@ -18,10 +19,11 @@ nothing.
 
 While no engine answers, the shell looks for the core on the disk and runs two programs of its own, each on a press:
 
-- It looks for `station` as an executable file at an absolute path, in three places and in this order
+- It looks for `station` as an executable file at an absolute path, in four places and in this order
   (`station_of`, `apps/desktop/src-tauri/src/station.rs`): the `executable` the engine's hello names, when an engine
   answers; the engine's record, `station/engine.json` under the state root (`station.engine-record/v1`, written at
-  each engine start); then the install folder. `core_present` looks every few seconds while the owner installs from
+  each engine start); the installer's record, `station/installed.json` beside it (`station.install-record/v1`,
+  written at each install); then the install folder. `core_present` looks every few seconds while the owner installs from
   a terminal.
 - Install runs the public installer as its own line says, `curl -fsSL https://spwn.sh/install.sh | bash`, through
   `/bin/bash -o pipefail -c` (`core_install`), and the window shows the installer's own lines as sent. A failure is
@@ -37,7 +39,7 @@ What it never does:
 
 - It reads no release of its own: what is out is the engine's answer, and the update it offers on a press is
   [ADR-060](060-the-window-offers-the-engines-release-and-updates-on-a-press.md)'s. The installer alone fetches.
-- It looks nowhere but those three places: no `PATH` lookup (a window opened from the Finder has launchd's), no
+- It looks nowhere but those four places: no `PATH` lookup (a window opened from the Finder has launchd's), no
   `which`, no shell profile read.
 - It never runs `station init`: the engine start alone, as the installer leaves the core.
 - Nothing once the engine answers, but the update ADR-060 offers: the panel goes, and the window is the engine's
