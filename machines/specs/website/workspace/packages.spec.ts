@@ -101,6 +101,8 @@ describe('packages', () => {
                 // Then - the plan says the engine's sentence of the extra beside what stays
                 await visitor.see(content('bat stays: Apply leaves extras.'));
                 await visitor.see(content('Nothing is removed. 3 apps stay as they are.'));
+                await visitor.see(within(region('Extra'), content('stays')));
+                await visitor.gone(region('To remove'));
             },
         );
         expect(result.errors.text).toBe('');

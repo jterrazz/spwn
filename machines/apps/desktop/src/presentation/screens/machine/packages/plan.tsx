@@ -103,7 +103,7 @@ export function PlanSteps({ plan }: { plan: MachinefilePlan }) {
                     <Steps
                         key={`extra/${action}`}
                         lines={lines}
-                        note="not in the file"
+                        note={wordOf('MachinefileAction', action).Word}
                         title={headingOf(action)}
                     />
                 ))}
