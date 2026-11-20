@@ -5,6 +5,7 @@ mod engine;
 mod local_core;
 mod opener;
 mod station;
+mod updates;
 
 use std::sync::Arc;
 
@@ -17,8 +18,10 @@ fn main() {
     let loading = bridge.exchanges.clone();
     let closing = bridge.exchanges.clone();
     tauri::Builder::default()
+        .plugin(updates::plugin())
         .manage(bridge.clone())
         .manage(Arc::new(local_core::Runs::default()))
+        .manage(updates::Pending::default())
         .invoke_handler(tauri::generate_handler![
             engine::engine_link,
             engine::engine_open,
@@ -29,7 +32,9 @@ fn main() {
             local_core::core_present,
             local_core::core_install,
             local_core::core_start,
-            local_core::core_cancel
+            local_core::core_cancel,
+            updates::window_update_check,
+            updates::window_update_install
         ])
         .on_page_load(move |webview, payload| {
             if payload.event() == PageLoadEvent::Started {
