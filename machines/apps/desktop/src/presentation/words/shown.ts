@@ -33,7 +33,6 @@ import {
     OWN_STATE_TONES,
     PORT_REACH_TONES,
     REVERSIBLE_TONE,
-    SETTING_STATE_TONES,
     UPDATE_TONES,
 } from './tones';
 import {
@@ -47,7 +46,6 @@ import {
     OWN_STATE_WORDS,
     PORT_REACH_WORDS,
     REVERSIBLE_WORD,
-    SETTING_STATE_WORDS,
     SSH_WORDS,
     UPDATE_WORDS,
 } from './words';
@@ -141,7 +139,7 @@ export function appUpdate(report: AppsReport): null | Shown {
 }
 
 export function settingState(state: SettingsRow['State']): Shown {
-    return { tone: SETTING_STATE_TONES[state], word: SETTING_STATE_WORDS[state] };
+    return engineShown('SettingsState', state);
 }
 
 export function machineKindWord(kind: string): string {

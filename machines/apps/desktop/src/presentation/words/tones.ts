@@ -5,7 +5,6 @@ import type {
     DiskOutcome,
     PortsPort,
     PortsSharedPort,
-    SettingsRow,
 } from '@jterrazz/station-api';
 
 import type { CoreKind } from '../../application/use-cases/core-flow';
@@ -120,16 +119,6 @@ export const APP_STATE_TONES: Tones<AppsReport['State']> = {
     ok: 'ok',
     pending: 'new',
     unknown: 'plain',
-};
-
-export const SETTING_STATE_TONES: Tones<SettingsRow['State']> = {
-    '': 'plain',
-    applied: 'ok',
-    'changed-since': 'warn',
-    'not-applied': 'plain',
-    'not-for-this-machine': 'plain',
-    'off-here': 'plain',
-    reading: 'new',
 };
 
 export const DISK_RESULT_TONES: Tones<DiskOutcome['Result']> = {
