@@ -24,6 +24,7 @@ export const BRIDGED = [
     'disk.move',
     'disk.read',
     'engine.events',
+    'engine.log',
     'engine.read',
     'engine.read-release',
     'engine.refresh-release',

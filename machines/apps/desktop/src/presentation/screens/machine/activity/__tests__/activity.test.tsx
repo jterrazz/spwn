@@ -8,18 +8,24 @@ import type { Recording } from '../../../../../infrastructure/outbound/engine-re
 
 const recordingFor = await recordingsOf('disk-low', 'mini-offline', 'one-mac', 'two-macs');
 
+const macLog = region('What station did on this Mac');
+
+const LOG_READ_AT = 'read at 14:20';
+
 function activityOf(world: string, machine: string) {
     return pageOver(recordingFor(world), { machine, page: 'machine', tab: 'Activity' });
 }
 
 describe('Activity', () => {
     test("a calm Mac's Activity is its measures, its busiest and its facts", async () => {
-        // Given - This Mac over two-macs, which raises no finding
+        // Given - This Mac over two-macs, which raises no finding, its log read at 14:20
+        using _ = clock.at('2026-11-04T14:20:00Z');
         const result = await component.render(
             activityOf('two-macs', 'macbook-pro'),
             async (visitor) => {
-                // When - its activity has been read
+                // When - its activity and its log have been read
                 await visitor.see(heading('Nothing to look at.'));
+                await visitor.see(within(macLog, content(LOG_READ_AT, { exact: false })));
             },
         );
 
@@ -28,12 +34,14 @@ describe('Activity', () => {
     });
 
     test("a finding heads the tab in the engine's words, with its fix", async () => {
-        // Given - This Mac over disk-low, whose disk is almost full
+        // Given - This Mac over disk-low, whose disk is almost full, its log read at 14:20
+        using _ = clock.at('2026-11-04T14:20:00Z');
         const result = await component.render(
             activityOf('disk-low', 'macbook-pro'),
             async (visitor) => {
-                // When - its activity has been read
+                // When - its activity and its log have been read
                 await visitor.see(heading('Disk almost full: 4 % free.'));
+                await visitor.see(within(macLog, content(LOG_READ_AT, { exact: false })));
             },
         );
 
@@ -42,12 +50,14 @@ describe('Activity', () => {
     });
 
     test('a Mac whose kernel counted nothing shows unknown, never zeros', async () => {
-        // Given - This Mac over one-mac, whose meter counted no tick and no memory
+        // Given - This Mac over one-mac, whose meter counted no tick and no memory, its log read at 14:20
+        using _ = clock.at('2026-11-04T14:20:00Z');
         const result = await component.render(
             activityOf('one-mac', 'macbook-pro'),
             async (visitor) => {
-                // When - its activity has been read
+                // When - its activity and its log have been read
                 await visitor.see(heading('Nothing to look at.'));
+                await visitor.see(within(macLog, content(LOG_READ_AT, { exact: false })));
             },
         );
 
@@ -129,11 +139,13 @@ describe('Activity', () => {
     });
 
     test('the switches choose the window and the order of the busiest', async () => {
-        // Given - This Mac over two-macs, read over the hour
+        // Given - This Mac over two-macs, read over the hour, its log read at 14:20
+        using _ = clock.at('2026-11-04T14:20:00Z');
         const result = await component.render(
             activityOf('two-macs', 'macbook-pro'),
             async (visitor) => {
                 await visitor.see(heading('Nothing to look at.'));
+                await visitor.see(within(macLog, content(LOG_READ_AT, { exact: false })));
 
                 // When - the day is chosen, then the busiest by memory
                 await visitor.click(button('24 h'));

@@ -19,6 +19,8 @@ const recordingFor = await recordingsOf('mini-offline', 'one-mac', 'two-macs');
 const READ_AT =
     '0 lines · read at 14:20 · a reading, not a live feed: press Refresh for the newest lines';
 
+const macLog = region('What station did on this Mac');
+
 function activityOf(world: string, machine: string) {
     return pageOver(recordingFor(world), { machine, page: 'machine', tab: 'Activity' });
 }
@@ -83,20 +85,86 @@ describe('Log', () => {
         await expect(result.tree).toMatch(file('./__expected__/two-macs-setup-run.aria.yaml'));
     });
 
-    test("a Mac's log is a panel that says what no call reads", async () => {
-        // Given - This Mac over one-mac
+    test("a Mac's log is the lines station wrote there, a withheld one as the engine sent it", async () => {
+        // Given - This Mac over two-macs, its engine's lines read at 14:20
+        using _ = clock.at('2026-11-04T14:20:00Z');
+        const result = await component.render(
+            activityOf('two-macs', 'macbook-pro'),
+            async (visitor) => {
+                // When - its activity and its engine's lines have been read
+                await visitor.see(heading('Nothing to look at.'));
+                await visitor.see(
+                    within(macLog, content('4 lines · read at 14:20', { exact: false })),
+                );
+
+                // Then - each line is the engine's, the one it withheld drawn as it came
+                await visitor.see(
+                    within(macLog, content('ping https://withheld@example.com/x ok')),
+                );
+            },
+        );
+        await expect(result.tree).toMatch(file('./__expected__/two-macs-this-mac-log.aria.yaml'));
+    });
+
+    test("a filter narrows a Mac's lines to those that hold it", async () => {
+        // Given - This Mac over two-macs, its engine's lines read
+        using _ = clock.at('2026-11-04T14:20:00Z');
+        const result = await component.render(
+            activityOf('two-macs', 'macbook-pro'),
+            async (visitor) => {
+                await visitor.see(
+                    within(macLog, content('4 lines · read at 14:20', { exact: false })),
+                );
+
+                // When - a filter is typed
+                await visitor.fill(within(macLog, field('Filter the lines')), 'nightly');
+
+                // Then - the count says what the filter left of the whole
+                await visitor.see(
+                    within(macLog, content('2 of 4 lines · read at 14:20', { exact: false })),
+                );
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
+
+    test('a Mac that is not This Mac has its own lines read at that Mac', async () => {
+        // Given - the Mac mini over two-macs
+        const result = await component.render(
+            activityOf('two-macs', 'mac-mini'),
+            async (visitor) => {
+                // When - its Activity is shown
+                // Then - its log holds the lines its own engine wrote
+                await visitor.see(within(macLog, content('waiting for the next night run')));
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
+
+    test("a Mac whose engine wrote no line says the engine's sentence for it", async () => {
+        // Given - This Mac over one-mac, whose engine has written no line
         const result = await component.render(
             activityOf('one-mac', 'macbook-pro'),
             async (visitor) => {
                 // When - its Activity is shown
-                await visitor.see(heading('Nothing to look at.'));
-
-                // Then - its last panel names the log no call reads, and draws no line
+                // Then - the log says so in the engine's words
                 await visitor.see(
-                    within(
-                        region('What station did on this Mac'),
-                        content("The engine's own lines and its setup runs."),
-                    ),
+                    within(macLog, content('The engine has written no line here yet.')),
+                );
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
+
+    test("a Mac that does not answer draws the refusal in its log's place", async () => {
+        // Given - the Mac mini over mini-offline, whose engine.log is refused as unreachable
+        const result = await component.render(
+            activityOf('mini-offline', 'mac-mini'),
+            async (visitor) => {
+                // When - its Activity is shown
+                // Then - the log panel says the Mac does not answer, and no line
+                await visitor.see(
+                    within(macLog, content('mac-mini does not answer.', { exact: false })),
                 );
             },
         );

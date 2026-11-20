@@ -1,4 +1,10 @@
-import type { MachinesLogInput, MachinesLogOutput, Target } from '@jterrazz/station-api';
+import type {
+    EngineLog,
+    EngineLogInput,
+    MachinesLogInput,
+    MachinesLogOutput,
+    Target,
+} from '@jterrazz/station-api';
 import { useCallback, useEffect, useState } from 'react';
 
 import type { EngineError } from '../../../../domain/engine-error';
@@ -7,7 +13,7 @@ import { targetOf } from '../../../../domain/machines/machines';
 import type { Found } from '../../../../domain/machines/machines';
 import { SEPARATOR } from '../../../../domain/separator';
 import { useRead } from '../../../dependencies/dependencies';
-import { NotGiven, Unanswered } from '../../../kit/readings';
+import { Unanswered } from '../../../kit/readings';
 import { Button, Missing, Panel, SearchField, Switch } from '../../../ui/index';
 import { LineList } from './line-list';
 
@@ -17,18 +23,21 @@ type Source = 'console' | 'setup';
 
 type Heard =
     | { kind: 'failed'; error: EngineError }
-    | { kind: 'read'; out: MachinesLogOutput; at: Date };
+    | { kind: 'read'; out: EngineLog | MachinesLogOutput; at: Date };
 
 const FOOT = 'a reading, not a live feed: press Refresh for the newest lines';
 
-type ReaderProps = {
-    input: MachinesLogInput;
+type Asked =
+    | { call: 'engine.log'; input: EngineLogInput }
+    | { call: 'machines.log'; input: MachinesLogInput };
+
+type ReaderProps = Asked & {
     target: Target | undefined;
     heard: (heard: Heard) => void;
 };
 
-function Reader({ input, target, heard }: ReaderProps) {
-    const reading = useRead('machines.log', input, target);
+function Reader({ call, input, target, heard }: ReaderProps) {
+    const reading = useRead(call, input, target);
     useEffect(() => {
         if (reading.kind === 'read') {
             heard({ at: new Date(), kind: 'read', out: reading.out });
@@ -55,13 +64,14 @@ function SourceSwitch({ value, onChange }: { value: Source; onChange: (next: Sou
 }
 
 type ConsoleProps = {
-    vm: string;
+    memory: string;
     lines: readonly string[];
+    none: string | undefined;
     at: Date;
     onRefresh: () => void;
 };
 
-function Console({ vm, lines, at, onRefresh }: ConsoleProps) {
+function Console({ memory, lines, none, at, onRefresh }: ConsoleProps) {
     const [query, setQuery] = useState('');
     return (
         <>
@@ -84,48 +94,78 @@ function Console({ vm, lines, at, onRefresh }: ConsoleProps) {
             <LineList
                 foot={`read at ${clock(at) ?? ''}${SEPARATOR}${FOOT}`}
                 lines={lines}
-                memory={vm}
+                memory={memory}
+                none={none}
                 query={query}
             />
         </>
     );
 }
 
-function useLog(vm: string, target: Target | undefined) {
+function useLog(of: string) {
     const [round, setRound] = useState(0);
-    const input: MachinesLogInput = { VM: vm };
-    const [last, setLast] = useState<undefined | { vm: string; heard: Heard }>(undefined);
+    const [last, setLast] = useState<undefined | { of: string; heard: Heard }>(undefined);
     const heard = useCallback(
         (next: Heard) => {
-            setLast({ heard: next, vm });
+            setLast({ heard: next, of });
         },
-        [vm],
+        [of],
     );
     const refresh = useCallback(() => {
         setRound((value) => value + 1);
     }, []);
-    return {
-        reader: <Reader heard={heard} input={input} key={round} target={target} />,
-        refresh,
-        shown: last?.vm === vm ? last.heard : undefined,
-    };
+    return { heard, refresh, round, shown: last?.of === of ? last.heard : undefined };
+}
+
+type LinesProps = {
+    memory: string;
+    reading: string;
+    shown: Heard | undefined;
+    onRefresh: () => void;
+};
+
+function Lines({ memory, reading, shown, onRefresh }: LinesProps) {
+    if (shown?.kind === 'failed') {
+        return <Unanswered error={shown.error} size="panel" />;
+    }
+    if (shown) {
+        const none = 'Empty' in shown.out ? shown.out.Empty : undefined;
+        return (
+            <Console
+                at={shown.at}
+                lines={shown.out.Lines ?? []}
+                memory={memory}
+                none={none}
+                onRefresh={onRefresh}
+            />
+        );
+    }
+    return <p className={styles.text}>{reading}</p>;
 }
 
 function ConsoleBody({ vm, target }: { vm: string; target: Target | undefined }) {
-    const { reader, refresh, shown } = useLog(vm, target);
-    let body;
-    if (shown?.kind === 'failed') {
-        body = <Unanswered error={shown.error} size="panel" />;
-    } else if (shown) {
-        body = <Console at={shown.at} lines={shown.out.Lines ?? []} onRefresh={refresh} vm={vm} />;
-    } else {
-        body = <p className={styles.text}>Reading its console…</p>;
-    }
+    const { heard, refresh, round, shown } = useLog(vm);
     return (
         <>
-            {reader}
-            {body}
+            <Reader
+                call="machines.log"
+                heard={heard}
+                input={{ VM: vm }}
+                key={round}
+                target={target}
+            />
+            <Lines memory={vm} onRefresh={refresh} reading="Reading its console…" shown={shown} />
         </>
+    );
+}
+
+function MacLog({ mac, target }: { mac: string; target: Target | undefined }) {
+    const { heard, refresh, round, shown } = useLog(mac);
+    return (
+        <Panel title="What station did on this Mac">
+            <Reader call="engine.log" heard={heard} input={{}} key={round} target={target} />
+            <Lines memory={mac} onRefresh={refresh} reading="Reading its lines…" shown={shown} />
+        </Panel>
     );
 }
 
@@ -151,13 +191,9 @@ function VmLog({ vm, target }: { vm: string; target: Target | undefined }) {
 }
 
 export function Log({ found }: { found: Found }) {
+    const target = targetOf({ mac: found.mac });
     if (!found.vm) {
-        return (
-            <NotGiven
-                title="What station did on this Mac"
-                what="The engine's own lines and its setup runs."
-            />
-        );
+        return <MacLog key={found.mac.Name} mac={found.mac.Name} target={target} />;
     }
-    return <VmLog key={found.vm.Name} target={targetOf({ mac: found.mac })} vm={found.vm.Name} />;
+    return <VmLog key={found.vm.Name} target={target} vm={found.vm.Name} />;
 }

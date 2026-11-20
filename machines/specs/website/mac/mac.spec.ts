@@ -1,4 +1,13 @@
-import { button, content, dialog, heading, navigation, region, within } from '@jterrazz/test';
+import {
+    button,
+    content,
+    dialog,
+    field,
+    heading,
+    navigation,
+    region,
+    within,
+} from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { website } from '../website.specification.js';
@@ -308,5 +317,45 @@ describe('mac', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test.todo("M13 waits for a call reading the engine's lines and its setup runs");
+    test("M13 a Mac's log reads the lines station wrote there, a withheld one as the engine sent it, and the filter narrows them", async () => {
+        // Given - the Activity of This Mac over two-macs
+        const result = await website.visit(
+            '/?world=two-macs&machine=macbook-pro&tab=Activity',
+            async (visitor) => {
+                // When - its log is read
+                const log = region('What station did on this Mac');
+                await visitor.see(within(log, content('nightly run done')));
+
+                // Then - every line is the engine's, the one it withheld as it came
+                await visitor.see(within(log, content('engine started')));
+                await visitor.see(within(log, content('ping https://withheld@example.com/x ok')));
+
+                // When - a filter is typed
+                await visitor.fill(within(log, field('Filter the lines')), 'nightly');
+
+                // Then - the lines that hold it stay, counted out of the whole
+                await visitor.see(within(log, content('2 of 4 lines', { exact: false })));
+                await visitor.see(within(log, content('nightly run started')));
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
+
+    test("M13 a Mac whose engine wrote no line says the engine's sentence for it", async () => {
+        // Given - the Activity of This Mac over bare-mac, whose engine has written no line
+        const result = await website.visit(
+            '/?world=bare-mac&machine=macbook-pro&tab=Activity',
+            async (visitor) => {
+                // When - its log is read
+                // Then - it says so in the engine's words
+                await visitor.see(
+                    within(
+                        region('What station did on this Mac'),
+                        content('The engine has written no line here yet.'),
+                    ),
+                );
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
 });

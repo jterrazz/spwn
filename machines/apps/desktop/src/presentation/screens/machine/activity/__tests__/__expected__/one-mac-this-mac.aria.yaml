@@ -52,4 +52,9 @@
     - definition: not given yet
   - region "What station did on this Mac":
     - heading "What station did on this Mac" [level=2]
-    - paragraph: not given yet The engine's own lines and its setup runs.
+    - searchbox "Filter the lines"
+    - button "Refresh"
+    - button "Copy all"
+    - log "Log lines":
+      - paragraph: The engine has written no line here yet.
+    - paragraph: "0 lines · read at 14:20 · a reading, not a live feed: press Refresh for the newest lines"

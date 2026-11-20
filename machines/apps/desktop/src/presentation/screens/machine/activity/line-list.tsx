@@ -4,14 +4,24 @@ import { SEPARATOR } from '../../../../domain/separator';
 import { CodeBlock } from '../../../ui/index';
 import { countOf, filtered, numbered } from './lines';
 
-type LineListProps = { lines: readonly string[]; query: string; memory: string; foot?: string };
+type LineListProps = {
+    lines: readonly string[];
+    query: string;
+    memory: string;
+    foot?: string;
+    none?: string | undefined;
+};
 
-export function LineList({ lines, query, memory, foot = '' }: LineListProps) {
+export function LineList({ lines, query, memory, foot = '', none }: LineListProps) {
     const all = useMemo(() => numbered(lines), [lines]);
     const shown = useMemo(() => filtered(all, query), [all, query]);
     return (
         <CodeBlock
-            empty={all.length === 0 ? 'The engine read no line.' : `No line holds "${query}".`}
+            empty={
+                all.length === 0
+                    ? (none ?? 'The engine read no line.')
+                    : `No line holds "${query}".`
+            }
             foot={[countOf(shown.length, all.length, query), ...(foot === '' ? [] : [foot])].join(
                 SEPARATOR,
             )}
