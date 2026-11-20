@@ -101,7 +101,8 @@ final class StoryTests: XCTestCase {
 
     func matchGoldens(shard index: Int) throws {
         let windows = NSApplication.shared.windows.count
-        let stories = Self.shard(try stories(), index)
+        let all = try stories()
+        let stories = Self.shard(all, index)
         XCTAssertFalse(stories.isEmpty)
         var failures: [String] = []
         for story in stories {
@@ -109,9 +110,12 @@ final class StoryTests: XCTestCase {
                 failures.append("\(story.id): draws nothing")
                 continue
             }
+            let under = Self.base(of: story, among: all)
             for scheme in Self.schemes {
                 let rendered = Snapshot.render(view(story), scheme: scheme, over: AnyView(FlatDesk(scheme: scheme)))
                 if let f = try Golden.match(rendered, file: "\(story.id).\(scheme == .dark ? "dark" : "light")", in: Tree.storyGoldens) { failures.append(f) }
+                if let f = try ViewGolden.check(story.id, view(story), scheme: scheme, ground: "FlatDesk", in: Tree.storyGoldens,
+                                                over: under.map { ($0.id, view($0)) }) { failures.append(f) }
             }
         }
         XCTAssertEqual(failures, [])
@@ -125,6 +129,42 @@ final class StoryTests: XCTestCase {
     func testStoryGoldensShard1() throws { try matchGoldens(shard: 1) }
     func testStoryGoldensShard2() throws { try matchGoldens(shard: 2) }
     func testStoryGoldensShard3() throws { try matchGoldens(shard: 3) }
+
+    // value: what an overlay story opens over a page, the keys a base
+    // story does not have.
+    static func bare(_ ui: StoryUI) -> StoryUI {
+        var ui = ui
+        ui.popover = nil
+        ui.menu = nil
+        ui.alert = nil
+        ui.sheet = nil
+        ui.find = nil
+        ui.hud = nil
+        return ui
+    }
+
+    // invariant: an overlay story is drawn over its base: the first story,
+    // outside the transitions, of its pages, its samples and its UI but
+    // what it opens over them; nil for a story that opens nothing, or
+    // whose page no story draws bare.
+    static func base(of story: Story, among stories: [Story]) -> Story? {
+        let ui = bare(story.ui)
+        guard ui != story.ui else { return nil }
+        return stories.first {
+            $0.id != story.id && $0.group != .transition && $0.file.pages == story.file.pages && $0.file.samples == story.file.samples && $0.ui == ui
+        }
+    }
+
+    func testAnOverlayStoryIsDrawnOverTheStoryOfItsPageAndNoOther() throws {
+        let all = try stories()
+        let bases = all.reduce(into: [String: String]()) { $0[$1.id] = Self.base(of: $1, among: all)?.id }
+        XCTAssertEqual(bases["pop.info"], "ports.all")
+        XCTAssertEqual(bases["menu.context.stopped"], "mac.this.overview")
+        XCTAssertEqual(bases["alert.restart-mac"], "mac.mini.overview")
+        XCTAssertNil(bases["home.needs"])
+        XCTAssertNil(bases["find.port"])
+        for (id, base) in bases { XCTAssertNil(bases[base], "\(id) is drawn over \(base), itself an overlay") }
+    }
 
     // invariant: the shards are exactly the story list, each story once, and
     // there is one method per shard.
@@ -170,9 +210,9 @@ final class StoryTests: XCTestCase {
 
     // invariant: SPEC C4: one story of each group, tagged a11y, holds at
     // Increase Contrast in dark and at Reduce Transparency in light, each
-    // proved by its golden. A status item is drawn in the bar's one ink
-    // whatever the settings, so its proof is that it draws its plain
-    // story's pixels.
+    // proved by its golden and by its view golden over the plain story's.
+    // A status item is drawn in the bar's one ink whatever the settings,
+    // so its proof is that it draws its plain story's pixels.
     func testEveryGroupHasAStoryProvedAtIncreasedContrastAndReducedTransparency() throws {
         let stories = try stories()
         let tagged = stories.filter(\.a11y)
@@ -180,12 +220,12 @@ final class StoryTests: XCTestCase {
         XCTAssertEqual(tagged.count, Set(tagged.map(\.group)).count, "one a11y story per group")
         var failures: [String] = []
         for story in tagged {
-            let variants: [(knob: String, scheme: ColorScheme, view: AnyView)] = [
-                ("ic", .dark, AnyView(StoryView(story).stationAccessibility(contrast: .increased))),
-                ("rt", .light, AnyView(StoryView(story).stationAccessibility(reduceTransparency: true))),
+            let variants: [(knob: String, scheme: ColorScheme, contrast: ColorSchemeContrast, reduceTransparency: Bool)] = [
+                ("ic", .dark, .increased, false), ("rt", .light, .standard, true),
             ]
             for v in variants {
-                let rendered = Snapshot.render(v.view, scheme: v.scheme, over: AnyView(FlatDesk(scheme: v.scheme)))
+                let drawn = AnyView(StoryView(story).stationAccessibility(contrast: v.contrast, reduceTransparency: v.reduceTransparency))
+                let rendered = Snapshot.render(drawn, scheme: v.scheme, over: AnyView(FlatDesk(scheme: v.scheme)))
                 let file = "\(story.id).\(v.knob).\(v.scheme == .dark ? "dark" : "light")"
                 if story.ui.statusItem == true {
                     let plain = Snapshot.render(view(story), scheme: v.scheme, over: AnyView(FlatDesk(scheme: v.scheme)))
@@ -193,6 +233,8 @@ final class StoryTests: XCTestCase {
                 } else if let f = try Golden.match(rendered, file: file, in: Tree.storyGoldens) {
                     failures.append(f)
                 }
+                if let f = try ViewGolden.check("\(story.id).\(v.knob)", drawn, scheme: v.scheme, ground: "FlatDesk", contrast: v.contrast,
+                                                reduceTransparency: v.reduceTransparency, in: Tree.storyGoldens, over: (story.id, view(story))) { failures.append(f) }
             }
         }
         XCTAssertEqual(failures, [])
