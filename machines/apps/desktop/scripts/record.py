@@ -23,8 +23,11 @@ WORLDS no longer names.
 
 `--if-moved`, the form `make generate` runs, records every world unless nothing the run reads and nothing it writes
 moved since one that succeeded: `key` hashes them by content, and a run that succeeds leaves its key in
-.artifacts/window-record.stamp, outside the tracked tree, so a fresh clone always records. A hit prints one line and its
-key; WINDOW_RECORD_FORCE=1 records all the same.
+.artifacts/window-record.stamp, outside the tracked tree. A fresh clone has no stamp, so it also asks the store the
+copies of the repository share, $STATION_BENCH/record-keys/<key> (bench-env.sh), where a run that recorded every world
+and left the recordings as it found them (the key after equals the key before) leaves its key as an empty file, renamed
+in whole. A key the stamp or the store holds is a hit, which prints one line, its key and the evidence it skipped on;
+with no STATION_BENCH, or no such file, the run records. WINDOW_RECORD_FORCE=1 records all the same.
 
 Two runs over the same tree write the same bytes. The world build's clock moves when a watch waits on it
 (apps/engine/wire/world_on.go), and what a watch streams before it settles comes in the scheduler's order, so the
@@ -70,6 +73,7 @@ CLOCKED = {"settings.matrix": "Read", "awake.read": "Now"}
 MACHINES = {"watch": "machines.list", "in": {}}
 STAMP = ROOT / ".artifacts" / "window-record.stamp"
 FORCE = "WINDOW_RECORD_FORCE"
+KEYS = pathlib.Path(os.environ["STATION_BENCH"]) / "record-keys" if os.environ.get("STATION_BENCH") else None
 
 
 def serve(seed, requests, fixture=None):
@@ -535,6 +539,21 @@ def key():
     return digest.hexdigest()[:16]
 
 
+def remember(now):
+    """Leave `now` in KEYS, an empty file named for the key, written whole under a name of its own then renamed in, so
+    two runs at once never leave half of one. A store that cannot be written costs the next clone its skip, never this
+    run its success."""
+    if not KEYS:
+        return
+    try:
+        KEYS.mkdir(parents=True, exist_ok=True)
+        temporary = KEYS / f".{now}.{os.getpid()}"
+        temporary.touch()
+        os.replace(temporary, KEYS / now)
+    except OSError as error:
+        print(f"recordings: key {now} not stored ({error})")
+
+
 USAGE = "usage: record.py [--if-moved] [--call=<call>...] [<world>...], a world of world.py's WORLDS"
 
 if __name__ == "__main__":
@@ -549,9 +568,10 @@ if __name__ == "__main__":
         sys.exit(f"{USAGE}; --if-moved records every world; not one: {' '.join(flags + unknown)}")
     if moved:
         was = STAMP.read_text().strip() if STAMP.is_file() else None
-        now = key()
-        if was == now and os.environ.get(FORCE) != "1":
-            print(f"recordings: skipped, nothing they read or hold moved since the run of key {now} ({FORCE}=1 records)")
+        before = key()
+        evidence = "stamp" if was == before else f"store {KEYS / before}" if KEYS and (KEYS / before).is_file() else None
+        if evidence and os.environ.get(FORCE) != "1":
+            print(f"recordings: skipped, nothing they read or hold moved since the run of key {before} ({evidence}; {FORCE}=1 records)")
             sys.exit(0)
         STAMP.unlink(missing_ok=True)
     doors.binary = world_binary()
@@ -568,3 +588,5 @@ if __name__ == "__main__":
         now = key()
         STAMP.write_text(now + "\n")
         print(f"recordings: recorded, key {now}")
+        if now == before:
+            remember(now)

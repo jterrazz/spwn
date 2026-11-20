@@ -43,12 +43,14 @@ def temporary(prefix):
 
 def build_digest():
     """The hash of what the world build is built from, path and bytes of each file in sorted order: the Go modules,
-    every Go source of apps/engine and every file of catalog/."""
+    every file of apps/engine outside a testdata folder, which no build reads, so a file a package embeds is in with
+    its sources, and every file of catalog/."""
     digest = hashlib.sha256()
     modules = [ROOT / "go.work", *sorted(ROOT.glob("go.work.sum"))]
     for module in ("apps/engine", "catalog"):
         modules += [ROOT / module / "go.mod", *sorted((ROOT / module).glob("go.sum"))]
-    sources = [*modules, *sorted((ROOT / "apps" / "engine").rglob("*.go")), *sorted((ROOT / "catalog").rglob("*"))]
+    engine = [path for path in sorted((ROOT / "apps" / "engine").rglob("*")) if "testdata" not in path.parts]
+    sources = [*modules, *engine, *sorted((ROOT / "catalog").rglob("*"))]
     sources = [source for source in sources if source.is_file()]
     for source in sources:
         digest.update(str(source.relative_to(ROOT)).encode())
