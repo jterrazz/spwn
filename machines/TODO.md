@@ -83,7 +83,7 @@ Today the public `install.sh` (spwn-web's, served at spwn.sh) is the only instal
   - U7: the menu bar's lockstep swap in the engine, the `station.updated` event, the relaunch.
   - U8: dependencies pinned in the manifest (tart's version and sha256 first); the installers with sha256; the launcher question above.
   - U9: `Hypervisor.Capabilities()` and the per-VM `hypervisor` field.
-  - U10: Developer ID signing and notarisation of the window, once a job builds it; the binaries and Station.app are signed and notarised by publish.yaml.
+  - U10: the install of the window: publish.yaml signs, notarises and attaches `Spwn_darwin_arm64.zip`, and nothing puts it on a Mac yet.
   - U11: the Homebrew cask, bumped by publish.yaml.
   - U12: tier 2 and 3 upgrade runs.
   - U13 (later): a `vz` adapter spike behind the port.

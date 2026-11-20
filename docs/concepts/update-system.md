@@ -91,7 +91,7 @@ spwn upgrade --force         # reinstall current version
 
 ## Tauri desktop auto-update
 
-No workflow builds, signs or publishes the desktop bundles today: the release job set ships the CLI only, and the shared `release-tauri.yaml` is deleted. What follows is the design the desktop job must meet when it returns.
+No workflow builds, signs or publishes the desktop bundles of `apps/web` today, and the shared `release-tauri.yaml` is deleted; the one Tauri app a release ships is station's window, `Spwn_darwin_arm64.zip`, with no updater ([Release](../guides/release.md#2-signing-and-notarization)). What follows is the design the desktop job must meet when it returns.
 
 The desktop app uses the official
 [`tauri-plugin-updater`](https://v2.tauri.app/plugin/updater/) plugin,

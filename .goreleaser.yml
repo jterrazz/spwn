@@ -41,7 +41,7 @@ archives:
           - goos: windows
             format: zip
 
-# invariant: .artifacts/station/ holds station's binaries and Station.app.zip, which the publish workflow builds and downloads before goreleaser runs; one checksums.txt lists them beside spwn's archives, the file station's image builder and the installer both read
+# invariant: .artifacts/station/ holds station's binaries, Station.app.zip and Spwn_darwin_arm64.zip, which the publish workflow builds and downloads before goreleaser runs; one checksums.txt lists them beside spwn's archives, the file station's image builder and the installer both read
 checksum:
     name_template: 'checksums.txt'
     extra_files:
