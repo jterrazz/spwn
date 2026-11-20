@@ -13,9 +13,9 @@ Each story gives: what it shows; the data the page needs (what the engine must s
 ## Index
 
 - **Menu bar and panel shell** (6): `menubar.down`, `menubar.restarting`, `menubar.fine`, `menubar.open`, `menubar.stopped`, `menubar.connecting`
-- **All machines (home)** (14): `home.needs`, `home.hover`, `home.keyboard`, `home.down`, `home.restarting`, `home.recovered`, `home.exposed`, `home.down-and-exposed`, `home.loading`, `home.loaded`, `home.fine`, `home.empty`, `home.awake-off`, `home.capped`
+- **All machines (home)** (12): `home.needs`, `home.hover`, `home.keyboard`, `home.down`, `home.restarting`, `home.down-and-exposed`, `home.loading`, `home.loaded`, `home.fine`, `home.empty`, `home.awake-off`, `home.capped`
 - **Needs you (fleet list)** (5): `needs.all`, `needs.empty`, `needs.updating`, `needs.updated`, `needs.catalog-refused`
-- **A Mac** (21): `mac.this.overview`, `mac.this.upkeep`, `mac.this.activity`, `mac.this.ports`, `mac.this.accounts`, `mac.this.exposed`, `mac.mini.overview`, `mac.mini.activity`, `mac.mini.activity.6m`, `mac.mini.activity.24h`, `mac.mini.activity.scrub`, `mac.mini.ports`, `mac.mini.ports.https`, `mac.mini.accounts`, `mac.mini.down`, `mac.mini.loading`, `mac.mini.stale`, `mac.mini.creating`, `mac.mini.created`, `mac.air.asleep`, `mac.this.empty`
+- **A Mac** (20): `mac.this.overview`, `mac.this.upkeep`, `mac.this.activity`, `mac.this.ports`, `mac.this.accounts`, `mac.this.exposed`, `mac.mini.overview`, `mac.mini.activity`, `mac.mini.activity.6m`, `mac.mini.activity.24h`, `mac.mini.activity.scrub`, `mac.mini.ports`, `mac.mini.ports.https`, `mac.mini.accounts`, `mac.mini.down`, `mac.mini.loading`, `mac.mini.creating`, `mac.mini.created`, `mac.air.asleep`, `mac.this.empty`
 - **A workspace** (8): `workspace.overview`, `workspace.ephemeral`, `workspace.working.activity`, `workspace.working.ports`, `workspace.working.accounts`, `workspace.waiting.ports`, `workspace.stopped`, `workspace.started`
 - **A server** (8): `server.healthy`, `server.health-unfolded`, `server.activity`, `server.down`, `server.restarting`, `server.restarting.late`, `server.recovered`, `server.stopped`
 - **Ports (fleet and scoped)** (5): `ports.all`, `ports.all.exposed`, `ports.all.down`, `ports.shared-new`, `ports.audiences`
@@ -133,28 +133,6 @@ Each story gives: what it shows; the data the page needs (what the engine must s
 - **Interactions**: "New VM" → newvm(thismac) [New VM · on This Mac, the most free memory · ⌘N]; "More options for station" → gear; "2 more need you · review-bot, linux-1" → allNeeds; "Ports, 2 wait for the restart · 5 shared" → push(ports:all) [2 wait for the restart · 5 shared · ⌘P]; "Accounts 1 signed out" → push(accounts:all) [Accounts · All machines · ⌘U]; "Awake, until 18:00" → push(awake:all) [Awake until 18:00 · ⌘E · right-click for a duration]; "Keep This Mac awake" → awakeToggle; "review-botmac-mini fixes the token refresh" → push(vm:review-bot); "Open review-bot in Terminal" → attach(review-bot) [Open in Terminal · ⌘↩]; "linux-1This Mac running tests · 41/58 pass 41%" → push(vm:linux-1); "Open linux-1 in Terminal" → attach(linux-1) [Open in Terminal · ⌘↩]; "linux-3mac-mini editing src/auth/refresh.ts 70%" → push(vm:linux-3); "Open linux-3 in Terminal" → attach(linux-3) [Open in Terminal · ⌘↩]; "agent-7f tests pass Clean up" → push(vm:agent-7f); "Clean up" → cleanup(thismac); "infra restarting · 2 of 4" → push(vm:infra); "This Mac 1 working4 upkeep 23 GB free" → push(mac:thismac); "New VM on This Mac" → newvm(thismac) [New VM on This Mac · ⌘N]; "mac-mini 1 working1 waiting 19 GB free" → push(mac:mac-mini); "New VM on mac-mini" → newvm(mac-mini) [New VM on mac-mini · ⌘N]; "macbook-air asleep · seen 2 hr ago" → push(mac:macbook-air); "Find a machine, a port, an action… ⌘K" → find
 - **Enters**: .hero-top: opacity+transform 0 translateY(-3px) → 1 none 340 ms smooth; .hero-rows: opacity 0 → 1 340 ms smooth +60 ms; svg: CSS color 120 ms; .sitext: CSS max-width 340 ms cubic-bezier(0.32, 0.72, 0, 1); .sitext: CSS opacity 120 ms; .busy: CSS spin 800 ms linear; .spin: CSS spin 800 ms linear; #hud: CSS hud 2600 ms linear
 - **Leaves**: #panel: opacity+transform 1 none → 0 scale(.98) 200 ms snappy; #sItem: CSS background-color 120 ms; .busy: CSS spin 800 ms linear; .spin: CSS spin 800 ms linear (esc)
-
-### `home.recovered`
-
-![home.recovered](stories/home.recovered.png)
-
-- **Capture**: [dark](stories/home.recovered.png)
-- **Shows**: infra is healthy again: Needs you is gone and infra's row says healthy with its CPU.
-- **Data**: server healthy with wasDown; restart count +1; down duration
-- **Interactions**: "New VM" → newvm(thismac) [New VM · on This Mac, the most free memory · ⌘N]; "More options for station" → gear; "Review" → push(vm:review-bot); "Ports, 5 shared" → push(ports:all) [5 shared · ⌘P]; "Accounts 1 signed out" → push(accounts:all) [Accounts · All machines · ⌘U]; "Awake, until 18:00" → push(awake:all) [Awake until 18:00 · ⌘E · right-click for a duration]; "Keep This Mac awake" → awakeToggle; "review-botmac-mini fixes the token refresh" → push(vm:review-bot); "Open review-bot in Terminal" → attach(review-bot) [Open in Terminal · ⌘↩]; "linux-1This Mac running tests · 42/58 pass 40%" → push(vm:linux-1); "Open linux-1 in Terminal" → attach(linux-1) [Open in Terminal · ⌘↩]; "linux-3mac-mini editing src/auth/refresh.ts 65%" → push(vm:linux-3); "Open linux-3 in Terminal" → attach(linux-3) [Open in Terminal · ⌘↩]; "agent-7f tests pass Clean up" → push(vm:agent-7f); "Clean up" → cleanup(thismac); "infra healthy · up 1 min · 2 ports" → push(vm:infra); "This Mac 1 working4 upkeep 23 GB free" → push(mac:thismac); "New VM on This Mac" → newvm(thismac) [New VM on This Mac · ⌘N]; "mac-mini 1 working1 waiting 19 GB free" → push(mac:mac-mini); "New VM on mac-mini" → newvm(mac-mini) [New VM on mac-mini · ⌘N]; "macbook-air asleep · seen 2 hr ago" → push(mac:macbook-air); "Find a machine, a port, an action… ⌘K" → find
-- **Enters**: .hero.need: height 93px → 113px 340 ms smooth; .hero-top.one: opacity+transform 0 translateY(-3px) → 1 none 340 ms smooth; .hero-rows: opacity 0 → 1 340 ms smooth +60 ms; .sitext: CSS max-width 340 ms cubic-bezier(0.32, 0.72, 0, 1); .busy: CSS spin 800 ms linear; .spin: CSS spin 800 ms linear; #hud: CSS hud 2600 ms linear
-- **Leaves**: #panel: opacity+transform 1 none → 0 scale(.98) 200 ms snappy; #sItem: CSS background-color 120 ms; #hud: CSS hud 2600 ms linear (esc)
-
-### `home.exposed`
-
-![home.exposed](stories/home.exposed.png) ![home.exposed light](stories/home.exposed.light.png)
-
-- **Capture**: [dark](stories/home.exposed.png), [light](stories/home.exposed.light.png)
-- **Shows**: Port 5000 is exposed: its row under Needs you with Review; Ports says 1 exposed.
-- **Data**: an exposed listener (port, process, Mac) outside the tailnet
-- **Interactions**: "New VM" → newvm(thismac) [New VM · on This Mac, the most free memory · ⌘N]; "More options for station" → gear; "Review" → goExposed(thismac); "2 more need you · review-bot, linux-1" → allNeeds; "Ports, 1 exposed · 5 shared" → push(ports:all) [1 exposed · 5 shared · ⌘P]; "Accounts 1 signed out" → push(accounts:all) [Accounts · All machines · ⌘U]; "Awake, until 18:00" → push(awake:all) [Awake until 18:00 · ⌘E · right-click for a duration]; "Keep This Mac awake" → awakeToggle; "review-botmac-mini fixes the token refresh" → push(vm:review-bot); "Open review-bot in Terminal" → attach(review-bot) [Open in Terminal · ⌘↩]; "linux-1This Mac running tests · 41/58 pass 38%" → push(vm:linux-1); "Open linux-1 in Terminal" → attach(linux-1) [Open in Terminal · ⌘↩]; "linux-3mac-mini editing src/auth/refresh.ts 63%" → push(vm:linux-3); "Open linux-3 in Terminal" → attach(linux-3) [Open in Terminal · ⌘↩]; "agent-7f tests pass Clean up" → push(vm:agent-7f); "Clean up" → cleanup(thismac); "infra healthy · up 12 days · 2 ports" → push(vm:infra); "This Mac 1 working4 upkeep 23 GB free" → push(mac:thismac); "New VM on This Mac" → newvm(thismac) [New VM on This Mac · ⌘N]; "mac-mini 1 working1 waiting 19 GB free" → push(mac:mac-mini); "New VM on mac-mini" → newvm(mac-mini) [New VM on mac-mini · ⌘N]; "macbook-air asleep · seen 2 hr ago" → push(mac:macbook-air); "Find a machine, a port, an action… ⌘K" → find
-- **Enters**: no animation (a state reached in place; live values tick every 1 to 2 s)
-- **Leaves**: #panel: opacity+transform 1 none → 0 scale(.98) 200 ms snappy; #sItem: CSS background-color 120 ms (esc)
 
 ### `home.down-and-exposed`
 
@@ -465,15 +443,6 @@ Each story gives: what it shows; the data the page needs (what the engine must s
 - **Interactions**: "All machines" → back; "New VM" → newvm(mac-mini) [New VM on mac-mini · ⌘N]; "More options for mac-mini" → pageMenu(mac:mac-mini); "Overview" → seg(overview); "Activity" → seg(activity) [⌘I]; "Ports" → seg(ports) [⌘P]; "Accounts" → seg(accounts) [⌘U]; "Review" → push(vm:review-bot); "CPU 46%" → seg(activity); "Memory 19 GB free" → seg(activity); "Network 0.7 MB/s" → seg(activity); "infra healthy · up 12 days" → push(vm:infra); "linux-3 working" → push(vm:linux-3); "Open linux-3 in Terminal" → attach(linux-3) [Open in Terminal · ⌘↩]; "review-bot fixes the token refresh" → push(vm:review-bot); "Open review-bot in Terminal" → attach(review-bot) [Open in Terminal · ⌘↩]; "Keep mac-mini awake" → awakeChange(mac-mini); "Upkeep all fine" → unfold(upkeep:mac-mini)
 - **Enters**: #panel: height 689px → 506px 340 ms smooth; .page: transform+opacity none 1 → translateX(-30%) 0 340 ms smooth; .page: transform translateX(100%) → none 340 ms smooth; .spin.sm: CSS spin 800 ms linear; .dot.ring: CSS ping 600 ms linear; .dot.ping: CSS ping 600 ms linear
 - **Leaves**: #panel: height 506px → 689px 340 ms smooth; .page: transform+opacity none 1 → translateX(100%) 0.6 340 ms smooth; .page: transform+opacity translateX(-30%) 0 → none 1 340 ms smooth; .spin.sm: CSS spin 800 ms linear; .dot.ring: CSS ping 600 ms linear; .fwrap.morph: CSS morph 340 ms linear (esc)
-
-### `mac.mini.stale`
-
-- **Capture**: none (a gap state SPEC A4 rules, after `mac.mini.loading`: the prototype does not draw it)
-- **Shows**: mac-mini not heard from for 3 min while its page is open: its facts carry no marking, the gauges say their last values in t3 with no spark, and every VM row is dimmed to .45.
-- **Data**: last answer 3 min ago; the Mac's last page parts
-- **Interactions**: as `mac.mini.loading`
-- **Enters**: no animation (the dimming turns on in place once the Mac is 30 s late)
-- **Leaves**: the dimming turns off in place when mac-mini answers again
 
 ### `mac.mini.creating`
 
@@ -1700,11 +1669,11 @@ Every transient confirmation the prototype fires, read from its code: the gestur
 
 ## Gaps: IA states the prototype does not draw
 
-These are in `ia/PROPOSAL.md` but have no screen in the prototype, so no capture. Each has an id, which `StoryCoverageTests` lists as pending until it is designed into this file as a story of its own; that list only shrinks. One is built, since SPEC v4 rules it.
+These are in `ia/PROPOSAL.md` but have no screen in the prototype, so no capture. Each has an id, which `StoryCoverageTests` lists as pending until it is designed into this file as a story of its own; that list only shrinks.
 
 | Gap | Id | Status |
 | --- | --- | --- |
-| the stale gauges and rows on a remote Mac's own page (see `mac.mini.loading`) | `mac.mini.stale` | built (P4), its story under A Mac |
+| the stale gauges and rows on a remote Mac's own page (see `mac.mini.loading`) | `mac.mini.stale` | pending: its page draws as `mac.mini.loading`'s, so it is that story until its stale marking is drawn |
 | a Mac unreachable, told apart from an asleep one | `mac.unreachable` | pending |
 | a Mac's disk locked at boot (chip + Unlock the disk ↗) | `mac.disk-locked` | pending |
 | the engine stopped (Start) | `engine.stopped` | pending |
@@ -1717,8 +1686,8 @@ These are in `ia/PROPOSAL.md` but have no screen in the prototype, so no capture
 | a Mac row folding past 4 workspaces | `mac.many-workspaces` | pending |
 | more than 3 Macs collapsing | `home.many-macs` | pending |
 
-Every story of this file is green: its story file, its pages and its dark and light goldens (`INDEX.md`).
+Every story of this file is green: its story file, its pages, its dark and light goldens and its dark and light view goldens (`INDEX.md`).
 
 ---
 
-149 ids: 148 stories (four of them designed after the prototype, without a capture, the gap story `mac.mini.stale` among them) and `phone.explainer`; 202 captures of the prototype (34 light). This file is edited by hand: `tools/gen.mjs` would rewrite it from the prototype and undo every story designed since, so it regenerates only into a scratch copy, from which a re-captured prototype story is carried over by hand. Regenerate the captures: `node tools/run.mjs [regex]` then `node tools/gen.mjs` (driver, story definitions and generator in `tools/`; Playwright from /private/tmp/station-work/shot, metadata in /private/tmp/station-work/v4/meta.json).
+145 ids: 144 stories (three of them designed after the prototype, without a capture) and `phone.explainer`; 199 captures of the prototype (33 light). This file is edited by hand: `tools/gen.mjs` would rewrite it from the prototype and undo every story designed since, so it regenerates only into a scratch copy, from which a re-captured prototype story is carried over by hand. Regenerate the captures: `node tools/run.mjs [regex]` then `node tools/gen.mjs` (driver, story definitions and generator in `tools/`; Playwright from /private/tmp/station-work/shot, metadata in /private/tmp/station-work/v4/meta.json).

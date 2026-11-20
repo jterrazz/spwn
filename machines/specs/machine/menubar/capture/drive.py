@@ -26,9 +26,9 @@ SCHEMES = ["dark", "light"]
 ROOT = os.environ.get("STATION_VM_ROOT", "~/station")
 APP = f"{ROOT}/.artifacts/menubar/Station.app"
 CAPTURE = f"{ROOT}/specs/machine/menubar/capture"
-# value: STATION_CAPTURE_PAGE names the home story served, home.exposed by
+# value: STATION_CAPTURE_PAGE names the home story served, home.needs by
 # default; home.empty is shorter than the cap on any screen.
-STORY = os.environ.get("STATION_CAPTURE_PAGE", "home.exposed")
+STORY = os.environ.get("STATION_CAPTURE_PAGE", "home.needs")
 PAGE = f"{ROOT}/apps/menubar/stories/pages/machines.{STORY}.menubar.json"
 # value: the panel's top-left in M1's scene, from the item, as StatusPanel
 # places it: its right edge under the item's, 5 pt under it.

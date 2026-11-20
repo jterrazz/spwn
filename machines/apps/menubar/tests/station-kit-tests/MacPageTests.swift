@@ -112,7 +112,7 @@ final class MacPageTests: XCTestCase {
     // invariant: SPEC A4, B5.15: a Mac not heard from says nothing of when
     // it was seen after its facts: an Unseen Mac keeps no last values.
     func testAStaleMacHasNoSeenMarkingAfterItsFacts() throws {
-        let page = try XCTUnwrap(Stories["mac.mini.stale"].state.pushed)
+        let page = try XCTUnwrap(Stories["mac.mini.loading"].state.pushed)
         let facts = MachineHeader.facts(page).items ?? []
         XCTAssertNil(page.header?.stale)
         XCTAssertNil(facts.first { $0.signal == "stale" })

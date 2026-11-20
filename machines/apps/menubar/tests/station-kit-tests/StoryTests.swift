@@ -170,7 +170,9 @@ final class StoryTests: XCTestCase {
 
     // invariant: SPEC C4: one story of each group, tagged a11y, holds at
     // Increase Contrast in dark and at Reduce Transparency in light, each
-    // proved by its golden.
+    // proved by its golden. A status item is drawn in the bar's one ink
+    // whatever the settings, so its proof is that it draws its plain
+    // story's pixels.
     func testEveryGroupHasAStoryProvedAtIncreasedContrastAndReducedTransparency() throws {
         let stories = try stories()
         let tagged = stories.filter(\.a11y)
@@ -184,7 +186,13 @@ final class StoryTests: XCTestCase {
             ]
             for v in variants {
                 let rendered = Snapshot.render(v.view, scheme: v.scheme, over: AnyView(FlatDesk(scheme: v.scheme)))
-                if let f = try Golden.match(rendered, file: "\(story.id).\(v.knob).\(v.scheme == .dark ? "dark" : "light")", in: Tree.storyGoldens) { failures.append(f) }
+                let file = "\(story.id).\(v.knob).\(v.scheme == .dark ? "dark" : "light")"
+                if story.ui.statusItem == true {
+                    let plain = Snapshot.render(view(story), scheme: v.scheme, over: AnyView(FlatDesk(scheme: v.scheme)))
+                    if rendered?.bitmap.pixels != plain?.bitmap.pixels { failures.append("\(file): a status item draws otherwise than its plain story") }
+                } else if let f = try Golden.match(rendered, file: file, in: Tree.storyGoldens) {
+                    failures.append(f)
+                }
             }
         }
         XCTAssertEqual(failures, [])

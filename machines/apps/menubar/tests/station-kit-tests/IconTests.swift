@@ -90,7 +90,7 @@ final class IconTests: XCTestCase {
 
     // invariant: a port exposed slashes the mark as a server down does.
     func testAPortExposedIsSlashedToo() throws {
-        let exposed = try icon(story: "home.exposed")
+        let exposed = try icon(story: "home.needs")
         XCTAssertEqual(exposed.mark, .down)
         XCTAssertEqual(exposed.face, .slashed)
         XCTAssertEqual(exposed.label, "Spwn Menu, port 5000 exposed")

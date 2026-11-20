@@ -6,7 +6,7 @@ import XCTest
 // right edge, and it follows the ticks of its live key.
 @MainActor
 final class RowSparkTests: XCTestCase {
-    static let homes = ["home.needs", "home.down", "home.restarting", "home.exposed", "home.fine", "home.loading", "home.empty", "home.awake-off"]
+    static let homes = ["home.needs", "home.down", "home.restarting", "home.fine", "home.loading", "home.empty", "home.awake-off"]
     static let running: Set<String> = ["running", "healthy", "online"]
 
     func testASparkEndsOnlyARunningRow() throws {

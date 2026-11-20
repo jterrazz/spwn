@@ -1,5 +1,5 @@
 """value: the capture's contrast measure, M1's method on real pixels: each text
-of the golden panel of the shot's story (home.exposed unless
+of the golden panel of the shot's story (home.needs unless
 STATION_CAPTURE_PAGE named another) is found and sorted by tone (t1, t2, the red
 pill), the same box is taken in the capture, its pixels that are no glyph are
 the glass behind the text, the token's colour is composited over each, and the
@@ -192,7 +192,7 @@ def main():
     rows = []
     for shot in shots:
         name, scheme = shot["name"], shot["scheme"]
-        golden_full = np.array(Image.open(os.path.join(goldens, f"{shot.get('story', 'home.exposed')}.{scheme}.png")).convert("RGB"))
+        golden_full = np.array(Image.open(os.path.join(goldens, f"{shot.get('story', 'home.needs')}.{scheme}.png")).convert("RGB"))
         golden = golden_full[PAD:-PAD, PAD:-PAD]
         if scheme not in found:
             found[scheme] = boxes(golden, scheme)

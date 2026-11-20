@@ -72,8 +72,6 @@ import SwiftUI
 
 #Preview("home.empty") { StoryStage(Stories["home.empty"]) }
 
-#Preview("home.exposed") { StoryStage(Stories["home.exposed"]) }
-
 #Preview("home.fine") { StoryStage(Stories["home.fine"]) }
 
 #Preview("home.hover") { StoryStage(Stories["home.hover"]) }
@@ -85,8 +83,6 @@ import SwiftUI
 #Preview("home.loading") { StoryStage(Stories["home.loading"]) }
 
 #Preview("home.needs") { StoryStage(Stories["home.needs"]) }
-
-#Preview("home.recovered") { StoryStage(Stories["home.recovered"]) }
 
 #Preview("home.restarting") { StoryStage(Stories["home.restarting"]) }
 
@@ -115,8 +111,6 @@ import SwiftUI
 #Preview("mac.mini.ports.https") { StoryStage(Stories["mac.mini.ports.https"]) }
 
 #Preview("mac.mini.ports") { StoryStage(Stories["mac.mini.ports"]) }
-
-#Preview("mac.mini.stale") { StoryStage(Stories["mac.mini.stale"]) }
 
 #Preview("mac.this.accounts") { StoryStage(Stories["mac.this.accounts"]) }
 
