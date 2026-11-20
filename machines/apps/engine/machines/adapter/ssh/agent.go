@@ -3,10 +3,10 @@ package ssh
 import (
 	"bytes"
 	"context"
-	"crypto"
-	"crypto/ecdsa"
+	"encoding/asn1"
 	"errors"
 	"io"
+	"math/big"
 	"sync"
 
 	"golang.org/x/crypto/ssh"
@@ -53,7 +53,11 @@ func (a *Agent) signer(ctx context.Context) (ssh.Signer, error) {
 	if err != nil {
 		return nil, err
 	}
-	return ssh.NewSignerFromSigner(deviceSigner{ctx: ctx, key: a.key, pub: pub})
+	sshPub, err := ssh.NewPublicKey(pub)
+	if err != nil {
+		return nil, err
+	}
+	return deviceSigner{ctx: ctx, key: a.key, pub: sshPub}, nil
 }
 
 func (a *Agent) Listen(ctx context.Context, l local.Listener) error {
@@ -96,16 +100,27 @@ func (a *Agent) Serve(ctx context.Context, conn io.ReadWriter) error {
 	return err
 }
 
+// invariant: the device key signs the message itself, since the Secure
+// Enclave hashes what it signs; the signature is then worded as ssh's
+// ecdsa-sha2-nistp256.
 type deviceSigner struct {
 	ctx context.Context
 	key contract.DeviceKey
-	pub *ecdsa.PublicKey
+	pub ssh.PublicKey
 }
 
-func (s deviceSigner) Public() crypto.PublicKey { return s.pub }
+func (s deviceSigner) PublicKey() ssh.PublicKey { return s.pub }
 
-func (s deviceSigner) Sign(_ io.Reader, digest []byte, _ crypto.SignerOpts) ([]byte, error) {
-	return s.key.Sign(s.ctx, digest)
+func (s deviceSigner) Sign(_ io.Reader, message []byte) (*ssh.Signature, error) {
+	der, err := s.key.Sign(s.ctx, message)
+	if err != nil {
+		return nil, err
+	}
+	var rs struct{ R, S *big.Int }
+	if rest, parseErr := asn1.Unmarshal(der, &rs); parseErr != nil || len(rest) > 0 {
+		return nil, errors.New("the device key's signature is not ASN.1 ECDSA")
+	}
+	return &ssh.Signature{Format: s.pub.Type(), Blob: ssh.Marshal(rs)}, nil
 }
 
 type keyring struct {

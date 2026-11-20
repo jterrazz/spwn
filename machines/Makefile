@@ -1,4 +1,4 @@
-.PHONY: help install build build-linux lint fix test check menubar-check menubar menubar-install menubar-uninstall window catalog catalog-open catalog-export catalog-gallery e2e-machine e2e-binaries provision deprovision generate clean
+.PHONY: help install build build-linux enclave lint fix test check menubar-check menubar menubar-install menubar-uninstall window catalog catalog-open catalog-export catalog-gallery e2e-machine e2e-binaries provision deprovision generate clean
 
 BINARY       := station
 BUILD_PATH   := .artifacts/go/$(BINARY)
@@ -25,6 +25,12 @@ WINDOW_VERSION ?= $(patsubst v%,%,$(shell git describe --tags --always --dirty))
 CATALOG_BIN  := .artifacts/menubar/build/debug/StationCatalog
 CATALOG_OUT  ?= .artifacts/catalog
 LDFLAGS      := -X github.com/jterrazz/studio-station/apps/engine/wire.version=$(shell git describe --tags --always --dirty)
+# value: the Secure Enclave's Swift half, which every darwin build with cgo
+# links (CryptoKit has no C API); built for both release arches, from the
+# release's macOS floor.
+ENCLAVE_LIB  := .artifacts/enclave/libstationenclave.a
+ENCLAVE_SRC  := apps/engine/platform/darwin/enclave.swift
+MACOS_FLOOR  := 14.0
 SPEC_LDFLAGS := -X github.com/jterrazz/studio-station/apps/engine/wire.version=$(shell git describe --tags --always --dirty --long)
 
 CYAN  := \033[36m
@@ -44,9 +50,21 @@ node_modules/.install: package.json package-lock.json $(wildcard .artifacts/pack
 install: node_modules/.install ## Install the dependencies of both halves
 	@go work sync
 
-build: ## Build the binary, stamped with the version git describes
+build: enclave ## Build the binary, stamped with the version git describes
 	@go build -ldflags "$(LDFLAGS)" -o $(BUILD_PATH) ./apps/engine/cmd/station
 	@printf "$(GREEN)●$(RESET) Built $(BUILD_PATH)\n"
+
+enclave: ## On a Mac, the Secure Enclave's Swift half the darwin build links; nothing elsewhere
+	@if [ "$$(uname)" = Darwin ]; then $(MAKE) --no-print-directory $(ENCLAVE_LIB); fi
+
+$(ENCLAVE_LIB): $(ENCLAVE_SRC)
+	@mkdir -p $(@D)
+	@for arch in arm64 x86_64; do \
+		xcrun --sdk macosx swiftc -O -parse-as-library -static -emit-library -module-name StationEnclave \
+			-target $$arch-apple-macos$(MACOS_FLOOR) $(ENCLAVE_SRC) -o $(@D)/$$arch.a || exit 1; \
+	done
+	@lipo -create $(@D)/arm64.a $(@D)/x86_64.a -output $@
+	@printf "$(GREEN)●$(RESET) Built $@\n"
 
 build-linux: ## Build the linux/arm64 binary a VM image carries
 	@CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -ldflags "$(LDFLAGS)" -o $(LINUX_PATH) ./apps/engine/cmd/station
@@ -71,7 +89,7 @@ fix: node_modules/.install ## Every fixer: gofmt over Go, then typescript fix
 # second time over the fake vz once every spec has passed over tart's.
 VZ_SUITES    := usecases/machines usecases/engine/keep
 
-test: node_modules/.install ## The Go tests (modules and the boundary), then the CLI specs against a fresh build of station and the window's scenarios against its proof build, then the VM suites again over vz
+test: node_modules/.install enclave ## The Go tests (modules and the boundary), then the CLI specs against a fresh build of station and the window's scenarios against its proof build, then the VM suites again over vz
 	@$(TURBO) run test --filter='!go-workspace' --filter='!studio-station-specs'
 	@go test -race -tags $(SPEC_TAGS) -run TestWorldMac ./apps/engine/wire
 	@go build -tags $(SPEC_TAGS) -ldflags "$(SPEC_LDFLAGS)" -o $(TEST_PATH) ./apps/engine/cmd/station && touch $(TEST_PATH)

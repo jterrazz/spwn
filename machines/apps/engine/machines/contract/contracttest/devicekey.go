@@ -27,10 +27,10 @@ func DeviceKey(t *testing.T, subject func(t *testing.T) contract.DeviceKey) {
 			t.Fatal("a second ask gave another key")
 		}
 	})
-	t.Run("a signature verifies against the public half, and only for its digest", func(t *testing.T) {
+	t.Run("a signature verifies against the public half, and only for its message", func(t *testing.T) {
 		k := subject(t)
 		digest := sha256.Sum256([]byte("a challenge"))
-		sig, err := k.Sign(t.Context(), digest[:])
+		sig, err := k.Sign(t.Context(), []byte("a challenge"))
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -43,7 +43,7 @@ func DeviceKey(t *testing.T, subject func(t *testing.T) contract.DeviceKey) {
 		}
 		other := sha256.Sum256([]byte("another challenge"))
 		if ecdsa.VerifyASN1(pub, other[:], sig) {
-			t.Fatal("the signature verifies another digest")
+			t.Fatal("the signature verifies another message")
 		}
 	})
 }

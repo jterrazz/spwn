@@ -10,8 +10,8 @@ type DeviceKey interface {
 	// was made: its public half and its signatures leave the device, the
 	// private half never does.
 	Public(ctx context.Context) (*ecdsa.PublicKey, error)
-	// value: an ASN.1 ECDSA signature over a SHA-256 digest.
-	Sign(ctx context.Context, digest []byte) ([]byte, error)
+	// value: an ASN.1 ECDSA signature over the SHA-256 digest of message.
+	Sign(ctx context.Context, message []byte) ([]byte, error)
 }
 
 type NoDeviceKeyError struct {

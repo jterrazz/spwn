@@ -105,6 +105,7 @@ jobs:
                   dist="$RUNNER_TEMP/station"
                   mkdir -p "$dist"
                   sdk=$(xcrun --sdk macosx --show-sdk-path)
+                  make enclave
                   for arch in arm64 amd64; do
                       case "$arch" in arm64) target=arm64 ;; amd64) target=x86_64 ;; esac
                       CGO_ENABLED=1 GOOS=darwin GOARCH="$arch" CC="clang -arch $target -isysroot $sdk -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET" \

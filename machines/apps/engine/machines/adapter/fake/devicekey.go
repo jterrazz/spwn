@@ -5,6 +5,7 @@ import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
+	"crypto/sha256"
 	"sync"
 
 	"github.com/jterrazz/studio-station/apps/engine/machines/contract"
@@ -44,7 +45,7 @@ func (k *DeviceKey) Public(context.Context) (*ecdsa.PublicKey, error) {
 	return &key.PublicKey, nil
 }
 
-func (k *DeviceKey) Sign(_ context.Context, digest []byte) ([]byte, error) {
+func (k *DeviceKey) Sign(_ context.Context, message []byte) ([]byte, error) {
 	key, err := k.private()
 	if err != nil {
 		return nil, err
@@ -52,5 +53,6 @@ func (k *DeviceKey) Sign(_ context.Context, digest []byte) ([]byte, error) {
 	k.mu.Lock()
 	k.Signed++
 	k.mu.Unlock()
-	return ecdsa.SignASN1(rand.Reader, key, digest)
+	digest := sha256.Sum256(message)
+	return ecdsa.SignASN1(rand.Reader, key, digest[:])
 }

@@ -2,56 +2,26 @@ package wire
 
 import (
 	"context"
-	"crypto/ecdsa"
-	"crypto/elliptic"
 	"errors"
 	"path"
 	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/accounts/adapter/keychain"
+	"github.com/jterrazz/studio-station/apps/engine/machines/adapter/macos"
 	"github.com/jterrazz/studio-station/apps/engine/machines/adapter/ssh"
 	"github.com/jterrazz/studio-station/apps/engine/machines/contract"
-	"github.com/jterrazz/studio-station/apps/engine/platform/darwin"
 	"github.com/jterrazz/studio-station/apps/engine/platform/local"
 )
-
-// value: the Secure Enclave's tag for this Mac's one device key.
-const deviceKeyLabel = "com.jterrazz.station.device-key"
-
-const signReason = "sign in over ssh as this Mac"
 
 func AgentSocket(state string) string { return path.Join(state, "agent.sock") }
 
 func DeviceKeyFile(state string) string { return path.Join(state, "device-key.pub") }
 
-type enclaveKey struct{}
-
-func enclaveRefusal(err error) error {
-	var none *darwin.NoEnclaveError
-	if errors.As(err, &none) {
-		return &contract.NoDeviceKeyError{Why: none.Why}
-	}
-	return err
-}
-
-func (enclaveKey) Public(context.Context) (*ecdsa.PublicKey, error) {
-	point, err := darwin.EnclavePublic(deviceKeyLabel)
-	if err != nil {
-		return nil, enclaveRefusal(err)
-	}
-	return ecdsa.ParseUncompressedPublicKey(elliptic.P256(), point)
-}
-
-func (enclaveKey) Sign(_ context.Context, digest []byte) ([]byte, error) {
-	sig, err := darwin.EnclaveSign(deviceKeyLabel, signReason, keychain.PresenceBudget, digest)
-	return sig, enclaveRefusal(err)
-}
-
 func (m machine) deviceKey() contract.DeviceKey {
 	if m.world != nil {
 		return m.world.deviceKey()
 	}
-	return enclaveKey{}
+	return macos.NewDeviceKey(m.sys.FS, m.paths.State, keychain.PresenceBudget)
 }
 
 // invariant: the session's own agent is relayed only when it is not this

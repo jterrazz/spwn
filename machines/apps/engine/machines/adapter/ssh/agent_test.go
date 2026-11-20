@@ -6,6 +6,7 @@ import (
 	"crypto/ed25519"
 	"crypto/elliptic"
 	"crypto/rand"
+	"crypto/sha256"
 	"errors"
 	"io"
 	"strings"
@@ -49,13 +50,14 @@ func (k *deviceKey) Public(context.Context) (*ecdsa.PublicKey, error) {
 	return &key.PublicKey, nil
 }
 
-func (k *deviceKey) Sign(_ context.Context, digest []byte) ([]byte, error) {
+func (k *deviceKey) Sign(_ context.Context, message []byte) ([]byte, error) {
 	key, err := k.private()
 	if err != nil {
 		return nil, err
 	}
 	k.signed++
-	return ecdsa.SignASN1(rand.Reader, key, digest)
+	digest := sha256.Sum256(message)
+	return ecdsa.SignASN1(rand.Reader, key, digest[:])
 }
 
 func TestTheInMemoryKeyKeepsTheDeviceKeyContract(t *testing.T) {
