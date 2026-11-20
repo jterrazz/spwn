@@ -1,0 +1,15 @@
+description: 'an updated app is kept in its Mac''s journal as "updated", done by you'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'apps update --manager brew'
+      exit: 0
+      stdout: |
+          ●	gh	2.98.0	brew
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.out.Lines // [] | .[] | {Machine, Call, Text, By, Outcome}'''
+      stdin: |
+          {"v":2,"id":"1","call":"journal.kept","in":{}}
+      exit: 0
+      stdout: |
+          {"Machine":"macbook-pro","Call":"apps.update","Text":"gh updated","By":"you","Outcome":"done"}
