@@ -189,9 +189,9 @@ describe('workspace', () => {
                 // When - the Inbox is opened
                 await visitor.click(within(sidebar, button('Inbox 2')));
 
-                // Then - it is a need, with the engine's command
+                // Then - it is a need, with the engine's Try again
                 await visitor.see(content('linux-2 was not created: it failed at boot'));
-                await visitor.see(content('station machines start linux-2'));
+                await visitor.see(within(region('Needs you'), button('Try again linux-2')));
             },
         );
         expect(result.errors.text).toBe('');

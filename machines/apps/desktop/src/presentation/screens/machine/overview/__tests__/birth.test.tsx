@@ -41,7 +41,7 @@ describe('birth', () => {
                 await visitor.see(
                     within(step, content('cloud-init[498]: running init-local', { exact: false })),
                 );
-                await visitor.see(button('Start'));
+                await visitor.see(button('Try again'));
             },
         );
         expect(result.errors.text).toBe('');
