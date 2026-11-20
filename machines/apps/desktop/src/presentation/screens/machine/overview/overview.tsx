@@ -22,7 +22,7 @@ import { Page } from '../../../ui/page';
 import { machineKindOf } from '../../../words/provisional';
 import { DeleteGesture } from '../gestures';
 import { FailedCreate } from './birth';
-import { CheckLatency, CheckTile, Health, LastDays } from './health';
+import { CheckLatency, CheckTile, Health, UptimeStrip } from './health';
 import { FileChapters, ItsFile } from './its-file';
 import { Follows, Machines, MachinesTile } from './mac';
 import { SharedPorts, SignInsPanel } from './shared';
@@ -151,7 +151,7 @@ function VmOverview({ mac, vm, go }: VmProps) {
                             <>
                                 <Health vm={vm} />
                                 <CheckLatency vm={vm} />
-                                <LastDays vm={vm} />
+                                <UptimeStrip go={go} vm={vm} />
                             </>
                         ) : (
                             <>

@@ -1,0 +1,79 @@
+- main:
+  - heading "infra down" [level=2]
+  - paragraph:
+    - text: server · always on · on
+    - button "mac-mini"
+  - button "Stop"
+  - button "Restart"
+  - button "Open in Terminal"
+  - tablist "Tabs":
+    - tab "Overview" [selected]
+    - tab "Activity"
+    - tab "Ports"
+  - heading "infra is down." [level=1]
+  - paragraph:
+    - img "infra is down."
+    - text: Its check fails since 10:18.
+  - text: CPU 18%
+  - img "CPU of infra, its last bars"
+  - text: Peak 44 % · 38 min ago Memory 16GB
+  - meter "Memory used of its total"
+  - text: of 24 GB Disk 20GB
+  - meter "Disk used of its total"
+  - text: of 80 GB Check 42ms fails
+  - region "Health":
+    - heading "Health" [level=2]
+    - text: Down. Its check fails since 10:18. Its state down Its address 192.168.64.5 SSH answers Its check fails
+  - region "Check latency":
+    - heading "Check latency last hour" [level=2]
+    - text: 42 ms now
+    - img "Latency of the check"
+    - text: 1 h ago Now
+  - region "Last 30 days":
+    - heading "Last 30 days Up 99.98 % over 30 days, 2 restarts" [level=2]
+    - group "Its days":
+      - img "Fri 9 Oct. Up all day"
+      - img "Sat 10 Oct. Up all day"
+      - img "Sun 11 Oct. Up all day"
+      - img "Mon 12 Oct. Up all day"
+      - img "Tue 13 Oct. Up all day"
+      - img "Wed 14 Oct. Up all day"
+      - img "Thu 15 Oct. Up all day"
+      - img "Fri 16 Oct. Up all day"
+      - img "Sat 17 Oct. Up all day"
+      - button "Sun 18 Oct. Down from 04:30 to 04:34, out of memory; restarted 1 time"
+      - img "Mon 19 Oct. Up all day"
+      - img "Tue 20 Oct. Up all day"
+      - img "Wed 21 Oct. Up all day"
+      - img "Thu 22 Oct. Up all day"
+      - img "Fri 23 Oct. Up all day"
+      - img "Sat 24 Oct. Up all day"
+      - img "Sun 25 Oct. Up all day"
+      - img "Mon 26 Oct. Up all day"
+      - img "Tue 27 Oct. Up all day"
+      - img "Wed 28 Oct. Up all day"
+      - img "Thu 29 Oct. Up all day"
+      - button "Fri 30 Oct. Down from 04:30 to 04:34, out of memory; restarted 1 time"
+      - img "Sat 31 Oct. Up all day"
+      - img "Sun 1 Nov. Up all day"
+      - img "Mon 2 Nov. Up all day"
+      - img "Tue 3 Nov. Up all day"
+      - img "Wed 4 Nov. Up all day"
+      - img "Thu 5 Nov. Up all day"
+      - img "Fri 6 Nov. Up all day"
+      - img "Sat 7 Nov. Up all day"
+    - text: 9 Oct 7 Nov
+  - region "Why it exists":
+    - heading "Why it exists" [level=2]
+    - term: Purpose
+    - definition: The cluster's control plane
+    - term: Created
+    - definition: 2 Nov, by you
+    - term: Hold
+    - definition: Always on. Stopping it needs its name typed.
+    - term: Check
+    - definition: https://example.com/healthz
+  - region "Busiest now":
+    - heading "Busiest now" [level=2]
+    - paragraph: The engine listed no process.
+  - button "Delete infra…"

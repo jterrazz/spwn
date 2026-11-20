@@ -1,15 +1,18 @@
-import type { MachinesLatencyPoint, MachinesUptimeDay, MachinesVM } from '@jterrazz/station-api';
+import type { MachinesLatencyPoint, MachinesUptimeCell, MachinesVM } from '@jterrazz/station-api';
 import type { ReactNode } from 'react';
 
-import { clock, duration, seconds, sentence } from '../../../../domain/format';
+import { clock, duration, seconds } from '../../../../domain/format';
 import { SEPARATOR } from '../../../../domain/separator';
 import { between, shortDay } from '../../../../domain/when';
+import type { Route } from '../../../navigation/route';
 import { Chart, MissingMark, Panel, StatePill, Tile, Value } from '../../../ui/index';
 import type { Measured } from '../../../ui/index';
-import { countOf } from '../../../words/engine-words';
-import { verdictShown, vmCheck, vmSsh, vmState } from '../../../words/shown';
+import { dayOpensHistory, verdictShown, vmCheck, vmSsh, vmState } from '../../../words/shown';
+import { UPTIME_MARK_TONES } from '../../../words/tones';
 
 import styles from './overview.module.css';
+
+type Go = (to: Route) => void;
 
 const NS_PER_MS = 1_000_000;
 const NS_PER_SECOND = 1_000_000_000;
@@ -140,47 +143,54 @@ export function CheckLatency({ vm }: { vm: MachinesVM }) {
     );
 }
 
-function dayOf(day: MachinesUptimeDay): string {
-    const restarts = day.restarts ?? 0;
-    const down = day.down_s ?? 0;
-    return sentence([
-        shortDay(day.date) ?? day.date,
-        restarts > 0 ? countOf('restart', restarts) : undefined,
-        down > 0 ? `down ${seconds(down * NS_PER_SECOND)}` : undefined,
-    ]);
-}
-
 function daysOf(count: number): Measured {
     return { '--days': count };
 }
 
-// invariant: the record keeps a day only once the server went down or restarted on it, so a cell is such a day,
-// invariant: never a day of a calendar: the days between two cells are not drawn.
-export function LastDays({ vm }: { vm: MachinesVM }) {
-    const days = vm.Uptime.days ?? [];
+function Day({ cell, go }: { cell: MachinesUptimeCell; go: Go }) {
+    const tone = styles[UPTIME_MARK_TONES[cell.Mark]];
+    const named =
+        cell.Sentence === undefined ? {} : { 'aria-label': cell.Sentence, title: cell.Sentence };
+    if (dayOpensHistory(cell)) {
+        return (
+            <button
+                className={tone}
+                onClick={() => {
+                    go({ page: 'inbox' });
+                }}
+                type="button"
+                {...named}
+            />
+        );
+    }
+    return <i className={tone} role={cell.Sentence === undefined ? undefined : 'img'} {...named} />;
+}
+
+export function UptimeStrip({ vm, go }: { vm: MachinesVM; go: Go }) {
+    const days = vm.Strip?.Days ?? [];
     const first = days[0];
     const last = days.at(-1);
     return (
-        <Panel padded title="Days it went down">
+        <Panel note={vm.Strip?.Sentence ?? ''} padded title="Last 30 days">
             {first && last ? (
                 <div>
                     <div
                         aria-label="Its days"
                         className={styles.strip}
-                        role="img"
+                        role="group"
                         style={daysOf(days.length)}
                     >
-                        {days.map((day) => (
-                            <i key={day.date} title={dayOf(day)} />
+                        {days.map((cell) => (
+                            <Day cell={cell} go={go} key={cell.Date} />
                         ))}
                     </div>
                     <div className={styles.axis}>
-                        <span>{shortDay(first.date)}</span>
-                        <span>{shortDay(last.date)}</span>
+                        <span>{shortDay(first.Date)}</span>
+                        <span>{shortDay(last.Date)}</span>
                     </div>
                 </div>
             ) : (
-                <p className={styles.none}>The engine kept no such day.</p>
+                <p className={styles.none}>The engine kept no day yet.</p>
             )}
         </Panel>
     );

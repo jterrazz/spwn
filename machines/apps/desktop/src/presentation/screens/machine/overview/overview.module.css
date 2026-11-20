@@ -78,6 +78,28 @@
     background: var(--raise-2);
     border-radius: 3px;
 }
+.strip button {
+    all: unset;
+    cursor: pointer;
+    background: var(--raise-2);
+    border-radius: 3px;
+}
+.strip button:active {
+    transform: var(--motion-press);
+}
+.strip button:focus-visible {
+    outline: 2px solid var(--new);
+    outline-offset: 2px;
+}
+.strip .ok {
+    background: color-mix(in srgb, var(--ok) 70%, var(--inset));
+}
+.strip .warn {
+    background: var(--warn);
+}
+.strip .bad {
+    background: var(--bad);
+}
 .axis {
     display: flex;
     justify-content: space-between;

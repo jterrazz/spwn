@@ -13,6 +13,8 @@ import { describe, expect, test } from 'vitest';
 
 import { website } from '../website.specification.js';
 
+const RESTARTED = 'Sun 18 Oct. Down from 04:30 to 04:34, out of memory; restarted 1 time';
+
 describe('server', () => {
     test('S1 a healthy server reads its four steps and its latency', async () => {
         // Given - the window on infra's page over two-macs, a server whose check passes
@@ -37,7 +39,24 @@ describe('server', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test.todo('S1 waits for 30 days of uptime on MachinesUptimeDay');
+    test("S1 a server's last 30 days are the engine's strip, its sentence and a day named by its own", async () => {
+        // Given - the window on infra's page over working-hard, a server restarted on two of its 30 days
+        const result = await website.visit(
+            '/?world=working-hard&machine=infra&tab=Overview',
+            async (visitor) => {
+                // When - its last 30 days are read
+                const days = region('Last 30 days');
+                await visitor.see(days);
+
+                // Then - the panel says the engine's sentence of the 30 days, and a restarted day its own
+                await visitor.see(
+                    within(days, content('Up 99.98 % over 30 days, 2 restarts', { exact: false })),
+                );
+                await visitor.see(within(days, button(RESTARTED)));
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
 
     test('S2 a server whose check fails says so, and no step of its health is drawn ok', async () => {
         // Given - the window on infra's page over stories, a server on mac-mini whose check fails
@@ -169,7 +188,23 @@ describe('server', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test.todo('S5 waits for a state per day on MachinesUptimeDay');
+    test('S5 a restarted day of the strip opens the Inbox on its history', async () => {
+        // Given - the window on infra's page over working-hard
+        const result = await website.visit(
+            '/?world=working-hard&machine=infra&tab=Overview',
+            async (visitor) => {
+                const restarted = within(region('Last 30 days'), button(RESTARTED));
+                await visitor.see(restarted);
+
+                // When - the restarted day is pressed
+                await visitor.click(restarted);
+
+                // Then - the Inbox opens on its History
+                await visitor.see(region('History'));
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
 
     test('S6 a server has no Sign-ins tab: it keeps its own sign-ins', async () => {
         // Given - the window on infra's page over two-macs, a server

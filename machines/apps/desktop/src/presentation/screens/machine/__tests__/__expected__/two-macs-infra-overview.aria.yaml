@@ -23,9 +23,40 @@
     - heading "Check latency" [level=2]
     - text: 41 ms now
     - paragraph: The engine kept one check so far.
-  - region "Days it went down":
-    - heading "Days it went down" [level=2]
-    - paragraph: The engine kept no such day.
+  - region "Last 30 days":
+    - heading "Last 30 days Up 100 % over 1 day" [level=2]
+    - group "Its days":
+      - img "Tue 6 Oct. Not recorded yet"
+      - img "Wed 7 Oct. Not recorded yet"
+      - img "Thu 8 Oct. Not recorded yet"
+      - img "Fri 9 Oct. Not recorded yet"
+      - img "Sat 10 Oct. Not recorded yet"
+      - img "Sun 11 Oct. Not recorded yet"
+      - img "Mon 12 Oct. Not recorded yet"
+      - img "Tue 13 Oct. Not recorded yet"
+      - img "Wed 14 Oct. Not recorded yet"
+      - img "Thu 15 Oct. Not recorded yet"
+      - img "Fri 16 Oct. Not recorded yet"
+      - img "Sat 17 Oct. Not recorded yet"
+      - img "Sun 18 Oct. Not recorded yet"
+      - img "Mon 19 Oct. Not recorded yet"
+      - img "Tue 20 Oct. Not recorded yet"
+      - img "Wed 21 Oct. Not recorded yet"
+      - img "Thu 22 Oct. Not recorded yet"
+      - img "Fri 23 Oct. Not recorded yet"
+      - img "Sat 24 Oct. Not recorded yet"
+      - img "Sun 25 Oct. Not recorded yet"
+      - img "Mon 26 Oct. Not recorded yet"
+      - img "Tue 27 Oct. Not recorded yet"
+      - img "Wed 28 Oct. Not recorded yet"
+      - img "Thu 29 Oct. Not recorded yet"
+      - img "Fri 30 Oct. Not recorded yet"
+      - img "Sat 31 Oct. Not recorded yet"
+      - img "Sun 1 Nov. Not recorded yet"
+      - img "Mon 2 Nov. Not recorded yet"
+      - img "Tue 3 Nov. Not recorded yet"
+      - img "Wed 4 Nov. Up all day"
+    - text: 6 Oct 4 Nov
   - region "Why it exists":
     - heading "Why it exists" [level=2]
     - term: Purpose
