@@ -434,7 +434,7 @@ WORLDS = {
     **{name: plain(name) for name in (
         "bare-mac", "disk-low", "engine-stopped", "mini-offline", "mini-workspace", "one-mac", "standings",
     )},
-    "creating": ("creating", None, {}, [engine_logged("macbook-pro", ["engine started"])]),
+    "creating": ("creating", None, {}, []),
     "stories": ("stories", None, {}, STORIES_JOURNAL),
     "two-macs":("two-macs", "homebrew", machine("macbook-pro", ["lazygit", "bat"]),
                  [exchange("linux-1", "ex-1", "gh", "device-code", "github.com"),
