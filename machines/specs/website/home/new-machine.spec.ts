@@ -7,6 +7,7 @@ import {
     heading,
     navigation,
     region,
+    testId,
     within,
 } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
@@ -92,7 +93,40 @@ describe('new machine', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test.todo(
-        "H8 the drag across the free squares waits only for a drag verb of @jterrazz/test's visitor (its verbs are check, click, fill, gone, hover, press, see, select): the window takes the drag, proved by MemoryPick's component test, memory-pick.test.tsx",
-    );
+    test('H8 a drag across the free squares lights the squares taken among those held, the figure and what it leaves follow, and it stops at what is free', async () => {
+        // Given - the New machine sheet over two-macs, on the Mac with 36 GB free: its 64 squares are macOS 4, infra 24, the 8 chosen and the 28 free, two rows of 32
+        const result = await website.visit(TWO_MACS, async (visitor) => {
+            await visitor.click(button('New machine'));
+            const sheet = dialog('New machine on mac-mini');
+            // testId: the memory grid is an img, a role no locator of the visitor names
+            const grid = within(sheet, testId('memory-grid'));
+            await visitor.see(within(sheet, content('leaves 28 GB free on mac-mini')));
+
+            // When - the pointer goes down on the free square of column 8, row 2, and is released on column 16, the 20th GB
+            await visitor.drag(
+                grid,
+                { x: (8 - 0.5) / 32, y: 0.75 },
+                { x: (16 - 0.5) / 32, y: 0.75 },
+            );
+
+            // Then - the figure and what it leaves follow
+            await visitor.see(within(sheet, content('20GB')));
+            await visitor.see(within(sheet, content('leaves 16 GB free on mac-mini')));
+
+            // When - the pointer goes down on the 20th square and is released on the last one, past which nothing is free
+            await visitor.drag(
+                grid,
+                { x: (16 - 0.5) / 32, y: 0.75 },
+                { x: (32 - 0.5) / 32, y: 0.75 },
+            );
+
+            // Then - the 36 GB it can hold are chosen, no more
+            await visitor.see(within(sheet, content('36GB')));
+            await visitor.see(within(sheet, content('leaves 0 GB free on mac-mini')));
+        });
+        expect(result.errors.text).toBe('');
+
+        // Then - the 36 squares taken are lit, among the 28 held by macOS and infra
+        expect(result.html.text.match(/data-identity="[^"]+" data-take=/gu)).toHaveLength(36);
+    });
 });

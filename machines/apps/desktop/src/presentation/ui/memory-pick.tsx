@@ -118,6 +118,7 @@ export function MemoryPick({
                 aria-label={`Memory of ${name}, one square per GB`}
                 className={`${styles.grid} ${take === undefined ? '' : styles.take}`}
                 data-dragging={taking.dragging ? 'true' : undefined}
+                data-testid="memory-grid"
                 role="img"
                 {...taking.handlers}
             >
