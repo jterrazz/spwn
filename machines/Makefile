@@ -140,9 +140,10 @@ window: node_modules/.install ## Build the window's bundle for darwin-arm64, sig
 	@cd apps/desktop && CARGO_TARGET_DIR=$(CURDIR)/$(WINDOW_CARGO) npx tauri build --ci --target aarch64-apple-darwin --bundles app --config '{"version":"$(WINDOW_VERSION)"}'
 	@rm -rf $(WINDOW_APP)
 	@cp -R $(WINDOW_CARGO)/aarch64-apple-darwin/release/bundle/macos/Spwn.app $(WINDOW_APP)
-	@shown=$$(plutil -extract CFBundleShortVersionString raw $(WINDOW_APP)/Contents/Info.plist); \
-		if [ "$$shown" != "$(WINDOW_VERSION)" ]; then printf "window: the bundle says %s, not the %s compiled in\n" "$$shown" "$(WINDOW_VERSION)"; exit 1; fi
-	@plutil -replace CFBundleVersion -string "$(WINDOW_VERSION)" $(WINDOW_APP)/Contents/Info.plist
+	@for key in CFBundleShortVersionString CFBundleVersion; do \
+		shown=$$(plutil -extract $$key raw $(WINDOW_APP)/Contents/Info.plist); \
+		if [ "$$shown" != "$(WINDOW_VERSION)" ]; then printf "window: the bundle's %s says %s, not the %s compiled in\n" "$$key" "$$shown" "$(WINDOW_VERSION)"; exit 1; fi; \
+	done
 	@codesign --force --sign - --timestamp=none $(WINDOW_APP)
 	@codesign --verify --strict $(WINDOW_APP)
 	@printf "$(GREEN)●$(RESET) Built $(WINDOW_APP) ($(WINDOW_VERSION), signed ad hoc)\n"
