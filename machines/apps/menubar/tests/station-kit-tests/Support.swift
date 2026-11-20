@@ -52,6 +52,26 @@ struct Bitmap {
         self.init(image)
     }
 
+    init(width: Int, height: Int, pixels: [UInt8]) {
+        self.width = width
+        self.height = height
+        self.pixels = pixels
+    }
+
+    // value: the pixels inside a border of `inset` pixels on every side.
+    func cropped(by inset: Int) -> Bitmap? {
+        guard inset > 0 else { return self }
+        let w = width - 2 * inset, h = height - 2 * inset
+        guard w > 0, h > 0 else { return nil }
+        var out = [UInt8]()
+        out.reserveCapacity(w * h * 4)
+        for row in inset..<(inset + h) {
+            let start = (row * width + inset) * 4
+            out.append(contentsOf: pixels[start..<(start + w * 4)])
+        }
+        return Bitmap(width: w, height: h, pixels: out)
+    }
+
     // value: the pixels as an 8-bit sRGB image, what a golden PNG keeps
     // whatever depth the renderer drew at.
     var image: CGImage? {
@@ -59,6 +79,10 @@ struct Bitmap {
         return CGImage(width: width, height: height, bitsPerComponent: 8, bitsPerPixel: 32, bytesPerRow: width * 4,
                        space: CGColorSpace(name: CGColorSpace.sRGB)!, bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedLast.rawValue),
                        provider: provider, decode: nil, shouldInterpolate: false, intent: .defaultIntent)
+    }
+
+    var png: Data? {
+        image.flatMap { NSBitmapImageRep(cgImage: $0).representation(using: .png, properties: [:]) }
     }
 
     func differing(_ other: Bitmap, tolerance: Int = 0) -> Int {
@@ -76,6 +100,11 @@ struct Bitmap {
         zip(pixels, other.pixels).reduce(0) { max($0, abs(Int($1.0) - Int($1.1))) }
     }
 
+    // value: every pixel the first one's, a drawing that drew nothing.
+    var flat: Bool {
+        pixels.count >= 4 && stride(from: 4, to: pixels.count, by: 4).allSatisfy { pixels[$0..<($0 + 4)].elementsEqual(pixels[0..<4]) }
+    }
+
     var placeholder: Int {
         var n = 0
         for i in stride(from: 0, to: pixels.count, by: 4)
@@ -88,6 +117,8 @@ struct Bitmap {
 
 enum Snapshot {
     static let now = ISO8601DateFormatter().date(from: "2026-11-03T10:30:00Z")!
+    // value: the desk drawn around a view on every side, in points.
+    static let margin: CGFloat = 24
 
     // value: the popover as a fixture shows it: Home or a page of the menu
     // bar's own, or a machine's page pushed over Home.
@@ -120,7 +151,7 @@ enum Snapshot {
     @MainActor
     static func canvas(_ view: AnyView, scheme: ColorScheme, over desk: AnyView?) -> AnyView {
         let themed = view.stationTheme(scheme).environment(\.stationNow, now).environment(\.stationStill, true)
-        return desk.map { AnyView(themed.fixedSize().padding(24).background($0)) } ?? AnyView(themed)
+        return desk.map { AnyView(themed.fixedSize().padding(margin).background($0)) } ?? AnyView(themed)
     }
 
     // hazard: a render whose image is never read can leave the process's
@@ -137,9 +168,7 @@ enum Snapshot {
     static func render(_ view: AnyView, scheme: ColorScheme, over desk: AnyView?, scale: CGFloat = 2) -> (png: Data, bitmap: Bitmap)? {
         let renderer = ImageRenderer(content: canvas(view, scheme: scheme, over: desk))
         renderer.scale = scale
-        guard let image = renderer.cgImage, let bitmap = Bitmap(image), let flat = bitmap.image else { return nil }
-        let rep = NSBitmapImageRep(cgImage: flat)
-        guard let png = rep.representation(using: .png, properties: [:]) else { return nil }
+        guard let image = renderer.cgImage, let bitmap = Bitmap(image), let png = bitmap.png else { return nil }
         return (png, bitmap)
     }
 }
@@ -170,7 +199,7 @@ enum Golden {
     @MainActor
     static func check(_ name: String, _ view: AnyView, scheme: ColorScheme, desk: Bool = true, scale: CGFloat = 2) throws -> String? {
         let file = "\(name).\(scheme == .dark ? "dark" : "light")"
-        return try match(Snapshot.render(view, scheme: scheme, desk: desk, scale: scale), file: file, in: Tree.goldens)
+        return try match(Snapshot.render(view, scheme: scheme, desk: desk, scale: scale), file: file, in: Tree.goldens, desk: desk ? scale : nil)
     }
 
     static func gap(_ got: Bitmap, _ want: Bitmap, file: String) -> String? {
@@ -180,12 +209,17 @@ enum Golden {
     }
 
     // invariant: a golden is written only when its pixels change, so a
-    // drawing that did not move leaves its file's bytes alone.
-    static func match(_ rendered: (png: Data, bitmap: Bitmap)?, file: String, in folder: URL) throws -> String? {
+    // drawing that did not move leaves its file's bytes alone. A drawing
+    // over a desk, `desk` its scale, is kept without the desk's margin.
+    static func match(_ rendered: (png: Data, bitmap: Bitmap)?, file: String, in folder: URL, desk: CGFloat? = nil) throws -> String? {
         let golden = folder.appendingPathComponent(file + ".png")
-        guard let (png, bitmap) = rendered else { return "\(file): no image rendered" }
+        guard let (drawn, bitmap) = rendered else { return "\(file): no image rendered" }
         if bitmap.placeholder >= 20 { return "\(file): \(bitmap.placeholder) pixels of the unsupported placeholder" }
-        guard let got = Bitmap(png: png) else { return "\(file): the drawing's PNG does not decode" }
+        let inset = desk.map { Int(Snapshot.margin * $0) } ?? 0
+        guard let png = inset == 0 ? drawn : Bitmap(png: drawn)?.cropped(by: inset)?.png, let got = Bitmap(png: png) else {
+            return "\(file): the drawing's PNG does not decode"
+        }
+        if got.flat { return "\(file): the drawing is one flat colour, so it drew nothing" }
         let listed = Expectation.listed(golden, in: expected)
         let actual = folder.appendingPathComponent(file + ".actual.png")
         let failure: String?
@@ -199,9 +233,8 @@ enum Golden {
             return listed ? "\(file): listed in STATION_EXPECT_GOLDENS, but it did not change" : nil
         }
         if update || listed {
-            try png.write(to: golden)
             try? FileManager.default.removeItem(at: actual)
-            return nil
+            return try Encoder.write(png, to: golden, as: got)
         }
         try png.write(to: actual)
         return failure
@@ -218,6 +251,31 @@ enum Golden {
             if share >= 0.4 { failures.append("\(name) \(scheme): \(Int(share * 100)) % of it is opaque") }
         }
         return failures.isEmpty ? nil : failures.joined(separator: "; ")
+    }
+}
+
+// invariant: a pixel golden is written by one pinned lossless encoder,
+// the oxipng the rig installs (specs/machine/menubar/run.sh), so the same
+// pixels are always the same bytes; the file it leaves decodes to the
+// drawing's pixels, or the write fails.
+enum Encoder {
+    static let path = ProcessInfo.processInfo.environment["STATION_OXIPNG"]
+    static let arguments = ["--opt", "6", "--strip", "safe", "--threads", "1", "--quiet"]
+
+    static func write(_ png: Data, to golden: URL, as drawn: Bitmap) throws -> String? {
+        let name = golden.lastPathComponent
+        guard let path, !path.isEmpty else { return "\(name): STATION_OXIPNG names no encoder, so no golden is written (specs/machine/menubar/run.sh installs it)" }
+        try png.write(to: golden)
+        let encoder = Process()
+        encoder.executableURL = URL(fileURLWithPath: path)
+        encoder.arguments = arguments + [golden.path]
+        try encoder.run()
+        encoder.waitUntilExit()
+        guard encoder.terminationStatus == 0 else { return "\(name): oxipng exited \(encoder.terminationStatus)" }
+        guard let back = Bitmap(png: try Data(contentsOf: golden)), back.width == drawn.width, back.height == drawn.height, back.pixels == drawn.pixels else {
+            return "\(name): oxipng wrote other pixels than the drawing's"
+        }
+        return nil
     }
 }
 

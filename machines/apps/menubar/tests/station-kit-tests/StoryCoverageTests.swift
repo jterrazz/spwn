@@ -51,13 +51,15 @@ struct Coverage {
     let unbuilt: [String]
     let files: Set<String>
     let goldens: [String]
+    let witnesses: Set<String>
 
-    init(ids: [String], excluded: [String], unbuilt: [String] = Coverage.unbuilt, files: Set<String>, goldens: [String]) {
+    init(ids: [String], excluded: [String], unbuilt: [String] = Coverage.unbuilt, files: Set<String>, goldens: [String], witnesses: Set<String>) {
         self.ids = ids
         self.excluded = excluded
         self.unbuilt = unbuilt
         self.files = files
         self.goldens = goldens
+        self.witnesses = witnesses
     }
 
     static func goldenID(_ name: String) -> String? {
@@ -81,16 +83,22 @@ struct Coverage {
 
     func written(_ id: String) -> Bool { goldens.contains("\(id).dark.view.yaml") && goldens.contains("\(id).light.view.yaml") }
 
-    func green(_ id: String) -> Bool { files.contains(id) && drawn(id) && written(id) }
+    func green(_ id: String) -> Bool { files.contains(id) && (!witnesses.contains(id) || drawn(id)) && written(id) }
+
+    // value: a PNG beside the stories is a witness's dark or light golden.
+    func pixels(_ name: String, of id: String) -> Bool {
+        !name.hasSuffix(".png") || name.contains(".actual.") || (witnesses.contains(id) && (name == "\(id).dark.png" || name == "\(id).light.png"))
+    }
 
     func status(_ id: String) -> String {
         if excluded.contains(id) { return "excluded" }
         return green(id) ? "green" : "pending"
     }
 
-    // invariant: every id of STORIES.md is green, its story file, its two
-    // goldens and its two view goldens in place, but the unbuilt ones; an unbuilt id gone green
-    // leaves the list, and nothing names an id STORIES.md does not hold.
+    // invariant: every id of STORIES.md is green, its story file and its two
+    // view goldens in place, and a witness's two goldens, but the unbuilt ones; an unbuilt id gone green
+    // leaves the list, nothing names an id STORIES.md does not hold, and no
+    // story keeps a PNG no recipe names.
     func audit() -> (findings: [String], tally: Tally) {
         var findings: [String] = []
         var tally = Tally()
@@ -103,7 +111,7 @@ struct Coverage {
                 tally.pending += 1
             } else {
                 findings.append(!files.contains(id) ? "\(id): no story file"
-                    : !drawn(id) ? "\(id): its dark and light goldens are missing" : "\(id): its dark and light view goldens are missing")
+                    : witnesses.contains(id) && !drawn(id) ? "\(id): its dark and light goldens are missing" : "\(id): its dark and light view goldens are missing")
             }
         }
         for id in excluded where !ids.contains(id) { findings.append("\(id): excluded, but STORIES.md does not hold it") }
@@ -115,7 +123,11 @@ struct Coverage {
                 orphans.append("\(name): not a golden of a story")
                 continue
             }
-            if !held.contains(id) { orphans.append("\(name): a golden STORIES.md does not hold") }
+            if !held.contains(id) {
+                orphans.append("\(name): a golden STORIES.md does not hold")
+            } else if !pixels(name, of: id) {
+                orphans.append("\(name): a pixel golden no recipe names")
+            }
         }
         tally.orphans = orphans.count
         return (findings + orphans, tally)
@@ -176,7 +188,8 @@ final class StoryCoverageTests: XCTestCase {
     func coverage() throws -> Coverage {
         let goldens = (try? FileManager.default.contentsOfDirectory(atPath: Tree.storyGoldens.path)) ?? []
         return Coverage(ids: try catalogue().ids, excluded: try excluded(), files: Set(try stories().keys),
-                        goldens: goldens.filter { ($0.hasSuffix(".png") || $0.hasSuffix(".view.yaml")) && !$0.contains(".actual.") })
+                        goldens: goldens.filter { ($0.hasSuffix(".png") || $0.hasSuffix(".view.yaml")) && !$0.contains(".actual.") },
+                        witnesses: Set(Witness.recipes.keys))
     }
 
     func testEveryStoryIsGreen() throws {
@@ -253,9 +266,10 @@ final class StoryCoverageTests: XCTestCase {
             unbuilt: ["home.d", "home.e", "home.gone"],
             files: ["home.b", "home.c", "home.e", "home.f", "home.stray"],
             goldens: ["home.b.dark.png", "home.b.light.png", "home.b.dark.view.yaml", "home.b.light.view.yaml", "home.c.dark.png",
-                      "home.e.dark.png", "home.e.light.png", "home.e.dark.view.yaml", "home.e.light.view.yaml", "home.f.dark.png", "home.f.light.png",
+                      "home.e.dark.view.yaml", "home.e.light.view.yaml", "home.f.dark.png", "home.f.light.png",
                       "home.f.dark.view.yaml", "home.b.ic.dark.png", "home.b.ic.dark.view.yaml", "home.c.light.actual.png", "home.old.dark.png",
-                      "home.old.light.view.yaml", "notes.png"])
+                      "home.old.light.view.yaml", "notes.png"],
+            witnesses: ["home.b", "home.c"])
         let (findings, tally) = coverage.audit()
         XCTAssertEqual(findings, [
             "home.a: no story file",
@@ -264,11 +278,14 @@ final class StoryCoverageTests: XCTestCase {
             "home.f: its dark and light view goldens are missing",
             "home.gone: unbuilt, but STORIES.md does not hold it",
             "home.stray: a story file STORIES.md does not hold",
+            "home.b.ic.dark.png: a pixel golden no recipe names",
+            "home.f.dark.png: a pixel golden no recipe names",
+            "home.f.light.png: a pixel golden no recipe names",
             "home.old.dark.png: a golden STORIES.md does not hold",
             "home.old.light.view.yaml: a golden STORIES.md does not hold",
             "notes.png: not a golden of a story",
         ])
-        XCTAssertEqual(tally, Coverage.Tally(green: 2, pending: 1, orphans: 5))
+        XCTAssertEqual(tally, Coverage.Tally(green: 2, pending: 1, orphans: 8))
         XCTAssertEqual(coverage.status("home.c"), "pending")
         XCTAssertEqual(coverage.status("phone.explainer"), "excluded")
     }

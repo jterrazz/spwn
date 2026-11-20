@@ -49,7 +49,7 @@ struct Heights: Decodable {
 
 enum Budget {
     static let stories: Int64 = 120_000_000
-    static let rest: Int64 = 5_000_000
+    static let rest: Int64 = 1_850_000
     static let slack: Int64 = 1_000_000
 
     static func bytes(_ folder: URL, skipping skipped: String? = nil) -> Int64 {
@@ -73,6 +73,37 @@ enum Budget {
         if rest > Self.rest { findings.append("the other goldens weigh \(rest) bytes, past their ratchet of \(Self.rest)") }
         if rest < Self.rest - slack { findings.append("the other goldens weigh \(rest) bytes: lower their ratchet of \(Self.rest) to what they weigh") }
         return findings
+    }
+}
+
+// invariant: a story keeps pixel goldens only for a paint recipe no view
+// golden states and no sheet of the kit draws: what each kind of overlay
+// composites over its page, and the panel the live capture measures its
+// contrast against. Every other story is proved by its view goldens.
+enum Witness {
+    static let recipes: [String: String] = [
+        "pop.info": "a popover's glass and shadow over its page",
+        "menu.context.stopped": "a menu's glass, shadow and lit row over its page",
+        "alert.delete-vm.persistent": "an alert's card over its dimmed page",
+        "sheet.share-port.empty": "a sheet's card over its dimmed page",
+        "find.port": "Find's field and results over the panel",
+        "pop.hud.copy": "a HUD's glass over its page",
+        "home.needs": "the panel specs/machine/menubar/capture/measure.py reads the live capture's contrast against",
+    ]
+
+    static func kinds(_ ui: StoryUI) -> Set<String> {
+        let opened: [(String, Bool)] = [
+            ("a popover", ui.popover != nil), ("a menu", ui.menu != nil), ("an alert", ui.alert != nil),
+            ("a sheet", ui.sheet != nil), ("Find", ui.find != nil), ("a HUD", ui.hud != nil),
+        ]
+        return Set(opened.filter(\.1).map(\.0))
+    }
+
+    // value: the overlay kinds the stories open that no witness opens.
+    static func unproved(_ stories: [(id: String, ui: StoryUI)], recipes: [String: String] = recipes) -> [String] {
+        let opened = stories.reduce(into: Set<String>()) { $0.formUnion(kinds($1.ui)) }
+        let proved = stories.filter { recipes[$0.id] != nil }.reduce(into: Set<String>()) { $0.formUnion(kinds($1.ui)) }
+        return opened.subtracting(proved).sorted().map { "\($0) over a page: no witness story keeps its pixels" }
     }
 }
 
@@ -110,8 +141,10 @@ final class StoryTests: XCTestCase {
             }
             let under = Self.base(of: story, among: all)
             for scheme in Self.schemes {
-                let rendered = Snapshot.render(view(story), scheme: scheme, over: AnyView(FlatDesk(scheme: scheme)))
-                if let f = try Golden.match(rendered, file: "\(story.id).\(scheme == .dark ? "dark" : "light")", in: Tree.storyGoldens) { failures.append(f) }
+                if Witness.recipes[story.id] != nil {
+                    let rendered = Snapshot.render(view(story), scheme: scheme, over: AnyView(FlatDesk(scheme: scheme)))
+                    if let f = try Golden.match(rendered, file: "\(story.id).\(scheme == .dark ? "dark" : "light")", in: Tree.storyGoldens, desk: 2) { failures.append(f) }
+                }
                 if let f = try ViewGolden.check(story.id, view(story), scheme: scheme, ground: "FlatDesk", in: Tree.storyGoldens,
                                                 over: under.map { ($0.id, view($0)) }) { failures.append(f) }
             }
@@ -151,6 +184,15 @@ final class StoryTests: XCTestCase {
         return stories.first {
             $0.id != story.id && $0.group != .transition && $0.file.pages == story.file.pages && $0.file.samples == story.file.samples && $0.ui == ui
         }
+    }
+
+    func testEveryKindOfOverlayKeepsTheWitnessOfItsPixels() throws {
+        let all = try stories()
+        XCTAssertEqual(Set(Witness.recipes.keys).subtracting(all.map(\.id)), [], "a witness names no story")
+        XCTAssertEqual(Witness.unproved(all.map { ($0.id, $0.ui) }), [])
+        var recipes = Witness.recipes
+        recipes["find.port"] = nil
+        XCTAssertEqual(Witness.unproved(all.map { ($0.id, $0.ui) }, recipes: recipes), ["Find over a page: no witness story keeps its pixels"])
     }
 
     func testAnOverlayStoryIsDrawnOverTheStoryOfItsPageAndNoOther() throws {
@@ -208,9 +250,10 @@ final class StoryTests: XCTestCase {
 
     // invariant: SPEC C4: one story of each group, tagged a11y, holds at
     // Increase Contrast in dark and at Reduce Transparency in light, each
-    // proved by its golden and by its view golden over the plain story's.
-    // A status item is drawn in the bar's one ink whatever the settings,
-    // so its proof is that it draws its plain story's pixels.
+    // proved by its view golden over the plain story's; the kit's panel
+    // sheets keep the pixels of both settings. A status item is drawn in
+    // the bar's one ink whatever the settings, so it also draws its plain
+    // story's pixels.
     func testEveryGroupHasAStoryProvedAtIncreasedContrastAndReducedTransparency() throws {
         let stories = try stories()
         let tagged = stories.filter(\.a11y)
@@ -223,13 +266,11 @@ final class StoryTests: XCTestCase {
             ]
             for v in variants {
                 let drawn = AnyView(StoryView(story).stationAccessibility(contrast: v.contrast, reduceTransparency: v.reduceTransparency))
-                let rendered = Snapshot.render(drawn, scheme: v.scheme, over: AnyView(FlatDesk(scheme: v.scheme)))
-                let file = "\(story.id).\(v.knob).\(v.scheme == .dark ? "dark" : "light")"
                 if story.ui.statusItem == true {
+                    let file = "\(story.id).\(v.knob).\(v.scheme == .dark ? "dark" : "light")"
+                    let rendered = Snapshot.render(drawn, scheme: v.scheme, over: AnyView(FlatDesk(scheme: v.scheme)))
                     let plain = Snapshot.render(view(story), scheme: v.scheme, over: AnyView(FlatDesk(scheme: v.scheme)))
                     if rendered?.bitmap.pixels != plain?.bitmap.pixels { failures.append("\(file): a status item draws otherwise than its plain story") }
-                } else if let f = try Golden.match(rendered, file: file, in: Tree.storyGoldens) {
-                    failures.append(f)
                 }
                 if let f = try ViewGolden.check("\(story.id).\(v.knob)", drawn, scheme: v.scheme, ground: "FlatDesk", contrast: v.contrast,
                                                 reduceTransparency: v.reduceTransparency, in: Tree.storyGoldens, over: (story.id, view(story))) { failures.append(f) }
@@ -322,10 +363,10 @@ final class StoryTests: XCTestCase {
     func testTheBudgetOnlyLetsTheOldGoldensShrink() {
         XCTAssertEqual(Budget.audit(stories: Budget.stories + 1, rest: Budget.rest + 1), [
             "the story goldens weigh 120000001 bytes, past their 120000000",
-            "the other goldens weigh 5000001 bytes, past their ratchet of 5000000",
+            "the other goldens weigh 1850001 bytes, past their ratchet of 1850000",
         ])
-        XCTAssertEqual(Budget.audit(stories: 0, rest: 3_000_000), [
-            "the other goldens weigh 3000000 bytes: lower their ratchet of 5000000 to what they weigh",
+        XCTAssertEqual(Budget.audit(stories: 0, rest: 400_000), [
+            "the other goldens weigh 400000 bytes: lower their ratchet of 1850000 to what they weigh",
         ])
     }
 }

@@ -137,7 +137,7 @@ The architecture has its own words, used in Go and in the docs, never in the int
 | **world**           | the fake world the spec build runs every fake over                                                                                                                               |
 | **tailnet**         | Tailscale's private network, as the `Tailnet` contract names it; the interface says Tailscale                                                                                    |
 | **story**           | one state of the menu bar's panel: an id of `apps/menubar/stories/STORIES.md`, its `<id>.story.json` and its goldens; never the catalog, which is what station puts on a machine |
-| **golden**          | the PNG a story or a view is proved against, dark and light, drawn offscreen                                                                                                     |
+| **golden**          | what a story or a view is proved against, dark and light, drawn offscreen: its view golden, and a PNG for a paint no text states                                                 |
 | **Station Catalog** | the dev-only window over every story, `make catalog-open`; its export and gallery draw the same stories headless                                                                 |
 | **live key**        | `<measure>:<machine>`, a moving number a page follows (`cpu:linux-1`), its value sent in each `sample`                                                                           |
 | **notice**          | what the engine tells, of a closed list of kinds: the menu bar's HUD and the owner's notifications                                                                               |

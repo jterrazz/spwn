@@ -61,6 +61,12 @@ tart() { TART_NO_AUTO_PRUNE=1 "$tart_bin" "$@"; }
 
 # invariant: the goldens are drawn by this image, so it is pinned by digest, not by a
 # tag a registry may move; the digest is macos-tahoe-xcode:27.2 (macOS 26.6.2, Xcode 27.2).
+# invariant: a pixel golden is written by this oxipng, pinned by version and
+# digest, so the same pixels are always the same bytes; its release tarball is
+# fetched once into .artifacts/e2e/ and copied into the guest, never run here.
+oxipng_version=10.2.1
+oxipng_digest=7039fcfc78e8aa1ed2b57d848057a0296f082e92b3e1807ac65402d10d926764
+oxipng_tar="$out/oxipng-$oxipng_version-aarch64-apple-darwin.tar.gz"
 image=${STATION_XCODE_IMAGE:-ghcr.io/cirruslabs/macos-tahoe-xcode@sha256:f8315a2f627daf64ab2c4e11d29a4d267953902a16151ee28fcdd7185927c317}
 hash=$(printf '%s' "$image" | shasum -a 256 | cut -c1-12)
 base="station-e2e-xcode-$hash"
@@ -168,10 +174,18 @@ if [ $capture -eq 1 ]; then
   exit 0
 fi
 
+pinned() { printf '%s  %s\n' "$oxipng_digest" "$oxipng_tar" | shasum -a 256 -c - > /dev/null 2>&1; }
+if ! pinned; then
+  curl -fsSL -o "$oxipng_tar" "https://github.com/oxipng/oxipng/releases/download/v$oxipng_version/oxipng-$oxipng_version-aarch64-apple-darwin.tar.gz" >> "$log" 2>&1 || fail "download oxipng $oxipng_version"
+  pinned || fail "oxipng $oxipng_version: $oxipng_tar is not the pinned digest"
+fi
+ssh "${ssh_opts[@]}" -i "$ssh_key" "$user@$ip" 'mkdir -p ~/oxipng && tar -xzf - --strip-components=1 -C ~/oxipng' < "$oxipng_tar" || fail "copy oxipng into the VM"
+say "oxipng: $(in_vm '~/oxipng/oxipng --version' 2>&1)"
+
 t=$SECONDS
 # value: a login shell for the PATH Xcode and brew give; the gate runs with the
 # SDK required, so a VM that lost Xcode fails and never skips.
-env_line='STATION_REQUIRE_MENUBAR=1'
+env_line='STATION_REQUIRE_MENUBAR=1 STATION_OXIPNG=$HOME/oxipng/oxipng'
 [ $update -eq 0 ] || env_line="$env_line STATION_UPDATE_GOLDENS=1 STATION_UPDATE_INDEX=1"
 expected="$work/expected.txt"
 if [ -n "$expect" ]; then

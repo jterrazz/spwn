@@ -30,8 +30,6 @@ import tint  # noqa: E402
 # t1 white or black, t2 white at 72 % or black at 62 %.
 TONES = {"dark": {"t1": ((255, 255, 255), 1.0), "t2": ((255, 255, 255), 0.72)},
          "light": {"t1": ((0, 0, 0), 1.0), "t2": ((0, 0, 0), 0.62)}}
-# value: a golden is the panel drawn with 24 pt of desk around it, at 2x.
-PAD = 48
 # value: Find's row at the panel's foot, 70 pt at 2x, pinned under the
 # scroll when the panel stops at its cap.
 FOOT = 140
@@ -192,8 +190,7 @@ def main():
     rows = []
     for shot in shots:
         name, scheme = shot["name"], shot["scheme"]
-        golden_full = np.array(Image.open(os.path.join(goldens, f"{shot.get('story', 'home.needs')}.{scheme}.png")).convert("RGB"))
-        golden = golden_full[PAD:-PAD, PAD:-PAD]
+        golden = np.array(Image.open(os.path.join(goldens, f"{shot.get('story', 'home.needs')}.{scheme}.png")).convert("RGB"))
         if scheme not in found:
             found[scheme] = boxes(golden, scheme)
         capture = np.array(Image.open(os.path.join(out, f"{name}.png")).convert("RGB"))
