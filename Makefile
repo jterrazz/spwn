@@ -2,7 +2,7 @@
 
 # outside: Turborepo reads go.work and pnpm-workspace.yaml into one task graph, caches every result under
 # .artifacts/turbo, and names the workspace as a whole `go-workspace`, a scope that owns no directory.
-GOLANGCI_VERSION := v2.13.2
+GOLANGCI_VERSION := v2.15.0
 GOLANGCI         := $(shell go env GOPATH)/bin/golangci-lint
 TURBO            := GOLANGCI_VERSION=$(GOLANGCI_VERSION) PATH="$(shell go env GOPATH)/bin:$$PATH" pnpm exec turbo
 GO_PACKAGES      := 'go-workspace...'
