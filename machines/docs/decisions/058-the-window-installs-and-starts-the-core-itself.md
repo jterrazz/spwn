@@ -37,8 +37,10 @@ While no engine answers, the shell looks for the core on the disk and runs two p
 
 What it never does:
 
-- It reads no release of its own: what is out is the engine's answer, and the update it offers on a press is
-  [ADR-060](060-the-window-offers-the-engines-release-and-updates-on-a-press.md)'s. The installer alone fetches.
+- It reads no release of the core: what is out is the engine's answer, and the update it offers on a press is
+  [ADR-060](060-the-window-offers-the-engines-release-and-updates-on-a-press.md)'s. The installer alone fetches the
+  core; the window's own bundle is
+  [ADR-065](065-the-window-updates-itself-through-the-tauri-updater.md)'s.
 - It looks nowhere but those four places: no `PATH` lookup (a window opened from the Finder has launchd's), no
   `which`, no shell profile read.
 - It never runs `station init`: the engine start alone, as the installer leaves the core.

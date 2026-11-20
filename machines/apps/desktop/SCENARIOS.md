@@ -15,6 +15,7 @@ What the desktop window must let its user do, page by page: one row is one scena
 | The window itself        | A1 to A6                                          |
 | No engine on this Mac    | E1 to E6                                          |
 | The engine's release     | U1 to U4                                          |
+| The window's release     | R1 to R7                                          |
 
 ## How a scenario is proved
 
@@ -220,3 +221,17 @@ The engine reads the latest release; the window offers it at the sidebar foot an
 | U2  | See nothing when nothing is out | the engine says this Mac is not behind                | I look at the sidebar foot, then open the Engine page | no row at the foot, and the page says what the engine says                                           | no     |
 | U3  | Read why a check failed         | the engine cannot reach the releases                  | I press Check now                                     | a failed row says the engine's message, and I can dismiss it                                         | no     |
 | U4  | Update in one press             | the engine says this Mac is behind                    | I press Update                                        | the installer's own lines run, then the engine start, and the row goes once the engine is not behind | yes    |
+
+## The window's release
+
+The window checks its own release once, at its start, and offers it on the Engine page's Window panel and at the sidebar foot; the press installs it and relaunches the window ([ADR-065](../../docs/decisions/065-the-window-updates-itself-through-the-tauri-updater.md)). A window that cannot update itself (a debug build, Linux, a page outside Tauri) draws neither.
+
+| ID  | Scenario                                     | Given                                              | When                                           | Then                                                                                                                         | Mockup |
+| --- | -------------------------------------------- | -------------------------------------------------- | ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ------ |
+| R1  | Learn that the window has a release          | the window finds v0.22.0, the engine is not behind | I look at the sidebar foot, then press its row | the row reads "Spwn v0.22.0 available" and Update, and opens the Engine page, whose Window panel offers Install and relaunch | no     |
+| R2  | See nothing to do when the window is current | the window finds nothing newer                     | I open the Engine page                         | the Window panel says "This window runs v0.21.0, the latest release.", and no row at the foot                                | no     |
+| R3  | Read why the window's check failed           | the window cannot reach its releases               | I press the Window panel's Check now           | it says "The window could not read its latest release." with the shell's message, and no row at the foot                     | no     |
+| R4  | Update the window in one press               | the window finds v0.22.0                           | I press Install and relaunch                   | a line counts the download, then "Relaunching Spwn."                                                                         | no     |
+| R5  | Keep the window when its update fails        | the install is refused                             | I press Install and relaunch, then Try again   | "The update did not install. Spwn is unchanged.", the shell's message and what to do, then Try again installs with no check  | no     |
+| R6  | One row at the foot when both are out        | the engine is behind and the window finds v0.22.0  | I look at the sidebar foot, then press its row | only the engine's row, and the Engine page offers both the engine's Update and the window's Install and relaunch             | no     |
+| R7  | The window really relaunches as the new one  | a released window, an older one installed          | it starts and I press Install and relaunch     | it relaunches as the new version: proved outside `make test`, by the macOS rehearsal and the first real publish              | no     |

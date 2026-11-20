@@ -8,6 +8,9 @@ import type {
 
 import type { CoreKind } from '../../application/use-cases/core-flow';
 import type { UpdateKind } from '../../application/use-cases/update-flow';
+import type { WindowRelease } from '../../application/use-cases/window-update-flow';
+import { bytes } from '../../domain/format';
+import type { WindowUpdateCode } from '../../domain/window-update';
 import type { DiskCall } from './provisional';
 
 type Words<T extends PropertyKey> = Readonly<Record<T, string>>;
@@ -34,6 +37,7 @@ export const OWN_STATE_WORDS = {
     unknown: 'unknown',
     untyped: 'error',
     'window-error': 'error',
+    'window-out': 'release out',
 } as const;
 
 export type OwnState = keyof typeof OWN_STATE_WORDS;
@@ -87,6 +91,56 @@ export const RELEASE_WORDS = {
     update: 'Update',
     whatChanged: 'What changed',
 } as const;
+
+// value: the window's own words of its own release, said by the window about itself; no engine sends them.
+export const WINDOW_RELEASE_WORDS = {
+    checking: 'Checking for a release',
+    checkNow: 'Check now',
+    checkTitle: 'Read the latest release of this window now',
+    install: 'Install and relaunch',
+    latest: 'Latest release',
+    relaunching: 'Relaunching Spwn',
+    title: 'Window',
+    tryAgain: 'Try again',
+    update: 'Update',
+} as const;
+
+export const WINDOW_REFUSAL_WORDS: Words<WindowUpdateCode> = {
+    'window.update-busy': 'The window is installing its update already.',
+    'window.update-gone': 'The window holds no update to install: check again.',
+    'window.update-install': 'The update did not install. Spwn is unchanged.',
+    'window.update-unpublished': 'The latest release carries no update for this window yet.',
+    'window.update-unreachable': 'The window could not read its latest release.',
+    'window.update-unsigned': "The update was refused: its signature is not this window's.",
+};
+
+const WINDOW_REFUSAL_HINTS: Readonly<Partial<Record<WindowUpdateCode, string>>> = {
+    'window.update-install': 'If Spwn runs from Downloads, move it to Applications first.',
+};
+
+export function windowRefusalHint(code: WindowUpdateCode): string | undefined {
+    return WINDOW_REFUSAL_HINTS[code];
+}
+
+export function windowCurrentWord(current: string): string {
+    return `This window runs v${current}, the latest release.`;
+}
+
+export function windowOutWord({ current, version }: WindowRelease): string {
+    return `Spwn v${version} is out; this window runs v${current}.`;
+}
+
+export function windowDownloadingWord(version: string): string {
+    return `Downloading Spwn v${version}`;
+}
+
+export function windowDownloadedWord(downloaded: number, total: number | undefined): string {
+    return total === undefined ? bytes(downloaded) : `${bytes(downloaded)} of ${bytes(total)}`;
+}
+
+export function windowAvailableWord(version: string): string {
+    return `Spwn v${version} available`;
+}
 
 export const NEWEST_WORD = 'newest';
 

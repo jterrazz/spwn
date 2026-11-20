@@ -14,6 +14,7 @@ import { shownOrWithheld } from '../../ui/secret';
 import { RELEASE_WORDS } from '../../words/words';
 import { Fine, Mono } from './core-parts';
 import { UpdatePanel } from './update';
+import { WindowRelease } from './window-release';
 
 import page from '../../ui/page.module.css';
 import styles from './core.module.css';
@@ -142,6 +143,7 @@ export function EnginePage() {
                     size="page"
                 />
             )}
+            <WindowRelease />
         </div>
     );
 }

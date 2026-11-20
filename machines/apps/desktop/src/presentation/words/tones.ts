@@ -27,6 +27,7 @@ export const OWN_STATE_TONES: Tones<OwnState> = {
     unknown: 'warn',
     untyped: 'bad',
     'window-error': 'plain',
+    'window-out': 'new',
 };
 
 export const CORE_TONES: Tones<CoreKind> = {
