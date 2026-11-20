@@ -1,0 +1,4 @@
+{"world": "engine-stopped", "station": "dev", "exchanges": [
+{"request":{"call":"engine.log","in":{}},"answers":[{"v":2,"out":{"Lines":[],"Empty":"The engine has written no line here yet."}}]},
+{"request":{"call":"engine.log","in":{},"target":{"name":"mac-mini"}},"answers":[{"v":2,"error":{"message":"the engine is not running","hint":"station engine start","exit":1}}]}
+]}

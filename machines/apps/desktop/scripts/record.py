@@ -156,6 +156,7 @@ def asks(listed):
         *[{"watch": "vault.list", "in": {}} for _ in here],
         *[{"watch": "vault.new", "in": {}} for _ in here],
         *[{"watch": "awake.read", "in": {}, **onMac(mac)} for mac in macs],
+        *[{"call": "engine.log", "in": {}, **onMac(mac)} for mac in macs],
         {"call": "journal.read", "in": {}},
         {"call": "journal.read", "in": {"Night": True}},
         *[{"call": "journal.read", "in": {"Mac": mac}} for mac in macsOf(listed)],

@@ -221,6 +221,15 @@ def failed_at_boot(name, vm):
     return edit
 
 
+def installed_for(mac, machinefile, package, method):
+    """A package the ledger says station installed for `machinefile`: when the file lists it no longer, it is an extra
+    Apply leaves (specs/usecases/machinefile/drift/an-extra-stays-at-a-bare-apply.spec.yaml)."""
+    def edit(content):
+        content["macs"][mac].setdefault("stores", {}).setdefault("ledger", []).append(
+            {"package": package, "method": method, "machinefile": machinefile, "at": "2026-11-03T09:00:00Z"})
+    return edit
+
+
 def holds_file(name, path, size):
     def edit(content):
         content["macs"][name]["disk"]["files"][path] = size
@@ -276,6 +285,14 @@ def journaled(mac, lines):
     Mac that held it."""
     def edit(content):
         content["macs"][mac].setdefault("stores", {})["journal"] = lines
+    return edit
+
+
+def engine_logged(mac, lines):
+    """The lines a Mac's engine log holds, as the world seeds them (specs/usecases/engine/log/): a text shaped like a
+    secret is withheld by the engine when it answers."""
+    def edit(content):
+        content["macs"][mac]["engine_log"] = lines
     return edit
 
 
@@ -415,18 +432,24 @@ STATION_VM = "~/.local/share/station/vms/vms/linux-1/disk.img"
 
 WORLDS = {
     **{name: plain(name) for name in (
-        "bare-mac", "creating", "disk-low", "engine-stopped", "mini-offline", "mini-workspace", "one-mac", "standings",
+        "bare-mac", "disk-low", "engine-stopped", "mini-offline", "mini-workspace", "one-mac", "standings",
     )},
+    "creating": ("creating", None, {}, [engine_logged("macbook-pro", ["engine started"])]),
     "stories": ("stories", None, {}, STORIES_JOURNAL),
     "two-macs":("two-macs", "homebrew", machine("macbook-pro", ["lazygit", "bat"]),
                  [exchange("linux-1", "ex-1", "gh", "device-code", "github.com"),
                   broken("macbook-pro", "npm", "you", "The token is refused by registry.npmjs.org"),
-                  *TWO_MACS_JOURNAL]),
+                  *TWO_MACS_JOURNAL,
+                  engine_logged("macbook-pro", ["engine started", "nightly run started", "ping https://u:hunter2@example.com/x ok",
+                                                "nightly run done"]),
+                  engine_logged("mac-mini", ["engine started", "waiting for the next night run"])]),
     "sign-ins": ("two-macs", "homebrew", machine("macbook-pro", ["lazygit", "bat"]),
                  [signed_out("linux-1", "claude"), exchange("linux-1", "ex-1", "claude", "paste", "claude.com", asking=True)]),
     "calm": ("two-macs", "homebrew", machine("macbook-pro", ["lazygit", "bat"]),
              [dropped("macbook-pro", "jobs", "com.example.brain.x-snapshot")]),
     "machinefile-kept": ("two-macs", "homebrew", applied(["lazygit", "bat"]), []),
+    "machinefile-extra": ("two-macs", "homebrew", applied(["lazygit"]),
+                          [installed_for("macbook-pro", "macbook-pro", "bat", "brew")]),
     "machinefile-differs": ("two-macs", "homebrew", applied(["lazygit", "bat", "ripgrep", "fd"]), []),
     "ranged-apps": ("two-macs", "homebrew",
                     applied(["lazygit", "{ name: node, version: '24' }", "{ name: go, version: '1.25' }",

@@ -1,0 +1,4 @@
+{"world": "mini-offline", "station": "dev", "exchanges": [
+{"request":{"call":"engine.log","in":{}},"answers":[{"v":2,"out":{"Lines":[],"Empty":"The engine has written no line here yet."}}]},
+{"request":{"call":"engine.log","in":{},"target":{"name":"mac-mini"}},"answers":[{"v":2,"error":{"type":"unreachable","code":"remote.unreachable","subject":"mac-mini","detail":{"label":"mac-mini"},"message":"mac-mini does not answer","hint":"station machines mac-mini"}}]}
+]}

@@ -1,0 +1,4 @@
+{"world": "two-macs", "station": "dev", "exchanges": [
+{"request":{"call":"engine.log","in":{}},"answers":[{"v":2,"out":{"Lines":["engine started","nightly run started","ping https://withheld@example.com/x ok","nightly run done"]}}]},
+{"request":{"call":"engine.log","in":{},"target":{"name":"mac-mini"}},"answers":[{"v":2,"out":{"Lines":["engine started","waiting for the next night run"]}}]}
+]}

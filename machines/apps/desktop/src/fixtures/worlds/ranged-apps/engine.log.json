@@ -1,0 +1,4 @@
+{"world": "ranged-apps", "station": "dev", "exchanges": [
+{"request":{"call":"engine.log","in":{}},"answers":[{"v":2,"out":{"Lines":[],"Empty":"The engine has written no line here yet."}}]},
+{"request":{"call":"engine.log","in":{},"target":{"name":"mac-mini"}},"answers":[{"v":2,"out":{"Lines":[],"Empty":"The engine has written no line here yet."}}]}
+]}
