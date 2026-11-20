@@ -38,3 +38,14 @@ func TestAFormsProgramAppliesTheTerminalSizeOnce(t *testing.T) {
 		}
 	}
 }
+
+func TestACancelledFormQuitsItsProgram(t *testing.T) {
+	form := huh.NewForm(huh.NewGroup(huh.NewConfirm().Title("Remove lazygit?")))
+	ends(form)
+	if msg := form.CancelCmd(); msg != tea.Quit() {
+		t.Errorf("ctrl-c at a form ends its program with %#v; want tea.Quit(), as an interrupted program leaves its input reader to take the terminal's next reply", msg)
+	}
+	if msg := form.SubmitCmd(); msg != tea.Quit() {
+		t.Errorf("an answer ends the form's program with %#v; want tea.Quit()", msg)
+	}
+}

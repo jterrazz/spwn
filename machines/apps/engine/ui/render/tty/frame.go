@@ -63,7 +63,7 @@ func (a *answered) View() tea.View {
 }
 
 func OnFrame(form *huh.Form, in io.Reader, out io.Writer) error {
-	form.SubmitCmd, form.CancelCmd = tea.Quit, tea.Interrupt
+	ends(form)
 	_, err := tea.NewProgram(&answered{form: form}, tea.WithInput(in), tea.WithOutput(out), tea.WithFilter(unasked)).Run()
 	switch {
 	case form.State == huh.StateAborted || errors.Is(err, tea.ErrInterrupted):
@@ -73,3 +73,9 @@ func OnFrame(form *huh.Form, in io.Reader, out io.Writer) error {
 	}
 	return nil
 }
+
+// hazard: a cancelled form quits its program as an answer does, never
+// interrupts it: an interrupted program returns before its input reader
+// stops, and that reader takes the reply to the terminal's next question,
+// the background query of the error that follows, which then never returns.
+func ends(form *huh.Form) { form.SubmitCmd, form.CancelCmd = tea.Quit, tea.Quit }
