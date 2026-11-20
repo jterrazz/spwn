@@ -67,6 +67,7 @@ func bannedWords() []banned {
 		{word: "VM engine"},
 		{word: "NAT", exact: true},
 		{word: "tailnet", forms: []string{"tailnets"}, allowed: []string{"your tailnet"}},
+		{word: "Station", exact: true, allowed: []string{"Station.app", "Station keeps no agents", "Station reads only its current state", "Station names the Local Network approval"}},
 		{word: "item", forms: []string{"items"}, allowed: []string{"login item", "login items", "status item", "menu item", "keychain item"}, only: `\b(?:an?|the|each|every|one|no|its|this|built-in|owner's|shared|unknown|catalog|\d+)\s+items?\b|\bitems?\s+files?\b`},
 	}
 }
@@ -191,6 +192,15 @@ func TestBannedWordsBite(t *testing.T) {
 	visible(page, false, &texts)
 	if got := bannedIn(texts); !slices.Equal(got, []string{"fleet", "storage", "lend"}) {
 		t.Errorf("a planted page says %v, want [fleet storage lend]: the id, the kind and Dock reset are not read, lent is lend", got)
+	}
+}
+
+func TestBannedWordsRefuseTheAppsOldNameOnly(t *testing.T) {
+	if got := bannedIn([]string{"Station takes the token"}); !slices.Equal(got, []string{"Station"}) {
+		t.Errorf("the app's old name says %v, want [Station]", got)
+	}
+	if got := bannedIn([]string{"Machines takes the token", "run station init", "station never runs sudo", "052 Station keeps no agents"}); len(got) != 0 {
+		t.Errorf("the app's name, the command and a decision's title say %v, want none", got)
 	}
 }
 
