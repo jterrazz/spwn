@@ -12,4 +12,4 @@ runs:
       exit: 2
       stderr: |
           Error: ~/.config/station/machinefiles/macbook-pro.machine.yaml: unmarshal errors: line 4: version ">=22" is no version: latest, 24, 24.11, 24.11.3, ^24.2.0 or ~24.11.0
-          Hint: fix that line: station never rewrites a Machinefile
+          Hint: fix that line: Machines never rewrites a Machinefile

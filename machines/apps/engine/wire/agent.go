@@ -67,4 +67,4 @@ func (m machine) serveKey(ctx context.Context, key contract.DeviceKey) error {
 	return a.Listen(ctx, l)
 }
 
-var errAgentRuns = errors.New("station's agent already serves this Mac")
+var errAgentRuns = errors.New("Machines' agent already serves this Mac")

@@ -5,6 +5,6 @@ runs:
       exit: 1
       stderr: |
           Error: the engine needs launchd: launchctl is not found
-          Hint: macOS keeps it in /bin: check the PATH station runs with
+          Hint: macOS keeps it in /bin: check the PATH Machines runs with
       files:
           Library/LaunchAgents/com.jterrazz.station.engine.plist: absent

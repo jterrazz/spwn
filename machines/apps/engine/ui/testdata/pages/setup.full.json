@@ -29,7 +29,7 @@
           "row": {
             "id": "summary/init",
             "mark": "ok",
-            "label": "Known to station",
+            "label": "Known to Machines",
             "cells": [
               {
                 "kind": "list",

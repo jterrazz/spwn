@@ -11,7 +11,7 @@ runs:
       stdout: |
           ○	hushlogin	not applied	station settings apply hushlogin
           # Detail
-          group	Set by station
+          group	Set by Machines
           does	Silence the terminal login message
           lives on	Macs, Linux VMs, macOS VMs
           where	~/.hushlogin

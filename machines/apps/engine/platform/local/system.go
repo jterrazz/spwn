@@ -15,7 +15,7 @@ var (
 	ErrTimeout     = errors.New("command timed out")
 	ErrSilent      = errors.New("command said nothing")
 	ErrCrossDevice = errors.New("another volume: a rename cannot move it")
-	ErrWildcard    = errors.New("refused: station never listens on every interface")
+	ErrWildcard    = errors.New("refused: Machines never listens on every interface")
 )
 
 type Stream int

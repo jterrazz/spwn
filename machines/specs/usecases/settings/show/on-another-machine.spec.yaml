@@ -12,7 +12,7 @@ runs:
           	On mac-mini:
           ●	dns	applied
           # Detail
-          group	Set by station
+          group	Set by Machines
           does	Encrypted DNS via Quad9 (DoH)
           lives on	Macs
           applied	just now

@@ -24,8 +24,8 @@
 ●	mac-mini	Mac	read
 ●	linux-1	Workspace	read
 ○	api	Workspace	stopped · last read 2 h ago
-–	infra	Server	not checked: station does not manage its settings
-# Set by station
+–	infra	Server	not checked: Machines does not manage its settings
+# Set by Machines
 ◐	git-shortcuts	◐	◐	◐	◐	0/4
 ◐	dns	◐	◐	◐	◐	0/4
 ◐	zed-dotfiles	◐	◐	◐	◐	0/4

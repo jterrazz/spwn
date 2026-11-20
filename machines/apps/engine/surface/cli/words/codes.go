@@ -110,7 +110,7 @@ func Codes() map[fail.Code]Wording {
 			if why := e.Detail["why"]; why != "" {
 				return why, "run station overview for what " + e.Subject + " has"
 			}
-			return e.Subject + " is a " + machine.Kind(e.Detail["kind"]).Word(machine.OS(e.Detail["os"])) + ": station does not manage its " + e.Detail["section"], "run station overview for what " + e.Subject + " has"
+			return e.Subject + " is a " + machine.Kind(e.Detail["kind"]).Word(machine.OS(e.Detail["os"])) + ": Machines does not manage its " + e.Detail["section"], "run station overview for what " + e.Subject + " has"
 		},
 		call.NeedMissing: func(e *fail.Error) (string, string) {
 			return e.Subject + " is required by " + NeededBy(e.Detail["call"]), NeedFix(e.Subject, e.Detail["package"])
@@ -119,7 +119,7 @@ func Codes() map[fail.Code]Wording {
 			return e.Subject + " cannot read its input", "check the request against " + e.Detail["in"]
 		},
 		call.BadOutput: func(e *fail.Error) (string, string) {
-			return e.Subject + " answered what it cannot write", "report it: station --version"
+			return e.Subject + " answered what it cannot write", "report it: Machines --version"
 		},
 		call.Unknown: func(e *fail.Error) (string, string) {
 			return "no call is named " + e.Subject, "run station --help"
@@ -160,10 +160,10 @@ func Codes() map[fail.Code]Wording {
 			return carried(e, "the VM's guest did not answer in time", "station machines")
 		},
 		enginecalls.LocalNetwork: func(e *fail.Error) (string, string) {
-			return carried(e, "the Mac has not approved station for Local Network", "station machines")
+			return carried(e, "the Mac has not approved Machines for Local Network", "station machines")
 		},
 		enginecalls.IgnoredPort: func(e *fail.Error) (string, string) {
-			return carried(e, "station never shares port 22 nor a port below 1024", "station ports")
+			return carried(e, "Machines never shares port 22 nor a port below 1024", "station ports")
 		},
 		enginecalls.NotAllowed: func(e *fail.Error) (string, string) {
 			return carried(e, "the port is outside the rights of its VM", "station ports")
@@ -193,7 +193,7 @@ func Codes() map[fail.Code]Wording {
 			return "no Machinefile named " + e.Subject, "give this machine one: station init --machinefile <name>"
 		},
 		machinefilecalls.NameTaken: func(e *fail.Error) (string, string) {
-			return e.Detail["path"] + " already holds another " + e.Detail["name"] + ": station never replaces your Machinefile", "edit that file, or remove it to copy " + e.Subject + " instead"
+			return e.Detail["path"] + " already holds another " + e.Detail["name"] + ": Machines never replaces your Machinefile", "edit that file, or remove it to copy " + e.Subject + " instead"
 		},
 		machinefilecalls.Busy: func(*fail.Error) (string, string) {
 			return "another station run holds this machine (an apply, an upgrade or the night's upgrade): one runs at a time", "run it again once that one ends"
@@ -213,15 +213,15 @@ func Codes() map[fail.Code]Wording {
 				return e.Detail["problem"], "remove it: the next station apply writes it anew from what is there"
 			}
 			if e.Detail["rename"] != "" {
-				return e.Detail["problem"], "rename it " + e.Detail["rename"] + ": station reads a Machinefile by that name alone"
+				return e.Detail["problem"], "rename it " + e.Detail["rename"] + ": Machines reads a Machinefile by that name alone"
 			}
-			return e.Detail["problem"], "fix that line: station never rewrites a Machinefile" + newerWrote(e)
+			return e.Detail["problem"], "fix that line: Machines never rewrites a Machinefile" + newerWrote(e)
 		},
 		machinefilecalls.NewerSchema: func(e *fail.Error) (string, string) {
 			return e.Subject + " is " + e.Detail["schema"] + ", newer than this station reads (" + e.Detail["reads"] + ")", updateStation
 		},
 		machinefilecalls.CatalogInvalid: func(e *fail.Error) (string, string) {
-			return e.Detail["problem"], "fix that line: station never rewrites a package file" + newerWrote(e)
+			return e.Detail["problem"], "fix that line: Machines never rewrites a package file" + newerWrote(e)
 		},
 		machinefilecalls.CatalogNewer: func(e *fail.Error) (string, string) {
 			return e.Subject + " is " + e.Detail["schema"] + ", newer than this station reads (" + e.Detail["reads"] + ")", updateStation
@@ -311,7 +311,7 @@ func Codes() map[fail.Code]Wording {
 			return e.Subject + " " + e.Detail["version"] + ": " + e.Detail["method"] + " holds " + cmp.Or(e.Detail["holds"], "only its newest") + ", never " + e.Detail["version"], "ask " + e.Subject + " with no version, or by a method that holds it"
 		},
 		accounts.LoginUnknownProgram: func(e *fail.Error) (string, string) {
-			return "no program named \"" + e.Subject + "\"", "station signs in gh, npm, claude and wrangler"
+			return "no program named \"" + e.Subject + "\"", "Machines signs in gh, npm, claude and wrangler"
 		},
 		accounts.LoginNotInstalled: func(e *fail.Error) (string, string) {
 			return programLabel(e) + " is not installed here", "install it first: station apps"
@@ -326,7 +326,7 @@ func Codes() map[fail.Code]Wording {
 			return programLabel(e) + " is already signing in", "finish that sign-in or wait for it to expire"
 		},
 		accounts.LoginSiteRefused: func(e *fail.Error) (string, string) {
-			return programLabel(e) + " asked to open a site station does not know", "nothing was opened"
+			return programLabel(e) + " asked to open a site Machines does not know", "nothing was opened"
 		},
 		accounts.LoginExpired: func(e *fail.Error) (string, string) {
 			return "the sign-in expired before " + programLabel(e) + " was approved", "start the sign-in again"
@@ -365,7 +365,7 @@ func Codes() map[fail.Code]Wording {
 			return programLabel(e) + " is not signed in on this Mac: there is nothing to add", "sign in first"
 		},
 		accounts.VaultCannotCapture: func(e *fail.Error) (string, string) {
-			return "station cannot take " + programLabel(e) + "'s sign-in into the vault", "type its token instead"
+			return "Machines cannot take " + programLabel(e) + "'s sign-in into the vault", "type its token instead"
 		},
 		accounts.VaultUnknown: func(e *fail.Error) (string, string) {
 			return "no password " + e.Subject + " in this Mac's vault", "read the vault for what it keeps"
@@ -528,16 +528,16 @@ func Codes() map[fail.Code]Wording {
 			return "no background task \"" + e.Subject + "\"", "station background"
 		},
 		backgroundcalls.RootScope: func(e *fail.Error) (string, string) {
-			return e.Subject + " runs as root: station never runs sudo", e.Detail["command"]
+			return e.Subject + " runs as root: Machines never runs sudo", e.Detail["command"]
 		},
 		backgroundcalls.IsTheEngine: func(*fail.Error) (string, string) {
-			return "that is station's engine", "station engine stop"
+			return "that is Machines' engine", "station engine stop"
 		},
 		settingscalls.Unknown: func(e *fail.Error) (string, string) {
 			return "no setting named \"" + e.Subject + "\"", "station settings"
 		},
 		settingscalls.IsChecked: func(e *fail.Error) (string, string) {
-			return e.Subject + " is checked, not set: station never runs sudo", e.Detail["fix"]
+			return e.Subject + " is checked, not set: Machines never runs sudo", e.Detail["fix"]
 		},
 		settingscalls.NotForThisMachine: func(e *fail.Error) (string, string) {
 			if e.Detail["why"] == "Mac only" {
@@ -565,13 +565,13 @@ func Codes() map[fail.Code]Wording {
 			return e.Detail["why"], "station disk"
 		},
 		diskcalls.NothingToFree: func(e *fail.Error) (string, string) {
-			return e.Subject + " keeps nothing station can rebuild", "station disk"
+			return e.Subject + " keeps nothing Machines can rebuild", "station disk"
 		},
 		diskcalls.NeverTouched: func(e *fail.Error) (string, string) {
-			return e.Detail["path"] + " is never touched: station erases no key, token or setting", "station disk"
+			return e.Detail["path"] + " is never touched: Machines erases no key, token or setting", "station disk"
 		},
 		diskcalls.NothingToErase: func(e *fail.Error) (string, string) {
-			return e.Subject + " has no data station can erase", cmp.Or(e.Detail["hint"], "station disk")
+			return e.Subject + " has no data Machines can erase", cmp.Or(e.Detail["hint"], "station disk")
 		},
 		diskcalls.AppRunning: func(e *fail.Error) (string, string) {
 			process, subject := e.Detail["process"], e.Detail["subject"]
@@ -584,7 +584,7 @@ func Codes() map[fail.Code]Wording {
 			return e.Subject + " is not misplaced", "station disk"
 		},
 		diskcalls.NotFreeable: func(e *fail.Error) (string, string) {
-			return e.Subject + " is not freeable: in use, gone or not station's, so nothing is freed", "station disk"
+			return e.Subject + " is not freeable: in use, gone or not Machines', so nothing is freed", "station disk"
 		},
 		diskcalls.NamesNeeded: func(*fail.Error) (string, string) {
 			return "nothing named: free-unused frees only what it names", "station disk"
@@ -620,7 +620,7 @@ func Codes() map[fail.Code]Wording {
 			return "say how " + e.Subject + " is reached from elsewhere", "add --via, one of " + e.Detail["routes"]
 		},
 		ports.CodeUnknownRoute: func(e *fail.Error) (string, string) {
-			return `"` + e.Subject + `" is not a route station knows`, "--via is one of " + e.Detail["routes"]
+			return `"` + e.Subject + `" is not a route Machines knows`, "--via is one of " + e.Detail["routes"]
 		},
 		ports.CodeUnknownAudience: func(e *fail.Error) (string, string) {
 			return `"` + e.Subject + `" is not an audience`, "--to is one of " + e.Detail["audiences"]

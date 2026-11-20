@@ -94,7 +94,7 @@ func TestUpkeepListsTheFirewallThenTheFailingItemThenTheSignInThenTheUpdatesAsOn
 		got = append(got, said{n.Hero, n.Subject, n.What, n.Verb.Label, strings.Join(n.Detail, " | ")})
 	}
 	want := []said{
-		{"Firewall off on This Mac", "This Mac", "firewall off", "How to", "station never changes it for you"},
+		{"Firewall off on This Mac", "This Mac", "firewall off", "How to", "Machines never changes it for you"},
 		{"A login item failed on This Mac", "This Mac", "1 login item failed", "Show", "com.example.socket is failing, last exit 78"},
 		{"Cloudflare needs sign-in on This Mac", "This Mac", "Cloudflare needs sign-in", "Sign in", "signed out"},
 		{"4 updates to install", "This Mac", "4 updates", "Update", "2 tool-a updates waiting | 2 tool-b updates waiting"},
@@ -159,7 +159,7 @@ func TestTheNeedsPageListsEveryNeedThenUpkeepAndAMacsPageOnlyItsOwn(t *testing.T
 	if got, want := rows(mini, SectionNeeds), []string{"infra | down since 14:02 [down:infra]"}; !slices.Equal(got, want) {
 		t.Errorf("mac-mini's needs %q, want %q", got, want)
 	}
-	if got := rows(pro, SectionUpkeep); len(got) == 0 || got[0] != "Firewall off | station never changes it for you [upkeep:"+needsPro+"/settings/4]" {
+	if got := rows(pro, SectionUpkeep); len(got) == 0 || got[0] != "Firewall off | Machines never changes it for you [upkeep:"+needsPro+"/settings/4]" {
 		t.Errorf("This Mac's upkeep %q: its own rows say what, then the detail", got)
 	}
 	if got, want := rows(none, SectionNeeds), []string{"Nothing needs you | "}; !slices.Equal(got, want) {
@@ -222,7 +222,7 @@ func TestARefusedFileOfTheOwnerIsUpkeepNamingItsFileAndLine(t *testing.T) {
 	}
 	n := upkeep[0]
 	if n.Hero != "A file of yours is refused on This Mac" || n.Verb.Label != VerbShow ||
-		!slices.Equal(n.Detail, []string{"~/.config/station/catalog/apps/jq.yaml:3: unknown key", "fix ~/.config/station/catalog/apps/jq.yaml: station reads the built-in packages meanwhile"}) {
+		!slices.Equal(n.Detail, []string{"~/.config/station/catalog/apps/jq.yaml:3: unknown key", "fix ~/.config/station/catalog/apps/jq.yaml: Machines reads the built-in packages meanwhile"}) {
 		t.Errorf("the refused file says %q, %q, %q", n.Hero, n.Verb.Label, n.Detail)
 	}
 }

@@ -82,7 +82,7 @@ func newWorld(t *testing.T, r awake.Reading) *world {
 func (w *world) awake(req awake.Request) {
 	w.t.Helper()
 	if req.By == "" {
-		req.By = "station power awake"
+		req.By = "Machines power awake"
 	}
 	if _, _, err := w.m.Awake(req); err != nil {
 		w.t.Fatalf("awake: %v", err)
@@ -167,11 +167,11 @@ func TestARefreshKeepsOneAssertionAndOnlyTheLidTouchesTheClamshell(t *testing.T)
 	if w.port.count("clamshell disabled") != 0 {
 		t.Fatalf("a session without --lid disabled the clamshell: %v", w.port.calls)
 	}
-	_, refreshed, err := w.m.Awake(awake.Request{Lid: true, For: time.Hour, By: "station power awake --lid --for 1h"})
+	_, refreshed, err := w.m.Awake(awake.Request{Lid: true, For: time.Hour, By: "Machines power awake --lid --for 1h"})
 	if err != nil || !refreshed {
 		t.Fatalf("the second awake = %v, refreshed %v", err, refreshed)
 	}
-	if w.port.count("assert station: station power awake") != 1 || w.port.count("clamshell disabled") != 1 {
+	if w.port.count("assert station: Machines power awake") != 1 || w.port.count("clamshell disabled") != 1 {
 		t.Fatalf("a refresh took a second assertion or no clamshell: %v", w.port.calls)
 	}
 	if s := w.m.View().Session; !s.Lid || s.Until.Sub(w.clock.At) != time.Hour {

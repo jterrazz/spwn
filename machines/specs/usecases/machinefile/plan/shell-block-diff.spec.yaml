@@ -15,7 +15,7 @@ runs:
       exit: 0
       stdout: |
           --- ~/.zshrc [station:postgres/path]
-          +++ station's ~/.zshrc [station:postgres/path]
+          +++ Machines' ~/.zshrc [station:postgres/path]
           @@ -1,0 +1,1 @@
           +[[ -d /opt/homebrew/opt/postgresql@18/bin ]] && path=(/opt/homebrew/opt/postgresql@18/bin $path)
     - command: 'init --yes > /dev/null'
@@ -30,7 +30,7 @@ runs:
       exit: 0
       stdout: |
           --- ~/.zshrc [station:postgres/path]
-          +++ station's ~/.zshrc [station:postgres/path]
+          +++ Machines' ~/.zshrc [station:postgres/path]
           @@ -1,1 +1,1 @@
           -[[ -d /opt/mine/postgresql@18/bin ]] && path=(/opt/mine/postgresql@18/bin $path)
           +[[ -d /opt/homebrew/opt/postgresql@18/bin ]] && path=(/opt/homebrew/opt/postgresql@18/bin $path)

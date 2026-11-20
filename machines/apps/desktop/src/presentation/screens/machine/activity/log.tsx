@@ -162,7 +162,7 @@ function ConsoleBody({ vm, target }: { vm: string; target: Target | undefined })
 function MacLog({ mac, target }: { mac: string; target: Target | undefined }) {
     const { heard, refresh, round, shown } = useLog(mac);
     return (
-        <Panel title="What station did on this Mac">
+        <Panel title="What Machines did on this Mac">
             <Reader call="engine.log" heard={heard} input={{}} key={round} target={target} />
             <Lines memory={mac} onRefresh={refresh} reading="Reading its lines…" shown={shown} />
         </Panel>

@@ -335,7 +335,7 @@ describe('mac', () => {
             '/?world=two-macs&machine=macbook-pro&tab=Activity',
             async (visitor) => {
                 // When - its log is read
-                const log = region('What station did on this Mac');
+                const log = region('What Machines did on this Mac');
                 await visitor.see(within(log, content('nightly run done')));
 
                 // Then - every line is the engine's, the one it withheld as it came
@@ -362,7 +362,7 @@ describe('mac', () => {
                 // Then - it says so in the engine's words
                 await visitor.see(
                     within(
-                        region('What station did on this Mac'),
+                        region('What Machines did on this Mac'),
                         content('The engine has written no line here yet.'),
                     ),
                 );

@@ -14,7 +14,7 @@ func appsFailure(err error) (*fail.Error, bool) {
 	var appStore *apps.AppStoreError
 	switch {
 	case errors.As(err, &irreversible):
-		return usage(irreversible.Error(), "station installs it but cannot remove it: remove it by hand"), true
+		return usage(irreversible.Error(), "Machines installs it but cannot remove it: remove it by hand"), true
 	case errors.As(err, &manual):
 		return usage(manual.Error(), manual.Hint), true
 	case errors.As(err, &appStore):

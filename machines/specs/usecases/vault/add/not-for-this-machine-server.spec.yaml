@@ -10,4 +10,4 @@ runs:
           {"v":2,"id":"1","call":"vault.add","in":{"Label":"x","Program":"gh","Kind":"token","From":"typed","Value":"correct horse"}}
       exit: 0
       stdout: |
-          {"code":"section.not-for-this-machine","field":null,"subject":"infra","message":"infra is a server: station does not manage its accounts"}
+          {"code":"section.not-for-this-machine","field":null,"subject":"infra","message":"infra is a server: Machines does not manage its accounts"}

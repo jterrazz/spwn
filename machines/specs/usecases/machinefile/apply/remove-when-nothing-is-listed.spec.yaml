@@ -27,5 +27,5 @@ runs:
       exit: 0
       stdout: |
           # Extra
-          ?	fd	brew	installed by station for macbook-pro, listed no longer
+          ?	fd	brew	installed by Machines for macbook-pro, listed no longer
           ●	fd		brew	removed

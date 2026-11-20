@@ -18,7 +18,7 @@ runs:
       exit: 0
       stdout: |
           ●	homebrew	5.0.1	script
-          ●	ghostty	1.2.0	cask	updates itself: station checks it is there
+          ●	ghostty	1.2.0	cask	updates itself: Machines checks it is there
     - command: 'apps update ghostty'
       exit: 0
       stdout: |

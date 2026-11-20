@@ -14,7 +14,7 @@ runs:
       stdout: |
           ┃ Name this machine
           ┃ lowercase letters, digits and -, as in macbook or mac-mini
-          ✓ Known to station · 3 steps changed
+          ✓ Known to Machines · 3 steps changed
 
           Changes
             ● name      macbook-pro

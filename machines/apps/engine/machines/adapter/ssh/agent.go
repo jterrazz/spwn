@@ -22,7 +22,7 @@ const (
 	DeviceKeyComment = "station device key"
 )
 
-var errHoldsNoOther = errors.New("station's agent holds only this device's key")
+var errHoldsNoOther = errors.New("the agent of Machines holds only this device's key")
 
 type Agent struct {
 	// value: the agent ssh reaches through IdentityAgent: it signs with this

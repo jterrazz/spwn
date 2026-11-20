@@ -32,12 +32,12 @@ runs:
       exit: 0
       stdout: |
           # Extra
-          ?	mas	brew	installed by station for macbook-pro, required by keynote: kept
+          ?	mas	brew	installed by Machines for macbook-pro, required by keynote: kept
     - command: 'apply --remove --yes'
       exit: 0
       stdout: |
           # Extra
-          ?	mas	brew	installed by station for macbook-pro, required by keynote: kept
+          ?	mas	brew	installed by Machines for macbook-pro, required by keynote: kept
           ●	homebrew	5.0.1	script	the manager of jq
           ●	jq	1.8.1	brew
           ●	mas	1.0.0	brew	required by keynote: kept, judged again next run

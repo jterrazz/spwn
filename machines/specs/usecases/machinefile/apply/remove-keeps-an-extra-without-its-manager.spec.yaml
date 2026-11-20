@@ -15,12 +15,12 @@ runs:
       exit: 0
       stdout: |
           # Extra
-          ?	ripgrep	brew	installed by station for macbook-pro, its manager homebrew is missing: kept
+          ?	ripgrep	brew	installed by Machines for macbook-pro, its manager homebrew is missing: kept
     - command: 'apply --remove --yes'
       exit: 0
       stdout: |
           # Extra
-          ?	ripgrep	brew	installed by station for macbook-pro, its manager homebrew is missing: kept
+          ?	ripgrep	brew	installed by Machines for macbook-pro, its manager homebrew is missing: kept
           ◐	ripgrep		brew	its manager homebrew is missing: kept, judged again next run
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].stores.ledger | map(.package)'' world.json'
       exit: 0

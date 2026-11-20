@@ -13,8 +13,8 @@
   - paragraph: Mixins
   - group "Mixins":
     - button "base"
-  - paragraph: Shipped with station
-  - group "Shipped with station":
+  - paragraph: Shipped with Machines
+  - group "Shipped with Machines":
     - button "base-macos"
     - button "base-ubuntu"
   - region "macbook-pro.machine.yaml":

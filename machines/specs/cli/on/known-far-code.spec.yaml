@@ -4,5 +4,5 @@ runs:
     - command: 'apps install jq --on y'
       exit: 2
       stderr: |
-          Error: y is a server: station does not manage its apps
+          Error: y is a server: Machines does not manage its apps
           Hint: run station overview for what y has

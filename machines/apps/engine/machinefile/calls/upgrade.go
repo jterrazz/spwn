@@ -163,7 +163,7 @@ func atNewest(judge func() (machinefile.Plan, error), pull func() (back func(), 
 // why its newest commit was not taken, as the run says it.
 func keptBefore(plan machinefile.Plan, back func(), unresolved error) (machinefile.Plan, string, error) {
 	back()
-	return plan, "its newest commit does not resolve, so station keeps the one before: " + unresolved.Error(), nil
+	return plan, "its newest commit does not resolve, so Machines keeps the one before: " + unresolved.Error(), nil
 }
 
 // value: the machine's turn, taken for one apply or upgrade; a turn

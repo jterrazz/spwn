@@ -26,7 +26,7 @@ func groups() []group {
 	return []group{
 		{"failing", "Failing", false},
 		{"orphans", "Orphans", false},
-		{"station", "Station", true},
+		{"station", "Machines", true},
 		{"known", "Known apps", true},
 		{"unknown", "Unknown", true},
 	}

@@ -180,7 +180,7 @@ type ThisMachineError struct{ Name, Verb string }
 
 func (e *ThisMachineError) Error() string {
 	if e.Verb == VerbForget {
-		return "this is This Mac: station forgets only the other Macs"
+		return "this is This Mac: Machines forgets only the other Macs"
 	}
 	return "\"" + e.Name + "\" is this machine"
 }

@@ -11,5 +11,5 @@ runs:
           scrollback
       exit: 2
       stdout: |
-          Error: infra is a server: station does not manage its accounts
+          Error: infra is a server: Machines does not manage its accounts
           Hint: manage it with your own tooling: ssh infra

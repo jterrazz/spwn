@@ -7,4 +7,4 @@ How it is reached
   ◌ This Mac to mac-mini
   ◌ mac-mini to infra
 Inside
-  Station opens it for debugging only; your tooling owns what runs inside.
+  Machines opens it for debugging only; your tooling owns what runs inside.

@@ -26,7 +26,7 @@ func settingsFailure(err error) (*fail.Error, bool) {
 	case errors.As(err, &livesOn):
 		return usage(livesOn.Error(), "station settings apply "+livesOn.Package+" --on this-mac"), true
 	case errors.As(err, &irreversible):
-		return usage(irreversible.Error(), "station applies it but cannot undo it: undo it by hand"), true
+		return usage(irreversible.Error(), "Machines applies it but cannot undo it: undo it by hand"), true
 	case errors.As(err, &terminal):
 		return Translate(fail.New(fail.NeedsTerminal, words.NeedsTerminal, terminal.Package, nil), ""), true
 	}

@@ -24,6 +24,6 @@ runs:
           macbook-pro · 2 present · 1 extra
 
           Extra  ? claude · script
-                   installed by station for macbook-pro, station cannot uninstall it: kept
+                   installed by Machines for macbook-pro, Machines cannot uninstall it: kt
 
           → station apply --remove  lets go of what is yours now

@@ -172,7 +172,7 @@ describe('machine files', () => {
                 // Then - three captions, the shelves' files under them, and the tab of a file with differing machines flagged
                 await visitor.see(content('Your machines'));
                 await visitor.see(content('Mixins'));
-                await visitor.see(content('Shipped with station'));
+                await visitor.see(content('Shipped with Machines'));
                 await visitor.see(button('base-macos'));
                 await visitor.see(button('linux-dev 2 machines differ.'));
 

@@ -51,7 +51,7 @@ type rendered struct{ id, body string }
 func (a *Applier) of(it catalog.Setting) ([]rendered, error) {
 	s, ok := it.Effect.(catalog.ShellBlocks)
 	if !ok || len(s.Blocks) == 0 {
-		return nil, errors.New(it.Name + " is not shell blocks station writes")
+		return nil, errors.New(it.Name + " is not shell blocks Machines writes")
 	}
 	var out []rendered
 	for _, b := range s.Blocks {
@@ -99,7 +99,7 @@ func (a *Applier) Observe(ctx context.Context, it catalog.Setting) (settings.Obs
 			same++
 			continue
 		}
-		diffs = append(diffs, settings.UnifiedDiff(b.body, have, "station's "+name(b.id), name(b.id)))
+		diffs = append(diffs, settings.UnifiedDiff(b.body, have, "Machines' "+name(b.id), name(b.id)))
 	}
 	o.Diff = strings.Join(diffs, "")
 	switch {
@@ -108,7 +108,7 @@ func (a *Applier) Observe(ctx context.Context, it catalog.Setting) (settings.Obs
 	case same == len(blocks):
 		o.State, o.Detail = catalog.StateOK, o.Where
 	default:
-		o.State, o.Detail = catalog.StateDegraded, "differs from station's: station settings apply "+it.Name
+		o.State, o.Detail = catalog.StateDegraded, "differs from Machines': station settings apply "+it.Name
 	}
 	if found > 0 {
 		sum := sha256.Sum256([]byte(strings.Join(there, "\x00")))

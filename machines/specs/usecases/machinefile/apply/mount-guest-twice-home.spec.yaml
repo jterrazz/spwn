@@ -15,4 +15,4 @@ runs:
       exit: 2
       stderr: |
           Error: ~/.config/station/machinefiles/linux-1.machine.yaml:4: two mounts share the guest folder "/home/admin/notes"
-          Hint: fix that line: station never rewrites a Machinefile
+          Hint: fix that line: Machines never rewrites a Machinefile

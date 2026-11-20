@@ -2,7 +2,7 @@
   "AccountsAddFrom": {
     "sign-in": {
       "Word": "from a sign-in",
-      "Detail": "Station takes the token this sign-in left on this Mac and keeps it in the Keychain. The sign-in itself stays as it is.",
+      "Detail": "Machines takes the token this sign-in left on this Mac and keeps it in the Keychain. The sign-in itself stays as it is.",
       "Tone": "plain"
     },
     "typed": {
@@ -1302,7 +1302,7 @@
       "Tone": "warn"
     },
     "logs": {
-      "Word": "Station logs",
+      "Word": "Machines' logs",
       "Tone": "plain"
     },
     "machine-disks": {
@@ -1517,7 +1517,7 @@
   },
   "MachinefileOriginKind": {
     "built-in": {
-      "Word": "built into station",
+      "Word": "built into Machines",
       "Tone": "plain"
     },
     "catalog": {
@@ -1551,7 +1551,7 @@
       "Tone": "plain"
     },
     "shipped": {
-      "Word": "Shipped with station",
+      "Word": "Shipped with Machines",
       "Tone": "plain"
     },
     "yours": {

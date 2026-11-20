@@ -31,7 +31,7 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 		Group:   kit.StationItself,
 		Declare: func(f *pflag.FlagSet, in *Input) {
 			f.StringVar(&in.Machinefile, "machinefile", "", "the Machinefile, by its name or its file, which this machine then carries (default: the one it carries)")
-			f.BoolVar(&in.Remove, "remove", false, "also remove what station installed here that the Machinefile lists no longer")
+			f.BoolVar(&in.Remove, "remove", false, "also remove what Machines installed here that the Machinefile lists no longer")
 			f.StringVar(&in.Phase, "phase", "", "carry out one phase: image (what a VM image bakes), boot (a VM's first start), apply (default)")
 		},
 		Asks:    true,

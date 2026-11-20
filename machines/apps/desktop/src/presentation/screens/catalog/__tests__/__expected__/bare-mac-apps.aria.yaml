@@ -27,7 +27,7 @@
   - region "Apps":
     - paragraph: Package Managers 8
     - button "cocoapods Dependency manager for iOS and macOS projects not installed"
-    - button "github-release manager 1 of 1 machine Commands from a project's GitHub releases, fetched and checked by station itself installed"
+    - button "github-release manager 1 of 1 machine Commands from a project's GitHub releases, fetched and checked by Machines itself installed"
     - button "homebrew manager macOS package manager not installed"
     - button "mas manager Mac App Store command line not installed"
     - 'button "mise manager Polyglot runtime manager: node, go, python, bun, rust, java not installed"'
@@ -78,7 +78,7 @@
     - button "kubectl Kubernetes command line not installed"
     - button "lens Kubernetes IDE for managing clusters not installed"
     - button "orbstack Docker and Linux machines on the Mac, for exploration on a Mac not installed"
-    - 'button "tart Virtual machines on Apple silicon: the engine of station''s VMs not installed"'
+    - 'button "tart Virtual machines on Apple silicon: the engine of Machines'' VMs not installed"'
     - paragraph: Deploy 4
     - button "ansible Agentless IT automation and configuration management not installed"
     - button "eas Expo's EAS CLI for app builds not installed"
@@ -128,7 +128,7 @@
     - paragraph: Remote Access 3
     - button "jump-desktop Jump Desktop viewer/client app not installed"
     - button "jump-desktop-connect Remote GUI recovery for headless Macs not installed"
-    - 'button "tailscale The Tailscale app: each Mac is a node, and station reads it not installed"'
+    - 'button "tailscale The Tailscale app: each Mac is a node, and Machines reads it not installed"'
     - paragraph: Security 3
     - button "adguard Ad blocker for Safari not installed"
     - button "bitwarden Password manager not installed"
@@ -139,4 +139,4 @@
     - button "pipifier Picture-in-Picture for Safari not installed"
     - button "snippety Code snippet manager not installed"
     - button "speedtest Internet speed test not installed"
-    - button "station-menubar Station's menu bar app, from the latest release not installed"
+    - button "station-menubar Machines' menu bar app, from the latest release not installed"

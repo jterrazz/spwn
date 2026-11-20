@@ -16,7 +16,7 @@ import (
 // own /bin/zsh, which a Linux runner does not ship.
 func TestAFreshMacsZshGetsTheCompletionFromTheBlock(t *testing.T) {
 	block := zshblock.NewBlock(&memory{files: map[string][]byte{}}, catalog.DotfilesFS, zshblock.BlockOptions{ThisMachine: catalog.Mac})
-	script, err := block.Zsh(context.Background(), "_station() { }\ncompdef _station station")
+	script, err := block.Zsh(context.Background(), "_station() { }\ncompdef _station Machines")
 	if err != nil {
 		t.Fatal(err)
 	}

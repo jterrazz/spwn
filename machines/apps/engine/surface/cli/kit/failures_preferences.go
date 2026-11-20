@@ -25,7 +25,7 @@ func preferencesFailure(err error) (*fail.Error, bool) {
 		if unreadable.Line > 0 {
 			where = "line " + strconv.Itoa(unreadable.Line) + ": " + where
 		}
-		return failed(unreadable.Path+" cannot be read: "+where, "fix that line: station never rewrites a file it cannot read", err), true
+		return failed(unreadable.Path+" cannot be read: "+where, "fix that line: Machines never rewrites a file it cannot read", err), true
 	case errors.As(err, &unreadable) && errors.As(err, &older):
 		return failed("cannot read \""+unreadable.Path+"\": "+older.Error(), "move \""+unreadable.Path+"\" away to start afresh", err), true
 	case errors.As(err, &unreadable):

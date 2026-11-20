@@ -10,4 +10,4 @@ runs:
           {"v":2,"id":"1","watch":"accounts.login","in":{"Program":"gh"}}
       exit: 0
       stdout: |
-          {"code":"login.site-refused","field":null,"subject":"gh","message":"GitHub asked to open a site station does not know","hint":"nothing was opened"}
+          {"code":"login.site-refused","field":null,"subject":"gh","message":"GitHub asked to open a site Machines does not know","hint":"nothing was opened"}

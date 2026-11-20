@@ -58,8 +58,8 @@
     - definition: 98 % · 112 cycles
     - term: Up for
     - definition: 3 d
-  - region "What station did on this Mac":
-    - heading "What station did on this Mac" [level=2]
+  - region "What Machines did on this Mac":
+    - heading "What Machines did on this Mac" [level=2]
     - searchbox "Filter the lines"
     - button "Refresh"
     - button "Copy all"

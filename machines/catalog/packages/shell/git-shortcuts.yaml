@@ -31,4 +31,4 @@ methods:
 writes:
     - path: ~/.gitconfig
       level: settings
-      note: station's `[alias]` block
+      note: Machines' `[alias]` block

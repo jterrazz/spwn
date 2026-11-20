@@ -4,5 +4,5 @@ runs:
     - command: 'settings diff firewall'
       exit: 2
       stderr: |
-          Error: firewall is checked, not set: station never runs sudo
+          Error: firewall is checked, not set: Machines never runs sudo
           Hint: System Settings > Network > Firewall

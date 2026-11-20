@@ -534,7 +534,7 @@ func (r *Releases) download(ctx context.Context, a asset) ([]byte, error) {
 	at, err := url.Parse(a.URL)
 	api, _ := url.Parse(r.o.APIURL)
 	if a.URL == "" || err != nil || at.Host == "" || api == nil || at.Scheme != api.Scheme {
-		return nil, fmt.Errorf("%s has no download address station takes (%q)", a.Name, a.URL)
+		return nil, fmt.Errorf("%s has no download address Machines takes (%q)", a.Name, a.URL)
 	}
 	got, err := r.o.Net.Fetch(ctx, a.URL, map[string]string{"Accept": "application/octet-stream"})
 	if err != nil {

@@ -14,4 +14,4 @@ runs:
       exit: 2
       stderr: |
           Error: ~/.config/station/machinefiles/linux-1.machine.yaml:4: mount folder "/etc/notes" of the VM is in the system folder /etc: mount under /srv, /opt, /mnt, /data or the home
-          Hint: fix that line: station never rewrites a Machinefile
+          Hint: fix that line: Machines never rewrites a Machinefile

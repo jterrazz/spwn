@@ -516,8 +516,8 @@ func (s ExtraLine) Fate() Fate {
 // and in the run: station cannot uninstall it here, or it is there by
 // another way since; it is the owner's from then on.
 const (
-	CannotUninstall = "station cannot uninstall it: kept, and yours: remove it by hand if you want"
-	AnotherWay      = "present another way since station installed it: kept, and yours"
+	CannotUninstall = "Machines cannot uninstall it: kept, and yours: remove it by hand if you want"
+	AnotherWay      = "present another way since Machines installed it: kept, and yours"
 )
 
 func (s ExtraLine) Holding() string {

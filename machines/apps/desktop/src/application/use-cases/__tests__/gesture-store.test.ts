@@ -7,7 +7,7 @@ import { GestureStore } from '../gesture-store';
 const ERASE = 'call disk.erase {"App":"orbstack"} {"name":"macbook-pro"}';
 
 const REFUSED = {
-    error: new EngineError({ message: 'orbstack has no data station can erase', type: 'refused' }),
+    error: new EngineError({ message: 'orbstack has no data Machines can erase', type: 'refused' }),
     kind: 'failed',
 } as const;
 

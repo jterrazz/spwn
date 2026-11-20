@@ -29,7 +29,7 @@
           "row": {
             "id": "summary/init",
             "mark": "pending",
-            "label": "Known to station",
+            "label": "Known to Machines",
             "cells": [
               {
                 "kind": "pending"

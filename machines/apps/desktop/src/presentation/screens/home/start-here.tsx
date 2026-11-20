@@ -34,7 +34,7 @@ export function StartHere({ macs, go, onNewMachine }: StartHereProps) {
                 }
             />
             <Row
-                sentence="Its machine file: the apps and settings station keeps on it"
+                sentence="Its machine file: the apps and settings Machines keeps on it"
                 title="Read what this Mac follows"
                 trail={
                     <Button
@@ -48,7 +48,7 @@ export function StartHere({ macs, go, onNewMachine }: StartHereProps) {
             />
             <Row
                 sentence="Apps, agent skills and settings, each one a package"
-                title="Browse what station can install"
+                title="Browse what Machines can install"
                 trail={
                     <Button
                         onClick={() => {

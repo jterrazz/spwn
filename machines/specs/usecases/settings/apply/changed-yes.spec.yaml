@@ -16,8 +16,8 @@ runs:
       stdout: |
           ●	tart-launcher	applied · ~/.local/bin/tart
           # Detail
-          group	Set by station
-          does	The tart launcher: Tart's home is station's VMs folder
+          group	Set by Machines
+          does	The tart launcher: Tart's home is Machines' VMs folder
           lives on	Macs
           where	~/.local/bin/tart
           applied	just now

@@ -61,12 +61,12 @@ func head(report setup.Report) *pages.RunHead {
 			changed++
 		}
 	}
-	h := &pages.RunHead{Label: "Known to station", Mark: page.OK, Words: []string{"nothing to change"}}
+	h := &pages.RunHead{Label: "Known to Machines", Mark: page.OK, Words: []string{"nothing to change"}}
 	switch {
 	case failed > 0:
-		h.Label, h.Mark, h.Words = "Not known to station yet", page.Broken, []string{steps(failed) + " failed"}
+		h.Label, h.Mark, h.Words = "Not known to Machines yet", page.Broken, []string{steps(failed) + " failed"}
 	case open > 0:
-		h.Label, h.Mark, h.Words = "Known to station, with a step left", page.Attention, []string{steps(open) + " left"}
+		h.Label, h.Mark, h.Words = "Known to Machines, with a step left", page.Attention, []string{steps(open) + " left"}
 	case changed > 0:
 		h.Words = []string{steps(changed) + " changed"}
 	}

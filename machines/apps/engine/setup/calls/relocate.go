@@ -77,7 +77,7 @@ func (s *Provisioner) writeAppFiles() (written, notes []string, err error) {
 	for _, file := range order {
 		target := s.o.Files[file]
 		if target == "" {
-			notes = append(notes, file.Label()+" is off (GOENV=off): station writes nothing")
+			notes = append(notes, file.Label()+" is off (GOENV=off): Machines writes nothing")
 			continue
 		}
 		current, _, readErr := s.m.ReadFile(target)
@@ -108,7 +108,7 @@ func (s *Provisioner) writeAppFiles() (written, notes []string, err error) {
 			}
 			updated, did, hand := upsert(text, r.Key, value)
 			if hand != "" {
-				notes = append(notes, file.KeyLabel(r.Key)+" set by hand to "+hand+"; station leaves it")
+				notes = append(notes, file.KeyLabel(r.Key)+" set by hand to "+hand+"; Machines leaves it")
 				continue
 			}
 			text, changed = updated, changed || did

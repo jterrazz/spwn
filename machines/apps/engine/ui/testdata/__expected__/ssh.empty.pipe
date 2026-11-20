@@ -6,4 +6,4 @@
 ●	This Mac to mac-mini	over Tailscale · as jterrazz.agent
 ●	mac-mini to infra	its Mac's private network
 # Inside
-	Station opens it for debugging only; your tooling owns what runs inside.
+	Machines opens it for debugging only; your tooling owns what runs inside.

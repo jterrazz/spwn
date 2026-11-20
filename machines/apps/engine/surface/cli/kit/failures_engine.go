@@ -47,7 +47,7 @@ func portsFailure(err error) (*fail.Error, bool) {
 	case errors.As(err, &badPort):
 		return usage(badPort.Error(), "a port is a number from 1 to 65535"), true
 	case errors.As(err, &ignored):
-		return usage(ignored.Error(), "station never shares port 22 nor a port below 1024"), true
+		return usage(ignored.Error(), "Machines never shares port 22 nor a port below 1024"), true
 	case errors.As(err, &away):
 		return failed(away.Error(), away.Hint(), err), true
 	case errors.As(err, &unknown):
@@ -67,7 +67,7 @@ func controlFailure(err error) (*fail.Error, bool) {
 	case errors.As(err, &noJobs):
 		// invariant: never the start that just failed: the job manager
 		// is the system's, found on the search path station runs with.
-		return failed(noJobs.Error(), "macOS keeps it in /bin: check the PATH station runs with", err), true
+		return failed(noJobs.Error(), "macOS keeps it in /bin: check the PATH Machines runs with", err), true
 	case errors.As(err, &stuck):
 		return failed(stuck.Error(), "station machines delete "+stuck.VM, err), true
 	case errors.As(err, &boot):

@@ -4,12 +4,12 @@ runs:
     - command: 'machines forget macbook-pro --yes'
       exit: 2
       stderr: |
-          Error: this is This Mac: station forgets only the other Macs
+          Error: this is This Mac: Machines forgets only the other Macs
           Hint: station machines
     - command: 'machines forget macbook-pro --yes'
       exit: 2
       stderr: |
-          Error: this is This Mac: station forgets only the other Macs
+          Error: this is This Mac: Machines forgets only the other Macs
           Hint: station machines
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].preferences.macs | keys'' world.json'
       exit: 0

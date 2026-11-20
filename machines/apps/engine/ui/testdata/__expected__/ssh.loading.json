@@ -134,7 +134,7 @@
       "items": [
         {
           "note": {
-            "text": "Station opens it for debugging only; your tooling owns what runs inside."
+            "text": "Machines opens it for debugging only; your tooling owns what runs inside."
           }
         }
       ],

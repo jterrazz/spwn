@@ -17,7 +17,7 @@ runs:
           ○	apt	apt	the manager of jq
           ○	jq	apt
           # Extra
-          ?	node	mise	installed by station for linux-1, holds 1 package of yours: kept
+          ?	node	mise	installed by Machines for linux-1, holds 1 package of yours: kept
     - command: 'apply --remove --yes'
       exit: 0
       stdout: |
@@ -25,7 +25,7 @@ runs:
           ○	apt	apt	the manager of jq
           ○	jq	apt
           # Extra
-          ?	node	mise	installed by station for linux-1, holds 1 package of yours: kept
+          ?	node	mise	installed by Machines for linux-1, holds 1 package of yours: kept
           ●	apt	1.0.0	apt	the manager of jq
           ●	jq	1.0.0	apt
           ●	node	24.11.0	mise	holds 1 package of yours: kept, judged again next run
@@ -35,7 +35,7 @@ runs:
       exit: 0
       stdout: |
           # Extra
-          ?	node	mise	installed by station for linux-1, listed no longer
+          ?	node	mise	installed by Machines for linux-1, listed no longer
           ●	apt	1.0.0	apt	the manager of jq
           ●	jq	1.0.0	apt
           ●	node		mise	removed

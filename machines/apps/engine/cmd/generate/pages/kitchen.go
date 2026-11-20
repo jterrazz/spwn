@@ -112,7 +112,7 @@ func kitchen(edit func(*page.Page)) page.Page {
 		{page.Unmanaged, page.Attention, "on PATH, not managed by cask", ""},
 		{page.Missing, page.Attention, "installed, mise not installed", "station apps install mise"},
 		{page.Partial, page.Attention, "policy partly applied", ""},
-		{page.Differs, page.Attention, "differs from station's", "station settings apply " + catalog.HypervisorLauncher},
+		{page.Differs, page.Attention, "differs from Machines'", "station settings apply " + catalog.HypervisorLauncher},
 		{page.Unset, page.Attention, "name not set", "station init"},
 		{page.Stopped, page.Attention, "stopped", "station engine start"},
 		{page.Late, page.Attention, "no answer in 2s", ""},

@@ -16,7 +16,7 @@ runs:
           {"v":2,"id":"1","watch":"disk.read","in":{}}
       exit: 0
       stdout: |
-          {"frees":[{"Holder":"images","Kind":"image","Name":"base-ubuntu@2026.10.20","Bytes":3000000000}],"kept":[{"Name":"~/.tart","VMs":["linux-dev"],"Sentence":"~/.tart holds VMs of yours (linux-dev), so station never frees it: move each into ~/.local/share/station/vms/vms first."}]}
+          {"frees":[{"Holder":"images","Kind":"image","Name":"base-ubuntu@2026.10.20","Bytes":3000000000}],"kept":[{"Name":"~/.tart","VMs":["linux-dev"],"Sentence":"~/.tart holds VMs of yours (linux-dev), so Machines never frees it: move each into ~/.local/share/station/vms/vms first."}]}
     - command: '--version >/dev/null; /usr/bin/jq ''del(.macs["macbook-pro"].disk.files["~/.tart/vms/linux-dev/disk.img"]) | .macs["macbook-pro"].disk.files["~/.tart/cache/OCIs/ghcr.io/x/disk.img"] = 4000000000'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
     - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -s -c ''[.[] | select(.out)] | last | .out | {frees: .Station.CanFree.Frees, kept: .Station.Kept, kinds: .Kinds, holds: .Station.Holds}'''

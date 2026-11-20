@@ -99,7 +99,7 @@ func regular(dir folders, links Links, at string, e fs.DirEntry) error {
 			return &catalog.FileError{File: p, Problem: "is a link to no file: a link in your folders points at a regular file"}
 		}
 	case t&fs.ModeSymlink != 0:
-		return &catalog.FileError{File: p, Problem: "is a link: station reads a shared source's files as they are, never through a link"}
+		return &catalog.FileError{File: p, Problem: "is a link: Machines reads a shared source's files as they are, never through a link"}
 	case !t.IsRegular():
 		return &catalog.FileError{File: p, Problem: "is no regular file: a source holds files and folders alone"}
 	}

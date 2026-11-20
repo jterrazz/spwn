@@ -239,7 +239,7 @@ func TestAFunnelPortHeldByStationsOwnEntryNamesIt(t *testing.T) {
 	tn.funnel = map[int]bool{443: true}
 	h.d.tn = tn
 	err := h.d.heldOutside(t.Context(), ports.Share{Port: 443, Path: "/", Reserved: 40000, Scheme: ports.SchemeHTTPS, To: catalog.AudiencePublic})
-	if want := "Funnel port 443 still serves station's entry from port 40001 of this Mac"; err == nil || err.Error() != want {
+	if want := "Funnel port 443 still serves Machines' entry from port 40001 of this Mac"; err == nil || err.Error() != want {
 		t.Errorf("held = %v, want %q", err, want)
 	}
 }
@@ -253,7 +253,7 @@ func TestAPrivateShareOnAFunneledPortIsRefused(t *testing.T) {
 	tn.funnel = map[int]bool{40001: true}
 	h.d.tn = tn
 	err := h.d.heldOutside(t.Context(), ports.Share{Port: 40001, Reserved: 40001, Scheme: ports.SchemeHTTPS})
-	if want := "port 40001 is funneled by an entry station did not make: a private share on it would be public"; err == nil || err.Error() != want {
+	if want := "port 40001 is funneled by an entry Machines did not make: a private share on it would be public"; err == nil || err.Error() != want {
 		t.Errorf("held = %v, want %q", err, want)
 	}
 }

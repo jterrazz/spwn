@@ -14,7 +14,7 @@
   - region "From":
     - text: From
     - group "From":
-      - button "From a sign-in": From a sign-in Station takes the token this sign-in left on this Mac and keeps it in the Keychain. The sign-in itself stays as it is.
+      - button "From a sign-in": From a sign-in Machines takes the token this sign-in left on this Mac and keeps it in the Keychain. The sign-in itself stays as it is.
       - button "Typed" [pressed]: Typed A token you made yourself
   - region "Program":
     - text: Program

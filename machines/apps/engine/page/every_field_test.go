@@ -46,7 +46,7 @@ func everyField() page.Page {
 		Glance:  []page.Value{page.Text("1 waits")},
 		Segment: "overview", Card: page.CardNow,
 		Picker: []page.Action{{ID: "window-6m", Label: "6 min", Picked: true, Run: &page.Run{Call: "activity.window", In: map[string]string{"Window": "6m"}}}},
-		About:  &page.About{Label: "About machines", Text: "A machine is a Mac or a VM station keeps."},
+		About:  &page.About{Label: "About machines", Text: "A machine is a Mac or a VM Machines keeps."},
 	}
 	cards := page.Section{
 		ID: "cards", Title: "Cards", Uncounted: true, Counts: []page.Tally{{Mark: page.OK, N: 3}}, Segment: "activity", Card: page.CardHealth,
@@ -94,7 +94,7 @@ func everyField() page.Page {
 			{ID: "menu", Label: "More", Submenu: []string{"copy", "logs"}},
 			{ID: "attach", Label: "Attach", Disabled: "Needs infra running"},
 		},
-		Badge:    &page.Badge{Down: true, Restarting: true, Label: "Station, infra down"},
+		Badge:    &page.Badge{Down: true, Restarting: true, Label: "Spwn Menu, infra down"},
 		Header:   &page.Header{Back: "Back", Title: "linux-1", Search: "Find a machine", Glyph: page.Glyph{Kind: "workspace"}, Buttons: []string{"new-vm", "menu"}, Stale: &page.Value{Kind: page.KindAge, N: 40, Text: "seen 40 s ago, checking"}},
 		Segments: []page.Segment{{ID: "overview", Label: "Overview", Picked: true}, {ID: "activity", Label: "Activity", Key: "cmd+i"}},
 		Footer:   &page.Footer{Kind: page.FooterSSH, Copy: &page.Value{Kind: page.KindCommand, Text: "linux-1.local"}, Note: "Needs infra running", Buttons: []string{"attach"}},

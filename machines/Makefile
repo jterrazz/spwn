@@ -148,7 +148,7 @@ window: node_modules/.install ## Build the window's bundle for darwin-arm64, sig
 	@codesign --verify --strict $(WINDOW_APP)
 	@printf "$(GREEN)●$(RESET) Built $(WINDOW_APP) ($(WINDOW_VERSION), signed ad hoc)\n"
 
-catalog: ## Build the Station Catalog, the dev-only window over every story, never bundled into Station.app
+catalog: ## Build the Spwn Menu Catalog, the dev-only window over every story, never bundled into Station.app
 	@swift apps/menubar/scripts/symbols.swift apps/menubar/sources/station-kit/token/symbols.xcassets
 	@swift build --package-path apps/menubar --scratch-path .artifacts/menubar/build --product StationCatalog
 	@printf "$(GREEN)●$(RESET) Built $(CATALOG_BIN)\n"

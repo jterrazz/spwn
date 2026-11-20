@@ -24,7 +24,7 @@ type Input struct {
 func Command(d Deps, env kit.Env, children ...*cobra.Command) *cobra.Command {
 	cmd := kit.Command(kit.Leaf[Input]{
 		Use:     "background",
-		Short:   "The background tasks of this machine: failing, orphans, station's, the apps', unknown",
+		Short:   "The background tasks of this machine: failing, orphans, Machines', the apps', unknown",
 		Example: "  station background\n  station background --all\n  station background --json",
 		Group:   kit.OnAMachine,
 		Args:    cobra.NoArgs,

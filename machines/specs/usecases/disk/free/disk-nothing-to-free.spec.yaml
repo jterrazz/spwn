@@ -4,5 +4,5 @@ runs:
     - command: 'disk free gpg'
       exit: 2
       stderr: |
-          Error: gpg keeps nothing station can rebuild
+          Error: gpg keeps nothing Machines can rebuild
           Hint: station disk

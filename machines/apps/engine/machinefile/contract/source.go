@@ -45,7 +45,7 @@ type NotForwardError struct {
 }
 
 func (e *NotForwardError) Error() string {
-	return "its branch is at " + short(e.Newest) + ", which does not follow " + short(e.At) + ", the commit its clone is at (a force-push, a rewritten history or another default branch): station keeps " + short(e.At)
+	return "its branch is at " + short(e.Newest) + ", which does not follow " + short(e.At) + ", the commit its clone is at (a force-push, a rewritten history or another default branch): Machines keeps " + short(e.At)
 }
 
 func short(commit string) string { return commit[:min(7, len(commit))] }

@@ -25,7 +25,7 @@ runs:
           macbook-pro · 2 present · 1 extra
 
           Extra  ? lazygit · brew
-                   installed by station for macbook-pro, listed no longer
+                   installed by Machines for macbook-pro, listed no longer
 
           → station apply --remove  also removes what is extra
           ┃ Remove what the Machinefile lists no longer?

@@ -98,9 +98,9 @@ func TestABlockIsJudgedAgainstWhatTheFileHolds(t *testing.T) {
 		{"absent is set", "mine\n", nil, machinefile.Absent, machinefile.Set},
 		{"absent though written once is set again", "mine\n", []machinefile.Written{wrote("station:lib/path", body)}, machinefile.Absent, machinefile.Set},
 		{"as written is kept", block(body), nil, machinefile.Present, machinefile.Keep},
-		{"what station last wrote, written otherwise now, is outdated and set", block(earlier), []machinefile.Written{wrote("station:lib/path", earlier)}, machinefile.Outdated, machinefile.Set},
+		{"what Machines last wrote, written otherwise now, is outdated and set", block(earlier), []machinefile.Written{wrote("station:lib/path", earlier)}, machinefile.Outdated, machinefile.Set},
 		{"edited by hand is left", block("export LIB=mine\n"), nil, machinefile.Changed, machinefile.Leave},
-		{"edited by hand since station wrote it is left", block("export LIB=mine\n"), []machinefile.Written{wrote("station:lib/path", earlier)}, machinefile.Changed, machinefile.Leave},
+		{"edited by hand since Machines wrote it is left", block("export LIB=mine\n"), []machinefile.Written{wrote("station:lib/path", earlier)}, machinefile.Changed, machinefile.Leave},
 		{"damaged is left", "# >>> station:lib/path >>>\n" + body, []machinefile.Written{wrote("station:lib/path", body)}, machinefile.Changed, machinefile.Leave},
 	}
 	for _, c := range cases {
@@ -161,7 +161,7 @@ func TestABlockStationWroteForAnExtraGoesWithItsApp(t *testing.T) {
 		{"its app still required", soloUntouched, []machinefile.Written{soloRecord}, []machinefile.ExtraLine{soloRequired}, 1, machinefile.Leave, machinefile.KeptRequired},
 		{"edited by hand since", soloFile("export SOLO=mine\n"), []machinefile.Written{soloRecord}, []machinefile.ExtraLine{soloTaken}, 1, machinefile.Leave, machinefile.KeptEdited},
 		{"its app no extra: adopted, another Machinefile's, skipped here", soloUntouched, []machinefile.Written{soloRecord}, nil, 0, "", ""},
-		{"never written by station", soloUntouched, nil, []machinefile.ExtraLine{soloTaken}, 0, "", ""},
+		{"never written by Machines", soloUntouched, nil, []machinefile.ExtraLine{soloTaken}, 0, "", ""},
 		{"none in the file", "mine\n", []machinefile.Written{soloRecord}, []machinefile.ExtraLine{soloTaken}, 0, "", ""},
 	}
 	for _, c := range cases {

@@ -73,7 +73,7 @@ func Body(s overview.Summary, self []string, all bool) []page.Section {
 		lines = append(lines, page.Item{Row: &row})
 	}
 	if s.Head.Server() {
-		lines = append(lines, page.Item{Note: &page.Note{Text: "Apps, settings, accounts: not managed by station"}})
+		lines = append(lines, page.Item{Note: &page.Note{Text: "Apps, settings, accounts: not managed by Machines"}})
 	}
 	sections = append(sections, page.Section{ID: "sections", Role: page.Banner, Uncounted: true, Columns: []page.Column{
 		{Key: "section", Kind: page.KindListing, Keep: 100}, {Key: "line", Kind: page.KindList, Keep: 90},

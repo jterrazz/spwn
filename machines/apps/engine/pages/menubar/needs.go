@@ -204,7 +204,7 @@ func (w needSaid) upkeep(s overview.Summary) []Need {
 			item.Glyph = symbol("shield", page.SignalWaits)
 			item.Verb = settingHint(item.Verb, n.Subject)
 			if n.Path != "" {
-				item.Detail = []string{"station never changes it for you"}
+				item.Detail = []string{"Machines never changes it for you"}
 			}
 		case section.Accounts:
 			account := accounts.Program(n.Subject).Label()
@@ -248,7 +248,7 @@ func (w needSaid) upkeep(s overview.Summary) []Need {
 			}
 			row("A file of yours is refused on "+label, "1 file refused", VerbShow)
 			item.Glyph = symbol("exclamationmark.triangle", page.SignalFailing)
-			item.Detail = []string{n.Text, "fix " + n.Path + ": station reads the built-in packages meanwhile"}
+			item.Detail = []string{n.Text, "fix " + n.Path + ": Machines reads the built-in packages meanwhile"}
 		default:
 			continue
 		}

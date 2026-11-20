@@ -262,7 +262,7 @@ type mountSide struct {
 type keptFolder struct{ at, what string }
 
 var (
-	stationKept  = []keptFolder{{".ssh", "the ssh keys"}, {".config/station", "station's own files"}, {".local/state/station", "station's own state"}}
+	stationKept  = []keptFolder{{".ssh", "the ssh keys"}, {".config/station", "Machines' own files"}, {".local/state/station", "Machines' own state"}}
 	computerSide = mountSide{
 		word: "computer", homes: "/Users", data: "/System/Volumes/Data", caseless: true,
 		elsewhere: "mount a folder of a home or of /Volumes",

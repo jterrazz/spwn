@@ -4,20 +4,20 @@ runs:
     - command: 'disk erase homebrew'
       exit: 2
       stderr: |
-          Error: homebrew has no data station can erase
+          Error: homebrew has no data Machines can erase
           Hint: Homebrew's data are its formulae: station apps remove <app>
     - command: 'disk erase tart'
       exit: 2
       stderr: |
-          Error: tart has no data station can erase
+          Error: tart has no data Machines can erase
           Hint: station's data are VMs and images: station machines delete <vm>, station images delete <image>
     - command: 'disk erase rust'
       exit: 2
       stderr: |
-          Error: rust has no data station can erase
+          Error: rust has no data Machines can erase
           Hint: nothing to erase: keys and logins are kept
     - command: 'disk erase notion'
       exit: 2
       stderr: |
-          Error: notion has no data station can erase
+          Error: notion has no data Machines can erase
           Hint: an app's data is its account's: erase it in the app

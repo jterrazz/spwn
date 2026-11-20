@@ -90,7 +90,7 @@ export function AddMac({ go, onClose }: AddMacProps) {
                         )}
                     </>
                 }
-                consequence="A Mac of yours on Tailscale where station runs."
+                consequence="A Mac of yours on Tailscale where Machines runs."
                 onClose={onClose}
                 title="Add a Mac"
             >

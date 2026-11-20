@@ -5,5 +5,5 @@ runs:
       exit: 0
       stdout: |
           	On mac-mini:
-          # Station	1 ●
+          # Machines	1 ●
           ●	com.jterrazz.station.engine	user	running · pid 812		~/Library/LaunchAgents/com.jterrazz.station.engine.plist

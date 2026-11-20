@@ -47,7 +47,7 @@ runs:
       exit: 0
       stdout: |
           # Extra
-          ?	scripted	shell	installed by station for macbook-pro, listed no longer
+          ?	scripted	shell	installed by Machines for macbook-pro, listed no longer
           ●	homebrew	5.0.1	script	the manager of jq
           ●	jq	1.8.1	brew
           ●	scripted		shell	removed

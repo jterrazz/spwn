@@ -41,7 +41,7 @@ const STARTED: ScriptedRun = {
     lines: [
         out('✓ engine · installed, running · v0.21.0'),
         out(
-            "◐ local network · needs you · approve station on macbook-pro's screen, or in System Settings > Privacy & Security > Local Network",
+            "◐ local network · needs you · approve Machines on macbook-pro's screen, or in System Settings > Privacy & Security > Local Network",
         ),
     ],
 };

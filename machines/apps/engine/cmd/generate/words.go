@@ -109,7 +109,7 @@ func wordedEnums() []worded {
 			string(machinefile.Overlay):     plain("this machine's own changes"),
 			string(machinefile.User):        plain("~/.config/station"),
 			string(machinefile.Shared):      plain("a shared source"),
-			string(machinefile.Builtin):     plain("built into station"),
+			string(machinefile.Builtin):     plain("built into Machines"),
 			string(machinefile.ThisMachine): plain("this machine"),
 			string(machinefile.Catalog):     plain("the catalog"),
 			string(machinefile.Locked):      plain("the lock"),
@@ -175,7 +175,7 @@ func wordedEnums() []worded {
 		{machinefile.Shelf(""), map[string]word{
 			string(machinefile.ShelfYours):   plain("Your machines"),
 			string(machinefile.ShelfMixin):   plain("Mixins"),
-			string(machinefile.ShelfShipped): plain("Shipped with station"),
+			string(machinefile.ShelfShipped): plain("Shipped with Machines"),
 		}},
 		{machinefile.FollowerState(""), map[string]word{
 			string(machinefile.FollowerMatches): toned(verdict.OK, "Matches"),
@@ -260,7 +260,7 @@ func wordedEnums() []worded {
 			string(disk.HolderMachineDisks): plain("Machine disks"),
 			string(disk.HolderImages):       plain("Images"),
 			string(disk.HolderLeftovers):    toned(verdict.Warn, "Leftovers"),
-			string(disk.HolderLogs):         plain("Station logs"),
+			string(disk.HolderLogs):         plain("Machines' logs"),
 			string(disk.HolderThisMac):      plain("The Mac itself"),
 			string(disk.HolderFree):         plain("Free"),
 		}},

@@ -187,7 +187,7 @@ func (a Action) Consequence() string {
 	case Undeclare:
 		return "%s is no longer declared, so a listener on it is flagged again."
 	case OffHere:
-		return "station stops applying %s on this machine; its value now stays."
+		return "Machines stops applying %s on this machine; its value now stays."
 	case Overwrite:
 		return "Your value of %s is replaced by the one the file asks."
 	case Forget:

@@ -13,5 +13,5 @@ runs:
     - command: 'apply --yes'
       exit: 2
       stderr: |
-          Error: ~/.config/station/machinefiles/linux-1.machine.yaml:4: mount folder "~/.config" of the VM holds ~/.config/station, station's own files, which no mount reaches: mount a folder beside it
-          Hint: fix that line: station never rewrites a Machinefile
+          Error: ~/.config/station/machinefiles/linux-1.machine.yaml:4: mount folder "~/.config" of the VM holds ~/.config/station, Machines' own files, which no mount reaches: mount a folder beside it
+          Hint: fix that line: Machines never rewrites a Machinefile

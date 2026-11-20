@@ -1,0 +1,118 @@
+canvas: { scheme: light, scale: 2, unit: pt, still: true, ground: FlatDesk }
+tokens:
+  color.plate: rgba(244 244 244 / 0.64)
+  Glass.window: 18
+  Pane.shades: [rgba(20 20 30 / 0.2) 30 24, rgba(20 20 30 / 0.1) 9 6]
+  Pane.ring: rgba(0 0 0 / 0.18)
+  Pane.outline: 0.5
+  Pane.rim: rgba(255 255 255 / 0.55)
+  Pane.rimWidth: 1
+  Metric.Panel.header: [10, 14, 8, 14]
+  Metric.Panel.body: [2, 12, 12, 12]
+  Role.homeSuffix: system 13 regular t2
+  Role.rowSub: system 11 regular t2
+  Role.homeValue: system 13 regular t2
+  Metric.Panel.footer: [6, 12, 12, 12]
+tree:
+- group [kit=Popover] [at=24,24] [size=322x778]:
+  - group [kit=Panel] [at=0,0] [size=322x778] [fill=color.plate] [corner=Glass.window] [shadow=Pane.shades] [ring=Pane.ring] [rim=Pane.rim]:
+    - group [kit=Panel.header] [at=0,0] [size=322x76]:
+      - group [kit=HomeHeaderBar] [at=14,10] [size=294x58]:
+        - button "plus" [kit=RoundButton] [at=234,-4] [size=28x28]
+        - button "ellipsis" [kit=RoundButton] [at=262,-4] [size=28x28]
+        - textbox "Find a machine, a port, an action" [kit=FindField] [at=-2,30] [size=298x28]
+    - group [kit=Panel.content] [at=0,76] [size=322x702]:
+      - group [kit=HomePage] [at=12,2] [size=298x688]:
+        - heading "This Mac" [kit=HomeHead] [at=0,2] [size=298x28]
+        - group [kit=HomeStrip] [at=0,30] [size=298x70]:
+          - group "CPU" [kit=HomeMeasure] [at=16,8] [size=72x52]:
+            - img [kit=RowSpark] [at=0,36] [size=72x16]
+          - group "Memory" [kit=HomeMeasure] [at=115.5,8] [size=72x52]:
+            - img [kit=RowSpark] [at=0,36] [size=72x16]
+          - group "Network" [kit=HomeMeasure] [at=206.5,8] [size=72x52]:
+            - img [kit=RowSpark] [at=0,36] [size=72x16]
+        - region "Servers" [kit=HomeSection] [at=0,112] [size=298x68]:
+          - heading "Servers" [kit=HomeHead] [at=0,0] [size=298x28]
+          - group [kit=Card] [at=0,28] [size=298x40]:
+            - list [kit=RowStack] [at=4,0] [size=290x40]:
+              - listitem "infra" [kit=RowView] [at=0,0] [size=290x40]:
+                - img "well" [kit=StatusDot] [at=18,16] [size=8x8]
+                - text "mac-mini" [at=78,4.5] [size=57x16] [font=Role.homeSuffix]
+                - text [kit=FactsLine] [at=44,21.5] [size=84x14] [font=Role.rowSub]
+                - img [kit=RowSpark] [at=195.5,13] [size=40x14]
+                - text "5 %" [kit=LiveText] [at=241.5,12] [size=24x16] [font=Role.homeValue]
+        - region "VMs" [kit=HomeSection] [at=0,192] [size=298x228]:
+          - heading "VMs" [kit=HomeHead] [at=0,0] [size=298x28]
+          - group [kit=Card] [at=0,28] [size=298x200]:
+            - list [kit=RowStack] [at=4,0] [size=290x200]:
+              - listitem "linux-1" [kit=RowView] [at=0,0] [size=290x40]:
+                - img "well" [kit=StatusDot] [at=18,16] [size=8x8]
+                - text "This Mac" [at=93.5,4.5] [size=55x16] [font=Role.homeSuffix]
+                - text [kit=FactsLine] [at=44,21.5] [size=85.5x14] [font=Role.rowSub]
+                - img [kit=RowSpark] [at=187.5,13] [size=40x14]
+                - text "37 %" [kit=LiveText] [at=233.5,12] [size=32x16] [font=Role.homeValue]
+              - listitem "agent-7f" [kit=RowView] [at=0,40] [size=290x40]:
+                - img "well" [kit=StatusDot] [at=18,16] [size=8x8]
+                - text "This Mac" [at=105,4.5] [size=55x16] [font=Role.homeSuffix]
+                - text [kit=FactsLine] [at=44,21.5] [size=85.5x14] [font=Role.rowSub]
+                - img [kit=RowSpark] [at=187.5,13] [size=40x14]
+                - text "20 %" [kit=LiveText] [at=233.5,12] [size=32x16] [font=Role.homeValue]
+              - listitem "linux-3" [kit=RowView] [at=0,80] [size=290x40]:
+                - img "well" [kit=StatusDot] [at=18,16] [size=8x8]
+                - text "mac-mini" [at=93.5,4.5] [size=57x16] [font=Role.homeSuffix]
+                - text [kit=FactsLine] [at=44,21.5] [size=85.5x14] [font=Role.rowSub]
+                - img [kit=RowSpark] [at=187.5,13] [size=40x14]
+                - text "60 %" [kit=LiveText] [at=233.5,12] [size=32x16] [font=Role.homeValue]
+              - listitem "review-bot" [kit=RowView] [at=0,120] [size=290x40]:
+                - img "well" [kit=StatusDot] [at=18,16] [size=8x8]
+                - text "mac-mini" [at=118,4.5] [size=57x16] [font=Role.homeSuffix]
+                - text [kit=FactsLine] [at=44,21.5] [size=85.5x14] [font=Role.rowSub]
+                - img [kit=RowSpark] [at=187.5,13] [size=40x14]
+                - text "26 %" [kit=LiveText] [at=233.5,12] [size=32x16] [font=Role.homeValue]
+              - listitem "api" [kit=RowView] [at=0,160] [size=290x40]:
+                - img "quiet" [kit=StatusDot] [at=18,16] [size=8x8]
+                - text "This Mac" [at=68.5,4.5] [size=55x16] [font=Role.homeSuffix]
+                - text [kit=FactsLine] [at=44,21.5] [size=100.5x14] [font=Role.rowSub]
+        - region "Macs" [kit=HomeSection] [at=0,432] [size=298x148]:
+          - heading "Macs" [kit=HomeHead] [at=0,0] [size=298x28]
+          - group [kit=Card] [at=0,28] [size=298x120]:
+            - list [kit=RowStack] [at=4,0] [size=290x120]:
+              - listitem "This Mac" [kit=RowView] [at=0,0] [size=290x40]:
+                - img "laptop" [kit=HomeLead] [at=8,6] [size=28x28]
+                - text [kit=FactsLine] [at=44,21.5] [size=94.5x14] [font=Role.rowSub]
+                - button "plus" [kit=RoundButton] [at=159.5,8] [size=24x24]
+                - img [kit=RowSpark] [at=187.5,13] [size=40x14]
+                - text "30 %" [kit=LiveText] [at=233.5,12] [size=32x16] [font=Role.homeValue]
+              - listitem "mac-mini" [kit=RowView] [at=0,40] [size=290x40]:
+                - img "desktop" [kit=HomeLead] [at=8,6] [size=28x28]
+                - text [kit=FactsLine] [at=44,21.5] [size=94.5x14] [font=Role.rowSub]
+                - button "plus" [kit=RoundButton] [at=159.5,8] [size=24x24]
+                - img [kit=RowSpark] [at=187.5,13] [size=40x14]
+                - text "55 %" [kit=LiveText] [at=233.5,12] [size=32x16] [font=Role.homeValue]
+              - listitem "macbook-air" [kit=RowView] [at=0,80] [size=290x40] [state=dimmed]:
+                - img "laptop" [kit=HomeLead] [at=8,6] [size=28x28]
+                - text [kit=FactsLine] [at=44,21.5] [size=116x14] [font=Role.rowSub]
+        - region "Shortcuts" [kit=HomeSection] [at=0,592] [size=298x96]:
+          - group [kit=Card] [at=0,0] [size=298x96]:
+            - list [kit=RowStack] [at=4,0] [size=290x96]:
+              - listitem "Keep awake" [kit=RowView] [at=0,0] [size=290x32]:
+                - img "symbol:sun.max" [kit=HomeLead] [at=12,6.5] [size=20x19]
+                - text "until 18:00" [kit=LiveText] [at=176,8] [size=66x16] [font=Role.homeValue]
+                - switch [kit=StationSwitch] [at=250,7] [size=32x18] [state=on]
+              - listitem "Ports" [kit=RowView] [at=0,32] [size=290x32]:
+                - img "symbol:network" [kit=HomeLead] [at=12.5,7] [size=19x18]
+                - text "5 shared" [kit=LiveText] [at=183.5,8] [size=53.5x16] [font=Role.homeValue]
+              - listitem "Accounts" [kit=RowView] [at=0,64] [size=290x32]:
+                - img "symbol:key" [kit=HomeLead] [at=15,5] [size=14.5x22]
+                - img "waits" [kit=StatusDot] [at=147,12.5] [size=7x7]
+                - text "1 signed out" [kit=LiveText] [at=160,8] [size=76x16] [font=Role.homeValue]
+    - group [kit=Panel.footer] [at=0,778] [size=0x0]
+- menu [kit=MenuStage] [at=24,24] [size=322x778]:
+  - menu [kit=MenuPreview] [at=61.5,38] [size=242.5x152]:
+    - menuitem "New VM…" [kit=MenuPreview.item] [at=5,5] [size=232.5x24] [key=⌘N]
+    - menuitem "Add a Mac…" [kit=MenuPreview.item] [at=5,29] [size=232.5x24]
+    - menuitem "Open station in Terminal" [kit=MenuPreview.item] [at=5,53] [size=232.5x24] [key=⌘T]
+    - separator [kit=MenuPreview.line] [at=5,77] [size=232.5x11]
+    - menuitem "Open at login" [kit=MenuPreview.item] [at=5,88] [size=232.5x24] [state=checked]
+    - separator [kit=MenuPreview.line] [at=5,112] [size=232.5x11]
+    - menuitem "Quit Spwn Menu" [kit=MenuPreview.item] [at=5,123] [size=232.5x24] [key=⌘Q]

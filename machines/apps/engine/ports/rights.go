@@ -320,13 +320,13 @@ func (e *FunnelHeld) Error() string {
 	// station made for another share that still holds it.
 	switch {
 	case e.Private:
-		return "port " + strconv.Itoa(e.Port) + " is funneled by an entry station did not make: a private share on it would be public"
+		return "port " + strconv.Itoa(e.Port) + " is funneled by an entry Machines did not make: a private share on it would be public"
 	case e.Paths:
-		return "Funnel port " + strconv.Itoa(e.Port) + " still serves station's private paths: shared once they leave it"
+		return "Funnel port " + strconv.Itoa(e.Port) + " still serves Machines' private paths: shared once they leave it"
 	case e.From != 0:
-		return "Funnel port " + strconv.Itoa(e.Port) + " still serves station's entry from port " + strconv.Itoa(e.From) + " of this Mac"
+		return "Funnel port " + strconv.Itoa(e.Port) + " still serves Machines' entry from port " + strconv.Itoa(e.From) + " of this Mac"
 	}
-	return "Funnel port " + strconv.Itoa(e.Port) + " already serves an entry station did not make"
+	return "Funnel port " + strconv.Itoa(e.Port) + " already serves an entry Machines did not make"
 }
 
 func HintOf(hints []catalog.PackagePort, port int) (catalog.PackagePort, bool) {

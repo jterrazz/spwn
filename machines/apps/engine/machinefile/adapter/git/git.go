@@ -130,7 +130,7 @@ func (s Source) clone(ctx context.Context) (head string, fresh bool, err error) 
 	case !catalog.IsMachinefileName(s.src.Name):
 		return "", false, errors.New("its name " + strconv.Quote(s.src.Name) + " is no name: lower-case words joined by dashes (`studio`)")
 	case !remote.MatchString(s.src.URL):
-		return "", false, errors.New("its url " + strconv.Quote(s.src.URL) + " is no url station clones: https://, ssh:// or user@domain:path")
+		return "", false, errors.New("its url " + strconv.Quote(s.src.URL) + " is no url Machines clones: https://, ssh:// or user@domain:path")
 	}
 	if _, missing := s.fs.Stat(filepath.Join(s.dir, ".git")); missing != nil {
 		if _, err = s.git(ctx, "", "clone", "--quiet", "--", s.src.URL, s.dir); err != nil {
@@ -143,7 +143,7 @@ func (s Source) clone(ctx context.Context) (head string, fresh bool, err error) 
 	case err != nil:
 		return "", false, err
 	case !untouched:
-		return "", false, errors.New("its clone " + s.dir + " holds changes: station only checks it out, so delete it and station clones it again")
+		return "", false, errors.New("its clone " + s.dir + " holds changes: Machines only checks it out, so delete it and Machines clones it again")
 	case !commit.MatchString(head):
 		return "", false, errors.New("its clone " + s.dir + " is at no commit: its default branch holds none")
 	}

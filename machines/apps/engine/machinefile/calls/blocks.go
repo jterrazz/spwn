@@ -95,7 +95,7 @@ func writtenBlocks(ctx context.Context, d Deps) (map[string]machinefile.Written,
 // value: a block's diff as apply would change the file: what the file holds
 // first (`-`), then what apply writes (`+`).
 func blockDiff(have, want, id string) string {
-	return settings.UnifiedDiff(have, want, blockName(id), "station's "+blockName(id))
+	return settings.UnifiedDiff(have, want, blockName(id), "Machines' "+blockName(id))
 }
 
 // value: whether the file holds exactly what apply last wrote under the id.

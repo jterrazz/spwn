@@ -34,7 +34,7 @@ func (*Applier) Kind() catalog.EffectKind { return catalog.EffectGitAliases }
 func of(it catalog.Setting) (catalog.GitAliases, error) {
 	g, ok := it.Effect.(catalog.GitAliases)
 	if !ok || len(g.Aliases) == 0 {
-		return catalog.GitAliases{}, errors.New(it.Name + " is not git aliases station writes")
+		return catalog.GitAliases{}, errors.New(it.Name + " is not git aliases Machines writes")
 	}
 	return g, nil
 }
@@ -102,7 +102,7 @@ func (a *Applier) Observe(_ context.Context, it catalog.Setting) (settings.Obser
 	where := g.File + " [alias]"
 	want := block(it, g)
 	_, have, _, found := split(text, it)
-	o := settings.Observation{Where: where, Diff: settings.UnifiedDiff(want, have, "station's "+where, where)}
+	o := settings.Observation{Where: where, Diff: settings.UnifiedDiff(want, have, "Machines' "+where, where)}
 	if !found {
 		o.State = catalog.StateAbsent
 		return o, nil
@@ -113,7 +113,7 @@ func (a *Applier) Observe(_ context.Context, it catalog.Setting) (settings.Obser
 		o.State, o.Detail, o.Diff = catalog.StateOK, where, ""
 		return o, nil
 	}
-	o.State, o.Detail = catalog.StateDegraded, "differs from station's: station settings apply "+it.Name
+	o.State, o.Detail = catalog.StateDegraded, "differs from Machines': station settings apply "+it.Name
 	return o, nil
 }
 

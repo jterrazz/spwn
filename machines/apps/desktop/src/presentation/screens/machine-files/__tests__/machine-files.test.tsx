@@ -77,7 +77,7 @@ describe('Machine files', () => {
             // Then - one group per shelf, each under its caption
             await visitor.see(content('Your machines'));
             await visitor.see(content('Mixins'));
-            await visitor.see(content('Shipped with station'));
+            await visitor.see(content('Shipped with Machines'));
             await visitor.see(button('base-ubuntu'));
         });
         expect(result.errors.text).toBe('');

@@ -8,8 +8,8 @@
     [38;2;76;79;105mroot[m  [38;2;76;79;105midle[m  [38;2;76;79;105miStat Menus (gone)[m  [38;2;108;111;133m/Library/LaunchDaemons/com.bjango.istatmenus.installer.plist[m
     [38;2;108;111;133m→ [m[38;2;76;79;105msudo launchctl bootout system/com.bjango.istatmenus.installer &&[m
       [38;2;76;79;105msudo rm /Library/LaunchDaemons/com.bjango.istatmenus.installer.plist[m
-[38;2;64;160;43m●[m [38;2;76;79;105mcom.jterrazz.station.engine[m[38;2;76;79;105m · user[m[38;2;76;79;105m · running[m[38;2;76;79;105m · pid 812[m
-  [38;2;76;79;105m~/Library/LaunchAgents/com.jterrazz.station.engine.plist[m
+[1;38;2;76;79;105mMachines  [m  [38;2;64;160;43m●[m [38;2;76;79;105mcom.jterrazz.station.engine[m[38;2;76;79;105m · user[m[38;2;76;79;105m · running[m[38;2;76;79;105m · pid 812[m
+              [38;2;76;79;105m~/Library/LaunchAgents/com.jterrazz.station.engine.plist[m
 [1;38;2;76;79;105mKnown apps[m  [38;2;64;160;43m●[m [38;2;76;79;105mcom.github.facebook.watchman[m[38;2;76;79;105m · user[m[38;2;76;79;105m · running[m[38;2;76;79;105m · pid 3464[m[38;2;76;79;105m · watchman[m
               [38;2;76;79;105m~/Library/LaunchAgents/com.github.facebook.watchman.plist[m
 [1;38;2;76;79;105mUnknown[m

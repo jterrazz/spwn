@@ -10,7 +10,7 @@ struct CatalogApp: App {
     }
 
     var body: some Scene {
-        WindowGroup("Station Catalog") {
+        WindowGroup("Spwn Menu Catalog") {
             CatalogWindow()
                 .environmentObject(catalog)
                 .frame(minWidth: 900, minHeight: 600)

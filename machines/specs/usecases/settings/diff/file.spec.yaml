@@ -15,7 +15,7 @@ runs:
     - command: 'settings diff tart-launcher'
       exit: 0
       stdout: |
-          --- station's ~/.local/bin/tart
+          --- Machines' ~/.local/bin/tart
           +++ ~/.local/bin/tart
           @@ -3,2 +3,3 @@
            case "$XDG_DATA_HOME" in /*) d="$XDG_DATA_HOME" ;; esac

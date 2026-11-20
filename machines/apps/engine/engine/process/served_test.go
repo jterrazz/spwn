@@ -332,7 +332,7 @@ func TestAPublicShareJudgedAheadOfTheModeTickIsServedAtIt(t *testing.T) {
 	pub := h.d.svcs[key("pub", 3000)]
 	note := pub.serveNote
 	h.d.mu.Unlock()
-	if want := "serve: Funnel port 443 still serves station's private paths: shared once they leave it"; note != want {
+	if want := "serve: Funnel port 443 still serves Machines' private paths: shared once they leave it"; note != want {
 		t.Errorf("pub's note ahead of the tick = %q, want %q", note, want)
 	}
 	h.d.tickShares(ctx)

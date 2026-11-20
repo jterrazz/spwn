@@ -33,7 +33,7 @@ func ReportColumns() []page.Column {
 	}
 }
 
-const differs = "differs from station's"
+const differs = "differs from Machines'"
 
 func ReportRow(r settingsmodel.Report) page.Row {
 	name := r.Package.Name

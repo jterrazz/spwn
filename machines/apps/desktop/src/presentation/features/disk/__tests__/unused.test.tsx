@@ -61,7 +61,7 @@ describe('unused', () => {
     test('a folder the engine keeps is drawn with its sentence, and no gesture', async () => {
         // Given - Storage over leftovers, where ~/.tart holds a VM of the owner's
         const said = content(
-            '~/.tart holds VMs of yours (linux-dev), so station never frees it: move each into ~/.local/share/station/vms/vms first.',
+            '~/.tart holds VMs of yours (linux-dev), so Machines never frees it: move each into ~/.local/share/station/vms/vms first.',
         );
         const result = await component.render(
             storageOver(recordingFor('leftovers')),
@@ -164,7 +164,7 @@ describe('unused', () => {
         // Given - Storage over leftovers, whose leftover runs by the time the free reaches the engine
         const refusing = answeredBy(recordingFor('leftovers'), recordingFor('leftover-running'));
         const said = content(
-            "old-vm is not freeable: in use, gone or not station's, so nothing is freed",
+            "old-vm is not freeable: in use, gone or not Machines', so nothing is freed",
             { exact: false },
         );
         const result = await component.render(storageOver(refusing), async (visitor) => {

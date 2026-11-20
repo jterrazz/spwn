@@ -57,7 +57,7 @@ final class MenuTests: XCTestCase {
     // offers, in groups, red what destroys, each key as the system says it.
     func testEachMenuSaysWhatSpecA5Lists() throws {
         let read = Dictionary(uniqueKeysWithValues: try menuStories().compactMap { s in s.menu.map { (s.id, Self.read($0)) } })
-        XCTAssertEqual(read["menu.station"], ["New VM… ⌘N", "Add a Mac…", "Open station in Terminal ⌘T", "-", "✓ Open at login", "-", "Quit station ⌘Q"])
+        XCTAssertEqual(read["menu.station"], ["New VM… ⌘N", "Add a Mac…", "Open station in Terminal ⌘T", "-", "✓ Open at login", "-", "Quit Spwn Menu ⌘Q"])
         XCTAssertEqual(read["menu.context.workspace"], ["linux-1 on This Mac", "Open ↩", "Open in Terminal ⌘↩", "Open Vite", "-",
                                                         "Copy [SSH command, Link to Vite, Link to Port 3000]", "Share [Show QR…, A port…]", "Grant a password…", "-",
                                                         "Stop…", "-", "Delete… (red)"])

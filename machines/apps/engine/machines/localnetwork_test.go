@@ -7,7 +7,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 )
 
-const fixOnMini = "approve station on mac-mini's screen, or in System Settings > Privacy & Security > Local Network"
+const fixOnMini = "approve Machines on mac-mini's screen, or in System Settings > Privacy & Security > Local Network"
 
 func TestARunningVMItsMacBlocksIsUnreachableNamingTheMacAndItsFix(t *testing.T) {
 	ref := machine.Ref{Name: "linux-2", On: "mac-mini"}
@@ -16,7 +16,7 @@ func TestARunningVMItsMacBlocksIsUnreachableNamingTheMacAndItsFix(t *testing.T) 
 		{Name: "linux-2", Lifetime: AlwaysOn, State: Running, Guest: "absent", Blocked: LocalNetworkBlock, Check: "https://x", CheckStatus: CheckStatus{State: CheckFailing}},
 	} {
 		f, ok := vmFinding(ref, vm, " --on mini")
-		if !ok || f.Text != "linux-2 is unreachable: mac-mini has not approved station for Local Network" || f.Fix.Path != fixOnMini || f.Fix.Command != "" || f.Fix.Call != "" {
+		if !ok || f.Text != "linux-2 is unreachable: mac-mini has not approved Machines for Local Network" || f.Fix.Path != fixOnMini || f.Fix.Command != "" || f.Fix.Call != "" {
 			t.Errorf("%s blocked: %+v, %v", vm.Lifetime, f, ok)
 		}
 	}
@@ -32,7 +32,7 @@ func TestAVMNotRunningIsNeverToldBlocked(t *testing.T) {
 func TestABlockedServerFailsSSHWithItsMacNamed(t *testing.T) {
 	server := VM{Name: "infra", Mac: "mac-mini", Lifetime: AlwaysOn, State: Running, IP: "192.168.64.3", Guest: "absent", Blocked: LocalNetworkBlock}
 	v := HealthVerdict(server)
-	if v.Sentence != SentenceNoSSH || v.Line != "mac-mini has not approved station for Local Network." {
+	if v.Sentence != SentenceNoSSH || v.Line != "mac-mini has not approved Machines for Local Network." {
 		t.Errorf("a blocked server: %+v", v)
 	}
 	server.Blocked = ""
@@ -54,7 +54,7 @@ func TestAMacWhoseEngineReadsNoApprovalNeedsALookNamingIt(t *testing.T) {
 			}
 		}
 		switch {
-		case tc.want && (len(got) != 1 || got[0].Text != "mac-mini has not approved station for Local Network" || got[0].Severity != finding.NeedsALook):
+		case tc.want && (len(got) != 1 || got[0].Text != "mac-mini has not approved Machines for Local Network" || got[0].Severity != finding.NeedsALook):
 			t.Errorf("read %q: %+v, want one look naming mac-mini", tc.read, got)
 		case !tc.want && len(got) != 0:
 			t.Errorf("read %q: %+v, want none", tc.read, got)

@@ -514,7 +514,7 @@ func packages(installs []catalog.Install, pinned bool) ([]string, []catalog.AptI
 type RecordError struct{ Path string }
 
 func (e *RecordError) Error() string {
-	return "station's record " + e.Path + " does not read, so which apps hold its package is unknown: nothing done"
+	return "Machines' record " + e.Path + " does not read, so which apps hold its package is unknown: nothing done"
 }
 
 type TakesMoreError struct {

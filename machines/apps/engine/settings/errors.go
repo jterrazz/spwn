@@ -30,7 +30,7 @@ func (e *WrongLivesOnError) Error() string {
 
 type NotReversibleError struct{ Package string }
 
-func (e *NotReversibleError) Error() string { return e.Package + " cannot be uninstalled by station" }
+func (e *NotReversibleError) Error() string { return e.Package + " cannot be uninstalled by Machines" }
 
 type NeedsTerminalError struct{ Package string }
 

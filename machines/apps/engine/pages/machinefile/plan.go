@@ -160,7 +160,7 @@ func fate(e machinefile.ExtraLine) string {
 func extraRows(p machinefile.Plan, lead ...string) []page.Row {
 	rows := make([]page.Row, 0, len(p.Extra))
 	for _, e := range p.Extra {
-		words := append(slices.Clone(lead), "installed by station for "+e.Installed.Machinefile+", "+fate(e))
+		words := append(slices.Clone(lead), "installed by Machines for "+e.Installed.Machinefile+", "+fate(e))
 		if e.Takes() {
 			for _, n := range e.Step.Needs {
 				if p.Asks(n) {

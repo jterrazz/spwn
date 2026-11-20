@@ -220,7 +220,7 @@ func List(rows []settings.Row, now time.Time, all bool, thisMac page.Context) pa
 		if all {
 			fold = page.Open
 		}
-		p.Sections = append(p.Sections, page.Section{ID: "set", Title: "Set by station", Fold: fold, Columns: columns(), Items: items(set, now), PipeCounts: true})
+		p.Sections = append(p.Sections, page.Section{ID: "set", Title: "Set by Machines", Fold: fold, Columns: columns(), Items: items(set, now), PipeCounts: true})
 	}
 	if len(always) > 0 {
 		s := page.Section{ID: "always-on-mac", Title: "Always-on Mac", Columns: columns(), PipeCounts: true}
@@ -305,7 +305,7 @@ func firstLine(rows []settings.Row, look int, thisMac page.Context) page.Section
 	if thisMac.Machine != "" && thisMac.Kind != string(machine.Computer) {
 		label = thisMac.Machine
 	}
-	words := []string{strconv.Itoa(set) + " set by station here"}
+	words := []string{strconv.Itoa(set) + " set by Machines here"}
 	if checked > 0 {
 		words = append(words, strconv.Itoa(checked)+" checked")
 	}
@@ -354,7 +354,7 @@ func actions() []page.Action {
 func OffConfirm(names []string, also ...string) page.Confirm {
 	// value: also is what else the off does, said in the question: the
 	// servers that pause with a Mac that sleeps again.
-	q := "Turn " + strings.Join(names, ", ") + " off here? station stops applying and watching it on this machine"
+	q := "Turn " + strings.Join(names, ", ") + " off here? Machines stops applying and watching it on this machine"
 	if len(also) > 0 {
 		q += "; " + strings.Join(also, "; ")
 	}
@@ -376,9 +376,9 @@ func Show(r settings.Row, now time.Time, thisMac page.Context) page.Page {
 	if r.Group == settings.Checked {
 		return showChecked(r, head, thisMac)
 	}
-	group := page.Text("Set by station")
+	group := page.Text("Set by Machines")
 	if r.Group == settings.AlwaysOnMac {
-		group = page.Texts("Set by station", "Always-on Mac")
+		group = page.Texts("Set by Machines", "Always-on Mac")
 	}
 	facts := []page.Item{
 		{Fact: &page.Fact{Key: "group", Value: group}},

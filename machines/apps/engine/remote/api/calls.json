@@ -1071,7 +1071,7 @@
       "section": "settings",
       "where": "at-target",
       "confirm": "off-here",
-      "consequence": "station stops applying %s on this machine; its value now stays.",
+      "consequence": "Machines stops applying %s on this machine; its value now stays.",
       "errors": [
         "confirm.yes-needed",
         "setting.needs-admin",

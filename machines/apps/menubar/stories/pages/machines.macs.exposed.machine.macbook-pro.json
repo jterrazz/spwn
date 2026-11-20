@@ -409,7 +409,7 @@
                       },
                       {
                         "kind": "text",
-                        "text": "station never changes it for you",
+                        "text": "Machines never changes it for you",
                         "pri": 1
                       }
                     ]
@@ -2531,7 +2531,7 @@
             }
           }
         ],
-        "subtitle": "station never changes a security setting for you. Run this in Terminal, or open System Settings > Network > Firewall.",
+        "subtitle": "Machines never changes a security setting for you. Run this in Terminal, or open System Settings > Network > Firewall.",
         "primary": [
           {
             "label": "Done"
@@ -4636,7 +4636,7 @@
             }
           }
         ],
-        "subtitle": "A public port is one you meant to open. Declaring it moves it from Exposed to Public; station then watches that it stays as declared. The route is cloudflare-tunnel, tailscale-funnel, lan.",
+        "subtitle": "A public port is one you meant to open. Declaring it moves it from Exposed to Public; Machines then watches that it stays as declared. The route is cloudflare-tunnel, tailscale-funnel, lan.",
         "primary": [
           {
             "label": "Done"

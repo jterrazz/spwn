@@ -4,5 +4,5 @@ runs:
     - command: 'background --on linux-1'
       exit: 2
       stderr: |
-          Error: linux-1 has no job manager station reads
+          Error: linux-1 has no job manager Machines reads
           Hint: run station overview for what linux-1 has

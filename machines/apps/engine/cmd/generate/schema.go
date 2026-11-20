@@ -49,12 +49,12 @@ func wireSchemaOf(t reflect.Type) (map[string]any, bool) {
 // name, and a type with an Enum lists its values.
 func catalogSchema() []byte {
 	return projected(reflect.TypeFor[catalog.Package](), "package", catalog.Schema, schemaPath,
-		"One package of station's catalog: a manager, an app or a setting, its methods, and an app's disk row. Written by make generate from apps/engine/catalog; each method names exactly one manager key. The format is docs/reference/catalog.md.")
+		"One package of Machines' catalog: a manager, an app or a setting, its methods, and an app's disk row. Written by make generate from apps/engine/catalog; each method names exactly one manager key. The format is docs/reference/catalog.md.")
 }
 
 func machinefileSchema() []byte {
 	return projected(reflect.TypeFor[catalog.Machinefile](), "machinefile", catalog.MachinefileSchema, machinefileSchemaPath,
-		"One Machinefile: what a machine carries (machine, vm, extends, prefer, apps, settings, accounts, ports), or its overlay <name>.local.yaml (overrides). Written by make generate from apps/engine/catalog; station alone checks what needs the catalog. The format is docs/reference/machinefiles.md.")
+		"One Machinefile: what a machine carries (machine, vm, extends, prefer, apps, settings, accounts, ports), or its overlay <name>.local.yaml (overrides). Written by make generate from apps/engine/catalog; Machines alone checks what needs the catalog. The format is docs/reference/machinefiles.md.")
 }
 
 func projected(t reflect.Type, key, schema, at, description string) []byte {

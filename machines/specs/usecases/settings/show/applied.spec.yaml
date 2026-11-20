@@ -12,8 +12,8 @@ runs:
       stdout: |
           ●	tart-launcher	applied · ~/.local/bin/tart
           # Detail
-          group	Set by station
-          does	The tart launcher: Tart's home is station's VMs folder
+          group	Set by Machines
+          does	The tart launcher: Tart's home is Machines' VMs folder
           lives on	Macs
           where	~/.local/bin/tart
           applied	3 h ago
@@ -22,6 +22,6 @@ runs:
       stdout: |
           ○	restart-after-power-cut	not applied	station settings apply restart-after-power-cut
           # Detail
-          group	Set by station · Always-on Mac
+          group	Set by Machines · Always-on Mac
           does	Restarts after a power cut, and wakes for the network
           lives on	Macs

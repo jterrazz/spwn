@@ -4,5 +4,5 @@ runs:
     - command: 'disk erase claude --confirm=claude --on infra'
       exit: 2
       stderr: |
-          Error: infra is a server: station does not manage its disk
+          Error: infra is a server: Machines does not manage its disk
           Hint: manage it with your own tooling: ssh infra

@@ -28,7 +28,7 @@ runs:
           # To install
           ○	fd	brew
           # Extra
-          ?	corp-vpn	cask	installed by station for macbook-pro, listed no longer · asks your password once
+          ?	corp-vpn	cask	installed by Machines for macbook-pro, listed no longer · asks your password once
       stderr: |
           Error: corp-vpn asks your password: apply asks it on a terminal, and this run has none
           Hint: run station apply on a terminal

@@ -51,12 +51,12 @@ runs:
       exit: 0
       stdout: |
           # To set
-          ○	served	shell	~/.zshrc [station:served]: 1 line · station's earlier text, written anew
+          ○	served	shell	~/.zshrc [station:served]: 1 line · Machines' earlier text, written anew
     - command: 'plan --diff'
       exit: 0
       stdout: |
           --- ~/.zshrc [station:served]
-          +++ station's ~/.zshrc [station:served]
+          +++ Machines' ~/.zshrc [station:served]
           @@ -1,1 +1,1 @@
           -export SERVED_PORT=8080
           +export SERVED_PORT=9090
@@ -64,7 +64,7 @@ runs:
       exit: 0
       stdout: |
           # To set
-          ○	served	shell	~/.zshrc [station:served]: 1 line · station's earlier text, written anew
+          ○	served	shell	~/.zshrc [station:served]: 1 line · Machines' earlier text, written anew
           ●	homebrew	5.0.1	script	the manager of served
           ●	served	0.23.4	brew	port 9090
           ●	served		shell	~/.zshrc [station:served]: written

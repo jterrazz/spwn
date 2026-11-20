@@ -353,7 +353,7 @@
                     "items": [
                       {
                         "kind": "text",
-                        "text": "set by station"
+                        "text": "set by Machines"
                       },
                       {
                         "kind": "text",
@@ -4516,7 +4516,7 @@
         "lines": [
           {
             "kind": "text",
-            "text": "Its VMs keep running; station stops showing it. You can add it again."
+            "text": "Its VMs keep running; Machines stops showing it. You can add it again."
           }
         ],
         "danger": true,

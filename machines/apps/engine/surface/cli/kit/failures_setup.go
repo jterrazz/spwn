@@ -31,7 +31,7 @@ func setupFailure(err error) (*fail.Error, bool) {
 		case errors.As(err, &exists):
 			hint = exists.Path + " already exists: move one of them by hand"
 		case errors.As(err, &cross):
-			hint = "station never copies: move it by hand, then station init"
+			hint = "Machines never copies: move it by hand, then station init"
 		}
 		return failed(step.Error(), hint, err), true
 	}

@@ -18,17 +18,17 @@ func (e *ElsewhereError) Error() string { return e.Name + " is for " + apps.Live
 
 type NothingToFreeError struct{ Name string }
 
-func (e *NothingToFreeError) Error() string { return e.Name + " keeps nothing station can rebuild" }
+func (e *NothingToFreeError) Error() string { return e.Name + " keeps nothing Machines can rebuild" }
 
 type NeverTouchedError struct{ Name, Path string }
 
 func (e *NeverTouchedError) Error() string {
-	return e.Path + " is never touched: station erases no key, token or setting"
+	return e.Path + " is never touched: Machines erases no key, token or setting"
 }
 
 type NothingToEraseError struct{ Name, Hint string }
 
-func (e *NothingToEraseError) Error() string { return e.Name + " has no data station can erase" }
+func (e *NothingToEraseError) Error() string { return e.Name + " has no data Machines can erase" }
 
 type RunningError struct {
 	// value: the app whose row it is, the process that runs, and what its

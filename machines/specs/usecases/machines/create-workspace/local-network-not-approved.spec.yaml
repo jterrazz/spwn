@@ -6,8 +6,8 @@ runs:
     - command: 'machines create --memory 4G'
       exit: 1
       stderr: |
-          Error: linux-2 is kept, failing SSH answers: macbook-pro has not approved station for Local Network
-          Hint: approve station on macbook-pro's screen, or in System Settings > Privacy & Security > Local Network; start linux-2 once approved
+          Error: linux-2 is kept, failing SSH answers: macbook-pro has not approved Machines for Local Network
+          Hint: approve Machines on macbook-pro's screen, or in System Settings > Privacy & Security > Local Network; start linux-2 once approved
     - command: 'machines --this-mac'
       exit: 0
       stdout: |
@@ -16,9 +16,9 @@ runs:
           ●	linux-1	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB
           ●	linux-2	Workspace	macbook-pro	Running · ephemeral	4 CPU	4 GB	Failed at SSH 4 of 4
           # Needs you
-          ✗	linux-2	is unreachable: macbook-pro has not approved station for Local Network	approve station on macbook-pro's screen, or in System Settings > Privacy & Security > Local Network
-          ◐	This Mac	macbook-pro has not approved station for Local Network	approve station on macbook-pro's screen, or in System Settings > Privacy & Security > Local Network
-          ◐	linux-1	is unreachable: macbook-pro has not approved station for Local Network	approve station on macbook-pro's screen, or in System Settings > Privacy & Security > Local Network
+          ✗	linux-2	is unreachable: macbook-pro has not approved Machines for Local Network	approve Machines on macbook-pro's screen, or in System Settings > Privacy & Security > Local Network
+          ◐	This Mac	macbook-pro has not approved Machines for Local Network	approve Machines on macbook-pro's screen, or in System Settings > Privacy & Security > Local Network
+          ◐	linux-1	is unreachable: macbook-pro has not approved Machines for Local Network	approve Machines on macbook-pro's screen, or in System Settings > Privacy & Security > Local Network
     - command: 'world local-network macbook-pro approved'
       exit: 0
     - command: 'machines linux-2'
@@ -27,7 +27,7 @@ runs:
           	On linux-2:
           	Activity	? not measured
           	Apps	● 1 ok · ○ 72 not installed
-          	Settings	set by station · ○ 0 of 6
+          	Settings	set by Machines · ○ 0 of 6
           	Disk	● 0 B free · 0 B can rebuild
           	Ports	Public 0 · Private 2
           	Accounts	● 0

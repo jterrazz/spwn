@@ -8,4 +8,4 @@ runs:
           {"v":2,"id":"1","watch":"disk.read","in":{}}
       exit: 0
       stdout: |
-          {"holds":[["machine-disks",100000000000],["images",7000000000],["leftovers",0],["logs",300000000],["this-mac",498700000000],["free",388000000000]],"sentence":"Outside any machine, station holds 107 GB: machine disks, images, leftovers and its logs","machines":[["macbook-pro",498700000000],["api",50000000000],["linux-1",50000000000]]}
+          {"holds":[["machine-disks",100000000000],["images",7000000000],["leftovers",0],["logs",300000000],["this-mac",498700000000],["free",388000000000]],"sentence":"Outside any machine, Machines holds 107 GB: machine disks, images, leftovers and its logs","machines":[["macbook-pro",498700000000],["api",50000000000],["linux-1",50000000000]]}

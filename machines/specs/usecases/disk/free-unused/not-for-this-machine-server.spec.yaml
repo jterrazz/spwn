@@ -8,4 +8,4 @@ runs:
           {"v":2,"id":"1","call":"disk.free-unused","in":{"Names":["base-ubuntu@2026.10.20"],"Confirm":"base-ubuntu@2026.10.20"}}
       exit: 0
       stdout: |
-          {"code":"section.not-for-this-machine","message":"infra is a server: station does not manage its disk"}
+          {"code":"section.not-for-this-machine","message":"infra is a server: Machines does not manage its disk"}

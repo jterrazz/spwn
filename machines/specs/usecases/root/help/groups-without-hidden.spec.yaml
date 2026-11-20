@@ -10,7 +10,7 @@ runs:
             ON A MACHINE
             A MAC'S IMAGES AND ENGINE
             THIS TERMINAL
-            STATION ITSELF
+            MACHINES ITSELF
             FLAGS
     - command: 'help | /usr/bin/sed -n "/^  ON A MACHINE/,/^  A MAC/p" | /usr/bin/grep -oE "^    [a-z]+ " | /usr/bin/tr -d " "'
       exit: 0
@@ -29,7 +29,7 @@ runs:
       stdout: |
           images
           engine
-    - command: 'help | /usr/bin/sed -n "/^  THIS TERMINAL/,/^  STATION/p" | /usr/bin/grep -oE "^    [a-z]+ " | /usr/bin/tr -d " "'
+    - command: 'help | /usr/bin/sed -n "/^  THIS TERMINAL/,/^  MACHINES/p" | /usr/bin/grep -oE "^    [a-z]+ " | /usr/bin/tr -d " "'
       exit: 0
       stdout: |
           use

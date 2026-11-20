@@ -15,12 +15,12 @@ runs:
       exit: 0
       stdout: |
           # Extra
-          ?	homebrew	script	installed by station for macbook-pro, required by mise, ghostty, bat, jq, gh, lazygit: kept
+          ?	homebrew	script	installed by Machines for macbook-pro, required by mise, ghostty, bat, jq, gh, lazygit: kept
     - command: 'apply --remove --yes'
       exit: 0
       stdout: |
           # Extra
-          ?	homebrew	script	installed by station for macbook-pro, required by mise, ghostty, bat, jq, gh, lazygit: kept
+          ?	homebrew	script	installed by Machines for macbook-pro, required by mise, ghostty, bat, jq, gh, lazygit: kept
           ●	claude	2.0.14	script
           ●	homebrew	5.0.1	script	required by mise, ghostty, bat, jq, gh, lazygit: kept, judged again next run
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].stores.ledger | map(.package)'' world.json'

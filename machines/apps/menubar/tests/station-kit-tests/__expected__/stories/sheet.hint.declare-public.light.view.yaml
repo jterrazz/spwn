@@ -1,0 +1,15 @@
+canvas: { scheme: light, scale: 2, unit: pt, still: true, ground: FlatDesk }
+base: ./ports.all.exposed.light.view.yaml
+tokens:
+  Role.sheetTitle: system 15 semibold t1
+  Role.sheetBody: system 12 regular t2
+added:
+- in group [kit=PortsPage] › group [kit=AllPorts] › group [kit=Panel]:
+  - dialog [kit=HintSheet] [at=0,0] [size=322x242.5]:
+    - group "Declare a port public" [kit=SheetCard] [at=0,0] [size=322x242.5]:
+      - text "Declare a port public" [at=24,20] [size=148.5x19] [font=Role.sheetTitle]
+      - text "A public port is one you meant to open. Declaring it moves it from Exposed to Public; Machines then watches that it stays as declared. The route is cloudflare-tunnel, tailscale-funnel, lan." [at=24,41] [size=256.5x75] [font=Role.sheetBody] [lines=5]
+      - group [kit=CommandBox] [at=24,128] [size=274x50]
+      - button [kit=SheetPrimary] [at=251,198.5] [size=51x24]:
+        - button "Done" [kit=PanelButton] [at=0,0] [size=51x24]:
+          - text "Done" [at=10,4.5] [size=31x15] [font=Role.button]

@@ -156,7 +156,7 @@ describe('disk gestures', () => {
             await visitor.click(within(asked, button('Erase')));
 
             // Then - the engine's refusal, as it came, and the row as it was
-            const said = content('has no data station can erase', { exact: false });
+            const said = content('has no data Machines can erase', { exact: false });
             await visitor.see(within(data, said));
             await visitor.see(
                 within(data, content('OrbStack erases its own data, in its Settings')),

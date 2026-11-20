@@ -4,7 +4,7 @@ runs:
     - command: 'ports declare mac-mini 443 --via ngrok'
       exit: 2
       stderr: |
-          Error: "ngrok" is not a route station knows
+          Error: "ngrok" is not a route Machines knows
           Hint: --via is one of cloudflare-tunnel, tailscale-funnel, lan
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].stores.declarations'' world.json'
       exit: 0

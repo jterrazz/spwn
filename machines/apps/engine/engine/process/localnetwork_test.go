@@ -104,10 +104,10 @@ func TestARunItsMacBlocksAnswersLocalNetworkAfterAMinuteNamingTheMac(t *testing.
 	if !errors.As(err, &op) || op.Code != enginecalls.LocalNetwork {
 		t.Fatalf("a guest its Mac blocks: %v, want local_network", err)
 	}
-	if want := "x has not approved station for Local Network"; op.Message != want {
+	if want := "x has not approved Machines for Local Network"; op.Message != want {
 		t.Errorf("message %q, want %q", op.Message, want)
 	}
-	if want := "approve station on x's screen, or in System Settings > Privacy & Security > Local Network"; op.Hint != want {
+	if want := "approve Machines on x's screen, or in System Settings > Privacy & Security > Local Network"; op.Hint != want {
 		t.Errorf("hint %q, want %q", op.Hint, want)
 	}
 	if waited := h.clock.At.Sub(began); waited < 60*time.Second {

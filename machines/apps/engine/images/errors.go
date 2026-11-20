@@ -67,7 +67,7 @@ func (e *NoEngineError) Unwrap() error { return e.Cause }
 type NoRecipeError struct{ Image string }
 
 func (e *NoRecipeError) Error() string {
-	return "station has no recipe for " + e.Image + ": it is fetched, never built here"
+	return "Machines has no recipe for " + e.Image + ": it is fetched, never built here"
 }
 
 type NotReleasedError struct {

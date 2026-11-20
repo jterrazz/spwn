@@ -41,7 +41,7 @@ export const CHOICE_CARD_STORIES: readonly Story<ChoiceCardProps>[] = [
         props: {
             count: '1,204 apps',
             description:
-                'Everything station knows how to install on a machine, from the runtimes to the Mac apps and the agent skills',
+                'Everything Machines knows how to install on a machine, from the runtimes to the Mac apps and the agent skills',
             foot: 'node, go, docker, kubectl, terraform, mise, uv and 1,197 more',
             icon: 'apps',
             onChoose: nothing,

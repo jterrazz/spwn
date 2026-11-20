@@ -83,7 +83,7 @@
               "items": [
                 {
                   "kind": "text",
-                  "text": "station never changes it for you"
+                  "text": "Machines never changes it for you"
                 }
               ]
             },
@@ -190,7 +190,7 @@
             }
           }
         ],
-        "subtitle": "station never changes a security setting for you. Run this in Terminal, or open System Settings > Network > Firewall.",
+        "subtitle": "Machines never changes a security setting for you. Run this in Terminal, or open System Settings > Network > Firewall.",
         "primary": [
           {
             "label": "Done"

@@ -15,18 +15,18 @@ runs:
       exit: 0
       stdout: |
           # Extra
-          ?	fd	brew	installed by station for macbook-pro, already gone
-          ?	ripgrep	brew	installed by station for macbook-pro, present another way since station installed it: kept, and yours
+          ?	fd	brew	installed by Machines for macbook-pro, already gone
+          ?	ripgrep	brew	installed by Machines for macbook-pro, present another way since Machines installed it: kept, and yours
     - command: 'apply --remove --yes'
       exit: 0
       stdout: |
           # Extra
-          ?	fd	brew	installed by station for macbook-pro, already gone
-          ?	ripgrep	brew	installed by station for macbook-pro, present another way since station installed it: kept, and yours
+          ?	fd	brew	installed by Machines for macbook-pro, already gone
+          ?	ripgrep	brew	installed by Machines for macbook-pro, present another way since Machines installed it: kept, and yours
           ●	homebrew	5.0.1	script	the manager of jq
           ●	jq	1.8.1	brew
           ○	fd		brew	already gone
-          ◐	ripgrep		brew	present another way since station installed it: kept, and yours
+          ◐	ripgrep		brew	present another way since Machines installed it: kept, and yours
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].stores.ledger | map(.package)'' world.json'
       exit: 0
       stdout: |

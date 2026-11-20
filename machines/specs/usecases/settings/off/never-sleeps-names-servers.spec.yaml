@@ -18,10 +18,10 @@ runs:
           see never-sleeps:
       exit: 0
       stdout: |
-          ┃ Turn never-sleeps off here? station stops applying and watching it on this
+          ┃ Turn never-sleeps off here? Machines stops applying and watching it on this
           ┃ machine; infra pauses while mac-mini sleeps
           ┃
-          ┃                                  Yes  No
+          ┃                                   Yes  No
     - command: 'awake | /usr/bin/grep mac-mini'
       exit: 0
       stdout: |

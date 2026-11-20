@@ -37,5 +37,5 @@ func (e *DestinationExistsError) Error() string { return e.Path + " already exis
 type CrossDeviceError struct{ From, To string }
 
 func (e *CrossDeviceError) Error() string {
-	return e.From + " and " + e.To + " are on different volumes: station moves, never copies"
+	return e.From + " and " + e.To + " are on different volumes: Machines moves, never copies"
 }

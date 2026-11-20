@@ -70,7 +70,7 @@ func Shown(id ID) machine.Applies {
 			return machine.Yes
 		}
 		if p.Kind == machine.Server {
-			return machine.Verdict{Why: p.Ref.Name + " is a server: station does not manage its " + noun(id), Fix: "manage it with your own tooling: ssh " + p.Ref.Name}
+			return machine.Verdict{Why: p.Ref.Name + " is a server: Machines does not manage its " + noun(id), Fix: "manage it with your own tooling: ssh " + p.Ref.Name}
 		}
 		return machine.No(p.Ref.Name + " is a " + p.Kind.Word(p.System.OS) + ": it has no " + noun(id) + " section")
 	}

@@ -19,7 +19,7 @@ const recordingFor = await recordingsOf('mini-offline', 'one-mac', 'two-macs');
 const READ_AT =
     '0 lines · read at 14:20 · a reading, not a live feed: press Refresh for the newest lines';
 
-const macLog = region('What station did on this Mac');
+const macLog = region('What Machines did on this Mac');
 
 function activityOf(world: string, machine: string) {
     return pageOver(recordingFor(world), { machine, page: 'machine', tab: 'Activity' });

@@ -1,7 +1,7 @@
 package: station.package/v1
 kind: app
 name: station-menubar
-description: Station's menu bar app, from the latest release
+description: Machines' menu bar app, from the latest release
 version-read:
     path: ~/Applications/Station.app
     args:

@@ -9,7 +9,7 @@ var Applies = machine.All(section.Shown(section.Background), managed)
 
 func managed(p machine.Profile) machine.Verdict {
 	if !p.Caps.Jobs {
-		return machine.No(p.Ref.Name + " has no job manager station reads")
+		return machine.No(p.Ref.Name + " has no job manager Machines reads")
 	}
 	return machine.Yes
 }

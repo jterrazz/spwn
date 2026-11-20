@@ -120,7 +120,7 @@
   },
   "settings.off": {
     "confirm": "off-here",
-    "consequence": "station stops applying %s on this machine; its value now stays.",
+    "consequence": "Machines stops applying %s on this machine; its value now stays.",
     "form": "yes-no"
   },
   "settings.run-containers": {

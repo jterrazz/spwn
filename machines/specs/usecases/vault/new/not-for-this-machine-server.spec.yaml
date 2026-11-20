@@ -10,4 +10,4 @@ runs:
           {"v":2,"id":"1","watch":"vault.new","in":{}}
       exit: 0
       stdout: |
-          {"code":"section.not-for-this-machine","field":null,"subject":"infra","message":"infra is a server: station does not manage its accounts","hint":"manage it with your own tooling: ssh infra"}
+          {"code":"section.not-for-this-machine","field":null,"subject":"infra","message":"infra is a server: Machines does not manage its accounts","hint":"manage it with your own tooling: ssh infra"}

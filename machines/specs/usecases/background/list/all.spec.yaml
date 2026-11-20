@@ -1,4 +1,4 @@
-description: 'background --all unfolds every group: Station, Known apps and Unknown row by row'
+description: 'background --all unfolds every group: Machines, Known apps and Unknown row by row'
 fixture:
     - ../../../__fixtures__/terminal/
 env:
@@ -27,8 +27,8 @@ runs:
             ◐ com.docker.vmnetd  root  idle  Docker.app (gone)  /Library/…/com.docker.vmnetd.plist
               → sudo launchctl bootout system/com.docker.vmnetd &&
                 sudo rm /Library/LaunchDaemons/com.docker.vmnetd.plist
-          ● com.jterrazz.station.engine · user · running · pid 812
-            ~/Library/LaunchAgents/com.jterrazz.station.engine.plist
+          Machines  ● com.jterrazz.station.engine · user · running · pid 812
+                      ~/Library/LaunchAgents/com.jterrazz.station.engine.plist
           Known apps
             ● com.adguard.mac.adguard.loginhelper
               user  running · pid 702  AdGuard

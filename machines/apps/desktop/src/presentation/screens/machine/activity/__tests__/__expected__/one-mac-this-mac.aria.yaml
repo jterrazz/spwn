@@ -50,8 +50,8 @@
     - definition: not given yet
     - term: Up for
     - definition: not given yet
-  - region "What station did on this Mac":
-    - heading "What station did on this Mac" [level=2]
+  - region "What Machines did on this Mac":
+    - heading "What Machines did on this Mac" [level=2]
     - searchbox "Filter the lines"
     - button "Refresh"
     - button "Copy all"

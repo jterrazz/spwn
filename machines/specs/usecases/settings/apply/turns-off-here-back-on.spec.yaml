@@ -10,7 +10,7 @@ runs:
       stdout: |
           ⊘	hushlogin	off here
           # Detail
-          group	Set by station
+          group	Set by Machines
           does	Silence the terminal login message
           lives on	Macs, Linux VMs, macOS VMs
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].preferences.off_here'' world.json'
@@ -26,7 +26,7 @@ runs:
       stdout: |
           ●	hushlogin	applied · ~/.hushlogin
           # Detail
-          group	Set by station
+          group	Set by Machines
           does	Silence the terminal login message
           lives on	Macs, Linux VMs, macOS VMs
           where	~/.hushlogin

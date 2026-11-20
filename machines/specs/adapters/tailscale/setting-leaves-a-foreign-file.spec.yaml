@@ -7,7 +7,7 @@ runs:
     - command: '--version >/dev/null; /bin/rm bin/tailscale; /bin/mkdir -p .local/bin; printf "#!/bin/sh\necho mine\n" > .local/bin/tailscale; "$STATION" settings apply tailscale-cli </dev/null'
       exit: 0
       stdout: |
-          ●	tailscale-cli	~/.local/bin/tailscale: a file station did not write, left alone
+          ●	tailscale-cli	~/.local/bin/tailscale: a file Machines did not write, left alone
       files:
           .local/bin/tailscale:
               equals: |

@@ -42,7 +42,7 @@ Needs a look
   ◐ api       tailscale-cli  changed since 2 d ago
     → station machines start api
 Machines  ● 3  ○ 1  – 1 · This Mac, mac-mini, linux-1, api, infra
-Set by station
+Set by Machines
                    This Mac  mac-mini  linux-1  api     OK
   ◐ git-shortcuts  ◐         ◐         ◐        ◐       0/4
   ◐ dns            ◐         ◐         ◐        ◐       0/4

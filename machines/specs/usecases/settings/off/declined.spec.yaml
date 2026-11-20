@@ -17,7 +17,7 @@ runs:
           screen
       exit: 1
       stdout: |
-          ┃ Turn hushlogin off here? station stops applying and watching it on this
+          ┃ Turn hushlogin off here? Machines stops applying and watching it on this
           ┃ machine
           ┃
           Error: hushlogin kept: you said no

@@ -37,7 +37,7 @@ type Input struct {
 func Command(d Deps, env kit.Env, children ...*cobra.Command) *cobra.Command {
 	cmd := kit.Command(kit.Leaf[Input]{
 		Use:     "settings [<setting>]",
-		Short:   "What station sets on this machine: applied, changed since, off here",
+		Short:   "What Machines sets on this machine: applied, changed since, off here",
 		Example: "  station settings\n  station settings starship-dotfiles\n  station settings --all-machines\n  station settings --json",
 		Group:   kit.OnAMachine,
 		Args:    cobra.MaximumNArgs(1),

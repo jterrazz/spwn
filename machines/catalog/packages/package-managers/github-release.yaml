@@ -1,7 +1,7 @@
 package: station.package/v1
 kind: manager
 name: github-release
-description: Commands from a project's GitHub releases, fetched and checked by station itself
+description: Commands from a project's GitHub releases, fetched and checked by Machines itself
 manages: [github-release]
 priority: { macos: 3, ubuntu: 2, debian: 2 }
 provides: [station]
@@ -14,5 +14,5 @@ disk:
     paths:
         - path: '{data}/station/releases'
           level: kept
-          note: what each release station installed put in ~/.local/bin, by its hash, the only commands it replaces or removes there; and each repo's latest release, kept an hour in .latest/
+          note: what each release Machines installed put in ~/.local/bin, by its hash, the only commands it replaces or removes there; and each repo's latest release, kept an hour in .latest/
     no-erase: 'what it installed is apps: station apps remove <app>'

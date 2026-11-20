@@ -12,7 +12,7 @@ runs:
       exit: 1
       stderr: |
           Error: ~/.config/station/preferences.json cannot be read: line 4: invalid character '}' looking for beginning of object key string
-          Hint: fix that line: station never rewrites a file it cannot read
+          Hint: fix that line: Machines never rewrites a file it cannot read
     - command: 'machines; /usr/bin/jq -r ''.macs["macbook-pro"].files["preferences.json"]'' world.json'
       exit: 0
       stdout: |+
@@ -23,4 +23,4 @@ runs:
 
       stderr: |
           Error: ~/.config/station/preferences.json cannot be read: line 4: invalid character '}' looking for beginning of object key string
-          Hint: fix that line: station never rewrites a file it cannot read
+          Hint: fix that line: Machines never rewrites a file it cannot read

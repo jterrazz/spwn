@@ -75,5 +75,5 @@ func (e *TemplateNameError) Error() string {
 type ServerTemplateError struct{ Name string }
 
 func (e *ServerTemplateError) Error() string {
-	return e.Name + " is a server's Machinefile: station sets up nothing inside a server"
+	return e.Name + " is a server's Machinefile: Machines sets up nothing inside a server"
 }

@@ -44,7 +44,7 @@ func machinesFailure(err error) (*fail.Error, bool) {
 	case errors.As(err, &unreachable):
 		return failed(unreachable.Error(), "station machines", err), true
 	case errors.As(err, &noEther):
-		return failed(noEther.Error(), "wake it by hand once; station keeps its address at its next answer", err), true
+		return failed(noEther.Error(), "wake it by hand once; Machines keeps its address at its next answer", err), true
 	case errors.As(err, &timeout):
 		return failed(timeout.Error(), "station machines "+timeout.Name, err), true
 	case errors.As(err, &refused):

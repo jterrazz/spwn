@@ -14,4 +14,4 @@ runs:
       exit: 2
       stderr: |
           Error: ~/.config/station/catalog/command-line/jq.yaml:4: an anchor (&d): write the value out
-          Hint: fix that line: station never rewrites a package file
+          Hint: fix that line: Machines never rewrites a package file

@@ -75,7 +75,7 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 		Declare: func(f *pflag.FlagSet, in *Input) {
 			f.BoolVar(&in.Permanent, "permanent", false, "--persistent")
 			f.BoolVar(&in.Persistent, "persistent", false, "kept until you delete it; without it, deleted when it powers off from inside")
-			f.BoolVar(&in.Server, "server", false, "a server: always on, set up by your own tooling, never by station (default 4 CPU, 8G, 50G)")
+			f.BoolVar(&in.Server, "server", false, "a server: always on, set up by your own tooling, never by Machines (default 4 CPU, 8G, 50G)")
 			f.StringVar(&in.Check, "check", "", "a server's health check: a URL (https://infra:6443/readyz) or host:port")
 			f.BoolVar(&in.AlwaysOn, "always-on", false, "a server (--server)")
 			in.flags = f

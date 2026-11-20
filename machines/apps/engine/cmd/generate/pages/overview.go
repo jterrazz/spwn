@@ -22,7 +22,7 @@ func overviewOf(needs bool) overview.Summary {
 				overview.Count(catalog.StateOK, 39, "ok", "ok"), overview.Count(catalog.StateDegraded, 122, "updates", "update-available"),
 				overview.Count(catalog.StateUnknown, 35, "not managed", "not-managed"), overview.Count(catalog.StateAbsent, 34, "not installed", "not-installed"),
 			}},
-			{Section: "settings", Parts: []overview.Part{{Word: "set by station"}, {State: catalog.StateOK, N: 12, Of: 22, Key: "applied", Counted: true}, {Word: "checked"}, {State: catalog.StateOK, N: 8, Of: 9, Key: "as-expected", Counted: true}}},
+			{Section: "settings", Parts: []overview.Part{{Word: "set by Machines"}, {State: catalog.StateOK, N: 12, Of: 22, Key: "applied", Counted: true}, {Word: "checked"}, {State: catalog.StateOK, N: 8, Of: 9, Key: "as-expected", Counted: true}}},
 			{Section: "disk", Parts: []overview.Part{{State: catalog.StateDegraded, Bytes: 388_000_000_000, Word: "free"}, {Bytes: 34_800_000_000, Word: "can rebuild"}, overview.Count(catalog.StateDegraded, 1, "misplaced", "misplaced")}},
 			{Section: "ports", Parts: []overview.Part{{Word: "Public", Key: "public", Counted: true}, {Word: "Private", N: 2, Key: "private", Counted: true}}},
 			{Section: "accounts", Parts: []overview.Part{overview.Count(catalog.StateOK, 6, "", "signed-in"), {State: catalog.StateBroken, Word: "npm"}}},

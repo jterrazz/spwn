@@ -13,13 +13,13 @@ runs:
       exit: 0
       stdout: |
           --- ~/.gitconfig [alias]
-          +++ station's ~/.gitconfig [alias]
+          +++ Machines' ~/.gitconfig [alias]
           @@ -1,0 +1,13 @@
           +# >>> station git-shortcuts >>>
     - command: 'settings diff git-shortcuts | /usr/bin/head -4'
       exit: 0
       stdout: |
-          --- station's ~/.gitconfig [alias]
+          --- Machines' ~/.gitconfig [alias]
           +++ ~/.gitconfig [alias]
           @@ -1,13 +1,0 @@
           -# >>> station git-shortcuts >>>

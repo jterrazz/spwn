@@ -30,7 +30,7 @@ runs:
       exit: 0
       stdout: |
           # Extra
-          ?	foo	apt	installed by station for ci, listed no longer
+          ?	foo	apt	installed by Machines for ci, listed no longer
           ●	foo		apt	removed
     - command: '--version >/dev/null; /bin/cat dpkg.db'
       exit: 0

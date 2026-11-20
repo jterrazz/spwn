@@ -3609,7 +3609,7 @@ export interface Calls {
     'settings.diff': { in: SettingsDiffInput; out: SettingsDiffOutput; watch: false };
     'settings.list': { in: SettingsListInput; out: SettingsListOutput; watch: true };
     'settings.matrix': { in: SettingsMatrixInput; out: SettingsMatrixOutput; watch: false };
-    'settings.off': { in: SettingsOffInput; out: SettingsOffOutput; watch: false; confirm: 'off-here'; consequence: 'station stops applying %s on this machine; its value now stays.' };
+    'settings.off': { in: SettingsOffInput; out: SettingsOffOutput; watch: false; confirm: 'off-here'; consequence: 'Machines stops applying %s on this machine; its value now stays.' };
     'settings.run-containers': { in: SettingsRunContainersInput; out: SettingsRunContainersOutput; watch: false; confirm: 'remove'; consequence: '%s leaves this machine; its data stays.' };
     'settings.run-git': { in: SettingsRunGitInput; out: SettingsRunGitOutput; watch: false };
     'settings.show': { in: SettingsShowInput; out: SettingsShowOutput; watch: false };

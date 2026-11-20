@@ -20,7 +20,7 @@ runs:
           # Failing	1 ✗
           # Orphans	3 ◐
           ◐	com.docker.vmnetd	root	idle	Docker.app (gone)	/Library/LaunchDaemons/com.docker.vmnetd.plist · sudo launchctl bootout system/com.docker.vmnetd && sudo rm /Library/LaunchDaemons/com.docker.vmnetd.plist
-          # Station	1 ●
+          # Machines	1 ●
           ●	com.jterrazz.station.engine	user	running · pid 812		~/Library/LaunchAgents/com.jterrazz.station.engine.plist
           # Known apps	7 ●
           # Unknown	2 ●

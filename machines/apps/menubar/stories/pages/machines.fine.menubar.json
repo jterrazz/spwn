@@ -4193,12 +4193,12 @@
     },
     {
       "key": "cmd+q",
-      "label": "Quit station",
+      "label": "Quit Spwn Menu",
       "on": "menu",
       "id": "app:quit"
     },
     {
-      "label": "More options for station",
+      "label": "More options for Spwn Menu",
       "on": "menu",
       "id": "menu",
       "icon": "ellipsis",

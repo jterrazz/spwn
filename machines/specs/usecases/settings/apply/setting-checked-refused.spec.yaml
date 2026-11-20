@@ -4,12 +4,12 @@ runs:
     - command: 'settings apply firewall'
       exit: 2
       stderr: |
-          Error: firewall is checked, not set: station never runs sudo
+          Error: firewall is checked, not set: Machines never runs sudo
           Hint: System Settings > Network > Firewall
     - command: 'settings apply hushlogin firewall'
       exit: 2
       stderr: |
-          Error: firewall is checked, not set: station never runs sudo
+          Error: firewall is checked, not set: Machines never runs sudo
           Hint: System Settings > Network > Firewall
     - command: '--version >/dev/null; test -e .hushlogin && echo written || echo nothing written'
       exit: 0

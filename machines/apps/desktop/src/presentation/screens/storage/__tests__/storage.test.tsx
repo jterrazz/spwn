@@ -121,7 +121,7 @@ describe('Storage', () => {
                 within(
                     region('Disk'),
                     content(
-                        "Every image and every disk station holds is a machine's or the newest.",
+                        "Every image and every disk Machines holds is a machine's or the newest.",
                     ),
                 ),
             );

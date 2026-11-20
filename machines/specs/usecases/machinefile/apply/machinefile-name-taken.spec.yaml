@@ -22,7 +22,7 @@ runs:
           # To install
           ○	fd	brew
       stderr: |
-          Error: machinefiles/laptop.machine.yaml already holds another laptop: station never replaces your Machinefile
+          Error: machinefiles/laptop.machine.yaml already holds another laptop: Machines never replaces your Machinefile
           Hint: edit that file, or remove it to copy downloads/laptop.machine.yaml instead
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"] | [.preferences.machinefile, .files["machinefiles/laptop.machine.yaml"]]'' world.json'
       exit: 0

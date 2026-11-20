@@ -35,7 +35,7 @@ func Matrix(m settings.Matrix, now time.Time, all bool, label func(string) strin
 		group settings.Group
 		id    string
 		title string
-	}{{settings.SetByStation, "set", "Set by station"}, {settings.AlwaysOnMac, "always-on-mac", "Always-on Mac"}, {settings.Checked, "checked", "Checked"}} {
+	}{{settings.SetByStation, "set", "Set by Machines"}, {settings.AlwaysOnMac, "always-on-mac", "Always-on Mac"}, {settings.Checked, "checked", "Checked"}} {
 		if s, ok := groupSection(m, g.group, g.id, g.title, all, label); ok {
 			p.Sections = append(p.Sections, s)
 		}
@@ -125,7 +125,7 @@ func machinesSection(m settings.Matrix, now time.Time, label func(string) string
 		s.Items = append(s.Items, page.Item{Row: &row})
 	}
 	for _, name := range m.Servers {
-		row := page.Row{ID: name, Label: name, Short: label(name), Mark: page.NotForThisMachine, Cells: []page.Value{page.Text("Server"), page.Text("not checked: station does not manage its settings")}}
+		row := page.Row{ID: name, Label: name, Short: label(name), Mark: page.NotForThisMachine, Cells: []page.Value{page.Text("Server"), page.Text("not checked: Machines does not manage its settings")}}
 		s.Items = append(s.Items, page.Item{Row: &row})
 	}
 	if len(s.Items) == 0 {

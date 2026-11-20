@@ -41,7 +41,7 @@ describe('storage', () => {
             await visitor.see(
                 within(
                     region('Disk'),
-                    content('Outside any machine, station holds 107 GB', { exact: false }),
+                    content('Outside any machine, Machines holds 107 GB', { exact: false }),
                 ),
             );
             await visitor.see(within(region('Disk'), content('Machine disks')));
@@ -100,7 +100,7 @@ describe('storage', () => {
             // Then - its verdict heads the page, and the disk says what station holds outside any machine on it
             await visitor.see(heading('Nothing to free.'));
             await visitor.see(
-                within(region('Disk'), content('station holds 84.0 GB', { exact: false })),
+                within(region('Disk'), content('Machines holds 84.0 GB', { exact: false })),
             );
         });
         expect(result.errors.text).toBe('');
@@ -167,7 +167,7 @@ describe('storage', () => {
             // Then - leftovers and logs are gone from it, the others listed
             await visitor.see(within(disk, content('Images')));
             await visitor.gone(within(disk, content('Leftovers')));
-            await visitor.gone(within(disk, content('Station logs')));
+            await visitor.gone(within(disk, content("Machines' logs")));
         });
         expect(result.errors.text).toBe('');
     });

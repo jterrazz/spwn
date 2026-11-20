@@ -466,7 +466,7 @@ func TestAShareOpensItsLinkOnlyWhileItIsServed(t *testing.T) {
 		{"served", ports.SharedPort{Reserved: 40001, State: ports.PhaseShared}, true, page.OK, "", false},
 		{"waiting", ports.SharedPort{State: ports.PhaseRefused, Detail: "no Funnel port is left"}, false, page.Attention, "waiting", false},
 		{"unreserved", ports.SharedPort{State: ports.PhaseShared}, false, page.Attention, "waiting", false},
-		{"local only", ports.SharedPort{Reserved: 40001, State: ports.PhaseShared, Detail: "serve: Funnel port 443 already serves an entry station did not make"}, false, page.Attention, "local only", false},
+		{"local only", ports.SharedPort{Reserved: 40001, State: ports.PhaseShared, Detail: "serve: Funnel port 443 already serves an entry Machines did not make"}, false, page.Attention, "local only", false},
 		{"not listening", ports.SharedPort{Reserved: 40001, State: ports.PhaseWaiting}, false, page.Absent, "not listening", false},
 		{"stopped", ports.SharedPort{Reserved: 40001, State: ports.PhaseWaiting, Detail: stoppedVM}, false, page.Absent, stoppedVM, false},
 		{"engine stopped", ports.SharedPort{Reserved: 40001, State: ports.PhaseUnknown}, false, page.Attention, "not shared while the engine is stopped", false},

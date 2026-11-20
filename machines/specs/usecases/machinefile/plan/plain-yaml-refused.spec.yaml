@@ -12,4 +12,4 @@ runs:
       exit: 2
       stderr: |
           Error: ~/.config/station/machinefiles/laptop.yaml: is no Machinefile: a Machinefile is machinefiles/<name>.machine.yaml
-          Hint: rename it laptop.machine.yaml: station reads a Machinefile by that name alone
+          Hint: rename it laptop.machine.yaml: Machines reads a Machinefile by that name alone

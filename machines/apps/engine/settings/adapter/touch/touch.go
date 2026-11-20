@@ -33,7 +33,7 @@ func (*Applier) Kind() catalog.EffectKind { return catalog.EffectTouch }
 func (a *Applier) at(it catalog.Setting) (shown, full string, err error) {
 	t, ok := it.Effect.(catalog.Touch)
 	if !ok {
-		return "", "", errors.New(it.Name + " is not a file station creates")
+		return "", "", errors.New(it.Name + " is not a file Machines creates")
 	}
 	return t.Path, expand(a.home, t.Path), nil
 }

@@ -30,7 +30,7 @@ runs:
           	Activity	memory 15 of 24 GB · 44.0 GB free
           	Ports	Public 0 · Private 0
           	SSH	ssh infra
-          	Apps, settings, accounts: not managed by station
+          	Apps, settings, accounts: not managed by Machines
           # Health
           ●	Running
           ●	Has an address	192.168.64.5

@@ -70,7 +70,7 @@ type Kept struct {
 func KeptOf(folder, into string, vms []string) Kept {
 	return Kept{
 		Name: folder, VMs: vms,
-		Sentence: folder + " holds VMs of yours (" + strings.Join(vms, ", ") + "), so station never frees it: move each into " + into + " first.",
+		Sentence: folder + " holds VMs of yours (" + strings.Join(vms, ", ") + "), so Machines never frees it: move each into " + into + " first.",
 	}
 }
 
@@ -169,7 +169,7 @@ func StationOf(total, free, logs int64, h Held, mac string) StationPart {
 			{Holder: HolderThisMac, Bytes: itself},
 			{Holder: HolderFree, Bytes: free},
 		},
-		Sentence: "Outside any machine, station holds " + size.Bytes(held) + ": machine disks, images, leftovers and its logs",
+		Sentence: "Outside any machine, Machines holds " + size.Bytes(held) + ": machine disks, images, leftovers and its logs",
 		Itself:   "This Mac itself holds " + size.Bytes(itself) + ".",
 		Machines: machines,
 		CanFree:  can,
@@ -184,7 +184,7 @@ func unusedFree(frees []Freeable) CanFree {
 		bytes += max(f.Bytes, 0)
 	}
 	if len(frees) == 0 {
-		return CanFree{Sentence: "Every image and every disk station holds is a machine's or the newest."}
+		return CanFree{Sentence: "Every image and every disk Machines holds is a machine's or the newest."}
 	}
 	return CanFree{
 		Bytes:    bytes,

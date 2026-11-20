@@ -5,12 +5,12 @@ runs:
       exit: 2
       stderr: |
           Error: port 22 is never shared
-          Hint: station never shares port 22 nor a port below 1024
+          Hint: Machines never shares port 22 nor a port below 1024
     - command: 'ports share linux-1 80'
       exit: 2
       stderr: |
           Error: port 80 is never shared
-          Hint: station never shares port 22 nor a port below 1024
+          Hint: Machines never shares port 22 nor a port below 1024
     - command: 'ports share linux-1 x'
       exit: 2
       stderr: |

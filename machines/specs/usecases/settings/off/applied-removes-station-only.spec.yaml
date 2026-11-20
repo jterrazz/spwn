@@ -18,6 +18,6 @@ runs:
       stdout: |
           ⊘	tart-launcher	off here
           # Detail
-          group	Set by station
-          does	The tart launcher: Tart's home is station's VMs folder
+          group	Set by Machines
+          does	The tart launcher: Tart's home is Machines' VMs folder
           lives on	Macs

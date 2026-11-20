@@ -4,7 +4,7 @@ runs:
     - command: 'settings'
       exit: 0
       stdout: |
-          # Set by station	6 ○
+          # Set by Machines	6 ○
           ○	docker-shortcuts	not applied	station settings apply docker-shortcuts
           ○	git-shortcuts	not applied	station settings apply git-shortcuts
           ○	hushlogin	not applied	station settings apply hushlogin

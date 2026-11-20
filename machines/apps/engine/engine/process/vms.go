@@ -843,7 +843,7 @@ func (d *Engine) guestRequest(ctx context.Context, vm string, m guestMessage) (a
 		// invariant: a guest's share is checked as the owner's is, on the
 		// engine's side: its own binary is not trusted to have done it.
 		if err := ports.Shareable(m.Port); err != nil {
-			return nil, fault(enginecalls.IgnoredPort, err.Error(), "station never shares port 22 nor a port below 1024")
+			return nil, fault(enginecalls.IgnoredPort, err.Error(), "Machines never shares port 22 nor a port below 1024")
 		}
 		// invariant: a guest's share is judged by its VM's rights, never
 		// made as the owner's: one they do not open is refused, one they

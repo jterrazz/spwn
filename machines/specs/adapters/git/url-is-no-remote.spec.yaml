@@ -6,7 +6,7 @@ runs:
     - command: 'explain machine.kind --machinefile base-macos'
       exit: 1
       stderr: |
-          Error: the source studio cannot be read: its url "ext::sh -c id" is no url station clones: https://, ssh:// or user@domain:path
+          Error: the source studio cannot be read: its url "ext::sh -c id" is no url Machines clones: https://, ssh:// or user@domain:path
           Hint: check its url in ~/.config/station/preferences.json
       files:
           .calls: absent

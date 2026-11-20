@@ -650,7 +650,7 @@ func TestAMoveOffALineRunsItsUndoOnlyForACopyTheLedgerHolds(t *testing.T) {
 		name   string
 		ledger ledgered
 		kept   bool
-	}{{"yours", nil, true}, {"station's", ledgered{"lined"}, false}} {
+	}{{"yours", nil, true}, {"Machines'", ledgered{"lined"}, false}} {
 		b := benchOf(t, catalog.Mac, "", func(_ *localtest.Runner, o *appscalls.ShelfOptions) { o.HeldByLedger = c.ledger.Recorded })
 		b.w.Mac("here").Apps[catalog.MethodShell].Installed["install-lined"] = "1.2.0"
 		out, err := b.shelf.Move(context.Background(), "lined", catalog.MethodScript, nil)

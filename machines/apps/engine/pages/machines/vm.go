@@ -316,6 +316,6 @@ func SSHPage(o VMOverview, target model.SSHTarget, thisMac page.Context) page.Pa
 	return page.Seal(page.Page{ID: page.ID(coresection.SSH), Command: "machines ssh " + vm.Name, Context: thisMac, Sections: []page.Section{
 		{ID: "door", Title: "SSH", Caption: []page.Value{page.Text(vm.Name)}, Uncounted: true, Columns: columns, Items: append(rows(door, editor), page.Item{Note: &page.Note{Text: "No password: your key. Files travel through the same name; no folder of a Mac is shared."}})},
 		{ID: "reached", Title: "How it is reached", Uncounted: true, Columns: columns, Items: rows(reached...)},
-		{ID: "inside", Title: "Inside", Uncounted: true, Items: []page.Item{{Note: &page.Note{Text: "Station opens it for debugging only; your tooling owns what runs inside."}}}},
+		{ID: "inside", Title: "Inside", Uncounted: true, Items: []page.Item{{Note: &page.Note{Text: "Machines opens it for debugging only; your tooling owns what runs inside."}}}},
 	}})
 }

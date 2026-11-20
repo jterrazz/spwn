@@ -1,0 +1,52 @@
+canvas: { scheme: dark, scale: 2, unit: pt, still: true, ground: FlatDesk }
+tokens:
+  color.plate: rgba(32 32 34 / 0.6)
+  Glass.window: 18
+  Pane.shades: [rgba(0 0 0 / 0.45) 30 24, rgba(0 0 0 / 0.3) 9 6]
+  Pane.ring: rgba(0 0 0 / 0.7)
+  Pane.outline: 0.5
+  Pane.rim: rgba(255 255 255 / 0.09)
+  Pane.rimWidth: 1
+  Metric.Panel.header: [10, 14, 8, 14]
+  Role.back: system 13 regular t2
+  Role.facts: system 12 regular t2
+  Metric.Panel.body: [2, 12, 12, 12]
+  Role.sectionLabel: system 12 semibold section
+  Metric.Panel.footer: [6, 12, 12, 12]
+  Role.sheetTitle: system 15 semibold t1
+  Role.sheetBody: system 12 regular t2
+  Role.button: system 12 semibold t1
+tree:
+- group [kit=NeedsPage] [at=24,24] [size=322x333]:
+  - group [kit=Panel] [at=0,0] [size=322x333] [fill=color.plate] [corner=Glass.window] [shadow=Pane.shades] [ring=Pane.ring] [rim=Pane.rim]:
+    - group [kit=Panel.header] [at=0,0] [size=322x89]:
+      - group [kit=MachineHeader] [at=14,10] [size=294x71]:
+        - text "Back" [at=11.5,0] [size=30x16] [font=Role.back]
+        - text [kit=FactsLine] [at=0,56] [size=214x15] [font=Role.facts]
+    - group [kit=Panel.content] [at=0,89] [size=322x244]:
+      - group [kit=Card] [at=12,2] [size=298x66]:
+        - group [kit=EmptyState] [at=12,10] [size=274x46]
+      - heading "Upkeep" [kit=CardLabel] [at=12,76] [size=298x16]:
+        - text "Upkeep" [at=4,0.5] [size=45x15] [font=Role.sectionLabel]
+      - group [kit=Card] [at=12,96] [size=298x136]:
+        - listitem "This Mac" [kit=NeedRow] [at=4,4] [size=290x32]:
+          - img "symbol:shield" [kit=GlyphView] [at=6,4] [size=24x24]
+          - button "How to" [kit=VerbButton] [at=220,5] [size=64x22]
+        - listitem "This Mac" [kit=NeedRow] [at=4,36] [size=290x32]:
+          - img "symbol:exclamationmark.triangle" [kit=GlyphView] [at=6,4] [size=24x24]
+          - button "Show" [kit=VerbButton] [at=220,5] [size=64x22]
+        - listitem "This Mac" [kit=NeedRow] [at=4,68] [size=290x32]:
+          - img "symbol:key" [kit=GlyphView] [at=6,4] [size=24x24]
+          - button "Sign in" [kit=VerbButton] [at=220,5] [size=64x22]
+        - listitem "This Mac" [kit=NeedRow] [at=4,100] [size=290x32]:
+          - img "symbol:arrow.down.circle" [kit=GlyphView] [at=6,4] [size=24x24]
+          - button "Update" [kit=VerbButton] [at=220,5] [size=64x22]
+    - group [kit=Panel.footer] [at=0,333] [size=0x0]
+    - dialog [kit=HintSheet] [at=0,0] [size=322x242.5]:
+      - group "Turn the firewall on" [kit=SheetCard] [at=0,0] [size=322x242.5]:
+        - text "Turn the firewall on" [at=24,20] [size=137x19] [font=Role.sheetTitle]
+        - text "Machines never changes a security setting for you. Run this in Terminal, or open System Settings > Network > Firewall." [at=24,41] [size=264x45] [font=Role.sheetBody] [lines=3]
+        - group [kit=CommandBox] [at=24,98] [size=274x80]
+        - button [kit=SheetPrimary] [at=251,198.5] [size=51x24]:
+          - button "Done" [kit=PanelButton] [at=0,0] [size=51x24]:
+            - text "Done" [at=10,4.5] [size=31x15] [font=Role.button]

@@ -98,12 +98,12 @@ func (e *NotYetProvidedError) Error() string {
 
 type NotReversibleError struct{ App string }
 
-func (e *NotReversibleError) Error() string { return e.App + " cannot be uninstalled by station" }
+func (e *NotReversibleError) Error() string { return e.App + " cannot be uninstalled by Machines" }
 
 type UnrecordedError struct{ App string }
 
 func (e *UnrecordedError) Error() string {
-	return "station recorded adding none of " + e.App + "'s packages: they are yours"
+	return "Machines recorded adding none of " + e.App + "'s packages: they are yours"
 }
 
 type ManualInstallError struct{ App, Hint string }

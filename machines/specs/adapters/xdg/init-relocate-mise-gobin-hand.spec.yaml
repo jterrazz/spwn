@@ -6,7 +6,7 @@ runs:
       stdout: |
           ●	name	m
           ●	zshrc
-          ◐	relocate	mise go_set_gobin set by hand to true; station leaves it
+          ◐	relocate	mise go_set_gobin set by hand to true; Machines leaves it
           # Machinefile
           	none bound by init: init --machinefile binds one
       files:

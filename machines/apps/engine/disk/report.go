@@ -94,5 +94,5 @@ func Failures(outcomes []Outcome) (failed int, firstFailed Outcome) {
 
 const (
 	StationName     = "station"
-	StationCategory = "Station"
+	StationCategory = "Machines"
 )

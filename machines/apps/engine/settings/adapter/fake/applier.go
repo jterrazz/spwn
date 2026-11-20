@@ -18,7 +18,7 @@ type Applier struct {
 
 var _ contract.Applier = (*Applier)(nil)
 
-const Ours = "station's"
+const Ours = "Machines'"
 
 func ApplierOf(w *world.World, mac string, kind catalog.EffectKind) *Applier {
 	return &Applier{w: w, mac: mac, kind: kind}
@@ -86,7 +86,7 @@ func (a *Applier) Observe(_ context.Context, it catalog.Setting) (settings.Obser
 	}
 	o := settings.Observation{State: catalog.StateOK, Digest: text, Before: decode(it.Name, text), After: want}
 	if text != encode(want) {
-		o.State, o.Detail = catalog.StateDegraded, "differs from station's"
+		o.State, o.Detail = catalog.StateDegraded, "differs from Machines'"
 	}
 	return o, nil
 }

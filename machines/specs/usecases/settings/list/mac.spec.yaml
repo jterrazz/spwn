@@ -4,7 +4,7 @@ runs:
     - command: 'settings'
       exit: 0
       stdout: |
-          # Set by station	17 ○
+          # Set by Machines	17 ○
           ○	docker-shortcuts	not applied	station settings apply docker-shortcuts
           ○	git-shortcuts	not applied	station settings apply git-shortcuts
           ○	ghostty-dotfiles	not applied · needs ghostty	station apps install ghostty

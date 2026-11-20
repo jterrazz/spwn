@@ -133,7 +133,7 @@ func proSummary() overview.Summary {
 		Lines: []overview.Line{
 			{Section: "activity", Parts: []overview.Part{{Word: "CPU 34%"}, {Word: "memory 31 of 48 GB"}, {Bytes: 388_000_000_000, Word: "free"}}},
 			{Section: "apps", Parts: []overview.Part{overview.Count(catalog.StateOK, 39, "ok", "ok"), overview.Count(catalog.StateDegraded, 2, "updates", "update-available")}},
-			{Section: "settings", Parts: []overview.Part{{Word: "set by station"}, {State: catalog.StateDegraded, N: 11, Of: 12, Key: "applied", Counted: true}}},
+			{Section: "settings", Parts: []overview.Part{{Word: "set by Machines"}, {State: catalog.StateDegraded, N: 11, Of: 12, Key: "applied", Counted: true}}},
 			{Section: "disk", Parts: []overview.Part{{Bytes: 388_000_000_000, Word: "free"}}},
 			{Section: "ports", Parts: []overview.Part{{Word: "Private", N: 2, Key: "private", Counted: true}}},
 			{Section: "accounts", Parts: []overview.Part{overview.Count(catalog.StateOK, 6, "", "signed-in"), {State: catalog.StateBroken, Word: "npm"}}},
@@ -155,7 +155,7 @@ func miniOverview() overview.Summary {
 		},
 		Lines: []overview.Line{
 			{Section: "apps", Parts: []overview.Part{overview.Count(catalog.StateOK, 38, "ok", "ok")}},
-			{Section: "settings", Parts: []overview.Part{{Word: "set by station"}, {State: catalog.StateOK, N: 12, Of: 12, Key: "applied", Counted: true}}},
+			{Section: "settings", Parts: []overview.Part{{Word: "set by Machines"}, {State: catalog.StateOK, N: 12, Of: 12, Key: "applied", Counted: true}}},
 			{Section: "disk", Parts: []overview.Part{{Bytes: 731_000_000_000, Word: "free"}}},
 			{Section: "background", Parts: []overview.Part{overview.Count(catalog.StateOK, 9, "", "ok")}},
 		},

@@ -34,7 +34,7 @@ func (s Sentence) Text() string {
 	case SentencePasswordsSome:
 		return "%d kept, %d granted"
 	case SentenceCaptureNote:
-		return "Station takes the token this sign-in left on this Mac and keeps it in the Keychain. The sign-in itself stays as it is."
+		return "Machines takes the token this sign-in left on this Mac and keeps it in the Keychain. The sign-in itself stays as it is."
 	case SentenceRowSignedByItself:
 		return "signed in by itself"
 	case SentenceRowFromPassword:

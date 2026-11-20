@@ -8,4 +8,4 @@ runs:
           {"v":2,"id":"1","call":"apps.matrix","target":{},"in":{}}
       exit: 0
       stdout: |
-          {"type":"not-for-this-machine","code":"section.not-for-this-machine","subject":"infra","detail":{"call":"apps.matrix","fix":"manage it with your own tooling: ssh infra","why":"infra is a server: station does not manage its apps"},"message":"infra is a server: station does not manage its apps","hint":"manage it with your own tooling: ssh infra"}
+          {"type":"not-for-this-machine","code":"section.not-for-this-machine","subject":"infra","detail":{"call":"apps.matrix","fix":"manage it with your own tooling: ssh infra","why":"infra is a server: Machines does not manage its apps"},"message":"infra is a server: Machines does not manage its apps","hint":"manage it with your own tooling: ssh infra"}

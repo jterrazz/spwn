@@ -10,7 +10,7 @@ runs:
           ●	SSH answers
           ◐	Check waiting	normal: what answers comes with your tooling
           ●	infra-2	is a server	always on · 8 CPU · 24 GB · 80 GB
-          ●	Station sets up nothing inside	no apps, settings or accounts: set it up with your tooling
+          ●	Machines sets up nothing inside	no apps, settings or accounts: set it up with your tooling
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].vms["infra-2"] | {lifetime: .kept.lifetime, want: .kept.want, check: .kept.check, size, running: (.pid > 0), ran: [.guest.ran[]? | select(startswith("/usr/local/bin/station guest serve") | not)]}'' world.json'
       exit: 0
       stdout: |

@@ -8,7 +8,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/settings"
 )
 
-var ErrNoUndo = errors.New("station does not undo it")
+var ErrNoUndo = errors.New("it is not undone by Machines")
 
 type Applier interface {
 	// value: the kind of effect it writes, its key in Appliers.

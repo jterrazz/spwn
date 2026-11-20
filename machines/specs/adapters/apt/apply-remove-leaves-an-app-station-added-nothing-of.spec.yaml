@@ -20,8 +20,8 @@ runs:
       exit: 0
       stdout: |
           # Extra
-          ?	foo	apt	installed by station for ci, listed no longer
-          ●	foo	1.0	apt	station cannot uninstall it: kept, and yours: remove it by hand if you want
+          ?	foo	apt	installed by Machines for ci, listed no longer
+          ●	foo	1.0	apt	Machines cannot uninstall it: kept, and yours: remove it by hand if you want
     - command: '--version >/dev/null; /bin/cat dpkg.db'
       exit: 0
       stdout: |

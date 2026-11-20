@@ -161,7 +161,7 @@ func TestJudgeGivesEveryExtraOneFateWhetherAnAppNeedsIt(t *testing.T) {
 		alone, neededBy machinefile.Fate
 	}{
 		{"there by its method", machinefile.Seen{Condition: machinefile.Present, Method: "pkg"}, machinefile.Taken, machinefile.KeptRequired},
-		{"there, station cannot uninstall it", machinefile.Seen{Condition: machinefile.Present, Method: "pkg", Irreversible: true}, machinefile.KeptIrreversible, machinefile.KeptRequired},
+		{"there, Machines cannot uninstall it", machinefile.Seen{Condition: machinefile.Present, Method: "pkg", Irreversible: true}, machinefile.KeptIrreversible, machinefile.KeptRequired},
 		{"absent, its manager missing", machinefile.Seen{Condition: machinefile.Absent, Method: "pkg", Lacks: "manager"}, machinefile.KeptManagerMissing, machinefile.KeptManagerMissing},
 		{"already gone", machinefile.Seen{Condition: machinefile.Absent, Method: "pkg"}, machinefile.Gone, machinefile.Gone},
 		{"there another way", machinefile.Seen{Condition: machinefile.NotManaged, Method: "script"}, machinefile.KeptAnotherWay, machinefile.KeptAnotherWay},

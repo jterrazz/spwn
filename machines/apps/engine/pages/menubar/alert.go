@@ -195,7 +195,7 @@ func restartMac(label string, servers []string) alert {
 
 func forgetMac(label string) alert {
 	return alert{Gesture: "forget", Kind: machine.Computer, Name: label, Question: "Forget " + label + "?",
-		Says: []string{"Its VMs keep running; station stops showing it. You can add it again."}, Verb: "Forget " + label, Danger: true}
+		Says: []string{"Its VMs keep running; Machines stops showing it. You can add it again."}, Verb: "Forget " + label, Danger: true}
 }
 
 func stopShare(vm, port string) alert {

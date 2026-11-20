@@ -8,4 +8,4 @@ runs:
           {"v":2,"id":"1","call":"vault.add","in":{"Label":"cf","Program":"wrangler","Kind":"token","From":"sign-in"}}
       exit: 0
       stdout: |
-          {"code":"vault.cannot-capture","field":null,"subject":"wrangler","message":"station cannot take Cloudflare's sign-in into the vault"}
+          {"code":"vault.cannot-capture","field":null,"subject":"wrangler","message":"Machines cannot take Cloudflare's sign-in into the vault"}

@@ -54,7 +54,7 @@ func TailnetSections(s ports.Status) []page.Section {
 	}
 	serve := make([]page.Row, 0, len(s.Serve))
 	for _, e := range s.Serve {
-		owner := "not station's"
+		owner := "not Machines'"
 		if e.Station {
 			owner = "station"
 		}

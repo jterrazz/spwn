@@ -17,6 +17,6 @@ func Groups() []*cobra.Group {
 		{ID: OnAMachine, Title: "On a machine"},
 		{ID: ImagesAndEngine, Title: "A Mac's images and engine"},
 		{ID: ThisTerminal, Title: "This terminal"},
-		{ID: StationItself, Title: "Station itself"},
+		{ID: StationItself, Title: "Machines itself"},
 	}
 }

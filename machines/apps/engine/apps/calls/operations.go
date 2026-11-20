@@ -657,11 +657,11 @@ func (s *Shelf) leave(ctx context.Context, t catalog.App, was apps.Report) apps.
 	case !was.Managed:
 		step.Package, step.Detail = "copy on PATH", "kept: it is yours, installed by none of its methods"
 	case s.uninstallable(old) != nil:
-		step.Detail = "kept: station cannot uninstall it"
+		step.Detail = "kept: Machines cannot uninstall it"
 	case s.unrecorded(ctx, old):
-		step.Detail = "kept: yours, station added none of its packages; `station apps remove " + t.Name + "` takes it on your word"
+		step.Detail = "kept: yours, Machines added none of its packages; `station apps remove " + t.Name + "` takes it on your word"
 	case byLine(s.install(old)) && !s.ledgered(ctx, old):
-		step.Detail = "kept: yours, the ledger holds no install of it by station; `station apps remove " + t.Name + "` takes it on your word"
+		step.Detail = "kept: yours, the ledger holds no install of it by Machines; `station apps remove " + t.Name + "` takes it on your word"
 	default:
 		o := s.undone(ctx, old, s.run(ctx, verbUninstall, old, false, contract.Installer.Remove), false)
 		step.Result, step.Detail, step.Why = o.Result, "uninstalled", o.Why

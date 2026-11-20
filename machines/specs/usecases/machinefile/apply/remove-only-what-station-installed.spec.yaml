@@ -30,12 +30,12 @@ runs:
       exit: 0
       stdout: |
           # Extra
-          ?	fd	brew	installed by station for macbook-pro, listed no longer
+          ?	fd	brew	installed by Machines for macbook-pro, listed no longer
     - command: 'apply --remove --yes'
       exit: 0
       stdout: |
           # Extra
-          ?	fd	brew	installed by station for macbook-pro, listed no longer
+          ?	fd	brew	installed by Machines for macbook-pro, listed no longer
           ●	homebrew	5.0.1	script	the manager of eza
           ●	eza	0.23.4	brew
           ●	fd		brew	removed

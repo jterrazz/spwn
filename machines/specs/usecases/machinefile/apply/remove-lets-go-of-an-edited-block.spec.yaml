@@ -30,14 +30,14 @@ runs:
           # Packages
           ●	homebrew	script	present
           ●	jq	brew	present
-          ?	postgres	brew	extra · installed by station for macbook-pro, listed no longer
-          ?	postgres	shell	extra · ~/.zshrc [station:postgres/path] · edited by hand since station wrote it: kept, and yours
+          ?	postgres	brew	extra · installed by Machines for macbook-pro, listed no longer
+          ?	postgres	shell	extra · ~/.zshrc [station:postgres/path] · edited by hand since Machines wrote it: kept, and yours
     - command: 'apply --remove --yes'
       exit: 0
       stdout: |
           # Extra
-          ?	postgres	brew	installed by station for macbook-pro, listed no longer
-          ?	postgres	shell	~/.zshrc [station:postgres/path] · edited by hand since station wrote it: kept, and yours
+          ?	postgres	brew	installed by Machines for macbook-pro, listed no longer
+          ?	postgres	shell	~/.zshrc [station:postgres/path] · edited by hand since Machines wrote it: kept, and yours
           ●	homebrew	5.0.1	script	the manager of jq
           ●	jq	1.8.1	brew
           ●	postgres		brew	removed

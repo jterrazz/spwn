@@ -22,7 +22,7 @@ type Input struct{ Name string }
 func Command(d Deps, env kit.Env) *cobra.Command {
 	return kit.Command(kit.Leaf[Input]{
 		Use:      "diff <setting>",
-		Short:    "What station would write against what is on this machine",
+		Short:    "What Machines would write against what is on this machine",
 		Example:  "  station settings diff starship-dotfiles",
 		Args:     cobra.ExactArgs(1),
 		Bind:     func(in *Input, args []string) error { in.Name = args[0]; return nil },

@@ -4,7 +4,7 @@ runs:
     - command: 'init'
       exit: 0
       stdout: |
-          ●	kind	server: its own tooling keeps it, station sets nothing up
+          ●	kind	server: its own tooling keeps it, Machines sets nothing up
           # Machinefile
           	none bound by init: init --machinefile binds one
       files:

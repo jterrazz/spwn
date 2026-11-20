@@ -76,8 +76,8 @@ docs: generate ## Regenerate docs/reference/commands.md from the Cobra tree
 web-dev: ## Next.js dev server
 	@pnpm -C apps/web dev
 
-machines-check: ## Station's own `make check`, run inside machines/ with its toolchain
+machines-check: ## Machines' own `make check`, run inside machines/ with its toolchain
 	@$(MAKE) -C machines check
 
-machines-build: ## Station's own `make build`, into machines/.artifacts/go/station
+machines-build: ## Machines' own `make build`, into machines/.artifacts/go/station
 	@$(MAKE) -C machines build

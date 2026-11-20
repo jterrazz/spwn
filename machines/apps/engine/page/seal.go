@@ -239,7 +239,7 @@ func checkHint(h *Hint) error {
 		return errors.New("a hint names its command")
 	}
 	if !isStation(h.Command) && !h.External {
-		return errors.New("hint " + strconv.Quote(h.Command) + " is not station's: it is External")
+		return errors.New("hint " + strconv.Quote(h.Command) + " is not Machines': it is External")
 	}
 	return nil
 }

@@ -42,7 +42,7 @@ func (rs PublicRoutes) Verify(ctx context.Context, ms []ports.Machine, ps []port
 		if p.Declared == nil {
 			continue
 		}
-		v := ports.Verified{Missing: "station knows no route " + p.Declared.Via}
+		v := ports.Verified{Missing: "Machines knows no route " + p.Declared.Via}
 		j := slices.IndexFunc(ms, func(m ports.Machine) bool { return m.Ref == p.Machine })
 		if r, ok := rs.Named(p.Declared.Via); ok && j >= 0 {
 			if got, err := r.Verify(ctx, *p.Declared, ms[j]); err == nil {

@@ -31,7 +31,7 @@
     - paragraph: Starting the engine
     - list "Starting the engine":
       - listitem: Runs at login From now on the engine starts with the Mac
-      - listitem: Asks once macOS asks to let station reach the local network
+      - listitem: Asks once macOS asks to let Machines reach the local network
     - button "Start the engine"
     - button "Later"
     - text: station engine start

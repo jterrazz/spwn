@@ -57,11 +57,11 @@ func settingHint(a page.Action, subject string) page.Action {
 	if title == "" {
 		title = "Turn " + it.Label + " on"
 	}
-	why := "station never changes a security setting for you. Open " + it.Fix + "."
+	why := "Machines never changes a security setting for you. Open " + it.Fix + "."
 	if it.Command == "" {
 		return hintSheet(a, subject, title, why)
 	}
-	why = "station never changes a security setting for you. Run this in Terminal, or open " + it.Fix + "."
+	why = "Machines never changes a security setting for you. Run this in Terminal, or open " + it.Fix + "."
 	return hintSheet(a, subject, title, why, hintLine{Command: it.Command})
 }
 
@@ -69,7 +69,7 @@ func settingHint(a page.Action, subject string) page.Action {
 // the leaf that declares it, the route the owner's to name.
 func declareHint(p ports.Port, mac, self string) page.Action {
 	a := page.Action{ID: ActionDeclareHint + p.Key(), Label: "Declare public", On: page.OnRow, Rows: []string{p.Key()}, Priority: 2}
-	why := "A public port is one you meant to open. Declaring it moves it from Exposed to Public; station then watches that it stays as declared. The route is " + catalog.RouteNames() + "."
+	why := "A public port is one you meant to open. Declaring it moves it from Exposed to Public; Machines then watches that it stays as declared. The route is " + catalog.RouteNames() + "."
 	return hintSheet(a, HintDeclarePublic, "Declare a port public", why, hintLine{Command: declareCommand(p, mac, self)})
 }
 

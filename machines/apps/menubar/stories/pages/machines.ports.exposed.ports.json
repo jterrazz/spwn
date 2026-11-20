@@ -564,7 +564,7 @@
             }
           }
         ],
-        "subtitle": "A public port is one you meant to open. Declaring it moves it from Exposed to Public; station then watches that it stays as declared. The route is cloudflare-tunnel, tailscale-funnel, lan.",
+        "subtitle": "A public port is one you meant to open. Declaring it moves it from Exposed to Public; Machines then watches that it stays as declared. The route is cloudflare-tunnel, tailscale-funnel, lan.",
         "primary": [
           {
             "label": "Done"

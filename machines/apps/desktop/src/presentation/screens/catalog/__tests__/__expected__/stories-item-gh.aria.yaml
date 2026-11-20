@@ -39,4 +39,4 @@
       - button "agent-7f"
       - button "linux-1"
     - term: Comes from
-    - definition: built into station built-in/catalog/git/gh.yaml
+    - definition: built into Machines built-in/catalog/git/gh.yaml

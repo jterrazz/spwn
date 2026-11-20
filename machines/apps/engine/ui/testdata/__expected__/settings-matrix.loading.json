@@ -579,7 +579,7 @@
     },
     {
       "id": "set",
-      "title": "Set by station",
+      "title": "Set by Machines",
       "columns": [
         {
           "key": "name",

@@ -40,7 +40,7 @@ Modern replacements are on every machine; prefer them over the defaults:
 
 - **apt**: Debian and Ubuntu's package manager
 - **cocoapods**: Dependency manager for iOS and macOS projects
-- **github-release**: Commands from a project's GitHub releases, fetched and checked by station itself
+- **github-release**: Commands from a project's GitHub releases, fetched and checked by Machines itself
 - **homebrew**: macOS package manager
 - **mas**: Mac App Store command line
 - **mise**: Polyglot runtime manager: node, go, python, bun, rust, java
@@ -105,7 +105,7 @@ Modern replacements are on every machine; prefer them over the defaults:
 - **kubectl**: Kubernetes command line
 - **lens**: Kubernetes IDE for managing clusters
 - **orbstack**: Docker and Linux machines on the Mac, for exploration on a Mac
-- **tart**: Virtual machines on Apple silicon: the engine of station's VMs
+- **tart**: Virtual machines on Apple silicon: the engine of Machines' VMs
 
 ### Deploy
 
@@ -180,7 +180,7 @@ Modern replacements are on every machine; prefer them over the defaults:
 
 - **jump-desktop**: Jump Desktop viewer/client app
 - **jump-desktop-connect**: Remote GUI recovery for headless Macs
-- **tailscale**: The Tailscale app: each Mac is a node, and station reads it
+- **tailscale**: The Tailscale app: each Mac is a node, and Machines reads it
 
 ### Security
 
@@ -195,7 +195,7 @@ Modern replacements are on every machine; prefer them over the defaults:
 - **pipifier**: Picture-in-Picture for Safari
 - **snippety**: Code snippet manager
 - **speedtest**: Internet speed test
-- **station-menubar**: Station's menu bar app, from the latest release
+- **station-menubar**: Machines' menu bar app, from the latest release
 
 ### Agent skills
 

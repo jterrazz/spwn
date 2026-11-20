@@ -63,7 +63,7 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 		Declare: func(f *pflag.FlagSet, in *Input) {
 			f.StringVar(&in.Machinefile, "machinefile", "", "the Machinefile planned, by its name or its file (default: the one this machine carries)")
 			f.StringVar(&in.Phase, "phase", "", "plan one phase: image (what a VM image bakes), boot (a VM's first start), apply (default)")
-			f.BoolVar(&in.Diff, "diff", false, "what apply would change in each file it writes, from the file to station's: each shell block of ~/.zshrc and each setting's file")
+			f.BoolVar(&in.Diff, "diff", false, "what apply would change in each file it writes, from the file to Machines': each shell block of ~/.zshrc and each setting's file")
 		},
 		Read:  func(*Input) bool { return true },
 		Pages: true,

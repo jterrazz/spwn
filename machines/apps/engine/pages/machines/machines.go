@@ -501,7 +501,7 @@ func serverCreated(c model.Created, rows []page.Row, thisMac page.Context) page.
 	head := pages.Done(vm.Name, catalog.StateOK, "")
 	head.Cells = []page.Value{page.Text("is a server"), page.List(page.Text("always on"), page.Text(strconv.Itoa(r.CPUs)+" CPU"), Memory(r.MemoryBytes), DiskSize(r.DiskBytes))}
 	rows = append(rows, head)
-	note := page.Row{ID: "inside", Label: "Station sets up nothing inside", Mark: page.OK, Cells: []page.Value{page.Text("no apps, settings or accounts: set it up with your tooling")}}
+	note := page.Row{ID: "inside", Label: "Machines sets up nothing inside", Mark: page.OK, Cells: []page.Value{page.Text("no apps, settings or accounts: set it up with your tooling")}}
 	rows = append(rows, note)
 	columns := []page.Column{
 		{Key: "name", Kind: page.KindText, Keep: 100}, {Key: "what", Kind: page.KindText, Keep: 60},

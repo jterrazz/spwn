@@ -193,12 +193,12 @@ const (
 	LocalNetworkNotApproved LocalNetwork = "not-approved"
 )
 
-func NotApproved(mac string) string { return mac + " has not approved station for Local Network" }
+func NotApproved(mac string) string { return mac + " has not approved Machines for Local Network" }
 
 func LocalNetworkFix(mac string) string {
 	// value: the one gesture that lifts the block, on the Mac itself, named
 	// by its name: the engine that words it may be another Mac's.
-	return "approve station on " + mac + "'s screen, or in System Settings > Privacy & Security > Local Network"
+	return "approve Machines on " + mac + "'s screen, or in System Settings > Privacy & Security > Local Network"
 }
 
 type EngineState string

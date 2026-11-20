@@ -10,7 +10,7 @@ export const FACTS_STORIES: readonly Story<ComponentProps<typeof Facts>>[] = [
         name: 'grid',
         props: {
             facts: [
-                { label: 'Purpose', value: 'Design of the Station window' },
+                { label: 'Purpose', value: 'Design of the Spwn window' },
                 { label: 'Created', value: '6 Nov, by studio-os-e8' },
                 { label: 'Hold', value: 'Yours' },
                 { label: 'Image', value: <Value>cirruslabs/ubuntu:24.04</Value> },

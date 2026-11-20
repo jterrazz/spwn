@@ -32,7 +32,7 @@ Marks
   ◐ missing               attention                   installed, mise not installed
     → station apps install mise
   ◐ partial               attention                   policy partly applied
-  ◐ differs               attention                   differs from station's
+  ◐ differs               attention                   differs from Machines'
     → station settings apply tart-launcher
   ◐ unset                 attention                   name not set  → station init
   ◐ stopped               attention                   stopped  → station engine start

@@ -4,7 +4,7 @@ runs:
     - command: 'disk erase ssh --confirm=ssh'
       exit: 2
       stderr: |
-          Error: ~/.ssh is never touched: station erases no key, token or setting
+          Error: ~/.ssh is never touched: Machines erases no key, token or setting
           Hint: station disk
     - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].disk.files["~/.ssh/known_hosts"]'' world.json'
       exit: 0

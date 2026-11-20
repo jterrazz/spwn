@@ -5,7 +5,7 @@ runs:
       exit: 2
       stderr: |
           → now: git wip
-          Error: infra is a server: station does not manage its settings
+          Error: infra is a server: Machines does not manage its settings
           Hint: manage it with your own tooling: ssh infra
       files:
           .calls: absent

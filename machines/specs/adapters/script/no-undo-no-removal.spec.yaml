@@ -8,8 +8,8 @@ runs:
     - command: 'apps remove keeper --yes'
       exit: 2
       stderr: |
-          Error: keeper cannot be uninstalled by station
-          Hint: station installs it but cannot remove it: remove it by hand
+          Error: keeper cannot be uninstalled by Machines
+          Hint: Machines installs it but cannot remove it: remove it by hand
       files:
           .calls:
               equals: |

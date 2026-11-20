@@ -8,7 +8,7 @@ import type { Recording } from '../../../../../infrastructure/outbound/engine-re
 
 const recordingFor = await recordingsOf('disk-low', 'mini-offline', 'one-mac', 'two-macs');
 
-const macLog = region('What station did on this Mac');
+const macLog = region('What Machines did on this Mac');
 
 const LOG_READ_AT = 'read at 14:20';
 

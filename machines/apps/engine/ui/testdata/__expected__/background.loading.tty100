@@ -4,7 +4,7 @@ Failing
   ◌ com.example.brain.x-snapshot
 Orphans
   ◌ com.bjango.istatmenus.installer
-Station     ◌ 1 · com.jterrazz.station.engine
+Machines    ◌ 1 · com.jterrazz.station.engine
 Known apps  ◌ 1 · com.github.facebook.watchman
 Unknown     ◌ 2 · com.example.brain.sync, com.example.brain.late
 

@@ -185,7 +185,7 @@ func SettingsRead(rows []settings.Row, m machine.Ref) Read {
 	if applied == 0 && total > 0 {
 		appliedState = catalog.StateAbsent
 	}
-	parts := append([]Part{{Word: "set by station"}, {State: appliedState, N: applied, Of: total, Key: string(settings.StateApplied), Counted: true}},
+	parts := append([]Part{{Word: "set by Machines"}, {State: appliedState, N: applied, Of: total, Key: string(settings.StateApplied), Counted: true}},
 		counted([]Part{{}, Count(catalog.StateDegraded, changed, "changed since", string(settings.StateChangedSince)), Count(catalog.StateAbsent, off, "off here", string(settings.StateOffThisMac))})[1:]...)
 	if checked > 0 {
 		parts = append(parts, Part{Word: "checked"}, Part{State: catalog.StateOK, N: expected, Of: checked, Key: string(settings.AsExpected), Counted: true})

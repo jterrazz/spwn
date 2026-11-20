@@ -8,7 +8,7 @@ extension Token {
     public enum HomeHeader {
         public static let plus = Symbol.plus
         public static let menu = "ellipsis"
-        public static let menuLabel = "More options for station"
+        public static let menuLabel = "More options for Spwn Menu"
         public static let bar: CGFloat = 20
         public static let titleInset: CGFloat = 10
         public static let glyphsEnd: CGFloat = 4

@@ -50,7 +50,7 @@ func (*Applier) Kind() catalog.EffectKind { return catalog.EffectDotfile }
 func of(it catalog.Setting) (catalog.Dotfiles, error) {
 	d, ok := it.Effect.(catalog.Dotfiles)
 	if !ok || len(d.Files) == 0 {
-		return catalog.Dotfiles{}, errors.New(it.Name + " is not files station writes")
+		return catalog.Dotfiles{}, errors.New(it.Name + " is not files Machines writes")
 	}
 	return d, nil
 }
@@ -85,13 +85,13 @@ func (a *Applier) Observe(_ context.Context, it catalog.Setting) (settings.Obser
 		}
 		if !bytes.Equal(want, have) {
 			differ = true
-			diffs.WriteString(settings.UnifiedDiff(string(want), string(have), "station's "+c.To, c.To))
+			diffs.WriteString(settings.UnifiedDiff(string(want), string(have), "Machines' "+c.To, c.To))
 		}
 	}
 	o.Digest, o.Diff = "sha256:"+hex.EncodeToString(sum.Sum(nil)), diffs.String()
 	switch {
 	case present == len(d.Files) && differ:
-		o.State, o.Detail = catalog.StateDegraded, "differs from station's: station settings apply "+it.Name
+		o.State, o.Detail = catalog.StateDegraded, "differs from Machines': station settings apply "+it.Name
 	case present == len(d.Files):
 		o.State, o.Detail = catalog.StateOK, d.Files[0].To
 	case present == 0:

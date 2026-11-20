@@ -14,4 +14,4 @@ runs:
       exit: 2
       stderr: |
           Error: ~/.config/station/machinefiles/linux-1.machine.yaml:4: mount folder "/System/Volumes/Data/private/etc" of the computer is in the system folder /private: mount a folder of a home or of /Volumes
-          Hint: fix that line: station never rewrites a Machinefile
+          Hint: fix that line: Machines never rewrites a Machinefile

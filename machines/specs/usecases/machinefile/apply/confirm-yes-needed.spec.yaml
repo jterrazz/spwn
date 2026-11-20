@@ -27,7 +27,7 @@ runs:
       exit: 2
       stdout: |
           # Extra
-          ?	fd	brew	installed by station for macbook-pro, listed no longer
+          ?	fd	brew	installed by Machines for macbook-pro, listed no longer
       stderr: |
           Error: refusing to remove what the Machinefile lists no longer without --yes
           Hint: re-run with --yes

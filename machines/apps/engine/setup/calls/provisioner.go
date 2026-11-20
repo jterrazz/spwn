@@ -119,7 +119,7 @@ func (s *Provisioner) Run(ctx context.Context, r Request) (setup.Report, error) 
 		return setup.Report{}, err
 	}
 	if s.o.Server {
-		return setup.Report{Steps: []setup.Step{{Name: stepKind, State: catalog.StateOK, Detail: "server: its own tooling keeps it, station sets nothing up"}}}, nil
+		return setup.Report{Steps: []setup.Step{{Name: stepKind, State: catalog.StateOK, Detail: "server: its own tooling keeps it, Machines sets nothing up"}}}, nil
 	}
 	if !s.onMac() {
 		zshrc, err := s.zshrc(ctx)

@@ -101,7 +101,7 @@ enum Gallery {
         <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Station stories</title>
+        <title>Spwn Menu stories</title>
         <style>
         :root { color-scheme: light dark; --line: light-dark(#d9d9de, #3a3a40); --card: light-dark(#fff, #1e1e22); --dim: light-dark(#6e6e73, #98989f); --red: light-dark(#d70015, #ff6961); }
         * { box-sizing: border-box; }
@@ -128,7 +128,7 @@ enum Gallery {
         </style>
         </head>
         <body>
-        <header class="top"><h1>Station stories</h1><p>\(cards.count) stories, \(failing) failing</p></header>
+        <header class="top"><h1>Spwn Menu stories</h1><p>\(cards.count) stories, \(failing) failing</p></header>
 
         """
         out += "<nav>" + sections.map { "<a href=\"#\($0.anchor)\">\(escape($0.title))</a>" }.joined() + "</nav>\n"

@@ -93,7 +93,7 @@ func entries(asset string, body []byte, cmds []string, b bounds) ([]entry, bool,
 		es, err := unzip(body, cmds, b)
 		return es, true, wrap(asset, err)
 	case strings.HasSuffix(lower, ".tar.xz"), strings.HasSuffix(lower, ".txz"), strings.HasSuffix(lower, ".tar.zst"), strings.HasSuffix(lower, ".7z"), strings.HasSuffix(lower, ".deb"), strings.HasSuffix(lower, ".rpm"), strings.HasSuffix(lower, ".dmg"), strings.HasSuffix(lower, ".pkg"):
-		return nil, true, fmt.Errorf("%s is an archive station does not open: its method names a .tar.gz, .zip or bare asset", asset)
+		return nil, true, fmt.Errorf("%s is an archive Machines does not open: its method names a .tar.gz, .zip or bare asset", asset)
 	case strings.HasSuffix(lower, ".gz"), strings.HasSuffix(lower, ".bz2"), strings.HasSuffix(lower, ".xz"), strings.HasSuffix(lower, ".zst"), strings.HasSuffix(lower, ".lz4"), strings.HasSuffix(lower, ".z"):
 		return nil, true, fmt.Errorf("%s is a compressed file, no command: its method names a .tar.gz, .zip or bare asset", asset)
 	}
@@ -268,7 +268,7 @@ func (e *MismatchError) Error() string {
 type NotOursError struct{ Path string }
 
 func (e *NotOursError) Error() string {
-	return e.Path + " is not station's: kept, nothing installed"
+	return e.Path + " is not Machines': kept, nothing installed"
 }
 
 type SelfError struct{ Repo string }
@@ -283,7 +283,7 @@ type RecordError struct {
 }
 
 func (e *RecordError) Error() string {
-	return e.File + " is no record station reads: " + e.Err.Error() + "; nothing installed nor removed"
+	return e.File + " is no record Machines reads: " + e.Err.Error() + "; nothing installed nor removed"
 }
 
 func (e *RecordError) Unwrap() error { return e.Err }

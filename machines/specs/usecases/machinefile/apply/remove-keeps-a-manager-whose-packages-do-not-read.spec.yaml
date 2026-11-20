@@ -17,7 +17,7 @@ runs:
           ○	apt	apt	the manager of jq
           ○	jq	apt
           # Extra
-          ?	node	mise	installed by station for linux-1, what it holds does not read: kept
+          ?	node	mise	installed by Machines for linux-1, what it holds does not read: kept
           ●	apt	1.0.0	apt	the manager of jq
           ●	jq	1.0.0	apt
           ●	node	24.11.0	mise	what it holds does not read: kept, judged again next run

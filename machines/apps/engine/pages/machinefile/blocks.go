@@ -50,7 +50,7 @@ func blockRows(p machinefile.Plan, a machinefile.Action) []page.Row {
 		switch {
 		case b.Action != a || b.Condition == machinefile.Extra:
 		case a == machinefile.Set && b.Condition == machinefile.Outdated:
-			rows = append(rows, blockRow(b, blockWhere(b)+": "+lines(b.Zsh), "station's earlier text, written anew"))
+			rows = append(rows, blockRow(b, blockWhere(b)+": "+lines(b.Zsh), "Machines' earlier text, written anew"))
 		case a == machinefile.Set:
 			rows = append(rows, blockRow(b, blockWhere(b)+": "+lines(b.Zsh)))
 		case a == machinefile.Leave:
@@ -76,9 +76,9 @@ func extraBlockRows(p machinefile.Plan, lead ...string) []page.Row {
 func blockFate(b machinefile.Block) string {
 	switch b.Fate {
 	case machinefile.Taken, machinefile.Gone:
-		return "written by station, goes with " + b.Package
+		return "written by Machines, goes with " + b.Package
 	case machinefile.KeptEdited:
-		return "edited by hand since station wrote it: kept, and yours"
+		return "edited by hand since Machines wrote it: kept, and yours"
 	case machinefile.KeptIrreversible, machinefile.KeptAnotherWay:
 		return "kept with " + b.Package + ", and yours"
 	case machinefile.KeptRequired, machinefile.KeptHolding, machinefile.KeptManagerMissing, machinefile.KeptUnread:

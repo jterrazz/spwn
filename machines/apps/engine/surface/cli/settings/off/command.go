@@ -26,7 +26,7 @@ type Input struct{ Names []string }
 func Command(d Deps, env kit.Env) *cobra.Command {
 	return kit.Command(kit.Leaf[Input]{
 		Use:     "off <setting...>",
-		Short:   "Turn settings off here: station neither applies nor watches them; a change of yours is kept",
+		Short:   "Turn settings off here: Machines neither applies nor watches them; a change of yours is kept",
 		Example: "  station settings off starship-dotfiles --yes",
 		Args:    cobra.MinimumNArgs(1),
 		Bind:    func(in *Input, args []string) error { in.Names = args; return nil },

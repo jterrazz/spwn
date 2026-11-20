@@ -89,9 +89,9 @@ func (c *CLI) Observe(_ context.Context, _ catalog.Setting) (settings.Observatio
 	case ours:
 		o.State, o.Detail = catalog.StateOK, c.o.Shown
 	case theirs:
-		o.State, o.Detail = catalog.StateOK, "a file station did not write, left alone"
+		o.State, o.Detail = catalog.StateOK, "a file Machines did not write, left alone"
 	case link:
-		o.State, o.Detail = catalog.StateAbsent, "a link to the app crashes: station writes a script"
+		o.State, o.Detail = catalog.StateAbsent, "a link to the app crashes: Machines writes a script"
 	case nothing:
 		o.State = catalog.StateAbsent
 		if other, ok := c.o.LookPath(catalog.TailnetCLI); ok && other != c.at() {
@@ -135,5 +135,5 @@ func (c *CLI) Undo(_ context.Context, _ catalog.Setting) (settings.Change, error
 			return settings.Change{Steps: []settings.ChangeStep{{Label: c.o.Shown, State: catalog.StateOK, Detail: "removed"}}}, nil
 		}
 	}
-	return settings.Change{Steps: []settings.ChangeStep{{Label: c.o.Shown, State: catalog.StateOK, Detail: "nothing of station's to remove"}}}, nil
+	return settings.Change{Steps: []settings.ChangeStep{{Label: c.o.Shown, State: catalog.StateOK, Detail: "nothing of Machines' to remove"}}}, nil
 }

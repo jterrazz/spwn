@@ -229,7 +229,7 @@
       ],
       "about": {
         "label": "About machines",
-        "text": "A machine is a Mac or a VM station keeps."
+        "text": "A machine is a Mac or a VM Machines keeps."
       }
     },
     {
@@ -659,7 +659,7 @@
   "badge": {
     "down": true,
     "restarting": true,
-    "label": "Station, infra down"
+    "label": "Spwn Menu, infra down"
   },
   "header": {
     "back": "Back",
