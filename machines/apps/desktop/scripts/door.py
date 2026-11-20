@@ -37,6 +37,7 @@ class Door:
 
     def __init__(self, seed, fixture):
         self.home, env = sandbox(seed, fixture)
+        self.env = env
         # invariant: the world's engines take one turn before the door opens, as a Mac's engine has run before
         # the window does: what an engine keeps beside its loop (a VM's drift) is kept when it is asked. That turn
         # is the engine's life before the story, so the story's clock is given back as the seed holds it: the
@@ -74,6 +75,8 @@ class Door:
         slowest part has not answered may be silent longer than QUIET. A request still open after WHOLE silences in a
         row stops the run, so no part-read answer is ever written."""
         ids, watches, unended = [], set(), set()
+        first = len(requests)
+        unheld = False
 
         def sent(more):
             if not more:
@@ -111,10 +114,19 @@ class Door:
             answers.setdefault(frame["id"], []).append({key: value for key, value in frame.items() if key != "id"})
             if frame["id"] == ids[0]:
                 sent(during(len(answers[ids[0]])))
+            if not unheld and len(ids) > first and set(ids[first:]) <= ended and ids[0] not in ended:
+                self.unhold()
+                unheld = True
         if len(ended) < len(ids):
             self.close()
             sys.exit(f"{len(ended)} of {len(ids)} requests answered")
         return [answers[id] for id in ids]
+
+    def unhold(self):
+        """Lets go of every hold of the world, so a gesture the world holds goes on to its end once its `during`
+        reads have answered; with nothing held it changes nothing."""
+        subprocess.run([str(binary), "world", "unhold"], cwd=self.home, env=self.env, stdout=subprocess.DEVNULL,
+                       check=True)
 
     def close(self):
         self.process.stdin.close()

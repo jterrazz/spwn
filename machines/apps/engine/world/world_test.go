@@ -129,6 +129,59 @@ func TestAHoldHoldsOneCallAndNeverFailsIt(t *testing.T) {
 	}
 }
 
+func TestAHoldTheWorldDeclaresForOneVMKeepsItsCallsForTheWorldsLife(t *testing.T) {
+	w := seeded(t, `{"this_mac": "mbp", "macs": {"mbp": {}, "mini": {}}, "script": [{"call": "Hypervisor.Boot", "hold": true, "mac": "mini", "vm": "linux-2"}]}`)
+	if w.Holds("Hypervisor.Boot") {
+		t.Error("a hold declared for one VM held the next call of any VM")
+	}
+	for range 3 {
+		if !w.Keeps("Hypervisor.Boot", "mini", "linux-2") {
+			t.Fatal("a hold declared for linux-2 on mini let one of its calls go")
+		}
+	}
+	if w.Keeps("Hypervisor.Boot", "mbp", "linux-2") || w.Keeps("Hypervisor.Boot", "mini", "linux-3") || w.Keeps("Hypervisor.Clone", "mini", "linux-2") {
+		t.Error("a hold declared for linux-2's boot on mini kept another call")
+	}
+	if w.Fails("Hypervisor.Boot") {
+		t.Error("a declared hold failed its call")
+	}
+}
+
+func TestAnUnholdLetsGoOfTheHoldsItNamesAndOfNothingElse(t *testing.T) {
+	two := `{"this_mac": "mbp", "macs": {"mbp": {}, "mini": {}}, "script": [{"call": "Hypervisor.Boot", "hold": true, "mac": "mini", "vm": "linux-2"}, {"call": "Hypervisor.Clone", "hold": true, "mac": "mbp", "vm": "linux-4"}, {"call": "Jobs.Start"}]}`
+	w := seeded(t, two)
+	if err := apply(t, w, "unhold", "mini", "linux-2"); err != nil {
+		t.Fatal(err)
+	}
+	if w.Keeps("Hypervisor.Boot", "mini", "linux-2") || !w.Keeps("Hypervisor.Clone", "mbp", "linux-4") || !w.Fails("Jobs.Start") {
+		t.Errorf("an unhold of linux-2 on mini left %+v", w.Script)
+	}
+	w = seeded(t, two)
+	if err := apply(t, w, "hold", "Bundler.Bundle"); err != nil {
+		t.Fatal(err)
+	}
+	if err := apply(t, w, "unhold"); err != nil {
+		t.Fatal(err)
+	}
+	if len(w.Script) != 1 || !w.Fails("Jobs.Start") {
+		t.Errorf("an unhold of every hold left %+v", w.Script)
+	}
+	for range 2 {
+		if err := apply(t, w, "unhold"); err != nil {
+			t.Errorf("an unhold with nothing held failed: %v", err)
+		}
+	}
+	if err := apply(t, w, "unhold", "mini", "linux-9"); err != nil {
+		t.Errorf("an unhold of a VM nothing holds failed: %v", err)
+	}
+	if err := apply(t, w, "unhold", "nowhere", "linux-2"); err == nil {
+		t.Error("an unhold on a Mac the world lacks was taken")
+	}
+	if err := apply(t, w, "unhold", "mini"); err == nil {
+		t.Error("an unhold naming a Mac and no VM was taken")
+	}
+}
+
 func TestAWorldReadsBackAsItWasWritten(t *testing.T) {
 	w := seeded(t, laptop)
 	w.Mac("mbp").Listening = []ports.Listener{{Port: 5000, Bind: "*", Process: "ControlCenter", PID: 1}}

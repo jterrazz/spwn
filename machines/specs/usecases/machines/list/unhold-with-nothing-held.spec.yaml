@@ -1,0 +1,11 @@
+description: 'a world unhold with nothing held changes nothing and answers with no error, named or not'
+env: one-mac
+runs:
+    - command: 'world unhold'
+      exit: 0
+    - command: 'world unhold mac-mini linux-2'
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.script'' world.json'
+      exit: 0
+      stdout: |
+          null

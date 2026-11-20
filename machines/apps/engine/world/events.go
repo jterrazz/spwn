@@ -59,6 +59,7 @@ func events() []event {
 		{"advance", []string{"<duration>"}, advance},
 		{"fault", []string{"<Contract>.<Method>", "[<n>]", "[times]"}, fault},
 		{"hold", []string{"<Contract>.<Method>"}, hold},
+		{"unhold", []string{"[<mac>]", "[<vm>]"}, unhold},
 		{"upgrade", []string{"<machine>", "<version>"}, upgrade},
 		{"address", []string{"<vm>", "<ip>"}, address},
 		{"slow", []string{"<machine>", "<duration>"}, slow},
@@ -542,6 +543,23 @@ func hold(w *World, args []string) error {
 	}
 	w.Script = append(w.Script, Fault{Call: args[0], Hold: true})
 	return nil
+}
+
+// invariant: an unhold with nothing held changes nothing and fails nothing,
+// so a recorder may run it after every gesture.
+func unhold(w *World, args []string) error {
+	switch len(args) {
+	case 0:
+		w.Unhold("", "")
+		return nil
+	case 2:
+		if _, err := w.known(args[0]); err != nil {
+			return err
+		}
+		w.Unhold(args[0], args[1])
+		return nil
+	}
+	return fmt.Errorf("world unhold takes <mac> <vm>, or nothing, not %q", strings.Join(args, " "))
 }
 
 func fault(w *World, args []string) error {

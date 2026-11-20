@@ -1,6 +1,7 @@
 package world
 
 import (
+	"context"
 	"encoding/json"
 	"maps"
 	"slices"
@@ -32,6 +33,10 @@ type World struct {
 	// back and lets go of it, so a command run meanwhile reads what the held
 	// one has made so far; nil in a run that writes nothing back.
 	paused func()
+	// value: closes once the world's file no longer declares the hold, so a
+	// world unhold run as another command lets go of the call it keeps; nil
+	// in a run that writes nothing back.
+	unheld func(context.Context, Fault) <-chan struct{}
 
 	Now time.Time `json:"now"`
 	// value: the Mac the binary runs on, and its owner's login.
@@ -97,6 +102,12 @@ type Fault struct {
 	// value: the next call does its first step, then waits until it is
 	// interrupted, as a long install caught by ctrl-c.
 	Hold bool `json:"hold,omitempty"`
+	// value: the one VM of one Mac a hold the world file declares keeps:
+	// every call of it waits, for the world's life, so its create stays at
+	// that step and every read meanwhile sees it there; empty, a hold of
+	// the next call, whichever VM it is of.
+	Mac string `json:"mac,omitempty"`
+	VM  string `json:"vm,omitempty"`
 }
 
 type Mac struct {
@@ -602,12 +613,38 @@ func (w *World) Fails(call string) bool {
 func (w *World) Holds(call string) bool {
 	// invariant: a scripted hold is spent by the one call it holds.
 	for i, f := range w.Script {
-		if f.Call == call && f.Hold {
+		if f.Call == call && f.Hold && f.VM == "" {
 			w.Script = append(w.Script[:i], w.Script[i+1:]...)
 			return true
 		}
 	}
 	return false
+}
+
+func (w *World) Keeps(call, mac, vm string) bool {
+	// invariant: a hold declared for one VM of one Mac is never spent.
+	return slices.ContainsFunc(w.Script, func(f Fault) bool {
+		return f.Call == call && f.Hold && f.VM == vm && f.Mac == mac
+	})
+}
+
+func (w *World) Unheld(ctx context.Context, call, mac, vm string) <-chan struct{} {
+	// value: closes once a world unhold lets go of the hold the world
+	// declares for vm of mac; nil, so never, for a hold of the next call.
+	if w.unheld == nil || !w.Keeps(call, mac, vm) {
+		return nil
+	}
+	return w.unheld(ctx, Fault{Call: call, Hold: true, Mac: mac, VM: vm})
+}
+
+func (w *World) OnUnhold(f func(context.Context, Fault) <-chan struct{}) { w.unheld = f }
+
+func (w *World) Unhold(mac, vm string) {
+	// value: every hold the script declares or keeps for the next call is
+	// gone; given a VM of a Mac, only the holds declared for it.
+	w.Script = slices.DeleteFunc(w.Script, func(f Fault) bool {
+		return f.Hold && (mac == "" || f.Mac == mac && f.VM == vm)
+	})
 }
 
 func (w *World) Pause() {

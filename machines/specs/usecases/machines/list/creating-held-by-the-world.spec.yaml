@@ -1,0 +1,34 @@
+description: 'a create the world file holds at its boot reads boot 2 of 4 at every read, and the hold stays'
+fixture:
+    - ../../../__fixtures__/terminal/
+env:
+    - two-macs
+    - terminal
+runs:
+    - command: '--version >/dev/null; terminal /usr/bin/env -u NO_COLOR "$STATION" machines create --memory 4G linux-2'
+      stdin: |
+          see On which Mac?
+          send \x1b[B
+          send \r
+          see Running
+          run "$STATION" machines | /usr/bin/grep linux-2 >seen
+          run "$STATION" machines --json | /usr/bin/jq -c '[.macs[].vms[] | select(.name == "linux-2") | {state, birth}]' >>seen
+          run "$STATION" machines | /usr/bin/grep linux-2 >>seen
+          send \x03
+          scrollback
+      exit: 130
+      stdout: |
+          ┃ On which Mac?
+          ┃ macbook-pro  2 VMs
+          Error: context canceled
+          Hint: run station machines create --help
+    - command: '--version >/dev/null; /bin/cat seen'
+      exit: 0
+      stdout: |
+          	linux-2	Workspace	mac-mini	Creating · ephemeral	4 CPU	4 GB	boot 2 of 4
+          [{"state":"creating","birth":{"progress":400,"step":"booting"}}]
+          	linux-2	Workspace	mac-mini	Creating · ephemeral	4 CPU	4 GB	boot 2 of 4
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.script'' world.json'
+      exit: 0
+      stdout: |
+          [{"call":"Hypervisor.Boot","hold":true,"mac":"mac-mini","vm":"linux-2"}]

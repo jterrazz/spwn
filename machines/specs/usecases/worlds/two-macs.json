@@ -1054,5 +1054,13 @@
     "user": "you",
     "registry": {
         "base-ubuntu": "2026.11.03"
-    }
+    },
+    "script": [
+        {
+            "call": "Hypervisor.Boot",
+            "hold": true,
+            "mac": "mac-mini",
+            "vm": "linux-2"
+        }
+    ]
 }

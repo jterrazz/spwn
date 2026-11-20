@@ -116,7 +116,7 @@ func (h *Hypervisor) Fetch(_ context.Context, img imagescontract.ImageLocation, 
 func (h *Hypervisor) Clone(ctx context.Context, from imagescontract.ImageLocation, vm string) error {
 	h.w.Lock()
 	defer h.w.Unlock()
-	if err := h.held(ctx, "Hypervisor.Clone"); err != nil {
+	if err := h.held(ctx, "Hypervisor.Clone", vm); err != nil {
 		return err
 	}
 	m := h.thisMac()
@@ -228,7 +228,7 @@ func (h *Hypervisor) nextBorn() int {
 func (h *Hypervisor) Boot(ctx context.Context, vm string, opts contract.BootOptions) (contract.Run, error) {
 	h.w.Lock()
 	defer h.w.Unlock()
-	if err := h.held(ctx, "Hypervisor.Boot"); err != nil {
+	if err := h.held(ctx, "Hypervisor.Boot", vm); err != nil {
 		return nil, err
 	}
 	v, ok := h.disk(vm)
@@ -272,16 +272,25 @@ func folders(mounts []machines.Mount) []string {
 }
 
 // invariant: a held call, called under the world's lock, lets the world go
-// and waits until it is interrupted, as a long clone or boot caught by ctrl-c.
-func (h *Hypervisor) held(ctx context.Context, method string) error {
-	if !h.w.Holds(method) {
+// and waits until it is interrupted, as a long clone or boot caught by ctrl-c;
+// a hold the world declares for its VM also ends at a world unhold, and the
+// call goes on as if never held.
+func (h *Hypervisor) held(ctx context.Context, method, vm string) error {
+	if !h.w.Keeps(method, h.mac, vm) && !h.w.Holds(method) {
 		return nil
 	}
 	h.w.Pause()
+	unheld := h.w.Unheld(ctx, method, h.mac, vm)
 	h.w.Unlock()
-	<-ctx.Done()
-	h.w.Lock()
-	return ctx.Err()
+	select {
+	case <-ctx.Done():
+		h.w.Lock()
+		return ctx.Err()
+	case <-unheld:
+		h.w.Lock()
+		h.w.Unhold(h.mac, vm)
+		return nil
+	}
 }
 
 // value: pids count up over the whole world, so no two runs share one.

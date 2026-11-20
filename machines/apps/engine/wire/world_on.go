@@ -175,6 +175,7 @@ func openWorld(vars map[string]string, look bool) (*worldRun, error) {
 	}
 	r := &worldRun{path: path, w: w, macs: map[string]*worldMac{}, held: held}
 	w.OnPause(r.pause)
+	w.OnUnhold(r.unheld)
 	return r, nil
 }
 
@@ -210,6 +211,30 @@ func (r *worldRun) pause() {
 	}
 	unlockWorld(r.held)
 	r.held = nil
+}
+
+// invariant: a world unhold is another command's, so a held call learns of
+// it from the world's file: it reads the file until its hold is gone from
+// the script, a file caught half written read again at the next look.
+func (r *worldRun) unheld(ctx context.Context, f world.Fault) <-chan struct{} {
+	gone := make(chan struct{})
+	go func() {
+		for {
+			var file struct {
+				Script []world.Fault `json:"script"`
+			}
+			if data, err := os.ReadFile(r.path); err == nil && json.Unmarshal(data, &file) == nil && !slices.Contains(file.Script, f) {
+				close(gone)
+				return
+			}
+			select {
+			case <-ctx.Done():
+				return
+			case <-time.After(20 * time.Millisecond):
+			}
+		}
+	}()
+	return gone
 }
 
 // hazard: a run that runs station as a child while it holds its world would
