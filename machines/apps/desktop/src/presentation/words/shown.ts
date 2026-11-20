@@ -35,7 +35,6 @@ import {
     PORT_REACH_TONES,
     REVERSIBLE_TONE,
     UPDATE_TONES,
-    UPTIME_MARK_TONES,
 } from './tones';
 import {
     APP_WHY_WORDS,
@@ -210,10 +209,15 @@ export function holdAgainst(hold: MachinesHold | undefined): string | undefined 
     return tone === 'warn' || tone === 'bad' ? hold.Sentence : undefined;
 }
 
-export function dayOpensHistory({ Mark }: MachinesUptimeCell): boolean {
-    const tone = UPTIME_MARK_TONES[Mark];
+export function dayState({ Mark }: MachinesUptimeCell): Shown {
+    return engineShown('MachinesUptimeMark', Mark);
+}
+
+export function dayOpensHistory(cell: MachinesUptimeCell): boolean {
+    const { tone } = dayState(cell);
     return tone === 'warn' || tone === 'bad';
 }
+
 export type SharedChapter = Extract<MachinefileChapter, 'accounts' | 'ports'>;
 
 export type DifferingSide = 'asked' | 'seen';

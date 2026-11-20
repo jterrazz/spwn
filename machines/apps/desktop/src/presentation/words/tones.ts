@@ -3,7 +3,6 @@ import type {
     DiskAmount,
     DiskHolding,
     DiskOutcome,
-    MachinesUptimeCell,
     PortsPort,
     PortsSharedPort,
 } from '@jterrazz/station-api';
@@ -130,13 +129,6 @@ export const DISK_RESULT_TONES: Tones<DiskOutcome['Result']> = {
     ok: 'ok',
     pending: 'new',
     unknown: 'plain',
-};
-
-export const UPTIME_MARK_TONES: Tones<MachinesUptimeCell['Mark']> = {
-    down: 'bad',
-    none: 'plain',
-    ok: 'ok',
-    restart: 'warn',
 };
 
 export const SHARE_STATE_TONES: Tones<PortsSharedPort['state']> = {

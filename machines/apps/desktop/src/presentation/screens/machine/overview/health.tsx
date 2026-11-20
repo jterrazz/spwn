@@ -7,8 +7,14 @@ import { between, shortDay } from '../../../../domain/when';
 import type { Route } from '../../../navigation/route';
 import { Chart, MissingMark, Panel, StatePill, Tile, Value } from '../../../ui/index';
 import type { Measured } from '../../../ui/index';
-import { dayOpensHistory, verdictShown, vmCheck, vmSsh, vmState } from '../../../words/shown';
-import { UPTIME_MARK_TONES } from '../../../words/tones';
+import {
+    dayOpensHistory,
+    dayState,
+    verdictShown,
+    vmCheck,
+    vmSsh,
+    vmState,
+} from '../../../words/shown';
 
 import styles from './overview.module.css';
 
@@ -148,7 +154,7 @@ function daysOf(count: number): Measured {
 }
 
 function Day({ cell, go }: { cell: MachinesUptimeCell; go: Go }) {
-    const tone = styles[UPTIME_MARK_TONES[cell.Mark]];
+    const tone = styles[dayState(cell).tone];
     const named =
         cell.Sentence === undefined ? {} : { 'aria-label': cell.Sentence, title: cell.Sentence };
     if (dayOpensHistory(cell)) {
