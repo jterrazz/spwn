@@ -20,7 +20,9 @@ SDK_PROBE    ?= xcrun --sdk macosx --show-sdk-path
 MENUBAR_HOME := $(HOME)/Applications/Station.app
 WINDOW_APP   := .artifacts/window/Spwn.app
 WINDOW_CARGO := .artifacts/window/cargo
-# value: the window's bundle version is the release's, as git describes it for the binaries and Station.app, without its v
+# value: the window's version is the release's, as git describes it for the binaries and Station.app, without its v;
+# value: it is compiled into the binary, where the updater reads it, and Tauri writes the bundle's from it
+# hazard: a bare hash (a clone with no tag reachable) is no semver, and tauri build refuses it
 WINDOW_VERSION ?= $(patsubst v%,%,$(shell git describe --tags --always --dirty))
 CATALOG_BIN  := .artifacts/menubar/build/debug/StationCatalog
 CATALOG_OUT  ?= .artifacts/catalog
@@ -135,10 +137,11 @@ menubar-uninstall: ## Unregister the login item, then remove ~/Applications/Stat
 	@printf "$(GREEN)●$(RESET) Removed $(MENUBAR_HOME)\n"
 
 window: node_modules/.install ## Build the window's bundle for darwin-arm64, signed ad hoc, into $(WINDOW_APP)
-	@cd apps/desktop && CARGO_TARGET_DIR=$(CURDIR)/$(WINDOW_CARGO) npx tauri build --ci --target aarch64-apple-darwin --bundles app
+	@cd apps/desktop && CARGO_TARGET_DIR=$(CURDIR)/$(WINDOW_CARGO) npx tauri build --ci --target aarch64-apple-darwin --bundles app --config '{"version":"$(WINDOW_VERSION)"}'
 	@rm -rf $(WINDOW_APP)
 	@cp -R $(WINDOW_CARGO)/aarch64-apple-darwin/release/bundle/macos/Spwn.app $(WINDOW_APP)
-	@plutil -replace CFBundleShortVersionString -string "$(WINDOW_VERSION)" $(WINDOW_APP)/Contents/Info.plist
+	@shown=$$(plutil -extract CFBundleShortVersionString raw $(WINDOW_APP)/Contents/Info.plist); \
+		if [ "$$shown" != "$(WINDOW_VERSION)" ]; then printf "window: the bundle says %s, not the %s compiled in\n" "$$shown" "$(WINDOW_VERSION)"; exit 1; fi
 	@plutil -replace CFBundleVersion -string "$(WINDOW_VERSION)" $(WINDOW_APP)/Contents/Info.plist
 	@codesign --force --sign - --timestamp=none $(WINDOW_APP)
 	@codesign --verify --strict $(WINDOW_APP)
