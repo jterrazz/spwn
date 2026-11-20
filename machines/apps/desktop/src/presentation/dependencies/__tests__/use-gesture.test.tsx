@@ -64,7 +64,7 @@ describe('use-gesture', () => {
                 await visitor.see(content('Update: done'));
 
                 // Then - the newest group is today's, holding the engine's line of the update, the journal asked once more
-                await visitor.see(content('newest: Today, node'));
+                await visitor.see(content('newest: Today, node updated'));
             },
         );
         const asked = stage
