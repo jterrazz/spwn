@@ -4,7 +4,7 @@ import styles from './panel.module.css';
 
 export type PanelProps = {
     title: string;
-    note?: string;
+    note?: ReactNode;
     action?: ReactNode;
     padded?: boolean;
     children?: ReactNode;
