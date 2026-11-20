@@ -21,7 +21,7 @@ The identity `package.json` carries beside what Getting started writes:
 {
     "name": "@jterrazz/{name}",
     "version": "0.1.0",
-    "author": "Jean-Baptiste Terrazzoni <contact@jterrazz.com>",
+    "author": "Jean-Baptiste Terrazzoni <you@example.com>",
     "type": "module",
     "files": ["dist"],
     "publishConfig": { "registry": "https://registry.npmjs.org/" },
