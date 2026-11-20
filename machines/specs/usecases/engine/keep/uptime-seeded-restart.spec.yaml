@@ -1,0 +1,21 @@
+description: 'a seeded server''s record starts at its seed; a restart boots it anew and keeps that start'
+env: two-macs
+runs:
+    - command: 'machines --json | /usr/bin/jq -c ''.macs[1].vms[0] | {name, since: .uptime.since[11:19], days: [.uptime.days[-2:][] | .mark]}'''
+      exit: 0
+      stdout: |
+          {"name":"infra","since":"10:00:00","days":["none","ok"]}
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"] | {since: .stores.uptime.infra.since[11:19], pid: .vms.infra.pid, booted: (.vms.infra.up_at != null)}'' world.json'
+      exit: 0
+      stdout: |
+          {"since":"10:00:00","pid":2001,"booted":false}
+    - command: 'machines restart infra --on mac-mini --confirm=infra >/dev/null'
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"] | {since: .stores.uptime.infra.since[11:19], pid: .vms.infra.pid, booted: (.vms.infra.up_at > .stores.uptime.infra.since)}'' world.json'
+      exit: 0
+      stdout: |
+          {"since":"10:00:00","pid":1002,"booted":true}
+    - command: 'machines --json | /usr/bin/jq -c ''.macs[1].vms[0] | {name, since: .uptime.since[11:19], restarts: (.uptime.days[-1].restarts // 0)}'''
+      exit: 0
+      stdout: |
+          {"name":"infra","since":"10:00:00","restarts":0}

@@ -190,6 +190,11 @@
             "offline": true,
             "locked": true,
             "stores": {
+                "uptime": {
+                    "infra": {
+                        "since": "2026-11-04T10:00:00Z"
+                    }
+                },
                 "release": {
                     "Read": "2026-11-04T10:00:00Z"
                 },
