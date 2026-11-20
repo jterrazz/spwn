@@ -25,7 +25,7 @@ The corpus is `docs/` + `README.md`, mapped by `docs/README.md`. Do not duplicat
 | Building, and which folder a change opens            | `docs/guides/develop.md`            |
 | The three tiers, use cases over a world, the stubs   | `docs/guides/test.md`               |
 | The menu bar's stories, goldens, the Station Catalog | `docs/guides/test.md`               |
-| The tagged release, `make provision`                 | `docs/guides/release.md`            |
+| What a release carries, `make provision`             | `docs/guides/release.md`            |
 | Every command and flag                               | `docs/reference/commands.md`        |
 | Macs, servers, workspaces, `--on`, `use`, the engine | `docs/reference/machines.md`        |
 | Ports: rights, audiences, sharing, HTTPS             | `docs/reference/ports.md`           |

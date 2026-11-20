@@ -1,42 +1,22 @@
 # Release
 
-This repository ships two artefacts, the `station` binary and the menu bar's `Station.app`, and they reach a machine two ways: a tagged GitHub release, or a build from a checkout.
+Station ships two artefacts, the `station` binary and the menu bar's `Station.app`, and they reach a machine two ways: a tagged GitHub release, or a build from a checkout. The pipeline that cuts the release (the tag, the jobs, the dry run, signing and notarization, the rollback) is spwn's, one release for both products: [Release](../../../docs/guides/release.md). This page keeps what is station's.
 
-| Section                | Answers                               |
-| ---------------------- | ------------------------------------- |
-| The tagged release     | What a `v*` tag builds and releases   |
-| The dry run            | The darwin build, with no release     |
-| How a machine takes it | The one-line install, and the upgrade |
-| From a checkout        | `make provision`, `make deprovision`  |
+| Section                | Answers                                          |
+| ---------------------- | ------------------------------------------------ |
+| What a release carries | The assets, their names, what a darwin one needs |
+| How a machine takes it | The one-line install, and the upgrade            |
+| From a checkout        | `make provision`, `make deprovision`             |
 
-## The tagged release
+## What a release carries
 
-There is no deploy: the release IS the delivery. Pushing a version tag is the whole gesture.
+Each binary is released as an asset named `station-<os>-<arch>`, for `linux` and `darwin` on `arm64` and `amd64`, beside `Station.app.zip`, all listed in the release's one `checksums.txt`; the install script asks for its binary's name and refuses a binary the checksums do not vouch for. A release that renames those assets breaks every machine's install path.
 
-```sh
-git tag v0.21.0-alpha.1
-git push --tags
-```
+The version is stamped from the tag ([ADR-005](../decisions/005-the-version-is-stamped-from-the-tag.md)); `v0.21.0-alpha.1` is station's first release from jterrazz/spwn, continuing that repository's version line after v0.20.0, with no compatibility kept with the v3 stations before it, and `api.Floor` is `v0.1.0`.
 
-`.github/workflows/publish.yaml` fires on `push: tags: v*` and runs three jobs, one run per ref at a time and never cancelled. Nothing is released on a merge to `main`: a merge only runs the validate workflow ([Test](test.md)).
-
-- **Release** waits for Darwin, so a darwin build that fails releases nothing. It calls the shared `studio-actions` `publish-go.yaml` workflow with the binary name `station`, the build path `./apps/engine/cmd/station`, the Go version of `go.work`, a linker flag that stamps the tag as the version, and two targets, `linux/arm64` and `linux/amd64`. It checks, then creates the release with those two binaries and their `checksums.txt`.
-- **Darwin** runs on a GitHub macOS arm64 runner (`macos-26`, the newest Xcode 26 selected). It builds `darwin/arm64` and `darwin/amd64` with cgo, each with Xcode's clang for its arch, so the release's Mac binary has IOKit (Awake's hold and the battery, lid and thermal reads) and LocalAuthentication (the presence a grant asks); a build without cgo has no presence to ask and refuses every grant with `grant.no-presence`. Both are built for macOS 14.0 (Sonoma) and later, `MACOSX_DEPLOYMENT_TARGET=14.0`; the job fails a binary whose build settings do not say `CGO_ENABLED=1` or whose `minos` is not 14.0. `Station.app` keeps its own floor, macOS 26 (`apps/menubar/Package.swift`), since its panel rests on macOS 26 behaviours ([ADR-021](../decisions/021-the-menu-bar-keeps-its-system-window.md)). It then runs `make menubar`, which builds `Station.app` signed ad hoc, and zips it with `ditto` into `Station.app.zip`. On a tag, and on a dry run whose signing secrets are set, the job first signs both binaries and the app with the Developer ID and the hardened runtime, notarizes them and staples the app before zipping it, and a tag whose signing secrets are not set fails before any build; the secrets and the script are the repository's [Release](../../../docs/guides/release.md#2-signing-and-notarization).
-- **Attach** waits for both, then adds the three darwin assets to the release that Release created, and their lines to its `checksums.txt`, with `gh release upload --clobber`.
-
-Each binary is released as an asset named `station-<os>-<arch>`, beside `Station.app.zip` and one `checksums.txt` for all five; the install script asks for its binary's name and refuses a binary the checksums do not vouch for. The version is stamped from the tag ([ADR-005](../decisions/005-the-version-is-stamped-from-the-tag.md)); `v0.21.0-alpha.1` is station's first release from jterrazz/spwn, continuing that repository's version line after v0.20.0, with no compatibility kept with the v3 stations before it, and `api.Floor` is `v0.1.0`. A release that renames those assets breaks every machine's install path.
-
-The release is whole once Attach has ended: between Release and Attach, the time Attach runs, the latest release has no darwin asset yet, and an install on a Mac fails at its download.
+A darwin binary is built on a Mac with cgo, so it has IOKit (Awake's hold and the battery, lid and thermal reads) and LocalAuthentication (the presence a grant asks); a build without cgo has no presence to ask and refuses every grant with `grant.no-presence`. Both darwin binaries run on macOS 14.0 (Sonoma) and later, `MACOSX_DEPLOYMENT_TARGET=14.0`, and the release fails one whose build settings do not say `CGO_ENABLED=1` or whose `minos` is not 14.0. `Station.app` keeps its own floor, macOS 26 (`apps/menubar/Package.swift`), since its panel rests on macOS 26 behaviours ([ADR-021](../decisions/021-the-menu-bar-keeps-its-system-window.md)); `make menubar` builds it.
 
 A released `Station.app` is signed with the Developer ID, notarized and stapled, so Gatekeeper accepts it even downloaded through a browser, which sets the quarantine attribute that `curl` does not; one built by `make menubar` stays signed ad hoc, and a browser's copy of it is refused at its first open.
-
-## The dry run
-
-```sh
-gh workflow run publish.yaml --ref <branch> -f dry_run=true
-```
-
-A `workflow_dispatch` run builds the Darwin job alone and uploads its five files as the run's artifact `station-darwin` (the three assets and `checksums-darwin.txt`); Release and Attach are skipped, so nothing is released. Its binaries are stamped `dry-run-<sha>`. `dry_run` defaults to true; set false on a `v*` tag, it releases that tag again, as its push did; from any other ref, it is a dry run still.
 
 ## How a machine takes it
 
@@ -47,8 +27,8 @@ A Mac takes `Station.app` as an app of the catalog, `station apps install statio
 ## From a checkout
 
 ```sh
-git clone https://github.com/jterrazz/studio-station.git
-cd studio-station
+git clone https://github.com/jterrazz/spwn.git
+cd spwn/machines
 make provision
 exec zsh
 ```

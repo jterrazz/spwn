@@ -14,7 +14,7 @@
 | ---------------------------- | ---------------------------------------------------------------------------------- |
 | [Develop](guides/develop.md) | Working from source: the gestures, which folder a change opens, what a change owes |
 | [Test](guides/test.md)       | The three tiers, a use case told over a world, the adapter documents, the stubs    |
-| [Release](guides/release.md) | The tagged release, how a machine takes it, provisioning from a checkout           |
+| [Release](guides/release.md) | What a release carries, how a machine takes it, provisioning from a checkout       |
 
 ## Concepts
 
