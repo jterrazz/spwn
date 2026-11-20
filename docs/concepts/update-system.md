@@ -8,14 +8,15 @@ infrastructure. Every artifact lives in a GitHub Release.
 
 ## Artifacts
 
-Two things are distributed:
+Three things are distributed, the last one only once its job returns:
 
-| Artifact          | Channel                   | Auto-update mechanism                       |
-| ----------------- | ------------------------- | ------------------------------------------- |
-| `spwn` CLI binary | GitHub Releases (tar.gz)  | `spwn upgrade` + background version check   |
-| Spwn spwn.app     | GitHub Releases (bundles) | Tauri updater plugin, reading `latest.json` |
+| Artifact               | Channel                                         | Auto-update mechanism                                             |
+| ---------------------- | ----------------------------------------------- | ----------------------------------------------------------------- |
+| `spwn` CLI binary      | GitHub Releases (tar.gz)                        | `spwn upgrade` + background version check                         |
+| the window, `Spwn.app` | GitHub Releases (`Spwn_darwin_arm64.zip`)       | Tauri updater plugin, reading `latest.json` (`Spwn.app.tar.gz`)   |
+| Spwn spwn.app          | GitHub Releases (bundles), no job builds it now | Tauri updater plugin, reading `latest.json`, when its job returns |
 
-Both are built from the same git tag (`vX.Y.Z`). A single `git push --tags`
+All are built from the same git tag (`vX.Y.Z`). A single `git push --tags`
 triggers the entire pipeline.
 
 ---
@@ -91,7 +92,19 @@ spwn upgrade --force         # reinstall current version
 
 ## Tauri desktop auto-update
 
-No workflow builds, signs or publishes the desktop bundles of `apps/web` today, and the shared `release-tauri.yaml` is deleted; the one Tauri app a release ships is station's window, `Spwn_darwin_arm64.zip`, with no updater ([Release](../guides/release.md#2-signing-and-notarization)). What follows is the design the desktop job must meet when it returns.
+The one Tauri app a release ships is station's window, and it updates itself
+([ADR-065](../../machines/docs/decisions/065-the-window-updates-itself-through-the-tauri-updater.md)).
+A signed run packs the stapled `Spwn.app` into `Spwn.app.tar.gz`, signs it
+with `TAURI_SIGNING_PRIVATE_KEY`, verifies the signature against the public
+key the window carries, and writes `latest.json`, all with
+`scripts/window-update.sh` ([Release](../guides/release.md#2-signing-and-notarization)).
+That manifest names one platform, `darwin-aarch64-window`, the target the
+window's updater looks up, so the spwn desktop apps up to v0.15.5, which poll
+the same URL with the same key and look up `darwin-aarch64`, find nothing.
+The window checks once at its start, offers a newer version, and swaps its
+bundle and relaunches on a press.
+
+No workflow builds, signs or publishes the desktop bundles of `apps/web` today, and the shared `release-tauri.yaml` is deleted. What follows is the design the desktop job must meet when it returns; a release carries one `latest.json`, the window's, so that job writes its platforms into it rather than a second manifest.
 
 The desktop app uses the official
 [`tauri-plugin-updater`](https://v2.tauri.app/plugin/updater/) plugin,

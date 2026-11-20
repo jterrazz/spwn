@@ -1,16 +1,18 @@
 # Release
 
-Station ships two artefacts, the `station` binary and the menu bar's `Station.app`, and they reach a machine two ways: a tagged GitHub release, or a build from a checkout. The pipeline that cuts the release (the tag, the jobs, the dry run, signing and notarization, the rollback) is spwn's, one release for both products: [Release](../../../docs/guides/release.md). This page keeps what is station's.
+Station ships three artefacts, the `station` binary, the menu bar's `Station.app`, and the window's `Spwn.app`, and they reach a machine two ways: a tagged GitHub release, or a build from a checkout. The pipeline that cuts the release (the tag, the jobs, the dry run, signing and notarization, the rollback) is spwn's, one release for both products: [Release](../../../docs/guides/release.md). This page keeps what is station's.
 
 | Section                | Answers                                          |
 | ---------------------- | ------------------------------------------------ |
 | What a release carries | The assets, their names, what a darwin one needs |
-| How a machine takes it | The one-line install, and the upgrade            |
+| How a machine takes it | The one-line install, the upgrade, the window's  |
 | From a checkout        | `make provision`, `make deprovision`             |
 
 ## What a release carries
 
 Each binary is released as an asset named `station-<os>-<arch>`, for `linux` and `darwin` on `arm64` and `amd64`, beside `Station.app.zip`, all listed in the release's one `checksums.txt`; the install script asks for its binary's name and refuses a binary the checksums do not vouch for. A release that renames those assets breaks every machine's install path.
+
+The window rides the same release: `Spwn_darwin_arm64.zip` (its first install), then `Spwn.app.tar.gz`, its `.sig` and `latest.json` (its update), listed in the same `checksums.txt`. A release that renames these, or a window whose `plugins.updater` endpoint moves, strands every installed window.
 
 The version is stamped from the tag ([ADR-005](../decisions/005-the-version-is-stamped-from-the-tag.md)); `v0.21.0-alpha.1` is station's first release from jterrazz/spwn, continuing that repository's version line after v0.20.0, with no compatibility kept with the v3 stations before it, and `api.Floor` is `v0.1.0`.
 
@@ -23,6 +25,8 @@ A released `Station.app` is signed with the Developer ID, notarized and stapled,
 A machine takes the release through the one-line install of [Getting started](../start/getting-started.md), which downloads the asset named for its platform; re-running it is station's own upgrade. What its Machinefile carries is upgraded by `station upgrade`, which leaves station itself alone ([Machinefiles](../reference/machinefiles.md#upgrade)).
 
 A Mac takes `Station.app` as an app of the catalog, `station apps install station-menubar` ([Apps and skills](../reference/apps-and-skills.md)), with no Xcode: it reads the latest release's tag once, downloads that release's `Station.app.zip`, refuses it unless its `checksums.txt` vouches for it, and puts it at `~/Applications/Station.app`, as `make menubar-install` does: the new bundle is copied beside the old, then renamed over it, so a failed install keeps the old app. A running `Station.app` keeps its old process until it is quit and opened again. Like that target, it registers no login item: the app's own "Open at login" switch does.
+
+The window updates itself: at each start it reads `latest.json` of the latest release and, when it is newer, offers it on the Engine page; Install and relaunch swaps the bundle where it runs and relaunches it ([ADR-065](../decisions/065-the-window-updates-itself-through-the-tauri-updater.md)).
 
 ## From a checkout
 
