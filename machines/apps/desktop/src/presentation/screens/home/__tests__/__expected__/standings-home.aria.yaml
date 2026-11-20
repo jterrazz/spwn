@@ -24,6 +24,3 @@
     - text: suspended
     - button "mac-mini"
     - text: 0 %
-  - region "Last night":
-    - heading "Last night" [level=2]
-    - paragraph: not given yet What moved, held or failed overnight

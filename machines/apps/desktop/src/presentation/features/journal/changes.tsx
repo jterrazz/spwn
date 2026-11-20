@@ -1,11 +1,10 @@
-import type { MachinesMacView } from '@jterrazz/station-api';
+import type { CoreJournalGroup, CoreJournalReading, MachinesMacView } from '@jterrazz/station-api';
 
-import { NotGiven } from '../../kit/readings';
+import { useRead } from '../../dependencies/dependencies';
+import { Unanswered } from '../../kit/readings';
 import type { Route } from '../../navigation/route';
 import { Button, Panel } from '../../ui/index';
 import { JournalLineRow } from './journal-line';
-import { useJournal } from './kept-journal/journal';
-import type { JournalGroup } from './kept-journal/journal';
 import { keyOfLine } from './model';
 
 import pageStyles from '../../ui/page.module.css';
@@ -15,7 +14,9 @@ type Go = (to: Route) => void;
 
 const NIGHT_LINES = 3;
 
-type GroupProps = { group: JournalGroup; macs: readonly MachinesMacView[]; go: Go };
+const HISTORY = 'History';
+
+type GroupProps = { group: CoreJournalGroup; macs: readonly MachinesMacView[]; go: Go };
 
 function Lines({ group, macs, go, most }: GroupProps & { most?: number }) {
     return (group.Lines ?? [])
@@ -36,27 +37,46 @@ function Day(props: GroupProps) {
     );
 }
 
+function Days({
+    reading,
+    macs,
+    go,
+}: {
+    reading: CoreJournalReading;
+    macs: readonly MachinesMacView[];
+    go: Go;
+}) {
+    const groups = reading.Groups ?? [];
+    return (
+        <>
+            {groups.length === 0 && reading.Empty !== '' ? (
+                <p className={pageStyles.none}>{reading.Empty}</p>
+            ) : null}
+            {groups.map((group) => (
+                <Day go={go} group={group} key={`${group.Day}/${group.Title}`} macs={macs} />
+            ))}
+            {(reading.Unheard ?? []).map((unheard) => (
+                <p className={pageStyles.none} key={unheard.Mac}>
+                    {unheard.Why}
+                </p>
+            ))}
+        </>
+    );
+}
+
 type HistoryProps = { macs: readonly MachinesMacView[]; go: Go; chosen: null | string };
 
 export function History({ macs, go, chosen }: HistoryProps) {
-    const journal = useJournal(chosen === null ? {} : { Mac: chosen });
+    const journal = useRead('journal.read', chosen === null ? {} : { Mac: chosen });
     if (journal.kind === 'reading') {
         return null;
     }
-    if (journal.kind !== 'read') {
-        return <NotGiven title="History" what="What happened, kept by day" />;
-    }
-    const groups = journal.out.Groups ?? [];
-    const none =
-        chosen === null
-            ? 'No change is kept yet.'
-            : `None of the changes kept concerns ${chosen} or its machines.`;
     return (
-        <Panel note="what happened, newest first" title="History">
-            {groups.length === 0 ? (
-                <p className={pageStyles.none}>{none}</p>
+        <Panel note="what happened, newest first" title={HISTORY}>
+            {journal.kind === 'failed' ? (
+                <Unanswered error={journal.error} size="panel" />
             ) : (
-                groups.map((group) => <Day go={go} group={group} key={group.Title} macs={macs} />)
+                <Days go={go} macs={macs} reading={journal.out} />
             )}
         </Panel>
     );
@@ -65,14 +85,18 @@ export function History({ macs, go, chosen }: HistoryProps) {
 type NightProps = { macs: readonly MachinesMacView[]; go: Go };
 
 export function LastNight({ macs, go }: NightProps) {
-    const journal = useJournal({});
+    const journal = useRead('journal.read', { Night: true });
     if (journal.kind === 'reading') {
         return null;
     }
-    if (journal.kind !== 'read') {
-        return <NotGiven title="Last night" what="What moved, held or failed overnight" />;
+    if (journal.kind === 'failed') {
+        return (
+            <Panel title="Last night">
+                <Unanswered error={journal.error} size="panel" />
+            </Panel>
+        );
     }
-    const night = (journal.out.Groups ?? []).find((group) => group.Night);
+    const [night] = journal.out.Groups ?? [];
     if (night === undefined) {
         return null;
     }

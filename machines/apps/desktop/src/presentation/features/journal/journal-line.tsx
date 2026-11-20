@@ -1,4 +1,10 @@
-import type { CallName, MachinesMacView } from '@jterrazz/station-api';
+import type {
+    AppsUpdateInput,
+    CallName,
+    CoreJournalReadLine,
+    MachinesMacView,
+    Target,
+} from '@jterrazz/station-api';
 import type { ReactNode } from 'react';
 
 import { clock } from '../../../domain/format';
@@ -9,8 +15,8 @@ import type { Route } from '../../navigation/route';
 import { Row, StatePill } from '../../ui/index';
 import type { RowProps } from '../../ui/row';
 import { isCalm } from '../../ui/state-pill';
-import { outcomeShown } from './kept-journal/journal';
-import type { JournalLine, JournalRetry } from './kept-journal/journal';
+import { updateInputOf } from '../../words/provisional';
+import { engineShown } from '../../words/shown';
 import { changeOf, endOf, routeOfLine } from './model';
 
 import styles from './changes.module.css';
@@ -19,10 +25,10 @@ const RETRY_REREADS: readonly CallName[] = ['overview.read', 'apps.list'];
 
 type Go = (to: Route) => void;
 
-type LineProps = { line: JournalLine; macs: readonly MachinesMacView[]; go: Go };
+type LineProps = { line: CoreJournalReadLine; macs: readonly MachinesMacView[]; go: Go };
 
-function Tail({ line }: { line: JournalLine }) {
-    const shown = outcomeShown(line.Outcome);
+function Tail({ line }: { line: CoreJournalReadLine }) {
+    const shown = engineShown('CoreJournalOutcome', line.Outcome);
     const end = endOf(line);
     return (
         <span className={styles.tail}>
@@ -58,13 +64,28 @@ function rowOf({ line, go }: LineProps, link?: ReactNode): RowProps {
     };
 }
 
-function Retried({ retry, ...props }: LineProps & { retry: JournalRetry }) {
-    const found = findMachine(props.macs, retry.Machine);
-    const gesture = useGesture(retry.Call, {
-        input: retry.Input,
+type Retrying = { input: AppsUpdateInput; target: Target | undefined; verb: string };
+
+function retryingOf({ line, macs }: LineProps): Retrying | undefined {
+    const { Retry } = line;
+    if (Retry === null) {
+        return undefined;
+    }
+    const input = updateInputOf(Retry);
+    const found = findMachine(macs, Retry.On);
+    if (input === undefined || found === undefined) {
+        return undefined;
+    }
+    return { input, target: targetOf(found), verb: Retry.Verb };
+}
+
+function Retried({ retrying, ...props }: LineProps & { retrying: Retrying }) {
+    const { input, target, verb } = retrying;
+    const gesture = useGesture('apps.update', {
+        input,
         rereads: RETRY_REREADS,
         subject: props.line.Text,
-        target: found ? targetOf(found) : { name: retry.Machine },
+        target,
     });
     return (
         <GestureRow
@@ -73,9 +94,9 @@ function Retried({ retry, ...props }: LineProps & { retry: JournalRetry }) {
                 props,
                 <GestureButton
                     gesture={gesture}
-                    label={retry.Verb}
-                    name={`${retry.Verb} ${props.line.Text}`}
-                    title={`${retry.Verb} ${props.line.Text}?`}
+                    label={verb}
+                    name={`${verb} ${props.line.Text}`}
+                    title={`${verb} ${props.line.Text}?`}
                 />,
             )}
         />
@@ -83,9 +104,9 @@ function Retried({ retry, ...props }: LineProps & { retry: JournalRetry }) {
 }
 
 export function JournalLineRow(props: LineProps) {
-    const { Retry } = props.line;
-    if (Retry === null) {
+    const retrying = retryingOf(props);
+    if (retrying === undefined) {
         return <Row {...rowOf(props)} />;
     }
-    return <Retried {...props} retry={Retry} />;
+    return <Retried {...props} retrying={retrying} />;
 }

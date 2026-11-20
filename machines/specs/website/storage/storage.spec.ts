@@ -45,7 +45,7 @@ describe('storage', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test.todo('D9 waits for a kept journal on the wire, so Changes records what was freed');
+    test.todo("D9 waits for a gesture's line kept in its Mac's journal");
 
     test('D10 choosing the other Mac at the top shows its own disk and its verdict', async () => {
         // Given - Storage over two-macs, where mac-mini's disk.read is recorded and has nothing to free

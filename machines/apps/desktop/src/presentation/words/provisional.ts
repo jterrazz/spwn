@@ -48,9 +48,11 @@ export function machineKindOf(vm: Pick<MachinesVM, 'Lifetime'>): MachineKind {
     return vm.Lifetime === 'always-on' ? 'server' : 'workspace';
 }
 
-// outside: a need's `Args` are its call's input fields, a list field holding the one value given; the call's input
-// outside: type is not on the wire, so each call's reads its fields here, a list field wrapped.
-export function updateInputOf(need: OverviewNeed): AppsUpdateInput | undefined {
+// outside: a need's or a journal line's Retry `Args` are its call's input fields, a list field holding the one value
+// outside: given; the call's input type is not on the wire, so each call's reads its fields here, a list field wrapped.
+export function updateInputOf(
+    need: Pick<OverviewNeed, 'Args' | 'Call'>,
+): AppsUpdateInput | undefined {
     if (need.Call !== 'apps.update') {
         return undefined;
     }

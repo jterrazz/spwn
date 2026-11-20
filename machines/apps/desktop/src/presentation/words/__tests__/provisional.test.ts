@@ -10,6 +10,7 @@ import {
     freesWhole,
     isPortShared,
     machineKindOf,
+    updateInputOf,
 } from '../provisional';
 
 const recordingFor = await recordingsOf('bare-mac', 'disk-low', 'stories', 'two-macs');
@@ -146,6 +147,27 @@ describe('provisional', () => {
             'on',
             'foot',
             'foot',
+        ]);
+    });
+
+    test("a journal line's Retry reads as the update its Args name, a list field wrapped", () => {
+        // Given - the Retry of a failed app, of a failed manager, of another call, and of an update naming nothing
+        const retries = [
+            { Args: { Names: 'ripgrep' }, Call: 'apps.update' },
+            { Args: { Managers: 'mise' }, Call: 'apps.update' },
+            { Args: { Names: 'ripgrep' }, Call: 'disk.free' },
+            { Args: null, Call: 'apps.update' },
+        ];
+
+        // When - each is read as an update's input
+        const inputs = retries.map((retry) => updateInputOf(retry));
+
+        // Then - the app, the manager, then nothing twice
+        expect(inputs).toStrictEqual([
+            { Names: ['ripgrep'] },
+            { Managers: ['mise'] },
+            undefined,
+            undefined,
         ]);
     });
 });

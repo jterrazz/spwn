@@ -34,6 +34,7 @@ export const BRIDGED = [
     'grants.remove',
     'images.delete',
     'images.list',
+    'journal.read',
     'machinefile.apply',
     'machinefile.drift',
     'machinefile.explain',

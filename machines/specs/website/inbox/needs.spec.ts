@@ -122,7 +122,7 @@ describe('needs', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test.todo("N9 waits for the engine's kept journal (drawn on a provisional copy)");
+    test.todo("N9 waits for a gesture's line kept in its Mac's journal");
 
     test("N10 a Mac chosen above the list keeps only that Mac's needs, and All brings them back", async () => {
         // Given - the Inbox over two-macs, where every need is on the first Mac
@@ -153,9 +153,27 @@ describe('needs', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test.todo(
-        "N10 waits for the engine's kept journal, read for one Mac alone (drawn on a provisional copy)",
-    );
+    test("N10 a Mac chosen above the list keeps only that Mac's history, and All brings it back", async () => {
+        // Given - the Inbox over two-macs, whose night failed mise on the first Mac and kept nothing on the mini
+        const history = region('History');
+        const result = await website.visit('/?world=two-macs&page=inbox', async (visitor) => {
+            await visitor.see(within(history, button('Retry mise')));
+
+            // When - the Mac mini is chosen
+            await visitor.click(within(main(), button('mac-mini')));
+
+            // Then - the History reads the engine's sentence for that Mac, and mise has left
+            await visitor.see(within(history, content('Nothing was done in the last 7 days.')));
+            await visitor.gone(within(history, button('Retry mise')));
+
+            // When - all machines are chosen again
+            await visitor.click(within(main(), button('All machines')));
+
+            // Then - the night is back
+            await visitor.see(within(history, button('Retry mise')));
+        });
+        expect(result.errors.text).toBe('');
+    });
 
     test("N12 a broken sign-in's line opens the sheet of the Sign-ins tab, for its program on its machine", async () => {
         // Given - the Inbox over two-macs, where This Mac's npm sign-in is broken

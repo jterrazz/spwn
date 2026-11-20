@@ -225,7 +225,7 @@ describe('mac', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test.todo('M7 waits for a kept journal that records a Free, read in Changes');
+    test.todo("M7 waits for a gesture's line kept in its Mac's journal");
 
     test('M8 the Packages tab names the file the Mac follows, and says it matches', async () => {
         // Given - the Packages tab of This Mac over two-macs

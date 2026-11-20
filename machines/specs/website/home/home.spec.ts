@@ -117,7 +117,21 @@ describe('home', () => {
         'H6 waits for a world whose activity moves: its meter grows each counter at one rate (apps/engine/world/past.go), so two activity.read of working-hard in one door answer the same bytes (probe.py), and the figure has nothing to move to',
     );
 
-    test.todo("H9 waits for the engine's kept journal (drawn on a provisional copy)");
+    test('H9 Last night counts what the night did, each line the package, its versions and its machines', async () => {
+        // Given - the window on Home over stories, whose night moved three packages, held one and failed one
+        const lastNight = region('Last night');
+        const result = await website.visit(STORIES, async (visitor) => {
+            // When - I look at Last night
+            await visitor.see(within(lastNight, content('3 moved, 1 held, 1 failed')));
+
+            // Then - node from 24.11.0 to 24.11.1 on six machines, gh on macbook-pro alone
+            await visitor.see(within(lastNight, content('24.11.0 → 24.11.1')));
+            await visitor.see(within(lastNight, content('6 machines')));
+            await visitor.see(within(lastNight, content('2.97.0 → 2.98.0')));
+            await visitor.see(within(lastNight, content('macbook-pro')));
+        });
+        expect(result.errors.text).toBe('');
+    });
 
     test('H10 Home offers no Stop and no Delete, only a line may offer one', async () => {
         // Given - the window on Home over two-macs, a running workspace on it

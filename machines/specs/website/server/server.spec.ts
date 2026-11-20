@@ -79,7 +79,7 @@ describe('server', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test.todo("S3 waits for the engine's kept journal, where Changes records a restart");
+    test.todo("S3 waits for a gesture's line kept in its Mac's journal");
 
     test('S4 Delete asks for the name typed, and stays off until it matches', async () => {
         // Given - the window on infra's page over two-macs
