@@ -2,22 +2,24 @@
 
 set -euo pipefail
 
-secrets=(MACOS_CERT_P12_BASE64 MACOS_CERT_PASSWORD APPLE_API_KEY_P8_BASE64 APPLE_API_KEY_ID APPLE_API_ISSUER_ID APPLE_TEAM_ID)
+secrets=(APPLE_CERTIFICATE APPLE_CERTIFICATE_PASSWORD APPLE_SIGNING_IDENTITY APPLE_ID APPLE_PASSWORD APPLE_TEAM_ID)
 
 usage() {
     cat >&2 <<'EOF'
 usage: sign-macos.sh <step> [paths...]
 
-  require             decide whether this run signs: every secret set, or none and not a tag
-  keychain            import MACOS_CERT_P12_BASE64 into a keychain of this run, and write the notary key
-  sign <path>...      codesign each binary or .app with the hardened runtime and a timestamp, then verify it
-  notarize <file>...  submit each .zip or .dmg to Apple's notary service and wait for its verdict
-  staple <path>...    staple the notarization ticket to each .app or .dmg, then let Gatekeeper judge it
-  cleanup             delete the keychain and the key files
+  require                 decide whether this run signs: every secret set, or none on a ref Infisical does not trust
+  keychain                import APPLE_CERTIFICATE into a keychain of this run, and check APPLE_SIGNING_IDENTITY is in it, of APPLE_TEAM_ID
+  sign <path>...          codesign each binary or .app with the hardened runtime and a timestamp, then verify it
+  notarize <file>...      submit each .zip or .dmg to Apple's notary service and wait for its verdict
+  staple <path>...        staple the notarization ticket to each .app or .dmg, then let Gatekeeper judge it
+  binary <target> <path>  GoReleaser's post-build hook: on a signed run, sign a darwin binary and notarize it inside a zip that is not shipped
+  cleanup                 delete the keychain and the files of this run
 
 env:
-  MACOS_SIGN_IDENTITY  the identity `keychain` found; `-` signs ad hoc, with no keychain and no timestamp
-  MACOS_NOTARIZE=skip  notarize and staple print what they skip and succeed: the dry run of a signing
+  APPLE_SIGNING_IDENTITY  the Developer ID Application identity, its name or its SHA-1; `-` signs ad hoc, with no keychain and no timestamp
+  MACOS_NOTARIZE=skip     notarize and staple print what they skip and succeed: the dry run of a signing
+  MACOS_SIGN=true         `binary` signs; any other value passes the binary through untouched
 EOF
     exit 2
 }
@@ -38,11 +40,16 @@ publish() {
 }
 
 adhoc() {
-    [ "${MACOS_SIGN_IDENTITY:-}" = - ]
+    [ "${APPLE_SIGNING_IDENTITY:-}" = - ]
 }
 
 skipped() {
     [ "${MACOS_NOTARIZE:-}" = skip ]
+}
+
+# invariant: Infisical gives a token to main and to a v* tag alone, so those two refs read the secrets and must find all of them; any other ref reads none
+trusted() {
+    case "${GITHUB_REF:-}" in refs/heads/main | refs/tags/v*) return 0 ;; *) return 1 ;; esac
 }
 
 require() {
@@ -55,22 +62,23 @@ require() {
         publish GITHUB_OUTPUT signed true
         return
     fi
-    if [ "${GITHUB_REF_TYPE:-}" = tag ]; then
-        fail "a release tag ships signed and notarized macOS artefacts, and these secrets are not set: ${missing[*]} (docs/guides/release.md, \"Signing and notarization\")"
+    if trusted; then
+        fail "${GITHUB_REF} reads the signing secrets from Infisical, and these are not set: ${missing[*]} (docs/guides/release.md, \"Signing and notarization\")"
     fi
     if [ ${#missing[@]} -lt ${#secrets[@]} ]; then
         fail "the signing secrets are set in part, and these are missing: ${missing[*]}"
     fi
-    echo "::notice::no signing secret is set: this run, not a tag, builds the macOS artefacts unsigned"
+    echo "::notice::no signing secret is set: ${GITHUB_REF:-this run} is neither main nor a v* tag, reads nothing from Infisical, and builds the macOS artefacts unsigned"
     publish GITHUB_OUTPUT signed false
 }
 
 keychain() {
     local name
-    for name in MACOS_CERT_P12_BASE64 MACOS_CERT_PASSWORD APPLE_API_KEY_P8_BASE64; do
+    for name in APPLE_CERTIFICATE APPLE_CERTIFICATE_PASSWORD APPLE_SIGNING_IDENTITY APPLE_TEAM_ID; do
         [ -n "${!name:-}" ] || fail "keychain: $name is not set"
     done
-    local dir chain password identity
+    adhoc && fail "keychain: APPLE_SIGNING_IDENTITY is -, which signs ad hoc and needs no keychain"
+    local dir chain password
     dir=$(mktemp -d "${RUNNER_TEMP:-${TMPDIR:-/tmp}}/signing.XXXXXX")
     chmod 700 "$dir"
     chain="$dir/signing.keychain-db"
@@ -79,13 +87,13 @@ keychain() {
     publish GITHUB_ENV MACOS_SIGN_DIR "$dir"
     publish GITHUB_ENV MACOS_SIGN_KEYCHAIN "$chain"
 
-    (umask 077 && printf '%s' "$MACOS_CERT_P12_BASE64" | base64 --decode > "$dir/certificate.p12") ||
-        fail "keychain: MACOS_CERT_P12_BASE64 is not base64"
+    (umask 077 && printf '%s' "$APPLE_CERTIFICATE" | base64 --decode > "$dir/certificate.p12") ||
+        fail "keychain: APPLE_CERTIFICATE is not base64"
     security create-keychain -p "$password" "$chain"
     security set-keychain-settings -lut 21600 "$chain"
     security unlock-keychain -p "$password" "$chain"
-    security import "$dir/certificate.p12" -k "$chain" -f pkcs12 -P "$MACOS_CERT_PASSWORD" -T /usr/bin/codesign >/dev/null ||
-        fail "keychain: MACOS_CERT_P12_BASE64 does not open with MACOS_CERT_PASSWORD"
+    security import "$dir/certificate.p12" -k "$chain" -f pkcs12 -P "$APPLE_CERTIFICATE_PASSWORD" -T /usr/bin/codesign >/dev/null ||
+        fail "keychain: APPLE_CERTIFICATE does not open with APPLE_CERTIFICATE_PASSWORD"
     rm -f "$dir/certificate.p12"
     # invariant: codesign reads the key without a prompt only once the partition list names it; a CI runner has nobody to click Allow
     security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$password" "$chain" >/dev/null
@@ -96,20 +104,29 @@ keychain() {
     done < <(security list-keychains -d user)
     security list-keychains -d user -s "$chain" "${chains[@]}"
 
-    identity=$(security find-identity -v -p codesigning "$chain" | awk '/"Developer ID Application: / { print $2; exit }')
-    [ -n "$identity" ] || fail "keychain: MACOS_CERT_P12_BASE64 holds no valid Developer ID Application identity with its private key"
-    echo "::add-mask::$identity"
-    publish GITHUB_ENV MACOS_SIGN_IDENTITY "$identity"
+    team_of_identity "$(security find-identity -v -p codesigning "$chain")"
+    echo "keychain: the Developer ID Application identity APPLE_SIGNING_IDENTITY names is imported, of team APPLE_TEAM_ID"
+}
 
-    (umask 077 && printf '%s' "$APPLE_API_KEY_P8_BASE64" | base64 --decode > "$dir/notary.p8") ||
-        fail "keychain: APPLE_API_KEY_P8_BASE64 is not base64"
-    grep -q 'BEGIN PRIVATE KEY' "$dir/notary.p8" || fail "keychain: APPLE_API_KEY_P8_BASE64 does not decode to a .p8 private key"
-    publish GITHUB_ENV APPLE_API_KEY_PATH "$dir/notary.p8"
-    echo "keychain: one Developer ID Application identity imported, notary key written"
+# value: reads `security find-identity` lines, `  1) <SHA-1> "<name>"`, and never prints one: the identity's name carries the owner's name
+team_of_identity() {
+    local listing=$1 line hash name found=
+    while IFS= read -r line; do
+        [[ $line =~ ^[[:space:]]*[0-9]+\)[[:space:]]+([0-9A-F]{40})[[:space:]]+\"(.*)\"$ ]] || continue
+        hash=${BASH_REMATCH[1]}
+        name=${BASH_REMATCH[2]}
+        if [ "$APPLE_SIGNING_IDENTITY" = "$hash" ] || [ "$APPLE_SIGNING_IDENTITY" = "$name" ]; then
+            found=$name
+            break
+        fi
+    done <<< "$listing"
+    [ -n "$found" ] || fail "keychain: APPLE_CERTIFICATE holds no valid codesigning identity APPLE_SIGNING_IDENTITY names, with its private key"
+    [[ $found == "Developer ID Application: "* ]] || fail "keychain: APPLE_SIGNING_IDENTITY is not a Developer ID Application identity"
+    [[ $found == *" ($APPLE_TEAM_ID)" ]] || fail "keychain: APPLE_SIGNING_IDENTITY belongs to another team than APPLE_TEAM_ID"
 }
 
 codesign_one() {
-    local path=$1 args=(--force --options runtime --sign "$MACOS_SIGN_IDENTITY")
+    local path=$1 args=(--force --options runtime --sign "$APPLE_SIGNING_IDENTITY")
     if adhoc; then
         args+=(--timestamp=none)
     else
@@ -120,7 +137,7 @@ codesign_one() {
 
 sign() {
     [ $# -gt 0 ] || usage
-    [ -n "${MACOS_SIGN_IDENTITY:-}" ] || fail "sign: no identity; run the keychain step first, or set MACOS_SIGN_IDENTITY=- to sign ad hoc"
+    [ -n "${APPLE_SIGNING_IDENTITY:-}" ] || fail "sign: APPLE_SIGNING_IDENTITY is not set; set it to - to sign ad hoc"
     if ! adhoc; then
         [ -n "${MACOS_SIGN_KEYCHAIN:-}" ] || fail "sign: MACOS_SIGN_KEYCHAIN is not set; run the keychain step first"
         [ -n "${APPLE_TEAM_ID:-}" ] || fail "sign: APPLE_TEAM_ID is not set"
@@ -155,18 +172,19 @@ notarize() {
         return
     fi
     local name
-    for name in APPLE_API_KEY_PATH APPLE_API_KEY_ID APPLE_API_ISSUER_ID; do
+    for name in APPLE_ID APPLE_PASSWORD APPLE_TEAM_ID; do
         [ -n "${!name:-}" ] || fail "notarize: $name is not set"
     done
     local answer id status
     for file in "$@"; do
         case "$file" in *.zip | *.dmg | *.pkg) ;; *) fail "notarize: $file is not a .zip, .dmg or .pkg, the only shapes the notary service takes" ;; esac
-        answer=$(xcrun notarytool submit "$file" --key "$APPLE_API_KEY_PATH" --key-id "$APPLE_API_KEY_ID" --issuer "$APPLE_API_ISSUER_ID" --wait --timeout 30m --output-format json) ||
+        # hazard: notarytool takes the app-specific password on its command line alone, so it is in the runner's process list while it runs; the runner is the job's own, and the log masks it
+        answer=$(xcrun notarytool submit "$file" --apple-id "$APPLE_ID" --password "$APPLE_PASSWORD" --team-id "$APPLE_TEAM_ID" --wait --timeout 30m --output-format json) ||
             fail "notarize: notarytool could not submit $file: $answer"
         id=$(plutil -extract id raw -o - - <<< "$answer")
         status=$(plutil -extract status raw -o - - <<< "$answer")
         if [ "$status" != Accepted ]; then
-            xcrun notarytool log "$id" --key "$APPLE_API_KEY_PATH" --key-id "$APPLE_API_KEY_ID" --issuer "$APPLE_API_ISSUER_ID" >&2 || true
+            xcrun notarytool log "$id" --apple-id "$APPLE_ID" --password "$APPLE_PASSWORD" --team-id "$APPLE_TEAM_ID" >&2 || true
             fail "notarize: Apple answered $status for $file (submission $id)"
         fi
         echo "notarize: $file accepted (submission $id)"
@@ -191,6 +209,23 @@ staple() {
     done
 }
 
+binary() {
+    [ $# -eq 2 ] || usage
+    local target=$1 path=$2
+    if [ "${MACOS_SIGN:-}" != true ] || [[ $target != darwin_* ]]; then
+        echo "binary: $target left as built, MACOS_SIGN is not true or the target is not darwin"
+        return
+    fi
+    sign "$path"
+    local dir
+    dir=$(mktemp -d "${MACOS_SIGN_DIR:-${RUNNER_TEMP:-${TMPDIR:-/tmp}}}/notary.XXXXXX")
+    mkdir "$dir/$target"
+    cp "$path" "$dir/$target/"
+    ditto -c -k --keepParent "$dir/$target" "$dir/$target.zip"
+    notarize "$dir/$target.zip"
+    rm -rf "$dir"
+}
+
 cleanup() {
     if [ -n "${MACOS_SIGN_KEYCHAIN:-}" ] && [ -e "$MACOS_SIGN_KEYCHAIN" ]; then
         security delete-keychain "$MACOS_SIGN_KEYCHAIN"
@@ -198,13 +233,13 @@ cleanup() {
     if [ -n "${MACOS_SIGN_DIR:-}" ]; then
         rm -rf "$MACOS_SIGN_DIR"
     fi
-    echo "cleanup: the keychain and the key files of this run are deleted"
+    echo "cleanup: the keychain and the files of this run are deleted"
 }
 
 [ $# -gt 0 ] || usage
 step=$1
 shift
 case "$step" in
-    require | keychain | sign | notarize | staple | cleanup) "$step" "$@" ;;
+    require | keychain | sign | notarize | staple | binary | cleanup) "$step" "$@" ;;
     *) usage ;;
 esac

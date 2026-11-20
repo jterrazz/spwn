@@ -25,23 +25,11 @@ builds:
           - arm64
       ldflags:
           - -s -w -X spwn.sh/apps/cli.Version={{.Version}}
-
-# invariant: on a signed run (MACOS_SIGN=true, set by the publish workflow's signing job) the darwin binaries are signed with the Developer ID and notarized before they are archived; a snapshot run by hand leaves them unsigned
-notarize:
-    macos:
-        - enabled: '{{ eq (envOrDefault "MACOS_SIGN" "false") "true" }}'
-          ids:
-              - spwn
-          sign:
-              certificate: '{{ .Env.MACOS_CERT_P12_BASE64 }}'
-              password: '{{ .Env.MACOS_CERT_PASSWORD }}'
-          notarize:
-              issuer_id: '{{ .Env.APPLE_API_ISSUER_ID }}'
-              key_id: '{{ .Env.APPLE_API_KEY_ID }}'
-              key: '{{ .Env.APPLE_API_KEY_P8_BASE64 }}'
-              wait: true
-              # invariant: GoReleaser refuses more than 20m, the lifetime Apple allows an API key's token
-              timeout: 20m
+      # invariant: on a signed run (MACOS_SIGN=true, set by the publish workflow's signing job, on its macOS runner) each darwin binary is signed with the Developer ID and notarized before it is archived; any other target, or a snapshot run by hand, passes through unsigned
+      hooks:
+          post:
+              - cmd: scripts/sign-macos.sh binary {{ .Target }} {{ .Path }}
+                output: true
 
 archives:
     - id: spwn

@@ -10,29 +10,36 @@ on:
 permissions:
     contents: read
 
+# value: where the signing secrets live, the one place a move of them is written; `.github/actions/signing-secrets` reads them by the job's OIDC token
+env:
+    SIGNING_SECRETS_PROJECT: studio-ci
+    SIGNING_SECRETS_PATH: /spwn
+
 # invariant: one run per ref at a time, never cancelled half way through a release
 concurrency:
     group: publish-${{ github.ref }}
     cancel-in-progress: false
 
 jobs:
-    # invariant: a release tag ships only signed and notarized macOS artefacts, so a tag whose signing secrets are not all set fails here, before any build; a dry run with none of them builds unsigned
+    # invariant: main and a v* tag, the refs Infisical gives a token to, ship only signed and notarized macOS artefacts, so either fails here, before any build, unless every signing secret is read; a dry run on another branch reads none and builds unsigned
     signing:
         name: Signing
         runs-on: ubuntu-26.04-arm
+        permissions:
+            contents: read
+            id-token: write
         outputs:
             signed: ${{ steps.require.outputs.signed }}
         steps:
             - uses: actions/checkout@v4
+            - if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
+              uses: ./.github/actions/signing-secrets
+              with:
+                  names: APPLE_CERTIFICATE APPLE_CERTIFICATE_PASSWORD APPLE_SIGNING_IDENTITY APPLE_ID APPLE_PASSWORD APPLE_TEAM_ID
+                  project: ${{ env.SIGNING_SECRETS_PROJECT }}
+                  path: ${{ env.SIGNING_SECRETS_PATH }}
             - id: require
               run: scripts/sign-macos.sh require
-              env:
-                  MACOS_CERT_P12_BASE64: ${{ secrets.MACOS_CERT_P12_BASE64 }}
-                  MACOS_CERT_PASSWORD: ${{ secrets.MACOS_CERT_PASSWORD }}
-                  APPLE_API_KEY_P8_BASE64: ${{ secrets.APPLE_API_KEY_P8_BASE64 }}
-                  APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
-                  APPLE_API_ISSUER_ID: ${{ secrets.APPLE_API_ISSUER_ID }}
-                  APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
 
     # value: station's linux binaries need no cgo, so they cross-build on Linux; its darwin ones need cgo for IOKit and build on a Mac below
     machines-linux:
@@ -67,6 +74,9 @@ jobs:
         name: Machines (darwin)
         needs: [signing]
         runs-on: macos-26
+        permissions:
+            contents: read
+            id-token: write
         defaults:
             run:
                 working-directory: machines
@@ -107,20 +117,19 @@ jobs:
                       [ "$minos" = "$MACOSX_DEPLOYMENT_TARGET" ]
                   done
                   "$dist/station-darwin-arm64" --version
+            - name: Read the signing secrets
+              if: needs.signing.outputs.signed == 'true'
+              uses: ./.github/actions/signing-secrets
+              with:
+                  names: APPLE_CERTIFICATE APPLE_CERTIFICATE_PASSWORD APPLE_SIGNING_IDENTITY APPLE_ID APPLE_PASSWORD APPLE_TEAM_ID
+                  project: ${{ env.SIGNING_SECRETS_PROJECT }}
+                  path: ${{ env.SIGNING_SECRETS_PATH }}
             - name: Import the signing identity
               if: needs.signing.outputs.signed == 'true'
               run: ../scripts/sign-macos.sh keychain
-              env:
-                  MACOS_CERT_P12_BASE64: ${{ secrets.MACOS_CERT_P12_BASE64 }}
-                  MACOS_CERT_PASSWORD: ${{ secrets.MACOS_CERT_PASSWORD }}
-                  APPLE_API_KEY_P8_BASE64: ${{ secrets.APPLE_API_KEY_P8_BASE64 }}
             # value: a bare binary cannot be stapled, so both are notarized inside one zip that is not shipped, and Gatekeeper reads their ticket online
             - name: Sign and notarize the binaries
               if: needs.signing.outputs.signed == 'true'
-              env:
-                  APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-                  APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
-                  APPLE_API_ISSUER_ID: ${{ secrets.APPLE_API_ISSUER_ID }}
               run: |
                   set -euo pipefail
                   dist="$RUNNER_TEMP/station"
@@ -136,10 +145,6 @@ jobs:
                   vtool -show-build .artifacts/menubar/Station.app/Contents/MacOS/StationMenuBar | awk '$1 == "minos"'
             - name: Sign, notarize and staple Station.app
               if: needs.signing.outputs.signed == 'true'
-              env:
-                  APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-                  APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
-                  APPLE_API_ISSUER_ID: ${{ secrets.APPLE_API_ISSUER_ID }}
               run: |
                   set -euo pipefail
                   ../scripts/sign-macos.sh sign .artifacts/menubar/Station.app
@@ -164,12 +169,14 @@ jobs:
 
     # value: one release per tag, opened once by goreleaser: spwn's archives, plus station's binaries and Station.app.zip as extra files, every asset listed in the one checksums.txt
     # invariant: the release opens only once both station jobs are built, so a failed station leaves no spwn-only release
+    # value: on macOS, because GoReleaser's post-build hook signs and notarizes spwn's darwin binaries with codesign and notarytool before it archives them
     publish:
         name: Publish
         needs: [signing, machines-linux, machines-darwin]
-        runs-on: ubuntu-26.04-arm
+        runs-on: macos-26
         permissions:
             contents: write
+            id-token: write
         steps:
             - uses: actions/checkout@v4
               with:
@@ -184,6 +191,16 @@ jobs:
                   path: .artifacts/station
                   merge-multiple: true
             - run: ls -l .artifacts/station
+            - name: Read the signing secrets
+              if: needs.signing.outputs.signed == 'true'
+              uses: ./.github/actions/signing-secrets
+              with:
+                  names: APPLE_CERTIFICATE APPLE_CERTIFICATE_PASSWORD APPLE_SIGNING_IDENTITY APPLE_ID APPLE_PASSWORD APPLE_TEAM_ID
+                  project: ${{ env.SIGNING_SECRETS_PROJECT }}
+                  path: ${{ env.SIGNING_SECRETS_PATH }}
+            - name: Import the signing identity
+              if: needs.signing.outputs.signed == 'true'
+              run: scripts/sign-macos.sh keychain
             - name: Run GoReleaser
               uses: goreleaser/goreleaser-action@v6
               with:
@@ -191,11 +208,9 @@ jobs:
                   args: release --clean ${{ github.event_name == 'workflow_dispatch' && '--snapshot' || '' }}
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                  # value: GoReleaser signs and notarizes spwn's darwin binaries itself, from Linux, before it archives them (`notarize` in .goreleaser.yml)
+                  # value: read by the spwn build's post hook in .goreleaser.yml, `scripts/sign-macos.sh binary`
                   MACOS_SIGN: ${{ needs.signing.outputs.signed }}
-                  MACOS_CERT_P12_BASE64: ${{ secrets.MACOS_CERT_P12_BASE64 }}
-                  MACOS_CERT_PASSWORD: ${{ secrets.MACOS_CERT_PASSWORD }}
-                  APPLE_API_KEY_P8_BASE64: ${{ secrets.APPLE_API_KEY_P8_BASE64 }}
-                  APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
-                  APPLE_API_ISSUER_ID: ${{ secrets.APPLE_API_ISSUER_ID }}
             - run: cat .artifacts/goreleaser/checksums.txt
+            - name: Delete the signing keychain
+              if: always() && needs.signing.outputs.signed == 'true'
+              run: scripts/sign-macos.sh cleanup

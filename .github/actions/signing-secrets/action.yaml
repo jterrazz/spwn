@@ -1,0 +1,122 @@
+name: Signing secrets
+description: With the job's GitHub OIDC token alone, read the named signing secrets from Infisical into this job's environment, each value masked; a secret not named is never read
+
+inputs:
+    names:
+        description: 'The secrets to read, separated by spaces: any of APPLE_CERTIFICATE APPLE_CERTIFICATE_PASSWORD APPLE_SIGNING_IDENTITY APPLE_ID APPLE_PASSWORD APPLE_TEAM_ID TAURI_SIGNING_PRIVATE_KEY TAURI_SIGNING_PRIVATE_KEY_PASSWORD'
+        required: true
+    project:
+        description: Infisical project holding the signing secrets
+        required: true
+    path:
+        description: Folder of that project holding them
+        required: true
+    # outside: the estate's CI identity, `studio-ci`, is owned by jterrazz/studio-actions (actions/connect-infra/action.yaml, `infisical-identity-id`); it trusts the subject repo:jterrazz@18480834/*:ref:refs/{heads/main,tags/v*} with audience https://github.com/jterrazz, and views project `studio-ci` alone
+    identity-id:
+        description: Infisical machine identity (OIDC auth) the job authenticates as; an identifier, not a secret
+        default: 'd3585cc2-272d-4b00-8d07-34419166a2ff'
+    environment:
+        description: Infisical environment of the project
+        default: prod
+
+# invariant: one read per name, `secret-name` set, so a job holds in its environment the secrets it named and no other of the folder
+# invariant: a read that fails leaves its name unset and does not stop the job: `scripts/sign-macos.sh require` then names every missing secret at once, and fails a ref Infisical trusts
+runs:
+    using: composite
+    steps:
+        - if: contains(format(' {0} ', inputs.names), ' APPLE_CERTIFICATE ')
+          continue-on-error: true
+          uses: Infisical/secrets-action@d2e351f16c6ca20d17c85e6c992e04bdeb64e87d # v1.0.18
+          with:
+              method: oidc
+              identity-id: ${{ inputs.identity-id }}
+              oidc-audience: https://github.com/jterrazz
+              domain: https://eu.infisical.com
+              project-slug: ${{ inputs.project }}
+              env-slug: ${{ inputs.environment }}
+              secret-path: ${{ inputs.path }}
+              secret-name: APPLE_CERTIFICATE
+        - if: contains(format(' {0} ', inputs.names), ' APPLE_CERTIFICATE_PASSWORD ')
+          continue-on-error: true
+          uses: Infisical/secrets-action@d2e351f16c6ca20d17c85e6c992e04bdeb64e87d # v1.0.18
+          with:
+              method: oidc
+              identity-id: ${{ inputs.identity-id }}
+              oidc-audience: https://github.com/jterrazz
+              domain: https://eu.infisical.com
+              project-slug: ${{ inputs.project }}
+              env-slug: ${{ inputs.environment }}
+              secret-path: ${{ inputs.path }}
+              secret-name: APPLE_CERTIFICATE_PASSWORD
+        - if: contains(format(' {0} ', inputs.names), ' APPLE_SIGNING_IDENTITY ')
+          continue-on-error: true
+          uses: Infisical/secrets-action@d2e351f16c6ca20d17c85e6c992e04bdeb64e87d # v1.0.18
+          with:
+              method: oidc
+              identity-id: ${{ inputs.identity-id }}
+              oidc-audience: https://github.com/jterrazz
+              domain: https://eu.infisical.com
+              project-slug: ${{ inputs.project }}
+              env-slug: ${{ inputs.environment }}
+              secret-path: ${{ inputs.path }}
+              secret-name: APPLE_SIGNING_IDENTITY
+        - if: contains(format(' {0} ', inputs.names), ' APPLE_ID ')
+          continue-on-error: true
+          uses: Infisical/secrets-action@d2e351f16c6ca20d17c85e6c992e04bdeb64e87d # v1.0.18
+          with:
+              method: oidc
+              identity-id: ${{ inputs.identity-id }}
+              oidc-audience: https://github.com/jterrazz
+              domain: https://eu.infisical.com
+              project-slug: ${{ inputs.project }}
+              env-slug: ${{ inputs.environment }}
+              secret-path: ${{ inputs.path }}
+              secret-name: APPLE_ID
+        - if: contains(format(' {0} ', inputs.names), ' APPLE_PASSWORD ')
+          continue-on-error: true
+          uses: Infisical/secrets-action@d2e351f16c6ca20d17c85e6c992e04bdeb64e87d # v1.0.18
+          with:
+              method: oidc
+              identity-id: ${{ inputs.identity-id }}
+              oidc-audience: https://github.com/jterrazz
+              domain: https://eu.infisical.com
+              project-slug: ${{ inputs.project }}
+              env-slug: ${{ inputs.environment }}
+              secret-path: ${{ inputs.path }}
+              secret-name: APPLE_PASSWORD
+        - if: contains(format(' {0} ', inputs.names), ' APPLE_TEAM_ID ')
+          continue-on-error: true
+          uses: Infisical/secrets-action@d2e351f16c6ca20d17c85e6c992e04bdeb64e87d # v1.0.18
+          with:
+              method: oidc
+              identity-id: ${{ inputs.identity-id }}
+              oidc-audience: https://github.com/jterrazz
+              domain: https://eu.infisical.com
+              project-slug: ${{ inputs.project }}
+              env-slug: ${{ inputs.environment }}
+              secret-path: ${{ inputs.path }}
+              secret-name: APPLE_TEAM_ID
+        - if: contains(format(' {0} ', inputs.names), ' TAURI_SIGNING_PRIVATE_KEY ')
+          continue-on-error: true
+          uses: Infisical/secrets-action@d2e351f16c6ca20d17c85e6c992e04bdeb64e87d # v1.0.18
+          with:
+              method: oidc
+              identity-id: ${{ inputs.identity-id }}
+              oidc-audience: https://github.com/jterrazz
+              domain: https://eu.infisical.com
+              project-slug: ${{ inputs.project }}
+              env-slug: ${{ inputs.environment }}
+              secret-path: ${{ inputs.path }}
+              secret-name: TAURI_SIGNING_PRIVATE_KEY
+        - if: contains(format(' {0} ', inputs.names), ' TAURI_SIGNING_PRIVATE_KEY_PASSWORD ')
+          continue-on-error: true
+          uses: Infisical/secrets-action@d2e351f16c6ca20d17c85e6c992e04bdeb64e87d # v1.0.18
+          with:
+              method: oidc
+              identity-id: ${{ inputs.identity-id }}
+              oidc-audience: https://github.com/jterrazz
+              domain: https://eu.infisical.com
+              project-slug: ${{ inputs.project }}
+              env-slug: ${{ inputs.environment }}
+              secret-path: ${{ inputs.path }}
+              secret-name: TAURI_SIGNING_PRIVATE_KEY_PASSWORD

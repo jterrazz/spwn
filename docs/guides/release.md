@@ -11,9 +11,9 @@ GitHub Release, and a user's `spwn upgrade` or the Tauri updater does the rest.
 
 ## One-time setup (do this once per clone)
 
-### 1. GitHub repository secrets for the Tauri updater
+### 1. The Tauri updater key
 
-These sign the updater manifest of the desktop app in `apps/web`, which no job builds today.
+These sign the updater manifest of the desktop app in `apps/web`, which no job builds today. They live beside the signing secrets, in Infisical (§2), and a job that signs the bundle reads them alone, naming them to `.github/actions/signing-secrets`.
 
 | Secret                               | Purpose                                 |
 | ------------------------------------ | --------------------------------------- |
@@ -35,12 +35,7 @@ Private: ~/.tauri/spwn-web.key      (KEEP SECRET)
 Public:  dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6...
 ```
 
-Paste the **private** key contents into `TAURI_SIGNING_PRIVATE_KEY`:
-
-```bash
-gh secret set TAURI_SIGNING_PRIVATE_KEY < ~/.tauri/spwn-web.key
-gh secret set TAURI_SIGNING_PRIVATE_KEY_PASSWORD  # prompts
-```
+Paste the **private** key contents into the Infisical secret `TAURI_SIGNING_PRIVATE_KEY`, and its passphrase into `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`, in the folder §2 names.
 
 Paste the **public** key into `apps/web/src-tauri/tauri.conf.json`:
 
@@ -58,28 +53,39 @@ Commit that change **once**. Never rotate the pubkey casually - see
 
 ### 2. Signing and notarization
 
-Every macOS artefact a tag ships is signed with a Developer ID Application certificate, with the hardened runtime and a secure timestamp, and notarized by Apple: spwn's two darwin binaries, signed and notarized by GoReleaser before it archives them; station's two darwin binaries, notarized inside a zip that is not shipped, since a bare binary cannot be stapled; and `Station.app`, notarized, then stapled before it is zipped into `Station.app.zip`. The Publish workflow reads six repository secrets, all or none:
+Every macOS artefact the Publish workflow ships from `main` or a `v*` tag is signed with a Developer ID Application certificate, with the hardened runtime and a secure timestamp, and notarized by Apple with `notarytool`, by Apple ID: spwn's two darwin binaries, signed and notarized by GoReleaser's post-build hook (`scripts/sign-macos.sh binary`) before it archives them; station's two darwin binaries, notarized inside a zip that is not shipped, since a bare binary cannot be stapled; and `Station.app`, notarized, then stapled before it is zipped into `Station.app.zip`.
 
-| Secret                    | What it is                                                                               | How to make it                                                                                                                                                                                                                                                                                     |
-| ------------------------- | ---------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `MACOS_CERT_P12_BASE64`   | The Developer ID Application certificate and its private key, a `.p12` in base64         | Create the certificate in the Apple Developer account (Certificates, type Developer ID Application) from a signing request made by Keychain Access, then export the certificate with its key from Keychain Access as a `.p12`; `base64 -i developer-id.p12 \| gh secret set MACOS_CERT_P12_BASE64` |
-| `MACOS_CERT_PASSWORD`     | The password the `.p12` was exported with                                                | `gh secret set MACOS_CERT_PASSWORD`, which prompts                                                                                                                                                                                                                                                 |
-| `APPLE_API_KEY_P8_BASE64` | An App Store Connect API key, the `.p8` notarytool and GoReleaser submit with, in base64 | App Store Connect, Users and Access, Integrations, Team Keys: generate a key with the Developer role and download its `.p8`, once; `base64 -i AuthKey_<id>.p8 \| gh secret set APPLE_API_KEY_P8_BASE64`                                                                                            |
-| `APPLE_API_KEY_ID`        | That key's ID, ten characters                                                            | The Key ID column of the same page                                                                                                                                                                                                                                                                 |
-| `APPLE_API_ISSUER_ID`     | The issuer of the team's keys, a UUID                                                    | The Issuer ID shown above the keys on the same page                                                                                                                                                                                                                                                |
-| `APPLE_TEAM_ID`           | The ten-character team the certificate belongs to                                        | The Membership details of the Apple Developer account; every signature is checked to carry it                                                                                                                                                                                                      |
+The workflow stores no secret in GitHub. Each job that signs reads the secrets it names from Infisical, through the job's GitHub OIDC token, with `.github/actions/signing-secrets`: the machine identity `studio-ci`, project `studio-ci`, environment `prod`, folder `/spwn`. The project and the folder are the workflow's `SIGNING_SECRETS_PROJECT` and `SIGNING_SECRETS_PATH`. Every value is masked in the log, and a secret a job does not name is never in its environment.
 
-The workflow's first job, Signing, runs `scripts/sign-macos.sh require`. On a `v*` tag a missing secret fails it, naming the missing ones, and nothing is built or released: a tag never ships unsigned. On a dry run the six together sign as a tag does, none builds unsigned, and a partial set fails. The Check workflow never signs. The certificate is imported into a keychain the macOS job creates and deletes, with a random password masked in the log, and the decoded key files live in the runner's temporary folder until that job ends.
+| Secret                       | What it is                                                                                   | How to make it                                                                                                                                                                                                            |
+| ---------------------------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `APPLE_CERTIFICATE`          | The Developer ID Application certificate and its private key, a `.p12` in base64, one line   | Create the certificate in the Apple Developer account (Certificates, type Developer ID Application) from a signing request made by Keychain Access, then export it with its key as a `.p12`; `base64 -i developer-id.p12` |
+| `APPLE_CERTIFICATE_PASSWORD` | The password the `.p12` was exported with                                                    | Chosen at the export                                                                                                                                                                                                      |
+| `APPLE_SIGNING_IDENTITY`     | The identity codesign signs with: its full name, `Developer ID Application: <name> (<team>)` | `security find-identity -v -p codesigning` on the Mac that holds the certificate; its SHA-1 works too                                                                                                                     |
+| `APPLE_ID`                   | The Apple ID notarytool submits as, a member of the team                                     | The account's email                                                                                                                                                                                                       |
+| `APPLE_PASSWORD`             | An app-specific password of that Apple ID, never the account's own                           | account.apple.com, Sign-In and Security, App-Specific Passwords                                                                                                                                                           |
+| `APPLE_TEAM_ID`              | The ten-character team the certificate belongs to                                            | The Membership details of the Apple Developer account; the identity's name and every signature are checked to carry it                                                                                                    |
 
-No artefact carries entitlements: neither `station` nor `Station.app` uses an API the hardened runtime withholds without one. The script signs ad hoc with `MACOS_SIGN_IDENTITY=-` and skips notarization and stapling with `MACOS_NOTARIZE=skip`, to run its logic on a Mac with no certificate:
+The workflow's first job, Signing, runs `scripts/sign-macos.sh require`. Infisical gives a token to `main` and to a `v*` tag alone, so on those two refs a missing secret fails it, naming the missing ones, and nothing is built or released: a tag never ships unsigned. A dry run on any other branch reads nothing and builds unsigned. The Check workflow never signs. The certificate is imported into a keychain the macOS job creates and deletes, with a random password masked in the log, and the decoded certificate lives in the runner's temporary folder only while the import runs.
+
+No artefact carries entitlements: neither `station` nor `Station.app` uses an API the hardened runtime withholds without one. The script signs ad hoc with `APPLE_SIGNING_IDENTITY=-` and skips notarization and stapling with `MACOS_NOTARIZE=skip`, to run its logic on a Mac with no certificate:
 
 ```sh
-MACOS_SIGN_IDENTITY=- MACOS_NOTARIZE=skip scripts/sign-macos.sh sign machines/.artifacts/menubar/Station.app
+APPLE_SIGNING_IDENTITY=- MACOS_NOTARIZE=skip scripts/sign-macos.sh sign machines/.artifacts/menubar/Station.app
 ```
+
+#### Owner step: open Infisical to spwn's runs
+
+The workflow reads nothing until two things are true, both the owner's:
+
+1. **The secrets are in the folder the workflow reads.** Copy the eight keys of `studio-infrastructure` `/spwn` into project `studio-ci`, environment `prod`, folder `/spwn`; `studio-ci` is the only project CI's identity may view.
+2. **spwn's runs present the subject that identity trusts.** The identity `studio-ci` trusts `repo:jterrazz@18480834/*:ref:refs/{heads/main,tags/v*}` with audience `https://github.com/jterrazz`, the immutable form every other `jterrazz` repository uses. spwn still presents the default `repo:jterrazz/spwn:ref:…`; turn on the immutable subject for the repository (GitHub, the repository's OIDC subject claim customization, `use_immutable_subject`), after which it reads `repo:jterrazz@18480834/spwn@1169179413:ref:refs/…`.
+
+The first real proof is then a dry run on `main`, `gh workflow run publish.yaml --ref main`: it reads the secrets, signs and notarizes every artefact, and publishes nothing.
 
 ### 3. GoReleaser is already configured
 
-`.goreleaser.yml` is committed; the workflow passes it the default `GITHUB_TOKEN` and the signing secrets above.
+`.goreleaser.yml` is committed; the workflow passes it the default `GITHUB_TOKEN`, and on a signed run the identity the job imported into its keychain and the notarization secrets above, which the spwn build's post hook reads.
 
 ## Cutting a release
 
@@ -129,11 +135,11 @@ both products of the repository, spwn and station (`machines/`):
 
 ```text
 .github/workflows/publish.yaml
-├─ signing          (ubuntu, arm)   on a tag, fails unless every signing secret is set
+├─ signing          (ubuntu, arm)   on main or a tag, fails unless every signing secret is read from Infisical
 ├─ machines-linux   (ubuntu, arm)   station-linux-arm64, station-linux-amd64, cgo off
 ├─ machines-darwin  (macos-26)      station-darwin-arm64, station-darwin-amd64 (cgo, IOKit), Station.app.zip,
 │                                   each signed and notarized, the app stapled
-└─ publish (GoReleaser)             opens the release once both are built: spwn's archives, its darwin
+└─ publish (GoReleaser, macos-26)   opens the release once both are built: spwn's archives, its darwin
                                     binaries signed and notarized, station's files as extra_files,
                                     one checksums.txt for all
 ```
@@ -146,8 +152,8 @@ release did. The desktop app and its `latest.json` have no job: the shared
 again signs them as the macOS job does.
 
 A manual run of the workflow (`workflow_dispatch`) is a dry run: every job
-builds, signed when the signing secrets are set, GoReleaser runs with
-`--snapshot`, and nothing is published.
+builds, signed and notarized on `main`, unsigned on any other branch,
+GoReleaser runs with `--snapshot`, and nothing is published.
 
 ### 4. Verify
 
@@ -226,7 +232,7 @@ Expect:
 Either:
 
 1. The app was built with a different private key than the one producing
-   signatures. Re-check `TAURI_SIGNING_PRIVATE_KEY` in GitHub Secrets.
+   signatures. Re-check `TAURI_SIGNING_PRIVATE_KEY` in Infisical.
 2. The embedded pubkey in `tauri.conf.json` doesn't match the signing
    keypair. Regenerate and sync.
 
@@ -261,7 +267,7 @@ git push origin v1.2.3
 If the Tauri private key leaks:
 
 1. Generate a new keypair.
-2. Update `TAURI_SIGNING_PRIVATE_KEY` in GitHub Secrets.
+2. Update `TAURI_SIGNING_PRIVATE_KEY` in Infisical.
 3. Update `pubkey` in `tauri.conf.json`.
 4. Cut a new release - users running the old app **cannot** auto-update
    to it (signatures won't verify with the old pubkey).

@@ -29,7 +29,7 @@ triggers the entire pipeline.
 
 1. Cross-compiles `spwn` for `darwin_{arm64,amd64}` and `linux_{arm64,amd64}`.
 2. Embeds the git tag into the binary via `-ldflags "-X spwn.sh/apps/cli.Version={{.Version}}"`.
-3. On a signed run, signs the two darwin binaries with the Developer ID and notarizes them ([Release](../guides/release.md#2-signing-and-notarization)).
+3. On a signed run, signs each darwin binary with the Developer ID and notarizes it, in its post-build hook on the macOS runner ([Release](../guides/release.md#2-signing-and-notarization)).
 4. Dependencies each binary into `spwn_{os}_{arch}.tar.gz`.
 5. Computes SHA256 of every archive into `checksums.txt`.
 6. Uploads archives + `checksums.txt` to the GitHub Release.
@@ -118,7 +118,8 @@ pnpm tauri signer generate -w ~/.tauri/spwn-web.key
 This produces two files:
 
 - **Private key** (`~/.tauri/spwn-web.key`) - stored in
-  GitHub Secrets as `TAURI_SIGNING_PRIVATE_KEY`.
+  Infisical as `TAURI_SIGNING_PRIVATE_KEY`, beside the signing secrets
+  ([Release](../guides/release.md#2-signing-and-notarization)).
 - **Public key** (printed to stdout) - pasted into `tauri.conf.json`
   under `plugins.updater.pubkey`.
 
@@ -210,7 +211,7 @@ Verify the version, platform URLs, and that signatures are populated.
 
 - **Never commit `~/.tauri/spwn-web.key`.** It's the only thing
   between the public and arbitrary code execution inside every user's
-  web UI instance. GitHub Secrets is the correct home.
+  web UI instance. Infisical is its home, read by the job that signs.
 - **Pub-key rotation.** If the private key is ever leaked, publish a new
   release with a rotated pubkey AND tell users to reinstall manually (the
   old app cannot verify signatures from the new key).
