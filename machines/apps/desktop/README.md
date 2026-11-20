@@ -294,6 +294,17 @@ The window names itself Spwn, on the owner's word of 2026-11-18, with a capital 
 - Its icon is the Spwn mark, `src-tauri/icons/` ([its page](src-tauri/icons/README.md)); the window draws it once more itself, at the head of the core's panel (`Mark`, `src/presentation/screens/core/core-parts.tsx`).
 - What the window reads of the engine keeps its words: the socket (`…/station/engine.sock`), `STATION_ENGINE_SOCKET` and `@jterrazz/station-api`. The window's own `STATION_WINDOW_OPENED`, `STATION_WINDOW_CORE`, the npm member `station-desktop` and the route's storage key `station.window.route` keep theirs too: no person reads them.
 
+## Its bundle
+
+`make window`, from the root of `machines/`, builds `.artifacts/window/Spwn.app` for darwin-arm64 on a Mac with Rust and Node, and the release ships it signed and notarized as `Spwn_darwin_arm64.zip` ([Release](../../../docs/guides/release.md#cutting-a-release)).
+
+- It runs `tauri build --bundles app --target aarch64-apple-darwin` from this folder, in its own Cargo target (`.artifacts/window/cargo`), then copies the bundle out. `tauri.conf.json` turns the bundle on for the `app` target alone: no dmg, no updater.
+- The production build loads the front end `npm run build` writes to `dist/`, embedded in the binary; `devUrl` is read by `tauri dev` alone.
+- Its version is the release's: `git describe --tags --always --dirty`, its `v` dropped, written into `CFBundleShortVersionString` and `CFBundleVersion`, as `Station.app` takes its own; the `version` of `tauri.conf.json` and `Cargo.toml` is not read for it. `WINDOW_VERSION=<version>` sets it where no git history is.
+- Its floor is macOS 26, `Station.app`'s (`bundle.macOS.minimumSystemVersion`), which also sets the binary's `minos`.
+- It is signed ad hoc by the target, then by the repository's `scripts/sign-macos.sh` with the Developer ID and the hardened runtime on a release, with no entitlements: nothing it starts needs one ([What the window opens outside itself](#what-the-window-opens-outside-itself)).
+- The Linux bench never bundles: its checks build and test the crate alone.
+
 ## The window's chrome on a Mac
 
 On a Mac the window is drawn as a native app with a unified toolbar: its traffic lights sit in the top bar's row, over a discreet vibrancy. Everywhere else (the Linux bench's WebKitGTK, a headless capture, a page outside Tauri) it is drawn opaque, as before.

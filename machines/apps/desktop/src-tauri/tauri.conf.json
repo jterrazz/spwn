@@ -32,5 +32,10 @@
         ],
         "security": { "csp": "default-src 'self'; font-src 'self' data:; img-src 'self' data:" }
     },
-    "bundle": { "active": false, "icon": ["icons/icon.png", "icons/icon.icns"] }
+    "bundle": {
+        "active": true,
+        "targets": ["app"],
+        "icon": ["icons/icon.png", "icons/icon.icns"],
+        "macOS": { "minimumSystemVersion": "26.0" }
+    }
 }

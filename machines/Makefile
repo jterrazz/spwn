@@ -1,4 +1,4 @@
-.PHONY: help install build build-linux lint fix test check menubar-check menubar menubar-install menubar-uninstall catalog catalog-open catalog-export catalog-gallery e2e-machine e2e-binaries provision deprovision generate clean
+.PHONY: help install build build-linux lint fix test check menubar-check menubar menubar-install menubar-uninstall window catalog catalog-open catalog-export catalog-gallery e2e-machine e2e-binaries provision deprovision generate clean
 
 BINARY       := station
 BUILD_PATH   := .artifacts/go/$(BINARY)
@@ -18,6 +18,10 @@ MENUBAR_APP  := .artifacts/menubar/Station.app
 # staged by overriding the probe (`make menubar-check SDK_PROBE=false`).
 SDK_PROBE    ?= xcrun --sdk macosx --show-sdk-path
 MENUBAR_HOME := $(HOME)/Applications/Station.app
+WINDOW_APP   := .artifacts/window/Spwn.app
+WINDOW_CARGO := .artifacts/window/cargo
+# value: the window's bundle version is the release's, as git describes it for the binaries and Station.app, without its v
+WINDOW_VERSION ?= $(patsubst v%,%,$(shell git describe --tags --always --dirty))
 CATALOG_BIN  := .artifacts/menubar/build/debug/StationCatalog
 CATALOG_OUT  ?= .artifacts/catalog
 LDFLAGS      := -X github.com/jterrazz/studio-station/apps/engine/wire.version=$(shell git describe --tags --always --dirty)
@@ -111,6 +115,16 @@ menubar-uninstall: ## Unregister the login item, then remove ~/Applications/Stat
 	@if [ -x "$(MENUBAR_HOME)/Contents/MacOS/StationMenuBar" ]; then "$(MENUBAR_HOME)/Contents/MacOS/StationMenuBar" --unregister-login-item || true; fi
 	@rm -rf "$(MENUBAR_HOME)"
 	@printf "$(GREEN)●$(RESET) Removed $(MENUBAR_HOME)\n"
+
+window: node_modules/.install ## Build the window's bundle for darwin-arm64, signed ad hoc, into $(WINDOW_APP)
+	@cd apps/desktop && CARGO_TARGET_DIR=$(CURDIR)/$(WINDOW_CARGO) npx tauri build --ci --target aarch64-apple-darwin --bundles app
+	@rm -rf $(WINDOW_APP)
+	@cp -R $(WINDOW_CARGO)/aarch64-apple-darwin/release/bundle/macos/Spwn.app $(WINDOW_APP)
+	@plutil -replace CFBundleShortVersionString -string "$(WINDOW_VERSION)" $(WINDOW_APP)/Contents/Info.plist
+	@plutil -replace CFBundleVersion -string "$(WINDOW_VERSION)" $(WINDOW_APP)/Contents/Info.plist
+	@codesign --force --sign - --timestamp=none $(WINDOW_APP)
+	@codesign --verify --strict $(WINDOW_APP)
+	@printf "$(GREEN)●$(RESET) Built $(WINDOW_APP) ($(WINDOW_VERSION), signed ad hoc)\n"
 
 catalog: ## Build the Station Catalog, the dev-only window over every story, never bundled into Station.app
 	@swift apps/menubar/scripts/symbols.swift apps/menubar/sources/station-kit/token/symbols.xcassets
