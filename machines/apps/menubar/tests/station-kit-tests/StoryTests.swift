@@ -88,9 +88,7 @@ final class StoryTests: XCTestCase {
 
     func height(_ story: Story) -> Double? {
         let themed = view(story).stationTheme(.dark).environment(\.stationNow, Snapshot.now).environment(\.stationStill, true)
-        let renderer = ImageRenderer(content: themed.fixedSize())
-        renderer.scale = 1
-        return renderer.cgImage.map { Double($0.height) }
+        return Snapshot.drawn(themed.fixedSize(), scale: 1).map { Double($0.height) }
     }
 
     static let goldenShards = 4

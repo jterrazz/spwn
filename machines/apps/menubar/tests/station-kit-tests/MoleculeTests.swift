@@ -28,8 +28,7 @@ final class MoleculeTests: XCTestCase {
             .onPreferenceChange(RowFrames.self) { sink.frames = $0 }
             .environment(\.stationSamples, Sheet.samples)
             .environment(\.stationStill, true)
-        let renderer = ImageRenderer(content: content)
-        _ = renderer.cgImage
+        _ = Snapshot.drawn(content, scale: 1)
         return sink.frames
     }
 

@@ -27,9 +27,7 @@ final class PanelTests: XCTestCase {
     }
 
     static func height(_ view: some View, room: CGFloat? = nil, still: Bool = true) -> CGFloat? {
-        let renderer = ImageRenderer(content: view.fixedSize().stationTheme(.dark).environment(\.stationStill, still).environment(\.stationPanelRoom, room))
-        renderer.scale = 1
-        return renderer.cgImage.map { CGFloat($0.height) }
+        Snapshot.drawn(view.fixedSize().stationTheme(.dark).environment(\.stationStill, still).environment(\.stationPanelRoom, room), scale: 1).map { CGFloat($0.height) }
     }
 
     static let variants: [(name: String, contrast: ColorSchemeContrast, reduceTransparency: Bool)] = [

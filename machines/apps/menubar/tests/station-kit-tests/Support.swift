@@ -123,6 +123,16 @@ enum Snapshot {
         return desk.map { AnyView(themed.fixedSize().padding(24).background($0)) } ?? AnyView(themed)
     }
 
+    // hazard: a render whose image is never read can leave the process's
+    // later renders blank, transparent or nil, once dozens run in a row; so
+    // a render read only for its size or its layout is drawn into memory too.
+    @MainActor
+    static func drawn(_ content: some View, scale: CGFloat) -> Bitmap? {
+        let renderer = ImageRenderer(content: content)
+        renderer.scale = scale
+        return renderer.cgImage.flatMap(Bitmap.init)
+    }
+
     @MainActor
     static func render(_ view: AnyView, scheme: ColorScheme, over desk: AnyView?, scale: CGFloat = 2) -> (png: Data, bitmap: Bitmap)? {
         let renderer = ImageRenderer(content: canvas(view, scheme: scheme, over: desk))

@@ -48,9 +48,7 @@ enum ViewGolden {
                     Color.clear
                 }
             }
-        let renderer = ImageRenderer(content: content)
-        renderer.scale = 2
-        _ = renderer.cgImage
+        _ = Snapshot.drawn(content, scale: 2)
         return sink.lines
     }
 
