@@ -11,10 +11,10 @@ extension Token.Metric {
 }
 
 extension Token.Role {
-    public static let chartTitle = Token.Role(13, .semibold, .t1)
-    public static let chartValue = Token.Role(13, .regular, .t2)
-    public static let chartNote = Token.Role(11, .medium, .t2)
-    public static let legend = Token.Role(11, .regular, .t2)
+    public static var chartTitle: Token.Role { Token.Role(13, .semibold, .t1) }
+    public static var chartValue: Token.Role { Token.Role(13, .regular, .t2) }
+    public static var chartNote: Token.Role { Token.Role(11, .medium, .t2) }
+    public static var legend: Token.Role { Token.Role(11, .regular, .t2) }
 }
 
 extension Token.Glyph {

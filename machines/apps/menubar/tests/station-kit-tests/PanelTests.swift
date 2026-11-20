@@ -10,17 +10,18 @@ final class PanelTests: XCTestCase {
 
         var body: some View {
             Panel {
-                Text("All machines").font(Token.Role.homeTitle.font)
+                Text("All machines").font(Token.Role.homeTitle.font).recorded(.text("All machines", .homeTitle, heading: true))
             } content: {
                 VStack(alignment: .leading, spacing: Token.Metric.Panel.blocks) {
                     ForEach(0..<rows, id: \.self) { i in
                         Text("linux-\(i + 1)")
                             .font(Token.Role.rowName.font)
                             .frame(maxWidth: .infinity, minHeight: Token.Metric.Row.height, alignment: .leading)
+                            .recorded(.text("linux-\(i + 1)", .rowName))
                     }
                 }
             } footer: {
-                Text("Find a machine, a port, an action…").font(Token.Role.findResult.font)
+                Text("Find a machine, a port, an action…").font(Token.Role.findResult.font).recorded(.text("Find a machine, a port, an action…", .findResult))
             }
         }
     }
@@ -41,6 +42,17 @@ final class PanelTests: XCTestCase {
                 try Golden.check(variant.name, AnyView(Frame(rows: 12).environment(\.stationPanelRoom, 300)
                         .stationAccessibility(contrast: variant.contrast, reduceTransparency: variant.reduceTransparency)),
                     scheme: scheme)
+            }
+        }
+        XCTAssertEqual(failures, [])
+    }
+
+    func testThePanelFrameIsWrittenAsItsViewGoldenInEverySchemeAndForEachAccessibilitySetting() throws {
+        let failures = try Self.variants.flatMap { variant in
+            try [ColorScheme.dark, .light].compactMap { scheme in
+                try ViewGolden.check(variant.name, AnyView(Frame(rows: 12).environment(\.stationPanelRoom, 300)
+                        .stationAccessibility(contrast: variant.contrast, reduceTransparency: variant.reduceTransparency)),
+                    scheme: scheme, contrast: variant.contrast, reduceTransparency: variant.reduceTransparency)
             }
         }
         XCTAssertEqual(failures, [])

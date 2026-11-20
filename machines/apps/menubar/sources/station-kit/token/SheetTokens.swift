@@ -43,12 +43,12 @@ extension Token.Metric.Sheet {
 }
 
 extension Token.Role {
-    public static let formLabel = Token.Role(12, .regular, .t2)
-    public static let formValue = Token.Role(13, .regular, .t1)
-    public static let formNote = Token.Role(13, .regular, .t3)
-    public static let formCaption = Token.Role(11, .regular, .t3)
-    public static let stopLabel = Token.Role(11, .regular, .t3)
-    public static let stopPicked = Token.Role(11, .semibold, .t1)
+    public static var formLabel: Token.Role { Token.Role(12, .regular, .t2) }
+    public static var formValue: Token.Role { Token.Role(13, .regular, .t1) }
+    public static var formNote: Token.Role { Token.Role(13, .regular, .t3) }
+    public static var formCaption: Token.Role { Token.Role(11, .regular, .t3) }
+    public static var stopLabel: Token.Role { Token.Role(11, .regular, .t3) }
+    public static var stopPicked: Token.Role { Token.Role(11, .semibold, .t1) }
 }
 
 extension Token.Symbol {
@@ -73,9 +73,9 @@ extension Token.Metric.Sheet {
 }
 
 extension Token.Role {
-    public static let listTitle = Token.Role(13, .regular, .t1)
-    public static let listNote = Token.Role(11, .regular, .t2)
-    public static let listLabel = Token.Role(12, .regular, .t2)
-    public static let sheetNote = Token.Role(11, .regular, .t3)
-    public static let commandLine = Token.Role(12, .regular, .t1, design: .monospaced)
+    public static var listTitle: Token.Role { Token.Role(13, .regular, .t1) }
+    public static var listNote: Token.Role { Token.Role(11, .regular, .t2) }
+    public static var listLabel: Token.Role { Token.Role(12, .regular, .t2) }
+    public static var sheetNote: Token.Role { Token.Role(11, .regular, .t3) }
+    public static var commandLine: Token.Role { Token.Role(12, .regular, .t1, design: .monospaced) }
 }

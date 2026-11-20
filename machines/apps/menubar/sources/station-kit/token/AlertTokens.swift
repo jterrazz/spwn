@@ -28,8 +28,8 @@ extension Token.Metric.Alert {
 }
 
 extension Token.Role {
-    public static let alertLabel = Token.Role(12, .medium, .t2)
-    public static let alertName = Token.Role(12, .bold, .t1, design: .monospaced)
+    public static var alertLabel: Token.Role { Token.Role(12, .medium, .t2) }
+    public static var alertName: Token.Role { Token.Role(12, .bold, .t1, design: .monospaced) }
 }
 
 extension Token {

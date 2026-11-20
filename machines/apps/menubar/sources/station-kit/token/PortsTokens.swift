@@ -13,9 +13,9 @@ extension Token.Metric {
 }
 
 extension Token.Role {
-    public static let portsSubhead = Token.Role(11, .regular, .t3)
-    public static let exposedTitle = Token.Role(13, .semibold, .t1)
-    public static let footerLink = Token.Role(13, .regular, .t2)
+    public static var portsSubhead: Token.Role { Token.Role(11, .regular, .t3) }
+    public static var exposedTitle: Token.Role { Token.Role(13, .semibold, .t1) }
+    public static var footerLink: Token.Role { Token.Role(13, .regular, .t2) }
 }
 
 extension Token.Symbol {

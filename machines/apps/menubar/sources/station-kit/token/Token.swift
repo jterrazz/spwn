@@ -551,8 +551,13 @@ extension Token {
         public let design: Font.Design
         public let tracking: CGFloat
         public let tone: Tone
+        public let name: String
 
-        init(_ size: CGFloat, _ weight: Font.Weight, _ tone: Tone, design: Font.Design = .default, tracking: CGFloat = 0) {
+        // hazard: a role is declared as a computed member, so its name is
+        // the member's: in a stored member's initializer `#function` names
+        // the type.
+        init(_ size: CGFloat, _ weight: Font.Weight, _ tone: Tone, design: Font.Design = .default, tracking: CGFloat = 0, name: String = #function) {
+            self.name = name
             self.size = size
             self.weight = weight
             self.design = design
@@ -562,30 +567,30 @@ extension Token {
 
         public var font: Font { .system(size: size, weight: weight, design: design).monospacedDigit() }
 
-        public static let heroTitle = Role(17, .bold, .t1, tracking: -0.17)
-        public static let pageTitle = Role(22, .bold, .t1, tracking: -0.40)
-        public static let homeTitle = Role(15, .bold, .t1)
-        public static let sectionLabel = Role(12, .semibold, .section)
-        public static let sectionValue = Role(12, .medium, .t3)
-        public static let rowName = Role(13, .medium, .t1)
-        public static let rowSuffix = Role(11, .regular, .t3)
-        public static let rowSub = Role(11, .regular, .t2)
-        public static let rowValue = Role(12, .regular, .t2)
-        public static let facts = Role(12, .regular, .t2)
-        public static let gaugeTitle = Role(11, .medium, .t2)
-        public static let gaugeValue = Role(15, .semibold, .t1, design: .rounded)
-        public static let gaugeUnit = Role(11, .medium, .t2)
-        public static let button = Role(12, .semibold, .t1)
-        public static let verb = Role(11, .semibold, .t1)
-        public static let address = Role(11, .regular, .t1, design: .monospaced)
-        public static let findGroup = Role(11, .semibold, .t3)
-        public static let findResult = Role(13, .regular, .t1)
-        public static let sheetTitle = Role(15, .semibold, .t1)
-        public static let sheetBody = Role(12, .regular, .t2)
-        public static let alertTitle = Role(13, .bold, .t1)
-        public static let alertBody = Role(11, .regular, .t2)
-        public static let keyCap = Role(11, .medium, .t2)
-        public static let hud = Role(12, .medium, .hud)
+        public static var heroTitle: Role { Role(17, .bold, .t1, tracking: -0.17) }
+        public static var pageTitle: Role { Role(22, .bold, .t1, tracking: -0.40) }
+        public static var homeTitle: Role { Role(15, .bold, .t1) }
+        public static var sectionLabel: Role { Role(12, .semibold, .section) }
+        public static var sectionValue: Role { Role(12, .medium, .t3) }
+        public static var rowName: Role { Role(13, .medium, .t1) }
+        public static var rowSuffix: Role { Role(11, .regular, .t3) }
+        public static var rowSub: Role { Role(11, .regular, .t2) }
+        public static var rowValue: Role { Role(12, .regular, .t2) }
+        public static var facts: Role { Role(12, .regular, .t2) }
+        public static var gaugeTitle: Role { Role(11, .medium, .t2) }
+        public static var gaugeValue: Role { Role(15, .semibold, .t1, design: .rounded) }
+        public static var gaugeUnit: Role { Role(11, .medium, .t2) }
+        public static var button: Role { Role(12, .semibold, .t1) }
+        public static var verb: Role { Role(11, .semibold, .t1) }
+        public static var address: Role { Role(11, .regular, .t1, design: .monospaced) }
+        public static var findGroup: Role { Role(11, .semibold, .t3) }
+        public static var findResult: Role { Role(13, .regular, .t1) }
+        public static var sheetTitle: Role { Role(15, .semibold, .t1) }
+        public static var sheetBody: Role { Role(12, .regular, .t2) }
+        public static var alertTitle: Role { Role(13, .bold, .t1) }
+        public static var alertBody: Role { Role(11, .regular, .t2) }
+        public static var keyCap: Role { Role(11, .medium, .t2) }
+        public static var hud: Role { Role(12, .medium, .hud) }
 
         public static let all: [(String, Role)] = [
             ("hero title", heroTitle), ("page title", pageTitle), ("home title", homeTitle), ("section label", sectionLabel),

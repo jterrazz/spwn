@@ -26,9 +26,9 @@ extension Token.Symbol {
 }
 
 extension Token.Role {
-    public static let popoverTitle = Token.Role(13, .semibold, .t1)
-    public static let popoverLink = Token.Role(12, .regular, .t2, design: .monospaced)
-    public static let popoverDomain = Token.Role(12, .regular, .t2)
-    public static let popoverReach = Token.Role(11, .regular, .t3)
-    public static let popoverBody = Token.Role(12, .regular, .t1)
+    public static var popoverTitle: Token.Role { Token.Role(13, .semibold, .t1) }
+    public static var popoverLink: Token.Role { Token.Role(12, .regular, .t2, design: .monospaced) }
+    public static var popoverDomain: Token.Role { Token.Role(12, .regular, .t2) }
+    public static var popoverReach: Token.Role { Token.Role(11, .regular, .t3) }
+    public static var popoverBody: Token.Role { Token.Role(12, .regular, .t1) }
 }

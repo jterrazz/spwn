@@ -114,10 +114,14 @@ enum Snapshot {
     }
 
     @MainActor
-    static func render(_ view: AnyView, scheme: ColorScheme, over desk: AnyView?, scale: CGFloat = 2) -> (png: Data, bitmap: Bitmap)? {
+    static func canvas(_ view: AnyView, scheme: ColorScheme, over desk: AnyView?) -> AnyView {
         let themed = view.stationTheme(scheme).environment(\.stationNow, now).environment(\.stationStill, true)
-        let content = desk.map { AnyView(themed.fixedSize().padding(24).background($0)) } ?? AnyView(themed)
-        let renderer = ImageRenderer(content: content)
+        return desk.map { AnyView(themed.fixedSize().padding(24).background($0)) } ?? AnyView(themed)
+    }
+
+    @MainActor
+    static func render(_ view: AnyView, scheme: ColorScheme, over desk: AnyView?, scale: CGFloat = 2) -> (png: Data, bitmap: Bitmap)? {
+        let renderer = ImageRenderer(content: canvas(view, scheme: scheme, over: desk))
         renderer.scale = scale
         guard let image = renderer.cgImage, let bitmap = Bitmap(image), let flat = bitmap.image else { return nil }
         let rep = NSBitmapImageRep(cgImage: flat)

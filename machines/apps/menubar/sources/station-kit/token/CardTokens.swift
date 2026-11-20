@@ -8,6 +8,6 @@ extension Token.Metric {
 }
 
 extension Token.Role {
-    public static let cardTitle = Token.Role(13, .semibold, .t1)
-    public static let copyCommand = Token.Role(12, .regular, .t2, design: .monospaced)
+    public static var cardTitle: Token.Role { Token.Role(13, .semibold, .t1) }
+    public static var copyCommand: Token.Role { Token.Role(12, .regular, .t2, design: .monospaced) }
 }

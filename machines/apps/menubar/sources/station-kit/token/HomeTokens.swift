@@ -87,8 +87,8 @@ extension EnvironmentValues {
 }
 
 extension Token.Role {
-    public static let homeName = Token.Role(13, .semibold, .t1)
-    public static let homeSuffix = Token.Role(13, .regular, .t2)
-    public static let homeValue = Token.Role(13, .regular, .t2)
-    public static let homeVerb = Token.Role(13, .medium, .t1)
+    public static var homeName: Token.Role { Token.Role(13, .semibold, .t1) }
+    public static var homeSuffix: Token.Role { Token.Role(13, .regular, .t2) }
+    public static var homeValue: Token.Role { Token.Role(13, .regular, .t2) }
+    public static var homeVerb: Token.Role { Token.Role(13, .medium, .t1) }
 }

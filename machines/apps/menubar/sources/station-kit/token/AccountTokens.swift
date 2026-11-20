@@ -9,8 +9,8 @@ extension Token.Metric {
 }
 
 extension Token.Role {
-    public static let addRow = Token.Role(13, .regular, .t1)
-    public static let addRowEnd = Token.Role(12, .regular, .t3)
-    public static let noneShared = Token.Role(12, .regular, .t2)
-    public static let accountsFooterLink = Token.Role(12, .regular, .t2)
+    public static var addRow: Token.Role { Token.Role(13, .regular, .t1) }
+    public static var addRowEnd: Token.Role { Token.Role(12, .regular, .t3) }
+    public static var noneShared: Token.Role { Token.Role(12, .regular, .t2) }
+    public static var accountsFooterLink: Token.Role { Token.Role(12, .regular, .t2) }
 }

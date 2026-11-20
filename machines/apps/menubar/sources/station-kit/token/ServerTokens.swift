@@ -38,12 +38,12 @@ extension Token.Motion {
 }
 
 extension Token.Role {
-    public static let healthTitle = Token.Role(13, .medium, .t1)
-    public static let healthSub = Token.Role(11, .regular, .t2)
-    public static let bannerTitle = Token.Role(15, .semibold, .t1)
-    public static let cardValue = Token.Role(13, .regular, .t2)
-    public static let cardSub = Token.Role(11, .regular, .t2)
-    public static let footerCopy = Token.Role(12, .regular, .t2, design: .monospaced)
-    public static let footerNote = Token.Role(12, .regular, .t3)
-    public static let toolingNote = Token.Role(11, .regular, .t3)
+    public static var healthTitle: Token.Role { Token.Role(13, .medium, .t1) }
+    public static var healthSub: Token.Role { Token.Role(11, .regular, .t2) }
+    public static var bannerTitle: Token.Role { Token.Role(15, .semibold, .t1) }
+    public static var cardValue: Token.Role { Token.Role(13, .regular, .t2) }
+    public static var cardSub: Token.Role { Token.Role(11, .regular, .t2) }
+    public static var footerCopy: Token.Role { Token.Role(12, .regular, .t2, design: .monospaced) }
+    public static var footerNote: Token.Role { Token.Role(12, .regular, .t3) }
+    public static var toolingNote: Token.Role { Token.Role(11, .regular, .t3) }
 }

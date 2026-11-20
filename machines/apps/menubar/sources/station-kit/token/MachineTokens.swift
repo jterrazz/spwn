@@ -40,8 +40,8 @@ extension Token.Metric {
 }
 
 extension Token.Role {
-    public static let back = Token.Role(13, .regular, .t2)
-    public static let footnote = Token.Role(12, .regular, .t3)
+    public static var back: Token.Role { Token.Role(13, .regular, .t2) }
+    public static var footnote: Token.Role { Token.Role(12, .regular, .t3) }
 }
 
 extension Token.Symbol {

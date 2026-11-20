@@ -79,16 +79,16 @@ extension Token.Metric.HUD {
 }
 
 extension Token.Role {
-    public static let needWhat = Token.Role(12, .regular, .t1)
-    public static let needSubject = Token.Role(12, .semibold, .t1)
-    public static let check = Token.Role(13, .regular, .t1)
-    public static let checkResult = Token.Role(11, .regular, .t3)
-    public static let logLine = Token.Role(10.5, .regular, .t2, design: .monospaced, tracking: -0.105)
-    public static let logSource = Token.Role(10.5, .medium, .t1, design: .monospaced, tracking: -0.105)
-    public static let link = Token.Role(12, .regular, .t2)
-    public static let fold = Token.Role(12, .regular, .t2)
-    public static let emptyBold = Token.Role(13, .semibold, .t1)
-    public static let emptyGrey = Token.Role(12, .regular, .t2)
+    public static var needWhat: Token.Role { Token.Role(12, .regular, .t1) }
+    public static var needSubject: Token.Role { Token.Role(12, .semibold, .t1) }
+    public static var check: Token.Role { Token.Role(13, .regular, .t1) }
+    public static var checkResult: Token.Role { Token.Role(11, .regular, .t3) }
+    public static var logLine: Token.Role { Token.Role(10.5, .regular, .t2, design: .monospaced, tracking: -0.105) }
+    public static var logSource: Token.Role { Token.Role(10.5, .medium, .t1, design: .monospaced, tracking: -0.105) }
+    public static var link: Token.Role { Token.Role(12, .regular, .t2) }
+    public static var fold: Token.Role { Token.Role(12, .regular, .t2) }
+    public static var emptyBold: Token.Role { Token.Role(13, .semibold, .t1) }
+    public static var emptyGrey: Token.Role { Token.Role(12, .regular, .t2) }
 }
 
 extension Token.Symbol {

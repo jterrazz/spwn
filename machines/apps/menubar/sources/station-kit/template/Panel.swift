@@ -118,19 +118,20 @@ public struct Panel<Header: View, Content: View, Footer: View>: View {
 
     public var body: some View {
         PanelColumn(cap: bounded ? cap : nil) {
-            padded(header, insets == .page ? Token.Metric.Panel.header : nil)
+            padded(header, insets == .page ? Token.Metric.Panel.header : nil, kit: "Panel.header", read: "Metric.Panel.header")
                 .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { measured.header = $0 }
-            pageBody
-            padded(footer, insets == .page ? Token.Metric.Panel.footer : nil)
+            pageBody.recorded(contentMark)
+            padded(footer, insets == .page ? Token.Metric.Panel.footer : nil, kit: "Panel.footer", read: "Metric.Panel.footer")
                 .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { measured.footer = $0 }
         }
         .frame(width: width, alignment: .topLeading)
         .overlayPreferenceValue(PopoverPins.self) { PopoverLayer(pins: $0) }
         .overlay(alignment: .top) { layered }
         .modifier(PanelPane(bare: caught?.bare == true))
+        .recorded(paneMark)
     }
 
-    func padded<V: View>(_ view: V, _ edges: EdgeInsets?) -> some View {
+    func padded<V: View>(_ view: V, _ edges: EdgeInsets?, kit: String? = nil, read: String = "") -> some View {
         VStack(alignment: .leading, spacing: 0) {
             if let edges, V.self != EmptyView.self {
                 view.padding(edges).frame(maxWidth: .infinity, alignment: .leading)
@@ -138,6 +139,28 @@ public struct Panel<Header: View, Content: View, Footer: View>: View {
                 view
             }
         }
+        .recorded(kit.flatMap { kit in V.self == EmptyView.self ? nil : ViewMark(.group, kit: kit, reads: edges.map { [TokenRead(read, $0)] } ?? []) })
+    }
+
+    var paneMark: ViewMark {
+        let scheme = tokens.scheme
+        let roomed = room.map { ["room=" + ViewNumber.text($0)] } ?? []
+        guard still, caught?.bare != true else { return ViewMark(.group, kit: "Panel", attrs: roomed) }
+        let plate = tokens.solid ? "color.plateSolid" : "color.plate"
+        let edge = tokens.solid
+            ? (attr: "stroke=color.hair", reads: [TokenRead("color.hair", tokens.color.hair), TokenRead("Pane.solidEdge", Token.Pane.solidEdge)])
+            : (attr: "rim=Pane.rim", reads: [TokenRead("Pane.rim", Token.Pane.rim(scheme)), TokenRead("Pane.rimWidth", Token.Pane.rimWidth)])
+        return ViewMark(.group, kit: "Panel",
+                        attrs: ["fill=" + plate, "corner=Glass.window", "shadow=Pane.shades", "ring=Pane.ring", edge.attr] + roomed,
+                        reads: [TokenRead(plate, tokens.plate), TokenRead("Glass.window", Token.Glass.window), TokenRead("Pane.shades", Token.Pane.shades(scheme)),
+                                TokenRead("Pane.ring", Token.Pane.ring(scheme)), TokenRead("Pane.outline", Token.Pane.outline)] + edge.reads)
+    }
+
+    var contentMark: ViewMark {
+        let edges = insets == .page ? [TokenRead("Metric.Panel.body", Token.Metric.Panel.body)] : []
+        guard bounded else { return ViewMark(.group, kit: "Panel.content", reads: edges) }
+        let fade = still ? [TokenRead("Pane.fade", Token.Pane.fade)] : []
+        return ViewMark(.group, kit: "Panel.content", attrs: ["scroll"], reads: edges + fade, clip: still ? ViewClip(fade: Token.Pane.fade, token: "Pane.fade") : nil)
     }
 
     var page: some View {
@@ -157,7 +180,7 @@ public struct Panel<Header: View, Content: View, Footer: View>: View {
                 .clipped()
                 .mask {
                     CutFade {
-                        page.hidden()
+                        page.hidden().unrecorded()
                         Rectangle().fill(Token.Pane.opaque)
                         LinearGradient(colors: [Token.Pane.opaque, Color.clear], startPoint: .top, endPoint: .bottom)
                     }
