@@ -2195,7 +2195,7 @@ export type MachinesUptime = {
 export type MachinesUptimeCell = {
     Date: string;
     Down?: MachinesIncident[];
-    Mark: '' | 'down' | 'none' | 'ok' | 'restart';
+    Mark: 'ok' | 'restart' | 'down' | 'none';
     Restarts?: number;
     Sentence?: string;
 };
@@ -3729,6 +3729,8 @@ export type MachinesRollUpState = 'down' | 'not-created' | 'engine-stopped' | 'n
 
 export type MachinesRoomFor = 'small' | 'workspace' | 'gate' | 'none';
 
+export type MachinesUptimeMark = 'ok' | 'restart' | 'down' | 'none';
+
 export type MachinesVMStanding = 'not-seen' | 'restarting' | 'creating' | 'not-created' | 'down' | 'stopped' | 'suspended' | 'healthy' | 'running';
 
 export type OverviewMark = 'exposed' | 'down' | 'not-created' | 'needs-you' | 'can-wait';
@@ -3804,6 +3806,7 @@ export type StationWords = {
     MachinesPreset: Record<MachinesPreset, StationWord>;
     MachinesRollUpState: Record<MachinesRollUpState, StationWord>;
     MachinesRoomFor: Record<MachinesRoomFor, StationWord>;
+    MachinesUptimeMark: Record<MachinesUptimeMark, StationWord>;
     MachinesVMStanding: Record<MachinesVMStanding, StationWord>;
     OverviewMark: Record<OverviewMark, StationWord>;
     OverviewUpkeep: Record<OverviewUpkeep, StationWord>;

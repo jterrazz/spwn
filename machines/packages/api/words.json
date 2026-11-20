@@ -1755,6 +1755,24 @@
       "Tone": "plain"
     }
   },
+  "MachinesUptimeMark": {
+    "down": {
+      "Word": "Down",
+      "Tone": "bad"
+    },
+    "none": {
+      "Word": "Not recorded",
+      "Tone": "plain"
+    },
+    "ok": {
+      "Word": "Up",
+      "Tone": "ok"
+    },
+    "restart": {
+      "Word": "Restarted",
+      "Tone": "warn"
+    }
+  },
   "MachinesVMStanding": {
     "creating": {
       "Word": "creating",

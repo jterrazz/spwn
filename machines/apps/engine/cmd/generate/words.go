@@ -281,6 +281,12 @@ func wordedEnums() []worded {
 			string(machines.HoldYours):    plain("Yours"),
 			string(machines.HoldNotSeen):  plain(machines.UnknownState.Word()),
 		}},
+		{machines.DayMark(""), map[string]word{
+			string(machines.DayOK):      toned(verdict.OK, "Up"),
+			string(machines.DayRestart): toned(verdict.Warn, "Restarted"),
+			string(machines.DayDown):    toned(verdict.Bad, "Down"),
+			string(machines.DayNone):    plain("Not recorded"),
+		}},
 		{machines.CheckState(""), map[string]word{
 			string(machines.CheckFailing): toned(verdict.Bad, "fails"),
 			string(machines.CheckPassing): toned(verdict.OK, "passes"),

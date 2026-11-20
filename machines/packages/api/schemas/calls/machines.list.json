@@ -909,11 +909,10 @@
         },
         "Mark": {
           "enum": [
-            "",
-            "down",
-            "none",
             "ok",
-            "restart"
+            "restart",
+            "down",
+            "none"
           ],
           "type": "string"
         },

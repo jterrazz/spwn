@@ -134,6 +134,12 @@ const (
 	DayNone    DayMark = "none"
 )
 
+func (DayMark) Enum() []string {
+	return []string{string(DayOK), string(DayRestart), string(DayDown), string(DayNone)}
+}
+
+func (DayMark) TSName() string { return "MachinesUptimeMark" }
+
 type UptimeCell struct {
 	Date string
 	Mark DayMark

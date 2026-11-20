@@ -133,7 +133,6 @@ export const DISK_RESULT_TONES: Tones<DiskOutcome['Result']> = {
 };
 
 export const UPTIME_MARK_TONES: Tones<MachinesUptimeCell['Mark']> = {
-    '': 'plain',
     down: 'bad',
     none: 'plain',
     ok: 'ok',
