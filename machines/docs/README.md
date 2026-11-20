@@ -1,4 +1,4 @@
-# The manual of station
+# The manual of Machines
 
 `station` is the CLI that sets up and runs a Mac, its VMs and your other Macs: it installs apps and agent skills from a catalogue, applies and checks the machine's settings, keeps servers alive and workspaces at hand, shows what listens and who reaches it, and keeps a Mac awake, the same sections on every machine. This repository also authors two doctrines every `@jterrazz` repository follows, shipped to agents as skills. This page lists every page of the manual, by what the reader came to do.
 
@@ -40,7 +40,7 @@
 | [Awake](reference/awake.md)                          | Every Mac's mode, keeping a Mac awake, the guards, Never sleeps                                |
 | [The catalog's package format](reference/catalog.md) | Every key of a package file, the selector, the methods, options, an example per method         |
 | [Machinefiles](reference/machinefiles.md)            | What a machine carries: every key, the overlay, sources and origins, the resolution, `explain` |
-| [Settings](reference/settings.md)                    | Every setting station applies, the Checked group, how a setting asks its values                |
+| [Settings](reference/settings.md)                    | Every setting Machines applies, the Checked group, how a setting asks its values               |
 | [Preferences](reference/preferences.md)              | `preferences.json`, its groups and their owners, the environment variables                     |
 | [Apps and skills](reference/apps-and-skills.md)      | The catalog, the method table, mise, skills as apps, the toolbelt                              |
 | [Images](reference/images.md)                        | The VM images, the recipe, the binary inside                                                   |

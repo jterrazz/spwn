@@ -31,16 +31,16 @@ The same tokens colour Fang's help and the forms that ask a setting's values.
 
 ## The marks
 
-| Mark | Means                                       |
-| ---- | ------------------------------------------- |
-| `●`  | ok                                          |
-| `◐`  | degraded, or unknown                        |
-| `○`  | absent                                      |
-| `✗`  | broken                                      |
-| `◌`  | pending                                     |
-| `⊘`  | off here, your choice                       |
-| `–`  | not for this machine                        |
-| `?`  | not managed by station, or not readable now |
+| Mark | Means                                        |
+| ---- | -------------------------------------------- |
+| `●`  | ok                                           |
+| `◐`  | degraded, or unknown                         |
+| `○`  | absent                                       |
+| `✗`  | broken                                       |
+| `◌`  | pending                                      |
+| `⊘`  | off here, your choice                        |
+| `–`  | not for this machine                         |
+| `?`  | not managed by Machines, or not readable now |
 
 Beside the marks, a few glyphs carry structure, never a state:
 
@@ -52,7 +52,7 @@ Beside the marks, a few glyphs carry structure, never a state:
 | `├─`, `└─` | a Mac's VMs under it               |
 | `▁▂▃▄▅▆▇█` | a sparkline ([Graphs](#graphs))    |
 
-The glyph is the meaning and survives a pipe and `NO_COLOR`; colour only reinforces it. `◌` (Muted) marks a row whose read has not answered yet, on a terminal only: a pipe, `NO_COLOR` and `--json` wait for every read, so they never carry it. `⊘` and `?` are Muted, `–` Subtle, each always followed by its word (`page.OffHere`, `page.NotForThisMachine`, `page.NotKnown`); the families draw them as they take their v3 words. Every glyph station prints is a token of `apps/engine/ui/token/glyphs.go` (`token.Glyphs`), and the layer test refuses one in any other Go literal of a migrated package.
+The glyph is the meaning and survives a pipe and `NO_COLOR`; colour only reinforces it. `◌` (Muted) marks a row whose read has not answered yet, on a terminal only: a pipe, `NO_COLOR` and `--json` wait for every read, so they never carry it. `⊘` and `?` are Muted, `–` Subtle, each always followed by its word (`page.OffHere`, `page.NotForThisMachine`, `page.NotKnown`); the families draw them as they take their v3 words. Every glyph Machines prints is a token of `apps/engine/ui/token/glyphs.go` (`token.Glyphs`), and the layer test refuses one in any other Go literal of a migrated package.
 
 ## Typography
 

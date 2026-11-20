@@ -1,16 +1,16 @@
 # Settings
 
-`station settings` is what station sets up on a machine (dotfiles, logins, macOS defaults, shortcuts) and what it checks there without applying it. Each entry is a setting, named by what it sets; station's own choices are not settings, they are [Preferences](preferences.md).
+`station settings` is what Machines sets up on a machine (dotfiles, logins, macOS defaults, shortcuts) and what it checks there without applying it. Each entry is a setting, named by what it sets; Machines' own choices are not settings, they are [Preferences](preferences.md).
 
-| Section      | Answers                                                     |
-| ------------ | ----------------------------------------------------------- |
-| The packages | Every setting station applies, where it lives, what it does |
-| Checked      | What station reads from macOS without applying it           |
-| Values       | How a setting that needs values asks for them               |
+| Section      | Answers                                                      |
+| ------------ | ------------------------------------------------------------ |
+| The packages | Every setting Machines applies, where it lives, what it does |
+| Checked      | What Machines reads from macOS without applying it           |
+| Values       | How a setting that needs values asks for them                |
 
 ## The packages
 
-The states a row says (`applied`, `changed-since`, `not-applied`, `off-here`, `not-for-this-machine`, `reading`) are one closed enum on the wire, `SettingsRow.State`, and `words.json` carries each one's word and tone (`SettingsState`); the page and the menu bar read the same words. A setting that does not live on this machine's kind reads Not for this machine, and an apply of it is refused with exit 2. Each that lives here reads Applied (exactly as station applied it), Changed since (applied, then changed by someone: `station settings diff` shows how), Not applied (never applied, or still exactly as station applied it while station writes it otherwise now, so the next apply writes the new text without asking), or Off here (the owner's choice, kept as `off_here` in [`preferences.json`](preferences.md)). What station applied, its fingerprint and when, is kept under `~/.local/state/station/applied/`. The fingerprint is what the machine holds of the setting's effect, never what station would write: an edit by hand, or a part taken away (a file deleted, a workspace taken out of the multiplexer), moves it and reads Changed since; a part the setting gained that is not there yet (a new file, a new block, a new workspace) does not, so the setting reads Not applied and the next apply writes it.
+The states a row says (`applied`, `changed-since`, `not-applied`, `off-here`, `not-for-this-machine`, `reading`) are one closed enum on the wire, `SettingsRow.State`, and `words.json` carries each one's word and tone (`SettingsState`); the page and the menu bar read the same words. A setting that does not live on this machine's kind reads Not for this machine, and an apply of it is refused with exit 2. Each that lives here reads Applied (exactly as Machines applied it), Changed since (applied, then changed by someone: `station settings diff` shows how), Not applied (never applied, or still exactly as Machines applied it while Machines writes it otherwise now, so the next apply writes the new text without asking), or Off here (the owner's choice, kept as `off_here` in [`preferences.json`](preferences.md)). What Machines applied, its fingerprint and when, is kept under `~/.local/state/station/applied/`. The fingerprint is what the machine holds of the setting's effect, never what Machines would write: an edit by hand, or a part taken away (a file deleted, a workspace taken out of the multiplexer), moves it and reads Changed since; a part the setting gained that is not there yet (a new file, a new block, a new workspace) does not, so the setting reads Not applied and the next apply writes it.
 
 | Package                     | Lives on   | Sets                                                                                                                                                                                                                                          | Reversible |
 | --------------------------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
@@ -33,14 +33,14 @@ The states a row says (`applied`, `changed-since`, `not-applied`, `off-here`, `n
 | `never-sleeps`              | Mac        | the engine keeps the Mac awake, its servers with it; no admin, applied from any Mac                                                                                                                                                           | yes        |
 | `lock-after-login`          | Mac        | lock the screen after the automatic login; admin                                                                                                                                                                                              | yes        |
 | `sshd`                      | Mac        | Remote Login; admin                                                                                                                                                                                                                           | yes        |
-| `git-shortcuts`             | all        | station's `[alias]` block in `~/.gitconfig`: wip, unwip, sync, feat, fix, chore, branches, lg, st, pushup                                                                                                                                     | yes        |
+| `git-shortcuts`             | all        | Machines' `[alias]` block in `~/.gitconfig`: wip, unwip, sync, feat, fix, chore, branches, lg, st, pushup                                                                                                                                     | yes        |
 | `docker-shortcuts`          | all        | `dclean`, `dclean-images`, `dreset` in a block of `~/.zshrc` (`station:docker-shortcuts`), each asks y/n before it removes every container, image, or both                                                                                    | yes        |
 
-The settings are Set by station; `autologin`, `restart-after-power-cut`, `never-sleeps`, `lock-after-login` and `sshd` are its Always-on Mac group, for a Mac that hosts servers: opt-in, applied by name only, one folded line until one of it is applied. An admin setting (all of the group but `never-sleeps`) applies only when you run station with admin rights on that Mac's own terminal: without them it is refused, exit 2, with the line that does it, `sudo station settings apply <setting>`, or through `--on`, `ssh -t <mac> sudo station settings apply <setting>`. station never calls sudo itself.
+The settings are Set by Machines; `autologin`, `restart-after-power-cut`, `never-sleeps`, `lock-after-login` and `sshd` are its Always-on Mac group, for a Mac that hosts servers: opt-in, applied by name only, one folded line until one of it is applied. An admin setting (all of the group but `never-sleeps`) applies only when you run station with admin rights on that Mac's own terminal: without them it is refused, exit 2, with the line that does it, `sudo station settings apply <setting>`, or through `--on`, `ssh -t <mac> sudo station settings apply <setting>`. Machines never calls sudo itself.
 
 ## Checked
 
-The Checked group is what station reads from macOS and never applies, on a Mac only (a VM reads each Not for this machine). Each is As expected (`●`) or needs a look (`◐`), its fix the System Settings pane or the command for you to run: station never runs sudo. They are read by `settings/contract.Inspector` (`macos`), each within its budget.
+The Checked group is what Machines reads from macOS and never applies, on a Mac only (a VM reads each Not for this machine). Each is As expected (`●`) or needs a look (`◐`), its fix the System Settings pane or the command for you to run: Machines never runs sudo. They are read by `settings/contract.Inspector` (`macos`), each within its budget.
 
 | Setting             | As expected when                                                              |
 | ------------------- | ----------------------------------------------------------------------------- |
@@ -56,7 +56,7 @@ The Checked group is what station reads from macOS and never applies, on a Mac o
 
 ## Across the machines
 
-The `settings.matrix` call reads each setting on every machine, a cell per machine: its state (`State`, a closed enum: a row's state, a checked row's, or `unknown` where the machine was not read) and whether the machine holds the setting (`Holds`: station set it there, or it is checked there, as expected or not). Its `Verdict` is the head of the catalog's Settings shelf: `Mine` counts the catalog settings held on at least one machine (`4 settings are on your machines`, `1 setting is on your machines`), and `Catalog` those the catalog holds (`25 settings are in the catalog`). A row of the Checked group is no package of the catalog and is not counted.
+The `settings.matrix` call reads each setting on every machine, a cell per machine: its state (`State`, a closed enum: a row's state, a checked row's, or `unknown` where the machine was not read) and whether the machine holds the setting (`Holds`: Machines set it there, or it is checked there, as expected or not). Its `Verdict` is the head of the catalog's Settings shelf: `Mine` counts the catalog settings held on at least one machine (`4 settings are on your machines`, `1 setting is on your machines`), and `Catalog` those the catalog holds (`25 settings are in the catalog`). A row of the Checked group is no package of the catalog and is not counted.
 
 ## Values
 
@@ -67,6 +67,6 @@ There is no flag to pass a value: a secret never travels in argv or shell histor
 ## Related
 
 - [Commands](commands.md): `station settings`.
-- [Preferences](preferences.md): `off_here`, and the environment station reads.
+- [Preferences](preferences.md): `off_here`, and the environment Machines reads.
 - [Dotfiles](dotfiles.md): the files the dotfile packages copy.
-- [Footprint](footprint.md): every file station writes.
+- [Footprint](footprint.md): every file Machines writes.

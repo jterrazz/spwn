@@ -1,11 +1,11 @@
 # Preferences
 
-station keeps its own choices in one file, `~/.config/station/preferences.json`, and reads a few environment variables once at start. Neither is a setting: [Settings](settings.md) is what station sets up on a machine ([ADR-015](../decisions/015-preferences-json.md)).
+Machines keeps its own choices in one file, `~/.config/station/preferences.json`, and reads a few environment variables once at start. Neither is a setting: [Settings](settings.md) is what Machines sets up on a machine ([ADR-015](../decisions/015-preferences-json.md)).
 
 | Section          | Answers                                           |
 | ---------------- | ------------------------------------------------- |
 | preferences.json | The file, its groups, the family that writes each |
-| Environment      | The variables station reads, all resolved once    |
+| Environment      | The variables Machines reads, all resolved once   |
 
 ## preferences.json
 
@@ -59,7 +59,7 @@ A key no group names is dropped at the next write. A `v` field names the version
 | `AGENT_PASSWORD`                                                       | pre-fills the `autologin` form                                                                                                                                                                        |
 | `MISE_DATA_DIR`                                                        | where mise keeps its shims                                                                                                                                                                            |
 | `NO_COLOR`, `COLUMNS`                                                  | the output form and width                                                                                                                                                                             |
-| `XDG_CONFIG_HOME`, `XDG_DATA_HOME`, `XDG_STATE_HOME`, `XDG_CACHE_HOME` | the folders station uses, when absolute ([Disk](disk.md#the-folders))                                                                                                                                 |
+| `XDG_CONFIG_HOME`, `XDG_DATA_HOME`, `XDG_STATE_HOME`, `XDG_CACHE_HOME` | the folders Machines uses, when absolute ([Disk](disk.md#the-folders))                                                                                                                                |
 | `STATION_TERMINAL`                                                     | this terminal's id, which `station use` keeps its machine under ([Machines](machines.md#this-terminals-machine))                                                                                      |
 | `STATION_SESSION`                                                      | the session the CLI's gestures are done for, by its name: a VM's creator and a journal line's `By`, `you` without it ([Machines](machines.md#the-commands), [The journal](journal.md#what-writes-it)) |
 | `GOENV`                                                                | where `station init` writes Go's env file; `off` writes none                                                                                                                                          |
@@ -75,6 +75,6 @@ A key no group names is dropped at the next write. A `v` field names the version
 
 ## Related
 
-- [Settings](settings.md): what station sets up, and Off here.
-- [Footprint](footprint.md): every file station writes.
+- [Settings](settings.md): what Machines sets up, and Off here.
+- [Footprint](footprint.md): every file Machines writes.
 - [ADR-007](../decisions/007-files-live-in-the-xdg-folders.md): why the XDG folders.

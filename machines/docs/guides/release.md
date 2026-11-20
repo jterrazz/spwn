@@ -1,6 +1,6 @@
 # Release
 
-Station ships three artefacts, the `station` binary, the menu bar's `Station.app`, and the window's `Spwn.app`, and they reach a machine two ways: a tagged GitHub release, or a build from a checkout. The pipeline that cuts the release (the tag, the jobs, the dry run, signing and notarization, the rollback) is spwn's, one release for both products: [Release](../../../docs/guides/release.md). This page keeps what is station's.
+Machines ships three artefacts, the `station` binary, the menu bar's `Station.app`, and the window's `Spwn.app`, and they reach a machine two ways: a tagged GitHub release, or a build from a checkout. The pipeline that cuts the release (the tag, the jobs, the dry run, signing and notarization, the rollback) is spwn's, one release for both products: [Release](../../../docs/guides/release.md). This page keeps what is Machines'.
 
 | Section                | Answers                                          |
 | ---------------------- | ------------------------------------------------ |
@@ -14,7 +14,7 @@ Each binary is released as an asset named `station-<os>-<arch>`, for `linux` and
 
 The window rides the same release: `Spwn_darwin_arm64.zip` (its first install), then `Spwn.app.tar.gz`, its `.sig` and `latest.json` (its update), listed in the same `checksums.txt`. A release that renames these, or a window whose `plugins.updater` endpoint moves, strands every installed window.
 
-The version is stamped from the tag ([ADR-005](../decisions/005-the-version-is-stamped-from-the-tag.md)); `v0.21.0-alpha.1` is station's first release from jterrazz/spwn, continuing that repository's version line after v0.20.0, with no compatibility kept with the v3 stations before it, and `api.Floor` is `v0.1.0`.
+The version is stamped from the tag ([ADR-005](../decisions/005-the-version-is-stamped-from-the-tag.md)); `v0.21.0-alpha.1` is Machines' first release from jterrazz/spwn, continuing that repository's version line after v0.20.0, with no compatibility kept with the v3 stations before it, and `api.Floor` is `v0.1.0`.
 
 A darwin binary is built on a Mac with cgo, so it has IOKit (Awake's hold and the battery, lid and thermal reads) and LocalAuthentication (the presence a grant asks), and links the Secure Enclave's Swift half, `make enclave`'s universal static library over CryptoKit, which the release's darwin job builds before both binaries; a build without cgo has no presence to ask and refuses every grant with `grant.no-presence`. Both darwin binaries run on macOS 14.0 (Sonoma) and later, `MACOSX_DEPLOYMENT_TARGET=14.0`, and the release fails one whose build settings do not say `CGO_ENABLED=1` or whose `minos` is not 14.0. `Station.app` keeps its own floor, macOS 26 (`apps/menubar/Package.swift`), since its panel rests on macOS 26 behaviours ([ADR-021](../decisions/021-the-menu-bar-keeps-its-system-window.md)); `make menubar` builds it.
 
@@ -22,7 +22,7 @@ A released `Station.app` is signed with the Developer ID, notarized and stapled,
 
 ## How a machine takes it
 
-A machine takes the release through the one-line install of [Getting started](../start/getting-started.md), which downloads the asset named for its platform; re-running it is station's own upgrade. What its Machinefile carries is upgraded by `station upgrade`, which leaves station itself alone ([Machinefiles](../reference/machinefiles.md#upgrade)).
+A machine takes the release through the one-line install of [Getting started](../start/getting-started.md), which downloads the asset named for its platform; re-running it is Machines' own upgrade. What its Machinefile carries is upgraded by `station upgrade`, which leaves Machines itself alone ([Machinefiles](../reference/machinefiles.md#upgrade)).
 
 A Mac takes `Station.app` as an app of the catalog, `station apps install station-menubar` ([Apps and skills](../reference/apps-and-skills.md)), with no Xcode: it reads the latest release's tag once, downloads that release's `Station.app.zip`, refuses it unless its `checksums.txt` vouches for it, and puts it at `~/Applications/Station.app`, as `make menubar-install` does: the new bundle is copied beside the old, then renamed over it, so a failed install keeps the old app. A running `Station.app` keeps its old process until it is quit and opened again. Like that target, it registers no login item: the app's own "Open at login" switch does.
 

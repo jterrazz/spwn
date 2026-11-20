@@ -1,4 +1,4 @@
-# station
+# Machines
 
 A single CLI to set up and run a Mac, its VMs and your other Macs: the apps and agent skills, the settings, the disk, the ports and who reaches them, who is signed in and what the vault granted, Awake, and the servers and workspaces where development lives. No sudo required for the install.
 
@@ -41,7 +41,7 @@ station engine          # this Mac's engine: running, its version, the VMs it ru
 # This terminal
 station use linux-1     # every later command of this terminal runs on linux-1
 
-# Station itself
+# Machines itself
 station init            # make this machine known: its name, the shell block, the XDG folders
 ```
 

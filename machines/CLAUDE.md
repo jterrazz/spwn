@@ -16,38 +16,38 @@ A Go CLI that sets up and runs a Mac, its VMs (servers and workspaces) and the o
 
 The corpus is `docs/` + `README.md`, mapped by `docs/README.md`. Do not duplicate it; link to it.
 
-| Working on                                           | Read                                |
-| ---------------------------------------------------- | ----------------------------------- |
-| A fresh machine: install, init                       | `docs/start/getting-started.md`     |
-| The families, contracts, Router, engine, world       | `docs/concepts/architecture.md`     |
-| Palette, marks, pipe format, graphs                  | `docs/concepts/design-system.md`    |
-| What a word means                                    | `docs/concepts/glossary.md`         |
-| Building, and which folder a change opens            | `docs/guides/develop.md`            |
-| The three tiers, use cases over a world, the stubs   | `docs/guides/test.md`               |
-| The menu bar's stories, goldens, the Station Catalog | `docs/guides/test.md`               |
-| What a release carries, `make provision`             | `docs/guides/release.md`            |
-| Every command and flag                               | `docs/reference/commands.md`        |
-| Macs, servers, workspaces, `--on`, `use`, the engine | `docs/reference/machines.md`        |
-| Ports: rights, audiences, sharing, HTTPS             | `docs/reference/ports.md`           |
-| Accounts, sign-ins, the vault, grants                | `docs/reference/accounts.md`        |
-| The Disk groups, free, erase, move                   | `docs/reference/disk.md`            |
-| Activity, its history and graphs                     | `docs/reference/activity.md`        |
-| The journal: what was done, by day, on each Mac      | `docs/reference/journal.md`         |
-| Awake, the guards, Never sleeps                      | `docs/reference/awake.md`           |
-| The settings and the Checked group                   | `docs/reference/settings.md`        |
-| `preferences.json`, the environment variables        | `docs/reference/preferences.md`     |
-| Apps, methods, skills, the toolbelt                  | `docs/reference/apps-and-skills.md` |
-| Every key of a catalog package file                  | `docs/reference/catalog.md`         |
-| Every key of a Machinefile, its layers, `explain`    | `docs/reference/machinefiles.md`    |
-| VM images and their recipe                           | `docs/reference/images.md`          |
-| The shell block, the embedded dotfiles               | `docs/reference/dotfiles.md`        |
-| `station.api/v2`, `calls.json`, the engine's calls   | `docs/reference/api.md`             |
-| The `station.status/v1` contract (one release)       | `docs/reference/status-json.md`     |
-| What station writes on a machine                     | `docs/reference/footprint.md`       |
-| Why a choice was made                                | `docs/decisions/`                   |
-| What is left for later                               | `TODO.md`                           |
-| `@jterrazz` stack conventions                        | `docs/concepts/stack.md`            |
-| Repo doctrine (corpus/injection/compiler)            | `docs/concepts/repo-structure.md`   |
+| Working on                                             | Read                                |
+| ------------------------------------------------------ | ----------------------------------- |
+| A fresh machine: install, init                         | `docs/start/getting-started.md`     |
+| The families, contracts, Router, engine, world         | `docs/concepts/architecture.md`     |
+| Palette, marks, pipe format, graphs                    | `docs/concepts/design-system.md`    |
+| What a word means                                      | `docs/concepts/glossary.md`         |
+| Building, and which folder a change opens              | `docs/guides/develop.md`            |
+| The three tiers, use cases over a world, the stubs     | `docs/guides/test.md`               |
+| The menu bar's stories, goldens, the Spwn Menu Catalog | `docs/guides/test.md`               |
+| What a release carries, `make provision`               | `docs/guides/release.md`            |
+| Every command and flag                                 | `docs/reference/commands.md`        |
+| Macs, servers, workspaces, `--on`, `use`, the engine   | `docs/reference/machines.md`        |
+| Ports: rights, audiences, sharing, HTTPS               | `docs/reference/ports.md`           |
+| Accounts, sign-ins, the vault, grants                  | `docs/reference/accounts.md`        |
+| The Disk groups, free, erase, move                     | `docs/reference/disk.md`            |
+| Activity, its history and graphs                       | `docs/reference/activity.md`        |
+| The journal: what was done, by day, on each Mac        | `docs/reference/journal.md`         |
+| Awake, the guards, Never sleeps                        | `docs/reference/awake.md`           |
+| The settings and the Checked group                     | `docs/reference/settings.md`        |
+| `preferences.json`, the environment variables          | `docs/reference/preferences.md`     |
+| Apps, methods, skills, the toolbelt                    | `docs/reference/apps-and-skills.md` |
+| Every key of a catalog package file                    | `docs/reference/catalog.md`         |
+| Every key of a Machinefile, its layers, `explain`      | `docs/reference/machinefiles.md`    |
+| VM images and their recipe                             | `docs/reference/images.md`          |
+| The shell block, the embedded dotfiles                 | `docs/reference/dotfiles.md`        |
+| `station.api/v2`, `calls.json`, the engine's calls     | `docs/reference/api.md`             |
+| The `station.status/v1` contract (one release)         | `docs/reference/status-json.md`     |
+| What Machines writes on a machine                      | `docs/reference/footprint.md`       |
+| Why a choice was made                                  | `docs/decisions/`                   |
+| What is left for later                                 | `TODO.md`                           |
+| `@jterrazz` stack conventions                          | `docs/concepts/stack.md`            |
+| Repo doctrine (corpus/injection/compiler)              | `docs/concepts/repo-structure.md`   |
 
 The repo-structure doctrine is authored **here** and ships to agents as the `studio-repo-structure` skill. This repo is an application: it adopts the corpus + injection layers and generates no API reference. Its one compiler is `make generate` (`apps/engine/cmd/generate/`), which projects the catalog into the `studio-toolbelt` skill, `docs/reference/footprint.md` and the JSON Schemas `packages/api/schemas/station.package.v1.json` and `packages/api/schemas/station.machinefile.v1.json`, writes the page fixtures of `apps/engine/ui/testdata/pages/` and the story worlds' pages of `apps/menubar/stories/pages/` from the real page functions, the Registry and the engine's own calls into `apps/engine/remote/api/calls.json`, and the wire's Go types into `packages/api/`: a JSON Schema per call, the frame's and the events', their TypeScript, and the words of the closed enums a client draws; on Linux it also regenerates the window's recordings, `apps/desktop/src/fixtures/worlds/`, from the world build of the tree.
 

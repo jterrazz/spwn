@@ -53,7 +53,7 @@ Commit that change **once**. Never rotate the pubkey casually - see
 
 ### 2. Signing and notarization
 
-Every macOS artefact the Publish workflow ships from `main` or a `v*` tag is signed with a Developer ID Application certificate, with the hardened runtime and a secure timestamp, and notarized by Apple with `notarytool`, by Apple ID: spwn's two darwin binaries, signed and notarized by GoReleaser's post-build hook (`scripts/sign-macos.sh binary`) before it archives them; station's two darwin binaries, notarized inside a zip that is not shipped, since a bare binary cannot be stapled; and the two apps, `Station.app` and the window's `Spwn.app`, each notarized, then stapled before it is zipped into `Station.app.zip` and `Spwn_darwin_arm64.zip`; then `Spwn.app`, stapled, is packed into `Spwn.app.tar.gz`, signed with the Tauri key and described by `latest.json` (`scripts/window-update.sh`).
+Every macOS artefact the Publish workflow ships from `main` or a `v*` tag is signed with a Developer ID Application certificate, with the hardened runtime and a secure timestamp, and notarized by Apple with `notarytool`, by Apple ID: spwn's two darwin binaries, signed and notarized by GoReleaser's post-build hook (`scripts/sign-macos.sh binary`) before it archives them; Machines' two darwin binaries, notarized inside a zip that is not shipped, since a bare binary cannot be stapled; and the two apps, `Station.app` and the window's `Spwn.app`, each notarized, then stapled before it is zipped into `Station.app.zip` and `Spwn_darwin_arm64.zip`; then `Spwn.app`, stapled, is packed into `Spwn.app.tar.gz`, signed with the Tauri key and described by `latest.json` (`scripts/window-update.sh`).
 
 The workflow stores no secret in GitHub. Each job that signs reads the secrets it names from Infisical, through the job's GitHub OIDC token, with `.github/actions/signing-secrets`: the machine identity `studio-ci`, project `studio-ci`, environment `prod`, folder `/spwn`. The project and the folder are the workflow's `SIGNING_SECRETS_PROJECT` and `SIGNING_SECRETS_PATH`. Every value is masked in the log, and a secret a job does not name is never in its environment.
 
@@ -93,8 +93,8 @@ The first real proof is then a dry run on `main`, `gh workflow run publish.yaml 
 
 Follow semver: `vMAJOR.MINOR.PATCH`. One tag versions both products, and the
 line continues after Spwn's last release, `v0.20.0`: the first unified release
-is `v0.21.0-alpha.1`. Station's own last release was `v3.1.0` (tagged in its
-former repository, `jterrazz/studio-station`); station accepts any version from
+is `v0.21.0-alpha.1`. Machines' own last release was `v3.1.0` (tagged in its
+former repository, `jterrazz/studio-station`); Machines accepts any version from
 `v0.1.0`, so `v0.21.0-alpha.1` passes.
 
 A host on `v0.20.0` is offered it: `spwn upgrade` compares the minor first
@@ -147,8 +147,8 @@ both products of the repository, Spwn and the engine (`machines/`):
                                     one checksums.txt for all
 ```
 
-The release is opened once, by GoReleaser, and only after both station jobs
-succeeded, so a failed station leaves no release behind. Station's binaries
+The release is opened once, by GoReleaser, and only after both Machines jobs
+succeeded, so a failed job leaves no release behind. Machines' binaries
 carry its version through `-X .../apps/engine/wire.version=<tag>`, as its own
 release did. The window's `Spwn.app` is built by `make window` and versioned the same way, from `git describe`; it carries that version in its binary and updates itself from `releases/latest/download/latest.json`, whose one platform is `darwin-aarch64-window`, so the old spwn desktop apps polling the same URL find nothing for them. The desktop app of `apps/web` has no job: the shared
 `release-tauri.yaml` they called is deleted, and a job that builds them
@@ -207,7 +207,7 @@ goreleaser release --snapshot --clean
 # Artifacts land in ./.artifacts/goreleaser/
 ```
 
-GoReleaser reads station's files from `.artifacts/station/` as extra files,
+GoReleaser reads Machines' files from `.artifacts/station/` as extra files,
 and a glob that matches nothing is an error, so a local snapshot needs at
 least one station binary there.
 

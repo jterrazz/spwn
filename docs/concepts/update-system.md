@@ -92,7 +92,7 @@ spwn upgrade --force         # reinstall current version
 
 ## Tauri desktop auto-update
 
-The one Tauri app a release ships is station's window, and it updates itself
+The one Tauri app a release ships is Machines' window, and it updates itself
 ([ADR-065](../../machines/docs/decisions/065-the-window-updates-itself-through-the-tauri-updater.md)).
 A signed run packs the stapled `Spwn.app` into `Spwn.app.tar.gz`, signs it
 with `TAURI_SIGNING_PRIVATE_KEY`, verifies the signature against the public

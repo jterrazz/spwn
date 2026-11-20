@@ -21,23 +21,23 @@ curl -fsSL https://spwn.sh/install.sh | bash
 Two commands, one per running app: `spwn-machines` (short: `machines`) and `spwn-agents` (short: `agents`). One install puts both on your path.
 
 > [!NOTE]
-> **Alpha.** Two apps run today, Station and Agents. Wiki, OS, Specs and Design are in progress: their rows say so, and nothing here claims more. Expect rough edges, and [open an issue](https://github.com/jterrazz/spwn/issues) where you hit one.
+> **Alpha.** Two apps run today, Machines and Agents. Wiki, OS, Specs and Design are in progress: their rows say so, and nothing here claims more. Expect rough edges, and [open an issue](https://github.com/jterrazz/spwn/issues) where you hit one.
 
 ## The six apps
 
-| App                               | What it does                 | State         | Command         | Folder                        |
-| --------------------------------- | ---------------------------- | ------------- | --------------- | ----------------------------- |
-| [**Station**](machines/README.md) | Machines built from one file | **Running**   | `spwn-machines` | `machines/`                   |
-| [**Agents**](docs/README.md)      | One agent, any harness       | **Running**   | `spwn-agents`   | `apps/cli/` (later `agents/`) |
-| **Wiki**                          | Each fact in one place       | _In progress_ | ·               | ·                             |
-| **OS**                            | One place to run it all      | _In progress_ | ·               | ·                             |
-| **Specs**                         | Proof it is as asked         | _In progress_ | ·               | ·                             |
-| **Design**                        | One family of shapes         | _In progress_ | ·               | ·                             |
+| App                                | What it does                 | State         | Command         | Folder                        |
+| ---------------------------------- | ---------------------------- | ------------- | --------------- | ----------------------------- |
+| [**Machines**](machines/README.md) | Machines built from one file | **Running**   | `spwn-machines` | `machines/`                   |
+| [**Agents**](docs/README.md)       | One agent, any harness       | **Running**   | `spwn-agents`   | `apps/cli/` (later `agents/`) |
+| **Wiki**                           | Each fact in one place       | _In progress_ | ·               | ·                             |
+| **OS**                             | One place to run it all      | _In progress_ | ·               | ·                             |
+| **Specs**                          | Proof it is as asked         | _In progress_ | ·               | ·                             |
+| **Design**                         | One family of shapes         | _In progress_ | ·               | ·                             |
 
 ## Commands, by app
 
 <details open>
-<summary><b>Station</b> · <code>spwn-machines</code> · machines built from one file</summary>
+<summary><b>Machines</b> · <code>spwn-machines</code> · machines built from one file</summary>
 
 ```sh
 spwn-machines init                                          # make this machine known
@@ -47,7 +47,7 @@ spwn-machines apply                                         # carry out this mac
 spwn-machines overview                                      # this machine at a glance
 ```
 
-Every command: [Station's command reference](machines/docs/reference/commands.md) · it runs on a Mac, and its VMs run on a hypervisor (`tart` today), see [the glossary](machines/docs/concepts/glossary.md).
+Every command: [Machines' command reference](machines/docs/reference/commands.md) · it runs on a Mac, and its VMs run on a hypervisor (`tart` today), see [the glossary](machines/docs/concepts/glossary.md).
 
 </details>
 
@@ -78,11 +78,11 @@ docs/         the manual of the repository and of Agents
 specs/        the suites that prove Agents
 ```
 
-The Agents code sits at the root today, and `machines/` holds Station. Next: Agents moves to `agents/`, and `app/` becomes a desktop app named spwn.
+The Agents code sits at the root today, and `machines/` holds Machines. Next: Agents moves to `agents/`, and `app/` becomes a desktop app named spwn.
 
 ## Contributing
 
-Build, test and release are the manual's: [Contributing](CONTRIBUTING.md), then [Develop](docs/guides/develop.md), [Test](docs/guides/test.md) and [Release](docs/guides/release.md). Station keeps its own loop, [Develop](machines/docs/guides/develop.md). Why the two share one repository: [ADR-017](docs/decisions/017-one-repository-station-moves-in-under-machines.md).
+Build, test and release are the manual's: [Contributing](CONTRIBUTING.md), then [Develop](docs/guides/develop.md), [Test](docs/guides/test.md) and [Release](docs/guides/release.md). Machines keeps its own loop, [Develop](machines/docs/guides/develop.md). Why the two share one repository: [ADR-017](docs/decisions/017-one-repository-station-moves-in-under-machines.md).
 
 ## License
 

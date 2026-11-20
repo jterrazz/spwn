@@ -41,7 +41,7 @@ Sign out runs the program's own logout (`accounts.logout`) after a confirmation 
 
 ## The vault
 
-The vault is the Keychain entries of one Mac under station's own Keychain name, each value under `vault:<id>`, and a book beside them, `~/.local/state/station/vault.json`, that lists each entry and its grants without a value. It has no sync: each Mac has its own, and the Passwords page shows This Mac's (`Passwords on <mac>`), with no Mac picker. Station is the only owner of the Claude token and of every granted secret; the studio CLI's credential store is not read.
+The vault is the Keychain entries of one Mac under Machines' own Keychain name, each value under `vault:<id>`, and a book beside them, `~/.local/state/station/vault.json`, that lists each entry and its grants without a value. It has no sync: each Mac has its own, and the Passwords page shows This Mac's (`Passwords on <mac>`), with no Mac picker. Machines is the only owner of the Claude token and of every granted secret; the studio CLI's credential store is not read.
 
 The verdict `vault.list` answers counts the entries (`3 kept, 1 granted`) and says under it, in its `Line`, that a value never leaves this Mac's Keychain to be shown.
 
@@ -54,7 +54,7 @@ The Add a password sheet reads one watched call, `vault.new`, of This Mac's engi
 
 A blank label is refused `vault.empty-label`, and a typed password with no value `vault.empty-value`; both carry `Field`.
 
-Each grant asks for Touch ID first, the engine's own `LAContext` with station's reason, from the window, the menu bar or the CLI, after the checks and before the Keychain is read. Removing an entry ends the grants made from it, after a confirmation that names them.
+Each grant asks for Touch ID first, the engine's own `LAContext` with Machines' reason, from the window, the menu bar or the CLI, after the checks and before the Keychain is read. Removing an entry ends the grants made from it, after a confirmation that names them.
 
 ## Grants
 
