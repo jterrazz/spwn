@@ -8,8 +8,13 @@ cd "$root"
 step() { printf '%-12s %s\n' "$1" "$2"; }
 start=$(date +%s)
 
-# value: the stamp `make install` keeps: `npm ci` runs again once the root manifest or the lockfile is newer.
-if [ ! node_modules/.install -nt package.json ] || [ ! node_modules/.install -nt package-lock.json ]; then
+# value: the stamp `make install` keeps: `npm ci` runs again once the root manifest, the lockfile or a packed
+# value: package under .artifacts/packages is newer.
+stale=no
+for source in package.json package-lock.json .artifacts/packages/*.tgz; do
+    if [ -e "$source" ] && [ ! node_modules/.install -nt "$source" ]; then stale=yes; fi
+done
+if [ "$stale" = yes ]; then
     if ! npm ci --prefer-offline --no-audit --no-fund >"$bench/install.log" 2>&1; then
         tail -20 "$bench/install.log" >&2
         echo "bench-setup: npm ci failed; log $bench/install.log" >&2
