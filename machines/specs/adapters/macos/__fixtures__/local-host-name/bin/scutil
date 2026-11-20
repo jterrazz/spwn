@@ -1,7 +1,7 @@
 #!/bin/sh
 # scutil answering the Mac's local host name, as System Settings writes it.
 case "$*" in
-    "--get LocalHostName") echo "Jean-Baptiste's MacBook Pro" ;;
+    "--get LocalHostName") echo "Jane's MacBook Pro" ;;
     *)
         echo "stub scutil: unexpected invocation: $*" >&2
         exit 97

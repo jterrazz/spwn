@@ -18,7 +18,7 @@ func TestRedactDropsEveryTokenShape(t *testing.T) {
 			t.Errorf("%q survived as %q", s, kept)
 		}
 	}
-	for _, s := range []string{"you@example.com", "Jean-Baptiste Terrazzoni", "SHA256:76MCcfWNZv0Ixcc4fM0b6Ue1o8l7W1Xo0n3zKhK1Vy4", "registry.example.com", "read:org"} {
+	for _, s := range []string{"you@example.com", "Jane Doe", "SHA256:76MCcfWNZv0Ixcc4fM0b6Ue1o8l7W1Xo0n3zKhK1Vy4", "registry.example.com", "read:org"} {
 		if kept, redacted := accounts.Redact(s); kept != s || redacted {
 			t.Errorf("an identity %q was taken for a token", s)
 		}

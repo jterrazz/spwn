@@ -1,0 +1,20 @@
+description: 'with no user_name in the preferences, git-signing refuses and generates no key'
+fixture:
+    - ../../__fixtures__/terminal/
+    - ./__fixtures__/settings-git-signing-no-name/
+env: terminal
+runs:
+    - command: '--version >/dev/null; terminal "$STATION" settings apply git-signing'
+      stdin: |
+          see failed: user_name is not set in the preferences
+          screen
+      exit: 1
+      stdout: |
+          ✗       git-signing     failed: user_name is not set in the preferences
+          Error: 1 of 1 settings failed
+          Hint: re-run it: station settings apply git-signing
+      files:
+          .calls:
+              equals: |
+                  git config --global commit.gpgsign
+                  git config --global gpg.program

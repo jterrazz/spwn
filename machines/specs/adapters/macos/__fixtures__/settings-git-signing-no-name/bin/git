@@ -1,0 +1,11 @@
+#!/bin/sh
+# git config --global, recorded and accepted.
+printf 'git %s\n' "$*" >> "$HOME/.calls"
+case "$*" in
+    "config --global user.signingkey "* | "config --global commit.gpgsign true" | "config --global gpg.program gpg") ;;
+    "config --global commit.gpgsign") exit 1 ;;
+    *)
+        echo "stub git: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

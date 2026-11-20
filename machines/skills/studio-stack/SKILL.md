@@ -28,5 +28,5 @@ The map of the `@jterrazz` ecosystem: composable packages, one set of convention
 ## Always
 
 - `npm` only (never pnpm/yarn), Node.js 24, ESM only, `.js` extensions in Node imports.
-- Author: `Jean-Baptiste Terrazzoni <you@example.com>`.
+- Author: `Jane Doe <you@example.com>`.
 - Never restate another skill's territory here; route to it.

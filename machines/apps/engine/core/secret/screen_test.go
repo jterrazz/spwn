@@ -106,7 +106,7 @@ func TestTheMachinesOwnDataIsShown(t *testing.T) {
 		"SHA256:76MCcfWNZv0Ixcc4fM0b6Ue1o8l7W1Xo0n3zKhK1Vy4",
 		"specs/usecases/machinefile/apply/a-failing-line-withholds",
 		"you@example.com, read:org, git@github.com:o/r.git",
-		"Jean-Baptiste Terrazzoni",
+		"Jane Doe",
 		"machine station-gate-cold-2026-11-13-redaction not found",
 		"refs/heads/feat/redaction-pre-verify1-2026-11-13",
 		"specs/usecases/machinefile/apply/a-failing-line-withholds-its-token.spec.yaml",

@@ -17,7 +17,7 @@ station keeps its own choices in one file, `~/.config/station/preferences.json`,
     },
     "vm_user": "you",
     "user_email": "you@example.com",
-    "user_name": "Jean-Baptiste Terrazzoni",
+    "user_name": "Jane Doe",
     "ports": { "max_per_vm": 10 },
 
     "off_here": ["dock-spacer"],
@@ -46,7 +46,7 @@ The file is a set of groups. Each is owned by one family and written only by tha
 | `never_sleeps`            | `awake`       | this Mac never sleeps: the engine's `awake` job holds it                                                                                                                                                                                                                                                                                                                                | `settings apply never-sleeps`, `settings off never-sleeps`  |
 | `machinefile`             | `machinefile` | `name`, the Machinefile this machine carries, set by `station init --machinefile` and `station apply --machinefile`, and `bound_at`, when it was bound, past which the engine's first night falls; `source`, the shared source: its `name` and its git `url`, cloned at its default branch into `~/.cache/station/sources/<name>` ([Machinefiles](machinefiles.md#sources-and-origins)) | `name` by apply, `source` by hand                           |
 
-An unset `user_email` stays unset: the git email row accepts any value git holds, and setting up commit signing refuses to generate a key for no address. An unset `user_name` reads as the default name.
+An unset `user_email` stays unset: the git email row accepts any value git holds, and setting up commit signing refuses to generate a key for no address. An unset `user_name` stays unset the same way: the git name row accepts any value git holds, and the same refusal names `user_name`.
 
 A key no group names is dropped at the next write. A `v` field names the version of the shape the file was written at; absent, it is version 1, and a file a newer station wrote is refused rather than read. A file that does not parse stops every command that reads it with its line, never overwritten.
 

@@ -370,7 +370,7 @@
                 },
                 "git": {
                     "State": "ok",
-                    "Who": ["Jean-Baptiste Terrazzoni", "you@example.com"]
+                    "Who": ["Jane Doe", "you@example.com"]
                 },
                 "ssh": {
                     "State": "ok",

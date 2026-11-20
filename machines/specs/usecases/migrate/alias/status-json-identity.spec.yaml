@@ -1,4 +1,4 @@
-description: 'identity rows read the global git config, gpg, gh and the ssh key, and flag a wrong git author'
+description: 'identity rows read git, gpg, gh and the ssh key, asking no author the preferences leave unset'
 fixture:
     - ./__fixtures__/status/workspace/
     - ./__fixtures__/status/identity/
@@ -6,4 +6,4 @@ runs:
     - command: 'status --json | /usr/bin/jq -c ''.identity | map([.name, .state, .value, .detail])'''
       exit: 0
       stdout: |
-          [["git-email","ok","you@example.com",""],["git-name","degraded","Someone Else","expected Jean-Baptiste Terrazzoni"],["git-signing","ok","on",""],["gpg-key","ok","present","~/.gnupg"],["github","ok","octo",""],["ssh-key","ok","present","~/.ssh/id_ed25519"]]
+          [["git-email","ok","you@example.com",""],["git-name","ok","Someone Else",""],["git-signing","ok","on",""],["gpg-key","ok","present","~/.gnupg"],["github","ok","octo",""],["ssh-key","ok","present","~/.ssh/id_ed25519"]]

@@ -54,7 +54,7 @@ Libraries use **ports & adapters** (`src/ports/` interfaces, `src/adapters/` imp
 
 - `npm` only, never pnpm or yarn; every repo commits `package-lock.json`. A unit on the `bun` platform is the one exception, and declares it.
 - Node.js 24, ESM only (`"type": "module"`), `.js` extensions in Node imports.
-- Author: `Jean-Baptiste Terrazzoni <you@example.com>`.
+- Author: `Jane Doe <you@example.com>`.
 
 ## Related
 

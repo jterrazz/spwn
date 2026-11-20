@@ -1,0 +1,10 @@
+description: 'a git email or name other than the ones the preferences ask is degraded'
+fixture:
+    - ./__fixtures__/status/workspace/
+    - ./__fixtures__/status/identity/
+    - ./__fixtures__/status/identity-asked/
+runs:
+    - command: 'status --json | /usr/bin/jq -c ''.identity | map(select(.name == "git-email" or .name == "git-name") | [.name, .state, .value, .detail])'''
+      exit: 0
+      stdout: |
+          [["git-email","degraded","you@example.com","expected me@example.com"],["git-name","degraded","Someone Else","expected Jane Doe"]]

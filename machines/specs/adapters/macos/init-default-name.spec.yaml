@@ -7,11 +7,11 @@ env: terminal
 runs:
     - command: '--version >/dev/null; terminal "$STATION" init'
       stdin: |
-          see jean-baptiste-s-macbook-pro
+          see jane-s-macbook-pro
           send \r
           see settings
       exit: 0
     - command: '--version >/dev/null; /usr/bin/jq -r .name .config/station/preferences.json'
       exit: 0
       stdout: |
-          jean-baptiste-s-macbook-pro
+          jane-s-macbook-pro
