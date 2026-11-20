@@ -200,6 +200,21 @@ describe('Storage', () => {
         expect(result.errors.text).toBe('');
     });
 
+    test('an image being built shows its four steps, each dotted by its state', async () => {
+        // Given - Storage over creating, a build held at Packages
+        const images = region('Images');
+        const result = await component.render(storageOver('creating'), async (visitor) => {
+            // When - its images have been read
+            await visitor.see(within(images, content('Packages · Step 2 of 4')));
+
+            // Then - the walk names each step in the engine's word, a dot of its state before it
+            await visitor.see(within(images, content('Seal')));
+        });
+
+        // Then - done, now, then the two to come, as the engine walks them
+        await expect(result.tree).toMatch(file('./__expected__/creating-storage.aria.yaml'));
+    });
+
     test('a machine of the Mac opens its own Storage tab', async () => {
         // Given - Storage over two-macs
         const result = await component.render(storageOver('two-macs'), async (visitor) => {

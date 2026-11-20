@@ -4,6 +4,21 @@ import { describe, expect, test } from 'vitest';
 import { website } from '../website.specification.js';
 
 describe('storage', () => {
+    test('D6 an image being built shows its four steps', async () => {
+        // Given - Storage over creating, an image held at its second step
+        const result = await website.visit('/?world=creating&page=storage', async (visitor) => {
+            // When - its images have been read
+            const images = region('Images');
+            await visitor.see(within(images, content('Packages · Step 2 of 4')));
+
+            // Then - its other steps stand in the engine's words
+            await visitor.see(within(images, content('Base system')));
+            await visitor.see(within(images, content('Settings')));
+            await visitor.see(within(images, content('Seal')));
+        });
+        expect(result.errors.text).toBe('');
+    });
+
     test.todo(
         'D6 waits for images.build to answer in the world build, which as a dev build refuses it with image.no-linux-binary (apps/engine/images/calls/binary.go:26)',
     );

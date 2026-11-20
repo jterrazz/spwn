@@ -2,18 +2,33 @@ import type { ImagesBuilding, ImagesReport } from '@jterrazz/station-api';
 
 import { sentence } from '../../../domain/format';
 import { Icon } from '../../ui/icon';
-import { Row, StatePill } from '../../ui/index';
+import { Row, StateDot, StatePill } from '../../ui/index';
 import { wordOf } from '../../words/engine-words';
-import { newestState } from '../../words/shown';
+import { engineShown, newestState } from '../../words/shown';
 
 import styles from '../../features/disk/disk.module.css';
 
 type BuildingLineProps = { building: ImagesBuilding; image: ImagesReport };
 
+function Walk({ building }: { building: ImagesBuilding }) {
+    const walk = building.Walk ?? [];
+    return walk.length === 0 ? null : (
+        <span className={styles.walk}>
+            {walk.map((step) => (
+                <span className={styles.step} key={step.Step}>
+                    <StateDot {...engineShown('ImagesBuildState', step.State)} />
+                    {step.Word}
+                </span>
+            ))}
+        </span>
+    );
+}
+
 export function BuildingLine({ building, image }: BuildingLineProps) {
     const newest = newestState(image.Newest);
     return (
         <Row
+            below={<Walk building={building} />}
             lead={
                 <span className={styles.disc}>
                     <Icon name="disc" />

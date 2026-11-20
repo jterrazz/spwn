@@ -50,6 +50,19 @@
     height: 14px;
     stroke-width: 1.4;
 }
+.walk {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4) var(--space-12);
+    margin-top: var(--space-4);
+    color: var(--t3);
+    font-size: var(--text-label);
+}
+.step {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-6);
+}
 .trail {
     display: flex;
     align-items: center;
