@@ -553,14 +553,16 @@ func (f worldFS) Stat(p string) (fs.FileInfo, error) {
 }
 
 // invariant: the lines the world gives a Mac's engine log are its file, read
-// whole as one, whatever the run's own state folder holds.
+// whole as one, whatever the run's own state folder holds; a log its disk
+// counts with no line given is a file with no line, never one the run's
+// folder is asked for.
 func (f worldFS) engineLog(p string) (string, bool) {
 	if p != f.m.logPath {
 		return "", false
 	}
 	lines := f.m.slice().EngineLog
 	if len(lines) == 0 {
-		return "", false
+		return "", f.files.Has(p)
 	}
 	return strings.Join(lines, "\n") + "\n", true
 }
