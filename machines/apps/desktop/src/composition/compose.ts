@@ -3,6 +3,7 @@ import { Channel, invoke } from '@tauri-apps/api/core';
 import type { CorePort } from '../application/ports/core.port';
 import type { Link } from '../application/ports/engine.port';
 import type { OpenerPort } from '../application/ports/opener.port';
+import type { WindowUpdatePort } from '../application/ports/window-update.port';
 import { tauriCore } from '../infrastructure/outbound/core-tauri/tauri-core';
 import { documentPresence } from '../infrastructure/outbound/document-presence/document-presence';
 import { Client } from '../infrastructure/outbound/engine-link/client';
@@ -12,6 +13,7 @@ import { replayTransport, stagedReplay } from '../infrastructure/outbound/engine
 import type { Pace, Recording } from '../infrastructure/outbound/engine-replay/replay';
 import { tauriTransport } from '../infrastructure/outbound/engine-tauri/tauri';
 import { NO_OPENER, tauriOpener } from '../infrastructure/outbound/opener-tauri/tauri-opener';
+import { tauriWindowUpdate } from '../infrastructure/outbound/window-update-tauri/tauri-window-update';
 import type { Dependencies } from '../presentation/dependencies/dependencies';
 
 // invariant: a build-time constant, so a production build drops the recorded worlds' import below.
@@ -106,6 +108,22 @@ async function composedOf({ inTauri, query }: Place): Promise<Composed> {
         : await scriptedOf(recording, script, pace);
 }
 
+async function windowUpdateOf({ inTauri, query }: Place): Promise<undefined | WindowUpdatePort> {
+    if (inTauri) {
+        return tauriWindowUpdate({ channel: (heard) => new Channel(heard), invoke });
+    }
+    const name = query.get('window');
+    if (!PROOF || name === null) {
+        return undefined;
+    }
+    const scripted =
+        await import('../infrastructure/outbound/window-update-scripted/scripted-window-update');
+    const script = scripted.windowScriptOf(name);
+    return script === undefined
+        ? undefined
+        : scripted.scriptedWindowUpdate(script, Number(query.get('pace') ?? '0'));
+}
+
 export async function compose(place: Place): Promise<Dependencies> {
     const { core, coreLookEvery, transport } = await composedOf(place);
     return {
@@ -114,6 +132,7 @@ export async function compose(place: Place): Promise<Dependencies> {
         engine: new Client(transport),
         opener: place.inTauri ? tauriOpener({ invoke }) : NO_OPENER,
         presence: documentPresence(),
+        windowUpdate: await windowUpdateOf(place),
     };
 }
 

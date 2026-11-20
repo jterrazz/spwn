@@ -13,6 +13,7 @@ import type {
 } from '../../application/ports/engine.port';
 import type { OpenerPort } from '../../application/ports/opener.port';
 import type { PresencePort } from '../../application/ports/presence.port';
+import type { WindowUpdatePort } from '../../application/ports/window-update.port';
 import { CoreFlow, NO_CORE } from '../../application/use-cases/core-flow';
 import type { CoreState } from '../../application/use-cases/core-flow';
 import { READING } from '../../application/use-cases/entry';
@@ -24,6 +25,8 @@ import type { Reach } from '../../application/use-cases/reach';
 import { askedKey, ReadStore } from '../../application/use-cases/store';
 import { UpdateFlow } from '../../application/use-cases/update-flow';
 import type { UpdateState } from '../../application/use-cases/update-flow';
+import { NO_WINDOW_UPDATE, WindowUpdateFlow } from '../../application/use-cases/window-update-flow';
+import type { WindowUpdateState } from '../../application/use-cases/window-update-flow';
 
 export type { Reading } from '../../application/use-cases/entry';
 
@@ -33,6 +36,7 @@ export type Dependencies = {
     presence: PresencePort;
     core?: CorePort | undefined;
     coreLookEvery?: number | undefined;
+    windowUpdate?: undefined | WindowUpdatePort;
 };
 
 type Engine = {
@@ -42,6 +46,7 @@ type Engine = {
     opener: OpenerPort;
     core: CoreFlow;
     update: UpdateFlow;
+    windowUpdate: WindowUpdateFlow;
 };
 
 const EngineContext = createContext<Engine | null>(null);
@@ -53,7 +58,14 @@ export function EngineProvider({
     dependencies: Dependencies;
     children: ReactNode;
 }) {
-    const { engine: client, opener, presence, core = NO_CORE, coreLookEvery } = dependencies;
+    const {
+        engine: client,
+        opener,
+        presence,
+        core = NO_CORE,
+        coreLookEvery,
+        windowUpdate = NO_WINDOW_UPDATE,
+    } = dependencies;
     const engine = useMemo(
         () => ({
             client,
@@ -62,15 +74,16 @@ export function EngineProvider({
             opener,
             store: new ReadStore(client, presence),
             update: new UpdateFlow(core),
+            windowUpdate: new WindowUpdateFlow(windowUpdate),
         }),
-        [client, core, coreLookEvery, opener, presence],
+        [client, core, coreLookEvery, opener, presence, windowUpdate],
     );
-    useEffect(
-        () => () => {
+    useEffect(() => {
+        engine.windowUpdate.start();
+        return () => {
             engine.core.close();
-        },
-        [engine],
-    );
+        };
+    }, [engine]);
     return <EngineContext value={engine}>{children}</EngineContext>;
 }
 
@@ -117,6 +130,12 @@ export function useUpdate(): { flow: UpdateFlow; state: UpdateState } {
     const { update } = useEngine();
     const state = useSyncExternalStore(update.subscribe, update.state);
     return { flow: update, state };
+}
+
+export function useWindowUpdate(): { flow: WindowUpdateFlow; state: WindowUpdateState } {
+    const { windowUpdate } = useEngine();
+    const state = useSyncExternalStore(windowUpdate.subscribe, windowUpdate.state);
+    return { flow: windowUpdate, state };
 }
 
 export function useHello(): EngineHello | undefined {
