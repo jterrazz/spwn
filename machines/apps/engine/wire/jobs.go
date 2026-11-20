@@ -27,6 +27,10 @@ func (m machine) engineJobRef() contract.Ref {
 	return contract.Ref{Domain: contract.Domain{UID: m.sys.Env.Euid()}, Label: engine.Label, File: catalog.EnginePlist(m.sys.Env.Home())}
 }
 
+func (m machine) agentJobRef() contract.Ref {
+	return contract.Ref{Domain: contract.Domain{UID: m.sys.Env.Euid()}, Label: catalog.AgentLabel, File: catalog.AgentPlist(m.sys.Env.Home())}
+}
+
 type engineJob struct {
 	jobs contract.Jobs
 	ref  contract.Ref

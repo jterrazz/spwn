@@ -183,6 +183,7 @@ var StationDisk = Disk{
 		noted(data("{state}/station/vms/.records.lock"), "empty: the lock a create and the engine take in turn to write a VM record"),
 		noted(data("{state}/station/use/*"), "each terminal's machine (`station use`), forgotten after 7 days unused"),
 		noted(conf("~/Library/LaunchAgents/com.jterrazz.station.engine.plist", Mac), "the one engine's launchd agent"),
+		noted(conf("~/Library/LaunchAgents/com.jterrazz.station.agent.plist", Mac), "the launchd agent of `station machines agent`, written and restarted with the engine's"),
 		noted(conf("{config}/station/preferences.json"), "here, hosts, vm_user, the ports policy"),
 		noted(conf("{config}/station/machinefiles/*.lock"), "each Machinefile's lock, written by `station apply` and `station upgrade`: deleting one makes the next apply write it from what is there"),
 		noted(conf("{config}/station/grants/*.env", Linux, MacOS), "mode 0600, the token of a program granted to it that reads one from its environment, sourced by the zsh block"),

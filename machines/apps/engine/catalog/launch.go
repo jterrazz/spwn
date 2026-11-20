@@ -42,6 +42,14 @@ func EnginePlist(home string) string {
 	return agentPlist(home, EngineLabel)
 }
 
+const AgentLabel = StationLaunchPrefix + "agent"
+
+func AgentPlist(home string) string {
+	// value: the launchd agent that keeps `station machines agent` serving
+	// this Mac's device key, installed and restarted with the engine.
+	return agentPlist(home, AgentLabel)
+}
+
 func agentPlist(home, label string) string {
 	return path.Join(home, "Library", "LaunchAgents", label+".plist")
 }

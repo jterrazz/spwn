@@ -6,31 +6,44 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/background/contract"
+	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
 	"github.com/jterrazz/studio-station/apps/engine/platform/local"
 	"github.com/jterrazz/studio-station/apps/engine/platform/local/localtest"
 	"github.com/jterrazz/studio-station/apps/engine/setup"
 )
 
-// value: a job manager that holds the engine's job, rewrites its definition
-// only when changed says so, and counts the restarts it is asked for.
+// value: a job manager that holds the engine's and the agent's jobs,
+// rewrites a definition only when changed (or agentChanged, for the agent's
+// alone) says so, and counts by label the loads, starts and restarts asked.
 type installJobs struct {
 	contract.Jobs
-	changed, loaded bool
-	restarts, loads int
+	changed, agentChanged, loaded bool
+	asked                         map[string]int
 }
 
-func (j *installJobs) Install(context.Context, contract.JobSpec) (bool, error) { return j.changed, nil }
+func (j *installJobs) count(verb string, r contract.Ref) error {
+	if j.asked == nil {
+		j.asked = map[string]int{}
+	}
+	j.asked[verb+" "+r.Label]++
+	return nil
+}
+
+func (j *installJobs) Install(_ context.Context, spec contract.JobSpec) (bool, error) {
+	return j.changed || (j.agentChanged && spec.Label == catalog.AgentLabel), nil
+}
 func (j *installJobs) Read(context.Context, contract.Ref) contract.Status {
 	return contract.Status{Loaded: j.loaded}
 }
-func (j *installJobs) Load(context.Context, contract.Ref) error    { j.loads++; return nil }
-func (j *installJobs) Start(context.Context, contract.Ref) error   { return nil }
-func (j *installJobs) Restart(context.Context, contract.Ref) error { j.restarts++; return nil }
+func (j *installJobs) Load(_ context.Context, r contract.Ref) error    { return j.count("load", r) }
+func (j *installJobs) Start(_ context.Context, r contract.Ref) error   { return j.count("start", r) }
+func (j *installJobs) Restart(_ context.Context, r contract.Ref) error { return j.count("restart", r) }
 
 // value: the engine's socket; it answers a hello naming version, or refuses
 // the dial when version is empty.
@@ -92,9 +105,66 @@ func TestInstallRestartsTheEngineOnlyWhenItsDefinitionChangedOrItRunsAnotherVers
 			if err != nil || got != c.want {
 				t.Fatalf("install = %+v, %v; want %+v", got, err, c.want)
 			}
-			if wantRestarts := map[bool]int{true: 1, false: 0}[c.want.Restarted]; c.jobs.restarts != wantRestarts {
-				t.Errorf("the job was restarted %d times, want %d", c.jobs.restarts, wantRestarts)
+			if wantRestarts := map[bool]int{true: 1, false: 0}[c.want.Restarted]; c.jobs.asked["restart "+catalog.EngineLabel] != wantRestarts {
+				t.Errorf("the job was restarted %d times, want %d", c.jobs.asked["restart "+catalog.EngineLabel], wantRestarts)
 			}
 		})
 	}
+}
+
+func TestTheAgentsJobIsStartedOnceAndRestartedWithItsPlistOrTheEngine(t *testing.T) {
+	station := Version()
+	for _, c := range []struct {
+		name    string
+		jobs    installJobs
+		running string
+		want    map[string]int
+	}{
+		{"a job not loaded yet", installJobs{changed: true}, "", map[string]int{"load": 1, "start": 1}},
+		{"the same plist, the same engine", installJobs{loaded: true}, station, map[string]int{}},
+		{"a moved plist, the same engine", installJobs{loaded: true, agentChanged: true}, station, map[string]int{"restart": 1}},
+		{"the same plist, an engine of another version", installJobs{loaded: true}, station + "-older", map[string]int{"restart": 1}},
+	} {
+		t.Run(c.name, func(t *testing.T) {
+			if _, err := installerOf(c.running).install(context.Background(), &c.jobs); err != nil {
+				t.Fatal(err)
+			}
+			for _, verb := range []string{"load", "start", "restart"} {
+				if got := c.jobs.asked[verb+" "+catalog.AgentLabel]; got != c.want[verb] {
+					t.Errorf("the agent's job: %s asked %d times, want %d", verb, got, c.want[verb])
+				}
+			}
+		})
+	}
+}
+
+func TestTheAgentsJobRunsTheAgentAtLoginAndKeepsItAlive(t *testing.T) {
+	jobs := &specJobs{}
+	if _, err := installerOf("").install(context.Background(), jobs); err != nil {
+		t.Fatal(err)
+	}
+	spec, ok := jobs.specs[catalog.AgentLabel]
+	if !ok {
+		t.Fatal("no job was written for the agent")
+	}
+	if got := strings.Join(spec.Program, " "); got != "/home/u/.local/bin/station machines agent" {
+		t.Errorf("program = %q", got)
+	}
+	if !spec.AtLogin || !spec.KeepAlive || spec.File != catalog.AgentPlist("/home/u") || spec.Log != "/home/u/.local/state/station/logs/agent.log" {
+		t.Errorf("spec = %+v", spec)
+	}
+}
+
+// value: a job manager that keeps every definition it is given.
+type specJobs struct {
+	installJobs
+	specs map[string]contract.JobSpec
+}
+
+func (j *specJobs) Install(_ context.Context, spec contract.JobSpec) (bool, error) {
+	if j.specs == nil {
+		j.specs = map[string]contract.JobSpec{}
+	}
+	j.specs[spec.Label] = spec
+	return true, nil
 }

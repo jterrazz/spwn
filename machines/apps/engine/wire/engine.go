@@ -461,6 +461,41 @@ func startFailed(cause error) error {
 }
 
 func (i engineInstaller) install(ctx context.Context, jobs contract.Jobs) (engine.Installed, error) {
+	done, err := i.installEngine(ctx, jobs)
+	if err != nil {
+		return engine.Installed{}, err
+	}
+	if agentErr := i.installAgent(ctx, jobs, done.Restarted); agentErr != nil {
+		return engine.Installed{}, startFailed(agentErr)
+	}
+	return done, nil
+}
+
+// invariant: the agent's job follows the engine's: it restarts when its
+// plist changed or the engine restarted, so it never serves an older
+// binary's code.
+func (i engineInstaller) installAgent(ctx context.Context, jobs contract.Jobs, engineRestarted bool) error {
+	job := i.m.agentJobRef()
+	changed, err := jobs.Install(ctx, contract.JobSpec{
+		Label: job.Label, Program: []string{i.m.sys.Env.Executable(), "machines", "agent"}, Env: i.env(),
+		AtLogin: true, KeepAlive: true, Log: filepath.Join(i.m.paths.State, "logs", "agent.log"), File: job.File,
+	})
+	if err != nil {
+		return err
+	}
+	if !jobs.Read(ctx, job).Loaded {
+		if loadErr := jobs.Load(ctx, job); loadErr != nil {
+			return loadErr
+		}
+		return jobs.Start(ctx, job)
+	}
+	if changed || engineRestarted {
+		return jobs.Restart(ctx, job)
+	}
+	return nil
+}
+
+func (i engineInstaller) installEngine(ctx context.Context, jobs contract.Jobs) (engine.Installed, error) {
 	job := i.m.engineJobRef()
 	changed, err := jobs.Install(ctx, contract.JobSpec{
 		Label: job.Label, Program: []string{i.m.sys.Env.Executable(), "engine", "run"}, Env: i.env(),

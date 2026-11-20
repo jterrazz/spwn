@@ -14,7 +14,7 @@ runs:
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].jobs // {} | keys'' world.json'
       exit: 0
       stdout: |
-          ["com.jterrazz.station.engine"]
+          ["com.jterrazz.station.agent","com.jterrazz.station.engine"]
     - command: 'engine --json | /usr/bin/jq -r .engine.state'
       exit: 0
       stdout: |
