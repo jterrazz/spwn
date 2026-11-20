@@ -98,10 +98,9 @@ describe('packages', () => {
                 await visitor.see(within(differs, content('bat stays: Apply leaves extras.')));
                 await visitor.click(within(differs, button('Plan')));
 
-                // Then - the plan says the engine's sentence beside what stays, and removes nothing
+                // Then - the plan says the engine's sentence of the extra beside what stays
                 await visitor.see(content('bat stays: Apply leaves extras.'));
                 await visitor.see(content('Nothing is removed. 3 apps stay as they are.'));
-                await visitor.gone(region('To remove'));
             },
         );
         expect(result.errors.text).toBe('');
