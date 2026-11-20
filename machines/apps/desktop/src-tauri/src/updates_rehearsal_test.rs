@@ -18,6 +18,8 @@ use super::{
 
 // value: the folder holds A/Spwn.app, the installed window at INSTALLED, then the release's Spwn.app.tar.gz and
 // value: latest.json, and pubkey: the public half of the key that signed them, as plugins.updater.pubkey carries it
+// hazard: the swap rewrites the installed app the other rehearsals read, so they run with --test-threads=1, the swap
+// hazard: last by name
 const FOLDER: &str = "SPWN_WINDOW_REHEARSAL";
 const INSTALLED: &str = "0.0.1-rehearsal.1";
 
