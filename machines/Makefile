@@ -37,7 +37,7 @@ help: ## Show available targets
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | \
 		awk 'BEGIN {FS = ":.*?## "}; {printf "$(CYAN)%-12s$(RESET) %s\n", $$1, $$2}'
 
-node_modules/.install: package.json package-lock.json
+node_modules/.install: package.json package-lock.json $(wildcard .artifacts/packages/*.tgz)
 	@npm ci --silent
 	@touch node_modules/.install
 
