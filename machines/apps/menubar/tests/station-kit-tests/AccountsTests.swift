@@ -143,7 +143,7 @@ final class AccountsTests: XCTestCase {
                 let signIn = try XCTUnwrap(Snapshot.render(AnyView(StoryView(story, state: idle)), scheme: scheme, desk: false))
                 XCTAssertEqual([waiting.bitmap.width, waiting.bitmap.height], [signIn.bitmap.width, signIn.bitmap.height])
                 guard waiting.bitmap.height == signIn.bitmap.height else { continue }
-                XCTAssertGreaterThan(waiting.bitmap.differing(signIn.bitmap), 100, "\(name) \(scheme): Sign in draws the same pending or not")
+                XCTAssertGreaterThan(waiting.bitmap.differing(signIn.bitmap, tolerance: 16), 100, "\(name) \(scheme): Sign in draws the same pending or not")
             }
         }
     }

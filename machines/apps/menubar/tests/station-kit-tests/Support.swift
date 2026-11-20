@@ -61,7 +61,7 @@ struct Bitmap {
                        provider: provider, decode: nil, shouldInterpolate: false, intent: .defaultIntent)
     }
 
-    func differing(_ other: Bitmap, tolerance: Int = 16) -> Int {
+    func differing(_ other: Bitmap, tolerance: Int = 0) -> Int {
         var n = 0
         for i in stride(from: 0, to: pixels.count, by: 4) {
             for c in 0..<4 where abs(Int(pixels[i + c]) - Int(other.pixels[i + c])) > tolerance {
@@ -70,6 +70,10 @@ struct Bitmap {
             }
         }
         return n
+    }
+
+    func widest(_ other: Bitmap) -> Int {
+        zip(pixels, other.pixels).reduce(0) { max($0, abs(Int($1.0) - Int($1.1))) }
     }
 
     var placeholder: Int {
@@ -151,43 +155,40 @@ enum Golden {
     static let expected: Set<String> = Expectation.paths(ProcessInfo.processInfo.environment["STATION_EXPECT_GOLDENS"])
 
     // invariant: a view is proved by its golden PNG, drawn offscreen: nil
-    // when it matches within 0.1 % of its pixels, else what differs.
+    // when its decoded pixels are the golden's, every channel of every
+    // pixel, else what differs.
     @MainActor
-    static func check(_ name: String, _ view: AnyView, scheme: ColorScheme, desk: Bool = true, tolerance: Int = 16, scale: CGFloat = 2) throws -> String? {
+    static func check(_ name: String, _ view: AnyView, scheme: ColorScheme, desk: Bool = true, scale: CGFloat = 2) throws -> String? {
         let file = "\(name).\(scheme == .dark ? "dark" : "light")"
-        return try match(Snapshot.render(view, scheme: scheme, desk: desk, scale: scale), file: file, in: Tree.goldens, tolerance: tolerance)
+        return try match(Snapshot.render(view, scheme: scheme, desk: desk, scale: scale), file: file, in: Tree.goldens)
     }
 
-    static func match(_ rendered: (png: Data, bitmap: Bitmap)?, file: String, in folder: URL, tolerance: Int = 16) throws -> String? {
+    static func gap(_ got: Bitmap, _ want: Bitmap, file: String) -> String? {
+        if want.width != got.width || want.height != got.height { return "\(file): \(got.width)x\(got.height), golden \(want.width)x\(want.height)" }
+        if got.pixels == want.pixels { return nil }
+        return "\(file): \(got.differing(want)) pixels differ, by up to \(got.widest(want)) in a channel"
+    }
+
+    // invariant: a golden is written only when its pixels change, so a
+    // drawing that did not move leaves its file's bytes alone.
+    static func match(_ rendered: (png: Data, bitmap: Bitmap)?, file: String, in folder: URL) throws -> String? {
         let golden = folder.appendingPathComponent(file + ".png")
         guard let (png, bitmap) = rendered else { return "\(file): no image rendered" }
         if bitmap.placeholder >= 20 { return "\(file): \(bitmap.placeholder) pixels of the unsupported placeholder" }
-        if update {
-            try png.write(to: golden)
-            return nil
-        }
+        guard let got = Bitmap(png: png) else { return "\(file): the drawing's PNG does not decode" }
         let listed = Expectation.listed(golden, in: expected)
-        guard let data = try? Data(contentsOf: golden), let want = Bitmap(png: data) else {
-            if listed {
-                try png.write(to: golden)
-                return nil
-            }
-            return "\(file): no golden (STATION_UPDATE_GOLDENS=1 swift test writes it)"
-        }
         let actual = folder.appendingPathComponent(file + ".actual.png")
-        var failure: String?
-        if want.width != bitmap.width || want.height != bitmap.height {
-            failure = "\(file): \(bitmap.width)x\(bitmap.height), golden \(want.width)x\(want.height)"
+        let failure: String?
+        if let data = try? Data(contentsOf: golden), let want = Bitmap(png: data) {
+            failure = gap(got, want, file: file)
         } else {
-            let differing = bitmap.differing(want, tolerance: tolerance)
-            if Double(differing) > Double(bitmap.width * bitmap.height) * 0.001 { failure = "\(file): \(differing) pixels differ" }
+            failure = "\(file): no golden (STATION_UPDATE_GOLDENS=1 swift test writes it)"
         }
         guard let failure else {
-            if listed { return "\(file): listed in STATION_EXPECT_GOLDENS, but it did not change" }
             try? FileManager.default.removeItem(at: actual)
-            return nil
+            return listed ? "\(file): listed in STATION_EXPECT_GOLDENS, but it did not change" : nil
         }
-        if listed {
+        if update || listed {
             try png.write(to: golden)
             try? FileManager.default.removeItem(at: actual)
             return nil

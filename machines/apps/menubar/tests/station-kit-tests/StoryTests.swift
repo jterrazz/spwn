@@ -206,7 +206,7 @@ final class StoryTests: XCTestCase {
                 continue
             }
             for (name, other) in [("its end", end), ("where it starts", start)] where other.width == caught.width && other.height == caught.height {
-                if Double(caught.differing(other)) <= Double(caught.width * caught.height) * 0.001 { failures.append("\(story.id): drawn at \(freeze) as \(name)") }
+                if Double(caught.differing(other, tolerance: 16)) <= Double(caught.width * caught.height) * 0.001 { failures.append("\(story.id): drawn at \(freeze) as \(name)") }
             }
         }
         XCTAssertEqual(failures, [])
