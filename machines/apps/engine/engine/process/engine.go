@@ -17,6 +17,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/activity"
 	awakecalls "github.com/jterrazz/studio-station/apps/engine/awake/calls"
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
+	"github.com/jterrazz/studio-station/apps/engine/core/journal"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/ports"
@@ -61,6 +62,9 @@ type Tailnet interface {
 }
 
 type Options struct {
+	// value: where what the engine tells of a server is kept; nil keeps
+	// nothing.
+	Kept func(ctx context.Context, line journal.Line)
 	// value: keeps whether the owner stopped sharing a VM's port, so the
 	// next listen there is not shared until a share; nil keeps nothing.
 	Remember func(vm string, port int, stopped bool) error

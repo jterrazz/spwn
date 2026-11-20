@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/jterrazz/studio-station/apps/engine/core/journal"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
 )
@@ -26,6 +27,9 @@ func (d *Engine) tell(ctx context.Context, vm string, t engine.Told) {
 	}
 	d.notify(ctx, engine.Notification{Kind: t.Kind, Subject: vm, Text: text})
 	d.hub.tell(engine.Notice{Kind: t.Kind, Text: text})
+	if line, ok := journaled(vm, text, t); ok && d.o.Kept != nil {
+		d.o.Kept(context.WithoutCancel(ctx), line)
+	}
 }
 
 // invariant: a server whose run ended unexpectedly boots again after its
@@ -177,4 +181,15 @@ func (d *Engine) Events(ctx context.Context, send func(any) error) error {
 			}
 		}
 	}
+}
+
+func journaled(vm, text string, t engine.Told) (journal.Line, bool) {
+	// invariant: what the engine tells of a server is kept in its Mac's
+	// journal: a restart or a loop holds it, a shut-down fails it, its
+	// return is done; any other notice keeps no line.
+	outcome, ok := map[string]journal.Outcome{engine.EventRestarting: journal.Held, engine.EventLoop: journal.Held, engine.EventPoweredOff: journal.Failed, engine.EventBack: journal.Done}[t.Kind]
+	if !ok || vm == "" {
+		return journal.Line{}, false
+	}
+	return journal.Line{Machine: vm, Text: text, Subject: &journal.Subject{Kind: journal.Machine, Name: vm}, By: journal.ByStation, Outcome: outcome}, true
 }

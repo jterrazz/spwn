@@ -20,6 +20,7 @@ import (
 	corejournal "github.com/jterrazz/studio-station/apps/engine/core/journal"
 	coremachine "github.com/jterrazz/studio-station/apps/engine/core/machine"
 	enginejobs "github.com/jterrazz/studio-station/apps/engine/engine/jobs"
+	journalcalls "github.com/jterrazz/studio-station/apps/engine/journal/calls"
 	"github.com/jterrazz/studio-station/apps/engine/machinefile"
 	machinefilecalls "github.com/jterrazz/studio-station/apps/engine/machinefile/calls"
 	machinefilecontract "github.com/jterrazz/studio-station/apps/engine/machinefile/contract"
@@ -117,6 +118,11 @@ func (m machine) engine(env kit.Env) *process.Engine {
 		Changes:      driftChanges(),
 		Beside:       m.beside(),
 		LocalNetwork: m.localNetwork(),
+		Kept: func(ctx context.Context, line corejournal.Line) {
+			if m.kind == catalog.Mac {
+				_ = journalcalls.Keep(ctx, m.journalDeps(), journalcalls.Ran{Machine: m.profile.Ref.Name, By: corejournal.ByStation}, line)
+			}
+		},
 	})
 	if m.world == nil && m.kind == catalog.Mac {
 		owed.g = m.vaultKept(d).Grants()

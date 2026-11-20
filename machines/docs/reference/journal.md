@@ -58,6 +58,8 @@ A gesture declares the lines it keeps (`journal: true` in [calls.json](api.md#ca
 - **What.** A gesture that ran is kept, `done`, or `failed` with its error worded as the CLI words it when it ended in a failure or was interrupted. One refused before any effect (refused, asked for a confirmation, not for this machine, declined) keeps no line. A start or a stop that found the VM as asked keeps none, and so does a gesture run inside another (the `apps.update` of a `machinefile.upgrade`): the outer one's lines say what was done.
 - **Who.** `By` is the session `STATION_SESSION` names in the CLI's environment, or the frame's `by`, else `you`; a create's line is its creator's. The nightly upgrade's lines are `the night`'s, each carrying its night's instant in `Night`. A name that is no session's is refused before the gesture runs (`call.bad-input`, `by`). A far binary from before `by` reads a session's call as yours.
 
+What the engine tells of a server is kept too, by `station`, with no `Call`: a restart or a loop as `held`, a shut-down as `failed`, its return as `done`.
+
 The gestures that keep lines today:
 
 | Call                                                                     | Line                                                                                                         |
