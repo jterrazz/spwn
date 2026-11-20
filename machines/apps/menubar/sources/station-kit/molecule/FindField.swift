@@ -35,7 +35,11 @@ public struct FindField: View {
         close = {}
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.textbox, prompt, kit: "FindField") }
+
+    @ViewBuilder var drawing: some View {
         if let open {
             Button(action: open) { look.contentShape(Rectangle()) }
                 .buttonStyle(.plain)
@@ -150,7 +154,11 @@ public struct FindResult: View {
     var strong: Color { lit ? tokens.onTint : tokens.color.t1 }
     var faint: Color { lit ? tokens.onTint.opacity(Token.Find.onTintSoft) : tokens.color.t3 }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.listitem, entry.title, kit: "FindResult", states: ViewState.of([.lit: lit])) }
+
+    @ViewBuilder var drawing: some View {
         let f = Token.Find.self
         HStack(spacing: f.gap) {
             glyph.frame(width: f.glyphSlot)
@@ -226,7 +234,11 @@ public struct FindMore: View {
         self.lit = lit
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.button, kit: "FindMore", states: ViewState.of([.lit: lit])) }
+
+    @ViewBuilder var drawing: some View {
         let f = Token.Find.self
         let tone = lit ? tokens.onTint : tokens.color.t2
         HStack(spacing: f.gap) {

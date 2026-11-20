@@ -11,7 +11,11 @@ public struct GaugeStrip: View {
         self.open = open
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.region, section.title, kit: "GaugeStrip") }
+
+    @ViewBuilder var drawing: some View {
         let m = Token.Metric.Gauges.self
         HStack(spacing: m.gap) {
             ForEach(Array((section.items ?? []).compactMap(\.gauge).enumerated()), id: \.offset) { _, gauge in

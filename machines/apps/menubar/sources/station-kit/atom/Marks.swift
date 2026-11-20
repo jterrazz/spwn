@@ -20,7 +20,11 @@ public struct StatusDot: View {
 
     var ink: Color { shape == .fill ? tokens.signal(signal ?? "well") : tokens.color.t3 }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.img, signal, kit: "StatusDot", states: ViewState.of([.pinging: ping])) }
+
+    @ViewBuilder var drawing: some View {
         mark
             .frame(width: size, height: size)
             .overlay {
@@ -80,7 +84,11 @@ public struct MacRing: View {
         self.asleep = asleep
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.img, symbol, kit: "MacRing", states: ViewState.of([.asleep: asleep])) }
+
+    @ViewBuilder var drawing: some View {
         let m = Token.Metric.Marks.self
         let inset = m.macRing / 2 - m.macRingRadius
         ZStack {
@@ -108,7 +116,11 @@ public struct ProgressRing: View {
         self.size = size
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.progressbar, kit: "ProgressRing") }
+
+    @ViewBuilder var drawing: some View {
         let stroke = Token.Metric.Marks.progressStroke
         ZStack {
             Circle().inset(by: stroke / 2).stroke(tokens.color.track, lineWidth: stroke)
@@ -139,7 +151,11 @@ public struct Spinner: View {
         drawn = (size, stroke)
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.progressbar, kit: "Spinner") }
+
+    @ViewBuilder var drawing: some View {
         if still {
             ring(Token.Metric.Marks.spinnerStill)
         } else {
@@ -177,7 +193,11 @@ public struct LogoChip: View {
 
     var known: String? { Token.Object.brand(brand, among: kind == .account ? Token.Object.accounts : Token.Object.ports) }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.img, brand, kit: "LogoChip") }
+
+    @ViewBuilder var drawing: some View {
         let m = Token.Metric.Marks.self
         let chip = tokens.chip(known)
         let shape = RoundedRectangle(cornerRadius: m.logoRadius, style: .continuous)
@@ -231,7 +251,11 @@ public struct GlyphView: View {
         glyph.signal == "failing" && glyph.kind?.hasPrefix("symbol:") == true
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.img, glyph.kind, kit: "GlyphView") }
+
+    @ViewBuilder var drawing: some View {
         switch Self.drawn(glyph) {
         case let .chip(kind, brand): LogoChip(kind, brand)
         case let .mac(lid):

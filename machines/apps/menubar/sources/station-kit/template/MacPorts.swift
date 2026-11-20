@@ -9,7 +9,11 @@ struct MacPorts: View {
     let handlers: PopoverHandlers
     let run: (Action) -> Void
 
-    var body: some View {
+    var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.region, section.title, kit: "MacPorts") }
+
+    @ViewBuilder var drawing: some View {
         PortsSection(section, actions: page.actions ?? [], run: run, qr: handlers.toggleQR, about: { _ in handlers.toggleAbout(section.id ?? "") }, shown: state.qr, opened: state.about != nil && state.about == section.id)
     }
 }

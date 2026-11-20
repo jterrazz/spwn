@@ -34,7 +34,11 @@ public struct HealthCard: View {
 
     var unfolded: Bool { Self.shown(group, open: open) }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.region, section.title, kit: "HealthCard", states: ViewState.of([.expanded: open])) }
+
+    @ViewBuilder var drawing: some View {
         let m = Token.Metric.Health.self
         Card(flush: false) {
             if let verb = RowView.action(head.verb, in: actions) {

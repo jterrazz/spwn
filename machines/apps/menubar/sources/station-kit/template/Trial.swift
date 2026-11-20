@@ -40,7 +40,11 @@ public struct TrialPanel: View {
     // Tab with Shift held.
     static let backTab = KeyEquivalent("\u{19}")
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.group, kit: "TrialPanel") }
+
+    @ViewBuilder var drawing: some View {
         VStack(spacing: 0) {
             ForEach(0..<count, id: \.self) { i in
                 row(i)
@@ -146,7 +150,11 @@ public struct TrialItemView: View {
         self.scheme = scheme
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.img, kit: "TrialItemView") }
+
+    @ViewBuilder var drawing: some View {
         StatusItem(MenuBarIcon(.restarting), scheme: scheme, turn: turn)
     }
 

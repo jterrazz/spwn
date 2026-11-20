@@ -61,7 +61,11 @@ public struct PortsSection: View {
         }
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.region, section.title, kit: "PortsSection", states: ViewState.of([.expanded: opened])) }
+
+    @ViewBuilder var drawing: some View {
         if section.id == "https" {
             Card { ForEach(Array(section.rows.enumerated()), id: \.offset) { _, row in switchRow(row) } }
         } else if section.card == "exposed" {

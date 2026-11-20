@@ -13,7 +13,11 @@ public struct SkeletonGauges: View {
 
     public static let stillProgress = Token.Motion.skeletonStill
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.region, section.title, kit: "SkeletonGauges") }
+
+    @ViewBuilder var drawing: some View {
         if still {
             strip(Self.stillProgress)
         } else {

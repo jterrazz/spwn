@@ -23,7 +23,11 @@ struct WorkspacePage: View {
         _unfolded = State(initialValue: Set(state.unfolded))
     }
 
-    var body: some View {
+    var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.group, kit: "WorkspacePage") }
+
+    @ViewBuilder var drawing: some View {
         let layer = SheetLayer.of(page, state, handlers)
         Panel(insets: .page, bounded: scrolls, key: "\(state.openings)/\(page.context?.machine ?? "")/\(segment)", sheet: state.confirming, layers: AlertLayer.layers(page, state, handlers, sheet: layer)) {
             MachineHeader(page, segment: segment, pick: { segment = $0 }, back: handlers.back, run: tap, open: handlers.push).modifier(UnderSheet(layer != nil))
@@ -90,7 +94,11 @@ struct PageFooter: View {
     let state: PanelState
     let handlers: PopoverHandlers
 
-    var body: some View {
+    var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.group, kit: "PageFooter") }
+
+    @ViewBuilder var drawing: some View {
         VStack(spacing: Token.Metric.Panel.blocks) {
             if let footer = page.footer, footer.kind == "ssh" {
                 CopyFooter(footer, actions: page.actions ?? [], copy: handlers.copy) { perform($0, handlers) }

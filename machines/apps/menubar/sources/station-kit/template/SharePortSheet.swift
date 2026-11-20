@@ -11,7 +11,11 @@ public struct SharePortSheet: View {
         sheet = SheetForm(page: page, action: action, given: given, handlers: handlers)
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.dialog, kit: "SharePortSheet") }
+
+    @ViewBuilder var drawing: some View {
         SheetCard(sheet.form.title ?? "", subtitle: sheet.form.subtitle) {
             VStack(alignment: .leading, spacing: S.rowGap) {
                 ForEach(Array(sheet.fields.enumerated()), id: \.offset) { _, f in

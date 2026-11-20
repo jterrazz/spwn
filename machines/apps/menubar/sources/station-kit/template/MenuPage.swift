@@ -40,7 +40,11 @@ struct MenuPageFrame<Content: View>: View {
         self.content = content()
     }
 
-    var body: some View {
+    var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.group, kit: "MenuPageFrame") }
+
+    @ViewBuilder var drawing: some View {
         Panel(insets: .flush, bounded: scrolls, key: "\(state.openings)/\(state.page?.id ?? "")", sheet: state.confirming, layers: AlertLayer.layers(state.page, state, handlers)) {
             VStack(alignment: .leading, spacing: Token.Tile.section) {
                 content

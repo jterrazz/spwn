@@ -46,7 +46,11 @@ public struct HUDFlight: View {
 
     public init(_ notice: HUDNotice) { self.notice = notice }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.status, kit: "HUDFlight") }
+
+    @ViewBuilder var drawing: some View {
         HUDCapsule(notice)
             .fixedSize()
             .keyframeAnimator(initialValue: 0.0) { capsule, progress in

@@ -57,7 +57,11 @@ public struct Bar: View {
         }
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.progressbar, kit: "Bar") }
+
+    @ViewBuilder var drawing: some View {
         let track: Color = if case .capacity = kind { tokens.color.qq } else { tokens.color.track }
         let round: CGFloat = if case .capacity = kind { 0 } else { height / 2 }
         GeometryReader { geo in

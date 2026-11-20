@@ -14,7 +14,11 @@ struct FixedValue: View {
     let answers: Answers
     @Environment(\.stationTokens) private var tokens
 
-    var body: some View {
+    var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.text, kit: "FixedValue") }
+
+    @ViewBuilder var drawing: some View {
         HStack(spacing: S.popupGap) {
             if let glyph = option.glyph { OptionGlyph(glyph) }
             RoleText(option.label ?? "", .formValue)
@@ -31,7 +35,11 @@ struct OptionGlyph: View {
 
     init(_ glyph: Glyph) { self.glyph = glyph }
 
-    var body: some View {
+    var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.img, glyph.kind, kit: "OptionGlyph") }
+
+    @ViewBuilder var drawing: some View {
         switch GlyphView.drawn(glyph) {
         case let .chip(kind, brand): LogoChip(kind, brand)
         case let .symbol(name):
@@ -53,7 +61,11 @@ struct SheetRows<Row: View>: View {
         self.row = row
     }
 
-    var body: some View {
+    var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.list, kit: "SheetRows") }
+
+    @ViewBuilder var drawing: some View {
         VStack(spacing: 0) {
             ForEach(0..<count, id: \.self) { i in
                 row(i).frame(minHeight: S.listRow)
@@ -72,7 +84,11 @@ struct ListWords: View {
     let mono: Bool
     var wraps = false
 
-    var body: some View {
+    var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.text, label, kit: "ListWords") }
+
+    @ViewBuilder var drawing: some View {
         VStack(alignment: .leading, spacing: 0) {
             RoleText(label, .listTitle)
             if let note, !note.isEmpty {
@@ -96,7 +112,7 @@ struct SheetLine: View {
     }
 
     var body: some View {
-        Text(text).font(role.font).foregroundStyle(tokens.tone(role.tone)).fixedSize(horizontal: false, vertical: true)
+        Text(text).recorded(text, role, kit: "SheetLine").foregroundStyle(tokens.tone(role.tone)).fixedSize(horizontal: false, vertical: true)
     }
 }
 
@@ -115,7 +131,11 @@ public struct PickRows: View {
         self.set = set
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.list, field.label, kit: "PickRows") }
+
+    @ViewBuilder var drawing: some View {
         let options = field.options ?? []
         SheetRows(count: options.count) { i in
             let o = options[i]
@@ -150,7 +170,11 @@ public struct ListenerRows: View {
         self.run = run
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.list, field.label, kit: "ListenerRows") }
+
+    @ViewBuilder var drawing: some View {
         let options = field.options ?? []
         VStack(alignment: .leading, spacing: S.listLabelGap) {
             RoleText(field.label ?? "", .listLabel)
@@ -191,7 +215,11 @@ public struct CheckRows: View {
         return (field.options ?? []).compactMap(\.value).filter(now.contains).joined(separator: ",")
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.list, field.label, kit: "CheckRows") }
+
+    @ViewBuilder var drawing: some View {
         let options = field.options ?? []
         VStack(alignment: .leading, spacing: S.listLabelGap) {
             VStack(alignment: .leading, spacing: 0) {
@@ -222,7 +250,11 @@ struct CheckBox: View {
     let on: Bool
     @Environment(\.stationTokens) private var tokens
 
-    var body: some View {
+    var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.checkbox, kit: "CheckBox", states: ViewState.of([.checked: on])) }
+
+    @ViewBuilder var drawing: some View {
         ZStack {
             RoundedRectangle(cornerRadius: S.boxRadius, style: .continuous).fill(on ? tokens.color.accent : Color.clear)
             if !on { RoundedRectangle(cornerRadius: S.boxRadius, style: .continuous).strokeBorder(tokens.color.t3, lineWidth: S.boxStroke) }
@@ -245,7 +277,11 @@ public struct CommandBox: View {
         self.copy = copy
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.group, field.label, kit: "CommandBox") }
+
+    @ViewBuilder var drawing: some View {
         let command = field.hint?.command ?? ""
         VStack(alignment: .leading, spacing: S.listLabelGap) {
             if let lead = field.note { RoleText(lead, .listLabel) }
@@ -274,7 +310,11 @@ struct SheetPrimary: View {
     let fallback: String
     let run: () -> Void
 
-    var body: some View {
+    var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.button, kit: "SheetPrimary") }
+
+    @ViewBuilder var drawing: some View {
         PanelButton(primary?.label ?? fallback, look: primary?.danger == true ? .destructive : .tint, action: run)
             .keyboardShortcut(.defaultAction)
             .disabled(primary == nil)

@@ -13,7 +13,7 @@ struct RoleText: View {
     }
 
     var body: some View {
-        Text(text).font(role.font).foregroundStyle(tokens.tone(role.tone)).lineLimit(1)
+        Text(text).recorded(text, role, kit: "RoleText").foregroundStyle(tokens.tone(role.tone)).lineLimit(1)
     }
 }
 
@@ -58,7 +58,11 @@ public struct PopupField: View {
         .menuAnchor(SheetAnchor.field(field.key ?? ""))
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.button, field.label, kit: "PopupField") }
+
+    @ViewBuilder var drawing: some View {
         if still {
             face
         } else {
@@ -81,7 +85,11 @@ public struct DisclosureRow: View {
         self.toggle = toggle
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.button, summary, kit: "DisclosureRow", states: ViewState.of([.expanded: open])) }
+
+    @ViewBuilder var drawing: some View {
         Button(action: toggle) {
             HStack(spacing: S.popupGap) {
                 RoleText(summary, .formValue)
@@ -121,7 +129,11 @@ public struct MemorySlider: View {
     var options: [Option] { field.options ?? [] }
     var picked: Int { options.firstIndex { $0.value == answers.value(field) } ?? 0 }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.slider, field.label, kit: "MemorySlider") }
+
+    @ViewBuilder var drawing: some View {
         VStack(alignment: .leading, spacing: 0) {
             GeometryReader { g in
                 let w = g.size.width
@@ -203,7 +215,11 @@ public struct ChipPicker: View {
         return (field.options ?? []).compactMap(\.value).filter(now.contains).joined(separator: ",")
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.group, field.label, kit: "ChipPicker") }
+
+    @ViewBuilder var drawing: some View {
         VStack(alignment: .leading, spacing: S.caption) {
             HStack(spacing: S.chipGap) {
                 ForEach(Array((field.options ?? []).enumerated()), id: \.offset) { _, o in
@@ -256,11 +272,15 @@ public struct SplitButton: View {
             .frame(width: S.splitArrow, height: Token.Metric.Control.button.height).contentShape(Rectangle())
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.button, title, kit: "SplitButton") }
+
+    @ViewBuilder var drawing: some View {
         let c = Token.Metric.Control.button
         HStack(spacing: 0) {
             Button(action: run) {
-                Text(title).font(Token.Role.button.font).foregroundStyle(tokens.onTint)
+                Text(title).recorded(title, Token.Role.button).foregroundStyle(tokens.onTint)
                     .padding(.horizontal, c.padding).frame(height: c.height).contentShape(Rectangle())
             }
             .buttonStyle(.plain)
@@ -291,7 +311,11 @@ public struct FormText: View {
         self.submit = submit
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.textbox, kit: "FormText") }
+
+    @ViewBuilder var drawing: some View {
         HStack(spacing: 0) {
             if still {
                 RoleText(text, .formValue)

@@ -206,7 +206,11 @@ public struct Popover: View {
 
     // invariant: the panel is the app's one glass (ADR-036); nothing in it
     // is glass again (WWDC25: no glass on glass, none in the content).
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.group, kit: "Popover") }
+
+    @ViewBuilder var drawing: some View {
         SwiftUI.Group {
             if state.find != nil {
                 FindPanel(state: state, handlers: handlers, scrolls: scrolls)
@@ -360,7 +364,11 @@ struct BackKey: View {
         return state.pushed == nil ? .close : .back
     }
 
-    var body: some View {
+    var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { nil }
+
+    @ViewBuilder var drawing: some View {
         if !still {
             switch Self.gesture(state) {
             case .close: key(handlers.close).id(Gesture.close)
@@ -385,7 +393,11 @@ struct EscapeKey: View {
     let back: () -> Void
     @FocusState private var focused: Bool
 
-    var body: some View {
+    var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { nil }
+
+    @ViewBuilder var drawing: some View {
         Color.clear.frame(width: Token.Detail.anchor, height: Token.Detail.anchor)
             .focusable()
             .focusEffectDisabled()

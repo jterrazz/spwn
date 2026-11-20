@@ -24,7 +24,11 @@ public struct NeedsCard: View {
         return Array(rows.prefix(top))
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.region, section.title, kit: "NeedsCard", states: ViewState.of([.expanded: open])) }
+
+    @ViewBuilder var drawing: some View {
         VStack(alignment: .leading, spacing: Token.Metric.Panel.label) {
             CardLabel(section.title ?? "", value: section.caption ?? [])
             Card {

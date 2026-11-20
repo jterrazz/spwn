@@ -36,7 +36,11 @@ public struct ActivityCharts: View {
 
     var height: CGFloat { kind == .mirror ? Token.Metric.Chart.network : Token.Metric.Chart.cpu }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.img, chart.kind, kit: "ActivityCharts") }
+
+    @ViewBuilder var drawing: some View {
         let c = Token.Metric.Chart.self
         VStack(alignment: .leading, spacing: c.endsGap) {
             plot

@@ -21,7 +21,11 @@ public struct KeyCap: View {
         self.onTint = onTint
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.text, key, kit: "KeyCap") }
+
+    @ViewBuilder var drawing: some View {
         let c = Token.Metric.Control.self
         Text(Token.Key.cap(key))
             .font(Token.Role.keyCap.font)
@@ -57,7 +61,11 @@ public struct Pill: View {
         }
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.text, address, kit: "Pill") }
+
+    @ViewBuilder var drawing: some View {
         let c = Token.Metric.Control.self
         let shape = Capsule(style: .continuous)
         HStack(spacing: c.pillGap) {
@@ -114,8 +122,9 @@ public struct LiveText: View {
 
     func drawn(_ value: Value) -> some View {
         let shown = Live.value(value, samples: samples)
-        return Text(Format.show(shown, now: now))
-            .font(role.font)
+        let words = Format.show(shown, now: now)
+        return Text(words)
+            .recorded(words, role, kit: "LiveText", states: ViewState.of([.stale: value.stale == true]))
             .foregroundStyle(value.stale == true ? tokens.color.t3 : value.signal != nil ? tokens.signalText(value.signal) : tokens.tone(role.tone))
             .contentTransition(.numericText(value: Double(shown.n ?? 0)))
             .animation(tokens.motion(Token.Motion.sample), value: shown.n)
@@ -206,7 +215,11 @@ public struct FactsLine: View {
         return text
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark.font(.text, kit: "FactsLine", role) }
+
+    @ViewBuilder var drawing: some View {
         ViewThatFits(in: .horizontal) {
             ForEach(Array(Self.variants(parts).enumerated()), id: \.offset) { _, variant in
                 line(variant).font(role.font).foregroundStyle(tokens.tone(role.tone)).lineLimit(1).fixedSize()
@@ -233,7 +246,11 @@ public struct TimeLeft: View {
 
     var low: Bool { seconds < Token.Hot.leftSeconds }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.text, kit: "TimeLeft", states: ViewState.of([.low: low])) }
+
+    @ViewBuilder var drawing: some View {
         let c = Token.Metric.Control.self
         let share = min(max(Double(seconds) / Double(total), Token.Metric.Marks.progressLeast), 1)
         VStack(alignment: .trailing, spacing: c.timeLeftGap) {

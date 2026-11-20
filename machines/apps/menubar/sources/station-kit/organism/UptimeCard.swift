@@ -12,7 +12,11 @@ public struct UptimeCard: View {
 
     var uptime: Uptime? { (section.items ?? []).compactMap(\.uptime).first }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.region, section.title, kit: "UptimeCard") }
+
+    @ViewBuilder var drawing: some View {
         let m = Token.Metric.Uptime.self
         let ends = section.notes
         Card(flush: false) {

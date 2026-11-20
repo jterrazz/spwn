@@ -8,5 +8,5 @@ struct MacAccounts: View {
     let busy: Set<String>
     let run: (Action, Row?) -> Void
 
-    var body: some View { AccountsSection(section, actions: page.actions ?? [], busy: busy, run: run) }
+    var body: some View { AccountsSection(section, actions: page.actions ?? [], busy: busy, run: run).recorded(nil) }
 }

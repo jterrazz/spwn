@@ -22,7 +22,11 @@ public struct AwakeMac: View {
     var dim: Bool { row.signal == "asleep" }
     var sub: Value? { row.detail.flatMap { $0.isNone ? nil : $0 } }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.listitem, label, kit: "AwakeMac", states: ViewState.of([.on: on, .waiting: waiting, .dimmed: dim])) }
+
+    @ViewBuilder var drawing: some View {
         let m = Token.Metric.Row.self
         HStack(spacing: m.gap) {
             SwiftUI.Group {

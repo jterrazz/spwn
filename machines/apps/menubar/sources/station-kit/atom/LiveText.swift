@@ -72,7 +72,7 @@ public struct LiveRead<Content: View>: View {
 
     public init(@ViewBuilder _ content: @escaping (LiveStore) -> Content) { self.content = content }
 
-    public var body: some View { Following(store: store, content: content) }
+    public var body: some View { Following(store: store, content: content).recorded(nil) }
 
     struct Following: View {
         @ObservedObject var store: LiveStore

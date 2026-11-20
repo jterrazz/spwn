@@ -18,7 +18,11 @@ public struct CopyFooter: View {
 
     // invariant: the command is never cut: when it and the button do not
     // fit one line, the command takes its own line above the button.
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.group, kit: "CopyFooter") }
+
+    @ViewBuilder var drawing: some View {
         ViewThatFits(in: .horizontal) {
             HStack(spacing: Token.Gap.pair) {
                 command.fixedSize()

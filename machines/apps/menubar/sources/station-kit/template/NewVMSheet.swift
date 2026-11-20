@@ -24,12 +24,16 @@ public struct NewVMSheet: View {
     var answers: Answers { Answers(form, given) }
     var id: String { action.id ?? "" }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.dialog, action.label, kit: "NewVMSheet") }
+
+    @ViewBuilder var drawing: some View {
         SheetCard(form.title ?? "", subtitle: form.subtitle) {
             VStack(alignment: .leading, spacing: S.rowGap) {
                 rows(form.fields ?? [], depth: 0)
                 if let warn = form.warn {
-                    Text(warn).font(Token.Role.sheetBody.font).foregroundStyle(tokens.color.orangeText)
+                    Text(warn).recorded(warn, Token.Role.sheetBody).foregroundStyle(tokens.color.orangeText)
                         .fixedSize(horizontal: false, vertical: true).padding(.top, S.warnTop)
                 }
             }

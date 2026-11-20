@@ -15,7 +15,11 @@ public struct AddRow: View {
         self.tap = tap
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.button, label, kit: "AddRow") }
+
+    @ViewBuilder var drawing: some View {
         let m = Token.Metric.Row.self
         Button(action: tap) {
             HStack(spacing: m.gap) {
@@ -23,10 +27,10 @@ public struct AddRow: View {
                     .font(.system(size: Token.Metric.Accounts.plus, weight: .medium))
                     .foregroundStyle(tokens.color.accent)
                     .frame(width: m.accessory)
-                Text(label).font(Token.Role.addRow.font).foregroundStyle(tokens.color.accent).lineLimit(1)
+                Text(label).recorded(label, Token.Role.addRow).foregroundStyle(tokens.color.accent).lineLimit(1)
                 Spacer(minLength: 0)
                 if let trail {
-                    Text(trail).font(Token.Role.addRowEnd.font).foregroundStyle(tokens.tone(Token.Role.addRowEnd.tone)).lineLimit(1)
+                    Text(trail).recorded(trail, Token.Role.addRowEnd).foregroundStyle(tokens.tone(Token.Role.addRowEnd.tone)).lineLimit(1)
                 }
             }
             .padding(.horizontal, m.padding)

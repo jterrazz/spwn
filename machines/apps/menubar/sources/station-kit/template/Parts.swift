@@ -12,7 +12,11 @@ struct Metric: View {
 
     var waiting: Bool { value == nil || value?.kind == "pending" }
 
-    var body: some View {
+    var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.group, label, kit: "Metric", states: ViewState.of([.waiting: waiting])) }
+
+    @ViewBuilder var drawing: some View {
         let (number, unit, of) = Self.parts(value.map { Format.show($0, now: now) } ?? "")
         VStack(alignment: .leading, spacing: Token.Gap.small) {
             Text(label).font(.system(size: Token.Size.label, weight: .semibold)).foregroundStyle(Token.Ink.secondary).lineLimit(1)
@@ -82,7 +86,11 @@ struct Metric: View {
 struct Metrics: View {
     let measures: [(label: String, value: Value?, spark: [Int]?)]
 
-    var body: some View {
+    var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.group, kit: "Metrics") }
+
+    @ViewBuilder var drawing: some View {
         HStack(alignment: .top, spacing: Token.Tile.pair) {
             ForEach(Array(measures.enumerated()), id: \.offset) { _, m in
                 LiveRead { store in Metric(label: m.label, value: store.now(m.value), spark: store.points(m.value, else: m.spark)) }
@@ -122,7 +130,11 @@ struct MachineRow: View {
 
     var badge: String? { (kinds || kind == "Server") && kind != "Mac" && !kind.isEmpty ? kind : nil }
 
-    var body: some View {
+    var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.listitem, row.label, kit: "MachineRow") }
+
+    @ViewBuilder var drawing: some View {
         Button { open(row.id ?? "") } label: {
             HStack(spacing: Token.Tile.gap) {
                 IconTile(symbol, active: row.label == Page.ThisMacWord && !picked, tint: picked ? palette.onTint : nil, pulse: row.mark == .pending)
@@ -184,7 +196,11 @@ struct MachineTree: View {
         }
     }
 
-    var body: some View {
+    var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.list, section.title, kit: "MachineTree") }
+
+    @ViewBuilder var drawing: some View {
         let all = lines()
         VStack(alignment: .leading, spacing: 0) {
             ForEach(Self.keyed(all), id: \.key) { i, _, l in
@@ -260,7 +276,11 @@ struct MenuLine: View {
 
     var title: String { (action.form != nil || action.confirm?.type != nil) ? "\(action.label ?? "")\(Token.Glyph.ellipsis)" : action.label ?? "" }
 
-    var body: some View {
+    var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.menuitem, title, kit: "MenuLine", states: ViewState.of([.danger: danger])) }
+
+    @ViewBuilder var drawing: some View {
         Button(action: tap) {
             MenuText(symbol: symbol, title: title, key: action.key.map(Token.Key.shown), danger: danger)
         }
@@ -275,7 +295,11 @@ struct MenuText: View {
     let danger: Bool
     @Environment(\.stationPalette) private var palette
 
-    var body: some View {
+    var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.menuitem, title, kit: "MenuText", states: ViewState.of([.danger: danger])) }
+
+    @ViewBuilder var drawing: some View {
         HStack(spacing: Token.Tile.gap) {
             MenuGlyph(symbol).frame(width: Token.Detail.menuStroke)
                 .foregroundStyle(palette.glyph)
@@ -313,7 +337,11 @@ struct SheetFor: View {
     let state: PanelState
     let handlers: PopoverHandlers
 
-    var body: some View {
+    var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.group, kit: "SheetFor") }
+
+    @ViewBuilder var drawing: some View {
         if let id = state.confirming, let action = page.action(id), !SheetLayer.layered(action) {
             let answers = Binding(get: { state.answers[id] ?? [:] }, set: { new in for (k, v) in new { handlers.answer(id, k, v) } })
             if let form = action.form {

@@ -114,7 +114,11 @@ public struct RowView: View {
         return sub == nil ? m.height : m.twoLines
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.listitem, row.label, kit: "RowView", states: ViewState.of([.lit: lit, .stale: stale, .dimmed: dim])) }
+
+    @ViewBuilder var drawing: some View {
         let m = Token.Metric.Row.self
         HStack(spacing: m.gap) {
             accessory
@@ -190,7 +194,7 @@ public struct RowView: View {
                 .opacity(dim && !home ? m.dimShare : 1)
             if let mac = row.mac {
                 let role = home ? Token.Role.homeSuffix : Token.Role.rowSuffix
-                Text(mac).font(role.font).foregroundStyle(tokens.tone(role.tone))
+                Text(mac).recorded(mac, role).foregroundStyle(tokens.tone(role.tone))
             }
         }
         .lineLimit(1)
@@ -261,7 +265,11 @@ struct BirthBar: View {
         share = (birth.of ?? 0) > 0 ? min(max(Double(birth.n ?? 0) / Double(birth.of ?? 1), 0), 1) : 0
     }
 
-    var body: some View {
+    var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.progressbar, kit: "BirthBar") }
+
+    @ViewBuilder var drawing: some View {
         let m = Token.Metric.Birth.self
         Capsule().fill(tokens.color.track)
             .frame(height: m.bar)
@@ -314,7 +322,11 @@ public struct RowStack: View {
         return i > 0 && !tinted(i) && !tinted(i - 1)
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.list, kit: "RowStack") }
+
+    @ViewBuilder var drawing: some View {
         let m = Token.Metric.Row.self
         VStack(spacing: 0) {
             ForEach(Array(rows.enumerated()), id: \.offset) { i, row in
@@ -361,7 +373,11 @@ struct HomeLead: View {
 
     var mac: Bool { ["laptop", "desktop"].contains(glyph.kind ?? "") }
 
-    var body: some View {
+    var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.img, glyph.kind, kit: "HomeLead") }
+
+    @ViewBuilder var drawing: some View {
         let h = Token.HomeRow.self
         if mac {
             Image(systemName: Token.Object.mac(lid: glyph.kind == "laptop"))
@@ -392,10 +408,14 @@ struct HomeVerb: View {
         self.action = action
     }
 
-    var body: some View {
+    var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.button, title, kit: "HomeVerb") }
+
+    @ViewBuilder var drawing: some View {
         let h = Token.HomeRow.self
         Button(action: action) {
-            Text(title).font(Token.Role.homeVerb.font).foregroundStyle(Token.HomeRow.verbInk).lineLimit(1)
+            Text(title).recorded(title, Token.Role.homeVerb).foregroundStyle(Token.HomeRow.verbInk).lineLimit(1)
                 .padding(h.verb)
                 .frame(height: h.verbHeight)
                 .background(Capsule().fill(tokens.color.accent))

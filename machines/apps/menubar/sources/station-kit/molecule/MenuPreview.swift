@@ -38,19 +38,25 @@ public struct MenuPreview: View {
     var checks: Bool { model.items.contains(where: \.checked) }
     var icons: Bool { model.items.contains { $0.icon != nil } }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.menu, kit: "MenuPreview") }
+
+    @ViewBuilder var drawing: some View {
         VStack(alignment: .leading, spacing: 0) {
             if let header = model.header {
                 Text(verbatim: header).font(Token.Role.findGroup.font).foregroundStyle(tokens.color.t3)
                     .lineLimit(1)
                     .padding(.horizontal, P.side)
                     .frame(height: P.header, alignment: .leading)
+                    .recorded(ViewMark(.text, header, kit: "MenuPreview.header"))
             }
             ForEach(Array(model.items.enumerated()), id: \.offset) { _, item in
                 if item.separator {
                     Rectangle().fill(tokens.color.hair).frame(height: Token.Metric.Row.hairline)
                         .padding(.horizontal, P.side)
                         .frame(height: P.line)
+                        .recorded(ViewMark(ViewRole.separator, kit: "MenuPreview.line"))
                 } else {
                     entry(item)
                 }
@@ -95,6 +101,10 @@ public struct MenuPreview: View {
         .padding(.horizontal, P.side)
         .frame(height: M.item)
         .background(lit ? tokens.color.accent : .clear, in: RoundedRectangle(cornerRadius: M.itemRadius, style: .continuous))
+        .recorded(ViewMark(.menuitem, item.title, kit: "MenuPreview.item",
+                           attrs: (item.icon.map { ["icon=" + $0] } ?? []) + (item.key.map { ["key=" + MenuModel.keys($0)] } ?? [])
+                               + (item.submenu.isEmpty ? [] : ["submenu"]),
+                           states: ViewState.of([.lit: lit, .danger: item.destructive, .disabled: !item.enabled, .checked: item.checked])))
     }
 }
 
@@ -143,7 +153,11 @@ public struct MenuStage: View {
 
     var sub: MenuItem? { model.items.first { $0.id == child && !$0.submenu.isEmpty } }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.menu, kit: "MenuStage") }
+
+    @ViewBuilder var drawing: some View {
         MenuPlacement(x: popup ? anchor.minX : page ? anchor.maxX : anchor.minX + Token.MenuPreview.inset,
                       y: page || popup ? anchor.maxY + Token.MenuPreview.inset : anchor.minY + Token.MenuPreview.pointer,
                       trailing: page && !popup, entry: sub.map { MenuPreview.top(of: $0.id, in: model) - Token.Metric.Menu.padding } ?? 0) {

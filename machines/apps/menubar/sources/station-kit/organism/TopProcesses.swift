@@ -22,7 +22,11 @@ public struct TopProcesses: View {
         return shown.sorted { $0.share != $1.share ? $0.share > $1.share : $0.at < $1.at }.map(\.row)
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.region, section.title, kit: "TopProcesses") }
+
+    @ViewBuilder var drawing: some View {
         LiveRead { store in drawn(Self.ranked(section) { Live.value(store.now($0) ?? $0, samples: samples) }) }
     }
 

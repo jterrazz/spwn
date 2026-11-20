@@ -32,7 +32,11 @@ public struct LogLines: View {
         return Text("\(at)\(source)\(Text(verbatim: p.said).foregroundStyle(said))")
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.group, kit: "LogLines") }
+
+    @ViewBuilder var drawing: some View {
         let m = Token.Metric.Log.self
         VStack(alignment: .leading, spacing: m.lineGap) {
             ForEach(Array((log.lines ?? []).enumerated()), id: \.offset) { i, text in

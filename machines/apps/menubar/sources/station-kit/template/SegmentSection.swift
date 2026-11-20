@@ -5,7 +5,11 @@ import SwiftUI
 struct SegmentSection: View {
     let section: Section
 
-    var body: some View {
+    var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.region, section.title, kit: "SegmentSection") }
+
+    @ViewBuilder var drawing: some View {
         VStack(alignment: .leading, spacing: Token.Metric.Panel.label) {
             CardLabel(section.title ?? "", value: section.caption ?? [])
             Card(flush: false) {

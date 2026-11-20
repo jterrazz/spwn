@@ -26,7 +26,11 @@ struct ServerPage: View {
 
     var actions: [Action] { page.actions ?? [] }
 
-    var body: some View {
+    var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.group, kit: "ServerPage") }
+
+    @ViewBuilder var drawing: some View {
         Panel(insets: .page, bounded: scrolls, key: "\(state.openings)/\(page.context?.machine ?? "")/\(segment)", sheet: state.confirming, layers: AlertLayer.layers(page, state, handlers)) {
             MachineHeader(page, segment: segment, pick: { segment = $0 }, back: handlers.back, run: tap, open: handlers.push)
         } content: {
@@ -113,7 +117,7 @@ struct ServerPage: View {
 
     func footnote(_ s: Section) -> some View {
         ForEach(Array(s.notes.enumerated()), id: \.offset) { _, note in
-            Text(note).font(Token.Role.toolingNote.font).foregroundStyle(tokens.tone(Token.Role.toolingNote.tone))
+            Text(note).recorded(note, Token.Role.toolingNote).foregroundStyle(tokens.tone(Token.Role.toolingNote.tone))
                 .lineSpacing(Token.Metric.Footnote.lineSpacing)
                 .fixedSize(horizontal: false, vertical: true)
                 .padding(Token.Metric.Footnote.padding)

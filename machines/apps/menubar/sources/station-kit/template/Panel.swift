@@ -339,7 +339,11 @@ struct EdgeFade: View {
     let top: Bool
     let bottom: Bool
 
-    var body: some View {
+    var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.group, kit: "EdgeFade") }
+
+    @ViewBuilder var drawing: some View {
         VStack(spacing: 0) {
             if top { LinearGradient(colors: [Color.clear, Token.Pane.opaque], startPoint: .top, endPoint: .bottom).frame(height: Token.Pane.fade) }
             Rectangle().fill(Token.Pane.opaque)

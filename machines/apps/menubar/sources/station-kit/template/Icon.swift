@@ -104,7 +104,11 @@ public struct StatusItem: View {
 
     var ink: Color { Token.Icon.ink(scheme) }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.img, icon.label, kit: "StatusItem") }
+
+    @ViewBuilder var drawing: some View {
         let scale = Token.Icon.height / Token.Icon.box.height
         let face = icon.face
         Canvas { context, _ in

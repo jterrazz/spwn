@@ -36,7 +36,11 @@ struct MacPage: View {
         (page.sections ?? []).filter { $0.id != "summary" && ($0.segment == nil || $0.segment == segment) }
     }
 
-    var body: some View {
+    var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.group, kit: "MacPage") }
+
+    @ViewBuilder var drawing: some View {
         let layer = SheetLayer.of(page, state, handlers)
         Panel(insets: .page, bounded: scrolls, key: "\(state.openings)/\(page.context?.machine ?? "")/\(segment)", sheet: state.confirming, layers: AlertLayer.layers(page, state, handlers, sheet: layer)) {
             header.blur(radius: layer == nil ? 0 : S.blur)

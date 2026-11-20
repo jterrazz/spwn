@@ -42,7 +42,11 @@ struct MachineActivity: View {
 
     static func windowed(_ s: Section) -> Bool { s.id?.hasPrefix(windowPrefix) == true }
 
-    var body: some View {
+    var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.group, window, kit: "MachineActivity") }
+
+    @ViewBuilder var drawing: some View {
         VStack(alignment: .leading, spacing: Token.Metric.Panel.blocks) {
             if let w = Self.shown(sections, window: window) { windowed(w) }
             ForEach(Array(sections.filter { !Self.windowed($0) }.enumerated()), id: \.offset) { _, s in
@@ -111,7 +115,7 @@ struct MachineActivity: View {
                 }
                 .lineLimit(1)
                 if let sentence = chart?.anomaly?.sentence, !sentence.isEmpty {
-                    Text(sentence).font(Token.Role.chartNote.font).foregroundStyle(tokens.color.orangeText).lineLimit(1)
+                    Text(sentence).recorded(sentence, Token.Role.chartNote).foregroundStyle(tokens.color.orangeText).lineLimit(1)
                 }
                 if let chart {
                     ActivityCharts(chart, scrub: scrubbed ? scrub : nil, onScrub: scrubbed ? onScrub : { _ in })
@@ -140,7 +144,7 @@ struct MachineActivity: View {
             } else {
                 Circle().fill(ink).frame(width: m.legendDot, height: m.legendDot)
             }
-            Text(words).font(Token.Role.legend.font).foregroundStyle(tokens.tone(Token.Role.legend.tone))
+            Text(words).recorded(words, Token.Role.legend).foregroundStyle(tokens.tone(Token.Role.legend.tone))
         }
     }
 
@@ -163,7 +167,7 @@ struct MachineActivity: View {
             }
         default:
             ForEach(Array(s.notes.enumerated()), id: \.offset) { _, note in
-                Text(note).font(Token.Role.footnote.font).foregroundStyle(tokens.tone(Token.Role.footnote.tone))
+                Text(note).recorded(note, Token.Role.footnote).foregroundStyle(tokens.tone(Token.Role.footnote.tone))
                     .lineSpacing(Token.Metric.Footnote.lineSpacing)
                     .fixedSize(horizontal: false, vertical: true)
                     .padding(Token.Metric.Footnote.padding)
@@ -212,7 +216,7 @@ struct MachineActivity: View {
                 let label = part.label ?? ""
                 let words = [label, part.text ?? Format.show(part)].joined(separator: Token.Glyph.space)
                 if label == "of" {
-                    Text(words).font(Token.Role.legend.font).foregroundStyle(tokens.tone(Token.Role.legend.tone))
+                    Text(words).recorded(words, Token.Role.legend).foregroundStyle(tokens.tone(Token.Role.legend.tone))
                 } else {
                     dot(words, ink: Self.ink(label, tokens), hollow: label == "free")
                 }

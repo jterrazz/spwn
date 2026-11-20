@@ -16,7 +16,11 @@ public struct VMsCard: View {
         self.run = run
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.region, section.title, kit: "VMsCard") }
+
+    @ViewBuilder var drawing: some View {
         VStack(alignment: .leading, spacing: Token.Metric.Panel.label) {
             CardLabel(section.title ?? "", value: section.caption ?? [])
             if let empty = (section.items ?? []).compactMap(\.empty).first {

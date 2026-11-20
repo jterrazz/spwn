@@ -19,7 +19,11 @@ public struct CardLabel: View {
         self.tap = tap
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.heading, title, kit: "CardLabel", states: ViewState.of([.expanded: open])) }
+
+    @ViewBuilder var drawing: some View {
         let m = Token.Metric.CardLabel.self
         HStack(alignment: .firstTextBaseline) {
             if let about {
@@ -40,7 +44,7 @@ public struct CardLabel: View {
     }
 
     var name: some View {
-        Text(title).font(Token.Role.sectionLabel.font).foregroundStyle(tokens.tone(Token.Role.sectionLabel.tone))
+        Text(title).recorded(title, Token.Role.sectionLabel).foregroundStyle(tokens.tone(Token.Role.sectionLabel.tone))
     }
 
     func aboutButton(_ about: About) -> some View {
@@ -77,7 +81,11 @@ public struct Card<Content: View>: View {
         self.content = content()
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.group, kit: "Card") }
+
+    @ViewBuilder var drawing: some View {
         VStack(spacing: 0) { content }
             .padding(padding)
             .frame(maxWidth: .infinity, alignment: .leading)

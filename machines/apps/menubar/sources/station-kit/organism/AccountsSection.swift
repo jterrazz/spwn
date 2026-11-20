@@ -29,7 +29,11 @@ public struct AccountsSection: View {
 
     static let shareSheet = "grant"
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.region, section.title, kit: "AccountsSection") }
+
+    @ViewBuilder var drawing: some View {
         let items = section.items ?? []
         VStack(alignment: .leading, spacing: Token.Metric.Panel.label) {
             CardLabel(section.title ?? "", value: section.caption ?? [])
@@ -45,7 +49,7 @@ public struct AccountsSection: View {
                 }
             }
             ForEach(Array(section.notes.enumerated()), id: \.offset) { _, note in
-                Text(note).font(Token.Role.footnote.font).foregroundStyle(tokens.tone(Token.Role.footnote.tone))
+                Text(note).recorded(note, Token.Role.footnote).foregroundStyle(tokens.tone(Token.Role.footnote.tone))
                     .lineSpacing(Token.Metric.Footnote.lineSpacing)
                     .fixedSize(horizontal: false, vertical: true)
                     .padding(Token.Metric.Footnote.padding)

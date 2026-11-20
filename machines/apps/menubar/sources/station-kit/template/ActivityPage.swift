@@ -28,7 +28,11 @@ public struct ActivityPage: View {
         windows.map { w in (w.words, picked(page) == w.words, { handlers.window(w.flag) }) }
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.group, kit: "ActivityPage") }
+
+    @ViewBuilder var drawing: some View {
         let banner = page.section("machine")?.rows.first
         VStack(alignment: .leading, spacing: Token.Tile.section) {
             PageHeader(back: state.back ?? Page.ThisMacWord, title: "Activity", subtitle: Format.show(banner?.cells?.first ?? Value()), action: handlers.back)

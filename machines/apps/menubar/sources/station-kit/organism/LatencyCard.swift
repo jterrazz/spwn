@@ -21,7 +21,11 @@ public struct LatencyCard: View {
         return line
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.region, section.title, kit: "LatencyCard") }
+
+    @ViewBuilder var drawing: some View {
         let m = Token.Metric.Latency.self
         Card(flush: false) {
             HStack(alignment: .firstTextBaseline) {

@@ -20,7 +20,11 @@ public struct SSHFooter: View {
     var copy: Action? { buttons.first { $0.run?.copy != nil } }
     var terminal: Action? { buttons.first { $0.run?.terminal == true } }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.group, kit: "SSHFooter") }
+
+    @ViewBuilder var drawing: some View {
         let m = Token.Metric.SSHFooter.self
         HStack(spacing: Token.Metric.Panel.blocks) {
             if let words = footer.copy {
@@ -34,7 +38,7 @@ public struct SSHFooter: View {
                 .buttonStyle(.plain)
                 .accessibilityLabel(copy?.label ?? "")
             } else if let note = footer.note {
-                Text(note).font(Token.Role.footerNote.font).foregroundStyle(tokens.tone(Token.Role.footerNote.tone)).lineLimit(1)
+                Text(note).recorded(note, Token.Role.footerNote).foregroundStyle(tokens.tone(Token.Role.footerNote.tone)).lineLimit(1)
             }
             Spacer(minLength: 0)
             if let terminal {

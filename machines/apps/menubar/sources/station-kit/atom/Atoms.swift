@@ -8,7 +8,11 @@ public struct MarkView: View {
 
     public init(_ mark: Mark?) { self.mark = mark }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.img, mark?.rawValue, kit: "MarkView") }
+
+    @ViewBuilder var drawing: some View {
         if let mark {
             if mark == .pending {
                 PendingDot()
@@ -31,7 +35,11 @@ public struct PendingDot: View {
 
     var still: Bool { pinned || frozen }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.img, kit: "PendingDot") }
+
+    @ViewBuilder var drawing: some View {
         Image(systemName: Token.Symbol.pending)
             .font(.system(size: Token.Space.mark))
             .foregroundStyle(palette.muted)
@@ -54,7 +62,11 @@ public struct ValueText: View {
         self.size = size
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.text, value.map { Format.show($0, now: now) }, kit: "ValueText", states: ViewState.of([.dimmed: muted])) }
+
+    @ViewBuilder var drawing: some View {
         if let value {
             if value.kind == "pending" {
                 PendingDot()
@@ -91,7 +103,11 @@ public struct QRView: View {
         self.size = size
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.img, text, kit: "QRView") }
+
+    @ViewBuilder var drawing: some View {
         if let image = QR.modules(text) {
             Image(decorative: image, scale: 1)
                 .interpolation(.none)
@@ -110,7 +126,11 @@ public struct MenuGlyph: View {
 
     public init(_ symbol: String) { self.symbol = symbol }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.img, symbol, kit: "MenuGlyph") }
+
+    @ViewBuilder var drawing: some View {
         switch symbol {
         case Token.Symbol.prompt, Token.Symbol.list:
             Stroke16(symbol: symbol)

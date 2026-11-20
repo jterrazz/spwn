@@ -52,7 +52,11 @@ public struct CellsRow: View {
         self.hintAsButton = hintAsButton
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.listitem, row.label, kit: "CellsRow") }
+
+    @ViewBuilder var drawing: some View {
         let cells = row.cells ?? []
         VStack(alignment: .leading, spacing: Token.Gap.tight) {
             HStack(spacing: Token.Space.gap) {
@@ -86,7 +90,11 @@ public struct FactView: View {
 
     public init(_ fact: Fact) { self.fact = fact }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.text, kit: "FactView") }
+
+    @ViewBuilder var drawing: some View {
         HStack(spacing: Token.Space.gap) {
             Text(fact.key ?? "").font(.system(size: Token.Space.text)).foregroundStyle(palette.muted)
             ValueText(fact.value)
@@ -105,7 +113,11 @@ public struct HintView: View {
         self.asButton = asButton
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.group, kit: "HintView") }
+
+    @ViewBuilder var drawing: some View {
         HStack(spacing: Token.Space.gap / 2) {
             Text("\(Token.Glyph.arrow) \(hint.command ?? "")")
                 .font(.system(size: Token.Space.small, design: .monospaced))
@@ -134,7 +146,11 @@ public struct ErrorLine: View {
 
     public init(_ error: PageError) { self.error = error }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.text, kit: "ErrorLine") }
+
+    @ViewBuilder var drawing: some View {
         VStack(alignment: .leading, spacing: Token.Gap.tight) {
             HStack(spacing: Token.Space.gap / 2) {
                 Image(systemName: Token.Symbol.error).font(.system(size: Token.Space.text)).foregroundStyle(palette.bad)
@@ -157,7 +173,11 @@ public struct ConfirmPanel: View {
         self.onAnswer = onAnswer
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.dialog, confirm.question, kit: "ConfirmPanel") }
+
+    @ViewBuilder var drawing: some View {
         VStack(alignment: .leading, spacing: Token.Gap.small) {
             Text(confirm.question ?? "").font(.system(size: Token.Space.text, weight: .semibold)).foregroundStyle(palette.text)
             ForEach(Array((confirm.lines ?? []).enumerated()), id: \.offset) { _, line in
@@ -186,7 +206,11 @@ public struct FormView: View {
         Binding(get: { answers[f.key ?? ""] ?? f.default ?? "" }, set: { answers[f.key ?? ""] = $0 })
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.group, kit: "FormView") }
+
+    @ViewBuilder var drawing: some View {
         HStack(spacing: Token.Space.gap) {
             ForEach(Array((form.fields ?? []).enumerated()), id: \.offset) { _, f in
                 if f.kind == "confirm" {

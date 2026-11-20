@@ -19,7 +19,11 @@ struct MachinePage: View {
         }
     }
 
-    var body: some View {
+    var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.group, kit: "MachinePage") }
+
+    @ViewBuilder var drawing: some View {
         MachineContent(page: page, state: state, handlers: handlers)
     }
 }

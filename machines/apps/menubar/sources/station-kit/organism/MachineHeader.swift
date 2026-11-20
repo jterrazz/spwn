@@ -42,14 +42,18 @@ public struct MachineHeader: View {
         return Image(systemName: name)
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.group, kit: "MachineHeader") }
+
+    @ViewBuilder var drawing: some View {
         let m = Token.Metric.PageHeader.self
         VStack(alignment: .leading, spacing: 0) {
             if let words = page.header?.back {
                 Button(action: back) {
                     HStack(spacing: m.backGap) {
                         Image(systemName: Token.Symbol.back).font(.system(size: m.backChevron, weight: .semibold))
-                        Text(words).font(Token.Role.back.font)
+                        Text(words).recorded(words, Token.Role.back)
                     }
                     .foregroundStyle(tokens.tone(Token.Role.back.tone))
                     .contentShape(Rectangle())

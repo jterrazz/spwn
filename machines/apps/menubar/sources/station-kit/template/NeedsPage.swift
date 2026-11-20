@@ -13,7 +13,11 @@ struct NeedsPage: View {
 
     var busy: Set<String> { state.busy.union([state.settling].compactMap { $0 }) }
 
-    var body: some View {
+    var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.group, kit: "NeedsPage") }
+
+    @ViewBuilder var drawing: some View {
         let layer = SheetLayer.of(page, state, handlers)
         Panel(insets: .page, bounded: scrolls, key: "\(state.openings)/\(page.id ?? "")", sheet: state.confirming, layers: AlertLayer.layers(page, state, handlers, sheet: layer)) {
             MachineHeader(page, segment: nil, back: handlers.back) { perform($0, handlers) }.modifier(UnderSheet(layer != nil))

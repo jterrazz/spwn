@@ -28,7 +28,11 @@ public struct TypedField: View {
         _text = text
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.textbox, placeholder, kit: "TypedField") }
+
+    @ViewBuilder var drawing: some View {
         HStack(spacing: Token.Gap.pair) {
             if let symbol { Image(systemName: symbol).font(.system(size: Token.Size.text, weight: .medium)).foregroundStyle(palette.glyph) }
             field
@@ -102,7 +106,11 @@ public struct Choice: View {
         _value = value
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.group, field.label, kit: "Choice") }
+
+    @ViewBuilder var drawing: some View {
         let all = (field.options ?? []).map { ($0.label ?? $0.value ?? "", ($0.value ?? "") == value, { [o = $0] in value = o.value ?? "" }) }
         VStack(spacing: Token.Gap.small) {
             ForEach(Array(stride(from: 0, to: all.count, by: Self.perRow)), id: \.self) { i in
@@ -138,7 +146,11 @@ public struct ConfirmSheet: View {
         return typed == name
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.dialog, confirm.question, kit: "ConfirmSheet") }
+
+    @ViewBuilder var drawing: some View {
         VStack(alignment: .leading, spacing: Token.Gap.item) {
             Text(confirm.question ?? "").font(.body.weight(.semibold)).foregroundStyle(Token.Ink.primary)
             ForEach(Array((confirm.lines ?? []).enumerated()), id: \.offset) { _, v in
@@ -227,7 +239,11 @@ public struct FormSheet: View {
         return run.hasPrefix("New ") ? "Create" : run
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.dialog, kit: "FormSheet") }
+
+    @ViewBuilder var drawing: some View {
         VStack(alignment: .leading, spacing: Token.Gap.pair) {
             Text(form.title ?? "").font(.body.weight(.semibold)).foregroundStyle(Token.Ink.primary)
             ForEach(Array((form.fields ?? []).enumerated()), id: \.offset) { _, f in
@@ -269,7 +285,11 @@ public struct SheetButton: View {
         self.action = action
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.button, title, kit: "SheetButton") }
+
+    @ViewBuilder var drawing: some View {
         StationButton(title, role: role == .accent ? .primary : role == .danger ? .danger : .plain, action: action)
     }
 }
@@ -292,13 +312,17 @@ public struct SheetCard<Content: View, Footer: View>: View {
         self.footer = footer()
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.group, title, kit: "SheetCard") }
+
+    @ViewBuilder var drawing: some View {
         let shape = RoundedRectangle(cornerRadius: S.radius, style: .continuous)
         VStack(alignment: .leading, spacing: 0) {
             VStack(alignment: .leading, spacing: S.subtitleGap) {
-                Text(title).font(Token.Role.sheetTitle.font).foregroundStyle(tokens.tone(Token.Role.sheetTitle.tone))
+                Text(title).recorded(title, Token.Role.sheetTitle).foregroundStyle(tokens.tone(Token.Role.sheetTitle.tone))
                 if let subtitle {
-                    Text(subtitle).font(Token.Role.sheetBody.font).foregroundStyle(tokens.tone(Token.Role.sheetBody.tone)).fixedSize(horizontal: false, vertical: true)
+                    Text(subtitle).recorded(subtitle, Token.Role.sheetBody).foregroundStyle(tokens.tone(Token.Role.sheetBody.tone)).fixedSize(horizontal: false, vertical: true)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -330,13 +354,17 @@ public struct FormRow<Control: View>: View {
         self.control = control()
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.group, label, kit: "FormRow") }
+
+    @ViewBuilder var drawing: some View {
         HStack(alignment: .top, spacing: S.formGap) {
             RoleText(label ?? "", .formLabel).frame(width: S.labelColumn, height: S.field, alignment: .trailing)
             VStack(alignment: .leading, spacing: S.caption) {
                 control
                 if let caption, !caption.isEmpty {
-                    Text(caption).font(Token.Role.formCaption.font).foregroundStyle(tokens.tone(Token.Role.formCaption.tone)).fixedSize(horizontal: false, vertical: true)
+                    Text(caption).recorded(caption, Token.Role.formCaption).foregroundStyle(tokens.tone(Token.Role.formCaption.tone)).fixedSize(horizontal: false, vertical: true)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)

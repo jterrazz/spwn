@@ -10,7 +10,11 @@ public struct Switch: View {
         self.tap = tap
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.`switch`, kit: "Switch", states: ViewState.of([.on: on])) }
+
+    @ViewBuilder var drawing: some View {
         let c = Token.Metric.Control.self
         Button(action: tap) {
             ZStack(alignment: on ? .trailing : .leading) {
@@ -63,7 +67,11 @@ public struct Segmented: View {
         keys.indices.contains(i) ? keys[i].flatMap(MenuModel.shortcut) : nil
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.tablist, kit: "Segmented") }
+
+    @ViewBuilder var drawing: some View {
         let c = Token.Metric.Control.self
         HStack(spacing: 0) {
             ForEach(Array(options.enumerated()), id: \.offset) { i, o in
@@ -146,14 +154,18 @@ public struct PanelButton: View {
         }
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.button, title, kit: "PanelButton") }
+
+    @ViewBuilder var drawing: some View {
         let c = Token.Metric.Control.self
         let size = big ? c.big : c.button
         let shape = RoundedRectangle(cornerRadius: size.radius, style: .continuous)
         Button(action: action) {
             HStack(spacing: c.buttonGap) {
                 if let symbol { Image(systemName: symbol).font(.system(size: c.buttonGlyph, weight: .semibold)) }
-                Text(title).font(Token.Role.button.font).lineLimit(1)
+                Text(title).recorded(title, Token.Role.button).lineLimit(1)
                 if let key { KeyCap(key, onTint: look == .tint) }
             }
             .fixedSize()
@@ -196,7 +208,11 @@ public struct VerbButton: View {
         self.action = action
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.button, title, kit: "VerbButton", states: ViewState.of([.busy: busy])) }
+
+    @ViewBuilder var drawing: some View {
         let c = Token.Metric.Control.self
         let share = size == .share
         let box = share ? c.share : c.verb
@@ -255,7 +271,11 @@ public struct RoundButton: View {
         return hovering ? tokens.color.t1 : quiet ? tokens.color.t3 : tokens.color.t2
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.button, symbol, kit: "RoundButton") }
+
+    @ViewBuilder var drawing: some View {
         Button(action: action) {
             Image(systemName: symbol).font(.system(size: measure.glyph, weight: size == .bare ? .regular : .semibold))
                 .foregroundStyle(ink)
@@ -281,7 +301,11 @@ public struct IconButton: View {
         self.action = action
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.button, symbol, kit: "IconButton") }
+
+    @ViewBuilder var drawing: some View {
         let c = Token.Metric.Control.self
         Button(action: action) {
             Image(systemName: symbol).font(.system(size: c.iconGlyph, weight: .regular))

@@ -63,7 +63,11 @@ public struct GaugeTile: View {
             .animation(tokens.motion(Token.Motion.sample), value: share)
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.group, gauge.title, kit: "GaugeTile", states: ViewState.of([.stale: stale])) }
+
+    @ViewBuilder var drawing: some View {
         let m = Token.Metric.Gauges.self
         VStack(alignment: .leading, spacing: 0) {
             Text(gauge.heading)
@@ -103,11 +107,15 @@ public struct FoldButton: View {
         self.tap = tap
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.button, label, kit: "FoldButton", states: ViewState.of([.expanded: open])) }
+
+    @ViewBuilder var drawing: some View {
         let m = Token.Metric.Fold.self
         Button(action: tap) {
             HStack(spacing: m.gap) {
-                Text(label).font(Token.Role.fold.font).lineLimit(1)
+                Text(label).recorded(label, Token.Role.fold).lineLimit(1)
                 Image(systemName: Token.Symbol.down)
                     .font(.system(size: m.chevron, weight: .semibold))
                     .rotationEffect(open ? m.turned : .zero)
@@ -152,7 +160,11 @@ public struct EmptyState: View {
         return name
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.group, kit: "EmptyState") }
+
+    @ViewBuilder var drawing: some View {
         if full { block } else { line }
     }
 
@@ -167,7 +179,7 @@ public struct EmptyState: View {
                 .multilineTextAlignment(.center)
                 .padding(.top, m.boldTop)
             if let sub = empty.sub {
-                Text(sub).font(Token.Role.emptyGrey.font).foregroundStyle(tokens.tone(Token.Role.emptyGrey.tone))
+                Text(sub).recorded(sub, Token.Role.emptyGrey).foregroundStyle(tokens.tone(Token.Role.emptyGrey.tone))
                     .multilineTextAlignment(.center)
                     .padding(.top, m.greyTop)
             }
@@ -206,11 +218,15 @@ public struct HUDCapsule: View {
 
     public init(_ notice: HUDNotice) { self.init(notice.words, symbol: notice.symbol) }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.status, words, kit: "HUDCapsule") }
+
+    @ViewBuilder var drawing: some View {
         let m = Token.Metric.HUD.self
         HStack(spacing: m.gap) {
             Image(systemName: symbol).font(.system(size: m.icon, weight: .medium))
-            Text(words).font(Token.Role.hud.font).lineLimit(1)
+            Text(words).recorded(words, Token.Role.hud).lineLimit(1)
         }
         .foregroundStyle(tokens.tone(Token.Role.hud.tone))
         .padding(m.padding)

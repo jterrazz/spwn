@@ -21,7 +21,11 @@ struct FindPanel: View {
         return all.isEmpty ? nil : all[min(max(find.selected, 0), all.count - 1)]
     }
 
-    var body: some View {
+    var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.group, kit: "FindPanel") }
+
+    @ViewBuilder var drawing: some View {
         Panel(insets: .flush, bounded: scrolls, key: "\(state.openings)/find", sheet: state.confirming) {
             FindField(text: Binding(get: { find.query }, set: { handlers.find(find.typed($0)) }),
                       move: { handlers.find(find.moved($0, lines: lines.count)) },
@@ -149,7 +153,11 @@ struct FindFooter: View {
     let alt: String?
     @Environment(\.stationTokens) private var tokens
 
-    var body: some View {
+    var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.group, kit: "FindFooter") }
+
+    @ViewBuilder var drawing: some View {
         let f = Token.Find.self
         HStack(spacing: f.footerGap) {
             KeyCap(f.closeKey)
@@ -180,7 +188,11 @@ struct FindEscape: View {
     let close: () -> Void
     @Environment(\.stationStill) private var still
 
-    var body: some View {
+    var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { nil }
+
+    @ViewBuilder var drawing: some View {
         if !still {
             Button("", action: close)
                 .keyboardShortcut(.escape, modifiers: [])

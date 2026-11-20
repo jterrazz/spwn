@@ -46,7 +46,11 @@ struct HomePage: View {
         (page.header?.buttons ?? []) + (page.section(Self.empty)?.items ?? []).flatMap { $0.empty?.actions ?? [] }
     }
 
-    var body: some View {
+    var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.group, kit: "HomePage") }
+
+    @ViewBuilder var drawing: some View {
         VStack(alignment: .leading, spacing: listed ? Token.HomeCard.blocks : Token.Tile.section) {
             if listed {
                 ForEach(Array((page.sections ?? []).filter { Self.drawn.contains($0.id ?? "") }.enumerated()), id: \.offset) { _, s in
@@ -278,7 +282,11 @@ struct HomeHeaderBar: View {
     @Environment(\.stationStill) private var still
     @Environment(\.stationMenuPick) private var pick
 
-    var body: some View {
+    var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.group, kit: "HomeHeaderBar") }
+
+    @ViewBuilder var drawing: some View {
         let h = Token.HomeHeader.self
         VStack(alignment: .leading, spacing: h.field) {
             HStack(spacing: 0) {
@@ -347,7 +355,11 @@ struct HomeHead: View {
         self.caption = caption
     }
 
-    var body: some View {
+    var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.heading, title, kit: "HomeHead") }
+
+    @ViewBuilder var drawing: some View {
         let c = Token.HomeCard.self
         HStack(alignment: .firstTextBaseline) {
             Text(title).font(.system(size: c.headSize, weight: .bold)).foregroundStyle(tokens.color.t1)
@@ -371,7 +383,11 @@ struct HomeStrip: View {
     let strip: Strip
     @Environment(\.stationTokens) private var tokens
 
-    var body: some View {
+    var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.group, kit: "HomeStrip") }
+
+    @ViewBuilder var drawing: some View {
         let c = Token.HomeCard.self
         let measures: [(String, Value?, [Int]?)] = [("CPU", strip.cpu, strip.spark), ("Memory", strip.memory, strip.memory_spark), ("Network", strip.net?.first, strip.net_spark)]
         HStack(alignment: .top, spacing: 0) {
@@ -408,7 +424,11 @@ struct HomeMeasure: View {
         return of == nil && unit.isEmpty ? number : "\(number) \(unit)"
     }
 
-    var body: some View {
+    var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.group, label, kit: "HomeMeasure") }
+
+    @ViewBuilder var drawing: some View {
         let c = Token.HomeCard.self
         VStack(alignment: .leading, spacing: c.cellGap) {
             Text(label).font(.system(size: c.cellKey)).foregroundStyle(tokens.color.t2).lineLimit(1)
@@ -446,7 +466,11 @@ struct HomeSection: View {
     var rows: [Row] { section.rows.filter { $0.id != HomePage.addMac } }
     var add: Row? { section.rows.first { $0.id == HomePage.addMac } }
 
-    var body: some View {
+    var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.region, section.title, kit: "HomeSection") }
+
+    @ViewBuilder var drawing: some View {
         VStack(alignment: .leading, spacing: 0) {
             if headed {
                 HomeHead(section.title ?? "", caption: section.caption ?? [])

@@ -74,7 +74,7 @@ public struct RowSeparator: View {
 
     public init() {}
 
-    public var body: some View { Rectangle().fill(Token.Fill.faint(scheme)).frame(height: Token.Stroke.hair) }
+    public var body: some View { Rectangle().fill(Token.Fill.faint(scheme)).frame(height: Token.Stroke.hair).recorded(ViewMark(ViewRole.separator, kit: "RowSeparator")) }
 }
 
 // value: the rows of a list, a hairline between each two.
@@ -83,7 +83,11 @@ public struct Rows<Content: View>: View {
 
     public init(@ViewBuilder content: () -> Content) { self.content = content() }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.list, kit: "Rows") }
+
+    @ViewBuilder var drawing: some View {
         VStack(alignment: .leading, spacing: 0) {
             SwiftUI.Group(subviews: content) { subviews in
                 ForEach(Array(subviews.enumerated()), id: \.offset) { i, sub in
@@ -118,7 +122,11 @@ public struct SectionHeader: View {
         }.joined(separator: Token.Glyph.sep)
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.heading, title, kit: "SectionHeader") }
+
+    @ViewBuilder var drawing: some View {
         Wrap(Self.cased(title)).font(.system(size: Token.Size.label, weight: .semibold)).tracking(Token.Size.label * Token.Size.tracking)
             .foregroundStyle(Token.Ink.secondary).lineLimit(2).fixedSize(horizontal: false, vertical: true)
             .padding(.horizontal, Token.Gap.small).padding(.top, Token.Gap.tight)
@@ -132,7 +140,11 @@ public struct GroupCaption: View {
 
     public init(_ title: String) { self.title = title }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.heading, title, kit: "GroupCaption") }
+
+    @ViewBuilder var drawing: some View {
         Text(title.uppercased()).font(.system(size: Token.Size.caption, weight: .semibold)).tracking(Token.Size.caption * Token.Size.tracking)
             .foregroundStyle(Token.Ink.secondary)
             .padding(.leading, Token.Tile.indent).padding(.top, Token.Gap.item).padding(.trailing, Token.Gap.edge)
@@ -172,7 +184,11 @@ public struct IconTile: View {
         return active ? AnyShapeStyle(palette.accent) : AnyShapeStyle(Token.Fill.iconInk)
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.img, symbol, kit: "IconTile", states: ViewState.of([.active: active, .pinging: pulse])) }
+
+    @ViewBuilder var drawing: some View {
         let scale = size / Token.Tile.icon
         let shape = RoundedRectangle(cornerRadius: Token.Tile.corner * scale, style: .continuous)
         Image(systemName: symbol)
@@ -236,7 +252,11 @@ public struct MenuRow<Leading: View, Trailing: View>: View {
         .stationHover()
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.listitem, title, kit: "MenuRow") }
+
+    @ViewBuilder var drawing: some View {
         if let tap {
             Button(action: tap) { line }.buttonStyle(.plain)
         } else {
@@ -273,7 +293,11 @@ public struct RowText<Tag: View>: View {
         self.tag = tag()
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.text, title, kit: "RowText") }
+
+    @ViewBuilder var drawing: some View {
         VStack(alignment: .leading, spacing: Token.Gap.line) {
             HStack(alignment: .center, spacing: Token.Gap.item) {
                 Text(title).font(.system(size: Token.Size.text, weight: .semibold)).foregroundStyle(Token.Ink.primary).lineLimit(titleLines)
@@ -304,7 +328,11 @@ public struct SubText: View {
 
     public init(_ text: String) { self.text = text }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.text, text, kit: "SubText") }
+
+    @ViewBuilder var drawing: some View {
         Wrap(text, spacing: Token.Size.leading * 2).font(.system(size: Token.Size.sub)).foregroundStyle(Token.Ink.secondary)
             .padding(.vertical, Token.Size.leading).fixedSize(horizontal: false, vertical: true)
     }
@@ -317,7 +345,11 @@ public struct TrailingValue: View {
 
     public init(_ text: String) { self.text = text }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.text, text, kit: "TrailingValue") }
+
+    @ViewBuilder var drawing: some View {
         Text(text).font(.system(size: Token.Size.sub)).foregroundStyle(Token.Ink.secondary).monospacedDigit().lineLimit(1).truncationMode(.middle)
             .contentTransition(.numericText())
     }
@@ -336,7 +368,11 @@ public struct LinkText: View {
         self.center = center
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.link, text, kit: "LinkText") }
+
+    @ViewBuilder var drawing: some View {
         Text(center ? lines : text).font(.system(size: Token.Size.label, design: .monospaced)).foregroundStyle(palette.accent)
             .lineLimit(center ? 3 : 1).truncationMode(.tail).multilineTextAlignment(center ? .center : .leading)
             .textSelection(.enabled)
@@ -356,7 +392,11 @@ public struct Chevron: View {
 
     public init(down: Bool = false) { self.down = down }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.img, kit: "Chevron", states: ViewState.of([.expanded: down])) }
+
+    @ViewBuilder var drawing: some View {
         Image(systemName: down ? Token.Symbol.down : Token.Symbol.forward).font(.system(size: Token.Detail.chevron, weight: .semibold)).foregroundStyle(palette.glyph)
             .frame(width: Token.Tile.chevron)
     }
@@ -370,7 +410,11 @@ public struct StateDot: View {
 
     public init(mark: Mark?) { self.mark = mark }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.img, kit: "StateDot") }
+
+    @ViewBuilder var drawing: some View {
         if let mark {
             if mark == .pending {
                 PendingDot()
@@ -419,7 +463,11 @@ public struct StationButton: View {
         return AnyShapeStyle(Token.Fill.raised(scheme))
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.button, title, kit: "StationButton") }
+
+    @ViewBuilder var drawing: some View {
         Button(action: action) {
             SwiftUI.Group {
                 if wide {
@@ -457,7 +505,11 @@ public struct StationSwitch: View {
         self.tap = tap
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.`switch`, kit: "StationSwitch", states: ViewState.of([.on: on])) }
+
+    @ViewBuilder var drawing: some View {
         Button(action: tap) {
             ZStack(alignment: on ? .trailing : .leading) {
                 Capsule().fill(on ? AnyShapeStyle(palette.accent) : AnyShapeStyle(Token.Fill.faint(scheme)))
@@ -488,7 +540,11 @@ public struct TextAction: View {
         self.tap = tap
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.button, label, kit: "TextAction", states: ViewState.of([.danger: danger])) }
+
+    @ViewBuilder var drawing: some View {
         Button(action: tap) {
             HStack(spacing: Token.Gap.small) {
                 if let symbol { Image(systemName: symbol).font(.system(size: Token.Size.sub, weight: .medium)) }
@@ -518,7 +574,11 @@ public struct PlainIcon: View {
         self.tap = tap
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.img, symbol, kit: "PlainIcon", states: ViewState.of([.picked: picked])) }
+
+    @ViewBuilder var drawing: some View {
         let side = round ? Token.Tile.roundButton : Token.Tile.squareButton
         Button(action: tap) {
             Image(systemName: symbol).font(.system(size: round ? Token.Detail.roundGlyph : Token.Detail.squareGlyph, weight: .medium))
@@ -546,7 +606,11 @@ public struct CopyIcon: View {
 
     public init(tap: @escaping () -> Void) { self.tap = tap }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.img, kit: "CopyIcon") }
+
+    @ViewBuilder var drawing: some View {
         PlainIcon(copied ? Token.Symbol.check : Token.Symbol.copy, picked: copied) {
             tap()
             copied = true
@@ -572,7 +636,11 @@ public struct BackButton: View {
         self.action = action
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.button, title, kit: "BackButton") }
+
+    @ViewBuilder var drawing: some View {
         Button(action: action) {
             HStack(spacing: Token.Gap.tight) {
                 Image(systemName: Token.Symbol.back).font(.system(size: Token.Detail.back, weight: .bold)).foregroundStyle(palette.glyph)
@@ -610,7 +678,11 @@ public struct PageHeader<Trailing: View>: View {
         self.trailing = trailing()
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.group, title, kit: "PageHeader", states: ViewState.of([.active: active])) }
+
+    @ViewBuilder var drawing: some View {
         VStack(alignment: .leading, spacing: Token.Tile.gap) {
             BackButton(back, action: action)
             HStack(alignment: .center, spacing: Token.Gap.pair) {
@@ -654,7 +726,11 @@ public struct StateWord: View {
         self.mark = mark
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.text, word, kit: "StateWord") }
+
+    @ViewBuilder var drawing: some View {
         let on = mark != .absent && mark != .pending
         let hue = palette.of(mark)
         Text(word).font(.system(size: Token.Size.label, weight: .semibold)).lineLimit(1).fixedSize()
@@ -672,7 +748,11 @@ public struct KindTag: View {
 
     public init(_ kind: String) { self.kind = kind }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.text, kind, kit: "KindTag") }
+
+    @ViewBuilder var drawing: some View {
         let server = kind == "Server"
         Text(kind).font(.system(size: Token.Size.tag, weight: .semibold)).lineLimit(1).fixedSize()
             .foregroundStyle(server ? AnyShapeStyle(Token.Hue.teal(scheme)) : AnyShapeStyle(Token.Ink.secondary))
@@ -685,7 +765,7 @@ public struct KindTag: View {
 public struct SectionDivider: View {
     public init() {}
 
-    public var body: some View { RowSeparator() }
+    public var body: some View { RowSeparator().recorded(nil) }
 }
 
 // value: a short note under a section: 11.5 pt, secondary.
@@ -694,7 +774,11 @@ public struct FootNote: View {
 
     public init(_ text: String) { self.text = text }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.text, text, kit: "FootNote") }
+
+    @ViewBuilder var drawing: some View {
         SubText(text).padding(.horizontal, Token.Gap.small)
     }
 }

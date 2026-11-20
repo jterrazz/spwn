@@ -19,7 +19,11 @@ public struct Spark: View {
         self.hot = hot
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.img, kit: "Spark") }
+
+    @ViewBuilder var drawing: some View {
         let c = Token.Metric.Chart.self
         let ink = hot ? tokens.color.orange : tint ?? tokens.color.accent
         let shown = Array(ChartScale.eased(points).enumerated())
@@ -77,7 +81,11 @@ public struct RowSpark: View {
         return (0..<min(n, Token.Metric.Chart.rowSparkPoints)).map { first + $0 }
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.img, kit: "RowSpark") }
+
+    @ViewBuilder var drawing: some View {
         let c = Token.Metric.Chart.self
         let last = Double(c.rowSparkPoints - 1)
         let pad = last * Double(c.sparkDot) / Double(size.width)

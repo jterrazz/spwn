@@ -24,7 +24,11 @@ public struct LinkView: View {
 
     var key: String { link.label ?? Format.show(link.lead ?? Value()) }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.link, link.label, kit: "LinkView") }
+
+    @ViewBuilder var drawing: some View {
         VStack(alignment: .leading, spacing: Token.Gap.item) {
             HStack(spacing: Token.Space.gap) {
                 VStack(alignment: .leading, spacing: Token.Gap.line) {
@@ -58,7 +62,11 @@ struct LinkButton: View {
     let tap: () -> Void
     @Environment(\.stationPalette) private var palette
 
-    var body: some View {
+    var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.button, symbol, kit: "LinkButton", states: ViewState.of([.picked: picked])) }
+
+    @ViewBuilder var drawing: some View {
         Button(action: tap) {
             Image(systemName: symbol).font(.system(size: Token.Space.small + Token.Gap.line, weight: .medium))
                 .foregroundStyle(picked ? palette.onTint : palette.text)
@@ -84,7 +92,11 @@ public struct ItemsView: View {
         self.hintButtons = hintButtons
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.list, kit: "ItemsView") }
+
+    @ViewBuilder var drawing: some View {
         VStack(alignment: .leading, spacing: Token.Gap.tight) {
             ForEach(Array(items.enumerated()), id: \.offset) { _, item in
                 ItemView(item: item, columns: columns, width: width, links: links, hintButtons: hintButtons)
@@ -101,7 +113,11 @@ struct ItemView: View {
     let hintButtons: Bool
     @Environment(\.stationPalette) private var palette
 
-    var body: some View {
+    var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.listitem, kit: "ItemView") }
+
+    @ViewBuilder var drawing: some View {
         if let row = item.row {
             CellsRow(row, columns: columns, width: width, hintAsButton: hintButtons)
         } else if let fact = item.fact {
@@ -132,7 +148,11 @@ struct GroupView: View {
             .padding(.leading, Token.Space.indent)
     }
 
-    var body: some View {
+    var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.group, kit: "GroupView") }
+
+    @ViewBuilder var drawing: some View {
         let head = CellsRow(group.head ?? Row(), columns: columns, width: width, hintAsButton: hintButtons)
         if group.fold == nil || group.fold == "open" {
             VStack(alignment: .leading, spacing: Token.Gap.tight) {
@@ -155,7 +175,11 @@ public struct StatusBar: View {
         self.failed = failed
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.status, line, kit: "StatusBar", states: ViewState.of([.failed: failed])) }
+
+    @ViewBuilder var drawing: some View {
         HStack(spacing: Token.Space.gap / 2) {
             if failed { MarkView(.broken) }
             Text(line).font(.system(size: Token.Space.small)).foregroundStyle(failed ? palette.text : palette.muted).lineLimit(2)

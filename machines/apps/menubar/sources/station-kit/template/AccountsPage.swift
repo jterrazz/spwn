@@ -18,7 +18,11 @@ public struct AccountsPage: View {
 
     func tap(_ action: Action) { perform(action, handlers) }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.group, kit: "AccountsPage") }
+
+    @ViewBuilder var drawing: some View {
         let layer = SheetLayer.of(page, state, handlers)
         Panel(insets: .page, bounded: scrolls, key: "\(state.openings)/\(page.id ?? "")", sheet: state.confirming, layers: AlertLayer.layers(page, state, handlers, sheet: layer)) {
             MachineHeader(page, segment: nil, back: handlers.back, run: tap).modifier(UnderSheet(layer != nil))
@@ -53,7 +57,11 @@ struct ListFooter: View {
 
     var buttons: [Action] { (page.footer?.buttons ?? []).compactMap { page.action($0) } }
 
-    var body: some View {
+    var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.group, kit: "ListFooter") }
+
+    @ViewBuilder var drawing: some View {
         if let lead = buttons.first {
             HStack(spacing: Token.Metric.Accounts.footerGap) {
                 Button { run(lead) } label: {

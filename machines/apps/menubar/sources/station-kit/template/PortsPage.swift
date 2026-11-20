@@ -22,7 +22,11 @@ public struct PortsPage: View {
     var page: Page { state.page ?? Page() }
     var act: Act { Act(state: state, handlers: handlers) }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.group, kit: "PortsPage") }
+
+    @ViewBuilder var drawing: some View {
         if page.header != nil {
             AllPorts(page: page, state: state, handlers: handlers, scrolls: scrolls)
         } else {
@@ -260,7 +264,11 @@ struct SharedPortCard: View {
     @Environment(\.stationPalette) private var palette
     @State private var copied = false
 
-    var body: some View {
+    var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.region, kit: "SharedPortCard") }
+
+    @ViewBuilder var drawing: some View {
         let act = Act(state: state, handlers: handlers)
         let links = PortsPage.link(url, handlers: handlers)
         VStack(alignment: .center, spacing: Token.Tile.gap) {
@@ -309,7 +317,11 @@ struct AllPorts: View {
 
     func tap(_ action: Action) { perform(action, handlers) }
 
-    var body: some View {
+    var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.group, kit: "AllPorts") }
+
+    @ViewBuilder var drawing: some View {
         let layer = SheetLayer.of(page, state, handlers)
         Panel(insets: .page, bounded: scrolls, key: "\(state.openings)/\(page.id ?? "")/\(page.context?.machine ?? "")", sheet: state.confirming, layers: AlertLayer.layers(page, state, handlers, sheet: layer)) {
             MachineHeader(page, segment: nil, back: handlers.back, run: tap).modifier(UnderSheet(layer != nil))

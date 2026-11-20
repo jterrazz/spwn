@@ -13,7 +13,11 @@ struct MacOverview: View {
 
     var id: String { section.id ?? "" }
 
-    var body: some View {
+    var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.region, section.title, kit: "MacOverview") }
+
+    @ViewBuilder var drawing: some View {
         if id == "vms" {
             VMsCard(section, actions: page.actions ?? [], open: go, run: run)
         } else {
@@ -40,7 +44,7 @@ struct MacOverview: View {
                 SegmentSection(section: section)
             } else {
                 ForEach(Array(section.notes.enumerated()), id: \.offset) { _, note in
-                    Text(note).font(Token.Role.footnote.font).foregroundStyle(tokens.tone(Token.Role.footnote.tone))
+                    Text(note).recorded(note, Token.Role.footnote).foregroundStyle(tokens.tone(Token.Role.footnote.tone))
                         .lineSpacing(Token.Metric.Footnote.lineSpacing)
                         .fixedSize(horizontal: false, vertical: true)
                         .padding(Token.Metric.Footnote.padding)

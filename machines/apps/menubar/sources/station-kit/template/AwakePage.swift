@@ -27,7 +27,11 @@ public struct AwakePage: View {
     var busy: Bool { state.running != nil }
     func waiting(_ a: Action?) -> Bool { a != nil && (state.running == a?.id || state.settling == a?.id) }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.group, kit: "AwakePage") }
+
+    @ViewBuilder var drawing: some View {
         Panel(insets: .page, bounded: scrolls, key: "\(state.openings)/\(page.id ?? "")", sheet: state.confirming, layers: AlertLayer.layers(page, state, handlers)) {
             MachineHeader(page, segment: nil, back: handlers.back)
         } content: {
@@ -62,7 +66,7 @@ public struct AwakePage: View {
     }
 
     func footnote(_ text: String) -> some View {
-        Text(text).font(Token.Role.footnote.font).foregroundStyle(tokens.tone(Token.Role.footnote.tone))
+        Text(text).recorded(text, Token.Role.footnote).foregroundStyle(tokens.tone(Token.Role.footnote.tone))
             .lineSpacing(Token.Metric.Footnote.lineSpacing)
             .fixedSize(horizontal: false, vertical: true)
             .padding(Token.Metric.Footnote.padding)
@@ -92,7 +96,7 @@ public struct AwakePage: View {
             VStack(alignment: .leading, spacing: Token.Metric.Awake.follows) {
                 picker(on: on)
                 ForEach(Array(s.notes.enumerated()), id: \.offset) { _, n in
-                    Text(n).font(Token.Role.rowSub.font).foregroundStyle(tokens.tone(Token.Role.rowSub.tone))
+                    Text(n).recorded(n, Token.Role.rowSub).foregroundStyle(tokens.tone(Token.Role.rowSub.tone))
                 }
             }
             .padding(Token.Metric.Awake.picker)

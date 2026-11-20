@@ -22,7 +22,11 @@ public struct CareCard: View {
     var awake: Row? { section.rows.first }
     var upkeep: Group? { (section.items ?? []).compactMap(\.group).first }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.region, section.title, kit: "CareCard", states: ViewState.of([.expanded: open])) }
+
+    @ViewBuilder var drawing: some View {
         let m = Token.Metric.Row.self
         Card {
             if let awake { awakeRow(awake) }

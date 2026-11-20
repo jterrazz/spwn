@@ -33,7 +33,11 @@ public struct AlertCard: View {
     var consequence: String? { confirm.lines?.first.map { Format.show($0) } }
     var losses: [String] { (confirm.lines ?? []).dropFirst().map { Format.show($0) } }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.dialog, confirm.question, kit: "AlertCard") }
+
+    @ViewBuilder var drawing: some View {
         let a = Token.Metric.Alert.self
         VStack(spacing: 0) {
             icon.padding(.bottom, a.iconBelow)
@@ -90,11 +94,11 @@ public struct AlertCard: View {
         let shape = RoundedRectangle(cornerRadius: a.fieldRadius, style: .continuous)
         return VStack(alignment: .leading, spacing: a.labelBelow) {
             HStack(spacing: a.labelGap) {
-                Text("Type").font(Token.Role.alertLabel.font).foregroundStyle(tokens.color.of(Token.Role.alertLabel.tone))
+                Text("Type").recorded("Type", Token.Role.alertLabel).foregroundStyle(tokens.color.of(Token.Role.alertLabel.tone))
                 Spacer(minLength: 0)
-                Text(name).font(Token.Role.alertName.font).foregroundStyle(tokens.color.of(Token.Role.alertName.tone))
+                Text(name).recorded(name, Token.Role.alertName).foregroundStyle(tokens.color.of(Token.Role.alertName.tone))
                 Spacer(minLength: 0)
-                Text("to confirm").font(Token.Role.alertLabel.font).foregroundStyle(tokens.color.of(Token.Role.alertLabel.tone))
+                Text("to confirm").recorded("to confirm", Token.Role.alertLabel).foregroundStyle(tokens.color.of(Token.Role.alertLabel.tone))
             }
             SwiftUI.Group {
                 if still {

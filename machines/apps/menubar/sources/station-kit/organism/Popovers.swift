@@ -34,7 +34,11 @@ public struct QRPopover: View {
         return (address, anyone + Token.Glyph.sep + route, true)
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.dialog, row.label, kit: "QRPopover") }
+
+    @ViewBuilder var drawing: some View {
         let m = Token.Metric.Popover.self
         let verbs = Self.verbs(of: row, in: actions)
         let said = Self.reach(row)
@@ -43,12 +47,12 @@ public struct QRPopover: View {
                 .padding(m.qrInset)
                 .background(RoundedRectangle(cornerRadius: m.qrRadius, style: .continuous).fill(palette.qrLight))
             VStack(alignment: .leading, spacing: m.lines) {
-                Text(Self.scan).font(Token.Role.popoverTitle.font).foregroundStyle(tokens.tone(Token.Role.popoverTitle.tone))
+                Text(Self.scan).recorded(Self.scan, Token.Role.popoverTitle).foregroundStyle(tokens.tone(Token.Role.popoverTitle.tone))
                 Text(verbatim: said.link)
                     .font((said.public ? Token.Role.popoverDomain : Token.Role.popoverLink).font)
                     .foregroundStyle(tokens.tone(Token.Role.popoverLink.tone))
                     .lineLimit(1)
-                Text(said.line).font(Token.Role.popoverReach.font).foregroundStyle(tokens.tone(Token.Role.popoverReach.tone))
+                Text(said.line).recorded(said.line, Token.Role.popoverReach).foregroundStyle(tokens.tone(Token.Role.popoverReach.tone))
                     .fixedSize(horizontal: false, vertical: true)
                 HStack(spacing: m.buttons) {
                     if let copy = verbs.copy { PanelButton(Self.copy, symbol: Token.Symbol.copy) { run(copy) } }
@@ -76,7 +80,11 @@ public struct InfoPopover: View {
 
     public init(_ text: String) { self.text = text }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.dialog, text, kit: "InfoPopover") }
+
+    @ViewBuilder var drawing: some View {
         let m = Token.Metric.Popover.self
         Text(text)
             .font(Token.Role.popoverBody.font)

@@ -30,7 +30,11 @@ struct PopoverLayer: View {
     let pins: [PopoverPin]
     @Environment(\.stationTokens) private var tokens
 
-    var body: some View {
+    var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { pins.isEmpty ? nil : ViewMark(.group, kit: "PopoverLayer") }
+
+    @ViewBuilder var drawing: some View {
         GeometryReader { proxy in
             ForEach(Array(pins.enumerated()), id: \.offset) { _, pin in
                 PopoverLayout(rect: proxy[pin.anchor], side: pin.side, width: pin.width) {
@@ -49,7 +53,11 @@ struct PopoverCard<Content: View>: View {
     @ViewBuilder let content: Content
     @Environment(\.stationTokens) private var tokens
 
-    var body: some View {
+    var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.dialog, kit: "PopoverCard") }
+
+    @ViewBuilder var drawing: some View {
         let shape = RoundedRectangle(cornerRadius: Token.Metric.Popover.radius, style: .continuous)
         content
             .background(shape.fill(tokens.color.sheetSolid))

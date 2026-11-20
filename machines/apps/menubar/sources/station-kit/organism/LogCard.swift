@@ -17,7 +17,11 @@ public struct LogCard: View {
 
     var log: Log? { (section.items ?? []).compactMap(\.log).first }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.region, section.title, kit: "LogCard") }
+
+    @ViewBuilder var drawing: some View {
         Card(flush: false) {
             Text(section.title ?? "").font(Token.Role.cardTitle.font).foregroundStyle(tokens.tone(Token.Role.cardTitle.tone))
                 .lineLimit(1)

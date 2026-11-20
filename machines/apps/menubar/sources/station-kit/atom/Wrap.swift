@@ -18,7 +18,11 @@ public struct Wrap: View {
 
     var words: [String] { text.split(separator: " ", omittingEmptySubsequences: true).map(String.init) }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.text, text, kit: "Wrap") }
+
+    @ViewBuilder var drawing: some View {
         if limit == 1 {
             Text(text).lineLimit(1)
         } else {

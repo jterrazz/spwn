@@ -16,7 +16,11 @@ public struct UptimeCells: View {
         }
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.img, kit: "UptimeCells") }
+
+    @ViewBuilder var drawing: some View {
         let c = Token.Metric.Chart.self
         let shown = Array(days.suffix(c.uptimeCells))
         HStack(spacing: c.uptimeGap) {

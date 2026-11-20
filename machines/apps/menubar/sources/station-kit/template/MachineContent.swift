@@ -33,7 +33,11 @@ struct MachineContent: View {
         }
     }
 
-    var body: some View {
+    var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.group, kit: "MachineContent") }
+
+    @ViewBuilder var drawing: some View {
         VStack(alignment: .leading, spacing: Token.Tile.section) {
             if let error = page.error { ErrorLine(error) }
             if segment == nil, let head, let top = page.header { header(head, top) }

@@ -27,7 +27,11 @@ struct QuickSlot: View {
     let run: (Action) -> Void
     @Environment(\.stationTokens) private var tokens
 
-    var body: some View {
+    var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.button, action?.label, kit: "QuickSlot", states: ViewState.of([.lit: lit])) }
+
+    @ViewBuilder var drawing: some View {
         if let action {
             RoundButton(action.icon ?? Token.Symbol.copy, size: size, quiet: true) { run(action) }
                 .accessibilityLabel(Text(action.label ?? ""))
@@ -72,7 +76,11 @@ public struct NeedRow: View {
         return Text("\(subject)\(Text(verbatim: Token.Glyph.sep + words).font(Token.Role.needWhat.font))")
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.listitem, row.label, kit: "NeedRow", states: ViewState.of([.lit: highlighted || keyed, .stale: stale])) }
+
+    @ViewBuilder var drawing: some View {
         let parts = row.detail.map { $0.items ?? [$0] } ?? []
         HStack(spacing: Token.Metric.Row.gap) {
             SwiftUI.Group {
@@ -161,7 +169,11 @@ public struct PortRow: View {
         (row.menu ?? []).compactMap { id in id == "-" ? .some(nil) : RowView.action(id, in: actions).map { .some($0) } }
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.listitem, row.label, kit: "PortRow", states: ViewState.of([.lit: lit, .dimmed: off])) }
+
+    @ViewBuilder var drawing: some View {
         SwiftUI.Group {
             if let link {
                 Button { run(link) } label: { line }
@@ -248,7 +260,11 @@ public struct AccountRow: View {
         return Text("\(label)\(Text(verbatim: " \(Token.Glyph.arrow) \(target)").font(Token.Role.rowName.font.weight(.regular)).foregroundStyle(tokens.color.t2))")
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.listitem, row.label, kit: "AccountRow") }
+
+    @ViewBuilder var drawing: some View {
         let m = Token.Metric.Row.self
         HStack(spacing: m.gap) {
             SwiftUI.Group { if let glyph = row.glyph { GlyphView(glyph) } }
@@ -303,7 +319,11 @@ public struct CheckRow: View {
         }
     }
 
-    public var body: some View {
+    public var body: some View { drawing.recorded(viewMark) }
+
+    var viewMark: ViewMark? { ViewMark(.listitem, row.label, kit: "CheckRow") }
+
+    @ViewBuilder var drawing: some View {
         let next = Self.state(row) == .next
         HStack(spacing: Token.Metric.Check.gap) {
             slot.frame(width: Token.Metric.Marks.check, height: Token.Metric.Marks.check)
