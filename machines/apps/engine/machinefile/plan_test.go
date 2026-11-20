@@ -190,6 +190,9 @@ func TestJudgeGivesEveryExtraOneFateWhetherAnAppNeedsIt(t *testing.T) {
 			if removes := e.Removes(); removes != (want == machinefile.Taken || want == machinefile.Gone) {
 				t.Errorf("lib %s, needed %v: --remove removes %v; want only when taken back or gone", c.reads, needed, removes)
 			}
+			if e.Step.Chapter != machinefile.ChapterApps {
+				t.Errorf("lib %s, needed %v: in the chapter %q; want apps, where drift counts it", c.reads, needed, e.Step.Chapter)
+			}
 			if e.Action != machinefile.LeaveExtra {
 				t.Errorf("lib %s, needed %v: the plan's action %s; want extra, whatever --remove does", c.reads, needed, e.Action)
 			}

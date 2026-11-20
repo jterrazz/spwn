@@ -257,7 +257,7 @@ func Judge(r Resolved, cat catalog.Catalog, seen map[string]Seen, ledger []Insta
 func extras(sys catalog.System, cat catalog.Catalog, seen map[string]Seen, extra []Installed) []ExtraLine {
 	out := make([]ExtraLine, 0, len(extra))
 	for _, in := range extra {
-		step := Step{Package: in.Package, Kind: catalog.KindApp, Method: in.Method, Phase: catalog.PhaseApply}
+		step := Step{Package: in.Package, Kind: catalog.KindApp, Method: in.Method, Phase: catalog.PhaseApply, Chapter: chapterOf(catalog.KindApp)}
 		s := ExtraLine{Installed: in, Line: Line{Step: step, Seen: seen[in.Package], Action: LeaveExtra}}
 		if s.Seen.Condition == "" {
 			s.Seen.Condition = Unknown

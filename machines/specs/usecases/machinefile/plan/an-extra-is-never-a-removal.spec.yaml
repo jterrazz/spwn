@@ -20,12 +20,12 @@ runs:
           machine: { kind: computer, system: { os: macos } }
           apps: [jq, eza]
       exit: 0
-    - command: 'guest serve --stdio | /usr/bin/jq -c ''.out | {Extra: [.Extra[] | {Package: .Step.Package, Action, Condition: .Seen.Condition}], Actions: [.Lines[].Action] | unique}'''
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.out | {Extra: [.Extra[] | {Package: .Step.Package, Chapter: .Step.Chapter, Action, Condition: .Seen.Condition}], Actions: [.Lines[].Action] | unique}'''
       stdin: |
           {"v":2,"id":"1","call":"machinefile.plan","target":{},"in":{}}
       exit: 0
       stdout: |
-          {"Extra":[{"Package":"fd","Action":"extra","Condition":"present"}],"Actions":["keep"]}
+          {"Extra":[{"Package":"fd","Chapter":"apps","Action":"extra","Condition":"present"}],"Actions":["keep"]}
     - command: 'plan --json | /usr/bin/jq -c ''.extra'''
       exit: 0
       stdout: |
