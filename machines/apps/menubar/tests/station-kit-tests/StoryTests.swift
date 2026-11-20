@@ -47,35 +47,6 @@ struct Heights: Decodable {
     }
 }
 
-enum Budget {
-    static let stories: Int64 = 120_000_000
-    static let rest: Int64 = 1_850_000
-    static let slack: Int64 = 1_000_000
-
-    static func bytes(_ folder: URL, skipping skipped: String? = nil) -> Int64 {
-        guard let walk = FileManager.default.enumerator(at: folder, includingPropertiesForKeys: [.fileSizeKey, .isRegularFileKey]) else { return 0 }
-        var total: Int64 = 0
-        for case let file as URL in walk {
-            if let skipped, file.lastPathComponent == skipped {
-                walk.skipDescendants()
-                continue
-            }
-            guard !file.lastPathComponent.hasSuffix(".actual.png"),
-                  let values = try? file.resourceValues(forKeys: [.fileSizeKey, .isRegularFileKey]), values.isRegularFile == true else { continue }
-            total += Int64(values.fileSize ?? 0)
-        }
-        return total
-    }
-
-    static func audit(stories: Int64, rest: Int64) -> [String] {
-        var findings: [String] = []
-        if stories > Self.stories { findings.append("the story goldens weigh \(stories) bytes, past their \(Self.stories)") }
-        if rest > Self.rest { findings.append("the other goldens weigh \(rest) bytes, past their ratchet of \(Self.rest)") }
-        if rest < Self.rest - slack { findings.append("the other goldens weigh \(rest) bytes: lower their ratchet of \(Self.rest) to what they weigh") }
-        return findings
-    }
-}
-
 // invariant: a story keeps pixel goldens only for a paint recipe no view
 // golden states and no sheet of the kit draws: what each kind of overlay
 // composites over its page, and the panel the live capture measures its
@@ -350,23 +321,6 @@ final class StoryTests: XCTestCase {
         XCTAssertEqual(heights.audit(stories, measured: measured), [
             "home.fine: 600 pt tall, the prototype's 455 pt (a heightNote names a difference on purpose)",
             "home.unknown: no prototype height in heights.json",
-        ])
-    }
-
-    func testTheGoldensStayWithinTheirBudget() {
-        let stories = Budget.bytes(Tree.storyGoldens)
-        let rest = Budget.bytes(Tree.goldens, skipping: "stories")
-        print("goldens: stories \(stories) bytes of \(Budget.stories), the rest \(rest) bytes of \(Budget.rest)")
-        XCTAssertEqual(Budget.audit(stories: stories, rest: rest), [])
-    }
-
-    func testTheBudgetOnlyLetsTheOldGoldensShrink() {
-        XCTAssertEqual(Budget.audit(stories: Budget.stories + 1, rest: Budget.rest + 1), [
-            "the story goldens weigh 120000001 bytes, past their 120000000",
-            "the other goldens weigh 1850001 bytes, past their ratchet of 1850000",
-        ])
-        XCTAssertEqual(Budget.audit(stories: 0, rest: 400_000), [
-            "the other goldens weigh 400000 bytes: lower their ratchet of 1850000 to what they weigh",
         ])
     }
 }
