@@ -26,6 +26,12 @@ export type GestureSpec<N extends ReadName> = {
 // value: how long a gesture may go without a frame before its outcome is unknown: a gesture's work runs long.
 const GESTURE_WITHIN = 10 * 60_000;
 
+const JOURNAL: CallName = 'journal.read';
+
+function rereadsAfter(rereads: readonly CallName[]): readonly CallName[] {
+    return rereads.includes(JOURNAL) ? rereads : [JOURNAL, ...rereads];
+}
+
 export type Gesture<O> = {
     key: string;
     consequence: (ask: Ask) => string | undefined;
@@ -102,7 +108,7 @@ export function useGesture<N extends ReadName>(name: N, spec: GestureSpec<N>): G
             latest.current.onDone?.(after.out);
         }
         if (before.kind === 'running' && after.kind !== 'running' && after.kind !== 'asking') {
-            reread(latest.current.rereads);
+            reread(rereadsAfter(latest.current.rereads));
         }
     }
     return {
