@@ -27,7 +27,7 @@ func init() {
 	buildCmd.Flags().StringVar(&buildAgent, "agent", "", "Compile only the named agent (tree-only mode)")
 
 	buildCmd.Flags().StringVar(&buildTag, "tag", "", "Image tag (default: spwn-<project>:latest)")
-	buildCmd.Flags().StringVar(&buildBase, "base", "", "Base image to derive from (default: $SPWN_BASE_IMAGE, else spwn-world:latest)")
+	buildCmd.Flags().StringVar(&buildBase, "base", "", "Base image to derive from (default: $SPWN_BASE_IMAGE, else spwn-world:latest); on a Linux host it needs a spwn user and passwordless sudo")
 	buildCmd.Flags().BoolVar(&buildNoCache, "no-cache", false, "Disable Docker build cache")
 
 	buildCmd.Flags().BoolVar(&buildTreeOnly, "tree-only", false, "Stop after the compile step; write the Tree to --output instead of building a Docker image")

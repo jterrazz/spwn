@@ -108,3 +108,22 @@ func TestFollowHostUserScriptReownsTheImageAndPrunesEveryMountByItsLiteralName(t
 		t.Errorf("group:\n got  %q\n want %q", group, want)
 	}
 }
+
+func TestFollowHostUserScriptExitsWithTheRemapCodeWhenAChownFails(t *testing.T) {
+	f := newHostUserFixture(t, 1)
+
+	if code := f.run(t); code != followHostUserRemapFailed {
+		t.Fatalf("exit %d, want %d", code, followHostUserRemapFailed)
+	}
+}
+
+func TestFollowHostUserScriptExitsWithoutTheRemapCodeWhenTheImageHasNoSpwnUser(t *testing.T) {
+	f := newHostUserFixture(t, 0)
+	if err := os.WriteFile(filepath.Join(f.etc, "passwd"), []byte("root:x:0:0:root:/root:/bin/sh\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	if code := f.run(t); code == 0 || code == followHostUserRemapFailed {
+		t.Fatalf("exit %d, want a requirement failure", code)
+	}
+}

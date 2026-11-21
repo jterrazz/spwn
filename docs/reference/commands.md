@@ -658,7 +658,7 @@ spwn build [flags]
 
 ```text
       --agent string     Compile only the named agent (tree-only mode)
-      --base string      Base image to derive from (default: $SPWN_BASE_IMAGE, else spwn-world:latest)
+      --base string      Base image to derive from (default: $SPWN_BASE_IMAGE, else spwn-world:latest); on a Linux host it needs a spwn user and passwordless sudo
       --dry-run          Print paths that would be written, don't touch disk (requires --tree-only)
       --force            Overwrite existing files in --output without prompting (requires --tree-only)
       --json             Emit a machine-readable build report on stdout
