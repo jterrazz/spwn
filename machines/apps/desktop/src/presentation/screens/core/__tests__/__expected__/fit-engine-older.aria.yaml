@@ -1,0 +1,29 @@
+- navigation "Sidebar":
+  - button "Find" [disabled]
+  - button "Home"
+  - button "Inbox" [disabled]
+  - button "Machine files" [disabled]
+  - button "Passwords" [disabled]
+  - group "Machines":
+    - heading "Machines" [level=2]
+    - paragraph: Update station to see them
+  - group "Catalog":
+    - heading "Catalog" [level=2]
+    - button "Apps" [disabled]
+    - button "Skills" [disabled]
+    - button "Settings" [disabled]
+  - button "Storage" [disabled]
+  - img "engine older than this app"
+  - text: Engine older than this app
+- main:
+  - button "Show or hide the sidebar"
+  - button "Back" [disabled]
+  - button "Forward" [disabled]
+  - text: Home
+  - region "The engine on this Mac":
+    - text: engine older than this app
+    - heading "Update station here" [level=1]
+    - paragraph: The engine on this Mac runs, and speaks an older revision of its pages than this window draws. Update station to see your machines.
+    - code: curl -fsSL https://spwn.sh/install.sh | bash
+    - button "Copy the install command": Copy
+    - button "Update"

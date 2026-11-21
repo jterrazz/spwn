@@ -1,0 +1,27 @@
+- navigation "Sidebar":
+  - button "Find" [disabled]
+  - button "Home"
+  - button "Inbox" [disabled]
+  - button "Machine files" [disabled]
+  - button "Passwords" [disabled]
+  - group "Machines":
+    - heading "Machines" [level=2]
+    - paragraph: Update Spwn to see them
+  - group "Catalog":
+    - heading "Catalog" [level=2]
+    - button "Apps" [disabled]
+    - button "Skills" [disabled]
+    - button "Settings" [disabled]
+  - button "Storage" [disabled]
+  - img "this app older than the engine"
+  - text: This app older than the engine
+- main:
+  - button "Show or hide the sidebar"
+  - button "Back" [disabled]
+  - button "Forward" [disabled]
+  - text: Home
+  - region "The engine on this Mac":
+    - text: this app older than the engine
+    - heading "Update Spwn" [level=1]
+    - paragraph: The engine on this Mac runs, and speaks a newer revision of its pages than this window draws. Update the window to see your machines.
+    - text: This window updates itself from a release build on a Mac; elsewhere, install the latest Spwn_darwin_arm64.zip from its release.

@@ -14,7 +14,8 @@ import { Find } from './find';
 import { FrameToolbar } from './frame-toolbar';
 import { onTabKey, useShortcuts } from './keys';
 import { Lost, useLost } from './lost';
-import { NoEngine, useQuiet } from './no-engine';
+import { NoEngine, useHeld } from './no-engine';
+import type { Held } from './no-engine';
 import { TAB_PANEL } from './route';
 import type { PlainPage, Route } from './route';
 import { RouterProvider, useRouter } from './router';
@@ -52,6 +53,7 @@ export type Pages = {
     AddPassword: ComponentType<{ onClose: () => void }>;
     ItemName: ComponentType<{ page: PlainPage; item: string }>;
     routeOfNeed: (need: OverviewNeed) => Route;
+    Verdict: ComponentType;
 };
 
 export type WindowProps = {
@@ -195,12 +197,21 @@ type FrameProps = { Gallery?: ComponentType | undefined; pages: Pages };
 
 const NOWHERE = () => undefined;
 
-// invariant: one tree whatever the link says, so an absence and a relink remount no page and close no sheet.
+function Content({ area, held }: { area: AreaProps; held: Held | undefined }) {
+    if (held === undefined) {
+        return <PageArea {...area} panel />;
+    }
+    return <NoEngine Core={held === 'verdict' ? area.pages.Verdict : area.pages.Core} />;
+}
+
+// invariant: one tree whatever the link says, so an absence, a verdict and a relink remount no page and close no
+// invariant: sheet; the core's panel or the verdict's stands in the page's place.
 function Frame({ Gallery, pages }: FrameProps) {
     const router = useRouter();
     const { route, go } = router;
     const { drawn, home, listed, macs, needs, rail } = useStation();
-    const quiet = useQuiet(drawn);
+    const held = useHeld(drawn);
+    const quiet = held !== undefined;
     const { addMac, addPassword, close, find, newMachine, sheet, sidebar, toggleSidebar } =
         useSheets();
     useShortcuts(router, find, Gallery !== undefined, !quiet);
@@ -236,7 +247,7 @@ function Frame({ Gallery, pages }: FrameProps) {
                     {lost === undefined || quiet ? null : (
                         <Lost machine={lost} onDismiss={dismiss} />
                     )}
-                    {quiet ? <NoEngine Core={pages.Core} /> : <PageArea {...area} panel />}
+                    <Content area={area} held={held} />
                 </main>
             </div>
             {quiet ? null : (

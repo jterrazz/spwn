@@ -8,6 +8,7 @@ import { useCore, useReach } from '../dependencies/dependencies';
 import type { Reading } from '../dependencies/dependencies';
 import { identityOf, MachineIcon, NavItem, StateDot } from '../ui/index';
 import { failedState } from '../words/failed';
+import { FIT_MACHINES_WORDS, fitFootWord, fitState } from '../words/fit';
 import { machineKindOf } from '../words/provisional';
 import { coreState, engineState, macState, ownState, vmState } from '../words/shown';
 import { CORE_FOOT_WORDS, CORE_MACHINES_WORDS } from '../words/words';
@@ -44,18 +45,32 @@ function placeOf(route: Route, go: SidebarProps['go'], quiet: boolean): Place {
 
 function QuietMachines() {
     const { state } = useCore();
+    const reach = useReach();
     return (
         <div aria-labelledby="side-machines" className={styles.group} role="group">
             <h2 className={styles.caption} id="side-machines">
                 Machines
             </h2>
-            <p className={styles.none}>{CORE_MACHINES_WORDS[state.kind]}</p>
+            <p className={styles.none}>
+                {reach.kind === 'incompatible'
+                    ? FIT_MACHINES_WORDS[reach.fit]
+                    : CORE_MACHINES_WORDS[state.kind]}
+            </p>
         </div>
     );
 }
 
 function QuietFoot() {
     const { state } = useCore();
+    const reach = useReach();
+    if (reach.kind === 'incompatible') {
+        return (
+            <div className={styles.foot}>
+                <StateDot {...fitState(reach.fit)} />
+                <span className={styles.footText}>{fitFootWord(reach.fit)}</span>
+            </div>
+        );
+    }
     return (
         <div className={styles.foot}>
             <StateDot

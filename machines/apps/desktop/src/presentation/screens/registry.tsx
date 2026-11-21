@@ -10,6 +10,7 @@ import { ItemPage } from './catalog/item';
 import { ShelfPage } from './catalog/shelf';
 import { CorePage } from './core/core';
 import { EnginePage } from './core/engine';
+import { VerdictPage } from './core/verdict';
 import { HomePage } from './home/home';
 import { InboxPage } from './inbox/inbox';
 import { MachineFilesPage } from './machine-files/machine-files';
@@ -133,4 +134,5 @@ export const PAGES: Pages = {
     ItemName,
     NewMachine,
     routeOfNeed,
+    Verdict: VerdictPage,
 };
