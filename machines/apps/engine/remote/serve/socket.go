@@ -48,7 +48,9 @@ type Server struct {
 func (s Server) Conn(ctx context.Context, conn io.ReadWriteCloser) {
 	// invariant: the calls of a connection are answered in the order they came;
 	// a watch takes the connection over until either side ends it, and a later
-	// line on it is read and ignored.
+	// line on it is read and ignored. A watch that ends here says so with its
+	// done frame before the connection closes, so a client tells its end from
+	// a dropped connection.
 	defer func() { _ = conn.Close() }()
 	w := &writer{w: conn}
 	scanner := bufio.NewScanner(conn)
@@ -145,7 +147,9 @@ func (s Server) watch(ctx context.Context, conn io.ReadWriteCloser, lines *bufio
 	}
 	if err != nil {
 		_ = w.frame(api.Frame{ID: f.ID, Error: s.fault(err)})
+		return
 	}
+	_ = w.frame(api.Frame{ID: f.ID, Done: true})
 }
 
 // invariant: a watch whose target is another machine is that machine's

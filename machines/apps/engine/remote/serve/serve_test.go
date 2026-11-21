@@ -367,3 +367,32 @@ func doneMark(done bool) string {
 	}
 	return ""
 }
+
+func TestAWatchOverTheSocketEndsOnItsDoneBeforeItsConnectionCloses(t *testing.T) {
+	read := call.BindWatch(call.Watch[struct{}, struct{}, string]{
+		Name: "overview.read", Where: call.AtTarget, Applies: machine.Anywhere,
+		Run: func(context.Context, struct{}, struct{}, call.Progress) (<-chan call.Update[string], error) {
+			out := make(chan call.Update[string], 2)
+			out <- call.Update[string]{Value: "pending"}
+			out <- call.Update[string]{Value: "whole"}
+			close(out)
+			return out, nil
+		},
+	}, struct{}{})
+	s := serve.Server{Calls: func(name string) (call.Handler, bool) { return read, name == "overview.read" }, ThisMachine: laptop}
+	inR, inW := io.Pipe()
+	outR, outW := io.Pipe()
+	go s.Conn(t.Context(), pipe{Reader: inR, Writer: outW, closers: []io.Closer{inR, outW}})
+	go func() { _, _ = inW.Write([]byte(`{"v":2,"id":"1","watch":"overview.read"}` + "\n")) }()
+	var got []string
+	lines := bufio.NewScanner(outR)
+	for lines.Scan() {
+		var f api.Frame
+		if json.Unmarshal(lines.Bytes(), &f) == nil {
+			got = append(got, f.ID+" "+string(f.Out)+doneMark(f.Done))
+		}
+	}
+	if want := []string{`1 "pending"`, `1 "whole"`, "1 done"}; strings.Join(got, ",") != strings.Join(want, ",") {
+		t.Fatalf("the socket answered %v, want %v: a client cannot tell a watch's end from a dropped connection", got, want)
+	}
+}
