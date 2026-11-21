@@ -226,7 +226,7 @@ func miniPage(offline bool) pagemenubar.Machine {
 		f.Macs[1].Reachable, f.Macs[1].Node.Online, f.Macs[1].Engine = false, false, model.EngineView{}
 		f = model.Judged(f)
 	}
-	return pagemenubar.Machine{Asks: Levels, Name: miniName, All: &f, Summary: &s, Ports: &svc, Now: keepAwakeNow}
+	return pagemenubar.Machine{Asks: Levels, Name: miniName, All: &f, Summary: &s, Ports: &svc, SignIns: &pagemenubar.SignIns{}, Now: keepAwakeNow}
 }
 
 // value: mac-mini's Overview, as its engine reads it: its readiness all

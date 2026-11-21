@@ -376,12 +376,16 @@ func vmAccountActions(m Machine, h model.MacView, vm model.VM) []page.Action {
 // value: a Mac's Accounts segment: what needs you there about accounts,
 // then each of its machines' sign-ins and grants; each section of the
 // segment.
+// invariant: a Mac's Accounts is pending until its sign-ins answer, so a
+// page drawn before is never whole; a Mac with no sign-in says none only
+// once they did.
 func macAccounts(m Machine, h model.MacView) ([]page.Section, []page.Action) {
-	s := SignIns{}
-	if m.SignIns != nil {
-		s = m.SignIns.within(h.Name, "")
+	b := accountsBody{self: thisMacOf(*m.All), of: AccountsOf{Mac: h.Name, Asks: m.Asks}, segment: SegmentAccounts}
+	if m.SignIns == nil {
+		row := page.Row{ID: SectionNone, Label: "Checking", Mark: page.Awaiting, Detail: page.Pending()}
+		return []page.Section{{ID: b.id(SectionNone), Title: "Accounts", Segment: b.segment, Columns: columns(), Items: []page.Item{{Row: &row}}}}, nil
 	}
-	b := accountsBody{s: s, self: thisMacOf(*m.All), of: AccountsOf{Mac: h.Name, Asks: m.Asks}, segment: SegmentAccounts}
+	b.s = m.SignIns.within(h.Name, "")
 	return b.sections(), b.actions()
 }
 

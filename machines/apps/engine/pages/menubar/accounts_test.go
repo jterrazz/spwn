@@ -119,3 +119,17 @@ func TestRemovingAGrantAsksAndCallsGrantsRemoveOnThisMacAlone(t *testing.T) {
 		t.Errorf("a grant to a VM of another Mac offers Remove")
 	}
 }
+
+// invariant: ADR-069 decision 4: a Mac's page is not whole while its
+// sign-ins have not answered, so its Accounts is pending, never none.
+func TestAMacsAccountsArePendingUntilItsSignInsAnswer(t *testing.T) {
+	id := SegmentAccounts + ":" + SectionNone
+	asked := sectionOf(macPageOf(t, miniMac, nil), id)
+	if asked == nil || len(asked.Items) != 1 || asked.Items[0].Row == nil || asked.Items[0].Row.Mark != page.Awaiting {
+		t.Fatalf("Accounts before the sign-ins answer: %+v, want one pending row", asked)
+	}
+	answered := sectionOf(macPageOf(t, miniMac, func(m *Machine) { m.SignIns = &SignIns{} }), id)
+	if answered == nil || len(answered.Items) != 1 || answered.Items[0].Empty == nil {
+		t.Fatalf("Accounts once no sign-in answered: %+v, want none", answered)
+	}
+}
