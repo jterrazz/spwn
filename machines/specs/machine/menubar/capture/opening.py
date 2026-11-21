@@ -114,7 +114,7 @@ def pill(frame, closed, item, scale):
 
 def ticks(log):
     """The glass frames the app logged, one per display tick of the opening."""
-    return [m.group(1) for m in re.finditer(r" open t=\d+ frame=\d+ glass=(.*)", log)]
+    return [m.group(1) for m in re.finditer(r" open t=\d+ frame=\d+ glass=(x=\S+ y=\S+ w=\S+ h=\S+)", log)]
 
 
 def top(log):

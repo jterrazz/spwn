@@ -49,10 +49,15 @@ final class StationDelegate: NSObject, NSApplicationDelegate {
             return
         }
         let model = self.model
-        status = StatusPanel(content: { AnyView(ModelPanel(model: model)) }, opened: { model.opened() }, closed: { model.closed() }, report: report)
+        status = StatusPanel(content: { AnyView(ModelPanel(model: model)) }, opened: { model.opened() }, closed: { model.closed() }, report: report,
+                             generation: report == nil ? nil : { model.state.generation })
         label()
         labelling = model.objectWillChange.sink { [weak self] _ in DispatchQueue.main.async { self?.label() } }
         model.start()
+        if Bench.runs > 0, let status, let report {
+            let bench = Bench(panel: status, model: model, log: report)
+            Task { await bench.run() }
+        }
     }
 
     func label() {

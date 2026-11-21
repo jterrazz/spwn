@@ -99,6 +99,23 @@ public struct PanelState: Equatable, Sendable {
     public mutating func showing(_ watch: String?) {
         if watch != statusOn { status = nil }
     }
+
+    // value: what the panel draws, as one word per content generation: the
+    // page shown, its machine, whether it has its header yet, its state,
+    // the link and the sections drawn. Two frames that draw the same
+    // content say the same word; a page still without its header says
+    // `skeleton`. The bench counts the generations of an opening by it.
+    public var generation: String {
+        let shown = self.shown
+        let drawn = [shown?.id ?? "", shown?.context?.machine ?? "", shown?.state ?? "", "\(connection)",
+                     find == nil ? "" : "find"] + (shown?.sections ?? []).map { $0.id ?? "" }
+        var hash: UInt32 = 2_166_136_261
+        for byte in drawn.joined(separator: "/").utf8 {
+            hash = (hash ^ UInt32(byte)) &* 16_777_619
+        }
+        let word = String(format: "%08x", hash)
+        return shown?.header == nil ? "skeleton-\(word)" : word
+    }
 }
 
 public struct PopoverHandlers {

@@ -224,6 +224,8 @@ func (d *Engine) Stream(ctx context.Context, pages []string, write func(any) err
 	if err := write(engine.Opened{Stream: streamSchema, Pages: pages}); err != nil {
 		return err
 	}
+	opening := d.opening(pages)
+	defer opening.end()
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 	fed := &latest{pages: map[string]json.RawMessage{}}
@@ -270,6 +272,7 @@ func (d *Engine) Stream(ctx context.Context, pages []string, write func(any) err
 			if write(engine.Event{Event: "page", Page: p}) != nil {
 				return false
 			}
+			opening.wrote(id, p)
 		}
 		return true
 	}
@@ -287,6 +290,7 @@ func (d *Engine) Stream(ctx context.Context, pages []string, write func(any) err
 			if write(engine.Event{Event: "page", Page: p}) != nil {
 				return nil
 			}
+			opening.wrote(id, p)
 		case <-ctx.Done():
 			return nil
 		}

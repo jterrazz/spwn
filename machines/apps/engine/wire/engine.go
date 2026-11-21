@@ -45,6 +45,7 @@ import (
 	machinescalls "github.com/jterrazz/studio-station/apps/engine/machines/calls"
 	machinescontract "github.com/jterrazz/studio-station/apps/engine/machines/contract"
 	pageawake "github.com/jterrazz/studio-station/apps/engine/pages/awake"
+	"github.com/jterrazz/studio-station/apps/engine/platform/local"
 	"github.com/jterrazz/studio-station/apps/engine/remote"
 	"github.com/jterrazz/studio-station/apps/engine/remote/api"
 	enginerun "github.com/jterrazz/studio-station/apps/engine/surface/cli/engine/run"
@@ -111,7 +112,7 @@ func (m machine) engine(env kit.Env) *process.Engine {
 			return portscalls.Remember(m.stores.ports(), vm, port, stopped)
 		},
 		State: m.paths.State, ThisMachine: m.kind, Ports: m.cat.Ports(), Rights: m.portRights, Mounts: m.vmMounts, Version: m.engineVersion(), Abilities: m.engineAbilities(), Page: page.Revision, StartedAt: m.engineStarted(), PID: os.Getpid(), GuestPort: m.guestPort(),
-		Power: m.powerPort, KeepAwakePage: m.keepAwakePage, Executable: m.sys.Env.Executable(), Records: m.engineRecords(),
+		Power: m.powerPort, KeepAwakePage: m.keepAwakePage, Executable: m.sys.Env.Executable(), Records: m.engineRecords(), Commands: local.Ran,
 		NeverSleeps: func() bool { on, _ := m.stores.neverSleeps().Get(); return on },
 		GrantsOwed:  owed, Peer: m.engineAPI(),
 		Feeds: map[string]engine.Feed{engine.PageMenubar: menubar.Feed(), engine.PageMachine: menubar.Machine(),

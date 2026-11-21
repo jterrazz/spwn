@@ -103,4 +103,19 @@ final class PopoverTests: XCTestCase {
         XCTAssertEqual(ran, ["open-station"], "a terminal runs, its HUD said once it opened")
         XCTAssertEqual(shown, ["Copied ssh linux-1"])
     }
+
+    func testAContentGenerationSaysSkeletonUntilItsPageHasAHeaderAndMovesWithWhatIsDrawn() {
+        var state = Stories["home.needs"].state
+        let home = state.generation
+        XCTAssertFalse(home.hasPrefix("skeleton"), "Home with its header is no skeleton")
+        state.lit = "linux-1"
+        XCTAssertEqual(state.generation, home, "a lit row draws the same content")
+        var skeleton = Page()
+        skeleton.id = PageID.machine
+        skeleton.context = Context(machine: "mac-mini")
+        state.pushed = skeleton
+        XCTAssertTrue(state.generation.hasPrefix("skeleton-"), "a machine page without its header is its skeleton")
+        state.connection = .connecting
+        XCTAssertNotEqual(state.generation, home)
+    }
 }

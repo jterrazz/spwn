@@ -3,6 +3,7 @@ package process
 import (
 	"context"
 	"runtime"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -304,5 +305,24 @@ func TestARefreshReadsAgainOnlyThePageItNames(t *testing.T) {
 	close(woke)
 	for got := range woke {
 		t.Errorf("a refresh of linux-1's page also read %q again", got)
+	}
+}
+
+func TestAWatchLogsItsOpeningOnceItsFirstFullPageWentOut(t *testing.T) {
+	clock, feed := newManualClock(), make(chan any)
+	d := streamEngine(t, clock, feed)
+	notes := make(chan string, 4)
+	d.note = func(line string) { notes <- line }
+	var ran atomic.Int64
+	d.o.Commands = ran.Load
+	s := subscribe(t.Context(), t, d, true)
+	feed <- map[string]any{"id": "menubar", "sections": []any{map[string]any{"id": "reading", "mark": "pending"}}}
+	s.next(t, "page")
+	ran.Add(3)
+	settle(feed, map[string]any{"id": "menubar", "header": map[string]any{"title": "This Mac"}})
+	clock.advance(coalesce)
+	s.next(t, "page")
+	if got, want := <-notes, "watch: menubar first=0ms header=250ms full=250ms frames=2 commands=3"; !strings.HasSuffix(got, want) {
+		t.Fatalf("logged %q, want it to end %q", got, want)
 	}
 }
