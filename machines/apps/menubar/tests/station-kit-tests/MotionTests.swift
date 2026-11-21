@@ -64,6 +64,29 @@ final class MotionTests: XCTestCase {
         }
     }
 
+    // invariant: ADR-069: the panel's content is hosted once for the app's
+    // life, never per opening, and kept when the panel hides; only a gesture
+    // moves its height.
+    @MainActor
+    func testThePanelIsHostedOnceAndOnlyAGestureMovesItsHeight() throws {
+        let window = try String(contentsOf: Tree.app.appendingPathComponent("StatusPanel.swift"), encoding: .utf8)
+        XCTAssertEqual(window.components(separatedBy: "PanelHosting(rootView:").count - 1, 1, "the content is hosted more than once")
+        for verb in ["func show()", "func hide()"] {
+            let start = try XCTUnwrap(window.range(of: verb))
+            let end = try XCTUnwrap(window.range(of: "\n    }\n", range: start.upperBound..<window.endIndex))
+            let body = window[start.upperBound..<end.lowerBound]
+            for churn in ["PanelHosting(", "removeFromSuperview", "addSubview"] {
+                XCTAssertFalse(body.contains(churn), "\(verb) hosts the content anew: \(churn)")
+            }
+        }
+        PanelGesture.gated = true
+        defer { PanelGesture.gated = false }
+        let now = Date()
+        PanelGesture.mark(now)
+        XCTAssertTrue(PanelGesture.recent(now.addingTimeInterval(PanelGesture.window / 2)))
+        XCTAssertFalse(PanelGesture.recent(now.addingTimeInterval(PanelGesture.window + 0.1)), "a height data brought moved as a gesture's")
+    }
+
     func testAPushedPageSlidesInOverThePageBelowWhichDimsAThirdAway() {
         for t in Self.moments {
             let p = Self.smooth(t)

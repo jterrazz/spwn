@@ -195,6 +195,7 @@ final class Bench {
             panel.show()
             try? await Task.sleep(for: .seconds(Self.rest))
             log("bench push \(i)")
+            PanelGesture.mark()
             model.openMachine(mac)
             panel.pushed()
             try? await Task.sleep(for: .seconds(OpeningLog.pushSpan + 0.5))

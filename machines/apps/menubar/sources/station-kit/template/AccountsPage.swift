@@ -24,7 +24,7 @@ public struct AccountsPage: View {
 
     @ViewBuilder var drawing: some View {
         let layer = SheetLayer.of(page, state, handlers)
-        Panel(insets: .page, bounded: scrolls, key: "\(state.openings)/\(page.id ?? "")", sheet: state.confirming, layers: AlertLayer.layers(page, state, handlers, sheet: layer)) {
+        Panel(insets: .page, bounded: scrolls, key: "\(page.id ?? "")", sheet: state.confirming, layers: AlertLayer.layers(page, state, handlers, sheet: layer)) {
             MachineHeader(page, segment: nil, back: handlers.back, run: tap).modifier(UnderSheet(layer != nil))
         } content: {
             VStack(alignment: .leading, spacing: Token.Metric.Panel.blocks) {

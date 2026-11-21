@@ -3,8 +3,9 @@ import Foundation
 // invariant: SPEC §10.3: a page pushed over Home is the engine's watch of
 // that page, held only while it is on top: opening another pushes it over
 // the one shown, going back drops the top and watches the one under it
-// again, drawn at once as it was last seen; a page of a watch that ended is
-// never shown.
+// again. A page opened is drawn at once as it was last seen, across back and
+// across the panel's closings (the last `kept` pages seen), then as its
+// watch tells it; a page a watch that ended tells is never shown.
 public final class Navigation: @unchecked Sendable {
     public static let ports = "menubar.ports"
     public static let awake = "menubar.awake"
@@ -23,6 +24,7 @@ public final class Navigation: @unchecked Sendable {
     private var task: Task<Void, Never>?
     private var stack: [String] = []
     private var seen: [String: Page] = [:]
+    private var order: [String] = []
     private var picked: String?
     // value: called with Activity's window each time the owner picks one,
     // so the app keeps it for the next visit.
@@ -37,7 +39,18 @@ public final class Navigation: @unchecked Sendable {
         self.shown = shown
     }
 
+    // value: how many pages are kept as last seen, the least recent dropped.
+    public static let kept = 8
+
     public var watched: String? { lock.withLock { stack.last } }
+
+    // value: the page a watch last told, kept the least recent first out.
+    private func keep(_ page: Page, as watch: String) {
+        seen[watch] = page
+        order.removeAll { $0 == watch }
+        order.append(watch)
+        while order.count > Self.kept { seen[order.removeFirst()] = nil }
+    }
 
     // value: the watches open, Home's first pushed one first.
     public var path: [String] { lock.withLock { stack } }
@@ -73,9 +86,11 @@ public final class Navigation: @unchecked Sendable {
 
     public func open(_ page: String) {
         let page = windowed(page)
-        lock.withLock {
+        let last = lock.withLock { () -> Page? in
             if stack.last != page { stack.append(page) }
+            return seen[page]
         }
+        if let last { shown(page, last) }
         watch(page)
     }
 
@@ -99,7 +114,7 @@ public final class Navigation: @unchecked Sendable {
                 return
             }
             guard case .page(let p) = event, let self, self.watched == page else { return }
-            self.lock.withLock { self.seen[page] = p }
+            self.lock.withLock { self.keep(p, as: page) }
             self.shown(page, p)
         }
         lock.withLock {
@@ -115,7 +130,6 @@ public final class Navigation: @unchecked Sendable {
             task?.cancel()
             task = nil
             let was = stack.popLast()
-            if let was { seen[was] = nil }
             let under = stack.last
             return (was, under, under.flatMap { seen[$0] })
         }
@@ -127,15 +141,13 @@ public final class Navigation: @unchecked Sendable {
         }
     }
 
-    // value: every page dropped at once: the panel closed shows Home next.
+    // value: every page dropped at once, its last seen kept: the panel
+    // closed shows Home next.
     public func home() {
         let was = lock.withLock { () -> String? in
             task?.cancel()
             task = nil
-            defer {
-                stack = []
-                seen = [:]
-            }
+            defer { stack = [] }
             return stack.last
         }
         if let was { shown(was, nil) }

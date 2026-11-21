@@ -31,7 +31,7 @@ struct ServerPage: View {
     var viewMark: ViewMark? { ViewMark(.group, kit: "ServerPage") }
 
     @ViewBuilder var drawing: some View {
-        Panel(insets: .page, bounded: scrolls, key: "\(state.openings)/\(page.context?.machine ?? "")/\(segment)", sheet: state.confirming, layers: AlertLayer.layers(page, state, handlers)) {
+        Panel(insets: .page, bounded: scrolls, key: "\(page.context?.machine ?? "")/\(segment)", sheet: state.confirming, layers: AlertLayer.layers(page, state, handlers)) {
             MachineHeader(page, segment: segment, pick: { segment = $0 }, back: handlers.back, run: tap, open: handlers.push)
         } content: {
             VStack(alignment: .leading, spacing: Token.Metric.Panel.blocks) {

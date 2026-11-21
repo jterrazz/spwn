@@ -20,6 +20,10 @@ private struct PanelRoomKey: EnvironmentKey {
     static let defaultValue: CGFloat? = nil
 }
 
+private struct PanelOpeningKey: EnvironmentKey {
+    static let defaultValue = 0
+}
+
 extension EnvironmentValues {
     public var stationContrast: ColorSchemeContrast {
         get { self[ContrastKey.self] }
@@ -44,6 +48,13 @@ extension EnvironmentValues {
     public var stationPanelRoom: CGFloat? {
         get { self[PanelRoomKey.self] }
         set { self[PanelRoomKey.self] = newValue }
+    }
+
+    // value: the panel's openings and closings counted, so a panel scrolls
+    // back to its top at each without its content being drawn anew.
+    public var stationPanelOpening: Int {
+        get { self[PanelOpeningKey.self] }
+        set { self[PanelOpeningKey.self] = newValue }
     }
 }
 

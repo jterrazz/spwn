@@ -21,6 +21,26 @@ public enum PanelHeight {
     static var screen: CGFloat? { NSScreen.main?.visibleFrame.height }
 }
 
+// invariant: ADR-069: a panel's height moves only when a gesture in it
+// asked for the change, the click or key of the last `window` seconds; a
+// height its data brought is placed at once. A host that tells no gesture
+// (`gated` false: the stories, the catalog) moves every height, as a
+// gesture would.
+@MainActor
+public enum PanelGesture {
+    public static var gated = false
+    public static let window: TimeInterval = Token.Motion.gestureWindow
+    private static var at: Date?
+
+    public static func mark(_ now: Date = Date()) { at = now }
+
+    public static func recent(_ now: Date = Date()) -> Bool {
+        guard gated else { return true }
+        guard let at else { return false }
+        return now.timeIntervalSince(at) <= window
+    }
+}
+
 public struct PageStack<Element: Equatable>: Equatable {
     public private(set) var pages: [Element]
 
@@ -77,6 +97,7 @@ public struct Panel<Header: View, Content: View, Footer: View>: View {
     @Environment(\.stationPanelWidth) private var width
     @Environment(\.stationPanelRoom) private var room
     @Environment(\.stationCaught) private var caught
+    @Environment(\.stationPanelOpening) private var openings
 
     @State private var measured = Measured()
     @State private var shown: CGFloat = 0
@@ -218,12 +239,16 @@ public struct Panel<Header: View, Content: View, Footer: View>: View {
             offset = 0
             position.scrollTo(edge: .top)
         }
+        .onChange(of: openings) {
+            offset = 0
+            position.scrollTo(edge: .top)
+        }
         .onChange(of: measured.footer) { was, now in
             guard was > 0, now > was, PanelHeight.scrolls(measured.content, room: bodyRoom) else { return }
             position.scrollTo(y: offset + now - was)
         }
         .onChange(of: target, initial: true) { _, now in
-            if shown == 0 {
+            if shown == 0 || !PanelGesture.recent() {
                 shown = now
             } else {
                 withAnimation(spring) { shown = now }

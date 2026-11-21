@@ -27,6 +27,9 @@ extension Token.Motion {
 
     public static let snappyDuration = 0.20
     public static let smoothDuration = 0.34
+    // value: how long after a click or key in the panel a new height still
+    // moves as that gesture's (ADR-069).
+    public static let gestureWindow = 0.6
 
     public static let reducedCurve = UnitCurve.easeInOut
     public static let easeOutCurve = UnitCurve.easeOut
