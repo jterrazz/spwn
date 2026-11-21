@@ -8,7 +8,8 @@ glass of sweep mb1-sweep4); the zoom measure must refuse a title that scales or 
 as the panel opens, and an item that drops its highlight, or a panel whose top is not
 Passwords', and accept a panel shown whole under a lit item. The Dock's verdict must
 refuse a bright white tile among grey glass in a mono appearance, and accept one inside
-the Apple tiles' range.
+the Apple tiles' range. The bench's reader must time an opening to its first full frame,
+and refuse a bench over an engine that never answered: every frame a skeleton, no watch logged.
 """
 
 import json
@@ -22,6 +23,7 @@ from PIL import Image, ImageDraw, ImageFont
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import dock  # noqa: E402
+import bench  # noqa: E402
 import opening  # noqa: E402
 import tint  # noqa: E402
 
@@ -196,6 +198,43 @@ class Dock(unittest.TestCase):
 
     def test_a_saturated_tile_among_grey_glass_fails(self):
         self.assertFalse(self.verdict((40, 140, 255)))
+
+
+def bench_log(kind, frames):
+    """An app's bench log of one opening per list of (t, height, generation)."""
+    lines = []
+    for i, opening_frames in enumerate(frames):
+        lines.append(f"trial 1 bench {kind} {i}")
+        lines += [f"trial 2 {kind} t={t} frame={n} glass=x=477.0 y=545.0 w=322.0 h={h} gen={g}"
+                  for n, (t, h, g) in enumerate(opening_frames, 1)]
+    return "\n".join(lines) + "\n"
+
+
+WATCH = "2026-11-21T14:40:00Z watch: menubar first=12ms header=40ms full=95ms frames=3 commands=2\n"
+DRAWN = [(20, 192.0, "skeleton-ddd6f82d"), (37, 192.0, "skeleton-ddd6f82d"), (54, 412.0, "1a2b3c4d"), (71, 630.0, "5e6f7a8b"),
+         (88, 630.0, "5e6f7a8b")]
+SKELETON = [(23, 192.0, "skeleton-ddd6f82d"), (39, 192.0, "skeleton-ddd6f82d"), (56, 192.0, "skeleton-ddd6f82d")]
+
+
+class Bench(unittest.TestCase):
+    def test_an_opening_is_timed_to_its_first_full_frame(self):
+        self.assertEqual(bench.measure(DRAWN), {"full": 71, "first": 20, "gens": 3, "heights": 2, "skeleton": 2})
+
+    def test_an_opening_left_on_its_skeleton_reaches_no_full_frame(self):
+        self.assertIsNone(bench.measure(SKELETON)["full"])
+
+    def test_a_bench_over_a_drawn_page_and_a_watch_measures(self):
+        result = bench.bench(bench_log("open", [DRAWN]) + bench_log("push", [DRAWN]), WATCH)
+        self.assertEqual(result["open"]["full"]["p50"], 71)
+        self.assertEqual(result["watch menubar"]["full"]["p50"], 95)
+        self.assertEqual(bench.refusals(result), [])
+
+    def test_a_bench_over_an_engine_that_never_answered_fails(self):
+        # the baseline run mbp-base2: the engine refused the macOS VM, the app drew its skeleton 50 times
+        result = bench.bench(bench_log("open", [SKELETON] * 50) + bench_log("push", [SKELETON] * 50),
+                             "Error: the engine runs only on a Mac; this machine is a macos VM\n")
+        self.assertEqual(bench.refusals(result), ["no open opening reached a full frame", "no push opening reached a full frame",
+                                                  "the engine logged no watch"])
 
 
 if __name__ == "__main__":

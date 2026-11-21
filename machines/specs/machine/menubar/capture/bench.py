@@ -5,15 +5,22 @@ p50 and p95 of each measure, then writes them to bench.json beside the logs.
 
 usage: bench.py <capture dir>
 
-Per opening of the panel (`open`) and of This Mac's page over it (`push`):
-  ready    ms from its first logged frame to the first frame from which the
-           glass's height and the content generation no longer change
+Per opening of the panel (`open`, from the window shown) and of This Mac's page
+over it (`push`, from the page opened):
+  full     ms to its first full frame: the first from which the glass's height
+           and the content generation no longer change, the page drawn with its
+           header; none for an opening whose last frame is still a skeleton
   first    ms to its first logged frame
   gens     content generations drawn, the last included
   heights  times the glass's height changed
   skeleton frames drawn with a page still without its header
 Per watch of the engine: first, header and full (ms after the watch opened),
 frames before the full one, and the commands run meanwhile.
+
+invariant: a bench that measured nothing fails: no opening of a kind, no opening of a
+kind that reached a full frame, or no watch logged by the engine (an engine that
+refused to start leaves the app on its skeleton, every opening one generation that
+never moves).
 """
 
 import json
@@ -54,15 +61,17 @@ def measure(frames):
     if not frames:
         return None
     last = frames[-1][1:]
-    ready = frames[-1][0]
+    full = frames[-1][0]
     for t, h, g in reversed(frames):
         if (h, g) != last:
             break
-        ready = t
+        full = t
+    if last[1].startswith("skeleton"):
+        full = None
     gens = 1 + sum(1 for a, b in zip(frames, frames[1:]) if a[2] != b[2])
     heights = sum(1 for a, b in zip(frames, frames[1:]) if a[1] != b[1])
     skeleton = sum(1 for f in frames if f[2].startswith("skeleton"))
-    return {"ready": ready - frames[0][0], "first": frames[0][0], "gens": gens, "heights": heights, "skeleton": skeleton}
+    return {"full": full, "first": frames[0][0], "gens": gens, "heights": heights, "skeleton": skeleton}
 
 
 def ms(word):
@@ -86,24 +95,43 @@ def summary(rows, keys):
     return out
 
 
+def bench(app, engine):
+    result = {}
+    for kind, runs in openings(app).items():
+        rows = [r for r in (measure(f) for f in runs) if r]
+        result[kind] = summary(rows, ["full", "first", "gens", "heights", "skeleton"])
+    for page, rows in watches(engine).items():
+        result[f"watch {page}"] = summary(rows, ["first", "header", "full", "frames", "commands"])
+    return result
+
+
+def refusals(result):
+    """Why the bench measured nothing, one reason per line; none for a bench that measured."""
+    out = []
+    for kind in ("open", "push"):
+        if not result.get(kind, {}).get("n"):
+            out.append(f"no {kind} opening measured")
+        elif not result[kind]["full"]["n"]:
+            out.append(f"no {kind} opening reached a full frame")
+    if not any(name.startswith("watch ") for name in result):
+        out.append("the engine logged no watch")
+    return out
+
+
 def main():
     folder = sys.argv[1]
     app = open(os.path.join(folder, "bench-app.log"), encoding="utf-8").read()
     engine_path = os.path.join(folder, "bench-engine.log")
     engine = open(engine_path, encoding="utf-8").read() if os.path.exists(engine_path) else ""
-    result = {}
-    for kind, runs in openings(app).items():
-        rows = [r for r in (measure(f) for f in runs) if r]
-        result[kind] = summary(rows, ["ready", "first", "gens", "heights", "skeleton"])
-    for page, rows in watches(engine).items():
-        result[f"watch {page}"] = summary(rows, ["first", "header", "full", "frames", "commands"])
+    result = bench(app, engine)
     json.dump(result, open(os.path.join(folder, "bench.json"), "w", encoding="utf-8"), indent=1)
     for name, s in result.items():
         cells = " ".join(f"{k} p50={v['p50']} p95={v['p95']} max={v['max']}" for k, v in s.items() if k != "n")
         print(f"bench {name} n={s['n']}: {cells}")
-    if not result.get("open", {}).get("n") or not result.get("push", {}).get("n"):
-        print("bench: no opening measured")
-        sys.exit(1)
+    reasons = refusals(result)
+    for reason in reasons:
+        print(f"bench: {reason}")
+    sys.exit(1 if reasons else 0)
 
 
 if __name__ == "__main__":

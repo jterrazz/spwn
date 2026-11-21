@@ -104,18 +104,27 @@ class Rig:
         self.ssh("mkdir -p ~/cap ~/.local/state/station; pkill -f '[r]eplay.py'; true")
         self.ssh("printf 'tell application \"Terminal\" to quit\\n' > ~/cap/quit.scpt")
         self.gui("osascript ~/cap/quit.scpt")
+        # invariant: the bench's engine plays a Mac (STATION_MACHINE_KIND=mac, as the
+        # macOS tier's guest does): the guest is a macOS VM, where the engine refuses to
+        # run, and a bench over no engine measures the app's skeleton alone.
         if engine:
             self.ssh("pkill -f '[c]ap/station engine run'; rm -f ~/.local/state/station/engine.sock; true")
-            self.gui("sh -c 'nohup ~/cap/station engine run > ~/cap/engine.log 2>&1 < /dev/null &'")
+            self.gui("sh -c 'STATION_MACHINE_KIND=mac nohup ~/cap/station engine run > ~/cap/engine.log 2>&1 < /dev/null &'")
+            up = False
             for _ in range(60):
-                if self.ssh("test -S ~/.local/state/station/engine.sock && echo up").strip() == "up":
+                up = self.ssh("test -S ~/.local/state/station/engine.sock && echo up").strip() == "up"
+                if up:
                     break
                 time.sleep(1)
             self.say(f"   engine: {self.ssh('ls -l ~/.local/state/station/engine.sock; tail -3 ~/cap/engine.log').strip()}")
+            if not up:
+                self.say("FAIL bench: the engine made no socket in 60 s")
+                return False
         else:
             self.ssh(f"nohup python3 {CAPTURE}/replay.py {PAGE} ~/.local/state/station/engine.sock {revision} > ~/cap/replay.log 2>&1 < /dev/null &")
         self.wake()
         self.settle()
+        return True
 
     # hazard: the framebuffer is the login screen's 1280 x 720 until the guest's session
     # sets its display (2048 x 1536 here), and a size read at connect time mapped every
@@ -520,7 +529,8 @@ def main():
     sets = sets.split(",")
     os.makedirs(out, exist_ok=True)
     rig = Rig(ip, key, url, repo, out)
-    rig.setup(engine="bench" in sets)
+    if not rig.setup(engine="bench" in sets):
+        sys.exit(1)
     frames = {"STATION_TRIAL_FRAMES": "1"}
     shots = []
     old_item = None
