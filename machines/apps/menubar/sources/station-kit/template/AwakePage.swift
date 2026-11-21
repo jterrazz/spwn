@@ -32,7 +32,7 @@ public struct AwakePage: View {
     var viewMark: ViewMark? { ViewMark(.group, kit: "AwakePage") }
 
     @ViewBuilder var drawing: some View {
-        Panel(insets: .page, bounded: scrolls, key: "\(state.openings)/\(page.id ?? "")", sheet: state.confirming, layers: AlertLayer.layers(page, state, handlers)) {
+        Panel(insets: .page, bounded: scrolls, key: "\(page.id ?? "")", sheet: state.confirming, layers: AlertLayer.layers(page, state, handlers)) {
             MachineHeader(page, segment: nil, back: handlers.back)
         } content: {
             VStack(alignment: .leading, spacing: Token.Metric.Panel.blocks) {

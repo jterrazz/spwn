@@ -18,19 +18,20 @@ final class StatusPanel: NSObject, NSWindowDelegate {
     private let ground = Ground()
     private let backdrop = Backdrop()
     private let opening = OpeningLog()
-    private let content: () -> AnyView
+    private let hosting: PanelHosting
     private let opened: () -> Void
     private let closed: () -> Void
     private let report: ((String) -> Void)?
     private let generation: (() -> String)?
     private var outside: Any?
     private var press: Any?
+    private var gestures: Any?
     private var anchor = CGPoint.zero
     private var placing = false
     private var pending: CGSize?
 
-    init(content: @escaping () -> AnyView, opened: @escaping () -> Void, closed: @escaping () -> Void, report: ((String) -> Void)? = nil, generation: (() -> String)? = nil) {
-        self.content = content
+    init(content: () -> AnyView, opened: @escaping () -> Void, closed: @escaping () -> Void, report: ((String) -> Void)? = nil, generation: (() -> String)? = nil) {
+        hosting = PanelHosting(rootView: content())
         self.opened = opened
         self.closed = closed
         self.report = report
@@ -59,6 +60,15 @@ final class StatusPanel: NSObject, NSWindowDelegate {
         backdrop.addSubview(glass)
         backdrop.outside = { [weak self] in self?.hide() }
         panel.contentView = backdrop
+        // invariant: ADR-069: one hosting view for the app's life, laid out
+        // while the panel is hidden, so an opening orders the panel front at
+        // the size its content already has; no state carries across openings
+        // because each is reset by the model (Navigation's home, the scroll's
+        // top), never by tearing the content down.
+        hosting.sizingOptions = [.intrinsicContentSize]
+        hosting.resized = { [weak self] size in self?.fit(size) }
+        hosting.frame = ground.bounds
+        ground.addSubview(hosting)
         panel.delegate = self
         panel.cancelled = { [weak self] in self?.hide() }
         item.button?.target = self
@@ -75,6 +85,14 @@ final class StatusPanel: NSObject, NSWindowDelegate {
             let taken = MainActor.assumeIsolated { self?.take(window: window, at: point) ?? false }
             return taken ? nil : event
         }
+        gestures = NSEvent.addLocalMonitorForEvents(matching: [.leftMouseUp, .rightMouseUp, .keyDown]) { [weak self] event in
+            let window = event.windowNumber
+            MainActor.assumeIsolated {
+                if let self, window == self.panel.windowNumber { PanelGesture.mark() }
+            }
+            return event
+        }
+        PanelGesture.gated = true
         if report != nil { announce(tries: 60) }
     }
 
@@ -111,17 +129,12 @@ final class StatusPanel: NSObject, NSWindowDelegate {
         if shown { hide() } else { show() }
     }
 
-    // invariant: each opening holds a new content, so no state of the last
-    // one shows, and the panel is ordered in whole: glass and content on its
+    // invariant: the panel is ordered in whole: glass and content on its
     // first frame, nothing scaled or faded, as the system's own extras open
     // (Passwords on Tahoe, no intermediate frame). It closes as they do, at once.
     func show() {
         guard !shown, let button = item.button, let spot, let bar = button.window else { return }
-        let view = PanelHosting(rootView: content())
-        view.sizingOptions = [.intrinsicContentSize]
-        view.resized = { [weak self] size in self?.fit(size) }
-        view.frame = ground.bounds
-        ground.addSubview(view)
+        let view = hosting
         let size = view.fittingSize
         let room = (bar.screen ?? NSScreen.main)?.visibleFrame ?? spot
         anchor = CGPoint(x: min(max(spot.maxX - size.width, room.minX + Self.margin), room.maxX - Self.margin - size.width), y: spot.minY - Self.drop)
@@ -157,7 +170,6 @@ final class StatusPanel: NSObject, NSWindowDelegate {
         guard shown else { return }
         opening.end()
         panel.orderOut(nil)
-        for view in ground.subviews { view.removeFromSuperview() }
         if let outside { NSEvent.removeMonitor(outside) }
         outside = nil
         item.button?.highlight(false)
@@ -169,7 +181,9 @@ final class StatusPanel: NSObject, NSWindowDelegate {
     // height follows the content's, so it grows downward. The content
     // reports only the height its spring ends at (the capture's trial,
     // ADR-036), so the window moves there itself, on the same curve, and
-    // snaps under Reduce Motion as the content does.
+    // snaps under Reduce Motion as the content does. Only a height a
+    // gesture in the panel asked for moves (ADR-069): one that data brought
+    // is placed at once, as the content's own height is.
     // hazard: a size the content asks while the window is being moved
     // (its layout runs inside setFrame) is held and placed right after,
     // never dropped: dropped, the window kept the cap's height around a
@@ -184,7 +198,7 @@ final class StatusPanel: NSObject, NSWindowDelegate {
         placing = true
         let area = CGRect(x: anchor.x, y: anchor.y - size.height, width: size.width, height: size.height)
         let frame = area.insetBy(dx: -Self.shade, dy: -Self.shade)
-        if shown, frame != panel.frame, !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion {
+        if shown, frame != panel.frame, PanelGesture.recent(), !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion {
             NSAnimationContext.runAnimationGroup { context in
                 let p = Token.Motion.smoothPoints.map { Float($0) }
                 context.duration = Token.Motion.smoothDuration

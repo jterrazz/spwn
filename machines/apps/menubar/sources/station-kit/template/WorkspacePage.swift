@@ -29,7 +29,7 @@ struct WorkspacePage: View {
 
     @ViewBuilder var drawing: some View {
         let layer = SheetLayer.of(page, state, handlers)
-        Panel(insets: .page, bounded: scrolls, key: "\(state.openings)/\(page.context?.machine ?? "")/\(segment)", sheet: state.confirming, layers: AlertLayer.layers(page, state, handlers, sheet: layer)) {
+        Panel(insets: .page, bounded: scrolls, key: "\(page.context?.machine ?? "")/\(segment)", sheet: state.confirming, layers: AlertLayer.layers(page, state, handlers, sheet: layer)) {
             MachineHeader(page, segment: segment, pick: { segment = $0 }, back: handlers.back, run: tap, open: handlers.push).modifier(UnderSheet(layer != nil))
         } content: {
             VStack(alignment: .leading, spacing: Token.Metric.Panel.blocks) {

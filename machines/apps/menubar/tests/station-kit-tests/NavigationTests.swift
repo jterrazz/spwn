@@ -60,6 +60,48 @@ final class NavigationTests: XCTestCase {
             XCTAssertNil(nav.watched)
         }
     }
+
+    // invariant: ADR-069: a page seen is drawn at once when it is opened
+    // again, after back and after the panel closed, before its watch tells it.
+    func testAPageSeenIsDrawnAtOnceWhenOpenedAgainAfterBackAndAClose() async throws {
+        let engine = try FakeEngine("mb-seen")
+        defer { engine.stop() }
+        engine.serveOnce(try Streamed.answer(Navigation.ports, "menubar.ports.mini"), thenClose: false)
+        let shown = Shown()
+        let nav = Navigation(socket: engine.path, clock: TestClock()) { shown.add($0, $1) }
+        let id = try XCTUnwrap(Tree.page("menubar.ports.mini").id)
+        nav.open(Navigation.ports)
+        await until { !shown.all.isEmpty }
+        nav.back()
+        nav.home()
+        XCTAssertEqual(shown.all, ["\(Navigation.ports) \(id)", "\(Navigation.ports) nil"])
+        nav.open(Navigation.ports)
+        XCTAssertEqual(shown.all.last, "\(Navigation.ports) \(id)", "the page seen waited for its watch")
+        XCTAssertEqual(nav.watched, Navigation.ports)
+    }
+
+    // invariant: the pages kept as last seen are the last `kept` ones; the
+    // least recent is dropped first.
+    func testThePagesKeptAreTheLastEightSeen() async throws {
+        XCTAssertEqual(Navigation.kept, 8)
+        let engine = try FakeEngine("mb-kept")
+        defer { engine.stop() }
+        let watches = (0 ... Navigation.kept).map { Navigation.page(Navigation.ports, of: "m\($0)") }
+        for watch in watches { engine.serveOnce(try Streamed.answer(watch, "menubar.ports.mini"), thenClose: false) }
+        let shown = Shown()
+        let nav = Navigation(socket: engine.path, clock: TestClock()) { shown.add($0, $1) }
+        for watch in watches {
+            nav.open(watch)
+            await until { shown.all.last?.hasPrefix(watch + " ") == true }
+            nav.home()
+        }
+        let before = shown.all.count
+        nav.open(watches[0])
+        XCTAssertEqual(shown.all.count, before, "the least recent page was kept past \(Navigation.kept)")
+        nav.home()
+        nav.open(watches[1])
+        XCTAssertEqual(shown.all.last, "\(watches[1]) \(try XCTUnwrap(Tree.page("menubar.ports.mini").id))")
+    }
 }
 
 final class Said: @unchecked Sendable {

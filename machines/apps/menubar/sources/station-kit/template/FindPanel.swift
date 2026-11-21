@@ -26,7 +26,7 @@ struct FindPanel: View {
     var viewMark: ViewMark? { ViewMark(.group, kit: "FindPanel") }
 
     @ViewBuilder var drawing: some View {
-        Panel(insets: .flush, bounded: scrolls, key: "\(state.openings)/find", sheet: state.confirming) {
+        Panel(insets: .flush, bounded: scrolls, key: "find", sheet: state.confirming) {
             FindField(text: Binding(get: { find.query }, set: { handlers.find(find.typed($0)) }),
                       move: { handlers.find(find.moved($0, lines: lines.count)) },
                       submit: { quick in if let lit { pick(lit, quick: quick) } },

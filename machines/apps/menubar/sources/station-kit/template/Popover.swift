@@ -274,6 +274,7 @@ public struct Popover: View {
             }
         }
         .environment(\.stationMenuPick, MenuPick(handlers))
+        .environment(\.stationPanelOpening, state.openings)
         .modifier(PanelKeyboard(state: state, handlers: handlers))
     }
 
@@ -286,7 +287,7 @@ public struct Popover: View {
         return MenuPage.view(shown, handlers: handlers, scrolls: scrolls)
     }
 
-    var key: String { "\(state.openings)/\(state.shown?.id ?? "")/\(state.shown?.context?.machine ?? "")" }
+    var key: String { "\(state.shown?.id ?? "")/\(state.shown?.context?.machine ?? "")" }
 
     // value: Home as SPEC A4 draws it, once its engine sends its header.
     var home: Page? {

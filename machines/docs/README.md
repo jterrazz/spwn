@@ -118,5 +118,6 @@ The records of decisions this repository alone took go in [`decisions/`](decisio
 - [066 A commit owes that it builds and lints, a lot owes the gate](decisions/066-a-commit-owes-that-it-builds-and-lints-a-lot-owes-the-gate.md) (Accepted)
 - [067 One train, appended by makers, proved at its tip](decisions/067-one-train-appended-by-makers-proved-at-its-tip.md) (Accepted)
 - [068 In the fake world no result waits on real time](decisions/068-in-the-fake-world-no-result-waits-on-real-time.md) (Proposed)
+- [069 The menu bar hosts its panel once, and keeps what it saw](decisions/069-the-menu-bar-hosts-its-panel-once-and-keeps-what-it-saw.md) (Proposed)
 
 A decision spanning several repositories is recorded by the corpus that spans them. What was left for later is `TODO.md` at the repository root.

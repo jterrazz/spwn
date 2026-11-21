@@ -24,7 +24,6 @@ final class Model: ObservableObject {
     static let settle: UInt64 = 2_500_000_000
 
     let socket = EnginePath.socket()
-    private var lastPage: Date?
     private var subscription: Task<Void, Never>?
     private var events: Task<Void, Never>?
     private var clearing: Task<Void, Never>?
@@ -148,7 +147,6 @@ final class Model: ObservableObject {
         case .page(let page):
             state.connection = .live
             state.page = page
-            lastPage = Date()
             if navigation.watched == nil { state.settling = nil }
         case .tick:
             break
@@ -225,9 +223,6 @@ final class Model: ObservableObject {
         watching?.cancel()
         watching = Task.detached { await Client.hold(path: socket, watch: "engine.watch") }
         revive()
-        if let last = lastPage, Date().timeIntervalSince(last) > 60 {
-            Task { _ = await Client.call(path: socket, name: ActionRunner.refresh, input: ["pages": [PageID.home]]) }
-        }
     }
 
     // invariant: while the panel is open over an engine that does not
