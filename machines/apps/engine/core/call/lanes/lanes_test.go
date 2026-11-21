@@ -266,3 +266,33 @@ func TestCloseEndsASharedJobAndWaitsForIt(t *testing.T) {
 		return set(0, "ran")
 	}}}, clone))
 }
+
+func TestASettledReadingIsReadAgainOnceItOutlivedThePoolsKeep(t *testing.T) {
+	clock := &manualClock{}
+	p := NewPool(context.Background(), clock, 4, 1)
+	p.Keep(10 * time.Minute)
+	var runs, starts atomic.Int32
+	job := Job[report]{Key: "apps/list/formulae", Do: func(context.Context) func(*report) {
+		return set(0, strconv.Itoa(int(runs.Add(1))))
+	}}
+	start := func(context.Context) <-chan int {
+		ch := make(chan int, 1)
+		ch <- int(starts.Add(1))
+		close(ch)
+		return ch
+	}
+	read := func() (string, int) {
+		return Last(Run(context.Background(), p, report{parts: []string{""}}, []Job[report]{job}, clone)).parts[0], Last(Stream(context.Background(), p, "apps", start))
+	}
+	if job, stream := read(); job != "1" || stream != 1 {
+		t.Fatalf("the first readers read %q and %d, want the first run of each", job, stream)
+	}
+	clock.advance(9 * time.Minute)
+	if job, stream := read(); job != "1" || stream != 1 {
+		t.Errorf("9 min after they settled the readers read %q and %d, want the shared readings", job, stream)
+	}
+	clock.advance(time.Minute)
+	if job, stream := read(); job != "2" || stream != 2 {
+		t.Errorf("10 min after they settled the readers read %q and %d, want each read again", job, stream)
+	}
+}
