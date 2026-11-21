@@ -9,8 +9,6 @@ import (
 
 	awakecontract "github.com/jterrazz/studio-station/apps/engine/awake/contract"
 
-	"github.com/jterrazz/studio-station/apps/engine/catalog"
-
 	"github.com/jterrazz/studio-station/apps/engine/engine"
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
 
@@ -32,6 +30,8 @@ type ControlMachines interface {
 
 type Job interface {
 	Loaded(ctx context.Context) bool
+	// value: its job manager holds its job, loaded or not (contract.Jobs).
+	Installed() bool
 	Load(ctx context.Context) error
 	Start(ctx context.Context) error
 	Stop(ctx context.Context) error
@@ -71,7 +71,7 @@ func (c *Control) Check() error {
 }
 
 func (c *Control) installed() bool {
-	return c.h.Exists(catalog.EnginePlist(c.h.Home()))
+	return c.job.Installed()
 }
 
 func (c *Control) Read(ctx context.Context) (engine.Reading, error) {

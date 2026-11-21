@@ -115,7 +115,7 @@ func (s *Machinist) engineView(ctx context.Context) (info model.EngineView, live
 	}
 	info, err := s.engineAPI.Hello(ctx)
 	if err != nil {
-		if !s.h.Exists(catalog.EnginePlist(s.h.Home())) {
+		if !s.engineInstalled() {
 			return model.EngineView{State: model.EngineNotInstalled}, nil
 		}
 		return model.EngineView{State: model.EngineStopped}, nil

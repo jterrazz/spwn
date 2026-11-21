@@ -272,13 +272,13 @@ func (s *Machinist) engineUp(ctx context.Context, start bool) error {
 	// check that does not start it (create's, before its questions) lets
 	// such an engine through: the create itself starts it.
 	if s.engineAPI == nil {
-		return &model.EngineDownError{Mac: s.ThisMacName(), Installed: s.h.Exists(catalog.EnginePlist(s.h.Home()))}
+		return &model.EngineDownError{Mac: s.ThisMacName(), Installed: s.engineInstalled()}
 	}
 	_, err := s.engineAPI.Hello(ctx)
 	if !errors.Is(err, model.ErrEngineDown) {
 		return err
 	}
-	installed := s.h.Exists(catalog.EnginePlist(s.h.Home()))
+	installed := s.engineInstalled()
 	if installed || s.o.StartEngine == nil || !s.engine.Installed() {
 		return &model.EngineDownError{Mac: s.ThisMacName(), Installed: installed}
 	}

@@ -6,7 +6,6 @@ import (
 
 	"github.com/jterrazz/studio-station/apps/engine/awake"
 	awakecalls "github.com/jterrazz/studio-station/apps/engine/awake/calls"
-	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
 	"github.com/jterrazz/studio-station/apps/engine/overview"
 	"github.com/jterrazz/studio-station/apps/engine/page"
@@ -42,10 +41,7 @@ func (m machine) awakeWaker() *awakecalls.Waker {
 			err := c.do(ctx, engine.CallAwakeOff, nil, &s)
 			return awake.Slept{Ended: s.Ended, After: time.Duration(s.After) * time.Second}, awakeDown(err)
 		},
-		Installed: func() bool {
-			_, err := m.sys.FS.Stat(catalog.EnginePlist(m.sys.Env.Home()))
-			return err == nil
-		},
+		Installed: m.engineInstalled,
 	}, awakecalls.WakerOptions{Power: m.powerPort, ThisMachine: m.kind, ThisMacName: m.where.Machine, Zone: time.Local})
 }
 

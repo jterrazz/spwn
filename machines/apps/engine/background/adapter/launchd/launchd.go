@@ -117,6 +117,8 @@ func (j *Jobs) Read(ctx context.Context, r contract.Ref) contract.Status {
 	return s
 }
 
+func (j *Jobs) Installed(r contract.Ref) bool { return j.exists(r.File) }
+
 func (j *Jobs) Overrides(ctx context.Context, d contract.Domain) map[string]bool {
 	// outside: `launchctl print-disabled <domain>` prints one `"<label>" => <value>`
 	// per override: enabled or disabled, true for disabled on older macOS; false

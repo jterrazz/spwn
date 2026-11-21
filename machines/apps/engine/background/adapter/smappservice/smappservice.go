@@ -13,6 +13,8 @@ type Agents interface {
 	// each named by its plist in Contents/Library/LaunchAgents.
 	Register(plist string) error
 	Unregister(plist string) error
+	// value: the app holds the agent registered and enabled.
+	Registered(plist string) bool
 }
 
 type Clock interface {
@@ -22,9 +24,10 @@ type Clock interface {
 type Jobs struct {
 	// value: the jobs of the engine inside Spwn.app (ADR-073, mode A): their
 	// definitions are the bundle's, registered by SMAppService, and every read,
-	// start and stop is launchd's, as on a Mac without the app; a job is judged
-	// by `launchctl print`, never by SMAppService's status, which reads enabled
-	// for a job launchd does not hold.
+	// start and stop is launchd's, as on a Mac without the app; whether a job
+	// runs is judged by `launchctl print`, never by SMAppService's status,
+	// which reads enabled for a job launchd does not hold, and that status
+	// answers only whether the app holds the job installed.
 	contract.Jobs
 	agents Agents
 	clock  Clock
@@ -48,6 +51,13 @@ func (j *Jobs) failed(verb string, r contract.Ref, err error) error {
 		Argv: []string{"SMAppService", verb, plistOf(r)}, Exit: 1, Stderr: err.Error(),
 		See: j.read(r),
 	}
+}
+
+func (j *Jobs) Installed(r contract.Ref) bool {
+	// invariant: a bundled job is installed while its app holds it
+	// registered, read from SMAppService, whatever ~/Library/LaunchAgents
+	// holds.
+	return j.agents.Registered(plistOf(r))
 }
 
 func (j *Jobs) Install(context.Context, contract.JobSpec) (bool, error) {

@@ -125,8 +125,3 @@ func listedOrNone(read func(ctx context.Context) ([]ports.Listener, error)) func
 		return listed, err
 	}
 }
-
-func (m machine) engineInstalled() bool {
-	_, err := m.sys.FS.Stat(catalog.EnginePlist(m.sys.Env.Home()))
-	return err == nil
-}

@@ -37,8 +37,9 @@ const StationLaunchPrefix = "com.jterrazz.station."
 const EngineLabel = StationLaunchPrefix + "engine"
 
 func EnginePlist(home string) string {
-	// value: the one engine's launchd agent: its first start writes it, a stopped engine
-	// keeps it, so its presence tells "stopped" from "not installed" (R9.D3).
+	// value: the bare engine's launchd agent, on a Mac without Spwn.app: its
+	// first start writes it and a stopped engine keeps it, so launchd's
+	// Installed reads it to tell "stopped" from "not installed" (R9.D3).
 	return agentPlist(home, EngineLabel)
 }
 

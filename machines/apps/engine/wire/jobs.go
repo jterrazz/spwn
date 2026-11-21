@@ -66,6 +66,12 @@ func (m machine) engineJob() engineJob {
 
 func (j engineJob) Loaded(ctx context.Context) bool { return j.jobs.Read(ctx, j.ref).Loaded }
 
+func (j engineJob) Installed() bool { return j.jobs.Installed(j.ref) }
+
+// value: this Mac's engine job is installed, as its job manager answers,
+// in either mode; every reader of "installed" asks it here.
+func (m machine) engineInstalled() bool { return m.engineJob().Installed() }
+
 func (j engineJob) Load(ctx context.Context) error { return booted(j.jobs.Load(ctx, j.ref)) }
 
 func (j engineJob) Start(ctx context.Context) error { return booted(j.jobs.Start(ctx, j.ref)) }

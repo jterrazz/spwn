@@ -56,6 +56,9 @@ type Options struct {
 	// value: installs this Mac's engine job and starts it, as engine start
 	// does; nil installs none.
 	StartEngine func(ctx context.Context) error
+	// value: this Mac's engine job is installed, as its job manager
+	// answers; nil says it is not.
+	EngineInstalled func() bool
 	// value: the Machinefiles workspaces are made from, as this Mac reads
 	// them; nil reads none.
 	Templates Templates
@@ -168,6 +171,10 @@ func (s *Machinist) prefs() (prefsView, error) {
 
 func New(h ThisMac, e contract.Hypervisor, p Prefs, vms contract.MachineStore, nodes Nodes, img Images, d Engine, rel Releaser, o Options) *Machinist {
 	return &Machinist{h: h, engine: e, p: p, recs: vms, nodes: nodes, img: img, engineAPI: d, rel: rel, o: o}
+}
+
+func (s *Machinist) engineInstalled() bool {
+	return s.o.EngineInstalled != nil && s.o.EngineInstalled()
 }
 
 type Machine struct {

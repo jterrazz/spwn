@@ -15,6 +15,10 @@ type Jobs interface {
 	// readable without root, sorted by label.
 	List(ctx context.Context) ([]background.Job, error)
 	Read(ctx context.Context, r Ref) Status
+	// value: the job's definition is known to its job manager, loaded or
+	// not: written where the manager reads it, or registered by the app
+	// that holds it. It tells a stopped job from one never installed.
+	Installed(r Ref) bool
 	// value: each label the domain lists, enabled or not; a label it does not
 	// list is absent.
 	Overrides(ctx context.Context, d Domain) map[string]bool

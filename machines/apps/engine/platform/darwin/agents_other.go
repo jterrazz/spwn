@@ -14,3 +14,5 @@ var errNoAppAgents = errors.New("SMAppService needs the release's darwin build, 
 func (Agents) Register(string) error { return errNoAppAgents }
 
 func (Agents) Unregister(string) error { return errNoAppAgents }
+
+func (Agents) Registered(string) bool { return false }

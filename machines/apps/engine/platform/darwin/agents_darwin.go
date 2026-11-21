@@ -21,6 +21,13 @@ static char *station_agent(const char *plist, int on) {
 		return strdup(why.UTF8String);
 	}
 }
+
+static int station_agent_enabled(const char *plist) {
+	@autoreleasepool {
+		SMAppService *service = [SMAppService agentServiceWithPlistName:[NSString stringWithUTF8String:plist]];
+		return service.status == SMAppServiceStatusEnabled;
+	}
+}
 */
 import "C"
 
@@ -39,6 +46,12 @@ type Agents struct {
 func (Agents) Register(plist string) error { return agent(plist, 1) }
 
 func (Agents) Unregister(plist string) error { return agent(plist, 0) }
+
+func (Agents) Registered(plist string) bool {
+	name := C.CString(plist)
+	defer C.free(unsafe.Pointer(name))
+	return C.station_agent_enabled(name) != 0
+}
 
 func agent(plist string, on C.int) error {
 	name := C.CString(plist)

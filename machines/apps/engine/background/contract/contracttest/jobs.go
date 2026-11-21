@@ -68,6 +68,34 @@ func Jobs(t *testing.T, subject func(t *testing.T) Subject) {
 		}
 	})
 
+	t.Run("a job is installed from its definition's write to its removal, loaded or not", func(t *testing.T) {
+		s := subject(t)
+		if s.Jobs.Installed(ref(s, label)) {
+			t.Fatal("a job never written reads installed")
+		}
+		if _, err := s.Jobs.Install(ctx, spec(s, label)); err != nil {
+			t.Fatalf("Install: %v", err)
+		}
+		if !s.Jobs.Installed(ref(s, label)) {
+			t.Fatal("a written job does not read installed")
+		}
+		if err := s.Jobs.Load(ctx, ref(s, label)); err != nil {
+			t.Fatalf("Load: %v", err)
+		}
+		if err := s.Jobs.Stop(ctx, ref(s, label)); err != nil {
+			t.Fatalf("Stop: %v", err)
+		}
+		if !s.Jobs.Installed(ref(s, label)) {
+			t.Fatal("a stopped job does not read installed")
+		}
+		if err := s.Jobs.Remove(ctx, ref(s, label)); err != nil {
+			t.Fatalf("Remove: %v", err)
+		}
+		if s.Jobs.Installed(ref(s, label)) {
+			t.Fatal("a removed job reads installed")
+		}
+	})
+
 	t.Run("installing the same definition again writes nothing", func(t *testing.T) {
 		s := subject(t)
 		if _, err := s.Jobs.Install(ctx, spec(s, label)); err != nil {

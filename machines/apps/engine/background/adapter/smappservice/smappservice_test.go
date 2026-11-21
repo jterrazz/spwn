@@ -20,6 +20,8 @@ type trail struct {
 	loaded  map[string]bool
 	refuse  error
 	removed map[string]bool
+	// value: the plists SMAppService holds registered.
+	registered map[string]bool
 	// value: how many reads still see a removed job, as launchd does while
 	// the job's process exits after its bootout.
 	lingers int
@@ -44,6 +46,7 @@ func (l manager) Read(_ context.Context, r contract.Ref) contract.Status {
 	}
 	return contract.Status{Loaded: l.t.loaded[r.Label]}
 }
+func (manager) Installed(contract.Ref) bool                                { return true }
 func (manager) Overrides(context.Context, contract.Domain) map[string]bool { return nil }
 func (l manager) Install(context.Context, contract.JobSpec) (bool, error) {
 	l.t.calls = append(l.t.calls, "manager install")
@@ -80,12 +83,16 @@ func (a agents) Register(plist string) error {
 		return a.t.refuse
 	}
 	a.t.loaded[strings.TrimSuffix(plist, ".plist")] = true
+	a.t.registered[plist] = true
 	return nil
 }
+
+func (a agents) Registered(plist string) bool { return a.t.registered[plist] }
 
 func (a agents) Unregister(plist string) error {
 	a.t.calls = append(a.t.calls, "unregister "+plist)
 	a.t.loaded[strings.TrimSuffix(plist, ".plist")] = false
+	a.t.registered[plist] = false
 	return nil
 }
 
@@ -98,7 +105,7 @@ const label = "com.jterrazz.station.engine"
 var ref = contract.Ref{Domain: contract.Domain{UID: 501}, Label: label, File: "/home/o/Library/LaunchAgents/" + label + ".plist"}
 
 func jobs(loaded bool) (*smappservice.Jobs, *trail) {
-	t := &trail{loaded: map[string]bool{label: loaded}, removed: map[string]bool{}}
+	t := &trail{loaded: map[string]bool{label: loaded}, removed: map[string]bool{}, registered: map[string]bool{}}
 	return smappservice.New(manager{t}, agents{t}, clock{}), t
 }
 
@@ -130,6 +137,25 @@ func TestARestartUnregistersThenRegistersSoTheBundlesBinaryRunsNow(t *testing.T)
 	}
 	if want := []string{"unregister " + label + ".plist", "register " + label + ".plist", "kickstart " + label}; !slices.Equal(tr.calls, want) {
 		t.Errorf("calls = %q, want %q", tr.calls, want)
+	}
+}
+
+func TestABundledJobIsInstalledWhileItsAppHoldsItRegisteredWhateverTheManagersFolderHolds(t *testing.T) {
+	j, _ := jobs(false)
+	if j.Installed(ref) {
+		t.Error("a job never registered reads installed")
+	}
+	if err := j.Load(t.Context(), ref); err != nil {
+		t.Fatal(err)
+	}
+	if !j.Installed(ref) {
+		t.Error("a registered job does not read installed")
+	}
+	if err := j.Remove(t.Context(), ref); err != nil {
+		t.Fatal(err)
+	}
+	if j.Installed(ref) {
+		t.Error("an unregistered job reads installed")
 	}
 }
 

@@ -129,6 +129,15 @@ func (j *Jobs) Read(_ context.Context, r contract.Ref) contract.Status {
 	return contract.Status{Loaded: true, State: "waiting"}
 }
 
+func (j *Jobs) Installed(r contract.Ref) bool {
+	j.w.Lock()
+	defer j.w.Unlock()
+	if j.engine(r) {
+		return j.setUp()
+	}
+	return j.thisMac().Jobs[r.Label] != nil
+}
+
 func (j *Jobs) Overrides(context.Context, contract.Domain) map[string]bool {
 	j.w.Lock()
 	defer j.w.Unlock()
