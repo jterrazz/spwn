@@ -106,24 +106,34 @@ final class Trial: ObservableObject {
 }
 
 // invariant: under any STATION_TRIAL_ flag, each opening logs one line per display
-// frame, `open t=<ms since the window was shown> frame=<n> glass=<x y w h>`, for its
-// first `span` seconds, so the capture rig reads whether the panel's outline moves
-// between two frames.
+// frame, `<what> t=<ms since it began> frame=<n> glass=<x y w h> gen=<word>`, for its
+// first `span` seconds: `open` from the window shown, `push` from a page opened over
+// it, for `pushSpan`. The capture rig reads whether the panel's outline moves between
+// two frames, and the bench how many content generations (PanelState.generation) an
+// opening draws before its last.
 @MainActor
 final class OpeningLog: NSObject {
     private var link: CADisplayLink?
     private var started = Date()
     private var frames = 0
+    private var what = "open"
+    private var span = OpeningLog.span
     private var report: ((String) -> Void)?
+    private var generation: (() -> String)?
     private weak var panel: NSWindow?
 
     // value: past the height's own 340 ms morph, which the first sizes of a content can start.
     static let span = 1.0
+    // value: past the slowest machine page the bench meets on a lone Mac.
+    static let pushSpan = 6.0
 
-    func begin(_ panel: NSWindow, report: @escaping (String) -> Void) {
+    func begin(_ panel: NSWindow, what: String = "open", report: @escaping (String) -> Void, generation: (() -> String)?) {
         end()
         self.panel = panel
         self.report = report
+        self.generation = generation
+        self.what = what
+        span = what == "open" ? Self.span : Self.pushSpan
         started = Date()
         frames = 0
         link = panel.displayLink(target: self, selector: #selector(tick(_:)))
@@ -138,9 +148,59 @@ final class OpeningLog: NSObject {
     @objc private func tick(_: CADisplayLink) {
         guard let panel else { return end() }
         let t = Date().timeIntervalSince(started)
-        guard t < Self.span else { return end() }
+        guard t < span else { return end() }
         frames += 1
         let glass = panel.frame.insetBy(dx: StatusPanel.shade, dy: StatusPanel.shade)
-        report?("open t=\(Int(t * 1000)) frame=\(frames) glass=\(StatusPanel.frame(glass))")
+        report?("\(what) t=\(Int(t * 1000)) frame=\(frames) glass=\(StatusPanel.frame(glass)) gen=\(generation?() ?? "-")")
+    }
+}
+
+// invariant: STATION_TRIAL_BENCH=<n> (with STATION_TRIAL_FRAMES=1) makes the app its
+// own bench over the engine it reaches: once Home is drawn it opens the panel n times,
+// then opens This Mac's page n times, each from a closed panel, and logs `bench open
+// <i>` or `bench push <i>` before each, then `bench done`. The frames of each are
+// OpeningLog's; the rig reads them back (capture/bench.py).
+@MainActor
+final class Bench {
+    static let runs = Int(Trial.environment["STATION_TRIAL_BENCH"] ?? "") ?? 0
+
+    // value: an opening is held past OpeningLog's spans, then the panel rests closed.
+    static let held = 1.5
+    static let rest = 0.6
+
+    let panel: StatusPanel
+    let model: Model
+    let log: (String) -> Void
+
+    init(panel: StatusPanel, model: Model, log: @escaping (String) -> Void) {
+        self.panel = panel
+        self.model = model
+        self.log = log
+    }
+
+    func run() async {
+        for _ in 0 ..< 120 where model.state.page?.header == nil {
+            try? await Task.sleep(for: .milliseconds(500))
+        }
+        guard let mac = model.state.page?.context?.machine else { return log("bench no-home") }
+        log("bench home machine=\(mac)")
+        for i in 0 ..< Self.runs {
+            log("bench open \(i)")
+            panel.show()
+            try? await Task.sleep(for: .seconds(Self.held))
+            panel.hide()
+            try? await Task.sleep(for: .seconds(Self.rest))
+        }
+        for i in 0 ..< Self.runs {
+            panel.show()
+            try? await Task.sleep(for: .seconds(Self.rest))
+            log("bench push \(i)")
+            model.openMachine(mac)
+            panel.pushed()
+            try? await Task.sleep(for: .seconds(OpeningLog.pushSpan + 0.5))
+            panel.hide()
+            try? await Task.sleep(for: .seconds(Self.rest))
+        }
+        log("bench done")
     }
 }

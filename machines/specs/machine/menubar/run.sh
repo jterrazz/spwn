@@ -24,6 +24,10 @@
 #   STATION_CAPTURE_ITEM=x,y,w,h gives old's item frame, STATION_CAPTURE_PAGE=<story>
 #   the home story served (home.needs by default). native and opening add the wash
 #   and zoom measures (capture/tint.py, opening.py), which fail the run when they fail.
+#   STATION_CAPTURE_SET=bench is the bench alone: the tree's engine is built in the
+#   guest by the pinned Go and serves the app in place of the fake one, the app
+#   opens its panel and This Mac's page STATION_BENCH_RUNS times each (50 unless
+#   named), and capture/bench.py prints the p50 and p95 into the log and bench.json.
 set -uo pipefail
 
 label=${1:-}
@@ -157,14 +161,34 @@ if [ $capture -eq 1 ]; then
   venv="$out/menubar-venv"
   [ -x "$venv/bin/python" ] || { python3 -m venv "$venv" && "$venv/bin/pip" install -q vncdotool pillow numpy scipy; } >> "$log" 2>&1 || fail "the capture's venv"
   "$venv/bin/python" -I "$suite/menubar/capture/measure_test.py" >> "$log" 2>&1 || fail "the measures' own test (capture/measure_test.py), see $log"
+  sets=${STATION_CAPTURE_SET:-walls,behave,trial}
+  if [ "$sets" = bench ]; then
+    # invariant: the bench's engine is the tree's, built by the Go go.work names,
+    # its archive checked against the digest pinned here before it is unpacked.
+    go_version=$(awk '$1=="go"{print $2; exit}' "$repo/go.work")
+    case "$go_version" in
+      1.27.3) go_digest=dd3908cf20959d798c1e06ebe5b72213f0505ce01373b40ce3110975a6cd99c2 ;;
+      *) fail "no pinned digest for go $go_version: add it from go.dev/dl/?mode=json" ;;
+    esac
+    t=$SECONDS
+    in_vm "set -e; cd ~; curl -fsSLo go.tgz https://go.dev/dl/go$go_version.darwin-arm64.tar.gz; echo '$go_digest  go.tgz' | shasum -a 256 -c -; mkdir -p gotool cap; tar -xzf go.tgz -C gotool; cd $vm_root && ~/gotool/go/bin/go build -o ~/cap/station ./apps/engine/cmd/station" >> "$log" 2>&1 || fail "build the engine in the VM"
+    say "-- built the engine in $((SECONDS - t)) s"
+  fi
   t=$SECONDS
   in_vm "zsh -lc 'cd $vm_root && make menubar'" >> "$log" 2>&1 || fail "make menubar in the VM"
   say "-- built Station.app in $((SECONDS - t)) s"
   shots="$work/capture"
   STATION_VM_ROOT="$vm_root" "$venv/bin/python" -I "$suite/menubar/capture/drive.py" "$ip" "$ssh_key" "$url" "$repo" "$shots" \
-    "${STATION_CAPTURE_SET:-walls,behave,trial}" "${STATION_CAPTURE_ITEM:-}" 2>&1 | tee -a "$log"
+    "$sets" "${STATION_CAPTURE_ITEM:-}" 2>&1 | tee -a "$log"
   code=${PIPESTATUS[0]}
   in_vm 'cat ~/cap/replay.log' >> "$log" 2>&1
+  if [ "$sets" = bench ]; then
+    [ $code -eq 0 ] || fail "bench: drive.py exit $code"
+    "$venv/bin/python" -I "$suite/menubar/capture/bench.py" "$shots" 2>&1 | tee -a "$log"
+    [ "${PIPESTATUS[0]}" -eq 0 ] || fail "bench: no opening measured, see $shots"
+    say "PASS bench: $shots/bench.json"
+    exit 0
+  fi
   "$venv/bin/python" -I "$suite/menubar/capture/measure.py" "$shots" "$repo/apps/menubar/tests/station-kit-tests/__expected__/stories" \
     ${STATION_CAPTURE_M1:+"$STATION_CAPTURE_M1"} 2>&1 | tee -a "$log"
   measured=${PIPESTATUS[0]}

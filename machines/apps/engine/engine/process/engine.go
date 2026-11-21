@@ -106,6 +106,9 @@ type Options struct {
 	// value: where the engine keeps the binary it started from, at each
 	// start; nil keeps none.
 	Records engine.Records
+	// value: how many commands this process has run since it started; nil
+	// counts none, and the opening of a watch then logs no commands.
+	Commands func() int64
 	// value: this engine as a client sees it: a second engine asks it first.
 	Peer Peer
 	// value: the grant removals a VM could not receive, retried here; nil

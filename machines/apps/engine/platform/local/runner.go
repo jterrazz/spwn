@@ -16,6 +16,12 @@ import (
 	"time"
 )
 
+// value: every command a runner of this process started, counted for the
+// engine's log of a watch's opening.
+var ran atomic.Int64
+
+func Ran() int64 { return ran.Load() }
+
 type runner struct {
 	env     []string
 	dirs    []string
@@ -65,6 +71,7 @@ func (r *runner) command(ctx context.Context, c Cmd) (context.Context, *exec.Cmd
 	if c.Timeout > 0 {
 		ctx, cancel = context.WithTimeout(ctx, c.Timeout)
 	}
+	ran.Add(1)
 	cmd := exec.CommandContext(ctx, path, c.Args...)
 	cmd.Dir = c.Dir
 	cmd.Env = append(append([]string{}, r.env...), c.Env...)
@@ -392,6 +399,7 @@ func (r *runner) Start(c Cmd, logPath string) (int, error) {
 		return 0, err
 	}
 	defer func() { _ = log.Close() }()
+	ran.Add(1)
 	cmd := exec.Command(path, c.Args...)
 	cmd.Dir = c.Dir
 	cmd.Env = append(append([]string{}, r.env...), c.Env...)

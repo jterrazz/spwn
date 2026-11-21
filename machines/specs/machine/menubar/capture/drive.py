@@ -9,7 +9,10 @@ usage: drive.py <ip> <ssh key> <vnc url> <repo> <out dir> <set> [old item x,y,w,
   build with no frame log: the item's frame is given and the panel is found
   by what the click changed), native (the Apple menu over the same walls, twice,
   for the wash measure) and opening (the panel's opening, sampled frame by
-  frame after a click held as a hand holds it).
+  frame after a click held as a hand holds it) and bench (the app's own bench,
+  STATION_TRIAL_BENCH, over the real engine of the tree, which run.sh built as
+  ~/cap/station: the panel and This Mac's page opened BENCH times each, read
+  by bench.py).
 """
 
 import json
@@ -84,12 +87,21 @@ class Rig:
     def gui(self, cmd, check=False):
         return self.ssh(f"sudo -n launchctl asuser $(id -u) sudo -n -u admin {cmd}", check)
 
-    def setup(self):
+    def setup(self, engine=False):
         revision = re.search(r"pageRevision = (\d+)", open(os.path.join(self.repo, "apps/menubar/sources/station-kit/page/Page.swift"), encoding="utf-8").read()).group(1)
         self.ssh("mkdir -p ~/cap ~/.local/state/station; pkill -f '[r]eplay.py'; true")
         self.ssh("printf 'tell application \"Terminal\" to quit\\n' > ~/cap/quit.scpt")
         self.gui("osascript ~/cap/quit.scpt")
-        self.ssh(f"nohup python3 {CAPTURE}/replay.py {PAGE} ~/.local/state/station/engine.sock {revision} > ~/cap/replay.log 2>&1 < /dev/null &")
+        if engine:
+            self.ssh("pkill -f '[c]ap/station engine run'; rm -f ~/.local/state/station/engine.sock; true")
+            self.gui("sh -c 'nohup ~/cap/station engine run > ~/cap/engine.log 2>&1 < /dev/null &'")
+            for _ in range(60):
+                if self.ssh("test -S ~/.local/state/station/engine.sock && echo up").strip() == "up":
+                    break
+                time.sleep(1)
+            self.say(f"   engine: {self.ssh('ls -l ~/.local/state/station/engine.sock; tail -3 ~/cap/engine.log').strip()}")
+        else:
+            self.ssh(f"nohup python3 {CAPTURE}/replay.py {PAGE} ~/.local/state/station/engine.sock {revision} > ~/cap/replay.log 2>&1 < /dev/null &")
         self.wake()
         self.settle()
 
@@ -384,6 +396,24 @@ class Rig:
             self.say(f"-- behave {gesture}: {results[gesture]}")
         return results
 
+    # value: the bench is the app's own (Bench in Trial.swift): the rig launches it over
+    # the real engine and waits for its last line, then keeps the app's and the engine's logs.
+    def bench(self, runs):
+        self.appearance("dark")
+        line = self.launch({"STATION_TRIAL_FRAMES": "1", "STATION_TRIAL_BENCH": str(runs)})
+        if not line:
+            self.say("FAIL bench: the app logged no item frame")
+            return None
+        deadline = time.time() + runs * 12 + 120
+        while time.time() < deadline and not self.last("bench done") and not self.last("bench no-home"):
+            time.sleep(10)
+        for name, path in (("bench-app.log", "~/cap/app.log"), ("bench-engine.log", "~/cap/engine.log")):
+            with open(os.path.join(self.out, name), "w", encoding="utf-8") as f:
+                f.write(self.ssh(f"cat {path}"))
+        done = bool(self.last("bench done"))
+        self.say(f"-- bench runs={runs} done={done}")
+        return {"runs": runs} if done else None
+
     def trial(self, keyboard):
         self.appearance("dark", keyboard=keyboard)
         line = self.launch({"STATION_TRIAL": "1", "STATION_TRIAL_FPS": "0", "STATION_TRIAL_CYCLE": "1"})
@@ -410,7 +440,7 @@ def main():
     sets = sets.split(",")
     os.makedirs(out, exist_ok=True)
     rig = Rig(ip, key, url, repo, out)
-    rig.setup()
+    rig.setup(engine="bench" in sets)
     frames = {"STATION_TRIAL_FRAMES": "1"}
     shots = []
     old_item = None
@@ -450,6 +480,8 @@ def main():
     if "trial" in sets:
         for keyboard in (3, 0):
             rig.trial(keyboard)
+    if "bench" in sets:
+        openings.append(rig.bench(int(os.environ.get("STATION_BENCH_RUNS", "50"))))
     rig.appearance("dark")
     json.dump([s for s in shots if s], open(os.path.join(out, "shots.json"), "w"), indent=1)
     rig.vnc.disconnect()

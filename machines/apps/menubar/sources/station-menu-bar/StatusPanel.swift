@@ -22,17 +22,19 @@ final class StatusPanel: NSObject, NSWindowDelegate {
     private let opened: () -> Void
     private let closed: () -> Void
     private let report: ((String) -> Void)?
+    private let generation: (() -> String)?
     private var outside: Any?
     private var press: Any?
     private var anchor = CGPoint.zero
     private var placing = false
     private var pending: CGSize?
 
-    init(content: @escaping () -> AnyView, opened: @escaping () -> Void, closed: @escaping () -> Void, report: ((String) -> Void)? = nil) {
+    init(content: @escaping () -> AnyView, opened: @escaping () -> Void, closed: @escaping () -> Void, report: ((String) -> Void)? = nil, generation: (() -> String)? = nil) {
         self.content = content
         self.opened = opened
         self.closed = closed
         self.report = report
+        self.generation = generation
         super.init()
         panel.identifier = PanelWindow.id
         panel.isOpaque = false
@@ -140,8 +142,15 @@ final class StatusPanel: NSObject, NSWindowDelegate {
             MainActor.assumeIsolated { self?.hide() }
         }
         report?("opened key=\(panel.isKeyWindow)")
-        if let report { opening.begin(panel, report: report) }
+        if let report { opening.begin(panel, report: report, generation: generation) }
         opened()
+    }
+
+    // value: a page opened over the one shown, logged frame by frame as an
+    // opening is, under the trial's flags.
+    func pushed() {
+        guard shown, let report else { return }
+        opening.begin(panel, what: "push", report: report, generation: generation)
     }
 
     func hide() {
