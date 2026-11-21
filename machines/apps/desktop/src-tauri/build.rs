@@ -58,6 +58,7 @@ fn install() -> String {
         ("INSTALL_LINE", "/line"),
         ("INSTALL_DIR", "/dir"),
         ("CORE_BINARY", "/binary"),
+        ("BUNDLED_ENGINE", "/bundled"),
         ("RECORD_PATH", "/record/path"),
         ("INSTALLED_PATH", "/installed/path"),
     ]

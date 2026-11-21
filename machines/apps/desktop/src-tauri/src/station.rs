@@ -40,6 +40,7 @@ pub fn recorded(record: &Path) -> Option<PathBuf> {
 pub struct Where<'a> {
     pub faked: Option<&'a Path>,
     pub said: Option<&'a Path>,
+    pub bundled: Option<&'a Path>,
     pub home: &'a Path,
     pub xdg_state: Option<OsString>,
 }
@@ -51,6 +52,7 @@ pub fn station_of(at: Where<'_>) -> Option<PathBuf> {
     let state = state_root(at.home, at.xdg_state);
     [
         at.said.map(Path::to_path_buf),
+        at.bundled.map(Path::to_path_buf),
         recorded(&state.join(RECORD_PATH)),
         recorded(&state.join(INSTALLED_PATH)),
         Some(under_home(INSTALL_DIR, at.home).join(CORE_BINARY)),
@@ -58,6 +60,16 @@ pub fn station_of(at: Where<'_>) -> Option<PathBuf> {
     .into_iter()
     .flatten()
     .find(|path| usable(path))
+}
+
+// value: the engine Spwn.app carries beside the window's own executable
+// (ADR-073, mode A); none when the window runs outside a bundle.
+pub fn bundled_of(executable: &Path) -> Option<PathBuf> {
+    let bundle = executable.parent()?.parent()?.parent()?;
+    bundle
+        .extension()
+        .is_some_and(|extension| extension == "app")
+        .then(|| bundle.join(BUNDLED_ENGINE))
 }
 
 #[cfg(test)]

@@ -17,7 +17,7 @@ use tauri::State;
 
 use crate::engine::Bridge;
 use crate::opener::Refusal;
-use crate::station::{station_of, Where, INSTALL_LINE};
+use crate::station::{bundled_of, station_of, Where, INSTALL_LINE};
 
 pub const SEARCH_PATH: &str = "/usr/bin:/bin:/usr/sbin:/sbin";
 pub const FALLBACK_SHELL: &str = "/bin/zsh";
@@ -334,9 +334,11 @@ fn child_env() -> Vec<(String, OsString)> {
 }
 
 fn station(faked: Option<&Path>, said: Option<&Path>) -> Option<PathBuf> {
+    let bundled = env::current_exe().ok().and_then(|exe| bundled_of(&exe));
     station_of(Where {
         faked,
         said,
+        bundled: bundled.as_deref(),
         home: &home(),
         xdg_state: env::var_os("XDG_STATE_HOME"),
     })

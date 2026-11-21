@@ -5,8 +5,8 @@ use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicUsize, Ordering};
 
 use super::{
-    recorded, state_root, station_of, under_home, usable, Where, CORE_BINARY, INSTALLED_PATH,
-    INSTALL_DIR, INSTALL_LINE, RECORD_PATH,
+    bundled_of, recorded, state_root, station_of, under_home, usable, Where, BUNDLED_ENGINE,
+    CORE_BINARY, INSTALLED_PATH, INSTALL_DIR, INSTALL_LINE, RECORD_PATH,
 };
 
 fn scratch() -> PathBuf {
@@ -49,6 +49,7 @@ fn looked(home: &Path, said: Option<&Path>) -> Option<PathBuf> {
     station_of(Where {
         faked: None,
         said,
+        bundled: None,
         home,
         xdg_state: None,
     })
@@ -64,6 +65,7 @@ fn the_install_constants_are_the_packages_install_json() {
     assert_eq!(INSTALL_LINE, "curl -fsSL https://spwn.sh/install.sh | bash");
     assert_eq!(INSTALL_DIR, "~/.local/bin");
     assert_eq!(CORE_BINARY, "station");
+    assert_eq!(BUNDLED_ENGINE, "Contents/MacOS/Spwn Engine");
     assert_eq!(RECORD_PATH, "station/engine.json");
     assert_eq!(INSTALLED_PATH, "station/installed.json");
 }
@@ -148,6 +150,7 @@ fn the_install_record_is_read_under_xdg_state_home_when_it_is_absolute() {
     let found = station_of(Where {
         faked: None,
         said: None,
+        bundled: None,
         home: &home,
         xdg_state: Some(state.into_os_string()),
     });
@@ -293,10 +296,48 @@ fn a_fake_folder_is_the_one_place_looked_at() {
     let found = station_of(Where {
         faked: Some(&fake),
         said: Some(&other.join("station")),
+        bundled: None,
         home: &other,
         xdg_state: None,
     });
 
     // Then - it is the fake's station, never what the engine said
     assert_eq!(found, Some(fake.join("station")));
+}
+
+#[test]
+fn the_engine_beside_the_window_in_its_bundle_comes_before_any_record() {
+    // Given - a bundle holding the window and the engine, and an engine record naming a bare station
+    let [home, apps] = [scratch(), scratch()];
+    let bundle = apps.join("Spwn.app");
+    let engine = bundle.join(BUNDLED_ENGINE);
+    executable(&engine, 0o755);
+    let bare = home.join(".local/bin/station");
+    executable(&bare, 0o755);
+    record(&home, &bare);
+
+    // When - the window running from that bundle looks for station
+    let bundled = bundled_of(&bundle.join("Contents/MacOS/spwn-window"));
+    let found = station_of(Where {
+        faked: None,
+        said: None,
+        bundled: bundled.as_deref(),
+        home: &home,
+        xdg_state: None,
+    });
+
+    // Then - it is the bundle's engine
+    assert_eq!(bundled, Some(engine.clone()));
+    assert_eq!(found, Some(engine));
+}
+
+#[test]
+fn a_window_outside_a_bundle_carries_no_engine() {
+    // Given - the window's binary in a cargo target folder
+
+    // When - its bundled engine is looked for
+    let bundled = bundled_of(Path::new("/w/target/release/spwn-window"));
+
+    // Then - there is none
+    assert_eq!(bundled, None);
 }
