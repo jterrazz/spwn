@@ -3,7 +3,8 @@
 Usage: record.py [--call=<call>...] [<world>...], every world of world.py's WORLDS when none is named, in a Linux VM
 only: it asks `station guest serve --stdio` of the world build (world.py), the door
 specs/architecture/answers_test.go asks, over a fresh copy of each world in a temporary HOME (one per request,
-so no answer depends on what another request did to the world), and writes one file per call:
+so no answer depends on what another request did to the world; each is a copy of the HOME the world's engines
+turned once, door.py's `turned`), and writes one file per call:
 apps/desktop/src/fixtures/worlds/<world>/<call>.json, every request of that call the pages make in that world,
 with its answers. The recorder's tables are the one list of what is asked: a page that reads a new call, or the same
 call with a new input, adds its requests to `asks` (`follows`, when they depend on another answer; ALSO, when one
