@@ -424,6 +424,18 @@
       "out": "StartReport"
     },
     {
+      "name": "engine.state",
+      "schema": "station.engine.state/v1",
+      "where": "in-engine",
+      "errors": [
+        "engine.state-no-key",
+        "engine.state-unknown-key"
+      ],
+      "in": "StateIn",
+      "out": "StateFrame",
+      "watch": true
+    },
+    {
       "name": "engine.stop",
       "schema": "station.engine.stop/v1",
       "where": "at-target",

@@ -121,10 +121,11 @@ func (h *hub) listening() bool {
 }
 
 // invariant: the daemon's own state is compared each tick while a client
-// subscribes, so a VM, guest or reservation change reaches the stream within a
-// tick; with no subscriber nothing is read.
+// subscribes or readers keep the store, so a VM, guest or reservation change
+// reaches the stream and the store within a tick; with neither nothing is
+// read.
 func (d *Engine) watchState() {
-	if !d.hub.listening() {
+	if !d.hub.listening() && d.o.Reading == nil {
 		return
 	}
 	now := string(mustJSON([]any{d.vmViews(), d.macPorts("")}))
@@ -134,6 +135,9 @@ func (d *Engine) watchState() {
 	d.hub.mu.Unlock()
 	if moved {
 		d.hub.changed()
+		if d.o.Reading != nil {
+			d.o.Reading.Moved()
+		}
 	}
 }
 

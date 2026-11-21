@@ -1,0 +1,14 @@
+description: 'the mini answers the slices its own engine keeps'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.this_mac = "mac-mini"'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .error then .error | {code, field} elif .out.event == "opened" then [.out.event, .out.stream, .out.state, .out.fit.verdict] else [.out.event, (.out.slices | to_entries | map([.key, .value.state, (.value.value != null)]))] end'''
+      stdin: |
+          {"v":2,"id":"1","watch":"engine.state","in":{"keys":["local"],"revision":1}}
+      exit: 0
+      stdout: |
+          ["opened","station.state/v1",1,"fits"]
+          ["snapshot",[["activity:infra","fresh",true],["activity:mac-mini","fresh",true],["awake:mac-mini","fresh",true],["mac:mac-mini","fresh",true],["overview:infra","fresh",true],["overview:mac-mini","fresh",true],["ports:mac-mini","fresh",true],["signins:infra","fresh",true],["signins:mac-mini","fresh",true]]]

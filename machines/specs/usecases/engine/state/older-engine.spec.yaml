@@ -1,0 +1,11 @@
+description: 'a client of a newer state revision is told the engine is older, and sent no slice'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .error then .error | {code, field} elif .out.event == "opened" then [.out.event, .out.stream, .out.state, .out.fit.verdict] else [.out.event, (.out.slices | to_entries | map([.key, .value.state, (.value.value != null)]))] end'''
+      stdin: |
+          {"v":2,"id":"1","watch":"engine.state","in":{"keys":["local"],"revision":2}}
+      exit: 0
+      stdout: |
+          ["opened","station.state/v1",1,"engine-older"]

@@ -401,6 +401,7 @@ func wordedEnums() []worded {
 		{fail.Field(""), map[string]word{
 			string(fail.FieldLabel): plain("label"),
 			string(fail.FieldValue): plain("value"),
+			string(fail.FieldKeys):  plain("keys"),
 		}},
 		{page.Noun(""), map[string]word{
 			string(page.NounMachine):       {Word: "Machines", One: "machine", Other: "machines", Tone: verdict.Plain},

@@ -1,0 +1,149 @@
+{
+  "$defs": {
+    "engine.Fit": {
+      "additionalProperties": false,
+      "properties": {
+        "app": {
+          "type": "integer"
+        },
+        "engine": {
+          "type": "integer"
+        },
+        "verdict": {
+          "enum": [
+            "",
+            "app-older",
+            "engine-older",
+            "fits"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "app",
+        "engine",
+        "verdict"
+      ],
+      "type": "object"
+    },
+    "engine.SliceOut": {
+      "additionalProperties": false,
+      "properties": {
+        "hash": {
+          "type": "string"
+        },
+        "read_at": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "value": {},
+        "why": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "state"
+      ],
+      "type": "object"
+    },
+    "engine.StateFrame": {
+      "additionalProperties": false,
+      "properties": {
+        "at": {
+          "type": "string"
+        },
+        "epoch": {
+          "type": "string"
+        },
+        "event": {
+          "type": "string"
+        },
+        "fit": {
+          "$ref": "#/$defs/engine.Fit"
+        },
+        "gone": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "page": {
+          "type": "integer"
+        },
+        "rev": {
+          "type": "integer"
+        },
+        "slices": {
+          "additionalProperties": {
+            "$ref": "#/$defs/engine.SliceOut"
+          },
+          "type": "object"
+        },
+        "state": {
+          "type": "integer"
+        },
+        "stream": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "event",
+        "rev"
+      ],
+      "type": "object"
+    },
+    "engine.StateIn": {
+      "additionalProperties": false,
+      "properties": {
+        "hold": {
+          "type": "boolean"
+        },
+        "keys": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "revision": {
+          "type": "integer"
+        },
+        "since": {
+          "$ref": "#/$defs/engine.StateSince"
+        }
+      },
+      "type": "object"
+    },
+    "engine.StateSince": {
+      "additionalProperties": false,
+      "properties": {
+        "epoch": {
+          "type": "string"
+        },
+        "rev": {
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/spwn/blob/main/machines/packages/api/schemas/calls/engine.state.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The watch engine.state of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/engine.StateIn"
+    },
+    "out": {
+      "$ref": "#/$defs/engine.StateFrame"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "engine.state",
+  "type": "object"
+}

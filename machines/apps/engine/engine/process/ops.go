@@ -120,5 +120,8 @@ func (d *Engine) Refresh(pages []string) error {
 		return err
 	}
 	d.hub.refreshed(pages)
+	if d.o.Reading != nil {
+		d.o.Reading.DueAll()
+	}
 	return nil
 }

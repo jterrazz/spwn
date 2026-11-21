@@ -40,6 +40,8 @@ import (
 	enginecalls "github.com/jterrazz/studio-station/apps/engine/engine/calls"
 	"github.com/jterrazz/studio-station/apps/engine/engine/feeds"
 	"github.com/jterrazz/studio-station/apps/engine/engine/process"
+	"github.com/jterrazz/studio-station/apps/engine/engine/readers"
+	"github.com/jterrazz/studio-station/apps/engine/engine/store"
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/machines/adapter/dial"
 	machinescalls "github.com/jterrazz/studio-station/apps/engine/machines/calls"
@@ -107,6 +109,7 @@ func (m machine) engine(env kit.Env) *process.Engine {
 		},
 	}
 	jobs := append([]process.Tick{sample.Run}, m.macJobs(calls)...)
+	state := m.readers(calls, menubar.Report, func() awake.View { return d.AwakeView() })
 	d = process.New(engineMac{m.sys}, engineHypervisor{m.hypervisor()}, guests, m.machines(false), tailnet, process.Stores{Ports: m.stores.ports(), Reservations: m.stores.reservations}, process.Options{
 		Remember: func(vm string, port int, stopped bool) error {
 			return portscalls.Remember(m.stores.ports(), vm, port, stopped)
@@ -126,6 +129,7 @@ func (m machine) engine(env kit.Env) *process.Engine {
 		Changes:      driftChanges(),
 		Beside:       m.beside(),
 		LocalNetwork: m.localNetwork(),
+		Reading:      state,
 		Kept: func(ctx context.Context, line corejournal.Line) {
 			if m.kind == catalog.Mac {
 				_ = journalcalls.Keep(ctx, m.journalDeps(), journalcalls.Ran{Machine: m.profile.Ref.Name, By: corejournal.ByStation}, line)
@@ -141,6 +145,21 @@ func (m machine) engine(env kit.Env) *process.Engine {
 	m.far.engine = d
 	d.ServeWith(m.engineServer(d, registry, calls))
 	return d
+}
+
+// invariant: the engine's store is one engine's life, its epoch that
+// engine's start; its readers run beside the tick, inline in a world, so a
+// command's first frame reads what its engine read at its first tick.
+func (m machine) readers(calls call.Router, report func(awake.View) *awake.Report, view func() awake.View) *readers.Set {
+	now := m.sys.Clock.Now()
+	st := store.New(store.EpochOf(cmp.Or(m.engineStarted(), now), os.Getpid()), now, func(err error) *fail.Error { return kit.Translate(err, "") })
+	var run func(func())
+	lazy := m.world != nil
+	if lazy {
+		run = func(f func()) { f() }
+	}
+	own := readers.Local{Calls: calls, ThisMac: m.where.Machine, Awake: func() awake.Report { return *report(view()) }}
+	return readers.New(readers.Options{Store: st, Clock: m.sys.Clock, Run: run, Readers: own.Readers(), Lazy: lazy})
 }
 
 // invariant: a workspace's reading of its file is machinefile.drift's
@@ -419,8 +438,8 @@ func (r reservationReleaser) ReleaseVM(ctx context.Context, vm string) error {
 	if err := portscalls.ForgetDeclarations(ctx, r.m.stores.declarations, vm); err != nil {
 		return err
 	}
-	store := r.m.stores.reservations
-	reservations, err := store.List(ctx)
+	reserved := r.m.stores.reservations
+	reservations, err := reserved.List(ctx)
 	if err != nil {
 		return err
 	}
@@ -436,7 +455,7 @@ func (r reservationReleaser) ReleaseVM(ctx context.Context, vm string) error {
 			_ = tn.Unshare(ctx, ports.ShareOf(l, mode))
 		}
 	}
-	return portscalls.SaveReservations(ctx, store, kept)
+	return portscalls.SaveReservations(ctx, reserved, kept)
 }
 
 type engineInstaller struct {

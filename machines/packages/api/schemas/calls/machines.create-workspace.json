@@ -286,6 +286,8 @@
             "disk.unknown",
             "engine.release-unreachable",
             "engine.start-failed",
+            "engine.state-no-key",
+            "engine.state-unknown-key",
             "grant.cannot-deliver",
             "grant.machine-stopped",
             "grant.many-passwords",

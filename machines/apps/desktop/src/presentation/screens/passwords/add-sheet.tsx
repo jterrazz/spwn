@@ -14,12 +14,13 @@ import type { Asked } from './use-add';
 
 const TITLE = 'Add a password';
 
-// invariant: a refusal is drawn on the input its `field` names, and in the sheet's foot when it names none.
+// invariant: a refusal is drawn on the input its `field` names, and in the sheet's foot when it names no input of the sheet.
 function placeOf(error: EngineError | undefined): Place | undefined {
     if (error === undefined) {
         return undefined;
     }
-    return error.wire?.field ?? 'foot';
+    const field = error.wire?.field;
+    return field === 'label' || field === 'value' ? field : 'foot';
 }
 
 type ActionsProps = {

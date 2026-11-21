@@ -1,0 +1,15 @@
+description: 'two engines of an unchanged world answer the same revision and hash for every slice of This Mac'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out.event == "snapshot") | .out | {rev, hashes: (.slices | map_values(.hash))}'' > first.json'
+      stdin: |
+          {"v":2,"id":"1","watch":"engine.state","in":{"keys":["mac:macbook-pro","ports:macbook-pro","overview:*","signins:*"],"revision":1}}
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out.event == "snapshot") | .out | {rev, hashes: (.slices | map_values(.hash))}'' > second.json; /usr/bin/jq -s -c ''[(.[0] == .[1]), (.[0].hashes | length > 0)]'' first.json second.json'
+      stdin: |
+          {"v":2,"id":"1","watch":"engine.state","in":{"keys":["mac:macbook-pro","ports:macbook-pro","overview:*","signins:*"],"revision":1}}
+      exit: 0
+      stdout: |
+          [true,true]

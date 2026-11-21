@@ -39,7 +39,7 @@ func familyInside(family, rest string) bool {
 	switch rest {
 	case "", "contract", "contract/contracttest", "calls":
 		return true
-	case "process", "jobs", "feeds", "store":
+	case "process", "jobs", "feeds", "store", "readers":
 		return family == "engine"
 	}
 	tech, ok := strings.CutPrefix(rest, "adapter/")

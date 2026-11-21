@@ -141,6 +141,12 @@ func Codes() map[fail.Code]Wording {
 		enginecalls.ReleaseUnreachable: func(e *fail.Error) (string, string) {
 			return "the latest release was not read: " + e.Detail["cause"], "station engine"
 		},
+		enginecalls.StateNoKey: func(*fail.Error) (string, string) {
+			return "the state was asked with no key: name a key, <family>:* or local", "station engine"
+		},
+		enginecalls.StateUnknownKey: func(e *fail.Error) (string, string) {
+			return e.Subject + " is no key of the engine's state: name a key, <family>:* or local", "station engine"
+		},
 		enginecalls.VMStopped: func(e *fail.Error) (string, string) {
 			return carried(e, "the VM is stopped", "station machines")
 		},

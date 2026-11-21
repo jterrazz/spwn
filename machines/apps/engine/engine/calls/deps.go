@@ -2,6 +2,7 @@ package calls
 
 import (
 	"context"
+	"encoding/json"
 	"sync"
 	"time"
 
@@ -28,6 +29,11 @@ type Deps struct {
 	// value: held from the read of what the engine kept to the write of its
 	// next asks, one for the Mac, shared by every ask of it.
 	Asking *sync.Mutex
+	// value: the revision of station.page/v1 the engine's pages speak.
+	Page int
+	// value: engine.state asked of this Mac's engine, for a door that is
+	// not the engine itself.
+	Forward func(ctx context.Context, in engine.StateIn) (<-chan json.RawMessage, error)
 }
 
 type Installer interface {
@@ -58,5 +64,5 @@ var Applies machine.Applies = func(p machine.Profile) machine.Verdict {
 }
 
 func All(d Deps) []call.Handler {
-	return []call.Handler{call.Bind(Read, d), call.Bind(Start, d), call.Bind(Stop, d), call.Bind(ReadRelease, d), call.Bind(RefreshRelease, d), call.Bind(ReadLog, d)}
+	return []call.Handler{call.Bind(Read, d), call.Bind(Start, d), call.Bind(Stop, d), call.Bind(ReadRelease, d), call.Bind(RefreshRelease, d), call.Bind(ReadLog, d), call.BindWatch(StateWatch, d)}
 }

@@ -519,6 +519,16 @@
       "Word": "Engine did not start",
       "Tone": "plain"
     },
+    "engine.state-no-key": {
+      "Word": "state no key",
+      "Detail": "engine",
+      "Tone": "plain"
+    },
+    "engine.state-unknown-key": {
+      "Word": "state unknown key",
+      "Detail": "engine",
+      "Tone": "plain"
+    },
     "grant.cannot-deliver": {
       "Word": "cannot deliver",
       "Detail": "grant",
@@ -1105,6 +1115,10 @@
     }
   },
   "CoreFailField": {
+    "keys": {
+      "Word": "keys",
+      "Tone": "plain"
+    },
     "label": {
       "Word": "label",
       "Tone": "plain"

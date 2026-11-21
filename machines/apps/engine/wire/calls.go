@@ -2,12 +2,14 @@ package wire
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/activity"
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
 	"github.com/jterrazz/studio-station/apps/engine/engine/adapter/github"
+	"github.com/jterrazz/studio-station/apps/engine/page"
 	"github.com/jterrazz/studio-station/apps/engine/settings/adapter/docker"
 	"github.com/jterrazz/studio-station/apps/engine/settings/adapter/gitaliases"
 	"github.com/jterrazz/studio-station/apps/engine/ui/token"
@@ -178,7 +180,11 @@ func (m machine) engineDeps() enginecalls.Deps {
 	d := enginecalls.Deps{
 		Control: m.control(), Installer: engineInstaller{m: m}, Kind: m.profile.Kind,
 		Cache: m.stores.release, Version: m.engineVersion(), Arch: m.sys.Env.GOARCH(), Now: m.sys.Clock.Now,
-		Asking: &m.stores.asking,
+		Asking: &m.stores.asking, Page: page.Revision,
+		Forward: func(ctx context.Context, in engine.StateIn) (<-chan json.RawMessage, error) {
+			frames, err := m.engineAPI().c.Watch(ctx, enginecalls.StateWatch.Name, in)
+			return frames, downAs(err, &enginecalls.DownError{})
+		},
 	}
 	if m.world != nil {
 		d.Releases = m.world.releases()

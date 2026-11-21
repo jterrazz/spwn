@@ -55,10 +55,11 @@ type Field string
 const (
 	FieldLabel Field = "label"
 	FieldValue Field = "value"
+	FieldKeys  Field = "keys"
 )
 
 func (Field) Enum() []string {
-	return []string{string(FieldLabel), string(FieldValue)}
+	return []string{string(FieldLabel), string(FieldValue), string(FieldKeys)}
 }
 
 type Error struct {

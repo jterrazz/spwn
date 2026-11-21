@@ -129,7 +129,7 @@ func allowedModule(p place, pkg, rel string, test bool) bool {
 	case rowContracttest:
 		return isModel(rel) || isKernel(rel) || isContract(rel) || rel == "catalog" || rel == "world" || (own && isAdapter(rel) && strings.HasSuffix(rel, "/adapter/fake"))
 	case rowCalls:
-		return isModel(rel) || isContract(rel) || isCalls(rel) || isKernel(rel) || rel == "catalog"
+		return isModel(rel) || isContract(rel) || isCalls(rel) || isKernel(rel) || rel == "catalog" || (p.family == "engine" && rel == "engine/store")
 	case rowAdapter:
 		if isAdapter(rel) {
 			return false
@@ -141,7 +141,7 @@ func allowedModule(p place, pkg, rel string, test bool) bool {
 			return true
 		}
 		return isCalls(rel) || isModel(rel) || isContract(rel) || isKernel(rel) || rel == "catalog" ||
-			(topOf(rel) == "remote" && !isAdapter(rel)) || (topOf(rel) == "engine" && slices.Contains([]string{"process", "jobs", "feeds"}, restOf(rel)))
+			(topOf(rel) == "remote" && !isAdapter(rel)) || (topOf(rel) == "engine" && slices.Contains([]string{"process", "jobs", "feeds", "store"}, restOf(rel)))
 	case rowRemote:
 		return isKernel(rel) || isModel(rel) || (topOf(rel) == "remote" && !isAdapter(rel))
 	case rowPlatform:

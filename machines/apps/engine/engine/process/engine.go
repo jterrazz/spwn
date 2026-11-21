@@ -145,9 +145,21 @@ type Options struct {
 	Drift   func(ctx context.Context, vm string) model.KeptDrift
 	Changes []string
 	Beside  func(func())
+	// value: the readers that keep the engine's store warm (ADR-070), run
+	// at every tick; nil keeps no store.
+	Reading Reading
 	// value: how this Mac stands with macOS's Local Network approval of
 	// the engine, read now; nil, or an empty answer, where it cannot tell.
 	LocalNetwork func(ctx context.Context) model.LocalNetwork
+}
+
+type Reading interface {
+	// value: one tick: watched says a watch of pages is open, which holds
+	// the readers at their attached pace.
+	Tick(ctx context.Context, watched bool)
+	// value: makes due the readers of This Mac's own state, which moved.
+	Moved()
+	DueAll()
 }
 
 type Engine struct {
@@ -429,6 +441,9 @@ func (d *Engine) Serve(ctx context.Context, conn Stream) { d.ServeGuest(ctx, con
 
 func (d *Engine) ServeGuest(ctx context.Context, conn Stream, guest string) {
 	defer func() { _ = conn.Close() }()
+	if s, ok := d.o.Reading.(enginecalls.State); ok {
+		ctx = enginecalls.WithState(ctx, s)
+	}
 	if d.serve != nil {
 		d.serve(ctx, conn, guest)
 	}
@@ -452,6 +467,9 @@ func (d *Engine) step(ctx context.Context, tick int) {
 	d.tellBack(ctx)
 	d.rereadLocalNetwork(ctx)
 	d.watchState()
+	if d.o.Reading != nil {
+		d.o.Reading.Tick(ctx, d.hub.listening())
+	}
 	for _, job := range d.o.Jobs {
 		job(ctx)
 	}
