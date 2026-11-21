@@ -93,6 +93,7 @@ describe('store', () => {
         expect(whileWaiting).toBe('reading');
         expect(heard).toStrictEqual(['first', 'second']);
         expect(store.reading(API_KEY)).toStrictEqual({
+            at: new Date('2026-11-13T10:00:00.050Z'),
             done: true,
             kind: 'read',
             out: { State: 'running', Version: 'api' },
@@ -149,7 +150,12 @@ describe('store', () => {
 
         // Then - the restart asked nothing kept, the answer showed at once, and its equal re-ask told no one
         expect(whileKept).toBe(1);
-        expect(atOnce).toStrictEqual({ done: true, kind: 'read', out: { State: 'running' } });
+        expect(atOnce).toStrictEqual({
+            at: new Date('2026-11-13T10:00:00.001Z'),
+            done: true,
+            kind: 'read',
+            out: { State: 'running' },
+        });
         expect(asked(stage, 'engine.read')).toBe(2);
         expect(told).toBe(0);
     });
@@ -191,6 +197,7 @@ describe('store', () => {
         // Then - the read was asked twice and shows what the new engine says
         expect(asked(stage, 'engine.read')).toBe(2);
         expect(store.reading('call engine.read {} {}')).toStrictEqual({
+            at: new Date('2026-11-13T10:00:00.001Z'),
             done: true,
             kind: 'read',
             out: { State: 'running', Version: 'v2' },
@@ -241,7 +248,12 @@ describe('store', () => {
         await clock.advance(200);
 
         // Then - the late answer of the running engine never replaced the newer one
-        expect(newer).toStrictEqual({ done: true, kind: 'read', out: { State: 'stopped' } });
+        expect(newer).toStrictEqual({
+            at: new Date('2026-11-13T10:00:00.002Z'),
+            done: true,
+            kind: 'read',
+            out: { State: 'stopped' },
+        });
         expect(store.reading('call engine.read {} {}')).toStrictEqual(newer);
     });
 

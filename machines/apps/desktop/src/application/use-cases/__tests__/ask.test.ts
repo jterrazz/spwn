@@ -12,6 +12,10 @@ const UNREACHABLE = {
     type: 'unreachable',
 };
 
+function settledOn(at: Date | undefined, out: unknown) {
+    return { at, done: true, kind: 'read', out };
+}
+
 describe('ask', () => {
     test('a re-ask a far Mac misses keeps the shown answer marked stale, and the next answer clears the mark', async () => {
         // Given - machines.list settled on running
@@ -30,7 +34,12 @@ describe('ask', () => {
             RUNNING.out,
             'unreachable',
         ]);
-        expect(store.reading(KEY)).toStrictEqual({ done: true, kind: 'read', out: RUNNING.out });
+        expect(store.reading(KEY)).toStrictEqual({
+            at: new Date('2026-11-13T10:01:00.001Z'),
+            done: true,
+            kind: 'read',
+            out: RUNNING.out,
+        });
     });
 
     test('a dropped watch keeps its answer unmarked while it reconnects, a dropped read keeps it marked stale', async () => {
@@ -88,16 +97,20 @@ describe('ask', () => {
         restart.engine.answer('machines.list', STOPPED, DONE);
 
         // Then - both were asked again, the pending value never shown, and each shows the last
-        const shown = { done: true, kind: 'read', out: RUNNING.out };
-        const last = { done: true, kind: 'read', out: STOPPED.out };
+        const [first, second] = ['2026-11-13T10:00:00.001Z', '2026-11-13T10:00:00.002Z'].map(
+            (at) => new Date(at),
+        );
         expect([
             gesture.engine.asked('machines.list'),
             restart.engine.asked('machines.list'),
         ]).toStrictEqual([2, 2]);
-        expect(meanwhile).toStrictEqual([shown, shown]);
+        expect(meanwhile).toStrictEqual([
+            settledOn(first, RUNNING.out),
+            settledOn(second, RUNNING.out),
+        ]);
         expect([gesture.store.reading(KEY), restart.store.reading(KEY)]).toStrictEqual([
-            last,
-            last,
+            settledOn(second, STOPPED.out),
+            settledOn(second, STOPPED.out),
         ]);
     });
 });

@@ -54,6 +54,44 @@ describe('entry', () => {
         expect(again).toBe(web);
     });
 
+    test('an equal answer keeps the reading and its instant, and a stale mark carries the instant of the last answer heard', async () => {
+        // Given - machines.list settled on running, then answered equal on the next cadence
+        using _ = clock.run('2026-11-13T10:00:00Z');
+        const { engine, store } = await settled();
+        const shown = store.reading(KEY);
+        await clock.advance(EVERY);
+        engine.answer('machines.list', { out: { State: 'running' } }, DONE);
+        const equal = store.reading(KEY);
+
+        // When - the cadence after is refused as a far Mac that missed the ask
+        await clock.advance(EVERY);
+        engine.answer('machines.list', { error: UNREACHABLE });
+        const stale = store.reading(KEY);
+
+        // Then - the equal answer was the reading shown, as of its first answer; the stale one is as of the equal one
+        expect(equal).toBe(shown);
+        expect(
+            [shown, stale].map((one) => (one.kind === 'read' ? one.at : undefined)),
+        ).toStrictEqual([
+            new Date('2026-11-13T10:00:00.001Z'),
+            new Date('2026-11-13T10:00:30.001Z'),
+        ]);
+    });
+
+    test("an answer's instant is read off the store's clock", async () => {
+        // Given - a store whose clock says eight o'clock
+        using _ = clock.run('2026-11-13T10:00:00Z');
+
+        // When - machines.list is answered
+        const { store } = await settled(undefined, { now: () => new Date('2026-11-13T08:00:00Z') });
+
+        // Then - the reading is as of the store's clock
+        const reading = store.reading(KEY);
+        expect(reading.kind === 'read' ? reading.at : undefined).toStrictEqual(
+            new Date('2026-11-13T08:00:00Z'),
+        );
+    });
+
     test('a refusal said again in the same words keeps the reading itself, stale or failed', async () => {
         // Given - one store whose answer a far Mac missed, another whose machine was not found
         using _ = clock.run('2026-11-13T10:00:00Z');

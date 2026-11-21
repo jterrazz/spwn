@@ -144,7 +144,12 @@ describe('launch', () => {
             socket: 's',
         } as const;
         const reading = { kind: 'reading' } as const;
-        const partial = { done: false, kind: 'read', out: {} } as const;
+        const partial = {
+            at: new Date('2026-11-13T10:00:00Z'),
+            done: false,
+            kind: 'read',
+            out: {},
+        } as const;
         const refused = { error: new EngineError(undefined, 'refused'), kind: 'failed' } as const;
 
         // When - each pair is judged

@@ -160,6 +160,10 @@ export function readingWord(what: string): string {
     return `Reading ${what}…`;
 }
 
+export function asOfWord(time: string): string {
+    return `as of ${time}`;
+}
+
 export function logFootWord(read: string): string {
     return `read at ${read}${SEPARATOR}a reading, not a live feed: press Refresh for the newest lines`;
 }

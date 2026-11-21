@@ -38,7 +38,7 @@ function Reader({ call, input, target, heard }: ReaderProps) {
     const reading = useRead(call, input, target);
     useEffect(() => {
         if (reading.kind === 'read') {
-            heard({ at: new Date(), kind: 'read', out: reading.out });
+            heard({ at: reading.at, kind: 'read', out: reading.out });
         } else if (reading.kind === 'failed') {
             heard(reading);
         }

@@ -28,8 +28,8 @@ import { UpdateFlow } from '../../application/use-cases/update-flow';
 import type { UpdateState } from '../../application/use-cases/update-flow';
 import { NO_WINDOW_UPDATE, WindowUpdateFlow } from '../../application/use-cases/window-update-flow';
 import type { WindowUpdateState } from '../../application/use-cases/window-update-flow';
-import type { EngineError } from '../../domain/engine-error';
 import { StaleMarks } from './stale-marks';
+import type { Stale } from './stale-marks';
 import { usePlaceholder } from './use-placeholder';
 import type { Asking } from './use-placeholder';
 
@@ -175,10 +175,11 @@ function useAsked(asked: Asked): Reading<unknown> {
 function useStaleMark(reading: Reading<unknown>): void {
     const { stale } = useEngine();
     const reader = useId();
-    const held = reading.kind === 'read' ? reading.stale : undefined;
+    const error = reading.kind === 'read' ? reading.stale : undefined;
+    const at = reading.kind === 'read' ? reading.at : undefined;
     useEffect(() => {
-        stale.hold(reader, held);
-    }, [stale, reader, held]);
+        stale.hold(reader, error === undefined || at === undefined ? undefined : { at, error });
+    }, [stale, reader, error, at]);
     useEffect(
         () => () => {
             stale.hold(reader, undefined);
@@ -187,7 +188,7 @@ function useStaleMark(reading: Reading<unknown>): void {
     );
 }
 
-export function useStale(): readonly EngineError[] {
+export function useStale(): readonly Stale[] {
     const { stale } = useEngine();
     return useSyncExternalStore(stale.subscribe, stale.shown);
 }

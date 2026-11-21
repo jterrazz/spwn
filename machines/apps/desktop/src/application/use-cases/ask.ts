@@ -1,6 +1,6 @@
 import type { EnginePort } from '../ports/engine.port';
-import { failed, failedOf, show, stop } from './entry';
-import type { Asked, Entry } from './entry';
+import { answered, failed, failedOf, heardOf, stop } from './entry';
+import type { Asked, Entry, Heard } from './entry';
 import { heardDone, heardOut, markOf } from './marks';
 
 async function read(
@@ -18,7 +18,7 @@ async function read(
         if (current()) {
             heardDone(entry.mark);
             entry.asking = false;
-            show(entry, { done: true, kind: 'read', out });
+            answered(entry, heardOf(entry, out), true);
         }
     } catch (error) {
         if (current()) {
@@ -39,7 +39,7 @@ export function ask(client: EnginePort, entry: Entry): void {
         return;
     }
     const holds = reading.kind === 'read' && reading.done;
-    let last: undefined | { out: unknown };
+    let last: Heard | undefined;
     entry.watch = client.watch(
         asked.name,
         asked.input,
@@ -50,7 +50,7 @@ export function ask(client: EnginePort, entry: Entry): void {
                     entry.asking = false;
                     entry.held = undefined;
                     if (last) {
-                        show(entry, { done: true, kind: 'read', out: last.out });
+                        answered(entry, last, true);
                     }
                 }
             },
@@ -66,11 +66,11 @@ export function ask(client: EnginePort, entry: Entry): void {
             out: (out: unknown) => {
                 if (current()) {
                     heardOut(mark);
-                    last = { out };
+                    last = heardOf(entry, out);
                     if (holds) {
                         entry.held = last;
                     } else {
-                        show(entry, { done: false, kind: 'read', out });
+                        answered(entry, last, false);
                     }
                 }
             },

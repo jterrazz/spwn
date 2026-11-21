@@ -6,8 +6,9 @@ import { EngineError } from '../../../domain/engine-error';
 import type { Reading } from '../dependencies';
 import { usePlaceholder } from '../use-placeholder';
 
-const ONE_HOUR: Reading<string> = { done: true, kind: 'read', out: 'one hour' };
-const ONE_DAY: Reading<string> = { done: true, kind: 'read', out: 'one day' };
+const AT = new Date('2026-11-13T10:00:00Z');
+const ONE_HOUR: Reading<string> = { at: AT, done: true, kind: 'read', out: 'one hour' };
+const ONE_DAY: Reading<string> = { at: AT, done: true, kind: 'read', out: 'one day' };
 const READING: Reading<string> = { kind: 'reading' };
 const REFUSED: Reading<string> = {
     error: new EngineError(undefined),

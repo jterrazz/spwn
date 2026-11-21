@@ -201,7 +201,7 @@ A scenario is a test of `specs/website/`, a visit of the window's proof build ov
 | A6  | Find the same tabs on every machine | a Mac, a workspace and a server   | I open each                             | a Mac and a workspace the same six tabs in the same order, a server the tabs its engine has sections for; a tab with nothing in it says so in its head and still shows its lists        | yes    |
 | A7  | Open the window on its page         | the engine answers, or none does  | I launch the window                     | the first frame I see holds the page and its data in its own faces, or after 0.8 s whatever is drawn; never empty glass, never a font that swaps                                        | no     |
 | A8  | Open a page before it answers       | a read not answered yet           | I open a page                           | it draws its own verdict, panels and tiles as quiet bones, a panel's rows as one, and says what it reads; the answer, once come, only grows the page, moving nothing above what it adds | no     |
-| A9  | See an answer that is not fresh     | a page drawn, its refresh refused | I look at the page                      | the page stays drawn as answered, and one dimmed dot before the toolbar's action names what the engine said, until a refresh answers                                                    | no     |
+| A9  | See an answer that is not fresh     | a page drawn, its refresh refused | I look at the page                      | the page stays drawn as answered, and one dimmed dot before the toolbar's action names what the engine said, the time of the answer shown beside it, until a refresh answers            | no     |
 
 ## No engine on this Mac
 

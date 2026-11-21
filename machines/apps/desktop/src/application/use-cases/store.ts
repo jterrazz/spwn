@@ -10,14 +10,22 @@ import { FRESH_EVERY, Freshness, sameEngine } from './fresh';
 import type { Why } from './fresh';
 
 // value: `grace`, how long a request nobody holds stays open; `keptFor` and `keptAtMost`, how long and how many of the
-// value: answers nobody holds are kept after it, so a page drawn again shows its answer at once.
-export type StoreTiming = { grace: number; every: number; keptFor: number; keptAtMost: number };
+// value: answers nobody holds are kept after it, so a page drawn again shows its answer at once; `now`, the clock an
+// value: answer's instant is read off.
+export type StoreTiming = {
+    grace: number;
+    every: number;
+    keptFor: number;
+    keptAtMost: number;
+    now: () => Date;
+};
 
 const DEFAULTS: StoreTiming = {
     every: FRESH_EVERY,
     grace: 1500,
     keptAtMost: 50,
     keptFor: 600_000,
+    now: () => new Date(),
 };
 
 export function askedKey(asked: Asked): string {
@@ -136,11 +144,13 @@ export class ReadStore {
             asking: false,
             asks: 0,
             grace: undefined,
+            heardAt: undefined,
             held: undefined,
             kept: false,
             key,
             listeners: new Set(),
             mark: undefined,
+            now: this.timing.now,
             reading: READING,
             subscribe: (listener) => this.subscribe(asked, listener),
             watch: undefined,

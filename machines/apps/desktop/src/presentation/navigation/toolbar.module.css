@@ -40,6 +40,14 @@
     flex: none;
     display: inline-flex;
     align-items: center;
+    gap: var(--space-6);
     padding: var(--space-6);
     cursor: help;
+}
+.asOf {
+    color: var(--t3);
+    font-size: var(--text-body);
+    font-weight: var(--weight-regular);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
 }

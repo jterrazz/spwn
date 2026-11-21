@@ -33,7 +33,12 @@ describe('fresh', () => {
 
         // Then - the watch was asked twice and shows the stopped state
         expect(engine.asked('machines.list')).toBe(2);
-        expect(store.reading(KEY)).toStrictEqual({ done: true, kind: 'read', out: STOPPED.out });
+        expect(store.reading(KEY)).toStrictEqual({
+            at: new Date('2026-11-13T10:00:30.001Z'),
+            done: true,
+            kind: 'read',
+            out: STOPPED.out,
+        });
     });
 
     test('a re-ask keeps the shown answer while the engine sends pending values, then shows its last', async () => {
@@ -48,8 +53,18 @@ describe('fresh', () => {
         engine.answer('machines.list', STOPPED, DONE);
 
         // Then - the pending value was never shown, nor a reading state
-        expect(meanwhile).toStrictEqual({ done: true, kind: 'read', out: RUNNING.out });
-        expect(store.reading(KEY)).toStrictEqual({ done: true, kind: 'read', out: STOPPED.out });
+        expect(meanwhile).toStrictEqual({
+            at: new Date('2026-11-13T10:00:00.001Z'),
+            done: true,
+            kind: 'read',
+            out: RUNNING.out,
+        });
+        expect(store.reading(KEY)).toStrictEqual({
+            at: new Date('2026-11-13T10:00:30.001Z'),
+            done: true,
+            kind: 'read',
+            out: STOPPED.out,
+        });
     });
 
     test('a re-ask still unanswered at the next tick is not asked again, and its last value is shown', async () => {
@@ -62,9 +77,14 @@ describe('fresh', () => {
         // When - two more cadences pass
         await clock.advance(EVERY * 2);
 
-        // Then - one re-ask in all, and what it said is shown rather than held for ever
+        // Then - one re-ask in all, and what it said is shown rather than held for ever, as of when it was heard
         expect(engine.asked('machines.list')).toBe(2);
-        expect(store.reading(KEY)).toStrictEqual({ done: false, kind: 'read', out: PENDING.out });
+        expect(store.reading(KEY)).toStrictEqual({
+            at: new Date('2026-11-13T10:00:30.001Z'),
+            done: false,
+            kind: 'read',
+            out: PENDING.out,
+        });
     });
 
     test('a watch still streaming is never asked again', async () => {
@@ -145,7 +165,12 @@ describe('fresh', () => {
         expect(opened).toBe(1);
         expect(engine.asked('engine.events')).toBe(1);
         expect(engine.asked('machines.list')).toBe(2);
-        expect(store.reading(KEY)).toStrictEqual({ done: true, kind: 'read', out: STOPPED.out });
+        expect(store.reading(KEY)).toStrictEqual({
+            at: new Date('2026-11-13T10:00:00.001Z'),
+            done: true,
+            kind: 'read',
+            out: STOPPED.out,
+        });
     });
 
     test('an engine that does not offer engine.events is never asked it, and one that refuses it keeps the cadence', async () => {

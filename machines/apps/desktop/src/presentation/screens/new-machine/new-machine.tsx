@@ -225,14 +225,14 @@ function Sheet(props: SheetProps) {
 // invariant: one comes, so the sheet is never redrawn as reading in between.
 function useAnswer(input: MachinesCallsNewIn): Answered<MachinesCallsNewMachine> {
     const reading = useWatch('machines.new', input);
-    const [held, setHeld] = useState<MachinesCallsNewMachine | undefined>(undefined);
-    if (reading.kind === 'read' && reading.out !== held) {
-        setHeld(reading.out);
+    const [held, setHeld] = useState<Answered<MachinesCallsNewMachine> | undefined>(undefined);
+    if (reading.kind === 'read' && reading !== held) {
+        setHeld(reading);
     }
-    if (reading.kind !== 'reading' || held === undefined) {
+    if (reading.kind !== 'reading' || held?.kind !== 'read') {
         return reading;
     }
-    return { done: false, kind: 'read', out: held };
+    return { ...held, done: false };
 }
 
 export function NewMachine(props: NewMachineProps) {
