@@ -87,13 +87,12 @@ func (j *Jobs) Restart(ctx context.Context, r contract.Ref) error {
 }
 
 func (j *Jobs) Retire(ctx context.Context, r contract.Ref) error {
-	// invariant: a bare job of the same label leaves launchd before the bundle
-	// registers it, and is never unregistered: SMAppService's unregister of a
-	// label a bare job still holds disables that job's Background Task
-	// Management record, and the register that follows is refused, "Job is not
-	// allowed to bootstrap" (ADR-073). Its bootout returns while its process
-	// still exits, so the label is waited out of launchd, up to launchd's own
-	// exit timeout.
+	// invariant: a bare job leaves launchd before the bundle registers its
+	// own, and is never unregistered: SMAppService's unregister of a label a
+	// bare job still holds disables that job's Background Task Management
+	// record (ADR-073). Its bootout returns while its process still exits, so
+	// the label is waited out of launchd, up to launchd's own exit timeout,
+	// and the bundle's engine never starts beside the bare one.
 	if err := j.Jobs.Remove(ctx, r); err != nil {
 		return err
 	}

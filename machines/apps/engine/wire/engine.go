@@ -554,13 +554,13 @@ func (i engineInstaller) installAgent(ctx context.Context, jobs contract.Jobs, e
 // invariant: a Mac moves from the bare jobs to the bundle's once, at the
 // bundle's first start, and keeps nothing of them: both are booted out,
 // waited out of launchd and their definitions deleted before the bundle
-// registers the same labels, and the VMs outlive the restart and are
-// adopted again (ADR-073). Then the jobs' start is recorded, and
+// registers its own labels, which no record of the bare jobs matches, and
+// the VMs outlive the restart and are adopted again (ADR-073). Then the jobs' start is recorded, and
 // ~/.local/bin/station links into the bundle; started tells whether what
 // the jobs start with changed.
 func (i engineInstaller) intoTheBundle(ctx context.Context, bundle string) (started bool, err error) {
 	bundled := i.m.bundledJobs(process.JobBudget)
-	for _, job := range []contract.Ref{i.m.agentJobRef(), i.m.engineJobRef()} {
+	for _, job := range i.m.bareJobRefs() {
 		if _, statErr := i.m.sys.FS.Stat(job.File); statErr != nil {
 			continue
 		}
@@ -576,8 +576,8 @@ func (i engineInstaller) intoTheBundle(ctx context.Context, bundle string) (star
 
 func (i engineInstaller) writeJobStart() (bool, error) {
 	body, err := json.MarshalIndent(local.JobStart{Env: i.env(), Logs: map[string]string{
-		catalog.EngineLabel: filepath.Join(i.m.paths.State, "logs", "engine.log"),
-		catalog.AgentLabel:  filepath.Join(i.m.paths.State, "logs", "agent.log"),
+		catalog.BundledJobs.Engine: filepath.Join(i.m.paths.State, "logs", "engine.log"),
+		catalog.BundledJobs.Agent:  filepath.Join(i.m.paths.State, "logs", "agent.log"),
 	}}, "", "  ")
 	if err != nil {
 		return false, err

@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>Label</key>
-	<string>com.jterrazz.station.engine</string>
+	<string>com.jterrazz.spwn.engine</string>
 	<key>BundleProgram</key>
 	<string>Contents/MacOS/Spwn Engine</string>
 	<key>ProgramArguments</key>

@@ -46,7 +46,7 @@ func plistValues(t *testing.T, body []byte) map[string][]string {
 }
 
 func TestEachBundledJobRunsTheBundlesEngineUnderTheCatalogsLabel(t *testing.T) {
-	for label, args := range map[string][]string{catalog.EngineLabel: catalog.EngineArgs, catalog.AgentLabel: catalog.AgentArgs} {
+	for label, args := range map[string][]string{catalog.BundledJobs.Engine: catalog.EngineArgs, catalog.BundledJobs.Agent: catalog.AgentArgs} {
 		body, err := os.ReadFile(filepath.Join(root(t), bundleAgentsDir, path.Base(catalog.BundledPlist(label))))
 		if err != nil {
 			t.Fatal(err)
@@ -90,7 +90,7 @@ func TestTheWindowsBundleHoldsTheEngineAndBothJobsWhereTheCatalogSays(t *testing
 	}
 	contents := func(p string) string { return path.Clean(p[len("Contents/"):]) }
 	want := map[string]string{contents(catalog.BundledEnginePath): "../../../.artifacts/window/engine/station"}
-	for _, label := range []string{catalog.EngineLabel, catalog.AgentLabel} {
+	for _, label := range []string{catalog.BundledJobs.Engine, catalog.BundledJobs.Agent} {
 		want[contents(catalog.BundledPlist(label))] = path.Join(path.Base(bundleAgentsDir), path.Base(catalog.BundledPlist(label)))
 	}
 	if got := conf.Bundle.MacOS.Files; len(got) != len(want) {

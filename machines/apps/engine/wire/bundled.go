@@ -9,13 +9,14 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/platform/local"
 )
 
-// value: the label of the job args run, when they are one of the engine's two.
+// value: the label of the bundle's job args run, when they are one of the
+// engine's two.
 func jobOf(args []string) string {
 	switch {
 	case slices.Equal(args, catalog.EngineArgs):
-		return catalog.EngineLabel
+		return catalog.BundledJobs.Engine
 	case slices.Equal(args, catalog.AgentArgs):
-		return catalog.AgentLabel
+		return catalog.BundledJobs.Agent
 	}
 	return ""
 }

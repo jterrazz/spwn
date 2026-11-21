@@ -45,6 +45,17 @@ func EnginePlist(home string) string {
 
 const AgentLabel = StationLaunchPrefix + "agent"
 
+type JobLabels struct{ Engine, Agent string }
+
+var (
+	// value: the labels of the engine's two jobs: the bare binary's on a Mac
+	// without Spwn.app (mode B), and the app's own inside it (mode A, ADR-073).
+	// They never match, so no Background Task Management record a bare job
+	// left is ever attached to a job the bundle registers.
+	BareJobs    = JobLabels{Engine: EngineLabel, Agent: AgentLabel}
+	BundledJobs = JobLabels{Engine: WindowBundle + ".engine", Agent: WindowBundle + ".agent"}
+)
+
 // value: the arguments each job runs the engine's binary with, in both modes.
 var (
 	EngineArgs = []string{"engine", "run"}

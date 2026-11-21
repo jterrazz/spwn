@@ -3,6 +3,7 @@ package wire
 import (
 	"context"
 	"errors"
+	"path/filepath"
 	"strconv"
 	"time"
 
@@ -10,7 +11,6 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/background/adapter/smappservice"
 	"github.com/jterrazz/studio-station/apps/engine/background/contract"
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
-	"github.com/jterrazz/studio-station/apps/engine/engine"
 	enginecalls "github.com/jterrazz/studio-station/apps/engine/engine/calls"
 	"github.com/jterrazz/studio-station/apps/engine/engine/process"
 	"github.com/jterrazz/studio-station/apps/engine/platform/darwin"
@@ -47,12 +47,38 @@ func (m machine) bundle() string {
 	return local.BundleOf(m.sys.Env.Executable(), catalog.BundledEnginePath)
 }
 
-func (m machine) engineJobRef() contract.Ref {
-	return contract.Ref{Domain: contract.Domain{UID: m.sys.Env.Euid()}, Label: engine.Label, File: catalog.EnginePlist(m.sys.Env.Home())}
+func (m machine) engineJobRef() contract.Ref { return m.jobRefs().engine }
+
+func (m machine) agentJobRef() contract.Ref { return m.jobRefs().agent }
+
+type jobRefs struct{ engine, agent contract.Ref }
+
+// value: this Mac's two engine jobs: the bundle's own labels and
+// definitions in mode A, the bare binary's in mode B.
+func (m machine) jobRefs() jobRefs {
+	bundle := m.bundle()
+	if bundle == "" {
+		return m.bareRefs()
+	}
+	ref := func(label string) contract.Ref {
+		return contract.Ref{Domain: contract.Domain{UID: m.sys.Env.Euid()}, Label: label, File: filepath.Join(bundle, catalog.BundledPlist(label))}
+	}
+	return jobRefs{engine: ref(catalog.BundledJobs.Engine), agent: ref(catalog.BundledJobs.Agent)}
 }
 
-func (m machine) agentJobRef() contract.Ref {
-	return contract.Ref{Domain: contract.Domain{UID: m.sys.Env.Euid()}, Label: catalog.AgentLabel, File: catalog.AgentPlist(m.sys.Env.Home())}
+func (m machine) bareRefs() jobRefs {
+	domain := contract.Domain{UID: m.sys.Env.Euid()}
+	return jobRefs{
+		engine: contract.Ref{Domain: domain, Label: catalog.BareJobs.Engine, File: catalog.EnginePlist(m.sys.Env.Home())},
+		agent:  contract.Ref{Domain: domain, Label: catalog.BareJobs.Agent, File: catalog.AgentPlist(m.sys.Env.Home())},
+	}
+}
+
+// value: the bare binary's two jobs, the agent's first, as the move to the
+// bundle boots them out.
+func (m machine) bareJobRefs() []contract.Ref {
+	bare := m.bareRefs()
+	return []contract.Ref{bare.agent, bare.engine}
 }
 
 type engineJob struct {

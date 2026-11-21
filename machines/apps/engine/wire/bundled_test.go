@@ -7,8 +7,8 @@ import (
 
 func TestOnlyTheEnginesTwoJobsAreRunAsBundledJobs(t *testing.T) {
 	for args, want := range map[string]string{
-		"engine run":     "com.jterrazz.station.engine",
-		"machines agent": "com.jterrazz.station.agent",
+		"engine run":     "com.jterrazz.spwn.engine",
+		"machines agent": "com.jterrazz.spwn.agent",
 		"engine start":   "",
 		"engine":         "",
 	} {

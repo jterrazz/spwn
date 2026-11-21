@@ -16,8 +16,8 @@ const bundleAgentsDir = "apps/desktop/src-tauri/agents"
 // relative to the bundle.
 func bundledAgents() map[string][]byte {
 	return map[string][]byte{
-		path.Base(catalog.BundledPlist(catalog.EngineLabel)): bundledAgent(catalog.EngineLabel, catalog.EngineArgs),
-		path.Base(catalog.BundledPlist(catalog.AgentLabel)):  bundledAgent(catalog.AgentLabel, catalog.AgentArgs),
+		path.Base(catalog.BundledPlist(catalog.BundledJobs.Engine)): bundledAgent(catalog.BundledJobs.Engine, catalog.EngineArgs),
+		path.Base(catalog.BundledPlist(catalog.BundledJobs.Agent)):  bundledAgent(catalog.BundledJobs.Agent, catalog.AgentArgs),
 	}
 }
 

@@ -5,11 +5,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
 )
-
-const Label = catalog.EngineLabel
 
 type Hello struct {
 	Version    string    `json:"version"`
