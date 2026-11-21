@@ -1,6 +1,6 @@
 # Domain model
 
-Spwn is the **operating system for autonomous agent worlds**. You compose tools, skills, and identity into agents, then spawn them into isolated worlds where they wake up, find their tools, and get to work.
+The words of Agents, the Spwn app that runs one agent, or a team with a chief and workers, in a world you declare, in any harness. What Spwn is as a whole is stated once, in [the README](../../README.md). In Agents you compose tools, skills, and an identity into agents, then run them in isolated worlds where they find their tools and get to work.
 
 ## The three abstractions
 
@@ -40,7 +40,7 @@ Knowledge is **world-scoped**, not held in the Mind: declare a host path via `wo
 - **Worker**: persistent worker agent with its own identity and memory.
 - **NPC**: ephemeral agent, no persistent memory. Single task, fire-and-forget.
 
-Each agent declares one of these as its `role:`: `chief`, `manager`, `worker`, or `npc` ([Primitives](../reference/primitives.md)). Product and marketing material uses a parallel vocabulary for the same tiers: a Governor is a chief, a Citizen is a worker, an NPC is an npc. The role names above are the ones the manifests and the CLI accept.
+Each agent declares one of these as its `role:`: `chief`, `manager`, `worker`, or `npc` ([Primitives](../reference/primitives.md)). These are the ones the manifests and the CLI accept.
 
 ### Evolution
 

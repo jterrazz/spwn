@@ -1,6 +1,6 @@
 # Spwn: agent brief
 
-The operating system for autonomous agent worlds: compose tools, skills, and identity into **agents**, then spawn them into isolated Docker **worlds**. This file is a map, not the territory: it routes into the corpus and repeats none of it.
+Spwn is one stack of six apps, defined once in [`README.md`](README.md). This repository holds the two that run: Agents at the root, which composes tools, skills, and identity into **agents** and runs them in isolated Docker **worlds**, and Machines under `machines/`. This file is a map, not the territory: it routes into the corpus and repeats none of it.
 
 ## Mental model
 
