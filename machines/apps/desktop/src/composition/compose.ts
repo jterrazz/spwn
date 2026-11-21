@@ -4,6 +4,7 @@ import type { CorePort } from '../application/ports/core.port';
 import type { Link } from '../application/ports/engine.port';
 import type { OpenerPort } from '../application/ports/opener.port';
 import type { WindowUpdatePort } from '../application/ports/window-update.port';
+import { Launch } from '../application/use-cases/launch';
 import { tauriCore } from '../infrastructure/outbound/core-tauri/tauri-core';
 import { documentPresence } from '../infrastructure/outbound/document-presence/document-presence';
 import { Client } from '../infrastructure/outbound/engine-link/client';
@@ -11,6 +12,8 @@ import type { Transport } from '../infrastructure/outbound/engine-link/transport
 import { helloOf } from '../infrastructure/outbound/engine-replay/hello';
 import { replayTransport, stagedReplay } from '../infrastructure/outbound/engine-replay/replay';
 import type { Pace, Recording } from '../infrastructure/outbound/engine-replay/replay';
+import { documentLaunch } from '../infrastructure/outbound/launch-document/document-launch';
+import { NO_SHOW, tauriShow } from '../infrastructure/outbound/launch-tauri/tauri-show';
 import { tauriTransport } from '../infrastructure/outbound/engine-tauri/tauri';
 import { NO_OPENER, tauriOpener } from '../infrastructure/outbound/opener-tauri/tauri-opener';
 import { tauriWindowUpdate } from '../infrastructure/outbound/window-update-tauri/tauri-window-update';
@@ -139,6 +142,10 @@ export async function compose(place: Place): Promise<Dependencies> {
         presence: documentPresence(),
         windowUpdate: await windowUpdateOf(place),
     };
+}
+
+export function composeLaunch({ inTauri }: Pick<Place, 'inTauri'>): Launch {
+    return new Launch(documentLaunch(inTauri ? tauriShow({ invoke }) : NO_SHOW));
 }
 
 export function composeReplay({

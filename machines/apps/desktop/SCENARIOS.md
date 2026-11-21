@@ -12,7 +12,7 @@ What the desktop window must let its user do, page by page: one row is one scena
 | A workspace              | W1 to W32                                         |
 | A server                 | S1 to S6                                          |
 | Library and Storage      | D1 to D38                                         |
-| The window itself        | A1 to A6                                          |
+| The window itself        | A1 to A7                                          |
 | No engine on this Mac    | E1 to E7                                          |
 | The engine's release     | U1 to U4                                          |
 | The window's release     | R1 to R7                                          |
@@ -23,7 +23,7 @@ A scenario is a test of `specs/website/`, a visit of the window's proof build ov
 
 - A scenario whose test has a body is proved by it, on every `make test`. A scenario may take several tests, each title opening on its id, and it is proved when every test opening on its id has a body: an id that keeps a pending test beside a passing one is partly proved, and its pending reason says what is missing.
 - A scenario not proved yet is declared all the same, a `test.todo` whose title is its id and why it waits: `lot <n>`, the lot of the window's scenario plan that writes its body, or `waits for <field>`, the field the engine owes for it, as the window's page names it ([What the engine owes](README.md#what-the-window-still-decides-and-what-the-engine-owes)), or `not in this version`, a scenario the owner's decisions leave out of it, the decision named when one is written.
-- A scenario only the Tauri window shows, which no visit of a page can (A5), is declared as such: the bench's `live-tauri.sh` captures it, outside `make test`.
+- A scenario only the Tauri window shows, which no visit of a page can (A5, A7), is declared as such: the bench's `live-tauri.sh` captures it, outside `make test`.
 - An id is used once, and never given again to another scenario.
 
 **Mockup** says whether the design's mockup plays the scenario: `yes`, `part` (shown, the gesture is inert) or `no`.
@@ -199,6 +199,7 @@ A scenario is a test of `specs/website/`, a visit of the window's proof build ov
 | A4  | Go back                             | I followed two links            | I press the arrow in the toolbar, or ⌘[ | I am back on the page and the tab I came from                                                                                                                                    | part   |
 | A5  | Look the same on Linux              | the app runs on Linux           | I open it                               | the same pages, with the same proportions                                                                                                                                        | no     |
 | A6  | Find the same tabs on every machine | a Mac, a workspace and a server | I open each                             | a Mac and a workspace the same six tabs in the same order, a server the tabs its engine has sections for; a tab with nothing in it says so in its head and still shows its lists | yes    |
+| A7  | Open the window on its page | the engine answers, or none does | I launch the window | the first frame I see holds the page and its data in its own faces, or after 0.8 s whatever is drawn; never empty glass, never a font that swaps | no |
 
 ## No engine on this Mac
 

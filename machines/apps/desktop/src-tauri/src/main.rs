@@ -6,11 +6,26 @@ mod local_core;
 mod opener;
 mod station;
 mod updates;
+mod window;
 
 use std::sync::Arc;
 
 use tauri::webview::PageLoadEvent;
-use tauri::WindowEvent;
+use tauri::{AppHandle, RunEvent, WindowEvent};
+
+#[cfg(target_os = "macos")]
+fn on_run(app: &AppHandle, event: RunEvent) {
+    if let RunEvent::Reopen {
+        has_visible_windows: false,
+        ..
+    } = event
+    {
+        window::reopened(app);
+    }
+}
+
+#[cfg(not(target_os = "macos"))]
+fn on_run(_app: &AppHandle, _event: RunEvent) {}
 
 fn main() {
     opener::sweep(&opener::folder());
@@ -22,6 +37,7 @@ fn main() {
         .manage(bridge.clone())
         .manage(Arc::new(local_core::Runs::default()))
         .manage(updates::Pending::default())
+        .manage(window::Shown::default())
         .invoke_handler(tauri::generate_handler![
             engine::engine_link,
             engine::engine_open,
@@ -34,7 +50,8 @@ fn main() {
             local_core::core_start,
             local_core::core_cancel,
             updates::window_update_check,
-            updates::window_update_install
+            updates::window_update_install,
+            window::window_ready
         ])
         .on_page_load(move |webview, payload| {
             if payload.event() == PageLoadEvent::Started {
@@ -47,9 +64,11 @@ fn main() {
             }
         })
         .setup(move |app| {
+            window::backstop(app.handle().clone());
             engine::supervise(app.handle().clone(), bridge);
             Ok(())
         })
-        .run(tauri::generate_context!())
-        .expect("the window could not start");
+        .build(tauri::generate_context!())
+        .expect("the window could not start")
+        .run(on_run);
 }

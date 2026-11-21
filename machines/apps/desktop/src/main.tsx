@@ -2,10 +2,11 @@ import './presentation/ui/document.css';
 import { lazy, StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 
-import { compose, composeGallerySample } from './composition/compose';
+import { compose, composeGallerySample, composeLaunch } from './composition/compose';
 import { EngineProvider } from './presentation/dependencies/dependencies';
 import { Boundary } from './presentation/navigation/boundary';
 import { placeOf, wearDress } from './presentation/navigation/chrome';
+import { Launched } from './presentation/navigation/launched';
 import { startRoute } from './presentation/navigation/route';
 import type { Route } from './presentation/navigation/route';
 import { recalled, remember } from './presentation/navigation/route-memory';
@@ -27,6 +28,8 @@ async function galleryOf() {
 const Gallery = proof ? lazy(galleryOf) : undefined;
 const query = new URLSearchParams(globalThis.location.search);
 const inTauri = '__TAURI_INTERNALS__' in globalThis;
+const launch = composeLaunch({ inTauri });
+launch.begin();
 
 function memoryOf(): Memory | undefined {
     try {
@@ -76,6 +79,7 @@ if (root) {
                         onRoute={onRoute}
                         pages={PAGES}
                     />
+                    <Launched onDrawn={launch.drawn} />
                 </EngineProvider>
             </Boundary>
         </StrictMode>,
