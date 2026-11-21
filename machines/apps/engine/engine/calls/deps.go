@@ -34,6 +34,9 @@ type Deps struct {
 	// value: engine.state asked of this Mac's engine, for a door that is
 	// not the engine itself.
 	Forward func(ctx context.Context, in engine.StateIn) (<-chan json.RawMessage, error)
+	// value: the views engine.state projects of the store beside its
+	// slices; nil projects none.
+	Views Views
 }
 
 type Installer interface {

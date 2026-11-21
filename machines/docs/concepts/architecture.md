@@ -38,7 +38,7 @@ apps/engine/
     process/ the engine itself: its runs, its guest connections, its jobs, its socket and its server
     jobs/    the sample job, which feeds Activity's history, and the nightly job, which
              upgrades a Mac's bound Machinefile every night
-    feeds/   the menu bar's pages, each a pure function of one snapshot of the store
+    feeds/   the menu bar's pages and the window's views, each a pure function of one snapshot of the store
     live/    what an open page reads itself: its moving numbers every 2 s, and the Activity page
     store/   the read model: one snapshot per revision of slices by key, each its value, hash,
              read time and whether it is fresh, stale or unread

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"slices"
+	"strings"
 	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
@@ -34,6 +35,13 @@ type State interface {
 	Sleep(ctx context.Context, d time.Duration) error
 }
 
+type Views interface {
+	// value: the window's views: each a projection of one snapshot, named
+	// as the call whose answer it is.
+	Known(name string) bool
+	Project(s *store.Snapshot, asked func(name string) bool) map[string]store.View
+}
+
 type stateKey struct{}
 
 func WithState(ctx context.Context, s State) context.Context {
@@ -57,7 +65,7 @@ var StateWatch = call.Watch[Deps, engine.StateIn, engine.StateFrame]{
 		// from a read: a snapshot, or the keys changed since the revision
 		// the client names; held, a change per gathered revision and a tick
 		// every 15 s.
-		patterns, err := patternsOf(in.Keys)
+		patterns, err := patternsOf(in.Keys, d.Views)
 		if err != nil {
 			return nil, err
 		}
@@ -100,22 +108,78 @@ func forward(ctx context.Context, d Deps, in engine.StateIn) (<-chan call.Update
 	return out, nil
 }
 
-func patternsOf(keys []string) ([]store.Pattern, error) {
+// value: what a stream is asked: the slices by their patterns, and the
+// views by their names.
+type asked struct {
+	slices []store.Pattern
+	views  []string
+	of     Views
+}
+
+func patternsOf(keys []string, views Views) (asked, error) {
 	if len(keys) == 0 {
-		return nil, &fail.Error{Type: fail.Refused, Code: StateNoKey, Field: fail.FieldKeys}
+		return asked{}, &fail.Error{Type: fail.Refused, Code: StateNoKey, Field: fail.FieldKeys}
 	}
-	out := make([]store.Pattern, 0, len(keys))
+	out := asked{of: views}
 	for _, k := range keys {
+		if views != nil && views.Known(k) {
+			out.views = append(out.views, k)
+			continue
+		}
 		p, err := store.ParsePattern(k)
 		if err != nil {
-			return nil, &fail.Error{Type: fail.Refused, Code: StateUnknownKey, Field: fail.FieldKeys, Subject: k, Cause: err}
+			return asked{}, &fail.Error{Type: fail.Refused, Code: StateUnknownKey, Field: fail.FieldKeys, Subject: k, Cause: err}
 		}
-		out = append(out, p)
+		out.slices = append(out.slices, p)
 	}
 	return out, nil
 }
 
-func stream(ctx context.Context, src State, page int, patterns []store.Pattern, in engine.StateIn, out chan<- call.Update[engine.StateFrame]) {
+func (a asked) view(name string) bool {
+	// invariant: a view is asked by its name, or with every view of its kind
+	// as `<kind>:*`.
+	for _, v := range a.views {
+		if v == name {
+			return true
+		}
+		if kind, ok := strings.CutSuffix(v, ":*"); ok && strings.HasPrefix(name, kind+":") {
+			return true
+		}
+	}
+	return false
+}
+
+// value: the asked views of a snapshot, encoded as a slice is.
+func (a asked) project(st *store.Store, s *store.Snapshot) map[string]viewed {
+	if a.of == nil || len(a.views) == 0 {
+		return nil
+	}
+	out := map[string]viewed{}
+	for name, v := range a.of.Project(s, a.view) {
+		raw, hash, err := st.Encode(v.Value)
+		if err != nil {
+			continue
+		}
+		out[name] = viewed{View: v, raw: raw, hash: hash}
+	}
+	return out
+}
+
+type viewed struct {
+	store.View
+	raw  json.RawMessage
+	hash string
+}
+
+func (v viewed) out(value bool) engine.SliceOut {
+	o := engine.SliceOut{Hash: v.hash, ReadAt: stamp(v.ReadAt), State: string(v.State), Why: v.Why}
+	if value {
+		o.Value = v.raw
+	}
+	return o
+}
+
+func stream(ctx context.Context, src State, page int, patterns asked, in engine.StateIn, out chan<- call.Update[engine.StateFrame]) {
 	defer close(out)
 	send := func(f engine.StateFrame) bool {
 		select {
@@ -139,7 +203,7 @@ func stream(ctx context.Context, src State, page int, patterns []store.Pattern, 
 	watch := st.Watch(ctx)
 	now = <-watch
 	matches := func(k store.Key) bool {
-		return slices.ContainsFunc(patterns, func(p store.Pattern) bool {
+		return slices.ContainsFunc(patterns.slices, func(p store.Pattern) bool {
 			return p.Match(k, func(string) bool { return src.Owns(k) })
 		})
 	}
@@ -165,6 +229,12 @@ func stream(ctx context.Context, src State, page int, patterns []store.Pattern, 
 				first.Slices[string(k)] = sliceOut(sl, true)
 			}
 		}
+	}
+	// invariant: a view is sent whole on a resume too: the client's revision
+	// says which slices it holds, never which projection of them.
+	views := patterns.project(st, now)
+	for name, v := range views {
+		first.Slices[name] = v.out(true)
 	}
 	if !send(first) || !in.Hold {
 		return
@@ -201,10 +271,13 @@ func stream(ctx context.Context, src State, page int, patterns []store.Pattern, 
 				next = later
 			default:
 			}
-			if f, moved := changedSince(last, next, matches); moved && !send(f) {
+			f, _ := changedSince(last, next, matches)
+			projected := patterns.project(st, next)
+			f = viewsChanged(f, views, projected)
+			if (len(f.Slices) > 0 || len(f.Gone) > 0) && !send(f) {
 				return
 			}
-			last = next
+			last, views = next, projected
 		}
 	}
 }
@@ -228,6 +301,25 @@ func changedSince(last, next *store.Snapshot, matches func(store.Key) bool) (eng
 	}
 	slices.Sort(f.Gone)
 	return f, len(f.Slices) > 0 || len(f.Gone) > 0
+}
+
+// invariant: a view moves when its bytes or its state do; one whose bytes
+// did not move is sent without its value.
+func viewsChanged(f engine.StateFrame, was, now map[string]viewed) engine.StateFrame {
+	for name, v := range now {
+		old, held := was[name]
+		if held && old.hash == v.hash && old.State == v.State && old.Why == v.Why {
+			continue
+		}
+		f.Slices[name] = v.out(!held || old.hash != v.hash)
+	}
+	for name := range was {
+		if _, held := now[name]; !held {
+			f.Gone = append(f.Gone, name)
+		}
+	}
+	slices.Sort(f.Gone)
+	return f
 }
 
 func sliceOut(sl store.Slice, value bool) engine.SliceOut {

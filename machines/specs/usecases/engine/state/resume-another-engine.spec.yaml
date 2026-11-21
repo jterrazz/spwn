@@ -1,0 +1,14 @@
+description: 'a revision named of an engine since restarted is answered a whole snapshot, its views with it'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c -s ''{epoch: (.[] | select(.out.event == "opened") | .out.epoch), rev: (.[] | select(.out.event == "snapshot") | .out.rev)}'' > held.json'
+      stdin: |
+          {"v":2,"id":"1","watch":"engine.state","in":{"keys":["local"],"revision":1}}
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq -c ''{v: 2, id: "1", watch: "engine.state", in: {keys: ["local", "machines.list"], revision: 1, since: .}}'' held.json | "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out.event) | [.out.event, (.out.slices // {} | keys)]'''
+      exit: 0
+      stdout: |
+          ["opened",[]]
+          ["snapshot",["activity:linux-1","activity:macbook-pro","awake:macbook-pro","mac:macbook-pro","machines.list","overview:linux-1","overview:macbook-pro","ports:macbook-pro","signins:linux-1","signins:macbook-pro"]]
