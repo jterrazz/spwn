@@ -165,6 +165,10 @@ A watch the engine ends (`done`) and a plain read are an answer of one moment, s
 - Activity's five-second timer (`useActivity`, `src/presentation/features/activity/reading.tsx`, which the tiles of Home and of a machine's Overview read through too, and Home's fleet board once per Mac through `useActivities`) is a graph's pace, not this mechanism: it is the page's to move onto `useReread`.
 - The timer goes when every engine the window reaches offers `engine.events` with a notice for each change a read shows: today the list is the HUD's (a server down, a VM ready), so a VM stopped from the CLI tells nothing, and the world's `guest serve` does not answer the call.
 
+### A read marks its time
+
+Every ask the store makes is measured in the webview's User Timing (`src/application/use-cases/marks.ts`): `read first <key>` from the ask to its first out, and `read done <key>` from the ask to its end, the key being the request's (`watch machines.list {} {}`). Each name keeps the last ask's measure alone, so a window open for days holds one pair per request. In a running window's web inspector, `performance.getEntriesByType('measure')` lists them, and the timeline draws them; a refused ask marks no end.
+
 ## The link to the engine
 
 The shell says hello to the engine's socket on a thread of its own (`supervise`, `src-tauri/src/engine.rs`) and emits `engine://link` each time the link changes; `reachOf` (`src/application/use-cases/reach.ts`) reads it.

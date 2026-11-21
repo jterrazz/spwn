@@ -1,4 +1,4 @@
-import { clock } from '@jterrazz/test';
+import { clock, waitUntil } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { documentPresence } from '../../../infrastructure/outbound/document-presence/document-presence';
@@ -174,5 +174,30 @@ describe('store', () => {
         // Then - the late answer of the running engine never replaced the newer one
         expect(newer).toStrictEqual({ done: true, kind: 'read', out: { State: 'stopped' } });
         expect(store.reading('call engine.read {} {}')).toStrictEqual(newer);
+    });
+
+    test('each request marks its first out and its end, one measure per name however often it is asked', async () => {
+        // Given - a store over a replay, machines.list watched and api's engine.read read
+        performance.clearMeasures();
+        const { stage, store } = staged();
+        const watch: Asked = { input: {}, kind: 'watch', name: 'machines.list', target: undefined };
+        store.subscribe(watch, () => {});
+        store.subscribe({ ...engineRead(), target: { name: 'api', on: 'mac' } }, () => {});
+
+        // When - both are answered, then asked again on a gesture's reread
+        await waitUntil(() => store.reading(API_KEY).kind === 'read', { why: 'the read answered' });
+        store.reread(['engine.read', 'machines.list']);
+        await waitUntil(() => stage.open() === 0, { why: 'the reread answered' });
+
+        // Then - one measure per name: the read's first out and end, the watch, which has not ended, its first out
+        const names = performance
+            .getEntriesByType('measure')
+            .map((measure) => measure.name)
+            .filter((name) => name.startsWith('read '));
+        expect(names.toSorted()).toStrictEqual([
+            `read done ${API_KEY}`,
+            `read first ${API_KEY}`,
+            'read first watch machines.list {} {}',
+        ]);
     });
 });

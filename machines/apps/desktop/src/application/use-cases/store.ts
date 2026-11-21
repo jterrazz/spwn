@@ -7,6 +7,7 @@ import { failed, failedOf, flush, READING, show, stop } from './entry';
 import type { Asked, Entry, Reading } from './entry';
 import { FRESH_EVERY, Freshness, sameEngine } from './fresh';
 import type { Why } from './fresh';
+import { heardDone, heardOut, markOf } from './marks';
 
 export type StoreTiming = { grace: number; every: number };
 
@@ -120,7 +121,9 @@ export class ReadStore {
             asks: 0,
             grace: undefined,
             held: undefined,
+            key,
             listeners: new Set(),
+            mark: undefined,
             reading: READING,
             subscribe: (listener) => this.subscribe(asked, listener),
             watch: undefined,
@@ -180,7 +183,8 @@ export class ReadStore {
     private ask(entry: Entry, quiet: boolean): void {
         stop(entry);
         entry.asking = true;
-        const { asked, asks } = entry;
+        entry.mark = markOf(entry.key);
+        const { asked, asks, mark } = entry;
         const current = () => entry.asks === asks;
         if (asked.kind === 'read') {
             void this.read(entry, asked, current);
@@ -194,6 +198,7 @@ export class ReadStore {
             {
                 done: () => {
                     if (current()) {
+                        heardDone(mark);
                         entry.asking = false;
                         entry.held = undefined;
                         if (last) {
@@ -209,6 +214,7 @@ export class ReadStore {
                 },
                 out: (out: unknown) => {
                     if (current()) {
+                        heardOut(mark);
                         last = { out };
                         if (holds) {
                             entry.held = last;
@@ -234,6 +240,7 @@ export class ReadStore {
                 asked.target ? { target: asked.target } : {},
             );
             if (current()) {
+                heardDone(entry.mark);
                 entry.asking = false;
                 show(entry, { done: true, kind: 'read', out });
             }

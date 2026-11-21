@@ -2,6 +2,7 @@ import type { Target } from '@jterrazz/station-api';
 
 import { EngineError } from '../../domain/engine-error';
 import type { In, ReadName, Watch, WatchName } from '../ports/engine.port';
+import type { Mark } from './marks';
 
 export type Reading<T> =
     | { kind: 'failed'; error: EngineError }
@@ -16,7 +17,9 @@ export type Asked =
 
 // value: `asking` while a request is out and has not settled; `held`, a quiet re-ask's last out not shown yet.
 export type Entry = {
+    key: string;
     asked: Asked;
+    mark: Mark | undefined;
     subscribe: (listener: () => void) => () => void;
     reading: Reading<unknown>;
     listeners: Set<() => void>;
