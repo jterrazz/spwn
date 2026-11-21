@@ -1,6 +1,6 @@
 # ADR-018: The product describes itself as one stack of six apps
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-11-21
 
 An agent leaves the status `Proposed`; only the owner writes `Accepted`.
