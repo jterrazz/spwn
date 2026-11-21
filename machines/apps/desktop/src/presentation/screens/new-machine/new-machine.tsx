@@ -12,7 +12,8 @@ import { useReread, useWatch } from '../../dependencies/dependencies';
 import { useGesture } from '../../dependencies/use-gesture';
 import type { Gesture } from '../../dependencies/use-gesture';
 import { GestureButton, GestureOutcome } from '../../kit/gestures';
-import { Reading, Unanswered } from '../../kit/readings';
+import { Unanswered } from '../../kit/readings';
+import { Skeleton, SkeletonRows } from '../../kit/skeleton';
 import { machineRoute } from '../../navigation/route';
 import type { Route } from '../../navigation/route';
 import { Button, Dialog, FormField, Screen } from '../../ui/index';
@@ -257,7 +258,9 @@ export function NewMachine(props: NewMachineProps) {
                 {reading.kind === 'failed' ? (
                     <Unanswered error={reading.error} size="panel" />
                 ) : (
-                    <Reading size="tab" what="What a new machine can be" />
+                    <Skeleton what="What a new machine can be">
+                        <SkeletonRows count={3} sentence={false} />
+                    </Skeleton>
                 )}
             </Dialog>
         </Screen>

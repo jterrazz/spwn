@@ -17,7 +17,8 @@ import { useRead } from '../../../dependencies/dependencies';
 import { useGesture } from '../../../dependencies/use-gesture';
 import { headChapter, packageChapters } from '../../../features/machinefile/model';
 import { GestureButton, GestureOutcome } from '../../../kit/gestures';
-import { NoVerdict, Reading } from '../../../kit/readings';
+import { NoVerdict } from '../../../kit/readings';
+import { SkeletonHead } from '../../../kit/skeleton';
 import { useRouter } from '../../../navigation/router';
 import { Panel, Row, Screen, Verdict } from '../../../ui/index';
 import { Page } from '../../../ui/page';
@@ -76,7 +77,7 @@ function chaptersMatch(drift: MachinefileDrift): string {
 
 function FileState({ drift, name }: { drift: Read<MachinefileDrift>; name: string }) {
     if (drift.kind === 'reading') {
-        return <Reading size="tab" what={`the file ${name} follows`} />;
+        return <SkeletonHead size="tab" what={`the file ${name} follows`} />;
     }
     if (drift.kind === 'failed') {
         return <NoVerdict line="What the engine answered is below" size="tab" />;

@@ -8,8 +8,9 @@ import { useGesture } from '../../dependencies/use-gesture';
 import { GestureButton, GestureOutcome } from '../../kit/gestures';
 import { Openable } from '../../kit/openable';
 import { OpenButton } from '../../kit/opens';
-import { NoVerdict, Reading, Unanswered, VerdictHead } from '../../kit/readings';
-import { Button, Panel, Row } from '../../ui/index';
+import { NoVerdict, Unanswered, VerdictHead } from '../../kit/readings';
+import { Skeleton, SkeletonPanel } from '../../kit/skeleton';
+import { Button, Panel, Row, VerdictSkeleton } from '../../ui/index';
 import { shownOrWithheld } from '../../ui/secret';
 import { RELEASE_WORDS } from '../../words/words';
 import { Fine, Mono } from './core-parts';
@@ -20,6 +21,8 @@ import page from '../../ui/page.module.css';
 import styles from './core.module.css';
 
 const NO_NOTES = 'The engine names no release notes';
+
+const ENGINE_TITLE = 'Engine';
 
 function checkedOf(release: MachinesRelease): string | undefined {
     const at = dayAndClock(release.Checked);
@@ -86,7 +89,7 @@ function Latest({ release }: { release: MachinesRelease }) {
     });
     const refused = check.state.kind === 'failed' ? undefined : refusedOf(release);
     return (
-        <Panel title="Engine">
+        <Panel title={ENGINE_TITLE}>
             <Row
                 below={<GestureOutcome gesture={check} />}
                 sentence={sentenceOf(release, refused)}
@@ -115,7 +118,12 @@ function Release() {
     const reading = useRead('engine.read-release', {});
     const { flow, state } = useUpdate();
     if (reading.kind === 'reading') {
-        return <Reading size="page" what="the latest release" />;
+        return (
+            <Skeleton what="the latest release">
+                <VerdictSkeleton size="page" />
+                <SkeletonPanel count={1} title={ENGINE_TITLE} trail="fit" />
+            </Skeleton>
+        );
     }
     if (reading.kind === 'failed') {
         return <Unanswered error={reading.error} size="page" />;

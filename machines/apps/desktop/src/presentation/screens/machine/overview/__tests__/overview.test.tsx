@@ -1,6 +1,13 @@
 import { button, component, content, dialog, heading, within } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
+import {
+    gapAbove,
+    heightOf,
+    heldPageOver,
+    panelHeight,
+    settled,
+} from '../../../../../composition/__tests__/page-over';
 import { composeReplay } from '../../../../../composition/compose';
 import { recordingsOf } from '../../../../../infrastructure/outbound/engine-replay/recordings';
 import { EngineProvider } from '../../../../dependencies/dependencies';
@@ -21,6 +28,29 @@ function machineOver(world: string, machine: string) {
 }
 
 describe('overview', () => {
+    test('the page keeps its height across its first answer, but for the needs it adds', async () => {
+        // Given - macbook-pro's Overview over stories, its overview.read held unread
+        const route: Route = { machine: 'macbook-pro', page: 'machine', tab: 'Overview' };
+        const { held, stage, ui } = heldPageOver(recordingFor('stories'), route, 'overview.read');
+        const needs = 'Needs you, on this Mac';
+        let heights: number[] = [];
+        await component.render(ui, async () => {
+            await settled(stage);
+            const before = heightOf('main');
+
+            // When - overview.read answers
+            held.release();
+            await settled(stage);
+            const panel = panelHeight(needs);
+            heights = [before, heightOf('main'), panel === 0 ? 0 : panel + gapAbove(needs)];
+        });
+
+        // Then - the main region grows by the needs panel the answer adds and the gap before it, and no more
+        const [before = 0, after = 0, added = 0] = heights;
+        expect(before).toBeGreaterThan(0);
+        expect(after - before).toBe(added);
+    });
+
     test("a delete's dialog says its consequence alone while the machine's hold is calm", async () => {
         // Given - api's page over two-macs, api yours and stopped
         const result = await component.render(machineOver('two-macs', 'api'), async (visitor) => {

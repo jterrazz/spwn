@@ -6,7 +6,8 @@ import type { Reading } from '../../dependencies/dependencies';
 import { LastNight } from '../../features/journal/changes';
 import { Needs } from '../../features/overview/needs-panel';
 import { HeldOutcomes } from '../../kit/gestures';
-import { Absent, Reading as ReadingVerdict, SummaryHead, Unanswered } from '../../kit/readings';
+import { Absent, SummaryHead, Unanswered } from '../../kit/readings';
+import { SkeletonHead } from '../../kit/skeleton';
 import type { Route } from '../../navigation/route';
 import { newMachineLeads } from '../../navigation/toolbar-action';
 import { Page } from '../../ui/page';
@@ -24,6 +25,30 @@ export type HomeProps = {
     onAddMac?: (() => void) | undefined;
 };
 
+type Summary = OverviewReadOutput['Summary'];
+
+// value: while the summary is read, the head is drawn as bones and the rest of Home, read apart, is drawn already.
+function Head({ summary }: { summary: Summary | undefined }) {
+    if (summary === undefined) {
+        return <SkeletonHead size="page" what="This Mac" />;
+    }
+    return <SummaryHead size="page" summary={summary} verdict={summary.Verdict} />;
+}
+
+function HomeNeeds({ summary, macs, go }: { summary: Summary; macs: HomeProps['macs']; go: Go }) {
+    return (
+        <HeldOutcomes>
+            <Needs
+                go={go}
+                macs={macs}
+                needs={needsYou(summary.Needs ?? [])}
+                standsBack={newMachineLeads(macs)}
+                title="Needs you"
+            />
+        </HeldOutcomes>
+    );
+}
+
 export function HomePage({ macs, overview, go, onNewMachine, onAddMac }: HomeProps) {
     const reach = useReach();
     if (reach.kind === 'unanswered' && overview.kind !== 'read') {
@@ -40,29 +65,14 @@ export function HomePage({ macs, overview, go, onNewMachine, onAddMac }: HomePro
             </Page>
         );
     }
-    if (overview.kind === 'reading') {
-        return (
-            <Page>
-                <ReadingVerdict size="page" what="This Mac" />
-            </Page>
-        );
-    }
-    const { Summary } = overview.out;
+    const summary = overview.kind === 'read' ? overview.out.Summary : undefined;
     const thisMac = macs.find((mac) => mac.ThisMac);
     return (
         <Page>
-            <SummaryHead size="page" summary={Summary} verdict={Summary.Verdict} />
+            <Head summary={summary} />
             {thisMac ? <HomeTiles mac={thisMac} /> : null}
             <StartHere go={go} macs={macs} onNewMachine={onNewMachine} />
-            <HeldOutcomes>
-                <Needs
-                    go={go}
-                    macs={macs}
-                    needs={needsYou(Summary.Needs ?? [])}
-                    standsBack={newMachineLeads(macs)}
-                    title="Needs you"
-                />
-            </HeldOutcomes>
+            {summary === undefined ? null : <HomeNeeds go={go} macs={macs} summary={summary} />}
             {macs.length > 0 ? <HomeFleet go={go} macs={macs} onAddMac={onAddMac} /> : null}
             {holdsNoMachine(macs) ? null : <LastNight go={go} macs={macs} />}
         </Page>

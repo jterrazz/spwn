@@ -3,7 +3,8 @@ import { useState } from 'react';
 
 import type { EngineError } from '../../../domain/engine-error';
 import { useWatch } from '../../dependencies/dependencies';
-import { Reading, Unanswered } from '../../kit/readings';
+import { Unanswered } from '../../kit/readings';
+import { Skeleton, SkeletonRows } from '../../kit/skeleton';
 import { Button, Dialog } from '../../ui/index';
 import { codesOf } from '../../words/engine-words';
 import { BLANK, chosenOf, Form, wayOf } from './add-form';
@@ -113,7 +114,9 @@ export function AddPasswordSheet({ onClose }: { onClose: () => void }) {
     if (offered.kind === 'reading' || first === undefined) {
         return (
             <Dialog actions={cancel} onClose={onClose} title={TITLE}>
-                <Reading size="tab" what="the programs a password is for" />
+                <Skeleton what="the programs a password is for">
+                    <SkeletonRows count={3} lead="icon" />
+                </Skeleton>
             </Dialog>
         );
     }

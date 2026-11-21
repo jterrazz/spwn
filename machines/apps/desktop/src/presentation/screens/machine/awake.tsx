@@ -8,7 +8,8 @@ import { useWatch } from '../../dependencies/dependencies';
 import { useGesture } from '../../dependencies/use-gesture';
 import type { Gesture } from '../../dependencies/use-gesture';
 import { GestureButton, GestureOutcome, useStart } from '../../kit/gestures';
-import { Reading, Unanswered } from '../../kit/readings';
+import { Unanswered } from '../../kit/readings';
+import { Skeleton, SkeletonRows } from '../../kit/skeleton';
 import { Button, Dialog, StateSign, Switch } from '../../ui/index';
 import { AWAKE_GESTURE_WORDS } from '../../words/words';
 
@@ -173,7 +174,9 @@ function AwakeSheet({ found, onClose }: SheetProps) {
             {awake.kind === 'failed' ? (
                 <Unanswered error={awake.error} size="panel" />
             ) : (
-                <Reading size="tab" what="Awake" />
+                <Skeleton what="Awake">
+                    <SkeletonRows count={3} />
+                </Skeleton>
             )}
         </Dialog>
     );

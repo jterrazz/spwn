@@ -1,0 +1,13 @@
+/* invariant: the region adds no box, so each piece it holds keeps its place in the page's own column and gaps. */
+.region {
+    display: contents;
+}
+.said {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}

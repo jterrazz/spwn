@@ -19,13 +19,8 @@ import { DiskPanel, groupOf, GroupPanel } from '../../features/disk/disk-view';
 import { KeptPanel, UnusedFoot, UnusedPanel, useFreeUnused } from '../../features/disk/unused';
 import { HeldOutcomes } from '../../kit/gestures';
 import { useIdentityOf } from '../../kit/identity';
-import {
-    Absent,
-    NoVerdict,
-    Reading as ReadingVerdict,
-    Unanswered,
-    VerdictHead,
-} from '../../kit/readings';
+import { Absent, NoVerdict, Unanswered, VerdictHead } from '../../kit/readings';
+import { SkeletonHead } from '../../kit/skeleton';
 import { machineRoute } from '../../navigation/route';
 import type { Route } from '../../navigation/route';
 import { MachineIcon, Panel, Row, Switch } from '../../ui/index';
@@ -82,7 +77,7 @@ function DiskOf({ disk, mac, target }: DiskOfMacProps) {
         return <Unanswered error={disk.error} size="tab" />;
     }
     if (disk.kind === 'reading') {
-        return <ReadingVerdict size="tab" what={`the disk of ${mac}`} />;
+        return <SkeletonHead size="tab" what={`the disk of ${mac}`} />;
     }
     return <DiskRead mac={mac} reading={disk.out} target={target} />;
 }
@@ -260,7 +255,7 @@ export function StoragePage({ macs, go }: { macs: readonly MachinesMacView[]; go
     if (!mac) {
         return (
             <Page>
-                <ReadingVerdict size="page" what="the Macs" />
+                <SkeletonHead size="page" what="the Macs" />
             </Page>
         );
     }

@@ -3,6 +3,8 @@ import { AppIcon } from '../../ui/app-icon';
 import { APP_ICON_STORIES } from '../../ui/app-icon.stories';
 import { Bar, ShareBar } from '../../ui/bar';
 import { BAR_STORIES, SHARE_BAR_STORIES } from '../../ui/bar.stories';
+import { Bone } from '../../ui/bone';
+import { BONE_STORIES } from '../../ui/bone.stories';
 import { Button } from '../../ui/button';
 import { BUTTON_STORIES } from '../../ui/button.stories';
 import { Caption } from '../../ui/caption';
@@ -58,6 +60,8 @@ import { QR_CODE_STORIES } from '../../ui/qr-code.stories';
 import { RadioRows } from '../../ui/radio-rows';
 import { RADIO_ROWS_STORIES } from '../../ui/radio-rows.stories';
 import { Row, RowHead } from '../../ui/row';
+import { RowSkeleton } from '../../ui/row-skeleton';
+import { ROW_SKELETON_STORIES } from '../../ui/row-skeleton.stories';
 import { ROW_HEAD_STORIES, ROW_STORIES } from '../../ui/row.stories';
 import { SearchField } from '../../ui/search-field';
 import { SEARCH_FIELD_STORIES } from '../../ui/search-field.stories';
@@ -75,7 +79,8 @@ import { TypeTag } from '../../ui/type-tag';
 import { TYPE_TAG_STORIES } from '../../ui/type-tag.stories';
 import { Value } from '../../ui/value';
 import { VALUE_STORIES } from '../../ui/value.stories';
-import { Verdict } from '../../ui/verdict';
+import { Verdict, VerdictSkeleton } from '../../ui/verdict';
+import { VERDICT_SKELETON_STORIES } from '../../ui/verdict-skeleton.stories';
 import { VERDICT_STORIES } from '../../ui/verdict.stories';
 import { entry } from './entry';
 import type { Entry } from './entry';
@@ -95,6 +100,7 @@ export const ENTRIES: readonly Entry[] = [
     entry('Caption', 'Marks', { Component: Caption, frame: 'block', stories: CAPTION_STORIES }),
     entry('Missing', 'Marks', { Component: Missing, frame: 'block', stories: MISSING_STORIES }),
     entry('MissingMark', 'Marks', { Component: MissingMark, stories: MISSING_MARK_STORIES }),
+    entry('Bone', 'Marks', { Component: Bone, frame: 'meter', stories: BONE_STORIES }),
     entry('Bar', 'Measures', { Component: Bar, frame: 'meter', stories: BAR_STORIES }),
     entry('ShareBar', 'Measures', {
         Component: ShareBar,
@@ -170,10 +176,20 @@ export const ENTRIES: readonly Entry[] = [
         stories: CODE_BLOCK_STORIES,
     }),
     entry('QrCode', 'Containers', { Component: QrCode, stories: QR_CODE_STORIES }),
+    entry('RowSkeleton', 'Containers', {
+        Component: RowSkeleton,
+        frame: 'block',
+        stories: ROW_SKELETON_STORIES,
+    }),
     entry('Verdict', 'Statements', {
         Component: Verdict,
         frame: 'block',
         stories: VERDICT_STORIES,
+    }),
+    entry('VerdictSkeleton', 'Statements', {
+        Component: VerdictSkeleton,
+        frame: 'block',
+        stories: VERDICT_SKELETON_STORIES,
     }),
     entry('Modal', 'Dialogs', { Component: Modal, frame: 'dialog', stories: MODAL_STORIES }),
     entry('Dialog', 'Dialogs', { Component: Dialog, frame: 'dialog', stories: DIALOG_STORIES }),

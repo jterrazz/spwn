@@ -5,12 +5,15 @@ import { useWatch } from '../../../dependencies/dependencies';
 import { Freed, useFreeAll } from '../../../features/disk/disk-gestures';
 import { ByApp, DiskPanel } from '../../../features/disk/disk-view';
 import { HeldOutcomes } from '../../../kit/gestures';
-import { Reading, Unanswered } from '../../../kit/readings';
+import { Unanswered } from '../../../kit/readings';
+import { Skeleton, SkeletonPanel } from '../../../kit/skeleton';
 import type { Route } from '../../../navigation/route';
 import { Screen } from '../../../ui/index';
 import { Page } from '../../../ui/page';
 
 import styles from './machine-storage.module.css';
+
+const TITLE = 'Storage';
 
 const FOOT = "Data and settings are never freed here. Erasing an app's data is asked for by name.";
 
@@ -56,7 +59,7 @@ function Read({ reading, name, target, vm, go }: ReadProps) {
                     name={name}
                     reading={reading}
                     sub={vm ? <Inside go={go} /> : reading.Station?.Itself}
-                    title="Storage"
+                    title={TITLE}
                 />
                 <HeldOutcomes>
                     <Freed gesture={freeAll} />
@@ -86,7 +89,9 @@ export function StorageTab({ name, target, vm = false, go }: StorageTabProps) {
     if (disk.kind === 'reading') {
         return (
             <Page>
-                <Reading size="tab" what={`the disk of ${name}`} />
+                <Skeleton what={`the disk of ${name}`}>
+                    <SkeletonPanel count={3} title={TITLE} trail="fit" />
+                </Skeleton>
             </Page>
         );
     }

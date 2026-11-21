@@ -6,9 +6,10 @@ import type { Span } from '../../../../domain/activity/measures';
 import type { Found } from '../../../../domain/machines/machines';
 import { Busiest } from '../../../features/activity/busiest';
 import { useActivity, useHistory } from '../../../features/activity/reading';
-import { Reading, Unanswered } from '../../../kit/readings';
+import { Unanswered } from '../../../kit/readings';
+import { Skeleton } from '../../../kit/skeleton';
 import type { Route } from '../../../navigation/route';
-import { Switch } from '../../../ui/index';
+import { Switch, VerdictSkeleton } from '../../../ui/index';
 import { Page } from '../../../ui/page';
 import { THIS_MAC_WORD } from '../../../words/words';
 import { Cards } from './cards';
@@ -78,10 +79,10 @@ export function ActivityTab({ found, go }: { found: Found; go: Go }) {
         );
     } else {
         now = (
-            <>
-                <Reading size="tab" what={`the activity of ${name}`} />
+            <Skeleton what={`the activity of ${name}`}>
+                <VerdictSkeleton size="tab" />
                 {switcher}
-            </>
+            </Skeleton>
         );
     }
     return (

@@ -4,7 +4,8 @@ import { useState } from 'react';
 import { useReach, useRead } from '../../dependencies/dependencies';
 import type { Reading } from '../../dependencies/dependencies';
 import { planFilesOf } from '../../features/machinefile/model';
-import { Absent, Reading as ReadingVerdict, Unanswered, VerdictHead } from '../../kit/readings';
+import { Absent, Unanswered, VerdictHead } from '../../kit/readings';
+import { SkeletonHead } from '../../kit/skeleton';
 import type { Route } from '../../navigation/route';
 import type { Opening } from '../../navigation/window';
 import { Caption, Missing, Switch } from '../../ui/index';
@@ -61,7 +62,7 @@ function Waiting({ reading, what }: { reading: Reading<unknown>; what: string })
     if (reading.kind === 'failed') {
         return <Unanswered error={reading.error} size="page" />;
     }
-    return <ReadingVerdict size="page" what={what} />;
+    return <SkeletonHead size="page" what={what} />;
 }
 
 function File({
@@ -110,7 +111,7 @@ function File({
                     ) : drift.kind === 'failed' ? (
                         <Unanswered error={drift.error} size="tab" />
                     ) : (
-                        <ReadingVerdict size="tab" what={`This Mac against ${file}`} />
+                        <SkeletonHead size="tab" what={`This Mac against ${file}`} />
                     )}
                     <Own view={view} />
                 </>

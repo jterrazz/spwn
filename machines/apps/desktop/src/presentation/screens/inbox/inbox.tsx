@@ -8,7 +8,8 @@ import { History } from '../../features/journal/changes';
 import { needsOn } from '../../features/overview/needs';
 import { Needs } from '../../features/overview/needs-panel';
 import { HeldOutcomes } from '../../kit/gestures';
-import { Absent, Reading as ReadingVerdict, SummaryHead, Unanswered } from '../../kit/readings';
+import { Absent, SummaryHead, Unanswered } from '../../kit/readings';
+import { SkeletonHead } from '../../kit/skeleton';
 import type { Route } from '../../navigation/route';
 import { Switch } from '../../ui/index';
 import { Page } from '../../ui/page';
@@ -58,7 +59,7 @@ export function InboxPage({ macs, overview, go }: InboxProps) {
     if (overview.kind === 'reading') {
         return (
             <Page>
-                <ReadingVerdict size="page" what="what needs you" />
+                <SkeletonHead size="page" what="what needs you" />
             </Page>
         );
     }

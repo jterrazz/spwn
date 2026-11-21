@@ -170,7 +170,7 @@ describe('words', () => {
             "return route.page === 'machine';",
             'const TITLES: Record<PlainPage, string> = {};',
             "<p className={styles.text}>{readingWord('its machine file')}</p>",
-            '<Reading size="tab" what="its apps" />',
+            '<SkeletonHead size="tab" what="its apps" />',
         ];
 
         // When - each is read as a page's line

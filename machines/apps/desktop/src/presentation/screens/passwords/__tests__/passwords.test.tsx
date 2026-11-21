@@ -1,7 +1,12 @@
 import { button, component, content, dialog, file, heading, region, within } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
-import { pageOver } from '../../../../composition/__tests__/page-over';
+import {
+    heightOf,
+    heldPageOver,
+    pageOver,
+    settled,
+} from '../../../../composition/__tests__/page-over';
 import { recordingsOf } from '../../../../infrastructure/outbound/engine-replay/recordings';
 
 const recordingFor = await recordingsOf('two-macs', 'bare-mac');
@@ -26,6 +31,31 @@ describe('passwords', () => {
         });
         expect(result.errors.text).toBe('');
         await expect(result.tree).toMatch(file('./__expected__/two-macs-passwords.aria.yaml'));
+    });
+
+    test('the page keeps its height across its first answer, three passwords where three bones stood', async () => {
+        // Given - the Passwords page over two-macs, its three passwords held unread
+        const { held, stage, ui } = heldPageOver(
+            recordingFor('two-macs'),
+            { page: 'passwords' },
+            'vault.list',
+        );
+        let heights: number[] = [];
+        await component.render(ui, async (visitor) => {
+            await settled(stage);
+            const before = heightOf('main');
+
+            // When - vault.list answers
+            held.release();
+            await visitor.see(heading('Passwords on macbook-pro'));
+            await settled(stage);
+            heights = [before, heightOf('main')];
+        });
+
+        // Then - the main region stands as tall before the answer as after it
+        const [before, after] = heights;
+        expect(before).toBeGreaterThan(0);
+        expect(after).toBe(before);
     });
 
     test('an empty vault says so in the engine’s words', async () => {

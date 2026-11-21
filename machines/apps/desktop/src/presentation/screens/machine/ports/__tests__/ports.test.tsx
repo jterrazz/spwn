@@ -2,7 +2,13 @@ import type { PortsPort } from '@jterrazz/station-api';
 import { button, component, content, file, region, within } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
-import { pageOver } from '../../../../../composition/__tests__/page-over';
+import {
+    heightOf,
+    heldPageOver,
+    pageOver,
+    panelHeight,
+    settled,
+} from '../../../../../composition/__tests__/page-over';
 import { composeReplay } from '../../../../../composition/compose';
 import { recordingsOf } from '../../../../../infrastructure/outbound/engine-replay/recordings';
 import { EngineProvider } from '../../../../dependencies/dependencies';
@@ -42,6 +48,29 @@ function macPortOver(port: PortsPort) {
 }
 
 describe('ports', () => {
+    test('the page keeps its height across its first answer, but for the rows the answer adds', async () => {
+        // Given - macbook-pro's Ports over stories, its listing held unread
+        const route = { machine: 'macbook-pro', page: 'machine', tab: 'Ports' } as const;
+        const { held, stage, ui } = heldPageOver(recordingFor('stories'), route, 'ports.list');
+        const listening = 'What listens on this Mac';
+        let heights: number[] = [];
+        await component.render(ui, async (visitor) => {
+            await settled(stage);
+            const before = [heightOf('main'), panelHeight(listening)];
+
+            // When - ports.list answers
+            held.release();
+            await visitor.see(region(listening));
+            await settled(stage);
+            heights = [...before, heightOf('main'), panelHeight(listening)];
+        });
+
+        // Then - the main region grows by what its listening panel grows, its rows past the three bones, and no more
+        const [mainBefore = 0, panelBefore = 0, mainAfter = 0, panelAfter = 0] = heights;
+        expect(panelBefore).toBeGreaterThan(0);
+        expect(mainAfter - mainBefore).toBe(panelAfter - panelBefore);
+    });
+
     test("a workspace's shares carry their addresses, and a QR code on demand", async () => {
         // Given - linux-1's Ports over two-macs, two of its ports shared
         const result = await component.render(portsOver('two-macs', 'linux-1'), async (visitor) => {

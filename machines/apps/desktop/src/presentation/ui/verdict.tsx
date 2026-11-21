@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 
 import type { Tone } from '../../domain/tone';
+import { Bone } from './bone';
 import { StateDot } from './state-dot';
 
 import styles from './verdict.module.css';
@@ -25,6 +26,26 @@ export function Verdict({ title, line, tone, word, size, action }: VerdictProps)
                 </p>
             )}
             {action === undefined ? null : <div className={styles.action}>{action}</div>}
+        </div>
+    );
+}
+
+export type VerdictSkeletonProps = { size: 'page' | 'tab'; line?: boolean };
+
+// value: a verdict of one title line and, where its answer carries one, a line under it, before its answer: its
+// value: height is an answered one's.
+export function VerdictSkeleton({ size, line = true }: VerdictSkeletonProps) {
+    return (
+        <div aria-hidden="true" className={`${styles.verdict} ${styles[size]}`}>
+            <p className={styles.title}>
+                <Bone width="wide" />
+            </p>
+            {line ? (
+                <p className={styles.line}>
+                    <span className={styles.dot} />
+                    <Bone width="long" />
+                </p>
+            ) : null}
         </div>
     );
 }

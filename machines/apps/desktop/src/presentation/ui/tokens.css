@@ -81,6 +81,7 @@
 
     --motion-hover: 120ms ease-out;
     --motion-press: scale(0.97);
+    --motion-wait: 2.4s ease-in-out infinite;
 
     --chrome-row: 46px;
     --chrome-lights-room: 84px;

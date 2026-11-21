@@ -6,9 +6,10 @@ import { useRead, useWatch } from '../../../dependencies/dependencies';
 import { Needs } from '../../../features/overview/needs-panel';
 import { ChapterDiffers } from '../../../kit/chapter-differs';
 import { GestureButton, GestureRow, HeldOutcomes } from '../../../kit/gestures';
-import { Reading, Unanswered, VerdictHead } from '../../../kit/readings';
+import { Unanswered, VerdictHead } from '../../../kit/readings';
+import { Skeleton, SkeletonPanel } from '../../../kit/skeleton';
 import type { Route } from '../../../navigation/route';
-import { Panel, Row, StatePill, Value } from '../../../ui/index';
+import { Panel, Row, StatePill, Value, VerdictSkeleton } from '../../../ui/index';
 import { Page } from '../../../ui/page';
 import { isDeclarable, isPortShared } from '../../../words/provisional';
 import { portReach, shareToWord } from '../../../words/shown';
@@ -20,6 +21,9 @@ import type { PortsOf } from './ports-of';
 import { SharedRow } from './shared-row';
 
 import styles from './ports.module.css';
+
+const SHARED_TITLE = 'Shared';
+const MAC_PORTS_TITLE = 'What listens on this Mac';
 
 function Answer({ port }: { port: PortsPort }) {
     if (port.Answer === '') {
@@ -144,7 +148,7 @@ function VmPorts({ of, vm, target }: VmPortsProps) {
     return (
         <>
             {of.shared.length === 0 && rest > 0 ? null : (
-                <Panel title="Shared">
+                <Panel title={SHARED_TITLE}>
                     {of.shared.length === 0 ? (
                         <p className={styles.empty}>Nothing listed on {vm}.</p>
                     ) : (
@@ -182,7 +186,7 @@ type MacPortsProps = { of: PortsOf; name: string; target: Target | undefined };
 
 function MacPorts({ of, name, target }: MacPortsProps) {
     return (
-        <Panel title="What listens on this Mac">
+        <Panel title={MAC_PORTS_TITLE}>
             {of.ports.length === 0 ? (
                 <p className={styles.empty}>
                     {of.mac ? `Nothing listed on ${name}.` : `The answer names no Mac ${name}.`}
@@ -206,14 +210,23 @@ export function PortsTab({ found, go }: { found: Found; go: Go }) {
             </Page>
         );
     }
+    const vm = found.vm?.Name;
     if (listing.kind === 'reading') {
         return (
             <Page>
-                <Reading size="tab" what={`the ports of ${name}`} />
+                <Skeleton what={`the ports of ${name}`}>
+                    <VerdictSkeleton size="tab" />
+                    <Alarm found={found} go={go} name={name} />
+                    <SkeletonPanel
+                        count={3}
+                        lead="value"
+                        title={vm === undefined ? MAC_PORTS_TITLE : SHARED_TITLE}
+                        trail="wide"
+                    />
+                </Skeleton>
             </Page>
         );
     }
-    const vm = found.vm?.Name;
     const of = portsOf(listing.out, { mac: found.mac.Name, vm });
     return (
         <Page>

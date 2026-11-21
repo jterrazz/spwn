@@ -10,8 +10,9 @@ import type { Reading as Read } from '../../../dependencies/dependencies';
 import { useGesture } from '../../../dependencies/use-gesture';
 import { byAction } from '../../../features/machinefile/model';
 import { GestureButton, GestureOutcome } from '../../../kit/gestures';
-import { Reading, Unanswered } from '../../../kit/readings';
-import { AppIcon, Button, Panel, Row, Tile } from '../../../ui/index';
+import { Unanswered } from '../../../kit/readings';
+import { Skeleton, SkeletonTile } from '../../../kit/skeleton';
+import { AppIcon, Bone, Button, Panel, Row, Tile } from '../../../ui/index';
 import { Page, Tiles } from '../../../ui/page';
 import { headingOf, nounOf, wordOf } from '../../../words/engine-words';
 import type { PlanLine } from '../../../words/provisional';
@@ -156,7 +157,21 @@ function PlanBody({ plan, name }: { plan: Read<MachinefilePlan>; name: string })
         return <Unanswered error={plan.error} size="tab" />;
     }
     if (plan.kind === 'reading') {
-        return <Reading size="tab" what={`the plan of ${name}`} />;
+        return (
+            <Skeleton what={`the plan of ${name}`}>
+                <div aria-hidden="true" className={styles.planHead}>
+                    <p className={styles.planTitle}>Plan for {name}</p>
+                    <p className={styles.planLine}>
+                        <Bone width="wide" />
+                    </p>
+                </div>
+                <Tiles>
+                    {COUNTED.map(({ action }) => (
+                        <SkeletonTile key={action} label={headingOf(action)} />
+                    ))}
+                </Tiles>
+            </Skeleton>
+        );
     }
     return (
         <>

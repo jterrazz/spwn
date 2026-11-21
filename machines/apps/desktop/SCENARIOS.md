@@ -12,7 +12,7 @@ What the desktop window must let its user do, page by page: one row is one scena
 | A workspace              | W1 to W32                                         |
 | A server                 | S1 to S6                                          |
 | Library and Storage      | D1 to D38                                         |
-| The window itself        | A1 to A7                                          |
+| The window itself        | A1 to A8                                          |
 | No engine on this Mac    | E1 to E7                                          |
 | The engine's release     | U1 to U4                                          |
 | The window's release     | R1 to R7                                          |
@@ -200,6 +200,7 @@ A scenario is a test of `specs/website/`, a visit of the window's proof build ov
 | A5  | Look the same on Linux              | the app runs on Linux            | I open it                               | the same pages, with the same proportions                                                                                                                                        | no     |
 | A6  | Find the same tabs on every machine | a Mac, a workspace and a server  | I open each                             | a Mac and a workspace the same six tabs in the same order, a server the tabs its engine has sections for; a tab with nothing in it says so in its head and still shows its lists | yes    |
 | A7  | Open the window on its page         | the engine answers, or none does | I launch the window                     | the first frame I see holds the page and its data in its own faces, or after 0.8 s whatever is drawn; never empty glass, never a font that swaps                                 | no     |
+| A8  | Open a page before it answers       | a read not answered yet          | I open a page                           | it draws its own verdict, panels, rows and tiles as quiet bones of their answered heights and says what it reads; the answer, once come, moves nothing above what it adds        | no     |
 
 ## No engine on this Mac
 

@@ -16,7 +16,8 @@ import { DiskTile } from '../../../features/disk/disk-tile';
 import { MemoryPanel } from '../../../features/machines/memory';
 import { Needs } from '../../../features/overview/needs-panel';
 import { HeldOutcomes } from '../../../kit/gestures';
-import { NoVerdict, Reading, SummaryHead, Unanswered, VerdictHead } from '../../../kit/readings';
+import { NoVerdict, SummaryHead, Unanswered, VerdictHead } from '../../../kit/readings';
+import { SkeletonHead } from '../../../kit/skeleton';
 import type { Route } from '../../../navigation/route';
 import { Page } from '../../../ui/page';
 import { machineKindOf } from '../../../words/provisional';
@@ -44,7 +45,7 @@ function MacHead({ overview, name, unseen }: MacHeadProps) {
         return <Unanswered error={overview.error} size="tab" />;
     }
     if (overview.kind === 'reading') {
-        return <Reading size="tab" what={name} />;
+        return <SkeletonHead size="tab" what={name} />;
     }
     const { Summary } = overview.out;
     return Summary.Head.Verdict === undefined ? (

@@ -3,10 +3,11 @@ import type { AccountsVaultEntry, AccountsVaultRead } from '@jterrazz/station-ap
 import { sentence } from '../../../domain/format';
 import { useWatch } from '../../dependencies/dependencies';
 import { HeldOutcomes } from '../../kit/gestures';
-import { Reading, Unanswered } from '../../kit/readings';
+import { Unanswered } from '../../kit/readings';
+import { Skeleton, SkeletonPanel } from '../../kit/skeleton';
 import type { Route } from '../../navigation/route';
 import { Icon } from '../../ui/icon';
-import { AppIcon, asSentence, Panel, Row, RowHead, Verdict } from '../../ui/index';
+import { AppIcon, asSentence, Panel, Row, RowHead, Verdict, VerdictSkeleton } from '../../ui/index';
 import { Page } from '../../ui/page';
 import { verdictShown } from '../../words/shown';
 import { EntryPage } from './entry';
@@ -15,6 +16,8 @@ import { addedDay, grantedTo, kindWord } from './passwords-of';
 import styles from './passwords.module.css';
 
 type Go = (to: Route) => void;
+
+const TITLE = 'Passwords';
 
 const COLUMNS = [
     { label: 'Password' },
@@ -59,7 +62,7 @@ function Vault({ read, go }: { read: AccountsVaultRead; go: Go }) {
                 {...verdictShown(read.Verdict)}
             />
             <HeldOutcomes>
-                <Panel note={String(entries.length)} title="Passwords">
+                <Panel note={String(entries.length)} title={TITLE}>
                     {entries.length === 0 ? null : (
                         <RowHead columns={COLUMNS} lead template="passwords" />
                     )}
@@ -85,7 +88,16 @@ export function PasswordsPage({ opened, go }: { opened: string | undefined; go: 
     if (listed.kind === 'reading') {
         return (
             <Page>
-                <Reading size="page" what="the passwords of this Mac" />
+                <Skeleton what="the passwords of this Mac">
+                    <VerdictSkeleton size="page" />
+                    <SkeletonPanel
+                        count={3}
+                        head={<RowHead columns={COLUMNS} lead template="passwords" />}
+                        lead="icon"
+                        template="passwords"
+                        title={TITLE}
+                    />
+                </Skeleton>
             </Page>
         );
     }

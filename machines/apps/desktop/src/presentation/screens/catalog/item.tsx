@@ -3,7 +3,8 @@ import type { AppsReport, MachinesMacView, SettingsRow } from '@jterrazz/station
 import { isSkill } from '../../../domain/catalog/apps';
 import { useReach, useRead, useWatch } from '../../dependencies/dependencies';
 import type { Reading as Answer } from '../../dependencies/dependencies';
-import { Absent, Reading, Unanswered } from '../../kit/readings';
+import { Absent, Unanswered } from '../../kit/readings';
+import { SkeletonHead } from '../../kit/skeleton';
 import type { Route } from '../../navigation/route';
 import { Verdict } from '../../ui/index';
 import { Page } from '../../ui/page';
@@ -88,7 +89,7 @@ function Waiting({ name, reading }: { name: string; reading: Answer<unknown> }) 
     if (reading.kind === 'failed') {
         return <Unanswered error={reading.error} size="page" />;
     }
-    return <Reading size="page" what={name} />;
+    return <SkeletonHead size="page" what={name} />;
 }
 
 export function ItemPage({

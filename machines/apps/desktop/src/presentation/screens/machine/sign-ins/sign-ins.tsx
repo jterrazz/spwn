@@ -8,9 +8,10 @@ import { useGesture } from '../../../dependencies/use-gesture';
 import type { Gesture } from '../../../dependencies/use-gesture';
 import { GestureButton, GestureRow, HeldOutcomes } from '../../../kit/gestures';
 import { LoginSheet } from '../../../kit/login-sheet';
-import { Reading, Unanswered } from '../../../kit/readings';
+import { Unanswered } from '../../../kit/readings';
+import { Skeleton, SkeletonPanel } from '../../../kit/skeleton';
 import type { Route } from '../../../navigation/route';
-import { AppIcon, asSentence, Button, Panel, Verdict } from '../../../ui/index';
+import { AppIcon, asSentence, Button, Panel, Verdict, VerdictSkeleton } from '../../../ui/index';
 import { Page } from '../../../ui/page';
 import { countOf, wordOf } from '../../../words/engine-words';
 import { engineShown, grantedCount, verdictShown } from '../../../words/shown';
@@ -22,6 +23,8 @@ const LIST_REREADS: readonly CallName[] = ['accounts.list'];
 const GRANT_REREADS: readonly CallName[] = ['accounts.list', 'vault.list', 'grants.new'];
 
 type Go = (to: Route) => void;
+
+const TITLE = 'Sign-ins';
 
 type Asked = { program: AccountsProgramRow['Program']; action: AccountsProgramRow['Action'] };
 
@@ -231,7 +234,10 @@ export function SignInsTab({ found, go }: { found: Found; go: Go }) {
     if (listed.kind === 'reading') {
         return (
             <Page>
-                <Reading size="tab" what={`the sign-ins of ${name}`} />
+                <Skeleton what={`the sign-ins of ${name}`}>
+                    <VerdictSkeleton line={false} size="tab" />
+                    <SkeletonPanel count={3} lead="icon" title={TITLE} trail="fit" />
+                </Skeleton>
             </Page>
         );
     }
@@ -246,7 +252,7 @@ export function SignInsTab({ found, go }: { found: Found; go: Go }) {
                 {...verdictShown(verdict)}
             />
             <HeldOutcomes>
-                <Panel note={String(programs.length)} title="Sign-ins">
+                <Panel note={String(programs.length)} title={TITLE}>
                     {programs.map((row) => (
                         <ProgramRow
                             found={found}

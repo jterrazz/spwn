@@ -5,7 +5,8 @@ import type { ReactNode } from 'react';
 import { useWatch } from '../../dependencies/dependencies';
 import { useGesture } from '../../dependencies/use-gesture';
 import { GestureButton, GestureOutcome } from '../../kit/gestures';
-import { Reading, Unanswered } from '../../kit/readings';
+import { Unanswered } from '../../kit/readings';
+import { Skeleton, SkeletonRows } from '../../kit/skeleton';
 import { Button, Dialog, RadioRows } from '../../ui/index';
 import { targetRowsOf, VAULT_REREADS } from './passwords-of';
 
@@ -77,7 +78,11 @@ export function GrantSheet({ entry, onClose }: { entry: AccountsVaultEntry; onCl
     if (offered.kind === 'reading') {
         return (
             <Dialog actions={cancel} onClose={onClose} title={title}>
-                <Reading size="tab" what={`where ${entry.Label} can go`} />
+                <Skeleton what={`where ${entry.Label} can go`}>
+                    <div className={styles.picks}>
+                        <SkeletonRows count={3} lead="icon" />
+                    </div>
+                </Skeleton>
             </Dialog>
         );
     }

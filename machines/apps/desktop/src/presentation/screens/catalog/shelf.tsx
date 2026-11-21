@@ -16,7 +16,8 @@ import {
 import { sentence } from '../../../domain/format';
 import { useReach, useRead, useWatch } from '../../dependencies/dependencies';
 import type { Reading } from '../../dependencies/dependencies';
-import { Absent, Reading as ReadingVerdict, Unanswered, VerdictHead } from '../../kit/readings';
+import { Absent, Unanswered, VerdictHead } from '../../kit/readings';
+import { SkeletonHead } from '../../kit/skeleton';
 import type { Route } from '../../navigation/route';
 import { AppIcon, Row, StatePill, Value } from '../../ui/index';
 import { Page } from '../../ui/page';
@@ -42,7 +43,7 @@ function headOf<Out>(
             return <Unanswered error={matrix.error} size="page" />;
         }
         if (matrix.kind !== 'read') {
-            return <ReadingVerdict size="page" what={what} />;
+            return <SkeletonHead size="page" what={what} />;
         }
         const shelf = shelfOf(matrix.out);
         return (
@@ -145,7 +146,7 @@ function Waiting({ reading, what }: { reading: Reading<unknown>; what: string })
     if (reading.kind === 'failed') {
         return <Unanswered error={reading.error} size="page" />;
     }
-    return <ReadingVerdict size="page" what={what} />;
+    return <SkeletonHead size="page" what={what} />;
 }
 
 function SettingsShelf({ open }: { open: Open }) {
