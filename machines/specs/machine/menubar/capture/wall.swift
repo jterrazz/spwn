@@ -1,13 +1,15 @@
 // value: draws one of M1's three wallpapers (the contrast round's walls.js,
 // ported to CoreGraphics) over the guest's whole screen, its scene placed so
-// the panel lands where M1 drew it, then sets it as every screen's desktop.
-// usage: swift wall.swift <dark|light|color> <out.png> <panel left pt> <panel top pt>
+// the panel lands where M1 drew it (grey is one plain mid-grey, saturation 0, whose
+// scene has no panel: the Dock set's ground, so a translucent tile sits on the same
+// pixels in every appearance), then sets it as every screen's desktop.
+// usage: swift wall.swift <dark|light|color|grey> <out.png> <panel left pt> <panel top pt>
 //   the panel's top-left is in points from the screen's top-left corner.
 import AppKit
 
 let args = CommandLine.arguments
 guard args.count == 5, let left = Double(args[3]), let top = Double(args[4]), let screen = NSScreen.main else {
-    FileHandle.standardError.write(Data("usage: wall.swift <dark|light|color> <out.png> <left> <top>\n".utf8))
+    FileHandle.standardError.write(Data("usage: wall.swift <dark|light|color|grey> <out.png> <left> <top>\n".utf8))
     exit(2)
 }
 let kind = args[1]
@@ -125,6 +127,8 @@ case "light":
     }
     window(x: -20, y: 150, w: 240, h: 330, bg: 0xFFFFFF, bar: 0xF2F2F2, ink: 0x333333, lines: 18, bold: true, seed: 11)
     window(x: 230, y: 250, w: 230, h: 230, bg: 0xFAFAFA, bar: 0xE6E6E6, ink: 0x555555, lines: 14, bold: false, seed: 4)
+case "grey":
+    fill(rgba(0x808080))
 case "color":
     linear([(0, 0x1747D1), (0.5, 0x4B3FE0), (1, 0x8A3BE6)], from: CGPoint(x: ox, y: oy), to: CGPoint(x: ox + 420, y: oy + 452))
     blob(160, 200, 420, c(60, 200, 255, 0.85), c(60, 200, 255, 0))

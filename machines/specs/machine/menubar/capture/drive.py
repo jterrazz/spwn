@@ -390,7 +390,9 @@ class Rig:
         return meta
 
     # value: the two bundles go where a person installs them, then the Dock is
-    # rewritten to Finder and DOCK alone, at TILE_PT with no magnification.
+    # rewritten to Finder and DOCK alone, at TILE_PT with no magnification, over a plain
+    # grey desktop: a Clear or Tinted tile is translucent, so its pixels carry the ground
+    # behind it, and one ground for every appearance judges the icon alone.
     def dock_setup(self):
         for target, built in BUILT.items():
             self.ssh(f"sudo -n rm -rf {target!r} && sudo -n ditto {built} {target!r}", check=True)
@@ -405,6 +407,7 @@ class Rig:
         for key, kind, value in (("show-recents", "bool", "false"), ("magnification", "bool", "false"),
                                  ("tilesize", "int", str(TILE_PT)), ("autohide", "bool", "false")):
             self.gui(f"defaults write com.apple.dock {key} -{kind} {value}", check=True)
+        self.place("grey", 0, 0)
         self.ssh("printf 'tell application \"System Events\" to tell process \"Dock\"\n"
                  "set out to \"\"\nrepeat with e in UI elements of list 1\n"
                  "set p to position of e\nset z to size of e\n"
