@@ -13,6 +13,8 @@ import { READING } from '../../application/use-cases/entry';
 import type { Asked, Reading } from '../../application/use-cases/entry';
 import { offers } from '../../application/use-cases/fresh';
 import { GestureStore } from '../../application/use-cases/gesture-store';
+import { StateMirror, viewOf } from '../../application/use-cases/mirror';
+import type { MirrorTiming } from '../../application/use-cases/mirror';
 import { reachOf } from '../../application/use-cases/reach';
 import type { Judged, Reach } from '../../application/use-cases/reach';
 import { askedKey, ReadStore } from '../../application/use-cases/store';
@@ -37,11 +39,13 @@ export type Dependencies = {
     coreLookEvery?: number | undefined;
     windowUpdate?: undefined | WindowUpdatePort;
     reads?: Partial<StoreTiming> | undefined;
+    mirror?: Partial<MirrorTiming> | undefined;
 };
 
 type Engine = {
     client: EnginePort;
     store: ReadStore;
+    mirror: StateMirror;
     stale: StaleMarks;
     gestures: GestureStore;
     opener: OpenerPort;
@@ -67,19 +71,21 @@ export function EngineProvider({
         coreLookEvery,
         windowUpdate = NO_WINDOW_UPDATE,
         reads,
+        mirror,
     } = dependencies;
     const engine = useMemo(
         () => ({
             client,
             core: new CoreFlow(core, coreLookEvery),
             gestures: new GestureStore(),
+            mirror: new StateMirror(client, mirror),
             opener,
             stale: new StaleMarks(),
             store: new ReadStore(client, presence, reads),
             update: new UpdateFlow(core),
             windowUpdate: new WindowUpdateFlow(windowUpdate),
         }),
-        [client, core, coreLookEvery, opener, presence, reads, windowUpdate],
+        [client, core, coreLookEvery, mirror, opener, presence, reads, windowUpdate],
     );
     useEffect(() => {
         engine.windowUpdate.start();
@@ -158,10 +164,15 @@ function isOutOf<N extends CallName>(
     return reading.kind !== 'read' || reading.out !== undefined;
 }
 
+// invariant: a view the engine keeps is read from its mirrored stream, never asked by its call; any other read is the
+// invariant: store's.
 function useAsked(asked: Asked): Reading<unknown> {
-    const { store } = useEngine();
+    const { store, mirror } = useEngine();
+    const view = viewOf(asked);
     const key = askedKey(asked);
-    return useSyncExternalStore(store.subscriberOf(asked), () => store.reading(key));
+    const subscribe = view === undefined ? store.subscriberOf(asked) : mirror.subscriberOf(view);
+    const read = () => (view === undefined ? store.reading(key) : mirror.reading(view));
+    return useSyncExternalStore(subscribe, read);
 }
 
 // invariant: a reader drawn holds its answer's stale refusal in the frame's marks for as long as it is drawn.

@@ -29,6 +29,7 @@ export const BRIDGED = [
     'engine.read-release',
     'engine.refresh-release',
     'engine.start',
+    'engine.state',
     'engine.watch',
     'grants.add',
     'grants.new',

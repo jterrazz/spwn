@@ -2,7 +2,6 @@ import { component, content, waitUntil } from '@jterrazz/test';
 import { Profiler } from 'react';
 import { describe, expect, test } from 'vitest';
 
-import { PAGE_REVISION } from '../../../domain/fit';
 import { keyOf } from '../../../domain/request-key';
 import { documentPresence } from '../../../infrastructure/outbound/document-presence/document-presence';
 import { Client } from '../../../infrastructure/outbound/engine-link/client';
@@ -16,11 +15,11 @@ import { PAGES } from '../../screens/registry';
 import { EngineProvider, useRead } from '../dependencies';
 import { useGesture } from '../use-gesture';
 import { counted } from './counted';
+import { CHANGES, HELLO, opened, watched } from './over-a-replay';
+import { pushed, said } from './pushed';
 import { socketEnded } from './socket-ended';
 
 const recordingFor = await recordingsOf('two-macs');
-
-const HELLO = { page: PAGE_REVISION, pid: 41, started_at: '2026-11-13T09:00:00Z', version: 'dev' };
 
 function EngineState({ label }: { label: string }) {
     const engine = useRead('engine.read', {});
@@ -70,17 +69,6 @@ function upgraded(recording: Recording, version: string): Recording {
     };
 }
 
-function opened(recording: Recording) {
-    return stagedReplay(recording, {
-        hello: HELLO,
-        kind: 'open',
-        refused: undefined,
-        socket: 'replay',
-    });
-}
-
-const CHANGES = { characterData: true, childList: true, subtree: true };
-
 function readingsIn(html: string): number {
     return html.split('Reading').length;
 }
@@ -113,14 +101,6 @@ async function disturbed(stage: ReturnType<typeof opened>, count: Counted) {
     await waitUntil(() => count.refused() > 0, { why: 'ports.list refused' });
     await waitUntil(() => staleMarked() !== null, { why: 'the stale mark drawn' });
     return { marked: staleMarked(), refused: pageDrawn(), restarted };
-}
-
-function watched() {
-    const drawn: string[] = [];
-    const watcher = new MutationObserver(() => {
-        drawn.push(document.body.innerHTML);
-    });
-    return { drawn, watcher };
 }
 
 function pageDrawn(): string {
@@ -262,8 +242,8 @@ describe('dependencies', () => {
         expect(drawn.filter((html) => readingsIn(html) > readingsIn(before))).toStrictEqual([]);
     });
 
-    test('home drawn whole is never drawn reading again by a watch the engine ends by closing its connection', async () => {
-        // Given - the window on Home over two-macs, each watch ended as the engine's socket ends it, overview.read first pending
+    test('home drawn whole is never drawn reading again by a stream the engine ends by closing its connection', async () => {
+        // Given - the window on Home over two-macs, each stream ended as the engine's socket ends it, its Overview first unread
         const stage = opened(recordingFor('two-macs'));
         const socket = socketEnded(stage.transport);
         const { drawn, watcher } = watched();
@@ -281,11 +261,11 @@ describe('dependencies', () => {
                 await visitor.see(content('2 things need you.'));
                 watcher.observe(document.body, CHANGES);
 
-                // When - the client reconnects the ended watch twice, and each new stream answers pending before its whole
+                // When - the window asks the ended stream again twice, and each new stream answers unread before whole
                 const answered = socket.answered();
                 await waitUntil(() => socket.answered() >= answered + 2, {
                     timeout: 10_000,
-                    why: 'overview.read asked again twice, and answered whole each time',
+                    why: 'engine.state asked again twice, and answered whole each time',
                 });
                 watcher.disconnect();
             },
@@ -294,6 +274,48 @@ describe('dependencies', () => {
         // Then - no frame drawn since said it was reading the Mac, or dropped its Needs you
         expect(drawn.filter((html) => html.includes('Reading macbook-pro.'))).toStrictEqual([]);
         expect(drawn.filter((html) => !html.includes('2 things need you.'))).toStrictEqual([]);
+    });
+
+    test('home is drawn once per pushed revision that moves its views, and never for one equal to the one drawn', async () => {
+        // Given - the window on Home over two-macs, each React commit counted
+        const stage = opened(recordingFor('two-macs'));
+        const engine = pushed(stage.transport);
+        let commits = 0;
+        let counts: number[] = [];
+        await component.render(
+            <EngineProvider
+                dependencies={{
+                    engine: new Client(engine.transport),
+                    opener: NO_OPENER,
+                    presence: documentPresence(),
+                }}
+            >
+                <Profiler
+                    id="window"
+                    onRender={() => {
+                        commits += 1;
+                    }}
+                >
+                    <Window initial={{ page: 'home' }} pages={PAGES} />
+                </Profiler>
+            </EngineProvider>,
+            async (visitor) => {
+                await visitor.see(content('2 things need you.'));
+                const committed = commits;
+
+                // When - the engine pushes a revision equal to the one drawn, then one that moves both Overviews, then one that moves them back
+                engine.same();
+                engine.push(said('1 thing needs you.'));
+                await visitor.see(content('1 thing needs you.'));
+                const moved = commits;
+                engine.push(said('2 things need you.'));
+                await visitor.see(content('2 things need you.'));
+                counts = [moved - committed, commits - moved];
+            },
+        );
+
+        // Then - one commit for each revision that moved, none for the equal one
+        expect(counts).toStrictEqual([1, 1]);
     });
 
     test('a page once drawn is never blank again: an equal re-ask, a restart, a refusal and a revisit', async () => {

@@ -3,10 +3,13 @@ import type { EngineHello, Request } from '@jterrazz/station-api';
 import type { Link } from '../../../application/ports/engine.port';
 import { isRecord, keyOf } from '../../../domain/request-key';
 import type { Exchange as Opened, Receiver, Transport } from '../engine-link/transport';
+import { answersOf } from './answers';
+import type { Answers } from './answers';
 import { helloOf } from './hello';
 import { inFlight, play } from './played';
 import type { Played } from './played';
 import { refusalOf, stagedOf } from './staged';
+import { HeldStates, isState, openingOf, viewsOf } from './state';
 import { throwIf, unrecordedOf } from './unrecorded';
 
 export type Exchange = { request: Record<string, unknown>; answers: readonly unknown[] };
@@ -89,8 +92,8 @@ export type Pace = {
     stale?: string | undefined;
 };
 
-// value: a replay the spec drives: the link flips as shown, a drop ends every open exchange after its request was
-// value: sent, a restart drops them and answers from the world the engine came back with, and `open` counts the exchanges a page holds at once.
+// value: a replay the spec drives: the link flips as shown, a drop ends every open exchange after its request was sent, a
+// value: restart drops them and answers from the world the engine came back with, `open` counts those still playing.
 export type Stage = {
     transport: Transport;
     show: (link: Link) => void;
@@ -99,22 +102,6 @@ export type Stage = {
     open: () => number;
     asked: () => readonly Request[];
 };
-
-type Answers = {
-    reads: Map<string, readonly unknown[]>;
-    gestures: Map<string, GestureExchange>;
-};
-
-function answersOf(recording: Recording): Answers {
-    return {
-        gestures: new Map(
-            (recording.gestures ?? []).map((gesture) => [keyOf(gesture.request), gesture]),
-        ),
-        reads: new Map(
-            recording.exchanges.map((exchange) => [keyOf(exchange.request), exchange.answers]),
-        ),
-    };
-}
 
 type Live = { receiver: Receiver; timers: ReturnType<typeof setTimeout>[] };
 
@@ -135,6 +122,7 @@ class Staging {
     private readonly listeners = new Set<(link: Link) => void>();
     private readonly live = new Set<Live>();
     private readonly times = new Map<string, number>();
+    private readonly states = new HeldStates();
     readonly requests: Request[] = [];
 
     constructor(recording: Recording, link: Link | undefined, pace: Pace | undefined) {
@@ -167,6 +155,7 @@ class Staging {
             held.receiver.end('the engine closed the connection', true);
         }
         this.live.clear();
+        this.states.clear();
     }
 
     restart(hello: EngineHello, after: Recording | undefined): void {
@@ -176,7 +165,7 @@ class Staging {
     }
 
     open(): number {
-        return this.live.size;
+        return this.live.size - this.states.size;
     }
 
     link(listener: (link: Link) => void): () => void {
@@ -198,6 +187,7 @@ class Staging {
         const tracked: Receiver = {
             end: (reason, sent) => {
                 this.live.delete(held);
+                this.states.release(receiver);
                 receiver.end(reason, sent);
             },
             frame: receiver.frame,
@@ -216,6 +206,9 @@ class Staging {
                   }, 0),
               ];
         this.live.add(held);
+        if (played && isState(request)) {
+            this.states.hold(receiver, request);
+        }
         return {
             cancel: (frame) => {
                 this.requests.push(frame);
@@ -223,6 +216,7 @@ class Staging {
             close: () => {
                 stopped(held);
                 this.live.delete(held);
+                this.states.release(receiver);
             },
         };
     }
@@ -242,6 +236,10 @@ class Staging {
         const staged = stagedOf(request, asked, this.pace, this.refusal);
         if (staged !== undefined) {
             return { first, ...staged };
+        }
+        if (isState(request)) {
+            const views = viewsOf(this.answers.reads, request, this.pace?.unread);
+            return { first, ...openingOf(this.recording.world, views) };
         }
         if (this.answers.gestures.has(key)) {
             return this.gesturePlayed(request, key, first);
@@ -263,8 +261,15 @@ class Staging {
             frames: held ? gesture.answers.slice(0, 1) : gesture.answers,
             gap: this.pace?.gestureFrame ?? 0,
             held,
-            onFirst: flight.begun,
-            onLast: held ? undefined : flight.ended,
+            onFirst: this.pushing(flight.begun),
+            onLast: held ? undefined : this.pushing(flight.ended),
+        };
+    }
+
+    private pushing(step: () => void): () => void {
+        return () => {
+            step();
+            this.states.push(this.answers.reads, this.pace?.unread);
         };
     }
 }

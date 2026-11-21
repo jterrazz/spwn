@@ -45,9 +45,9 @@ function nameOf(request: Request): string | undefined {
 export function fakeEngine(hello: EngineHello) {
     const opened: Opened[] = [];
     const linked = new Set<(link: Link) => void>();
+    const link = { hello, kind: 'open', refused: undefined, socket: 'fake' } satisfies Link;
     const transport: Transport = {
         link: (listener) => {
-            const link: Link = { hello, kind: 'open', refused: undefined, socket: 'fake' };
             linked.add(listener);
             const timer = setTimeout(() => {
                 listener(link);
@@ -79,24 +79,20 @@ export function fakeEngine(hello: EngineHello) {
     const end = (name: string) => {
         live(name)?.receiver.end('the engine closed the connection', true);
     };
-    const show = (link: Link) => {
+    const show = (shown: Link) => {
         for (const listener of linked) {
-            listener(link);
+            listener(shown);
         }
     };
     const restart = () => {
-        show({
-            hello: { ...hello, pid: hello.pid + 1 },
-            kind: 'open',
-            refused: undefined,
-            socket: 'fake',
-        });
+        show({ ...link, hello: { ...hello, pid: hello.pid + 1 } });
     };
     return {
         answer,
         asked: (name: string) => of(name).length,
         end,
         open: (name: string) => of(name).filter((each) => !each.closed).length,
+        requests: (name: string) => of(name).map((each) => each.request),
         restart,
         show,
         transport,

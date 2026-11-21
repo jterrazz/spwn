@@ -2,6 +2,9 @@
 // value: until 1.0 there is no range (ADR-072); `fit.test.ts` holds it to the tree's engine's.
 export const PAGE_REVISION = 5;
 
+// value: the one revision of `station.state/v1` this window reads, as `engine.state` judges it (ADR-072).
+export const STATE_REVISION = 1;
+
 // value: ADR-070's three verdicts, in the codes its `opened` frame is to carry as `fit`.
 export type Fit = 'app-older' | 'engine-older' | 'fits';
 
