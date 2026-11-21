@@ -85,6 +85,7 @@ export const DISK_HOLDER_COLOURS: Readonly<Record<DiskHolding['Holder'], ShareCo
     leftovers: 'pink',
     logs: 'sky',
     'machine-disks': 'blue',
+    'other-vms': 'indigo',
     'this-mac': 'slate',
 };
 

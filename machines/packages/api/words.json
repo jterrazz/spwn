@@ -1323,6 +1323,10 @@
       "Word": "Machine disks",
       "Tone": "plain"
     },
+    "other-vms": {
+      "Word": "Other VMs",
+      "Tone": "plain"
+    },
     "this-mac": {
       "Word": "The Mac itself",
       "Tone": "plain"

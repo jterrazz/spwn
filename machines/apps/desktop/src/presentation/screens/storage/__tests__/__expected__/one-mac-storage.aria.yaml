@@ -8,7 +8,7 @@
   - region "Disk":
     - heading "Disk" [level=2]
     - button "Rescan"
-    - paragraph: "Outside any machine, Machines holds 0 B: machine disks, images, leftovers and its logs"
+    - paragraph: "Outside any machine, Machines holds 0 B: machine disks, images, other VMs, leftovers and its logs"
     - list "The parts":
       - listitem: Free 0 B
     - paragraph: Every image and every disk Machines holds is a machine's or the newest.

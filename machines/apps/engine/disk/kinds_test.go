@@ -101,8 +101,8 @@ func TestStationPartLeavesTheMacItselfWhatItsPartsDoNotHold(t *testing.T) {
 		Unused: []Freeable{{Holder: HolderImages, Kind: FreeImage, Name: "img@1", Bytes: 30}, {Holder: HolderLeftovers, Kind: FreeDisk, Name: "gone", Bytes: 40}},
 	}
 	p := StationOf(1000, 600, 20, h, "mbp")
-	if p.Holds[2] != (Holding{Holder: HolderLeftovers, Bytes: 40}) || p.Holds[4] != (Holding{Holder: HolderThisMac, Bytes: 260}) || p.Machines[0] != (MachineDisk{Name: "mbp", Bytes: 260}) {
-		t.Fatalf("leftovers %+v, the Mac itself %+v, %+v, want 40 and 400 used - 50 - 30 - 40 - 20", p.Holds[2], p.Holds[4], p.Machines[0])
+	if p.Holds[3] != (Holding{Holder: HolderLeftovers, Bytes: 40}) || p.Holds[5] != (Holding{Holder: HolderThisMac, Bytes: 260}) || p.Machines[0] != (MachineDisk{Name: "mbp", Bytes: 260}) {
+		t.Fatalf("leftovers %+v, the Mac itself %+v, %+v, want 40 and 400 used - 50 - 30 - 40 - 20", p.Holds[3], p.Holds[5], p.Machines[0])
 	}
 	if p.Itself != "This Mac itself holds 260 B." {
 		t.Fatalf("itself %q", p.Itself)
@@ -120,6 +120,22 @@ func TestStationPartLeavesTheMacItselfWhatItsPartsDoNotHold(t *testing.T) {
 	none := StationOf(1000, 600, 0, Held{}, "mbp")
 	if none.Verdict.Sentence != "Nothing to free." || none.CanFree.Call != "" {
 		t.Fatalf("verdict %q, can free %+v, want nothing to free and no gesture", none.Verdict.Sentence, none.CanFree)
+	}
+}
+
+func TestEveryDiskInMachinesHomeIsMachinesWhoeverMadeIt(t *testing.T) {
+	h := Held{
+		Machines: []MachineDisk{{Name: "development-linux", Bytes: 116}},
+		Images:   []MachineDisk{{Name: "station-image-station-linux-2026.11.17", Bytes: 5}},
+		Others:   []MachineDisk{{Name: "development-macos", Bytes: 116}, {Name: "station-e2e-xcode-e6a1", Bytes: 77}},
+	}
+	p := StationOf(1000, 300, 0, h, "mbp")
+	if p.Holds[2] != (Holding{Holder: HolderOtherVMs, Bytes: 193}) || p.Holds[5] != (Holding{Holder: HolderThisMac, Bytes: 386}) {
+		t.Fatalf("other VMs %+v, the Mac itself %+v, want 193 and 700 used - 116 - 5 - 193", p.Holds[2], p.Holds[5])
+	}
+	got, _ := KindsOf(1000, 300, Survey{System: 0, Apps: 0}, nil, HeldReading{State: HeldAnswered, Held: h})
+	if got[4] != (Amount{Kind: KindMachines, Bytes: 314}) || got[2] != (Amount{Kind: KindYourData, Bytes: 386}) {
+		t.Fatalf("kinds %+v, want machines and images 116 + 5 + 193 and your data the 386 left", got)
 	}
 }
 

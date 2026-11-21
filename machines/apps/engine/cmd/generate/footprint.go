@@ -26,6 +26,7 @@ func footprint() string {
 		{"can rebuild", "`station disk free`, with no question"},
 		{"your data", "`station disk erase <app>`, its name typed"},
 		{"never touched", "nobody: keys, tokens, settings and VM records; a setting's `off` where reversible"},
+		{"machines and images", "`station machines delete`, `station images delete`: no Disk row, counted whoever made the VM"},
 	})
 	parts := []string{
 		strings.Replace(footprintPreamble, "%LEVELS%", levels, 1),
@@ -65,6 +66,15 @@ func group(l catalog.Level) string {
 		return strings.ReplaceAll(string(disk.Misplaced), "-", " ")
 	}
 	return strings.ReplaceAll(string(disk.GroupOf(l)), "-", " ")
+}
+
+// value: Machines' VMs and images are no Disk row: disk.read counts them
+// in Machines and images, whoever made them.
+func storedGroup(p catalog.Stored) string {
+	if p.Path == catalog.StationVMs {
+		return "machines and images"
+	}
+	return group(p.Level)
 }
 
 func code(s string) string { return "`" + s + "`" }
@@ -115,7 +125,7 @@ func memoNote(memos []string) string {
 func storedRows(s catalog.Disk) [][]string {
 	rows := make([][]string, 0, len(s.Paths)+len(s.Installed)+len(s.Misplaced))
 	for _, p := range s.Paths {
-		rows = append(rows, []string{code(shown(p.Path)), group(p.Level), note(on(p.On), p.Note, memoNote(p.Memos))})
+		rows = append(rows, []string{code(shown(p.Path)), storedGroup(p), note(on(p.On), p.Note, memoNote(p.Memos))})
 	}
 	for _, p := range s.Installed {
 		removal := s.Removal[p]

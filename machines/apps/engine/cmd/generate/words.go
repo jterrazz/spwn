@@ -259,6 +259,7 @@ func wordedEnums() []worded {
 		{disk.Holder(""), map[string]word{
 			string(disk.HolderMachineDisks): plain("Machine disks"),
 			string(disk.HolderImages):       plain("Images"),
+			string(disk.HolderOtherVMs):     plain("Other VMs"),
 			string(disk.HolderLeftovers):    toned(verdict.Warn, "Leftovers"),
 			string(disk.HolderLogs):         plain("Machines' logs"),
 			string(disk.HolderThisMac):      plain("The Mac itself"),

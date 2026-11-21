@@ -984,14 +984,14 @@ export type DiskCanFree = {
 
 export type DiskFreeable = {
     Bytes: number;
-    Holder: 'machine-disks' | 'images' | 'leftovers' | 'logs' | 'this-mac' | 'free';
+    Holder: 'machine-disks' | 'images' | 'other-vms' | 'leftovers' | 'logs' | 'this-mac' | 'free';
     Kind: 'image' | 'disk' | 'folder';
     Name: string;
 };
 
 export type DiskHolding = {
     Bytes: number;
-    Holder: 'machine-disks' | 'images' | 'leftovers' | 'logs' | 'this-mac' | 'free';
+    Holder: 'machine-disks' | 'images' | 'other-vms' | 'leftovers' | 'logs' | 'this-mac' | 'free';
 };
 
 export type DiskKept = {
@@ -3736,7 +3736,7 @@ export type DiskFreeableKind = 'image' | 'disk' | 'folder';
 
 export type DiskGroup = 'misplaced' | 'can-rebuild' | 'your-data' | 'never-touched';
 
-export type DiskHolder = 'machine-disks' | 'images' | 'leftovers' | 'logs' | 'this-mac' | 'free';
+export type DiskHolder = 'machine-disks' | 'images' | 'other-vms' | 'leftovers' | 'logs' | 'this-mac' | 'free';
 
 export type DiskKind = 'system' | 'apps' | 'your-data' | 'caches' | 'machines' | 'free';
 

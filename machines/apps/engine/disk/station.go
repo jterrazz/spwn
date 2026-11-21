@@ -13,6 +13,7 @@ type Holder string
 const (
 	HolderMachineDisks Holder = "machine-disks"
 	HolderImages       Holder = "images"
+	HolderOtherVMs     Holder = "other-vms"
 	HolderLeftovers    Holder = "leftovers"
 	HolderLogs         Holder = "logs"
 	HolderThisMac      Holder = "this-mac"
@@ -31,7 +32,7 @@ func (Holder) Enum() []string {
 func Holders() []Holder {
 	// value: what holds a Mac's disk, station's parts first, in the order
 	// its bar draws them.
-	return []Holder{HolderMachineDisks, HolderImages, HolderLeftovers, HolderLogs, HolderThisMac, HolderFree}
+	return []Holder{HolderMachineDisks, HolderImages, HolderOtherVMs, HolderLeftovers, HolderLogs, HolderThisMac, HolderFree}
 }
 
 type Holding struct {
@@ -45,11 +46,13 @@ type MachineDisk struct {
 }
 
 type Held struct {
-	// value: the disks a Mac's hypervisor holds for station: each machine's,
-	// each image version's, and what nothing uses: the image versions no
-	// machine is made from and the leftovers.
+	// value: every disk a Mac's hypervisor holds in Machines' home: each
+	// machine's, each image version's, every other VM's (a test VM, one made
+	// by hand, one no record names that is no leftover), and what nothing
+	// uses: the image versions no machine is made from and the leftovers.
 	Machines []MachineDisk
 	Images   []MachineDisk
+	Others   []MachineDisk
 	Unused   []Freeable
 	// value: the hypervisor's old folders that hold VMs of the owner's,
 	// never freed.
@@ -76,7 +79,7 @@ func KeptOf(folder, into string, vms []string) Kept {
 
 func TestVM(name string) bool {
 	// value: a VM the machine tiers make with the hypervisor directly, under
-	// these names; it is never a leftover.
+	// these names; it is never a leftover, and its disk is another VM's.
 	return strings.HasPrefix(name, "station-e2e-") || name == "station-play"
 }
 
@@ -127,6 +130,8 @@ func (h Held) machines() int64 { return sumDisks(h.Machines) }
 
 func (h Held) images() int64 { return sumDisks(h.Images) }
 
+func (h Held) others() int64 { return sumDisks(h.Others) }
+
 func sumDisks(disks []MachineDisk) int64 {
 	var total int64
 	for _, d := range disks {
@@ -153,7 +158,7 @@ func StationOf(total, free, logs int64, h Held, mac string) StationPart {
 	// invariant: the Mac itself is what the volume uses beyond station's
 	// parts, never below 0; the verdict sums exactly what CanFree frees.
 	leftovers := h.unused(HolderLeftovers)
-	held := h.machines() + h.images() + leftovers + max(logs, 0)
+	held := h.Holding() + max(logs, 0)
 	itself := max(total-free-held, 0)
 	machines := append([]MachineDisk{{Name: mac, Bytes: itself}}, h.Machines...)
 	can := unusedFree(h.Unused)
@@ -164,12 +169,13 @@ func StationOf(total, free, logs int64, h Held, mac string) StationPart {
 		Holds: []Holding{
 			{Holder: HolderMachineDisks, Bytes: h.machines()},
 			{Holder: HolderImages, Bytes: h.images()},
+			{Holder: HolderOtherVMs, Bytes: h.others()},
 			{Holder: HolderLeftovers, Bytes: leftovers},
 			{Holder: HolderLogs, Bytes: max(logs, 0)},
 			{Holder: HolderThisMac, Bytes: itself},
 			{Holder: HolderFree, Bytes: free},
 		},
-		Sentence: "Outside any machine, Machines holds " + size.Bytes(held) + ": machine disks, images, leftovers and its logs",
+		Sentence: "Outside any machine, Machines holds " + size.Bytes(held) + ": machine disks, images, other VMs, leftovers and its logs",
 		Itself:   "This Mac itself holds " + size.Bytes(itself) + ".",
 		Machines: machines,
 		CanFree:  can,
@@ -243,4 +249,6 @@ func (h Held) unused(holder Holder) int64 {
 	return total
 }
 
-func (h Held) Holding() int64 { return h.machines() + h.images() + h.unused(HolderLeftovers) }
+func (h Held) Holding() int64 {
+	return h.machines() + h.images() + h.others() + h.unused(HolderLeftovers)
+}

@@ -150,33 +150,48 @@ func (s diskStation) Held(ctx context.Context) (*disk.Held, error) {
 	if err != nil {
 		return nil, err
 	}
-	held := disk.Held{Unread: f.unread}
+	// invariant: every disk the hypervisor lists is counted once, under the
+	// first that names it: a machine record, an image version, a leftover,
+	// else another VM's.
+	held, counted := disk.Held{Unread: f.unread}, map[string]bool{}
 	for _, r := range f.records {
-		if b, ok := sizes[r.Name]; ok {
+		if b, ok := sizes[r.Name]; ok && !counted[r.Name] {
+			counted[r.Name] = true
 			held.Machines = append(held.Machines, disk.MachineDisk{Name: r.Name, Bytes: b})
 		}
 	}
 	for _, r := range reports {
 		name := imagescalls.DiskName(r.Record.Name, r.Record.Version)
 		b, ok := sizes[name]
-		if !ok {
+		if !ok || counted[name] {
 			continue
 		}
+		counted[name] = true
 		held.Images = append(held.Images, disk.MachineDisk{Name: name, Bytes: b})
 		if r.Unused() {
 			held.Unused = append(held.Unused, disk.Freeable{Holder: disk.HolderImages, Kind: disk.FreeImage, Name: r.Record.Name + "@" + r.Record.Version, Bytes: b})
 		}
 	}
 	for _, d := range f.disks {
-		if f.leftover(d) {
+		switch {
+		case counted[d.VM]:
+		case f.leftover(d):
 			held.Unused = append(held.Unused, disk.Freeable{Holder: disk.HolderLeftovers, Kind: disk.FreeDisk, Name: d.VM, Bytes: d.Bytes})
+		default:
+			held.Others = append(held.Others, disk.MachineDisk{Name: d.VM, Bytes: d.Bytes})
 		}
+		counted[d.VM] = true
 	}
 	homes, kept := s.oldHomes(ctx, h.Name())
 	held.Unused, held.Kept = append(held.Unused, homes...), kept
 	if f.unread != "" {
 		// invariant: while a record cannot be read, nothing is unused: its
-		// disk may be any of them.
+		// disk may be any of them, so a leftover disk is another VM's.
+		for _, u := range held.Unused {
+			if u.Kind == disk.FreeDisk {
+				held.Others = append(held.Others, disk.MachineDisk{Name: u.Name, Bytes: u.Bytes})
+			}
+		}
 		held.Unused = nil
 	}
 	return &held, nil
