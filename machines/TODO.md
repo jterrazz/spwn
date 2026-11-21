@@ -82,6 +82,15 @@ The engine keeps one read model, whose projections are the menu bar's pages and 
 
 Starts: RM3 and RM4 run now; RM6 after RM4, RM7 once RM6's stream is on main.
 
+## The window after alpha.3
+What the window's session left open when it closed (2026-11-21). Its record is `apps/desktop/README.md`, `apps/desktop/SCENARIOS.md` and ADR-071.
+
+- **The owner's eye on alpha.3**, in the real macOS app: the first frame at launch, the skeletons, the stale mark ("as of 10:42"), the incompatible-version panel, the Engine page's Update, the first update and relaunch. Starts when the owner opens alpha.3.
+- **The Dock reopen**: HYPOTHESIS (2026-11-21) that a click on the Dock icon while no window is on screen shows the window again (`RunEvent::Reopen`, as `apps/desktop/README.md` states); one click after closing settles it.
+- **Scenario A7**, the window shown at its first data (`apps/desktop/SCENARIOS.md`), stays `no`: no bench runs the native window. Starts with a bench that captures the Tauri window on development-macos.
+- **The window mirrors `engine.state`**: RM7, in the read model's item above.
+- **Waiting on the engine or the owner**: the input `Default` (D15, D19), the second half of D6, the `engineRestarts` sentence, one press that updates the engine and the window (mode A of "One Spwn on a Mac" makes it one update), the update row in the quiet window, and where `machines.server-needs-name` is drawn (no recording has it yet).
+
 ## The old goldens' last copies on GitHub
 The history rewrite (S5) ran on 2026-11-21: `main` is `e82228f9d`, both
 alpha tags were re-pointed, and the pack fell from 614 to 173 MiB. GitHub
