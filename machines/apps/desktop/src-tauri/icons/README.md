@@ -4,11 +4,11 @@
 
 ## What the document holds
 
-The Spwn mark, three dots rising on a diagonal, spans about 70 % of the tile, as Apple's own marks do. Its parts follow Apple's layer rules: each layer is a square 1024 canvas with no tile, mask or shadow of its own, and the system draws those.
+The OS mark, the brand's own: one dot and three rounded-square rings in a two-by-two grid, which fills about 66 % of the tile. Its parts follow Apple's layer rules: each layer is a square 1024 canvas with no tile, mask or shadow of its own, and the system draws those. The owner picked it as the one app's icon on 2026-11-21.
 
-- **Two glass groups**: `you`, the big dot (`Assets/big.svg`), and `spawned`, the two smaller ones (`Assets/small.svg`), each with specular light, a neutral shadow and 40 % translucency.
-- **The ground** is a gradient: Papier in the light appearance (white to `#e9e9ec`), graphite in the dark one (`#232326` to `#040404`).
-- **The dots** are ink (`#0a0a0a`) on Papier, and white in the dark appearance and in the clear and tinted ones, where the system turns them to glass over its own ground.
+- **Two glass groups**: `you`, the dot (`Assets/you.svg`), and `apps`, the three rounded-square rings (`Assets/apps.svg`), each with specular light and a neutral shadow, and no translucency.
+- **The ground** is a gradient: Papier in the light appearance (white to `#ebebee`), graphite in the dark one (`#2c2c2e` to `#0c0c0d`).
+- **The mark** is one ink (`#0a0a0a`) on Papier, and white in the dark appearance and in the clear and tinted ones, where the system turns it to glass over its own ground.
 
 `icon.json` is edited by hand or in Icon Composer (inside Xcode); `fill` and `fill-specializations` exclude each other, so every colour is a specialization list whose entry with no `appearance` is the default.
 
