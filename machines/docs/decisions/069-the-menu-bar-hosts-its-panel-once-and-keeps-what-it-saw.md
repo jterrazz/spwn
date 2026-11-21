@@ -2,7 +2,7 @@
 
 **Status:** Accepted
 **Date:** 2026-11-21
-**Amended:** 2026-11-21, decision 4, Proposed until the owner accepts it
+**Amended:** 2026-11-21, decisions 4 and 6, Proposed until the owner accepts them
 
 ## Context
 
@@ -22,12 +22,13 @@ The audit's decision 3 reverses ADR-036 decision 1. The owner approved it on 202
 3. **Only a gesture moves the height.** A click or key in the panel marks a gesture (`PanelGesture`). Within the next 0.6 s, a new height moves on `Token.Motion.smooth`, both the window (`StatusPanel.fit`) and the content's own spring (`Panel`). Outside that window, a height that data brought is placed at once. The rest of ADR-036 decision 3 still holds: the top edge stays pinned, a size asked mid-placement is held, and Reduce Motion snaps. A host that marks no gesture, as the stories and the catalog do not, moves every height, so no golden moved.
 4. **The pages seen are kept across closes, and give way only to a whole page.** `Navigation` keeps the last 8 pages it drew (`Navigation.kept`), the least recent dropped first, across back and across the panel's closings. A page opened again is drawn at once as last seen, in the turn of the gesture that opened it, before the panel's next frame. It gives way only to the first whole page its watch tells (`Page.whole`: a header, no loading state, no value or mark pending, the engine's own rule of a full page in `engine/process/opening.go`). The pages the watch tells while it is still reading are held, and the newest of them is drawn once `Navigation.patience` (0.75 s) passed without a whole one, so a Mac that does not answer still shows what was read. An opening thus draws the page seen, then at most the page read, never a page half read between the two.
 5. **An opening asks the engine for nothing.** The app no longer sends `engine.refresh` for Home when it opens; the engine's own cadence keeps the pages fresh.
+6. **One panel frame for every page.** What a `Panel` measured (its header, content and footer heights), the height it draws, its scroll position and its edges live in one `PanelFrame`, held by the app's `StorePanel` for its life and shared by Home, every page pushed and Find. A page drawn in another's place starts at the height the panel has and moves from there under decision 3, never from no height; it starts at its top, since the frame remembers the key of the page it last scrolled. A `Panel` with no frame in its environment, as in a story or a test, holds its own.
 
 ## Consequences
 
 - The cold first size is gone: the hosting view has already measured its page when the panel opens. The bench of the opening (`specs/machine/menubar/run.sh <label> --capture` with `STATION_CAPTURE_SET=bench`) counts content generations and height changes per opening, before and after.
 - A page kept as last seen can be up to its watch's first frame old when it is drawn. The page language has no mark for that age yet.
-- One `Panel` container for every page, the audit's other half of this lot, is not built. Home, the machine pages and the menu bar's own pages are still separate `Panel` trees, so a push still changes trees. The cache makes it one change, not two.
+- Home, the machine pages and the menu bar's own pages each still build their own `Panel` view, since each page view owns the state its header and content share (a Mac's segment). What they share is the frame of decision 6, which holds every state a `Panel` kept, so a push changes the content and not the panel.
 - A page drawn as last seen can stay up to `Navigation.patience` past its watch's first frame when the watch reads slowly.
 - A page is whole by the engine's marks alone. A part the engine draws as read before it is passes: a Mac's Accounts is drawn `none` until its sign-ins answer (`pages/menubar/accounts.go`, `macAccounts`), so opening a Mac with sign-ins draws the page seen, that page without them, then the page read: three content generations where the rule aims at one.
 - The observation split (`PanelStore`: link, home, pages and ui, the live values LiveStore's, each view reading only its slices) comes after this decision, and it changes none of it.

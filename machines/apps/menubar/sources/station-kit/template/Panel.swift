@@ -1,4 +1,5 @@
 import AppKit
+import Observation
 import SwiftUI
 
 public enum PanelHeight {
@@ -38,6 +39,57 @@ public enum PanelGesture {
         guard gated else { return true }
         guard let at else { return false }
         return now.timeIntervalSince(at) <= window
+    }
+}
+
+// invariant: ADR-069: one panel frame for every page a StorePanel draws:
+// the heights the panel measured, the height it draws, its scroll and
+// edges, held across a push, a back and Find, so a page drawn in the
+// place of another starts at the height the panel has and moves from
+// there, never from no height. A Panel with no frame in its environment
+// (a story, a test) holds its own.
+@MainActor
+@Observable
+public final class PanelFrame {
+    var measured = PanelMeasured()
+    var shown: CGFloat = 0
+    var edges = PanelEdges()
+    var offset: CGFloat = 0
+    var position = ScrollPosition(edge: .top)
+    var opening = false
+    // value: the key of the page the frame last scrolled, so a page drawn
+    // in another's place starts at its top.
+    var page = ""
+
+    public init() {}
+
+    func measure(_ change: (inout PanelMeasured) -> Void) {
+        var next = measured
+        change(&next)
+        if next != measured { measured = next }
+    }
+}
+
+struct PanelMeasured: Equatable {
+    var header: CGFloat = 0
+    var content: CGFloat = 0
+    var footer: CGFloat = 0
+}
+
+struct PanelEdges: Equatable {
+    var top = false
+    var bottom = false
+}
+
+private struct PanelFrameKey: EnvironmentKey {
+    static let defaultValue: PanelFrame? = nil
+}
+
+extension EnvironmentValues {
+    // value: the StorePanel's one panel frame, which every Panel it draws shares.
+    public var stationPanelFrame: PanelFrame? {
+        get { self[PanelFrameKey.self] }
+        set { self[PanelFrameKey.self] = newValue }
     }
 }
 
@@ -98,24 +150,11 @@ public struct Panel<Header: View, Content: View, Footer: View>: View {
     @Environment(\.stationPanelRoom) private var room
     @Environment(\.stationCaught) private var caught
     @Environment(\.stationPanelOpening) private var openings
+    @Environment(\.stationPanelFrame) private var shared
+    @State private var own = PanelFrame()
 
-    @State private var measured = Measured()
-    @State private var shown: CGFloat = 0
-    @State private var edges = Edges()
-    @State private var offset: CGFloat = 0
-    @State private var position = ScrollPosition(edge: .top)
-    @State private var opening = false
-
-    struct Measured: Equatable {
-        var header: CGFloat = 0
-        var content: CGFloat = 0
-        var footer: CGFloat = 0
-    }
-
-    struct Edges: Equatable {
-        var top = false
-        var bottom = false
-    }
+    var pane: PanelFrame { shared ?? own }
+    var measured: PanelMeasured { pane.measured }
 
     public init(insets: PanelInsets = .page, bounded: Bool = true, key: String = "", sheet: String? = nil, layers: PanelLayers = PanelLayers(),
                 @ViewBuilder header: () -> Header, @ViewBuilder content: () -> Content, @ViewBuilder footer: () -> Footer) {
@@ -140,10 +179,10 @@ public struct Panel<Header: View, Content: View, Footer: View>: View {
     public var body: some View {
         PanelColumn(cap: bounded ? cap : nil) {
             padded(header, insets == .page ? Token.Metric.Panel.header : nil, kit: "Panel.header", read: "Metric.Panel.header")
-                .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { measured.header = $0 }
+                .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { h in pane.measure { $0.header = h } }
             pageBody.recorded(contentMark)
             padded(footer, insets == .page ? Token.Metric.Panel.footer : nil, kit: "Panel.footer", read: "Metric.Panel.footer")
-                .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { measured.footer = $0 }
+                .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { h in pane.measure { $0.footer = h } }
         }
         .frame(width: width, alignment: .topLeading)
         .overlayPreferenceValue(PopoverPins.self) { PopoverLayer(pins: $0) }
@@ -214,50 +253,54 @@ public struct Panel<Header: View, Content: View, Footer: View>: View {
     var scrolled: some View {
         ScrollViewReader { proxy in
             ScrollView(.vertical) {
-                page.onGeometryChange(for: CGFloat.self) { $0.size.height } action: { measured.content = $0 }
+                page.onGeometryChange(for: CGFloat.self) { $0.size.height } action: { h in pane.measure { $0.content = h } }
                     .background(OverlayScroller())
             }
-            .scrollPosition($position)
-            .onScrollGeometryChange(for: Edges.self) { g in
-                Edges(top: g.contentOffset.y > Token.Measure.grid,
-                      bottom: g.contentOffset.y + g.containerSize.height < g.contentSize.height - Token.Measure.grid)
-            } action: { _, now in edges = now }
-            .onScrollGeometryChange(for: CGFloat.self) { $0.contentOffset.y } action: { _, y in offset = y }
+            .scrollPosition(Binding(get: { pane.position }, set: { pane.position = $0 }))
+            .onScrollGeometryChange(for: PanelEdges.self) { g in
+                PanelEdges(top: g.contentOffset.y > Token.Measure.grid,
+                           bottom: g.contentOffset.y + g.containerSize.height < g.contentSize.height - Token.Measure.grid)
+            } action: { _, now in if pane.edges != now { pane.edges = now } }
+            .onScrollGeometryChange(for: CGFloat.self) { $0.contentOffset.y } action: { _, y in pane.offset = y }
             .onChange(of: sheet) { _, open in
-                opening = open != nil
+                pane.opening = open != nil
                 guard open != nil else { return }
                 DispatchQueue.main.async { withAnimation(spring) { proxy.scrollTo(PanelHeight.sheetAnchor, anchor: .bottom) } }
             }
             .onChange(of: measured.content) {
-                guard opening else { return }
-                opening = false
+                guard pane.opening else { return }
+                pane.opening = false
                 DispatchQueue.main.async { withAnimation(spring) { proxy.scrollTo(PanelHeight.sheetAnchor, anchor: .bottom) } }
             }
         }
         .id(key)
-        .onChange(of: key) {
-            offset = 0
-            position.scrollTo(edge: .top)
+        .onChange(of: key, initial: true) {
+            guard pane.page != key else { return }
+            pane.page = key
+            top()
         }
-        .onChange(of: openings) {
-            offset = 0
-            position.scrollTo(edge: .top)
-        }
+        .onChange(of: openings) { top() }
         .onChange(of: measured.footer) { was, now in
             guard was > 0, now > was, PanelHeight.scrolls(measured.content, room: bodyRoom) else { return }
-            position.scrollTo(y: offset + now - was)
+            pane.position.scrollTo(y: pane.offset + now - was)
         }
         .onChange(of: target, initial: true) { _, now in
-            if shown == 0 || !PanelGesture.recent() {
-                shown = now
+            guard pane.shown != now else { return }
+            if pane.shown == 0 || !PanelGesture.recent() {
+                pane.shown = now
             } else {
-                withAnimation(spring) { shown = now }
+                withAnimation(spring) { pane.shown = now }
             }
         }
         .scrollBounceBehavior(.basedOnSize)
         .scrollIndicators(.never)
-        .mask { EdgeFade(top: edges.top, bottom: edges.bottom) }
-        .frame(height: shown > 0 ? shown : nil)
+        .mask { EdgeFade(top: pane.edges.top, bottom: pane.edges.bottom) }
+        .frame(height: pane.shown > 0 ? pane.shown : nil)
+    }
+
+    func top() {
+        pane.offset = 0
+        pane.position.scrollTo(edge: .top)
     }
 
     @ViewBuilder

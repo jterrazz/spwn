@@ -69,4 +69,24 @@ final class PanelStoreTests: XCTestCase {
         XCTAssertEqual(change { _ in }, [], "the same state written again drew a view")
         XCTAssertTrue(Set(change { $0.find = FindQuery() }).isSuperset(of: ["find", "route"]), "Find opened")
     }
+
+    // invariant: ADR-069: Home and every page pushed over it are drawn in
+    // one panel frame, the store's, which holds the height and the scroll
+    // from one page to the next.
+    func testHomeAndAPagePushedDrawInTheStoresOnePanelFrame() throws {
+        let start = Stories["home.fine"].state
+        let home = try XCTUnwrap(start.page)
+        let pushed = try XCTUnwrap(Stories["mac.mini.overview"].state.pushed)
+        let store = PanelStore(start)
+        let frame = PanelFrame()
+        let view = host(StorePanel(store: store, handlers: PopoverHandlers(), frame: frame))
+        XCTAssertGreaterThan(frame.shown, 0, "Home drew no height in the store's frame")
+        XCTAssertEqual(frame.page, "\(home.id ?? "")/\(home.context?.machine ?? "")", "Home drew in a frame of its own")
+        var state = store.state
+        state.pushed = pushed
+        store.state = state
+        settle(view)
+        XCTAssertGreaterThan(frame.shown, 0)
+        XCTAssertTrue(frame.page.hasPrefix("mac-mini/"), "the page pushed drew in a frame of its own: \(frame.page)")
+    }
 }

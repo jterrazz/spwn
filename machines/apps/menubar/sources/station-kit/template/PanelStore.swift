@@ -93,15 +93,18 @@ extension EnvironmentValues {
 
 // invariant: the app's panel over its store: the route alone picks the
 // view, and each view reads the slices it draws, so Home's changes never
-// draw a page pushed over it, nor a page pushed's Home.
+// draw a page pushed over it, nor a page pushed's Home. One panel frame
+// is held for the store's life, shared by every page it draws (ADR-069).
 public struct StorePanel: View {
     let store: PanelStore
     let handlers: PopoverHandlers
+    @State private var frame: PanelFrame
     @Environment(\.stationEvaluated) private var evaluated
 
-    public init(store: PanelStore, handlers: PopoverHandlers) {
+    public init(store: PanelStore, handlers: PopoverHandlers, frame: PanelFrame? = nil) {
         self.store = store
         self.handlers = handlers
+        _frame = State(initialValue: frame ?? PanelFrame())
     }
 
     public var body: some View {
@@ -113,6 +116,7 @@ public struct StorePanel: View {
             case .find: FindSlice(store: store, handlers: handlers)
             }
         }
+        .environment(\.stationPanelFrame, frame)
         .recorded(nil)
     }
 }
