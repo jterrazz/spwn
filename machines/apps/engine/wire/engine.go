@@ -146,9 +146,12 @@ func (m machine) engine(env kit.Env) *process.Engine {
 	return d
 }
 
-// value: a page projection as the engine serves it.
-func projection[P any](p func(*store.Snapshot, string) P) process.Projection {
-	return func(s *store.Snapshot, subject string) any { return p(s, subject) }
+// value: a page projection as the engine serves it: the page in its
+// document, which the menu bar refuses without its schema.
+func projection(p func(*store.Snapshot, string) page.Page) process.Projection {
+	return func(s *store.Snapshot, subject string) any {
+		return page.Document{Schema: page.Schema, Page: p(s, subject)}
+	}
 }
 
 // invariant: the engine's store is one engine's life, its epoch that
