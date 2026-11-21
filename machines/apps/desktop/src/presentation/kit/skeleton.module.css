@@ -2,6 +2,14 @@
 .region {
     display: contents;
 }
+/* invariant: a held answer keeps the page's column and gap, so dimming it moves nothing. */
+.held {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-14);
+    opacity: 0.55;
+    transition: opacity var(--motion-hover);
+}
 .said {
     position: absolute;
     width: 1px;

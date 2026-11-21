@@ -17,31 +17,32 @@ import type { Found } from '../../../domain/machines/machines';
 import { keyOf } from '../../../domain/request-key';
 import { useWatch } from '../../dependencies/dependencies';
 
-export type Heard = { kind: 'failed'; error: EngineError } | { kind: 'read'; out: ActivityReport };
+export type Heard =
+    | { kind: 'failed'; error: EngineError }
+    | { kind: 'read'; out: ActivityReport; placeholder?: true };
 
-export function useAgain(every: number): number {
-    const [tick, setTick] = useState(0);
-    useEffect(() => {
-        const timer = setInterval(() => {
-            setTick((value) => value + 1);
-        }, every);
-        return () => {
-            clearInterval(timer);
-        };
-    }, [every]);
-    return tick;
+function placeheld(heard: Heard): Heard {
+    return heard.kind === 'read' ? { ...heard, placeholder: true } : heard;
 }
 
+// invariant: what was last heard of a machine stays shown while another span of it is read, marked a placeholder
+// invariant: until that span answers; a reader of another machine starts from nothing.
 export function useHeard(input: ActivityReadInput) {
     const key = keyOf({ call: 'activity.read', in: input });
-    const [last, setLast] = useState<undefined | { key: string; heard: Heard }>(undefined);
+    const of = input.of ?? '';
+    const [last, setLast] = useState<undefined | { key: string; of: string; heard: Heard }>(
+        undefined,
+    );
     const heard = useCallback(
         (next: Heard) => {
-            setLast({ heard: next, key });
+            setLast({ heard: next, key, of });
         },
-        [key],
+        [key, of],
     );
-    return { heard, shown: last?.key === key ? last.heard : undefined };
+    if (last === undefined || last.of !== of) {
+        return { heard, shown: undefined };
+    }
+    return { heard, shown: last.key === key ? last.heard : placeheld(last.heard) };
 }
 
 export function Reader({
@@ -53,10 +54,16 @@ export function Reader({
     target: Target | undefined;
     heard: (heard: Heard) => void;
 }) {
-    const reading = useWatch('activity.read', input, target);
+    const reading = useWatch('activity.read', input, target, { placeholder: true });
     useEffect(() => {
-        if (reading.kind !== 'reading') {
-            heard(reading.kind === 'read' ? { kind: 'read', out: reading.out } : reading);
+        if (reading.kind === 'failed') {
+            heard(reading);
+        } else if (reading.kind === 'read') {
+            heard(
+                reading.placeholder === true
+                    ? { kind: 'read', out: reading.out, placeholder: true }
+                    : { kind: 'read', out: reading.out },
+            );
         }
     }, [reading, heard]);
     return null;
@@ -78,8 +85,6 @@ export function useHistory(found: Found): readonly ActivitySample[] | undefined 
     return reading.kind === 'read' ? (reading.out.history ?? []) : undefined;
 }
 
-const AGAIN_MS = 5000;
-
 function inputOf(mac: string, vm: string | undefined, span: Span): ActivityReadInput {
     const graph = spanOf(span).ns;
     if (vm === undefined) {
@@ -95,7 +100,6 @@ export function useActivity(
     const name = found.vm?.Name ?? found.mac.Name;
     const mac = found.mac.Name;
     const vm = found.vm?.Name;
-    const tick = useAgain(AGAIN_MS);
     const onMac = targetOf({ mac: found.mac });
     const inVm = targetOf(found);
     const kept = inputOf(mac, vm, span);
@@ -107,15 +111,8 @@ export function useActivity(
     const readers = (
         <>
             <Held name={name} thisMac={found.mac.ThisMac && vm === undefined} />
-            <Reader heard={first.heard} input={kept} key={`kept-${String(tick)}`} target={onMac} />
-            {unkept ? (
-                <Reader
-                    heard={second.heard}
-                    input={own}
-                    key={`own-${String(tick)}`}
-                    target={inVm}
-                />
-            ) : null}
+            <Reader heard={first.heard} input={kept} target={onMac} />
+            {unkept ? <Reader heard={second.heard} input={own} target={inVm} /> : null}
         </>
     );
     return { readers, shown: unkept ? second.shown : first.shown };

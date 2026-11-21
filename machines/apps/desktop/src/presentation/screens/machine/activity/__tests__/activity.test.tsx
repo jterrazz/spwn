@@ -1,16 +1,46 @@
-import { button, clock, component, content, file, heading, region, within } from '@jterrazz/test';
+import type { Request } from '@jterrazz/station-api';
+import {
+    button,
+    clock,
+    component,
+    content,
+    file,
+    heading,
+    region,
+    waitUntil,
+    within,
+} from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { pageOver } from '../../../../../composition/__tests__/page-over';
+import { spanOf } from '../../../../../domain/activity/measures';
 import { unansweredAt } from '../../../../../infrastructure/outbound/engine-replay/__tests__/unanswered';
 import { recordingsOf } from '../../../../../infrastructure/outbound/engine-replay/recordings';
-import type { Recording } from '../../../../../infrastructure/outbound/engine-replay/replay';
+import type { Pace, Recording } from '../../../../../infrastructure/outbound/engine-replay/replay';
+import type { Route } from '../../../../navigation/route';
 
 const recordingFor = await recordingsOf('disk-low', 'mini-offline', 'one-mac', 'two-macs');
 
 const macLog = region('What Machines did on this Mac');
 
 const LOG_READ_AT = 'read at 14:20';
+
+// value: long enough that the day never answers while the spec looks.
+const A_MINUTE = 60_000;
+
+function graphOf(request: Request): unknown {
+    const input: unknown = 'in' in request ? request.in : undefined;
+    return typeof input === 'object' && input !== null && 'graph' in input
+        ? input.graph
+        : undefined;
+}
+
+function heldOpacity(): null | string {
+    const held = [...document.querySelectorAll('main [aria-busy="true"]')].find(
+        (busy) => getComputedStyle(busy).display !== 'contents',
+    );
+    return held ? getComputedStyle(held).opacity : null;
+}
 
 function activityOf(world: string, machine: string) {
     return pageOver(recordingFor(world), { machine, page: 'machine', tab: 'Activity' });
@@ -157,6 +187,34 @@ describe('Activity', () => {
             },
         );
         await expect(result.tree).toMatch(file('./__expected__/two-macs-day-memory.aria.yaml'));
+    });
+
+    test('a span switched keeps the last span drawn, dimmed and busy, until the new one answers', async () => {
+        // Given - This Mac over two-macs, its day of activity answering only a minute after it is asked
+        const pace: Pace = {
+            gestureFrame: 0,
+            latency: (request) => (graphOf(request) === spanOf('24h').ns ? A_MINUTE : 0),
+        };
+        const route: Route = { machine: 'macbook-pro', page: 'machine', tab: 'Activity' };
+        let held: null | string = null;
+        const result = await component.render(
+            pageOver(recordingFor('two-macs'), route, undefined, pace),
+            async (visitor) => {
+                await visitor.see(heading('Nothing to look at.'));
+
+                // When - the day is chosen
+                await visitor.click(button('24 h'));
+                await waitUntil(() => heldOpacity() === '0.55', { why: 'the hour held, dimmed' });
+                held = heldOpacity();
+
+                // Then - the hour's verdict is still drawn
+                await visitor.see(heading('Nothing to look at.'));
+            },
+        );
+
+        // Then - it is dimmed and busy while the day is read, and nothing failed
+        expect(held).toBe('0.55');
+        expect(result.errors.text).toBe('');
     });
 
     test("a VM among a Mac's busiest opens that VM's Activity", async () => {

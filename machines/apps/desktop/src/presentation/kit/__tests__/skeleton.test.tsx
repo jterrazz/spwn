@@ -2,7 +2,7 @@ import { component } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { Tile } from '../../ui/index';
-import { Skeleton, SkeletonHead, SkeletonPanel, SkeletonTile } from '../skeleton';
+import { Placeheld, Skeleton, SkeletonHead, SkeletonPanel, SkeletonTile } from '../skeleton';
 
 function heightOf(id: string): number {
     return document.querySelector(`#${id}`)?.getBoundingClientRect().height ?? 0;
@@ -56,5 +56,35 @@ describe('skeleton', () => {
         const [answered, skeleton] = heights;
         expect(answered).toBeGreaterThan(0);
         expect(skeleton).toBe(answered);
+    });
+
+    test('an answer held while another is read is dimmed and busy, and an answer shown is neither', async () => {
+        // Given - the same answer drawn held and drawn as shown
+        let seen: string[] = [];
+        await component.render(
+            <div>
+                <div id="held">
+                    <Placeheld held>
+                        <p>CPU 12 %</p>
+                    </Placeheld>
+                </div>
+                <div id="shown">
+                    <Placeheld held={false}>
+                        <p>CPU 12 %</p>
+                    </Placeheld>
+                </div>
+            </div>,
+            async () => {
+                // When - each wrapper's state is read
+                seen = ['held', 'shown'].map((id) => {
+                    const box = document.querySelector(`#${id} > div`);
+                    const style = box ? getComputedStyle(box) : undefined;
+                    return `${box?.getAttribute('aria-busy')} ${style?.display} ${style?.opacity}`;
+                });
+            },
+        );
+
+        // Then - the held one is busy, a box of its own and dimmed; the shown one adds no box
+        expect(seen).toStrictEqual(['true flex 0.55', 'false contents 1']);
     });
 });

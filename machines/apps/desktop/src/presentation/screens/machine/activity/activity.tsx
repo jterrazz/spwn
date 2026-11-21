@@ -7,7 +7,7 @@ import type { Found } from '../../../../domain/machines/machines';
 import { Busiest } from '../../../features/activity/busiest';
 import { useActivity, useHistory } from '../../../features/activity/reading';
 import { Unanswered } from '../../../kit/readings';
-import { Skeleton } from '../../../kit/skeleton';
+import { Placeheld, Skeleton } from '../../../kit/skeleton';
 import type { Route } from '../../../navigation/route';
 import { Switch, VerdictSkeleton } from '../../../ui/index';
 import { Page } from '../../../ui/page';
@@ -69,12 +69,17 @@ export function ActivityTab({ found, go }: { found: Found; go: Go }) {
     if (shown?.kind === 'failed') {
         now = <Unanswered error={shown.error} size="tab" />;
     } else if (shown) {
+        const held = shown.placeholder === true;
         now = (
             <>
-                <Head report={shown.out} />
+                <Placeheld held={held}>
+                    <Head report={shown.out} />
+                </Placeheld>
                 {switcher}
-                <Findings findings={shown.out.findings ?? []} />
-                <Measured found={found} go={go} report={shown.out} span={span} />
+                <Placeheld held={held}>
+                    <Findings findings={shown.out.findings ?? []} />
+                    <Measured found={found} go={go} report={shown.out} span={span} />
+                </Placeheld>
             </>
         );
     } else {

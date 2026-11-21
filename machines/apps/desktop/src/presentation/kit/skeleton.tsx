@@ -20,6 +20,16 @@ export function Skeleton({ what, children }: { what: string; children: ReactNode
     );
 }
 
+// value: an answer kept on screen while the read that replaces it has not answered: drawn as it was, dimmed and
+// value: busy, so the page keeps its place and says it is about to change.
+export function Placeheld({ held, children }: { held: boolean; children: ReactNode }) {
+    return (
+        <div aria-busy={held} className={held ? styles.held : styles.region}>
+            {children}
+        </div>
+    );
+}
+
 export type SkeletonHeadProps = VerdictSkeletonProps & { what: string };
 
 // value: a page whose read draws only its verdict before the answer: the verdict's bones, busy.
