@@ -2,7 +2,7 @@
 
 **Status:** Accepted
 **Date:** 2026-11-21
-**Amended:** 2026-11-21, decisions 4 and 6, Proposed until the owner accepts them
+**Amended:** 2026-11-21, decisions 4 and 6, accepted under the owner's standing go of 2026-11-21
 
 ## Context
 
