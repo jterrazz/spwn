@@ -5,6 +5,7 @@ import type { Link } from '../application/ports/engine.port';
 import type { OpenerPort } from '../application/ports/opener.port';
 import type { WindowUpdatePort } from '../application/ports/window-update.port';
 import { Launch } from '../application/use-cases/launch';
+import type { StoreTiming } from '../application/use-cases/store';
 import { tauriCore } from '../infrastructure/outbound/core-tauri/tauri-core';
 import { documentPresence } from '../infrastructure/outbound/document-presence/document-presence';
 import { Client } from '../infrastructure/outbound/engine-link/client';
@@ -134,6 +135,12 @@ async function windowUpdateOf({ inTauri, query }: Place): Promise<undefined | Wi
         : scripted.scriptedWindowUpdate(script, Number(query.get('pace') ?? '0'));
 }
 
+// value: `?every=<ms>` asks the reads again on that cadence in a proof build, so a visit sees a refresh within it.
+function readsOf({ inTauri, query }: Place): Partial<StoreTiming> | undefined {
+    const every = Number(query.get('every') ?? '');
+    return !inTauri && PROOF && every > 0 ? { every } : undefined;
+}
+
 export async function compose(place: Place): Promise<Dependencies> {
     const { core, coreLookEvery, transport } = await composedOf(place);
     return {
@@ -142,6 +149,7 @@ export async function compose(place: Place): Promise<Dependencies> {
         engine: new Client(transport),
         opener: place.inTauri ? tauriOpener({ invoke }) : NO_OPENER,
         presence: documentPresence(),
+        reads: readsOf(place),
         windowUpdate: await windowUpdateOf(place),
     };
 }

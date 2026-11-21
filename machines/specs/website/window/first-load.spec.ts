@@ -1,4 +1,4 @@
-import { content, main, region, within } from '@jterrazz/test';
+import { content, main, region, status, within } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { website } from '../website.specification.js';
@@ -18,7 +18,23 @@ describe('first load', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test.todo(
-        'A9 waits for a visit that can let the store ask again: a refresh is asked on its 30 s cadence or a focus regained, which a visit gives neither of with no clock; src/presentation/dependencies/__tests__/dependencies.test.tsx proves the mark meanwhile, and a capture shows it with ?stale=',
-    );
+    test('A9 a refresh refused keeps the page as answered, and the toolbar says what the engine said and since when', async () => {
+        // Given - macbook-pro's Ports over stories, its reads asked again every half second, every ask of ports.list but the first refused
+        const result = await website.visit(
+            '/?world=stories&machine=macbook-pro&tab=Ports&stale=ports.list&every=500',
+            async (visitor) => {
+                const listening = region('What listens on this Mac');
+                await visitor.see(within(listening, content('ControlCenter', { exact: false })));
+
+                // When - the next refresh of ports.list is refused
+                await visitor.see(status('macbook-air does not answer'));
+
+                // Then - the listing stays drawn as answered, the mark beside the time of that answer
+                await visitor.see(content('as of', { exact: false }));
+                await visitor.see(within(listening, content('ControlCenter', { exact: false })));
+                await visitor.see(within(listening, content('Outside Tailscale')));
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
 });
