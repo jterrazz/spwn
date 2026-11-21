@@ -137,3 +137,33 @@ func TestWorldMacClockLeapLetsWhatAlreadyRunsTakeItsTurnFirst(t *testing.T) {
 		t.Fatal("the clock leapt before the work that already ran had its turn")
 	}
 }
+
+func TestWorldMacClockAwaitsGiveBackTheTurnTheWaiterKept(t *testing.T) {
+	ready := make(chan struct{})
+	close(ready)
+	waits := map[string]func(c worldClock) error{
+		"Await": func(c worldClock) error {
+			return c.Await(context.Background(), ready, time.Second)
+		},
+		"AwaitWhile": func(c worldClock) error {
+			return c.AwaitWhile(context.Background(), ready, nil, time.Second)
+		},
+	}
+	for name, wait := range waits {
+		t.Run(name, func(t *testing.T) {
+			c := leapingClock()
+			c.moved.mu.Lock()
+			c.moved.out = 1
+			c.moved.held[goroutine()] = true
+			c.moved.mu.Unlock()
+			if err := wait(c); err != nil {
+				t.Fatalf("the wait failed: %v", err)
+			}
+			c.moved.mu.Lock()
+			defer c.moved.mu.Unlock()
+			if c.moved.out != 0 || len(c.moved.held) != 0 {
+				t.Fatalf("after the wait, out is %d and %d turns are held, want the turn given back", c.moved.out, len(c.moved.held))
+			}
+		})
+	}
+}
