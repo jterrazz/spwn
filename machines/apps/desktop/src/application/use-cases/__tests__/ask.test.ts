@@ -1,7 +1,10 @@
 import { clock } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
+import type { Asked } from '../entry';
 import { DONE, EVERY, KEY, PENDING, RUNNING, settled, STOPPED } from './fake-engine';
+
+const ENGINE_READ: Asked = { input: {}, kind: 'read', name: 'engine.read', target: undefined };
 
 const UNREACHABLE = {
     code: 'remote.unreachable',
@@ -30,26 +33,43 @@ describe('ask', () => {
         expect(store.reading(KEY)).toStrictEqual({ done: true, kind: 'read', out: RUNNING.out });
     });
 
-    test('a re-ask whose connection drops keeps the shown answer marked stale, and a refusal of the subject replaces it', async () => {
-        // Given - two stores, each with machines.list settled on running
+    test('a dropped watch keeps its answer unmarked while it reconnects, a dropped read keeps it marked stale', async () => {
+        // Given - machines.list settled on running, and engine.read answered beside it
         using _ = clock.run('2026-11-13T10:00:00Z');
-        const dropped = await settled();
-        const refused = await settled();
+        const { engine, store } = await settled();
+        store.subscribe(ENGINE_READ, () => {});
+        await clock.advance(1);
+        engine.answer('engine.read', RUNNING);
+        const shown = store.reading(KEY);
 
-        // When - one re-ask's connection ends unanswered, the other is answered that the machine is not found
+        // When - the cadence asks both again and the connection of each ends unanswered
         await clock.advance(EVERY);
-        dropped.engine.end('machines.list');
-        refused.engine.answer('machines.list', {
-            error: { code: 'unknown_vm', message: 'no such machine', type: 'not-found' },
-        });
+        engine.end('machines.list');
+        engine.end('engine.read');
+        await clock.advance(1);
 
-        // Then - the first keeps its answer with a stale mark of no engine word, the second shows the refusal
-        const kept = dropped.store.reading(KEY);
-        expect(kept.kind === 'read' ? [kept.out, kept.stale?.wire] : []).toStrictEqual([
+        // Then - the watch's reading is the one shown, the read's answer carries a stale mark of no engine word
+        const read = store.reading('call engine.read {} {}');
+        expect(store.reading(KEY)).toBe(shown);
+        expect(read.kind === 'read' ? [read.out, read.stale?.wire] : []).toStrictEqual([
             RUNNING.out,
             undefined,
         ]);
-        expect(refused.store.reading(KEY).kind).toBe('failed');
+    });
+
+    test('a refusal of the subject itself replaces the shown answer', async () => {
+        // Given - machines.list settled on running
+        using _ = clock.run('2026-11-13T10:00:00Z');
+        const { engine, store } = await settled();
+
+        // When - the next re-ask is answered that the machine is not found
+        await clock.advance(EVERY);
+        engine.answer('machines.list', {
+            error: { code: 'unknown_vm', message: 'no such machine', type: 'not-found' },
+        });
+
+        // Then - the refusal is shown
+        expect(store.reading(KEY).kind).toBe('failed');
     });
 
     test("a gesture's reread and an engine restart hold a watch's pending outs over its settled answer", async () => {

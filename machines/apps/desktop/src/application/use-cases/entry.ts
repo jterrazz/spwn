@@ -34,12 +34,27 @@ export type Entry = {
     grace: ReturnType<typeof setTimeout> | undefined;
 };
 
+function sameError(before: EngineError | undefined, next: EngineError | undefined): boolean {
+    if (before === undefined || next === undefined) {
+        return before === next;
+    }
+    return (
+        before.message === next.message &&
+        before.fate === next.fate &&
+        replaceEqualDeep(before.wire, next.wire) === before.wire
+    );
+}
+
 function sharedOf(before: Reading<unknown>, next: Reading<unknown>): Reading<unknown> {
+    if (before.kind === 'failed' && next.kind === 'failed') {
+        return sameError(before.error, next.error) ? before : next;
+    }
     if (before.kind !== 'read' || next.kind !== 'read') {
         return next;
     }
     const out = replaceEqualDeep(before.out, next.out);
-    const same = out === before.out && next.done === before.done && next.stale === before.stale;
+    const same =
+        out === before.out && next.done === before.done && sameError(before.stale, next.stale);
     return same ? before : { ...next, out };
 }
 

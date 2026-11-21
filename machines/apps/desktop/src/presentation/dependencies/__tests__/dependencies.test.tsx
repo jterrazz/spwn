@@ -1,11 +1,10 @@
-import type { Request } from '@jterrazz/station-api';
 import { component, content, waitUntil } from '@jterrazz/test';
+import { Profiler } from 'react';
 import { describe, expect, test } from 'vitest';
 
 import { keyOf } from '../../../domain/request-key';
 import { documentPresence } from '../../../infrastructure/outbound/document-presence/document-presence';
 import { Client } from '../../../infrastructure/outbound/engine-link/client';
-import type { Receiver, Transport } from '../../../infrastructure/outbound/engine-link/transport';
 import { holdingCall } from '../../../infrastructure/outbound/engine-replay/__tests__/held-call';
 import { recordingsOf } from '../../../infrastructure/outbound/engine-replay/recordings';
 import { stagedReplay } from '../../../infrastructure/outbound/engine-replay/replay';
@@ -15,6 +14,7 @@ import { Window } from '../../navigation/window';
 import { PAGES } from '../../screens/registry';
 import { EngineProvider, useRead } from '../dependencies';
 import { useGesture } from '../use-gesture';
+import { counted } from './counted';
 
 const recordingFor = await recordingsOf('two-macs');
 
@@ -83,24 +83,33 @@ function readingsIn(html: string): number {
     return html.split('Reading').length;
 }
 
-function countingFrames(transport: Transport) {
-    let frames = 0;
-    return {
-        frames: () => frames,
-        transport: {
-            link: (listener: Parameters<Transport['link']>[0]) => transport.link(listener),
-            open: (request: Request, receiver: Receiver) =>
-                transport.open(request, {
-                    end: (reason, sent) => {
-                        receiver.end(reason, sent);
-                    },
-                    frame: (frame) => {
-                        frames += 1;
-                        receiver.frame(frame);
-                    },
-                }),
-        } satisfies Transport,
-    };
+type Counted = ReturnType<typeof counted>;
+
+async function answeredAgain(stage: ReturnType<typeof opened>, count: Counted, ask: () => void) {
+    const asked = stage.asked().length;
+    const framed = count.frames();
+    ask();
+    await waitUntil(() => stage.asked().length > asked, { why: 'reads asked again' });
+    const again = stage.asked().length - asked;
+    await waitUntil(() => count.frames() >= framed + again, {
+        why: 'every read asked again answered',
+    });
+}
+
+function focusAgain() {
+    globalThis.dispatchEvent(new Event('blur'));
+    globalThis.dispatchEvent(new Event('focus'));
+}
+
+async function disturbed(stage: ReturnType<typeof opened>, count: Counted) {
+    await answeredAgain(stage, count, () => {
+        stage.restart({ ...HELLO, pid: 42 });
+    });
+    const restarted = document.body.innerHTML;
+    count.refuse('ports.list');
+    focusAgain();
+    await waitUntil(() => count.refused() > 0, { why: 'ports.list refused' });
+    return { refused: document.body.innerHTML, restarted };
 }
 
 describe('dependencies', () => {
@@ -202,7 +211,7 @@ describe('dependencies', () => {
     test('reads asked again change nothing visible, and draw no refreshing mark', async () => {
         // Given - the window on Home over two-macs, its answers counted as they come
         const stage = opened(recordingFor('two-macs'));
-        const counted = countingFrames(stage.transport);
+        const count = counted(stage.transport);
         const drawn: string[] = [];
         const watcher = new MutationObserver(() => {
             drawn.push(document.body.innerHTML);
@@ -212,7 +221,7 @@ describe('dependencies', () => {
         await component.render(
             <EngineProvider
                 dependencies={{
-                    engine: new Client(counted.transport),
+                    engine: new Client(count.transport),
                     opener: NO_OPENER,
                     presence: documentPresence(),
                 }}
@@ -225,15 +234,7 @@ describe('dependencies', () => {
                 watcher.observe(document.body, CHANGES);
 
                 // When - the window loses the focus and regains it, and every read it shows is answered again
-                const asked = stage.asked().length;
-                const framed = counted.frames();
-                globalThis.dispatchEvent(new Event('blur'));
-                globalThis.dispatchEvent(new Event('focus'));
-                await waitUntil(() => stage.asked().length > asked, { why: 'reads asked again' });
-                const again = stage.asked().length - asked;
-                await waitUntil(() => counted.frames() >= framed + again, {
-                    why: 'every read asked again answered',
-                });
+                await answeredAgain(stage, count, focusAgain);
                 watcher.disconnect();
                 after = document.body.innerHTML;
             },
@@ -241,6 +242,67 @@ describe('dependencies', () => {
 
         // Then - the page reads as before, and no frame in between said it was reading
         expect(after).toBe(before);
+        expect(drawn.filter((html) => readingsIn(html) > readingsIn(before))).toStrictEqual([]);
+    });
+
+    test('a page once drawn is never blank again: an equal re-ask, a restart, a refusal and a revisit', async () => {
+        // Given - linux-1's Ports over two-macs, each React commit counted, a grace of nothing so a revisit is kept
+        const stage = opened(recordingFor('two-macs'));
+        const count = counted(stage.transport);
+        const drawn: string[] = [];
+        const watcher = new MutationObserver(() => {
+            drawn.push(document.body.innerHTML);
+        });
+        let commits = 0;
+        let before = '';
+        const seen = { equal: -1, refused: '', restarted: '' };
+        const roots: (Element | null)[] = [];
+        await component.render(
+            <EngineProvider
+                dependencies={{
+                    engine: new Client(count.transport),
+                    opener: NO_OPENER,
+                    presence: documentPresence(),
+                    reads: { grace: 0 },
+                }}
+            >
+                <Profiler
+                    id="window"
+                    onRender={() => {
+                        commits += 1;
+                    }}
+                >
+                    <Window
+                        initial={{ machine: 'linux-1', page: 'machine', tab: 'Ports' }}
+                        pages={PAGES}
+                    />
+                </Profiler>
+            </EngineProvider>,
+            async (visitor) => {
+                await visitor.see(content(':5173'));
+                before = document.body.innerHTML;
+                roots.push(document.querySelector('main'));
+                watcher.observe(document.body, CHANGES);
+
+                // When - every read is answered again equal, the engine restarts, ports.list is refused, and Ports is left and drawn again
+                const committed = commits;
+                await answeredAgain(stage, count, focusAgain);
+                seen.equal = commits - committed;
+                Object.assign(seen, await disturbed(stage, count));
+                roots.push(document.querySelector('main'));
+                await visitor.click(content('Sign-ins'));
+                await visitor.see(content('Signed in to 2 of 4 programs.'));
+                drawn.length = 0;
+                await visitor.click(content('Ports'));
+                await visitor.see(content(':5173'));
+                watcher.disconnect();
+            },
+        );
+
+        // Then - no commit on the equal answer, the page unmoved by the restart and the refusal, on one root, and never reading
+        expect(seen.equal).toBe(0);
+        expect([seen.restarted, seen.refused]).toStrictEqual([before, before]);
+        expect(roots[1]).toBe(roots[0]);
         expect(drawn.filter((html) => readingsIn(html) > readingsIn(before))).toStrictEqual([]);
     });
 });

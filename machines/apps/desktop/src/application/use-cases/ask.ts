@@ -56,8 +56,11 @@ export function ask(client: EnginePort, entry: Entry): void {
             },
             error: (error) => {
                 if (current()) {
-                    entry.asking = error.wire === undefined;
-                    failed(entry, error);
+                    const reconnects = error.wire === undefined;
+                    entry.asking = reconnects;
+                    if (!reconnects || entry.reading.kind !== 'read') {
+                        failed(entry, error);
+                    }
                 }
             },
             out: (out: unknown) => {

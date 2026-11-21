@@ -23,6 +23,7 @@ import { GestureStore } from '../../application/use-cases/gesture-store';
 import { reachOf } from '../../application/use-cases/reach';
 import type { Reach } from '../../application/use-cases/reach';
 import { askedKey, ReadStore } from '../../application/use-cases/store';
+import type { StoreTiming } from '../../application/use-cases/store';
 import { UpdateFlow } from '../../application/use-cases/update-flow';
 import type { UpdateState } from '../../application/use-cases/update-flow';
 import { NO_WINDOW_UPDATE, WindowUpdateFlow } from '../../application/use-cases/window-update-flow';
@@ -37,6 +38,7 @@ export type Dependencies = {
     core?: CorePort | undefined;
     coreLookEvery?: number | undefined;
     windowUpdate?: undefined | WindowUpdatePort;
+    reads?: Partial<StoreTiming> | undefined;
 };
 
 type Engine = {
@@ -65,6 +67,7 @@ export function EngineProvider({
         core = NO_CORE,
         coreLookEvery,
         windowUpdate = NO_WINDOW_UPDATE,
+        reads,
     } = dependencies;
     const engine = useMemo(
         () => ({
@@ -72,11 +75,11 @@ export function EngineProvider({
             core: new CoreFlow(core, coreLookEvery),
             gestures: new GestureStore(),
             opener,
-            store: new ReadStore(client, presence),
+            store: new ReadStore(client, presence, reads),
             update: new UpdateFlow(core),
             windowUpdate: new WindowUpdateFlow(windowUpdate),
         }),
-        [client, core, coreLookEvery, opener, presence, windowUpdate],
+        [client, core, coreLookEvery, opener, presence, reads, windowUpdate],
     );
     useEffect(() => {
         engine.windowUpdate.start();

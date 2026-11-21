@@ -3,6 +3,13 @@ import { describe, expect, test } from 'vitest';
 
 import { DONE, EVERY, KEY, rowsOf, settled } from './fake-engine';
 
+const UNREACHABLE = {
+    code: 'remote.unreachable',
+    message: 'studio did not answer',
+    type: 'unreachable',
+};
+const NOT_FOUND = { code: 'unknown_vm', message: 'no such machine', type: 'not-found' };
+
 describe('entry', () => {
     test('a re-ask answered equal keeps the reading itself and tells no subscriber', async () => {
         // Given - machines.list settled on running, and what its subscriber has heard so far
@@ -45,5 +52,27 @@ describe('entry', () => {
         const [api, again] = rowsOf(store.reading(KEY));
         expect(api).toStrictEqual({ Name: 'api', State: 'stopped' });
         expect(again).toBe(web);
+    });
+
+    test('a refusal said again in the same words keeps the reading itself, stale or failed', async () => {
+        // Given - one store whose answer a far Mac missed, another whose machine was not found
+        using _ = clock.run('2026-11-13T10:00:00Z');
+        const missed = await settled();
+        const lost = await settled();
+        const refuse = async (error: object) => {
+            await clock.advance(EVERY);
+            missed.engine.answer('machines.list', { error: UNREACHABLE });
+            lost.engine.answer('machines.list', { error });
+        };
+        await refuse(NOT_FOUND);
+        const shown = [missed.store.reading(KEY), lost.store.reading(KEY)];
+
+        // When - the next cadence is refused again, each in the same words as new objects
+        await refuse({ ...NOT_FOUND });
+
+        // Then - each reading is the one shown
+        expect(shown.map((reading) => reading.kind)).toStrictEqual(['read', 'failed']);
+        expect(missed.store.reading(KEY)).toBe(shown[0]);
+        expect(lost.store.reading(KEY)).toBe(shown[1]);
     });
 });
