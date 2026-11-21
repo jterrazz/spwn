@@ -102,13 +102,22 @@ func (c *sshFile) block(b contract.MachineBlock) string {
 func (c *sshFile) proxy(b contract.MachineBlock) string {
 	words := []string{"machines", "pipe", b.Name}
 	if b.ThisMac {
-		return c.o.Executable + " " + strings.Join(words, " ")
+		return shellWord(c.o.Executable) + " " + strings.Join(words, " ")
 	}
 	// invariant: ssh runs a ProxyCommand through a local shell, then joins
 	// its words for the far one: the far command line is one word here,
 	// double-quoted, so the far shell still reads hop as one argument.
 	far := strings.Join(append([]string{"sh", "-c", hop, "station"}, words...), " ")
 	return "ssh " + b.Behind + " -- " + doubleQuoted(far)
+}
+
+// invariant: ssh hands a ProxyCommand to a shell, so a path with a space,
+// Spwn.app's `Spwn Engine`, is one word only once quoted.
+func shellWord(s string) string {
+	if strings.Trim(s, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/._+-") == "" {
+		return s
+	}
+	return doubleQuoted(s)
 }
 
 func doubleQuoted(s string) string {

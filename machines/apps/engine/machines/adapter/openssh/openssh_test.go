@@ -120,3 +120,19 @@ func TestABlockOffTheMacNamesNoAgent(t *testing.T) {
 		t.Errorf("block:\n%s", got)
 	}
 }
+
+func TestAVMOfThisMacIsReachedThroughTheEnginesPathAsOneShellWord(t *testing.T) {
+	for executable, want := range map[string]string{
+		"/bin/station": "  ProxyCommand /bin/station machines pipe linux-1\n",
+		home + "/Applications/Spwn.app/Contents/MacOS/Spwn Engine": `  ProxyCommand "` + home + `/Applications/Spwn.app/Contents/MacOS/Spwn Engine" machines pipe linux-1` + "\n",
+	} {
+		f := files{}
+		c := New(f, Options{Home: home, KnownHosts: home + "/.local/state/station/known_hosts", Executable: executable})
+		if err := c.Put(context.Background(), []contract.MachineBlock{{Name: "linux-1", Behind: "mac-mini", ThisMac: true}}); err != nil {
+			t.Fatal(err)
+		}
+		if got := string(read(t, f)); !strings.Contains(got, want) {
+			t.Errorf("with %s the block lacks\n%s\nin\n%s", executable, want, got)
+		}
+	}
+}
