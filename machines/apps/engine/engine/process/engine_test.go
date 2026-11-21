@@ -217,6 +217,50 @@ func TestARunWhoseGuestNeverConnectsAnswersGuestTimeoutAfterAMinute(t *testing.T
 	}
 }
 
+// value: a Mac whose waits for an event pass no time, as a world's do: it
+// tells awaiting once a wait begins.
+type eventMac struct {
+	*fakeMac
+	awaiting chan struct{}
+}
+
+func (m eventMac) Await(ctx context.Context, ready <-chan struct{}, _ time.Duration) error {
+	close(m.awaiting)
+	select {
+	case <-ready:
+		return nil
+	case <-ctx.Done():
+		return ctx.Err()
+	}
+}
+
+func TestAGuestsGreetingIsWaitedForBeforeTheGuestIsJudgedSoItMovesNoPoll(t *testing.T) {
+	h := newHarness(t, model.VMRecord{Name: "api", Lifetime: model.Persistent, Want: model.WantRunning})
+	mac := eventMac{fakeMac: h.mac, awaiting: make(chan struct{})}
+	d := New(mac, h.hv, nil, h.m, &fakeTailnet{}, memStores(), Options{State: "/s", ThisMachine: catalog.Mac})
+	h.hv.outlived("api")
+	v, _ := d.find("api")
+	v.run, _ = h.hv.Adopt(t.Context(), "api")
+	v.state, v.guest = engine.StateRunning, engine.GuestConnecting
+	d.mu.Lock()
+	d.greetLocked(v)
+	d.mu.Unlock()
+	go func() {
+		<-mac.awaiting
+		d.mu.Lock()
+		v.guest = engine.GuestConnected
+		d.greetedLocked(v)
+		d.mu.Unlock()
+	}()
+	began := h.clock.At
+	if err := d.awaitGuest(t.Context(), "api"); err != nil {
+		t.Fatalf("a guest that greets and connects: %v, want it run", err)
+	}
+	if moved := h.clock.At.Sub(began); moved != 0 {
+		t.Errorf("the clock moved %s while the guest greeted, want none", moved)
+	}
+}
+
 func TestStopAllAnswersFailedForALastingVMTheEngineStillRuns(t *testing.T) {
 	h := newHarness(t,
 		model.VMRecord{Name: "api", Lifetime: model.Persistent, Want: model.WantRunning},

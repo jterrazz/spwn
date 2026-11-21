@@ -29,6 +29,16 @@ func (staggerClock) Sleep(ctx context.Context, d time.Duration) error {
 	return ctx.Err()
 }
 
+func (staggerClock) Await(ctx context.Context, ready <-chan struct{}, d time.Duration) error {
+	waited, cancel := context.WithTimeout(ctx, d)
+	defer cancel()
+	select {
+	case <-ready:
+	case <-waited.Done():
+	}
+	return ctx.Err()
+}
+
 // value: a disk that answers its roots one at a time, 10 ms apart.
 type staggered struct{ localtest.Disk }
 

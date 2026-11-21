@@ -1158,6 +1158,25 @@ func (c worldClock) Now() time.Time {
 	return c.w.Now
 }
 
+// invariant: what a wait waits for (a guest's greeting) lands on no clock, so
+// it is waited for before the clock moves, however loaded the gate: one that
+// is in moves the clock not at all.
+//
+// hazard: one that waits on the clock all the same is waited for greetBound
+// of real time, then passes as a sleep of d.
+func (c worldClock) Await(ctx context.Context, ready <-chan struct{}, d time.Duration) error {
+	bound := time.NewTimer(greetBound)
+	defer bound.Stop()
+	select {
+	case <-ready:
+		return ctx.Err()
+	case <-ctx.Done():
+		return ctx.Err()
+	case <-bound.C:
+	}
+	return c.Sleep(ctx, d)
+}
+
 func (c worldClock) Sleep(ctx context.Context, d time.Duration) error {
 	if err := ctx.Err(); err != nil {
 		return err

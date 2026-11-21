@@ -89,6 +89,10 @@ func (yielding) Sleep(ctx context.Context, _ time.Duration) error {
 	return ctx.Err()
 }
 
+func (y yielding) Await(ctx context.Context, _ <-chan struct{}, d time.Duration) error {
+	return y.Sleep(ctx, d)
+}
+
 func recorded(t *testing.T, name string) string {
 	t.Helper()
 	data, err := os.ReadFile("testdata/" + name)

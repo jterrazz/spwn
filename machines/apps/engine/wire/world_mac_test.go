@@ -24,8 +24,11 @@ type quietMac struct{}
 
 func (quietMac) Now() time.Time                             { return time.Unix(1, 0) }
 func (quietMac) Sleep(context.Context, time.Duration) error { return nil }
-func (quietMac) Home() string                               { return "/home" }
-func (quietMac) ReadFile(string) ([]byte, error)            { return nil, context.Canceled }
+func (quietMac) Await(context.Context, <-chan struct{}, time.Duration) error {
+	return nil
+}
+func (quietMac) Home() string                    { return "/home" }
+func (quietMac) ReadFile(string) ([]byte, error) { return nil, context.Canceled }
 func (quietMac) Tail(string, int64) (tail []byte, cut bool, err error) {
 	return nil, false, context.Canceled
 }

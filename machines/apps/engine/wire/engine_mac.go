@@ -19,8 +19,11 @@ var _ process.Mac = engineMac{}
 
 func (m engineMac) Now() time.Time                                   { return m.Clock.Now() }
 func (m engineMac) Sleep(ctx context.Context, d time.Duration) error { return m.Clock.Sleep(ctx, d) }
-func (m engineMac) Home() string                                     { return m.Env.Home() }
-func (m engineMac) ReadFile(path string) ([]byte, error)             { return m.FS.ReadFile(path) }
+func (m engineMac) Await(ctx context.Context, ready <-chan struct{}, d time.Duration) error {
+	return m.Clock.Await(ctx, ready, d)
+}
+func (m engineMac) Home() string                         { return m.Env.Home() }
+func (m engineMac) ReadFile(path string) ([]byte, error) { return m.FS.ReadFile(path) }
 func (m engineMac) Tail(path string, limit int64) (tail []byte, cut bool, err error) {
 	f, err := m.FS.Open(path)
 	if err != nil {

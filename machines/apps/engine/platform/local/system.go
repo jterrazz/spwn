@@ -160,6 +160,8 @@ type Sockets interface {
 type Clock interface {
 	Now() time.Time
 	Sleep(ctx context.Context, d time.Duration) error
+	// value: waits until ready is closed, d at most.
+	Await(ctx context.Context, ready <-chan struct{}, d time.Duration) error
 }
 
 type System struct {

@@ -17,7 +17,7 @@ func (d *Engine) greetLocked(v *vmState) {
 	if v.greeting {
 		return
 	}
-	v.greeting = true
+	v.greeting, v.greeted = true, make(chan struct{})
 	if d.greets.n == 0 {
 		d.greets.none = make(chan struct{})
 	}
@@ -29,6 +29,7 @@ func (d *Engine) greetedLocked(v *vmState) {
 		return
 	}
 	v.greeting = false
+	close(v.greeted)
 	d.greets.n--
 	if d.greets.n == 0 {
 		close(d.greets.none)
@@ -54,6 +55,17 @@ func (d *Engine) fromSession(ctx context.Context, v *vmState, gen int, line []by
 	if greeting && json.Unmarshal(line, &m) == nil && m.Type == "snapshot" {
 		d.greetedBy(v, gen)
 	}
+}
+
+// value: closed once v's guest ends the greeting it is in; nil while it
+// greets none.
+func (d *Engine) greetingOf(v *vmState) <-chan struct{} {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	if !v.greeting {
+		return nil
+	}
+	return v.greeted
 }
 
 func (d *Engine) Greeted() <-chan struct{} {

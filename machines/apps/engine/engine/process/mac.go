@@ -33,6 +33,8 @@ type Mac interface {
 	// and the children a former engine left behind.
 	Now() time.Time
 	Sleep(ctx context.Context, d time.Duration) error
+	// value: waits until ready is closed, d of the clock at most.
+	Await(ctx context.Context, ready <-chan struct{}, d time.Duration) error
 	Home() string
 	ReadFile(path string) ([]byte, error)
 	// invariant: the last max bytes of a file, and whether the file held

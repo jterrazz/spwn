@@ -62,6 +62,7 @@ type vmState struct {
 	checking bool
 	ssh      bool
 	greeting bool
+	greeted  chan struct{}
 	// value: a server's last check runs; the restart it walks, nil when
 	// none; its uptime record holds it down; it was marked since this
 	// engine began.
@@ -378,13 +379,22 @@ func (d *Engine) opRun(ctx context.Context, vm string) error {
 
 // invariant: run answers once the guest is connected (it has written the VM's
 // keys block and services.env), or when the run ended first (its end is the
-// supervision's), else guest_timeout after guestReady.
+// supervision's), else guest_timeout after guestReady. A greeting the guest
+// is in is waited for before the guest is judged, each once, so how long a
+// greeting takes moves no poll.
 func (d *Engine) awaitGuest(ctx context.Context, vm string) error {
 	v, err := d.find(vm)
 	if err != nil {
 		return err
 	}
+	var heard <-chan struct{}
 	for waited := time.Duration(0); waited < guestReady; waited += pollEvery {
+		if greeting := d.greetingOf(v); greeting != nil && greeting != heard {
+			heard = greeting
+			if err := d.h.Await(ctx, greeting, pollEvery); err != nil {
+				return err
+			}
+		}
 		d.mu.Lock()
 		connected, ended := v.guest == engine.GuestConnected, v.over()
 		d.mu.Unlock()

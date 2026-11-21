@@ -28,6 +28,15 @@ func (c *stepClock) Sleep(ctx context.Context, d time.Duration) error {
 // value: a Mac of a module test: no file, every socket idle.
 type fakeMac struct{ clock }
 
+func (m *fakeMac) Await(ctx context.Context, ready <-chan struct{}, d time.Duration) error {
+	select {
+	case <-ready:
+		return ctx.Err()
+	default:
+		return m.Sleep(ctx, d)
+	}
+}
+
 func (*fakeMac) Home() string                    { return "/home/u" }
 func (*fakeMac) ReadFile(string) ([]byte, error) { return nil, errors.New("no file in a module test") }
 func (*fakeMac) Tail(string, int64) (tail []byte, cut bool, err error) {

@@ -102,6 +102,15 @@ func (c *Clock) Sleep(ctx context.Context, d time.Duration) error {
 	return nil
 }
 
+func (c *Clock) Await(ctx context.Context, ready <-chan struct{}, d time.Duration) error {
+	select {
+	case <-ready:
+		return ctx.Err()
+	default:
+		return c.Sleep(ctx, d)
+	}
+}
+
 func Mac(r *Runner, f *FS, e Env, n *Net, c *Clock) local.System {
 	return local.System{Run: r, FS: f, Env: e, Net: n, Clock: c}
 }
