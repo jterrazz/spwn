@@ -12,18 +12,15 @@ mkdir -p "$app/Contents/MacOS" "$app/Contents/Resources"
 cp "$bin/StationMenuBar" "$app/Contents/MacOS/StationMenuBar"
 cp "$package/resources/Info.plist" "$app/Contents/Info.plist"
 cp -R "$bin/StationMenuBar_StationKit.bundle" "$app/Contents/Resources/"
-icons="$scratch/AppIcon.iconset"
-rm -rf "$icons" && mkdir -p "$icons"
-qlmanage -t -s 1024 -o "$scratch" "$package/resources/AppIcon.svg" >/dev/null
-for size in 16 32 128 256 512; do
-    sips -z $size $size "$scratch/AppIcon.svg.png" --out "$icons/icon_${size}x${size}.png" >/dev/null
-    sips -z $((size * 2)) $((size * 2)) "$scratch/AppIcon.svg.png" --out "$icons/icon_${size}x${size}@2x.png" >/dev/null
-done
-iconutil -c icns "$icons" -o "$app/Contents/Resources/AppIcon.icns"
+rm -rf "$scratch/AppIcon.icon" && cp -R "$package/resources/app-icon.icon" "$scratch/AppIcon.icon"
+xcrun actool "$scratch/AppIcon.icon" --compile "$app/Contents/Resources" --app-icon AppIcon --include-all-app-icons \
+    --target-device mac --minimum-deployment-target 26.0 --platform macosx --output-partial-info-plist "$scratch/AppIcon.plist" >/dev/null
+/usr/libexec/PlistBuddy -c "Merge $scratch/AppIcon.plist" "$app/Contents/Info.plist" >/dev/null
 version=$(git -C "$root" describe --tags --always --dirty | sed 's/^v//')
 plutil -replace CFBundleShortVersionString -string "$version" "$app/Contents/Info.plist"
 cp "$root/apps/engine/ui/testdata/pages/menubar.home.engine-stopped.json" "$app/Contents/Resources/stopped.json"
 cp "$root/apps/engine/ui/testdata/pages/menubar.home.engine-outdated.json" "$app/Contents/Resources/outdated.json"
 codesign --force --sign - --timestamp=none "$app"
 codesign --verify --strict "$app"
+"$root/../scripts/app-icon-check.sh" "$app"
 printf '● Built %s (%s, signed ad hoc)\n' ".artifacts/menubar/Station.app" "$version"
