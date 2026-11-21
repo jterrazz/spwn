@@ -47,7 +47,7 @@ final class MotionTests: XCTestCase {
     // own, and the window is ordered in and out with no animation.
     func testThePanelOpensWholeAndClosesAtOnce() throws {
         let app = try String(contentsOf: Tree.app.appendingPathComponent("App.swift"), encoding: .utf8)
-        let panel = try XCTUnwrap(app.range(of: "Popover(model.state"))
+        let panel = try XCTUnwrap(app.range(of: "StorePanel(store: model.store"))
         let theme = try XCTUnwrap(app.range(of: ".stationSystemTheme()", range: panel.upperBound..<app.endIndex))
         let chain = app[panel.upperBound..<theme.lowerBound]
         for moving in [".modifier(", "scaleEffect", "transition", "animation", "opacity"] {

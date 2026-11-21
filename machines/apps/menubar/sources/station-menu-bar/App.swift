@@ -78,7 +78,7 @@ struct ModelPanel: View {
     let model: Model
 
     var body: some View {
-        Popover(model.state, handlers: handlers)
+        StorePanel(store: model.store, handlers: handlers)
             .environment(\.stationLive, model.live)
             .stationSystemTheme()
             .stationSystemAccessibility()

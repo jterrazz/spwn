@@ -30,4 +30,4 @@ The audit's decision 3 reverses ADR-036 decision 1. The owner approved it on 202
 - One `Panel` container for every page, the audit's other half of this lot, is not built. Home, the machine pages and the menu bar's own pages are still separate `Panel` trees, so a push still changes trees. The cache makes it one change, not two.
 - A page drawn as last seen can stay up to `Navigation.patience` past its watch's first frame when the watch reads slowly.
 - A page is whole by the engine's marks alone. A part the engine draws as read before it is passes: a Mac's Accounts is drawn `none` until its sign-ins answer (`pages/menubar/accounts.go`, `macAccounts`), so opening a Mac with sign-ins draws the page seen, that page without them, then the page read: three content generations where the rule aims at one.
-- The observation split (`@Observable` link, home, pages, live, ui) comes after this decision, and it changes none of it.
+- The observation split (`PanelStore`: link, home, pages and ui, the live values LiveStore's, each view reading only its slices) comes after this decision, and it changes none of it.

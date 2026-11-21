@@ -4,35 +4,20 @@ import Observation
 import StationKit
 import UserNotifications
 
-// invariant: the model is observed by slice: the engine's link, Home, the
-// page pushed over it, the live values (LiveStore) and the rest of the
-// panel's state. A reader is told only of the slices it read, and `state`,
-// the panel's whole state, writes back only the slices that changed.
+// invariant: the panel's state is the store's, observed by slice
+// (PanelStore): the engine's link, Home, the page pushed over it and the
+// rest of the panel's state; the live values are LiveStore's. `state` is
+// the panel's whole state, and writing it writes back only the slices that
+// changed.
 @MainActor
 @Observable
 final class Model {
-    private(set) var link: Connection = .connecting
-    private(set) var home: Page?
-    private(set) var pages: Page?
-    private(set) var ui = PanelState(page: nil, connection: .connecting)
+    let store = PanelStore(PanelState(page: nil, connection: .connecting))
 
     var state: PanelState {
-        get {
-            var whole = ui
-            whole.connection = link
-            whole.page = home
-            whole.pushed = pages
-            return whole
-        }
+        get { store.state }
         set {
-            if link != newValue.connection { link = newValue.connection }
-            if home != newValue.page { home = newValue.page }
-            if pages != newValue.pushed { pages = newValue.pushed }
-            var rest = newValue
-            rest.connection = .connecting
-            rest.page = nil
-            rest.pushed = nil
-            if ui != rest { ui = rest }
+            store.state = newValue
             turner.follow(icon)
         }
     }
