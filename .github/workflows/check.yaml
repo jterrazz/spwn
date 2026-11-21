@@ -197,6 +197,10 @@ jobs:
                   browsers: 'true'
                   dockerfile: ''
                   report: check-machines
+                  cache-paths: |
+                      machines/.artifacts
+                      ~/.cache/go-build
+                      ~/go/pkg/mod
 
     build:
         name: Build
