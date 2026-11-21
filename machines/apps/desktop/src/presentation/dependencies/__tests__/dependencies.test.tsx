@@ -2,7 +2,7 @@ import { component, content, waitUntil } from '@jterrazz/test';
 import { Profiler } from 'react';
 import { describe, expect, test } from 'vitest';
 
-import { PAGE_NEWEST } from '../../../domain/fit';
+import { PAGE_REVISION } from '../../../domain/fit';
 import { keyOf } from '../../../domain/request-key';
 import { documentPresence } from '../../../infrastructure/outbound/document-presence/document-presence';
 import { Client } from '../../../infrastructure/outbound/engine-link/client';
@@ -19,7 +19,7 @@ import { counted } from './counted';
 
 const recordingFor = await recordingsOf('two-macs');
 
-const HELLO = { page: PAGE_NEWEST, pid: 41, started_at: '2026-11-13T09:00:00Z', version: 'dev' };
+const HELLO = { page: PAGE_REVISION, pid: 41, started_at: '2026-11-13T09:00:00Z', version: 'dev' };
 
 function EngineState({ label }: { label: string }) {
     const engine = useRead('engine.read', {});

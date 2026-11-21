@@ -82,13 +82,13 @@ Beside the Registry, the engine serves calls of its own, which the CLI's reads a
 
 ## The compatibility verdict
 
-A client judges an engine before it draws any of its pages, from the `page` revision the engine's opening of a watch of pages names, or `engine.hello`'s for a client that watches none. A client declares the range of revisions it draws, the newest it knows and the oldest it accepts (the menu bar: `pageOldest` to `pageRevision`), and the verdict is ADR-070's one rule, worded the same in the menu bar and the window:
+A client judges an engine before it draws any of its pages, from the `page` revision the engine's opening of a watch of pages names, or `engine.hello`'s for a client that watches none. Until 1.0 there is no range: a client draws one revision, a single constant (the menu bar's `pageRevision`, the window's `PAGE_REVISION`), and only an engine at that revision fits ([ADR-072](../decisions/072-before-1-0-every-station-runs-the-same-release.md)). The verdict is ADR-070's one rule, worded the same in the menu bar and the window:
 
-| The engine's revision           | The verdict                      | The remedy, and its command                                                       |
-| ------------------------------- | -------------------------------- | --------------------------------------------------------------------------------- |
-| within the client's range       | compatible: its pages are drawn  |                                                                                   |
-| below its oldest, or none named | `engine older than this app`     | `Update station here`, with `catalog.InstallLine`, the line that installs station |
-| above its newest                | `this app older than the engine` | the client's own update (the menu bar: `station apps install station-menubar`)    |
+| The engine's revision       | The verdict                      | The remedy, and its command                                                       |
+| --------------------------- | -------------------------------- | --------------------------------------------------------------------------------- |
+| the client's revision       | compatible: its pages are drawn  |                                                                                   |
+| below the client's, or none | `engine older than this app`     | `Update station here`, with `catalog.InstallLine`, the line that installs station |
+| above the client's          | `this app older than the engine` | the client's own update (the menu bar: `station apps install station-menubar`)    |
 
 An incompatible engine is running, so it is never said stopped: the menu bar's item reads `Spwn Menu: engine older than this app`, dimmed as a stopped one is, and its panel draws the engine's own page of the verdict, `menubar.home.engine-outdated`, with none of the engine's pages ([`Subscription`](../../apps/menubar/sources/station-kit/engine/Client.swift) drops them).
 

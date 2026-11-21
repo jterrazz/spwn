@@ -1,7 +1,7 @@
 import { component, content, status, waitUntil } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
-import { PAGE_NEWEST } from '../../../domain/fit';
+import { PAGE_REVISION } from '../../../domain/fit';
 import { documentPresence } from '../../../infrastructure/outbound/document-presence/document-presence';
 import { Client } from '../../../infrastructure/outbound/engine-link/client';
 import { recordingsOf } from '../../../infrastructure/outbound/engine-replay/recordings';
@@ -14,7 +14,7 @@ import { Window } from '../window';
 
 const recordingFor = await recordingsOf('two-macs');
 
-const HELLO = { page: PAGE_NEWEST, pid: 41, started_at: '2026-11-13T09:00:00Z', version: 'dev' };
+const HELLO = { page: PAGE_REVISION, pid: 41, started_at: '2026-11-13T09:00:00Z', version: 'dev' };
 
 function focusAgain() {
     globalThis.dispatchEvent(new Event('blur'));

@@ -213,13 +213,12 @@ final class ClientTests: XCTestCase {
         XCTAssertEqual(calls.all, [])
     }
 
-    // invariant: ADR-070's fit as a range: an engine is older only below the
-    // oldest revision the app accepts, the app older only above the newest it
-    // knows, and every revision between fits.
-    func testTheVerdictIsARangeFromTheOldestAcceptedToTheNewestKnown() {
-        let verdicts = [nil, 2, 3, 4, 5, 6].map { EngineIncompatibility.of(revision: $0, oldest: 3, newest: 5) }
-        XCTAssertEqual(verdicts, [.engineOlder, .engineOlder, nil, nil, nil, .appOlder])
-        XCTAssertLessThanOrEqual(pageOldest, pageRevision)
+    // invariant: the fit has no range: only the revision the app draws fits;
+    // below it, or none named, the engine is older, above it the app is.
+    func testOnlyTheRevisionTheAppDrawsFits() {
+        let verdicts = [nil, 3, 4, 5, 6].map { EngineIncompatibility.of(revision: $0, drawn: 5) }
+        XCTAssertEqual(verdicts, [.engineOlder, .engineOlder, .engineOlder, nil, .appOlder])
+        XCTAssertNil(EngineIncompatibility.of(revision: pageRevision))
     }
 
     // invariant: the verdict comes in the watch's opening, before any page: an

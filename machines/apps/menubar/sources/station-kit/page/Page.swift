@@ -1,9 +1,9 @@
 import Foundation
 
 public let pageSchema = "station.page/v1"
+// value: the one page revision this app draws; until 1.0 an engine at any
+// other revision is incompatible (ADR-072).
 public let pageRevision = 5
-// value: the oldest page revision this app draws; pageRevision is the newest it knows.
-public let pageOldest = 5
 
 public struct Page: Codable, Equatable, Sendable {
     public var schema: String?

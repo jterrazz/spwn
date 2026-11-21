@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { PAGE_NEWEST, PAGE_OLDEST } from '../../../domain/fit';
+import { PAGE_REVISION } from '../../../domain/fit';
 import { judged, reachOf } from '../reach';
 
 describe('reach', () => {
@@ -36,13 +36,13 @@ describe('reach', () => {
         ]);
     });
 
-    test('an engine answering outside the range is judged incompatible and running, never absent', () => {
-        // Given - hellos naming no revision, one below the oldest accepted, the newest known, and one above it
+    test('an engine answering another revision is judged incompatible and running, never absent', () => {
+        // Given - hellos naming no revision, one below the revision drawn, that revision, and one above it
         const socket = '/run/engine.sock';
         const unnamed = { executable: '/u/bin/station', pid: 1, started_at: '', version: 'v1' };
         const hellos = [
             unnamed,
-            ...[PAGE_OLDEST - 1, PAGE_NEWEST, PAGE_NEWEST + 1].map((page) => ({
+            ...[PAGE_REVISION - 1, PAGE_REVISION, PAGE_REVISION + 1].map((page) => ({
                 ...unnamed,
                 page,
             })),

@@ -5,19 +5,19 @@ public enum Connection: Equatable, Sendable {
     case incompatible(EngineIncompatibility)
 }
 
-// invariant: the one compatibility verdict of docs/reference/api.md and ADR-070:
-// the engine's pages are drawn when the page revision its watch opened with lies
-// in the range this app draws, pageOldest to pageRevision. Below the oldest, or
-// none named, the engine is older than this app; above the newest, this app is
-// older than the engine. Neither is ever said "stopped".
+// invariant: the one compatibility verdict of docs/reference/api.md: the
+// engine's pages are drawn when the page revision its watch opened with is the
+// one this app draws, pageRevision. Below it, or none named, the engine is
+// older than this app; above it, this app is older than the engine. Neither is
+// ever said "stopped".
 public enum EngineIncompatibility: Equatable, Sendable {
     case engineOlder, appOlder
 
     // value: the verdict on the revision a watch of pages opened with; nil
     // when it fits.
-    public static func of(revision: Int?, oldest: Int = pageOldest, newest: Int = pageRevision) -> EngineIncompatibility? {
-        guard let revision, revision >= oldest else { return .engineOlder }
-        if revision > newest { return .appOlder }
+    public static func of(revision: Int?, drawn: Int = pageRevision) -> EngineIncompatibility? {
+        guard let revision, revision >= drawn else { return .engineOlder }
+        if revision > drawn { return .appOlder }
         return nil
     }
 

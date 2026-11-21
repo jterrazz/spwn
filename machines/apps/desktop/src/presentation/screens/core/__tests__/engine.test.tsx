@@ -2,7 +2,7 @@ import { button, component, content, file, heading, navigation, within } from '@
 import { describe, expect, test } from 'vitest';
 
 import type { Link } from '../../../../application/ports/engine.port';
-import { PAGE_NEWEST } from '../../../../domain/fit';
+import { PAGE_REVISION } from '../../../../domain/fit';
 import { refreshRefused, updated } from '../../../../infrastructure/outbound/core-scripted/release';
 import { scriptedCore } from '../../../../infrastructure/outbound/core-scripted/scripted-core';
 import { SCRIPTS } from '../../../../infrastructure/outbound/core-scripted/scripts';
@@ -191,7 +191,7 @@ describe('EnginePage', () => {
         const link: Link = {
             hello: {
                 calls: ['engine.read'],
-                page: PAGE_NEWEST,
+                page: PAGE_REVISION,
                 pid: 1,
                 started_at: 'older',
                 version: 'v0.20.0',
