@@ -5,6 +5,7 @@ import type { Found } from '../../domain/machines/machines';
 import { crumbsOf, TITLES } from './crumbs';
 import type { PlainPage } from './route';
 import type { Router } from './router';
+import { StaleMark } from './stale-mark';
 import { Toolbar } from './toolbar';
 import { actionOf } from './toolbar-action';
 
@@ -50,6 +51,7 @@ export function FrameToolbar(props: FrameToolbarProps) {
             canGoBack={canGoBack}
             canGoForward={canGoForward}
             crumbs={crumbsOf({ found, go, ItemName, route })}
+            mark={<StaleMark />}
             onBack={back}
             onForward={forward}
             onToggleSidebar={onToggleSidebar}

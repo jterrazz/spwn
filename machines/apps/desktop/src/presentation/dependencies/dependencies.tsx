@@ -1,5 +1,5 @@
 import type { CallName, EngineHello, Target } from '@jterrazz/station-api';
-import { createContext, useContext, useEffect, useMemo, useSyncExternalStore } from 'react';
+import { createContext, useContext, useEffect, useId, useMemo, useSyncExternalStore } from 'react';
 import type { ReactNode } from 'react';
 
 import type { CorePort } from '../../application/ports/core.port';
@@ -28,6 +28,8 @@ import { UpdateFlow } from '../../application/use-cases/update-flow';
 import type { UpdateState } from '../../application/use-cases/update-flow';
 import { NO_WINDOW_UPDATE, WindowUpdateFlow } from '../../application/use-cases/window-update-flow';
 import type { WindowUpdateState } from '../../application/use-cases/window-update-flow';
+import type { EngineError } from '../../domain/engine-error';
+import { StaleMarks } from './stale-marks';
 import { usePlaceholder } from './use-placeholder';
 import type { Asking } from './use-placeholder';
 
@@ -47,6 +49,7 @@ export type Dependencies = {
 type Engine = {
     client: EnginePort;
     store: ReadStore;
+    stale: StaleMarks;
     gestures: GestureStore;
     opener: OpenerPort;
     core: CoreFlow;
@@ -78,6 +81,7 @@ export function EngineProvider({
             core: new CoreFlow(core, coreLookEvery),
             gestures: new GestureStore(),
             opener,
+            stale: new StaleMarks(),
             store: new ReadStore(client, presence, reads),
             update: new UpdateFlow(core),
             windowUpdate: new WindowUpdateFlow(windowUpdate),
@@ -167,6 +171,27 @@ function useAsked(asked: Asked): Reading<unknown> {
     return useSyncExternalStore(store.subscriberOf(asked), () => store.reading(key));
 }
 
+// invariant: a reader drawn holds its answer's stale refusal in the frame's marks for as long as it is drawn.
+function useStaleMark(reading: Reading<unknown>): void {
+    const { stale } = useEngine();
+    const reader = useId();
+    const held = reading.kind === 'read' ? reading.stale : undefined;
+    useEffect(() => {
+        stale.hold(reader, held);
+    }, [stale, reader, held]);
+    useEffect(
+        () => () => {
+            stale.hold(reader, undefined);
+        },
+        [stale, reader],
+    );
+}
+
+export function useStale(): readonly EngineError[] {
+    const { stale } = useEngine();
+    return useSyncExternalStore(stale.subscribe, stale.shown);
+}
+
 export function useWatch<N extends WatchName>(
     name: N,
     input: In<N>,
@@ -174,6 +199,7 @@ export function useWatch<N extends WatchName>(
     asking: Asking = {},
 ): Reading<Out<N>> {
     const reading = useAsked({ input, kind: 'watch', name, target });
+    useStaleMark(reading);
     return usePlaceholder(isOutOf(name, reading) ? reading : READING, asking);
 }
 
@@ -184,5 +210,6 @@ export function useRead<N extends ReadName>(
     asking: Asking = {},
 ): Reading<Out<N>> {
     const reading = useAsked({ input, kind: 'read', name, target });
+    useStaleMark(reading);
     return usePlaceholder(isOutOf(name, reading) ? reading : READING, asking);
 }

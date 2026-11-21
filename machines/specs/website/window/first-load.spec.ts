@@ -17,4 +17,8 @@ describe('first load', () => {
         );
         expect(result.errors.text).toBe('');
     });
+
+    test.todo(
+        'A9 waits for a visit that can let the store ask again: a refresh is asked on its 30 s cadence or a focus regained, which a visit gives neither of with no clock; src/presentation/dependencies/__tests__/dependencies.test.tsx proves the mark meanwhile, and a capture shows it with ?stale=',
+    );
 });

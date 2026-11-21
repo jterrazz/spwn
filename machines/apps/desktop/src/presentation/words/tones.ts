@@ -24,6 +24,7 @@ export const OWN_STATE_TONES: Tones<OwnState> = {
     'not-started': 'plain',
     'not-wired': 'plain',
     reading: 'new',
+    stale: 'plain',
     unknown: 'warn',
     untyped: 'bad',
     'window-error': 'plain',

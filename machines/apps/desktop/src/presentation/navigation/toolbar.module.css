@@ -36,3 +36,10 @@
 .crumb:hover {
     color: var(--t1);
 }
+.stale {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    padding: var(--space-6);
+    cursor: help;
+}

@@ -105,11 +105,29 @@ async function disturbed(stage: ReturnType<typeof opened>, count: Counted) {
     await answeredAgain(stage, count, () => {
         stage.restart({ ...HELLO, pid: 42 });
     });
-    const restarted = document.body.innerHTML;
+    const restarted = pageDrawn();
     count.refuse('ports.list');
     focusAgain();
     await waitUntil(() => count.refused() > 0, { why: 'ports.list refused' });
-    return { refused: document.body.innerHTML, restarted };
+    await waitUntil(() => staleMarked() !== null, { why: 'the stale mark drawn' });
+    return { marked: staleMarked(), refused: pageDrawn(), restarted };
+}
+
+function watched() {
+    const drawn: string[] = [];
+    const watcher = new MutationObserver(() => {
+        drawn.push(document.body.innerHTML);
+    });
+    return { drawn, watcher };
+}
+
+function pageDrawn(): string {
+    const below = document.querySelectorAll('main > :not(header)');
+    return [...below].map((element) => element.outerHTML).join('');
+}
+
+function staleMarked(): null | string {
+    return document.querySelector('header [role="status"]')?.getAttribute('aria-label') ?? null;
 }
 
 describe('dependencies', () => {
@@ -212,10 +230,7 @@ describe('dependencies', () => {
         // Given - the window on Home over two-macs, its answers counted as they come
         const stage = opened(recordingFor('two-macs'));
         const count = counted(stage.transport);
-        const drawn: string[] = [];
-        const watcher = new MutationObserver(() => {
-            drawn.push(document.body.innerHTML);
-        });
+        const { drawn, watcher } = watched();
         let before = '';
         let after = '';
         await component.render(
@@ -249,13 +264,10 @@ describe('dependencies', () => {
         // Given - linux-1's Ports over two-macs, each React commit counted, a grace of nothing so a revisit is kept
         const stage = opened(recordingFor('two-macs'));
         const count = counted(stage.transport);
-        const drawn: string[] = [];
-        const watcher = new MutationObserver(() => {
-            drawn.push(document.body.innerHTML);
-        });
+        const { drawn, watcher } = watched();
         let commits = 0;
         let before = '';
-        const seen = { equal: -1, refused: '', restarted: '' };
+        const seen = { equal: -1, marked: null as null | string, refused: '', restarted: '' };
         const roots: (Element | null)[] = [];
         await component.render(
             <EngineProvider
@@ -280,7 +292,7 @@ describe('dependencies', () => {
             </EngineProvider>,
             async (visitor) => {
                 await visitor.see(content(':5173'));
-                before = document.body.innerHTML;
+                before = pageDrawn();
                 roots.push(document.querySelector('main'));
                 watcher.observe(document.body, CHANGES);
 
@@ -299,9 +311,11 @@ describe('dependencies', () => {
             },
         );
 
-        // Then - no commit on the equal answer, the page unmoved by the restart and the refusal, on one root, and never reading
+        // Then - no commit on the equal answer, the page unmoved by the restart and the refusal, which the toolbar marks
+        // Then - in the engine's words, on one root, and never reading
         expect(seen.equal).toBe(0);
         expect([seen.restarted, seen.refused]).toStrictEqual([before, before]);
+        expect(seen.marked).toBe('macbook-pro did not answer');
         expect(roots[1]).toBe(roots[0]);
         expect(drawn.filter((html) => readingsIn(html) > readingsIn(before))).toStrictEqual([]);
     });

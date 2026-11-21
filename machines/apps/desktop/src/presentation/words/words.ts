@@ -23,8 +23,8 @@ type WordsOfAnOpenCode = Readonly<Partial<Record<number | string, string>>>;
 export const NO_STATE_WORD = 'no state given';
 
 // value: what the window says of its own reading of a call or of a gesture's fate, never of an engine code: an
-// value: answer not yet come, none at all, a refusal sent with no type, a slot no call fills, a gesture done or of
-// value: unknown outcome.
+// value: answer not yet come, none at all, an answer kept whose refresh was refused, a refusal sent with no type, a
+// value: slot no call fills, a gesture done or of unknown outcome.
 export const OWN_STATE_WORDS = {
     connecting: 'connecting',
     done: 'done',
@@ -35,6 +35,7 @@ export const OWN_STATE_WORDS = {
     'not-started': 'not started',
     'not-wired': 'not wired',
     reading: 'reading',
+    stale: 'not refreshed',
     unknown: 'unknown',
     untyped: 'error',
     'window-error': 'error',

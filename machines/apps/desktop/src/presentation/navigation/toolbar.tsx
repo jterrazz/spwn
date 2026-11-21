@@ -18,6 +18,7 @@ export type ToolbarProps = {
     onForward: () => void;
     onToggleSidebar: () => void;
     action?: ToolbarAction | undefined;
+    mark?: ReactNode;
     sidebar?: boolean;
 };
 
@@ -29,6 +30,7 @@ export function Toolbar({
     onForward,
     onToggleSidebar,
     action,
+    mark,
     sidebar = true,
 }: ToolbarProps) {
     const last = crumbs.at(-1);
@@ -63,6 +65,7 @@ export function Toolbar({
                 ))}
                 <b>{last?.shown ?? last?.label}</b>
             </div>
+            {mark}
             {action === undefined ? null : (
                 <Button onClick={action.onClick} variant={action.leads ? 'primary' : 'plain'}>
                     {action.label}
