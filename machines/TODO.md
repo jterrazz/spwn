@@ -4,9 +4,11 @@ Decided with the owner and left for later, each with what starts it.
 
 ## Station becomes Machines, past the display name
 The owner's ask (2026-11-20): rename station to machines everywhere, now
-that Machines is the app's name. The display name ("Station" in the UI, the
-docs and the site) changes first; what goes past it waits for one design
-talk with the owner on what it does to the commands.
+that Machines is the app's name. The display name landed in v0.21.0-alpha.2
+(the UI, the manual and the site say Machines; the window stays "Spwn", the
+owner, 2026-11-20). What goes past it waits for one design talk with the
+owner on what it does to the commands, which he holds in another session
+(the command vision, 2026-11-21).
 
 - **The command grammar**: today `station machines start linux-2`. A binary
   named `machines` reads `machines machines start linux-2`, so the rename
@@ -14,17 +16,28 @@ talk with the owner on what it does to the commands.
   `machines create qa`, and what bare `machines` shows, the fleet or this
   Mac), or one umbrella command (`spwn machines start linux-2`,
   `spwn agents ...`). Either one rewrites the CLI goldens and `words.json`.
+  The proposal sent to the owner (2026-11-21) is the umbrella, a flat
+  `spwn <noun> <verb>`, with six questions he has not answered yet.
+- **What the talk decides for one bundle** ("One Spwn on a Mac", below):
+  whether Spwn.app holds one CLI binary or two, the names of the
+  `~/.local/bin` links, the launchd label prefix and the nested menu bar's
+  bundle id. None of them changes a Login Items or Local Network row there.
 - **The identities**, in the same breaking version: the state, config, data
   and cache folders (`station/`), the launchd labels
   (`com.jterrazz.station.*`), the menu bar's bundle id, the Keychain
   service, the schema ids (`station.*/v1`), the `STATION_*` variables, the
-  hello, the zsh and hosts block markers, the release assets and the Go
-  module path. No compat code: an installed host takes one written
-  migration (stop the old launchd jobs, move the folders, re-add the Keychain
-  items, re-tag the guests), proved on a VM before it is handed over.
-- **Starts** after the joint publication, never mid-programme: without the
-  migration the new engine orphans every existing VM, the development VMs
-  included.
+  hello, the zsh and hosts block markers, the release assets (`Station.app`
+  and `Station.app.zip`, the one `Station` the retired-word guard still
+  allows, `specs/architecture/banned_test.go:70`) and the Go module path. No
+  compat code: an installed host takes one written migration (stop the old
+  launchd jobs, move the folders, re-add the Keychain items, re-tag the
+  guests), proved on a VM before it is handed over.
+- **How it lands**: three to five large commits, each a lot tip with
+  `make lint` and then the full gate, the `go.mod` commit first, the
+  window's recordings recorded once at the end, never a regeneration per
+  commit (the runs audit of 2026-11-20).
+- **Starts** after the owner's command talk: without the migration the new
+  engine orphans every existing VM, the development VMs included.
 
 ## The history rewrite: the old goldens leave the repository
 The owner's call (2026-11-20): after the joint publication of v0.21.0-alpha.2,
