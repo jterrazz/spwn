@@ -209,6 +209,22 @@ The panel's own colour moves between runs (the dark wall's reading went from 4.2
 
 The footprint test: the home is listed (depth 4) before the first step and after every step, and every new path must be one a Disk row holds (`station disk --json`) or [Footprint](../reference/footprint.md) declares, a home-root exception of Footprint, a path the OS writes itself (`specs/machine/<kind>/os-noise.txt`, never an app's), or one the suite's own native commands put where their user asked (`specs/machine/suite-made.txt`: `uv tool install` links into `~/.local/bin`). An unmatched path fails the suite, named with the step that made it. `station disk free` must leave every Can rebuild row empty and every Your data row untouched, and `station disk erase go --confirm=go`, on a fresh clone of the macOS VM, must take only go's data.
 
+## The gate scripts
+
+The scripts that prove a change on the shared Linux VM live in `scripts/gates/` at the repository root, so a session reads one folder and every machine runs the same code. [ADR-066](../decisions/066-a-commit-owes-that-it-builds-and-lints-a-lot-owes-the-gate.md) sets the two tiers and [ADR-067](../decisions/067-one-train-appended-by-makers-proved-at-its-tip.md) the train; these are the commands that run them.
+
+| Script                                                  | Runs                                                                                                                                                                                        |
+| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `cc.sh <worktree> <base> <label>`                       | The per-commit loop over `base..HEAD`: `CHEAP=1` is the cheap tier (gofmt, vet, golangci, `make lint`, the world build), without it the heavy tier. It prints one `VERDICT` line per commit |
+| `cold-gate.sh <worktree> <branch> <label>`              | One cold `make check` of a tip in a fresh clone, holding the VM exclusive; given the repository root it enters `machines/` itself                                                           |
+| `desktop-proof.sh`, `regen.sh`, `fold.sh`, `ratchet.sh` | The desktop proofs of a tip, the forced regeneration of the generated worlds and its fold into a rebase, and the pixel-golden byte count per commit                                         |
+| `tip-mac.sh`, `darwin-build.sh`                         | The Mac proofs of a tip: the menu bar check, then the darwin build in a tart VM, each through the gate slot                                                                                 |
+| `gate-slot.sh <command>`                                | The one workstation-wide slot a full gate takes, by priority                                                                                                                                |
+
+A run writes its logs, end files and locks under `GATE_RUN_DIR` (default `.artifacts/gates/`), reaches the VM named by `GATE_VM_LINUX` (default `development-linux`) and keeps its files in `~/$GATE_VM_DIR` there (default `spwn-gates`); the VM's homes, its heavy-run lock and its ports are the estate's development-VM page. Each launcher starts its work on the VM under `setsid` and waits on an end file, so a killed shell never kills a run.
+
+The slot serves `GATE_SLOT_PRIORITY=landing` first (a gate that lands work on the train), then `normal`, then `low` (a bench, a capture, a rig run); a waiter never takes the slot while a waiter of a higher priority waits. The scripts close the lock descriptors (3 to 9) before they start a child, so a fixture server left behind by a story never holds the heavy-run lock. `scripts/gates/test.sh`, run by the root `make lint`, parses every script and proves the priority order.
+
 ## What CI runs
 
 `.github/workflows/check.yaml` calls the shared `studio-actions` check workflow on every push and every pull request to `main`; what that workflow runs against a repository's `make` targets is [The stack](../concepts/stack.md)'s. Locally the same gate is `make build` then `make check`.

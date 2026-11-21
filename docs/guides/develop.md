@@ -25,7 +25,7 @@ The `Makefile` is the single entry point for both toolchains, and CI calls its g
 
 ```bash
 make fix             # every fixer of the TypeScript toolchain
-make lint            # golangci-lint over go.work, then every gate of the TypeScript toolchain
+make lint            # golangci-lint over go.work, every gate of the TypeScript toolchain, the gate scripts' test
 make test            # every member's tests, the cli and website specifications included
 make check           # lint, test and mutation: what CI runs
 ```

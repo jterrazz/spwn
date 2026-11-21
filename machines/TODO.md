@@ -118,10 +118,9 @@ The owner's vision (accepted 2026-11-20, its five recommendations on 2026-11-21)
 
 Starts with S1 under the owner's go of 2026-11-20 for the plan after alpha.2; S2 after the ADR amendments, S6 with S2, S5's facts case once S2 lands.
 
-## The gate scripts come into the repository
-[ADR-066](docs/decisions/066-a-commit-owes-that-it-builds-and-lints-a-lot-owes-the-gate.md) and [ADR-067](docs/decisions/067-one-train-appended-by-makers-proved-at-its-tip.md) set the cheap per-commit tier, the full gate per lot tip and the train, but the scripts that run them were written in one session's scratchpad during the station programme and live in no repository: the per-commit loop (`cc-v2.sh` with its VM loop, remote and verdict table), `cold-gate.sh`, `gate-slot.sh`, `darwin-build.sh`, `desktop-proof-v2.sh` and the fold, ratchet, regen and tip drivers. They hard-code that scratchpad's path. The owner accepted on 2026-11-20 that the method leaves `/tmp`; a copy as of 2026-11-21 is kept outside every repository, in the studio-os checkout's `home/spwn/work/archive/station-programme-method-2026-11-21/` (`scripts/`, and the designs they ran under in `designs/`).
+## The train, the faster stories and the warm lanes
+[ADR-066](docs/decisions/066-a-commit-owes-that-it-builds-and-lints-a-lot-owes-the-gate.md) and [ADR-067](docs/decisions/067-one-train-appended-by-makers-proved-at-its-tip.md) set the cheap per-commit tier, the full gate per lot tip and the train. The scripts that run the tiers are in `scripts/gates/` ([Test](docs/guides/test.md), "The gate scripts"); what remains is the train's own scripts and the speed work of the runs audit, each a project of its own.
 
-- **The scripts move in** (the runs audit's L6): under `scripts/` or `specs/machine/`, parametrised by their environment, with no path under `/private/tmp`. With them: a `landing` priority in the gate slot that a bench, a capture or a rig run yields to, as studio-os's `home/_all/context/development-vm.md` proposes; a launcher that closes the heavy-run lock's descriptor (or `setsid`s) before it starts a long-lived fixture server, since three orphaned `vm-sshd` story fixtures held it and starved a cold gate for 70 min (2026-11-21); and the cold gate taking the `machines/` folder. Proof: every script runs from a fresh session with no scratchpad.
 - **The train in scripts** (L5): `train append`, `prove` and `bisect`, the integrator's state two refs. Proof: the next lots land through it, and a staged red is bisected to its lot in four runs.
 - **Stories wait on the world, not on real time** (T4): the 22 documents with a pause of 1 s or more, then the `/bin/sleep 0.1` socket polls of `specs/cli/engine`; 47 documents of 3 s or more were 329 s of 1,106 s of test time. Proof: each golden unchanged byte for byte, 100 runs beside two lanes.
 - **Warm lanes** (T5, its ADR still to write): worktrees at fixed paths on the VM, a bare mirror, `git checkout --detach <sha>` and a clean that keeps `.artifacts/` and `node_modules`, so the recorder's key, turbo and Go's caches hit; the cold gate stays a fresh clone. Proof: a docs-only commit in a lane prints the recorder's "skipped, key" and turbo's "cached".
@@ -129,7 +128,7 @@ Starts with S1 under the owner's go of 2026-11-20 for the plan after alpha.2; S2
 - **Pre-warmed tart images** (T8) for the darwin build and `menubar-check`: the base carries the pinned Go, a module and build cache and the SwiftPM scratch folder of a recent main. HYPOTHESIS (2026-11-20): darwin from 83 s to about 35 s, the menu bar check from 190 s to about 60 s; timestamps per step before and after settle it. The release workflow keeps building cold.
 - **A third story slot** (L7): three slots and eight workers measured at an exclusive gate. Its precondition, the recorder's determinism, was met on 2026-11-21 (20 forced records at load 37 to 40, one hash).
 
-Starts with the script move, in any session, then the train scripts; T4 to T8 and L7 after.
+Starts with the train scripts; T4 to T8 and L7 after.
 
 ## The old goldens' last copies on GitHub
 The history rewrite (S5) ran on 2026-11-21: `main` is `e82228f9d`, both
