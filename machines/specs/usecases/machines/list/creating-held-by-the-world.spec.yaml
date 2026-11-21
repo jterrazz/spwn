@@ -1,4 +1,4 @@
-description: 'a create the world file holds at its boot reads boot 2 of 4 at every read, and the hold stays'
+description: 'a create held at its boot reads boot 2 of 4, and the world file lists the hold as reached'
 fixture:
     - ../../../__fixtures__/terminal/
 env:
@@ -14,6 +14,7 @@ runs:
           run "$STATION" machines | /usr/bin/grep linux-2 >seen
           run "$STATION" machines --json | /usr/bin/jq -c '[.macs[].vms[] | select(.name == "linux-2") | {state, birth}]' >>seen
           run "$STATION" machines | /usr/bin/grep linux-2 >>seen
+          run /usr/bin/jq -c '.held' world.json >>seen
           send \x03
           scrollback
       exit: 130
@@ -28,7 +29,8 @@ runs:
           	linux-2	Workspace	mac-mini	Creating · ephemeral	4 CPU	4 GB	boot 2 of 4
           [{"state":"creating","birth":{"progress":400,"step":"booting"}}]
           	linux-2	Workspace	mac-mini	Creating · ephemeral	4 CPU	4 GB	boot 2 of 4
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.script'' world.json'
+          [{"call":"Hypervisor.Boot","hold":true,"mac":"mac-mini","vm":"linux-2"}]
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.script, .held]'' world.json'
       exit: 0
       stdout: |
-          [{"call":"Hypervisor.Boot","hold":true,"mac":"mac-mini","vm":"linux-2"}]
+          [[{"call":"Hypervisor.Boot","hold":true,"mac":"mac-mini","vm":"linux-2"}],[{"call":"Hypervisor.Boot","hold":true,"mac":"mac-mini","vm":"linux-2"}]]

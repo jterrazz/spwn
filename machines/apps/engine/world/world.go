@@ -49,6 +49,9 @@ type World struct {
 	Registry map[string]string `json:"registry,omitempty"`
 	// value: the failures injected into the fakes, in the order scripted.
 	Script []Fault `json:"script,omitempty"`
+	// value: the holds declared for a VM whose call waits now: written with
+	// the world its held call lets go of, gone once that call goes on.
+	Held []Fault `json:"held,omitempty"`
 	// value: every command station asked a Mac of the world to run as root,
 	// each refused (SC-03: station never runs sudo).
 	AsRoot []string `json:"as_root,omitempty"`
@@ -645,6 +648,21 @@ func (w *World) Unhold(mac, vm string) {
 	w.Script = slices.DeleteFunc(w.Script, func(f Fault) bool {
 		return f.Hold && (mac == "" || f.Mac == mac && f.VM == vm)
 	})
+}
+
+func (w *World) Reach(f Fault) {
+	// value: f, a hold declared for a VM, is reached: its call waits now.
+	w.Held = append(w.Held, f)
+}
+
+func (w *World) Leave(f Fault) {
+	// value: the call f held goes on: it waits no more.
+	if i := slices.Index(w.Held, f); i >= 0 {
+		w.Held = slices.Delete(w.Held, i, i+1)
+	}
+	if len(w.Held) == 0 {
+		w.Held = nil
+	}
 }
 
 func (w *World) Pause() {

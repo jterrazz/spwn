@@ -13,9 +13,10 @@ world's spec alone makes it) and records again the worlds its specs use.
 A gesture of GESTURES is recorded in a fresh world of its own: the gesture, then every read of that world asked
 again in the same door, one after the other, with the reads of a machine the gesture created, and written to
 <world>/gestures/<call>.json with the reads whose answer it changed; the replay transport plays it, then answers
-those reads as they were after it. The reads a gesture names `during` are asked in that door once its first frame is
-in, while it runs, and written under `during` as they answered; the replay answers them so while it plays the
-gesture (scripts/door.py, `ask`).
+those reads as they were after it. The reads a gesture names `during` are asked in that door while it runs, once its
+first frame is in and every hold the world declares for a VM is reached (door.py, `reached`), so they read the world
+where the hold keeps it however loaded the run; they are written under `during` as they answered, and the replay
+answers them so while it plays the gesture (scripts/door.py, `ask`).
 
 One path records every world, one world or one call: a world is always asked whole, and `--call=<call>` writes only
 that call's files, <world>/<call>.json and <world>/gestures/<call>.json, in the worlds named or every one. A world
@@ -437,14 +438,22 @@ def gesture(world, seed, fixture, request, reads, before):
     its settled answer, the one a window shows once it has read again. A read the world did not ask before, of a
     machine the gesture made, is kept whatever it answers. A gesture `following` another is made once that one is,
     in the same world, and judged against what the reads answer then. The reads it names `during` are asked once its
-    first frame is in, while it still runs, and kept as it answers them, changed or not."""
+    first frame is in and every hold the world declares for a VM is reached, while it still runs, and kept as it
+    answers them, changed or not."""
     door = Door(seed, fixture)
     following, during = request.get("following"), request.get("during", [])
     request = {key: value for key, value in request.items() if key not in ("following", "during")}
     if following:
         door.ask([following])
         before = based(door, world, reads, before)
-    [answers, *heard] = door.ask([request], lambda count: during if count == 1 else [])
+
+    def asked_while(count):
+        if count != 1 or not during:
+            return []
+        door.reached()
+        return during
+
+    [answers, *heard] = door.ask([request], asked_while)
     running = [{"request": read, "answers": kept(read, frames)} for read, frames in zip(during, heard)]
     [listed] = door.ask([MACHINES])
     born = [read for read in asked_in(world, listed) if keyOf(read) not in before]

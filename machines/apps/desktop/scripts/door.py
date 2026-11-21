@@ -10,6 +10,7 @@ import shutil
 import subprocess
 import sys
 import threading
+import time
 
 from world import sandbox
 
@@ -138,6 +139,25 @@ class Door:
             self.close()
             sys.exit(f"{len(ended)} of {len(ids)} requests answered")
         return [answers[id] for id in ids]
+
+    def reached(self):
+        """Returns once every hold the world declares for a VM is reached, its call waiting: the world file lists it
+        under `held`, written as that call lets the world go, so a read asked then reads the world where the hold
+        keeps it, however loaded the run. With no such hold it returns at once; one not reached after WHOLE * QUIET
+        seconds stops the run."""
+        world = self.home / "world.json"
+        for _ in range(WHOLE * QUIET * 50):
+            try:
+                kept = json.loads(world.read_text())
+            except ValueError:
+                kept = None
+            if kept is not None:
+                declared = [fault for fault in kept.get("script") or [] if fault.get("hold") and fault.get("vm")]
+                if all(fault in (kept.get("held") or []) for fault in declared):
+                    return
+            time.sleep(0.02)
+        self.close()
+        sys.exit(f"a hold of the world was not reached after {WHOLE * QUIET} s")
 
     def unhold(self):
         """Lets go of every hold of the world, so a gesture the world holds goes on to its end once its `during`

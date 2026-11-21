@@ -276,8 +276,13 @@ func folders(mounts []machines.Mount) []string {
 // a hold the world declares for its VM also ends at a world unhold, and the
 // call goes on as if never held.
 func (h *Hypervisor) held(ctx context.Context, method, vm string) error {
-	if !h.w.Keeps(method, h.mac, vm) && !h.w.Holds(method) {
+	kept := h.w.Keeps(method, h.mac, vm)
+	if !kept && !h.w.Holds(method) {
 		return nil
+	}
+	reached := world.Fault{Call: method, Hold: true, Mac: h.mac, VM: vm}
+	if kept {
+		h.w.Reach(reached)
 	}
 	h.w.Pause()
 	unheld := h.w.Unheld(ctx, method, h.mac, vm)
@@ -285,10 +290,12 @@ func (h *Hypervisor) held(ctx context.Context, method, vm string) error {
 	select {
 	case <-ctx.Done():
 		h.w.Lock()
+		h.w.Leave(reached)
 		return ctx.Err()
 	case <-unheld:
 		h.w.Lock()
 		h.w.Unhold(h.mac, vm)
+		h.w.Leave(reached)
 		return nil
 	}
 }
