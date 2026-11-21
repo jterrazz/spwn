@@ -1,6 +1,6 @@
 # ADR-071: The window mirrors engine-kept state, never blank
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-11-21
 
 This record decides the client half. The engine half stands on ADR-070, "The engine keeps one read model"; the `state.watch` stream that would carry its kept snapshots to the window is decided later, by its own record.
