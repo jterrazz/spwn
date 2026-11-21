@@ -28,10 +28,11 @@ generate: ## Run every //go:generate directive (refreshes the embedded catalog)
 fix: ## Repair what a fixer can: every fixer of the TypeScript toolchain
 	pnpm run lint:fix
 
-lint: ## golangci-lint across go.work, then every gate of the TypeScript toolchain
+lint: ## golangci-lint across go.work, every gate of the TypeScript toolchain, then the gate scripts' own test
 	@$(GOLANGCI) --version 2>/dev/null | grep -q "$(GOLANGCI_VERSION:v%=%)" || \
 		go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GOLANGCI_VERSION)
 	@$(TURBO) run lint --filter='!go-workspace'
+	@scripts/gates/test.sh
 
 test: build test-image ## Go unit tests, the web and gate module tests, the cli and website specs
 	@$(TURBO) run test --filter='!go-workspace'
