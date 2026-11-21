@@ -6,6 +6,7 @@ import { website } from '../website.specification.js';
 const sidebar = navigation('Sidebar');
 const ROW = button('v0.22.0 available Update');
 const BEHIND = heading('Spwn v0.22.0 is out.');
+const ENGINE_LINE = button('Engine running · v4.0.0');
 
 describe('engine', () => {
     test('U1 a Mac behind the release shows the row at the sidebar foot, and it opens the Engine page', async () => {
@@ -22,13 +23,14 @@ describe('engine', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test('U2 a Mac not behind shows no row, and its Engine page says what the engine says', async () => {
+    test("U2 a Mac not behind shows no row, and the foot's Engine line opens a page that says what the engine says", async () => {
         // Given - the proof build over an engine whose reading is not behind
-        const result = await website.visit('/?world=stories&page=engine', async (visitor) => {
-            // When - the page has read the release
-            await visitor.see(heading('The latest release is not known yet.'));
+        const result = await website.visit('/?world=stories&page=home', async (visitor) => {
+            // When - the sidebar foot's Engine line is pressed
+            await visitor.click(within(sidebar, ENGINE_LINE));
 
-            // Then - when it last checked, and no Update row at the foot
+            // Then - the Engine page, when it last checked, and no Update row at the foot
+            await visitor.see(heading('The latest release is not known yet.'));
             await visitor.see(content('Latest release'));
             await visitor.see(button('Check now'));
         });

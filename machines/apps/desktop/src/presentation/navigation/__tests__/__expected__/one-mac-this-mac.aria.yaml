@@ -15,8 +15,7 @@
     - button "Skills 0"
     - button "Settings 0"
   - button "Storage"
-  - img "running"
-  - text: Engine running · dev
+  - button "Engine running · dev"
 - main:
   - button "Show or hide the sidebar"
   - button "Back" [disabled]

@@ -42,8 +42,7 @@
     - button "Skills 0"
     - button "Settings 3"
   - button "Storage"
-  - img "running"
-  - text: Engine running · v4.0.0
+  - button "Engine running · v4.0.0"
 - main:
   - button "Show or hide the sidebar"
   - button "Back" [disabled]

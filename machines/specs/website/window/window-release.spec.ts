@@ -30,9 +30,10 @@ describe('window release', () => {
     test('R2 a window current says its version, and no row at the foot', async () => {
         // Given - the proof build whose window finds nothing newer
         const result = await website.visit(
-            '/?world=stories&page=engine&window=current',
+            '/?world=stories&page=home&window=current',
             async (visitor) => {
-                // When - the page has read the engine's release
+                // When - the sidebar foot's Engine line is pressed
+                await visitor.click(within(sidebar, button('Engine running · v4.0.0')));
                 await visitor.see(heading('The latest release is not known yet.'));
 
                 // Then - the window's own line, and no offer

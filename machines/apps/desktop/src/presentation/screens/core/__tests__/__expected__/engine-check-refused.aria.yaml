@@ -28,8 +28,7 @@
     - button "Settings 3"
   - button "Storage"
   - button "v0.22.0 available Update"
-  - img "running"
-  - text: Engine running · v0.21.0
+  - button "Engine running · v0.21.0"
 - main:
   - button "Show or hide the sidebar"
   - button "Back" [disabled]

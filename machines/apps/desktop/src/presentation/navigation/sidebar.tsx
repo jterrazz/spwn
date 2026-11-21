@@ -3,6 +3,7 @@ import type { EngineReadOutput, MachinesMacView, OverviewNeed } from '@jterrazz/
 import { machineNamesOf } from '../../domain/machines/machines';
 import { needsYou } from '../../domain/overview/upkeep';
 import { SEPARATOR } from '../../domain/separator';
+import type { Tone } from '../../domain/tone';
 import { useCore, useReach } from '../dependencies/dependencies';
 import type { Reading } from '../dependencies/dependencies';
 import { identityOf, MachineIcon, NavItem, StateDot } from '../ui/index';
@@ -169,7 +170,26 @@ function Catalog({ place, carried }: { place: Place; carried: Carried }) {
     );
 }
 
-function Engine({ engine }: Pick<SidebarProps, 'engine'>) {
+type Dot = { tone: Tone; word: string };
+
+function OpensEngine({ go, dot, said }: { go: SidebarProps['go']; dot: Dot; said: string }) {
+    return (
+        <button
+            className={`${styles.foot} ${styles.opens}`}
+            onClick={() => {
+                go({ page: 'engine' });
+            }}
+            type="button"
+        >
+            <span aria-hidden="true">
+                <StateDot tone={dot.tone} word={dot.word} />
+            </span>
+            <span className={styles.footText}>{said}</span>
+        </button>
+    );
+}
+
+function Engine({ engine, go }: Pick<SidebarProps, 'engine' | 'go'>) {
     const reach = useReach();
     if (reach.kind === 'unanswered') {
         return (
@@ -189,32 +209,15 @@ function Engine({ engine }: Pick<SidebarProps, 'engine'>) {
         );
     }
     if (engine.kind === 'failed') {
-        const { tone, word } = failedState(engine.error);
-        return (
-            <div className={styles.foot}>
-                <StateDot tone={tone} word={word} />
-                <span className={styles.footText}>{engine.error.message}</span>
-            </div>
-        );
+        return <OpensEngine dot={failedState(engine.error)} go={go} said={engine.error.message} />;
     }
     if (engine.kind === 'reading') {
-        return (
-            <div className={styles.foot}>
-                <StateDot {...ownState('reading')} />
-                <span className={styles.footText}>Engine</span>
-            </div>
-        );
+        return <OpensEngine dot={ownState('reading')} go={go} said="Engine" />;
     }
     const { Version } = engine.out;
-    const { tone, word } = engineState(engine.out);
-    return (
-        <div className={styles.foot}>
-            <StateDot tone={tone} word={word} />
-            <span className={styles.footText}>
-                {Version === '' ? `Engine ${word}` : `Engine ${word}${SEPARATOR}${Version}`}
-            </span>
-        </div>
-    );
+    const dot = engineState(engine.out);
+    const said = Version === '' ? `Engine ${dot.word}` : `Engine ${dot.word}${SEPARATOR}${Version}`;
+    return <OpensEngine dot={dot} go={go} said={said} />;
 }
 
 const UNCARRIED: Carried = { apps: undefined, settings: undefined, skills: undefined };
@@ -251,7 +254,7 @@ export function Sidebar({
             </div>
             <Storage place={place} />
             {quiet ? null : <ReleaseRow go={go} />}
-            {quiet ? <QuietFoot /> : <Engine engine={engine} />}
+            {quiet ? <QuietFoot /> : <Engine engine={engine} go={go} />}
         </nav>
     );
 }
