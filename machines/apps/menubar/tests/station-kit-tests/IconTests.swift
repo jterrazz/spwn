@@ -189,6 +189,15 @@ final class IconTests: XCTestCase {
         XCTAssertEqual(older.label, "Spwn Menu: engine older than this app")
     }
 
+    // invariant: the status item is drawn again only when its icon or its
+    // spinner's turn changed.
+    func testTheStatusItemIsDrawnOnlyWhenItsIconChanges() {
+        var drawing = StatusDrawing()
+        let steps: [(MenuBarIcon, Double)] = [(MenuBarIcon(.plain), 0), (MenuBarIcon(.plain), 0), (MenuBarIcon(.plain, busy: true), 0),
+                                              (MenuBarIcon(.plain, busy: true), 0.5), (MenuBarIcon(.plain, busy: true), 0.5), (MenuBarIcon(.stopped), 0.5)]
+        XCTAssertEqual(steps.map { drawing.take($0.0, turn: $0.1) }, [true, false, true, true, false, true])
+    }
+
     // invariant: a connection being made keeps the first dot solid and the
     // two others at 32 %.
     func testIconConnecting() throws {

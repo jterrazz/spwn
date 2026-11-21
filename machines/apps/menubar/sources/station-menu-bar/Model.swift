@@ -1,15 +1,44 @@
 import AppKit
 import Foundation
+import Observation
 import StationKit
 import UserNotifications
 
+// invariant: the model is observed by slice: the engine's link, Home, the
+// page pushed over it, the live values (LiveStore) and the rest of the
+// panel's state. A reader is told only of the slices it read, and `state`,
+// the panel's whole state, writes back only the slices that changed.
 @MainActor
-final class Model: ObservableObject {
-    @Published var state = PanelState(page: nil, connection: .connecting) {
-        didSet { turner.follow(icon) }
+@Observable
+final class Model {
+    private(set) var link: Connection = .connecting
+    private(set) var home: Page?
+    private(set) var pages: Page?
+    private(set) var ui = PanelState(page: nil, connection: .connecting)
+
+    var state: PanelState {
+        get {
+            var whole = ui
+            whole.connection = link
+            whole.page = home
+            whole.pushed = pages
+            return whole
+        }
+        set {
+            if link != newValue.connection { link = newValue.connection }
+            if home != newValue.page { home = newValue.page }
+            if pages != newValue.pushed { pages = newValue.pushed }
+            var rest = newValue
+            rest.connection = .connecting
+            rest.page = nil
+            rest.pushed = nil
+            if ui != rest { ui = rest }
+            turner.follow(icon)
+        }
     }
-    @Published private(set) var turn = 0.0
-    @Published var loginItemOn = LoginItem.on
+
+    private(set) var turn = 0.0
+    var loginItemOn = LoginItem.on
 
     // value: the machines last opened, Find's Recent (SPEC B5.21): the menu
     // bar's own, in its macOS user defaults.
@@ -24,20 +53,20 @@ final class Model: ObservableObject {
     static let settle: UInt64 = 2_500_000_000
 
     let socket = EnginePath.socket()
-    private var subscription: Task<Void, Never>?
-    private var events: Task<Void, Never>?
-    private var clearing: Task<Void, Never>?
-    private var watching: Task<Void, Never>?
-    private var reviving: Task<Void, Never>?
-    private var finding: Task<Void, Never>?
-    private var asked = false
-    private(set) var navigation: Navigation!
+    @ObservationIgnored private var subscription: Task<Void, Never>?
+    @ObservationIgnored private var events: Task<Void, Never>?
+    @ObservationIgnored private var clearing: Task<Void, Never>?
+    @ObservationIgnored private var watching: Task<Void, Never>?
+    @ObservationIgnored private var reviving: Task<Void, Never>?
+    @ObservationIgnored private var finding: Task<Void, Never>?
+    @ObservationIgnored private var asked = false
+    @ObservationIgnored private(set) var navigation: Navigation!
     let live = LiveStore()
     let hud = HUDWindow()
-    private var open = false
+    @ObservationIgnored private var open = false
 
-    private var settled: Task<Void, Never>?
-    private lazy var turner = Turner { [weak self] in self?.turn = $0 }
+    @ObservationIgnored private var settled: Task<Void, Never>?
+    @ObservationIgnored private lazy var turner = Turner { [weak self] in self?.turn = $0 }
 
     init() {
         navigation = Navigation(socket: socket, window: UserDefaults.standard.string(forKey: Self.windowKey)) { [weak self] page, shown in
@@ -71,8 +100,6 @@ final class Model: ObservableObject {
         icon.busy = state.running != nil
         return icon
     }
-
-    var iconImage: NSImage { icon.nsImage(turn: turn) }
 
     func start() {
         guard subscription == nil else { return }
