@@ -12,6 +12,7 @@ import (
 	"testing/fstest"
 
 	"github.com/jterrazz/studio-station/apps/engine/background/adapter/launchd"
+	"github.com/jterrazz/studio-station/apps/engine/background/contract"
 	"github.com/jterrazz/studio-station/apps/engine/background/contract/contracttest"
 	"github.com/jterrazz/studio-station/apps/engine/platform/local"
 )
@@ -112,4 +113,35 @@ func TestJobs(t *testing.T) {
 		jobs := launchd.New(run, f, launchd.Options{Home: home, Root: "/", UID: uid})
 		return contracttest.Subject{Jobs: jobs, UID: uid, Dir: home + "/Library/LaunchAgents"}
 	})
+}
+
+func TestTheDefinitionNamesTheAppsLoginItemsShowsTheJobUnder(t *testing.T) {
+	const apps = "\t<key>AssociatedBundleIdentifiers</key>\n\t<array>\n\t\t<string>com.example.window</string>\n\t\t<string>com.example.menu</string>\n\t</array>\n"
+	for _, c := range []struct {
+		name string
+		apps []string
+		want bool
+	}{
+		{"a job of two apps", []string{"com.example.window", "com.example.menu"}, true},
+		{"a job of no app", nil, false},
+	} {
+		t.Run(c.name, func(t *testing.T) {
+			f := files{m: fstest.MapFS{}}
+			jobs := launchd.New(&launchctl{files: f}, f, launchd.Options{Home: "/Users/owner", UID: 501})
+			spec := contract.JobSpec{
+				Label: "com.example.agent", Apps: c.apps, Program: []string{"/usr/local/bin/agent"},
+				Log: "/Users/owner/agent.log", File: "/Users/owner/Library/LaunchAgents/com.example.agent.plist",
+			}
+			if _, err := jobs.Install(context.Background(), spec); err != nil {
+				t.Fatal(err)
+			}
+			body, _ := f.ReadFile(spec.File)
+			if got := strings.Contains(string(body), "\t<string>com.example.agent</string>\n"+apps+"\t<key>ProgramArguments</key>"); got != c.want {
+				t.Errorf("the apps follow the label: %v, want %v, in\n%s", got, c.want, body)
+			}
+			if !c.want && strings.Contains(string(body), "AssociatedBundleIdentifiers") {
+				t.Errorf("a job of no app names apps:\n%s", body)
+			}
+		})
+	}
 }

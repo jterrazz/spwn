@@ -155,6 +155,18 @@ func TestTheAgentsJobRunsTheAgentAtLoginAndKeepsItAlive(t *testing.T) {
 	}
 }
 
+func TestTheEnginesAndTheAgentsJobsAreShownUnderTheApps(t *testing.T) {
+	jobs := &specJobs{}
+	if _, err := installerOf("").install(context.Background(), jobs); err != nil {
+		t.Fatal(err)
+	}
+	for _, label := range []string{catalog.EngineLabel, catalog.AgentLabel} {
+		if got := strings.Join(jobs.specs[label].Apps, " "); got != "com.jterrazz.spwn com.jterrazz.station.menubar" {
+			t.Errorf("%s names the apps %q", label, got)
+		}
+	}
+}
+
 // value: a job manager that keeps every definition it is given.
 type specJobs struct {
 	installJobs

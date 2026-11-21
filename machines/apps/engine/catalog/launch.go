@@ -50,6 +50,13 @@ func AgentPlist(home string) string {
 	return agentPlist(home, AgentLabel)
 }
 
+const (
+	WindowBundle  = "com.jterrazz.spwn"
+	MenuBarBundle = "com.jterrazz.station.menubar"
+)
+
+var StationApps = []string{WindowBundle, MenuBarBundle}
+
 func agentPlist(home, label string) string {
 	return path.Join(home, "Library", "LaunchAgents", label+".plist")
 }
