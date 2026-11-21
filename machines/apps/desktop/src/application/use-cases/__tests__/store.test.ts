@@ -7,7 +7,7 @@ import { stagedReplay } from '../../../infrastructure/outbound/engine-replay/rep
 import type { Pace, Recording } from '../../../infrastructure/outbound/engine-replay/replay';
 import type { Asked } from '../entry';
 import { ReadStore } from '../store';
-import { fakeEngine, fakePresence } from './fake-engine';
+import { fakeEngine, fakePresence, HELLO } from './fake-engine';
 
 const READ = { call: 'engine.read', in: {} };
 const MACHINES = { in: {}, watch: 'machines.list' };
@@ -47,8 +47,6 @@ const MACHINES_WATCH: Asked = {
 };
 
 const KEPT_FOR = 10_000;
-
-const HELLO = { pid: 1, started_at: '2026-11-13T09:00:00Z', version: 'v1' };
 
 function engineRead(input: Record<string, never> = {}): Asked {
     return { input, kind: 'read', name: 'engine.read', target: undefined };

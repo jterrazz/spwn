@@ -8,6 +8,8 @@ import { flush, READING, stop } from './entry';
 import type { Asked, Entry, Reading } from './entry';
 import { FRESH_EVERY, Freshness, sameEngine } from './fresh';
 import type { Why } from './fresh';
+import { judged } from './reach';
+import type { Judged } from './reach';
 
 // value: `grace`, how long a request nobody holds stays open; `keptFor` and `keptAtMost`, how long and how many of the
 // value: answers nobody holds are kept after it, so a page drawn again shows its answer at once; `now`, the clock an
@@ -37,7 +39,8 @@ export function askedKey(asked: Asked): string {
 // invariant: one socket each, closed a grace after the last leaves; its answer is then kept, the request stopped,
 // invariant: until `keptFor` has passed or `keptAtMost` answers left later are kept, and a subscriber back meanwhile
 // invariant: sees it at once while it is asked again. Every entry still open is asked again when the link opens, or
-// invariant: opens on another engine (its hello's pid or start); a kept one is asked when it is held again.
+// invariant: opens on another engine (its hello's pid or start); a kept one is asked when it is held again. A link
+// invariant: judged incompatible is no open link: nothing is asked of its engine until a hello that fits.
 // invariant: An entry a component holds is asked again by `Freshness` once its answer has settled, and every ask
 // invariant: over a settled answer (the cadence's, a gesture's rereads, a relink's) is quiet: the answer stays shown,
 // invariant: and a watch's next outs are held until it ends or the next tick, so a re-ask never draws a pending
@@ -48,7 +51,7 @@ export class ReadStore {
     private readonly entries = new Map<string, Entry>();
     private readonly linkListeners = new Set<() => void>();
     private readonly freshness: Freshness;
-    private shown: Link | undefined;
+    private shown: Judged | undefined;
     private unlink: (() => void) | undefined;
 
     constructor(client: EnginePort, presence: PresencePort, timing: Partial<StoreTiming> = {}) {
@@ -61,7 +64,7 @@ export class ReadStore {
 
     readonly reading = (key: string): Reading<unknown> => this.entries.get(key)?.reading ?? READING;
 
-    readonly link = (): Link | undefined => this.shown;
+    readonly link = (): Judged | undefined => this.shown;
 
     readonly subscribe = (asked: Asked, listener: () => void): (() => void) => {
         const key = askedKey(asked);
@@ -208,8 +211,9 @@ export class ReadStore {
         }
     }
 
-    private heard(link: Link): void {
+    private heard(heard: Link): void {
         const before = this.shown;
+        const link = judged(heard);
         this.shown = link;
         for (const listener of this.linkListeners) {
             listener();

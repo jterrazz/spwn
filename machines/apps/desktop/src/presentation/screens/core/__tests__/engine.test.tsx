@@ -2,6 +2,7 @@ import { button, component, content, file, heading, navigation, within } from '@
 import { describe, expect, test } from 'vitest';
 
 import type { Link } from '../../../../application/ports/engine.port';
+import { PAGE_NEWEST } from '../../../../domain/fit';
 import { refreshRefused, updated } from '../../../../infrastructure/outbound/core-scripted/release';
 import { scriptedCore } from '../../../../infrastructure/outbound/core-scripted/scripted-core';
 import { SCRIPTS } from '../../../../infrastructure/outbound/core-scripted/scripts';
@@ -188,7 +189,13 @@ describe('EnginePage', () => {
     test('an engine older than the release calls shows no row and no release', async () => {
         // Given - an engine whose hello offers no release call
         const link: Link = {
-            hello: { calls: ['engine.read'], pid: 1, started_at: 'older', version: 'v0.20.0' },
+            hello: {
+                calls: ['engine.read'],
+                page: PAGE_NEWEST,
+                pid: 1,
+                started_at: 'older',
+                version: 'v0.20.0',
+            },
             kind: 'open',
             refused: undefined,
             socket: 'replay',

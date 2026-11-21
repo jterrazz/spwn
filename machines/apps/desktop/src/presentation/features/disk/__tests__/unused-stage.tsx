@@ -2,6 +2,7 @@ import type { Request, Target } from '@jterrazz/station-api';
 import { button, disabled, enabled, region } from '@jterrazz/test';
 
 import { pageOver } from '../../../../composition/__tests__/page-over';
+import { PAGE_NEWEST } from '../../../../domain/fit';
 import { isRecord } from '../../../../domain/request-key';
 import { documentPresence } from '../../../../infrastructure/outbound/document-presence/document-presence';
 import { Client } from '../../../../infrastructure/outbound/engine-link/client';
@@ -29,7 +30,7 @@ export const freeCaches = enabled(button('Free 34.8 GB'));
 
 export function staged(recording: Recording): Stage {
     return stagedReplay(recording, {
-        hello: { pid: 41, started_at: '2026-11-16T09:00:00Z', version: 'dev' },
+        hello: { page: PAGE_NEWEST, pid: 41, started_at: '2026-11-16T09:00:00Z', version: 'dev' },
         kind: 'open',
         refused: undefined,
         socket: 'replay',
@@ -145,7 +146,12 @@ export function withMini(recording: Recording, frees: readonly Free[]): Recordin
     return { ...recording, exchanges: [...recording.exchanges, mini] };
 }
 
-export const HELLO_AGAIN = { pid: 42, started_at: '2026-11-16T09:05:00Z', version: 'dev' };
+export const HELLO_AGAIN = {
+    page: PAGE_NEWEST,
+    pid: 42,
+    started_at: '2026-11-16T09:05:00Z',
+    version: 'dev',
+};
 
 export function sentTo(stage: Stage): readonly { names: unknown; target: Target | undefined }[] {
     return stage.asked().flatMap((request: Request) =>

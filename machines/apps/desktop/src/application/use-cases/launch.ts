@@ -4,9 +4,12 @@ import type { Reach } from './reach';
 
 export const LAUNCH_CAP = 800;
 
-// value: machines.list's first out or refusal, or no engine answering, the core's panel then being the page.
+// value: machines.list's first out or refusal, or no engine answering, the core's panel then being the page, or an
+// value: engine judged incompatible, the verdict's panel then being it.
 export function holdsData(reach: Reach, machines: Reading<unknown>): boolean {
-    return reach.kind === 'unanswered' || machines.kind !== 'reading';
+    return (
+        reach.kind === 'unanswered' || reach.kind === 'incompatible' || machines.kind !== 'reading'
+    );
 }
 
 export class Launch {

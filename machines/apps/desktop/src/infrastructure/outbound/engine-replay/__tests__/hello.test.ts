@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
+import { PAGE_NEWEST } from '../../../../domain/fit';
 import { helloOf } from '../hello';
 import type { Recording } from '../replay';
 
@@ -31,9 +32,10 @@ describe('hello', () => {
         // When - its hello is made
         const hello = helloOf(RECORDING);
 
-        // Then - both calls, sorted, under the world's station
+        // Then - both calls, sorted, under the world's station, at the page revision of its tree
         expect(hello).toStrictEqual({
             calls: ['engine.read', 'engine.stop'],
+            page: PAGE_NEWEST,
             pid: 0,
             started_at: '',
             version: 'dev',

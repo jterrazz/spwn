@@ -151,6 +151,12 @@ describe('launch', () => {
             out: {},
         } as const;
         const refused = { error: new EngineError(undefined, 'refused'), kind: 'failed' } as const;
+        const unfit = {
+            executable: undefined,
+            fit: 'engine-older',
+            kind: 'incompatible',
+            socket: 's',
+        } as const;
 
         // When - each pair is judged
         const judged = [
@@ -159,9 +165,10 @@ describe('launch', () => {
             holdsData(answering, partial),
             holdsData(answering, refused),
             holdsData(unanswered, reading),
+            holdsData(unfit, reading),
         ];
 
-        // Then - only a link still connecting or a list still unanswered holds none
-        expect(judged).toStrictEqual([false, false, true, true, true]);
+        // Then - only a link still connecting or a list still unanswered holds none; a verdict holds its panel
+        expect(judged).toStrictEqual([false, false, true, true, true, true]);
     });
 });

@@ -6,6 +6,7 @@ import { SCRIPTS } from '../../../../infrastructure/outbound/core-scripted/scrip
 import type { CoreScriptName } from '../../../../infrastructure/outbound/core-scripted/scripts';
 import { documentPresence } from '../../../../infrastructure/outbound/document-presence/document-presence';
 import { Client } from '../../../../infrastructure/outbound/engine-link/client';
+import { helloOf } from '../../../../infrastructure/outbound/engine-replay/hello';
 import { recordingsOf } from '../../../../infrastructure/outbound/engine-replay/recordings';
 import { stagedReplay } from '../../../../infrastructure/outbound/engine-replay/replay';
 import { NO_OPENER } from '../../../../infrastructure/outbound/opener-tauri/tauri-opener';
@@ -27,7 +28,12 @@ function noEngineWith(script: CoreScriptName) {
     });
     const core = scriptedCore(SCRIPTS[script], {
         onStarted: () => {
-            stage.show({ hello: undefined, kind: 'open', refused: undefined, socket: 'replay' });
+            stage.show({
+                hello: helloOf(recordingFor('two-macs')),
+                kind: 'open',
+                refused: undefined,
+                socket: 'replay',
+            });
         },
     });
     return (

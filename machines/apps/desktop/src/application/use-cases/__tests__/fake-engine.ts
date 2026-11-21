@@ -1,6 +1,7 @@
 import type { EngineHello, Request } from '@jterrazz/station-api';
 import { clock } from '@jterrazz/test';
 
+import { PAGE_NEWEST } from '../../../domain/fit';
 import { Client } from '../../../infrastructure/outbound/engine-link/client';
 import type { Receiver, Transport } from '../../../infrastructure/outbound/engine-link/transport';
 import type { Link } from '../../ports/engine.port';
@@ -11,7 +12,12 @@ import type { StoreTiming } from '../store';
 
 type Opened = { request: Request; receiver: Receiver; closed: boolean };
 
-export const HELLO: EngineHello = { pid: 1, started_at: '2026-11-13T09:00:00Z', version: 'v1' };
+export const HELLO: EngineHello = {
+    page: PAGE_NEWEST,
+    pid: 1,
+    started_at: '2026-11-13T09:00:00Z',
+    version: 'v1',
+};
 
 export const MACHINES: Asked = {
     input: {},

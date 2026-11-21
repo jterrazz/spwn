@@ -3,14 +3,7 @@ import { createContext, useContext, useEffect, useId, useMemo, useSyncExternalSt
 import type { ReactNode } from 'react';
 
 import type { CorePort } from '../../application/ports/core.port';
-import type {
-    EnginePort,
-    In,
-    Link,
-    Out,
-    ReadName,
-    WatchName,
-} from '../../application/ports/engine.port';
+import type { EnginePort, In, Out, ReadName, WatchName } from '../../application/ports/engine.port';
 import type { OpenerPort } from '../../application/ports/opener.port';
 import type { PresencePort } from '../../application/ports/presence.port';
 import type { WindowUpdatePort } from '../../application/ports/window-update.port';
@@ -21,7 +14,7 @@ import type { Asked, Reading } from '../../application/use-cases/entry';
 import { offers } from '../../application/use-cases/fresh';
 import { GestureStore } from '../../application/use-cases/gesture-store';
 import { reachOf } from '../../application/use-cases/reach';
-import type { Reach } from '../../application/use-cases/reach';
+import type { Judged, Reach } from '../../application/use-cases/reach';
 import { askedKey, ReadStore } from '../../application/use-cases/store';
 import type { StoreTiming } from '../../application/use-cases/store';
 import { UpdateFlow } from '../../application/use-cases/update-flow';
@@ -121,7 +114,7 @@ export function useReread(): (names: readonly CallName[]) => void {
     return useEngine().store.reread;
 }
 
-function useLink(): Link | undefined {
+function useLink(): Judged | undefined {
     const { store } = useEngine();
     return useSyncExternalStore(store.subscribeLink, store.link);
 }
