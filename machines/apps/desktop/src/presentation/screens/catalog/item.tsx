@@ -105,14 +105,14 @@ export function ItemPage({
     const reach = useReach();
     const apps = useWatch('apps.list', {});
     const settings = useWatch('settings.list', {});
-    if (reach.kind === 'unanswered') {
+    const needed = shelf === 'settings' ? settings : apps;
+    if (reach.kind === 'unanswered' && needed.kind !== 'read') {
         return (
             <Page>
                 <Absent reach={reach} />
             </Page>
         );
     }
-    const needed = shelf === 'settings' ? settings : apps;
     if (needed.kind !== 'read') {
         return (
             <Page>

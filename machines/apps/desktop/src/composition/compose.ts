@@ -103,9 +103,14 @@ async function composedOf({ inTauri, query }: Place): Promise<Composed> {
     const recording =
         query.get('release') === 'refused' ? release.refreshRefused(recorded) : recorded;
     const script = query.get('core');
-    return script === null
-        ? { transport: replayTransport(recording, undefined, pace) }
-        : await scriptedOf(recording, script, pace);
+    if (script !== null) {
+        return await scriptedOf(recording, script, pace);
+    }
+    if (query.get('link') === 'blip') {
+        const { blippedReplay } = await import('../infrastructure/outbound/engine-replay/blip');
+        return { transport: blippedReplay(recording, pace) };
+    }
+    return { transport: replayTransport(recording, undefined, pace) };
 }
 
 async function windowUpdateOf({ inTauri, query }: Place): Promise<undefined | WindowUpdatePort> {

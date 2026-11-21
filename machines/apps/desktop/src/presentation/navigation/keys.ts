@@ -39,12 +39,18 @@ function obey(shortcut: Shortcut, router: Router, onFind: () => void): void {
     }
 }
 
-// invariant: while a dialog is open the window's shortcuts are swallowed, so a draft in it is never unmounted.
-export function useShortcuts(router: Router, onFind: () => void, withGallery: boolean): void {
+// invariant: while a dialog is open the window's shortcuts are swallowed, so a draft in it is never unmounted; while
+// invariant: the frame holds the no-engine panel (`on` false) none of them acts.
+export function useShortcuts(
+    router: Router,
+    onFind: () => void,
+    withGallery: boolean,
+    on: boolean,
+): void {
     useEffect(() => {
         const onKey = (event: globalThis.KeyboardEvent) => {
             const shortcut = shortcutOf(event, withGallery);
-            if (shortcut === undefined) {
+            if (shortcut === undefined || !on) {
                 return;
             }
             event.preventDefault();
@@ -54,7 +60,7 @@ export function useShortcuts(router: Router, onFind: () => void, withGallery: bo
         };
         const onMouse = (event: MouseEvent) => {
             const shortcut = mouseShortcutOf(event.button);
-            if (shortcut === undefined) {
+            if (shortcut === undefined || !on) {
                 return;
             }
             event.preventDefault();
@@ -68,7 +74,7 @@ export function useShortcuts(router: Router, onFind: () => void, withGallery: bo
             globalThis.removeEventListener('keydown', onKey);
             globalThis.removeEventListener('mouseup', onMouse);
         };
-    }, [router, onFind, withGallery]);
+    }, [router, onFind, withGallery, on]);
 }
 
 export function onTabKey(event: KeyboardEvent<HTMLElement>): void {

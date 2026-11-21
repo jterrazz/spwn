@@ -13,7 +13,7 @@ What the desktop window must let its user do, page by page: one row is one scena
 | A server                 | S1 to S6                                          |
 | Library and Storage      | D1 to D38                                         |
 | The window itself        | A1 to A6                                          |
-| No engine on this Mac    | E1 to E6                                          |
+| No engine on this Mac    | E1 to E7                                          |
 | The engine's release     | U1 to U4                                          |
 | The window's release     | R1 to R7                                          |
 
@@ -202,16 +202,17 @@ A scenario is a test of `specs/website/`, a visit of the window's proof build ov
 
 ## No engine on this Mac
 
-The window opened on a Mac where no engine answers: its shell looks for the core on the disk, installs it and starts it ([ADR 058](../../docs/decisions/058-the-window-installs-and-starts-the-core-itself.md)).
+The window opened on a Mac where no engine answers: its shell looks for the core on the disk, installs it and starts it ([ADR 058](../../docs/decisions/058-the-window-installs-and-starts-the-core-itself.md)). An engine that stops answering once the window has drawn its pages is E7: the pages stay.
 
-| ID  | Scenario                              | Given                                    | When                                      | Then                                                                                                    | Mockup |
-| --- | ------------------------------------- | ---------------------------------------- | ----------------------------------------- | ------------------------------------------------------------------------------------------------------- | ------ |
-| E1  | Learn that Spwn is not on this Mac    | no engine answers and no core is on disk | I open the window                         | one panel on Home says so, what the install puts where, and the command; the sidebar's items are dimmed | yes    |
-| E2  | Install and start Spwn in two presses | no core is on disk                       | I press Install, then Start the engine    | the installer's own lines run in the well, then the start panel, then the window the engine answers     | yes    |
-| E3  | Read why an install failed            | the installer exits 1                    | I press Install                           | its last error line is the sentence, its output stays in the well, and Retry is the one bright button   | yes    |
-| E4  | Install from my own terminal          | no core is on disk                       | I choose the terminal and run the command | the page looks for station every few seconds and moves on to the start by itself                        | yes    |
-| E5  | Stop an install                       | the installer is running                 | I press Cancel                            | the installer and its children are stopped and the offer comes back                                     | yes    |
-| E6  | Start a core already installed        | a core is on disk and no engine answers  | I open the window                         | the start panel, its command, and a foot that says the engine is not started                            | yes    |
+| ID  | Scenario                              | Given                                    | When                                      | Then                                                                                                                                                         | Mockup |
+| --- | ------------------------------------- | ---------------------------------------- | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------ |
+| E1  | Learn that Spwn is not on this Mac    | no engine answers and no core is on disk | I open the window                         | one panel on Home says so, what the install puts where, and the command; the sidebar's items are dimmed                                                      | yes    |
+| E2  | Install and start Spwn in two presses | no core is on disk                       | I press Install, then Start the engine    | the installer's own lines run in the well, then the start panel, then the window the engine answers                                                          | yes    |
+| E3  | Read why an install failed            | the installer exits 1                    | I press Install                           | its last error line is the sentence, its output stays in the well, and Retry is the one bright button                                                        | yes    |
+| E4  | Install from my own terminal          | no core is on disk                       | I choose the terminal and run the command | the page looks for station every few seconds and moves on to the start by itself                                                                             | yes    |
+| E5  | Stop an install                       | the installer is running                 | I press Cancel                            | the installer and its children are stopped and the offer comes back                                                                                          | yes    |
+| E6  | Start a core already installed        | a core is on disk and no engine answers  | I open the window                         | the start panel, its command, and a foot that says the engine is not started                                                                                 | yes    |
+| E7  | Keep my page through an engine's blip | a page drawn, a sheet open on it         | the engine stops answering, then answers  | a single failed hello changes nothing; an absence the shell declares is the sidebar foot's line, and the page and its sheet stay open through it and its end | no     |
 
 ## The engine's release
 

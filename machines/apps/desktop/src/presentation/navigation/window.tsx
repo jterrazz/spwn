@@ -9,8 +9,9 @@ import type { Reading } from '../dependencies/dependencies';
 import { Screen } from '../ui/index';
 import { Boundary } from './boundary';
 import { useCarried } from './carried';
-import { crumbsOf, TITLES } from './crumbs';
+import { TITLES } from './crumbs';
 import { Find } from './find';
+import { FrameToolbar } from './frame-toolbar';
 import { onTabKey, useShortcuts } from './keys';
 import { Lost, useLost } from './lost';
 import { NoEngine, useQuiet } from './no-engine';
@@ -18,8 +19,6 @@ import { TAB_PANEL } from './route';
 import type { PlainPage, Route } from './route';
 import { RouterProvider, useRouter } from './router';
 import { Sidebar } from './sidebar';
-import { Toolbar } from './toolbar';
-import { actionOf } from './toolbar-action';
 
 import styles from './window.module.css';
 
@@ -120,8 +119,9 @@ export function useStation() {
     const macs = macsOf(machines.kind === 'read' ? machines.out : undefined);
     const needs = overview.kind === 'read' ? (overview.out.Summary.Needs ?? []) : [];
     const home: Station = { macs, overview };
-    const listed = machines.kind === 'read' && machines.done;
-    return { home, listed, macs, needs, rail: { carried, engine, macs, needs } };
+    const drawn = machines.kind === 'read';
+    const listed = drawn && machines.done;
+    return { drawn, home, listed, macs, needs, rail: { carried, engine, macs, needs } };
 }
 
 type SheetsProps = {
@@ -193,85 +193,64 @@ function useSheets() {
 
 type FrameProps = { Gallery?: ComponentType | undefined; pages: Pages };
 
-function Frame(props: FrameProps) {
-    return useQuiet() ? <Quiet pages={props.pages} /> : <Answered {...props} />;
-}
+const NOWHERE = () => undefined;
 
-const UNFOUND = () => undefined;
-
-function Quiet({ pages }: { pages: Pages }) {
-    const { route, go } = useRouter();
-    const { rail } = useStation();
-    const [sidebar, setSidebar] = useState(true);
-    const toggleSidebar = useCallback(() => {
-        setSidebar((open) => !open);
-    }, []);
-    return (
-        <NoEngine
-            Core={pages.Core}
-            onToggleSidebar={toggleSidebar}
-            sidebar={
-                sidebar ? <Sidebar {...rail} go={go} onFind={UNFOUND} quiet route={route} /> : null
-            }
-        />
-    );
-}
-
-function Answered({ Gallery, pages }: FrameProps) {
+// invariant: one tree whatever the link says, so an absence and a relink remount no page and close no sheet.
+function Frame({ Gallery, pages }: FrameProps) {
     const router = useRouter();
-    const { route, go, back, forward, canGoBack, canGoForward } = router;
-    const { home, listed, macs, needs, rail } = useStation();
+    const { route, go } = router;
+    const { drawn, home, listed, macs, needs, rail } = useStation();
+    const quiet = useQuiet(drawn);
     const { addMac, addPassword, close, find, newMachine, sheet, sidebar, toggleSidebar } =
         useSheets();
-    useShortcuts(router, find, Gallery !== undefined);
+    useShortcuts(router, find, Gallery !== undefined, !quiet);
     const { lost, dismiss } = useLost(router, macs, listed);
     const found = route.page === 'machine' ? findMachine(macs, route.machine) : undefined;
+    const area = { addMac, found, Gallery, go, home, newMachine, pages, route };
     return (
         <Screen>
             <div className={`${styles.window} ${sidebar ? '' : styles.collapsed}`}>
-                {sidebar ? <Sidebar {...rail} go={go} onFind={find} route={route} /> : null}
-                <main className={styles.main}>
-                    <Toolbar
-                        action={actionOf({
-                            addPassword,
-                            macs,
-                            newMachine: () => {
-                                newMachine();
-                            },
-                            route,
-                        })}
-                        canGoBack={canGoBack}
-                        canGoForward={canGoForward}
-                        crumbs={crumbsOf({ found, go, ItemName: pages.ItemName, route })}
-                        onBack={back}
-                        onForward={forward}
-                        onToggleSidebar={toggleSidebar}
-                        sidebar={sidebar}
-                    />
-                    {lost === undefined ? null : <Lost machine={lost} onDismiss={dismiss} />}
-                    <PageArea
-                        addMac={addMac}
-                        found={found}
-                        Gallery={Gallery}
+                {sidebar ? (
+                    <Sidebar
+                        {...rail}
                         go={go}
-                        home={home}
-                        newMachine={newMachine}
-                        pages={pages}
-                        panel
+                        onFind={quiet ? NOWHERE : find}
+                        quiet={quiet}
                         route={route}
                     />
+                ) : null}
+                <main className={styles.main}>
+                    <FrameToolbar
+                        found={found}
+                        ItemName={pages.ItemName}
+                        macs={macs}
+                        onAddPassword={addPassword}
+                        onNewMachine={() => {
+                            newMachine();
+                        }}
+                        onToggleSidebar={toggleSidebar}
+                        quiet={quiet}
+                        router={router}
+                        sidebar={sidebar}
+                    />
+                    {lost === undefined || quiet ? null : (
+                        <Lost machine={lost} onDismiss={dismiss} />
+                    )}
+                    {quiet ? <NoEngine Core={pages.Core} /> : <PageArea {...area} panel />}
                 </main>
             </div>
-            <Sheets
-                go={go}
-                macs={macs}
-                needs={needs}
-                onAddMac={addMac}
-                onClose={close}
-                pages={pages}
-                sheet={sheet}
-                withGallery={Gallery !== undefined}
-            />
+            {quiet ? null : (
+                <Sheets
+                    go={go}
+                    macs={macs}
+                    needs={needs}
+                    onAddMac={addMac}
+                    onClose={close}
+                    pages={pages}
+                    sheet={sheet}
+                    withGallery={Gallery !== undefined}
+                />
+            )}
             <pages.Confirm />
         </Screen>
     );

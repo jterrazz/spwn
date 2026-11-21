@@ -149,11 +149,10 @@ function Waiting({ reading, what }: { reading: Reading<unknown>; what: string })
 }
 
 function SettingsShelf({ open }: { open: Open }) {
-    const reach = useReach();
     const settings = useWatch('settings.list', {});
     const matrix = useRead('settings.matrix', {});
     const size = useCatalogSize();
-    if (settings.kind !== 'read' || reach.kind === 'unanswered') {
+    if (settings.kind !== 'read') {
         return (
             <Page>
                 <Waiting reading={settings} what="Settings" />
@@ -196,12 +195,11 @@ function useCatalogSize(): number | undefined {
 }
 
 function AppsShelf({ shelf, open }: { shelf: 'apps' | 'skills'; open: Open }) {
-    const reach = useReach();
     const apps = useWatch('apps.list', {});
     const matrix = useRead('apps.matrix', {});
     const size = useCatalogSize();
     const { title } = SHELVES[shelf];
-    if (apps.kind !== 'read' || reach.kind === 'unanswered') {
+    if (apps.kind !== 'read') {
         return (
             <Page>
                 <Waiting reading={apps} what={title} />

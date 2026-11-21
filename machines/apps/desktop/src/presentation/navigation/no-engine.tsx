@@ -1,19 +1,20 @@
-import { useEffect } from 'react';
-import type { ComponentType, ReactNode } from 'react';
+import { useEffect, useState } from 'react';
+import type { ComponentType } from 'react';
 
 import { useCore, useReach } from '../dependencies/dependencies';
-import { Screen } from '../ui/index';
 import { Boundary } from './boundary';
-import { TITLES } from './crumbs';
-import { Toolbar } from './toolbar';
 
 import styles from './window.module.css';
 
-const NOWHERE = () => undefined;
-
-export function useQuiet(): boolean {
+// invariant: the frame holds the no-engine panel only while the link is declared absent and it never drew the
+// invariant: engine's machines: once it has, an absence keeps every page drawn and the sidebar's foot says it.
+export function useQuiet(drawn: boolean): boolean {
     const { kind } = useReach();
     const { flow } = useCore();
+    const [shown, setShown] = useState(drawn);
+    if (drawn && !shown) {
+        setShown(true);
+    }
     useEffect(() => {
         if (kind === 'unanswered') {
             flow.enter();
@@ -21,37 +22,15 @@ export function useQuiet(): boolean {
             flow.answered();
         }
     }, [kind, flow]);
-    return kind === 'unanswered';
+    return kind === 'unanswered' && !shown && !drawn;
 }
 
-type NoEngineProps = {
-    Core: ComponentType;
-    sidebar: ReactNode;
-    onToggleSidebar: () => void;
-};
-
-export function NoEngine({ Core, sidebar, onToggleSidebar }: NoEngineProps) {
+export function NoEngine({ Core }: { Core: ComponentType }) {
     return (
-        <Screen>
-            <div className={`${styles.window} ${sidebar === null ? styles.collapsed : ''}`}>
-                {sidebar}
-                <main className={styles.main}>
-                    <Toolbar
-                        canGoBack={false}
-                        canGoForward={false}
-                        crumbs={[{ label: TITLES.home }]}
-                        onBack={NOWHERE}
-                        onForward={NOWHERE}
-                        onToggleSidebar={onToggleSidebar}
-                        sidebar={sidebar !== null}
-                    />
-                    <div className={styles.scroll}>
-                        <Boundary where="Home">
-                            <Core />
-                        </Boundary>
-                    </div>
-                </main>
-            </div>
-        </Screen>
+        <div className={styles.scroll}>
+            <Boundary where="Home">
+                <Core />
+            </Boundary>
+        </div>
     );
 }

@@ -26,7 +26,7 @@ export type HomeProps = {
 
 export function HomePage({ macs, overview, go, onNewMachine, onAddMac }: HomeProps) {
     const reach = useReach();
-    if (reach.kind === 'unanswered') {
+    if (reach.kind === 'unanswered' && overview.kind !== 'read') {
         return (
             <Page>
                 <Absent reach={reach} />

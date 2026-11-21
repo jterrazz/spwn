@@ -41,7 +41,7 @@ function CanWait({
 export function InboxPage({ macs, overview, go }: InboxProps) {
     const reach = useReach();
     const [chosen, setChosen] = useState<null | string>(null);
-    if (reach.kind === 'unanswered') {
+    if (reach.kind === 'unanswered' && overview.kind !== 'read') {
         return (
             <Page>
                 <Absent reach={reach} />

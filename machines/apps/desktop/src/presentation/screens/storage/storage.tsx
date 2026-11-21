@@ -248,7 +248,7 @@ function ChosenMac({ mac, macs, choose, go }: ChosenProps) {
 export function StoragePage({ macs, go }: { macs: readonly MachinesMacView[]; go: Go }) {
     const reach = useReach();
     const [chosen, setChosen] = useState<string | undefined>(undefined);
-    if (reach.kind === 'unanswered') {
+    if (reach.kind === 'unanswered' && macs.length === 0) {
         return (
             <Page>
                 <Absent reach={reach} />

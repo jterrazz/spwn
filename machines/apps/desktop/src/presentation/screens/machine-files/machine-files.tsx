@@ -134,7 +134,7 @@ export function MachineFilesPage({
     const explain = useRead('machinefile.explain', {});
     const files = useRead('machinefile.files', {});
     const [chosen, setChosen] = useState<string | undefined>(undefined);
-    if (reach.kind === 'unanswered') {
+    if (reach.kind === 'unanswered' && (explain.kind !== 'read' || files.kind !== 'read')) {
         return (
             <Page>
                 <Absent reach={reach} />
