@@ -16,6 +16,7 @@ import { PAGES } from '../../screens/registry';
 import { EngineProvider, useRead } from '../dependencies';
 import { useGesture } from '../use-gesture';
 import { counted } from './counted';
+import { socketEnded } from './socket-ended';
 
 const recordingFor = await recordingsOf('two-macs');
 
@@ -259,6 +260,40 @@ describe('dependencies', () => {
         // Then - the page reads as before, and no frame in between said it was reading
         expect(after).toBe(before);
         expect(drawn.filter((html) => readingsIn(html) > readingsIn(before))).toStrictEqual([]);
+    });
+
+    test('home drawn whole is never drawn reading again by a watch the engine ends by closing its connection', async () => {
+        // Given - the window on Home over two-macs, each watch ended as the engine's socket ends it, overview.read first pending
+        const stage = opened(recordingFor('two-macs'));
+        const socket = socketEnded(stage.transport);
+        const { drawn, watcher } = watched();
+        await component.render(
+            <EngineProvider
+                dependencies={{
+                    engine: new Client(socket.transport),
+                    opener: NO_OPENER,
+                    presence: documentPresence(),
+                }}
+            >
+                <Window initial={{ page: 'home' }} pages={PAGES} />
+            </EngineProvider>,
+            async (visitor) => {
+                await visitor.see(content('2 things need you.'));
+                watcher.observe(document.body, CHANGES);
+
+                // When - the client reconnects the ended watch twice, and each new stream answers pending before its whole
+                const answered = socket.answered();
+                await waitUntil(() => socket.answered() >= answered + 2, {
+                    timeout: 10_000,
+                    why: 'overview.read asked again twice, and answered whole each time',
+                });
+                watcher.disconnect();
+            },
+        );
+
+        // Then - no frame drawn since said it was reading the Mac, or dropped its Needs you
+        expect(drawn.filter((html) => html.includes('Reading macbook-pro.'))).toStrictEqual([]);
+        expect(drawn.filter((html) => !html.includes('2 things need you.'))).toStrictEqual([]);
     });
 
     test('a page once drawn is never blank again: an equal re-ask, a restart, a refusal and a revisit', async () => {

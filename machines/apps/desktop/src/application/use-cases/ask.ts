@@ -38,7 +38,9 @@ export function ask(client: EnginePort, entry: Entry): void {
         void read(client, entry, asked, current);
         return;
     }
-    const holds = reading.kind === 'read' && reading.done;
+    // invariant: a re-ask over a settled answer holds its outs; so does a watch the client reconnects over any answer
+    // invariant: shown, since its new stream starts again from its first, pending out.
+    let holds = reading.kind === 'read' && reading.done;
     let last: Heard | undefined;
     entry.watch = client.watch(
         asked.name,
@@ -58,7 +60,9 @@ export function ask(client: EnginePort, entry: Entry): void {
                 if (current()) {
                     const reconnects = error.wire === undefined;
                     entry.asking = reconnects;
-                    if (!reconnects || entry.reading.kind !== 'read') {
+                    if (reconnects && entry.reading.kind === 'read') {
+                        holds = true;
+                    } else {
                         failed(entry, error);
                     }
                 }

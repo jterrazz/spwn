@@ -124,7 +124,7 @@ export function fakePresence() {
     return { listening: () => listeners.size, presence, set };
 }
 
-export async function settled(hello: EngineHello = HELLO, timing: Partial<StoreTiming> = {}) {
+export async function unsettled(hello: EngineHello = HELLO, timing: Partial<StoreTiming> = {}) {
     const engine = fakeEngine(hello);
     const seen = fakePresence();
     const store = new ReadStore(new Client(engine.transport), seen.presence, {
@@ -137,8 +137,13 @@ export async function settled(hello: EngineHello = HELLO, timing: Partial<StoreT
         told += 1;
     });
     await clock.advance(1);
-    engine.answer('machines.list', RUNNING, DONE);
     return { engine, heard: () => told, leave, seen, store };
+}
+
+export async function settled(hello: EngineHello = HELLO, timing: Partial<StoreTiming> = {}) {
+    const asked = await unsettled(hello, timing);
+    asked.engine.answer('machines.list', RUNNING, DONE);
+    return asked;
 }
 
 export function rowsOf(reading: Reading<unknown>): readonly unknown[] {

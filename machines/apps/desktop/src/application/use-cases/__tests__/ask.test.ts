@@ -2,7 +2,7 @@ import { clock } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import type { Asked } from '../entry';
-import { DONE, EVERY, KEY, PENDING, RUNNING, settled, STOPPED } from './fake-engine';
+import { DONE, EVERY, KEY, PENDING, RUNNING, settled, STOPPED, unsettled } from './fake-engine';
 
 const ENGINE_READ: Asked = { input: {}, kind: 'read', name: 'engine.read', target: undefined };
 
@@ -64,6 +64,27 @@ describe('ask', () => {
             RUNNING.out,
             undefined,
         ]);
+    });
+
+    test('a watch whose connection ends after its answer never draws its pending outs again once reconnected', async () => {
+        // Given - machines.list asked for the first time, answered pending then running
+        using _ = clock.run('2026-11-13T10:00:00Z');
+        const { engine, store } = await unsettled();
+        engine.answer('machines.list', PENDING, RUNNING);
+
+        // When - its connection ends with no done, the client reconnects it, and the new stream answers pending first
+        engine.end('machines.list');
+        await clock.advance(1000);
+        engine.answer('machines.list', PENDING);
+        const meanwhile = store.reading(KEY);
+        engine.answer('machines.list', STOPPED, DONE);
+
+        // Then - the watch was asked twice, the second stream's pending out never shown, and its last out shown whole
+        expect(engine.asked('machines.list')).toBe(2);
+        expect(meanwhile.kind === 'read' ? meanwhile.out : undefined).toStrictEqual(RUNNING.out);
+        expect(store.reading(KEY)).toStrictEqual(
+            settledOn(new Date('2026-11-13T10:00:01.001Z'), STOPPED.out),
+        );
     });
 
     test('a refusal of the subject itself replaces the shown answer', async () => {
