@@ -170,6 +170,9 @@ export const FAILED_CREATE_WORDS = {
     none: 'The engine kept no line of its console.',
 } as const;
 
+// value: the New machine sheet's own field titles; what each field asks and refuses is the engine's.
+export const NEW_MACHINE_WORDS = { called: 'What it is called', purpose: 'Purpose' } as const;
+
 export const BATTERY_WORDS = { charging: 'charging', onBattery: 'on battery' } as const;
 
 export const MACHINE_KIND_WORDS: WordsOfAnOpenCode = {

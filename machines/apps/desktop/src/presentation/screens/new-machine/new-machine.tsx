@@ -19,6 +19,7 @@ import type { Route } from '../../navigation/route';
 import { Button, Dialog, FormField, Screen } from '../../ui/index';
 import { createRefusalPlaceOf } from '../../words/provisional';
 import type { RefusalPlace } from '../../words/provisional';
+import { NEW_MACHINE_WORDS } from '../../words/words';
 import {
     askedOf,
     chosenOnOf,
@@ -135,7 +136,7 @@ type PurposeProps = { draft: Draft; change: Change; refusal: null | ReactElement
 
 function Purpose({ draft, change, refusal }: PurposeProps) {
     return (
-        <section aria-label="Purpose" className={styles.field}>
+        <section aria-label={NEW_MACHINE_WORDS.purpose} className={styles.field}>
             <FormField
                 label="What is it for?"
                 look="boxed"
@@ -152,7 +153,7 @@ function Purpose({ draft, change, refusal }: PurposeProps) {
 
 function NameField({ answer, draft, change, refusal }: Pick<SheetProps, 'answer'> & PurposeProps) {
     return (
-        <section aria-label="What it is called" className={styles.field}>
+        <section aria-label={NEW_MACHINE_WORDS.called} className={styles.field}>
             <FormField
                 label="Name"
                 look="boxed"
