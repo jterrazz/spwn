@@ -68,6 +68,15 @@ The rules are readable without root, in `/Library/Preferences/com.apple.networke
 - **One grant across the two modes: yes, by UUID, once.** A bare binary whose Mach-O UUID equals an executable of an app LaunchServices knows was asked about under the app's name, "Allow “L0Probe”…", and that Allow set the app's rule. Whether it then reached the LAN was not read.
 - **The LAN's default gateway was reached** by an agent that had no Local Network rule at all. That was one host, read once.
 
+### What L2's smoke found
+
+Ad hoc builds of `feat/one-spwn-l1-l2`, each run on a fresh throwaway clone of development-macos (macOS 26.6.2), with the user logged in at the screen, no reboot and no logout:
+
+- **The same labels collide after B to A.** With the bundle registering `com.jterrazz.station.engine` and `.agent`, the bare jobs' labels, launchd attached both to the bare jobs' legacy Background Task Management records, whose plists the move had deleted. xpcproxy refused every spawn, "Missing container for matching BTMItem" (`EX_CONFIG`), and only a reboot cleared it.
+- **The app's own labels do not.** With `com.jterrazz.spwn.engine` and `com.jterrazz.spwn.agent` (2026-11-22), the move boots out the bare jobs and deletes their plists, and both bundled jobs run at once under `2.com.jterrazz.spwn`. The system log holds no `BTMItem` or `EX_CONFIG` line over the run. `station engine start` exits 0, "already running"; a stop then reads "stopped", and a start runs it again; a bundle replaced by the next build re-registers both jobs, which answer at its version.
+- **The bare jobs' records stay.** After the move `sfltool dumpbtm` still lists the two legacy agents, enabled and allowed, their plists gone. Nothing matches them any longer, so they are harmless. Only `sudo sfltool resetbtm` clears them, and since it resets every third-party item, it is the owner's call, never the updater's.
+- **SMAppService's status is readable from the engine's side.** The CLI, run through `~/.local/bin`, reads its jobs as registered while the engine is stopped. So mode A answers "installed" from it.
+
 ## Decision
 
 On a Mac with a screen, Spwn.app carries the engine, and install.sh stays the headless install:
@@ -85,7 +94,9 @@ On a Mac with a screen, Spwn.app carries the engine, and install.sh stays the he
     The name changes no Local Network or Login Items row: the one-row probe's nested binary was named `station` and listed as the app, by its identifier. Mode B keeps the bare `station`.
 
 - **An update restarts the agents by `unregister()` then `register()`.** `kickstart -k` is never trusted across a replaced binary.
-- **The engine judges its job by launchd.** `launchctl print gui/<uid>/<label>` is read, never `SMAppService.status`.
+- **Mode A's jobs carry the app's own labels**, `com.jterrazz.spwn.engine` and `com.jterrazz.spwn.agent` (`catalog.BundledJobs`). Mode B keeps `com.jterrazz.station.engine` and `.agent`. No Background Task Management record of a bare job can match a bundled one, so the move needs no reboot (what L2's smoke found, above). Socket paths and state folders do not change.
+- **The engine judges whether its job runs by launchd.** `launchctl print gui/<uid>/<label>` is read, never `SMAppService.status`.
+- **Whether its job is installed is one question, asked of the job manager port** (`contract.Jobs.Installed`). Mode B reads the plist in `~/Library/LaunchAgents`. Mode A reads whether the app holds the agent registered and enabled (`SMAppService.status`). Every reader that tells a stopped engine from one never installed asks it there.
 
 What this changes in earlier records:
 
@@ -98,5 +109,6 @@ What this changes in earlier records:
 - Local Network lists one row in mode A, "Spwn", asked once, as measured with ad hoc code (variant f). The engine stays launchd's, never the window's child.
 - The B to A move asks for Local Network once more, and leaves the bare "station" row. macOS 27.2's (-) button removes it, and the window's migration panel says so once.
 - Every release must keep the bundle id, which is also the nested identifier, and the team. A change of either is a new row and a new question.
+- The bare jobs' legacy Background Task Management rows outlive the move, harmless. `sudo sfltool resetbtm` is the owner's to run.
 - An agent registered with no GUI session is not running, although `status` reads `enabled`. Mode A needs a logged-in user, as mode B's `launchctl bootstrap gui/<uid>` already did.
 - Before L3 lands, L2 owes one proof with two Developer-ID builds (a `workflow_dispatch` on main) on the Mac mini: Local Network shows ONE row named Spwn across both, an update keeps the job starting, and keeps the Local Network grant, one row named Spwn. If either fails, this record goes back to the owner before any engine code moves.
