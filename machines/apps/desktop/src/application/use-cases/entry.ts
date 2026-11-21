@@ -17,7 +17,8 @@ export type Asked =
     | { kind: 'read'; name: ReadName; input: In<ReadName>; target: Target | undefined }
     | { kind: 'watch'; name: WatchName; input: In<WatchName>; target: Target | undefined };
 
-// value: `asking` while a request is out and has not settled; `held`, a quiet re-ask's last out not shown yet.
+// value: `asking` while a request is out and has not settled; `held`, a quiet re-ask's last out not shown yet; `kept`,
+// value: past its grace with nobody holding it, its request stopped and its answer kept.
 export type Entry = {
     key: string;
     asked: Asked;
@@ -28,6 +29,7 @@ export type Entry = {
     asks: number;
     asking: boolean;
     held: undefined | { out: unknown };
+    kept: boolean;
     watch: undefined | Watch;
     grace: ReturnType<typeof setTimeout> | undefined;
 };

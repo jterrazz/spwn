@@ -7,6 +7,7 @@ import { stagedReplay } from '../../../infrastructure/outbound/engine-replay/rep
 import type { Pace, Recording } from '../../../infrastructure/outbound/engine-replay/replay';
 import type { Asked } from '../entry';
 import { ReadStore } from '../store';
+import { fakeEngine, fakePresence } from './fake-engine';
 
 const READ = { call: 'engine.read', in: {} };
 const MACHINES = { in: {}, watch: 'machines.list' };
@@ -35,6 +36,17 @@ const RESTARTED: Recording = {
 };
 
 const API_KEY = 'call engine.read {} {"name":"api","on":"mac"}';
+const READ_KEY = 'call engine.read {} {}';
+const MACHINES_KEY = 'watch machines.list {} {}';
+
+const MACHINES_WATCH: Asked = {
+    input: {},
+    kind: 'watch',
+    name: 'machines.list',
+    target: undefined,
+};
+
+const KEPT_FOR = 10_000;
 
 const HELLO = { pid: 1, started_at: '2026-11-13T09:00:00Z', version: 'v1' };
 
@@ -49,7 +61,8 @@ function staged(pace?: Pace) {
         pace,
     );
     const client = new Client(stage.transport);
-    return { client, stage, store: new ReadStore(client, documentPresence(), { grace: 500 }) };
+    const timing = { grace: 500, keptAtMost: 2, keptFor: KEPT_FOR };
+    return { client, stage, store: new ReadStore(client, documentPresence(), timing) };
 }
 
 function asked(stage: ReturnType<typeof stagedReplay>, call: string): number {
@@ -86,26 +99,82 @@ describe('store', () => {
         });
     });
 
-    test('the last subscriber leaving closes the watch after its grace, and one back within it keeps it', async () => {
-        // Given - a watch of machines.list held by one subscriber
+    test('the last subscriber leaving closes the watch after its grace, its answer kept until its time is spent', async () => {
+        // Given - a watch of machines.list held by one subscriber, streaming
         using _ = clock.run('2026-11-13T10:00:00Z');
-        const { store } = staged();
-        const watch: Asked = { input: {}, kind: 'watch', name: 'machines.list', target: undefined };
-        const leave = store.subscribe(watch, () => {});
+        const engine = fakeEngine(HELLO);
+        const store = new ReadStore(new Client(engine.transport), fakePresence().presence, {
+            grace: 500,
+            keptFor: KEPT_FOR,
+        });
+        const leave = store.subscribe(MACHINES_WATCH, () => {});
         await clock.advance(1);
-        const watching = store.reading('watch machines.list {} {}').kind;
+        engine.answer('machines.list', { out: [{ Name: 'api' }] });
 
-        // When - it leaves and comes back within the grace, then leaves for longer than it
+        // When - it leaves and comes back within the grace, leaves for longer than it, then past its keeping
         leave();
         await clock.advance(400);
-        const back = store.subscribe(watch, () => {});
-        const kept = store.reading('watch machines.list {} {}').kind;
+        const back = store.subscribe(MACHINES_WATCH, () => {});
+        const inGrace = engine.open('machines.list');
         back();
         await clock.advance(501);
+        const left = [engine.open('machines.list'), store.reading(MACHINES_KEY).kind];
+        await clock.advance(KEPT_FOR);
 
-        // Then - the answer was kept across the flap, and dropped once the grace was spent
-        expect([watching, kept]).toStrictEqual(['read', 'read']);
-        expect(store.reading('watch machines.list {} {}')).toStrictEqual({ kind: 'reading' });
+        // Then - the watch stayed open across the flap, closed after the grace with its answer kept, then forgotten
+        expect(inGrace).toBe(1);
+        expect(left).toStrictEqual([0, 'read']);
+        expect(store.reading(MACHINES_KEY)).toStrictEqual({ kind: 'reading' });
+    });
+
+    test('a read held again after its grace shows its kept answer at once, and is asked again quietly', async () => {
+        // Given - engine.read answered, then left past its grace, and the engine restarted meanwhile
+        using _ = clock.run('2026-11-13T10:00:00Z');
+        const { stage, store } = staged();
+        const leave = store.subscribe(engineRead(), () => {});
+        await clock.advance(1);
+        leave();
+        await clock.advance(501);
+        stage.restart({ ...HELLO, pid: 2 });
+        await clock.advance(1);
+        const whileKept = asked(stage, 'engine.read');
+
+        // When - a page holds it again
+        let told = 0;
+        store.subscribe(engineRead(), () => {
+            told += 1;
+        });
+        const atOnce = store.reading(READ_KEY);
+        await clock.advance(1);
+
+        // Then - the restart asked nothing kept, the answer showed at once, and its equal re-ask told no one
+        expect(whileKept).toBe(1);
+        expect(atOnce).toStrictEqual({ done: true, kind: 'read', out: { State: 'running' } });
+        expect(asked(stage, 'engine.read')).toBe(2);
+        expect(told).toBe(0);
+    });
+
+    test('the answers nobody holds are kept two at most, the one left first forgotten first', async () => {
+        // Given - three requests answered, each held by one subscriber
+        using _ = clock.run('2026-11-13T10:00:00Z');
+        const { store } = staged();
+        const leaves = [
+            engineRead(),
+            MACHINES_WATCH,
+            { ...engineRead(), target: { name: 'api', on: 'mac' } },
+        ].map((one) => store.subscribe(one, () => {}));
+        await clock.advance(1);
+
+        // When - each is left in turn, and their graces pass
+        for (const leave of leaves) {
+            leave();
+        }
+        await clock.advance(501);
+
+        // Then - the first left is forgotten, the two others are kept
+        expect(
+            [READ_KEY, MACHINES_KEY, API_KEY].map((key) => store.reading(key).kind),
+        ).toStrictEqual(['reading', 'read', 'read']);
     });
 
     test('an engine that comes back with another hello is asked every read again', async () => {

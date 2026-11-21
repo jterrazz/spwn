@@ -9,9 +9,16 @@ import type { Asked, Entry, Reading } from './entry';
 import { FRESH_EVERY, Freshness, sameEngine } from './fresh';
 import type { Why } from './fresh';
 
-export type StoreTiming = { grace: number; every: number };
+// value: `grace`, how long a request nobody holds stays open; `keptFor` and `keptAtMost`, how long and how many of the
+// value: answers nobody holds are kept after it, so a page drawn again shows its answer at once.
+export type StoreTiming = { grace: number; every: number; keptFor: number; keptAtMost: number };
 
-const DEFAULTS: StoreTiming = { every: FRESH_EVERY, grace: 1500 };
+const DEFAULTS: StoreTiming = {
+    every: FRESH_EVERY,
+    grace: 1500,
+    keptAtMost: 50,
+    keptFor: 600_000,
+};
 
 export function askedKey(asked: Asked): string {
     const verb = asked.kind === 'read' ? 'call' : 'watch';
@@ -19,8 +26,10 @@ export function askedKey(asked: Asked): string {
 }
 
 // invariant: one entry per request compared by value (its call, input and target), shared by every subscriber:
-// invariant: one socket each, the last answer kept while one remains, closed a grace after the last leaves. Every
-// invariant: entry is asked again when the link opens, or opens on another engine (its hello's pid or start).
+// invariant: one socket each, closed a grace after the last leaves; its answer is then kept, the request stopped,
+// invariant: until `keptFor` has passed or `keptAtMost` answers left later are kept, and a subscriber back meanwhile
+// invariant: sees it at once while it is asked again. Every entry still open is asked again when the link opens, or
+// invariant: opens on another engine (its hello's pid or start); a kept one is asked when it is held again.
 // invariant: An entry a component holds is asked again by `Freshness` once its answer has settled, and every ask
 // invariant: over a settled answer (the cadence's, a gesture's rereads, a relink's) is quiet: the answer stays shown,
 // invariant: and a watch's next outs are held until it ends or the next tick, so a re-ask never draws a pending
@@ -52,12 +61,18 @@ export class ReadStore {
         clearTimeout(entry.grace);
         entry.grace = undefined;
         entry.listeners.add(listener);
+        if (entry.kept) {
+            entry.kept = false;
+            if (this.shown?.kind === 'open') {
+                ask(this.client, entry);
+            }
+        }
         this.fresh();
         return () => {
             entry.listeners.delete(listener);
             if (entry.listeners.size === 0) {
                 entry.grace = setTimeout(() => {
-                    this.forget(key, entry);
+                    this.keep(key, entry);
                 }, this.timing.grace);
             }
             this.fresh();
@@ -83,7 +98,7 @@ export class ReadStore {
             return;
         }
         for (const entry of this.entries.values()) {
-            if (names.includes(entry.asked.name)) {
+            if (!entry.kept && names.includes(entry.asked.name)) {
                 ask(this.client, entry);
             }
         }
@@ -122,6 +137,7 @@ export class ReadStore {
             asks: 0,
             grace: undefined,
             held: undefined,
+            kept: false,
             key,
             listeners: new Set(),
             mark: undefined,
@@ -137,10 +153,31 @@ export class ReadStore {
         return entry;
     }
 
+    private keep(key: string, entry: Entry): void {
+        if (entry.listeners.size > 0) {
+            return;
+        }
+        stop(entry);
+        entry.kept = true;
+        this.entries.delete(key);
+        this.entries.set(key, entry);
+        entry.grace = setTimeout(() => {
+            this.forget(key, entry);
+        }, this.timing.keptFor);
+        const kept = [...this.entries].filter(([, one]) => one.kept);
+        for (const [oldest, one] of kept.slice(
+            0,
+            Math.max(0, kept.length - this.timing.keptAtMost),
+        )) {
+            this.forget(oldest, one);
+        }
+    }
+
     private forget(key: string, entry: Entry): void {
         if (entry.listeners.size > 0) {
             return;
         }
+        clearTimeout(entry.grace);
         stop(entry);
         this.entries.delete(key);
         this.release();
@@ -171,7 +208,9 @@ export class ReadStore {
         const wasOpen = before?.kind === 'open';
         if (opened && (!wasOpen || !sameEngine(before.hello, link.hello))) {
             for (const entry of this.entries.values()) {
-                ask(this.client, entry);
+                if (!entry.kept) {
+                    ask(this.client, entry);
+                }
             }
         } else if (!opened && wasOpen) {
             for (const entry of this.entries.values()) {
