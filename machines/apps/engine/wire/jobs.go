@@ -18,7 +18,7 @@ func (m machine) jobs(budget time.Duration) contract.Jobs {
 	if m.world != nil {
 		return m.world.jobs()
 	}
-	return launchd.New(m.sys.Run, m.sys.FS, launchd.Options{
+	return launchd.New(m.sys.Run, m.sys.FS, m.sys.Clock, launchd.Options{
 		Home: m.sys.Env.Home(), Root: m.systemRoot(), UID: m.sys.Env.Euid(), Budget: budget,
 	})
 }

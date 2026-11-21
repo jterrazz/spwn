@@ -442,8 +442,8 @@ case_pass
 # newer binary renamed over the one the job runs, `station engine start`: it restarts the
 # engine onto the new version and rewrites no plist. A VM's run is a child of the engine in
 # the job's process group, and a macOS guest nests no VM (kern.hv_support 0), so the run is
-# stood in for by a child of a job whose plist is the engine's own, restarted by the same
-# `launchctl kickstart -k`; a twin job whose plist lacks AbandonProcessGroup loses its child
+# stood in for by a child of a job whose plist is the engine's own, restarted the same way,
+# booted out and in; a twin job whose plist lacks AbandonProcessGroup loses its child
 # the same way, so the key is what saves the first.
 case_begin engine-restart-under-launchd ADR-060
 in_vm 'mkdir -p /tmp/station-e2e' || fail "scratch folder"
@@ -499,10 +499,10 @@ beat_kept=$(in_vm "cat /tmp/station-e2e/kept/beat.$kept_child")
 
 # value: the Update: the new binary lands as a new file renamed over the old (macOS kills a
 # signed binary rewritten in place), then the engine is started again; the stand-ins are
-# restarted the way the job manager's Restart does, `kickstart -k`.
+# restarted the way the job manager's Restart does, `launchctl bootout` then `bootstrap`.
 in_vm 'cp /tmp/station-e2e/station-swap ~/.local/bin/station.new && chmod +x ~/.local/bin/station.new && mv -f ~/.local/bin/station.new ~/.local/bin/station' || fail "rename the new binary over the old"
 for kind in kept control; do
-  in_vm "launchctl kickstart -k gui/\$(id -u)/com.jterrazz.station.stand-in-$kind" || fail "restart the $kind job"
+  in_vm "launchctl bootout gui/\$(id -u)/com.jterrazz.station.stand-in-$kind && launchctl bootstrap gui/\$(id -u) ~/Library/LaunchAgents/com.jterrazz.station.stand-in-$kind.plist" || fail "restart the $kind job"
 done
 started=$(in_vm "$station engine start 2>&1")
 say "$(sed 's/^/   engine start: /' <<< "$started")"

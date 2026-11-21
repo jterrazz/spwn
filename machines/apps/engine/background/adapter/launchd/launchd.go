@@ -39,16 +39,21 @@ type Files interface {
 	ReadDir(path string) ([]fs.DirEntry, error)
 }
 
+type Clock interface {
+	Sleep(ctx context.Context, d time.Duration) error
+}
+
 type Jobs struct {
 	run   Runner
 	files Files
+	clock Clock
 	o     Options
 }
 
 var _ contract.Jobs = (*Jobs)(nil)
 
-func New(run Runner, files Files, o Options) *Jobs {
-	return &Jobs{run: run, files: files, o: o}
+func New(run Runner, files Files, clock Clock, o Options) *Jobs {
+	return &Jobs{run: run, files: files, clock: clock, o: o}
 }
 
 func (j *Jobs) Present() bool {
@@ -165,8 +170,34 @@ func (j *Jobs) Start(ctx context.Context, r contract.Ref) error {
 }
 
 func (j *Jobs) Restart(ctx context.Context, r contract.Ref) error {
-	return j.must(ctx, r, "kickstart", "-k", target(r))
+	// outside: `kickstart -k` restarts a job on the definition and the code
+	// requirement launchd recorded when it was loaded: it reads no changed plist,
+	// and a job loaded at login refuses a binary signed by another identity until
+	// it is loaded again (OS_REASON_CODESIGNING). So a restart boots the job out
+	// and in.
+	if err := j.Stop(ctx, r); err != nil && j.Read(ctx, r).Loaded {
+		return err
+	}
+	for wait := 0; j.Read(ctx, r).Loaded; wait++ {
+		if wait == unloadPolls {
+			break
+		}
+		if err := j.clock.Sleep(ctx, unloadPoll); err != nil {
+			return err
+		}
+	}
+	if err := j.Load(ctx, r); err != nil {
+		return err
+	}
+	return j.Start(ctx, r)
 }
+
+// value: how long a restart waits for launchd to unload the job it booted
+// out before it loads it again.
+const (
+	unloadPoll  = 100 * time.Millisecond
+	unloadPolls = 50
+)
 
 func (j *Jobs) Stop(ctx context.Context, r contract.Ref) error {
 	return j.must(ctx, r, "bootout", target(r))

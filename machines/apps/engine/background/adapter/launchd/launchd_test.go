@@ -15,6 +15,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/background/contract"
 	"github.com/jterrazz/studio-station/apps/engine/background/contract/contracttest"
 	"github.com/jterrazz/studio-station/apps/engine/platform/local"
+	"github.com/jterrazz/studio-station/apps/engine/platform/local/localtest"
 )
 
 type files struct{ m fstest.MapFS }
@@ -49,12 +50,17 @@ type launchctl struct {
 	files   files
 	loaded  map[string]bool
 	running map[string]bool
+	// value: every command line but the reads, in order.
+	calls []string
 }
 
 func (l *launchctl) LookPath(name string) (string, bool) { return "/bin/" + name, name == "launchctl" }
 
 func (l *launchctl) Output(_ context.Context, c local.Cmd) (local.Output, error) {
 	a := c.Args
+	if a[0] != "print" && a[0] != "list" && a[0] != "print-disabled" {
+		l.calls = append(l.calls, strings.Join(a, " "))
+	}
 	label := func(target string) string { return target[strings.LastIndex(target, "/")+1:] }
 	switch {
 	case len(a) == 1 && a[0] == "list":
@@ -110,7 +116,7 @@ func TestJobs(t *testing.T) {
 		const home, uid = "/Users/owner", 501
 		f := files{m: fstest.MapFS{}}
 		run := &launchctl{files: f, loaded: map[string]bool{}, running: map[string]bool{}}
-		jobs := launchd.New(run, f, launchd.Options{Home: home, Root: "/", UID: uid})
+		jobs := launchd.New(run, f, &localtest.Clock{}, launchd.Options{Home: home, Root: "/", UID: uid})
 		return contracttest.Subject{Jobs: jobs, UID: uid, Dir: home + "/Library/LaunchAgents"}
 	})
 }
@@ -127,7 +133,7 @@ func TestTheDefinitionNamesTheAppsLoginItemsShowsTheJobUnder(t *testing.T) {
 	} {
 		t.Run(c.name, func(t *testing.T) {
 			f := files{m: fstest.MapFS{}}
-			jobs := launchd.New(&launchctl{files: f}, f, launchd.Options{Home: "/Users/owner", UID: 501})
+			jobs := launchd.New(&launchctl{files: f}, f, &localtest.Clock{}, launchd.Options{Home: "/Users/owner", UID: 501})
 			spec := contract.JobSpec{
 				Label: "com.example.agent", Apps: c.apps, Program: []string{"/usr/local/bin/agent"},
 				Log: "/Users/owner/agent.log", File: "/Users/owner/Library/LaunchAgents/com.example.agent.plist",
@@ -143,5 +149,33 @@ func TestTheDefinitionNamesTheAppsLoginItemsShowsTheJobUnder(t *testing.T) {
 				t.Errorf("a job of no app names apps:\n%s", body)
 			}
 		})
+	}
+}
+
+func TestARestartLoadsTheJobAgainSoLaunchdReadsItsDefinitionAndItsBinaryAfresh(t *testing.T) {
+	f := files{m: fstest.MapFS{}}
+	run := &launchctl{files: f, loaded: map[string]bool{}, running: map[string]bool{}}
+	jobs := launchd.New(run, f, &localtest.Clock{}, launchd.Options{Home: "/Users/owner", UID: 501})
+	spec := contract.JobSpec{Label: "com.example.agent", Program: []string{"/usr/local/bin/agent"}, Log: "/Users/owner/agent.log", File: "/Users/owner/Library/LaunchAgents/com.example.agent.plist"}
+	ref := contract.Ref{Domain: contract.Domain{UID: 501}, Label: spec.Label, File: spec.File}
+	ctx := context.Background()
+	if _, err := jobs.Install(ctx, spec); err != nil {
+		t.Fatal(err)
+	}
+	for _, step := range []func(context.Context, contract.Ref) error{jobs.Load, jobs.Start} {
+		if err := step(ctx, ref); err != nil {
+			t.Fatal(err)
+		}
+	}
+	run.calls = nil
+	if err := jobs.Restart(ctx, ref); err != nil {
+		t.Fatalf("Restart: %v", err)
+	}
+	want := "bootout gui/501/com.example.agent | bootstrap gui/501 " + spec.File + " | kickstart gui/501/com.example.agent"
+	if got := strings.Join(run.calls, " | "); got != want {
+		t.Errorf("a restart ran\n%s\nwant\n%s", got, want)
+	}
+	if !run.running[spec.Label] {
+		t.Error("the restarted job is not running")
 	}
 }

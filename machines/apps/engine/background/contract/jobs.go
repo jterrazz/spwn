@@ -23,6 +23,8 @@ type Jobs interface {
 	Install(ctx context.Context, j JobSpec) (changed bool, err error)
 	Load(ctx context.Context, r Ref) error
 	Start(ctx context.Context, r Ref) error
+	// invariant: the job is loaded again from its definition as written now,
+	// then started; what it started outlives it when its definition says so.
 	Restart(ctx context.Context, r Ref) error
 	Stop(ctx context.Context, r Ref) error
 	// invariant: the job is stopped whatever its state, then its definition
