@@ -20,6 +20,7 @@ SDK_PROBE    ?= xcrun --sdk macosx --show-sdk-path
 MENUBAR_HOME := $(HOME)/Applications/Station.app
 WINDOW_APP   := .artifacts/window/Spwn.app
 WINDOW_CARGO := .artifacts/window/cargo
+WINDOW_ICON  := .artifacts/window/icon
 # value: the window's version is the release's, as git describes it for the binaries and Station.app, without its v;
 # value: it is compiled into the binary, where the updater reads it, and Tauri writes the bundle's from it
 # hazard: a bare hash (a clone with no tag reachable) is no semver, and tauri build refuses it
@@ -137,6 +138,7 @@ menubar-uninstall: ## Unregister the login item, then remove ~/Applications/Stat
 	@printf "$(GREEN)●$(RESET) Removed $(MENUBAR_HOME)\n"
 
 window: node_modules/.install ## Build the window's bundle for darwin-arm64, signed ad hoc, into $(WINDOW_APP)
+	@../scripts/app-icon-compile.sh apps/desktop/src-tauri/icons/spwn.icon Spwn $(WINDOW_ICON) $(WINDOW_ICON)/Spwn.plist
 	@cd apps/desktop && CARGO_TARGET_DIR=$(CURDIR)/$(WINDOW_CARGO) npx tauri build --ci --target aarch64-apple-darwin --bundles app --config '{"version":"$(WINDOW_VERSION)"}'
 	@rm -rf $(WINDOW_APP)
 	@cp -R $(WINDOW_CARGO)/aarch64-apple-darwin/release/bundle/macos/Spwn.app $(WINDOW_APP)

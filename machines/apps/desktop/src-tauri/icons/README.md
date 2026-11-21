@@ -14,14 +14,13 @@ The Spwn mark, three dots rising on a diagonal, spans about 70 % of the tile, as
 
 ## How it ships
 
-`bundle.icon` in `../tauri.conf.json` lists the document, and Tauri's bundler compiles it with Xcode's `actool` (26 or later) into the bundle's `Assets.car`, then writes `CFBundleIconName`. When `actool` is missing or too old, Tauri logs an error and still builds, with a flat icon, so `make window` ends with `scripts/app-icon-check.sh` (at the repository's root), which fails unless the bundle names its icon and its `Assets.car` holds the light, dark and tintable renditions.
+`make window` compiles the document before it bundles: `scripts/app-icon-compile.sh` (at the repository's root, the same script Spwn Menu's build calls) runs Xcode's `actool` (26 or later) on it as `Spwn.icon`, into `.artifacts/window/icon/`, and fails unless `Assets.car`, `Spwn.icns` and the partial plist naming the icon `Spwn` are all there.
 
-## The rasters beside it
+`bundle.icon` in `../tauri.conf.json` lists those two outputs: Tauri copies the `Assets.car` into the bundle and writes `CFBundleIconName` from the icon it holds, and `Spwn.icns` becomes the fallback `CFBundleIconFile`. Tauri is never given the document itself: its own `actool` call fails inside its process with "Bad file descriptor", where the same call compiles from a shell. `make window` then ends with `scripts/app-icon-check.sh`, which fails unless the bundle names its icon and its `Assets.car` holds the light, dark and tintable renditions.
 
-`icon.icns` is the fallback `CFBundleIconFile` names, and `icon.png` is the window icon Tauri's codegen embeds, which must be a PNG. Both are `actool`'s output, never drawn by hand, and are made again whenever the document changes, on a Mac with Xcode, in a VM:
+## The raster beside it
 
-1. With `spwn.icon` copied to `<dir>/Spwn.icon` (actool names the icon for the document), `xcrun actool <dir>/Spwn.icon --compile <dir> --app-icon Spwn --include-all-app-icons --target-device mac --minimum-deployment-target 26.0 --platform macosx --output-partial-info-plist <dir>/partial.plist` writes `<dir>/Spwn.icns`, which replaces `icon.icns`.
-2. `iconutil -c iconset <dir>/Spwn.icns` unpacks it, and its largest picture, `icon_128x128@2x.png` (256 px: actool packs no larger one), replaces `icon.png`.
+`icon.png` is the window icon Tauri's codegen embeds, which must be a PNG. It is `actool`'s output, never drawn by hand, and is made again whenever the document changes, on a Mac with Xcode, in a VM: `iconutil -c iconset .artifacts/window/icon/Spwn.icns` unpacks the compiled icon after `make window`, and its largest picture, `icon_128x128@2x.png` (256 px: actool packs no larger one), replaces `icon.png`.
 
 ## How its look is proved
 

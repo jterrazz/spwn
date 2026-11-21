@@ -12,9 +12,7 @@ mkdir -p "$app/Contents/MacOS" "$app/Contents/Resources"
 cp "$bin/StationMenuBar" "$app/Contents/MacOS/StationMenuBar"
 cp "$package/resources/Info.plist" "$app/Contents/Info.plist"
 cp -R "$bin/StationMenuBar_StationKit.bundle" "$app/Contents/Resources/"
-rm -rf "$scratch/AppIcon.icon" && cp -R "$package/resources/app-icon.icon" "$scratch/AppIcon.icon"
-xcrun actool "$scratch/AppIcon.icon" --compile "$app/Contents/Resources" --app-icon AppIcon --include-all-app-icons \
-    --target-device mac --minimum-deployment-target 26.0 --platform macosx --output-partial-info-plist "$scratch/AppIcon.plist" >/dev/null
+"$root/../scripts/app-icon-compile.sh" "$package/resources/app-icon.icon" AppIcon "$app/Contents/Resources" "$scratch/AppIcon.plist"
 /usr/libexec/PlistBuddy -c "Merge $scratch/AppIcon.plist" "$app/Contents/Info.plist" >/dev/null
 version=$(git -C "$root" describe --tags --always --dirty | sed 's/^v//')
 plutil -replace CFBundleShortVersionString -string "$version" "$app/Contents/Info.plist"

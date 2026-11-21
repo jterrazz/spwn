@@ -36,7 +36,11 @@
     "bundle": {
         "active": true,
         "targets": ["app"],
-        "icon": ["icons/icon.png", "icons/icon.icns", "icons/spwn.icon"],
+        "icon": [
+            "icons/icon.png",
+            "../../../.artifacts/window/icon/Spwn.icns",
+            "../../../.artifacts/window/icon/Assets.car"
+        ],
         "macOS": { "minimumSystemVersion": "26.0" }
     },
     "plugins": {
