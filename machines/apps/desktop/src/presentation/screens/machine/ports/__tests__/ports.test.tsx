@@ -48,7 +48,7 @@ function macPortOver(port: PortsPort) {
 }
 
 describe('ports', () => {
-    test('the page keeps its height across its first answer, but for the rows the answer adds', async () => {
+    test('the page never gets shorter at its first answer, and grows by the rows the answer adds', async () => {
         // Given - macbook-pro's Ports over stories, its listing held unread
         const route = { machine: 'macbook-pro', page: 'machine', tab: 'Ports' } as const;
         const { held, stage, ui } = heldPageOver(recordingFor('stories'), route, 'ports.list');
@@ -65,9 +65,10 @@ describe('ports', () => {
             heights = [...before, heightOf('main'), panelHeight(listening)];
         });
 
-        // Then - the main region grows by what its listening panel grows, its rows past the three bones, and no more
+        // Then - the main region is no shorter, and grows by what its listening panel grows past its one bone, no more
         const [mainBefore = 0, panelBefore = 0, mainAfter = 0, panelAfter = 0] = heights;
         expect(panelBefore).toBeGreaterThan(0);
+        expect(mainAfter).toBeGreaterThanOrEqual(mainBefore);
         expect(mainAfter - mainBefore).toBe(panelAfter - panelBefore);
     });
 

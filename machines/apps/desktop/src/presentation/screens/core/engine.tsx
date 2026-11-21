@@ -121,7 +121,7 @@ function Release() {
         return (
             <Skeleton what="the latest release">
                 <VerdictSkeleton size="page" />
-                <SkeletonPanel count={1} title={ENGINE_TITLE} trail="fit" />
+                <SkeletonPanel title={ENGINE_TITLE} trail="fit" />
             </Skeleton>
         );
     }

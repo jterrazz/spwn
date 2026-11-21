@@ -43,9 +43,10 @@ export function SkeletonHead({ what, ...verdict }: SkeletonHeadProps) {
 
 const ROWS = ['first', 'second', 'third', 'fourth', 'fifth', 'sixth'] as const;
 
-export type SkeletonRowsProps = RowSkeletonProps & { count: 1 | 2 | 3 | 4 | 5 | 6 };
+export type SkeletonRowsProps = RowSkeletonProps & { count?: 1 | 2 | 3 | 4 | 5 | 6 };
 
-export function SkeletonRows({ count, ...row }: SkeletonRowsProps) {
+// invariant: one bone row unless the page knows its count, so a first answer only ever grows the page.
+export function SkeletonRows({ count = 1, ...row }: SkeletonRowsProps) {
     return ROWS.slice(0, count).map((place) => <RowSkeleton key={place} {...row} />);
 }
 

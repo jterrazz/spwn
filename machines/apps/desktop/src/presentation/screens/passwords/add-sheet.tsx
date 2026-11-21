@@ -115,7 +115,7 @@ export function AddPasswordSheet({ onClose }: { onClose: () => void }) {
         return (
             <Dialog actions={cancel} onClose={onClose} title={TITLE}>
                 <Skeleton what="the programs a password is for">
-                    <SkeletonRows count={3} lead="icon" />
+                    <SkeletonRows lead="icon" />
                 </Skeleton>
             </Dialog>
         );

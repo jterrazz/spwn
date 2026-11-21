@@ -175,7 +175,7 @@ function AwakeSheet({ found, onClose }: SheetProps) {
                 <Unanswered error={awake.error} size="panel" />
             ) : (
                 <Skeleton what="Awake">
-                    <SkeletonRows count={3} />
+                    <SkeletonRows />
                 </Skeleton>
             )}
         </Dialog>

@@ -90,7 +90,7 @@ export function StorageTab({ name, target, vm = false, go }: StorageTabProps) {
         return (
             <Page>
                 <Skeleton what={`the disk of ${name}`}>
-                    <SkeletonPanel count={3} title={TITLE} trail="fit" />
+                    <SkeletonPanel title={TITLE} trail="fit" />
                 </Skeleton>
             </Page>
         );

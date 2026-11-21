@@ -28,7 +28,7 @@ function machineOver(world: string, machine: string) {
 }
 
 describe('overview', () => {
-    test('the page keeps its height across its first answer, but for the needs it adds', async () => {
+    test('the page never gets shorter at its first answer, and grows by the needs it adds', async () => {
         // Given - macbook-pro's Overview over stories, its overview.read held unread
         const route: Route = { machine: 'macbook-pro', page: 'machine', tab: 'Overview' };
         const { held, stage, ui } = heldPageOver(recordingFor('stories'), route, 'overview.read');
@@ -45,9 +45,10 @@ describe('overview', () => {
             heights = [before, heightOf('main'), panel === 0 ? 0 : panel + gapAbove(needs)];
         });
 
-        // Then - the main region grows by the needs panel the answer adds and the gap before it, and no more
+        // Then - the main region is no shorter, and grows by the needs panel the answer adds and the gap before it
         const [before = 0, after = 0, added = 0] = heights;
         expect(before).toBeGreaterThan(0);
+        expect(after).toBeGreaterThanOrEqual(before);
         expect(after - before).toBe(added);
     });
 

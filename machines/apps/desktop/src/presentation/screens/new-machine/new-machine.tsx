@@ -260,7 +260,7 @@ export function NewMachine(props: NewMachineProps) {
                     <Unanswered error={reading.error} size="panel" />
                 ) : (
                     <Skeleton what="What a new machine can be">
-                        <SkeletonRows count={3} sentence={false} />
+                        <SkeletonRows sentence={false} />
                     </Skeleton>
                 )}
             </Dialog>

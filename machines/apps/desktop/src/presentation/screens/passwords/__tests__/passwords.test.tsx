@@ -5,6 +5,7 @@ import {
     heightOf,
     heldPageOver,
     pageOver,
+    panelHeight,
     settled,
 } from '../../../../composition/__tests__/page-over';
 import { recordingsOf } from '../../../../infrastructure/outbound/engine-replay/recordings';
@@ -33,7 +34,7 @@ describe('passwords', () => {
         await expect(result.tree).toMatch(file('./__expected__/two-macs-passwords.aria.yaml'));
     });
 
-    test('the page keeps its height across its first answer, three passwords where three bones stood', async () => {
+    test('the page never gets shorter at its first answer, three passwords where one bone stood', async () => {
         // Given - the Passwords page over two-macs, its three passwords held unread
         const { held, stage, ui } = heldPageOver(
             recordingFor('two-macs'),
@@ -43,19 +44,20 @@ describe('passwords', () => {
         let heights: number[] = [];
         await component.render(ui, async (visitor) => {
             await settled(stage);
-            const before = heightOf('main');
+            const before = [heightOf('main'), panelHeight('Passwords')];
 
             // When - vault.list answers
             held.release();
             await visitor.see(heading('Passwords on macbook-pro'));
             await settled(stage);
-            heights = [before, heightOf('main')];
+            heights = [...before, heightOf('main'), panelHeight('Passwords')];
         });
 
-        // Then - the main region stands as tall before the answer as after it
-        const [before, after] = heights;
-        expect(before).toBeGreaterThan(0);
-        expect(after).toBe(before);
+        // Then - the main region is no shorter, and grows by what its panel grows past its one bone, no more
+        const [mainBefore = 0, panelBefore = 0, mainAfter = 0, panelAfter = 0] = heights;
+        expect(panelBefore).toBeGreaterThan(0);
+        expect(mainAfter).toBeGreaterThanOrEqual(mainBefore);
+        expect(mainAfter - mainBefore).toBe(panelAfter - panelBefore);
     });
 
     test('an empty vault says so in the engine’s words', async () => {

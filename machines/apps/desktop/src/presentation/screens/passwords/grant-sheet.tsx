@@ -80,7 +80,7 @@ export function GrantSheet({ entry, onClose }: { entry: AccountsVaultEntry; onCl
             <Dialog actions={cancel} onClose={onClose} title={title}>
                 <Skeleton what={`where ${entry.Label} can go`}>
                     <div className={styles.picks}>
-                        <SkeletonRows count={3} lead="icon" />
+                        <SkeletonRows lead="icon" />
                     </div>
                 </Skeleton>
             </Dialog>

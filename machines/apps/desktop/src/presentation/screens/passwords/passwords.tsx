@@ -91,7 +91,6 @@ export function PasswordsPage({ opened, go }: { opened: string | undefined; go: 
                 <Skeleton what="the passwords of this Mac">
                     <VerdictSkeleton size="page" />
                     <SkeletonPanel
-                        count={3}
                         head={<RowHead columns={COLUMNS} lead template="passwords" />}
                         lead="icon"
                         template="passwords"

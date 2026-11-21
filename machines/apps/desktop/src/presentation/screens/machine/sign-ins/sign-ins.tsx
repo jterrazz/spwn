@@ -236,7 +236,7 @@ export function SignInsTab({ found, go }: { found: Found; go: Go }) {
             <Page>
                 <Skeleton what={`the sign-ins of ${name}`}>
                     <VerdictSkeleton line={false} size="tab" />
-                    <SkeletonPanel count={3} lead="icon" title={TITLE} trail="fit" />
+                    <SkeletonPanel lead="icon" title={TITLE} trail="fit" />
                 </Skeleton>
             </Page>
         );

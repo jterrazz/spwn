@@ -1,7 +1,7 @@
 import { component } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
-import { Tile } from '../../ui/index';
+import { Panel, Row, Tile } from '../../ui/index';
 import { Placeheld, Skeleton, SkeletonHead, SkeletonPanel, SkeletonTile } from '../skeleton';
 
 function heightOf(id: string): number {
@@ -10,10 +10,10 @@ function heightOf(id: string): number {
 
 describe('skeleton', () => {
     test('a skeleton is busy, and says the one reading sentence while its bones stay silent', async () => {
-        // Given - a page head and a panel of three rows, not answered yet
+        // Given - a page head and a panel, not answered yet
         const result = await component.render(
             <Skeleton what="the ports of macbook-pro">
-                <SkeletonPanel count={3} title="What listens on this Mac" trail="fit" />
+                <SkeletonPanel title="What listens on this Mac" trail="fit" />
             </Skeleton>,
             async () => {},
         );
@@ -21,6 +21,41 @@ describe('skeleton', () => {
         // Then - the region is busy and the tree holds the sentence alone
         expect(document.querySelector('[aria-busy="true"]')).not.toBeNull();
         expect(result.tree.text).toBe('- status: Reading the ports of macbook-pro…');
+    });
+
+    test('a panel draws one bone row, so its first answer only grows it, unless its page knows it holds more', async () => {
+        // Given - a panel left at its one row, one answered with one row, and one its page asks two rows of
+        let heights: number[] = [];
+        await component.render(
+            <div>
+                <div id="bones">
+                    <SkeletonPanel title="What listens on this Mac" trail="fit" />
+                </div>
+                <div id="answered">
+                    <Panel title="What listens on this Mac">
+                        <Row
+                            sentence="Listening on 127.0.0.1"
+                            title="node"
+                            trail="5173"
+                            trailSize="fit"
+                        />
+                    </Panel>
+                </div>
+                <div id="known">
+                    <SkeletonPanel count={2} title="What listens on this Mac" trail="fit" />
+                </div>
+            </div>,
+            async () => {
+                // When - the three are measured
+                heights = [heightOf('bones'), heightOf('answered'), heightOf('known')];
+            },
+        );
+
+        // Then - the one row's answer stands no shorter than its bones, and the panel asked two stands taller
+        const [bones = 0, answered = 0, known = 0] = heights;
+        expect(bones).toBeGreaterThan(0);
+        expect(answered).toBeGreaterThanOrEqual(bones);
+        expect(known).toBeGreaterThan(bones);
     });
 
     test('a skeleton head is busy and says what it reads', async () => {

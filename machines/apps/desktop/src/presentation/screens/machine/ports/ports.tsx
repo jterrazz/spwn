@@ -218,7 +218,6 @@ export function PortsTab({ found, go }: { found: Found; go: Go }) {
                     <VerdictSkeleton size="tab" />
                     <Alarm found={found} go={go} name={name} />
                     <SkeletonPanel
-                        count={3}
                         lead="value"
                         title={vm === undefined ? MAC_PORTS_TITLE : SHARED_TITLE}
                         trail="wide"
