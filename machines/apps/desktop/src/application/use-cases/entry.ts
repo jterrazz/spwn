@@ -5,9 +5,10 @@ import type { In, ReadName, Watch, WatchName } from '../ports/engine.port';
 import { replaceEqualDeep } from './equal';
 import type { Mark } from './marks';
 
+// value: `stale`, the error a re-ask met that could not read the answer again, the answer kept: a page draws it as a mark.
 export type Reading<T> =
     | { kind: 'failed'; error: EngineError }
-    | { kind: 'read'; out: T; done: boolean }
+    | { kind: 'read'; out: T; done: boolean; stale?: EngineError }
     | { kind: 'reading' };
 
 export const READING = { kind: 'reading' } as const;
@@ -36,7 +37,15 @@ function sharedOf(before: Reading<unknown>, next: Reading<unknown>): Reading<unk
         return next;
     }
     const out = replaceEqualDeep(before.out, next.out);
-    return out === before.out && next.done === before.done ? before : { ...next, out };
+    const same = out === before.out && next.done === before.done && next.stale === before.stale;
+    return same ? before : { ...next, out };
+}
+
+// value: the refusals that say the answer could not be read again, not what the engine answers of its subject: no
+// value: engine word (the request reached none, or its answer was lost), a far Mac that missed the ask, a call cut short.
+function unread(error: EngineError): boolean {
+    const type = error.wire?.type;
+    return error.wire === undefined || type === 'unreachable' || type === 'interrupted';
 }
 
 export function show(entry: Entry, next: Reading<unknown>): void {
@@ -51,7 +60,10 @@ export function show(entry: Entry, next: Reading<unknown>): void {
 }
 
 export function failed(entry: Entry, error: EngineError): void {
-    if (error.wire || entry.reading.kind !== 'read') {
+    const { reading } = entry;
+    if (reading.kind === 'read' && unread(error)) {
+        show(entry, { ...reading, stale: error });
+    } else {
         show(entry, { error, kind: 'failed' });
     }
 }
