@@ -102,7 +102,10 @@ func (r *Reader[App, Item, Misplaced]) Compose(ctx context.Context, elsewhere bo
 	// first value has every line pending, each answer fills its own, and the
 	// last is the whole Overview.
 	kind := r.d.Kind
-	head := overview.Head{Name: r.d.ThisMac.Hostname, Kind: kind, ThisMac: true}
+	// invariant: the head names this machine as every call does: its
+	// registered name, else its hostname lowercased.
+	registered, _ := r.d.Name.Get()
+	head := overview.Head{Name: machines.ThisMacName(registered, r.d.ThisMac.Hostname), Kind: kind, ThisMac: true}
 	self := machine.Ref{Name: head.Name}
 	if r.d.Meter != nil {
 		if sample, err := r.d.Meter.Sample(ctx); err == nil && !sample.Boot.IsZero() {

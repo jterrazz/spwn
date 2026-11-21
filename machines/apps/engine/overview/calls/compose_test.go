@@ -129,3 +129,29 @@ func TestALedgerAnOlderStationWroteIsANeedThatNamesItsFile(t *testing.T) {
 		t.Errorf("a night that cannot be asked for another reason, yet findings %+v", other)
 	}
 }
+
+type registered string
+
+func (r registered) Read(_ string, into any) error {
+	if s, ok := into.(*string); ok {
+		*s = string(r)
+	}
+	return nil
+}
+func (registered) Write(string, any) error { return nil }
+
+func TestTheOverviewsHeadNamesThisMacAsEveryCallDoes(t *testing.T) {
+	for _, c := range []struct{ registered, want string }{{"mac-studio", "mac-studio"}, {"", "reading-mac.lan"}} {
+		r := New(Deps[struct{}, struct{}, struct{}]{
+			Calls: downRouter{}, Kind: machine.Server, ThisMac: ThisMac{Hostname: "Reading-Mac.lan"},
+			Name: setupcontract.Name(registered(c.registered)), Settings: noSettings{}, Facts: noFacts{},
+		})
+		var last overview.Summary
+		for u := range r.Compose(t.Context(), false) {
+			last = u
+		}
+		if last.Head.Name != c.want {
+			t.Errorf("registered %q, hostname Reading-Mac.lan: the head names %q, want %q", c.registered, last.Head.Name, c.want)
+		}
+	}
+}
