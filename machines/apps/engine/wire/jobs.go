@@ -7,20 +7,44 @@ import (
 	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/background/adapter/launchd"
+	"github.com/jterrazz/studio-station/apps/engine/background/adapter/smappservice"
 	"github.com/jterrazz/studio-station/apps/engine/background/contract"
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
 	enginecalls "github.com/jterrazz/studio-station/apps/engine/engine/calls"
 	"github.com/jterrazz/studio-station/apps/engine/engine/process"
+	"github.com/jterrazz/studio-station/apps/engine/platform/darwin"
+	"github.com/jterrazz/studio-station/apps/engine/platform/local"
 )
 
 func (m machine) jobs(budget time.Duration) contract.Jobs {
 	if m.world != nil {
 		return m.world.jobs()
 	}
+	if m.bundle() != "" {
+		return m.bundledJobs(budget)
+	}
+	return m.bareJobs(budget)
+}
+
+func (m machine) bundledJobs(budget time.Duration) *smappservice.Jobs {
+	return smappservice.New(m.bareJobs(budget), darwin.Agents{}, m.sys.Clock)
+}
+
+func (m machine) bareJobs(budget time.Duration) contract.Jobs {
 	return launchd.New(m.sys.Run, m.sys.FS, m.sys.Clock, launchd.Options{
 		Home: m.sys.Env.Home(), Root: m.systemRoot(), UID: m.sys.Env.Euid(), Budget: budget,
 	})
+}
+
+// value: Spwn.app, when this binary is the engine it carries (ADR-073, mode
+// A), its links resolved; "" for the bare binary of a Mac without the app,
+// and in a world, whose jobs are the world's.
+func (m machine) bundle() string {
+	if m.world != nil {
+		return ""
+	}
+	return local.BundleOf(m.sys.Env.Executable(), catalog.BundledEnginePath)
 }
 
 func (m machine) engineJobRef() contract.Ref {

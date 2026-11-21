@@ -98,6 +98,7 @@ type FS interface {
 	Chmod(path string, perm fs.FileMode) error
 	Chown(path string, uid, gid int) error
 	Readlink(path string) (string, error)
+	Symlink(target, path string) error
 }
 
 type Env interface {

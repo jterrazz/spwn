@@ -25,6 +25,8 @@ func (p proc) ReadDir(name string) ([]fs.DirEntry, error) {
 
 func (proc) Readlink(string) (string, error) { return "", fs.ErrInvalid }
 
+func (proc) Symlink(string, string) error { return fs.ErrInvalid }
+
 const header = "  sl  local_address rem_address   st tx_queue rx_queue tr tm->when retrnsmt   uid  timeout inode\n"
 
 func row(local, state, inode string) string {

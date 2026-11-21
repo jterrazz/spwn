@@ -30,6 +30,8 @@ func (f *FS) ReadFile(p string) ([]byte, error) { return f.Files.ReadFile(key(p)
 
 func (f *FS) Readlink(string) (string, error) { return "", fs.ErrNotExist }
 
+func (f *FS) Symlink(string, string) error { return fs.ErrInvalid }
+
 func (f *FS) WriteFile(p string, data []byte, perm fs.FileMode) error {
 	f.Files[key(p)] = &fstest.MapFile{Data: append([]byte{}, data...), Mode: perm, ModTime: time.Unix(0, 0)}
 	return nil

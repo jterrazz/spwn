@@ -8,7 +8,9 @@ import (
 
 type identity struct{ vars map[string]string }
 
-func (i identity) Executable() string {
+func (i identity) Executable() string { return Executable() }
+
+func Executable() string {
 	path, err := os.Executable()
 	if err != nil {
 		return ""

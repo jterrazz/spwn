@@ -36,6 +36,7 @@ import (
 )
 
 func Run(args, env []string, stdin, stdout, stderr *os.File) int {
+	env = asBundledJob(args, env)
 	env = withAppBins(env, len(args) > 0 && args[0] == "guest")
 	frames, frameIn := stdout, stdin
 	var childIn io.Reader = stdin

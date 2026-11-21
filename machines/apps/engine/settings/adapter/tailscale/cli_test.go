@@ -26,6 +26,8 @@ func (m *memory) WriteFile(p string, b []byte, _ fs.FileMode) error {
 func (*memory) MkdirAll(string, fs.FileMode) error { return nil }
 func (*memory) Chmod(string, fs.FileMode) error    { return nil }
 
+func (*memory) Symlink(string, string) error { return fs.ErrInvalid }
+
 func (*memory) Readlink(p string) (string, error) {
 	return "", &fs.PathError{Op: "readlink", Path: p, Err: fs.ErrInvalid}
 }

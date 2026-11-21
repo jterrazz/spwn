@@ -1,9 +1,12 @@
 package wire
 
 import (
+	"bytes"
 	"cmp"
 	"context"
+	"encoding/json"
 	"errors"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"slices"
@@ -506,7 +509,15 @@ func startFailed(cause error) error {
 }
 
 func (i engineInstaller) install(ctx context.Context, jobs contract.Jobs) (engine.Installed, error) {
-	done, err := i.installEngine(ctx, jobs)
+	started := false
+	if bundle := i.m.bundle(); bundle != "" {
+		changed, err := i.intoTheBundle(ctx, bundle)
+		if err != nil {
+			return engine.Installed{}, startFailed(err)
+		}
+		started = changed
+	}
+	done, err := i.installEngine(ctx, jobs, started)
 	if err != nil {
 		return engine.Installed{}, err
 	}
@@ -540,7 +551,64 @@ func (i engineInstaller) installAgent(ctx context.Context, jobs contract.Jobs, e
 	return nil
 }
 
-func (i engineInstaller) installEngine(ctx context.Context, jobs contract.Jobs) (engine.Installed, error) {
+// invariant: a Mac moves from the bare jobs to the bundle's once, at the
+// bundle's first start, and keeps nothing of them: both are booted out,
+// waited out of launchd and their definitions deleted before the bundle
+// registers the same labels, and the VMs outlive the restart and are
+// adopted again (ADR-073). Then the jobs' start is recorded, and
+// ~/.local/bin/station links into the bundle; started tells whether what
+// the jobs start with changed.
+func (i engineInstaller) intoTheBundle(ctx context.Context, bundle string) (started bool, err error) {
+	bundled := i.m.bundledJobs(process.JobBudget)
+	for _, job := range []contract.Ref{i.m.agentJobRef(), i.m.engineJobRef()} {
+		if _, statErr := i.m.sys.FS.Stat(job.File); statErr != nil {
+			continue
+		}
+		if retireErr := bundled.Retire(ctx, job); retireErr != nil {
+			return false, retireErr
+		}
+	}
+	if started, err = i.writeJobStart(); err != nil {
+		return false, err
+	}
+	return started, i.linkIntoTheBundle(filepath.Join(bundle, catalog.BundledEnginePath))
+}
+
+func (i engineInstaller) writeJobStart() (bool, error) {
+	body, err := json.MarshalIndent(local.JobStart{Env: i.env(), Logs: map[string]string{
+		catalog.EngineLabel: filepath.Join(i.m.paths.State, "logs", "engine.log"),
+		catalog.AgentLabel:  filepath.Join(i.m.paths.State, "logs", "agent.log"),
+	}}, "", "  ")
+	if err != nil {
+		return false, err
+	}
+	file := catalog.JobStartPath(i.m.sys.Env.Home())
+	if current, _ := i.m.sys.FS.ReadFile(file); bytes.Equal(current, body) {
+		return false, nil
+	}
+	if err := i.m.sys.FS.MkdirAll(filepath.Dir(file), 0o700); err != nil {
+		return false, err
+	}
+	return true, i.m.sys.FS.Replace(file, body, 0o600)
+}
+
+// invariant: the CLI on the PATH is the bundle's engine through a link, so
+// the bare binary a move leaves is replaced, never kept beside it.
+func (i engineInstaller) linkIntoTheBundle(engineFile string) error {
+	link := filepath.Join(catalog.InstallDirIn(i.m.sys.Env.Home()), catalog.StationBinary)
+	if target, err := i.m.sys.FS.Readlink(link); err == nil && target == engineFile {
+		return nil
+	}
+	if err := i.m.sys.FS.Remove(link); err != nil && !errors.Is(err, fs.ErrNotExist) {
+		return err
+	}
+	if err := i.m.sys.FS.MkdirAll(filepath.Dir(link), 0o755); err != nil {
+		return err
+	}
+	return i.m.sys.FS.Symlink(engineFile, link)
+}
+
+func (i engineInstaller) installEngine(ctx context.Context, jobs contract.Jobs, started bool) (engine.Installed, error) {
 	job := i.m.engineJobRef()
 	changed, err := jobs.Install(ctx, contract.JobSpec{
 		Label: job.Label, Apps: catalog.StationApps, Program: append([]string{i.m.sys.Env.Executable()}, catalog.EngineArgs...), Env: i.env(),
@@ -549,6 +617,7 @@ func (i engineInstaller) installEngine(ctx context.Context, jobs contract.Jobs) 
 	if err != nil {
 		return engine.Installed{}, startFailed(err)
 	}
+	changed = changed || started
 	if !jobs.Read(ctx, job).Loaded {
 		for _, run := range []func(context.Context, contract.Ref) error{jobs.Load, jobs.Start} {
 			if runErr := run(ctx, job); runErr != nil {

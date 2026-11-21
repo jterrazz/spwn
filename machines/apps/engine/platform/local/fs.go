@@ -16,6 +16,7 @@ type disk struct{}
 func (disk) Open(name string) (fs.File, error)            { return os.Open(name) }
 func (disk) ReadFile(path string) ([]byte, error)         { return os.ReadFile(path) }
 func (disk) Readlink(path string) (string, error)         { return os.Readlink(path) }
+func (disk) Symlink(target, path string) error            { return os.Symlink(target, path) }
 func (disk) Stat(path string) (fs.FileInfo, error)        { return os.Stat(path) }
 func (disk) ReadDir(path string) ([]fs.DirEntry, error)   { return os.ReadDir(path) }
 func (disk) Glob(pattern string) ([]string, error)        { return filepath.Glob(pattern) }
