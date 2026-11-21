@@ -53,7 +53,6 @@ final class StationDelegate: NSObject, NSApplicationDelegate {
         label()
         labelling = model.objectWillChange.sink { [weak self] _ in DispatchQueue.main.async { self?.label() } }
         model.start()
-        FindHotKey.shared.register { model.findFromAnywhere() }
     }
 
     func label() {
