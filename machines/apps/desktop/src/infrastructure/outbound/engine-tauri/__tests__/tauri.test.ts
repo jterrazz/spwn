@@ -89,6 +89,37 @@ describe('tauri transport', () => {
         expect(links).toStrictEqual(['open']);
     });
 
+    test("an open link carries the hello's page revision and executable, the verdict's and the remedy's", async () => {
+        // Given - a bridge whose engine answers naming its revision and where its station is
+        using _ = clock.run('2026-11-13T10:00:00Z');
+        const bridge = fakeBridge();
+        const hellos: Link[] = [];
+        tauriTransport(bridge.ipc).link((link) => {
+            hellos.push(link);
+        });
+        await clock.advance(1);
+
+        // When - the engine answers
+        bridge.emit({
+            ...OPEN,
+            answer: {
+                ...OPEN.answer,
+                out: { ...OPEN.answer.out, executable: '/u/bin/station', page: 5 },
+            },
+        });
+        await clock.advance(1);
+
+        // Then - the hello keeps both
+        const open = hellos.findLast((link) => link.kind === 'open');
+        expect(open?.kind === 'open' ? open.hello : undefined).toStrictEqual({
+            executable: '/u/bin/station',
+            page: 5,
+            pid: 7,
+            started_at: '2026-11-13T09:00:00Z',
+            version: 'v1',
+        });
+    });
+
     test('an event heard while the link is being read wins over the older answer', async () => {
         // Given - a bridge listening at once, whose link read takes 30 ms
         using _ = clock.run('2026-11-13T10:00:00Z');

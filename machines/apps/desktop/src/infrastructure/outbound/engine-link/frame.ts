@@ -41,6 +41,8 @@ export function helloOf(value: unknown): EngineHello | undefined {
             started_at: value.started_at,
             version: value.version,
             ...(calls ? { calls } : {}),
+            ...(typeof value.executable === 'string' ? { executable: value.executable } : {}),
+            ...(typeof value.page === 'number' ? { page: value.page } : {}),
         };
     }
     return undefined;
