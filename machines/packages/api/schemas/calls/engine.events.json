@@ -16,6 +16,32 @@
       ],
       "type": "object"
     },
+    "engine.Fit": {
+      "additionalProperties": false,
+      "properties": {
+        "app": {
+          "type": "integer"
+        },
+        "engine": {
+          "type": "integer"
+        },
+        "verdict": {
+          "enum": [
+            "",
+            "app-older",
+            "engine-older",
+            "fits"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "app",
+        "engine",
+        "verdict"
+      ],
+      "type": "object"
+    },
     "engine.Notice": {
       "additionalProperties": false,
       "properties": {
@@ -38,6 +64,9 @@
     "engine.Opened": {
       "additionalProperties": false,
       "properties": {
+        "fit": {
+          "$ref": "#/$defs/engine.Fit"
+        },
         "page": {
           "type": "integer"
         },

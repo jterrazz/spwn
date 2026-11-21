@@ -1108,6 +1108,12 @@ export type EngineExecOut = {
     stdout: string;
 };
 
+export type EngineFit = {
+    app: number;
+    engine: number;
+    verdict: '' | 'app-older' | 'engine-older' | 'fits';
+};
+
 export type EngineHello = {
     abilities?: string[];
     calls?: string[];
@@ -1154,9 +1160,15 @@ export type EngineNotice = {
 };
 
 export type EngineOpened = {
+    fit?: EngineFit;
     page?: number;
     pages?: string[];
     stream: string;
+};
+
+export type EnginePageWatchIn = {
+    pages?: string[];
+    revision?: number;
 };
 
 export type EnginePagesIn = {
@@ -3468,7 +3480,7 @@ export type MachinesWakeInput = MachinesCallsWakeIn;
 export type MachinesWakeOutput = MachinesWoken;
 export type OverviewReadInput = OverviewCallsReadIn;
 export type OverviewReadOutput = OverviewCallsReadOut;
-export type PageInput = EnginePagesIn;
+export type PageInput = EnginePageWatchIn;
 export type PageOutput = EngineOpened | PageEvent | SampleEvent | TickEvent | NoticeEvent;
 export type PortsDeclareInput = PortsCallsDeclareIn;
 export type PortsDeclareOutput = PortsCallsDeclareOut;

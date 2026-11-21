@@ -202,7 +202,7 @@ public final class Subscription: @unchecked Sendable {
 
     var request: [String: Any] {
         var body: [String: Any] = ["v": 2, "id": "1", "watch": watch]
-        if watch == Self.pageWatch { body["in"] = ["pages": pages] }
+        if watch == Self.pageWatch { body["in"] = ["pages": pages, "revision": pageRevision] as [String: Any] }
         return body
     }
 

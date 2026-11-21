@@ -957,7 +957,7 @@
       "name": "page",
       "schema": "station.page/v1",
       "where": "in-engine",
-      "in": "PagesIn",
+      "in": "PageWatchIn",
       "out": "Opened|Event",
       "watch": true,
       "own": true

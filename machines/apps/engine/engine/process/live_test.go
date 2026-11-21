@@ -57,7 +57,7 @@ func watchPage(ctx context.Context, d *Engine, id string) <-chan engine.Event {
 	events := make(chan engine.Event, 16)
 	go func() {
 		defer close(events)
-		_ = d.Stream(ctx, []string{id}, func(v any) error {
+		_ = d.Stream(ctx, engine.PageWatchIn{Pages: []string{id}}, func(v any) error {
 			if ev, ok := v.(engine.Event); ok {
 				events <- ev
 			}

@@ -153,13 +153,13 @@ func Server(d *Engine, h Serving) serve.Server {
 			return h.Registry.Lookup(name)
 		},
 		Streams: map[string]serve.Feed{engine.CallPage: func(ctx context.Context, raw json.RawMessage, send func(any) error) error {
-			var in engine.PagesIn
+			var in engine.PageWatchIn
 			if len(raw) > 0 {
 				if err := json.Unmarshal(raw, &in); err != nil {
 					return err
 				}
 			}
-			return worded(d.Stream(ctx, in.Pages, send))
+			return worded(d.Stream(ctx, in, send))
 		}, engine.CallEvents: func(ctx context.Context, _ json.RawMessage, send func(any) error) error {
 			return d.Events(ctx, send)
 		}, engine.CallWatch: func(ctx context.Context, raw json.RawMessage, send func(any) error) error {

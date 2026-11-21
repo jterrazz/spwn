@@ -202,7 +202,7 @@ final class PagesTests: XCTestCase {
         let task = Task.detached { await sub.run() }
         for _ in 0..<500 where got.page == nil { try? await Task.sleep(nanoseconds: 10_000_000) }
         task.cancel()
-        XCTAssertEqual(engine.received, [#"{"id":"1","in":{"pages":["menubar.machine:mac-mini"]},"v":2,"watch":"page"}"#])
+        XCTAssertEqual(engine.received, [#"{"id":"1","in":{"pages":["menubar.machine:mac-mini"],"revision":5},"v":2,"watch":"page"}"#])
         XCTAssertEqual(got.page?.section("vms"), page.section("vms"))
     }
 }

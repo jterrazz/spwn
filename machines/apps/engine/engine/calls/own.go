@@ -48,7 +48,7 @@ func Owns() []Own {
 	}
 	opened, event := reflect.TypeFor[engine.Opened](), reflect.TypeFor[engine.Event]()
 	return append(out,
-		watched(engine.CallPage, reflect.TypeFor[engine.PagesIn](), opened, event, "page", engine.EventSample, "tick", "notice"),
+		watched(engine.CallPage, reflect.TypeFor[engine.PageWatchIn](), opened, event, "page", engine.EventSample, "tick", "notice"),
 		watched(engine.CallEvents, none, opened, event, "notice"),
 		watched(engine.CallWatch, reflect.TypeFor[engine.WatchIn](), nil, reflect.TypeFor[engine.Watching]()),
 	)

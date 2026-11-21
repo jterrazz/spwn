@@ -20,7 +20,7 @@ enum Streamed {
         return opened + [0x0A] + event + [0x0A]
     }
 
-    static func watch(_ page: String) -> String { #"{"id":"1","in":{"pages":[""# + page + #""]},"v":2,"watch":"page"}"# }
+    static func watch(_ page: String) -> String { #"{"id":"1","in":{"pages":[""# + page + #""],"revision":"# + String(pageRevision) + #"},"v":2,"watch":"page"}"# }
 }
 
 @MainActor

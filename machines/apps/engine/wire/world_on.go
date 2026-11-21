@@ -62,6 +62,7 @@ import (
 	machinefilecontract "github.com/jterrazz/studio-station/apps/engine/machinefile/contract"
 	machinesfake "github.com/jterrazz/studio-station/apps/engine/machines/adapter/fake"
 	"github.com/jterrazz/studio-station/apps/engine/machines/contract"
+	"github.com/jterrazz/studio-station/apps/engine/page"
 	"github.com/jterrazz/studio-station/apps/engine/platform/local"
 	"github.com/jterrazz/studio-station/apps/engine/ports"
 	portsfake "github.com/jterrazz/studio-station/apps/engine/ports/adapter/fake"
@@ -799,7 +800,7 @@ func (m *worldMac) surfaces(ctx context.Context, d *process.Engine) {
 	}
 	if e.MenuBar != "" {
 		hold(func(ctx context.Context, send func(any) error) error {
-			return d.Stream(ctx, []string{engine.PageMenubar}, send)
+			return d.Stream(ctx, engine.PageWatchIn{Pages: []string{engine.PageMenubar}, Revision: page.Revision}, send)
 		})
 		hold(events)
 	}

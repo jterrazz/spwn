@@ -41,4 +41,7 @@ type Opened struct {
 	// value: the revision of `station.page/v1` the pages of a watch of pages
 	// speak, so a client judges the engine before any page of it.
 	Page int `json:"page,omitempty"`
+	// value: the verdict on the revision the client declared; a watch whose
+	// verdict is not Fits sends nothing after its opening.
+	Fit *Fit `json:"fit,omitempty"`
 }

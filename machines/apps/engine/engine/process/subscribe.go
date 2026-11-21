@@ -209,19 +209,24 @@ func (d *Engine) feed(ctx context.Context, id string, sub *subscriber, into *lat
 	}
 }
 
-func (d *Engine) Stream(ctx context.Context, pages []string, write func(any) error) error {
+func (d *Engine) Stream(ctx context.Context, in engine.PageWatchIn, write func(any) error) error {
 	// invariant: after its opening, a watch of pages only streams: a full page
 	// per change, coalesced over 250 ms (so at most 4 a second) and never resent
 	// unchanged, the values of its pages' live keys every 2 s, a tick every
-	// 15 s, and the notices.
-	if err := d.CheckPages(pages); err != nil {
+	// 15 s, and the notices. A watch whose verdict does not fit ends at its
+	// opening: no page is ever sent to a client that cannot draw it.
+	if err := d.CheckPages(in.Pages); err != nil {
 		return err
 	}
-	pages = slices.Compact(slices.Sorted(slices.Values(pages)))
+	pages := slices.Compact(slices.Sorted(slices.Values(in.Pages)))
+	fit := engine.FitOf(d.o.Page, in.Revision)
+	if fit.Verdict != engine.Fits {
+		return write(engine.Opened{Stream: streamSchema, Pages: pages, Page: d.o.Page, Fit: &fit})
+	}
 	sub := d.hub.add(pages...)
 	defer d.hub.remove(sub)
 	defer d.joinLive(ctx)()
-	if err := write(engine.Opened{Stream: streamSchema, Pages: pages, Page: d.o.Page}); err != nil {
+	if err := write(engine.Opened{Stream: streamSchema, Pages: pages, Page: d.o.Page, Fit: &fit}); err != nil {
 		return err
 	}
 	opening := d.opening(pages)

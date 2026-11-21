@@ -76,6 +76,32 @@
       ],
       "type": "object"
     },
+    "engine.Fit": {
+      "additionalProperties": false,
+      "properties": {
+        "app": {
+          "type": "integer"
+        },
+        "engine": {
+          "type": "integer"
+        },
+        "verdict": {
+          "enum": [
+            "",
+            "app-older",
+            "engine-older",
+            "fits"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "app",
+        "engine",
+        "verdict"
+      ],
+      "type": "object"
+    },
     "engine.Notice": {
       "additionalProperties": false,
       "properties": {
@@ -98,6 +124,9 @@
     "engine.Opened": {
       "additionalProperties": false,
       "properties": {
+        "fit": {
+          "$ref": "#/$defs/engine.Fit"
+        },
         "page": {
           "type": "integer"
         },
@@ -116,7 +145,7 @@
       ],
       "type": "object"
     },
-    "engine.PagesIn": {
+    "engine.PageWatchIn": {
       "additionalProperties": false,
       "properties": {
         "pages": {
@@ -124,6 +153,9 @@
             "type": "string"
           },
           "type": "array"
+        },
+        "revision": {
+          "type": "integer"
         }
       },
       "type": "object"
@@ -1479,7 +1511,7 @@
   "description": "The watch page of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
   "properties": {
     "in": {
-      "$ref": "#/$defs/engine.PagesIn"
+      "$ref": "#/$defs/engine.PageWatchIn"
     },
     "out": {
       "anyOf": [

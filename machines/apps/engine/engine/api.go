@@ -126,3 +126,10 @@ type WatchIn struct {
 type PagesIn struct {
 	Pages []string `json:"pages"`
 }
+
+type PageWatchIn struct {
+	Pages []string `json:"pages"`
+	// value: the revision of `station.page/v1` the client draws, judged by
+	// FitOf in the watch's opening.
+	Revision int `json:"revision"`
+}

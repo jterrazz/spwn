@@ -122,7 +122,7 @@ func subscribe(ctx context.Context, t *testing.T, d *Engine, reading bool) strea
 	go func() {
 		defer close(s.ended)
 		defer close(s.events)
-		_ = d.Stream(ctx, []string{engine.PageMenubar}, func(v any) error {
+		_ = d.Stream(ctx, engine.PageWatchIn{Pages: []string{engine.PageMenubar}}, func(v any) error {
 			if _, ok := v.(engine.Opened); ok {
 				close(opened)
 				return nil
@@ -233,7 +233,7 @@ func TestAMachinesPageIsWatchedByItsName(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	var pages []string
-	_ = d.Stream(ctx, []string{"menubar.machine:mac-mini"}, func(v any) error {
+	_ = d.Stream(ctx, engine.PageWatchIn{Pages: []string{"menubar.machine:mac-mini"}}, func(v any) error {
 		if ev, ok := v.(engine.Event); ok && ev.Event == "page" {
 			pages = append(pages, string(ev.Page))
 			cancel()
@@ -283,7 +283,7 @@ func TestARefreshReadsAgainOnlyThePageItNames(t *testing.T) {
 	go func() {
 		defer close(done)
 		n := 0
-		_ = d.Stream(ctx, []string{engine.PageMenubar, "menubar.machine:linux-1"}, func(v any) error {
+		_ = d.Stream(ctx, engine.PageWatchIn{Pages: []string{engine.PageMenubar, "menubar.machine:linux-1"}}, func(v any) error {
 			if ev, ok := v.(engine.Event); ok && ev.Event == "page" {
 				n++
 				if n == 2 {

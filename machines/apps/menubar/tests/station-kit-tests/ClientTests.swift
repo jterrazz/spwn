@@ -142,7 +142,7 @@ final class ClientTests: XCTestCase {
         let keys = "cpu:mac-mini cpu:macbook-pro memory:macbook-pro net:macbook-pro"
         XCTAssertEqual(kinds, ["connected", "page loading", "page ready", "sample 2026-11-03T10:30:02Z \(keys)", "sample 2026-11-03T10:30:04Z \(keys) stale", "tick",
                                "notice awake_ended moon: Awake stopped on This Mac: battery 20 %"])
-        XCTAssertEqual(engine.received, [#"{"id":"1","in":{"pages":["menubar"]},"v":2,"watch":"page"}"#])
+        XCTAssertEqual(engine.received, [#"{"id":"1","in":{"pages":["menubar"],"revision":5},"v":2,"watch":"page"}"#])
         for _ in 0..<200 where clock.backoffs.isEmpty {
             clock.releaseSilence()
             try await Task.sleep(nanoseconds: 10_000_000)
