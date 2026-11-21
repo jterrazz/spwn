@@ -83,7 +83,9 @@ func (s *Surveyor) Forget() { s.o.Pool.Forget(subject) }
 func (s *Surveyor) Held(ctx context.Context) <-chan disk.HeldReading {
 	// invariant: each reader asks the hypervisor itself, never through the
 	// survey a pool shares, so a machine or an image made or deleted since
-	// the last read is seen; the frame is pending, and a machine with no
+	// the last read is seen; the frame is pending, holding the last answer
+	// the pool heard, which stands too when this one fails or is late, so a
+	// read asked again never draws less than the last; a machine with no
 	// hypervisor to ask answers none at once.
 	if s.o.Station == nil {
 		out := make(chan disk.HeldReading, 1)
@@ -91,24 +93,30 @@ func (s *Surveyor) Held(ctx context.Context) <-chan disk.HeldReading {
 		close(out)
 		return out
 	}
+	key := subject + "/station"
+	frame := disk.HeldReading{State: disk.HeldPending}
+	frame.Held, frame.Known = lanes.Remembered[disk.Held](s.o.Pool, key)
 	job := lanes.Job[disk.HeldReading]{
-		Key: subject + "/station", Lane: lanes.Commands, Fresh: true,
+		Key: key, Lane: lanes.Commands, Fresh: true,
 		Do: func(ctx context.Context) func(*disk.HeldReading) {
 			held, err := s.o.Station.Held(ctx)
+			if err == nil && held != nil {
+				lanes.Remember(s.o.Pool, key, *held)
+			}
 			return func(r *disk.HeldReading) {
 				switch {
 				case err != nil:
 					r.State = disk.HeldFailed
 				case held == nil:
-					r.State = disk.HeldNone
+					r.State, r.Held, r.Known = disk.HeldNone, disk.Held{}, false
 				default:
-					r.State, r.Held = disk.HeldAnswered, *held
+					r.State, r.Held, r.Known = disk.HeldAnswered, *held, false
 				}
 			}
 		},
 		Late: func(r *disk.HeldReading) { r.State = disk.HeldFailed },
 	}
-	return lanes.Run(ctx, s.o.Pool, disk.HeldReading{State: disk.HeldPending}, []lanes.Job[disk.HeldReading]{job}, func(r disk.HeldReading) disk.HeldReading { return r })
+	return lanes.Run(ctx, s.o.Pool, frame, []lanes.Job[disk.HeldReading]{job}, func(r disk.HeldReading) disk.HeldReading { return r })
 }
 
 // invariant: the frame is every placed entry whose declared paths exist, read

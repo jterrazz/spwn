@@ -55,6 +55,9 @@ type Pool struct {
 	prefer string
 	seq    uint64
 	shared map[string]any
+	// value: the last answer Remember kept under each key, which Forget
+	// never drops.
+	known map[string]any
 	// value: how long a settled reading answers its key's next readers;
 	// zero answers them for the life of the pool.
 	keep time.Duration
@@ -79,7 +82,23 @@ func NewPool(ctx context.Context, clock Clock, commands, walks int) *Pool {
 		clock:  clock,
 		lanes:  [2]*lane{{free: commands}, {free: walks}},
 		shared: map[string]any{},
+		known:  map[string]any{},
 	}
+}
+
+func Remember[T any](p *Pool, key string, v T) {
+	// invariant: a reading each reader asks afresh starts from the last
+	// answer one of them heard, kept for the life of the pool.
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.known[key] = v
+}
+
+func Remembered[T any](p *Pool, key string) (T, bool) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	v, ok := p.known[key].(T)
+	return v, ok
 }
 
 func (p *Pool) Close() {

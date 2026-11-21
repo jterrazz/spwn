@@ -62,7 +62,8 @@ type Reading struct {
 
 func ReadingOf(total, free int64, s Survey, h HeldReading, mac string) Reading {
 	// invariant: station's part is there only once the hypervisor, the
-	// walk of its logs and its image cache's answered: pending, failed or
+	// walk of its logs and its image cache's answered, or the hypervisor's
+	// last answer stands while it is asked again: never heard, failed or
 	// absent, it is nil, never zeros. The image cache offers its free only
 	// with the caches.
 	r := Reading{Total: total, Free: free, Used: max(total-free, 0), Rows: Classify(s), Pending: h.State == HeldPending || s.SystemPending}
@@ -70,7 +71,7 @@ func ReadingOf(total, free int64, s Survey, h HeldReading, mac string) Reading {
 	for _, t := range s.Rows {
 		r.Pending = r.Pending || t.Pending
 	}
-	if h.State == HeldAnswered && s.Logs >= 0 && imageCache >= 0 {
+	if h.Heard() && s.Logs >= 0 && imageCache >= 0 {
 		station := StationOf(total, free, s.Logs, imageCache, h.Held, mac)
 		r.Station = &station
 	}

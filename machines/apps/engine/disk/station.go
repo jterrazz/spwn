@@ -122,10 +122,15 @@ const (
 
 type HeldReading struct {
 	// value: what a Mac's hypervisor answered of the disks it holds; Held
-	// is read only once State is HeldAnswered.
+	// is read only once State is HeldAnswered, or while Known.
 	State HeldState
 	Held  Held
+	// value: Held is the last answer the hypervisor gave this engine,
+	// standing while it is asked again, fails or answers late.
+	Known bool
 }
+
+func (h HeldReading) Heard() bool { return h.State == HeldAnswered || h.Known }
 
 func (h Held) machines() int64 { return sumDisks(h.Machines) }
 

@@ -296,3 +296,16 @@ func TestASettledReadingIsReadAgainOnceItOutlivedThePoolsKeep(t *testing.T) {
 		t.Errorf("10 min after they settled the readers read %q and %d, want each read again", job, stream)
 	}
 }
+
+func TestARememberedAnswerOutlivesItsKeysForget(t *testing.T) {
+	p := NewPool(context.Background(), &manualClock{}, 1, 1)
+	defer p.Close()
+	if _, ok := Remembered[int](p, "disk/station"); ok {
+		t.Fatal("a key nothing remembered has a remembered answer")
+	}
+	Remember(p, "disk/station", 7)
+	p.Forget("disk")
+	if got, ok := Remembered[int](p, "disk/station"); !ok || got != 7 {
+		t.Fatalf("remembered %d, %v after a Forget; want the 7 remembered", got, ok)
+	}
+}

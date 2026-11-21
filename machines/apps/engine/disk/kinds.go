@@ -56,11 +56,12 @@ func KindsOf(total, free int64, s Survey, rows []Row, h HeldReading) ([]Amount, 
 	// invariant: a kind whose measure has not answered is absent, never 0:
 	// the system where the volume cannot tell it apart or its walk pends,
 	// apps and caches while a walk of theirs pends or past its budget,
-	// machines and images while the hypervisor is pending, failed or late,
-	// and on a machine with none; your data, the remainder, whenever a kind
-	// it subtracts is unknown. The image cache is the hypervisor's Can
-	// rebuild row, apart from the caches and known with them; what can be
-	// freed is absent with the caches.
+	// machines and images until the hypervisor is heard (its last answer
+	// stands while it is asked again, fails or is late), and on a machine
+	// with none; your data, the remainder, whenever a kind it subtracts is
+	// unknown. The image cache is the hypervisor's Can rebuild row, apart
+	// from the caches and known with them; what can be freed is absent with
+	// the caches.
 	cacheRows := Reading{Rows: rows}.Of(CanRebuild)
 	cachesKnown := !s.CachesUnknown
 	var caches, imageCache int64
@@ -72,7 +73,7 @@ func KindsOf(total, free int64, s Survey, rows []Row, h HeldReading) ([]Amount, 
 			caches += max(r.Bytes, 0)
 		}
 	}
-	machines, held := int64(0), h.State == HeldAnswered
+	machines, held := int64(0), h.Heard()
 	if held {
 		machines = h.Held.Holding()
 	}

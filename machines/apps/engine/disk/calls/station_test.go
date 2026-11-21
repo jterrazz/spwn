@@ -18,9 +18,21 @@ type changingStation struct {
 	held  *disk.Held
 	err   error
 	freed []string
+	// value: while set, the hypervisor answers nothing until it is closed.
+	asked chan struct{}
 }
 
-func (c *changingStation) Held(context.Context) (*disk.Held, error) {
+func (c *changingStation) Held(ctx context.Context) (*disk.Held, error) {
+	c.mu.Lock()
+	asked := c.asked
+	c.mu.Unlock()
+	if asked != nil {
+		select {
+		case <-asked:
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		}
+	}
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	return c.held, c.err
@@ -59,6 +71,21 @@ func readings(t *testing.T, s *Surveyor) []disk.Reading {
 		t.Fatal("disk.read never ended")
 	}
 	return out
+}
+
+func firstReading(t *testing.T, s *Surveyor) disk.Reading {
+	t.Helper()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	updates, err := Read.Run(ctx, Deps{Disk: s, Name: "mbp"}, ReadIn{}, nil)
+	if err != nil {
+		t.Fatalf("disk.read: %v", err)
+	}
+	u, ok := <-updates
+	if !ok {
+		t.Fatal("disk.read sent no reading")
+	}
+	return u.Value
 }
 
 func last(t *testing.T, s *Surveyor) disk.Reading {
@@ -120,5 +147,35 @@ func TestAFailedHypervisorLeavesMachinesAndYourDataUnknown(t *testing.T) {
 	_, yours := kinds[disk.KindYourData]
 	if got.Station != nil || machines || yours || got.Pending {
 		t.Fatalf("a failed hypervisor reads %+v, station %+v: want no part, no machines, no your data, nothing pending", got.Kinds, got.Station)
+	}
+}
+
+func TestARereadShowsTheMachinesTheLastReadHeardWhileTheHypervisorIsAskedAgain(t *testing.T) {
+	station := &changingStation{held: &disk.Held{Machines: []disk.MachineDisk{{Name: "api", Bytes: 50}}}}
+	s := onMac(station)
+	last(t, s)
+	asked := make(chan struct{})
+	defer close(asked)
+	station.mu.Lock()
+	station.asked = asked
+	station.mu.Unlock()
+	got := firstReading(t, s)
+	kinds := kindSet(got)
+	_, yours := kinds[disk.KindYourData]
+	if got.Station == nil || kinds[disk.KindMachines] != 50 || !yours || !got.Pending {
+		t.Fatalf("a re-read's first reading is %+v, station %+v: want api's 50 and your data the last read heard, pending while the hypervisor is asked", got.Kinds, got.Station)
+	}
+}
+
+func TestARereadTheHypervisorFailsKeepsTheMachinesTheLastReadHeard(t *testing.T) {
+	station := &changingStation{held: &disk.Held{Machines: []disk.MachineDisk{{Name: "api", Bytes: 50}}}}
+	s := onMac(station)
+	last(t, s)
+	station.set(nil, errors.New("the hypervisor could not list its disks"))
+	got := last(t, s)
+	kinds := kindSet(got)
+	_, yours := kinds[disk.KindYourData]
+	if got.Station == nil || kinds[disk.KindMachines] != 50 || !yours || got.Pending {
+		t.Fatalf("a re-read the hypervisor fails reads %+v, station %+v: want api's 50 and your data the last read heard, nothing pending", got.Kinds, got.Station)
 	}
 }
