@@ -7,6 +7,7 @@
 package validate
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -157,13 +158,16 @@ func IsValidAgentName(name string) bool {
 	return name != "" && len(name) <= MaxAgentNameLen && slugRe.MatchString(name)
 }
 
+// ErrInvalidWorkspaceName is the error WorkspaceName wraps.
+var ErrInvalidWorkspaceName = errors.New("invalid workspace name")
+
 // WorkspaceName rejects a workspace name that is not a slug, the rule
 // the manifest enforces and Spawn applies to every caller.
 func WorkspaceName(name string) error {
 	if slugRe.MatchString(name) {
 		return nil
 	}
-	return fmt.Errorf("workspace name %q must match %s", name, slugRe.String())
+	return fmt.Errorf("%w: workspace name %q must match %s", ErrInvalidWorkspaceName, name, slugRe.String())
 }
 
 // IsValidProjectName reports whether the given name matches the

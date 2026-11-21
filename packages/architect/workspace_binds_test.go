@@ -118,7 +118,7 @@ func TestWorkspaceContainerPath(t *testing.T) {
 
 func TestSpawnRejectsAWorkspaceNameThatIsNotASlug(t *testing.T) {
 	for _, name := range []string{"my ws", "a*", "Proj", "x\\040y"} {
-		_, err := (&Architect{}).Spawn(context.Background(), SpawnOpts{
+		_, err := New(newMockBackend(), nil).Spawn(context.Background(), SpawnOpts{
 			ConfigName: "c",
 			Workspaces: []models.Workspace{{Name: name, Path: t.TempDir()}},
 		})

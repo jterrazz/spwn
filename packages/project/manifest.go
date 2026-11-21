@@ -221,6 +221,9 @@ func IsValidAgentName(name string) bool {
 // doesn't reach into the internal validate package.
 const MaxAgentNameLen = validate.MaxAgentNameLen
 
+// ErrInvalidWorkspaceName is the error ValidateWorkspaceName wraps.
+var ErrInvalidWorkspaceName = validate.ErrInvalidWorkspaceName
+
 // ValidateWorkspaceName rejects a workspace name the manifest would
 // reject, so a CLI flag or an API body meets the manifest's rule.
 func ValidateWorkspaceName(name string) error {

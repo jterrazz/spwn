@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -760,7 +761,11 @@ func (s *Server) handleCreateWorld(w http.ResponseWriter, r *http.Request) {
 		Manifest:   m,
 	})
 	if err != nil {
-		jsonError(w, err.Error(), 500)
+		status := 500
+		if errors.Is(err, projectpkg.ErrInvalidWorkspaceName) {
+			status = 400
+		}
+		jsonError(w, err.Error(), status)
 		return
 	}
 
