@@ -334,7 +334,7 @@ Docker's ports), whatever the Tailscale policy says; the Ports section shows
 each as Public when it is.
 
 ## What the new MacBook met (2026-11-10)
-Four gaps found setting up the owner's new Mac and its first workspace, `os`.
+Three gaps found setting up the owner's new Mac and its first workspace, `os`.
 
 - **`git-signing` on a Linux workspace**: the setting is for Macs and macOS
   VMs only, so a commit made in a Linux workspace is unsigned. Until it is
@@ -348,10 +348,6 @@ Four gaps found setting up the owner's new Mac and its first workspace, `os`.
   shell failed on `libatk-1.0.so.0` until `playwright install-deps chromium`
   ran in the workspace. The recipe installs those packages, so a gate with a
   browser runs on a fresh workspace.
-- **The release ships no `Station.app`**: the menu bar was built on the host
-  with `make menubar-install`, which needs a full Xcode (`actool`, then
-  `xcodebuild -runFirstLaunch`), outside the minimal host. The release
-  carries the signed bundle, so the host needs no Xcode.
 
 ## A workspace that reads the host's checkout
 The owner's idea (2026-11-10): share the host's studio-os checkout with a
