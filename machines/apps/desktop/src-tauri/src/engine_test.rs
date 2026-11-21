@@ -8,7 +8,16 @@ use std::time::{Duration, Instant};
 
 use serde_json::{json, Value};
 
-use super::{changed, hello, next, Bridge, Link, FIRST_BACKOFF, MAX_BACKOFF, RECHECK};
+use super::{
+    changed, hello, next, told, Bridge, Failed, Link, FIRST_BACKOFF, MAX_BACKOFF, RECHECK,
+};
+
+fn refused() -> Failed {
+    Failed {
+        step: "connect",
+        said: String::from("refused"),
+    }
+}
 
 fn socket_path() -> PathBuf {
     static NEXT: AtomicUsize = AtomicUsize::new(0);
@@ -74,11 +83,12 @@ fn a_hello_refused_is_still_an_answer_and_one_unanswered_is_an_error() {
     assert!(refused.is_ok_and(|answer| answer.get("error").is_some()));
     assert_eq!(
         closed,
-        Err(String::from(
-            "the engine closed the connection before it answered"
-        ))
+        Err(Failed {
+            step: "read",
+            said: String::from("the engine closed the connection before it answered"),
+        })
     );
-    assert!(absent.is_err());
+    assert!(absent.is_err_and(|failed| failed.step == "connect"));
     let _ = std::fs::remove_file(refusing);
     let _ = std::fs::remove_file(closing);
 }
@@ -91,14 +101,10 @@ fn an_engine_that_goes_is_retried_after_a_doubling_backoff_and_its_return_resets
 
     // When - six hellos fail, then one answers, then one fails again
     let waits: Vec<u64> = (0..6)
-        .map(|_| {
-            next(Err(String::from("refused")), socket(), &mut backoff)
-                .1
-                .as_secs()
-        })
+        .map(|_| next(Err(refused()), socket(), &mut backoff).1.as_secs())
         .collect();
     let (open, recheck) = next(Ok(json!({ "out": {} })), socket(), &mut backoff);
-    let (absent, wait) = next(Err(String::from("refused")), socket(), &mut backoff);
+    let (absent, wait) = next(Err(refused()), socket(), &mut backoff);
 
     // Then - the waits double up to the cap, an answer is open and checked again later, and the backoff restarted
     assert_eq!(waits, vec![1, 2, 4, 8, 16, MAX_BACKOFF]);
@@ -134,6 +140,32 @@ fn a_link_is_emitted_when_it_changes_and_never_when_it_stays() {
     assert!(first);
     assert!(!second);
     assert!(shown.lock().is_ok_and(|link| *link == open));
+}
+
+#[test]
+fn a_link_change_is_told_by_its_kind_and_what_the_hello_heard_never_its_answer_or_socket() {
+    // Given - a link opened by an answer naming the engine's executable, and one lost to a refused connect
+    let open = Link::Open {
+        socket: String::from("/Users/you/.local/state/station/engine.sock"),
+        answer: json!({ "out": { "executable": "/Users/you/.local/bin/station", "pid": 7 } }),
+    };
+    let absent = Link::Absent {
+        socket: String::from("/Users/you/.local/state/station/engine.sock"),
+        reason: String::from("refused"),
+        retry_in: 1000,
+    };
+
+    // When - each change is told
+    let lines = [told(&open, None), told(&absent, Some(&refused()))];
+
+    // Then - the kind and the reason, with no path from the answer or the socket
+    assert_eq!(
+        lines,
+        [
+            "link open: answered",
+            "link absent: hello failed at connect: refused"
+        ]
+    );
 }
 
 #[test]

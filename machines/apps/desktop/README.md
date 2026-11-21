@@ -165,6 +165,12 @@ A watch the engine ends (`done`) and a plain read are an answer of one moment, s
 - Activity's five-second timer (`useActivity`, `src/presentation/features/activity/reading.tsx`, which the tiles of Home and of a machine's Overview read through too, and Home's fleet board once per Mac through `useActivities`) is a graph's pace, not this mechanism: it is the page's to move onto `useReread`.
 - The timer goes when every engine the window reaches offers `engine.events` with a notice for each change a read shows: today the list is the HUD's (a server down, a VM ready), so a VM stopped from the CLI tells nothing, and the world's `guest serve` does not answer the call.
 
+## The link to the engine
+
+The shell says hello to the engine's socket on a thread of its own (`supervise`, `src-tauri/src/engine.rs`) and emits `engine://link` each time the link changes; `reachOf` (`src/application/use-cases/reach.ts`) reads it.
+
+- Each change is a line of the link log: its UTC instant to the millisecond, the link's kind, and what the hello heard, `answered` or the step it failed at (connect, write, read, answer) with that step's error. The log is `link.log` in the app's log folder, `~/Library/Logs/com.jterrazz.spwn/` on a Mac, kept under 1 MiB with one older file beside it, `link.log.1` (`src-tauri/src/link_log.rs`). It writes no answer and no socket path: a hello's answer names the engine's executable.
+
 ## The calls the bridge forwards
 
 `src/domain/bridged.ts` lists the calls the window sends, and it is the one list. `src-tauri/build.rs` reads it into the Rust bridge, which refuses any other name before it reaches the engine: `refused`, code `bridge.not-bridged`, drawn like any refusal. `ReadName` and `WatchName` admit only its names, so a page that reads or makes a call off the list fails the compile, and `bridged.test.ts` fails a name of the list no source sends. A call joins the list in the commit that first sends it.
