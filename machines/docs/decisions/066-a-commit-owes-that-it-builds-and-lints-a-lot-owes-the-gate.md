@@ -11,7 +11,7 @@ A lot is a unit of work of one maker: one or more commits, each a unit of meanin
 
 ## Decision
 
-- **Every commit passes the cheap tier alone**: `gofmt`, `go vet` (linux, the world build tag, the specs module, darwin without cgo), `golangci-lint`, `make lint`, and the world build. About a minute, no story slot, several commits at once. It answers whether the commit builds and lints on its own tree, which is what `git bisect`, a revert and a cherry-pick need.
+- **Every commit passes the cheap tier alone**: `gofmt`, `go vet` (linux, the world build tag, the specs module), `golangci-lint`, `make lint`, and the world build. About a minute, no story slot, several commits at once. It answers whether the commit builds and lints on its own tree, which is what `git bisect`, a revert and a cherry-pick need. The darwin-only files are vetted once, with cgo, by the Mac proof at the lot's tip, not per commit.
 - **Every lot's tip, and the train's tip ([ADR-067](067-one-train-appended-by-makers-proved-at-its-tip.md)), passes the full gate**: `make generate` with drift, `go test`, the stories, the desktop proofs, and the Mac proofs when the lot moves what they prove.
 - A behaviour change still lands with its test in the same commit; the gate at the tip is what runs it.
 
