@@ -14,6 +14,7 @@ import { AgentPicker } from './agent-picker';
 import { ConfigFields, NameField, SpawnPreview, workspaceDraft } from './spawn-world-parts';
 import type { Mount, WorkspaceDraft } from './spawn-world-parts';
 import { WorkspaceEditor } from './workspace-editor';
+import { workspaceNameError } from './workspace-name';
 
 interface SpawnWorldDialogProps {
     onClose: () => void;
@@ -66,6 +67,8 @@ function useSpawnForm() {
     const [role, setRole] = useState('worker');
     const [first] = selected;
     const defaultPath = `/tmp/spwn-${first ?? 'workspace'}-...`;
+    const workspaceError =
+        workspaces.map((draft) => workspaceNameError(draft.name)).find((text) => text !== '') ?? '';
 
     const request = (suffix: string) => ({
         agents: [...selected].map((name) => ({ name, role })),
@@ -86,6 +89,7 @@ function useSpawnForm() {
         handleWorldName: setWorldName,
         selected,
         setSelected,
+        workspaceError,
         workspaces,
         worldName,
     };
@@ -190,6 +194,10 @@ export function SpawnWorldDialog({ onClose, onComplete }: SpawnWorldDialogProps)
     const [error, setError] = useState('');
 
     const spawn = async () => {
+        if (form.workspaceError !== '') {
+            setError(form.workspaceError);
+            return;
+        }
         setSpawning(true);
         setError('');
         try {

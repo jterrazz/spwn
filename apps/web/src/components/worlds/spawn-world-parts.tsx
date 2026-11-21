@@ -4,6 +4,7 @@ import { IconX } from '@tabler/icons-react';
 import { useId } from 'react';
 
 import { AVAILABLE_CONFIGS } from '../../domain/model';
+import { workspaceNameError } from './workspace-name';
 
 export const LABEL = 'text-muted-foreground/40 text-[10px] tracking-widest uppercase';
 const FIELD =
@@ -70,44 +71,53 @@ export function WorkspaceRow({ draft, placeholder, onChange, onRemove }: Workspa
     const tone = draft.readonly
         ? 'border border-amber-500/25 bg-amber-500/15 text-amber-300'
         : 'text-muted-foreground/40 hover:text-foreground/70 border border-white/[0.08] bg-white/[0.03]';
+    const nameError = workspaceNameError(draft.name);
     return (
-        <div className="flex items-center gap-1.5">
-            <input
-                aria-label="Workspace name"
-                className={`${SMALL_FIELD} w-24 shrink-0`}
-                onChange={(event) => {
-                    onChange({ ...draft, name: event.target.value });
-                }}
-                placeholder="name"
-                value={draft.name}
-            />
-            <input
-                aria-label="Workspace path"
-                className={`${SMALL_FIELD} min-w-0 flex-1`}
-                onChange={(event) => {
-                    onChange({ ...draft, path: event.target.value });
-                }}
-                placeholder={placeholder}
-                value={draft.path}
-            />
-            <button
-                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg font-mono text-[10px] transition-colors ${tone}`}
-                onClick={() => {
-                    onChange({ ...draft, readonly: !draft.readonly });
-                }}
-                title={draft.readonly ? 'Read-only' : 'Read-write'}
-                type="button"
-            >
-                ro
-            </button>
-            <button
-                aria-label="Remove the workspace"
-                className="text-muted-foreground/30 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors hover:bg-red-500/10 hover:text-red-400"
-                onClick={onRemove}
-                type="button"
-            >
-                <IconX size={14} />
-            </button>
+        <div>
+            <div className="flex items-center gap-1.5">
+                <input
+                    aria-invalid={nameError !== ''}
+                    aria-label="Workspace name"
+                    className={`${SMALL_FIELD} w-24 shrink-0 ${nameError === '' ? '' : 'border-red-500/40'}`}
+                    onChange={(event) => {
+                        onChange({ ...draft, name: event.target.value });
+                    }}
+                    placeholder="name"
+                    value={draft.name}
+                />
+                <input
+                    aria-label="Workspace path"
+                    className={`${SMALL_FIELD} min-w-0 flex-1`}
+                    onChange={(event) => {
+                        onChange({ ...draft, path: event.target.value });
+                    }}
+                    placeholder={placeholder}
+                    value={draft.path}
+                />
+                <button
+                    className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg font-mono text-[10px] transition-colors ${tone}`}
+                    onClick={() => {
+                        onChange({ ...draft, readonly: !draft.readonly });
+                    }}
+                    title={draft.readonly ? 'Read-only' : 'Read-write'}
+                    type="button"
+                >
+                    ro
+                </button>
+                <button
+                    aria-label="Remove the workspace"
+                    className="text-muted-foreground/30 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors hover:bg-red-500/10 hover:text-red-400"
+                    onClick={onRemove}
+                    type="button"
+                >
+                    <IconX size={14} />
+                </button>
+            </div>
+            {nameError !== '' && (
+                <p className="mt-1 text-[11px] text-red-400" role="alert">
+                    {nameError}
+                </p>
+            )}
         </div>
     );
 }
