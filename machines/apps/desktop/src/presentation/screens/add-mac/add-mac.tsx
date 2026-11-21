@@ -1,4 +1,4 @@
-import type { CallName, MachinesAdded } from '@jterrazz/station-api';
+import type { MachinesAdded } from '@jterrazz/station-api';
 import { useState } from 'react';
 
 import { useGesture } from '../../dependencies/use-gesture';
@@ -10,8 +10,6 @@ import { addInputOf, EMPTY_MAC } from './model';
 import type { MacDraft } from './model';
 
 import styles from './add-mac.module.css';
-
-const ADD_REREADS: readonly CallName[] = ['machines.list'];
 
 export type AddMacProps = { go: (to: Route) => void; onClose: () => void };
 
@@ -67,7 +65,7 @@ export function AddMac({ go, onClose }: AddMacProps) {
             onClose();
             go(machineRoute(out.Name));
         },
-        rereads: ADD_REREADS,
+        rereads: [],
         subject: name,
     });
     return (

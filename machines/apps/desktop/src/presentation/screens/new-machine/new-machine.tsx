@@ -8,7 +8,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { ReactElement } from 'react';
 
 import type { Reading as Answered } from '../../../application/use-cases/entry';
-import { useReread, useWatch } from '../../dependencies/dependencies';
+import { useWatch } from '../../dependencies/dependencies';
 import { useGesture } from '../../dependencies/use-gesture';
 import type { Gesture } from '../../dependencies/use-gesture';
 import { GestureButton, GestureOutcome } from '../../kit/gestures';
@@ -36,9 +36,8 @@ import type { Change } from './parts';
 
 import styles from './new-machine.module.css';
 
-const CREATE_REREADS: readonly CallName[] = ['machines.list', 'overview.read'];
+const CREATE_REREADS: readonly CallName[] = ['overview.read'];
 
-const LISTED: readonly CallName[] = ['machines.list'];
 export type NewMachineProps = { go: (to: Route) => void; onClose: () => void; opening: Opening };
 
 type SheetProps = NewMachineProps & {
@@ -58,7 +57,6 @@ function placeOf(gesture: Gesture<unknown>, answer: MachinesCallsNewMachine): Re
 // invariant: progress frame) or answered, whichever comes first, and only once: a refusal comes before either, so
 // invariant: it is drawn in the sheet.
 function useLaunch({ go, onClose }: Pick<NewMachineProps, 'go' | 'onClose'>) {
-    const reread = useReread();
     const launched = useRef(false);
     return (name: string) => {
         if (launched.current || name === '') {
@@ -67,7 +65,6 @@ function useLaunch({ go, onClose }: Pick<NewMachineProps, 'go' | 'onClose'>) {
         launched.current = true;
         onClose();
         go(machineRoute(name));
-        reread(LISTED);
     };
 }
 

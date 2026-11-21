@@ -12,7 +12,7 @@ import { holdAgainst, verdictShown } from '../../words/shown';
 
 import styles from './machine.module.css';
 
-const LIFECYCLE_REREADS: readonly CallName[] = ['machines.list', 'overview.read'];
+const LIFECYCLE_REREADS: readonly CallName[] = ['overview.read'];
 
 type VmProps = { mac: MachinesMacView; vm: MachinesVM };
 

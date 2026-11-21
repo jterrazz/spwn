@@ -15,7 +15,7 @@ import { AWAKE_GESTURE_WORDS } from '../../words/words';
 
 import styles from './machine.module.css';
 
-const AWAKE_REREADS: readonly CallName[] = ['awake.read', 'machines.list', 'overview.read'];
+const AWAKE_REREADS: readonly CallName[] = ['awake.read', 'overview.read'];
 
 type SheetProps = { found: Found; onClose: () => void };
 

@@ -40,9 +40,9 @@ import styles from './needs.module.css';
 const UPDATE_REREADS: readonly CallName[] = ['overview.read', 'apps.list'];
 const REMOVE_REREADS: readonly CallName[] = ['overview.read', 'background.list'];
 const MOVE_REREADS: readonly CallName[] = ['overview.read', 'disk.read'];
-const START_REREADS: readonly CallName[] = ['engine.read', 'machines.list', 'overview.read'];
+const START_REREADS: readonly CallName[] = ['engine.read', 'overview.read'];
 
-const LIFECYCLE_REREADS: readonly CallName[] = ['machines.list', 'overview.read'];
+const LIFECYCLE_REREADS: readonly CallName[] = ['overview.read'];
 
 type Props = {
     need: OverviewNeed;
