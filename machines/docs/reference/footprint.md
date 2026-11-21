@@ -406,7 +406,7 @@ Erase: none (OrbStack erases its own data, in its Settings).
 
 | Path                                          | Group       | Note                                                                                                                                                                      |
 | --------------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `~/.local/share/station/vms/cache/OCIs`       | can rebuild | the base images Tart pulled                                                                                                                                               |
+| `~/.local/share/station/vms/cache/OCIs`       | can rebuild | the image cache: the upstream disks Tart pulled, freed only by name (`station disk free tart`), since the next image built or fetched from one downloads it again         |
 | `~/.local/share/station/vms/cache/IPSWs`      | can rebuild |                                                                                                                                                                           |
 | `~/.local/share/station/vms/tmp`              | can rebuild |                                                                                                                                                                           |
 | `~/Library/Caches/com.github.cirruslabs.tart` | can rebuild | Tart's NSURLCache                                                                                                                                                         |

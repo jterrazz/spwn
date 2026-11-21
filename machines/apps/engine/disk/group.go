@@ -37,6 +37,9 @@ type Row struct {
 	Paths  []string
 	Bytes  int64
 	MoveTo string
+	// value: what the owner is told of the row beyond its group: the image
+	// cache's row says what freeing it costs.
+	Note string `json:",omitempty"`
 	// value: the walk has not answered: Bytes is the last size known.
 	Pending bool
 }
@@ -50,23 +53,31 @@ type Reading struct {
 	// value: the machine's disk by kind, and what its caches can free.
 	Kinds   []Amount `json:",omitempty"`
 	CanFree CanFree  `json:",omitempty,omitzero"`
+	// value: what the image cache can free, by its name; absent with the
+	// caches, and while it holds nothing.
+	ImageCache CanFree `json:",omitempty,omitzero"`
 	// value: what station holds on a Mac, nil on any other machine.
 	Station *StationPart `json:",omitempty"`
 }
 
 func ReadingOf(total, free int64, s Survey, h HeldReading, mac string) Reading {
-	// invariant: station's part is there only once the hypervisor and the
-	// walk of its logs answered: pending, failed or absent, it is nil, never
-	// zeros.
+	// invariant: station's part is there only once the hypervisor, the
+	// walk of its logs and its image cache's answered: pending, failed or
+	// absent, it is nil, never zeros. The image cache offers its free only
+	// with the caches.
 	r := Reading{Total: total, Free: free, Used: max(total-free, 0), Rows: Classify(s), Pending: h.State == HeldPending || s.SystemPending}
+	imageCache, imageFree := imageCacheOf(s, r.Rows)
 	for _, t := range s.Rows {
 		r.Pending = r.Pending || t.Pending
 	}
-	if h.State == HeldAnswered && s.Logs >= 0 {
-		station := StationOf(total, free, s.Logs, h.Held, mac)
+	if h.State == HeldAnswered && s.Logs >= 0 && imageCache >= 0 {
+		station := StationOf(total, free, s.Logs, imageCache, h.Held, mac)
 		r.Station = &station
 	}
 	r.Kinds, r.CanFree = KindsOf(total, free, s, r.Rows, h)
+	if r.CanFree.Sentence != "" {
+		r.ImageCache = imageFree
+	}
 	return r
 }
 
@@ -134,7 +145,7 @@ func Classify(s Survey) []Row {
 		}
 		for _, g := range Groups()[1:] {
 			if bytes[g] > 0 || (t.Unmeasured && frees && g == CanRebuild) {
-				out = append(out, Row{App: t.Entry.Name, Group: g, Paths: append([]string{}, paths[g]...), Bytes: bytes[g], Pending: t.Pending})
+				out = append(out, Row{App: t.Entry.Name, Group: g, Paths: append([]string{}, paths[g]...), Bytes: bytes[g], Note: noteOf(s, t.Entry.Name, g), Pending: t.Pending})
 			}
 		}
 	}
@@ -145,3 +156,12 @@ func Classify(s Survey) []Row {
 }
 
 const Station = "station"
+
+const imageCacheNote = "the image cache: the next image built or fetched from one downloads it again"
+
+func noteOf(s Survey, app string, g Group) string {
+	if g == CanRebuild && s.Hypervisor != "" && app == s.Hypervisor {
+		return imageCacheNote
+	}
+	return ""
+}

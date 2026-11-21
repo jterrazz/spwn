@@ -103,11 +103,31 @@ function Foot({ reading, freeAll, name, variant }: FootProps) {
     );
 }
 
+type ImageCacheFootProps = { reading: DiskReading; freeImageCache: DiskGesture; name: string };
+
+function ImageCacheFoot({ reading, freeImageCache, name }: ImageCacheFootProps) {
+    const { ImageCache } = reading;
+    if (ImageCache?.Call === undefined) {
+        return null;
+    }
+    return (
+        <div className={styles.foot}>
+            <p>{ImageCache.Sentence}</p>
+            <FreeAllButton
+                gesture={freeImageCache}
+                label={`Free the image cache, ${bytes(ImageCache.Bytes)}`}
+                name={name}
+            />
+        </div>
+    );
+}
+
 type DiskPanelProps = {
     reading: DiskReading;
     name: string;
     title: string;
     freeAll: DiskGesture;
+    freeImageCache: DiskGesture;
     by: 'holds' | 'kinds';
     sub?: ReactNode;
     station?: ReactNode;
@@ -119,6 +139,7 @@ export function DiskPanel({
     name,
     title,
     freeAll,
+    freeImageCache,
     by,
     sub,
     station,
@@ -145,6 +166,7 @@ export function DiskPanel({
             <Legend parts={parts} />
             {station}
             <Foot freeAll={freeAll} name={name} reading={reading} variant={freeAllVariant} />
+            <ImageCacheFoot freeImageCache={freeImageCache} name={name} reading={reading} />
         </Panel>
     );
 }
@@ -160,6 +182,7 @@ export function GroupPanel({ group, target }: GroupProps) {
                     lead={<AppIcon name={row.App} />}
                     row={row}
                     sentence={sentence([
+                        row.Note,
                         (row.Paths ?? []).join(SEPARATOR),
                         row.MoveTo === '' ? undefined : `to ${row.MoveTo}`,
                     ])}
@@ -221,6 +244,7 @@ function AppLine({ app, target }: { app: AppRow; target: Target | undefined }) {
             lead={<AppIcon name={app.app} />}
             row={row}
             sentence={sentence([
+                ...app.rows.map((one) => one.Note),
                 app.rows.flatMap((one) => one.Paths ?? []).join(SEPARATOR),
                 ...moves.map((to) => `to ${to}`),
             ])}

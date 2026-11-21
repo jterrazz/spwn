@@ -305,7 +305,7 @@ func (s *Surveyor) globAll(placed []disk.Entry) map[string][]string {
 }
 
 func (s *Surveyor) assemble(p plan, r reading) disk.Survey {
-	report := disk.Survey{Rows: []disk.Tally{}, Misplaced: []disk.MisplacedReport{}}
+	report := disk.Survey{Rows: []disk.Tally{}, Misplaced: []disk.MisplacedReport{}, Hypervisor: s.o.Hypervisor}
 	for _, ep := range p.entries {
 		row, show := s.row(ep, r)
 		if !show {

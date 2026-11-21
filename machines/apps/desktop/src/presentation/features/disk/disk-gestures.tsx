@@ -1,4 +1,4 @@
-import type { CallName, DiskOutcome, DiskRow, Target } from '@jterrazz/station-api';
+import type { CallName, DiskOutcome, DiskReading, DiskRow, Target } from '@jterrazz/station-api';
 import type { ReactNode } from 'react';
 
 import { useGesture } from '../../dependencies/use-gesture';
@@ -193,6 +193,19 @@ export function EraseLink({ row, target }: { row: DiskRow; target: Target | unde
 
 export function useFreeAll(target: Target | undefined): DiskGesture {
     return useGesture('disk.free', { input: {}, rereads: FREE_REREADS, subject: '', target });
+}
+
+export function useFreeImageCache(
+    reading: DiskReading | undefined,
+    target: Target | undefined,
+): DiskGesture {
+    const apps = reading?.ImageCache?.Apps ?? [];
+    return useGesture('disk.free', {
+        input: { Apps: [...apps] },
+        rereads: FREE_REREADS,
+        subject: apps.join(', '),
+        target,
+    });
 }
 
 type FreeAllProps = {

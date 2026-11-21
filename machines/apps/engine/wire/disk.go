@@ -45,8 +45,9 @@ func diskCommand(env kit.Env, m machine) *cobra.Command {
 
 func (m machine) diskOf(env kit.Env) *diskcalls.Surveyor {
 	var station diskcalls.Station
+	hypervisor := ""
 	if m.profile.Kind == coremachine.Computer {
-		station = diskStation{m}
+		station, hypervisor = diskStation{m}, catalog.HypervisorApp
 	}
 	return diskcalls.NewSurveyor(diskMachine{m.sys}, m.cat.Apps, diskcalls.SurveyorOptions{
 		Disk:        m.disk(),
@@ -58,6 +59,7 @@ func (m machine) diskOf(env kit.Env) *diskcalls.Surveyor {
 		Inventory:   inventory{apps: appsOf(env, m)},
 		Configurer:  setupSettingsWriter{settings: settingsOf(m)},
 		Station:     station,
+		Hypervisor:  hypervisor,
 	})
 }
 

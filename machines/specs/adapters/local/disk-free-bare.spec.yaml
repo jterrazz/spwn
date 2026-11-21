@@ -1,4 +1,4 @@
-description: 'a bare free empties every Can rebuild row with its app''s own commands, asking nothing'
+description: 'a bare free runs each cache row''s own command but the image cache''s, which is freed by its name'
 fixture:
     - ../__fixtures__/system-tools/
     - ./__fixtures__/disk-go/
@@ -12,18 +12,28 @@ runs:
           ●	homebrew	2 B freed
           ●	go	2 B freed
           ●	node	2 B freed
-          ●	tart	3 B freed
-          ●	Freed	9 B	nothing is lost
+          ●	Freed	6 B	nothing is lost
       files:
           .calls:
               contains:
                   - 'go clean -cache -modcache'
                   - 'brew cleanup --prune=all'
-                  - 'tart prune --entries=caches --older-than=0'
                   - 'npm cache clean --force'
-          Library/Caches/com.github.cirruslabs.tart/Cache.db: absent
+          Library/Caches/com.github.cirruslabs.tart/Cache.db:
+              equals: |
+                  db
           .cache/npm/_npx/x: absent
-    - command: '--version >/dev/null; /usr/bin/grep "^tart prune" .calls'
+    - command: '--version >/dev/null; /usr/bin/grep -c "^tart" .calls'
+      exit: 1
+      stdout: |
+          0
+    - command: 'disk free tart </dev/null'
       exit: 0
       stdout: |
-          tart prune --entries=caches --older-than=0
+          ●	tart	3 B freed
+          ●	Freed	3 B	nothing is lost
+      files:
+          .calls:
+              contains:
+                  - 'tart prune --entries=caches --older-than=0'
+          Library/Caches/com.github.cirruslabs.tart/Cache.db: absent

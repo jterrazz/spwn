@@ -14,6 +14,7 @@ const (
 	HolderMachineDisks Holder = "machine-disks"
 	HolderImages       Holder = "images"
 	HolderOtherVMs     Holder = "other-vms"
+	HolderImageCache   Holder = "image-cache"
 	HolderLeftovers    Holder = "leftovers"
 	HolderLogs         Holder = "logs"
 	HolderThisMac      Holder = "this-mac"
@@ -32,7 +33,7 @@ func (Holder) Enum() []string {
 func Holders() []Holder {
 	// value: what holds a Mac's disk, station's parts first, in the order
 	// its bar draws them.
-	return []Holder{HolderMachineDisks, HolderImages, HolderOtherVMs, HolderLeftovers, HolderLogs, HolderThisMac, HolderFree}
+	return []Holder{HolderMachineDisks, HolderImages, HolderOtherVMs, HolderImageCache, HolderLeftovers, HolderLogs, HolderThisMac, HolderFree}
 }
 
 type Holding struct {
@@ -154,11 +155,11 @@ type StationPart struct {
 	Verdict verdict.Verdict
 }
 
-func StationOf(total, free, logs int64, h Held, mac string) StationPart {
+func StationOf(total, free, logs, imageCache int64, h Held, mac string) StationPart {
 	// invariant: the Mac itself is what the volume uses beyond station's
 	// parts, never below 0; the verdict sums exactly what CanFree frees.
 	leftovers := h.unused(HolderLeftovers)
-	held := h.Holding() + max(logs, 0)
+	held := h.Holding() + max(imageCache, 0) + max(logs, 0)
 	itself := max(total-free-held, 0)
 	machines := append([]MachineDisk{{Name: mac, Bytes: itself}}, h.Machines...)
 	can := unusedFree(h.Unused)
@@ -170,12 +171,13 @@ func StationOf(total, free, logs int64, h Held, mac string) StationPart {
 			{Holder: HolderMachineDisks, Bytes: h.machines()},
 			{Holder: HolderImages, Bytes: h.images()},
 			{Holder: HolderOtherVMs, Bytes: h.others()},
+			{Holder: HolderImageCache, Bytes: max(imageCache, 0)},
 			{Holder: HolderLeftovers, Bytes: leftovers},
 			{Holder: HolderLogs, Bytes: max(logs, 0)},
 			{Holder: HolderThisMac, Bytes: itself},
 			{Holder: HolderFree, Bytes: free},
 		},
-		Sentence: "Outside any machine, Machines holds " + size.Bytes(held) + ": machine disks, images, other VMs, leftovers and its logs",
+		Sentence: "Outside any machine, Machines holds " + size.Bytes(held) + ": machine disks, images, other VMs, the image cache, leftovers and its logs",
 		Itself:   "This Mac itself holds " + size.Bytes(itself) + ".",
 		Machines: machines,
 		CanFree:  can,

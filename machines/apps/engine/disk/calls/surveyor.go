@@ -43,6 +43,9 @@ type SurveyorOptions struct {
 	Configurer Configurer
 	// value: the disks station holds on a Mac, nil on any other machine.
 	Station Station
+	// value: the hypervisor's package, whose Can rebuild row is the image
+	// cache, on a Mac; empty on any other machine.
+	Hypervisor string
 }
 
 type Station interface {
@@ -279,10 +282,12 @@ func (s *Surveyor) Free(ctx context.Context, names []string) ([]disk.Outcome, er
 	}
 	installed := s.installed(ctx)
 	if !named {
-		// invariant: a bare free empties every Can rebuild row, the rows
-		// whose caches hold anything, and only those.
+		// invariant: a bare free empties every Can rebuild row whose caches
+		// hold anything, and only those, but the image cache: the
+		// hypervisor's goes only by its name, since the next image built
+		// or fetched downloads it again.
 		for _, e := range s.Placed() {
-			if len(e.Disk.Free) > 0 && s.levelBytes(e, catalog.LevelCache) > 0 {
+			if e.Name != s.o.Hypervisor && len(e.Disk.Free) > 0 && s.levelBytes(e, catalog.LevelCache) > 0 {
 				entries = append(entries, e)
 			}
 		}

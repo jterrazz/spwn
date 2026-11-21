@@ -16,7 +16,7 @@ disk:
     paths:
         - path: '{data}/station/vms/cache/OCIs'
           level: cache
-          note: the base images Tart pulled
+          note: 'the image cache: the upstream disks Tart pulled, freed only by name (`station disk free tart`), since the next image built or fetched from one downloads it again'
         - path: '{data}/station/vms/cache/IPSWs'
           level: cache
         - path: '{data}/station/vms/tmp'

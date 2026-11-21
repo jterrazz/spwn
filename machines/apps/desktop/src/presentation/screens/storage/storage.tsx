@@ -14,7 +14,7 @@ import type { Found } from '../../../domain/machines/machines';
 import { shortDay } from '../../../domain/when';
 import { useReach, useRead, useWatch } from '../../dependencies/dependencies';
 import type { Reading } from '../../dependencies/dependencies';
-import { Freed, useFreeAll } from '../../features/disk/disk-gestures';
+import { Freed, useFreeAll, useFreeImageCache } from '../../features/disk/disk-gestures';
 import { DiskPanel, groupOf, GroupPanel } from '../../features/disk/disk-view';
 import { KeptPanel, UnusedFoot, UnusedPanel, useFreeUnused } from '../../features/disk/unused';
 import { HeldOutcomes } from '../../kit/gestures';
@@ -40,6 +40,7 @@ type DiskOfProps = { reading: DiskReading; mac: string; target: Target | undefin
 
 function DiskRead({ reading, mac, target }: DiskOfProps) {
     const freeAll = useFreeAll(target);
+    const freeImageCache = useFreeImageCache(reading, target);
     const station = reading.Station?.CanFree;
     const freeUnused = useFreeUnused(station, target);
     const erasable = groupOf(reading, (row) => diskGestureOf(row.Group)?.call === 'disk.erase');
@@ -49,6 +50,7 @@ function DiskRead({ reading, mac, target }: DiskOfProps) {
                 by="holds"
                 freeAll={freeAll}
                 freeAllVariant={station?.Call === undefined ? 'primary' : 'plain'}
+                freeImageCache={freeImageCache}
                 name={mac}
                 reading={reading}
                 station={
@@ -61,6 +63,7 @@ function DiskRead({ reading, mac, target }: DiskOfProps) {
             />
             <HeldOutcomes>
                 <Freed gesture={freeAll} />
+                <Freed gesture={freeImageCache} />
                 <Freed gesture={freeUnused} />
                 {station === undefined ? null : <UnusedPanel canFree={station} />}
                 <KeptPanel kept={reading.Station?.Kept} />

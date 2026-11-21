@@ -100,9 +100,9 @@ func TestStationPartLeavesTheMacItselfWhatItsPartsDoNotHold(t *testing.T) {
 		Machines: []MachineDisk{{Name: "linux-1", Bytes: 50}}, Images: []MachineDisk{{Name: "img", Bytes: 30}},
 		Unused: []Freeable{{Holder: HolderImages, Kind: FreeImage, Name: "img@1", Bytes: 30}, {Holder: HolderLeftovers, Kind: FreeDisk, Name: "gone", Bytes: 40}},
 	}
-	p := StationOf(1000, 600, 20, h, "mbp")
-	if p.Holds[3] != (Holding{Holder: HolderLeftovers, Bytes: 40}) || p.Holds[5] != (Holding{Holder: HolderThisMac, Bytes: 260}) || p.Machines[0] != (MachineDisk{Name: "mbp", Bytes: 260}) {
-		t.Fatalf("leftovers %+v, the Mac itself %+v, %+v, want 40 and 400 used - 50 - 30 - 40 - 20", p.Holds[3], p.Holds[5], p.Machines[0])
+	p := StationOf(1000, 600, 20, 0, h, "mbp")
+	if p.Holds[4] != (Holding{Holder: HolderLeftovers, Bytes: 40}) || p.Holds[6] != (Holding{Holder: HolderThisMac, Bytes: 260}) || p.Machines[0] != (MachineDisk{Name: "mbp", Bytes: 260}) {
+		t.Fatalf("leftovers %+v, the Mac itself %+v, %+v, want 40 and 400 used - 50 - 30 - 40 - 20", p.Holds[4], p.Holds[6], p.Machines[0])
 	}
 	if p.Itself != "This Mac itself holds 260 B." {
 		t.Fatalf("itself %q", p.Itself)
@@ -114,10 +114,10 @@ func TestStationPartLeavesTheMacItselfWhatItsPartsDoNotHold(t *testing.T) {
 		t.Fatalf("can free says %q", p.CanFree.Sentence)
 	}
 	h.Unread = "~/.local/state/station/vms/x.json"
-	if u := StationOf(1000, 600, 20, h, "mbp"); u.CanFree.Call != "" || u.Verdict.Sentence != "A machine record cannot be read." {
+	if u := StationOf(1000, 600, 20, 0, h, "mbp"); u.CanFree.Call != "" || u.Verdict.Sentence != "A machine record cannot be read." {
 		t.Fatalf("a record unread: can free %+v, verdict %q, want no gesture and the reason", u.CanFree, u.Verdict.Sentence)
 	}
-	none := StationOf(1000, 600, 0, Held{}, "mbp")
+	none := StationOf(1000, 600, 0, 0, Held{}, "mbp")
 	if none.Verdict.Sentence != "Nothing to free." || none.CanFree.Call != "" {
 		t.Fatalf("verdict %q, can free %+v, want nothing to free and no gesture", none.Verdict.Sentence, none.CanFree)
 	}
@@ -129,13 +129,66 @@ func TestEveryDiskInMachinesHomeIsMachinesWhoeverMadeIt(t *testing.T) {
 		Images:   []MachineDisk{{Name: "station-image-station-linux-2026.11.17", Bytes: 5}},
 		Others:   []MachineDisk{{Name: "development-macos", Bytes: 116}, {Name: "station-e2e-xcode-e6a1", Bytes: 77}},
 	}
-	p := StationOf(1000, 300, 0, h, "mbp")
-	if p.Holds[2] != (Holding{Holder: HolderOtherVMs, Bytes: 193}) || p.Holds[5] != (Holding{Holder: HolderThisMac, Bytes: 386}) {
-		t.Fatalf("other VMs %+v, the Mac itself %+v, want 193 and 700 used - 116 - 5 - 193", p.Holds[2], p.Holds[5])
+	p := StationOf(1000, 300, 0, 0, h, "mbp")
+	if p.Holds[2] != (Holding{Holder: HolderOtherVMs, Bytes: 193}) || p.Holds[6] != (Holding{Holder: HolderThisMac, Bytes: 386}) {
+		t.Fatalf("other VMs %+v, the Mac itself %+v, want 193 and 700 used - 116 - 5 - 193", p.Holds[2], p.Holds[6])
 	}
 	got, _ := KindsOf(1000, 300, Survey{System: 0, Apps: 0}, nil, HeldReading{State: HeldAnswered, Held: h})
 	if got[4] != (Amount{Kind: KindMachines, Bytes: 314}) || got[2] != (Amount{Kind: KindYourData, Bytes: 386}) {
 		t.Fatalf("kinds %+v, want machines and images 116 + 5 + 193 and your data the 386 left", got)
+	}
+}
+
+func TestTheImageCacheIsMachinesAndApartFromTheCaches(t *testing.T) {
+	s := Survey{System: 0, Apps: 0, Hypervisor: "hv"}
+	rows := []Row{{App: "go", Group: CanRebuild, Bytes: 9}, {App: "hv", Group: CanRebuild, Bytes: 113}, {App: "hv", Group: Misplaced, Bytes: 4}}
+	got, can := KindsOf(1000, 300, s, rows, holding(200))
+	want := []Amount{{KindSystem, 0}, {KindApps, 0}, {KindYourData, 378}, {KindCaches, 9}, {KindMachines, 200}, {KindImageCache, 113}, {KindFree, 300}}
+	if !slices.Equal(got, want) {
+		t.Fatalf("kinds %+v, want %+v: the image cache is neither a cache to free bare nor your data", got, want)
+	}
+	if can.Bytes != 9 || can.Call != FreeCall || len(can.Apps) != 0 {
+		t.Fatalf("caches can free %+v, want the 9 bytes of go alone, freed bare", can)
+	}
+	r := ReadingOf(1000, 300, Survey{System: 0, Apps: 0, Hypervisor: "hv", Rows: nil}, holding(200), "mbp")
+	if r.ImageCache.Call != "" {
+		t.Fatalf("image cache %+v with no row, want nothing to free", r.ImageCache)
+	}
+	bytes, free := imageCacheOf(s, Classify(Survey{}))
+	if bytes != 0 || free.Call != "" {
+		t.Fatalf("no row: %d, %+v", bytes, free)
+	}
+	bytes, free = imageCacheOf(s, rows)
+	if bytes != 113 || free.Call != FreeCall || !slices.Equal(free.Apps, []string{"hv"}) {
+		t.Fatalf("image cache %d, %+v, want 113 freed by hv's name", bytes, free)
+	}
+	if free.Sentence != "The image cache holds 113 B: the upstream disks Machines downloaded. The next image built or fetched from one downloads it again." {
+		t.Fatalf("image cache says %q", free.Sentence)
+	}
+	if b, _ := imageCacheOf(s, []Row{{App: "hv", Group: CanRebuild, Bytes: -1}}); b != -1 {
+		t.Fatalf("an unsized image cache is %d, want -1", b)
+	}
+	if b, f := imageCacheOf(Survey{}, rows); b != 0 || f.Call != "" {
+		t.Fatalf("no hypervisor: %d, %+v, want no image cache", b, f)
+	}
+	p := StationOf(1000, 300, 0, 113, Held{Machines: []MachineDisk{{Name: "linux-1", Bytes: 200}}}, "mbp")
+	if p.Holds[3] != (Holding{Holder: HolderImageCache, Bytes: 113}) || p.Holds[6] != (Holding{Holder: HolderThisMac, Bytes: 387}) {
+		t.Fatalf("image cache %+v, the Mac itself %+v, want 113 and 700 - 200 - 113", p.Holds[3], p.Holds[6])
+	}
+}
+
+func TestTheImageCachesRowSaysWhatFreeingItCosts(t *testing.T) {
+	if got := noteOf(Survey{Hypervisor: "hv"}, "hv", CanRebuild); got != imageCacheNote {
+		t.Fatalf("hv's Can rebuild row says %q", got)
+	}
+	for _, c := range []struct {
+		s   Survey
+		app string
+		g   Group
+	}{{Survey{Hypervisor: "hv"}, "go", CanRebuild}, {Survey{Hypervisor: "hv"}, "hv", Misplaced}, {Survey{}, "hv", CanRebuild}} {
+		if got := noteOf(c.s, c.app, c.g); got != "" {
+			t.Errorf("%s %s says %q, want nothing", c.app, c.g, got)
+		}
 	}
 }
 

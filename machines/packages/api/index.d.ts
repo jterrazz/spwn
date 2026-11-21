@@ -952,7 +952,7 @@ export type CoreVerdictVerdict = {
 
 export type DiskAmount = {
     Bytes: number;
-    Kind: 'system' | 'apps' | 'your-data' | 'caches' | 'machines' | 'free';
+    Kind: 'system' | 'apps' | 'your-data' | 'caches' | 'machines' | 'image-cache' | 'free';
 };
 
 export type DiskCallsEraseIn = {
@@ -976,6 +976,7 @@ export type DiskCallsMoveIn = {
 export type DiskCallsReadIn = Record<string, never>;
 
 export type DiskCanFree = {
+    Apps?: string[];
     Bytes: number;
     Call?: string;
     Frees?: DiskFreeable[];
@@ -984,14 +985,14 @@ export type DiskCanFree = {
 
 export type DiskFreeable = {
     Bytes: number;
-    Holder: 'machine-disks' | 'images' | 'other-vms' | 'leftovers' | 'logs' | 'this-mac' | 'free';
+    Holder: 'machine-disks' | 'images' | 'other-vms' | 'image-cache' | 'leftovers' | 'logs' | 'this-mac' | 'free';
     Kind: 'image' | 'disk' | 'folder';
     Name: string;
 };
 
 export type DiskHolding = {
     Bytes: number;
-    Holder: 'machine-disks' | 'images' | 'other-vms' | 'leftovers' | 'logs' | 'this-mac' | 'free';
+    Holder: 'machine-disks' | 'images' | 'other-vms' | 'image-cache' | 'leftovers' | 'logs' | 'this-mac' | 'free';
 };
 
 export type DiskKept = {
@@ -1026,6 +1027,7 @@ export type DiskOutcome = {
 export type DiskReading = {
     CanFree?: DiskCanFree;
     Free: number;
+    ImageCache?: DiskCanFree;
     Kinds?: DiskAmount[];
     Pending: boolean;
     Rows: DiskRow[] | null;
@@ -1039,6 +1041,7 @@ export type DiskRow = {
     Bytes: number;
     Group: 'misplaced' | 'can-rebuild' | 'your-data' | 'never-touched';
     MoveTo: string;
+    Note?: string;
     Paths: string[] | null;
     Pending: boolean;
 };
@@ -3736,9 +3739,9 @@ export type DiskFreeableKind = 'image' | 'disk' | 'folder';
 
 export type DiskGroup = 'misplaced' | 'can-rebuild' | 'your-data' | 'never-touched';
 
-export type DiskHolder = 'machine-disks' | 'images' | 'other-vms' | 'leftovers' | 'logs' | 'this-mac' | 'free';
+export type DiskHolder = 'machine-disks' | 'images' | 'other-vms' | 'image-cache' | 'leftovers' | 'logs' | 'this-mac' | 'free';
 
-export type DiskKind = 'system' | 'apps' | 'your-data' | 'caches' | 'machines' | 'free';
+export type DiskKind = 'system' | 'apps' | 'your-data' | 'caches' | 'machines' | 'image-cache' | 'free';
 
 export type EngineReadState = 'running' | 'stopped' | 'not-installed';
 

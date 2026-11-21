@@ -9,7 +9,7 @@
     - heading "Disk" [level=2]
     - paragraph: 582 GB of 994 GB used
     - button "Rescan"
-    - paragraph: "Outside any machine, Machines holds 20.1 GB: machine disks, images, other VMs, leftovers and its logs"
+    - paragraph: "Outside any machine, Machines holds 20.1 GB: machine disks, images, other VMs, the image cache, leftovers and its logs"
     - 'img "What holds the disk of macbook-pro: Machine disks 20 GB · Machines'' logs 120 MB · The Mac itself 562 GB · Free 412 GB"'
     - list "The parts":
       - listitem: Machine disks 20 GB

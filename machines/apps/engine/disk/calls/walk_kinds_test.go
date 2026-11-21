@@ -89,7 +89,7 @@ func TestAKindWhoseWalkHasNotAnsweredIsAbsentAndTheReadingPending(t *testing.T) 
 	for s := range surveys {
 		last = s
 	}
-	if r := disk.ReadingOf(1000, 500, last, disk.HeldReading{}, "linux-1"); r.Pending || len(r.Kinds) != len(disk.Kinds())-1 {
-		t.Fatalf("once every walk answered the kinds are %+v, pending %v; want all but machines", r.Kinds, r.Pending)
+	if r := disk.ReadingOf(1000, 500, last, disk.HeldReading{}, "linux-1"); r.Pending || len(r.Kinds) != len(disk.Kinds())-2 {
+		t.Fatalf("once every walk answered the kinds are %+v, pending %v; want all but machines and the image cache, a Mac's", r.Kinds, r.Pending)
 	}
 }

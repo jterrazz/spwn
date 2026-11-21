@@ -67,6 +67,9 @@ type Survey struct {
 	SystemPending bool
 	// value: a cache's walk has not answered, or did not within its budget.
 	CachesUnknown bool
+	// value: the app whose Can rebuild row is the image cache: the
+	// hypervisor's package on a Mac, empty on any other machine.
+	Hypervisor string
 }
 
 type Outcome struct {

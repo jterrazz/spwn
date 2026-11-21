@@ -1307,6 +1307,10 @@
       "Word": "Free",
       "Tone": "plain"
     },
+    "image-cache": {
+      "Word": "Image cache",
+      "Tone": "plain"
+    },
     "images": {
       "Word": "Images",
       "Tone": "plain"
@@ -1343,6 +1347,10 @@
     },
     "free": {
       "Word": "Free",
+      "Tone": "plain"
+    },
+    "image-cache": {
+      "Word": "Image cache",
       "Tone": "plain"
     },
     "machines": {

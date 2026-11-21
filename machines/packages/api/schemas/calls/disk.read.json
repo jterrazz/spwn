@@ -39,6 +39,7 @@
             "your-data",
             "caches",
             "machines",
+            "image-cache",
             "free"
           ],
           "type": "string"
@@ -53,6 +54,12 @@
     "disk.CanFree": {
       "additionalProperties": false,
       "properties": {
+        "Apps": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
         "Bytes": {
           "type": "integer"
         },
@@ -86,6 +93,7 @@
             "machine-disks",
             "images",
             "other-vms",
+            "image-cache",
             "leftovers",
             "logs",
             "this-mac",
@@ -124,6 +132,7 @@
             "machine-disks",
             "images",
             "other-vms",
+            "image-cache",
             "leftovers",
             "logs",
             "this-mac",
@@ -189,6 +198,9 @@
         "Free": {
           "type": "integer"
         },
+        "ImageCache": {
+          "$ref": "#/$defs/disk.CanFree"
+        },
         "Kinds": {
           "items": {
             "$ref": "#/$defs/disk.Amount"
@@ -245,6 +257,9 @@
           "type": "string"
         },
         "MoveTo": {
+          "type": "string"
+        },
+        "Note": {
           "type": "string"
         },
         "Paths": {

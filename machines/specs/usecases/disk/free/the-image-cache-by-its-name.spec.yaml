@@ -1,0 +1,14 @@
+description: 'a bare free leaves the image cache, which goes only by its name'
+env: two-macs
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].disk.files["~/.local/share/station/vms/cache/OCIs/ghcr.io/cirruslabs/macos/disk.img"] = 113000000000'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'disk free >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].disk.files | {go: .["~/Library/Caches/go-build/00/a"], images: .["~/.local/share/station/vms/cache/OCIs/ghcr.io/cirruslabs/macos/disk.img"]}'' world.json'
+      exit: 0
+      stdout: |
+          {"go":null,"images":113000000000}
+    - command: 'disk free tart'
+      exit: 0
+      stdout: |
+          ●	tart	113 GB freed
+          ●	Freed	113 GB	nothing is lost

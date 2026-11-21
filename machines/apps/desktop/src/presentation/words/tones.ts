@@ -74,6 +74,7 @@ export const DISK_KIND_COLOURS: Readonly<Record<DiskAmount['Kind'], ShareColour>
     apps: 'blue',
     caches: 'teal',
     free: 'system',
+    'image-cache': 'sky',
     machines: 'indigo',
     system: 'slate',
     'your-data': 'purple',
@@ -81,6 +82,7 @@ export const DISK_KIND_COLOURS: Readonly<Record<DiskAmount['Kind'], ShareColour>
 
 export const DISK_HOLDER_COLOURS: Readonly<Record<DiskHolding['Holder'], ShareColour>> = {
     free: 'system',
+    'image-cache': 'teal',
     images: 'purple',
     leftovers: 'pink',
     logs: 'sky',

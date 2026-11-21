@@ -2,7 +2,7 @@ import type { DiskReading, Target } from '@jterrazz/station-api';
 
 import { SEPARATOR } from '../../../../domain/separator';
 import { useWatch } from '../../../dependencies/dependencies';
-import { Freed, useFreeAll } from '../../../features/disk/disk-gestures';
+import { Freed, useFreeAll, useFreeImageCache } from '../../../features/disk/disk-gestures';
 import { ByApp, DiskPanel } from '../../../features/disk/disk-view';
 import { HeldOutcomes } from '../../../kit/gestures';
 import { Unanswered } from '../../../kit/readings';
@@ -50,12 +50,14 @@ type ReadProps = {
 
 function Read({ reading, name, target, vm, go }: ReadProps) {
     const freeAll = useFreeAll(target);
+    const freeImageCache = useFreeImageCache(reading, target);
     return (
         <Screen>
             <Page>
                 <DiskPanel
                     by="kinds"
                     freeAll={freeAll}
+                    freeImageCache={freeImageCache}
                     name={name}
                     reading={reading}
                     sub={vm ? <Inside go={go} /> : reading.Station?.Itself}
@@ -63,6 +65,7 @@ function Read({ reading, name, target, vm, go }: ReadProps) {
                 />
                 <HeldOutcomes>
                     <Freed gesture={freeAll} />
+                    <Freed gesture={freeImageCache} />
                     <ByApp foot={FOOT} name={name} reading={reading} target={target} />
                 </HeldOutcomes>
             </Page>

@@ -8,4 +8,4 @@ runs:
           {"v":2,"id":"1","watch":"disk.read","in":{}}
       exit: 0
       stdout: |
-          {"kinds":[["system",21400000000],["apps",0],["your-data",549800000000],["caches",34800000000],["free",388000000000]],"station":null}
+          {"kinds":[["system",21400000000],["apps",0],["your-data",549800000000],["caches",34800000000],["image-cache",0],["free",388000000000]],"station":null}
