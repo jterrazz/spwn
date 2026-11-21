@@ -11,10 +11,10 @@ import type { EngineError } from '../../../../domain/engine-error';
 import { clock } from '../../../../domain/format';
 import { targetOf } from '../../../../domain/machines/machines';
 import type { Found } from '../../../../domain/machines/machines';
-import { SEPARATOR } from '../../../../domain/separator';
 import { useRead } from '../../../dependencies/dependencies';
 import { Unanswered } from '../../../kit/readings';
 import { Button, Missing, Panel, SearchField, Switch } from '../../../ui/index';
+import { logFootWord, readingWord } from '../../../words/words';
 import { LineList } from './line-list';
 
 import styles from './log.module.css';
@@ -24,8 +24,6 @@ type Source = 'console' | 'setup';
 type Heard =
     | { kind: 'failed'; error: EngineError }
     | { kind: 'read'; out: EngineLog | MachinesLogOutput; at: Date };
-
-const FOOT = 'a reading, not a live feed: press Refresh for the newest lines';
 
 type Asked =
     | { call: 'engine.log'; input: EngineLogInput }
@@ -92,7 +90,7 @@ function Console({ memory, lines, none, at, onRefresh }: ConsoleProps) {
                 </Button>
             </div>
             <LineList
-                foot={`read at ${clock(at) ?? ''}${SEPARATOR}${FOOT}`}
+                foot={logFootWord(clock(at) ?? '')}
                 lines={lines}
                 memory={memory}
                 none={none}
@@ -154,7 +152,12 @@ function ConsoleBody({ vm, target }: { vm: string; target: Target | undefined })
                 key={round}
                 target={target}
             />
-            <Lines memory={vm} onRefresh={refresh} reading="Reading its console…" shown={shown} />
+            <Lines
+                memory={vm}
+                onRefresh={refresh}
+                reading={readingWord('its console')}
+                shown={shown}
+            />
         </>
     );
 }
@@ -164,7 +167,12 @@ function MacLog({ mac, target }: { mac: string; target: Target | undefined }) {
     return (
         <Panel title="What Machines did on this Mac">
             <Reader call="engine.log" heard={heard} input={{}} key={round} target={target} />
-            <Lines memory={mac} onRefresh={refresh} reading="Reading its lines…" shown={shown} />
+            <Lines
+                memory={mac}
+                onRefresh={refresh}
+                reading={readingWord('its lines')}
+                shown={shown}
+            />
         </Panel>
     );
 }

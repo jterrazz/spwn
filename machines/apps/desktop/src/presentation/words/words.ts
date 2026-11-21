@@ -10,6 +10,7 @@ import type { CoreKind } from '../../application/use-cases/core-flow';
 import type { UpdateKind } from '../../application/use-cases/update-flow';
 import type { WindowRelease } from '../../application/use-cases/window-update-flow';
 import { bytes } from '../../domain/format';
+import { SEPARATOR } from '../../domain/separator';
 import type { WindowUpdateCode } from '../../domain/window-update';
 import type { DiskCall } from './provisional';
 
@@ -153,6 +154,14 @@ export const THE_MAC_ITSELF_WORD = 'the Mac itself';
 export const NO_PURPOSE_WORD = 'No purpose given';
 
 export const SHOW_OLDER_WORD = 'Show older';
+
+export function readingWord(what: string): string {
+    return `Reading ${what}…`;
+}
+
+export function logFootWord(read: string): string {
+    return `read at ${read}${SEPARATOR}a reading, not a live feed: press Refresh for the newest lines`;
+}
 
 // value: the window's words around a create that failed: the step's sentence and the lines are the engine's.
 export const FAILED_CREATE_WORDS = {

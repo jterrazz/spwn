@@ -11,6 +11,7 @@ import { asSentence, capitalised, Missing, Panel, StatePill, Value, Verdict } fr
 import { shownOrWithheld } from '../ui/secret';
 import { failedState } from '../words/failed';
 import { ownState, verdictShown } from '../words/shown';
+import { readingWord } from '../words/words';
 
 import styles from '../ui/page.module.css';
 
@@ -73,7 +74,7 @@ export function Reading({ size, what }: { size: 'page' | 'tab'; what: string }) 
         <Verdict
             line="The engine has not answered yet"
             size={size}
-            title={`Reading ${what}…`}
+            title={readingWord(what)}
             {...ownState('reading')}
         />
     );

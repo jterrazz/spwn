@@ -15,6 +15,7 @@ import {
 import type { Shelf } from '../../../features/machinefile/model';
 import { Unanswered } from '../../../kit/readings';
 import { Panel, Switch } from '../../../ui/index';
+import { readingWord } from '../../../words/words';
 
 import styles from './packages.module.css';
 
@@ -73,7 +74,7 @@ export function Inventory({
             {drift.kind === 'failed' ? (
                 <Unanswered error={drift.error} size="panel" />
             ) : (
-                <p className={styles.text}>Reading its machine file…</p>
+                <p className={styles.text}>{readingWord('its machine file')}</p>
             )}
         </Panel>
     );

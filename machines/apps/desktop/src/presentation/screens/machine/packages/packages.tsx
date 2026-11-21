@@ -22,6 +22,7 @@ import { useRouter } from '../../../navigation/router';
 import { Panel, Row, Screen, Verdict } from '../../../ui/index';
 import { Page } from '../../../ui/page';
 import { chapterNoun, fileJoinOf, verdictShown } from '../../../words/shown';
+import { readingWord } from '../../../words/words';
 import { Differs } from './differs';
 import { Inventory } from './inventory';
 import { PlanView } from './plan';
@@ -136,7 +137,7 @@ function UpgradeBody({ drift }: { drift: Read<MachinefileDrift> }) {
             <p className={styles.text}>
                 {drift.kind === 'failed'
                     ? 'What the engine answered is below'
-                    : 'Reading how it upgrades…'}
+                    : readingWord('how it upgrades')}
             </p>
         );
     }

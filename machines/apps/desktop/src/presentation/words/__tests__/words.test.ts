@@ -22,6 +22,7 @@ const RULES: readonly Rule[] = [
         name: 'a table keyed by a wire code',
         shape: /Record<\s*(?:NonNullable<\s*)?[A-Z]\w*\['\w+'\]/gu,
     },
+    { name: 'a reading sentence written outside words.ts', shape: /\bReading [^\n'"`<>]*…/gu },
 ];
 
 type Exempt = { file: RegExp; rule: string; why: string };
@@ -157,6 +158,8 @@ describe('words', () => {
             "state={{ tone: 'ok', word: 'settled' }}",
             "return need.Section === 'ports';",
             "const GESTURES: Readonly<Record<DiskRow['Group'], Gesture>> = {};",
+            '<p className={styles.text}>Reading its machine file…</p>',
+            '<Lines memory={vm} reading="Reading its console…" />',
         ];
         const lawful = [
             '<StatePill tone={TONES[port.Answer]} word={WORDS[port.Answer]} />',
@@ -166,6 +169,8 @@ describe('words', () => {
             "if (reading.kind === 'failed') {",
             "return route.page === 'machine';",
             'const TITLES: Record<PlainPage, string> = {};',
+            "<p className={styles.text}>{readingWord('its machine file')}</p>",
+            '<Reading size="tab" what="its apps" />',
         ];
 
         // When - each is read as a page's line
@@ -173,8 +178,8 @@ describe('words', () => {
 
         // Then - every forbidden line is found once, no lawful one
         expect(found).toStrictEqual([
-            [1, 1, 1, 1, 1],
-            [0, 0, 0, 0, 0, 0, 0],
+            [1, 1, 1, 1, 1, 1, 1],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
         ]);
     });
 
