@@ -6,6 +6,11 @@ import Foundation
 // again. A page opened is drawn at once as it was last seen, across back and
 // across the panel's closings (the last `kept` pages seen), then as its
 // watch tells it; a page a watch that ended tells is never shown.
+// invariant: ADR-069: a page drawn as last seen gives way only to a whole
+// page of its watch (`Page.whole`): the pages the watch tells while it is
+// still reading are held, the newest drawn once `patience` passed without
+// a whole one, so an opening draws the page seen, then at most the page
+// read, never a page half read between the two.
 public final class Navigation: @unchecked Sendable {
     public static let ports = "menubar.ports"
     public static let awake = "menubar.awake"
@@ -26,6 +31,12 @@ public final class Navigation: @unchecked Sendable {
     private var seen: [String: Page] = [:]
     private var order: [String] = []
     private var picked: String?
+    // value: the watch whose page is drawn as last seen until a whole one
+    // comes, the page it told meanwhile, and the count of holds begun, so a
+    // patience that ran out ends only its own hold.
+    private var holding: String?
+    private var held: Page?
+    private var holds = 0
     // value: called with Activity's window each time the owner picks one,
     // so the app keeps it for the next visit.
     public var remember: (@Sendable (String) -> Void)?
@@ -41,6 +52,10 @@ public final class Navigation: @unchecked Sendable {
 
     // value: how many pages are kept as last seen, the least recent dropped.
     public static let kept = 8
+    // value: how long a page drawn as last seen waits for a whole page of
+    // its watch before the page read so far replaces it: past the slowest
+    // whole machine page the bench met on a lone Mac (576 ms).
+    public static let patience = 0.75
 
     public var watched: String? { lock.withLock { stack.last } }
 
@@ -90,8 +105,52 @@ public final class Navigation: @unchecked Sendable {
             if stack.last != page { stack.append(page) }
             return seen[page]
         }
-        if let last { shown(page, last) }
+        if let last { hold(page, last) }
         watch(page)
+    }
+
+    // value: a page drawn as last seen, held until its watch tells a whole
+    // page or `patience` ran out.
+    func hold(_ page: String, _ last: Page) {
+        let hold = lock.withLock { () -> Int in
+            holds += 1
+            holding = page
+            held = nil
+            return holds
+        }
+        shown(page, last)
+        let clock = self.clock
+        Task.detached { [weak self] in
+            guard (try? await clock.sleep(Navigation.patience)) != nil else { return }
+            self?.waited(hold)
+        }
+    }
+
+    func waited(_ hold: Int) {
+        let (page, last) = lock.withLock { () -> (String?, Page?) in
+            guard holds == hold, let page = holding else { return (nil, nil) }
+            defer { holding = nil; held = nil }
+            return (page, held)
+        }
+        guard let page, let last, watched == page else { return }
+        lock.withLock { keep(last, as: page) }
+        shown(page, last)
+    }
+
+    // value: a page its watch told: drawn, or held while a page seen waits
+    // for a whole one.
+    func told(_ p: Page, on page: String) {
+        let drawn = lock.withLock { () -> Bool in
+            guard stack.last == page else { return false }
+            if holding == page, !p.whole {
+                held = p
+                return false
+            }
+            if holding == page { holding = nil; held = nil }
+            keep(p, as: page)
+            return true
+        }
+        if drawn { shown(page, p) }
     }
 
     // invariant: the window picked replaces Activity on top, never a level
@@ -113,9 +172,8 @@ public final class Navigation: @unchecked Sendable {
                 self.sampled?(s)
                 return
             }
-            guard case .page(let p) = event, let self, self.watched == page else { return }
-            self.lock.withLock { self.keep(p, as: page) }
-            self.shown(page, p)
+            guard case .page(let p) = event, let self else { return }
+            self.told(p, on: page)
         }
         lock.withLock {
             task?.cancel()
@@ -133,8 +191,11 @@ public final class Navigation: @unchecked Sendable {
             let under = stack.last
             return (was, under, under.flatMap { seen[$0] })
         }
-        if let under {
-            shown(under, page)
+        if let under, let page {
+            hold(under, page)
+            watch(under)
+        } else if let under {
+            shown(under, nil)
             watch(under)
         } else if let was {
             shown(was, nil)
@@ -147,6 +208,8 @@ public final class Navigation: @unchecked Sendable {
         let was = lock.withLock { () -> String? in
             task?.cancel()
             task = nil
+            holding = nil
+            held = nil
             defer { stack = [] }
             return stack.last
         }

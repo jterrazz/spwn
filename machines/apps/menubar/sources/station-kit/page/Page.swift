@@ -35,6 +35,16 @@ public struct Page: Codable, Equatable, Sendable {
     }
 
     public var loading: Bool { state == "loading" }
+
+    // value: a page read whole, by the engine's own rule of a full page
+    // (engine/process/opening.go): it has its header, it is not loading, and
+    // no value or mark of it is still pending.
+    public var whole: Bool {
+        guard header != nil, !loading, let data = try? encoded() else { return false }
+        return Self.pending.allSatisfy { data.range(of: $0) == nil }
+    }
+
+    static let pending = [Data(#""mark":"pending""#.utf8), Data(#""kind":"pending""#.utf8)]
     public func section(_ id: String) -> Section? { sections?.first { $0.id == id } }
     public func action(_ id: String) -> Action? { actions?.first { $0.id == id } }
     public var pageActions: [Action] { (actions ?? []).filter { $0.on == "page" && $0.run != nil } }

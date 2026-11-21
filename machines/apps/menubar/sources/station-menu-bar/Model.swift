@@ -69,8 +69,15 @@ final class Model {
     @ObservationIgnored private lazy var turner = Turner { [weak self] in self?.turn = $0 }
 
     init() {
+        // invariant: a page Navigation draws on the main thread (the one seen,
+        // on a gesture) is drawn in that same turn, before the panel's next
+        // frame; only what a watch tells hops to the main actor.
         navigation = Navigation(socket: socket, window: UserDefaults.standard.string(forKey: Self.windowKey)) { [weak self] page, shown in
-            Task { @MainActor in self?.show(page, shown) }
+            guard Thread.isMainThread else {
+                Task { @MainActor in self?.show(page, shown) }
+                return
+            }
+            MainActor.assumeIsolated { self?.show(page, shown) }
         }
         navigation.remember = { flag in UserDefaults.standard.set(flag, forKey: Model.windowKey) }
         state.windows = UserDefaults.standard.dictionary(forKey: Self.windowsKey) as? [String: String] ?? [:]

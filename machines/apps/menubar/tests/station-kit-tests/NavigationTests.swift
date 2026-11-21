@@ -104,6 +104,120 @@ final class NavigationTests: XCTestCase {
     }
 }
 
+// value: a clock whose sleeps never end but Navigation's patience, which
+// ends when the test says: a watch's reconnect never comes, and a page
+// seen waits for its whole page until `release`.
+final class HeldClock: StreamClock, @unchecked Sendable {
+    private let lock = NSLock()
+    private var waiters: [Int: (seconds: Double, go: CheckedContinuation<Void, Error>)] = [:]
+    private var next = 0
+
+    func sleep(_ seconds: Double) async throws {
+        let id = lock.withLock { next += 1; return next }
+        try await withTaskCancellationHandler {
+            try await withCheckedThrowingContinuation { (c: CheckedContinuation<Void, Error>) in
+                lock.withLock { waiters[id] = (seconds, c) }
+                if Task.isCancelled { lock.withLock { waiters.removeValue(forKey: id) }?.go.resume(throwing: CancellationError()) }
+            }
+        } onCancel: {
+            lock.withLock { waiters.removeValue(forKey: id) }?.go.resume(throwing: CancellationError())
+        }
+    }
+
+    var patient: Int { lock.withLock { waiters.values.filter { $0.seconds == Navigation.patience }.count } }
+
+    func release() {
+        let ready = lock.withLock { () -> [CheckedContinuation<Void, Error>] in
+            let ids = waiters.filter { $0.value.seconds == Navigation.patience }.map(\.key)
+            return ids.compactMap { waiters.removeValue(forKey: $0)?.go }
+        }
+        for go in ready { go.resume() }
+    }
+}
+
+final class Titles: @unchecked Sendable {
+    private let lock = NSLock()
+    private var list: [String] = []
+    func add(_ page: Page?) { lock.withLock { list.append(page?.header?.title ?? "nil") } }
+    var all: [String] { lock.withLock { list } }
+}
+
+@MainActor
+final class KeptPageTests: XCTestCase {
+    func until(_ condition: @escaping () -> Bool) async {
+        for _ in 0..<500 where !condition() {
+            try? await Task.sleep(nanoseconds: 10_000_000)
+        }
+    }
+
+    static func page(_ title: String, reading: Bool = false, state: String? = nil) throws -> Page {
+        let row = reading ? #","items":[{"row":{"id":"reading","label":"reading","mark":"pending"}}]"# : ""
+        let state = state.map { #","state":""# + $0 + #"""# } ?? ""
+        return try Page.decode(Data((#"{"schema":""# + pageSchema + #"","id":"menubar.machine","header":{"title":""# + title + #""},"sections":[{"id":"summary""# + row + "}]" + state + "}").utf8))
+    }
+
+    // invariant: the engine's rule of a full page: a header, no loading
+    // state, no value or mark still pending.
+    func testAPageIsWholeByTheEnginesRuleOfAFullPage() throws {
+        XCTAssertTrue(try Self.page("mac-mini").whole)
+        XCTAssertFalse(try Self.page("mac-mini", reading: true).whole, "a mark still pending")
+        XCTAssertFalse(try Self.page("mac-mini", state: "loading").whole, "a page loading")
+        var value = try Self.page("mac-mini")
+        value.sections?[0].caption = [Value(kind: "pending")]
+        XCTAssertFalse(value.whole, "a value still pending")
+        var bare = try Self.page("mac-mini")
+        bare.header = nil
+        XCTAssertFalse(bare.whole, "a page without its header")
+    }
+
+    // invariant: ADR-069: a page opened again is drawn as last seen, then
+    // as the first whole page its watch tells; the pages it tells while
+    // still reading are never drawn between the two.
+    func testAPageSeenGivesWayOnlyToAWholePageOfItsWatch() async throws {
+        let titles = Titles(), clock = HeldClock()
+        let nav = Navigation(socket: "/private/tmp/station-work/mb-none-\(getpid()).sock", clock: clock) { _, page in titles.add(page) }
+        let watch = PageID.of("mac-mini")
+        nav.open(watch)
+        nav.told(try Self.page("seen"), on: watch)
+        nav.home()
+        XCTAssertEqual(titles.all, ["seen", "nil"])
+        nav.open(watch)
+        XCTAssertEqual(titles.all.last, "seen", "the page seen waited for its watch")
+        nav.told(try Self.page("half", reading: true), on: watch)
+        XCTAssertEqual(titles.all.last, "seen", "a page still reading replaced the page seen")
+        nav.told(try Self.page("read"), on: watch)
+        XCTAssertEqual(titles.all, ["seen", "nil", "seen", "read"])
+        nav.told(try Self.page("next", reading: true), on: watch)
+        XCTAssertEqual(titles.all.last, "next", "a page drawn from its watch held back the next one")
+    }
+
+    // invariant: a page seen whose watch tells no whole page gives way to
+    // the newest page read once `patience` passed, and a patience that ran
+    // out after its page was left draws nothing.
+    func testAPageSeenGivesWayToThePageReadOncePatienceRanOut() async throws {
+        let titles = Titles(), clock = HeldClock()
+        let nav = Navigation(socket: "/private/tmp/station-work/mb-none-\(getpid()).sock", clock: clock) { _, page in titles.add(page) }
+        let watch = PageID.of("mac-mini")
+        nav.open(watch)
+        nav.told(try Self.page("seen"), on: watch)
+        nav.home()
+        nav.open(watch)
+        nav.told(try Self.page("half", reading: true), on: watch)
+        await until { clock.patient == 1 }
+        clock.release()
+        await until { titles.all.last == "half" }
+        XCTAssertEqual(titles.all, ["seen", "nil", "seen", "half"])
+        nav.home()
+        nav.open(watch)
+        nav.told(try Self.page("later", reading: true), on: watch)
+        await until { clock.patient == 1 }
+        nav.home()
+        clock.release()
+        try await Task.sleep(nanoseconds: 50_000_000)
+        XCTAssertEqual(titles.all, ["seen", "nil", "seen", "half", "nil", "half", "nil"])
+    }
+}
+
 final class Said: @unchecked Sendable {
     private let lock = NSLock()
     private var calls: [String] = []
