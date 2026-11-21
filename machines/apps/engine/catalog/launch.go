@@ -44,10 +44,24 @@ func EnginePlist(home string) string {
 
 const AgentLabel = StationLaunchPrefix + "agent"
 
+// value: the arguments each job runs the engine's binary with, in both modes.
+var (
+	EngineArgs = []string{"engine", "run"}
+	AgentArgs  = []string{"machines", "agent"}
+)
+
 func AgentPlist(home string) string {
 	// value: the launchd agent that keeps `station machines agent` serving
 	// this Mac's device key, installed and restarted with the engine.
 	return agentPlist(home, AgentLabel)
+}
+
+const BundledEngine = "Spwn Engine" // value: the engine's file inside Spwn.app on a Mac with the window (ADR-073, mode A), the name Activity Monitor gives its processes; the bare binary of a Mac without the app keeps StationBinary.
+
+const BundledEnginePath = "Contents/MacOS/" + BundledEngine // value: where Spwn.app holds the engine, relative to the bundle, as launchd's BundleProgram reads it.
+
+func BundledPlist(label string) string {
+	return "Contents/Library/LaunchAgents/" + label + ".plist"
 }
 
 const (

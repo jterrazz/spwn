@@ -2,6 +2,7 @@
   "line": "curl -fsSL https://spwn.sh/install.sh | bash",
   "dir": "~/.local/bin",
   "binary": "station",
+  "bundled": "Contents/MacOS/Spwn Engine",
   "record": {
     "root": "state",
     "path": "station/engine.json",

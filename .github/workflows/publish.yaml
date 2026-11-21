@@ -14,6 +14,8 @@ permissions:
 env:
     SIGNING_SECRETS_PROJECT: studio-ci
     SIGNING_SECRETS_PATH: /spwn
+    # value: the version stamped into every station binary, the one inside Spwn.app included: the tag, or dry-run-<sha> on a dry run
+    STATION_VERSION: ${{ github.ref_type == 'tag' && github.ref_name || format('dry-run-{0}', github.sha) }}
 
 # invariant: one run per ref at a time, never cancelled half way through a release
 concurrency:
@@ -56,7 +58,7 @@ jobs:
                   cache-dependency-path: machines/go.work.sum
             - name: Build the binaries
               env:
-                  LDFLAGS: -X github.com/jterrazz/studio-station/apps/engine/wire.version=${{ github.ref_type == 'tag' && github.ref_name || format('dry-run-{0}', github.sha) }}
+                  LDFLAGS: -X github.com/jterrazz/studio-station/apps/engine/wire.version=${{ env.STATION_VERSION }}
               run: |
                   set -euo pipefail
                   dist="$RUNNER_TEMP/station"
@@ -99,7 +101,7 @@ jobs:
               env:
                   # value: the oldest macOS the binaries run on, Sonoma
                   MACOSX_DEPLOYMENT_TARGET: '14.0'
-                  LDFLAGS: -X github.com/jterrazz/studio-station/apps/engine/wire.version=${{ github.ref_type == 'tag' && github.ref_name || format('dry-run-{0}', github.sha) }}
+                  LDFLAGS: -X github.com/jterrazz/studio-station/apps/engine/wire.version=${{ env.STATION_VERSION }}
               run: |
                   set -euo pipefail
                   dist="$RUNNER_TEMP/station"
@@ -154,11 +156,12 @@ jobs:
                       curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal
                       echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
                   fi
+            # invariant: Spwn.app carries the darwin-arm64 station built and signed above, which the window's signing signs again under the bundle's identifier (ADR-073)
             - name: Build Spwn.app
               run: |
                   set -euo pipefail
                   cargo --version
-                  make window
+                  make window ENGINE="$RUNNER_TEMP/station/station-darwin-arm64" ENGINE_VERSION="$STATION_VERSION"
                   vtool -show-build .artifacts/window/Spwn.app/Contents/MacOS/spwn-window | awk '$1 == "minos"'
             - name: Sign, notarize and staple Station.app and Spwn.app
               if: needs.signing.outputs.signed == 'true'
@@ -193,6 +196,7 @@ jobs:
                   ditto -c -k --keepParent .artifacts/window/Spwn.app "$RUNNER_TEMP/station/Spwn_darwin_arm64.zip"
                   codesign -dv .artifacts/menubar/Station.app
                   codesign -dv .artifacts/window/Spwn.app
+                  codesign -dv ".artifacts/window/Spwn.app/Contents/MacOS/Spwn Engine"
             - name: Delete the signing keychain
               if: always() && needs.signing.outputs.signed == 'true'
               run: ../scripts/sign-macos.sh cleanup

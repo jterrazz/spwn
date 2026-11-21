@@ -41,7 +41,14 @@
             "../../../.artifacts/window/icon/Spwn.icns",
             "../../../.artifacts/window/icon/Assets.car"
         ],
-        "macOS": { "minimumSystemVersion": "26.0" }
+        "macOS": {
+            "minimumSystemVersion": "26.0",
+            "files": {
+                "MacOS/Spwn Engine": "../../../.artifacts/window/engine/station",
+                "Library/LaunchAgents/com.jterrazz.station.engine.plist": "agents/com.jterrazz.station.engine.plist",
+                "Library/LaunchAgents/com.jterrazz.station.agent.plist": "agents/com.jterrazz.station.agent.plist"
+            }
+        }
     },
     "plugins": {
         "updater": {

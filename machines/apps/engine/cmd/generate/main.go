@@ -84,6 +84,9 @@ func main() {
 	if err := writeAPI("."); err != nil {
 		panic(err)
 	}
+	if err := rewrite(bundleAgentsDir, bundledAgents()); err != nil {
+		panic(err)
+	}
 }
 
 func playWorld() []byte {

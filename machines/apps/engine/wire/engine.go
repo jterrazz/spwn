@@ -522,7 +522,7 @@ func (i engineInstaller) install(ctx context.Context, jobs contract.Jobs) (engin
 func (i engineInstaller) installAgent(ctx context.Context, jobs contract.Jobs, engineRestarted bool) error {
 	job := i.m.agentJobRef()
 	changed, err := jobs.Install(ctx, contract.JobSpec{
-		Label: job.Label, Apps: catalog.StationApps, Program: []string{i.m.sys.Env.Executable(), "machines", "agent"}, Env: i.env(),
+		Label: job.Label, Apps: catalog.StationApps, Program: append([]string{i.m.sys.Env.Executable()}, catalog.AgentArgs...), Env: i.env(),
 		AtLogin: true, KeepAlive: true, Log: filepath.Join(i.m.paths.State, "logs", "agent.log"), File: job.File,
 	})
 	if err != nil {
@@ -543,7 +543,7 @@ func (i engineInstaller) installAgent(ctx context.Context, jobs contract.Jobs, e
 func (i engineInstaller) installEngine(ctx context.Context, jobs contract.Jobs) (engine.Installed, error) {
 	job := i.m.engineJobRef()
 	changed, err := jobs.Install(ctx, contract.JobSpec{
-		Label: job.Label, Apps: catalog.StationApps, Program: []string{i.m.sys.Env.Executable(), "engine", "run"}, Env: i.env(),
+		Label: job.Label, Apps: catalog.StationApps, Program: append([]string{i.m.sys.Env.Executable()}, catalog.EngineArgs...), Env: i.env(),
 		AtLogin: true, KeepAlive: true, Log: filepath.Join(i.m.paths.State, "logs", "engine.log"), File: job.File,
 	})
 	if err != nil {

@@ -21,6 +21,10 @@ MENUBAR_HOME := $(HOME)/Applications/Station.app
 WINDOW_APP   := .artifacts/window/Spwn.app
 WINDOW_CARGO := .artifacts/window/cargo
 WINDOW_ICON  := .artifacts/window/icon
+# value: the engine Spwn.app carries (ADR-073, mode A): ENGINE=<path> names a darwin-arm64 build, the release's; without it the target builds one
+WINDOW_ENGINE := $(WINDOW_APP)/Contents/MacOS/Spwn Engine
+ENGINE       ?=
+ENGINE_VERSION ?= $(shell git describe --tags --always --dirty)
 # value: the window's version is the release's, as git describes it for the binaries and Station.app, without its v;
 # value: it is compiled into the binary, where the updater reads it, and Tauri writes the bundle's from it
 # hazard: a bare hash (a clone with no tag reachable) is no semver, and tauri build refuses it
@@ -137,7 +141,8 @@ menubar-uninstall: ## Unregister the login item, then remove ~/Applications/Stat
 	@rm -rf "$(MENUBAR_HOME)"
 	@printf "$(GREEN)●$(RESET) Removed $(MENUBAR_HOME)\n"
 
-window: node_modules/.install ## Build the window's bundle for darwin-arm64, signed ad hoc, into $(WINDOW_APP)
+window: node_modules/.install $(if $(ENGINE),,build) ## Build the window's bundle for darwin-arm64 with the engine inside (ENGINE=<path>, else this build's), signed ad hoc, into $(WINDOW_APP)
+	@mkdir -p .artifacts/window/engine && cp "$(or $(ENGINE),$(BUILD_PATH))" .artifacts/window/engine/station
 	@../scripts/app-icon-compile.sh apps/desktop/src-tauri/icons/spwn.icon Spwn $(WINDOW_ICON) $(WINDOW_ICON)/Spwn.plist
 	@cd apps/desktop && CARGO_TARGET_DIR=$(CURDIR)/$(WINDOW_CARGO) npx tauri build --ci --target aarch64-apple-darwin --bundles app --config '{"version":"$(WINDOW_VERSION)"}'
 	@rm -rf $(WINDOW_APP)
@@ -146,9 +151,11 @@ window: node_modules/.install ## Build the window's bundle for darwin-arm64, sig
 		shown=$$(plutil -extract $$key raw $(WINDOW_APP)/Contents/Info.plist); \
 		if [ "$$shown" != "$(WINDOW_VERSION)" ]; then printf "window: the bundle's %s says %s, not the %s compiled in\n" "$$key" "$$shown" "$(WINDOW_VERSION)"; exit 1; fi; \
 	done
+	@shown=$$("$(WINDOW_ENGINE)" --version); if [ "$${shown%% (*}" != "station $(ENGINE_VERSION)" ]; then printf "window: the bundle's engine says %s, not station %s\n" "$$shown" "$(ENGINE_VERSION)"; exit 1; fi
+	@for job in engine agent; do plutil -lint -s "$(WINDOW_APP)/Contents/Library/LaunchAgents/com.jterrazz.station.$$job.plist" || exit 1; done
 	@APPLE_SIGNING_IDENTITY=- ../scripts/sign-macos.sh sign $(WINDOW_APP)
 	@../scripts/app-icon-check.sh $(WINDOW_APP)
-	@printf "$(GREEN)●$(RESET) Built $(WINDOW_APP) ($(WINDOW_VERSION), signed ad hoc)\n"
+	@printf "$(GREEN)●$(RESET) Built $(WINDOW_APP) ($(WINDOW_VERSION), its engine $(ENGINE_VERSION), signed ad hoc)\n"
 
 catalog: ## Build the Spwn Menu Catalog, the dev-only window over every story, never bundled into Station.app
 	@swift apps/menubar/scripts/symbols.swift apps/menubar/sources/station-kit/token/symbols.xcassets
@@ -194,7 +201,7 @@ deprovision: ## Remove the binary from ~/.local/bin; the user data stays
 
 generate: ## Regenerate the catalog's projections, and on Linux the window's recordings
 	@go run ./apps/engine/cmd/generate
-	@printf "$(GREEN)●$(RESET) Regenerated skills/studio-toolbelt/SKILL.md, docs/reference/footprint.md, packages/api/schemas/station.package.v1.json, packages/api/schemas/station.machinefile.v1.json, apps/engine/remote/api/calls.json, packages/api, the page fixtures, the story worlds' pages and the recorded menubar stream\n"
+	@printf "$(GREEN)●$(RESET) Regenerated skills/studio-toolbelt/SKILL.md, docs/reference/footprint.md, packages/api/schemas/station.package.v1.json, packages/api/schemas/station.machinefile.v1.json, apps/engine/remote/api/calls.json, packages/api, the page fixtures, the story worlds' pages and the recorded menubar stream and the window's bundled agents\n"
 	@if $(SDK_PROBE) >/dev/null 2>&1; then \
 		mkdir -p .artifacts/menubar; \
 		STATION_UPDATE_INDEX=1 swift test --package-path apps/menubar --scratch-path .artifacts/menubar/build --filter StoryCoverageTests > .artifacts/menubar/index.log 2>&1 \
