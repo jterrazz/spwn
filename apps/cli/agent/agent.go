@@ -88,7 +88,7 @@ func agentHelp(cmd *cobra.Command, args []string) {
 // Subcommands (new, ls, inspect, ...) resolve first.
 var Cmd = &cobra.Command{
 	Use:   "agent [name]",
-	Short: "Spawn an agent - a living identity that inhabits a world",
+	Short: "Spawn an agent into a world, or open a session with one",
 	Long: `Spawn an agent into an existing world.
 
 An agent is backed by a Mind - a persistent directory holding its SOUL.md

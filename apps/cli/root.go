@@ -32,10 +32,11 @@ var Version = "dev"
 
 var rootCmd = &cobra.Command{
 	Use:   "spwn",
-	Short: "spwn - create realities for things that can think",
-	Long: `Spwn creates isolated Docker environments for AI agents.
-Each world has its own rules (network, filesystem, tools) and a
-Mind (persistent agent identity).`,
+	Short: "spwn - run AI agents in isolated worlds you declare",
+	Long: `The spwn command is Agents, the Spwn app that runs one agent, or a
+team of agents, in isolated Docker worlds. Each world has its own
+rules (network, filesystem, tools), and each agent keeps its Mind
+(its identity and memory) from one world to the next.`,
 	SilenceUsage:  true,
 	SilenceErrors: true,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {

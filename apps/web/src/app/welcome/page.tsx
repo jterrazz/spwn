@@ -53,8 +53,8 @@ function Intro() {
                 Welcome to spwn
             </h1>
             <p className="text-muted-foreground/70 mx-auto mt-2 max-w-lg text-sm">
-                The control plane for AI agents. Four quick steps and you&apos;re ready to spawn
-                your first world.
+                Run agents in isolated worlds. Four quick steps and you&apos;re ready to spawn your
+                first world.
             </p>
         </header>
     );

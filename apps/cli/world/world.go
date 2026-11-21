@@ -134,8 +134,8 @@ var Cmd = &cobra.Command{
 
 var upCmd = &cobra.Command{
 	Use:   "up [name]",
-	Short: "Spawn a world - an isolated reality for agents",
-	Long: `Spawn a world - the Big Bang.
+	Short: "Spawn a world - an isolated container for agents",
+	Long: `Spawn a world: an isolated container and the agents declared in it.
 
 Inside a Spwn project:
   spwn up             brings up every world declared in spwn.yaml

@@ -4,15 +4,16 @@ Every command of the `spwn` binary, as `spwn <command> --help` prints it. The pa
 
 ## spwn
 
-spwn - create realities for things that can think.
+spwn - run AI agents in isolated worlds you declare.
 
 ```text
-Spwn creates isolated Docker environments for AI agents.
-Each world has its own rules (network, filesystem, tools) and a
-Mind (persistent agent identity).
+The spwn command is Agents, the Spwn app that runs one agent, or a
+team of agents, in isolated Docker worlds. Each world has its own
+rules (network, filesystem, tools), and each agent keeps its Mind
+(its identity and memory) from one world to the next.
 ```
 
-- [spwn agent](#spwn-agent): Spawn an agent - a living identity that inhabits a world.
+- [spwn agent](#spwn-agent): Spawn an agent into a world, or open a session with one.
 - [spwn architect](#spwn-architect): Your always-on world builder.
 - [spwn auth](#spwn-auth): Manage credentials: dashboard, login, use, logout, disable.
 - [spwn automation](#spwn-automation): Trigger-driven agent wakeups (cron + filesystem).
@@ -29,13 +30,13 @@ Mind (persistent agent identity).
 - [spwn skill](#spwn-skill): Author bare-markdown skill files.
 - [spwn status](#spwn-status): Show the full status of your Spwn environment.
 - [spwn uninstall](#spwn-uninstall): Remove a dependency from the project.
-- [spwn up](#spwn-up): Spawn a world - an isolated reality for agents.
+- [spwn up](#spwn-up): Spawn a world - an isolated container for agents.
 - [spwn upgrade](#spwn-upgrade): Upgrade Spwn to the latest version.
 - [spwn world](#spwn-world): Manage worlds - ephemeral runtime instances for agents.
 
 ## spwn agent
 
-Spawn an agent - a living identity that inhabits a world.
+Spawn an agent into a world, or open a session with one.
 
 ```text
 Spawn an agent into an existing world.
@@ -275,7 +276,7 @@ spwn agent talk <agent-name> [message] [flags]
 Your always-on world builder.
 
 ```text
-The Architect is your always-on world builder. It manages worlds and orchestrates artificial life.
+The Architect is your always-on world builder. It manages worlds and the agents in them.
 ```
 
 - [spwn architect logs](#spwn-architect-logs): Show the Architect daemon's event log.
@@ -1081,10 +1082,10 @@ spwn uninstall <ref> [flags]
 
 ## spwn up
 
-Spawn a world - an isolated reality for agents.
+Spawn a world - an isolated container for agents.
 
 ```text
-Spawn a world - the Big Bang.
+Spawn a world: an isolated container and the agents declared in it.
 ```
 
 ```text
@@ -1168,7 +1169,7 @@ spwn world [name] [flags]
 - [spwn world snap](#spwn-world-snap): World snapshots - save, ls, restore, rm.
 - [spwn world start](#spwn-world-start): Start a world (alias for `spwn up`).
 - [spwn world stop](#spwn-world-stop): Stop a world (alias for `spwn down`).
-- [spwn world up](#spwn-world-up): Spawn a world - an isolated reality for agents.
+- [spwn world up](#spwn-world-up): Spawn a world - an isolated container for agents.
 
 ## spwn world create
 
@@ -1405,10 +1406,10 @@ spwn world stop [name-or-id] [flags]
 
 ## spwn world up
 
-Spawn a world - an isolated reality for agents.
+Spawn a world - an isolated container for agents.
 
 ```text
-Spawn a world - the Big Bang.
+Spawn a world: an isolated container and the agents declared in it.
 ```
 
 ```text

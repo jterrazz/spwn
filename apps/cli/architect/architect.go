@@ -20,7 +20,7 @@ var defaultArchitectHelp func(*cobra.Command, []string)
 var Cmd = &cobra.Command{
 	Use:   "architect",
 	Short: "Your always-on world builder",
-	Long:  `The Architect is your always-on world builder. It manages worlds and orchestrates artificial life.`,
+	Long:  `The Architect is your always-on world builder. It manages worlds and the agents in them.`,
 }
 
 var startCmd = &cobra.Command{
