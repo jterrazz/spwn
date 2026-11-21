@@ -812,6 +812,7 @@ func worlds(t *testing.T) (clean, mutant *world) {
 }
 
 func judge(t *testing.T, name string) {
+	t.Parallel()
 	clean, mutant := worlds(t)
 	i := slices.IndexFunc(rules(), func(r rule) bool { return r.name == name })
 	r := rules()[i]

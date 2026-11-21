@@ -478,6 +478,7 @@ func TestVocabularyKeepsPowerForItsContractOnly(t *testing.T) {
 }
 
 func TestVocabulary(t *testing.T) {
+	t.Parallel()
 	clean, _ := worlds(t)
 	for _, f := range ruleVocabulary(vocabularyTexts(t, clean)) {
 		t.Errorf("%s: %s", f.where, f.what)
@@ -485,6 +486,7 @@ func TestVocabulary(t *testing.T) {
 }
 
 func TestVocabularyBites(t *testing.T) {
+	t.Parallel()
 	_, mutant := worlds(t)
 	texts := vocabularyTexts(t, mutant)
 	planted := []corpusText{

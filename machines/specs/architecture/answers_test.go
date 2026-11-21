@@ -43,6 +43,7 @@ type served struct {
 // packages/api says. A full JSON Schema validator reads the schemas, so the
 // generator's own reading of them is not what judges them.
 func TestTheWorldsAnswersMatchTheirSchemas(t *testing.T) {
+	t.Parallel()
 	root := repoRoot(t)
 	bin := filepath.Join(t.TempDir(), "station-test")
 	build := exec.Command("go", "build", "-tags", "world", "-o", bin, "./apps/engine/cmd/station")

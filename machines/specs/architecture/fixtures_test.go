@@ -105,6 +105,7 @@ func ruleFixturesCarryNoSecret(fixtures map[string]string, secrets []string) []f
 }
 
 func TestFixturesCarryNoSecret(t *testing.T) {
+	t.Parallel()
 	root := repoRoot(t)
 	fixtures, secrets := jsonFixtures(t, root), worldSecrets(t, root)
 	if len(secrets) == 0 {
