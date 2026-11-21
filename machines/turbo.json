@@ -2,17 +2,10 @@
     "$schema": "https://turborepo.dev/schema.json",
     "agentGuidance": false,
     "futureFlags": {
-        "experimentalGoWorkspaces": true,
-        "experimentalTaskCommand": true
+        "experimentalGoWorkspaces": true
     },
     "cacheDir": ".artifacts/turbo",
     "tasks": {
-        "lint": {
-            "command": {
-                "go": ["go", "tool", "golangci-lint", "run", "--allow-parallel-runners", "./..."]
-            },
-            "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/.golangci.yml"]
-        },
         "//#lint": {
             "cache": false
         },

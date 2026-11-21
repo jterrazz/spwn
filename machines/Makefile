@@ -72,10 +72,10 @@ build-linux: ## Build the linux/arm64 binary a VM image carries
 	@CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -ldflags "$(LDFLAGS)" -o $(LINUX_PATH) ./apps/engine/cmd/station
 	@printf "$(GREEN)●$(RESET) Built $(LINUX_PATH)\n"
 
-lint: node_modules/.install ## Both halves: gofmt, golangci-lint and deadcode over Go, typescript check over the rest
+lint: node_modules/.install ## Both halves: gofmt, golangci-lint (once, over the three modules) and deadcode over Go, typescript check over the rest
 	@unformatted=$$(gofmt -l ./apps/engine ./catalog ./specs); \
 		if [ -n "$$unformatted" ]; then printf "gofmt would rewrite:\n%s\n" "$$unformatted"; exit 1; fi
-	@$(TURBO) run lint --filter='!go-workspace'
+	@$(TURBO) run lint
 	@GOOS=linux $$(go tool -n golangci-lint) run ./apps/engine/... ./catalog/... ./specs/...
 	@dead=$$(go tool deadcode -test -tags $(SPEC_TAGS) ./apps/engine/...); \
 		if [ -n "$$dead" ]; then printf "deadcode found unreachable functions:\n%s\n" "$$dead"; exit 1; fi
