@@ -156,10 +156,11 @@ final class OpeningLog: NSObject {
 }
 
 // invariant: STATION_TRIAL_BENCH=<n> (with STATION_TRIAL_FRAMES=1) makes the app its
-// own bench over the engine it reaches: once Home is drawn it opens the panel n times,
-// then opens This Mac's page n times, each from a closed panel, and logs `bench open
-// <i>` or `bench push <i>` before each, then `bench done`. The frames of each are
-// OpeningLog's; the rig reads them back (capture/bench.py).
+// own bench over the engine it reaches: once Home is drawn with its header, it opens
+// the panel n times, then opens This Mac's page n times, each from a closed panel, and
+// logs `bench open <i>` or `bench push <i>` before each, then `bench done`; a Home
+// still without its header after a minute logs `bench no-home` and opens nothing. The
+// frames of each are OpeningLog's; the rig reads them back (capture/bench.py).
 @MainActor
 final class Bench {
     static let runs = Int(Trial.environment["STATION_TRIAL_BENCH"] ?? "") ?? 0
@@ -182,7 +183,7 @@ final class Bench {
         for _ in 0 ..< 120 where model.state.page?.header == nil {
             try? await Task.sleep(for: .milliseconds(500))
         }
-        guard let mac = model.state.page?.context?.machine else { return log("bench no-home") }
+        guard let home = model.state.page, home.header != nil, let mac = home.context?.machine else { return log("bench no-home") }
         log("bench home machine=\(mac)")
         for i in 0 ..< Self.runs {
             log("bench open \(i)")
