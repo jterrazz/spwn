@@ -91,6 +91,20 @@ What the window's session left open when it closed (2026-11-21). Its record is `
 - **The window mirrors `engine.state`**: RM7, in the read model's item above.
 - **Waiting on the engine or the owner**: the input `Default` (D15, D19), the second half of D6, the `engineRestarts` sentence, one press that updates the engine and the window (mode A of "One Spwn on a Mac" makes it one update), the update row in the quiet window, and where `machines.server-needs-name` is drawn (no recording has it yet).
 
+## studio-infrastructure on a station server: the spwn lots
+The owner's vision (accepted 2026-11-20, its five recommendations on 2026-11-21): the cluster's machine is a Debian 13 server that station builds from its Machinefile on the Mac mini; studio-infrastructure's CI is the only deployer of what runs on it, over Tailscale and ssh; secrets stay with the deployer (that repository's ADR-015); the Mac holds station and its vault alone. No GitOps, no secret in the VM, and the VM never clones the repository. The Machinefile owns the base apt, UTC, unattended-upgrades, sshd's hardening, the CI's public key, systemd-resolved and its upstreams, the sysctls and modprobe blacklist, and Tailscale joined by a vault grant; it changes only on the owner's verb, never by a night or drift job. studio-infrastructure's `TODO.md` holds its own lots and the cutover; these are this repository's, each with its stories, a tier-2 case and a cold `make check`.
+
+- **S1, base-debian**: `catalog/machines/base-debian.machine.yaml` (`{os: debian, version: '13', arch: arm64}`, the upstream pinned by digest), a Debian recipe in `catalog.RecipeFor` (`apps/engine/catalog/images.go:142-150`), `os: debian` counted as Linux (`catalog/convert.go:6-9`), `family: debian` on the apt packages that hold, and `docs/reference/images.md`, which calls it a proposal. Proof: stories, a tier-2 `image-build` case on base-debian. ADR-051 already decides it.
+- **S2, a server from a Machinefile**: lift the refusal (`surface/cli/machines/create/command.go:188-193`, `machines/calls/create.go:82-83`, `machines/template.go:76-78`, `wire/machines_templates.go:44`); the record keeps the server's Machinefile; a server runs the image phase, then a first-start phase (`linux-firstboot.sh`: hostname, machine-id, growpart; the fstab mounts; `run.boot`); `station upgrade --on <server>` applies its Machinefile; `--from` takes a path; a server refuses `vm.lifetime` and `network: bridged`; night and drift keep skipping servers (`engine/process/drift.go:25,34`). Proof: the two `machines-server-template.spec.yaml` stories (`specs/usecases/machines/new/`, `create-workspace/`) turn from refused to made, a story per refusal, the CLI goldens, `words.json` and the schema by `make generate`, and a tier-2 `create-server-from` case (sized, check passing, `upgrade --on` applying one change).
+- **S3, Linux machine settings**: the `file` method writes root-owned `/etc` destinations (mode, owner, a reload command), so each concern is a setting with drift and undo; built-in packages taking their values from the Machinefile: `sysctl`, `modprobe-blacklist` (it creates `/etc/modprobe.d`, absent on a bare trixie), `timezone`, `unattended-upgrades` (one run at first start), `resolver` (systemd-resolved, an upstream drop-in, the stub link; k3s cannot start a pod without `/run/systemd/resolve/resolv.conf`) and `sshd-hardening` (a `70-*.conf`, keys only, station's forwarding and keepalive kept). HYPOTHESIS (2026-11-20): today's `file` decoder refuses an absolute path; read `catalog/decode.go` before sizing the lot. Proof: stories per outcome (applied, drift, undo, refused outside `/etc`), a tier-2 case reading `timedatectl`, `sysctl`, `sshd -T`, `resolvectl`, `/etc/modprobe.d` and the unattended stamp.
+- **S4, an authorized public key**: an `authorized-key` setting (`user`, `key`) writing a block in `~user/.ssh/authorized_keys` (`/root` for root) and keeping a person's lines (ADR-043's principle). Proof: stories (added, kept beside a hand line, removed), a tier-2 `ssh -i <test key> root@<server> true`.
+- **S5, Tailscale on Linux and a grant to a server**: a Debian method in `remote-access/tailscale.yaml` (the pkgs.tailscale.com apt repository, tailscaled enabled), a `tailscale` delivery (`sudo tailscale up --auth-key="$(cat)" --hostname=<vm>`), `GrantToServer` lifted for that delivery alone (`accounts/adapter/keychain/grants.go:176-178` and the fake). The key is one-off, pre-approved, tagged `tag:cluster`, expiring in a day. Proof: stories (granted to a server, still refused there for gh, npm, claude and wrangler, the value in no log, ADR-048), a tier-2 case against the stub tailnet, and a `server-facts` case once S2 lands: an fsync-per-write measure on the data disk and on the boot disk (whether studio-infrastructure's write-through unit goes), and `ip -br a; ip route` (the guard's values).
+- **S6, a data disk** (the owner, 2026-11-21, replacing a share of the Mac's folder): a server's Machinefile declares a second disk image (tart `--disk`), ext4, at `/srv/data` in the guest (k3s's local-path at `/srv/data/k3s`), kept across a rebuild of the boot disk. It needs its ADR, amending 044 and 033. Since the rehearsal's ext4 enforced ownership (five stateful workloads crash-looped on `root 0755` volumes), studio-infrastructure's ownership lot applies.
+- **The ADRs, written before S2**: amend [ADR-017](docs/decisions/017-servers-and-workspaces.md) (a server is made from its Machinefile, set up at its creation and on the owner's `upgrade --on`; accounts stay refused but the `tailscale` delivery), [ADR-044](docs/decisions/044-an-image-is-baked-from-its-machinefile.md) (a server runs the image phase and a first-start phase), [ADR-033](docs/decisions/033-a-machine-is-declared-by-its-machinefile.md) (`kind: server` is a usable Machinefile) and [ADR-049](docs/decisions/049-a-vm-signs-itself-in-the-vault-grants-the-rest.md) (the Tailscale auth key is the one grant a server takes, delivered once).
+- **Sizing**: 16 CPU and 30 GB on the new Mac mini M5 Pro, the production target (the owner, 2026-11-21). The rehearsal (2026-11-20, a Debian 13 arm64 stand-in on development-linux with fake secrets) measured about 2.6 GiB of working set, a lower bound, and 12 GB of disk.
+
+Starts with S1 under the owner's go of 2026-11-20 for the plan after alpha.2; S2 after the ADR amendments, S6 with S2, S5's facts case once S2 lands.
+
 ## The old goldens' last copies on GitHub
 The history rewrite (S5) ran on 2026-11-21: `main` is `e82228f9d`, both
 alpha tags were re-pointed, and the pack fell from 614 to 173 MiB. GitHub
@@ -265,11 +279,13 @@ What waits is tier 3 as a nightly on the Mac mini, once a tart VM may run
 there.
 
 ## The Mac mini as an always-on Mac
-Installing station there is the owner's go, never a lot's. When its disk is
-upgraded: `station init --name mac-mini` there, the Always-on Mac settings,
-the infrastructure moved from OrbStack to a server (`machines create infra
---server --check https://infra:6443/readyz`), images built there. Ask the
-owner before any test on it.
+Installing station there is the owner's go, never a lot's. The production
+Mac mini is the new M5 Pro (64 GB, 1 TB); the old one is the test bench
+until the cutover, carrying the latest Spwn.app and menu bar, and is erased
+after it (the owner, 2026-11-21). On the new one: `station init --name
+mac-mini`, the Always-on Mac settings, the infrastructure moved from
+OrbStack to a station server ("studio-infrastructure on a station server",
+above), images built there. Ask the owner before any test on it.
 
 ## The menu bar's stories left after v4
 Fourteen gap ids wait for a design before they are stories (STORIES.md,
