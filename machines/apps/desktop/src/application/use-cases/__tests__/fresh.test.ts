@@ -1,122 +1,25 @@
-import type { EngineHello, Request } from '@jterrazz/station-api';
+import type { EngineHello } from '@jterrazz/station-api';
 import { clock } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { Client } from '../../../infrastructure/outbound/engine-link/client';
-import type { Receiver, Transport } from '../../../infrastructure/outbound/engine-link/transport';
-import type { Link } from '../../ports/engine.port';
-import type { PresencePort } from '../../ports/presence.port';
-import type { Asked, Reading } from '../entry';
 import { offers } from '../fresh';
 import { ReadStore } from '../store';
-
-type Opened = { request: Request; receiver: Receiver; closed: boolean };
-
-const HELLO: EngineHello = { pid: 1, started_at: '2026-11-13T09:00:00Z', version: 'v1' };
+import {
+    DONE,
+    EVERY,
+    fakeEngine,
+    fakePresence,
+    HELLO,
+    KEY,
+    MACHINES,
+    PENDING,
+    RUNNING,
+    settled,
+    STOPPED,
+} from './fake-engine';
 
 const EVENTS: EngineHello = { ...HELLO, calls: ['engine.events', 'machines.list'] };
-
-const MACHINES: Asked = { input: {}, kind: 'watch', name: 'machines.list', target: undefined };
-
-const KEY = 'watch machines.list {} {}';
-
-const EVERY = 30_000;
-
-function nameOf(request: Request): string | undefined {
-    if ('watch' in request) {
-        return request.watch;
-    }
-    return 'call' in request ? request.call : undefined;
-}
-
-function fakeEngine(hello: EngineHello) {
-    const opened: Opened[] = [];
-    const transport: Transport = {
-        link: (listener) => {
-            const link: Link = { hello, kind: 'open', refused: undefined, socket: 'fake' };
-            const timer = setTimeout(() => {
-                listener(link);
-            }, 0);
-            return () => {
-                clearTimeout(timer);
-            };
-        },
-        open: (request, receiver) => {
-            const entry = { closed: false, receiver, request };
-            opened.push(entry);
-            return {
-                cancel: () => undefined,
-                close: () => {
-                    entry.closed = true;
-                },
-            };
-        },
-    };
-    const of = (name: string) => opened.filter((one) => nameOf(one.request) === name);
-    const answer = (name: string, ...frames: Record<string, unknown>[]) => {
-        const one = of(name).findLast((each) => !each.closed);
-        for (const frame of frames) {
-            one?.receiver.frame({ ...frame, id: one.request.id, v: 2 });
-        }
-    };
-    const end = (name: string) => {
-        of(name)
-            .findLast((each) => !each.closed)
-            ?.receiver.end('the engine closed the connection', true);
-    };
-    return { answer, asked: (name: string) => of(name).length, end, transport };
-}
-
-function fakePresence() {
-    let visible = true;
-    const listeners = new Set<(seen: 'back' | 'hidden') => void>();
-    const presence: PresencePort = {
-        subscribe: (listener) => {
-            listeners.add(listener);
-            return () => {
-                listeners.delete(listener);
-            };
-        },
-        visible: () => visible,
-    };
-    const set = (seen: 'back' | 'hidden') => {
-        visible = seen === 'back';
-        for (const listener of listeners) {
-            listener(seen);
-        }
-    };
-    return { listening: () => listeners.size, presence, set };
-}
-
-const RUNNING = { out: { State: 'running' } };
-const PENDING = { out: { State: 'pending' } };
-const STOPPED = { out: { State: 'stopped' } };
-const DONE = { done: true };
-const UNREACHABLE = {
-    code: 'remote.unreachable',
-    message: 'studio did not answer',
-    type: 'unreachable',
-};
-
-async function settled(hello: EngineHello = HELLO) {
-    const engine = fakeEngine(hello);
-    const seen = fakePresence();
-    const store = new ReadStore(new Client(engine.transport), seen.presence, {
-        every: EVERY,
-        grace: 500,
-    });
-    let told = 0;
-    const leave = store.subscribe(MACHINES, () => {
-        told += 1;
-    });
-    await clock.advance(1);
-    engine.answer('machines.list', RUNNING, DONE);
-    return { engine, heard: () => told, leave, seen, store };
-}
-
-function rowsOf(reading: Reading<unknown>): readonly unknown[] {
-    return reading.kind === 'read' && Array.isArray(reading.out) ? reading.out : [];
-}
 
 describe('fresh', () => {
     test('a watch that ended is asked again on the cadence, and shows what the engine now says', async () => {
@@ -131,91 +34,6 @@ describe('fresh', () => {
         // Then - the watch was asked twice and shows the stopped state
         expect(engine.asked('machines.list')).toBe(2);
         expect(store.reading(KEY)).toStrictEqual({ done: true, kind: 'read', out: STOPPED.out });
-    });
-
-    test('a re-ask answered equal keeps the reading itself and tells no subscriber', async () => {
-        // Given - machines.list settled on running, and what its subscriber has heard so far
-        using _ = clock.run('2026-11-13T10:00:00Z');
-        const { engine, heard, store } = await settled();
-        const shown = store.reading(KEY);
-        const told = heard();
-
-        // When - the cadence passes and the engine answers the same state, as a new object
-        await clock.advance(EVERY);
-        engine.answer('machines.list', { out: { State: 'running' } }, DONE);
-
-        // Then - it was asked again, and the reading is the one shown, its subscriber never told
-        expect(engine.asked('machines.list')).toBe(2);
-        expect(store.reading(KEY)).toBe(shown);
-        expect(heard()).toBe(told);
-    });
-
-    test('a re-ask that moves one row shows a new reading whose other rows are the shown ones', async () => {
-        // Given - machines.list settled on two running VMs
-        using _ = clock.run('2026-11-13T10:00:00Z');
-        const { engine, store } = await settled();
-        const rows = [
-            { Name: 'api', State: 'running' },
-            { Name: 'web', State: 'running' },
-        ];
-        await clock.advance(EVERY);
-        engine.answer('machines.list', { out: rows }, DONE);
-        const [, web] = rowsOf(store.reading(KEY));
-
-        // When - the next cadence answers api stopped and web as it was
-        await clock.advance(EVERY);
-        engine.answer(
-            'machines.list',
-            { out: [{ ...rows[0], State: 'stopped' }, { ...rows[1] }] },
-            DONE,
-        );
-
-        // Then - the reading shows api stopped, and web is the very row shown before
-        const [api, again] = rowsOf(store.reading(KEY));
-        expect(api).toStrictEqual({ Name: 'api', State: 'stopped' });
-        expect(again).toBe(web);
-    });
-
-    test('a re-ask a far Mac misses keeps the shown answer marked stale, and the next answer clears the mark', async () => {
-        // Given - machines.list settled on running
-        using _ = clock.run('2026-11-13T10:00:00Z');
-        const { engine, store } = await settled();
-
-        // When - the next re-ask is refused as unreachable, then the one after answers again
-        await clock.advance(EVERY);
-        engine.answer('machines.list', { error: UNREACHABLE });
-        const missed = store.reading(KEY);
-        await clock.advance(EVERY);
-        engine.answer('machines.list', RUNNING, DONE);
-
-        // Then - the answer stayed shown with the refusal as its stale mark, and the mark went with the new answer
-        expect(missed.kind === 'read' ? [missed.out, missed.stale?.wire?.type] : []).toStrictEqual([
-            RUNNING.out,
-            'unreachable',
-        ]);
-        expect(store.reading(KEY)).toStrictEqual({ done: true, kind: 'read', out: RUNNING.out });
-    });
-
-    test('a re-ask whose connection drops keeps the shown answer marked stale, and a refusal of the subject replaces it', async () => {
-        // Given - two stores, each with machines.list settled on running
-        using _ = clock.run('2026-11-13T10:00:00Z');
-        const dropped = await settled();
-        const refused = await settled();
-
-        // When - one re-ask's connection ends unanswered, the other is answered that the machine is not found
-        await clock.advance(EVERY);
-        dropped.engine.end('machines.list');
-        refused.engine.answer('machines.list', {
-            error: { code: 'unknown_vm', message: 'no such machine', type: 'not-found' },
-        });
-
-        // Then - the first keeps its answer with a stale mark of no engine word, the second shows the refusal
-        const kept = dropped.store.reading(KEY);
-        expect(kept.kind === 'read' ? [kept.out, kept.stale?.wire] : []).toStrictEqual([
-            RUNNING.out,
-            undefined,
-        ]);
-        expect(refused.store.reading(KEY).kind).toBe('failed');
     });
 
     test('a re-ask keeps the shown answer while the engine sends pending values, then shows its last', async () => {

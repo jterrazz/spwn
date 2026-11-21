@@ -3,11 +3,11 @@ import type { CallName } from '@jterrazz/station-api';
 import { keyOf } from '../../domain/request-key';
 import type { EnginePort, Link } from '../ports/engine.port';
 import type { PresencePort } from '../ports/presence.port';
-import { failed, failedOf, flush, READING, show, stop } from './entry';
+import { ask } from './ask';
+import { flush, READING, stop } from './entry';
 import type { Asked, Entry, Reading } from './entry';
 import { FRESH_EVERY, Freshness, sameEngine } from './fresh';
 import type { Why } from './fresh';
-import { heardDone, heardOut, markOf } from './marks';
 
 export type StoreTiming = { grace: number; every: number };
 
@@ -21,9 +21,10 @@ export function askedKey(asked: Asked): string {
 // invariant: one entry per request compared by value (its call, input and target), shared by every subscriber:
 // invariant: one socket each, the last answer kept while one remains, closed a grace after the last leaves. Every
 // invariant: entry is asked again when the link opens, or opens on another engine (its hello's pid or start).
-// invariant: An entry a component holds is asked again quietly by `Freshness` once its answer has settled: its
-// invariant: answer stays shown, and a watch's next outs are held until it ends or the next tick, so a re-ask
-// invariant: never draws a pending answer over a settled one; one still asking is never asked twice.
+// invariant: An entry a component holds is asked again by `Freshness` once its answer has settled, and every ask
+// invariant: over a settled answer (the cadence's, a gesture's rereads, a relink's) is quiet: the answer stays shown,
+// invariant: and a watch's next outs are held until it ends or the next tick, so a re-ask never draws a pending
+// invariant: answer over a settled one; one still asking is never asked twice by the cadence.
 export class ReadStore {
     private readonly client: EnginePort;
     private readonly timing: StoreTiming;
@@ -83,7 +84,7 @@ export class ReadStore {
         }
         for (const entry of this.entries.values()) {
             if (names.includes(entry.asked.name)) {
-                this.ask(entry, false);
+                ask(this.client, entry);
             }
         }
     };
@@ -94,7 +95,7 @@ export class ReadStore {
                 continue;
             }
             if (!entry.asking) {
-                this.ask(entry, true);
+                ask(this.client, entry);
             } else if (why === 'tick') {
                 flush(entry);
             }
@@ -131,7 +132,7 @@ export class ReadStore {
         this.entries.set(key, entry);
         this.hold();
         if (this.shown?.kind === 'open') {
-            this.ask(entry, false);
+            ask(this.client, entry);
         }
         return entry;
     }
@@ -170,7 +171,7 @@ export class ReadStore {
         const wasOpen = before?.kind === 'open';
         if (opened && (!wasOpen || !sameEngine(before.hello, link.hello))) {
             for (const entry of this.entries.values()) {
-                this.ask(entry, false);
+                ask(this.client, entry);
             }
         } else if (!opened && wasOpen) {
             for (const entry of this.entries.values()) {
@@ -178,77 +179,5 @@ export class ReadStore {
             }
         }
         this.fresh();
-    }
-
-    private ask(entry: Entry, quiet: boolean): void {
-        stop(entry);
-        entry.asking = true;
-        entry.mark = markOf(entry.key);
-        const { asked, asks, mark } = entry;
-        const current = () => entry.asks === asks;
-        if (asked.kind === 'read') {
-            void this.read(entry, asked, current);
-            return;
-        }
-        const holds = quiet && entry.reading.kind === 'read';
-        let last: undefined | { out: unknown };
-        entry.watch = this.client.watch(
-            asked.name,
-            asked.input,
-            {
-                done: () => {
-                    if (current()) {
-                        heardDone(mark);
-                        entry.asking = false;
-                        entry.held = undefined;
-                        if (last) {
-                            show(entry, { done: true, kind: 'read', out: last.out });
-                        }
-                    }
-                },
-                error: (error) => {
-                    if (current()) {
-                        entry.asking = error.wire === undefined;
-                        failed(entry, error);
-                    }
-                },
-                out: (out: unknown) => {
-                    if (current()) {
-                        heardOut(mark);
-                        last = { out };
-                        if (holds) {
-                            entry.held = last;
-                        } else {
-                            show(entry, { done: false, kind: 'read', out });
-                        }
-                    }
-                },
-            },
-            asked.target,
-        );
-    }
-
-    private async read(
-        entry: Entry,
-        asked: Extract<Asked, { kind: 'read' }>,
-        current: () => boolean,
-    ): Promise<void> {
-        try {
-            const out: unknown = await this.client.call(
-                asked.name,
-                asked.input,
-                asked.target ? { target: asked.target } : {},
-            );
-            if (current()) {
-                heardDone(entry.mark);
-                entry.asking = false;
-                show(entry, { done: true, kind: 'read', out });
-            }
-        } catch (error) {
-            if (current()) {
-                entry.asking = false;
-                failed(entry, failedOf(error));
-            }
-        }
     }
 }
