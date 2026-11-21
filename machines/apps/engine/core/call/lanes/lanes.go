@@ -377,13 +377,20 @@ func collect[R any](ctx context.Context, clock Clock, report R, left int, answer
 	defer close(out)
 	ctx, stop := context.WithCancel(ctx)
 	defer stop()
+	// invariant: the first value is the frame as it was given, never an
+	// answer that raced it: out holds one value, so the frame is sent before
+	// the loop reads any answer.
+	out <- clone(report)
 	var (
-		ready  = clone(report)
-		send   = out
+		ready  R
+		send   chan<- R
 		last   = clock.Now()
 		wakeUp chan struct{}
 		dirty  bool
 	)
+	if left == 0 {
+		return
+	}
 	for {
 		select {
 		case <-ctx.Done():
