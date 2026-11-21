@@ -54,9 +54,16 @@ import (
 
 func (m machine) guestPort() int { return m.port(22, "STATION_GUEST_SSH_PORT") }
 
+// value: how long the engine answers a re-ask with a reading its calls
+// share (the apps, the disk walk, the overview's checks).
+const engineKeep = 10 * time.Minute
+
 // invariant: inside the engine, the menu bar reads through this run's
-// Router, so its fleet reaches the other Macs as the CLI's does.
+// Router, so its fleet reaches the other Macs as the CLI's does; the
+// readings its calls share are read again once they are 10 min old, so
+// what changed outside the engine reaches its next answer.
 func (m machine) engine(env kit.Env) *process.Engine {
+	m.pool.Keep(engineKeep)
 	owed := &engineGrants{}
 	registry := m.registry(env)
 	calls := env.Calls

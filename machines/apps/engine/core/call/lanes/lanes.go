@@ -55,6 +55,9 @@ type Pool struct {
 	prefer string
 	seq    uint64
 	shared map[string]any
+	// value: how long a settled reading answers its key's next readers;
+	// zero answers them for the life of the pool.
+	keep time.Duration
 }
 
 type lane struct {
@@ -124,6 +127,21 @@ func (p *Pool) Prefer(prefix string) {
 		p.order(l)
 	}
 	p.mu.Unlock()
+}
+
+func (p *Pool) Keep(d time.Duration) {
+	// invariant: a pool that outlives one run's readers (the engine's) keeps
+	// a settled reading for d, then its key's next reader reads again; a
+	// reading still running is shared whatever its age.
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.keep = d
+}
+
+// value: a reading that settled at, which its key's readers no longer
+// share; called under mu.
+func (p *Pool) outlived(at time.Time) bool {
+	return p.keep > 0 && !at.IsZero() && p.clock.Now().Sub(at) >= p.keep
 }
 
 func (p *Pool) Forget(prefix string) {
@@ -200,6 +218,8 @@ type flight struct {
 	done   chan struct{}
 	answer any
 	late   bool
+	// value: when the answer came, written under the pool's mu.
+	settled time.Time
 }
 
 // invariant: a job's budget counts from the moment it holds its slot, never
@@ -251,12 +271,13 @@ func (p *Pool) execute(ctx context.Context, which Lane, budget time.Duration, wa
 	}
 }
 
-// invariant: one key is one execution for the life of the pool (until Forget):
-// a second reader of the same key waits for the first one's answer.
+// invariant: one key is one execution for the life of the pool (until Forget,
+// or until its answer outlived the pool's keep): a second reader of the same
+// key waits for the first one's answer.
 func (p *Pool) start(ctx context.Context, which Lane, key string, shared bool, budget time.Duration, do func(context.Context) any) *flight {
 	shared = shared && key != ""
 	p.mu.Lock()
-	if f, ok := p.shared[key].(*flight); ok && shared {
+	if f, ok := p.shared[key].(*flight); ok && shared && !p.outlived(f.settled) {
 		p.mu.Unlock()
 		return f
 	}
@@ -270,6 +291,9 @@ func (p *Pool) start(ctx context.Context, which Lane, key string, shared bool, b
 	wait := p.enqueue(which, key)
 	go func() {
 		f.answer, f.late = p.execute(base, which, budget, wait, do)
+		p.mu.Lock()
+		f.settled = p.clock.Now()
+		p.mu.Unlock()
 		close(f.done)
 	}()
 	return f
@@ -421,13 +445,17 @@ func collect[R any](ctx context.Context, clock Clock, report R, left int, answer
 }
 
 func Stream[T any](ctx context.Context, p *Pool, key string, start func(context.Context) <-chan T) <-chan T {
-	// invariant: one producer per key for the life of the pool: every reader
-	// gets the latest value at once, then each newer one, and its channel
-	// closes with the producer's.
+	// invariant: one producer per key for the life of the pool, or until its
+	// last value outlived the pool's keep: every reader gets the latest value
+	// at once, then each newer one, and its channel closes with the
+	// producer's.
 	p.mu.Lock()
 	h, ok := p.shared[key].(*hub[T])
+	if ok && p.outlived(h.ended()) {
+		ok = false
+	}
 	if !ok {
-		h = &hub[T]{}
+		h = &hub[T]{now: p.clock.Now}
 		h.cond = sync.NewCond(&h.mu)
 		p.shared[key] = h
 	}
@@ -454,6 +482,15 @@ type hub[T any] struct {
 	latest  T
 	version int
 	closed  bool
+	// value: when the producer's channel closed, on the pool's clock.
+	closedAt time.Time
+	now      func() time.Time
+}
+
+func (h *hub[T]) ended() time.Time {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	return h.closedAt
 }
 
 func (h *hub[T]) pump(source <-chan T) {
@@ -465,7 +502,7 @@ func (h *hub[T]) pump(source <-chan T) {
 		h.cond.Broadcast()
 	}
 	h.mu.Lock()
-	h.closed = true
+	h.closed, h.closedAt = true, h.now()
 	h.mu.Unlock()
 	h.cond.Broadcast()
 }
