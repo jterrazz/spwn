@@ -12,9 +12,9 @@ import type { Transport } from '../infrastructure/outbound/engine-link/transport
 import { helloOf } from '../infrastructure/outbound/engine-replay/hello';
 import { replayTransport, stagedReplay } from '../infrastructure/outbound/engine-replay/replay';
 import type { Pace, Recording } from '../infrastructure/outbound/engine-replay/replay';
+import { tauriTransport } from '../infrastructure/outbound/engine-tauri/tauri';
 import { documentLaunch } from '../infrastructure/outbound/launch-document/document-launch';
 import { NO_SHOW, tauriShow } from '../infrastructure/outbound/launch-tauri/tauri-show';
-import { tauriTransport } from '../infrastructure/outbound/engine-tauri/tauri';
 import { NO_OPENER, tauriOpener } from '../infrastructure/outbound/opener-tauri/tauri-opener';
 import { tauriWindowUpdate } from '../infrastructure/outbound/window-update-tauri/tauri-window-update';
 import type { Dependencies } from '../presentation/dependencies/dependencies';

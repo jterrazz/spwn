@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 import { NO_SHOW, tauriShow } from '../tauri-show';
 
 describe('tauri show', () => {
-    test("the shell is asked to show its window by its one command, with no argument", async () => {
+    test('the shell is asked to show its window by its one command, with no argument', async () => {
         // Given - the shell's invoke
         const invoked: { command: string; args: Record<string, unknown> | undefined }[] = [];
         const ipc = {
