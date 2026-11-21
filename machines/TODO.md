@@ -39,14 +39,16 @@ owner on what it does to the commands, which he holds in another session
 - **Starts** after the owner's command talk: without the migration the new
   engine orphans every existing VM, the development VMs included.
 
-## The history rewrite: the old goldens leave the repository
-The owner's call (2026-11-20): after the joint publication of v0.21.0-alpha.2,
-never before it. The goldens lots S1 to S4 moved the menu bar's and the
-window's goldens to their small form; S5 rewrites jterrazz/spwn's history so
-the old goldens' blobs leave every clone. It is its own lot with its own
-owner go, since it rewrites a tagged public history: every session's clone
-and worktree is recut from the rewritten main, and nothing unpushed may be
-left on a branch when it runs.
+## The old goldens' last copies on GitHub
+The history rewrite (S5) ran on 2026-11-21: `main` is `e82228f9d`, both
+alpha tags were re-pointed, and the pack fell from 614 to 173 MiB. GitHub
+still keeps `refs/pull/26/head`, `27/head` and `28/head` on the old history,
+read only, with cached views of old commits by sha, and the fork
+`OpenAgentSystem/spawn` shares the network's object store, so the old
+goldens' blobs stay on GitHub until its Support collects them. Starts with
+the owner's ticket on GitHub's "remove sensitive data" path, naming the
+repository, the rewritten refs, and the pull request refs and cached views
+to collect.
 
 ## Blueprints: each machine's install, declared (the next major project)
 The owner's goal (2026-11-10): a folder of configuration files says what
