@@ -259,7 +259,7 @@ func MenubarStream() []byte {
 	frame, _ := json.Marshal(page.Document{Schema: page.Schema, Page: byName["menubar.loading"]})
 	ready, _ := json.Marshal(page.Document{Schema: page.Schema, Page: byName["menubar.full"]})
 	outs := []any{
-		engine.Opened{Stream: page.Schema, Pages: []string{engine.PageMenubar}},
+		engine.Opened{Stream: page.Schema, Pages: []string{engine.PageMenubar}, Page: page.Revision},
 		engine.Event{Event: "page", Page: frame},
 		engine.Event{Event: "page", Page: ready},
 		sampled(byName["menubar.full"].Live, "2026-11-03T10:30:02Z", 3, false),

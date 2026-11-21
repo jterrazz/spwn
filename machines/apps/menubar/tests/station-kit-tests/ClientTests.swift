@@ -131,6 +131,7 @@ final class ClientTests: XCTestCase {
         let kinds = recorder.events.prefix(7).map { e -> String in
             switch e {
             case .connected: "connected"
+            case .incompatible(let why): "incompatible \(why)"
             case .page(let p): "page \(p.state ?? "")"
             case .tick: "tick"
             case .sample(let s): "sample \(s.at) \(s.values.keys.sorted().joined(separator: " "))\(s.stale.isEmpty ? "" : " stale")"
@@ -212,24 +213,45 @@ final class ClientTests: XCTestCase {
         XCTAssertEqual(calls.all, [])
     }
 
-    func testAnEngineOlderThanThePageLanguageOfTheAppIsTold() async throws {
-        let answers = [
-            "mb-hello-now": (#"{"version":"v4.1.0","page":5,"executable":"/u/bin/station"}"#, false),
-            "mb-hello-old": (#"{"version":"v3.9.0","page":4}"#, true),
-            "mb-hello-v3": (#"{"version":"v3.0.0"}"#, true),
+    // invariant: ADR-070's fit as a range: an engine is older only below the
+    // oldest revision the app accepts, the app older only above the newest it
+    // knows, and every revision between fits.
+    func testTheVerdictIsARangeFromTheOldestAcceptedToTheNewestKnown() {
+        let verdicts = [nil, 2, 3, 4, 5, 6].map { EngineIncompatibility.of(revision: $0, oldest: 3, newest: 5) }
+        XCTAssertEqual(verdicts, [.engineOlder, .engineOlder, nil, nil, nil, .appOlder])
+        XCTAssertLessThanOrEqual(pageOldest, pageRevision)
+    }
+
+    // invariant: the verdict comes in the watch's opening, before any page: an
+    // engine at another page revision than the app's has none of its pages drawn.
+    func testAWatchOpenedAtAnotherPageRevisionIsJudgedAndNoneOfItsPagesReachTheApp() async throws {
+        let fixture = try JSONSerialization.jsonObject(with: Data(contentsOf: Tree.pages.appendingPathComponent("menubar.full.json")))
+        let page = String(decoding: try JSONSerialization.data(withJSONObject: ["v": 2, "id": "1", "out": ["event": "page", "page": fixture]], options: [.sortedKeys]), as: UTF8.self)
+        let openings: [(String, String, String)] = [
+            ("mb-open-now", #""page":\#(pageRevision),"#, "connected page"),
+            ("mb-open-old", #""page":\#(pageRevision - 1),"#, "incompatible engineOlder"),
+            ("mb-open-v3", "", "incompatible engineOlder"),
+            ("mb-open-new", #""page":\#(pageRevision + 1),"#, "incompatible appOlder"),
         ]
-        for (name, (out, older)) in answers {
-            let engine = try answered(name, #"{"v":2,"id":"1","out":\#(out)}"#)
+        for (name, revision, want) in openings {
+            let engine = try answered(name, #"{"v":2,"id":"1","out":{\#(revision)"stream":"station.page/v1","pages":["menubar"]}}"# + "\n" + page + "\n" + page)
             defer { engine.stop() }
-            let reply = await Client.hello(path: engine.path)
-            let hello = try XCTUnwrap(reply, name)
-            XCTAssertEqual(hello.older, older, name)
-            XCTAssertEqual(engine.received, [#"{"call":"engine.hello","id":"1","v":2}"#], name)
+            let recorder = Recorder()
+            let sub = Subscription(path: engine.path, clock: TestClock()) { recorder.add($0) }
+            let task = Task { await sub.run() }
+            await until { recorder.events.count >= (want.hasSuffix("page") ? 2 : 1) }
+            try await Task.sleep(nanoseconds: 100_000_000)
+            task.cancel()
+            let seen = recorder.events.compactMap { e -> String? in
+                switch e {
+                case .connected: "connected"
+                case .incompatible(let why): "incompatible \(why)"
+                case .page: "page"
+                default: nil
+                }
+            }
+            XCTAssertEqual(seen.prefix(2).joined(separator: " "), want, name)
         }
-        let silent = try FakeEngine("mb-hello-none")
-        silent.stop()
-        let none = await Client.hello(path: silent.path)
-        XCTAssertNil(none, "no engine answers, so none is older: the Stopped page says so")
     }
 
     func testAFailingCallsMessageAndHintMakeTheStatusLine() async throws {

@@ -38,4 +38,7 @@ type Feed func(ctx context.Context, in FeedInput) <-chan any
 type Opened struct {
 	Stream string   `json:"stream"`
 	Pages  []string `json:"pages,omitempty"`
+	// value: the revision of `station.page/v1` the pages of a watch of pages
+	// speak, so a client judges the engine before any page of it.
+	Page int `json:"page,omitempty"`
 }

@@ -1,6 +1,7 @@
 """value: a fake engine for the capture: one station.api/v2 socket that streams
 one page to every page watch, holds every other watch open, and answers every
-call with an empty out, engine.hello with the page revision the app reads.
+call with an empty out; engine.hello and every page watch's opening name the
+page revision the app reads.
 
 usage: python3 replay.py <page.json> <socket> <page revision>
 """
@@ -29,7 +30,8 @@ def serve(conn, page, revision):
                 out = {"page": revision, "executable": "/usr/local/bin/station"} if request["call"] == "engine.hello" else {}
                 send(conn, {"v": 2, "id": request.get("id", "1"), "out": out})
                 return
-            send(conn, {"v": 2, "id": request.get("id", "1"), "out": {"stream": True}})
+            opened = {"stream": True, "page": revision} if request.get("watch") == "page" else {"stream": True}
+            send(conn, {"v": 2, "id": request.get("id", "1"), "out": opened})
             if request.get("watch") == "page":
                 send(conn, {"v": 2, "id": request.get("id", "1"), "out": {"event": "page", "page": page}})
             while True:

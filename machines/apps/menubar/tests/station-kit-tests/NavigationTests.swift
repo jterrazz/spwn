@@ -15,7 +15,7 @@ enum Streamed {
     // page of a fixture, on one line each.
     static func answer(_ watch: String, _ fixture: String) throws -> Data {
         let page = try JSONSerialization.jsonObject(with: Data(contentsOf: Tree.pages.appendingPathComponent(fixture + ".json")))
-        let opened = try JSONSerialization.data(withJSONObject: ["v": 2, "id": "1", "out": ["stream": "page", "pages": [watch]]], options: [.sortedKeys])
+        let opened = try JSONSerialization.data(withJSONObject: ["v": 2, "id": "1", "out": ["stream": "page", "pages": [watch], "page": pageRevision]], options: [.sortedKeys])
         let event = try JSONSerialization.data(withJSONObject: ["v": 2, "id": "1", "out": ["event": "page", "page": page]], options: [.sortedKeys])
         return opened + [0x0A] + event + [0x0A]
     }

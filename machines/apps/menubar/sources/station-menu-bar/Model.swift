@@ -32,7 +32,6 @@ final class Model: ObservableObject {
     private var reviving: Task<Void, Never>?
     private var finding: Task<Void, Never>?
     private var asked = false
-    private var outdated = false
     private(set) var navigation: Navigation!
     let live = LiveStore()
     let hud = HUDWindow()
@@ -144,9 +143,9 @@ final class Model: ObservableObject {
         switch event {
         case .connected:
             state.connection = .live
-            askEngine()
+        case .incompatible(let why):
+            showIncompatible(why)
         case .page(let page):
-            guard !outdated else { return }
             state.connection = .live
             state.page = page
             lastPage = Date()
@@ -181,20 +180,21 @@ final class Model: ObservableObject {
         state.page = page
     }
 
-    func askEngine() {
-        let socket = self.socket
-        Task {
-            guard let hello = await Client.hello(path: socket) else { return }
-            outdated = hello.older
-            if outdated { showOutdated() }
-        }
-    }
-
-    func showOutdated() {
-        state.connection = .stopped
+    // invariant: an engine this app does not draw is said by its verdict, on
+    // the engine's own page of it, never as stopped; this app older than the
+    // engine says its own remedy on that page.
+    func showIncompatible(_ why: EngineIncompatibility) {
+        state.connection = .incompatible(why)
         guard let url = Bundle.main.url(forResource: "outdated", withExtension: "json"),
               let data = try? Data(contentsOf: url), var page = try? Page.decode(data) else { return }
         page.context = Context(machine: state.page?.context?.machine ?? Format.bareName(ProcessInfo.processInfo.hostName), kind: page.context?.kind)
+        if why == .appOlder, var s = page.sections?.first, var row = s.items?.first?.row {
+            row.cells = [Value(kind: "text", text: why.words)]
+            row.hint = Hint(command: "station apps install station-menubar")
+            s.items = [Item(row: row)]
+            s.caption = [Value(kind: "text", text: why.remedy)]
+            page.sections = [s]
+        }
         state.page = page
     }
 
@@ -240,6 +240,7 @@ final class Model: ObservableObject {
             while !Task.isCancelled {
                 try? await Task.sleep(nanoseconds: 2_000_000_000)
                 guard let self, !Task.isCancelled, self.state.connection != .live else { return }
+                if case .incompatible = self.state.connection { return }
                 if (try? UnixSocket.connect(socket)) != nil {
                     self.subscription?.cancel()
                     self.subscription = nil

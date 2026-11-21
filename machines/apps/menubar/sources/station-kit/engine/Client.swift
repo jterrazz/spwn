@@ -27,8 +27,6 @@ public struct Reply: Sendable {
 public struct EngineHello: Equatable, Sendable {
     public var executable: String?
     public var page: Int?
-
-    public var older: Bool { (page ?? 0) < pageRevision }
 }
 
 public struct AnySendable: @unchecked Sendable {
@@ -37,6 +35,9 @@ public struct AnySendable: @unchecked Sendable {
 
 public enum StreamEvent: Sendable {
     case connected
+    // value: the watch of pages opened at a revision this app does not draw;
+    // no page of it follows.
+    case incompatible(EngineIncompatibility)
     case page(Page)
     case tick
     case sample(LiveSample)
@@ -205,6 +206,9 @@ public final class Subscription: @unchecked Sendable {
         return body
     }
 
+    // invariant: a watch of pages is judged by the revision its opening names
+    // before any page of it is drawn (EngineIncompatibility): one this app does
+    // not draw emits `incompatible` and none of its pages.
     // invariant: one subscribed connection at a time; a connection that ends,
     // or a page watch that says nothing for 45 s (it ticks every 15 s), is
     // dropped and made again after 1, 2, 4 up to 30 s, the wait starting over
@@ -241,6 +245,7 @@ public final class Subscription: @unchecked Sendable {
                 }
             }
             var streamed = false
+            var refused = false
             await withTaskCancellationHandler {
                 while let line = try? await Client.readLine(socket) {
                     seen.bump()
@@ -249,12 +254,17 @@ public final class Subscription: @unchecked Sendable {
                     guard let obj = frame["out"] as? [String: Any] else { continue }
                     if obj["stream"] != nil {
                         streamed = true
-                        emit(.connected)
+                        if ticks, let why = EngineIncompatibility.of(revision: obj["page"] as? Int) {
+                            refused = true
+                            emit(.incompatible(why))
+                        } else {
+                            emit(.connected)
+                        }
                         continue
                     }
                     switch obj["event"] as? String {
                     case "page":
-                        if let raw = obj["page"], let data = try? JSONSerialization.data(withJSONObject: raw), let page = try? Page.decode(data) {
+                        if !refused, let raw = obj["page"], let data = try? JSONSerialization.data(withJSONObject: raw), let page = try? Page.decode(data) {
                             emit(.page(page))
                         }
                     case "tick":

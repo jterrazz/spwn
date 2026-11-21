@@ -1,2 +1,2 @@
-Needs you  Update station here (curl -fsSL https://spwn.sh/install.sh | bash)
-  ◐ engine  older than this app  → station engine start
+Needs you  Update station here
+  ◐ engine  older than this app  → curl -fsSL https://spwn.sh/install.sh | bash
