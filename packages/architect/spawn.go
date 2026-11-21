@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 
@@ -426,6 +427,13 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		return nil, fmt.Errorf("start container: %w", err)
 	}
 	opts.progress("container_created", id)
+
+	if runtime.GOOS == "linux" && os.Getuid() != 0 {
+		if err := deploy.FollowHostUser(ctx, a.backend, containerID, os.Getuid(), os.Getgid()); err != nil {
+			a.rollback(ctx, containerID)
+			return nil, err
+		}
+	}
 
 	agentHomes := agentHomesForSpawn(opts)
 	if err := deploy.SyncIn(ctx, a.backend, containerID, agentHomes); err != nil {

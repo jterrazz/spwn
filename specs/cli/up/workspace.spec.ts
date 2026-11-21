@@ -1,7 +1,7 @@
 import { directory } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
-import { cli, writableByTheWorld } from '../cli.specification.js';
+import { cli } from '../cli.specification.js';
 
 // hazard: a document cannot run a command inside the running world, which is what proves the mount
 
@@ -10,7 +10,6 @@ describe('workspace', () => {
         // Given - the docker-pilot project brought up
         await using result = await cli
             .fixture(directory('../__fixtures__/docker-pilot/'))
-            .prepare(writableByTheWorld)
             .exec('up');
 
         // When - the agent reads the manifest and writes a file in its workspace

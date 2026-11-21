@@ -35,17 +35,6 @@ owner go, since it rewrites a tagged public history: every session's clone
 and worktree is recut from the rewritten main, and nothing unpushed may be
 left on a branch when it runs.
 
-## A world's user on a Linux host whose uid is not 1001
-Found 2026-11-20 on the development VM (uid 1002): a world's `spwn` user is
-uid 1001 (`docker/spwn-test/Dockerfile:15`,
-`packages/compile/baseimages/world.Dockerfile:2,9`), and a bind-mounted
-workspace keeps the host's owner and its 0700 mode, so the agent cannot
-write into its own workspace. The stories open their workdir to the world's
-user (`specs/cli/cli.specification.ts`, `writableByTheWorld`); the product
-does not. Linux hosts are out of scope today
-(`docs/reference/manual-edge-cases.md`); the owner decides, after the
-publication, whether the world's user follows the host's uid.
-
 ## Blueprints: each machine's install, declared (the next major project)
 The owner's goal (2026-11-10): a folder of configuration files says what
 every machine of the fleet installs, the MacBook, the Mac mini and each kind of

@@ -1,5 +1,4 @@
 import { specification } from '@jterrazz/test';
-import { chmodSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { afterAll } from 'vitest';
 
@@ -81,8 +80,3 @@ export const { cli, cleanup } = await specification.cli(SPWN_BIN, {
 });
 
 afterAll(cleanup);
-
-// outside: a Linux daemon bind-mounts the project with its host owner and mode, the working directory is created 0700, and the world's `spwn` user is uid 1001 whatever the host's uid is; Docker Desktop on macOS maps ownership, so there it opens nothing new
-export function writableByTheWorld(workdir: string): void {
-    chmodSync(workdir, 0o777);
-}

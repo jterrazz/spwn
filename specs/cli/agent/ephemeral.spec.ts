@@ -1,7 +1,7 @@
 import { directory, file } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
-import { cli, writableByTheWorld } from '../cli.specification.js';
+import { cli } from '../cli.specification.js';
 
 // hazard: a document cannot scope the containers a session starts nor read them back
 
@@ -12,7 +12,6 @@ describe('ephemeral', () => {
         // Given - the project brought up, then a task dispatched into its world by id
         await using result = await simulated
             .fixture(directory('../__fixtures__/docker-pilot/'))
-            .prepare(writableByTheWorld)
             .exec([
                 'up',
                 'agent --ephemeral "lint the code" --world $(ls .spwn/world-states | head -1)',

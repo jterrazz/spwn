@@ -24,7 +24,7 @@ Docker is the default and, today, the only adapter. Designed, not shipped: edge 
 | Mind persistence | Bidirectional   | Agent memory (playbooks, journal)         | Persists across worlds |
 | Baked blocks     | Into the image  | Tools, skills, rendered context           | Rebuilt with the image |
 
-- **Workspaces** are host paths a world declares, mounted at `/workspace`: the way an agent is handed a project and its output collected. When the world is destroyed, the results stay on the host.
+- **Workspaces** are host paths a world declares, mounted at `/workspace`: the way an agent is handed a project and its output collected. When the world is destroyed, the results stay on the host. On a Linux host the world's `spwn` user takes the host user's uid and gid when the world starts, so the agent owns the workspace as the host user does; on macOS, Docker Desktop and OrbStack translate the ownership of a mount.
 - **Knowledge** is world-scoped, not agent-scoped: the path a world names is mounted at `/world/knowledge/`. Omit the key and no mount happens; the agents are never told a knowledge base exists.
 - **The Mind** (`SOUL.md`, playbooks, journal) lives on the host filesystem and travels with the agent across worlds; the journal is appended as sessions run ([The Mind](mind.md)).
 - **Everything composed** (tools, skills, the rendered operating manual) is baked into the image at build time and delivered to the paths each runtime expects. No bind-mount indirection and no symlinks, so a world's capabilities are immutable while it runs.
