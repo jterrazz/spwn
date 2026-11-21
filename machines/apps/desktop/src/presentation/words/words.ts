@@ -152,6 +152,8 @@ export const THE_MAC_ITSELF_WORD = 'the Mac itself';
 
 export const NO_PURPOSE_WORD = 'No purpose given';
 
+export const SHOW_OLDER_WORD = 'Show older';
+
 // value: the window's words around a create that failed: the step's sentence and the lines are the engine's.
 export const FAILED_CREATE_WORDS = {
     lines: 'What its console last wrote',

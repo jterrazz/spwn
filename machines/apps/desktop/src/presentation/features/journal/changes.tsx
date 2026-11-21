@@ -1,11 +1,22 @@
 import type { CoreJournalGroup, CoreJournalReading, MachinesMacView } from '@jterrazz/station-api';
+import { useState } from 'react';
 
 import { useRead } from '../../dependencies/dependencies';
 import { Unanswered } from '../../kit/readings';
 import type { Route } from '../../navigation/route';
 import { Button, Panel } from '../../ui/index';
+import { SHOW_OLDER_WORD } from '../../words/words';
 import { JournalLineRow } from './journal-line';
 import { keyOfLine } from './model';
+import {
+    askedOf,
+    olderAsked,
+    olderOffered,
+    pageInput,
+    pagingOf,
+    saidAfter,
+    unheardUnsaid,
+} from './pages';
 
 import pageStyles from '../../ui/page.module.css';
 import styles from './changes.module.css';
@@ -37,15 +48,16 @@ function Day(props: GroupProps) {
     );
 }
 
-function Days({
-    reading,
-    macs,
-    go,
-}: {
-    reading: CoreJournalReading;
+type PageProps = {
     macs: readonly MachinesMacView[];
     go: Go;
-}) {
+    chosen: null | string;
+    asked: readonly string[];
+    said: readonly string[];
+    onOlder: (before: string) => void;
+};
+
+function Days({ reading, said, macs, go }: PageProps & { reading: CoreJournalReading }) {
     const groups = reading.Groups ?? [];
     return (
         <>
@@ -55,7 +67,7 @@ function Days({
             {groups.map((group) => (
                 <Day go={go} group={group} key={`${group.Day}/${group.Title}`} macs={macs} />
             ))}
-            {(reading.Unheard ?? []).map((unheard) => (
+            {unheardUnsaid(said, reading).map((unheard) => (
                 <p className={pageStyles.none} key={unheard.Mac}>
                     {unheard.Why}
                 </p>
@@ -64,19 +76,69 @@ function Days({
     );
 }
 
+function Pages({ reading, ...props }: PageProps & { reading: CoreJournalReading }) {
+    const next = olderOffered(reading);
+    let older = null;
+    if (next !== undefined && props.asked.includes(next)) {
+        older = <Older {...props} before={next} said={saidAfter(props.said, reading)} />;
+    } else if (next !== undefined) {
+        older = (
+            <div className={styles.older}>
+                <Button
+                    onClick={() => {
+                        props.onOlder(next);
+                    }}
+                    variant="link"
+                >
+                    {SHOW_OLDER_WORD}
+                </Button>
+            </div>
+        );
+    }
+    return (
+        <>
+            <Days {...props} reading={reading} />
+            {older}
+        </>
+    );
+}
+
+function Older({ before, ...props }: PageProps & { before: string }) {
+    const page = useRead('journal.read', pageInput(props.chosen, before));
+    if (page.kind === 'reading') {
+        return null;
+    }
+    if (page.kind === 'failed') {
+        return <Unanswered error={page.error} size="panel" />;
+    }
+    return <Pages {...props} reading={page.out} />;
+}
+
 type HistoryProps = { macs: readonly MachinesMacView[]; go: Go; chosen: null | string };
 
 export function History({ macs, go, chosen }: HistoryProps) {
-    const journal = useRead('journal.read', chosen === null ? {} : { Mac: chosen });
+    const journal = useRead('journal.read', pageInput(chosen));
+    const [paging, setPaging] = useState(() => pagingOf(chosen));
     if (journal.kind === 'reading') {
         return null;
     }
+    const onOlder = (before: string) => {
+        setPaging((was) => olderAsked(was, chosen, before));
+    };
     return (
         <Panel note="what happened, newest first" title={HISTORY}>
             {journal.kind === 'failed' ? (
                 <Unanswered error={journal.error} size="panel" />
             ) : (
-                <Days go={go} macs={macs} reading={journal.out} />
+                <Pages
+                    asked={askedOf(paging, chosen)}
+                    chosen={chosen}
+                    go={go}
+                    macs={macs}
+                    onOlder={onOlder}
+                    reading={journal.out}
+                    said={[]}
+                />
             )}
         </Panel>
     );

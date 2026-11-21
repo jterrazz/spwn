@@ -339,6 +339,7 @@ STORIES_JOURNAL = [
         night_line(STORIES_NIGHT, "2026-11-07T03:14:00Z", "macbook-pro", "orbstack", Detail="updates itself",
                    Outcome="held"),
         failed(STORIES_NIGHT, "2026-11-07T03:15:00Z", "linux-1", "ripgrep", {"Names": "ripgrep"}),
+        kept_line("2026-10-28T09:00:00Z", "macbook-pro", "lazygit installed", Subject=about("app", "lazygit")),
     ]),
     journaled("mac-mini", [
         kept_line("2026-11-07T09:12:00Z", "gate-2", "gate-2 deleted", Call="machines.delete", Detail="8 GB freed",

@@ -29,6 +29,27 @@ describe('changes', () => {
         expect(result.html.text).toMatch(/_pill_[^>]*>failed</u);
     });
 
+    test("pressing Show older draws the engine's older page below, and goes once no older page is left", async () => {
+        // Given - the Inbox over stories, whose journal keeps a line older than the first page
+        const result = await component.render(
+            pageOver(recordingFor('stories'), { page: 'inbox' }),
+            async (visitor) => {
+                await visitor.see(within(history, heading('Yesterday')));
+
+                // When - Show older is pressed at the History's foot
+                await visitor.click(within(history, button('Show older')));
+
+                // Then - the older day is drawn below Yesterday, and the control has gone
+                await visitor.see(within(history, heading('Wednesday 28 October')));
+                await visitor.gone(within(history, button('Show older')));
+            },
+        );
+        await expect(result.tree).toMatch(file('./__expected__/stories-history-older.aria.yaml'));
+
+        // And - the silent Mac is named once, though the older page heard nothing of it either
+        expect(result.html.text.split('macbook-air does not answer')).toHaveLength(2);
+    });
+
     test('home draws the last night alone, with its first three lines', async () => {
         // Given - Home over stories
         const result = await component.render(

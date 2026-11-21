@@ -32,6 +32,10 @@
 .sum {
     color: var(--t3);
 }
+.older {
+    padding-top: var(--space-14);
+    border-top: 1px solid var(--line);
+}
 .dayHead + * {
     border-top: 0;
 }

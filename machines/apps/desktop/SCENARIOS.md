@@ -7,7 +7,7 @@ What the desktop window must let its user do, page by page: one row is one scena
 | How a scenario is proved | Where its test lives, and the states it can be in |
 | Home                     | H1 to H14                                         |
 | Inbox, what needs you    | N1 to N11                                         |
-| Inbox, the history       | C1 to C9                                          |
+| Inbox, the history       | C1 to C10                                         |
 | A Mac                    | M1 to M14                                         |
 | A workspace              | W1 to W32                                         |
 | A server                 | S1 to S6                                          |
@@ -76,6 +76,7 @@ A scenario is a test of `specs/website/`, a visit of the window's proof build ov
 | C7  | Read the history while a Mac is silent    | a Mac of mine does not answer        | I open the Inbox's History    | the other Macs' lines still read, and the History names the silent Mac with the engine's reason | no     |
 | C8  | See that nothing was done                 | no line kept in the days read        | I open the Inbox's History    | the engine's sentence says nothing was done, and no day is drawn                                | no     |
 | C9  | Read a line about a machine deleted since | a VM deleted today                   | I open the Inbox's History    | its line keeps the machine's name, and pressing it opens nothing                                | no     |
+| C10 | Read further back than the first page     | a line kept before the days read     | I press Show older            | the older days are drawn below, and Show older goes once the engine offers no older page        | no     |
 
 ## A Mac
 

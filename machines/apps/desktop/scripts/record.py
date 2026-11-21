@@ -118,7 +118,7 @@ def asks(listed):
     input and no target, as driftAsked sends it. A VM's activity and its log are asked at its Mac, as useActivity
     and VmLog send them. A Mac's Awake sheet watches its awake.read, of This Mac's engine for This Mac and named for a
     far one. The journal is read of the socket's engine, which asks every Mac: whole for the Inbox's History, its
-    newest night for Home's Last night, and for each Mac the Inbox chooses. The New machine sheet watches machines.new of the socket's engine, opened anywhere or on one
+    newest night for Home's Last night, and for each Mac the Inbox chooses, its older pages by `follows`. The New machine sheet watches machines.new of the socket's engine, opened anywhere or on one
     Mac machines.list lists, as askedOf sends it; a sheet opened from a machine file names it in From, a request of
     ALSO."""
     here = thisMac(listed)
@@ -187,9 +187,17 @@ def asked_in(world, listed):
     return list({keyOf(request): request for request in [*asks(listed), *ALSO.get(world, [])]}.values())
 
 
+def older_pages(requests, answered):
+    """The History's next, older page of each journal read the Inbox makes that offers one: the same read with
+    `Before` its answer's `Next`, as the window asks it on Show older."""
+    return [{"call": "journal.read", "in": {**request["in"], "Before": out["Next"]}}
+            for request, out in ((request, last_out(frames)) for request, frames in zip(requests, answered))
+            if request.get("call") == "journal.read" and not request["in"].get("Night") and out and out.get("Next")]
+
+
 def follows(requests, answered):
-    """The reads asked of an answer: a drift per machine file machinefile.files names, and the grant picker's offer
-    per entry of this Mac's vault."""
+    """The reads asked of an answer: a drift per machine file machinefile.files names, the grant picker's offer per
+    entry of this Mac's vault, and the History's older pages, each asked of the page before it."""
     listed = [last_out(frames) for request, frames in zip(requests, answered)
               if request.get("call") == "machinefile.files" and "target" not in request]
     names = [file["Name"] for out in listed if out for file in out.get("Files") or [] if file.get("Name")]
@@ -199,6 +207,7 @@ def follows(requests, answered):
     more = [
         *[{"call": "machinefile.drift", "in": {"Machinefile": name}} for name in dict.fromkeys(names)],
         *[{"watch": "grants.new", "in": {"Entry": entry}} for entry in dict.fromkeys(entries)],
+        *older_pages(requests, answered),
     ]
     return [request for request in more if keyOf(request) not in asked_already]
 
@@ -500,8 +509,9 @@ def record(world, calls):
     requests = asked_in(world, listed)
     answered = asked(seed, requests, fixture)
     more = follows(requests, answered)
-    if more:
+    while more:
         requests, answered = requests + more, answered + asked(seed, more, fixture)
+        more = follows(requests, answered)
     requests, answered = [MACHINES, *requests], [listed, *answered]
     before = {keyOf(request): kept(request, frames) for request, frames in zip(requests, answered)}
     chosen = [request for request in GESTURES.get(world, []) if not calls or callOf(request) in calls]

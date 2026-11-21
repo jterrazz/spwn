@@ -185,4 +185,40 @@ describe('history', () => {
         });
         expect(result.errors.text).toBe('');
     });
+
+    test('C10 Show older draws the older days below, and goes once no older page is left', async () => {
+        // Given - the Inbox over stories, where lazygit was installed before the seven days read
+        const result = await website.visit(STORIES, async (visitor) => {
+            await visitor.see(within(history, heading('Yesterday')));
+            await visitor.gone(within(history, content('lazygit installed')));
+
+            // When - Show older is pressed
+            await visitor.click(within(history, button('Show older')));
+
+            // Then - the older day holds lazygit's line, and nothing older is offered
+            await visitor.see(
+                within(
+                    region('Wednesday 28 October'),
+                    content('lazygit installed', { exact: false }),
+                ),
+            );
+            await visitor.gone(within(history, button('Show older')));
+        });
+        expect(result.errors.text).toBe('');
+    });
+
+    test('C10 a Mac chosen pages its own days alone', async () => {
+        // Given - the Inbox over stories, the older line kept by macbook-pro
+        const result = await website.visit(STORIES, async (visitor) => {
+            await visitor.see(within(history, button('Show older')));
+
+            // When - mac-mini is chosen above the list
+            await visitor.click(within(main(), button('mac-mini')));
+
+            // Then - mac-mini keeps nothing older, so no older page is offered
+            await visitor.see(within(night, content('24.11.0 → 24.11.1')));
+            await visitor.gone(within(history, button('Show older')));
+        });
+        expect(result.errors.text).toBe('');
+    });
 });
