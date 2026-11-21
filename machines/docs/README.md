@@ -114,13 +114,16 @@ The records of decisions this repository alone took go in [`decisions/`](decisio
 - [059 The latest release is read by two calls: one reads what the engine kept, one asks GitHub](decisions/059-the-latest-release-is-read-by-two-calls.md) (Accepted)
 - [060 The window offers the engine's release and updates on a press](decisions/060-the-window-offers-the-engines-release-and-updates-on-a-press.md) (Accepted)
 - [061 The history is kept by the Mac that holds the machine](decisions/061-the-history-is-kept-by-the-mac-that-holds-the-machine.md) (Proposed)
+- [062 A failed create stays on the record until its start or its delete](decisions/062-a-failed-create-stays-on-the-record-until-its-start-or-its-delete.md) (Proposed)
+- [063 A gesture is kept by the Router of its Mac, with who did it](decisions/063-a-gesture-is-kept-by-the-router-of-its-mac.md) (Proposed)
+- [064 A key never leaves its device; station is the ssh agent](decisions/064-a-key-never-leaves-its-device.md) (Proposed)
 - [065 The window updates itself through the Tauri updater](decisions/065-the-window-updates-itself-through-the-tauri-updater.md) (Proposed)
 - [066 A commit owes that it builds and lints, a lot owes the gate](decisions/066-a-commit-owes-that-it-builds-and-lints-a-lot-owes-the-gate.md) (Accepted)
 - [067 One train, appended by makers, proved at its tip](decisions/067-one-train-appended-by-makers-proved-at-its-tip.md) (Accepted)
 - [068 In the fake world no result waits on real time](decisions/068-in-the-fake-world-no-result-waits-on-real-time.md) (Proposed)
-- [072 Before 1.0, every station runs the same release, and every Mac pushes its state](decisions/072-before-1-0-every-station-runs-the-same-release.md) (Accepted)
 - [069 The menu bar hosts its panel once, and keeps what it saw](decisions/069-the-menu-bar-hosts-its-panel-once-and-keeps-what-it-saw.md) (Accepted)
 - [070 The engine keeps one read model; pages and views are its projections](decisions/070-the-engine-keeps-one-read-model.md) (Accepted)
 - [071 The window mirrors engine-kept state, never blank](decisions/071-the-window-mirrors-engine-kept-state-never-blank.md) (Accepted)
+- [072 Before 1.0, every station runs the same release, and every Mac pushes its state](decisions/072-before-1-0-every-station-runs-the-same-release.md) (Accepted)
 
 A decision spanning several repositories is recorded by the corpus that spans them. What was left for later is `TODO.md` at the repository root.
