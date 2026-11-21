@@ -446,9 +446,7 @@ new world has stale role.md but otherwise fine.
 ## Out of scope (still)
 
 - DoS / adversarial workloads (testing against a malicious agent).
-- Cross-platform (Windows/Linux divergence: Spwn is macOS-first
-  today). On a Linux host, the world's `spwn` user takes the host
-  user's uid and gid when the world starts, so the agent writes its
-  bind-mounted workspace.
+- Cross-platform beyond the world user's uid on Linux, which
+  [Worlds](../concepts/worlds.md) covers (Spwn is macOS-first today).
 - HTTP API auth edges (apps/api is same-machine only).
 - Web UI specifics (Playwright suite).
