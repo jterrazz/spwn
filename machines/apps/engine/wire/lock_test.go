@@ -5,6 +5,7 @@ import (
 	"errors"
 	"slices"
 	"strings"
+	"sync"
 	"testing"
 
 	"github.com/jterrazz/studio-station/apps/engine/apps"
@@ -104,66 +105,81 @@ func TestWhatApplyInstallsIsWhatTheLockNamesOnEveryPath(t *testing.T) {
 	// this machine's choice, written anew. On each path the lock then
 	// names what the machine holds.
 	base := benchOf(t, catalog.Mac, "")
+	var mu sync.Mutex
 	written := map[catalog.MachineKind]map[string]string{}
 	pinned := map[catalog.Method]int{}
-	for kind := range systems() {
-		written[kind] = map[string]string{}
-		for _, a := range base.cat.Apps {
-			if in, ok := a.InstallOn(kind); !ok || !registryCan(base, in.Method()).Install {
-				continue
-			}
-			about := string(kind) + " " + a.Name
-			fresh := lockBenchOf(t, kind, "", a.Name)
-			out := fresh.apply(t)
-			l := fresh.lock(t)
-			holdsWhatTheLockNames(t, about+" fresh", fresh, out.Plan, l)
-			body, err := catalog.EncodeLock(l)
-			if err != nil {
-				t.Fatal(err)
-			}
-			written[kind][a.Name] = string(body)
-			again := lockBenchOf(t, kind, string(body), a.Name)
-			out = again.apply(t)
-			for _, d := range out.Done {
-				locked, ok := lockedOf(l, d.Line.Step.Package)
-				if !ok || !d.Line.Acts() {
+	t.Run("fresh then locked", func(t *testing.T) {
+		for kind := range systems() {
+			written[kind] = map[string]string{}
+			for _, a := range base.cat.Apps {
+				if in, ok := a.InstallOn(kind); !ok || !registryCan(base, in.Method()).Install {
 					continue
 				}
-				if d.Method != locked.Method {
-					t.Errorf("%s locked: %s locked by %s, installed by %s", about, d.Line.Step.Package, locked.Method, d.Method)
-				}
-				if d.Line.Step.Spec.Pins() {
-					pinned[catalog.Method(d.Line.Step.Method)]++
-					if !catalog.Exactly(locked.Version).Contains(d.Version) {
-						t.Errorf("%s locked: %s locked at %s, installed at %s", about, d.Line.Step.Package, locked.Version, d.Version)
+				about := string(kind) + " " + a.Name
+				t.Run(about, func(t *testing.T) {
+					t.Parallel()
+					fresh := lockBenchOf(t, kind, "", a.Name)
+					out := fresh.apply(t)
+					l := fresh.lock(t)
+					holdsWhatTheLockNames(t, about+" fresh", fresh, out.Plan, l)
+					body, err := catalog.EncodeLock(l)
+					if err != nil {
+						t.Fatal(err)
 					}
-				}
+					mu.Lock()
+					written[kind][a.Name] = string(body)
+					mu.Unlock()
+					again := lockBenchOf(t, kind, string(body), a.Name)
+					out = again.apply(t)
+					for _, d := range out.Done {
+						locked, ok := lockedOf(l, d.Line.Step.Package)
+						if !ok || !d.Line.Acts() {
+							continue
+						}
+						if d.Method != locked.Method {
+							t.Errorf("%s locked: %s locked by %s, installed by %s", about, d.Line.Step.Package, locked.Method, d.Method)
+						}
+						if d.Line.Step.Spec.Pins() {
+							mu.Lock()
+							pinned[catalog.Method(d.Line.Step.Method)]++
+							mu.Unlock()
+							if !catalog.Exactly(locked.Version).Contains(d.Version) {
+								t.Errorf("%s locked: %s locked at %s, installed at %s", about, d.Line.Step.Package, locked.Version, d.Version)
+							}
+						}
+					}
+					holdsWhatTheLockNames(t, about+" locked", again, out.Plan, again.lock(t))
+				})
 			}
-			holdsWhatTheLockNames(t, about+" locked", again, out.Plan, again.lock(t))
 		}
-	}
+	})
 	for _, m := range []catalog.Method{catalog.MethodApt, catalog.MethodGitHubRelease} {
 		if pinned[m] == 0 {
 			t.Errorf("no app of the catalog was installed at its locked version by %s", m)
 		}
 	}
-	for kind := range systems() {
-		for other := range systems() {
-			if other == kind {
-				continue
-			}
-			for name, body := range written[other] {
-				a, _ := base.cat.App(name)
-				if in, ok := a.InstallOn(kind); !ok || !registryCan(base, in.Method()).Install {
+	t.Run("from another lock", func(t *testing.T) {
+		for kind := range systems() {
+			for other := range systems() {
+				if other == kind {
 					continue
 				}
-				about := string(kind) + " " + name + " from a lock of " + string(other)
-				b := lockBenchOf(t, kind, body, name)
-				out := b.apply(t)
-				holdsWhatTheLockNames(t, about, b, out.Plan, b.lock(t))
+				for name, body := range written[other] {
+					a, _ := base.cat.App(name)
+					if in, ok := a.InstallOn(kind); !ok || !registryCan(base, in.Method()).Install {
+						continue
+					}
+					about := string(kind) + " " + name + " from a lock of " + string(other)
+					t.Run(about, func(t *testing.T) {
+						t.Parallel()
+						b := lockBenchOf(t, kind, body, name)
+						out := b.apply(t)
+						holdsWhatTheLockNames(t, about, b, out.Plan, b.lock(t))
+					})
+				}
 			}
 		}
-	}
+	})
 }
 
 func TestTheLockChoosesAmongTheMethodsTheMachinefileAllows(t *testing.T) {

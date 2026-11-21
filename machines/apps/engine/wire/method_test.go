@@ -297,65 +297,68 @@ func TestTheMethodApplyRunsIsTheMethodThePlanShows(t *testing.T) {
 			if in, ok := a.InstallOn(kind); !ok || !registryCan(base, in.Method()).Install {
 				continue
 			}
-			for _, entry := range entries(cat, a, kind) {
-				about := string(kind) + " " + entry
-				b := benchOf(t, kind, entry)
-				step := b.step(t, a.Name)
-				method := catalog.Method(step.Method)
-				in, _ := a.InstallBy(kind, method)
-				done := doneOf(t, b.apply(t, false).Done, a.Name)
-				if done.State != catalog.StateOK || !b.holds(method, in.Key()) {
-					t.Errorf("%s: the plan showed %s, apply ended %s %q and left %s without it", about, step.Method, done.State, done.Detail, step.Method)
-					continue
-				}
-				if !step.Version.Any() && !step.Version.Contains(done.Version) {
-					t.Errorf("%s: asked at %s, holds %s", about, step.Version, done.Version)
-				}
-				if rec, ok := b.recorded(a.Name); !ok || rec.Method != step.Method {
-					t.Errorf("%s: installed by %s, recorded %+v", about, step.Method, rec)
-				}
-				row := b.row(t, a.Name)
-				if string(row.Method) != step.Method {
-					t.Errorf("%s: installed by %s, read back by %s", about, step.Method, row.Method)
-				}
-				if line := b.planned(t, a.Name); line.Action != machinefile.Keep || line.Method() != step.Method {
-					t.Errorf("%s: then planned %s by %s", about, line.Action, line.Method())
-				}
-				can := registryCan(b, method)
-				if can.Update {
-					up, err := b.shelf.Upgrade(ctx, apps.UpgradeRequest{Names: []string{a.Name}})
-					if err != nil || string(outcomeOf(t, up, a.Name).Method) != step.Method {
-						t.Errorf("%s: an update reached %+v (%v)", about, up, err)
+			t.Run(string(kind)+" "+a.Name, func(t *testing.T) {
+				t.Parallel()
+				for _, entry := range entries(cat, a, kind) {
+					about := string(kind) + " " + entry
+					b := benchOf(t, kind, entry)
+					step := b.step(t, a.Name)
+					method := catalog.Method(step.Method)
+					in, _ := a.InstallBy(kind, method)
+					done := doneOf(t, b.apply(t, false).Done, a.Name)
+					if done.State != catalog.StateOK || !b.holds(method, in.Key()) {
+						t.Errorf("%s: the plan showed %s, apply ended %s %q and left %s without it", about, step.Method, done.State, done.Detail, step.Method)
+						continue
+					}
+					if !step.Version.Any() && !step.Version.Contains(done.Version) {
+						t.Errorf("%s: asked at %s, holds %s", about, step.Version, done.Version)
+					}
+					if rec, ok := b.recorded(a.Name); !ok || rec.Method != step.Method {
+						t.Errorf("%s: installed by %s, recorded %+v", about, step.Method, rec)
+					}
+					row := b.row(t, a.Name)
+					if string(row.Method) != step.Method {
+						t.Errorf("%s: installed by %s, read back by %s", about, step.Method, row.Method)
+					}
+					if line := b.planned(t, a.Name); line.Action != machinefile.Keep || line.Method() != step.Method {
+						t.Errorf("%s: then planned %s by %s", about, line.Action, line.Method())
+					}
+					can := registryCan(b, method)
+					if can.Update {
+						up, err := b.shelf.Upgrade(ctx, apps.UpgradeRequest{Names: []string{a.Name}})
+						if err != nil || string(outcomeOf(t, up, a.Name).Method) != step.Method {
+							t.Errorf("%s: an update reached %+v (%v)", about, up, err)
+						}
+					}
+					b.w.Mac("here").Apps[method].Behind = map[string]string{in.Key(): "99.0.0"}
+					// invariant: a bare update takes the rows its method reads behind, so a
+					// method that reads no currency is reached by name only.
+					seen, _ := appsfake.InstallerOf(b.w, "here", method, false).Outdated(ctx, []string{in.Key()})
+					// invariant: a bare update leaves an app that updates itself to its updater.
+					if can.Update && can.UpdateAll && seen[in.Key()].Verdict == apps.Behind && a.UpdatesSelf {
+						b.shelf.Forget()
+						up, err := b.shelf.Upgrade(ctx, apps.UpgradeRequest{All: true})
+						if err != nil || slices.ContainsFunc(up, func(o apps.Outcome) bool { return o.Name == a.Name }) || b.w.Mac("here").Apps[method].Installed[in.Key()] == "99.0.0" {
+							t.Errorf("%s: a bare update moved an app that updates itself: %+v (%v)", about, up, err)
+						}
+					} else if can.Update && can.UpdateAll && seen[in.Key()].Verdict == apps.Behind {
+						var via []catalog.ManagerKey
+						if _, ok := b.cat.Manager(row.Manager); ok {
+							via = []catalog.ManagerKey{catalog.ManagerKey(row.Manager)}
+						}
+						b.shelf.Forget()
+						up, err := b.shelf.Upgrade(ctx, apps.UpgradeRequest{All: via == nil, Via: via})
+						if i := slices.IndexFunc(up, func(o apps.Outcome) bool { return o.Name == a.Name }); err != nil || i < 0 || string(up[i].Method) != step.Method || b.w.Mac("here").Apps[method].Installed[in.Key()] != "99.0.0" {
+							t.Errorf("%s: the update of %v reached %+v (%v)", about, via, up, err)
+						}
+					}
+					if can.Remove && catalog.Undoable(in) {
+						if _, err := b.shelf.Uninstall(ctx, []string{a.Name}, true); err != nil || b.holds(method, in.Key()) {
+							t.Errorf("%s: the removal left the %s copy (%v)", about, step.Method, err)
+						}
 					}
 				}
-				b.w.Mac("here").Apps[method].Behind = map[string]string{in.Key(): "99.0.0"}
-				// invariant: a bare update takes the rows its method reads behind, so a
-				// method that reads no currency is reached by name only.
-				seen, _ := appsfake.InstallerOf(b.w, "here", method, false).Outdated(ctx, []string{in.Key()})
-				// invariant: a bare update leaves an app that updates itself to its updater.
-				if can.Update && can.UpdateAll && seen[in.Key()].Verdict == apps.Behind && a.UpdatesSelf {
-					b.shelf.Forget()
-					up, err := b.shelf.Upgrade(ctx, apps.UpgradeRequest{All: true})
-					if err != nil || slices.ContainsFunc(up, func(o apps.Outcome) bool { return o.Name == a.Name }) || b.w.Mac("here").Apps[method].Installed[in.Key()] == "99.0.0" {
-						t.Errorf("%s: a bare update moved an app that updates itself: %+v (%v)", about, up, err)
-					}
-				} else if can.Update && can.UpdateAll && seen[in.Key()].Verdict == apps.Behind {
-					var via []catalog.ManagerKey
-					if _, ok := b.cat.Manager(row.Manager); ok {
-						via = []catalog.ManagerKey{catalog.ManagerKey(row.Manager)}
-					}
-					b.shelf.Forget()
-					up, err := b.shelf.Upgrade(ctx, apps.UpgradeRequest{All: via == nil, Via: via})
-					if i := slices.IndexFunc(up, func(o apps.Outcome) bool { return o.Name == a.Name }); err != nil || i < 0 || string(up[i].Method) != step.Method || b.w.Mac("here").Apps[method].Installed[in.Key()] != "99.0.0" {
-						t.Errorf("%s: the update of %v reached %+v (%v)", about, via, up, err)
-					}
-				}
-				if can.Remove && catalog.Undoable(in) {
-					if _, err := b.shelf.Uninstall(ctx, []string{a.Name}, true); err != nil || b.holds(method, in.Key()) {
-						t.Errorf("%s: the removal left the %s copy (%v)", about, step.Method, err)
-					}
-				}
-			}
+			})
 		}
 	}
 }
