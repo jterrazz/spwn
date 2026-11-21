@@ -24,15 +24,18 @@ export function fitAllows(fit: MachinesFit): boolean {
     return fit === 'fits';
 }
 
-export type RefusalPlace = 'file' | 'foot' | 'memory' | 'on' | 'purpose';
+export type RefusalPlace = 'file' | 'foot' | 'memory' | 'name' | 'on' | 'purpose';
 
-// outside: a create's refusal names no field of the sheet it is about, so its code places it (purpose, memory, file);
-// outside: one of another code whose subject is a Mac the sheet offers is that Mac's, any other the sheet's own.
+// outside: a create's refusal names no field of the sheet it is about, so its code places it (name, purpose, memory,
+// outside: file); one of another code whose subject is a Mac the sheet offers is that Mac's, any other the sheet's own.
 const CREATE_REFUSAL_PLACES: Readonly<Partial<Record<string, RefusalPlace>>> = {
     'machinefile.not-a-template': 'file',
     'machinefile.not-found': 'file',
+    'machines.bad-name': 'name',
     'machines.bad-purpose': 'purpose',
+    'machines.name-taken': 'name',
     'machines.server-template': 'file',
+    'machines.template-name': 'name',
     'machines.too-little-memory': 'memory',
 };
 

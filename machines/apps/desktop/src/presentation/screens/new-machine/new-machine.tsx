@@ -149,6 +149,22 @@ function Purpose({ draft, change, refusal }: PurposeProps) {
     );
 }
 
+function NameField({ answer, draft, change, refusal }: Pick<SheetProps, 'answer'> & PurposeProps) {
+    return (
+        <section aria-label="What it is called" className={styles.field}>
+            <FormField
+                label="Name"
+                look="boxed"
+                onChange={(typed) => {
+                    change({ name: typed });
+                }}
+                value={draft.name ?? answer.Name}
+            />
+            {refusal}
+        </section>
+    );
+}
+
 function Sheet(props: SheetProps) {
     const { answer, draft, change, onClose } = props;
     const [open, setOpen] = useState(false);
@@ -173,14 +189,7 @@ function Sheet(props: SheetProps) {
         >
             {file === null ? null : <div className={styles.outcome}>{file}</div>}
             <Purpose change={change} draft={draft} refusal={outcome('purpose')} />
-            <FormField
-                label="Name"
-                look="boxed"
-                onChange={(typed) => {
-                    change({ name: typed });
-                }}
-                value={draft.name ?? answer.Name}
-            />
+            <NameField answer={answer} change={change} draft={draft} refusal={outcome('name')} />
             <OnRow answer={answer} change={change} refusal={outcome('on')} />
             {on === undefined ? null : (
                 <Memory

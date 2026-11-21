@@ -94,7 +94,7 @@ describe('New machine', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test('a name the engine finds taken is refused in the foot of the sheet, in its words', async () => {
+    test('a name the engine finds taken is refused under the name field, in its words', async () => {
         // Given - the New machine sheet over two-macs, where the mini holds infra
         const result = await component.render(windowOver('two-macs'), async (visitor) => {
             await visitor.click(button('New machine'));
@@ -104,10 +104,46 @@ describe('New machine', () => {
             await visitor.click(within(onMini, button('Launch')));
             await visitor.click(within(dialog('Launch infra?'), button('Launch')));
 
-            // Then - the sheet stays, with the engine's refusal, off the On row
+            // Then - the sheet stays, with the engine's refusal under the name, off the On row
             const said = content('"infra" is taken (on mac-mini)', { exact: false });
-            await visitor.see(within(onMini, said));
+            await visitor.see(within(region('What it is called'), said));
             await visitor.gone(within(region('On'), said));
+        });
+        expect(result.errors.text).toBe('');
+    });
+
+    test("a name the template's chain already bears is refused under the name field, in the engine's sentence", async () => {
+        // Given - the New machine sheet over two-macs, following base-ubuntu
+        const result = await component.render(windowOver('two-macs'), async (visitor) => {
+            await visitor.click(button('New machine'));
+
+            // When - base-ubuntu is launched on the mini
+            await visitor.fill(within(onMini, field('Name')), 'base-ubuntu');
+            await visitor.click(within(onMini, button('Launch')));
+            await visitor.click(within(dialog('Launch base-ubuntu?'), button('Launch')));
+
+            // Then - the engine's sentence stands under the name
+            const said = content("base-ubuntu names a Machinefile of base-ubuntu's chain", {
+                exact: false,
+            });
+            await visitor.see(within(region('What it is called'), said));
+        });
+        expect(result.errors.text).toBe('');
+    });
+
+    test('a name the engine finds malformed is refused under the name field', async () => {
+        // Given - the New machine sheet over two-macs
+        const result = await component.render(windowOver('two-macs'), async (visitor) => {
+            await visitor.click(button('New machine'));
+
+            // When - Bad_Name is launched on the mini
+            await visitor.fill(within(onMini, field('Name')), 'Bad_Name');
+            await visitor.click(within(onMini, button('Launch')));
+            await visitor.click(within(dialog('Launch Bad_Name?'), button('Launch')));
+
+            // Then - the engine's sentence stands under the name
+            const said = content('"Bad_Name" is not a valid name', { exact: false });
+            await visitor.see(within(region('What it is called'), said));
         });
         expect(result.errors.text).toBe('');
     });

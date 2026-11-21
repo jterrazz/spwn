@@ -130,7 +130,22 @@ describe('provisional', () => {
                 message: 'not enough',
                 subject: 'macbook-pro',
             }),
-            new EngineError({ code: 'machines.name-taken', message: 'taken', subject: 'linux-1' }),
+            new EngineError({
+                code: 'machines.template-name',
+                message: 'names a Machinefile',
+                subject: 'base-ubuntu',
+            }),
+            new EngineError({ code: 'machines.name-taken', message: 'taken', subject: 'mac-mini' }),
+            new EngineError({
+                code: 'machines.bad-name',
+                message: 'not valid',
+                subject: 'Bad_Name',
+            }),
+            new EngineError({
+                code: 'machines.being-created',
+                message: 'being created',
+                subject: 'linux-1',
+            }),
             new EngineError(undefined),
         ];
 
@@ -145,6 +160,9 @@ describe('provisional', () => {
             'file',
             'file',
             'on',
+            'name',
+            'name',
+            'name',
             'foot',
             'foot',
         ]);

@@ -129,4 +129,43 @@ describe('new machine', () => {
         // Then - the 36 squares taken are lit, among the 28 held by macOS and infra
         expect(result.html.text.match(/data-identity="[^"]+" data-take=/gu)).toHaveLength(36);
     });
+
+    test('H15 a name the file it follows already bears is refused under the Name field, the sheet kept', async () => {
+        // Given - the New machine sheet opened from Home over two-macs, on mac-mini, following base-ubuntu
+        const result = await website.visit(TWO_MACS, async (visitor) => {
+            await visitor.click(button('New machine'));
+            const sheet = dialog('New machine on mac-mini');
+
+            // When - base-ubuntu is named, launched and confirmed
+            await visitor.fill(within(sheet, field('Name')), 'base-ubuntu');
+            await visitor.click(within(sheet, button('Launch')));
+            await visitor.click(within(dialog('Launch base-ubuntu?'), button('Launch')));
+
+            // Then - the sheet stays, the engine's sentence under the name
+            const said = content("base-ubuntu names a Machinefile of base-ubuntu's chain", {
+                exact: false,
+            });
+            await visitor.see(within(region('What it is called'), said));
+            await visitor.see(within(sheet, said));
+        });
+        expect(result.errors.text).toBe('');
+    });
+
+    test('H15 a name taken on the Mac is refused under the Name field', async () => {
+        // Given - the New machine sheet opened from Home over two-macs, on mac-mini, which holds infra
+        const result = await website.visit(TWO_MACS, async (visitor) => {
+            await visitor.click(button('New machine'));
+            const sheet = dialog('New machine on mac-mini');
+
+            // When - infra is named, launched and confirmed
+            await visitor.fill(within(sheet, field('Name')), 'infra');
+            await visitor.click(within(sheet, button('Launch')));
+            await visitor.click(within(dialog('Launch infra?'), button('Launch')));
+
+            // Then - the engine's sentence under the name
+            const said = content('"infra" is taken (on mac-mini)', { exact: false });
+            await visitor.see(within(region('What it is called'), said));
+        });
+        expect(result.errors.text).toBe('');
+    });
 });

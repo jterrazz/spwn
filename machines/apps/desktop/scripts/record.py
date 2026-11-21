@@ -246,6 +246,8 @@ GESTURES = {
         {"call": "machines.create-workspace", "in": {"Request": {"Name": "gate5", "From": "base-ubuntu", "Lifetime": "ephemeral"}, "Confirm": "yes"}, **at("mac-mini")},
         {"call": "machines.create-workspace", "in": {"Request": {"Name": "gate5", "From": "base-ubuntu", "Lifetime": "ephemeral", "Size": {"MemoryBytes": 4294967296}}, "Confirm": "yes"}},
         {"call": "machines.create-workspace", "in": {"Request": {"Name": "infra", "From": "base-ubuntu", "Lifetime": "ephemeral"}, "Confirm": "yes"}, **at("mac-mini")},
+        {"call": "machines.create-workspace", "in": {"Request": {"Name": "base-ubuntu", "From": "base-ubuntu", "Lifetime": "ephemeral"}, "Confirm": "yes"}, **at("mac-mini")},
+        {"call": "machines.create-workspace", "in": {"Request": {"Name": "Bad_Name", "From": "base-ubuntu", "Lifetime": "ephemeral"}, "Confirm": "yes"}, **at("mac-mini")},
         {"call": "machines.create-workspace", "in": {"Request": {"Name": "linux-2", "From": "base-ubuntu", "Lifetime": "ephemeral", "Purpose": "x" * 121}, "Confirm": "yes"}, **at("mac-mini")},
         {"call": "machines.create-workspace", "in": {"Request": {"Name": "linux-2", "From": "base-ubuntu", "Lifetime": "ephemeral", "Purpose": "Lot shell"}, "Confirm": "yes"}, **at("mac-mini"),
          "during": [MACHINES, {"watch": "overview.read", "in": {}, **at("linux-2")}]},
