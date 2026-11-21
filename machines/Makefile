@@ -146,8 +146,7 @@ window: node_modules/.install ## Build the window's bundle for darwin-arm64, sig
 		shown=$$(plutil -extract $$key raw $(WINDOW_APP)/Contents/Info.plist); \
 		if [ "$$shown" != "$(WINDOW_VERSION)" ]; then printf "window: the bundle's %s says %s, not the %s compiled in\n" "$$key" "$$shown" "$(WINDOW_VERSION)"; exit 1; fi; \
 	done
-	@codesign --force --sign - --timestamp=none $(WINDOW_APP)
-	@codesign --verify --strict $(WINDOW_APP)
+	@APPLE_SIGNING_IDENTITY=- ../scripts/sign-macos.sh sign $(WINDOW_APP)
 	@../scripts/app-icon-check.sh $(WINDOW_APP)
 	@printf "$(GREEN)●$(RESET) Built $(WINDOW_APP) ($(WINDOW_VERSION), signed ad hoc)\n"
 

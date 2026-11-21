@@ -10,7 +10,8 @@ usage: sign-macos.sh <step> [paths...]
 
   require                 decide whether this run signs: every secret set, or none on a ref Infisical does not trust
   keychain                import APPLE_CERTIFICATE into a keychain of this run, and check APPLE_SIGNING_IDENTITY is in it, of APPLE_TEAM_ID
-  sign <path>...          codesign each binary or .app with the hardened runtime and a timestamp, then verify it
+  sign <path>...          codesign each binary or .app with the hardened runtime and a timestamp, then verify it; in an .app, every
+                          bundle, framework and library inside out, and every Mach-O beside the main executable under the bundle's identifier
   notarize <file>...      submit each .zip or .dmg to Apple's notary service and wait for its verdict
   staple <path>...        staple the notarization ticket to each .app or .dmg, then let Gatekeeper judge it
   binary <target> <path>  GoReleaser's post-build hook: on a signed run, sign a darwin binary and notarize it inside a zip that is not shipped
@@ -129,6 +130,7 @@ team_of_identity() {
 
 codesign_one() {
     local path=$1 args=(--force --options runtime --sign "$APPLE_SIGNING_IDENTITY")
+    [ -z "${2:-}" ] || args+=(--identifier "$2")
     if adhoc; then
         args+=(--timestamp=none)
     else
@@ -144,18 +146,29 @@ sign() {
         [ -n "${MACOS_SIGN_KEYCHAIN:-}" ] || fail "sign: MACOS_SIGN_KEYCHAIN is not set; run the keychain step first"
         [ -n "${APPLE_TEAM_ID:-}" ] || fail "sign: APPLE_TEAM_ID is not set"
     fi
-    local path nested details
+    local path nested details bundle main
     for path in "$@"; do
         [ -e "$path" ] || fail "sign: $path does not exist"
         if [ -d "$path" ]; then
             [ -f "$path/Contents/Info.plist" ] || fail "sign: $path is a folder but not an app bundle"
+            bundle=$(plutil -extract CFBundleIdentifier raw "$path/Contents/Info.plist") || fail "sign: $path names no CFBundleIdentifier"
+            main=$(plutil -extract CFBundleExecutable raw "$path/Contents/Info.plist") || fail "sign: $path names no CFBundleExecutable"
             # invariant: a bundle is sealed inside out, every nested piece of code signed before the bundle that holds it
             while IFS= read -r -d '' nested; do
                 codesign_one "$nested"
             done < <(find "$path/Contents" -depth \( -name '*.framework' -o -name '*.dylib' -o -name '*.app' -o -name '*.xpc' -o -name '*.appex' \) -print0)
+            # invariant: a helper beside the main executable carries the bundle's own identifier, so Local Network resolves it to the app and asks once, under the app's one row (ADR-073)
+            while IFS= read -r -d '' nested; do
+                [ "$(basename "$nested")" != "$main" ] || continue
+                file -b "$nested" | grep -q '^Mach-O' || continue
+                codesign_one "$nested" "$bundle"
+                details=$(codesign --display --verbose=2 "$nested" 2>&1)
+                grep -qx "Identifier=$bundle" <<< "$details" || fail "sign: $nested is not signed with the bundle's identifier $bundle"
+            done < <(find "$path/Contents/MacOS" -type f -print0)
         fi
         codesign_one "$path"
         codesign --verify --strict --verbose=2 "$path"
+        [ ! -d "$path" ] || codesign --verify --deep --strict --verbose=2 "$path"
         details=$(codesign --display --verbose=2 "$path" 2>&1)
         grep -Eq '^CodeDirectory .*flags=0x[0-9a-f]+\([^)]*runtime' <<< "$details" || fail "sign: $path is signed without the hardened runtime"
         if ! adhoc; then
