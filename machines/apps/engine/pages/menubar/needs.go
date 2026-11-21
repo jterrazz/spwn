@@ -304,11 +304,7 @@ func minutes(d time.Duration) string {
 func NeedsPage(r NeedsReading, of string, thisMac page.Context) page.Page {
 	// invariant: SPEC A4, B5.7: menubar.needs lists every need with its verb,
 	// most urgent first, then the upkeep apart; menubar.needs:<machine>
-	// lists those of that machine (a Mac's with its VMs'). Nothing read yet
-	// is the page's frame.
-	if r.All == nil {
-		return Opening(NeedsID, thisMac)
-	}
+	// lists those of that machine (a Mac's with its VMs').
 	needs, upkeep := needsOf(r, thisMac.Machine)
 	where := "All machines"
 	if of != "" {

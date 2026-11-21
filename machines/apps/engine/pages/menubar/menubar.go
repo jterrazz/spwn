@@ -594,12 +594,6 @@ func titled(s string) string {
 	return strings.ToUpper(s[:1]) + s[1:]
 }
 
-func Opening(id page.ID, thisMac page.Context) page.Page {
-	// invariant: the frame of one of the menu bar's own pages, before its
-	// first read.
-	return page.Page{ID: id, Context: thisMac, State: page.Loading}
-}
-
 func Unread(id page.ID, thisMac page.Context, err error) page.Page {
 	return page.Seal(page.Page{ID: id, Context: thisMac, Error: &page.Error{Message: err.Error()}})
 }

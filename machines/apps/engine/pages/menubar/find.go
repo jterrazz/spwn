@@ -63,10 +63,7 @@ func Find(r FindReading, thisMac page.Context) page.Page {
 	// its title, where it is, its tags, its verb (whose Key is the entry's),
 	// its alternate verb as the quick slot and the page it opens; the needs
 	// first, ranked, in Find's words; each VM's verbs headed by its name.
-	// The app scores and groups them; nothing read yet is the page's frame.
-	if r.All == nil {
-		return Opening(FindID, thisMac)
-	}
+	// The app scores and groups them.
 	f := finder{r: r, self: thisMac.Machine}
 	p := page.Page{ID: FindID, Command: "menubar", Context: thisMac}
 	needs := f.needs()

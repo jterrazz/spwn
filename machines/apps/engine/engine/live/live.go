@@ -1,4 +1,4 @@
-package feeds
+package live
 
 import (
 	"context"
@@ -22,6 +22,13 @@ const (
 	// goes out with the last value of those still late.
 	tickBudget = time.Second
 )
+
+type Clock interface {
+	Sleep(ctx context.Context, d time.Duration) error
+	Now() time.Time
+}
+
+const sampleKept = 16
 
 type Live struct {
 	// value: the router each machine's sample rides: This Mac's in the
@@ -191,16 +198,29 @@ func (l *Live) compose(keys []string, of map[string]string) engine.Sample {
 	return out
 }
 
-func (l *Live) Readings(name string) []activity.Reading {
-	// value: the readings of a machine the ticks kept, oldest first, so a page
-	// rebuilt for its content starts from the values on screen.
+func (l *Live) Kept(keys []string) engine.Sample {
+	// invariant: the values the ticks kept of keys, read from the rings alone
+	// and never asked, so a page that opens is followed at once by its
+	// numbers; a key of a VM whose Mac no tick found yet is left out.
 	if l == nil {
-		return nil
+		return engine.Sample{}
 	}
 	l.mu.Lock()
-	defer l.mu.Unlock()
-	if w := l.of[name]; w != nil {
-		return slices.Clone(w.readings)
+	of := map[string]string{}
+	for _, k := range keys {
+		measure, m := engine.LiveOf(k)
+		if m == "" {
+			continue
+		}
+		if measure == engine.LiveCPUMac || measure == engine.LiveMemMac {
+			mac, ok := l.macs[m]
+			if !ok {
+				continue
+			}
+			m = mac
+		}
+		of[k] = m
 	}
-	return nil
+	l.mu.Unlock()
+	return l.compose(keys, of)
 }

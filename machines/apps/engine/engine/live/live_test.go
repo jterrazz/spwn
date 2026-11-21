@@ -1,4 +1,4 @@
-package feeds_test
+package live_test
 
 import (
 	"context"
@@ -10,14 +10,17 @@ import (
 
 	"github.com/jterrazz/studio-station/apps/engine/activity"
 	activitycalls "github.com/jterrazz/studio-station/apps/engine/activity/calls"
-	"github.com/jterrazz/studio-station/apps/engine/awake"
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
-	"github.com/jterrazz/studio-station/apps/engine/engine/feeds"
-	"github.com/jterrazz/studio-station/apps/engine/machines"
+	"github.com/jterrazz/studio-station/apps/engine/engine/live"
 	"github.com/jterrazz/studio-station/apps/engine/page"
-	pagemenubar "github.com/jterrazz/studio-station/apps/engine/pages/menubar"
+)
+
+const (
+	thisMac = "macbook-pro"
+	mini    = "mac-mini"
+	gb      = int64(1) << 30
 )
 
 type moving struct {
@@ -113,17 +116,17 @@ func lead(s engine.Sample, key string) page.Value {
 
 func TestALateRemoteMacKeepsItsLastValueTurnsStaleAndNeverHoldsTheTick(t *testing.T) {
 	f, clock := &fleet{asked: map[string]uint64{}, at: map[string]time.Time{}}, &moving{now: time.Date(2026, 11, 3, 10, 30, 0, 0, time.UTC)}
-	live := &feeds.Live{Calls: f, Clock: clock, ThisMac: thisMac, Budget: 50 * time.Millisecond}
+	l := &live.Live{Calls: f, Clock: clock, ThisMac: thisMac, Budget: 50 * time.Millisecond}
 	keys := []string{"cpu:" + thisMac, "memory:" + mini, "free:" + mini}
-	live.Sample(t.Context(), keys)
-	before := live.Sample(t.Context(), keys)
+	l.Sample(t.Context(), keys)
+	before := l.Sample(t.Context(), keys)
 	if got := lead(before, "memory:"+mini); got.Kind != page.KindRatio || got.Of != 64*gb || got.Stale {
 		t.Fatalf("the mini answering gives its memory %+v, want its own 64 GB, fresh", got)
 	}
 	answer := f.lateFromNow()
 	defer answer()
 	clock.pass(10 * time.Second)
-	late := func() engine.Sample { return live.Sample(t.Context(), keys) }
+	late := func() engine.Sample { return l.Sample(t.Context(), keys) }
 	during := late()
 	if got, was := lead(during, "memory:"+mini), lead(before, "memory:"+mini); got.N != was.N || got.Of != was.Of || got.Stale {
 		t.Errorf("the mini late 10 s gives its memory %+v, want its last value %+v, not yet stale", got, lead(before, "memory:"+mini))
@@ -147,7 +150,7 @@ func TestALateRemoteMacKeepsItsLastValueTurnsStaleAndNeverHoldsTheTick(t *testin
 	}
 	answer()
 	for range 50 {
-		if back := live.Sample(t.Context(), keys); len(back.Stale) == 0 {
+		if back := l.Sample(t.Context(), keys); len(back.Stale) == 0 {
 			return
 		}
 	}
@@ -157,13 +160,13 @@ func TestALateRemoteMacKeepsItsLastValueTurnsStaleAndNeverHoldsTheTick(t *testin
 func TestAVMsShareOfItsMacIsReadOnThatMacAndItsOwnCoresInsideIt(t *testing.T) {
 	f, clock := &fleet{asked: map[string]uint64{}, at: map[string]time.Time{}}, &moving{now: time.Date(2026, 11, 3, 10, 30, 0, 0, time.UTC)}
 	macs := map[string]string{"linux-1": thisMac, "infra": mini}
-	live := &feeds.Live{Calls: f, Clock: clock, ThisMac: thisMac, Budget: 50 * time.Millisecond, MacOf: func(_ context.Context, vm string) (string, bool) {
+	l := &live.Live{Calls: f, Clock: clock, ThisMac: thisMac, Budget: 50 * time.Millisecond, MacOf: func(_ context.Context, vm string) (string, bool) {
 		mac, ok := macs[vm]
 		return mac, ok
 	}}
 	keys := []string{"cpu:linux-1", "cpuh:infra", "cpuh:linux-1", "cpuh:" + mini, "memh:infra", "memh:linux-1", "memh:" + mini}
-	live.Sample(t.Context(), keys)
-	tick := live.Sample(t.Context(), keys)
+	l.Sample(t.Context(), keys)
+	tick := l.Sample(t.Context(), keys)
 	if got := lead(tick, "cpuh:linux-1"); got.Kind != page.KindPercent || got.N != 90 {
 		t.Errorf("linux-1's share of This Mac is %+v; want 9 %%, as This Mac reads its process", got)
 	}
@@ -192,58 +195,27 @@ func TestAVMsShareOfItsMacIsReadOnThatMacAndItsOwnCoresInsideIt(t *testing.T) {
 	}
 }
 
-// invariant: Home draws a far Mac's CPU and its VMs' from the readings
-// the ticks kept of that Mac, each a spark, the Mac asked once a tick.
-func TestHomeDrawsAFarMacAndItsVMsFromThatMacsReadings(t *testing.T) {
-	w := &world{infra: []machines.VM{infraAt(machines.Running, 0)}, asked: map[string][]string{}, activity: map[string]uint64{}}
+func TestAPageThatOpensIsHandedTheValuesTheTicksKeptAndNothingIsAsked(t *testing.T) {
 	f, clock := &fleet{asked: map[string]uint64{}, at: map[string]time.Time{}}, &moving{now: time.Date(2026, 11, 3, 10, 30, 0, 0, time.UTC)}
-	live := &feeds.Live{Calls: f, Clock: clock, ThisMac: thisMac, Budget: 50 * time.Millisecond, MacOf: func(_ context.Context, vm string) (string, bool) {
-		return mini, vm == "infra"
-	}}
-	keys := []string{"cpu:" + mini, "cpuh:infra"}
-	live.Sample(t.Context(), keys)
-	live.Sample(t.Context(), keys)
-	ctx, cancel := context.WithCancel(t.Context())
-	defer cancel()
-	o := feeds.Menubar{Calls: w, Clock: newSteps(), Live: live, ThisMachine: page.Context{Machine: thisMac}, Report: func(awake.View) *awake.Report { return nil }}
-	cell := func(p page.Page, section, row string) page.Value {
-		for _, s := range p.Sections {
-			for _, it := range s.Items {
-				if s.ID == section && it.Row != nil && it.Row.ID == row && len(it.Row.Cells) == 1 {
-					return it.Row.Cells[0]
-				}
-			}
-		}
-		return page.Value{}
+	l := &live.Live{Calls: f, Clock: clock, ThisMac: thisMac, Budget: 50 * time.Millisecond}
+	keys := []string{"cpu:" + thisMac, "memory:" + mini}
+	if kept := l.Kept(keys); len(kept.Values) != 0 {
+		t.Fatalf("before any tick the rings hold %v; want nothing", kept.Values)
 	}
-	home := until(t, o.Feed()(ctx, engine.FeedInput{Changed: make(chan struct{}), Refresh: make(chan struct{}), Awake: func() awake.View { return awake.View{} }}), "home with mac-mini", func(p page.Page) bool {
-		return cell(p, pagemenubar.SectionMacs, mini).Kind != ""
-	})
-	for _, c := range []struct{ section, row, key string }{{pagemenubar.SectionMacs, mini, "cpu:" + mini}, {pagemenubar.SectionServers, "infra", "cpuh:infra"}} {
-		if got := cell(home, c.section, c.row); got.Kind != page.KindSpark || got.Live != c.key || len(got.Items) < 2 {
-			t.Errorf("%s: its cell %+v, want a spark of %s with a point at least", c.row, got, c.key)
-		}
-		if !slices.Contains(home.Live, c.key) {
-			t.Errorf("home follows %q, want %s among them", home.Live, c.key)
+	l.Sample(t.Context(), keys)
+	tick := l.Sample(t.Context(), keys)
+	f.mu.Lock()
+	asked := f.asked[thisMac] + f.asked[mini]
+	f.mu.Unlock()
+	kept := l.Kept(keys)
+	for _, k := range keys {
+		if got, want := lead(kept, k), lead(tick, k); got.N != want.N || got.Of != want.Of || got.Kind != want.Kind {
+			t.Errorf("kept %s is %+v; want the last tick's %+v", k, got, want)
 		}
 	}
 	f.mu.Lock()
 	defer f.mu.Unlock()
-	if f.asked[mini] != 2 {
-		t.Errorf("the mini was asked %d times over two ticks, want once a tick for its CPU and its VMs", f.asked[mini])
-	}
-}
-
-func TestHomeAndAVMPageListTheKeysTheirMovingNumbersFollow(t *testing.T) {
-	w := &world{infra: []machines.VM{infraAt(machines.Running, 0)}, asked: map[string][]string{}, activity: map[string]uint64{}}
-	ctx, cancel := context.WithCancel(t.Context())
-	defer cancel()
-	o := feeds.Menubar{Calls: w, Clock: newSteps(), ThisMachine: page.Context{Machine: thisMac}, Report: func(awake.View) *awake.Report { return nil }}
-	home := until(t, o.Feed()(ctx, engine.FeedInput{Changed: make(chan struct{}), Refresh: make(chan struct{}), Awake: func() awake.View { return awake.View{} }}), "home", func(p page.Page) bool { return p.Strip != nil })
-	if want := []string{"cpu:" + thisMac, "memory:" + thisMac}; !slices.Equal(home.Live, want) {
-		t.Errorf("home reads the live keys %q, want This Mac's %q", home.Live, want)
-	}
-	if home.Strip.CPU.Live != "cpu:"+thisMac {
-		t.Errorf("home's CPU follows %q, want This Mac's CPU key", home.Strip.CPU.Live)
+	if again := f.asked[thisMac] + f.asked[mini]; again != asked {
+		t.Errorf("the kept values asked the Macs %d times more; want none", again-asked)
 	}
 }

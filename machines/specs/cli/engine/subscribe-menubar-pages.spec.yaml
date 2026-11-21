@@ -9,25 +9,25 @@ runs:
       exit: 0
       stdout: |
           ["menubar.ports"]
-          loading ready
+          ready
           ["menubar.ports",["summary","public","private"],null]
           ["menubar.awake"]
-          loading ready
+          ready
           ["menubar.awake",["summary","this-mac"],null]
           ["menubar.activity:6m"]
-          loading ready
+          ready
           ["menubar.activity",["machine","graphs"],null]
           ["menubar.activity:24h"]
-          loading ready
+          ready
           ["menubar.activity",["machine","graphs"],null]
           ["menubar.accounts"]
-          loading ready
+          ready
           ["menubar.accounts",["summary","needs-you"],null]
           ["menubar.needs"]
-          loading ready
+          ready
           ["menubar.needs",["summary","needs-you"],null]
           ["menubar.find"]
-          loading ready
+          ready
           ["menubar.find",["machines","actions","sections"],null]
           Over the last 6 min
           Over the last 24 h

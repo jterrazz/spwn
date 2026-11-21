@@ -165,9 +165,6 @@ func TestTheNeedsPageListsEveryNeedThenUpkeepAndAMacsPageOnlyItsOwn(t *testing.T
 	if got, want := rows(none, SectionNeeds), []string{"Nothing needs you | "}; !slices.Equal(got, want) {
 		t.Errorf("a calm fleet's needs %q, want %q", got, want)
 	}
-	if NeedsPage(NeedsReading{}, "", here).State != page.Loading {
-		t.Error("a needs page read from nothing is not its frame")
-	}
 }
 
 // invariant: SPEC B5.7, B5.18: a failing login item is shown from the

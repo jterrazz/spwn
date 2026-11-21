@@ -2,6 +2,10 @@ package readers
 
 import (
 	"context"
+
+	"github.com/jterrazz/studio-station/apps/engine/accounts"
+	grantscalls "github.com/jterrazz/studio-station/apps/engine/grants/calls"
+	vaultcalls "github.com/jterrazz/studio-station/apps/engine/vault/calls"
 	"sync"
 	"time"
 
@@ -26,6 +30,8 @@ const (
 	NameActivity     = "activity"
 	NameSignins      = "signins"
 	NameAwake        = "awake"
+	NameRecords      = "records"
+	NameVault        = "vault"
 	activityGraph    = 6 * time.Minute
 	macIdle          = time.Minute
 	macAttached      = 30 * time.Second
@@ -35,6 +41,8 @@ const (
 	activityAttached = 30 * time.Second
 	signinsIdle      = 15 * time.Minute
 	signinsAttached  = 5 * time.Minute
+	vaultIdle        = 15 * time.Minute
+	vaultAttached    = 5 * time.Minute
 )
 
 type Local struct {
@@ -44,13 +52,17 @@ type Local struct {
 	ThisMac string
 	// value: This Mac's Awake as the engine holds it; nil reads none.
 	Awake func() awake.Report
+	// value: every other Mac as This Mac's records keep it and the
+	// tailnet's node of each Mac; nil reads neither.
+	Known func(ctx context.Context) (map[string]machines.MacRecord, map[string]machines.Node)
 }
 
 func (l Local) Readers() []*Reader {
 	// invariant: ADR-070's cadences: This Mac and its ports every 60 s idle
 	// and 30 s attached; the overview every 15 min, a VM's every 5 min
 	// attached; activity every 5 min idle and 30 s attached; sign-ins every
-	// 15 min idle and 5 min attached; Awake at every tick, from memory.
+	// 15 min idle and 5 min attached; Awake at every tick, from memory; the
+	// records and the tailnet with This Mac, the vault with the sign-ins.
 	out := []*Reader{
 		{Name: NameMac, Idle: macIdle, Attached: macAttached, Budget: 5 * time.Second, Read: l.mac},
 		{Name: NamePorts, Idle: macIdle, Attached: macAttached, Budget: 5 * time.Second, Read: l.ports},
@@ -58,6 +70,10 @@ func (l Local) Readers() []*Reader {
 		{Name: NameOverviewVMs, Idle: overviewEvery, Attached: vmOverviewEvery, Budget: time.Minute, Read: l.overview(true)},
 		{Name: NameActivity, Idle: activityIdle, Attached: activityAttached, Budget: 2 * time.Second, Read: l.activity},
 		{Name: NameSignins, Idle: signinsIdle, Attached: signinsAttached, Budget: 10 * time.Second, Read: l.signins},
+		{Name: NameVault, Idle: vaultIdle, Attached: vaultAttached, Budget: 5 * time.Second, Read: l.vault},
+	}
+	if l.Known != nil {
+		out = append(out, &Reader{Name: NameRecords, Idle: macIdle, Attached: macAttached, Budget: 5 * time.Second, Read: l.known})
 	}
 	if l.Awake != nil {
 		out = append(out, &Reader{Name: NameAwake, Read: l.awake})
@@ -178,4 +194,31 @@ func (l Local) awake(context.Context, *store.Snapshot) Reading {
 	r := l.Awake()
 	r.Now = time.Time{}
 	return Reading{Owns: []store.Key{k}, Puts: []store.Put{{Key: k, Value: r}}}
+}
+
+func (l Local) known(ctx context.Context, _ *store.Snapshot) Reading {
+	records, nodes := l.Known(ctx)
+	if records == nil {
+		records = map[string]machines.MacRecord{}
+	}
+	if nodes == nil {
+		nodes = map[string]machines.Node{}
+	}
+	r, t := store.Of(store.FamilyRecords, ""), store.Of(store.FamilyTailnet, "")
+	return Reading{Owns: []store.Key{r, t}, Puts: []store.Put{{Key: r, Value: records}, {Key: t, Value: nodes}}}
+}
+
+func (l Local) vault(ctx context.Context, _ *store.Snapshot) Reading {
+	k := store.Of(store.FamilyVault, "")
+	read, err := call.Read(ctx, l.Calls, machine.Ref{}, vaultcalls.VaultList, vaultcalls.VaultListIn{}, nil)
+	if err != nil {
+		return Reading{Owns: []store.Key{k}, Failed: map[store.Key]string{k: Why(err)}}
+	}
+	out := accounts.VaultOffers{Vault: read, Offers: map[string]accounts.GrantOffer{}}
+	for _, e := range read.Entries {
+		if offer, err := call.Read(ctx, l.Calls, machine.Ref{}, grantscalls.GrantNew, grantscalls.GrantNewIn{Entry: e.ID}, nil); err == nil {
+			out.Offers[e.ID] = offer
+		}
+	}
+	return Reading{Owns: []store.Key{k}, Puts: []store.Put{{Key: k, Value: out}}}
 }

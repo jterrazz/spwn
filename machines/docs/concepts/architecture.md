@@ -38,7 +38,8 @@ apps/engine/
     process/ the engine itself: its runs, its guest connections, its jobs, its socket and its server
     jobs/    the sample job, which feeds Activity's history, and the nightly job, which
              upgrades a Mac's bound Machinefile every night
-    feeds/   the menu bar's pages, built over watches
+    feeds/   the menu bar's pages, each a pure function of one snapshot of the store
+    live/    what an open page reads itself: its moving numbers every 2 s, and the Activity page
     store/   the read model: one snapshot per revision of slices by key, each its value, hash,
              read time and whether it is fresh, stale or unread
     readers/ the readers that keep the store warm, each slice's with its cadence and budget
@@ -153,23 +154,23 @@ So there is one way into a VM (its Mac's engine and its one `Guest` connection) 
 
 `engine/` is the process launchd keeps alive on each Mac (`station engine run`, the agent `com.jterrazz.station.engine`). It is a family like the others, plus a process: `engine` holds its model (its `Event`s, the names and shapes of its own calls), `engine/calls` its calls (`engine.read`, `engine.start`, `engine.stop`), `engine/contract` the `Notifier`. `engine/process` is the engine itself: it holds the runs of every VM, the one guest connection of each running VM, the Awake session, the activity history, the reservations' listeners and the event bus, serves `remote/serve` on its socket, and runs its jobs. The jobs hold no product rule of their own: each calls its family's rules and calls.
 
-| Job        | Runs                                                   | Does                                                                                                                    |
-| ---------- | ------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------- |
-| `keep`     | when a run ends, at start, on the engine's loop        | keeps each VM in its wanted state: a server boots again after its wait; the health steps after every boot               |
-| `guest`    | per running VM                                         | holds its one `Guest` connection: dial after boot, redial, close at the end; every other job uses it                    |
-| `share`    | on a reservation change, on the loop                   | shares a VM's ports inside its rights with their audience (Serve, Funnel), flags the others, reconciles the entries     |
-| `retry`    | every minute                                           | takes out a grant removal owed to a VM                                                                                  |
-| `awake`    | on a reading change, on `never_sleeps`, on the loop    | holds the keep-awake session and Never sleeps (`Power.Hold`), ends them by the guards this Mac's capabilities allow     |
-| `sample`   | every 2 s while a surface watches a machine, else 60 s | feeds Activity's history (`engine/jobs`)                                                                                |
-| `exposure` | every 5 min                                            | reads every listener of this Mac and its VMs; a port reachable outside Tailscale undeclared is told                     |
-| `back`     | every 30 s while the owner asked to be told of a Mac   | asks that Mac; the moment it answers, `mac_back` is told once and the ask is cleared                                    |
-| `live`     | every 2 s while a watch of pages lists live keys       | reads every open page's live keys at once and sends each watch one `sample`                                             |
-| `drift`    | after each boot, every 10 min, after a change          | keeps how each running workspace stands with its file (`machinefile.drift`), the reading `machines.list` heads from     |
-| `readers`  | at every tick, each slice at its own cadence           | keeps the read model warm (`engine/readers`): This Mac, its ports, its machines' Overview, Activity and sign-ins, Awake |
+| Job        | Runs                                                   | Does                                                                                                                                                                              |
+| ---------- | ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `keep`     | when a run ends, at start, on the engine's loop        | keeps each VM in its wanted state: a server boots again after its wait; the health steps after every boot                                                                         |
+| `guest`    | per running VM                                         | holds its one `Guest` connection: dial after boot, redial, close at the end; every other job uses it                                                                              |
+| `share`    | on a reservation change, on the loop                   | shares a VM's ports inside its rights with their audience (Serve, Funnel), flags the others, reconciles the entries                                                               |
+| `retry`    | every minute                                           | takes out a grant removal owed to a VM                                                                                                                                            |
+| `awake`    | on a reading change, on `never_sleeps`, on the loop    | holds the keep-awake session and Never sleeps (`Power.Hold`), ends them by the guards this Mac's capabilities allow                                                               |
+| `sample`   | every 2 s while a surface watches a machine, else 60 s | feeds Activity's history (`engine/jobs`)                                                                                                                                          |
+| `exposure` | every 5 min                                            | reads every listener of this Mac and its VMs; a port reachable outside Tailscale undeclared is told                                                                               |
+| `back`     | every 30 s while the owner asked to be told of a Mac   | asks that Mac; the moment it answers, `mac_back` is told once and the ask is cleared                                                                                              |
+| `live`     | every 2 s while a watch of pages lists live keys       | reads every open page's live keys at once and sends each watch one `sample` (`engine/live`)                                                                                       |
+| `drift`    | after each boot, every 10 min, after a change          | keeps how each running workspace stands with its file (`machinefile.drift`), the reading `machines.list` heads from                                                               |
+| `readers`  | at every tick, each slice at its own cadence           | keeps the read model warm (`engine/readers`): This Mac, its ports, its machines' Overview, Activity and sign-ins, Awake, its records of the other Macs, the tailnet and the vault |
 
 A reading that is slow or fans out to every Mac is KEPT by a job, never read inside a watch: the `drift` job reads a workspace's `machinefile.drift` beside the loop, one reading per VM at a time and bound by 2 min, keeps it with the VM (`engine.VMView.Drift`, nil until its first reading since the boot), and `machines.list` judges each VM's `Head` from it. What makes a reading due early is a call that changes a VM ending on it: the `unix` endpoint tells the engine the call each guest exchange carries (`engine.guest-exec`'s `call`), and a call of `Options.Changes` (`machinefile.apply`, `machinefile.upgrade`, `apps.install`, `apps.remove`, `apps.update`, `apps.move`, `settings.apply`, `settings.off`, `settings.run-containers`) makes that VM's reading due at the next step. A change made inside the VM by any other way (a shell in it, a package manager run by hand) goes through no guest exchange, so its head tells it at the next 10-min reading. The Router stays transport: a VM's answer reaches its client as its guest said it.
 
-An event is the one channel the `Notifier` and the menu bar read, a `notice` of the closed list `engine.Notifies` holds: `server_restarting`, `server_loop`, `server_powered_off`, `server_back`, `awake_ended`, `port_exposed`, `disk_low`, and the menu bar's own, `vm_ready` and `mac_back` (the `back` job). Each carries its kind, the SF Symbol its HUD draws and its words ([The API](../reference/api.md#the-engines-own-calls)). The menu bar's pages are built in `engine/feeds` over watches, and streamed to it as `station.page/v1`.
+An event is the one channel the `Notifier` and the menu bar read, a `notice` of the closed list `engine.Notifies` holds: `server_restarting`, `server_loop`, `server_powered_off`, `server_back`, `awake_ended`, `port_exposed`, `disk_low`, and the menu bar's own, `vm_ready` and `mac_back` (the `back` job). Each carries its kind, the SF Symbol its HUD draws and its words ([The API](../reference/api.md#the-engines-own-calls)). The menu bar's pages are projected from the store in `engine/feeds`, once per revision for every watch of them, and streamed to it as `station.page/v1`.
 
 ## The fake world
 

@@ -39,6 +39,7 @@ import (
 	enginelog "github.com/jterrazz/studio-station/apps/engine/engine/adapter/log"
 	enginecalls "github.com/jterrazz/studio-station/apps/engine/engine/calls"
 	"github.com/jterrazz/studio-station/apps/engine/engine/feeds"
+	enginelive "github.com/jterrazz/studio-station/apps/engine/engine/live"
 	"github.com/jterrazz/studio-station/apps/engine/engine/process"
 	"github.com/jterrazz/studio-station/apps/engine/engine/readers"
 	"github.com/jterrazz/studio-station/apps/engine/engine/store"
@@ -46,7 +47,6 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/machines/adapter/dial"
 	machinescalls "github.com/jterrazz/studio-station/apps/engine/machines/calls"
 	machinescontract "github.com/jterrazz/studio-station/apps/engine/machines/contract"
-	pageawake "github.com/jterrazz/studio-station/apps/engine/pages/awake"
 	"github.com/jterrazz/studio-station/apps/engine/platform/local"
 	"github.com/jterrazz/studio-station/apps/engine/remote"
 	"github.com/jterrazz/studio-station/apps/engine/remote/api"
@@ -73,14 +73,11 @@ func (m machine) engine(env kit.Env) *process.Engine {
 	if calls == nil {
 		calls = remote.NewRouter(registry, m.profile, remote.Reach{})
 	}
-	live := &feeds.Live{Calls: calls, Clock: m.sys.Clock, ThisMac: m.where.Machine, MacOf: m.macOf}
-	menubar := feeds.Menubar{Calls: calls, Clock: m.sys.Clock, ThisMachine: m.where, Live: live, HomeRead: &feeds.HomeRead{}, Report: func(v awake.View) *awake.Report {
+	live := &enginelive.Live{Calls: calls, Clock: m.sys.Clock, ThisMac: m.where.Machine, MacOf: m.macOf}
+	pages := feeds.Pages{ThisMachine: m.where}
+	report := func(v awake.View) *awake.Report {
 		return &awake.Report{Now: m.sys.Clock.Now(), Zone: time.Local, Engine: awake.EngineRunning, Reading: v.Reading, Session: v.Session, LastEnd: v.LastEnd, Guards: v.Guards}
-	}, EveryMac: func(ctx context.Context) (pageawake.AllMachines, error) {
-		inside := env
-		inside.Calls = calls
-		return m.everyMacAwake(ctx, inside)
-	}}
+	}
 	guests := engineGuests{dialer: m.guestDialer(), vms: m.machines(false)}
 	notifier := func(write func(subject, text string)) process.Notifier { return enginelog.New(write) }
 	var tailnet sharingNode = m.tailnetCLI().Tracked(engine.ChildrenDir(m.paths.State))
@@ -109,7 +106,7 @@ func (m machine) engine(env kit.Env) *process.Engine {
 		},
 	}
 	jobs := append([]process.Tick{sample.Run}, m.macJobs(calls)...)
-	state := m.readers(calls, menubar.Report, func() awake.View { return d.AwakeView() })
+	state := m.readers(calls, report, func() awake.View { return d.AwakeView() })
 	d = process.New(engineMac{m.sys}, engineHypervisor{m.hypervisor()}, guests, m.machines(false), tailnet, process.Stores{Ports: m.stores.ports(), Reservations: m.stores.reservations}, process.Options{
 		Remember: func(vm string, port int, stopped bool) error {
 			return portscalls.Remember(m.stores.ports(), vm, port, stopped)
@@ -118,9 +115,11 @@ func (m machine) engine(env kit.Env) *process.Engine {
 		Power: m.powerPort, KeepAwakePage: m.keepAwakePage, Executable: m.sys.Env.Executable(), Records: m.engineRecords(), Commands: local.Ran,
 		NeverSleeps: func() bool { on, _ := m.stores.neverSleeps().Get(); return on },
 		GrantsOwed:  owed, Peer: m.engineAPI(),
-		Feeds: map[string]engine.Feed{engine.PageMenubar: menubar.Feed(), engine.PageMachine: menubar.Machine(),
-			engine.PagePorts: menubar.Ports(), engine.PageAwake: menubar.Awake(), engine.PageActivity: menubar.Activity(), engine.PageAccounts: menubar.Accounts(), engine.PageNeeds: menubar.Needs(), engine.PageFind: menubar.Find()},
+		Pages: map[string]process.Projection{engine.PageMenubar: projection(pages.Home), engine.PageMachine: projection(pages.Machine),
+			engine.PagePorts: projection(pages.Ports), engine.PageAwake: projection(pages.Awake), engine.PageAccounts: projection(pages.Accounts), engine.PageNeeds: projection(pages.Needs), engine.PageFind: projection(pages.Find)},
+		Live:     map[string]process.LivePage{engine.PageActivity: enginelive.Activity{Calls: calls, Clock: m.sys.Clock, ThisMachine: m.where, Live: live}.Page},
 		Sample:   live.Sample,
+		KeptLive: live.Kept,
 		Notifier: notifier, Checks: checks, Join: func(parts ...string) string { return strings.Join(parts, token.Sep) },
 		Listening: m.listeners("/").Read, Declarations: m.stores.declarations.List,
 		Jobs:     jobs,
@@ -147,6 +146,11 @@ func (m machine) engine(env kit.Env) *process.Engine {
 	return d
 }
 
+// value: a page projection as the engine serves it.
+func projection[P any](p func(*store.Snapshot, string) P) process.Projection {
+	return func(s *store.Snapshot, subject string) any { return p(s, subject) }
+}
+
 // invariant: the engine's store is one engine's life, its epoch that
 // engine's start; its readers run beside the tick, inline in a world, so a
 // command's first frame reads what its engine read at its first tick.
@@ -159,6 +163,9 @@ func (m machine) readers(calls call.Router, report func(awake.View) *awake.Repor
 		run = func(f func()) { f() }
 	}
 	own := readers.Local{Calls: calls, ThisMac: m.where.Machine, Awake: func() awake.Report { return *report(view()) }}
+	if m.kind == catalog.Mac {
+		own.Known = m.machines(false).Known
+	}
 	var far *readers.Far
 	if m.world == nil || m.world.holdsFar() {
 		far = &readers.Far{Calls: calls, Macs: m.machines(false).OtherMacs, Following: m.world.watchContext, Drop: func(mac string) {

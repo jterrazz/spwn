@@ -10,6 +10,7 @@ import (
 
 	"github.com/jterrazz/studio-station/apps/engine/engine"
 	enginecalls "github.com/jterrazz/studio-station/apps/engine/engine/calls"
+	"github.com/jterrazz/studio-station/apps/engine/engine/store"
 )
 
 const (
@@ -18,7 +19,11 @@ const (
 	streamSchema = "station.page/v1"
 )
 
-// value: a watched page's feed and its subject, `<feed>:<subject>`.
+type Projection func(s *store.Snapshot, subject string) any
+
+type LivePage func(ctx context.Context, subject string) <-chan any
+
+// value: a watched page's name and its subject, `<page>:<subject>`.
 func feedOf(id string) (feed, subject string) {
 	feed, subject, _ = strings.Cut(id, ":")
 	return feed, subject
@@ -27,18 +32,10 @@ func feedOf(id string) (feed, subject string) {
 type subscriber struct {
 	change chan struct{}
 	notice chan engine.Notice
-	inlets map[string]inlet
 	// value: the live keys each of its pages lists, and the latest tick of
 	// their values not yet written.
 	live   map[string][]string
 	sample chan engine.Event
-}
-
-// value: what wakes one watched page's feed: the engine's state moving, and
-// a refresh that names that page.
-type inlet struct {
-	state   chan struct{}
-	refresh chan struct{}
 }
 
 type hub struct {
@@ -48,11 +45,8 @@ type hub struct {
 	live liveRun
 }
 
-func (h *hub) add(pages ...string) *subscriber {
-	s := &subscriber{change: make(chan struct{}, 1), notice: make(chan engine.Notice, 8), inlets: map[string]inlet{}, live: map[string][]string{}, sample: make(chan engine.Event, 1)}
-	for _, id := range pages {
-		s.inlets[id] = inlet{state: make(chan struct{}, 1), refresh: make(chan struct{}, 1)}
-	}
+func (h *hub) add() *subscriber {
+	s := &subscriber{change: make(chan struct{}, 1), notice: make(chan engine.Notice, 8), live: map[string][]string{}, sample: make(chan engine.Event, 1)}
 	h.mu.Lock()
 	defer h.mu.Unlock()
 	if h.subs == nil {
@@ -82,21 +76,6 @@ func (h *hub) changed() {
 	defer h.mu.Unlock()
 	for s := range h.subs {
 		signal(s.change)
-		for _, in := range s.inlets {
-			signal(in.state)
-		}
-	}
-}
-
-func (h *hub) refreshed(pages []string) {
-	h.mu.Lock()
-	defer h.mu.Unlock()
-	for s := range h.subs {
-		for _, id := range pages {
-			if in, ok := s.inlets[id]; ok {
-				signal(in.refresh)
-			}
-		}
 	}
 }
 
@@ -145,11 +124,10 @@ func (d *Engine) known(id string) bool {
 	if id == engine.PageKeepAwake {
 		return d.o.KeepAwakePage != nil
 	}
-	_, ok := d.o.Feeds[id]
-	if feed, subject := feedOf(id); !ok && subject != "" {
-		_, ok = d.o.Feeds[feed]
-	}
-	return ok
+	name, _ := feedOf(id)
+	_, projected := d.o.Pages[name]
+	_, live := d.o.Live[name]
+	return projected || live
 }
 
 func (d *Engine) CheckPages(pages []string) error {
@@ -183,23 +161,16 @@ func (l *latest) get(id string) (json.RawMessage, bool) {
 	return p, ok
 }
 
-// invariant: a feed's first page is its frame and goes out before any
-// other, never coalesced away by the reads that answer right after it.
-func (d *Engine) feed(ctx context.Context, id string, sub *subscriber, into *latest, first chan<- json.RawMessage) {
-	in := engine.FeedInput{Changed: sub.inlets[id].state, Refresh: sub.inlets[id].refresh, Awake: d.awakeJob.View}
-	feed, ok := d.o.Feeds[id]
-	if !ok {
-		var name string
-		name, in.Subject = feedOf(id)
-		feed = d.o.Feeds[name]
-	}
+// value: a live page's readings, the latest kept for the stream, its first
+// handed on first, closed if the page ends before any.
+func (d *Engine) follow(ctx context.Context, id string, sub *subscriber, into *latest, first chan<- json.RawMessage) {
+	name, subject := feedOf(id)
 	framed := false
-	for p := range feed(ctx, in) {
+	for p := range d.o.Live[name](ctx, subject) {
 		data, err := json.Marshal(p)
 		if err != nil {
 			continue
 		}
-		d.hub.listLive(sub, id, liveOf(data))
 		if !framed {
 			framed = true
 			first <- data
@@ -214,8 +185,10 @@ func (d *Engine) feed(ctx context.Context, id string, sub *subscriber, into *lat
 }
 
 func (d *Engine) Stream(ctx context.Context, in engine.PageWatchIn, write func(any) error) error {
-	// invariant: after its opening, a watch of pages only streams: a full page
-	// per change, coalesced over 250 ms (so at most 4 a second) and never resent
+	// invariant: after its opening, a watch of pages only streams: its pages
+	// at once from what the store holds (ADR-070), never after a read, then
+	// the values the live ticks kept of their keys; then a full page per
+	// change, coalesced over 250 ms (so at most 4 a second) and never resent
 	// unchanged, the values of its pages' live keys every 2 s, a tick every
 	// 15 s, and the notices. A watch whose verdict does not fit ends at its
 	// opening: no page is ever sent to a client that cannot draw it.
@@ -227,7 +200,7 @@ func (d *Engine) Stream(ctx context.Context, in engine.PageWatchIn, write func(a
 	if fit.Verdict != engine.Fits {
 		return write(engine.Opened{Stream: streamSchema, Pages: pages, Page: d.o.Page, Fit: &fit})
 	}
-	sub := d.hub.add(pages...)
+	sub := d.hub.add()
 	defer d.hub.remove(sub)
 	defer d.joinLive(ctx)()
 	if err := write(engine.Opened{Stream: streamSchema, Pages: pages, Page: d.o.Page, Fit: &fit}); err != nil {
@@ -237,22 +210,39 @@ func (d *Engine) Stream(ctx context.Context, in engine.PageWatchIn, write func(a
 	defer opening.end()
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
+	var snaps <-chan *store.Snapshot
+	var snap *store.Snapshot
+	if d.o.Reading != nil && slices.ContainsFunc(pages, d.projected) {
+		d.o.Reading.Ready(ctx)
+		snaps = d.o.Reading.Store().Watch(ctx)
+		snap = <-snaps
+	}
 	fed := &latest{pages: map[string]json.RawMessage{}}
 	frames := map[string]chan json.RawMessage{}
-	var feeds sync.WaitGroup
+	var follows sync.WaitGroup
 	for _, id := range pages {
-		if id != engine.PageKeepAwake {
+		if name, _ := feedOf(id); d.o.Live[name] != nil {
 			frame := make(chan json.RawMessage, 1)
 			frames[id] = frame
-			feeds.Add(1)
+			follows.Add(1)
 			go func() {
-				defer feeds.Done()
-				d.feed(ctx, id, sub, fed, frame)
+				defer follows.Done()
+				d.follow(ctx, id, sub, fed, frame)
 			}()
 		}
 	}
-	defer feeds.Wait()
+	defer follows.Wait()
 	defer cancel()
+	for id, frame := range frames {
+		select {
+		case p, ok := <-frame:
+			if ok {
+				fed.set(id, p)
+			}
+		case <-ctx.Done():
+			return nil
+		}
+	}
 
 	ticks := make(chan struct{}, 1)
 	go func() {
@@ -262,22 +252,23 @@ func (d *Engine) Stream(ctx context.Context, in engine.PageWatchIn, write func(a
 	}()
 	last := map[string]string{}
 	pageOf := func(id string) (json.RawMessage, bool) {
-		if id == engine.PageKeepAwake {
+		switch {
+		case id == engine.PageKeepAwake:
 			data, err := json.Marshal(d.o.KeepAwakePage(d.awakeJob.View()))
 			return data, err == nil
+		case d.projected(id) && snap != nil:
+			return d.project(id, snap)
 		}
 		return fed.get(id)
 	}
-	send := func(framed bool) bool {
+	send := func() bool {
 		for _, id := range pages {
-			if _, fed := frames[id]; fed && !framed {
-				continue
-			}
 			p, ok := pageOf(id)
 			if !ok || last[id] == string(p) {
 				continue
 			}
 			last[id] = string(p)
+			d.hub.listLive(sub, id, liveOf(p))
 			if write(engine.Event{Event: "page", Page: p}) != nil {
 				return false
 			}
@@ -285,32 +276,25 @@ func (d *Engine) Stream(ctx context.Context, in engine.PageWatchIn, write func(a
 		}
 		return true
 	}
-	for _, id := range pages {
-		frame, ok := frames[id]
-		if !ok {
-			continue
-		}
-		select {
-		case p, ok := <-frame:
-			if !ok {
-				continue
-			}
-			last[id] = string(p)
-			if write(engine.Event{Event: "page", Page: p}) != nil {
-				return nil
-			}
-			opening.wrote(id, p)
-		case <-ctx.Done():
-			return nil
-		}
-	}
-	if !send(false) {
+	if !send() || !d.kept(sub, write) {
 		return nil
 	}
 	for {
 		select {
 		case <-ctx.Done():
 			return nil
+		case next, ok := <-snaps:
+			if !ok {
+				return nil
+			}
+			snap = next
+			if d.h.Sleep(ctx, coalesce) != nil {
+				return nil
+			}
+			snap = newest(snaps, snap)
+			if !send() {
+				return nil
+			}
 		case <-sub.change:
 			if d.h.Sleep(ctx, coalesce) != nil {
 				return nil
@@ -319,7 +303,7 @@ func (d *Engine) Stream(ctx context.Context, in engine.PageWatchIn, write func(a
 			case <-sub.change:
 			default:
 			}
-			if !send(true) {
+			if !send() {
 				return nil
 			}
 		case n := <-sub.notice:
@@ -336,6 +320,32 @@ func (d *Engine) Stream(ctx context.Context, in engine.PageWatchIn, write func(a
 			}
 		}
 	}
+}
+
+// value: the latest snapshot waiting, else the one held.
+func newest(snaps <-chan *store.Snapshot, held *store.Snapshot) *store.Snapshot {
+	select {
+	case next, ok := <-snaps:
+		if ok {
+			return next
+		}
+	default:
+	}
+	return held
+}
+
+// invariant: a page's moving numbers follow it at once, as the live ticks
+// kept them, so its first paint holds current values without a read.
+func (d *Engine) kept(sub *subscriber, write func(any) error) bool {
+	keys := sub.wanted()
+	if d.o.KeptLive == nil || len(keys) == 0 {
+		return true
+	}
+	s := d.o.KeptLive(keys)
+	if len(s.Values) == 0 {
+		return true
+	}
+	return write(engine.Event{Event: engine.EventSample, At: d.h.Now().UTC().Format(time.RFC3339), Values: s.Values, Stale: s.Stale}) == nil
 }
 
 func mustJSON(v any) json.RawMessage {

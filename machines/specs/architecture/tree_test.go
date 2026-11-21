@@ -39,7 +39,7 @@ func familyInside(family, rest string) bool {
 	switch rest {
 	case "", "contract", "contract/contracttest", "calls":
 		return true
-	case "process", "jobs", "feeds", "store", "readers":
+	case "process", "jobs", "feeds", "live", "store", "readers":
 		return family == "engine"
 	}
 	tech, ok := strings.CutPrefix(rest, "adapter/")
@@ -66,7 +66,7 @@ func declaresApplies(file *ast.File) bool {
 
 // invariant: rule tree-screams: every top-level package is a family or named
 // plumbing; a family holds only its model, contract/, calls/ and
-// adapter/<tech>/ (the engine adds process/, jobs/, feeds/ and store/); a family with
+// adapter/<tech>/ (the engine adds process/, jobs/, feeds/, live/, store/ and readers/); a family with
 // a section has an applies.go declaring Applies once it holds more than its
 // doc.go.
 func ruleTree(w *world) []finding {

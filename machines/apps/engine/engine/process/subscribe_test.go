@@ -2,7 +2,9 @@ package process
 
 import (
 	"context"
+	"fmt"
 	"runtime"
+	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -10,7 +12,9 @@ import (
 	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
+	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
+	"github.com/jterrazz/studio-station/apps/engine/engine/store"
 	"github.com/jterrazz/studio-station/apps/engine/setup"
 )
 
@@ -84,33 +88,53 @@ type streamed struct {
 	ended  chan struct{}
 }
 
-// value: the nth subscription's feed reads the nth channel.
-func streamEngine(t *testing.T, clock *manualClock, feeds ...chan any) *Engine {
+// value: the engine's readings as a stream sees them: a store the test
+// puts into, and the gestures it counts.
+type fakeReading struct {
+	st    *store.Store
+	ready atomic.Int32
+	due   atomic.Int32
+}
+
+func newReading(clock *manualClock) *fakeReading {
+	return &fakeReading{st: store.New(store.EpochOf(clock.Now(), 1), clock.Now(), func(err error) *fail.Error { return &fail.Error{Message: err.Error()} })}
+}
+
+func (r *fakeReading) Tick(context.Context, bool) {}
+func (r *fakeReading) Moved()                     {}
+func (r *fakeReading) DueAll()                    { r.due.Add(1) }
+func (r *fakeReading) Remember(engine.Held)       {}
+func (r *fakeReading) Held() engine.Held          { return engine.Held{} }
+func (r *fakeReading) Store() *store.Store        { return r.st }
+func (r *fakeReading) Ready(context.Context)      { r.ready.Add(1) }
+
+var homeKey = store.Of(store.FamilyOverview, "this-mac")
+
+func (r *fakeReading) put(t *testing.T, v any) {
+	t.Helper()
+	if err := r.st.Put(store.Put{Key: homeKey, Value: v}); err != nil {
+		t.Fatal(err)
+	}
+}
+
+// value: a page that says the value of This Mac's overview slice, or
+// "unread"; projections counts the pages drawn.
+type homePage struct{ projections atomic.Int32 }
+
+func (h *homePage) project(s *store.Snapshot, _ string) any {
+	h.projections.Add(1)
+	if sl, ok := s.Slices[homeKey]; ok {
+		return sl.Value
+	}
+	return "unread"
+}
+
+func streamEngine(t *testing.T, clock *manualClock, r *fakeReading, home *homePage) *Engine {
 	t.Helper()
 	h := &fakeMac{clock: clock}
 	paths := setup.Paths{Prefs: "/c", State: "/s"}
-	var n atomic.Int32
-	return New(h, newHypervisor(), nil, &fakeMachines{}, &fakeTailnet{}, memStores(), Options{State: paths.State, ThisMachine: catalog.Mac,
-		Feeds: map[string]engine.Feed{engine.PageMenubar: func(ctx context.Context, _ engine.FeedInput) <-chan any {
-			feed := feeds[n.Add(1)-1]
-			out := make(chan any)
-			go func() {
-				defer close(out)
-				for {
-					select {
-					case <-ctx.Done():
-						return
-					case p := <-feed:
-						select {
-						case out <- p:
-						case <-ctx.Done():
-							return
-						}
-					}
-				}
-			}()
-			return out
-		}}})
+	return New(h, newHypervisor(), nil, &fakeMachines{}, &fakeTailnet{}, memStores(), Options{State: paths.State, ThisMachine: catalog.Mac, Reading: r,
+		Pages: map[string]Projection{engine.PageMenubar: home.project}})
 }
 
 // value: a watch of the menubar page; a subscriber not reading blocks each
@@ -154,40 +178,84 @@ func (s streamed) next(t *testing.T, kind string) string {
 	return ""
 }
 
-// value: the third send returns only once the feed's loop is back for more,
-// so the first one is stored.
-func settle(feed chan any, v any) {
-	for range 3 {
-		feed <- v
+func TestAWatchOpensOnWhatTheStoreHoldsOnceTheEngineIsReady(t *testing.T) {
+	clock, home := newManualClock(), &homePage{}
+	r := newReading(clock)
+	r.put(t, "held")
+	s := subscribe(t.Context(), t, streamEngine(t, clock, r, home), true)
+	if got := s.next(t, "page"); got != `"held"` {
+		t.Fatalf("first page %s, want what the store held", got)
+	}
+	if r.ready.Load() != 1 {
+		t.Fatalf("the engine was made ready %d times before the first page, want once", r.ready.Load())
 	}
 }
 
-func TestAStreamSendsTheFrameThenOnePageForABurstAndNeverTheSamePageTwice(t *testing.T) {
-	clock, feed := newManualClock(), make(chan any)
-	s := subscribe(t.Context(), t, streamEngine(t, clock, feed), true)
-	feed <- "frame"
-	if got := s.next(t, "page"); got != `"frame"` {
-		t.Fatalf("first page %s, want the frame", got)
+func TestAStreamSendsOnePageForABurstAndNeverTheSamePageTwice(t *testing.T) {
+	clock, home := newManualClock(), &homePage{}
+	r := newReading(clock)
+	s := subscribe(t.Context(), t, streamEngine(t, clock, r, home), true)
+	if got := s.next(t, "page"); got != `"unread"` {
+		t.Fatalf("first page %s, want the page of an empty store", got)
 	}
-	feed <- "a"
-	feed <- "b"
-	settle(feed, "c")
+	r.put(t, "a")
+	r.put(t, "b")
+	r.put(t, "c")
 	clock.advance(coalesce)
 	if got := s.next(t, "page"); got != `"c"` {
 		t.Fatalf("after a burst %s, want only its last page", got)
 	}
-	settle(feed, "c")
-	settle(feed, "d")
+	if err := r.st.Put(store.Put{Key: store.Of(store.FamilyPorts, "this-mac"), Value: "other"}); err != nil {
+		t.Fatal(err)
+	}
+	clock.advance(coalesce)
+	clock.advance(tickEvery)
+	if ev := <-s.events; ev.Event != "tick" {
+		t.Fatalf("a revision that left the page as it was sent a %s, want nothing before the tick", ev.Event)
+	}
+	r.put(t, "d")
 	clock.advance(coalesce)
 	if got := s.next(t, "page"); got != `"d"` {
 		t.Fatalf("next page %s, want d: an equal page is never resent", got)
 	}
 }
 
+func TestAPageIsProjectedOncePerRevisionHoweverManyWatchIt(t *testing.T) {
+	clock, home := newManualClock(), &homePage{}
+	r := newReading(clock)
+	r.put(t, "held")
+	d := streamEngine(t, clock, r, home)
+	a := subscribe(t.Context(), t, d, true)
+	b := subscribe(t.Context(), t, d, true)
+	a.next(t, "page")
+	b.next(t, "page")
+	if got := home.projections.Load(); got != 1 {
+		t.Fatalf("two watches of one revision drew %d pages, want 1", got)
+	}
+}
+
+// invariant: the page a watch sends last is the store's newest: revisions
+// written at once never leave an older page standing after a newer one.
+func TestRevisionsWrittenAtOnceLeaveTheNewestPageSentLast(t *testing.T) {
+	clock, home := newManualClock(), &homePage{}
+	r := newReading(clock)
+	s := subscribe(t.Context(), t, streamEngine(t, clock, r, home), true)
+	s.next(t, "page")
+	var writers sync.WaitGroup
+	for i := range 32 {
+		writers.Go(func() { r.put(t, strconv.Itoa(i)) })
+	}
+	writers.Wait()
+	clock.advance(coalesce)
+	want := fmt.Sprintf("%q", r.st.Now().Slices[homeKey].Value)
+	if got := s.next(t, "page"); got != want {
+		t.Fatalf("the last page sent %s, want the newest revision's %s", got, want)
+	}
+}
+
 func TestAStreamTicksEvery15Seconds(t *testing.T) {
-	clock, feed := newManualClock(), make(chan any)
-	s := subscribe(t.Context(), t, streamEngine(t, clock, feed), true)
-	feed <- "frame"
+	clock, home := newManualClock(), &homePage{}
+	s := subscribe(t.Context(), t, streamEngine(t, clock, newReading(clock), home), true)
 	s.next(t, "page")
 	clock.advance(tickEvery)
 	if got := s.next(t, "tick"); got != "2026-11-03T10:30:15Z" {
@@ -196,14 +264,13 @@ func TestAStreamTicksEvery15Seconds(t *testing.T) {
 }
 
 func TestASubscriberThatDoesNotReadNeverHoldsAnotherBack(t *testing.T) {
-	clock, feedA, feedB := newManualClock(), make(chan any), make(chan any)
-	d := streamEngine(t, clock, feedA, feedB)
+	clock, home := newManualClock(), &homePage{}
+	r := newReading(clock)
+	d := streamEngine(t, clock, r, home)
 	reader := subscribe(t.Context(), t, d, true)
-	feedA <- "frame"
 	reader.next(t, "page")
 	subscribe(t.Context(), t, d, false)
-	feedB <- "frame"
-	settle(feedA, "after")
+	r.put(t, "after")
 	clock.advance(coalesce)
 	if got := reader.next(t, "page"); got != `"after"` {
 		t.Fatalf("the reader got %s, want its page after the other was dropped", got)
@@ -211,18 +278,15 @@ func TestASubscriberThatDoesNotReadNeverHoldsAnotherBack(t *testing.T) {
 }
 
 // invariant: MB-14: a machine's page is watched by its name after the
-// page's (`menubar.machine:mac-mini`): the machine feed streams it
+// page's (`menubar.machine:mac-mini`): the machine's projection draws it
 // for that machine; an unknown page is still refused.
 func TestAMachinesPageIsWatchedByItsName(t *testing.T) {
-	h := &fakeMac{clock: newManualClock()}
+	clock := newManualClock()
 	subjects := make(chan string, 1)
-	d := New(h, newHypervisor(), nil, &fakeMachines{}, &fakeTailnet{}, memStores(), Options{State: "/s", ThisMachine: catalog.Mac,
-		Feeds: map[string]engine.Feed{engine.PageMachine: func(_ context.Context, in engine.FeedInput) <-chan any {
-			subjects <- in.Subject
-			out := make(chan any, 1)
-			out <- map[string]string{"infra": "restarting"}
-			close(out)
-			return out
+	d := New(&fakeMac{clock: clock}, newHypervisor(), nil, &fakeMachines{}, &fakeTailnet{}, memStores(), Options{State: "/s", ThisMachine: catalog.Mac, Reading: newReading(clock),
+		Pages: map[string]Projection{engine.PageMachine: func(_ *store.Snapshot, subject string) any {
+			subjects <- subject
+			return map[string]string{"infra": "restarting"}
 		}}})
 	if err := d.CheckPages([]string{"menubar.machine:mac-mini"}); err != nil {
 		t.Fatalf("the machine's page is refused: %v", err)
@@ -241,85 +305,38 @@ func TestAMachinesPageIsWatchedByItsName(t *testing.T) {
 		return nil
 	})
 	if got := <-subjects; got != "mac-mini" {
-		t.Fatalf("the feed was asked for %q", got)
+		t.Fatalf("the page was drawn for %q", got)
 	}
 	if len(pages) != 1 || pages[0] != `{"infra":"restarting"}` {
 		t.Fatalf("streamed %q, want the mini's page", pages)
 	}
 }
 
-func TestARefreshReadsAgainOnlyThePageItNames(t *testing.T) {
-	h := &fakeMac{clock: newManualClock()}
-	woke := make(chan string, 8)
-	reread := func(name string) engine.Feed {
-		return func(ctx context.Context, in engine.FeedInput) <-chan any {
-			out := make(chan any, 1)
-			out <- map[string]string{"page": name}
-			go func() {
-				defer close(out)
-				for {
-					select {
-					case <-in.Refresh:
-						woke <- name
-					case <-ctx.Done():
-						select {
-						case <-in.Refresh:
-							woke <- name
-						default:
-						}
-						return
-					}
-				}
-			}()
-			return out
-		}
+func TestARefreshMakesEveryReaderDue(t *testing.T) {
+	clock := newManualClock()
+	r := newReading(clock)
+	d := streamEngine(t, clock, r, &homePage{})
+	if err := d.Refresh([]string{engine.PageMenubar}); err != nil {
+		t.Fatalf("home is not refreshed: %v", err)
 	}
-	d := New(h, newHypervisor(), nil, &fakeMachines{}, &fakeTailnet{}, memStores(), Options{State: "/s", ThisMachine: catalog.Mac,
-		Feeds: map[string]engine.Feed{engine.PageMenubar: reread("home"), engine.PageMachine: reread("linux-1")}})
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-	framed := make(chan struct{})
-	done := make(chan struct{})
-	go func() {
-		defer close(done)
-		n := 0
-		_ = d.Stream(ctx, engine.PageWatchIn{Pages: []string{engine.PageMenubar, "menubar.machine:linux-1"}}, func(v any) error {
-			if ev, ok := v.(engine.Event); ok && ev.Event == "page" {
-				n++
-				if n == 2 {
-					close(framed)
-				}
-			}
-			return nil
-		})
-	}()
-	<-framed
-	if err := d.Refresh([]string{"menubar.machine:linux-1"}); err != nil {
-		t.Fatalf("linux-1's page is not refreshed: %v", err)
-	}
-	if got := <-woke; got != "linux-1" {
-		t.Fatalf("a refresh of linux-1's page read %q again", got)
-	}
-	cancel()
-	<-done
-	close(woke)
-	for got := range woke {
-		t.Errorf("a refresh of linux-1's page also read %q again", got)
+	if r.due.Load() != 1 {
+		t.Fatalf("a refresh made the readers due %d times, want once", r.due.Load())
 	}
 }
 
 func TestAWatchLogsItsOpeningOnceItsFirstFullPageWentOut(t *testing.T) {
-	clock, feed := newManualClock(), make(chan any)
-	d := streamEngine(t, clock, feed)
+	clock, home := newManualClock(), &homePage{}
+	r := newReading(clock)
+	r.put(t, map[string]any{"id": "menubar", "sections": []any{map[string]any{"id": "reading", "mark": "pending"}}})
+	d := streamEngine(t, clock, r, home)
 	notes := make(chan string, 4)
 	d.note = func(line string) { notes <- line }
 	var ran atomic.Int64
 	d.o.Commands = ran.Load
 	s := subscribe(t.Context(), t, d, true)
-	feed <- map[string]any{"id": "menubar", "sections": []any{map[string]any{"id": "reading", "mark": "pending"}}}
 	s.next(t, "page")
 	ran.Add(3)
-	settle(feed, map[string]any{"id": "menubar", "header": map[string]any{"title": "This Mac"}})
+	r.put(t, map[string]any{"id": "menubar", "header": map[string]any{"title": "This Mac"}})
 	clock.advance(coalesce)
 	s.next(t, "page")
 	if got, want := <-notes, "watch: menubar first=0ms header=250ms full=250ms frames=2 commands=3"; !strings.HasSuffix(got, want) {

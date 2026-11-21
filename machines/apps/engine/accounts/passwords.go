@@ -145,3 +145,10 @@ func RevokedSentence(t Program) string {
 	}
 	return line
 }
+
+type VaultOffers struct {
+	// value: This Mac's vault as vault.list reads it, and by password what
+	// grants.new says of it, as the engine's store holds them.
+	Vault  VaultRead
+	Offers map[string]GrantOffer
+}

@@ -9,7 +9,7 @@ import (
 // composes a reading (a Mac's VMs with it, SPEC B5.3), the sample job and
 // the live ticks that ask for it.
 func samplePath() []string {
-	return []string{"activity/adapter/macos", "activity/adapter/linux", "activity/calls", "engine/jobs", "engine/feeds"}
+	return []string{"activity/adapter/macos", "activity/adapter/linux", "activity/calls", "engine/jobs", "engine/live"}
 }
 
 func spawning() []string {

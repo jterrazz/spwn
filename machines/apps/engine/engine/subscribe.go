@@ -1,11 +1,5 @@
 package engine
 
-import (
-	"context"
-
-	"github.com/jterrazz/studio-station/apps/engine/awake"
-)
-
 const (
 	PageKeepAwake = "keep-awake"
 	PageMenubar   = "menubar"
@@ -22,18 +16,6 @@ const (
 	PageNeeds    = "menubar.needs"
 	PageFind     = "menubar.find"
 )
-
-type FeedInput struct {
-	// value: the daemon's own state moved (VMs, guests, leases, Power).
-	Changed <-chan struct{}
-	Refresh <-chan struct{}
-	Awake   func() awake.View
-	// value: what a page is of, after its page's name (`menubar.machine:infra`,
-	// `menubar.ports:mac-mini`); empty for every other page.
-	Subject string
-}
-
-type Feed func(ctx context.Context, in FeedInput) <-chan any
 
 type Opened struct {
 	Stream string   `json:"stream"`

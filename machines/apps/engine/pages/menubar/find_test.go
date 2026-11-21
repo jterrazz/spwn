@@ -241,13 +241,6 @@ func TestFindLeadsWithRestartInfraWhileItIsDown(t *testing.T) {
 	}
 }
 
-// invariant: nothing read yet is Find's frame, loading.
-func TestFindIsLoadingUntilTheMachinesAreRead(t *testing.T) {
-	if p := Find(FindReading{}, page.Context{Machine: findPro}); p.State != page.Loading || p.ID != FindID {
-		t.Errorf("Find before any read is %+v, want its loading frame", p)
-	}
-}
-
 // invariant: a keep-awake from Find never shortens the term held: past
 // 4 h left it extends the end by 4 h.
 func TestFindExtendsAwakeWhenMoreThanFourHoursAreLeft(t *testing.T) {

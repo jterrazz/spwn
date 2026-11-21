@@ -83,10 +83,6 @@ func MachinePage(m Machine) page.Page {
 	// invariant: SPEC A4's page of one machine: a Mac's, a workspace's or a
 	// server's, each with only the actions its kind takes, each naming its
 	// call and asking at the level the call asks.
-	if m.All == nil {
-		row := page.Row{ID: "reading", Label: m.Name, Mark: page.Awaiting}
-		return page.Seal(page.Page{ID: MachineID, Command: "menubar", Context: page.Context{Machine: m.Name}, Sections: []page.Section{{ID: SectionMachine, Title: m.Name, Role: page.Summary, Items: []page.Item{{Row: &row}}}}})
-	}
 	for _, h := range m.All.Macs {
 		if h.Name == m.Name {
 			return macPage(m, h)

@@ -129,39 +129,19 @@ func (s *Machinist) engineView(ctx context.Context) (info model.EngineView, live
 
 func (s *Machinist) view(name string, h model.MacRecord, node model.Node, answers map[string]model.MacView) model.MacView {
 	far, ok := answers[name]
-	if !ok || far.OtherRelease {
-		silent := model.MacView{Name: name, User: h.User, Node: node, Answered: h.Answered, LAN: h.LAN, Laptop: h.Laptop, Asleep: h.Asleep}
-		if h.Hardware != nil {
-			silent.Hardware = *h.Hardware
+	return model.ViewOf(name, h, node, far, ok)
+}
+
+func (s *Machinist) Known(ctx context.Context) (records map[string]model.MacRecord, nodes map[string]model.Node) {
+	// value: every other Mac as This Mac's records keep it, and the
+	// tailnet's node of each Mac it sees, read now.
+	records = map[string]model.MacRecord{}
+	if cfg, err := s.prefs(); err == nil {
+		for _, n := range s.OtherMacs() {
+			records[n] = cfg.Macs[n]
 		}
-		if ok {
-			silent.StationVersion, silent.Reachable, silent.OtherRelease = far.StationVersion, true, true
-		}
-		for _, vm := range h.VMs {
-			// invariant: a VM remembered with no kind is left out, never
-			// guessed; its Mac's next answer brings it back with its own.
-			if vm.Kind == "" {
-				continue
-			}
-			silent.VMs = append(silent.VMs, model.VM{
-				Name: vm.Name, Mac: name, Kind: vm.Kind, Lifetime: vm.Lifetime, State: model.UnknownState,
-				Resources: model.Resources{CPUs: vm.CPUs, MemoryBytes: vm.MemoryBytes},
-			})
-		}
-		return silent
 	}
-	view := model.MacView{
-		Name: name, User: h.User, StationVersion: far.StationVersion, Reachable: true, LAN: far.LAN, Node: far.Node, Engine: far.Engine,
-		Hardware: far.Hardware, Laptop: far.Laptop, Asleep: far.Asleep, Awake: far.Awake,
-	}
-	for _, vm := range far.VMs {
-		vm.Mac = name
-		view.VMs = append(view.VMs, vm)
-	}
-	if node.IP != "" || node.Online {
-		view.Node = node
-	}
-	return view
+	return records, s.nodeMap(ctx)
 }
 
 func (s *Machinist) Running(ctx context.Context) (map[string]catalog.MachineKind, error) {

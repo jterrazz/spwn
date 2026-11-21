@@ -23,3 +23,16 @@ func KeptOf(s Summary) Kept {
 	s.Head.Verdict = HeadOf(s)
 	return Kept{Summary: s, Boot: boot}
 }
+
+func (k Kept) At(now, read time.Time) Summary {
+	// invariant: the facts back to an Overview as of now: the uptime is now
+	// less the boot instant, the head line said from it, and Read the
+	// slice's own instant, so the store holds no value of the clock.
+	s := k.Summary
+	s.Read = read
+	if !k.Boot.IsZero() && now.After(k.Boot) {
+		s.Head.Up = now.Sub(k.Boot)
+	}
+	s.Head.Verdict = HeadOf(s)
+	return s
+}

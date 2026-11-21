@@ -10,6 +10,7 @@ import (
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
+	"github.com/jterrazz/studio-station/apps/engine/engine/store"
 	"github.com/jterrazz/studio-station/apps/engine/setup"
 )
 
@@ -32,24 +33,16 @@ func (s *ticks) sample(_ context.Context, keys []string) engine.Sample {
 }
 
 // value: an engine whose home lists This Mac's CPU and network, and whose
-// machine pages list their machine's CPU, each sent once, as its frame.
+// machine pages list their machine's CPU.
 func liveEngine(clock *manualClock, s *ticks) *Engine {
-	listing := func(ctx context.Context, keys ...string) <-chan any {
-		out := make(chan any, 1)
-		out <- json.RawMessage(`{"live":` + string(mustJSON(keys)) + `}`)
-		go func() {
-			<-ctx.Done()
-			close(out)
-		}()
-		return out
+	listing := func(keys ...string) any {
+		return json.RawMessage(`{"live":` + string(mustJSON(keys)) + `}`)
 	}
 	paths := setup.Paths{Prefs: "/c", State: "/s"}
-	return New(&fakeMac{clock: clock}, newHypervisor(), nil, &fakeMachines{}, &fakeTailnet{}, memStores(), Options{State: paths.State, ThisMachine: catalog.Mac, Sample: s.sample,
-		Feeds: map[string]engine.Feed{
-			engine.PageMenubar: func(ctx context.Context, _ engine.FeedInput) <-chan any {
-				return listing(ctx, "cpu:"+here, "net:"+here)
-			},
-			engine.PageMachine: func(ctx context.Context, in engine.FeedInput) <-chan any { return listing(ctx, "cpu:"+in.Subject) },
+	return New(&fakeMac{clock: clock}, newHypervisor(), nil, &fakeMachines{}, &fakeTailnet{}, memStores(), Options{State: paths.State, ThisMachine: catalog.Mac, Sample: s.sample, Reading: newReading(clock),
+		Pages: map[string]Projection{
+			engine.PageMenubar: func(*store.Snapshot, string) any { return listing("cpu:"+here, "net:"+here) },
+			engine.PageMachine: func(_ *store.Snapshot, subject string) any { return listing("cpu:" + subject) },
 		}})
 }
 

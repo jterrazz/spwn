@@ -24,6 +24,7 @@ import (
 	portscalls "github.com/jterrazz/studio-station/apps/engine/ports/calls"
 
 	enginecalls "github.com/jterrazz/studio-station/apps/engine/engine/calls"
+	"github.com/jterrazz/studio-station/apps/engine/engine/store"
 )
 
 const (
@@ -96,8 +97,15 @@ type Options struct {
 	NeverSleeps func() bool
 	// value: the power page a subscription streams, built by the caller's pages.
 	KeepAwakePage func(awake.View) any
-	// value: the other pages a subscription streams (the menu bar's), by id.
-	Feeds map[string]engine.Feed
+	// value: the menu bar's pages a subscription streams, by id: each drawn
+	// from one snapshot of the store, its subject after the page's name, and
+	// reading nothing; or else read while it is open, each reading a page on
+	// a channel that closes when the watch ends.
+	Pages map[string]Projection
+	Live  map[string]LivePage
+	// value: the values the live ticks kept of the keys a page lists, read
+	// from memory; nil sends none at a page's opening.
+	KeptLive func(keys []string) engine.Sample
 	// value: the reading of the live keys the streamed pages list; nil sends
 	// no sample.
 	Sample engine.Sampler
@@ -164,6 +172,9 @@ type Reading interface {
 	// engine to the next.
 	Remember(held engine.Held)
 	Held() engine.Held
+	Store() *store.Store
+	// value: the store holds what the engine reads before it answers.
+	Ready(ctx context.Context)
 }
 
 type Engine struct {
@@ -207,6 +218,7 @@ type Engine struct {
 	awakeJob   *awakecalls.Keeper
 	awake      *awake.Kept
 	hub        hub
+	memo       memo
 	history    *activity.History
 	watchers   watchers
 	settings   engine.SettingsKept

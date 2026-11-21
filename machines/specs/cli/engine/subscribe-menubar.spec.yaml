@@ -12,7 +12,6 @@ runs:
           ["2",true,null]
           ["3",false,"unknown_page"]
           ["1",["menubar"]]
-          loading
           ready
           ["menubar",["this-mac","empty","macs","shortcuts","needs-you","machines"]]
           [["new-vm","machines.create-workspace"],["open-station","terminal"],["stop-all","engine.stop"]]
