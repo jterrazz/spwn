@@ -6,9 +6,10 @@ import { replaceEqualDeep } from './equal';
 import type { Mark } from './marks';
 
 // value: `stale`, the error a re-ask met that could not read the answer again, the answer kept: a page draws it as a mark.
+// value: `placeholder`, the answer of the input a hook asked before, shown while the new one is read.
 export type Reading<T> =
     | { kind: 'failed'; error: EngineError }
-    | { kind: 'read'; out: T; done: boolean; stale?: EngineError }
+    | { kind: 'read'; out: T; done: boolean; stale?: EngineError; placeholder?: true }
     | { kind: 'reading' };
 
 export const READING = { kind: 'reading' } as const;

@@ -28,8 +28,11 @@ import { UpdateFlow } from '../../application/use-cases/update-flow';
 import type { UpdateState } from '../../application/use-cases/update-flow';
 import { NO_WINDOW_UPDATE, WindowUpdateFlow } from '../../application/use-cases/window-update-flow';
 import type { WindowUpdateState } from '../../application/use-cases/window-update-flow';
+import { usePlaceholder } from './use-placeholder';
+import type { Asking } from './use-placeholder';
 
 export type { Reading } from '../../application/use-cases/entry';
+export type { Asking } from './use-placeholder';
 
 export type Dependencies = {
     engine: EnginePort;
@@ -168,16 +171,18 @@ export function useWatch<N extends WatchName>(
     name: N,
     input: In<N>,
     target?: Target,
+    asking: Asking = {},
 ): Reading<Out<N>> {
     const reading = useAsked({ input, kind: 'watch', name, target });
-    return isOutOf(name, reading) ? reading : READING;
+    return usePlaceholder(isOutOf(name, reading) ? reading : READING, asking);
 }
 
 export function useRead<N extends ReadName>(
     name: N,
     input: In<N>,
     target?: Target,
+    asking: Asking = {},
 ): Reading<Out<N>> {
     const reading = useAsked({ input, kind: 'read', name, target });
-    return isOutOf(name, reading) ? reading : READING;
+    return usePlaceholder(isOutOf(name, reading) ? reading : READING, asking);
 }
