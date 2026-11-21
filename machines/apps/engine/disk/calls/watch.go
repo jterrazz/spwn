@@ -482,6 +482,9 @@ func (s *Surveyor) row(ep entryPlan, r reading) (disk.Tally, bool) {
 		row.Install += value(i)
 	}
 	for _, st := range ep.misplacedOnes {
+		if holdsNothing(r, st.root) {
+			continue
+		}
 		report := st.report
 		report.Bytes = value(st.root)
 		row.Misplaced = append(row.Misplaced, report)
@@ -518,6 +521,14 @@ func (s *Surveyor) row(ep entryPlan, r reading) (disk.Tally, bool) {
 		return row, e.Name == disk.StationName || ep.exists || (ep.containers && installed)
 	}
 	return row, e.Name == disk.StationName || row.Total() != 0
+}
+
+// invariant: a misplaced folder the walk answers empty, or last answered
+// empty while it walks it again, is no misplaced folder: there is nothing to
+// move.
+func holdsNothing(r reading, i int) bool {
+	b := r.sizes[i]
+	return b == 0 || (b == pending && r.known[i] == 0)
 }
 
 func (s *Surveyor) walkBudget() time.Duration {

@@ -102,7 +102,7 @@ Tart's app and its `LICENSE` live in `~/.local/share/station/tart/`, its home (`
 
 ## Misplaced
 
-A misplaced folder is a home-root folder an app writes when its relocation is missing or was never applied: `~/go`, `~/.npm`, `~/.tart`. `station disk` lists it first, and `station overview` shows it as a `◐` row with its size and its fix, `station disk move <folder>`: what is still to move moves, the cache inside it is emptied (the app's own command, or by path with the app gone) and the emptied folders go. A file Machines does not own stays where it is.
+A misplaced folder is a home-root folder an app writes when its relocation is missing or was never applied: `~/go`, `~/.npm`, `~/.tart`. One that holds nothing (a `~/.tart` of an empty `cache` and `tmp`) is none, since there is nothing to move. `station disk` lists it first, and `station overview` shows it as a `◐` row with its size and its fix, `station disk move <folder>`: what is still to move moves, the cache inside it is emptied (the app's own command, or by path with the app gone) and the emptied folders go. A file Machines does not own stays where it is.
 
 ## Backups
 
