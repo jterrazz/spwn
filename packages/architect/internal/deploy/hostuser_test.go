@@ -13,7 +13,7 @@ import (
 )
 
 type hostUserFixture struct {
-	root, etc, mountinfo, log, stubs string
+	root, etc, mountinfo, log, stubs, targetUID, targetGID string
 }
 
 func newHostUserFixture(t *testing.T, chownExit int) hostUserFixture {
@@ -23,6 +23,7 @@ func newHostUserFixture(t *testing.T, chownExit int) hostUserFixture {
 	f.mountinfo = filepath.Join(f.stubs, "mountinfo")
 	f.log = filepath.Join(f.stubs, "log")
 	uid, gid := strconv.Itoa(os.Getuid()), strconv.Itoa(os.Getgid())
+	f.targetUID, f.targetGID = strconv.Itoa(os.Getuid()+1), strconv.Itoa(os.Getgid()+1)
 
 	write := func(path, content string, mode os.FileMode) {
 		t.Helper()
@@ -33,11 +34,11 @@ func newHostUserFixture(t *testing.T, chownExit int) hostUserFixture {
 			t.Fatal(err)
 		}
 	}
-	write(filepath.Join(f.etc, "passwd"), "root:x:0:0:root:/root:/bin/sh\nubuntu:x:1000:1000::/home/ubuntu:/bin/sh\nspwn:x:"+uid+":"+gid+"::/home/spwn:/bin/sh\n", 0o644)
-	write(filepath.Join(f.etc, "group"), "root:x:0:\nubuntu:x:1000:\nspwn:x:"+gid+":\n", 0o644)
+	write(filepath.Join(f.etc, "passwd"), "root:x:0:0:root:/root:/bin/sh\nubuntu:x:"+f.targetUID+":"+f.targetUID+"::/home/ubuntu:/bin/sh\nspwn:x:"+uid+":"+gid+"::/home/spwn:/bin/sh\n", 0o644)
+	write(filepath.Join(f.etc, "group"), "root:x:0:\nubuntu:x:"+f.targetGID+":\nspwn:x:"+gid+":\n", 0o644)
 	write(filepath.Join(f.root, "home", "spwn", "file"), "", 0o644)
 	write(filepath.Join(f.root, "workspaces", "ab", "own.txt"), "", 0o644)
-	mounts := map[string]string{"my ws": `my\040ws`, "a*": "a*", "t\tb": `t\011b`, `b\c`: `b\134c`}
+	mounts := map[string]string{"my ws": `my\040ws`, "a*": "a*", "t\tb": `t\011b`, `b\c`: `b\134c`, "n\nl": `n\012l`, "q?[x]": "q?[x]"}
 	info := "1 0 8:1 / / rw - ext4 /dev/vda1 rw\n"
 	for name, encoded := range mounts {
 		write(filepath.Join(f.root, "workspaces", name, "host.txt"), "", 0o644)
@@ -52,7 +53,7 @@ func newHostUserFixture(t *testing.T, chownExit int) hostUserFixture {
 
 func (f hostUserFixture) run(t *testing.T) int {
 	t.Helper()
-	cmd := exec.Command("sh", "-c", followHostUserScript, "sh", "1000", "1000", f.etc, f.mountinfo, f.root)
+	cmd := exec.Command("sh", "-c", followHostUserScript, "sh", f.targetUID, f.targetGID, f.etc, f.mountinfo, f.root)
 	cmd.Env = append(os.Environ(), "PATH="+f.stubs+string(os.PathListSeparator)+os.Getenv("PATH"))
 	out, err := cmd.CombinedOutput()
 	var exitErr *exec.ExitError
@@ -74,7 +75,7 @@ func (f hostUserFixture) changed(t *testing.T, tool string) []string {
 	var paths []string
 	for _, line := range strings.Split(strings.TrimSuffix(string(raw), "\n"), "\n") {
 		arg, ok := strings.CutPrefix(line, tool+" ")
-		if ok && arg != "-h" && arg != "1000" {
+		if ok && arg != "-h" && arg != f.targetUID && arg != f.targetGID {
 			paths = append(paths, arg)
 		}
 	}
@@ -101,10 +102,10 @@ func TestFollowHostUserScriptReownsTheImageAndPrunesEveryMountByItsLiteralName(t
 	}
 	passwd, _ := os.ReadFile(filepath.Join(f.etc, "passwd"))
 	group, _ := os.ReadFile(filepath.Join(f.etc, "group"))
-	if want := "spwn:x:1000:1000::/home/spwn:/bin/sh\nroot:x:0:0:root:/root:/bin/sh\nubuntu:x:1000:1000::/home/ubuntu:/bin/sh\n"; string(passwd) != want {
+	if want := "spwn:x:" + f.targetUID + ":" + f.targetGID + "::/home/spwn:/bin/sh\nroot:x:0:0:root:/root:/bin/sh\nubuntu:x:" + f.targetUID + ":" + f.targetUID + "::/home/ubuntu:/bin/sh\n"; string(passwd) != want {
 		t.Errorf("passwd:\n got  %q\n want %q", passwd, want)
 	}
-	if want := "spwn:x:1000:\nroot:x:0:\nubuntu:x:1000:\n"; string(group) != want {
+	if want := "spwn:x:" + f.targetGID + ":\nroot:x:0:\nubuntu:x:" + f.targetGID + ":\n"; string(group) != want {
 		t.Errorf("group:\n got  %q\n want %q", group, want)
 	}
 }
