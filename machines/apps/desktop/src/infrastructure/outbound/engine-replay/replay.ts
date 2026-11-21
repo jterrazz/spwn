@@ -6,6 +6,7 @@ import type { Exchange as Opened, Receiver, Transport } from '../engine-link/tra
 import { helloOf } from './hello';
 import { inFlight, play } from './played';
 import type { Played } from './played';
+import { refusalOf, stagedOf } from './staged';
 import { throwIf, unrecordedOf } from './unrecorded';
 
 export type Exchange = { request: Record<string, unknown>; answers: readonly unknown[] };
@@ -81,6 +82,11 @@ export type Pace = {
     latency?: (request: Request, asked: number) => number;
     // value: the call whose gestures stop after their first frame and never end, their reads answering as while they ran.
     held?: string | undefined;
+    // value: the call or watch never answered, its exchanges left open: a page drawn before its first answer.
+    unread?: string | undefined;
+    // value: the call or watch answered as recorded once per request, then refused as the world's first unreachable
+    // value: Mac was: an answer kept on screen whose refresh was refused.
+    stale?: string | undefined;
 };
 
 // value: a replay the spec drives: the link flips as shown, a drop ends every open exchange after its request was
@@ -125,6 +131,7 @@ class Staging {
     private answers: Answers;
     private readonly recording: Recording;
     private readonly pace: Pace | undefined;
+    private readonly refusal: unknown;
     private readonly listeners = new Set<(link: Link) => void>();
     private readonly live = new Set<Live>();
     private readonly times = new Map<string, number>();
@@ -134,6 +141,7 @@ class Staging {
         this.recording = recording;
         this.pace = pace;
         this.answers = answersOf(recording);
+        this.refusal = refusalOf(recording);
         this.shown = link ?? {
             hello: helloOf(recording),
             kind: 'open',
@@ -229,23 +237,35 @@ class Staging {
         if (this.shown.kind !== 'open') {
             return undefined;
         }
+        const asked = this.times.get(key) ?? 0;
         const first = this.firstOf(request, key);
+        const staged = stagedOf(request, asked, this.pace, this.refusal);
+        if (staged !== undefined) {
+            return { first, ...staged };
+        }
+        if (this.answers.gestures.has(key)) {
+            return this.gesturePlayed(request, key, first);
+        }
+        const recorded = this.answers.reads.get(key);
+        return recorded ? { first, frames: recorded, gap: 0 } : undefined;
+    }
+
+    private gesturePlayed(request: Request, key: string, first: number): Played | undefined {
         const { gestures, reads } = this.answers;
         const gesture = gestures.get(key);
-        if (gesture) {
-            const flight = inFlight(reads, gesture.during ?? [], gesture.after);
-            const held = 'call' in request && request.call === this.pace?.held;
-            return {
-                first,
-                frames: held ? gesture.answers.slice(0, 1) : gesture.answers,
-                gap: this.pace?.gestureFrame ?? 0,
-                held,
-                onFirst: flight.begun,
-                onLast: held ? undefined : flight.ended,
-            };
+        if (!gesture) {
+            return undefined;
         }
-        const recorded = reads.get(key);
-        return recorded ? { first, frames: recorded, gap: 0 } : undefined;
+        const flight = inFlight(reads, gesture.during ?? [], gesture.after);
+        const held = 'call' in request && request.call === this.pace?.held;
+        return {
+            first,
+            frames: held ? gesture.answers.slice(0, 1) : gesture.answers,
+            gap: this.pace?.gestureFrame ?? 0,
+            held,
+            onFirst: flight.begun,
+            onLast: held ? undefined : flight.ended,
+        };
     }
 }
 

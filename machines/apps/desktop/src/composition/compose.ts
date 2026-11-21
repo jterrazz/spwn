@@ -100,6 +100,8 @@ async function composedOf({ inTauri, query }: Place): Promise<Composed> {
     const pace = {
         gestureFrame: Number(query.get('pace') ?? '0'),
         held: query.get('held') ?? undefined,
+        stale: query.get('stale') ?? undefined,
+        unread: query.get('unread') ?? undefined,
     };
     const recorded = await recordingFor(world);
     const release = await import('../infrastructure/outbound/core-scripted/release');
