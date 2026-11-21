@@ -2,6 +2,7 @@ import type { Target } from '@jterrazz/station-api';
 
 import { EngineError } from '../../domain/engine-error';
 import type { In, ReadName, Watch, WatchName } from '../ports/engine.port';
+import { replaceEqualDeep } from './equal';
 import type { Mark } from './marks';
 
 export type Reading<T> =
@@ -30,7 +31,19 @@ export type Entry = {
     grace: ReturnType<typeof setTimeout> | undefined;
 };
 
-export function show(entry: Entry, reading: Reading<unknown>): void {
+function sharedOf(before: Reading<unknown>, next: Reading<unknown>): Reading<unknown> {
+    if (before.kind !== 'read' || next.kind !== 'read') {
+        return next;
+    }
+    const out = replaceEqualDeep(before.out, next.out);
+    return out === before.out && next.done === before.done ? before : { ...next, out };
+}
+
+export function show(entry: Entry, next: Reading<unknown>): void {
+    const reading = sharedOf(entry.reading, next);
+    if (reading === entry.reading) {
+        return;
+    }
     entry.reading = reading;
     for (const listener of entry.listeners) {
         listener();

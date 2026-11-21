@@ -6,7 +6,7 @@ import { Client } from '../../../infrastructure/outbound/engine-link/client';
 import type { Receiver, Transport } from '../../../infrastructure/outbound/engine-link/transport';
 import type { Link } from '../../ports/engine.port';
 import type { PresencePort } from '../../ports/presence.port';
-import type { Asked } from '../entry';
+import type { Asked, Reading } from '../entry';
 import { offers } from '../fresh';
 import { ReadStore } from '../store';
 
@@ -95,10 +95,17 @@ async function settled(hello: EngineHello = HELLO) {
         every: EVERY,
         grace: 500,
     });
-    const leave = store.subscribe(MACHINES, () => {});
+    let told = 0;
+    const leave = store.subscribe(MACHINES, () => {
+        told += 1;
+    });
     await clock.advance(1);
     engine.answer('machines.list', RUNNING, DONE);
-    return { engine, leave, seen, store };
+    return { engine, heard: () => told, leave, seen, store };
+}
+
+function rowsOf(reading: Reading<unknown>): readonly unknown[] {
+    return reading.kind === 'read' && Array.isArray(reading.out) ? reading.out : [];
 }
 
 describe('fresh', () => {
@@ -114,6 +121,49 @@ describe('fresh', () => {
         // Then - the watch was asked twice and shows the stopped state
         expect(engine.asked('machines.list')).toBe(2);
         expect(store.reading(KEY)).toStrictEqual({ done: true, kind: 'read', out: STOPPED.out });
+    });
+
+    test('a re-ask answered equal keeps the reading itself and tells no subscriber', async () => {
+        // Given - machines.list settled on running, and what its subscriber has heard so far
+        using _ = clock.run('2026-11-13T10:00:00Z');
+        const { engine, heard, store } = await settled();
+        const shown = store.reading(KEY);
+        const told = heard();
+
+        // When - the cadence passes and the engine answers the same state, as a new object
+        await clock.advance(EVERY);
+        engine.answer('machines.list', { out: { State: 'running' } }, DONE);
+
+        // Then - it was asked again, and the reading is the one shown, its subscriber never told
+        expect(engine.asked('machines.list')).toBe(2);
+        expect(store.reading(KEY)).toBe(shown);
+        expect(heard()).toBe(told);
+    });
+
+    test('a re-ask that moves one row shows a new reading whose other rows are the shown ones', async () => {
+        // Given - machines.list settled on two running VMs
+        using _ = clock.run('2026-11-13T10:00:00Z');
+        const { engine, store } = await settled();
+        const rows = [
+            { Name: 'api', State: 'running' },
+            { Name: 'web', State: 'running' },
+        ];
+        await clock.advance(EVERY);
+        engine.answer('machines.list', { out: rows }, DONE);
+        const [, web] = rowsOf(store.reading(KEY));
+
+        // When - the next cadence answers api stopped and web as it was
+        await clock.advance(EVERY);
+        engine.answer(
+            'machines.list',
+            { out: [{ ...rows[0], State: 'stopped' }, { ...rows[1] }] },
+            DONE,
+        );
+
+        // Then - the reading shows api stopped, and web is the very row shown before
+        const [api, again] = rowsOf(store.reading(KEY));
+        expect(api).toStrictEqual({ Name: 'api', State: 'stopped' });
+        expect(again).toBe(web);
     });
 
     test('a re-ask keeps the shown answer while the engine sends pending values, then shows its last', async () => {
