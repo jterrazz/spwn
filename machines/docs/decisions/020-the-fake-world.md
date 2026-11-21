@@ -3,6 +3,8 @@
 **Status:** Proposed
 **Date:** 2026-11-06
 
+Amended by [ADR-068](068-in-the-fake-world-no-result-waits-on-real-time.md): a leap of the world's clock waits for the waiters it wakes, never on real time.
+
 Written 2026-11-06 from the owner's round 3 test policy and round 13 decision Q3, and the code that carries them.
 
 ## Context

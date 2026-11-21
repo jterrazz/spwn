@@ -17,7 +17,9 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"runtime/metrics"
 	"slices"
+	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -80,6 +82,8 @@ import (
 const (
 	quietTicks = 3
 	mostTicks  = 120
+	// value: the quiet readings in a row that let go of a waiter still out.
+	letGo = 4
 	// value: the real time a settling waits, in all, for its guests' greetings.
 	greetBound = 2 * time.Second
 )
@@ -1118,9 +1122,24 @@ func (*worldMac) watchContext(ctx context.Context) context.Context {
 	return context.WithValue(ctx, waits{}, true)
 }
 
+// invariant: a leap is a handshake with what runs. It waits until nothing
+// but leapers can run, so what already runs takes its turn; it moves the time
+// and wakes the waiters parked on it; it goes on once each is back, parked on
+// the clock again or, its wait over, at its goroutine's next call on the
+// clock, and nothing but leapers can run. No real time decides what a leap
+// sees.
 type moves struct {
 	mu sync.Mutex
 	ch chan struct{}
+	// value: the leaps so far, and the waiters parked since the last one.
+	gen    int
+	parked int
+	// value: the waiters a leap woke that are not back on the clock, and
+	// those of them whose wait is over, by goroutine, back at their next call.
+	out  int
+	held map[int64]bool
+	// value: the leapers waiting on the handshake.
+	leapers atomic.Int32
 	// invariant: while a Mac's surfaces are being let go, a wait on the clock
 	// does not wait for it to move: the flow that moves it waits on them.
 	leaving atomic.Int32
@@ -1128,15 +1147,73 @@ type moves struct {
 
 func (r *worldRun) clock() worldClock {
 	if r.moved == nil {
-		r.moved = &moves{ch: make(chan struct{})}
+		r.moved = &moves{ch: make(chan struct{}), held: map[int64]bool{}}
 	}
 	return worldClock{w: r.w, moved: r.moved}
 }
 
-func (m *moves) next() <-chan struct{} {
+// value: one wait on the clock: the leap it parked after, if parked.
+type sleeper struct {
+	gen    int
+	parked bool
+}
+
+// invariant: a waiter whose wait is over keeps its turn when a leap woke it,
+// and parks again otherwise; the world lock is taken under mu, never mu
+// under it.
+func (m *moves) park(c worldClock, until time.Time, s *sleeper) (<-chan struct{}, bool) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	return m.ch
+	woken := m.unpark(s)
+	if !c.Now().Before(until) {
+		if woken {
+			m.held[goroutine()] = true
+		}
+		return nil, true
+	}
+	m.back(woken)
+	m.parked++
+	s.gen, s.parked = m.gen, true
+	return m.ch, false
+}
+
+func (m *moves) drop(s *sleeper) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.back(m.unpark(s))
+}
+
+func (m *moves) unpark(s *sleeper) bool {
+	if !s.parked {
+		return false
+	}
+	s.parked = false
+	if s.gen == m.gen {
+		m.parked--
+		return false
+	}
+	return true
+}
+
+func (m *moves) back(woken bool) {
+	if woken {
+		m.out--
+	}
+}
+
+// invariant: every wait the clock offers begins here: a goroutine that waits
+// again, on the clock's time or on what the clock bounds, gives back the turn
+// it kept.
+func (m *moves) enter() {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if len(m.held) == 0 {
+		return
+	}
+	if id := goroutine(); m.held[id] {
+		delete(m.held, id)
+		m.out--
+	}
 }
 
 func (m *moves) leave() func() {
@@ -1147,9 +1224,72 @@ func (m *moves) leave() func() {
 
 func (m *moves) tell() {
 	m.mu.Lock()
+	m.out += m.parked
+	m.parked = 0
+	m.gen++
 	close(m.ch)
 	m.ch = make(chan struct{})
 	m.mu.Unlock()
+}
+
+func (m *moves) settled() bool {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	return m.out <= 0
+}
+
+// invariant: a leap goes on once every waiter it woke is back and nothing but
+// leapers can run. While a turn is out, quiet must hold for letGo readings in
+// a row, a turn of the scheduler between: the turn is then a goroutine that
+// waits on something other than the clock, or has ended, and is let go.
+func (m *moves) await(ctx context.Context) {
+	for still := 0; ctx.Err() == nil; runtime.Gosched() {
+		if !m.quiet() {
+			still = 0
+			continue
+		}
+		if m.settled() {
+			return
+		}
+		still++
+		if still == letGo {
+			m.mu.Lock()
+			m.out = 0
+			clear(m.held)
+			m.mu.Unlock()
+			return
+		}
+	}
+}
+
+// value: nothing but leapers can run, twice in a row with a turn of the
+// scheduler between.
+func (m *moves) quiet() bool {
+	if !m.idle() {
+		return false
+	}
+	runtime.Gosched()
+	return m.idle()
+}
+
+func (m *moves) idle() bool {
+	read := []metrics.Sample{{Name: "/sched/goroutines/running:goroutines"}, {Name: "/sched/goroutines/runnable:goroutines"}}
+	metrics.Read(read)
+	busy := read[0].Value.Uint64() + read[1].Value.Uint64()
+	for n := m.leapers.Load(); n > 0 && busy > 0; n-- {
+		busy--
+	}
+	return busy == 0
+}
+
+func goroutine() int64 {
+	var buf [64]byte
+	field := bytes.Fields(buf[:runtime.Stack(buf[:], false)])
+	if len(field) < 2 {
+		return 0
+	}
+	id, _ := strconv.ParseInt(string(field[1]), 10, 64)
+	return id
 }
 
 func (c worldClock) Now() time.Time {
@@ -1165,6 +1305,7 @@ func (c worldClock) Now() time.Time {
 // hazard: one that waits on the clock all the same is waited for greetBound
 // of real time, then passes as a sleep of d.
 func (c worldClock) Await(ctx context.Context, ready <-chan struct{}, d time.Duration) error {
+	c.moved.enter()
 	bound := time.NewTimer(greetBound)
 	defer bound.Stop()
 	select {
@@ -1181,7 +1322,8 @@ func (c worldClock) Await(ctx context.Context, ready <-chan struct{}, d time.Dur
 // only a move would bring: what busy may still bring (on no clock) is waited
 // for, greetBound of real time at most, and what is not ready once it ends is
 // judged at once, however loaded the gate.
-func (worldClock) AwaitWhile(ctx context.Context, ready, busy <-chan struct{}, _ time.Duration) error {
+func (c worldClock) AwaitWhile(ctx context.Context, ready, busy <-chan struct{}, _ time.Duration) error {
+	c.moved.enter()
 	if busy != nil {
 		bound := time.NewTimer(greetBound)
 		defer bound.Stop()
@@ -1199,29 +1341,27 @@ func (c worldClock) Sleep(ctx context.Context, d time.Duration) error {
 	if err := ctx.Err(); err != nil {
 		return err
 	}
+	c.moved.enter()
 	if ctx.Value(waits{}) == nil {
-		// invariant: what already runs takes its turn before the clock
-		// leaps, and a moment of real time with it (a fiftieth of the leap,
-		// at most 5 ms), so a poll counts the work it waits on, a guest's
-		// pipe under a loaded gate included, not the scheduler.
-		runtime.Gosched()
-		time.Sleep(min(d/50, 5*time.Millisecond))
-	}
-	c.w.Lock()
-	until := c.w.Now.Add(d)
-	if ctx.Value(waits{}) == nil {
-		c.w.Now = until
+		c.moved.leapers.Add(1)
+		defer c.moved.leapers.Add(-1)
+		c.moved.await(ctx)
+		c.w.Lock()
+		c.w.Now = c.w.Now.Add(d)
 		c.w.Unlock()
 		c.moved.tell()
+		c.moved.await(ctx)
 		return nil
 	}
-	c.w.Unlock()
+	until := c.Now().Add(d)
+	var s sleeper
 	for {
-		moved := c.moved.next()
-		if !c.Now().Before(until) {
+		moved, over := c.moved.park(c, until, &s)
+		if over {
 			return nil
 		}
 		if c.moved.leaving.Load() > 0 {
+			c.moved.drop(&s)
 			select {
 			case <-ctx.Done():
 				return ctx.Err()
@@ -1231,6 +1371,7 @@ func (c worldClock) Sleep(ctx context.Context, d time.Duration) error {
 		}
 		select {
 		case <-ctx.Done():
+			c.moved.drop(&s)
 			return ctx.Err()
 		case <-moved:
 		}
