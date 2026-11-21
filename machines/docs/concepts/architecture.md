@@ -39,6 +39,8 @@ apps/engine/
     jobs/    the sample job, which feeds Activity's history, and the nightly job, which
              upgrades a Mac's bound Machinefile every night
     feeds/   the menu bar's pages, built over watches
+    store/   the read model: one snapshot per revision of slices by key, each its value, hash,
+             read time and whether it is fresh, stale or unread
 ```
 
 The shared kernel, which does no I/O:
