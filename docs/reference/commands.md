@@ -74,7 +74,7 @@ spwn agent [name] [flags]
 - [spwn agent logs](#spwn-agent-logs): Show the event log for a specific agent.
 - [spwn agent ls](#spwn-agent-ls): List all agents on this Host.
 - [spwn agent rm](#spwn-agent-rm): Remove an agent and its Mind directory.
-- [spwn agent sleep](#spwn-agent-sleep): Consolidate experience - archive stale files, prune old sessions.
+- [spwn agent sleep](#spwn-agent-sleep): Archive stale playbooks and delete old journal files.
 - [spwn agent talk](#spwn-agent-talk): Talk to a running agent - interactive or one-shot.
 
 ## spwn agent create
@@ -243,7 +243,7 @@ spwn agent rm <agent-name>
 
 ## spwn agent sleep
 
-Consolidate experience - archive stale files, prune old sessions.
+Archive stale playbooks and delete old journal files.
 
 ```text
 spwn agent sleep <agent-name>

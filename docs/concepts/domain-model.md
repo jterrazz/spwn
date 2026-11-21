@@ -45,7 +45,7 @@ Each agent declares one of these as its `role:`: `chief`, `manager`, `worker`, o
 ### Evolution
 
 - **Dream**: analyze experience, discover patterns, promote successes to playbooks. `spwn agent dream <name>`
-- **Sleep**: graceful shutdown. Save state, consolidate, prune. `spwn agent sleep <name>`
+- **Sleep**: tidy the Mind on the host. Playbooks untouched for 30 days move to `archive/playbooks/`, journal files older than 90 days are deleted, and a dated summary is written to the journal. It stops nothing. `spwn agent sleep <name>`
 - **Fork**: clone an agent with everything it knows. `spwn agent fork <src> <dst>`
 
 ## IDs

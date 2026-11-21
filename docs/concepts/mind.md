@@ -6,7 +6,7 @@ An agent is three layers (identity, skills, memory), and the whole point of draw
 
 - **Identity**: the immutable core of purpose, values, bonds, role, voice. It does not fork, does not sleep, does not prune.
 - **Skills**: invocable capabilities, what the agent can do.
-- **Memory**: the evolving layer of knowledge, playbooks, journal. It grows through experience, restructures during Sleep, and branches when the agent is forked.
+- **Memory**: the evolving layer of knowledge, playbooks, journal. It grows through experience, is tidied by Sleep, and branches when the agent is forked.
 
 The profile is mounted into every world the agent enters; without one, every world starts from zero. Identity is what keeps the accumulation coherent: an agent that evolves long enough without one drifts out of its purpose.
 
@@ -44,7 +44,7 @@ The Soul is the identity layer: purpose, values, bonds. The Mind is everything t
 |              | Soul                             | Mind                                    |
 | ------------ | -------------------------------- | --------------------------------------- |
 | Changes      | Never, or rarely and with intent | Constantly: grows, prunes, restructures |
-| During Sleep | Untouched                        | Consolidated, pruned, reorganised       |
+| During Sleep | Untouched                        | Old playbooks archived, old journal cut |
 | During Fork  | Shared across all forks          | Each fork gets its own copy             |
 | During Merge | No conflict possible             | Needs conflict resolution               |
 
@@ -62,9 +62,23 @@ Dream is the incremental cycle, one task at a time: the agent executes a task an
 
 The framework supplies the primitives (snapshot, fork, merge) and the reflection logic runs as an agent-level feature on top.
 
-## Sleep: restructuring the whole Mind
+## Sleep: tidying the Mind
 
-An agent that only accumulates degrades: the journal grows unbounded, new learnings contradict old ones, outdated playbooks go unreviewed, the self-model drifts. Sleep is the phase where the agent steps back from execution and restructures the entire Mind. Four operations, plus one optional:
+An agent that only accumulates degrades: the journal grows unbounded, new learnings contradict old ones, outdated playbooks go unreviewed, the self-model drifts. Sleep is the answer, and today it is a mechanical pass over the agent's directory on the host.
+
+### What Sleep does today
+
+`spwn agent sleep <name>` runs no model and stops no world. It does three things, in this order:
+
+1. **Archive**: every file of `playbooks/` not modified for 30 days moves to `archive/playbooks/`.
+2. **Prune**: every file of `journal/` not modified for 90 days is deleted.
+3. **Record**: it writes `journal/sleep-<date>.md` with both counts, and logs one `agent.slept` event to the event log.
+
+It does not touch `SOUL.md`, and it does not read what a file says: age is its only rule.
+
+### What Sleep is designed to become
+
+Not shipped: Sleep as the phase where the agent steps back from execution and restructures the entire Mind. Four operations, plus one optional:
 
 1. **Consolidate**: compress journal entries into knowledge. Raw detail fades, lessons persist.
 2. **Prune**: retire low-confidence playbooks, remove stale knowledge.
@@ -74,7 +88,7 @@ An agent that only accumulates degrades: the journal grows unbounded, new learni
 
 Sleep has depth: a nap compresses recent entries after a few tasks, light sleep prunes and consolidates after a day's work, deep sleep runs the full restructuring including the dream (weekly, or after a milestone). The Soul is the fixed point through all of it: Sleep can reorganise knowledge and playbooks completely and the agent stays recognisably itself.
 
-### Open question: the Sleep execution model
+#### Open question: the Sleep execution model
 
 Undecided: should Sleep run inside a world (the agent restructures its own Mind through the runtime: consistent and creative, but slow and token-hungry), outside it (a framework process over the profile directory: fast and deterministic, but unable to resolve semantic contradictions), or as a hybrid (the framework does journal compression and dedup, the agent does contradictions, self-model, and dreaming)? Leaning toward the hybrid: mechanical consolidation does not need an LLM; semantic restructuring does.
 
