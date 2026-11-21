@@ -3,6 +3,7 @@
         "pixel-goldens/bytes": 2819399
     },
     "typescript": {
+        "names/directory-in-kebab-case": 1,
         "names/no-grab-bag-name": 1,
         "names/specs-root-holds-specifications-and-shared": 2
     }

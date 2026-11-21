@@ -36,7 +36,7 @@
     "bundle": {
         "active": true,
         "targets": ["app"],
-        "icon": ["icons/icon.png", "icons/icon.icns"],
+        "icon": ["icons/icon.png", "icons/icon.icns", "icons/spwn.icon"],
         "macOS": { "minimumSystemVersion": "26.0" }
     },
     "plugins": {

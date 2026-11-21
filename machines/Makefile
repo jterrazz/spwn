@@ -146,6 +146,7 @@ window: node_modules/.install ## Build the window's bundle for darwin-arm64, sig
 	done
 	@codesign --force --sign - --timestamp=none $(WINDOW_APP)
 	@codesign --verify --strict $(WINDOW_APP)
+	@../scripts/app-icon-check.sh $(WINDOW_APP)
 	@printf "$(GREEN)●$(RESET) Built $(WINDOW_APP) ($(WINDOW_VERSION), signed ad hoc)\n"
 
 catalog: ## Build the Spwn Menu Catalog, the dev-only window over every story, never bundled into Station.app
