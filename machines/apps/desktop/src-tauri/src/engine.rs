@@ -21,6 +21,8 @@ const FIRST_BACKOFF: u64 = 1;
 const MAX_BACKOFF: u64 = 30;
 const RECHECK: Duration = Duration::from_secs(10);
 const HELLO_WITHIN: Duration = Duration::from_secs(5);
+const RETRY: Duration = Duration::from_secs(5);
+const ABSENT_AFTER: u32 = 3;
 
 #[derive(Clone, Debug, PartialEq, Serialize)]
 #[serde(tag = "kind", rename_all = "lowercase")]
@@ -66,6 +68,15 @@ impl Bridge {
         }
     }
 
+    pub fn shown(&self) -> Link {
+        self.link
+            .lock()
+            .map(|link| link.clone())
+            .unwrap_or(Link::Connecting {
+                socket: socket_path().display().to_string(),
+            })
+    }
+
     pub fn rest(&self, wait: Duration) -> bool {
         let Ok(woken) = self.woken.lock() else {
             thread::sleep(wait);
@@ -100,13 +111,7 @@ pub fn socket_path() -> PathBuf {
 // invariant: engine that stalls never freezes the window.
 #[tauri::command(async)]
 pub fn engine_link(bridge: State<'_, Arc<Bridge>>) -> Link {
-    bridge
-        .link
-        .lock()
-        .map(|link| link.clone())
-        .unwrap_or(Link::Connecting {
-            socket: socket_path().display().to_string(),
-        })
+    bridge.shown()
 }
 
 #[tauri::command]
@@ -200,26 +205,70 @@ fn told(link: &Link, failed: Option<&Failed>) -> String {
     }
 }
 
-// invariant: an answer resets the backoff and is checked again after RECHECK; a failure waits the backoff, which
-// invariant: doubles up to MAX_BACKOFF, and says so in the link as `retryIn` milliseconds.
-fn next(heard: Result<Value, Failed>, socket: String, backoff: &mut u64) -> (Link, Duration) {
-    match heard {
-        Ok(answer) => {
-            *backoff = FIRST_BACKOFF;
-            (Link::Open { socket, answer }, RECHECK)
+// value: the line for a failed hello that left the link as it was, counted in its row.
+fn kept(link: &Link, failed: &Failed, in_a_row: u32) -> String {
+    format!(
+        "{} ({in_a_row} of {ABSENT_AFTER} in a row, link kept)",
+        told(link, Some(failed))
+    )
+}
+
+// value: what the supervisor carries from one hello to the next: the hellos failed in a row, and the backoff of a
+// value: declared absence.
+pub struct Watch {
+    failed: u32,
+    backoff: u64,
+}
+
+impl Default for Watch {
+    fn default() -> Self {
+        Watch {
+            failed: 0,
+            backoff: FIRST_BACKOFF,
         }
-        Err(Failed { said: reason, .. }) => {
-            let wait = *backoff;
-            *backoff = (wait * 2).min(MAX_BACKOFF);
-            (
-                Link::Absent {
-                    socket,
-                    reason,
-                    retry_in: wait * 1000,
-                },
-                Duration::from_secs(wait),
-            )
+    }
+}
+
+impl Watch {
+    pub fn woken(&mut self) {
+        self.backoff = FIRST_BACKOFF;
+    }
+
+    pub fn failed(&self) -> u32 {
+        self.failed
+    }
+
+    // invariant: an answer opens the link and is checked again after RECHECK. A failure leaves the link as shown and
+    // invariant: is tried again after RETRY, until the ABSENT_AFTER-th in a row declares it absent; from there the wait
+    // invariant: doubles from FIRST_BACKOFF up to MAX_BACKOFF, said in the link as `retryIn` milliseconds.
+    pub fn next(
+        &mut self,
+        heard: Result<Value, Failed>,
+        socket: String,
+        shown: &Link,
+    ) -> (Link, Duration) {
+        let reason = match heard {
+            Ok(answer) => {
+                self.failed = 0;
+                self.backoff = FIRST_BACKOFF;
+                return (Link::Open { socket, answer }, RECHECK);
+            }
+            Err(Failed { said, .. }) => said,
+        };
+        self.failed = self.failed.saturating_add(1);
+        if self.failed < ABSENT_AFTER {
+            return (shown.clone(), RETRY);
         }
+        let wait = self.backoff;
+        self.backoff = (wait * 2).min(MAX_BACKOFF);
+        (
+            Link::Absent {
+                socket,
+                reason,
+                retry_in: wait * 1000,
+            },
+            Duration::from_secs(wait),
+        )
     }
 }
 
@@ -237,19 +286,21 @@ fn changed(shown: &Mutex<Link>, link: &Link) -> bool {
 pub fn supervise(app: AppHandle, bridge: Arc<Bridge>) {
     let log = LinkLog::in_folder(app.path().app_log_dir().ok());
     thread::spawn(move || {
-        let mut backoff = FIRST_BACKOFF;
+        let mut watch = Watch::default();
         loop {
             let path = socket_path();
             let socket = path.display().to_string();
             let heard = hello(&path);
             let failed = heard.as_ref().err().cloned();
-            let (link, wait) = next(heard, socket, &mut backoff);
+            let (link, wait) = watch.next(heard, socket, &bridge.shown());
             if changed(&bridge.link, &link) {
                 log.write(SystemTime::now(), &told(&link, failed.as_ref()));
                 let _ = app.emit("engine://link", &link);
+            } else if let Some(failed) = failed.as_ref().filter(|_| watch.failed() < ABSENT_AFTER) {
+                log.write(SystemTime::now(), &kept(&link, failed, watch.failed()));
             }
             if bridge.rest(wait) {
-                backoff = FIRST_BACKOFF;
+                watch.woken();
             }
         }
     });

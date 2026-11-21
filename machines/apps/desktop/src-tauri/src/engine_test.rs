@@ -9,7 +9,8 @@ use std::time::{Duration, Instant};
 use serde_json::{json, Value};
 
 use super::{
-    changed, hello, next, told, Bridge, Failed, Link, FIRST_BACKOFF, MAX_BACKOFF, RECHECK,
+    changed, hello, kept, told, Bridge, Failed, Link, Watch, ABSENT_AFTER, FIRST_BACKOFF,
+    MAX_BACKOFF, RECHECK, RETRY,
 };
 
 fn refused() -> Failed {
@@ -93,32 +94,139 @@ fn a_hello_refused_is_still_an_answer_and_one_unanswered_is_an_error() {
     let _ = std::fs::remove_file(closing);
 }
 
+const SOCKET: &str = "/run/engine.sock";
+
+fn open() -> Link {
+    Link::Open {
+        socket: String::from(SOCKET),
+        answer: json!({ "out": {} }),
+    }
+}
+
+// value: the supervisor's loop with a clock of its own: each hello is heard, the link it gives shown, and the wait it
+// value: asks for added to the clock, so the instant each link is shown is read with no sleep.
+fn played(
+    watch: &mut Watch,
+    mut shown: Link,
+    heard: Vec<Result<Value, Failed>>,
+) -> Vec<(u64, Link)> {
+    let mut clock = Duration::ZERO;
+    heard
+        .into_iter()
+        .map(|heard| {
+            let (link, wait) = watch.next(heard, String::from(SOCKET), &shown);
+            let at = clock.as_secs();
+            clock += wait;
+            shown = link.clone();
+            (at, link)
+        })
+        .collect()
+}
+
 #[test]
-fn an_engine_that_goes_is_retried_after_a_doubling_backoff_and_its_return_resets_it() {
-    // Given - the backoff at its start
-    let mut backoff = FIRST_BACKOFF;
-    let socket = || String::from("/run/engine.sock");
+fn a_single_failed_hello_keeps_the_link_and_the_third_in_a_row_declares_it_absent_10_s_after_the_first(
+) {
+    // Given - a link open, and an engine that refuses from now on
+    let mut watch = Watch::default();
 
-    // When - six hellos fail, then one answers, then one fails again
-    let waits: Vec<u64> = (0..6)
-        .map(|_| next(Err(refused()), socket(), &mut backoff).1.as_secs())
-        .collect();
-    let (open, recheck) = next(Ok(json!({ "out": {} })), socket(), &mut backoff);
-    let (absent, wait) = next(Err(refused()), socket(), &mut backoff);
+    // When - three hellos fail at once, one after another
+    let heard = played(
+        &mut watch,
+        open(),
+        vec![Err(refused()), Err(refused()), Err(refused())],
+    );
 
-    // Then - the waits double up to the cap, an answer is open and checked again later, and the backoff restarted
-    assert_eq!(waits, vec![1, 2, 4, 8, 16, MAX_BACKOFF]);
-    assert!(matches!(open, Link::Open { .. }));
-    assert_eq!(recheck, RECHECK);
+    // Then - the first two leave the link open, 5 s apart, and the third, at 10 s, declares it absent
     assert_eq!(
-        absent,
+        heard,
+        vec![
+            (0, open()),
+            (RETRY.as_secs(), open()),
+            (
+                2 * RETRY.as_secs(),
+                Link::Absent {
+                    socket: String::from(SOCKET),
+                    reason: String::from("refused"),
+                    retry_in: FIRST_BACKOFF * 1000,
+                }
+            ),
+        ]
+    );
+    assert_eq!(ABSENT_AFTER, 3);
+    assert_eq!(2 * RETRY, Duration::from_secs(10));
+}
+
+#[test]
+fn an_answer_between_two_failures_starts_the_row_again_and_a_link_still_connecting_stays_so() {
+    // Given - a window still connecting
+    let mut watch = Watch::default();
+    let connecting = Link::Connecting {
+        socket: String::from(SOCKET),
+    };
+
+    // When - two hellos fail, one answers, then two fail again
+    let heard = played(
+        &mut watch,
+        connecting.clone(),
+        vec![
+            Err(refused()),
+            Err(refused()),
+            Ok(json!({ "out": {} })),
+            Err(refused()),
+            Err(refused()),
+        ],
+    );
+
+    // Then - connecting until the answer, then open through the two failures that follow it
+    let links: Vec<Link> = heard.into_iter().map(|(_, link)| link).collect();
+    assert_eq!(
+        links,
+        vec![connecting.clone(), connecting, open(), open(), open()]
+    );
+    assert_eq!(watch.failed(), 2);
+}
+
+#[test]
+fn a_declared_absence_is_retried_after_a_doubling_backoff_and_a_return_resets_it() {
+    // Given - a link open
+    let mut watch = Watch::default();
+
+    // When - eight hellos fail, then one answers, then three fail again
+    let mut heard = vec![Err(refused()); 8];
+    heard.push(Ok(json!({ "out": {} })));
+    heard.extend(vec![Err(refused()); 3]);
+    let shown = played(&mut watch, open(), heard);
+
+    // Then - 5 s twice, then the backoff doubles up to its cap; the answer at 71 s is checked 10 s later, and the
+    // next absence is declared 10 s after its first failure, the backoff at its start again
+    let instants: Vec<u64> = shown.iter().map(|(at, _)| *at).collect();
+    assert_eq!(instants, vec![0, 5, 10, 11, 13, 17, 25, 41, 71, 81, 86, 91]);
+    assert_eq!(MAX_BACKOFF, 30);
+    assert!(matches!(shown[8].1, Link::Open { .. }));
+    assert_eq!(RECHECK, Duration::from_secs(10));
+    assert_eq!(
+        shown[11].1,
         Link::Absent {
-            socket: socket(),
+            socket: String::from(SOCKET),
             reason: String::from("refused"),
             retry_in: 1000
         }
     );
-    assert_eq!(wait, Duration::from_secs(1));
+}
+
+#[test]
+fn a_failed_hello_that_keeps_the_link_is_told_with_its_place_in_the_row() {
+    // Given - a link open, and a refused connect
+    let link = open();
+
+    // When - the first failure of a row is told
+    let line = kept(&link, &refused(), 1);
+
+    // Then - the link it kept, what the hello heard, and its place in the row
+    assert_eq!(
+        line,
+        "link open: hello failed at connect: refused (1 of 3 in a row, link kept)"
+    );
 }
 
 #[test]
