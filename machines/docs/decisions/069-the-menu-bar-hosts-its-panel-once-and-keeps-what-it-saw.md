@@ -1,6 +1,6 @@
 # ADR-069: The menu bar hosts its panel once, and keeps what it saw
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-11-21
 
 ## Context
@@ -12,7 +12,7 @@
 - Each height the content reports moves the window on the 340 ms spring, the heights that data brought as much as the ones a click asked for (ADR-036 decision 3, "Height").
 - Each close drops every page seen, so the next opening of a machine draws Home, then a skeleton, then the page: three trees of three heights.
 
-The audit's decision 3 reverses ADR-036 decision 1. The owner approved it in the audit's review.
+The audit's decision 3 reverses ADR-036 decision 1. The owner approved it on 2026-11-21, decision 3 of the audit's review.
 
 ## Decision
 
