@@ -32,11 +32,12 @@ with no STATION_BENCH, or no such file, the run records. WINDOW_RECORD_FORCE=1 r
 
 Two runs over the same tree write the same bytes. The world build's clock moves when a watch waits on it
 (apps/engine/wire/world_on.go), and what a watch streams before it settles comes in the scheduler's order, so the
-recorder keeps only what no run decides: of a watch its first answer and its last, and of a watch of SETTLED (one
-whose first answer races its walk, disk.read) its last alone; of overview.read, its last alone too unless it streams a
-birth: its summary answers once per part (each section, the machines, the other Macs, the readiness) in the order the
-parts arrive, and the engine ends the watch once every part is in (apps/engine/overview/calls/compose.go), so the
-answer before its done is the whole Overview, which the recorder waits for, never letting go of it on silence; a
+recorder keeps only what no run decides: of a watch its first answer and its last, its last alone when the two are
+the same, and of a watch of SETTLED (one whose first answer races its walk, disk.read) its last alone, by its place
+and never by its value, so an answer streamed again the same, or one more between, changes no file; of
+overview.read, its last alone too unless it streams a birth: its summary answers once per part (each section, the
+machines, the other Macs, the readiness) in the order the parts arrive, and the engine ends the watch once every
+part is in (apps/engine/overview/calls/compose.go), so the answer before its done is the whole Overview, which the recorder waits for, never letting go of it on silence; a
 gesture's reads in the world's order of asks, judged changed by `compared`, never by the clock; no read of TIMED after
 a gesture, but the activity of the VM a gesture of MEASURED stopped, which measures nothing; and, as the file's last recording holds them, the NOISE field of a gesture (the process number the host
 gave) and the CLOCKED field of an answer (the world's clock: settings.matrix's Read, awake.read's Now).
@@ -90,8 +91,8 @@ def last_out(frames):
 
 
 def settled(frames):
-    last = [frame for frame in frames if "out" in frame][-1:]
-    return [frame for frame in frames if "out" not in frame or frame in last]
+    last = [index for index, frame in enumerate(frames) if "out" in frame][-1:]
+    return [frame for index, frame in enumerate(frames) if "out" not in frame or index in last]
 
 
 def at(name):
@@ -318,6 +319,8 @@ GESTURES = {
 def bounded(frames):
     outs = [index for index, frame in enumerate(frames) if "out" in frame]
     ends = {outs[0], outs[-1]} if outs else set()
+    if outs and frames[outs[0]] == frames[outs[-1]]:
+        ends = {outs[-1]}
     return [frame for index, frame in enumerate(frames) if "out" not in frame or index in ends]
 
 
