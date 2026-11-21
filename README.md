@@ -11,8 +11,10 @@
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/_assets/readme/hero-dark.png">
-  <img src="docs/_assets/readme/hero-light.png" alt="Stay you, at scale. Doing more is easy now. Still knowing what you’re doing isn’t. Spwn is the set of abstractions, rules and controls that gets you there. Machines, agents, teams: one file each. Beside it, Station: one file, one machine, ready for the job." width="830">
+  <img src="docs/_assets/readme/hero-light.png" alt="Spwn's home page: the line Stay you, at scale., the install command, and a tab for each of the six apps. The first tab is open and shows a file, qa.machine.yaml, becoming a running machine, qa-1, with 4 CPU, 8 GB, its system, apps, settings and accounts." width="830">
 </picture>
+
+Spwn is a stack of apps and abstractions that lets one person build at the scale of a team, and still be the author of what gets built. It is six apps on one ladder: each takes one kind of work off your hands and leaves you the decision above it.
 
 ```sh
 curl -fsSL https://spwn.sh/install.sh | bash
@@ -21,18 +23,18 @@ curl -fsSL https://spwn.sh/install.sh | bash
 Two commands, one per running app: `spwn-machines` (short: `machines`) and `spwn-agents` (short: `agents`). One install puts both on your path.
 
 > [!NOTE]
-> **Alpha.** Two apps run today, Machines and Agents. Wiki, OS, Specs and Design are in progress: their rows say so, and nothing here claims more. Expect rough edges, and [open an issue](https://github.com/jterrazz/spwn/issues) where you hit one.
+> **Alpha.** Two apps run today, Machines and Agents. Wiki, Specs, Design and OS are being made: their rows say so, and nothing here claims more. Expect rough edges, and [open an issue](https://github.com/jterrazz/spwn/issues) where you hit one.
 
 ## The six apps
 
-| App                                | What it does                 | State         | Command         | Folder                        |
-| ---------------------------------- | ---------------------------- | ------------- | --------------- | ----------------------------- |
-| [**Machines**](machines/README.md) | Machines built from one file | **Running**   | `spwn-machines` | `machines/`                   |
-| [**Agents**](docs/README.md)       | One agent, any harness       | **Running**   | `spwn-agents`   | `apps/cli/` (later `agents/`) |
-| **Wiki**                           | Each fact in one place       | _In progress_ | ·               | ·                             |
-| **OS**                             | One place to run it all      | _In progress_ | ·               | ·                             |
-| **Specs**                          | Proof it is as asked         | _In progress_ | ·               | ·                             |
-| **Design**                         | One family of shapes         | _In progress_ | ·               | ·                             |
+| App                                | What it does                 | State        | Command         | Folder                        |
+| ---------------------------------- | ---------------------------- | ------------ | --------------- | ----------------------------- |
+| [**Machines**](machines/README.md) | Machines built from one file | **Running**  | `spwn-machines` | `machines/`                   |
+| [**Agents**](docs/README.md)       | One agent, any harness       | **Running**  | `spwn-agents`   | `apps/cli/` (later `agents/`) |
+| **Wiki**                           | Each fact in one place       | _Being made_ | ·               | ·                             |
+| **Specs**                          | Proof it is as asked         | _Being made_ | ·               | ·                             |
+| **Design**                         | One family of shapes         | _Being made_ | ·               | ·                             |
+| **OS**                             | One place to run it all      | _Being made_ | ·               | ·                             |
 
 ## Commands, by app
 
@@ -70,7 +72,7 @@ Every command: [Agents' command reference](docs/reference/commands.md) · runs o
 ## Repository map
 
 ```text
-machines/     Station: its code and its own manual, machines/docs/
+machines/     Machines: its code and its own manual, machines/docs/
 apps/         Agents' surfaces: cli (the command), api, gate, web, spwn-cookie-sync
 packages/     Agents: the packages behind them
 catalog/      Agents: the blocks an agent is made of
