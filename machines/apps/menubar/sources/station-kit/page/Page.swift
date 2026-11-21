@@ -2,6 +2,8 @@ import Foundation
 
 public let pageSchema = "station.page/v1"
 public let pageRevision = 5
+// value: the oldest page revision this app draws; pageRevision is the newest it knows.
+public let pageOldest = 5
 
 public struct Page: Codable, Equatable, Sendable {
     public var schema: String?

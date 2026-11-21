@@ -177,6 +177,18 @@ final class IconTests: XCTestCase {
         try drawn("stopped", stopped)
     }
 
+    // invariant: an engine this app does not draw is said by its verdict, dimmed
+    // as a stopped one is, and never said stopped.
+    func testAnIncompatibleEngineIsSaidByItsVerdictNeverAsStopped() throws {
+        let labels = [Connection.connecting, .live, .stopped, .notInstalled, .incompatible(.engineOlder), .incompatible(.appOlder)]
+            .map { MenuBarIcon.of(connection: $0, page: nil).label }
+        XCTAssertEqual(labels, ["Spwn Menu: connecting", "Spwn Menu", "Spwn Menu: engine stopped", "Spwn Menu: engine stopped",
+                                "Spwn Menu: engine older than this app", "Spwn Menu: this app older than the engine"])
+        let older = try icon("menubar.home.engine-outdated", .incompatible(.engineOlder))
+        XCTAssertEqual(older.face, .away)
+        XCTAssertEqual(older.label, "Spwn Menu: engine older than this app")
+    }
+
     // invariant: a connection being made keeps the first dot solid and the
     // two others at 32 %.
     func testIconConnecting() throws {

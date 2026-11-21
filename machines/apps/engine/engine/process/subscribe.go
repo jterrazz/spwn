@@ -221,7 +221,7 @@ func (d *Engine) Stream(ctx context.Context, pages []string, write func(any) err
 	sub := d.hub.add(pages...)
 	defer d.hub.remove(sub)
 	defer d.joinLive(ctx)()
-	if err := write(engine.Opened{Stream: streamSchema, Pages: pages}); err != nil {
+	if err := write(engine.Opened{Stream: streamSchema, Pages: pages, Page: d.o.Page}); err != nil {
 		return err
 	}
 	opening := d.opening(pages)

@@ -83,7 +83,7 @@ final class AccountsTests: XCTestCase {
         let engine = try FakeEngine("mb-signin")
         defer { engine.stop() }
         let page = try JSONSerialization.jsonObject(with: Data(contentsOf: Tree.stories.appendingPathComponent("pages/machines.accounts.signed-in.accounts.json")))
-        let opened = try JSONSerialization.data(withJSONObject: ["v": 2, "id": "1", "out": ["stream": "page", "pages": [Navigation.accounts]]], options: [.sortedKeys])
+        let opened = try JSONSerialization.data(withJSONObject: ["v": 2, "id": "1", "out": ["stream": "page", "pages": [Navigation.accounts], "page": pageRevision]], options: [.sortedKeys])
         let event = try JSONSerialization.data(withJSONObject: ["v": 2, "id": "1", "out": ["event": "page", "page": page]], options: [.sortedKeys])
         engine.serveOnce(opened + [0x0A] + event + [0x0A], thenClose: false)
         let wait = SignInWait(id: id, watch: Navigation.accounts, on: try story("machines.accounts.accounts"))

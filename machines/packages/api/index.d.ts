@@ -1154,6 +1154,7 @@ export type EngineNotice = {
 };
 
 export type EngineOpened = {
+    page?: number;
     pages?: string[];
     stream: string;
 };

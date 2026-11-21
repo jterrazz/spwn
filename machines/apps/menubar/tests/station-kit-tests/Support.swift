@@ -123,7 +123,8 @@ enum Snapshot {
     // value: the popover as a fixture shows it: Home or a page of the menu
     // bar's own, or a machine's page pushed over Home.
     static func state(_ name: String, _ page: Page) -> PanelState {
-        let connection: Connection = name.hasSuffix(".error") || name.hasSuffix(".engine-stopped") || name.hasSuffix(".engine-outdated") ? .stopped : .live
+        let connection: Connection = name.hasSuffix(".engine-outdated") ? .incompatible(.engineOlder)
+            : name.hasSuffix(".error") || name.hasSuffix(".engine-stopped") ? .stopped : .live
         guard page.id == PageID.machine else { return PanelState(page: page, connection: connection) }
         return PanelState(page: nil, connection: connection, pushed: page)
     }

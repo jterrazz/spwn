@@ -2,6 +2,40 @@ import SwiftUI
 
 public enum Connection: Equatable, Sendable {
     case connecting, live, stopped, notInstalled
+    case incompatible(EngineIncompatibility)
+}
+
+// invariant: the one compatibility verdict of docs/reference/api.md and ADR-070:
+// the engine's pages are drawn when the page revision its watch opened with lies
+// in the range this app draws, pageOldest to pageRevision. Below the oldest, or
+// none named, the engine is older than this app; above the newest, this app is
+// older than the engine. Neither is ever said "stopped".
+public enum EngineIncompatibility: Equatable, Sendable {
+    case engineOlder, appOlder
+
+    // value: the verdict on the revision a watch of pages opened with; nil
+    // when it fits.
+    public static func of(revision: Int?, oldest: Int = pageOldest, newest: Int = pageRevision) -> EngineIncompatibility? {
+        guard let revision, revision >= oldest else { return .engineOlder }
+        if revision > newest { return .appOlder }
+        return nil
+    }
+
+    // value: the verdict's words and the remedy's; the remedy's command is the
+    // engine's own page's (`menubar.home.engine-outdated`, bundled).
+    public var words: String {
+        switch self {
+        case .engineOlder: "engine older than this app"
+        case .appOlder: "this app older than the engine"
+        }
+    }
+
+    public var remedy: String {
+        switch self {
+        case .engineOlder: "Update station here"
+        case .appOlder: "Update Spwn Menu"
+        }
+    }
 }
 
 public enum PageID {

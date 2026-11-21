@@ -98,6 +98,9 @@
     "engine.Opened": {
       "additionalProperties": false,
       "properties": {
+        "page": {
+          "type": "integer"
+        },
         "pages": {
           "items": {
             "type": "string"

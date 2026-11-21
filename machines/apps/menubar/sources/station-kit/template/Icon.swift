@@ -4,6 +4,7 @@ import SwiftUI
 public struct MenuBarIcon: Equatable, Sendable {
     public enum Mark: Equatable, Sendable {
         case plain, down, restarting, stopped, connecting
+        case incompatible(EngineIncompatibility)
     }
 
     // value: how the mark is drawn, the six states of the item: the dots
@@ -34,6 +35,7 @@ public struct MenuBarIcon: Equatable, Sendable {
         switch connection {
         case .connecting: return MenuBarIcon(.connecting)
         case .stopped, .notInstalled: return MenuBarIcon(.stopped)
+        case .incompatible(let why): return MenuBarIcon(.incompatible(why))
         case .live: break
         }
         guard let badge = page?.badge else { return MenuBarIcon(.plain) }
@@ -45,6 +47,7 @@ public struct MenuBarIcon: Equatable, Sendable {
         if let said { return said }
         switch mark {
         case .stopped: return "Spwn Menu: engine stopped"
+        case .incompatible(let why): return "Spwn Menu: \(why.words)"
         case .connecting: return "Spwn Menu: connecting"
         case .plain, .down, .restarting: return "Spwn Menu"
         }
@@ -52,7 +55,7 @@ public struct MenuBarIcon: Equatable, Sendable {
 
     public var face: Face {
         switch mark {
-        case .stopped: return .away
+        case .stopped, .incompatible: return .away
         case .down: return .slashed
         case .connecting: return .connecting
         case .restarting: return .waving
