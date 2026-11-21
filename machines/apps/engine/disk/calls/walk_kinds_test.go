@@ -93,3 +93,21 @@ func TestAKindWhoseWalkHasNotAnsweredIsAbsentAndTheReadingPending(t *testing.T) 
 		t.Fatalf("once every walk answered the kinds are %+v, pending %v; want all but machines and the image cache, a Mac's", r.Kinds, r.Pending)
 	}
 }
+
+func TestEveryAppInAMacsAppFoldersIsAnAppWhoeverInstalledIt(t *testing.T) {
+	files := map[string]int64{
+		"/Applications/Zed.app/Contents/MacOS/zed":    40,
+		"/Applications/Game.app/Contents/data":        390,
+		"/h/Applications/Store.app/Contents/MacOS/st": 110,
+		"/h/Music/song": 200,
+	}
+	usage := fake.NewUsage(files, 2000, 1000)
+	apps := []catalog.App{{Name: "zed", Installs: []catalog.LivesOn{{Kinds: []catalog.MachineKind{catalog.Mac}, Install: catalog.ShellInstall{Line: "zed"}}}, Disk: catalog.Disk{Installed: []string{"/Applications/Zed.app"}}}}
+	s, err := NewSurveyor(onMachine{Usage: usage}, apps, SurveyorOptions{Disk: usage, ThisMachine: catalog.Mac, Expand: disk.Expander{Home: "/h"}}).List(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if s.Apps != 540 {
+		t.Fatalf("apps %d, want zed's 40 once and the 500 of the apps the catalog does not carry", s.Apps)
+	}
+}

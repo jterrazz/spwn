@@ -21,6 +21,10 @@ const (
 	systemRoot  = "/usr"
 )
 
+// value: the folders macOS keeps apps in, every app in them an app whoever
+// installed it.
+func appFolders() []string { return []string{"/Applications", "~/Applications"} }
+
 type part struct {
 	root int
 	sign int64
@@ -49,6 +53,9 @@ type plan struct {
 	entries []entryPlan
 	roots   []string
 	other   []int
+	// value: each entry of a macOS app folder that no catalog install
+	// names: an app the catalog does not carry.
+	apps []int
 	// value: the root the system is walked at, -1 where the volume tells it,
 	// and the apps' install roots inside it, which are apps, not system.
 	system      int
@@ -244,6 +251,7 @@ func (s *Surveyor) plan() plan {
 		ep.exists = ep.exists || len(ep.misplacedOnes) > 0
 		p.entries = append(p.entries, ep)
 	}
+	p.apps = s.appRoots(p, root)
 	for _, other := range s.otherRoots() {
 		p.other = append(p.other, root(other))
 	}
@@ -262,6 +270,35 @@ func (s *Surveyor) plan() plan {
 		}
 	}
 	return p
+}
+
+func (s *Surveyor) appRoots(p plan, root func(string) int) []int {
+	// invariant: on macOS every entry of an app folder is an app, whoever
+	// installed it, counted once: one a catalog install names, or holds, is
+	// that install's; Linux keeps no app folder.
+	if s.o.ThisMachine == catalog.Linux {
+		return nil
+	}
+	var installed []string
+	for _, ep := range p.entries {
+		for _, i := range ep.install {
+			installed = append(installed, p.roots[i])
+		}
+	}
+	var out []int
+	for _, folder := range appFolders() {
+		dir := s.o.Expand.Expand(folder)
+		names, err := s.m.Names(dir)
+		if err != nil {
+			continue
+		}
+		for _, name := range names {
+			if full := path.Join(dir, name); !claims(installed, full) {
+				out = append(out, root(full))
+			}
+		}
+	}
+	return out
 }
 
 // value: the frame's globs are independent reads of the disk, so they run at
@@ -371,6 +408,12 @@ func (s *Surveyor) kinds(p plan, r reading) (apps int64, cachesUnknown bool) {
 			}
 		}
 		cachesUnknown = cachesUnknown || (ep.containers && r.containers < 0)
+	}
+	for _, i := range p.apps {
+		if !seen[i] {
+			seen[i] = true
+			installs = append(installs, i)
+		}
 	}
 	apps, _ = walked(r, installs)
 	return apps, cachesUnknown
