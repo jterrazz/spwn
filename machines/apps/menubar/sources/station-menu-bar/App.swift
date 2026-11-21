@@ -1,5 +1,6 @@
 import AppKit
 import Combine
+import Observation
 import StationKit
 import SwiftUI
 
@@ -34,6 +35,7 @@ final class StationDelegate: NSObject, NSApplicationDelegate {
     let trial = Trial()
     private var status: StatusPanel?
     private var labelling: AnyCancellable?
+    private var drawing = StatusDrawing()
 
     func applicationDidFinishLaunching(_: Notification) {
         let trial = self.trial
@@ -52,7 +54,6 @@ final class StationDelegate: NSObject, NSApplicationDelegate {
         status = StatusPanel(content: { AnyView(ModelPanel(model: model)) }, opened: { model.opened() }, closed: { model.closed() }, report: report,
                              generation: report == nil ? nil : { model.state.generation })
         label()
-        labelling = model.objectWillChange.sink { [weak self] _ in DispatchQueue.main.async { self?.label() } }
         model.start()
         if Bench.runs > 0, let status, let report {
             let bench = Bench(panel: status, model: model, log: report)
@@ -60,14 +61,21 @@ final class StationDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
+    // invariant: the status item is drawn again only when its icon or its
+    // turn changed, whatever else of the model moved; it follows the slices
+    // the icon reads and none other.
     func label() {
-        status?.item.button?.image = model.iconImage
-        status?.item.button?.setAccessibilityLabel(model.icon.label)
+        let (icon, turn) = withObservationTracking { (model.icon, model.turn) } onChange: {
+            DispatchQueue.main.async { [weak self] in self?.label() }
+        }
+        guard drawing.take(icon, turn: turn) else { return }
+        status?.item.button?.image = icon.nsImage(turn: turn)
+        status?.item.button?.setAccessibilityLabel(icon.label)
     }
 }
 
 struct ModelPanel: View {
-    @ObservedObject var model: Model
+    let model: Model
 
     var body: some View {
         Popover(model.state, handlers: handlers)

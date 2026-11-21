@@ -167,3 +167,18 @@ extension MenuBarIcon {
         return image
     }
 }
+
+// invariant: the status item draws an icon at a turn of its spinner once:
+// the same pair asked again draws nothing.
+public struct StatusDrawing: Sendable {
+    private var last: (icon: MenuBarIcon, turn: Double)?
+
+    public init() {}
+
+    // value: whether this pair is to be drawn, kept as the last drawn if so.
+    public mutating func take(_ icon: MenuBarIcon, turn: Double) -> Bool {
+        if let last, last.icon == icon, last.turn == turn { return false }
+        last = (icon, turn)
+        return true
+    }
+}
