@@ -39,6 +39,10 @@ func (staggerClock) Await(ctx context.Context, ready <-chan struct{}, d time.Dur
 	return ctx.Err()
 }
 
+func (c staggerClock) AwaitWhile(ctx context.Context, ready, _ <-chan struct{}, d time.Duration) error {
+	return c.Await(ctx, ready, d)
+}
+
 // value: a disk that answers its roots one at a time, 10 ms apart.
 type staggered struct{ localtest.Disk }
 

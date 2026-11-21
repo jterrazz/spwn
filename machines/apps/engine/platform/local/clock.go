@@ -13,6 +13,10 @@ func (c clock) Sleep(ctx context.Context, d time.Duration) error {
 	return c.Await(ctx, nil, d)
 }
 
+func (c clock) AwaitWhile(ctx context.Context, ready, _ <-chan struct{}, d time.Duration) error {
+	return c.Await(ctx, ready, d)
+}
+
 func (clock) Await(ctx context.Context, ready <-chan struct{}, d time.Duration) error {
 	t := time.NewTimer(d)
 	defer t.Stop()

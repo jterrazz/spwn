@@ -261,6 +261,75 @@ func TestAGuestsGreetingIsWaitedForBeforeTheGuestIsJudgedSoItMovesNoPoll(t *test
 	}
 }
 
+// value: a Mac whose clock only its waiters move, as a world's: a bounded
+// wait waits for the work in flight that may end it, never for time. It tells
+// waiting once such a wait begins.
+type stillMac struct {
+	*fakeMac
+	waiting chan struct{}
+}
+
+func (m stillMac) AwaitWhile(ctx context.Context, ready, busy <-chan struct{}, _ time.Duration) error {
+	if busy == nil {
+		return ctx.Err()
+	}
+	close(m.waiting)
+	select {
+	case <-ready:
+	case <-busy:
+	case <-ctx.Done():
+	}
+	return ctx.Err()
+}
+
+func dialingVM(t *testing.T) (*Engine, *vmState, stillMac) {
+	t.Helper()
+	h := newHarness(t, model.VMRecord{Name: "api", Lifetime: model.Persistent, Want: model.WantRunning})
+	mac := stillMac{fakeMac: h.mac, waiting: make(chan struct{})}
+	d := New(mac, h.hv, nil, h.m, &fakeTailnet{}, memStores(), Options{State: "/s", ThisMachine: catalog.Mac})
+	h.hv.outlived("api")
+	v, _ := d.find("api")
+	v.run, _ = h.hv.Adopt(t.Context(), "api")
+	v.state, v.guest, v.up = engine.StateRunning, engine.GuestConnecting, make(chan struct{})
+	return d, v, mac
+}
+
+func TestACallToAVMWhoseGuestDialsNoMoreIsAbsentOnTheClockNotAfterRealTime(t *testing.T) {
+	d, _, _ := dialingVM(t)
+	ctx, cancel := context.WithTimeout(t.Context(), time.Second)
+	defer cancel()
+	_, err := d.GuestExec(ctx, "api", "true", "")
+	if ctx.Err() != nil {
+		t.Fatalf("a guest between two dials was judged after %s of real time, want at once", time.Second)
+	}
+	var op *enginecalls.OpError
+	if !errors.As(err, &op) || op.Code != enginecalls.GuestAbsent {
+		t.Fatalf("a guest between two dials: %v, want guest_absent", err)
+	}
+}
+
+func TestACallThatLandsWhileTheGuestIsDialedWaitsForThatDial(t *testing.T) {
+	d, v, mac := dialingVM(t)
+	d.mu.Lock()
+	d.greetLocked(v)
+	d.mu.Unlock()
+	go func() {
+		<-mac.waiting
+		d.mu.Lock()
+		v.client = speaksFirst{}
+		v.release()
+		d.greetedLocked(v)
+		d.mu.Unlock()
+	}()
+	ctx, cancel := context.WithTimeout(t.Context(), time.Second)
+	defer cancel()
+	_, err := d.GuestExec(ctx, "api", "true", "")
+	var op *enginecalls.OpError
+	if errors.As(err, &op) || err == nil {
+		t.Fatalf("a call during a dial that lands: %v, want the guest's own answer", err)
+	}
+}
+
 func TestStopAllAnswersFailedForALastingVMTheEngineStillRuns(t *testing.T) {
 	h := newHarness(t,
 		model.VMRecord{Name: "api", Lifetime: model.Persistent, Want: model.WantRunning},

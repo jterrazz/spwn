@@ -67,19 +67,19 @@ const guestWait = 10 * time.Second
 
 func (d *Engine) dialed(ctx context.Context, v *vmState) (client Guest, state string) {
 	// invariant: a call that lands while the guest is being dialed waits for
-	// that dial, within guestWait, rather than being refused as absent.
+	// that dial, within guestWait of the engine's clock, rather than being
+	// refused as absent.
 	d.mu.Lock()
 	client, state, up := v.client, v.state, v.up
+	var dialing <-chan struct{}
+	if v.greeting {
+		dialing = v.greeted
+	}
 	d.mu.Unlock()
 	if client != nil || up == nil {
 		return client, state
 	}
-	wait, cancel := context.WithTimeout(ctx, guestWait)
-	defer cancel()
-	select {
-	case <-up:
-	case <-wait.Done():
-	}
+	_ = d.h.AwaitWhile(ctx, up, dialing, guestWait)
 	d.mu.Lock()
 	defer d.mu.Unlock()
 	return v.client, v.state

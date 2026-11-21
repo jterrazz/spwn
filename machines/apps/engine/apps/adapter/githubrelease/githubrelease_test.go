@@ -159,6 +159,10 @@ func (c *later) Sleep(context.Context, time.Duration) error { return nil }
 
 func (c *later) Await(context.Context, <-chan struct{}, time.Duration) error { return nil }
 
+func (c *later) AwaitWhile(context.Context, <-chan struct{}, <-chan struct{}, time.Duration) error {
+	return nil
+}
+
 func releases(files local.FS, n local.Net, arch string) *githubrelease.Releases {
 	return githubrelease.New(githubrelease.Options{FS: files, Net: n, Clock: hourly, APIURL: api, OS: "linux", Arch: arch, Bin: bin, Store: store})
 }

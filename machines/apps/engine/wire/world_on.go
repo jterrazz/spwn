@@ -1177,6 +1177,24 @@ func (c worldClock) Await(ctx context.Context, ready <-chan struct{}, d time.Dur
 	return c.Sleep(ctx, d)
 }
 
+// invariant: a bounded wait moves no clock and waits no real time for what
+// only a move would bring: what busy may still bring (on no clock) is waited
+// for, greetBound of real time at most, and what is not ready once it ends is
+// judged at once, however loaded the gate.
+func (worldClock) AwaitWhile(ctx context.Context, ready, busy <-chan struct{}, _ time.Duration) error {
+	if busy != nil {
+		bound := time.NewTimer(greetBound)
+		defer bound.Stop()
+		select {
+		case <-ready:
+		case <-busy:
+		case <-ctx.Done():
+		case <-bound.C:
+		}
+	}
+	return ctx.Err()
+}
+
 func (c worldClock) Sleep(ctx context.Context, d time.Duration) error {
 	if err := ctx.Err(); err != nil {
 		return err

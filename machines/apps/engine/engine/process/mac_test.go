@@ -37,6 +37,16 @@ func (m *fakeMac) Await(ctx context.Context, ready <-chan struct{}, d time.Durat
 	}
 }
 
+func (*fakeMac) AwaitWhile(ctx context.Context, ready, _ <-chan struct{}, d time.Duration) error {
+	waited, cancel := context.WithTimeout(ctx, d)
+	defer cancel()
+	select {
+	case <-ready:
+	case <-waited.Done():
+	}
+	return ctx.Err()
+}
+
 func (*fakeMac) Home() string                    { return "/home/u" }
 func (*fakeMac) ReadFile(string) ([]byte, error) { return nil, errors.New("no file in a module test") }
 func (*fakeMac) Tail(string, int64) (tail []byte, cut bool, err error) {

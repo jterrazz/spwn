@@ -35,6 +35,10 @@ type Mac interface {
 	Sleep(ctx context.Context, d time.Duration) error
 	// value: waits until ready is closed, d of the clock at most.
 	Await(ctx context.Context, ready <-chan struct{}, d time.Duration) error
+	// value: waits until ready is closed, d of the clock at most; a clock
+	// only its waiters move (a world's) waits no longer than busy, the work
+	// on no clock that may close ready, is open (nil: none is).
+	AwaitWhile(ctx context.Context, ready, busy <-chan struct{}, d time.Duration) error
 	Home() string
 	ReadFile(path string) ([]byte, error)
 	// invariant: the last max bytes of a file, and whether the file held

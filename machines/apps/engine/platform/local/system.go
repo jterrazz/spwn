@@ -162,6 +162,9 @@ type Clock interface {
 	Sleep(ctx context.Context, d time.Duration) error
 	// value: waits until ready is closed, d at most.
 	Await(ctx context.Context, ready <-chan struct{}, d time.Duration) error
+	// value: waits until ready is closed, d at most; a clock only its
+	// waiters move waits no longer than busy is open (nil: at once).
+	AwaitWhile(ctx context.Context, ready, busy <-chan struct{}, d time.Duration) error
 }
 
 type System struct {

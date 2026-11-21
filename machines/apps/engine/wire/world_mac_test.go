@@ -27,6 +27,9 @@ func (quietMac) Sleep(context.Context, time.Duration) error { return nil }
 func (quietMac) Await(context.Context, <-chan struct{}, time.Duration) error {
 	return nil
 }
+func (quietMac) AwaitWhile(context.Context, <-chan struct{}, <-chan struct{}, time.Duration) error {
+	return nil
+}
 func (quietMac) Home() string                    { return "/home" }
 func (quietMac) ReadFile(string) ([]byte, error) { return nil, context.Canceled }
 func (quietMac) Tail(string, int64) (tail []byte, cut bool, err error) {
@@ -563,5 +566,32 @@ func TestWorldMacReadingsBesideRunInOrderOnAClockRealTimeNeverMoves(t *testing.T
 	}
 	if !w.Now.Equal(began) || len(m.besides) != 0 {
 		t.Fatalf("after the readings the clock reads %v with %d left, want %v and none", w.Now, len(m.besides), began)
+	}
+}
+
+func TestWorldClockBoundedWaitWaitsTheWorkInFlightAndNeverTheClock(t *testing.T) {
+	began := time.Unix(1000, 0)
+	w := &world.World{ThisMac: "here", Now: began, Macs: map[string]*world.Mac{"here": {}}}
+	clock := (&worldRun{w: w, macs: map[string]*worldMac{}}).clock()
+	never := make(chan struct{})
+	from := time.Now()
+	if err := clock.AwaitWhile(context.Background(), never, nil, time.Hour); err != nil {
+		t.Fatalf("a wait with nothing in flight: %v", err)
+	}
+	if took := time.Since(from); took >= greetWait {
+		t.Fatalf("a wait with nothing in flight took %v of real time, want it judged at once", took)
+	}
+	busy, ready := make(chan struct{}), make(chan struct{})
+	landed := time.AfterFunc(100*time.Millisecond, func() { close(ready) })
+	defer landed.Stop()
+	from = time.Now()
+	if err := clock.AwaitWhile(context.Background(), ready, busy, time.Hour); err != nil {
+		t.Fatalf("a wait on work in flight: %v", err)
+	}
+	if took := time.Since(from); took < 100*time.Millisecond || took >= greetWait {
+		t.Fatalf("a wait on work in flight that lands after 100 ms took %v, want it waited for", took)
+	}
+	if !w.Now.Equal(began) {
+		t.Fatalf("the waits moved the clock to %v, want %v", w.Now, began)
 	}
 }

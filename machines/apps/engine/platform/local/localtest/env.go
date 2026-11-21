@@ -111,6 +111,10 @@ func (c *Clock) Await(ctx context.Context, ready <-chan struct{}, d time.Duratio
 	}
 }
 
+func (c *Clock) AwaitWhile(ctx context.Context, ready, _ <-chan struct{}, d time.Duration) error {
+	return c.Await(ctx, ready, d)
+}
+
 func Mac(r *Runner, f *FS, e Env, n *Net, c *Clock) local.System {
 	return local.System{Run: r, FS: f, Env: e, Net: n, Clock: c}
 }
