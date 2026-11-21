@@ -1,6 +1,6 @@
 # The manual of Machines
 
-`station` is the CLI that sets up and runs a Mac, its VMs and your other Macs: it installs apps and agent skills from a catalogue, applies and checks the machine's settings, keeps servers alive and workspaces at hand, shows what listens and who reaches it, and keeps a Mac awake, the same sections on every machine. This repository also authors two doctrines every `@jterrazz` repository follows, shipped to agents as skills. This page lists every page of the manual, by what the reader came to do.
+Machines is the Spwn app that sets up and runs a Mac, its VMs and your other Macs, each from one file; its command is `station`. It installs apps and agent skills from a catalogue, applies and checks the machine's settings, keeps servers alive and workspaces at hand, shows what listens and who reaches it, and keeps a Mac awake, the same sections on every machine. What Spwn is as a whole is stated once, in the README at the root of the repository. This folder also authors two doctrines every `@jterrazz` repository follows, shipped to agents as skills. This page lists every page of the manual, by what the reader came to do.
 
 ## Start
 
