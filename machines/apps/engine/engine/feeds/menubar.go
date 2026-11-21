@@ -45,6 +45,34 @@ type Menubar struct {
 	// value: the zone the pages say their times in; nil is the process's own
 	// local zone.
 	Zone *time.Location
+	// value: the machines Home last read, which a machine's page draws its
+	// first frame from; nil keeps none.
+	HomeRead *HomeRead
+}
+
+type HomeRead struct {
+	mu sync.Mutex
+	// value: the machines a Home or a Find feed last drew, shared by every
+	// feed of the engine.
+	all *machines.AllMachines
+}
+
+func (l *HomeRead) keep(all *machines.AllMachines) {
+	if l == nil || all == nil {
+		return
+	}
+	l.mu.Lock()
+	l.all = all
+	l.mu.Unlock()
+}
+
+func (l *HomeRead) Last() *machines.AllMachines {
+	if l == nil {
+		return nil
+	}
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	return l.all
 }
 
 func (o Menubar) zone() *time.Location {
@@ -143,6 +171,7 @@ func (f *menubar) update(ctx context.Context, change func(*pagemenubar.Reading))
 	f.r.Now, f.r.Zone = f.o.Clock.Now(), f.o.zone()
 	f.r.Samples = readingsOf(f.o.Live, f.o.ThisMachine.Machine, f.r.All)
 	p := page.Document{Schema: page.Schema, Page: f.draw(f.r)}
+	f.o.HomeRead.keep(f.r.All)
 	f.mu.Unlock()
 	select {
 	case <-f.out:

@@ -312,7 +312,7 @@ func TestTheMacMinisPageOpenFromThisMacIsTheMinisOwnAnswer(t *testing.T) {
 		}
 		return out
 	}
-	p := until(t, watch(t, w, newSteps(), mini), "mac-mini's time up", func(p page.Page) bool { return len(facts(p)) > 0 })
+	p := until(t, watch(t, w, newSteps(), mini), "mac-mini's time up", func(p page.Page) bool { return slices.Contains(facts(p), "up 21 days") })
 	if got := facts(p); !slices.Equal(got, []string{"online", "up 21 days"}) {
 		t.Errorf("mac-mini's page says %q, want its standing, then the mini's own time up", got)
 	}
@@ -334,7 +334,11 @@ func TestInfrasPageFollowsItLiveWhileItRestarts(t *testing.T) {
 		}
 		return ""
 	}
-	p := until(t, pages, "infra running", func(p page.Page) bool { return state(p) == page.OK })
+	p := until(t, pages, "infra running, its activity read", func(p page.Page) bool {
+		w.mu.Lock()
+		defer w.mu.Unlock()
+		return state(p) == page.OK && len(w.reads["infra"]) > 0
+	})
 	if !slices.Equal(p.Live, []string{"cpu:infra", "free:infra", "net:infra"}) {
 		t.Errorf("infra's page reads the live keys %q, want its CPU, free memory and network", p.Live)
 	}
@@ -566,4 +570,322 @@ func gaugeOf(p page.Page, key string) *page.Value {
 		}
 	}
 	return nil
+}
+
+// value: a clock that moves only when the test leaps it; a sleeper parks
+// until its deadline, and the test sees how many are parked.
+type virtual struct {
+	mu       sync.Mutex
+	at       time.Duration
+	sleepers map[*nap]bool
+	moved    chan struct{}
+}
+
+type nap struct {
+	until time.Duration
+	wake  chan struct{}
+}
+
+func newVirtual() *virtual {
+	return &virtual{sleepers: map[*nap]bool{}, moved: make(chan struct{})}
+}
+
+func (v *virtual) Now() time.Time {
+	v.mu.Lock()
+	defer v.mu.Unlock()
+	return time.Date(2026, 11, 3, 10, 30, 0, 0, time.UTC).Add(v.at)
+}
+
+func (v *virtual) since() time.Duration {
+	v.mu.Lock()
+	defer v.mu.Unlock()
+	return v.at
+}
+
+func (v *virtual) told() {
+	close(v.moved)
+	v.moved = make(chan struct{})
+}
+
+func (v *virtual) Sleep(ctx context.Context, d time.Duration) error {
+	v.mu.Lock()
+	n := &nap{until: v.at + d, wake: make(chan struct{})}
+	v.sleepers[n] = true
+	v.told()
+	v.mu.Unlock()
+	select {
+	case <-n.wake:
+		return nil
+	case <-ctx.Done():
+		v.mu.Lock()
+		delete(v.sleepers, n)
+		v.told()
+		v.mu.Unlock()
+		return ctx.Err()
+	}
+}
+
+// value: the deadlines of the sleepers parked once at least n are, within
+// 5 s of real time.
+func (v *virtual) parked(t *testing.T, n int, what string) []time.Duration {
+	t.Helper()
+	ctx, cancel := context.WithTimeout(t.Context(), 5*time.Second)
+	defer cancel()
+	for {
+		v.mu.Lock()
+		until := make([]time.Duration, 0, len(v.sleepers))
+		for s := range v.sleepers {
+			until = append(until, s.until)
+		}
+		moved := v.moved
+		v.mu.Unlock()
+		if len(until) >= n {
+			slices.Sort(until)
+			return until
+		}
+		select {
+		case <-moved:
+		case <-ctx.Done():
+			t.Fatalf("%d reads wait on the clock, want %d: %s", len(until), n, what)
+		}
+	}
+}
+
+func (v *virtual) leap(to time.Duration) {
+	v.mu.Lock()
+	defer v.mu.Unlock()
+	v.at = to
+	for s := range v.sleepers {
+		if s.until <= to {
+			delete(v.sleepers, s)
+			close(s.wake)
+		}
+	}
+	v.told()
+}
+
+// value: the world answering each call after its lag on the virtual
+// clock; every call at the silent Mac waits until the watch ends, and the
+// machines.list it holds back answers This Mac's row first.
+type lagged struct {
+	w      *world
+	clock  *virtual
+	lag    map[string]time.Duration
+	silent string
+}
+
+func (l lagged) wait(ctx context.Context, name string, target machine.Ref) error {
+	if l.silent != "" && target.Name == l.silent {
+		<-ctx.Done()
+		return ctx.Err()
+	}
+	if d := l.lag[name]; d > 0 {
+		return l.clock.Sleep(ctx, d)
+	}
+	return nil
+}
+
+func (l lagged) answer(name string, target machine.Ref, in any) any {
+	switch name {
+	case portscalls.List.Name:
+		of, _ := in.(portscalls.ListIn)
+		macs := []ports.MacPorts{{Name: thisMac, ThisMac: true, Reachable: true}}
+		if of.AllMachines {
+			macs = append(macs, ports.MacPorts{Name: mini, Reachable: true})
+		}
+		return ports.Listing{AllMachines: ports.AllMachines{Macs: macs}}
+	case overviewcalls.Read.Name:
+		if target.Name == "" || target.Name == thisMac {
+			return overviewcalls.ReadOut{Summary: overview.Summary{Head: overview.Head{Name: thisMac, Up: 3 * 24 * time.Hour}}}
+		}
+	}
+	return l.w.answer(name, target, in)
+}
+
+func (l lagged) Invoke(ctx context.Context, target machine.Ref, name string, in, out any, _ call.Progress) error {
+	everyMac, _ := in.(portscalls.ListIn)
+	if l.silent != "" && (name == machinescalls.List.Name || name == portscalls.List.Name && everyMac.AllMachines) {
+		<-ctx.Done()
+		return ctx.Err()
+	}
+	if err := l.wait(ctx, name, target); err != nil {
+		return err
+	}
+	v := l.answer(name, target, in)
+	if v == nil {
+		return errors.New(name + " is not answered in this world")
+	}
+	reflect.ValueOf(out).Elem().Set(reflect.ValueOf(v))
+	return nil
+}
+
+func (l lagged) Watch(ctx context.Context, target machine.Ref, name string, in any, p call.Progress) (<-chan call.Update[any], error) {
+	if name != machinescalls.List.Name {
+		out := make(chan call.Update[any], 1)
+		go func() {
+			defer close(out)
+			var v any
+			if err := l.Invoke(ctx, target, name, in, &v, p); err == nil {
+				out <- call.Update[any]{Value: v}
+			}
+		}()
+		return out, nil
+	}
+	out := make(chan call.Update[any])
+	go func() {
+		defer close(out)
+		if l.wait(ctx, name, target) != nil {
+			return
+		}
+		all, _ := l.w.answer(name, target, in).(machinescalls.ListOut)
+		own := all
+		own.All.Macs = own.All.Macs[:1]
+		for _, u := range []machinescalls.ListOut{own, all} {
+			select {
+			case out <- call.Update[any]{Value: u}:
+			case <-ctx.Done():
+				return
+			}
+			if l.silent != "" {
+				<-ctx.Done()
+				return
+			}
+		}
+	}()
+	return out, nil
+}
+
+// value: the machines Home keeps once it drew every Mac.
+func homeRead(t *testing.T, w *world) *feeds.HomeRead {
+	t.Helper()
+	ctx, cancel := context.WithCancel(context.Background())
+	t.Cleanup(cancel)
+	read := &feeds.HomeRead{}
+	in := engine.FeedInput{}
+	in.Awake = nothing(in.Awake)
+	o := feeds.Menubar{Calls: w, Clock: newSteps(), HomeRead: read, ThisMachine: page.Context{Machine: thisMac}, Report: func(awake.View) *awake.Report { return nil }}
+	until(t, o.Feed()(ctx, in), "every Mac", func(p page.Page) bool { return row(p, "machines", mini) != nil })
+	return read
+}
+
+func laggedPage(t *testing.T, l lagged, home *feeds.HomeRead, subject string) <-chan any {
+	t.Helper()
+	ctx, cancel := context.WithCancel(context.Background())
+	t.Cleanup(cancel)
+	o := feeds.Menubar{Calls: l, Clock: l.clock, HomeRead: home, ThisMachine: page.Context{Machine: thisMac}}
+	return o.Machine()(ctx, engine.FeedInput{Subject: subject})
+}
+
+func readingRows(items []page.Item) []string {
+	var out []string
+	for _, it := range items {
+		if it.Row != nil && it.Row.ID == "reading" {
+			out = append(out, it.Row.Label)
+		}
+		if it.Group != nil {
+			out = append(out, readingRows(it.Group.Items)...)
+		}
+	}
+	return out
+}
+
+// value: the sections of a page that still draw a part being read.
+func stillReading(p page.Page) []string {
+	var out []string
+	for _, s := range p.Sections {
+		if len(readingRows(s.Items)) > 0 {
+			out = append(out, s.ID)
+		}
+	}
+	return out
+}
+
+func caption(p page.Page) []string {
+	for _, s := range p.Sections {
+		if s.ID == "summary" {
+			out := make([]string, 0, len(s.Caption))
+			for _, v := range s.Caption {
+				out = append(out, v.Text)
+			}
+			return out
+		}
+	}
+	return nil
+}
+
+func twoMacsAwake() *world {
+	return &world{infra: []machines.VM{infraAt(machines.Running, 0)}, asked: map[string][]string{}, activity: map[string]uint64{},
+		awake: map[string]awake.Report{thisMac: {Engine: awake.EngineRunning}, mini: {Engine: awake.EngineRunning}}}
+}
+
+// invariant: arch L2: with Home watched, a machine's first frame is drawn
+// from the machines Home read before any read of the page answers: its header, its
+// kind and its standing at the clock's start.
+func TestAMachinesPageOpensWithItsHeaderFromHomesRead(t *testing.T) {
+	w := twoMacsAwake()
+	home := homeRead(t, w)
+	l := lagged{w: w, clock: newVirtual(), lag: map[string]time.Duration{}}
+	for _, name := range []string{machinescalls.List.Name, portscalls.List.Name, overviewcalls.Read.Name, activitycalls.Read.Name, awakecalls.Read.Name, vaultcalls.VaultList.Name, accountscalls.Programs.Name} {
+		l.lag[name] = time.Hour
+	}
+	first, _ := (<-laggedPage(t, l, home, mini)).(page.Document)
+	if first.Header == nil || first.Header.Title != mini || first.Context.Kind != "computer" {
+		t.Fatalf("mac-mini's first frame has header %+v and kind %q, want mac-mini's header and a computer's kind", first.Header, first.Context.Kind)
+	}
+	if got := caption(first.Page); len(got) == 0 || got[0] != "online" {
+		t.Errorf("mac-mini's first frame says %q, want its standing first", got)
+	}
+	if at := l.clock.since(); at != 0 {
+		t.Errorf("the first frame came at %s, want at once", at)
+	}
+	alone, _ := (<-laggedPage(t, l, nil, mini)).(page.Document)
+	if alone.Header != nil {
+		t.Errorf("with no Home read, mac-mini's first frame has header %+v, want it reading", alone.Header)
+	}
+}
+
+// invariant: arch L2: every read of a machine's page runs at once and the
+// page is drawn after each answer, so it is whole at its slowest read's
+// lag, not at the sum of them.
+func TestThisMacsPageIsWholeOnceItsSlowestReadAnswers(t *testing.T) {
+	w := twoMacsAwake()
+	home := homeRead(t, w)
+	clock := newVirtual()
+	l := lagged{w: w, clock: clock, lag: map[string]time.Duration{
+		machinescalls.List.Name: 3 * time.Second, portscalls.List.Name: 2 * time.Second,
+		overviewcalls.Read.Name: time.Second, activitycalls.Read.Name: time.Second,
+		awakecalls.Read.Name: time.Second, vaultcalls.VaultList.Name: time.Second,
+	}}
+	pages := laggedPage(t, l, home, thisMac)
+	clock.parked(t, 7, "every read of the page asked at once: the machines, both ports, the overview, the activity, the Awake and the vault")
+	clock.leap(time.Second)
+	p := until(t, pages, "This Mac up 3 days", func(p page.Page) bool { return slices.Contains(caption(p), "up 3 days") })
+	if !slices.Contains(stillReading(p), "private") {
+		t.Errorf("at 1 s This Mac's ports read %q, want them still reading: they answer at 2 s", stillReading(p))
+	}
+	clock.leap(2 * time.Second)
+	until(t, pages, "This Mac's ports", func(p page.Page) bool { return !slices.Contains(stillReading(p), "private") })
+	clock.leap(3 * time.Second)
+	until(t, pages, "This Mac's page whole", func(p page.Page) bool { return len(stillReading(p)) == 0 })
+	if next := clock.parked(t, 1, "the page's rest"); !slices.Equal(next, []time.Duration{33 * time.Second}) {
+		t.Errorf("after its reads the page waits until %v, want its next read 30 s after the slowest answered at 3 s", next)
+	}
+}
+
+// invariant: arch L2: a Mac that does not answer holds back its own parts
+// of This Mac's page alone: This Mac's row, its overview, its ports and
+// its Awake are drawn while the clock has not moved.
+func TestASilentMacDoesNotHoldBackThisMacsPage(t *testing.T) {
+	w := twoMacsAwake()
+	clock := newVirtual()
+	l := lagged{w: w, clock: clock, silent: mini}
+	p := until(t, laggedPage(t, l, nil, thisMac), "This Mac's page while mac-mini is silent", func(p page.Page) bool {
+		return p.Header != nil && slices.Contains(caption(p), "up 3 days") && !slices.Contains(stillReading(p), "private") && row(p, "care", "awake") != nil
+	})
+	if p.Header.Title != "This Mac" && p.Header.Title != thisMac {
+		t.Errorf("This Mac's page heads %q", p.Header.Title)
+	}
+	if at := clock.since(); at != 0 {
+		t.Errorf("This Mac's page came at %s, want with the clock unmoved", at)
+	}
 }
