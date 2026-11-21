@@ -7,7 +7,7 @@ The owner's ask (2026-11-20): rename station to machines everywhere, now
 that Machines is the app's name. The display name landed in v0.21.0-alpha.2
 (the UI, the manual and the site say Machines; the window stays "Spwn", the
 owner, 2026-11-20). What goes past it waits for one design talk with the
-owner on what it does to the commands, which he holds in another session
+owner on what it does to the commands, which they hold in another session
 (the command vision, 2026-11-21).
 
 - **The command grammar**: today `station machines start linux-2`. A binary
@@ -17,7 +17,18 @@ owner on what it does to the commands, which he holds in another session
   Mac), or one umbrella command (`spwn machines start linux-2`,
   `spwn agents ...`). Either one rewrites the CLI goldens and `words.json`.
   The proposal sent to the owner (2026-11-21) is the umbrella, a flat
-  `spwn <noun> <verb>`, with six questions he has not answered yet.
+  `spwn <noun> <verb>`, with six questions not answered yet, each with its
+  recommendation:
+  1. Grammar: flat `spwn <noun> <verb>`; Machines and Agents are sections
+     of the app and the help, not command levels (the `gh`, `kubectl` model).
+  2. Nouns: plural everywhere (`agents`, `worlds`, `machines`, `apps`).
+  3. Credentials: Agents drops `auth`, `gate` and `cookie-sync` for
+     `spwn accounts`, with one vault.
+  4. Daemons: one engine per Mac, absorbing the credential broker and the
+     automation daemon.
+  5. Automations: they run on Machines' background tasks (the automation
+     keeps what to run, Machines when and where).
+  6. A world on a machine: yes, `spwn worlds up --on <machine>`.
 - **What the talk decides for one bundle** ("One Spwn on a Mac", below):
   whether Spwn.app holds one CLI binary or two, the names of the
   `~/.local/bin` links, the launchd label prefix and the nested menu bar's
@@ -66,7 +77,7 @@ Starts when the owner says go, with L0.
 ## The read model, RM3 to RM7
 The engine keeps one read model, whose projections are the menu bar's pages and the window's views ([ADR-070](docs/decisions/070-the-engine-keeps-one-read-model.md)). RM1, the store, is on main (0cc22d9a3). RM5 (the verdict in `opened`, 471df4b83) and RM2 (readers keep the store warm and `engine.state` streams it, 03c70fb65) are on the branch `feat/engine-read-model`, where RM3 and RM4 are in progress; then RM6 and RM7, the window.
 
-- **RM3, far slices**: every Mac holds every other Mac's `local` stream (ADR-072). The owner (2026-11-21): every Mac pushes continuously, with no poll setting, so the per-Mac push verb the design held for his answer (RM3b) is not built. A far Mac's keys sit in this Mac's store under their own names (`mac:mac-mini`, `overview:infra`) and match an exact key and `<family>:*`, never `local`; a silent Mac's keys keep their last value, `stale`, `unreachable`; the link backs off 5, 10, 30 s, then 1 min. A held stream with `pace: idle` does not hold the readers at the attached pace. Proof: the stories `specs/usecases/engine/state/far-*.spec.yaml`. Pages: the `engine.state` paragraph of `docs/reference/api.md`, and `docs/reference/machines.md`.
+- **RM3, far slices**: every Mac holds every other Mac's `local` stream (ADR-072). The owner (2026-11-21): every Mac pushes continuously, with no poll setting, so the per-Mac push verb the design held for the owner's answer (RM3b) is not built. A far Mac's keys sit in this Mac's store under their own names (`mac:mac-mini`, `overview:infra`) and match an exact key and `<family>:*`, never `local`; a silent Mac's keys keep their last value, `stale`, `unreachable`; the link backs off 5, 10, 30 s, then 1 min. A held stream with `pace: idle` does not hold the readers at the attached pace. Proof: the stories `specs/usecases/engine/state/far-*.spec.yaml`. Pages: the `engine.state` paragraph of `docs/reference/api.md`, and `docs/reference/machines.md`.
 - **RM4, pages are projections**: `apps/engine/engine/feeds` rewritten as pure functions of a snapshot, the per-subscriber feed reads deleted, the architecture rule `FeedsReadNoCall` with its mutant, and `overview.Kept.At(now)` computing uptime and the head line at read time. Two defects it carries: Home's `menubar.update` can lose an update, since its page channel is written outside the lock; and a pushed Mac page draws three content generations (the menu bar bench, 2026-11-21) because its Accounts section reads `none` before the sign-ins answer (`pages/menubar/accounts.go`, `macAccounts`), so that section is pending until they answer, and `Page.whole` and the engine's full-page rule (`engine/process/opening.go`) see the page whole only then. Proof: a counting-router module test (with Home watched, opening `menubar.machine:linux-1` makes no router call before a first frame that has its header and kind), the stories `engine/page/machine-opens-whole` and `silent-mac-kept-stale`, one generation for an unchanged page, darwin-build and menubar-check. The bench's Home watch reached its full frame in 4.8 s p50 on 2026-11-21.
 - **RM6, the window's views**: `apps/engine/engine/views/` (`machines.list` as one composed fleet value, `overview.read` with its elsewhere, ports, accounts, awake), their keys in `engine/calls/state.go`, and `engine.state` added to what `apps/desktop/src/domain/bridged.ts` forwards. Proof: the stories `engine/state/views-equal-calls` (in `two-macs` and `mini-offline`, a view's value equals its call's last answer minus its read time) and `engine/state/resume` (a `since` inside the ring answers `changed`, an evicted one `snapshot`).
 - **RM7, the window mirrors the stream**: `apps/desktop/src/application/use-cases/{store.ts,fresh.ts}` and `src-tauri/src/engine.rs`; the engine's `fit` replaces `judged` in `use-cases/reach.ts`; `FRESH_EVERY` and the 10 s hello are deleted; the last snapshot is kept on disk. Proof: store specs, page specs over recorded worlds, the launch capture of the first frame at 0.8 s and the `--fault=engine.hello` capture of the no-engine panel ([ADR-071](docs/decisions/071-the-window-mirrors-engine-kept-state-never-blank.md)).
@@ -78,7 +89,7 @@ The engine keeps one read model, whose projections are the menu bar's pages and 
   - A slice carries `state` (`fresh`, `stale`, `unread`), `why` (`reading`, `late`, `unreachable`, `far-too-old` or an error code) and `read_at`. Values hold facts only: `overview:<m>` is `{Summary, Boot}`, so uptime (now minus `Boot`) and the head line are computed at draw time.
   - In a world (the stories, the recordings) the readers start at the first `engine.state` ask, not at the engine's start.
 - **Hypotheses**: a page projected twice from one snapshot is byte-identical unless a relative-time word moved (settled in RM4 by projecting `menubar` and `menubar.machine:linux-1` at two instants); a held far watch inside the world does not stall the clock's leap (RM3's pushed story under `-race` in the cold gate); every field holding a read instant in a slice value is listed (RM2's `unchanged-world-same-revision` story); the folded activity slice stays a few KB (sized in RM2's story); a held watch's tick does not keep a far Mac awake (the owner's Macs alone).
-- **Open, the owner's**: whether `apps`, `settings` and `disk` become slices kept forever (brew, apt and settings reads every 10 min on every machine; recommended, a separate ADR once measured, the window keeping those calls meanwhile); whether `station machines` reads the engine's view when an engine runs (not proposed). ADR-070's line "a slice holds facts, never a value of the clock" (RM2) is Proposed until he accepts it.
+- **Open, the owner's**: whether `apps`, `settings` and `disk` become slices kept forever (brew, apt and settings reads every 10 min on every machine; recommended, a separate ADR once measured, the window keeping those calls meanwhile); whether `station machines` reads the engine's view when an engine runs (not proposed). ADR-070's line "a slice holds facts, never a value of the clock" (RM2) was taken by the orchestrator under the owner's standing go of 2026-11-21.
 
 Starts: RM3 and RM4 run now; RM6 after RM4, RM7 once RM6's stream is on main.
 
@@ -284,7 +295,7 @@ Access; unproven). No Tailscale inside. Then the recipe and its first boot, and
 the apps that live on macOS VMs only (xcode, cocoapods, xcodegen,
 android-studio, lens) install there. If the iPhone cannot be reached from the
 VM, the owner decides how the install step reaches it (an Xcode on the Mac is
-not an option he has accepted).
+not an option the owner has accepted).
 
 ## Machine test tiers: the nightly
 Tiers 2 and 3 are built (`make e2e-machine`, [Test](docs/guides/test.md#the-machine-specs)).
