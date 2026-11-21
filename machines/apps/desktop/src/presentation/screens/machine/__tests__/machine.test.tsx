@@ -158,7 +158,8 @@ describe('machine', () => {
     });
 
     test("a Mac's machine reads its state and how long it has been up as one string, at the row's end", async () => {
-        // Given - macbook-pro's Overview over stories, linux-1 running since its boot
+        // Given - macbook-pro's Overview over stories, drawn when the world was recorded, linux-1 running since its boot
+        using _ = clock.at('2026-11-07T10:30:06Z');
         const result = await component.render(
             overviewOver('stories', 'macbook-pro'),
             async (visitor) => {
@@ -167,7 +168,7 @@ describe('machine', () => {
             },
         );
 
-        // Then - running and its uptime share the state's place, as the engine's word and "up 6 d"
-        expect(result.html.text).toMatch(/>running · up \d+ (?:min|h|d)</u);
+        // Then - running and its uptime share the state's place, as the engine's word and "up 2 h"
+        expect(result.html.text).toContain('>running · up 2 h<');
     });
 });

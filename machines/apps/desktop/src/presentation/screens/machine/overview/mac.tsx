@@ -4,7 +4,7 @@ import { duration, sentence } from '../../../../domain/format';
 import { driftAsked } from '../../../../domain/machines/machines';
 import type { Found } from '../../../../domain/machines/machines';
 import { between, firstUnitOf } from '../../../../domain/when';
-import { useRead, useWatch } from '../../../dependencies/dependencies';
+import { useNow, useRead } from '../../../dependencies/dependencies';
 import { useIdentityOf } from '../../../kit/identity';
 import { Unanswered } from '../../../kit/readings';
 import { machineRoute } from '../../../navigation/route';
@@ -24,9 +24,9 @@ export function MachinesTile({ found, foot }: { found: Found; foot: string | und
     return <Tile foot={foot} label="Its machines" unit={nounOf('machine', count)} value={count} />;
 }
 
-// value: how long a VM has run, from its boot to the moment machines.list was read: a date drawn as "6 d".
-function upFor(vm: MachinesVM, read: string | undefined): string | undefined {
-    const span = between(vm.BootAt, read);
+// value: how long a VM has run, from its boot to the instant it is drawn at: a date drawn as "6 d".
+function upFor(vm: MachinesVM, now: string): string | undefined {
+    const span = between(vm.BootAt, now);
     if (span === undefined) {
         return undefined;
     }
@@ -34,17 +34,16 @@ function upFor(vm: MachinesVM, read: string | undefined): string | undefined {
     return `up ${value} ${unit}`;
 }
 
-function stateUp(vm: MachinesVM, read: string | undefined) {
+function stateUp(vm: MachinesVM, now: string) {
     const shown = vmState(vm);
     if (vm.Birth !== null && vm.Birth.failed !== true) {
         return { ...shown, word: vm.Birth.sentence };
     }
-    return { ...shown, word: sentence([shown.word, upFor(vm, read)]) };
+    return { ...shown, word: sentence([shown.word, upFor(vm, now)]) };
 }
 
 export function Machines({ found, go }: { found: Found; go: Go }) {
-    const listing = useWatch('machines.list', {});
-    const read = listing.kind === 'read' ? listing.out.All.Read : undefined;
+    const now = useNow().toISOString();
     const vms = found.mac.VMs ?? [];
     const identityOf = useIdentityOf();
     if (vms.length === 0) {
@@ -65,7 +64,7 @@ export function Machines({ found, go }: { found: Found; go: Go }) {
                         vm.Purpose,
                         vm.Creator === '' ? undefined : `by ${vm.Creator}`,
                     ])}
-                    state={stateUp(vm, read)}
+                    state={stateUp(vm, now)}
                     title={vm.Name}
                 />
             ))}

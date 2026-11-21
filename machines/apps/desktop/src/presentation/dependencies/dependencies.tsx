@@ -40,12 +40,14 @@ export type Dependencies = {
     windowUpdate?: undefined | WindowUpdatePort;
     reads?: Partial<StoreTiming> | undefined;
     mirror?: Partial<MirrorTiming> | undefined;
+    now?: (() => Date) | undefined;
 };
 
 type Engine = {
     client: EnginePort;
     store: ReadStore;
     mirror: StateMirror;
+    now: () => Date;
     stale: StaleMarks;
     gestures: GestureStore;
     opener: OpenerPort;
@@ -55,6 +57,8 @@ type Engine = {
 };
 
 const EngineContext = createContext<Engine | null>(null);
+
+const NOW = () => new Date();
 
 export function EngineProvider({
     dependencies,
@@ -72,6 +76,7 @@ export function EngineProvider({
         windowUpdate = NO_WINDOW_UPDATE,
         reads,
         mirror,
+        now = NOW,
     } = dependencies;
     const engine = useMemo(
         () => ({
@@ -79,13 +84,14 @@ export function EngineProvider({
             core: new CoreFlow(core, coreLookEvery),
             gestures: new GestureStore(),
             mirror: new StateMirror(client, mirror),
+            now,
             opener,
             stale: new StaleMarks(),
             store: new ReadStore(client, presence, reads),
             update: new UpdateFlow(core),
             windowUpdate: new WindowUpdateFlow(windowUpdate),
         }),
-        [client, core, coreLookEvery, mirror, opener, presence, reads, windowUpdate],
+        [client, core, coreLookEvery, mirror, now, opener, presence, reads, windowUpdate],
     );
     useEffect(() => {
         engine.windowUpdate.start();
@@ -110,6 +116,11 @@ export function useClient(): EnginePort {
 
 export function useGestureStore(): GestureStore {
     return useEngine().gestures;
+}
+
+// value: the instant a frame is drawn at, the window's clock: a replay's is the instant its world was recorded at.
+export function useNow(): Date {
+    return useEngine().now();
 }
 
 export function useOpener(): OpenerPort {

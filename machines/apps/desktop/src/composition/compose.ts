@@ -11,6 +11,7 @@ import { documentPresence } from '../infrastructure/outbound/document-presence/d
 import { Client } from '../infrastructure/outbound/engine-link/client';
 import type { Transport } from '../infrastructure/outbound/engine-link/transport';
 import { helloOf } from '../infrastructure/outbound/engine-replay/hello';
+import { recordedAt } from '../infrastructure/outbound/engine-replay/instant';
 import { replayTransport, stagedReplay } from '../infrastructure/outbound/engine-replay/replay';
 import type { Pace, Recording } from '../infrastructure/outbound/engine-replay/replay';
 import { tauriTransport } from '../infrastructure/outbound/engine-tauri/tauri';
@@ -47,7 +48,17 @@ function absent(reason: string): Transport {
     );
 }
 
-type Composed = { transport: Transport; core?: CorePort | undefined; coreLookEvery?: number };
+type Composed = {
+    transport: Transport;
+    core?: CorePort | undefined;
+    coreLookEvery?: number;
+    now?: (() => Date) | undefined;
+};
+
+function clockOf(recording: Recording): (() => Date) | undefined {
+    const at = recordedAt(recording);
+    return at === undefined ? undefined : () => new Date(at);
+}
 
 const SCRIPTED_LOOK_EVERY = 500;
 
@@ -115,15 +126,16 @@ async function composedOf({ inTauri, query }: Place): Promise<Composed> {
         query.get('release') === 'refused' ? release.refreshRefused(recorded) : recorded;
     const { fittedLink } = await import('../infrastructure/outbound/engine-replay/fitted');
     const fitted = fittedLink(recording, query.get('fit'));
+    const now = clockOf(recording);
     const script = query.get('core');
     if (script !== null) {
-        return await scriptedOf(recording, script, pace, fitted);
+        return { ...(await scriptedOf(recording, script, pace, fitted)), now };
     }
     if (query.get('link') === 'blip') {
         const { blippedReplay } = await import('../infrastructure/outbound/engine-replay/blip');
-        return { transport: blippedReplay(recording, pace) };
+        return { now, transport: blippedReplay(recording, pace) };
     }
-    return { transport: replayTransport(recording, fitted, pace) };
+    return { now, transport: replayTransport(recording, fitted, pace) };
 }
 
 async function windowUpdateOf({ inTauri, query }: Place): Promise<undefined | WindowUpdatePort> {
@@ -149,11 +161,12 @@ function readsOf({ inTauri, query }: Place): Partial<StoreTiming> | undefined {
 }
 
 export async function compose(place: Place): Promise<Dependencies> {
-    const { core, coreLookEvery, transport } = await composedOf(place);
+    const { core, coreLookEvery, now, transport } = await composedOf(place);
     return {
         core,
         coreLookEvery,
         engine: new Client(transport),
+        now,
         opener: place.inTauri ? tauriOpener({ invoke }) : NO_OPENER,
         presence: documentPresence(),
         reads: readsOf(place),
@@ -175,6 +188,7 @@ export function composeReplay({
     return {
         core,
         engine: new Client(replayTransport(recording, link, pace)),
+        now: clockOf(recording),
         opener,
         presence: documentPresence(),
     };
