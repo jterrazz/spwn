@@ -2,6 +2,7 @@
 
 **Status:** Accepted
 **Date:** 2026-11-21
+**Amended:** 2026-11-21, the line "A slice holds facts, never a value of the clock", accepted under the owner's standing go of 2026-11-21
 
 Accepted by the owner on 2026-11-21.
 
