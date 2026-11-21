@@ -171,7 +171,7 @@ if [ $capture -eq 1 ]; then
       *) fail "no pinned digest for go $go_version: add it from go.dev/dl/?mode=json" ;;
     esac
     t=$SECONDS
-    in_vm "set -e; cd ~; curl -fsSLo go.tgz https://go.dev/dl/go$go_version.darwin-arm64.tar.gz; echo '$go_digest  go.tgz' | shasum -a 256 -c -; mkdir -p gotool cap; tar -xzf go.tgz -C gotool; cd $vm_root && ~/gotool/go/bin/go build -o ~/cap/station ./apps/engine/cmd/station" >> "$log" 2>&1 || fail "build the engine in the VM"
+    in_vm "set -e; cd ~; curl -fsSLo go.tgz https://go.dev/dl/go$go_version.darwin-arm64.tar.gz; echo '$go_digest  go.tgz' | shasum -a 256 -c -; mkdir -p gotool cap; tar -xzf go.tgz -C gotool; cd $vm_root && make enclave && ~/gotool/go/bin/go build -o ~/cap/station ./apps/engine/cmd/station" >> "$log" 2>&1 || fail "build the engine in the VM"
     say "-- built the engine in $((SECONDS - t)) s"
   fi
   t=$SECONDS
