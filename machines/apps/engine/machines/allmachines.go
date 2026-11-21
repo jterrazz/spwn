@@ -250,6 +250,9 @@ type MacView struct {
 	// value: SPEC B5.15: at its last answer it was on battery with its lid
 	// closed, so its silence since is sleep.
 	Asleep bool
+	// value: it answered its hello on another release than this station's,
+	// so nothing else of it was read: its VMs are the ones remembered.
+	OtherRelease bool `json:",omitempty"`
 	// value: a Mac that does not answer, said in one verdict: since when
 	// it is not seen, and that nothing proves it is down; nil while it
 	// answers.

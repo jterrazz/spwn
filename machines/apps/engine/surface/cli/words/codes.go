@@ -661,13 +661,17 @@ func Codes() map[fail.Code]Wording {
 			if image := e.Detail["image"]; image != "" {
 				repair = "station images build " + image + ", then make " + far + " again from it: station machines delete " + far + " --confirm=" + far + ", then station machines create " + far + " --image " + image
 			}
-			if floor := e.Detail["floor"]; floor != "" {
-				return far + " runs station " + e.Detail["version"] + ": this station speaks to " + floor + " and later", repair
+			if lacked := e.Detail["call"]; lacked != "" {
+				return far + " runs station " + e.Detail["version"] + ", which has no " + lacked, repair
 			}
-			return far + " runs station " + e.Detail["version"] + ", which has no " + e.Detail["call"], repair
+			return far + " runs station " + e.Detail["version"] + ": this station speaks only to its own release", repair
 		},
 		call.CallerTooOld: func(e *fail.Error) (string, string) {
-			return "station " + e.Detail["version"] + " is older than " + e.Detail["floor"] + ", the first release the far station speaks to", "update station here (" + catalog.InstallLine + ")"
+			repair := "update station here (" + catalog.InstallLine + ")"
+			if far := cmp.Or(e.Detail["label"], e.Subject); far != "" {
+				return far + " runs station " + e.Detail["version"] + ": this station speaks only to its own release", repair
+			}
+			return "station " + e.Detail["version"] + " is not the release the far station runs, the only one it speaks to", repair
 		},
 	}
 	for code, word := range usage() {

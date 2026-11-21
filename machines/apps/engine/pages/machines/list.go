@@ -36,7 +36,7 @@ func List(f model.AllMachines, warnings []string, thisMac page.Context) page.Pag
 			row := listVMRow(h.Name, vm)
 			g.Items = append(g.Items, page.Item{Row: &row})
 		}
-		if len(h.VMs) == 0 && h.Reachable {
+		if len(h.VMs) == 0 && h.Reachable && !h.OtherRelease {
 			create := "station machines create"
 			if !h.ThisMac {
 				create += " --on " + model.Label(f, h)

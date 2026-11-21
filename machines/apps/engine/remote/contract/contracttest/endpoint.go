@@ -14,7 +14,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/remote/contract"
 )
 
-const Version = "v3.3.0"
+const Version = "v0.21.0"
 
 var (
 	// value: the far machine of every case: a Mac with jq to install, which

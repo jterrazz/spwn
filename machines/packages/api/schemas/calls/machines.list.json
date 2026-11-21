@@ -582,6 +582,9 @@
         "Node": {
           "$ref": "#/$defs/machines.Node"
         },
+        "OtherRelease": {
+          "type": "boolean"
+        },
         "Reachable": {
           "type": "boolean"
         },

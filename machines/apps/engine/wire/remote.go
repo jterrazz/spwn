@@ -3,6 +3,7 @@ package wire
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
 	enginecalls "github.com/jterrazz/studio-station/apps/engine/engine/calls"
 	"github.com/jterrazz/studio-station/apps/engine/engine/process"
@@ -213,6 +214,9 @@ func (m machine) askAllMachines(ctx context.Context, macs []string, answered fun
 			return model.MacView{}, err
 		}
 		out, err := call.Read(ctx, r, coremachine.Ref{Name: mac}, machinescalls.List, machinescalls.ListIn{ThisMac: true}, nil)
+		if otherRelease(err) {
+			return model.MacView{Name: mac, StationVersion: hello.Version, Reachable: true, OtherRelease: true}, nil
+		}
 		if err != nil || len(out.All.Macs) == 0 {
 			return model.MacView{}, orNone(err)
 		}
@@ -224,6 +228,13 @@ func (m machine) askAllMachines(ctx context.Context, macs []string, answered fun
 			answered(got.Mac, got.Value)
 		}
 	}
+}
+
+// value: a Mac on another release answers its version alone: its row says
+// which side to update, and its VMs are the ones remembered.
+func otherRelease(err error) bool {
+	var e *fail.Error
+	return errors.As(err, &e) && (e.Code == call.CallerTooOld || e.Code == call.FarTooOld && e.Detail["call"] == "")
 }
 
 func (m machine) askPorts(ctx context.Context, macs []string) map[string]ports.MacPorts {

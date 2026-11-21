@@ -44,3 +44,9 @@ func TestAFleetOnOneAlphaDiffersNowhere(t *testing.T) {
 		t.Errorf("Behind = %q, %v; want the alpha asked to update", fix, ok)
 	}
 }
+
+func TestAStationOfTheOldNumberingIsAskedToUpdateThere(t *testing.T) {
+	if fix, ok := Behind(MacView{StationVersion: "v3.2.0"}, "v0.21.0-alpha.2"); !ok || fix != "update station there ("+catalog.InstallLine+")" {
+		t.Errorf("Behind = %q, %v; want the v3 Mac asked to update", fix, ok)
+	}
+}

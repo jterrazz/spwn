@@ -4,7 +4,7 @@ runs:
     - command: 'ports share infra 3000 --to private --on mac-mini'
       exit: 1
       stderr: |
-          Error: mac-mini runs station v3.2.0, which has no ports.share.to
+          Error: mac-mini runs station dev, which has no ports.share.to
           Hint: update station on mac-mini (run curl -fsSL https://spwn.sh/install.sh | bash there)
     - command: 'ports share infra 3000 --on mac-mini'
       exit: 1

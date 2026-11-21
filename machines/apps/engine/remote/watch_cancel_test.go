@@ -40,11 +40,11 @@ func TestAWatchLetGoHereEndsItsProducerThere(t *testing.T) {
 	inR, inW := io.Pipe()
 	outR, outW := io.Pipe()
 	go func() {
-		_ = serve.Stream(context.WithoutCancel(t.Context()), inR, outW, serve.Local(registry, contracttest.Mini, "v3.3.0"), nil)
+		_ = serve.Stream(context.WithoutCancel(t.Context()), inR, outW, serve.Local(registry, contracttest.Mini, "v0.21.0"), nil)
 		_ = outW.Close()
 	}()
 	t.Cleanup(func() { _ = inW.Close() })
-	c := api.NewConn(outR, inW, nil, nil, "v3.3.0")
+	c := api.NewConn(outR, inW, nil, nil, "v0.21.0")
 	ctx, letGo := context.WithCancel(t.Context())
 	updates, err := c.Watch(ctx, machine.Ref{}, "activity.read", json.RawMessage(`{}`), nil)
 	if err != nil {
@@ -95,11 +95,11 @@ func TestAWatchThatAnswersAnErrorHasEndedItsProducerThere(t *testing.T) {
 	inR, inW := io.Pipe()
 	outR, outW := io.Pipe()
 	go func() {
-		_ = serve.Stream(context.WithoutCancel(t.Context()), inR, outW, serve.Local(registry, contracttest.Mini, "v3.3.0"), func(error) *fail.Error { return nil })
+		_ = serve.Stream(context.WithoutCancel(t.Context()), inR, outW, serve.Local(registry, contracttest.Mini, "v0.21.0"), func(error) *fail.Error { return nil })
 		_ = outW.Close()
 	}()
 	t.Cleanup(func() { _ = inW.Close() })
-	c := api.NewConn(outR, inW, nil, nil, "v3.3.0")
+	c := api.NewConn(outR, inW, nil, nil, "v0.21.0")
 	updates, err := c.Watch(t.Context(), machine.Ref{}, "activity.read", json.RawMessage(`{}`), nil)
 	if err != nil {
 		t.Fatal(err)

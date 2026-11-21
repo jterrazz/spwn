@@ -15,10 +15,12 @@ const (
 	Unreachable fail.Code = "remote.unreachable"
 	// value: a VM whose Mac does not answer, so nothing reaches it.
 	VMMacUnreachable fail.Code = "remote.vm-mac-unreachable"
-	// value: a far binary that serves no such call.
+	// value: a far binary that serves no such call, or on an older release
+	// than this station's.
 	FarTooOld fail.Code = "remote.far-too-old"
-	// value: a caller whose hello names a release before the floor, refused
-	// by the station it called.
+	// value: a caller behind the release of the station it reaches: refused
+	// by the far station, or here before any call is sent when the far
+	// station is on a newer release.
 	CallerTooOld fail.Code = "remote.caller-too-old"
 	// value: a Mac whose ssh answers and that has no station to answer it.
 	NoStation fail.Code = "remote.no-station"

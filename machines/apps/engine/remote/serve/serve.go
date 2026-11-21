@@ -28,8 +28,8 @@ func Stream(ctx context.Context, r io.Reader, w io.Writer, calls Calls, word cal
 	// invariant: serves frames until the caller closes its side; each
 	// request runs on its own, its answers written whole, one line each, and
 	// the server returns once every request has answered. A caller whose
-	// hello names a release before api.Floor is answered its hello, and every
-	// request after it is refused unrun.
+	// hello names another release than this station's is answered its hello,
+	// and every request after it is refused unrun.
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 	out := &writer{w: w}
@@ -48,7 +48,7 @@ func Stream(ctx context.Context, r io.Reader, w io.Writer, calls Calls, word cal
 			answering.end(f.ID)
 			continue
 		}
-		if f.Hello != nil && api.BeforeFloor(f.Hello.Version) {
+		if f.Hello != nil && api.SkewOf(calls.Hello().Version, f.Hello.Version) != api.Speaks {
 			caller = f.Hello.Version
 		}
 		if caller != "" && f.Hello == nil {
@@ -150,7 +150,7 @@ func answer(ctx context.Context, f api.Frame, out *writer, calls Calls, word cal
 }
 
 func tooOld(version string) error {
-	return fail.New(fail.Refused, call.CallerTooOld, "", map[string]string{"version": version, "floor": api.Floor})
+	return fail.New(fail.Refused, call.CallerTooOld, "", map[string]string{"version": version})
 }
 
 func orNull(raw json.RawMessage) json.RawMessage {

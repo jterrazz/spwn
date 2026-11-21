@@ -201,7 +201,7 @@ func streamed(t *testing.T, caller string) (frames map[string]api.Frame, ran int
 	}
 	in := `{"v":2,"id":"1","hello":{"version":"` + caller + `"}}` + "\n" + `{"v":2,"id":"2","call":"ports.declare"}` + "\n"
 	var out strings.Builder
-	if err := serve.Stream(t.Context(), strings.NewReader(in), &out, serve.Local(registry, laptop, "v3.3.0"), func(err error) *fail.Error {
+	if err := serve.Stream(t.Context(), strings.NewReader(in), &out, serve.Local(registry, laptop, "v0.21.0"), func(err error) *fail.Error {
 		var f *fail.Error
 		errors.As(err, &f)
 		return f
@@ -219,18 +219,21 @@ func streamed(t *testing.T, caller string) (frames map[string]api.Frame, ran int
 	return frames, ran
 }
 
-func TestACallerOfAReleaseBeforeTheFloorIsAnsweredItsHelloAndRefusedEveryCall(t *testing.T) {
-	frames, ran := streamed(t, "v0.0.9")
-	if frames["1"].Hello == nil || frames["1"].Hello.Version != "v3.3.0" {
-		t.Errorf("the hello of a caller at v0.0.9 was answered %+v, want this station's hello", frames["1"])
+func TestACallerOnAnotherReleaseIsAnsweredItsHelloAndRefusedEveryCall(t *testing.T) {
+	for _, caller := range []string{"v0.0.9", "v0.20.0", "v3.2.0", "v0.22.0"} {
+		frames, ran := streamed(t, caller)
+		if frames["1"].Hello == nil || frames["1"].Hello.Version != "v0.21.0" {
+			t.Errorf("the hello of a caller at %s was answered %+v, want this station's hello", caller, frames["1"])
+		}
+		refused := frames["2"].Error
+		if ran != 0 || refused == nil || refused.Code != call.CallerTooOld || refused.Detail["version"] != caller {
+			t.Errorf("a call from a caller at %s ran %d times and answered %+v, want it refused unrun as %s", caller, ran, refused, call.CallerTooOld)
+		}
 	}
-	refused := frames["2"].Error
-	if ran != 0 || refused == nil || refused.Code != call.CallerTooOld || refused.Detail["version"] != "v0.0.9" || refused.Detail["floor"] != api.Floor {
-		t.Errorf("a call from a caller at v0.0.9 ran %d times and answered %+v, want it refused unrun as %s", ran, refused, call.CallerTooOld)
-	}
-	frames, ran = streamed(t, "dev")
-	if ran != 1 || frames["2"].Error != nil {
-		t.Errorf("a call from a build of no release ran %d times and answered %+v, want it run", ran, frames["2"].Error)
+	for _, caller := range []string{"v0.21.0", "v0.21.0-2-gabcdef1", "dev"} {
+		if frames, ran := streamed(t, caller); ran != 1 || frames["2"].Error != nil {
+			t.Errorf("a call from a caller at %s ran %d times and answered %+v, want it run", caller, ran, frames["2"].Error)
+		}
 	}
 }
 

@@ -128,12 +128,12 @@ func (d Dialer) far(ctx context.Context, target machine.Ref) (*api.Hello, error)
 }
 
 // invariant: two exchanges per call: the guest's server reads its stdin to
-// the end, answers and exits, so its Hello is asked alone first and a release
-// before api.Floor, or one that lacks an ability the request's input asks, is
-// refused before the request reaches it; the second sends the hello and the
-// request, and its Hello is judged again, so a guest whose binary changed
-// between the two, to a release before the floor or one that serves no such
-// call or ability, is too old.
+// the end, answers and exits, so its Hello is asked alone first and a guest
+// on another release than this Mac's, or one that lacks an ability the
+// request's input asks, is refused before the request reaches it; the second
+// sends the hello and the request, and its Hello is judged again, so a guest
+// whose binary changed between the two, to another release or one that
+// serves no such call or ability, is refused.
 func (e endpoint) exchange(ctx context.Context, target machine.Ref, request api.Frame) ([]api.Frame, error) {
 	first, err := Dialer(e).far(ctx, target)
 	if err != nil {
@@ -144,8 +144,8 @@ func (e endpoint) exchange(ctx context.Context, target machine.Ref, request api.
 	if e.asks != nil {
 		asks = e.asks(name, request.In)
 	}
-	if api.BeforeFloor(first.Version) {
-		return nil, e.tooOld(target, map[string]string{"version": first.Version, "floor": api.Floor})
+	if refused := e.skew(target, first.Version); refused != nil {
+		return nil, refused
 	}
 	if lacked := first.Lacks(name, asks); lacked != "" && lacked != name {
 		return nil, e.tooOld(target, map[string]string{"version": first.Version, "call": lacked})
@@ -179,13 +179,26 @@ func (e endpoint) exchange(ctx context.Context, target machine.Ref, request api.
 	if far == nil {
 		return nil, lost(target, errors.New("the guest's station did not answer, exit "+strconv.Itoa(code)))
 	}
-	if api.BeforeFloor(far.Version) {
-		return nil, e.tooOld(target, map[string]string{"version": far.Version, "floor": api.Floor})
+	if err := e.skew(target, far.Version); err != nil {
+		return nil, err
 	}
 	if lacked := far.Lacks(name, asks); lacked != "" {
 		return nil, e.tooOld(target, map[string]string{"version": far.Version, "call": lacked})
 	}
 	return answers, nil
+}
+
+// value: a guest on another release than this Mac's station is refused: an
+// older one by its image's repair, a newer one by updating station here.
+func (e endpoint) skew(target machine.Ref, version string) error {
+	switch api.SkewOf(Dialer(e).hello().Version, version) {
+	case api.FarBehind:
+		return e.tooOld(target, map[string]string{"version": version})
+	case api.HereBehind:
+		return fail.New(fail.Refused, call.CallerTooOld, target.Name, map[string]string{"version": version})
+	case api.Speaks:
+	}
+	return nil
 }
 
 // value: a VM's station is the one its image was built with, so the refusal

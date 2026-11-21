@@ -110,7 +110,7 @@ func Behind(h MacView, thisMac string) (fix string, differs bool) {
 	if h.ThisMac || h.StationVersion == "" || thisMac == "" || h.StationVersion == thisMac {
 		return "", false
 	}
-	if Newer(h.StationVersion, thisMac) {
+	if skew := SkewOf(thisMac, h.StationVersion); skew == HereBehind || (skew == Speaks && Newer(h.StationVersion, thisMac)) {
 		return "update station here (" + catalog.InstallLine + ")", true
 	}
 	return "update station there (" + catalog.InstallLine + ")", true

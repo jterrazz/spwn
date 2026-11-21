@@ -231,14 +231,13 @@ func (r *Router) inEngine(name string) bool {
 
 func (r *Router) endpoint(ctx context.Context, t machine.Ref, name string, in json.RawMessage) (*link, error) {
 	// invariant: a call the far Hello lacks, an ability its input asks that
-	// the far Hello does not list, or a far release before api.Floor, is
+	// the far Hello does not list, or a far station on another release, is
 	// asked again of a fresh connection, so a Mac upgraded since its
-	// connection was opened serves it; a far release before the floor, and a
-	// call or ability the fresh Hello still lacks, is refused before any call
-	// is sent.
+	// connection was opened serves it; another release, and a call or
+	// ability the fresh Hello still lacks, is refused before any call is sent.
 	asks := r.registry.Asks(name, in)
 	l, hello, fresh, err := r.connect(ctx, t)
-	if err == nil && !fresh && (hello.Lacks(name, asks) != "" || api.BeforeFloor(hello.Version)) {
+	if err == nil && !fresh && (hello.Lacks(name, asks) != "" || api.SkewOf(r.reach.Version, hello.Version) != api.Speaks) {
 		r.drop(t.Mac(), l)
 		r.release(l)
 		l, hello, _, err = r.connect(ctx, t)
@@ -246,20 +245,22 @@ func (r *Router) endpoint(ctx context.Context, t machine.Ref, name string, in js
 	if err != nil {
 		return nil, err
 	}
-	if api.BeforeFloor(hello.Version) {
+	detail := map[string]string{"version": hello.Version}
+	if r.reach.Label != nil {
+		detail["label"] = r.reach.Label(t.Mac())
+	}
+	switch api.SkewOf(r.reach.Version, hello.Version) {
+	case api.FarBehind:
 		r.release(l)
-		detail := map[string]string{"version": hello.Version, "floor": api.Floor}
-		if r.reach.Label != nil {
-			detail["label"] = r.reach.Label(t.Mac())
-		}
 		return nil, fail.New(fail.FarTooOld, call.FarTooOld, t.Mac(), detail)
+	case api.HereBehind:
+		r.release(l)
+		return nil, fail.New(fail.Refused, call.CallerTooOld, t.Mac(), detail)
+	case api.Speaks:
 	}
 	if lacked := hello.Lacks(name, asks); lacked != "" {
 		r.release(l)
-		detail := map[string]string{"version": hello.Version, "call": lacked}
-		if r.reach.Label != nil {
-			detail["label"] = r.reach.Label(t.Mac())
-		}
+		detail["call"] = lacked
 		return nil, fail.New(fail.FarTooOld, call.FarTooOld, t.Mac(), detail)
 	}
 	return l, nil

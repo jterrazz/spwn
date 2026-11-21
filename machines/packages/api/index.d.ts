@@ -2062,6 +2062,7 @@ export type MachinesMacView = {
     Machines?: MachinesRollUp;
     Name: string;
     Node: MachinesNode;
+    OtherRelease?: boolean;
     Reachable: boolean;
     Sentence?: string;
     Standing?: 'asleep' | 'not-seen' | 'engine-stopped' | 'engine-not-installed' | 'online';

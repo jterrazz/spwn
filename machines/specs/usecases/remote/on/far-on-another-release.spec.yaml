@@ -1,0 +1,31 @@
+description: 'a far Mac on another release is refused, the side behind told to update; its own release is served'
+env: mini-old
+runs:
+    - command: 'world upgrade mac-mini v0.0.9'
+      exit: 0
+    - command: 'ports declare 5000 --via lan --on mac-mini'
+      exit: 1
+      stderr: |
+          Error: mac-mini runs station v0.0.9: this station speaks only to its own release
+          Hint: update station on mac-mini (run curl -fsSL https://spwn.sh/install.sh | bash there)
+    - command: 'world upgrade mac-mini v3.2.0'
+      exit: 0
+    - command: 'ports declare 5000 --via lan --on mac-mini'
+      exit: 1
+      stderr: |
+          Error: mac-mini runs station v3.2.0: this station speaks only to its own release
+          Hint: update station on mac-mini (run curl -fsSL https://spwn.sh/install.sh | bash there)
+    - command: 'world upgrade mac-mini v0.99.0'
+      exit: 0
+    - command: 'ports declare 5000 --via lan --on mac-mini'
+      exit: 2
+      stderr: |
+          Error: mac-mini runs station v0.99.0: this station speaks only to its own release
+          Hint: update station here (curl -fsSL https://spwn.sh/install.sh | bash)
+    - command: 'world upgrade mac-mini ""'
+      exit: 0
+    - command: 'ports declare 5000 --via lan --on mac-mini'
+      exit: 0
+      stdout: |
+          	On mac-mini:
+          ●	5000 on mac-mini	declared public (your LAN)

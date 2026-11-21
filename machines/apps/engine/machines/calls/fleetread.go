@@ -129,10 +129,13 @@ func (s *Machinist) engineView(ctx context.Context) (info model.EngineView, live
 
 func (s *Machinist) view(name string, h model.MacRecord, node model.Node, answers map[string]model.MacView) model.MacView {
 	far, ok := answers[name]
-	if !ok {
+	if !ok || far.OtherRelease {
 		silent := model.MacView{Name: name, User: h.User, Node: node, Answered: h.Answered, LAN: h.LAN, Laptop: h.Laptop, Asleep: h.Asleep}
 		if h.Hardware != nil {
 			silent.Hardware = *h.Hardware
+		}
+		if ok {
+			silent.StationVersion, silent.Reachable, silent.OtherRelease = far.StationVersion, true, true
 		}
 		for _, vm := range h.VMs {
 			// invariant: a VM remembered with no kind is left out, never

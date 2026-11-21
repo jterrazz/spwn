@@ -53,10 +53,10 @@ func laptopSocketOver(t *testing.T, minis *call.Registry) (s serve.Server, macs,
 	t.Helper()
 	here := sampled(99)
 	macs, engine = fake.New(), fake.New()
-	macs.Serve(fullMini, fake.Mac{Registry: minis, Profile: contracttest.Mini, Version: "v3.3.0"})
-	engine.Serve(laptop.Ref.Name, fake.Mac{Registry: sampled(7), Profile: linux1, Version: "v3.3.0"})
+	macs.Serve(fullMini, fake.Mac{Registry: minis, Profile: contracttest.Mini, Version: "v0.21.0"})
+	engine.Serve(laptop.Ref.Name, fake.Mac{Registry: sampled(7), Profile: linux1, Version: "v0.21.0"})
 	r := remote.NewRouter(here, laptop, remote.Reach{
-		Macs: macs, Engine: engine, Version: "v3.3.0",
+		Macs: macs, Engine: engine, Version: "v0.21.0",
 		Label: func(mac string) string { return strings.TrimPrefix(mac, "sam-") },
 		Locate: func(name string) (machine.Ref, bool) {
 			switch name {

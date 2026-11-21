@@ -5,23 +5,24 @@ env:
     - mini-old
     - terminal
 runs:
+    - command: 'world upgrade mac-mini v0.0.9'
+      exit: 0
     - command: '--version >/dev/null; terminal --size 100x30 /usr/bin/env -u NO_COLOR COLUMNS=100 "$STATION" machines'
       stdin: |
           scrollback
       exit: 0
       stdout: |
-          5 machines · 4 running · 1 stopped · 1 needs you
+          4 machines · 3 running · 1 stopped · 1 needs you
 
-              MACHINE     KIND       STATE                         CPU    MEMORY
+              MACHINE     KIND       STATE                 CPU    MEMORY
             ● This Mac    Mac        Engine running
-            ├─ ○ api      Workspace  Stopped · persistent          4 CPU  8 GB
-            └─ ● linux-1  Workspace  Running · ephemeral           4 CPU  8 GB
-            ◐ mac-mini    Mac        Engine running · runs v3.2.0
-            └─ ● infra    Server     Running · always on           8 CPU  24 GB
+            ├─ ○ api      Workspace  Stopped · persistent  4 CPU  8 GB
+            └─ ● linux-1  Workspace  Running · ephemeral   4 CPU  8 GB
+            ◐ mac-mini    Mac        Online · runs v0.0.9
 
           Needs you
-            ◐ mac-mini  runs v3.2.0  update station there (curl -fsSL https://spwn.sh/install.sh | bash)
+            ◐ mac-mini  runs v0.0.9  update station there (curl -fsSL https://spwn.sh/install.sh | bash)
     - command: 'machines --json | /usr/bin/jq -c ''.findings'''
       exit: 0
       stdout: |
-          [{"machine":"mac-mini","severity":"needs-a-look","section":"overview","subject":"mac-mini","text":"mac-mini runs v3.2.0","fix":{"call":null,"command":null,"path":"update station there (curl -fsSL https://spwn.sh/install.sh | bash)"}}]
+          [{"machine":"mac-mini","severity":"needs-a-look","section":"overview","subject":"mac-mini","text":"mac-mini runs v0.0.9","fix":{"call":null,"command":null,"path":"update station there (curl -fsSL https://spwn.sh/install.sh | bash)"}}]

@@ -45,8 +45,8 @@ func laptopSharingOn(t *testing.T, lacks ...string) (r *remote.Router, ran *int)
 		t.Fatal(err)
 	}
 	macs := fake.New()
-	macs.Serve(mini, fake.Mac{Registry: far, Profile: machine.Profile{Ref: machine.Ref{Name: mini}, Kind: machine.Computer}, Version: "v3.2.0", Lacks: lacks})
-	r = remote.NewRouter(near, laptop, remote.Reach{Macs: macs, Version: "v3.3.0"})
+	macs.Serve(mini, fake.Mac{Registry: far, Profile: machine.Profile{Ref: machine.Ref{Name: mini}, Kind: machine.Computer}, Version: "v0.21.0-3-gabcdef1", Lacks: lacks})
+	r = remote.NewRouter(near, laptop, remote.Reach{Macs: macs, Version: "v0.21.0"})
 	t.Cleanup(r.Close)
 	return r, ran
 }
@@ -55,8 +55,8 @@ func TestAFarBinaryThatLacksAnAbilityTheInputAsksIsTooOldAndNeverRunsIt(t *testi
 	r, ran := laptopSharingOn(t, audienceAbility)
 	_, err := call.Invoke(t.Context(), r, machine.Ref{Name: mini}, shareTo, shareIn{To: "private"}, nil)
 	var e *fail.Error
-	if !errors.As(err, &e) || e.Type != fail.FarTooOld || e.Subject != mini || e.Detail["version"] != "v3.2.0" || e.Detail["call"] != audienceAbility {
-		t.Errorf("share to private on a mini that lacks its ability: %v, want far-too-old naming the mini, v3.2.0 and the ability", err)
+	if !errors.As(err, &e) || e.Type != fail.FarTooOld || e.Subject != mini || e.Detail["version"] != "v0.21.0-3-gabcdef1" || e.Detail["call"] != audienceAbility {
+		t.Errorf("share to private on a mini that lacks its ability: %v, want far-too-old naming the mini, v0.21.0-3-gabcdef1 and the ability", err)
 	}
 	if *ran != 0 {
 		t.Errorf("the share ran %d times on the mini, want never: it would have shared with no audience", *ran)

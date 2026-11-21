@@ -4,9 +4,9 @@ runs:
     - command: 'ports declare 5000 --via lan --on mac-mini'
       exit: 1
       stderr: |
-          Error: mac-mini runs station v3.2.0, which has no ports.declare
+          Error: mac-mini runs station dev, which has no ports.declare
           Hint: update station on mac-mini (run curl -fsSL https://spwn.sh/install.sh | bash there)
-    - command: 'world upgrade mac-mini v3.3.0'
+    - command: 'world upgrade mac-mini ""'
       exit: 0
     - command: 'ports declare 5000 --via lan --on mac-mini'
       exit: 0

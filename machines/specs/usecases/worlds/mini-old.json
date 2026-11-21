@@ -75,8 +75,7 @@
                         "size_gb": 12
                     }
                 ]
-            },
-            "station": "v3.3.0"
+            }
         },
         "mac-mini": {
             "engine": {
@@ -153,7 +152,7 @@
                     }
                 ]
             },
-            "station": "v3.2.0",
+            "station": "dev",
             "lacks": ["ports.declare", "activity.read", "ports.share.to"]
         }
     },

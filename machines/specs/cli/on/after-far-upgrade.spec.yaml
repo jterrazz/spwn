@@ -10,14 +10,14 @@ runs:
             "type": "far-too-old",
             "code": "remote.far-too-old",
             "subject": "y",
-            "message": "y runs station v3.2.0, which has no apps.list",
+            "message": "y runs station dev, which has no apps.list",
             "hint": "update station on y (run curl -fsSL https://spwn.sh/install.sh | bash there)",
             "fix": null
           }
       stderr: |
-          Error: y runs station v3.2.0, which has no apps.list
+          Error: y runs station dev, which has no apps.list
           Hint: update station on y (run curl -fsSL https://spwn.sh/install.sh | bash there)
-    - command: '--version > /dev/null; printf v3.3.0 > answers/ssh/api-y/version; printf "[]" > answers/ssh/api-y/apps.list.json; "$STATION" apps --json --on y | /usr/bin/jq -r .schema'
+    - command: '--version > /dev/null; printf "[]" > answers/ssh/api-y/apps.list.json; "$STATION" apps --json --on y | /usr/bin/jq -r .schema'
       exit: 0
       stdout: |
           station.apps.list/v1
