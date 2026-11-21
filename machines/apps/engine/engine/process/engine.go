@@ -160,6 +160,10 @@ type Reading interface {
 	// value: makes due the readers of This Mac's own state, which moved.
 	Moved()
 	DueAll()
+	// value: the slices copied from the other Macs, handed from one stepped
+	// engine to the next.
+	Remember(held engine.Held)
+	Held() engine.Held
 }
 
 type Engine struct {
@@ -411,6 +415,19 @@ func (d *Engine) waiting() bool {
 		}
 	}
 	return false
+}
+
+func (d *Engine) RememberHeld(held engine.Held) {
+	if d.o.Reading != nil {
+		d.o.Reading.Remember(held)
+	}
+}
+
+func (d *Engine) Held() engine.Held {
+	if d.o.Reading == nil {
+		return nil
+	}
+	return d.o.Reading.Held()
 }
 
 func (d *Engine) Memory() engine.Memory {

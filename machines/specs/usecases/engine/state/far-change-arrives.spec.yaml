@@ -1,0 +1,15 @@
+description: 'a VM of the other Mac that crashes is read as it stands by the next stream of This Mac'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'world fault Hypervisor.Boot'
+      exit: 0
+    - command: 'world crash infra'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out.event == "snapshot") | .out.slices["mac:mac-mini"].value.VMs | map([.Name, .State])'''
+      stdin: |
+          {"v":2,"id":"1","watch":"engine.state","in":{"keys":["mac:mac-mini"],"revision":1}}
+      exit: 0
+      stdout: |
+          [["infra","stopped"]]

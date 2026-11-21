@@ -42,6 +42,12 @@ func WithState(ctx context.Context, s State) context.Context {
 	return context.WithValue(ctx, stateKey{}, s)
 }
 
+func WithoutState(ctx context.Context) context.Context {
+	// value: a context that carries no engine's store, so an engine.state
+	// asked within it is answered by the engine it reaches.
+	return context.WithValue(ctx, stateKey{}, nil)
+}
+
 var StateWatch = call.Watch[Deps, engine.StateIn, engine.StateFrame]{
 	Name: "engine.state", Where: call.InEngine, Applies: Applies,
 	Errors: []fail.Code{StateNoKey, StateUnknownKey},
@@ -127,7 +133,7 @@ func stream(ctx context.Context, src State, page int, patterns []store.Pattern, 
 	if !send(opened) || fit.Verdict != engine.Fits {
 		return
 	}
-	if in.Hold {
+	if in.Hold && in.Pace != engine.PaceIdle {
 		defer src.Attach()()
 	}
 	watch := st.Watch(ctx)

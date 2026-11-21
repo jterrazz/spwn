@@ -108,6 +108,7 @@ func (*worldMac) stopMarks() engine.StopMarks         { return nil }
 func (*worldMac) records() engine.Records             { return nil }
 func (*worldMac) engineVersion() string               { return "" }
 func (*worldMac) engineLacks(string) bool             { return false }
+func (*worldMac) holdsFar() bool                      { return true }
 func (*worldMac) absent(string) bool                  { return false }
 func (*worldMac) stationVersion() string              { return "" }
 func (*worldMac) engineStarted() time.Time            { return time.Time{} }

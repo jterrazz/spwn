@@ -29,7 +29,18 @@ type StateIn struct {
 	Hold bool `json:"hold,omitempty"`
 	// value: the revision of station.state/v1 the client reads.
 	Revision int `json:"revision"`
+	// value: the pace of whoever reads the stream: a held stream holds the
+	// engine's readers at their attached pace unless it says idle, as
+	// another Mac's engine does while no client is attached to it.
+	Pace string `json:"pace,omitempty"`
 }
+
+const (
+	PaceAttached = "attached"
+	PaceIdle     = "idle"
+)
+
+type Held map[string]map[string]SliceOut
 
 type StateSince struct {
 	Epoch string `json:"epoch"`

@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
+	"github.com/jterrazz/studio-station/apps/engine/engine"
 	"github.com/jterrazz/studio-station/apps/engine/engine/store"
 )
 
@@ -56,6 +57,7 @@ type Set struct {
 	// release build, inline in a world.
 	run     func(func())
 	readers []*Reader
+	far     *Far
 
 	mu      sync.Mutex
 	asleep  bool
@@ -76,6 +78,8 @@ type Options struct {
 	// value: the readers wait for the store's first ask before they read,
 	// as a stepped engine's do.
 	Lazy bool
+	// value: the other Macs' slices, held from their engines; nil holds none.
+	Far *Far
 }
 
 func New(o Options) *Set {
@@ -83,21 +87,43 @@ func New(o Options) *Set {
 	if run == nil {
 		run = func(f func()) { go f() }
 	}
-	return &Set{store: o.Store, clock: o.Clock, run: run, readers: o.Readers, asleep: o.Lazy,
+	s := &Set{store: o.Store, clock: o.Clock, run: run, readers: o.Readers, asleep: o.Lazy, far: o.Far,
 		started: map[string]time.Time{}, running: map[string]bool{}, due: map[string]bool{}, owner: map[store.Key]*Reader{}}
+	if s.far != nil {
+		s.far.Store, s.far.Clock, s.far.Pace = o.Store, o.Clock, s.Pace
+	}
+	return s
+}
+
+func (s *Set) Remember(held engine.Held) {
+	if s.far != nil {
+		s.far.Remember(held)
+	}
+}
+
+func (s *Set) Held() engine.Held {
+	if s.far == nil {
+		return nil
+	}
+	return s.far.Held()
 }
 
 func (s *Set) Ready(ctx context.Context) {
 	// invariant: a stepped engine stands for one that has run all along: its
 	// readers read when its store is first asked, at once, so the answer holds
 	// what such an engine read before, and a command that never asks it runs
-	// no reading it did not ask for.
+	// no reading it did not ask for. It waits for every other Mac's first
+	// snapshot too.
 	s.mu.Lock()
 	wake := s.asleep
 	s.asleep = false
 	s.mu.Unlock()
-	if wake {
-		s.Tick(ctx, false)
+	if !wake {
+		return
+	}
+	s.Tick(ctx, false)
+	if s.far != nil {
+		s.far.Warm(ctx)
 	}
 }
 
@@ -179,6 +205,9 @@ func (s *Set) Tick(ctx context.Context, watched bool) {
 	s.store.Clock(now)
 	for _, r := range start {
 		s.run(func() { s.read(ctx, r) })
+	}
+	if s.far != nil {
+		s.far.Tick(ctx)
 	}
 }
 

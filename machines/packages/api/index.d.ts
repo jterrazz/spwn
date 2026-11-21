@@ -1223,6 +1223,7 @@ export type EngineStateFrame = {
 export type EngineStateIn = {
     hold?: boolean;
     keys?: string[];
+    pace?: string;
     revision?: number;
     since?: EngineStateSince;
 };

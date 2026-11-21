@@ -463,6 +463,12 @@ func (m *worldMac) engineLacks(ability string) bool {
 
 func (m *worldMac) stationVersion() string { return m.slice().Station }
 
+// invariant: in a world only This Mac's engine holds the other Macs'
+// streams: another Mac's engine runs only to answer This Mac's command, and
+// what it would copy is read by no one, while its streams would wait on the
+// very start that asks it.
+func (m *worldMac) holdsFar() bool { return m.name == m.run.w.ThisMac }
+
 func (m *worldMac) absent(program string) bool { return slices.Contains(m.slice().Absent, program) }
 
 // invariant: a reading the engine runs beside its loop is, in a world, run
@@ -765,6 +771,7 @@ func (m *worldMac) begin(ctx context.Context, s *engineStart, start func() *proc
 	// invariant: when it began is set before the engine is, so a surface of
 	// that engine that asks for it meanwhile never reads it as a successor.
 	m.hold(d, m.engineStarted())
+	d.RememberHeld(m.slice().Engine.Held)
 	m.surfaces(ctx, d)
 	// invariant: a start begun in an engine's lifetime (waits) leaves the
 	// settling to the command: that command waits on this very start at its
@@ -926,6 +933,7 @@ func (m *worldMac) down(forget bool) {
 	memory := d.Memory()
 	history := d.History().Hand()
 	read := d.SettingsKept()
+	held := d.Held()
 	if leave := m.takeLeave(); leave != nil {
 		left := m.run.clock().moved.leave()
 		leave()
@@ -944,9 +952,9 @@ func (m *worldMac) down(forget bool) {
 	defer m.run.w.Unlock()
 	if e := m.run.w.Mac(m.name).Engine; e != nil {
 		e.Memory = memory
-		e.Awake, e.Exposure, e.Activity, e.Settings = &kept, &exposure, history, read
+		e.Awake, e.Exposure, e.Activity, e.Settings, e.Held = &kept, &exposure, history, read, held
 		if forget || e.Stopped {
-			e.Awake, e.Exposure, e.Activity, e.Settings = nil, nil, nil, nil
+			e.Awake, e.Exposure, e.Activity, e.Settings, e.Held = nil, nil, nil, nil, nil
 		}
 	}
 }

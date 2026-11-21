@@ -390,6 +390,8 @@ type Engine struct {
 	// its memory between two commands; its successor after a restart holds
 	// none.
 	Settings engine.SettingsKept `json:"settings,omitempty"`
+	// value: what the engine copied of the other Macs between two commands.
+	Held engine.Held `json:"held,omitempty"`
 	// value: the menu bar runs against this engine between two commands,
 	// "closed" or "open": closed it holds its page and events watches,
 	// open it watches This Mac's activity too.

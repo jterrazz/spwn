@@ -159,7 +159,15 @@ func (m machine) readers(calls call.Router, report func(awake.View) *awake.Repor
 		run = func(f func()) { f() }
 	}
 	own := readers.Local{Calls: calls, ThisMac: m.where.Machine, Awake: func() awake.Report { return *report(view()) }}
-	return readers.New(readers.Options{Store: st, Clock: m.sys.Clock, Run: run, Readers: own.Readers(), Lazy: lazy})
+	var far *readers.Far
+	if m.world == nil || m.world.holdsFar() {
+		far = &readers.Far{Calls: calls, Macs: m.machines(false).OtherMacs, Following: m.world.watchContext, Drop: func(mac string) {
+			if m.far != nil && m.far.router != nil {
+				m.far.router.Drop(mac)
+			}
+		}}
+	}
+	return readers.New(readers.Options{Store: st, Clock: m.sys.Clock, Run: run, Readers: own.Readers(), Lazy: lazy, Far: far})
 }
 
 // invariant: a workspace's reading of its file is machinefile.drift's
