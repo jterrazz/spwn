@@ -277,7 +277,7 @@ func TestKeysAndPatterns(t *testing.T) {
 		in string
 		ok bool
 	}{
-		{"mac:macbook-pro", true}, {"overview:linux-1", true}, {"tailnet", true}, {"records", true}, {"vault", true},
+		{"mac:macbook-pro", true}, {"mac:manageds-virtual-machine.local", true}, {"mac:.local", false}, {"overview:linux-1", true}, {"tailnet", true}, {"records", true}, {"vault", true},
 		{"mac", false}, {"vault:a", false}, {"apps:linux-1", false}, {"mac:Linux-1", false}, {"mac:", false}, {"mac:a_b", false},
 	} {
 		if _, err := ParseKey(tc.in); (err == nil) != tc.ok {

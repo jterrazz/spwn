@@ -61,17 +61,19 @@ func ParseKey(s string) (Key, error) {
 		return "", fmt.Errorf("%q: the family %s names no machine", s, family)
 	}
 	if per && !machineName(machine) {
-		return "", fmt.Errorf("%q: a machine is lowercase letters, digits and dashes", s)
+		return "", fmt.Errorf("%q: a machine is lowercase letters, digits, dashes and dots", s)
 	}
 	return Key(s), nil
 }
 
 func machineName(s string) bool {
-	if s == "" {
+	// invariant: a machine is named as every call names it: a registered
+	// name, or an unregistered Mac's hostname lowercased, dots and all.
+	if s == "" || s[0] == '.' {
 		return false
 	}
 	for _, r := range s {
-		if (r < 'a' || r > 'z') && (r < '0' || r > '9') && r != '-' {
+		if (r < 'a' || r > 'z') && (r < '0' || r > '9') && r != '-' && r != '.' {
 			return false
 		}
 	}
