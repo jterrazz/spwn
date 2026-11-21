@@ -6,9 +6,10 @@ the glass behind the text, the token's colour is composited over each, and the
 WCAG ratio's 10th percentile is the box's value. It prints a table, writes
 measures.json and a compare image per shot: capture | M1 cell | golden.
 
-It then reads the wash (tint.py, from native.json and the walls' shots) and the opening
-(opening.py, from opening.json) when the run took them, prints each with PASS or FAIL
-and its numbers, writes tint.json and opening.json, and exits 1 when either fails.
+It then reads the wash (tint.py, from native.json and the walls' shots), the opening
+(opening.py, from opening.json) and the Dock (dock.py, from dock.json) when the run took
+them, prints each with PASS or FAIL and its numbers, writes tint.json, opening.json and
+dock-verdict.json, and exits 1 when any fails.
 
 usage: measure.py <out dir> <goldens dir> [M1 scenes dir]
 """
@@ -23,6 +24,7 @@ from scipy import ndimage
 
 # invariant: run.sh starts this with -I, which leaves the script's folder off the path.
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import dock  # noqa: E402
 import opening  # noqa: E402
 import tint  # noqa: E402
 
@@ -244,4 +246,6 @@ if __name__ == "__main__":
         verdicts.append(wash(out))
     if os.path.exists(os.path.join(out, "opening.json")):
         verdicts.append(zoom(out))
+    if os.path.exists(os.path.join(out, "dock.json")):
+        verdicts.append(dock.verdict(out))
     sys.exit(0 if all(verdicts) else 1)

@@ -45,6 +45,18 @@ SPAN = 5.0
 # value: a hand's click holds the button about a tenth of a second, through which the
 # status button tracks the mouse and may drop its highlight when it lets go.
 HOLD = 0.15
+# value: the Dock's six icon appearances, AppleIconAppearanceTheme's values (the L1 spike
+# read them in System Settings, 2026-11-21), each in the scheme its name gives.
+THEMES = [("RegularLight", "light"), ("RegularDark", "dark"), ("ClearLight", "light"),
+          ("ClearDark", "dark"), ("TintedLight", "light"), ("TintedDark", "dark")]
+# value: the pinned apps, the two under judgement each between Apple's; Finder is
+# the Dock's first tile whatever is pinned, and a tile's accessibility name is its bundle's
+# file name ("Station" for Spwn Menu). The window is built by make window.
+DOCK = [("Safari", "/Applications/Safari.app"), ("Notes", "/System/Applications/Notes.app"),
+        ("Spwn", "/Applications/Spwn.app"), ("System Settings", "/System/Applications/System Settings.app"),
+        ("Spwn Menu", "/Applications/Station.app"), ("Terminal", "/System/Applications/Utilities/Terminal.app")]
+BUILT = {"/Applications/Spwn.app": f"{ROOT}/.artifacts/window/Spwn.app", "/Applications/Station.app": APP}
+TILE_PT = 64
 
 
 class Rig:
@@ -377,6 +389,71 @@ class Rig:
         self.say(f"-- {name}: {len(frames)} frames in {frames[-1][0]:.1f} s")
         return meta
 
+    # value: the two bundles go where a person installs them, then the Dock is
+    # rewritten to Finder and DOCK alone, at TILE_PT with no magnification.
+    def dock_setup(self):
+        for target, built in BUILT.items():
+            self.ssh(f"sudo -n rm -rf {target!r} && sudo -n ditto {built} {target!r}", check=True)
+            self.ssh(f"/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f {target!r}", check=True)
+        tiles = " ".join(
+            "'<dict><key>tile-data</key><dict><key>file-data</key><dict><key>_CFURLString</key>"
+            f"<string>file://{path.replace(' ', '%20')}/</string><key>_CFURLStringType</key><integer>15</integer>"
+            "</dict></dict><key>tile-type</key><string>file-tile</string></dict>'"
+            for _, path in DOCK)
+        self.gui(f"defaults write com.apple.dock persistent-apps -array {tiles}", check=True)
+        self.gui("defaults write com.apple.dock persistent-others -array", check=True)
+        for key, kind, value in (("show-recents", "bool", "false"), ("magnification", "bool", "false"),
+                                 ("tilesize", "int", str(TILE_PT)), ("autohide", "bool", "false")):
+            self.gui(f"defaults write com.apple.dock {key} -{kind} {value}", check=True)
+        self.ssh("printf 'tell application \"System Events\" to tell process \"Dock\"\n"
+                 "set out to \"\"\nrepeat with e in UI elements of list 1\n"
+                 "set p to position of e\nset z to size of e\n"
+                 "set out to out & (name of e) & tab & (item 1 of p) & tab & (item 2 of p) & tab & (item 1 of z) & tab & (item 2 of z) & linefeed\n"
+                 "end repeat\nreturn out\nend tell\n' > ~/cap/dock.scpt")
+
+    # invariant: an appearance is the scheme and the icon theme together, and the Dock
+    # draws a theme it reads at its start, so it is restarted after both are written.
+    def dock_shot(self, theme, scheme):
+        self.appearance(scheme)
+        self.gui(f"defaults write -g AppleIconAppearanceTheme {theme}", check=True)
+        self.ssh("killall Dock; true")
+        time.sleep(8)
+        tiles = {}
+        for line in self.gui("osascript ~/cap/dock.scpt").splitlines():
+            parts = line.split("\t")
+            if len(parts) == 5:
+                tiles[parts[0]] = dict(zip("xywh", map(float, parts[1:])))
+        self.park()
+        time.sleep(1)
+        self.reconnect()
+        full = self.capture(f"dock-{theme}")
+        s, _ = self.scale(None)
+        names = ["Finder"] + [n for n, _ in DOCK]
+        titles = {"Finder": "Finder"} | {n: os.path.basename(path).removesuffix(".app") for n, path in DOCK}
+        missing = [n for n in names if titles[n] not in tiles]
+        if missing:
+            self.say(f"FAIL dock-{theme}: no Dock frame for {', '.join(missing)}; read {sorted(tiles)}")
+            return None
+        from PIL import Image
+
+        img = Image.open(full).convert("RGB")
+        boxes = {}
+        for n in names:
+            t = tiles[titles[n]]
+            side = min(t["w"], t["h"])
+            x, y = t["x"] + (t["w"] - side) / 2, t["y"] + (t["h"] - side) / 2
+            box = [int(round(x * s)), int(round(y * s)), int(round((x + side) * s)), int(round((y + side) * s))]
+            img.crop(box).save(os.path.join(self.out, f"dock-{theme}-{n.replace(' ', '')}.png"))
+            boxes[n] = box
+        left, top = min(b[0] for b in boxes.values()), min(b[1] for b in boxes.values())
+        right, bottom = max(b[2] for b in boxes.values()), max(b[3] for b in boxes.values())
+        pad = int(12 * s)
+        img.crop((left - pad, top - pad, right + pad, bottom + pad)).save(os.path.join(self.out, f"dock-{theme}.png"))
+        read = self.gui("defaults read -g AppleIconAppearanceTheme; defaults read -g AppleInterfaceStyle").split()
+        meta = {"theme": theme, "scheme": scheme, "read": read, "tiles": boxes, "order": names}
+        self.say(f"-- dock-{theme}: {json.dumps(meta)}")
+        return meta
+
     def behave(self, item):
         results = {}
         for gesture in ["item", "outside", "esc"]:
@@ -482,12 +559,19 @@ def main():
             rig.trial(keyboard)
     if "bench" in sets:
         openings.append(rig.bench(int(os.environ.get("STATION_BENCH_RUNS", "50"))))
+    docks = []
+    if "dock" in sets:
+        rig.dock_setup()
+        docks = [rig.dock_shot(theme, scheme) for theme, scheme in THEMES]
+        rig.gui("defaults delete -g AppleIconAppearanceTheme")
+        rig.ssh("killall Dock; true")
+        json.dump([d for d in docks if d], open(os.path.join(out, "dock.json"), "w"), indent=1)
     rig.appearance("dark")
     json.dump([s for s in shots if s], open(os.path.join(out, "shots.json"), "w"), indent=1)
     rig.vnc.disconnect()
     api.shutdown()
-    failed = [s for s in shots + openings if s is None]
-    rig.say(f"-- {len(shots) - len(failed)} shots, {len(failed)} failed")
+    failed = [s for s in shots + openings + docks if s is None]
+    rig.say(f"-- {len(shots) + len(docks) - len(failed)} shots, {len(failed)} failed")
     sys.exit(1 if failed else 0)
 
 

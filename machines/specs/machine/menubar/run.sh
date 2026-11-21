@@ -24,6 +24,7 @@
 #   STATION_CAPTURE_ITEM=x,y,w,h gives old's item frame, STATION_CAPTURE_PAGE=<story>
 #   the home story served (home.needs by default). native and opening add the wash
 #   and zoom measures (capture/tint.py, opening.py), which fail the run when they fail.
+#   dock builds Spwn.app too and judges both apps' icons in the Dock (capture/dock.py).
 #   STATION_CAPTURE_SET=bench is the bench alone: the tree's engine is built in the
 #   guest by the pinned Go and serves the app in place of the fake one, the app
 #   opens its panel and This Mac's page STATION_BENCH_RUNS times each (50 unless
@@ -177,6 +178,16 @@ if [ $capture -eq 1 ]; then
   t=$SECONDS
   in_vm "zsh -lc 'cd $vm_root && make menubar'" >> "$log" 2>&1 || fail "make menubar in the VM"
   say "-- built Station.app in $((SECONDS - t)) s"
+  case ",${STATION_CAPTURE_SET:-walls,behave,trial}," in
+    *,dock,*)
+      # value: the window is built as the release builds it, Rust taken by rustup when
+      # the image has none, as publish.yaml does on its runner; the pushed branch carries
+      # no tag, so its version is given.
+      t=$SECONDS
+      in_vm "zsh -lc 'command -v cargo >/dev/null || curl --proto \\=https --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal; . \$HOME/.cargo/env; cd $vm_root && make window WINDOW_VERSION=0.0.0-capture'" >> "$log" 2>&1 || fail "make window in the VM"
+      say "-- built Spwn.app in $((SECONDS - t)) s"
+      ;;
+  esac
   shots="$work/capture"
   STATION_VM_ROOT="$vm_root" "$venv/bin/python" -I "$suite/menubar/capture/drive.py" "$ip" "$ssh_key" "$url" "$repo" "$shots" \
     "$sets" "${STATION_CAPTURE_ITEM:-}" 2>&1 | tee -a "$log"
@@ -193,7 +204,7 @@ if [ $capture -eq 1 ]; then
     ${STATION_CAPTURE_M1:+"$STATION_CAPTURE_M1"} 2>&1 | tee -a "$log"
   measured=${PIPESTATUS[0]}
   [ $code -eq 0 ] || fail "capture: drive.py exit $code"
-  [ $measured -eq 0 ] || fail "capture: a measure failed (the wash or the zoom), see $shots"
+  [ $measured -eq 0 ] || fail "capture: a measure failed (the wash, the zoom or the Dock), see $shots"
   say "PASS capture: $shots"
   exit 0
 fi

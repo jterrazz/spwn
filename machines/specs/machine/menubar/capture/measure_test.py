@@ -6,7 +6,9 @@ The wash bars must hold the system's own pairs and the owner's pick, and refuse 
 builds the baseline records (baseline.json: the capture at 47bedbecd, and the tinted
 glass of sweep mb1-sweep4); the zoom measure must refuse a title that scales or fades in
 as the panel opens, and an item that drops its highlight, or a panel whose top is not
-Passwords', and accept a panel shown whole under a lit item.
+Passwords', and accept a panel shown whole under a lit item. The Dock's verdict must
+refuse a bright white tile among grey glass in a mono appearance, and accept one inside
+the Apple tiles' range.
 """
 
 import json
@@ -19,6 +21,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
+import dock  # noqa: E402
 import opening  # noqa: E402
 import tint  # noqa: E402
 
@@ -162,6 +165,37 @@ class Zoom(unittest.TestCase):
         for row in base:
             self.assertFalse(row["pass"], row["name"])
             self.assertFalse(row["checks"]["title"], row["name"])
+
+
+class Dock(unittest.TestCase):
+    def capture(self, folder, theme, spwn):
+        """A dock.json of one appearance: Apple's tiles grey from 60 to 110, Spwn Menu at
+        90, and Spwn at `spwn`, each a flat 40 px tile."""
+        greys = dict(zip(dock.APPLE, (60, 75, 90, 100, 110)))
+        for name, grey in {**greys, "Spwn": spwn, "Spwn Menu": 90}.items():
+            colour = grey if isinstance(grey, tuple) else (grey,) * 3
+            Image.new("RGB", (40, 40), colour).save(dock.tile_path(folder, theme, name))
+        Image.new("RGB", (300, 60), (50, 50, 50)).save(os.path.join(folder, f"dock-{theme}.png"))
+        return {"theme": theme}
+
+    def verdict(self, spwn):
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as folder:
+            docks = [self.capture(folder, theme, spwn) for theme in dock.MONO]
+            json.dump(docks, open(os.path.join(folder, "dock.json"), "w"))
+            ok = dock.verdict(folder)
+            self.assertTrue(os.path.exists(os.path.join(folder, "board.png")))
+            return ok
+
+    def test_a_tile_inside_the_apple_range_passes(self):
+        self.assertTrue(self.verdict(80))
+
+    def test_a_white_tile_among_grey_glass_fails(self):
+        self.assertFalse(self.verdict(250))
+
+    def test_a_saturated_tile_among_grey_glass_fails(self):
+        self.assertFalse(self.verdict((40, 140, 255)))
 
 
 if __name__ == "__main__":
