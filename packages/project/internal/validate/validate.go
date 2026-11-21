@@ -157,6 +157,15 @@ func IsValidAgentName(name string) bool {
 	return name != "" && len(name) <= MaxAgentNameLen && slugRe.MatchString(name)
 }
 
+// WorkspaceName rejects a workspace name that is not a slug, the rule
+// the manifest enforces and Spawn applies to every caller.
+func WorkspaceName(name string) error {
+	if slugRe.MatchString(name) {
+		return nil
+	}
+	return fmt.Errorf("workspace name %q must match %s", name, slugRe.String())
+}
+
 // IsValidProjectName reports whether the given name matches the
 // manifest's project-name regex (`^[a-z0-9][a-z0-9-]*$`). Empty
 // names are invalid.
@@ -587,10 +596,10 @@ func ruleWorkspaceMounts(in Input) []Issue {
 					})
 					continue
 				}
-				if !slugRe.MatchString(name) {
+				if err := WorkspaceName(name); err != nil {
 					out = append(out, Issue{
 						Level: LevelError, Path: "spwn.yaml#worlds." + wname + ".workspaces",
-						Message: fmt.Sprintf("workspace name %q must match ^[a-z][a-z0-9-]*$", name),
+						Message: err.Error(),
 					})
 				}
 				continue

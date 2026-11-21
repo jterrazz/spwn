@@ -1,6 +1,7 @@
 package architect
 
 import (
+	"context"
 	"reflect"
 	"sort"
 	"strings"
@@ -111,6 +112,18 @@ func TestWorkspaceContainerPath(t *testing.T) {
 	for _, tt := range tests {
 		if got := workspaceContainerPath(tt.name, tt.total); got != tt.want {
 			t.Errorf("workspaceContainerPath(%q, %d) = %q, want %q", tt.name, tt.total, got, tt.want)
+		}
+	}
+}
+
+func TestSpawnRejectsAWorkspaceNameThatIsNotASlug(t *testing.T) {
+	for _, name := range []string{"my ws", "a*", "Proj", "x\\040y"} {
+		_, err := (&Architect{}).Spawn(context.Background(), SpawnOpts{
+			ConfigName: "c",
+			Workspaces: []models.Workspace{{Name: name, Path: t.TempDir()}},
+		})
+		if err == nil || !strings.Contains(err.Error(), "must match ^[a-z][a-z0-9-]*$") {
+			t.Errorf("workspace %q: got %v, want the slug rule", name, err)
 		}
 	}
 }

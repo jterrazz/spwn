@@ -24,6 +24,7 @@ import (
 	"spwn.sh/packages/dependency/resolver"
 	"spwn.sh/packages/gate"
 	"spwn.sh/packages/platform"
+	"spwn.sh/packages/project"
 	"spwn.sh/packages/transpile"
 	"spwn.sh/packages/world/labels"
 	"spwn.sh/packages/world/models"
@@ -150,6 +151,9 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		name := strings.TrimSpace(ws.Name)
 		if name == "" {
 			name = fmt.Sprintf("w%d", i)
+		}
+		if err := project.ValidateWorkspaceName(name); err != nil {
+			return nil, err
 		}
 		if seenNames[name] {
 			return nil, fmt.Errorf("duplicate workspace name %q", name)

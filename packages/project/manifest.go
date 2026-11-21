@@ -221,6 +221,12 @@ func IsValidAgentName(name string) bool {
 // doesn't reach into the internal validate package.
 const MaxAgentNameLen = validate.MaxAgentNameLen
 
+// ValidateWorkspaceName rejects a workspace name the manifest would
+// reject, so a CLI flag or an API body meets the manifest's rule.
+func ValidateWorkspaceName(name string) error {
+	return validate.WorkspaceName(name)
+}
+
 // IsValidProjectName reports whether the given string matches the
 // manifest's project-name regex.
 func IsValidProjectName(name string) bool {
