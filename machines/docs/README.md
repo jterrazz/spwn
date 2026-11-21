@@ -115,5 +115,7 @@ The records of decisions this repository alone took go in [`decisions/`](decisio
 - [060 The window offers the engine's release and updates on a press](decisions/060-the-window-offers-the-engines-release-and-updates-on-a-press.md) (Accepted)
 - [061 The history is kept by the Mac that holds the machine](decisions/061-the-history-is-kept-by-the-mac-that-holds-the-machine.md) (Proposed)
 - [065 The window updates itself through the Tauri updater](decisions/065-the-window-updates-itself-through-the-tauri-updater.md) (Proposed)
+- [066 A commit owes that it builds and lints, a lot owes the gate](decisions/066-a-commit-owes-that-it-builds-and-lints-a-lot-owes-the-gate.md) (Accepted)
+- [067 One train, appended by makers, proved at its tip](decisions/067-one-train-appended-by-makers-proved-at-its-tip.md) (Accepted)
 
 A decision spanning several repositories is recorded by the corpus that spans them. What was left for later is `TODO.md` at the repository root.
