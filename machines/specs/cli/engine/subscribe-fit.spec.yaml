@@ -5,7 +5,7 @@ fixture:
     - ../../__fixtures__/power/
 env: engine
 runs:
-    - command: '--version > /dev/null; "$STATION" engine run 2> engine.log & d=$!; n=0; while [ ! -S .local/state/station/engine.sock ] && [ $n -lt 50 ]; do /bin/sleep 0.1; n=$((n+1)); done; for r in 5 6 4 none; do if [ $r = none ]; then i=''{"pages":["keep-awake"]}''; else i="{\"pages\":[\"keep-awake\"],\"revision\":$r}"; fi; ( printf ''{"v":2,"id":"1","watch":"page","in":%s}\n'' "$i"; /bin/sleep 1 ) | socket .local/state/station/engine.sock > "$r.jsonl"; /usr/bin/jq -c ''select(.out.stream)|[.out.page, .out.fit.verdict, .out.fit.engine, .out.fit.app]'' "$r.jsonl"; /usr/bin/jq -s -c ''[.[]|select(.out.event=="page")]|length|"pages: \(.)"'' "$r.jsonl"; done; kill $d; wait $d'
+    - command: '--version > /dev/null; "$STATION" engine run 2> engine.log & d=$!; n=0; while [ ! -S .local/state/station/engine.sock ] && [ $n -lt 50 ]; do /bin/sleep 0.1; n=$((n+1)); done; for r in 5 6 4 none; do if [ $r = none ]; then i=''{"pages":["keep-awake"]}''; else i="{\"pages\":[\"keep-awake\"],\"revision\":$r}"; fi; ( printf ''{"v":2,"id":"1","watch":"page","in":%s}\n'' "$i"; n=0; until /usr/bin/jq -e ''select(.out.event=="page" or .done)'' "$r.jsonl" > /dev/null 2>&1 || [ $n -ge 100 ]; do /bin/sleep 0.1; n=$((n+1)); done ) | socket .local/state/station/engine.sock > "$r.jsonl"; /usr/bin/jq -c ''select(.out.stream)|[.out.page, .out.fit.verdict, .out.fit.engine, .out.fit.app]'' "$r.jsonl"; /usr/bin/jq -s -c ''[.[]|select(.out.event=="page")]|length|"pages: \(.)"'' "$r.jsonl"; done; kill $d; wait $d'
       exit: 0
       stdout: |
           [5,"fits",5,5]
