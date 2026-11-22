@@ -6,6 +6,7 @@ runs:
       stdout: |
           	On mac-mini:
           ●	base-ubuntu	2026.11.01	deleted
+          	The upstream disk tart downloaded stays for the next build: station disk free tart frees it
     - command: 'images --json | /usr/bin/jq -r ''.images[] | "\(.mac) \(.version)"'''
       exit: 0
       stdout: |

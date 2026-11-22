@@ -71,7 +71,7 @@ station images build base-ubuntu --binary .artifacts/go/station-linux-arm64
 
 ## Cleaning
 
-`station images delete <image>@<version>` deletes only a deletable version: the newest, one a machine was made from and one a build is making are refused (exit 2, `image.in-use`), naming why, whichever client asks; a bare `<image>` deletes every version, the newest included, but is refused (`image.in-use`, "being built") while a build of that image is making one. A delete never touches a VM: a VM is an APFS clone, independent of its image once made. Bare `station images` marks every version older than the newest. Deleting never prunes Tart's cache of the upstream: that cache is Tart's, emptied by `station disk free tart` ([Disk](disk.md)), and the next build pulls the upstream again after it.
+`station images delete <image>@<version>` deletes only a deletable version: the newest, one a machine was made from and one a build is making are refused (exit 2, `image.in-use`), naming why, whichever client asks; a bare `<image>` deletes every version, the newest included, but is refused (`image.in-use`, "being built") while a build of that image is making one. A delete never touches a VM: a VM is an APFS clone, independent of its image once made. Bare `station images` marks every version older than the newest. Deleting never prunes Tart's cache of the upstream: that cache is Tart's, emptied by `station disk free tart` ([Disk](disk.md)), and the next build pulls the upstream again after it. A delete that leaves no image on the Mac says so, in a line under its rows, with the gesture: `The upstream disk tart downloaded stays for the next build: station disk free tart frees it`; the delete frees nothing of that cache, which is shared by every build.
 
 ## Related
 

@@ -56,7 +56,8 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			return io.Page(pageimages.Deleted(removed, d.ThisMachine), nil)
+			left, listed := call.Invoke(ctx, env.Calls, env.Target(), imagescalls.List, imagescalls.ListIn{}, nil)
+			return io.Page(pageimages.Deleted(removed, listed == nil && len(left) == 0, d.ThisMachine), nil)
 		},
 	}, env)
 }

@@ -139,8 +139,14 @@ func Updated(updates []images.Update, thisMac page.Context) page.Page {
 	return pages.Outcome("images update", thisMac, versioned(), out, "images to update")
 }
 
-func Deleted(records []images.Record, thisMac page.Context) page.Page {
-	return pages.Outcome("images delete", thisMac, versioned(), rows(records, "deleted"), "images to delete")
+const CacheKept = "The upstream disk " + catalog.HypervisorApp + " downloaded stays for the next build: station disk free " + catalog.HypervisorApp + " frees it"
+
+func Deleted(records []images.Record, noneLeft bool, thisMac page.Context) page.Page {
+	var extra []page.Section
+	if noneLeft && len(records) > 0 {
+		extra = append(extra, page.Section{ID: "cache", Role: page.Banner, Uncounted: true, Items: []page.Item{{Note: &page.Note{Text: CacheKept}}}})
+	}
+	return pages.Outcome("images delete", thisMac, versioned(), rows(records, "deleted"), "images to delete", extra...)
 }
 
 func versioned() []page.Column {
