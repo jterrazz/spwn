@@ -732,7 +732,11 @@ func (m *worldMac) up(ctx context.Context) (*process.Engine, bool) {
 		}
 		s, mine := m.beginStarting()
 		if mine {
-			return m.begin(context.WithoutCancel(ctx), s, start)
+			d, ok := m.begin(context.WithoutCancel(ctx), s, start)
+			if ok && ctx.Value(waits{}) != nil {
+				greeted(d)
+			}
+			return d, ok
 		}
 		if s == nil {
 			continue
@@ -780,6 +784,22 @@ func (m *worldMac) begin(ctx context.Context, s *engineStart, start func() *proc
 		m.settle(ctx)
 	}
 	return d, true
+}
+
+// invariant: an engine begun in another engine's lifetime is read by that
+// engine at once, with no settling of its own: it is handed over once every
+// guest greeting it has said what it says at the start, as an engine the
+// world says runs has long said it, so what the reader reads of its VMs'
+// guests is the same however loaded the gate. A greeting lands on no clock;
+// one that waits on the clock all the same is waited for greetBound of real
+// time.
+func greeted(d *process.Engine) {
+	bound := time.NewTimer(greetBound)
+	defer bound.Stop()
+	select {
+	case <-d.Greeted():
+	case <-bound.C:
+	}
 }
 
 // invariant: the surfaces the world says watch this engine hold the very
