@@ -1,0 +1,3 @@
+#!/bin/sh
+# The station inside the VM: the spec binary as a linux machine whose root is vm/root.
+exec /usr/bin/env STATION_MACHINE_KIND=linux STATION_SYSTEM_ROOT="$HOME/root" STATION_SYSTEM_DIRS= NO_COLOR=1 "$STATION" "$@"

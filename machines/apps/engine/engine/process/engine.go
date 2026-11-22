@@ -72,6 +72,9 @@ type Options struct {
 	// value: the engine's own state folder: its socket and its children.
 	State       string
 	ThisMachine catalog.MachineKind
+	// value: the file of this Mac's device key's public half, the first key a
+	// VM trusts; empty when this Mac has no device key.
+	DeviceKey string
 	// value: the ports the catalog's packages serve on: a reserved port's HTTP
 	// and label, the env a VM's run sets.
 	Ports []catalog.PackagePort
