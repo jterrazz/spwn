@@ -111,5 +111,10 @@ func (s *Store) Delete(_ context.Context, image, version string) error {
 	if err := s.files.Remove(s.file(image, version)); err != nil && !errors.Is(err, fs.ErrNotExist) {
 		return err
 	}
+	if left, err := s.files.ReadDir(s.imageDir(image)); err == nil && len(left) == 0 {
+		if err := s.files.Remove(s.imageDir(image)); err != nil && !errors.Is(err, fs.ErrNotExist) {
+			return err
+		}
+	}
 	return nil
 }

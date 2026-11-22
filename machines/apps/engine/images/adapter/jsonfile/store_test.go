@@ -2,6 +2,7 @@ package jsonfile_test
 
 import (
 	"context"
+	"errors"
 	"io/fs"
 	"path"
 	"testing"
@@ -49,5 +50,28 @@ func TestAMarkClearedWhileTheFolderIsReadIsNone(t *testing.T) {
 	got, err := jsonfile.NewMarks(vanishing{Files: files, gone: "base-ubuntu.json"}, dir).Marked(ctx)
 	if err != nil || len(got) != 1 || got[0].Image != "studio-linux" {
 		t.Fatalf("Marked = %+v, %v; want the mark still there", got, err)
+	}
+}
+
+func TestTheLastRecordDeletedTakesItsImageFolderWithIt(t *testing.T) {
+	ctx, dir := context.Background(), t.TempDir()
+	files := local.New(nil, nil, nil, nil).FS
+	store := jsonfile.New(files, dir)
+	for _, version := range []string{"1", "2"} {
+		if err := store.Put(ctx, images.Record{Name: "base-ubuntu", Version: version}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := store.Delete(ctx, "base-ubuntu", "1"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := files.ReadDir(path.Join(dir, "base-ubuntu")); err != nil {
+		t.Fatalf("the folder went with one of two records: %v", err)
+	}
+	if err := store.Delete(ctx, "base-ubuntu", "2"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := files.ReadDir(path.Join(dir, "base-ubuntu")); !errors.Is(err, fs.ErrNotExist) {
+		t.Errorf("the image folder stays after its last record: %v", err)
 	}
 }
