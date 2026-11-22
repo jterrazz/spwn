@@ -113,9 +113,7 @@ describe('server', () => {
                 await visitor.fill(within(confirm, field('Type infra to confirm')), 'infra');
                 await visitor.click(within(confirm, button('Restart')));
                 await visitor.gone(within(needs, line));
-                await visitor.click(
-                    within(navigation('Sidebar'), button('Inbox', { exact: false })),
-                );
+                await visitor.click(within(navigation('Rail'), button('Inbox', { exact: false })));
 
                 // Then - Today holds the engine's line of this restart, beside the one of the morning
                 const today = region('Today');

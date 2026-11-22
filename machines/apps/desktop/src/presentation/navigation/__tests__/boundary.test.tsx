@@ -28,11 +28,11 @@ describe('Boundary', () => {
                 <Window initial={{ page: 'home' }} pages={THROWING} />
             </EngineProvider>,
             async (visitor) => {
-                const sidebar = navigation('Sidebar');
+                const rail = navigation('Rail');
                 await visitor.see(content('Home is drawn'));
 
                 // When - Inbox is opened
-                await visitor.click(within(sidebar, button('Inbox 2')));
+                await visitor.click(within(rail, button('Inbox 2')));
 
                 // Then - its frame says what broke and where, with a Reload
                 await visitor.see(heading('The window could not draw Inbox.'));
@@ -40,7 +40,7 @@ describe('Boundary', () => {
                 await visitor.see(button('Reload'));
 
                 // When - Home is opened from the sidebar that survived
-                await visitor.click(within(sidebar, button('Home')));
+                await visitor.click(within(rail, button('Home')));
 
                 // Then - Home is drawn again
                 await visitor.see(content('Home is drawn'));

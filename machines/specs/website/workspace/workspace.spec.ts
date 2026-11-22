@@ -14,6 +14,7 @@ import { describe, expect, test } from 'vitest';
 import { website } from '../website.specification.js';
 
 const sidebar = navigation('Sidebar');
+const rail = navigation('Rail');
 
 describe('workspace', () => {
     test.todo(
@@ -110,7 +111,7 @@ describe('workspace', () => {
             // Then - it reads stopped, and Home counts its memory free
             await visitor.see(heading('linux-1 stopped'));
             await visitor.see(within(sidebar, button('linux-1 stopped')));
-            await visitor.click(within(sidebar, button('Home')));
+            await visitor.click(within(rail, button('Home')));
             await visitor.see(within(region('Machines'), content('12 free')));
         });
         expect(result.errors.text).toBe('');
@@ -187,7 +188,7 @@ describe('workspace', () => {
                 await visitor.see(within(sidebar, button('linux-2 not created')));
 
                 // When - the Inbox is opened
-                await visitor.click(within(sidebar, button('Inbox 2')));
+                await visitor.click(within(rail, button('Inbox 2')));
 
                 // Then - it is a need, with the engine's Try again
                 await visitor.see(content('linux-2 was not created: it failed at boot'));

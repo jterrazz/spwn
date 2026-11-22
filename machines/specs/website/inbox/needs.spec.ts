@@ -4,6 +4,7 @@ import { describe, expect, test } from 'vitest';
 import { website } from '../website.specification.js';
 
 const sidebar = navigation('Sidebar');
+const rail = navigation('Rail');
 const needs = region('Needs you');
 const canWait = region('Upkeep');
 
@@ -12,7 +13,7 @@ describe('needs', () => {
         // Given - the window on Home over engine-stopped, whose one line that needs me is the stopped engine
         const start = button('Start the engine', { exact: false });
         const result = await website.visit('/?world=engine-stopped&page=home', async (visitor) => {
-            await visitor.see(within(sidebar, button('Inbox 1')));
+            await visitor.see(within(rail, button('Inbox 1')));
             await visitor.see(heading('Needs you 1'));
             await visitor.see(heading('The engine is stopped.'));
 
@@ -21,7 +22,7 @@ describe('needs', () => {
 
             // Then - the line has left, and the sidebar no longer counts it
             await visitor.gone(within(needs, start));
-            await visitor.see(within(sidebar, button('Inbox')));
+            await visitor.see(within(rail, button('Inbox')));
         });
         expect(result.errors.text).toBe('');
     });
@@ -224,8 +225,8 @@ describe('needs', () => {
             await visitor.see(sidebar);
 
             // Then - the fleet's places are there, Inbox with its count of the lines that need me, the Catalog with its counts
-            await visitor.see(within(sidebar, button('Home')));
-            await visitor.see(within(sidebar, button('Inbox 2')));
+            await visitor.see(within(rail, button('Home')));
+            await visitor.see(within(rail, button('Inbox 2')));
             await visitor.see(within(sidebar, button('Machine files')));
             await visitor.see(within(sidebar, button('Passwords')));
             await visitor.see(within(sidebar, button('macbook-pro online')));

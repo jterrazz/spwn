@@ -1,7 +1,15 @@
-- navigation "Sidebar":
-  - button "Find"
+- navigation "Rail":
   - button "Home"
   - button "Inbox 2"
+  - group "Spaces":
+    - button "Machine" [pressed]
+    - button "Agent soon" [disabled]
+    - button "OS soon" [disabled]
+  - button "Settings"
+  - button "Engine stopped"
+- navigation "Sidebar":
+  - heading "Machine" [level=2]
+  - button "Find"
   - button "Machine files"
   - button "Passwords"
   - group "Machines":
@@ -27,7 +35,6 @@
     - button "Skills 0"
     - button "Machine settings 3"
   - button "Storage"
-  - button "Engine stopped"
 - main:
   - button "Show or hide the sidebar"
   - button "Back" [disabled]

@@ -7,8 +7,11 @@ import { machineRoute } from './route';
 import type { Router } from './router';
 import { mouseShortcutOf, shortcutOf } from './shortcut';
 import type { Shortcut } from './shortcut';
+import type { Space } from './spaces';
 
-function obey(shortcut: Shortcut, router: Router, onFind: () => void): void {
+export type Acts = { onFind: () => void; onSpace: (space: Space) => void };
+
+function obey(shortcut: Shortcut, router: Router, { onFind, onSpace }: Acts): void {
     const { route, go, back, forward } = router;
     switch (shortcut) {
         case 'back': {
@@ -31,6 +34,18 @@ function obey(shortcut: Shortcut, router: Router, onFind: () => void): void {
             go({ page: 'settings' });
             return;
         }
+        case 'inbox': {
+            go({ page: 'inbox' });
+            return;
+        }
+        case 'space-machine': {
+            onSpace('machine');
+            return;
+        }
+        case 'space-agent':
+        case 'space-os': {
+            return;
+        }
         case 'gallery': {
             go({ page: 'gallery' });
             return;
@@ -45,12 +60,7 @@ function obey(shortcut: Shortcut, router: Router, onFind: () => void): void {
 
 // invariant: while a dialog is open the window's shortcuts are swallowed, so a draft in it is never unmounted; while
 // invariant: the frame holds the no-engine panel (`on` false) none of them acts.
-export function useShortcuts(
-    router: Router,
-    onFind: () => void,
-    withGallery: boolean,
-    on: boolean,
-): void {
+export function useShortcuts(router: Router, acts: Acts, withGallery: boolean, on: boolean): void {
     useEffect(() => {
         const onKey = (event: globalThis.KeyboardEvent) => {
             const shortcut = shortcutOf(event, withGallery);
@@ -59,7 +69,7 @@ export function useShortcuts(
             }
             event.preventDefault();
             if (!aDialogIsOpen()) {
-                obey(shortcut, router, onFind);
+                obey(shortcut, router, acts);
             }
         };
         const onMouse = (event: MouseEvent) => {
@@ -69,7 +79,7 @@ export function useShortcuts(
             }
             event.preventDefault();
             if (!aDialogIsOpen()) {
-                obey(shortcut, router, onFind);
+                obey(shortcut, router, acts);
             }
         };
         globalThis.addEventListener('keydown', onKey);
@@ -78,7 +88,7 @@ export function useShortcuts(
             globalThis.removeEventListener('keydown', onKey);
             globalThis.removeEventListener('mouseup', onMouse);
         };
-    }, [router, onFind, withGallery, on]);
+    }, [router, acts, withGallery, on]);
 }
 
 export function onTabKey(event: KeyboardEvent<HTMLElement>): void {

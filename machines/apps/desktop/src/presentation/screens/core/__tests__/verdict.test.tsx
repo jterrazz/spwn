@@ -28,7 +28,7 @@ import { PAGES } from '../../registry';
 
 const recordingFor = await recordingsOf('two-macs');
 
-const sidebar = navigation('Sidebar');
+const rail = navigation('Rail');
 const PANEL = region('The engine on this Mac');
 const HOME = content('2 things need you.');
 
@@ -63,9 +63,9 @@ describe('verdict', () => {
             // When - the window opens on it
             await visitor.see(within(PANEL, heading('Update station here')));
 
-            // Then - the install line beside Update, and the verdict in the sidebar's foot
+            // Then - the install line beside Update, and the verdict on the rail's Engine line
             await visitor.see(within(PANEL, content(INSTALL_LINE)));
-            await visitor.see(within(sidebar, content('Engine older than this app')));
+            await visitor.see(within(rail, content('Engine older than this app')));
         });
         expect(stage.asked()).toStrictEqual([]);
         expect(result.errors.text).toBe('');
@@ -79,8 +79,8 @@ describe('verdict', () => {
             // When - the window opens on it
             await visitor.see(within(PANEL, heading('Update Spwn')));
 
-            // Then - the verdict in the sidebar's foot
-            await visitor.see(within(sidebar, content('This app older than the engine')));
+            // Then - the verdict on the rail's Engine line
+            await visitor.see(within(rail, content('This app older than the engine')));
         });
         expect(stage.asked()).toStrictEqual([]);
         expect(result.errors.text).toBe('');
@@ -100,7 +100,7 @@ describe('verdict', () => {
 
             // Then - Home is drawn, and the foot no longer says the verdict
             await visitor.see(HOME);
-            await visitor.gone(within(sidebar, content('Engine older than this app')));
+            await visitor.gone(within(rail, content('Engine older than this app')));
             mains.push(document.querySelector('main'));
         });
         expect(mains[0]).toBeInstanceOf(HTMLElement);

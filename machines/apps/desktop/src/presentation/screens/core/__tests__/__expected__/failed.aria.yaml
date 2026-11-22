@@ -1,7 +1,16 @@
-- navigation "Sidebar":
-  - button "Find" [disabled]
+- navigation "Rail":
   - button "Home"
   - button "Inbox" [disabled]
+  - group "Spaces":
+    - button "Machine" [pressed]
+    - button "Agent soon" [disabled]
+    - button "OS soon" [disabled]
+  - button "Settings" [disabled]
+  - img "failed"
+  - text: No engine on this Mac
+- navigation "Sidebar":
+  - heading "Machine" [level=2]
+  - button "Find" [disabled]
   - button "Machine files" [disabled]
   - button "Passwords" [disabled]
   - group "Machines":
@@ -13,8 +22,6 @@
     - button "Skills" [disabled]
     - button "Machine settings" [disabled]
   - button "Storage" [disabled]
-  - img "failed"
-  - text: No engine on this Mac
 - main:
   - button "Show or hide the sidebar"
   - button "Back" [disabled]

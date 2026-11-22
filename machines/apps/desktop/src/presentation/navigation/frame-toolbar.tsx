@@ -17,7 +17,6 @@ export type FrameToolbarProps = {
     found: Found | undefined;
     macs: readonly MachinesMacView[];
     ItemName: ComponentType<{ page: PlainPage; item: string }>;
-    sidebar: boolean;
     onToggleSidebar: () => void;
     onAddPassword: () => void;
     onNewMachine: () => void;
@@ -25,7 +24,7 @@ export type FrameToolbarProps = {
 
 // value: the frame's toolbar: Home's crumb alone while the frame holds the no-engine panel, else the route's.
 export function FrameToolbar(props: FrameToolbarProps) {
-    const { quiet, router, found, macs, ItemName, sidebar, onToggleSidebar } = props;
+    const { quiet, router, found, macs, ItemName, onToggleSidebar } = props;
     const { route, go, back, forward, canGoBack, canGoForward } = router;
     if (quiet) {
         return (
@@ -36,7 +35,6 @@ export function FrameToolbar(props: FrameToolbarProps) {
                 onBack={NOWHERE}
                 onForward={NOWHERE}
                 onToggleSidebar={onToggleSidebar}
-                sidebar={sidebar}
             />
         );
     }
@@ -55,7 +53,6 @@ export function FrameToolbar(props: FrameToolbarProps) {
             onBack={back}
             onForward={forward}
             onToggleSidebar={onToggleSidebar}
-            sidebar={sidebar}
         />
     );
 }

@@ -3,14 +3,34 @@ import type { Tab } from './route';
 
 export type Keystroke = { key: string; metaKey: boolean; ctrlKey: boolean; shiftKey: boolean };
 
-export type Shortcut = 'back' | 'find' | 'forward' | 'gallery' | 'home' | 'settings' | Tab;
+export type Shortcut =
+    | 'back'
+    | 'find'
+    | 'forward'
+    | 'gallery'
+    | 'home'
+    | 'inbox'
+    | 'settings'
+    | 'space-agent'
+    | 'space-machine'
+    | 'space-os'
+    | Tab;
 
-const COMMANDS: Readonly<Record<string, 'back' | 'find' | 'forward' | 'home' | 'settings'>> = {
+const COMMANDS: Readonly<
+    Record<string, 'back' | 'find' | 'forward' | 'home' | 'inbox' | 'settings'>
+> = {
     ',': 'settings',
     '0': 'home',
     '[': 'back',
     ']': 'forward',
+    i: 'inbox',
     k: 'find',
+};
+
+const SPACE_KEYS: Readonly<Record<string, 'space-agent' | 'space-machine' | 'space-os'>> = {
+    '1': 'space-machine',
+    '2': 'space-agent',
+    '3': 'space-os',
 };
 
 const MOUSE_BUTTONS: Readonly<Record<number, 'back' | 'forward'>> = { 3: 'back', 4: 'forward' };
@@ -33,6 +53,8 @@ export function shortcutOf(stroke: Keystroke, withGallery: boolean): Shortcut | 
     if (Object.hasOwn(COMMANDS, key)) {
         return COMMANDS[key];
     }
-    const digit = Number(key);
-    return /^[1-9]$/u.test(key) ? TABS[digit - 1] : undefined;
+    if (!stroke.metaKey) {
+        return SPACE_KEYS[key];
+    }
+    return /^[1-9]$/u.test(key) ? TABS[Number(key) - 1] : undefined;
 }

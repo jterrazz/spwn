@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 
 import { website } from '../website.specification.js';
 
-const sidebar = navigation('Sidebar');
+const rail = navigation('Rail');
 const PANEL = region('The engine on this Mac');
 
 describe('fit', () => {
@@ -19,7 +19,7 @@ describe('fit', () => {
                 await visitor.see(
                     within(PANEL, content('curl -fsSL https://spwn.sh/install.sh | bash')),
                 );
-                await visitor.see(within(sidebar, content('Engine older than this app')));
+                await visitor.see(within(rail, content('Engine older than this app')));
                 await visitor.click(within(PANEL, button('Update')));
                 await visitor.see(heading('2 things need you.'));
             },
@@ -35,8 +35,8 @@ describe('fit', () => {
                 // When - the window opens on it
                 await visitor.see(within(PANEL, heading('Update Spwn')));
 
-                // Then - the verdict at the foot, and the window's own Install and relaunch
-                await visitor.see(within(sidebar, content('This app older than the engine')));
+                // Then - the verdict on the rail's Engine line, and the window's own Install and relaunch
+                await visitor.see(within(rail, content('This app older than the engine')));
                 await visitor.see(within(PANEL, button('Install and relaunch')));
             },
         );

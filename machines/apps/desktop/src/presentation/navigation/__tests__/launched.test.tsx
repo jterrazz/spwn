@@ -17,7 +17,7 @@ const NONE: Recording = { exchanges: [], station: '', world: 'none' };
 function launchedOver(recording: Recording, link?: Link) {
     const drawn: string[] = [];
     const onDrawn = () => {
-        drawn.push(document.querySelector('nav')?.textContent ?? '');
+        drawn.push(document.querySelector('nav[aria-label="Sidebar"]')?.textContent ?? '');
     };
     const dependencies = composeReplay({ link, recording });
     const tree = (
@@ -74,7 +74,7 @@ describe('Launched', () => {
 
         // When - the frame says the engine is connecting
         await component.render(tree, async (visitor) => {
-            await visitor.see(within(navigation('Sidebar'), content('Engine connecting')));
+            await visitor.see(within(navigation('Rail'), content('Engine connecting')));
         });
 
         // Then - nothing is told

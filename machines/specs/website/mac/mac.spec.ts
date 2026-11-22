@@ -13,6 +13,7 @@ import { describe, expect, test } from 'vitest';
 import { website } from '../website.specification.js';
 
 const sidebar = navigation('Sidebar');
+const rail = navigation('Rail');
 
 describe('mac', () => {
     test('M1 a Mac reads its name, online, its CPU, memory and disk', async () => {
@@ -163,7 +164,7 @@ describe('mac', () => {
         const result = await website.visit('/?world=engine-stopped&page=home', async (visitor) => {
             // When - the window opens
             // Then - the sidebar's foot says so, and the line of Needs you offers to start it
-            await visitor.see(within(sidebar, content('Engine stopped')));
+            await visitor.see(within(rail, content('Engine stopped')));
             await visitor.see(
                 within(region('Needs you'), button('Needs you Engine stopped', { exact: false })),
             );
@@ -239,7 +240,7 @@ describe('mac', () => {
                 // When - Free is pressed on go, then the Inbox opened
                 await visitor.click(within(region('By app'), button('Free go')));
                 await visitor.see(within(region('Done here'), content('19.4 GB freed')));
-                await visitor.click(within(sidebar, button('Inbox', { exact: false })));
+                await visitor.click(within(rail, button('Inbox', { exact: false })));
 
                 // Then - a Today group holds the engine's line of the free, its time first
                 await visitor.see(within(region('Today'), button('10:00 go freed by you')));

@@ -55,7 +55,7 @@ describe('new machine', () => {
                 await visitor.see(content('Creating: boot 2 of 4'));
 
                 // When - Home is opened while it runs
-                await visitor.click(within(navigation('Sidebar'), button('Home')));
+                await visitor.click(within(navigation('Rail'), button('Home')));
 
                 // Then - its line reads creating, and its 8 GB are gone from what mac-mini has free
                 await visitor.see(within(machines, button('linux-2')));

@@ -25,6 +25,7 @@ import { Window } from '../window';
 const recordingFor = await recordingsOf('two-macs');
 
 const sidebar = navigation('Sidebar');
+const rail = navigation('Rail');
 const SOCKET = 'replay of two-macs';
 const ABSENT: Link = {
     kind: 'absent',
@@ -38,7 +39,7 @@ const OPEN: Link = {
     refused: undefined,
     socket: SOCKET,
 };
-const SAID = within(sidebar, content(`No engine answers at ${SOCKET}`));
+const SAID = within(rail, content(`No engine answers at ${SOCKET}`));
 const VERDICT = content('2 things need you.');
 const FIND = dialog('Find');
 

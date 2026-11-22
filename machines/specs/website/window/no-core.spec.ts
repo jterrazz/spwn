@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 
 import { website } from '../website.specification.js';
 
-const sidebar = navigation('Sidebar');
+const rail = navigation('Rail');
 const OFFER = heading('Spwn is not installed on this Mac.');
 const INSTALLED = heading('Spwn is installed. Start the engine next.');
 
@@ -18,7 +18,7 @@ describe('no core', () => {
 
                 // Then - the command to copy, and a foot that says no engine is here
                 await visitor.see(content('curl -fsSL https://spwn.sh/install.sh | bash'));
-                await visitor.see(within(sidebar, content('No engine on this Mac')));
+                await visitor.see(within(rail, content('No engine on this Mac')));
             },
         );
         expect(result.errors.text).toBe('');
@@ -107,7 +107,7 @@ describe('no core', () => {
 
                 // Then - the start and its command, and a foot that says the engine is not started
                 await visitor.see(content('station engine start'));
-                await visitor.see(within(sidebar, content('Engine not started')));
+                await visitor.see(within(rail, content('Engine not started')));
             },
         );
         expect(result.errors.text).toBe('');

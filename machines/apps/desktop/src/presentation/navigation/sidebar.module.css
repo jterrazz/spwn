@@ -1,12 +1,16 @@
 .sidebar {
     border-right: 1px solid var(--line);
+    background: linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--horizon) 15%, var(--ground-sidebar)),
+        var(--ground-sidebar) 150px
+    );
     display: flex;
     flex-direction: column;
     gap: 18px;
     padding: var(--space-14) var(--space-10) var(--space-10);
     min-width: 0;
     overflow-y: auto;
-    background: var(--ground-sidebar);
 }
 .list {
     display: flex;
@@ -23,8 +27,15 @@
     margin-top: auto;
 }
 .lights {
-    height: var(--space-14);
     flex: none;
+    display: flex;
+    align-items: center;
+}
+.space {
+    margin: 0;
+    font-size: 13px;
+    font-weight: var(--weight-strong);
+    color: var(--t1);
 }
 :global(html[data-chrome='overlay']) .sidebar {
     padding-top: 0;
@@ -78,32 +89,6 @@
     color: var(--t4);
     background: var(--panel);
 }
-.foot {
-    margin-top: auto;
-    padding: var(--space-10) var(--space-8) var(--space-2);
-    border-top: 1px solid var(--line);
-    color: var(--t3);
-    font-size: var(--text-label);
-    display: flex;
-    gap: var(--space-8);
-    align-items: center;
-}
-.opens {
-    margin-left: 0;
-    margin-right: 0;
-    margin-bottom: 0;
-    border: 0;
-    border-top: 1px solid var(--line);
-    background: none;
-    font: inherit;
-    font-size: var(--text-label);
-    text-align: left;
-    cursor: pointer;
-    transition: color var(--motion-hover);
-}
-.opens:hover {
-    color: var(--t1);
-}
 .release {
     flex: none;
     display: flex;
@@ -133,10 +118,4 @@
 }
 .releaseGo {
     color: var(--new);
-}
-.footText {
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
 }

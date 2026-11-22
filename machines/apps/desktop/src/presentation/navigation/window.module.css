@@ -1,15 +1,20 @@
 .window {
+    --horizon: var(--space-machine);
     height: 100%;
     display: grid;
-    grid-template-columns: 244px minmax(0, 1fr);
+    grid-template-columns: 76px 244px minmax(0, 1fr);
     background: var(--ground-window);
     overflow: hidden;
 }
 .collapsed {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: 76px minmax(0, 1fr);
 }
 .main {
-    background: var(--ground);
+    background: linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--horizon) 15%, var(--ground)),
+        var(--ground) 150px
+    );
     display: flex;
     flex-direction: column;
     min-width: 0;

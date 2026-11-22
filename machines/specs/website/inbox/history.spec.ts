@@ -92,9 +92,7 @@ describe('history', () => {
                 await visitor.fill(within(confirm, field('Type infra to confirm')), 'infra');
                 await visitor.click(within(confirm, button('Restart')));
                 await visitor.gone(confirm);
-                await visitor.click(
-                    within(navigation('Sidebar'), button('Inbox', { exact: false })),
-                );
+                await visitor.click(within(navigation('Rail'), button('Inbox', { exact: false })));
 
                 // Then - a Today group holds the engine's line of the restart, its time first
                 await visitor.see(within(region('Today'), button('10:01 infra restarted by you')));

@@ -6,9 +6,6 @@
     gap: var(--space-10);
     padding: 0 var(--space-14) 0 var(--space-12);
 }
-:global(html[data-chrome='overlay']) .bare {
-    padding-left: var(--chrome-lights-room);
-}
 .title {
     display: flex;
     gap: var(--space-6);

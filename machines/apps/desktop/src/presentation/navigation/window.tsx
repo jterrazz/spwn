@@ -12,14 +12,16 @@ import { useCarried } from './carried';
 import { TITLES } from './crumbs';
 import { Find } from './find';
 import { FrameToolbar } from './frame-toolbar';
-import { onTabKey, useShortcuts } from './keys';
+import { onTabKey } from './keys';
 import { Lost, useLost } from './lost';
 import { NoEngine, useHeld } from './no-engine';
 import type { Held } from './no-engine';
+import { Rail } from './rail';
 import { TAB_PANEL } from './route';
 import type { PlainPage, Route } from './route';
 import { RouterProvider, useRouter } from './router';
 import { Sidebar } from './sidebar';
+import { useSpaceKeys } from './use-spaces';
 
 import styles from './window.module.css';
 
@@ -123,7 +125,7 @@ export function useStation() {
     const home: Station = { macs, overview };
     const drawn = machines.kind === 'read';
     const listed = drawn && machines.done;
-    return { drawn, home, listed, macs, needs, rail: { carried, engine, macs, needs } };
+    return { drawn, engine, home, listed, macs, needs, side: { carried, macs } };
 }
 
 type SheetsProps = {
@@ -195,6 +197,7 @@ function useSheets() {
 
 type FrameProps = { Gallery?: ComponentType | undefined; pages: Pages };
 
+// invariant: a space opens where this window last was in it; only Machine opens today, Agent and OS wait.
 const NOWHERE = () => undefined;
 
 function Content({ area, held }: { area: AreaProps; held: Held | undefined }) {
@@ -209,27 +212,25 @@ function Content({ area, held }: { area: AreaProps; held: Held | undefined }) {
 function Frame({ Gallery, pages }: FrameProps) {
     const router = useRouter();
     const { route, go } = router;
-    const { drawn, home, listed, macs, needs, rail } = useStation();
+    const { drawn, engine, home, listed, macs, needs, side } = useStation();
     const held = useHeld(drawn);
     const quiet = held !== undefined;
     const { addMac, addPassword, close, find, newMachine, sheet, sidebar, toggleSidebar } =
         useSheets();
-    useShortcuts(router, find, Gallery !== undefined, !quiet);
+    const onSpace = useSpaceKeys(router, macs, find, {
+        on: !quiet,
+        withGallery: Gallery !== undefined,
+    });
     const { lost, dismiss } = useLost(router, macs, listed);
     const found = route.page === 'machine' ? findMachine(macs, route.machine) : undefined;
     const area = { addMac, found, Gallery, go, home, newMachine, pages, route };
+    const rail = { engine, go, needs, onSpace, quiet, route };
+    const aside = { ...side, go, onFind: quiet ? NOWHERE : find, quiet, route };
     return (
         <Screen>
             <div className={`${styles.window} ${sidebar ? '' : styles.collapsed}`}>
-                {sidebar ? (
-                    <Sidebar
-                        {...rail}
-                        go={go}
-                        onFind={quiet ? NOWHERE : find}
-                        quiet={quiet}
-                        route={route}
-                    />
-                ) : null}
+                <Rail {...rail} />
+                {sidebar ? <Sidebar {...aside} /> : null}
                 <main className={styles.main}>
                     <FrameToolbar
                         found={found}
@@ -242,7 +243,6 @@ function Frame({ Gallery, pages }: FrameProps) {
                         onToggleSidebar={toggleSidebar}
                         quiet={quiet}
                         router={router}
-                        sidebar={sidebar}
                     />
                     {lost === undefined || quiet ? null : (
                         <Lost machine={lost} onDismiss={dismiss} />

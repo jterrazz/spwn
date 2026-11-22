@@ -1,30 +1,24 @@
-import type { EngineReadOutput, MachinesMacView, OverviewNeed } from '@jterrazz/station-api';
+import type { MachinesMacView } from '@jterrazz/station-api';
 
 import { machineNamesOf } from '../../domain/machines/machines';
-import { needsYou } from '../../domain/overview/upkeep';
-import { SEPARATOR } from '../../domain/separator';
-import type { Tone } from '../../domain/tone';
 import { useCore, useReach } from '../dependencies/dependencies';
-import type { Reading } from '../dependencies/dependencies';
-import { identityOf, MachineIcon, NavItem, StateDot } from '../ui/index';
-import { failedState } from '../words/failed';
-import { FIT_MACHINES_WORDS, fitFootWord, fitState } from '../words/fit';
+import { identityOf, MachineIcon, NavItem } from '../ui/index';
+import { FIT_MACHINES_WORDS } from '../words/fit';
 import { machineKindOf } from '../words/provisional';
-import { coreState, engineState, macState, ownState, vmState } from '../words/shown';
-import { CORE_FOOT_WORDS, CORE_MACHINES_WORDS } from '../words/words';
+import { macState, vmState } from '../words/shown';
+import { CORE_MACHINES_WORDS } from '../words/words';
 import type { Carried } from './carried';
 import { onListKey } from './keys';
 import { ReleaseRow } from './release-row';
 import { machineRoute } from './route';
 import type { PlainPage, Route } from './route';
+import { SPACE_WORDS } from './spaces';
 
 import styles from './sidebar.module.css';
 
 export type SidebarProps = {
     carried: Carried;
     macs: readonly MachinesMacView[];
-    needs: readonly OverviewNeed[];
-    engine: Reading<EngineReadOutput>;
     route: Route;
     go: (to: Route) => void;
     onFind: () => void;
@@ -35,8 +29,8 @@ type Place = (page: PlainPage) => { current: boolean; disabled: boolean; onSelec
 
 function placeOf(route: Route, go: SidebarProps['go'], quiet: boolean): Place {
     return (page) => ({
-        current: quiet ? page === 'home' : route.page === page,
-        disabled: quiet && page !== 'home',
+        current: !quiet && route.page === page,
+        disabled: quiet,
         onSelect: () => {
             go({ page });
         },
@@ -60,42 +54,9 @@ function QuietMachines() {
     );
 }
 
-function QuietFoot() {
-    const { state } = useCore();
-    const reach = useReach();
-    if (reach.kind === 'incompatible') {
-        return (
-            <div className={styles.foot}>
-                <StateDot {...fitState(reach.fit)} />
-                <span className={styles.footText}>{fitFootWord(reach.fit)}</span>
-            </div>
-        );
-    }
-    return (
-        <div className={styles.foot}>
-            <StateDot
-                {...(state.kind === 'installed' ? ownState('not-started') : coreState(state.kind))}
-            />
-            <span className={styles.footText}>{CORE_FOOT_WORDS[state.kind]}</span>
-        </div>
-    );
-}
-
-function Places({ needs, place }: { needs: readonly OverviewNeed[]; place: Place }) {
-    const owed = needsYou(needs);
+function Places({ place }: { place: Place }) {
     return (
         <div className={styles.group}>
-            <NavItem {...place('home')} icon="home" label="Home" />
-            <NavItem
-                {...place('inbox')}
-                count={
-                    owed.length > 0
-                        ? { urgent: owed.some((need) => need.Broken), value: owed.length }
-                        : undefined
-                }
-                icon="inbox"
-                label="Inbox"
-            />
             <NavItem {...place('machine-files')} icon="file" label="Machine files" />
             <NavItem {...place('passwords')} icon="key" label="Passwords" />
         </div>
@@ -185,72 +146,15 @@ function Catalog({ place, carried }: { place: Place; carried: Carried }) {
     );
 }
 
-type Dot = { tone: Tone; word: string };
-
-function OpensEngine({ go, dot, said }: { go: SidebarProps['go']; dot: Dot; said: string }) {
-    return (
-        <button
-            className={`${styles.foot} ${styles.opens}`}
-            onClick={() => {
-                go({ page: 'engine' });
-            }}
-            type="button"
-        >
-            <span aria-hidden="true">
-                <StateDot tone={dot.tone} word={dot.word} />
-            </span>
-            <span className={styles.footText}>{said}</span>
-        </button>
-    );
-}
-
-function Engine({ engine, go }: Pick<SidebarProps, 'engine' | 'go'>) {
-    const reach = useReach();
-    if (reach.kind === 'unanswered') {
-        return (
-            <div className={styles.foot}>
-                <StateDot {...ownState('engine-absent')} />
-                <span className={styles.footText}>{reach.said}</span>
-            </div>
-        );
-    }
-    if (reach.kind === 'connecting') {
-        const { tone, word } = ownState('connecting');
-        return (
-            <div className={styles.foot}>
-                <StateDot tone={tone} word={word} />
-                <span className={styles.footText}>Engine {word}</span>
-            </div>
-        );
-    }
-    if (engine.kind === 'failed') {
-        return <OpensEngine dot={failedState(engine.error)} go={go} said={engine.error.message} />;
-    }
-    if (engine.kind === 'reading') {
-        return <OpensEngine dot={ownState('reading')} go={go} said="Engine" />;
-    }
-    const { Version } = engine.out;
-    const dot = engineState(engine.out);
-    const said = Version === '' ? `Engine ${dot.word}` : `Engine ${dot.word}${SEPARATOR}${Version}`;
-    return <OpensEngine dot={dot} go={go} said={said} />;
-}
-
 const UNCARRIED: Carried = { apps: undefined, settings: undefined, skills: undefined };
 
-export function Sidebar({
-    carried,
-    macs,
-    needs,
-    engine,
-    route,
-    go,
-    onFind,
-    quiet = false,
-}: SidebarProps) {
+export function Sidebar({ carried, macs, route, go, onFind, quiet = false }: SidebarProps) {
     const place = placeOf(route, go, quiet);
     return (
         <nav aria-label="Sidebar" className={styles.sidebar} onKeyDown={onListKey}>
-            <div className={styles.lights} data-tauri-drag-region="deep" />
+            <div className={styles.lights} data-tauri-drag-region="deep">
+                <h2 className={styles.space}>{SPACE_WORDS.machine.name}</h2>
+            </div>
             <button
                 aria-keyshortcuts="Meta+K"
                 aria-label="Find"
@@ -263,13 +167,12 @@ export function Sidebar({
                 <kbd aria-hidden="true">⌘K</kbd>
             </button>
             <div className={styles.list}>
-                <Places needs={quiet ? [] : needs} place={place} />
+                <Places place={place} />
                 {quiet ? <QuietMachines /> : <Machines go={go} macs={macs} route={route} />}
                 <Catalog carried={quiet ? UNCARRIED : carried} place={place} />
             </div>
             <Storage place={place} />
             {quiet ? null : <ReleaseRow go={go} />}
-            {quiet ? <QuietFoot /> : <Engine engine={engine} go={go} />}
         </nav>
     );
 }

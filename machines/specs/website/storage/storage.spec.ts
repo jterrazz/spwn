@@ -79,7 +79,7 @@ describe('storage', () => {
             await visitor.fill(within(asked, field(`Type ${subject} to confirm`)), subject);
             await visitor.click(within(asked, button('Free')));
             await visitor.see(heading('Nothing to free.'));
-            await visitor.click(within(navigation('Sidebar'), button('Inbox', { exact: false })));
+            await visitor.click(within(navigation('Rail'), button('Inbox', { exact: false })));
 
             // Then - a Today group holds the engine's line of each name it freed
             const today = region('Today');

@@ -4,7 +4,8 @@ import { describe, expect, test } from 'vitest';
 import { website } from '../website.specification.js';
 
 const sidebar = navigation('Sidebar');
-const SAID = within(sidebar, content('No engine answers at replay of two-macs'));
+const rail = navigation('Rail');
+const SAID = within(rail, content('No engine answers at replay of two-macs'));
 
 describe('link', () => {
     test('E7 an engine absent for a moment leaves the page drawn and its sheet open', async () => {

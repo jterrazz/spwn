@@ -19,7 +19,6 @@ export type ToolbarProps = {
     onToggleSidebar: () => void;
     action?: ToolbarAction | undefined;
     mark?: ReactNode;
-    sidebar?: boolean;
 };
 
 export function Toolbar({
@@ -31,14 +30,10 @@ export function Toolbar({
     onToggleSidebar,
     action,
     mark,
-    sidebar = true,
 }: ToolbarProps) {
     const last = crumbs.at(-1);
     return (
-        <header
-            className={`${styles.toolbar} ${sidebar ? '' : styles.bare}`}
-            data-tauri-drag-region="deep"
-        >
+        <header className={styles.toolbar} data-tauri-drag-region="deep">
             <IconButton icon="sidebar" label="Show or hide the sidebar" onClick={onToggleSidebar} />
             <IconButton
                 disabled={!canGoBack}
