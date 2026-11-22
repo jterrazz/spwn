@@ -1,10 +1,10 @@
-import type { DiskAmount, DiskHolding, DiskRow } from '@jterrazz/station-api';
+import type { DiskAmount, DiskRow } from '@jterrazz/station-api';
 
 import { bytes } from '../../../domain/format';
 import type { Identity } from '../../ui/index';
 import { wordOfSent } from '../../words/engine-words';
 import { diskGestureOf } from '../../words/provisional';
-import { DISK_HOLDER_COLOURS, DISK_KIND_COLOURS, UNKNOWN_SHARE_COLOUR } from '../../words/tones';
+import { DISK_KIND_COLOURS, UNKNOWN_SHARE_COLOUR } from '../../words/tones';
 import type { ShareColour } from '../../words/tones';
 import { DISK_PENDING_WORD } from '../../words/words';
 
@@ -46,8 +46,6 @@ function colourOf(table: Readonly<Record<string, ShareColour>>, code: string): S
 
 type Amount = Pick<DiskAmount, 'Bytes'> & { Kind: string };
 
-type Holding = Pick<DiskHolding, 'Bytes'> & { Holder: string };
-
 export function kindPartsOf(kinds: readonly Amount[] | undefined): readonly Part[] {
     return (kinds ?? []).map(({ Kind, Bytes }) => ({
         bytes: Bytes,
@@ -55,16 +53,6 @@ export function kindPartsOf(kinds: readonly Amount[] | undefined): readonly Part
         key: Kind,
         label: wordOfSent('DiskKind', Kind),
         rest: Kind === 'free',
-    }));
-}
-
-export function holdPartsOf(holds: null | readonly Holding[] | undefined): readonly Part[] {
-    return (holds ?? []).map(({ Holder, Bytes }) => ({
-        bytes: Bytes,
-        identity: colourOf(DISK_HOLDER_COLOURS, Holder),
-        key: Holder,
-        label: wordOfSent('DiskHolder', Holder),
-        rest: Holder === 'free',
     }));
 }
 

@@ -69,10 +69,10 @@ func group(l catalog.Level) string {
 }
 
 // value: Machines' VMs and images are no Disk row: disk.read counts them
-// in Machines and images, whoever made them.
+// in Machines' kinds, whoever made them.
 func storedGroup(p catalog.Stored) string {
 	if p.Path == catalog.StationVMs {
-		return "machines and images"
+		return "Machines' kinds"
 	}
 	return group(p.Level)
 }

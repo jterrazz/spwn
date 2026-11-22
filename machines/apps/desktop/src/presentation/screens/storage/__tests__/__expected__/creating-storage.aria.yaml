@@ -9,12 +9,14 @@
     - heading "Disk" [level=2]
     - paragraph: 582 GB of 994 GB used
     - button "Rescan"
-    - paragraph: "Outside any machine, Machines holds 20.1 GB: machine disks, images, other VMs, the image cache, leftovers and its logs"
-    - 'img "What holds the disk of macbook-pro: Machine disks 20 GB · Machines'' logs 120 MB · The Mac itself 562 GB · Free 412 GB"'
+    - paragraph: This Mac itself holds 562 GB. Outside any machine, Machines holds 20.1 GB.
+    - 'img "What holds the disk of macbook-pro: System 21.4 GB · Your data 530 GB · Caches 10.2 GB · Machine disks 20 GB · Machines'' logs 120 MB · Free 412 GB"'
     - list "The parts":
+      - listitem: System 21.4 GB
+      - listitem: Your data 530 GB
+      - listitem: Caches 10.2 GB
       - listitem: Machine disks 20 GB
       - listitem: Machines' logs 120 MB
-      - listitem: The Mac itself 562 GB
       - listitem: Free 412 GB
     - paragraph: Every image and every disk Machines holds is a machine's or the newest.
     - paragraph: Caches hold 10.3 GB. Each app rebuilds its own when it needs it.

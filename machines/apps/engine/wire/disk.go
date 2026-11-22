@@ -181,14 +181,14 @@ func (s diskStation) Held(ctx context.Context) (*disk.Held, error) {
 		counted[name] = true
 		held.Images = append(held.Images, disk.MachineDisk{Name: name, Bytes: b})
 		if r.Unused() {
-			held.Unused = append(held.Unused, disk.Freeable{Holder: disk.HolderImages, Kind: disk.FreeImage, Name: r.Record.Name + "@" + r.Record.Version, Bytes: b})
+			held.Unused = append(held.Unused, disk.Freeable{Holder: disk.KindImages, Kind: disk.FreeImage, Name: r.Record.Name + "@" + r.Record.Version, Bytes: b})
 		}
 	}
 	for _, d := range f.disks {
 		switch {
 		case counted[d.VM]:
 		case f.leftover(d):
-			held.Unused = append(held.Unused, disk.Freeable{Holder: disk.HolderLeftovers, Kind: disk.FreeDisk, Name: d.VM, Bytes: d.Bytes})
+			held.Unused = append(held.Unused, disk.Freeable{Holder: disk.KindLeftovers, Kind: disk.FreeDisk, Name: d.VM, Bytes: d.Bytes})
 		default:
 			held.Others = append(held.Others, disk.MachineDisk{Name: d.VM, Bytes: d.Bytes})
 		}
@@ -225,7 +225,7 @@ func (s diskStation) oldHomes(ctx context.Context, hypervisor string) ([]disk.Fr
 		if bytes <= 0 {
 			continue
 		}
-		out = append(out, disk.Freeable{Holder: disk.HolderLeftovers, Kind: disk.FreeFolder, Name: st.Path, Bytes: bytes})
+		out = append(out, disk.Freeable{Holder: disk.KindLeftovers, Kind: disk.FreeFolder, Name: st.Path, Bytes: bytes})
 	}
 	return out, kept
 }

@@ -1,11 +1,11 @@
-description: 'a mac''s reading holds station''s part: machine disks, images, leftovers, its logs, the mac itself'
+description: 'a mac''s kinds hold Machines'' parts: machine disks, images, leftovers, logs, beside the mac'
 env:
     - two-macs
     - engine
 runs:
-    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].disk.files["~/.local/state/station/logs/engine.log"] = 300000000'' world.json > w.json && /bin/mv w.json world.json; "$STATION" guest serve --stdio | /usr/bin/jq -s -c ''[.[] | select(.out)] | last | .out.Station | {holds: [.Holds[] | [.Holder, .Bytes]], sentence: .Sentence, machines: [.Machines[] | [.Name, .Bytes]]}'''
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].disk.files["~/.local/state/station/logs/engine.log"] = 300000000'' world.json > w.json && /bin/mv w.json world.json; "$STATION" guest serve --stdio | /usr/bin/jq -s -c ''[.[] | select(.out)] | last | .out | {kinds: [.Kinds[] | [.Kind, .Bytes]], sentence: .Station.Sentence, machines: [.Station.Machines[] | [.Name, .Bytes]]}'''
       stdin: |
           {"v":2,"id":"1","watch":"disk.read","in":{}}
       exit: 0
       stdout: |
-          {"holds":[["machine-disks",100000000000],["images",7000000000],["other-vms",0],["image-cache",0],["leftovers",0],["logs",300000000],["this-mac",498700000000],["free",388000000000]],"sentence":"Outside any machine, Machines holds 107 GB: machine disks, images, other VMs, the image cache, leftovers and its logs","machines":[["macbook-pro",498700000000],["api",50000000000],["linux-1",50000000000]]}
+          {"kinds":[["system",21400000000],["apps",0],["your-data",442500000000],["caches",34800000000],["machine-disks",100000000000],["images",7000000000],["other-vms",0],["leftovers",0],["image-cache",0],["logs",300000000],["free",388000000000]],"sentence":"This Mac itself holds 499 GB. Outside any machine, Machines holds 107 GB.","machines":[["macbook-pro",498700000000],["api",50000000000],["linux-1",50000000000]]}

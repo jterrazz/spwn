@@ -8,39 +8,6 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/verdict"
 )
 
-type Holder string
-
-const (
-	HolderMachineDisks Holder = "machine-disks"
-	HolderImages       Holder = "images"
-	HolderOtherVMs     Holder = "other-vms"
-	HolderImageCache   Holder = "image-cache"
-	HolderLeftovers    Holder = "leftovers"
-	HolderLogs         Holder = "logs"
-	HolderThisMac      Holder = "this-mac"
-	HolderFree         Holder = "free"
-)
-
-func (Holder) Enum() []string {
-	holders := Holders()
-	out := make([]string, len(holders))
-	for i, h := range holders {
-		out[i] = string(h)
-	}
-	return out
-}
-
-func Holders() []Holder {
-	// value: what holds a Mac's disk, station's parts first, in the order
-	// its bar draws them.
-	return []Holder{HolderMachineDisks, HolderImages, HolderOtherVMs, HolderImageCache, HolderLeftovers, HolderLogs, HolderThisMac, HolderFree}
-}
-
-type Holding struct {
-	Holder Holder
-	Bytes  int64
-}
-
 type MachineDisk struct {
 	Name  string
 	Bytes int64
@@ -102,7 +69,7 @@ type Freeable struct {
 	// (`base-ubuntu@2026.10.20`), a disk station's hypervisor made that no
 	// machine record names, or the hypervisor's old folder (`~/.tart`) once
 	// it holds no VM.
-	Holder Holder
+	Holder Kind
 	Kind   FreeableKind
 	Name   string
 	Bytes  int64
@@ -147,12 +114,11 @@ func sumDisks(disks []MachineDisk) int64 {
 }
 
 type StationPart struct {
-	// value: what station holds on a Mac outside any machine's own files,
-	// and the Mac itself beside it; each machine's size, the Mac first;
-	// what nothing uses, and the gesture that frees it.
-	Holds    []Holding
+	// value: what the Mac itself holds and what Machines holds on it
+	// outside any machine's own files, said; each machine's size, the Mac
+	// first; what nothing uses, and the gesture that frees it. Its parts
+	// are the reading's Kinds.
 	Sentence string
-	Itself   string
 	Machines []MachineDisk
 	CanFree  CanFree
 	// value: the old folders station never frees, each with why.
@@ -163,7 +129,6 @@ type StationPart struct {
 func StationOf(total, free, logs, imageCache int64, h Held, mac string) StationPart {
 	// invariant: the Mac itself is what the volume uses beyond station's
 	// parts, never below 0; the verdict sums exactly what CanFree frees.
-	leftovers := h.unused(HolderLeftovers)
 	held := h.Holding() + max(imageCache, 0) + max(logs, 0)
 	itself := max(total-free-held, 0)
 	machines := append([]MachineDisk{{Name: mac, Bytes: itself}}, h.Machines...)
@@ -172,18 +137,7 @@ func StationOf(total, free, logs, imageCache int64, h Held, mac string) StationP
 		can = CanFree{Sentence: h.Unread + " cannot be read: nothing is offered to free until it can."}
 	}
 	return StationPart{
-		Holds: []Holding{
-			{Holder: HolderMachineDisks, Bytes: h.machines()},
-			{Holder: HolderImages, Bytes: h.images()},
-			{Holder: HolderOtherVMs, Bytes: h.others()},
-			{Holder: HolderImageCache, Bytes: max(imageCache, 0)},
-			{Holder: HolderLeftovers, Bytes: leftovers},
-			{Holder: HolderLogs, Bytes: max(logs, 0)},
-			{Holder: HolderThisMac, Bytes: itself},
-			{Holder: HolderFree, Bytes: free},
-		},
-		Sentence: "Outside any machine, Machines holds " + size.Bytes(held) + ": machine disks, images, other VMs, the image cache, leftovers and its logs",
-		Itself:   "This Mac itself holds " + size.Bytes(itself) + ".",
+		Sentence: "This Mac itself holds " + size.Bytes(itself) + ". Outside any machine, Machines holds " + size.Bytes(held) + ".",
 		Machines: machines,
 		CanFree:  can,
 		Kept:     h.Kept,
@@ -246,7 +200,7 @@ func freeable(can CanFree, unread, mac string) verdict.Verdict {
 	return verdict.Verdict{Tone: verdict.OK, Sentence: "Nothing to free.", Line: line}
 }
 
-func (h Held) unused(holder Holder) int64 {
+func (h Held) unused(holder Kind) int64 {
 	var total int64
 	for _, f := range h.Unused {
 		if f.Holder == holder {
@@ -257,5 +211,5 @@ func (h Held) unused(holder Holder) int64 {
 }
 
 func (h Held) Holding() int64 {
-	return h.machines() + h.images() + h.others() + h.unused(HolderLeftovers)
+	return h.machines() + h.images() + h.others() + h.unused(KindLeftovers)
 }

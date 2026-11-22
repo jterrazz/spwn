@@ -1,7 +1,7 @@
-import type { DiskAmount, DiskHolding, DiskRow } from '@jterrazz/station-api';
+import type { DiskAmount, DiskRow } from '@jterrazz/station-api';
 import { describe, expect, test } from 'vitest';
 
-import { byApp, groupsOf, holdPartsOf, kindPartsOf, listedOf, sizeOf } from '../disk';
+import { byApp, groupsOf, kindPartsOf, listedOf, sizeOf } from '../disk';
 
 function row(App: string, Group: DiskRow['Group'], change: Partial<DiskRow> = {}): DiskRow {
     return { App, Bytes: 1_000_000_000, Group, MoveTo: '', Paths: [], Pending: false, ...change };
@@ -59,21 +59,6 @@ describe('disk', () => {
 
         // Then - its code as its word and the neutral colour
         expect([part?.label, part?.identity]).toStrictEqual(['swap', 'system']);
-    });
-
-    test("the holders of a Mac's station are parts in the engine's order, and none is no part", () => {
-        // Given - two holders
-        const holds: DiskHolding[] = [
-            { Bytes: 3, Holder: 'images' },
-            { Bytes: 1, Holder: 'machine-disks' },
-        ];
-
-        // When - parts are made from them and from none
-        const parts = holdPartsOf(holds);
-
-        // Then - images then machine disks, and nothing from null
-        expect(parts.map((part) => part.key)).toStrictEqual(['images', 'machine-disks']);
-        expect(holdPartsOf(null)).toStrictEqual([]);
     });
 
     test('a part of no bytes is not listed, but free always is, in the engine order', () => {

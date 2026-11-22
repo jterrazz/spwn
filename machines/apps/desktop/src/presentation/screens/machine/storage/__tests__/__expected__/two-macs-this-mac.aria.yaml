@@ -10,20 +10,26 @@
     - tab "Ports"
     - tab "Sign-ins"
     - tab "Storage" [selected]
-  - region "Storage":
-    - heading "Storage" [level=2]
+  - region "Disk":
+    - heading "Disk" [level=2]
     - paragraph: 606 GB of 994 GB used
     - button "Rescan"
-    - paragraph: This Mac itself holds 499 GB.
-    - 'img "What holds the disk of macbook-pro: System 21.4 GB · Your data 443 GB · Caches 34.8 GB · Machines and images 107 GB · Free 388 GB"'
+    - paragraph: This Mac itself holds 499 GB. Outside any machine, Machines holds 107 GB.
+    - 'img "What holds the disk of macbook-pro: System 21.4 GB · Your data 443 GB · Caches 34.8 GB · Machine disks 100 GB · Images 7 GB · Free 388 GB"'
     - list "The parts":
       - listitem: System 21.4 GB
       - listitem: Your data 443 GB
       - listitem: Caches 34.8 GB
-      - listitem: Machines and images 107 GB
+      - listitem: Machine disks 100 GB
+      - listitem: Images 7 GB
       - listitem: Free 388 GB
+    - paragraph: "3.0 GB can be freed: 1 unused image."
+    - button "Free 3 GB"
     - paragraph: Caches hold 34.8 GB. Each app rebuilds its own when it needs it.
     - button "Free 34.8 GB"
+  - region "Can be freed":
+    - heading "Can be freed" [level=2]
+    - text: base-ubuntu@2026.10.20 Unused image 3 GB
   - region "By app":
     - heading "By app each app says in the catalog which of its folders are cache, data or settings" [level=2]
     - text: tart ~/.tart · to ~/.local/share/station/vms misplaced 73.3 GB

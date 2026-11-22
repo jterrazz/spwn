@@ -1312,7 +1312,15 @@
       "Tone": "plain"
     }
   },
-  "DiskHolder": {
+  "DiskKind": {
+    "apps": {
+      "Word": "Apps",
+      "Tone": "plain"
+    },
+    "caches": {
+      "Word": "Caches",
+      "Tone": "plain"
+    },
     "free": {
       "Word": "Free",
       "Tone": "plain"
@@ -1339,32 +1347,6 @@
     },
     "other-vms": {
       "Word": "Other VMs",
-      "Tone": "plain"
-    },
-    "this-mac": {
-      "Word": "The Mac itself",
-      "Tone": "plain"
-    }
-  },
-  "DiskKind": {
-    "apps": {
-      "Word": "Apps",
-      "Tone": "plain"
-    },
-    "caches": {
-      "Word": "Caches",
-      "Tone": "plain"
-    },
-    "free": {
-      "Word": "Free",
-      "Tone": "plain"
-    },
-    "image-cache": {
-      "Word": "Image cache",
-      "Tone": "plain"
-    },
-    "machines": {
-      "Word": "Machines and images",
       "Tone": "plain"
     },
     "system": {

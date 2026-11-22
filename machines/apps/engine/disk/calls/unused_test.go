@@ -14,8 +14,8 @@ import (
 
 func unusedStation() *changingStation {
 	return &changingStation{held: &disk.Held{Unused: []disk.Freeable{
-		{Holder: disk.HolderImages, Kind: disk.FreeImage, Name: "base-ubuntu@2026.10.20", Bytes: 30},
-		{Holder: disk.HolderLeftovers, Kind: disk.FreeDisk, Name: "gone", Bytes: 40},
+		{Holder: disk.KindImages, Kind: disk.FreeImage, Name: "base-ubuntu@2026.10.20", Bytes: 30},
+		{Holder: disk.KindLeftovers, Kind: disk.FreeDisk, Name: "gone", Bytes: 40},
 	}}}
 }
 

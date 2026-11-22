@@ -38,8 +38,12 @@
             "apps",
             "your-data",
             "caches",
-            "machines",
+            "machine-disks",
+            "images",
+            "other-vms",
+            "leftovers",
             "image-cache",
+            "logs",
             "free"
           ],
           "type": "string"
@@ -90,13 +94,16 @@
         },
         "Holder": {
           "enum": [
+            "system",
+            "apps",
+            "your-data",
+            "caches",
             "machine-disks",
             "images",
             "other-vms",
-            "image-cache",
             "leftovers",
+            "image-cache",
             "logs",
-            "this-mac",
             "free"
           ],
           "type": "string"
@@ -118,32 +125,6 @@
         "Holder",
         "Kind",
         "Name"
-      ],
-      "type": "object"
-    },
-    "disk.Holding": {
-      "additionalProperties": false,
-      "properties": {
-        "Bytes": {
-          "type": "integer"
-        },
-        "Holder": {
-          "enum": [
-            "machine-disks",
-            "images",
-            "other-vms",
-            "image-cache",
-            "leftovers",
-            "logs",
-            "this-mac",
-            "free"
-          ],
-          "type": "string"
-        }
-      },
-      "required": [
-        "Bytes",
-        "Holder"
       ],
       "type": "object"
     },
@@ -291,18 +272,6 @@
         "CanFree": {
           "$ref": "#/$defs/disk.CanFree"
         },
-        "Holds": {
-          "items": {
-            "$ref": "#/$defs/disk.Holding"
-          },
-          "type": [
-            "array",
-            "null"
-          ]
-        },
-        "Itself": {
-          "type": "string"
-        },
         "Kept": {
           "items": {
             "$ref": "#/$defs/disk.Kept"
@@ -327,8 +296,6 @@
       },
       "required": [
         "CanFree",
-        "Holds",
-        "Itself",
         "Machines",
         "Sentence",
         "Verdict"

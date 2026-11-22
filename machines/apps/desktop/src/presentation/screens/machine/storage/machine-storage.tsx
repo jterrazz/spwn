@@ -2,18 +2,16 @@ import type { DiskReading, Target } from '@jterrazz/station-api';
 
 import { SEPARATOR } from '../../../../domain/separator';
 import { useWatch } from '../../../dependencies/dependencies';
-import { Freed, useFreeAll, useFreeImageCache } from '../../../features/disk/disk-gestures';
-import { ByApp, DiskPanel } from '../../../features/disk/disk-view';
-import { HeldOutcomes } from '../../../kit/gestures';
+import { DiskCard } from '../../../features/disk/disk-card';
+import { ByApp } from '../../../features/disk/disk-view';
 import { Unanswered } from '../../../kit/readings';
 import { Skeleton, SkeletonPanel } from '../../../kit/skeleton';
 import type { Route } from '../../../navigation/route';
 import { Screen } from '../../../ui/index';
 import { Page } from '../../../ui/page';
+import { DISK_TITLE } from '../../../words/words';
 
 import styles from './machine-storage.module.css';
-
-const TITLE = 'Storage';
 
 const FOOT = "Data and settings are never freed here. Erasing an app's data is asked for by name.";
 
@@ -49,25 +47,17 @@ type ReadProps = {
 };
 
 function Read({ reading, name, target, vm, go }: ReadProps) {
-    const freeAll = useFreeAll(target);
-    const freeImageCache = useFreeImageCache(reading, target);
     return (
         <Screen>
             <Page>
-                <DiskPanel
-                    by="kinds"
-                    freeAll={freeAll}
-                    freeImageCache={freeImageCache}
+                <DiskCard
                     name={name}
                     reading={reading}
-                    sub={vm ? <Inside go={go} /> : reading.Station?.Itself}
-                    title={TITLE}
-                />
-                <HeldOutcomes>
-                    <Freed gesture={freeAll} />
-                    <Freed gesture={freeImageCache} />
+                    sub={vm ? <Inside go={go} /> : undefined}
+                    target={target}
+                >
                     <ByApp foot={FOOT} name={name} reading={reading} target={target} />
-                </HeldOutcomes>
+                </DiskCard>
             </Page>
         </Screen>
     );
@@ -93,7 +83,7 @@ export function StorageTab({ name, target, vm = false, go }: StorageTabProps) {
         return (
             <Page>
                 <Skeleton what={`the disk of ${name}`}>
-                    <SkeletonPanel title={TITLE} trail="fit" />
+                    <SkeletonPanel title={DISK_TITLE} trail="fit" />
                 </Skeleton>
             </Page>
         );

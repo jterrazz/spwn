@@ -14,9 +14,8 @@ import type { Found } from '../../../domain/machines/machines';
 import { shortDay } from '../../../domain/when';
 import { useReach, useRead, useWatch } from '../../dependencies/dependencies';
 import type { Reading } from '../../dependencies/dependencies';
-import { Freed, useFreeAll, useFreeImageCache } from '../../features/disk/disk-gestures';
-import { DiskPanel, groupOf, GroupPanel } from '../../features/disk/disk-view';
-import { KeptPanel, UnusedFoot, UnusedPanel, useFreeUnused } from '../../features/disk/unused';
+import { DiskCard } from '../../features/disk/disk-card';
+import { groupOf, GroupPanel } from '../../features/disk/disk-view';
 import { HeldOutcomes } from '../../kit/gestures';
 import { useIdentityOf } from '../../kit/identity';
 import { Absent, NoVerdict, Unanswered, VerdictHead } from '../../kit/readings';
@@ -39,37 +38,11 @@ type Go = (to: Route) => void;
 type DiskOfProps = { reading: DiskReading; mac: string; target: Target | undefined };
 
 function DiskRead({ reading, mac, target }: DiskOfProps) {
-    const freeAll = useFreeAll(target);
-    const freeImageCache = useFreeImageCache(reading, target);
-    const station = reading.Station?.CanFree;
-    const freeUnused = useFreeUnused(station, target);
     const erasable = groupOf(reading, (row) => diskGestureOf(row.Group)?.call === 'disk.erase');
     return (
-        <>
-            <DiskPanel
-                by="holds"
-                freeAll={freeAll}
-                freeAllVariant={station?.Call === undefined ? 'primary' : 'plain'}
-                freeImageCache={freeImageCache}
-                name={mac}
-                reading={reading}
-                station={
-                    station === undefined ? null : (
-                        <UnusedFoot canFree={station} gesture={freeUnused} name={mac} />
-                    )
-                }
-                sub={reading.Station?.Sentence}
-                title="Disk"
-            />
-            <HeldOutcomes>
-                <Freed gesture={freeAll} />
-                <Freed gesture={freeImageCache} />
-                <Freed gesture={freeUnused} />
-                {station === undefined ? null : <UnusedPanel canFree={station} />}
-                <KeptPanel kept={reading.Station?.Kept} />
-                {erasable === undefined ? null : <GroupPanel group={erasable} target={target} />}
-            </HeldOutcomes>
-        </>
+        <DiskCard name={mac} reading={reading} target={target}>
+            {erasable === undefined ? null : <GroupPanel group={erasable} target={target} />}
+        </DiskCard>
     );
 }
 

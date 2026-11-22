@@ -8,4 +8,4 @@ runs:
           {"v":2,"id":"1","watch":"disk.read","in":{}}
       exit: 0
       stdout: |
-          {"kinds":[["system",21400000000],["apps",12000000000],["your-data",430800000000],["caches",34800000000],["machines",107000000000],["image-cache",0],["free",388000000000]],"can":{"Bytes":34800000000,"Sentence":"Caches hold 34.8 GB. Each app rebuilds its own when it needs it.","Call":"disk.free"}}
+          {"kinds":[["system",21400000000],["apps",12000000000],["your-data",430800000000],["caches",34800000000],["machine-disks",100000000000],["images",7000000000],["other-vms",0],["leftovers",0],["image-cache",0],["logs",0],["free",388000000000]],"can":{"Bytes":34800000000,"Sentence":"Caches hold 34.8 GB. Each app rebuilds its own when it needs it.","Call":"disk.free"}}

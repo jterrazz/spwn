@@ -5,7 +5,7 @@ env:
 runs:
     - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].vms["old-vm"] = {"disk": true, "size": {"CPUs": 0, "Memory": 0, "Disk": 9000000000}} | .macs["macbook-pro"].cloned = {"old-vm": 901} | .macs["macbook-pro"].vms["api"].unreadable = true | .macs["macbook-pro"].vms["old-vm"].born = 901'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
-    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -s -c ''[.[] | select(.out)] | last | .out | {leftovers: [.Station.Holds[] | select(.Holder == "leftovers") | .Bytes], can: .Station.CanFree, verdict: .Station.Verdict.Sentence}'''
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -s -c ''[.[] | select(.out)] | last | .out | {leftovers: [.Kinds[] | select(.Kind == "leftovers") | .Bytes], can: .Station.CanFree, verdict: .Station.Verdict.Sentence}'''
       stdin: |
           {"v":2,"id":"1","watch":"disk.read","in":{}}
       exit: 0

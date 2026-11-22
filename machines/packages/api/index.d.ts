@@ -952,7 +952,7 @@ export type CoreVerdictVerdict = {
 
 export type DiskAmount = {
     Bytes: number;
-    Kind: 'system' | 'apps' | 'your-data' | 'caches' | 'machines' | 'image-cache' | 'free';
+    Kind: 'system' | 'apps' | 'your-data' | 'caches' | 'machine-disks' | 'images' | 'other-vms' | 'leftovers' | 'image-cache' | 'logs' | 'free';
 };
 
 export type DiskCallsEraseIn = {
@@ -985,14 +985,9 @@ export type DiskCanFree = {
 
 export type DiskFreeable = {
     Bytes: number;
-    Holder: 'machine-disks' | 'images' | 'other-vms' | 'image-cache' | 'leftovers' | 'logs' | 'this-mac' | 'free';
+    Holder: 'system' | 'apps' | 'your-data' | 'caches' | 'machine-disks' | 'images' | 'other-vms' | 'leftovers' | 'image-cache' | 'logs' | 'free';
     Kind: 'image' | 'disk' | 'folder';
     Name: string;
-};
-
-export type DiskHolding = {
-    Bytes: number;
-    Holder: 'machine-disks' | 'images' | 'other-vms' | 'image-cache' | 'leftovers' | 'logs' | 'this-mac' | 'free';
 };
 
 export type DiskKept = {
@@ -1048,8 +1043,6 @@ export type DiskRow = {
 
 export type DiskStationPart = {
     CanFree: DiskCanFree;
-    Holds: DiskHolding[] | null;
-    Itself: string;
     Kept?: DiskKept[];
     Machines: DiskMachineDisk[] | null;
     Sentence: string;
@@ -3743,9 +3736,7 @@ export type DiskFreeableKind = 'image' | 'disk' | 'folder';
 
 export type DiskGroup = 'misplaced' | 'can-rebuild' | 'your-data' | 'never-touched';
 
-export type DiskHolder = 'machine-disks' | 'images' | 'other-vms' | 'image-cache' | 'leftovers' | 'logs' | 'this-mac' | 'free';
-
-export type DiskKind = 'system' | 'apps' | 'your-data' | 'caches' | 'machines' | 'image-cache' | 'free';
+export type DiskKind = 'system' | 'apps' | 'your-data' | 'caches' | 'machine-disks' | 'images' | 'other-vms' | 'leftovers' | 'image-cache' | 'logs' | 'free';
 
 export type EngineReadState = 'running' | 'stopped' | 'not-installed';
 
@@ -3843,7 +3834,6 @@ export type StationWords = {
     CoreSectionID: Record<CoreSectionID, StationWord>;
     DiskFreeableKind: Record<DiskFreeableKind, StationWord>;
     DiskGroup: Record<DiskGroup, StationWord>;
-    DiskHolder: Record<DiskHolder, StationWord>;
     DiskKind: Record<DiskKind, StationWord>;
     EngineReadState: Record<EngineReadState, StationWord>;
     ImagesBuildState: Record<ImagesBuildState, StationWord>;

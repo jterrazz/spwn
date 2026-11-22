@@ -7,6 +7,10 @@ import { recordingsOf } from '../../../../../infrastructure/outbound/engine-repl
 
 const recordingFor = await recordingsOf('mini-offline', 'one-mac', 'stories', 'two-macs');
 
+function cardOf(html: string): string | undefined {
+    return /<section aria-label="Disk"[^>]*>.*?<\/section>/su.exec(html)?.[0];
+}
+
 function windowOver(world: string, machine: string) {
     return pageOver(recordingFor(world), { machine, page: 'machine', tab: 'Storage' });
 }
@@ -31,23 +35,32 @@ describe('machine-storage', () => {
         await expect(result.tree).toMatch(file('./__expected__/two-macs-this-mac.aria.yaml'));
     });
 
-    test("a Mac's Storage tab says what the Mac itself holds, the page's sentence left to Storage", async () => {
-        // Given - the window on This Mac's Storage over two-macs
-        const result = await component.render(
+    test("a Mac's Storage tab and the Storage page draw its disk as one card, part for part", async () => {
+        // Given - the window over two-macs, on This Mac's Storage tab and on the Storage page
+        const tab = await component.render(
             windowOver('two-macs', 'macbook-pro'),
             async (visitor) => {
-                // When - its disk has been read
                 await visitor.see(region('By app'));
-
-                // Then - Itself under the figure, and not what station holds outside any machine
-                const storage = region('Storage');
-                await visitor.see(within(storage, content('This Mac itself holds 499 GB.')));
-                await visitor.gone(
-                    within(storage, content('Outside any machine', { exact: false })),
-                );
             },
         );
-        expect(result.errors.text).toBe('');
+        const page = await component.render(
+            pageOver(recordingFor('two-macs'), { page: 'storage' }),
+            async (visitor) => {
+                await visitor.see(region('Machines'));
+            },
+        );
+
+        // When - the Disk card is cut out of each
+        const card = cardOf(tab.html.text);
+        const onThePage = cardOf(page.html.text);
+
+        // Then - one card, byte for byte: what the Mac itself holds and what Machines holds beside it, every
+        // Then - part, and the same gestures to free
+        expect(card).toBeDefined();
+        expect(card).toBe(onThePage);
+        expect(card).toContain('This Mac itself holds');
+        expect(card).toContain('Machine disks');
+        expect(card).toContain('Your data');
     });
 
     test("a machine's disk says it is one file on its Mac, read in Storage", async () => {
@@ -59,7 +72,7 @@ describe('machine-storage', () => {
                 await visitor.see(content('cache 1.2 GB'));
 
                 // Then - the line under its figure opens Storage
-                await visitor.click(within(region('Storage'), button('Storage')));
+                await visitor.click(within(region('Disk'), button('Storage')));
                 await visitor.see(heading('3.0 GB can be freed.'));
             },
         );
@@ -70,7 +83,7 @@ describe('machine-storage', () => {
         // Given - the window on linux-1's Storage over stories, whose system, apps and caches hold 0 bytes
         const result = await component.render(windowOver('stories', 'linux-1'), async (visitor) => {
             // When - its disk has been read
-            await visitor.see(within(region('Storage'), content('Your data')));
+            await visitor.see(within(region('Disk'), content('Your data')));
         });
 
         // Then - one segment for your data, one for free, none for what holds nothing

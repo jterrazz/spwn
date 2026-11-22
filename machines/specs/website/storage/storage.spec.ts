@@ -32,7 +32,7 @@ describe('storage', () => {
         'D6 waits for images.build to answer in the world build, which as a dev build refuses it with image.no-linux-binary (apps/engine/images/calls/binary.go:26)',
     );
 
-    test('D8 the disk of a Mac is told by what Station holds and the engine verdict heads the page', async () => {
+    test('D8 the disk of a Mac is told by what Machines holds on it and the engine verdict heads the page', async () => {
         // Given - Storage over two-macs
         const result = await website.visit('/?world=two-macs&page=storage', async (visitor) => {
             // When - the page is read
@@ -144,7 +144,7 @@ describe('storage', () => {
             '/?world=stories&machine=linux-1&tab=Storage',
             async (visitor) => {
                 // When - the tab is read
-                const storage = region('Storage');
+                const storage = region('Disk');
                 await visitor.see(within(storage, content('Your data')));
 
                 // Then - only what holds bytes is listed, and free last
@@ -157,8 +157,8 @@ describe('storage', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test('D38 a holder that holds nothing on a Mac is neither drawn nor listed', async () => {
-        // Given - Storage over two-macs, whose Station holds give leftovers and logs at 0 bytes
+    test('D38 a kind of Machines that holds nothing on a Mac is neither drawn nor listed', async () => {
+        // Given - Storage over two-macs, whose disk.read gives leftovers and logs at 0 bytes
         const result = await website.visit('/?world=two-macs&page=storage', async (visitor) => {
             // When - the disk is read
             const disk = region('Disk');

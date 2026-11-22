@@ -5,13 +5,17 @@ import "github.com/jterrazz/studio-station/apps/engine/core/size"
 type Kind string
 
 const (
-	KindSystem     Kind = "system"
-	KindApps       Kind = "apps"
-	KindYourData   Kind = "your-data"
-	KindCaches     Kind = "caches"
-	KindMachines   Kind = "machines"
-	KindImageCache Kind = "image-cache"
-	KindFree       Kind = "free"
+	KindSystem       Kind = "system"
+	KindApps         Kind = "apps"
+	KindYourData     Kind = "your-data"
+	KindCaches       Kind = "caches"
+	KindMachineDisks Kind = "machine-disks"
+	KindImages       Kind = "images"
+	KindOtherVMs     Kind = "other-vms"
+	KindLeftovers    Kind = "leftovers"
+	KindImageCache   Kind = "image-cache"
+	KindLogs         Kind = "logs"
+	KindFree         Kind = "free"
 )
 
 func (Kind) Enum() []string {
@@ -24,8 +28,9 @@ func (Kind) Enum() []string {
 }
 
 func Kinds() []Kind {
-	// value: a machine's disk by kind, in the order its bar draws them.
-	return []Kind{KindSystem, KindApps, KindYourData, KindCaches, KindMachines, KindImageCache, KindFree}
+	// value: a machine's disk by kind, in the order its bar draws them:
+	// the machine's own, then what Machines holds on a Mac, then free.
+	return []Kind{KindSystem, KindApps, KindYourData, KindCaches, KindMachineDisks, KindImages, KindOtherVMs, KindLeftovers, KindImageCache, KindLogs, KindFree}
 }
 
 type Amount struct {
@@ -56,12 +61,13 @@ func KindsOf(total, free int64, s Survey, rows []Row, h HeldReading) ([]Amount, 
 	// invariant: a kind whose measure has not answered is absent, never 0:
 	// the system where the volume cannot tell it apart, the system, apps
 	// and caches while a walk of theirs pends with no last walk's size, or
-	// past its budget (a walk again keeps the last size), machines and images until the hypervisor is heard (its last answer
-	// stands while it is asked again, fails or is late), and on a machine
-	// with none; your data, the remainder, whenever a kind it subtracts is
-	// unknown. The image cache is the hypervisor's Can rebuild row, apart
-	// from the caches and known with them; what can be freed is absent with
-	// the caches.
+	// past its budget (a walk again keeps the last size), Machines' disks
+	// until the hypervisor is heard (its last answer stands while it is
+	// asked again, fails or is late), and on a machine with none; your
+	// data, the remainder, whenever a kind it subtracts is unknown. The
+	// image cache is the hypervisor's Can rebuild row and Machines' logs a
+	// part of its own, both apart from the caches and known with them; what
+	// can be freed is absent with the caches, and counts the logs it frees.
 	cacheRows := Reading{Rows: rows}.Of(CanRebuild)
 	cachesKnown := !s.CachesUnknown
 	var caches, imageCache int64
@@ -72,6 +78,10 @@ func KindsOf(total, free int64, s Survey, rows []Row, h HeldReading) ([]Amount, 
 		} else {
 			caches += max(r.Bytes, 0)
 		}
+	}
+	logs := int64(-1)
+	if cachesKnown && s.Logs >= 0 {
+		logs = min(s.Logs, caches)
 	}
 	machines, held := int64(0), h.Heard()
 	if held {
@@ -88,13 +98,21 @@ func KindsOf(total, free int64, s Survey, rows []Row, h HeldReading) ([]Amount, 
 		out = append(out, Amount{Kind: KindYourData, Bytes: max(total-free-s.System-s.Apps-caches-imageCache-machines, 0)})
 	}
 	if cachesKnown {
-		out = append(out, Amount{Kind: KindCaches, Bytes: caches})
+		out = append(out, Amount{Kind: KindCaches, Bytes: caches - max(logs, 0)})
 	}
 	if held {
-		out = append(out, Amount{Kind: KindMachines, Bytes: machines})
+		out = append(out,
+			Amount{Kind: KindMachineDisks, Bytes: h.Held.machines()},
+			Amount{Kind: KindImages, Bytes: h.Held.images()},
+			Amount{Kind: KindOtherVMs, Bytes: h.Held.others()},
+			Amount{Kind: KindLeftovers, Bytes: h.Held.unused(KindLeftovers)},
+		)
 	}
 	if cachesKnown && s.Hypervisor != "" {
 		out = append(out, Amount{Kind: KindImageCache, Bytes: imageCache})
+	}
+	if logs >= 0 {
+		out = append(out, Amount{Kind: KindLogs, Bytes: logs})
 	}
 	out = append(out, Amount{Kind: KindFree, Bytes: free})
 	if !cachesKnown {

@@ -1,7 +1,6 @@
 import type {
     AppsReport,
     DiskAmount,
-    DiskHolding,
     DiskOutcome,
     PortsPort,
     PortsSharedPort,
@@ -57,10 +56,11 @@ export const AWAKE_ON_TONE = 'ok' satisfies Tone;
 export const REVERSIBLE_TONE: Tone = 'ok';
 
 // outside: a colour of identity is design/'s type, which engine/ never imports: these are the colours the Disk
-// outside: bar's kinds and holders take, and design/'s type checks each where a page hands it over.
+// outside: bar's kinds take, and design/'s type checks each where a page hands it over.
 export type ShareColour =
     | 'blue'
     | 'indigo'
+    | 'lilac'
     | 'pink'
     | 'purple'
     | 'sky'
@@ -70,25 +70,20 @@ export type ShareColour =
 
 export const UNKNOWN_SHARE_COLOUR: ShareColour = 'system';
 
+// invariant: the caches and the image cache share teal, Machines' logs and the system slate: each pair is one
+// invariant: family, so eight colours tell the ten kinds that hold a disk apart.
 export const DISK_KIND_COLOURS: Readonly<Record<DiskAmount['Kind'], ShareColour>> = {
     apps: 'blue',
     caches: 'teal',
     free: 'system',
-    'image-cache': 'sky',
-    machines: 'indigo',
+    'image-cache': 'teal',
+    images: 'lilac',
+    leftovers: 'pink',
+    logs: 'slate',
+    'machine-disks': 'indigo',
+    'other-vms': 'sky',
     system: 'slate',
     'your-data': 'purple',
-};
-
-export const DISK_HOLDER_COLOURS: Readonly<Record<DiskHolding['Holder'], ShareColour>> = {
-    free: 'system',
-    'image-cache': 'teal',
-    images: 'purple',
-    leftovers: 'pink',
-    logs: 'sky',
-    'machine-disks': 'blue',
-    'other-vms': 'indigo',
-    'this-mac': 'slate',
 };
 
 export const PORT_ANSWER_TONES: Tones<PortsPort['Answer']> = {

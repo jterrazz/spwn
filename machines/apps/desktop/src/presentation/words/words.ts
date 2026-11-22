@@ -148,6 +148,8 @@ export const NEWEST_WORD = 'newest';
 
 export const DISK_PENDING_WORD = 'reading';
 
+export const DISK_TITLE = 'Disk';
+
 export const THIS_MAC_WORD = 'This Mac';
 
 export const THE_MAC_ITSELF_WORD = 'the Mac itself';

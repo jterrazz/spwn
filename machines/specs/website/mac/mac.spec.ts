@@ -194,7 +194,7 @@ describe('mac', () => {
         const result = await website.visit(
             '/?world=two-macs&machine=macbook-pro&tab=Storage',
             async (visitor) => {
-                await visitor.see(within(region('Storage'), content('606 GB', { exact: false })));
+                await visitor.see(within(region('Disk'), content('606 GB', { exact: false })));
                 await visitor.see(within(region('By app'), button('Free go')));
 
                 // When - Free is pressed on go
@@ -202,7 +202,7 @@ describe('mac', () => {
 
                 // Then - what it held is freed, said under Done here, and the groups count less
                 await visitor.see(within(region('Done here'), content('19.4 GB freed')));
-                await visitor.see(within(region('Storage'), content('587 GB', { exact: false })));
+                await visitor.see(within(region('Disk'), content('587 GB', { exact: false })));
                 await visitor.see(button('Free 15.4 GB'));
                 await visitor.gone(within(region('By app'), button('Free go')));
                 await visitor.see(within(region('By app'), button('Erase… xcode')));
@@ -212,21 +212,29 @@ describe('mac', () => {
     });
 
     test('M7 the bar of a Mac holds what the disk holds, by the kinds the engine gives', async () => {
-        // Given - the Storage tab of This Mac over two-macs, whose disk.read gives system, apps, data, caches, machines and free
+        // Given - the Storage tab of This Mac over two-macs, whose disk.read gives system, apps, data, caches, machine disks, images and free
         const result = await website.visit(
             '/?world=two-macs&machine=macbook-pro&tab=Storage',
             async (visitor) => {
                 // When - the tab is read
-                const storage = region('Storage');
+                const disk = region('Disk');
 
-                // Then - each kind is named with its bytes, and the Mac says what it holds itself
-                for (const kind of ['System', 'Your data', 'Caches', 'Machines and images']) {
-                    await visitor.see(within(storage, content(kind)));
+                // Then - each kind is named with its bytes, and the Mac says what it holds itself and what Machines
+                // Then - holds beside it
+                for (const kind of ['System', 'Your data', 'Caches', 'Machine disks', 'Images']) {
+                    await visitor.see(within(disk, content(kind)));
                 }
-                for (const size of ['21.4 GB', '443 GB', '107 GB']) {
-                    await visitor.see(within(storage, content(size)));
+                for (const size of ['21.4 GB', '443 GB', '100 GB', '7 GB']) {
+                    await visitor.see(within(disk, content(size)));
                 }
-                await visitor.see(within(storage, content('This Mac itself holds 499 GB.')));
+                await visitor.see(
+                    within(
+                        disk,
+                        content(
+                            'This Mac itself holds 499 GB. Outside any machine, Machines holds 107 GB.',
+                        ),
+                    ),
+                );
             },
         );
         expect(result.errors.text).toBe('');
