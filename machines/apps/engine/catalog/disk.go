@@ -176,6 +176,8 @@ var StationDisk = Disk{
 		noted(data("{state}/station/installed.json"), "the binary the public installer last installed and its version, written by the installer at the end of an install that installed a station binary, never deleted: the window finds station by it before any engine has started"),
 		noted(data("{state}/station/children/*"), "the engine's `tailscale` calls in flight, `<pid>` holding its start: the next engine start kills what a killed one left"),
 		noted(data("{state}/station/runs/*"), "each running VM's `<vm>.pid` and `<vm>.exit`"),
+		noted(data("{state}/station/applied/*.json"), "one record for each setting Machines applied: when, and a fingerprint of what it wrote, so a setting changed since reads as such; deleting them leaves each setting read from what is there"),
+		noted(data("{state}/station/engine-stopped.json"), "when and by whom the owner last stopped the engine, shown while it is stopped: deleting it only forgets who stopped it"),
 		noted(data("{state}/station/uptime.json"), "each server's last 30 days, written by its Mac's engine: deleting it starts every record again"),
 		noted(data("{state}/station/journal.jsonl", Mac), "what was done on this Mac and its VMs, the last 30 days: deleting it forgets that history"),
 		noted(data("{state}/station/journal.jsonl.lock", Mac), "empty: the lock every write of the journal takes"),
