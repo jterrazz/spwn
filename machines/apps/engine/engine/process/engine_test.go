@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/netip"
+	"reflect"
 	"slices"
 	"strings"
 	"sync"
@@ -170,6 +171,21 @@ func TestAtStartADeadRunLeavesEveryWorkspaceStoppedAndRunsNone(t *testing.T) {
 	}
 	if h.runs() != 0 {
 		t.Errorf("%d runs started, want none: a workspace never restarts by itself", h.runs())
+	}
+}
+
+func TestAtStartTheStopsOfSharingOfAVMWithNoRecordAreForgotten(t *testing.T) {
+	h := newHarness(t, model.VMRecord{Name: "api", Lifetime: model.Persistent}, model.VMRecord{Name: "off", Lifetime: model.Persistent})
+	var kept [][]string
+	h.d.o.ForgetStops = func(vms []string) error {
+		kept = append(kept, vms)
+		return nil
+	}
+	if err := h.d.Begin(t.Context(), nil); err != nil {
+		t.Fatal(err)
+	}
+	if want := [][]string{{"api", "off"}}; !reflect.DeepEqual(kept, want) {
+		t.Errorf("the start kept the stops of %v, want %v", kept, want)
 	}
 }
 

@@ -70,6 +70,9 @@ type Options struct {
 	// value: keeps whether the owner stopped sharing a VM's port, so the
 	// next listen there is not shared until a share; nil keeps nothing.
 	Remember func(vm string, port int, stopped bool) error
+	// value: forgets the owner's stops of sharing of every VM but vms, this
+	// Mac's VMs; nil forgets none.
+	ForgetStops func(vms []string) error
 	// value: the engine's own state folder: its socket and its children.
 	State       string
 	ThisMachine catalog.MachineKind
@@ -362,8 +365,8 @@ func (d *Engine) Run(ctx context.Context, note func(line string)) error {
 func (d *Engine) Begin(ctx context.Context, note func(line string)) error {
 	// invariant: Begin is the engine up to its socket: the clamshell set back
 	// to normal (a killed daemon's mask is cleared by its successor), the
-	// children a killed one left reaped, the runs adopted, the lends swept and
-	// Serve reconciled. Run follows it with the socket and a tick a second; a
+	// children a killed one left reaped, the runs adopted, the stops of
+	// sharing of VMs gone forgotten, the lends swept and Serve reconciled. Run follows it with the socket and a tick a second; a
 	// stepped engine (the spec world) follows it with Step, then Serve per
 	// connection, and Stop.
 	if err := d.Check(); err != nil {
@@ -409,9 +412,28 @@ func (d *Engine) Begin(ctx context.Context, note func(line string)) error {
 	d.refreshSelf(ctx)
 	d.readLocalNetwork(ctx)
 	d.adopt(ctx)
+	d.forgetStops()
 	d.sweepOwed(ctx)
 	d.reconcileServe(ctx)
 	return nil
+}
+
+// invariant: the owner's stops of sharing name only VMs this Mac holds a
+// record of; a records read that fails forgets none, and the next start
+// forgets them.
+func (d *Engine) forgetStops() {
+	if d.o.ForgetStops == nil {
+		return
+	}
+	records, err := d.m.Records()
+	if err != nil {
+		return
+	}
+	vms := make([]string, 0, len(records))
+	for _, r := range records {
+		vms = append(vms, r.Name)
+	}
+	_ = d.o.ForgetStops(vms)
 }
 
 func (d *Engine) Step(ctx context.Context, tick int) bool {

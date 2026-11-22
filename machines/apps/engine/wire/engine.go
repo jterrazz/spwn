@@ -122,6 +122,9 @@ func (m machine) engine(env kit.Env) *process.Engine {
 		Remember: func(vm string, port int, stopped bool) error {
 			return portscalls.Remember(m.stores.ports(), vm, port, stopped)
 		},
+		ForgetStops: func(vms []string) error {
+			return portscalls.ForgetStopsBut(m.stores.ports(), vms)
+		},
 		State: m.paths.State, DeviceKey: deviceKey, ThisMachine: m.kind, Ports: m.cat.Ports(), Rights: m.portRights, Mounts: m.vmMounts, Version: m.engineVersion(), Abilities: m.engineAbilities(), Page: page.Revision, StartedAt: m.engineStarted(), PID: os.Getpid(), GuestPort: m.guestPort(),
 		Power: m.powerPort, KeepAwakePage: m.keepAwakePage, Executable: m.sys.Env.Executable(), Records: m.engineRecords(), Commands: local.Ran,
 		NeverSleeps: func() bool { on, _ := m.stores.neverSleeps().Get(); return on },

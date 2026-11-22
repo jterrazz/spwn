@@ -157,3 +157,26 @@ func TestADeletedVMLeavesNoStopOfSharingBehind(t *testing.T) {
 		t.Errorf("stops = %+v, want none", g)
 	}
 }
+
+func TestTheStopsOfSharingOfAVMThatDoesNotExistAreForgotten(t *testing.T) {
+	prefs := contract.Ports(memoryPreferences{})
+	for _, key := range []string{"accept-1:8080", "api:3000", "api:5173"} {
+		vm, port, _ := strings.Cut(key, ":")
+		n, _ := strconv.Atoi(port)
+		if err := Remember(prefs, vm, n, true); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := ForgetStopsBut(prefs, []string{"api", "web"}); err != nil {
+		t.Fatal(err)
+	}
+	if g, err := prefs.Get(); err != nil || g == nil || !slices.Equal(g.NotShared, []string{"api:3000", "api:5173"}) {
+		t.Fatalf("stops = %+v, %v; want api's alone", g, err)
+	}
+	if err := ForgetStopsBut(prefs, nil); err != nil {
+		t.Fatal(err)
+	}
+	if g, _ := prefs.Get(); g != nil && len(g.NotShared) != 0 {
+		t.Errorf("stops = %+v, want none", g)
+	}
+}
