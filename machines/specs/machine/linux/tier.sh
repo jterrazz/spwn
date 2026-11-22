@@ -26,7 +26,8 @@ home_of() {
   local h=$1 name=$2
   mkdir -p "$h/.local/bin" "$h/.local/share/station/tart" "$h/.local/share/station/vms" \
     "$h/.config/station" "$h/power" "$h/root"
-  ln -s "$real_tart" "$h/.local/share/station/tart/tart.app"
+  # value: a copy, since a tart.app reached through a link does not run its VMs.
+  cp -RH "$real_tart" "$h/.local/share/station/tart/tart.app"
   # value: the OCI cache is the owner's, read when the base image is already
   # pulled; the VMs and images this run makes stay in its own store, and tart's
   # automatic pruning is off (TART_NO_AUTO_PRUNE in as), or a clone of this run
@@ -77,16 +78,19 @@ cleanup_tier() {
 # names a shorter one, so a guest command that never returns fails its case rather
 # than hold the run.
 key="$mac/.local/state/station/images/key"
+# value: bounded <seconds> <command>, ended at its bound by SIGALRM: macOS ships no
+# timeout(1).
+bounded=(/usr/bin/perl -e 'alarm shift; exec @ARGV or die "exec $ARGV[0]: $!\n"')
 vm_ssh() {
   local vm=$1
   shift
-  on_mac /usr/bin/timeout -k 10 600 /usr/bin/ssh "${ssh_opts[@]}" -i "$key" -o ProxyCommand="$mac/.local/bin/station machines pipe $vm" "$vm_user@$vm" "$@"
+  on_mac "${bounded[@]}" 600 /usr/bin/ssh "${ssh_opts[@]}" -i "$key" -o ProxyCommand="$mac/.local/bin/station machines pipe $vm" "$vm_user@$vm" "$@"
 }
 in_vm() { vm_ssh "$1" "$2" < /dev/null; }
 # value: in_vm_for <seconds> <vm> <command>: in_vm with a bound of its own.
 in_vm_for() {
   local secs=$1 vm=$2
-  on_mac /usr/bin/timeout -k 10 "$secs" /usr/bin/ssh "${ssh_opts[@]}" -i "$key" -o ProxyCommand="$mac/.local/bin/station machines pipe $vm" "$vm_user@$vm" "$3" < /dev/null
+  on_mac "${bounded[@]}" "$secs" /usr/bin/ssh "${ssh_opts[@]}" -i "$key" -o ProxyCommand="$mac/.local/bin/station machines pipe $vm" "$vm_user@$vm" "$3" < /dev/null
 }
 
 # invariant: a GITHUB_TOKEN the runner holds reaches the station of a workspace, so its
