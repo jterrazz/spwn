@@ -470,6 +470,11 @@
       "Detail": "disk",
       "Tone": "plain"
     },
+    "disk.linked": {
+      "Word": "linked",
+      "Detail": "disk",
+      "Tone": "plain"
+    },
     "disk.lives-elsewhere": {
       "Word": "lives elsewhere",
       "Detail": "disk",

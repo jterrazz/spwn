@@ -271,6 +271,7 @@
       "errors": [
         "disk.app-running",
         "disk.destination-held",
+        "disk.linked",
         "disk.not-misplaced"
       ],
       "in": "MoveIn",

@@ -589,6 +589,9 @@ func Codes() map[fail.Code]Wording {
 		diskcalls.NotMisplaced: func(e *fail.Error) (string, string) {
 			return e.Subject + " is not misplaced", "station disk"
 		},
+		diskcalls.Linked: func(e *fail.Error) (string, string) {
+			return e.Subject + " is a link to " + e.Detail["target"] + ", not moved", "station disk"
+		},
 		diskcalls.DestinationHeld: func(e *fail.Error) (string, string) {
 			held := e.Detail["path"]
 			return held + " already exists: " + e.Subject + " cannot move onto it", "move or remove " + held + ", then station disk move " + e.Subject

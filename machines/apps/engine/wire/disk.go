@@ -424,6 +424,10 @@ func (d diskMachine) Exists(path string) bool {
 	_, err := d.h.FS.Stat(path)
 	return err == nil
 }
+func (d diskMachine) Link(path string) (string, bool) {
+	to, err := d.h.FS.Readlink(path)
+	return to, err == nil
+}
 func (d diskMachine) Names(dir string) ([]string, error) {
 	entries, err := d.h.FS.ReadDir(dir)
 	if err != nil {
@@ -436,7 +440,11 @@ func (d diskMachine) Names(dir string) ([]string, error) {
 	return names, nil
 }
 func (d diskMachine) ReadFile(path string) ([]byte, error) { return d.h.FS.ReadFile(path) }
-func (d diskMachine) Prune(dir string)                     { _ = d.h.FS.Remove(dir) }
+func (d diskMachine) Prune(dir string) {
+	if _, linked := d.Link(dir); !linked {
+		_ = d.h.FS.Remove(dir)
+	}
+}
 func (d diskMachine) Has(name string) bool {
 	_, ok := d.h.Run.LookPath(name)
 	return ok

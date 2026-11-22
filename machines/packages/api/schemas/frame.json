@@ -305,6 +305,7 @@
             "confirm.yes-needed",
             "disk.app-running",
             "disk.destination-held",
+            "disk.linked",
             "disk.lives-elsewhere",
             "disk.names-needed",
             "disk.never-touched",

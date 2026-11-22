@@ -231,11 +231,16 @@ func (s *Surveyor) exists(pattern string) bool {
 	return len(matches) > 0
 }
 
+func (s *Surveyor) strayed(abs string) bool {
+	_, linked := s.m.Link(abs)
+	return !linked && s.m.Exists(abs)
+}
+
 func (s *Surveyor) misplacedOnes(e disk.Entry) []disk.MisplacedReport {
 	out := []disk.MisplacedReport{}
 	for _, st := range e.Disk.Misplaced {
 		abs := s.o.Expand.Expand(st.Path)
-		if !s.m.Exists(abs) {
+		if !s.strayed(abs) {
 			continue
 		}
 		out = append(out, s.misplaced(e, st, abs, s.dirSize(abs)))
@@ -313,7 +318,7 @@ func (s *Surveyor) Free(ctx context.Context, names []string) ([]disk.Outcome, er
 			failure = s.deleteCaches(e)
 		}
 		for _, st := range e.Disk.Misplaced {
-			if s.m.Exists(s.o.Expand.Expand(st.Path)) {
+			if s.strayed(s.o.Expand.Expand(st.Path)) {
 				failure = first(failure, s.actions(ctx, st.Free, present))
 			}
 		}
@@ -406,7 +411,13 @@ func (s *Surveyor) Move(ctx context.Context, folder string) (disk.Outcome, error
 	}
 	for _, e := range s.Placed() {
 		for _, st := range e.Disk.Misplaced {
-			if s.o.Expand.Expand(st.Path) != abs || !s.exists(st.Path) {
+			if s.o.Expand.Expand(st.Path) != abs {
+				continue
+			}
+			if to, linked := s.m.Link(abs); linked {
+				return disk.Outcome{}, &disk.LinkedError{Path: s.o.Expand.Display(abs), Target: s.o.Expand.Display(to)}
+			}
+			if !s.exists(st.Path) {
 				continue
 			}
 			return s.move(ctx, e, st)

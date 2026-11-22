@@ -104,3 +104,55 @@ func TestAMoveOntoDataThatHoldsTheSameEntryIsRefusedAndMovesNothing(t *testing.T
 		t.Errorf("a refused move moved %q; want nothing moved", usage.Glob("/h/builder/bin/*"))
 	}
 }
+
+type linkedHome struct {
+	onMachine
+	links  map[string]string
+	pruned []string
+}
+
+func (m *linkedHome) Link(p string) (string, bool) {
+	to, ok := m.links[p]
+	return to, ok
+}
+
+func (m *linkedHome) Prune(dir string) { m.pruned = append(m.pruned, dir) }
+
+type movedFiles struct {
+	*fake.Usage
+	moved []string
+}
+
+func (f *movedFiles) Move(ctx context.Context, from, to string) error {
+	f.moved = append(f.moved, from)
+	return f.Usage.Move(ctx, from, to)
+}
+
+func TestAMisplacedFolderThatIsALinkIsRefusedAndNothingMovesOrIsPruned(t *testing.T) {
+	usage := fake.NewUsage(map[string]int64{"/h/go/pkg/mod/x/f": 2}, 1<<40, 1<<39)
+	files := &movedFiles{Usage: usage}
+	machine := &linkedHome{onMachine: onMachine{Usage: usage}, links: map[string]string{"/h/go": "/h/elsewhere"}}
+	apps := []catalog.App{{
+		Name:     "go",
+		Installs: []catalog.LivesOn{{Kinds: []catalog.MachineKind{catalog.Mac}, Install: catalog.CaskInstall{Token: "go"}}},
+		Disk: catalog.Disk{Misplaced: []catalog.Misplaced{{
+			Path:  "~/go",
+			Move:  []catalog.Move{{From: "~/go/pkg/mod/*", To: "~/.cache/go/mod"}},
+			Prune: []string{"~/go/pkg", "~/go"},
+		}}},
+	}}
+	s := NewSurveyor(machine, apps, SurveyorOptions{Disk: files, ThisMachine: catalog.Mac, Expand: disk.Expander{Home: "/h"}})
+
+	_, err := s.Move(context.Background(), "~/go")
+
+	var linked *disk.LinkedError
+	if !errors.As(err, &linked) || linked.Path != "~/go" || linked.Target != "~/elsewhere" {
+		t.Fatalf("Move of a linked folder returned %v, want a LinkedError for ~/go to ~/elsewhere", err)
+	}
+	if len(files.moved) != 0 || len(machine.pruned) != 0 {
+		t.Errorf("moved %v and pruned %v, want neither", files.moved, machine.pruned)
+	}
+	if got := s.misplacedOnes(s.Entries()[0]); len(got) != 0 {
+		t.Errorf("the listing shows %+v for a linked folder, want none", got)
+	}
+}

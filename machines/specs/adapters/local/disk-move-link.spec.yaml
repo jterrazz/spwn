@@ -1,0 +1,20 @@
+description: 'a misplaced folder that is a link is refused by move, and nothing moves'
+fixture:
+    - ./__fixtures__/disk-go/
+    - ./__fixtures__/disk-relocated/
+    - ./__fixtures__/disk-strays/
+runs:
+    - command: '--version >/dev/null; /bin/mkdir -p elsewhere/pkg/mod/x elsewhere/bin && echo hi > elsewhere/pkg/mod/x/f && /bin/rm -rf go && /bin/ln -s "$HOME/elsewhere" go'
+      exit: 0
+    - command: 'disk move ~/go'
+      exit: 2
+      stderr: |
+          Error: ~/go is a link to ~/elsewhere, not moved
+          Hint: station disk
+      files:
+          elsewhere/pkg/mod/x/f: exists
+          elsewhere/bin: exists
+    - command: 'status --json | /usr/bin/jq -c ''.workspace.strays | map(.name)'''
+      exit: 0
+      stdout: |
+          ["node"]

@@ -30,6 +30,7 @@ type onMachine struct {
 func (m onMachine) Exists(p string) bool               { return m.Usage.Has(p) }
 func (m onMachine) Names(dir string) ([]string, error) { return m.Children(dir), nil }
 func (onMachine) ReadFile(string) ([]byte, error)      { return nil, errors.ErrUnsupported }
+func (onMachine) Link(string) (string, bool)           { return "", false }
 func (onMachine) Prune(string)                         {}
 func (onMachine) Has(string) bool                      { return false }
 func (onMachine) Keep(string, []byte) error            { return nil }

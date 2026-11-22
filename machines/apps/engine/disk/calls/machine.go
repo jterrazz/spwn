@@ -16,6 +16,10 @@ type Machine interface {
 	// value: the names in dir, an error when it cannot be read.
 	Names(dir string) ([]string, error)
 	ReadFile(path string) ([]byte, error)
+	// value: where the link at path points, false when path is not a link
+	// (a missing path included): the link itself is read, never what it
+	// points to.
+	Link(path string) (string, bool)
 	// value: dir removed when it is empty, else left.
 	Prune(dir string)
 	// value: whether name is a command on PATH.

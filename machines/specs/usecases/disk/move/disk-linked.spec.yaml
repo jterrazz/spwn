@@ -1,0 +1,10 @@
+description: 'a misplaced folder that is a link is refused by move, and nothing moves'
+env: two-macs
+runs:
+    - command: '--version >/dev/null; /bin/mkdir -p elsewhere && /bin/ln -s "$HOME/elsewhere" go'
+      exit: 0
+    - command: 'disk move ~/go'
+      exit: 2
+      stderr: |
+          Error: ~/go is a link to ~/elsewhere, not moved
+          Hint: station disk

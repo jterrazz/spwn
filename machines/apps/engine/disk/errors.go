@@ -42,6 +42,10 @@ type NotMisplacedError struct{ Path string }
 
 func (e *NotMisplacedError) Error() string { return e.Path + " is not misplaced" }
 
+type LinkedError struct{ Path, Target string }
+
+func (e *LinkedError) Error() string { return e.Path + " is a link to " + e.Target + ", not moved" }
+
 type UnreadRecordError struct{ Path string }
 
 func (e *UnreadRecordError) Error() string {
