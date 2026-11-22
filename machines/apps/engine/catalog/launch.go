@@ -1,6 +1,9 @@
 package catalog
 
-import "path"
+import (
+	"path"
+	"strings"
+)
 
 type LaunchOwner struct {
 	Prefix string
@@ -33,6 +36,23 @@ var LaunchSystemPrefixes = []string{
 }
 
 const StationLaunchPrefix = "com.jterrazz.station."
+
+var OwnLaunchPrefixes = []string{
+	// value: the prefixes of every launchd label this product writes: the
+	// bare engine's two jobs and the menu bar's under StationLaunchPrefix,
+	// and the jobs Spwn.app registers under its own bundle identifier
+	// (ADR-073).
+	StationLaunchPrefix, WindowBundle + ".",
+}
+
+func IsOwnLaunchLabel(label string) bool {
+	for _, prefix := range OwnLaunchPrefixes {
+		if strings.HasPrefix(label, prefix) {
+			return true
+		}
+	}
+	return false
+}
 
 const EngineLabel = StationLaunchPrefix + "engine"
 

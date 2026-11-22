@@ -17,6 +17,8 @@ func TestATaskIsAnOrphanWhenItsProgramOrItsAppIsGone(t *testing.T) {
 		{"its program and its app are there", background.Job{Label: "com.bjango.istatmenus.installer", File: "/Library/LaunchDaemons/com.bjango.istatmenus.installer.plist", Loaded: true, ProgramExists: true, OwnerExists: true}, background.GroupKnown},
 		{"no app is known for it", background.Job{Label: "com.example.brain.x", File: "/home/me/Library/LaunchAgents/com.example.brain.x.plist", Loaded: true, ProgramExists: true, OwnerExists: true}, background.GroupUnknown},
 		{"it is Machines' own, even with its program missing", background.Job{Label: "com.jterrazz.station.engine", File: "/home/me/Library/LaunchAgents/com.jterrazz.station.engine.plist", Loaded: true, OwnerExists: true}, background.GroupStation},
+		{"it is Spwn.app's engine, loaded from the bundle", background.Job{Label: "com.jterrazz.spwn.engine", Loaded: true, Running: true, PID: 13629, OwnerExists: true}, background.GroupStation},
+		{"it is Spwn.app's agent, loaded from the bundle", background.Job{Label: "com.jterrazz.spwn.agent", Loaded: true, Running: true, PID: 9006, OwnerExists: true}, background.GroupStation},
 		{"it was loaded without a definition", background.Job{Label: "com.example.brain.adhoc", Loaded: true, Running: true, PID: 7, OwnerExists: true}, background.GroupUnknown},
 	} {
 		if got := background.Judge([]background.Job{c.job}, "", "/home/me")[0].Group; got != c.want {

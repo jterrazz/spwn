@@ -77,7 +77,7 @@ func livesOn(j *Task, l Job) {
 		j.OwnerGone = !l.OwnerExists
 	}
 	switch {
-	case strings.HasPrefix(j.Label, catalog.StationLaunchPrefix):
+	case catalog.IsOwnLaunchLabel(j.Label):
 		j.Group = GroupStation
 	case j.Plist != "" && (!l.ProgramExists || j.OwnerGone):
 		j.Group = GroupOrphan
