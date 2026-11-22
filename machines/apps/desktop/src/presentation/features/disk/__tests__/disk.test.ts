@@ -1,6 +1,7 @@
 import type { DiskAmount, DiskRow } from '@jterrazz/station-api';
 import { describe, expect, test } from 'vitest';
 
+import { DISK_KIND_COLOURS } from '../../../words/tones';
 import { byApp, groupsOf, kindPartsOf, listedOf, sizeOf } from '../disk';
 
 function row(App: string, Group: DiskRow['Group'], change: Partial<DiskRow> = {}): DiskRow {
@@ -8,6 +9,14 @@ function row(App: string, Group: DiskRow['Group'], change: Partial<DiskRow> = {}
 }
 
 describe('disk', () => {
+    test('every kind of the bar has a colour of its own', () => {
+        // Given - the colour each kind of the Disk card takes
+        const colours = Object.values(DISK_KIND_COLOURS);
+
+        // Then - no two kinds share one, so the legend never reads two parts as one
+        expect(new Set(colours).size).toBe(colours.length);
+    });
+
     test('rows are grouped in the order the engine first gives each group', () => {
         // Given - rows of three groups, interleaved
         const rows = [

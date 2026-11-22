@@ -58,9 +58,11 @@ export const REVERSIBLE_TONE: Tone = 'ok';
 // outside: a colour of identity is design/'s type, which engine/ never imports: these are the colours the Disk
 // outside: bar's kinds take, and design/'s type checks each where a page hands it over.
 export type ShareColour =
+    | 'amber'
     | 'blue'
     | 'indigo'
     | 'lilac'
+    | 'orange'
     | 'pink'
     | 'purple'
     | 'sky'
@@ -70,20 +72,20 @@ export type ShareColour =
 
 export const UNKNOWN_SHARE_COLOUR: ShareColour = 'system';
 
-// invariant: the caches and the image cache share teal, Machines' logs and the system slate: each pair is one
-// invariant: family, so eight colours tell the ten kinds that hold a disk apart.
+// invariant: no two kinds share a colour; the Mac's four are cool (slate, blue, teal, sky), Machines' six take the
+// invariant: rest in an order that never sets two near hues side by side, and free is the neutral.
 export const DISK_KIND_COLOURS: Readonly<Record<DiskAmount['Kind'], ShareColour>> = {
     apps: 'blue',
-    caches: 'teal',
+    caches: 'sky',
     free: 'system',
-    'image-cache': 'teal',
-    images: 'lilac',
+    'image-cache': 'amber',
+    images: 'orange',
     leftovers: 'pink',
-    logs: 'slate',
+    logs: 'lilac',
     'machine-disks': 'indigo',
-    'other-vms': 'sky',
+    'other-vms': 'purple',
     system: 'slate',
-    'your-data': 'purple',
+    'your-data': 'teal',
 };
 
 export const PORT_ANSWER_TONES: Tones<PortsPort['Answer']> = {

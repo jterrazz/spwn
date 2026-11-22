@@ -47,6 +47,8 @@
     --id-sky: #79c0ff;
     --id-lilac: #d08cf5;
     --id-slate: #98a2b3;
+    --id-orange: #ff8a4c;
+    --id-amber: #e8c547;
 
     --font-sans: 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
     --font-mono: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, monospace;
@@ -128,6 +130,12 @@ html[data-material='vibrant'] {
 }
 [data-identity='slate'] {
     --c: var(--id-slate);
+}
+[data-identity='orange'] {
+    --c: var(--id-orange);
+}
+[data-identity='amber'] {
+    --c: var(--id-amber);
 }
 [data-identity='system'] {
     --c: var(--system);

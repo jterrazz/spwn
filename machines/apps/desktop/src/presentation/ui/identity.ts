@@ -9,7 +9,9 @@ export const IDENTITIES = [
     'slate',
 ] as const;
 
-export type Identity = 'system' | (typeof IDENTITIES)[number];
+export const STORAGE_IDENTITIES = ['orange', 'amber'] as const;
+
+export type Identity = 'system' | (typeof IDENTITIES)[number] | (typeof STORAGE_IDENTITIES)[number];
 
 // value: the mockup's seven machine colours, in its order; slate is a colour of what is no machine.
 const MACHINE_IDENTITIES = [
