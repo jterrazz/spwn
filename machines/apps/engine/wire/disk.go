@@ -218,9 +218,14 @@ func (s diskStation) oldHomes(ctx context.Context, hypervisor string) ([]disk.Fr
 			kept = append(kept, disk.KeptOf(st.Path, x.Display(x.Expand(st.Move[0].To))+"/"+filepath.Base(st.Yours[0]), vms))
 			continue
 		}
+		// invariant: an old home that holds nothing, or whose size is not
+		// read, is nothing to free: no gesture offers to free 0 B.
 		bytes := int64(-1)
 		s.m.disk().Sizes(ctx, []string{x.Expand(st.Path)}, func(_ int, b int64) { bytes = b })
-		out = append(out, disk.Freeable{Holder: disk.HolderLeftovers, Kind: disk.FreeFolder, Name: st.Path, Bytes: max(bytes, 0)})
+		if bytes <= 0 {
+			continue
+		}
+		out = append(out, disk.Freeable{Holder: disk.HolderLeftovers, Kind: disk.FreeFolder, Name: st.Path, Bytes: bytes})
 	}
 	return out, kept
 }
