@@ -102,6 +102,10 @@ func (l Local) ports(ctx context.Context, _ *store.Snapshot) Reading {
 
 // value: the VMs of This Mac that run, as its slice last said them.
 func running(now *store.Snapshot, thisMac string) []string {
+	return vms(now, thisMac, func(vm machines.VM) bool { return vm.State == machines.Running })
+}
+
+func vms(now *store.Snapshot, thisMac string, keep func(machines.VM) bool) []string {
 	sl, ok := now.Slices[store.Of(store.FamilyMac, thisMac)]
 	if !ok {
 		return nil
@@ -112,7 +116,7 @@ func running(now *store.Snapshot, thisMac string) []string {
 	}
 	var out []string
 	for _, vm := range view.VMs {
-		if vm.State == machines.Running {
+		if keep(vm) {
 			out = append(out, vm.Name)
 		}
 	}
@@ -179,8 +183,14 @@ func (l Local) activity(ctx context.Context, now *store.Snapshot) Reading {
 	})
 }
 
+// value: This Mac then every VM it hosts, a stopped one too: its sign-ins are
+// the call's answer for a machine that is not running.
+func (l Local) hosted(now *store.Snapshot) []string {
+	return append([]string{l.ThisMac}, vms(now, l.ThisMac, func(machines.VM) bool { return true })...)
+}
+
 func (l Local) signins(ctx context.Context, now *store.Snapshot) Reading {
-	return each(ctx, store.FamilySignins, l.machines(now), func(ctx context.Context, m string) (any, time.Time, error) {
+	return each(ctx, store.FamilySignins, l.hosted(now), func(ctx context.Context, m string) (any, time.Time, error) {
 		in := accountscalls.ProgramsIn{}
 		if m != l.ThisMac {
 			in.Machine = m

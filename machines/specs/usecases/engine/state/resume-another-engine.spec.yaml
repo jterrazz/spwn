@@ -11,4 +11,4 @@ runs:
       exit: 0
       stdout: |
           ["opened",[]]
-          ["snapshot",["activity:linux-1","activity:macbook-pro","awake:macbook-pro","mac:macbook-pro","machines.list","overview:linux-1","overview:macbook-pro","ports:macbook-pro","signins:linux-1","signins:macbook-pro"]]
+          ["snapshot",["activity:linux-1","activity:macbook-pro","awake:macbook-pro","mac:macbook-pro","machines.list","overview:linux-1","overview:macbook-pro","ports:macbook-pro","signins:api","signins:linux-1","signins:macbook-pro"]]
