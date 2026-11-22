@@ -237,6 +237,10 @@ fn a_quiet_watch_ends_its_reader_and_socket_when_its_webview_goes() {
     let (mut engine, _) = listener.accept().expect("the engine accepts");
     let mut asked = vec![0; 1];
     engine.read_exact(&mut asked).expect("the request arrives");
+    // hazard: macOS refuses a read timeout on a socket whose peer has gone, so it is set before the peer closes.
+    engine
+        .set_read_timeout(Some(SOON))
+        .expect("a read timeout sets");
 
     // When - the webview reloads, closing what it opened
     let closed = exchanges.close_owner("main");
@@ -247,9 +251,6 @@ fn a_quiet_watch_ends_its_reader_and_socket_when_its_webview_goes() {
         received.recv_timeout(SOON).ok(),
         Some(Message::End("the engine closed the connection".into()))
     );
-    engine
-        .set_read_timeout(Some(SOON))
-        .expect("a read timeout sets");
     let mut rest = Vec::new();
     assert!(engine.read_to_end(&mut rest).is_ok());
     assert_eq!(exchanges.count(), 0);
@@ -585,14 +586,15 @@ fn every_call_of_the_bridged_list_passes_and_no_other_name() {
 
 fn full_backlog() -> (UnixListener, PathBuf, Vec<UnixStream>) {
     let (listener, path) = listening();
-    // hazard: std listens with the system's backlog; a backlog of 0 lets one connection wait, so the next blocks.
+    // hazard: std listens with the system's backlog; a backlog of 0 lets one connection wait on Linux, so the next blocks,
+    // hazard: and macOS takes up to its 128 before it refuses the next.
     // SAFETY: listen on the listener's own open descriptor.
     let listened = unsafe { libc::listen(std::os::fd::AsRawFd::as_raw_fd(&listener), 0) };
     assert_eq!(listened, 0);
     let mut waiting = Vec::new();
     while let Ok(stream) = connect_within(&path, Duration::from_millis(200)) {
         waiting.push(stream);
-        assert!(waiting.len() < 64, "the backlog never filled");
+        assert!(waiting.len() < 256, "the backlog never filled");
     }
     (listener, path, waiting)
 }
