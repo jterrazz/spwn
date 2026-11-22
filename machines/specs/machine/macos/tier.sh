@@ -540,3 +540,34 @@ done
 in_vm "kill $kept_child $control_child" > /dev/null 2>&1 || true
 in_vm 'launchctl bootout gui/$(id -u)/com.jterrazz.station.engine; rm -f ~/Library/LaunchAgents/com.jterrazz.station.engine.plist; sudo -n launchctl asuser "$(id -u)" launchctl unsetenv STATION_MACHINE_KIND' > /dev/null 2>&1 || true
 case_pass
+
+# value: the move of a Mac from the bare jobs to Spwn.app's, made by the window's own start
+# (ADR-073): mode B placed with a standalone menu bar running, then Spwn.app opened, after
+# which the engine's job runs the bundle's binary, the bare jobs and their plists are gone,
+# ~/.local/bin/station links into the bundle, the standalone menu bar is deleted and the
+# bundle's runs. The bundle is `make window`'s, built on a Mac with Xcode before the tier;
+# the guest-side body is bundle-move.sh.
+# invariant: the standalone menu bar is a release's, pinned by version and digest and fetched
+# once into .artifacts/e2e/: the move runs its `--unregister-login-item`, which only a menu
+# bar released on its own answers, the tree's opening a second menu bar instead.
+case_begin bundle-move-by-the-window ADR-073
+standalone_version=v0.21.0-alpha.4
+standalone_digest=3dbb4d592c421008dabf03aed0df0866a346091601a9265b24ca21dd8eab8a4c
+standalone_zip="$repo/.artifacts/e2e/Station.app-$standalone_version.zip"
+[ -d "$repo/.artifacts/window/Spwn.app" ] || fail "no $repo/.artifacts/window/Spwn.app: run make window on a Mac with Xcode first"
+if ! printf '%s  %s\n' "$standalone_digest" "$standalone_zip" | shasum -a 256 -c - > /dev/null 2>&1; then
+  mkdir -p "$repo/.artifacts/e2e" && curl -fsSL -o "$standalone_zip" "https://github.com/jterrazz/spwn/releases/download/$standalone_version/Station.app.zip" >> "$log" 2>&1 || fail "download Station.app $standalone_version"
+  printf '%s  %s\n' "$standalone_digest" "$standalone_zip" | shasum -a 256 -c - > /dev/null 2>&1 || fail "Station.app $standalone_version: $standalone_zip is not the pinned digest"
+fi
+in_vm 'rm -rf /tmp/station-e2e && mkdir -p /tmp/station-e2e' || fail "scratch folder"
+scp "${ssh_opts[@]}" -i "$ssh_key" -q "$repo/.artifacts/go/station" "$user@$ip:/tmp/station-e2e/station" || fail "copy the binary"
+tar -C "$repo/.artifacts/window" -cf - Spwn.app | ssh "${ssh_opts[@]}" -i "$ssh_key" "$user@$ip" 'tar -C /tmp/station-e2e -xf -' || fail "copy Spwn.app"
+ssh "${ssh_opts[@]}" -i "$ssh_key" "$user@$ip" 'cat > /tmp/station-e2e/Station.app.zip && ditto -x -k /tmp/station-e2e/Station.app.zip /tmp/station-e2e/' < "$standalone_zip" || fail "copy Station.app $standalone_version"
+moved=$(ssh "${ssh_opts[@]}" -i "$ssh_key" "$user@$ip" 'bash -s' < "$suite/macos/bundle-move.sh")
+code=$?
+say "$(grep -v '^miss ' <<< "$moved")"
+[ $code -eq 0 ] || fail "the move's setup: $(grep '^setup ' <<< "$moved")"
+while read -r lost; do
+  [ -z "$lost" ] || miss "${lost#miss }"
+done <<< "$(grep '^miss ' <<< "$moved")"
+case_pass
