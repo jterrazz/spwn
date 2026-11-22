@@ -18,6 +18,10 @@ const SetupMoved = "apps and settings no longer come with setup: station apps in
 
 type Deps struct {
 	ThisMachine page.Context
+	// value: the Machinefile named, resolved and read with the state its
+	// apply needs, as `station apply --machinefile` refuses it; init runs it
+	// before any step.
+	Resolve func(ctx context.Context, machinefile string) error
 	// value: the plan of the Machinefile named, then its run, as `station
 	// apply --machinefile` prints them.
 	Apply func(ctx context.Context, machinefile string, io kit.IO) error
@@ -45,6 +49,11 @@ func Leaf(d Deps, env kit.Env, note string) kit.Leaf[Input] {
 		Run: func(ctx context.Context, in *Input, io kit.IO) error {
 			if note != "" && !io.JSON && !io.PageJSON {
 				io.Note(note)
+			}
+			if in.Machinefile != "" {
+				if err := d.Resolve(ctx, in.Machinefile); err != nil {
+					return err
+				}
 			}
 			plan, err := call.Invoke(ctx, env.Calls, env.Target(), setupcalls.Init, setupcalls.InitIn{Name: in.Name, Plan: true}, nil)
 			if err != nil {

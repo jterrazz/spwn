@@ -43,10 +43,19 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 	}, env)
 }
 
+func planned(ctx context.Context, env kit.Env, in Input) (machinefile.Plan, error) {
+	return call.Invoke(ctx, env.Calls, env.Target(), machinefilecalls.Plan, machinefilecalls.PlanIn{Machinefile: in.Machinefile, Phase: catalog.Phase(in.Phase)}, nil)
+}
+
+func Resolve(ctx context.Context, env kit.Env, in Input) error {
+	_, err := planned(ctx, env, in)
+	return err
+}
+
 func Run(ctx context.Context, d Deps, env kit.Env, in Input, io kit.IO) error {
 	// value: the plan, then the run: what `station apply` and `station init
 	// --machinefile` print.
-	p, err := call.Invoke(ctx, env.Calls, env.Target(), machinefilecalls.Plan, machinefilecalls.PlanIn{Machinefile: in.Machinefile, Phase: catalog.Phase(in.Phase)}, nil)
+	p, err := planned(ctx, env, in)
 	if err != nil {
 		return err
 	}

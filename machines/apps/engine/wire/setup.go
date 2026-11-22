@@ -21,7 +21,9 @@ import (
 )
 
 func initCommands(env kit.Env, m machine) []*cobra.Command {
-	d := initcmd.Deps{ThisMachine: m.where, Apply: func(ctx context.Context, name string, io kit.IO) error {
+	d := initcmd.Deps{ThisMachine: m.where, Resolve: func(ctx context.Context, name string) error {
+		return apply.Resolve(ctx, env, apply.Input{Machinefile: name})
+	}, Apply: func(ctx context.Context, name string, io kit.IO) error {
 		return apply.Run(ctx, apply.Deps{ThisMachine: m.where}, env, apply.Input{Machinefile: name}, io)
 	}}
 	// value: setup, init's hidden word for one release.

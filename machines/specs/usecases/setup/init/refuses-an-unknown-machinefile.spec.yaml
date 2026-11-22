@@ -1,0 +1,12 @@
+description: 'init --machinefile of a Machinefile no source holds is refused before any step, and writes nothing'
+env: fresh
+runs:
+    - command: 'init --yes --name macbook-pro --machinefile nonexistent'
+      exit: 2
+      stderr: |
+          Error: no Machinefile named nonexistent
+          Hint: give this machine one: station init --machinefile <name>
+      files:
+          .zshrc: absent
+          .npmrc: absent
+          .bunfig.toml: absent
