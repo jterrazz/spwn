@@ -51,9 +51,9 @@ if [ ! -d $W/$L-node/machines/node_modules ]; then
   cd ~
 fi
 flock -u 6
-# invariant: a lane clones to a fixed path (<label>-cc-wt, one per cheap slot under CHEAP) so Go's build cache, keyed by the directory, hits on the next commit; two loops of a label never meet, cc-loop.sh refuses the second.
+# invariant: a lane clones to a fixed path so Go's build cache, keyed by the directory, hits on the next commit: <label>-cc-wt, or under CHEAP cc-wt-s<slot>, shared by every label since a cheap slot has one holder on the VM; two loops of a label never meet, cc-loop.sh refuses the second.
 # invariant: the lane's node_modules is hard-linked from the label's node clone, so both sit in CC_WORK, on one filesystem.
-WT=$W/$L-cc-wt${CK:+-s$CK}; rm -rf "${WT:?}"
+if [ -n "$CK" ]; then WT=$W/cc-wt-s$CK; else WT=$W/$L-cc-wt; fi; rm -rf "${WT:?}"
 git clone -q -b $B $R/$L-cc.bundle "$WT" && cd "$WT" && git reset -q --hard $sha && git log -1 --oneline && cd machines && cp -al $W/$L-node/machines/node_modules . || exit 9
 if run STATIC; then
 echo GOFMT[$(gofmt -l apps/engine catalog specs)]

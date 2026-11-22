@@ -4,7 +4,8 @@
 W=$1; B=$2; L=$3; H=$(git -C "$W" rev-parse "$B")
 sub=$(git -C "$W" rev-parse --show-prefix)  # "" at a repo root, "machines/" in a subdir
 [ -z "$sub" ] && [ -d "$W/machines/apps/engine" ] && sub=machines/
-VM=$VM_LINUX; R='$HOME'/$VM_DIR; RS=$VM_DIR/; C=$VM_RAM/wt-$L-cold
+# invariant: the clone is one fixed path, $VM_RAM/cold, since the exclusive heavy-run lock lets one cold gate run at a time, so Go's build cache, keyed by the directory, hits from one gate to the next.
+VM=$VM_LINUX; R='$HOME'/$VM_DIR; RS=$VM_DIR/; C=$VM_RAM/cold
 git -C "$W" bundle create "$RUN/$L-cold.bundle" "$B" --tags 2>/dev/null || exit 90
 cat > "$RUN/$L-cold-remote.sh" <<R
 export PATH=\$HOME/.local/bin:\$PATH; eval "\$(mise activate bash --shims)"
