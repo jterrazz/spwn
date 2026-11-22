@@ -101,7 +101,10 @@ type Report struct {
 	NeverSleeps bool
 	NeverSince  time.Time
 	NeverHeld   bool
-	Servers     []string
+	// value: the Mac's own sleep timer is off (pmset sleep 0), as System
+	// Settings sets it, whatever the engine holds.
+	MacNeverSleeps bool
+	Servers        []string
 	// value: SPEC B5.14: the workspaces running on it now, which pause
 	// while it sleeps; a stopped one is not listed.
 	Pauses []string
@@ -138,9 +141,14 @@ func (r Report) Clauses() []string {
 	// by clause: "never sleeps" and "let go while the battery is low" while
 	// the battery guard lets the policy go, "awake until 18:00" and "lid
 	// closed" when the session holds it so, "awake stopped" with the guard's
-	// words while that end is told, else "sleeps normally", as with its
-	// engine down.
+	// words while that end is told, else "never sleeps" and "set in System
+	// Settings" while the Mac's own sleep timer is off, else "sleeps
+	// normally", as with its engine down.
+	bySettings := []string{"never sleeps", "set in System Settings"}
 	if r.EngineDown() {
+		if r.MacNeverSleeps {
+			return bySettings
+		}
 		return []string{"sleeps normally"}
 	}
 	switch r.Mode() {
@@ -160,6 +168,9 @@ func (r Report) Clauses() []string {
 		}
 		return []string{"awake stopped"}
 	case SleepsNormally:
+		if r.MacNeverSleeps {
+			return bySettings
+		}
 	}
 	return []string{"sleeps normally"}
 }

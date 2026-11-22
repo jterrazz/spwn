@@ -14,7 +14,8 @@ const (
 func VerdictOf(r Report) *verdict.Verdict {
 	// invariant: the cases of docs/reference/awake.md's verdict table, the
 	// first that matches: none while the engine reads, the engine down,
-	// then one per Mode. The sentence is Phrase's, the tone needs a look
+	// then one per Mode, the Mac's own sleep timer before a guard that would
+	// refuse a keep-awake. The sentence is Phrase's, the tone needs a look
 	// wherever a page marks the Mac for one.
 	if r.Engine == EngineReading {
 		return nil
@@ -40,6 +41,9 @@ func VerdictOf(r Report) *verdict.Verdict {
 	case StoppedByGuard:
 		return said(verdict.Warn, "")
 	case SleepsNormally:
+		if r.MacNeverSleeps {
+			return said(verdict.OK, "")
+		}
 		if v := Next(r.Caps, Held{}, r.Reading, 0); v.Tripped {
 			return said(verdict.Warn, refusedBy+v.Trip.Words)
 		}

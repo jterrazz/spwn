@@ -25,17 +25,19 @@ A client that draws Keep awake for… takes its terms from `awake.read`: its `Ch
 
 `awake.read` says how the Mac stands awake in one `Verdict` ([the API](api.md)): the first case that matches, its `Sentence` the Mac's `Awake` words, capitalised. A client draws it as given and writes no sentence of its own.
 
-| Case                                                 | Tone       | Sentence                                         | Line                                         |
-| ---------------------------------------------------- | ---------- | ------------------------------------------------ | -------------------------------------------- |
-| the engine reads (`Engine` is `pending`)             | no verdict |                                                  |                                              |
-| the engine is stopped or not installed               | `plain`    | `Sleeps normally.`                               | `the engine is stopped`                      |
-| `never-sleeps`, let go while the battery is low      | `warn`     | `Never sleeps, let go while the battery is low.` | `the always-on Mac policy`                   |
-| `never-sleeps`                                       | `ok`       | `Never sleeps.`                                  | `the always-on Mac policy`                   |
-| `awake-until`, on battery at 21 to 30 %              | `warn`     | `Awake until 18:00.`                             | `battery 25 %, it stops at 20 %`             |
-| `awake-until`                                        | `ok`       | `Awake until 18:00, lid closed.`                 |                                              |
-| `stopped-by-guard`                                   | `warn`     | `Awake stopped, battery 18 %.`                   |                                              |
-| `sleeps-normally`, a guard would refuse a keep-awake | `warn`     | `Sleeps normally.`                               | `cannot be kept awake: Low Power Mode is on` |
-| `sleeps-normally`                                    | `plain`    | `Sleeps normally.`                               |                                              |
+| Case                                                                  | Tone       | Sentence                                         | Line                                         |
+| --------------------------------------------------------------------- | ---------- | ------------------------------------------------ | -------------------------------------------- |
+| the engine reads (`Engine` is `pending`)                              | no verdict |                                                  |                                              |
+| the engine is stopped or not installed, the Mac's own sleep timer off | `plain`    | `Never sleeps, set in System Settings.`          | `the engine is stopped`                      |
+| the engine is stopped or not installed                                | `plain`    | `Sleeps normally.`                               | `the engine is stopped`                      |
+| `never-sleeps`, let go while the battery is low                       | `warn`     | `Never sleeps, let go while the battery is low.` | `the always-on Mac policy`                   |
+| `never-sleeps`                                                        | `ok`       | `Never sleeps.`                                  | `the always-on Mac policy`                   |
+| `awake-until`, on battery at 21 to 30 %                               | `warn`     | `Awake until 18:00.`                             | `battery 25 %, it stops at 20 %`             |
+| `awake-until`                                                         | `ok`       | `Awake until 18:00, lid closed.`                 |                                              |
+| `stopped-by-guard`                                                    | `warn`     | `Awake stopped, battery 18 %.`                   |                                              |
+| `sleeps-normally`, the Mac's own sleep timer off (`pmset sleep 0`)    | `ok`       | `Never sleeps, set in System Settings.`          |                                              |
+| `sleeps-normally`, a guard would refuse a keep-awake                  | `warn`     | `Sleeps normally.`                               | `cannot be kept awake: Low Power Mode is on` |
+| `sleeps-normally`                                                     | `plain`    | `Sleeps normally.`                               |                                              |
 
 The menu bar marks another Mac's card by the same tone: `ok` OK, `warn` Attention, `plain` Absent.
 
@@ -58,7 +60,7 @@ So a Mac mini, which reports no battery and no lid, has no battery or lid guard;
 
 ## Never sleeps
 
-`never-sleeps` is a setting of the Always-on Mac group ([Settings](settings.md#the-packages)): applied, it writes `never_sleeps` to [`preferences.json`](preferences.md), and the engine's `awake` job holds the Mac awake for as long as it runs, its servers with it; no admin, applied from any Mac. `station awake off` ends a keep-awake only; Never sleeps stays until `station settings off never-sleeps`. Its [Mac readiness](machines.md#mac-readiness) lists it, and reads a Mac whose own sleep is off in System Settings (`pmset` sleep 0) as never sleeping too, set in System Settings, with the setting not applied.
+`never-sleeps` is a setting of the Always-on Mac group ([Settings](settings.md#the-packages)): applied, it writes `never_sleeps` to [`preferences.json`](preferences.md), and the engine's `awake` job holds the Mac awake for as long as it runs, its servers with it; no admin, applied from any Mac. `station awake off` ends a keep-awake only; Never sleeps stays until `station settings off never-sleeps`. Its [Mac readiness](machines.md#mac-readiness) lists it, and reads a Mac whose own sleep is off in System Settings (`pmset` sleep 0) as never sleeping too, set in System Settings, with the setting not applied; so does its `awake` verdict, `Never sleeps, set in System Settings.`
 
 ## Related
 

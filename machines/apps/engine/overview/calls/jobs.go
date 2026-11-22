@@ -119,7 +119,7 @@ func (r *Reader[App, Item, Misplaced]) readiness(ctx context.Context) []overview
 		RestartsAfterPowerCut: on(settingRestartAfterPowerCut), NeverSleeps: on(settingNeverSleeps), LogsIn: on(settingAutoLogin),
 		EngineKnown: r.d.ThisMac.Agent != nil,
 	}
-	if sleep, ok := r.fact(ctx, catalog.FactSystemSleep); ok && sleep.State == catalog.StateOK && sleep.Value == "0" {
+	if sleep, ok := r.fact(ctx, catalog.FactSystemSleep); ok && settings.NeverSleeps(sleep) {
 		f.MacNeverSleeps = true
 	}
 	if machines.Readiness(f) == nil && r.d.Servers != nil {

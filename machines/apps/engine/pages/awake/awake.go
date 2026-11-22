@@ -106,6 +106,8 @@ func never(r awake.Report) (words, since []string) {
 	return words, since
 }
 
+const bySettings = "set in System Settings"
+
 func Row(r awake.Report) page.Row {
 	row := page.Row{ID: r.Mac, Label: r.Mac}
 	switch {
@@ -113,6 +115,9 @@ func Row(r awake.Report) page.Row {
 		row.Mark, row.Cells = page.Awaiting, []page.Value{page.Pending()}
 	case r.EngineDown():
 		row.Mark, row.Cells = page.Absent, []page.Value{page.Texts("Sleeps normally", "the engine is stopped")}
+		if r.MacNeverSleeps {
+			row.Cells = []page.Value{page.Texts("Never sleeps", bySettings, "the engine is stopped")}
+		}
 		row.Hint = page.Cmd("station engine start")
 	default:
 		switch r.Mode() {
@@ -132,6 +137,9 @@ func Row(r awake.Report) page.Row {
 			row.Cells = []page.Value{page.Texts("Awake stopped", r.LastEnd.Detail)}
 		case awake.SleepsNormally:
 			row.Mark, row.Cells = page.Absent, []page.Value{page.Text("Sleeps normally")}
+			if r.MacNeverSleeps {
+				row.Mark, row.Cells = page.OK, []page.Value{page.Texts("Never sleeps", bySettings)}
+			}
 		}
 	}
 	return row

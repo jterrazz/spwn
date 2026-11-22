@@ -25,6 +25,8 @@ type WakerOptions struct {
 	ThisMachine catalog.MachineKind
 	ThisMacName string
 	Zone        *time.Location
+	// value: the Mac's own sleep timer is off, read once per report.
+	MacNeverSleeps func(ctx context.Context) bool
 }
 
 type Waker struct {
@@ -77,6 +79,7 @@ func (s *Waker) Read(ctx context.Context) <-chan awake.Report {
 		}
 		last := first
 		last.Now = s.clock.Now()
+		last.MacNeverSleeps = s.o.MacNeverSleeps != nil && s.o.MacNeverSleeps(ctx)
 		if err != nil {
 			last.Engine = s.engineState()
 		} else {

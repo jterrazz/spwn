@@ -1,0 +1,15 @@
+description: 'a Mac whose own sleep timer System Settings set to never reads as never sleeping, set there'
+env: two-macs
+runs:
+    - command: 'world reads macbook-pro system-sleep 0'
+      exit: 0
+    - command: 'awake'
+      exit: 0
+      stdout: |
+          ●	macbook-pro	Never sleeps · set in System Settings
+          ●	mac-mini	Never sleeps · always-on Mac policy	last slept: never in 12d 1h · hosts infra (server)
+          # This Mac
+          lid	open
+          power source	AC · 96 % · charging
+          thermal	nominal
+          screen	always turns off

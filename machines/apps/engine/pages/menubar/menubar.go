@@ -452,7 +452,11 @@ func awakeWords(r awake.Report) string {
 		return "never sleeps"
 	case awake.AwakeUntil:
 		return r.Until()
-	case awake.StoppedByGuard, awake.SleepsNormally:
+	case awake.SleepsNormally:
+		if r.MacNeverSleeps {
+			return "never sleeps"
+		}
+	case awake.StoppedByGuard:
 	}
 	return ""
 }

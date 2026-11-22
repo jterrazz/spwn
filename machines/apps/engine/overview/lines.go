@@ -288,6 +288,9 @@ func AwakeRead(r awake.Report, m machine.Ref) Read {
 		parts = []Part{{State: catalog.StateDegraded, Word: "stopped"}, {Word: r.LastEnd.Detail}}
 	case awake.SleepsNormally:
 		parts = []Part{{State: catalog.StateAbsent, Word: "sleeps normally"}}
+		if r.MacNeverSleeps {
+			parts = []Part{{State: catalog.StateOK, Word: "never sleeps"}, {Word: "set in System Settings"}}
+		}
 	}
 	return Read{Line: Line{Section: section.Awake, Parts: parts}, Findings: awake.Findings(r, m)}
 }

@@ -11,13 +11,13 @@ import (
 )
 
 type awakeCase struct {
-	engine                                           string
-	never, held, session, lid, ended, near, lowPower bool
+	engine                                                string
+	never, held, session, lid, ended, near, lowPower, mac bool
 }
 
 func (c awakeCase) report() awake.Report {
 	now := time.Date(2026, 11, 7, 10, 30, 0, 0, time.UTC)
-	r := awake.Report{Now: now, Engine: c.engine, Caps: machine.Capabilities{Engine: true, Battery: true, Lid: true}, NeverSleeps: c.never, NeverHeld: c.held,
+	r := awake.Report{Now: now, Engine: c.engine, Caps: machine.Capabilities{Engine: true, Battery: true, Lid: true}, NeverSleeps: c.never, NeverHeld: c.held, MacNeverSleeps: c.mac,
 		Reading: awake.Reading{Lid: "open", HasBattery: true, Source: "ac", Percent: 80, LowPower: c.lowPower}}
 	if c.session {
 		r.Session = &awake.Session{StartedAt: now.Add(-time.Hour), Until: time.Date(2026, 11, 7, 18, 0, 0, 0, time.UTC), Lid: c.lid}
@@ -33,11 +33,11 @@ func (c awakeCase) report() awake.Report {
 
 func everyAwakeCase() []awakeCase {
 	engines := []string{awake.EngineReading, awake.EngineStopped, awake.EngineAbsent, awake.EngineRunning}
-	out := make([]awakeCase, 0, len(engines)<<7)
+	out := make([]awakeCase, 0, len(engines)<<8)
 	for _, engine := range engines {
-		for bits := range 1 << 7 {
+		for bits := range 1 << 8 {
 			on := func(i int) bool { return bits&(1<<i) != 0 }
-			out = append(out, awakeCase{engine: engine, never: on(0), held: on(1), session: on(2), lid: on(3), ended: on(4), near: on(5), lowPower: on(6)})
+			out = append(out, awakeCase{engine: engine, never: on(0), held: on(1), session: on(2), lid: on(3), ended: on(4), near: on(5), lowPower: on(6), mac: on(7)})
 		}
 	}
 	return out
@@ -51,6 +51,8 @@ func (c awakeCase) want() *verdict.Verdict {
 	switch {
 	case c.engine == awake.EngineReading:
 		return nil
+	case c.engine != awake.EngineRunning && c.mac:
+		return &verdict.Verdict{Tone: verdict.Plain, Sentence: "Never sleeps, set in System Settings.", Line: "the engine is " + c.engine}
 	case c.engine != awake.EngineRunning:
 		return &verdict.Verdict{Tone: verdict.Plain, Sentence: "Sleeps normally.", Line: "the engine is " + c.engine}
 	case c.never && !c.held:
@@ -63,6 +65,8 @@ func (c awakeCase) want() *verdict.Verdict {
 		return &verdict.Verdict{Tone: verdict.OK, Sentence: until}
 	case c.ended:
 		return &verdict.Verdict{Tone: verdict.Warn, Sentence: "Awake stopped, battery 18 %."}
+	case c.mac:
+		return &verdict.Verdict{Tone: verdict.OK, Sentence: "Never sleeps, set in System Settings."}
 	case c.lowPower:
 		return &verdict.Verdict{Tone: verdict.Warn, Sentence: "Sleeps normally.", Line: "cannot be kept awake: Low Power Mode is on"}
 	}
@@ -70,8 +74,8 @@ func (c awakeCase) want() *verdict.Verdict {
 }
 
 // invariant: docs/reference/awake.md's verdict table, held whole over every
-// mode, engine state, policy hold, battery and guard: the first case that
-// matches says the verdict.
+// mode, engine state, policy hold, battery, guard and the Mac's own sleep
+// timer: the first case that matches says the verdict.
 func TestAMacsAwakeVerdictIsTheFirstCaseOfItsTableThatMatches(t *testing.T) {
 	for _, c := range everyAwakeCase() {
 		got, want := awake.VerdictOf(c.report()), c.want()
@@ -91,7 +95,7 @@ func TestAnAwakeVerdictWarnsWhereItsFindingsDo(t *testing.T) {
 		}
 		v := awake.VerdictOf(c.report())
 		found := len(awake.Findings(c.report(), machine.Ref{Name: "this"})) > 0
-		unnamed := (c.never && !c.held) || (!c.never && !c.session && !c.ended && c.lowPower)
+		unnamed := (c.never && !c.held) || (!c.never && !c.session && !c.ended && !c.mac && c.lowPower)
 		if found != (v.Tone == verdict.Warn && !unnamed) {
 			t.Errorf("%+v: verdict %s, a finding: %v", c, v.Tone, found)
 		}

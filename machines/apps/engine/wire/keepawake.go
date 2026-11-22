@@ -6,10 +6,13 @@ import (
 
 	"github.com/jterrazz/studio-station/apps/engine/awake"
 	awakecalls "github.com/jterrazz/studio-station/apps/engine/awake/calls"
+	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
 	"github.com/jterrazz/studio-station/apps/engine/overview"
 	"github.com/jterrazz/studio-station/apps/engine/page"
 	pagekeepawake "github.com/jterrazz/studio-station/apps/engine/pages/keepawake"
+	"github.com/jterrazz/studio-station/apps/engine/settings"
+	settingscalls "github.com/jterrazz/studio-station/apps/engine/settings/calls"
 )
 
 func (m machine) keepAwakePage(v awake.View) any {
@@ -42,7 +45,19 @@ func (m machine) awakeWaker() *awakecalls.Waker {
 			return awake.Slept{Ended: s.Ended, After: time.Duration(s.After) * time.Second}, awakeDown(err)
 		},
 		Installed: m.engineInstalled,
-	}, awakecalls.WakerOptions{Power: m.powerPort, ThisMachine: m.kind, ThisMacName: m.where.Machine, Zone: time.Local})
+	}, awakecalls.WakerOptions{Power: m.powerPort, ThisMachine: m.kind, ThisMacName: m.where.Machine, Zone: time.Local, MacNeverSleeps: m.macNeverSleeps})
+}
+
+// value: this Mac's own sleep timer reads off, within the settings' read
+// budget; false on a Linux machine or a Mac that cannot say.
+func (m machine) macNeverSleeps(ctx context.Context) bool {
+	if m.kind != catalog.Mac {
+		return false
+	}
+	ctx, cancel := context.WithTimeout(ctx, settingscalls.ReadBudget)
+	defer cancel()
+	got, err := m.facts().Read(ctx, catalog.FactSystemSleep)
+	return err == nil && settings.NeverSleeps(got)
 }
 
 type statusAwake struct{ s *awakecalls.Waker }

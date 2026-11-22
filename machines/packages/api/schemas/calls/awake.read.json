@@ -140,6 +140,9 @@
         "Mac": {
           "type": "string"
         },
+        "MacNeverSleeps": {
+          "type": "boolean"
+        },
         "NeverHeld": {
           "type": "boolean"
         },
@@ -204,6 +207,7 @@
         "Guards",
         "LastEnd",
         "Mac",
+        "MacNeverSleeps",
         "NeverHeld",
         "NeverSince",
         "NeverSleeps",

@@ -417,6 +417,7 @@ export type AwakeReport = {
     Guards: AwakeGuardState[] | null;
     LastEnd: AwakeEnd | null;
     Mac: string;
+    MacNeverSleeps: boolean;
     NeverHeld: boolean;
     NeverSince: string;
     NeverSleeps: boolean;
