@@ -11,12 +11,6 @@ runs:
               contains:
                   - |-
                     	<string>com.jterrazz.station.engine</string>
-                    	<key>AssociatedBundleIdentifiers</key>
-                    	<array>
-                    		<string>com.jterrazz.spwn</string>
-                    		<string>com.jterrazz.station.menubar</string>
-                    	</array>
-                  - |-
                     	<key>ProgramArguments</key>
                     	<array>
                     		<string>{{path}}</string>

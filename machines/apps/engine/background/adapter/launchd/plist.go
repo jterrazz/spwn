@@ -22,15 +22,6 @@ func plist(spec contract.JobSpec) string {
 <dict>
 `)
 	b.WriteString("\t<key>Label</key>\n\t<string>" + xmlText(spec.Label) + "</string>\n")
-	// outside: Login Items shows a job under the app this key names, when the
-	// app and the program are signed by the same team (launchd.plist(5)).
-	if len(spec.Apps) > 0 {
-		b.WriteString("\t<key>AssociatedBundleIdentifiers</key>\n\t<array>\n")
-		for _, app := range spec.Apps {
-			b.WriteString("\t\t<string>" + xmlText(app) + "</string>\n")
-		}
-		b.WriteString("\t</array>\n")
-	}
 	b.WriteString("\t<key>ProgramArguments</key>\n\t<array>\n")
 	for _, arg := range spec.Program {
 		b.WriteString("\t\t<string>" + xmlText(arg) + "</string>\n")

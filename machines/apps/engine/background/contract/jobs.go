@@ -55,10 +55,7 @@ type Status struct {
 }
 
 type JobSpec struct {
-	Label string
-	// value: the bundle identifiers of the apps the system names as the job's
-	// owner, where it lists the jobs that run in the background.
-	Apps      []string
+	Label     string
 	Program   []string
 	Env       map[string]string
 	AtLogin   bool

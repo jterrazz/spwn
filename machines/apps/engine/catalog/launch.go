@@ -89,8 +89,6 @@ const (
 
 const WindowName = "Spwn" // value: Spwn.app's product name, the name macOS's Local Network alert and row give the engine it carries (ADR-073, mode A).
 
-var StationApps = []string{WindowBundle, MenuBarBundle}
-
 func agentPlist(home, label string) string {
 	return path.Join(home, "Library", "LaunchAgents", label+".plist")
 }
