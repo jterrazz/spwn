@@ -1,13 +1,19 @@
 package machines
 
-import "github.com/jterrazz/studio-station/apps/engine/catalog"
+import (
+	"slices"
+
+	"github.com/jterrazz/studio-station/apps/engine/catalog"
+)
 
 type ReadinessSetting struct {
-	// value: the setting that makes the check true, its state on the Mac, and
-	// whether it applies only as root.
-	Name  string
-	State catalog.State
-	Root  bool
+	// value: the setting that makes the check true, its state as measured on
+	// the Mac, whether it applies only as root, and whether Machines keeps a
+	// record of applying it there.
+	Name     string
+	State    catalog.State
+	Root     bool
+	Recorded bool
 }
 
 type ReadinessFacts struct {
@@ -15,6 +21,9 @@ type ReadinessFacts struct {
 	Mac                                        string
 	MacsServer                                 bool
 	RestartsAfterPowerCut, NeverSleeps, LogsIn ReadinessSetting
+	// value: the Mac's own sleep timer is off (pmset sleep 0, System
+	// Settings' "Prevent automatic sleeping"), whatever the engine holds.
+	MacNeverSleeps bool
 	// value: FileVault on, and FileVault's planned restart supported, each
 	// ok, absent or unknown as the Mac reads it.
 	FileVault, AuthRestart catalog.State
@@ -41,16 +50,20 @@ const (
 )
 
 func Readiness(f ReadinessFacts) []ReadinessItem {
-	// invariant: SPEC 7.6: a Mac that hosts a server, or holds Never sleeps,
-	// has its readiness, six checks in the one order, each measured; any
-	// other Mac has none. A disk that FileVault guards needs you after a
-	// power cut, however ready the rest is.
-	if !f.MacsServer && f.NeverSleeps.State != catalog.StateOK {
+	// invariant: SPEC 7.6: a Mac that hosts a server, or has any always-on
+	// check in force whoever set it, has its readiness, six checks in the one
+	// order, each measured; any other Mac has none. A disk that FileVault
+	// guards needs you after a power cut, however ready the rest is.
+	if !f.MacsServer && !f.MacNeverSleeps && !slices.ContainsFunc([]ReadinessSetting{f.RestartsAfterPowerCut, f.NeverSleeps, f.LogsIn}, func(s ReadinessSetting) bool { return s.State == catalog.StateOK }) {
 		return nil
+	}
+	never := setting(ItemNeverSleeps, f.NeverSleeps)
+	if never.State != catalog.StateOK && f.MacNeverSleeps {
+		never = ReadinessItem{Name: ItemNeverSleeps, State: catalog.StateOK, Value: "set in System Settings"}
 	}
 	return []ReadinessItem{
 		setting(ItemRestartsAfterPowerCut, f.RestartsAfterPowerCut),
-		setting(ItemNeverSleeps, f.NeverSleeps),
+		never,
 		setting(ItemLogsIn, f.LogsIn),
 		diskUnlock(f.FileVault, f.Mac),
 		plannedRestarts(f.AuthRestart),
@@ -59,20 +72,23 @@ func Readiness(f ReadinessFacts) []ReadinessItem {
 }
 
 func setting(name string, s ReadinessSetting) ReadinessItem {
-	fix, root := "station settings apply "+s.Name, ""
+	fix := "station settings apply " + s.Name
 	if s.Root {
-		root = ", as root"
+		fix = catalog.AsRoot(catalog.InstallDir + "/" + catalog.StationBinary + " settings apply " + s.Name)
 	}
-	switch s.State {
-	case catalog.StateOK:
-		return ReadinessItem{Name: name, State: catalog.StateOK, Value: "applied"}
-	case catalog.StateDegraded:
-		return ReadinessItem{Name: name, State: catalog.StateDegraded, Value: "changed since" + root, Fix: fix}
-	case catalog.StateUnknown, catalog.StatePending:
+	switch {
+	case s.State == catalog.StateOK && s.Recorded:
+		return ReadinessItem{Name: name, State: catalog.StateOK, Value: "set by Machines"}
+	case s.State == catalog.StateOK:
+		return ReadinessItem{Name: name, State: catalog.StateOK, Value: "set by hand"}
+	case s.State == catalog.StateDegraded && s.Recorded:
+		return ReadinessItem{Name: name, State: catalog.StateDegraded, Value: "changed since", Fix: fix}
+	case s.State == catalog.StateDegraded:
+		return ReadinessItem{Name: name, State: catalog.StateDegraded, Value: "partly set", Fix: fix}
+	case s.State == catalog.StateUnknown, s.State == catalog.StatePending:
 		return ReadinessItem{Name: name, State: catalog.StateUnknown}
-	case catalog.StateAbsent, catalog.StateBroken:
 	}
-	return ReadinessItem{Name: name, State: catalog.StateAbsent, Value: "not applied" + root, Fix: fix}
+	return ReadinessItem{Name: name, State: catalog.StateAbsent, Value: "not applied", Fix: fix}
 }
 
 func diskUnlock(fileVault catalog.State, mac string) ReadinessItem {

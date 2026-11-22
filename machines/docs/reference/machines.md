@@ -12,7 +12,7 @@ All machines are every machine the owner runs: the physical Macs and the VMs on 
 | Tailscale     | The Tailscale app on each Mac, read only                     |
 | SSH           | How one name reaches a Mac, a VM of This Mac, of another Mac |
 | The engine    | The one process per Mac that runs the VMs                    |
-| Mac readiness | What a Mac that hosts servers must have, each check measured |
+| Mac readiness | What an always-on Mac must have, measured, and who set it    |
 
 ## Macs and VMs
 
@@ -191,7 +191,7 @@ The engine reads Machines' latest [release](../concepts/glossary.md), the newest
 
 ## Mac readiness
 
-The Overview of a Mac that hosts a server, or that never sleeps (its `never-sleeps` setting applied), ends with Mac readiness, six checks in this order, each measured on that Mac: restarts after a power cut (`restart-after-power-cut`), never sleeps (`never-sleeps`), logs in by itself (`autologin`), disk unlock after a power cut (FileVault on is `◐ needs you`, its fix `station machines unlock <mac>` from the same network), planned restarts unlock themselves (`fdesetup supportsauthrestart`, a fact), engine starts at login (the engine's job installed, else `station engine start`). A setting not applied names its fix, and says `as root` where it needs it. A Mac hosts a server when one of its running VMs says it is one, asked of its guest's station. Any other Mac has no readiness, and reads no fact for it.
+The Overview of a Mac that hosts a server, or that has any of its first three checks in force whoever set it, ends with Mac readiness, six checks in this order, each measured on that Mac: restarts after a power cut (`restart-after-power-cut`), never sleeps (`never-sleeps`, or the Mac's own sleep off, `pmset` sleep 0), logs in by itself (`autologin`), disk unlock after a power cut (FileVault on is `◐ needs you`, its fix `station machines unlock <mac>` from the same network), planned restarts unlock themselves (`fdesetup supportsauthrestart`, a fact), engine starts at login (the engine's job installed, else `station engine start`). A setting that is set says who set it: `set by Machines` when Machines keeps a record of applying it there, `set by hand` when it does not, and never sleeps reads `set in System Settings` when the Mac's own sleep is off and the setting is not applied. One partly there reads `changed since` when Machines applied it, `partly set` when it never did. A setting not set names its fix, `sudo ~/.local/bin/station settings apply <setting>` where it needs root, so the line runs whatever sudo's PATH. A Mac hosts a server when one of its running VMs says it is one, asked of its guest's station. Any other Mac has no readiness, and reads no fact for it but its own sleep.
 
 ## Related
 

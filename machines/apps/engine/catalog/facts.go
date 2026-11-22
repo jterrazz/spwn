@@ -13,7 +13,9 @@ const (
 	// off; the display's own idle minutes, 0 for never.
 	FactScreenLock   Fact = "screen-lock"
 	FactDisplaySleep Fact = "display-sleep"
-	FactRemoteLogin  Fact = "remote-login"
+	// value: the Mac's own idle-sleep minutes, 0 for never.
+	FactSystemSleep Fact = "system-sleep"
+	FactRemoteLogin Fact = "remote-login"
 	// value: when Time Machine last finished a backup (RFC 3339), or never.
 	FactTimeMachine Fact = "time-machine"
 	// value: whether FileVault's planned restart, which unlocks the disk

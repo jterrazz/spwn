@@ -18,7 +18,8 @@ func (i *Inspector) checks() map[catalog.Fact]func(context.Context) (settings.Fa
 	return map[catalog.Fact]func(context.Context) (settings.Fact, error){
 		catalog.FactAutoUpdates:  i.autoUpdates,
 		catalog.FactScreenLock:   i.screenLock,
-		catalog.FactDisplaySleep: i.displaySleep,
+		catalog.FactDisplaySleep: func(ctx context.Context) (settings.Fact, error) { return i.pmsetMinutes(ctx, "displaysleep") },
+		catalog.FactSystemSleep:  func(ctx context.Context) (settings.Fact, error) { return i.pmsetMinutes(ctx, "sleep") },
 		catalog.FactRemoteLogin:  i.remoteLogin,
 		catalog.FactTimeMachine:  i.timeMachine,
 	}
@@ -73,16 +74,16 @@ func (i *Inspector) screenLock(ctx context.Context) (settings.Fact, error) {
 	return settings.Unread(), nil
 }
 
-// outside: `pmset -g` lists the active settings, ` displaysleep  10` in
-// minutes, 0 for never, sometimes followed by what prevents it.
-func (i *Inspector) displaySleep(ctx context.Context) (settings.Fact, error) {
+// outside: `pmset -g` lists the active settings, ` displaysleep  10` and
+// ` sleep  0` in minutes, 0 for never, sometimes followed by what prevents it.
+func (i *Inspector) pmsetMinutes(ctx context.Context, key string) (settings.Fact, error) {
 	r, err := i.ask(ctx, local.Command("pmset", "-g"))
 	if err != nil {
 		return settings.Fact{}, err
 	}
 	for _, line := range strings.Split(r.out.Stdout, "\n") {
 		fields := strings.Fields(line)
-		if len(fields) < 2 || fields[0] != "displaysleep" {
+		if len(fields) < 2 || fields[0] != key {
 			continue
 		}
 		if _, err := strconv.Atoi(fields[1]); err == nil && r.ok() {

@@ -71,7 +71,7 @@ func statusDeps(env kit.Env, m machine) overviewcalls.Sections {
 		Tailnet:    m.tailnetStatus(),
 		Awake:      statusAwake{s: m.awakeWaker()},
 		Apps:       appsOf(env, m),
-		Settings:   settingsRead{settingsOf(m)},
+		Settings:   settingsRead{settingsOf(m), m.stores.applied},
 		Setup:      setupRead{setupOf(env, m)},
 		Disk:       diskRead{m.diskOf(env)},
 		Engine:     m.macEngine(),
@@ -131,9 +131,20 @@ func (s hostedServers) Hosted(ctx context.Context) bool {
 	return false
 }
 
-type settingsRead struct{ *settingscalls.Catalogue }
+type settingsRead struct {
+	*settingscalls.Catalogue
+	applied settingscontract.AppliedStore
+}
 
 func (settingsRead) Placed(r settings.Report) (string, catalog.State) { return r.Package.Name, r.State }
+
+func (s settingsRead) Recorded(ctx context.Context, setting string) bool {
+	if s.applied == nil {
+		return false
+	}
+	_, err := s.applied.Get(ctx, setting)
+	return err == nil
+}
 
 type setupRead struct{ s *setupcalls.Provisioner }
 

@@ -51,6 +51,8 @@ func (s noSettings) List(context.Context) ([]struct{}, error) {
 }
 func (noSettings) Placed(struct{}) (string, catalog.State) { return "", catalog.StateUnknown }
 
+func (noSettings) Recorded(context.Context, string) bool { return false }
+
 type noFacts struct{}
 
 func (noFacts) Read(context.Context, catalog.Fact) (settings.Fact, error) {

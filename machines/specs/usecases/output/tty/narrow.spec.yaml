@@ -108,9 +108,9 @@ runs:
           Awake       ● never sleeps
           VMs         ● infra running
           Mac readiness
-            ● restarts after a power cut  applied
-            ● never sleeps                applied
-            ● logs in by itself           applied
+            ● restarts after a power cut  set by hand
+            ● never sleeps                set by hand
+            ● logs in by itself           set by hand
             ◐ disk unlock after a power cut
               needs you
               → station machines unlock mac-mini (from the same network)

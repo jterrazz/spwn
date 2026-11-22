@@ -11,6 +11,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/overview"
 	"github.com/jterrazz/studio-station/apps/engine/ports"
+	"github.com/jterrazz/studio-station/apps/engine/settings"
 )
 
 const (
@@ -82,8 +83,8 @@ func (r *Reader[App, Item, Misplaced]) machineJobs() []job[App, Item, Misplaced]
 	}
 }
 
-// invariant: the readiness reads the settings first, and the Mac's facts
-// only when the Mac needs a readiness at all.
+// invariant: the readiness reads the settings and the Mac's own sleep first,
+// and the Mac's other facts only when the Mac needs a readiness at all.
 func (r *Reader[App, Item, Misplaced]) readinessJob() job[App, Item, Misplaced] {
 	type sn = snapshot[App, Item, Misplaced]
 	return job[App, Item, Misplaced]{Key: subject + "/readiness", Budget: partBudget,
@@ -111,14 +112,17 @@ func (r *Reader[App, Item, Misplaced]) readiness(ctx context.Context) []overview
 		if !ok {
 			state = catalog.StateUnknown
 		}
-		return machines.ReadinessSetting{Name: name, State: state, Root: r.needsRoot(name)}
+		return machines.ReadinessSetting{Name: name, State: state, Root: r.needsRoot(name), Recorded: r.d.Settings.Recorded(ctx, name)}
 	}
 	f := machines.ReadinessFacts{
 		Mac:                   r.label(),
 		RestartsAfterPowerCut: on(settingRestartAfterPowerCut), NeverSleeps: on(settingNeverSleeps), LogsIn: on(settingAutoLogin),
 		EngineKnown: r.d.ThisMac.Agent != nil,
 	}
-	if f.NeverSleeps.State != catalog.StateOK && r.d.Servers != nil {
+	if sleep, ok := r.fact(ctx, catalog.FactSystemSleep); ok && sleep.State == catalog.StateOK && sleep.Value == "0" {
+		f.MacNeverSleeps = true
+	}
+	if machines.Readiness(f) == nil && r.d.Servers != nil {
 		f.MacsServer = r.d.Servers.Hosted(ctx)
 	}
 	if machines.Readiness(f) == nil {
@@ -140,17 +144,22 @@ func (r *Reader[App, Item, Misplaced]) needsRoot(setting string) bool {
 }
 
 func (r *Reader[App, Item, Misplaced]) factState(ctx context.Context, f catalog.Fact) catalog.State {
+	if got, ok := r.fact(ctx, f); ok {
+		return got.State
+	}
+	return catalog.StateUnknown
+}
+
+func (r *Reader[App, Item, Misplaced]) fact(ctx context.Context, f catalog.Fact) (settings.Fact, bool) {
 	ctx, cancel := context.WithTimeout(ctx, defaultBudget)
 	defer cancel()
 	got, err := r.d.Facts.Read(ctx, f)
-	if err != nil || ctx.Err() != nil {
-		return catalog.StateUnknown
-	}
-	return got.State
+	return got, err == nil && ctx.Err() == nil
 }
 
 func (r *Reader[App, Item, Misplaced]) label() string {
-	name, _ := r.d.Name.Get()
+	registered, _ := r.d.Name.Get()
+	name := machines.ThisMacName(registered, r.d.ThisMac.Hostname)
 	if short, ok := strings.CutPrefix(name, r.d.ThisMac.User+"-"); ok && short != "" && r.d.ThisMac.User != "" {
 		return short
 	}

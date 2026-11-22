@@ -121,6 +121,8 @@ type Settings[Item any] interface {
 	List(ctx context.Context) ([]Item, error)
 	// value: the config item a row is, and its state.
 	Placed(r Item) (pkg string, state catalog.State)
+	// value: Machines keeps a record of applying the setting on this machine.
+	Recorded(ctx context.Context, setting string) bool
 }
 
 type Setup interface {
