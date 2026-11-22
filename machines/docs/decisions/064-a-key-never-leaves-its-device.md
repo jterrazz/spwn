@@ -3,6 +3,8 @@
 **Status:** Proposed
 **Date:** 2026-11-20
 
+Amended by [ADR-077](077-a-workspace-trusts-its-macs-device-key-first.md): a VM authorizes its Mac's device key.
+
 Written 2026-11-20 from the connection architecture's design (option C, "hardened status quo") and its lot L2.
 
 ## Context

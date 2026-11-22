@@ -351,6 +351,13 @@ line), those packages and the key dropped from the MacBook's Machinefile
 unless the permanent machine reuses them, and optionally the Mac's host key
 removed from the iPhone app.
 
+## The device book (lot L3 of [ADR-064](docs/decisions/064-a-key-never-leaves-its-device.md))
+The VM's managed block drops the authorized_keys copy and the `id_ed25519.pub` line for the device book
+([ADR-077](docs/decisions/077-a-workspace-trusts-its-macs-device-key-first.md)), the device keys of the owner's known Macs.
+Red-first proof: `specs/cli/machines/create/guest-never-trusts-a-foreign-key.spec.yaml`, where the Mac's `authorized_keys`
+holds `ssh-ed25519 AAAA… stranger@elsewhere` and the guest's block does not. It rewrites
+`guest-trusts-device-key-first.spec.yaml` on purpose.
+
 ## Network isolation
 Tart Softnet for VMs that need no LAN. Until then a VM behind its Mac reaches
 what its Mac binds on every interface, and the other VMs of its Mac (sshd,

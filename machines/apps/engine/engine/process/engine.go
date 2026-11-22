@@ -5,6 +5,7 @@ import (
 	"errors"
 	"path"
 	"reflect"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -665,16 +666,22 @@ func (d *Engine) closeAll() {
 func (d *Engine) hostKeys() []string {
 	home := d.h.Home()
 	var keys []string
-	if pub, err := d.h.ReadFile(path.Join(home, ".ssh", "id_ed25519.pub")); err == nil {
-		if line := strings.TrimSpace(string(pub)); line != "" {
+	add := func(line string) {
+		if line = strings.TrimSpace(line); line != "" && !strings.HasPrefix(line, "#") && !slices.Contains(keys, line) {
 			keys = append(keys, line)
+		}
+	}
+	for _, file := range []string{d.o.DeviceKey, path.Join(home, ".ssh", "id_ed25519.pub")} {
+		if file == "" {
+			continue
+		}
+		if pub, err := d.h.ReadFile(file); err == nil {
+			add(string(pub))
 		}
 	}
 	if auth, err := d.h.ReadFile(path.Join(home, ".ssh", "authorized_keys")); err == nil {
 		for _, line := range strings.Split(string(auth), "\n") {
-			if line = strings.TrimSpace(line); line != "" && !strings.HasPrefix(line, "#") {
-				keys = append(keys, line)
-			}
+			add(line)
 		}
 	}
 	return keys
