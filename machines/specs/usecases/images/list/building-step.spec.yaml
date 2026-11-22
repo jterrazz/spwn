@@ -13,6 +13,7 @@ runs:
       exit: 0
       stdout: |
           ○	base-ubuntu	2026.11.04		macbook-pro	building: Packages, Step 2 of 4
+          ○	base-debian				not built yet
           ○	base-macos				not built yet
     - command: 'images --json | /usr/bin/jq -c ''.images'''
       exit: 0

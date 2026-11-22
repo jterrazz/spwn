@@ -45,8 +45,8 @@ func unasking(t *testing.T) *machines.Machinist {
 	if err := p.Name.Set("mac"); err != nil {
 		t.Fatal(err)
 	}
-	linux := catalog.Image{Name: catalog.LinuxImage, Machinefile: catalog.LinuxImage, Recipe: "images/linux.sh", Kind: catalog.Linux, Defaults: catalog.ImageDefaults{CPUs: 4, MemoryBytes: 4 << 30, DiskBytes: 20e9}}
-	macos := catalog.Image{Name: catalog.MacOSImage, Machinefile: catalog.MacOSImage, Kind: catalog.MacOS, Defaults: catalog.ImageDefaults{CPUs: 4, MemoryBytes: 8 << 30, DiskBytes: 80e9}}
+	linux := catalog.Image{Name: catalog.LinuxImage, Machinefile: catalog.LinuxImage, Recipe: "images/linux.sh", Kind: catalog.Linux, Distro: catalog.DistroUbuntu, Defaults: catalog.ImageDefaults{CPUs: 4, MemoryBytes: 4 << 30, DiskBytes: 20e9}}
+	macos := catalog.Image{Name: catalog.MacOSImage, Machinefile: catalog.MacOSImage, Kind: catalog.MacOS, Distro: catalog.DistroMacOS, Defaults: catalog.ImageDefaults{CPUs: 4, MemoryBytes: 8 << 30, DiskBytes: 80e9}}
 	return machines.New(&stillMac{at: time.Date(2026, 11, 13, 10, 0, 0, 0, time.UTC)}, machinesfake.HypervisorOf(w, "mac", "hypervisor", nil), p, machinesfake.StoreOf(w, "mac"), noTailnet{}, &images{built: true}, &idleEngine{}, nil, machines.Options{
 		ThisMachine: catalog.Mac, Images: []catalog.Image{linux, macos}, KnownHosts: "/state/known_hosts", Logs: "/state/logs", Templates: files{},
 		Hardware: func(context.Context) coremachine.Hardware { return coremachine.Hardware{Memory: 16 << 30, CPUs: 8} },

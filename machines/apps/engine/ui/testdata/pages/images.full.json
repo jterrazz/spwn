@@ -42,6 +42,10 @@
                   },
                   {
                     "kind": "text",
+                    "text": "base-debian not built yet"
+                  },
+                  {
+                    "kind": "text",
                     "text": "base-macos not built yet"
                   }
                 ]
@@ -197,6 +201,18 @@
         },
         {
           "row": {
+            "id": "base-debian",
+            "mark": "absent",
+            "label": "base-debian",
+            "detail": {
+              "kind": "text",
+              "text": "not built yet"
+            },
+            "reason": "missing"
+          }
+        },
+        {
+          "row": {
             "id": "base-macos",
             "mark": "absent",
             "label": "base-macos",
@@ -215,7 +231,7 @@
         },
         {
           "mark": "absent",
-          "n": 2
+          "n": 3
         }
       ]
     }

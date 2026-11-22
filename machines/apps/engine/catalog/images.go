@@ -61,10 +61,12 @@ func (d Distro) Word() string {
 var Recipes embed.FS
 
 // value: the built-in image a workspace is made of when none is named,
-// and its Machinefile's name; the built-in macOS image, and its.
+// and its Machinefile's name; the built-in Debian and macOS images, and
+// theirs.
 const (
-	LinuxImage = "base-ubuntu"
-	MacOSImage = "base-macos"
+	LinuxImage  = "base-ubuntu"
+	DebianImage = "base-debian"
+	MacOSImage  = "base-macos"
 )
 
 // value: the images station knows; an image is no package of the catalog's
@@ -79,6 +81,16 @@ var builtinImages = []Image{
 		Firstboot:   "images/linux-firstboot.sh",
 		Kind:        Linux,
 		Distro:      DistroUbuntu,
+	},
+	{
+		Name:        DebianImage,
+		Machinefile: DebianImage,
+		Recipe:      "images/linux.sh",
+		Bake:        "images/linux-bake.sh",
+		Cleanup:     "images/linux-cleanup.sh",
+		Firstboot:   "images/linux-firstboot.sh",
+		Kind:        Linux,
+		Distro:      DistroDebian,
 	},
 	{
 		Name:        MacOSImage,
@@ -141,10 +153,15 @@ func (c Catalog) Image(name string) (Image, bool) {
 
 func (c Catalog) RecipeFor(os OS) (Image, bool) {
 	// value: the base plumbing a template of this system is built with: the
-	// recipe, cleanup and first boot of the built-in image of its kind; only
-	// ubuntu has one (a template that says no os is the base's).
+	// recipe, cleanup and first boot of the built-in image of its distro;
+	// ubuntu and debian have one, and a template that says no os is
+	// ubuntu's.
+	distro := Distro(os)
+	if os == "" {
+		distro = DistroUbuntu
+	}
 	for _, img := range c.Images {
-		if img.Recipe != "" && img.Kind == Linux && (os == OSUbuntu || os == "") {
+		if img.Recipe != "" && img.Kind == Linux && img.Distro == distro {
 			return img, true
 		}
 	}

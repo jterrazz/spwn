@@ -12,6 +12,11 @@ name: base-ubuntu
 machine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }
 vm: { resources: { cpus: 6, memory: 12G, disk: 1T } }
 `)},
+		"machines/base-debian.machine.yaml": {Data: []byte(`machinefile: station.machinefile/v1
+name: base-debian
+machine: { kind: workspace, system: { os: debian, version: '13' } }
+vm: { resources: { cpus: 2, memory: 4G, disk: 30G } }
+`)},
 		"machines/base-macos.machine.yaml": {Data: []byte(`machinefile: station.machinefile/v1
 name: base-macos
 machine: { kind: workspace, system: { os: macos } }
@@ -23,8 +28,9 @@ vm: { resources: { cpus: 3, memory: 6G, disk: 90G } }
 		t.Fatal(err)
 	}
 	want := map[string]ImageDefaults{
-		LinuxImage: {CPUs: 6, MemoryBytes: 12 << 30, DiskBytes: 1e12},
-		MacOSImage: {CPUs: 3, MemoryBytes: 6 << 30, DiskBytes: 90e9},
+		LinuxImage:    {CPUs: 6, MemoryBytes: 12 << 30, DiskBytes: 1e12},
+		"base-debian": {CPUs: 2, MemoryBytes: 4 << 30, DiskBytes: 30e9},
+		MacOSImage:    {CPUs: 3, MemoryBytes: 6 << 30, DiskBytes: 90e9},
 	}
 	for _, img := range images {
 		if img.Defaults != want[img.Name] {

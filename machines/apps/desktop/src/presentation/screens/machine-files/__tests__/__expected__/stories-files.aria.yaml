@@ -15,6 +15,7 @@
     - button "base"
   - paragraph: Shipped with Machines
   - group "Shipped with Machines":
+    - button "base-debian"
     - button "base-macos"
     - button "base-ubuntu"
   - region "macbook-pro.machine.yaml":

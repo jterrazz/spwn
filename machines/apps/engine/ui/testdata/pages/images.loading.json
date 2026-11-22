@@ -163,6 +163,16 @@
         },
         {
           "row": {
+            "id": "base-debian",
+            "mark": "pending",
+            "label": "base-debian",
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
             "id": "base-macos",
             "mark": "pending",
             "label": "base-macos",
@@ -175,7 +185,7 @@
       "counts": [
         {
           "mark": "pending",
-          "n": 4
+          "n": 5
         }
       ]
     }

@@ -6,4 +6,5 @@ runs:
       stdout: |
           	On mac-mini:
           ●	base-ubuntu	2026.11.01	4.0 GB	mac-mini	infra
+          ○	base-debian				not built yet
           ○	base-macos				not built yet

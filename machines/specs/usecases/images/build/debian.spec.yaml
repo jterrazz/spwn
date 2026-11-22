@@ -1,0 +1,12 @@
+description: 'base-debian is built on This Mac from Debian 13, its upstream pinned by digest, its record Debian'
+fixture: ../../__fixtures__/build/
+env: two-macs
+runs:
+    - command: 'images build base-debian --binary $HOME/station-linux'
+      exit: 0
+      stdout: |
+          ●	base-debian	2026.11.04	built
+    - command: '--version >/dev/null; /usr/bin/jq -r ''.macs["macbook-pro"].stores.images[] | select(.name == "base-debian") | "\(.version) \(.distro) \(.distro_version) \(.upstream) \(.machinefile)"'' "$STATION_WORLD"'
+      exit: 0
+      stdout: |
+          2026.11.04 debian 13 ghcr.io/cirruslabs/debian@sha256:74f0de37c757af07910e18fec88c80bcf828259ff01a0b0e1daa596b3281c7cb base-debian

@@ -114,7 +114,8 @@ runs:
           scrollback
       exit: 0
       stdout: |
-          3 images on 2 Macs · 1 older · base-macos not built yet
+          3 images on 2 Macs · 1 older · base-debian not built yet
+            base-macos not built yet
 
           Images
                            version       size  on
@@ -122,6 +123,7 @@ runs:
             ○ base-ubuntu  2026.10.20  3.0 GB  This Mac  older
               → station images delete base-ubuntu@2026.10.20
             ● base-ubuntu  2026.11.01  4.0 GB  mac-mini  infra
+            ○ base-debian                                not built yet
             ○ base-macos                                 not built yet
 
           → station images update

@@ -1,0 +1,21 @@
+description: 'a Machinefile that extends base-debian is built with the Debian plumbing, and its record is Debian'
+fixture: ../../__fixtures__/build/
+env: two-macs
+runs:
+    - command: 'world edit macbook-pro machinefiles/studio-node.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: studio-node
+          machine: { kind: workspace, system: { os: debian, version: '13' } }
+          extends: [base-debian]
+          vm: { image: { bake: [jq] } }
+          apps: [jq]
+      exit: 0
+    - command: 'images build studio-node --binary $HOME/station-linux'
+      exit: 0
+      stdout: |
+          ●	studio-node	2026.11.04	built
+    - command: '--version >/dev/null; /usr/bin/jq -r ''.macs["macbook-pro"].stores.images[] | select(.name == "studio-node") | "\(.distro) \(.distro_version) \(.upstream)"'' "$STATION_WORLD"'
+      exit: 0
+      stdout: |
+          debian 13 ghcr.io/cirruslabs/debian@sha256:74f0de37c757af07910e18fec88c80bcf828259ff01a0b0e1daa596b3281c7cb

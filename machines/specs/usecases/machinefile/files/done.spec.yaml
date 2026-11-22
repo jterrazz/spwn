@@ -9,6 +9,7 @@ runs:
       exit: 0
       stdout: |
           {"name":"base","shelf":"yours","origin":"user","kind":"workspace","vm":{"Lifetime":"","CPUs":0,"Memory":"","Disk":"","From":""},"extends":null,"apps":["jq","gh"],"followers":[],"verdict":"No machine follows it."}
+          {"name":"base-debian","shelf":"shipped","origin":"built-in","kind":"workspace","vm":{"Lifetime":"ephemeral","CPUs":4,"Memory":"8G","Disk":"20G","From":"ghcr.io/cirruslabs/debian@sha256:74f0de37c757af07910e18fec88c80bcf828259ff01a0b0e1daa596b3281c7cb"},"extends":null,"apps":[],"followers":[],"verdict":"No machine follows it."}
           {"name":"base-macos","shelf":"shipped","origin":"built-in","kind":"workspace","vm":{"Lifetime":"persistent","CPUs":4,"Memory":"8G","Disk":"80G","From":"ghcr.io/cirruslabs/macos-tahoe-base:latest"},"extends":null,"apps":["homebrew","git","ohmyzsh"],"followers":[],"verdict":"No machine follows it."}
           {"name":"base-ubuntu","shelf":"shipped","origin":"built-in","kind":"workspace","vm":{"Lifetime":"ephemeral","CPUs":4,"Memory":"8G","Disk":"20G","From":"ghcr.io/cirruslabs/ubuntu:24.04"},"extends":null,"apps":["mise","git","ohmyzsh","docker","build-essential","playwright-deps"],"followers":[],"verdict":"No machine follows it."}
           {"name":"linux-1","shelf":"yours","origin":"user","kind":"workspace","vm":{"Lifetime":"","CPUs":0,"Memory":"","Disk":"","From":""},"extends":["linux-dev"],"apps":[],"followers":[],"verdict":"No machine follows it."}

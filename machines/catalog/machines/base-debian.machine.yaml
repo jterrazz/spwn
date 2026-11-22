@@ -1,0 +1,12 @@
+machinefile: station.machinefile/v1
+name: base-debian
+description: A Debian 13 machine with station's plumbing and nothing else
+machine:
+    kind: workspace
+    system: { os: debian, version: '13', arch: arm64 }
+vm:
+    lifetime: ephemeral
+    resources: { cpus: 4, memory: 8G, disk: 20G }
+    network: nat
+    image:
+        from: 'ghcr.io/cirruslabs/debian@sha256:74f0de37c757af07910e18fec88c80bcf828259ff01a0b0e1daa596b3281c7cb'

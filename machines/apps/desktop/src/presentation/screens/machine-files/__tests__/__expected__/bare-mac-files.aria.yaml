@@ -6,37 +6,34 @@
     - text: "Not found · give this machine one: station init --machinefile <name>"
   - paragraph: Shipped with Machines
   - group "Shipped with Machines":
-    - button "base-macos" [pressed]
+    - button "base-debian" [pressed]
+    - button "base-macos"
     - button "base-ubuntu"
-  - region "base-macos.machine.yaml":
-    - heading "base-macos.machine.yaml" [level=2]
-    - text: built-in/machinefiles/base-macos.machine.yaml
+  - region "base-debian.machine.yaml":
+    - heading "base-debian.machine.yaml" [level=2]
+    - text: built-in/machinefiles/base-debian.machine.yaml
     - group "How the file is shown":
       - button "Fields" [pressed]
       - button "YAML"
-    - paragraph: A macOS workspace with Homebrew, git and zsh
+    - paragraph: A Debian 13 machine with station's plumbing and nothing else
     - term: Makes
     - definition: a workspace
     - term: System
-    - definition: macOS · arm64
+    - definition: Debian 13 · arm64
     - term: Size
-    - definition: 4 CPU · 8G · 80G
+    - definition: 4 CPU · 8G · 20G
     - term: Lifetime
-    - definition: persistent
+    - definition: ephemeral
     - term: Starts from
-    - definition: ghcr.io/cirruslabs/macos-tahoe-base:latest
+    - definition: ghcr.io/cirruslabs/debian@sha256:74f0de37c757af07910e18fec88c80bcf828259ff01a0b0e1daa596b3281c7cb
   - region "Machines that follow it":
     - heading "Machines that follow it" [level=2]
     - paragraph: No machine follows it.
   - region "What it puts on a machine":
     - heading "What it puts on a machine the boxed values are the ones you set" [level=2]
     - group "Chapter":
-      - button "Apps3" [pressed]
+      - button "Apps0" [pressed]
       - button "Skills0"
-      - button "Settings2"
+      - button "Settings0"
       - button "Access"
-    - region "base-macos":
-      - paragraph: base-macos this file · 3
-      - button "homebrew manager macOS package manager takes every version"
-      - button "git Distributed version control system takes every version"
-      - button "ohmyzsh Oh My Zsh shell framework takes every version"
+    - paragraph: None.
