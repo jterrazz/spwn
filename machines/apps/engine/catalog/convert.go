@@ -3,14 +3,14 @@ package catalog
 import "slices"
 
 // invariant: a selector is the kinds of machine it is for, in the order
-// Mac, Linux, macOS VM. Station's Linux machines are Ubuntu VMs and all of
-// its machines arm64, so `os: debian`, a Linux computer and `arch: amd64`
+// Mac, Linux, macOS VM. Station's Linux machines are Ubuntu and Debian VMs
+// and all of its machines arm64, so a Linux computer and `arch: amd64`
 // match none of them; a version range is judged by the resolution
 // against a machine's system, and here keeps every version.
 func (s Selector) kinds() []MachineKind {
 	var all []MachineKind
 	switch {
-	case s.Family != "" || s.OS == OSUbuntu:
+	case s.Family != "" || s.OS == OSUbuntu || s.OS == OSDebian:
 		all = []MachineKind{Linux}
 	case s.OS == OSMacOS:
 		all = []MachineKind{Mac, MacOS}

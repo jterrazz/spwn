@@ -4,6 +4,7 @@ import (
 	"errors"
 	"io/fs"
 	"regexp"
+	"slices"
 	"strings"
 	"testing"
 	"testing/fstest"
@@ -324,6 +325,19 @@ func TestAPackageShowsNoWorkingNote(t *testing.T) {
 			if working.MatchString(line) {
 				t.Errorf("%s:%d shows a working note: %s", p.File, n+1, strings.TrimSpace(line))
 			}
+		}
+	}
+}
+
+func TestADebianMethodLivesOnTheLinuxVMs(t *testing.T) {
+	for os, want := range map[string][]catalog.MachineKind{"debian": {catalog.Linux}, "ubuntu": {catalog.Linux}} {
+		c, err := catalogOf(map[string]string{"git/gh.yaml": strings.Replace(gh, "    - os: macos\n      brew: gh", "    - os: "+os+"\n      needs: [sudo]\n      apt: {packages: [gh]}", 1)})
+		if err != nil {
+			t.Fatal(err)
+		}
+		app, _ := c.App("gh")
+		if got := app.LivesOn(); !slices.Equal(got, want) {
+			t.Errorf("an os: %s method lives on %v; want %v", os, got, want)
 		}
 	}
 }

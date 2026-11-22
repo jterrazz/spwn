@@ -96,7 +96,7 @@ A method names its system by `os` or by `family`, one of them; a version range b
   github-release: { repo: jesseduffield/lazygit, asset: 'lazygit_*_linux_arm64.tar.gz' }
 ```
 
-Machines' computers today are Macs and its VMs run on them, so `os: macos` is a Mac and a macOS VM, `family: linux` and `os: ubuntu` a Linux VM. `os: debian`, a Linux computer and `arch: amd64` match no machine Machines runs yet, and a version range is not judged before the Machinefile's resolution reads a machine's system.
+Machines' computers today are Macs and its VMs run on them, so `os: macos` is a Mac and a macOS VM, `family: linux`, `family: debian`, `os: ubuntu` and `os: debian` a Linux VM. A Linux computer and `arch: amd64` match no machine Machines runs yet, and a version range is not judged before the Machinefile's resolution reads a machine's system.
 
 ## Methods
 
