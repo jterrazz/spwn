@@ -34,7 +34,7 @@ final class MenuTests: XCTestCase {
             return (form.fields ?? []).first { SheetAnchor.field($0.key ?? "") == open.id }.map { MenuModel.popup($0, answers) }
         }
         guard let key = open.row else {
-            return page.id == PageID.home ? MenuModel.station(page, loginItemOn: story.ui.loginItem ?? false) : MenuModel.page(page)
+            return page.id == PageID.home ? MenuModel.station(page) : MenuModel.page(page)
         }
         let actions = page.actions ?? []
         let rows = (page.sections ?? []).flatMap { s in (s.items ?? []).flatMap { [$0.row].compactMap { $0 } + ($0.group?.items ?? []).compactMap(\.row) } }
@@ -57,7 +57,7 @@ final class MenuTests: XCTestCase {
     // offers, in groups, red what destroys, each key as the system says it.
     func testEachMenuSaysWhatSpecA5Lists() throws {
         let read = Dictionary(uniqueKeysWithValues: try menuStories().compactMap { s in s.menu.map { (s.id, Self.read($0)) } })
-        XCTAssertEqual(read["menu.station"], ["New VM… ⌘N", "Add a Mac…", "Open station in Terminal ⌘T", "-", "✓ Open at login", "-", "Quit Spwn Menu ⌘Q"])
+        XCTAssertEqual(read["menu.station"], ["New VM… ⌘N", "Add a Mac…", "Open station in Terminal ⌘T", "-", "Quit Spwn Menu ⌘Q"])
         XCTAssertEqual(read["menu.context.workspace"], ["linux-1 on This Mac", "Open ↩", "Open in Terminal ⌘↩", "Open Vite", "-",
                                                         "Copy [SSH command, Link to Vite, Link to Port 3000]", "Share [Show QR…, A port…]", "Grant a password…", "-",
                                                         "Stop…", "-", "Delete… (red)"])
@@ -90,11 +90,11 @@ final class MenuTests: XCTestCase {
 
     // invariant: picking an entry does what it says: a link opens or is
     // copied, Open goes to the row's page, a verb that asks first opens
-    // its question, the app's own switches flip.
+    // its question, the app's own Quit quits.
     func testPickingAnEntryDoesWhatItSays() throws {
         var did: [String] = []
         var h = PopoverHandlers(confirm: { did.append("asks " + ($0?.id ?? "")) }, open: { did.append("opens " + $0.absoluteString) },
-                                loginItem: { did.append("login \($0)") }, loginItemOn: true, quit: { did.append("quits") },
+                                quit: { did.append("quits") },
                                 copy: { did.append("copies " + $0) })
         h.push = { did.append("goes to " + $0) }
         let pick = MenuPick(h)
@@ -105,10 +105,10 @@ final class MenuTests: XCTestCase {
             pick(try XCTUnwrap(entries.first { $0.title == title }, title), nav: "menubar.machine:linux-1")
         }
         let home = try XCTUnwrap(try Stories.load(root: Tree.stories).first { $0.id == "menu.station" }?.state.shown)
-        for item in MenuModel.station(home, loginItemOn: true).items where item.id == MenuModel.login || item.id == MenuModel.quit {
+        for item in MenuModel.station(home).items where item.id == MenuModel.quit {
             pick(item, nav: nil)
         }
-        XCTAssertEqual(did, ["goes to menubar.machine:linux-1", "opens https://macbook-pro.tail77a797.ts.net:40001", "copies ssh linux-1", "asks stop@linux-1", "login false", "quits"])
+        XCTAssertEqual(did, ["goes to menubar.machine:linux-1", "opens https://macbook-pro.tail77a797.ts.net:40001", "copies ssh linux-1", "asks stop@linux-1", "quits"])
     }
 
     // value: a native menu as the owner reads it: its header, each entry's

@@ -16,7 +16,6 @@
     },
     "schema": "station.story/v1",
     "ui": {
-        "loginItem": true,
         "menu": {
             "id": "station"
         }

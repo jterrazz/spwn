@@ -159,8 +159,6 @@ public struct PopoverHandlers {
     public var open: (URL) -> Void
     public var toggleQR: (String) -> Void
     public var toggleMenu: () -> Void
-    public var loginItem: (Bool) -> Void
-    public var loginItemOn: Bool
     public var quit: () -> Void
     public var copy: (String) -> Void
     // value: navigation: open a machine's page, a page by its
@@ -183,7 +181,7 @@ public struct PopoverHandlers {
 
     public init(run: @escaping (Action, [String: String]) -> Void = { _, _ in }, confirm: @escaping (Action?) -> Void = { _ in },
                 answer: @escaping (String, String, String) -> Void = { _, _, _ in }, open: @escaping (URL) -> Void = { _ in },
-                toggleQR: @escaping (String) -> Void = { _ in }, toggleMenu: @escaping () -> Void = {}, loginItem: @escaping (Bool) -> Void = { _ in }, loginItemOn: Bool = false,
+                toggleQR: @escaping (String) -> Void = { _ in }, toggleMenu: @escaping () -> Void = {},
                 quit: @escaping () -> Void = {},
                 openMachine: @escaping (String) -> Void = { _ in },
                 copy: @escaping (String) -> Void = { _ in }, window: @escaping (String) -> Void = { _ in },
@@ -194,8 +192,6 @@ public struct PopoverHandlers {
         self.open = open
         self.toggleQR = toggleQR
         self.toggleMenu = toggleMenu
-        self.loginItem = loginItem
-        self.loginItemOn = loginItemOn
         self.quit = quit
         self.openMachine = openMachine
         self.copy = copy
@@ -382,13 +378,10 @@ public struct Popover: View {
         }
     }
 
-    // invariant: the footer menu is drawn inline, never an AppKit menu: the
-    // switch for launch at login, and quit.
+    // invariant: the footer menu is drawn inline, never an AppKit menu: quit
+    // alone, since whether the menu bar opens at login is the window's switch.
     var menu: some View {
         HStack(spacing: Token.Space.gap) {
-            Toggle("Open at login", isOn: Binding(get: { handlers.loginItemOn }, set: { handlers.loginItem($0) }))
-                .toggleStyle(.checkbox)
-                .font(.system(size: Token.Space.small))
             Spacer()
             TextAction("Quit") { handlers.quit() }
         }

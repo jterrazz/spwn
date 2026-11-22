@@ -65,8 +65,6 @@ public struct StoryUI: Codable, Equatable, Sendable {
     public var hud: String?
     public var statusItem: Bool?
     public var pressed: Bool?
-    // value: the app's own Open at login switch, as the station menu shows it.
-    public var loginItem: Bool?
     // value: the row a transition story catches leaving its list, by its
     // id.
     public var leaving: String?

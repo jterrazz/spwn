@@ -41,7 +41,6 @@ final class Live: ObservableObject {
                 state.qr = state.qr == url ? nil : url
             },
             toggleMenu: { [weak self] in self?.state.menu.toggle() },
-            loginItem: { [weak self] on in self?.log("login item \(on ? "on" : "off")") },
             quit: { [weak self] in self?.log("quit") },
             openMachine: { [weak self] name in self?.log("open machine \(name)") },
             copy: { [weak self] text in self?.log("copy \(text)") },

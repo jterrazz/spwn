@@ -27,8 +27,7 @@ const (
 
 	MenuSeparator = "-"
 
-	appLogin = "app:login"
-	appQuit  = "app:quit"
+	appQuit = "app:quit"
 )
 
 // value: a menu's list being built: its entries in order, a separator
@@ -336,8 +335,7 @@ func vmPageMenu(m Machine, h model.MacView, vm model.VM, p page.Page) page.Page 
 }
 
 // invariant: SPEC A5: Home's menus: the station menu (New VM…, Add a
-// Mac…, Open station in Terminal; the app's own Open at login, CPU in the
-// menu bar and Quit); each server's row as its page offers its verbs;
+// Mac…, Open station in Terminal; the app's own Quit); each server's row as its page offers its verbs;
 // each Mac's (Open, New VM on it, Open in Terminal; asleep, Wake); the
 // Awake tile's terms.
 func homeMenus(r Reading, p page.Page) page.Page {
@@ -353,8 +351,6 @@ func homeMenus(r Reading, p page.Page) page.Page {
 	if a, ok := pageAction(p, ActionOpenStation); ok {
 		sm.add(menuCopy(a, menuID(a.ID, "menu"), "Open station in Terminal", ""))
 	}
-	sm.next()
-	sm.add(page.Action{ID: appLogin, Label: "Open at login", On: OnMenu})
 	sm.next()
 	sm.add(page.Action{ID: appQuit, Label: "Quit Spwn Menu", Key: "cmd+q", On: OnMenu})
 	p.Actions = append(p.Actions, sm.added...)

@@ -37,31 +37,30 @@ public struct MenuModel: Equatable, Sendable {
     static let qr = "qr:"
     static let links = ["open-port:", "copy-port:", "copy:"]
 
-    public static let login = "app:login"
     public static let quit = "app:quit"
 
     public var isEmpty: Bool { items.allSatisfy(\.separator) }
 
     // value: the menu of a list of action ids: a "title:" entry first is
     // its header, "-" a separator, each other id the action it names.
-    public static func list(_ ids: [String], actions: [Action], checked: Set<String> = []) -> MenuModel {
+    public static func list(_ ids: [String], actions: [Action]) -> MenuModel {
         var ids = ids[...]
         var header: String?
         if let first = ids.first, first.hasPrefix(title) {
             header = action(first, in: actions)?.label
             ids = ids.dropFirst()
         }
-        return MenuModel(header: header, items: ids.compactMap { item($0, actions: actions, checked: checked) })
+        return MenuModel(header: header, items: ids.compactMap { item($0, actions: actions) })
     }
 
-    static func item(_ id: String, actions: [Action], checked: Set<String>) -> MenuItem? {
+    static func item(_ id: String, actions: [Action]) -> MenuItem? {
         if id == separator { return .line }
         guard let a = action(id, in: actions) else { return nil }
-        let sub = (a.submenu ?? []).compactMap { item($0, actions: actions, checked: checked) }
+        let sub = (a.submenu ?? []).compactMap { item($0, actions: actions) }
         let asks = a.confirm != nil || a.form != nil || a.sheet != nil || id.hasPrefix(qr)
         let words = (a.label ?? "") + (asks && !(a.label ?? "").hasSuffix(Token.Glyph.ellipsis) ? Token.Glyph.ellipsis : "")
         return MenuItem(id: id, title: words, icon: a.icon, key: a.key, destructive: a.destructive == true,
-                        enabled: a.disabled == nil, checked: a.picked == true || checked.contains(id), submenu: sub, action: a, link: link(of: a, in: actions))
+                        enabled: a.disabled == nil, checked: a.picked == true, submenu: sub, action: a, link: link(of: a, in: actions))
     }
 
     static func action(_ id: String, in actions: [Action]) -> Action? { actions.first { $0.id == id } }
@@ -117,12 +116,10 @@ public struct MenuModel: Equatable, Sendable {
         return list(action(menu, in: actions)?.submenu ?? [], actions: actions)
     }
 
-    // value: the station menu: Home's More menu, the app's own switch
-    // checked as it stands.
-    public static func station(_ page: Page, loginItemOn: Bool) -> MenuModel {
+    // value: the station menu: Home's More menu.
+    public static func station(_ page: Page) -> MenuModel {
         let actions = page.actions ?? []
-        let on = Set([loginItemOn ? login : nil].compactMap { $0 })
-        return list(action(menu, in: actions)?.submenu ?? [], actions: actions, checked: on)
+        return list(action(menu, in: actions)?.submenu ?? [], actions: actions)
     }
 
     // value: the glyphs a key is said by in a menu: "⇧⌘N", "⌘↩", "↩".
@@ -159,7 +156,7 @@ public struct MenuModel: Equatable, Sendable {
     }
 }
 
-// value: what picking a menu's entry does: the app's own switch, a link
+// value: what picking a menu's entry does: the app's own Quit, a link
 // opened or copied, a QR shown, the row's page opened when the verb runs
 // nothing, else the verb as any gesture runs it (its sheet or question
 // first).
@@ -172,7 +169,6 @@ public struct MenuPick {
 
     public func callAsFunction(_ item: MenuItem, nav: String?) {
         switch item.id {
-        case MenuModel.login: return handlers.loginItem(!handlers.loginItemOn)
         case MenuModel.quit: return handlers.quit()
         default: break
         }

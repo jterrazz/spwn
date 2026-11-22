@@ -23,7 +23,6 @@ final class Model {
     }
 
     private(set) var turn = 0.0
-    var loginItemOn = LoginItem.on
 
     // value: the machines last opened, Find's Recent (SPEC B5.21): the menu
     // bar's own, in its macOS user defaults.
@@ -358,15 +357,6 @@ final class Model {
     }
 
     static var fallbackExecutable: String { NSHomeDirectory() + "/.local/bin/station" }
-
-    func setLoginItem(_ on: Bool) {
-        do {
-            try LoginItem.set(on)
-        } catch {
-            state.say(Status(error.localizedDescription, failed: true), on: navigation.watched)
-        }
-        loginItemOn = LoginItem.on
-    }
 
     func notify(_ text: String) {
         let center = UNUserNotificationCenter.current()

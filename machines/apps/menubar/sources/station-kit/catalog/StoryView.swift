@@ -12,7 +12,7 @@ extension Story {
             return nil
         }
         guard let key = open.row else {
-            return open.id == "station" ? MenuModel.station(page, loginItemOn: ui.loginItem ?? false) : MenuModel.page(page)
+            return open.id == "station" ? MenuModel.station(page) : MenuModel.page(page)
         }
         let actions = page.actions ?? []
         for section in page.sections ?? [] {

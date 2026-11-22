@@ -3636,11 +3636,6 @@
       }
     },
     {
-      "label": "Open at login",
-      "on": "menu",
-      "id": "app:login"
-    },
-    {
       "key": "cmd+q",
       "label": "Quit Spwn Menu",
       "on": "menu",
@@ -3655,8 +3650,6 @@
         "new-vm",
         "add-mac",
         "open-station@menu",
-        "-",
-        "app:login",
         "-",
         "app:quit"
       ]

@@ -8,23 +8,6 @@ import SwiftUI
 struct StationMenuBarApp: App {
     @NSApplicationDelegateAdaptor(StationDelegate.self) private var station
 
-    init() {
-        let args = CommandLine.arguments
-        if args.contains("--login-item-status") {
-            print(LoginItem.status)
-            exit(0)
-        }
-        if args.contains("--unregister-login-item") {
-            do {
-                try LoginItem.unregister()
-                exit(0)
-            } catch {
-                FileHandle.standardError.write(Data("Error: \(error.localizedDescription)\n".utf8))
-                exit(1)
-            }
-        }
-    }
-
     // value: an App has a scene; the panel is the status item's, not one.
     var body: some Scene { Settings { EmptyView() } }
 }
@@ -92,8 +75,6 @@ struct ModelPanel: View {
             open: { url in model.open(url) },
             toggleQR: { url in model.state.qr = model.state.qr == url ? nil : url },
             toggleMenu: { model.state.menu.toggle() },
-            loginItem: { on in model.setLoginItem(on) },
-            loginItemOn: model.loginItemOn,
             quit: { NSApplication.shared.terminate(nil) },
             openMachine: { name in model.openMachine(name) },
             copy: { text in

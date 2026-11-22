@@ -1,7 +1,7 @@
 {
     "group": "menu",
     "id": "menu.station",
-    "note": "The Spwn Menu menu from Home's …: New VM…, Add a Mac…, Open station in Terminal, ✓ Open at login, Quit Spwn Menu.",
+    "note": "The Spwn Menu menu from Home's …: New VM…, Add a Mac…, Open station in Terminal, Quit Spwn Menu.",
     "pages": ["pages/machines.home.menubar.json"],
     "samples": {
         "cpu:mac-mini": 55,
@@ -12,7 +12,6 @@
     "schema": "station.story/v1",
     "tags": ["a11y"],
     "ui": {
-        "loginItem": true,
         "menu": {
             "id": "station"
         }

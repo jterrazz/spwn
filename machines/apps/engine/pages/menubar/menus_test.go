@@ -109,11 +109,11 @@ func TestAServersMenuNamesItsMacThenItsVerbs(t *testing.T) {
 }
 
 // invariant: SPEC A5: the station menu: New VM..., Add a Mac..., Open
-// station in Terminal; then the app's own Open at login; Quit Spwn Menu
-// last.
+// station in Terminal; then Quit Spwn Menu. Whether the menu bar opens at
+// login is the window's Settings switch, so the menu holds no item for it.
 func TestTheStationMenuListsItsVerbsThenTheAppsOwn(t *testing.T) {
 	got := pageMenu(homeOf(t, newHeroWorld()))
-	want := []string{"New VM...", "Add a Mac...", "Open station in Terminal", "-", "Open at login", "-", "Quit Spwn Menu"}
+	want := []string{"New VM...", "Add a Mac...", "Open station in Terminal", "-", "Quit Spwn Menu"}
 	if !slices.Equal(got, want) {
 		t.Fatalf("the station menu %q", got)
 	}
