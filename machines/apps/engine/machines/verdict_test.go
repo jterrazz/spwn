@@ -29,11 +29,11 @@ func TestAServersHealthIsItsFirstStepThatDoesNotPass(t *testing.T) {
 	} {
 		vm := up
 		c.change(&vm)
-		if got := machines.HealthVerdict(vm); got == nil || *got != c.want {
+		if got := machines.HealthVerdict(vm, false); got == nil || *got != c.want {
 			t.Errorf("%s: %+v; want %+v", name, got, c.want)
 		}
 	}
-	if machines.HealthVerdict(machines.VM{Lifetime: machines.Persistent, State: machines.Running}) != nil {
+	if machines.HealthVerdict(machines.VM{Lifetime: machines.Persistent, State: machines.Running}, false) != nil {
 		t.Errorf("a workspace has a server's health verdict")
 	}
 }

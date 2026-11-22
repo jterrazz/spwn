@@ -153,7 +153,7 @@ func Findings(f AllMachines) []finding.Finding {
 		case MacOnline:
 		}
 		if h.Reachable && h.Engine.Running() && h.Engine.LocalNetwork == LocalNetworkNotApproved {
-			out = append(out, finding.Finding{Machine: mac, Section: section.Overview, Severity: finding.NeedsALook, Subject: label, Text: NotApproved(h.Name), Fix: finding.Fix{Path: LocalNetworkFix(h.Name, h.Engine.Bundled)}})
+			out = append(out, finding.Finding{Machine: mac, Section: section.Overview, Severity: finding.NeedsALook, Subject: label, Text: NotApproved(h.Name, h.Engine.Bundled), Fix: finding.Fix{Path: LocalNetworkFix(h.Name, h.Engine.Bundled)}})
 		}
 		if fix, ok := Behind(h, thisMac); ok && h.Reachable {
 			out = append(out, finding.Finding{Machine: mac, Section: section.Overview, Severity: finding.NeedsALook, Subject: label, Text: label + " runs " + h.StationVersion, Fix: finding.Fix{Path: fix}})
@@ -203,7 +203,7 @@ func vmFinding(ref machine.Ref, vm VM, on string, bundled bool) (finding.Finding
 	server := vm.Lifetime == AlwaysOn
 	switch {
 	case vm.State == Running && vm.Blocked == LocalNetworkBlock:
-		f.Text, f.Fix = vm.Name+" is unreachable: "+NotApproved(ref.On), finding.Fix{Path: LocalNetworkFix(ref.On, bundled)}
+		f.Text, f.Fix = vm.Name+" is unreachable: "+NotApproved(ref.On, bundled), finding.Fix{Path: LocalNetworkFix(ref.On, bundled)}
 	case s == StandingNotCreated:
 		f.Text, f.Again = vm.Name+" was not created: it failed at "+vm.Birth.Step.Noun(), true
 		f.Fix = finding.Fix{Call: "machines.start", Args: map[string]string{"VM": vm.Name}, On: ref.On, Command: "station machines start " + vm.Name + on}

@@ -175,7 +175,7 @@ const (
 	LineNoCheck        = "No check is set: its health stops at SSH."
 )
 
-func HealthVerdict(vm VM) *verdict.Verdict {
+func HealthVerdict(vm VM, bundled bool) *verdict.Verdict {
 	// invariant: SPEC §7.2: a server's health is its first step that does
 	// not pass, in the steps' order, a restart that runs said first; a
 	// workspace has none.
@@ -196,7 +196,7 @@ func HealthVerdict(vm VM) *verdict.Verdict {
 	case !steps.SSH:
 		v = verdict.Verdict{Tone: verdict.Bad, Sentence: SentenceNoSSH}
 		if vm.Blocked == LocalNetworkBlock {
-			v.Line = NotApproved(vm.Mac) + "."
+			v.Line = NotApproved(vm.Mac, bundled) + "."
 		}
 	case vm.Check == "":
 		v.Line = LineNoCheck
@@ -241,7 +241,7 @@ func Judged(f AllMachines) AllMachines {
 		macs[i].Machines = &rollUp
 		vms := slices.Clone(macs[i].VMs)
 		for j := range vms {
-			vms[j].Health, vms[j].LatencyNote = HealthVerdict(vms[j]), LatencyNote(vms[j])
+			vms[j].Health, vms[j].LatencyNote = HealthVerdict(vms[j], macs[i].Engine.Bundled), LatencyNote(vms[j])
 			head, pending := HeadOf(vms[j], f.Read)
 			vms[j].Head, vms[j].Pending, vms[j].Standing = &head, pending, StandingOf(vms[j])
 			hold, sections := HoldOf(vms[j]), SectionsOf(vms[j])

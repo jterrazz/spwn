@@ -15,7 +15,7 @@ runs:
           ○	api	Workspace	macbook-pro	Stopped · persistent	4 CPU	8 GB
           ○	linux-1	Workspace	macbook-pro	Stopped · ephemeral	4 CPU	8 GB
           # Needs you
-          ◐	This Mac	macbook-pro has not approved Machines for Local Network	approve station on macbook-pro's screen, or in System Settings > Privacy & Security > Local Network
+          ◐	This Mac	macbook-pro has not approved station for Local Network	approve station on macbook-pro's screen, or in System Settings > Privacy & Security > Local Network
     - command: 'world local-network macbook-pro approved'
       exit: 0
     - command: 'machines --this-mac'

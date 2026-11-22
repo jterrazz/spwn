@@ -624,7 +624,7 @@ func (s *Machinist) sshFails(ctx context.Context, name, detail string) error {
 	if live, err := s.engineAPI.VMs(ctx); err == nil && live[name].Blocked == model.LocalNetworkBlock {
 		mac := s.ThisMacName()
 		hello, _ := s.engineAPI.Hello(ctx)
-		return &model.UnhealthyError{Name: name, Step: model.StepSSH, Detail: model.NotApproved(mac), BlockedOn: mac, BlockedBundled: hello.Bundled}
+		return &model.UnhealthyError{Name: name, Step: model.StepSSH, Detail: model.NotApproved(mac, hello.Bundled), BlockedOn: mac, BlockedBundled: hello.Bundled}
 	}
 	return &model.UnhealthyError{Name: name, Step: model.StepSSH, Detail: detail}
 }

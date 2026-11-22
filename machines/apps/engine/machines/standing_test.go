@@ -157,7 +157,7 @@ func agree(t *testing.T, vm VM, now time.Time) {
 			t.Errorf("%+v: head tone %q, standing %q's %q", vm, head.Tone, s, s.Tone())
 		}
 	}
-	if health := HealthVerdict(vm); health != nil && vm.State != UnknownState {
+	if health := HealthVerdict(vm, false); health != nil && vm.State != UnknownState {
 		if (health.Sentence == SentenceDown) != (s == StandingDown) {
 			t.Errorf("%+v: health %q, standing %q", vm, health.Sentence, s)
 		}

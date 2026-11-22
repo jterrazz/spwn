@@ -194,7 +194,9 @@ const (
 	LocalNetworkNotApproved LocalNetwork = "not-approved"
 )
 
-func NotApproved(mac string) string { return mac + " has not approved Machines for Local Network" }
+func NotApproved(mac string, bundled bool) string {
+	return mac + " has not approved " + LocalNetworkApp(bundled) + " for Local Network"
+}
 
 func LocalNetworkFix(mac string, bundled bool) string {
 	// value: the one gesture that lifts the block, on the Mac itself, named
