@@ -6,9 +6,11 @@ use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::{Duration, Instant};
 
+use serde_json::json;
+
 use super::{
-    environment, install_plan, piped, start_plan, Ended, Heard, Line, Plan, Runs, Stream, BUSY,
-    INSTALL_LINE, NOT_RUN, SEARCH_PATH,
+    environment, install_plan, move_plan, piped, start_plan, Ended, Heard, Line, Plan, Runs,
+    Stream, BUSY, INSTALL_LINE, NOT_RUN, SEARCH_PATH,
 };
 
 fn scratch() -> PathBuf {
@@ -274,4 +276,73 @@ fn a_cancel_ends_the_whole_group_and_a_second_run_meanwhile_is_refused() {
         .expect("it is a pid");
     assert!(waits_for(|| !alive(child)));
     assert!(!runs.cancel());
+}
+
+fn carried(dir: &Path) -> PathBuf {
+    let engine = dir.join("Spwn.app/Contents/MacOS/Spwn Engine");
+    fs::create_dir_all(engine.parent().expect("the engine has a folder")).expect("it is made");
+    fs::write(&engine, "#!/bin/sh\n").expect("the engine is written");
+    fs::set_permissions(&engine, std::os::unix::fs::PermissionsExt::from_mode(0o755))
+        .expect("it is executable");
+    engine
+}
+
+fn answered(executable: &str) -> serde_json::Value {
+    json!({ "v": 2, "id": "hello", "out": { "executable": executable } })
+}
+
+#[test]
+fn a_bare_engine_answering_a_bundled_window_is_moved_by_the_bundles_engine_start() {
+    // Given - a window whose Spwn.app carries its engine, and a bare engine answering its hello
+    let dir = scratch();
+    let bundled = carried(&dir);
+    let env = environment(Path::new("/Users/you"), "/bin/zsh".as_ref(), |_| None);
+
+    // When - the window judges the hello
+    let plan = move_plan(
+        Some(&bundled),
+        &answered("/Users/you/.local/bin/station"),
+        env.clone(),
+    );
+
+    // Then - the bundle's own engine runs `engine start`, which moves the Mac to mode A
+    assert_eq!(
+        plan,
+        Some(Plan {
+            program: bundled,
+            args: vec![OsString::from("engine"), OsString::from("start")],
+            env,
+        })
+    );
+}
+
+#[test]
+fn an_engine_inside_a_bundle_an_unnamed_one_or_a_window_with_no_engine_moves_nothing() {
+    // Given - a bundled window, and hellos from the bundle's engine, another copy's, and one naming no executable
+    let dir = scratch();
+    let bundled = carried(&dir);
+    let env = || environment(Path::new("/Users/you"), "/bin/zsh".as_ref(), |_| None);
+    let own = bundled.to_string_lossy().into_owned();
+
+    // When / Then - none of them asks for a move
+    for answer in [
+        answered(&own),
+        answered("/Applications/Spwn.app/Contents/MacOS/Spwn Engine"),
+        json!({ "v": 2, "id": "hello", "out": {} }),
+        json!({ "v": 2, "id": "hello", "error": { "code": "engine.down" } }),
+    ] {
+        assert_eq!(move_plan(Some(&bundled), &answer, env()), None, "{answer}");
+    }
+
+    // When / Then - a window outside a bundle, or whose bundle lost its engine, never moves a bare engine
+    let bare = answered("/Users/you/.local/bin/station");
+    assert_eq!(move_plan(None, &bare, env()), None);
+    assert_eq!(
+        move_plan(
+            Some(&dir.join("Gone.app/Contents/MacOS/Spwn Engine")),
+            &bare,
+            env()
+        ),
+        None
+    );
 }

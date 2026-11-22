@@ -72,6 +72,16 @@ pub fn bundled_of(executable: &Path) -> Option<PathBuf> {
         .then(|| bundle.join(BUNDLED_ENGINE))
 }
 
+// value: whether an engine's executable, as its hello names it, is one a Spwn.app carries, whichever copy.
+pub fn carried(executable: &Path) -> bool {
+    executable.ends_with(BUNDLED_ENGINE)
+        && executable
+            .ancestors()
+            .nth(Path::new(BUNDLED_ENGINE).components().count())
+            .and_then(Path::extension)
+            .is_some_and(|extension| extension == "app")
+}
+
 #[cfg(test)]
 #[path = "station_test.rs"]
 mod tests;

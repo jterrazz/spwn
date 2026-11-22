@@ -12,6 +12,7 @@ use tauri::ipc::Channel;
 use tauri::{AppHandle, Emitter, Manager, State, Webview};
 
 use crate::bridge::{connect_within, write_line, Exchanges, Message, Sink, LIMITS};
+use crate::local_core::{moved, Runs};
 
 #[path = "link_log.rs"]
 mod link_log;
@@ -283,14 +284,44 @@ fn changed(shown: &Mutex<Link>, link: &Link) -> bool {
         .unwrap_or(false)
 }
 
-pub fn supervise(app: AppHandle, bridge: Arc<Bridge>) {
+// invariant: the first engine to answer after the window's launch is judged once for the B to A move, on a thread
+// invariant: of its own, so the link is supervised meanwhile; a move that ran wakes the link.
+fn judged_once(app: &AppHandle, bridge: &Arc<Bridge>, runs: &Arc<Runs>, answer: &Value) {
+    let (log, bridge, runs, answer) = (
+        LinkLog::in_folder(app.path().app_log_dir().ok()),
+        Arc::clone(bridge),
+        Arc::clone(runs),
+        answer.clone(),
+    );
+    thread::spawn(move || {
+        let said = match moved(&runs, &answer) {
+            None => return,
+            Some(Ok(ended)) if ended.code == 0 => {
+                bridge.wake();
+                String::from("moved the bare engine into Spwn.app")
+            }
+            Some(Ok(ended)) => format!("the move into Spwn.app exited {}", ended.code),
+            Some(Err(refusal)) => {
+                format!("the move into Spwn.app did not run: {}", refusal.message)
+            }
+        };
+        log.write(SystemTime::now(), &said);
+    });
+}
+
+pub fn supervise(app: AppHandle, bridge: Arc<Bridge>, runs: Arc<Runs>) {
     let log = LinkLog::in_folder(app.path().app_log_dir().ok());
     thread::spawn(move || {
         let mut watch = Watch::default();
+        let mut judged = false;
         loop {
             let path = socket_path();
             let socket = path.display().to_string();
             let heard = hello(&path);
+            if let (false, Ok(answer)) = (judged, heard.as_ref()) {
+                judged = true;
+                judged_once(&app, &bridge, &runs, answer);
+            }
             let failed = heard.as_ref().err().cloned();
             let (link, wait) = watch.next(heard, socket, &bridge.shown());
             if changed(&bridge.link, &link) {

@@ -30,12 +30,13 @@ fn on_run(_app: &AppHandle, _event: RunEvent) {}
 fn main() {
     opener::sweep(&opener::folder());
     let bridge = engine::Bridge::new();
+    let runs = Arc::new(local_core::Runs::default());
     let loading = bridge.exchanges.clone();
     let closing = bridge.exchanges.clone();
     tauri::Builder::default()
         .plugin(updates::plugin())
         .manage(bridge.clone())
-        .manage(Arc::new(local_core::Runs::default()))
+        .manage(Arc::clone(&runs))
         .manage(updates::Pending::default())
         .manage(window::Shown::default())
         .invoke_handler(tauri::generate_handler![
@@ -65,7 +66,7 @@ fn main() {
         })
         .setup(move |app| {
             window::backstop(app.handle().clone());
-            engine::supervise(app.handle().clone(), bridge);
+            engine::supervise(app.handle().clone(), bridge, runs);
             Ok(())
         })
         .build(tauri::generate_context!())

@@ -12,12 +12,13 @@ use std::thread;
 use std::time::{Duration, Instant};
 
 use serde::Serialize;
+use serde_json::Value;
 use tauri::ipc::Channel;
 use tauri::State;
 
 use crate::engine::Bridge;
 use crate::opener::Refusal;
-use crate::station::{bundled_of, station_of, Where, INSTALL_LINE};
+use crate::station::{bundled_of, carried, station_of, usable, Where, INSTALL_LINE};
 
 pub const SEARCH_PATH: &str = "/usr/bin:/bin:/usr/sbin:/sbin";
 pub const FALLBACK_SHELL: &str = "/bin/zsh";
@@ -191,6 +192,23 @@ pub fn start_plan(
     })
 }
 
+// invariant: a bundled window that hears a bare engine answer, one whose executable is in no Spwn.app, runs its own
+// invariant: engine's `engine start`, which moves the Mac from B to A (ADR-073); a hello naming no executable moves
+// invariant: nothing, since nothing says the engine is bare.
+pub fn move_plan(
+    bundled: Option<&Path>,
+    answer: &Value,
+    env: Vec<(String, OsString)>,
+) -> Option<Plan> {
+    let program = bundled.filter(|path| usable(path))?;
+    let executable = answer.pointer("/out/executable").and_then(Value::as_str)?;
+    (!carried(Path::new(executable))).then(|| Plan {
+        program: program.to_path_buf(),
+        args: ["engine", "start"].map(OsString::from).to_vec(),
+        env,
+    })
+}
+
 fn text_of(mut bytes: Vec<u8>) -> String {
     while bytes
         .last()
@@ -348,6 +366,23 @@ async fn ran(runs: Arc<Runs>, plan: Plan, channel: Channel<Line>) -> Result<Ende
     tauri::async_runtime::spawn_blocking(move || runs.run(&plan, Arc::new(channel)))
         .await
         .map_err(|error| refused(NOT_RUN, error.to_string()))?
+}
+
+struct Unheard;
+
+impl Heard for Unheard {
+    fn heard(&self, _line: Line) {}
+}
+
+// value: the move's run, silent: its lines are not shown, and its end is the code `engine start` exited with, or
+// value: none when no move is due or the build runs no engine.
+pub fn moved(runs: &Runs, answer: &Value) -> Option<Result<Ended, Refusal>> {
+    if cfg!(debug_assertions) {
+        return None;
+    }
+    let bundled = env::current_exe().ok().and_then(|exe| bundled_of(&exe));
+    let plan = move_plan(bundled.as_deref(), answer, child_env())?;
+    Some(runs.run(&plan, Arc::new(Unheard)))
 }
 
 #[tauri::command(async)]
