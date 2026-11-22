@@ -161,11 +161,18 @@ func Start(r engine.StartReport, thisMac page.Context) page.Page {
 	row := pages.Done(Row, catalog.StateOK, "running")
 	row.Detail = page.Texts(words...)
 	rows := []page.Row{row}
-	if r.LocalNetwork == machines.LocalNetworkNotApproved {
+	switch r.LocalNetwork {
+	case machines.LocalNetworkNotApproved:
 		ln := pages.Done(LocalNetworkRow, catalog.StateDegraded, "")
 		ln.Label = "local network"
 		ln.Detail = page.Texts("needs you", machines.LocalNetworkFix(thisMac.Machine, r.Bundled))
 		rows = append(rows, ln)
+	case machines.LocalNetworkChecking:
+		ln := pages.Done(LocalNetworkRow, catalog.StateUnknown, "")
+		ln.Label = "local network"
+		ln.Detail = page.Texts("checking", "if macOS asks, "+machines.LocalNetworkFix(thisMac.Machine, r.Bundled))
+		rows = append(rows, ln)
+	case machines.LocalNetworkApproved:
 	}
 	return pages.Outcome("engine start", thisMac, nil, rows, "engine to start")
 }

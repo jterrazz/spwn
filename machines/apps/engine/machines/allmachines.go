@@ -188,10 +188,11 @@ type LocalNetwork string
 
 const (
 	// value: how a Mac stands with macOS's Local Network approval of
-	// station, as its engine read it; empty where the read cannot tell
-	// (off a Mac).
+	// station, as its engine read it; checking while a refusal is not yet
+	// its verdict; empty where the read cannot tell (off a Mac).
 	LocalNetworkApproved    LocalNetwork = "approved"
 	LocalNetworkNotApproved LocalNetwork = "not-approved"
+	LocalNetworkChecking    LocalNetwork = "checking"
 )
 
 func NotApproved(mac string, bundled bool) string {

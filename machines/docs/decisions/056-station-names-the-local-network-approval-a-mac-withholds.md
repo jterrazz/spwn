@@ -25,13 +25,16 @@ Five facts the design leans on are HYPOTHESES, not yet proved on a real Mac:
 The engine reads the approval itself and every surface names the Mac:
 
 - The engine reads the approval at its start, before its socket opens, bounded to a second, and again every 30 s while
-  the Mac has not approved station. Its hello carries it, `local_network`: `approved`, `not-approved`, or absent where
-  it cannot tell (off a Mac, a read that does not end). The read is one adapter (`wire/localnetwork.go`), so its
+  the Mac has not approved station. A refusal in its first 90 s reads `checking`, read again every 2 s, since macOS
+  refuses the first read of a bundle it has just seen replaced ([ADR-073](073-spwn-app-carries-the-engine-on-a-mac-with-a-screen.md)'s
+  gate). Its hello carries it, `local_network`: `approved`, `not-approved`, `checking`, or absent where it cannot tell
+  (off a Mac, a read that does not end). The read is one adapter (`wire/localnetwork.go`), so its
   trigger changes alone if H1 or H2 fails.
 - A guest dial a Mac refuses with `EHOSTUNREACH` is the block, on a Mac only. The engine keeps the VM `blocked:
 local-network` until a dial connects or its run ends, and answers a run it cannot reach `local_network`.
-- `station engine start` exits 0 with the row `◐ local network needs you · approve station on <mac>'s screen, or in
-System Settings > Privacy & Security > Local Network`: the engine runs, and a VM created meanwhile is started once approved, its first boot never having run ([ADR-062](062-a-failed-create-stays-on-the-record-until-its-start-or-its-delete.md)).
+- `station engine start` waits 5 s at most for a `checking` read to settle, then exits 0 with the row `◐ local network
+needs you · approve station on <mac>'s screen, or in System Settings > Privacy & Security > Local Network`, or
+  `◐ local network checking · if macOS asks, <the same fix>` while the read still checks: the engine runs, and a VM created meanwhile is started once approved, its first boot never having run ([ADR-062](062-a-failed-create-stays-on-the-record-until-its-start-or-its-delete.md)).
 - `machines create` says `<vm> is kept, failing SSH answers: <mac> has not approved station for Local Network`, its
   hint the same fix; `machines` lists the VM unreachable and the Mac as needing a look, both with that fix.
 

@@ -1,4 +1,4 @@
-description: 'start on a Mac that has not approved Local Network runs the engine and says what to do'
+description: 'start on a Mac that has not approved Local Network checks for 90 s, then says what to do'
 env: engine-stopped
 runs:
     - command: 'world local-network macbook-pro not-approved'
@@ -7,7 +7,15 @@ runs:
       exit: 0
       stdout: |
           ●	engine	running · {{string}}
-          ◐	local network	needs you · approve station on macbook-pro's screen, or in System Settings > Privacy & Security > Local Network
+          ◐	local network	checking · if macOS asks, approve station on macbook-pro's screen, or in System Settings > Privacy & Security > Local Network
+    - command: 'machines --this-mac'
+      exit: 0
+      stdout: |
+          ●	macbook-pro	Mac	macbook-pro	Engine running
+          ○	api	Workspace	macbook-pro	Stopped · persistent	4 CPU	8 GB
+          ○	linux-1	Workspace	macbook-pro	Stopped · ephemeral	4 CPU	8 GB
+    - command: 'world advance 90s'
+      exit: 0
     - command: 'machines --this-mac'
       exit: 0
       stdout: |

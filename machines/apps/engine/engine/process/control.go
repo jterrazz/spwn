@@ -21,6 +21,8 @@ const (
 	bootoutWait = 10 * time.Second
 	startWait   = 15 * time.Second
 	controlPoll = 200 * time.Millisecond
+
+	localNetworkSettleWait = 5 * time.Second
 )
 
 type ControlMachines interface {
@@ -215,6 +217,7 @@ func (c *Control) stopDirect(ctx context.Context, w engine.Work) []engine.Stoppe
 
 func (c *Control) Start(ctx context.Context) (engine.StartReport, error) {
 	if p, err := c.c.Hello(ctx); err == nil {
+		p = c.settled(ctx, p)
 		return engine.StartReport{Already: true, Version: p.Version, PID: p.PID, LocalNetwork: p.LocalNetwork, Bundled: model.InBundle(p.Executable)}, nil
 	}
 	if !c.job.Loaded(ctx) {
@@ -227,6 +230,7 @@ func (c *Control) Start(ctx context.Context) (engine.StartReport, error) {
 	}
 	for waited := time.Duration(0); waited < startWait; waited += controlPoll {
 		if p, err := c.c.Hello(ctx); err == nil {
+			p = c.settled(ctx, p)
 			return engine.StartReport{Version: p.Version, PID: p.PID, LocalNetwork: p.LocalNetwork, Bundled: model.InBundle(p.Executable)}, nil
 		}
 		if err := c.h.Sleep(ctx, controlPoll); err != nil {
@@ -234,6 +238,22 @@ func (c *Control) Start(ctx context.Context) (engine.StartReport, error) {
 		}
 	}
 	return engine.StartReport{}, c.failed(errors.New("it did not answer in " + strconv.Itoa(int(startWait.Seconds())) + "s"))
+}
+
+// invariant: a start reports the engine's Local Network read once it has
+// settled, waiting for it 5 s at most: past them it reports it checking.
+func (c *Control) settled(ctx context.Context, p engine.Hello) engine.Hello {
+	for waited := time.Duration(0); p.LocalNetwork == model.LocalNetworkChecking && waited < localNetworkSettleWait; waited += controlPoll {
+		if c.h.Sleep(ctx, controlPoll) != nil {
+			return p
+		}
+		next, err := c.c.Hello(ctx)
+		if err != nil {
+			return p
+		}
+		p = next
+	}
+	return p
 }
 
 func (c *Control) failed(cause error) error {

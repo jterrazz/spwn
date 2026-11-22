@@ -3,6 +3,7 @@ package process
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/engine"
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
@@ -39,6 +40,51 @@ func TestAnEngineThatDoesNotAnswerIsStoppedWhenItsJobManagerHoldsItsJobWhateverT
 		}
 		if checked := c.Check(); (checked == nil) != installed {
 			t.Errorf("installed %v: Check = %v", installed, checked)
+		}
+	}
+}
+
+type sleepingMac struct {
+	Mac
+	slept time.Duration
+}
+
+func (m *sleepingMac) Sleep(_ context.Context, d time.Duration) error {
+	m.slept += d
+	return nil
+}
+
+// value: an engine that answers, its Local Network read checking for its
+// first hellos, then the answer it settles on.
+type checkingPeer struct {
+	Peer
+	checking int
+	settles  model.LocalNetwork
+}
+
+func (p *checkingPeer) Hello(context.Context) (engine.Hello, error) {
+	if p.checking > 0 {
+		p.checking--
+		return engine.Hello{Version: "v3", LocalNetwork: model.LocalNetworkChecking}, nil
+	}
+	return engine.Hello{Version: "v3", LocalNetwork: p.settles}, nil
+}
+
+func TestAStartWaitsForTheEnginesLocalNetworkReadToSettleWithinItsBound(t *testing.T) {
+	for _, c := range []struct {
+		name      string
+		checking  int
+		want      model.LocalNetwork
+		mostSlept time.Duration
+	}{
+		{"settled approved", 10, model.LocalNetworkApproved, 2 * time.Second},
+		{"settled not approved", 3, model.LocalNetworkNotApproved, time.Second},
+		{"still checking", 1000, model.LocalNetworkChecking, localNetworkSettleWait},
+	} {
+		h := &sleepingMac{}
+		r, err := NewControl(h, &checkingPeer{checking: c.checking, settles: c.want}, nil, nil, installedJob{installed: true}, ControlOptions{}).Start(t.Context())
+		if err != nil || r.LocalNetwork != c.want || h.slept > c.mostSlept {
+			t.Errorf("%s: Start = %q after %s, %v; want %q within %s", c.name, r.LocalNetwork, h.slept, err, c.want, c.mostSlept)
 		}
 	}
 }

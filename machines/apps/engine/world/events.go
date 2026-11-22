@@ -604,6 +604,7 @@ func localNetwork(w *World, args []string) error {
 	case machines.LocalNetworkApproved, machines.LocalNetworkNotApproved:
 		m.LocalNetwork = v
 		return nil
+	case machines.LocalNetworkChecking:
 	}
 	return fmt.Errorf("world local-network: %q is not approved or not-approved", args[1])
 }
