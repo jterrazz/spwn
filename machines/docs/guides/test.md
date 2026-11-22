@@ -209,6 +209,29 @@ The panel's own colour moves between runs (the dark wall's reading went from 4.2
 
 The footprint test: the home is listed (depth 4) before the first step and after every step, and every new path must be one a Disk row holds (`station disk --json`) or [Footprint](../reference/footprint.md) declares, a home-root exception of Footprint, a path the OS writes itself (`specs/machine/<kind>/os-noise.txt`, never an app's), or one the suite's own native commands put where their user asked (`specs/machine/suite-made.txt`: `uv tool install` links into `~/.local/bin`). An unmatched path fails the suite, named with the step that made it. `station disk free` must leave every Can rebuild row empty and every Your data row untouched, and `station disk erase go --confirm=go`, on a fresh clone of the macOS VM, must take only go's data.
 
+## A QA wave over Machines
+
+A wave of explorers that try the random cases (wrong arguments, hostile homes, killed runs, a Mac that goes quiet) runs on the Linux VM, never on the owner's Mac. The first one, `spwn-machines-qa` (2026-11-22, origin/main `a1c38d56a`), taught which rigs carry and where an explorer is blocked.
+
+**Rigs that worked on `development-linux`:**
+
+- The release build of `machines/` with `CGO_ENABLED=0`, one folder per probe under `~/qa-<area>/`, each run with its own `HOME`. The folder and every `qa-*` process are removed at the end. On Linux the CLI refuses every VM verb (create, start, stop, delete, ssh, edit, add) with exit 2, so what a Linux build proves is the parsing, the Machinefile and the settings; `STATION_MACHINE_KIND=mac` runs the real engine there without tart, launchd or tailscale, enough for the socket, a stale socket, a second `engine run`, `kill -9` and SIGTERM.
+- Two isolated Mac homes (alpha, beta) on the one VM, each with its own engine and an ssh stub that can be cut, frozen (SIGSTOP), made silent (`exec sleep 3600`) or redirected to a binary stamped with another version. This is the fleet rig: it settled partition, the version skew of [ADR-072](../decisions/072-before-1-0-every-station-runs-the-same-release.md) and the hang of a far Mac that connects and says nothing. A goroutine dump (SIGQUIT) of the hung CLI named the real wait; the brief's guess was wrong.
+- The window over the proof build in headless Chromium (Playwright), across every recorded world and page, with `link=blip`, `stale=<call>` and `unread=<call>`. It proves layout, routes and states; it does not run the Tauri window, because `live-tauri.sh` needs openbox and xdotool, which the VM lacks.
+- A throwaway tart clone of `development-macos` for the darwin binary (`scripts/gates/darwin-build.sh`): disk and apps through the CLI. A clone is a workspace, not a Mac, so tart, the image cache, leftovers and the Station kinds stay unexercised.
+- The public installer under throwaway homes on the VM, and the Mac mini bench for the macOS paths, in a `/tmp` home.
+- A random kill of `init` and `settings apply` at 40 delays, and 15 rounds of two racing: a reliable way to prove that no file is left half written.
+
+**What blocked explorers:**
+
+- The menu bar driver (a darwin VM, VNC) waited about an hour for the gate slot at low priority, built the app, and saw no status item in three captures: no verdict.
+- `cc.sh` exits 86 when the VM's disk is at 90 %. Four makers met it and three deleted other sessions' `*-node` clones under `~/spwn-gates` and `~/station-programme`; one fix has no docs or link verdict for that reason. A wave starts by reading the disk, and an orchestrator owns the clean-up, not each maker.
+- No libfaketime (clock skew), no loop mount (full disk), no openbox or xdotool (the Tauri window), no sudo.
+- A cold gate went red twice on code that was not the maker's: the architecture rule that bans timers in `remote/api`, and a `TestVocabulary` failure on main itself. Rebase on the fixed main before a third run.
+- A finding seen once, or only by an edited `preferences.json` standing in for a rename, was dropped; a finding is kept when it is reproduced twice and its cause is read in code. A report whose cause is a guess goes back to investigation, not to a maker.
+
+**What a wave leaves:** a fix per branch with its red test first, pushed and not merged, and the findings over the cap of the wave named for the next one. The installer is spwn-web's, so its findings are filed there.
+
 ## The gate scripts
 
 The scripts that prove a change on the shared Linux VM live in `scripts/gates/` at the repository root, so a session reads one folder and every machine runs the same code. [ADR-066](../decisions/066-a-commit-owes-that-it-builds-and-lints-a-lot-owes-the-gate.md) sets the two tiers and [ADR-067](../decisions/067-one-train-appended-by-makers-proved-at-its-tip.md) the train; these are the commands that run them.
