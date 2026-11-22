@@ -85,6 +85,11 @@ const (
 	mostTicks  = 120
 	// value: the quiet readings in a row that let go of a waiter still out.
 	letGo = 4
+	// value: the busy readings a leap takes a turn of the scheduler after,
+	// before it sleeps between readings, from the first pause to the longest.
+	spinReadings = 8
+	firstPause   = 20 * time.Microsecond
+	longestPause = time.Millisecond
 	// value: the real time a settling waits, in all, for its guests' greetings.
 	greetBound = 2 * time.Second
 )
@@ -1271,12 +1276,21 @@ func (m *moves) settled() bool {
 // leapers can run. While a turn is out, quiet must hold for letGo readings in
 // a row, a turn of the scheduler between: the turn is then a goroutine that
 // waits on something other than the clock, or has ended, and is let go.
+//
+// invariant: a leap that reads something else running gives the CPU back
+// past spinReadings such readings in a row, so what it waits for runs on it,
+// however loaded the machine: the pause spaces the readings and never ends
+// the wait, which only the readings do.
 func (m *moves) await(ctx context.Context) {
+	busy := 0
 	for still := 0; ctx.Err() == nil; runtime.Gosched() {
 		if !m.quiet() {
 			still = 0
+			busy++
+			m.yield(busy)
 			continue
 		}
+		busy = 0
 		if m.settled() {
 			return
 		}
@@ -1289,6 +1303,18 @@ func (m *moves) await(ctx context.Context) {
 			return
 		}
 	}
+}
+
+// invariant: a leap asleep between its readings is not counted among the
+// leapers, so the others' readings never count it out of what runs; awake
+// again before it counts, it reads as running, which only delays a leap.
+func (m *moves) yield(busy int) {
+	if busy <= spinReadings {
+		return
+	}
+	m.leapers.Add(-1)
+	time.Sleep(min(firstPause<<min(busy-spinReadings-1, 6), longestPause))
+	m.leapers.Add(1)
 }
 
 // value: nothing but leapers can run, twice in a row with a turn of the
