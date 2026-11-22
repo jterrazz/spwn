@@ -60,12 +60,14 @@ type Survey struct {
 	Misplaced []MisplacedReport
 	Other     int64
 	// value: what the system, the apps' installs and station's logs hold;
-	// -1 while a part of one has not answered or did not within its budget,
-	// and the system's -1 too where the volume cannot tell it apart.
+	// a part walked again counts its last walk's size until it answers; -1
+	// while a part no walk has answered still pends or did not within its
+	// budget, and the system's -1 too where the volume cannot tell it apart.
 	System, Apps, Logs int64
 	// value: the system's walk has not answered yet.
 	SystemPending bool
-	// value: a cache's walk has not answered, or did not within its budget.
+	// value: a cache no walk has answered still pends, or did not answer
+	// within its budget.
 	CachesUnknown bool
 	// value: the app whose Can rebuild row is the image cache: the
 	// hypervisor's package on a Mac, empty on any other machine.

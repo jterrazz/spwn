@@ -368,9 +368,10 @@ func (s *Surveyor) assemble(p plan, r reading) disk.Survey {
 	if p.system >= 0 {
 		report.System, report.SystemPending = walked(r, append([]int{p.system}, p.underSystem...))
 		if report.System >= 0 {
-			report.System = r.sizes[p.system]
+			report.System, _ = r.size(p.system)
 			for _, i := range p.underSystem {
-				report.System -= r.sizes[i]
+				b, _ := r.size(i)
+				report.System -= b
 			}
 			report.System = max(report.System, 0)
 		}
@@ -380,14 +381,24 @@ func (s *Surveyor) assemble(p plan, r reading) disk.Survey {
 	return report
 }
 
-// invariant: a size the walk has not answered, pending or past its
-// budget, is never read as 0: what it is part of is -1, pending while one
-// of its roots still is.
+// invariant: a root walked again reads its last walk's size until it
+// answers, so a re-walk never drops what was known; one with no last size
+// is pending.
+func (r reading) size(i int) (bytes int64, waiting bool) {
+	if b := r.sizes[i]; b != pending {
+		return b, false
+	}
+	return r.known[i], true
+}
+
+// invariant: a size the walk has not answered and no walk knew, pending or
+// past its budget, is never read as 0: what it is part of is -1, pending
+// while one of its roots still walks.
 func walked(r reading, roots []int) (bytes int64, waiting bool) {
 	for _, i := range roots {
-		switch b := r.sizes[i]; {
-		case b == pending:
-			bytes, waiting = -1, true
+		b, w := r.size(i)
+		waiting = waiting || w
+		switch {
 		case b < 0:
 			bytes = -1
 		case bytes >= 0:
@@ -412,7 +423,8 @@ func (s *Surveyor) kinds(p plan, r reading) (apps int64, cachesUnknown bool) {
 				continue
 			}
 			for _, pt := range pp.parts {
-				cachesUnknown = cachesUnknown || r.sizes[pt.root] < 0
+				b, _ := r.size(pt.root)
+				cachesUnknown = cachesUnknown || b < 0
 			}
 		}
 		cachesUnknown = cachesUnknown || (ep.containers && r.containers < 0)
@@ -439,10 +451,11 @@ func (s *Surveyor) logs(p plan, r reading) int64 {
 			}
 			var bytes int64
 			for _, pt := range pp.parts {
-				if r.sizes[pt.root] < 0 {
+				b, _ := r.size(pt.root)
+				if b < 0 {
 					return -1
 				}
-				bytes += pt.sign * r.sizes[pt.root]
+				bytes += pt.sign * b
 			}
 			return max(bytes, 0)
 		}
@@ -527,8 +540,8 @@ func (s *Surveyor) row(ep entryPlan, r reading) (disk.Tally, bool) {
 // empty while it walks it again, is no misplaced folder: there is nothing to
 // move.
 func holdsNothing(r reading, i int) bool {
-	b := r.sizes[i]
-	return b == 0 || (b == pending && r.known[i] == 0)
+	b, _ := r.size(i)
+	return b == 0
 }
 
 func (s *Surveyor) walkBudget() time.Duration {

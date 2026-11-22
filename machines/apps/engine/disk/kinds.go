@@ -54,9 +54,9 @@ type CanFree struct {
 
 func KindsOf(total, free int64, s Survey, rows []Row, h HeldReading) ([]Amount, CanFree) {
 	// invariant: a kind whose measure has not answered is absent, never 0:
-	// the system where the volume cannot tell it apart or its walk pends,
-	// apps and caches while a walk of theirs pends or past its budget,
-	// machines and images until the hypervisor is heard (its last answer
+	// the system where the volume cannot tell it apart, the system, apps
+	// and caches while a walk of theirs pends with no last walk's size, or
+	// past its budget (a walk again keeps the last size), machines and images until the hypervisor is heard (its last answer
 	// stands while it is asked again, fails or is late), and on a machine
 	// with none; your data, the remainder, whenever a kind it subtracts is
 	// unknown. The image cache is the hypervisor's Can rebuild row, apart

@@ -9,6 +9,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/disk"
 	"github.com/jterrazz/studio-station/apps/engine/disk/adapter/fake"
+	"github.com/jterrazz/studio-station/apps/engine/setup"
 )
 
 // value: a disk whose held roots answer only once the test releases them.
@@ -109,5 +110,57 @@ func TestEveryAppInAMacsAppFoldersIsAnAppWhoeverInstalledIt(t *testing.T) {
 	}
 	if s.Apps != 540 {
 		t.Fatalf("apps %d, want zed's 40 once and the 500 of the apps the catalog does not carry", s.Apps)
+	}
+}
+
+// value: a machine that keeps the files the survey writes, so its last
+// sizes are there for the next walk.
+type keptFiles struct {
+	onMachine
+	files map[string][]byte
+}
+
+func (m keptFiles) ReadFile(p string) ([]byte, error) {
+	if b, ok := m.files[p]; ok {
+		return b, nil
+	}
+	return m.onMachine.ReadFile(p)
+}
+
+func (m keptFiles) Keep(p string, b []byte) error {
+	m.files[p] = b
+	return nil
+}
+
+func TestAKindKeepsItsLastSizeWhileItsWalkAnswersAgain(t *testing.T) {
+	kept := map[string][]byte{}
+	surveyor := func(d heldRoots) *Surveyor {
+		apps := onLinux(d).apps
+		return NewSurveyor(keptFiles{onMachine{Usage: d.Usage}, kept}, apps, SurveyorOptions{Disk: d, ThisMachine: catalog.Linux, Expand: disk.Expander{Home: "/h", Roots: setup.Roots{Cache: "/h/.cache"}}})
+	}
+	first := linuxDisk()
+	close(first.release)
+	if _, err := surveyor(first).List(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+
+	again := linuxDisk("/usr", "/usr/local/bin/agent", "/h/slow/tree")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	surveys := surveyor(again).Watch(ctx)
+	var frame disk.Survey
+	select {
+	case frame = <-surveys:
+	case <-ctx.Done():
+		t.Fatal("no frame")
+	}
+	close(again.release)
+	for range surveys {
+	}
+
+	r := disk.ReadingOf(1000, 500, frame, disk.HeldReading{}, "linux-1")
+	got := kindSet(r)
+	if got[disk.KindSystem] != 100 || got[disk.KindApps] != 30 || got[disk.KindCaches] != 5 || got[disk.KindYourData] != 365 || !r.Pending {
+		t.Fatalf("while every root is walked again the kinds are %+v, pending %v; want the last walk's system 100, apps 30, caches 5 and your data 365, pending", r.Kinds, r.Pending)
 	}
 }
