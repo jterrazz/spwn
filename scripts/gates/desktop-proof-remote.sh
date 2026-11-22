@@ -2,9 +2,9 @@
 export PATH=$HOME/.local/bin:$PATH; eval "$(mise activate bash --shims)"
 # invariant: a child never inherits a lock's descriptor (3 to 9: flock's own, the story and cheap slots, the heavy-run lock): an orphaned fixture server that did kept the lock held for 70 min and starved a cold gate (2026-11-21).
 nl(){ "$@" 3>&- 4>&- 5>&- 6>&- 7>&- 8>&- 9>&-; }
-R=${CC_HOME:?CC_HOME is the folder of the files}; L=${1:?label}; B=${2:?branch}; C=$R/$L-wt; cd $R || exit 2
+R=${CC_HOME:?CC_HOME is the folder of the files}; W=${CC_WORK:?CC_WORK is the folder of the clones}; L=${1:?label}; B=${2:?branch}; C=$W/$L-wt; cd $R || exit 2
 echo "waiting for lock $(date +%T)"; ~/.local/bin/heavy-run-wait; exec 9>/var/lock/heavy-run; flock -w 7200 -s 9 || { echo LOCK-TIMEOUT; exit 85; }
-export TMPDIR=$(mktemp -d /tmp/sp-$L-XXXXXX); df -h ~ | tail -1; uptime
+export TMPDIR=$(mktemp -d /tmp/sp-$L-XXXXXX); mkdir -p "$W"; df -h ~ "$W" /tmp | tail -n +2; uptime
 rm -rf "${C:?}" && git clone -q -b $B $R/$L.bundle $C && cd $C && git log -1 --oneline && cd machines || exit 9
 npm ci > $R/$L-npmci.log 2>&1; echo NPMCI=$?
 cd apps/desktop

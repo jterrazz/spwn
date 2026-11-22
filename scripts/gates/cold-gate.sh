@@ -4,12 +4,12 @@
 W=$1; B=$2; L=$3; H=$(git -C "$W" rev-parse "$B")
 sub=$(git -C "$W" rev-parse --show-prefix)  # "" at a repo root, "machines/" in a subdir
 [ -z "$sub" ] && [ -d "$W/machines/apps/engine" ] && sub=machines/
-VM=$VM_LINUX; R='$HOME'/$VM_DIR; RS=$VM_DIR/
+VM=$VM_LINUX; R='$HOME'/$VM_DIR; RS=$VM_DIR/; C=$VM_RAM/wt-$L-cold
 git -C "$W" bundle create "$RUN/$L-cold.bundle" "$B" --tags 2>/dev/null || exit 90
 cat > "$RUN/$L-cold-remote.sh" <<R
 export PATH=\$HOME/.local/bin:\$PATH; eval "\$(mise activate bash --shims)"
-df -h ~ | tail -1; echo "vm $VM \$(nproc) cpu \$(free -g | awk '/Mem:/{print \$2}') GB load \$(cut -d' ' -f1-3 /proc/loadavg)"
-rm -rf $R/wt-$L-cold; git clone -q -b $B $R/$L-cold.bundle $R/wt-$L-cold && cd $R/wt-$L-cold && git log -1 --oneline || exit 99
+mkdir -p $VM_RAM; df -h ~ $VM_RAM /tmp | tail -n +2; echo "vm $VM \$(nproc) cpu \$(free -g | awk '/Mem:/{print \$2}') GB load \$(cut -d' ' -f1-3 /proc/loadavg)"
+rm -rf $C; git clone -q -b $B $R/$L-cold.bundle $C && cd $C && git log -1 --oneline || exit 99
 test "\$(git rev-parse HEAD)" = "$H" || { echo WRONG-HEAD; exit 98; }
 $([ -n "$sub" ] && echo "cd $sub || exit 95")
 nl(){ "\$@" 3>&- 4>&- 5>&- 6>&- 7>&- 8>&- 9>&-; }
@@ -34,7 +34,7 @@ echo "t-rootlint \$(date +%T)"
 [ \$rl = 0 ] || { sed 's/\x1b\[[0-9;]*m//g' /tmp/$L-rootlint.log | grep -vE '^\\s*\$' | tail -25; [ \$rc = 0 ] && rc=\$rl; }
 grep -E "FAIL|Test Files" /tmp/$L-check.log | sed 's/\x1b\[[0-9;]*m//g' | tail -20
 tail -15 /tmp/$L-check.log | sed 's/\x1b\[[0-9;]*m//g'
-cp /tmp/$L-check.log $R/$L-check.log 2>/dev/null; cd ~ && rm -rf $R/wt-$L-cold $R/$L-cold.bundle /tmp/$L-*.log
+cp /tmp/$L-check.log $R/$L-check.log 2>/dev/null; cd ~ && rm -rf $C $R/$L-cold.bundle /tmp/$L-*.log
 echo COLD-DONE
 exit \$rc
 R

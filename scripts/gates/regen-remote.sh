@@ -2,7 +2,7 @@
 export PATH=$HOME/.local/bin:$PATH; eval "$(mise activate bash --shims)"
 # invariant: a child never inherits a lock's descriptor (3 to 9: flock's own, the story and cheap slots, the heavy-run lock): an orphaned fixture server that did kept the lock held for 70 min and starved a cold gate (2026-11-21).
 nl(){ "$@" 3>&- 4>&- 5>&- 6>&- 7>&- 8>&- 9>&-; }
-L=${1:?label}; B=${2:?branch}; ARIA=$3; R=${CC_HOME:?CC_HOME is the folder of the files}; RUNTMP=/tmp/sp-$L-regen-$$
+L=${1:?label}; B=${2:?branch}; ARIA=$3; R=${CC_HOME:?CC_HOME is the folder of the files}; W=${CC_WORK:?CC_WORK is the folder of the clones}; RUNTMP=/tmp/sp-$L-regen-$$
 trap 'cd ~; rm -rf "${RUNTMP:?}"' EXIT
 ~/.local/bin/heavy-run-wait; exec 9>/var/lock/heavy-run; flock -w 7200 -s 9 || exit 85
 export TMPDIR=$RUNTMP; mkdir -p "$TMPDIR"
@@ -15,8 +15,8 @@ take_slot(){ [ -n "$got" ] && return 0; local P=${SLOT_POLL:-20} w=0 k
     w=$((w+1)); command sleep $P
   done
 }; got=
-df -h ~ | tail -1
-rm -rf "${R:?}/$L-regen-node"; git clone -q -b $B $R/$L-regen.bundle $R/$L-regen-node && cd $R/$L-regen-node/machines || exit 9
+mkdir -p "$W"; df -h ~ "$W" /tmp | tail -n +2
+rm -rf "${W:?}/$L-regen-node"; git clone -q -b $B $R/$L-regen.bundle $W/$L-regen-node && cd $W/$L-regen-node/machines || exit 9
 npm ci >$R/$L-regen-npmci.log 2>&1; echo NPMCI=$?
 app=$(ls -d apps/desktop apps/window 2>/dev/null | head -1); (cd $app && npx playwright install chromium-headless-shell >/dev/null 2>&1)
 mkdir -p .artifacts/go; go work sync

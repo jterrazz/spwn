@@ -27,12 +27,12 @@ if [ -z "$ATTACH" ]; then
   w=0; until ! { [ -e $RUN/vm-hold/$VM ] || [ -e $RUN/vm-hold/all ]; } && ssh -n -o ConnectTimeout=10 $VM true 2>/dev/null; do [ $w -ge 180 ] && { echo "VM $VM not free after 60 min"; exit 87; }; [ $w = 0 ] && echo "waiting for $VM (hold or ssh) $(date +%T)"; w=$((w+1)); sleep 20; done
   if $SSHP $VM "[ -e $R/$L-cc.pid ] && kill -0 \$(cat $R/$L-cc.pid) 2>/dev/null"; then echo "refused: $L already runs on $VM (ATTACH=1 waits on it)"; exit 88; fi
   $SSHP $VM "mkdir -p $R && find $R -maxdepth 1 -name '*.bundle' -mmin +1440 -delete; df -h ~ | tail -1"
-  u=$($SSHP $VM "df --output=pcent ~ | tail -1 | tr -dc 0-9"); [ "${u:-100}" -lt 90 ] || { echo "DISK $VM at ${u}%: free it (old *-node, clones, logs) before rerunning"; exit 86; }
+  u=$($SSHP $VM "df --output=pcent ~ | tail -1 | tr -dc 0-9"); [ "${u:-100}" -lt 90 ] || { echo "DISK $VM at ${u}%: free it (old clones, logs) before rerunning"; exit 86; }
   git -C "$W" bundle create $RUN/$L-cc.bundle "$B" --tags >/dev/null 2>&1 || exit 90
   scp -q $RUN/$L-cc.bundle $VM:$RS && scp -q $GATE_DIR/cc-remote.sh $VM:$RS$L-cc-remote.sh && scp -q $GATE_DIR/cc-verdict.py $VM:$RS$L-cc-verdict.py && scp -q $GATE_DIR/cc-loop.sh $VM:$RS$L-cc-loop.sh && scp -q $RUN/$L-cc.items $VM:$RS$L-cc.items || exit 91
   rm -f $RUN/$L-cc.bundle $RUN/$L-cc.items
   if [ $# -eq 0 ]; then FILTERS="cli usecases adapters"; else FILTERS="$*"; fi
-  until $SSHP $VM "rm -f $R/$L-cc.log $R/$L-cc.end; CC_HOME=$R CHEAP=$CHEAP ONLY=$ONLY UPD=$UPD PAR=$PAR setsid nohup bash $R/$L-cc-loop.sh $L $B $FILTERS > $R/$L-cc.log 2>&1 < /dev/null & echo launched" | grep -q launched; do fails=$((fails+1)); [ $fails -ge 15 ] && { echo "launch failed on $VM"; exit 91; }; sleep 20; done
+  until $SSHP $VM "rm -f $R/$L-cc.log $R/$L-cc.end; CC_HOME=$R CC_WORK=$VM_RAM CHEAP=$CHEAP ONLY=$ONLY UPD=$UPD PAR=$PAR setsid nohup bash $R/$L-cc-loop.sh $L $B $FILTERS > $R/$L-cc.log 2>&1 < /dev/null & echo launched" | grep -q launched; do fails=$((fails+1)); [ $fails -ge 15 ] && { echo "launch failed on $VM"; exit 91; }; sleep 20; done
   launched=1; echo "launched $L on $VM $(date +%T): CHEAP=${CHEAP:-0} commits=$(echo ${PICK:-all}) log $R/$L-cc.log"
 fi
 launched=1; off=0; fails=0; polls=0

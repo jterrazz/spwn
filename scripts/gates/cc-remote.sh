@@ -1,7 +1,7 @@
 #!/bin/bash
 export PATH=$HOME/.local/bin:$PATH; eval "$(mise activate bash --shims)"
 L=$1; B=$2; sha=$3; n=$4; shift 4
-R=${CC_HOME:-$HOME}; NS=; RUNTMP=
+R=${CC_HOME:-$HOME}; W=${CC_WORK:?CC_WORK is the folder of the clones}; NS=; RUNTMP=
 # invariant: a child never inherits a lock's descriptor (3 to 9: flock's own, the story and cheap slots, the heavy-run lock): an orphaned fixture server that did kept the lock held for 70 min and starved a cold gate (2026-11-21).
 nl(){ "$@" 3>&- 4>&- 5>&- 6>&- 7>&- 8>&- 9>&-; }
 WT=
@@ -41,19 +41,20 @@ take_slot(){ [ -n "$got" ] && return 0; local P=${SLOT_POLL:-20} w=0 k l ml=${ST
     w=$((w+1)); command sleep $P
   done
 }; got=
-df -h ~ | tail -1
+mkdir -p "$W"; df -h ~ "$W" /tmp | tail -n +2
 [ -n "$CHEAP" ] && take_cheap
 # invariant: the per-label node clone is built once, under a lock: runs of one label in parallel wait for it instead of racing on it.
 exec 6>$R/$L-node.lock; flock 6
-if [ ! -d $R/$L-node/machines/node_modules ]; then
-  rm -rf "${R:?}/$L-node"; git clone -q -b $B $R/$L-cc.bundle $R/$L-node && cd $R/$L-node && git reset -q --hard $sha && cd machines && npm ci >$R/$L-npmci.log 2>&1; echo NPMCI=$?
-  (cd $R/$L-node/machines && cd "$(ls -d apps/desktop apps/window 2>/dev/null | head -1)" && npx playwright install chromium-headless-shell >/dev/null 2>&1)
+if [ ! -d $W/$L-node/machines/node_modules ]; then
+  rm -rf "${W:?}/$L-node"; git clone -q -b $B $R/$L-cc.bundle $W/$L-node && cd $W/$L-node && git reset -q --hard $sha && cd machines && npm ci >$R/$L-npmci.log 2>&1; echo NPMCI=$?
+  (cd $W/$L-node/machines && cd "$(ls -d apps/desktop apps/window 2>/dev/null | head -1)" && npx playwright install chromium-headless-shell >/dev/null 2>&1)
   cd ~
 fi
 flock -u 6
 # invariant: a lane clones to a fixed path (<label>-cc-wt, one per cheap slot under CHEAP) so Go's build cache, keyed by the directory, hits on the next commit; two loops of a label never meet, cc-loop.sh refuses the second.
-WT=$R/$L-cc-wt${CK:+-s$CK}; rm -rf "${WT:?}"
-git clone -q -b $B $R/$L-cc.bundle "$WT" && cd "$WT" && git reset -q --hard $sha && git log -1 --oneline && cd machines && cp -al $R/$L-node/machines/node_modules . || exit 9
+# invariant: the lane's node_modules is hard-linked from the label's node clone, so both sit in CC_WORK, on one filesystem.
+WT=$W/$L-cc-wt${CK:+-s$CK}; rm -rf "${WT:?}"
+git clone -q -b $B $R/$L-cc.bundle "$WT" && cd "$WT" && git reset -q --hard $sha && git log -1 --oneline && cd machines && cp -al $W/$L-node/machines/node_modules . || exit 9
 if run STATIC; then
 echo GOFMT[$(gofmt -l apps/engine catalog specs)]
 TIMEFORMAT='VET-CPU user %U sys %S real %R'

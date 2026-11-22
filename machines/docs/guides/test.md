@@ -225,6 +225,8 @@ A run writes its logs, end files and locks under `GATE_RUN_DIR` (default `.artif
 
 The VM's own story slot (`take_slot` in `cc-remote.sh`, two holders) follows the same load rule as `gate-slot.sh`: a free slot is taken only while the VM's 1-min load is under `STORY_SLOT_MAX_LOAD` (default twice `nproc`); after `STORY_SLOT_LOAD_WAIT` seconds (default 900) of a loaded VM it proceeds and logs the load. The stories then run on `STORIES_WORKERS` workers, by default the cores the load leaves free (2 to 8), and no story timeout is raised for a loaded VM.
 
+Every clone a script makes on the VM lands in `GATE_VM_RAM` (default `/gates/<GATE_VM_DIR>`), on the VM's RAM disk, so a throwaway tree never reaches the disk the Mac's SSD backs; logs, bundles and end files stay in `~/$GATE_VM_DIR`. A loop deletes its label's node clone when it ends.
+
 The slot serves `GATE_SLOT_PRIORITY=landing` first (a gate that lands work on the train), then `normal`, then `low` (a bench, a capture, a rig run); a waiter never takes the slot while a waiter of a higher priority waits. The scripts close the lock descriptors (3 to 9) before they start a child, so a fixture server left behind by a story never holds the heavy-run lock. `scripts/gates/test.sh`, run by the root `make lint`, parses every script and proves the priority order.
 
 ### Usage and knobs
@@ -238,7 +240,7 @@ The scripts carry no usage header: a comment states an invariant, a hazard, an o
 - `desktop-proof.sh <worktree> <label> [branch]`: runs `desktop-proof-remote.sh` detached on the VM and waits on `<label>-dt.end`; its output is `<label>-dt.out`.
 - `regen.sh one <worktree> <sha> <label> [aria filter]` and `regen.sh all <worktree> <map file> <prefix> "<lane A>" "<lane B>"`: the forced regeneration of `machines/` twice (determinism), the changed files back under `<label>-regen-out/`, the list in `changes.txt`; `fold.sh <old sha> <label>` (a rebase exec line, `GEN_DIRS` overrides the folders) amends that output into the old sha's commit; `ratchet.sh <worktree> <base>` prints `<sha7> bl=<baseline> png=<sum> EQ|DIFF` per commit.
 - `tip-mac.sh <worktree> <tip sha, 9 chars> <label>`: the menu bar check plain, twice with `--update-goldens`, then the darwin build, each through the gate slot; it refuses when HEAD is not the tip.
-- `env.sh`: sourced by every launcher, never run; `GATE_RUN_DIR`, `GATE_VM_LINUX` and `GATE_VM_DIR` are read nowhere else.
+- `env.sh`: sourced by every launcher, never run; `GATE_RUN_DIR`, `GATE_VM_LINUX`, `GATE_VM_DIR` and `GATE_VM_RAM` are read nowhere else. The launchers hand the RAM folder to the scripts they run on the VM as `CC_WORK`, and their files folder as `CC_HOME`.
 
 ## What CI runs
 

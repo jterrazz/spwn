@@ -4,4 +4,5 @@ GATE_DIR=$GATE_ROOT/scripts/gates
 RUN=${GATE_RUN_DIR:-$GATE_ROOT/.artifacts/gates}
 VM_LINUX=${GATE_VM_LINUX:-development-linux}
 VM_DIR=${GATE_VM_DIR:-spwn-gates}
+VM_RAM=${GATE_VM_RAM:-/gates/$VM_DIR}
 mkdir -p "$RUN"
