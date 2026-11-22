@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"strconv"
 	"strings"
 	"time"
 
@@ -612,9 +613,24 @@ func (i engineInstaller) retireStandaloneMenuBar(ctx context.Context) (had bool,
 		}
 		return false, statErr
 	}
-	_, _ = i.m.sys.Run.Output(ctx, local.Cmd{Name: bin, Args: []string{"--unregister-login-item"}})
-	_, _ = i.m.sys.Run.Output(ctx, local.Cmd{Name: "/usr/bin/pkill", Args: []string{"-f", bin}})
+	_, _ = i.m.sys.Run.Output(ctx, local.Cmd{Name: bin, Args: []string{"--unregister-login-item"}, Timeout: standaloneMenuBarBudget})
+	i.quitRunning(ctx, bin)
 	return true, i.m.sys.FS.RemoveAll(app)
+}
+
+const standaloneMenuBarBudget = 5 * time.Second
+
+func (i engineInstaller) quitRunning(ctx context.Context, executable string) {
+	listed, err := i.m.sys.Run.Output(ctx, local.Cmd{Name: "/bin/ps", Args: []string{"-axo", "pid=,comm="}})
+	if err != nil {
+		return
+	}
+	for _, line := range strings.Split(listed.Stdout, "\n") {
+		pid, path, _ := strings.Cut(strings.TrimSpace(line), " ")
+		if n, convErr := strconv.Atoi(pid); convErr == nil && strings.TrimSpace(path) == executable {
+			_ = i.m.sys.Run.Signal(n, local.SigTerm)
+		}
+	}
 }
 
 func (i engineInstaller) writeJobStart() (bool, error) {

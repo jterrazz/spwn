@@ -2,9 +2,13 @@ package wire
 
 import (
 	"context"
+	"io"
 	"os"
 	"path/filepath"
+	"strconv"
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/background/contract"
 	"github.com/jterrazz/studio-station/apps/engine/platform/local"
@@ -74,7 +78,9 @@ func TestTheMoveTakesTheStandaloneMenuBarAnEarlierReleaseInstalled(t *testing.T)
 		}
 		run := localtest.NewRunner(t)
 		run.On(bin, "--unregister-login-item")
-		run.On("/usr/bin/pkill", "-f", bin)
+		run.On("/bin/ps", "-axo", "pid=,comm=").Reply(local.Output{Stdout: "  1 /usr/sbin/syslogd\n4242 " + bin + "\n4243 " + bin + "-other\n4244 /Users/o/Applications/Other.app/Contents/MacOS/StationMenuBar\n"})
+		run.Spawn(4242)
+		run.Spawn(4243)
 		m.sys.FS, m.sys.Run = files, run
 		had, err := (engineInstaller{m: m}).retireStandaloneMenuBar(context.Background())
 		if err != nil {
@@ -90,8 +96,50 @@ func TestTheMoveTakesTheStandaloneMenuBarAnEarlierReleaseInstalled(t *testing.T)
 		if installed {
 			want = 2
 		}
-		if len(run.Calls) != want || (installed && (run.Calls[0].Args[0] != "--unregister-login-item" || run.Calls[1].Name != "/usr/bin/pkill")) {
+		if installed && (run.Alive(4242) || !run.Alive(4243) || len(run.Signals) != 1) {
+			t.Errorf("the standalone's process is not the one stopped: signals %v", run.Signals)
+		}
+		if installed && run.Calls[0].Timeout <= 0 {
+			t.Errorf("the standalone binary runs with no bound: %+v", run.Calls[0])
+		}
+		if len(run.Calls) != want || (installed && (run.Calls[0].Args[0] != "--unregister-login-item" || run.Calls[1].Name != "/bin/ps")) {
 			t.Errorf("installed=%v: ran %+v", installed, run.Calls)
 		}
+	}
+}
+
+func TestTheMoveReturnsWhenTheStandaloneBuildNeverExits(t *testing.T) {
+	home := t.TempDir()
+	bin := filepath.Join(home, "Applications", "Station.app", "Contents", "MacOS", "StationMenuBar")
+	started := filepath.Join(home, "pid")
+	if err := os.MkdirAll(filepath.Dir(bin), 0o750); err != nil {
+		t.Fatal(err)
+	}
+	script := "#!/bin/sh\necho $$ > '" + started + "'\nwhile :; do sleep 1; done\n"
+	if err := os.WriteFile(bin, []byte(script), 0o700); err != nil { //nolint:gosec // value: a program the runner starts must be executable.
+		t.Fatal(err)
+	}
+	m := machineRunning(t, true)
+	m.sys = local.New(nil, nil, io.Discard, io.Discard)
+	m.sys.Env = localtest.Env{HomeDir: home, OS: "darwin"}
+	ctx, cancel := context.WithTimeout(context.Background(), standaloneMenuBarBudget+5*time.Second)
+	defer cancel()
+	had, err := (engineInstaller{m: m}).retireStandaloneMenuBar(ctx)
+	if err != nil || !had {
+		t.Fatalf("had = %v, err = %v", had, err)
+	}
+	if ctx.Err() != nil {
+		t.Errorf("the move waited past %v for a standalone build that never exits", standaloneMenuBarBudget+5*time.Second)
+	}
+	raw, err := os.ReadFile(started)
+	if err != nil {
+		t.Fatal(err)
+	}
+	pid, err := strconv.Atoi(strings.TrimSpace(string(raw)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if m.sys.Run.Alive(pid) {
+		t.Errorf("the standalone build %d still runs", pid)
 	}
 }
