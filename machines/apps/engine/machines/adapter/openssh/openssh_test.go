@@ -33,6 +33,14 @@ func (f files) WriteFile(p string, data []byte, _ fs.FileMode) error {
 
 func (files) MkdirAll(string, fs.FileMode) error { return nil }
 
+func (f files) Remove(p string) error {
+	if _, ok := f[p]; !ok {
+		return fs.ErrNotExist
+	}
+	delete(f, p)
+	return nil
+}
+
 func adapter(f files) contract.SSHConfig {
 	return New(f, Options{
 		Home: home, KnownHosts: home + "/.local/state/station/known_hosts", Executable: "/bin/station",
@@ -87,6 +95,27 @@ func TestTheOwnersOwnLinesComeBackByteForByteOnceStationsBlockGoes(t *testing.T)
 
 	if got := string(read(t, disk)); got != mine {
 		t.Errorf("the owner's file came back as\n%s\nwant\n%s", got, mine)
+	}
+}
+
+func TestTheFileStationCreatedIsRemovedWithItsLastBlockNeverLeftEmpty(t *testing.T) {
+	disk := files{}
+	c := adapter(disk)
+
+	if err := c.Put(t.Context(), []contract.MachineBlock{{Name: "vm-1", User: "u"}}); err != nil {
+		t.Fatal(err)
+	}
+	if err := c.Remove(t.Context(), "vm-1"); err != nil {
+		t.Fatal(err)
+	}
+	if data, ok := disk[configFile]; ok {
+		t.Errorf("the config file stays after its last block went, with %q", data)
+	}
+	if err := c.Remove(t.Context(), "vm-1"); err != nil {
+		t.Fatal(err)
+	}
+	if _, ok := disk[configFile]; ok {
+		t.Error("removing a block from no file created one")
 	}
 }
 

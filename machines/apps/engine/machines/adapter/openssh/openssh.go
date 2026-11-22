@@ -45,6 +45,7 @@ type Files interface {
 	ReadFile(path string) ([]byte, error)
 	WriteFile(path string, data []byte, perm fs.FileMode) error
 	MkdirAll(path string, perm fs.FileMode) error
+	Remove(path string) error
 }
 
 type sshFile struct {
@@ -176,7 +177,11 @@ func (c *sshFile) edit(upsert []contract.MachineBlock, prune bool, remove []stri
 			}
 		}
 	}
-	if !bytes.Equal(updated, existing) {
+	if len(updated) == 0 && len(existing) > 0 {
+		if err := c.fs.Remove(file); err != nil && !errors.Is(err, fs.ErrNotExist) {
+			return &contract.SSHConfigError{Path: file, Cause: err}
+		}
+	} else if !bytes.Equal(updated, existing) {
 		if err := c.fs.MkdirAll(path.Dir(file), 0o700); err != nil {
 			return &contract.SSHConfigError{Path: file, Cause: err}
 		}
