@@ -67,7 +67,7 @@ public struct MenuBarIcon: Equatable, Sendable {
     public var turning: Bool { face == .waving }
 }
 
-// value: the spwn mark, two floors and the dot on top (`Token.Icon`).
+// value: the spwn mark, three floors growing with depth and the dot on top (`Token.Icon`).
 public enum SpwnMark {
     // value: a floor's opacity at a turn of the loop (0 to 1): it runs from
     // `Token.Icon.low` up to 1 and back, peaking `Token.Icon.peak` of the
@@ -105,13 +105,13 @@ public enum SpwnMark {
         face == .needs ? Token.Icon.needsDot : Token.Icon.dot
     }
 
-    // value: a floor centred at `y` on the box's middle line.
-    public static func floor(at y: CGFloat) -> Path {
-        let side = Token.Icon.floor.width / 2.squareRoot()
-        let square = Path(roundedRect: CGRect(x: -side / 2, y: -side / 2, width: side, height: side), cornerRadius: Token.Icon.corner)
+    // value: a floor of `Token.Icon.floors`, on the box's middle line.
+    public static func floor(_ floor: (y: CGFloat, width: CGFloat, height: CGFloat)) -> Path {
+        let side = floor.width / 2.squareRoot()
+        let square = Path(roundedRect: CGRect(x: -side / 2, y: -side / 2, width: side, height: side), cornerRadius: floor.width * Token.Icon.corner)
         let turn = CGAffineTransform(rotationAngle: .pi / 4)
-            .concatenating(CGAffineTransform(scaleX: 1, y: Token.Icon.floor.height / Token.Icon.floor.width))
-            .concatenating(CGAffineTransform(translationX: Token.Icon.box.width / 2, y: y))
+            .concatenating(CGAffineTransform(scaleX: 1, y: floor.height / floor.width))
+            .concatenating(CGAffineTransform(translationX: Token.Icon.box.width / 2, y: floor.y))
         return square.applying(turn)
     }
 
@@ -150,13 +150,13 @@ public struct StatusItem: View {
             line.addLine(to: Token.Icon.slashTo)
             context.drawLayer { layer in
                 let floors = Token.Icon.floors
-                for (i, y) in floors.enumerated() {
+                for (i, slab) in floors.enumerated() {
                     layer.drawLayer { floor in
-                        floor.fill(SpwnMark.floor(at: y), with: .color(ink.opacity(SpwnMark.opacity(floor: i, face: face, turn: turn))))
+                        floor.fill(SpwnMark.floor(slab), with: .color(ink.opacity(SpwnMark.opacity(floor: i, face: face, turn: turn))))
                         floor.blendMode = .destinationOut
                         floor.fill(SpwnMark.circle(dot, grown: Token.Icon.dotGap), with: .color(ink))
                         if i + 1 < floors.count {
-                            let above = SpwnMark.floor(at: floors[i + 1])
+                            let above = SpwnMark.floor(floors[i + 1])
                             floor.fill(above, with: .color(ink))
                             floor.stroke(above, with: .color(ink), lineWidth: Token.Icon.gap * 2)
                         }

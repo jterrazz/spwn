@@ -138,24 +138,24 @@ public enum Token {
         }
     }
 
-    // value: the menu bar icon: the spwn mark, two floors and the dot on
-    // top, the app icon's silhouette, in the one ink the system paints, on
-    // the bar's 18 pt box in points; `glyph` and `weight` draw the bar's own
-    // symbols beside it in the stories and the tests.
+    // value: the menu bar icon: the spwn mark, three floors growing with
+    // depth and the dot on top, the app icon's silhouette, in the one ink
+    // the system paints, on the bar's 18 pt box in points; `glyph` and
+    // `weight` draw the bar's own symbols beside it in the stories and the tests.
     public enum Icon {
         public static let box = CGSize(width: 18, height: 18)
-        // value: a floor, a slab seen from above: a square rounded by
-        // `corner`, turned a quarter and flattened to `floor` wide and tall.
-        public static let floor = CGSize(width: 17, height: 8.2)
-        public static let corner: CGFloat = 1.5
-        // value: the floors' centres on the box's middle line, bottom first;
-        // each floor is cut out of around the one above it by a band `gap` wide.
-        public static let floors: [CGFloat] = [12.4, 8.7]
+        // value: the floors, bottom first, each a slab seen from above: a
+        // square rounded by `corner` of its width, turned a quarter,
+        // flattened to its `width` and `height` and centred at `y` on the
+        // box's middle line; each floor is cut out of around the one above
+        // it by a band `gap` wide.
+        public static let floors: [(y: CGFloat, width: CGFloat, height: CGFloat)] = [(12.4, 16.7, 8), (9.5, 12, 5.9), (6.9, 8, 4)]
+        public static let corner: CGFloat = 0.09
         public static let gap: CGFloat = 1
         // value: the dot on the top floor, cut out of the floors by a band
         // `dotGap` wide; while something needs you it grows to `needsDot`.
-        public static let dot = (x: CGFloat(9), y: CGFloat(3.7), r: CGFloat(2.6))
-        public static let needsDot = (x: CGFloat(9), y: CGFloat(3.5), r: CGFloat(3.2))
+        public static let dot = (x: CGFloat(9), y: CGFloat(3.2), r: CGFloat(2.1))
+        public static let needsDot = (x: CGFloat(9), y: CGFloat(2.8), r: CGFloat(2.6))
         public static let dotGap: CGFloat = 0.9
         // value: the slash, one line across the box from `slashFrom` to
         // `slashTo`, round caps: the glyph is cut out of by a band `cut`
@@ -170,15 +170,15 @@ public enum Token {
         public static let dimmed = 0.45
         // value: the needs-you mark: the floors at this opacity, the dot solid and grown.
         public static let faded = 0.34
-        // value: the connecting mark: the top floor and the dot at this opacity.
+        // value: the connecting mark: the floors above the bottom one and the dot at this opacity.
         public static let resting = 0.32
         // value: the busy wave: each floor's opacity runs `low` to 1 to
         // `low` once per `Token.Busy.period`, at its peak `peak` of the way
-        // through, eased in and out, each floor `stagger` seconds after the
-        // one below it.
+        // through, eased in and out, each floor `stagger` seconds, a third
+        // of the loop, after the one below it.
         public static let low = 0.3
         public static let peak = 0.35
-        public static let stagger = 0.6
+        public static let stagger = Token.Busy.period / 3
 
         public static func needs(_ scheme: ColorScheme) -> Color { Token.hex(scheme == .dark ? 0xFFAD1F : 0xF29D0B) }
         public static func down(_ scheme: ColorScheme) -> Color { Token.hex(scheme == .dark ? 0xFF4F45 : 0xEC3B30) }

@@ -43,7 +43,7 @@ final class IconTests: XCTestCase {
 
     // value: a point inside each floor that no other floor covers, floor 0
     // the bottom one, and the dot's centre.
-    static let floor = [CGPoint(x: 9, y: 14.8), CGPoint(x: 9, y: 9)]
+    static let floor = [CGPoint(x: 9, y: 14.6), CGPoint(x: 9, y: 11), CGPoint(x: 9, y: 7.5)]
     static let dot = CGPoint(x: Token.Icon.dot.x, y: Token.Icon.dot.y)
 
     // value: the top floor's own points on the slash: where the line passes
@@ -51,7 +51,7 @@ final class IconTests: XCTestCase {
     // stroke and the cut's edge, on the centre's side, still inside the floor.
     func slashPoints() -> (stroke: CGPoint, gap: CGPoint) {
         let from = Token.Icon.slashFrom, to = Token.Icon.slashTo
-        let d = CGPoint(x: Token.Icon.box.width / 2, y: Token.Icon.floors[1])
+        let d = CGPoint(x: Token.Icon.box.width / 2, y: Token.Icon.floors[2].y)
         let (dx, dy) = (to.x - from.x, to.y - from.y)
         let t = ((d.x - from.x) * dx + (d.y - from.y) * dy) / (dx * dx + dy * dy)
         let foot = CGPoint(x: from.x + t * dx, y: from.y + t * dy)
@@ -61,7 +61,7 @@ final class IconTests: XCTestCase {
     }
 
     // invariant: MB-01: the plain state: nothing is down and nothing is
-    // restarting, the two floors and the dot in the one ink.
+    // restarting, the three floors and the dot in the one ink.
     func testIconPlain() throws {
         let icon = try icon("menubar.home.one-mac")
         XCTAssertEqual(icon, MenuBarIcon(.plain, said: "all machines are fine"))
@@ -84,7 +84,7 @@ final class IconTests: XCTestCase {
         XCTAssertEqual(icon.face, .needs)
         XCTAssertTrue(icon.nsImage().isTemplate)
         for scale in [1, 2] as [CGFloat] {
-            for floor in 0..<2 {
+            for floor in 0..<3 {
                 XCTAssertEqual(try alpha(icon, at: Self.floor[floor], scale: scale), Token.Icon.faded, accuracy: 0.03, "floor \(floor) at \(scale)x")
             }
             XCTAssertGreaterThan(try alpha(icon, at: Self.dot, scale: scale), 0.97, "the dot at \(scale)x")
@@ -126,7 +126,7 @@ final class IconTests: XCTestCase {
         XCTAssertEqual(icon.face, .waving)
         XCTAssertTrue(icon.turning)
         let low = Token.Icon.low, peak = Token.Icon.peak, lag = Token.Icon.stagger / Token.Busy.period
-        for floor in 0..<2 {
+        for floor in 0..<3 {
             let start = Double(floor) * lag
             XCTAssertEqual(SpwnMark.light(floor: floor, turn: start), low, accuracy: 1e-9, "floor \(floor) at the start of its run")
             XCTAssertEqual(SpwnMark.light(floor: floor, turn: start + peak), 1, accuracy: 1e-9, "floor \(floor) at its peak")
@@ -136,16 +136,21 @@ final class IconTests: XCTestCase {
             XCTAssertGreaterThan(SpwnMark.light(floor: floor, turn: start + peak + 0.1), SpwnMark.light(floor: floor, turn: start + peak + 0.4), "floor \(floor) falling")
         }
         for frame in 0..<Token.Busy.frames {
-            for floor in 0..<2 {
+            for floor in 0..<3 {
                 let light = SpwnMark.light(floor: floor, turn: Token.Busy.turn(frame: frame))
                 XCTAssertGreaterThanOrEqual(light, low - 1e-9)
                 XCTAssertLessThanOrEqual(light, 1)
             }
         }
         XCTAssertEqual(Double(Token.Busy.frames) / Token.Busy.fps, 1.2, accuracy: 1e-9)
-        XCTAssertEqual(Token.Icon.stagger, Token.Busy.period / 2)
-        XCTAssertGreaterThan(try alpha(icon, at: Self.floor[0], scale: 2, turn: peak), try alpha(icon, at: Self.floor[1], scale: 2, turn: peak) + 0.3)
-        XCTAssertGreaterThan(try alpha(icon, at: Self.floor[1], scale: 2, turn: peak + lag), try alpha(icon, at: Self.floor[0], scale: 2, turn: peak + lag) + 0.3)
+        XCTAssertEqual(Token.Icon.stagger, Token.Busy.period / 3)
+        for floor in 0..<3 {
+            let turn = peak + Double(floor) * lag
+            for other in 0..<3 where other != floor {
+                XCTAssertGreaterThan(try alpha(icon, at: Self.floor[floor], scale: 2, turn: turn), try alpha(icon, at: Self.floor[other], scale: 2, turn: turn) + 0.3,
+                                     "floor \(floor) lit over floor \(other)")
+            }
+        }
         XCTAssertGreaterThan(try alpha(icon, at: Self.dot, scale: 2, turn: peak + lag / 2), 0.97, "the dot stays solid")
         try drawn("waving", icon, turn: 0.4)
     }
@@ -200,7 +205,7 @@ final class IconTests: XCTestCase {
     }
 
     // invariant: a connection being made keeps the bottom floor solid, the
-    // top floor and the dot at 32 %.
+    // floors above it and the dot at 32 %.
     func testIconConnecting() throws {
         let connecting = try icon("menubar.home.two-macs", .connecting)
         XCTAssertEqual(connecting, MenuBarIcon(.connecting))
@@ -209,7 +214,9 @@ final class IconTests: XCTestCase {
         for scale in [1, 2] as [CGFloat] {
             let drawing = connecting
             XCTAssertGreaterThan(try alpha(drawing, at: Self.floor[0], scale: scale), 0.97, "the bottom floor at \(scale)x")
-            XCTAssertEqual(try alpha(drawing, at: Self.floor[1], scale: scale), Token.Icon.resting, accuracy: 0.03, "the top floor at \(scale)x")
+            for floor in 1..<3 {
+                XCTAssertEqual(try alpha(drawing, at: Self.floor[floor], scale: scale), Token.Icon.resting, accuracy: 0.03, "floor \(floor) at \(scale)x")
+            }
             XCTAssertEqual(try alpha(drawing, at: Self.dot, scale: scale), Token.Icon.resting, accuracy: 0.03, "the dot at \(scale)x")
         }
         try drawn("connecting", connecting)
@@ -293,17 +300,21 @@ final class IconTests: XCTestCase {
         return rep.cgImage
     }
 
-    // invariant: the mark is two floors and the dot on top, never joined:
-    // each is inked, and the ground between the floors and between the
-    // dot and the top floor is empty, at 2x.
-    func testTheMarkIsTwoFloorsAndTheDot() throws {
+    // invariant: the mark is three floors growing with depth and the dot
+    // on top, never joined: each is inked, each floor wider than the one
+    // above it, and the ground between the floors and between the dot and
+    // the top floor is empty, at 2x.
+    func testTheMarkIsThreeFloorsGrowingWithDepthAndTheDot() throws {
         let plain = MenuBarIcon(.plain)
+        let floors = Token.Icon.floors
+        for i in 1..<floors.count { XCTAssertLessThan(floors[i].width, floors[i - 1].width, "floor \(i) narrower than the one below") }
         for scale in [1, 2] as [CGFloat] {
-            for floor in 0..<2 { XCTAssertGreaterThan(try alpha(plain, at: Self.floor[floor], scale: scale), 0.95, "floor \(floor) at \(scale)x") }
+            for floor in 0..<3 { XCTAssertGreaterThan(try alpha(plain, at: Self.floor[floor], scale: scale), 0.95, "floor \(floor) at \(scale)x") }
             XCTAssertGreaterThan(try alpha(plain, at: Self.dot, scale: scale), 0.95, "the dot at \(scale)x")
         }
-        XCTAssertLessThan(try alpha(plain, at: CGPoint(x: 9, y: 13.1), scale: 2), 0.05, "between the floors")
-        XCTAssertLessThan(try alpha(plain, at: CGPoint(x: 9, y: 6.6), scale: 2), 0.05, "between the dot and the top floor")
+        XCTAssertLessThan(try alpha(plain, at: CGPoint(x: 9, y: 12.75), scale: 2), 0.05, "between the bottom and the middle floor")
+        XCTAssertLessThan(try alpha(plain, at: CGPoint(x: 9, y: 9.25), scale: 2), 0.05, "between the middle and the top floor")
+        XCTAssertLessThan(try alpha(plain, at: CGPoint(x: 9, y: 5.75), scale: 2), 0.05, "between the dot and the top floor")
     }
 
     static func native(_ name: String) -> CGImage? {
