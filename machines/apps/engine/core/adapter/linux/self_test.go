@@ -10,7 +10,7 @@ import (
 
 func TestTheLinuxSelfKeepsTheContract(t *testing.T) {
 	contracttest.Self(t, func(_ *testing.T, s contracttest.Scene) contract.Self {
-		self := New(s.Name)
+		self := New(s.Name, nil)
 		self.hardware = func() (machine.System, machine.Hardware) {
 			return machine.System{Version: "6.12.0"}, machine.Hardware{Memory: 8 << 30}
 		}

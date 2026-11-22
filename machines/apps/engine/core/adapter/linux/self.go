@@ -12,7 +12,9 @@ type Self struct {
 	hardware func() (machine.System, machine.Hardware)
 }
 
-func New(hostname string) *Self { return &Self{hostname: hostname, hardware: hardware} }
+func New(hostname string, read func(string) ([]byte, error)) *Self {
+	return &Self{hostname: hostname, hardware: func() (machine.System, machine.Hardware) { return hardware(read) }}
+}
 
 func (s *Self) Read(context.Context) (machine.Ref, machine.Kind, machine.System, machine.Hardware, error) {
 	// invariant: station runs on Linux only inside a VM a Mac created, so a

@@ -20,7 +20,7 @@ func selfOf(h local.System, pin string) contract.Self {
 		system = string(os)
 	}
 	if system == "linux" {
-		return coreadapterlinux.New(h.Env.Hostname())
+		return coreadapterlinux.New(h.Env.Hostname(), h.FS.ReadFile)
 	}
 	return coreadaptermacos.New(h.Run, h.Env.Hostname())
 }

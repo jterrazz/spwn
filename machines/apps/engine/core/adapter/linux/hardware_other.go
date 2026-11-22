@@ -4,4 +4,6 @@ package linux
 
 import "github.com/jterrazz/studio-station/apps/engine/core/machine"
 
-func hardware() (machine.System, machine.Hardware) { return machine.System{}, machine.Hardware{} }
+func hardware(func(string) ([]byte, error)) (machine.System, machine.Hardware) {
+	return machine.System{}, machine.Hardware{}
+}
