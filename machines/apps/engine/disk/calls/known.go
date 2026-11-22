@@ -42,20 +42,22 @@ func (s *Surveyor) loadKnown() map[string]knownEntry {
 
 // invariant: last-known sizes are stale-while-revalidate, never a reason to skip
 // a walk (a directory's mtime does not move when a file deeper down grows): every
-// walk rewrites the file with what it answered, by an atomic rename.
+// walk rewrites the file with what it answered, by an atomic rename. The file
+// holds the walk's roots alone, a root it did not answer at its last size, so a
+// path deleted since leaves it.
 func (s *Surveyor) saveKnown(roots []string, sizes []int64) {
 	file := s.knownPath()
 	if file == "" {
 		return
 	}
-	known := s.loadKnown()
-	if known == nil {
-		known = map[string]knownEntry{}
-	}
+	last := s.loadKnown()
+	known := make(map[string]knownEntry, len(roots))
 	at := s.m.Now().UTC().Truncate(time.Second)
 	for i, root := range roots {
 		if sizes[i] >= 0 {
 			known[root] = knownEntry{Bytes: sizes[i], At: at}
+		} else if k, ok := last[root]; ok {
+			known[root] = k
 		}
 	}
 	raw, err := json.Marshal(knownFile{V: knownVersion, Sizes: known})
