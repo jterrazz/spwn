@@ -10,3 +10,7 @@ runs:
           ●	tailscale-cli	~/.local/bin/tailscale: the app brings its own command
       files:
           .local/bin/tailscale: absent
+    - command: '--version >/dev/null; "$STATION" settings tailscale-cli | /usr/bin/head -1'
+      exit: 0
+      stdout: |
+          ●	tailscale-cli	applied

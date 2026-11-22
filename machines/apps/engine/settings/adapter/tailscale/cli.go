@@ -77,7 +77,7 @@ func (c *CLI) read(cli string) (what found, data []byte) {
 }
 
 func (c *CLI) Observe(_ context.Context, _ catalog.Setting) (settings.Observation, error) {
-	o := settings.Observation{Where: c.o.Shown}
+	o := settings.Observation{}
 	cli := c.o.AppStoreCLI()
 	if cli == "" {
 		o.State, o.Detail = catalog.StateOK, "the app brings its own command"
@@ -87,9 +87,9 @@ func (c *CLI) Observe(_ context.Context, _ catalog.Setting) (settings.Observatio
 	o.Digest = string(data)
 	switch what {
 	case ours:
-		o.State, o.Detail = catalog.StateOK, c.o.Shown
+		o.State, o.Detail, o.Where = catalog.StateOK, c.o.Shown, c.o.Shown
 	case theirs:
-		o.State, o.Detail = catalog.StateOK, "a file Machines did not write, left alone"
+		o.State, o.Detail, o.Where = catalog.StateOK, "a file Machines did not write, left alone", c.o.Shown
 	case link:
 		o.State, o.Detail = catalog.StateAbsent, "a link to the app crashes: Machines writes a script"
 	case nothing:
