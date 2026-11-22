@@ -138,34 +138,47 @@ public enum Token {
         }
     }
 
-    // value: the menu bar icon: the spwn mark, three dots on an arc, in the
-    // one ink the system paints. `height` is its 44-unit box in points, the
-    // optical height of the bar's own round symbols; `glyph` and `weight`
-    // draw those neighbours in the stories and the tests.
+    // value: the menu bar icon: the spwn mark, two floors and the dot on
+    // top, the app icon's silhouette, in the one ink the system paints, on
+    // the bar's 18 pt box in points; `glyph` and `weight` draw the bar's own
+    // symbols beside it in the stories and the tests.
     public enum Icon {
-        public static let height: CGFloat = 16
-        public static let box = CGSize(width: 48, height: 44)
-        // value: the three dots on the box, each its centre and radius.
-        public static let dots: [(x: CGFloat, y: CGFloat, r: CGFloat)] = [(10, 35, 8), (31.86, 23.37, 5.6), (42.81, 5.85, 3.9)]
+        public static let box = CGSize(width: 18, height: 18)
+        // value: a floor, a slab seen from above: a square rounded by
+        // `corner`, turned a quarter and flattened to `floor` wide and tall.
+        public static let floor = CGSize(width: 17, height: 8.2)
+        public static let corner: CGFloat = 1.5
+        // value: the floors' centres on the box's middle line, bottom first;
+        // each floor is cut out of around the one above it by a band `gap` wide.
+        public static let floors: [CGFloat] = [12.4, 8.7]
+        public static let gap: CGFloat = 1
+        // value: the dot on the top floor, cut out of the floors by a band
+        // `dotGap` wide; while something needs you it grows to `needsDot`.
+        public static let dot = (x: CGFloat(9), y: CGFloat(3.7), r: CGFloat(2.6))
+        public static let needsDot = (x: CGFloat(9), y: CGFloat(3.5), r: CGFloat(3.2))
+        public static let dotGap: CGFloat = 0.9
         // value: the slash, one line across the box from `slashFrom` to
-        // `slashTo`, round caps: the dots are cut out of by a band `cut`
+        // `slashTo`, round caps: the glyph is cut out of by a band `cut`
         // wide, and the stroke `stroke` wide is drawn on top of the cut.
-        public static let slashFrom = CGPoint(x: 6, y: 4)
-        public static let slashTo = CGPoint(x: 44, y: 42)
-        public static let cut: CGFloat = 9
-        public static let stroke: CGFloat = 3.6
+        public static let slashFrom = CGPoint(x: 2.6, y: 2.4)
+        public static let slashTo = CGPoint(x: 15.4, y: 16.2)
+        public static let cut: CGFloat = 3.3
+        public static let stroke: CGFloat = 1.3
         public static let glyph: CGFloat = 15
         public static let weight = Font.Weight.medium
-        // value: the stopped mark: the whole glyph, dots and stroke, at this opacity.
+        // value: the stopped mark: the floors and the dot at this opacity, the slash solid.
         public static let dimmed = 0.45
-        // value: the connecting mark: the dots after the first, at this opacity.
+        // value: the needs-you mark: the floors at this opacity, the dot solid and grown.
+        public static let faded = 0.34
+        // value: the connecting mark: the top floor and the dot at this opacity.
         public static let resting = 0.32
-        // value: the restart wave: each dot's opacity runs `low` to 1 to
+        // value: the busy wave: each floor's opacity runs `low` to 1 to
         // `low` once per `Token.Busy.period`, at its peak `peak` of the way
-        // through, eased in and out, each dot `stagger` seconds after the last.
+        // through, eased in and out, each floor `stagger` seconds after the
+        // one below it.
         public static let low = 0.3
         public static let peak = 0.35
-        public static let stagger = 0.2
+        public static let stagger = 0.6
 
         public static func needs(_ scheme: ColorScheme) -> Color { Token.hex(scheme == .dark ? 0xFFAD1F : 0xF29D0B) }
         public static func down(_ scheme: ColorScheme) -> Color { Token.hex(scheme == .dark ? 0xFF4F45 : 0xEC3B30) }

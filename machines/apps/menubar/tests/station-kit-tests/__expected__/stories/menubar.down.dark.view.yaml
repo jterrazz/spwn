@@ -1,3 +1,3 @@
 canvas: { scheme: dark, scale: 2, unit: pt, still: true, ground: FlatDesk }
 tree:
-- img "Spwn Menu, infra down" [kit=StatusItem] [at=456,30] [size=17.5x16]
+- img "Spwn Menu, infra down" [kit=StatusItem] [at=455.5,29] [size=18x18]

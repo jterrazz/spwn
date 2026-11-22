@@ -1,6 +1,6 @@
 {
     "test": {
-        "pixel-goldens/bytes": 2819399
+        "pixel-goldens/bytes": 2822798
     },
     "typescript": {
         "names/directory-in-kebab-case": 2,

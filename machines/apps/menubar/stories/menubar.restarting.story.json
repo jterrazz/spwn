@@ -2,7 +2,7 @@
     "freeze": 0.4,
     "group": "shell",
     "id": "menubar.restarting",
-    "note": "The status item while infra restarts: the dots lighting in a wave, caught at 0.4 of its turn.",
+    "note": "The status item while infra restarts: the floors lighting in turn, caught at 0.4 of its turn.",
     "pages": ["pages/machines.restarting.menubar.json"],
     "schema": "station.story/v1",
     "ui": {

@@ -1,7 +1,7 @@
 {
     "group": "shell",
     "id": "menubar.fine",
-    "note": "The status item when nothing is down: the three dots, plain.",
+    "note": "The status item when nothing is down: the two floors and the dot, plain.",
     "pages": ["pages/machines.fine.menubar.json"],
     "schema": "station.story/v1",
     "ui": {
