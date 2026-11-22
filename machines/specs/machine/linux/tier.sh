@@ -162,6 +162,22 @@ jq -r .lock <<< "$record" | grep -q '^lock: station.lock/v1' || fail "the image 
 case_pass
 
 
+case_begin image-build-debian ADR-051
+# value: base-debian built from its upstream pinned by digest, a throwaway workspace
+# made of it that runs Debian 13 and the station binary, deleted after.
+started=$(date +%s)
+st images build base-debian --binary "$repo/.artifacts/go/station-linux-arm64" >> "$log" 2>&1 || fail "images build base-debian exited $?"
+say "   images build base-debian took $(( ($(date +%s) - started) / 60 )) min $(( ($(date +%s) - started) % 60 )) s"
+record=$(cat "$mac"/.local/state/station/images/base-debian/*.json)
+[ "$(jq -r '.distro, .distro_version' <<< "$record" | tr '\n' ' ')" = "debian 13 " ] || fail "the base-debian record is not Debian 13: $record"
+jq -r .upstream <<< "$record" | grep -q '^ghcr.io/cirruslabs/debian@sha256:' || fail "base-debian's upstream is not pinned by digest: $record"
+st machines create deb1 --image base-debian >> "$log" 2>&1 || fail "machines create deb1 --image base-debian exited $?"
+[ "$(in_vm deb1 '. /etc/os-release && echo "$ID $VERSION_ID"')" = "debian 13" ] || fail "deb1 does not run Debian 13"
+in_vm deb1 'station --version' >> "$log" 2>&1 || fail "station does not run in deb1"
+st machines delete deb1 --confirm=deb1 >> "$log" 2>&1 || on_mac tart delete deb1 >> "$log" 2>&1
+case_pass
+
+
 case_begin create-workspace-from ADR-044
 st machines create ws1 --from studio-linux --json > "$work/ws1-created.json" 2>> "$log" || fail "machines create ws1 --from studio-linux exited $?"
 created=$(cat "$work/ws1-created.json")
