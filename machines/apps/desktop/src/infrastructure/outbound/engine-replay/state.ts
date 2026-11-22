@@ -24,10 +24,27 @@ function lastOut(answers: readonly unknown[] | undefined): unknown {
     return isRecord(last) ? last.out : undefined;
 }
 
+function refusalOf(answers: readonly unknown[] | undefined): unknown {
+    const last = (answers ?? []).findLast((frame) => isRecord(frame) && 'error' in frame);
+    return isRecord(last) ? last.error : undefined;
+}
+
+// value: the word an engine leaves on a view it could not read (`readers.Why`): a Mac that does not answer, a Mac too
+// value: old, else the refusal's own code.
+function whyOf(refusal: unknown): string {
+    if (!isRecord(refusal)) {
+        return 'failed';
+    }
+    if (refusal.type === 'unreachable' || refusal.type === 'far-too-old') {
+        return refusal.type;
+    }
+    return typeof refusal.code === 'string' ? refusal.code : 'failed';
+}
+
 // value: each asked view the world holds an answer for, as the engine streams it: the story
 // value: `engine/state/views-equal-calls*` proves a view equals its call's last answer but for when it was read, so a
 // value: world's recordings answer both. A view whose call the pace leaves unread is not sent, as an engine still
-// value: reading it does not.
+// value: reading it does not; one whose call the world recorded refused is sent unread with the why of its refusal.
 export function viewsOf(
     answers: Pick<Answers, 'reads' | 'views'>,
     request: Request,
@@ -47,6 +64,11 @@ export function viewsOf(
         const value = lastOut(recorded);
         if (value !== undefined) {
             slices[view] = { state: 'fresh', value };
+            continue;
+        }
+        const refusal = refusalOf(recorded);
+        if (refusal !== undefined) {
+            slices[view] = { state: 'unread', why: whyOf(refusal) };
         }
     }
     return slices;
