@@ -1,6 +1,4 @@
 #!/bin/bash
-# usage (on the VM, copied and run by regen.sh): regen-remote.sh <label> <branch> [vitest filter for the desktop aria goldens]
-# Forced regen of machines/ twice at the branch tip (determinism), the changes list in $CC_HOME/<label>-regen-changes.txt and the changed files in <label>-regen-r.tar.
 export PATH=$HOME/.local/bin:$PATH; eval "$(mise activate bash --shims)"
 # invariant: a child never inherits a lock's descriptor (3 to 9: flock's own, the story and cheap slots, the heavy-run lock): an orphaned fixture server that did kept the lock held for 70 min and starved a cold gate (2026-11-21).
 nl(){ "$@" 3>&- 4>&- 5>&- 6>&- 7>&- 8>&- 9>&-; }
@@ -8,7 +6,7 @@ L=${1:?label}; B=${2:?branch}; ARIA=$3; R=${CC_HOME:?CC_HOME is the folder of th
 trap 'cd ~; rm -rf "${RUNTMP:?}"' EXIT
 ~/.local/bin/heavy-run-wait; exec 9>/var/lock/heavy-run; flock -w 7200 -s 9 || exit 85
 export TMPDIR=$RUNTMP; mkdir -p "$TMPDIR"
-# GEN through STORIES (and only those) sit behind a VM-wide slot (2 holders: /tmp/story-slot-{1,2}, flock on fd 8): taken once, held to the end of STORIES; else wait (<= 60 min, a line a minute).
+# invariant: GEN through STORIES (and only those) sit behind a VM-wide slot (2 holders: /tmp/story-slot-{1,2}, flock on fd 8), taken once and held to the end of STORIES.
 take_slot(){ [ -n "$got" ] && return 0; local P=${SLOT_POLL:-20} w=0 k
   while :; do
     for k in 1 2; do exec 8>/tmp/story-slot-$k; flock -n 8 && { got=$k; echo "STORY-SLOT $got taken"; return 0; }; exec 8>&-; done

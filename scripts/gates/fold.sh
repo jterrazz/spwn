@@ -1,8 +1,6 @@
 #!/bin/bash
-# usage (a rebase exec line): fold.sh <old sha> <label>   (env GEN_DIRS overrides the generated folders): the generated folders become the old sha's plus that sha's regen output
-# (every generated file it changed, go.mod/go.sum/go.work.sum excepted), amended in place. Regen output: $RUN/<label>-regen-out.
 . "$(dirname "$0")/env.sh"
-[ $# -eq 2 ] || { sed -n 2,2p "$0"; exit 2; }
+[ $# -eq 2 ] || { echo "usage: fold.sh <old sha> <label>" >&2; exit 2; }
 OLD=$1; O=$RUN/$2-regen-out; SKIP='(^|/)(go\.mod|go\.sum|go\.work\.sum)$'
 [ -f $O/changes.txt ] || { echo "fold $2: no changes.txt"; exit 1; }
 GEN=${GEN_DIRS:-"machines/apps/desktop/src/fixtures machines/packages/api"}

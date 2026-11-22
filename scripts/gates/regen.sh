@@ -1,12 +1,7 @@
 #!/bin/bash
-# usage: regen.sh one <worktree> <sha> <label> [aria vitest filter]
-#        regen.sh all <worktree> <map file of "<n> <sha>" lines> <label prefix> "<lane A positions>" "<lane B positions>"
-# one: forced regen (twice, determinism) of machines/ at <sha> on development-linux, shared lock; changed files back to $RUN/<label>-regen-out/ (paths relative to the repo root),
-#   its changes list in changes.txt. Waits for nothing: run it with run_in_background; end file $RUN/<label>-regen.end (wait on that file).
-# all: `one` for every listed position, two lanes at once; position n runs as label <prefix>-c<n>, its log $RUN/station-<prefix>-regen-c<n>.log; end file $RUN/<prefix>-regen-all.end.
-# <label> and <prefix> are letters, digits, dot, dash, underscore.
+# hazard: `one` waits for nothing: run it with run_in_background and wait on its end file, never on a name.
 . "$(dirname "$0")/env.sh"
-usage(){ sed -n 2,3p "$0"; exit 2; }
+usage(){ echo "usage: regen.sh one <worktree> <sha> <label> [aria vitest filter]; regen.sh all <worktree> <map file> <label prefix> \"<lane A positions>\" \"<lane B positions>\"" >&2; exit 2; }
 ok(){ case $1 in "" | *[!A-Za-z0-9._-]*) echo "bad name: $1"; exit 2 ;; esac; }
 case $1 in
 one)

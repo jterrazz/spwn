@@ -1,10 +1,5 @@
 #!/bin/bash
-# usage: [GATE_SLOT_PRIORITY=landing|normal|low] gate-slot.sh <command...>  runs the command once the one host-wide full-gate slot is free (the 18-core Mac fails gates on timeouts past 1 concurrent make check)
-# It also waits while the host's 1-min load is at or above GATE_SLOT_MAX_LOAD (20), so a gate never starts on a busy host.
-# GATE_SLOT_VM=<ssh host> (cold-gate.sh sets it): the VM's own 1-min load counts too, the higher of the two.
-# Priority, from the highest: landing (a gate that lands work on the train), normal (the default), low (a bench, a capture, a rig run, a measurement).
 # invariant: a waiter never takes the slot while a live waiter of a higher priority waits: each waiter marks itself in $RUN/gate-slots/wanted/<pid> with its priority on the first line.
-# Waiters of one priority race for the slot. The holder's pid, start time and command are in $RUN/gate-slots/1/{pid,since,cmd}; a waiter prints who holds the slot every 10 min.
 . "$(dirname "$0")/env.sh"
 D=$RUN/gate-slots
 mkdir -p "$D/wanted"
@@ -30,7 +25,7 @@ higher_waiting() {
   done
   return 1
 }
-# RAM cap 50 GB: the Linux VM (42) plus one other VM. A command that starts a tart rig (menubar check, darwin build) waits while any other VM runs.
+# value: the RAM cap is 50 GB, the Linux VM (42) plus one other VM: a command that starts a tart rig (menubar check, darwin build) waits while any other VM runs.
 rig_room() {
   case "$*" in *darwin-build*|*menubar/run.sh*) ;; *) return 0 ;; esac
   command -v tart >/dev/null || return 0

@@ -1,6 +1,4 @@
 #!/bin/bash
-# usage: test.sh  proves the gate scripts without a VM: every script parses, none names a scratchpad, the run folder is a parameter with a repo-relative default,
-# and the gate slot serves its waiters by priority (landing, then normal, then low) whatever order they arrived in. About 10 s; `make lint` runs it.
 set -u
 cd "$(dirname "$0")" || exit 2
 fail=0; bad() { echo "FAIL $*"; fail=1; }

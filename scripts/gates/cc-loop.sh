@@ -1,10 +1,5 @@
 #!/bin/bash
-# usage (on the VM, launched by cc.sh under setsid; never by hand): cc-loop.sh <label> <branch> [vitest filters...]
-# env: CC_HOME (the folder of the files), CHEAP, ONLY, UPD, PAR (commits at once: 4 under CHEAP, else 1).
-# Reads $CC_HOME/<label>-cc.items ("<n> <sha>" per line, oldest first), runs cc-remote.sh on each, prints the commits IN ORDER to its stdout
-# (the launcher's <label>-cc.log), then one line "VERDICT <label> <n> <sha9> GREEN|FLAKE(<name>)|RED steps=..." per commit.
-# A FLAKE reruns its failing step alone once (ONLY=GEN for a drift, ONLY=STORIES for a story): green again keeps FLAKE, red again is RED.
-# It writes <label>-cc.end last, whatever ends it, and keeps <label>-cc.pid while it runs.
+# invariant: <label>-cc.end is written last, whatever ends the loop, and <label>-cc.pid exists only while it runs.
 export PATH=$HOME/.local/bin:$PATH
 L=$1; B=$2; shift 2
 R=${CC_HOME:?CC_HOME is the folder of the files}; PAR=${PAR:-$([ -n "$CHEAP" ] && echo 4 || echo 1)}
@@ -15,7 +10,6 @@ trap 'kill $(jobs -p) 2>/dev/null; rm -f "$pidf"; echo "END $(date +%T)" > "$R/$
 trap 'exit 143' TERM HUP INT
 disk_ok(){ local u; u=$(df --output=pcent ~ | tail -1 | tr -dc 0-9); [ "${u:-100}" -lt 90 ] || { echo "DISK at ${u}%: free it (old *-node, clones, logs) before rerunning"; exit 86; }; }
 disk_ok
-# one <n> <sha> <only> <suffix> [filters]: the remote script on one commit, output in <label>-cc<n><suffix>.out, its exit code in .rc
 one(){ local n=$1 sha=$2 step=$3 suffix=$4 f=$R/$L-cc$1 t0=$SECONDS; shift 4
   rm -f "$f$suffix.out" "$f$suffix.rc"; [ -z "$suffix" ] && rm -f "$R/$L-drift$n.patch"
   CC_HOME=$R CC_SHARED=1 CHEAP=$CHEAP ONLY=$step UPD=$UPD bash "$R/$L-cc-remote.sh" "$L" "$B" "$sha" "$n" "$@" > "$f$suffix.out" 2>&1; local rc=$?; echo $((SECONDS-t0)) > "$f$suffix.secs"; echo $rc > "$f$suffix.rc"

@@ -1,10 +1,7 @@
 #!/bin/bash
-# usage: desktop-proof.sh <worktree> <label> [branch]  the desktop proof of the worktree's branch tip (BRANCH default: HEAD's branch) on development-linux:
-# tsc, vitest (2 workers), the proof build, the website project, typescript check, the architecture suite and make lint, in its own clone.
-# It bundles with tags, runs desktop-proof-remote.sh detached on the VM, waits on its end file and prints its output (also in $RUN/<label>-dt.out); end file $RUN/<label>-dt.end.
-# Run it with run_in_background; a killed shell leaves the run going on the VM (output ~/$VM_DIR/<label>-dt.out).
+# hazard: run it with run_in_background; a killed shell leaves the run going on the VM.
 . "$(dirname "$0")/env.sh"
-[ $# -ge 2 ] || { sed -n 2,2p "$0"; exit 2; }
+[ $# -ge 2 ] || { echo "usage: desktop-proof.sh <worktree> <label> [branch]" >&2; exit 2; }
 W=$1; L=$2; VM=$VM_LINUX; RS=$VM_DIR/; R='$HOME'/$VM_DIR
 case $L in "" | *[!A-Za-z0-9._-]*) echo "bad label: $L"; exit 2 ;; esac
 rm -f "${RUN:?}/$L-dt.end"; trap 'echo "END $(date +%T)" > $RUN/$L-dt.end' EXIT

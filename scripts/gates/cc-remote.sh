@@ -1,9 +1,4 @@
 #!/bin/bash
-# usage: cc-remote.sh <label> <branch> <sha> <n> [vitest filters...]  the per-commit checks of ONE commit, on the VM (cc.sh and cc-loop.sh launch it)
-# CHEAP=1: the cheap tier (gofmt, vet x3, golangci, make lint, root lint, the world build); no story slot, up to 4 at once (/tmp/cheap-slot-1..4).
-# ONLY=<step[,step]>: those steps alone (STATIC GEN GOTEST MAKELINT ROOTLINT STORIES; DRIFT is GEN; 1 is STORIES). UPD=1 re-records the stories.
-# CC_HOME: the folder its files go in (default ~). CC_SHARED=1 (the shared VM): holds /var/lock/heavy-run shared for the commit, a TMPDIR of its own per run,
-# and the stories in their own network namespace (netns-run), so two runs never share a port, a clone or a temp folder.
 export PATH=$HOME/.local/bin:$PATH; eval "$(mise activate bash --shims)"
 L=$1; B=$2; sha=$3; n=$4; shift 4
 R=${CC_HOME:-$HOME}; NS=; RUNTMP=
@@ -27,8 +22,7 @@ take_cheap(){ local w=0 k
     w=$((w+1)); command sleep 20
   done
 }
-# GEN through STORIES (and only those) sit behind a VM-wide slot (2 holders: /tmp/story-slot-{1,2}, flock on fd 8): taken once, held to the end of STORIES; else wait (<= 60 min, a line a minute).
-# A free slot is taken only while the VM's 1-min load is under STORY_SLOT_MAX_LOAD (default 2 x nproc); past STORY_SLOT_LOAD_WAIT seconds (default 900) of a loaded VM it proceeds with a logged line.
+# invariant: GEN through STORIES (and only those) sit behind a VM-wide slot (2 holders: /tmp/story-slot-{1,2}, flock on fd 8), taken once and held to the end of STORIES; a free slot is taken only while the VM's load is under STORY_SLOT_MAX_LOAD, and past STORY_SLOT_LOAD_WAIT seconds of a loaded VM the run proceeds with a logged line.
 take_slot(){ [ -n "$got" ] && return 0; local P=${SLOT_POLL:-20} w=0 k l ml=${STORY_SLOT_MAX_LOAD:-$((2*$(nproc)))} b=
   while :; do
     for k in 1 2; do
@@ -49,8 +43,7 @@ take_slot(){ [ -n "$got" ] && return 0; local P=${SLOT_POLL:-20} w=0 k l ml=${ST
 }; got=
 df -h ~ | tail -1
 [ -n "$CHEAP" ] && take_cheap
-# STORIES_WORKERS: vitest workers of the stories (default: the cores the 1-min load leaves free, 2 to 8; 12 is for an exclusive gate).
-# The per-label node clone is built once, under a lock: runs of one label in parallel wait for it instead of racing on it.
+# invariant: the per-label node clone is built once, under a lock: runs of one label in parallel wait for it instead of racing on it.
 exec 6>$R/$L-node.lock; flock 6
 if [ ! -d $R/$L-node/machines/node_modules ]; then
   rm -rf "${R:?}/$L-node"; git clone -q -b $B $R/$L-cc.bundle $R/$L-node && cd $R/$L-node && git reset -q --hard $sha && cd machines && npm ci >$R/$L-npmci.log 2>&1; echo NPMCI=$?
@@ -58,7 +51,7 @@ if [ ! -d $R/$L-node/machines/node_modules ]; then
   cd ~
 fi
 flock -u 6
-# a lane clones to a fixed path, so Go's build cache (keyed by the directory) hits on the next commit: <label>-cc-wt; under CHEAP, one per cheap slot. Two loops of a label never meet (cc-loop.sh refuses the second).
+# invariant: a lane clones to a fixed path (<label>-cc-wt, one per cheap slot under CHEAP) so Go's build cache, keyed by the directory, hits on the next commit; two loops of a label never meet, cc-loop.sh refuses the second.
 WT=$R/$L-cc-wt${CK:+-s$CK}; rm -rf "${WT:?}"
 git clone -q -b $B $R/$L-cc.bundle "$WT" && cd "$WT" && git reset -q --hard $sha && git log -1 --oneline && cd machines && cp -al $R/$L-node/machines/node_modules . || exit 9
 if run STATIC; then

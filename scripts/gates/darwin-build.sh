@@ -1,11 +1,4 @@
 #!/bin/bash
-# usage: GATE_SLOT_PRIORITY=low gate-slot.sh bash darwin-build.sh <worktree> <label>
-#   env: DARWIN_STEPS  extra commands run in the VM's repo after build+vet, e.g. 'go test -count=1 ./apps/engine/platform/...'
-#        DARWIN_OUT    a path on this Mac: the built binary is copied there
-#        DARWIN_VERSION the stamped version (default v3.1.0-local-<sha9>)
-# Bundles the worktree's HEAD, clones the xcode base, installs the pinned Go (sha256 checked),
-# runs the release build (cgo, SDK, minos 14.0) and go vet on darwin. Prints PASS darwin-build <sha> or FAIL.
-# Deletes the clone, keeps the base. Log: $RUN/inst-darwin-<label>.log
 set -uo pipefail
 . "$(dirname "$0")/env.sh"
 wt=${1:-}; label=${2:-}

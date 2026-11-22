@@ -1,5 +1,4 @@
 #!/bin/bash
-# usage (on the VM, copied and run by desktop-proof.sh): desktop-proof-remote.sh <label> <branch>: desktop tsc, vitest (2 workers), proof build, website, typescript check, architecture suite and make lint at the branch tip, own clone, deleted at the end
 export PATH=$HOME/.local/bin:$PATH; eval "$(mise activate bash --shims)"
 # invariant: a child never inherits a lock's descriptor (3 to 9: flock's own, the story and cheap slots, the heavy-run lock): an orphaned fixture server that did kept the lock held for 70 min and starved a cold gate (2026-11-21).
 nl(){ "$@" 3>&- 4>&- 5>&- 6>&- 7>&- 8>&- 9>&-; }

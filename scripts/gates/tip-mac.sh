@@ -1,9 +1,7 @@
 #!/bin/bash
-# usage: tip-mac.sh <worktree> <tip sha, 9 chars> <label>  the mac proofs of a tip, in order: the menubar check plain, twice with --update-goldens (the written files are counted), then the darwin build.
-# Every run goes through gate-slot.sh (the darwin build at low priority); logs $RUN/station-<label>-mbtip.log, -mbtipu1.log, -mbtipu2.log, -dw.log. Refuses (exit 2) when HEAD is not the tip.
-# Run it with run_in_background, once per launch, never inside `timeout`.
+# hazard: run it with run_in_background, once per launch, never inside `timeout`.
 . "$(dirname "$0")/env.sh"
-[ $# -eq 3 ] || { sed -n 2,2p "$0"; exit 2; }
+[ $# -eq 3 ] || { echo "usage: tip-mac.sh <worktree> <tip sha, 9 chars> <label>" >&2; exit 2; }
 W=$1; T=$2; L=$3
 case $L in "" | *[!A-Za-z0-9._-]*) echo "bad label: $L"; exit 2 ;; esac
 cd "$W/machines" && test "$(git rev-parse --short=9 HEAD)" = "$T" || { echo "HEAD moved"; exit 2; }

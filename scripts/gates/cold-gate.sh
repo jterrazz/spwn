@@ -1,9 +1,4 @@
 #!/bin/bash
-# usage: [GATE_SLOT_PRIORITY=landing|normal|low] [GATE_VITEST_WORKERS=12] cold-gate.sh <worktree> <branch> <label>  full cold make check of the branch tip, in a fresh clone on the shared Linux VM, inside the gate slot; log $RUN/station-<label>-cold.log
-# The worktree may be the repository's root or its machines/ folder: the gate runs in machines/ either way (given the root, npm ci would meet the root's pnpm devEngines and exit 97).
-# Files on the VM are in ~/$VM_DIR/ (GATE_VM_DIR), the VM is GATE_VM_LINUX. The run holds /var/lock/heavy-run exclusive (alone on the VM: the loops' shared holds drain first, other sessions' heavy runs wait),
-# and the slot also reads the VM's load. The VM's cron prunes go-build. This script takes the slot itself, so it is never wrapped in gate-slot.sh.
-# A landing gate (the train's tip) runs at GATE_SLOT_PRIORITY=landing, which every other waiter of the slot yields to.
 # invariant: GEN through STORIES run behind the VM-wide story slot; a child of the gate never inherits a lock's descriptor (see nl in cc-remote.sh).
 . "$(dirname "$0")/env.sh"
 W=$1; B=$2; L=$3; H=$(git -C "$W" rev-parse "$B")
@@ -18,7 +13,6 @@ rm -rf $R/wt-$L-cold; git clone -q -b $B $R/$L-cold.bundle $R/wt-$L-cold && cd $
 test "\$(git rev-parse HEAD)" = "$H" || { echo WRONG-HEAD; exit 98; }
 $([ -n "$sub" ] && echo "cd $sub || exit 95")
 nl(){ "\$@" 3>&- 4>&- 5>&- 6>&- 7>&- 8>&- 9>&-; }
-# GEN through STORIES (and only those) sit behind a VM-wide slot (2 holders: /tmp/story-slot-{1,2}, flock on fd 8): taken once, held to the end of STORIES; else wait (<= 60 min, a line a minute).
 take_slot(){ [ -n "\$got" ] && return 0; local P=\${SLOT_POLL:-20} w=0 k
   while :; do
     for k in 1 2; do exec 8>/tmp/story-slot-\$k; flock -n 8 && { got=\$k; echo "STORY-SLOT \$got taken"; return 0; }; exec 8>&-; done
