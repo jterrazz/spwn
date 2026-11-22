@@ -22,7 +22,7 @@ function nameOf(request: Request): string {
 }
 
 function isViewOf(key: string, name: string): boolean {
-    return key === name || key.startsWith(`${name}+`);
+    return key === name || key.startsWith(`${name}+`) || key.startsWith(`${name}:`);
 }
 
 // value: an engine.state stream whose snapshot sends the views of `name` unread, as an engine still reading them,

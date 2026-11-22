@@ -1,16 +1,10 @@
 import type { EngineSliceOut, EngineStateFrame, Request } from '@jterrazz/station-api';
 
 import { PAGE_REVISION, STATE_REVISION } from '../../../domain/fit';
-import { isRecord, keyOf } from '../../../domain/request-key';
+import { isRecord } from '../../../domain/request-key';
+import { askedBy, callOfView } from '../../../domain/views';
 import type { Receiver } from '../engine-link/transport';
-
-// value: the call whose recorded answer each view of engine.state is: the story `engine/state/views-equal-calls`
-// value: proves a view equals its call's last answer but for when it was read, so a world's recordings answer both.
-const VIEW_CALLS: Readonly<Record<string, Record<string, unknown>>> = {
-    'machines.list': { in: {}, watch: 'machines.list' },
-    'overview.read': { in: {}, watch: 'overview.read' },
-    'overview.read+elsewhere': { in: { Elsewhere: true }, watch: 'overview.read' },
-};
+import type { Answers } from './answers';
 
 export function isState(request: Request): boolean {
     return 'watch' in request && request.watch === 'engine.state';
@@ -30,22 +24,29 @@ function lastOut(answers: readonly unknown[] | undefined): unknown {
     return isRecord(last) ? last.out : undefined;
 }
 
-// value: each asked view the world holds an answer for, as the engine streams it; a view whose call the pace leaves
-// value: unread is not sent, as an engine still reading it does not.
+// value: each asked view the world holds an answer for, as the engine streams it: the story
+// value: `engine/state/views-equal-calls*` proves a view equals its call's last answer but for when it was read, so a
+// value: world's recordings answer both. A view whose call the pace leaves unread is not sent, as an engine still
+// value: reading it does not.
 export function viewsOf(
-    reads: ReadonlyMap<string, readonly unknown[]>,
+    answers: Pick<Answers, 'reads' | 'views'>,
     request: Request,
     unread: string | undefined,
 ): Record<string, EngineSliceOut> {
+    const keys = keysOf(request);
     const slices: Record<string, EngineSliceOut> = {};
-    for (const key of keysOf(request)) {
-        const asked = VIEW_CALLS[key];
-        if (asked === undefined || asked.watch === unread) {
+    for (const [key, recorded] of answers.reads) {
+        const view = answers.views.get(key);
+        if (
+            view === undefined ||
+            callOfView(view) === unread ||
+            !keys.some((asked) => askedBy(asked, view))
+        ) {
             continue;
         }
-        const value = lastOut(reads.get(keyOf(asked)));
+        const value = lastOut(recorded);
         if (value !== undefined) {
-            slices[key] = { state: 'fresh', value };
+            slices[view] = { state: 'fresh', value };
         }
     }
     return slices;
@@ -97,11 +98,11 @@ export class HeldStates {
         this.held.clear();
     }
 
-    push(reads: ReadonlyMap<string, readonly unknown[]>, unread: string | undefined): void {
+    push(answers: Pick<Answers, 'reads' | 'views'>, unread: string | undefined): void {
         setTimeout(() => {
             this.rev += 1;
             for (const [receiver, request] of this.held) {
-                const slices = viewsOf(reads, request, unread);
+                const slices = viewsOf(answers, request, unread);
                 receiver.frame({
                     id: request.id,
                     out: { event: 'changed', rev: this.rev, slices },

@@ -96,9 +96,9 @@ async function disturbed(stage: ReturnType<typeof opened>, count: Counted) {
         stage.restart({ ...HELLO, pid: 42 });
     });
     const restarted = pageDrawn();
-    count.refuse('ports.list');
+    count.refuse('machines.ssh');
     focusAgain();
-    await waitUntil(() => count.refused() > 0, { why: 'ports.list refused' });
+    await waitUntil(() => count.refused() > 0, { why: 'machines.ssh refused' });
     await waitUntil(() => staleMarked() !== null, { why: 'the stale mark drawn' });
     return { marked: staleMarked(), refused: pageDrawn(), restarted };
 }
@@ -354,7 +354,7 @@ describe('dependencies', () => {
                 roots.push(document.querySelector('main'));
                 watcher.observe(document.body, CHANGES);
 
-                // When - every read is answered again equal, the engine restarts, ports.list is refused, and Ports is left and drawn again
+                // When - every read is answered again equal, the engine restarts, machines.ssh is refused, and Ports is left and drawn again
                 const committed = commits;
                 await answeredAgain(stage, count, focusAgain);
                 seen.equal = commits - committed;

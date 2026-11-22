@@ -49,11 +49,11 @@ describe('StaleMark', () => {
             async (visitor) => {
                 await visitor.see(content(':5173'));
 
-                // When - a minute on, the window regains the focus and ports.list is refused as unreachable
+                // When - a minute on, the window regains the focus and machines.ssh is refused as unreachable
                 now = new Date(2026, 10, 13, 10, 43);
-                count.refuse('ports.list');
+                count.refuse('machines.ssh');
                 focusAgain();
-                await waitUntil(() => count.refused() > 0, { why: 'ports.list refused' });
+                await waitUntil(() => count.refused() > 0, { why: 'machines.ssh refused' });
 
                 // Then - the page is drawn as answered, and the mark names the refusal and the answer's time
                 await visitor.see(status('macbook-pro did not answer'));

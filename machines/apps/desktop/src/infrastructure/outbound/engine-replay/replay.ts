@@ -238,7 +238,7 @@ class Staging {
             return { first, ...staged };
         }
         if (isState(request)) {
-            const views = viewsOf(this.answers.reads, request, this.pace?.unread);
+            const views = viewsOf(this.answers, request, this.pace?.unread);
             return { first, ...openingOf(this.recording.world, views) };
         }
         if (this.answers.gestures.has(key)) {
@@ -269,7 +269,7 @@ class Staging {
     private pushing(step: () => void): () => void {
         return () => {
             step();
-            this.states.push(this.answers.reads, this.pace?.unread);
+            this.states.push(this.answers, this.pace?.unread);
         };
     }
 }

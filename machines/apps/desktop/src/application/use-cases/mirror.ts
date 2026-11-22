@@ -2,16 +2,13 @@ import type { EngineSliceOut, EngineStateFrame, EngineStateSince } from '@jterra
 
 import { EngineError } from '../../domain/engine-error';
 import { STATE_REVISION } from '../../domain/fit';
+import { isView, VIEW_KEYS, viewNamed } from '../../domain/views';
+import type { View } from '../../domain/views';
 import type { EnginePort, Link, Watch } from '../ports/engine.port';
 import { READING } from './entry';
 import type { Asked, Reading } from './entry';
 import { replaceEqualDeep } from './equal';
 import { judged } from './reach';
-
-// value: the engine's views the window mirrors (ADR-070), each named as the call whose answer it is.
-export const VIEWS = ['machines.list', 'overview.read', 'overview.read+elsewhere'] as const;
-
-export type View = (typeof VIEWS)[number];
 
 // value: `lost`, how long a held stream may send no frame before it is asked again from the revision held: three of
 // value: the engine's 15 s ticks; `retry`, how long after a cut connection it is asked again; `grace`, how long the
@@ -20,31 +17,9 @@ export type MirrorTiming = { lost: number; retry: number; grace: number };
 
 const DEFAULTS: MirrorTiming = { grace: 1500, lost: 45_000, retry: 1000 };
 
-function isEmpty(input: unknown): boolean {
-    return typeof input === 'object' && input !== null && Object.keys(input).length === 0;
-}
-
-// invariant: a read is a view when it asks This Mac's engine for the answer the engine keeps: the whole fleet, or This
-// invariant: Mac's Overview, with the other Macs or without; any other input or target is still asked by its call.
+// value: the view a read is, by the engine's naming (`domain/views.ts`); undefined is a read asked by its call.
 export function viewOf(asked: Asked): undefined | View {
-    if (asked.kind !== 'watch' || asked.target !== undefined) {
-        return undefined;
-    }
-    if (asked.name === 'machines.list' && isEmpty(asked.input)) {
-        return 'machines.list';
-    }
-    if (asked.name !== 'overview.read') {
-        return undefined;
-    }
-    if (isEmpty(asked.input)) {
-        return 'overview.read';
-    }
-    const elsewhere = JSON.stringify(asked.input) === JSON.stringify({ Elsewhere: true });
-    return elsewhere ? 'overview.read+elsewhere' : undefined;
-}
-
-function isView(key: string): key is View {
-    return (VIEWS as readonly string[]).includes(key);
+    return viewNamed(asked.name, asked.input, asked.target);
 }
 
 function staleOf(slice: EngineSliceOut): EngineError | undefined {
@@ -172,8 +147,8 @@ export class StateMirror {
     private ask(): void {
         const { since } = this;
         const input = since
-            ? { hold: true, keys: [...VIEWS], revision: STATE_REVISION, since }
-            : { hold: true, keys: [...VIEWS], revision: STATE_REVISION };
+            ? { hold: true, keys: [...VIEW_KEYS], revision: STATE_REVISION, since }
+            : { hold: true, keys: [...VIEW_KEYS], revision: STATE_REVISION };
         const mine = {};
         this.asking = mine;
         const current = () => this.asking === mine;

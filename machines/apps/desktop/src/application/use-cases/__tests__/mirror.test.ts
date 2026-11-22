@@ -136,4 +136,111 @@ describe('mirror', () => {
             undefined,
         ]);
     });
+
+    test("every Mac's ports, a machine's sign-ins and a Mac's Awake are views; a VM aimed at by target is a call", () => {
+        // Given - the reads the window makes of ports, sign-ins and Awake
+
+        // When - each is named as a view
+        const named = [
+            viewOf({
+                input: { AllMachines: true },
+                kind: 'read',
+                name: 'ports.list',
+                target: undefined,
+            }),
+            viewOf({
+                input: { Of: 'linux-1' },
+                kind: 'read',
+                name: 'ports.list',
+                target: undefined,
+            }),
+            viewOf({ input: {}, kind: 'watch', name: 'accounts.list', target: undefined }),
+            viewOf({
+                input: { Machine: 'linux-1' },
+                kind: 'watch',
+                name: 'accounts.list',
+                target: undefined,
+            }),
+            viewOf({
+                input: {},
+                kind: 'watch',
+                name: 'accounts.list',
+                target: { name: 'mac-mini' },
+            }),
+            viewOf({ input: {}, kind: 'watch', name: 'awake.read', target: undefined }),
+            viewOf({ input: {}, kind: 'watch', name: 'awake.read', target: { name: 'mac-mini' } }),
+            viewOf({
+                input: {},
+                kind: 'watch',
+                name: 'awake.read',
+                target: { name: 'linux-1', on: 'macbook-pro' },
+            }),
+            viewOf({ input: {}, kind: 'read', name: 'ports.list', target: undefined }),
+        ];
+
+        // Then - all but the last two are views, named by machine when they are not This Mac's own
+        expect(named).toStrictEqual([
+            'ports.list+all-machines',
+            'ports.list:linux-1',
+            'accounts.list',
+            'accounts.list:linux-1',
+            'accounts.list:mac-mini',
+            'awake.read',
+            'awake.read:mac-mini',
+            undefined,
+            undefined,
+        ]);
+    });
+
+    test('a still engine draws nothing new on the ports, sign-ins and Awake it pushes', async () => {
+        // Given - a window holding every Mac's ports, a VM's sign-ins and a Mac's Awake from one snapshot
+        using _ = clock.run('2026-11-21T09:00:00Z');
+        const engine = fakeEngine(HELLO);
+        const mirror = new StateMirror(new Client(engine.transport), {
+            grace: 500,
+            lost: 45_000,
+            retry: 1000,
+        });
+        const views = [
+            'ports.list+all-machines',
+            'accounts.list:linux-1',
+            'awake.read:mac-mini',
+        ] as const;
+        const drawn = { renders: 0 };
+        for (const view of views) {
+            mirror.subscriberOf(view)(() => {
+                drawn.renders += 1;
+            });
+        }
+        await clock.advance(1);
+        const values = {
+            'accounts.list:linux-1': { Programs: [] },
+            'awake.read:mac-mini': { Mac: 'mac-mini' },
+            'ports.list+all-machines': { all: { macs: [] } },
+        };
+        const slices = (value: boolean) =>
+            Object.fromEntries(
+                views.map((view) => [
+                    view,
+                    {
+                        hash: view,
+                        state: 'fresh',
+                        ...(value ? { value: structuredClone(values[view]) } : {}),
+                    },
+                ]),
+            );
+        engine.answer('engine.state', OPENED, {
+            out: { event: 'snapshot', rev: 7, slices: slices(true) },
+        });
+        const first = drawn.renders;
+
+        // When - the engine pushes revisions that move none of them: sent without their values, then equal
+        engine.answer('engine.state', { out: { event: 'changed', rev: 8, slices: slices(false) } });
+        engine.answer('engine.state', { out: { event: 'changed', rev: 9, slices: slices(true) } });
+        engine.answer('engine.state', { out: { event: 'tick', rev: 9 } });
+
+        // Then - each view was drawn once, by the snapshot, and nothing after it
+        expect(first).toBe(3);
+        expect(drawn.renders).toBe(3);
+    });
 });
