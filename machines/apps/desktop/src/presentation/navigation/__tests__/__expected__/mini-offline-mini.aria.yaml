@@ -25,7 +25,7 @@
     - heading "Catalog" [level=2]
     - button "Apps 9"
     - button "Skills 0"
-    - button "Settings 0"
+    - button "Machine settings 0"
   - button "Storage"
   - button "Engine running · dev"
 - main:

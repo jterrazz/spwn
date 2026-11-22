@@ -179,7 +179,7 @@ function Catalog({ place, carried }: { place: Place; carried: Carried }) {
                 {...place('catalog-settings')}
                 count={countOf(carried.settings)}
                 icon="settings"
-                label="Settings"
+                label="Machine settings"
             />
         </div>
     );

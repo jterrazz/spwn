@@ -13,7 +13,7 @@ export const TITLES: Record<PlainPage, string> = {
     passwords: 'Passwords',
     'catalog-apps': 'Apps',
     'catalog-skills': 'Skills',
-    'catalog-settings': 'Settings',
+    'catalog-settings': 'Machine settings',
     engine: 'Engine',
     gallery: 'Gallery',
 };

@@ -178,7 +178,7 @@ function SettingsShelf({ open }: { open: Open }) {
                     <SettingRow held={held.get(row.Name)} key={row.Name} open={open} row={row} />
                 )}
                 size={size}
-                title="Settings"
+                title={SHELVES.settings.title}
             />
         </Page>
     );

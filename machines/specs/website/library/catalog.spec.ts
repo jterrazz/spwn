@@ -119,11 +119,11 @@ describe('catalog', () => {
             await visitor.see(content('agent-browser-skill'));
             await visitor.gone(region('Apps'));
 
-            // When - Settings is pressed
-            await visitor.click(within(sidebar, button('Settings', { exact: false })));
+            // When - Machine settings is pressed
+            await visitor.click(within(sidebar, button('Machine settings', { exact: false })));
 
             // Then - the page lists settings alone
-            await visitor.see(region('Settings'));
+            await visitor.see(region('Machine settings'));
             await visitor.gone(region('Skills'));
         });
         expect(result.errors.text).toBe('');

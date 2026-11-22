@@ -11,7 +11,7 @@
     - heading "Catalog" [level=2]
     - button "Apps" [disabled]
     - button "Skills" [disabled]
-    - button "Settings" [disabled]
+    - button "Machine settings" [disabled]
   - button "Storage" [disabled]
   - img "engine older than this app"
   - text: Engine older than this app

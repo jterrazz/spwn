@@ -5,9 +5,9 @@
     - button "On your machines3" [pressed]
     - button "Everything22"
   - group "Category":
-    - button "All settings3" [pressed]
+    - button "All machine settings3" [pressed]
     - button "Headless3"
-  - region "Settings":
+  - region "Machine settings":
     - paragraph: Headless 3
     - button "autologin setting GUI auto-login for jterrazz.agent (FileVault-aware) 1 of 1 machine OK"
     - 'button "never-sleeps setting Never sleeps: the engine keeps this Mac awake, its servers with it 1 of 1 machine OK"'

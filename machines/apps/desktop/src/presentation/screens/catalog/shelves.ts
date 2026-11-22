@@ -3,7 +3,7 @@ import type { Shelf } from './model';
 
 export const SHELVES = {
     apps: { page: 'catalog-apps', title: 'Apps' },
-    settings: { page: 'catalog-settings', title: 'Settings' },
+    settings: { page: 'catalog-settings', title: 'Machine settings' },
     skills: { page: 'catalog-skills', title: 'Skills' },
 } as const satisfies Record<Shelf, { page: PlainPage; title: string }>;
 
