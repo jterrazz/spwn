@@ -7,7 +7,7 @@ then: [tmux-dotfiles]
 methods:
     - os: macos
       brew: tmux
-    - os: ubuntu
+    - family: debian
       needs: [sudo]
       apt: { packages: [tmux] }
 disk:

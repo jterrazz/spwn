@@ -7,7 +7,7 @@ provides: [fd]
 methods:
     - os: macos
       brew: fd
-    - os: ubuntu
+    - family: debian
       provides: [fdfind]
       needs: [sudo]
       apt: { packages: [fd-find] }

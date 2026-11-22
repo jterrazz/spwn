@@ -7,7 +7,7 @@ provides: [zoxide]
 methods:
     - os: macos
       brew: zoxide
-    - os: ubuntu
+    - family: debian
       needs: [sudo]
       apt: { packages: [zoxide] }
 disk:

@@ -8,7 +8,7 @@ then: [github-login]
 methods:
     - os: macos
       brew: gh
-    - os: ubuntu
+    - family: debian
       needs: [sudo]
       apt: { packages: [gh] }
 disk:

@@ -6,7 +6,7 @@ provides: [ansible]
 methods:
     - os: macos
       brew: ansible
-    - os: ubuntu
+    - family: debian
       needs: [sudo]
       apt: { packages: [ansible] }
 disk:

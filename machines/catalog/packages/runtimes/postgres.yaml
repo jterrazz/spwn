@@ -7,7 +7,7 @@ ports:
     - port: 5432
       label: Postgres
 methods:
-    - os: ubuntu
+    - family: debian
       provides: [psql]
       needs: [sudo]
       apt: { packages: [postgresql] }

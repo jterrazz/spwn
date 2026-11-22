@@ -7,7 +7,7 @@ provides: [bat]
 methods:
     - os: macos
       brew: bat
-    - os: ubuntu
+    - family: debian
       provides: [batcat]
       needs: [sudo]
       apt: { packages: [bat] }

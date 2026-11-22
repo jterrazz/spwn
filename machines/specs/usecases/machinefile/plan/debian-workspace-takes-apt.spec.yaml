@@ -1,0 +1,28 @@
+description: 'inside a Debian workspace, the apps apt carries on Ubuntu are planned by apt under the same names'
+env: in-workspace
+runs:
+    - command: 'world edit linux-1 machinefiles/linux-1.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: linux-1
+          machine: { kind: workspace, system: { os: debian, version: '13' } }
+          apps: [ansible, bat, build-essential, eza, fd, gh, git, jq, postgres, ripgrep, sd, tmux, zoxide]
+      exit: 0
+    - command: 'plan'
+      exit: 0
+      stdout: |
+          # To install
+          ○	apt	apt	the manager of ansible
+          ○	ansible	apt
+          ○	bat	apt
+          ○	build-essential	apt
+          ○	eza	apt
+          ○	fd	apt
+          ○	gh	apt
+          ○	git	apt
+          ○	jq	apt
+          ○	postgres	apt
+          ○	ripgrep	apt
+          ○	sd	apt
+          ○	tmux	apt
+          ○	zoxide	apt

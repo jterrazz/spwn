@@ -6,6 +6,6 @@ provides: [jq]
 methods:
     - os: macos
       brew: jq
-    - os: ubuntu
+    - family: debian
       needs: [sudo]
       apt: { packages: [jq] }

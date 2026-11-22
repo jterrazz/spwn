@@ -7,6 +7,6 @@ provides: [eza]
 methods:
     - os: macos
       brew: eza
-    - os: ubuntu
+    - family: debian
       needs: [sudo]
       apt: { packages: [eza] }

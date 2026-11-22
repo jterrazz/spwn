@@ -7,6 +7,6 @@ provides: [rg]
 methods:
     - os: macos
       brew: ripgrep
-    - os: ubuntu
+    - family: debian
       needs: [sudo]
       apt: { packages: [ripgrep] }

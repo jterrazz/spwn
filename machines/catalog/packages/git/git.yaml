@@ -10,7 +10,7 @@ methods:
     - os: macos
       script:
           run: xcode-select --install
-    - os: ubuntu
+    - family: debian
       needs: [sudo]
       apt: { packages: [git] }
 disk:
