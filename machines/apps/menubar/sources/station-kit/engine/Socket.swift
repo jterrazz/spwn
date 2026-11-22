@@ -77,8 +77,4 @@ public enum EnginePath {
         if let state = environment["XDG_STATE_HOME"], !state.isEmpty { return state + "/station/engine.sock" }
         return (environment["HOME"] ?? NSHomeDirectory()) + "/.local/state/station/engine.sock"
     }
-
-    public static func agentPlist(environment: [String: String] = ProcessInfo.processInfo.environment) -> String {
-        (environment["HOME"] ?? NSHomeDirectory()) + "/Library/LaunchAgents/com.jterrazz.station.engine.plist"
-    }
 }

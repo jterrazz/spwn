@@ -96,7 +96,7 @@ On a Mac with a screen, Spwn.app carries the engine, and install.sh stays the he
 - **An update restarts the agents by `unregister()` then `register()`.** `kickstart -k` is never trusted across a replaced binary.
 - **Mode A's jobs carry the app's own labels**, `com.jterrazz.spwn.engine` and `com.jterrazz.spwn.agent` (`catalog.BundledJobs`). Mode B keeps `com.jterrazz.station.engine` and `.agent`. No Background Task Management record of a bare job can match a bundled one, so the move needs no reboot (what L2's smoke found, above). Socket paths and state folders do not change.
 - **The engine judges whether its job runs by launchd.** `launchctl print gui/<uid>/<label>` is read, never `SMAppService.status`.
-- **Whether its job is installed is one question, asked of the job manager port** (`contract.Jobs.Installed`). Mode B reads the plist in `~/Library/LaunchAgents`. Mode A reads whether the app holds the agent registered and enabled (`SMAppService.status`). Every reader that tells a stopped engine from one never installed asks it there.
+- **Whether its job is installed is one question, asked of the job manager port** (`contract.Jobs.Installed`). Mode B reads the plist in `~/Library/LaunchAgents`. Mode A reads whether the app holds the agent registered and enabled (`SMAppService.status`). Every reader that tells a stopped engine from one never installed asks it there, the menu bar through `station engine --json`, since the nested app cannot ask SMAppService for the bundle's agents.
 
 What this changes in earlier records:
 

@@ -186,7 +186,13 @@ final class Model {
 
     func showStopped() {
         if watching != nil { revive() }
-        let installed = FileManager.default.fileExists(atPath: EnginePath.agentPlist())
+        Task {
+            let installed = await EngineInstall.read(executable: Self.fallbackExecutable)
+            if state.connection != .live { showStopped(installed: installed) }
+        }
+    }
+
+    func showStopped(installed: Bool) {
         state.connection = installed ? .stopped : .notInstalled
         guard let url = Bundle.main.url(forResource: "stopped", withExtension: "json"),
               let data = try? Data(contentsOf: url), var page = try? Page.decode(data) else { return }

@@ -3,9 +3,11 @@ import Foundation
 public struct Launched: Sendable, Equatable {
     public var code: Int32
     public var stderr: String
-    public init(code: Int32, stderr: String) {
+    public var stdout: String
+    public init(code: Int32, stderr: String, stdout: String = "") {
         self.code = code
         self.stderr = stderr
+        self.stdout = stdout
     }
 }
 
@@ -13,9 +15,10 @@ public protocol Launcher: Sendable {
     func run(_ path: String, _ args: [String], environment: [String: String]) async -> Launched
 }
 
-// invariant: the one place the menu bar starts a program, and it starts only
-// the opening of a terminal (Open in Terminal): every other action is a call
-// over the engine's socket.
+// invariant: the one place the menu bar starts a program: the opening of a
+// terminal (Open in Terminal) and the read of whether the engine is
+// installed, which no socket can answer while the engine is down; every other
+// action is a call over the engine's socket.
 public struct ProcessLauncher: Launcher {
     public static let budget = 60.0
 
@@ -29,22 +32,38 @@ public struct ProcessLauncher: Launcher {
                 p.arguments = args
                 p.environment = ProcessInfo.processInfo.environment.merging(environment) { $1 }
                 p.standardInput = FileHandle.nullDevice
-                p.standardOutput = FileHandle.nullDevice
+                let out = Pipe()
                 let err = Pipe()
+                p.standardOutput = out
                 p.standardError = err
                 do { try p.run() } catch {
                     c.resume(returning: Launched(code: 127, stderr: "Error: \(path) could not run"))
                     return
                 }
+                let errData = Captured()
+                let draining = DispatchGroup()
+                draining.enter()
+                DispatchQueue.global().async {
+                    errData.set(err.fileHandleForReading.readDataToEndOfFile())
+                    draining.leave()
+                }
                 let timer = DispatchWorkItem { if p.isRunning { p.terminate() } }
                 DispatchQueue.global().asyncAfter(deadline: .now() + Self.budget, execute: timer)
-                let data = err.fileHandleForReading.readDataToEndOfFile()
+                let data = out.fileHandleForReading.readDataToEndOfFile()
+                draining.wait()
                 p.waitUntilExit()
                 timer.cancel()
-                c.resume(returning: Launched(code: p.terminationStatus, stderr: String(decoding: data, as: UTF8.self)))
+                c.resume(returning: Launched(code: p.terminationStatus, stderr: String(decoding: errData.value, as: UTF8.self), stdout: String(decoding: data, as: UTF8.self)))
             }
         }
     }
+}
+
+private final class Captured: @unchecked Sendable {
+    private let lock = NSLock()
+    private var data = Data()
+    func set(_ d: Data) { lock.withLock { data = d } }
+    var value: Data { lock.withLock { data } }
 }
 
 public enum Terminal {
