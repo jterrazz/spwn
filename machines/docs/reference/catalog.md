@@ -70,6 +70,8 @@ The lists stand by category, in the categories' order (`Package Managers`, `Runt
 
 A disk action (`free`, `erase`, a misplaced row's `free`) runs a command, deletes or prunes paths: `run`, `env`, `delete`, `prune`, `uses` (the command it runs with, which must be on the search path), `exists`, and a selector.
 
+No path of a disk row (a path, an install, a misplaced folder, what an action deletes or prunes) may lie inside another app's container, `~/Library/Containers` or `~/Library/Group Containers`, in any letter case or through a wildcard: macOS blocks Machines from reading there, and the package is refused at decode ([Disk](disk.md#the-groups)).
+
 A port's `env` maps a variable name to a template the app's server is started with once the port is shared: `{url}` is the shared URL and `{host}` the name it is reached by, the only two braces a value may hold (any other is refused at decode); `http: true` marks a dev server that speaks HTTP.
 
 ## The selector

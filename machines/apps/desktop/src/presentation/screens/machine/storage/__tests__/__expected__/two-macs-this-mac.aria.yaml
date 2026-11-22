@@ -67,8 +67,6 @@
     - button "Free helm": Free
     - text: starship ~/.cache/starship cache 100 MB
     - button "Free starship": Free
-    - text: orbstack ~/Library/Group Containers/HUAQ24HBR6.dev.orbstack data 15.8 GB
-    - button "Erase… orbstack": Erase…
     - text: ollama ~/.ollama/models data 1.9 GB
     - button "Erase… ollama": Erase…
     - text: gpg ~/.gnupg never touched 200 KB ssh ~/.ssh never touched 100 KB

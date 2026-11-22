@@ -605,6 +605,9 @@ func checkDisk(d Disk) string {
 	if problem := checkStored(d.Paths); problem != "" {
 		return problem
 	}
+	if problem := checkOtherAppsData(d); problem != "" {
+		return problem
+	}
 	if d.Size != SizeDirs && !known(d.Size) {
 		return fmt.Sprintf("size %q is none of %s", d.Size, strings.Join(d.Size.Enum(), ", "))
 	}
@@ -620,6 +623,34 @@ func checkDisk(d Disk) string {
 	for _, r := range d.Relocate {
 		if !known(r.File) {
 			return fmt.Sprintf("relocate's file %q is none of %s", r.File, strings.Join(r.File.Enum(), ", "))
+		}
+	}
+	return ""
+}
+
+// invariant: no path of a disk row, sized, installed, stray or deleted, lies
+// inside another app's container (InOtherAppsData).
+func checkOtherAppsData(d Disk) string {
+	patterns := slices.Clone(d.Installed)
+	for _, p := range d.Paths {
+		patterns = append(patterns, p.Path)
+	}
+	actions := slices.Concat(d.Free, d.Erase)
+	for _, m := range d.Misplaced {
+		patterns = append(patterns, m.Path)
+		patterns = append(patterns, m.Prune...)
+		for _, mv := range m.Move {
+			patterns = append(patterns, mv.From, mv.To)
+		}
+		actions = append(actions, m.Free...)
+	}
+	for _, a := range actions {
+		patterns = append(patterns, a.Delete...)
+		patterns = append(patterns, a.Prune...)
+	}
+	for _, p := range patterns {
+		if InOtherAppsData(p) {
+			return p + " is inside another app's container, which macOS blocks Machines from reading"
 		}
 	}
 	return ""

@@ -77,6 +77,10 @@ type Surveyor struct {
 }
 
 func NewSurveyor(m Machine, apps []catalog.App, o SurveyorOptions) *Surveyor {
+	m = guardedMachine{Machine: m, expand: o.Expand}
+	if o.Disk != nil {
+		o.Disk = guardedUsage{DiskUsage: o.Disk, expand: o.Expand}
+	}
 	if o.Pool == nil {
 		o.Pool = lanes.NewPool(context.Background(), m, commandLane, walkLane)
 	}

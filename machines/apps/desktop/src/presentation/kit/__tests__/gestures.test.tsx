@@ -13,7 +13,9 @@ import { GestureButton, GestureConfirm, GestureOutcome } from '../gestures';
 const recordingFor = await recordingsOf('stories', 'two-macs');
 
 const erasing = dialog('Erase orbstack?');
-const refusal = content('has no data Machines can erase', { exact: false });
+const refusal = content('~/.orbstack is never touched: Machines erases no key, token or setting', {
+    exact: false,
+});
 
 function Erase({ label, held }: { label: string; held?: string }) {
     const erase = useGesture('disk.erase', {

@@ -1,21 +1,18 @@
-description: 'the tailscale row sizes both variants'' containers as Never touched, and frees and erases none'
+description: 'the tailscale row sizes its Application Scripts alone, never either variant''s containers'
 fixture:
     - ../../__fixtures__/tailscale-app-store/
 env: engine
 runs:
-    - command: '--version >/dev/null; /bin/mkdir -p Library/Containers/io.tailscale.ipn.macos Library/Containers/io.tailscale.ipn.macsys "Library/Group Containers/W5364U7YZB.group.io.tailscale.ipn.macos" "Library/Group Containers/group.W5364U7YZB.io.tailscale.shared" .local/bin && /bin/dd if=/dev/zero of=Library/Containers/io.tailscale.ipn.macos/x bs=1048576 count=1 2>/dev/null && /bin/dd if=/dev/zero of=Library/Containers/io.tailscale.ipn.macsys/y bs=1048576 count=1 2>/dev/null && echo z > "Library/Group Containers/W5364U7YZB.group.io.tailscale.ipn.macos/z" && echo w > "Library/Group Containers/group.W5364U7YZB.io.tailscale.shared/w" && printf "#!/bin/sh\nexec x \"\$@\"\n" > .local/bin/tailscale'
+    - command: '--version >/dev/null; /bin/mkdir -p Library/Containers/io.tailscale.ipn.macos Library/Containers/io.tailscale.ipn.macsys "Library/Group Containers/W5364U7YZB.group.io.tailscale.ipn.macos" "Library/Group Containers/group.W5364U7YZB.io.tailscale.shared" "Library/Application Scripts/W5364U7YZB.io.tailscale.ipn.macos" .local/bin && /bin/dd if=/dev/zero of=Library/Containers/io.tailscale.ipn.macos/x bs=1048576 count=1 2>/dev/null && /bin/dd if=/dev/zero of=Library/Containers/io.tailscale.ipn.macsys/y bs=1048576 count=1 2>/dev/null && /bin/dd if=/dev/zero of="Library/Application Scripts/W5364U7YZB.io.tailscale.ipn.macos/s" bs=1048576 count=1 2>/dev/null && echo z > "Library/Group Containers/W5364U7YZB.group.io.tailscale.ipn.macos/z" && echo w > "Library/Group Containers/group.W5364U7YZB.io.tailscale.shared/w" && printf "#!/bin/sh\nexec x \"\$@\"\n" > .local/bin/tailscale'
       exit: 0
-    - command: 'disk --json | /usr/bin/jq -c ''[.rows[] | select(.app == "tailscale") | [.group, .bytes >= 2097152]]'''
+    - command: 'disk --json | /usr/bin/jq -c ''[.rows[] | select(.app == "tailscale") | [.group, .bytes >= 1048576, .bytes < 2097152]]'''
       exit: 0
       stdout: |
-          [["never-touched",true]]
+          [["never-touched",true,true]]
     - command: 'disk --json | /usr/bin/jq -r ''.rows[] | select(.app == "tailscale") | .paths[]'''
       exit: 0
       stdout: |
-          ~/Library/Containers/io.tailscale.ipn.macos*
-          ~/Library/Containers/io.tailscale.ipn.macsys*
-          ~/Library/Group Containers/*io.tailscale.ipn.macos
-          ~/Library/Group Containers/group.*.io.tailscale.shared
+          ~/Library/Application Scripts/*io.tailscale.*
     - command: 'disk free tailscale'
       exit: 2
       stderr: |
@@ -25,6 +22,7 @@ runs:
       exit: 0
       stdout: |
           .local/bin/tailscale
+          Library/Application Scripts/W5364U7YZB.io.tailscale.ipn.macos/s
           Library/Containers/io.tailscale.ipn.macos/x
           Library/Containers/io.tailscale.ipn.macsys/y
           Library/Group Containers/W5364U7YZB.group.io.tailscale.ipn.macos/z
@@ -32,5 +30,5 @@ runs:
     - command: 'disk erase tailscale --confirm=tailscale'
       exit: 2
       stderr: |
-          Error: ~/Library/Containers/Tailscale is never touched: Machines erases no key, token or setting
+          Error: tailscale is never touched: Machines erases no key, token or setting
           Hint: station disk

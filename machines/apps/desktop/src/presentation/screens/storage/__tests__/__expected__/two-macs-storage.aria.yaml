@@ -25,11 +25,9 @@
     - heading "Can be freed" [level=2]
     - text: base-ubuntu@2026.10.20 Unused image 3 GB
   - region "Your data":
-    - heading "Your data 5" [level=2]
+    - heading "Your data 4" [level=2]
     - text: xcode ~/Library/Developer/CoreSimulator/Devices 19.1 GB
     - button "Erase… xcode": Erase…
-    - text: orbstack ~/Library/Group Containers/HUAQ24HBR6.dev.orbstack 15.8 GB
-    - button "Erase… orbstack": Erase…
     - text: claude ~/.claude/projects 3.6 GB
     - button "Erase… claude": Erase…
     - text: ollama ~/.ollama/models 1.9 GB

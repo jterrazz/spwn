@@ -395,11 +395,10 @@ Free: delete `~/.kube/cache/*`. Erase: none (nothing to erase: keys and logins a
 
 ### orbstack
 
-| Path                                                 | Group         | Note                             |
-| ---------------------------------------------------- | ------------- | -------------------------------- |
-| `~/Library/Group Containers/HUAQ24HBR6.dev.orbstack` | your data     |                                  |
-| `~/.orbstack`                                        | never touched |                                  |
-| `/Applications/OrbStack.app`                         | installed     | removed by `station apps remove` |
+| Path                         | Group         | Note                             |
+| ---------------------------- | ------------- | -------------------------------- |
+| `~/.orbstack`                | never touched |                                  |
+| `/Applications/OrbStack.app` | installed     | removed by `station apps remove` |
 
 Erase: none (OrbStack erases its own data, in its Settings).
 
@@ -612,18 +611,12 @@ Erase: none (an app's data is its account's: erase it in the app). An erase refu
 
 ### tailscale
 
-| Path                                                     | Group         | Note                                                                                                          |
-| -------------------------------------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------- |
-| `~/Library/Containers/io.tailscale.ipn.macos*`           | never touched | Mac; the App Store app's login                                                                                |
-| `~/Library/Containers/io.tailscale.ipn.macsys*`          | never touched | Mac; the Standalone app's login                                                                               |
-| `~/Library/Containers/Tailscale`                         | never touched | Mac                                                                                                           |
-| `~/Library/Group Containers/*io.tailscale.ipn.macos`     | never touched | Mac                                                                                                           |
-| `~/Library/Group Containers/*io.tailscale.ipn.macsys`    | never touched | Mac                                                                                                           |
-| `~/Library/Group Containers/group.*.io.tailscale.shared` | never touched | Mac                                                                                                           |
-| `~/Library/Application Scripts/*io.tailscale.*`          | never touched | Mac                                                                                                           |
-| `/Applications/Tailscale.app`                            | installed     | removed by `station apps remove`                                                                              |
-| `/usr/local/bin/tailscale`                               | installed     | removed by `station apps remove`                                                                              |
-| `~/.local/bin/tailscale`                                 | installed     | written by the `tailscale-cli` setting for the App Store app: `station settings off tailscale-cli` removes it |
+| Path                                            | Group         | Note                                                                                                          |
+| ----------------------------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------- |
+| `~/Library/Application Scripts/*io.tailscale.*` | never touched | Mac                                                                                                           |
+| `/Applications/Tailscale.app`                   | installed     | removed by `station apps remove`                                                                              |
+| `/usr/local/bin/tailscale`                      | installed     | removed by `station apps remove`                                                                              |
+| `~/.local/bin/tailscale`                        | installed     | written by the `tailscale-cli` setting for the App Store app: `station settings off tailscale-cli` removes it |
 
 Erase: none (nothing to erase: the login is the Tailscale app's).
 

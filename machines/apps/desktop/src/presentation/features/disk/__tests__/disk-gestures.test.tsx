@@ -145,24 +145,53 @@ describe('disk gestures', () => {
     });
 
     test('an erase the engine refuses shows its words and its hint, and the row stays', async () => {
-        // Given - Storage over two-macs, where OrbStack erases its own data
-        const result = await component.render(storageOver('two-macs'), async (visitor) => {
-            const data = region('Your data');
+        // Given - Storage over two-macs, where the engine answers the erase of xcode with disk.app-running
+        const recording = recordingFor('two-macs');
+        const refusing = {
+            ...recording,
+            gestures: [
+                ...(recording.gestures ?? []),
+                {
+                    after: [],
+                    answers: [
+                        {
+                            error: {
+                                code: 'disk.app-running',
+                                detail: { process: 'Xcode', subject: 'xcode', verb: 'erase' },
+                                hint: 'quit Xcode, then station disk erase xcode',
+                                message: 'Xcode is running: its data cannot be erased now',
+                                subject: 'xcode',
+                                type: 'failed',
+                            },
+                            v: 2,
+                        },
+                    ],
+                    request: { call: 'disk.erase', in: { App: 'xcode', Confirm: 'xcode' } },
+                },
+            ],
+        };
+        const result = await component.render(
+            pageOver(refusing, { page: 'storage' }),
+            async (visitor) => {
+                const data = region('Your data');
 
-            // When - Erase… orbstack is confirmed with its name typed
-            await visitor.click(within(data, button('Erase… orbstack')));
-            const asked = dialog('Erase orbstack?');
-            await visitor.fill(within(asked, field('Type orbstack to confirm')), 'orbstack');
-            await visitor.click(within(asked, button('Erase')));
+                // When - Erase… xcode is confirmed with its name typed
+                await visitor.click(within(data, button('Erase… xcode')));
+                const asked = dialog('Erase xcode?');
+                await visitor.fill(within(asked, field('Type xcode to confirm')), 'xcode');
+                await visitor.click(within(asked, button('Erase')));
 
-            // Then - the engine's refusal, as it came, and the row as it was
-            const said = content('has no data Machines can erase', { exact: false });
-            await visitor.see(within(data, said));
-            await visitor.see(
-                within(data, content('OrbStack erases its own data, in its Settings')),
-            );
-            await visitor.see(within(data, button('Erase… orbstack')));
-        });
+                // Then - the engine's sentence and its hint, as they came, and the row as it was
+                const said = content('Xcode is running: its data cannot be erased now', {
+                    exact: false,
+                });
+                await visitor.see(within(data, said));
+                await visitor.see(
+                    within(data, content('quit Xcode, then station disk erase xcode')),
+                );
+                await visitor.see(within(data, button('Erase… xcode')));
+            },
+        );
         expect(result.errors.text).toBe('');
     });
 

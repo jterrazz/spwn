@@ -28,7 +28,6 @@ runs:
           ●	starship	100 MB
           # Your data
           ●	xcode	19.1 GB
-          ●	orbstack	15.8 GB
           ●	claude	3.6 GB
           ●	ollama	1.9 GB
           ●	zed	1.2 GB

@@ -172,6 +172,24 @@ func TestAPackageIsJudgedAlone(t *testing.T) {
 	refusedFor(t, defaults+"writes: [{path: ~/x, level: settings, os: macos, family: linux}]\n", "~/x: names an os and a family")
 }
 
+func TestAPathInsideAnotherAppsContainerIsRefused(t *testing.T) {
+	disk := func(rows string) string { return gh + "disk:\n" + rows + "    no-erase: gh's own\n" }
+	for body, want := range map[string]string{
+		disk("    paths: [{path: ~/Library/Group Containers/TEAM.example.app, level: data}]\n"):            "~/Library/Group Containers/TEAM.example.app is inside another app's container",
+		disk("    paths: [{path: ~/Library/Containers/com.example.app/*, level: kept}]\n"):                 "~/Library/Containers/com.example.app/* is inside another app's container",
+		disk("    paths: [{path: ~/Library/*/com.example.app, level: data}]\n"):                            "~/Library/*/com.example.app is inside another app's container",
+		disk("    paths: [{path: ~/library/containers/com.example.app, level: data}]\n"):                   "~/library/containers/com.example.app is inside another app's container",
+		disk("    installed: [~/Library/Group Containers/TEAM.example.app/bin]\n"):                         "~/Library/Group Containers/TEAM.example.app/bin is inside another app's container",
+		disk("    paths: [{path: ~/.gh, level: cache}]\n    free: [{delete: [~/Library/Containers/x]}]\n"): "~/Library/Containers/x is inside another app's container",
+		disk("    misplaced: [{path: ~/Library/Group Containers/x}]\n"):                                    "~/Library/Group Containers/x is inside another app's container",
+	} {
+		refusedFor(t, body, want)
+	}
+	if err := decoded(t, disk("    paths: [{path: ~/Library/Application Support/gh, level: data}, {path: ~/Library/Caches/gh, level: cache}]\n")); err != nil {
+		t.Errorf("a path beside the containers is refused: %v", err)
+	}
+}
+
 func TestAnOptionIsJudgedByItsType(t *testing.T) {
 	option := func(o string) string {
 		return "package: station.package/v1\nkind: setting\nname: gh\ndescription: d\noptions:\n    - " + o + "\nmethods:\n    - os: any\n      builtin: dns\n"

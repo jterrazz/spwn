@@ -11,8 +11,6 @@ methods:
       cask: orbstack
 disk:
     paths:
-        - path: ~/Library/Group Containers/HUAQ24HBR6.dev.orbstack
-          level: data
         - path: ~/.orbstack
           level: settings
     installed: [/Applications/OrbStack.app]

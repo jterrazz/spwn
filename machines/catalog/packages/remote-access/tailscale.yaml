@@ -14,32 +14,6 @@ methods:
       cask: tailscale-app
 disk:
     paths:
-        - path: ~/Library/Containers/io.tailscale.ipn.macos*
-          level: kept
-          os: macos
-          machine: computer
-          note: the App Store app's login
-        - path: ~/Library/Containers/io.tailscale.ipn.macsys*
-          level: kept
-          os: macos
-          machine: computer
-          note: the Standalone app's login
-        - path: ~/Library/Containers/Tailscale
-          level: kept
-          os: macos
-          machine: computer
-        - path: ~/Library/Group Containers/*io.tailscale.ipn.macos
-          level: kept
-          os: macos
-          machine: computer
-        - path: ~/Library/Group Containers/*io.tailscale.ipn.macsys
-          level: kept
-          os: macos
-          machine: computer
-        - path: ~/Library/Group Containers/group.*.io.tailscale.shared
-          level: kept
-          os: macos
-          machine: computer
         - path: ~/Library/Application Scripts/*io.tailscale.*
           level: kept
           os: macos
