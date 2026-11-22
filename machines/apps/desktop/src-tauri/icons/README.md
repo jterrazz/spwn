@@ -4,11 +4,12 @@
 
 ## What the document holds
 
-La pile: a stack of two glass plates over a third, with one amber ball resting on top, on a paper tile. Its parts follow Apple's layer rules: each layer is a square 1024 canvas with no tile, mask or shadow of its own, and the system draws those. The owner picked this variant, "Deux étages" (two larger plates, a bigger ball, less detail for the small Dock and 16 px), on 2026-11-22.
+La pile: three floors growing with depth, the smallest on top with one ball resting on it, on a paper tile. Its parts follow Apple's layer rules: each layer is a square 1024 canvas with no tile, mask or shadow of its own, and the system draws those. The owner picked it on 2026-11-22: round 5's variant F, "Trois étages, ambre", in the colour appearances, and round 6's mix 2 in the clear and tinted ones.
 
-- **Three glass groups**: `you`, the amber ball (`Assets/you.png`), `top`, the upper plate with its contact shadow, and `f1`, the plate below with its spill of amber light. Each plate is a top face and a side face, with specular light and no translucency.
-- **The ground** is a gradient: Papier in the light appearance (white to `#e3e6ec`), graphite in the dark one (`#383537` to `#0a0a0c`).
-- **The appearances**: each plate layer carries a default, a `-dark` and a `-tinted` picture, and the system turns the dark and tintable ones to clear or tinted glass over its own ground.
+- **Four glass groups**: `you`, the ball, then one group a floor from the top down, `f0`, `f1` and `f2`, each a top face and a side face, with specular light and no translucency; `f0` also holds the ball's contact shadow.
+- **In colour**, light and dark: an amber ball on a white top floor, then a light amber floor and a deep amber one.
+- **In clear and tinted**, light and dark: the top floor greyed under a solid white ball, so the ball stands apart from the floor it rests on, and the two floors below are white faces over empty walls. Each layer carries a default, a `-dark` and a `-tinted` picture, and the system turns the tinted one to clear or tinted glass over its own ground.
+- **The ground** is a gradient: Papier in the light appearance (white to `#e4e6ec`), graphite in the dark one (`#38353d` to `#0a0a0c`).
 
 `icon.json` is edited by hand or in Icon Composer (inside Xcode); `fill` and `fill-specializations` exclude each other, so every colour is a specialization list whose entry with no `appearance` is the default.
 

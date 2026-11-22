@@ -44,8 +44,20 @@
             "layers": [
                 {
                     "name": "you",
-                    "image-name": "you.png",
-                    "glass": true
+                    "glass": true,
+                    "image-name-specializations": [
+                        {
+                            "value": "you.png"
+                        },
+                        {
+                            "appearance": "dark",
+                            "value": "you-dark.png"
+                        },
+                        {
+                            "appearance": "tinted",
+                            "value": "you-tinted.png"
+                        }
+                    ]
                 }
             ],
             "lighting": "individual",
@@ -60,7 +72,7 @@
             }
         },
         {
-            "name": "top",
+            "name": "f0",
             "layers": [
                 {
                     "name": "contact",
@@ -129,23 +141,6 @@
             "name": "f1",
             "layers": [
                 {
-                    "name": "spill1",
-                    "glass": false,
-                    "image-name-specializations": [
-                        {
-                            "value": "spill1.png"
-                        },
-                        {
-                            "appearance": "dark",
-                            "value": "spill1-dark.png"
-                        },
-                        {
-                            "appearance": "tinted",
-                            "value": "spill1-tinted.png"
-                        }
-                    ]
-                },
-                {
                     "name": "top1",
                     "glass": true,
                     "image-name-specializations": [
@@ -176,6 +171,55 @@
                         {
                             "appearance": "tinted",
                             "value": "side1-tinted.png"
+                        }
+                    ]
+                }
+            ],
+            "lighting": "individual",
+            "specular": true,
+            "shadow": {
+                "kind": "neutral",
+                "opacity": 0.5
+            },
+            "translucency": {
+                "enabled": false,
+                "value": 0.0
+            }
+        },
+        {
+            "name": "f2",
+            "layers": [
+                {
+                    "name": "top2",
+                    "glass": true,
+                    "image-name-specializations": [
+                        {
+                            "value": "top2.png"
+                        },
+                        {
+                            "appearance": "dark",
+                            "value": "top2-dark.png"
+                        },
+                        {
+                            "appearance": "tinted",
+                            "value": "top2-tinted.png"
+                        }
+                    ]
+                },
+                {
+                    "name": "side2",
+                    "glass": true,
+                    "image-name-specializations": [
+                        {
+                            "value": "side2.png"
+                        },
+                        {
+                            "appearance": "dark",
+                            "value": "side2-dark.png"
+                        },
+                        {
+                            "appearance": "tinted",
+                            "value": "side2-tinted.png"
                         }
                     ]
                 }
