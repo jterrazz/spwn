@@ -266,14 +266,15 @@ describe('Machine files', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test('a Mac with no machine file shows the engine refusal and its gesture', async () => {
+    test('a Mac with no machine file still lists every file, and says where it follows none', async () => {
         // Given - the window on Machine files over bare-mac, which follows no file
         const result = await component.render(windowOver('bare-mac'), async (visitor) => {
-            // When - machinefile.explain has refused
+            // When - machinefile.files has answered and machinefile.explain has refused
+            await visitor.see(button('base-macos'));
             await visitor.see(heading('no Machinefile named macbook-pro.'));
         });
 
-        // Then - the page is the refusal, with the hint the engine gave
+        // Then - the files are cards, and the refusal with the hint the engine gave sits beside them
         await expect(result.tree).toMatch(file('./__expected__/bare-mac-files.aria.yaml'));
     });
 });

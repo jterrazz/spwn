@@ -1,4 +1,4 @@
-import type { MachinefileFileView } from '@jterrazz/station-api';
+import type { MachinefileExplainOutput, MachinefileFileView } from '@jterrazz/station-api';
 import { useState } from 'react';
 
 import { useReach, useRead } from '../../dependencies/dependencies';
@@ -58,11 +58,19 @@ function Tabs({
     );
 }
 
-function Waiting({ reading, what }: { reading: Reading<unknown>; what: string }) {
+function Waiting({
+    reading,
+    size,
+    what,
+}: {
+    reading: Reading<unknown>;
+    size: 'page' | 'tab';
+    what: string;
+}) {
     if (reading.kind === 'failed') {
-        return <Unanswered error={reading.error} size="page" />;
+        return <Unanswered error={reading.error} size={size} />;
     }
-    return <SkeletonHead size="page" what={what} />;
+    return <SkeletonHead size={size} what={what} />;
 }
 
 function File({
@@ -122,6 +130,23 @@ function File({
     );
 }
 
+function openedBy(
+    explain: Reading<MachinefileExplainOutput>,
+    files: readonly MachinefileFileView[],
+): string {
+    if (explain.kind === 'read') {
+        return explain.out.Name;
+    }
+    return shelvedOf(files)[0]?.files[0]?.Name ?? '';
+}
+
+function Following({ explain }: { explain: Reading<MachinefileExplainOutput> }) {
+    if (explain.kind === 'read') {
+        return null;
+    }
+    return <Waiting reading={explain} size="tab" what="the machine file This Mac follows" />;
+}
+
 export function MachineFilesPage({
     go,
     opened,
@@ -142,26 +167,20 @@ export function MachineFilesPage({
             </Page>
         );
     }
-    if (explain.kind !== 'read') {
-        return (
-            <Page>
-                <Waiting reading={explain} what="the machine file This Mac follows" />
-            </Page>
-        );
-    }
     if (files.kind !== 'read') {
         return (
             <Page>
-                <Waiting reading={files} what="the machine files This Mac reads" />
+                <Waiting reading={files} size="page" what="the machine files This Mac reads" />
             </Page>
         );
     }
     const all = files.out.Files ?? [];
-    const file = chosen ?? opened ?? explain.out.Name;
+    const file = chosen ?? opened ?? openedBy(explain, all);
     const view = all.find((candidate) => candidate.Name === file);
     return (
         <Page>
             <VerdictHead size="page" verdict={files.out.Verdict} />
+            <Following explain={explain} />
             {view === undefined ? (
                 <Missing>{`No machine file named ${file}`}</Missing>
             ) : (

@@ -1,5 +1,42 @@
 - main:
+  - heading "No machine follows a file." [level=1]
   - heading "no Machinefile named macbook-pro." [level=1]
   - paragraph:
     - img "not found"
     - text: "Not found · give this machine one: station init --machinefile <name>"
+  - paragraph: Shipped with Machines
+  - group "Shipped with Machines":
+    - button "base-macos" [pressed]
+    - button "base-ubuntu"
+  - region "base-macos.machine.yaml":
+    - heading "base-macos.machine.yaml" [level=2]
+    - text: built-in/machinefiles/base-macos.machine.yaml
+    - group "How the file is shown":
+      - button "Fields" [pressed]
+      - button "YAML"
+    - paragraph: A macOS workspace with Homebrew, git and zsh
+    - term: Makes
+    - definition: a workspace
+    - term: System
+    - definition: macOS · arm64
+    - term: Size
+    - definition: 4 CPU · 8G · 80G
+    - term: Lifetime
+    - definition: persistent
+    - term: Starts from
+    - definition: ghcr.io/cirruslabs/macos-tahoe-base:latest
+  - region "Machines that follow it":
+    - heading "Machines that follow it" [level=2]
+    - paragraph: No machine follows it.
+  - region "What it puts on a machine":
+    - heading "What it puts on a machine the boxed values are the ones you set" [level=2]
+    - group "Chapter":
+      - button "Apps3" [pressed]
+      - button "Skills0"
+      - button "Settings2"
+      - button "Access"
+    - region "base-macos":
+      - paragraph: base-macos this file · 3
+      - button "homebrew manager macOS package manager takes every version"
+      - button "git Distributed version control system takes every version"
+      - button "ohmyzsh Oh My Zsh shell framework takes every version"
