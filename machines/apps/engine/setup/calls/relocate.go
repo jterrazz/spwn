@@ -34,7 +34,7 @@ func (s *Provisioner) placedApps() []catalog.App {
 }
 
 func (s *Provisioner) relocate(ctx context.Context, interactive bool) (setup.Step, error) {
-	written, notes, err := s.writeAppFiles()
+	written, notes, err := s.writeAppFiles(s.placedApps())
 	if err != nil {
 		return failed(stepRelocate, err)
 	}
@@ -60,10 +60,18 @@ func (s *Provisioner) relocate(ctx context.Context, interactive bool) (setup.Ste
 	return setup.Step{Name: stepRelocate, State: catalog.StateOK, Detail: strings.Join(parts, ", "), Changed: true}, nil
 }
 
-func (s *Provisioner) writeAppFiles() (written, notes []string, err error) {
+func (s *Provisioner) Relocate(_ context.Context, app string) error {
+	// invariant: one placed app's relocation, written as init writes it,
+	// never over a value set by hand.
+	apps := slices.DeleteFunc(s.placedApps(), func(t catalog.App) bool { return t.Name != app })
+	_, _, err := s.writeAppFiles(apps)
+	return err
+}
+
+func (s *Provisioner) writeAppFiles(apps []catalog.App) (written, notes []string, err error) {
 	byFile := map[catalog.AppFile][]catalog.Relocation{}
 	var order []catalog.AppFile
-	for _, t := range s.placedApps() {
+	for _, t := range apps {
 		for _, r := range t.Disk.Relocate {
 			if r.Pending != "" {
 				continue

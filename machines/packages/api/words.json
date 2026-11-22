@@ -465,6 +465,11 @@
       "Detail": "disk",
       "Tone": "plain"
     },
+    "disk.destination-held": {
+      "Word": "destination held",
+      "Detail": "disk",
+      "Tone": "plain"
+    },
     "disk.lives-elsewhere": {
       "Word": "lives elsewhere",
       "Detail": "disk",

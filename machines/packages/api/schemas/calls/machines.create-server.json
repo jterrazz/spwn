@@ -230,6 +230,7 @@
             "confirm.needed",
             "confirm.yes-needed",
             "disk.app-running",
+            "disk.destination-held",
             "disk.lives-elsewhere",
             "disk.names-needed",
             "disk.never-touched",

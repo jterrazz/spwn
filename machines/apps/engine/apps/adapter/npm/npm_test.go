@@ -19,6 +19,8 @@ import (
 
 var line = regexp.MustCompile(`^npm "([^"]+)"$`)
 
+const cache = "/home/u/.cache/npm"
+
 // value: npm's global prefix as these tests play it, and the bundle that
 // installs its lines.
 type prefix struct {
@@ -67,7 +69,7 @@ func TestInstaller(t *testing.T) {
 		if seed.Absent {
 			names = nil
 		}
-		return npm.New(local.Played(p.play, names...), p, nil)
+		return npm.New(local.Played(p.play, names...), p, nil, cache)
 	})
 }
 
@@ -76,7 +78,7 @@ func TestAListingThatExitsOneStillListsEveryPackage(t *testing.T) {
 		return local.Output{ExitCode: 1, Stdout: `{"dependencies":{"@playwright/mcp":{"version":"0.0.41"}}}`, Stderr: "npm error missing: peer"}, nil
 	}, "npm")
 
-	got, err := npm.New(run, nil, nil).Inventory(context.Background())
+	got, err := npm.New(run, nil, nil, cache).Inventory(context.Background())
 
 	if err != nil || got["@playwright/mcp"] != "0.0.41" {
 		t.Fatalf("inventory %v %v", got, err)
@@ -88,7 +90,7 @@ func TestTheListingLeavesOutWhatNodeItselfLays(t *testing.T) {
 		return local.Output{Stdout: `{"dependencies":{"corepack":{"version":"0.34.0"},"npm":{"version":"11.6.2"},"typescript":{"version":"5.9.3"}}}`}, nil
 	}, "npm")
 
-	got, err := npm.New(run, nil, nil).Inventory(context.Background())
+	got, err := npm.New(run, nil, nil, cache).Inventory(context.Background())
 
 	if err != nil || len(got) != 1 || got["typescript"] != "5.9.3" {
 		t.Fatalf("inventory %v %v; want typescript alone", got, err)
@@ -110,7 +112,7 @@ func TestTheReadAndTheRemovalAddressTheFolderOfTheGlobalNode(t *testing.T) {
 		}
 		return []string{"/home/u/node/24.22.2"}, nil
 	}
-	n := npm.New(run, nil, where)
+	n := npm.New(run, nil, where, cache)
 
 	_, _ = n.Inventory(context.Background())
 	_ = n.Remove(context.Background(), []catalog.Install{catalog.NpmInstall{Package: "typescript"}}, nil)
@@ -127,7 +129,7 @@ func TestAGlobalNodeThatDoesNotReadLeavesThePackagesUnread(t *testing.T) {
 	}, "npm")
 	unread := func(context.Context, string) ([]string, error) { return nil, errors.New("the manager did not answer") }
 
-	if got, err := npm.New(run, nil, unread).Inventory(context.Background()); err == nil {
+	if got, err := npm.New(run, nil, unread, cache).Inventory(context.Background()); err == nil {
 		t.Fatalf("inventory %v; want the global node's read to fail it", got)
 	}
 }
@@ -157,7 +159,7 @@ func TestEveryGlobalNodeIsReadAndRemovedFrom(t *testing.T) {
 	where := func(context.Context, string) ([]string, error) {
 		return []string{"/home/u/node/22.1.0", "/home/u/node/24.22.2"}, nil
 	}
-	n := npm.New(run, nil, where)
+	n := npm.New(run, nil, where, cache)
 
 	got, err := n.Inventory(context.Background())
 	if err != nil || got["owner-pkg"] != "1.0.0" || got["typescript"] != "5.9.3" || len(got) != 2 {
@@ -182,7 +184,7 @@ func TestAGlobalNodeWhoseListDoesNotReadLeavesThePackagesUnread(t *testing.T) {
 		return []string{"/home/u/node/22.1.0", "/home/u/node/24.22.2"}, nil
 	}
 
-	if got, err := npm.New(run, nil, where).Inventory(context.Background()); err == nil {
+	if got, err := npm.New(run, nil, where, cache).Inventory(context.Background()); err == nil {
 		t.Fatalf("inventory %v; want the second node's list to fail it", got)
 	}
 }
@@ -201,7 +203,7 @@ func TestOutdatedReadsTheRegistrysLatestOfEachGlobalNode(t *testing.T) {
 	}, "npm")
 	where := func(context.Context, string) ([]string, error) { return []string{"/home/u/node/22.1.0"}, nil }
 
-	got, err := npm.New(run, nil, where).Outdated(context.Background(), []string{"cowsay", "left-pad"})
+	got, err := npm.New(run, nil, where, cache).Outdated(context.Background(), []string{"cowsay", "left-pad"})
 
 	if err != nil || got["cowsay"] != (apps.Currency{Verdict: apps.Behind, Newest: "1.6.0"}) || got["left-pad"].Verdict != apps.Current {
 		t.Fatalf("currency %v %v", got, err)
@@ -222,7 +224,7 @@ func TestOutdatedIsCurrentWhenNpmListsNothingAndUnknownWhenItDidNotAnswer(t *tes
 		"an error document":    {local.Output{ExitCode: 1, Stdout: `{"error":{"code":"E","summary":"s"}}`}, apps.Unknown},
 	} {
 		run := local.Played(func(local.Cmd) (local.Output, error) { return tc.out, nil }, "npm")
-		got, err := npm.New(run, nil, nil).Outdated(context.Background(), []string{"cowsay"})
+		got, err := npm.New(run, nil, nil, cache).Outdated(context.Background(), []string{"cowsay"})
 		if err != nil || got["cowsay"].Verdict != tc.want {
 			t.Errorf("%s: currency %v %v; want %s", name, got, err, tc.want)
 		}
@@ -240,9 +242,34 @@ func TestOutdatedIsBehindWhereAnyGlobalNodeHoldsAnOldCopy(t *testing.T) {
 		return []string{"/home/u/node/22.1.0", "/home/u/node/24.22.2"}, nil
 	}
 
-	got, _ := npm.New(run, nil, where).Outdated(context.Background(), []string{"cowsay"})
+	got, _ := npm.New(run, nil, where, cache).Outdated(context.Background(), []string{"cowsay"})
 
 	if got["cowsay"].Verdict != apps.Behind {
 		t.Errorf("currency %v; want behind", got)
+	}
+}
+
+func TestEveryNpmCallKeepsItsCacheWhereStationMovesIt(t *testing.T) {
+	// outside: npm writes its logs and its update check under its cache
+	// on every call, a list included, so a read run with ~/.npm as its
+	// cache makes the misplaced folder it then reports.
+	var ran []local.Cmd
+	run := local.Played(func(c local.Cmd) (local.Output, error) {
+		ran = append(ran, c)
+		return local.Output{Stdout: `{"dependencies":{"typescript":{"version":"5.9.3"}}}`}, nil
+	}, "npm")
+	n := npm.New(run, nil, nil, cache)
+
+	_, _ = n.Inventory(context.Background())
+	_, _ = n.Outdated(context.Background(), []string{"typescript"})
+	_ = n.Remove(context.Background(), []catalog.Install{catalog.NpmInstall{Package: "typescript"}}, nil)
+
+	if len(ran) != 3 {
+		t.Fatalf("npm ran %d times; want the list, the outdated read and the removal", len(ran))
+	}
+	for _, c := range ran {
+		if !slices.Contains(c.Env, "NPM_CONFIG_CACHE="+cache) || !slices.Contains(c.Env, "NPM_CONFIG_UPDATE_NOTIFIER=false") {
+			t.Errorf("npm %q ran with env %q; want its cache at %s and no update check", c.Args, c.Env, cache)
+		}
 	}
 }

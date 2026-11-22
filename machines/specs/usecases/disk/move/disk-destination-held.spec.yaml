@@ -1,0 +1,14 @@
+description: 'a move onto a file of the owner''s is refused by its path, and nothing moves'
+env: two-macs
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].disk.files += {"~/go/bin/gopls": 9000, "~/go/bin/dlv": 8000, "~/.local/share/go/bin/dlv": 7000}'' world.json > next.json && /bin/mv next.json world.json'
+      exit: 0
+    - command: 'disk move ~/go'
+      exit: 2
+      stderr: |
+          Error: ~/.local/share/go/bin/dlv already exists: ~/go cannot move onto it
+          Hint: move or remove ~/.local/share/go/bin/dlv, then station disk move ~/go
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].disk.files | keys | map(select(test("go/bin")))'' world.json'
+      exit: 0
+      stdout: |
+          ["~/.local/share/go/bin/dlv","~/go/bin/dlv","~/go/bin/gopls"]

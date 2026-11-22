@@ -47,3 +47,7 @@ type UnreadRecordError struct{ Path string }
 func (e *UnreadRecordError) Error() string {
 	return e.Path + " cannot be read: nothing is freed until it can"
 }
+
+type DestinationHeldError struct{ Folder, Path string }
+
+func (e *DestinationHeldError) Error() string { return e.Path + " already exists" }

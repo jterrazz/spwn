@@ -21,6 +21,7 @@ disk:
           note: may hold registry tokens
     free:
         - run: [npm, cache, clean, --force]
+          env: ['NPM_CONFIG_CACHE={cache}/npm', NPM_CONFIG_UPDATE_NOTIFIER=false]
           uses: npm
         - delete: ['{cache}/npm/*']
     no-erase: "npm's globals are apps: station apps remove <app>"

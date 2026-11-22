@@ -589,6 +589,10 @@ func Codes() map[fail.Code]Wording {
 		diskcalls.NotMisplaced: func(e *fail.Error) (string, string) {
 			return e.Subject + " is not misplaced", "station disk"
 		},
+		diskcalls.DestinationHeld: func(e *fail.Error) (string, string) {
+			held := e.Detail["path"]
+			return held + " already exists: " + e.Subject + " cannot move onto it", "move or remove " + held + ", then station disk move " + e.Subject
+		},
 		diskcalls.NotFreeable: func(e *fail.Error) (string, string) {
 			return e.Subject + " is not freeable: in use, gone or not Machines', so nothing is freed", "station disk"
 		},

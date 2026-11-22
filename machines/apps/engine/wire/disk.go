@@ -58,9 +58,19 @@ func (m machine) diskOf(env kit.Env) *diskcalls.Surveyor {
 		Files:       m.appFiles(),
 		Inventory:   inventory{apps: appsOf(env, m)},
 		Configurer:  setupSettingsWriter{settings: settingsOf(m)},
+		Relocator:   relocator{env: env, m: m},
 		Station:     station,
 		Hypervisor:  hypervisor,
 	})
+}
+
+type relocator struct {
+	env kit.Env
+	m   machine
+}
+
+func (r relocator) Relocate(ctx context.Context, app string) error {
+	return setupOf(r.env, r.m).Relocate(ctx, app)
 }
 
 func (m machine) disk() diskcontract.DiskUsage {

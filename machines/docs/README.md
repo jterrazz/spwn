@@ -127,5 +127,6 @@ The records of decisions this repository alone took go in [`decisions/`](decisio
 - [072 Before 1.0, every station runs the same release, and every Mac pushes its state](decisions/072-before-1-0-every-station-runs-the-same-release.md) (Accepted)
 - [073 Spwn.app carries the engine on a Mac with a screen; install.sh is the headless install](decisions/073-spwn-app-carries-the-engine-on-a-mac-with-a-screen.md) (Proposed)
 - [074 A far station answers its hello within 5 seconds, and ssh keeps the link alive](decisions/074-a-far-station-answers-its-hello-within-5-seconds.md) (Proposed)
+- [075 A move merges into a cache and refuses onto anything else](decisions/075-a-move-merges-a-cache-and-refuses-onto-data.md) (Proposed)
 
 A decision spanning several repositories is recorded by the corpus that spans them. What was left for later is `TODO.md` at the repository root.

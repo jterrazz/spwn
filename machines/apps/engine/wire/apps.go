@@ -126,6 +126,19 @@ func managing(m machine) local.System {
 	return sys
 }
 
+// value: the value the catalog's relocation gives a key of an app file,
+// expanded on this machine.
+func relocatedValue(m machine, file catalog.AppFile, key string) string {
+	for _, app := range m.cat.Apps {
+		for _, r := range app.Disk.Relocate {
+			if r.File == file && r.Key == key {
+				return m.expander().Expand(r.Value)
+			}
+		}
+	}
+	return ""
+}
+
 func installers(m machine, terminal bool) (contract.Installers, contract.Bundler) {
 	run := managing(m).Run
 	runtimes := mise.New(run)
@@ -133,7 +146,7 @@ func installers(m machine, terminal bool) (contract.Installers, contract.Bundler
 	registry := contract.Installers{}
 	for _, i := range []contract.Installer{
 		bundle.Formulae(), bundle.Casks(),
-		mas.New(run), npm.New(run, bundle, runtimes.Where), uv.New(run, bundle),
+		mas.New(run), npm.New(run, bundle, runtimes.Where, relocatedValue(m, catalog.FileNpmrc, "cache")), uv.New(run, bundle),
 		bun.New(run), runtimes, apt.New(run, m.sys.FS, filepath.Join(m.paths.Data, "apt"), terminal),
 		skills.New(skills.Options{
 			Run: run, FS: m.sys.FS, Net: m.sys.Net, Home: m.sys.Env.Home(),

@@ -1,0 +1,23 @@
+description: 'disk move ~/.npm merges into its cache and sets npm there, so an apps read brings no ~/.npm back'
+env: two-macs
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].disk.files += {"~/.npm/_npx/a/package.json": 2000, "~/.npm/_logs/b.log": 818, "~/.cache/npm/_logs/a.log": 818}'' world.json > next.json && /bin/mv next.json world.json'
+      exit: 0
+    - command: 'disk move ~/.npm'
+      exit: 0
+      stdout: |
+          ●	~/.npm	moved to ~/.cache/npm
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].disk.files | keys | map(select(test("^~/(\\.cache/)?\\.?npm/")))'' world.json'
+      exit: 0
+      stdout: |
+          ["~/.cache/npm/_cacache/x","~/.cache/npm/_logs/a.log","~/.cache/npm/_npx/a/package.json"]
+    - command: '--version >/dev/null; /usr/bin/grep -c "^cache=.*/\.cache/npm$" .npmrc'
+      exit: 0
+      stdout: |
+          1
+    - command: 'apps >/dev/null'
+      exit: 0
+    - command: 'disk | /usr/bin/grep -c "~/.npm"'
+      exit: 1
+      stdout: |
+          0

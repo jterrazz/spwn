@@ -270,6 +270,7 @@
       "where": "at-target",
       "errors": [
         "disk.app-running",
+        "disk.destination-held",
         "disk.not-misplaced"
       ],
       "in": "MoveIn",

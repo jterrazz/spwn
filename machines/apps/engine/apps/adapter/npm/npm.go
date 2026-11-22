@@ -24,12 +24,15 @@ type Npm struct {
 	run    local.Runner
 	bundle contract.Bundler
 	where  func(ctx context.Context, runtime string) ([]string, error)
+	cache  string
 }
 
-func New(run local.Runner, bundle contract.Bundler, where func(ctx context.Context, runtime string) ([]string, error)) *Npm {
+func New(run local.Runner, bundle contract.Bundler, where func(ctx context.Context, runtime string) ([]string, error), cache string) *Npm {
 	// value: where names the folders of every global version of a runtime
 	// its manager holds, none when it holds none; nil reads npm's own prefix.
-	return &Npm{run: run, bundle: bundle, where: where}
+	// cache is the folder every npm call keeps its cache, its logs and its
+	// update check in, where node's relocation puts them.
+	return &Npm{run: run, bundle: bundle, where: where, cache: cache}
 }
 
 func (n *Npm) Method() catalog.Method { return catalog.MethodNpm }
@@ -75,7 +78,7 @@ func (n *Npm) Inventory(ctx context.Context) (map[string]string, error) {
 func (n *Npm) list(ctx context.Context, folder []string) (map[string]string, error) {
 	// outside: `npm ls -g` exits 1 on an extraneous or missing peer while its
 	// JSON still lists every global package, so its exit code is not read.
-	out, err := n.run.Output(ctx, local.Command(command, append([]string{"ls", "-g", "--depth=0", "--json"}, folder...)...))
+	out, err := n.run.Output(ctx, n.cmd(append([]string{"ls", "-g", "--depth=0", "--json"}, folder...)))
 	if err != nil {
 		return nil, err
 	}
@@ -134,7 +137,9 @@ func (n *Npm) outdated(ctx context.Context, folder []string) (map[string]string,
 	// outside: `npm outdated` exits 1 when it lists a package, 0 when it lists
 	// none (printing nothing), and prints nothing on stdout when the registry
 	// did not answer: an empty stdout is no answer at exit 1 only.
-	out, err := n.run.Output(ctx, local.Cmd{Name: command, Args: append([]string{"outdated", "-g", "--json"}, folder...), Timeout: contract.CurrencyBudget})
+	c := n.cmd(append([]string{"outdated", "-g", "--json"}, folder...))
+	c.Timeout = contract.CurrencyBudget
+	out, err := n.run.Output(ctx, c)
 	if err != nil || out.ExitCode > 1 || out.ExitCode == 1 && strings.TrimSpace(out.Stdout) == "" {
 		return nil, false
 	}
@@ -179,7 +184,7 @@ func (n *Npm) Remove(ctx context.Context, installs []catalog.Install, logs contr
 			return errors.New(i.Key() + " is not an npm package")
 		}
 		for _, folder := range folders {
-			c := local.Command(command, append(append([]string{"uninstall", "-g"}, folder...), v.Package)...)
+			c := n.cmd(append(append([]string{"uninstall", "-g"}, folder...), v.Package))
 			c.Logs = logs
 			if err := local.Attach(ctx, n.run, c); err != nil {
 				return err
@@ -187,6 +192,15 @@ func (n *Npm) Remove(ctx context.Context, installs []catalog.Install, logs contr
 		}
 	}
 	return nil
+}
+
+func (n *Npm) cmd(args []string) local.Cmd {
+	// outside: npm writes its logs and its update check under its cache on
+	// every call, a list included, so a read run with npm's default cache
+	// makes the ~/.npm it then reports misplaced.
+	c := local.Command(command, args...)
+	c.Env = []string{"NPM_CONFIG_CACHE=" + n.cache, "NPM_CONFIG_UPDATE_NOTIFIER=false"}
+	return c
 }
 
 func (n *Npm) global(ctx context.Context) ([][]string, error) {

@@ -41,6 +41,9 @@ type SurveyorOptions struct {
 	Containers ContainerSpace
 	// value: applies the settings a moved folder needs (tart-launcher).
 	Configurer Configurer
+	// value: writes an app's relocation into its own settings files, so a
+	// moved folder is where the app looks next.
+	Relocator Relocator
 	// value: the disks station holds on a Mac, nil on any other machine.
 	Station Station
 	// value: the hypervisor's package, whose Can rebuild row is the image
@@ -59,6 +62,11 @@ type Station interface {
 
 type Configurer interface {
 	Configure(ctx context.Context, pkg string, interactive bool) error
+}
+
+type Relocator interface {
+	// invariant: a value the owner set by hand is left as it is.
+	Relocate(ctx context.Context, app string) error
 }
 
 type Surveyor struct {
@@ -412,22 +420,18 @@ func (s *Surveyor) move(ctx context.Context, e disk.Entry, st catalog.Misplaced)
 	if st.Busy != "" && s.running(ctx, st.Busy) {
 		return disk.Outcome{}, &disk.RunningError{Name: e.Name, Process: st.Busy, Verb: "move", Subject: shown}
 	}
-	var to string
-	for _, m := range st.Move {
-		from, dest := s.o.Expand.Expand(m.From), s.o.Expand.Expand(m.To)
-		pairs := [][2]string{{from, dest}}
-		if strings.HasSuffix(m.From, "/*") {
-			matches := s.m.Glob(from)
-			pairs = pairs[:0]
-			for _, src := range matches {
-				pairs = append(pairs, [2]string{src, path.Join(dest, path.Base(src))})
-			}
+	renames, drops, to, refused := s.planMove(e, st, shown)
+	if refused != nil {
+		return disk.Outcome{}, refused
+	}
+	if len(drops) > 0 {
+		if err := s.o.Disk.Erase(ctx, drops); err != nil {
+			return disk.Outcome{}, err
 		}
-		for _, p := range pairs {
-			if err := s.o.Disk.Move(ctx, p[0], p[1]); err != nil {
-				return disk.Outcome{}, err
-			}
-			to = s.o.Expand.Display(dest)
+	}
+	for _, p := range renames {
+		if err := s.o.Disk.Move(ctx, p[0], p[1]); err != nil {
+			return disk.Outcome{}, err
 		}
 	}
 	for _, a := range st.Free {
@@ -446,10 +450,70 @@ func (s *Surveyor) move(ctx context.Context, e disk.Entry, st catalog.Misplaced)
 			return disk.Outcome{}, err
 		}
 	}
+	if err := s.relocate(ctx, e); err != nil {
+		return disk.Outcome{}, err
+	}
 	if to == "" {
 		return disk.Outcome{Name: shown, Result: catalog.StateOK, Detail: "nothing to move: its rebuildable files freed"}, nil
 	}
 	return disk.Outcome{Name: shown, Result: catalog.StateOK, Detail: "moved to " + to}, nil
+}
+
+func (s *Surveyor) relocate(ctx context.Context, e disk.Entry) error {
+	if len(e.Disk.Relocate) == 0 || s.o.Relocator == nil {
+		return nil
+	}
+	return s.o.Relocator.Relocate(ctx, e.Name)
+}
+
+// invariant: a move is planned whole before anything moves. An entry of a
+// misplaced folder whose name its cache destination already holds is the
+// same rebuildable cache twice, so the source's copy is dropped and the
+// destination's kept; any other destination that holds something (data, or
+// a whole folder's destination) refuses the move, and nothing moves.
+func (s *Surveyor) planMove(e disk.Entry, st catalog.Misplaced, shown string) (renames [][2]string, drops []string, to string, err error) {
+	for _, m := range st.Move {
+		from, dest := s.o.Expand.Expand(m.From), s.o.Expand.Expand(m.To)
+		entries := strings.HasSuffix(m.From, "/*")
+		pairs := [][2]string{{from, dest}}
+		if entries {
+			pairs = pairs[:0]
+			for _, src := range s.m.Glob(from) {
+				pairs = append(pairs, [2]string{src, path.Join(dest, path.Base(src))})
+			}
+		}
+		for _, p := range pairs {
+			to = s.o.Expand.Display(dest)
+			if !s.held(p[1]) {
+				renames = append(renames, p)
+				continue
+			}
+			if entries && s.rebuildable(e, p[1]) {
+				drops = append(drops, p[0])
+				continue
+			}
+			return nil, nil, "", &disk.DestinationHeldError{Folder: shown, Path: s.o.Expand.Display(p[1])}
+		}
+	}
+	return renames, drops, to, nil
+}
+
+func (s *Surveyor) held(p string) bool {
+	if !s.m.Exists(p) {
+		return false
+	}
+	names, err := s.m.Names(p)
+	return err != nil || len(names) > 0
+}
+
+func (s *Surveyor) rebuildable(e disk.Entry, p string) bool {
+	for _, stored := range e.Disk.Paths {
+		root := s.o.Expand.Expand(strings.TrimSuffix(stored.Path, "/*"))
+		if stored.Level == catalog.LevelCache && stored.PlacedOn(s.o.ThisMachine) && (p == root || strings.HasPrefix(p, root+"/")) {
+			return true
+		}
+	}
+	return false
 }
 
 func (s *Surveyor) Unused(ctx context.Context) ([]disk.Freeable, error) {

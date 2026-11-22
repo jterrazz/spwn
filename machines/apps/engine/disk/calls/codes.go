@@ -15,6 +15,9 @@ const (
 	NothingToErase fail.Code = "disk.nothing-to-erase"
 	AppRunning     fail.Code = "disk.app-running"
 	NotMisplaced   fail.Code = "disk.not-misplaced"
+	// value: a move's destination already holds what is not a cache of
+	// its app's, so nothing moves.
+	DestinationHeld fail.Code = "disk.destination-held"
 	// value: a name free-unused was asked that is not among what nothing
 	// uses: a machine is made from it or names it, it runs, it is gone, or
 	// station did not make it.
@@ -36,6 +39,7 @@ func coded(err error) error {
 	var running *disk.RunningError
 	var placed *disk.NotMisplacedError
 	var unread *disk.UnreadRecordError
+	var held *disk.DestinationHeldError
 	switch {
 	case errors.As(err, &unknown):
 		return fail.New(fail.NotFound, Unknown, unknown.Name, nil)
@@ -51,6 +55,8 @@ func coded(err error) error {
 		return fail.New(fail.Failed, AppRunning, running.Name, map[string]string{"process": running.Process, "verb": running.Verb, "subject": running.Subject})
 	case errors.As(err, &placed):
 		return fail.New(fail.Refused, NotMisplaced, placed.Path, nil)
+	case errors.As(err, &held):
+		return fail.New(fail.Refused, DestinationHeld, held.Folder, map[string]string{"path": held.Path})
 	case errors.As(err, &unread):
 		return fail.New(fail.Failed, RecordUnreadable, unread.Path, nil)
 	}
