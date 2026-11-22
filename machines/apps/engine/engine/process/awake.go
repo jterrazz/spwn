@@ -37,6 +37,12 @@ func (d *Engine) neverSleeps(since time.Time) {
 	}
 }
 
+// value: the Never sleeps preference says other than the awake job holds:
+// a write since the last tick, acted on at this one.
+func (d *Engine) neverSleepsWritten() bool {
+	return d.o.NeverSleeps != nil && d.o.NeverSleeps() != d.awakeJob.NeverSleeps()
+}
+
 func (d *Engine) AwakeKept() awake.Kept {
 	// value: what this engine keeps of Awake, for the stepped engine that
 	// follows it.

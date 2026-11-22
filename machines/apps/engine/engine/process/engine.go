@@ -491,6 +491,8 @@ func (d *Engine) step(ctx context.Context, tick int) {
 	if tick%serveEvery == 0 {
 		d.refreshSelf(ctx)
 		d.neverSleeps(time.Time{})
+	} else if d.neverSleepsWritten() {
+		d.neverSleeps(time.Time{})
 	}
 	d.tick(ctx)
 	d.sweepOwed(ctx)
