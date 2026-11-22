@@ -341,3 +341,27 @@ fn a_window_outside_a_bundle_carries_no_engine() {
     // Then - there is none
     assert_eq!(bundled, None);
 }
+
+#[test]
+fn the_engine_beside_the_window_in_its_bundle_comes_before_the_one_a_running_engine_said() {
+    // Given - a bundle holding the window and the engine, and a running bare engine that said its own station
+    let [home, apps] = [scratch(), scratch()];
+    let bundle = apps.join("Spwn.app");
+    let engine = bundle.join(BUNDLED_ENGINE);
+    executable(&engine, 0o755);
+    let bare = home.join(".local/bin/station");
+    executable(&bare, 0o755);
+
+    // When - the window running from that bundle looks for station
+    let bundled = bundled_of(&bundle.join("Contents/MacOS/spwn-window"));
+    let found = station_of(Where {
+        faked: None,
+        said: Some(&bare),
+        bundled: bundled.as_deref(),
+        home: &home,
+        xdg_state: None,
+    });
+
+    // Then - it is the bundle's engine, never the bare one beside it
+    assert_eq!(found, Some(engine));
+}

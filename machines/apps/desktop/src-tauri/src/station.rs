@@ -45,14 +45,16 @@ pub struct Where<'a> {
     pub xdg_state: Option<OsString>,
 }
 
+// invariant: a window inside Spwn.app runs the engine its bundle carries before any other, the one a running engine
+// invariant: names included, so the Mac stays in mode A (ADR-073).
 pub fn station_of(at: Where<'_>) -> Option<PathBuf> {
     if let Some(dir) = at.faked {
         return Some(dir.join(CORE_BINARY)).filter(|path| usable(path));
     }
     let state = state_root(at.home, at.xdg_state);
     [
-        at.said.map(Path::to_path_buf),
         at.bundled.map(Path::to_path_buf),
+        at.said.map(Path::to_path_buf),
         recorded(&state.join(RECORD_PATH)),
         recorded(&state.join(INSTALLED_PATH)),
         Some(under_home(INSTALL_DIR, at.home).join(CORE_BINARY)),
