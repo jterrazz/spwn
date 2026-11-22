@@ -90,7 +90,7 @@ A client judges an engine before it draws any of its pages. A watch of pages dec
 | --------------------------- | -------------------------------- | --------------------------------------------------------------------------------- |
 | the client's revision       | compatible: its pages are drawn  |                                                                                   |
 | below the client's, or none | `engine older than this app`     | `Update station here`, with `catalog.InstallLine`, the line that installs station |
-| above the client's          | `this app older than the engine` | the client's own update (the menu bar: `station apps install station-menubar`)    |
+| above the client's          | `this app older than the engine` | the client's own update (the menu bar: Spwn.app's, `open -b com.jterrazz.spwn`)   |
 
 An incompatible engine is running, so it is never said stopped: the menu bar's item reads `Spwn Menu: engine older than this app`, dimmed as a stopped one is, and its panel draws the engine's own page of the verdict, `menubar.home.engine-outdated`, with none of the engine's pages ([`Subscription`](../../apps/menubar/sources/station-kit/engine/Client.swift) drops them).
 

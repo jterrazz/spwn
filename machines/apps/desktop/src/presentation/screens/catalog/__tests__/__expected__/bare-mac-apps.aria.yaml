@@ -3,9 +3,9 @@
   - searchbox "Search the catalog"
   - group "Show":
     - button "On your machines1"
-    - button "Everything97" [pressed]
+    - button "Everything96" [pressed]
   - group "Category":
-    - button "All apps97" [pressed]
+    - button "All apps96" [pressed]
     - button "Package Managers8"
     - button "Runtimes7"
     - button "Shell & Terminal5"
@@ -23,7 +23,7 @@
     - button "Media5"
     - button "Remote Access3"
     - button "Security3"
-    - button "System Utilities6"
+    - button "System Utilities5"
   - region "Apps":
     - paragraph: Package Managers 8
     - button "cocoapods Dependency manager for iOS and macOS projects not installed"
@@ -133,10 +133,9 @@
     - button "adguard Ad blocker for Safari not installed"
     - button "bitwarden Password manager not installed"
     - button "passepartout VPN client not installed"
-    - paragraph: System Utilities 6
+    - paragraph: System Utilities 5
     - button "betterdisplay Flexible HiDPI scaling and display management not installed"
     - button "mole Tidy, uninstall, analyze, and optimize macOS from the terminal not installed"
     - button "pipifier Picture-in-Picture for Safari not installed"
     - button "snippety Code snippet manager not installed"
     - button "speedtest Internet speed test not installed"
-    - button "station-menubar Machines' menu bar app, from the latest release not installed"

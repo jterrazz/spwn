@@ -616,7 +616,7 @@ func releaseTag(w *World, args []string) error {
 	r := Release{Tag: args[0], URL: "https://github.com/" + catalog.StationRepo + "/releases/tag/" + args[0]}
 	switch {
 	case len(args) == 1:
-		r.Assets = []string{"station-linux-amd64", "station-linux-arm64", "station-darwin-amd64", "station-darwin-arm64", "Station.app.zip"}
+		r.Assets = []string{"station-linux-amd64", "station-linux-arm64", "station-darwin-amd64", "station-darwin-arm64"}
 	case args[1] == "no-asset":
 		r.Assets = []string{"station-linux-amd64", "station-linux-arm64"}
 	default:

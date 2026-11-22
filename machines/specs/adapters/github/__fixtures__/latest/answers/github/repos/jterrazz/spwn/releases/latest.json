@@ -6,7 +6,6 @@
         { "name": "station-linux-amd64" },
         { "name": "station-linux-arm64" },
         { "name": "station-darwin-amd64" },
-        { "name": "station-darwin-arm64" },
-        { "name": "Station.app.zip" }
+        { "name": "station-darwin-arm64" }
     ]
 }

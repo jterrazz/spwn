@@ -213,7 +213,7 @@ final class Model {
         page.context = Context(machine: state.page?.context?.machine ?? Format.bareName(ProcessInfo.processInfo.hostName), kind: page.context?.kind)
         if why == .appOlder, var s = page.sections?.first, var row = s.items?.first?.row {
             row.cells = [Value(kind: "text", text: why.words)]
-            row.hint = Hint(command: "station apps install station-menubar")
+            row.hint = Hint(command: "open -b com.jterrazz.spwn")
             s.items = [Item(row: row)]
             s.caption = [Value(kind: "text", text: why.remedy)]
             page.sections = [s]

@@ -22,6 +22,18 @@ static char *station_agent(const char *plist, int on) {
 	}
 }
 
+static char *station_login_item(const char *identifier) {
+	@autoreleasepool {
+		SMAppService *service = [SMAppService loginItemServiceWithIdentifier:[NSString stringWithUTF8String:identifier]];
+		NSError *err = nil;
+		if ([service registerAndReturnError:&err]) {
+			return NULL;
+		}
+		NSString *why = [NSString stringWithFormat:@"%@ %ld: %@", err.domain, (long)err.code, err.localizedDescription];
+		return strdup(why.UTF8String);
+	}
+}
+
 static int station_agent_enabled(const char *plist) {
 	@autoreleasepool {
 		SMAppService *service = [SMAppService agentServiceWithPlistName:[NSString stringWithUTF8String:plist]];
@@ -51,6 +63,20 @@ func (Agents) Registered(plist string) bool {
 	name := C.CString(plist)
 	defer C.free(unsafe.Pointer(name))
 	return C.station_agent_enabled(name) != 0
+}
+
+// value: registers the login item of the app whose bundle holds this
+// binary, named by its bundle identifier in Contents/Library/LoginItems,
+// which macOS starts now and at every login.
+func (Agents) ShowLoginItem(identifier string) error {
+	name := C.CString(identifier)
+	defer C.free(unsafe.Pointer(name))
+	why := C.station_login_item(name)
+	if why == nil {
+		return nil
+	}
+	defer C.free(unsafe.Pointer(why))
+	return errors.New(C.GoString(why))
 }
 
 func agent(plist string, on C.int) error {

@@ -50,6 +50,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/machines/adapter/dial"
 	machinescalls "github.com/jterrazz/studio-station/apps/engine/machines/calls"
 	machinescontract "github.com/jterrazz/studio-station/apps/engine/machines/contract"
+	"github.com/jterrazz/studio-station/apps/engine/platform/darwin"
 	"github.com/jterrazz/studio-station/apps/engine/platform/local"
 	"github.com/jterrazz/studio-station/apps/engine/remote"
 	"github.com/jterrazz/studio-station/apps/engine/remote/api"
@@ -562,7 +563,8 @@ func (i engineInstaller) installAgent(ctx context.Context, jobs contract.Jobs, e
 // bundle's first start, and keeps nothing of them: both are booted out,
 // waited out of launchd and their definitions deleted before the bundle
 // registers its own labels, which no record of the bare jobs matches, and
-// the VMs outlive the restart and are adopted again (ADR-073). Then the jobs' start is recorded, and
+// the VMs outlive the restart and are adopted again (ADR-073). Then the
+// standalone menu bar goes, the jobs' start is recorded, and
 // ~/.local/bin/station links into the bundle; started tells whether what
 // the jobs start with changed.
 func (i engineInstaller) intoTheBundle(ctx context.Context, bundle string) (started bool, err error) {
@@ -575,10 +577,35 @@ func (i engineInstaller) intoTheBundle(ctx context.Context, bundle string) (star
 			return false, retireErr
 		}
 	}
+	hadMenuBar, err := i.retireStandaloneMenuBar(ctx)
+	if err != nil {
+		return false, err
+	}
+	if hadMenuBar {
+		_ = darwin.Agents{}.ShowLoginItem(catalog.MenuBarBundle)
+	}
 	if started, err = i.writeJobStart(); err != nil {
 		return false, err
 	}
 	return started, i.linkIntoTheBundle(filepath.Join(bundle, catalog.BundledEnginePath))
+}
+
+// invariant: the menu bar an earlier release installed on its own leaves with
+// the bare jobs, since Spwn.app carries it: its own binary unregisters its
+// login item, its running copy quits, and its bundle is deleted; had tells
+// whether there was one, so the bundle's menu bar is shown in its place.
+func (i engineInstaller) retireStandaloneMenuBar(ctx context.Context) (had bool, err error) {
+	app := filepath.Join(i.m.sys.Env.Home(), catalog.StandaloneMenuBarPath)
+	bin := filepath.Join(app, "Contents", "MacOS", "StationMenuBar")
+	if _, statErr := i.m.sys.FS.Stat(bin); statErr != nil {
+		if errors.Is(statErr, fs.ErrNotExist) {
+			return false, nil
+		}
+		return false, statErr
+	}
+	_, _ = i.m.sys.Run.Output(ctx, local.Cmd{Name: bin, Args: []string{"--unregister-login-item"}})
+	_, _ = i.m.sys.Run.Output(ctx, local.Cmd{Name: "/usr/bin/pkill", Args: []string{"-f", bin}})
+	return true, i.m.sys.FS.RemoveAll(app)
 }
 
 func (i engineInstaller) writeJobStart() (bool, error) {

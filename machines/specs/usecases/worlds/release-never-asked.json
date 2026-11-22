@@ -10,8 +10,7 @@
                 "station-linux-amd64",
                 "station-linux-arm64",
                 "station-darwin-amd64",
-                "station-darwin-arm64",
-                "Station.app.zip"
+                "station-darwin-arm64"
             ]
         }
     ],

@@ -3,9 +3,9 @@
   - searchbox "Search the catalog"
   - group "Show":
     - button "On your machines6"
-    - button "Everything97" [pressed]
+    - button "Everything96" [pressed]
   - group "Category":
-    - button "All apps97"
+    - button "All apps96"
     - button "Package Managers8"
     - button "Runtimes7"
     - button "Shell & Terminal5"
@@ -23,7 +23,7 @@
     - button "Media5"
     - button "Remote Access3"
     - button "Security3"
-    - button "System Utilities6"
+    - button "System Utilities5"
   - region "Apps":
     - paragraph: Git 4
     - button "gh 3 of 6 machines GitHub CLI for repository management 2.98.0 is out 2.97.0"

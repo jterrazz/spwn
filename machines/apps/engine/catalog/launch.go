@@ -74,6 +74,8 @@ const BundledEnginePath = "Contents/MacOS/" + BundledEngine // value: where Spwn
 
 const BundledMenuBarPath = "Contents/Library/LoginItems/Station.app" // value: where Spwn.app holds the menu bar, its login item, relative to the bundle.
 
+const StandaloneMenuBarPath = "Applications/Station.app" // value: where an earlier release installed the menu bar on its own, relative to the home, which the move into Spwn.app deletes.
+
 const JobStartFile = "jobs.json" // value: the file, in ~/.local/state/station, that a bundled job of the engine reads at its start (ADR-073, mode A).
 
 func JobStartPath(home string) string {

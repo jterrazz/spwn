@@ -24,7 +24,7 @@ A released `Spwn.app` is signed with the Developer ID, its menu bar inside it, n
 
 A machine takes the release through the one-line install of [Getting started](../start/getting-started.md), which downloads the asset named for its platform; re-running it is Machines' own upgrade. What its Machinefile carries is upgraded by `station upgrade`, which leaves Machines itself alone ([Machinefiles](../reference/machinefiles.md#upgrade)).
 
-A Mac takes `Station.app` as an app of the catalog, `station apps install station-menubar` ([Apps and skills](../reference/apps-and-skills.md)), with no Xcode: it reads the latest release's tag once, downloads that release's `Station.app.zip`, refuses it unless its `checksums.txt` vouches for it, and puts it at `~/Applications/Station.app`, as `make menubar-install` does: the new bundle is copied beside the old, then renamed over it, so a failed install keeps the old app. A running `Station.app` keeps its old process until it is quit and opened again. Like that target, it registers no login item: the app's own "Open at login" switch does.
+A Mac takes the menu bar with Spwn.app, which carries it as its login item and updates it with itself: no catalog app installs it on its own, and the app's first start deletes the `~/Applications/Station.app` an earlier release installed, its login item unregistered first ([ADR-073](../decisions/073-spwn-app-carries-the-engine-on-a-mac-with-a-screen.md)).
 
 The window updates itself: at each start it reads `latest.json` of the latest release and, when it is newer, offers it on the Engine page; Install and relaunch swaps the bundle where it runs and relaunches it ([ADR-065](../decisions/065-the-window-updates-itself-through-the-tauri-updater.md)).
 
