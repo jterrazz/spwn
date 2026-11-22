@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 
 import type { CorePort } from '../../application/ports/core.port';
 import type { EnginePort, In, Out, ReadName, WatchName } from '../../application/ports/engine.port';
+import type { MenuBarPort } from '../../application/ports/menu-bar.port';
 import type { OpenerPort } from '../../application/ports/opener.port';
 import type { PresencePort } from '../../application/ports/presence.port';
 import type { WindowUpdatePort } from '../../application/ports/window-update.port';
@@ -13,6 +14,8 @@ import { READING } from '../../application/use-cases/entry';
 import type { Asked, Reading } from '../../application/use-cases/entry';
 import { offers } from '../../application/use-cases/fresh';
 import { GestureStore } from '../../application/use-cases/gesture-store';
+import { MenuBarFlow, NO_MENU_BAR } from '../../application/use-cases/menu-bar-flow';
+import type { MenuBarState } from '../../application/use-cases/menu-bar-flow';
 import { StateMirror, viewOf } from '../../application/use-cases/mirror';
 import type { MirrorTiming } from '../../application/use-cases/mirror';
 import { reachOf } from '../../application/use-cases/reach';
@@ -38,6 +41,7 @@ export type Dependencies = {
     core?: CorePort | undefined;
     coreLookEvery?: number | undefined;
     windowUpdate?: undefined | WindowUpdatePort;
+    menuBar?: MenuBarPort | undefined;
     reads?: Partial<StoreTiming> | undefined;
     mirror?: Partial<MirrorTiming> | undefined;
     now?: (() => Date) | undefined;
@@ -54,6 +58,7 @@ type Engine = {
     core: CoreFlow;
     update: UpdateFlow;
     windowUpdate: WindowUpdateFlow;
+    menuBar: MenuBarFlow;
 };
 
 const EngineContext = createContext<Engine | null>(null);
@@ -74,6 +79,7 @@ export function EngineProvider({
         core = NO_CORE,
         coreLookEvery,
         windowUpdate = NO_WINDOW_UPDATE,
+        menuBar = NO_MENU_BAR,
         reads,
         mirror,
         now = NOW,
@@ -83,6 +89,7 @@ export function EngineProvider({
             client,
             core: new CoreFlow(core, coreLookEvery),
             gestures: new GestureStore(),
+            menuBar: new MenuBarFlow(menuBar),
             mirror: new StateMirror(client, mirror),
             now,
             opener,
@@ -91,7 +98,7 @@ export function EngineProvider({
             update: new UpdateFlow(core),
             windowUpdate: new WindowUpdateFlow(windowUpdate),
         }),
-        [client, core, coreLookEvery, mirror, now, opener, presence, reads, windowUpdate],
+        [client, core, coreLookEvery, menuBar, mirror, now, opener, presence, reads, windowUpdate],
     );
     useEffect(() => {
         engine.windowUpdate.start();
@@ -239,4 +246,10 @@ export function useRead<N extends ReadName>(
     const reading = useAsked({ input, kind: 'read', name, target });
     useStaleMark(reading);
     return usePlaceholder(isOutOf(name, reading) ? reading : READING, asking);
+}
+
+export function useMenuBar(): { flow: MenuBarFlow; state: MenuBarState } {
+    const { menuBar } = useEngine();
+    const state = useSyncExternalStore(menuBar.subscribe, menuBar.state);
+    return { flow: menuBar, state };
 }

@@ -248,7 +248,16 @@ The window checks its own release once, when it starts, and offers it on Setting
 
 ## Settings is the app's own
 
-Settings (`SettingsPage`, `src/presentation/screens/settings/settings.tsx`, opened by ⌘,) holds what the window decides for itself, never a machine's, which the catalog's Machine settings shelf holds. Today that is two panels: the Window panel, the window's own release ([above](#the-window-updates-itself)), and the Engine panel, the engine's line (`useEngineLine`, `src/presentation/navigation/engine-line.ts`) with Open, which opens the Engine page. The window keeps no preference of its own yet, so Settings draws no control that would set one.
+Settings (`SettingsPage`, `src/presentation/screens/settings/settings.tsx`, opened by ⌘,) holds what the window decides for itself, never a machine's, which the catalog's Machine settings shelf holds. Today that is three panels: the Window panel, the window's own release ([above](#the-window-updates-itself)); the Menu bar panel, its switch ([below](#the-menu-bar-is-switched-from-settings)); and the Engine panel, the engine's line (`useEngineLine`, `src/presentation/navigation/engine-line.ts`) with Open, which opens the Engine page. The window keeps no preference of its own: the one switch it draws sets what macOS holds.
+
+## The menu bar is switched from Settings
+
+Spwn.app carries the menu bar, `Contents/Library/LoginItems/Station.app`, as its login item, and the Menu bar panel's "Show in menu bar" is its one switch ([ADR-073](../../docs/decisions/073-spwn-app-carries-the-engine-on-a-mac-with-a-screen.md)); the menu bar draws none of its own. Its scenarios are [B1 to B4](SCENARIOS.md#the-menu-bar).
+
+- The shell owns it: two commands of `src-tauri/src/menu_bar.rs`, `menu_bar_read` and `menu_bar_show`, over `SMAppService.loginItem(identifier:)` with the menu bar's bundle id, `com.jterrazz.station.menubar`. On registers it, which starts it now and at every login, and Off unregisters it. Each answers the status macOS then holds, `shown`, `hidden` or `approval` (registered, waiting for the owner in System Settings, General, Login Items), so the switch draws what is true, never what was asked. A debug build and any build off macOS answer `unsupported` and touch no login item.
+- `MenuBarFlow` (`src/application/use-cases/menu-bar-flow.ts`) runs over the port `MenuBarPort`: Settings reads it each time it is drawn, a press switches it, and a refusal keeps the state held beside the shell's message (`src/domain/menu-bar.ts`). `MenuBar` (`src/presentation/features/menu-bar/menu-bar.tsx`) draws the panel, and nothing before the first answer nor while the shell answers `unsupported`.
+- The B to A move shows the menu bar in place of a standalone one it retires (the engine's `darwin.Agents.ShowLoginItem`); from then on, the switch alone changes it.
+- A proof build plays it without a shell: `?menubar=shown`, `hidden`, `approval` or `refusing` gives the window `scriptedMenuBar` (`src/infrastructure/outbound/menu-bar-scripted/`), its login item held in memory.
 
 ## The compatibility verdict
 

@@ -2,6 +2,7 @@ import { Channel, invoke } from '@tauri-apps/api/core';
 
 import type { CorePort } from '../application/ports/core.port';
 import type { Link } from '../application/ports/engine.port';
+import type { MenuBarPort } from '../application/ports/menu-bar.port';
 import type { OpenerPort } from '../application/ports/opener.port';
 import type { WindowUpdatePort } from '../application/ports/window-update.port';
 import { Launch } from '../application/use-cases/launch';
@@ -17,6 +18,7 @@ import type { Pace, Recording } from '../infrastructure/outbound/engine-replay/r
 import { tauriTransport } from '../infrastructure/outbound/engine-tauri/tauri';
 import { documentLaunch } from '../infrastructure/outbound/launch-document/document-launch';
 import { NO_SHOW, tauriShow } from '../infrastructure/outbound/launch-tauri/tauri-show';
+import { tauriMenuBar } from '../infrastructure/outbound/menu-bar-tauri/tauri-menu-bar';
 import { NO_OPENER, tauriOpener } from '../infrastructure/outbound/opener-tauri/tauri-opener';
 import { tauriWindowUpdate } from '../infrastructure/outbound/window-update-tauri/tauri-window-update';
 import type { Dependencies } from '../presentation/dependencies/dependencies';
@@ -32,6 +34,7 @@ export type Replayed = {
     pace?: Pace | undefined;
     opener?: OpenerPort | undefined;
     core?: CorePort | undefined;
+    menuBar?: MenuBarPort | undefined;
 };
 
 const NO_ENGINE_YET: Link = {
@@ -154,6 +157,19 @@ async function windowUpdateOf({ inTauri, query }: Place): Promise<undefined | Wi
         : scripted.scriptedWindowUpdate(script, Number(query.get('pace') ?? '0'));
 }
 
+async function menuBarOf({ inTauri, query }: Place): Promise<MenuBarPort | undefined> {
+    if (inTauri) {
+        return tauriMenuBar({ invoke });
+    }
+    const name = query.get('menubar');
+    if (!PROOF || name === null) {
+        return undefined;
+    }
+    const scripted = await import('../infrastructure/outbound/menu-bar-scripted/scripted-menu-bar');
+    const script = scripted.menuBarScriptOf(name);
+    return script === undefined ? undefined : scripted.scriptedMenuBar(script);
+}
+
 // value: `?every=<ms>` asks the reads again on that cadence in a proof build, so a visit sees a refresh within it.
 function readsOf({ inTauri, query }: Place): Partial<StoreTiming> | undefined {
     const every = Number(query.get('every') ?? '');
@@ -166,6 +182,7 @@ export async function compose(place: Place): Promise<Dependencies> {
         core,
         coreLookEvery,
         engine: new Client(transport),
+        menuBar: await menuBarOf(place),
         now,
         opener: place.inTauri ? tauriOpener({ invoke }) : NO_OPENER,
         presence: documentPresence(),
@@ -184,10 +201,12 @@ export function composeReplay({
     pace,
     opener = NO_OPENER,
     core,
+    menuBar,
 }: Replayed): Dependencies {
     return {
         core,
         engine: new Client(replayTransport(recording, link, pace)),
+        menuBar,
         now: clockOf(recording),
         opener,
         presence: documentPresence(),

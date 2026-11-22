@@ -16,6 +16,7 @@ What the desktop window must let its user do, page by page: one row is one scena
 | No engine on this Mac    | E1 to E9                                          |
 | The engine's release     | U1 to U4                                          |
 | The window's release     | R1 to R7                                          |
+| The menu bar             | B1 to B4                                          |
 
 ## How a scenario is proved
 
@@ -203,7 +204,7 @@ A scenario is a test of `specs/website/`, a visit of the window's proof build ov
 | A8  | Open a page before it answers                   | a read not answered yet           | I open a page                                         | it draws its own verdict, panels and tiles as quiet bones, a panel's rows as one, and says what it reads; the answer, once come, only grows the page, moving nothing above what it adds | no     |
 | A9  | See an answer that is not fresh                 | a page drawn, its refresh refused | I look at the page                                    | the page stays drawn as answered, and one dimmed dot before the toolbar's action names what the engine said, the time of the answer shown beside it, until a refresh answers            | no     |
 | A10 | Move between the window's places and its spaces | any page                          | I press the rail's Inbox, then Machine, or ⌘I then ⌃1 | Inbox opens beside the Machine space's sidebar, then Machine returns to the page I left; Agent and OS say soon and open nothing                                                         | no     |
-| A11 | Reach the app's own settings                    | any page                          | I press the rail's Settings, or ⌘,                    | Settings holds the window's release and the engine's line, apart from the catalog's Machine settings                                                                                    | no     |
+| A11 | Reach the app's own settings                    | any page                          | I press the rail's Settings, or ⌘,                    | Settings holds the window's release, the menu bar's switch where the window has one, and the engine's line, apart from the catalog's Machine settings                                   | no     |
 
 ## No engine on this Mac
 
@@ -245,3 +246,14 @@ The window checks its own release once, at its start, and offers it on Settings'
 | R5  | Keep the window when its update fails        | the install is refused                             | I press Install and relaunch, then Try again   | "The update did not install. Spwn is unchanged.", the shell's message and what to do, then Try again installs with no check              | no     |
 | R6  | One row at the foot when both are out        | the engine is behind and the window finds v0.22.0  | I look at the sidebar foot, then press its row | only the engine's row; it opens the Engine page, which offers the engine's Update, and Settings offers the window's Install and relaunch | no     |
 | R7  | The window really relaunches as the new one  | a released window, an older one installed          | it starts and I press Install and relaunch     | it relaunches as the new version: proved outside `make test`, by the macOS rehearsal and the first real publish                          | no     |
+
+## The menu bar
+
+Spwn.app carries the menu bar, Spwn Menu, as its login item, and Settings' Menu bar panel switches it: On registers it with macOS, which starts it now and at every login, Off unregisters it ([ADR-073](../../docs/decisions/073-spwn-app-carries-the-engine-on-a-mac-with-a-screen.md)). The switch shows what macOS holds, read each time Settings is drawn and after each press. A window with no switch (a debug build, Linux, a page outside Tauri) draws no panel.
+
+| ID  | Scenario                            | Given                             | When                         | Then                                                                                           | Mockup |
+| --- | ----------------------------------- | --------------------------------- | ---------------------------- | ---------------------------------------------------------------------------------------------- | ------ |
+| B1  | Show the menu bar at every login    | the menu bar is hidden            | I open Settings and press On | the switch reads On                                                                            | no     |
+| B2  | Hide the menu bar                   | the menu bar is shown             | I press Off                  | the switch reads Off                                                                           | no     |
+| B3  | Learn that macOS waits for approval | macOS holds the item for approval | I press On                   | the switch reads On, and the panel says to allow Spwn in System Settings, General, Login Items | no     |
+| B4  | Read why the switch failed          | macOS refuses the item            | I press On                   | "The menu bar could not be switched." with the shell's message, and the switch still reads Off | no     |

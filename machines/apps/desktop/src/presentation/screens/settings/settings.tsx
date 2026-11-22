@@ -1,4 +1,5 @@
 import { useRead } from '../../dependencies/dependencies';
+import { MenuBar } from '../../features/menu-bar/menu-bar';
 import { WindowRelease } from '../../features/window-release/window-release';
 import { useEngineLine } from '../../navigation/engine-line';
 import type { Route } from '../../navigation/route';
@@ -46,6 +47,7 @@ export function SettingsPage({ go }: { go: Go }) {
     return (
         <div className={page.page}>
             <WindowRelease />
+            <MenuBar />
             <EnginePanel go={go} />
         </div>
     );

@@ -3,6 +3,7 @@
 mod bridge;
 mod engine;
 mod local_core;
+mod menu_bar;
 mod opener;
 mod station;
 mod updates;
@@ -52,6 +53,8 @@ fn main() {
             local_core::core_cancel,
             updates::window_update_check,
             updates::window_update_install,
+            menu_bar::menu_bar_read,
+            menu_bar::menu_bar_show,
             window::window_ready
         ])
         .on_page_load(move |webview, payload| {
