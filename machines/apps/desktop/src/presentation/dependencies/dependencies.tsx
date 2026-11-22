@@ -175,15 +175,26 @@ function isOutOf<N extends CallName>(
     return reading.kind !== 'read' || reading.out !== undefined;
 }
 
-// invariant: a view the engine keeps is read from its mirrored stream, never asked by its call; any other read is the
-// invariant: store's.
+const IDLE = () => () => undefined;
+
+// invariant: a view the engine keeps is read from its mirrored stream, never asked by its call, unless the engine
+// invariant: could not read it: the call then answers what the window draws, its refusal. Any other read is the store's.
 function useAsked(asked: Asked): Reading<unknown> {
     const { store, mirror } = useEngine();
     const view = viewOf(asked);
     const key = askedKey(asked);
-    const subscribe = view === undefined ? store.subscriberOf(asked) : mirror.subscriberOf(view);
-    const read = () => (view === undefined ? store.reading(key) : mirror.reading(view));
-    return useSyncExternalStore(subscribe, read);
+    const subscribe = view === undefined ? IDLE : mirror.subscriberOf(view);
+    const mirrored = useSyncExternalStore(subscribe, () =>
+        view === undefined ? READING : mirror.reading(view),
+    );
+    const refused = useSyncExternalStore(subscribe, () =>
+        view === undefined ? undefined : mirror.refusedOf(view),
+    );
+    const called = view === undefined || refused !== undefined;
+    const stored = useSyncExternalStore(called ? store.subscriberOf(asked) : IDLE, () =>
+        called ? store.reading(key) : READING,
+    );
+    return called ? stored : mirrored;
 }
 
 // invariant: a reader drawn holds its answer's stale refusal in the frame's marks for as long as it is drawn.

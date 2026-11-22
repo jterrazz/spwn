@@ -33,6 +33,18 @@ function atOf(slice: EngineSliceOut, held: Reading<unknown> | undefined): Date {
     return held?.kind === 'read' ? held.at : new Date(0);
 }
 
+// value: the why of a view the engine could not read and holds no reading of: its call answers the refusal, so the
+// value: window asks it; `reading` is a view still being read, which draws its skeleton.
+function refusedOf(slice: EngineSliceOut, held: Reading<unknown>): string | undefined {
+    const refused =
+        slice.state === 'unread' &&
+        slice.value === undefined &&
+        slice.why !== undefined &&
+        slice.why !== 'reading' &&
+        held.kind !== 'read';
+    return refused ? slice.why : undefined;
+}
+
 function sameMark(held: Reading<unknown>, stale: EngineError | undefined): boolean {
     return held.kind === 'read' && held.stale?.message === stale?.message;
 }
@@ -62,6 +74,7 @@ export class StateMirror {
     private readonly client: EnginePort;
     private readonly timing: MirrorTiming;
     private readonly readings = new Map<View, Reading<unknown>>();
+    private readonly refused = new Map<View, string>();
     private readonly listeners = new Map<View, Set<() => void>>();
     private readonly subscribers = new Map<View, (listener: () => void) => () => void>();
     private open = false;
@@ -80,6 +93,8 @@ export class StateMirror {
     }
 
     readonly reading = (view: View): Reading<unknown> => this.readings.get(view) ?? READING;
+
+    readonly refusedOf = (view: View): string | undefined => this.refused.get(view);
 
     // value: the same function for a view every time, so React keeps its subscription.
     readonly subscriberOf = (view: View): ((listener: () => void) => () => void) => {
@@ -211,8 +226,23 @@ export class StateMirror {
         }
         for (const [key, slice] of Object.entries(frame.slices ?? {})) {
             if (isView(key)) {
+                this.refuse(key, refusedOf(slice, this.reading(key)));
                 this.show(key, readingOf(this.reading(key), slice));
             }
+        }
+    }
+
+    private refuse(view: View, why: string | undefined): void {
+        if (this.refused.get(view) === why) {
+            return;
+        }
+        if (why === undefined) {
+            this.refused.delete(view);
+        } else {
+            this.refused.set(view, why);
+        }
+        for (const listener of this.listeners.get(view) ?? []) {
+            listener();
         }
     }
 

@@ -2,12 +2,39 @@ import { button, component, content, dialog, file, heading, region, within } fro
 import { describe, expect, test } from 'vitest';
 
 import { pageOver } from '../../../../../composition/__tests__/page-over';
+import { isRecord } from '../../../../../domain/request-key';
 import { recordingsOf } from '../../../../../infrastructure/outbound/engine-replay/recordings';
+import type { Recording } from '../../../../../infrastructure/outbound/engine-replay/replay';
 
 const recordingFor = await recordingsOf('stories', 'two-macs', 'leftovers');
 
 function signInsOver(world: string, machine: string) {
     return pageOver(recordingFor(world), { machine, page: 'machine', tab: 'Sign-ins' });
+}
+
+function refusingSignIns(world: string, machine: string): Recording {
+    const recording = recordingFor(world);
+    return {
+        ...recording,
+        exchanges: recording.exchanges.map((exchange) => {
+            const asked = isRecord(exchange.request.in) ? exchange.request.in : {};
+            return exchange.request.watch === 'accounts.list' && asked.Machine === machine
+                ? {
+                      ...exchange,
+                      answers: [
+                          {
+                              error: {
+                                  code: 'guest_timeout',
+                                  message: `${machine} did not answer`,
+                                  type: 'failed',
+                              },
+                              v: 2,
+                          },
+                      ],
+                  }
+                : exchange;
+        }),
+    };
 }
 
 describe('sign-ins', () => {
@@ -74,6 +101,20 @@ describe('sign-ins', () => {
         });
         expect(result.errors.text).toBe('');
         expect(result.content.text).toContain('Start the machine first');
+    });
+
+    test("a VM whose sign-ins cannot be read draws the call's refusal, never a skeleton", async () => {
+        // Given - api's Sign-ins over leftovers, its sign-ins read refused by the engine
+        const recording = refusingSignIns('leftovers', 'api');
+        const result = await component.render(
+            pageOver(recording, { machine: 'api', page: 'machine', tab: 'Sign-ins' }),
+            async (visitor) => {
+                // When - the engine sends the view unread, with the code of its refusal
+                // Then - the page draws what the call answers
+                await visitor.see(content('api did not answer', { exact: false }));
+            },
+        );
+        expect(result.errors.text).toBe('');
     });
 
     test('a server answers with its own verdict, and its rows offer no gesture', async () => {
