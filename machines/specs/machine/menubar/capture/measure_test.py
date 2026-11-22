@@ -171,10 +171,10 @@ class Zoom(unittest.TestCase):
 
 class Dock(unittest.TestCase):
     def capture(self, folder, theme, spwn):
-        """A dock.json of one appearance: Apple's tiles grey from 60 to 110, Spwn Menu at
-        90, and Spwn at `spwn`, each a flat 40 px tile."""
+        """A dock.json of one appearance: Apple's tiles grey from 60 to 110, and Spwn at
+        `spwn`, each a flat 40 px tile."""
         greys = dict(zip(dock.APPLE, (60, 75, 90, 100, 110)))
-        for name, grey in {**greys, "Spwn": spwn, "Spwn Menu": 90}.items():
+        for name, grey in {**greys, "Spwn": spwn}.items():
             colour = grey if isinstance(grey, tuple) else (grey,) * 3
             Image.new("RGB", (40, 40), colour).save(dock.tile_path(folder, theme, name))
         Image.new("RGB", (300, 60), (50, 50, 50)).save(os.path.join(folder, f"dock-{theme}.png"))

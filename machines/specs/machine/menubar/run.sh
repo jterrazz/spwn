@@ -24,7 +24,7 @@
 #   STATION_CAPTURE_ITEM=x,y,w,h gives old's item frame, STATION_CAPTURE_PAGE=<story>
 #   the home story served (home.needs by default). native and opening add the wash
 #   and zoom measures (capture/tint.py, opening.py), which fail the run when they fail.
-#   dock builds Spwn.app too and judges both apps' icons in the Dock (capture/dock.py).
+#   dock builds Spwn.app too and judges its icon in the Dock (capture/dock.py).
 #   STATION_CAPTURE_SET=bench is the bench alone: the tree's engine is built in the
 #   guest by the pinned Go and serves the app in place of the fake one, the app
 #   opens its panel and This Mac's page STATION_BENCH_RUNS times each (50 unless

@@ -49,13 +49,13 @@ HOLD = 0.15
 # read them in System Settings, 2026-11-21), each in the scheme its name gives.
 THEMES = [("RegularLight", "light"), ("RegularDark", "dark"), ("ClearLight", "light"),
           ("ClearDark", "dark"), ("TintedLight", "light"), ("TintedDark", "dark")]
-# value: the pinned apps, the two under judgement each between Apple's; Finder is
-# the Dock's first tile whatever is pinned, and a tile's accessibility name is its bundle's
-# file name ("Station" for Spwn Menu). The window is built by make window.
+# value: the pinned apps, the one under judgement between Apple's; Finder is the Dock's
+# first tile whatever is pinned, and a tile's accessibility name is its bundle's file name.
+# The window is built by make window, the menu bar inside it, which keeps no Dock tile.
 DOCK = [("Safari", "/Applications/Safari.app"), ("Notes", "/System/Applications/Notes.app"),
         ("Spwn", "/Applications/Spwn.app"), ("System Settings", "/System/Applications/System Settings.app"),
-        ("Spwn Menu", "/Applications/Station.app"), ("Terminal", "/System/Applications/Utilities/Terminal.app")]
-BUILT = {"/Applications/Spwn.app": f"{ROOT}/.artifacts/window/Spwn.app", "/Applications/Station.app": APP}
+        ("Terminal", "/System/Applications/Utilities/Terminal.app")]
+BUILT = {"/Applications/Spwn.app": f"{ROOT}/.artifacts/window/Spwn.app"}
 TILE_PT = 64
 
 
@@ -398,7 +398,7 @@ class Rig:
         self.say(f"-- {name}: {len(frames)} frames in {frames[-1][0]:.1f} s")
         return meta
 
-    # value: the two bundles go where a person installs them, then the Dock is
+    # value: Spwn.app goes where a person installs it, then the Dock is
     # rewritten to Finder and DOCK alone, at TILE_PT with no magnification, over a plain
     # grey desktop: a Clear or Tinted tile is translucent, so its pixels carry the ground
     # behind it, and one ground for every appearance judges the icon alone.

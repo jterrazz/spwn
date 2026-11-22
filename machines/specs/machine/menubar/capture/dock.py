@@ -17,7 +17,7 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
 APPLE = ["Finder", "Safari", "Notes", "System Settings", "Terminal"]
-JUDGED = ["Spwn", "Spwn Menu"]
+JUDGED = ["Spwn"]
 MONO = ["ClearLight", "ClearDark", "TintedLight", "TintedDark"]
 # value: the middle of a tile, clear of its rounded corners and of the Dock's glass.
 INNER = 0.6
