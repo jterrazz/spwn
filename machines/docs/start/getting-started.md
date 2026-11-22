@@ -52,7 +52,7 @@ launchctl bootout gui/$UID/com.jterrazz.station.engine
 launchctl bootout gui/$UID/com.jterrazz.station.agent
 ```
 
-The two labels are `catalog.EngineLabel` and `catalog.AgentLabel` (`apps/engine/catalog/launch.go`). The `bootout` of a job that is not loaded fails: that is fine, go on. Then the files launchd read, and Station.app when the menu bar was installed:
+The two labels are `catalog.EngineLabel` and `catalog.AgentLabel` (`apps/engine/catalog/launch.go`), the bare install's ([ADR-073](../decisions/073-spwn-app-carries-the-engine-on-a-mac-with-a-screen.md), mode B). On a Mac with Spwn.app the two jobs are the bundle's own, `catalog.BundledJobs`, and this recipe does not cover them. The `bootout` of a job that is not loaded fails: that is fine, go on. Then the files launchd read, and Station.app when the menu bar was installed:
 
 ```sh
 rm -f ~/Library/LaunchAgents/com.jterrazz.station.engine.plist ~/Library/LaunchAgents/com.jterrazz.station.agent.plist
