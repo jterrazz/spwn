@@ -4,11 +4,11 @@
 
 ## What the document holds
 
-The OS mark, the brand's own: one dot and three rounded-square rings in a two-by-two grid, which fills about 66 % of the tile. Its parts follow Apple's layer rules: each layer is a square 1024 canvas with no tile, mask or shadow of its own, and the system draws those. The owner picked it as the one app's icon on 2026-11-21.
+La pile: a stack of two glass plates over a third, with one amber ball resting on top, on a paper tile. Its parts follow Apple's layer rules: each layer is a square 1024 canvas with no tile, mask or shadow of its own, and the system draws those. The owner picked this variant, "Deux étages" (two larger plates, a bigger ball, less detail for the small Dock and 16 px), on 2026-11-22.
 
-- **Two glass groups**: `you`, the dot (`Assets/you.svg`), and `apps`, the three rounded-square rings (`Assets/apps.svg`), each with specular light and a neutral shadow, and no translucency.
-- **The ground** is a gradient: Papier in the light appearance (white to `#ebebee`), graphite in the dark one (`#2c2c2e` to `#0c0c0d`).
-- **The mark** is one ink (`#0a0a0a`) on Papier, and white in the dark appearance and in the clear and tinted ones, where the system turns it to glass over its own ground.
+- **Three glass groups**: `you`, the amber ball (`Assets/you.png`), `top`, the upper plate with its contact shadow, and `f1`, the plate below with its spill of amber light. Each plate is a top face and a side face, with specular light and no translucency.
+- **The ground** is a gradient: Papier in the light appearance (white to `#e3e6ec`), graphite in the dark one (`#383537` to `#0a0a0c`).
+- **The appearances**: each plate layer carries a default, a `-dark` and a `-tinted` picture, and the system turns the dark and tintable ones to clear or tinted glass over its own ground.
 
 `icon.json` is edited by hand or in Icon Composer (inside Xcode); `fill` and `fill-specializations` exclude each other, so every colour is a specialization list whose entry with no `appearance` is the default.
 
