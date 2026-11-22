@@ -107,11 +107,15 @@ func KindWord(k machine.Kind) string {
 }
 
 func Behind(h MacView, thisMac string) (fix string, differs bool) {
-	if h.ThisMac || h.StationVersion == "" || thisMac == "" || h.StationVersion == thisMac {
+	if h.ThisMac || h.StationVersion == "" || thisMac == "" {
 		return "", false
 	}
-	if skew := SkewOf(thisMac, h.StationVersion); skew == HereBehind || (skew == Speaks && Newer(h.StationVersion, thisMac)) {
+	switch SkewOf(thisMac, h.StationVersion) {
+	case Speaks:
+		return "", false
+	case HereBehind:
 		return "update station here (" + catalog.InstallLine + ")", true
+	case FarBehind:
 	}
 	return "update station there (" + catalog.InstallLine + ")", true
 }

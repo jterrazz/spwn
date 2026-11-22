@@ -97,13 +97,18 @@ func Actions() []page.Action {
 	}
 }
 
+func behind(h model.MacView, thisVersion string) bool {
+	_, differs := model.Behind(h, thisVersion)
+	return differs
+}
+
 func macHeadRow(h model.MacView, thisVersion string) page.Row {
 	row := page.Row{ID: h.Name, Label: h.Name, Mark: page.OK}
 	state, resources, detail := page.Text("online"), vmCount(len(h.VMs)), page.None()
 	switch {
 	case !h.Reachable:
 		row.Mark, row.Reason, state, resources = page.Attention, page.Unreachable, page.Text("unreachable"), page.Text("-")
-	case h.StationVersion != "" && h.StationVersion != thisVersion:
+	case behind(h, thisVersion):
 		row.Mark, row.Reason = page.Attention, page.Mismatch
 		detail = page.Text("station " + h.StationVersion + ", This Mac " + thisVersion)
 	case h.Engine.Known() && !h.Engine.Running():

@@ -50,3 +50,24 @@ func TestAStationOfTheOldNumberingIsAskedToUpdateThere(t *testing.T) {
 		t.Errorf("Behind = %q, %v; want the v3 Mac asked to update", fix, ok)
 	}
 }
+
+func TestBehindFollowsTheSkewOfTheReleases(t *testing.T) {
+	there := "update station there (" + catalog.InstallLine + ")"
+	here := "update station here (" + catalog.InstallLine + ")"
+	for _, c := range []struct{ peer, own, fix string }{
+		{"v0.21.0-alpha.4-8-gabc", "v0.21.0-alpha.4", ""},
+		{"v0.21.0-alpha.4", "v0.21.0-alpha.4-8-gabc", ""},
+		{"v0.21.0-alpha.4-8-gabc", "v0.21.0-alpha.4-3-gdef", ""},
+		{"v0.21.0-alpha.4-dirty", "v0.21.0-alpha.4", ""},
+		{"v0.21.0-alpha.3", "v0.21.0-alpha.4-8-gabc", there},
+		{"v0.21.0-alpha.5", "v0.21.0-alpha.4-8-gabc", here},
+		{"dev", "v0.21.0-alpha.4", ""},
+		{"v0.21.0-alpha.4", "dev", here},
+		{"dev", "dev", ""},
+	} {
+		fix, differs := Behind(MacView{StationVersion: c.peer}, c.own)
+		if fix != c.fix || differs != (c.fix != "") {
+			t.Errorf("Behind(peer %q, here %q) = %q, %v; want %q", c.peer, c.own, fix, differs, c.fix)
+		}
+	}
+}
