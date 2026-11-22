@@ -5,6 +5,8 @@
 
 Amended by [ADR-077](077-a-workspace-trusts-its-macs-device-key-first.md): a VM authorizes its Mac's device key.
 
+Amended by [ADR-076](076-spwn-on-a-machine-one-active-app-one-background-job-the-engine-updates.md): the key agent is served by the engine, not by a launchd job of its own.
+
 Written 2026-11-20 from the connection architecture's design (option C, "hardened status quo") and its lot L2.
 
 ## Context

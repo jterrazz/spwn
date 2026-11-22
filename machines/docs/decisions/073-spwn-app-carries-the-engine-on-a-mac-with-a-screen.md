@@ -3,6 +3,8 @@
 **Status:** Proposed
 **Date:** 2026-11-21
 
+Amended by [ADR-076](076-spwn-on-a-machine-one-active-app-one-background-job-the-engine-updates.md): mode B leaves macOS after one release, and the engine, not the Tauri updater, updates the app.
+
 ## Context
 
 macOS lists the product several times on one Mac, and the owner wants it listed once (2026-11-21). Login Items shows "Spwn" and the owner's name; Local Network shows five lowercase "station" rows and one "Station"; the Dock shows two apps. The engine must stay usable without the window, so one engine binary needs two install modes, exactly one active per Mac. The design and its lots are the item "One Spwn on a Mac" in [`TODO.md`](../../TODO.md).

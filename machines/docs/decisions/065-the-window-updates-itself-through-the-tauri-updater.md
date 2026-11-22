@@ -1,6 +1,6 @@
 # ADR-065: The window updates itself through the Tauri updater
 
-**Status:** Proposed
+**Status:** Superseded by [ADR-076](076-spwn-on-a-machine-one-active-app-one-background-job-the-engine-updates.md)
 **Date:** 2026-11-20
 
 ## Context

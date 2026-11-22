@@ -117,7 +117,7 @@ The records of decisions this repository alone took go in [`decisions/`](decisio
 - [062 A failed create stays on the record until its start or its delete](decisions/062-a-failed-create-stays-on-the-record-until-its-start-or-its-delete.md) (Proposed)
 - [063 A gesture is kept by the Router of its Mac, with who did it](decisions/063-a-gesture-is-kept-by-the-router-of-its-mac.md) (Proposed)
 - [064 A key never leaves its device; station is the ssh agent](decisions/064-a-key-never-leaves-its-device.md) (Proposed)
-- [065 The window updates itself through the Tauri updater](decisions/065-the-window-updates-itself-through-the-tauri-updater.md) (Proposed)
+- [065 The window updates itself through the Tauri updater](decisions/065-the-window-updates-itself-through-the-tauri-updater.md) (Superseded by 076)
 - [066 A commit owes that it builds and lints, a lot owes the gate](decisions/066-a-commit-owes-that-it-builds-and-lints-a-lot-owes-the-gate.md) (Accepted)
 - [067 One train, appended by makers, proved at its tip](decisions/067-one-train-appended-by-makers-proved-at-its-tip.md) (Accepted)
 - [068 In the fake world no result waits on real time](decisions/068-in-the-fake-world-no-result-waits-on-real-time.md) (Proposed)
@@ -128,5 +128,7 @@ The records of decisions this repository alone took go in [`decisions/`](decisio
 - [073 Spwn.app carries the engine on a Mac with a screen; install.sh is the headless install](decisions/073-spwn-app-carries-the-engine-on-a-mac-with-a-screen.md) (Proposed)
 - [074 A far station answers its hello within 5 seconds, and ssh keeps the link alive](decisions/074-a-far-station-answers-its-hello-within-5-seconds.md) (Proposed)
 - [075 A move merges into a cache and refuses onto anything else](decisions/075-a-move-merges-a-cache-and-refuses-onto-data.md) (Proposed)
+- [076 Spwn on a machine: one active app, one background job, the engine updates](decisions/076-spwn-on-a-machine-one-active-app-one-background-job-the-engine-updates.md) (Accepted)
+- [077 A workspace trusts its Mac's device key first](decisions/077-a-workspace-trusts-its-macs-device-key-first.md) (Proposed)
 
 A decision spanning several repositories is recorded by the corpus that spans them. What was left for later is `TODO.md` at the repository root.
