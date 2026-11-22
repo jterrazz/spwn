@@ -22,6 +22,7 @@ export function MachineTab({ found, tab, go }: Props) {
         case 'Packages': {
             return (
                 <PackagesTab
+                    answers={found.mac.Reachable}
                     asked={driftAsked(found)}
                     key={name}
                     name={name}

@@ -16,7 +16,6 @@
     - text: What the engine answered is below
   - region "Upgrades":
     - heading "Upgrades" [level=2]
-    - button "Upgrade now"
     - paragraph: What the engine answered is below
   - region "Apps":
     - heading "Apps by file, a later one wins" [level=2]

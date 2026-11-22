@@ -51,17 +51,18 @@ function windowOver(world: string, machine: string) {
 }
 
 describe('Packages', () => {
-    test('a Mac with no file of its name keeps an honest head, and its refusal in the body', async () => {
+    test('a Mac with no file of its name says it follows none, and keeps its refusal in the body', async () => {
         // Given - the window on This Mac's Packages over one-mac
         const result = await component.render(
             windowOver('one-mac', 'macbook-pro'),
             async (visitor) => {
                 // When - its file has been read, and refused
                 await visitor.see(content('no Machinefile named macbook-pro.', { exact: false }));
+                await visitor.see(heading('Follows no machine file.'));
             },
         );
 
-        // Then - the head stays honest, and the refusal with its fix sits in the body
+        // Then - the head says it follows none, and the refusal with its fix sits in the body
         await expect(result.tree).toMatch(file('./__expected__/one-mac-this-mac.aria.yaml'));
     });
 
@@ -166,13 +167,14 @@ describe('Packages', () => {
         await expect(result.tree).toMatch(file('./__expected__/stories-settings.aria.yaml'));
     });
 
-    test('a machine the engine does not answer for shows its refusal', async () => {
+    test('a machine the engine does not answer for shows its refusal and offers no upgrade', async () => {
         // Given - the window on the Mac that does not answer, over mini-offline
         const result = await component.render(
             windowOver('mini-offline', 'mac-mini'),
             async (visitor) => {
                 // When - the tab has heard from its transport
                 await visitor.see(heading('No verdict from the engine.'));
+                await visitor.gone(button('Upgrade now'));
             },
         );
 

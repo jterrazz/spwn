@@ -9,6 +9,7 @@ import type {
 } from '@jterrazz/station-api';
 import { useState } from 'react';
 
+import type { EngineError } from '../../../../domain/engine-error';
 import { clock } from '../../../../domain/format';
 import { SEPARATOR } from '../../../../domain/separator';
 import { shortDay } from '../../../../domain/when';
@@ -22,7 +23,7 @@ import { SkeletonHead } from '../../../kit/skeleton';
 import { useRouter } from '../../../navigation/router';
 import { Panel, Row, Screen, Verdict } from '../../../ui/index';
 import { Page } from '../../../ui/page';
-import { chapterNoun, fileJoinOf, verdictShown } from '../../../words/shown';
+import { chapterNoun, fileJoinOf, ownState, verdictShown } from '../../../words/shown';
 import { readingWord } from '../../../words/words';
 import { Differs } from './differs';
 import { Inventory } from './inventory';
@@ -75,12 +76,31 @@ function chaptersMatch(drift: MachinefileDrift): string {
         .join('');
 }
 
+function followsNoFile(error: EngineError): boolean {
+    return error.wire?.code === 'machinefile.not-found';
+}
+
+function NoFile({ hint }: { hint: string }) {
+    return (
+        <Verdict
+            line={hint === '' ? 'What the engine answered is below' : hint}
+            size="tab"
+            title="Follows no machine file."
+            {...ownState('not-given')}
+        />
+    );
+}
+
 function FileState({ drift, name }: { drift: Read<MachinefileDrift>; name: string }) {
     if (drift.kind === 'reading') {
         return <SkeletonHead size="tab" what={`the file ${name} follows`} />;
     }
     if (drift.kind === 'failed') {
-        return <NoVerdict line="What the engine answered is below" size="tab" />;
+        return followsNoFile(drift.error) ? (
+            <NoFile hint={drift.error.wire?.hint ?? ''} />
+        ) : (
+            <NoVerdict line="What the engine answered is below" size="tab" />
+        );
     }
     const line = (
         <>
@@ -106,7 +126,7 @@ const UPGRADE_REREADS: readonly CallName[] = ['machinefile.drift', 'machinefile.
 
 type Aimed = { target: Target | undefined; name: string };
 
-type Asked = Aimed & { asked: MachinefileDriftInput };
+type Asked = Aimed & { answers: boolean; asked: MachinefileDriftInput };
 
 function lastRunOf(last: MachinefileLastRun): string {
     const day = shortDay(last.At);
@@ -145,7 +165,12 @@ function UpgradeBody({ drift }: { drift: Read<MachinefileDrift> }) {
     return <UpgradeRows upgrades={drift.out.Upgrades} />;
 }
 
-function Upgrades({ target, name, drift }: Aimed & { drift: Read<MachinefileDrift> }) {
+function Upgrades({
+    answers,
+    target,
+    name,
+    drift,
+}: Aimed & { answers: boolean; drift: Read<MachinefileDrift> }) {
     const upgrade = useGesture('machinefile.upgrade', {
         input: {},
         rereads: UPGRADE_REREADS,
@@ -156,12 +181,14 @@ function Upgrades({ target, name, drift }: Aimed & { drift: Read<MachinefileDrif
         <>
             <Panel
                 action={
-                    <GestureButton
-                        gesture={upgrade}
-                        label="Upgrade now"
-                        title={`Upgrade what the file of ${name} lists?`}
-                        verb="Upgrade"
-                    />
+                    answers ? (
+                        <GestureButton
+                            gesture={upgrade}
+                            label="Upgrade now"
+                            title={`Upgrade what the file of ${name} lists?`}
+                            verb="Upgrade"
+                        />
+                    ) : undefined
                 }
                 title="Upgrades"
             >
@@ -172,19 +199,19 @@ function Upgrades({ target, name, drift }: Aimed & { drift: Read<MachinefileDrif
     );
 }
 
-function Setup({ target, name, asked, onPlan }: Asked & { onPlan: () => void }) {
+function Setup({ answers, target, name, asked, onPlan }: Asked & { onPlan: () => void }) {
     const drift = useRead('machinefile.drift', asked);
     return (
         <Page>
             <FileState drift={drift} name={name} />
             {drift.kind === 'read' ? <Differs drift={drift.out} onPlan={onPlan} /> : null}
-            <Upgrades drift={drift} name={name} target={target} />
+            <Upgrades answers={answers} drift={drift} name={name} target={target} />
             <Inventory drift={drift} target={target} />
         </Page>
     );
 }
 
-export function PackagesTab({ name, target, asked }: Asked) {
+export function PackagesTab({ answers, name, target, asked }: Asked) {
     const [planning, setPlanning] = useState(false);
     return (
         <Screen>
@@ -199,6 +226,7 @@ export function PackagesTab({ name, target, asked }: Asked) {
                 />
             ) : (
                 <Setup
+                    answers={answers}
                     asked={asked}
                     name={name}
                     onPlan={() => {
