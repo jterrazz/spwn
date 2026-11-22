@@ -59,7 +59,7 @@ rm -rf ~/Applications/Station.app
 rm -rf ~/Library/Application\ Support/com.jterrazz.spwn ~/Library/Caches/com.jterrazz.spwn ~/Library/WebKit/com.jterrazz.spwn ~/Library/Preferences/com.jterrazz.spwn.plist
 ```
 
-macOS keeps what it recorded of the app in its Background Task Management database, three records (Spwn and its two agents) marked disabled, and no command of Machines reaches them: `sudo sfltool resetbtm` clears the whole database and is yours to run, after a restart. The window's own folders in the last line are the Tauri shell's, named by its bundle identifier `com.jterrazz.spwn`; one that is absent is fine.
+macOS keeps what it recorded of the app in its Background Task Management database, three records (Spwn and its two agents) marked disabled, and no command of Machines reaches them: `sudo sfltool resetbtm` clears the whole database and is yours to run, after a restart. A Mac that moved from mode B to mode A keeps two more, the bare jobs `com.jterrazz.station.engine` and `com.jterrazz.station.agent`, which `sfltool dumpbtm` lists as legacy agents with no plist behind them: the move deleted their plists, and nothing but `sfltool resetbtm` takes the records, so it is your one-time cleanup there too, never run by Machines (decided 2026-11-22). The window's own folders in the last line are the Tauri shell's, named by its bundle identifier `com.jterrazz.spwn`; one that is absent is fine.
 
 Then the binaries, the shell profile's blocks and the folders:
 
