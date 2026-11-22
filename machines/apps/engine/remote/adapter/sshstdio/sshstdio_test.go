@@ -91,9 +91,9 @@ func TestAnotherMacIsReachedOnlyThroughItsEngineInBatchMode(t *testing.T) {
 		t.Fatal(err)
 	}
 	_ = ep.Close()
-	want := []string{"ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=5", "mac-mini", "--", "sh", "-c"}
+	want := []string{"ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=5", "-o", "ServerAliveInterval=2", "-o", "ServerAliveCountMax=2", "mac-mini", "--", "sh", "-c"}
 	if len(s.ran) != 1 || !slices.Equal(s.ran[0][:len(want)], want) || !strings.HasSuffix(strings.Join(s.ran[0], " "), " station engine attach") {
-		t.Errorf("dialing mac-mini ran %q, want one BatchMode ssh to its `station engine attach`", s.ran)
+		t.Errorf("dialing mac-mini ran %q, want one BatchMode ssh with keepalives to its `station engine attach`", s.ran)
 	}
 }
 

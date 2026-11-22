@@ -13,12 +13,12 @@ runs:
       files:
           .calls:
               equals: |
-                  ssh -o BatchMode=yes -o ConnectTimeout=5 x -- sh -c 'PATH="$HOME/.local/bin:/usr/local/bin:$PATH" exec station "$@"' station engine attach
-                  ssh -o BatchMode=yes -o ConnectTimeout=5 x -- sh -c 'PATH="$HOME/.local/bin:/usr/local/bin:$PATH" exec station "$@"' station engine attach
+                  ssh -o BatchMode=yes -o ConnectTimeout=5 -o ServerAliveInterval=2 -o ServerAliveCountMax=2 x -- sh -c 'PATH="$HOME/.local/bin:/usr/local/bin:$PATH" exec station "$@"' station engine attach
+                  ssh -o BatchMode=yes -o ConnectTimeout=5 -o ServerAliveInterval=2 -o ServerAliveCountMax=2 x -- sh -c 'PATH="$HOME/.local/bin:/usr/local/bin:$PATH" exec station "$@"' station engine attach
     - command: '--on=y apps --json | /usr/bin/jq -r .schema'
       exit: 0
       stdout: |
           station.apps.list/v1
       files:
           .calls:
-              contains: ssh -o BatchMode=yes -o ConnectTimeout=5 y -- sh -c
+              contains: ssh -o BatchMode=yes -o ConnectTimeout=5 -o ServerAliveInterval=2 -o ServerAliveCountMax=2 y -- sh -c

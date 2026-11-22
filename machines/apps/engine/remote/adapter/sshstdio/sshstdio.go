@@ -21,6 +21,10 @@ const (
 	// value: the far shell found no station to exec.
 	missing     = 127
 	connectWait = 5
+	// value: ssh asks the far sshd every aliveEvery seconds over a link that
+	// passes nothing, and ends after aliveMissed asks go unanswered.
+	aliveEvery  = 2
+	aliveMissed = 2
 	// value: what the far side is given to end once its stdin is closed.
 	closeWait = 2 * time.Second
 )
@@ -40,8 +44,10 @@ func New(spawn local.Spawner, version string) Dialer { return Dialer{spawn: spaw
 func Argv(mac string) []string {
 	// invariant: the one command line station runs on another Mac: its
 	// engine's API over ssh's stdio, in BatchMode, so it never waits on a
-	// prompt nobody sees.
-	return []string{"-o", "BatchMode=yes", "-o", "ConnectTimeout=" + strconv.Itoa(connectWait), mac, "--", "sh", "-c", attach, "station", "engine", "attach"}
+	// prompt nobody sees, with keepalives, so a link that stops passing data
+	// ends.
+	return []string{"-o", "BatchMode=yes", "-o", "ConnectTimeout=" + strconv.Itoa(connectWait),
+		"-o", "ServerAliveInterval=" + strconv.Itoa(aliveEvery), "-o", "ServerAliveCountMax=" + strconv.Itoa(aliveMissed), mac, "--", "sh", "-c", attach, "station", "engine", "attach"}
 }
 
 func (d Dialer) Dial(ctx context.Context, mac string) (contract.Endpoint, error) {

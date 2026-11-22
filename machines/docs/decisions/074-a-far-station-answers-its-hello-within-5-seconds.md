@@ -1,4 +1,4 @@
-# ADR-074: A far station answers its hello within 5 seconds
+# ADR-074: A far station answers its hello within 5 seconds, and ssh keeps the link alive
 
 **Status:** Proposed
 **Date:** 2026-11-22
@@ -13,6 +13,7 @@ ssh's own `ConnectTimeout=5` bounds the TCP connect only. A far station that is 
 
 - **The hello is answered within 5 s or the connection ends** (`api.HelloBudget`, beside `api.ConnectBudget`). The budget runs from the hello's request, the far side's connect and start included. When it runs out, the connection is closed and its error is the connection's end, which over ssh is `remote.unreachable`: a read prints `✗ <mac> does not answer` and exits 0, an action `Error: <mac> does not answer` and exits 1, the words a Mac that does not answer already had. 5 s is the budget All machines gives each Mac, so a Mac is silent by one measure in both.
 - **Only the hello is bounded.** A call's own answer is not: a long action may send no frame for minutes, and a bound there would cut it. A connection whose hello answered is a far station that spoke.
+- **ssh keeps the link alive**: `-o ServerAliveInterval=2 -o ServerAliveCountMax=2`, so a link that stops passing data, a call's included, ends within about 6 s, as a Mac that does not answer.
 
 ## Consequences
 
