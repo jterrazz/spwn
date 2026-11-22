@@ -26,7 +26,16 @@ pub const BUSY: &str = "core.busy";
 pub const NOT_RUN: &str = "core.not-run";
 pub const FAKED_BY: &str = "STATION_WINDOW_CORE";
 
-const PASSED_THROUGH: [&str; 3] = ["USER", "LOGNAME", "TMPDIR"];
+const PASSED_THROUGH: [&str; 8] = [
+    "USER",
+    "LOGNAME",
+    "TMPDIR",
+    "XDG_CONFIG_HOME",
+    "XDG_DATA_HOME",
+    "XDG_STATE_HOME",
+    "XDG_CACHE_HOME",
+    "STATION_MACHINE_KIND",
+];
 const READERS_WITHIN: Duration = Duration::from_secs(2);
 
 #[derive(Clone, Copy, Debug, PartialEq, Serialize)]

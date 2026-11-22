@@ -99,6 +99,40 @@ fn the_child_gets_home_a_minimal_path_the_login_shell_and_nothing_else() {
 }
 
 #[test]
+fn the_engine_gets_the_folders_and_the_machine_kind_the_window_was_started_with() {
+    // Given - a parent environment holding the four XDG folders, the kind pin and a spec-only root
+    let parent = |name: &str| match name {
+        "XDG_CONFIG_HOME" => Some(OsString::from("/Users/someone/config")),
+        "XDG_DATA_HOME" => Some(OsString::from("/Users/someone/data")),
+        "XDG_STATE_HOME" => Some(OsString::from("/Users/someone/state")),
+        "XDG_CACHE_HOME" => Some(OsString::from("/Users/someone/cache")),
+        "STATION_MACHINE_KIND" => Some(OsString::from("mac")),
+        "STATION_SYSTEM_ROOT" => Some(OsString::from("/not-passed")),
+        _ => None,
+    };
+
+    // When - the child's environment is made
+    let mut env = environment(Path::new("/Users/someone"), "/bin/zsh".as_ref(), parent);
+    env.sort();
+
+    // Then - the folders and the kind reach it beside HOME, PATH and SHELL, and the root does not
+    assert_eq!(
+        env,
+        [
+            ("HOME", "/Users/someone"),
+            ("PATH", SEARCH_PATH),
+            ("SHELL", "/bin/zsh"),
+            ("STATION_MACHINE_KIND", "mac"),
+            ("XDG_CACHE_HOME", "/Users/someone/cache"),
+            ("XDG_CONFIG_HOME", "/Users/someone/config"),
+            ("XDG_DATA_HOME", "/Users/someone/data"),
+            ("XDG_STATE_HOME", "/Users/someone/state"),
+        ]
+        .map(|(name, value)| (String::from(name), OsString::from(value)))
+    );
+}
+
+#[test]
 fn each_line_is_streamed_as_sent_on_its_stream_then_the_exit_code() {
     // Given - a run that writes two lines out, one err and a last line with no line break
     let kept = Arc::new(Kept::default());

@@ -32,7 +32,8 @@ While no engine answers, the shell looks for the core on the disk and runs two p
 - Each run gets an environment of its own, the window's cleared: `HOME`, `PATH` fixed to
   `/usr/bin:/bin:/usr/sbin:/sbin`, `SHELL` set to the user's login shell (the account's entry, else the window's
   `SHELL`, else `/bin/zsh`, so the installer writes the profile of the shell the owner logs into), and `USER`,
-  `LOGNAME`, `TMPDIR` passed through. One run at a time, in a process group of its own, which Cancel ends with
+  `LOGNAME`, `TMPDIR` passed through, with what the engine reads of its place: the four `XDG_*_HOME` folders and
+  `STATION_MACHINE_KIND`. One run at a time, in a process group of its own, which Cancel ends with
   `SIGTERM`.
 
 What it never does:
