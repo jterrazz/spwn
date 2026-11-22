@@ -40,4 +40,39 @@ station overview
 
 An app comes with what it requires: a cask on a Mac without Homebrew installs homebrew first, said before it runs (`▸ Installing homebrew · required by tailscale · asks your password once`), its installer's words kept in `~/.local/state/station/logs/homebrew.log`. The VMs need tart and the engine: a VM command without tart offers to install it, and the first one installs the engine at login ([Machines](../reference/machines.md#the-engine)). The engine reaches its VMs through the Mac's local network, which macOS opens to Machines only once that Mac has approved it: the first `station engine start` asks on the Mac's screen, and until it is approved the start says so, `◐ local network needs you · approve station on macbook-pro's screen, or in System Settings > Privacy & Security > Local Network`. Open the Tailscale app once and log in: Machines only reads it. A setting that needs values (a password, a token) opens a form on a terminal ([Settings](../reference/settings.md)). A Mac stays tidy: dev work lives in VMs ([Machines](../reference/machines.md)), and Claude Code reaches them with a shared token ([Accounts](../reference/accounts.md#the-vault)).
 
+## 5. Remove what it put down
+
+There is no `station uninstall` command yet ([the TODO](../../TODO.md#station-uninstall-undoes-its-own-writes)): `spwn uninstall <ref>` only detaches a dependency from an agent. Removal is these steps, in this order, by hand. Run them on the Mac that carries them.
+
+First the apps and the data you want kept. `station apps remove <app>` takes back what station installed, and `station disk erase <app>` an app's data ([Disk](../reference/disk.md)): do both before the binary goes. VMs and images live in `~/.local/share/station/vms`: `station machines delete` and `station images delete` remove them, and the folder is your data until they have.
+
+```sh
+station engine stop --yes
+launchctl bootout gui/$UID/com.jterrazz.station.engine
+launchctl bootout gui/$UID/com.jterrazz.station.agent
+```
+
+The two labels are `catalog.EngineLabel` and `catalog.AgentLabel` (`apps/engine/catalog/launch.go`). The `bootout` of a job that is not loaded fails: that is fine, go on. Then the files launchd read, and Station.app when the menu bar was installed:
+
+```sh
+rm -f ~/Library/LaunchAgents/com.jterrazz.station.engine.plist ~/Library/LaunchAgents/com.jterrazz.station.agent.plist
+~/Applications/Station.app/Contents/MacOS/StationMenuBar --unregister-login-item
+rm -rf ~/Applications/Station.app
+```
+
+Then the binaries, the shell profile's blocks and the folders:
+
+```sh
+rm -f ~/.local/bin/spwn ~/.local/bin/spwn-agents ~/.local/bin/station ~/.local/bin/spwn-machines
+rm -rf ~/.local/state/station ~/.config/station ~/.cache/station ~/.spwn
+```
+
+`~/.local/share/station` is left out of that line on purpose: remove it last, once its VMs are deleted.
+
+The installer wrote one block to the profile of the shell that ran it (`~/.zshrc` for zsh, `~/.profile` for bash): the line `# Added by spwn installer`, then `export PATH="$HOME/.local/bin:$PATH"` and the aliases `agents` and `machines`. Delete those four lines. `station init` wrote the block of `~/.zshrc` between `# >>> station >>>` and `# <<< station <<<` (`blockStart` and `blockEnd`, `apps/engine/settings/zshrc.go`), and the apps' packages each a block `# >>> station <id> >>>` to `# <<< station <id> <<<`: delete every such pair, markers included, and nothing between or around them.
+
+The files `init` only edited are yours: delete none of them whole. Their paths are `catalog.AppFilePaths` (`apps/engine/catalog/disk.go`): `~/.npmrc`, `~/.bunfig.toml` (`$XDG_CONFIG_HOME/.bunfig.toml` when it is absolute), Go's env file (`~/Library/Application Support/go/env` on a Mac, `$GOENV` when absolute) and mise's `~/.config/mise/config.toml`. Remove only the keys [Disk's relocation table](../reference/disk.md#relocation) lists for each. In `~/.bunfig.toml` they sit between `# >>> station >>>` and `# <<< station <<<` (`bunfigStart`, `apps/engine/catalog/bunfig.go`), so remove that pair. On a Mac `init` found bare, each of the four holds nothing but station's keys once yours are not there, and goes whole; one with a line of yours stays, minus station's keys. `init` moved the apps' folders (`~/.bun`, `~/go`, `~/.npm`) to where those keys point, so once the keys are gone, an app writes them at the home root again.
+
+Last, `exec zsh`. [Footprint](../reference/footprint.md) lists every path station and the catalogue's apps write, by who removes it.
+
 Every command is in [Commands](../reference/commands.md); every file written is in [Footprint](../reference/footprint.md).

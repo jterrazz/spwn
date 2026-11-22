@@ -80,6 +80,14 @@ The owner's ask (2026-11-21): macOS lists the product once, where today Login It
 
 L1 starts once the owner has read ADR-073: mode A gives one Local Network row, if the nested engine carries the bundle's identifier.
 
+## `station uninstall` undoes its own writes
+
+Today removal is a recipe by hand ([Getting started](docs/start/getting-started.md#5-remove-what-it-put-down)), and `station uninstall` is an unknown command (QA, 2026-11-21). The command undoes what station wrote, by its ledger (`ledger.json`) and the Footprint's rows, never by a path list of its own: the engine's two jobs booted out, the plists, Station.app, the `# >>> station >>>` blocks, the keys `init` set in the owner's files, the folders, then its own binary last, and `--keep-data` for the VMs.
+
+- **When it starts**: with U3 of "Install and upgrade for customers", since the versioned layout and `install.json` are what it removes (`~/.local/share/station/versions/<v>/` and the symlink), and `station init` must record its edits in the ledger first, since the keys it sets in `~/.npmrc` and the other three files are not recorded today.
+- **Mode A**: with Spwn.app (L2 and L3 of "One Spwn on a Mac"), the jobs are `SMAppService` registrations the app owns, so the command unregisters them and leaves the bundle to the owner's trash; `~/.local/bin/{station,spwn}` are links it removes, not binaries. Mode B is what the recipe covers today.
+- **Not in the installer**: `install.sh` is spwn-web's, so the profile block it writes (`# Added by spwn installer`) is removed by the command from a marker the installer's record names; that record is a spwn-web change, owed first.
+
 ## The read model, RM6 and RM7
 The engine keeps one read model, whose projections are the menu bar's pages and the window's views ([ADR-070](docs/decisions/070-the-engine-keeps-one-read-model.md)). On main: RM1, the store (0cc22d9a3); RM5, the verdict in `opened` (74b908ec0); RM2, readers keep the store warm and `engine.state` streams it (1054632c4); RM3, every Mac holds every other Mac's `local` stream (dd4447ae2, ADR-072); a Mac's Accounts pending until its sign-ins answer (1395dcd7b); and RM4, the menu bar's pages projected from the store (`engine/feeds`, the rule `feeds-read-no-call`). The contract they landed is the `engine.state` paragraph and the pages paragraph of [`docs/reference/api.md`](docs/reference/api.md), which this item does not repeat. What is left is the window's half, RM6 and RM7.
 

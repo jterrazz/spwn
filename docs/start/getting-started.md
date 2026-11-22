@@ -16,6 +16,8 @@ Three commands, one working agent. It needs Docker.
 | 02   | `spwn init`      | Drops `spwn.yaml` + a starter `neo` agent into the current directory.                                          |
 | 03   | `spwn agent neo` | Opens an interactive session with neo inside a sandboxed Docker world. Container lifecycle is handled for you. |
 
+Removing what the installer put down is [machines' getting started](../../machines/docs/start/getting-started.md#5-remove-what-it-put-down)'s recipe; `spwn uninstall <ref>` only detaches a dependency from an agent.
+
 Prefer a bundled demo? `spwn init matrix` drops a ready-made multi-agent world into the current directory (swap `matrix` for any template slug in the [catalog](../../catalog/)).
 
 ## The layout
