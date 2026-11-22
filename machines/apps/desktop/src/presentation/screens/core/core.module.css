@@ -237,14 +237,6 @@
     flex: 1;
 }
 
-.below {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-8);
-    align-items: flex-start;
-    padding-top: var(--space-6);
-}
-
 .fine {
     font-size: var(--text-label);
     color: var(--t3);

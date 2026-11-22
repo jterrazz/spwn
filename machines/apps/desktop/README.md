@@ -237,13 +237,17 @@ The Engine page (`EnginePage`, `src/presentation/screens/core/engine.tsx`) draws
 
 ## The window updates itself
 
-The window checks its own release once, when it starts, and offers it on the Engine page and at the sidebar foot; a press installs it and relaunches the window. The decision is [ADR-065](../../docs/decisions/065-the-window-updates-itself-through-the-tauri-updater.md), and its proof is [the scenarios](SCENARIOS.md#the-windows-release).
+The window checks its own release once, when it starts, and offers it on Settings and at the sidebar foot; a press installs it and relaunches the window. The decision is [ADR-065](../../docs/decisions/065-the-window-updates-itself-through-the-tauri-updater.md), and its proof is [the scenarios](SCENARIOS.md#the-windows-release).
 
 - The shell owns the updater: two commands of `src-tauri/src/updates.rs`, `window_update_check` and `window_update_install`, which take no argument but the install's progress channel, so the page names no address, version or file. A debug build and any build off macOS answer `unsupported` and reach no network. They are no engine calls: `BRIDGED`, `build.rs`, the capabilities and the CSP are untouched.
 - `WindowUpdateFlow` (`src/application/use-cases/window-update-flow.ts`) runs over the port `WindowUpdatePort`: the check at start (`start`, called once by `EngineProvider`), Check now, the install with its progress, then relaunching, and a refusal at either step in the shell's code (`src/domain/window-update.ts`). A failed install keeps the update in the shell, so Try again installs it with no new check. No timer asks again.
-- `WindowRelease` (`src/presentation/screens/core/window-release.tsx`) draws the Engine page's Window panel, whatever the engine answers, even an engine older than `engine.read-release`: its Latest release row says the version this window runs, or the release out with Install and relaunch, the download counted, Relaunching Spwn, or the refusal with the shell's message and Try again. It draws nothing before the first answer, nor while the shell answers `unsupported`.
-- The sidebar foot keeps one row (`ReleaseRow`, `src/presentation/navigation/release-row.tsx`): the engine's while it is behind, else "Spwn v`<version>` available · Update" while the window's release is out. The quiet window, with no engine, draws neither.
+- `WindowRelease` (`src/presentation/features/window-release/window-release.tsx`) draws Settings' Window panel, whatever the engine answers, even an engine older than `engine.read-release`: its Latest release row says the version this window runs, or the release out with Install and relaunch, the download counted, Relaunching Spwn, or the refusal with the shell's message and Try again. It draws nothing before the first answer, nor while the shell answers `unsupported`.
+- The sidebar foot keeps one row (`ReleaseRow`, `src/presentation/navigation/release-row.tsx`): the engine's while it is behind, else "Spwn v`<version>` available · Update" while the window's release is out. The first opens the Engine page, the second Settings; the quiet window, with no engine, draws neither.
 - Its words are the window's own, about itself (`WINDOW_RELEASE_WORDS`, `WINDOW_REFUSAL_WORDS`, `src/presentation/words/words.ts`); no "What changed" is offered for the window.
+
+## Settings is the app's own
+
+Settings (`SettingsPage`, `src/presentation/screens/settings/settings.tsx`, opened by ⌘,) holds what the window decides for itself, never a machine's, which the catalog's Machine settings shelf holds. Today that is two panels: the Window panel, the window's own release ([above](#the-window-updates-itself)), and the Engine panel, the engine's line (`useEngineLine`, `src/presentation/navigation/engine-line.ts`) with Open, which opens the Engine page. The window keeps no preference of its own yet, so Settings draws no control that would set one.
 
 ## The compatibility verdict
 
@@ -302,6 +306,7 @@ The shortcuts are `src/presentation/navigation/keys.ts` over `src/presentation/n
 | ⌘K          | Find: machines, pages, a machine's tabs, packages and needs the window already holds; its first row as drawn is chosen, and a machine's tabs come in the tab bar's order |
 | ⌘[ and ⌘]   | Back and forward, as the toolbar's two buttons and a mouse's back and forward buttons do                                                                                 |
 | ⌘0          | Home                                                                                                                                                                     |
+| ⌘,          | Settings                                                                                                                                                                 |
 | ⌘1 to ⌘6    | A machine's tab, in the tab bar's order                                                                                                                                  |
 | Arrows      | The sidebar's rows up and down, a tab bar's tabs sideways, Find's results; a tab bar is one Tab stop, its chosen tab                                                     |
 | Tab, Escape | A dialog keeps the focus inside it, Escape closes it, and the focus returns to its opener                                                                                |

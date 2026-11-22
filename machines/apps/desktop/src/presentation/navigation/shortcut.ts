@@ -3,9 +3,10 @@ import type { Tab } from './route';
 
 export type Keystroke = { key: string; metaKey: boolean; ctrlKey: boolean; shiftKey: boolean };
 
-export type Shortcut = 'back' | 'find' | 'forward' | 'gallery' | 'home' | Tab;
+export type Shortcut = 'back' | 'find' | 'forward' | 'gallery' | 'home' | 'settings' | Tab;
 
-const COMMANDS: Readonly<Record<string, 'back' | 'find' | 'forward' | 'home'>> = {
+const COMMANDS: Readonly<Record<string, 'back' | 'find' | 'forward' | 'home' | 'settings'>> = {
+    ',': 'settings',
     '0': 'home',
     '[': 'back',
     ']': 'forward',

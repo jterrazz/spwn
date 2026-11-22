@@ -21,6 +21,7 @@ import { AddPasswordSheet } from './passwords/add-sheet';
 import { PasswordName } from './passwords/name';
 import { PasswordsPage } from './passwords/passwords';
 import { PlaceholderPage } from './placeholder';
+import { SettingsPage } from './settings/settings';
 import { StoragePage } from './storage/storage';
 
 function Shelf({
@@ -57,6 +58,16 @@ function ItemName({ page, item }: { page: PlainPage; item: string }) {
     return page === 'passwords' ? <PasswordName id={item} /> : item;
 }
 
+function GalleryPage({ Gallery }: Pick<PageProps, 'Gallery'>) {
+    return Gallery ? (
+        <Suspense fallback={null}>
+            <Gallery />
+        </Suspense>
+    ) : (
+        <PlaceholderPage title={TITLES.gallery} />
+    );
+}
+
 function Head({ route, found, go, newMachine }: PageProps) {
     return route.page === 'machine' && found ? (
         <MachineHeader found={found} go={go} onNewMachine={newMachine} tab={route.tab} />
@@ -90,6 +101,9 @@ function Body({ route, found, home, go, Gallery, newMachine, addMac }: PageProps
         case 'engine': {
             return <EnginePage />;
         }
+        case 'settings': {
+            return <SettingsPage go={go} />;
+        }
         case 'machine': {
             return found ? (
                 <MachineTab found={found} go={go} tab={route.tab} />
@@ -113,13 +127,7 @@ function Body({ route, found, home, go, Gallery, newMachine, addMac }: PageProps
             return <Shelf go={go} item={route.item} macs={home.macs} shelf="settings" />;
         }
         case 'gallery': {
-            return Gallery ? (
-                <Suspense fallback={null}>
-                    <Gallery />
-                </Suspense>
-            ) : (
-                <PlaceholderPage title={TITLES.gallery} />
-            );
+            return <GalleryPage Gallery={Gallery} />;
         }
     }
 }

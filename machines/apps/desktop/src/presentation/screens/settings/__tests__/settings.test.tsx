@@ -1,0 +1,41 @@
+import { button, component, content, heading, region, within } from '@jterrazz/test';
+import { describe, expect, test } from 'vitest';
+
+import { composeReplay } from '../../../../composition/compose';
+import { recordingsOf } from '../../../../infrastructure/outbound/engine-replay/recordings';
+import { EngineProvider } from '../../../dependencies/dependencies';
+import type { Route } from '../../../navigation/route';
+import { Window } from '../../../navigation/window';
+import { PAGES } from '../../registry';
+
+const recordingFor = await recordingsOf('stories');
+
+const COMMAND_COMMA = 'Meta>},{/Meta';
+const engine = region('Engine');
+
+function windowOn(initial: Route) {
+    const dependencies = composeReplay({ recording: recordingFor('stories') });
+    return (
+        <EngineProvider dependencies={dependencies}>
+            <Window initial={initial} pages={PAGES} />
+        </EngineProvider>
+    );
+}
+
+describe('Settings', () => {
+    test('⌘, opens the app’s Settings, which names its engine and opens the Engine page', async () => {
+        // Given - the window on Home over stories
+        const result = await component.render(windowOn({ page: 'home' }), async (visitor) => {
+            await visitor.see(content('2 things need you.'));
+
+            // When - ⌘, is pressed
+            await visitor.press(COMMAND_COMMA);
+
+            // Then - Settings holds the engine's line, whose Open leads to the Engine page
+            await visitor.see(within(engine, content('Engine running · v4.0.0')));
+            await visitor.click(within(engine, button('Open')));
+            await visitor.see(heading('The latest release is not known yet.'));
+        });
+        expect(result.errors.text).toBe('');
+    });
+});

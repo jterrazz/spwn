@@ -27,6 +27,10 @@ function obey(shortcut: Shortcut, router: Router, onFind: () => void): void {
             onFind();
             return;
         }
+        case 'settings': {
+            go({ page: 'settings' });
+            return;
+        }
         case 'gallery': {
             go({ page: 'gallery' });
             return;

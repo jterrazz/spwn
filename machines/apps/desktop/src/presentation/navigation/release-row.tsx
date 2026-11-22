@@ -11,15 +11,11 @@ import styles from './sidebar.module.css';
 
 type Go = (to: Route) => void;
 
-function Foot({ go, dot, said, verb }: { go: Go; dot: Shown; said: ReactNode; verb: string }) {
+type FootProps = { go: () => void; dot: Shown; said: ReactNode; verb: string };
+
+function Foot({ go, dot, said, verb }: FootProps) {
     return (
-        <button
-            className={styles.release}
-            onClick={() => {
-                go({ page: 'engine' });
-            }}
-            type="button"
-        >
+        <button className={styles.release} onClick={go} type="button">
             <span aria-hidden="true">
                 <StateDot {...dot} />
             </span>
@@ -37,7 +33,9 @@ function WindowOut({ go }: { go: Go }) {
     return (
         <Foot
             dot={ownState('window-out')}
-            go={go}
+            go={() => {
+                go({ page: 'settings' });
+            }}
             said={windowAvailableWord(state.version)}
             verb={WINDOW_RELEASE_WORDS.update}
         />
@@ -53,7 +51,9 @@ function Behind({ go }: { go: Go }) {
     return (
         <Foot
             dot={verdictShown(Head)}
-            go={go}
+            go={() => {
+                go({ page: 'engine' });
+            }}
             said={
                 <>
                     {Latest} {RELEASE_WORDS.available}

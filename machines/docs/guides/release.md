@@ -26,7 +26,7 @@ A machine takes the release through the one-line install of [Getting started](..
 
 A Mac takes the menu bar with Spwn.app, which carries it as its login item and updates it with itself: no catalog app installs it on its own, and the app's first start deletes the `~/Applications/Station.app` an earlier release installed, its login item unregistered first ([ADR-073](../decisions/073-spwn-app-carries-the-engine-on-a-mac-with-a-screen.md)).
 
-The window updates itself: at each start it reads `latest.json` of the latest release and, when it is newer, offers it on the Engine page; Install and relaunch swaps the bundle where it runs and relaunches it ([ADR-065](../decisions/065-the-window-updates-itself-through-the-tauri-updater.md)).
+The window updates itself: at each start it reads `latest.json` of the latest release and, when it is newer, offers it on the window's Settings; Install and relaunch swaps the bundle where it runs and relaunches it ([ADR-065](../decisions/065-the-window-updates-itself-through-the-tauri-updater.md)).
 
 ## From a checkout
 

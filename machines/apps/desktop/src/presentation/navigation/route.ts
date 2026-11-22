@@ -34,6 +34,7 @@ export const PLAIN_PAGES = [
     'inbox',
     'machine-files',
     'passwords',
+    'settings',
     'storage',
 ] as const;
 

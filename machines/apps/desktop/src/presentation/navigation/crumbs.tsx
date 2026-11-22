@@ -11,6 +11,7 @@ export const TITLES: Record<PlainPage, string> = {
     storage: 'Storage',
     'machine-files': 'Machine files',
     passwords: 'Passwords',
+    settings: 'Settings',
     'catalog-apps': 'Apps',
     'catalog-skills': 'Skills',
     'catalog-settings': 'Machine settings',

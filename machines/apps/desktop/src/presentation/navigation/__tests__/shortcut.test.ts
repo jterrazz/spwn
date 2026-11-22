@@ -9,6 +9,7 @@ describe('shortcut', () => {
     test.each([
         { expected: 'back', stroke: { ...bare, key: '[', metaKey: true } },
         { expected: 'home', stroke: { ...bare, key: '0', metaKey: true } },
+        { expected: 'settings', stroke: { ...bare, key: ',', metaKey: true } },
         { expected: 'find', stroke: { ...bare, key: 'K', metaKey: true } },
         { expected: 'find', stroke: { ...bare, ctrlKey: true, key: 'k' } },
         { expected: 'forward', stroke: { ...bare, key: ']', metaKey: true } },

@@ -13,9 +13,8 @@ import {
     windowOutWord,
     windowRefusalHint,
 } from '../../words/words';
-import { Fine } from './core-parts';
 
-import styles from './core.module.css';
+import styles from './window-release.module.css';
 
 type Drawn = Exclude<WindowUpdateState, { kind: 'unknown' } | { kind: 'unsupported' }>;
 
@@ -41,7 +40,7 @@ function Failed({ flow, state }: { flow: WindowUpdateFlow; state: FailedState })
     return (
         <span className={styles.below}>
             <ProgressLine detail={state.message} failed task={WINDOW_REFUSAL_WORDS[state.code]} />
-            {hint === undefined ? null : <Fine>{hint}</Fine>}
+            {hint === undefined ? null : <span className={styles.fine}>{hint}</span>}
             <span className={styles.acts}>
                 <Button
                     onClick={() => {

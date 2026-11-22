@@ -11,7 +11,7 @@ const OUT = content('Spwn v0.22.0 is out; this window runs v0.21.0.');
 const INSTALL = button('Install and relaunch');
 
 describe('window release', () => {
-    test('R1 a window with a release out shows its row at the sidebar foot, and it opens the Window panel', async () => {
+    test('R1 a window with a release out shows its row at the sidebar foot, and it opens Settings, whose Window panel offers it', async () => {
         // Given - the proof build whose window finds v0.22.0, over an engine not behind
         const result = await website.visit(
             '/?world=stories&page=home&window=out',
@@ -19,7 +19,7 @@ describe('window release', () => {
                 // When - the row is pressed
                 await visitor.click(within(sidebar, WINDOW_ROW));
 
-                // Then - the Engine page, whose Window panel offers the release
+                // Then - Settings, whose Window panel offers the release
                 await visitor.see(within(windowPanel, OUT));
                 await visitor.see(within(windowPanel, INSTALL));
             },
@@ -32,9 +32,9 @@ describe('window release', () => {
         const result = await website.visit(
             '/?world=stories&page=home&window=current',
             async (visitor) => {
-                // When - the sidebar foot's Engine line is pressed
-                await visitor.click(within(sidebar, button('Engine running · v4.0.0')));
-                await visitor.see(heading('The latest release is not known yet.'));
+                // When - ⌘, opens Settings
+                await visitor.see(content('2 things need you.'));
+                await visitor.press('Control+Comma');
 
                 // Then - the window's own line, and no offer
                 await visitor.see(
@@ -50,7 +50,7 @@ describe('window release', () => {
     test("R3 a check that cannot reach the releases says so with the shell's message, and Check now asks again", async () => {
         // Given - the proof build whose window cannot reach its releases
         const result = await website.visit(
-            '/?world=stories&page=engine&window=refused',
+            '/?world=stories&page=settings&window=refused',
             async (visitor) => {
                 await visitor.see(
                     within(windowPanel, content('The window could not read its latest release.')),
@@ -72,7 +72,7 @@ describe('window release', () => {
     test('R4 Install and relaunch downloads the release, then relaunches', async () => {
         // Given - the proof build whose window finds v0.22.0
         const result = await website.visit(
-            '/?world=stories&page=engine&window=out',
+            '/?world=stories&page=settings&window=out',
             async (visitor) => {
                 // When - Install and relaunch is pressed
                 await visitor.click(within(windowPanel, INSTALL));
@@ -87,7 +87,7 @@ describe('window release', () => {
     test('R4 a download under way counts what it took', async () => {
         // Given - the proof build whose install holds after its first chunk
         const result = await website.visit(
-            '/?world=stories&page=engine&window=install-holding',
+            '/?world=stories&page=settings&window=install-holding',
             async (visitor) => {
                 // When - Install and relaunch is pressed
                 await visitor.click(within(windowPanel, INSTALL));
@@ -103,7 +103,7 @@ describe('window release', () => {
     test('R5 a failed install keeps the window, and Try again installs with no new check', async () => {
         // Given - the proof build whose first install is refused
         const result = await website.visit(
-            '/?world=stories&page=engine&window=install-failing',
+            '/?world=stories&page=settings&window=install-failing',
             async (visitor) => {
                 // When - Install and relaunch is pressed
                 await visitor.click(within(windowPanel, INSTALL));
@@ -128,7 +128,7 @@ describe('window release', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test("R6 with the engine behind and the window's release out, the foot keeps the engine's row and the page offers both", async () => {
+    test("R6 with the engine behind and the window's release out, the foot keeps the engine's row, and each page offers its own", async () => {
         // Given - the proof build over an engine behind, whose window finds v0.22.0
         const result = await website.visit(
             '/?world=release-behind&page=home&window=out',
@@ -136,9 +136,11 @@ describe('window release', () => {
                 // When - the foot's one row is pressed
                 await visitor.click(within(sidebar, ENGINE_ROW));
 
-                // Then - the engine's Update and the window's Install and relaunch
+                // Then - the Engine page's Update, then Settings' Install and relaunch
                 await visitor.see(heading('Spwn v0.22.0 is out.'));
                 await visitor.see(within(region('Update'), button('Update')));
+                await visitor.gone(windowPanel);
+                await visitor.press('Control+Comma');
                 await visitor.see(within(windowPanel, INSTALL));
             },
         );

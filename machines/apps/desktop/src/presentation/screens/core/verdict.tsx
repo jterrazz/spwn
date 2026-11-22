@@ -1,5 +1,6 @@
 import type { Unfit } from '../../../domain/fit';
 import { useReach, useUpdate, useWindowUpdate } from '../../dependencies/dependencies';
+import { WindowRelease } from '../../features/window-release/window-release';
 import { Button, StatePill } from '../../ui/index';
 import {
     FIT_APP_UPDATE_WORD,
@@ -12,7 +13,6 @@ import {
 import { RELEASE_WORDS } from '../../words/words';
 import { Acts, Command, Fine, Head } from './core-parts';
 import { UpdatePanel } from './update';
-import { WindowRelease } from './window-release';
 
 import styles from './core.module.css';
 

@@ -16,6 +16,7 @@ const TITLES: Record<PlainPage, string> = {
     inbox: 'Inbox',
     'machine-files': 'Machine files',
     passwords: 'Passwords',
+    settings: 'Settings',
     storage: 'Storage',
 };
 
@@ -214,6 +215,15 @@ describe('finds', () => {
             'Places',
             ['Home', 'Inbox', 'Storage', 'Passwords'],
         ]);
+    });
+
+    test("the app's Settings is found by its name, apart from the catalog's shelf", () => {
+        // Given - the query settings
+        const asked = matching(everything(HELD), 'settings');
+
+        // Then - the app's Settings as a place, the shelf still in the catalog
+        expect(shown(asked)).toContainEqual(['Places', ['Settings']]);
+        expect(asked[0]?.results[0]?.to).toStrictEqual({ route: { page: 'settings' } });
     });
 
     test('a query nothing holds finds nothing', () => {
