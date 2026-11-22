@@ -36,6 +36,7 @@ vmx "set -e; $env; if grep -q '^enclave:' Makefile; then make enclave; fi" || di
 vmx "set -e; $env; for d in \$(go list -m -f '{{.Dir}}'); do echo module \$d; (cd \$d && go build ./... && go vet ./...) || exit 1; done" || die "go build ./... or go vet (per workspace module)"
 vmx "set -e; $env; go build -ldflags '-X github.com/jterrazz/studio-station/apps/engine/wire.version=$ver' -o ~/station-bin ./apps/engine/cmd/station; go version -m ~/station-bin | grep -q CGO_ENABLED=1; lipo -archs ~/station-bin; vtool -show-build ~/station-bin | grep minos; ~/station-bin --version; otool -L ~/station-bin; file ~/station-bin; shasum -a 256 ~/station-bin" || die "release build"
 vmx "set -e; $env; command -v cargo >/dev/null || [ -x \$HOME/.cargo/bin/cargo ] || curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal >/dev/null 2>&1; . \$HOME/.cargo/env; cd apps/desktop/src-tauri; cargo test --bin spwn-window" || die "cargo test of the window (apps/desktop/src-tauri)"
+vmx "set -e; $env; ../scripts/sign-macos-test.sh" || die "scripts/sign-macos-test.sh"
 if [ -n "${DARWIN_STEPS:-}" ]; then vmx "set -e; $env; $DARWIN_STEPS" || die "DARWIN_STEPS"; fi
 if [ -n "${DARWIN_OUT:-}" ]; then scp "${opts[@]}" -i $key admin@$ip:station-bin "$DARWIN_OUT" >> $log 2>&1 || die scp; fi
 echo "PASS darwin-build $sha ($ver)" | tee -a $log

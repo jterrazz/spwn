@@ -11,7 +11,10 @@ usage: sign-macos.sh <step> [paths...]
   require                 decide whether this run signs: every secret set, or none on a ref Infisical does not trust
   keychain                import APPLE_CERTIFICATE into a keychain of this run, and check APPLE_SIGNING_IDENTITY is in it, of APPLE_TEAM_ID
   sign <path>...          codesign each binary or .app with the hardened runtime and a timestamp, then verify it; in an .app, every
-                          bundle, framework and library inside out, and every Mach-O beside the main executable under the bundle's identifier
+                          bundle, framework and library inside out, and every Mach-O beside the main executable under the bundle's identifier;
+                          an .app is then verified as verify does
+  verify <app>...         check each .app as the notary service reads it: verified strict and deep, and every Mach-O in it, nested bundles
+                          included, signed with the hardened runtime by the outer bundle's team, and with a secure timestamp unless ad hoc
   notarize <file>...      submit each .zip or .dmg to Apple's notary service and wait for its verdict
   staple <path>...        staple the notarization ticket to each .app or .dmg, then let Gatekeeper judge it
   binary <target> <path>  GoReleaser's post-build hook: on a signed run, sign a darwin binary and notarize it inside a zip that is not shipped
@@ -168,14 +171,37 @@ sign() {
         fi
         codesign_one "$path"
         codesign --verify --strict --verbose=2 "$path"
-        [ ! -d "$path" ] || codesign --verify --deep --strict --verbose=2 "$path"
         details=$(codesign --display --verbose=2 "$path" 2>&1)
         grep -Eq '^CodeDirectory .*flags=0x[0-9a-f]+\([^)]*runtime' <<< "$details" || fail "sign: $path is signed without the hardened runtime"
         if ! adhoc; then
             grep -qx "TeamIdentifier=$APPLE_TEAM_ID" <<< "$details" || fail "sign: $path is signed by another team than APPLE_TEAM_ID"
             grep -q '^Timestamp=' <<< "$details" || fail "sign: $path carries no secure timestamp"
         fi
+        [ ! -d "$path" ] || verify "$path"
         echo "sign: $path signed with the hardened runtime and verified strict"
+    done
+}
+
+signature_of() {
+    codesign --display --verbose=2 "$1" 2>&1 || fail "verify: $1 carries no signature"
+}
+
+verify() {
+    [ $# -gt 0 ] || usage
+    local path details team nested
+    for path in "$@"; do
+        [ -f "$path/Contents/Info.plist" ] || fail "verify: $path is not an app bundle"
+        codesign --verify --deep --strict "$path" || fail "verify: $path does not verify strict and deep"
+        details=$(signature_of "$path")
+        team=$(grep '^TeamIdentifier=' <<< "$details") || fail "verify: $path names no team"
+        while IFS= read -r -d '' nested; do
+            file -b "$nested" | grep -q '^Mach-O' || continue
+            details=$(signature_of "$nested")
+            grep -Eq '^CodeDirectory .*flags=0x[0-9a-f]+\([^)]*runtime' <<< "$details" || fail "verify: $nested is signed without the hardened runtime"
+            grep -qx "$team" <<< "$details" || fail "verify: $nested is signed by another team than $path"
+            adhoc || grep -q '^Timestamp=' <<< "$details" || fail "verify: $nested carries no secure timestamp"
+        done < <(find "$path/Contents" -type f -print0)
+        echo "verify: $path and every Mach-O in it are signed with the hardened runtime, by one team"
     done
 }
 
@@ -255,6 +281,6 @@ cleanup() {
 step=$1
 shift
 case "$step" in
-    require | keychain | sign | notarize | staple | binary | cleanup) "$step" "$@" ;;
+    require | keychain | sign | verify | notarize | staple | binary | cleanup) "$step" "$@" ;;
     *) usage ;;
 esac
