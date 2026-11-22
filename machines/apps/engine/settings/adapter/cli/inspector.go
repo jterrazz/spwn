@@ -68,7 +68,7 @@ func (i *Inspector) Read(ctx context.Context, f catalog.Fact) (settings.Fact, er
 	if errors.Is(err, local.ErrTimeout) || ctx.Err() != nil {
 		return settings.Fact{}, local.ErrTimeout
 	}
-	if fact, unanswered := unanswered(f, out, err); unanswered {
+	if fact, unanswered := unanswered(f, r.cmd.Name, out, err); unanswered {
 		return fact, nil
 	}
 	return r.interpret(out.Stdout + "\x00" + out.Stderr), nil
@@ -82,11 +82,14 @@ func (i *Inspector) sshKey() settings.Fact {
 }
 
 // invariant: a tool that is missing or fails is an answer: the fact is
-// absent (signing off), never an error.
-func unanswered(f catalog.Fact, out local.Output, err error) (settings.Fact, bool) {
+// absent (signing off), never an error; a git that is not installed reads as
+// needing git, its install the owner's to run.
+func unanswered(f catalog.Fact, program string, out local.Output, err error) (settings.Fact, bool) {
 	switch {
 	case err == nil && out.ExitCode == 0:
 		return settings.Fact{}, false
+	case program == "git" && errors.Is(err, local.ErrNotFound):
+		return settings.Fact{State: catalog.StateAbsent, Value: "needs git", Detail: "station apps install git"}, true
 	case f == catalog.FactGitSigning:
 		return settings.Fact{State: catalog.StateAbsent, Value: "off"}, true
 	}

@@ -17,7 +17,7 @@ runs:
     - command: '--version >/dev/null; PATH="$PATH:$HOME/root/usr/bin" "$STATION" status --json | /usr/bin/jq -c ".identity[:3]"'
       exit: 0
       stdout: |
-          [{"name":"git-email","state":"absent","value":"","detail":""},{"name":"git-name","state":"absent","value":"","detail":""},{"name":"git-signing","state":"absent","value":"off","detail":""}]
+          [{"name":"git-email","state":"absent","value":"needs git","detail":"station apps install git"},{"name":"git-name","state":"absent","value":"needs git","detail":"station apps install git"},{"name":"git-signing","state":"absent","value":"needs git","detail":"station apps install git"}]
     - command: '--version >/dev/null; PATH="$PATH:$HOME/root/usr/bin" "$STATION" overview --all >/dev/null; /bin/cat shims.log 2>/dev/null; echo none ran'
       exit: 0
       stdout: |

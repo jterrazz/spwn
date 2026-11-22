@@ -21,7 +21,7 @@ func GitValue(name string, f settings.Fact, expected string) Check {
 	// An expectation the preferences leave empty accepts any set value.
 	switch {
 	case f.State != catalog.StateOK || f.Value == "":
-		return Check{Name: name, State: catalog.StateAbsent}
+		return Check{Name: name, State: catalog.StateAbsent, Value: f.Value, Detail: f.Detail}
 	case expected != "" && f.Value != expected:
 		return Check{Name: name, State: catalog.StateDegraded, Value: f.Value, Detail: "expected " + expected}
 	}
