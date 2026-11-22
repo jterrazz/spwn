@@ -14,4 +14,4 @@ runs:
       exit: 2
       stderr: |
           Error: this station is a dev build: there is no release binary to put in the image
-          Hint: make build-linux, then station images build base-ubuntu --binary .artifacts/go/station-linux-arm64
+          Hint: download station-linux-arm64 from https://github.com/jterrazz/spwn/releases, then station images build base-ubuntu --binary <that file>

@@ -30,7 +30,7 @@ import (
 
 type Wording func(e *fail.Error) (message, hint string)
 
-const linuxBinaryHint = "make build-linux, then station images build base-ubuntu --binary .artifacts/go/station-linux-arm64"
+const linuxBinaryHint = "download station-linux-arm64 from https://github.com/" + catalog.StationRepo + "/releases, then station images build base-ubuntu --binary <that file>"
 
 // value: the way out of a file a newer station wrote: its schema, or a key
 // this station does not know.

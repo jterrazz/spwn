@@ -33,7 +33,7 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 		Args:      cobra.ArbitraryArgs,
 		ValidArgs: imageNames(d.Images),
 		Declare: func(f *pflag.FlagSet, in *Input) {
-			f.StringVar(&in.Binary, "binary", "", "the linux station binary to put in the image (a dev build needs one: make build-linux)")
+			f.StringVar(&in.Binary, "binary", "", "the linux station binary to put in the image (a build that is no release's needs one: the release's station-linux-arm64)")
 		},
 		Bind: func(in *Input, args []string) error {
 			in.Names = args

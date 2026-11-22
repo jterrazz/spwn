@@ -8,7 +8,7 @@ An image is a versioned, read-only VM disk that VMs are cloned from. Each Mac ho
 | Building          | `station images build`, the Machinefile and the version |
 | Updating          | `station images update`, a version a registry offers    |
 | The recipe        | The plumbing, the image phase, and the cleanup          |
-| The binary inside | `--binary` and `make build-linux`                       |
+| The binary inside | `--binary`, the release's asset or `make build-linux`   |
 | Cleaning          | `images delete`; Tart's pull cache is `disk free tart`  |
 
 ## Listing
@@ -62,11 +62,11 @@ The plumbing is bounded at 30 minutes, and the image phase at 35: 15 for its pac
 
 ## The binary inside
 
-The image carries `station-linux-arm64`. A release build downloads the asset of its own version into `~/.cache/station/` and checks it against the release's `checksums.txt`. A development build has no release, so `make build-linux` makes the binary and you pass it:
+The image carries `station-linux-arm64`. A release build downloads the asset of its own version into `~/.cache/station/` and checks it against the release's `checksums.txt`. A build whose version is no release's tag (a development build, a build of a branch) has none to download: the refusal names where a customer gets it, the `station-linux-arm64` asset of a release at `https://github.com/jterrazz/spwn/releases`, and `--binary` takes that file. From a checkout, `make build-linux` makes it:
 
 ```sh
-make build-linux
-station images build base-ubuntu --binary .artifacts/go/station-linux-arm64
+station images build base-ubuntu --binary ~/Downloads/station-linux-arm64
+make build-linux && station images build base-ubuntu --binary .artifacts/go/station-linux-arm64
 ```
 
 ## Cleaning
