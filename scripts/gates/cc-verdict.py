@@ -4,7 +4,7 @@
 usage:
   cc-verdict.py --block <file> [--patch <drift.patch>] [--only <STEP>]   one commit's output; prints "<VERDICT> steps=<failed steps> [why]"
   cc-verdict.py --replay <cc log>...                                     every "=== n sha" block of old logs (no patch: drift flakes match on their file only)
-Steps: GOFMT VET LINT GEN DRIFT GOTEST MAKELINT BUILD STORIES; INCOMPLETE when the block never reached CC-DONE.
+Steps: GOFMT VET LINT GEN DRIFT GOTEST MAKELINT ROOTLINT BUILD STORIES; INCOMPLETE when the block never reached CC-DONE.
 --only <STEP> judges one step alone (a flake rerun's output). A FLAKE names every signature that explains every failed step;
 a failed step no signature explains, or a drift whose diff shape differs from its signature's, is RED.
 Exit code: 0 for GREEN and FLAKE, 1 for RED (--block only).
@@ -90,7 +90,7 @@ def steps_of(body):
         seen.add("GOFMT")
         if m.group(1).strip():
             failed.append("GOFMT")
-    for k in ("LINT", "GEN", "GOTEST", "MAKELINT", "BUILD", "STORIES"):
+    for k in ("LINT", "GEN", "GOTEST", "MAKELINT", "ROOTLINT", "BUILD", "STORIES"):
         m = re.search(r"^" + k + r"=(\S+)", body, flags=re.M)
         if m:
             seen.add(k)

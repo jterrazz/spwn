@@ -1,8 +1,8 @@
 #!/bin/bash
 # usage: [GATE_RUN_DIR=<dir>] [GATE_VM_LINUX=<ssh host>] [GATE_VM_DIR=<folder>] cc.sh <worktree> <base> <label> [vitest filters...]  the per-commit loop: every commit of base..HEAD (BRANCH=<name> instead of HEAD's branch), oldest first.
-# Two tiers. CHEAP=1: gofmt, vet x3, golangci, make lint, the world build: no story slot, 4 commits at once (PAR=<n>), about 1 min each. Without CHEAP, the heavy tier: the whole of cc (generate, drift, go test, stories) behind the 2 story slots, one commit at a time:
+# Two tiers. CHEAP=1: gofmt, vet x3, golangci, make lint, root lint, the world build: no story slot, 4 commits at once (PAR=<n>), about 1 min each. Without CHEAP, the heavy tier: the whole of cc (generate, drift, go test, stories) behind the 2 story slots, one commit at a time:
 #   give it PICK="<n> <n>" (the lot tips) rather than every commit. Both: PICK="<n> <n>" runs only those positions (1-based); FROM=<n> skips commits before the n-th.
-# ONLY=<step[,step]> runs those steps alone (STATIC GEN GOTEST MAKELINT STORIES; 1 is STORIES); UPD=1 re-records the stories. Default filters: "cli usecases adapters".
+# ONLY=<step[,step]> runs those steps alone (STATIC GEN GOTEST MAKELINT ROOTLINT STORIES; 1 is STORIES); UPD=1 re-records the stories. Default filters: "cli usecases adapters".
 # The loop runs ON the VM under setsid (cc-loop.sh): killing this shell, the agent or the background task never kills it. This script copies, launches, then prints the loop's log
 # and waits on its end file. When the loop ends it writes $RUN/<label>-cc.end (wait on that file, never on a name). If this shell dies first it writes $RUN/<label>-cc.detached instead:
 # ATTACH=1 cc.sh <same arguments> waits on the running loop again, from the start of its log.

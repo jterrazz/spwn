@@ -1,7 +1,7 @@
 #!/bin/bash
 # usage: cc-remote.sh <label> <branch> <sha> <n> [vitest filters...]  the per-commit checks of ONE commit, on the VM (cc.sh and cc-loop.sh launch it)
-# CHEAP=1: the cheap tier (gofmt, vet x3, golangci, make lint, the world build); no story slot, up to 4 at once (/tmp/cheap-slot-1..4).
-# ONLY=<step[,step]>: those steps alone (STATIC GEN GOTEST MAKELINT STORIES; DRIFT is GEN; 1 is STORIES). UPD=1 re-records the stories.
+# CHEAP=1: the cheap tier (gofmt, vet x3, golangci, make lint, root lint, the world build); no story slot, up to 4 at once (/tmp/cheap-slot-1..4).
+# ONLY=<step[,step]>: those steps alone (STATIC GEN GOTEST MAKELINT ROOTLINT STORIES; DRIFT is GEN; 1 is STORIES). UPD=1 re-records the stories.
 # CC_HOME: the folder its files go in (default ~). CC_SHARED=1 (the shared VM): holds /var/lock/heavy-run shared for the commit, a TMPDIR of its own per run,
 # and the stories in their own network namespace (netns-run), so two runs never share a port, a clone or a temp folder.
 export PATH=$HOME/.local/bin:$PATH; eval "$(mise activate bash --shims)"
@@ -17,7 +17,7 @@ if [ -n "$CC_SHARED" ]; then
 fi
 ONLYS=,${ONLY//DRIFT/GEN},; ONLYS=${ONLYS/,1,/,STORIES,}; [ "$ONLYS" = ,, ] && ONLYS=
 want(){ [ -z "$ONLYS" ] && return 0; case "$ONLYS" in *",$1,"*) return 0 ;; esac; return 1; }
-tier(){ [ -z "$CHEAP" ] && return 0; case $1 in STATIC | MAKELINT | BUILD) return 0 ;; esac; return 1; }
+tier(){ [ -z "$CHEAP" ] && return 0; case $1 in STATIC | MAKELINT | ROOTLINT | BUILD) return 0 ;; esac; return 1; }
 run(){ want "$1" && tier "$1"; }
 take_cheap(){ local w=0 k
   while :; do
@@ -78,6 +78,7 @@ take_slot
 (cd apps/engine && nl timeout 40m go test -p 4 -count=1 -timeout 20m ./... ../../specs/architecture/ > $R/$L-gotest$n.log 2>&1; echo GOTEST=$?; grep -E "^(--- FAIL|FAIL|panic)" $R/$L-gotest$n.log | head -20)
 fi
 if run MAKELINT; then nl make lint >$R/$L-makelint$n.log 2>&1; echo MAKELINT=$?; sed 's/\x1b\[[0-9;]*m//g' $R/$L-makelint$n.log | grep -vE '^\s*$' | tail -25; fi
+if run ROOTLINT; then (cd "$WT" && nl pnpm install --frozen-lockfile >$R/$L-rootinstall$n.log 2>&1 && nl make lint >$R/$L-rootlint$n.log 2>&1); echo ROOTLINT=$?; sed 's/\x1b\[[0-9;]*m//g' $R/$L-rootlint$n.log 2>/dev/null | grep -vE '^\s*$' | tail -25; fi
 if { want STORIES || want BUILD; } && { [ -z "$CHEAP" ] || run BUILD; }; then
 mkdir -p .artifacts/go
 go build -tags world -ldflags "-X github.com/jterrazz/studio-station/apps/engine/wire.version=$(git describe --tags --always --dirty --long)" -o .artifacts/go/station-test ./apps/engine/cmd/station && touch .artifacts/go/station-test; echo BUILD=$?

@@ -213,13 +213,13 @@ The footprint test: the home is listed (depth 4) before the first step and after
 
 The scripts that prove a change on the shared Linux VM live in `scripts/gates/` at the repository root, so a session reads one folder and every machine runs the same code. [ADR-066](../decisions/066-a-commit-owes-that-it-builds-and-lints-a-lot-owes-the-gate.md) sets the two tiers and [ADR-067](../decisions/067-one-train-appended-by-makers-proved-at-its-tip.md) the train; these are the commands that run them.
 
-| Script                                                  | Runs                                                                                                                                                                                        |
-| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `cc.sh <worktree> <base> <label>`                       | The per-commit loop over `base..HEAD`: `CHEAP=1` is the cheap tier (gofmt, vet, golangci, `make lint`, the world build), without it the heavy tier. It prints one `VERDICT` line per commit |
-| `cold-gate.sh <worktree> <branch> <label>`              | One cold `make check` of a tip in a fresh clone, holding the VM exclusive; given the repository root it enters `machines/` itself                                                           |
-| `desktop-proof.sh`, `regen.sh`, `fold.sh`, `ratchet.sh` | The desktop proofs of a tip, the forced regeneration of the generated worlds and its fold into a rebase, and the pixel-golden byte count per commit                                         |
-| `tip-mac.sh`, `darwin-build.sh`                         | The Mac proofs of a tip: the menu bar check, then the darwin build in a tart VM, each through the gate slot                                                                                 |
-| `gate-slot.sh <command>`                                | The one workstation-wide slot a full gate takes, by priority                                                                                                                                |
+| Script                                                  | Runs                                                                                                                                                                                                                           |
+| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `cc.sh <worktree> <base> <label>`                       | The per-commit loop over `base..HEAD`: `CHEAP=1` is the cheap tier (gofmt, vet, golangci, `make lint`, the repository root's `make lint`, the world build), without it the heavy tier. It prints one `VERDICT` line per commit |
+| `cold-gate.sh <worktree> <branch> <label>`              | One cold `make check` of a tip in a fresh clone, then the repository root's `make lint`, holding the VM exclusive; given the repository root it enters `machines/` itself                                                      |
+| `desktop-proof.sh`, `regen.sh`, `fold.sh`, `ratchet.sh` | The desktop proofs of a tip, the forced regeneration of the generated worlds and its fold into a rebase, and the pixel-golden byte count per commit                                                                            |
+| `tip-mac.sh`, `darwin-build.sh`                         | The Mac proofs of a tip: the menu bar check, then the darwin build in a tart VM, each through the gate slot                                                                                                                    |
+| `gate-slot.sh <command>`                                | The one workstation-wide slot a full gate takes, by priority                                                                                                                                                                   |
 
 A run writes its logs, end files and locks under `GATE_RUN_DIR` (default `.artifacts/gates/`), reaches the VM named by `GATE_VM_LINUX` (default `development-linux`) and keeps its files in `~/$GATE_VM_DIR` there (default `spwn-gates`); the VM's homes, its heavy-run lock and its ports are the estate's development-VM page. Each launcher starts its work on the VM under `setsid` and waits on an end file, so a killed shell never kills a run.
 
@@ -229,7 +229,7 @@ The slot serves `GATE_SLOT_PRIORITY=landing` first (a gate that lands work on th
 
 ## What CI runs
 
-`.github/workflows/check.yaml` calls the shared `studio-actions` check workflow on every push and every pull request to `main`; what that workflow runs against a repository's `make` targets is [The stack](../concepts/stack.md)'s. Locally the same gate is `make build` then `make check`.
+`.github/workflows/check.yaml` calls the shared `studio-actions` check workflow on every push and every pull request to `main`; what that workflow runs against a repository's `make` targets is [The stack](../concepts/stack.md)'s. Locally the same gate is `make build` then `make check`. CI's Lint job runs the repository root's `make lint` (Go lint, the TypeScript toolchain's comment and architecture rules, the gate scripts' test), which `machines/`'s own `make lint` does not, so the cheap and heavy tiers and the cold gate run both: a red CI Lint is caught before a push.
 
 The npm half is linted by the same toolchain as every other repository: `npm run lint` is `typescript check`, and `make lint` runs it after the Go half ([Develop](develop.md)).
 

@@ -35,6 +35,9 @@ take_slot; go work sync; nl make generate >/tmp/$L-gen.log 2>&1; echo "generate=
 echo "t-check \$(date +%T) workers=${GATE_VITEST_WORKERS:-12}"
 VITEST_MAX_WORKERS=${GATE_VITEST_WORKERS:-12} nl make check >/tmp/$L-check.log 2>&1; rc=\$?; echo "check=\$rc"
 echo "t-check-done \$(date +%T)"
+echo "t-rootlint \$(date +%T)"
+(cd "\$(git rev-parse --show-toplevel)" && nl pnpm install --frozen-lockfile >/tmp/$L-rootinstall.log 2>&1 && nl make lint >/tmp/$L-rootlint.log 2>&1); rl=\$?; echo "rootlint=\$rl"
+[ \$rl = 0 ] || { sed 's/\x1b\[[0-9;]*m//g' /tmp/$L-rootlint.log | grep -vE '^\\s*\$' | tail -25; [ \$rc = 0 ] && rc=\$rl; }
 grep -E "FAIL|Test Files" /tmp/$L-check.log | sed 's/\x1b\[[0-9;]*m//g' | tail -20
 tail -15 /tmp/$L-check.log | sed 's/\x1b\[[0-9;]*m//g'
 cp /tmp/$L-check.log $R/$L-check.log 2>/dev/null; cd ~ && rm -rf $R/wt-$L-cold $R/$L-cold.bundle /tmp/$L-*.log
