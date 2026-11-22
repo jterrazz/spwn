@@ -1,0 +1,5 @@
+#!/bin/sh
+# ssh to a Mac whose station takes the connection and never answers: the argv is
+# recorded in $HOME/.calls, and ssh stays open, silent.
+printf 'ssh %s\n' "$*" >> "$HOME/.calls"
+exec /bin/sleep 3600

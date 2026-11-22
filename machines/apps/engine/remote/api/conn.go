@@ -8,6 +8,7 @@ import (
 	"io"
 	"strconv"
 	"sync"
+	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
@@ -32,10 +33,12 @@ type Conn struct {
 	ended   chan struct{}
 	// value: this binary's version, which its hello names to the far side.
 	version string
+	// value: what the far side is given to answer the hello.
+	helloBudget time.Duration
 }
 
 func NewConn(r io.Reader, w io.Writer, closer func() error, broken func(error) error, version string) *Conn {
-	c := &Conn{w: w, close: closer, broken: broken, waiting: map[string]*pending{}, ended: make(chan struct{}), version: version}
+	c := &Conn{w: w, close: closer, broken: broken, waiting: map[string]*pending{}, ended: make(chan struct{}), version: version, helloBudget: HelloBudget}
 	go c.read(r)
 	return c
 }
@@ -137,7 +140,9 @@ func (c *Conn) lost() error {
 
 func (c *Conn) Hello(ctx context.Context) (Hello, error) {
 	// invariant: asked once per connection, so a far side upgraded since the
-	// last connection is read again.
+	// last connection is read again; a far side that takes the connection and
+	// does not answer within the hello budget ends it, its error the
+	// connection's end.
 	c.mu.Lock()
 	if c.hello != nil {
 		h := *c.hello
@@ -150,6 +155,8 @@ func (c *Conn) Hello(ctx context.Context) (Hello, error) {
 		return Hello{}, err
 	}
 	defer c.forget(id)
+	budget, stop := context.WithTimeout(context.Background(), c.helloBudget)
+	defer stop()
 	select {
 	case f, ok := <-ch:
 		if !ok {
@@ -165,6 +172,9 @@ func (c *Conn) Hello(ctx context.Context) (Hello, error) {
 		c.hello = f.Hello
 		c.mu.Unlock()
 		return *f.Hello, nil
+	case <-budget.Done():
+		_ = c.Close()
+		return Hello{}, c.lost()
 	case <-ctx.Done():
 		return Hello{}, ctx.Err()
 	}

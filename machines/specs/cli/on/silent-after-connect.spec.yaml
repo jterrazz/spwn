@@ -1,0 +1,12 @@
+description: 'a Mac whose station is silent after connect does not answer: a read exits 0, an action exits 1'
+fixture: ./__fixtures__/ssh-silent/
+runs:
+    - command: 'apps --on x'
+      exit: 0
+      stdout: |
+          ✗ x does not answer
+    - command: 'apps install jq --on x'
+      exit: 1
+      stderr: |
+          Error: x does not answer
+          Hint: station machines x

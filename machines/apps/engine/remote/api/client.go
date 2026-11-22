@@ -11,7 +11,12 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 )
 
-const ConnectBudget = 2 * time.Second
+const (
+	ConnectBudget = 2 * time.Second
+	// value: what a far side is given, from the request, to answer a
+	// connection's hello before it is a Mac that does not answer.
+	HelloBudget = 5 * time.Second
+)
 
 type Dial func(ctx context.Context) (io.ReadWriteCloser, error)
 
