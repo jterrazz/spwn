@@ -20,6 +20,7 @@ const (
 	FamilyTailnet  Family = "tailnet"
 	FamilyRecords  Family = "records"
 	FamilyVault    Family = "vault"
+	FamilyNode     Family = "node"
 )
 
 func Of(f Family, machine string) Key {
@@ -41,7 +42,7 @@ func (f Family) PerMachine() bool {
 
 func (f Family) known() bool {
 	switch f {
-	case FamilyTailnet, FamilyRecords, FamilyVault:
+	case FamilyTailnet, FamilyRecords, FamilyVault, FamilyNode:
 		return true
 	default:
 		return f.PerMachine()

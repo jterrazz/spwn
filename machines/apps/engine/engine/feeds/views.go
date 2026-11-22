@@ -3,21 +3,34 @@ package feeds
 import (
 	"slices"
 	"strings"
+	"time"
 
+	"github.com/jterrazz/studio-station/apps/engine/accounts"
+	"github.com/jterrazz/studio-station/apps/engine/awake"
 	"github.com/jterrazz/studio-station/apps/engine/engine/store"
 	"github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/overview"
+	"github.com/jterrazz/studio-station/apps/engine/ports"
 )
 
 // value: the window's views, each named as the call whose answer it is:
 // the machines list, This Mac's Overview, This Mac's with the other Macs' roll-up
 // in its verdict, and one machine's (`overview.read:<machine>`, every
-// machine's as `overview.read:*`).
+// machine's as `overview.read:*`); every Mac's ports, and one machine's
+// (`ports.list:<machine>`); This Mac's sign-ins, and another machine's
+// (`accounts.list:<machine>`); This Mac's Awake, and another Mac's
+// (`awake.read:<mac>`).
 const (
 	ViewMachines          = "machines.list"
 	ViewOverview          = "overview.read"
 	ViewOverviewElsewhere = "overview.read+elsewhere"
 	viewOverviewOf        = ViewOverview + ":"
+	ViewPorts             = "ports.list+all-machines"
+	viewPortsOf           = "ports.list:"
+	ViewAccounts          = "accounts.list"
+	viewAccountsOf        = ViewAccounts + ":"
+	ViewAwake             = "awake.read"
+	viewAwakeOf           = ViewAwake + ":"
 )
 
 type MachinesView struct {
@@ -34,15 +47,16 @@ type OverviewView struct {
 
 func (o Pages) Known(name string) bool {
 	switch name {
-	case ViewMachines, ViewOverview, ViewOverviewElsewhere:
+	case ViewMachines, ViewOverview, ViewOverviewElsewhere, ViewPorts, ViewAccounts, ViewAwake:
 		return true
 	}
-	machine, ok := strings.CutPrefix(name, viewOverviewOf)
-	if !ok {
-		return false
+	for _, kind := range []string{viewOverviewOf, viewPortsOf, viewAccountsOf, viewAwakeOf} {
+		if machine, ok := strings.CutPrefix(name, kind); ok {
+			_, err := store.ParseKey(string(store.Of(store.FamilyOverview, machine)))
+			return machine == "*" || err == nil
+		}
 	}
-	_, err := store.ParseKey(string(store.Of(store.FamilyOverview, machine)))
-	return machine == "*" || err == nil
+	return false
 }
 
 func (o Pages) Project(s *store.Snapshot, asked func(name string) bool) map[string]store.View {
@@ -79,7 +93,98 @@ func (o Pages) Project(s *store.Snapshot, asked func(name string) bool) map[stri
 			out[name] = viewOf(sl, OverviewView{Summary: sum})
 		}
 	}
+	v.portsViews(all, asked, out)
+	v.ownViews(asked, out)
 	return out
+}
+
+// value: every Mac's ports as ports.list composes them with This Mac's
+// node on the tailnet, and each machine's alone, as of their readings.
+func (v view) portsViews(all *machines.AllMachines, asked func(name string) bool, out map[string]store.View) {
+	sl := v.s.Slices[store.Of(store.FamilyPorts, v.this)]
+	every := v.ports(all)
+	if every == nil {
+		return
+	}
+	node, _, _ := value[ports.Status](v.s, store.Of(store.FamilyNode, ""))
+	// invariant: OwnDevices marks the ports it is given: each Mac's are
+	// copied first, so the snapshot's values never move.
+	for i := range every.Macs {
+		every.Macs[i].Ports = slices.Clone(every.Macs[i].Ports)
+	}
+	listed := ports.OwnDevices(*every, node.Peers)
+	if asked(ViewPorts) {
+		out[ViewPorts] = viewOf(sl, ports.Listing{AllMachines: listed, Tailnet: node, Verdict: ports.VerdictOf(listed)})
+	}
+	for _, name := range machineNames(all) {
+		if !asked(viewPortsOf + name) {
+			continue
+		}
+		l := ports.Listing{AllMachines: ports.Of(listed, name), Tailnet: node}
+		if len(l.AllMachines.Macs) == 0 || !l.AllMachines.Macs[0].ThisMac {
+			l.Tailnet = ports.Status{}
+		}
+		l.Verdict = ports.VerdictOf(l.AllMachines)
+		out[viewPortsOf+name] = viewOf(sl, l)
+	}
+}
+
+// value: every Mac and every VM the fleet lists, by name.
+func machineNames(all *machines.AllMachines) []string {
+	var out []string
+	for _, h := range all.Macs {
+		out = append(out, h.Name)
+		for _, vm := range h.VMs {
+			out = append(out, vm.Name)
+		}
+	}
+	return slices.Compact(slices.Sorted(slices.Values(out)))
+}
+
+// value: the sign-ins and the Awake of each machine the store holds, as
+// accounts.list and awake.read answer them: This Mac's by the call's name,
+// another machine's by `<call>:<machine>`. An Awake is said as of its
+// reading.
+func (v view) ownViews(asked func(name string) bool, out map[string]store.View) {
+	for k, sl := range v.s.Slices {
+		if read, _, ok := value[accounts.ProgramsRead](v.s, k); ok && k.Family() == store.FamilySignins {
+			if name := v.named(ViewAccounts, k); asked(name) {
+				out[name] = viewOf(sl, read)
+			}
+		}
+		if r, _, ok := value[awake.Report](v.s, k); ok && k.Family() == store.FamilyAwake {
+			if name := v.named(ViewAwake, k); asked(name) {
+				out[name] = viewOf(sl, v.awakeOf(k.Machine(), r, sl.ReadAt))
+			}
+		}
+	}
+}
+
+// value: the view of a slice by its call: This Mac's by the call's name,
+// another machine's by `<call>:<machine>`.
+func (v view) named(call string, k store.Key) string {
+	if k.Machine() == v.this {
+		return call
+	}
+	return call + ":" + k.Machine()
+}
+
+// value: a Mac's Awake as awake.read answers it at the instant it was read:
+// the servers it hosts and the work that pauses while it sleeps from its
+// machines slice, its choices and its verdict said then.
+func (v view) awakeOf(mac string, r awake.Report, read time.Time) awake.Report {
+	r.Mac, r.Now = mac, read
+	if h, _, ok := value[machines.MacView](v.s, store.Of(store.FamilyMac, mac)); ok {
+		r.Servers, r.Pauses = nil, machines.Pausing(h.VMs)
+		for _, vm := range h.VMs {
+			if vm.Lifetime == machines.AlwaysOn {
+				r.Servers = append(r.Servers, vm.Name)
+			}
+		}
+		slices.Sort(r.Servers)
+	}
+	r.Choices, r.Verdict = awake.Choices(r.Now, r.Zone, r.Keeping()), awake.VerdictOf(r)
+	return r
 }
 
 // value: a machine's Overview as of its own reading: its uptime and the

@@ -62,7 +62,8 @@ func (l Local) Readers() []*Reader {
 	// and 30 s attached; the overview every 15 min, a VM's every 5 min
 	// attached; activity every 5 min idle and 30 s attached; sign-ins every
 	// 15 min idle and 5 min attached; Awake at every tick, from memory; the
-	// records and the tailnet with This Mac, the vault with the sign-ins.
+	// records and the tailnet with This Mac, its node on the tailnet with its
+	// ports, the vault with the sign-ins.
 	out := []*Reader{
 		{Name: NameMac, Idle: macIdle, Attached: macAttached, Budget: 5 * time.Second, Read: l.mac},
 		{Name: NamePorts, Idle: macIdle, Attached: macAttached, Budget: 5 * time.Second, Read: l.ports},
@@ -91,12 +92,12 @@ func (l Local) mac(ctx context.Context, _ *store.Snapshot) Reading {
 }
 
 func (l Local) ports(ctx context.Context, _ *store.Snapshot) Reading {
-	k := store.Of(store.FamilyPorts, l.ThisMac)
+	k, node := store.Of(store.FamilyPorts, l.ThisMac), store.Of(store.FamilyNode, "")
 	out, err := call.Invoke(ctx, l.Calls, machine.Ref{}, portscalls.List, portscalls.ListIn{}, nil)
 	if err != nil || len(out.AllMachines.Macs) == 0 {
-		return Reading{Owns: []store.Key{k}, Failed: map[store.Key]string{k: Why(err)}}
+		return Reading{Owns: []store.Key{k, node}, Failed: map[store.Key]string{k: Why(err), node: Why(err)}}
 	}
-	return Reading{Owns: []store.Key{k}, Puts: []store.Put{{Key: k, Value: out.AllMachines.Macs[0]}}}
+	return Reading{Owns: []store.Key{k, node}, Puts: []store.Put{{Key: k, Value: out.AllMachines.Macs[0]}, {Key: node, Value: out.Tailnet}}}
 }
 
 // value: the VMs of This Mac that run, as its slice last said them.

@@ -384,7 +384,7 @@ func decode(family store.Family, raw json.RawMessage) (any, error) {
 		return decodeAs[activityReport](raw)
 	case store.FamilySignins:
 		return decodeAs[signinsRead](raw)
-	case store.FamilyTailnet, store.FamilyRecords, store.FamilyVault:
+	case store.FamilyTailnet, store.FamilyRecords, store.FamilyVault, store.FamilyNode:
 		return decodeAs[any](raw)
 	}
 	return nil, fmt.Errorf("no family %q", family)
