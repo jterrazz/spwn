@@ -461,8 +461,12 @@ type reservationReleaser struct{ m machine }
 
 func (r reservationReleaser) ReleaseVM(ctx context.Context, vm string) error {
 	// invariant: a VM leaves nothing of its ports on its Mac: its ports
-	// declared public, its reserved ports and their shares.
+	// declared public, the stops of sharing the owner chose, its reserved
+	// ports and their shares.
 	if err := portscalls.ForgetDeclarations(ctx, r.m.stores.declarations, vm); err != nil {
+		return err
+	}
+	if err := portscalls.ForgetStops(r.m.stores.ports(), vm); err != nil {
 		return err
 	}
 	reserved := r.m.stores.reservations

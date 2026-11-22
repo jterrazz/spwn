@@ -86,3 +86,20 @@ func Remember(prefs contract.PortsPrefs, vm string, port int, stopped bool) erro
 	}
 	return prefs.Set(g)
 }
+
+func ForgetStops(prefs contract.PortsPrefs, vm string) error {
+	// invariant: a VM deleted leaves none of the owner's stops of sharing.
+	g, err := prefs.Get()
+	if err != nil || g == nil {
+		return err
+	}
+	kept := slices.DeleteFunc(slices.Clone(g.NotShared), func(k string) bool { return strings.HasPrefix(k, vm+":") })
+	if len(kept) == len(g.NotShared) {
+		return nil
+	}
+	if len(kept) == 0 {
+		kept = nil
+	}
+	g.NotShared = kept
+	return prefs.Set(g)
+}

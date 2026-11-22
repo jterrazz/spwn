@@ -2,12 +2,17 @@ package calls
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"slices"
+	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 	"github.com/jterrazz/studio-station/apps/engine/ports"
+	"github.com/jterrazz/studio-station/apps/engine/ports/contract"
 )
 
 type audienceEngine struct {
@@ -104,5 +109,51 @@ func TestAShareThatCannotBeReleasedSaysItIsStillShared(t *testing.T) {
 	f := refusal(t, err, ports.CodeAudienceNotKept)
 	if e.released != 1 || f.Detail["released"] != "" || f.Detail["cause"] != "release failed" {
 		t.Fatalf("refusal = %+v, released %d; want a release tried and the share said still on", f, e.released)
+	}
+}
+
+type memoryPreferences map[string][]byte
+
+func (m memoryPreferences) Read(group string, v any) error {
+	if b, ok := m[group]; ok {
+		return json.Unmarshal(b, v)
+	}
+	return nil
+}
+
+func (m memoryPreferences) Write(group string, v any) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+	if string(b) == "null" {
+		delete(m, group)
+		return nil
+	}
+	m[group] = b
+	return nil
+}
+
+func TestADeletedVMLeavesNoStopOfSharingBehind(t *testing.T) {
+	prefs := contract.Ports(memoryPreferences{})
+	for _, key := range []string{"accept-1:8080", "accept-1:3000", "other:8080"} {
+		vm, port, _ := strings.Cut(key, ":")
+		n, _ := strconv.Atoi(port)
+		if err := Remember(prefs, vm, n, true); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := ForgetStops(prefs, "accept-1"); err != nil {
+		t.Fatal(err)
+	}
+	g, err := prefs.Get()
+	if err != nil || g == nil || !slices.Equal(g.NotShared, []string{"other:8080"}) {
+		t.Fatalf("stops = %+v, %v; want only other:8080", g, err)
+	}
+	if err := ForgetStops(prefs, "other"); err != nil {
+		t.Fatal(err)
+	}
+	if g, _ := prefs.Get(); g != nil && len(g.NotShared) != 0 {
+		t.Errorf("stops = %+v, want none", g)
 	}
 }
