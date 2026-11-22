@@ -28,9 +28,20 @@ take_cheap(){ local w=0 k
   done
 }
 # GEN through STORIES (and only those) sit behind a VM-wide slot (2 holders: /tmp/story-slot-{1,2}, flock on fd 8): taken once, held to the end of STORIES; else wait (<= 60 min, a line a minute).
-take_slot(){ [ -n "$got" ] && return 0; local P=${SLOT_POLL:-20} w=0 k
+# A free slot is taken only while the VM's 1-min load is under STORY_SLOT_MAX_LOAD (default 2 x nproc); past STORY_SLOT_LOAD_WAIT seconds (default 900) of a loaded VM it proceeds with a logged line.
+take_slot(){ [ -n "$got" ] && return 0; local P=${SLOT_POLL:-20} w=0 k l ml=${STORY_SLOT_MAX_LOAD:-$((2*$(nproc)))} b=
   while :; do
-    for k in 1 2; do exec 8>/tmp/story-slot-$k; flock -n 8 && { got=$k; echo "STORY-SLOT $got taken"; return 0; }; exec 8>&-; done
+    for k in 1 2; do
+      exec 8>/tmp/story-slot-$k
+      if flock -n 8; then
+        l=$(awk '{print int($1)}' /proc/loadavg)
+        if [ "$l" -lt "$ml" ]; then got=$k; echo "STORY-SLOT $got taken"; return 0; fi
+        [ -z "$b" ] && b=$SECONDS
+        if [ $((SECONDS-b)) -ge ${STORY_SLOT_LOAD_WAIT:-900} ]; then got=$k; echo "STORY-SLOT $got taken: load $l stayed at or above $ml for ${STORY_SLOT_LOAD_WAIT:-900}s, proceeding"; return 0; fi
+        [ $(((SECONDS-b) % 60)) -lt $P ] && echo "STORY-SLOT: free but load $l >= $ml, waiting $(date +%T)"
+      fi
+      exec 8>&-
+    done
     [ $w -ge $((3600/P)) ] && { echo "STORY-SLOT: both held for 60 min"; exit 84; }
     [ $((w % (60/P))) = 0 ] && echo "STORY-SLOT: both held, waiting $(date +%T)"
     w=$((w+1)); command sleep $P
@@ -38,7 +49,7 @@ take_slot(){ [ -n "$got" ] && return 0; local P=${SLOT_POLL:-20} w=0 k
 }; got=
 df -h ~ | tail -1
 [ -n "$CHEAP" ] && take_cheap
-# STORIES_WORKERS: vitest workers of the stories (default 8; 12 is for an exclusive gate).
+# STORIES_WORKERS: vitest workers of the stories (default: the cores the 1-min load leaves free, 2 to 8; 12 is for an exclusive gate).
 # The per-label node clone is built once, under a lock: runs of one label in parallel wait for it instead of racing on it.
 exec 6>$R/$L-node.lock; flock 6
 if [ ! -d $R/$L-node/machines/node_modules ]; then
@@ -73,7 +84,8 @@ go build -tags world -ldflags "-X github.com/jterrazz/studio-station/apps/engine
 fi
 if run STORIES; then
 take_slot
-nl $NS env ${UPD:+TEST_UPDATE=1} STATION_SPEC_BUILT=1 ${TMPDIR:+TMPDIR=$TMPDIR} timeout 60m npm --workspace specs exec -- vitest --run --maxWorkers=${STORIES_WORKERS:-8} "${@:-cli}" > $R/$L-stories$n.log 2>&1; echo STORIES=$?; exec 8>&-
+W=${STORIES_WORKERS:-$(l=$(awk '{print int($1)}' /proc/loadavg); f=$(($(nproc)-l)); [ $f -gt 8 ] && f=8; [ $f -lt 2 ] && f=2; echo $f)}; echo "STORIES-WORKERS $W"
+nl $NS env ${UPD:+TEST_UPDATE=1} STATION_SPEC_BUILT=1 ${TMPDIR:+TMPDIR=$TMPDIR} timeout 60m npm --workspace specs exec -- vitest --run --maxWorkers=$W "${@:-cli}" > $R/$L-stories$n.log 2>&1; echo STORIES=$?; exec 8>&-
 sed 's/\x1b\[[0-9;]*m//g' $R/$L-stories$n.log | grep -E "^ +(×|❯) |Test Files|Tests |FAIL|Error" | cut -c1-220 | head -40
 fi
 echo CC-DONE $sha

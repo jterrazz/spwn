@@ -223,6 +223,8 @@ The scripts that prove a change on the shared Linux VM live in `scripts/gates/` 
 
 A run writes its logs, end files and locks under `GATE_RUN_DIR` (default `.artifacts/gates/`), reaches the VM named by `GATE_VM_LINUX` (default `development-linux`) and keeps its files in `~/$GATE_VM_DIR` there (default `spwn-gates`); the VM's homes, its heavy-run lock and its ports are the estate's development-VM page. Each launcher starts its work on the VM under `setsid` and waits on an end file, so a killed shell never kills a run.
 
+The VM's own story slot (`take_slot` in `cc-remote.sh`, two holders) follows the same load rule as `gate-slot.sh`: a free slot is taken only while the VM's 1-min load is under `STORY_SLOT_MAX_LOAD` (default twice `nproc`); after `STORY_SLOT_LOAD_WAIT` seconds (default 900) of a loaded VM it proceeds and logs the load. The stories then run on `STORIES_WORKERS` workers, by default the cores the load leaves free (2 to 8), and no story timeout is raised for a loaded VM.
+
 The slot serves `GATE_SLOT_PRIORITY=landing` first (a gate that lands work on the train), then `normal`, then `low` (a bench, a capture, a rig run); a waiter never takes the slot while a waiter of a higher priority waits. The scripts close the lock descriptors (3 to 9) before they start a child, so a fixture server left behind by a story never holds the heavy-run lock. `scripts/gates/test.sh`, run by the root `make lint`, parses every script and proves the priority order.
 
 ## What CI runs
