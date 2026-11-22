@@ -23,22 +23,25 @@ var ran atomic.Int64
 func Ran() int64 { return ran.Load() }
 
 type runner struct {
-	env     []string
-	dirs    []string
-	system  []string
-	landing []string
-	stdin   io.Reader
-	stdout  io.Writer
-	stderr  io.Writer
+	env       []string
+	dirs      []string
+	system    []string
+	landing   []string
+	shims     string
+	shimNames map[string]bool
+	root      string
+	stdin     io.Reader
+	stdout    io.Writer
+	stderr    io.Writer
 }
 
 func (r *runner) LookPath(name string) (string, bool) {
 	if strings.Contains(name, "/") {
-		return name, executable(name)
+		return name, executable(name) && !r.shimmed(name)
 	}
 	for _, dir := range r.dirs {
 		candidate := filepath.Join(dir, name)
-		if executable(candidate) {
+		if executable(candidate) && !r.shimmed(candidate) {
 			return candidate, true
 		}
 	}

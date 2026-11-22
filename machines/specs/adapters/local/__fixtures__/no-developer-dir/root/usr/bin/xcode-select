@@ -1,0 +1,5 @@
+#!/bin/sh
+# a Mac with no developer directory selected.
+echo "xcode-select $*" >> "$HOME/.calls"
+echo "xcode-select: error: unable to get active developer directory. Use \`sudo xcode-select --switch path/to/Xcode.app\` to set one (or see \`man xcode-select\`)" >&2
+exit 2

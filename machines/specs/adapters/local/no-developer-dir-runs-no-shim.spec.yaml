@@ -1,0 +1,28 @@
+description: 'with no developer directory no xcode-select shim runs, and git reads not installed'
+fixture: ./__fixtures__/no-developer-dir/
+env: engine
+runs:
+    - command: '--version >/dev/null; PATH="$PATH:$HOME/root/usr/bin" "$STATION" apps --json | /usr/bin/jq -r ''.apps[] | select(.name == "git" or .name == "xcode" or .name == "python") | "\(.name) \(.state)"'''
+      exit: 0
+      stdout: |
+          python not-installed
+          git not-installed
+          xcode not-installed
+    - command: '--version >/dev/null; PATH="$PATH:$HOME/root/usr/bin" "$STATION" settings | /usr/bin/grep git'
+      exit: 0
+      stdout: |
+          ○	git-shortcuts	not applied	station settings apply git-shortcuts
+          ○	git-signing	not applied · needs gpg	station apps install gpg
+          ○	github-login	not applied · needs gh	station apps install gh
+    - command: '--version >/dev/null; PATH="$PATH:$HOME/root/usr/bin" "$STATION" status --json | /usr/bin/jq -c ".identity[:3]"'
+      exit: 0
+      stdout: |
+          [{"name":"git-email","state":"absent","value":"","detail":""},{"name":"git-name","state":"absent","value":"","detail":""},{"name":"git-signing","state":"absent","value":"off","detail":""}]
+    - command: '--version >/dev/null; PATH="$PATH:$HOME/root/usr/bin" "$STATION" overview --all >/dev/null; /bin/cat shims.log 2>/dev/null; echo none ran'
+      exit: 0
+      stdout: |
+          none ran
+      files:
+          .calls:
+              contains:
+                  - 'xcode-select -p'

@@ -2,6 +2,7 @@ package wire
 
 import (
 	"context"
+	"runtime"
 
 	awakecontract "github.com/jterrazz/studio-station/apps/engine/awake/contract"
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
@@ -23,6 +24,13 @@ func selfOf(h local.System, pin string) contract.Self {
 		return coreadapterlinux.New(h.Env.Hostname(), h.FS.ReadFile)
 	}
 	return coreadaptermacos.New(h.Run, h.Env.Hostname())
+}
+
+func onMacOS(pin string) bool {
+	if _, os, ok := pinned(pin); ok {
+		return os == coremachine.MacOS
+	}
+	return runtime.GOOS == "darwin"
 }
 
 // value: the kind STATION_MACHINE_KIND pins, in the words it is spelled

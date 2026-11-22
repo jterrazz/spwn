@@ -19,6 +19,12 @@ type Search struct {
 	// value: this user's own absolute folders, under HOME, which a fence
 	// points into the run's own folder; taken as they are.
 	Home []string
+	// value: on macOS, the folder of the shims xcode-select manages, read
+	// under STATION_SYSTEM_ROOT; empty on a system with none.
+	ShimsDir string
+	// value: the names of those shims: each runs only while the developer
+	// directory holds its program.
+	Shims []string
 }
 
 func New(env []string, stdin io.Reader, stdout, stderr io.Writer) System {
@@ -38,8 +44,19 @@ func NewSearching(env []string, stdin io.Reader, stdout, stderr io.Writer, searc
 	}
 	landing := search.under(vars)
 	system := strings.Split(systemDirs, ":")
+	root := vars["STATION_SYSTEM_ROOT"]
+	if !filepath.IsAbs(root) {
+		root = ""
+	}
+	shims, names := "", map[string]bool{}
+	if search.ShimsDir != "" {
+		shims = root + search.ShimsDir
+	}
+	for _, name := range search.Shims {
+		names[name] = true
+	}
 	return System{
-		Run:     &runner{env: env, dirs: searched(vars["PATH"], system, landing), system: system, landing: landing, stdin: stdin, stdout: stdout, stderr: stderr},
+		Run:     &runner{env: env, dirs: searched(vars["PATH"], system, landing), system: system, landing: landing, shims: shims, shimNames: names, root: root, stdin: stdin, stdout: stdout, stderr: stderr},
 		FS:      disk{},
 		Env:     identity{vars: vars},
 		Net:     network{most: 512 << 20},

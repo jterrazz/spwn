@@ -1,0 +1,3 @@
+#!/bin/sh
+# git of the developer directory, run through its shim.
+exit 0

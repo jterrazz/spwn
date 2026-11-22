@@ -1,0 +1,4 @@
+#!/bin/sh
+# a Mac whose developer directory is the command line developer package.
+echo "xcode-select $*" >> "$HOME/.calls"
+echo /Library/Developer/CommandLineTools

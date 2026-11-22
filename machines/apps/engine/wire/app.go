@@ -289,6 +289,10 @@ func landing(cat catalog.Catalog, vars map[string]string) local.Search {
 	if home := vars["HOME"]; filepath.IsAbs(home) {
 		s.Home = []string{catalog.InstallDirIn(home), filepath.Join(appData(home, vars[catalog.AppDataVar]), catalog.AppShims)}
 	}
+	if onMacOS(vars["STATION_MACHINE_KIND"]) {
+		shims := catalog.XcodeShims()
+		s.ShimsDir, s.Shims = shims.Dir, shims.Command
+	}
 	return s
 }
 

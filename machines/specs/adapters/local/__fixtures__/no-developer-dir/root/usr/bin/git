@@ -1,0 +1,4 @@
+#!/bin/sh
+# the xcode-select shim of a Mac with no developer directory: run, it would open the install dialog.
+echo "git $*" >> "$HOME/shims.log"
+exit 1

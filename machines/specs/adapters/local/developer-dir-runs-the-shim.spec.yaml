@@ -1,0 +1,9 @@
+description: 'a developer directory that holds git lets its xcode-select shim run, and git reads installed'
+fixture: ./__fixtures__/developer-dir/
+env: engine
+runs:
+    - command: '--version >/dev/null; PATH="$PATH:$HOME/root/usr/bin" "$STATION" apps --json | /usr/bin/jq -r ''.apps[] | select(.name == "git") | "\(.name) \(.state) \(.installed)"''; /bin/cat shims.log'
+      exit: 0
+      stdout: |
+          git ok 2.50.1
+          git --version

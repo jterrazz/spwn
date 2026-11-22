@@ -1,0 +1,4 @@
+#!/bin/sh
+# the xcode-select shim of git, with the command line developer package installed.
+echo "git $*" >> "$HOME/shims.log"
+echo "git version 2.50.1 (Apple Git-155)"
