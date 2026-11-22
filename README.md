@@ -6,7 +6,7 @@
 <p align="center">
   <a href="https://spwn.sh"><b>Website</b></a> ·
   <a href="https://spwn.sh/docs"><b>Docs</b></a> ·
-  <a href="#the-six-apps"><b>The six apps</b></a>
+  <a href="#the-three-spaces"><b>The three spaces</b></a>
 </p>
 
 <picture>
@@ -14,7 +14,7 @@
   <img src="docs/_assets/readme/hero-light.png" alt="Spwn's home page: the line Stay you, at scale., the install command, and a tab for each of the six apps. The first tab is open and shows a file, qa.machine.yaml, becoming a running machine, qa-1, with 4 CPU, 8 GB, its system, apps, settings and accounts." width="830">
 </picture>
 
-Spwn is a stack of apps and abstractions that lets one person build at the scale of a team, and still be the author of what gets built. It is six apps on one ladder: each takes one kind of work off your hands and leaves you the decision above it.
+Spwn is a stack of apps and abstractions that lets one person build at the scale of a team, and still be the author of what gets built. It is three spaces: Machine, Agent and OS. Each takes one kind of work off your hands and leaves you the decision above it.
 
 ```sh
 curl -fsSL https://spwn.sh/install.sh | bash
@@ -23,9 +23,17 @@ curl -fsSL https://spwn.sh/install.sh | bash
 Two commands, one per running app: `spwn-machines` (short: `machines`) and `spwn-agents` (short: `agents`). One install puts both on your path.
 
 > [!NOTE]
-> **Alpha.** Two apps run today, Machines and Agents. Wiki, Specs, Design and OS are being made: their rows say so, and nothing here claims more. Expect rough edges, and [open an issue](https://github.com/jterrazz/spwn/issues) where you hit one.
+> **Alpha.** Two apps run today, Machines and Agents. Wiki, Specs and Design, which live in the OS space, are being made: their rows say so, and nothing here claims more. Expect rough edges, and [open an issue](https://github.com/jterrazz/spwn/issues) where you hit one.
 
-## The six apps
+## The three spaces
+
+| Space       | What it holds                                                                 |
+| ----------- | ----------------------------------------------------------------------------- |
+| **Machine** | The premises: the fleet of machines, access, security, documents              |
+| **Agent**   | The workforce: personalities, roles, focus, responsibilities                  |
+| **OS**      | The steering: flows, projects, vision, products, the system, the abstractions |
+
+Each space is made of apps. Wiki, Specs and Design live inside the OS space.
 
 | App                                | What it does                 | State        | Command         | Folder                        |
 | ---------------------------------- | ---------------------------- | ------------ | --------------- | ----------------------------- |
@@ -34,7 +42,8 @@ Two commands, one per running app: `spwn-machines` (short: `machines`) and `spwn
 | **Wiki**                           | Each fact in one place       | _Being made_ | ·               | ·                             |
 | **Specs**                          | Proof it is as asked         | _Being made_ | ·               | ·                             |
 | **Design**                         | One family of shapes         | _Being made_ | ·               | ·                             |
-| **OS**                             | One place to run it all      | _Being made_ | ·               | ·                             |
+
+In the app, the three spaces are distinct. A switch between them comes first, with Agent and OS greyed until they run.
 
 ## Commands, by app
 

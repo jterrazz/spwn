@@ -1,6 +1,6 @@
 # Spwn: agent brief
 
-Spwn is one stack of six apps, defined once in [`README.md`](README.md). This repository holds the two that run: Agents at the root, which composes tools, skills, and identity into **agents** and runs them in isolated Docker **worlds**, and Machines under `machines/`. This file is a map, not the territory: it routes into the corpus and repeats none of it.
+Spwn is three spaces (Machine, Agent and OS), defined once in [`README.md`](README.md). This repository holds the two that run: Agents at the root, which composes tools, skills, and identity into **agents** and runs them in isolated Docker **worlds**, and Machines under `machines/`. This file is a map, not the territory: it routes into the corpus and repeats none of it.
 
 ## Mental model
 

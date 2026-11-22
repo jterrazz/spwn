@@ -1,6 +1,6 @@
 # Spwn: the manual
 
-Everything this repository knows about itself, by what the reader came to do. What Spwn is, one stack of six apps, is stated once in the README at the root of the repository, with its quickstart. This manual is the repository's and that of Agents, the app that runs one agent, or a team with a chief and workers, in a world you declare, in any harness (Claude Code or Codex today). New here, [Getting started](start/getting-started.md) comes next.
+Everything this repository knows about itself, by what the reader came to do. What Spwn is, three spaces (Machine, Agent and OS), is stated once in the README at the root of the repository, with its quickstart. This manual is the repository's and that of Agents, the app that runs one agent, or a team with a chief and workers, in a world you declare, in any harness (Claude Code or Codex today). New here, [Getting started](start/getting-started.md) comes next.
 
 ## Start
 

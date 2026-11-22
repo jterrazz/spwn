@@ -1,6 +1,6 @@
 # ADR-018: The product describes itself as one stack of six apps
 
-**Status:** Accepted
+**Status:** Superseded by [ADR-019](019-the-product-is-three-spaces-machine-agent-and-os.md)
 **Date:** 2026-11-21
 
 An agent leaves the status `Proposed`; only the owner writes `Accepted`.
