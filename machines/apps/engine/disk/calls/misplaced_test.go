@@ -1,6 +1,8 @@
 package calls
 
 import (
+	"context"
+	"errors"
 	"testing"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
@@ -29,5 +31,27 @@ func TestAMisplacedFolderThatHoldsNothingIsNoRow(t *testing.T) {
 	}
 	if got := misplacedOn(t, map[string]int64{"/h/hyper-data/f": 10, "/h/.hyper/cache/blob": 30}); len(got) != 1 || got[0].Bytes != 30 {
 		t.Fatalf("a ~/.hyper holding 30 bytes reads %+v, want its misplaced row of 30", got)
+	}
+}
+
+func TestAMisplacedFolderWhoseMoveIsRefusedIsNoRowToMove(t *testing.T) {
+	files := map[string]int64{"/h/.hyper/vms/dev/disk.img": 40, "/h/.local/share/station/vms/vms/other/disk.img": 70}
+	usage := fake.NewUsage(files, 1000, 500)
+	apps := []catalog.App{{
+		Name:     "hyper",
+		Installs: []catalog.LivesOn{{Kinds: []catalog.MachineKind{catalog.Mac}, Install: catalog.CaskInstall{Token: "hyper"}}},
+		Disk: catalog.Disk{
+			Misplaced: []catalog.Misplaced{{Path: "~/.hyper", Move: []catalog.Move{{From: "~/.hyper", To: "~/.local/share/station/vms"}}, Yours: []string{"~/.hyper/vms"}}},
+		},
+	}}
+	s := NewSurveyor(onMachine{Usage: usage}, apps, SurveyorOptions{Disk: withSystem{usage}, ThisMachine: catalog.Mac, Expand: disk.Expander{Home: "/h"}})
+
+	_, err := s.Move(context.Background(), "~/.hyper")
+	var held *disk.DestinationHeldError
+	if !errors.As(err, &held) {
+		t.Fatalf("move %v; want it refused: the folder it moves to holds VMs", err)
+	}
+	if got := last(t, s).Of(disk.Misplaced); len(got) != 0 {
+		t.Fatalf("a ~/.hyper whose move is refused reads %+v; want no misplaced row: the page never offers a move the command refuses", got)
 	}
 }

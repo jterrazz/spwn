@@ -251,7 +251,7 @@ func (s *Surveyor) plan() plan {
 		ep.exists = ep.exists || len(ep.install) > 0
 		for _, st := range e.Disk.Misplaced {
 			abs := s.o.Expand.Expand(st.Path)
-			if !s.m.Exists(abs) {
+			if !s.m.Exists(abs) || !s.movable(e, st) {
 				continue
 			}
 			ep.misplacedOnes = append(ep.misplacedOnes, misplacedPlan{report: s.misplaced(e, st, abs, 0), root: root(abs)})

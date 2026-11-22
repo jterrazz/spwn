@@ -509,6 +509,13 @@ func (s *Surveyor) planMove(e disk.Entry, st catalog.Misplaced, shown string) (r
 	return renames, drops, to, nil
 }
 
+// invariant: a misplaced folder is offered only while its move would run:
+// the offer and the refusal are one plan.
+func (s *Surveyor) movable(e disk.Entry, st catalog.Misplaced) bool {
+	_, _, _, err := s.planMove(e, st, "")
+	return err == nil
+}
+
 func (s *Surveyor) held(p string) bool {
 	if !s.m.Exists(p) {
 		return false
