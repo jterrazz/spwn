@@ -70,6 +70,8 @@ final class FakeEngine: @unchecked Sendable {
     func serveOnce(_ answer: Data, thenClose: Bool, hangUp: Bool = false) {
         Thread.detachNewThread { [self] in
             let client = accept(fd, nil, nil)
+            var one: Int32 = 1
+            setsockopt(client, SOL_SOCKET, SO_NOSIGPIPE, &one, socklen_t(MemoryLayout<Int32>.size))
             if thenClose {
                 close(fd)
                 unlink(path)
