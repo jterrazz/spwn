@@ -62,7 +62,7 @@ The plumbing is bounded at 30 minutes, and the image phase at 35: 15 for its pac
 
 ## The binary inside
 
-The image carries `station-linux-arm64`. A release build downloads the asset of its own version into `~/.cache/station/` and checks it against the release's `checksums.txt`. A build whose version is no release's tag (a development build, a build of a branch) has none to download: the refusal names where a customer gets it, the `station-linux-arm64` asset of a release at `https://github.com/jterrazz/spwn/releases`, and `--binary` takes that file. From a checkout, `make build-linux` makes it:
+The image carries `station-linux-arm64`. A release build downloads the asset of its own version into `~/.cache/station/` and checks it against the release's `checksums.txt`. A build whose version is no release's tag (a development build, a build of a branch, signed or not) has none to download: the refusal says this station is not a released version and names where a customer gets it, the `station-linux-arm64` asset of a release at `https://github.com/jterrazz/spwn/releases`, and `--binary` takes that file. From a checkout, `make build-linux` makes it:
 
 ```sh
 station images build base-ubuntu --binary ~/Downloads/station-linux-arm64

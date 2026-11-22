@@ -48,7 +48,7 @@ func (e *NotBuiltError) Error() string { return "image " + e.Image + " is not bu
 type NoLinuxBinaryError struct{}
 
 func (e *NoLinuxBinaryError) Error() string {
-	return "this station is a dev build: there is no release binary to put in the image"
+	return "this station is not a released version: there is no release binary to put in the image"
 }
 
 type BinaryNotFoundError struct{ Path string }

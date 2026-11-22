@@ -29,7 +29,7 @@ describe('storage', () => {
     });
 
     test.todo(
-        'D6 waits for images.build to answer in the world build, which as a dev build refuses it with image.no-linux-binary (apps/engine/images/calls/binary.go:26)',
+        'D6 waits for images.build to answer in the world build, which as an unreleased station refuses it with image.no-linux-binary (apps/engine/images/calls/binary.go:26)',
     );
 
     test('D8 the disk of a Mac is told by what Machines holds on it and the engine verdict heads the page', async () => {
