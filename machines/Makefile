@@ -1,4 +1,4 @@
-.PHONY: help install build build-linux enclave lint fix test check menubar-check menubar menubar-install menubar-uninstall window catalog catalog-open catalog-export catalog-gallery e2e-machine e2e-binaries provision deprovision generate clean
+.PHONY: help install build build-linux enclave lint fix test check menubar-check menubar window catalog catalog-open catalog-export catalog-gallery e2e-machine e2e-binaries provision deprovision generate clean
 
 BINARY       := station
 BUILD_PATH   := .artifacts/go/$(BINARY)
@@ -17,12 +17,12 @@ MENUBAR_APP  := .artifacts/menubar/Station.app
 # value: /usr/bin/make on macOS is itself an xcrun shim, so a missing SDK is
 # staged by overriding the probe (`make menubar-check SDK_PROBE=false`).
 SDK_PROBE    ?= xcrun --sdk macosx --show-sdk-path
-MENUBAR_HOME := $(HOME)/Applications/Station.app
 WINDOW_APP   := .artifacts/window/Spwn.app
 WINDOW_CARGO := .artifacts/window/cargo
 WINDOW_ICON  := .artifacts/window/icon
 # value: the engine Spwn.app carries (ADR-073, mode A): ENGINE=<path> names a darwin-arm64 build, the release's; without it the target builds one
 WINDOW_ENGINE := $(WINDOW_APP)/Contents/MacOS/Spwn Engine
+WINDOW_MENUBAR := $(WINDOW_APP)/Contents/Library/LoginItems/Station.app
 ENGINE       ?=
 ENGINE_VERSION ?= $(shell git describe --tags --always --dirty)
 # value: the window's version is the release's, as git describes it for the binaries and Station.app, without its v;
@@ -130,18 +130,7 @@ menubar-check: ## The menu bar's swift test, then its bundle; one line of skip w
 menubar: ## Build the menu bar's bundle, signed ad hoc, into $(MENUBAR_APP)
 	@apps/menubar/scripts/build.sh
 
-menubar-install: menubar ## Copy the bundle to ~/Applications/Station.app, and nothing else
-	@mkdir -p $(HOME)/Applications
-	@rm -rf "$(MENUBAR_HOME)"
-	@cp -R $(MENUBAR_APP) "$(MENUBAR_HOME)"
-	@printf "$(GREEN)●$(RESET) Installed $(MENUBAR_HOME)\n"
-
-menubar-uninstall: ## Unregister the login item, then remove ~/Applications/Station.app
-	@if [ -x "$(MENUBAR_HOME)/Contents/MacOS/StationMenuBar" ]; then "$(MENUBAR_HOME)/Contents/MacOS/StationMenuBar" --unregister-login-item || true; fi
-	@rm -rf "$(MENUBAR_HOME)"
-	@printf "$(GREEN)●$(RESET) Removed $(MENUBAR_HOME)\n"
-
-window: node_modules/.install $(if $(ENGINE),,build) ## Build the window's bundle for darwin-arm64 with the engine inside (ENGINE=<path>, else this build's), signed ad hoc, into $(WINDOW_APP)
+window: node_modules/.install $(if $(ENGINE),,build) menubar ## Build the window's bundle for darwin-arm64 with the engine and the menu bar inside (ENGINE=<path>, else this build's), signed ad hoc, into $(WINDOW_APP)
 	@mkdir -p .artifacts/window/engine && cp "$(or $(ENGINE),$(BUILD_PATH))" .artifacts/window/engine/station
 	@../scripts/app-icon-compile.sh apps/desktop/src-tauri/icons/spwn.icon Spwn $(WINDOW_ICON) $(WINDOW_ICON)/Spwn.plist
 	@cd apps/desktop && CARGO_TARGET_DIR=$(CURDIR)/$(WINDOW_CARGO) npx tauri build --ci --target aarch64-apple-darwin --bundles app --config '{"version":"$(WINDOW_VERSION)"}'
@@ -153,11 +142,12 @@ window: node_modules/.install $(if $(ENGINE),,build) ## Build the window's bundl
 	done
 	@shown=$$("$(WINDOW_ENGINE)" --version); if [ "$${shown%% (*}" != "station $(ENGINE_VERSION)" ]; then printf "window: the bundle's engine says %s, not station %s\n" "$$shown" "$(ENGINE_VERSION)"; exit 1; fi
 	@for job in engine agent; do plutil -lint -s "$(WINDOW_APP)/Contents/Library/LaunchAgents/com.jterrazz.spwn.$$job.plist" || exit 1; done
+	@shown=$$(plutil -extract CFBundleIdentifier raw "$(WINDOW_MENUBAR)/Contents/Info.plist"); if [ "$$shown" != "com.jterrazz.station.menubar" ] || [ ! -x "$(WINDOW_MENUBAR)/Contents/MacOS/StationMenuBar" ]; then printf "window: the bundle carries no menu bar at %s\n" "$(WINDOW_MENUBAR)"; exit 1; fi
 	@APPLE_SIGNING_IDENTITY=- ../scripts/sign-macos.sh sign $(WINDOW_APP)
 	@../scripts/app-icon-check.sh $(WINDOW_APP)
-	@printf "$(GREEN)●$(RESET) Built $(WINDOW_APP) ($(WINDOW_VERSION), its engine $(ENGINE_VERSION), signed ad hoc)\n"
+	@printf "$(GREEN)●$(RESET) Built $(WINDOW_APP) ($(WINDOW_VERSION), its engine $(ENGINE_VERSION) and its menu bar, signed ad hoc)\n"
 
-catalog: ## Build the Spwn Menu Catalog, the dev-only window over every story, never bundled into Station.app
+catalog: ## Build the Spwn Menu Catalog, the dev-only window over every story, never bundled into the menu bar
 	@swift apps/menubar/scripts/symbols.swift apps/menubar/sources/station-kit/token/symbols.xcassets
 	@swift build --package-path apps/menubar --scratch-path .artifacts/menubar/build --product StationCatalog
 	@printf "$(GREEN)●$(RESET) Built $(CATALOG_BIN)\n"

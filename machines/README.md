@@ -47,7 +47,7 @@ station init            # make this machine known: its name, the shell block, th
 
 Every command is in [Commands](docs/reference/commands.md); `--on <machine>` runs any of them elsewhere.
 
-The menu bar app, `apps/menubar`, shows All machines, Needs you, Activity and Awake from this Mac's engine. `station init` never installs it: `make menubar-install` copies it to `~/Applications`, and [Develop](docs/guides/develop.md) holds its targets.
+The menu bar app, `apps/menubar`, shows All machines, Needs you, Activity and Awake from this Mac's engine. `station init` never installs it: Spwn.app carries it as its login item, and [Develop](docs/guides/develop.md) holds its targets.
 
 ## Documentation
 

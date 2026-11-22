@@ -69,7 +69,7 @@ func TestEachBundledJobRunsTheBundlesEngineUnderTheCatalogsLabel(t *testing.T) {
 	}
 }
 
-func TestTheWindowsBundleHoldsTheEngineAndBothJobsWhereTheCatalogSays(t *testing.T) {
+func TestTheWindowsBundleHoldsTheEngineBothJobsAndTheMenuBarWhereTheCatalogSays(t *testing.T) {
 	body, err := os.ReadFile(filepath.Join(root(t), "apps", "desktop", "src-tauri", "tauri.conf.json"))
 	if err != nil {
 		t.Fatal(err)
@@ -89,7 +89,10 @@ func TestTheWindowsBundleHoldsTheEngineAndBothJobsWhereTheCatalogSays(t *testing
 		t.Errorf("tauri.conf.json identifier = %q, catalog.WindowBundle says %q", conf.Identifier, catalog.WindowBundle)
 	}
 	contents := func(p string) string { return path.Clean(p[len("Contents/"):]) }
-	want := map[string]string{contents(catalog.BundledEnginePath): "../../../.artifacts/window/engine/station"}
+	want := map[string]string{
+		contents(catalog.BundledEnginePath):  "../../../.artifacts/window/engine/station",
+		contents(catalog.BundledMenuBarPath): "../../../.artifacts/menubar/Station.app",
+	}
 	for _, label := range []string{catalog.BundledJobs.Engine, catalog.BundledJobs.Agent} {
 		want[contents(catalog.BundledPlist(label))] = path.Join(path.Base(bundleAgentsDir), path.Base(catalog.BundledPlist(label)))
 	}
@@ -103,5 +106,8 @@ func TestTheWindowsBundleHoldsTheEngineAndBothJobsWhereTheCatalogSays(t *testing
 	}
 	if got, want := makeVariable(t, "WINDOW_ENGINE"), "$(WINDOW_APP)/"+catalog.BundledEnginePath; got != want {
 		t.Errorf("Makefile WINDOW_ENGINE = %q, want %q", got, want)
+	}
+	if got, want := makeVariable(t, "WINDOW_MENUBAR"), "$(WINDOW_APP)/"+catalog.BundledMenuBarPath; got != want {
+		t.Errorf("Makefile WINDOW_MENUBAR = %q, want %q", got, want)
 	}
 }

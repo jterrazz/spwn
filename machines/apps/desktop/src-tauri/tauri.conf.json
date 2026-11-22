@@ -46,7 +46,8 @@
             "files": {
                 "MacOS/Spwn Engine": "../../../.artifacts/window/engine/station",
                 "Library/LaunchAgents/com.jterrazz.spwn.engine.plist": "agents/com.jterrazz.spwn.engine.plist",
-                "Library/LaunchAgents/com.jterrazz.spwn.agent.plist": "agents/com.jterrazz.spwn.agent.plist"
+                "Library/LaunchAgents/com.jterrazz.spwn.agent.plist": "agents/com.jterrazz.spwn.agent.plist",
+                "Library/LoginItems/Station.app": "../../../.artifacts/menubar/Station.app"
             }
         }
     },

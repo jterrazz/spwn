@@ -72,6 +72,8 @@ const BundledEngine = "Spwn Engine" // value: the engine's file inside Spwn.app 
 
 const BundledEnginePath = "Contents/MacOS/" + BundledEngine // value: where Spwn.app holds the engine, relative to the bundle, as launchd's BundleProgram reads it.
 
+const BundledMenuBarPath = "Contents/Library/LoginItems/Station.app" // value: where Spwn.app holds the menu bar, its login item, relative to the bundle.
+
 const JobStartFile = "jobs.json" // value: the file, in ~/.local/state/station, that a bundled job of the engine reads at its start (ADR-073, mode A).
 
 func JobStartPath(home string) string {

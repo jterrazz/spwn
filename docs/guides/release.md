@@ -53,7 +53,7 @@ Commit that change **once**. Never rotate the pubkey casually - see
 
 ### 2. Signing and notarization
 
-Every macOS artefact the Publish workflow ships from `main` or a `v*` tag is signed with a Developer ID Application certificate, with the hardened runtime and a secure timestamp, and notarized by Apple with `notarytool`, by Apple ID: spwn's two darwin binaries, signed and notarized by GoReleaser's post-build hook (`scripts/sign-macos.sh binary`) before it archives them; Machines' two darwin binaries, notarized inside a zip that is not shipped, since a bare binary cannot be stapled; and the two apps, `Station.app` and the window's `Spwn.app`, which carries that darwin-arm64 binary again as `Contents/MacOS/Spwn Engine`, signed inside the app under the app's identifier, each notarized, then stapled before it is zipped into `Station.app.zip` and `Spwn_darwin_arm64.zip`; then `Spwn.app`, stapled, is packed into `Spwn.app.tar.gz`, signed with the Tauri key and described by `latest.json` (`scripts/window-update.sh`).
+Every macOS artefact the Publish workflow ships from `main` or a `v*` tag is signed with a Developer ID Application certificate, with the hardened runtime and a secure timestamp, and notarized by Apple with `notarytool`, by Apple ID: spwn's two darwin binaries, signed and notarized by GoReleaser's post-build hook (`scripts/sign-macos.sh binary`) before it archives them; Machines' two darwin binaries, notarized inside a zip that is not shipped, since a bare binary cannot be stapled; and the window's `Spwn.app`, which carries that darwin-arm64 binary again as `Contents/MacOS/Spwn Engine`, signed inside the app under the app's identifier, and the menu bar's `Station.app` as its login item, `Contents/Library/LoginItems/Station.app`, signed inside it, notarized, then stapled before it is zipped into `Spwn_darwin_arm64.zip`; then `Spwn.app`, stapled, is packed into `Spwn.app.tar.gz`, signed with the Tauri key and described by `latest.json` (`scripts/window-update.sh`).
 
 The workflow stores no secret in GitHub. Each job that signs reads the secrets it names from Infisical, through the job's GitHub OIDC token, with `.github/actions/signing-secrets`: the machine identity `studio-ci`, project `studio-ci`, environment `prod`, folder `/spwn`. The project and the folder are the workflow's `SIGNING_SECRETS_PROJECT` and `SIGNING_SECRETS_PATH`. Every value is masked in the log, and a secret a job does not name is never in its environment.
 
@@ -68,7 +68,7 @@ The workflow stores no secret in GitHub. Each job that signs reads the secrets i
 
 The workflow's first job, Signing, runs `scripts/sign-macos.sh require`. Infisical gives a token to `main` and to a `v*` tag alone, so on those two refs a missing secret (one of the six above, or `TAURI_SIGNING_PRIVATE_KEY`) fails it, naming the missing ones, and nothing is built or released: a tag never ships unsigned. A dry run on any other branch reads nothing and builds unsigned. The Check workflow never signs. The certificate is imported into a keychain the macOS job creates and deletes, with a random password masked in the log, and the decoded certificate lives in the runner's temporary folder only while the import runs.
 
-No artefact carries entitlements: neither `station`, `Station.app` nor `Spwn.app` uses an API the hardened runtime withholds without one. The window starts its programs as plain child processes (`open`, the installer's shell, `station`), reaches Terminal through `open -a Terminal` on a `.command` script and never through Apple Events, and its web view is the system's WKWebView, whose JIT runs in WebKit's own process. The script signs ad hoc with `APPLE_SIGNING_IDENTITY=-` and skips notarization and stapling with `MACOS_NOTARIZE=skip`, to run its logic on a Mac with no certificate:
+No artefact carries entitlements: neither `station`, `Spwn.app` nor the menu bar it carries uses an API the hardened runtime withholds without one. The window starts its programs as plain child processes (`open`, the installer's shell, `station`), reaches Terminal through `open -a Terminal` on a `.command` script and never through Apple Events, and its web view is the system's WKWebView, whose JIT runs in WebKit's own process. The script signs ad hoc with `APPLE_SIGNING_IDENTITY=-` and skips notarization and stapling with `MACOS_NOTARIZE=skip`, to run its logic on a Mac with no certificate:
 
 ```sh
 APPLE_SIGNING_IDENTITY=- MACOS_NOTARIZE=skip scripts/sign-macos.sh sign machines/.artifacts/menubar/Station.app
@@ -139,8 +139,8 @@ both products of the repository, Spwn and the engine (`machines/`):
 .github/workflows/publish.yaml
 ├─ signing          (ubuntu, arm)   on main or a tag, fails unless every signing secret is read from Infisical
 ├─ machines-linux   (ubuntu, arm)   station-linux-arm64, station-linux-amd64, cgo off
-├─ machines-darwin  (macos-26)      station-darwin-arm64, station-darwin-amd64 (cgo, IOKit), Station.app.zip,
-│                                   Spwn_darwin_arm64.zip (the window), each signed and notarized, the apps stapled;
+├─ machines-darwin  (macos-26)      station-darwin-arm64, station-darwin-amd64 (cgo, IOKit),
+│                                   Spwn_darwin_arm64.zip (the window and the menu bar), each signed and notarized, the app stapled;
 │                                   Spwn.app.tar.gz, its .sig and latest.json (the window's update), on a signed run
 └─ publish (GoReleaser, macos-26)   opens the release once both are built: spwn's archives, its darwin
                                     binaries signed and notarized, station's files as extra_files,

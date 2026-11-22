@@ -141,11 +141,6 @@ jobs:
                   cp "$dist/station-darwin-arm64" "$dist/station-darwin-amd64" "$RUNNER_TEMP/notary/station-darwin/"
                   ditto -c -k --keepParent "$RUNNER_TEMP/notary/station-darwin" "$RUNNER_TEMP/notary/station-darwin.zip"
                   ../scripts/sign-macos.sh notarize "$RUNNER_TEMP/notary/station-darwin.zip"
-            - name: Build Station.app
-              run: |
-                  set -euo pipefail
-                  make menubar
-                  vtool -show-build .artifacts/menubar/Station.app/Contents/MacOS/StationMenuBar | awk '$1 == "minos"'
             - uses: actions/setup-node@v4
               with:
                   node-version: '24'
@@ -163,16 +158,16 @@ jobs:
                   cargo --version
                   make window ENGINE="$RUNNER_TEMP/station/station-darwin-arm64" ENGINE_VERSION="$STATION_VERSION"
                   vtool -show-build .artifacts/window/Spwn.app/Contents/MacOS/spwn-window | awk '$1 == "minos"'
-            - name: Sign, notarize and staple Station.app and Spwn.app
+                  vtool -show-build .artifacts/window/Spwn.app/Contents/Library/LoginItems/Station.app/Contents/MacOS/StationMenuBar | awk '$1 == "minos"'
+            - name: Sign, notarize and staple Spwn.app
               if: needs.signing.outputs.signed == 'true'
               run: |
                   set -euo pipefail
-                  ../scripts/sign-macos.sh sign .artifacts/menubar/Station.app .artifacts/window/Spwn.app
+                  ../scripts/sign-macos.sh sign .artifacts/window/Spwn.app
                   mkdir -p "$RUNNER_TEMP/notary"
-                  ditto -c -k --keepParent .artifacts/menubar/Station.app "$RUNNER_TEMP/notary/Station.app.zip"
                   ditto -c -k --keepParent .artifacts/window/Spwn.app "$RUNNER_TEMP/notary/Spwn.app.zip"
-                  ../scripts/sign-macos.sh notarize "$RUNNER_TEMP/notary/Station.app.zip" "$RUNNER_TEMP/notary/Spwn.app.zip"
-                  ../scripts/sign-macos.sh staple .artifacts/menubar/Station.app .artifacts/window/Spwn.app
+                  ../scripts/sign-macos.sh notarize "$RUNNER_TEMP/notary/Spwn.app.zip"
+                  ../scripts/sign-macos.sh staple .artifacts/window/Spwn.app
             # value: the minisign verifier the update's check runs, pinned, built from crates.io by the cargo the job already holds
             - name: Install rsign
               if: needs.signing.outputs.signed == 'true'
@@ -189,12 +184,11 @@ jobs:
                   ../scripts/window-update.sh sign "$RUNNER_TEMP/station/Spwn.app.tar.gz"
                   ../scripts/window-update.sh manifest .artifacts/window/Spwn.app "$RUNNER_TEMP/station"
             # invariant: the shipped zips are made after the staple, so the apps they carry hold their ticket offline
-            - name: Zip Station.app and Spwn.app
+            - name: Zip Spwn.app
               run: |
                   set -euo pipefail
-                  ditto -c -k --keepParent .artifacts/menubar/Station.app "$RUNNER_TEMP/station/Station.app.zip"
                   ditto -c -k --keepParent .artifacts/window/Spwn.app "$RUNNER_TEMP/station/Spwn_darwin_arm64.zip"
-                  codesign -dv .artifacts/menubar/Station.app
+                  codesign -dv .artifacts/window/Spwn.app/Contents/Library/LoginItems/Station.app
                   codesign -dv .artifacts/window/Spwn.app
                   codesign -dv ".artifacts/window/Spwn.app/Contents/MacOS/Spwn Engine"
             - name: Delete the signing keychain
@@ -206,7 +200,7 @@ jobs:
                   path: ${{ runner.temp }}/station/*
                   if-no-files-found: error
 
-    # value: one release per tag, opened once by goreleaser: spwn's archives, plus station's binaries, Station.app.zip, Spwn_darwin_arm64.zip and, on a signed run, the window's update (Spwn.app.tar.gz, its .sig, latest.json) as extra files, every asset listed in the one checksums.txt
+    # value: one release per tag, opened once by goreleaser: spwn's archives, plus station's binaries, Spwn_darwin_arm64.zip and, on a signed run, the window's update (Spwn.app.tar.gz, its .sig, latest.json) as extra files, every asset listed in the one checksums.txt
     # invariant: the release opens only once both station jobs are built, so a failed station leaves no spwn-only release
     # value: on macOS, because GoReleaser's post-build hook signs and notarizes spwn's darwin binaries with codesign and notarytool before it archives them
     publish:

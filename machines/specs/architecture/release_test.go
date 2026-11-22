@@ -44,7 +44,7 @@ func TestTheReleaseBinaryLinksNoWorld(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	recipe := regexp.MustCompile(`(?m)^(build|build-linux|provision|menubar-install):[^\n]*\n((?:\t[^\n]*\n)*)`)
+	recipe := regexp.MustCompile(`(?m)^(build|build-linux|provision):[^\n]*\n((?:\t[^\n]*\n)*)`)
 	for _, m := range recipe.FindAllStringSubmatch(string(makefile), -1) {
 		if strings.Contains(m[2], "-tags") {
 			t.Errorf("the Makefile's %s recipe builds with tags: the binary it makes may ship", m[1])
