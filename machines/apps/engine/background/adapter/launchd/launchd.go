@@ -109,9 +109,11 @@ func (j *Jobs) Read(ctx context.Context, r contract.Ref) contract.Status {
 	}
 	s := contract.Status{Loaded: true}
 	for _, line := range strings.Split(out.Stdout, "\n") {
-		if state, ok := strings.CutPrefix(strings.TrimSpace(line), "state = "); ok {
+		if state, ok := strings.CutPrefix(strings.TrimSpace(line), "state = "); ok && s.State == "" {
 			s.State = state
-			break
+		}
+		if pid, ok := strings.CutPrefix(line, "\tpid = "); ok {
+			s.PID, _ = strconv.Atoi(strings.TrimSpace(pid))
 		}
 	}
 	return s

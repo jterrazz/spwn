@@ -179,7 +179,7 @@ func (m machine) activityDeps(meter activitycontract.Meter) activitycalls.Deps {
 // the same variables as the apps' releases.
 func (m machine) engineDeps() enginecalls.Deps {
 	d := enginecalls.Deps{
-		Control: m.control(), Installer: engineInstaller{m: m}, Kind: m.profile.Kind,
+		Control: m.control(), Installer: m.installer(), Kind: m.profile.Kind,
 		Cache: m.stores.release, Version: m.engineVersion(), Arch: m.sys.Env.GOARCH(), Now: m.sys.Clock.Now,
 		Asking: &m.stores.asking, Page: page.Revision, Views: feeds.Pages{ThisMachine: m.where},
 		Forward: func(ctx context.Context, in engine.StateIn) (<-chan json.RawMessage, error) {

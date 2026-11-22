@@ -9,6 +9,14 @@ import (
 	"golang.org/x/sys/unix"
 )
 
+func Resolved(file string) string {
+	// value: file with its links resolved, itself when they cannot be.
+	if resolved, err := filepath.EvalSymlinks(file); err == nil {
+		return resolved
+	}
+	return file
+}
+
 func BundleOf(executable, rel string) string {
 	// value: the app bundle that holds executable as rel, its links resolved
 	// first, so a run through ~/.local/bin finds the bundle too; "" when the

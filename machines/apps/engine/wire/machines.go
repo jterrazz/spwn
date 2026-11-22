@@ -118,7 +118,7 @@ func (m machine) vmUses(ctx context.Context) map[string]int64 {
 // value: engine start's own use case, run for a call that needs the engine
 // on a Mac that never installed it.
 func (m machine) startEngine(ctx context.Context) error {
-	d := enginecalls.Deps{Control: m.control(), Installer: engineInstaller{m: m}, Kind: m.profile.Kind}
+	d := enginecalls.Deps{Control: m.control(), Installer: m.installer(), Kind: m.profile.Kind}
 	_, err := enginecalls.Start.Run(ctx, d, enginecalls.StartIn{}, nil)
 	return err
 }

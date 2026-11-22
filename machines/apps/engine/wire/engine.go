@@ -53,6 +53,7 @@ import (
 	machinescontract "github.com/jterrazz/studio-station/apps/engine/machines/contract"
 	"github.com/jterrazz/studio-station/apps/engine/platform/darwin"
 	"github.com/jterrazz/studio-station/apps/engine/platform/local"
+	"github.com/jterrazz/studio-station/apps/engine/ports/adapter/lsof"
 	"github.com/jterrazz/studio-station/apps/engine/remote"
 	"github.com/jterrazz/studio-station/apps/engine/remote/api"
 	enginerun "github.com/jterrazz/studio-station/apps/engine/surface/cli/engine/run"
@@ -490,8 +491,16 @@ func (r reservationReleaser) ReleaseVM(ctx context.Context, vm string) error {
 	return portscalls.SaveReservations(ctx, reserved, kept)
 }
 
+func (m machine) installer() engineInstaller {
+	return engineInstaller{m: m, texts: lsof.New(m.sys.Run)}
+}
+
 type engineInstaller struct {
 	m machine
+	// value: the files a process maps as text.
+	texts interface {
+		Texts(ctx context.Context, pid int) ([]string, error)
+	}
 }
 
 func (i engineInstaller) env() map[string]string {
@@ -546,8 +555,8 @@ func (i engineInstaller) install(ctx context.Context, jobs contract.Jobs) (engin
 }
 
 // invariant: the agent's job follows the engine's: it restarts when its
-// plist changed or the engine restarted, so it never serves an older
-// binary's code.
+// plist changed, the engine restarted, or its process runs another file than
+// the one its job starts, so it never serves another binary's code.
 func (i engineInstaller) installAgent(ctx context.Context, jobs contract.Jobs, engineRestarted bool) error {
 	job := i.m.agentJobRef()
 	changed, err := jobs.Install(ctx, contract.JobSpec{
@@ -557,16 +566,34 @@ func (i engineInstaller) installAgent(ctx context.Context, jobs contract.Jobs, e
 	if err != nil {
 		return err
 	}
-	if !jobs.Read(ctx, job).Loaded {
+	status := jobs.Read(ctx, job)
+	if !status.Loaded {
 		if loadErr := jobs.Load(ctx, job); loadErr != nil {
 			return loadErr
 		}
 		return jobs.Start(ctx, job)
 	}
-	if changed || engineRestarted {
+	if changed || engineRestarted || i.runsAnotherFile(ctx, status.PID, i.agentProgram()) {
 		return jobs.Restart(ctx, job)
 	}
 	return nil
+}
+
+func (i engineInstaller) agentProgram() string {
+	if bundle := i.m.bundle(); bundle != "" {
+		return filepath.Join(bundle, catalog.BundledEnginePath)
+	}
+	return local.Resolved(i.m.sys.Env.Executable())
+}
+
+// value: process pid maps no file at program among its text files; a
+// process whose text files are not read is not judged.
+func (i engineInstaller) runsAnotherFile(ctx context.Context, pid int, program string) bool {
+	if pid <= 0 {
+		return false
+	}
+	texts, err := i.texts.Texts(ctx, pid)
+	return err == nil && !slices.Contains(texts, program)
 }
 
 // invariant: a Mac moves from the bare jobs to the bundle's once, at the

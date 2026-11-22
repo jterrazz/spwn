@@ -24,6 +24,7 @@ import (
 type installJobs struct {
 	contract.Jobs
 	changed, agentChanged, loaded bool
+	agentPID                      int
 	asked                         map[string]int
 }
 
@@ -38,7 +39,10 @@ func (j *installJobs) count(verb string, r contract.Ref) error {
 func (j *installJobs) Install(_ context.Context, spec contract.JobSpec) (bool, error) {
 	return j.changed || (j.agentChanged && spec.Label == catalog.AgentLabel), nil
 }
-func (j *installJobs) Read(context.Context, contract.Ref) contract.Status {
+func (j *installJobs) Read(_ context.Context, r contract.Ref) contract.Status {
+	if r.Label == catalog.AgentLabel && j.loaded && j.agentPID != 0 {
+		return contract.Status{Loaded: true, State: "running", PID: j.agentPID}
+	}
 	return contract.Status{Loaded: j.loaded}
 }
 func (j *installJobs) Load(_ context.Context, r contract.Ref) error    { return j.count("load", r) }
@@ -133,6 +137,48 @@ func TestTheAgentsJobIsStartedOnceAndRestartedWithItsPlistOrTheEngine(t *testing
 				if got := c.jobs.asked[verb+" "+catalog.AgentLabel]; got != c.want[verb] {
 					t.Errorf("the agent's job: %s asked %d times, want %d", verb, got, c.want[verb])
 				}
+			}
+		})
+	}
+}
+
+// value: the text files of one process, or no answer for it when files is
+// nil.
+type processTexts struct {
+	pid   int
+	files []string
+}
+
+func (p processTexts) Texts(_ context.Context, pid int) ([]string, error) {
+	if pid != p.pid || p.files == nil {
+		return nil, errors.New("no such process")
+	}
+	return p.files, nil
+}
+
+func TestTheAgentsJobRestartsWhenItsProcessRunsAnotherFileThanTheOneItStarts(t *testing.T) {
+	const pid = 9006
+	for _, c := range []struct {
+		name     string
+		files    []string
+		restarts int
+	}{
+		{"the file its job starts", []string{"/home/u/.local/bin/station", "/usr/lib/dyld"}, 0},
+		{"a file moved aside by an update", []string{"/private/tmp/old-Spwn.app/Contents/MacOS/Spwn Engine", "/usr/lib/dyld"}, 1},
+		{"a process whose files are not read", nil, 0},
+	} {
+		t.Run(c.name, func(t *testing.T) {
+			installer := installerOf(Version())
+			installer.texts = processTexts{pid: pid, files: c.files}
+			jobs := installJobs{loaded: true, agentPID: pid}
+			if _, err := installer.install(context.Background(), &jobs); err != nil {
+				t.Fatal(err)
+			}
+			if got := jobs.asked["restart "+catalog.AgentLabel]; got != c.restarts {
+				t.Errorf("the agent's job was restarted %d times, want %d", got, c.restarts)
+			}
+			if got := jobs.asked["restart "+catalog.EngineLabel]; got != 0 {
+				t.Errorf("the engine's job was restarted %d times, want 0", got)
 			}
 		})
 	}

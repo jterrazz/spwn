@@ -79,11 +79,11 @@ func (l *launchctl) Output(_ context.Context, c local.Cmd) (local.Output, error)
 		if !l.loaded[name] {
 			return local.Output{ExitCode: 113, Stderr: "Could not find service"}, nil
 		}
-		state := "waiting"
+		state, pid := "waiting", ""
 		if l.running[name] {
-			state = "running"
+			state, pid = "running", "\tpid = 4242\n"
 		}
-		return local.Output{Stdout: name + " = {\n\tstate = " + state + "\n}\n"}, nil
+		return local.Output{Stdout: name + " = {\n\tstate = " + state + "\n" + pid + "\tendpoints = {\n\t\tpid = 1\n\t}\n}\n"}, nil
 	case len(a) == 3 && a[0] == "bootstrap":
 		body, _ := l.files.ReadFile(a[2])
 		m := labelKey.FindSubmatch(body)
@@ -146,5 +146,19 @@ func TestARestartLoadsTheJobAgainSoLaunchdReadsItsDefinitionAndItsBinaryAfresh(t
 	}
 	if !run.running[spec.Label] {
 		t.Error("the restarted job is not running")
+	}
+}
+
+func TestAReadNamesTheProcessARunningJobRunsAndNoneForAWaitingOne(t *testing.T) {
+	f := files{m: fstest.MapFS{}}
+	run := &launchctl{files: f, loaded: map[string]bool{"com.example.agent": true}, running: map[string]bool{}}
+	jobs := launchd.New(run, f, &localtest.Clock{}, launchd.Options{Home: "/Users/owner", UID: 501})
+	ref := contract.Ref{Domain: contract.Domain{UID: 501}, Label: "com.example.agent"}
+	if got := jobs.Read(context.Background(), ref); got != (contract.Status{Loaded: true, State: "waiting"}) {
+		t.Errorf("a waiting job reads %+v", got)
+	}
+	run.running["com.example.agent"] = true
+	if got := jobs.Read(context.Background(), ref); got != (contract.Status{Loaded: true, State: "running", PID: 4242}) {
+		t.Errorf("a running job reads %+v", got)
 	}
 }

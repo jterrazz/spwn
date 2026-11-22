@@ -52,6 +52,9 @@ type Ref struct {
 type Status struct {
 	Loaded bool
 	State  string
+	// value: the process the job runs, 0 when it runs none or its manager
+	// does not tell.
+	PID int
 }
 
 type JobSpec struct {
