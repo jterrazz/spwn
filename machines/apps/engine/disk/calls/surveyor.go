@@ -4,6 +4,7 @@ import (
 	"cmp"
 	"context"
 	"path"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -483,6 +484,7 @@ func (s *Surveyor) relocate(ctx context.Context, e disk.Entry) error {
 // destination's kept; any other destination that holds something (data, or
 // a whole folder's destination) refuses the move, and nothing moves.
 func (s *Surveyor) planMove(e disk.Entry, st catalog.Misplaced, shown string) (renames [][2]string, drops []string, to string, err error) {
+	var dests []string
 	for _, m := range st.Move {
 		from, dest := s.o.Expand.Expand(m.From), s.o.Expand.Expand(m.To)
 		entries := strings.HasSuffix(m.From, "/*")
@@ -494,7 +496,9 @@ func (s *Surveyor) planMove(e disk.Entry, st catalog.Misplaced, shown string) (r
 			}
 		}
 		for _, p := range pairs {
-			to = s.o.Expand.Display(dest)
+			if folder := s.o.Expand.Display(dest); !slices.Contains(dests, folder) {
+				dests = append(dests, folder)
+			}
 			if !s.held(p[1]) {
 				renames = append(renames, p)
 				continue
@@ -506,7 +510,7 @@ func (s *Surveyor) planMove(e disk.Entry, st catalog.Misplaced, shown string) (r
 			return nil, nil, "", &disk.DestinationHeldError{Folder: shown, Path: s.o.Expand.Display(p[1])}
 		}
 	}
-	return renames, drops, to, nil
+	return renames, drops, strings.Join(dests, ", "), nil
 }
 
 // invariant: a misplaced folder is offered only while its move would run:
