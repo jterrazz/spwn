@@ -46,3 +46,12 @@ func TestAServerWhoseGuestStopsAnsweringBeforeItsMacNoticesIsShownFromItsMac(t *
 		t.Errorf("activity --on infra shows %+v; want its run from mac-mini, 15 GB resident", v.Report)
 	}
 }
+
+func TestActivityInsideAServerIsLabelledAsTheServerNotAsThisMac(t *testing.T) {
+	self := machine.Ref{Name: "infra"}
+	env := kit.Env{Calls: silentGuest{mini: machine.Ref{Name: "mac-mini"}}, Self: self, Kind: machine.Server}
+	v, _ := mac(t.Context(), env, self, "infra", read{})
+	if v.Kind != string(machine.Server) || v.Label != "infra" || !v.ThisMac {
+		t.Errorf("activity inside a server is %q labeled %q; want the server, labeled infra", v.Kind, v.Label)
+	}
+}

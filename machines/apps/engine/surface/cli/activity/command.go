@@ -70,7 +70,10 @@ type read struct{ history bool }
 func mac(ctx context.Context, env kit.Env, ref machine.Ref, label string, how read) (pageactivity.View, error) {
 	v := pageactivity.View{Name: ref.Name, Label: label, Kind: string(machine.Computer), ThisMac: ref == env.Self}
 	if v.ThisMac {
-		v.Label = "This Mac"
+		v.Kind = string(env.Kind)
+		if env.Kind == machine.Computer {
+			v.Label = "This Mac"
+		}
 	}
 	r, err := call.Read(ctx, env.Calls, ref, activitycalls.Read, activitycalls.ReadIn{History: how.history}, nil)
 	v.Report = r
