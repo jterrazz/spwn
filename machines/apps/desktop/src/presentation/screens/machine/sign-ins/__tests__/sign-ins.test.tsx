@@ -4,7 +4,7 @@ import { describe, expect, test } from 'vitest';
 import { pageOver } from '../../../../../composition/__tests__/page-over';
 import { recordingsOf } from '../../../../../infrastructure/outbound/engine-replay/recordings';
 
-const recordingFor = await recordingsOf('stories', 'two-macs');
+const recordingFor = await recordingsOf('stories', 'two-macs', 'leftovers');
 
 function signInsOver(world: string, machine: string) {
     return pageOver(recordingFor(world), { machine, page: 'machine', tab: 'Sign-ins' });
@@ -60,6 +60,20 @@ describe('sign-ins', () => {
         );
         expect(result.errors.text).toBe('');
         await expect(result.tree).toMatch(file('./__expected__/stories-linux-3.aria.yaml'));
+    });
+
+    test("a stopped VM's tab draws the engine's answer for it, never a skeleton", async () => {
+        // Given - api's Sign-ins over leftovers, a workspace that is stopped
+        const result = await component.render(signInsOver('leftovers', 'api'), async (visitor) => {
+            // When - accounts.list:api has answered
+            // Then - its stopped verdict and a row each program that offers nothing
+            await visitor.see(
+                heading('api is stopped: its sign-ins are read when it runs', { exact: false }),
+            );
+            await visitor.see(region('Sign-ins'));
+        });
+        expect(result.errors.text).toBe('');
+        expect(result.content.text).toContain('Start the machine first');
     });
 
     test('a server answers with its own verdict, and its rows offer no gesture', async () => {
