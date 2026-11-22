@@ -8,6 +8,6 @@
   "state": "failed",
   "error": {
     "message": "restart-after-power-cut needs admin rights",
-    "hint": "sudo station settings apply restart-after-power-cut"
+    "hint": "sudo ~/.local/bin/station settings apply restart-after-power-cut"
   }
 }

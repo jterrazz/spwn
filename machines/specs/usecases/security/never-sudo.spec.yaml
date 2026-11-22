@@ -5,12 +5,12 @@ runs:
       exit: 2
       stderr: |
           Error: sshd needs admin rights
-          Hint: sudo station settings apply sshd
+          Hint: sudo ~/.local/bin/station settings apply sshd
     - command: 'settings apply restart-after-power-cut'
       exit: 2
       stderr: |
           Error: restart-after-power-cut needs admin rights
-          Hint: sudo station settings apply restart-after-power-cut
+          Hint: sudo ~/.local/bin/station settings apply restart-after-power-cut
     - command: 'apps install tart'
       exit: 0
       stdout: |

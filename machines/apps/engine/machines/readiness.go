@@ -74,7 +74,7 @@ func Readiness(f ReadinessFacts) []ReadinessItem {
 func setting(name string, s ReadinessSetting) ReadinessItem {
 	fix := "station settings apply " + s.Name
 	if s.Root {
-		fix = catalog.AsRoot(catalog.InstallDir + "/" + catalog.StationBinary + " settings apply " + s.Name)
+		fix = catalog.StationAsRoot("settings apply " + s.Name)
 	}
 	switch {
 	case s.State == catalog.StateOK && s.Recorded:

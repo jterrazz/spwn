@@ -11,26 +11,36 @@ import (
 	"time"
 )
 
-type disk struct{}
+type disk struct{ owner *invoker }
 
-func (disk) Open(name string) (fs.File, error)            { return os.Open(name) }
-func (disk) ReadFile(path string) ([]byte, error)         { return os.ReadFile(path) }
-func (disk) Readlink(path string) (string, error)         { return os.Readlink(path) }
-func (disk) Symlink(target, path string) error            { return os.Symlink(target, path) }
-func (disk) Stat(path string) (fs.FileInfo, error)        { return os.Stat(path) }
-func (disk) ReadDir(path string) ([]fs.DirEntry, error)   { return os.ReadDir(path) }
-func (disk) Glob(pattern string) ([]string, error)        { return filepath.Glob(pattern) }
-func (disk) Remove(path string) error                     { return os.Remove(path) }
-func (disk) RemoveAll(path string) error                  { return os.RemoveAll(path) }
-func (disk) MkdirAll(path string, perm fs.FileMode) error { return os.MkdirAll(path, perm) }
-func (disk) Chmod(path string, perm fs.FileMode) error    { return os.Chmod(path, perm) }
-func (disk) Chown(path string, uid, gid int) error        { return os.Chown(path, uid, gid) }
+func (disk) Open(name string) (fs.File, error)          { return os.Open(name) }
+func (disk) ReadFile(path string) ([]byte, error)       { return os.ReadFile(path) }
+func (disk) Readlink(path string) (string, error)       { return os.Readlink(path) }
+func (disk) Symlink(target, path string) error          { return os.Symlink(target, path) }
+func (disk) Stat(path string) (fs.FileInfo, error)      { return os.Stat(path) }
+func (disk) ReadDir(path string) ([]fs.DirEntry, error) { return os.ReadDir(path) }
+func (disk) Glob(pattern string) ([]string, error)      { return filepath.Glob(pattern) }
+func (disk) Remove(path string) error                   { return os.Remove(path) }
+func (disk) RemoveAll(path string) error                { return os.RemoveAll(path) }
+func (disk) Chmod(path string, perm fs.FileMode) error  { return os.Chmod(path, perm) }
+func (disk) Chown(path string, uid, gid int) error      { return os.Chown(path, uid, gid) }
 
-func (disk) WriteFile(path string, data []byte, perm fs.FileMode) error {
-	return os.WriteFile(path, data, perm)
+func (d disk) MkdirAll(path string, perm fs.FileMode) error {
+	made := missing(path)
+	if err := os.MkdirAll(path, perm); err != nil {
+		return err
+	}
+	return d.owner.give(made...)
 }
 
-func (disk) Append(path string, data []byte, perm fs.FileMode) error {
+func (d disk) WriteFile(path string, data []byte, perm fs.FileMode) error {
+	if err := os.WriteFile(path, data, perm); err != nil {
+		return err
+	}
+	return d.owner.give(path)
+}
+
+func (d disk) Append(path string, data []byte, perm fs.FileMode) error {
 	f, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, perm)
 	if err != nil {
 		return err
@@ -39,11 +49,17 @@ func (disk) Append(path string, data []byte, perm fs.FileMode) error {
 		_ = f.Close()
 		return err
 	}
-	return f.Close()
+	if err := f.Close(); err != nil {
+		return err
+	}
+	return d.owner.give(path)
 }
 
-func (disk) Replace(path string, data []byte, perm fs.FileMode) error {
-	return durable{sync: (*os.File).Sync}.replace(path, data, perm)
+func (d disk) Replace(path string, data []byte, perm fs.FileMode) error {
+	if err := (durable{sync: (*os.File).Sync}).replace(path, data, perm); err != nil {
+		return err
+	}
+	return d.owner.give(path)
 }
 
 func (disk) WalkDir(root string, fn fs.WalkDirFunc) error { return filepath.WalkDir(root, fn) }
@@ -52,9 +68,13 @@ func (disk) WalkDir(root string, fn fs.WalkDirFunc) error { return filepath.Walk
 // advisory, held until unlock: two processes of one Mac, or two
 // goroutines of one, never hold it at once, and a process that dies lets
 // go of it.
-func (disk) Lock(path string) (unlock func(), err error) {
+func (d disk) Lock(path string) (unlock func(), err error) {
 	f, err := os.OpenFile(path, os.O_CREATE|os.O_RDWR, 0o600)
 	if err != nil {
+		return nil, err
+	}
+	if err := d.owner.give(path); err != nil {
+		_ = f.Close()
 		return nil, err
 	}
 	if err := syscall.Flock(int(f.Fd()), syscall.LOCK_EX); err != nil {
@@ -67,7 +87,7 @@ func (disk) Lock(path string) (unlock func(), err error) {
 	}, nil
 }
 
-func ExclusiveWithin(ctx context.Context, path string, within time.Duration) (release func(), held bool, err error) {
+func (s System) ExclusiveWithin(ctx context.Context, path string, within time.Duration) (release func(), held bool, err error) {
 	// invariant: Exclusive's lock, its folder made when missing, tried every
 	// tenth of a second until it is free; one another holder keeps past
 	// within is answered held, never waited for longer, and a wait ctx
@@ -77,7 +97,7 @@ func ExclusiveWithin(ctx context.Context, path string, within time.Duration) (re
 	tick := time.NewTicker(100 * time.Millisecond)
 	defer tick.Stop()
 	for {
-		release, held, err := tryExclusive(path)
+		release, held, err := tryExclusive(path, s.owner)
 		if err != nil || !held {
 			return release, false, err
 		}
@@ -92,8 +112,8 @@ func ExclusiveWithin(ctx context.Context, path string, within time.Duration) (re
 	}
 }
 
-func tryExclusive(path string) (release func(), held bool, err error) {
-	f, err := openMade(path)
+func tryExclusive(path string, owner *invoker) (release func(), held bool, err error) {
+	f, err := openMade(path, owner)
 	if err != nil {
 		return nil, false, err
 	}
@@ -110,11 +130,20 @@ func tryExclusive(path string) (release func(), held bool, err error) {
 	}, false, nil
 }
 
-func openMade(path string) (*os.File, error) {
+func openMade(path string, owner *invoker) (*os.File, error) {
+	made := missing(filepath.Dir(path))
 	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
 		return nil, err
 	}
-	return os.OpenFile(path, os.O_CREATE|os.O_RDWR, 0o600) //nolint:gosec // a lock file of station's own state folder.
+	f, err := os.OpenFile(path, os.O_CREATE|os.O_RDWR, 0o600) //nolint:gosec // a lock file of station's own state folder.
+	if err != nil {
+		return nil, err
+	}
+	if err := owner.give(append(made, path)...); err != nil {
+		_ = f.Close()
+		return nil, err
+	}
+	return f, nil
 }
 
 func (disk) Rename(from, to string) error {

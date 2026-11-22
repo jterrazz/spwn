@@ -13,6 +13,6 @@ import (
 func TestTheTurnIsOneFileLockOfTheMachine(t *testing.T) {
 	contracttest.Turn(t, func(t *testing.T) (contract.Turn, contract.Turn) {
 		at := filepath.Join(t.TempDir(), "station", "runs.lock")
-		return files.NewTurn(at, local.ExclusiveWithin), files.NewTurn(at, local.ExclusiveWithin)
+		return files.NewTurn(at, local.System{}.ExclusiveWithin), files.NewTurn(at, local.System{}.ExclusiveWithin)
 	})
 }

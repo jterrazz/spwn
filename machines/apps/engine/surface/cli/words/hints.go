@@ -1,6 +1,10 @@
 package words
 
-func SettingsAsRoot(verb, pkg string) string { return "sudo station settings " + verb + " " + pkg }
+import "github.com/jterrazz/studio-station/apps/engine/catalog"
+
+func SettingsAsRoot(verb, pkg string) string {
+	return catalog.StationAsRoot("settings " + verb + " " + pkg)
+}
 
 func PasswordlessRestart(mac string) string {
 	return "check that sudo needs no password for fdesetup on " + mac

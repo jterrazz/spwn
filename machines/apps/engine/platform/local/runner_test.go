@@ -123,7 +123,7 @@ func TestAChildGivenAnEnvironmentHasItAloneAndIsFoundOnItsPath(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	run := NewSearching([]string{"PATH=" + started, "DROPPED=x", "STATION_SYSTEM_DIRS="}, nil, nil, nil, Search{}).Run
+	run := NewSearching([]string{"PATH=" + started, "DROPPED=x", "STATION_SYSTEM_DIRS="}, nil, nil, nil, Search{}, Invoking{}).Run
 	within := run.Within([]string{"PATH=" + given, "KEPT=k"})
 
 	if found, _ := within.LookPath("tool"); found != filepath.Join(given, "tool") {

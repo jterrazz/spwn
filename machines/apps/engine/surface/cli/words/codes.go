@@ -552,9 +552,9 @@ func Codes() map[fail.Code]Wording {
 			return e.Subject + " is for " + strings.TrimSuffix(e.Detail["why"], " only") + " only", "station settings"
 		},
 		settingscalls.NeedsAdmin: func(e *fail.Error) (string, string) {
-			line := "sudo station settings " + cmp.Or(e.Detail["verb"], "apply") + " " + e.Subject
+			line := SettingsAsRoot(cmp.Or(e.Detail["verb"], "apply"), e.Subject)
 			if mac := e.Detail["label"]; mac != "" {
-				line = "ssh -t " + mac + " " + line
+				line = catalog.OnMac(mac, line)
 			}
 			return e.Subject + " needs admin rights", line
 		},

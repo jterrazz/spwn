@@ -481,7 +481,7 @@ func outcomes() []Fixture {
 	out = append(out, states("outcome-settings-apply",
 		pending(pagesettings.Changes("apply", changes, thisMacContext())),
 		pagesettings.Changes("apply", nil, thisMacContext()),
-		failure("outcome", "settings apply", "restart-after-power-cut needs admin rights", "sudo station settings apply restart-after-power-cut"),
+		failure("outcome", "settings apply", "restart-after-power-cut needs admin rights", catalog.StationAsRoot("settings apply restart-after-power-cut")),
 		pagesettings.Changes("apply", changes, thisMacContext()))...)
 	return append(out, states("outcome-disk-free",
 		pending(pagedisk.Freed(cleaned, thisMacContext())),

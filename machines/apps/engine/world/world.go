@@ -124,7 +124,7 @@ type Mac struct {
 	Locked bool `json:"locked,omitempty"`
 	// value: out of the tailnet's reach.
 	Offline bool `json:"offline,omitempty"`
-	// value: the owner runs station as root on this Mac (sudo station), as a
+	// value: the owner runs station as root on this Mac (sudo ~/.local/bin/station), as a
 	// setting that needs root asks; station itself never runs sudo.
 	Root bool `json:"root,omitempty"`
 	// value: a line run as root asks no password on this machine, as in a

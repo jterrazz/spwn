@@ -80,9 +80,10 @@ func Run(args, env []string, stdin, stdout, stderr *os.File) int {
 	// invariant: the owner's packages are layered before the search is built,
 	// so the folders an owner's package lands its commands in (`path:`) are
 	// searched as a built-in package's are.
-	unsearched := local.New(env, nil, nil, nil)
+	invoking := local.Invoking{User: catalog.SudoUser, UID: catalog.SudoUID, GID: catalog.SudoGID}
+	unsearched := local.NewSearching(env, nil, nil, nil, local.Search{}, invoking)
 	cat, broken := layerCatalog(userSource(world, unsearched.FS, pathsOf(unsearched.Env.Home(), vars).Prefs), builtin)
-	thisMac := resolve(local.NewSearching(env, childIn, stdout, stderr, landing(cat, vars)), darwin.NewDoor(env), vars, world, cat)
+	thisMac := resolve(local.NewSearching(env, childIn, stdout, stderr, landing(cat, vars), invoking), darwin.NewDoor(env), vars, world, cat)
 	kenv := kit.Env{
 		Out:         writer,
 		Prompt:      output.Terminal(stdin, stderr, vars["TERM"] == "dumb"),

@@ -2,6 +2,8 @@ package local
 
 import (
 	"io"
+	"os"
+	"os/user"
 	"path/filepath"
 	"slices"
 	"strings"
@@ -28,10 +30,10 @@ type Search struct {
 }
 
 func New(env []string, stdin io.Reader, stdout, stderr io.Writer) System {
-	return NewSearching(env, stdin, stdout, stderr, Search{})
+	return NewSearching(env, stdin, stdout, stderr, Search{}, Invoking{})
 }
 
-func NewSearching(env []string, stdin io.Reader, stdout, stderr io.Writer, search Search) System {
+func NewSearching(env []string, stdin io.Reader, stdout, stderr io.Writer, search Search, invoking Invoking) System {
 	vars := map[string]string{}
 	for _, kv := range env {
 		if k, v, ok := strings.Cut(kv, "="); ok {
@@ -43,6 +45,7 @@ func NewSearching(env []string, stdin io.Reader, stdout, stderr io.Writer, searc
 		systemDirs = defaultSystemDirs
 	}
 	landing := search.under(vars)
+	owner := invokerOf(vars, invoking, os.Geteuid(), user.Lookup)
 	system := strings.Split(systemDirs, ":")
 	root := vars["STATION_SYSTEM_ROOT"]
 	if !filepath.IsAbs(root) {
@@ -57,11 +60,12 @@ func NewSearching(env []string, stdin io.Reader, stdout, stderr io.Writer, searc
 	}
 	return System{
 		Run:     &runner{env: env, dirs: searched(vars["PATH"], system, landing), system: system, landing: landing, shims: shims, shimNames: names, root: root, stdin: stdin, stdout: stdout, stderr: stderr},
-		FS:      disk{},
-		Env:     identity{vars: vars},
+		FS:      disk{owner: owner},
+		Env:     identity{vars: vars, sudo: owner},
 		Net:     network{most: 512 << 20},
 		Sockets: sockets{},
 		Clock:   clock{},
+		owner:   owner,
 	}
 }
 

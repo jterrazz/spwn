@@ -175,4 +175,5 @@ type System struct {
 	Net     Net
 	Sockets Sockets
 	Clock   Clock
+	owner   *invoker
 }

@@ -1,2 +1,2 @@
 Error: restart-after-power-cut needs admin rights
-Hint: sudo station settings apply restart-after-power-cut
+Hint: sudo ~/.local/bin/station settings apply restart-after-power-cut

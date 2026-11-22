@@ -46,17 +46,17 @@ func TestTheDiskLockIsHeldByOneTakerAtATime(t *testing.T) {
 // ends, and interrupted, never held, when the run's ctx ends first.
 func TestAWaitForAHeldLockEndsHeldOrInterrupted(t *testing.T) {
 	at := filepath.Join(t.TempDir(), "station", "runs.lock")
-	release, held, err := ExclusiveWithin(context.Background(), at, time.Second)
+	release, held, err := (System{}).ExclusiveWithin(context.Background(), at, time.Second)
 	if err != nil || held {
 		t.Fatalf("a free lock was not taken: held %v, %v", held, err)
 	}
 	defer release()
-	if _, held, err := ExclusiveWithin(context.Background(), at, 200*time.Millisecond); err != nil || !held {
+	if _, held, err := (System{}).ExclusiveWithin(context.Background(), at, 200*time.Millisecond); err != nil || !held {
 		t.Errorf("a lock held past within answered held %v, %v", held, err)
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	time.AfterFunc(150*time.Millisecond, cancel)
-	if _, held, err := ExclusiveWithin(ctx, at, 10*time.Second); held || !errors.Is(err, context.Canceled) {
+	if _, held, err := (System{}).ExclusiveWithin(ctx, at, 10*time.Second); held || !errors.Is(err, context.Canceled) {
 		t.Errorf("a wait the run's ctx ended answered held %v, %v", held, err)
 	}
 }

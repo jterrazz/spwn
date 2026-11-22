@@ -6,7 +6,10 @@ import (
 	"runtime"
 )
 
-type identity struct{ vars map[string]string }
+type identity struct {
+	vars map[string]string
+	sudo *invoker
+}
 
 func (i identity) Executable() string { return Executable() }
 
@@ -19,6 +22,9 @@ func Executable() string {
 }
 
 func (i identity) Home() string {
+	if i.sudo != nil {
+		return i.sudo.home
+	}
 	if home := i.vars["HOME"]; home != "" {
 		return home
 	}
@@ -27,6 +33,9 @@ func (i identity) Home() string {
 }
 
 func (i identity) User() string {
+	if i.sudo != nil {
+		return i.sudo.name
+	}
 	if name := i.vars["USER"]; name != "" {
 		return name
 	}

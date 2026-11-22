@@ -5,7 +5,7 @@ runs:
       exit: 2
       stderr: |
           Error: restart-after-power-cut needs admin rights
-          Hint: ssh -t mac-mini sudo station settings off restart-after-power-cut
+          Hint: ssh -t mac-mini 'sudo ~/.local/bin/station settings off restart-after-power-cut'
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].settings["restart-after-power-cut"]'' world.json'
       exit: 0
       stdout: |

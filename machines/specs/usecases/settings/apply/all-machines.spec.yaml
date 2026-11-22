@@ -48,9 +48,9 @@ runs:
       exit: 0
       stdout: |
           ●	macbook-pro	dns · dns: applied
-          ○	macbook-pro	sshd · needs admin rights · sudo station settings apply sshd
+          ○	macbook-pro	sshd · needs admin rights · sudo ~/.local/bin/station settings apply sshd
           ●	mac-mini	dns · dns: applied
-          ○	mac-mini	sshd · needs admin rights · ssh -t mac-mini sudo station settings apply sshd
+          ○	mac-mini	sshd · needs admin rights · ssh -t mac-mini 'sudo ~/.local/bin/station settings apply sshd'
           –	linux-1	skipped (sshd is for Macs only)
           –	linux-1	skipped (dns is for Macs only)
           –	api	skipped (stopped)

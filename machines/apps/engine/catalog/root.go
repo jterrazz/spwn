@@ -9,6 +9,8 @@ const Sudo = "sudo" // value: the one spelling of sudo outside the owner's words
 
 func AsRoot(line string) string { return Sudo + " " + line }
 
+const SudoUser, SudoUID, SudoGID = "SUDO_USER", "SUDO_UID", "SUDO_GID" // value: the variables sudo sets for the account that typed its line: its name, its uid and its gid.
+
 const InstallDir = "~/.local/bin" // value: the folder the one public installer puts station in when it is given no other; `~` is the home. The installer is another repository's, so a window reads what the engine records for the folder it really runs from, and this only when none is recorded.
 
 func InstallDirIn(home string) string {
@@ -16,6 +18,18 @@ func InstallDirIn(home string) string {
 }
 
 const StationBinary = "station" // value: the file station is installed as, in InstallDir.
+
+func StationAsRoot(args string) string {
+	// value: the line that runs station as root, by the path the install
+	// linked it at: sudo's own PATH has no ~/.local/bin.
+	return AsRoot(InstallDir + "/" + StationBinary + " " + args)
+}
+
+func OnMac(mac, line string) string {
+	// value: line run on another Mac's terminal, quoted so its ~ is that
+	// Mac's home, never the caller's.
+	return "ssh -t " + mac + " '" + line + "'"
+}
 
 const StateFolder = "station" // value: the folder station keeps its preferences, data, state and cache in, under each XDG root.
 

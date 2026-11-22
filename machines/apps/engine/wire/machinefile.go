@@ -196,7 +196,7 @@ func (m machine) turn() machinefilecontract.Turn {
 	if m.world != nil {
 		return m.world.turn()
 	}
-	return files.NewTurn(filepath.Join(m.paths.State, "runs.lock"), local.ExclusiveWithin)
+	return files.NewTurn(filepath.Join(m.paths.State, "runs.lock"), m.sys.ExclusiveWithin)
 }
 
 // value: the shell the owner's lines of a phase run in, as this
