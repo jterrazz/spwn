@@ -466,7 +466,7 @@ func outcomes() []Fixture {
 		{Name: "typewhisper", Verb: "install", Result: catalog.StateBroken, Method: catalog.MethodCask, Detail: "brew bundle exited 1"},
 	}
 	changes := []settings.Change{
-		{Package: "restart-after-power-cut", Verb: "apply", Result: catalog.StateOK, Before: []settings.KeyValue{{Key: "autorestart", Value: "0"}}, After: []settings.KeyValue{{Key: "autorestart", Value: "1"}}},
+		{Package: "restart-after-power-cut", Verb: "apply", Result: catalog.StateOK, Before: []settings.KeyValue{{Key: "autorestartatconnect", Value: "0"}}, After: []settings.KeyValue{{Key: "autorestartatconnect", Value: "1"}}},
 		{Package: catalog.HypervisorLauncher, Verb: "apply", Result: catalog.StateOK},
 	}
 	cleaned := []disk.Outcome{

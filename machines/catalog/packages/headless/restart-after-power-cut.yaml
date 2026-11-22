@@ -5,7 +5,7 @@ description: Restarts after a power cut, and wakes for the network
 needs: [sudo]
 reversible: true
 sets:
-    - { key: autorestart, value: '1' }
+    - { key: autorestartatconnect, value: '1' }
     - { key: womp, value: '1' }
 methods:
     - os: macos
@@ -14,4 +14,4 @@ methods:
 writes:
     - path: /Library/Preferences/SystemConfiguration/com.apple.PowerManagement.plist
       level: settings
-      note: 'pmset: autorestart, wake for network'
+      note: 'pmset: start up after a power cut, wake for network'

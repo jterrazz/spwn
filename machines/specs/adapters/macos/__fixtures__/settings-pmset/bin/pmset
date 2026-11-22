@@ -1,9 +1,9 @@
 #!/bin/sh
-# pmset: -g custom prints a Mac that sleeps after 10 minutes, with no autorestart.
+# pmset: -g custom prints a Mac that sleeps after 10 minutes, and starts by itself neither way.
 printf 'pmset %s\n' "$*" >> "$HOME/.calls"
 case "$*" in
     "-g custom")
-        printf 'AC Power:\n autorestart          0\n sleep                10\n displaysleep         5\n disksleep            10\n powernap             1\n womp                 1\n'
+        printf 'AC Power:\n autorestartatconnect 0\n sleep                10\n displaysleep         5\n autorestart          0\n disksleep            10\n powernap             1\n womp                 1\n'
         ;;
     *)
         echo "stub pmset: unexpected invocation: $*" >&2

@@ -5,5 +5,5 @@ runs:
       exit: 0
       stdout: |
           # restart-after-power-cut
-          ○	autorestart	0	1
+          ○	autorestartatconnect	0	1
           ●	womp	1	1

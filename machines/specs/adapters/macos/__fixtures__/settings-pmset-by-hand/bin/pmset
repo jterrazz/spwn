@@ -1,0 +1,12 @@
+#!/bin/sh
+# pmset: -g custom prints, verbatim, a Mac mini on macOS 27.2.1 set in System Settings to start up when power is connected and never sleep.
+printf 'pmset %s\n' "$*" >> "$HOME/.calls"
+case "$*" in
+    "-g custom")
+        printf 'AC Power:\n Sleep On Power Button 1\n autorestartatconnect 1\n powermode            0\n standby              0\n ttyskeepawake        1\n powernap             1\n displaysleep         10\n womp                 1\n networkoversleep     0\n sleep                0\n tcpkeepalive         1\n autorestart          0\n disksleep            10\n'
+        ;;
+    *)
+        echo "stub pmset: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

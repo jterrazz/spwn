@@ -3,6 +3,6 @@
   [38;2;156;160;176m[m[38;2;64;160;43m●[m [1;38;2;76;79;105mtart-launcher[m
 
 [1;38;2;76;79;105mrestart-after-power-cut before[m
-  [1;38;2;76;79;105mautorestart[m  [38;2;76;79;105m0[m
+  [1;38;2;76;79;105mautorestartatconnect[m  [38;2;76;79;105m0[m
 [1;38;2;76;79;105mrestart-after-power-cut after[m
-  [1;38;2;76;79;105mautorestart[m  [38;2;76;79;105m1[m
+  [1;38;2;76;79;105mautorestartatconnect[m  [38;2;76;79;105m1[m

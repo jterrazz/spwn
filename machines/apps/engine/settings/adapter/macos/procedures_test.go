@@ -109,7 +109,7 @@ func TestAutologinWritesThePasswordItIsGivenAsTheEncodedKcpassword(t *testing.T)
 
 func TestAProcedureReadsItsValuesNowBesideTheOnesStationSets(t *testing.T) {
 	run := played(map[string]local.Output{
-		"pmset -g custom": {Stdout: "AC Power:\n autorestart 0\n sleep 0\n displaysleep 5\n disksleep 0\n powernap 0\n womp 1\n"},
+		"pmset -g custom": {Stdout: "AC Power:\n autorestartatconnect 0\n autorestart 0\n sleep 0\n displaysleep 5\n disksleep 0\n powernap 0\n womp 1\n"},
 	}, "pmset")
 	power := setting(t, "restart-after-power-cut")
 
@@ -118,7 +118,73 @@ func TestAProcedureReadsItsValuesNowBesideTheOnesStationSets(t *testing.T) {
 	if err != nil || o.State != catalog.StateDegraded {
 		t.Fatalf("one value off the policy reads %s (%v), want partly there", o.State, err)
 	}
-	if len(o.Before) != len(o.After) || o.Before[0] != (settings.KeyValue{Key: "autorestart", Value: "0"}) || o.After[0] != (settings.KeyValue{Key: "autorestart", Value: "1"}) {
+	if len(o.Before) != len(o.After) || o.Before[0] != (settings.KeyValue{Key: "autorestartatconnect", Value: "0"}) || o.After[0] != (settings.KeyValue{Key: "autorestartatconnect", Value: "1"}) {
 		t.Fatalf("before %v, after %v", o.Before, o.After)
+	}
+}
+
+const handSetMini = "AC Power:\n Sleep On Power Button 1\n autorestartatconnect 1\n powermode            0\n standby              0\n ttyskeepawake        1\n powernap             1\n displaysleep         10\n womp                 1\n networkoversleep     0\n sleep                0\n tcpkeepalive         1\n autorestart          0\n disksleep            10\n"
+
+func TestAMacSetByHandToStartWhenPowerIsConnectedRestartsAfterAPowerCut(t *testing.T) {
+	run := played(map[string]local.Output{"pmset -g custom": {Stdout: handSetMini}}, "pmset")
+	power := setting(t, "restart-after-power-cut")
+
+	o, err := applierOf(t, run, &memory{files: map[string][]byte{}}, power).Observe(context.Background(), power)
+
+	if err != nil || o.State != catalog.StateOK {
+		t.Fatalf("autorestartatconnect 1 with autorestart 0 reads %s %q (%v), want in place", o.State, o.Detail, err)
+	}
+}
+
+func TestAMacThatRestartsOnPowerLossAloneRestartsAfterAPowerCut(t *testing.T) {
+	run := played(map[string]local.Output{
+		"pmset -g custom": {Stdout: "AC Power:\n autorestartatconnect 0\n autorestart 1\n womp 1\n"},
+	}, "pmset")
+	power := setting(t, "restart-after-power-cut")
+
+	o, err := applierOf(t, run, &memory{files: map[string][]byte{}}, power).Observe(context.Background(), power)
+
+	if err != nil || o.State != catalog.StateOK {
+		t.Fatalf("autorestart 1 alone reads %s %q (%v), want in place", o.State, o.Detail, err)
+	}
+}
+
+func pmsetWrites(t *testing.T, custom string, undo bool) []string {
+	t.Helper()
+	var wrote []string
+	run := local.Played(func(c local.Cmd) (local.Output, error) {
+		line := strings.Join(append([]string{c.Name}, c.Args...), " ")
+		if line == "pmset -g custom" {
+			return local.Output{Stdout: custom}, nil
+		}
+		wrote = append(wrote, line)
+		return local.Output{}, nil
+	}, "pmset")
+	power := setting(t, "restart-after-power-cut")
+	a := applierOf(t, run, &memory{files: map[string][]byte{}}, power)
+	var err error
+	if undo {
+		_, err = a.Undo(context.Background(), power)
+	} else {
+		_, err = a.Apply(context.Background(), power, nil)
+	}
+	if err != nil {
+		t.Fatal(err)
+	}
+	return wrote
+}
+
+func TestApplyWritesTheKeyTheMacsSystemSettingsWrites(t *testing.T) {
+	if got := pmsetWrites(t, handSetMini, false); len(got) != 1 || got[0] != "pmset -a autorestartatconnect 1 womp 1" {
+		t.Fatalf("a Mac that knows autorestartatconnect: %q", got)
+	}
+	if got := pmsetWrites(t, "AC Power:\n autorestart 0\n womp 0\n", false); len(got) != 1 || got[0] != "pmset -a autorestart 1 womp 1" {
+		t.Fatalf("a Mac that knows autorestart only: %q", got)
+	}
+}
+
+func TestUndoTurnsOffEitherWayTheMacRestarts(t *testing.T) {
+	if got := pmsetWrites(t, handSetMini, true); len(got) != 1 || got[0] != "pmset -a autorestartatconnect 0 autorestart 0 womp 0" {
+		t.Fatalf("undo wrote %q", got)
 	}
 }

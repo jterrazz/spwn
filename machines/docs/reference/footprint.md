@@ -664,7 +664,7 @@ Free: delete `~/.cache/mole/*`, delete `~/Library/Logs/mole/*`. Erase: none (not
 | lock-after-login        | `/Users/jterrazz.agent/Library/LaunchAgents/ai.jterrazz.lock-after-login.plist` | never touched | the agent user's `lock-after-login.plist`                                |
 | lock-after-login        | `/Users/jterrazz.agent/.openclaw/logs`                                          | can rebuild   | its logs                                                                 |
 | never-sleeps            | `~/.config/station/preferences.json`                                            | never touched | `never_sleeps`, the engine holds an idle-sleep assertion while it is set |
-| restart-after-power-cut | `/Library/Preferences/SystemConfiguration/com.apple.PowerManagement.plist`      | never touched | pmset: autorestart, wake for network                                     |
+| restart-after-power-cut | `/Library/Preferences/SystemConfiguration/com.apple.PowerManagement.plist`      | never touched | pmset: start up after a power cut, wake for network                      |
 | sshd                    | `/System/Library/LaunchDaemons/ssh.plist`                                       | never touched | Remote Login, through systemsetup                                        |
 
 ## Home-root exceptions

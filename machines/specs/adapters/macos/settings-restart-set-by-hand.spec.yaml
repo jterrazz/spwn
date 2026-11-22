@@ -1,0 +1,8 @@
+description: 'a Mac set by hand to start up after a power cut reads restart-after-power-cut applied'
+fixture: ./__fixtures__/settings-pmset-by-hand/
+runs:
+    - command: 'settings diff restart-after-power-cut'
+      exit: 0
+      stdout: |
+          # restart-after-power-cut
+          ●	restart-after-power-cut	applied

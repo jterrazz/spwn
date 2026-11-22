@@ -60,7 +60,7 @@
       "items": [
         {
           "fact": {
-            "key": "autorestart",
+            "key": "autorestartatconnect",
             "value": {
               "kind": "text",
               "text": "0"
@@ -82,7 +82,7 @@
       "items": [
         {
           "fact": {
-            "key": "autorestart",
+            "key": "autorestartatconnect",
             "value": {
               "kind": "text",
               "text": "1"

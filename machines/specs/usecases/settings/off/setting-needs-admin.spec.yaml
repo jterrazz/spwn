@@ -9,4 +9,4 @@ runs:
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].settings["restart-after-power-cut"]'' world.json'
       exit: 0
       stdout: |
-          "autorestart=1\nwomp=1"
+          "autorestartatconnect=1\nwomp=1"

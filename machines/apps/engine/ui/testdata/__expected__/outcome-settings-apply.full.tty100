@@ -3,6 +3,6 @@ Changes
   ● tart-launcher
 
 restart-after-power-cut before
-  autorestart  0
+  autorestartatconnect  0
 restart-after-power-cut after
-  autorestart  1
+  autorestartatconnect  1

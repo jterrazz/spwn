@@ -10,7 +10,7 @@ runs:
     - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs["macbook-pro"].settings["restart-after-power-cut"], .as_root]'' world.json'
       exit: 0
       stdout: |
-          ["autorestart=1\nwomp=1",null]
+          ["autorestartatconnect=1\nwomp=1",null]
     - command: 'world admin off'
       exit: 0
     - command: 'settings | /usr/bin/grep -A5 ''# Always-on'''
