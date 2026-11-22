@@ -47,18 +47,19 @@ There is no `station uninstall` command yet ([the TODO](../../TODO.md#station-un
 First the apps and the data you want kept. `station apps remove <app>` takes back what station installed, and `station disk erase <app>` an app's data ([Disk](../reference/disk.md)): do both before the binary goes. VMs and images live in `~/.local/share/station/vms`: `station machines delete` and `station images delete` remove them, and the folder is your data until they have.
 
 ```sh
-station engine stop --yes
-launchctl bootout gui/$UID/com.jterrazz.station.engine
-launchctl bootout gui/$UID/com.jterrazz.station.agent
+station engine stop --yes --remove
 ```
 
-The two labels are `catalog.EngineLabel` and `catalog.AgentLabel` (`apps/engine/catalog/launch.go`), the bare install's ([ADR-073](../decisions/073-spwn-app-carries-the-engine-on-a-mac-with-a-screen.md), mode B). On a Mac with Spwn.app the two jobs are the bundle's own, `catalog.BundledJobs`, and this recipe does not cover them. The `bootout` of a job that is not loaded fails: that is fine, go on. Then the files launchd read, and Station.app when the menu bar was installed:
+That one command takes the engine's two jobs from this Mac, whichever way it carries them ([ADR-073](../decisions/073-spwn-app-carries-the-engine-on-a-mac-with-a-screen.md)). Without Spwn.app (mode B) it boots both agents out of launchd and deletes `~/Library/LaunchAgents/com.jterrazz.station.engine.plist` and `com.jterrazz.station.agent.plist` (`catalog.BareJobs`). With Spwn.app (mode A) the jobs are the bundle's own, `com.jterrazz.spwn.engine` and `com.jterrazz.spwn.agent` (`catalog.BundledJobs`), and it unregisters them from SMAppService, so Login Items no longer lists them; no plist exists in `~/Library/LaunchAgents` in that mode. Run it before anything below: in mode A `~/.local/bin/station` is a link into the bundle, and the command goes with the app. An engine kept running for a server keeps its jobs, and the command says so; stop the server first. Then Spwn.app itself, wherever you put it, which holds nothing else of the engine, and Station.app when the menu bar was installed:
 
 ```sh
-rm -f ~/Library/LaunchAgents/com.jterrazz.station.engine.plist ~/Library/LaunchAgents/com.jterrazz.station.agent.plist
+rm -rf /Applications/Spwn.app ~/Applications/Spwn.app
 ~/Applications/Station.app/Contents/MacOS/StationMenuBar --unregister-login-item
 rm -rf ~/Applications/Station.app
+rm -rf ~/Library/Application\ Support/com.jterrazz.spwn ~/Library/Caches/com.jterrazz.spwn ~/Library/WebKit/com.jterrazz.spwn ~/Library/Preferences/com.jterrazz.spwn.plist
 ```
+
+macOS keeps what it recorded of the app in its Background Task Management database, three records (Spwn and its two agents) marked disabled, and no command of Machines reaches them: `sudo sfltool resetbtm` clears the whole database and is yours to run, after a restart. The window's own folders in the last line are the Tauri shell's, named by its bundle identifier `com.jterrazz.spwn`; one that is absent is fine.
 
 Then the binaries, the shell profile's blocks and the folders:
 
