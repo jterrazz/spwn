@@ -26,6 +26,9 @@
         "Already": {
           "type": "boolean"
         },
+        "Bundled": {
+          "type": "boolean"
+        },
         "Installed": {
           "$ref": "#/$defs/engine.Installed"
         },

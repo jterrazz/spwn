@@ -49,6 +49,9 @@ type StartReport struct {
 	// value: how its Mac stands with Local Network, as the engine read it
 	// at its start; empty where it cannot tell.
 	LocalNetwork model.LocalNetwork
+	// value: whether the engine that answers runs from Spwn.app (ADR-073,
+	// mode A), as its hello's executable says.
+	Bundled bool `json:",omitempty"`
 }
 
 type Installed struct {

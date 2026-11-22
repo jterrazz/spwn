@@ -447,6 +447,9 @@
     "machines.EngineView": {
       "additionalProperties": false,
       "properties": {
+        "Bundled": {
+          "type": "boolean"
+        },
         "LocalNetwork": {
           "type": "string"
         },

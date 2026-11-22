@@ -410,7 +410,7 @@ func (d *Engine) awaitGuest(ctx context.Context, vm string) error {
 	d.mu.Unlock()
 	if blocked == model.LocalNetworkBlock {
 		mac := d.m.ThisMacName()
-		return fault(enginecalls.LocalNetwork, model.NotApproved(mac), model.LocalNetworkFix(mac))
+		return fault(enginecalls.LocalNetwork, model.NotApproved(mac), model.LocalNetworkFix(mac, model.InBundle(d.o.Executable)))
 	}
 	return fault(enginecalls.GuestTimeout, vm+"'s guest did not connect in "+strconv.Itoa(int(guestReady.Seconds()))+" s", "station machines "+vm)
 }

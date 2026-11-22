@@ -164,7 +164,7 @@ func Start(r engine.StartReport, thisMac page.Context) page.Page {
 	if r.LocalNetwork == machines.LocalNetworkNotApproved {
 		ln := pages.Done(LocalNetworkRow, catalog.StateDegraded, "")
 		ln.Label = "local network"
-		ln.Detail = page.Texts("needs you", machines.LocalNetworkFix(thisMac.Machine))
+		ln.Detail = page.Texts("needs you", machines.LocalNetworkFix(thisMac.Machine, r.Bundled))
 		rows = append(rows, ln)
 	}
 	return pages.Outcome("engine start", thisMac, nil, rows, "engine to start")

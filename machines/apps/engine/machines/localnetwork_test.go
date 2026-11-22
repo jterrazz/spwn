@@ -7,7 +7,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 )
 
-const fixOnMini = "approve Machines on mac-mini's screen, or in System Settings > Privacy & Security > Local Network"
+const fixOnMini = "approve station on mac-mini's screen, or in System Settings > Privacy & Security > Local Network"
 
 func TestARunningVMItsMacBlocksIsUnreachableNamingTheMacAndItsFix(t *testing.T) {
 	ref := machine.Ref{Name: "linux-2", On: "mac-mini"}
@@ -15,7 +15,7 @@ func TestARunningVMItsMacBlocksIsUnreachableNamingTheMacAndItsFix(t *testing.T) 
 		{Name: "linux-2", Lifetime: Ephemeral, State: Running, Guest: "absent", Blocked: LocalNetworkBlock},
 		{Name: "linux-2", Lifetime: AlwaysOn, State: Running, Guest: "absent", Blocked: LocalNetworkBlock, Check: "https://x", CheckStatus: CheckStatus{State: CheckFailing}},
 	} {
-		f, ok := vmFinding(ref, vm, " --on mini")
+		f, ok := vmFinding(ref, vm, " --on mini", false)
 		if !ok || f.Text != "linux-2 is unreachable: mac-mini has not approved Machines for Local Network" || f.Fix.Path != fixOnMini || f.Fix.Command != "" || f.Fix.Call != "" {
 			t.Errorf("%s blocked: %+v, %v", vm.Lifetime, f, ok)
 		}
@@ -24,7 +24,7 @@ func TestARunningVMItsMacBlocksIsUnreachableNamingTheMacAndItsFix(t *testing.T) 
 
 func TestAVMNotRunningIsNeverToldBlocked(t *testing.T) {
 	vm := VM{Name: "linux-2", Lifetime: Persistent, State: Stopped, Blocked: LocalNetworkBlock}
-	if f, ok := vmFinding(machine.Ref{Name: "linux-2", On: "mac-mini"}, vm, ""); ok {
+	if f, ok := vmFinding(machine.Ref{Name: "linux-2", On: "mac-mini"}, vm, "", false); ok {
 		t.Errorf("a stopped VM is told: %+v", f)
 	}
 }
@@ -58,6 +58,33 @@ func TestAMacWhoseEngineReadsNoApprovalNeedsALookNamingIt(t *testing.T) {
 			t.Errorf("read %q: %+v, want one look naming mac-mini", tc.read, got)
 		case !tc.want && len(got) != 0:
 			t.Errorf("read %q: %+v, want none", tc.read, got)
+		}
+	}
+}
+
+func TestTheFixNamesTheAppTheBlockingMacsEngineRunsAs(t *testing.T) {
+	ref := machine.Ref{Name: "linux-2", On: "mac-mini"}
+	vm := VM{Name: "linux-2", Lifetime: Ephemeral, State: Running, Guest: "absent", Blocked: LocalNetworkBlock}
+	if f, _ := vmFinding(ref, vm, "", true); f.Fix.Path != "approve Spwn on mac-mini's screen, or in System Settings > Privacy & Security > Local Network" {
+		t.Errorf("a VM blocked on a Mac whose engine Spwn.app carries: %q", f.Fix.Path)
+	}
+	mac := MacView{Name: "mac-mini", ThisMac: true, Reachable: true, Engine: EngineView{State: EngineRunning, LocalNetwork: LocalNetworkNotApproved, Bundled: true}}
+	for _, f := range Findings(AllMachines{Macs: []MacView{mac}}) {
+		if f.Fix.Path == fixOnMini {
+			t.Errorf("a Mac whose engine Spwn.app carries is told the bare binary's row: %+v", f)
+		}
+	}
+}
+
+func TestAnEngineIsInTheBundleOnlyAsTheFileSpwnAppCarries(t *testing.T) {
+	for executable, want := range map[string]bool{
+		"/Users/me/Applications/Spwn.app/Contents/MacOS/Spwn Engine": true,
+		"/Users/me/.local/bin/station":                               false,
+		"/Users/me/Applications/Spwn.app/Contents/MacOS/spwn-window": false,
+		"": false,
+	} {
+		if got := InBundle(executable); got != want {
+			t.Errorf("InBundle(%q) = %v, want %v", executable, got, want)
 		}
 	}
 }

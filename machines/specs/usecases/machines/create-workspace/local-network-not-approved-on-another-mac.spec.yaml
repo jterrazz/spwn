@@ -7,4 +7,4 @@ runs:
       exit: 1
       stderr: |
           Error: box is kept, failing SSH answers: mac-mini has not approved Machines for Local Network
-          Hint: approve Machines on mac-mini's screen, or in System Settings > Privacy & Security > Local Network; start box once approved
+          Hint: approve station on mac-mini's screen, or in System Settings > Privacy & Security > Local Network; start box once approved

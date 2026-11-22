@@ -1204,6 +1204,7 @@ export type EngineSliceOut = {
 
 export type EngineStartReport = {
     Already: boolean;
+    Bundled?: boolean;
     Installed: EngineInstalled;
     LocalNetwork: string;
     PID: number;
@@ -2052,6 +2053,7 @@ export type MachinesEdited = {
 };
 
 export type MachinesEngineView = {
+    Bundled?: boolean;
     LocalNetwork?: string;
     State?: 'running' | 'stopped' | 'not-installed';
     Version: string;

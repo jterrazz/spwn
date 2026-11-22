@@ -146,6 +146,9 @@ type UnhealthyError struct {
 	// value: the Mac that has not approved station for Local Network, when
 	// that is why its SSH fails; empty otherwise.
 	BlockedOn string
+	// value: whether that Mac's engine runs from Spwn.app, which names the
+	// app its Local Network row asks for.
+	BlockedBundled bool
 }
 
 func (e *UnhealthyError) Error() string {
@@ -156,7 +159,7 @@ func (e *UnhealthyError) BlockedFix() string {
 	// value: what lifts a Local Network block and what follows: its VM's
 	// first boot never ran, so it is started once approved, never left to
 	// connect by itself.
-	return LocalNetworkFix(e.BlockedOn) + "; start " + e.Name + " once approved"
+	return LocalNetworkFix(e.BlockedOn, e.BlockedBundled) + "; start " + e.Name + " once approved"
 }
 
 var ErrEngineDown = errors.New("the engine is not running")

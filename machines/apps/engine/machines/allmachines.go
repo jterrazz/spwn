@@ -2,6 +2,7 @@ package machines
 
 import (
 	"slices"
+	"strings"
 	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
@@ -195,10 +196,27 @@ const (
 
 func NotApproved(mac string) string { return mac + " has not approved Machines for Local Network" }
 
-func LocalNetworkFix(mac string) string {
+func LocalNetworkFix(mac string, bundled bool) string {
 	// value: the one gesture that lifts the block, on the Mac itself, named
-	// by its name: the engine that words it may be another Mac's.
-	return "approve Machines on " + mac + "'s screen, or in System Settings > Privacy & Security > Local Network"
+	// by its name: the engine that words it may be another Mac's, so the
+	// app approved is the one that Mac's engine runs as.
+	return "approve " + LocalNetworkApp(bundled) + " on " + mac + "'s screen, or in System Settings > Privacy & Security > Local Network"
+}
+
+func LocalNetworkApp(bundled bool) string {
+	// value: the name macOS's Local Network alert and row give a Mac's
+	// engine: Spwn.app's when the app carries it (ADR-073, mode A), the bare
+	// binary's file otherwise (mode B).
+	if bundled {
+		return catalog.WindowName
+	}
+	return catalog.StationBinary
+}
+
+func InBundle(executable string) bool {
+	// value: whether an engine's executable, as its hello names it, is the
+	// one Spwn.app carries.
+	return strings.HasSuffix(executable, ".app/"+catalog.BundledEnginePath)
 }
 
 type EngineState string
@@ -228,6 +246,9 @@ type EngineView struct {
 	// value: how the Mac stands with macOS's Local Network approval of
 	// station, as its engine last read it; empty where it cannot tell.
 	LocalNetwork LocalNetwork `json:",omitempty"`
+	// value: whether its engine runs from Spwn.app (ADR-073, mode A), as its
+	// hello's executable says.
+	Bundled bool `json:",omitempty"`
 }
 
 func (e EngineView) Known() bool   { return e.State != "" }

@@ -153,13 +153,13 @@ func Findings(f AllMachines) []finding.Finding {
 		case MacOnline:
 		}
 		if h.Reachable && h.Engine.Running() && h.Engine.LocalNetwork == LocalNetworkNotApproved {
-			out = append(out, finding.Finding{Machine: mac, Section: section.Overview, Severity: finding.NeedsALook, Subject: label, Text: NotApproved(h.Name), Fix: finding.Fix{Path: LocalNetworkFix(h.Name)}})
+			out = append(out, finding.Finding{Machine: mac, Section: section.Overview, Severity: finding.NeedsALook, Subject: label, Text: NotApproved(h.Name), Fix: finding.Fix{Path: LocalNetworkFix(h.Name, h.Engine.Bundled)}})
 		}
 		if fix, ok := Behind(h, thisMac); ok && h.Reachable {
 			out = append(out, finding.Finding{Machine: mac, Section: section.Overview, Severity: finding.NeedsALook, Subject: label, Text: label + " runs " + h.StationVersion, Fix: finding.Fix{Path: fix}})
 		}
 		for _, vm := range Ordered(h.VMs) {
-			if f, ok := vmFinding(machine.Ref{Name: vm.Name, On: h.Name}, vm, on); ok {
+			if f, ok := vmFinding(machine.Ref{Name: vm.Name, On: h.Name}, vm, on, h.Engine.Bundled); ok {
 				out = append(out, f)
 			}
 		}
@@ -197,13 +197,13 @@ func severityOf(t verdict.Tone) finding.Severity {
 // VM down each have one; a check that has not answered yet is none. The
 // engine never restarts a server by itself: the restart is the owner's
 // gesture.
-func vmFinding(ref machine.Ref, vm VM, on string) (finding.Finding, bool) {
+func vmFinding(ref machine.Ref, vm VM, on string, bundled bool) (finding.Finding, bool) {
 	s := StandingOf(vm)
 	f := finding.Finding{Machine: ref, Section: section.Overview, Severity: severityOf(s.Tone()), Subject: vm.Name}
 	server := vm.Lifetime == AlwaysOn
 	switch {
 	case vm.State == Running && vm.Blocked == LocalNetworkBlock:
-		f.Text, f.Fix = vm.Name+" is unreachable: "+NotApproved(ref.On), finding.Fix{Path: LocalNetworkFix(ref.On)}
+		f.Text, f.Fix = vm.Name+" is unreachable: "+NotApproved(ref.On), finding.Fix{Path: LocalNetworkFix(ref.On, bundled)}
 	case s == StandingNotCreated:
 		f.Text, f.Again = vm.Name+" was not created: it failed at "+vm.Birth.Step.Noun(), true
 		f.Fix = finding.Fix{Call: "machines.start", Args: map[string]string{"VM": vm.Name}, On: ref.On, Command: "station machines start " + vm.Name + on}

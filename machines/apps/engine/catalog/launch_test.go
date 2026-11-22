@@ -12,7 +12,7 @@ import (
 
 func TestTheJobsNameTheBundleIdentifiersTheAppsShipWith(t *testing.T) {
 	apps := filepath.Join("..", "..")
-	var window struct{ Identifier string }
+	var window struct{ Identifier, ProductName string }
 	body, err := os.ReadFile(filepath.Join(apps, "desktop", "src-tauri", "tauri.conf.json"))
 	if err != nil {
 		t.Fatal(err)
@@ -22,6 +22,9 @@ func TestTheJobsNameTheBundleIdentifiersTheAppsShipWith(t *testing.T) {
 	}
 	if window.Identifier != catalog.WindowBundle {
 		t.Errorf("the window ships as %q, the jobs name %q", window.Identifier, catalog.WindowBundle)
+	}
+	if window.ProductName != catalog.WindowName {
+		t.Errorf("the window is named %q, the catalog %q", window.ProductName, catalog.WindowName)
 	}
 	info, err := os.ReadFile(filepath.Join(apps, "menubar", "resources", "Info.plist"))
 	if err != nil {
