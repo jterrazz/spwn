@@ -258,5 +258,8 @@ func (j *Jobs) Remove(_ context.Context, r contract.Ref) error {
 	defer j.w.Unlock()
 	_ = j.stop(r)
 	delete(j.thisMac().Jobs, r.Label)
+	if j.engine(r) {
+		j.thisMac().Engine = nil
+	}
 	return nil
 }

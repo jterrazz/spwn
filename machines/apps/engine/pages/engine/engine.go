@@ -121,6 +121,9 @@ func Stop(r engine.StopReport, thisMac page.Context) page.Page {
 	case engine.EngineServers:
 		parts = append(parts, "the engine keeps running for "+strings.Join(r.Servers, ", "))
 	}
+	if r.Removed {
+		parts = append(parts, "its jobs removed")
+	}
 	row := pages.Done(Row, state, "")
 	row.Detail = page.Texts(parts...)
 	p := pages.Outcome("engine stop", thisMac, nil, []page.Row{row}, "nothing to stop")

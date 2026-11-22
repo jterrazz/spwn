@@ -9,6 +9,9 @@
         "Engine": {
           "type": "string"
         },
+        "Removed": {
+          "type": "boolean"
+        },
         "Servers": {
           "items": {
             "type": "string"
@@ -103,6 +106,9 @@
         },
         "Confirm": {
           "type": "string"
+        },
+        "Remove": {
+          "type": "boolean"
         }
       },
       "type": "object"

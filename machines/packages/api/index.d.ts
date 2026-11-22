@@ -1091,6 +1091,7 @@ export type EngineCallsStartIn = Record<string, never>;
 export type EngineCallsStopIn = {
     By?: string;
     Confirm?: string;
+    Remove?: boolean;
 };
 
 export type EngineCallsStopOut = {
@@ -1251,6 +1252,7 @@ export type EngineStopMark = {
 export type EngineStopReport = {
     Awake: string;
     Engine: string;
+    Removed?: boolean;
     Servers: string[] | null;
     Sharing: boolean;
     VMs: EngineStopped[] | null;

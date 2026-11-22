@@ -187,11 +187,11 @@ An image is named after the Machinefile it is built from (`base-ubuntu`, `studio
 
 ```sh
 station engine [--json] # running, its version, up, the VMs it runs, Awake; or stopped, since when and by what
-station engine stop [--yes] # Stop everything on this Mac: every running workspace stopped, its disk kept; Awake and the sharing end; then the engine, unless a server runs: it is skipped, and the engine keeps running for it
+station engine stop [--yes] [--remove] # Stop everything on this Mac: every running workspace stopped, its disk kept; Awake and the sharing end; then the engine, unless a server runs: it is skipped, and the engine keeps running for it; `--remove` then takes the engine's two jobs from the job manager too
 station engine start # the engine installed when it is not, restarted when it runs another version, bootstrapped again; the VMs it stopped stay stopped
 ```
 
-`--json` is `station.engine.read/v1`: `{schema, engine: {state, version, up_s, vms, stopped_at, stopped_by}}`, `state` `running`, `stopped` or `not-installed`. An engine running another version than station names both and `station engine start`. A Mac only; `--on <mac>` runs it on another Mac. `station stop` and `station start` are hidden aliases of `engine stop` and `engine start` for one release, saying `→ now: station engine stop` on stderr (see [Hidden aliases](#hidden-aliases)). A start the job manager refuses ends in `the engine did not start: <its last word>` (exit 1). See [Machines](machines.md#the-engine).
+`--json` is `station.engine.read/v1`: `{schema, engine: {state, version, up_s, vms, stopped_at, stopped_by}}`, `state` `running`, `stopped` or `not-installed`. An engine running another version than station names both and `station engine start`. `--remove` ends the engine's life on this Mac once it has stopped: without Spwn.app it deletes both agents' plists and boots them out, with it it unregisters both bundled agents from SMAppService, and `station engine` then reads `not-installed`; it removes nothing else ([Getting started](../start/getting-started.md#5-remove-what-it-put-down) lists the rest), and an engine kept running for a server keeps its jobs. A Mac only; `--on <mac>` runs it on another Mac. `station stop` and `station start` are hidden aliases of `engine stop` and `engine start` for one release, saying `→ now: station engine stop` on stderr (see [Hidden aliases](#hidden-aliases)). A start the job manager refuses ends in `the engine did not start: <its last word>` (exit 1). See [Machines](machines.md#the-engine).
 
 ## This terminal
 

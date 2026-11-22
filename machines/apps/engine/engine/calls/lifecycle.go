@@ -62,6 +62,9 @@ type StopIn struct {
 	// value: what asked the stop, as a reading names it: the command, or
 	// the menu bar.
 	By string
+	// value: after the stop, the engine's two jobs are taken from the job
+	// manager too, so it holds neither.
+	Remove bool
 }
 
 type StopOut struct {
@@ -95,6 +98,13 @@ var Stop = call.Call[Deps, StopIn, StopOut]{
 			by = "station engine stop"
 		}
 		report, err := d.Control.Stop(ctx, work, by)
+		if err == nil && in.Remove && d.Installer != nil && (report.Engine == engine.EngineHalted || report.Engine == engine.EngineAlready) {
+			// invariant: the jobs are removed only once the engine has stopped, never
+			// while it keeps running for a server.
+			if err = d.Installer.Uninstall(ctx); err == nil {
+				report.Removed = true
+			}
+		}
 		return StopOut{Work: work, Report: &report}, err
 	},
 }

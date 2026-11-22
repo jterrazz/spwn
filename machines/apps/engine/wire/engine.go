@@ -504,6 +504,13 @@ func (i engineInstaller) Install(ctx context.Context) (engine.Installed, error) 
 	return i.install(ctx, jobs)
 }
 
+// invariant: the agent's job goes before the engine's, each in the mode this
+// Mac is in, and a job already gone is no failure.
+func (i engineInstaller) Uninstall(ctx context.Context) error {
+	jobs := i.m.jobs(0)
+	return errors.Join(jobs.Remove(ctx, i.m.agentJobRef()), jobs.Remove(ctx, i.m.engineJobRef()))
+}
+
 func startFailed(cause error) error {
 	return &engine.StartFailedError{Last: cause.Error(), Cause: cause}
 }

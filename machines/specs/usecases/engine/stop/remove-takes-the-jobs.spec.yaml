@@ -1,0 +1,15 @@
+description: 'stop --remove stops the engine, then takes both its jobs: it reads not installed'
+env: one-mac
+runs:
+    - command: 'engine stop --remove'
+      exit: 0
+      stdout: |
+          ●	engine	the engine stopped · its jobs removed
+    - command: 'engine --json | /usr/bin/jq -r .engine.state'
+      exit: 0
+      stdout: |
+          not-installed
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].jobs // {} | keys'' world.json'
+      exit: 0
+      stdout: |
+          []
