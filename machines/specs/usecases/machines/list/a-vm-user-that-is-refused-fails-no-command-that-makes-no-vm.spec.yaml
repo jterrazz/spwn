@@ -9,6 +9,8 @@ runs:
           ●	macbook-pro	Mac	macbook-pro	Engine running
           ○	api	Workspace	macbook-pro	Stopped · persistent	4 CPU	8 GB
           ●	linux-1	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB
+          # Needs you
+          ◐	linux-1	fails SSH answers	station machines restart linux-1
 
     - command: 'machines create mac-1 --memory 2G'
       exit: 1

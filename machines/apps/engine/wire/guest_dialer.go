@@ -35,7 +35,11 @@ type engineGuests struct {
 }
 
 func (g engineGuests) Dial(ctx context.Context, vm string, at netip.AddrPort) (process.Guest, error) {
-	c, err := g.dial(ctx, g.vms.GuestTarget(vm, at))
+	t, err := g.vms.GuestTarget(ctx, vm, at)
+	if err != nil {
+		return nil, err
+	}
+	c, err := g.dial(ctx, t)
 	if err != nil {
 		return nil, err
 	}

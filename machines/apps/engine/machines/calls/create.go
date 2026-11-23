@@ -437,7 +437,7 @@ func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, build Ima
 	if err != nil {
 		return model.Created{}, err
 	}
-	if _, bad := s.checkedVMUser(cfg); bad != nil {
+	if _, bad := s.vmUser(cfg); bad != nil {
 		return model.Created{}, bad
 	}
 	img, _ := s.imageOf(ctx, r.Image)

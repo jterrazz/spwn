@@ -93,7 +93,7 @@ func (s *Machinist) Start(ctx context.Context, name string) error {
 		if err != nil {
 			return err
 		}
-		if _, bad := s.checkedVMUser(cfg); bad != nil {
+		if _, bad := s.vmUser(cfg); bad != nil {
 			return bad
 		}
 	}

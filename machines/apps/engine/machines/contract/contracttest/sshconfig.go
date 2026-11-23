@@ -72,4 +72,21 @@ func SSHConfig(t *testing.T, subject func(t *testing.T) SSHConfigSubject) {
 			t.Errorf("station manages %v, want only [%s]", got, VM)
 		}
 	})
+	t.Run("a block whose name, user or Mac is no one word is never written, and the other blocks are", func(t *testing.T) {
+		s := subject(t)
+		blocks := []contract.MachineBlock{
+			{Name: Mac, User: "u\n  ProxyCommand touch pwned"},
+			{Name: Renamed, User: "u;touch pwned"},
+			{Name: "a b", User: "u"},
+			{Name: Renamed + "-far", User: "u", Behind: "m\n  ProxyCommand touch pwned"},
+			vm(VM),
+		}
+		var refused *contract.SSHConfigError
+		if err := s.Blocks.Put(t.Context(), blocks); !errors.As(err, &refused) {
+			t.Fatalf("a block that is no ssh word returned %v, want an SSHConfigError", err)
+		}
+		if got := s.Managed(t); !slices.Equal(got, []string{VM}) {
+			t.Errorf("station manages %v, want only [%s]", got, VM)
+		}
+	})
 }

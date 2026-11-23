@@ -168,6 +168,12 @@ func (c *sshFile) edit(upsert []contract.MachineBlock, prune bool, remove []stri
 	updated := existing
 	var conflict error
 	for _, b := range upsert {
+		if why := contract.Unwritable(b); why != "" {
+			if conflict == nil {
+				conflict = fmt.Errorf("refusing to write %s: %s", file, why)
+			}
+			continue
+		}
 		next, clash := upsertBlock(updated, b.Name, c.block(b))
 		if clash != "" && conflict == nil {
 			conflict = fmt.Errorf("refusing to modify %s: %s", file, clash)

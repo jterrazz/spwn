@@ -23,13 +23,24 @@ func (s *Machinist) SSH(ctx context.Context, name string) (model.SSHTarget, erro
 	var unknown *model.UnknownMachineError
 	if errors.As(err, &unknown) {
 		if mac, ok := s.macOf(ctx, name); ok {
-			return sshTarget(s.guestUser(cfg, mac), name), nil
+			user, bad := s.guestUser(cfg, mac)
+			if bad != nil {
+				return model.SSHTarget{}, bad
+			}
+			return sshTarget(user, name), nil
 		}
 	}
 	if err != nil {
 		return model.SSHTarget{}, err
 	}
-	return sshTarget(m.User, m.Name), nil
+	if m.Kind == catalog.Mac {
+		return sshTarget(m.User, m.Name), nil
+	}
+	user, bad := s.vmUser(cfg)
+	if bad != nil {
+		return model.SSHTarget{}, bad
+	}
+	return sshTarget(user, m.Name), nil
 }
 
 func sshTarget(user, mac string) model.SSHTarget {
