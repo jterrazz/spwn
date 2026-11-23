@@ -604,7 +604,7 @@ func (a *Applier) Undo(ctx context.Context, it catalog.Setting) (settings.Change
 		return settings.Change{}, err
 	}
 	if len(rec.Files) == 0 {
-		return a.unrecorded(ctx, k.Block)
+		return a.unrecorded(ctx, k.Block, configured(it))
 	}
 	files := make([]string, 0, len(rec.Files))
 	for _, w := range rec.Files {
@@ -747,10 +747,13 @@ func (a *Applier) fallback(it catalog.Setting) (string, bool) {
 }
 
 // invariant: with no record, the block's markers are the record: off looks
-// in the authorized_keys of every account with a home, root's among them, and a block of station's there leaves it, its owner's lines as
-// they were; a damaged one is refused, so off never reads done while a
-// block of station's is left.
-func (a *Applier) unrecorded(ctx context.Context, id string) (settings.Change, error) {
+// in the authorized_keys of every account with a home, root's among them,
+// and a block of station's there leaves it, its owner's lines as they
+// were, only while every line in it is a key Machines knows; a damaged
+// one, or one holding any other line, is kept, so off never reads done
+// while a block of station's is left and never deletes a key of the
+// owner's.
+func (a *Applier) unrecorded(ctx context.Context, id string, known map[string]bool) (settings.Change, error) {
 	files, err := a.homes()
 	if err != nil {
 		return settings.Change{}, err
@@ -763,7 +766,7 @@ func (a *Applier) unrecorded(ctx context.Context, id string) (settings.Change, e
 	var steps []settings.ChangeStep
 	var stays []error
 	for _, file := range files {
-		step, err := a.unrecordedIn(file, held[file], id)
+		step, err := a.unrecordedIn(file, held[file], id, known)
 		if step != nil {
 			steps = append(steps, *step)
 		}
@@ -772,7 +775,7 @@ func (a *Applier) unrecorded(ctx context.Context, id string) (settings.Change, e
 	return settings.Change{Steps: steps}, errors.Join(stays...)
 }
 
-func (a *Applier) unrecordedIn(file string, h holding, id string) (*settings.ChangeStep, error) {
+func (a *Applier) unrecordedIn(file string, h holding, id string, known map[string]bool) (*settings.ChangeStep, error) {
 	switch {
 	case errors.Is(h.err, fs.ErrNotExist):
 		return nil, nil
@@ -786,12 +789,23 @@ func (a *Applier) unrecordedIn(file string, h holding, id string) (*settings.Cha
 	if err != nil {
 		return nil, err
 	}
-	switch _, state := settings.PackageBlock(text, id); state {
+	body, state := settings.PackageBlock(text, id)
+	switch state {
 	case settings.BlockAbsent:
 		return nil, nil
 	case settings.BlockDamaged:
-		return nil, fmt.Errorf("%s holds a damaged %s block Machines has no record of, not touched: delete %s of %s, then the rest of the block", file, id, strings.Join(settings.DamagedLines(text, id), " and "), file)
+		return nil, &edited{fmt.Errorf("%s holds a damaged %s block Machines has no record of, not touched: delete %s of %s, then the rest of the block", file, id, strings.Join(settings.DamagedLines(text, id), " and "), file)}
 	case settings.BlockHere:
+	}
+	first, last := settings.BlockLines(text, id)
+	var strange []string
+	for i, line := range strings.Split(strings.TrimSuffix(body, "\n"), "\n") {
+		if strings.TrimSpace(line) != "" && !known[identity(line)] {
+			strange = append(strange, "line "+strconv.Itoa(first+1+i))
+		}
+	}
+	if len(strange) > 0 {
+		return nil, &edited{fmt.Errorf("%s holds a %s block Machines has no record of, kept: %s of %s is no key Machines knows, so the block's keys still sign in; keep what is yours out of it, then delete lines %d to %d of %s", file, id, strings.Join(strange, " and "), file, first, last, file)}
 	}
 	updated, _ := settings.RemovePackageBlock(text, id)
 	err = h.folder.Replace(keysFile, local.Seen{Data: []byte(text), There: true}, []byte(updated), 0o600, local.Owner{})
@@ -825,6 +839,34 @@ func (a *Applier) homes() ([]string, error) {
 		}
 	}
 	return files, nil
+}
+
+// value: the keys the setting is configured with, its key input's
+// default, each by its type and blob: the only lines the no-record scan
+// takes as Machines'.
+func configured(it catalog.Setting) map[string]bool {
+	out := map[string]bool{}
+	for _, in := range it.Inputs {
+		if in.Name != InputKey {
+			continue
+		}
+		body, err := Keys(in.Default)
+		if err != nil {
+			continue
+		}
+		for line := range strings.SplitSeq(strings.TrimSuffix(body, "\n"), "\n") {
+			out[identity(line)] = true
+		}
+	}
+	return out
+}
+
+func identity(line string) string {
+	f := strings.Fields(line)
+	if len(f) < 2 {
+		return line
+	}
+	return f[0] + " " + f[1]
 }
 
 func Keys(given string) (string, error) {

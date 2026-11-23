@@ -2,11 +2,13 @@ package authorizedkeys_test
 
 import (
 	"context"
+	"errors"
 	"strings"
 	"testing"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/platform/local"
+	"github.com/jterrazz/studio-station/apps/engine/settings/contract"
 )
 
 func known(keys ...string) catalog.Setting {
@@ -20,6 +22,22 @@ func (m *machine) sshOf(home string, o local.Owner) {
 	m.mkdir(home+"/.ssh", 0o700)
 	m.chown(home, o)
 	m.chown(home+"/.ssh", o)
+}
+
+func TestWithNoRecordALineMachinesDoesNotKnowKeepsTheBlock(t *testing.T) {
+	m := newMachine(t)
+	m.mkdir("root/.ssh", 0o700)
+	k, mine := key(t, 1, "x"), key(t, 7, "mine")
+	text := key(t, 9, "laptop") + "\n" + block(k, mine)
+	m.write(rootAK, text, 0o600)
+	_, err := m.open().Undo(context.Background(), known(k))
+	if err == nil || !errors.Is(err, contract.ErrKept) || !strings.Contains(err.Error(), "line 4 of /root/.ssh/authorized_keys") || m.content(rootAK) != text {
+		t.Fatalf("Undo of a block holding a key Machines does not know = %v; file %q; want it kept, line 4 named", err, m.content(rootAK))
+	}
+	_, err = m.open().Undo(context.Background(), setting())
+	if err == nil || !errors.Is(err, contract.ErrKept) || m.content(rootAK) != text {
+		t.Fatalf("Undo with no key configured = %v; want the block kept", err)
+	}
 }
 
 func TestTheAccountListIsReadOrRefused(t *testing.T) {

@@ -1,4 +1,4 @@
-description: 'authorized-key records its blocks in /var/lib/station, and off with no record finds them by markers'
+description: 'with no record in /var/lib/station, off keeps a block of keys Machines does not know'
 env:
     - in-workspace
     - engine
@@ -22,10 +22,15 @@ runs:
     - command: '--version >/dev/null; /bin/rm root/var/lib/station/authorized-keys.json'
       exit: 0
     - command: 'settings off authorized-key --yes'
+      exit: 1
+      stdout: |
+          ✗	authorized-key	needs you: /root/.ssh/authorized_keys holds a station:authorized-key block Machines has no record of, kept: line 2 of /root/.ssh/authorized_keys is no key Machines knows, so the block's keys still sign in; keep what is yours out of it, then delete lines 1 to 3 of /root/.ssh/authorized_keys
+      stderr: |
+          Error: 1 of 1 settings failed
+          Hint: do what it says, then again: station settings off authorized-key
+    - command: '--version >/dev/null; /bin/cat root/root/.ssh/authorized_keys'
       exit: 0
       stdout: |
-          ●	authorized-key	/root/.ssh/authorized_keys: removed, found with no record
-    - command: '--version >/dev/null; /usr/bin/wc -c < root/root/.ssh/authorized_keys'
-      exit: 0
-      stdout: |
-          0
+          # >>> station:authorized-key >>>
+          ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGZ2c8e4bOqkqO0+5N0VXlFz4sVJyDQzH+LVRG4RvMZb ci@deploy
+          # <<< station:authorized-key <<<

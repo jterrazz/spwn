@@ -551,14 +551,15 @@ func TestAFileChangedAfterItsReadIsRefusedAndTheChangeKept(t *testing.T) {
 }
 
 // invariant: with no record at all, off finds station's block by its
-// markers in the default user's file and takes it out.
+// markers in the default user's file and takes it out, its keys the ones
+// the setting is configured with.
 func TestOffFindsABlockWithNoRecordInTheDefaultUsersFile(t *testing.T) {
 	m := newMachine(t)
 	m.mkdir("root/.ssh", 0o700)
 	own := key(t, 9, "laptop") + "\n"
 	m.write(rootAK, own+block(key(t, 1, "ci")), 0o600)
 	it := setting()
-	it.Inputs = []catalog.Input{{Name: "user", Default: "root"}, {Name: "key"}}
+	it.Inputs = []catalog.Input{{Name: "user", Default: "root"}, {Name: "key", Default: key(t, 1, "ci")}}
 	seen, err := m.open().Observe(context.Background(), it)
 	if err != nil || seen.State != catalog.StateOK || seen.Where != "/root/.ssh/authorized_keys" {
 		t.Fatalf("Observe = %+v, %v; want the block seen in the default user's file", seen, err)
@@ -1000,7 +1001,7 @@ func TestOffWithNoRecordFindsABlockInEveryAccountThatSignsIn(t *testing.T) {
 	m.write(ciAK, own+block(key(t, 1, "x")), 0o600)
 	m.chown(ciAK, m.ci)
 	it := setting()
-	it.Inputs = []catalog.Input{{Name: "user", Default: "root"}, {Name: "key"}}
+	it.Inputs = []catalog.Input{{Name: "user", Default: "root"}, {Name: "key", Default: key(t, 1, "x")}}
 	_, err := m.open().Undo(context.Background(), it)
 	if err != nil || m.content(ciAK) != own {
 		t.Fatalf("Undo with no record = %v; ci's file %q; want the block found and removed", err, m.content(ciAK))
