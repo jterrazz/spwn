@@ -80,33 +80,81 @@ func lines(s string) []string {
 
 func script(a, b []string) []op {
 	// invariant: the longest common subsequence of lines, walked into keeps,
-	// removals and additions.
-	n, m := len(a), len(b)
-	lcs := make([][]int, n+1)
-	for i := range lcs {
-		lcs[i] = make([]int, m+1)
+	// removals and additions. The lines both texts open with are kept without
+	// a table, and the table of the rest is held as every k-th row of it, the
+	// rows between recomputed as the walk reaches them, so its memory is the
+	// square root of the full table's and its walk is the full table's.
+	head := 0
+	for head < len(a) && head < len(b) && a[head] == b[head] {
+		head++
 	}
-	for i := n - 1; i >= 0; i-- {
-		for j := m - 1; j >= 0; j-- {
-			if a[i] == b[j] {
-				lcs[i][j] = lcs[i+1][j+1] + 1
-			} else {
-				lcs[i][j] = max(lcs[i+1][j], lcs[i][j+1])
-			}
+	out := make([]op, 0, len(a)+len(b)-head)
+	for i := range head {
+		out = append(out, op{' ', a[i], i, i})
+	}
+	return walk(out, a[head:], b[head:], head)
+}
+
+func fillRow(cur, next []int32, line string, b []string) {
+	cur[len(b)] = 0
+	for j := len(b) - 1; j >= 0; j-- {
+		if line == b[j] {
+			cur[j] = next[j+1] + 1
+		} else {
+			cur[j] = max(next[j], cur[j+1])
 		}
 	}
-	var out []op
+}
+
+func walk(out []op, a, b []string, at int) []op {
+	n, m := len(a), len(b)
+	k := 1
+	for k*k < n {
+		k++
+	}
+	zero := make([]int32, m+1)
+	checks := make(map[int][]int32)
+	cur, spare := make([]int32, m+1), make([]int32, m+1)
+	for i := n - 1; i >= 0; i-- {
+		fillRow(spare, cur, a[i], b)
+		cur, spare = spare, cur
+		if i%k == 0 {
+			checks[i/k] = append([]int32(nil), cur...)
+		}
+	}
+	checkAt := func(i int) []int32 {
+		if i >= n {
+			return zero
+		}
+		return checks[i/k]
+	}
+	block := make([][]int32, k+1)
+	for r := range block {
+		block[r] = make([]int32, m+1)
+	}
+	lo, hi := 0, 0
+	load := func(i int) {
+		lo = i / k * k
+		hi = min(lo+k, n)
+		copy(block[hi-lo], checkAt(hi))
+		for r := hi - 1; r >= lo; r-- {
+			fillRow(block[r-lo], block[r+1-lo], a[r], b)
+		}
+	}
 	i, j := 0, 0
 	for i < n || j < m {
+		if i < n && i >= hi {
+			load(i)
+		}
 		switch {
 		case i < n && j < m && a[i] == b[j]:
-			out = append(out, op{' ', a[i], i, j})
+			out = append(out, op{' ', a[i], at + i, at + j})
 			i, j = i+1, j+1
-		case i < n && (j == m || lcs[i+1][j] >= lcs[i][j+1]):
-			out = append(out, op{'-', a[i], i, j})
+		case i < n && (j == m || block[i+1-lo][j] >= block[i-lo][j+1]):
+			out = append(out, op{'-', a[i], at + i, at + j})
 			i++
 		default:
-			out = append(out, op{'+', b[j], i, j})
+			out = append(out, op{'+', b[j], at + i, at + j})
 			j++
 		}
 	}
