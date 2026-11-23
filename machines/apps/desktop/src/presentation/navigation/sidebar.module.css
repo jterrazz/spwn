@@ -16,12 +16,6 @@
     min-height: 160px;
     overflow-y: auto;
 }
-.pinned {
-    display: flex;
-    flex-direction: column;
-    flex: none;
-    margin-top: auto;
-}
 .lights {
     flex: none;
     display: flex;

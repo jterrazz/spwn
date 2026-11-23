@@ -1,4 +1,5 @@
 import type { EngineReadOutput, OverviewNeed } from '@jterrazz/station-api';
+import { useId } from 'react';
 
 import { needsYou } from '../../domain/overview/upkeep';
 import { useCore, useReach } from '../dependencies/dependencies';
@@ -32,48 +33,80 @@ const SPACE_ICONS: Readonly<Record<Space, IconName>> = {
     os: 'os',
 };
 
-const SPACE_KEYS: Readonly<Record<Space, string>> = { agent: '⌃2', machine: '⌃1', os: '⌃3' };
+const SPACE_KEYS: Readonly<Record<Space, { aria: string; shown: string }>> = {
+    agent: { aria: 'Control+2', shown: '⌃2' },
+    machine: { aria: 'Control+1', shown: '⌃1' },
+    os: { aria: 'Control+3', shown: '⌃3' },
+};
+
+type Keys = { aria: string; shown: string };
+
+type TipProps = { id: string; label: string; keys?: Keys | undefined; read?: boolean };
+
+function Tip({ id, label, keys, read = false }: TipProps) {
+    return (
+        <span aria-hidden={read ? undefined : true} className={styles.tip}>
+            <span className={styles.tipHead}>
+                <span id={id}>{label}</span>
+                {keys === undefined ? null : (
+                    <kbd aria-hidden="true" className={styles.tipKeys}>
+                        {keys.shown}
+                    </kbd>
+                )}
+            </span>
+        </span>
+    );
+}
 
 type PlaceProps = {
     icon: IconName;
     label: string;
     current: boolean;
     disabled: boolean;
-    keys: string;
+    keys?: Keys | undefined;
     onSelect: () => void;
     count?: undefined | { value: number; urgent: boolean };
 };
 
 function Place({ icon, label, current, disabled, keys, onSelect, count }: PlaceProps) {
+    const id = useId();
+    const named = count === undefined ? `${id}-name` : `${id}-name ${id}-count`;
     return (
-        <button
-            aria-current={current ? 'page' : undefined}
-            aria-keyshortcuts={keys}
-            className={styles.place}
-            disabled={disabled}
-            onClick={onSelect}
-            type="button"
-        >
-            <span className={styles.mark}>
+        <span className={styles.slot}>
+            <button
+                aria-current={current ? 'page' : undefined}
+                aria-keyshortcuts={keys?.aria}
+                aria-labelledby={named}
+                className={styles.place}
+                disabled={disabled}
+                onClick={onSelect}
+                type="button"
+            >
                 <Icon name={icon} />
-            </span>
-            <span className={styles.label}>{label}</span>
-            {count === undefined ? null : (
-                <span className={`${styles.count} ${count.urgent ? styles.urgent : ''}`}>
-                    {count.value}
-                </span>
-            )}
-        </button>
+                {count === undefined ? null : (
+                    <span
+                        aria-hidden="true"
+                        className={`${styles.count} ${count.urgent ? styles.urgent : ''}`}
+                        id={`${id}-count`}
+                    >
+                        {count.value}
+                    </span>
+                )}
+            </button>
+            <Tip id={`${id}-name`} keys={keys} label={label} />
+        </span>
     );
 }
 
 function Segment({
     space,
     chosen,
+    active,
     onSpace,
 }: {
     space: Space;
     chosen: boolean;
+    active: boolean;
     onSpace: RailProps['onSpace'];
 }) {
     const words = SPACE_WORDS[space];
@@ -82,11 +115,12 @@ function Segment({
     return (
         <span className={styles.slot}>
             <button
-                aria-describedby={soon ? tip : undefined}
+                aria-describedby={soon ? `${tip}-line` : undefined}
                 aria-disabled={soon ? true : undefined}
+                aria-keyshortcuts={SPACE_KEYS[space].aria}
+                aria-labelledby={soon ? `${tip}-name ${tip}-soon` : `${tip}-name`}
                 aria-pressed={chosen}
-                className={`${styles.segment} ${soon ? styles.soon : ''}`}
-                data-space={space}
+                className={`${styles.place} ${soon ? styles.soon : ''} ${chosen && active ? styles.chosen : ''}`}
                 onClick={() => {
                     if (!soon) {
                         onSpace(space);
@@ -94,22 +128,24 @@ function Segment({
                 }}
                 type="button"
             >
-                <span className={styles.mark}>
-                    <Icon name={SPACE_ICONS[space]} />
-                </span>
-                <span className={styles.label}>{words.name}</span>
-                {soon ? <span className={styles.soonWord}>{SOON_WORD.toLowerCase()}</span> : null}
+                <Icon name={SPACE_ICONS[space]} />
             </button>
             {soon ? (
-                <span className={styles.tip} id={tip} role="tooltip">
+                <span aria-hidden="true" className={styles.tip} role="tooltip">
                     <span className={styles.tipHead}>
-                        {words.name}
-                        <span className={styles.pill}>{SOON_WORD}</span>
-                        <kbd className={styles.tipKeys}>{SPACE_KEYS[space]}</kbd>
+                        <span id={`${tip}-name`}>{words.name}</span>
+                        <span className={styles.pill} id={`${tip}-soon`}>
+                            {SOON_WORD.toLowerCase()}
+                        </span>
+                        <kbd aria-hidden="true" className={styles.tipKeys}>
+                            {SPACE_KEYS[space].shown}
+                        </kbd>
                     </span>
-                    <span>{words.line}</span>
+                    <span id={`${tip}-line`}>{words.line}</span>
                 </span>
-            ) : null}
+            ) : (
+                <Tip id={`${tip}-name`} keys={SPACE_KEYS[space]} label={words.name} />
+            )}
         </span>
     );
 }
@@ -117,13 +153,15 @@ function Segment({
 function Spaces({ route, onSpace, quiet }: Pick<RailProps, 'onSpace' | 'quiet' | 'route'>) {
     const active = !quiet && inSpace(route);
     return (
-        <div
-            aria-label="Spaces"
-            className={`${styles.well} ${active ? styles.active : ''}`}
-            role="group"
-        >
+        <div aria-label="Spaces" className={styles.places} role="group">
             {SPACES.map((space) => (
-                <Segment chosen={space === 'machine'} key={space} onSpace={onSpace} space={space} />
+                <Segment
+                    active={active}
+                    chosen={space === 'machine'}
+                    key={space}
+                    onSpace={onSpace}
+                    space={space}
+                />
             ))}
         </div>
     );
@@ -140,33 +178,28 @@ function Foot({
     below: string;
     go?: (() => void) | undefined;
 }) {
+    const id = useId();
     const inner = (
         <>
             <span aria-hidden={go === undefined ? undefined : true} className={styles.dot}>
                 <StateDot tone={dot.tone} word={dot.word} />
             </span>
-            <span aria-hidden="true" className={styles.label}>
-                Engine
-            </span>
             <span aria-hidden="true" className={styles.version}>
                 {below}
             </span>
-            <span className={styles.hidden}>{said}</span>
         </>
     );
-    return go === undefined ? (
-        <div className={`${styles.place} ${styles.engine}`} title={said}>
-            {inner}
-        </div>
-    ) : (
-        <button
-            className={`${styles.place} ${styles.engine}`}
-            onClick={go}
-            title={said}
-            type="button"
-        >
-            {inner}
-        </button>
+    return (
+        <span className={styles.slot}>
+            {go === undefined ? (
+                <div className={styles.engine}>{inner}</div>
+            ) : (
+                <button aria-labelledby={id} className={styles.engine} onClick={go} type="button">
+                    {inner}
+                </button>
+            )}
+            <Tip id={id} label={said} read={go === undefined} />
+        </span>
     );
 }
 
@@ -205,10 +238,12 @@ function owedOf(needs: readonly OverviewNeed[]): PlaceProps['count'] {
         : undefined;
 }
 
-// invariant: the rail is the window's, whatever the space: Home, Inbox and Settings are places of the window, the
-// invariant: spaces one choice of three; the space's sidebar stays beside it on every page.
+type Reached = 'home' | 'inbox' | 'passwords' | 'settings' | 'storage';
+
+// invariant: the rail is the window's, whatever the space: Home and Inbox at its top, the spaces one choice of three
+// invariant: in its middle, the global pages and the engine at its foot.
 export function Rail({ route, go, onSpace, needs, engine, quiet }: RailProps) {
-    const at = (page: 'home' | 'inbox' | 'settings') => ({
+    const at = (page: Reached) => ({
         current: quiet ? page === 'home' : route.page === page,
         disabled: quiet && page !== 'home',
         onSelect: () => {
@@ -219,19 +254,31 @@ export function Rail({ route, go, onSpace, needs, engine, quiet }: RailProps) {
         <nav aria-label="Rail" className={styles.rail}>
             <div className={styles.lights} data-tauri-drag-region="deep" />
             <div className={styles.places}>
-                <Place {...at('home')} icon="home" keys="Meta+0" label="Home" />
+                <Place
+                    {...at('home')}
+                    icon="home"
+                    keys={{ aria: 'Meta+0', shown: '⌘0' }}
+                    label="Home"
+                />
                 <Place
                     {...at('inbox')}
                     count={quiet ? undefined : owedOf(needs)}
                     icon="inbox"
-                    keys="Meta+I"
+                    keys={{ aria: 'Meta+I', shown: '⌘I' }}
                     label="Inbox"
                 />
             </div>
             <span aria-hidden="true" className={styles.rule} />
             <Spaces onSpace={onSpace} quiet={quiet} route={route} />
             <div className={styles.foot}>
-                <Place {...at('settings')} icon="gear" keys="Meta+," label="Settings" />
+                <Place {...at('passwords')} icon="key" label="Passwords" />
+                <Place {...at('storage')} icon="disc" label="Storage" />
+                <Place
+                    {...at('settings')}
+                    icon="gear"
+                    keys={{ aria: 'Meta+,', shown: '⌘,' }}
+                    label="Settings"
+                />
                 {quiet ? <QuietEngine /> : <Engine engine={engine} go={go} />}
             </div>
         </nav>

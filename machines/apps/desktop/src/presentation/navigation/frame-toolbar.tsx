@@ -17,7 +17,7 @@ export type FrameToolbarProps = {
     found: Found | undefined;
     macs: readonly MachinesMacView[];
     ItemName: ComponentType<{ page: PlainPage; item: string }>;
-    onToggleSidebar: () => void;
+    onToggleSidebar: (() => void) | undefined;
     onAddPassword: () => void;
     onNewMachine: () => void;
 };

@@ -44,7 +44,7 @@ describe('rail', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test("A11 the rail's Settings opens the app's Settings, apart from the catalog's", async () => {
+    test("A11 the rail's Settings opens the app's Settings alone beside the rail, apart from the catalog's", async () => {
         // Given - the proof build on Home over stories
         const result = await website.visit('/?world=stories&page=home', async (visitor) => {
             await visitor.see(content('2 things need you.'));
@@ -52,9 +52,10 @@ describe('rail', () => {
             // When - the rail's Settings is pressed
             await visitor.click(within(rail, button('Settings')));
 
-            // Then - the Engine panel, and the catalog's shelf still named Machine settings
+            // Then - the Engine panel, with no Machine space's sidebar and its Machine settings
             await visitor.see(within(region('Engine'), content('Engine running · v4.0.0')));
-            await visitor.see(within(sidebar, button('Machine settings', { exact: false })));
+            await visitor.gone(sidebar);
+            await visitor.gone(button('Machine settings', { exact: false }));
         });
         expect(result.errors.text).toBe('');
     });

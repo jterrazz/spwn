@@ -5,14 +5,14 @@
     - button "Machine" [pressed]
     - button "Agent soon" [disabled]
     - button "OS soon" [disabled]
+  - button "Passwords" [disabled]
+  - button "Storage" [disabled]
   - button "Settings" [disabled]
   - img "engine older than this app"
   - text: Engine older than this app
 - navigation "Sidebar":
   - heading "Machine" [level=2]
   - button "Find" [disabled]
-  - button "Machine files" [disabled]
-  - button "Passwords" [disabled]
   - group "Machines":
     - heading "Machines" [level=2]
     - paragraph: Update station to see them
@@ -21,7 +21,7 @@
     - button "Apps" [disabled]
     - button "Skills" [disabled]
     - button "Machine settings" [disabled]
-  - button "Storage" [disabled]
+    - button "Machine files" [disabled]
 - main:
   - button "Show or hide the sidebar"
   - button "Back" [disabled]

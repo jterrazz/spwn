@@ -21,6 +21,7 @@ import { TAB_PANEL } from './route';
 import type { PlainPage, Route } from './route';
 import { RouterProvider, useRouter } from './router';
 import { Sidebar } from './sidebar';
+import { isGlobal } from './spaces';
 import { useSpaceKeys } from './use-spaces';
 
 import styles from './window.module.css';
@@ -226,11 +227,13 @@ function Frame({ Gallery, pages }: FrameProps) {
     const area = { addMac, found, Gallery, go, home, newMachine, pages, route };
     const rail = { engine, go, needs, onSpace, quiet, route };
     const aside = { ...side, go, onFind: quiet ? NOWHERE : find, quiet, route };
+    const spaced = quiet || !isGlobal(route);
+    const shown = spaced && sidebar;
     return (
         <Screen>
-            <div className={`${styles.window} ${sidebar ? '' : styles.collapsed}`}>
+            <div className={`${styles.window} ${shown ? '' : styles.collapsed}`}>
                 <Rail {...rail} />
-                {sidebar ? <Sidebar {...aside} /> : null}
+                {shown ? <Sidebar {...aside} /> : null}
                 <main className={styles.main}>
                     <FrameToolbar
                         found={found}
@@ -240,7 +243,7 @@ function Frame({ Gallery, pages }: FrameProps) {
                         onNewMachine={() => {
                             newMachine();
                         }}
-                        onToggleSidebar={toggleSidebar}
+                        onToggleSidebar={spaced ? toggleSidebar : undefined}
                         quiet={quiet}
                         router={router}
                     />

@@ -308,12 +308,14 @@ A machine has six tabs, not the mockup's seven: on the owner's word (2026-11-13,
 
 ## The rail and the spaces
 
-Spwn has three spaces, Machine, Agent and OS; this window is Machine, and the two others are named and wait. The rail (`Rail`, `src/presentation/navigation/rail.tsx`, 76 px) is the window's column at the far left, every item named under its icon:
+Spwn has three spaces, Machine, Agent and OS; this window is Machine, and the two others are named and wait. The window is two columns of navigation and the page, as Slack draws it: the rail carries the app, the sidebar the space.
 
-- Home and Inbox at the top, the places of the window whatever the space, Inbox counting the lines that need me in the warn tone; Settings and the Engine line, its state's dot and the engine's version, at its foot, the line opening the Engine page.
-- Between them the spaces, one choice of three in a segmented well (`src/presentation/navigation/spaces.ts`): Machine raised with its colour's mark while one of its pages is open, Agent and OS dimmed with "soon" under their name and a tooltip saying what each will hold. A press on Machine, or ⌃1, opens the last of its pages this window showed, else the first Mac listed.
-- Home, Inbox, Settings and the Engine page open in the content and leave the sidebar as it is: the sidebar is the Machine space's, headed by its name.
-- The window is flat: the rail, the sidebar and the content are plain neutral grounds, and the space's colour, `--space-machine` (`src/presentation/ui/tokens.css`), only marks the chosen segment of the rail.
+- The rail (`Rail`, `src/presentation/navigation/rail.tsx`) is the window's column at the far left, icons only, each naming itself in a tooltip on hover or focus with its shortcut, the current one raised. It is 56 px, and 76 px where the Mac's traffic lights sit at its top (`html[data-chrome='overlay']`, `src/presentation/navigation/window.module.css`): the lights stand 18 px from the window's edge and their last button ends at 72 px.
+- Home and Inbox at its top, the window's daily places, Inbox counting the lines that need me in the warn tone; the spaces in its middle (`src/presentation/navigation/spaces.ts`), Machine raised while one of its pages is open, Agent and OS dimmed, their tooltip saying "Soon" and what each will hold. A press on Machine, or ⌃1, opens the last of its pages this window showed, else the first Mac listed.
+- Its foot holds the global pages, Passwords, Storage and Settings, then the Engine line: its state's dot and the engine's version, opening the Engine page.
+- The sidebar (`Sidebar`, `src/presentation/navigation/sidebar.tsx`, 224 px) is the Machine space's, headed by its name: Find, the machines, each with its state's dot and, when it is not fine, its state's word, then the Catalog: Apps, Skills, Machine settings and Machine files. Its toggle in the toolbar hides and shows it.
+- Home and Inbox open beside the sidebar; a global page, Passwords, Storage, Settings or the Engine page, opens alone beside the rail, with no sidebar and no toggle (`isGlobal`, `src/presentation/navigation/spaces.ts`).
+- The window is flat: the rail, the sidebar and the content are plain neutral grounds, and no space has a colour of its own.
 
 ## The keyboard
 
