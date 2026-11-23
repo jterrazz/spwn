@@ -57,6 +57,8 @@ type Machines interface {
 	// value: refuses every action while this Mac's engine is stopped.
 	EngineUp(ctx context.Context) error
 	CheckStart(name string) error
+	// value: the VM's create failed, so its start is that create's retry.
+	NotCreated(name string) bool
 	Start(ctx context.Context, name string) error
 	CheckStop(name string) error
 	// value: the lifetime of a VM of this Mac, which says its kind; empty

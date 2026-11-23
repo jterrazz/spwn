@@ -1,0 +1,23 @@
+description: 'a workspace that failed at SSH and still runs is retried by its start, never told it runs'
+env: two-macs
+runs:
+    - command: 'world local-network macbook-pro not-approved'
+      exit: 0
+    - command: 'machines create --memory 4G'
+      exit: 1
+      stderr: |
+          Error: linux-2 is kept, failing SSH answers: macbook-pro has not approved station for Local Network
+          Hint: approve station on macbook-pro's screen, or in System Settings > Privacy & Security > Local Network; start linux-2 once approved
+    - command: 'world local-network macbook-pro approved'
+      exit: 0
+    - command: 'machines start linux-2'
+      exit: 0
+      stdout: |
+          ●	linux-2	started
+    - command: 'machines --this-mac'
+      exit: 0
+      stdout: |
+          ●	macbook-pro	Mac	macbook-pro	Engine running
+          ○	api	Workspace	macbook-pro	Stopped · persistent	4 CPU	8 GB
+          ●	linux-1	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB
+          ●	linux-2	Workspace	macbook-pro	Running · ephemeral	4 CPU	4 GB

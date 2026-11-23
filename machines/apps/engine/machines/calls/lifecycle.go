@@ -30,7 +30,9 @@ var Start = call.Call[Deps, VMIn, StartOut]{
 			return StartOut{}, err
 		}
 		kind := d.Machines.LifetimeOf(in.VM).Kind()
-		if running, err := d.Machines.Running(ctx, in.VM); err != nil || running {
+		// invariant: a VM whose create failed is retried even while it runs:
+		// its run is not what it lacks.
+		if running, err := d.Machines.Running(ctx, in.VM); err != nil || running && !d.Machines.NotCreated(in.VM) {
 			return StartOut{Already: running, Kind: kind}, err
 		}
 		return StartOut{Kind: kind}, d.Machines.Start(ctx, in.VM)

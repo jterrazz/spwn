@@ -63,6 +63,11 @@ func (s *Machinist) CheckStart(name string) error {
 	return err
 }
 
+func (s *Machinist) NotCreated(name string) bool {
+	rec, err := s.VM(name, "")
+	return err == nil && rec.Birth != nil && rec.Birth.Failed
+}
+
 func (s *Machinist) CheckStop(name string) error {
 	_, err := s.VM(name, engine.VMStop)
 	return err
