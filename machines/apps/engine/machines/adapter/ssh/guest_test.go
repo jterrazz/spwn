@@ -380,3 +380,31 @@ func TestARefusedDialOnAMacIsNoLocalNetworkBlock(t *testing.T) {
 		t.Fatalf("Dial = %v; want a plain refusal", err)
 	}
 }
+
+func TestAVMRepinnedToTheHostKeyItsLockdownPrintedIsLetInByThatKeyAlone(t *testing.T) {
+	known := filepath.Join(t.TempDir(), "known_hosts", "dev")
+	first := startSSHD(t, newHostKey(t))
+	g, err := dial(t).Dial(t.Context(), target(t, first, known))
+	if err != nil {
+		t.Fatalf("the first sight of the VM was refused: %v", err)
+	}
+	_ = g.Close()
+	made := newHostKey(t)
+	h := local.New(nil, nil, io.Discard, io.Discard)
+	if pinned := Repin(h.FS, known, "dev", string(ssh.MarshalAuthorizedKey(made.PublicKey()))); pinned != nil {
+		t.Fatalf("the printed host key was not pinned: %v", pinned)
+	}
+	again := startSSHD(t, made)
+	g, err = dial(t).Dial(t.Context(), target(t, again, known))
+	if err != nil {
+		t.Fatalf("the VM answering with the host key its lockdown printed was refused: %v", err)
+	}
+	_ = g.Close()
+	if g, err := dial(t).Dial(t.Context(), target(t, first, known)); err == nil {
+		_ = g.Close()
+		t.Fatal("the VM's host key before its lockdown is still let in")
+	}
+	if Repin(h.FS, known, "dev", "not a key") == nil {
+		t.Fatal("a printed line that is no host key was pinned")
+	}
+}

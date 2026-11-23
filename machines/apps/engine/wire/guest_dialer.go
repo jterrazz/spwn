@@ -14,6 +14,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/machines/adapter/ssh"
 	machinescalls "github.com/jterrazz/studio-station/apps/engine/machines/calls"
 	"github.com/jterrazz/studio-station/apps/engine/machines/contract"
+	"github.com/jterrazz/studio-station/apps/engine/platform/local"
 )
 
 // invariant: the one way into a VM: ssh, or the world's guests in a spec
@@ -28,6 +29,7 @@ func (m machine) guestDialer() contract.GuestDialer {
 type engineGuests struct {
 	dialer contract.GuestDialer
 	vms    *machinescalls.Machinist
+	files  local.FS
 }
 
 func (g engineGuests) Dial(ctx context.Context, vm string, at netip.AddrPort) (process.Guest, error) {
@@ -69,7 +71,7 @@ func (g engineGuests) firstLogin(ctx context.Context, l machinescalls.Lockdown) 
 		return errors.New("its first login as " + l.Login.User + " was refused too: " + err.Error())
 	}
 	defer func() { _ = c.Close() }()
-	return g.lockdown(ctx, c, l)
+	return g.lockdown(ctx, c, l, l.Login)
 }
 
 func (g engineGuests) locked(ctx context.Context, c contract.Guest, t contract.GuestTarget) error {
@@ -87,13 +89,16 @@ func (g engineGuests) locked(ctx context.Context, c contract.Guest, t contract.G
 	if err != nil {
 		return err
 	}
-	if ran := g.lockdown(ctx, c, l); ran != nil {
+	if ran := g.lockdown(ctx, c, l, t); ran != nil {
 		return errors.New(t.VM + " takes the key with its lockdown unfinished, and running it again failed: " + ran.Error())
 	}
 	return nil
 }
 
-func (g engineGuests) lockdown(ctx context.Context, c contract.Guest, l machinescalls.Lockdown) error {
+// invariant: a lockdown makes the guest's host keys anew and prints its
+// ed25519 one as soon as it is made, which replaces every key the VM's
+// known hosts held, whether the lockdown ends 0 or not.
+func (g engineGuests) lockdown(ctx context.Context, c contract.Guest, l machinescalls.Lockdown, t contract.GuestTarget) error {
 	made, err := c.Exec(ctx, contract.GuestCommand{Line: catalog.LockdownFolder})
 	if err != nil {
 		return err
@@ -112,7 +117,14 @@ func (g engineGuests) lockdown(ctx context.Context, c contract.Guest, l machines
 	if err != nil {
 		return err
 	}
-	return l.Failed(res.Code, res.Stderr, res.Stdout)
+	if strings.TrimSpace(res.Stdout) != "" {
+		if pinned := ssh.Repin(g.files, t.KnownHosts, t.VM, res.Stdout); pinned != nil {
+			return errors.Join(l.Failed(res.Code, res.Stderr), pinned)
+		}
+	} else if res.Code == 0 {
+		return errors.New("its lockdown printed no host key")
+	}
+	return l.Failed(res.Code, res.Stderr)
 }
 
 type engineGuest struct{ contract.Guest }

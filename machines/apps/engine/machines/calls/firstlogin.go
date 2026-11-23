@@ -35,11 +35,11 @@ func (l Lockdown) Folder(made contract.GuestResult) (string, error) {
 	return dir, nil
 }
 
-func (l Lockdown) Failed(code int, stderr, stdout string) error {
+func (l Lockdown) Failed(code int, stderr string) error {
 	if code == 0 {
 		return nil
 	}
-	return errors.New("its lockdown exited " + strconv.Itoa(code) + ": " + firstLine(cmpOr(stderr, stdout)))
+	return errors.New("its lockdown exited " + strconv.Itoa(code) + ": " + firstLine(stderr))
 }
 
 func (s *Machinist) GuestTarget(vm string, at netip.AddrPort) contract.GuestTarget {

@@ -69,6 +69,32 @@ func (d dialer) pin(file, name string) func(ssh.PublicKey) error {
 	}
 }
 
+func Repin(files local.FS, file, name, printed string) error {
+	// invariant: a VM's known hosts hold the one host key its lockdown
+	// printed: every key pinned for it before is dropped, every other host
+	// kept.
+	key, _, _, _, err := ssh.ParseAuthorizedKey([]byte(printed))
+	if err != nil {
+		return fmt.Errorf("the host key %s's lockdown printed is none: %w", name, err)
+	}
+	if made := files.MkdirAll(filepath.Dir(file), 0o700); made != nil {
+		return made
+	}
+	known, err := files.ReadFile(file)
+	if err != nil && !errors.Is(err, fs.ErrNotExist) {
+		return err
+	}
+	var kept []byte
+	for _, line := range bytes.SplitAfter(known, []byte("\n")) {
+		_, hosts, _, _, _, parsed := ssh.ParseKnownHosts(line)
+		if parsed == nil && (slices.Contains(hosts, name) || slices.Contains(hosts, knownhosts.Normalize(name+":22"))) {
+			continue
+		}
+		kept = append(kept, line...)
+	}
+	return files.WriteFile(file, append(kept, knownhosts.Line([]string{name}, key)+"\n"...), 0o600)
+}
+
 // invariant: a known_hosts file that cannot be read refuses at the
 // handshake, so a VM that does not answer is told as such first.
 func acceptNew[A any](check func(string, A, ssh.PublicKey) error, unreadable error, name string, pin func(ssh.PublicKey) error) func(string, A, ssh.PublicKey) error {

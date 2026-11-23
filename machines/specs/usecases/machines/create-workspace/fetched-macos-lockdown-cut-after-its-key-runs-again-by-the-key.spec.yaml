@@ -18,3 +18,8 @@ runs:
       exit: 0
       stdout: |
           {"login":null,"unlocked":null,"ran":["/usr/bin/mktemp -d <folder>","sudo -n /bin/bash <folder>/lockdown.sh","/bin/test -f /var/db/station/locked","/usr/bin/mktemp -d <folder>","sudo -n /bin/bash <folder>/lockdown.sh","/bin/test -f /var/db/station/locked"]}
+    - command: '--version >/dev/null; /bin/cat .local/state/station/known_hosts/mac-1; /usr/bin/jq -c ''.macs[.this_mac].vms["mac-1"].guest.host_keys'' world.json'
+      exit: 0
+      stdout: |
+          mac-1 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBb8nh4zHySZaSVQdesiX1zRxZpp1Fik/x6mWbs0kM/e
+          2

@@ -527,6 +527,8 @@ type Guest struct {
 	Login *ImageLogin `json:"login,omitempty"`
 	// value: takes station's key while its lockdown's marker is absent.
 	Unlocked bool `json:"unlocked,omitempty"`
+	// value: how many host keys its lockdowns made; it serves the last.
+	HostKeys int `json:"host_keys,omitempty"`
 }
 
 const (

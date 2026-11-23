@@ -2,6 +2,9 @@ package fake
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/base64"
+	"encoding/binary"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -352,10 +355,23 @@ func (c *guest) lockdown(cmd contract.GuestCommand) (contract.GuestResult, bool)
 		return contract.GuestResult{Code: 1, Stderr: "the lockdown was cut before its key\n"}, true
 	case world.CutAfterKey:
 		g.Login, g.Unlocked = nil, true
-		return contract.GuestResult{Code: 1, Stderr: "the lockdown was cut after its key\n"}, true
+		g.HostKeys++
+		return contract.GuestResult{Code: 1, Stdout: hostKey(c.name, g.HostKeys), Stderr: "the lockdown was cut after its key\n"}, true
 	}
 	g.Login, g.Unlocked = nil, false
-	return contract.GuestResult{}, true
+	g.HostKeys++
+	return contract.GuestResult{Stdout: hostKey(c.name, g.HostKeys)}, true
+}
+
+// value: the ed25519 host key line a guest's nth lockdown makes, its 32
+// bytes drawn from the VM's name and n.
+func hostKey(vm string, n int) string {
+	raw := sha256.Sum256([]byte(vm + "#" + strconv.Itoa(n)))
+	blob := binary.BigEndian.AppendUint32(nil, uint32(len("ssh-ed25519")))
+	blob = append(blob, "ssh-ed25519"...)
+	blob = binary.BigEndian.AppendUint32(blob, uint32(len(raw)))
+	blob = append(blob, raw[:]...)
+	return "ssh-ed25519 " + base64.StdEncoding.EncodeToString(blob) + " root@" + vm + "\n"
 }
 
 func (c *guest) state() *world.Guest {

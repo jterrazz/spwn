@@ -4,7 +4,8 @@
 # image's own account by its published default password, or over the VM user by the key when
 # its marker is absent. Its values come on stdin, one per line, never in a command line. It is
 # idempotent, and it makes the key reachable only once nothing of the image's logs in, then
-# writes its marker last.
+# writes its marker last; its stdout is the guest's new ed25519 host key, printed as soon as it is
+# made, nothing else.
 set -euo pipefail
 
 IFS= read -r VM_USER
@@ -83,6 +84,10 @@ AllowTcpForwarding local
 ClientAliveInterval 15
 ClientAliveCountMax 4
 CONF
+/bin/rm -f /etc/ssh/ssh_host_*
+/usr/bin/ssh-keygen -A
+[ -s /etc/ssh/ssh_host_ed25519_key.pub ] || { echo "ssh-keygen made no ed25519 host key" >&2; exit 1; }
+/bin/cat /etc/ssh/ssh_host_ed25519_key.pub >&3
 
 if /usr/bin/dscl . -authonly "$LOGIN_USER" "$LOGIN_PASSWORD" 2>/dev/null; then
     echo "$LOGIN_USER still logs in by the image's default password" >&2

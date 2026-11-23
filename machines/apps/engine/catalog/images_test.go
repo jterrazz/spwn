@@ -115,6 +115,8 @@ func lockdownPutsTheKeyInLastAndItsMarkerAfterIt(t *testing.T, name, script stri
 		"PasswordAuthentication no",
 		"KbdInteractiveAuthentication no",
 		"PermitRootLogin no",
+		"rm -f /etc/ssh/ssh_host_*",
+		"/usr/bin/ssh-keygen -A",
 		"/usr/sbin/sshd -T",
 		`-authonly "$LOGIN_USER" "$LOGIN_PASSWORD"`,
 	} {
