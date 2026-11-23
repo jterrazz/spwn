@@ -1,55 +1,101 @@
 #!/bin/bash
-# invariant: A fetched macOS guest's first login: run as root (sudo -n /bin/bash -s) over
-# the image's own account, LOGIN_USER by its published default password, once, before
-# station's key is in the guest. Station sets VM_USER, IMAGE_KEY, LOGIN_USER and
-# LOGIN_PASSWORD above this script and has copied its own binary to /tmp/station. It ends
-# with no password of the image's that logs in: password login is off, and the image
-# account's password is one made here and never kept.
+# invariant: A fetched macOS guest's lockdown: run as root (sudo -n /bin/bash <dir>/lockdown.sh)
+# from the private folder station made and put this script and its own binary in, over the
+# image's own account by its published default password, or over the VM user by the key when
+# its marker is absent. Its values come on stdin, one per line, never in a command line. It is
+# idempotent, and it makes the key reachable only once nothing of the image's logs in, then
+# writes its marker last.
 set -euo pipefail
 
-unknown() { /usr/bin/openssl rand -base64 33; }
+IFS= read -r VM_USER
+IFS= read -r IMAGE_KEY
+IFS= read -r LOGIN_USER
+IFS= read -r LOGIN_PASSWORD
+IFS= read -r BIN_SHA256
+exec </dev/null 3>&1 1>&2
+
+dir=$(/usr/bin/dirname "$0")
+trap '/bin/rm -rf "$dir"' EXIT
+marker=/var/db/station/locked
+/bin/rm -f "$marker"
+
+random() {
+    local p
+    p=$(/usr/bin/openssl rand -base64 33)
+    [ -n "$p" ] || { echo "openssl made no password" >&2; exit 1; }
+    printf '%s\n' "$p"
+}
+
+home_of() { /usr/bin/dscl . -read "/Users/$1" NFSHomeDirectory | /usr/bin/awk '{print $2}'; }
+
+[ "$(/usr/bin/shasum -a 256 "$dir/station" | /usr/bin/awk '{print $1}')" = "$BIN_SHA256" ] || { echo "the station binary in $dir is not the engine's" >&2; exit 1; }
+/usr/bin/install -d -m 0755 /usr/local/bin
+/usr/bin/install -m 0755 "$dir/station" /usr/local/bin/station
 
 if ! /usr/bin/id "$VM_USER" >/dev/null 2>&1; then
-    /usr/sbin/sysadminctl -addUser "$VM_USER" -fullName "$VM_USER" -shell /bin/zsh -password "$(unknown)" -admin
+    p=$(random)
+    /usr/sbin/sysadminctl -addUser "$VM_USER" -fullName "$VM_USER" -shell /bin/zsh -password "$p" -admin
 fi
+p=$(random)
+printf '%s\n' "$p" | /usr/bin/dscl . -passwd "/Users/$VM_USER" >/dev/null
+unset p
 /usr/sbin/createhomedir -c -u "$VM_USER" >/dev/null
-home=$(/usr/bin/dscl . -read "/Users/$VM_USER" NFSHomeDirectory | /usr/bin/awk '{print $2}')
+home=$(home_of "$VM_USER")
 if /usr/bin/dscl . -read /Groups/com.apple.access_ssh >/dev/null 2>&1; then
     /usr/sbin/dseditgroup -o edit -a "$VM_USER" -t user com.apple.access_ssh
 fi
+/usr/bin/install -d -m 0700 -o "$VM_USER" -g staff "$home/.ssh"
+: > "$home/.ssh/authorized_keys"
+/usr/sbin/chown "$VM_USER:staff" "$home/.ssh/authorized_keys"
+/bin/chmod 0600 "$home/.ssh/authorized_keys"
+/bin/rm -f "$home/.ssh/authorized_keys2"
+/usr/bin/install -d -m 0700 -o "$VM_USER" -g staff "$home/.config" "$home/.config/station" "$home/.config/station/machinefiles"
 
 echo "$VM_USER ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/60-station-user
 /bin/chmod 0440 /etc/sudoers.d/60-station-user
 /usr/sbin/visudo -cf /etc/sudoers.d/60-station-user
 /usr/bin/sudo -u "$VM_USER" /usr/bin/sudo -k -n true || { echo "sudo asks $VM_USER a password: /etc/sudoers.d/60-station-user is not read" >&2; exit 1; }
 
-/usr/bin/install -d -m 0700 -o "$VM_USER" -g staff "$home/.ssh"
-printf '%s\n' "$IMAGE_KEY" > "$home/.ssh/authorized_keys"
-/usr/sbin/chown "$VM_USER:staff" "$home/.ssh/authorized_keys"
-/bin/chmod 0600 "$home/.ssh/authorized_keys"
-/usr/bin/install -d -m 0700 -o "$VM_USER" -g staff "$home/.config" "$home/.config/station" "$home/.config/station/machinefiles"
-
-/usr/bin/install -d -m 0755 /usr/local/bin
-/usr/bin/install -m 0755 /tmp/station /usr/local/bin/station
-/bin/rm -f /tmp/station
-
-# invariant: the image password goes before sshd is locked, so a failure past it leaves no password known.
 # outside: the image logs LOGIN_USER in at boot by the password /etc/kcpassword holds.
 /usr/bin/defaults delete /Library/Preferences/com.apple.loginwindow autoLoginUser 2>/dev/null || true
 /bin/rm -f /etc/kcpassword
-/usr/bin/dscl . -passwd "/Users/$LOGIN_USER" "$LOGIN_PASSWORD" "$(unknown)"
+# outside: macOS changes the password of an account holding a secure token only by its old one, read from a terminal or the command line.
 if /usr/bin/dscl . -authonly "$LOGIN_USER" "$LOGIN_PASSWORD" 2>/dev/null; then
-    echo "$LOGIN_USER still logs in by the image's default password" >&2
-    exit 1
+    p=$(random)
+    /usr/bin/dscl . -passwd "/Users/$LOGIN_USER" "$LOGIN_PASSWORD" "$p"
+    unset p
 fi
+login_home=$(home_of "$LOGIN_USER")
+if [ -d "$login_home/.ssh" ]; then
+    : > "$login_home/.ssh/authorized_keys"
+    /bin/rm -f "$login_home/.ssh/authorized_keys2"
+fi
+/bin/rm -f /var/root/.ssh/authorized_keys /var/root/.ssh/authorized_keys2
+/bin/rm -f "/etc/sudoers.d/$LOGIN_USER-nopasswd"
 
 # outside: sshd keeps the first value it reads, and macOS's sshd_config includes sshd_config.d/* before its own lines, in name order.
 /bin/cat > /etc/ssh/sshd_config.d/000-station.conf <<'CONF'
 PasswordAuthentication no
 KbdInteractiveAuthentication no
+PermitRootLogin no
+AuthorizedKeysFile .ssh/authorized_keys
 AllowTcpForwarding local
 ClientAliveInterval 15
 ClientAliveCountMax 4
 CONF
-/usr/sbin/sshd -T | /usr/bin/grep -qx 'passwordauthentication no' || { echo "sshd still takes passwords: /etc/ssh/sshd_config.d/000-station.conf is not read first" >&2; exit 1; }
-/usr/sbin/sshd -T | /usr/bin/grep -qx 'kbdinteractiveauthentication no' || { echo "sshd still takes keyboard-interactive logins" >&2; exit 1; }
+
+if /usr/bin/dscl . -authonly "$LOGIN_USER" "$LOGIN_PASSWORD" 2>/dev/null; then
+    echo "$LOGIN_USER still logs in by the image's default password" >&2
+    exit 1
+fi
+[ ! -e /etc/kcpassword ] || { echo "/etc/kcpassword is still there" >&2; exit 1; }
+[ ! -e "/etc/sudoers.d/$LOGIN_USER-nopasswd" ] || { echo "$LOGIN_USER still has a passwordless sudo" >&2; exit 1; }
+sshd=$(/usr/sbin/sshd -T)
+for want in 'passwordauthentication no' 'kbdinteractiveauthentication no' 'permitrootlogin no' 'authorizedkeysfile .ssh/authorized_keys'; do
+    printf '%s\n' "$sshd" | /usr/bin/grep -qx "$want" || { echo "sshd does not read '$want': /etc/ssh/sshd_config.d/000-station.conf is not read first" >&2; exit 1; }
+done
+/usr/bin/sudo -u "$VM_USER" /usr/bin/sudo -k -n true || { echo "sudo asks $VM_USER a password" >&2; exit 1; }
+
+printf '%s\n' "$IMAGE_KEY" > "$home/.ssh/authorized_keys"
+/usr/bin/install -d -m 0755 /var/db/station
+: > "$marker"

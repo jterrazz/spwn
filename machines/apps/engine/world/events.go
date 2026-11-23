@@ -58,6 +58,7 @@ func events() []event {
 		{"low-power", []string{"on|off"}, lowPower},
 		{"advance", []string{"<duration>"}, advance},
 		{"upstream-login", []string{"<user>", "<password>"}, upstreamLogin},
+		{"lockdown-cut", []string{"before-key|after-key", "[<n>]"}, lockdownCut},
 		{"fault", []string{"<Contract>.<Method>", "[<n>]", "[times]"}, fault},
 		{"hold", []string{"<Contract>.<Method>"}, hold},
 		{"unhold", []string{"[<mac>]", "[<vm>]"}, unhold},
@@ -268,6 +269,23 @@ func edit(w *World, args []string) error {
 
 func upstreamLogin(w *World, args []string) error {
 	w.UpstreamLogin = &ImageLogin{User: args[0], Password: args[1]}
+	return nil
+}
+
+func lockdownCut(w *World, args []string) error {
+	if args[0] != CutBeforeKey && args[0] != CutAfterKey {
+		return fmt.Errorf("lockdown-cut takes before-key or after-key, not %q", args[0])
+	}
+	n := 1
+	if len(args) > 1 {
+		var err error
+		if n, err = strconv.Atoi(args[1]); err != nil || n < 1 {
+			return fmt.Errorf("lockdown-cut takes a count of at least 1, not %q", args[1])
+		}
+	}
+	for range n {
+		w.LockdownCuts = append(w.LockdownCuts, args[0])
+	}
 	return nil
 }
 

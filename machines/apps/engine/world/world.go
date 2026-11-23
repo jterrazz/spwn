@@ -50,6 +50,9 @@ type World struct {
 	// value: the one account every image pulled from its publisher ships
 	// with; nil when the world's pulled images take station's key.
 	UpstreamLogin *ImageLogin `json:"upstream_login,omitempty"`
+	// value: how each next lockdown run in a guest is cut, in order: before
+	// its key goes in, or after it and before its marker.
+	LockdownCuts []string `json:"lockdown_cuts,omitempty"`
 	// value: the failures injected into the fakes, in the order scripted.
 	Script []Fault `json:"script,omitempty"`
 	// value: the holds declared for a VM whose call waits now: written with
@@ -522,7 +525,14 @@ type Guest struct {
 	// value: the one login it takes: a clone of an image as its publisher
 	// ships it, before station's key is in it; nil takes station's key.
 	Login *ImageLogin `json:"login,omitempty"`
+	// value: takes station's key while its lockdown's marker is absent.
+	Unlocked bool `json:"unlocked,omitempty"`
 }
+
+const (
+	CutBeforeKey = "before-key"
+	CutAfterKey  = "after-key"
+)
 
 type ImageLogin struct {
 	User     string `json:"user"`

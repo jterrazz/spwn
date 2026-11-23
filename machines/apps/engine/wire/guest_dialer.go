@@ -8,6 +8,7 @@ import (
 	"net/netip"
 	"strings"
 
+	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
 	"github.com/jterrazz/studio-station/apps/engine/engine/process"
 	"github.com/jterrazz/studio-station/apps/engine/machines/adapter/ssh"
@@ -38,36 +39,80 @@ func (g engineGuests) Dial(ctx context.Context, vm string, at netip.AddrPort) (p
 }
 
 // invariant: a dial the VM's first login answers (machinescalls.FirstLoginOf)
-// runs it once, as the image's own account, then dials by the key again.
+// runs its lockdown once, as the image's own account, then dials by the key
+// again; a key dial to a VM whose image carries a lockdown is kept only
+// once its marker holds, the lockdown run again over it until it does.
 func (g engineGuests) dial(ctx context.Context, t contract.GuestTarget) (contract.Guest, error) {
 	c, err := g.dialer.Dial(ctx, t)
-	if err == nil {
-		return c, nil
+	if err != nil {
+		first, ok, why := g.vms.FirstLoginOf(ctx, t, err)
+		if !ok || why != nil {
+			return nil, errors.Join(err, why)
+		}
+		if ran := g.firstLogin(ctx, first); ran != nil {
+			return nil, errors.Join(err, ran)
+		}
+		if c, err = g.dialer.Dial(ctx, t); err != nil {
+			return nil, err
+		}
 	}
-	first, ok, why := g.vms.FirstLoginOf(ctx, t, err)
-	if !ok || why != nil {
-		return nil, errors.Join(err, why)
+	if held := g.locked(ctx, c, t); held != nil {
+		_ = c.Close()
+		return nil, held
 	}
-	if ran := g.firstLogin(ctx, first); ran != nil {
-		return nil, errors.Join(err, ran)
-	}
-	return g.dialer.Dial(ctx, t)
+	return c, nil
 }
 
-func (g engineGuests) firstLogin(ctx context.Context, f machinescalls.FirstLogin) error {
-	c, err := g.dialer.Dial(ctx, f.Login)
+func (g engineGuests) firstLogin(ctx context.Context, l machinescalls.Lockdown) error {
+	c, err := g.dialer.Dial(ctx, l.Login)
 	if err != nil {
-		return errors.New("its first login as " + f.Login.User + " was refused too: " + err.Error())
+		return errors.New("its first login as " + l.Login.User + " was refused too: " + err.Error())
 	}
 	defer func() { _ = c.Close() }()
-	if put := c.Put(ctx, f.Bin, f.Binary, 0o755); put != nil {
-		return put
+	return g.lockdown(ctx, c, l)
+}
+
+func (g engineGuests) locked(ctx context.Context, c contract.Guest, t contract.GuestTarget) error {
+	if locks, err := g.vms.Locks(ctx, t.VM); err != nil || !locks {
+		return err
 	}
-	res, err := c.Exec(ctx, contract.GuestCommand{Line: f.Line, Stdin: strings.NewReader(f.Stdin)})
+	res, err := c.Exec(ctx, contract.GuestCommand{Line: catalog.LockedLine})
 	if err != nil {
 		return err
 	}
-	return f.Failed(res.Code, res.Stderr, res.Stdout)
+	if res.Code == 0 {
+		return nil
+	}
+	l, _, err := g.vms.LockdownOf(ctx, t)
+	if err != nil {
+		return err
+	}
+	if ran := g.lockdown(ctx, c, l); ran != nil {
+		return errors.New(t.VM + " takes the key with its lockdown unfinished, and running it again failed: " + ran.Error())
+	}
+	return nil
+}
+
+func (g engineGuests) lockdown(ctx context.Context, c contract.Guest, l machinescalls.Lockdown) error {
+	made, err := c.Exec(ctx, contract.GuestCommand{Line: catalog.LockdownFolder})
+	if err != nil {
+		return err
+	}
+	dir, err := l.Folder(made)
+	if err != nil {
+		return err
+	}
+	if put := c.Put(ctx, dir+"/station", l.Binary, 0o755); put != nil {
+		return put
+	}
+	if put := c.Put(ctx, dir+"/lockdown.sh", l.Script, 0o600); put != nil {
+		return put
+	}
+	res, err := c.Exec(ctx, contract.GuestCommand{Line: catalog.LockdownLine(dir), Stdin: strings.NewReader(l.Values)})
+	if err != nil {
+		return err
+	}
+	return l.Failed(res.Code, res.Stderr, res.Stdout)
 }
 
 type engineGuest struct{ contract.Guest }

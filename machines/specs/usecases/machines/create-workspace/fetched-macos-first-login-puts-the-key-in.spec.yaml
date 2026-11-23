@@ -12,7 +12,7 @@ runs:
       exit: 0
       stdout: |
           ●	mac-1	Created	Ephemeral · 4 CPU · 8 GB · 80 GB
-    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs[.this_mac].vms["mac-1"].guest | {login, ran: [.ran[]? | select(startswith("/usr/local/bin/station guest") | not)]}'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs[.this_mac].vms["mac-1"].guest | {login, ran: [.ran[]? | select(startswith("/usr/local/bin/station guest") | not) | sub("/tmp/station[.][A-Za-z0-9X]+"; "<folder>")]}'' world.json'
       exit: 0
       stdout: |
-          {"login":null,"ran":["sudo -n /bin/bash -s"]}
+          {"login":null,"ran":["/usr/bin/mktemp -d <folder>","sudo -n /bin/bash <folder>/lockdown.sh","/bin/test -f /var/db/station/locked","/bin/test -f /var/db/station/locked"]}

@@ -12,6 +12,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/machines/contract"
 	"github.com/jterrazz/studio-station/apps/engine/world"
@@ -159,7 +160,7 @@ func (g *Guests) Dial(_ context.Context, t contract.GuestTarget) (contract.Guest
 	if wg.Replaced {
 		serving = ""
 	}
-	return &guest{vm: v, name: t.VM, w: g.w, serving: serving, fresh: wg.Fresh, login: login != nil, done: make(chan struct{})}, nil
+	return &guest{vm: v, name: t.VM, w: g.w, serving: serving, fresh: wg.Fresh, done: make(chan struct{})}, nil
 }
 
 type guest struct {
@@ -172,9 +173,6 @@ type guest struct {
 	// value: a guest made from station's image: a line no answer scripts
 	// succeeds, as the image's own commands do; `true` succeeds on any guest.
 	fresh bool
-	// value: reached by its image's own login: a command it runs that
-	// succeeds is the first login, which puts station's key in.
-	login bool
 	done  chan struct{}
 	once  sync.Once
 }
@@ -272,6 +270,9 @@ func (c *guest) Exec(ctx context.Context, cmd contract.GuestCommand) (contract.G
 	if cmd.Line != "true" {
 		c.ran(cmd.Line)
 	}
+	if res, ok := c.lockdown(cmd); ok {
+		return res, nil
+	}
 	var in []byte
 	if cmd.Stdin != nil {
 		var err error
@@ -306,23 +307,62 @@ func (c *guest) Exec(ctx context.Context, cmd contract.GuestCommand) (contract.G
 		}
 		res.Stderr = ""
 	}
-	if c.login && res.Code == 0 && cmd.Line != "true" {
-		c.keyed()
-	}
 	if poweroff {
 		c.poweroff()
 	}
 	return res, nil
 }
 
-func (c *guest) keyed() {
+// value: the folder a fake lockdown is put in.
+const lockdownFolder = "/tmp/station.fake"
+
+// invariant: a guest plays its image's lockdown: the folder it is put in,
+// the script, which ends with the password closed and the key in, its
+// marker last, unless the world cuts it, and the marker's read.
+func (c *guest) lockdown(cmd contract.GuestCommand) (contract.GuestResult, bool) {
+	switch cmd.Line {
+	case catalog.LockdownFolder:
+		return contract.GuestResult{Stdout: lockdownFolder + "\n"}, true
+	case catalog.LockedLine:
+		c.w.Lock()
+		defer c.w.Unlock()
+		if g := c.state(); g != nil && (g.Login != nil || g.Unlocked) {
+			return contract.GuestResult{Code: 1}, true
+		}
+		return contract.GuestResult{}, true
+	case catalog.LockdownLine(lockdownFolder):
+	default:
+		return contract.GuestResult{}, false
+	}
+	if cmd.Stdin != nil {
+		_, _ = io.ReadAll(cmd.Stdin)
+	}
 	c.w.Lock()
 	defer c.w.Unlock()
-	if mac := c.w.Holder(c.name); mac != "" {
-		if g := c.w.Macs[mac].VMs[c.name].Guest; g != nil {
-			g.Login = nil
-		}
+	g := c.state()
+	if g == nil {
+		return contract.GuestResult{Code: 1, Stderr: "no guest\n"}, true
 	}
+	cut := ""
+	if len(c.w.LockdownCuts) > 0 {
+		cut, c.w.LockdownCuts = c.w.LockdownCuts[0], c.w.LockdownCuts[1:]
+	}
+	switch cut {
+	case world.CutBeforeKey:
+		return contract.GuestResult{Code: 1, Stderr: "the lockdown was cut before its key\n"}, true
+	case world.CutAfterKey:
+		g.Login, g.Unlocked = nil, true
+		return contract.GuestResult{Code: 1, Stderr: "the lockdown was cut after its key\n"}, true
+	}
+	g.Login, g.Unlocked = nil, false
+	return contract.GuestResult{}, true
+}
+
+func (c *guest) state() *world.Guest {
+	if mac := c.w.Holder(c.name); mac != "" {
+		return c.w.Macs[mac].VMs[c.name].Guest
+	}
+	return nil
 }
 
 func (c *guest) ran(line string) {

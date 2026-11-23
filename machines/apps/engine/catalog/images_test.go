@@ -94,10 +94,44 @@ func TestAFetchOnlyBaseCarriesTheFirstLoginThatPutsStationsKeyIn(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		for _, line := range []string{"PasswordAuthentication no", "KbdInteractiveAuthentication no", "rm -f /etc/kcpassword", "-passwd"} {
-			if !strings.Contains(string(script), line) {
-				t.Errorf("%s's first login lacks %q: a password of the image's would outlive it", img.Name, line)
-			}
+		lockdownPutsTheKeyInLastAndItsMarkerAfterIt(t, img.Name, string(script))
+	}
+}
+
+func lockdownPutsTheKeyInLastAndItsMarkerAfterIt(t *testing.T, name, script string) {
+	t.Helper()
+	key := strings.Index(script, `"$IMAGE_KEY" > "$home/.ssh/authorized_keys"`)
+	marker := strings.Index(script, `: > "$marker"`)
+	if key < 0 || marker < 0 {
+		t.Fatalf("%s's first login writes no key (%d) or no marker (%d)", name, key, marker)
+	}
+	for _, step := range []string{
+		"rm -f /etc/kcpassword",
+		`-passwd "/Users/$LOGIN_USER"`,
+		`-passwd "/Users/$VM_USER"`,
+		`: > "$home/.ssh/authorized_keys"`,
+		`: > "$login_home/.ssh/authorized_keys"`,
+		`rm -f "/etc/sudoers.d/$LOGIN_USER-nopasswd"`,
+		"PasswordAuthentication no",
+		"KbdInteractiveAuthentication no",
+		"PermitRootLogin no",
+		"/usr/sbin/sshd -T",
+		`-authonly "$LOGIN_USER" "$LOGIN_PASSWORD"`,
+	} {
+		at := strings.LastIndex(script, step)
+		switch {
+		case at < 0:
+			t.Errorf("%s's first login lacks %q: what the image left open would outlive it", name, step)
+		case at > key:
+			t.Errorf("%s's first login puts the key in before %q: a failure between leaves the guest open and keyed", name, step)
+		}
+	}
+	if marker < key {
+		t.Errorf("%s's first login writes its marker before the key", name)
+	}
+	for _, line := range strings.Split(strings.TrimSpace(script[marker:]), "\n")[1:] {
+		if !strings.HasSuffix(strings.TrimSpace(line), ">&3") {
+			t.Errorf("%s's first login runs %q after its marker, which is its last step", name, line)
 		}
 	}
 }

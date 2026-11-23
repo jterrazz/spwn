@@ -1,0 +1,21 @@
+description: 'a fetched macOS workspace whose lockdown never finishes fails its create, no session opened'
+fixture: ../../__fixtures__/build/
+env: one-mac
+runs:
+    - command: 'world upstream-login admin admin'
+      exit: 0
+    - command: 'world lockdown-cut after-key 100'
+      exit: 0
+    - command: 'images update base-macos'
+      exit: 0
+      stdout: |
+          ●	base-macos	26.6.2	fetched
+    - command: 'machines create mac-1 --image base-macos'
+      exit: 1
+      stderr: |
+          Error: mac-1 is kept, failing SSH answers: none after 60 s
+          Hint: station machines start mac-1, or station machines delete mac-1
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs[.this_mac].vms["mac-1"].guest | {login, unlocked, ran: [.ran[]? | select(startswith("/usr/local/bin/station guest") | not) | sub("/tmp/station[.][A-Za-z0-9X]+"; "<folder>")]}'' world.json'
+      exit: 0
+      stdout: |
+          {"login":null,"unlocked":true,"ran":["/usr/bin/mktemp -d <folder>","sudo -n /bin/bash <folder>/lockdown.sh","/bin/test -f /var/db/station/locked","/usr/bin/mktemp -d <folder>","sudo -n /bin/bash <folder>/lockdown.sh","/bin/test -f /var/db/station/locked","/usr/bin/mktemp -d <folder>","sudo -n /bin/bash <folder>/lockdown.sh","/bin/test -f /var/db/station/locked","/usr/bin/mktemp -d <folder>","sudo -n /bin/bash <folder>/lockdown.sh","/bin/test -f /var/db/station/locked","/usr/bin/mktemp -d <folder>","sudo -n /bin/bash <folder>/lockdown.sh","/bin/test -f /var/db/station/locked","/usr/bin/mktemp -d <folder>","sudo -n /bin/bash <folder>/lockdown.sh","/bin/test -f /var/db/station/locked","/usr/bin/mktemp -d <folder>","sudo -n /bin/bash <folder>/lockdown.sh","/bin/test -f /var/db/station/locked","/usr/bin/mktemp -d <folder>","sudo -n /bin/bash <folder>/lockdown.sh","/bin/test -f /var/db/station/locked","/usr/bin/mktemp -d <folder>","sudo -n /bin/bash <folder>/lockdown.sh","/bin/test -f /var/db/station/locked","/usr/bin/mktemp -d <folder>","sudo -n /bin/bash <folder>/lockdown.sh"]}

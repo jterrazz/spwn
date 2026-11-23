@@ -73,6 +73,16 @@ var (
 	UpstreamLogin = ImageLogin{User: "admin", Password: "admin"}
 )
 
+// value: the line that makes the private folder a lockdown is put in; the
+// line that runs it from there as root; the line that succeeds once its
+// marker, its last step, is written.
+const (
+	LockdownFolder = "/usr/bin/mktemp -d /tmp/station.XXXXXXXX"
+	LockedLine     = "/bin/test -f /var/db/station/locked"
+)
+
+func LockdownLine(folder string) string { return AsRoot("-n /bin/bash " + folder + "/lockdown.sh") }
+
 // value: the built-in image a workspace is made of when none is named,
 // and its Machinefile's name; the built-in Debian and macOS images, and
 // theirs.
