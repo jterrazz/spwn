@@ -14,7 +14,7 @@
             },
             "preferences": {
                 "name": "macbook-pro",
-                "vm_user": "admin",
+                "vm_user": "you",
                 "macs": {
                     "macbook-air": {
                         "user": "you"
@@ -45,7 +45,7 @@
                         "user": "you"
                     }
                 },
-                "vm_user": "admin"
+                "vm_user": "you"
             },
             "power": {
                 "Lid": "closed",

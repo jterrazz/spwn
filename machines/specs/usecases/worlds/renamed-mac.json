@@ -12,7 +12,7 @@
             "engine": {},
             "preferences": {
                 "name": "studio-laptop",
-                "vm_user": "admin"
+                "vm_user": "you"
             },
             "power": {
                 "Lid": "open",

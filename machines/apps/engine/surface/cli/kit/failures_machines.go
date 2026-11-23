@@ -110,6 +110,9 @@ func vmFailure(err error) (*fail.Error, bool) {
 	case errors.As(err, &shrinks):
 		return usage(shrinks.Error(), shrinks.Name+" has "+strconv.FormatFloat(float64(shrinks.Has)/1e9, 'f', 1, 64)+" GB: ask for more"), true
 	case errors.As(err, &vmUser):
+		if vmUser.Account {
+			return failed(vmUser.Error(), "set vm_user in ~/.config/station/preferences.json", err), true
+		}
 		return failed(vmUser.Error(), "set another vm_user in ~/.config/station/preferences.json", err), true
 	case errors.As(err, &noBoot):
 		return failed(noBoot.Error(), keptFix(noBoot.Name), err), true

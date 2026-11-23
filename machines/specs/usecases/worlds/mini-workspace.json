@@ -20,7 +20,7 @@
                         "user": "jterrazz.agent"
                     }
                 },
-                "vm_user": "admin"
+                "vm_user": "you"
             },
             "images": ["ghcr.io/jterrazz/station-base-ubuntu:1"],
             "fresh": {
@@ -226,19 +226,19 @@
             "ssh": {
                 "blocks": {
                     "api": {
-                        "user": "admin",
+                        "user": "you",
                         "behind": "macbook-pro",
                         "this_mac": true
                     },
                     "infra": {
-                        "user": "admin",
+                        "user": "you",
                         "behind": "mac-mini"
                     },
                     "mac-mini": {
                         "user": "jterrazz.agent"
                     },
                     "linux-1": {
-                        "user": "admin",
+                        "user": "you",
                         "behind": "macbook-pro",
                         "this_mac": true
                     }
@@ -264,7 +264,7 @@
                     }
                 },
                 "never_sleeps": true,
-                "vm_user": "admin"
+                "vm_user": "you"
             },
             "facts": {
                 "filevault": {
@@ -371,7 +371,7 @@
             "ssh": {
                 "blocks": {
                     "ci-1": {
-                        "user": "admin",
+                        "user": "you",
                         "behind": "mac-mini"
                     }
                 }

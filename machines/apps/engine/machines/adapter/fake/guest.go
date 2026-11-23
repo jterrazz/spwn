@@ -325,8 +325,9 @@ const lockdownFolder = "/tmp/station.fake"
 
 // invariant: a guest plays its image's lockdown: the folder it is put in,
 // the script, which closes the image's login, then ends with the key in and
-// its marker last, unless the world cuts it, and the marker's read. A cut
-// before its lock leaves the image's login; one before its key, one that
+// its marker last, unless the world cuts it, and the marker's read. A VM
+// user the script refuses, refused before its lock, and a cut before its
+// lock leave the image's login; one before its key, one that
 // never finishes, or a connection dropped once its new host key is printed,
 // leaves no login at all; one after it, the key without the marker.
 func (c *guest) lockdown(cmd contract.GuestCommand) (contract.GuestResult, bool, error) {
@@ -344,14 +345,19 @@ func (c *guest) lockdown(cmd contract.GuestCommand) (contract.GuestResult, bool,
 	default:
 		return contract.GuestResult{}, false, nil
 	}
+	values := []string{"", "", ""}
 	if cmd.Stdin != nil {
-		_, _ = io.ReadAll(cmd.Stdin)
+		read, _ := io.ReadAll(cmd.Stdin)
+		values = append(strings.Split(string(read), "\n"), values...)
 	}
 	c.w.Lock()
 	defer c.w.Unlock()
 	g := c.state()
 	if g == nil {
 		return contract.GuestResult{Code: 1, Stderr: "no guest\n"}, true, nil
+	}
+	if contract.CheckVMUser(values[0], false) != nil || values[0] == values[2] {
+		return contract.GuestResult{Code: 1, Stderr: "the VM user '" + values[0] + "' is no lowercase short name, or the image's own account or root: a fetched macOS guest is made for another user\n"}, true, nil
 	}
 	cut := ""
 	if len(c.w.LockdownCuts) > 0 {

@@ -31,7 +31,7 @@
                         ]
                     }
                 },
-                "vm_user": "admin"
+                "vm_user": "you"
             },
             "images": ["ghcr.io/jterrazz/station-base-ubuntu:1"],
             "vms": {
@@ -146,7 +146,7 @@
                     }
                 },
                 "never_sleeps": true,
-                "vm_user": "admin"
+                "vm_user": "you"
             },
             "facts": {
                 "filevault": {

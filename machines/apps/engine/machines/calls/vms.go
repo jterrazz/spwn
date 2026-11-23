@@ -78,13 +78,24 @@ func (s *Machinist) Start(ctx context.Context, name string) error {
 	// retry: it runs the VM, then its set-up from its first boot on, as the
 	// create would have; its birth goes once the set-up answers, and
 	// otherwise holds the new failure (its step, cause and console lines
-	// replacing the old), which the start answers as its error.
+	// replacing the old), which the start answers as its error. A VM whose
+	// image carries a lockdown is not run for a VM user its rule refuses.
 	rec, err := s.VM(name, engine.VMStart)
 	if err != nil {
 		return err
 	}
 	if err := s.EngineUp(ctx); err != nil {
 		return err
+	}
+	img, _ := s.imageOf(ctx, rec.Image)
+	if img.FirstLogin != "" {
+		cfg, err := s.prefs()
+		if err != nil {
+			return err
+		}
+		if _, bad := s.checkedVMUser(cfg); bad != nil {
+			return bad
+		}
 	}
 	retry := rec.Birth != nil && rec.Birth.Failed
 	if err := s.engineAPI.Do(ctx, engine.VMStart, name); err != nil {
@@ -100,7 +111,6 @@ func (s *Machinist) Start(ctx context.Context, name string) error {
 	if !retry {
 		return nil
 	}
-	img, _ := s.imageOf(ctx, rec.Image)
 	if err := s.setUp(ctx, img, model.CreateRequest{Name: name, Lifetime: rec.Lifetime}); err != nil {
 		failed := &model.UnhealthyError{Name: name, Step: model.StepSSH, Detail: strings.TrimSpace(err.Error())}
 		if ctx.Err() == nil {

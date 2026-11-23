@@ -125,7 +125,8 @@ func lockdownClosesTheImageBeforeAnythingElse(t *testing.T, name, script string)
 		`-passwd "/Users/$LOGIN_USER"`,
 		`: > "$login_home/.ssh/authorized_keys"`,
 		`rm -f "/etc/sudoers.d/$LOGIN_USER-nopasswd"`,
-		`[[ "$VM_USER" =~ ^[a-z_][a-z0-9_-]{0,31}$ ]]`,
+		"vm_user_rule='",
+		`[[ "$VM_USER" =~ $vm_user_rule ]]`,
 		`[ "$VM_USER" != "$LOGIN_USER" ]`,
 	} {
 		at := strings.Index(script, step)

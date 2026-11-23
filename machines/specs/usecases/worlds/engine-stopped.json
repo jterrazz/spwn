@@ -21,7 +21,7 @@
                 "macs": {
                     "mac-mini": {}
                 },
-                "vm_user": "admin"
+                "vm_user": "you"
             },
             "images": ["station-image-base-ubuntu-1"],
             "vms": {
@@ -126,7 +126,7 @@
                     }
                 },
                 "never_sleeps": true,
-                "vm_user": "admin"
+                "vm_user": "you"
             },
             "facts": {
                 "filevault": {

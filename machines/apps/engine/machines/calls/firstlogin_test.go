@@ -41,7 +41,7 @@ func lockingDown(t *testing.T) *machines.Machinist {
 
 func TestALockdownIsRefusedForAVMUserThatIsTheImagesOwnAccount(t *testing.T) {
 	m := lockingDown(t)
-	for _, user := range []string{catalog.UpstreamLogin.User, "Admin", "root", "ROOT", ""} {
+	for _, user := range []string{catalog.UpstreamLogin.User, "Admin", "root", "ROOT", "", "you.", "You.ops"} {
 		_, ok, err := m.LockdownOf(t.Context(), machinescontract.GuestTarget{VM: "mac-1", User: user})
 		if err == nil || ok {
 			t.Errorf("VM user %q: lockdown %v, %v; want it refused", user, ok, err)
@@ -54,8 +54,10 @@ func TestALockdownIsRefusedForAVMUserThatIsTheImagesOwnAccount(t *testing.T) {
 			t.Errorf("VM user %q: %v is not a lockdown failure, so its VM would not be stopped", user, err)
 		}
 	}
-	if _, ok, err := m.LockdownOf(t.Context(), machinescontract.GuestTarget{VM: "mac-1", User: "you"}); err != nil || !ok {
-		t.Fatalf("VM user you: lockdown %v, %v; want it made", ok, err)
+	for _, user := range []string{"you", "jterrazz.ops"} {
+		if _, ok, err := m.LockdownOf(t.Context(), machinescontract.GuestTarget{VM: "mac-1", User: user}); err != nil || !ok {
+			t.Fatalf("VM user %s: lockdown %v, %v; want it made", user, ok, err)
+		}
 	}
 }
 
@@ -102,8 +104,8 @@ func TestALockdownFolderIsTakenOnlyAsMktempPrintsIt(t *testing.T) {
 	}
 }
 
-func TestAVMUserIsTakenOnlyAsALowercaseShortNameNeverRoot(t *testing.T) {
-	for _, user := range []string{"you", "_build", "dev-2", "a23456789012345678901234567890ab"} {
+func TestAVMUserIsTakenOnlyAsALowercaseShortNameNeverAdminNorRoot(t *testing.T) {
+	for _, user := range []string{"you", "_build", "dev-2", "a23456789012345678901234567890ab", "jterrazz", "jterrazz.ops", "jterrazz.agent", "a.b-c_d"} {
 		prefs := memoryPrefs{}
 		if err := machinescontract.VMUser(prefs).Set(user); err != nil {
 			t.Fatal(err)
@@ -112,13 +114,37 @@ func TestAVMUserIsTakenOnlyAsALowercaseShortNameNeverRoot(t *testing.T) {
 			t.Errorf("vm_user %q read back %q, %v", user, got, err)
 		}
 	}
-	for _, user := range []string{"Admin", "ROOT", "root", "you\nroot", "2you", "you me", "-you", "a23456789012345678901234567890abc"} {
+	for _, user := range []string{"Admin", "admin", "ROOT", "root", "you\nroot", "you\n", "2you", "you me", "-you", ".you", "you.", "Jterrazz.ops", "you:x", "you/x", "a23456789012345678901234567890abc"} {
 		prefs := memoryPrefs{}
 		if err := machinescontract.VMUser(prefs).Set(user); err != nil {
 			t.Fatal(err)
 		}
 		if got, err := machinescontract.VMUser(prefs).Get(); err == nil || !strings.Contains(err.Error(), "vm_user") {
 			t.Errorf("vm_user %q read back %q, %v; want it refused, naming vm_user", user, got, err)
+		}
+	}
+}
+
+func TestTheLockdownScriptChecksTheVMUserByTheContractsRule(t *testing.T) {
+	script, err := catalog.Recipes.ReadFile("images/macos-firstlogin.sh")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if rule := "vm_user_rule='" + machinescontract.VMUserPattern + "'\n"; !strings.Contains(string(script), rule) {
+		t.Errorf("the lockdown script lacks %q: its check of the VM user is not the contract's rule", rule)
+	}
+}
+
+func TestThisMacsAccountIsCheckedByTheVMUsersRule(t *testing.T) {
+	for user, ok := range map[string]bool{"jterrazz": true, "jterrazz.ops": true, "jterrazz.agent": true, "Jterrazz": false, "jterrazz.": false, "admin": false, "root": false, "": false} {
+		err := machinescontract.CheckVMUser(user, true)
+		if (err == nil) != ok {
+			t.Errorf("this Mac's account %q: %v; want taken %v", user, err, ok)
+			continue
+		}
+		var bad *model.BadVMUserError
+		if !ok && (!errors.As(err, &bad) || !bad.Account || !strings.Contains(err.Error(), "this Mac's account")) {
+			t.Errorf("this Mac's account %q: %v; want it named as the account, no vm_user set", user, err)
 		}
 	}
 }

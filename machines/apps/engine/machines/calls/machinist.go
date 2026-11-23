@@ -197,10 +197,17 @@ type Machine struct {
 }
 
 func (s *Machinist) vmUser(cfg prefsView) string {
+	user, _ := s.checkedVMUser(cfg)
+	return user
+}
+
+func (s *Machinist) checkedVMUser(cfg prefsView) (string, error) {
+	// invariant: the VM user is vm_user, which its read checked, or else
+	// this Mac's account, checked by the same rule.
 	if cfg.VMUser != "" {
-		return cfg.VMUser
+		return cfg.VMUser, nil
 	}
-	return s.o.User
+	return s.o.User, contract.CheckVMUser(s.o.User, true)
 }
 
 // invariant: a guest's user is the OS user of the Mac it runs on, so a VM on
