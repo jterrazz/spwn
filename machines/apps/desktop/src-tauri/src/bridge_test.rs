@@ -1,4 +1,4 @@
-use std::io::{BufRead, BufReader, Cursor, Read};
+use std::io::{BufRead, BufReader, Cursor, Read, Write};
 use std::os::unix::net::{UnixListener, UnixStream};
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
@@ -58,6 +58,38 @@ fn call() -> Value {
 
 fn watch() -> Value {
     json!({ "v": 2, "id": "8", "watch": "engine.watch", "in": {} })
+}
+
+fn state() -> Value {
+    json!({ "v": 2, "id": "9", "watch": "engine.state", "in": { "keys": ["local"] } })
+}
+
+// value: an exchange of `request` over an engine that reads it, then does what `then` does with its socket; true when
+// value: the alarm was cut once the window heard its end.
+fn ended(request: Value, then: impl FnOnce(UnixStream, &Exchanges, u32)) -> bool {
+    let (listener, path) = listening();
+    let exchanges = Arc::new(Exchanges::default());
+    let (sink, received, _) = heard();
+    let handle = exchanges
+        .open(&path, "main", request, sink, LIMITS)
+        .expect("the exchange opens");
+    let (mut engine, _) = listener.accept().expect("the engine accepts");
+    let mut asked = vec![0; 1];
+    engine.read_exact(&mut asked).expect("the request arrives");
+    then(engine, &exchanges, handle);
+    let end = drained_until_end(&received);
+    let _ = std::fs::remove_file(path);
+    assert!(end, "the exchange ends");
+    exchanges.alarm.is_cut()
+}
+
+fn drained_until_end(received: &Receiver<Message>) -> bool {
+    while let Ok(message) = received.recv_timeout(SOON) {
+        if matches!(message, Message::End(_)) {
+            return true;
+        }
+    }
+    false
 }
 
 fn answer(name: &str) -> Value {
@@ -642,4 +674,82 @@ fn an_engine_that_reads_nothing_never_holds_the_write_past_its_limit() {
     assert!(opened.is_err_and(|error| error.starts_with("no engine answers at ")));
     drop(listener);
     let _ = std::fs::remove_file(path);
+}
+
+#[test]
+fn a_held_state_stream_the_engine_cuts_rings_the_alarm() {
+    // Given - the window's engine.state stream, held open
+    // When - the engine's side closes it unanswered
+    let cut = ended(state(), |engine, _, _| drop(engine));
+
+    // Then - the supervisor is told to say hello again
+    assert!(cut);
+}
+
+#[test]
+fn a_state_stream_the_window_closes_or_the_engine_ends_and_any_other_watch_cut_never_ring_it() {
+    // Given - three exchanges: the state stream, the state stream again, and another watch
+    // When - the window closes the first, the engine ends the second with its done, and the third is cut by the engine
+    let closed = ended(state(), |_engine, exchanges, handle| {
+        exchanges.close(handle)
+    });
+    let done = ended(state(), |mut engine, _, _| {
+        engine
+            .write_all(b"{\"v\":2,\"id\":\"9\",\"done\":true}\n")
+            .expect("the done is written");
+    });
+    let other = ended(watch(), |engine, _, _| drop(engine));
+
+    // Then - none of them rings the alarm
+    assert_eq!((closed, done, other), (false, false, false));
+}
+
+#[test]
+fn an_engine_that_does_not_answer_an_open_rings_the_alarm() {
+    // Given - no engine at the socket
+    let exchanges = Arc::new(Exchanges::default());
+    let (sink, _, _) = heard();
+
+    // When - the window opens a call there
+    let opened = exchanges.open(&socket_path(), "main", call(), sink, LIMITS);
+
+    // Then - the open fails, and the supervisor is told to say hello again
+    assert!(opened.is_err());
+    assert!(exchanges.alarm.is_cut());
+}
+
+#[test]
+fn a_socket_changed_while_no_state_stream_is_held_rings_the_alarm() {
+    // Given - a window that holds no engine.state stream
+    let exchanges = Exchanges::default();
+
+    // When - the engine's socket changes
+    exchanges.replaced();
+
+    // Then - the supervisor is told to say hello again
+    assert!(exchanges.alarm.is_cut());
+}
+
+#[test]
+fn a_socket_changed_while_a_state_stream_is_held_rings_nothing_until_that_stream_ends() {
+    // Given - the window's engine.state stream, held open
+    let (listener, path) = listening();
+    let exchanges = Arc::new(Exchanges::default());
+    let (sink, received, _) = heard();
+    let handle = exchanges
+        .open(&path, "main", state(), sink, LIMITS)
+        .expect("the exchange opens");
+    let (_engine, _) = listener.accept().expect("the engine accepts");
+
+    // When - the engine's socket changes, then the window closes the stream and the socket changes again
+    exchanges.replaced();
+    let while_held = exchanges.alarm.is_cut();
+    exchanges.close(handle);
+    let end = drained_until_end(&received);
+    exchanges.replaced();
+    let _ = std::fs::remove_file(path);
+
+    // Then - the first change rang nothing, the one after the stream's end rang the cut
+    assert!(end, "the exchange ends");
+    assert_eq!((while_held, exchanges.alarm.is_cut()), (false, true));
 }

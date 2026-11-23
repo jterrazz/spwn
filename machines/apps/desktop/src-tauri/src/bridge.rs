@@ -3,8 +3,8 @@ use std::io::{self, BufRead, BufReader, Read, Write};
 use std::net::Shutdown;
 use std::os::unix::net::UnixStream;
 use std::path::Path;
-use std::sync::atomic::{AtomicU32, Ordering};
-use std::sync::{mpsc, Arc, Mutex};
+use std::sync::atomic::{AtomicU32, AtomicUsize, Ordering};
+use std::sync::{mpsc, Arc, Condvar, Mutex, PoisonError};
 use std::thread;
 use std::time::Duration;
 
@@ -18,6 +18,9 @@ const BAD_FRAME: &str = "call.bad-frame";
 pub const NOT_BRIDGED: &str = "bridge.not-bridged";
 pub const NOT_OPENED: &str = "bridge.not-opened";
 const REQUEST_KEYS: [&str; 6] = ["v", "id", "call", "watch", "target", "in"];
+const HELD: &str = "engine.state";
+const ANSWERED: &str = "answered";
+const STOPPED: &str = "the window stopped listening";
 
 #[derive(Debug, PartialEq)]
 pub struct Refusal {
@@ -211,10 +214,10 @@ pub fn pump(reader: impl Read, id: &str, watch: bool, sink: &impl Sink, limit: u
                 Ok(answer) => {
                     let last = ends(watch, &answer);
                     if !sink.send(Message::Frame(answer)) {
-                        return String::from("the window stopped listening");
+                        return String::from(STOPPED);
                     }
                     if last {
-                        return String::from("answered");
+                        return String::from(ANSWERED);
                     }
                     continue;
                 }
@@ -222,7 +225,7 @@ pub fn pump(reader: impl Read, id: &str, watch: bool, sink: &impl Sink, limit: u
             },
         };
         sink.send(Message::Frame(wire_error(id, "failed", BAD_FRAME, refused)));
-        return String::from("answered");
+        return String::from(ANSWERED);
     }
 }
 
@@ -247,9 +250,70 @@ fn cancel_id(frame: &Value) -> Option<&str> {
 }
 
 #[derive(Default)]
+struct Rung {
+    woken: bool,
+    cut: bool,
+}
+
+// value: what ends the supervisor's rest: a wake (a core started, a move ran), or a cut, which only a rest with no end
+// value: of its own listens for: the held engine.state stream cut by the engine's side, an open no engine answers, or
+// value: the engine's socket changed while no state stream is held.
+#[derive(Default)]
+pub struct Alarm {
+    rung: Mutex<Rung>,
+    bell: Condvar,
+}
+
+impl Alarm {
+    pub fn wake(&self) {
+        self.ring(|rung| rung.woken = true);
+    }
+
+    pub fn cut(&self) {
+        self.ring(|rung| rung.cut = true);
+    }
+
+    fn ring(&self, set: impl Fn(&mut Rung)) {
+        if let Ok(mut rung) = self.rung.lock() {
+            set(&mut rung);
+            self.bell.notify_all();
+        }
+    }
+
+    // value: true when a wake ended it. A rest of `None` lasts until a wake or a cut; one of `Some(wait)` until a
+    // value: wake or its end. Either clears both.
+    pub fn rest(&self, wait: Option<Duration>) -> bool {
+        let Ok(rung) = self.rung.lock() else {
+            thread::sleep(wait.unwrap_or(Duration::from_secs(1)));
+            return false;
+        };
+        let mut rung = match wait {
+            None => self
+                .bell
+                .wait_while(rung, |rung| !rung.woken && !rung.cut)
+                .unwrap_or_else(PoisonError::into_inner),
+            Some(wait) => {
+                self.bell
+                    .wait_timeout_while(rung, wait, |rung| !rung.woken)
+                    .unwrap_or_else(PoisonError::into_inner)
+                    .0
+            }
+        };
+        std::mem::take(&mut *rung).woken
+    }
+
+    #[cfg(test)]
+    pub fn is_cut(&self) -> bool {
+        self.rung.lock().is_ok_and(|rung| rung.cut)
+    }
+}
+
+#[derive(Default)]
 pub struct Exchanges {
     next: AtomicU32,
     open: Mutex<HashMap<u32, Open>>,
+    holding: AtomicUsize,
+    pub alarm: Alarm,
 }
 
 impl Exchanges {
@@ -261,7 +325,17 @@ impl Exchanges {
             .map(|open| open.stream)
     }
 
+    // invariant: what stands at the engine's socket path changed while the window holds no engine.state stream, so no
+    // invariant: cut would tell it: the link shown is no longer known, and the alarm rings its cut.
+    pub fn replaced(&self) {
+        if self.holding.load(Ordering::SeqCst) == 0 {
+            self.alarm.cut();
+        }
+    }
+
     // value: 0 names no exchange: a request the bridge refused, answered on the sink alone.
+    // invariant: an engine that does not answer an open, and a held engine.state stream that ends unanswered while
+    // invariant: the window still holds it, ring the alarm's cut: the link shown is no longer known.
     // invariant: a request's `in` (a pasted code among them) lives in the one frame written to the engine: the
     // invariant: request is dropped once written, the reader holds its id alone, and a refusal never echoes it.
     pub fn open<S: Sink>(
@@ -286,8 +360,10 @@ impl Exchanges {
             sink.send(Message::End(String::from("answered")));
             return Ok(0);
         }
-        let unanswered =
-            |error: io::Error| format!("no engine answers at {}: {error}", path.display());
+        let unanswered = |error: io::Error| {
+            self.alarm.cut();
+            format!("no engine answers at {}: {error}", path.display())
+        };
         let mut stream = connect_within(path, limits.connect).map_err(unanswered)?;
         stream
             .set_write_timeout(Some(limits.write))
@@ -299,10 +375,14 @@ impl Exchanges {
             .unwrap_or_default()
             .to_owned();
         let watch = request.get("watch").is_some();
+        let holds_state = request.get("watch").and_then(Value::as_str) == Some(HELD);
         let written = write_line(&mut stream, &request);
         drop(request);
         written.map_err(unanswered)?;
         let handle = self.next.fetch_add(1, Ordering::SeqCst) + 1;
+        if holds_state {
+            self.holding.fetch_add(1, Ordering::SeqCst);
+        }
         if let Ok(mut open) = self.open.lock() {
             open.insert(
                 handle,
@@ -316,7 +396,15 @@ impl Exchanges {
         let exchanges = Arc::clone(self);
         thread::spawn(move || {
             let reason = pump(reader, &id, watch, &sink, limits.answer);
-            exchanges.close(handle);
+            let ours = exchanges
+                .held(handle)
+                .map(|stream| stream.shutdown(Shutdown::Both));
+            if holds_state {
+                exchanges.holding.fetch_sub(1, Ordering::SeqCst);
+            }
+            if holds_state && ours.is_some() && reason != ANSWERED && reason != STOPPED {
+                exchanges.alarm.cut();
+            }
             sink.send(Message::End(reason));
         });
         Ok(handle)

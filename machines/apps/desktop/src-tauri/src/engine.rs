@@ -2,8 +2,8 @@ use std::env;
 use std::io::{BufRead, BufReader};
 use std::net::Shutdown;
 use std::path::{Path, PathBuf};
-use std::sync::{Arc, Condvar, Mutex};
-use std::thread;
+use std::sync::{Arc, Mutex};
+use std::thread::{self, JoinHandle};
 use std::time::{Duration, SystemTime};
 
 use serde::Serialize;
@@ -18,9 +18,11 @@ use crate::local_core::{moved, Runs};
 mod link_log;
 use link_log::LinkLog;
 
+#[path = "socket_watch.rs"]
+mod socket_watch;
+
 const FIRST_BACKOFF: u64 = 1;
 const MAX_BACKOFF: u64 = 30;
-const RECHECK: Duration = Duration::from_secs(10);
 const HELLO_WITHIN: Duration = Duration::from_secs(5);
 const RETRY: Duration = Duration::from_secs(5);
 const ABSENT_AFTER: u32 = 3;
@@ -46,8 +48,6 @@ pub enum Link {
 pub struct Bridge {
     pub exchanges: Arc<Exchanges>,
     link: Mutex<Link>,
-    woken: Mutex<bool>,
-    nudge: Condvar,
 }
 
 impl Bridge {
@@ -57,16 +57,11 @@ impl Bridge {
             link: Mutex::new(Link::Connecting {
                 socket: socket_path().display().to_string(),
             }),
-            woken: Mutex::new(false),
-            nudge: Condvar::new(),
         })
     }
 
     pub fn wake(&self) {
-        if let Ok(mut woken) = self.woken.lock() {
-            *woken = true;
-            self.nudge.notify_all();
-        }
+        self.exchanges.alarm.wake();
     }
 
     pub fn shown(&self) -> Link {
@@ -78,16 +73,8 @@ impl Bridge {
             })
     }
 
-    pub fn rest(&self, wait: Duration) -> bool {
-        let Ok(woken) = self.woken.lock() else {
-            thread::sleep(wait);
-            return false;
-        };
-        let (mut woken, _) = self
-            .nudge
-            .wait_timeout_while(woken, wait, |woken| !*woken)
-            .unwrap_or_else(std::sync::PoisonError::into_inner);
-        std::mem::replace(&mut *woken, false)
+    pub fn rest(&self, wait: Option<Duration>) -> bool {
+        self.exchanges.alarm.rest(wait)
     }
 }
 
@@ -239,26 +226,27 @@ impl Watch {
         self.failed
     }
 
-    // invariant: an answer opens the link and is checked again after RECHECK. A failure leaves the link as shown and
-    // invariant: is tried again after RETRY, until the ABSENT_AFTER-th in a row declares it absent; from there the wait
-    // invariant: doubles from FIRST_BACKOFF up to MAX_BACKOFF, said in the link as `retryIn` milliseconds.
+    // invariant: an answer opens the link, which is checked again only when the alarm rings its cut or a wake comes
+    // invariant: (`None`), never by a timer. A failure leaves the link as shown and is tried again
+    // invariant: after RETRY, until the ABSENT_AFTER-th in a row declares it absent; from there the wait doubles from
+    // invariant: FIRST_BACKOFF up to MAX_BACKOFF, said in the link as `retryIn` milliseconds.
     pub fn next(
         &mut self,
         heard: Result<Value, Failed>,
         socket: String,
         shown: &Link,
-    ) -> (Link, Duration) {
+    ) -> (Link, Option<Duration>) {
         let reason = match heard {
             Ok(answer) => {
                 self.failed = 0;
                 self.backoff = FIRST_BACKOFF;
-                return (Link::Open { socket, answer }, RECHECK);
+                return (Link::Open { socket, answer }, None);
             }
             Err(Failed { said, .. }) => said,
         };
         self.failed = self.failed.saturating_add(1);
         if self.failed < ABSENT_AFTER {
-            return (shown.clone(), RETRY);
+            return (shown.clone(), Some(RETRY));
         }
         let wait = self.backoff;
         self.backoff = (wait * 2).min(MAX_BACKOFF);
@@ -268,7 +256,7 @@ impl Watch {
                 reason,
                 retry_in: wait * 1000,
             },
-            Duration::from_secs(wait),
+            Some(Duration::from_secs(wait)),
         )
     }
 }
@@ -309,11 +297,37 @@ fn judged_once(app: &AppHandle, bridge: &Arc<Bridge>, runs: &Arc<Runs>, answer: 
     });
 }
 
+// invariant: once an engine answers, its socket's folder is watched for as long as the folder stands, so an engine
+// invariant: that replaces one the window holds no stream of is heard at once; a watch that ends is armed again at the
+// invariant: next answer.
+fn watched(
+    watching: Option<JoinHandle<()>>,
+    path: &Path,
+    bridge: &Arc<Bridge>,
+    log: &LinkLog,
+) -> Option<JoinHandle<()>> {
+    if watching.as_ref().is_some_and(|watch| !watch.is_finished()) {
+        return watching;
+    }
+    let exchanges = Arc::clone(&bridge.exchanges);
+    match socket_watch::watch(path, move || exchanges.replaced()) {
+        Ok(watch) => Some(watch),
+        Err(error) => {
+            log.write(
+                SystemTime::now(),
+                &format!("the engine's socket is not watched: {error}"),
+            );
+            None
+        }
+    }
+}
+
 pub fn supervise(app: AppHandle, bridge: Arc<Bridge>, runs: Arc<Runs>) {
     let log = LinkLog::in_folder(app.path().app_log_dir().ok());
     thread::spawn(move || {
         let mut watch = Watch::default();
         let mut judged = false;
+        let mut watching = None;
         loop {
             let path = socket_path();
             let socket = path.display().to_string();
@@ -324,6 +338,9 @@ pub fn supervise(app: AppHandle, bridge: Arc<Bridge>, runs: Arc<Runs>) {
             }
             let failed = heard.as_ref().err().cloned();
             let (link, wait) = watch.next(heard, socket, &bridge.shown());
+            if matches!(link, Link::Open { .. }) {
+                watching = watched(watching.take(), &path, &bridge, &log);
+            }
             if changed(&bridge.link, &link) {
                 log.write(SystemTime::now(), &told(&link, failed.as_ref()));
                 let _ = app.emit("engine://link", &link);

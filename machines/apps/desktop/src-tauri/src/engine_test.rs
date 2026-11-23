@@ -10,7 +10,7 @@ use serde_json::{json, Value};
 
 use super::{
     changed, hello, kept, told, Bridge, Failed, Link, Watch, ABSENT_AFTER, FIRST_BACKOFF,
-    MAX_BACKOFF, RECHECK, RETRY,
+    MAX_BACKOFF, RETRY,
 };
 
 fn refused() -> Failed {
@@ -104,7 +104,8 @@ fn open() -> Link {
 }
 
 // value: the supervisor's loop with a clock of its own: each hello is heard, the link it gives shown, and the wait it
-// value: asks for added to the clock, so the instant each link is shown is read with no sleep.
+// value: asks for added to the clock, so the instant each link is shown is read with no sleep; a rest with no end is
+// value: cut at once.
 fn played(
     watch: &mut Watch,
     mut shown: Link,
@@ -116,7 +117,7 @@ fn played(
         .map(|heard| {
             let (link, wait) = watch.next(heard, String::from(SOCKET), &shown);
             let at = clock.as_secs();
-            clock += wait;
+            clock += wait.unwrap_or(Duration::ZERO);
             shown = link.clone();
             (at, link)
         })
@@ -197,13 +198,12 @@ fn a_declared_absence_is_retried_after_a_doubling_backoff_and_a_return_resets_it
     heard.extend(vec![Err(refused()); 3]);
     let shown = played(&mut watch, open(), heard);
 
-    // Then - 5 s twice, then the backoff doubles up to its cap; the answer at 71 s is checked 10 s later, and the
-    // next absence is declared 10 s after its first failure, the backoff at its start again
+    // Then - 5 s twice, then the backoff doubles up to its cap; the answer at 71 s is checked again when its stream is
+    // cut, and the next absence is declared 10 s after its first failure, the backoff at its start again
     let instants: Vec<u64> = shown.iter().map(|(at, _)| *at).collect();
-    assert_eq!(instants, vec![0, 5, 10, 11, 13, 17, 25, 41, 71, 81, 86, 91]);
+    assert_eq!(instants, vec![0, 5, 10, 11, 13, 17, 25, 41, 71, 71, 76, 81]);
     assert_eq!(MAX_BACKOFF, 30);
     assert!(matches!(shown[8].1, Link::Open { .. }));
-    assert_eq!(RECHECK, Duration::from_secs(10));
     assert_eq!(
         shown[11].1,
         Link::Absent {
@@ -277,6 +277,36 @@ fn a_link_change_is_told_by_its_kind_and_what_the_hello_heard_never_its_answer_o
 }
 
 #[test]
+fn an_answer_is_said_again_only_when_its_stream_is_cut_or_a_wake_comes_never_after_a_time() {
+    // Given - a link that answers
+    let mut watch = Watch::default();
+
+    // When - its hello is heard
+    let (link, wait) = watch.next(Ok(json!({ "out": {} })), String::from(SOCKET), &open());
+
+    // Then - the link is open, and its rest has no end of its own
+    assert_eq!((link, wait), (open(), None));
+}
+
+#[test]
+fn a_rest_with_no_end_ends_on_a_cut_and_a_timed_rest_never_does() {
+    // Given - a bridge whose held state stream is cut before its supervisor rests
+    let bridge = Bridge::new();
+    bridge.exchanges.alarm.cut();
+
+    // When - it rests with no end, then a timed rest follows a second cut
+    let untimed = bridge.rest(None);
+    bridge.exchanges.alarm.cut();
+    let started = Instant::now();
+    let timed = bridge.rest(Some(Duration::from_millis(50)));
+
+    // Then - the cut ended the first at once, unwoken; the second ran its whole wait, the cut ignored
+    assert!(!untimed);
+    assert!(!timed);
+    assert!(started.elapsed() >= Duration::from_millis(50));
+}
+
+#[test]
 fn a_wake_cuts_the_supervisors_rest_short_once() {
     // Given - a bridge whose supervisor rests a minute, and a core started meanwhile
     let bridge = Bridge::new();
@@ -288,9 +318,9 @@ fn a_wake_cuts_the_supervisors_rest_short_once() {
     });
 
     // When - it rests, then rests again
-    let first = bridge.rest(Duration::from_secs(60));
+    let first = bridge.rest(Some(Duration::from_secs(60)));
     let woke_after = started.elapsed();
-    let second = bridge.rest(Duration::from_millis(20));
+    let second = bridge.rest(Some(Duration::from_millis(20)));
     let _ = wakes.join();
 
     // Then - the first rest ends on the wake, well before its minute, and the next one is a plain rest
