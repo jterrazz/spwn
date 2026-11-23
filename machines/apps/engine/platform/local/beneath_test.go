@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 	"testing"
 	"time"
+
+	"golang.org/x/sys/unix"
 )
 
 func opened(t *testing.T, base, rel string) *Folder {
@@ -180,5 +182,39 @@ func TestAHeldFolderKeepsAnotherHolderOutAcrossARename(t *testing.T) {
 	}
 	if data, err := os.ReadFile(filepath.Join(base, "moved", "f")); err != nil || string(data) != "x" {
 		t.Fatalf("the write = %q, %v; want it in the held folder", data, err)
+	}
+}
+
+func TestOnlyTheFolderJustMadeEmptyAndOursIsFresh(t *testing.T) {
+	base := t.TempDir()
+	stat := func(name string) (int, *unix.Stat_t) {
+		t.Helper()
+		if err := os.MkdirAll(filepath.Join(base, name), 0o700); err != nil {
+			t.Fatal(err)
+		}
+		fd, err := unix.Open(filepath.Join(base, name), unix.O_RDONLY|unix.O_DIRECTORY, 0)
+		if err != nil {
+			t.Fatal(err)
+		}
+		t.Cleanup(func() { _ = unix.Close(fd) })
+		var st unix.Stat_t
+		if err := unix.Fstat(fd, &st); err != nil {
+			t.Fatal(err)
+		}
+		return fd, &st
+	}
+	fd, made := stat("made")
+	if err := fresh(fd, made, made); err != nil {
+		t.Fatalf("fresh on the empty folder just made = %v; want nil", err)
+	}
+	other, swapped := stat("swapped")
+	if err := fresh(other, made, swapped); !errors.Is(err, errNotMade) {
+		t.Fatalf("fresh on another folder = %v; want errNotMade", err)
+	}
+	if err := os.WriteFile(filepath.Join(base, "made", "planted"), nil, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := fresh(fd, made, made); !errors.Is(err, errNotMade) {
+		t.Fatalf("fresh on a folder that holds a file = %v; want errNotMade", err)
 	}
 }

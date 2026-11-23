@@ -68,8 +68,11 @@ func (Beneath) Lstat(base, rel string) (Entry, error) {
 
 func (Beneath) Mkdir(base, rel string, perm fs.FileMode, o Owner) (err error) {
 	// value: the folder rel made with perm and given o; one there already is
-	// refused (fs.ErrExist), and one that fails after it is made is taken
-	// away again.
+	// refused (fs.ErrExist). Its mode and owner are set only through a
+	// descriptor proved to be the folder just made, this process's, empty,
+	// the one its name held right after it was made; anything else is
+	// refused with nothing touched, and a folder made that fails after
+	// that proof is taken away again.
 	dir, name, at, err := parent(base, rel)
 	if err != nil {
 		return err
@@ -79,21 +82,56 @@ func (Beneath) Mkdir(base, rel string, perm fs.FileMode, o Owner) (err error) {
 	if err != nil {
 		return &fs.PathError{Op: "mkdir", Path: at, Err: err}
 	}
+	mine := false
 	defer func() {
-		if err != nil {
+		if err != nil && mine {
 			_ = unix.Unlinkat(dir, name, unix.AT_REMOVEDIR)
 		}
 	}()
+	var made, held unix.Stat_t
+	if err = unix.Fstatat(dir, name, &made, unix.AT_SYMLINK_NOFOLLOW); err != nil {
+		return &fs.PathError{Op: "mkdir", Path: at, Err: err}
+	}
 	fd, err := openat(dir, name, unix.O_RDONLY|unix.O_DIRECTORY, at)
 	if err != nil {
 		return err
 	}
 	defer closeFD(fd)
-	if err := unix.Fchmod(fd, uint32(perm.Perm())); err != nil {
+	if err = unix.Fstat(fd, &held); err != nil {
+		return &fs.PathError{Op: "mkdir", Path: at, Err: err}
+	}
+	if err = fresh(fd, &made, &held); err != nil {
+		return &fs.PathError{Op: "mkdir", Path: at, Err: err}
+	}
+	mine = true
+	if err = unix.Fchmod(fd, uint32(perm.Perm())); err != nil {
 		return &fs.PathError{Op: "chmod", Path: at, Err: err}
 	}
-	if err := unix.Fchown(fd, o.UID, o.GID); err != nil {
+	if err = unix.Fchown(fd, o.UID, o.GID); err != nil {
 		return &fs.PathError{Op: "chown", Path: at, Err: err}
+	}
+	return nil
+}
+
+var errNotMade = errors.New("is not the folder just made")
+
+// value: nil when held, opened through fd, is made, the folder its name
+// held right after Mkdirat, still this process's and empty.
+func fresh(fd int, made, held *unix.Stat_t) error {
+	if made.Mode&unix.S_IFMT != unix.S_IFDIR || held.Dev != made.Dev || held.Ino != made.Ino || int(held.Uid) != os.Geteuid() {
+		return errNotMade
+	}
+	dup, err := unix.Dup(fd)
+	if err != nil {
+		return err
+	}
+	folder := os.NewFile(uintptr(dup), "")
+	defer func() { _ = folder.Close() }()
+	if _, err := unix.Seek(dup, 0, io.SeekStart); err != nil {
+		return err
+	}
+	if _, err := folder.Readdirnames(1); !errors.Is(err, io.EOF) {
+		return errNotMade
 	}
 	return nil
 }
