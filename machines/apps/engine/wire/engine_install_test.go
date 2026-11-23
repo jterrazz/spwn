@@ -13,6 +13,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/background/contract"
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
+	model "github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/platform/local"
 	"github.com/jterrazz/studio-station/apps/engine/platform/local/localtest"
 	"github.com/jterrazz/studio-station/apps/engine/setup"
@@ -50,6 +51,7 @@ func (j *installJobs) Restart(_ context.Context, r contract.Ref) error { return 
 type helloSockets struct {
 	local.Sockets
 	version string
+	agent   model.Agent
 }
 
 type duplex struct {
@@ -71,37 +73,46 @@ func (s helloSockets) DialUnix(context.Context, string, time.Duration) (local.Co
 		if _, err := bufio.NewReader(request).ReadBytes('\n'); err != nil {
 			return
 		}
-		out, _ := json.Marshal(engine.Hello{Version: s.version})
+		out, _ := json.Marshal(engine.Hello{Version: s.version, Agent: s.agent})
 		frame, _ := json.Marshal(map[string]any{"v": 1, "id": "1", "out": json.RawMessage(out), "done": true})
 		_, _ = answer.Write(append(frame, '\n'))
 	}()
 	return duplex{Reader: answered, Writer: asked, closer: asked.Close}, nil
 }
 
-func installerOf(running string) engineInstaller {
-	sys := local.System{Env: localtest.Env{Exe: "/home/u/.local/bin/station", HomeDir: "/home/u", OS: "darwin"}, Sockets: helloSockets{version: running}}
+func installerOf(running string, agent ...model.Agent) engineInstaller {
+	hello := helloSockets{version: running}
+	if len(agent) > 0 {
+		hello.agent = agent[0]
+	}
+	sys := local.System{Env: localtest.Env{Exe: "/home/u/.local/bin/station", HomeDir: "/home/u", OS: "darwin"}, Sockets: hello}
 	return engineInstaller{m: machine{sys: sys, paths: setup.Paths{State: "/home/u/.local/state/station"}}}
 }
 
-func TestInstallRestartsTheEngineOnlyWhenItsDefinitionChangedOrItRunsAnotherVersion(t *testing.T) {
+func TestInstallRestartsTheEngineOnlyWhenItsDefinitionChangedItRunsAnotherVersionOrServesNoAgent(t *testing.T) {
 	station := Version()
 	older := station + "-older"
+	held := model.Agent{State: model.AgentHeld, PID: 9006, Free: "kill 9006"}
 	for _, c := range []struct {
 		name    string
 		jobs    installJobs
 		running string
+		agent   model.Agent
 		want    engine.Installed
 	}{
-		{"a newer binary, the same definition", installJobs{loaded: true}, older, engine.Installed{Restarted: true, From: older}},
-		{"a moved binary, the same version", installJobs{loaded: true, changed: true}, station, engine.Installed{Restarted: true}},
-		{"a moved binary, another version", installJobs{loaded: true, changed: true}, older, engine.Installed{Restarted: true, From: older}},
-		{"the same binary, the same version", installJobs{loaded: true}, station, engine.Installed{}},
-		{"an engine that does not answer, the same definition", installJobs{loaded: true}, "", engine.Installed{}},
-		{"an engine that does not answer, a moved binary", installJobs{loaded: true, changed: true}, "", engine.Installed{Restarted: true}},
-		{"a job not loaded yet", installJobs{changed: true}, "", engine.Installed{Written: true}},
+		{"the same binary, the same version, its agent socket held", installJobs{loaded: true}, station, held, engine.Installed{Restarted: true}},
+		{"the same binary, the same version, its agent failed", installJobs{loaded: true}, station, model.Agent{State: model.AgentFailed, Detail: "listen"}, engine.Installed{Restarted: true}},
+		{"the same binary, the same version, its agent served", installJobs{loaded: true}, station, model.Agent{State: model.AgentServed}, engine.Installed{}},
+		{"a newer binary, the same definition", installJobs{loaded: true}, older, model.Agent{}, engine.Installed{Restarted: true, From: older}},
+		{"a moved binary, the same version", installJobs{loaded: true, changed: true}, station, model.Agent{}, engine.Installed{Restarted: true}},
+		{"a moved binary, another version", installJobs{loaded: true, changed: true}, older, model.Agent{}, engine.Installed{Restarted: true, From: older}},
+		{"the same binary, the same version", installJobs{loaded: true}, station, model.Agent{}, engine.Installed{}},
+		{"an engine that does not answer, the same definition", installJobs{loaded: true}, "", model.Agent{}, engine.Installed{}},
+		{"an engine that does not answer, a moved binary", installJobs{loaded: true, changed: true}, "", model.Agent{}, engine.Installed{Restarted: true}},
+		{"a job not loaded yet", installJobs{changed: true}, "", model.Agent{}, engine.Installed{Written: true}},
 	} {
 		t.Run(c.name, func(t *testing.T) {
-			got, err := installerOf(c.running).install(context.Background(), &c.jobs)
+			got, err := installerOf(c.running, c.agent).install(context.Background(), &c.jobs)
 			if err != nil || got != c.want {
 				t.Fatalf("install = %+v, %v; want %+v", got, err, c.want)
 			}

@@ -16,6 +16,7 @@ const (
 	ID              = "engine"
 	Row             = "engine"
 	LocalNetworkRow = "local-network"
+	AgentRow        = "agent"
 )
 
 func columns() []page.Column {
@@ -177,5 +178,18 @@ func Start(r engine.StartReport, thisMac page.Context) page.Page {
 		rows = append(rows, ln)
 	case machines.LocalNetworkApproved:
 	}
+	if r.Agent.Unserved() {
+		agent := pages.Done(AgentRow, catalog.StateDegraded, "")
+		agent.Label = "SSH agent"
+		agent.Detail = page.Texts(agentWords(r.Agent)...)
+		rows = append(rows, agent)
+	}
 	return pages.Outcome("engine start", thisMac, nil, rows, "engine to start")
+}
+
+func agentWords(a machines.Agent) []string {
+	if a.State == machines.AgentHeld {
+		return []string{"needs you", "held by " + a.Holder(), a.Fix()}
+	}
+	return []string{"needs you", "serves none: " + a.Detail, a.Fix()}
 }

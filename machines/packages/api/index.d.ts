@@ -1180,6 +1180,7 @@ export type EnginePagesIn = {
 };
 
 export type EngineReading = {
+    Agent: MachinesAgent;
     AwakeUntil: string | null;
     State: 'running' | 'stopped' | 'not-installed';
     Station: string;
@@ -1204,6 +1205,7 @@ export type EngineSliceOut = {
 };
 
 export type EngineStartReport = {
+    Agent?: MachinesAgent;
     Already: boolean;
     Bundled?: boolean;
     Installed: EngineInstalled;

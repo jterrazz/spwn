@@ -91,7 +91,7 @@ func (c *Control) Read(ctx context.Context) (engine.Reading, error) {
 		}
 		return r, nil
 	}
-	r.State, r.Version = model.EngineRunning, hello.Version
+	r.State, r.Version, r.Agent = model.EngineRunning, hello.Version, hello.Agent
 	if !hello.StartedAt.IsZero() {
 		r.Up = c.h.Now().Sub(hello.StartedAt)
 	}
@@ -218,7 +218,7 @@ func (c *Control) stopDirect(ctx context.Context, w engine.Work) []engine.Stoppe
 func (c *Control) Start(ctx context.Context) (engine.StartReport, error) {
 	if p, err := c.c.Hello(ctx); err == nil {
 		p = c.settled(ctx, p)
-		return engine.StartReport{Already: true, Version: p.Version, PID: p.PID, LocalNetwork: p.LocalNetwork, Bundled: model.InBundle(p.Executable)}, nil
+		return engine.StartReport{Already: true, Version: p.Version, PID: p.PID, LocalNetwork: p.LocalNetwork, Bundled: model.InBundle(p.Executable), Agent: p.Agent}, nil
 	}
 	if !c.job.Loaded(ctx) {
 		if err := c.job.Load(ctx); err != nil {
@@ -231,7 +231,7 @@ func (c *Control) Start(ctx context.Context) (engine.StartReport, error) {
 	for waited := time.Duration(0); waited < startWait; waited += controlPoll {
 		if p, err := c.c.Hello(ctx); err == nil {
 			p = c.settled(ctx, p)
-			return engine.StartReport{Version: p.Version, PID: p.PID, LocalNetwork: p.LocalNetwork, Bundled: model.InBundle(p.Executable)}, nil
+			return engine.StartReport{Version: p.Version, PID: p.PID, LocalNetwork: p.LocalNetwork, Bundled: model.InBundle(p.Executable), Agent: p.Agent}, nil
 		}
 		if err := c.h.Sleep(ctx, controlPoll); err != nil {
 			return engine.StartReport{}, err

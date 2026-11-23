@@ -659,7 +659,7 @@ func (i engineInstaller) installEngine(ctx context.Context, jobs contract.Jobs, 
 	}
 	running, err := i.m.engineAPI().Hello(ctx)
 	version := Version()
-	if changed || (err == nil && running.Version != version) {
+	if changed || (err == nil && (running.Version != version || running.Agent.Unserved())) {
 		if kickErr := jobs.Restart(ctx, job); kickErr != nil {
 			return engine.Installed{}, startFailed(kickErr)
 		}

@@ -53,7 +53,8 @@ type StartReport struct {
 	LocalNetwork model.LocalNetwork
 	// value: whether the engine that answers runs from Spwn.app (ADR-073,
 	// mode A), as its hello's executable says.
-	Bundled bool `json:",omitempty"`
+	Bundled bool        `json:",omitempty"`
+	Agent   model.Agent `json:",omitzero"`
 }
 
 type Installed struct {

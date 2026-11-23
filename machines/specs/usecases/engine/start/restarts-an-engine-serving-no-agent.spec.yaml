@@ -1,0 +1,24 @@
+description: 'start at the same version restarts an engine serving no ssh agent, the VMs kept running'
+env: two-macs
+runs:
+    - command: 'world agent macbook-pro held 9006 /private/tmp/old/Spwn.app/Contents/MacOS/spwn-engine com.jterrazz.spwn.agent'
+      exit: 0
+    - command: 'engine start'
+      exit: 0
+      stdout: |
+          ●	engine	restarted · {{string}}
+          ◐	SSH agent	needs you · held by spwn-engine (pid 9006) · launchctl bootout gui/$(id -u)/com.jterrazz.spwn.agent
+    - command: 'machines --this-mac'
+      exit: 0
+      stdout: |
+          ●	macbook-pro	Mac	macbook-pro	Engine running
+          ○	api	Workspace	macbook-pro	Stopped · persistent	4 CPU	8 GB
+          ●	linux-1	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB
+          # Needs you
+          ◐	This Mac	macbook-pro's ssh agent socket is held by spwn-engine (pid 9006), not its engine	launchctl bootout gui/$(id -u)/com.jterrazz.spwn.agent
+    - command: 'world agent macbook-pro served'
+      exit: 0
+    - command: 'engine start'
+      exit: 0
+      stdout: |
+          ●	engine	already running · {{string}}

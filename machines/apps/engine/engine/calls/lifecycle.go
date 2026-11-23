@@ -27,15 +27,16 @@ var Start = call.Call[Deps, StartIn, engine.StartReport]{
 	Errors: []fail.Code{StartFailed},
 	Run: func(ctx context.Context, d Deps, _ StartIn, _ call.Progress) (engine.StartReport, error) {
 		// invariant: start is also how the engine comes to a Mac: its job is
-		// written when it is not installed, and an engine of another version
-		// restarted; an engine installed and current is only started.
+		// written when it is not installed, and an engine of another version,
+		// or one that serves no ssh agent, restarted; an engine installed,
+		// current and serving its agent is only started.
 		var installed engine.Installed
 		if d.Installer != nil {
 			reading, err := d.Control.Read(ctx)
 			if err != nil {
 				return engine.StartReport{}, err
 			}
-			if reading.State == machines.EngineNotInstalled || reading.Skewed() {
+			if reading.State == machines.EngineNotInstalled || reading.Skewed() || reading.Agent.Unserved() {
 				if installed, err = d.Installer.Install(ctx); err != nil {
 					return engine.StartReport{}, startError(err)
 				}

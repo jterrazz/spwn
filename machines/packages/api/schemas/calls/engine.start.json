@@ -23,6 +23,9 @@
     "engine.StartReport": {
       "additionalProperties": false,
       "properties": {
+        "Agent": {
+          "$ref": "#/$defs/machines.Agent"
+        },
         "Already": {
           "type": "boolean"
         },
@@ -54,6 +57,36 @@
     "engine.calls.StartIn": {
       "additionalProperties": false,
       "properties": {},
+      "type": "object"
+    },
+    "machines.Agent": {
+      "additionalProperties": false,
+      "properties": {
+        "detail": {
+          "type": "string"
+        },
+        "executable": {
+          "type": "string"
+        },
+        "free": {
+          "type": "string"
+        },
+        "pid": {
+          "type": "integer"
+        },
+        "state": {
+          "enum": [
+            "",
+            "failed",
+            "held",
+            "served"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "state"
+      ],
       "type": "object"
     }
   },

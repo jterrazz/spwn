@@ -19,6 +19,7 @@ type Reading struct {
 	AwakeUntil *time.Time
 	// value: set while the engine is stopped by the owner: when, and by what.
 	Stopped StopMark
+	Agent   model.Agent
 }
 
 func (r Reading) Skewed() bool {
