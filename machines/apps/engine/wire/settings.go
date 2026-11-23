@@ -102,6 +102,7 @@ func settingAppliers(m machine) []settingscontract.Applier {
 	}
 	appliers = append(appliers, authorizedkeys.New(m.sys.FS, local.Beneath{}, authorizedkeys.Options{
 		Root: m.systemRoot(), Record: path.Join("/", m.systemRoot(), authorizedkeys.Record), Run: run,
+		Lock: path.Join("/", m.systemRoot(), authorizedkeys.Lock), Take: m.sys.ExclusiveWithin,
 	}))
 	if m.world != nil {
 		return append(appliers, m.world.procedureAppliers()...)

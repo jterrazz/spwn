@@ -26,3 +26,6 @@ writes:
     - path: /var/lib/station/authorized-keys.json
       level: settings
       note: "root's, 0600: every file station wrote the block in and the block's text, which drift and off read, whoever runs station"
+    - path: /var/lib/station/authorized-keys.lock
+      level: settings
+      note: "empty: the lock apply and off hold from their read of a user's file to its write"

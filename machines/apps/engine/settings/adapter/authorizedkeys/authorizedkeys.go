@@ -14,6 +14,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/platform/local"
@@ -46,7 +47,16 @@ type Options struct {
 	// value: in a world, the owner every account's files carry, the run's
 	// own, so a world gives no file away; nil on a machine.
 	Run *local.Owner
+	// value: the lock every writer of a block takes from its read to its
+	// rename (Lock, beside Record), and how it is taken (the system's
+	// ExclusiveWithin).
+	Lock string
+	Take Exclusive
 }
+
+type Exclusive func(ctx context.Context, path string, within time.Duration) (release func(), held bool, err error)
+
+const wait = 10 * time.Second
 
 type Applier struct {
 	files Files
@@ -69,6 +79,7 @@ const (
 	// the same whoever runs station: never under the home of a sudo's
 	// invoker.
 	Record = "/var/lib/station/authorized-keys.json"
+	Lock   = "/var/lib/station/authorized-keys.lock"
 )
 
 // value: every authorized_keys station wrote its block in and has not
@@ -218,7 +229,7 @@ func (a *Applier) Observe(_ context.Context, it catalog.Setting) (settings.Obser
 	return o, nil
 }
 
-func (a *Applier) Apply(_ context.Context, it catalog.Setting, values map[string]string) (settings.Change, error) {
+func (a *Applier) Apply(ctx context.Context, it catalog.Setting, values map[string]string) (settings.Change, error) {
 	// invariant: every value is read, and refused, before the first write:
 	// a key that does not parse never reaches the file sshd reads.
 	k, err := of(it)
@@ -241,6 +252,11 @@ func (a *Applier) Apply(_ context.Context, it catalog.Setting, values map[string
 	dir := path.Join(who.home, ".ssh")
 	file := path.Join(dir, "authorized_keys")
 	ssh := path.Join(path.Base(who.home), ".ssh")
+	release, err := a.turn(ctx)
+	if err != nil {
+		return settings.Change{}, err
+	}
+	defer release()
 	text, there, err := a.text(file)
 	if err != nil {
 		return settings.Change{}, err
@@ -313,7 +329,7 @@ func (a *Applier) Apply(_ context.Context, it catalog.Setting, values map[string
 	return settings.Change{Steps: steps}, errors.Join(stays...)
 }
 
-func (a *Applier) Undo(_ context.Context, it catalog.Setting) (settings.Change, error) {
+func (a *Applier) Undo(ctx context.Context, it catalog.Setting) (settings.Change, error) {
 	// invariant: the block leaves every file station wrote it in, each only
 	// while it is still exactly station's, and nothing else of a file moves:
 	// off never destroys a line of the owner's.
@@ -321,6 +337,11 @@ func (a *Applier) Undo(_ context.Context, it catalog.Setting) (settings.Change, 
 	if err != nil {
 		return settings.Change{}, err
 	}
+	release, err := a.turn(ctx)
+	if err != nil {
+		return settings.Change{}, err
+	}
+	defer release()
 	rec, err := a.read()
 	if err != nil {
 		return settings.Change{}, err
@@ -352,6 +373,17 @@ func (a *Applier) Undo(_ context.Context, it catalog.Setting) (settings.Change, 
 // in the file of the package's default user, and a block of station's
 // there leaves it, its owner's lines as they were; a damaged one is
 // refused, so off never reads done while a block of station's is left.
+func (a *Applier) turn(ctx context.Context) (func(), error) {
+	release, held, err := a.o.Take(ctx, a.o.Lock, wait)
+	if err != nil {
+		return nil, err
+	}
+	if held {
+		return nil, fmt.Errorf("%s is held by another run writing these keys, nothing touched: apply again once it ends", strings.TrimPrefix(a.o.Lock, path.Join("/", a.o.Root)))
+	}
+	return release, nil
+}
+
 func (a *Applier) fallback(it catalog.Setting) (string, bool) {
 	user := ""
 	for _, in := range it.Inputs {

@@ -12,6 +12,7 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/platform/local"
@@ -27,13 +28,15 @@ type machine struct {
 	t        *testing.T
 	root     string
 	disk     local.FS
+	sys      local.System
 	self, ci local.Owner
 	run      *local.Owner
 }
 
 func newMachine(t *testing.T) *machine {
 	t.Helper()
-	m := &machine{t: t, root: t.TempDir(), disk: local.New(nil, nil, nil, nil).FS, self: local.Self()}
+	sys := local.New(nil, nil, nil, nil)
+	m := &machine{t: t, root: t.TempDir(), disk: sys.FS, sys: sys, self: local.Self()}
 	m.ci = m.self
 	if m.self.UID == 0 {
 		m.ci = local.Owner{UID: 1001, GID: 1002}
@@ -111,7 +114,12 @@ func (m *machine) content(rel string) string {
 func (m *machine) open() *authorizedkeys.Applier { return m.openWith(m.disk) }
 
 func (m *machine) openWith(files authorizedkeys.Files) *authorizedkeys.Applier {
-	return authorizedkeys.New(files, local.Beneath{}, authorizedkeys.Options{Root: m.root, Record: m.at(authorizedkeys.Record), Run: m.run})
+	return authorizedkeys.New(files, local.Beneath{}, authorizedkeys.Options{
+		Root: m.root, Record: m.at(authorizedkeys.Record), Run: m.run,
+		Lock: m.at(authorizedkeys.Lock), Take: func(ctx context.Context, at string, _ time.Duration) (func(), bool, error) {
+			return m.sys.ExclusiveWithin(ctx, at, 200*time.Millisecond)
+		},
+	})
 }
 
 // value: the disk, but a replace of the file at refused as a full disk.
@@ -541,5 +549,32 @@ func TestAHandEditInsideTheBlockReadsDriftAndSurvivesUndo(t *testing.T) {
 	change, err := a.Undo(context.Background(), setting())
 	if err != nil || m.content(rootAK) != edited || detail(change) != "yours, kept" {
 		t.Fatalf("Undo = %+v, %v; file %q; want it kept", change, err, m.content(rootAK))
+	}
+}
+
+func TestAWriterHoldingTheLockKeepsApplyAndOffOutOfTheFile(t *testing.T) {
+	m := newMachine(t)
+	m.mkdir("root/.ssh", 0o700)
+	own := key(t, 9, "laptop") + "\n"
+	m.write(rootAK, own, 0o600)
+	release, held, err := m.sys.ExclusiveWithin(context.Background(), m.at(authorizedkeys.Lock), time.Second)
+	if err != nil || held {
+		t.Fatalf("ExclusiveWithin = %v, %v; want the lock taken", held, err)
+	}
+	why := refused(t, m.open(), "root", key(t, 1, "ci")).Error()
+	if !strings.Contains(why, "/var/lib/station/authorized-keys.lock is held by another run") || m.content(rootAK) != own {
+		t.Fatalf("Apply with the lock held = %q; file %q; want it refused and the file as it was", why, m.content(rootAK))
+	}
+	release()
+	apply(t, m.open(), "root", key(t, 1, "ci"))
+	release, _, err = m.sys.ExclusiveWithin(context.Background(), m.at(authorizedkeys.Lock), time.Second)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer release()
+	written := m.content(rootAK)
+	_, err = m.open().Undo(context.Background(), setting())
+	if err == nil || !strings.Contains(err.Error(), "is held by another run") || m.content(rootAK) != written {
+		t.Fatalf("Undo with the lock held = %v; file %q; want it refused and the block kept", err, m.content(rootAK))
 	}
 }
