@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
+	"errors"
 	"strings"
 	"testing"
 	"time"
@@ -49,9 +50,19 @@ func TestALockdownIsRefusedForAVMUserThatIsTheImagesOwnAccount(t *testing.T) {
 		if !strings.Contains(err.Error(), "vm_user") {
 			t.Errorf("VM user %q: %q names no way out", user, err)
 		}
+		if !errors.As(err, new(*machinescontract.LockdownError)) {
+			t.Errorf("VM user %q: %v is not a lockdown failure, so its VM would not be stopped", user, err)
+		}
 	}
 	if _, ok, err := m.LockdownOf(t.Context(), machinescontract.GuestTarget{VM: "mac-1", User: "you"}); err != nil || !ok {
 		t.Fatalf("VM user you: lockdown %v, %v; want it made", ok, err)
+	}
+}
+
+func TestALockdownThatCannotBeReadIsNoLockdownFailure(t *testing.T) {
+	_, _, err := lockingDown(t).LockdownOf(t.Context(), machinescontract.GuestTarget{VM: "mac-2", User: "you"})
+	if err == nil || errors.As(err, new(*machinescontract.LockdownError)) {
+		t.Errorf("a VM its store does not hold came back %v; want its own error, no lockdown failure", err)
 	}
 }
 

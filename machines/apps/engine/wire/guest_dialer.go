@@ -49,10 +49,11 @@ const lockdownWait = 3 * time.Minute
 // runs its lockdown as the image's own account, then dials by the key
 // again; a key dial to a VM whose image carries a lockdown is kept only
 // once its marker holds, the lockdown run again over it when it does not.
-// A lockdown that cannot run or fails is a contract.LockdownError, the
-// guest probed for a login a start could run it again by; so is a host key
-// other than the one pinned, on such a VM, which no start cures. A dial the
-// guest did not answer stays the dial's own.
+// A lockdown that is refused, cannot run or fails is a
+// contract.LockdownError, the guest probed for a login a start could run it
+// again by; so is a host key other than the one pinned, on such a VM, which
+// no start cures. What could not be read for a lockdown is its own error, and
+// a dial the guest did not answer stays the dial's own.
 func (g engineGuests) dial(ctx context.Context, t contract.GuestTarget) (contract.Guest, error) {
 	c, err := g.dialer.Dial(ctx, t)
 	if errors.Is(err, contract.ErrHostKeyChanged) {
@@ -63,7 +64,7 @@ func (g engineGuests) dial(ctx context.Context, t contract.GuestTarget) (contrac
 	if err != nil {
 		first, ok, why := g.vms.FirstLoginOf(ctx, t, err)
 		if why != nil {
-			return nil, &contract.LockdownError{Cause: why.Error()}
+			return nil, why
 		}
 		if !ok {
 			return nil, err
@@ -130,7 +131,7 @@ func (g engineGuests) locked(ctx context.Context, c contract.Guest, t contract.G
 	}
 	l, _, err := g.vms.LockdownOf(ctx, t)
 	if err != nil {
-		return &contract.LockdownError{Cause: err.Error()}
+		return err
 	}
 	if ran := g.lockdown(ctx, c, l, t); ran != nil {
 		return &contract.LockdownError{Cause: "its lockdown is unfinished, and running it again failed: " + ran.Error()}
