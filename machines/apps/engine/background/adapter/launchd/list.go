@@ -205,7 +205,20 @@ func (j *Jobs) livesOn(job *background.Job) {
 		job.OwnerExists = j.exists(path.Join("/", j.o.Root, owner.Bundle))
 	}
 	job.ProgramExists = job.Program == "" || !strings.HasPrefix(job.Program, "/") || j.exists(j.rooted(job.Program))
+	j.ownedHere(job)
 	job.Removal = j.removal(*job)
+}
+
+func (j *Jobs) ownedHere(job *background.Job) {
+	if !catalog.IsOwnLaunchLabel(job.Label) || !job.Running || j.o.Executable == nil {
+		return
+	}
+	exe := j.o.Executable(job.PID)
+	if exe == "" {
+		return
+	}
+	job.Program = exe
+	job.Foreign = !j.exists(exe) || j.o.Bundle != "" && !strings.HasPrefix(exe, j.o.Bundle+"/")
 }
 
 // value: a program path under the user's home stays where it is; the rest of
@@ -234,6 +247,8 @@ func (j *Jobs) removal(job background.Job) string {
 	gui := "gui/" + strconv.Itoa(j.o.UID) + "/" + job.Label
 	shown := j.unrooted(job.File)
 	switch {
+	case job.File == "" && job.Foreign:
+		return command + " bootout " + gui
 	case job.File == "":
 		return ""
 	case strings.HasPrefix(shown, "/Library/LaunchDaemons/"):

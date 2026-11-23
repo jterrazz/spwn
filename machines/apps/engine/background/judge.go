@@ -37,6 +37,7 @@ type Task struct {
 	OwnerGone bool
 	Plist     string
 	Program   string
+	Foreign   bool
 	Removal   string
 	// value: the command that removes it by hand, whatever its state;
 	// Removal is that command only where it is the task's fix.
@@ -51,7 +52,7 @@ func Judge(listed []Job, root, home string) []Task {
 	// one the owner types.
 	tasks := make([]Task, 0, len(listed))
 	for _, l := range listed {
-		j := Task{Label: l.Label, Scope: l.Scope, PID: l.PID, Plist: unrooted(l.File, root, home), Program: unrooted(l.Program, root, home), Removal: l.Removal, ByHand: l.Removal}
+		j := Task{Label: l.Label, Scope: l.Scope, PID: l.PID, Plist: unrooted(l.File, root, home), Program: unrooted(l.Program, root, home), Removal: l.Removal, ByHand: l.Removal, Foreign: l.Foreign}
 		switch {
 		case l.Unread:
 			j.Run = Unread
@@ -77,6 +78,8 @@ func livesOn(j *Task, l Job) {
 		j.OwnerGone = !l.OwnerExists
 	}
 	switch {
+	case l.Foreign:
+		j.Group = GroupOrphan
 	case catalog.IsOwnLaunchLabel(j.Label):
 		j.Group = GroupStation
 	case j.Plist != "" && (!l.ProgramExists || j.OwnerGone):

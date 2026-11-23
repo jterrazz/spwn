@@ -158,7 +158,7 @@ station background [--all] [--json] # every non-Apple launchd job: Failing, Orph
 station background remove <label> [--yes] # a task of your own: boot it out and delete its plist
 ```
 
-An orphan is a task whose program is missing or whose app is gone. `remove` asks on a terminal and needs `--yes` off one; it takes only a user-scope task: a root one is refused, exit 2, with the command to run yourself (Machines never runs sudo), and the engine's own job is refused with `station engine stop`. A Linux workspace has no job manager Machines reads, so `--on` one is refused; a macOS workspace lists its own launchd tasks. `--json` is `station.background.list/v1`.
+An orphan is a task whose program is missing or whose app is gone. A job of Machines' own labels whose running binary is gone, or lies outside the Spwn.app this station runs from, is an orphan too, `not this Spwn's` with the binary it runs, removed by hand with the command it names, `launchctl bootout gui/<uid>/<label>`. `remove` asks on a terminal and needs `--yes` off one; it takes only a user-scope task: a root one is refused, exit 2, with the command to run yourself (Machines never runs sudo), and the engine's own job is refused with `station engine stop`. A Linux workspace has no job manager Machines reads, so `--on` one is refused; a macOS workspace lists its own launchd tasks. `--json` is `station.background.list/v1`.
 
 ### `station awake`
 

@@ -34,6 +34,7 @@ func (m machine) bundledJobs(budget time.Duration) *smappservice.Jobs {
 func (m machine) bareJobs(budget time.Duration) contract.Jobs {
 	return launchd.New(m.sys.Run, m.sys.FS, m.sys.Clock, launchd.Options{
 		Home: m.sys.Env.Home(), Root: m.systemRoot(), UID: m.sys.Env.Euid(), Budget: budget,
+		Bundle: m.bundle(), Executable: local.ExecutableOf,
 	})
 }
 

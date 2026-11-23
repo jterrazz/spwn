@@ -9,6 +9,9 @@
         "Exit": {
           "type": "integer"
         },
+        "Foreign": {
+          "type": "boolean"
+        },
         "Group": {
           "enum": [
             "",
@@ -70,6 +73,7 @@
       "required": [
         "ByHand",
         "Exit",
+        "Foreign",
         "Group",
         "Label",
         "Owner",

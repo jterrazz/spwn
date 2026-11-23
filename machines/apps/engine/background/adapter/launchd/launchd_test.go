@@ -162,3 +162,38 @@ func TestAReadNamesTheProcessARunningJobRunsAndNoneForAWaitingOne(t *testing.T) 
 		t.Errorf("a running job reads %+v", got)
 	}
 }
+
+func TestAnOwnJobRunningABinaryGoneOrOutsideThisBundleIsNotThisSpwns(t *testing.T) {
+	const bundle = "/Users/owner/Applications/Spwn.app"
+	for _, c := range []struct {
+		story, exe string
+		foreign    bool
+	}{
+		{"its binary was deleted", "/private/tmp/old/Spwn.app/Contents/MacOS/Spwn Engine", true},
+		{"its binary is another bundle's", "/Applications/Spwn.app/Contents/MacOS/Spwn Engine", true},
+		{"its binary is this bundle's", bundle + "/Contents/MacOS/Spwn Engine", false},
+	} {
+		f := files{m: fstest.MapFS{
+			rel("/Applications/Spwn.app/Contents/MacOS/Spwn Engine"): &fstest.MapFile{},
+			rel(bundle + "/Contents/MacOS/Spwn Engine"):              &fstest.MapFile{},
+		}}
+		run := &launchctl{files: f, loaded: map[string]bool{"com.jterrazz.spwn.agent": true}, running: map[string]bool{"com.jterrazz.spwn.agent": true}}
+		jobs := launchd.New(run, f, &localtest.Clock{}, launchd.Options{Home: "/Users/owner", UID: 501, Bundle: bundle, Executable: func(pid int) string {
+			if pid != 4242 {
+				return ""
+			}
+			return c.exe
+		}})
+		listed, err := jobs.List(context.Background())
+		if err != nil || len(listed) != 1 {
+			t.Fatalf("%s: listed %+v, %v", c.story, listed, err)
+		}
+		job := listed[0]
+		if job.Foreign != c.foreign || job.Program != c.exe {
+			t.Errorf("%s: foreign %v running %q, want %v running %q", c.story, job.Foreign, job.Program, c.foreign, c.exe)
+		}
+		if want := map[bool]string{true: "launchctl bootout gui/501/com.jterrazz.spwn.agent", false: ""}[c.foreign]; job.Removal != want {
+			t.Errorf("%s: removed by %q, want %q", c.story, job.Removal, want)
+		}
+	}
+}

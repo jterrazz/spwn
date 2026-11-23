@@ -24,7 +24,9 @@ type Options struct {
 	// value: the user this station runs as: its session is the one a hint names.
 	UID int
 	// value: how long one call of the job manager may take; zero is no limit.
-	Budget time.Duration
+	Budget     time.Duration
+	Bundle     string
+	Executable func(pid int) string
 }
 
 type Runner interface {

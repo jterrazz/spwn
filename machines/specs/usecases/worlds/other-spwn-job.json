@@ -1,0 +1,25 @@
+{
+    "now": "2026-11-23T07:00:00Z",
+    "this_mac": "macbook-pro",
+    "macs": {
+        "macbook-pro": {
+            "preferences": {
+                "name": "macbook-pro"
+            },
+            "jobs": {
+                "com.jterrazz.spwn.agent": {
+                    "Label": "com.jterrazz.spwn.agent",
+                    "Program": "/Applications/Old/Spwn.app/Contents/MacOS/Spwn Engine",
+                    "Scope": "user",
+                    "Loaded": true,
+                    "Running": true,
+                    "PID": 9006,
+                    "ProgramExists": false,
+                    "OwnerExists": true,
+                    "Foreign": true,
+                    "Removal": "launchctl bootout gui/501/com.jterrazz.spwn.agent"
+                }
+            }
+        }
+    }
+}

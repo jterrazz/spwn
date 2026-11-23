@@ -165,7 +165,7 @@ func fixOf(t background.Task) string {
 	switch {
 	case t.Group == background.GroupStation:
 		return ""
-	case t.Scope == background.ScopeRoot:
+	case t.Scope == background.ScopeRoot, t.Foreign:
 		return t.ByHand
 	}
 	return "station background remove " + t.Label
@@ -189,6 +189,9 @@ func Row(t background.Task) page.Row {
 	}
 	if r.Reason == page.Failing || r.Reason == page.Orphan {
 		switch fix := fixOf(t); {
+		case t.Foreign:
+			r.Detail = page.Texts("not this Spwn's", t.Program)
+			r.Hint = &page.Hint{Command: fix, External: true}
 		case t.Plist == "":
 			r.Detail = page.Text("managed by " + t.Owner + ", remove it from the app")
 		case t.Scope == background.ScopeRoot && fix != "":

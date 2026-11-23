@@ -21,6 +21,7 @@ type Job struct {
 	Unread        bool
 	ProgramExists bool
 	OwnerExists   bool
+	Foreign       bool
 	// value: the command line the owner types to remove the job by hand.
 	Removal string
 }

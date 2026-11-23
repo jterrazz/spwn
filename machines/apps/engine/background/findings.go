@@ -18,6 +18,8 @@ func Findings(tasks []Task, m machine.Ref) []finding.Finding {
 		switch {
 		case t.Run == Failing:
 			f.Severity, f.Text = finding.Broken, t.Label+" is failing, last exit "+strconv.Itoa(t.Exit)
+		case t.Foreign:
+			f.Severity, f.Text = finding.NeedsALook, t.Label+" runs "+t.Program+", not this Spwn's"
 		case t.Group == GroupOrphan:
 			f.Severity, f.Text = finding.NeedsALook, t.Label+" is left over"
 		default:
@@ -32,7 +34,7 @@ func FixOf(t Task) finding.Fix {
 	switch {
 	case t.Group == GroupStation:
 		return finding.Fix{}
-	case t.Scope == ScopeRoot:
+	case t.Scope == ScopeRoot, t.Foreign:
 		return finding.Fix{Command: t.ByHand}
 	}
 	return finding.Fix{Call: "background.remove", Args: map[string]string{"Label": t.Label}}

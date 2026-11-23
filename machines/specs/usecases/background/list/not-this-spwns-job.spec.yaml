@@ -1,0 +1,12 @@
+description: 'an own job running a binary gone or outside this Spwn.app is not this Spwn''s, removed by hand'
+env: other-spwn-job
+runs:
+    - command: 'background'
+      exit: 0
+      stdout: |
+          # Orphans	1 ◐
+          ◐	com.jterrazz.spwn.agent	user	running · pid 9006		not this Spwn's · /Applications/Old/Spwn.app/Contents/MacOS/Spwn Engine · launchctl bootout gui/501/com.jterrazz.spwn.agent
+    - command: 'background --json | /usr/bin/jq -c .findings'
+      exit: 0
+      stdout: |
+          [{"severity":"needs-a-look","section":"background","subject":"com.jterrazz.spwn.agent","text":"com.jterrazz.spwn.agent runs /Applications/Old/Spwn.app/Contents/MacOS/Spwn Engine, not this Spwn's","fix":{"call":null,"command":"launchctl bootout gui/501/com.jterrazz.spwn.agent","path":null}}]

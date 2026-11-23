@@ -476,6 +476,7 @@ export type BackgroundCallsRemoveIn = {
 export type BackgroundTask = {
     ByHand: string;
     Exit: number;
+    Foreign: boolean;
     Group: '' | 'known' | 'orphan' | 'station' | 'unknown';
     Label: string;
     Owner: string;
