@@ -3,6 +3,10 @@
 **Status:** Accepted
 **Date:** 2026-11-11
 
+**Amended by:** [ADR-080](080-kind-server-is-a-usable-machinefile.md): `kind: server` is a usable Machinefile.
+
+**Amended by:** [ADR-082](082-a-server-keeps-its-data-on-a-disk-of-its-own.md): the `vm` family gains `vm.data`, a server's data disk.
+
 ## Context
 
 [ADR-031](031-the-catalog-defines-the-machinefile-chooses.md) made the catalog files: an item says how to install or set one thing on each system. What one machine carries had no file: `init` ends on none ([ADR-030](030-init-makes-a-machine-known-apply-carries-its-machinefile.md)), the apps of a machine are what the owner installed one at a time, its settings what was applied, a VM's resources the flags of its `create`, the accounts shared with it and the ports it opens what was asked call by call. Nothing could be read back, shared between machines, fixed locally or explained, and a catalog decoder that refuses unknown keys means a format extended later breaks every older station.

@@ -3,6 +3,10 @@
 **Status:** Proposed
 **Date:** 2026-11-12
 
+**Amended by:** [ADR-079](079-a-server-runs-the-image-phase-then-a-first-start-phase.md): a server runs the image phase, then a first-start phase.
+
+**Amended by:** [ADR-082](082-a-server-keeps-its-data-on-a-disk-of-its-own.md): a server keeps its data on a disk of its own, kept across a rebuild.
+
 ## Context
 
 The Linux image's recipe held a hand-written list of what a workspace carries: apt packages, Docker, mise, then the libraries headless Chromium needs (L5.0). That list was a second answer to the question a Machinefile answers ([ADR-033](033-a-machine-is-declared-by-its-machinefile.md)): what an owner's workspace wanted baked meant editing station's own shell file, a changed Machinefile never rebuilt an image, and an image kept no trace of the versions it carried. The design asked for `station images build <machinefile>`, the image named after its Machinefile and recording its hash and lock, and three phases (`image`, `boot`, `apply`), and left open how the build VM reads the Machinefile, what the image phase installs, and what becomes of the image called `linux`.

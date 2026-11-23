@@ -3,6 +3,8 @@
 **Status:** Proposed
 **Date:** 2026-11-06
 
+**Amended by:** [ADR-078](078-a-server-is-set-up-from-its-machinefile-on-the-owners-verb.md): station sets a server up from its Machinefile, at its creation and on the owner's `upgrade --on` alone.
+
 Written 2026-11-06 from the owner's round 11 to 13 decisions (K1, decisions 13 and 14) and the code that carries them.
 
 ## Context

@@ -3,6 +3,8 @@
 **Status:** Proposed
 **Date:** 2026-11-14
 
+**Amended by:** [ADR-081](081-a-server-takes-one-grant-the-tailscale-auth-key-delivered-once.md): the Tailscale auth key is the one grant a server takes, delivered once.
+
 ## Context
 
 Accounts rest on three tiers: a secret is kept on its Mac, shared with a VM as a copy for a time, or bound inside one VM (`docs/reference/accounts.md`, "The three tiers"). No ADR records them; the page is their only owner. The model has four faults.
