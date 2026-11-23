@@ -1,0 +1,41 @@
+description: 'a fetched macOS workspace the engine dials for a vm_user now refused is stopped, its restart refused'
+fixture: ../../__fixtures__/build/
+env: one-mac
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].preferences.vm_user = "you"'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'world upstream-login admin admin'
+      exit: 0
+    - command: 'images update base-macos'
+      exit: 0
+      stdout: |
+          ●	base-macos	26.6.2	fetched
+    - command: 'machines create mac-1 --image base-macos | /usr/bin/tail -1'
+      exit: 0
+      stdout: |
+          ●	mac-1	Created	Ephemeral · 4 CPU · 8 GB · 80 GB
+    - command: 'machines --this-mac'
+      exit: 0
+      stdout: |
+          ●	macbook-pro	Mac	macbook-pro	Engine running
+          ●	mac-1	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].preferences.vm_user = "Admin"'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'machines --this-mac'
+      exit: 0
+      stdout: |
+          ●	macbook-pro	Mac	macbook-pro	Engine running
+          ○	mac-1	Workspace	macbook-pro	Stopped · ephemeral	4 CPU	8 GB
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs[.this_mac].vms["mac-1"] | {want: .kept.want, down: (.down_at != null), login: .guest.login, lockdowns: ([.guest.ran[]? | select(endswith("/lockdown.sh"))] | length), ran: (.guest.ran | length)}'' world.json'
+      exit: 0
+      stdout: |
+          {"want":"stopped","down":true,"login":null,"lockdowns":1,"ran":5}
+    - command: 'machines restart mac-1'
+      exit: 1
+      stderr: |
+          Error: vm_user "Admin" in preferences.json is not a VM user: a lowercase short name (a-z first, then up to 31 of a-z, 0-9, _, . and -, never a dot last), never admin or root
+          Hint: set another vm_user in ~/.config/station/preferences.json
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs[.this_mac].vms["mac-1"] | {want: .kept.want, down: (.down_at != null), login: .guest.login, lockdowns: ([.guest.ran[]? | select(endswith("/lockdown.sh"))] | length), ran: (.guest.ran | length)}'' world.json'
+      exit: 0
+      stdout: |
+          {"want":"stopped","down":true,"login":null,"lockdowns":1,"ran":5}
