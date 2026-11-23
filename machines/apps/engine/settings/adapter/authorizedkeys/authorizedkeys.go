@@ -621,7 +621,7 @@ func (a *Applier) Apply(ctx context.Context, it catalog.Setting, values map[stri
 			return settings.Change{}, a.linked(err)
 		}
 	}
-	err = a.strict(f)
+	err = a.strict(f, file, who.UID)
 	if err != nil {
 		return settings.Change{}, err
 	}
@@ -760,11 +760,15 @@ const loose fs.FileMode = 0o022
 // invariant: a folder or file others can write loses that write alone; a
 // strict one keeps its own mode, and no owner is ever changed: station
 // gives the user only what it makes, and never takes a file from whoever
-// owns it.
-func (a *Applier) strict(f *local.Folder) error {
+// owns it. Each mode is judged and changed through one descriptor, the
+// home owner's (uid), the file a file of one name.
+func (a *Applier) strict(f *local.Folder, file string, uid int) error {
 	e, err := f.Stat()
 	if err != nil {
 		return err
+	}
+	if why := notTheHomes(path.Dir(file), e, uid); why != "" {
+		return errors.New(strings.Replace(why, ":", ", not touched:", 1))
 	}
 	if e.Mode.Perm()&loose != 0 {
 		err = f.Chmod(e.Mode.Perm() &^ loose)
@@ -772,14 +776,7 @@ func (a *Applier) strict(f *local.Folder) error {
 			return err
 		}
 	}
-	e, err = f.Lstat(keysFile)
-	if err != nil {
-		return a.linked(err)
-	}
-	if e.Mode.Perm()&loose == 0 {
-		return nil
-	}
-	return a.linked(f.ChmodFile(keysFile, e.Mode.Perm()&^loose))
+	return a.linked(f.ChmodFile(keysFile, uid, func(m fs.FileMode) fs.FileMode { return m &^ loose }))
 }
 func octal(m fs.FileMode) string { return "0" + strconv.FormatUint(uint64(m.Perm()), 8) }
 
@@ -1155,6 +1152,8 @@ func (a *Applier) linked(err error) error {
 	switch {
 	case errors.Is(err, local.ErrLink):
 		return fmt.Errorf("%s is a link, not touched: Machines follows no link in a home", at)
+	case errors.Is(err, local.ErrOwner):
+		return fmt.Errorf("%s is not the home's owner's, not touched: Machines changes a mode only on what the home's owner owns", at)
 	case errors.Is(err, local.ErrHardLink):
 		return fmt.Errorf("%s has another name, a hard link, not touched: Machines writes keys only in a file of one name", at)
 	case errors.Is(err, local.ErrTooLarge):

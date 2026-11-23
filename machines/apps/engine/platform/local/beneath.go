@@ -39,6 +39,8 @@ var (
 	// value: a file whose bytes are no longer those its writer judged its
 	// write on.
 	ErrChanged = errors.New("changed since it was read")
+	// value: a file another user owns, which a Folder never chmods.
+	ErrOwner = errors.New("is another user's")
 	// value: a file larger than MaxRead, which a Folder never reads.
 	ErrTooLarge = errors.New("is larger than 1 MiB")
 )
@@ -257,9 +259,10 @@ func single(e Entry) error {
 	return nil
 }
 
-func (f *Folder) ChmodFile(name string, perm fs.FileMode) error {
-	// value: the mode of the file name holds set to perm through the
-	// descriptor of what was opened, a file of one name.
+func (f *Folder) ChmodFile(name string, uid int, perm func(fs.FileMode) fs.FileMode) error {
+	// value: the mode of the file name holds set to perm of its mode, judged
+	// and set through the one descriptor of what was opened, a file of one
+	// name that uid owns; anything else is refused, never chmodded.
 	at := path.Join(f.at, name)
 	fd, err := openat(f.fd, name, unix.O_RDONLY, at)
 	if err != nil {
@@ -270,10 +273,18 @@ func (f *Folder) ChmodFile(name string, perm fs.FileMode) error {
 	if err := unix.Fstat(fd, &st); err != nil {
 		return &fs.PathError{Op: "chmod", Path: at, Err: err}
 	}
-	if err := single(entryOf(&st)); err != nil {
+	e := entryOf(&st)
+	if err := single(e); err != nil {
 		return &fs.PathError{Op: "chmod", Path: at, Err: err}
 	}
-	if err := unix.Fchmod(fd, uint32(perm.Perm())); err != nil {
+	if e.UID != uid {
+		return &fs.PathError{Op: "chmod", Path: at, Err: ErrOwner}
+	}
+	want := perm(e.Mode.Perm()).Perm()
+	if want == e.Mode.Perm() {
+		return nil
+	}
+	if err := unix.Fchmod(fd, uint32(want)); err != nil {
 		return &fs.PathError{Op: "chmod", Path: at, Err: err}
 	}
 	return nil

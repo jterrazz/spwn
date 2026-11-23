@@ -263,7 +263,7 @@ func (s *Agent) writeKeys(ctx context.Context, home string, keys []string) error
 	if err := f.Replace("authorized_keys", seen, []byte(strings.Join(lines, "\n")+"\n"), 0o600, local.Self()); err != nil {
 		return err
 	}
-	return f.ChmodFile("authorized_keys", 0o600)
+	return f.ChmodFile("authorized_keys", local.Self().UID, func(fs.FileMode) fs.FileMode { return 0o600 })
 }
 
 func Quote(v string) string { return "'" + strings.ReplaceAll(v, "'", `'\''`) + "'" }

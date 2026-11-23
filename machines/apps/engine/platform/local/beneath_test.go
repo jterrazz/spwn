@@ -40,7 +40,7 @@ func TestALinkBeneathTheBaseIsNeverFollowed(t *testing.T) {
 		"lstat through":      func() error { _, err := b.Lstat(base, "on-the-way/f"); return err }(),
 		"open through":       func() error { _, err := b.Open(base, "on-the-way"); return err }(),
 		"mkdir through":      b.Mkdir(base, "on-the-way/d", 0o700, Self()),
-		"chmod at the end":   f.ChmodFile("at-the-end", 0o644),
+		"chmod at the end":   f.ChmodFile("at-the-end", os.Geteuid(), func(fs.FileMode) fs.FileMode { return 0o644 }),
 		"read at the end":    func() error { _, _, err := f.ReadFile("at-the-end"); return err }(),
 		"replace at the end": f.Replace("at-the-end", Seen{}, []byte("y"), 0o600, Self()),
 		"remove at the end":  f.Remove("at-the-end", Seen{}),
@@ -216,5 +216,29 @@ func TestOnlyTheFolderJustMadeEmptyAndOursIsFresh(t *testing.T) {
 	}
 	if err := fresh(fd, made, made); !errors.Is(err, errNotMade) {
 		t.Fatalf("fresh on a folder that holds a file = %v; want errNotMade", err)
+	}
+}
+
+func TestChmodFileChangesOnlyAFileTheOwnerHolds(t *testing.T) {
+	base := t.TempDir()
+	if err := os.WriteFile(filepath.Join(base, "keys"), nil, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := unix.Chmod(filepath.Join(base, "keys"), 0o666); err != nil {
+		t.Fatal(err)
+	}
+	f := opened(t, filepath.Dir(base), filepath.Base(base))
+	tighter := func(m fs.FileMode) fs.FileMode { return m &^ 0o022 }
+	if err := f.ChmodFile("keys", os.Geteuid()+1, tighter); !errors.Is(err, ErrOwner) {
+		t.Fatalf("ChmodFile for another owner = %v; want ErrOwner", err)
+	}
+	if info, _ := os.Stat(filepath.Join(base, "keys")); info.Mode().Perm() != 0o666 {
+		t.Fatalf("mode after a refused chmod = %o; want 666", info.Mode().Perm())
+	}
+	if err := f.ChmodFile("keys", os.Geteuid(), tighter); err != nil {
+		t.Fatal(err)
+	}
+	if info, _ := os.Stat(filepath.Join(base, "keys")); info.Mode().Perm() != 0o644 {
+		t.Fatalf("mode after chmod = %o; want 644", info.Mode().Perm())
 	}
 }
