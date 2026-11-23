@@ -9,7 +9,7 @@
     - button "Headless3"
   - region "Machine settings":
     - paragraph: Headless 3
-    - button "autologin setting GUI auto-login for jterrazz.agent (FileVault-aware) 1 of 1 machine OK"
+    - button "autologin setting GUI auto-login for a user (FileVault-aware) 1 of 1 machine OK"
     - 'button "never-sleeps setting Never sleeps: the engine keeps this Mac awake, its servers with it 1 of 1 machine OK"'
     - button "restart-after-power-cut setting Restarts after a power cut, and wakes for the network 1 of 1 machine OK"
     - paragraph: Only what your machines carry is shown. The catalog holds 136 packages.

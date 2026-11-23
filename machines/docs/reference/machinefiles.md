@@ -61,7 +61,7 @@ apps: # WHAT it carries
     - { name: jq, manager: apt }
 settings:
     git-identity: { from: computer }
-    autologin: { password: 'vault:agent-password' }
+    autologin: { user: kiosk, password: 'vault:agent-password' }
     hushlogin: {}
 
 accounts: # WHAT it signs in to, and what this Mac's vault grants it

@@ -9,14 +9,20 @@ runs:
       exit: 0
     - command: '--version >/dev/null; terminal "$STATION" settings apply autologin'
       stdin: |
-          see ┃ Password of jterrazz.agent
+          see ┃ User to log in
+          send jterrazz.agent\r
+          see ┃ Password of the user
           send sk-ant-oat01-x\r
           see ●
           screen
       exit: 0
       stdout: |
           Configure autologin
-          ┃ Password of jterrazz.agent
+            User to log in
+            the account that logs in by itself at boot, no default
+            > jterrazz.agent
+
+          ┃ Password of the user
           ●       autologin       autologin: applied
     - command: 'settings autologin --json | /usr/bin/jq -r .setting.state'
       exit: 0

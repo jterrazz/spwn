@@ -92,7 +92,10 @@ describe('catalog item', () => {
                 // Then - it can be undone, and each file says which part is station's
                 await visitor.see(within(applied, content('can be undone')));
                 await visitor.see(
-                    within(changes, content("the agent user's login password", { exact: false })),
+                    within(
+                        changes,
+                        content('the login password of the user who logs in', { exact: false }),
+                    ),
                 );
                 await visitor.see(
                     within(changes, content('/Library/Preferences/com.apple.loginwindow')),

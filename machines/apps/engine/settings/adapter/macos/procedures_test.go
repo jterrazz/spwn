@@ -93,17 +93,45 @@ func TestRemoteLoginNeverReadsAsDoneWhenSystemsetupFails(t *testing.T) {
 
 func TestAutologinWritesThePasswordItIsGivenAsTheEncodedKcpassword(t *testing.T) {
 	run := played(map[string]local.Output{
-		"defaults read " + loginWindow + " autoLoginUser": {Stdout: "jterrazz.agent\n"},
+		"defaults read " + loginWindow + " autoLoginUser": {Stdout: "kiosk\n"},
 	}, "defaults", "sysadminctl")
-	files := &memory{files: map[string][]byte{agentHome: nil}}
+	files := &memory{files: map[string][]byte{"/Users/kiosk": nil}}
 	autologin := setting(t, "autologin")
 
-	if _, err := applierOf(t, run, files, autologin).Apply(context.Background(), autologin, map[string]string{"password": "typed"}); err != nil {
+	if _, err := applierOf(t, run, files, autologin).Apply(context.Background(), autologin, map[string]string{"user": "kiosk", "password": "typed"}); err != nil {
 		t.Fatal(err)
 	}
 
 	if got := files.files[kcpasswordTo]; !bytes.Equal(got, encodeKCPassword("typed")) {
 		t.Fatalf("kcpassword %x", got)
+	}
+}
+
+func TestAutologinLogsInTheUserItIsGivenAndNeverAnother(t *testing.T) {
+	run := played(map[string]local.Output{
+		"defaults read " + loginWindow + " autoLoginUser": {Stdout: "jterrazz.agent\n"},
+	}, "defaults", "sysadminctl")
+	files := &memory{files: map[string][]byte{"/Users/kiosk": nil}}
+	autologin := setting(t, "autologin")
+
+	_, err := applierOf(t, run, files, autologin).Apply(context.Background(), autologin, map[string]string{"user": "kiosk", "password": "typed"})
+
+	if err == nil || !strings.Contains(err.Error(), "cross-check failed") {
+		t.Fatalf("autoLoginUser read back as another user than the one given: %v", err)
+	}
+}
+
+func TestAutologinReadsInPlaceForWhicheverUserLogsIn(t *testing.T) {
+	run := played(map[string]local.Output{
+		"defaults read " + loginWindow + " autoLoginUser": {Stdout: "kiosk\n"},
+	}, "defaults")
+	files := &memory{files: map[string][]byte{kcpasswordTo: nil}}
+	autologin := setting(t, "autologin")
+
+	o, err := applierOf(t, run, files, autologin).Observe(context.Background(), autologin)
+
+	if err != nil || o.State != catalog.StateOK || o.Detail != "kiosk" {
+		t.Fatalf("a login for kiosk with a kcpassword reads %s %q (%v), want in place", o.State, o.Detail, err)
 	}
 }
 

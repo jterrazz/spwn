@@ -18,21 +18,27 @@ const (
 	autologinHint = "verify end to end: station machines restart <name>"
 )
 
+// invariant: autologin is in place for whichever user the Mac logs in: the
+// user is an input, so what is read is what is wanted.
 func (m *Mac) observeAutologin(ctx context.Context, want []settings.KeyValue) settings.Observation {
 	now := m.autologinValues(ctx)
-	o := judged(now, want, agentUser, kcpasswordTo+" is missing")
-	if now[0].Value != agentUser {
-		o.State, o.Detail = catalog.StateAbsent, ""
+	user := now[0].Value
+	if user == "" {
+		return settings.Observation{State: catalog.StateAbsent, Before: now, After: want, Digest: digestOf(now)}
 	}
-	return o
+	return judged(now, append([]settings.KeyValue{now[0]}, want...), user, kcpasswordTo+" is missing")
 }
 
 func (m *Mac) applyAutologin(ctx context.Context, values map[string]string) (settings.Change, error) {
 	if _, ok := m.run.LookPath("sysadminctl"); !ok {
 		return settings.Change{}, errors.New("sysadminctl not found")
 	}
-	if !m.exists(agentHome) {
-		return settings.Change{}, errors.New("user " + agentUser + " does not exist on this Mac")
+	user := values["user"]
+	if user == "" {
+		return settings.Change{}, errors.New("empty user: refusing to set autoLoginUser with an empty value")
+	}
+	if !m.exists("/Users/" + user) {
+		return settings.Change{}, errors.New("user " + user + " does not exist on this Mac")
 	}
 	password := values["password"]
 	if password == "" {
@@ -58,14 +64,14 @@ func (m *Mac) applyAutologin(ctx context.Context, values map[string]string) (set
 	_ = m.files.Chown(kcpasswordTo, 0, 0)
 	change.Steps = append(change.Steps, done(kcpasswordTo, "written (root:wheel 0600)"))
 
-	if _, err := m.must(ctx, "defaults", "write", loginWindow, "autoLoginUser", "-string", agentUser); err != nil {
+	if _, err := m.must(ctx, "defaults", "write", loginWindow, "autoLoginUser", "-string", user); err != nil {
 		return change, err
 	}
-	change.Steps = append(change.Steps, done("autoLoginUser = "+agentUser, ""))
+	change.Steps = append(change.Steps, done("autoLoginUser = "+user, ""))
 	if !m.exists(kcpasswordTo) {
 		return change, errors.New(kcpasswordTo + " missing after write")
 	}
-	if got, ok := m.output(ctx, "defaults", "read", loginWindow, "autoLoginUser"); !ok || got != agentUser {
+	if got, ok := m.output(ctx, "defaults", "read", loginWindow, "autoLoginUser"); !ok || got != user {
 		return change, errors.New("autoLoginUser cross-check failed (got \"" + got + "\")")
 	}
 	// value: clearing the screen-locked-after-resume flag keeps the auto-login session

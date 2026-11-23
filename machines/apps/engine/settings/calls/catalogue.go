@@ -2,13 +2,13 @@ package calls
 
 import (
 	"context"
-	"errors"
 	"slices"
 
 	"github.com/jterrazz/studio-station/apps/engine/settings"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	schedule "github.com/jterrazz/studio-station/apps/engine/core/call/lanes"
+	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 	settingscontract "github.com/jterrazz/studio-station/apps/engine/settings/contract"
 )
 
@@ -227,7 +227,7 @@ func (s *Catalogue) Install(ctx context.Context, name string, values map[string]
 		}
 		for _, in := range it.Inputs {
 			if in.Required && merged[in.Name] == "" {
-				return settings.Change{}, errors.New(it.Name + " needs " + in.Name)
+				return settings.Change{}, &fail.Said{Message: it.Name + " needs " + in.Name, Hint: "give the input " + in.Name + " of " + it.Name}
 			}
 		}
 		return h.install(ctx, merged)

@@ -278,7 +278,7 @@
             },
             "settings": {
                 "restart-after-power-cut": "autorestartatconnect=1\nwomp=1",
-                "autologin": "autoLoginUser=jterrazz.agent\n/etc/kcpassword=present"
+                "autologin": "/etc/kcpassword=present"
             },
             "images": ["ghcr.io/jterrazz/station-base-ubuntu:1"],
             "fresh": {

@@ -611,7 +611,7 @@
             },
             "settings": {
                 "power": "autorestart=1\nsleep=0\ndisplaysleep=5\ndisksleep=0\npowernap=0\nwomp=1",
-                "autologin": "autoLoginUser=jterrazz.agent\n/etc/kcpassword=present"
+                "autologin": "/etc/kcpassword=present"
             },
             "images": ["ghcr.io/jterrazz/station-base-ubuntu:1"],
             "fresh": {
