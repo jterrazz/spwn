@@ -3,6 +3,7 @@ package catalog_test
 import (
 	"io/fs"
 	"path"
+	"strings"
 	"testing"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
@@ -73,6 +74,31 @@ func TestAFetchOnlyBaseIsPinnedByDigest(t *testing.T) {
 	}
 	if fetched == 0 {
 		t.Error("no built-in image is fetched only, want base-macos")
+	}
+}
+
+func TestAFetchOnlyBaseCarriesTheFirstLoginThatPutsStationsKeyIn(t *testing.T) {
+	c, err := catalog.Assemble(nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, img := range c.Images {
+		if c.FetchedOnly(img.Name) != (img.FirstLogin != "") {
+			t.Errorf("%s: fetched only %v, first login %q; want a first login exactly when it is fetched only", img.Name, c.FetchedOnly(img.Name), img.FirstLogin)
+			continue
+		}
+		if img.FirstLogin == "" {
+			continue
+		}
+		script, err := fs.ReadFile(catalog.Recipes, img.FirstLogin)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, line := range []string{"PasswordAuthentication no", "KbdInteractiveAuthentication no", "rm -f /etc/kcpassword", "-passwd"} {
+			if !strings.Contains(string(script), line) {
+				t.Errorf("%s's first login lacks %q: a password of the image's would outlive it", img.Name, line)
+			}
+		}
 	}
 }
 

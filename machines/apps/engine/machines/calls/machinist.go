@@ -71,6 +71,9 @@ type Options struct {
 	// value: the processes of this Mac, which say whether a create still
 	// runs; nil says none does.
 	Processes contract.Processes
+	// value: the station binary a macOS guest's first login puts in: this
+	// Mac's own; nil puts none.
+	GuestBinary func() ([]byte, error)
 }
 
 type Templates interface {
@@ -128,6 +131,8 @@ type Releaser interface {
 type Images interface {
 	Latest(ctx context.Context, image string) (disk, version string, err error)
 	KeyPath() string
+	// value: the image key's public line, the key made when this Mac has none.
+	ImageKey(ctx context.Context) (pub string, err error)
 }
 
 type Machinist struct {

@@ -19,9 +19,14 @@ type Image struct {
 	// image; it is only fetched where it is published. Machinefile, the
 	// built-in template it is made from, its name the image's.
 	Name, Recipe, Bake, Cleanup, Firstboot string
-	Machinefile                            string
-	Defaults                               ImageDefaults
-	Kind                                   MachineKind
+	// value: the script a clone of an image station only fetches runs once,
+	// as UpstreamLogin, before station's key is in it; it puts the key in and
+	// leaves no password of the image's that logs in. Empty for an image
+	// station builds, whose key is baked.
+	FirstLogin  string
+	Machinefile string
+	Defaults    ImageDefaults
+	Kind        MachineKind
 	// value: the distro the image is, and its version as its Machinefile's
 	// `system.version` says it; empty while that file says none.
 	Distro        Distro
@@ -60,6 +65,14 @@ func (d Distro) Word() string {
 //go:embed images
 var Recipes embed.FS
 
+type ImageLogin struct{ User, Password string }
+
+// value: the account every Cirrus Labs tart image ships with, and its
+// password, the default Cirrus Labs publishes for all of them: no secret.
+var (
+	UpstreamLogin = ImageLogin{User: "admin", Password: "admin"}
+)
+
 // value: the built-in image a workspace is made of when none is named,
 // and its Machinefile's name; the built-in Debian and macOS images, and
 // theirs.
@@ -95,6 +108,7 @@ var builtinImages = []Image{
 	{
 		Name:        MacOSImage,
 		Machinefile: MacOSImage,
+		FirstLogin:  "images/macos-firstlogin.sh",
 		Kind:        MacOS,
 		Distro:      DistroMacOS,
 	},

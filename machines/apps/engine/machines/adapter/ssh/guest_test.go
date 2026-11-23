@@ -292,6 +292,14 @@ func TestABuildVMIsReachedByItsImagePassword(t *testing.T) {
 	}
 }
 
+func TestAGuestThatTakesNoneOfWhatIsOfferedIsAToldRefusal(t *testing.T) {
+	s := startSSHD(t, newHostKey(t))
+	_, err := dial(t).Dial(t.Context(), contract.GuestTarget{VM: "build", Address: s.addr, User: "admin", Password: "not-admin"})
+	if !errors.Is(err, contract.ErrLoginRefused) {
+		t.Fatalf("a refused password came back %v, want ErrLoginRefused", err)
+	}
+}
+
 func TestACommandEndedByItsContextIsToldToStopBeforeItsSessionCloses(t *testing.T) {
 	// invariant: with no terminal, a guest's command outlives its closed
 	// session (the probe of 2026-11-14 left a login polling), so the

@@ -57,6 +57,7 @@ func events() []event {
 		{"battery", []string{"<percent>"}, percent},
 		{"low-power", []string{"on|off"}, lowPower},
 		{"advance", []string{"<duration>"}, advance},
+		{"upstream-login", []string{"<user>", "<password>"}, upstreamLogin},
 		{"fault", []string{"<Contract>.<Method>", "[<n>]", "[times]"}, fault},
 		{"hold", []string{"<Contract>.<Method>"}, hold},
 		{"unhold", []string{"[<mac>]", "[<vm>]"}, unhold},
@@ -262,6 +263,11 @@ func edit(w *World, args []string) error {
 		text = args[2]
 	}
 	m.Files[args[1]] = text
+	return nil
+}
+
+func upstreamLogin(w *World, args []string) error {
+	w.UpstreamLogin = &ImageLogin{User: args[0], Password: args[1]}
 	return nil
 }
 

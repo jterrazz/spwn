@@ -51,6 +51,8 @@ func (unbuilt) Latest(_ context.Context, image string) (ref, version string, err
 }
 func (unbuilt) KeyPath() string { return "/nowhere/station" }
 
+func (unbuilt) ImageKey(context.Context) (string, error) { return "", nil }
+
 type answering struct{}
 
 func (answering) Hello(context.Context) (model.EngineView, error) {

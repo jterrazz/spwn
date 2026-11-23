@@ -137,6 +137,12 @@ func (g *Guests) Dial(_ context.Context, t contract.GuestTarget) (contract.Guest
 	if !ok {
 		return nil, ErrNoGuest
 	}
+	g.w.Lock()
+	login := wg.Login
+	g.w.Unlock()
+	if login != nil && (t.Password == "" || t.User != login.User || t.Password != login.Password) {
+		return nil, fmt.Errorf("%w: %s takes only its image's own login", contract.ErrLoginRefused, t.VM)
+	}
 	answers := wg.Answers
 	g.mu.Lock()
 	v, ok := g.vms[t.VM]
@@ -153,7 +159,7 @@ func (g *Guests) Dial(_ context.Context, t contract.GuestTarget) (contract.Guest
 	if wg.Replaced {
 		serving = ""
 	}
-	return &guest{vm: v, name: t.VM, w: g.w, serving: serving, fresh: wg.Fresh, done: make(chan struct{})}, nil
+	return &guest{vm: v, name: t.VM, w: g.w, serving: serving, fresh: wg.Fresh, login: login != nil, done: make(chan struct{})}, nil
 }
 
 type guest struct {
@@ -166,6 +172,9 @@ type guest struct {
 	// value: a guest made from station's image: a line no answer scripts
 	// succeeds, as the image's own commands do; `true` succeeds on any guest.
 	fresh bool
+	// value: reached by its image's own login: a command it runs that
+	// succeeds is the first login, which puts station's key in.
+	login bool
 	done  chan struct{}
 	once  sync.Once
 }
@@ -297,10 +306,23 @@ func (c *guest) Exec(ctx context.Context, cmd contract.GuestCommand) (contract.G
 		}
 		res.Stderr = ""
 	}
+	if c.login && res.Code == 0 && cmd.Line != "true" {
+		c.keyed()
+	}
 	if poweroff {
 		c.poweroff()
 	}
 	return res, nil
+}
+
+func (c *guest) keyed() {
+	c.w.Lock()
+	defer c.w.Unlock()
+	if mac := c.w.Holder(c.name); mac != "" {
+		if g := c.w.Macs[mac].VMs[c.name].Guest; g != nil {
+			g.Login = nil
+		}
+	}
 }
 
 func (c *guest) ran(line string) {

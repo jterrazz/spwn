@@ -25,7 +25,7 @@ const (
 
 // value: the base's admin account, reached by its password until the recipe
 // installs the image key.
-var baseAdmin = Login{User: "admin", Password: "admin"}
+var baseAdmin = Login{User: catalog.UpstreamLogin.User, Password: catalog.UpstreamLogin.Password}
 
 func (s *Builder) recipeSHA(img catalog.Image) (string, error) {
 	h := sha256.New()
@@ -267,6 +267,11 @@ func (s *Builder) waitStopped(ctx context.Context, vm string) error {
 }
 
 func (s *Builder) KeyPath() string { return s.o.Key }
+
+func (s *Builder) ImageKey(ctx context.Context) (string, error) {
+	_, pub, err := s.imageKey(ctx)
+	return pub, err
+}
 
 func (s *Builder) imageKey(ctx context.Context) (key, pub string, err error) {
 	key = s.KeyPath()

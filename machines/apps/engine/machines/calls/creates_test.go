@@ -36,6 +36,8 @@ func (i *images) Latest(_ context.Context, image string) (disk, version string, 
 
 func (*images) KeyPath() string { return "/home/.ssh/station" }
 
+func (*images) ImageKey(context.Context) (string, error) { return "", nil }
+
 // value: an engine that holds no VM and runs none; down, it does not
 // answer, as while it restarts; run, when set, is called at each VM's run;
 // starts, a start runs the VM and its guest answers.

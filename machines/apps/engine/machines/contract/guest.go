@@ -12,6 +12,9 @@ var (
 	// value: a dial its Mac refused because it has not approved station for
 	// Local Network; the dial's own error is wrapped beside it.
 	ErrLocalNetwork = errors.New("the Mac has not approved Machines for Local Network")
+	// value: a guest that answered and took none of the keys or the password
+	// it was offered.
+	ErrLoginRefused = errors.New("the guest refused the login")
 )
 
 type GuestDialer interface {

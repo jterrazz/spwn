@@ -157,6 +157,9 @@ func (d dialer) Dial(ctx context.Context, t contract.GuestTarget) (contract.Gues
 		return nil, err
 	}
 	c, chans, reqs, err := ssh.NewClientConn(conn, addr, cfg)
+	if err != nil && strings.Contains(err.Error(), "ssh: unable to authenticate") {
+		return nil, fmt.Errorf("%w: %w", contract.ErrLoginRefused, err)
+	}
 	if err != nil {
 		return nil, err
 	}

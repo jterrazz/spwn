@@ -82,6 +82,7 @@ func (m machine) machines(_ bool) *machinescalls.Machinist {
 		Grant:           m.grantProgram,
 		SignedIn:        m.signedIn,
 		Processes:       m.processes(),
+		GuestBinary:     m.guestBinary,
 	})
 }
 
@@ -383,12 +384,26 @@ func (c machineCalls) CheckRemote(name string) error {
 	return err
 }
 
+// value: the binary a macOS guest's first login puts in: this Mac's own
+// station, the one darwin build the guest runs too; a world's guest takes
+// its name alone.
+func (m machine) guestBinary() ([]byte, error) {
+	if m.world != nil {
+		return []byte("station"), nil
+	}
+	return m.sys.FS.ReadFile(m.sys.Env.Executable())
+}
+
 type allMachinesImages struct {
 	images *imagescalls.Builder
 	cat    catalog.Catalog
 }
 
 func (i allMachinesImages) KeyPath() string { return i.images.KeyPath() }
+
+func (i allMachinesImages) ImageKey(ctx context.Context) (string, error) {
+	return i.images.ImageKey(ctx)
+}
 
 func (i allMachinesImages) Latest(ctx context.Context, image string) (disk, version string, err error) {
 	r, err := i.images.Latest(ctx, image)

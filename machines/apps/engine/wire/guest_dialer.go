@@ -2,6 +2,7 @@ package wire
 
 import (
 	"context"
+	"errors"
 	"io"
 	"io/fs"
 	"net/netip"
@@ -29,11 +30,44 @@ type engineGuests struct {
 }
 
 func (g engineGuests) Dial(ctx context.Context, vm string, at netip.AddrPort) (process.Guest, error) {
-	c, err := g.dialer.Dial(ctx, contract.GuestTarget{VM: vm, Address: at, User: g.vms.VMUser(), Key: g.vms.KeyPath(), KnownHosts: g.vms.KnownHostsPath(vm)})
+	c, err := g.dial(ctx, g.vms.GuestTarget(vm, at))
 	if err != nil {
 		return nil, err
 	}
 	return engineGuest{c}, nil
+}
+
+// invariant: a dial the VM's first login answers (machinescalls.FirstLoginOf)
+// runs it once, as the image's own account, then dials by the key again.
+func (g engineGuests) dial(ctx context.Context, t contract.GuestTarget) (contract.Guest, error) {
+	c, err := g.dialer.Dial(ctx, t)
+	if err == nil {
+		return c, nil
+	}
+	first, ok, why := g.vms.FirstLoginOf(ctx, t, err)
+	if !ok || why != nil {
+		return nil, errors.Join(err, why)
+	}
+	if ran := g.firstLogin(ctx, first); ran != nil {
+		return nil, errors.Join(err, ran)
+	}
+	return g.dialer.Dial(ctx, t)
+}
+
+func (g engineGuests) firstLogin(ctx context.Context, f machinescalls.FirstLogin) error {
+	c, err := g.dialer.Dial(ctx, f.Login)
+	if err != nil {
+		return errors.New("its first login as " + f.Login.User + " was refused too: " + err.Error())
+	}
+	defer func() { _ = c.Close() }()
+	if put := c.Put(ctx, f.Bin, f.Binary, 0o755); put != nil {
+		return put
+	}
+	res, err := c.Exec(ctx, contract.GuestCommand{Line: f.Line, Stdin: strings.NewReader(f.Stdin)})
+	if err != nil {
+		return err
+	}
+	return f.Failed(res.Code, res.Stderr, res.Stdout)
 }
 
 type engineGuest struct{ contract.Guest }

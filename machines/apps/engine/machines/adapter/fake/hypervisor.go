@@ -120,7 +120,7 @@ func (h *Hypervisor) Clone(ctx context.Context, from imagescontract.ImageLocatio
 		return err
 	}
 	m := h.thisMac()
-	_, fromDisk := h.disk(from.Ref)
+	source, fromDisk := h.disk(from.Ref)
 	if !fromDisk && !slices.Contains(m.Images, from.Ref) {
 		return ErrNoImage
 	}
@@ -146,6 +146,14 @@ func (h *Hypervisor) Clone(ctx context.Context, from imagescontract.ImageLocatio
 	}
 	if v.Guest == nil {
 		v.Guest = &world.Guest{Fresh: true}
+	}
+	switch {
+	case fromDisk && source.Guest != nil && source.Guest.Login != nil:
+		login := *source.Guest.Login
+		v.Guest.Login = &login
+	case !fromDisk && h.w.UpstreamLogin != nil:
+		login := *h.w.UpstreamLogin
+		v.Guest.Login = &login
 	}
 	return nil
 }

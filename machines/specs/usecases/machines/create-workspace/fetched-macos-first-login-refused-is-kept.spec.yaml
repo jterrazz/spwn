@@ -1,0 +1,19 @@
+description: 'a fetched macOS workspace whose image login is refused too is kept, failing SSH answers'
+fixture: ../../__fixtures__/build/
+env: one-mac
+runs:
+    - command: 'world upstream-login admin changed'
+      exit: 0
+    - command: 'images update base-macos'
+      exit: 0
+      stdout: |
+          ●	base-macos	26.6.2	fetched
+    - command: 'machines create mac-1 --image base-macos'
+      exit: 1
+      stderr: |
+          Error: mac-1 is kept, failing SSH answers: none after 60 s
+          Hint: station machines start mac-1, or station machines delete mac-1
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs[.this_mac].vms["mac-1"].guest | {login, ran}'' world.json'
+      exit: 0
+      stdout: |
+          {"login":{"user":"admin","password":"changed"},"ran":null}

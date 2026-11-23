@@ -1,0 +1,18 @@
+description: 'a fetched macOS workspace is reached once its first login put the key in and retired its login'
+fixture: ../../__fixtures__/build/
+env: one-mac
+runs:
+    - command: 'world upstream-login admin admin'
+      exit: 0
+    - command: 'images update base-macos'
+      exit: 0
+      stdout: |
+          ●	base-macos	26.6.2	fetched
+    - command: 'machines create mac-1 --image base-macos | /usr/bin/tail -1'
+      exit: 0
+      stdout: |
+          ●	mac-1	Created	Ephemeral · 4 CPU · 8 GB · 80 GB
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs[.this_mac].vms["mac-1"].guest | {login, ran: [.ran[]? | select(startswith("/usr/local/bin/station guest") | not)]}'' world.json'
+      exit: 0
+      stdout: |
+          {"login":null,"ran":["sudo -n /bin/bash -s"]}

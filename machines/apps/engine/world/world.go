@@ -47,6 +47,9 @@ type World struct {
 	Told []engine.Notification `json:"told,omitempty"`
 	// value: each image's latest version, as its registry answers it.
 	Registry map[string]string `json:"registry,omitempty"`
+	// value: the one account every image pulled from its publisher ships
+	// with; nil when the world's pulled images take station's key.
+	UpstreamLogin *ImageLogin `json:"upstream_login,omitempty"`
 	// value: the failures injected into the fakes, in the order scripted.
 	Script []Fault `json:"script,omitempty"`
 	// value: the holds declared for a VM whose call waits now: written with
@@ -516,6 +519,14 @@ type Guest struct {
 	// value: every command line station ran in the VM, apart from its own
 	// session and the liveness probe, in the order run: what it set up inside.
 	Ran []string `json:"ran,omitempty"`
+	// value: the one login it takes: a clone of an image as its publisher
+	// ships it, before station's key is in it; nil takes station's key.
+	Login *ImageLogin `json:"login,omitempty"`
+}
+
+type ImageLogin struct {
+	User     string `json:"user"`
+	Password string `json:"password"`
 }
 
 type Answer struct {
