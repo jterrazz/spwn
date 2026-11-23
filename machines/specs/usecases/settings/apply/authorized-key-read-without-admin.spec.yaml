@@ -1,0 +1,28 @@
+description: 'without admin rights the root-only record is not read: authorized-key reads as Machines applied it'
+env:
+    - in-workspace
+    - engine
+runs:
+    - command: 'world admin on'
+      exit: 0
+    - command: '--version >/dev/null; /bin/mkdir -p root/root'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | .out[0].Steps'''
+      stdin: |
+          {"v":2,"id":"1","call":"settings.apply","in":{"Names":["authorized-key"],"Values":{"authorized-key":{"user":"root","key":"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGZ2c8e4bOqkqO0+5N0VXlFz4sVJyDQzH+LVRG4RvMZb ci@deploy"}}}}
+      exit: 0
+      stdout: |
+          [{"Label":"/root/.ssh/authorized_keys","State":"ok","Detail":"written"}]
+    - command: 'world admin off'
+      exit: 0
+    - command: '--version >/dev/null; /bin/chmod 000 root/var/lib/station/authorized-keys.json'
+      exit: 0
+    - command: 'settings authorized-key'
+      exit: 0
+      stdout: |
+          ●	authorized-key	applied
+          # Detail
+          group	Set by Machines
+          does	Public keys allowed to sign in over ssh, in a block of a user's authorized_keys
+          lives on	Linux VMs
+          applied	just now

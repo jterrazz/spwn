@@ -194,7 +194,10 @@ func (a *Applier) Observe(_ context.Context, it catalog.Setting) (settings.Obser
 		return settings.Observation{}, err
 	}
 	rec, err := a.read()
-	if err != nil {
+	switch {
+	case errors.Is(err, fs.ErrPermission):
+		return settings.Observation{State: catalog.StateUnknown, Detail: "needs admin to read " + strings.TrimPrefix(a.o.Record, path.Join("/", a.o.Root)), Blind: true}, nil
+	case err != nil:
 		return settings.Observation{State: catalog.StateAbsent}, err
 	}
 	var r written

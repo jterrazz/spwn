@@ -628,3 +628,21 @@ func TestAFolderOrFileTheSignInServerIgnoresIsDrift(t *testing.T) {
 		}
 	})
 }
+
+// invariant: a run without admin rights cannot read the machine's record;
+// it reads the setting blind, as an admin setting it cannot see, never as
+// an error or as a block that is not there.
+func TestARecordOnlyRootReadsIsReadBlindWithoutAdmin(t *testing.T) {
+	m := newMachine(t)
+	if m.self.UID == 0 {
+		t.Skip("root reads every record")
+	}
+	apply(t, m.open(), "root", key(t, 1, "ci"))
+	if err := m.disk.Chmod(m.at(authorizedkeys.Record), 0); err != nil {
+		t.Fatal(err)
+	}
+	o, err := m.open().Observe(context.Background(), setting())
+	if err != nil || !o.Blind || o.State == catalog.StateAbsent || o.Detail != "needs admin to read /var/lib/station/authorized-keys.json" {
+		t.Fatalf("Observe = %+v, %v; want it read blind, needing admin", o, err)
+	}
+}
