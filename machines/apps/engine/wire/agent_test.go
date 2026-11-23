@@ -13,7 +13,9 @@ import (
 
 	"github.com/jterrazz/studio-station/apps/engine/engine"
 	machinesfake "github.com/jterrazz/studio-station/apps/engine/machines/adapter/fake"
+	"github.com/jterrazz/studio-station/apps/engine/platform/darwin"
 	"github.com/jterrazz/studio-station/apps/engine/platform/local"
+	"github.com/jterrazz/studio-station/apps/engine/platform/local/localtest"
 	"github.com/jterrazz/studio-station/apps/engine/setup"
 )
 
@@ -27,6 +29,25 @@ func TestTheAgentRelaysTheSessionsAgentButNeverItself(t *testing.T) {
 	}
 	if relay := (machine{vars: map[string]string{"SSH_AUTH_SOCK": "/private/tmp/session/Listeners"}}).sessionAgent(own); relay == nil {
 		t.Fatal("the agent does not relay to the session's agent")
+	}
+}
+
+func TestAMacWhoseNeverSleepsIsAppliedKeepsAnUnattendedDeviceKey(t *testing.T) {
+	m := machine{stores: newStores(localtest.NewFS(), setup.Paths{Prefs: "/home/u/.config/station", State: "/home/u/.local/state/station"})}
+	if got := m.keyAccess(); got != darwin.AccessPresent {
+		t.Fatalf("a Mac with no Never sleeps keeps access %d; want the present owner's", got)
+	}
+	if err := m.stores.neverSleeps().Set(true); err != nil {
+		t.Fatal(err)
+	}
+	if got := m.keyAccess(); got != darwin.AccessUnattended {
+		t.Fatalf("a Mac whose Never sleeps is applied keeps access %d; want unattended", got)
+	}
+	if err := m.stores.neverSleeps().Set(false); err != nil {
+		t.Fatal(err)
+	}
+	if got := m.keyAccess(); got != darwin.AccessPresent {
+		t.Fatalf("a Mac whose Never sleeps is off again keeps access %d; want the present owner's", got)
 	}
 }
 

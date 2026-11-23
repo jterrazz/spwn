@@ -10,7 +10,7 @@ import (
 )
 
 func TestTheEnclaveWrapsAKeyThatOnlyItsBlobOpens(t *testing.T) {
-	blob, err := EnclaveCreate()
+	blob, err := EnclaveCreate(AccessPresent)
 	var none *NoEnclaveError
 	if errors.As(err, &none) {
 		t.Skip("this Mac has no Secure Enclave")
@@ -33,8 +33,24 @@ func TestTheEnclaveWrapsAKeyThatOnlyItsBlobOpens(t *testing.T) {
 		if pub, pubErr := EnclavePublic(b); pubErr == nil || errors.As(pubErr, &none) {
 			t.Errorf("%s: EnclavePublic = %x, %v; want a refusal", name, pub, pubErr)
 		}
-		if sig, signErr := EnclaveSign(b, "a test", time.Second, []byte("m")); signErr == nil || errors.As(signErr, &none) {
+		if sig, signErr := EnclaveSign(b, AccessPresent, "a test", time.Second, []byte("m")); signErr == nil || errors.As(signErr, &none) {
 			t.Errorf("%s: EnclaveSign = %x, %v; want a refusal", name, sig, signErr)
+		}
+	}
+}
+
+func TestAnUnattendedKeySignsAfterTheFirstUnlockWithNobodyPresentAndAnyOtherOnlyForAPresentOwner(t *testing.T) {
+	const privateKeyUsage, userPresence = 1 << 30, 1 << 0
+	for access, want := range map[Access]struct {
+		class string
+		flags uint64
+	}{
+		AccessUnattended: {class: "cku", flags: privateKeyUsage},
+		AccessPresent:    {class: "aku", flags: privateKeyUsage | userPresence},
+	} {
+		class, flags, err := enclaveAccess(access)
+		if err != nil || class != want.class || flags != want.flags {
+			t.Errorf("access %d: class %q flags %#x, %v; want %q %#x", access, class, flags, err, want.class, want.flags)
 		}
 	}
 }

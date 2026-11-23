@@ -13,6 +13,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/machines/adapter/macos"
 	"github.com/jterrazz/studio-station/apps/engine/machines/adapter/ssh"
 	"github.com/jterrazz/studio-station/apps/engine/machines/contract"
+	"github.com/jterrazz/studio-station/apps/engine/platform/darwin"
 	"github.com/jterrazz/studio-station/apps/engine/platform/local"
 )
 
@@ -27,7 +28,18 @@ func (m machine) deviceKey() contract.DeviceKey {
 	if key := specDeviceKey(m.vars); key != nil {
 		return key
 	}
-	return macos.NewDeviceKey(m.sys.FS, m.paths.State, keychain.PresenceBudget)
+	return macos.NewDeviceKey(m.sys.FS, m.paths.State, keychain.PresenceBudget, m.keyAccess())
+}
+
+// invariant: a Mac run alone is one whose Never sleeps is applied, the
+// owner's word that it hosts servers with nobody at it; its device key then
+// signs with nobody present. A preference that cannot be read keeps the key
+// that asks for a present owner.
+func (m machine) keyAccess() darwin.Access {
+	if alone, err := m.stores.neverSleeps().Get(); err == nil && alone {
+		return darwin.AccessUnattended
+	}
+	return darwin.AccessPresent
 }
 
 // invariant: the session's own agent is relayed only when it is not this

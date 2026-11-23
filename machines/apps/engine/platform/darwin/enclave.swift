@@ -21,11 +21,29 @@ private func refuse(_ why: String, _ code: Int32, _ out: UnsafeMutablePointer<Un
     return code
 }
 
+// invariant: a key made unattended signs with nobody present, from the Mac's
+// first unlock after its start on; any other key signs only for an owner
+// present at an unlocked Mac. The Enclave fixes this when it makes the key.
+private func protection(_ unattended: Int32) -> (CFString, SecAccessControlCreateFlags) {
+    unattended != 0
+        ? (kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly, [.privateKeyUsage])
+        : (kSecAttrAccessibleWhenUnlockedThisDeviceOnly, [.privateKeyUsage, .userPresence])
+}
+
+@_cdecl("station_enclave_access")
+public func stationEnclaveAccess(_ unattended: Int32, _ flags: UnsafeMutablePointer<UInt>, _ out: UnsafeMutablePointer<UnsafeMutablePointer<UInt8>?>, _ count: UnsafeMutablePointer<Int>) -> Int32 {
+    let (accessible, options) = protection(unattended)
+    flags.pointee = options.rawValue
+    give(Data((accessible as String).utf8), out, count)
+    return 0
+}
+
 @_cdecl("station_enclave_create")
-public func stationEnclaveCreate(_ out: UnsafeMutablePointer<UnsafeMutablePointer<UInt8>?>, _ count: UnsafeMutablePointer<Int>) -> Int32 {
+public func stationEnclaveCreate(_ unattended: Int32, _ out: UnsafeMutablePointer<UnsafeMutablePointer<UInt8>?>, _ count: UnsafeMutablePointer<Int>) -> Int32 {
     guard SecureEnclave.isAvailable else { return refuse("this Mac has no Secure Enclave", 2, out, count) }
+    let (accessible, options) = protection(unattended)
     var failure: Unmanaged<CFError>?
-    guard let access = SecAccessControlCreateWithFlags(nil, kSecAttrAccessibleWhenUnlockedThisDeviceOnly, [.privateKeyUsage, .userPresence], &failure) else {
+    guard let access = SecAccessControlCreateWithFlags(nil, accessible, options, &failure) else {
         return refuse(failure.map { "\($0.takeRetainedValue())" } ?? "no access control", 1, out, count)
     }
     do {
@@ -48,18 +66,28 @@ public func stationEnclavePublic(_ blob: UnsafePointer<UInt8>, _ blobCount: Int,
 }
 
 // invariant: a blob this Mac's Enclave did not wrap is refused before any
-// presence is asked. The owner's presence is asked once, on the first signature, and
+// presence is asked. An unattended key signs with no presence asked. For any
+// other, the owner's presence is asked once, on the first signature, and
 // no answer within the time given is a refusal; the evaluated context then
 // opens every later use of the key for the life of this process, so a
 // session asks once.
 @_cdecl("station_enclave_sign")
-public func stationEnclaveSign(_ blob: UnsafePointer<UInt8>, _ blobCount: Int, _ reason: UnsafePointer<CChar>, _ within: Double, _ message: UnsafePointer<UInt8>, _ messageCount: Int, _ out: UnsafeMutablePointer<UnsafeMutablePointer<UInt8>?>, _ count: UnsafeMutablePointer<Int>) -> Int32 {
+public func stationEnclaveSign(_ blob: UnsafePointer<UInt8>, _ blobCount: Int, _ unattended: Int32, _ reason: UnsafePointer<CChar>, _ within: Double, _ message: UnsafePointer<UInt8>, _ messageCount: Int, _ out: UnsafeMutablePointer<UnsafeMutablePointer<UInt8>?>, _ count: UnsafeMutablePointer<Int>) -> Int32 {
     guard SecureEnclave.isAvailable else { return refuse("this Mac has no Secure Enclave", 2, out, count) }
     let wrapped = Data(bytes: blob, count: blobCount)
+    let opened: SecureEnclave.P256.Signing.PrivateKey
     do {
-        _ = try SecureEnclave.P256.Signing.PrivateKey(dataRepresentation: wrapped)
+        opened = try SecureEnclave.P256.Signing.PrivateKey(dataRepresentation: wrapped)
     } catch {
         return refuse("this Mac's Secure Enclave refuses the device key: \(error.localizedDescription)", 1, out, count)
+    }
+    if unattended != 0 {
+        do {
+            give(try opened.signature(for: Data(bytes: message, count: messageCount)).derRepresentation, out, count)
+            return 0
+        } catch {
+            return refuse("the Secure Enclave did not sign: \(error.localizedDescription)", 1, out, count)
+        }
     }
     if session == nil {
         let context = LAContext()

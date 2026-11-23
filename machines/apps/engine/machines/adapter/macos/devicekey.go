@@ -17,14 +17,41 @@ import (
 
 const signReason = "sign in over ssh as this Mac"
 
-func DeviceKeyBlob(state string) string { return path.Join(state, "device-key.enclave") }
+func DeviceKeyBlob(state string, access darwin.Access) string {
+	// value: the file a device key of this access is kept in, so the file
+	// names who the key signs for.
+	if access == darwin.AccessUnattended {
+		return path.Join(state, "device-key-unattended.enclave")
+	}
+	return path.Join(state, "device-key.enclave")
+}
+
+type enclave interface {
+	create(access darwin.Access) ([]byte, error)
+	public(blob []byte) ([]byte, error)
+	sign(blob []byte, access darwin.Access, reason string, within time.Duration, message []byte) ([]byte, error)
+}
+
+type secureEnclave struct{}
+
+func (secureEnclave) create(access darwin.Access) ([]byte, error) {
+	return darwin.EnclaveCreate(access)
+}
+func (secureEnclave) public(blob []byte) ([]byte, error) { return darwin.EnclavePublic(blob) }
+func (secureEnclave) sign(blob []byte, access darwin.Access, reason string, within time.Duration, message []byte) ([]byte, error) {
+	return darwin.EnclaveSign(blob, access, reason, within, message)
+}
 
 type DeviceKey struct {
 	// value: this Mac's device key is kept as the blob its Secure Enclave
 	// wrapped it in: only that Enclave can use it, so the file opens nothing
 	// elsewhere.
-	files local.FS
-	state string
+	files   local.FS
+	state   string
+	enclave enclave
+	// value: who this process's key signs for, as the Mac is run when it
+	// starts.
+	access darwin.Access
 	// value: how long the owner has to give presence on the first signature.
 	within time.Duration
 	mu     sync.Mutex
@@ -33,8 +60,8 @@ type DeviceKey struct {
 	held []byte
 }
 
-func NewDeviceKey(files local.FS, state string, within time.Duration) *DeviceKey {
-	return &DeviceKey{files: files, state: state, within: within}
+func NewDeviceKey(files local.FS, state string, within time.Duration, access darwin.Access) *DeviceKey {
+	return &DeviceKey{files: files, state: state, within: within, access: access, enclave: secureEnclave{}}
 }
 
 func refusal(err error) error {
@@ -45,15 +72,17 @@ func refusal(err error) error {
 	return err
 }
 
-// invariant: the blob is made once, on the first ask; a blob the Enclave
-// refuses is a refusal, never replaced by a new key.
+// invariant: the blob is made once per access, on the first ask; the key of
+// the other access is deleted once its replacement is kept, since the Enclave
+// never changes a key's access. A blob the Enclave refuses is a refusal,
+// never replaced by a new key.
 func (k *DeviceKey) blob(create bool) ([]byte, error) {
 	k.mu.Lock()
 	defer k.mu.Unlock()
 	if k.held != nil {
 		return k.held, nil
 	}
-	file := DeviceKeyBlob(k.state)
+	file := DeviceKeyBlob(k.state, k.access)
 	blob, err := k.files.ReadFile(file)
 	if err == nil {
 		k.held = blob
@@ -64,7 +93,7 @@ func (k *DeviceKey) blob(create bool) ([]byte, error) {
 	if !create {
 		return nil, errors.New("this Mac's device key is gone: " + file)
 	}
-	made, err := darwin.EnclaveCreate()
+	made, err := k.enclave.create(k.access)
 	if err != nil {
 		return nil, refusal(err)
 	}
@@ -73,6 +102,13 @@ func (k *DeviceKey) blob(create bool) ([]byte, error) {
 	}
 	if writeErr := k.files.WriteFile(file, made, 0o600); writeErr != nil {
 		return nil, writeErr
+	}
+	other := DeviceKeyBlob(k.state, darwin.AccessPresent)
+	if k.access == darwin.AccessPresent {
+		other = DeviceKeyBlob(k.state, darwin.AccessUnattended)
+	}
+	if rmErr := k.files.Remove(other); rmErr != nil && !errors.Is(rmErr, fs.ErrNotExist) {
+		return nil, rmErr
 	}
 	k.held = made
 	return made, nil
@@ -83,7 +119,7 @@ func (k *DeviceKey) Public(context.Context) (*ecdsa.PublicKey, error) {
 	if err != nil {
 		return nil, err
 	}
-	point, err := darwin.EnclavePublic(blob)
+	point, err := k.enclave.public(blob)
 	if err != nil {
 		return nil, refusal(err)
 	}
@@ -95,6 +131,6 @@ func (k *DeviceKey) Sign(_ context.Context, message []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	sig, err := darwin.EnclaveSign(blob, signReason, k.within, message)
+	sig, err := k.enclave.sign(blob, k.access, signReason, k.within, message)
 	return sig, refusal(err)
 }
