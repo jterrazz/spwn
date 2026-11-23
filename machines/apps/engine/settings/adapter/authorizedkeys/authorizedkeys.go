@@ -416,11 +416,10 @@ func (a *Applier) Observe(_ context.Context, it catalog.Setting) (settings.Obser
 	var r written
 	unrecorded := len(rec.Files) == 0
 	if unrecorded {
-		file, ok := a.fallback(it)
-		if !ok {
-			return settings.Observation{State: catalog.StateAbsent}, nil
+		r.File, err = a.found(k.Block)
+		if err != nil {
+			return settings.Observation{State: catalog.StateAbsent}, err
 		}
-		r.File = file
 	} else {
 		r = rec.Files[len(rec.Files)-1]
 	}
@@ -729,21 +728,57 @@ func (a *Applier) turn(ctx context.Context) (func(), error) {
 	}
 	return release, nil
 }
-func (a *Applier) fallback(it catalog.Setting) (string, bool) {
-	user := ""
-	for _, in := range it.Inputs {
-		if in.Name == InputUser {
-			user = in.Default
+
+// value: with no record, the file Observe reads, through the scan off
+// takes the block out by: the first that holds a block of id or cannot be
+// read but for a permission, else the first a permission keeps from this
+// run, else root's.
+func (a *Applier) found(id string) (string, error) {
+	files, err := a.homes()
+	if err != nil {
+		return "", err
+	}
+	denied := ""
+	for _, file := range files {
+		switch a.sight(file, id) {
+		case stop:
+			return file, nil
+		case shut:
+			if denied == "" {
+				denied = file
+			}
+		case pass:
 		}
 	}
-	if user == "" {
-		return "", false
+	if denied != "" {
+		return denied, nil
 	}
-	who, err := a.account(user)
-	if err != nil {
-		return "", false
+	return files[0], nil
+}
+
+// value: what the no-record read makes of one file: it holds a block of
+// station's or cannot be read but for a permission (stop), a permission
+// keeps it from this run (shut), or nothing of station's is there (pass).
+type seen int
+
+const (
+	pass seen = iota
+	stop
+	shut
+)
+
+func (a *Applier) sight(file, id string) seen {
+	text, _, err := a.text(file)
+	switch {
+	case errors.Is(err, fs.ErrPermission):
+		return shut
+	case err != nil:
+		return stop
 	}
-	return path.Join(who.home, ".ssh", "authorized_keys"), true
+	if _, state := settings.PackageBlock(text, id); state != settings.BlockAbsent {
+		return stop
+	}
+	return pass
 }
 
 // invariant: with no record, the block's markers are the record: off looks

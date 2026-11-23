@@ -24,6 +24,23 @@ func (m *machine) sshOf(home string, o local.Owner) {
 	m.chown(home+"/.ssh", o)
 }
 
+func TestOffWithNoRecordReachesABlockInAnAccountThatIsNotTheDefault(t *testing.T) {
+	m := newMachine(t)
+	m.sshOf("home/ci", m.ci)
+	own := key(t, 9, "laptop") + "\n"
+	k := key(t, 1, "x")
+	m.write(ciAK, own+block(k), 0o600)
+	m.chown(ciAK, m.ci)
+	it := known(k)
+	seen, err := m.open().Observe(context.Background(), it)
+	if err != nil || seen.State != catalog.StateOK || seen.Where != "/home/ci/.ssh/authorized_keys" {
+		t.Fatalf("Observe with no record = %+v, %v; want ci's block seen", seen, err)
+	}
+	if _, err := m.open().Undo(context.Background(), it); err != nil || m.content(ciAK) != own {
+		t.Fatalf("Undo with no record = %v; ci's file %q; want the block out", err, m.content(ciAK))
+	}
+}
+
 func TestWithNoRecordALineMachinesDoesNotKnowKeepsTheBlock(t *testing.T) {
 	m := newMachine(t)
 	m.mkdir("root/.ssh", 0o700)
