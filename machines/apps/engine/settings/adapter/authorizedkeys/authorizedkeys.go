@@ -249,6 +249,18 @@ func (a *Applier) unmade(w written, f *local.Folder) ([]settings.ChangeStep, boo
 	return []settings.ChangeStep{file, {Label: path.Dir(w.File), State: catalog.StateOK, Detail: "removed, the empty folder Machines made"}}, false, nil
 }
 
+// invariant: a ~/.ssh an apply made, and left before its record names it,
+// is taken away while it is still empty, so no folder stays that off does
+// not know station made.
+func (a *Applier) unmakeFolder(base, ssh string) {
+	f, err := a.home.Open(base, ssh)
+	if err != nil {
+		return
+	}
+	defer f.Close()
+	_ = f.RemoveSelf()
+}
+
 // value: the folder of the system that holds the home of the
 // authorized_keys the system names file, and the ~/.ssh under it.
 func (a *Applier) beneath(file string) (base, ssh string) {
@@ -427,6 +439,14 @@ func (a *Applier) Apply(ctx context.Context, it catalog.Setting, values map[stri
 	if err != nil {
 		return settings.Change{}, err
 	}
+	recorded := false
+	if madeFolder {
+		defer func() {
+			if !recorded {
+				a.unmakeFolder(base, ssh)
+			}
+		}()
+	}
 	files := []string{file}
 	for _, w := range rec.Files {
 		if w.File != file {
@@ -468,6 +488,7 @@ func (a *Applier) Apply(ctx context.Context, it catalog.Setting, values map[stri
 	if err != nil {
 		return settings.Change{}, err
 	}
+	recorded = true
 	if changed || !there {
 		err = f.Replace(keysFile, []byte(updated), 0o600, who.Owner)
 		if err != nil {

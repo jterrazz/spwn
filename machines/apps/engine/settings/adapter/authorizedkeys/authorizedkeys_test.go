@@ -438,6 +438,19 @@ func TestAnApplyWhoseRecordFailsLeavesNoBlockOffCannotFind(t *testing.T) {
 	}
 }
 
+// invariant: an apply that made ~/.ssh and fails before its record names
+// it takes the folder away again: no folder is left that off does not know
+// it made.
+func TestAnApplyWhoseRecordFailsTakesAwayTheFolderItMade(t *testing.T) {
+	m := newMachine(t)
+	if _, err := m.openWith(full{FS: m.disk, at: m.at(authorizedkeys.Record)}).Apply(context.Background(), setting(), map[string]string{"user": "root", "key": key(t, 1, "")}); err == nil {
+		t.Fatal("Apply took a record it could not write")
+	}
+	if m.there("root/.ssh") {
+		t.Fatal("Apply left the ~/.ssh it made with no record of it")
+	}
+}
+
 // invariant: with no record at all, off finds station's block by its
 // markers in the default user's file and takes it out.
 func TestOffFindsABlockWithNoRecordInTheDefaultUsersFile(t *testing.T) {
