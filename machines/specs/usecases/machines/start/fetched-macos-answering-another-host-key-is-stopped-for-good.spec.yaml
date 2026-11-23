@@ -1,0 +1,32 @@
+description: 'a fetched macOS workspace that answers another host key at its start is stopped for good'
+fixture: ../../__fixtures__/build/
+env: one-mac
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].preferences.vm_user = "you"'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'world upstream-login admin admin'
+      exit: 0
+    - command: 'images update base-macos'
+      exit: 0
+      stdout: |
+          ●	base-macos	26.6.2	fetched
+    - command: 'machines create mac-1 --image base-macos --persistent | /usr/bin/tail -1'
+      exit: 0
+      stdout: |
+          ●	mac-1	Created	Persistent · 4 CPU · 8 GB · 80 GB
+    - command: 'machines stop mac-1 --yes'
+      exit: 0
+      stdout: |
+          ●	mac-1	stopped, kept
+    - command: '--version >/dev/null; printf ''mac-1 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMYRnPRb0woo5J/IbiUEUkSJ8kxETUFsKOWJfNno6nc5\n'' > .local/state/station/known_hosts/mac-1'
+      exit: 0
+    - command: 'machines start mac-1'
+      exit: 1
+      stderr: |
+          Error: mac-1's lockdown failed: it answers with a host key other than the one its lockdown printed
+          Hint: station machines delete mac-1, then make it again
+    - command: 'machines --this-mac'
+      exit: 0
+      stdout: |
+          ●	macbook-pro	Mac	macbook-pro	Engine running
+          ○	mac-1	Workspace	macbook-pro	Stopped · persistent	4 CPU	8 GB

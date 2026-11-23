@@ -50,10 +50,16 @@ const lockdownWait = 3 * time.Minute
 // again; a key dial to a VM whose image carries a lockdown is kept only
 // once its marker holds, the lockdown run again over it when it does not.
 // A lockdown that cannot run or fails is a contract.LockdownError, the
-// guest probed for a login a start could run it again by; a dial the
+// guest probed for a login a start could run it again by; so is a host key
+// other than the one pinned, on such a VM, which no start cures. A dial the
 // guest did not answer stays the dial's own.
 func (g engineGuests) dial(ctx context.Context, t contract.GuestTarget) (contract.Guest, error) {
 	c, err := g.dialer.Dial(ctx, t)
+	if errors.Is(err, contract.ErrHostKeyChanged) {
+		if locks, read := g.vms.Locks(ctx, t.VM); read == nil && locks {
+			return nil, &contract.LockdownError{Cause: "it answers with a host key other than the one its lockdown printed", Gone: true}
+		}
+	}
 	if err != nil {
 		first, ok, why := g.vms.FirstLoginOf(ctx, t, err)
 		if why != nil {
@@ -92,7 +98,7 @@ func (g engineGuests) firstLogin(ctx context.Context, l machinescalls.Lockdown, 
 }
 
 // value: a lockdown's failure, Gone when the guest now refuses both station's
-// key and its image's login.
+// key and its image's login, or answers either with another host key.
 func (g engineGuests) failed(ctx context.Context, t contract.GuestTarget, l machinescalls.Lockdown, cause error) error {
 	gone := true
 	for _, by := range []contract.GuestTarget{t, l.Login} {
@@ -100,7 +106,7 @@ func (g engineGuests) failed(ctx context.Context, t contract.GuestTarget, l mach
 		if err == nil {
 			_ = c.Close()
 		}
-		if !errors.Is(err, contract.ErrLoginRefused) {
+		if !errors.Is(err, contract.ErrLoginRefused) && !errors.Is(err, contract.ErrHostKeyChanged) {
 			gone = false
 		}
 	}

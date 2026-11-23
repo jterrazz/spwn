@@ -277,9 +277,13 @@ func TestAVMWhoseHostKeyChangedIsRefused(t *testing.T) {
 	}
 	_ = g.Close()
 	again := startSSHD(t, newHostKey(t))
-	if g, err := dial(t).Dial(t.Context(), target(t, again, known)); err == nil {
+	g, err = dial(t).Dial(t.Context(), target(t, again, known))
+	if err == nil {
 		_ = g.Close()
 		t.Fatal("a VM answering with another host key was let in")
+	}
+	if !errors.Is(err, contract.ErrHostKeyChanged) {
+		t.Errorf("a VM answering with another host key came back %v, want ErrHostKeyChanged", err)
 	}
 }
 

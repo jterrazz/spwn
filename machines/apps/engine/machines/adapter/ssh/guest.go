@@ -46,7 +46,7 @@ type client struct {
 
 // invariant: the VM's host key is checked against the same per-machine
 // known_hosts file the CLI's ssh uses, accept-new: an absent entry is appended,
-// a different key refuses.
+// a different key refuses, as contract.ErrHostKeyChanged.
 func (d dialer) knownHosts(file string) (ssh.HostKeyCallback, error) {
 	if err := d.files.MkdirAll(filepath.Dir(file), 0o700); err != nil {
 		return nil, err
@@ -109,8 +109,11 @@ func acceptNew[A any](check func(string, A, ssh.PublicKey) error, unreadable err
 		}
 		err := check(name+":22", remote, key)
 		var unknown *knownhosts.KeyError
-		if errors.As(err, &unknown) && len(unknown.Want) == 0 {
+		switch {
+		case errors.As(err, &unknown) && len(unknown.Want) == 0:
 			return pin(key)
+		case errors.As(err, &unknown):
+			return fmt.Errorf("%w: %w", contract.ErrHostKeyChanged, err)
 		}
 		return err
 	}

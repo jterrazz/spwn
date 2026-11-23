@@ -1544,7 +1544,7 @@ func (g worldGuests) hostKey(t contract.GuestTarget) error {
 		if f[1] == served[0] && f[2] == served[1] {
 			return nil
 		}
-		return errors.New("ssh: handshake failed: knownhosts: key mismatch")
+		return fmt.Errorf("%w: ssh: handshake failed: knownhosts: key mismatch", contract.ErrHostKeyChanged)
 	}
 	if err := os.MkdirAll(filepath.Dir(t.KnownHosts), 0o700); err != nil {
 		return err

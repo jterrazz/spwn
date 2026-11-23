@@ -384,7 +384,8 @@ func (d *Engine) opRun(ctx context.Context, vm string) error {
 
 // invariant: run answers once the guest is connected (it has written the VM's
 // keys block and services.env), or when the run ended first (its end is the
-// supervision's, or its failed lockdown's, which it answers), else
+// supervision's, or its failed lockdown's, which it answers, told to be
+// deleted when no start can run that lockdown again), else
 // guest_timeout after guestReady. A greeting the guest is in is waited for
 // before the guest is judged, each once, so how long a greeting takes moves
 // no poll; a dial in progress past guestReady, a lockdown, up to dialWait
@@ -406,7 +407,11 @@ func (d *Engine) awaitGuest(ctx context.Context, vm string) error {
 		connected, ended, lockdown := v.guest == engine.GuestConnected, v.over(), v.lockdown
 		d.mu.Unlock()
 		if lockdown != nil && ended {
-			return fault(enginecalls.GuestAbsent, vm+"'s lockdown failed: "+lockdown.Cause, "station machines "+vm)
+			hint := "station machines " + vm
+			if lockdown.Gone {
+				hint = "station machines delete " + vm + ", then make it again"
+			}
+			return fault(enginecalls.GuestAbsent, vm+"'s lockdown failed: "+lockdown.Cause, hint)
 		}
 		if connected || ended {
 			return nil

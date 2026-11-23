@@ -15,12 +15,15 @@ var (
 	// value: a guest that answered and took none of the keys or the password
 	// it was offered.
 	ErrLoginRefused = errors.New("the guest refused the login")
+	// value: a guest that answered with a host key other than the one its
+	// VM's known hosts pin.
+	ErrHostKeyChanged = errors.New("the guest answered with another host key")
 )
 
 type LockdownError struct {
-	// value: a dial its VM's lockdown failed at: why, and whether the guest
-	// now takes neither station's key nor its image's login, so no start
-	// can run the lockdown again.
+	// value: a dial its VM's lockdown failed at: why, and whether no start
+	// can run the lockdown again: the guest now takes neither station's key
+	// nor its image's login, or answers with another host key.
 	Cause string
 	Gone  bool
 }

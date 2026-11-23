@@ -186,8 +186,9 @@ const (
 
 type LockdownFailure struct {
 	// value: why its engine stopped a VM's run before its guest connected:
-	// its lockdown failed; and whether the guest takes neither station's key
-	// nor its image's login any more, so only a new create cures it.
+	// its lockdown failed; and whether no start can run it again (the guest
+	// takes neither station's key nor its image's login any more, or
+	// answers with another host key), so only a new create cures it.
 	Cause string `json:"cause"`
 	Gone  bool   `json:"gone,omitempty"`
 }
