@@ -540,6 +540,10 @@ export type CatalogAptMethod = {
     Packages: string[] | null;
 };
 
+export type CatalogAuthorizedKeys = {
+    Block: string;
+};
+
 export type CatalogCopy = {
     From: string;
     Mode: number;
@@ -653,6 +657,7 @@ export type CatalogMasMethod = {
 export type CatalogMethodSpec = {
     Apt: CatalogAptMethod | null;
     Arch?: 'arm64' | 'amd64';
+    AuthorizedKeys: CatalogAuthorizedKeys | null;
     Brew: string;
     Builtin: string;
     Bun: string;

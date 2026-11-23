@@ -43,10 +43,11 @@ type Effect interface{ Kind() EffectKind }
 type EffectKind string
 
 const (
-	EffectTouch      EffectKind = "touch"
-	EffectDotfile    EffectKind = "dotfile"
-	EffectGitAliases EffectKind = "git-aliases"
-	EffectShell      EffectKind = "shell"
+	EffectTouch          EffectKind = "touch"
+	EffectDotfile        EffectKind = "dotfile"
+	EffectGitAliases     EffectKind = "git-aliases"
+	EffectShell          EffectKind = "shell"
+	EffectAuthorizedKeys EffectKind = "authorized-keys"
 	// value: no Applier writes it yet: applied, it is refused as unhandled.
 	EffectMacOSDefaults EffectKind = "macos-defaults"
 )
@@ -75,6 +76,12 @@ type GitAlias struct {
 	Command string `yaml:"command"`
 }
 
+type AuthorizedKeys struct {
+	// value: the marked block of a user's ~/.ssh/authorized_keys that holds
+	// the keys the setting's values give, by its id.
+	Block string `yaml:"block"`
+}
+
 type Procedure string
 
 const (
@@ -94,10 +101,11 @@ const (
 	ProcTailscaleCLI         Procedure = "tailscale-cli"
 )
 
-func (Touch) Kind() EffectKind         { return EffectTouch }
-func (Dotfiles) Kind() EffectKind      { return EffectDotfile }
-func (GitAliases) Kind() EffectKind    { return EffectGitAliases }
-func (MacOSDefaults) Kind() EffectKind { return EffectMacOSDefaults }
+func (Touch) Kind() EffectKind          { return EffectTouch }
+func (Dotfiles) Kind() EffectKind       { return EffectDotfile }
+func (GitAliases) Kind() EffectKind     { return EffectGitAliases }
+func (AuthorizedKeys) Kind() EffectKind { return EffectAuthorizedKeys }
+func (MacOSDefaults) Kind() EffectKind  { return EffectMacOSDefaults }
 
 func (p Procedure) Kind() EffectKind { return EffectKind("procedure:" + string(p)) }
 

@@ -18,6 +18,18 @@
       ],
       "type": "object"
     },
+    "catalog.AuthorizedKeys": {
+      "additionalProperties": false,
+      "properties": {
+        "Block": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Block"
+      ],
+      "type": "object"
+    },
     "catalog.Copy": {
       "additionalProperties": false,
       "properties": {
@@ -266,6 +278,16 @@
           ],
           "type": "string"
         },
+        "AuthorizedKeys": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/catalog.AuthorizedKeys"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "Brew": {
           "type": "string"
         },
@@ -463,6 +485,7 @@
       },
       "required": [
         "Apt",
+        "AuthorizedKeys",
         "Brew",
         "Builtin",
         "Bun",

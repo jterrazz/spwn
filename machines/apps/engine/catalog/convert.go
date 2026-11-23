@@ -125,6 +125,8 @@ func (m MethodSpec) effect() Effect {
 		return Dotfiles{Files: m.File.Copy, Reload: m.File.Reload}
 	case m.GitAliases != nil:
 		return *m.GitAliases
+	case m.AuthorizedKeys != nil:
+		return *m.AuthorizedKeys
 	case len(m.Shell) > 0:
 		return ShellBlocks{Blocks: m.Shell}
 	case m.MacOSDefaults != nil:

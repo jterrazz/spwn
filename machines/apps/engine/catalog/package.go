@@ -322,23 +322,24 @@ type MethodSpec struct {
 	// method's.
 	Needs []Need `yaml:"needs,omitempty"`
 	// value: a brew or cask from a third-party tap the owner trusts.
-	Trusted       bool                 `yaml:"trusted,omitempty"`
-	Brew          string               `yaml:"brew,omitempty"`
-	Cask          string               `yaml:"cask,omitempty"`
-	Mas           *MasMethod           `yaml:"mas,omitempty"`
-	Apt           *AptMethod           `yaml:"apt,omitempty"`
-	Npm           string               `yaml:"npm,omitempty"`
-	Uv            string               `yaml:"uv,omitempty"`
-	Bun           string               `yaml:"bun,omitempty"`
-	Mise          *MiseMethod          `yaml:"mise,omitempty"`
-	GitHubRelease *GitHubReleaseMethod `yaml:"github-release,omitempty"`
-	Script        *ScriptMethod        `yaml:"script,omitempty"`
-	Skill         *SkillMethod         `yaml:"skill,omitempty"`
-	ProvidedBy    string               `yaml:"provided-by,omitempty"`
-	File          *FileMethod          `yaml:"file,omitempty"`
-	Builtin       Procedure            `yaml:"builtin,omitempty"`
-	MacOSDefaults *MacOSDefaults       `yaml:"macos-defaults,omitempty"`
-	GitAliases    *GitAliases          `yaml:"git-aliases,omitempty"`
+	Trusted        bool                 `yaml:"trusted,omitempty"`
+	Brew           string               `yaml:"brew,omitempty"`
+	Cask           string               `yaml:"cask,omitempty"`
+	Mas            *MasMethod           `yaml:"mas,omitempty"`
+	Apt            *AptMethod           `yaml:"apt,omitempty"`
+	Npm            string               `yaml:"npm,omitempty"`
+	Uv             string               `yaml:"uv,omitempty"`
+	Bun            string               `yaml:"bun,omitempty"`
+	Mise           *MiseMethod          `yaml:"mise,omitempty"`
+	GitHubRelease  *GitHubReleaseMethod `yaml:"github-release,omitempty"`
+	Script         *ScriptMethod        `yaml:"script,omitempty"`
+	Skill          *SkillMethod         `yaml:"skill,omitempty"`
+	ProvidedBy     string               `yaml:"provided-by,omitempty"`
+	File           *FileMethod          `yaml:"file,omitempty"`
+	Builtin        Procedure            `yaml:"builtin,omitempty"`
+	MacOSDefaults  *MacOSDefaults       `yaml:"macos-defaults,omitempty"`
+	GitAliases     *GitAliases          `yaml:"git-aliases,omitempty"`
+	AuthorizedKeys *AuthorizedKeys      `yaml:"authorized-keys,omitempty"`
 	// value: the identified blocks of ~/.zshrc this method writes beside
 	// what it installs (an app), or alone (a setting).
 	Shell []ShellBlock `yaml:"shell,omitempty"`

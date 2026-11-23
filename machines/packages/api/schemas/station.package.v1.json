@@ -101,6 +101,18 @@
       ],
       "type": "object"
     },
+    "AuthorizedKeys": {
+      "additionalProperties": false,
+      "properties": {
+        "block": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "block"
+      ],
+      "type": "object"
+    },
     "Copy": {
       "additionalProperties": false,
       "properties": {
@@ -395,6 +407,9 @@
             "amd64"
           ],
           "type": "string"
+        },
+        "authorized-keys": {
+          "$ref": "#/$defs/AuthorizedKeys"
         },
         "brew": {
           "type": "string"

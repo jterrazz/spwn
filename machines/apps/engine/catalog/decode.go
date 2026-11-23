@@ -335,7 +335,8 @@ func (m MethodSpec) settingKeys() []string {
 	var keys []string
 	for key, set := range map[string]bool{
 		"file": m.File != nil, "builtin": m.Builtin != "", "macos-defaults": m.MacOSDefaults != nil, "git-aliases": m.GitAliases != nil,
-		"shell": len(m.Shell) > 0 && len(m.appKeys()) == 0,
+		"authorized-keys": m.AuthorizedKeys != nil,
+		"shell":           len(m.Shell) > 0 && len(m.appKeys()) == 0,
 	} {
 		if set {
 			keys = append(keys, key)
@@ -478,6 +479,8 @@ func (m MethodSpec) checkManager() string {
 		return fmt.Sprintf("file's mode %q is none of %s", m.File.Mode, strings.Join(m.File.Mode.Enum(), ", "))
 	case m.MacOSDefaults != nil:
 		return m.MacOSDefaults.check(m.Selector)
+	case m.AuthorizedKeys != nil && !shellID.MatchString(m.AuthorizedKeys.Block):
+		return fmt.Sprintf("authorized-keys block %q is `station:<package>`", m.AuthorizedKeys.Block)
 	}
 	if m.GitHubRelease != nil {
 		if err := CheckRepo(m.GitHubRelease.Repo); err != nil {
