@@ -3,7 +3,7 @@
 # from the private folder station made and put this script and its own binary in, over the
 # image's own account by its published default password, or over the VM user by the key when
 # its marker is absent. Its values come on stdin, one per line, never in a command line. It is
-# idempotent. Once its binary is checked, it first closes what the image's login opens (sshd's
+# idempotent. Once its binary and its VM user are checked, it first closes what the image's login opens (sshd's
 # password login, the auto-login, Screen Sharing, the default password, its keys and sudo rule), so a run cut
 # after that block leaves no login of the image's (one cut inside it, before the password changes, leaves
 # the default password to a local login and su); it makes the key reachable only once all of it is
@@ -33,6 +33,9 @@ random() {
 home_of() { /usr/bin/dscl . -read "/Users/$1" NFSHomeDirectory | /usr/bin/awk '{print $2}'; }
 
 [ "$(/usr/bin/shasum -a 256 "$dir/station" | /usr/bin/awk '{print $1}')" = "$BIN_SHA256" ] || { echo "the station binary in $dir is not the engine's" >&2; exit 1; }
+# outside: macOS reads a user name whatever its case (id Admin is admin), so only a lowercase short name is compared.
+vm_user_rule='^[a-z_]([a-z0-9_.-]{0,30}[a-z0-9_-])?$'
+[[ "$VM_USER" =~ $vm_user_rule ]] && [ "$VM_USER" != "$LOGIN_USER" ] && [ "$VM_USER" != root ] || { echo "the VM user '$VM_USER' is no lowercase short name, or the image's own account or root: a fetched macOS guest is made for another user" >&2; exit 1; }
 # outside: sshd keeps the first value it reads, and macOS's sshd_config includes sshd_config.d/* before its own lines, in name order.
 /bin/cat > /etc/ssh/sshd_config.d/000-station.conf <<'CONF'
 PasswordAuthentication no
@@ -63,10 +66,6 @@ if [ -d "$login_home/.ssh" ]; then
 fi
 /bin/rm -f /var/root/.ssh/authorized_keys /var/root/.ssh/authorized_keys2
 /bin/rm -f "/etc/sudoers.d/$LOGIN_USER-nopasswd"
-
-# outside: macOS reads a user name whatever its case (id Admin is admin), so only a lowercase short name is compared.
-vm_user_rule='^[a-z_]([a-z0-9_.-]{0,30}[a-z0-9_-])?$'
-[[ "$VM_USER" =~ $vm_user_rule ]] && [ "$VM_USER" != "$LOGIN_USER" ] && [ "$VM_USER" != root ] || { echo "the VM user '$VM_USER' is no lowercase short name, or the image's own account or root: a fetched macOS guest is made for another user" >&2; exit 1; }
 
 
 /bin/mkdir -p /usr/local/bin

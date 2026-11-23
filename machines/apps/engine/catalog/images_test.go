@@ -125,9 +125,6 @@ func lockdownClosesTheImageBeforeAnythingElse(t *testing.T, name, script string)
 		`-passwd "/Users/$LOGIN_USER"`,
 		`: > "$login_home/.ssh/authorized_keys"`,
 		`rm -f "/etc/sudoers.d/$LOGIN_USER-nopasswd"`,
-		"vm_user_rule='",
-		`[[ "$VM_USER" =~ $vm_user_rule ]]`,
-		`[ "$VM_USER" != "$LOGIN_USER" ]`,
 	} {
 		at := strings.Index(script, step)
 		switch {
@@ -137,6 +134,23 @@ func lockdownClosesTheImageBeforeAnythingElse(t *testing.T, name, script string)
 			t.Errorf("%s's first login runs %q before it checks its binary", name, step)
 		case at > firstOther:
 			t.Errorf("%s's first login sets the guest up before %q: a failure between leaves the image's login open", name, step)
+		}
+	}
+	lock := strings.Index(script, "/etc/ssh/sshd_config.d/000-station.conf")
+	for _, step := range []string{
+		"vm_user_rule='",
+		`[[ "$VM_USER" =~ $vm_user_rule ]]`,
+		`[ "$VM_USER" != "$LOGIN_USER" ]`,
+		`[ "$VM_USER" != root ]`,
+	} {
+		at := strings.Index(script, step)
+		switch {
+		case at < 0:
+			t.Errorf("%s's first login lacks %q, the VM user's rule", name, step)
+		case at < checked:
+			t.Errorf("%s's first login runs %q before it checks its binary", name, step)
+		case at > lock:
+			t.Errorf("%s's first login checks its VM user by %q after it locks the image's login: a refusal there leaves a guest no login opens", name, step)
 		}
 	}
 	for _, step := range []string{
