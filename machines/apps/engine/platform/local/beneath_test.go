@@ -26,7 +26,6 @@ func TestALinkBeneathTheBaseIsNeverFollowed(t *testing.T) {
 		"lstat through":      func() error { _, err := b.Lstat(base, "on-the-way/f"); return err }(),
 		"chmod through":      b.Chmod(base, "on-the-way/f", 0o644),
 		"chmod at the end":   b.Chmod(base, "at-the-end", 0o644),
-		"chown at the end":   b.Chown(base, "at-the-end", Self()),
 		"mkdir through":      b.Mkdir(base, "on-the-way/d", 0o700, Self()),
 		"read through":       func() error { _, err := b.ReadFile(base, "on-the-way/f"); return err }(),
 		"read at the end":    func() error { _, err := b.ReadFile(base, "at-the-end"); return err }(),

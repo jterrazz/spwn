@@ -37,7 +37,6 @@ type Home interface {
 	Replace(base, rel string, data []byte, perm fs.FileMode, o local.Owner) error
 	Mkdir(base, rel string, perm fs.FileMode, o local.Owner) error
 	Chmod(base, rel string, perm fs.FileMode) error
-	Chown(base, rel string, o local.Owner) error
 	Remove(base, rel string) error
 }
 
@@ -351,13 +350,9 @@ func (a *Applier) Apply(ctx context.Context, it catalog.Setting, values map[stri
 		rel  string
 		mode fs.FileMode
 	}{{ssh, 0o700}, {path.Join(ssh, "authorized_keys"), 0o600}} {
-		err = a.home.Chmod(base, p.rel, p.mode)
+		err = a.strict(base, p.rel, p.mode)
 		if err != nil {
-			return settings.Change{}, a.linked(err)
-		}
-		err = a.home.Chown(base, p.rel, who.Owner)
-		if err != nil {
-			return settings.Change{}, a.linked(err)
+			return settings.Change{}, err
 		}
 	}
 	detail := "written"
@@ -434,9 +429,9 @@ type loosened struct {
 
 func (a *Applier) loose(file, name string) (loosened, error) {
 	// invariant: the keys count only while the sign-in server reads them:
-	// the folder 0700 and the file 0600, nothing for group or others, and
-	// both the home owner's or root's; anything else is drift, with apply as
-	// its fix.
+	// nothing of the folder or the file for group or others, and both the
+	// home owner's or root's; anything else is drift, a loose mode with apply
+	// as its fix, an owner with the owner's own chown.
 	base, rel := a.beneath(file)
 	home := path.Dir(path.Dir(rel))
 	owner, err := a.home.Lstat(base, home)
@@ -460,11 +455,25 @@ func (a *Applier) loose(file, name string) (loosened, error) {
 			return l, nil
 		case e.UID != owner.UID && e.UID != 0:
 			l.want, l.have = fmt.Sprintf("uid %d\n", owner.UID), fmt.Sprintf("uid %d\n", e.UID)
-			l.why = fmt.Sprintf("%s is uid %d's, not the home's (uid %d), so its keys are ignored: station settings apply %s gives it back", l.at, e.UID, owner.UID, name)
+			l.why = fmt.Sprintf("%s is uid %d's, not the home's (uid %d), so its keys are ignored: Machines never takes a file from its owner, give it back with %s", l.at, e.UID, owner.UID, catalog.AsRoot(fmt.Sprintf("chown %d %s", owner.UID, l.at)))
 			return l, nil
 		}
 	}
 	return loosened{}, nil
+}
+
+// invariant: a folder or file others can open is set to mode; a strict one
+// keeps its own, and no owner is ever changed: station gives the user only
+// what it makes, and never takes a file from whoever owns it.
+func (a *Applier) strict(base, rel string, mode fs.FileMode) error {
+	e, err := a.home.Lstat(base, rel)
+	if err != nil {
+		return a.linked(err)
+	}
+	if e.Mode.Perm()&0o077 == 0 {
+		return nil
+	}
+	return a.linked(a.home.Chmod(base, rel, mode))
 }
 
 func octal(m fs.FileMode) string { return "0" + strconv.FormatUint(uint64(m.Perm()), 8) }

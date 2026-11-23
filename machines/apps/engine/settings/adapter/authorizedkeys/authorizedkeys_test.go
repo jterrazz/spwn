@@ -621,13 +621,9 @@ func TestAFolderOrFileTheSignInServerIgnoresIsDrift(t *testing.T) {
 		}
 		m.chown(rootAK, m.ci)
 		o := seen(t)
-		want := "/root/.ssh/authorized_keys is uid " + strconv.Itoa(m.ci.UID) + "'s, not the home's (uid 0), so its keys are ignored: station settings apply authorized-key gives it back"
-		if o.State != catalog.StateDegraded || o.Detail != want {
+		want := "/root/.ssh/authorized_keys is uid " + strconv.Itoa(m.ci.UID) + "'s, not the home's (uid 0), so its keys are ignored: Machines never takes a file from its owner, give it back with sudo chown 0 /root/.ssh/authorized_keys"
+		if o.State != catalog.StateDegraded || o.Detail != want || !o.Loose {
 			t.Fatalf("Observe with the file given away = %s %q; want degraded %q", o.State, o.Detail, want)
-		}
-		apply(t, m.open(), "root", key(t, 1, "ci"))
-		if o := seen(t); o.State != catalog.StateOK {
-			t.Fatalf("Observe after apply again = %+v; want ok", o)
 		}
 	})
 }
@@ -724,4 +720,43 @@ func TestOffTakesAwayTheFileAndFolderItMadeOnceEmpty(t *testing.T) {
 			t.Fatalf("authorized_keys there %v, %q; want the empty file kept", m.there(ciAK), m.content(ciAK))
 		}
 	})
+}
+
+// invariant: a strict folder or file keeps the mode its owner gave it:
+// apply only closes what others can open.
+func TestAStrictModeIsKeptAsItIs(t *testing.T) {
+	m := newMachine(t)
+	m.mkdir("root/.ssh", 0o700)
+	m.write(rootAK, key(t, 9, "")+"\n", 0o400)
+	if m.self.UID == 0 {
+		m.mkdir("root/.ssh", 0o500)
+	}
+	apply(t, m.open(), "root", key(t, 1, ""))
+	dir, f := m.entry("root/.ssh").Mode.Perm(), m.entry(rootAK).Mode.Perm()
+	if f != 0o400 || (m.self.UID == 0 && dir != 0o500) {
+		t.Fatalf("folder %o, file %o; want the strict modes kept", dir, f)
+	}
+}
+
+// invariant: station gives the user only what it makes: an existing folder
+// or file keeps its owner, and one owned by another user reads drift with
+// the owner's own fix, never taken from them.
+func TestAnExistingOwnerIsNeverChanged(t *testing.T) {
+	m := newMachine(t)
+	if m.self.UID != 0 {
+		t.Skip("only root gives a file away")
+	}
+	m.mkdir("home/ci/.ssh", 0o700)
+	m.write(ciAK, key(t, 9, "")+"\n", 0o600)
+	other := local.Owner{UID: 1500, GID: 1500}
+	m.chown(ciAK, other)
+	apply(t, m.open(), "ci", key(t, 1, ""))
+	if dir, f := m.entry("home/ci/.ssh").Owner, m.entry(ciAK).Owner; dir != (local.Owner{}) || f != other {
+		t.Fatalf("folder %+v, file %+v; want root's folder and uid 1500's file kept", dir, f)
+	}
+	o, err := m.open().Observe(context.Background(), setting())
+	want := "/home/ci/.ssh/authorized_keys is uid 1500's, not the home's (uid " + strconv.Itoa(m.ci.UID) + "), so its keys are ignored: Machines never takes a file from its owner, give it back with sudo chown " + strconv.Itoa(m.ci.UID) + " /home/ci/.ssh/authorized_keys"
+	if err != nil || o.State != catalog.StateDegraded || o.Detail != want {
+		t.Fatalf("Observe = %s %q, %v; want degraded %q", o.State, o.Detail, err, want)
+	}
 }

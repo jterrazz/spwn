@@ -191,10 +191,6 @@ func (Beneath) Chmod(base, rel string, perm fs.FileMode) error {
 	return opened(base, rel, "chmod", func(fd int) error { return unix.Fchmod(fd, uint32(perm.Perm())) })
 }
 
-func (Beneath) Chown(base, rel string, o Owner) error {
-	return opened(base, rel, "chown", func(fd int) error { return unix.Fchown(fd, o.UID, o.GID) })
-}
-
 // value: do run on the descriptor of rel, a file or a folder, opened with
 // O_NOFOLLOW.
 func opened(base, rel, op string, do func(fd int) error) error {

@@ -1,0 +1,23 @@
+description: 'an authorized_keys at 0400 is strict already: apply writes its block and keeps the mode'
+env:
+    - in-workspace
+    - engine
+runs:
+    - command: 'world admin on'
+      exit: 0
+    - command: '--version >/dev/null; /bin/mkdir -p root/root/.ssh; /bin/chmod 700 root/root/.ssh; echo ''# my laptop'' > root/root/.ssh/authorized_keys; /bin/chmod 400 root/root/.ssh/authorized_keys'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | .out[0].Steps'''
+      stdin: |
+          {"v":2,"id":"1","call":"settings.apply","in":{"Names":["authorized-key"],"Values":{"authorized-key":{"user":"root","key":"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGZ2c8e4bOqkqO0+5N0VXlFz4sVJyDQzH+LVRG4RvMZb ci@deploy"}}}}
+      exit: 0
+      stdout: |
+          [{"Label":"/root/.ssh/authorized_keys","State":"ok","Detail":"written"}]
+    - command: '--version >/dev/null; /usr/bin/stat -c ''%a %n'' root/root/.ssh/authorized_keys'
+      exit: 0
+      stdout: |
+          400 root/root/.ssh/authorized_keys
+    - command: 'settings authorized-key | /usr/bin/sed -n 1p'
+      exit: 0
+      stdout: |
+          ●	authorized-key	applied · /root/.ssh/authorized_keys
