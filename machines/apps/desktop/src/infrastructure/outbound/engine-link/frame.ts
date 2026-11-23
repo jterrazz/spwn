@@ -42,7 +42,6 @@ export function helloOf(value: unknown): EngineHello | undefined {
             version: value.version,
             ...(calls ? { calls } : {}),
             ...(typeof value.executable === 'string' ? { executable: value.executable } : {}),
-            ...(typeof value.page === 'number' ? { page: value.page } : {}),
         };
     }
     return undefined;

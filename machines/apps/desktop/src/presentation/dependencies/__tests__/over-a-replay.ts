@@ -1,9 +1,7 @@
-import { PAGE_REVISION } from '../../../domain/fit';
 import type { Recording } from '../../../infrastructure/outbound/engine-replay/replay';
 import { stagedReplay } from '../../../infrastructure/outbound/engine-replay/replay';
 
 export const HELLO = {
-    page: PAGE_REVISION,
     pid: 41,
     started_at: '2026-11-13T09:00:00Z',
     version: 'dev',

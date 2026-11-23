@@ -4,6 +4,7 @@ import { describe, expect, test } from 'vitest';
 
 import { Client } from '../../../infrastructure/outbound/engine-link/client';
 import { offers } from '../fresh';
+import { StateMirror } from '../mirror';
 import { ReadStore } from '../store';
 import {
     DONE,
@@ -92,7 +93,10 @@ describe('fresh', () => {
         using _ = clock.run('2026-11-13T10:00:00Z');
         const engine = fakeEngine(HELLO);
         const seen = fakePresence();
-        const store = new ReadStore(new Client(engine.transport), seen.presence, { every: EVERY });
+        const client = new Client(engine.transport);
+        const store = new ReadStore(client, seen.presence, new StateMirror(client), {
+            every: EVERY,
+        });
         store.subscribe(MACHINES, () => {});
         await clock.advance(1);
         engine.answer('machines.list', RUNNING);

@@ -1,7 +1,6 @@
 import type { EngineHello } from '@jterrazz/station-api';
 
-import { fitOf } from '../../domain/fit';
-import type { Unfit } from '../../domain/fit';
+import type { Fit, Unfit } from '../../domain/fit';
 import type { Link } from '../ports/engine.port';
 
 // value: the link as the window holds it once judged: an engine that answers at a revision it does not draw is
@@ -10,16 +9,13 @@ export type Judged =
     | Link
     | { kind: 'incompatible'; socket: string; fit: Unfit; hello: EngineHello | undefined };
 
-// invariant: the one place the window judges an engine, from its hello's `page`; ADR-070's `opened.fit` replaces the
-// invariant: `fitOf` here once the engine sends it.
-export function judged(link: Link): Judged {
-    if (link.kind !== 'open') {
+// invariant: an open link is incompatible only on the engine's own verdict, its `opened.fit`; an engine not judged
+// invariant: yet counts as open.
+export function judgedOf(link: Link, fit: Fit | undefined): Judged {
+    if (link.kind !== 'open' || fit === undefined || fit === 'fits') {
         return link;
     }
-    const fit = fitOf(link.hello?.page);
-    return fit === 'fits'
-        ? link
-        : { fit, hello: link.hello, kind: 'incompatible', socket: link.socket };
+    return { fit, hello: link.hello, kind: 'incompatible', socket: link.socket };
 }
 
 // value: whether an engine answers on the window's socket: the transport's state, never the engine's own (running,

@@ -84,22 +84,22 @@ export function EngineProvider({
         mirror,
         now = NOW,
     } = dependencies;
-    const engine = useMemo(
-        () => ({
+    const engine = useMemo(() => {
+        const mirrored = new StateMirror(client, mirror);
+        return {
             client,
             core: new CoreFlow(core, coreLookEvery),
             gestures: new GestureStore(),
             menuBar: new MenuBarFlow(menuBar),
-            mirror: new StateMirror(client, mirror),
+            mirror: mirrored,
             now,
             opener,
             stale: new StaleMarks(),
-            store: new ReadStore(client, presence, reads),
+            store: new ReadStore(client, presence, mirrored, reads),
             update: new UpdateFlow(core),
             windowUpdate: new WindowUpdateFlow(windowUpdate),
-        }),
-        [client, core, coreLookEvery, menuBar, mirror, now, opener, presence, reads, windowUpdate],
-    );
+        };
+    }, [client, core, coreLookEvery, menuBar, mirror, now, opener, presence, reads, windowUpdate]);
     useEffect(() => {
         engine.windowUpdate.start();
         return () => {

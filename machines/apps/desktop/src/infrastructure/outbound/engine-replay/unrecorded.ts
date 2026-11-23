@@ -1,3 +1,4 @@
+import type { Link } from '../../../application/ports/engine.port';
 import { isRecord } from '../../../domain/request-key';
 
 function nameOf(request: unknown): string {
@@ -40,4 +41,14 @@ export function unrecordedOf(
     return new UnrecordedGestureError(
         `${name} was sent with ${asSent(request)}, but is recorded only with ${inputs.join(' or ')}`,
     );
+}
+
+// invariant: a request the world holds no answer for ends with no reason, as an engine that never answers does: the
+// invariant: window draws its own no-answer state, and the world's name never reaches the page; a gesture sent with an
+// invariant: input no recording of its call holds is a spec's mistake: it ends on what was sent and what is recorded, and throws.
+export function reasonOf(shown: Link): string {
+    if (shown.kind === 'absent') {
+        return shown.reason;
+    }
+    return shown.kind === 'open' ? '' : 'connecting';
 }

@@ -1,6 +1,7 @@
 import type { EngineSliceOut, EngineStateFrame, Request } from '@jterrazz/station-api';
 
-import { PAGE_REVISION, STATE_REVISION } from '../../../domain/fit';
+import { STATE_REVISION } from '../../../domain/fit';
+import type { Unfit } from '../../../domain/fit';
 import { isRecord } from '../../../domain/request-key';
 import { askedBy, callOfView } from '../../../domain/views';
 import type { Receiver } from '../engine-link/transport';
@@ -74,27 +75,38 @@ export function viewsOf(
     return slices;
 }
 
-// value: the opening and first snapshot of a world's engine.state, held open: it fits, the revision the tree speaks.
+const ENGINE: Readonly<Record<Unfit, number>> = {
+    'app-older': STATE_REVISION + 1,
+    'engine-older': STATE_REVISION - 1,
+};
+
+// value: the opening of a world's engine.state: one that fits sends its first snapshot and is held open, the revision
+// value: the tree speaks; one `unfit` names the engine's revision that misfits and ends, as an engine does.
 export function openingOf(
     world: string,
     slices: Record<string, EngineSliceOut>,
-): { frames: readonly { v: 2; out: EngineStateFrame }[]; gap: 0; held: true } {
-    const frames: readonly { v: 2; out: EngineStateFrame }[] = [
-        {
-            out: {
-                epoch: `replay of ${world}`,
-                event: 'opened',
-                fit: { app: STATE_REVISION, engine: STATE_REVISION, verdict: 'fits' },
-                page: PAGE_REVISION,
-                rev: 1,
-                state: STATE_REVISION,
-                stream: 'station.state/v1',
-            },
-            v: 2,
+    unfit: undefined | Unfit,
+): { frames: readonly { v: 2; out: EngineStateFrame }[]; gap: 0; held: boolean } {
+    const engine = unfit === undefined ? STATE_REVISION : ENGINE[unfit];
+    const opened: { v: 2; out: EngineStateFrame } = {
+        out: {
+            epoch: `replay of ${world}`,
+            event: 'opened',
+            fit: { app: STATE_REVISION, engine, verdict: unfit ?? 'fits' },
+            rev: 1,
+            state: engine,
+            stream: 'station.state/v1',
         },
-        { out: { event: 'snapshot', rev: 1, slices }, v: 2 },
-    ];
-    return { frames, gap: 0, held: true };
+        v: 2,
+    };
+    if (unfit !== undefined) {
+        return { frames: [opened], gap: 0, held: false };
+    }
+    return {
+        frames: [opened, { out: { event: 'snapshot', rev: 1, slices }, v: 2 }],
+        gap: 0,
+        held: true,
+    };
 }
 
 // invariant: the engine.state streams a replay holds open: a gesture that changes a read changes the views drawn from

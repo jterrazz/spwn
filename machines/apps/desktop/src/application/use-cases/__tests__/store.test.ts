@@ -6,8 +6,9 @@ import { Client } from '../../../infrastructure/outbound/engine-link/client';
 import { stagedReplay } from '../../../infrastructure/outbound/engine-replay/replay';
 import type { Pace, Recording } from '../../../infrastructure/outbound/engine-replay/replay';
 import type { Asked } from '../entry';
+import { StateMirror } from '../mirror';
 import { ReadStore } from '../store';
-import { fakeEngine, fakePresence, HELLO } from './fake-engine';
+import { fakeEngine, fakePresence, HELLO, settled } from './fake-engine';
 
 const READ = { call: 'engine.read', in: {} };
 const MACHINES = { in: {}, watch: 'machines.list' };
@@ -60,7 +61,8 @@ function staged(pace?: Pace) {
     );
     const client = new Client(stage.transport);
     const timing = { grace: 500, keptAtMost: 2, keptFor: KEPT_FOR };
-    return { client, stage, store: new ReadStore(client, documentPresence(), timing) };
+    const store = new ReadStore(client, documentPresence(), new StateMirror(client), timing);
+    return { client, stage, store };
 }
 
 function asked(stage: ReturnType<typeof stagedReplay>, call: string): number {
@@ -102,7 +104,8 @@ describe('store', () => {
         // Given - a watch of machines.list held by one subscriber, streaming
         using _ = clock.run('2026-11-13T10:00:00Z');
         const engine = fakeEngine(HELLO);
-        const store = new ReadStore(new Client(engine.transport), fakePresence().presence, {
+        const client = new Client(engine.transport);
+        const store = new ReadStore(client, fakePresence().presence, new StateMirror(client), {
             grace: 500,
             keptFor: KEPT_FOR,
         });
@@ -278,5 +281,31 @@ describe('store', () => {
             `read first ${API_KEY}`,
             'read first watch machines.list {} {}',
         ]);
+    });
+
+    test('an engine whose stream says it does not fit is incompatible and asked nothing more, until another fits', async () => {
+        // Given - machines.list settled over an engine whose state stream opens newer than this window
+        using _ = clock.run('2026-11-13T10:00:00Z');
+        const { engine, store } = await settled();
+        engine.answer('engine.state', {
+            out: { event: 'opened', fit: { app: 1, engine: 2, verdict: 'app-older' }, rev: 1 },
+        });
+        const unfit = store.link();
+
+        // When - a gesture rereads it, then the engine restarts as another whose stream fits
+        store.reread(['machines.list']);
+        const whileUnfit = engine.asked('machines.list');
+        engine.restart();
+        await clock.advance(1);
+        engine.answer('engine.state', {
+            out: { event: 'opened', fit: { app: 1, engine: 1, verdict: 'fits' }, rev: 1 },
+        });
+
+        // Then - the verdict is the engine's, nothing was asked of it, and the fitting engine is open and asked again
+        expect(unfit).toMatchObject({ fit: 'app-older', kind: 'incompatible', socket: 'fake' });
+        expect(whileUnfit).toBe(1);
+        expect(store.link()?.kind).toBe('open');
+        expect(engine.asked('machines.list')).toBe(2);
+        expect(engine.asked('engine.state')).toBe(2);
     });
 });

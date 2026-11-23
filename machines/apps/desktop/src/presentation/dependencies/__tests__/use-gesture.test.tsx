@@ -1,7 +1,6 @@
 import { component, content } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
-import { PAGE_REVISION } from '../../../domain/fit';
 import { keyOf } from '../../../domain/request-key';
 import { documentPresence } from '../../../infrastructure/outbound/document-presence/document-presence';
 import { Client } from '../../../infrastructure/outbound/engine-link/client';
@@ -13,7 +12,7 @@ import { useGesture } from '../use-gesture';
 
 const recordingFor = await recordingsOf('two-macs');
 
-const HELLO = { page: PAGE_REVISION, pid: 41, started_at: '2026-11-13T09:00:00Z', version: 'dev' };
+const HELLO = { pid: 41, started_at: '2026-11-13T09:00:00Z', version: 'dev' };
 
 function Newest() {
     const journal = useRead('journal.read', {});

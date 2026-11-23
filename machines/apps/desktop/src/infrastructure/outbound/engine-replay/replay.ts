@@ -1,6 +1,7 @@
 import type { EngineHello, Request } from '@jterrazz/station-api';
 
 import type { Link } from '../../../application/ports/engine.port';
+import type { Unfit } from '../../../domain/fit';
 import { isRecord, keyOf } from '../../../domain/request-key';
 import type { Exchange as Opened, Receiver, Transport } from '../engine-link/transport';
 import { answersOf } from './answers';
@@ -10,7 +11,7 @@ import { inFlight, play } from './played';
 import type { Played } from './played';
 import { refusalOf, stagedOf } from './staged';
 import { HeldStates, isState, openingOf, viewsOf } from './state';
-import { throwIf, unrecordedOf } from './unrecorded';
+import { reasonOf, throwIf, unrecordedOf } from './unrecorded';
 
 export type Exchange = { request: Record<string, unknown>; answers: readonly unknown[] };
 
@@ -69,16 +70,6 @@ export function recordingOf(value: unknown): Recording {
     };
 }
 
-// invariant: a request the world holds no answer for ends with no reason, as an engine that never answers does: the
-// invariant: window draws its own no-answer state, and the world's name never reaches the page; a gesture sent with an
-// invariant: input no recording of its call holds is a spec's mistake: it ends on what was sent and what is recorded, and throws.
-function reasonOf(shown: Link): string {
-    if (shown.kind === 'absent') {
-        return shown.reason;
-    }
-    return shown.kind === 'open' ? '' : 'connecting';
-}
-
 export type Pace = {
     gestureFrame: number;
     // value: how long the first answer to a request waits, by the request and how often its key was asked before.
@@ -90,6 +81,8 @@ export type Pace = {
     // value: the call or watch answered as recorded once per request, then refused as the world's first unreachable
     // value: Mac was: an answer kept on screen whose refresh was refused.
     stale?: string | undefined;
+    // value: the verdict the engine opens its state stream with until it restarts, `fittedOf`; none fits.
+    fit?: undefined | Unfit;
 };
 
 // value: a replay the spec drives: the link flips as shown, a drop ends every open exchange after its request was sent, a
@@ -119,6 +112,7 @@ class Staging {
     private readonly recording: Recording;
     private readonly pace: Pace | undefined;
     private readonly refusal: unknown;
+    private fit: undefined | Unfit;
     private readonly listeners = new Set<(link: Link) => void>();
     private readonly live = new Set<Live>();
     private readonly times = new Map<string, number>();
@@ -130,6 +124,7 @@ class Staging {
         this.pace = pace;
         this.answers = answersOf(recording);
         this.refusal = refusalOf(recording);
+        this.fit = pace?.fit;
         this.shown = link ?? {
             hello: helloOf(recording),
             kind: 'open',
@@ -160,6 +155,7 @@ class Staging {
 
     restart(hello: EngineHello, after: Recording | undefined): void {
         this.drop();
+        this.fit = undefined;
         this.answers = answersOf(after ?? this.recording);
         this.show({ hello, kind: 'open', refused: undefined, socket: this.socket() });
     }
@@ -206,7 +202,7 @@ class Staging {
                   }, 0),
               ];
         this.live.add(held);
-        if (played && isState(request)) {
+        if (played?.held === true && isState(request)) {
             this.states.hold(receiver, request);
         }
         return {
@@ -239,7 +235,7 @@ class Staging {
         }
         if (isState(request)) {
             const views = viewsOf(this.answers, request, this.pace?.unread);
-            return { first, ...openingOf(this.recording.world, views) };
+            return { first, ...openingOf(this.recording.world, views, this.fit) };
         }
         if (this.answers.gestures.has(key)) {
             return this.gesturePlayed(request, key, first);

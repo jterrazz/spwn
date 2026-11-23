@@ -8,7 +8,8 @@ import { flush, READING, stop } from './entry';
 import type { Asked, Entry, Reading } from './entry';
 import { FRESH_EVERY, Freshness, sameEngine } from './fresh';
 import type { Why } from './fresh';
-import { judged } from './reach';
+import type { StateMirror } from './mirror';
+import { judgedOf } from './reach';
 import type { Judged } from './reach';
 
 // value: `grace`, how long a request nobody holds stays open; `keptFor` and `keptAtMost`, how long and how many of the
@@ -40,7 +41,7 @@ export function askedKey(asked: Asked): string {
 // invariant: until `keptFor` has passed or `keptAtMost` answers left later are kept, and a subscriber back meanwhile
 // invariant: sees it at once while it is asked again. Every entry still open is asked again when the link opens, or
 // invariant: opens on another engine (its hello's pid or start); a kept one is asked when it is held again. A link
-// invariant: judged incompatible is no open link: nothing is asked of its engine until a hello that fits.
+// invariant: the mirror judges incompatible is no open link: nothing is asked of its engine until another that fits.
 // invariant: An entry a component holds is asked again by `Freshness` once its answer has settled, and every ask
 // invariant: over a settled answer (the cadence's, a gesture's rereads, a relink's) is quiet: the answer stays shown,
 // invariant: and a watch's next outs are held until it ends or the next tick, so a re-ask never draws a pending
@@ -51,11 +52,20 @@ export class ReadStore {
     private readonly entries = new Map<string, Entry>();
     private readonly linkListeners = new Set<() => void>();
     private readonly freshness: Freshness;
+    private readonly judging: Pick<StateMirror, 'fitOf' | 'subscribeFit'>;
+    private heardLink: Link | undefined;
     private shown: Judged | undefined;
     private unlink: (() => void) | undefined;
+    private unjudge: (() => void) | undefined;
 
-    constructor(client: EnginePort, presence: PresencePort, timing: Partial<StoreTiming> = {}) {
+    constructor(
+        client: EnginePort,
+        presence: PresencePort,
+        judging: Pick<StateMirror, 'fitOf' | 'subscribeFit'>,
+        timing: Partial<StoreTiming> = {},
+    ) {
         this.client = client;
+        this.judging = judging;
         this.timing = { ...DEFAULTS, ...timing };
         this.freshness = new Freshness(client, presence, this.timing, (why) => {
             this.refresh(why);
@@ -197,8 +207,12 @@ export class ReadStore {
     }
 
     private hold(): void {
+        this.unjudge ??= this.judging.subscribeFit(() => {
+            this.judge();
+        });
         this.unlink ??= this.client.link((link) => {
-            this.heard(link);
+            this.heardLink = link;
+            this.judge();
         });
     }
 
@@ -206,31 +220,48 @@ export class ReadStore {
         if (this.entries.size === 0 && this.linkListeners.size === 0) {
             this.unlink?.();
             this.unlink = undefined;
+            this.unjudge?.();
+            this.unjudge = undefined;
+            this.heardLink = undefined;
             this.shown = undefined;
             this.fresh();
         }
     }
 
-    private heard(heard: Link): void {
+    private judged(): Judged | undefined {
+        const heard = this.heardLink;
+        if (heard?.kind !== 'open') {
+            return heard;
+        }
+        return judgedOf(heard, this.judging.fitOf(heard.hello));
+    }
+
+    private judge(): void {
         const before = this.shown;
-        const link = judged(heard);
+        const link = this.judged();
+        if (link === undefined || link === before) {
+            return;
+        }
         this.shown = link;
         for (const listener of this.linkListeners) {
             listener();
         }
-        const opened = link.kind === 'open';
+        this.moved(before, link);
+        this.fresh();
+    }
+
+    private moved(before: Judged | undefined, link: Judged): void {
         const wasOpen = before?.kind === 'open';
-        if (opened && (!wasOpen || !sameEngine(before.hello, link.hello))) {
+        if (link.kind === 'open' && (!wasOpen || !sameEngine(before.hello, link.hello))) {
             for (const entry of this.entries.values()) {
                 if (!entry.kept) {
                     ask(this.client, entry);
                 }
             }
-        } else if (!opened && wasOpen) {
+        } else if (link.kind !== 'open' && wasOpen) {
             for (const entry of this.entries.values()) {
                 stop(entry);
             }
         }
-        this.fresh();
     }
 }

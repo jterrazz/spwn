@@ -16,7 +16,6 @@ import { scriptedCore } from '../../../../infrastructure/outbound/core-scripted/
 import { SCRIPTS } from '../../../../infrastructure/outbound/core-scripted/scripts';
 import { documentPresence } from '../../../../infrastructure/outbound/document-presence/document-presence';
 import { Client } from '../../../../infrastructure/outbound/engine-link/client';
-import { fittedLink } from '../../../../infrastructure/outbound/engine-replay/fitted';
 import { helloOf } from '../../../../infrastructure/outbound/engine-replay/hello';
 import { recordingsOf } from '../../../../infrastructure/outbound/engine-replay/recordings';
 import { stagedReplay } from '../../../../infrastructure/outbound/engine-replay/replay';
@@ -32,9 +31,16 @@ const rail = navigation('Rail');
 const PANEL = region('The engine on this Mac');
 const HOME = content('2 things need you.');
 
+function judgedOnce(stage: Stage): [number, number] {
+    const states = stage
+        .asked()
+        .filter((request) => 'watch' in request && request.watch === 'engine.state');
+    return [states.length, stage.open()];
+}
+
 function verdictOver(fit: 'app-older' | 'engine-older'): { stage: Stage; tree: ReactNode } {
     const recording = recordingFor('two-macs');
-    const stage = stagedReplay(recording, fittedLink(recording, fit));
+    const stage = stagedReplay(recording, undefined, { fit, gestureFrame: 0 });
     const core = scriptedCore(SCRIPTS.update, {
         onStarted: () => {
             stage.restart({ ...helloOf(recording), started_at: 'updated' }, recording);
@@ -56,8 +62,8 @@ function verdictOver(fit: 'app-older' | 'engine-older'): { stage: Stage; tree: R
 }
 
 describe('verdict', () => {
-    test('an engine older than this app is the panel in the one frame, says it in the foot, and is asked nothing', async () => {
-        // Given - an engine whose hello names a revision below the oldest accepted
+    test('an engine older than this app is the panel in the one frame, says it in the foot, and holds nothing open', async () => {
+        // Given - an engine whose state stream opens below the oldest revision accepted
         const { stage, tree } = verdictOver('engine-older');
         const result = await component.render(tree, async (visitor) => {
             // When - the window opens on it
@@ -67,13 +73,13 @@ describe('verdict', () => {
             await visitor.see(within(PANEL, content(INSTALL_LINE)));
             await visitor.see(within(rail, content('Engine older than this app')));
         });
-        expect(stage.asked()).toStrictEqual([]);
+        expect(judgedOnce(stage)).toStrictEqual([1, 0]);
         expect(result.errors.text).toBe('');
         await expect(result.tree).toMatch(file('./__expected__/fit-engine-older.aria.yaml'));
     });
 
     test('this app older than the engine is the panel with the window update named', async () => {
-        // Given - an engine whose hello names a revision above the newest known
+        // Given - an engine whose state stream opens above the newest revision known
         const { stage, tree } = verdictOver('app-older');
         const result = await component.render(tree, async (visitor) => {
             // When - the window opens on it
@@ -82,7 +88,7 @@ describe('verdict', () => {
             // Then - the verdict on the rail's Engine line
             await visitor.see(within(rail, content('This app older than the engine')));
         });
-        expect(stage.asked()).toStrictEqual([]);
+        expect(judgedOnce(stage)).toStrictEqual([1, 0]);
         expect(result.errors.text).toBe('');
         await expect(result.tree).toMatch(file('./__expected__/fit-app-older.aria.yaml'));
     });

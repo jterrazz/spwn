@@ -297,4 +297,35 @@ describe('mirror', () => {
         expect(mirror.refusedOf('overview.read:api')).toBeUndefined();
         expect(mirror.reading('overview.read:api').kind).toBe('read');
     });
+
+    test("the engine's opening is its verdict: a misfit closes the stream, and another engine is judged again", async () => {
+        // Given - a window holding only its link, over an engine whose stream opens older than the window
+        using _ = clock.run('2026-11-21T09:00:00Z');
+        const engine = fakeEngine(HELLO);
+        const mirror = new StateMirror(new Client(engine.transport));
+        let told = 0;
+        mirror.subscribeFit(() => {
+            told += 1;
+        });
+        await clock.advance(1);
+        engine.answer('engine.state', {
+            out: { ...OPENED.out, fit: { app: 1, engine: 0, verdict: 'engine-older' } },
+        });
+        const older = [mirror.fitOf(HELLO), engine.open('engine.state')];
+
+        // When - the engine restarts as another, whose opening names no verdict
+        engine.restart();
+        const restarted = { ...HELLO, pid: HELLO.pid + 1 };
+        const meanwhile = mirror.fitOf(restarted);
+        engine.answer('engine.state', { out: { epoch: EPOCH, event: 'opened', rev: 1 } });
+
+        // Then - older and closed, the new engine unjudged until it opens, then older too, each verdict told once
+        expect(older).toStrictEqual(['engine-older', 0]);
+        expect([meanwhile, mirror.fitOf(restarted), mirror.fitOf(HELLO)]).toStrictEqual([
+            undefined,
+            'engine-older',
+            undefined,
+        ]);
+        expect([engine.asked('engine.state'), told]).toStrictEqual([2, 2]);
+    });
 });

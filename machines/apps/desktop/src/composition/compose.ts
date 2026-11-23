@@ -65,21 +65,16 @@ function clockOf(recording: Recording): (() => Date) | undefined {
 
 const SCRIPTED_LOOK_EVERY = 500;
 
-async function scriptedOf(
-    recording: Recording,
-    script: string,
-    pace: Pace,
-    fitted: Link | undefined,
-): Promise<Composed> {
+async function scriptedOf(recording: Recording, script: string, pace: Pace): Promise<Composed> {
     const { scriptOf } = await import('../infrastructure/outbound/core-scripted/scripts');
     const found = scriptOf(script);
     if (found === undefined) {
-        return { transport: replayTransport(recording, fitted, pace) };
+        return { transport: replayTransport(recording, undefined, pace) };
     }
     const { scriptedCore } = await import('../infrastructure/outbound/core-scripted/scripted-core');
     if (found.answering === true) {
         const { updated } = await import('../infrastructure/outbound/core-scripted/release');
-        const stage = stagedReplay(recording, fitted, pace);
+        const stage = stagedReplay(recording, undefined, pace);
         const after = updated(recording);
         const core = scriptedCore(found, {
             gap: pace.gestureFrame,
@@ -117,7 +112,9 @@ async function composedOf({ inTauri, query }: Place): Promise<Composed> {
         return { transport: absent('no engine bridge outside the Tauri window') };
     }
     const { recordingFor } = await import('../infrastructure/outbound/engine-replay/recordings');
+    const { fittedOf } = await import('../infrastructure/outbound/engine-replay/fitted');
     const pace = {
+        fit: fittedOf(query.get('fit')),
         gestureFrame: Number(query.get('pace') ?? '0'),
         held: query.get('held') ?? undefined,
         stale: query.get('stale') ?? undefined,
@@ -127,18 +124,16 @@ async function composedOf({ inTauri, query }: Place): Promise<Composed> {
     const release = await import('../infrastructure/outbound/core-scripted/release');
     const recording =
         query.get('release') === 'refused' ? release.refreshRefused(recorded) : recorded;
-    const { fittedLink } = await import('../infrastructure/outbound/engine-replay/fitted');
-    const fitted = fittedLink(recording, query.get('fit'));
     const now = clockOf(recording);
     const script = query.get('core');
     if (script !== null) {
-        return { ...(await scriptedOf(recording, script, pace, fitted)), now };
+        return { ...(await scriptedOf(recording, script, pace)), now };
     }
     if (query.get('link') === 'blip') {
         const { blippedReplay } = await import('../infrastructure/outbound/engine-replay/blip');
         return { now, transport: blippedReplay(recording, pace) };
     }
-    return { now, transport: replayTransport(recording, fitted, pace) };
+    return { now, transport: replayTransport(recording, undefined, pace) };
 }
 
 async function windowUpdateOf({ inTauri, query }: Place): Promise<undefined | WindowUpdatePort> {

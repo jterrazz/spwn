@@ -1,19 +1,18 @@
 import type { EngineHello, Request } from '@jterrazz/station-api';
 import { clock } from '@jterrazz/test';
 
-import { PAGE_REVISION } from '../../../domain/fit';
 import { Client } from '../../../infrastructure/outbound/engine-link/client';
 import type { Receiver, Transport } from '../../../infrastructure/outbound/engine-link/transport';
 import type { Link } from '../../ports/engine.port';
 import type { PresencePort } from '../../ports/presence.port';
 import type { Asked, Reading } from '../entry';
+import { StateMirror } from '../mirror';
 import { ReadStore } from '../store';
 import type { StoreTiming } from '../store';
 
 type Opened = { request: Request; receiver: Receiver; closed: boolean };
 
 export const HELLO: EngineHello = {
-    page: PAGE_REVISION,
     pid: 1,
     started_at: '2026-11-13T09:00:00Z',
     version: 'v1',
@@ -123,7 +122,8 @@ export function fakePresence() {
 export async function unsettled(hello: EngineHello = HELLO, timing: Partial<StoreTiming> = {}) {
     const engine = fakeEngine(hello);
     const seen = fakePresence();
-    const store = new ReadStore(new Client(engine.transport), seen.presence, {
+    const client = new Client(engine.transport);
+    const store = new ReadStore(client, seen.presence, new StateMirror(client), {
         every: EVERY,
         grace: 500,
         ...timing,
