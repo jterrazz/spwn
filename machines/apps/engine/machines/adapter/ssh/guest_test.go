@@ -485,3 +485,19 @@ func TestARepinTakesOneLineHoldingOneKeyAndNothingElse(t *testing.T) {
 		}
 	}
 }
+
+func TestARepinTakesTheLineARealLockdownPrintedBeforeItWasKilled(t *testing.T) {
+	// value: what macos-firstlogin.sh prints on the pinned macos-tahoe-base
+	// (macOS 26.6.2, 25G83) when it is killed right after its print.
+	printed := "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILfppDqoZeh8VT6wKD6cvMPGhBzgZ2SaaTVigCblfOlJ root@Manageds-Virtual-Machine.local\n"
+	known := filepath.Join(t.TempDir(), "known_hosts")
+	if err := os.WriteFile(known, []byte("dev ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMYRnPRb0woo5J/IbiUEUkSJ8kxETUFsKOWJfNno6nc5\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := Repin(local.New(nil, nil, io.Discard, io.Discard).FS, known, "dev", printed); err != nil {
+		t.Fatalf("the real print was refused: %v", err)
+	}
+	if got, _ := os.ReadFile(known); string(got) != "dev ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILfppDqoZeh8VT6wKD6cvMPGhBzgZ2SaaTVigCblfOlJ\n" {
+		t.Errorf("known hosts hold %q; want the printed key alone", got)
+	}
+}
