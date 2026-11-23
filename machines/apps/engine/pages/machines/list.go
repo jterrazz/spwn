@@ -51,7 +51,7 @@ func List(f model.AllMachines, warnings []string, thisMac page.Context) page.Pag
 	title, caption := firstLine(model.Tally(f), len(findings))
 	sections := []page.Section{{ID: "machines", Title: title, Caption: caption, Joined: true, Role: page.Banner, Uncounted: true, Columns: listColumns(), Items: items}}
 	if len(findings) > 0 {
-		sections = append(sections, needsYou(findings))
+		sections = append(sections, needsYou(findings, macNames(f)))
 	}
 	if len(warnings) > 0 {
 		notes := make([]page.Item, 0, len(warnings))
@@ -83,7 +83,17 @@ func many(n int, noun string) string {
 	return strconv.Itoa(n) + " " + noun + "s"
 }
 
-func needsYou(fs []model.Need) page.Section {
+func macNames(f model.AllMachines) map[string]string {
+	names := map[string]string{}
+	for _, h := range f.Macs {
+		if label := model.Label(f, h); !h.ThisMac && label != h.Name {
+			names[label] = h.Name
+		}
+	}
+	return names
+}
+
+func needsYou(fs []model.Need, macNames map[string]string) page.Section {
 	items := make([]page.Item, 0, len(fs))
 	for i, f := range fs {
 		mark, reason := page.Attention, page.Degraded
@@ -92,6 +102,9 @@ func needsYou(fs []model.Need) page.Section {
 		}
 		says := strings.TrimPrefix(f.Text, f.Subject+" ")
 		row := page.Row{ID: strconv.Itoa(i) + "-" + f.Subject, Label: f.Subject, Mark: mark, Reason: reason, Cells: []page.Value{page.Text(says), fixOf(f)}}
+		if name, ok := macNames[f.Subject]; ok {
+			row.Label, row.Short = name, f.Subject
+		}
 		items = append(items, page.Item{Row: &row})
 	}
 	columns := []page.Column{{Key: "subject", Kind: page.KindText, Keep: 100}, {Key: "finding", Kind: page.KindList, Keep: 90}, {Key: "fix", Kind: page.KindList, Keep: 50}}
