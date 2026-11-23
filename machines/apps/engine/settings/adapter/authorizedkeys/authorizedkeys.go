@@ -89,7 +89,8 @@ const (
 // value: every authorized_keys station wrote its block in and has not
 // taken it out of yet, as the system names it, with the block's text and
 // whether station made the file and its ~/.ssh; the last is the one the
-// last apply wrote.
+// last apply wrote. Was is the block station's file held when an apply
+// began writing another, kept as station's until that write lands.
 type record struct {
 	Files []written `json:"files"`
 }
@@ -99,7 +100,12 @@ type written struct {
 	Body       string `json:"body"`
 	MadeFile   bool   `json:"made_file,omitempty"`
 	MadeFolder bool   `json:"made_folder,omitempty"`
+	Was        string `json:"was,omitempty"`
 }
+
+// value: have, the block a file holds, is one station wrote there: the
+// last, or the one a write not landed yet would have replaced.
+func (w written) ours(have string) bool { return have == w.Body || w.Was != "" && have == w.Was }
 
 type account struct {
 	name, home, shell string
@@ -176,7 +182,7 @@ func (a *Applier) takeOut(w written, h holding, id string) ([]settings.ChangeSte
 	switch {
 	case state == settings.BlockAbsent:
 		return []settings.ChangeStep{{Label: w.File, State: catalog.StateOK, Detail: "already gone"}}, false, nil
-	case state == settings.BlockDamaged || have != w.Body:
+	case state == settings.BlockDamaged || !w.ours(have):
 		return []settings.ChangeStep{{Label: w.File, State: catalog.StateOK, Detail: "yours, kept"}}, true, stillSigns(w.File, text, id)
 	}
 	updated, _ := settings.RemovePackageBlock(text, id)
@@ -271,7 +277,7 @@ func (a *Applier) Kept(_ context.Context, it catalog.Setting) error {
 			continue
 		}
 		w := files[file]
-		if have, state := settings.PackageBlock(text, k.Block); state == settings.BlockDamaged || w != nil && state == settings.BlockHere && have != w.Body {
+		if have, state := settings.PackageBlock(text, k.Block); state == settings.BlockDamaged || w != nil && state == settings.BlockHere && !w.ours(have) {
 			why = append(why, stillSigns(file, text, k.Block))
 		}
 	}
@@ -485,6 +491,9 @@ func (a *Applier) Observe(_ context.Context, it catalog.Setting) (settings.Obser
 	case state == settings.BlockAbsent:
 		o.State = catalog.StateAbsent
 		return o, nil
+	case state == settings.BlockHere && r.Was != "" && have == r.Was:
+		o.State, o.Detail, o.Loose = catalog.StateDegraded, "differs from Machines': station settings apply "+it.Name, true
+		o.Diff = settings.UnifiedDiff(r.Body, have, "Machines' "+r.File, r.File)
 	case state == settings.BlockHere && (unrecorded || have == r.Body):
 		o.State, o.Detail = catalog.StateOK, r.File
 		l, err := a.loose(r.File, it.Name)
@@ -577,14 +586,17 @@ func (a *Applier) Apply(ctx context.Context, it catalog.Setting, values map[stri
 	if err != nil {
 		return settings.Change{}, err
 	}
-	if _, state := settings.PackageBlock(text, k.Block); state == settings.BlockDamaged {
+	have, state := settings.PackageBlock(text, k.Block)
+	if state == settings.BlockDamaged {
 		return settings.Change{}, fmt.Errorf("%s holds a damaged %s block, a start with no end or two blocks, not touched: delete %s of %s, then apply again", file, k.Block, strings.Join(settings.DamagedLines(text, k.Block), " and "), file)
 	}
 	updated, changed := settings.UpsertPackageBlock(text, k.Block, body)
 	// invariant: the record names the file before its block is written, so
 	// a run cut between the two leaves off a block it knows, never one it
-	// does not: a recorded block that never landed reads gone. What station
-	// made, the file or its folder, stays recorded as made across applies.
+	// does not: a recorded block that never landed reads gone, and the block
+	// of station's it would have replaced stays station's until it lands.
+	// What station made, the file or its folder, stays recorded as made
+	// across applies.
 	now := written{File: file, Body: body, MadeFile: !there, MadeFolder: madeFolder}
 	var olds []written
 	for _, w := range rec.Files {
@@ -594,6 +606,9 @@ func (a *Applier) Apply(ctx context.Context, it catalog.Setting, values map[stri
 		}
 		now.MadeFile = now.MadeFile || w.MadeFile
 		now.MadeFolder = now.MadeFolder || w.MadeFolder
+		if state == settings.BlockHere && w.ours(have) && have != body {
+			now.Was = have
+		}
 	}
 	err = a.save(record{Files: append(slices.Clone(olds), now)})
 	if err != nil {
@@ -628,6 +643,7 @@ func (a *Applier) Apply(ctx context.Context, it catalog.Setting, values map[stri
 			stays = append(stays, why)
 		}
 	}
+	now.Was = ""
 	err = a.save(record{Files: append(kept, now)})
 	if err != nil {
 		return settings.Change{}, err

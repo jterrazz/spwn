@@ -10,6 +10,7 @@ import (
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/platform/local"
+	"github.com/jterrazz/studio-station/apps/engine/settings/adapter/authorizedkeys"
 	"github.com/jterrazz/studio-station/apps/engine/settings/contract"
 )
 
@@ -90,6 +91,23 @@ func TestOffOnAFileItCannotReadNeedsYou(t *testing.T) {
 	}
 	if _, err := m.open().Undo(context.Background(), setting()); !errors.Is(err, contract.ErrKept) {
 		t.Fatalf("Undo on a hard-linked file = %v; want needs-you", err)
+	}
+}
+
+func TestAWriteThatFailsLeavesMachinesOldBlockMachines(t *testing.T) {
+	m := newMachine(t)
+	m.mkdir("root/.ssh", 0o700)
+	own := key(t, 9, "laptop") + "\n"
+	m.write(rootAK, own, 0o600)
+	apply(t, m.open(), "root", key(t, 1, "old"))
+	extra := key(t, 8, "phone") + "\n"
+	stale := m.content(rootAK) + extra
+	_, err := m.openWith(racing{FS: m.disk, record: m.at(authorizedkeys.Record), file: m.at(rootAK), text: stale, done: new(bool)}).Apply(context.Background(), setting(), map[string]string{"user": "root", "key": key(t, 2, "new")})
+	if err == nil || m.content(rootAK) != stale {
+		t.Fatalf("Apply over a changed file = %v; want it refused", err)
+	}
+	if _, err := m.open().Undo(context.Background(), setting()); err != nil || m.content(rootAK) != own+extra {
+		t.Fatalf("Undo after a failed write = %v; file %q; want Machines' old block out", err, m.content(rootAK))
 	}
 }
 

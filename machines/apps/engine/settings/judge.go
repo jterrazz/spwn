@@ -75,9 +75,10 @@ type Observation struct {
 	Before, After []KeyValue
 	// value: an effect station cannot read back once done (the Dock reset).
 	Blind bool
-	// value: a drift only in what holds station's effect, a mode or an
-	// owner, the effect itself still exactly station's: off takes it away,
-	// since nothing of the owner's is inside it.
+	// value: a drift with nothing of the owner's in it: a mode or an owner
+	// of what holds station's effect, the effect itself still exactly
+	// station's, or station's own earlier effect a write that did not land
+	// left: off takes it away.
 	Loose bool
 }
 
