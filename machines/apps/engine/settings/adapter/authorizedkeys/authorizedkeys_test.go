@@ -317,6 +317,32 @@ func TestALinkedAuthorizedKeysIsNeitherReadNorReplaced(t *testing.T) {
 	}
 }
 
+// invariant: a block whose end marker is gone, or that is there twice, is
+// refused before any write, so a second apply never takes the owner's keys
+// after a lone start marker for station's.
+func TestADamagedBlockIsRefusedAndTheOwnersKeysKept(t *testing.T) {
+	for name, own := range map[string]string{
+		"a start with no end": key(t, 9, "laptop") + "\n# >>> station:authorized-key >>>\n" + key(t, 8, "phone") + "\n" + key(t, 7, "tablet") + "\n",
+		"two blocks":          block(key(t, 1, "")) + key(t, 9, "laptop") + "\n" + block(key(t, 2, "")),
+	} {
+		t.Run(name, func(t *testing.T) {
+			m := newMachine(t)
+			m.mkdir("root/.ssh", 0o700)
+			m.write(rootAK, own, 0o600)
+			a := m.open()
+			for range 2 {
+				err := refused(t, a, "root", key(t, 1, "ci"))
+				if !strings.Contains(err.Error(), "/root/.ssh/authorized_keys holds a damaged station:authorized-key block") || !strings.Contains(err.Error(), "then apply again") {
+					t.Fatalf("Apply = %v; want the damage named with its repair", err)
+				}
+			}
+			if got := m.content(rootAK); got != own {
+				t.Fatalf("authorized_keys = %q; want the owner's bytes %q", got, own)
+			}
+		})
+	}
+}
+
 // invariant: a home that is a link, not the user's, or not there is
 // refused: Machines writes in a real home and never makes one.
 func TestAHomeThatIsNotTheUsersRealFolderIsRefused(t *testing.T) {

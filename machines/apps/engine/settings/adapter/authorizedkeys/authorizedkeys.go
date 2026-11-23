@@ -178,6 +178,10 @@ func (a *Applier) Apply(_ context.Context, it catalog.Setting, values map[string
 	if err != nil {
 		return settings.Change{}, err
 	}
+	if _, state := settings.PackageBlock(text, k.Block); state == settings.BlockDamaged {
+		start, end := settings.BlockMarkers(k.Block)
+		return settings.Change{}, fmt.Errorf("%s holds a damaged %s block, a start with no end or two blocks, not touched: leave one `%s` line and one `%s` line around Machines' keys, then apply again", file, k.Block, start, end)
+	}
 	updated, changed := settings.UpsertPackageBlock(text, k.Block, body)
 	err = a.folder(base, ssh, who)
 	if err != nil {
