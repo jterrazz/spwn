@@ -520,7 +520,7 @@ func (a *Applier) Undo(ctx context.Context, it catalog.Setting) (settings.Change
 		return settings.Change{}, err
 	}
 	if len(rec.Files) == 0 {
-		return a.unrecorded(ctx, it, k.Block)
+		return a.unrecorded(ctx, k.Block)
 	}
 	files := make([]string, 0, len(rec.Files))
 	for _, w := range rec.Files {
@@ -551,10 +551,6 @@ func (a *Applier) Undo(ctx context.Context, it catalog.Setting) (settings.Change
 	return settings.Change{Steps: steps}, errors.Join(stays...)
 }
 
-// invariant: with no record, the block's markers are the record: off looks
-// in the file of the package's default user, and a block of station's
-// there leaves it, its owner's lines as they were; a damaged one is
-// refused, so off never reads done while a block of station's is left.
 type loosened struct {
 	// value: why the keys are ignored, at what path, and the mode and owner
 	// Machines sets there against what is there now; why empty when strict.
@@ -656,40 +652,76 @@ func (a *Applier) fallback(it catalog.Setting) (string, bool) {
 	return path.Join(who.home, ".ssh", "authorized_keys"), true
 }
 
-func (a *Applier) unrecorded(ctx context.Context, it catalog.Setting, id string) (settings.Change, error) {
-	file, ok := a.fallback(it)
-	if !ok {
-		return settings.Change{}, nil
-	}
-	held, letGo, err := a.holdAll(ctx, []string{file})
+// invariant: with no record, the block's markers are the record: off looks
+// in the authorized_keys of every account that signs in, root's among
+// them, and a block of station's there leaves it, its owner's lines as
+// they were; a damaged one is refused, so off never reads done while a
+// block of station's is left.
+func (a *Applier) unrecorded(ctx context.Context, id string) (settings.Change, error) {
+	files := a.signingIn()
+	held, letGo, err := a.holdAll(ctx, files)
 	if err != nil {
 		return settings.Change{}, err
 	}
 	defer letGo()
-	h := held[file]
+	var steps []settings.ChangeStep
+	var stays []error
+	for _, file := range files {
+		step, err := a.unrecordedIn(file, held[file], id)
+		if step != nil {
+			steps = append(steps, *step)
+		}
+		stays = append(stays, err)
+	}
+	return settings.Change{Steps: steps}, errors.Join(stays...)
+}
+
+func (a *Applier) unrecordedIn(file string, h holding, id string) (*settings.ChangeStep, error) {
 	switch {
 	case errors.Is(h.err, fs.ErrNotExist):
-		return settings.Change{}, nil
+		return nil, nil
 	case h.err != nil:
-		return settings.Change{}, h.err
+		return nil, h.err
 	}
 	text, _, err := a.textIn(h.folder)
 	if err != nil {
-		return settings.Change{}, err
+		return nil, err
 	}
 	switch _, state := settings.PackageBlock(text, id); state {
 	case settings.BlockAbsent:
-		return settings.Change{}, nil
+		return nil, nil
 	case settings.BlockDamaged:
-		return settings.Change{}, fmt.Errorf("%s holds a damaged %s block Machines has no record of, not touched: delete %s of %s, then the rest of the block", file, id, strings.Join(settings.DamagedLines(text, id), " and "), file)
+		return nil, fmt.Errorf("%s holds a damaged %s block Machines has no record of, not touched: delete %s of %s, then the rest of the block", file, id, strings.Join(settings.DamagedLines(text, id), " and "), file)
 	case settings.BlockHere:
 	}
 	updated, _ := settings.RemovePackageBlock(text, id)
 	err = h.folder.Replace(keysFile, []byte(updated), 0o600, local.Owner{})
 	if err != nil {
-		return settings.Change{}, a.linked(err)
+		return nil, a.linked(err)
 	}
-	return settings.Change{Steps: []settings.ChangeStep{{Label: file, State: catalog.StateOK, Detail: "removed, found with no record"}}}, nil
+	return &settings.ChangeStep{Label: file, State: catalog.StateOK, Detail: "removed, found with no record"}, nil
+}
+
+// value: the authorized_keys of every account of /etc/passwd that signs
+// in, root's always, each once.
+func (a *Applier) signingIn() []string {
+	files := []string{"/root/.ssh/" + keysFile}
+	data, _ := a.files.ReadFile(a.at("/etc/passwd"))
+	for line := range strings.SplitSeq(string(data), "\n") {
+		f := strings.Split(line, ":")
+		if len(f) < 7 {
+			continue
+		}
+		who, err := a.account(f[0])
+		if err != nil || who.home == "/" || signsIn(who) != nil {
+			continue
+		}
+		file := path.Join(who.home, ".ssh", keysFile)
+		if !slices.Contains(files, file) {
+			files = append(files, file)
+		}
+	}
+	return files
 }
 
 func Keys(given string) (string, error) {

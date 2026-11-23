@@ -867,3 +867,18 @@ func TestWithoutAdminAndNoRecordTheReadIsNeverRefused(t *testing.T) {
 		t.Fatalf("Observe without admin = %+v, %v; want absent or blind", o, err)
 	}
 }
+
+func TestOffWithNoRecordFindsABlockInEveryAccountThatSignsIn(t *testing.T) {
+	m := newMachine(t)
+	m.mkdir("home/ci/.ssh", 0o700)
+	m.chown("home/ci/.ssh", m.ci)
+	own := key(t, 9, "laptop") + "\n"
+	m.write(ciAK, own+block(key(t, 1, "x")), 0o600)
+	m.chown(ciAK, m.ci)
+	it := setting()
+	it.Inputs = []catalog.Input{{Name: "user", Default: "root"}, {Name: "key"}}
+	_, err := m.open().Undo(context.Background(), it)
+	if err != nil || m.content(ciAK) != own {
+		t.Fatalf("Undo with no record = %v; ci's file %q; want the block found and removed", err, m.content(ciAK))
+	}
+}
