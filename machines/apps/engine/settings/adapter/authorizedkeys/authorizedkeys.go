@@ -66,9 +66,14 @@ const (
 	InputKey  = "key"
 )
 
-// value: what station last wrote: the file, as the system names it, and
-// the block's text.
+// value: every authorized_keys station wrote its block in and has not
+// taken it out of yet, as the system names it, with the block's text; the
+// last is the one the last apply wrote.
 type record struct {
+	Files []written `json:"files"`
+}
+
+type written struct {
 	File string `json:"file"`
 	Body string `json:"body"`
 }
@@ -88,19 +93,65 @@ func of(it catalog.Setting) (catalog.AuthorizedKeys, error) {
 
 func (a *Applier) at(p string) string { return path.Join("/", a.o.Root, p) }
 
-func (a *Applier) last() (record, bool, error) {
+func (a *Applier) read() (record, error) {
 	data, err := a.files.ReadFile(a.o.Record)
 	switch {
 	case errors.Is(err, fs.ErrNotExist):
-		return record{}, false, nil
+		return record{}, nil
 	case err != nil:
-		return record{}, false, err
+		return record{}, err
 	}
 	var r record
 	if err := json.Unmarshal(data, &r); err != nil {
-		return record{}, false, fmt.Errorf("%s: %w", a.o.Record, err)
+		return record{}, fmt.Errorf("%s: %w", a.o.Record, err)
 	}
-	return r, r.File != "", nil
+	return r, nil
+}
+
+// invariant: a record with no file left is no record: its file is removed.
+func (a *Applier) save(r record) error {
+	if len(r.Files) == 0 {
+		err := a.files.Remove(a.o.Record)
+		if errors.Is(err, fs.ErrNotExist) {
+			return nil
+		}
+		return err
+	}
+	data, err := json.Marshal(r)
+	if err != nil {
+		return err
+	}
+	err = a.files.MkdirAll(path.Dir(a.o.Record), 0o700)
+	if err != nil {
+		return err
+	}
+	return a.files.Replace(a.o.Record, data, 0o600)
+}
+
+// value: what taking station's block out of w's file did, whether the
+// record keeps w, and why a block of station's stays there: a block gone
+// already, or taken out, is no longer station's to hold; one the owner
+// changed is kept as it is and stays recorded, and so does one in a file
+// station cannot read or write, with that error.
+func (a *Applier) takeOut(w written, id string) (settings.ChangeStep, bool, error) {
+	text, _, err := a.text(w.File)
+	if err != nil {
+		return settings.ChangeStep{Label: w.File, State: catalog.StateBroken, Detail: "not touched"}, true, err
+	}
+	have, state := settings.PackageBlock(text, id)
+	switch {
+	case state == settings.BlockAbsent:
+		return settings.ChangeStep{Label: w.File, State: catalog.StateOK, Detail: "already gone"}, false, nil
+	case state != settings.BlockHere || have != w.Body:
+		return settings.ChangeStep{Label: w.File, State: catalog.StateOK, Detail: "yours, kept"}, true, nil
+	}
+	updated, _ := settings.RemovePackageBlock(text, id)
+	base, rel := a.beneath(w.File)
+	err = a.home.Replace(base, rel, []byte(updated), 0o600, local.Owner{})
+	if err != nil {
+		return settings.ChangeStep{Label: w.File, State: catalog.StateBroken, Detail: "not touched"}, true, a.linked(err)
+	}
+	return settings.ChangeStep{Label: w.File, State: catalog.StateOK, Detail: "removed"}, false, nil
 }
 
 // value: the folder of the system that holds the home of the
@@ -126,10 +177,11 @@ func (a *Applier) Observe(_ context.Context, it catalog.Setting) (settings.Obser
 	if err != nil {
 		return settings.Observation{}, err
 	}
-	r, ok, err := a.last()
-	if err != nil || !ok {
+	rec, err := a.read()
+	if err != nil || len(rec.Files) == 0 {
 		return settings.Observation{State: catalog.StateAbsent}, err
 	}
+	r := rec.Files[len(rec.Files)-1]
 	text, _, err := a.text(r.File)
 	if err != nil {
 		return settings.Observation{}, err
@@ -207,15 +259,7 @@ func (a *Applier) Apply(_ context.Context, it catalog.Setting, values map[string
 			return settings.Change{}, a.linked(err)
 		}
 	}
-	data, err := json.Marshal(record{File: file, Body: body})
-	if err != nil {
-		return settings.Change{}, err
-	}
-	err = a.files.MkdirAll(path.Dir(a.o.Record), 0o700)
-	if err != nil {
-		return settings.Change{}, err
-	}
-	err = a.files.Replace(a.o.Record, data, 0o600)
+	rec, err := a.read()
 	if err != nil {
 		return settings.Change{}, err
 	}
@@ -223,43 +267,57 @@ func (a *Applier) Apply(_ context.Context, it catalog.Setting, values map[string
 	if !changed && there {
 		detail = "already there"
 	}
-	return settings.Change{Steps: []settings.ChangeStep{{Label: file, State: catalog.StateOK, Detail: detail}}}, nil
+	steps := []settings.ChangeStep{{Label: file, State: catalog.StateOK, Detail: detail}}
+	var kept []written
+	var stays []error
+	for _, w := range rec.Files {
+		if w.File == file {
+			continue
+		}
+		step, keep, why := a.takeOut(w, k.Block)
+		steps = append(steps, step)
+		if keep {
+			kept = append(kept, w)
+		}
+		stays = append(stays, why)
+	}
+	err = a.save(record{Files: append(kept, written{File: file, Body: body})})
+	if err != nil {
+		return settings.Change{}, err
+	}
+	return settings.Change{Steps: steps}, errors.Join(stays...)
 }
 
 func (a *Applier) Undo(_ context.Context, it catalog.Setting) (settings.Change, error) {
-	// invariant: the block leaves the file only while it is still exactly
-	// station's, and nothing else of the file moves: off never destroys a
-	// line of the owner's.
+	// invariant: the block leaves every file station wrote it in, each only
+	// while it is still exactly station's, and nothing else of a file moves:
+	// off never destroys a line of the owner's.
 	k, err := of(it)
 	if err != nil {
 		return settings.Change{}, err
 	}
-	r, ok, err := a.last()
-	if err != nil || !ok {
-		return settings.Change{}, err
-	}
-	text, _, err := a.text(r.File)
+	rec, err := a.read()
 	if err != nil {
 		return settings.Change{}, err
 	}
-	have, state := settings.PackageBlock(text, k.Block)
-	switch {
-	case state == settings.BlockAbsent:
-		return settings.Change{}, a.files.Remove(a.o.Record)
-	case state != settings.BlockHere || have != r.Body:
-		return settings.Change{Steps: []settings.ChangeStep{{Label: r.File, State: catalog.StateOK, Detail: "yours, kept"}}}, nil
+	var steps []settings.ChangeStep
+	var kept []written
+	var stays []error
+	for _, w := range rec.Files {
+		step, keep, why := a.takeOut(w, k.Block)
+		if step.Detail != "already gone" {
+			steps = append(steps, step)
+		}
+		if keep {
+			kept = append(kept, w)
+		}
+		stays = append(stays, why)
 	}
-	updated, _ := settings.RemovePackageBlock(text, k.Block)
-	base, rel := a.beneath(r.File)
-	err = a.home.Replace(base, rel, []byte(updated), 0o600, local.Owner{})
-	if err != nil {
-		return settings.Change{}, a.linked(err)
-	}
-	err = a.files.Remove(a.o.Record)
+	err = a.save(record{Files: kept})
 	if err != nil {
 		return settings.Change{}, err
 	}
-	return settings.Change{Steps: []settings.ChangeStep{{Label: r.File, State: catalog.StateOK, Detail: "removed"}}}, nil
+	return settings.Change{Steps: steps}, errors.Join(stays...)
 }
 
 func Keys(given string) (string, error) {

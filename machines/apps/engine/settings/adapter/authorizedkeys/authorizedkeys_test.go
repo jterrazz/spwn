@@ -343,6 +343,50 @@ func TestADamagedBlockIsRefusedAndTheOwnersKeysKept(t *testing.T) {
 	}
 }
 
+// invariant: applying for another user takes station's block out of the
+// first user's file, so the key it granted there stops signing in; off
+// takes it out of every file station wrote.
+func TestAnotherUserTakesTheBlockOutOfTheFirstUsersFile(t *testing.T) {
+	m := newMachine(t)
+	m.mkdir("root/.ssh", 0o700)
+	own := key(t, 9, "laptop") + "\n"
+	m.write(rootAK, own, 0o600)
+	a := m.open()
+	apply(t, a, "root", key(t, 1, "ci"))
+	change := apply(t, a, "ci", key(t, 1, "ci"))
+	if got := m.content(rootAK); got != own {
+		t.Fatalf("root's authorized_keys = %q; want the owner's line alone, %q", got, own)
+	}
+	if len(change.Steps) != 2 || change.Steps[1].Label != "/root/.ssh/authorized_keys" || change.Steps[1].Detail != "removed" {
+		t.Fatalf("steps %+v; want root's block named removed", change.Steps)
+	}
+	if got := m.content(ciAK); got != block(key(t, 1, "ci")) {
+		t.Fatalf("ci's authorized_keys = %q", got)
+	}
+	if _, err := a.Undo(context.Background(), setting()); err != nil {
+		t.Fatal(err)
+	}
+	if m.content(ciAK) != "" || m.content(rootAK) != own || m.there("state/authorized-keys.json") {
+		t.Fatalf("after off ci %q, root %q, record there %v; want both blocks gone and no record", m.content(ciAK), m.content(rootAK), m.there("state/authorized-keys.json"))
+	}
+}
+
+func TestABlockTheOwnerChangedIsKeptWhenAnotherUserTakesIt(t *testing.T) {
+	m := newMachine(t)
+	a := m.open()
+	apply(t, a, "root", key(t, 1, "ci"))
+	edited := strings.Replace(m.content(rootAK), " ci\n", " mine\n", 1)
+	m.write(rootAK, edited, 0o600)
+	change := apply(t, a, "ci", key(t, 1, "ci"))
+	if len(change.Steps) != 2 || change.Steps[1].Detail != "yours, kept" || m.content(rootAK) != edited {
+		t.Fatalf("steps %+v, root %q; want root's block kept as the owner left it", change.Steps, m.content(rootAK))
+	}
+	off, err := a.Undo(context.Background(), setting())
+	if err != nil || len(off.Steps) != 2 || off.Steps[0].Detail != "yours, kept" || off.Steps[1].Detail != "removed" || m.content(rootAK) != edited {
+		t.Fatalf("Undo = %+v, %v; want root's kept, ci's removed", off.Steps, err)
+	}
+}
+
 // invariant: a home that is a link, not the user's, or not there is
 // refused: Machines writes in a real home and never makes one.
 func TestAHomeThatIsNotTheUsersRealFolderIsRefused(t *testing.T) {

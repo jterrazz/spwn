@@ -1,0 +1,36 @@
+description: 'applied for another user, authorized-key leaves the first file, and off leaves every file it wrote'
+env:
+    - in-workspace
+    - engine
+runs:
+    - command: 'world admin on'
+      exit: 0
+    - command: '--version >/dev/null; /bin/mkdir -p root/root root/srv/ci root/etc && printf ''root:x:0:0:root:/root:/bin/bash\nci:x:1001:1001:CI:/srv/ci:/bin/bash\n'' > root/etc/passwd'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | .out[0].Steps'''
+      stdin: |
+          {"v":2,"id":"1","call":"settings.apply","in":{"Names":["authorized-key"],"Values":{"authorized-key":{"user":"root","key":"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGZ2c8e4bOqkqO0+5N0VXlFz4sVJyDQzH+LVRG4RvMZb ci@deploy"}}}}
+      exit: 0
+      stdout: |
+          [{"Label":"/root/.ssh/authorized_keys","State":"ok","Detail":"written"}]
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | .out[0].Steps'''
+      stdin: |
+          {"v":2,"id":"1","call":"settings.apply","in":{"Names":["authorized-key"],"Values":{"authorized-key":{"user":"ci","key":"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGZ2c8e4bOqkqO0+5N0VXlFz4sVJyDQzH+LVRG4RvMZb ci@deploy"}}}}
+      exit: 0
+      stdout: |
+          [{"Label":"/srv/ci/.ssh/authorized_keys","State":"ok","Detail":"written"},{"Label":"/root/.ssh/authorized_keys","State":"ok","Detail":"removed"}]
+    - command: '--version >/dev/null; /usr/bin/wc -c < root/root/.ssh/authorized_keys; /bin/cat root/srv/ci/.ssh/authorized_keys'
+      exit: 0
+      stdout: |
+          0
+          # >>> station:authorized-key >>>
+          ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGZ2c8e4bOqkqO0+5N0VXlFz4sVJyDQzH+LVRG4RvMZb ci@deploy
+          # <<< station:authorized-key <<<
+    - command: 'settings off authorized-key --yes'
+      exit: 0
+      stdout: |
+          ●	authorized-key	/srv/ci/.ssh/authorized_keys: removed
+    - command: '--version >/dev/null; /usr/bin/wc -c < root/srv/ci/.ssh/authorized_keys'
+      exit: 0
+      stdout: |
+          0
