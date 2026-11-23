@@ -120,7 +120,7 @@ func TestTheFileStationCreatedIsRemovedWithItsLastBlockNeverLeftEmpty(t *testing
 }
 
 func TestABlockOnAMacOffersTheDeviceKeyThroughStationsAgentThenTheOwnersKeyAndNothingElse(t *testing.T) {
-	f := files{}
+	f := files{home + "/.ssh/id_ed25519": []byte("key")}
 	c := New(f, Options{
 		Home: home, KnownHosts: home + "/.local/state/station/known_hosts", Executable: "/bin/station",
 		Agent: home + "/.local/state/station/agent.sock", DeviceKey: home + "/.local/state/station/device-key.pub",
@@ -140,7 +140,7 @@ func TestABlockOnAMacOffersTheDeviceKeyThroughStationsAgentThenTheOwnersKeyAndNo
 }
 
 func TestABlockOffTheMacNamesNoAgent(t *testing.T) {
-	f := files{}
+	f := files{home + "/.ssh/id_ed25519": []byte("key")}
 	if err := adapter(f).Put(context.Background(), []contract.MachineBlock{{Name: "mac-mini"}}); err != nil {
 		t.Fatal(err)
 	}
@@ -163,5 +163,38 @@ func TestAVMOfThisMacIsReachedThroughTheEnginesPathAsOneShellWord(t *testing.T) 
 		if got := string(read(t, f)); !strings.Contains(got, want) {
 			t.Errorf("with %s the block lacks\n%s\nin\n%s", executable, want, got)
 		}
+	}
+}
+
+func TestABlockNamesNoDefaultKeyThatIsNotOnThisMac(t *testing.T) {
+	f := files{}
+	c := New(f, Options{
+		Home: home, KnownHosts: home + "/.local/state/station/known_hosts", Executable: "/bin/station",
+		Agent: home + "/.local/state/station/agent.sock", DeviceKey: home + "/.local/state/station/device-key.pub",
+	})
+	if err := c.Put(context.Background(), []contract.MachineBlock{{Name: "linux-1", Behind: "mac-mini", ThisMac: true}, {Name: "linux-2", Key: "~/.ssh/agent_key"}}); err != nil {
+		t.Fatal(err)
+	}
+	got := string(read(t, f))
+	if strings.Contains(got, "id_ed25519") {
+		t.Errorf("a block names a key this Mac lacks:\n%s", got)
+	}
+	for _, want := range []string{
+		"Host linux-1\n  HostName linux-1\n  IdentityAgent ~/.local/state/station/agent.sock\n  IdentityFile ~/.local/state/station/device-key.pub\n  IdentitiesOnly yes\n",
+		"Host linux-2\n  HostName linux-2\n  IdentityAgent ~/.local/state/station/agent.sock\n  IdentityFile ~/.local/state/station/device-key.pub\n  IdentityFile ~/.ssh/agent_key\n  IdentitiesOnly yes\n",
+	} {
+		if !strings.Contains(got, want) {
+			t.Errorf("the block lacks\n%s\nin\n%s", want, got)
+		}
+	}
+}
+
+func TestABlockOffTheMacWithNoKeyNamesNoIdentityAtAll(t *testing.T) {
+	f := files{}
+	if err := adapter(f).Put(context.Background(), []contract.MachineBlock{{Name: "mac-mini"}}); err != nil {
+		t.Fatal(err)
+	}
+	if got := string(read(t, f)); strings.Contains(got, "Identity") {
+		t.Errorf("block:\n%s", got)
 	}
 }

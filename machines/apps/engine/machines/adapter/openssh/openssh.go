@@ -80,15 +80,22 @@ func (c *sshFile) block(b contract.MachineBlock) string {
 	if c.o.Agent != "" {
 		lines = append(lines, "  IdentityAgent "+c.tilde(c.o.Agent), "  IdentityFile "+c.tilde(c.o.DeviceKey))
 	}
+	// invariant: only the keys the block names are offered, so an agent
+	// holding many keys never exhausts the server's attempts before them; the
+	// default key is named only where its file exists.
+	named := c.o.Agent != ""
 	key := b.Key
-	if key == "" {
+	if key == "" && c.exists(defaultKey) {
 		key = defaultKey
 	}
-	// invariant: only the keys the block names are offered, so an agent
-	// holding many keys never exhausts the server's attempts before them.
+	if key != "" {
+		lines = append(lines, "  IdentityFile "+key)
+		named = true
+	}
+	if named {
+		lines = append(lines, "  IdentitiesOnly yes")
+	}
 	lines = append(lines,
-		"  IdentityFile "+key,
-		"  IdentitiesOnly yes",
 		"  ServerAliveInterval 30",
 		"  ServerAliveCountMax 3",
 		"  UserKnownHostsFile "+c.tilde(path.Join(c.o.KnownHosts, b.Name)),
@@ -98,6 +105,11 @@ func (c *sshFile) block(b contract.MachineBlock) string {
 		lines = append(lines, "  ProxyCommand "+c.proxy(b))
 	}
 	return strings.Join(append(lines, endMarker(b.Name), ""), "\n")
+}
+
+func (c *sshFile) exists(p string) bool {
+	_, err := c.fs.ReadFile(path.Join(c.o.Home, strings.TrimPrefix(p, "~/")))
+	return err == nil
 }
 
 func (c *sshFile) proxy(b contract.MachineBlock) string {
