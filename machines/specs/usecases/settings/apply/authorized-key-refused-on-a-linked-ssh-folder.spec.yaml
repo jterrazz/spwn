@@ -1,0 +1,19 @@
+description: 'a ~/.ssh that links elsewhere is refused, and what it links to is left as it was'
+env:
+    - in-workspace
+    - engine
+runs:
+    - command: 'world admin on'
+      exit: 0
+    - command: '--version >/dev/null; /bin/mkdir -p root/root root/etc/ssh && /bin/chmod 755 root/etc/ssh && /bin/ln -s "$PWD/root/etc/ssh" root/root/.ssh'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error)'''
+      stdin: |
+          {"v":2,"id":"1","call":"settings.apply","in":{"Names":["authorized-key"],"Values":{"authorized-key":{"user":"root","key":"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGZ2c8e4bOqkqO0+5N0VXlFz4sVJyDQzH+LVRG4RvMZb ci@deploy"}}}}
+      exit: 0
+      stdout: |
+          {"v":2,"id":"1","out":[{"Package":"authorized-key","Verb":"apply","Result":"broken","Before":null,"After":null,"Steps":[{"Label":"failed","State":"broken","Detail":"/root/.ssh is a link, not touched: Machines writes only in a real folder"}]}]}
+    - command: '--version >/dev/null; /bin/ls -A root/etc/ssh; /usr/bin/stat -c ''%a %n'' root/etc/ssh'
+      exit: 0
+      stdout: |
+          755 root/etc/ssh

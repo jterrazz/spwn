@@ -15,6 +15,7 @@ import (
 	"strings"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
+	"github.com/jterrazz/studio-station/apps/engine/platform/local"
 	"github.com/jterrazz/studio-station/apps/engine/settings"
 	"github.com/jterrazz/studio-station/apps/engine/settings/contract"
 )
@@ -23,26 +24,38 @@ type Files interface {
 	ReadFile(path string) ([]byte, error)
 	Replace(path string, data []byte, perm fs.FileMode) error
 	MkdirAll(path string, perm fs.FileMode) error
-	Chmod(path string, perm fs.FileMode) error
 	Remove(path string) error
+}
+
+type Home interface {
+	// value: the files under a folder the system owns, a user's home among
+	// them, each reached without following a link (local.Beneath).
+	Lstat(base, rel string) (local.Entry, error)
+	Mkdir(base, rel string, perm fs.FileMode, o local.Owner) error
+	Chmod(base, rel string, perm fs.FileMode) error
+	Chown(base, rel string, o local.Owner) error
 }
 
 type Options struct {
 	// value: the folder the system's absolute paths are read under ("" on
 	// the machine itself), and the file station keeps what it last wrote in.
 	Root, Record string
-	// value: a path made the user's, as sshd's strict modes ask.
-	Give func(path string, uid, gid int) error
+	// value: in a world, the owner every account's files carry, the run's
+	// own, so a world gives no file away; nil on a machine.
+	Run *local.Owner
 }
 
 type Applier struct {
 	files Files
+	home  Home
 	o     Options
 }
 
 var _ contract.Applier = (*Applier)(nil)
 
-func New(files Files, o Options) *Applier { return &Applier{files: files, o: o} }
+func New(files Files, home Home, o Options) *Applier {
+	return &Applier{files: files, home: home, o: o}
+}
 
 func (*Applier) Kind() catalog.EffectKind { return catalog.EffectAuthorizedKeys }
 
@@ -59,8 +72,8 @@ type record struct {
 }
 
 type account struct {
-	home     string
-	uid, gid int
+	name, home string
+	local.Owner
 }
 
 func of(it catalog.Setting) (catalog.AuthorizedKeys, error) {
@@ -145,14 +158,19 @@ func (a *Applier) Apply(_ context.Context, it catalog.Setting, values map[string
 	if err != nil {
 		return settings.Change{}, err
 	}
+	base, err := a.homeOf(who)
+	if err != nil {
+		return settings.Change{}, err
+	}
 	dir := path.Join(who.home, ".ssh")
 	file := path.Join(dir, "authorized_keys")
+	ssh := path.Join(path.Base(who.home), ".ssh")
 	text, there, err := a.text(file)
 	if err != nil {
 		return settings.Change{}, err
 	}
 	updated, changed := settings.UpsertPackageBlock(text, k.Block, body)
-	err = a.files.MkdirAll(a.at(dir), 0o700)
+	err = a.folder(base, ssh, who)
 	if err != nil {
 		return settings.Change{}, err
 	}
@@ -163,16 +181,16 @@ func (a *Applier) Apply(_ context.Context, it catalog.Setting, values map[string
 		}
 	}
 	for _, p := range []struct {
-		at   string
+		rel  string
 		mode fs.FileMode
-	}{{dir, 0o700}, {file, 0o600}} {
-		err = a.files.Chmod(a.at(p.at), p.mode)
+	}{{ssh, 0o700}, {path.Join(ssh, "authorized_keys"), 0o600}} {
+		err = a.home.Chmod(base, p.rel, p.mode)
 		if err != nil {
-			return settings.Change{}, err
+			return settings.Change{}, a.linked(err)
 		}
-		err = a.o.Give(a.at(p.at), who.uid, who.gid)
+		err = a.home.Chown(base, p.rel, who.Owner)
 		if err != nil {
-			return settings.Change{}, err
+			return settings.Change{}, a.linked(err)
 		}
 	}
 	data, err := json.Marshal(record{File: file, Body: body})
@@ -307,8 +325,61 @@ func parse(line string) (string, error) {
 	return key, nil
 }
 
+// invariant: a user's home is a folder there already, the user's own,
+// never a link: Machines writes in a home, it never makes one. The value is
+// the folder that holds it, which the system owns, read under the root;
+// every path under it is reached without following a link.
+func (a *Applier) homeOf(who account) (string, error) {
+	if who.home == "/" {
+		return "", fmt.Errorf("%s has no home of its own (/): Machines writes only in a user's home", who.name)
+	}
+	base := a.at(path.Dir(who.home))
+	e, err := a.home.Lstat(base, path.Base(who.home))
+	switch {
+	case errors.Is(err, fs.ErrNotExist):
+		return "", fmt.Errorf("%s has no home on this machine (%s is not there): Machines never makes one", who.name, who.home)
+	case err != nil:
+		return "", a.linked(err)
+	case e.Mode&fs.ModeSymlink != 0:
+		return "", fmt.Errorf("%s is a link, not touched: Machines writes only in a real folder", who.home)
+	case !e.Mode.IsDir():
+		return "", fmt.Errorf("%s is not a folder, not touched", who.home)
+	case e.UID != who.UID:
+		return "", fmt.Errorf("%s is not %s's (its owner is uid %d), not touched", who.home, who.name, e.UID)
+	}
+	return base, nil
+}
+
+// invariant: ~/.ssh is a real folder, made the user's at 0700 when it is
+// not there; a link there is refused, never followed.
+func (a *Applier) folder(base, rel string, who account) error {
+	e, err := a.home.Lstat(base, rel)
+	switch {
+	case errors.Is(err, fs.ErrNotExist):
+		return a.linked(a.home.Mkdir(base, rel, 0o700, who.Owner))
+	case err != nil:
+		return a.linked(err)
+	case e.Mode&fs.ModeSymlink != 0:
+		return fmt.Errorf("%s is a link, not touched: Machines writes only in a real folder", path.Join(path.Dir(who.home), rel))
+	case !e.Mode.IsDir():
+		return fmt.Errorf("%s is not a folder, not touched", path.Join(path.Dir(who.home), rel))
+	}
+	return nil
+}
+
+// value: err, a link met on the way said in the owner's words, by the
+// path the system names it.
+func (a *Applier) linked(err error) error {
+	var pe *fs.PathError
+	if errors.Is(err, local.ErrLink) && errors.As(err, &pe) {
+		at := strings.TrimPrefix(pe.Path, path.Join("/", a.o.Root))
+		return fmt.Errorf("%s is a link, not touched: Machines writes only in a real folder and file", path.Join("/", at))
+	}
+	return err
+}
+
 // invariant: root's home is /root; any other user's, and its ids, are its
-// line of the system's /etc/passwd.
+// line of the system's /etc/passwd. In a world every account is the run's.
 func (a *Applier) account(user string) (account, error) {
 	if user == "" {
 		return account{}, errors.New("no user given: the account whose ~/.ssh/authorized_keys takes the key")
@@ -325,11 +396,18 @@ func (a *Applier) account(user string) (account, error) {
 		uid, uerr := strconv.Atoi(f[2])
 		gid, gerr := strconv.Atoi(f[3])
 		if uerr == nil && gerr == nil {
-			return account{home: path.Clean(f[5]), uid: uid, gid: gid}, nil
+			return a.as(account{name: user, home: path.Clean(f[5]), Owner: local.Owner{UID: uid, GID: gid}}), nil
 		}
 	}
 	if user == "root" {
-		return account{home: "/root"}, nil
+		return a.as(account{name: user, home: "/root"}), nil
 	}
 	return account{}, fmt.Errorf("no user %s on this machine", user)
+}
+
+func (a *Applier) as(who account) account {
+	if a.o.Run != nil {
+		who.Owner = *a.o.Run
+	}
+	return who
 }

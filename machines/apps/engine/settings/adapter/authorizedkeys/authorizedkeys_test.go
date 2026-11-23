@@ -6,85 +6,114 @@ import (
 	"crypto/ed25519"
 	"encoding/base64"
 	"io/fs"
+	"os"
+	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
+	"github.com/jterrazz/studio-station/apps/engine/platform/local"
 	"github.com/jterrazz/studio-station/apps/engine/settings"
 	"github.com/jterrazz/studio-station/apps/engine/settings/adapter/authorizedkeys"
 	"github.com/jterrazz/studio-station/apps/engine/settings/contract/contracttest"
 )
 
-type file struct {
-	data []byte
-	mode fs.FileMode
-	uid  int
-	gid  int
+// value: a machine on the real disk, its system root a folder of the
+// test's own: as root, ci is uid 1001 and every owner is the system's; as
+// any other user every account is the run's, as in a world.
+type machine struct {
+	t        *testing.T
+	root     string
+	disk     local.FS
+	self, ci local.Owner
+	run      *local.Owner
 }
 
-type disk struct {
-	files    map[string]*file
-	replaced []string
-}
-
-func newDisk() *disk { return &disk{files: map[string]*file{}} }
-
-func (d *disk) ReadFile(p string) ([]byte, error) {
-	if f, ok := d.files[p]; ok && !f.mode.IsDir() {
-		return append([]byte(nil), f.data...), nil
+func newMachine(t *testing.T) *machine {
+	t.Helper()
+	m := &machine{t: t, root: t.TempDir(), disk: local.New(nil, nil, nil, nil).FS, self: local.Self()}
+	m.ci = m.self
+	if m.self.UID == 0 {
+		m.ci = local.Owner{UID: 1001, GID: 1002}
+	} else {
+		m.run = &m.self
 	}
-	return nil, &fs.PathError{Op: "open", Path: p, Err: fs.ErrNotExist}
+	m.write("etc/passwd", "root:x:0:0:root:/root:/bin/bash\nci:x:"+strconv.Itoa(m.ci.UID)+":"+strconv.Itoa(m.ci.GID)+":CI:/home/ci:/bin/bash\n", 0o644)
+	m.mkdir("root", 0o700)
+	m.mkdir("home/ci", 0o755)
+	m.chown("home/ci", m.ci)
+	return m
 }
 
-func (d *disk) Replace(p string, data []byte, perm fs.FileMode) error {
-	d.replaced = append(d.replaced, p)
-	if f, ok := d.files[p]; ok {
-		f.data = append([]byte(nil), data...)
-		return nil
+func (m *machine) at(rel string) string { return filepath.Join(m.root, rel) }
+
+func (m *machine) write(rel, data string, perm fs.FileMode) {
+	m.t.Helper()
+	if err := os.MkdirAll(filepath.Dir(m.at(rel)), 0o700); err != nil {
+		m.t.Fatal(err)
 	}
-	d.files[p] = &file{data: append([]byte(nil), data...), mode: perm, uid: -1, gid: -1}
-	return nil
+	if err := os.WriteFile(m.at(rel), []byte(data), perm); err != nil {
+		m.t.Fatal(err)
+	}
+	if err := m.disk.Chmod(m.at(rel), perm); err != nil {
+		m.t.Fatal(err)
+	}
 }
 
-func (d *disk) MkdirAll(p string, perm fs.FileMode) error {
-	if _, ok := d.files[p]; !ok {
-		d.files[p] = &file{mode: fs.ModeDir | perm, uid: -1, gid: -1}
+func (m *machine) mkdir(rel string, perm fs.FileMode) {
+	m.t.Helper()
+	if err := os.MkdirAll(m.at(rel), 0o700); err != nil {
+		m.t.Fatal(err)
 	}
-	return nil
+	if err := m.disk.Chmod(m.at(rel), perm); err != nil {
+		m.t.Fatal(err)
+	}
 }
 
-func (d *disk) Chmod(p string, perm fs.FileMode) error {
-	f, ok := d.files[p]
-	if !ok {
-		return &fs.PathError{Op: "chmod", Path: p, Err: fs.ErrNotExist}
+func (m *machine) chown(rel string, o local.Owner) {
+	m.t.Helper()
+	if err := m.disk.Chown(m.at(rel), o.UID, o.GID); err != nil {
+		m.t.Fatal(err)
 	}
-	f.mode = f.mode.Type() | perm
-	return nil
 }
 
-func (d *disk) Remove(p string) error {
-	if _, ok := d.files[p]; !ok {
-		return &fs.PathError{Op: "remove", Path: p, Err: fs.ErrNotExist}
+func (m *machine) link(target, rel string) {
+	m.t.Helper()
+	if err := m.disk.Symlink(target, m.at(rel)); err != nil {
+		m.t.Fatal(err)
 	}
-	delete(d.files, p)
-	return nil
 }
 
-func (d *disk) give(p string, uid, gid int) error {
-	f, ok := d.files[p]
-	if !ok {
-		return &fs.PathError{Op: "chown", Path: p, Err: fs.ErrNotExist}
+func (m *machine) entry(rel string) local.Entry {
+	m.t.Helper()
+	e, err := local.Beneath{}.Lstat(m.root, rel)
+	if err != nil {
+		m.t.Fatal(err)
 	}
-	f.uid, f.gid = uid, gid
-	return nil
+	return e
+}
+
+func (m *machine) there(rel string) bool {
+	_, err := local.Beneath{}.Lstat(m.root, rel)
+	return err == nil
+}
+
+func (m *machine) content(rel string) string {
+	data, err := os.ReadFile(m.at(rel))
+	if err != nil {
+		return ""
+	}
+	return string(data)
+}
+
+func (m *machine) open() *authorizedkeys.Applier {
+	return authorizedkeys.New(m.disk, local.Beneath{}, authorizedkeys.Options{Root: m.root, Record: m.at("state/authorized-keys.json"), Run: m.run})
 }
 
 const (
-	root     = "/sys"
-	record   = "/state/authorized-keys.json"
-	rootAK   = root + "/root/.ssh/authorized_keys"
-	ciAK     = root + "/home/ci/.ssh/authorized_keys"
-	accounts = "root:x:0:0:root:/root:/bin/bash\nci:x:1001:1002:CI:/home/ci:/bin/bash\n"
+	rootAK = "root/.ssh/authorized_keys"
+	ciAK   = "home/ci/.ssh/authorized_keys"
 )
 
 const ed25519Type = "\x00\x00\x00\x0bssh-ed25519"
@@ -105,25 +134,22 @@ func setting() catalog.Setting {
 	return catalog.Setting{Name: "authorized-key", Effect: catalog.AuthorizedKeys{Block: "station:authorized-key"}}
 }
 
-func open(d *disk) *authorizedkeys.Applier {
-	if _, ok := d.files[root+"/etc/passwd"]; !ok {
-		d.files[root+"/etc/passwd"] = &file{data: []byte(accounts), mode: 0o644}
-	}
-	return authorizedkeys.New(d, authorizedkeys.Options{Root: root, Record: record, Give: d.give})
-}
-
-func apply(t *testing.T, a *authorizedkeys.Applier, user, keys string) {
+func apply(t *testing.T, a *authorizedkeys.Applier, user, keys string) settings.Change {
 	t.Helper()
-	if _, err := a.Apply(context.Background(), setting(), map[string]string{"user": user, "key": keys}); err != nil {
+	c, err := a.Apply(context.Background(), setting(), map[string]string{"user": user, "key": keys})
+	if err != nil {
 		t.Fatalf("Apply: %v", err)
 	}
+	return c
 }
 
-func content(d *disk, p string) string {
-	if f, ok := d.files[p]; ok {
-		return string(f.data)
+func refused(t *testing.T, a *authorizedkeys.Applier, user, keys string) error {
+	t.Helper()
+	_, err := a.Apply(context.Background(), setting(), map[string]string{"user": user, "key": keys})
+	if err == nil {
+		t.Fatal("Apply took it; want a refusal")
 	}
-	return ""
+	return err
 }
 
 func detail(c settings.Change) string {
@@ -139,38 +165,40 @@ func block(keys ...string) string {
 
 func TestApplier(t *testing.T) {
 	contracttest.Applier(t, func(t *testing.T) contracttest.Opened {
-		d := newDisk()
-		d.files[rootAK] = &file{data: []byte(key(t, 9, "owner@laptop") + "\n"), mode: 0o600}
+		m := newMachine(t)
+		m.mkdir("root/.ssh", 0o700)
+		m.write(rootAK, key(t, 9, "owner@laptop")+"\n", 0o600)
 		edit := func(*testing.T) {
-			d.files[rootAK].data = bytes.Replace(d.files[rootAK].data, []byte("ci@deploy"), []byte("mine"), 1)
+			m.write(rootAK, strings.Replace(m.content(rootAK), "ci@deploy", "mine", 1), 0o600)
 		}
 		return contracttest.Opened{
-			Applier: open(d), Package: setting(), Edit: edit,
+			Applier: m.open(), Package: setting(), Edit: edit,
 			Values: map[string]string{"user": "root", "key": key(t, 1, "ci@deploy")},
 		}
 	})
 }
 
 func TestAnEmptyFileTakesTheBlockAlone(t *testing.T) {
-	d := newDisk()
-	d.files[rootAK] = &file{mode: 0o600}
-	apply(t, open(d), "root", key(t, 1, ""))
-	if got, want := content(d, rootAK), block(key(t, 1, "")); got != want {
+	m := newMachine(t)
+	m.mkdir("root/.ssh", 0o700)
+	m.write(rootAK, "", 0o600)
+	apply(t, m.open(), "root", key(t, 1, ""))
+	if got, want := m.content(rootAK), block(key(t, 1, "")); got != want {
 		t.Fatalf("authorized_keys = %q; want %q", got, want)
 	}
 }
 
 func TestAFileThatIsNotThereIsMadeWithTheModesSshdAsks(t *testing.T) {
-	d := newDisk()
-	apply(t, open(d), "ci", key(t, 1, ""))
-	dir, f := d.files[root+"/home/ci/.ssh"], d.files[ciAK]
-	if dir == nil || f == nil || dir.mode.Perm() != 0o700 || f.mode.Perm() != 0o600 {
-		t.Fatalf("folder %+v, file %+v; want 0700 and 0600", dir, f)
+	m := newMachine(t)
+	apply(t, m.open(), "ci", key(t, 1, ""))
+	dir, f := m.entry("home/ci/.ssh"), m.entry(ciAK)
+	if !dir.Mode.IsDir() || dir.Mode.Perm() != 0o700 || !f.Mode.IsRegular() || f.Mode.Perm() != 0o600 {
+		t.Fatalf("folder %v, file %v; want 0700 and 0600", dir.Mode, f.Mode)
 	}
-	if dir.uid != 1001 || dir.gid != 1002 || f.uid != 1001 || f.gid != 1002 {
-		t.Fatalf("folder %d:%d, file %d:%d; want both the user's, 1001:1002", dir.uid, dir.gid, f.uid, f.gid)
+	if dir.Owner != m.ci || f.Owner != m.ci {
+		t.Fatalf("folder %+v, file %+v; want both the user's, %+v", dir.Owner, f.Owner, m.ci)
 	}
-	if got := string(f.data); got != block(key(t, 1, "")) {
+	if got := m.content(ciAK); got != block(key(t, 1, "")) {
 		t.Fatalf("authorized_keys = %q", got)
 	}
 }
@@ -182,11 +210,12 @@ func TestTheOwnersLinesKeepTheirBytesAndUndoGivesThemBack(t *testing.T) {
 		"with a blank last line":  key(t, 9, "owner@laptop") + "\n\n",
 	} {
 		t.Run(name, func(t *testing.T) {
-			d := newDisk()
-			d.files[rootAK] = &file{data: []byte(own), mode: 0o600}
-			a := open(d)
+			m := newMachine(t)
+			m.mkdir("root/.ssh", 0o700)
+			m.write(rootAK, own, 0o600)
+			a := m.open()
 			apply(t, a, "root", key(t, 1, "ci@deploy"))
-			written := content(d, rootAK)
+			written := m.content(rootAK)
 			if !strings.Contains(written, block(key(t, 1, "ci@deploy"))) {
 				t.Fatalf("no block in %q", written)
 			}
@@ -198,7 +227,7 @@ func TestTheOwnersLinesKeepTheirBytesAndUndoGivesThemBack(t *testing.T) {
 			if _, err := a.Undo(context.Background(), setting()); err != nil {
 				t.Fatalf("Undo: %v", err)
 			}
-			if got := content(d, rootAK); got != own {
+			if got := m.content(rootAK); got != own {
 				t.Fatalf("after Undo authorized_keys = %q; want the owner's bytes %q", got, own)
 			}
 		})
@@ -206,42 +235,89 @@ func TestTheOwnersLinesKeepTheirBytesAndUndoGivesThemBack(t *testing.T) {
 }
 
 func TestABlockAlreadyThereIsNotWrittenAgain(t *testing.T) {
-	d := newDisk()
-	a := open(d)
+	m := newMachine(t)
+	a := m.open()
 	apply(t, a, "root", key(t, 1, ""))
-	before := content(d, rootAK)
-	d.replaced = nil
-	change, err := a.Apply(context.Background(), setting(), map[string]string{"user": "root", "key": key(t, 1, "")})
-	if err != nil {
-		t.Fatal(err)
-	}
-	for _, p := range d.replaced {
-		if p == rootAK {
-			t.Fatalf("authorized_keys was rewritten: %v", d.replaced)
-		}
-	}
-	if got := content(d, rootAK); got != before || detail(change) != "already there" {
+	before := m.content(rootAK)
+	change := apply(t, a, "root", key(t, 1, ""))
+	if got := m.content(rootAK); got != before || detail(change) != "already there" {
 		t.Fatalf("authorized_keys = %q, step %+v; want %q, already there", got, change.Steps, before)
 	}
 }
 
 func TestLooseModesAreSetAsSshdAsks(t *testing.T) {
-	d := newDisk()
-	d.files[root+"/root/.ssh"] = &file{mode: fs.ModeDir | 0o755}
-	d.files[rootAK] = &file{data: []byte(key(t, 9, "") + "\n"), mode: 0o664}
-	apply(t, open(d), "root", key(t, 1, ""))
-	if dir, f := d.files[root+"/root/.ssh"].mode.Perm(), d.files[rootAK].mode.Perm(); dir != 0o700 || f != 0o600 {
+	m := newMachine(t)
+	m.mkdir("root/.ssh", 0o755)
+	m.write(rootAK, key(t, 9, "")+"\n", 0o664)
+	apply(t, m.open(), "root", key(t, 1, ""))
+	if dir, f := m.entry("root/.ssh").Mode.Perm(), m.entry(rootAK).Mode.Perm(); dir != 0o700 || f != 0o600 {
 		t.Fatalf("folder %o, file %o; want 700 and 600", dir, f)
 	}
 }
 
 func TestStrictModesAreKept(t *testing.T) {
-	d := newDisk()
-	d.files[root+"/root/.ssh"] = &file{mode: fs.ModeDir | 0o700}
-	d.files[rootAK] = &file{data: []byte(key(t, 9, "") + "\n"), mode: 0o600}
-	apply(t, open(d), "root", key(t, 1, ""))
-	if dir, f := d.files[root+"/root/.ssh"].mode.Perm(), d.files[rootAK].mode.Perm(); dir != 0o700 || f != 0o600 {
+	m := newMachine(t)
+	m.mkdir("root/.ssh", 0o700)
+	m.write(rootAK, key(t, 9, "")+"\n", 0o600)
+	apply(t, m.open(), "root", key(t, 1, ""))
+	if dir, f := m.entry("root/.ssh").Mode.Perm(), m.entry(rootAK).Mode.Perm(); dir != 0o700 || f != 0o600 {
 		t.Fatalf("folder %o, file %o; want 700 and 600", dir, f)
+	}
+}
+
+// invariant: a user who links ~/.ssh to a folder of the system's gets it
+// refused: nothing there is made, chmodded or given to the user.
+func TestALinkedSshFolderIsRefusedAndItsTargetUntouched(t *testing.T) {
+	m := newMachine(t)
+	m.mkdir("etc/sudoers.d", 0o755)
+	m.write("etc/sudoers.d/ci", "ci ALL=(ALL) ALL\n", 0o644)
+	m.link(m.at("etc/sudoers.d"), "home/ci/.ssh")
+	before := m.entry("etc/sudoers.d")
+	err := refused(t, m.open(), "ci", key(t, 1, ""))
+	if !strings.Contains(err.Error(), "/home/ci/.ssh is a link, not touched") {
+		t.Fatalf("Apply = %v; want the link named", err)
+	}
+	if after := m.entry("etc/sudoers.d"); after != before || m.there("etc/sudoers.d/authorized_keys") {
+		t.Fatalf("the link's target moved: %+v, then %+v, authorized_keys there %v", before, after, m.there("etc/sudoers.d/authorized_keys"))
+	}
+}
+
+// invariant: a home that is a link, not the user's, or not there is
+// refused: Machines writes in a real home and never makes one.
+func TestAHomeThatIsNotTheUsersRealFolderIsRefused(t *testing.T) {
+	for name, c := range map[string]struct {
+		make func(m *machine)
+		says string
+	}{
+		"not there": {func(m *machine) { _ = m.disk.Remove(m.at("home/ci")) }, "ci has no home on this machine (/home/ci is not there): Machines never makes one"},
+		"a link": {func(m *machine) {
+			_ = m.disk.Remove(m.at("home/ci"))
+			m.mkdir("srv", 0o755)
+			m.link(m.at("srv"), "home/ci")
+		}, "/home/ci is a link, not touched"},
+		"a file": {func(m *machine) { _ = m.disk.Remove(m.at("home/ci")); m.write("home/ci", "", 0o644) }, "/home/ci is not a folder, not touched"},
+	} {
+		t.Run(name, func(t *testing.T) {
+			m := newMachine(t)
+			c.make(m)
+			if err := refused(t, m.open(), "ci", key(t, 1, "")); !strings.Contains(err.Error(), c.says) {
+				t.Fatalf("Apply = %v; want %q", err, c.says)
+			}
+			if m.there("srv/.ssh") || m.there("home/ci/.ssh") {
+				t.Fatal("a .ssh was made")
+			}
+		})
+	}
+}
+
+func TestAHomeAnotherUserOwnsIsRefused(t *testing.T) {
+	m := newMachine(t)
+	if m.self.UID != 0 {
+		t.Skip("an owner other than the run's is given by root alone")
+	}
+	m.chown("home/ci", local.Owner{UID: 1500, GID: 1500})
+	if err := refused(t, m.open(), "ci", key(t, 1, "")); !strings.Contains(err.Error(), "/home/ci is not ci's (its owner is uid 1500), not touched") {
+		t.Fatalf("Apply = %v", err)
 	}
 }
 
@@ -278,37 +354,34 @@ func TestKeys(t *testing.T) {
 }
 
 func TestABadKeyIsRefusedBeforeAnyWrite(t *testing.T) {
-	d := newDisk()
-	d.files[rootAK] = &file{data: []byte("mine\n"), mode: 0o644}
-	_, err := open(d).Apply(context.Background(), setting(), map[string]string{"user": "root", "key": "ssh-ed25519 AAAA"})
-	if err == nil || len(d.replaced) != 0 || d.files[rootAK].mode.Perm() != 0o644 {
-		t.Fatalf("Apply = %v, wrote %v, mode %o; want a refusal and nothing touched", err, d.replaced, d.files[rootAK].mode.Perm())
+	m := newMachine(t)
+	m.mkdir("root/.ssh", 0o755)
+	m.write(rootAK, "mine\n", 0o644)
+	_ = refused(t, m.open(), "root", "ssh-ed25519 AAAA")
+	if m.content(rootAK) != "mine\n" || m.entry(rootAK).Mode.Perm() != 0o644 || m.entry("root/.ssh").Mode.Perm() != 0o755 {
+		t.Fatalf("file %q mode %o, folder %o; want nothing touched", m.content(rootAK), m.entry(rootAK).Mode.Perm(), m.entry("root/.ssh").Mode.Perm())
 	}
 }
 
 func TestAnUnknownUserIsRefused(t *testing.T) {
-	d := newDisk()
-	_, err := open(d).Apply(context.Background(), setting(), map[string]string{"user": "nobody", "key": key(t, 1, "")})
-	if err == nil || err.Error() != "no user nobody on this machine" || len(d.replaced) != 0 {
-		t.Fatalf("Apply = %v, wrote %v", err, d.replaced)
+	m := newMachine(t)
+	if err := refused(t, m.open(), "nobody", key(t, 1, "")); err.Error() != "no user nobody on this machine" {
+		t.Fatalf("Apply = %v", err)
 	}
 }
 
 func TestAHandEditInsideTheBlockReadsDriftAndSurvivesUndo(t *testing.T) {
-	d := newDisk()
-	a := open(d)
+	m := newMachine(t)
+	a := m.open()
 	apply(t, a, "root", key(t, 1, "ci"))
-	if d.files[rootAK] == nil {
-		t.Fatal("no authorized_keys written")
-	}
-	d.files[rootAK].data = bytes.Replace(d.files[rootAK].data, []byte(" ci\n"), []byte(" mine\n"), 1)
+	m.write(rootAK, strings.Replace(m.content(rootAK), " ci\n", " mine\n", 1), 0o600)
 	o, err := a.Observe(context.Background(), setting())
 	if err != nil || o.State != catalog.StateDegraded || o.Diff == "" {
 		t.Fatalf("Observe = %+v, %v; want degraded with a diff", o, err)
 	}
-	edited := content(d, rootAK)
+	edited := m.content(rootAK)
 	change, err := a.Undo(context.Background(), setting())
-	if err != nil || content(d, rootAK) != edited || detail(change) != "yours, kept" {
-		t.Fatalf("Undo = %+v, %v; file %q; want it kept", change, err, d.files[rootAK].data)
+	if err != nil || m.content(rootAK) != edited || detail(change) != "yours, kept" {
+		t.Fatalf("Undo = %+v, %v; file %q; want it kept", change, err, m.content(rootAK))
 	}
 }
