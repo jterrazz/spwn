@@ -299,10 +299,9 @@ func path(s string, width int) string {
 	if width <= 2 {
 		return End(s, width)
 	}
-	runes := []rune(s)
 	keep := width - 1
 	head := keep / 2
-	return string(runes[:head]) + token.Ellipsis + string(runes[len(runes)-(keep-head):])
+	return joined(s, head, keep-head)
 }
 
 func url(s string, width int) string {

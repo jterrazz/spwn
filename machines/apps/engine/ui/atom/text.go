@@ -47,9 +47,20 @@ func Middle(s string, width int) string {
 	if width <= 2 {
 		return End(s, width)
 	}
-	runes := []rune(s)
 	keep := width - 1
 	head := (keep + 1) / 2
-	tail := keep - head
-	return string(runes[:head]) + token.Ellipsis + string(runes[len(runes)-tail:])
+	return joined(s, head, keep-head)
+}
+
+func joined(s string, head, tail int) string {
+	runes := []rune(s)
+	i := 0
+	for i < len(runes) && lipgloss.Width(string(runes[:i+1])) <= head {
+		i++
+	}
+	j := len(runes)
+	for j > i && lipgloss.Width(string(runes[j-1:])) <= tail {
+		j--
+	}
+	return string(runes[:i]) + token.Ellipsis + string(runes[j:])
 }
