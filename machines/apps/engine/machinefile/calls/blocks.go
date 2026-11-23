@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
+	"github.com/jterrazz/studio-station/apps/engine/core/textblock"
 	"github.com/jterrazz/studio-station/apps/engine/machinefile"
 	"github.com/jterrazz/studio-station/apps/engine/settings"
 )
@@ -99,19 +100,19 @@ func blockDiff(have, want, id string) string {
 }
 
 // value: whether the file holds exactly what apply last wrote under the id.
-func lastWritten(have string, state settings.BlockState, w machinefile.Written, ok bool) bool {
-	return ok && state == settings.BlockHere && machinefile.BlockDigest(have) == w.Digest
+func lastWritten(have string, state textblock.State, w machinefile.Written, ok bool) bool {
+	return ok && state == textblock.Found && machinefile.BlockDigest(have) == w.Digest
 }
 
 func judgeBlock(zshrc, pkg, id, body string, written map[string]machinefile.Written) machinefile.Block {
-	have, state := settings.PackageBlock(zshrc, id)
+	have, state := textblock.Of(zshrc, id)
 	w, recorded := written[id]
 	b := machinefile.Block{Package: pkg, ID: id, Zsh: body}
 	switch {
-	case state == settings.BlockAbsent:
+	case state == textblock.Absent:
 		b.Condition, b.Action = machinefile.Absent, machinefile.Set
 		b.Diff = blockDiff("", body, id)
-	case state == settings.BlockHere && have == body:
+	case state == textblock.Found && have == body:
 		b.Condition, b.Action = machinefile.Present, machinefile.Keep
 	case lastWritten(have, state, w, recorded):
 		b.Condition, b.Action = machinefile.Outdated, machinefile.Set
@@ -129,7 +130,7 @@ func judgeBlock(zshrc, pkg, id, body string, written map[string]machinefile.Writ
 // and the owner's with an app let go of as the owner's; and the owner's,
 // kept, once edited by hand since station wrote it.
 func extraBlock(zshrc string, w machinefile.Written, app machinefile.Fate) machinefile.Block {
-	have, state := settings.PackageBlock(zshrc, w.ID)
+	have, state := textblock.Of(zshrc, w.ID)
 	b := machinefile.Block{Package: w.Package, ID: w.ID, Zsh: have, Condition: machinefile.Extra, Action: machinefile.Leave, Fate: app}
 	switch {
 	case !lastWritten(have, state, w, true):
@@ -269,12 +270,12 @@ func (r *run) writeBlock(ctx context.Context, done machinefile.BlockDone) machin
 			done.Detail, edited = "written", true
 			return text, nil
 		default:
-			have, state := settings.PackageBlock(zshrc, done.ID)
+			have, state := textblock.Of(zshrc, done.ID)
 			if w, ok := written[done.ID]; !lastWritten(have, state, w, ok) {
-				gone = state == settings.BlockAbsent
+				gone = state == textblock.Absent
 				return zshrc, nil
 			}
-			text, _ := settings.RemovePackageBlock(zshrc, done.ID)
+			text, _ := textblock.Remove(zshrc, done.ID)
 			done.Detail, edited = "removed", true
 			return text, nil
 		}

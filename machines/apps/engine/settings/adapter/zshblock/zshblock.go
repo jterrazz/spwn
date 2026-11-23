@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
+	"github.com/jterrazz/studio-station/apps/engine/core/textblock"
 	"github.com/jterrazz/studio-station/apps/engine/settings"
 	"github.com/jterrazz/studio-station/apps/engine/settings/contract"
 )
@@ -90,12 +91,12 @@ func (a *Applier) Observe(ctx context.Context, it catalog.Setting) (settings.Obs
 	var found, same int
 	var diffs, there []string
 	for _, b := range blocks {
-		have, state := settings.PackageBlock(text, b.id)
-		if state != settings.BlockAbsent {
+		have, state := textblock.Of(text, b.id)
+		if state != textblock.Absent {
 			found++
 			there = append(there, have)
 		}
-		if state == settings.BlockHere && have == b.body {
+		if state == textblock.Found && have == b.body {
 			same++
 			continue
 		}
@@ -145,15 +146,15 @@ func (a *Applier) Undo(ctx context.Context, it catalog.Setting) (settings.Change
 	err = a.zshrc.Edit(ctx, func(text string) (string, error) {
 		steps = nil
 		for _, b := range blocks {
-			have, state := settings.PackageBlock(text, b.id)
+			have, state := textblock.Of(text, b.id)
 			switch {
-			case state == settings.BlockAbsent:
+			case state == textblock.Absent:
 				continue
-			case state != settings.BlockHere || have != b.body:
+			case state != textblock.Found || have != b.body:
 				steps = append(steps, settings.ChangeStep{Label: name(b.id), State: catalog.StateOK, Detail: "yours, kept"})
 				continue
 			}
-			text, _ = settings.RemovePackageBlock(text, b.id)
+			text, _ = textblock.Remove(text, b.id)
 			steps = append(steps, settings.ChangeStep{Label: name(b.id), State: catalog.StateOK, Detail: "removed"})
 		}
 		return text, nil

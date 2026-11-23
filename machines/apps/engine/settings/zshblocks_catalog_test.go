@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
+	"github.com/jterrazz/studio-station/apps/engine/core/textblock"
 )
 
 func builtinPackages(t *testing.T) []catalog.Placed {
@@ -37,10 +38,10 @@ func TestEveryShellBlockOfTheCatalogRendersOnEverySystemAndRoundTrips(t *testing
 					}
 					owner := "export EDITOR=vim\n\n# mine\n"
 					written, _ := UpsertPackageBlock(owner, b.ID, body)
-					if got, state := PackageBlock(written, b.ID); state != BlockHere || got != body {
+					if got, state := textblock.Of(written, b.ID); state != textblock.Found || got != body {
 						t.Errorf("%s reads back %q, %v; wrote %q", b.ID, got, state, body)
 					}
-					if back, _ := RemovePackageBlock(written, b.ID); back != owner {
+					if back, _ := textblock.Remove(written, b.ID); back != owner {
 						t.Errorf("%s: removing it leaves %q, not the owner's %q", b.ID, back, owner)
 					}
 				}

@@ -1,123 +1,19 @@
 package settings
 
 import (
-	"strconv"
 	"strings"
+
+	"github.com/jterrazz/studio-station/apps/engine/core/textblock"
 )
-
-const packageMarker = "station:"
-
-func BlockMarkers(id string) (start, end string) {
-	// value: the markers of one package block of ~/.zshrc, by its id.
-	return "# >>> " + id + " >>>", "# <<< " + id + " <<<"
-}
-
-// value: what ~/.zshrc holds of a package block: none, one block, or a
-// damage a hand cannot be told from (a start with no end, two of one id).
-
-type BlockState int
-
-const (
-	BlockAbsent BlockState = iota
-	BlockHere
-	BlockDamaged
-)
-
-type span struct {
-	id         string
-	start, end int
-}
-
-// invariant: a package block is found by its two marker lines alone, on
-// whole lines; the main block and the owner's lines are never part of one.
-// A start met again before its end leaves the first with no end.
-func spansOf(lines []string) []span {
-	var out []span
-	for i := 0; i < len(lines); i++ {
-		t := strings.TrimSpace(lines[i])
-		id, ok := strings.CutPrefix(t, "# >>> "+packageMarker)
-		if !ok || !strings.HasSuffix(id, " >>>") {
-			continue
-		}
-		id = packageMarker + strings.TrimSuffix(id, " >>>")
-		start, end := BlockMarkers(id)
-		s := span{id: id, start: i, end: -1}
-		for j := i + 1; j < len(lines); j++ {
-			if t := strings.TrimSpace(lines[j]); t == start {
-				break
-			} else if t == end {
-				s.end = j
-				break
-			}
-		}
-		out = append(out, s)
-		if s.end >= 0 {
-			i = s.end
-		}
-	}
-	return out
-}
 
 func bodyLines(body string) []string { return strings.Split(strings.TrimSuffix(body, "\n"), "\n") }
 
-func PackageBlock(zshrc, id string) (string, BlockState) {
-	// value: the body of one package block, without its markers, and whether
-	// it is there.
-	lines := strings.Split(zshrc, "\n")
-	var found []span
-	for _, s := range spansOf(lines) {
-		if s.id == id {
-			found = append(found, s)
-		}
-	}
-	switch {
-	case len(found) == 0:
-		return "", BlockAbsent
-	case len(found) > 1 || found[0].end < 0:
-		return "", BlockDamaged
-	}
-	s := found[0]
-	return strings.Join(lines[s.start+1:s.end], "\n") + "\n", BlockHere
-}
-
-func BlockLines(text, id string) (first, last int) {
-	// value: the lines, counted from 1, of the one whole block of id, its
-	// markers included; 0, 0 when there is none.
-	for _, s := range spansOf(strings.Split(text, "\n")) {
-		if s.id == id && s.end >= 0 {
-			return s.start + 1, s.end + 1
-		}
-	}
-	return 0, 0
-}
-
-func DamagedLines(text, id string) []string {
-	// value: what one hand deletes of a damaged block of id to leave one
-	// block, by its lines counted from 1: each start with no end of its own
-	// ("line N"), and every whole block after the first ("lines N to M").
-	var out []string
-	whole := 0
-	for _, s := range spansOf(strings.Split(text, "\n")) {
-		switch {
-		case s.id != id:
-		case s.end < 0:
-			out = append(out, "line "+strconv.Itoa(s.start+1))
-		default:
-			whole++
-			if whole > 1 {
-				out = append(out, "lines "+strconv.Itoa(s.start+1)+" to "+strconv.Itoa(s.end+1))
-			}
-		}
-	}
-	return out
-}
-
 func PackageBlockIDs(zshrc string) []string {
 	// value: the ids of the package blocks ~/.zshrc holds, in file order.
-	spans := spansOf(strings.Split(zshrc, "\n"))
+	spans := textblock.Spans(strings.Split(zshrc, "\n"))
 	out := make([]string, 0, len(spans))
 	for _, s := range spans {
-		out = append(out, s.id)
+		out = append(out, s.ID)
 	}
 	return out
 }
@@ -133,15 +29,15 @@ func UpsertPackageBlock(zshrc, id, body string) (updated string, changed bool) {
 	// ends the file with no newline gets one, station's own byte, before the
 	// new block follows it.
 	lines := strings.Split(zshrc, "\n")
-	start, end := BlockMarkers(id)
+	start, end := textblock.Markers(id)
 	block := append(append([]string{start}, bodyLines(body)...), end)
-	spans := spansOf(lines)
+	spans := textblock.Spans(lines)
 	for _, s := range spans {
-		if s.id == id && s.end >= 0 {
-			if have, _ := PackageBlock(zshrc, id); have == body {
+		if s.ID == id && s.End >= 0 {
+			if have, _ := textblock.Of(zshrc, id); have == body {
 				return zshrc, false
 			}
-			out := append(append(cloned(lines[:s.start]), block...), lines[s.end+1:]...)
+			out := append(append(cloned(lines[:s.Start]), block...), lines[s.End+1:]...)
 			return strings.Join(out, "\n"), true
 		}
 	}
@@ -150,7 +46,7 @@ func UpsertPackageBlock(zshrc, id, body string) (updated string, changed bool) {
 		last = end
 	}
 	for _, s := range spans {
-		last = max(last, s.end)
+		last = max(last, s.End)
 	}
 	if last >= 0 {
 		pos = last + 1
@@ -160,18 +56,6 @@ func UpsertPackageBlock(zshrc, id, body string) (updated string, changed bool) {
 	}
 	out := append(append(cloned(lines[:pos]), block...), lines[pos:]...)
 	return strings.Join(out, "\n"), true
-}
-
-func RemovePackageBlock(zshrc, id string) (updated string, changed bool) {
-	// value: zshrc without the package block of that id, its marker lines
-	// and what is between them, every other byte as it was.
-	lines := strings.Split(zshrc, "\n")
-	for _, s := range spansOf(lines) {
-		if s.id == id && s.end >= 0 {
-			return strings.Join(append(cloned(lines[:s.start]), lines[s.end+1:]...), "\n"), true
-		}
-	}
-	return zshrc, false
 }
 
 func cloned(lines []string) []string { return append([]string(nil), lines...) }

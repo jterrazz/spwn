@@ -15,13 +15,12 @@ import (
 	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
+	"github.com/jterrazz/studio-station/apps/engine/core/textblock"
 	"github.com/jterrazz/studio-station/apps/engine/platform/local"
 	"github.com/jterrazz/studio-station/apps/engine/ports"
 )
 
 const (
-	KeysBegin      = "# >>> station hosts >>>"
-	KeysEnd        = "# <<< station hosts <<<"
 	scanEvery      = time.Second
 	snapshotEach   = 60
 	containersEach = 5
@@ -247,24 +246,25 @@ func (s *Agent) writeKeys(ctx context.Context, home string, keys []string) error
 		return err
 	}
 	seen := local.Seen{Data: current, There: err == nil}
-	var kept []string
-	inside := false
-	for _, line := range strings.Split(strings.TrimRight(string(current), "\n"), "\n") {
-		switch {
-		case line == KeysBegin:
-			inside = true
-		case line == KeysEnd:
-			inside = false
-		case !inside && line != "":
-			kept = append(kept, line)
-		}
+	text := string(current)
+	if _, state := textblock.Of(text, keysID); state == textblock.Damaged {
+		return errors.New(path.Join(home, ".ssh", "authorized_keys") + " holds a damaged " + keysID + " block, not written: delete " + strings.Join(textblock.DamagedLines(text, keysID), " and ") + " of it")
 	}
-	lines := append(append(append(kept, KeysBegin), keys...), KeysEnd)
-	if err := f.Replace("authorized_keys", seen, []byte(strings.Join(lines, "\n")+"\n"), 0o600, local.Self()); err != nil {
+	text, _ = textblock.Remove(text, keysID)
+	if text != "" && !strings.HasSuffix(text, "\n") {
+		text += "\n"
+	}
+	text += strings.Join(append(append([]string{KeysBegin}, keys...), KeysEnd), "\n") + "\n"
+	if err := f.Replace("authorized_keys", seen, []byte(text), 0o600, local.Self()); err != nil {
 		return err
 	}
 	return f.ChmodFile("authorized_keys", local.Self().UID, func(fs.FileMode) fs.FileMode { return 0o600 })
 }
+
+// value: the id of the guest's block of authorized_keys, and its markers.
+const keysID = "station hosts"
+
+var KeysBegin, KeysEnd = textblock.Markers(keysID)
 
 func Quote(v string) string { return "'" + strings.ReplaceAll(v, "'", `'\''`) + "'" }
 

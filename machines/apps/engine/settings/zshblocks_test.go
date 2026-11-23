@@ -4,6 +4,8 @@ import (
 	"slices"
 	"strings"
 	"testing"
+
+	"github.com/jterrazz/studio-station/apps/engine/core/textblock"
 )
 
 const owner = "export EDITOR=vim\n\nalias gs='git status'\n"
@@ -36,12 +38,12 @@ func TestABlockIsReplacedInPlaceBetweenTheOwnersLines(t *testing.T) {
 func TestRemovingABlockGivesTheFileBackAsItWas(t *testing.T) {
 	for _, before := range []string{"", owner, "no newline at the end", "a\nlast with none", "\n\n", "crlf\r\nlines\r\n", "crlf\r\nlast with none", owner + "\n# >>> station >>>\nx\n# <<< station <<<\n"} {
 		written, _ := UpsertPackageBlock(before, "station:a", "echo a\n")
-		back, changed := RemovePackageBlock(written, "station:a")
+		back, changed := textblock.Remove(written, "station:a")
 		if !changed || back != before {
 			t.Errorf("removed from %q leaves %q, %v; want %q", written, back, changed, before)
 		}
 	}
-	if same, changed := RemovePackageBlock(owner, "station:a"); changed || same != owner {
+	if same, changed := textblock.Remove(owner, "station:a"); changed || same != owner {
 		t.Errorf("removing a block that is not there changed the file")
 	}
 }
@@ -58,22 +60,6 @@ func TestAMainBlockAddedLaterGoesBeforeThePackageBlocks(t *testing.T) {
 	}
 }
 
-func TestAHandEditedBlockReadsDifferentAndADamagedOneIsToldApart(t *testing.T) {
-	if body, state := PackageBlock("# >>> station:a >>>\nmine\n# <<< station:a <<<\n", "station:a"); state != BlockHere || body != "mine\n" {
-		t.Errorf("read %q, %v", body, state)
-	}
-	if _, state := PackageBlock("# >>> station:a >>>\nno end\n", "station:a"); state != BlockDamaged {
-		t.Errorf("a start with no end reads %v", state)
-	}
-	twice := "# >>> station:a >>>\n1\n# <<< station:a <<<\n# >>> station:a >>>\n2\n# <<< station:a <<<\n"
-	if _, state := PackageBlock(twice, "station:a"); state != BlockDamaged {
-		t.Errorf("a block twice reads %v", state)
-	}
-	if _, state := PackageBlock(owner, "station:a"); state != BlockAbsent {
-		t.Errorf("no block reads %v", state)
-	}
-}
-
 func TestPackageBlockIDsListTheBlocksInFileOrder(t *testing.T) {
 	text, _ := UpsertPackageBlock(owner, "station:b", "b\n")
 	text, _ = UpsertPackageBlock(text, "station:a/x", "a\n")
@@ -87,7 +73,7 @@ func TestANewBlocksEndMarkerIsNeverGluedToWhatAnInstallerAppends(t *testing.T) {
 	for _, before := range []string{"", owner, "no newline at the end", "a\nlast with none", "crlf\r\nlines\r\n", "crlf\r\nlast with none", "# >>> station >>>\nx\n# <<< station <<<"} {
 		written, _ := UpsertPackageBlock(before, "station:a", "echo a\n")
 		appended := written + "export FROM_AN_INSTALLER=1\n"
-		if body, state := PackageBlock(appended, "station:a"); state != BlockHere || body != "echo a\n" {
+		if body, state := textblock.Of(appended, "station:a"); state != textblock.Found || body != "echo a\n" {
 			t.Errorf("an append to %q breaks the block: %q, %v", written, body, state)
 		}
 		lines := strings.Split(appended, "\n")
@@ -103,27 +89,7 @@ func TestAMainMarkerThatEndsTheFileGetsItsNewlineBeforeANewBlock(t *testing.T) {
 	if want := before + "\n# >>> station:a >>>\necho a\n# <<< station:a <<<\n"; written != want {
 		t.Errorf("got %q, want %q", written, want)
 	}
-	if back, _ := RemovePackageBlock(written, "station:a"); back != before+"\n" {
+	if back, _ := textblock.Remove(written, "station:a"); back != before+"\n" {
 		t.Errorf("removal leaves %q; want the owner's lines with station's marker ended", back)
-	}
-}
-
-func TestAStartMetAgainBeforeItsEndIsDamage(t *testing.T) {
-	stray := "mine\n# >>> station:a >>>\nmine too\n# >>> station:a >>>\nk\n# <<< station:a <<<\n"
-	if _, state := PackageBlock(stray, "station:a"); state != BlockDamaged {
-		t.Fatalf("a stray start above a block = %v; want damaged", state)
-	}
-	if got := DamagedLines(stray, "station:a"); len(got) != 1 || got[0] != "line 2" {
-		t.Fatalf("DamagedLines = %q; want the stray start alone", got)
-	}
-	if first, last := BlockLines(stray, "station:a"); first != 4 || last != 6 {
-		t.Fatalf("BlockLines = %d, %d; want the whole block, 4 to 6", first, last)
-	}
-	if first, last := BlockLines(stray, "station:a"); first != 4 || last != 6 {
-		t.Fatalf("BlockLines = %d, %d; want the whole block, 4 to 6", first, last)
-	}
-	twice := "# >>> station:a >>>\nk\n# <<< station:a <<<\n# >>> station:a >>>\nk\n# <<< station:a <<<\n"
-	if got := DamagedLines(twice, "station:a"); len(got) != 1 || got[0] != "lines 4 to 6" {
-		t.Fatalf("DamagedLines = %q; want the second block", got)
 	}
 }

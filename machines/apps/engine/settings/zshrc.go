@@ -1,6 +1,10 @@
 package settings
 
-import "strings"
+import (
+	"strings"
+
+	"github.com/jterrazz/studio-station/apps/engine/core/textblock"
+)
 
 const (
 	blockStart = "# >>> station >>>"
@@ -35,12 +39,12 @@ func UpsertBlock(zshrc string) (updated string, changed bool) {
 			out = append(out, line)
 		}
 	}
-	if spans := spansOf(out); len(spans) > 0 {
-		head := strings.TrimRight(strings.Join(out[:spans[0].start], "\n"), "\n")
+	if spans := textblock.Spans(out); len(spans) > 0 {
+		head := strings.TrimRight(strings.Join(out[:spans[0].Start], "\n"), "\n")
 		if head != "" {
 			head += "\n\n"
 		}
-		updated = head + block + strings.Join(out[spans[0].start:], "\n")
+		updated = head + block + strings.Join(out[spans[0].Start:], "\n")
 		return updated, updated != zshrc
 	}
 	text := strings.TrimRight(strings.Join(out, "\n"), "\n")
@@ -68,13 +72,13 @@ func mainSpan(lines []string) (start, end int, ok bool) {
 
 // invariant: station's main block comes before every package block.
 func mainFirst(lines []string) bool {
-	spans := spansOf(lines)
+	spans := textblock.Spans(lines)
 	if len(spans) == 0 {
 		return true
 	}
 	for i, line := range lines {
 		if strings.TrimSpace(line) == blockStart {
-			return i < spans[0].start
+			return i < spans[0].Start
 		}
 	}
 	return true

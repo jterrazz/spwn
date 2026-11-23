@@ -18,6 +18,7 @@ import (
 	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
+	"github.com/jterrazz/studio-station/apps/engine/core/textblock"
 	"github.com/jterrazz/studio-station/apps/engine/platform/local"
 	"github.com/jterrazz/studio-station/apps/engine/settings"
 	"github.com/jterrazz/studio-station/apps/engine/settings/contract"
@@ -178,14 +179,14 @@ func (a *Applier) takeOut(w written, h holding, id string) ([]settings.ChangeSte
 	if err != nil {
 		return []settings.ChangeStep{{Label: w.File, State: catalog.StateBroken, Detail: "not touched"}}, true, cannot(err)
 	}
-	have, state := settings.PackageBlock(text, id)
+	have, state := textblock.Of(text, id)
 	switch {
-	case state == settings.BlockAbsent:
+	case state == textblock.Absent:
 		return []settings.ChangeStep{{Label: w.File, State: catalog.StateOK, Detail: "already gone"}}, false, nil
-	case state == settings.BlockDamaged || !w.ours(have):
+	case state == textblock.Damaged || !w.ours(have):
 		return []settings.ChangeStep{{Label: w.File, State: catalog.StateOK, Detail: "yours, kept"}}, true, stillSigns(w.File, text, id)
 	}
-	updated, _ := settings.RemovePackageBlock(text, id)
+	updated, _ := textblock.Remove(text, id)
 	seen := local.Seen{Data: []byte(text), There: true}
 	if updated == "" && w.MadeFile {
 		return a.unmade(w, h.folder, seen)
@@ -235,10 +236,10 @@ func (a *Applier) whose(file string) string {
 }
 
 func stillSigns(file, text, id string) error {
-	if _, state := settings.PackageBlock(text, id); state == settings.BlockDamaged {
-		return &edited{fmt.Errorf("%s holds a damaged %s block, kept, so the Machines key still signs in: delete %s of %s, then the rest of the block", file, id, strings.Join(settings.DamagedLines(text, id), " and "), file)}
+	if _, state := textblock.Of(text, id); state == textblock.Damaged {
+		return &edited{fmt.Errorf("%s holds a damaged %s block, kept, so the Machines key still signs in: delete %s of %s, then the rest of the block", file, id, strings.Join(textblock.DamagedLines(text, id), " and "), file)}
 	}
-	first, last := settings.BlockLines(text, id)
+	first, last := textblock.Lines(text, id)
 	return &edited{fmt.Errorf("%s keeps the Machines block you changed, so the Machines key still signs in: delete lines %d to %d of %s to take it out", file, first, last, file)}
 }
 
@@ -277,7 +278,7 @@ func (a *Applier) Kept(_ context.Context, it catalog.Setting) error {
 			continue
 		}
 		w := files[file]
-		if have, state := settings.PackageBlock(text, k.Block); state == settings.BlockDamaged || w != nil && state == settings.BlockHere && !w.ours(have) {
+		if have, state := textblock.Of(text, k.Block); state == textblock.Damaged || w != nil && state == textblock.Found && !w.ours(have) {
 			why = append(why, stillSigns(file, text, k.Block))
 		}
 	}
@@ -486,15 +487,15 @@ func (a *Applier) Observe(_ context.Context, it catalog.Setting) (settings.Obser
 		return settings.Observation{}, err
 	}
 	o := settings.Observation{Where: r.File}
-	have, state := settings.PackageBlock(text, k.Block)
+	have, state := textblock.Of(text, k.Block)
 	switch {
-	case state == settings.BlockAbsent:
+	case state == textblock.Absent:
 		o.State = catalog.StateAbsent
 		return o, nil
-	case state == settings.BlockHere && r.Was != "" && have == r.Was:
+	case state == textblock.Found && r.Was != "" && have == r.Was:
 		o.State, o.Detail, o.Loose = catalog.StateDegraded, "differs from Machines': station settings apply "+it.Name, true
 		o.Diff = settings.UnifiedDiff(r.Body, have, "Machines' "+r.File, r.File)
-	case state == settings.BlockHere && (unrecorded || have == r.Body):
+	case state == textblock.Found && (unrecorded || have == r.Body):
 		o.State, o.Detail = catalog.StateOK, r.File
 		l, err := a.loose(r.File, it.Name)
 		if err != nil {
@@ -586,9 +587,9 @@ func (a *Applier) Apply(ctx context.Context, it catalog.Setting, values map[stri
 	if err != nil {
 		return settings.Change{}, err
 	}
-	have, state := settings.PackageBlock(text, k.Block)
-	if state == settings.BlockDamaged {
-		return settings.Change{}, fmt.Errorf("%s holds a damaged %s block, a start with no end or two blocks, not touched: delete %s of %s, then apply again", file, k.Block, strings.Join(settings.DamagedLines(text, k.Block), " and "), file)
+	have, state := textblock.Of(text, k.Block)
+	if state == textblock.Damaged {
+		return settings.Change{}, fmt.Errorf("%s holds a damaged %s block, a start with no end or two blocks, not touched: delete %s of %s, then apply again", file, k.Block, strings.Join(textblock.DamagedLines(text, k.Block), " and "), file)
 	}
 	updated, changed := settings.UpsertPackageBlock(text, k.Block, body)
 	// invariant: the record names the file before its block is written, so
@@ -606,7 +607,7 @@ func (a *Applier) Apply(ctx context.Context, it catalog.Setting, values map[stri
 		}
 		now.MadeFile = now.MadeFile || w.MadeFile
 		now.MadeFolder = now.MadeFolder || w.MadeFolder
-		if state == settings.BlockHere && w.ours(have) && have != body {
+		if state == textblock.Found && w.ours(have) && have != body {
 			now.Was = have
 		}
 	}
@@ -837,7 +838,7 @@ func (a *Applier) sight(file, id string) seen {
 	case err != nil:
 		return stop
 	}
-	if _, state := settings.PackageBlock(text, id); state != settings.BlockAbsent {
+	if _, state := textblock.Of(text, id); state != textblock.Absent {
 		return stop
 	}
 	return pass
@@ -886,15 +887,15 @@ func (a *Applier) unrecordedIn(file string, h holding, id string, known map[stri
 	if err != nil {
 		return nil, cannot(err)
 	}
-	body, state := settings.PackageBlock(text, id)
+	body, state := textblock.Of(text, id)
 	switch state {
-	case settings.BlockAbsent:
+	case textblock.Absent:
 		return nil, nil
-	case settings.BlockDamaged:
-		return nil, &edited{fmt.Errorf("%s holds a damaged %s block Machines has no record of, not touched: delete %s of %s, then the rest of the block", file, id, strings.Join(settings.DamagedLines(text, id), " and "), file)}
-	case settings.BlockHere:
+	case textblock.Damaged:
+		return nil, &edited{fmt.Errorf("%s holds a damaged %s block Machines has no record of, not touched: delete %s of %s, then the rest of the block", file, id, strings.Join(textblock.DamagedLines(text, id), " and "), file)}
+	case textblock.Found:
 	}
-	first, last := settings.BlockLines(text, id)
+	first, last := textblock.Lines(text, id)
 	var strange []string
 	for i, line := range strings.Split(strings.TrimSuffix(body, "\n"), "\n") {
 		if strings.TrimSpace(line) != "" && !known[identity(line)] {
@@ -904,7 +905,7 @@ func (a *Applier) unrecordedIn(file string, h holding, id string, known map[stri
 	if len(strange) > 0 {
 		return nil, &edited{fmt.Errorf("%s holds a %s block Machines has no record of, kept: %s of %s is no key Machines knows, so the block's keys still sign in; keep what is yours out of it, then delete lines %d to %d of %s", file, id, strings.Join(strange, " and "), file, first, last, file)}
 	}
-	updated, _ := settings.RemovePackageBlock(text, id)
+	updated, _ := textblock.Remove(text, id)
 	err = h.folder.Replace(keysFile, local.Seen{Data: []byte(text), There: true}, []byte(updated), 0o600, local.Owner{})
 	if err != nil {
 		return nil, a.linked(err)

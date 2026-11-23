@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/jterrazz/studio-station/apps/engine/ports/adapter/guest"
 )
 
 func hello(t *testing.T, before string) string {
@@ -27,6 +29,13 @@ func hello(t *testing.T, before string) string {
 	<-done
 	data, _ := os.ReadFile(file)
 	return string(data)
+}
+
+func TestTheGuestKeepsADamagedBlockAsItIs(t *testing.T) {
+	damaged := "ssh-ed25519 AAAAown laptop\n" + guest.KeysBegin + "\nssh-ed25519 AAAAx a\n" + guest.KeysBegin + "\nssh-ed25519 AAAAy b\n" + guest.KeysEnd + "\n"
+	if got := hello(t, damaged); got != damaged {
+		t.Fatalf("authorized_keys after a hello over a damaged block = %q; want it as it was", got)
+	}
 }
 
 func TestTheGuestKeepsAFileLargerThanAMebibyteAsItIs(t *testing.T) {

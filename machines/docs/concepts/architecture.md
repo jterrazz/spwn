@@ -58,6 +58,7 @@ The shared kernel, which does no I/O:
     store/     what every store shares: its errors, its version, refused when it is not this station's
     fail/      the error: its type, its code, its words
     secret/    what a secret looks like (the token shapes, Screen and Kept) and the Value that never prints in clear
+    textblock/ a block of station's between two marker lines of a text file, found and judged one way: ~/.zshrc's, authorized_keys', the guest's
     adapter/   macos and linux (Self), jsonfile (Preferences), fake
 ```
 
