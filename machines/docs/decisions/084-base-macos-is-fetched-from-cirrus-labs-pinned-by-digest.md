@@ -7,6 +7,8 @@ Accepted by the owner on 2026-11-23, on the owner's word.
 
 Amends [ADR-051](051-a-machine-is-a-base-and-its-machinefiles.md).
 
+Amended by [ADR-087](087-a-fetched-macos-guest-takes-its-key-at-its-first-login.md): a VM made from it takes station's key at its first login, which retires the image's password.
+
 ## Context
 
 ADR-051 decided that Machines builds every base, macOS included, and that no base is fetched only. The macOS half was never built: `base-macos` has no recipe, and `station images update base-macos` asked a registry that releases no macOS image. On a new Mac on 2026-11-23, no Spwn gesture could make a macOS VM: `machines create --image base-macos` said to update, the update said no version is released, and its hint led back to `station images`.

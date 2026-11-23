@@ -139,5 +139,6 @@ The records of decisions this repository alone took go in [`decisions/`](decisio
 - [084 `base-macos` is fetched from Cirrus Labs, pinned by digest](decisions/084-base-macos-is-fetched-from-cirrus-labs-pinned-by-digest.md) (Accepted)
 - [085 A Mac run alone keeps a device key that signs with nobody present](decisions/085-a-mac-run-alone-keeps-a-device-key-that-signs-with-nobody-present.md) (Accepted)
 - [086 A VM reserves a package's port only when its Machinefile installs it](decisions/086-a-vm-reserves-a-packages-port-only-when-its-machinefile-installs-it.md) (Accepted)
+- [087 A fetched macOS guest takes its key at its first login](decisions/087-a-fetched-macos-guest-takes-its-key-at-its-first-login.md) (Proposed)
 
 A decision spanning several repositories is recorded by the corpus that spans them. What was left for later is `TODO.md` at the repository root.
