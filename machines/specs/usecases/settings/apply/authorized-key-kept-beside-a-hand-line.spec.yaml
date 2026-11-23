@@ -20,8 +20,8 @@ runs:
           # >>> station:authorized-key >>>
           ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGZ2c8e4bOqkqO0+5N0VXlFz4sVJyDQzH+LVRG4RvMZb ci@deploy
           # <<< station:authorized-key <<<
-          ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOWNERownerOWNERownerOWNERownerOWNERowner owner@laptop700 root/root/.ssh
-          600 root/root/.ssh/authorized_keys
+          ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOWNERownerOWNERownerOWNERownerOWNERowner owner@laptop755 root/root/.ssh
+          644 root/root/.ssh/authorized_keys
     - command: 'settings off authorized-key --yes'
       exit: 0
       stdout: |

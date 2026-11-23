@@ -13,7 +13,7 @@ runs:
       exit: 0
       stdout: |
           [{"Label":"/root/.ssh/authorized_keys","State":"ok","Detail":"written"}]
-    - command: '--version >/dev/null; /bin/chmod 755 root/root/.ssh'
+    - command: '--version >/dev/null; /bin/chmod 775 root/root/.ssh'
       exit: 0
     - command: 'settings authorized-key | /usr/bin/sed -n 1p'
       exit: 0

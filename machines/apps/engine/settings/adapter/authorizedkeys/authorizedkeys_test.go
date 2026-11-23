@@ -278,24 +278,60 @@ func TestABlockAlreadyThereIsNotWrittenAgain(t *testing.T) {
 	}
 }
 
+// invariant: a folder or file others can write loses only that write;
+// what others may read or open stays, as sshd takes it.
 func TestLooseModesAreSetAsSshdAsks(t *testing.T) {
 	m := newMachine(t)
-	m.mkdir("root/.ssh", 0o755)
-	m.write(rootAK, key(t, 9, "")+"\n", 0o664)
+	m.mkdir("root/.ssh", 0o775)
+	m.write(rootAK, key(t, 9, "")+"\n", 0o666)
 	apply(t, m.open(), "root", key(t, 1, ""))
-	if dir, f := m.entry("root/.ssh").Mode.Perm(), m.entry(rootAK).Mode.Perm(); dir != 0o700 || f != 0o600 {
-		t.Fatalf("folder %o, file %o; want 700 and 600", dir, f)
+	if dir, f := m.entry("root/.ssh").Mode.Perm(), m.entry(rootAK).Mode.Perm(); dir != 0o755 || f != 0o644 {
+		t.Fatalf("folder %o, file %o; want 755 and 644", dir, f)
 	}
 }
 
+// invariant: a folder and a file only their owner can write are what sshd
+// takes, others reading them or not: apply keeps their modes and reads
+// them applied.
 func TestStrictModesAreKept(t *testing.T) {
 	m := newMachine(t)
-	m.mkdir("root/.ssh", 0o700)
-	m.write(rootAK, key(t, 9, "")+"\n", 0o600)
+	m.mkdir("root/.ssh", 0o755)
+	m.write(rootAK, key(t, 9, "")+"\n", 0o644)
 	apply(t, m.open(), "root", key(t, 1, ""))
-	if dir, f := m.entry("root/.ssh").Mode.Perm(), m.entry(rootAK).Mode.Perm(); dir != 0o700 || f != 0o600 {
-		t.Fatalf("folder %o, file %o; want 700 and 600", dir, f)
+	if dir, f := m.entry("root/.ssh").Mode.Perm(), m.entry(rootAK).Mode.Perm(); dir != 0o755 || f != 0o644 {
+		t.Fatalf("folder %o, file %o; want 755 and 644", dir, f)
 	}
+	if o, err := m.open().Observe(context.Background(), setting()); err != nil || o.State != catalog.StateOK {
+		t.Fatalf("Observe = %+v, %v; want ok", o, err)
+	}
+}
+
+// invariant: a folder or file root owns in another user's ~/.ssh that
+// others can write is never chmodded for that user: it reads changed
+// since, with root's own fix.
+func TestAWritableFolderOrFileRootOwnsForAnotherUserIsDriftNeverChmodded(t *testing.T) {
+	m := newMachine(t)
+	if m.self.UID != 0 {
+		t.Skip("only root owns what another user's ~/.ssh holds")
+	}
+	m.mkdir("home/ci/.ssh", 0o775)
+	m.write(ciAK, key(t, 9, "")+"\n", 0o664)
+	apply(t, m.open(), "ci", key(t, 1, ""))
+	if dir, f := m.entry("home/ci/.ssh"), m.entry(ciAK); dir.Mode.Perm() != 0o775 || f.Mode.Perm() != 0o664 || dir.UID != 0 || f.UID != 0 {
+		t.Fatalf("folder %v uid %d, file %v uid %d; want root's 0775 and 0664 untouched", dir.Mode, dir.UID, f.Mode, f.UID)
+	}
+	seen := func(want string) {
+		t.Helper()
+		o, err := m.open().Observe(context.Background(), setting())
+		if err != nil || o.State != catalog.StateDegraded || o.Detail != want || !o.Loose {
+			t.Fatalf("Observe = %s %q, %v; want degraded %q, loose", o.State, o.Detail, err, want)
+		}
+	}
+	seen("/home/ci/.ssh is 0775, writable by others, so its keys are ignored: Machines changes no mode of root's for another user, take the write away with sudo chmod go-w /home/ci/.ssh")
+	if err := m.disk.Chmod(m.at("home/ci/.ssh"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	seen("/home/ci/.ssh/authorized_keys is 0664, writable by others, so its keys are ignored: Machines changes no mode of root's for another user, take the write away with sudo chmod go-w /home/ci/.ssh/authorized_keys")
 }
 
 // invariant: a user who links ~/.ssh to a folder of the system's gets it
@@ -631,11 +667,11 @@ func TestAFolderOrFileTheSignInServerIgnoresIsDrift(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	t.Run("a folder others can open", func(t *testing.T) {
-		loosen(t, "root/.ssh", 0o755, 0o700, "/root/.ssh is 0755, open to others, so its keys are ignored: station settings apply authorized-key sets it to 0700")
+	t.Run("a folder others can write", func(t *testing.T) {
+		loosen(t, "root/.ssh", 0o775, 0o700, "/root/.ssh is 0775, writable by others, so its keys are ignored: station settings apply authorized-key sets it to 0755")
 	})
-	t.Run("a file others can read", func(t *testing.T) {
-		loosen(t, rootAK, 0o644, 0o600, "/root/.ssh/authorized_keys is 0644, open to others, so its keys are ignored: station settings apply authorized-key sets it to 0600")
+	t.Run("a file others can write", func(t *testing.T) {
+		loosen(t, rootAK, 0o664, 0o600, "/root/.ssh/authorized_keys is 0664, writable by others, so its keys are ignored: station settings apply authorized-key sets it to 0644")
 	})
 	t.Run("a file another user owns", func(t *testing.T) {
 		if m.self.UID != 0 {
@@ -745,7 +781,7 @@ func TestOffTakesAwayTheFileAndFolderItMadeOnceEmpty(t *testing.T) {
 }
 
 // invariant: a strict folder or file keeps the mode its owner gave it:
-// apply only closes what others can open.
+// apply only takes away what others can write.
 func TestAStrictModeIsKeptAsItIs(t *testing.T) {
 	m := newMachine(t)
 	m.mkdir("root/.ssh", 0o700)

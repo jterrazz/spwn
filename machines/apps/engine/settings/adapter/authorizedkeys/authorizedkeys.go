@@ -495,7 +495,7 @@ func (a *Applier) Apply(ctx context.Context, it catalog.Setting, values map[stri
 			return settings.Change{}, a.linked(err)
 		}
 	}
-	err = a.strict(f)
+	err = a.strict(f, who.UID)
 	if err != nil {
 		return settings.Change{}, err
 	}
@@ -580,9 +580,10 @@ type loosened struct {
 
 func (a *Applier) loose(file, name string) (loosened, error) {
 	// invariant: the keys count only while the sign-in server reads them:
-	// nothing of the folder or the file for group or others, and both the
-	// home owner's or root's; anything else is drift, a loose mode with apply
-	// as its fix, an owner with the owner's own chown.
+	// neither the folder nor the file writable by group or others, and both
+	// the home owner's or root's; anything else is drift, an owner with the
+	// owner's own chown, a loose mode with apply as its fix on what the home
+	// owner owns and root's own chmod on what root owns for another user.
 	base, ssh := a.beneath(file)
 	owner, err := a.home.Lstat(base, path.Dir(ssh))
 	if err != nil {
@@ -602,35 +603,45 @@ func (a *Applier) loose(file, name string) (loosened, error) {
 		return loosened{}, a.linked(err)
 	}
 	for _, p := range []struct {
-		at   string
-		e    local.Entry
-		mode fs.FileMode
-	}{{path.Dir(file), folder, 0o700}, {file, keys, 0o600}} {
+		at string
+		e  local.Entry
+	}{{path.Dir(file), folder}, {file, keys}} {
 		l := loosened{at: p.at}
+		perm := p.e.Mode.Perm()
 		switch {
-		case p.e.Mode.Perm()&0o077 != 0:
-			l.want, l.have = octal(p.mode)+"\n", octal(p.e.Mode.Perm())+"\n"
-			l.why = l.at + " is " + octal(p.e.Mode.Perm()) + ", open to others, so its keys are ignored: station settings apply " + name + " sets it to " + octal(p.mode)
-			return l, nil
 		case p.e.UID != owner.UID && p.e.UID != 0:
 			l.want, l.have = fmt.Sprintf("uid %d\n", owner.UID), fmt.Sprintf("uid %d\n", p.e.UID)
 			l.why = fmt.Sprintf("%s is uid %d's, not the home's (uid %d), so its keys are ignored: Machines never takes a file from its owner, give it back with %s", l.at, p.e.UID, owner.UID, catalog.AsRoot(fmt.Sprintf("chown %d %s", owner.UID, l.at)))
 			return l, nil
+		case perm&loose == 0:
+			continue
 		}
+		l.want, l.have = octal(perm&^loose)+"\n", octal(perm)+"\n"
+		l.why = l.at + " is " + octal(perm) + ", writable by others, so its keys are ignored: station settings apply " + name + " sets it to " + octal(perm&^loose)
+		if p.e.UID != owner.UID {
+			l.why = l.at + " is " + octal(perm) + ", writable by others, so its keys are ignored: Machines changes no mode of root's for another user, take the write away with " + catalog.AsRoot("chmod go-w "+l.at)
+		}
+		return l, nil
 	}
 	return loosened{}, nil
 }
 
-// invariant: a folder or file others can open is set to mode; a strict one
-// keeps its own, and no owner is ever changed: station gives the user only
-// what it makes, and never takes a file from whoever owns it.
-func (a *Applier) strict(f *local.Folder) error {
+// value: the bits of a mode that let group or others write, which make
+// the sign-in server ignore the keys.
+const loose fs.FileMode = 0o022
+
+// invariant: a folder or file the user owns that others can write loses
+// that write alone; a strict one keeps its own mode, one root owns for
+// another user is never changed, and no owner is ever changed: station
+// gives the user only what it makes, and never takes a file from whoever
+// owns it.
+func (a *Applier) strict(f *local.Folder, uid int) error {
 	e, err := f.Stat()
 	if err != nil {
 		return err
 	}
-	if e.Mode.Perm()&0o077 != 0 {
-		err = f.Chmod(0o700)
+	if e.Mode.Perm()&loose != 0 && e.UID == uid {
+		err = f.Chmod(e.Mode.Perm() &^ loose)
 		if err != nil {
 			return err
 		}
@@ -639,10 +650,10 @@ func (a *Applier) strict(f *local.Folder) error {
 	if err != nil {
 		return a.linked(err)
 	}
-	if e.Mode.Perm()&0o077 == 0 {
+	if e.Mode.Perm()&loose == 0 || e.UID != uid {
 		return nil
 	}
-	return a.linked(f.ChmodFile(keysFile, 0o600))
+	return a.linked(f.ChmodFile(keysFile, e.Mode.Perm()&^loose))
 }
 func octal(m fs.FileMode) string { return "0" + strconv.FormatUint(uint64(m.Perm()), 8) }
 

@@ -1,11 +1,11 @@
-description: 'an authorized_keys at 0400 is strict already: apply writes its block and keeps the mode'
+description: 'a ~/.ssh at 0755 and an authorized_keys at 0400 are strict already: apply keeps both modes'
 env:
     - in-workspace
     - engine
 runs:
     - command: 'world admin on'
       exit: 0
-    - command: '--version >/dev/null; umask 022; /bin/mkdir -p root/root/.ssh; /bin/chmod 700 root/root/.ssh; echo ''# my laptop'' > root/root/.ssh/authorized_keys; /bin/chmod 400 root/root/.ssh/authorized_keys'
+    - command: '--version >/dev/null; umask 022; /bin/mkdir -p root/root/.ssh; /bin/chmod 755 root/root/.ssh; echo ''# my laptop'' > root/root/.ssh/authorized_keys; /bin/chmod 400 root/root/.ssh/authorized_keys'
       exit: 0
     - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | .out[0].Steps'''
       stdin: |
@@ -13,9 +13,10 @@ runs:
       exit: 0
       stdout: |
           [{"Label":"/root/.ssh/authorized_keys","State":"ok","Detail":"written"}]
-    - command: '--version >/dev/null; /usr/bin/stat -c ''%a %n'' root/root/.ssh/authorized_keys'
+    - command: '--version >/dev/null; /usr/bin/stat -c ''%a %n'' root/root/.ssh root/root/.ssh/authorized_keys'
       exit: 0
       stdout: |
+          755 root/root/.ssh
           400 root/root/.ssh/authorized_keys
     - command: 'settings authorized-key | /usr/bin/sed -n 1p'
       exit: 0
