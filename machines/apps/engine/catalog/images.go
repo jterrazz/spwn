@@ -176,3 +176,10 @@ func (c Catalog) FetchedOnly(name string) bool {
 	}
 	return false
 }
+
+func PinnedByDigest(ref string) bool {
+	// value: an image reference that names its content by a sha256 digest,
+	// never by a tag that may move.
+	_, digest, ok := strings.Cut(ref, "@sha256:")
+	return ok && len(digest) == 64 && strings.Trim(digest, "0123456789abcdef") == ""
+}

@@ -1,8 +1,15 @@
-description: 'an image no registry offers is said so, and nothing is fetched'
+description: 'an image no registry offers and Machines cannot build is said so, and nothing is fetched'
 env: two-macs
 runs:
-    - command: 'images update base-macos'
+    - command: 'world edit macbook-pro machinefiles/mac-dev.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: mac-dev
+          machine: { kind: workspace, system: { os: macos } }
+          vm: { image: { from: 'ghcr.io/cirruslabs/macos-tahoe-base:latest' } }
+      exit: 0
+    - command: 'images update mac-dev'
       exit: 1
       stderr: |
-          Error: no version of base-macos is released
+          Error: no version of mac-dev is released
           Hint: station images

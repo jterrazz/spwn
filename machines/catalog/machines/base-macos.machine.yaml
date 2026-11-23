@@ -3,12 +3,15 @@ name: base-macos
 description: A macOS workspace with Homebrew, git and zsh
 machine:
     kind: workspace
-    system: { os: macos, arch: arm64 }
+    system: { os: macos, version: '26.6.2', arch: arm64 }
 vm:
     lifetime: persistent
     resources: { cpus: 4, memory: 8G, disk: 80G }
     network: bridged
-    image: { from: 'ghcr.io/cirruslabs/macos-tahoe-base:latest' }
+    image:
+        {
+            from: 'ghcr.io/cirruslabs/macos-tahoe-base@sha256:65c3133a633fda8753cf1f71f2d55727792d534a2125b0032466563dcc8e58fd',
+        }
 apps: [homebrew, git, ohmyzsh]
 settings:
     git-shortcuts: {}

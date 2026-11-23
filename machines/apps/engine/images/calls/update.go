@@ -6,6 +6,7 @@ import (
 	"slices"
 	"time"
 
+	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/images"
 	imagescontract "github.com/jterrazz/studio-station/apps/engine/images/contract"
 )
@@ -70,12 +71,9 @@ func (s *Builder) Update(ctx context.Context, names []string, progress func(imag
 // the image as it was.
 func (s *Builder) updateOne(ctx context.Context, name string, progress func(images.Step)) (images.Update, error) {
 	img, _ := s.image(ctx, name)
-	latest, err := s.source.Latest(ctx, name)
-	switch {
-	case errors.Is(err, imagescontract.ErrNotReleased):
-		return images.Update{}, &images.NotReleasedError{Image: name, Buildable: img.Recipe != ""}
-	case err != nil:
-		return images.Update{}, &images.RegistryError{Image: name, Cause: err}
+	latest, at, upstream, err := s.offer(ctx, img)
+	if err != nil {
+		return images.Update{}, err
 	}
 	held, err := s.records(img)
 	if err != nil {
@@ -83,13 +81,6 @@ func (s *Builder) updateOne(ctx context.Context, name string, progress func(imag
 	}
 	if len(held) > 0 && images.CompareVersions(held[0].Version, latest.Version) >= 0 {
 		return images.Update{Ref: held[0].Ref(), Newest: true}, nil
-	}
-	at, err := s.source.Locate(ctx, latest, s.e.Name())
-	if errors.Is(err, imagescontract.ErrNotForHypervisor) {
-		return images.Update{}, &images.NotReleasedError{Image: name}
-	}
-	if err != nil {
-		return images.Update{}, &images.RegistryError{Image: name, Cause: err}
 	}
 	failed := func(step string, cause error) (images.Update, error) {
 		return images.Update{}, &images.FetchFailedError{Image: name, Version: latest.Version, Step: step, Cause: cause}
@@ -105,7 +96,7 @@ func (s *Builder) updateOne(ctx context.Context, name string, progress func(imag
 		return failed("keeping the fetched image", err)
 	}
 	_ = s.e.Discard(ctx, at)
-	rec := images.Record{Name: name, Version: latest.Version, Distro: img.Distro, DistroVersion: img.DistroVersion, BuiltAt: s.m.Now().UTC().Truncate(time.Second), Fetched: true}
+	rec := images.Record{Name: name, Version: latest.Version, Distro: img.Distro, DistroVersion: img.DistroVersion, Upstream: upstream, BuiltAt: s.m.Now().UTC().Truncate(time.Second), Fetched: true}
 	if disks, err := s.e.Disks(ctx); err == nil {
 		for _, d := range disks {
 			if d.VM == disk {
@@ -118,4 +109,42 @@ func (s *Builder) updateOne(ctx context.Context, name string, progress func(imag
 		return failed("writing the image record", err)
 	}
 	return images.Update{Ref: rec.Ref()}, nil
+}
+
+// invariant: a fetch-only image of the catalogue is offered by its
+// Machinefile's upstream, pinned by digest, at its system's version; every
+// other image by the newest version the registry releases.
+func (s *Builder) offer(ctx context.Context, img catalog.Image) (images.Ref, imagescontract.ImageLocation, string, error) {
+	if pin, ok := s.pinned(ctx, img); ok {
+		return images.Ref{Name: img.Name, Version: img.DistroVersion}, s.location(pin), pin, nil
+	}
+	latest, err := s.source.Latest(ctx, img.Name)
+	switch {
+	case errors.Is(err, imagescontract.ErrNotReleased):
+		return images.Ref{}, imagescontract.ImageLocation{}, "", &images.NotReleasedError{Image: img.Name, Buildable: img.Recipe != ""}
+	case err != nil:
+		return images.Ref{}, imagescontract.ImageLocation{}, "", &images.RegistryError{Image: img.Name, Cause: err}
+	}
+	at, err := s.source.Locate(ctx, latest, s.e.Name())
+	switch {
+	case errors.Is(err, imagescontract.ErrNotForHypervisor):
+		return images.Ref{}, imagescontract.ImageLocation{}, "", &images.NotReleasedError{Image: img.Name, Buildable: img.Recipe != ""}
+	case err != nil:
+		return images.Ref{}, imagescontract.ImageLocation{}, "", &images.RegistryError{Image: img.Name, Cause: err}
+	}
+	return latest, at, "", nil
+}
+
+func (s *Builder) pinned(ctx context.Context, img catalog.Image) (string, bool) {
+	if img.Recipe != "" || img.Machinefile == "" || img.DistroVersion == "" {
+		return "", false
+	}
+	if _, ok := s.cat.Image(img.Name); !ok {
+		return "", false
+	}
+	t, err := s.templates.Template(ctx, img.Machinefile)
+	if err != nil || !catalog.PinnedByDigest(t.From) {
+		return "", false
+	}
+	return t.From, true
 }

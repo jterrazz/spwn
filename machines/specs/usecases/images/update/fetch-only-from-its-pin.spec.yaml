@@ -1,0 +1,31 @@
+description: 'a fetch-only base is fetched from the digest its Machinefile pins, and a workspace made from it'
+env: two-macs
+runs:
+    - command: 'images update base-macos'
+      exit: 0
+      stdout: |
+          ●	base-macos	26.6.2	fetched
+    - command: 'images update base-macos'
+      exit: 0
+      stdout: |
+          ●	base-macos	26.6.2	is the newest
+    - command: '--version >/dev/null; /usr/bin/jq -r ''.macs["macbook-pro"].stores.images[] | select(.name == "base-macos") | "\(.version) \(.distro) \(.distro_version) \(.fetched) \(.upstream)"'' "$STATION_WORLD"'
+      exit: 0
+      stdout: |
+          26.6.2 macos 26.6.2 true ghcr.io/cirruslabs/macos-tahoe-base@sha256:65c3133a633fda8753cf1f71f2d55727792d534a2125b0032466563dcc8e58fd
+    - command: 'images --json | /usr/bin/jq -r ''.images[] | select(.name == "base-macos") | "\(.version) \(.distro) \(.size_bytes) \(.newest)"'''
+      exit: 0
+      stdout: |
+          26.6.2 macos 4000000000 true
+    - command: 'images | /usr/bin/grep base-macos'
+      exit: 0
+      stdout: |
+          ●	base-macos	26.6.2	4.0 GB	macbook-pro	no VM made from it
+    - command: 'machines create mac-1 --image base-macos --memory 4G | /usr/bin/tail -1'
+      exit: 0
+      stdout: |
+          ●	mac-1	Created	Ephemeral · 4 CPU · 4 GB · 80 GB
+    - command: 'images | /usr/bin/grep base-macos'
+      exit: 0
+      stdout: |
+          ●	base-macos	26.6.2	4.0 GB	macbook-pro	mac-1

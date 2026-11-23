@@ -1,0 +1,11 @@
+description: 'a macOS workspace made from the fetched base takes the sizes of its Machinefile'
+env: one-mac
+runs:
+    - command: 'images update base-macos'
+      exit: 0
+      stdout: |
+          ●	base-macos	26.6.2	fetched
+    - command: 'machines create mac-1 --image base-macos | /usr/bin/tail -1'
+      exit: 0
+      stdout: |
+          ●	mac-1	Created	Ephemeral · 4 CPU · 8 GB · 80 GB
