@@ -41,6 +41,26 @@ func TestOffWithNoRecordReachesABlockInAnAccountThatIsNotTheDefault(t *testing.T
 	}
 }
 
+func TestAUserHoldingTheirSSHFolderKeepsOnlyTheirOwnAccount(t *testing.T) {
+	m := newMachine(t)
+	k := key(t, 1, "x")
+	own := key(t, 9, "laptop") + "\n"
+	m.mkdir("root/.ssh", 0o700)
+	m.write(rootAK, own+block(k), 0o600)
+	m.sshOf("home/ci", m.ci)
+	m.write(ciAK, own+block(k), 0o600)
+	m.chown(ciAK, m.ci)
+	release := m.hold("home/ci/.ssh")
+	defer release()
+	_, err := m.open().Undo(context.Background(), known(k))
+	if err == nil || !errors.Is(err, contract.ErrKept) || !strings.Contains(err.Error(), "/home/ci/.ssh is held by another run") || !strings.Contains(err.Error(), "ci's keys") {
+		t.Fatalf("Undo with ci's ~/.ssh held = %v; want needs-you naming ci", err)
+	}
+	if m.content(rootAK) != own || m.content(ciAK) != own+block(k) {
+		t.Fatalf("root's %q, ci's %q; want root's block out and ci's kept", m.content(rootAK), m.content(ciAK))
+	}
+}
+
 func TestWithNoRecordALineMachinesDoesNotKnowKeepsTheBlock(t *testing.T) {
 	m := newMachine(t)
 	m.mkdir("root/.ssh", 0o700)

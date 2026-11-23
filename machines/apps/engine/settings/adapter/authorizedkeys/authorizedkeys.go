@@ -197,6 +197,29 @@ type edited struct{ error }
 
 func (*edited) Is(target error) bool { return target == contract.ErrKept }
 
+// value: why a file of station's block was left unread and untouched, so
+// its keys may still sign in: the run ends on it needing the owner, every
+// other file handled.
+type unreached struct{ error }
+
+func (*unreached) Is(target error) bool { return target == contract.ErrKept }
+
+// value: the account /etc/passwd gives the home of file, or that home when
+// none does.
+func (a *Applier) whose(file string) string {
+	home := path.Dir(path.Dir(file))
+	data, _ := a.files.ReadFile(a.at("/etc/passwd"))
+	for line := range strings.SplitSeq(string(data), "\n") {
+		if f := strings.Split(line, ":"); len(f) >= 7 && path.Clean(f[5]) == home {
+			return f[0]
+		}
+	}
+	if home == "/root" {
+		return "root"
+	}
+	return home
+}
+
 func stillSigns(file, text, id string) error {
 	if _, state := settings.PackageBlock(text, id); state == settings.BlockDamaged {
 		return &edited{fmt.Errorf("%s holds a damaged %s block, kept, so the Machines key still signs in: delete %s of %s, then the rest of the block", file, id, strings.Join(settings.DamagedLines(text, id), " and "), file)}
@@ -286,8 +309,9 @@ type holding struct {
 
 // invariant: every ~/.ssh a run writes in is held from its read to its
 // write, the lock the VM's guest takes too, each taken in the order of its
-// home owner's uid; one another run holds for 10 seconds refuses the run
-// with nothing touched.
+// home owner's uid; one another run holds for 10 seconds is left as it is,
+// its account named, and every other is still handled: a user who holds
+// their own ~/.ssh keeps no other account's keys in place.
 func (a *Applier) holdAll(ctx context.Context, files []string) (held map[string]holding, release func(), err error) {
 	uid := map[string]int{}
 	for _, file := range files {
@@ -317,8 +341,8 @@ func (a *Applier) holdAll(ctx context.Context, files []string) (held map[string]
 		f, busy, why := a.home.Hold(ctx, base, ssh, wait)
 		switch {
 		case busy:
-			release()
-			return nil, nil, fmt.Errorf("%s is held by another run writing its keys, nothing touched: apply again once it ends", path.Dir(file))
+			held[file] = holding{err: &unreached{fmt.Errorf("%s is held by another run writing its keys, not touched: %s's keys stay as they are, run it again once it ends", path.Dir(file), a.whose(file))}, owner: uid[file]}
+			continue
 		case errors.Is(why, context.Canceled), errors.Is(why, context.DeadlineExceeded):
 			release()
 			return nil, nil, why
