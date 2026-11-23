@@ -1,7 +1,9 @@
 # ADR-083: A re-ask is quiet only for an engine-kept view, and never by a timer
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-11-23
+
+Accepted by the owner on 2026-11-23, on his word.
 
 Amends [ADR-071](071-the-window-mirrors-engine-kept-state-never-blank.md).
 
