@@ -33,6 +33,16 @@ printf '%s\n' "$IMAGE_KEY" > "$home/.ssh/authorized_keys"
 /usr/bin/install -m 0755 /tmp/station /usr/local/bin/station
 /bin/rm -f /tmp/station
 
+# invariant: the image password goes before sshd is locked, so a failure past it leaves no password known.
+# outside: the image logs LOGIN_USER in at boot by the password /etc/kcpassword holds.
+/usr/bin/defaults delete /Library/Preferences/com.apple.loginwindow autoLoginUser 2>/dev/null || true
+/bin/rm -f /etc/kcpassword
+/usr/bin/dscl . -passwd "/Users/$LOGIN_USER" "$LOGIN_PASSWORD" "$(unknown)"
+if /usr/bin/dscl . -authonly "$LOGIN_USER" "$LOGIN_PASSWORD" 2>/dev/null; then
+    echo "$LOGIN_USER still logs in by the image's default password" >&2
+    exit 1
+fi
+
 # outside: sshd keeps the first value it reads, and macOS's sshd_config includes sshd_config.d/* before its own lines, in name order.
 /bin/cat > /etc/ssh/sshd_config.d/000-station.conf <<'CONF'
 PasswordAuthentication no
@@ -43,12 +53,3 @@ ClientAliveCountMax 4
 CONF
 /usr/sbin/sshd -T | /usr/bin/grep -qx 'passwordauthentication no' || { echo "sshd still takes passwords: /etc/ssh/sshd_config.d/000-station.conf is not read first" >&2; exit 1; }
 /usr/sbin/sshd -T | /usr/bin/grep -qx 'kbdinteractiveauthentication no' || { echo "sshd still takes keyboard-interactive logins" >&2; exit 1; }
-
-# outside: the image logs LOGIN_USER in at boot by the password /etc/kcpassword holds.
-/usr/bin/defaults delete /Library/Preferences/com.apple.loginwindow autoLoginUser 2>/dev/null || true
-/bin/rm -f /etc/kcpassword
-/usr/bin/dscl . -passwd "/Users/$LOGIN_USER" "$(unknown)"
-if /usr/bin/dscl . -authonly "$LOGIN_USER" "$LOGIN_PASSWORD" 2>/dev/null; then
-    echo "$LOGIN_USER still logs in by the image's default password" >&2
-    exit 1
-fi
