@@ -252,13 +252,13 @@ Today the public `install.sh` (spwn-web's, served at spwn.sh) is the only instal
   - U11: the Homebrew cask, bumped by publish.yaml.
   - U12: tier 2 and 3 upgrade runs.
   - U13 (later): a `vz` adapter spike behind the port.
-- **Open owner questions** (none answered yet):
-  1. One updater for the cask too, or brew owns brew installs? Recommendation: station updates both, since brew cannot run the engine restart or the guest push.
-  3. The default apply mode. Recommendation: `night`, with `ask` for teams that change-manage.
-  4. A beta channel? Recommendation: not before the first customer; `stable` only, plus a `--version` pin.
-  5. The Apple Developer ID entity (personal or the company that sells station). Recommendation: the selling entity, decided before U10.
-  6. Images rebuilt at night? Recommendation: `ask`.
-  7. Start L1 and L3 of the Go audit now. Recommendation: yes, their findings shape the other lots.
+- **Decided by the owner (2026-11-23)**:
+  1. Station updates itself, the app and the engine, even when brew installed it. The cask declares `auto_updates true`, so brew does not fight it.
+  3. The default apply mode is `night`.
+  4. No beta channel: `stable` only, plus a `--version` pin.
+  5. The Apple Developer ID is the selling entity's, settled before U10.
+  6. Images rebuilt at night: `ask`.
+  7. L1 and L3 of the Go audit start after the release.
 
 Starts with U1, the owner's go, and the answers above for U2 onward.
 
