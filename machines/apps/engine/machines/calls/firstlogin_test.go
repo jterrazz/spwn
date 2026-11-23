@@ -41,7 +41,7 @@ func lockingDown(t *testing.T) *machines.Machinist {
 
 func TestALockdownIsRefusedForAVMUserThatIsTheImagesOwnAccount(t *testing.T) {
 	m := lockingDown(t)
-	for _, user := range []string{catalog.UpstreamLogin.User, "root", ""} {
+	for _, user := range []string{catalog.UpstreamLogin.User, "Admin", "root", "ROOT", ""} {
 		_, ok, err := m.LockdownOf(t.Context(), machinescontract.GuestTarget{VM: "mac-1", User: user})
 		if err == nil || ok {
 			t.Errorf("VM user %q: lockdown %v, %v; want it refused", user, ok, err)
@@ -98,6 +98,27 @@ func TestALockdownFolderIsTakenOnlyAsMktempPrintsIt(t *testing.T) {
 	} {
 		if dir, err := l.Folder(made); err == nil {
 			t.Errorf("%s: %q taken as the folder %q", name, made.Stdout, dir)
+		}
+	}
+}
+
+func TestAVMUserIsTakenOnlyAsALowercaseShortNameNeverRoot(t *testing.T) {
+	for _, user := range []string{"you", "_build", "dev-2", "a23456789012345678901234567890ab"} {
+		prefs := memoryPrefs{}
+		if err := machinescontract.VMUser(prefs).Set(user); err != nil {
+			t.Fatal(err)
+		}
+		if got, err := machinescontract.VMUser(prefs).Get(); err != nil || got != user {
+			t.Errorf("vm_user %q read back %q, %v", user, got, err)
+		}
+	}
+	for _, user := range []string{"Admin", "ROOT", "root", "you\nroot", "2you", "you me", "-you", "a23456789012345678901234567890abc"} {
+		prefs := memoryPrefs{}
+		if err := machinescontract.VMUser(prefs).Set(user); err != nil {
+			t.Fatal(err)
+		}
+		if got, err := machinescontract.VMUser(prefs).Get(); err == nil || !strings.Contains(err.Error(), "vm_user") {
+			t.Errorf("vm_user %q read back %q, %v; want it refused, naming vm_user", user, got, err)
 		}
 	}
 }

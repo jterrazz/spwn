@@ -59,7 +59,8 @@ fi
 /bin/rm -f /var/root/.ssh/authorized_keys /var/root/.ssh/authorized_keys2
 /bin/rm -f "/etc/sudoers.d/$LOGIN_USER-nopasswd"
 
-[ -n "$VM_USER" ] && [ "$VM_USER" != "$LOGIN_USER" ] && [ "$VM_USER" != root ] || { echo "the VM user '$VM_USER' is the image's own account or none: a fetched macOS guest is made for another user" >&2; exit 1; }
+# outside: macOS reads a user name whatever its case (id Admin is admin), so only a lowercase short name is compared.
+[[ "$VM_USER" =~ ^[a-z_][a-z0-9_-]{0,31}$ ]] && [ "$VM_USER" != "$LOGIN_USER" ] && [ "$VM_USER" != root ] || { echo "the VM user '$VM_USER' is no lowercase short name, or the image's own account or root: a fetched macOS guest is made for another user" >&2; exit 1; }
 
 /bin/mkdir -p /usr/local/bin
 /usr/sbin/chown root:wheel /usr/local/bin

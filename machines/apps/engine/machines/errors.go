@@ -165,6 +165,12 @@ func (e *UnhealthyError) BlockedFix() string {
 	return LocalNetworkFix(e.BlockedOn, e.BlockedBundled) + "; start " + e.Name + " once approved"
 }
 
+type BadVMUserError struct{ User string }
+
+func (e *BadVMUserError) Error() string {
+	return "vm_user " + strconv.Quote(e.User) + " in preferences.json is not a VM user: a lowercase short name (a-z or _ first, then up to 31 of a-z, 0-9, _ and -), never root"
+}
+
 var ErrEngineDown = errors.New("the engine is not running")
 
 type NothingToChangeError struct{ Name string }
