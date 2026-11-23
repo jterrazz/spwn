@@ -80,6 +80,17 @@ func PackageBlock(zshrc, id string) (string, BlockState) {
 	return strings.Join(lines[s.start+1:s.end], "\n") + "\n", BlockHere
 }
 
+func BlockLines(text, id string) (first, last int) {
+	// value: the lines, counted from 1, of the one whole block of id, its
+	// markers included; 0, 0 when there is none.
+	for _, s := range spansOf(strings.Split(text, "\n")) {
+		if s.id == id && s.end >= 0 {
+			return s.start + 1, s.end + 1
+		}
+	}
+	return 0, 0
+}
+
 func DamagedLines(text, id string) []string {
 	// value: what one hand deletes of a damaged block of id to leave one
 	// block, by its lines counted from 1: each start with no end of its own

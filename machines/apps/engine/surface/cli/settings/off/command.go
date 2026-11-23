@@ -5,6 +5,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	"github.com/jterrazz/studio-station/apps/engine/page"
 	pagesettings "github.com/jterrazz/studio-station/apps/engine/pages/settings"
@@ -48,7 +49,28 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			return io.Page(pagesettings.Changes("off", changes, d.ThisMachine), nil)
+			if err := io.Page(pagesettings.Changes("off", changes, d.ThisMachine), nil); err != nil {
+				return err
+			}
+			return unfinished(changes)
 		},
 	}, env)
+}
+
+// invariant: an off that leaves a setting broken, or kept needing the
+// owner, ends non-zero.
+func unfinished(changes []settings.Change) error {
+	failed, hint := 0, ""
+	for _, c := range changes {
+		if c.Result == catalog.StateBroken {
+			if failed == 0 {
+				hint = "do what it says, then again: station settings off " + c.Package
+			}
+			failed++
+		}
+	}
+	if failed == 0 {
+		return nil
+	}
+	return kit.PartialFailure{Failed: failed, Total: len(changes), Noun: "settings", FirstHint: hint}
 }

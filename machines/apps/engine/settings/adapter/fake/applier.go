@@ -16,7 +16,10 @@ type Applier struct {
 	kind catalog.EffectKind
 }
 
-var _ contract.Applier = (*Applier)(nil)
+var (
+	_ contract.Applier = (*Applier)(nil)
+	_ contract.Keeper  = (*Applier)(nil)
+)
 
 const Ours = "Machines'"
 
@@ -106,4 +109,10 @@ func (a *Applier) Undo(_ context.Context, it catalog.Setting) (settings.Change, 
 	}
 	delete(a.held(), it.Name)
 	return settings.Change{Steps: []settings.ChangeStep{{Label: it.Name, State: catalog.StateOK, Detail: "undone"}}}, nil
+}
+
+func (*Applier) Kept(context.Context, catalog.Setting) error {
+	// value: nil: an edit the fake keeps through Undo acts no more, so
+	// keeping it is the end of it.
+	return nil
 }

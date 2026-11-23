@@ -64,7 +64,10 @@ type Applier struct {
 	o     Options
 }
 
-var _ contract.Applier = (*Applier)(nil)
+var (
+	_ contract.Applier = (*Applier)(nil)
+	_ contract.Keeper  = (*Applier)(nil)
+)
 
 func New(files Files, home Home, o Options) *Applier {
 	return &Applier{files: files, home: home, o: o}
@@ -169,8 +172,8 @@ func (a *Applier) takeOut(w written, h holding, id string) ([]settings.ChangeSte
 	switch {
 	case state == settings.BlockAbsent:
 		return []settings.ChangeStep{{Label: w.File, State: catalog.StateOK, Detail: "already gone"}}, false, nil
-	case state != settings.BlockHere || have != w.Body:
-		return []settings.ChangeStep{{Label: w.File, State: catalog.StateOK, Detail: "yours, kept"}}, true, nil
+	case state == settings.BlockDamaged || have != w.Body:
+		return []settings.ChangeStep{{Label: w.File, State: catalog.StateOK, Detail: "yours, kept"}}, true, stillSigns(w.File, text, id)
 	}
 	updated, _ := settings.RemovePackageBlock(text, id)
 	if updated == "" && w.MadeFile {
@@ -181,6 +184,46 @@ func (a *Applier) takeOut(w written, h holding, id string) ([]settings.ChangeSte
 		return []settings.ChangeStep{{Label: w.File, State: catalog.StateBroken, Detail: "not touched"}}, true, a.linked(err)
 	}
 	return []settings.ChangeStep{{Label: w.File, State: catalog.StateOK, Detail: "removed"}}, false, nil
+}
+
+// value: why a block of station's the owner changed stays, its keys still
+// signing in: off ends on it, needing the owner (contract.ErrKept); an
+// apply for another user keeps it recorded and goes on.
+type edited struct{ error }
+
+func (*edited) Is(target error) bool { return target == contract.ErrKept }
+
+func stillSigns(file, text, id string) error {
+	if _, state := settings.PackageBlock(text, id); state == settings.BlockDamaged {
+		return &edited{fmt.Errorf("%s holds a damaged %s block, kept, so the Machines key still signs in: delete %s of %s, then the rest of the block", file, id, strings.Join(settings.DamagedLines(text, id), " and "), file)}
+	}
+	first, last := settings.BlockLines(text, id)
+	return &edited{fmt.Errorf("%s keeps the Machines block you changed, so the Machines key still signs in: delete lines %d to %d of %s to take it out", file, first, last, file)}
+}
+
+func (a *Applier) Kept(_ context.Context, it catalog.Setting) error {
+	// invariant: a recorded block the owner changed still lets the Machines
+	// key sign in, so off, which keeps it, ends needing the owner; a record
+	// it cannot read says nothing of the kind.
+	k, err := of(it)
+	if err != nil {
+		return err
+	}
+	rec, err := a.read()
+	if err != nil {
+		return err
+	}
+	var why []error
+	for _, w := range rec.Files {
+		text, _, err := a.text(w.File)
+		if err != nil {
+			continue
+		}
+		if have, state := settings.PackageBlock(text, k.Block); state == settings.BlockDamaged || state == settings.BlockHere && have != w.Body {
+			why = append(why, stillSigns(w.File, text, k.Block))
+		}
+	}
+	return errors.Join(why...)
 }
 
 // invariant: a file station made that holds nothing once its block is out
@@ -445,7 +488,10 @@ func (a *Applier) Apply(ctx context.Context, it catalog.Setting, values map[stri
 		if keep {
 			kept = append(kept, w)
 		}
-		stays = append(stays, why)
+		var mine *edited
+		if !errors.As(why, &mine) {
+			stays = append(stays, why)
+		}
 	}
 	err = a.save(record{Files: append(kept, now)})
 	if err != nil {

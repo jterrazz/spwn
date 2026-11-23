@@ -28,9 +28,12 @@ runs:
           -ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGZ2c8e4bOqkqO0+5N0VXlFz4sVJyDQzH+LVRG4RvMZb ci@deploy
           +ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGZ2c8e4bOqkqO0+5N0VXlFz4sVJyDQzH+LVRG4RvMZb mine
     - command: 'settings off authorized-key --yes'
-      exit: 0
+      exit: 1
       stdout: |
-          ●	authorized-key	/root/.ssh/authorized_keys: yours, kept as it is
+          ✗	authorized-key	needs you: /root/.ssh/authorized_keys keeps the Machines block you changed, so the Machines key still signs in: delete lines 1 to 3 of /root/.ssh/authorized_keys to take it out
+      stderr: |
+          Error: 1 of 1 settings failed
+          Hint: do what it says, then again: station settings off authorized-key
     - command: '--version >/dev/null; /bin/cat root/root/.ssh/authorized_keys; /usr/bin/stat -c ''%a %n'' root/root/.ssh root/root/.ssh/authorized_keys'
       exit: 0
       stdout: |

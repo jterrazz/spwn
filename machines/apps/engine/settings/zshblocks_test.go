@@ -116,6 +116,12 @@ func TestAStartMetAgainBeforeItsEndIsDamage(t *testing.T) {
 	if got := DamagedLines(stray, "station:a"); len(got) != 1 || got[0] != "line 2" {
 		t.Fatalf("DamagedLines = %q; want the stray start alone", got)
 	}
+	if first, last := BlockLines(stray, "station:a"); first != 4 || last != 6 {
+		t.Fatalf("BlockLines = %d, %d; want the whole block, 4 to 6", first, last)
+	}
+	if first, last := BlockLines(stray, "station:a"); first != 4 || last != 6 {
+		t.Fatalf("BlockLines = %d, %d; want the whole block, 4 to 6", first, last)
+	}
 	twice := "# >>> station:a >>>\nk\n# <<< station:a <<<\n# >>> station:a >>>\nk\n# <<< station:a <<<\n"
 	if got := DamagedLines(twice, "station:a"); len(got) != 1 || got[0] != "lines 4 to 6" {
 		t.Fatalf("DamagedLines = %q; want the second block", got)

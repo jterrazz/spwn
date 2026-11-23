@@ -415,7 +415,7 @@ func TestABlockTheOwnerChangedIsKeptWhenAnotherUserTakesIt(t *testing.T) {
 		t.Fatalf("steps %+v, root %q; want root's block kept as the owner left it", change.Steps, m.content(rootAK))
 	}
 	off, err := a.Undo(context.Background(), setting())
-	if err != nil || len(off.Steps) != 3 || off.Steps[0].Detail != "yours, kept" || off.Steps[1].Detail != "removed, and the empty file Machines made" || off.Steps[2].Label != "/home/ci/.ssh" || m.content(rootAK) != edited {
+	if err == nil || !strings.Contains(err.Error(), "still signs in") || len(off.Steps) != 3 || off.Steps[0].Detail != "yours, kept" || off.Steps[1].Detail != "removed, and the empty file Machines made" || off.Steps[2].Label != "/home/ci/.ssh" || m.content(rootAK) != edited {
 		t.Fatalf("Undo = %+v, %v; want root's kept, ci's file and folder removed", off.Steps, err)
 	}
 }
@@ -559,7 +559,7 @@ func TestAHandEditInsideTheBlockReadsDriftAndSurvivesUndo(t *testing.T) {
 	}
 	edited := m.content(rootAK)
 	change, err := a.Undo(context.Background(), setting())
-	if err != nil || m.content(rootAK) != edited || detail(change) != "yours, kept" {
+	if err == nil || m.content(rootAK) != edited || detail(change) != "yours, kept" {
 		t.Fatalf("Undo = %+v, %v; file %q; want it kept", change, err, m.content(rootAK))
 	}
 }
@@ -838,5 +838,17 @@ func TestAHomeUnderAFolderOthersCanWriteIsRefused(t *testing.T) {
 	why = refused(t, m.open(), "ci", key(t, 1, "")).Error()
 	if !strings.Contains(why, "/home is not root's") || m.there(ciAK) {
 		t.Fatalf("Apply under a /home ci owns = %q; want it refused, nothing made", why)
+	}
+}
+
+func TestOffOnAnEditedBlockSaysTheKeyStillSignsIn(t *testing.T) {
+	m := newMachine(t)
+	a := m.open()
+	apply(t, a, "root", key(t, 1, "ci"))
+	m.write(rootAK, strings.Replace(m.content(rootAK), " ci\n", " mine\n", 1), 0o600)
+	edited := m.content(rootAK)
+	_, err := a.Undo(context.Background(), setting())
+	if err == nil || !strings.Contains(err.Error(), "still signs in") || !strings.Contains(err.Error(), "lines 1 to 3 of /root/.ssh/authorized_keys") || m.content(rootAK) != edited {
+		t.Fatalf("Undo of an edited block = %v; file %q; want it kept, and a refusal naming its lines", err, m.content(rootAK))
 	}
 }

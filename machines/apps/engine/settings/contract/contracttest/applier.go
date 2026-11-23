@@ -91,8 +91,13 @@ func Applier(t *testing.T, open func(t *testing.T) Opened) {
 		}
 		o.Edit(t)
 		edited, _ := o.Applier.Observe(ctx, o.Package)
-		if _, err := o.Applier.Undo(ctx, o.Package); err != nil && !errors.Is(err, contract.ErrNoUndo) {
-			t.Fatalf("Undo: %v", err)
+		_, err := o.Applier.Undo(ctx, o.Package)
+		_, keeps := o.Applier.(contract.Keeper)
+		switch {
+		case err == nil, errors.Is(err, contract.ErrNoUndo):
+		case keeps && errors.Is(err, contract.ErrKept):
+		default:
+			t.Fatalf("Undo: %v; want nil or ErrNoUndo, or ErrKept from a contract.Keeper", err)
 		}
 		if now, _ := o.Applier.Observe(ctx, o.Package); now.Digest != edited.Digest {
 			t.Fatalf("Undo took the owner's edit: %s, then %s", edited.Digest, now.Digest)

@@ -8,7 +8,18 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/settings"
 )
 
-var ErrNoUndo = errors.New("it is not undone by Machines")
+var (
+	ErrNoUndo = errors.New("it is not undone by Machines")
+	// value: an Undo that kept an edit of the owner's which still acts, so
+	// off ends needing the owner, never done.
+	ErrKept = errors.New("the owner's edit is kept and still acts")
+)
+
+type Keeper interface {
+	// value: why a setting that reads changed since, which off keeps as
+	// the owner left it, still acts: nil when keeping it is the end of it.
+	Kept(ctx context.Context, it catalog.Setting) error
+}
 
 type Applier interface {
 	// value: the kind of effect it writes, its key in Appliers.
@@ -25,7 +36,8 @@ type Applier interface {
 	// exactly as station writes it.
 	Apply(ctx context.Context, it catalog.Setting, values map[string]string) (settings.Change, error)
 	// invariant: Undo removes only what station wrote; once it returns no
-	// error, Observe reads it absent. ErrNoUndo changes nothing.
+	// error, Observe reads it absent. ErrNoUndo changes nothing; ErrKept
+	// keeps the owner's edit.
 	Undo(ctx context.Context, it catalog.Setting) (settings.Change, error)
 }
 

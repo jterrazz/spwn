@@ -65,6 +65,11 @@ var Off = call.Call[Deps, OffIn, []settings.Change]{
 				if a, ok := d.Appliers.For(it); ok {
 					undone, err := a.Undo(ctx, it)
 					switch {
+					case errors.Is(err, contract.ErrKept):
+						change.Result = catalog.StateBroken
+						change.Steps = append(undone.Steps, settings.ChangeStep{Label: "needs you", State: catalog.StateBroken, Detail: err.Error()})
+						changes = append(changes, change)
+						continue
 					case errors.Is(err, contract.ErrNoUndo):
 						change.Steps = []settings.ChangeStep{{Label: it.Name, State: catalog.StateOK, Detail: "kept: " + err.Error()}}
 					case err != nil:
@@ -77,6 +82,14 @@ var Off = call.Call[Deps, OffIn, []settings.Change]{
 					}
 				}
 			} else if row.State == settings.StateChangedSince {
+				if k, ok := keeper(d, it); ok {
+					if why := k.Kept(ctx, it); why != nil {
+						change.Result = catalog.StateBroken
+						change.Steps = []settings.ChangeStep{{Label: "needs you", State: catalog.StateBroken, Detail: why.Error()}}
+						changes = append(changes, change)
+						continue
+					}
+				}
 				label := row.Where
 				if label == "" {
 					label = it.Name
@@ -96,4 +109,13 @@ var Off = call.Call[Deps, OffIn, []settings.Change]{
 		}
 		return changes, setOff(d, off)
 	},
+}
+
+func keeper(d Deps, it catalog.Setting) (contract.Keeper, bool) {
+	a, ok := d.Appliers.For(it)
+	if !ok {
+		return nil, false
+	}
+	k, ok := a.(contract.Keeper)
+	return k, ok
 }
