@@ -1,0 +1,20 @@
+description: 'an authorized_keys that is a hard link is refused, the file it shares never read or written'
+env:
+    - in-workspace
+    - engine
+runs:
+    - command: 'world admin on'
+      exit: 0
+    - command: '--version >/dev/null; umask 022; /bin/mkdir -p root/root/.ssh root/etc && /bin/chmod 700 root/root/.ssh && printf ''root:$6$hash:19000:0:99999:7:::\n'' > root/etc/shadow && /bin/chmod 666 root/etc/shadow && /bin/ln root/etc/shadow root/root/.ssh/authorized_keys'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error)'''
+      stdin: |
+          {"v":2,"id":"1","call":"settings.apply","in":{"Names":["authorized-key"],"Values":{"authorized-key":{"user":"root","key":"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGZ2c8e4bOqkqO0+5N0VXlFz4sVJyDQzH+LVRG4RvMZb ci@deploy"}}}}
+      exit: 0
+      stdout: |
+          {"v":2,"id":"1","out":[{"Package":"authorized-key","Verb":"apply","Result":"broken","Before":null,"After":null,"Steps":[{"Label":"failed","State":"broken","Detail":"/root/.ssh/authorized_keys has another name, a hard link, not touched: Machines writes keys only in a file of one name"}]}]}
+    - command: '--version >/dev/null; /usr/bin/stat -c ''%a %h %n'' root/etc/shadow; /bin/cat root/etc/shadow'
+      exit: 0
+      stdout: |
+          666 2 root/etc/shadow
+          root:$6$hash:19000:0:99999:7:::

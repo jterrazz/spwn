@@ -307,18 +307,19 @@ func TestStrictModesAreKept(t *testing.T) {
 }
 
 // invariant: a folder or file root owns in another user's ~/.ssh that
-// others can write is never chmodded for that user: it reads changed
-// since, with root's own fix.
+// others can write reads changed since, with root's own fix, and apply
+// refuses it, never chmodding it for that user.
 func TestAWritableFolderOrFileRootOwnsForAnotherUserIsDriftNeverChmodded(t *testing.T) {
 	m := newMachine(t)
 	if m.self.UID != 0 {
 		t.Skip("only root owns what another user's ~/.ssh holds")
 	}
-	m.mkdir("home/ci/.ssh", 0o775)
-	m.write(ciAK, key(t, 9, "")+"\n", 0o664)
 	apply(t, m.open(), "ci", key(t, 1, ""))
-	if dir, f := m.entry("home/ci/.ssh"), m.entry(ciAK); dir.Mode.Perm() != 0o775 || f.Mode.Perm() != 0o664 || dir.UID != 0 || f.UID != 0 {
-		t.Fatalf("folder %v uid %d, file %v uid %d; want root's 0775 and 0664 untouched", dir.Mode, dir.UID, f.Mode, f.UID)
+	m.chown("home/ci/.ssh", local.Owner{})
+	m.chown(ciAK, local.Owner{})
+	m.mkdir("home/ci/.ssh", 0o775)
+	if err := m.disk.Chmod(m.at(ciAK), 0o664); err != nil {
+		t.Fatal(err)
 	}
 	seen := func(want string) {
 		t.Helper()
@@ -328,10 +329,37 @@ func TestAWritableFolderOrFileRootOwnsForAnotherUserIsDriftNeverChmodded(t *test
 		}
 	}
 	seen("/home/ci/.ssh is 0775, writable by others, so its keys are ignored: Machines changes no mode of root's for another user, take the write away with sudo chmod go-w /home/ci/.ssh")
+	why := refused(t, m.open(), "ci", key(t, 1, "")).Error()
+	if !strings.Contains(why, "/home/ci/.ssh is uid 0's, not the home's") {
+		t.Fatalf("Apply in a ~/.ssh root owns = %q; want it refused", why)
+	}
+	if dir, f := m.entry("home/ci/.ssh"), m.entry(ciAK); dir.Mode.Perm() != 0o775 || f.Mode.Perm() != 0o664 || dir.UID != 0 || f.UID != 0 {
+		t.Fatalf("folder %v uid %d, file %v uid %d; want root's 0775 and 0664 untouched", dir.Mode, dir.UID, f.Mode, f.UID)
+	}
 	if err := m.disk.Chmod(m.at("home/ci/.ssh"), 0o755); err != nil {
 		t.Fatal(err)
 	}
 	seen("/home/ci/.ssh/authorized_keys is 0664, writable by others, so its keys are ignored: Machines changes no mode of root's for another user, take the write away with sudo chmod go-w /home/ci/.ssh/authorized_keys")
+}
+
+// invariant: an authorized_keys with another name, a hard link, is
+// refused: neither read, written nor chmodded, so whatever it shares its
+// bytes with stays as it was.
+func TestAHardLinkedAuthorizedKeysIsRefusedAndItsTargetUntouched(t *testing.T) {
+	m := newMachine(t)
+	m.mkdir("root/.ssh", 0o700)
+	m.write("etc/shadow", "root:secret\n", 0o666)
+	if err := unix.Link(m.at("etc/shadow"), m.at(rootAK)); err != nil {
+		t.Fatal(err)
+	}
+	why := refused(t, m.open(), "root", key(t, 1, "")).Error()
+	if !strings.Contains(why, "/root/.ssh/authorized_keys has another name, a hard link, not touched") {
+		t.Fatalf("Apply on a hard link = %q; want it refused as a hard link", why)
+	}
+	_, _ = m.open().Undo(context.Background(), setting())
+	if got, mode := m.content("etc/shadow"), m.entry("etc/shadow").Mode.Perm(); got != "root:secret\n" || mode != 0o666 {
+		t.Fatalf("the file it links = %q at %o; want it untouched at 666", got, mode)
+	}
 }
 
 // invariant: a user who links ~/.ssh to a folder of the system's gets it
@@ -796,24 +824,36 @@ func TestAStrictModeIsKeptAsItIs(t *testing.T) {
 	}
 }
 
-// invariant: station gives the user only what it makes: an existing folder
-// or file keeps its owner, and one owned by another user reads drift with
-// the owner's own fix, never taken from them.
-func TestAnExistingOwnerIsNeverChanged(t *testing.T) {
+// invariant: station writes keys only in a ~/.ssh and a file the home's
+// owner owns: one another user or root owns is refused with nothing
+// touched, its owner kept, and one given away after an apply reads drift
+// with the owner's own fix.
+func TestAFolderOrFileNotTheUsersIsRefusedAndKeepsItsOwner(t *testing.T) {
 	m := newMachine(t)
 	if m.self.UID != 0 {
 		t.Skip("only root gives a file away")
 	}
 	m.mkdir("home/ci/.ssh", 0o700)
-	m.write(ciAK, key(t, 9, "")+"\n", 0o600)
+	own := key(t, 9, "") + "\n"
+	m.write(ciAK, own, 0o600)
 	other := local.Owner{UID: 1500, GID: 1500}
-	m.chown(ciAK, other)
-	apply(t, m.open(), "ci", key(t, 1, ""))
-	if dir, f := m.entry("home/ci/.ssh").Owner, m.entry(ciAK).Owner; dir != (local.Owner{}) || f != other {
-		t.Fatalf("folder %+v, file %+v; want root's folder and uid 1500's file kept", dir, f)
+	m.chown(ciAK, m.ci)
+	ci := strconv.Itoa(m.ci.UID)
+	why := refused(t, m.open(), "ci", key(t, 1, "")).Error()
+	if !strings.Contains(why, "/home/ci/.ssh is uid 0's, not the home's (uid "+ci+"), not touched") || m.entry("home/ci/.ssh").Owner != (local.Owner{}) || m.content(ciAK) != own {
+		t.Fatalf("Apply in a ~/.ssh root owns = %q; want it refused, nothing touched", why)
 	}
+	m.chown("home/ci/.ssh", m.ci)
+	m.chown(ciAK, other)
+	why = refused(t, m.open(), "ci", key(t, 1, "")).Error()
+	if !strings.Contains(why, "/home/ci/.ssh/authorized_keys is uid 1500's, not the home's (uid "+ci+"), not touched") || m.entry(ciAK).Owner != other || m.content(ciAK) != own {
+		t.Fatalf("Apply on a file uid 1500 owns = %q; want it refused, nothing touched", why)
+	}
+	m.chown(ciAK, m.ci)
+	apply(t, m.open(), "ci", key(t, 1, ""))
+	m.chown(ciAK, other)
 	o, err := m.open().Observe(context.Background(), setting())
-	want := "/home/ci/.ssh/authorized_keys is uid 1500's, not the home's (uid " + strconv.Itoa(m.ci.UID) + "), so its keys are ignored: Machines never takes a file from its owner, give it back with sudo chown " + strconv.Itoa(m.ci.UID) + " /home/ci/.ssh/authorized_keys"
+	want := "/home/ci/.ssh/authorized_keys is uid 1500's, not the home's (uid " + ci + "), so its keys are ignored: Machines never takes a file from its owner, give it back with sudo chown " + ci + " /home/ci/.ssh/authorized_keys"
 	if err != nil || o.State != catalog.StateDegraded || o.Detail != want {
 		t.Fatalf("Observe = %s %q, %v; want degraded %q", o.State, o.Detail, err, want)
 	}

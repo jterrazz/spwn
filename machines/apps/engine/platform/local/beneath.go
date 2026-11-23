@@ -23,14 +23,18 @@ func Self() Owner {
 
 type Entry struct {
 	// value: what a name is itself, a link never followed: its type and
-	// permission bits, and its owner.
-	Mode fs.FileMode
+	// permission bits, its owner, and how many names the system gives it.
+	Mode  fs.FileMode
+	Nlink int
 	Owner
 }
 
 var (
 	ErrLink     = errors.New("is a link")
 	ErrNotEmpty = errors.New("is a folder that is not empty")
+	// value: a file with another name, a hard link, which a write or a mode
+	// change through this name would reach too.
+	ErrHardLink = errors.New("has another name, a hard link")
 )
 
 type Beneath struct {
@@ -162,7 +166,7 @@ func (f *Folder) Lstat(name string) (Entry, error) {
 
 func (f *Folder) ReadFile(name string) ([]byte, Entry, error) {
 	// value: the file name holds, opened with O_NOFOLLOW, and what the same
-	// descriptor is: anything but a file is refused.
+	// descriptor is: anything but a file of one name is refused.
 	at := path.Join(f.at, name)
 	fd, err := openat(f.fd, name, unix.O_RDONLY, at)
 	if err != nil {
@@ -175,8 +179,8 @@ func (f *Folder) ReadFile(name string) ([]byte, Entry, error) {
 		return nil, Entry{}, &fs.PathError{Op: "read", Path: at, Err: err}
 	}
 	e := entryOf(&st)
-	if !e.Mode.IsRegular() {
-		return nil, Entry{}, &fs.PathError{Op: "read", Path: at, Err: errNotFile}
+	if refused := single(e); refused != nil {
+		return nil, Entry{}, &fs.PathError{Op: "read", Path: at, Err: refused}
 	}
 	data, err := io.ReadAll(file)
 	return data, e, err
@@ -184,9 +188,19 @@ func (f *Folder) ReadFile(name string) ([]byte, Entry, error) {
 
 var errNotFile = errors.New("is not a file")
 
+func single(e Entry) error {
+	switch {
+	case !e.Mode.IsRegular():
+		return errNotFile
+	case e.Nlink != 1:
+		return ErrHardLink
+	}
+	return nil
+}
+
 func (f *Folder) ChmodFile(name string, perm fs.FileMode) error {
 	// value: the mode of the file name holds set to perm through the
-	// descriptor of what was opened.
+	// descriptor of what was opened, a file of one name.
 	at := path.Join(f.at, name)
 	fd, err := openat(f.fd, name, unix.O_RDONLY, at)
 	if err != nil {
@@ -197,8 +211,8 @@ func (f *Folder) ChmodFile(name string, perm fs.FileMode) error {
 	if err := unix.Fstat(fd, &st); err != nil {
 		return &fs.PathError{Op: "chmod", Path: at, Err: err}
 	}
-	if !entryOf(&st).Mode.IsRegular() {
-		return &fs.PathError{Op: "chmod", Path: at, Err: errNotFile}
+	if err := single(entryOf(&st)); err != nil {
+		return &fs.PathError{Op: "chmod", Path: at, Err: err}
 	}
 	if err := unix.Fchmod(fd, uint32(perm.Perm())); err != nil {
 		return &fs.PathError{Op: "chmod", Path: at, Err: err}
@@ -210,16 +224,16 @@ func (f *Folder) Replace(name string, data []byte, perm fs.FileMode, o Owner) er
 	// invariant: name is replaced whole, at once and durably: data goes to a
 	// file of its own made beside it, synced, then renamed over it, and the
 	// folder synced. A file there keeps its mode and owner; one not there
-	// yet is made with perm and given o; a link or anything but a file
-	// there is refused.
+	// yet is made with perm and given o; a link, a file with another name
+	// or anything but a file there is refused.
 	at := path.Join(f.at, name)
 	var st unix.Stat_t
 	err := unix.Fstatat(f.fd, name, &st, unix.AT_SYMLINK_NOFOLLOW)
 	switch e := entryOf(&st); {
 	case err == nil && e.Mode&fs.ModeSymlink != 0:
 		return &fs.PathError{Op: "replace", Path: at, Err: ErrLink}
-	case err == nil && !e.Mode.IsRegular():
-		return &fs.PathError{Op: "replace", Path: at, Err: errNotFile}
+	case err == nil && single(e) != nil:
+		return &fs.PathError{Op: "replace", Path: at, Err: single(e)}
 	case err == nil:
 		perm, o = e.Mode.Perm(), e.Owner
 	case !errors.Is(err, unix.ENOENT):
@@ -365,7 +379,7 @@ func entryOf(st *unix.Stat_t) Entry {
 	default:
 		m |= fs.ModeIrregular
 	}
-	return Entry{Mode: m, Owner: Owner{UID: int(st.Uid), GID: int(st.Gid)}}
+	return Entry{Mode: m, Nlink: int(st.Nlink), Owner: Owner{UID: int(st.Uid), GID: int(st.Gid)}}
 }
 
 func closeFD(fd int) { _ = unix.Close(fd) }

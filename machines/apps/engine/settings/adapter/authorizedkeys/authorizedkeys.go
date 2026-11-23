@@ -164,7 +164,10 @@ func (a *Applier) takeOut(w written, h holding, id string) ([]settings.ChangeSte
 	case h.err != nil:
 		return []settings.ChangeStep{{Label: w.File, State: catalog.StateBroken, Detail: "not touched"}}, true, h.err
 	}
-	text, _, err := a.textIn(h.folder)
+	text, e, there, err := a.textIn(h.folder)
+	if err == nil {
+		err = a.owned(h.folder, w.File, e, there, h.owner)
+	}
 	if err != nil {
 		return []settings.ChangeStep{{Label: w.File, State: catalog.StateBroken, Detail: "not touched"}}, true, err
 	}
@@ -275,6 +278,9 @@ const keysFile = "authorized_keys"
 type holding struct {
 	folder *local.Folder
 	err    error
+	// value: the uid of the home's owner, the only owner of the folder and
+	// the file a run writes in.
+	owner int
 }
 
 // invariant: every ~/.ssh a run writes in is held from its read to its
@@ -312,20 +318,42 @@ func (a *Applier) holdAll(ctx context.Context, files []string) (held map[string]
 			release()
 			return nil, nil, why
 		}
-		held[file] = holding{folder: f, err: a.linked(why)}
+		held[file] = holding{folder: f, err: a.linked(why), owner: uid[file]}
 	}
 	return held, release, nil
 }
 
-func (a *Applier) textIn(f *local.Folder) (text string, there bool, err error) {
-	data, _, err := f.ReadFile(keysFile)
+// value: the authorized_keys f holds, and what the descriptor it was read
+// through is.
+func (a *Applier) textIn(f *local.Folder) (text string, e local.Entry, there bool, err error) {
+	data, e, err := f.ReadFile(keysFile)
 	switch {
 	case errors.Is(err, fs.ErrNotExist):
-		return "", false, nil
+		return "", local.Entry{}, false, nil
 	case err != nil:
-		return "", false, a.linked(err)
+		return "", local.Entry{}, false, a.linked(err)
 	}
-	return string(data), true, nil
+	return string(data), e, true, nil
+}
+
+// invariant: a run writes only in a ~/.ssh, and an authorized_keys there,
+// that the home's owner (uid) owns, each read through the descriptor it
+// was opened with; anything else is refused with nothing touched.
+func (a *Applier) owned(f *local.Folder, file string, e local.Entry, there bool, uid int) error {
+	folder, err := f.Stat()
+	if err != nil {
+		return err
+	}
+	for _, p := range []struct {
+		at string
+		e  local.Entry
+		is bool
+	}{{path.Dir(file), folder, true}, {file, e, there}} {
+		if p.is && p.e.UID != uid {
+			return fmt.Errorf("%s is uid %d's, not the home's (uid %d), not touched: Machines writes keys only in a folder and a file the home's owner owns, give it back with %s", p.at, p.e.UID, uid, catalog.AsRoot(fmt.Sprintf("chown %d %s", uid, p.at)))
+		}
+	}
+	return nil
 }
 
 // value: the authorized_keys the system names file, read through its
@@ -339,7 +367,8 @@ func (a *Applier) text(file string) (text string, there bool, err error) {
 		return "", false, a.linked(err)
 	}
 	defer f.Close()
-	return a.textIn(f)
+	text, _, there, err = a.textIn(f)
+	return text, there, err
 }
 
 func (a *Applier) Observe(_ context.Context, it catalog.Setting) (settings.Observation, error) {
@@ -462,7 +491,11 @@ func (a *Applier) Apply(ctx context.Context, it catalog.Setting, values map[stri
 		return settings.Change{}, held[file].err
 	}
 	f := held[file].folder
-	text, there, err := a.textIn(f)
+	text, e, there, err := a.textIn(f)
+	if err != nil {
+		return settings.Change{}, err
+	}
+	err = a.owned(f, file, e, there, who.UID)
 	if err != nil {
 		return settings.Change{}, err
 	}
@@ -495,7 +528,7 @@ func (a *Applier) Apply(ctx context.Context, it catalog.Setting, values map[stri
 			return settings.Change{}, a.linked(err)
 		}
 	}
-	err = a.strict(f, who.UID)
+	err = a.strict(f)
 	if err != nil {
 		return settings.Change{}, err
 	}
@@ -630,17 +663,16 @@ func (a *Applier) loose(file, name string) (loosened, error) {
 // the sign-in server ignore the keys.
 const loose fs.FileMode = 0o022
 
-// invariant: a folder or file the user owns that others can write loses
-// that write alone; a strict one keeps its own mode, one root owns for
-// another user is never changed, and no owner is ever changed: station
+// invariant: a folder or file others can write loses that write alone; a
+// strict one keeps its own mode, and no owner is ever changed: station
 // gives the user only what it makes, and never takes a file from whoever
 // owns it.
-func (a *Applier) strict(f *local.Folder, uid int) error {
+func (a *Applier) strict(f *local.Folder) error {
 	e, err := f.Stat()
 	if err != nil {
 		return err
 	}
-	if e.Mode.Perm()&loose != 0 && e.UID == uid {
+	if e.Mode.Perm()&loose != 0 {
 		err = f.Chmod(e.Mode.Perm() &^ loose)
 		if err != nil {
 			return err
@@ -650,7 +682,7 @@ func (a *Applier) strict(f *local.Folder, uid int) error {
 	if err != nil {
 		return a.linked(err)
 	}
-	if e.Mode.Perm()&loose == 0 || e.UID != uid {
+	if e.Mode.Perm()&loose == 0 {
 		return nil
 	}
 	return a.linked(f.ChmodFile(keysFile, e.Mode.Perm()&^loose))
@@ -715,7 +747,10 @@ func (a *Applier) unrecordedIn(file string, h holding, id string) (*settings.Cha
 	case h.err != nil:
 		return nil, h.err
 	}
-	text, _, err := a.textIn(h.folder)
+	text, e, there, err := a.textIn(h.folder)
+	if err == nil {
+		err = a.owned(h.folder, file, e, there, h.owner)
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -931,13 +966,19 @@ func (a *Applier) folder(base, rel string, who account) error {
 	return nil
 }
 
-// value: err, a link met on the way said in the owner's words, by the
-// path the system names it.
+// value: err, a link or a hard link met on the way said in the owner's
+// words, by the path the system names it.
 func (a *Applier) linked(err error) error {
 	var pe *fs.PathError
-	if errors.Is(err, local.ErrLink) && errors.As(err, &pe) {
-		at := strings.TrimPrefix(pe.Path, path.Join("/", a.o.Root))
-		return fmt.Errorf("%s is a link, not touched: Machines follows no link in a home", path.Join("/", at))
+	if !errors.As(err, &pe) {
+		return err
+	}
+	at := path.Join("/", strings.TrimPrefix(pe.Path, path.Join("/", a.o.Root)))
+	switch {
+	case errors.Is(err, local.ErrLink):
+		return fmt.Errorf("%s is a link, not touched: Machines follows no link in a home", at)
+	case errors.Is(err, local.ErrHardLink):
+		return fmt.Errorf("%s has another name, a hard link, not touched: Machines writes keys only in a file of one name", at)
 	}
 	return err
 }
