@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
+	"maps"
 	"path"
 	"slices"
 	"strconv"
@@ -162,14 +163,14 @@ func (a *Applier) takeOut(w written, h holding, id string) ([]settings.ChangeSte
 	case errors.Is(h.err, fs.ErrNotExist):
 		return []settings.ChangeStep{{Label: w.File, State: catalog.StateOK, Detail: "already gone"}}, false, nil
 	case h.err != nil:
-		return []settings.ChangeStep{{Label: w.File, State: catalog.StateBroken, Detail: "not touched"}}, true, h.err
+		return []settings.ChangeStep{{Label: w.File, State: catalog.StateBroken, Detail: "not touched"}}, true, cannot(h.err)
 	}
 	text, e, there, err := a.textIn(h.folder)
 	if err == nil {
 		err = a.owned(h.folder, w.File, e, there, h.owner)
 	}
 	if err != nil {
-		return []settings.ChangeStep{{Label: w.File, State: catalog.StateBroken, Detail: "not touched"}}, true, err
+		return []settings.ChangeStep{{Label: w.File, State: catalog.StateBroken, Detail: "not touched"}}, true, cannot(err)
 	}
 	have, state := settings.PackageBlock(text, id)
 	switch {
@@ -204,6 +205,13 @@ type unreached struct{ error }
 
 func (*unreached) Is(target error) bool { return target == contract.ErrKept }
 
+func cannot(err error) error {
+	if err == nil || errors.Is(err, contract.ErrKept) {
+		return err
+	}
+	return &unreached{err}
+}
+
 // value: the account /etc/passwd gives the home of file, or that home when
 // none does.
 func (a *Applier) whose(file string) string {
@@ -230,8 +238,10 @@ func stillSigns(file, text, id string) error {
 
 func (a *Applier) Kept(_ context.Context, it catalog.Setting) error {
 	// invariant: a recorded block the owner changed still lets the Machines
-	// key sign in, so off, which keeps it, ends needing the owner; a record
-	// it cannot read says nothing of the kind.
+	// key sign in, and so may a block in a file off cannot read (a link, a
+	// hard link, a permission), recorded or found by the no-record scan: off,
+	// which keeps either, ends needing the owner. A record it cannot read
+	// says nothing of the kind.
 	k, err := of(it)
 	if err != nil {
 		return err
@@ -240,14 +250,29 @@ func (a *Applier) Kept(_ context.Context, it catalog.Setting) error {
 	if err != nil {
 		return err
 	}
-	var why []error
-	for _, w := range rec.Files {
-		text, _, err := a.text(w.File)
+	files := map[string]*written{}
+	for i := range rec.Files {
+		files[rec.Files[i].File] = &rec.Files[i]
+	}
+	if len(rec.Files) == 0 {
+		homes, err := a.homes()
 		if err != nil {
+			return err
+		}
+		for _, file := range homes {
+			files[file] = nil
+		}
+	}
+	var why []error
+	for _, file := range slices.Sorted(maps.Keys(files)) {
+		text, _, err := a.text(file)
+		if err != nil {
+			why = append(why, cannot(err))
 			continue
 		}
-		if have, state := settings.PackageBlock(text, k.Block); state == settings.BlockDamaged || state == settings.BlockHere && have != w.Body {
-			why = append(why, stillSigns(w.File, text, k.Block))
+		w := files[file]
+		if have, state := settings.PackageBlock(text, k.Block); state == settings.BlockDamaged || w != nil && state == settings.BlockHere && have != w.Body {
+			why = append(why, stillSigns(file, text, k.Block))
 		}
 	}
 	return errors.Join(why...)
@@ -839,14 +864,14 @@ func (a *Applier) unrecordedIn(file string, h holding, id string, known map[stri
 	case errors.Is(h.err, fs.ErrNotExist):
 		return nil, nil
 	case h.err != nil:
-		return nil, h.err
+		return nil, cannot(h.err)
 	}
 	text, e, there, err := a.textIn(h.folder)
 	if err == nil {
 		err = a.owned(h.folder, file, e, there, h.owner)
 	}
 	if err != nil {
-		return nil, err
+		return nil, cannot(err)
 	}
 	body, state := settings.PackageBlock(text, id)
 	switch state {

@@ -16,8 +16,9 @@ var (
 )
 
 type Keeper interface {
-	// value: why a setting that reads changed since, which off keeps as
-	// the owner left it, still acts: nil when keeping it is the end of it.
+	// value: why a setting that reads changed since, or that could not be
+	// read, which off keeps as it is, still acts: nil when keeping it is the
+	// end of it.
 	Kept(ctx context.Context, it catalog.Setting) error
 }
 

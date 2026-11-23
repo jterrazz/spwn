@@ -81,7 +81,7 @@ var Off = call.Call[Deps, OffIn, []settings.Change]{
 						change.Steps = undone.Steps
 					}
 				}
-			} else if row.State == settings.StateChangedSince {
+			} else if row.State == settings.StateChangedSince || now.State == catalog.StateBroken {
 				if k, ok := keeper(d, it); ok {
 					if why := k.Kept(ctx, it); why != nil {
 						change.Result = catalog.StateBroken
@@ -90,11 +90,13 @@ var Off = call.Call[Deps, OffIn, []settings.Change]{
 						continue
 					}
 				}
-				label := row.Where
-				if label == "" {
-					label = it.Name
+				if row.State == settings.StateChangedSince {
+					label := row.Where
+					if label == "" {
+						label = it.Name
+					}
+					change.Steps = []settings.ChangeStep{{Label: label, State: catalog.StateOK, Detail: "yours, kept as it is"}}
 				}
-				change.Steps = []settings.ChangeStep{{Label: label, State: catalog.StateOK, Detail: "yours, kept as it is"}}
 			}
 			if err := d.Applied.Delete(ctx, it.Name); err != nil {
 				return changes, err

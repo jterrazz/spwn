@@ -6,6 +6,8 @@ import (
 	"strings"
 	"testing"
 
+	"golang.org/x/sys/unix"
+
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/platform/local"
 	"github.com/jterrazz/studio-station/apps/engine/settings/contract"
@@ -74,6 +76,20 @@ func TestWithNoRecordALineMachinesDoesNotKnowKeepsTheBlock(t *testing.T) {
 	_, err = m.open().Undo(context.Background(), setting())
 	if err == nil || !errors.Is(err, contract.ErrKept) || m.content(rootAK) != text {
 		t.Fatalf("Undo with no key configured = %v; want the block kept", err)
+	}
+}
+
+func TestOffOnAFileItCannotReadNeedsYou(t *testing.T) {
+	m := newMachine(t)
+	apply(t, m.open(), "root", key(t, 1, "ci"))
+	if err := unix.Link(m.at(rootAK), m.at("root/other")); err != nil {
+		t.Fatal(err)
+	}
+	if err := m.open().Kept(context.Background(), setting()); err == nil || !strings.Contains(err.Error(), "/root/.ssh/authorized_keys") {
+		t.Fatalf("Kept on a hard-linked file = %v; want it named, needing you", err)
+	}
+	if _, err := m.open().Undo(context.Background(), setting()); !errors.Is(err, contract.ErrKept) {
+		t.Fatalf("Undo on a hard-linked file = %v; want needs-you", err)
 	}
 }
 
