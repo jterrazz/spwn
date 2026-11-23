@@ -45,3 +45,28 @@ func TestOffWithNoRecordReachesAnAccountThatDoesNotSignIn(t *testing.T) {
 		t.Fatalf("Undo with no record = %v; backup's file %q; want the block out", err, m.content(ciAK))
 	}
 }
+
+func TestOffRefusesAHomeUnderAFolderOthersCanWrite(t *testing.T) {
+	m := newMachine(t)
+	apply(t, m.open(), "ci", key(t, 1, ""))
+	written := m.content(ciAK)
+	m.mkdir("home", 0o777)
+	t.Cleanup(func() { _ = m.disk.Chmod(m.at("home"), 0o755) })
+	_, err := m.open().Undo(context.Background(), setting())
+	if err == nil || !strings.Contains(err.Error(), "/home is writable by others") || m.content(ciAK) != written {
+		t.Fatalf("Undo under a /home others can write = %v; file %q; want it refused, the block kept", err, m.content(ciAK))
+	}
+}
+
+func TestAFileRootOwnsInAnotherUsersFolderReadsAsApplyRefusesIt(t *testing.T) {
+	m := newMachine(t)
+	if m.self.UID != 0 {
+		t.Skip("only root owns what another user's ~/.ssh holds")
+	}
+	apply(t, m.open(), "ci", key(t, 1, ""))
+	m.chown(ciAK, local.Owner{})
+	o, err := m.open().Observe(context.Background(), setting())
+	if err != nil || o.State != catalog.StateDegraded || !strings.Contains(o.Detail, "/home/ci/.ssh/authorized_keys is uid 0's, not the home's") {
+		t.Fatalf("Observe of a file root owns in ci's ~/.ssh = %s %q, %v; want the drift apply refuses", o.State, o.Detail, err)
+	}
+}

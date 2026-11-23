@@ -309,7 +309,11 @@ func (a *Applier) holdAll(ctx context.Context, files []string) (held map[string]
 		}
 	}
 	for _, file := range order {
-		base, ssh := a.beneath(file)
+		base, ssh, err := a.reach(file)
+		if err != nil {
+			held[file] = holding{err: err, owner: uid[file]}
+			continue
+		}
 		f, busy, why := a.home.Hold(ctx, base, ssh, wait)
 		switch {
 		case busy:
@@ -350,17 +354,42 @@ func (a *Applier) owned(f *local.Folder, file string, e local.Entry, there bool,
 		e  local.Entry
 		is bool
 	}{{path.Dir(file), folder, true}, {file, e, there}} {
-		if p.is && p.e.UID != uid {
-			return fmt.Errorf("%s is uid %d's, not the home's (uid %d), not touched: Machines writes keys only in a folder and a file the home's owner owns, give it back with %s", p.at, p.e.UID, uid, catalog.AsRoot(fmt.Sprintf("chown %d %s", uid, p.at)))
+		if why := notTheHomes(p.at, p.e, uid); p.is && why != "" {
+			return errors.New(strings.Replace(why, ":", ", not touched:", 1))
 		}
 	}
 	return nil
 }
 
+// value: why what is at, e, is not the home's owner's (uid), empty when it
+// is: the one rule apply refuses by and drift reads by.
+func notTheHomes(at string, e local.Entry, uid int) string {
+	if e.UID == uid {
+		return ""
+	}
+	return fmt.Sprintf("%s is uid %d's, not the home's (uid %d): Machines writes keys only in a folder and a file the home's owner owns, give it back with %s", at, e.UID, uid, catalog.AsRoot(fmt.Sprintf("chown %d %s", uid, at)))
+}
+
+// value: the folder of the system that holds the home of file, and the
+// ~/.ssh under it, once every folder above the home is root's alone: every
+// read and write of a ~/.ssh reaches it through here.
+func (a *Applier) reach(file string) (base, ssh string, err error) {
+	err = a.above(path.Dir(path.Dir(file)))
+	if err != nil {
+		return "", "", err
+	}
+	base, ssh = a.beneath(file)
+	return base, ssh, nil
+}
+
 // value: the authorized_keys the system names file, read through its
 // ~/.ssh opened once, with no lock: a read never waits on a writer.
 func (a *Applier) text(file string) (text string, there bool, err error) {
-	f, err := a.home.Open(a.beneath(file))
+	base, ssh, err := a.reach(file)
+	if err != nil {
+		return "", false, err
+	}
+	f, err := a.home.Open(base, ssh)
 	switch {
 	case errors.Is(err, fs.ErrNotExist):
 		return "", false, nil
@@ -614,11 +643,14 @@ type loosened struct {
 
 func (a *Applier) loose(file, name string) (loosened, error) {
 	// invariant: the keys count only while the sign-in server reads them:
-	// neither the folder nor the file writable by group or others, and both
-	// the home owner's or root's; anything else is drift, an owner with the
-	// owner's own chown, a loose mode with apply as its fix on what the home
-	// owner owns and root's own chmod on what root owns for another user.
-	base, ssh := a.beneath(file)
+	// neither the folder nor the file writable by group or others; and
+	// both are the home owner's, the rule apply refuses by. Anything else is
+	// drift, an owner with the owner's own chown, a loose mode with apply as
+	// its fix.
+	base, ssh, err := a.reach(file)
+	if err != nil {
+		return loosened{}, err
+	}
 	owner, err := a.home.Lstat(base, path.Dir(ssh))
 	if err != nil {
 		return loosened{}, a.linked(err)
@@ -642,19 +674,16 @@ func (a *Applier) loose(file, name string) (loosened, error) {
 	}{{path.Dir(file), folder}, {file, keys}} {
 		l := loosened{at: p.at}
 		perm := p.e.Mode.Perm()
-		switch {
-		case p.e.UID != owner.UID && p.e.UID != 0:
+		switch why := notTheHomes(p.at, p.e, owner.UID); {
+		case why != "":
 			l.want, l.have = fmt.Sprintf("uid %d\n", owner.UID), fmt.Sprintf("uid %d\n", p.e.UID)
-			l.why = fmt.Sprintf("%s is uid %d's, not the home's (uid %d), so its keys are ignored: Machines never takes a file from its owner, give it back with %s", l.at, p.e.UID, owner.UID, catalog.AsRoot(fmt.Sprintf("chown %d %s", owner.UID, l.at)))
+			l.why = why
 			return l, nil
 		case perm&loose == 0:
 			continue
 		}
 		l.want, l.have = octal(perm&^loose)+"\n", octal(perm)+"\n"
 		l.why = l.at + " is " + octal(perm) + ", writable by others, so its keys are ignored: station settings apply " + name + " sets it to " + octal(perm&^loose)
-		if p.e.UID != owner.UID {
-			l.why = l.at + " is " + octal(perm) + ", writable by others, so its keys are ignored: Machines changes no mode of root's for another user, take the write away with " + catalog.AsRoot("chmod go-w "+l.at)
-		}
 		return l, nil
 	}
 	return loosened{}, nil
