@@ -5,7 +5,7 @@ fixture:
     - ../../__fixtures__/power/
 env: engine
 runs:
-    - command: '--version > /dev/null; "$STATION" engine run 2> engine.log & d=$!; n=0; while [ ! -S .local/state/station/engine.sock ] && [ $n -lt 50 ]; do /bin/sleep 0.1; n=$((n+1)); done; /usr/bin/grep "^power" .calls; "$STATION" awake 4h --lid --battery > /dev/null; echo battery > power/source.new; /bin/mv power/source.new power/source; /bin/sleep 1; echo closed > power/lid.new; /bin/mv power/lid.new power/lid; /bin/sleep 1; echo open > power/lid.new; /bin/mv power/lid.new power/lid; /bin/sleep 1; /usr/bin/grep -c "power clamshell disabled" .calls; : > .calls; kill $d; wait $d; /usr/bin/grep -v pmset .calls'
+    - command: '--version > /dev/null; "$STATION" engine run 2> engine.log & d=$!; n=0; while [ ! -S .local/state/station/engine.sock ] && [ $n -lt 50 ]; do /bin/sleep 0.1; n=$((n+1)); done; /usr/bin/grep "^power" .calls; "$STATION" awake 4h --lid --battery > /dev/null; echo battery > power/source.new; /bin/mv power/source.new power/source; n=0; until [ "$(/usr/bin/grep -c "power clamshell disabled" .calls)" -ge 2 ] || [ $n -ge 50 ]; do /bin/sleep 0.1; n=$((n+1)); done; echo closed > power/lid.new; /bin/mv power/lid.new power/lid; n=0; until [ "$(/usr/bin/grep -c "power clamshell disabled" .calls)" -ge 3 ] || [ $n -ge 50 ]; do /bin/sleep 0.1; n=$((n+1)); done; echo open > power/lid.new; /bin/mv power/lid.new power/lid; n=0; until [ "$(/usr/bin/grep -c "power clamshell disabled" .calls)" -ge 4 ] || [ $n -ge 50 ]; do /bin/sleep 0.1; n=$((n+1)); done; /usr/bin/grep -c "power clamshell disabled" .calls; : > .calls; kill $d; wait $d; /usr/bin/grep -v pmset .calls'
       exit: 0
       stdout: |
           power clamshell normal
