@@ -1,7 +1,7 @@
 import type { MenuBarPort } from '../../../application/ports/menu-bar.port';
 import type { MenuBarRead, MenuBarRefused } from '../../../domain/menu-bar';
 
-export const MENU_BAR_SCRIPTS = ['approval', 'hidden', 'refusing', 'shown'] as const;
+export const MENU_BAR_SCRIPTS = ['approval', 'hidden', 'refusing', 'shown', 'waiting'] as const;
 
 export type MenuBarScriptName = (typeof MENU_BAR_SCRIPTS)[number];
 
@@ -20,6 +20,7 @@ const SCRIPTS: Readonly<Record<MenuBarScriptName, MenuBarScript>> = {
     hidden: { first: { kind: 'hidden' }, shown: { kind: 'shown' } },
     refusing: { first: { kind: 'hidden' }, shown: REFUSED },
     shown: { first: { kind: 'shown' }, shown: { kind: 'shown' } },
+    waiting: { first: { kind: 'approval' }, shown: { kind: 'approval' } },
 };
 
 function isMenuBarScript(name: string): name is MenuBarScriptName {

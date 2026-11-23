@@ -16,6 +16,8 @@ const recordingFor = await recordingsOf('stories');
 
 const COMMAND_COMMA = 'Meta>},{/Meta';
 const engine = region('Engine');
+const PRESSED_ON = /aria-pressed="true"[^>]*>On<\/button>/u;
+const PRESSED_OFF = /aria-pressed="true"[^>]*>Off<\/button>/u;
 
 function windowOn(initial: Route, menuBar?: string) {
     const script = menuBar === undefined ? undefined : menuBarScriptOf(menuBar);
@@ -63,5 +65,49 @@ describe('Settings', () => {
         // Then - the panel, Off pressed
         expect(result.errors.text).toBe('');
         await expect(result.tree).toMatch(file('./__expected__/settings-menu-bar.aria.yaml'));
+    });
+
+    test('a menu bar that is off says so beside its switch, which reads Off', async () => {
+        // Given - Settings over a menu bar no login shows
+        const result = await component.render(
+            windowOn({ page: 'settings' }, 'hidden'),
+            async (visitor) => {
+                // When - the panel is drawn
+                await visitor.see(within(region('Menu bar'), content('Show in menu bar')));
+
+                // Then - the line that says it is off
+                await visitor.see(
+                    within(
+                        region('Menu bar'),
+                        content('Spwn Menu is off: it is not in the menu bar.'),
+                    ),
+                );
+            },
+        );
+        expect(result.errors.text).toBe('');
+        expect(result.html.text).toMatch(PRESSED_OFF);
+    });
+
+    test('a menu bar the install showed and macOS holds for approval says where to allow it', async () => {
+        // Given - Settings over a menu bar registered and waiting for the owner in System Settings
+        const result = await component.render(
+            windowOn({ page: 'settings' }, 'waiting'),
+            async (visitor) => {
+                // When - the panel is drawn, nothing pressed
+                await visitor.see(within(region('Menu bar'), content('Show in menu bar')));
+
+                // Then - the sentence naming System Settings, and On pressed
+                await visitor.see(
+                    within(
+                        region('Menu bar'),
+                        content(
+                            'macOS waits for you: allow Spwn in System Settings, General, Login Items.',
+                        ),
+                    ),
+                );
+            },
+        );
+        expect(result.errors.text).toBe('');
+        expect(result.html.text).toMatch(PRESSED_ON);
     });
 });

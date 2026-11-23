@@ -57,7 +57,7 @@
   - text: Settings
   - region "Menu bar":
     - heading "Menu bar" [level=2]
-    - text: Show in menu bar Spwn Menu, at every login
+    - text: "Show in menu bar Spwn Menu, at every login Spwn Menu is off: it is not in the menu bar."
     - group "Show in menu bar":
       - button "On"
       - button "Off" [pressed]

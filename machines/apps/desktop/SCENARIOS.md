@@ -16,7 +16,7 @@ What the desktop window must let its user do, page by page: one row is one scena
 | No engine on this Mac    | E1 to E9                                          |
 | The engine's release     | U1 to U4                                          |
 | The window's release     | R1 to R7                                          |
-| The menu bar             | B1 to B4                                          |
+| The menu bar             | B1 to B6                                          |
 
 ## How a scenario is proved
 
@@ -251,9 +251,11 @@ The window checks its own release once, at its start, and offers it on Settings'
 
 Spwn.app carries the menu bar, Spwn Menu, as its login item, and Settings' Menu bar panel switches it: On registers it with macOS, which starts it now and at every login, Off unregisters it ([ADR-073](../../docs/decisions/073-spwn-app-carries-the-engine-on-a-mac-with-a-screen.md)). It is on by default: the engine's first start from the bundle registers it once, and from then on the switch alone changes it. The switch shows what macOS holds, read each time Settings is drawn and after each press. A window with no switch (a debug build, Linux, a page outside Tauri) draws no panel.
 
-| ID  | Scenario                            | Given                             | When                         | Then                                                                                           | Mockup |
-| --- | ----------------------------------- | --------------------------------- | ---------------------------- | ---------------------------------------------------------------------------------------------- | ------ |
-| B1  | Show the menu bar at every login    | the menu bar is hidden            | I open Settings and press On | the switch reads On                                                                            | no     |
-| B2  | Hide the menu bar                   | the menu bar is shown             | I press Off                  | the switch reads Off                                                                           | no     |
-| B3  | Learn that macOS waits for approval | macOS holds the item for approval | I press On                   | the switch reads On, and the panel says to allow Spwn in System Settings, General, Login Items | no     |
-| B4  | Read why the switch failed          | macOS refuses the item            | I press On                   | "The menu bar could not be switched." with the shell's message, and the switch still reads Off | no     |
+| ID  | Scenario                                | Given                                                  | When                         | Then                                                                                           | Mockup |
+| --- | --------------------------------------- | ------------------------------------------------------ | ---------------------------- | ---------------------------------------------------------------------------------------------- | ------ |
+| B1  | Show the menu bar at every login        | the menu bar is hidden                                 | I open Settings and press On | the switch reads On                                                                            | no     |
+| B2  | Hide the menu bar                       | the menu bar is shown                                  | I press Off                  | the switch reads Off                                                                           | no     |
+| B3  | Learn that macOS waits for approval     | macOS holds the item for approval                      | I press On                   | the switch reads On, and the panel says to allow Spwn in System Settings, General, Login Items | no     |
+| B4  | Read why the switch failed              | macOS refuses the item                                 | I press On                   | "The menu bar could not be switched." with the shell's message, and the switch still reads Off | no     |
+| B5  | Read that the menu bar is off           | the menu bar is hidden                                 | I open Settings              | the switch reads Off, and the panel says "Spwn Menu is off: it is not in the menu bar."        | no     |
+| B6  | Approve the menu bar the install showed | the install registered it, macOS holds it for approval | I open Settings              | the switch reads On, and the panel says to allow Spwn in System Settings, General, Login Items | no     |

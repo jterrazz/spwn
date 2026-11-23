@@ -6,6 +6,7 @@ import { Panel, ProgressLine, Row, Switch } from '../../ui/index';
 
 export const MENU_BAR_WORDS = {
     approval: 'macOS waits for you: allow Spwn in System Settings, General, Login Items.',
+    hidden: 'Spwn Menu is off: it is not in the menu bar.',
     off: 'Off',
     on: 'On',
     panel: 'Menu bar',
@@ -24,9 +25,13 @@ function Below({ state }: { state: Shown }) {
     if (state.kind === 'failed') {
         return <ProgressLine detail={state.message} failed task={MENU_BAR_WORDS.unswitched} />;
     }
-    return state.kind === 'held' && state.held === 'approval' ? (
-        <span>{MENU_BAR_WORDS.approval}</span>
-    ) : null;
+    if (state.kind !== 'held') {
+        return null;
+    }
+    if (state.held === 'approval') {
+        return <span>{MENU_BAR_WORDS.approval}</span>;
+    }
+    return state.held === 'hidden' ? <span>{MENU_BAR_WORDS.hidden}</span> : null;
 }
 
 // invariant: drawn only once the shell has read the login item, and never in a window that has no switch.
