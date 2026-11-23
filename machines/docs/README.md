@@ -136,6 +136,7 @@ The records of decisions this repository alone took go in [`decisions/`](decisio
 - [081 A server takes one grant, the Tailscale auth key, delivered once](decisions/081-a-server-takes-one-grant-the-tailscale-auth-key-delivered-once.md) (Accepted)
 - [082 A server keeps its data on a disk of its own](decisions/082-a-server-keeps-its-data-on-a-disk-of-its-own.md) (Accepted)
 - [083 A re-ask is quiet only for an engine-kept view, and never by a timer](decisions/083-a-re-ask-is-quiet-only-for-an-engine-kept-view-never-by-a-timer.md) (Accepted)
+- [084 `base-macos` is fetched from Cirrus Labs, pinned by digest](decisions/084-base-macos-is-fetched-from-cirrus-labs-pinned-by-digest.md) (Accepted)
 - [086 A VM reserves a package's port only when its Machinefile installs it](decisions/086-a-vm-reserves-a-packages-port-only-when-its-machinefile-installs-it.md) (Accepted)
 
 A decision spanning several repositories is recorded by the corpus that spans them. What was left for later is `TODO.md` at the repository root.

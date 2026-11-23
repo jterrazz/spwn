@@ -3,6 +3,8 @@
 **Status:** Accepted
 **Date:** 2026-11-17
 
+Amended by [ADR-084](084-base-macos-is-fetched-from-cirrus-labs-pinned-by-digest.md): `base-macos` is fetched from Cirrus Labs' public tart image, pinned by digest, its version the pinned image's macOS (26.6.2); `base-ubuntu` and `base-debian` are still built here.
+
 ## Context
 
 Station knew two images: `station-linux`, built from its Machinefile with a bake list a gate
