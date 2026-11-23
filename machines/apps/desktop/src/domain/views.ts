@@ -6,6 +6,7 @@ export const VIEW_KEYS = [
     'machines.list',
     'overview.read',
     'overview.read+elsewhere',
+    'overview.read:*',
     'ports.list+all-machines',
     'ports.list:*',
     'accounts.list',
@@ -14,7 +15,7 @@ export const VIEW_KEYS = [
     'awake.read:*',
 ] as const;
 
-const PER_MACHINE = ['ports.list:', 'accounts.list:', 'awake.read:'] as const;
+const PER_MACHINE = ['overview.read:', 'ports.list:', 'accounts.list:', 'awake.read:'] as const;
 
 export type View =
     | `${(typeof PER_MACHINE)[number]}${string}`
@@ -76,13 +77,18 @@ const NAMED: Readonly<Record<string, Named>> = {
     'awake.read': (fields, mac) => (isPlain(fields) ? ownOrOf('awake.read', mac) : undefined),
     'machines.list': (fields, mac) =>
         isPlain(fields) && mac === undefined ? 'machines.list' : undefined,
-    'overview.read': (fields, mac) => (mac === undefined ? overviewOf(fields) : undefined),
+    'overview.read': (fields, mac) => {
+        if (mac === undefined) {
+            return overviewOf(fields);
+        }
+        return isPlain(fields) ? `overview.read:${mac}` : undefined;
+    },
     'ports.list': (fields, mac) => (mac === undefined ? portsOf(fields) : undefined),
 };
 
 // invariant: a read is a view when it asks This Mac's engine for an answer the engine keeps: the fleet, This Mac's
-// invariant: Overview with the other Macs or without, every Mac's ports or one machine's, a machine's sign-ins and a
-// invariant: Mac's Awake; any other input or target is still asked by its call.
+// invariant: Overview with the other Macs or without, another machine's Overview, every Mac's ports or one machine's,
+// invariant: a machine's sign-ins and a Mac's Awake; any other input or target is still asked by its call.
 export function viewNamed(name: string, input: unknown, target: Aim): undefined | View {
     const fields = fieldsOf(input);
     const mac = aMac(target);
@@ -95,6 +101,11 @@ export function viewNamed(name: string, input: unknown, target: Aim): undefined 
         return undefined;
     }
     return named(fields, mac);
+}
+
+// value: whether a view is one machine's, which the engine keeps only for the machines it reads.
+export function isOfMachine(view: View): boolean {
+    return PER_MACHINE.some((kind) => view.startsWith(kind));
 }
 
 export function isView(key: string): key is View {

@@ -2,7 +2,7 @@ import type { EngineSliceOut, EngineStateFrame, EngineStateSince } from '@jterra
 
 import { EngineError } from '../../domain/engine-error';
 import { STATE_REVISION } from '../../domain/fit';
-import { isView, VIEW_KEYS, viewNamed } from '../../domain/views';
+import { isOfMachine, isView, VIEW_KEYS, viewNamed } from '../../domain/views';
 import type { View } from '../../domain/views';
 import type { EnginePort, Link, Watch } from '../ports/engine.port';
 import { READING } from './entry';
@@ -16,6 +16,10 @@ import { judged } from './reach';
 export type MirrorTiming = { lost: number; retry: number; grace: number };
 
 const DEFAULTS: MirrorTiming = { grace: 1500, lost: 45_000, retry: 1000 };
+
+// value: the why of a machine's view the engine's stream does not hold: the engine reads no such machine, so its call
+// value: answers.
+const NOT_KEPT = 'not-kept';
 
 // value: the view a read is, by the engine's naming (`domain/views.ts`); undefined is a read asked by its call.
 export function viewOf(asked: Asked): undefined | View {
@@ -80,6 +84,7 @@ export class StateMirror {
     private open = false;
     private held = 0;
     private since: EngineStateSince | undefined;
+    private kept: Set<View> | undefined;
     private watch: undefined | Watch;
     private asking: object | undefined;
     private silent: ReturnType<typeof setTimeout> | undefined;
@@ -111,6 +116,7 @@ export class StateMirror {
         this.listeners.set(view, listeners);
         listeners.add(listener);
         this.held += 1;
+        this.absent(view);
         clearTimeout(this.grace);
         this.unlink ??= this.client.link((link) => {
             this.heard(link);
@@ -214,21 +220,43 @@ export class StateMirror {
     private frame(frame: EngineStateFrame): void {
         this.alive();
         if (frame.event === 'opened') {
-            if (frame.fit?.verdict !== 'fits') {
-                this.close();
-            }
-            this.since =
-                frame.epoch === undefined ? undefined : { epoch: frame.epoch, rev: frame.rev };
+            this.opened(frame);
             return;
         }
+        const kept = this.kept ?? new Set<View>();
+        this.kept = kept;
         if (this.since) {
             this.since = { ...this.since, rev: frame.rev };
         }
         for (const [key, slice] of Object.entries(frame.slices ?? {})) {
             if (isView(key)) {
+                kept.add(key);
                 this.refuse(key, refusedOf(slice, this.reading(key)));
                 this.show(key, readingOf(this.reading(key), slice));
             }
+        }
+        for (const key of frame.gone ?? []) {
+            if (isView(key)) {
+                kept.delete(key);
+            }
+        }
+        for (const view of this.listeners.keys()) {
+            this.absent(view);
+        }
+    }
+
+    private opened(frame: EngineStateFrame): void {
+        if (frame.fit?.verdict !== 'fits') {
+            this.close();
+        }
+        this.since = frame.epoch === undefined ? undefined : { epoch: frame.epoch, rev: frame.rev };
+        this.kept = undefined;
+    }
+
+    // invariant: from the first frame of a stream on, a machine's view it does not hold is refused to its call.
+    private absent(view: View): void {
+        if (this.kept !== undefined && isOfMachine(view) && !this.kept.has(view)) {
+            this.refuse(view, NOT_KEPT);
         }
     }
 

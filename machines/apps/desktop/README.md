@@ -174,8 +174,9 @@ A watch the engine ends (`done`) and a plain read are an answer of one moment, s
 
 ### The engine's views are mirrored
 
-This Mac's fleet and Overview are not asked by their calls: `machines.list {}`, `overview.read {}` and `overview.read {Elsewhere: true}`, aimed at no target, are views the engine keeps ([ADR-070](../../docs/decisions/070-the-engine-keeps-one-read-model.md)), and the window reads them from one held `engine.state` stream (`StateMirror`, `src/application/use-cases/mirror.ts`; `viewOf` names which reads are views). Every other read is still the store's.
+The reads the engine keeps are not asked by their calls: the fleet (`machines.list {}`), This Mac's Overview (`overview.read {}`, and `{Elsewhere: true}`), another machine's Overview (`overview.read {}` aimed at it, the view `overview.read:<machine>`), every Mac's ports and one machine's, a machine's sign-ins and a Mac's Awake are views the engine keeps ([ADR-070](../../docs/decisions/070-the-engine-keeps-one-read-model.md)), and the window reads them from one held `engine.state` stream (`StateMirror`, `src/application/use-cases/mirror.ts`; `viewOf` names which reads are views). Every other read is still the store's.
 
+- A machine's view that the stream's first frame does not hold is one the engine keeps for no machine of that name (a server, a workspace): it is refused to its call, `not-kept`, and the store asks it, until a frame brings the view.
 - The stream is opened while a view is held and the link is open, and closed after the same grace once nobody holds one. Its readings outlive it, so a page once drawn never blanks.
 - A revision draws once: a slice is merged by `replaceEqualDeep`, a slice sent without its value keeps the one held, and one not read yet draws nothing new. An equal revision renders nothing.
 - A stream silent for 45 s, three of the engine's ticks, is asked again from the revision held (`since`); one whose connection is cut is asked again a second later, its views kept meanwhile. A refusal in the engine's words is drawn as the read's failure.

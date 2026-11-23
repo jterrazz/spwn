@@ -100,7 +100,7 @@ describe('mirror', () => {
         expect(engine.requests('engine.state')).toHaveLength(2);
     });
 
-    test("only This Mac's fleet and Overview are views; any other input or target is a call", () => {
+    test("the fleet and a machine's Overview are views; any other input, or a target on a Mac, is a call", () => {
         // Given - the reads the window makes of the two calls
 
         // When - each is named as a view
@@ -117,7 +117,19 @@ describe('mirror', () => {
                 input: {},
                 kind: 'watch',
                 name: 'overview.read',
+                target: { name: 'linux-1' },
+            }),
+            viewOf({
+                input: {},
+                kind: 'watch',
+                name: 'overview.read',
                 target: { name: 'linux-1', on: 'macbook-pro' },
+            }),
+            viewOf({
+                input: { Elsewhere: true },
+                kind: 'watch',
+                name: 'overview.read',
+                target: { name: 'mac-mini' },
             }),
             viewOf({
                 input: { ThisMac: true },
@@ -127,11 +139,13 @@ describe('mirror', () => {
             }),
         ];
 
-        // Then - the first three are views, the last two their calls
+        // Then - the first four are views, another machine's Overview named by it, the last three their calls
         expect(named).toStrictEqual([
             'machines.list',
             'overview.read',
             'overview.read+elsewhere',
+            'overview.read:linux-1',
+            undefined,
             undefined,
             undefined,
         ]);
@@ -242,5 +256,45 @@ describe('mirror', () => {
         // Then - each view was drawn once, by the snapshot, and nothing after it
         expect(first).toBe(3);
         expect(drawn.renders).toBe(3);
+    });
+
+    test('a machine whose view the engine does not keep is refused to its call, until the engine keeps it', async () => {
+        // Given - a window holding a server's Overview, which the engine's first snapshot does not hold
+        using _ = clock.run('2026-11-21T09:00:00Z');
+        const engine = fakeEngine(HELLO);
+        const mirror = new StateMirror(new Client(engine.transport), {
+            grace: 500,
+            lost: 45_000,
+            retry: 1000,
+        });
+        mirror.subscriberOf('overview.read:api')(() => undefined);
+        await clock.advance(1);
+        engine.answer('engine.state', OPENED, {
+            out: {
+                event: 'snapshot',
+                rev: 7,
+                slices: { 'machines.list': { hash: 'a', state: 'fresh', value: FLEET } },
+            },
+        });
+        const absent = mirror.refusedOf('overview.read:api');
+        mirror.subscriberOf('ports.list:api')(() => undefined);
+        const later = mirror.refusedOf('ports.list:api');
+
+        // When - the engine comes to keep the server's Overview
+        engine.answer('engine.state', {
+            out: {
+                event: 'changed',
+                rev: 8,
+                slices: {
+                    'overview.read:api': { hash: 'o', state: 'fresh', value: { Summary: {} } },
+                },
+            },
+        });
+
+        // Then - both were the calls' while the engine held neither; the Overview is now the view's
+        expect(absent).toBe('not-kept');
+        expect(later).toBe('not-kept');
+        expect(mirror.refusedOf('overview.read:api')).toBeUndefined();
+        expect(mirror.reading('overview.read:api').kind).toBe('read');
     });
 });
