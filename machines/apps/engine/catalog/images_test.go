@@ -95,6 +95,57 @@ func TestAFetchOnlyBaseCarriesTheFirstLoginThatPutsStationsKeyIn(t *testing.T) {
 			t.Fatal(err)
 		}
 		lockdownPutsTheKeyInLastAndItsMarkerAfterIt(t, img.Name, string(script))
+		lockdownClosesTheImageBeforeAnythingElse(t, img.Name, string(script))
+	}
+}
+
+func lockdownClosesTheImageBeforeAnythingElse(t *testing.T, name, script string) {
+	t.Helper()
+	checked := strings.Index(script, `= "$BIN_SHA256" ]`)
+	if checked < 0 {
+		t.Fatalf("%s's first login never checks its binary", name)
+	}
+	firstOther := len(script)
+	for _, after := range []string{"sysadminctl -addUser", "/usr/local/bin/station", "createhomedir", "/etc/sudoers.d/60-station-user", "ssh-keygen -A"} {
+		at := strings.Index(script, after)
+		if at < 0 {
+			t.Fatalf("%s's first login lacks %q", name, after)
+		}
+		firstOther = min(firstOther, at)
+	}
+	for _, step := range []string{
+		"PasswordAuthentication no",
+		"KbdInteractiveAuthentication no",
+		"PermitRootLogin no",
+		"autoLoginUser",
+		"rm -f /etc/kcpassword",
+		`-passwd "/Users/$LOGIN_USER"`,
+		`: > "$login_home/.ssh/authorized_keys"`,
+		`rm -f "/etc/sudoers.d/$LOGIN_USER-nopasswd"`,
+		`[ "$VM_USER" != "$LOGIN_USER" ]`,
+	} {
+		at := strings.Index(script, step)
+		switch {
+		case at < 0:
+			t.Errorf("%s's first login lacks %q", name, step)
+		case at < checked:
+			t.Errorf("%s's first login runs %q before it checks its binary", name, step)
+		case at > firstOther:
+			t.Errorf("%s's first login sets the guest up before %q: a failure between leaves the image's login open", name, step)
+		}
+	}
+	for _, step := range []string{
+		"/usr/sbin/chown root:wheel /usr/local/bin",
+		"/bin/chmod 0755 /usr/local/bin",
+		`/usr/sbin/visudo -cf "$rule"`,
+		`/bin/mv -f "$rule" /etc/sudoers.d/60-station-user`,
+	} {
+		if !strings.Contains(script, step) {
+			t.Errorf("%s's first login lacks %q", name, step)
+		}
+	}
+	if strings.Contains(script, "> /etc/sudoers.d/60-station-user") {
+		t.Errorf("%s's first login writes its sudo rule in place, read by sudo before visudo checked it", name)
 	}
 }
 

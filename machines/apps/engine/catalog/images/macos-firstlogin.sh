@@ -3,9 +3,11 @@
 # from the private folder station made and put this script and its own binary in, over the
 # image's own account by its published default password, or over the VM user by the key when
 # its marker is absent. Its values come on stdin, one per line, never in a command line. It is
-# idempotent, and it makes the key reachable only once nothing of the image's logs in, then
-# writes its marker last; its stdout is the guest's new ed25519 host key, printed as soon as it is
-# made, nothing else.
+# idempotent. Once its binary is checked, it first closes what the image's login opens (sshd's
+# password login, the auto-login, the default password, its keys and sudo rule), so a run cut
+# anywhere after leaves no login of the image's; it makes the key reachable only once all of it is
+# checked, then writes its marker last; its stdout is the guest's new ed25519 host key, printed as
+# soon as it is made, nothing else.
 set -euo pipefail
 
 IFS= read -r VM_USER
@@ -30,8 +32,39 @@ random() {
 home_of() { /usr/bin/dscl . -read "/Users/$1" NFSHomeDirectory | /usr/bin/awk '{print $2}'; }
 
 [ "$(/usr/bin/shasum -a 256 "$dir/station" | /usr/bin/awk '{print $1}')" = "$BIN_SHA256" ] || { echo "the station binary in $dir is not the engine's" >&2; exit 1; }
-/usr/bin/install -d -m 0755 /usr/local/bin
-/usr/bin/install -m 0755 "$dir/station" /usr/local/bin/station
+# outside: sshd keeps the first value it reads, and macOS's sshd_config includes sshd_config.d/* before its own lines, in name order.
+/bin/cat > /etc/ssh/sshd_config.d/000-station.conf <<'CONF'
+PasswordAuthentication no
+KbdInteractiveAuthentication no
+PermitRootLogin no
+AuthorizedKeysFile .ssh/authorized_keys
+AllowTcpForwarding local
+ClientAliveInterval 15
+ClientAliveCountMax 4
+CONF
+# outside: the image logs LOGIN_USER in at boot by the password /etc/kcpassword holds.
+/usr/bin/defaults delete /Library/Preferences/com.apple.loginwindow autoLoginUser 2>/dev/null || true
+/bin/rm -f /etc/kcpassword
+# outside: macOS changes the password of an account holding a secure token only by its old one, read from a terminal or the command line.
+if /usr/bin/dscl . -authonly "$LOGIN_USER" "$LOGIN_PASSWORD" 2>/dev/null; then
+    p=$(random)
+    /usr/bin/dscl . -passwd "/Users/$LOGIN_USER" "$LOGIN_PASSWORD" "$p"
+    unset p
+fi
+login_home=$(home_of "$LOGIN_USER")
+if [ -d "$login_home/.ssh" ]; then
+    : > "$login_home/.ssh/authorized_keys"
+    /bin/rm -f "$login_home/.ssh/authorized_keys2"
+fi
+/bin/rm -f /var/root/.ssh/authorized_keys /var/root/.ssh/authorized_keys2
+/bin/rm -f "/etc/sudoers.d/$LOGIN_USER-nopasswd"
+
+[ -n "$VM_USER" ] && [ "$VM_USER" != "$LOGIN_USER" ] && [ "$VM_USER" != root ] || { echo "the VM user '$VM_USER' is the image's own account or none: a fetched macOS guest is made for another user" >&2; exit 1; }
+
+/bin/mkdir -p /usr/local/bin
+/usr/sbin/chown root:wheel /usr/local/bin
+/bin/chmod 0755 /usr/local/bin
+/usr/bin/install -o root -g wheel -m 0755 "$dir/station" /usr/local/bin/station
 
 if ! /usr/bin/id "$VM_USER" >/dev/null 2>&1; then
     p=$(random)
@@ -52,38 +85,20 @@ fi
 /bin/rm -f "$home/.ssh/authorized_keys2"
 /usr/bin/install -d -m 0700 -o "$VM_USER" -g staff "$home/.config" "$home/.config/station" "$home/.config/station/machinefiles"
 
-echo "$VM_USER ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/60-station-user
-/bin/chmod 0440 /etc/sudoers.d/60-station-user
-/usr/sbin/visudo -cf /etc/sudoers.d/60-station-user
+# outside: sudo skips a file of /etc/sudoers.d whose name holds a dot.
+rule=$(/usr/bin/mktemp /etc/sudoers.d/.60-station-user.XXXXXXXX)
+echo "$VM_USER ALL=(ALL) NOPASSWD:ALL" > "$rule"
+/usr/sbin/chown root:wheel "$rule"
+/bin/chmod 0440 "$rule"
+/usr/sbin/visudo -cf "$rule" >/dev/null || { /bin/rm -f "$rule"; echo "visudo refuses the VM user's sudo rule" >&2; exit 1; }
+/bin/mv -f "$rule" /etc/sudoers.d/60-station-user
 /usr/bin/sudo -u "$VM_USER" /usr/bin/sudo -k -n true || { echo "sudo asks $VM_USER a password: /etc/sudoers.d/60-station-user is not read" >&2; exit 1; }
 
-# outside: the image logs LOGIN_USER in at boot by the password /etc/kcpassword holds.
-/usr/bin/defaults delete /Library/Preferences/com.apple.loginwindow autoLoginUser 2>/dev/null || true
-/bin/rm -f /etc/kcpassword
-# outside: macOS changes the password of an account holding a secure token only by its old one, read from a terminal or the command line.
-if /usr/bin/dscl . -authonly "$LOGIN_USER" "$LOGIN_PASSWORD" 2>/dev/null; then
-    p=$(random)
-    /usr/bin/dscl . -passwd "/Users/$LOGIN_USER" "$LOGIN_PASSWORD" "$p"
-    unset p
+# outside: the image's Homebrew belongs to LOGIN_USER, and brew runs as the user who owns its prefix.
+if [ -d /opt/homebrew ] && [ "$(/usr/bin/stat -f %Su /opt/homebrew)" = "$LOGIN_USER" ]; then
+    /usr/sbin/chown -R "$VM_USER" /opt/homebrew
 fi
-login_home=$(home_of "$LOGIN_USER")
-if [ -d "$login_home/.ssh" ]; then
-    : > "$login_home/.ssh/authorized_keys"
-    /bin/rm -f "$login_home/.ssh/authorized_keys2"
-fi
-/bin/rm -f /var/root/.ssh/authorized_keys /var/root/.ssh/authorized_keys2
-/bin/rm -f "/etc/sudoers.d/$LOGIN_USER-nopasswd"
 
-# outside: sshd keeps the first value it reads, and macOS's sshd_config includes sshd_config.d/* before its own lines, in name order.
-/bin/cat > /etc/ssh/sshd_config.d/000-station.conf <<'CONF'
-PasswordAuthentication no
-KbdInteractiveAuthentication no
-PermitRootLogin no
-AuthorizedKeysFile .ssh/authorized_keys
-AllowTcpForwarding local
-ClientAliveInterval 15
-ClientAliveCountMax 4
-CONF
 /bin/rm -f /etc/ssh/ssh_host_*
 /usr/bin/ssh-keygen -A
 [ -s /etc/ssh/ssh_host_ed25519_key.pub ] || { echo "ssh-keygen made no ed25519 host key" >&2; exit 1; }
