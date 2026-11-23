@@ -3,6 +3,7 @@ package calls
 import (
 	"context"
 	"encoding/json"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -66,11 +67,27 @@ func (h held) put(t *testing.T, v any) {
 	}
 }
 
+// value: the list view, counting the snapshots it is asked to project.
+type countedView struct {
+	listView
+	projected *atomic.Int32
+}
+
+func (c countedView) Project(s *store.Snapshot, asked func(string) bool) map[string]store.View {
+	c.projected.Add(1)
+	return c.listView.Project(s, asked)
+}
+
 func open(t *testing.T, h held, in engine.StateIn) <-chan call.Update[engine.StateFrame] {
+	t.Helper()
+	return openOn(t, h, Projected(listView{}), in)
+}
+
+func openOn(t *testing.T, h held, views *Projections, in engine.StateIn) <-chan call.Update[engine.StateFrame] {
 	t.Helper()
 	ctx, cancel := context.WithCancel(context.Background())
 	t.Cleanup(cancel)
-	asked, err := patternsOf(in.Keys, listView{})
+	asked, err := patternsOf(in.Keys, views)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -152,5 +169,30 @@ func TestAResumeOfThisEngineIsTheChangeAndOfAnotherASnapshot(t *testing.T) {
 	}
 	if snapshot.Event != engine.StateSnapshot || len(snapshot.Slices) != 3 {
 		t.Fatalf("another engine's resume %q with %d keys, want a snapshot of three", snapshot.Event, len(snapshot.Slices))
+	}
+}
+
+func TestTwoHeldStreamsProjectOneRevisionOnce(t *testing.T) {
+	h := newHeld(t)
+	h.put(t, []string{"linux-1"})
+	var projected atomic.Int32
+	views := Projected(countedView{projected: &projected})
+	in := engine.StateIn{Keys: []string{"machines"}, Revision: engine.StateRevision, Hold: true}
+	first, second := openOn(t, h, views, in), openOn(t, h, views, in)
+	for _, frames := range []<-chan call.Update[engine.StateFrame]{first, second} {
+		next(t, frames)
+		next(t, frames)
+	}
+
+	h.put(t, []string{"linux-1", "linux-2"})
+	<-h.gathered
+	<-h.gathered
+	a, b := next(t, first), next(t, second)
+
+	if a.Rev != b.Rev || string(a.Slices["machines"].Value) != string(b.Slices["machines"].Value) {
+		t.Fatalf("the streams sent %s at %d and %s at %d, want one projection", a.Slices["machines"].Value, a.Rev, b.Slices["machines"].Value, b.Rev)
+	}
+	if n := projected.Load(); n != 2 {
+		t.Fatalf("two revisions projected %d times for two streams, want once each", n)
 	}
 }

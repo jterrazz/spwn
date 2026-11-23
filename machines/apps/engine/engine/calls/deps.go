@@ -36,7 +36,7 @@ type Deps struct {
 	Forward func(ctx context.Context, in engine.StateIn) (<-chan json.RawMessage, error)
 	// value: the views engine.state projects of the store beside its
 	// slices; nil projects none.
-	Views Views
+	Views *Projections
 }
 
 type Installer interface {

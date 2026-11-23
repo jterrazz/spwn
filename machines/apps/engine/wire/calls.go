@@ -181,7 +181,7 @@ func (m machine) engineDeps() enginecalls.Deps {
 	d := enginecalls.Deps{
 		Control: m.control(), Installer: m.installer(), Kind: m.profile.Kind,
 		Cache: m.stores.release, Version: m.engineVersion(), Arch: m.sys.Env.GOARCH(), Now: m.sys.Clock.Now,
-		Asking: &m.stores.asking, Page: page.Revision, Views: feeds.Pages{ThisMachine: m.where},
+		Asking: &m.stores.asking, Page: page.Revision, Views: enginecalls.Projected(feeds.Pages{ThisMachine: m.where}),
 		Forward: func(ctx context.Context, in engine.StateIn) (<-chan json.RawMessage, error) {
 			frames, err := m.engineAPI().c.Watch(ctx, enginecalls.StateWatch.Name, in)
 			return frames, downAs(err, &enginecalls.DownError{})

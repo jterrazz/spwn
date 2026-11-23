@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"slices"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
@@ -40,6 +41,41 @@ type Views interface {
 	// as the call whose answer it is.
 	Known(name string) bool
 	Project(s *store.Snapshot, asked func(name string) bool) map[string]store.View
+}
+
+type Projections struct {
+	// value: the views of the store's latest revision, for every stream.
+	of Views
+	// invariant: ADR-070: a view is projected once per revision for every
+	// stream that holds it: the latest revision's views are kept, encoded,
+	// under this lock, and each stream reads those it asks.
+	mu  sync.Mutex
+	at  *store.Snapshot
+	all map[string]viewed
+}
+
+func Projected(of Views) *Projections {
+	return &Projections{of: of}
+}
+
+func (p *Projections) views(st *store.Store, s *store.Snapshot) map[string]viewed {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	if p.at != nil && p.at.Epoch == s.Epoch && p.at.Rev == s.Rev {
+		return p.all
+	}
+	all := map[string]viewed{}
+	for name, v := range p.of.Project(s, func(string) bool { return true }) {
+		raw, hash, err := st.Encode(v.Value)
+		if err != nil {
+			continue
+		}
+		all[name] = viewed{View: v, raw: raw, hash: hash}
+	}
+	if p.at == nil || p.at.Epoch != s.Epoch || p.at.Rev < s.Rev {
+		p.at, p.all = s, all
+	}
+	return all
 }
 
 type stateKey struct{}
@@ -113,16 +149,16 @@ func forward(ctx context.Context, d Deps, in engine.StateIn) (<-chan call.Update
 type asked struct {
 	slices []store.Pattern
 	views  []string
-	of     Views
+	of     *Projections
 }
 
-func patternsOf(keys []string, views Views) (asked, error) {
+func patternsOf(keys []string, views *Projections) (asked, error) {
 	if len(keys) == 0 {
 		return asked{}, &fail.Error{Type: fail.Refused, Code: StateNoKey, Field: fail.FieldKeys}
 	}
 	out := asked{of: views}
 	for _, k := range keys {
-		if views != nil && views.Known(k) {
+		if views != nil && views.of.Known(k) {
 			out.views = append(out.views, k)
 			continue
 		}
@@ -155,12 +191,10 @@ func (a asked) project(st *store.Store, s *store.Snapshot) map[string]viewed {
 		return nil
 	}
 	out := map[string]viewed{}
-	for name, v := range a.of.Project(s, a.view) {
-		raw, hash, err := st.Encode(v.Value)
-		if err != nil {
-			continue
+	for name, v := range a.of.views(st, s) {
+		if a.view(name) {
+			out[name] = v
 		}
-		out[name] = viewed{View: v, raw: raw, hash: hash}
 	}
 	return out
 }
