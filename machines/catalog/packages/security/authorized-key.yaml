@@ -28,4 +28,4 @@ writes:
       note: "root's, 0600: every file station wrote the block in, the block's text and whether station made the file and its folder, which drift and off read, whoever runs station"
     - path: /var/lib/station/authorized-keys.lock
       level: settings
-      note: "empty: the lock apply and off hold from their read of a user's file to its write"
+      note: "empty: the lock apply and off hold around the record; inside it each ~/.ssh they write in is held, the folder itself, the lock the VM's guest takes too"

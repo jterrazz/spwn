@@ -1,12 +1,24 @@
 package local
 
 import (
+	"context"
 	"errors"
 	"io/fs"
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 )
+
+func opened(t *testing.T, base, rel string) *Folder {
+	t.Helper()
+	f, err := Beneath{}.Open(base, rel)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(f.Close)
+	return f
+}
 
 // invariant: a link below base, at the end of the path or on the way to
 // it, is refused by every call, and what it links to keeps its mode.
@@ -21,38 +33,32 @@ func TestALinkBeneathTheBaseIsNeverFollowed(t *testing.T) {
 	if err := os.Symlink(filepath.Join(away, "f"), filepath.Join(base, "at-the-end")); err != nil {
 		t.Fatal(err)
 	}
-	b := Beneath{}
+	b, f := Beneath{}, opened(t, filepath.Dir(base), filepath.Base(base))
 	for name, err := range map[string]error{
 		"lstat through":      func() error { _, err := b.Lstat(base, "on-the-way/f"); return err }(),
-		"chmod through":      b.Chmod(base, "on-the-way/f", 0o644),
-		"chmod at the end":   b.Chmod(base, "at-the-end", 0o644),
+		"open through":       func() error { _, err := b.Open(base, "on-the-way"); return err }(),
 		"mkdir through":      b.Mkdir(base, "on-the-way/d", 0o700, Self()),
-		"read through":       func() error { _, err := b.ReadFile(base, "on-the-way/f"); return err }(),
-		"read at the end":    func() error { _, err := b.ReadFile(base, "at-the-end"); return err }(),
-		"replace through":    b.Replace(base, "on-the-way/f", []byte("y"), 0o600, Self()),
-		"replace at the end": b.Replace(base, "at-the-end", []byte("y"), 0o600, Self()),
-		"remove through":     b.Remove(base, "on-the-way/f"),
-		"remove at the end":  b.Remove(base, "at-the-end"),
-		"a name that climbs": b.Chmod(base, "../x", 0o600),
+		"chmod at the end":   f.ChmodFile("at-the-end", 0o644),
+		"read at the end":    func() error { _, _, err := f.ReadFile("at-the-end"); return err }(),
+		"replace at the end": f.Replace("at-the-end", []byte("y"), 0o600, Self()),
+		"remove at the end":  f.Remove("at-the-end"),
+		"a name that climbs": func() error { _, err := b.Open(base, "../x"); return err }(),
 	} {
 		if err == nil {
 			t.Errorf("%s: no refusal", name)
 		}
 	}
-	if err := b.Chmod(base, "at-the-end", 0o600); !errors.Is(err, ErrLink) {
-		t.Errorf("chmod of a link = %v; want ErrLink", err)
+	if _, err := b.Open(base, "on-the-way"); !errors.Is(err, ErrLink) {
+		t.Errorf("open of a link = %v; want ErrLink", err)
 	}
-	if e, err := b.Lstat(base, "at-the-end"); err != nil || e.Mode&fs.ModeSymlink == 0 {
-		t.Errorf("Lstat of a link = %+v, %v; want the link itself", e, err)
+	if e, err := f.Lstat("at-the-end"); err != nil || e.Mode&fs.ModeSymlink == 0 {
+		t.Errorf("the link was replaced: %+v, %v", e, err)
 	}
 	if info, err := os.Stat(filepath.Join(away, "f")); err != nil || info.Mode().Perm() != 0o600 {
 		t.Errorf("the target moved: %v, %v", info.Mode(), err)
 	}
 	if data, err := os.ReadFile(filepath.Join(away, "f")); err != nil || string(data) != "x" {
 		t.Errorf("the target was written: %q, %v", data, err)
-	}
-	if e, err := b.Lstat(base, "at-the-end"); err != nil || e.Mode&fs.ModeSymlink == 0 {
-		t.Errorf("the link was replaced: %+v, %v", e, err)
 	}
 	if _, err := os.Stat(filepath.Join(away, "d")); !errors.Is(err, fs.ErrNotExist) {
 		t.Errorf("a folder was made through the link: %v", err)
@@ -76,45 +82,76 @@ func TestAFolderIsMadeWithItsModeAndOwner(t *testing.T) {
 // invariant: a replace keeps a file's mode and owner, and gives a new one
 // perm and its owner.
 func TestAReplaceKeepsAFilesModeAndMakesANewOneWithPerm(t *testing.T) {
-	base, b := t.TempDir(), Beneath{}
-	if err := b.Replace(base, "new", []byte("a"), 0o600, Self()); err != nil {
+	base := t.TempDir()
+	f := opened(t, filepath.Dir(base), filepath.Base(base))
+	if err := f.Replace("new", []byte("a"), 0o600, Self()); err != nil {
 		t.Fatal(err)
 	}
 	if err := os.Chmod(filepath.Join(base, "new"), 0o400); err != nil {
 		t.Fatal(err)
 	}
-	if err := b.Replace(base, "new", []byte("b"), 0o600, Self()); err != nil {
+	if err := f.Replace("new", []byte("b"), 0o600, Self()); err != nil {
 		t.Fatal(err)
 	}
-	e, err := b.Lstat(base, "new")
-	data, _ := b.ReadFile(base, "new")
+	data, e, err := f.ReadFile("new")
 	if err != nil || e.Mode.Perm() != 0o400 || e.Owner != Self() || string(data) != "b" {
-		t.Fatalf("Lstat = %+v, %v, data %q; want b at 0400, %+v's", e, err, data, Self())
+		t.Fatalf("ReadFile = %q, %+v, %v; want b at 0400, %+v's", data, e, err, Self())
 	}
 	if left, _ := os.ReadDir(base); len(left) != 1 {
 		t.Fatalf("the folder holds %d entries; want the file alone", len(left))
 	}
 }
 
-// invariant: a folder is removed only while it is empty; a file is.
+// invariant: a file is removed; a folder removes itself only while it is
+// empty.
 func TestRemoveTakesAFileAndOnlyAnEmptyFolder(t *testing.T) {
 	base := t.TempDir()
-	if err := os.MkdirAll(filepath.Join(base, "d", "e"), 0o700); err != nil {
+	if err := os.MkdirAll(filepath.Join(base, "d"), 0o700); err != nil {
 		t.Fatal(err)
 	}
 	if err := os.WriteFile(filepath.Join(base, "d", "f"), []byte("x"), 0o600); err != nil {
 		t.Fatal(err)
 	}
-	b := Beneath{}
-	if err := b.Remove(base, "d"); err == nil {
-		t.Fatal("a folder that holds files was removed")
+	f := opened(t, base, "d")
+	if err := f.RemoveSelf(); !errors.Is(err, ErrNotEmpty) {
+		t.Fatalf("a folder that holds a file removed itself: %v", err)
 	}
-	for _, rel := range []string{"d/f", "d/e", "d"} {
-		if err := b.Remove(base, rel); err != nil {
-			t.Fatalf("Remove(%s) = %v", rel, err)
-		}
+	if err := f.Remove("f"); err != nil {
+		t.Fatal(err)
+	}
+	if err := f.RemoveSelf(); err != nil {
+		t.Fatal(err)
 	}
 	if _, err := os.Lstat(filepath.Join(base, "d")); !errors.Is(err, fs.ErrNotExist) {
 		t.Fatalf("d is still there: %v", err)
+	}
+}
+
+// invariant: a held folder keeps every other holder out, even once it is
+// renamed, and its writes land in the folder that was held.
+func TestAHeldFolderKeepsAnotherHolderOutAcrossARename(t *testing.T) {
+	base := t.TempDir()
+	if err := os.MkdirAll(filepath.Join(base, "d"), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	f, held, err := Beneath{}.Hold(context.Background(), base, "d", time.Second)
+	if err != nil || held {
+		t.Fatalf("Hold = %v, %v; want it taken", held, err)
+	}
+	defer f.Close()
+	if err := os.Rename(filepath.Join(base, "d"), filepath.Join(base, "moved")); err != nil {
+		t.Fatal(err)
+	}
+	if _, held, err := (Beneath{}).Hold(context.Background(), base, "moved", 200*time.Millisecond); err != nil || !held {
+		t.Fatalf("a second Hold = %v, %v; want it held", held, err)
+	}
+	if err := os.MkdirAll(filepath.Join(base, "d"), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	if err := f.Replace("f", []byte("x"), 0o600, Self()); err != nil {
+		t.Fatal(err)
+	}
+	if data, err := os.ReadFile(filepath.Join(base, "moved", "f")); err != nil || string(data) != "x" {
+		t.Fatalf("the write = %q, %v; want it in the held folder", data, err)
 	}
 }

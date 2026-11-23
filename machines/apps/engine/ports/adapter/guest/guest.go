@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"io/fs"
 	"path"
 	"sort"
 	"strconv"
@@ -25,6 +26,7 @@ const (
 	snapshotEach   = 60
 	containersEach = 5
 	relayBudget    = 30 * time.Second
+	keysWait       = 10 * time.Second
 )
 
 type Options struct {
@@ -152,7 +154,7 @@ func (g *session) handle(ctx context.Context, m message) {
 		g.mu.Lock()
 		g.hello = m.Hello
 		g.mu.Unlock()
-		_ = g.s.writeFiles(m.Hello)
+		_ = g.s.writeFiles(ctx, m.Hello)
 		if !g.ready {
 			g.ready = true
 			g.from, g.to = g.s.ephemeral(ctx)
@@ -219,13 +221,31 @@ func (s *Agent) scan(ctx context.Context, h Hello, held *[]ports.Announced, refr
 	return ports.MarkQuiet(ports.FilterAnnounced(found, h.MinPort, h.Ignored), from, to)
 }
 
-func (s *Agent) writeFiles(h Hello) error {
-	home := s.h.Env.Home()
-	return errors.Join(s.writeKeys(path.Join(home, ".ssh", "authorized_keys"), h.Keys), s.writeEnv(h.Env), s.writeMac(h))
+func (s *Agent) writeFiles(ctx context.Context, h Hello) error {
+	return errors.Join(s.writeKeys(ctx, s.h.Env.Home(), h.Keys), s.writeEnv(h.Env), s.writeMac(h))
 }
 
-func (s *Agent) writeKeys(file string, keys []string) error {
-	current, _ := s.h.FS.ReadFile(file)
+// invariant: the guest's block goes in ~/.ssh/authorized_keys while the
+// guest holds ~/.ssh itself, the lock the authorized-key setting takes too,
+// from its read to its write; one another run holds for 10 seconds leaves
+// the file as it is until the next hello.
+func (s *Agent) writeKeys(ctx context.Context, home string, keys []string) error {
+	ssh := path.Join(path.Base(home), ".ssh")
+	if err := s.h.FS.MkdirAll(path.Join(home, ".ssh"), 0o700); err != nil {
+		return err
+	}
+	f, held, err := local.Beneath{}.Hold(ctx, path.Dir(home), ssh, keysWait)
+	switch {
+	case err != nil:
+		return err
+	case held:
+		return errors.New(path.Join(home, ".ssh") + " is held by another run writing its keys, not written")
+	}
+	defer f.Close()
+	current, _, err := f.ReadFile("authorized_keys")
+	if err != nil && !errors.Is(err, fs.ErrNotExist) {
+		return err
+	}
 	var kept []string
 	inside := false
 	for _, line := range strings.Split(strings.TrimRight(string(current), "\n"), "\n") {
@@ -239,13 +259,10 @@ func (s *Agent) writeKeys(file string, keys []string) error {
 		}
 	}
 	lines := append(append(append(kept, KeysBegin), keys...), KeysEnd)
-	if err := s.h.FS.MkdirAll(path.Dir(file), 0o700); err != nil {
+	if err := f.Replace("authorized_keys", []byte(strings.Join(lines, "\n")+"\n"), 0o600, local.Self()); err != nil {
 		return err
 	}
-	if err := s.h.FS.WriteFile(file, []byte(strings.Join(lines, "\n")+"\n"), 0o600); err != nil {
-		return err
-	}
-	return s.h.FS.Chmod(file, 0o600)
+	return f.ChmodFile("authorized_keys", 0o600)
 }
 
 func Quote(v string) string { return "'" + strings.ReplaceAll(v, "'", `'\''`) + "'" }

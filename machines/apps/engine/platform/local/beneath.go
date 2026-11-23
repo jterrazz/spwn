@@ -1,6 +1,7 @@
 package local
 
 import (
+	"context"
 	"crypto/rand"
 	"errors"
 	"io"
@@ -8,6 +9,7 @@ import (
 	"os"
 	"path"
 	"strings"
+	"time"
 
 	"golang.org/x/sys/unix"
 )
@@ -78,43 +80,141 @@ func (Beneath) Mkdir(base, rel string, perm fs.FileMode, o Owner) error {
 	return nil
 }
 
-func (Beneath) ReadFile(base, rel string) ([]byte, error) {
-	dir, name, at, err := parent(base, rel)
+type Folder struct {
+	// value: a folder opened once, from base one name at a time with
+	// O_NOFOLLOW, and the folder that holds it: every name in it is then
+	// reached through its descriptor, never through a path, so a rename of the
+	// folder or of a folder above it after the open moves nothing it reads or
+	// writes.
+	fd, up   int
+	name, at string
+}
+
+func (Beneath) Open(base, rel string) (*Folder, error) {
+	up, name, at, err := parent(base, rel)
 	if err != nil {
 		return nil, err
 	}
-	defer closeFD(dir)
-	fd, err := openat(dir, name, unix.O_RDONLY, at)
+	fd, err := openat(up, name, unix.O_RDONLY|unix.O_DIRECTORY, at)
 	if err != nil {
+		closeFD(up)
 		return nil, err
 	}
-	f := os.NewFile(uintptr(fd), at)
-	defer func() { _ = f.Close() }()
-	info, err := f.Stat()
+	return &Folder{fd: fd, up: up, name: name, at: at}, nil
+}
+
+func (b Beneath) Hold(ctx context.Context, base, rel string, within time.Duration) (folder *Folder, held bool, err error) {
+	// invariant: the lock is flock(2)'s on the folder itself, exclusive and
+	// advisory, held until Close: root and the folder's owner both take it,
+	// a rename in the folder leaves the folder standing, and a process that
+	// dies lets go of it. It is tried every tenth of a second; one another
+	// holder keeps past within is answered held, and a wait ctx ends first
+	// answers ctx's error.
+	held, err = tried(ctx, within, func() (bool, error) {
+		f, opened := b.Open(base, rel)
+		if opened != nil {
+			return false, opened
+		}
+		locked := unix.Flock(f.fd, unix.LOCK_EX|unix.LOCK_NB)
+		switch {
+		case errors.Is(locked, unix.EWOULDBLOCK):
+			f.Close()
+			return true, nil
+		case locked != nil:
+			f.Close()
+			return false, &fs.PathError{Op: "lock", Path: f.at, Err: locked}
+		}
+		folder = f
+		return false, nil
+	})
+	return folder, held, err
+}
+
+func (f *Folder) Close() {
+	closeFD(f.fd)
+	closeFD(f.up)
+}
+
+func (f *Folder) Path() string { return f.at }
+
+func (f *Folder) Stat() (Entry, error) {
+	var st unix.Stat_t
+	if err := unix.Fstat(f.fd, &st); err != nil {
+		return Entry{}, &fs.PathError{Op: "stat", Path: f.at, Err: err}
+	}
+	return entryOf(&st), nil
+}
+
+func (f *Folder) Chmod(perm fs.FileMode) error {
+	if err := unix.Fchmod(f.fd, uint32(perm.Perm())); err != nil {
+		return &fs.PathError{Op: "chmod", Path: f.at, Err: err}
+	}
+	return nil
+}
+
+func (f *Folder) Lstat(name string) (Entry, error) {
+	var st unix.Stat_t
+	if err := unix.Fstatat(f.fd, name, &st, unix.AT_SYMLINK_NOFOLLOW); err != nil {
+		return Entry{}, &fs.PathError{Op: "lstat", Path: path.Join(f.at, name), Err: err}
+	}
+	return entryOf(&st), nil
+}
+
+func (f *Folder) ReadFile(name string) ([]byte, Entry, error) {
+	// value: the file name holds, opened with O_NOFOLLOW, and what the same
+	// descriptor is: anything but a file is refused.
+	at := path.Join(f.at, name)
+	fd, err := openat(f.fd, name, unix.O_RDONLY, at)
 	if err != nil {
-		return nil, err
+		return nil, Entry{}, err
 	}
-	if !info.Mode().IsRegular() {
-		return nil, &fs.PathError{Op: "read", Path: at, Err: errNotFile}
+	file := os.NewFile(uintptr(fd), at)
+	defer func() { _ = file.Close() }()
+	var st unix.Stat_t
+	if err = unix.Fstat(fd, &st); err != nil {
+		return nil, Entry{}, &fs.PathError{Op: "read", Path: at, Err: err}
 	}
-	return io.ReadAll(f)
+	e := entryOf(&st)
+	if !e.Mode.IsRegular() {
+		return nil, Entry{}, &fs.PathError{Op: "read", Path: at, Err: errNotFile}
+	}
+	data, err := io.ReadAll(file)
+	return data, e, err
 }
 
 var errNotFile = errors.New("is not a file")
 
-func (Beneath) Replace(base, rel string, data []byte, perm fs.FileMode, o Owner) error {
-	// invariant: rel is replaced whole, at once and durably: data goes to a
+func (f *Folder) ChmodFile(name string, perm fs.FileMode) error {
+	// value: the mode of the file name holds set to perm through the
+	// descriptor of what was opened.
+	at := path.Join(f.at, name)
+	fd, err := openat(f.fd, name, unix.O_RDONLY, at)
+	if err != nil {
+		return err
+	}
+	defer closeFD(fd)
+	var st unix.Stat_t
+	if err := unix.Fstat(fd, &st); err != nil {
+		return &fs.PathError{Op: "chmod", Path: at, Err: err}
+	}
+	if !entryOf(&st).Mode.IsRegular() {
+		return &fs.PathError{Op: "chmod", Path: at, Err: errNotFile}
+	}
+	if err := unix.Fchmod(fd, uint32(perm.Perm())); err != nil {
+		return &fs.PathError{Op: "chmod", Path: at, Err: err}
+	}
+	return nil
+}
+
+func (f *Folder) Replace(name string, data []byte, perm fs.FileMode, o Owner) error {
+	// invariant: name is replaced whole, at once and durably: data goes to a
 	// file of its own made beside it, synced, then renamed over it, and the
 	// folder synced. A file there keeps its mode and owner; one not there
 	// yet is made with perm and given o; a link or anything but a file
 	// there is refused.
-	dir, name, at, err := parent(base, rel)
-	if err != nil {
-		return err
-	}
-	defer closeFD(dir)
+	at := path.Join(f.at, name)
 	var st unix.Stat_t
-	err = unix.Fstatat(dir, name, &st, unix.AT_SYMLINK_NOFOLLOW)
+	err := unix.Fstatat(f.fd, name, &st, unix.AT_SYMLINK_NOFOLLOW)
 	switch e := entryOf(&st); {
 	case err == nil && e.Mode&fs.ModeSymlink != 0:
 		return &fs.PathError{Op: "replace", Path: at, Err: ErrLink}
@@ -126,96 +226,78 @@ func (Beneath) Replace(base, rel string, data []byte, perm fs.FileMode, o Owner)
 		return &fs.PathError{Op: "replace", Path: at, Err: err}
 	}
 	tmp := "." + name + "." + rand.Text() + ".station"
-	fd, err := unix.Openat(dir, tmp, unix.O_WRONLY|unix.O_CREAT|unix.O_EXCL|unix.O_NOFOLLOW|unix.O_CLOEXEC, 0o600)
+	fd, err := unix.Openat(f.fd, tmp, unix.O_WRONLY|unix.O_CREAT|unix.O_EXCL|unix.O_NOFOLLOW|unix.O_CLOEXEC, 0o600)
 	if err != nil {
 		return &fs.PathError{Op: "replace", Path: at, Err: err}
 	}
-	err = fill(os.NewFile(uintptr(fd), path.Join(path.Dir(at), tmp)), data, perm, o)
+	err = fill(os.NewFile(uintptr(fd), path.Join(f.at, tmp)), data, perm, o)
 	if err == nil {
-		err = unix.Renameat(dir, tmp, dir, name)
+		err = unix.Renameat(f.fd, tmp, f.fd, name)
 	}
 	if err != nil {
-		_ = unix.Unlinkat(dir, tmp, 0)
+		_ = unix.Unlinkat(f.fd, tmp, 0)
 		return &fs.PathError{Op: "replace", Path: at, Err: err}
 	}
-	return unix.Fsync(dir)
+	return unix.Fsync(f.fd)
 }
 
-func fill(f *os.File, data []byte, perm fs.FileMode, o Owner) error {
-	_, err := f.Write(data)
+func fill(file *os.File, data []byte, perm fs.FileMode, o Owner) error {
+	_, err := file.Write(data)
 	if err == nil {
-		err = f.Chmod(perm.Perm())
+		err = file.Chmod(perm.Perm())
 	}
 	if err == nil {
-		err = f.Chown(o.UID, o.GID)
+		err = file.Chown(o.UID, o.GID)
 	}
 	if err == nil {
-		err = f.Sync()
+		err = file.Sync()
 	}
-	return errors.Join(err, f.Close())
+	return errors.Join(err, file.Close())
 }
 
-func (Beneath) Remove(base, rel string) error {
-	// value: rel taken away: a file, or a folder only while it is empty
-	// (ErrNotEmpty otherwise); a link there is refused, never removed.
-	dir, name, at, err := parent(base, rel)
-	if err != nil {
+func (f *Folder) Remove(name string) error {
+	// value: the file name holds taken away; a link or anything but a file
+	// there is refused, never removed.
+	at := path.Join(f.at, name)
+	e, err := f.Lstat(name)
+	switch {
+	case err != nil:
 		return err
-	}
-	defer closeFD(dir)
-	var st unix.Stat_t
-	err = unix.Fstatat(dir, name, &st, unix.AT_SYMLINK_NOFOLLOW)
-	if err != nil {
-		return &fs.PathError{Op: "remove", Path: at, Err: err}
-	}
-	flags := 0
-	switch m := entryOf(&st).Mode; {
-	case m&fs.ModeSymlink != 0:
+	case e.Mode&fs.ModeSymlink != 0:
 		return &fs.PathError{Op: "remove", Path: at, Err: ErrLink}
-	case m.IsDir():
-		flags = unix.AT_REMOVEDIR
-	case !m.IsRegular():
+	case !e.Mode.IsRegular():
 		return &fs.PathError{Op: "remove", Path: at, Err: errNotFile}
 	}
-	err = unix.Unlinkat(dir, name, flags)
+	if err := unix.Unlinkat(f.fd, name, 0); err != nil {
+		return &fs.PathError{Op: "remove", Path: at, Err: err}
+	}
+	return nil
+}
+
+func (f *Folder) RemoveSelf() error {
+	// value: the folder itself taken away while it is empty (ErrNotEmpty
+	// otherwise), only while its name still holds the folder that was opened.
+	var held, there unix.Stat_t
+	if err := unix.Fstat(f.fd, &held); err != nil {
+		return &fs.PathError{Op: "remove", Path: f.at, Err: err}
+	}
+	if err := unix.Fstatat(f.up, f.name, &there, unix.AT_SYMLINK_NOFOLLOW); err != nil {
+		return &fs.PathError{Op: "remove", Path: f.at, Err: err}
+	}
+	if held.Dev != there.Dev || held.Ino != there.Ino {
+		return &fs.PathError{Op: "remove", Path: f.at, Err: errMoved}
+	}
+	err := unix.Unlinkat(f.up, f.name, unix.AT_REMOVEDIR)
 	if errors.Is(err, unix.ENOTEMPTY) || errors.Is(err, unix.EEXIST) {
 		err = ErrNotEmpty
 	}
 	if err != nil {
-		return &fs.PathError{Op: "remove", Path: at, Err: err}
+		return &fs.PathError{Op: "remove", Path: f.at, Err: err}
 	}
 	return nil
 }
 
-func (Beneath) Chmod(base, rel string, perm fs.FileMode) error {
-	return opened(base, rel, "chmod", func(fd int) error { return unix.Fchmod(fd, uint32(perm.Perm())) })
-}
-
-// value: do run on the descriptor of rel, a file or a folder, opened with
-// O_NOFOLLOW.
-func opened(base, rel, op string, do func(fd int) error) error {
-	dir, name, at, err := parent(base, rel)
-	if err != nil {
-		return err
-	}
-	defer closeFD(dir)
-	fd, err := openat(dir, name, unix.O_RDONLY, at)
-	if err != nil {
-		return err
-	}
-	defer closeFD(fd)
-	var st unix.Stat_t
-	if err := unix.Fstat(fd, &st); err != nil {
-		return &fs.PathError{Op: op, Path: at, Err: err}
-	}
-	if m := entryOf(&st).Mode; !m.IsDir() && !m.IsRegular() {
-		return &fs.PathError{Op: op, Path: at, Err: errors.New("is not a file or a folder")}
-	}
-	if err := do(fd); err != nil {
-		return &fs.PathError{Op: op, Path: at, Err: err}
-	}
-	return nil
-}
+var errMoved = errors.New("is no longer the folder that was opened")
 
 // value: the folder that holds rel's last name, opened from base through
 // every name before it, and that last name.

@@ -88,25 +88,37 @@ func (d disk) Lock(path string) (unlock func(), err error) {
 }
 
 func (s System) ExclusiveWithin(ctx context.Context, path string, within time.Duration) (release func(), held bool, err error) {
-	// invariant: Exclusive's lock, its folder made when missing, tried every
-	// tenth of a second until it is free; one another holder keeps past
-	// within is answered held, never waited for longer, and a wait ctx
-	// ends first answers ctx's error: the run was interrupted, not refused.
+	// invariant: Exclusive's lock, its folder made when missing, tried until
+	// it is free or within passes (tried).
+	held, err = tried(ctx, within, func() (bool, error) {
+		var busy bool
+		var failed error
+		release, busy, failed = tryExclusive(path, s.owner)
+		return busy, failed
+	})
+	return release, held, err
+}
+
+// invariant: try is called every tenth of a second while it answers held;
+// one held past within is answered held, never waited for longer, and a
+// wait ctx ends first answers ctx's error: the run was interrupted, not
+// refused.
+func tried(ctx context.Context, within time.Duration, try func() (held bool, err error)) (bool, error) {
 	deadline, cancel := context.WithTimeout(ctx, within)
 	defer cancel()
 	tick := time.NewTicker(100 * time.Millisecond)
 	defer tick.Stop()
 	for {
-		release, held, err := tryExclusive(path, s.owner)
+		held, err := try()
 		if err != nil || !held {
-			return release, false, err
+			return false, err
 		}
 		select {
 		case <-deadline.Done():
 			if err := ctx.Err(); err != nil {
-				return nil, false, err
+				return false, err
 			}
-			return nil, true, nil
+			return true, nil
 		case <-tick.C:
 		}
 	}

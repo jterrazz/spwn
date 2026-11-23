@@ -14,6 +14,8 @@ import (
 	"testing"
 	"time"
 
+	"golang.org/x/sys/unix"
+
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/platform/local"
 	"github.com/jterrazz/studio-station/apps/engine/settings"
@@ -114,12 +116,19 @@ func (m *machine) content(rel string) string {
 func (m *machine) open() *authorizedkeys.Applier { return m.openWith(m.disk) }
 
 func (m *machine) openWith(files authorizedkeys.Files) *authorizedkeys.Applier {
-	return authorizedkeys.New(files, local.Beneath{}, authorizedkeys.Options{
+	return authorizedkeys.New(files, brief{}, authorizedkeys.Options{
 		Root: m.root, Record: m.at(authorizedkeys.Record), Run: m.run,
 		Lock: m.at(authorizedkeys.Lock), Take: func(ctx context.Context, at string, _ time.Duration) (func(), bool, error) {
 			return m.sys.ExclusiveWithin(ctx, at, 200*time.Millisecond)
 		},
 	})
+}
+
+// value: the system's folders, a held ~/.ssh waited for 200 ms.
+type brief struct{ local.Beneath }
+
+func (b brief) Hold(ctx context.Context, base, rel string, _ time.Duration) (*local.Folder, bool, error) {
+	return b.Beneath.Hold(ctx, base, rel, 200*time.Millisecond)
 }
 
 // value: the disk, but a replace of the file at refused as a full disk.
@@ -598,14 +607,14 @@ func TestAFolderOrFileTheSignInServerIgnoresIsDrift(t *testing.T) {
 	}
 	loosen := func(t *testing.T, rel string, mode, strict fs.FileMode, want string) {
 		t.Helper()
-		if err := (local.Beneath{}).Chmod(m.root, rel, mode); err != nil {
+		if err := m.disk.Chmod(m.at(rel), mode); err != nil {
 			t.Fatal(err)
 		}
 		o := seen(t)
 		if o.State != catalog.StateDegraded || o.Detail != want || !o.Loose {
 			t.Fatalf("Observe with %s at %04o = %s %q, loose %v; want degraded %q, loose", rel, mode, o.State, o.Detail, o.Loose, want)
 		}
-		if err := (local.Beneath{}).Chmod(m.root, rel, strict); err != nil {
+		if err := m.disk.Chmod(m.at(rel), strict); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -758,5 +767,38 @@ func TestAnExistingOwnerIsNeverChanged(t *testing.T) {
 	want := "/home/ci/.ssh/authorized_keys is uid 1500's, not the home's (uid " + strconv.Itoa(m.ci.UID) + "), so its keys are ignored: Machines never takes a file from its owner, give it back with sudo chown " + strconv.Itoa(m.ci.UID) + " /home/ci/.ssh/authorized_keys"
 	if err != nil || o.State != catalog.StateDegraded || o.Detail != want {
 		t.Fatalf("Observe = %s %q, %v; want degraded %q", o.State, o.Detail, err, want)
+	}
+}
+
+func (m *machine) hold(rel string) func() {
+	m.t.Helper()
+	fd, err := unix.Open(m.at(rel), unix.O_RDONLY|unix.O_DIRECTORY|unix.O_NOFOLLOW|unix.O_CLOEXEC, 0)
+	if err != nil {
+		m.t.Fatal(err)
+	}
+	if err := unix.Flock(fd, unix.LOCK_EX|unix.LOCK_NB); err != nil {
+		m.t.Fatal(err)
+	}
+	return func() { _ = unix.Close(fd) }
+}
+
+func TestAHolderOfTheSSHFolderKeepsApplyAndOffOutOfTheFile(t *testing.T) {
+	m := newMachine(t)
+	m.mkdir("root/.ssh", 0o700)
+	own := key(t, 9, "laptop") + "\n"
+	m.write(rootAK, own, 0o600)
+	release := m.hold("root/.ssh")
+	why := refused(t, m.open(), "root", key(t, 1, "ci")).Error()
+	if !strings.Contains(why, "/root/.ssh is held by another run") || m.content(rootAK) != own {
+		t.Fatalf("Apply with ~/.ssh held = %q; file %q; want it refused and the file as it was", why, m.content(rootAK))
+	}
+	release()
+	apply(t, m.open(), "root", key(t, 1, "ci"))
+	release = m.hold("root/.ssh")
+	defer release()
+	written := m.content(rootAK)
+	_, err := m.open().Undo(context.Background(), setting())
+	if err == nil || !strings.Contains(err.Error(), "/root/.ssh is held by another run") || m.content(rootAK) != written {
+		t.Fatalf("Undo with ~/.ssh held = %v; file %q; want it refused and the block kept", err, m.content(rootAK))
 	}
 }

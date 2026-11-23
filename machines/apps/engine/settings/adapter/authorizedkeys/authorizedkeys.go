@@ -30,14 +30,14 @@ type Files interface {
 }
 
 type Home interface {
-	// value: the files under a folder the system owns, a user's home among
-	// them, each reached without following a link (local.Beneath).
+	// value: the folders under a folder the system owns, a user's home
+	// among them, each reached without following a link (local.Beneath):
+	// a ~/.ssh opened, or held, once, and every name in it reached through
+	// its descriptor.
 	Lstat(base, rel string) (local.Entry, error)
-	ReadFile(base, rel string) ([]byte, error)
-	Replace(base, rel string, data []byte, perm fs.FileMode, o local.Owner) error
 	Mkdir(base, rel string, perm fs.FileMode, o local.Owner) error
-	Chmod(base, rel string, perm fs.FileMode) error
-	Remove(base, rel string) error
+	Open(base, rel string) (*local.Folder, error)
+	Hold(ctx context.Context, base, rel string, within time.Duration) (*local.Folder, bool, error)
 }
 
 type Options struct {
@@ -47,9 +47,9 @@ type Options struct {
 	// value: in a world, the owner every account's files carry, the run's
 	// own, so a world gives no file away; nil on a machine.
 	Run *local.Owner
-	// value: the lock every writer of a block takes from its read to its
-	// rename (Lock, beside Record), and how it is taken (the system's
-	// ExclusiveWithin).
+	// value: the lock every run of the setting takes around its read and
+	// its write of Record, beside it, and how it is taken (the system's
+	// ExclusiveWithin); each ~/.ssh it writes in is held inside it.
 	Lock string
 	Take Exclusive
 }
@@ -147,13 +147,14 @@ func (a *Applier) save(r record) error {
 	return a.files.Replace(a.o.Record, data, 0o600)
 }
 
-// value: what taking station's block out of w's file did, whether the
-// record keeps w, and why a block of station's stays there: a block gone
-// already, or taken out, is no longer station's to hold; one the owner
-// changed is kept as it is and stays recorded, and so does one in a file
-// station cannot read or write, with that error.
-func (a *Applier) takeOut(w written, id string) ([]settings.ChangeStep, bool, error) {
-	text, _, err := a.text(w.File)
+func (a *Applier) takeOut(w written, h holding, id string) ([]settings.ChangeStep, bool, error) {
+	switch {
+	case errors.Is(h.err, fs.ErrNotExist):
+		return []settings.ChangeStep{{Label: w.File, State: catalog.StateOK, Detail: "already gone"}}, false, nil
+	case h.err != nil:
+		return []settings.ChangeStep{{Label: w.File, State: catalog.StateBroken, Detail: "not touched"}}, true, h.err
+	}
+	text, _, err := a.textIn(h.folder)
 	if err != nil {
 		return []settings.ChangeStep{{Label: w.File, State: catalog.StateBroken, Detail: "not touched"}}, true, err
 	}
@@ -165,11 +166,10 @@ func (a *Applier) takeOut(w written, id string) ([]settings.ChangeStep, bool, er
 		return []settings.ChangeStep{{Label: w.File, State: catalog.StateOK, Detail: "yours, kept"}}, true, nil
 	}
 	updated, _ := settings.RemovePackageBlock(text, id)
-	base, rel := a.beneath(w.File)
 	if updated == "" && w.MadeFile {
-		return a.unmade(w, base, rel)
+		return a.unmade(w, h.folder)
 	}
-	err = a.home.Replace(base, rel, []byte(updated), 0o600, local.Owner{})
+	err = h.folder.Replace(keysFile, []byte(updated), 0o600, local.Owner{})
 	if err != nil {
 		return []settings.ChangeStep{{Label: w.File, State: catalog.StateBroken, Detail: "not touched"}}, true, a.linked(err)
 	}
@@ -180,8 +180,8 @@ func (a *Applier) takeOut(w written, id string) ([]settings.ChangeStep, bool, er
 // is taken away, and so is the ~/.ssh station made once it is empty: off
 // leaves a home as station found it. A folder that holds anything else
 // stays.
-func (a *Applier) unmade(w written, base, rel string) ([]settings.ChangeStep, bool, error) {
-	err := a.home.Remove(base, rel)
+func (a *Applier) unmade(w written, f *local.Folder) ([]settings.ChangeStep, bool, error) {
+	err := f.Remove(keysFile)
 	if err != nil {
 		return []settings.ChangeStep{{Label: w.File, State: catalog.StateBroken, Detail: "not touched"}}, true, a.linked(err)
 	}
@@ -189,7 +189,7 @@ func (a *Applier) unmade(w written, base, rel string) ([]settings.ChangeStep, bo
 	if !w.MadeFolder {
 		return []settings.ChangeStep{file}, false, nil
 	}
-	err = a.home.Remove(base, path.Dir(rel))
+	err = f.RemoveSelf()
 	switch {
 	case errors.Is(err, local.ErrNotEmpty):
 		return []settings.ChangeStep{file}, false, nil
@@ -200,14 +200,63 @@ func (a *Applier) unmade(w written, base, rel string) ([]settings.ChangeStep, bo
 }
 
 // value: the folder of the system that holds the home of the
-// authorized_keys the system names file, and the file's path under it.
-func (a *Applier) beneath(file string) (base, rel string) {
+// authorized_keys the system names file, and the ~/.ssh under it.
+func (a *Applier) beneath(file string) (base, ssh string) {
 	home := path.Dir(path.Dir(file))
-	return a.at(path.Dir(home)), path.Join(path.Base(home), ".ssh", "authorized_keys")
+	return a.at(path.Dir(home)), path.Join(path.Base(home), ".ssh")
 }
 
-func (a *Applier) text(file string) (text string, there bool, err error) {
-	data, err := a.home.ReadFile(a.beneath(file))
+const keysFile = "authorized_keys"
+
+// value: the ~/.ssh of each authorized_keys the system names, held, or
+// why it is not: a folder not there answers fs.ErrNotExist.
+type holding struct {
+	folder *local.Folder
+	err    error
+}
+
+// invariant: every ~/.ssh a run writes in is held from its read to its
+// write, the lock the VM's guest takes too, each taken in the order of its
+// home owner's uid; one another run holds for 10 seconds refuses the run
+// with nothing touched.
+func (a *Applier) holdAll(ctx context.Context, files []string) (held map[string]holding, release func(), err error) {
+	uid := map[string]int{}
+	for _, file := range files {
+		base, ssh := a.beneath(file)
+		e, missing := a.home.Lstat(base, path.Dir(ssh))
+		uid[file] = e.UID
+		if missing != nil {
+			uid[file] = -1
+		}
+	}
+	order := slices.Clone(files)
+	slices.SortStableFunc(order, func(x, y string) int { return uid[x] - uid[y] })
+	held = map[string]holding{}
+	release = func() {
+		for _, h := range held {
+			if h.folder != nil {
+				h.folder.Close()
+			}
+		}
+	}
+	for _, file := range order {
+		base, ssh := a.beneath(file)
+		f, busy, why := a.home.Hold(ctx, base, ssh, wait)
+		switch {
+		case busy:
+			release()
+			return nil, nil, fmt.Errorf("%s is held by another run writing its keys, nothing touched: apply again once it ends", path.Dir(file))
+		case errors.Is(why, context.Canceled), errors.Is(why, context.DeadlineExceeded):
+			release()
+			return nil, nil, why
+		}
+		held[file] = holding{folder: f, err: a.linked(why)}
+	}
+	return held, release, nil
+}
+
+func (a *Applier) textIn(f *local.Folder) (text string, there bool, err error) {
+	data, _, err := f.ReadFile(keysFile)
 	switch {
 	case errors.Is(err, fs.ErrNotExist):
 		return "", false, nil
@@ -215,6 +264,20 @@ func (a *Applier) text(file string) (text string, there bool, err error) {
 		return "", false, a.linked(err)
 	}
 	return string(data), true, nil
+}
+
+// value: the authorized_keys the system names file, read through its
+// ~/.ssh opened once, with no lock: a read never waits on a writer.
+func (a *Applier) text(file string) (text string, there bool, err error) {
+	f, err := a.home.Open(a.beneath(file))
+	switch {
+	case errors.Is(err, fs.ErrNotExist):
+		return "", false, nil
+	case err != nil:
+		return "", false, a.linked(err)
+	}
+	defer f.Close()
+	return a.textIn(f)
 }
 
 func (a *Applier) Observe(_ context.Context, it catalog.Setting) (settings.Observation, error) {
@@ -294,15 +357,39 @@ func (a *Applier) Apply(ctx context.Context, it catalog.Setting, values map[stri
 	if err != nil {
 		return settings.Change{}, err
 	}
-	dir := path.Join(who.home, ".ssh")
-	file := path.Join(dir, "authorized_keys")
+	file := path.Join(who.home, ".ssh", keysFile)
 	ssh := path.Join(path.Base(who.home), ".ssh")
 	release, err := a.turn(ctx)
 	if err != nil {
 		return settings.Change{}, err
 	}
 	defer release()
-	text, there, err := a.text(file)
+	rec, err := a.read()
+	if err != nil {
+		return settings.Change{}, err
+	}
+	_, err = a.home.Lstat(base, ssh)
+	madeFolder := errors.Is(err, fs.ErrNotExist)
+	err = a.folder(base, ssh, who)
+	if err != nil {
+		return settings.Change{}, err
+	}
+	files := []string{file}
+	for _, w := range rec.Files {
+		if w.File != file {
+			files = append(files, w.File)
+		}
+	}
+	held, letGo, err := a.holdAll(ctx, files)
+	if err != nil {
+		return settings.Change{}, err
+	}
+	defer letGo()
+	if held[file].err != nil {
+		return settings.Change{}, held[file].err
+	}
+	f := held[file].folder
+	text, there, err := a.textIn(f)
 	if err != nil {
 		return settings.Change{}, err
 	}
@@ -311,17 +398,11 @@ func (a *Applier) Apply(ctx context.Context, it catalog.Setting, values map[stri
 		return settings.Change{}, fmt.Errorf("%s holds a damaged %s block, a start with no end or two blocks, not touched: leave one `%s` line and one `%s` line around Machines' keys, then apply again", file, k.Block, start, end)
 	}
 	updated, changed := settings.UpsertPackageBlock(text, k.Block, body)
-	rec, err := a.read()
-	if err != nil {
-		return settings.Change{}, err
-	}
 	// invariant: the record names the file before its block is written, so
 	// a run cut between the two leaves off a block it knows, never one it
 	// does not: a recorded block that never landed reads gone. What station
 	// made, the file or its folder, stays recorded as made across applies.
-	now := written{File: file, Body: body, MadeFile: !there}
-	_, err = a.home.Lstat(base, ssh)
-	now.MadeFolder = errors.Is(err, fs.ErrNotExist)
+	now := written{File: file, Body: body, MadeFile: !there, MadeFolder: madeFolder}
 	var olds []written
 	for _, w := range rec.Files {
 		if w.File != file {
@@ -335,25 +416,15 @@ func (a *Applier) Apply(ctx context.Context, it catalog.Setting, values map[stri
 	if err != nil {
 		return settings.Change{}, err
 	}
-	err = a.folder(base, ssh, who)
-	if err != nil {
-		return settings.Change{}, err
-	}
 	if changed || !there {
-		_, rel := a.beneath(file)
-		err = a.home.Replace(base, rel, []byte(updated), 0o600, who.Owner)
+		err = f.Replace(keysFile, []byte(updated), 0o600, who.Owner)
 		if err != nil {
 			return settings.Change{}, a.linked(err)
 		}
 	}
-	for _, p := range []struct {
-		rel  string
-		mode fs.FileMode
-	}{{ssh, 0o700}, {path.Join(ssh, "authorized_keys"), 0o600}} {
-		err = a.strict(base, p.rel, p.mode)
-		if err != nil {
-			return settings.Change{}, err
-		}
+	err = a.strict(f)
+	if err != nil {
+		return settings.Change{}, err
 	}
 	detail := "written"
 	if !changed && there {
@@ -363,7 +434,7 @@ func (a *Applier) Apply(ctx context.Context, it catalog.Setting, values map[stri
 	var kept []written
 	var stays []error
 	for _, w := range olds {
-		taken, keep, why := a.takeOut(w, k.Block)
+		taken, keep, why := a.takeOut(w, held[w.File], k.Block)
 		steps = append(steps, taken...)
 		if keep {
 			kept = append(kept, w)
@@ -376,7 +447,6 @@ func (a *Applier) Apply(ctx context.Context, it catalog.Setting, values map[stri
 	}
 	return settings.Change{Steps: steps}, errors.Join(stays...)
 }
-
 func (a *Applier) Undo(ctx context.Context, it catalog.Setting) (settings.Change, error) {
 	// invariant: the block leaves every file station wrote it in, each only
 	// while it is still exactly station's, and nothing else of a file moves:
@@ -395,13 +465,22 @@ func (a *Applier) Undo(ctx context.Context, it catalog.Setting) (settings.Change
 		return settings.Change{}, err
 	}
 	if len(rec.Files) == 0 {
-		return a.unrecorded(it, k.Block)
+		return a.unrecorded(ctx, it, k.Block)
 	}
+	files := make([]string, 0, len(rec.Files))
+	for _, w := range rec.Files {
+		files = append(files, w.File)
+	}
+	held, letGo, err := a.holdAll(ctx, files)
+	if err != nil {
+		return settings.Change{}, err
+	}
+	defer letGo()
 	var steps []settings.ChangeStep
 	var kept []written
 	var stays []error
 	for _, w := range rec.Files {
-		taken, keep, why := a.takeOut(w, k.Block)
+		taken, keep, why := a.takeOut(w, held[w.File], k.Block)
 		if taken[0].Detail != "already gone" {
 			steps = append(steps, taken...)
 		}
@@ -432,30 +511,38 @@ func (a *Applier) loose(file, name string) (loosened, error) {
 	// nothing of the folder or the file for group or others, and both the
 	// home owner's or root's; anything else is drift, a loose mode with apply
 	// as its fix, an owner with the owner's own chown.
-	base, rel := a.beneath(file)
-	home := path.Dir(path.Dir(rel))
-	owner, err := a.home.Lstat(base, home)
+	base, ssh := a.beneath(file)
+	owner, err := a.home.Lstat(base, path.Dir(ssh))
+	if err != nil {
+		return loosened{}, a.linked(err)
+	}
+	f, err := a.home.Open(base, ssh)
+	if err != nil {
+		return loosened{}, a.linked(err)
+	}
+	defer f.Close()
+	folder, err := f.Stat()
+	if err != nil {
+		return loosened{}, err
+	}
+	keys, err := f.Lstat(keysFile)
 	if err != nil {
 		return loosened{}, a.linked(err)
 	}
 	for _, p := range []struct {
-		rel  string
+		at   string
+		e    local.Entry
 		mode fs.FileMode
-	}{{path.Dir(rel), 0o700}, {rel, 0o600}} {
-		var e local.Entry
-		e, err = a.home.Lstat(base, p.rel)
-		if err != nil {
-			return loosened{}, a.linked(err)
-		}
-		l := loosened{at: path.Join(path.Dir(path.Dir(file)), strings.TrimPrefix(p.rel, home+"/"))}
+	}{{path.Dir(file), folder, 0o700}, {file, keys, 0o600}} {
+		l := loosened{at: p.at}
 		switch {
-		case e.Mode.Perm()&0o077 != 0:
-			l.want, l.have = octal(p.mode)+"\n", octal(e.Mode.Perm())+"\n"
-			l.why = l.at + " is " + octal(e.Mode.Perm()) + ", open to others, so its keys are ignored: station settings apply " + name + " sets it to " + octal(p.mode)
+		case p.e.Mode.Perm()&0o077 != 0:
+			l.want, l.have = octal(p.mode)+"\n", octal(p.e.Mode.Perm())+"\n"
+			l.why = l.at + " is " + octal(p.e.Mode.Perm()) + ", open to others, so its keys are ignored: station settings apply " + name + " sets it to " + octal(p.mode)
 			return l, nil
-		case e.UID != owner.UID && e.UID != 0:
-			l.want, l.have = fmt.Sprintf("uid %d\n", owner.UID), fmt.Sprintf("uid %d\n", e.UID)
-			l.why = fmt.Sprintf("%s is uid %d's, not the home's (uid %d), so its keys are ignored: Machines never takes a file from its owner, give it back with %s", l.at, e.UID, owner.UID, catalog.AsRoot(fmt.Sprintf("chown %d %s", owner.UID, l.at)))
+		case p.e.UID != owner.UID && p.e.UID != 0:
+			l.want, l.have = fmt.Sprintf("uid %d\n", owner.UID), fmt.Sprintf("uid %d\n", p.e.UID)
+			l.why = fmt.Sprintf("%s is uid %d's, not the home's (uid %d), so its keys are ignored: Machines never takes a file from its owner, give it back with %s", l.at, p.e.UID, owner.UID, catalog.AsRoot(fmt.Sprintf("chown %d %s", owner.UID, l.at)))
 			return l, nil
 		}
 	}
@@ -465,17 +552,26 @@ func (a *Applier) loose(file, name string) (loosened, error) {
 // invariant: a folder or file others can open is set to mode; a strict one
 // keeps its own, and no owner is ever changed: station gives the user only
 // what it makes, and never takes a file from whoever owns it.
-func (a *Applier) strict(base, rel string, mode fs.FileMode) error {
-	e, err := a.home.Lstat(base, rel)
+func (a *Applier) strict(f *local.Folder) error {
+	e, err := f.Stat()
+	if err != nil {
+		return err
+	}
+	if e.Mode.Perm()&0o077 != 0 {
+		err = f.Chmod(0o700)
+		if err != nil {
+			return err
+		}
+	}
+	e, err = f.Lstat(keysFile)
 	if err != nil {
 		return a.linked(err)
 	}
 	if e.Mode.Perm()&0o077 == 0 {
 		return nil
 	}
-	return a.linked(a.home.Chmod(base, rel, mode))
+	return a.linked(f.ChmodFile(keysFile, 0o600))
 }
-
 func octal(m fs.FileMode) string { return "0" + strconv.FormatUint(uint64(m.Perm()), 8) }
 
 func (a *Applier) turn(ctx context.Context) (func(), error) {
@@ -488,7 +584,6 @@ func (a *Applier) turn(ctx context.Context) (func(), error) {
 	}
 	return release, nil
 }
-
 func (a *Applier) fallback(it catalog.Setting) (string, bool) {
 	user := ""
 	for _, in := range it.Inputs {
@@ -506,12 +601,24 @@ func (a *Applier) fallback(it catalog.Setting) (string, bool) {
 	return path.Join(who.home, ".ssh", "authorized_keys"), true
 }
 
-func (a *Applier) unrecorded(it catalog.Setting, id string) (settings.Change, error) {
+func (a *Applier) unrecorded(ctx context.Context, it catalog.Setting, id string) (settings.Change, error) {
 	file, ok := a.fallback(it)
 	if !ok {
 		return settings.Change{}, nil
 	}
-	text, _, err := a.text(file)
+	held, letGo, err := a.holdAll(ctx, []string{file})
+	if err != nil {
+		return settings.Change{}, err
+	}
+	defer letGo()
+	h := held[file]
+	switch {
+	case errors.Is(h.err, fs.ErrNotExist):
+		return settings.Change{}, nil
+	case h.err != nil:
+		return settings.Change{}, h.err
+	}
+	text, _, err := a.textIn(h.folder)
 	if err != nil {
 		return settings.Change{}, err
 	}
@@ -523,8 +630,7 @@ func (a *Applier) unrecorded(it catalog.Setting, id string) (settings.Change, er
 	case settings.BlockHere:
 	}
 	updated, _ := settings.RemovePackageBlock(text, id)
-	base, rel := a.beneath(file)
-	err = a.home.Replace(base, rel, []byte(updated), 0o600, local.Owner{})
+	err = h.folder.Replace(keysFile, []byte(updated), 0o600, local.Owner{})
 	if err != nil {
 		return settings.Change{}, a.linked(err)
 	}
