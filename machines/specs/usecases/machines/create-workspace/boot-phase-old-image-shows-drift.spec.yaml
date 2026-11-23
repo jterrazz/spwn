@@ -28,8 +28,6 @@ runs:
           ●	Running
           ●	Has an address	192.168.64.5
           ●	SSH answers
-          ●	vite	5173	https://macbook-pro.tail1234.ts.net:40003
-          ●	expo	8081	https://macbook-pro.tail1234.ts.net:40000
           ●	Boot phase	studio-linux
           ◐	Drift	from its image	jq is not baked into the image
           ●	web	Created	Ephemeral · 4 CPU · 4 GB · 20 GB

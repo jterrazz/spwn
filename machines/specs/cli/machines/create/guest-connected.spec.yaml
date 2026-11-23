@@ -2,6 +2,7 @@ description: 'create answers once the guest is connected and wrote the VM''s key
 fixture:
     - ../../../__fixtures__/vms/
     - ../../../__fixtures__/engine-vm/
+    - ../../../__fixtures__/dev-servers/
 env: engine
 serve: sshd
 runs:

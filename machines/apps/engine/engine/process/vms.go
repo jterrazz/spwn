@@ -876,19 +876,22 @@ func joinPort(ip string, port int) string {
 }
 
 // invariant: a VM's environment is rendered at each of its runs, from its
-// rights and Serve's state read then, never at an adoption, so it holds for
-// the whole of a run, and a persistent VM picks up the public URLs at its
-// first start after Serve turns on. A port a package sets an env for, inside
-// the rights, is reserved then, before anything listens, so the server
-// started on it reads its URL.
+// rights, the packages its Machinefile installs and Serve's state read
+// then, never at an adoption, so it holds for the whole of a run, and a
+// persistent VM picks up the public URLs at its first start after Serve
+// turns on. A port a package its Machinefile installs sets an env for,
+// inside the rights, is reserved then, before anything listens, so the
+// server started on it reads its URL; a VM that installs no such package
+// reserves none.
 func (d *Engine) renderEnv(ctx context.Context, v *vmState) {
 	r := d.loadRights(ctx, v.name)
+	installs := d.installsOf(ctx, v.name)
 	p := d.policy()
 	d.mu.Lock()
 	e := d.exposureLocked()
 	env := map[string]string{}
 	for _, h := range d.o.Ports {
-		if len(h.Env) == 0 || !r.Allows(h.Port) {
+		if len(h.Env) == 0 || !slices.Contains(installs, h.Package) || !r.Allows(h.Port) {
 			continue
 		}
 		l, i := ports.Find(d.reservations, v.name, h.Port)
@@ -918,4 +921,16 @@ func (d *Engine) renderEnv(ctx context.Context, v *vmState) {
 	if d.m.Save(rec) == nil {
 		d.editRecord(v, func(rec *model.VMRecord) { rec.Env = env })
 	}
+}
+
+func (d *Engine) installsOf(ctx context.Context, vm string) []string {
+	if d.o.Installs == nil {
+		return nil
+	}
+	installs, err := d.o.Installs(ctx, vm)
+	if err != nil {
+		d.logf(vm+" packages", "its Machinefile could not be read ("+err.Error()+"): no package port is reserved")
+		return nil
+	}
+	return installs
 }

@@ -2,6 +2,7 @@ description: 'a port whose server speaks first is shared raw by serve --tcp, sch
 fixture:
     - ../../__fixtures__/vms/
     - ../../__fixtures__/engine-vm/
+    - ../../__fixtures__/dev-servers/
 env: engine
 serve: sshd
 runs:

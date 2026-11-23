@@ -24,8 +24,6 @@ runs:
           ●	Running
           ●	Has an address	192.168.64.5
           ●	SSH answers
-          ●	vite	5173	https://macbook-pro.tail1234.ts.net:40003
-          ●	expo	8081	https://macbook-pro.tail1234.ts.net:40000
           ●	Boot phase	studio-linux
           ●	web	Created	Ephemeral · 4 CPU · 4 GB · 20 GB
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].vms["web"] | {folders: .booted.folders, ran: [.guest.ran[]? | select(startswith("/usr/local/bin/station guest serve") | not)]}'' world.json'

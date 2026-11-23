@@ -2,6 +2,7 @@ description: 'with Serve off the packages'' env exports the local URL; once it i
 fixture:
     - ../../../__fixtures__/vms/
     - ../../../__fixtures__/engine-vm/
+    - ../../../__fixtures__/dev-servers/
 env: engine
 serve: sshd
 runs:

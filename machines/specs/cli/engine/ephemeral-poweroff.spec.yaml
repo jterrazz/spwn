@@ -2,6 +2,7 @@ description: 'an ephemeral VM''s declared poweroff deletes it and releases its r
 fixture:
     - ../../__fixtures__/vms/
     - ../../__fixtures__/engine-vm/
+    - ../../__fixtures__/dev-servers/
 env: engine
 serve: sshd
 runs:

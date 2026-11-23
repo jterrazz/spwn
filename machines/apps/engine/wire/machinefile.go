@@ -150,6 +150,39 @@ func gateCatalog(root *cobra.Command, out *output.Writer, broken error) (reporte
 // that cannot be read, or a refused file of its chain, is the error: the
 // VM then opens nothing.
 func (m machine) portRights(ctx context.Context, vm string) (*catalog.PortRights, string, error) {
+	trees, name, err := m.vmMachinefile(ctx, vm)
+	if err != nil {
+		return nil, "", err
+	}
+	rights, by, err := machinefile.RightsOf(trees, name, vm)
+	if err != nil {
+		return nil, "", machinefilecalls.Worded(err)
+	}
+	return rights, by, nil
+}
+
+// value: the packages the Machinefile a VM's rights are read from
+// installs; none when there is no such Machinefile, and a source that
+// cannot be read, or a plan that cannot be resolved, is the error.
+func (m machine) vmInstalls(ctx context.Context, vm string) ([]string, error) {
+	trees, name, err := m.vmMachinefile(ctx, vm)
+	if err != nil {
+		return nil, err
+	}
+	lib, err := machinefile.Load(trees)
+	if err != nil {
+		return nil, machinefilecalls.Worded(err)
+	}
+	installs, err := machinefile.Installs(lib, name, vm)
+	if err != nil {
+		return nil, machinefilecalls.Worded(err)
+	}
+	return installs, nil
+}
+
+// value: every source read, and the name of the Machinefile a VM follows:
+// the one named after it, else the one it was made from.
+func (m machine) vmMachinefile(ctx context.Context, vm string) ([]machinefile.Tree, string, error) {
 	trees := make([]machinefile.Tree, 0, 3)
 	named := false
 	for _, s := range m.machinefileSources() {
@@ -166,11 +199,7 @@ func (m machine) portRights(ctx context.Context, vm string) (*catalog.PortRights
 	if rec, err := m.stores.machines.Get(ctx, vm); !named && err == nil && rec.Template != "" {
 		name = rec.Template
 	}
-	rights, by, err := machinefile.RightsOf(trees, name, vm)
-	if err != nil {
-		return nil, "", machinefilecalls.Worded(err)
-	}
-	return rights, by, nil
+	return trees, name, nil
 }
 
 func judgeEach(ctx context.Context, keys []string, ask func(ctx context.Context, key string) (machinefile.Drift, error)) map[string]machinefilecalls.Judged {

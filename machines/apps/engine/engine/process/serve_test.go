@@ -2,6 +2,8 @@ package process
 
 import (
 	"context"
+	"errors"
+	"slices"
 	"strconv"
 	"strings"
 	"sync"
@@ -165,6 +167,7 @@ func TestARunRendersThePackagesEnvironmentAndAnAdoptionKeepsIt(t *testing.T) {
 	yes := true
 	expo := catalog.PackagePort{Package: "expo", PortHint: catalog.PortHint{Port: 8081, Label: "Expo", HTTP: true, Env: map[string]string{"EXPO_PACKAGER_PROXY_URL": "{url}"}}}
 	h.d.o.Ports = []catalog.PackagePort{expo}
+	h.d.o.Installs = func(context.Context, string) ([]string, error) { return []string{"expo"}, nil }
 	h.d.reservations = []ports.Reservation{{VM: "api", GuestPort: expo.Port, MacPort: 40000, HTTP: &yes}}
 	h.d.refreshSelf(t.Context())
 	h.hv.outlived("api")
@@ -178,6 +181,54 @@ func TestARunRendersThePackagesEnvironmentAndAnAdoptionKeepsIt(t *testing.T) {
 	_ = h.d.start(ctx, v)
 	if len(h.m.saved) != 1 || h.m.saved[0].Env["EXPO_PACKAGER_PROXY_URL"] != "https://x.tail1234.ts.net:40000" || h.m.saved[0].Env["STATION_PUBLIC_HOST"] != "x.tail1234.ts.net" {
 		t.Errorf("a run with Serve on saved %+v, want the https URL and the public host", h.m.saved)
+	}
+}
+
+func TestARunReservesOnlyThePortsOfThePackagesItsMachinefileInstalls(t *testing.T) {
+	vite := catalog.PackagePort{Package: "vite", PortHint: catalog.PortHint{Port: 5173, Label: "Vite", HTTP: true, Env: map[string]string{"__VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS": "{host}"}}}
+	expo := catalog.PackagePort{Package: "expo", PortHint: catalog.PortHint{Port: 8081, Label: "Expo", HTTP: true, Env: map[string]string{"EXPO_PACKAGER_PROXY_URL": "{url}"}}}
+	for _, c := range []struct {
+		name     string
+		installs []string
+		err      error
+		want     []int
+	}{
+		{name: "no vite, no expo", installs: []string{"linter", "formatter"}},
+		{name: "vite alone", installs: []string{"runtime", "vite"}, want: []int{5173}},
+		{name: "both", installs: []string{"expo", "vite"}, want: []int{5173, 8081}},
+		{name: "a Machinefile that cannot be read", err: errors.New("refused"), installs: []string{"vite"}},
+	} {
+		t.Run(c.name, func(t *testing.T) {
+			h := newHarness(t, model.VMRecord{Name: "api", Lifetime: model.Persistent, Want: model.WantRunning})
+			h.d.tn = &fakeTailnet{sharing: ports.SharingState{DNSName: "x.tail1234.ts.net", Backend: ports.Running, On: true}}
+			h.d.o.Ports = []catalog.PackagePort{vite, expo}
+			h.d.o.Installs = func(_ context.Context, vm string) ([]string, error) {
+				if vm != "api" {
+					t.Errorf("read the installs of %q, want api", vm)
+				}
+				return c.installs, c.err
+			}
+			h.d.refreshSelf(t.Context())
+			v, _ := h.d.find("api")
+			h.d.renderEnv(t.Context(), v)
+			var got []int
+			for _, r := range h.d.reservations {
+				if r.VM == "api" {
+					got = append(got, r.GuestPort)
+				}
+			}
+			slices.Sort(got)
+			if !slices.Equal(got, c.want) {
+				t.Errorf("reserved %v, want %v", got, c.want)
+			}
+			env := h.d.record(v).Env
+			if _, ok := env["__VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS"]; ok != slices.Contains(c.want, 5173) {
+				t.Errorf("env %v: Vite's variable set is %v, want %v", env, ok, slices.Contains(c.want, 5173))
+			}
+			if _, ok := env["EXPO_PACKAGER_PROXY_URL"]; ok != slices.Contains(c.want, 8081) {
+				t.Errorf("env %v: Expo's variable set is %v, want %v", env, ok, slices.Contains(c.want, 8081))
+			}
+		})
 	}
 }
 

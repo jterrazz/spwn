@@ -2,6 +2,7 @@ description: 'with Serve off every share is local only, says the admin step, and
 fixture:
     - ../../__fixtures__/vms/
     - ../../__fixtures__/engine-vm/
+    - ../../__fixtures__/dev-servers/
 env: engine
 serve: sshd
 runs:

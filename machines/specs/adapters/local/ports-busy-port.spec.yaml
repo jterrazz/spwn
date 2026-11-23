@@ -2,6 +2,7 @@ description: 'a port another process holds on the Mac is skipped: the reservatio
 fixture:
     - ../../__fixtures__/vms/
     - ../../__fixtures__/engine-vm/
+    - ../../__fixtures__/dev-servers/
 env: engine
 serve: sshd
 runs:

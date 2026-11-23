@@ -9,8 +9,6 @@ runs:
           ●	Running
           ●	Has an address	192.168.64.5
           ●	SSH answers
-          ●	vite	5173	{{url}}
-          ●	expo	8081	{{url}}
           ●	linux-1	Created	Ephemeral · 4 CPU · 8 GB · 20 GB
     - command: 'machines --this-mac'
       exit: 0

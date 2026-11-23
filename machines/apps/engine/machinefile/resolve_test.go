@@ -450,3 +450,31 @@ func TestAMixinsOwnValuesLeaveWithAnyTokenWithheld(t *testing.T) {
 		}
 	}
 }
+
+func TestAMachinefileInstallsWhatItListsAndWhatThatRequires(t *testing.T) {
+	serve := `package: station.package/v1
+kind: app
+name: serve
+description: a dev server
+requires: [fd]
+ports:
+    - { port: 5173, label: Serve, http: true, env: { SERVE_URL: '{url}' } }
+methods:
+    - { os: any, script: { run: 'true' } }
+`
+	lib := library(t, map[string]string{
+		"machinefiles/web.machine.yaml":   machine("web", "{ os: ubuntu }", "[serve]"),
+		"machinefiles/plain.machine.yaml": machine("plain", "{ os: ubuntu }", "[fd]"),
+	}, map[string]string{"catalog/command-line/serve.yaml": serve})
+	got, err := machinefile.Installs(lib, "web", "web-1")
+	slices.Sort(got)
+	if err != nil || !slices.Equal(got, []string{"fd", "serve"}) {
+		t.Errorf("web installs %v, %v; want fd and serve", got, err)
+	}
+	if got, err := machinefile.Installs(lib, "plain", "plain-1"); err != nil || !slices.Equal(got, []string{"fd"}) {
+		t.Errorf("plain installs %v, %v; want fd alone", got, err)
+	}
+	if got, err := machinefile.Installs(lib, "linux-1", "linux-1"); err != nil || got != nil {
+		t.Errorf("a VM with no Machinefile installs %v, %v; want none", got, err)
+	}
+}

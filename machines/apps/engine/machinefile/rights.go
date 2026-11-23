@@ -100,3 +100,24 @@ func decodeNamed(trees []Tree, name string, overlay bool) (catalog.Machinefile, 
 	}
 	return catalog.Machinefile{}, false, nil
 }
+
+func Installs(lib Library, name, machine string) ([]string, error) {
+	// invariant: what a VM's Machinefile installs is its plan's packages,
+	// resolved for that machine as its own apply resolves it: those it
+	// lists, bakes, and brings in by what they require, by the first method
+	// its system matches, no lock read, since a lock picks among the methods
+	// the file allows. None when the library holds no Machinefile of that
+	// name; a plan that cannot be resolved is the error.
+	if _, ok := lib.Machinefiles[name]; !ok {
+		return nil, nil
+	}
+	r, err := Resolve(lib, name, Machine{Name: machine}, Lock{})
+	if err != nil {
+		return nil, err
+	}
+	out := make([]string, 0, len(r.Steps))
+	for _, s := range r.Steps {
+		out = append(out, s.Package)
+	}
+	return out, nil
+}

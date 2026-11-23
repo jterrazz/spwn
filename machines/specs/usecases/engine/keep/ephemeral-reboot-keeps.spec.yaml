@@ -1,6 +1,13 @@
 description: 'an ephemeral workspace whose guest reboots boots again, kept, on the same reserved ports'
 env: two-macs
 runs:
+    - command: 'world edit macbook-pro machinefiles/linux-2.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: linux-2
+          machine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }
+          apps: [vite, expo]
+      exit: 0
     - command: 'machines create --memory 4G linux-2 | /usr/bin/tail -1'
       exit: 0
       stdout: |

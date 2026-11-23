@@ -2,6 +2,7 @@ description: 'the path mode serves HTTP on 443 under /<vm>/<port>/, a raw TCP on
 fixture:
     - ../../__fixtures__/vms/
     - ../../__fixtures__/engine-vm/
+    - ../../__fixtures__/dev-servers/
 env: engine
 serve: sshd
 runs:

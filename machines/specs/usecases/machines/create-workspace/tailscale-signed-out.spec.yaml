@@ -1,6 +1,13 @@
 description: 'a create on a Mac signed out of Tailscale makes the workspace, its ports local only'
 env: tailscale-out
 runs:
+    - command: 'world edit macbook-pro machinefiles/linux-2.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: linux-2
+          machine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }
+          apps: [vite, expo]
+      exit: 0
     - command: 'machines create --memory 4G'
       exit: 0
       stdout: |

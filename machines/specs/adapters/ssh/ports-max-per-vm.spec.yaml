@@ -2,6 +2,7 @@ description: 'a VM at the most ports it may share tells its next one in one line
 fixture:
     - ../../__fixtures__/vms/
     - ../../__fixtures__/engine-vm/
+    - ../../__fixtures__/dev-servers/
 env: engine
 serve: sshd
 runs:

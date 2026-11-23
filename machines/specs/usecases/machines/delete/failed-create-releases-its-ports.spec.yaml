@@ -1,8 +1,15 @@
-description: 'a create that fails at its boot keeps its two reserved ports for its start; a delete releases them'
+description: 'a create failed at its boot keeps its packages'' two reserved ports; a delete releases them'
 env:
     - two-macs
     - engine
 runs:
+    - command: 'world edit macbook-pro machinefiles/linux-2.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: linux-2
+          machine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }
+          apps: [vite, expo]
+      exit: 0
     - command: 'world fault Hypervisor.Boot 1'
       exit: 0
     - command: 'machines create --memory 4G'

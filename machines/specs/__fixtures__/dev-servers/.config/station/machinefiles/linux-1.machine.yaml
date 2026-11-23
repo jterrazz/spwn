@@ -1,0 +1,4 @@
+machinefile: station.machinefile/v1
+name: linux-1
+machine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }
+apps: [vite, expo]

@@ -2,6 +2,7 @@ description: 'a share is carried by Tailscale Serve from 127.0.0.1, never a wild
 fixture:
     - ../../__fixtures__/vms/
     - ../../__fixtures__/engine-vm/
+    - ../../__fixtures__/dev-servers/
 env: engine
 serve: sshd
 runs:

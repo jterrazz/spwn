@@ -23,8 +23,6 @@ runs:
             ● Running
             ● Has an address  192.168.64.5
             ● SSH answers
-            ● vite            5173          https://mac-mini.tail1234.ts.net:40001
-            ● expo            8081          https://mac-mini.tail1234.ts.net:40000
             ● linux-2         Created       Ephemeral · 4 CPU · 4 GB · 20 GB
 
           → ssh linux-2

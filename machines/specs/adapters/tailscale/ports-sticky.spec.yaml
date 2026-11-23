@@ -2,6 +2,7 @@ description: 'a stop of listening unshares after the grace and keeps the reserva
 fixture:
     - ../../__fixtures__/vms/
     - ../../__fixtures__/engine-vm/
+    - ../../__fixtures__/dev-servers/
 env: engine
 serve: sshd
 runs:

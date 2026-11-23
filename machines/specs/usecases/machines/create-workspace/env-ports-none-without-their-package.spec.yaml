@@ -1,0 +1,18 @@
+description: 'a create whose Machinefile installs neither Vite nor Expo reserves neither port and sets no env'
+env: two-macs
+runs:
+    - command: 'world edit macbook-pro machinefiles/linux-2.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: linux-2
+          machine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }
+          apps: [jq]
+      exit: 0
+    - command: 'machines create --memory 4G | /usr/bin/grep -cE "vite|expo"'
+      exit: 1
+      stdout: |
+          0
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"] | {reserved: [.stores.reservations[] | select(.vm == "linux-2") | [.guest_port, .host_port]], env: .vms["linux-2"].kept.env}'' world.json'
+      exit: 0
+      stdout: |
+          {"reserved":[],"env":null}

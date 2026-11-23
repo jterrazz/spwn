@@ -89,6 +89,9 @@ type Options struct {
 	// name, and the file that says them; nil when it says none (or there is
 	// none), and nil Rights reads none for every VM.
 	Rights func(ctx context.Context, vm string) (*catalog.PortRights, string, error)
+	// value: the packages a VM's Machinefile installs, read as its rights
+	// are; nil, or an error, installs none.
+	Installs func(ctx context.Context, vm string) ([]string, error)
 	// value: the folders of this Mac a VM shares, read at each of its
 	// starts, with why they are not its Machinefile's; an error refuses the
 	// start, and nil Mounts shares none.

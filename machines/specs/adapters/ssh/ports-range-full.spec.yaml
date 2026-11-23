@@ -2,6 +2,7 @@ description: 'a Mac whose reserved range is taken tells the next port in one lin
 fixture:
     - ../../__fixtures__/vms/
     - ../../__fixtures__/engine-vm/
+    - ../../__fixtures__/dev-servers/
     - ./__fixtures__/ports-narrow-range/
 env: engine
 serve: sshd

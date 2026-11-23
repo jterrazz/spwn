@@ -1,6 +1,13 @@
 description: 'create --json is station.machines.create-workspace/v1: the workspace, its health, its reserved ports'
 env: two-macs
 runs:
+    - command: 'world edit macbook-pro machinefiles/linux-2.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: linux-2
+          machine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }
+          apps: [vite, expo]
+      exit: 0
     - command: 'machines create --memory 4G --json | /usr/bin/jq -c "[.schema, .name, .lifetime, .cpus, .memory_bytes, .disk_bytes, .health, [.ports[] | [.guest_port, .reserved]]]"'
       exit: 0
       stdout: |
