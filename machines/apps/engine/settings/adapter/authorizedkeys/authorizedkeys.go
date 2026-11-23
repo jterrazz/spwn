@@ -220,6 +220,15 @@ func (a *Applier) Observe(_ context.Context, it catalog.Setting) (settings.Obser
 		return o, nil
 	case state == settings.BlockHere && (unrecorded || have == r.Body):
 		o.State, o.Detail = catalog.StateOK, r.File
+		l, err := a.loose(r.File, it.Name)
+		if err != nil {
+			return settings.Observation{}, err
+		}
+		if l.why != "" {
+			o.State, o.Detail = catalog.StateDegraded, l.why
+			o.Diff = settings.UnifiedDiff(l.want, l.have, "Machines' "+l.at, l.at)
+			have += "\x00" + l.have
+		}
 	default:
 		o.State, o.Detail = catalog.StateDegraded, "differs from Machines': station settings apply "+it.Name
 		o.Diff = settings.UnifiedDiff(r.Body, have, "Machines' "+r.File, r.File)
@@ -373,6 +382,49 @@ func (a *Applier) Undo(ctx context.Context, it catalog.Setting) (settings.Change
 // in the file of the package's default user, and a block of station's
 // there leaves it, its owner's lines as they were; a damaged one is
 // refused, so off never reads done while a block of station's is left.
+type loosened struct {
+	// value: why the keys are ignored, at what path, and the mode and owner
+	// Machines sets there against what is there now; why empty when strict.
+	why, at, want, have string
+}
+
+func (a *Applier) loose(file, name string) (loosened, error) {
+	// invariant: the keys count only while the sign-in server reads them:
+	// the folder 0700 and the file 0600, nothing for group or others, and
+	// both the home owner's or root's; anything else is drift, with apply as
+	// its fix.
+	base, rel := a.beneath(file)
+	home := path.Dir(path.Dir(rel))
+	owner, err := a.home.Lstat(base, home)
+	if err != nil {
+		return loosened{}, a.linked(err)
+	}
+	for _, p := range []struct {
+		rel  string
+		mode fs.FileMode
+	}{{path.Dir(rel), 0o700}, {rel, 0o600}} {
+		var e local.Entry
+		e, err = a.home.Lstat(base, p.rel)
+		if err != nil {
+			return loosened{}, a.linked(err)
+		}
+		l := loosened{at: path.Join(path.Dir(path.Dir(file)), strings.TrimPrefix(p.rel, home+"/"))}
+		switch {
+		case e.Mode.Perm()&0o077 != 0:
+			l.want, l.have = octal(p.mode)+"\n", octal(e.Mode.Perm())+"\n"
+			l.why = l.at + " is " + octal(e.Mode.Perm()) + ", open to others, so its keys are ignored: station settings apply " + name + " sets it to " + octal(p.mode)
+			return l, nil
+		case e.UID != owner.UID && e.UID != 0:
+			l.want, l.have = fmt.Sprintf("uid %d\n", owner.UID), fmt.Sprintf("uid %d\n", e.UID)
+			l.why = fmt.Sprintf("%s is uid %d's, not the home's (uid %d), so its keys are ignored: station settings apply %s gives it back", l.at, e.UID, owner.UID, name)
+			return l, nil
+		}
+	}
+	return loosened{}, nil
+}
+
+func octal(m fs.FileMode) string { return "0" + strconv.FormatUint(uint64(m.Perm()), 8) }
+
 func (a *Applier) turn(ctx context.Context) (func(), error) {
 	release, held, err := a.o.Take(ctx, a.o.Lock, wait)
 	if err != nil {

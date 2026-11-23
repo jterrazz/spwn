@@ -578,3 +578,53 @@ func TestAWriterHoldingTheLockKeepsApplyAndOffOutOfTheFile(t *testing.T) {
 		t.Fatalf("Undo with the lock held = %v; file %q; want it refused and the block kept", err, m.content(rootAK))
 	}
 }
+
+func TestAFolderOrFileTheSignInServerIgnoresIsDrift(t *testing.T) {
+	m := newMachine(t)
+	apply(t, m.open(), "root", key(t, 1, "ci"))
+	seen := func(t *testing.T) settings.Observation {
+		t.Helper()
+		o, err := m.open().Observe(context.Background(), setting())
+		if err != nil {
+			t.Fatal(err)
+		}
+		return o
+	}
+	if o := seen(t); o.State != catalog.StateOK {
+		t.Fatalf("Observe after apply = %+v; want ok", o)
+	}
+	loosen := func(t *testing.T, rel string, mode, strict fs.FileMode, want string) {
+		t.Helper()
+		if err := (local.Beneath{}).Chmod(m.root, rel, mode); err != nil {
+			t.Fatal(err)
+		}
+		o := seen(t)
+		if o.State != catalog.StateDegraded || o.Detail != want {
+			t.Fatalf("Observe with %s at %04o = %s %q; want degraded %q", rel, mode, o.State, o.Detail, want)
+		}
+		if err := (local.Beneath{}).Chmod(m.root, rel, strict); err != nil {
+			t.Fatal(err)
+		}
+	}
+	t.Run("a folder others can open", func(t *testing.T) {
+		loosen(t, "root/.ssh", 0o755, 0o700, "/root/.ssh is 0755, open to others, so its keys are ignored: station settings apply authorized-key sets it to 0700")
+	})
+	t.Run("a file others can read", func(t *testing.T) {
+		loosen(t, rootAK, 0o644, 0o600, "/root/.ssh/authorized_keys is 0644, open to others, so its keys are ignored: station settings apply authorized-key sets it to 0600")
+	})
+	t.Run("a file another user owns", func(t *testing.T) {
+		if m.self.UID != 0 {
+			t.Skip("only root gives a file away")
+		}
+		m.chown(rootAK, m.ci)
+		o := seen(t)
+		want := "/root/.ssh/authorized_keys is uid " + strconv.Itoa(m.ci.UID) + "'s, not the home's (uid 0), so its keys are ignored: station settings apply authorized-key gives it back"
+		if o.State != catalog.StateDegraded || o.Detail != want {
+			t.Fatalf("Observe with the file given away = %s %q; want degraded %q", o.State, o.Detail, want)
+		}
+		apply(t, m.open(), "root", key(t, 1, "ci"))
+		if o := seen(t); o.State != catalog.StateOK {
+			t.Fatalf("Observe after apply again = %+v; want ok", o)
+		}
+	})
+}
