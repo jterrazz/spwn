@@ -1,0 +1,31 @@
+description: 'authorized-key records its blocks in /var/lib/station, and off with no record finds them by markers'
+env:
+    - in-workspace
+    - engine
+runs:
+    - command: 'world admin on'
+      exit: 0
+    - command: '--version >/dev/null; /bin/mkdir -p root/root'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | .out[0].Steps'''
+      stdin: |
+          {"v":2,"id":"1","call":"settings.apply","in":{"Names":["authorized-key"],"Values":{"authorized-key":{"user":"root","key":"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGZ2c8e4bOqkqO0+5N0VXlFz4sVJyDQzH+LVRG4RvMZb ci@deploy"}}}}
+      exit: 0
+      stdout: |
+          [{"Label":"/root/.ssh/authorized_keys","State":"ok","Detail":"written"}]
+    - command: '--version >/dev/null; /usr/bin/stat -c ''%a %n'' root/var/lib/station root/var/lib/station/authorized-keys.json; /usr/bin/jq -c ''.files[] | [.file, .body]'' root/var/lib/station/authorized-keys.json; /usr/bin/find . -path ./root -prune -o -name authorized-keys.json -print'
+      exit: 0
+      stdout: |
+          700 root/var/lib/station
+          600 root/var/lib/station/authorized-keys.json
+          ["/root/.ssh/authorized_keys","ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGZ2c8e4bOqkqO0+5N0VXlFz4sVJyDQzH+LVRG4RvMZb ci@deploy\n"]
+    - command: '--version >/dev/null; /bin/rm root/var/lib/station/authorized-keys.json'
+      exit: 0
+    - command: 'settings off authorized-key --yes'
+      exit: 0
+      stdout: |
+          ●	authorized-key	/root/.ssh/authorized_keys: removed, found with no record
+    - command: '--version >/dev/null; /usr/bin/wc -c < root/root/.ssh/authorized_keys'
+      exit: 0
+      stdout: |
+          0

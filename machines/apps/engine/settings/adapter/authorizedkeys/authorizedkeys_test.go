@@ -5,6 +5,7 @@ import (
 	"context"
 	"crypto/ed25519"
 	"encoding/base64"
+	"errors"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -107,8 +108,23 @@ func (m *machine) content(rel string) string {
 	return string(data)
 }
 
-func (m *machine) open() *authorizedkeys.Applier {
-	return authorizedkeys.New(m.disk, local.Beneath{}, authorizedkeys.Options{Root: m.root, Record: m.at("state/authorized-keys.json"), Run: m.run})
+func (m *machine) open() *authorizedkeys.Applier { return m.openWith(m.disk) }
+
+func (m *machine) openWith(files authorizedkeys.Files) *authorizedkeys.Applier {
+	return authorizedkeys.New(files, local.Beneath{}, authorizedkeys.Options{Root: m.root, Record: m.at(authorizedkeys.Record), Run: m.run})
+}
+
+// value: the disk, but a replace of the file at refused as a full disk.
+type full struct {
+	local.FS
+	at string
+}
+
+func (f full) Replace(p string, data []byte, perm fs.FileMode) error {
+	if p == f.at {
+		return &fs.PathError{Op: "replace", Path: p, Err: errors.New("no space left on device")}
+	}
+	return f.FS.Replace(p, data, perm)
 }
 
 const (
@@ -366,8 +382,8 @@ func TestAnotherUserTakesTheBlockOutOfTheFirstUsersFile(t *testing.T) {
 	if _, err := a.Undo(context.Background(), setting()); err != nil {
 		t.Fatal(err)
 	}
-	if m.content(ciAK) != "" || m.content(rootAK) != own || m.there("state/authorized-keys.json") {
-		t.Fatalf("after off ci %q, root %q, record there %v; want both blocks gone and no record", m.content(ciAK), m.content(rootAK), m.there("state/authorized-keys.json"))
+	if m.content(ciAK) != "" || m.content(rootAK) != own || m.there(strings.TrimPrefix(authorizedkeys.Record, "/")) {
+		t.Fatalf("after off ci %q, root %q, record there %v; want both blocks gone and no record", m.content(ciAK), m.content(rootAK), m.there(strings.TrimPrefix(authorizedkeys.Record, "/")))
 	}
 }
 
@@ -384,6 +400,43 @@ func TestABlockTheOwnerChangedIsKeptWhenAnotherUserTakesIt(t *testing.T) {
 	off, err := a.Undo(context.Background(), setting())
 	if err != nil || len(off.Steps) != 2 || off.Steps[0].Detail != "yours, kept" || off.Steps[1].Detail != "removed" || m.content(rootAK) != edited {
 		t.Fatalf("Undo = %+v, %v; want root's kept, ci's removed", off.Steps, err)
+	}
+}
+
+// invariant: an apply cut before its record lands leaves no block of
+// station's that off cannot find: the record is written before the block.
+func TestAnApplyWhoseRecordFailsLeavesNoBlockOffCannotFind(t *testing.T) {
+	m := newMachine(t)
+	m.mkdir("root/.ssh", 0o700)
+	own := key(t, 9, "laptop") + "\n"
+	m.write(rootAK, own, 0o600)
+	if _, err := m.openWith(full{FS: m.disk, at: m.at(authorizedkeys.Record)}).Apply(context.Background(), setting(), map[string]string{"user": "root", "key": key(t, 1, "")}); err == nil {
+		t.Fatal("Apply took a record it could not write")
+	}
+	if _, err := m.open().Undo(context.Background(), setting()); err != nil {
+		t.Fatal(err)
+	}
+	if got := m.content(rootAK); got != own {
+		t.Fatalf("after off authorized_keys = %q; want the owner's line alone, no block of station's", got)
+	}
+}
+
+// invariant: with no record at all, off finds station's block by its
+// markers in the default user's file and takes it out.
+func TestOffFindsABlockWithNoRecordInTheDefaultUsersFile(t *testing.T) {
+	m := newMachine(t)
+	m.mkdir("root/.ssh", 0o700)
+	own := key(t, 9, "laptop") + "\n"
+	m.write(rootAK, own+block(key(t, 1, "ci")), 0o600)
+	it := setting()
+	it.Inputs = []catalog.Input{{Name: "user", Default: "root"}, {Name: "key"}}
+	seen, err := m.open().Observe(context.Background(), it)
+	if err != nil || seen.State != catalog.StateOK || seen.Where != "/root/.ssh/authorized_keys" {
+		t.Fatalf("Observe = %+v, %v; want the block seen in the default user's file", seen, err)
+	}
+	change, err := m.open().Undo(context.Background(), it)
+	if err != nil || detail(change) != "removed, found with no record" || m.content(rootAK) != own {
+		t.Fatalf("Undo = %+v, %v; file %q; want the block found and removed", change, err, m.content(rootAK))
 	}
 }
 

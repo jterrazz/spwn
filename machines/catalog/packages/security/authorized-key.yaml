@@ -23,6 +23,6 @@ writes:
     - path: ~user/.ssh/authorized_keys
       level: settings
       note: "the block station:authorized-key, between its two marker lines (`/root/.ssh` for root); the folder 0700, the file 0600, both the user's"
-    - path: '{state}/station/authorized-keys.json'
+    - path: /var/lib/station/authorized-keys.json
       level: settings
-      note: the file and the block station last wrote, which drift and off read
+      note: "root's, 0600: every file station wrote the block in and the block's text, which drift and off read, whoever runs station"

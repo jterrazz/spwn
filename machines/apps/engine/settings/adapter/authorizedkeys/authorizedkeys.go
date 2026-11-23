@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"io/fs"
 	"path"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -64,6 +65,10 @@ func (*Applier) Kind() catalog.EffectKind { return catalog.EffectAuthorizedKeys 
 const (
 	InputUser = "user"
 	InputKey  = "key"
+	// value: the machine's own record of every block station wrote, root's,
+	// the same whoever runs station: never under the home of a sudo's
+	// invoker.
+	Record = "/var/lib/station/authorized-keys.json"
 )
 
 // value: every authorized_keys station wrote its block in and has not
@@ -178,10 +183,20 @@ func (a *Applier) Observe(_ context.Context, it catalog.Setting) (settings.Obser
 		return settings.Observation{}, err
 	}
 	rec, err := a.read()
-	if err != nil || len(rec.Files) == 0 {
+	if err != nil {
 		return settings.Observation{State: catalog.StateAbsent}, err
 	}
-	r := rec.Files[len(rec.Files)-1]
+	var r written
+	unrecorded := len(rec.Files) == 0
+	if unrecorded {
+		file, ok := a.fallback(it)
+		if !ok {
+			return settings.Observation{State: catalog.StateAbsent}, nil
+		}
+		r.File = file
+	} else {
+		r = rec.Files[len(rec.Files)-1]
+	}
 	text, _, err := a.text(r.File)
 	if err != nil {
 		return settings.Observation{}, err
@@ -192,7 +207,7 @@ func (a *Applier) Observe(_ context.Context, it catalog.Setting) (settings.Obser
 	case state == settings.BlockAbsent:
 		o.State = catalog.StateAbsent
 		return o, nil
-	case state == settings.BlockHere && have == r.Body:
+	case state == settings.BlockHere && (unrecorded || have == r.Body):
 		o.State, o.Detail = catalog.StateOK, r.File
 	default:
 		o.State, o.Detail = catalog.StateDegraded, "differs from Machines': station settings apply "+it.Name
@@ -235,6 +250,23 @@ func (a *Applier) Apply(_ context.Context, it catalog.Setting, values map[string
 		return settings.Change{}, fmt.Errorf("%s holds a damaged %s block, a start with no end or two blocks, not touched: leave one `%s` line and one `%s` line around Machines' keys, then apply again", file, k.Block, start, end)
 	}
 	updated, changed := settings.UpsertPackageBlock(text, k.Block, body)
+	rec, err := a.read()
+	if err != nil {
+		return settings.Change{}, err
+	}
+	// invariant: the record names the file before its block is written, so
+	// a run cut between the two leaves off a block it knows, never one it
+	// does not: a recorded block that never landed reads gone.
+	var olds []written
+	for _, w := range rec.Files {
+		if w.File != file {
+			olds = append(olds, w)
+		}
+	}
+	err = a.save(record{Files: append(slices.Clone(olds), written{File: file, Body: body})})
+	if err != nil {
+		return settings.Change{}, err
+	}
 	err = a.folder(base, ssh, who)
 	if err != nil {
 		return settings.Change{}, err
@@ -259,10 +291,6 @@ func (a *Applier) Apply(_ context.Context, it catalog.Setting, values map[string
 			return settings.Change{}, a.linked(err)
 		}
 	}
-	rec, err := a.read()
-	if err != nil {
-		return settings.Change{}, err
-	}
 	detail := "written"
 	if !changed && there {
 		detail = "already there"
@@ -270,10 +298,7 @@ func (a *Applier) Apply(_ context.Context, it catalog.Setting, values map[string
 	steps := []settings.ChangeStep{{Label: file, State: catalog.StateOK, Detail: detail}}
 	var kept []written
 	var stays []error
-	for _, w := range rec.Files {
-		if w.File == file {
-			continue
-		}
+	for _, w := range olds {
 		step, keep, why := a.takeOut(w, k.Block)
 		steps = append(steps, step)
 		if keep {
@@ -300,6 +325,9 @@ func (a *Applier) Undo(_ context.Context, it catalog.Setting) (settings.Change, 
 	if err != nil {
 		return settings.Change{}, err
 	}
+	if len(rec.Files) == 0 {
+		return a.unrecorded(it, k.Block)
+	}
 	var steps []settings.ChangeStep
 	var kept []written
 	var stays []error
@@ -318,6 +346,52 @@ func (a *Applier) Undo(_ context.Context, it catalog.Setting) (settings.Change, 
 		return settings.Change{}, err
 	}
 	return settings.Change{Steps: steps}, errors.Join(stays...)
+}
+
+// invariant: with no record, the block's markers are the record: off looks
+// in the file of the package's default user, and a block of station's
+// there leaves it, its owner's lines as they were; a damaged one is
+// refused, so off never reads done while a block of station's is left.
+func (a *Applier) fallback(it catalog.Setting) (string, bool) {
+	user := ""
+	for _, in := range it.Inputs {
+		if in.Name == InputUser {
+			user = in.Default
+		}
+	}
+	if user == "" {
+		return "", false
+	}
+	who, err := a.account(user)
+	if err != nil {
+		return "", false
+	}
+	return path.Join(who.home, ".ssh", "authorized_keys"), true
+}
+
+func (a *Applier) unrecorded(it catalog.Setting, id string) (settings.Change, error) {
+	file, ok := a.fallback(it)
+	if !ok {
+		return settings.Change{}, nil
+	}
+	text, _, err := a.text(file)
+	if err != nil {
+		return settings.Change{}, err
+	}
+	switch _, state := settings.PackageBlock(text, id); state {
+	case settings.BlockAbsent:
+		return settings.Change{}, nil
+	case settings.BlockDamaged:
+		return settings.Change{}, fmt.Errorf("%s holds a damaged %s block Machines has no record of, not touched: remove it by hand", file, id)
+	case settings.BlockHere:
+	}
+	updated, _ := settings.RemovePackageBlock(text, id)
+	base, rel := a.beneath(file)
+	err = a.home.Replace(base, rel, []byte(updated), 0o600, local.Owner{})
+	if err != nil {
+		return settings.Change{}, a.linked(err)
+	}
+	return settings.Change{Steps: []settings.ChangeStep{{Label: file, State: catalog.StateOK, Detail: "removed, found with no record"}}}, nil
 }
 
 func Keys(given string) (string, error) {
