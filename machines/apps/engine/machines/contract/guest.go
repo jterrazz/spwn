@@ -58,6 +58,8 @@ type GuestResult struct {
 }
 
 type Guest interface {
+	// invariant: an Exec that errors, its connection lost or its ctx ended,
+	// answers the output its command wrote before.
 	Exec(ctx context.Context, c GuestCommand) (GuestResult, error)
 	Forward(ctx context.Context, addr string, port int) (io.ReadWriteCloser, error)
 	Put(ctx context.Context, path string, data []byte, mode fs.FileMode) error

@@ -233,7 +233,7 @@ func (c *client) Exec(ctx context.Context, cmd contract.GuestCommand) (contract.
 		return contract.GuestResult{}, err
 	}
 	defer func() { _ = session.Close() }()
-	var out, errs bytes.Buffer
+	var out, errs lockedBuffer
 	session.Stdin, session.Stdout, session.Stderr = cmd.Stdin, cmd.Stdout, cmd.Stderr
 	if cmd.Stdout == nil {
 		session.Stdout = &out
@@ -244,13 +244,20 @@ func (c *client) Exec(ctx context.Context, cmd contract.GuestCommand) (contract.
 	if err := session.Start(cmd.Line); err != nil {
 		return contract.GuestResult{}, err
 	}
-	ended := make(chan error, 1)
-	go func() { ended <- session.Wait() }()
+	ended, drained := make(chan error, 1), make(chan struct{})
+	go func() {
+		ended <- session.Wait()
+		close(drained)
+	}()
 	select {
 	case <-ctx.Done():
 		_ = session.Signal(ssh.SIGTERM)
 		_ = session.Close()
-		return contract.GuestResult{}, ctx.Err()
+		select {
+		case <-drained:
+		case <-time.After(drainWait):
+		}
+		return contract.GuestResult{Stdout: out.String(), Stderr: errs.String()}, ctx.Err()
 	case err := <-ended:
 		res := contract.GuestResult{Stdout: out.String(), Stderr: errs.String()}
 		var exit *ssh.ExitError
@@ -260,6 +267,27 @@ func (c *client) Exec(ctx context.Context, cmd contract.GuestCommand) (contract.
 		}
 		return res, err
 	}
+}
+
+// value: how long a command its context ended is waited for once its
+// session is closed, so the output it wrote before is answered whole.
+const drainWait = 5 * time.Second
+
+type lockedBuffer struct {
+	mu sync.Mutex
+	b  bytes.Buffer
+}
+
+func (l *lockedBuffer) Write(p []byte) (int, error) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	return l.b.Write(p)
+}
+
+func (l *lockedBuffer) String() string {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	return l.b.String()
 }
 
 func quote(v string) string { return "'" + strings.ReplaceAll(v, "'", `'\''`) + "'" }

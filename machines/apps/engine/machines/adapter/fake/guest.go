@@ -26,6 +26,7 @@ var (
 	ErrClosed       = errors.New("the guest connection is closed")
 	ErrNotListening = errors.New("nothing listens on this guest port")
 	ErrRefused      = errors.New("the guest connection is refused, as the world scripted it")
+	ErrDropped      = errors.New("the guest connection dropped")
 )
 
 type Answer struct {
@@ -325,9 +326,9 @@ const lockdownFolder = "/tmp/station.fake"
 // invariant: a guest plays its image's lockdown: the folder it is put in,
 // the script, which closes the image's login, then ends with the key in and
 // its marker last, unless the world cuts it, and the marker's read. A cut
-// before its lock leaves the image's login; one before its key, or one that
-// never finishes, leaves no login at all; one after it, the key without the
-// marker.
+// before its lock leaves the image's login; one before its key, one that
+// never finishes, or a connection dropped once its new host key is printed,
+// leaves no login at all; one after it, the key without the marker.
 func (c *guest) lockdown(cmd contract.GuestCommand) (contract.GuestResult, bool, error) {
 	switch cmd.Line {
 	case catalog.LockdownFolder:
@@ -365,19 +366,24 @@ func (c *guest) lockdown(cmd contract.GuestCommand) (contract.GuestResult, bool,
 	case world.CutNeverEnds:
 		g.Login, g.Closed = nil, true
 		return contract.GuestResult{}, true, context.DeadlineExceeded
+	case world.CutDropsAfterPrint:
+		g.Login, g.Closed = nil, true
+		g.HostKeys++
+		return contract.GuestResult{Stdout: HostKey(c.name, g.HostKeys)}, true, ErrDropped
 	case world.CutAfterKey:
 		g.Login, g.Unlocked, g.Closed = nil, true, false
 		g.HostKeys++
-		return contract.GuestResult{Code: 1, Stdout: hostKey(c.name, g.HostKeys), Stderr: "the lockdown was cut after its key\n"}, true, nil
+		return contract.GuestResult{Code: 1, Stdout: HostKey(c.name, g.HostKeys), Stderr: "the lockdown was cut after its key\n"}, true, nil
 	}
 	g.Login, g.Unlocked, g.Closed = nil, false, false
 	g.HostKeys++
-	return contract.GuestResult{Stdout: hostKey(c.name, g.HostKeys)}, true, nil
+	return contract.GuestResult{Stdout: HostKey(c.name, g.HostKeys)}, true, nil
 }
 
-// value: the ed25519 host key line a guest's nth lockdown makes, its 32
-// bytes drawn from the VM's name and n.
-func hostKey(vm string, n int) string {
+func HostKey(vm string, n int) string {
+	// value: the ed25519 host key line a guest serves once its nth lockdown
+	// made it, the clone's own at 0, its 32 bytes drawn from the VM's name
+	// and n.
 	raw := sha256.Sum256([]byte(vm + "#" + strconv.Itoa(n)))
 	blob := binary.BigEndian.AppendUint32(nil, uint32(len("ssh-ed25519")))
 	blob = append(blob, "ssh-ed25519"...)

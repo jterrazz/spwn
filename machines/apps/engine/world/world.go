@@ -52,7 +52,8 @@ type World struct {
 	UpstreamLogin *ImageLogin `json:"upstream_login,omitempty"`
 	// value: how each next lockdown run in a guest is cut, in order: before
 	// it closes the image's login, before its key goes in, after it and
-	// before its marker, or never ending.
+	// before its marker, never ending, or its connection dropped once it
+	// printed its new host key, before its key goes in.
 	LockdownCuts []string `json:"lockdown_cuts,omitempty"`
 	// value: the failures injected into the fakes, in the order scripted.
 	Script []Fault `json:"script,omitempty"`
@@ -536,10 +537,11 @@ type Guest struct {
 }
 
 const (
-	CutBeforeLock = "before-lock"
-	CutBeforeKey  = "before-key"
-	CutAfterKey   = "after-key"
-	CutNeverEnds  = "never-ends"
+	CutBeforeLock      = "before-lock"
+	CutBeforeKey       = "before-key"
+	CutAfterKey        = "after-key"
+	CutNeverEnds       = "never-ends"
+	CutDropsAfterPrint = "drops-after-print"
 )
 
 type ImageLogin struct {

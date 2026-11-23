@@ -134,7 +134,8 @@ func (g engineGuests) locked(ctx context.Context, c contract.Guest, t contract.G
 
 // invariant: a lockdown makes the guest's host keys anew and prints its
 // ed25519 one as soon as it is made, which replaces every key the VM's
-// known hosts held, whether the lockdown ends 0 or not; its script runs
+// known hosts held, whether the lockdown ends 0, fails, or its session
+// errors or ends past lockdownWait once that line came; its script runs
 // lockdownWait at most.
 func (g engineGuests) lockdown(ctx context.Context, c contract.Guest, l machinescalls.Lockdown, t contract.GuestTarget) error {
 	made, err := c.Exec(ctx, contract.GuestCommand{Line: catalog.LockdownFolder})
@@ -154,17 +155,18 @@ func (g engineGuests) lockdown(ctx context.Context, c contract.Guest, l machines
 	run, cancel := context.WithTimeout(ctx, lockdownWait)
 	defer cancel()
 	res, err := c.Exec(run, contract.GuestCommand{Line: catalog.LockdownLine(dir), Stdin: strings.NewReader(l.Values)})
-	if errors.Is(err, context.DeadlineExceeded) {
-		return errors.New("its lockdown did not finish in " + strconv.Itoa(int(lockdownWait.Minutes())) + " min")
-	}
-	if err != nil {
-		return err
-	}
+	var pinned error
 	if strings.TrimSpace(res.Stdout) != "" {
-		if pinned := ssh.Repin(g.files, t.KnownHosts, t.VM, res.Stdout); pinned != nil {
-			return errors.Join(l.Failed(res.Code, res.Stderr), pinned)
-		}
-	} else if res.Code == 0 {
+		pinned = ssh.Repin(g.files, t.KnownHosts, t.VM, res.Stdout)
+	}
+	switch {
+	case errors.Is(err, context.DeadlineExceeded):
+		return errors.Join(errors.New("its lockdown did not finish in "+strconv.Itoa(int(lockdownWait.Minutes()))+" min"), pinned)
+	case err != nil:
+		return errors.Join(err, pinned)
+	case pinned != nil:
+		return errors.Join(l.Failed(res.Code, res.Stderr), pinned)
+	case strings.TrimSpace(res.Stdout) == "" && res.Code == 0:
 		return errors.New("its lockdown printed no host key")
 	}
 	return l.Failed(res.Code, res.Stderr)

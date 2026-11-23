@@ -1,0 +1,27 @@
+description: 'a fetched macOS lockdown dropped after its host key print is repinned to it, and stopped'
+fixture: ../../__fixtures__/build/
+env: one-mac
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].preferences.vm_user = "you"'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'world upstream-login admin admin'
+      exit: 0
+    - command: 'world lockdown-cut drops-after-print'
+      exit: 0
+    - command: 'images update base-macos'
+      exit: 0
+      stdout: |
+          ●	base-macos	26.6.2	fetched
+    - command: 'machines create mac-1 --image base-macos'
+      exit: 1
+      stderr: |
+          Error: mac-1 is kept, failing SSH answers: the guest connection dropped; it now takes neither station's key nor its image's login
+          Hint: station machines delete mac-1, then make it again
+    - command: '--version >/dev/null; /bin/cat .local/state/station/known_hosts/mac-1'
+      exit: 0
+      stdout: |
+          mac-1 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIG+bdEtsnK57StLhS+r8K/k6g/HkvwCSWkzXgEapIQ4Z
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs[.this_mac].vms["mac-1"] | {login: .guest.login, closed: .guest.closed, host_keys: .guest.host_keys, ran: [.guest.ran[]? | select(startswith("/usr/local/bin/station guest") | not) | sub("/tmp/station[.][A-Za-z0-9X]+"; "<folder>")]}'' world.json'
+      exit: 0
+      stdout: |
+          {"login":null,"closed":true,"host_keys":1,"ran":["/usr/bin/mktemp -d <folder>","sudo -n /bin/bash <folder>/lockdown.sh"]}

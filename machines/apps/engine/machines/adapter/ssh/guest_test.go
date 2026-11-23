@@ -39,11 +39,13 @@ type sshd struct {
 	mu       sync.Mutex
 	answers  map[string]contracttest.Answer
 	received map[string][]byte
-	// value: a line that runs until the client ends it, and what the guest
-	// heard of that end, in order: a signal by its name, or the session's close.
-	held  string
-	began chan struct{}
-	heard chan string
+	// value: a line that runs until the client ends it, what it writes
+	// first, and what the guest heard of that end, in order: a signal by its
+	// name, or the session's close.
+	held    string
+	heldOut string
+	began   chan struct{}
+	heard   chan string
 }
 
 func newHostKey(t *testing.T) ssh.Signer {
@@ -131,6 +133,7 @@ func (s *sshd) session(nc ssh.NewChannel) {
 }
 
 func (s *sshd) hold(ch ssh.Channel, reqs <-chan *ssh.Request) {
+	_, _ = ch.Write([]byte(s.heldOut))
 	close(s.began)
 	for req := range reqs {
 		if req.Type != "signal" || len(req.Payload) <= 4 {
@@ -339,6 +342,25 @@ func TestACommandEndedByItsContextIsToldToStopBeforeItsSessionCloses(t *testing.
 		}
 	case <-time.NewTimer(10 * time.Second).C:
 		t.Fatal("Exec never returned")
+	}
+}
+
+func TestACommandEndedByItsContextAnswersTheOutputItWroteBefore(t *testing.T) {
+	s := startSSHD(t, newHostKey(t))
+	s.held, s.heldOut, s.began, s.heard = "lockdown", "ssh-ed25519 AAAA printed\n", make(chan struct{}), make(chan string, 2)
+	g, err := dial(t).Dial(t.Context(), target(t, s, filepath.Join(t.TempDir(), "known_hosts", "dev")))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = g.Close() }()
+	ctx, cancel := context.WithCancel(t.Context())
+	go func() {
+		<-s.began
+		cancel()
+	}()
+	res, err := g.Exec(ctx, contract.GuestCommand{Line: s.held})
+	if !errors.Is(err, context.Canceled) || res.Stdout != s.heldOut {
+		t.Errorf("Exec = %q, %v; want the line it printed and the context's end", res.Stdout, err)
 	}
 }
 

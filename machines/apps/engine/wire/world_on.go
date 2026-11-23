@@ -1501,11 +1501,55 @@ type worldGuest struct {
 }
 
 func (g worldGuests) Dial(ctx context.Context, t contract.GuestTarget) (contract.Guest, error) {
+	if err := g.hostKey(t); err != nil {
+		return nil, err
+	}
 	c, err := g.GuestDialer.Dial(ctx, t)
 	if err != nil {
 		return nil, err
 	}
 	return worldGuest{Guest: c, vm: t.VM, r: g.r}, nil
+}
+
+// invariant: in a world whose pulled images ship their publisher's login, a
+// guest serves the host key its last lockdown made (the clone's own before
+// any), checked as ssh checks it, accept-new against the VM's known hosts:
+// an absent entry is appended, a different key refuses.
+func (g worldGuests) hostKey(t contract.GuestTarget) error {
+	g.r.w.Lock()
+	upstream := g.r.w.UpstreamLogin != nil
+	mac := g.r.w.Holder(t.VM)
+	var guest *world.Guest
+	if mac != "" {
+		guest = g.r.w.Macs[mac].VMs[t.VM].Guest
+	}
+	n := 0
+	if guest != nil {
+		n = guest.HostKeys
+	}
+	g.r.w.Unlock()
+	if !upstream || guest == nil || t.KnownHosts == "" {
+		return nil
+	}
+	served := strings.Fields(machinesfake.HostKey(t.VM, n))
+	known, err := os.ReadFile(t.KnownHosts)
+	if err != nil && !errors.Is(err, fs.ErrNotExist) {
+		return err
+	}
+	for line := range strings.Lines(string(known)) {
+		f := strings.Fields(line)
+		if len(f) < 3 || f[0] != t.VM {
+			continue
+		}
+		if f[1] == served[0] && f[2] == served[1] {
+			return nil
+		}
+		return errors.New("ssh: handshake failed: knownhosts: key mismatch")
+	}
+	if err := os.MkdirAll(filepath.Dir(t.KnownHosts), 0o700); err != nil {
+		return err
+	}
+	return os.WriteFile(t.KnownHosts, append(known, t.VM+" "+served[0]+" "+served[1]+"\n"...), 0o600)
 }
 
 func (g worldGuest) Exec(ctx context.Context, cmd contract.GuestCommand) (contract.GuestResult, error) {
