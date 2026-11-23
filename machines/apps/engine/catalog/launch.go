@@ -39,7 +39,7 @@ const StationLaunchPrefix = "com.jterrazz.station."
 
 var OwnLaunchPrefixes = []string{
 	// value: the prefixes of every launchd label this product writes: the
-	// bare engine's two jobs and the menu bar's under StationLaunchPrefix,
+	// bare engine's job and the menu bar's under StationLaunchPrefix,
 	// and the jobs Spwn.app registers under its own bundle identifier
 	// (ADR-073).
 	StationLaunchPrefix, WindowBundle + ".",
@@ -63,30 +63,13 @@ func EnginePlist(home string) string {
 	return agentPlist(home, EngineLabel)
 }
 
-const AgentLabel = StationLaunchPrefix + "agent"
+const RetiredAgentLabel = StationLaunchPrefix + "agent" // value: the key agent's own job a Mac without Spwn.app carries from an earlier release, which the move into the bundle boots out with the bare engine's; the engine serves the key agent itself (ADR-076).
 
-type JobLabels struct{ Engine, Agent string }
+func RetiredAgentPlist(home string) string { return agentPlist(home, RetiredAgentLabel) }
 
-var (
-	// value: the labels of the engine's two jobs: the bare binary's on a Mac
-	// without Spwn.app (mode B), and the app's own inside it (mode A, ADR-073).
-	// They never match, so no Background Task Management record a bare job
-	// left is ever attached to a job the bundle registers.
-	BareJobs    = JobLabels{Engine: EngineLabel, Agent: AgentLabel}
-	BundledJobs = JobLabels{Engine: WindowBundle + ".engine", Agent: WindowBundle + ".agent"}
-)
+const BundledEngineLabel = WindowBundle + ".engine" // value: the engine's one job inside Spwn.app (ADR-073, mode A); it never matches EngineLabel, so no Background Task Management record a bare job left is ever attached to the job the bundle registers.
 
-// value: the arguments each job runs the engine's binary with, in both modes.
-var (
-	EngineArgs = []string{"engine", "run"}
-	AgentArgs  = []string{"machines", "agent"}
-)
-
-func AgentPlist(home string) string {
-	// value: the launchd agent that keeps `station machines agent` serving
-	// this Mac's device key, installed and restarted with the engine.
-	return agentPlist(home, AgentLabel)
-}
+var EngineArgs = []string{"engine", "run"} // value: the arguments the engine's job runs its binary with, in both modes.
 
 const BundledEngine = "Spwn Engine" // value: the engine's file inside Spwn.app on a Mac with the window (ADR-073, mode A), the name Activity Monitor gives its processes; the bare binary of a Mac without the app keeps StationBinary.
 

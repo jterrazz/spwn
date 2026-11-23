@@ -26,7 +26,7 @@ type StopReport struct {
 	Engine string
 	// value: the servers it skipped.
 	Servers []string
-	// value: the engine's two jobs were taken from the job manager.
+	// value: the engine's job was taken from the job manager.
 	Removed bool `json:",omitempty"`
 }
 

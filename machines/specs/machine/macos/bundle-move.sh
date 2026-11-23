@@ -42,9 +42,29 @@ sudo -n launchctl asuser "$uid" launchctl setenv STATION_MACHINE_KIND mac || set
 mkdir -p "$HOME/.local/bin" "$HOME/Applications" || setup "the install folders"
 cp $e2e/station "$station" && chmod +x "$station" || setup "place the binary"
 "$station" engine start > /dev/null || setup "engine start on a bare Mac"
-for job in engine agent; do
-  test -e "$agents/com.jterrazz.station.$job.plist" || setup "mode B wrote no com.jterrazz.station.$job.plist"
-done
+test -e "$agents/com.jterrazz.station.engine.plist" || setup "mode B wrote no com.jterrazz.station.engine.plist"
+# value: the key agent's own job an earlier release wrote beside the engine's, which the move must take.
+cat > "$agents/com.jterrazz.station.agent.plist" << PLIST || setup "write the earlier release's com.jterrazz.station.agent.plist"
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>com.jterrazz.station.agent</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/bin/sleep</string>
+		<string>86400</string>
+	</array>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>KeepAlive</key>
+	<true/>
+</dict>
+</plist>
+PLIST
+launchctl bootstrap "gui/$uid" "$agents/com.jterrazz.station.agent.plist" || setup "load the earlier release's com.jterrazz.station.agent"
+within 30 job_runs com.jterrazz.station.agent || setup "launchd keeps no pid for the earlier release's agent job"
 within 30 job_runs com.jterrazz.station.engine || setup "launchd keeps no pid for the bare engine"
 rm -rf "$old" && ditto $e2e/Station.app "$old" && open "$old" || setup "open the standalone menu bar"
 within 30 running "$old/Contents/MacOS/StationMenuBar" || setup "the standalone menu bar never ran"
@@ -63,6 +83,7 @@ for job in engine agent; do
   test -e "$agents/com.jterrazz.station.$job.plist" && miss "the bare com.jterrazz.station.$job.plist is still there"
   launchctl print "gui/$uid/com.jterrazz.station.$job" > /dev/null 2>&1 && miss "launchd still holds the bare com.jterrazz.station.$job"
 done
+launchctl print "gui/$uid/com.jterrazz.spwn.agent" > /dev/null 2>&1 && miss "the bundle registered a second job, com.jterrazz.spwn.agent"
 link=$(readlink "$station")
 [ "$link" = "$engine" ] || miss "~/.local/bin/station links to '$link', not into the bundle"
 within 30 test ! -e "$old" || miss "~/Applications/Station.app is still there"
@@ -74,8 +95,6 @@ say "after: plists $(ls "$agents" | grep jterrazz | tr '\n' ' '), ~/.local/bin/s
 
 osascript -e 'quit app "Spwn"' > /dev/null 2>&1 || true
 [ -z "$menubar" ] || kill "$menubar" > /dev/null 2>&1 || true
-for job in engine agent; do
-  launchctl bootout "gui/$uid/com.jterrazz.spwn.$job" > /dev/null 2>&1 || true
-done
+launchctl bootout "gui/$uid/com.jterrazz.spwn.engine" > /dev/null 2>&1 || true
 sudo -n launchctl asuser "$uid" launchctl unsetenv STATION_MACHINE_KIND > /dev/null 2>&1 || true
 exit 0

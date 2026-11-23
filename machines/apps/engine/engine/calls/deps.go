@@ -41,8 +41,8 @@ type Deps struct {
 
 type Installer interface {
 	Install(ctx context.Context) (engine.Installed, error)
-	// value: the engine's two jobs are gone from this Mac's job manager, in
-	// either mode: a bare job's definition deleted, a bundled one unregistered.
+	// value: the engine's job is gone from this Mac's job manager, in either
+	// mode: a bare job's definition deleted, a bundled one unregistered.
 	Uninstall(ctx context.Context) error
 }
 

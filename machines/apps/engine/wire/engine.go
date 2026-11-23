@@ -53,7 +53,6 @@ import (
 	machinescontract "github.com/jterrazz/studio-station/apps/engine/machines/contract"
 	"github.com/jterrazz/studio-station/apps/engine/platform/darwin"
 	"github.com/jterrazz/studio-station/apps/engine/platform/local"
-	"github.com/jterrazz/studio-station/apps/engine/ports/adapter/lsof"
 	"github.com/jterrazz/studio-station/apps/engine/remote"
 	"github.com/jterrazz/studio-station/apps/engine/remote/api"
 	enginerun "github.com/jterrazz/studio-station/apps/engine/surface/cli/engine/run"
@@ -495,16 +494,10 @@ func (r reservationReleaser) ReleaseVM(ctx context.Context, vm string) error {
 }
 
 func (m machine) installer() engineInstaller {
-	return engineInstaller{m: m, texts: lsof.New(m.sys.Run)}
+	return engineInstaller{m: m}
 }
 
-type engineInstaller struct {
-	m machine
-	// value: the files a process maps as text.
-	texts interface {
-		Texts(ctx context.Context, pid int) ([]string, error)
-	}
-}
+type engineInstaller struct{ m machine }
 
 func (i engineInstaller) env() map[string]string {
 	env := map[string]string{"HOME": i.m.sys.Env.Home()}
@@ -527,11 +520,10 @@ func (i engineInstaller) Install(ctx context.Context) (engine.Installed, error) 
 	return i.install(ctx, jobs)
 }
 
-// invariant: the agent's job goes before the engine's, each in the mode this
-// Mac is in, and a job already gone is no failure.
+// invariant: the engine's job goes in the mode this Mac is in, and a job
+// already gone is no failure.
 func (i engineInstaller) Uninstall(ctx context.Context) error {
-	jobs := i.m.jobs(0)
-	return errors.Join(jobs.Remove(ctx, i.m.agentJobRef()), jobs.Remove(ctx, i.m.engineJobRef()))
+	return i.m.jobs(0).Remove(ctx, i.m.engineJobRef())
 }
 
 func startFailed(cause error) error {
@@ -547,66 +539,17 @@ func (i engineInstaller) install(ctx context.Context, jobs contract.Jobs) (engin
 		}
 		started = changed
 	}
-	done, err := i.installEngine(ctx, jobs, started)
-	if err != nil {
-		return engine.Installed{}, err
-	}
-	if agentErr := i.installAgent(ctx, jobs, done.Restarted); agentErr != nil {
-		return engine.Installed{}, startFailed(agentErr)
-	}
-	return done, nil
-}
-
-// invariant: the agent's job follows the engine's: it restarts when its
-// plist changed, the engine restarted, or its process runs another file than
-// the one its job starts, so it never serves another binary's code.
-func (i engineInstaller) installAgent(ctx context.Context, jobs contract.Jobs, engineRestarted bool) error {
-	job := i.m.agentJobRef()
-	changed, err := jobs.Install(ctx, contract.JobSpec{
-		Label: job.Label, Program: append([]string{i.m.sys.Env.Executable()}, catalog.AgentArgs...), Env: i.env(),
-		AtLogin: true, KeepAlive: true, Log: filepath.Join(i.m.paths.State, "logs", "agent.log"), File: job.File,
-	})
-	if err != nil {
-		return err
-	}
-	status := jobs.Read(ctx, job)
-	if !status.Loaded {
-		if loadErr := jobs.Load(ctx, job); loadErr != nil {
-			return loadErr
-		}
-		return jobs.Start(ctx, job)
-	}
-	if changed || engineRestarted || i.runsAnotherFile(ctx, status.PID, i.agentProgram()) {
-		return jobs.Restart(ctx, job)
-	}
-	return nil
-}
-
-func (i engineInstaller) agentProgram() string {
-	if bundle := i.m.bundle(); bundle != "" {
-		return filepath.Join(bundle, catalog.BundledEnginePath)
-	}
-	return local.Resolved(i.m.sys.Env.Executable())
-}
-
-// value: process pid maps no file at program among its text files; a
-// process whose text files are not read is not judged.
-func (i engineInstaller) runsAnotherFile(ctx context.Context, pid int, program string) bool {
-	if pid <= 0 {
-		return false
-	}
-	texts, err := i.texts.Texts(ctx, pid)
-	return err == nil && !slices.Contains(texts, program)
+	return i.installEngine(ctx, jobs, started)
 }
 
 // invariant: a Mac moves from the bare jobs to the bundle's once, at the
-// bundle's first start, and keeps nothing of them: both are booted out,
-// waited out of launchd and their definitions deleted before the bundle
-// registers its own labels, which no record of the bare jobs matches, and
+// bundle's first start, and keeps nothing of them: each is booted out,
+// waited out of launchd and its definition deleted before the bundle
+// registers its own label, which no record of the bare jobs matches, and
 // the VMs outlive the restart and are adopted again (ADR-073). Then the
-// standalone menu bar goes, the jobs' start is recorded, and
+// standalone menu bar goes, the engine job's start is recorded, and
 // ~/.local/bin/station links into the bundle; started tells whether what
-// the jobs start with changed.
+// the engine's job starts with changed.
 func (i engineInstaller) intoTheBundle(ctx context.Context, bundle string) (started bool, err error) {
 	bundled := i.m.bundledJobs(process.JobBudget)
 	for _, job := range i.m.bareJobRefs() {
@@ -665,8 +608,7 @@ func (i engineInstaller) quitRunning(ctx context.Context, executable string) {
 
 func (i engineInstaller) writeJobStart() (bool, error) {
 	body, err := json.MarshalIndent(local.JobStart{Env: i.env(), Logs: map[string]string{
-		catalog.BundledJobs.Engine: filepath.Join(i.m.paths.State, "logs", "engine.log"),
-		catalog.BundledJobs.Agent:  filepath.Join(i.m.paths.State, "logs", "agent.log"),
+		catalog.BundledEngineLabel: filepath.Join(i.m.paths.State, "logs", "engine.log"),
 	}}, "", "  ")
 	if err != nil {
 		return false, err

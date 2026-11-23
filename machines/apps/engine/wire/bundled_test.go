@@ -5,10 +5,10 @@ import (
 	"testing"
 )
 
-func TestOnlyTheEnginesTwoJobsAreRunAsBundledJobs(t *testing.T) {
+func TestOnlyTheEnginesJobIsRunAsABundledJob(t *testing.T) {
 	for args, want := range map[string]string{
 		"engine run":     "com.jterrazz.spwn.engine",
-		"machines agent": "com.jterrazz.spwn.agent",
+		"machines agent": "",
 		"engine start":   "",
 		"engine":         "",
 	} {

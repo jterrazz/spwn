@@ -43,14 +43,6 @@ func (m machine) openAgent(ctx context.Context) (func(context.Context) error, er
 	return m.openKey(ctx, m.deviceKey())
 }
 
-func (m machine) serveAgent(ctx context.Context) error {
-	serve, err := m.openAgent(ctx)
-	if err != nil {
-		return err
-	}
-	return serve(ctx)
-}
-
 // invariant: an agent that answers on the socket makes a second one refuse;
 // a socket file nobody answers is removed and made again.
 func (m machine) openKey(ctx context.Context, key contract.DeviceKey) (func(context.Context) error, error) {

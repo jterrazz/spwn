@@ -62,8 +62,8 @@ type StopIn struct {
 	// value: what asked the stop, as a reading names it: the command, or
 	// the menu bar.
 	By string
-	// value: after the stop, the engine's two jobs are taken from the job
-	// manager too, so it holds neither.
+	// value: after the stop, the engine's job is taken from the job manager
+	// too, so it holds none.
 	Remove bool
 }
 

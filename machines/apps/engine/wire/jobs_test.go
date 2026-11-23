@@ -33,16 +33,11 @@ func machineRunning(t *testing.T, bundled bool) machine {
 	return machine{sys: local.System{Env: localtest.Env{Exe: exe, HomeDir: "/Users/o", OS: "darwin", UID: 501}}}
 }
 
-func TestTheBundlesJobsAreTheAppsOwnLabelsSoNoRecordOfTheBareJobsMatchesThem(t *testing.T) {
+func TestTheBundlesJobIsTheAppsOwnLabelSoNoRecordOfTheBareJobsMatchesIt(t *testing.T) {
 	m := machineRunning(t, true)
-	bundle := m.bundle()
-	for got, want := range map[contract.Ref]contract.Ref{
-		m.engineJobRef(): {Domain: contract.Domain{UID: 501}, Label: "com.jterrazz.spwn.engine", File: bundle + "/Contents/Library/LaunchAgents/com.jterrazz.spwn.engine.plist"},
-		m.agentJobRef():  {Domain: contract.Domain{UID: 501}, Label: "com.jterrazz.spwn.agent", File: bundle + "/Contents/Library/LaunchAgents/com.jterrazz.spwn.agent.plist"},
-	} {
-		if got != want {
-			t.Errorf("the bundle's job = %+v, want %+v", got, want)
-		}
+	want := contract.Ref{Domain: contract.Domain{UID: 501}, Label: "com.jterrazz.spwn.engine", File: m.bundle() + "/Contents/Library/LaunchAgents/com.jterrazz.spwn.engine.plist"}
+	if got := m.engineJobRef(); got != want {
+		t.Errorf("the bundle's job = %+v, want %+v", got, want)
 	}
 }
 
@@ -58,10 +53,10 @@ func TestTheMoveRetiresTheBareJobsByTheirLabelsAndPlists(t *testing.T) {
 	}
 }
 
-func TestTheBareBinarysJobsKeepTheirLabelsAndPlists(t *testing.T) {
+func TestTheBareBinarysJobIsTheBareEngineTheMoveRetires(t *testing.T) {
 	m := machineRunning(t, false)
-	if got := []contract.Ref{m.agentJobRef(), m.engineJobRef()}; got[0] != m.bareJobRefs()[0] || got[1] != m.bareJobRefs()[1] {
-		t.Errorf("the bare binary's jobs = %+v, want %+v", got, m.bareJobRefs())
+	if got := m.engineJobRef(); got != m.bareJobRefs()[1] {
+		t.Errorf("the bare binary's job = %+v, want %+v", got, m.bareJobRefs()[1])
 	}
 }
 

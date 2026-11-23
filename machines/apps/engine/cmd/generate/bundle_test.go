@@ -45,8 +45,8 @@ func plistValues(t *testing.T, body []byte) map[string][]string {
 	}
 }
 
-func TestEachBundledJobRunsTheBundlesEngineUnderTheCatalogsLabel(t *testing.T) {
-	for label, args := range map[string][]string{catalog.BundledJobs.Engine: catalog.EngineArgs, catalog.BundledJobs.Agent: catalog.AgentArgs} {
+func TestTheBundledJobRunsTheBundlesEngineUnderTheCatalogsLabel(t *testing.T) {
+	for label, args := range map[string][]string{catalog.BundledEngineLabel: catalog.EngineArgs} {
 		body, err := os.ReadFile(filepath.Join(root(t), bundleAgentsDir, path.Base(catalog.BundledPlist(label))))
 		if err != nil {
 			t.Fatal(err)
@@ -69,7 +69,7 @@ func TestEachBundledJobRunsTheBundlesEngineUnderTheCatalogsLabel(t *testing.T) {
 	}
 }
 
-func TestTheWindowsBundleHoldsTheEngineBothJobsAndTheMenuBarWhereTheCatalogSays(t *testing.T) {
+func TestTheWindowsBundleHoldsTheEngineItsOneJobAndTheMenuBarWhereTheCatalogSays(t *testing.T) {
 	body, err := os.ReadFile(filepath.Join(root(t), "apps", "desktop", "src-tauri", "tauri.conf.json"))
 	if err != nil {
 		t.Fatal(err)
@@ -93,9 +93,7 @@ func TestTheWindowsBundleHoldsTheEngineBothJobsAndTheMenuBarWhereTheCatalogSays(
 		contents(catalog.BundledEnginePath):  "../../../.artifacts/window/engine/station",
 		contents(catalog.BundledMenuBarPath): "../../../.artifacts/menubar/Station.app",
 	}
-	for _, label := range []string{catalog.BundledJobs.Engine, catalog.BundledJobs.Agent} {
-		want[contents(catalog.BundledPlist(label))] = path.Join(path.Base(bundleAgentsDir), path.Base(catalog.BundledPlist(label)))
-	}
+	want[contents(catalog.BundledPlist(catalog.BundledEngineLabel))] = path.Join(path.Base(bundleAgentsDir), path.Base(catalog.BundledPlist(catalog.BundledEngineLabel)))
 	if got := conf.Bundle.MacOS.Files; len(got) != len(want) {
 		t.Errorf("bundle.macOS.files = %q, want %q", got, want)
 	}

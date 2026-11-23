@@ -47,38 +47,25 @@ func (m machine) bundle() string {
 	return local.BundleOf(m.sys.Env.Executable(), catalog.BundledEnginePath)
 }
 
-func (m machine) engineJobRef() contract.Ref { return m.jobRefs().engine }
-
-func (m machine) agentJobRef() contract.Ref { return m.jobRefs().agent }
-
-type jobRefs struct{ engine, agent contract.Ref }
-
-// value: this Mac's two engine jobs: the bundle's own labels and
-// definitions in mode A, the bare binary's in mode B.
-func (m machine) jobRefs() jobRefs {
-	bundle := m.bundle()
-	if bundle == "" {
-		return m.bareRefs()
-	}
-	ref := func(label string) contract.Ref {
-		return contract.Ref{Domain: contract.Domain{UID: m.sys.Env.Euid()}, Label: label, File: filepath.Join(bundle, catalog.BundledPlist(label))}
-	}
-	return jobRefs{engine: ref(catalog.BundledJobs.Engine), agent: ref(catalog.BundledJobs.Agent)}
-}
-
-func (m machine) bareRefs() jobRefs {
+// value: this Mac's one engine job: the bundle's own label and definition
+// in mode A, the bare binary's in mode B.
+func (m machine) engineJobRef() contract.Ref {
 	domain := contract.Domain{UID: m.sys.Env.Euid()}
-	return jobRefs{
-		engine: contract.Ref{Domain: domain, Label: catalog.BareJobs.Engine, File: catalog.EnginePlist(m.sys.Env.Home())},
-		agent:  contract.Ref{Domain: domain, Label: catalog.BareJobs.Agent, File: catalog.AgentPlist(m.sys.Env.Home())},
+	if bundle := m.bundle(); bundle != "" {
+		return contract.Ref{Domain: domain, Label: catalog.BundledEngineLabel, File: filepath.Join(bundle, catalog.BundledPlist(catalog.BundledEngineLabel))}
 	}
+	return contract.Ref{Domain: domain, Label: catalog.EngineLabel, File: catalog.EnginePlist(m.sys.Env.Home())}
 }
 
-// value: the bare binary's two jobs, the agent's first, as the move to the
-// bundle boots them out.
+// value: the bare binary's jobs, the key agent's an earlier release wrote
+// first, as the move to the bundle boots them out.
 func (m machine) bareJobRefs() []contract.Ref {
-	bare := m.bareRefs()
-	return []contract.Ref{bare.agent, bare.engine}
+	domain := contract.Domain{UID: m.sys.Env.Euid()}
+	home := m.sys.Env.Home()
+	return []contract.Ref{
+		{Domain: domain, Label: catalog.RetiredAgentLabel, File: catalog.RetiredAgentPlist(home)},
+		{Domain: domain, Label: catalog.EngineLabel, File: catalog.EnginePlist(home)},
+	}
 }
 
 type engineJob struct {

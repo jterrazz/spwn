@@ -32,7 +32,7 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 		Example: "  station engine stop\n  station engine stop --yes\n  station engine stop --yes --remove",
 		Asks:    true,
 		Declare: func(f *pflag.FlagSet, in *Input) {
-			f.BoolVar(&in.remove, "remove", false, "After the stop, remove the engine's two jobs from this Mac, so the engine reads not installed")
+			f.BoolVar(&in.remove, "remove", false, "After the stop, remove the engine's job from this Mac, so the engine reads not installed")
 		},
 		Ask: func(in *Input) (bool, error) {
 			return env.Prompt.Confirm(pageengine.StopConfirm(in.asked.Work, d.ThisMachine.Machine))

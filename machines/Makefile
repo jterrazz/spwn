@@ -141,7 +141,7 @@ window: node_modules/.install $(if $(ENGINE),,build) menubar ## Build the window
 		if [ "$$shown" != "$(WINDOW_VERSION)" ]; then printf "window: the bundle's %s says %s, not the %s compiled in\n" "$$key" "$$shown" "$(WINDOW_VERSION)"; exit 1; fi; \
 	done
 	@shown=$$("$(WINDOW_ENGINE)" --version); if [ "$${shown%% (*}" != "station $(ENGINE_VERSION)" ]; then printf "window: the bundle's engine says %s, not station %s\n" "$$shown" "$(ENGINE_VERSION)"; exit 1; fi
-	@for job in engine agent; do plutil -lint -s "$(WINDOW_APP)/Contents/Library/LaunchAgents/com.jterrazz.spwn.$$job.plist" || exit 1; done
+	@plutil -lint -s "$(WINDOW_APP)/Contents/Library/LaunchAgents/com.jterrazz.spwn.engine.plist"
 	@shown=$$(plutil -extract CFBundleIdentifier raw "$(WINDOW_MENUBAR)/Contents/Info.plist"); if [ "$$shown" != "com.jterrazz.station.menubar" ] || [ ! -x "$(WINDOW_MENUBAR)/Contents/MacOS/StationMenuBar" ]; then printf "window: the bundle carries no menu bar at %s\n" "$(WINDOW_MENUBAR)"; exit 1; fi
 	@APPLE_SIGNING_IDENTITY=- ../scripts/sign-macos.sh sign $(WINDOW_APP)
 	@../scripts/app-icon-check.sh $(WINDOW_APP)

@@ -9,15 +9,14 @@ import (
 
 const bundleAgentsDir = "apps/desktop/src-tauri/agents"
 
-// value: the definitions of the engine's two jobs inside Spwn.app (ADR-073,
-// mode A): static, since a sealed bundle is never rewritten, so they hold no
-// home, no environment and no log path; the engine sets those itself at its
-// start. SMAppService registers them, and launchd runs BundleProgram, a path
+// value: the definition of the engine's one job inside Spwn.app (ADR-073,
+// mode A; ADR-076): static, since a sealed bundle is never rewritten, so it
+// holds no home, no environment and no log path; the engine sets those
+// itself at its start. SMAppService registers it, and launchd runs BundleProgram, a path
 // relative to the bundle.
 func bundledAgents() map[string][]byte {
 	return map[string][]byte{
-		path.Base(catalog.BundledPlist(catalog.BundledJobs.Engine)): bundledAgent(catalog.BundledJobs.Engine, catalog.EngineArgs),
-		path.Base(catalog.BundledPlist(catalog.BundledJobs.Agent)):  bundledAgent(catalog.BundledJobs.Agent, catalog.AgentArgs),
+		path.Base(catalog.BundledPlist(catalog.BundledEngineLabel)): bundledAgent(catalog.BundledEngineLabel, catalog.EngineArgs),
 	}
 }
 

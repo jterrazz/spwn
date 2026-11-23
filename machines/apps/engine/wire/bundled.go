@@ -9,23 +9,19 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/platform/local"
 )
 
-// value: the label of the bundle's job args run, when they are one of the
-// engine's two.
+// value: the label of the bundle's job args run, when they are the engine's.
 func jobOf(args []string) string {
-	switch {
-	case slices.Equal(args, catalog.EngineArgs):
-		return catalog.BundledJobs.Engine
-	case slices.Equal(args, catalog.AgentArgs):
-		return catalog.BundledJobs.Agent
+	if slices.Equal(args, catalog.EngineArgs) {
+		return catalog.BundledEngineLabel
 	}
 	return ""
 }
 
-// invariant: a job of Spwn.app's engine starts with launchd's bare
+// invariant: the job of Spwn.app's engine starts with launchd's bare
 // environment, since its definition in the sealed bundle holds none, so it
 // takes the environment `station engine start` recorded, which wins over
 // launchd's, and writes to its log (ADR-073, mode A). Any other run, and
-// the bare binary's jobs, keep the environment they were given.
+// the bare binary's job, keep the environment they were given.
 func asBundledJob(args, env []string) []string {
 	label := jobOf(args)
 	if label == "" || local.BundleOf(local.Executable(), catalog.BundledEnginePath) == "" {
