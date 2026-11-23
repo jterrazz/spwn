@@ -232,6 +232,46 @@ func TestARunReservesOnlyThePortsOfThePackagesItsMachinefileInstalls(t *testing.
 	}
 }
 
+func TestARunDropsTheEnvReservationsOfAPackageItsMachinefileNoLongerInstalls(t *testing.T) {
+	vite := catalog.PackagePort{Package: "vite", PortHint: catalog.PortHint{Port: 5173, Label: "Vite", HTTP: true, Env: map[string]string{"__VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS": "{host}"}}}
+	expo := catalog.PackagePort{Package: "expo", PortHint: catalog.PortHint{Port: 8081, Label: "Expo", HTTP: true, Env: map[string]string{"EXPO_PACKAGER_PROXY_URL": "{url}"}}}
+	seen := time.Date(2026, 11, 20, 9, 0, 0, 0, time.UTC)
+	for _, c := range []struct {
+		name     string
+		have     ports.Reservation
+		installs []string
+		err      error
+		kept     bool
+	}{
+		{name: "made by an earlier run, never listened on", have: ports.Reservation{By: ports.ByRights}},
+		{name: "its package is installed", have: ports.Reservation{By: ports.ByRights}, installs: []string{"vite"}, kept: true},
+		{name: "a server listened there", have: ports.Reservation{By: ports.ByRights, LastSeenAt: seen}, kept: true},
+		{name: "the owner shared it", have: ports.Reservation{By: ports.ByOwner}, kept: true},
+		{name: "the owner chose its audience", have: ports.Reservation{By: ports.ByRights, Chosen: catalog.AudiencePublic}, kept: true},
+		{name: "its Machinefile cannot be read", have: ports.Reservation{By: ports.ByRights}, err: errors.New("refused"), kept: true},
+	} {
+		t.Run(c.name, func(t *testing.T) {
+			h := newHarness(t, model.VMRecord{Name: "api", Lifetime: model.Persistent, Want: model.WantRunning})
+			h.d.tn = &fakeTailnet{sharing: ports.SharingState{DNSName: "x.tail1234.ts.net", Backend: ports.Running, On: true}}
+			h.d.o.Ports = []catalog.PackagePort{vite, expo}
+			h.d.o.Installs = func(context.Context, string) ([]string, error) { return c.installs, c.err }
+			c.have.VM, c.have.GuestPort, c.have.MacPort = "api", vite.Port, 40000
+			other := ports.Reservation{VM: "api", GuestPort: 3000, MacPort: 40001, By: ports.ByRights}
+			h.d.reservations = []ports.Reservation{c.have, other}
+			h.d.refreshSelf(t.Context())
+			v, _ := h.d.find("api")
+			h.d.renderEnv(t.Context(), v)
+			_, i := ports.Find(h.d.reservations, "api", vite.Port)
+			if kept := i >= 0; kept != c.kept {
+				t.Errorf("reservation of 5173 kept = %v, want %v", kept, c.kept)
+			}
+			if _, i := ports.Find(h.d.reservations, "api", 3000); i < 0 {
+				t.Error("a port no package sets an env for was dropped")
+			}
+		})
+	}
+}
+
 func certLines(d *Engine) chan string {
 	lines := make(chan string, 8)
 	d.note = func(line string) {

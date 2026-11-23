@@ -885,13 +885,20 @@ func joinPort(ip string, port int) string {
 // reserves none.
 func (d *Engine) renderEnv(ctx context.Context, v *vmState) {
 	r := d.loadRights(ctx, v.name)
-	installs := d.installsOf(ctx, v.name)
+	installs, read := d.installsOf(ctx, v.name)
 	p := d.policy()
 	d.mu.Lock()
 	e := d.exposureLocked()
 	env := map[string]string{}
 	for _, h := range d.o.Ports {
-		if len(h.Env) == 0 || !slices.Contains(installs, h.Package) || !r.Allows(h.Port) {
+		if len(h.Env) == 0 {
+			continue
+		}
+		if read && !slices.Contains(installs, h.Package) {
+			d.dropUnusedEnvPortLocked(ctx, v.name, h.Port)
+			continue
+		}
+		if !slices.Contains(installs, h.Package) || !r.Allows(h.Port) {
 			continue
 		}
 		l, i := ports.Find(d.reservations, v.name, h.Port)
@@ -923,14 +930,34 @@ func (d *Engine) renderEnv(ctx context.Context, v *vmState) {
 	}
 }
 
-func (d *Engine) installsOf(ctx context.Context, vm string) []string {
+// invariant: a reservation a run made for a package's env, never seen
+// listening and not the owner's, goes when its Machinefile no longer installs
+// that package; one that ever listened, or that the owner shared or gave an
+// audience, stays until its idle days, a delete or a stop of sharing. The
+// caller holds d.mu.
+func (d *Engine) dropUnusedEnvPortLocked(ctx context.Context, vm string, port int) {
+	i := d.reservationIndex(vm, port)
+	if i < 0 {
+		return
+	}
+	l := d.reservations[i]
+	if l.By != ports.ByRights || l.Chosen != "" || !l.LastSeenAt.IsZero() {
+		return
+	}
+	d.dropLocked(ctx, vm, port)
+	delete(d.svcs, key(vm, port))
+}
+
+// value: the packages the Machinefile installs, and whether it could be
+// read: a Machinefile that cannot be read installs none and drops nothing.
+func (d *Engine) installsOf(ctx context.Context, vm string) ([]string, bool) {
 	if d.o.Installs == nil {
-		return nil
+		return nil, false
 	}
 	installs, err := d.o.Installs(ctx, vm)
 	if err != nil {
 		d.logf(vm+" packages", "its Machinefile could not be read ("+err.Error()+"): no package port is reserved")
-		return nil
+		return nil, false
 	}
-	return installs
+	return installs, true
 }
