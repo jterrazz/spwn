@@ -41,7 +41,7 @@ func TestASecondAgentRefusesWhileOneAnswersOnTheSocket(t *testing.T) {
 	t.Cleanup(func() { _ = answering.Close() })
 	ctx, cancel := context.WithTimeout(t.Context(), 30*time.Second)
 	defer cancel()
-	err = m.serveKey(ctx, &machinesfake.DeviceKey{})
+	_, err = m.openKey(ctx, &machinesfake.DeviceKey{})
 	if !errors.Is(err, errAgentRuns) || !strings.Contains(err.Error(), "already serves this Mac") {
 		t.Fatalf("a second agent served beside the first: %v", err)
 	}
@@ -57,8 +57,12 @@ func TestAnAgentTakesOverASocketNobodyAnswers(t *testing.T) {
 	}
 	ctx, cancel := context.WithCancel(t.Context())
 	cancel()
-	if err := m.serveKey(ctx, &machinesfake.DeviceKey{}); err != nil {
+	serve, err := m.openKey(ctx, &machinesfake.DeviceKey{})
+	if err != nil {
 		t.Fatalf("the agent refused a socket nobody answers: %v", err)
+	}
+	if serveErr := serve(ctx); serveErr != nil {
+		t.Fatalf("the agent served with an error after its ctx ended: %v", serveErr)
 	}
 	line, err := m.sys.FS.ReadFile(DeviceKeyFile(m.paths.State))
 	if err != nil || !strings.HasPrefix(string(line), "ecdsa-sha2-nistp256 ") {

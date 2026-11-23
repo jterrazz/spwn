@@ -1,0 +1,9 @@
+#!/bin/sh
+# value: prints whether the agent lists exactly this Mac's device key, the public half
+# the engine wrote, and whether it is the key it listed first.
+sock=$(/bin/cat "$HOME/.agent-link")
+listed=$(SSH_AUTH_SOCK="$sock" /usr/bin/ssh-add -L | /usr/bin/cut -d' ' -f1,2)
+device=$(/usr/bin/cut -d' ' -f1,2 "$HOME/.local/state/station/device-key.pub")
+[ -n "$listed" ] && [ "$listed" = "$device" ] && echo "the agent lists the device key" || echo "the agent lists $listed"
+[ -f "$HOME/.first-key" ] || echo "$listed" > "$HOME/.first-key"
+[ "$listed" = "$(/bin/cat "$HOME/.first-key")" ] && echo "the same key as first listed" || echo "another key than first listed"

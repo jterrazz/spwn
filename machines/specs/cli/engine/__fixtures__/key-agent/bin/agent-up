@@ -1,0 +1,21 @@
+#!/bin/sh
+# value: starts the document's engine over the device key the spec build keeps in
+# device-key.pem, its stderr in engine.log and its pid in .engine.pid, then waits up to
+# 5 s for its agent to answer; how long it waited, in ms, is the last line of agent.ms.
+# hazard: ssh reaches no socket whose path passes sun_path (108 bytes on Linux), so the agent's socket is
+# reached through a link under /tmp, named in .agent-link, which agent-down removes.
+start=$(/bin/date +%s%N)
+if [ ! -s "$HOME/.agent-link" ]; then
+    dir=$(/usr/bin/mktemp -d /tmp/key-agent.XXXXXX)
+    /bin/ln -s "$HOME/.local/state/station/agent.sock" "$dir/sock"
+    echo "$dir/sock" > "$HOME/.agent-link"
+fi
+sock=$(/bin/cat "$HOME/.agent-link")
+STATION_DEVICE_KEY_STUB="$HOME/device-key.pem" "$STATION" engine run 2>> "$HOME/engine.log" &
+echo $! > "$HOME/.engine.pid"
+n=0
+until SSH_AUTH_SOCK="$sock" /usr/bin/ssh-add -l > /dev/null 2>&1 || [ $n -ge 500 ]; do
+    /bin/sleep 0.01
+    n=$((n + 1))
+done
+echo $((($(/bin/date +%s%N) - start) / 1000000)) >> "$HOME/agent.ms"

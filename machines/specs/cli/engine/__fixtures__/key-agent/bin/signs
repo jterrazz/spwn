@@ -1,0 +1,8 @@
+#!/bin/sh
+# value: an ssh sign-in to the served VM sshd that offers the device key alone, through
+# the agent's socket, as a block of ~/.ssh/config does; it prints what the VM ran.
+sock=$(/bin/cat "$HOME/.agent-link")
+/usr/bin/ssh -F /dev/null -o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR \
+    -o IdentitiesOnly=yes -o IdentityAgent="$sock" \
+    -o IdentityFile="$HOME/.local/state/station/device-key.pub" \
+    -p "$STATION_GUEST_SSH_PORT" vmu@127.0.0.1 echo signed

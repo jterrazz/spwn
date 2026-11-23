@@ -21,6 +21,9 @@ func (m machine) deviceKey() contract.DeviceKey {
 	if m.world != nil {
 		return m.world.deviceKey()
 	}
+	if key := specDeviceKey(m.vars); key != nil {
+		return key
+	}
 	return macos.NewDeviceKey(m.sys.FS, m.paths.State, keychain.PresenceBudget)
 }
 
@@ -36,35 +39,43 @@ func (m machine) sessionAgent(own string) func(ctx context.Context) (local.Conn,
 	}
 }
 
+func (m machine) openAgent(ctx context.Context) (func(context.Context) error, error) {
+	return m.openKey(ctx, m.deviceKey())
+}
+
 func (m machine) serveAgent(ctx context.Context) error {
-	return m.serveKey(ctx, m.deviceKey())
+	serve, err := m.openAgent(ctx)
+	if err != nil {
+		return err
+	}
+	return serve(ctx)
 }
 
 // invariant: an agent that answers on the socket makes a second one refuse;
 // a socket file nobody answers is removed and made again.
-func (m machine) serveKey(ctx context.Context, key contract.DeviceKey) error {
+func (m machine) openKey(ctx context.Context, key contract.DeviceKey) (func(context.Context) error, error) {
 	sock := AgentSocket(m.paths.State)
 	a := ssh.NewAgent(key, m.sessionAgent(sock))
 	line, err := a.PublicLine(ctx)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if c, dialErr := m.sys.Sockets.DialUnix(ctx, sock, time.Second); dialErr == nil {
 		_ = c.Close()
-		return errAgentRuns
+		return nil, errAgentRuns
 	}
 	if mkErr := m.sys.FS.MkdirAll(m.paths.State, 0o700); mkErr != nil {
-		return mkErr
+		return nil, mkErr
 	}
 	if writeErr := m.sys.FS.WriteFile(DeviceKeyFile(m.paths.State), []byte(line), 0o644); writeErr != nil {
-		return writeErr
+		return nil, writeErr
 	}
 	_ = m.sys.FS.Remove(sock)
 	l, err := m.sys.Sockets.ListenUnix(sock)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return a.Listen(ctx, l)
+	return func(ctx context.Context) error { return a.Listen(ctx, l) }, nil
 }
 
 var errAgentRuns = errors.New("Machines' agent already serves this Mac")

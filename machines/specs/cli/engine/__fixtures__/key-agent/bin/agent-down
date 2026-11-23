@@ -1,0 +1,7 @@
+#!/bin/sh
+# value: stops the engine agent-up started, waits until it is gone, and removes the link
+# to its socket.
+pid=$(/bin/cat "$HOME/.engine.pid")
+kill "$pid"
+while kill -0 "$pid" 2> /dev/null; do /bin/sleep 0.1; done
+/bin/rm -rf "$(/usr/bin/dirname "$(/bin/cat "$HOME/.agent-link")")"

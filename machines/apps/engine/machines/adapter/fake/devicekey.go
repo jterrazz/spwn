@@ -21,6 +21,8 @@ type DeviceKey struct {
 	Signed int
 }
 
+func DeviceKeyOf(key *ecdsa.PrivateKey) *DeviceKey { return &DeviceKey{key: key} }
+
 func (k *DeviceKey) private() (*ecdsa.PrivateKey, error) {
 	k.mu.Lock()
 	defer k.mu.Unlock()

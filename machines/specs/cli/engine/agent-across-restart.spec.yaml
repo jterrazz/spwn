@@ -1,0 +1,17 @@
+description: 'the engine serves the device key to ssh, and serves the same key again once it restarts'
+fixture:
+    - ../../__fixtures__/vms/
+    - ../../__fixtures__/engine-vm/
+    - ./__fixtures__/key-agent/
+env: engine
+serve: sshd
+runs:
+    - command: '--version >/dev/null; /usr/bin/sed -i.bak ''s/"vm_user": "vmu"/"vm_user": "vmu", "ports": {"range": "42760-42779"}/'' .config/station/preferences.json; agent-up; listed; signs; agent-restart; listed; signs; agent-down'
+      exit: 0
+      stdout: |
+          the agent lists the device key
+          the same key as first listed
+          signed
+          the agent lists the device key
+          the same key as first listed
+          signed

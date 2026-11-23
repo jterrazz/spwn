@@ -6,7 +6,12 @@ import (
 	"bytes"
 	"cmp"
 	"context"
+	"crypto/ecdsa"
+	"crypto/elliptic"
+	"crypto/rand"
+	"crypto/x509"
 	"encoding/json"
+	"encoding/pem"
 	"errors"
 	"fmt"
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
@@ -373,8 +378,38 @@ func (m *worldMac) imageSource(hypervisor string) imagescontract.ImageSource {
 }
 func (m *worldMac) sshConfig() contract.SSHConfig { return machinesfake.SSHConfigOf(m.run.w, m.name) }
 func (*worldMac) deviceKey() contract.DeviceKey   { return &machinesfake.DeviceKey{} }
-func (m *worldMac) unlocker() contract.Unlocker   { return machinesfake.MacsOf(m.run.w) }
-func (m *worldMac) waker() contract.Waker         { return machinesfake.WakerOf(m.run.w, m.name) }
+
+// invariant: outside a world the spec build never reaches a Secure Enclave:
+// its device key is the one kept in the file STATION_DEVICE_KEY_STUB names,
+// made there at its first ask, so a restarted engine serves the key it
+// served before; without that file, the Mac has no device key.
+func specDeviceKey(vars map[string]string) contract.DeviceKey {
+	file := vars["STATION_DEVICE_KEY_STUB"]
+	if !filepath.IsAbs(file) {
+		return &machinesfake.DeviceKey{Absent: true}
+	}
+	if data, err := os.ReadFile(file); err == nil {
+		if block, _ := pem.Decode(data); block != nil {
+			if key, parseErr := x509.ParseECPrivateKey(block.Bytes); parseErr == nil {
+				return machinesfake.DeviceKeyOf(key)
+			}
+		}
+	}
+	key, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	if err != nil {
+		return &machinesfake.DeviceKey{Absent: true}
+	}
+	der, err := x509.MarshalECPrivateKey(key)
+	if err != nil {
+		return &machinesfake.DeviceKey{Absent: true}
+	}
+	if err := os.WriteFile(file, pem.EncodeToMemory(&pem.Block{Type: "EC PRIVATE KEY", Bytes: der}), 0o600); err != nil {
+		return &machinesfake.DeviceKey{Absent: true}
+	}
+	return machinesfake.DeviceKeyOf(key)
+}
+func (m *worldMac) unlocker() contract.Unlocker { return machinesfake.MacsOf(m.run.w) }
+func (m *worldMac) waker() contract.Waker       { return machinesfake.WakerOf(m.run.w, m.name) }
 func (m *worldMac) processes(kernel contract.Processes) contract.Processes {
 	return machinesfake.ProcessesOf(m.run.w, m.name, kernel)
 }

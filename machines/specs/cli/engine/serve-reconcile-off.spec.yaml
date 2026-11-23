@@ -9,4 +9,5 @@ runs:
       exit: 0
       stdout: |
           0
+          agent: this machine cannot keep a device key: no secure key store
           tailnet: Serve is off on Tailscale: turn on HTTPS certificates in the Tailscale admin console: ports are local only

@@ -11,4 +11,5 @@ runs:
           left running
           reaped
           0
+          agent: this machine cannot keep a device key: no secure key store
           children: killed 1 process(es) a killed engine left running

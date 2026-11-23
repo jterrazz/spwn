@@ -1,0 +1,10 @@
+#!/bin/sh
+# value: restarts the engine agent-up started as launchd's kickstart does, its stop then
+# its start; how long no agent answered, in ms, from the stop to the new agent's first
+# answer, is the last line of agent-gap.ms.
+start=$(/bin/date +%s%N)
+pid=$(/bin/cat "$HOME/.engine.pid")
+kill "$pid"
+while kill -0 "$pid" 2> /dev/null; do /bin/sleep 0.01; done
+agent-up
+echo $((($(/bin/date +%s%N) - start) / 1000000)) >> "$HOME/agent-gap.ms"
