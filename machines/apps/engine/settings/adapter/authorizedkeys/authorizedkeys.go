@@ -718,12 +718,14 @@ func (a *Applier) fallback(it catalog.Setting) (string, bool) {
 }
 
 // invariant: with no record, the block's markers are the record: off looks
-// in the authorized_keys of every account that signs in, root's among
-// them, and a block of station's there leaves it, its owner's lines as
+// in the authorized_keys of every account with a home, root's among them, and a block of station's there leaves it, its owner's lines as
 // they were; a damaged one is refused, so off never reads done while a
 // block of station's is left.
 func (a *Applier) unrecorded(ctx context.Context, id string) (settings.Change, error) {
-	files := a.signingIn()
+	files, err := a.homes()
+	if err != nil {
+		return settings.Change{}, err
+	}
 	held, letGo, err := a.holdAll(ctx, files)
 	if err != nil {
 		return settings.Change{}, err
@@ -770,26 +772,30 @@ func (a *Applier) unrecordedIn(file string, h holding, id string) (*settings.Cha
 	return &settings.ChangeStep{Label: file, State: catalog.StateOK, Detail: "removed, found with no record"}, nil
 }
 
-// value: the authorized_keys of every account of /etc/passwd that signs
-// in, root's always, each once.
-func (a *Applier) signingIn() []string {
+// value: the authorized_keys of every account of /etc/passwd with a home
+// of its own, root's always, each once, whatever its shell or uid: off
+// reaches every file a block can be in, though apply refuses some of them.
+// No /etc/passwd is root alone; one that cannot be read refuses the run.
+func (a *Applier) homes() ([]string, error) {
 	files := []string{"/root/.ssh/" + keysFile}
-	data, _ := a.files.ReadFile(a.at("/etc/passwd"))
+	data, err := a.files.ReadFile(a.at("/etc/passwd"))
+	switch {
+	case errors.Is(err, fs.ErrNotExist):
+		return files, nil
+	case err != nil:
+		return nil, fmt.Errorf("/etc/passwd cannot be read, nothing touched: Machines finds every account's keys through it (%w)", err)
+	}
 	for line := range strings.SplitSeq(string(data), "\n") {
 		f := strings.Split(line, ":")
-		if len(f) < 7 {
+		if len(f) < 7 || !path.IsAbs(f[5]) || path.Clean(f[5]) == "/" {
 			continue
 		}
-		who, err := a.account(f[0])
-		if err != nil || who.home == "/" || signsIn(who) != nil {
-			continue
-		}
-		file := path.Join(who.home, ".ssh", keysFile)
+		file := path.Join(path.Clean(f[5]), ".ssh", keysFile)
 		if !slices.Contains(files, file) {
 			files = append(files, file)
 		}
 	}
-	return files
+	return files, nil
 }
 
 func Keys(given string) (string, error) {
