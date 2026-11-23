@@ -18,7 +18,10 @@ type NeverSleeps struct {
 
 var _ contract.Applier = (*NeverSleeps)(nil)
 
-const held = "held by the engine"
+const (
+	held    = "held by the engine"
+	keyNext = "; the device key changes at the engine's next start"
+)
 
 func New(prefs awakecontract.NeverSleepsPrefs) *NeverSleeps { return &NeverSleeps{prefs: prefs} }
 
@@ -47,7 +50,7 @@ func (n *NeverSleeps) Apply(_ context.Context, it catalog.Setting, _ map[string]
 	if err := n.prefs.Set(true); err != nil {
 		return change, err
 	}
-	change.Steps = []settings.ChangeStep{{Label: it.Name, State: catalog.StateOK, Detail: held}}
+	change.Steps = []settings.ChangeStep{{Label: it.Name, State: catalog.StateOK, Detail: held + keyNext}}
 	change.After = n.values()
 	return change, nil
 }
@@ -57,7 +60,7 @@ func (n *NeverSleeps) Undo(_ context.Context, it catalog.Setting) (settings.Chan
 	if err := n.prefs.Set(false); err != nil {
 		return change, err
 	}
-	change.Steps = []settings.ChangeStep{{Label: it.Name, State: catalog.StateOK, Detail: "the Mac sleeps normally"}}
+	change.Steps = []settings.ChangeStep{{Label: it.Name, State: catalog.StateOK, Detail: "the Mac sleeps normally" + keyNext}}
 	change.After = n.values()
 	return change, nil
 }

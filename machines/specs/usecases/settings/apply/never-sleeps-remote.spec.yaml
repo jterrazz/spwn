@@ -5,7 +5,7 @@ runs:
       exit: 0
       stdout: |
           	On mac-mini:
-          ●	never-sleeps	never-sleeps: the Mac sleeps normally
+          ●	never-sleeps	never-sleeps: the Mac sleeps normally; the device key changes at the engine's next start
     - command: 'awake | /usr/bin/grep mac-mini'
       exit: 0
       stdout: |
@@ -14,7 +14,7 @@ runs:
       exit: 0
       stdout: |
           	On mac-mini:
-          ●	never-sleeps	never-sleeps: held by the engine
+          ●	never-sleeps	never-sleeps: held by the engine; the device key changes at the engine's next start
           # never-sleeps before
           never sleeps	off
           # never-sleeps after

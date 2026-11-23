@@ -4,7 +4,7 @@ runs:
     - command: 'settings apply never-sleeps'
       exit: 0
       stdout: |
-          ●	never-sleeps	never-sleeps: held by the engine
+          ●	never-sleeps	never-sleeps: held by the engine; the device key changes at the engine's next start
           # never-sleeps before
           never sleeps	off
           # never-sleeps after

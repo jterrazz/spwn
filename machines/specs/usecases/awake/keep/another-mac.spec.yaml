@@ -5,7 +5,7 @@ runs:
       exit: 0
       stdout: |
           	On mac-mini:
-          ●	never-sleeps	never-sleeps: the Mac sleeps normally
+          ●	never-sleeps	never-sleeps: the Mac sleeps normally; the device key changes at the engine's next start
     - command: 'awake 2h --on mac-mini'
       exit: 0
       stdout: |
