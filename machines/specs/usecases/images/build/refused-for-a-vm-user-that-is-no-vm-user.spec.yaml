@@ -1,0 +1,11 @@
+description: 'a build is refused for a vm_user the rule refuses, before any VM is made'
+fixture: ../../__fixtures__/build/
+env: two-macs
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs[.this_mac].preferences.vm_user = "root"'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'images build base-ubuntu --binary $HOME/station-linux'
+      exit: 1
+      stderr: |
+          Error: vm_user "root" in preferences.json is not a VM user: a lowercase short name (a-z or _ first, then up to 31 of a-z, 0-9, _, . and -, never a dot last), never admin or root
+          Hint: set another vm_user in ~/.config/station/preferences.json

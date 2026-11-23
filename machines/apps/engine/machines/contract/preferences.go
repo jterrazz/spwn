@@ -45,13 +45,8 @@ func CheckVMUser(user string, account bool) error {
 
 func (v VMUserPrefs) Get() (string, error) {
 	var user string
-	if err := v.p.Read(GroupVMUser, &user); err != nil || user == "" {
-		return user, err
-	}
-	if err := CheckVMUser(user, false); err != nil {
-		return "", err
-	}
-	return user, nil
+	err := v.p.Read(GroupVMUser, &user)
+	return user, err
 }
 
 func (v VMUserPrefs) Set(user string) error { return v.p.Write(GroupVMUser, user) }

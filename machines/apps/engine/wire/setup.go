@@ -68,7 +68,7 @@ func (r allMachinesRegistrar) ThisMac() (string, bool) {
 	return thisMac, err == nil && thisMac != ""
 }
 
-func (r allMachinesRegistrar) Register(name string) error { return r.machines.Init(name) }
+func (r allMachinesRegistrar) Register(name string) (string, error) { return r.machines.Init(name) }
 
 type setupInit struct{ *setupcalls.Provisioner }
 

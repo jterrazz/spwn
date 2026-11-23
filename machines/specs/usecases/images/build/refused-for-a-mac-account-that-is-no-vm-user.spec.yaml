@@ -1,0 +1,11 @@
+description: 'a build is refused for a Mac account that is no VM user, with no vm_user set, before any VM is made'
+fixture: ../../__fixtures__/build/
+env: two-macs
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.user = "Jterrazz.Ops" | del(.macs[.this_mac].preferences.vm_user)'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'images build base-ubuntu --binary $HOME/station-linux'
+      exit: 1
+      stderr: |
+          Error: this Mac's account "Jterrazz.Ops" is not a VM user, and preferences.json sets no vm_user: a VM user is a lowercase short name (a-z or _ first, then up to 31 of a-z, 0-9, _, . and -, never a dot last), never admin or root
+          Hint: set vm_user in ~/.config/station/preferences.json

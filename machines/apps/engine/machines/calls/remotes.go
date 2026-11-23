@@ -5,6 +5,7 @@ import (
 	"errors"
 	"maps"
 	"sort"
+	"strconv"
 	"time"
 
 	coremachine "github.com/jterrazz/studio-station/apps/engine/core/machine"
@@ -76,13 +77,13 @@ func (s *Machinist) RemoteMac(name, verb string) (Machine, error) {
 	return m, nil
 }
 
-func (s *Machinist) Init(name string) error {
+func (s *Machinist) Init(name string) (string, error) {
 	if !validName(name) {
-		return &model.BadNameError{Name: name}
+		return "", &model.BadNameError{Name: name}
 	}
 	cfg, err := s.prefs()
 	if err != nil {
-		return err
+		return "", err
 	}
 	if _, ok := cfg.Macs[name]; !ok {
 		macs := maps.Clone(cfg.Macs)
@@ -91,13 +92,17 @@ func (s *Machinist) Init(name string) error {
 		}
 		macs[name] = model.MacRecord{}
 		if err := s.p.Macs.Set(macs); err != nil {
-			return err
+			return "", err
 		}
 	}
-	if cfg.VMUser == "" {
-		return s.p.VMUser.Set(s.o.User)
+	if cfg.VMUser != "" {
+		return "", nil
 	}
-	return nil
+	bad := contract.CheckVMUser(s.o.User, true)
+	if bad == nil {
+		return "", s.p.VMUser.Set(s.o.User)
+	}
+	return "vm_user left unset: this Mac's account " + strconv.Quote(s.o.User) + " is not a VM user (a lowercase short name, never admin or root); set vm_user in ~/.config/station/preferences.json before making a VM", nil
 }
 
 func (s *Machinist) AddMac(ctx context.Context, name string, h model.MacRecord) error {

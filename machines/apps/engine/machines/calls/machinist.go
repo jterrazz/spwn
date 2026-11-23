@@ -202,10 +202,10 @@ func (s *Machinist) vmUser(cfg prefsView) string {
 }
 
 func (s *Machinist) checkedVMUser(cfg prefsView) (string, error) {
-	// invariant: the VM user is vm_user, which its read checked, or else
-	// this Mac's account, checked by the same rule.
+	// invariant: the VM user is vm_user, or else this Mac's account, checked
+	// by the one rule where a VM is made or started, never where it is read.
 	if cfg.VMUser != "" {
-		return cfg.VMUser, nil
+		return cfg.VMUser, contract.CheckVMUser(cfg.VMUser, false)
 	}
 	return s.o.User, contract.CheckVMUser(s.o.User, true)
 }

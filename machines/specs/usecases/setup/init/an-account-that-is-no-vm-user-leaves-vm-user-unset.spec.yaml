@@ -1,0 +1,23 @@
+description: 'init on a Mac whose account is no VM user leaves vm_user unset and says what to set'
+env: fresh
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.user = "Jterrazz"'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'init --name macbook-pro'
+      exit: 0
+      stdout: |
+          ●	name	macbook-pro; vm_user left unset: this Mac's account "Jterrazz" is not a VM user (a lowercase short name, never admin or root); set vm_user in ~/.config/station/preferences.json before making a VM
+          ●	zshrc
+          ●	relocate	bunfig, go env, mise settings, npmrc
+          # Machinefile
+          	none bound by init: init --machinefile binds one
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].preferences | has("vm_user")'' world.json'
+      exit: 0
+      stdout: |
+          false
+    - command: 'machines --this-mac'
+      exit: 0
+      stdout: |
+          ✗	macbook-pro	Mac	macbook-pro	Engine not installed
+          # Needs you
+          ◐	This Mac	has no engine installed	station engine start
