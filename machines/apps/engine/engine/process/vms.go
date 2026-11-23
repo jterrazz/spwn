@@ -457,14 +457,19 @@ func (d *Engine) opStop(ctx context.Context, vm string, want bool) error {
 }
 
 // invariant: halt ends a VM's run and keeps its disk; want also keeps the
-// wish stopped, so a persistent VM stays stopped when the engine starts again.
+// wish stopped, so a persistent VM stays stopped when the engine starts
+// again. A wish that cannot be saved stops the VM all the same, its save's
+// error answered.
 func (d *Engine) halt(ctx context.Context, v *vmState, want bool) error {
-	vm := v.name
+	var saved error
 	if want {
-		if err := d.m.Save(d.editRecord(v, func(rec *model.VMRecord) { rec.Want = model.WantStopped })); err != nil {
-			return err
-		}
+		saved = d.m.Save(d.editRecord(v, func(rec *model.VMRecord) { rec.Want = model.WantStopped }))
 	}
+	return errors.Join(d.endRun(ctx, v), saved)
+}
+
+func (d *Engine) endRun(ctx context.Context, v *vmState) error {
+	vm := v.name
 	d.mu.Lock()
 	v.stopping = true
 	run, client := v.run, v.client

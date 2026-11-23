@@ -25,6 +25,7 @@ type fakeMachines struct {
 	stuck   map[string]bool
 	records []model.VMRecord
 	saved   []model.VMRecord
+	saveErr error
 }
 
 func (f *fakeMachines) Records() ([]model.VMRecord, error) { return f.records, nil }
@@ -32,6 +33,9 @@ func (f *fakeMachines) Records() ([]model.VMRecord, error) { return f.records, n
 func (f *fakeMachines) Save(r model.VMRecord) error {
 	f.mu.Lock()
 	defer f.mu.Unlock()
+	if f.saveErr != nil {
+		return f.saveErr
+	}
 	f.saved = append(f.saved, r)
 	return nil
 }
@@ -363,6 +367,21 @@ func TestStopAllAnswersFailedForALastingVMTheEngineStillRuns(t *testing.T) {
 	}
 	if len(got) != 2 || got[0] != want[0] || got[1] != want[1] {
 		t.Errorf("stop_all answered %+v, want %+v", got, want)
+	}
+}
+
+func TestAStopWhoseWishCannotBeSavedStopsTheVMAndSaysWhy(t *testing.T) {
+	h := newHarness(t, model.VMRecord{Name: "mac-1", Lifetime: model.Persistent, Want: model.WantRunning})
+	v, _ := h.d.find("mac-1")
+	if err := h.d.start(cancelled(t), v); err != nil {
+		t.Fatal(err)
+	}
+	h.m.saveErr = errors.New("the store is read-only")
+	if err := h.d.halt(t.Context(), v, true); !errors.Is(err, h.m.saveErr) {
+		t.Errorf("halt answered %v; want the wish's save error", err)
+	}
+	if got := h.state("mac-1"); got != engine.StateStopped {
+		t.Errorf("mac-1 reads %s after its stop; want it stopped though its wish was not saved", got)
 	}
 }
 
