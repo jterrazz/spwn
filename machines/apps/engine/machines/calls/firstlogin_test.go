@@ -164,7 +164,7 @@ func TestTheLockdownScriptChecksTheVMUserByTheContractsRule(t *testing.T) {
 }
 
 func TestThisMacsAccountIsCheckedByTheVMUsersRule(t *testing.T) {
-	for user, ok := range map[string]bool{"jterrazz": true, "jterrazz.ops": true, "jterrazz.agent": true, "Jterrazz": false, "jterrazz.": false, "admin": false, "root": false, "": false} {
+	for user, ok := range map[string]bool{"jterrazz": true, "jterrazz.ops": true, "jterrazz.agent": true, "Jterrazz": false, "jterrazz.": false, "admin": false, "root": false, "": false, "_www": false, "_spotlight": false} {
 		err := machinescontract.CheckVMUser(user, true)
 		if (err == nil) != ok {
 			t.Errorf("this Mac's account %q: %v; want taken %v", user, err, ok)

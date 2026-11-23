@@ -173,7 +173,7 @@ type BadVMUserError struct {
 }
 
 func (e *BadVMUserError) Error() string {
-	const rule = "a lowercase short name (a-z or _ first, then up to 31 of a-z, 0-9, _, . and -, never a dot last), never admin or root"
+	const rule = "a lowercase short name (a-z first, then up to 31 of a-z, 0-9, _, . and -, never a dot last), never admin or root"
 	if e.Account {
 		return "this Mac's account " + strconv.Quote(e.User) + " is not a VM user, and preferences.json sets no vm_user: a VM user is " + rule
 	}
