@@ -249,6 +249,7 @@ type EngineView struct {
 	// value: how the Mac stands with macOS's Local Network approval of
 	// station, as its engine last read it; empty where it cannot tell.
 	LocalNetwork LocalNetwork `json:",omitempty"`
+	Agent        Agent        `json:",omitzero"`
 	// value: whether its engine runs from Spwn.app (ADR-073, mode A), as its
 	// hello's executable says.
 	Bundled bool `json:",omitempty"`

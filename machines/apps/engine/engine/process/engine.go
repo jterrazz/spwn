@@ -267,6 +267,7 @@ type Engine struct {
 	// value: this Mac's Local Network approval as last read, and when.
 	localNetwork   model.LocalNetwork
 	localNetworkAt time.Time
+	agent          model.Agent
 }
 
 type Stores struct {
@@ -344,7 +345,6 @@ func (d *Engine) Run(ctx context.Context, note func(line string)) error {
 			return &enginecalls.RunningError{PID: p.PID}
 		}
 	}
-	d.openAgent(ctx, note)
 	if err := d.Begin(ctx, note); err != nil {
 		return err
 	}
@@ -369,32 +369,6 @@ func (d *Engine) Run(ctx context.Context, note func(line string)) error {
 	}
 }
 
-// invariant: the key agent opens at the engine's start, before the VMs are
-// adopted, so an engine restart leaves ssh without it only while the process
-// starts again; a refusal is logged before Begin's first line, and the engine
-// runs on.
-func (d *Engine) openAgent(ctx context.Context, note func(line string)) {
-	if d.o.Agent == nil {
-		return
-	}
-	serve, err := d.o.Agent(ctx)
-	if err != nil {
-		d.noteAgent(note, err)
-		return
-	}
-	go func() {
-		if serveErr := serve(ctx); serveErr != nil && ctx.Err() == nil {
-			d.noteAgent(note, serveErr)
-		}
-	}()
-}
-
-func (d *Engine) noteAgent(note func(line string), err error) {
-	if note != nil {
-		note(d.h.Now().UTC().Format(time.RFC3339) + " agent: " + err.Error())
-	}
-}
-
 func (d *Engine) Begin(ctx context.Context, note func(line string)) error {
 	// invariant: Begin is the engine up to its socket: the clamshell set back
 	// to normal (a killed daemon's mask is cleared by its successor), the
@@ -405,6 +379,7 @@ func (d *Engine) Begin(ctx context.Context, note func(line string)) error {
 	if err := d.Check(); err != nil {
 		return err
 	}
+	d.openAgent(ctx, note)
 	d.note, d.life = note, ctx
 	// invariant: no guest is heard as a share until the start's adoption,
 	// reconciliation and sweep have run: an entry of another HTTPS mode, still

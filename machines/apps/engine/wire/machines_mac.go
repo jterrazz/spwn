@@ -52,7 +52,7 @@ func (d machinesEngine) Hello(ctx context.Context) (model.EngineView, error) {
 	if err != nil {
 		return model.EngineView{}, downAs(err, model.ErrEngineDown)
 	}
-	return model.EngineView{State: model.EngineRunning, Version: p.Version, LocalNetwork: p.LocalNetwork, Bundled: model.InBundle(p.Executable)}, nil
+	return model.EngineView{State: model.EngineRunning, Version: p.Version, LocalNetwork: p.LocalNetwork, Agent: p.Agent, Bundled: model.InBundle(p.Executable)}, nil
 }
 
 func (d machinesEngine) GuestExec(ctx context.Context, vm, line, stdin string) (machinescalls.GuestRan, error) {

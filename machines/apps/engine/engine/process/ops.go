@@ -29,9 +29,9 @@ func fault(code fail.Code, message, hint string) *enginecalls.OpError {
 
 func (d *Engine) Hello() engine.Hello {
 	d.mu.Lock()
-	ln := d.localNetwork
+	ln, agent := d.localNetwork, d.agent
 	d.mu.Unlock()
-	return engine.Hello{Version: d.o.Version, Page: d.o.Page, PID: d.o.PID, StartedAt: d.started, Executable: d.o.Executable, Abilities: d.o.Abilities, LocalNetwork: ln}
+	return engine.Hello{Version: d.o.Version, Page: d.o.Page, PID: d.o.PID, StartedAt: d.started, Executable: d.o.Executable, Abilities: d.o.Abilities, LocalNetwork: ln, Agent: agent}
 }
 
 func (d *Engine) VMs() []engine.VMView { return d.vmViews() }

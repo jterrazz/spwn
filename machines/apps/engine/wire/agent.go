@@ -2,11 +2,14 @@ package wire
 
 import (
 	"context"
-	"errors"
 	"path"
+	"strconv"
 	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/accounts/adapter/keychain"
+	"github.com/jterrazz/studio-station/apps/engine/background/adapter/launchd"
+	"github.com/jterrazz/studio-station/apps/engine/engine"
+	model "github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/machines/adapter/macos"
 	"github.com/jterrazz/studio-station/apps/engine/machines/adapter/ssh"
 	"github.com/jterrazz/studio-station/apps/engine/machines/contract"
@@ -39,12 +42,20 @@ func (m machine) sessionAgent(own string) func(ctx context.Context) (local.Conn,
 	}
 }
 
+func (m machine) agentOpener() func(context.Context) (func(context.Context) error, error) {
+	if m.world != nil {
+		return m.world.agent()
+	}
+	return m.openAgent
+}
+
 func (m machine) openAgent(ctx context.Context) (func(context.Context) error, error) {
 	return m.openKey(ctx, m.deviceKey())
 }
 
-// invariant: an agent that answers on the socket makes a second one refuse;
-// a socket file nobody answers is removed and made again.
+// invariant: a process that answers on the socket holds it: the engine is
+// refused with who holds it, and the connection kept open tells when the
+// holder lets it go. A socket file nobody answers is removed and made again.
 func (m machine) openKey(ctx context.Context, key contract.DeviceKey) (func(context.Context) error, error) {
 	sock := AgentSocket(m.paths.State)
 	a := ssh.NewAgent(key, m.sessionAgent(sock))
@@ -53,8 +64,7 @@ func (m machine) openKey(ctx context.Context, key contract.DeviceKey) (func(cont
 		return nil, err
 	}
 	if c, dialErr := m.sys.Sockets.DialUnix(ctx, sock, time.Second); dialErr == nil {
-		_ = c.Close()
-		return nil, errAgentRuns
+		return nil, m.heldBy(c)
 	}
 	if mkErr := m.sys.FS.MkdirAll(m.paths.State, 0o700); mkErr != nil {
 		return nil, mkErr
@@ -70,4 +80,44 @@ func (m machine) openKey(ctx context.Context, key contract.DeviceKey) (func(cont
 	return func(ctx context.Context) error { return a.Listen(ctx, l) }, nil
 }
 
-var errAgentRuns = errors.New("Machines' agent already serves this Mac")
+func (m machine) heldBy(c local.Conn) *engine.AgentHeldError {
+	pid, exe := local.PeerOf(c)
+	return &engine.AgentHeldError{
+		Holder: model.Agent{PID: pid, Executable: exe, Free: agentFree(pid, m.jobOf(pid))},
+		Freed: func(ctx context.Context) error {
+			stop := context.AfterFunc(ctx, func() { _ = c.Close() })
+			defer stop()
+			buf := make([]byte, 512)
+			for {
+				if _, err := c.Read(buf); err != nil {
+					break
+				}
+			}
+			_ = c.Close()
+			return ctx.Err()
+		},
+	}
+}
+
+func agentFree(pid int, label string) string {
+	if label != "" {
+		return launchd.Bootout(label)
+	}
+	return "kill " + strconv.Itoa(pid)
+}
+
+func (m machine) jobOf(pid int) string {
+	if pid <= 0 || m.world != nil {
+		return ""
+	}
+	listed, err := m.bareJobs(time.Second).List(context.Background())
+	if err != nil {
+		return ""
+	}
+	for _, j := range listed {
+		if j.Running && j.PID == pid {
+			return j.Label
+		}
+	}
+	return ""
+}

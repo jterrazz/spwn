@@ -219,6 +219,13 @@ type Mac struct {
 	// station; empty, a read that cannot tell. While not approved, its
 	// engine's dial to any of its VMs is refused.
 	LocalNetwork machines.LocalNetwork `json:"local_network,omitempty"`
+	AgentHeld    *AgentHolder          `json:"agent_held,omitempty"`
+}
+
+type AgentHolder struct {
+	PID        int    `json:"pid"`
+	Executable string `json:"executable,omitempty"`
+	Label      string `json:"label,omitempty"`
 }
 
 type Self struct {

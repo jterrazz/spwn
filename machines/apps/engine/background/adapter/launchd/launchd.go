@@ -15,6 +15,8 @@ import (
 
 const command = "launchctl"
 
+func Bootout(label string) string { return command + " bootout gui/$(id -u)/" + label }
+
 type Options struct {
 	Home string
 	// value: the system root the machine-wide folders are read under.

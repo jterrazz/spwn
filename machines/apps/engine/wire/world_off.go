@@ -59,30 +59,31 @@ func (*worldMac) hypervisor(string, catalog.Install) contract.Hypervisor { retur
 func (*worldMac) guests() contract.GuestDialer                           { return nil }
 func (*worldMac) deviceKey() contract.DeviceKey                          { return nil }
 
-func specDeviceKey(map[string]string) contract.DeviceKey                 { return nil }
-func (*worldMac) localNetwork() func(context.Context) model.LocalNetwork { return nil }
-func (*worldMac) imageSource(string) imagescontract.ImageSource          { return nil }
-func (*worldMac) sshConfig() contract.SSHConfig                          { return nil }
-func (*worldMac) unlocker() contract.Unlocker                            { return nil }
-func (*worldMac) waker() contract.Waker                                  { return nil }
-func (*worldMac) processes(kernel contract.Processes) contract.Processes { return kernel }
-func (*worldMac) jobs() backgroundcontract.Jobs                          { return nil }
-func (*worldMac) releases() enginecontract.Releases                      { return nil }
-func (*worldMac) inspector() settingscontract.Inspector                  { return nil }
-func (*worldMac) procedureAppliers() []settingscontract.Applier          { return nil }
-func (*worldMac) meter() activitycontract.Meter                          { return nil }
-func (*worldMac) disk() diskcontract.DiskUsage                           { return nil }
-func (*worldMac) listeners() portscontract.Listeners                     { return nil }
-func (*worldMac) placement() (ports.VMLivesOn, bool)                     { return ports.VMLivesOn{}, false }
-func (*worldMac) tailnet() sharingNode                                   { return nil }
-func (*worldMac) funnel() funnel.Funnel                                  { return nil }
-func (*worldMac) installer(catalog.Method, bool) appscontract.Installer  { return nil }
-func (*worldMac) bundler() appscontract.Bundler                          { return nil }
-func (*worldMac) managers(map[catalog.Method]appscontract.Installer)     {}
-func (*worldMac) budgets() lanes.Clock                                   { return nil }
-func (*worldMac) poolContext(ctx context.Context) context.Context        { return ctx }
-func (*worldMac) watchContext(ctx context.Context) context.Context       { return ctx }
-func (*worldMac) vault() accountscontract.Vault                          { return nil }
+func specDeviceKey(map[string]string) contract.DeviceKey                            { return nil }
+func (*worldMac) localNetwork() func(context.Context) model.LocalNetwork            { return nil }
+func (*worldMac) agent() func(context.Context) (func(context.Context) error, error) { return nil }
+func (*worldMac) imageSource(string) imagescontract.ImageSource                     { return nil }
+func (*worldMac) sshConfig() contract.SSHConfig                                     { return nil }
+func (*worldMac) unlocker() contract.Unlocker                                       { return nil }
+func (*worldMac) waker() contract.Waker                                             { return nil }
+func (*worldMac) processes(kernel contract.Processes) contract.Processes            { return kernel }
+func (*worldMac) jobs() backgroundcontract.Jobs                                     { return nil }
+func (*worldMac) releases() enginecontract.Releases                                 { return nil }
+func (*worldMac) inspector() settingscontract.Inspector                             { return nil }
+func (*worldMac) procedureAppliers() []settingscontract.Applier                     { return nil }
+func (*worldMac) meter() activitycontract.Meter                                     { return nil }
+func (*worldMac) disk() diskcontract.DiskUsage                                      { return nil }
+func (*worldMac) listeners() portscontract.Listeners                                { return nil }
+func (*worldMac) placement() (ports.VMLivesOn, bool)                                { return ports.VMLivesOn{}, false }
+func (*worldMac) tailnet() sharingNode                                              { return nil }
+func (*worldMac) funnel() funnel.Funnel                                             { return nil }
+func (*worldMac) installer(catalog.Method, bool) appscontract.Installer             { return nil }
+func (*worldMac) bundler() appscontract.Bundler                                     { return nil }
+func (*worldMac) managers(map[catalog.Method]appscontract.Installer)                {}
+func (*worldMac) budgets() lanes.Clock                                              { return nil }
+func (*worldMac) poolContext(ctx context.Context) context.Context                   { return ctx }
+func (*worldMac) watchContext(ctx context.Context) context.Context                  { return ctx }
+func (*worldMac) vault() accountscontract.Vault                                     { return nil }
 func (*worldMac) signIns(func() time.Time, func(context.Context, time.Duration) error) accountscontract.SignIns {
 	return nil
 }

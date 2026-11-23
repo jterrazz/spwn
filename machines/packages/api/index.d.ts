@@ -1119,6 +1119,7 @@ export type EngineFit = {
 
 export type EngineHello = {
     abilities?: string[];
+    agent?: MachinesAgent;
     calls?: string[];
     executable?: string;
     local_network?: string;
@@ -1822,6 +1823,14 @@ export type MachinesAdded = {
     Version: string;
 };
 
+export type MachinesAgent = {
+    detail?: string;
+    executable?: string;
+    free?: string;
+    pid?: number;
+    state: '' | 'failed' | 'held' | 'served';
+};
+
 export type MachinesAllMachines = {
     Macs: MachinesMacView[] | null;
     Read: string;
@@ -2054,6 +2063,7 @@ export type MachinesEdited = {
 };
 
 export type MachinesEngineView = {
+    Agent?: MachinesAgent;
     Bundled?: boolean;
     LocalNetwork?: string;
     State?: 'running' | 'stopped' | 'not-installed';

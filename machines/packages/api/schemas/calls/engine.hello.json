@@ -9,6 +9,9 @@
           },
           "type": "array"
         },
+        "agent": {
+          "$ref": "#/$defs/machines.Agent"
+        },
         "calls": {
           "items": {
             "type": "string"
@@ -39,6 +42,36 @@
         "pid",
         "started_at",
         "version"
+      ],
+      "type": "object"
+    },
+    "machines.Agent": {
+      "additionalProperties": false,
+      "properties": {
+        "detail": {
+          "type": "string"
+        },
+        "executable": {
+          "type": "string"
+        },
+        "free": {
+          "type": "string"
+        },
+        "pid": {
+          "type": "integer"
+        },
+        "state": {
+          "enum": [
+            "",
+            "failed",
+            "held",
+            "served"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "state"
       ],
       "type": "object"
     }

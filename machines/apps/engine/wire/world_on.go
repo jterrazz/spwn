@@ -370,6 +370,22 @@ func (m *worldMac) localNetwork() func(context.Context) model.LocalNetwork {
 	return func(context.Context) model.LocalNetwork { return m.slice().LocalNetwork }
 }
 
+func (m *worldMac) agent() func(context.Context) (func(context.Context) error, error) {
+	return func(context.Context) (func(context.Context) error, error) {
+		if held := m.slice().AgentHeld; held != nil {
+			holder := model.Agent{PID: held.PID, Executable: held.Executable, Free: agentFree(held.PID, held.Label)}
+			return nil, &engine.AgentHeldError{Holder: holder, Freed: func(ctx context.Context) error {
+				<-ctx.Done()
+				return ctx.Err()
+			}}
+		}
+		return func(ctx context.Context) error {
+			<-ctx.Done()
+			return nil
+		}, nil
+	}
+}
+
 func (m *worldMac) guests() contract.GuestDialer {
 	return worldGuests{GuestDialer: machinesfake.GuestsOf(m.run.w).Serving(engine.GuestSession), r: m.run}
 }

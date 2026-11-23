@@ -155,6 +155,9 @@ func Findings(f AllMachines) []finding.Finding {
 		if h.Reachable && h.Engine.Running() && h.Engine.LocalNetwork == LocalNetworkNotApproved {
 			out = append(out, finding.Finding{Machine: mac, Section: section.Overview, Severity: finding.NeedsALook, Subject: label, Text: NotApproved(h.Name, h.Engine.Bundled), Fix: finding.Fix{Path: LocalNetworkFix(h.Name, h.Engine.Bundled)}})
 		}
+		if h.Reachable && h.Engine.Running() && h.Engine.Agent.Unserved() {
+			out = append(out, finding.Finding{Machine: mac, Section: section.Overview, Severity: finding.NeedsALook, Subject: label, Text: h.Engine.Agent.Said(h.Name), Fix: finding.Fix{Command: h.Engine.Agent.Fix()}})
+		}
 		if fix, ok := Behind(h, thisMac); ok && h.Reachable {
 			out = append(out, finding.Finding{Machine: mac, Section: section.Overview, Severity: finding.NeedsALook, Subject: label, Text: label + " runs " + h.StationVersion, Fix: finding.Fix{Path: fix}})
 		}

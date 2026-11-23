@@ -22,6 +22,7 @@ type Hello struct {
 	// value: how its Mac stands with macOS's Local Network approval of
 	// station, as the engine last read it; empty where it cannot tell.
 	LocalNetwork model.LocalNetwork `json:"local_network,omitempty"`
+	Agent        model.Agent        `json:"agent,omitzero"`
 }
 
 type VMView struct {

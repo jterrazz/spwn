@@ -67,6 +67,7 @@ func events() []event {
 		{"unopened", []string{"<mac>", "<app>"}, unopened},
 		{"certificate", []string{"<mac>", "pending|issued"}, certificate},
 		{"local-network", []string{"<mac>", "approved|not-approved"}, localNetwork},
+		{"agent", []string{"<mac>", "served|held", "[<pid>]", "[<executable>]", "[<label>]"}, agentSocket},
 		{"admin", []string{"on|off"}, admin},
 		{"release", []string{"<tag>", "[no-asset]"}, releaseTag},
 	}
@@ -607,6 +608,33 @@ func localNetwork(w *World, args []string) error {
 	case machines.LocalNetworkChecking:
 	}
 	return fmt.Errorf("world local-network: %q is not approved or not-approved", args[1])
+}
+
+func agentSocket(w *World, args []string) error {
+	m, err := w.known(args[0])
+	if err != nil {
+		return err
+	}
+	switch {
+	case len(args) == 2 && args[1] == "served":
+		m.AgentHeld = nil
+		return nil
+	case len(args) >= 3 && args[1] == "held":
+		pid, convErr := strconv.Atoi(args[2])
+		if convErr != nil {
+			return fmt.Errorf("world agent: %q is not a pid", args[2])
+		}
+		held := AgentHolder{PID: pid}
+		if len(args) > 3 {
+			held.Executable = args[3]
+		}
+		if len(args) > 4 {
+			held.Label = args[4]
+		}
+		m.AgentHeld = &held
+		return nil
+	}
+	return fmt.Errorf("world agent: %q is not served or held <pid>", strings.Join(args[1:], " "))
 }
 
 // invariant: the release made last is the latest; one made no-asset
