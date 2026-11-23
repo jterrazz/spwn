@@ -1,0 +1,20 @@
+description: 'an account whose shell is nologin does not sign in: authorized-key refuses it and makes nothing'
+env:
+    - in-workspace
+    - engine
+runs:
+    - command: 'world admin on'
+      exit: 0
+    - command: '--version >/dev/null; /bin/mkdir -p root/root root/srv/backup root/etc && printf ''root:x:0:0:root:/root:/bin/bash\nbackup:x:34:34:backup:/srv/backup:/usr/sbin/nologin\n'' > root/etc/passwd'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | .out[0].Steps'''
+      stdin: |
+          {"v":2,"id":"1","call":"settings.apply","in":{"Names":["authorized-key"],"Values":{"authorized-key":{"user":"backup","key":"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGZ2c8e4bOqkqO0+5N0VXlFz4sVJyDQzH+LVRG4RvMZb ci@deploy"}}}}
+      exit: 0
+      stdout: |
+          [{"Label":"failed","State":"broken","Detail":"backup does not sign in (its shell is /usr/sbin/nologin), not touched: Machines writes keys only for an account that signs in"}]
+    - command: '--version >/dev/null; /usr/bin/find root/srv -mindepth 1; /usr/bin/test -e root/var/lib/station || echo no record'
+      exit: 0
+      stdout: |
+          root/srv/backup
+          no record

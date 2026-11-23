@@ -95,7 +95,7 @@ type written struct {
 }
 
 type account struct {
-	name, home string
+	name, home, shell string
 	local.Owner
 }
 
@@ -254,6 +254,10 @@ func (a *Applier) Apply(ctx context.Context, it catalog.Setting, values map[stri
 	}
 	user := strings.TrimSpace(values[InputUser])
 	who, err := a.account(user)
+	if err != nil {
+		return settings.Change{}, err
+	}
+	err = signsIn(who)
 	if err != nil {
 		return settings.Change{}, err
 	}
@@ -584,6 +588,20 @@ func (a *Applier) homeOf(who account) (string, error) {
 	return base, nil
 }
 
+// invariant: a key goes only to an account that signs in: one whose shell
+// is nologin or false never does, and a key there would still open its
+// tunnels; root is always taken.
+func signsIn(who account) error {
+	if who.name == "root" {
+		return nil
+	}
+	switch path.Base(who.shell) {
+	case "nologin", "false":
+		return fmt.Errorf("%s does not sign in (its shell is %s), not touched: Machines writes keys only for an account that signs in", who.name, who.shell)
+	}
+	return nil
+}
+
 // invariant: ~/.ssh is a real folder, made the user's at 0700 when it is
 // not there; a link there is refused, never followed.
 func (a *Applier) folder(base, rel string, who account) error {
@@ -630,7 +648,7 @@ func (a *Applier) account(user string) (account, error) {
 		uid, uerr := strconv.Atoi(f[2])
 		gid, gerr := strconv.Atoi(f[3])
 		if uerr == nil && gerr == nil {
-			return a.as(account{name: user, home: path.Clean(f[5]), Owner: local.Owner{UID: uid, GID: gid}}), nil
+			return a.as(account{name: user, home: path.Clean(f[5]), shell: f[6], Owner: local.Owner{UID: uid, GID: gid}}), nil
 		}
 	}
 	if user == "root" {

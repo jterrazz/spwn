@@ -462,6 +462,9 @@ func TestAHomeThatIsNotTheUsersRealFolderIsRefused(t *testing.T) {
 			m.link(m.at("srv"), "home/ci")
 		}, "/home/ci is a link, not touched"},
 		"a file": {func(m *machine) { _ = m.disk.Remove(m.at("home/ci")); m.write("home/ci", "", 0o644) }, "/home/ci is not a folder, not touched"},
+		"the system's root": {func(m *machine) {
+			m.write("etc/passwd", "ci:x:"+strconv.Itoa(m.ci.UID)+":"+strconv.Itoa(m.ci.GID)+":CI:/:/bin/bash\n", 0o644)
+		}, "ci has no home of its own (/): Machines writes only in a user's home"},
 	} {
 		t.Run(name, func(t *testing.T) {
 			m := newMachine(t)
@@ -645,4 +648,29 @@ func TestARecordOnlyRootReadsIsReadBlindWithoutAdmin(t *testing.T) {
 	if err != nil || !o.Blind || o.State == catalog.StateAbsent || o.Detail != "needs admin to read /var/lib/station/authorized-keys.json" {
 		t.Fatalf("Observe = %+v, %v; want it read blind, needing admin", o, err)
 	}
+}
+
+// invariant: an account whose shell is nologin or false never signs in, and
+// gets no key: a key there would still open its tunnels; root always does.
+func TestAnAccountThatDoesNotSignInIsRefused(t *testing.T) {
+	for _, shell := range []string{"/usr/sbin/nologin", "/sbin/nologin", "/bin/false", "/usr/bin/false"} {
+		t.Run(shell, func(t *testing.T) {
+			m := newMachine(t)
+			m.write("etc/passwd", "root:x:0:0:root:/root:/bin/bash\nci:x:"+strconv.Itoa(m.ci.UID)+":"+strconv.Itoa(m.ci.GID)+":CI:/home/ci:"+shell+"\n", 0o644)
+			err := refused(t, m.open(), "ci", key(t, 1, ""))
+			if want := "ci does not sign in (its shell is " + shell + "), not touched"; !strings.Contains(err.Error(), want) {
+				t.Fatalf("Apply = %v; want %q", err, want)
+			}
+			if m.there("home/ci/.ssh") {
+				t.Fatal("a .ssh was made")
+			}
+		})
+	}
+	t.Run("root with nologin", func(t *testing.T) {
+		m := newMachine(t)
+		m.write("etc/passwd", "root:x:0:0:root:/root:/usr/sbin/nologin\n", 0o644)
+		if _, err := m.open().Apply(context.Background(), setting(), map[string]string{"user": "root", "key": key(t, 1, "")}); err != nil {
+			t.Fatalf("Apply for root = %v; want it taken", err)
+		}
+	})
 }
