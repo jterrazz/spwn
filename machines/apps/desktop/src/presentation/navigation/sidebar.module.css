@@ -32,6 +32,7 @@
 }
 :global(html[data-chrome='overlay']) .lights {
     height: var(--chrome-row);
+    margin-bottom: -18px;
 }
 .find {
     all: unset;
