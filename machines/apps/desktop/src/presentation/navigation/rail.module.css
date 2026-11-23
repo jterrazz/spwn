@@ -7,11 +7,7 @@
     min-height: 0;
     padding: 0 0 var(--space-10);
     border-right: 1px solid var(--line);
-    background: linear-gradient(
-        180deg,
-        color-mix(in srgb, var(--horizon) 15%, var(--ground-sidebar)),
-        var(--ground-sidebar) 150px
-    );
+    background: var(--ground-sidebar);
 }
 .lights {
     height: var(--space-14);

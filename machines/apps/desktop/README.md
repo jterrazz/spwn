@@ -313,7 +313,7 @@ Spwn has three spaces, Machine, Agent and OS; this window is Machine, and the tw
 - Home and Inbox at the top, the places of the window whatever the space, Inbox counting the lines that need me in the warn tone; Settings and the Engine line, its state's dot and the engine's version, at its foot, the line opening the Engine page.
 - Between them the spaces, one choice of three in a segmented well (`src/presentation/navigation/spaces.ts`): Machine raised with its colour's mark while one of its pages is open, Agent and OS dimmed with "soon" under their name and a tooltip saying what each will hold. A press on Machine, or ⌃1, opens the last of its pages this window showed, else the first Mac listed.
 - Home, Inbox, Settings and the Engine page open in the content and leave the sidebar as it is: the sidebar is the Machine space's, headed by its name.
-- The space's colour, `--space-machine` (`src/presentation/ui/tokens.css`), is a horizon: a glow over the top 150 px of the rail, the sidebar and the content, under which panels and states keep their neutral grounds.
+- The window is flat: the rail, the sidebar and the content are plain neutral grounds, and the space's colour, `--space-machine` (`src/presentation/ui/tokens.css`), only marks the chosen segment of the rail.
 
 ## The keyboard
 

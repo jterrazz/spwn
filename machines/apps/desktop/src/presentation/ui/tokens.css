@@ -27,14 +27,13 @@
     --new: #0a84ff;
 
     --on-primary: #111111;
-    --primary-top: #ffffff;
-    --primary-bottom: #e2e2e2;
+    --primary: #ffffff;
     --scrim: rgb(0 0 0 / 60%);
     --shadow-pop: 0 24px 64px rgb(0 0 0 / 60%);
-    --shadow-primary: 0 1px 0 rgb(255 255 255 / 50%) inset, 0 1px 2px rgb(0 0 0 / 40%);
+    --shadow-primary: 0 1px 2px rgb(0 0 0 / 40%);
     --shadow-segment: 0 1px 2.5px rgb(0 0 0 / 30%), inset 0 1px 0 rgb(255 255 255 / 9%);
 
-    /* value: each space's colour: the window's horizon and the mark of its chosen segment, never a state's */
+    /* value: each space's colour: the mark of its chosen segment, never a state's */
     --space-machine: #b3aca2;
     --space-agent: var(--id-purple);
     --space-os: var(--id-teal);

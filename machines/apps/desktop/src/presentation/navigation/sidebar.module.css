@@ -1,10 +1,6 @@
 .sidebar {
     border-right: 1px solid var(--line);
-    background: linear-gradient(
-        180deg,
-        color-mix(in srgb, var(--horizon) 15%, var(--ground-sidebar)),
-        var(--ground-sidebar) 150px
-    );
+    background: var(--ground-sidebar);
     display: flex;
     flex-direction: column;
     gap: 18px;

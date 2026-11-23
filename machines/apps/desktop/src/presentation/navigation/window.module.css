@@ -1,5 +1,4 @@
 .window {
-    --horizon: var(--space-machine);
     height: 100%;
     display: grid;
     grid-template-columns: 76px 244px minmax(0, 1fr);
@@ -10,11 +9,7 @@
     grid-template-columns: 76px minmax(0, 1fr);
 }
 .main {
-    background: linear-gradient(
-        180deg,
-        color-mix(in srgb, var(--horizon) 15%, var(--ground)),
-        var(--ground) 150px
-    );
+    background: var(--ground);
     display: flex;
     flex-direction: column;
     min-width: 0;
