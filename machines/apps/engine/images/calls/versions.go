@@ -18,7 +18,7 @@ func (s *Builder) Latest(ctx context.Context, image string) (images.Record, erro
 		return images.Record{}, err
 	}
 	if len(all) == 0 {
-		return images.Record{}, &images.NotBuiltError{Image: image}
+		return images.Record{}, &images.NotBuiltError{Image: image, Fetched: img.Recipe == ""}
 	}
 	return all[0], nil
 }

@@ -231,7 +231,7 @@ func (s *Builder) CheckDelete(ctx context.Context, image, version string) error 
 		}
 	}
 	if len(all) == 0 {
-		return &images.NotBuiltError{Image: image}
+		return &images.NotBuiltError{Image: image, Fetched: img.Recipe == ""}
 	}
 	if version != "" && !slices.ContainsFunc(all, func(r images.Record) bool { return r.Version == version }) {
 		return &images.UnknownVersionError{Image: image, Version: version}

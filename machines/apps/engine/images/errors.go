@@ -41,9 +41,18 @@ func (e *OldRecordError) Error() string {
 	return e.File + " is a record an older station wrote: it names no distro"
 }
 
-type NotBuiltError struct{ Image string }
+type NotBuiltError struct {
+	Image string
+	// value: Machines only fetches the image: it has no recipe to build it.
+	Fetched bool
+}
 
-func (e *NotBuiltError) Error() string { return "image " + e.Image + " is not built here" }
+func (e *NotBuiltError) Error() string {
+	if e.Fetched {
+		return "image " + e.Image + " is not on this Mac"
+	}
+	return "image " + e.Image + " is not built here"
+}
 
 type NoLinuxBinaryError struct{}
 

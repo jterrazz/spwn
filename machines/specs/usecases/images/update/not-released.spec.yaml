@@ -12,4 +12,4 @@ runs:
       exit: 1
       stderr: |
           Error: no version of mac-dev is released
-          Hint: station images
+          Hint: Machines has no recipe for mac-dev and no registry releases it: nothing on this Mac can fetch or build it

@@ -30,12 +30,15 @@ func imagesFailure(err error) (*fail.Error, bool) {
 	case errors.As(err, &version):
 		return usage(version.Error(), "station images lists the versions"), true
 	case errors.As(err, &notBuilt):
+		if notBuilt.Fetched {
+			return usage(notBuilt.Error(), "station images update "+notBuilt.Image), true
+		}
 		return usage(notBuilt.Error(), "station images build "+notBuilt.Image), true
 	case errors.As(err, &unpublished):
 		if unpublished.Buildable {
 			return failed(unpublished.Error(), "station images build "+unpublished.Image, err), true
 		}
-		return failed(unpublished.Error(), "station images", err), true
+		return failed(unpublished.Error(), "Machines has no recipe for "+unpublished.Image+" and no registry releases it: nothing on this Mac can fetch or build it", err), true
 	case errors.As(err, &registry):
 		return failed(registry.Error(), "station images update "+registry.Image, err), true
 	case errors.As(err, &fetch):

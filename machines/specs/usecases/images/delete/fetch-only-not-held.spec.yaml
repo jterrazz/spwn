@@ -1,0 +1,8 @@
+description: 'deleting a fetch-only image this Mac does not hold is refused with how to fetch it'
+env: two-macs
+runs:
+    - command: 'images delete base-macos --yes'
+      exit: 2
+      stderr: |
+          Error: image base-macos is not on this Mac
+          Hint: station images update base-macos

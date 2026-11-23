@@ -1,0 +1,18 @@
+description: 'on a terminal, a fetch-only image not on the Mac chosen is refused with how to fetch it'
+fixture: ../../../__fixtures__/terminal/
+env:
+    - two-macs
+    - terminal
+runs:
+    - command: '--version >/dev/null; terminal "$STATION" machines create --image base-macos --memory 4G'
+      stdin: |
+          see On which Mac?
+          send \r
+          see Hint
+          scrollback
+      exit: 2
+      stdout: |
+          ┃ On which Mac?
+          ┃ macbook-pro  2 VMs
+          Error: image base-macos is not on macbook-pro
+          Hint: station images update base-macos
