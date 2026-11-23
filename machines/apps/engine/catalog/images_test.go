@@ -119,6 +119,9 @@ func lockdownClosesTheImageBeforeAnythingElse(t *testing.T, name, script string)
 		"PermitRootLogin no",
 		"autoLoginUser",
 		"rm -f /etc/kcpassword",
+		"/bin/launchctl disable system/com.apple.screensharing",
+		"/bin/launchctl bootout system/com.apple.screensharing",
+		"/bin/rm -f /Library/Preferences/com.apple.VNCSettings.txt",
 		`-passwd "/Users/$LOGIN_USER"`,
 		`: > "$login_home/.ssh/authorized_keys"`,
 		`rm -f "/etc/sudoers.d/$LOGIN_USER-nopasswd"`,
@@ -159,6 +162,9 @@ func lockdownPutsTheKeyInLastAndItsMarkerAfterIt(t *testing.T, name, script stri
 	}
 	for _, step := range []string{
 		"rm -f /etc/kcpassword",
+		"/bin/launchctl disable system/com.apple.screensharing",
+		"/bin/launchctl bootout system/com.apple.screensharing",
+		"/bin/rm -f /Library/Preferences/com.apple.VNCSettings.txt",
 		`-passwd "/Users/$LOGIN_USER"`,
 		`-passwd "/Users/$VM_USER"`,
 		`: > "$home/.ssh/authorized_keys"`,

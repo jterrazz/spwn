@@ -1,8 +1,8 @@
 package catalog
 
 const (
-	GrantsDir = ".config/station/grants"                                             // value: where a VM keeps the environment files of the programs granted to it, from its home; the zsh block sources every `*.env` in it.
-	GuestPath = `export PATH="$HOME/.local/bin:$HOME/.local/share/mise/shims:$PATH"` // value: the PATH a delivery line runs under inside a VM, so it finds the program a non-interactive shell would not.
+	GrantsDir = ".config/station/grants"                                                               // value: where a VM keeps the environment files of the programs granted to it, from its home; the zsh block sources every `*.env` in it.
+	GuestPath = `export PATH="$HOME/.local/bin:$HOME/.local/share/mise/shims:/opt/homebrew/bin:$PATH"` // value: the PATH a delivery line runs under inside a VM, so it finds the program a non-interactive shell would not, a macOS guest's Homebrew among them.
 )
 
 type Delivery struct {

@@ -4,7 +4,7 @@
 # image's own account by its published default password, or over the VM user by the key when
 # its marker is absent. Its values come on stdin, one per line, never in a command line. It is
 # idempotent. Once its binary is checked, it first closes what the image's login opens (sshd's
-# password login, the auto-login, the default password, its keys and sudo rule), so a run cut
+# password login, the auto-login, Screen Sharing, the default password, its keys and sudo rule), so a run cut
 # anywhere after leaves no login of the image's; it makes the key reachable only once all of it is
 # checked, then writes its marker last; its stdout is the guest's new ed25519 host key, printed as
 # soon as it is made, nothing else.
@@ -45,6 +45,10 @@ CONF
 # outside: the image logs LOGIN_USER in at boot by the password /etc/kcpassword holds.
 /usr/bin/defaults delete /Library/Preferences/com.apple.loginwindow autoLoginUser 2>/dev/null || true
 /bin/rm -f /etc/kcpassword
+# outside: the image serves Screen Sharing (launchd listens on 5900), which takes LOGIN_USER's password, and a VNC password once VNCSettings.txt holds one.
+/bin/launchctl disable system/com.apple.screensharing
+/bin/launchctl bootout system/com.apple.screensharing 2>/dev/null || true
+/bin/rm -f /Library/Preferences/com.apple.VNCSettings.txt
 # outside: macOS changes the password of an account holding a secure token only by its old one, read from a terminal or the command line.
 if /usr/bin/dscl . -authonly "$LOGIN_USER" "$LOGIN_PASSWORD" 2>/dev/null; then
     p=$(random)
@@ -110,6 +114,7 @@ if /usr/bin/dscl . -authonly "$LOGIN_USER" "$LOGIN_PASSWORD" 2>/dev/null; then
     exit 1
 fi
 [ ! -e /etc/kcpassword ] || { echo "/etc/kcpassword is still there" >&2; exit 1; }
+! /bin/launchctl print system/com.apple.screensharing >/dev/null 2>&1 || { echo "Screen Sharing still runs" >&2; exit 1; }
 [ ! -e "/etc/sudoers.d/$LOGIN_USER-nopasswd" ] || { echo "$LOGIN_USER still has a passwordless sudo" >&2; exit 1; }
 sshd=$(/usr/sbin/sshd -T)
 for want in 'passwordauthentication no' 'kbdinteractiveauthentication no' 'permitrootlogin no' 'authorizedkeysfile .ssh/authorized_keys'; do
