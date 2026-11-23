@@ -1,7 +1,9 @@
 # ADR-079: A server runs the image phase, then a first-start phase
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-11-23
+
+Accepted by the owner on 2026-11-23, on his word, with the answers recorded below.
 
 **Amends:** [ADR-044](044-an-image-is-baked-from-its-machinefile.md): its line "A server's Machinefile is refused: station sets nothing up in a server".
 

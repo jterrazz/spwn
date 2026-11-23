@@ -1,7 +1,9 @@
 # ADR-081: A server takes one grant, the Tailscale auth key, delivered once
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-11-23
+
+Accepted by the owner on 2026-11-23, on his word, with the answers recorded below.
 
 **Amends:** [ADR-049](049-a-vm-signs-itself-in-the-vault-grants-the-rest.md): a server, which takes no grant under it, takes the `tailscale` grant.
 

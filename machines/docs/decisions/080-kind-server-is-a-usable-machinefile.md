@@ -1,7 +1,9 @@
 # ADR-080: `kind: server` is a usable Machinefile
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-11-23
+
+Accepted by the owner on 2026-11-23, on his word, with the answers recorded below.
 
 **Amends:** [ADR-033](033-a-machine-is-declared-by-its-machinefile.md): a Machinefile whose `machine.kind` is `server` is planned, applied and made into a server.
 
@@ -41,4 +43,4 @@ Three facts shape the answer:
 
 - The JSON Schema, `words.json` and the CLI goldens change through `make generate` in S2. `machines-server-template.spec.yaml` turns from refused to made, and each refusal above gets its story.
 - `machines create --from` and `images build` take a path in S2. `docs/reference/machinefiles.md` and `docs/reference/commands.md` say so in the same lot.
-- How the file reaches the Mac that hosts the server is open. The plan says that Mac holds no checkout, and a path needs the file on its disk. The owner places the file there before a create or an `upgrade --on`. Whether the Mac fetches it itself is a later decision, and remote code under ADR-033's rule.
+- The Mac that hosts the server holds no checkout, and a path needs the file on its disk. The owner places the file there before a create or an `upgrade --on`, by the owner's answer of 2026-11-23. A download by Spwn is a later decision in its own ADR, remote code under ADR-033's rule.

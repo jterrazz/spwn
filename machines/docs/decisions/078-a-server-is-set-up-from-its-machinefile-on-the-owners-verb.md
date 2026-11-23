@@ -1,7 +1,9 @@
 # ADR-078: A server is set up from its Machinefile, on the owner's verb alone
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-11-23
+
+Accepted by the owner on 2026-11-23, on his word, with the answers recorded below.
 
 **Amends:** [ADR-017](017-servers-and-workspaces.md): station now sets a server up, from its Machinefile, at its creation and on `upgrade --on`.
 
@@ -35,4 +37,4 @@ A server runs production. A workspace is changed by its Mac without asking: ever
 - S2 lifts the four refusals named in the context. Each refusal story turns into a story of a server made, and the error `ServerTemplateError` goes.
 - A change to the server's machine is a change to its Machinefile, merged in studio-infrastructure, then `upgrade --on` run by the owner on the Mac that hosts the server. The CI never creates, upgrades or deletes the server.
 - A server's Machinefile can change while no one has applied it. Until the owner runs `upgrade --on`, the server stays as it was set up, and only a plan shows the difference.
-- Which sections a server shows (ADR-017 refuses Apps, Settings, Disk, Accounts, Background and Awake on it) is not decided here. Station now knows what a server carries, so the window lot that shows it decides, and it is an open question for the owner.
+- A server's window shows its Apps and Settings sections read-only: the owner reads what the Machinefile gave it and changes nothing there, by the owner's answer of 2026-11-23. The window lot decides how, and the other sections ADR-017 refuses (Disk, Accounts, Background and Awake) stay as that record says.

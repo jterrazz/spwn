@@ -130,11 +130,11 @@ The records of decisions this repository alone took go in [`decisions/`](decisio
 - [075 A move merges into a cache and refuses onto anything else](decisions/075-a-move-merges-a-cache-and-refuses-onto-data.md) (Proposed)
 - [076 Spwn on a machine: one active app, one background job, the engine updates](decisions/076-spwn-on-a-machine-one-active-app-one-background-job-the-engine-updates.md) (Accepted)
 - [077 A workspace trusts its Mac's device key first](decisions/077-a-workspace-trusts-its-macs-device-key-first.md) (Proposed)
-- [078 A server is set up from its Machinefile, on the owner's verb alone](decisions/078-a-server-is-set-up-from-its-machinefile-on-the-owners-verb.md) (Proposed)
-- [079 A server runs the image phase, then a first-start phase](decisions/079-a-server-runs-the-image-phase-then-a-first-start-phase.md) (Proposed)
-- [080 `kind: server` is a usable Machinefile](decisions/080-kind-server-is-a-usable-machinefile.md) (Proposed)
-- [081 A server takes one grant, the Tailscale auth key, delivered once](decisions/081-a-server-takes-one-grant-the-tailscale-auth-key-delivered-once.md) (Proposed)
-- [082 A server keeps its data on a disk of its own](decisions/082-a-server-keeps-its-data-on-a-disk-of-its-own.md) (Proposed)
+- [078 A server is set up from its Machinefile, on the owner's verb alone](decisions/078-a-server-is-set-up-from-its-machinefile-on-the-owners-verb.md) (Accepted)
+- [079 A server runs the image phase, then a first-start phase](decisions/079-a-server-runs-the-image-phase-then-a-first-start-phase.md) (Accepted)
+- [080 `kind: server` is a usable Machinefile](decisions/080-kind-server-is-a-usable-machinefile.md) (Accepted)
+- [081 A server takes one grant, the Tailscale auth key, delivered once](decisions/081-a-server-takes-one-grant-the-tailscale-auth-key-delivered-once.md) (Accepted)
+- [082 A server keeps its data on a disk of its own](decisions/082-a-server-keeps-its-data-on-a-disk-of-its-own.md) (Accepted)
 - [083 A re-ask is quiet only for an engine-kept view, and never by a timer](decisions/083-a-re-ask-is-quiet-only-for-an-engine-kept-view-never-by-a-timer.md) (Proposed)
 
 A decision spanning several repositories is recorded by the corpus that spans them. What was left for later is `TODO.md` at the repository root.

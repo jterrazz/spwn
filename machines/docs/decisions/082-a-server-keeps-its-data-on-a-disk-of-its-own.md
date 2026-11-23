@@ -1,7 +1,9 @@
 # ADR-082: A server keeps its data on a disk of its own
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-11-23
+
+Accepted by the owner on 2026-11-23, on his word, with the answers recorded below.
 
 **Amends:** [ADR-044](044-an-image-is-baked-from-its-machinefile.md): a VM's disks, until now its boot disk alone.
 
@@ -39,6 +41,6 @@ The rehearsal's ext4 enforced ownership: five stateful workloads crash-looped on
 
 - S6 adds `vm.data` to the decoder and the JSON Schema, the attach in the tart adapter and the fake, the format and the mount in the first start, and the kept file at delete. Its proof is the stories and a tier-2 case: data written, the boot disk rebuilt, the data read back.
 - The data image counts on the Mac's disk. The Disk section and `docs/reference/disk.md` show it in S6.
-- The backups that stay beside the data (the owner, 2026-11-21) now sit inside the same image file. That file is lost with the Mac's disk, so the backups offer no safety beyond that disk. Offsite backup is studio-infrastructure's TODO.
+- The backups that stay beside the data (the owner, 2026-11-21) now sit inside the same image file. That file is lost with the Mac's disk, so the backups offer no safety beyond that disk. Offsite backup is studio-infrastructure's TODO. The owner accepted this for now on 2026-11-23.
 - An image attached to a new server of the same name is that server's data. A name reused for an unrelated server would mount the old data: the create's line naming the file is the guard.
 - HYPOTHESIS (2026-11-23): tart's `run --disk=<path>` attaches a raw image read-write as a second virtio disk, with a sync mode that honours fsync. To settle it, read `tart run --help` on development-macos. S5's `server-facts` case measures fsync on this disk and on the boot disk.
