@@ -3,6 +3,8 @@
 **Status:** Accepted
 **Date:** 2026-11-21
 
+Amended by [ADR-083](083-a-re-ask-is-quiet-only-for-an-engine-kept-view-never-by-a-timer.md): a re-ask is quiet only for a view the engine keeps, released by its next revision or the watch's end; any other is loud, never shows pending over a settled answer, and no timer releases either.
+
 This record decides the client half. The engine half stands on ADR-070, "The engine keeps one read model"; the `state.watch` stream that would carry its kept snapshots to the window is decided later, by its own record.
 
 ## Context
