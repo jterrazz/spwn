@@ -209,9 +209,12 @@
             "label": "base-macos",
             "detail": {
               "kind": "text",
-              "text": "not built yet"
+              "text": "not fetched yet"
             },
-            "reason": "missing"
+            "reason": "missing",
+            "hint": {
+              "command": "station images update base-macos"
+            }
           }
         }
       ],

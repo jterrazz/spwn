@@ -1,9 +1,9 @@
 No image yet · base-ubuntu not built yet · base-debian not built yet
-  base-macos not built yet
+  base-macos not fetched yet
 
 Images
   ○ base-ubuntu  not built yet
   ○ base-debian  not built yet
-  ○ base-macos   not built yet
+  ○ base-macos   not fetched yet  → station images update base-macos
 
 → station images update

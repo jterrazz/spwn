@@ -14,7 +14,8 @@ Images
     → station images delete base-ubuntu@2026.10.20
   ● base-ubuntu  2026.11.01  4.0 GB  mac-mini     infra
   ○ base-debian                                   not built yet
-  ○ base-macos                                    not built yet
+  ○ base-macos                                    not fetched yet
+    → station images update base-macos
 Tailscale
   ● Tailscale        Running · macbook-pro.tail1234.ts.net
   ● node             macbook  100.98.133.14

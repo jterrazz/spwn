@@ -1,4 +1,4 @@
-description: 'a Mac that holds no image lists every image as not built yet, and --json holds none'
+description: 'a Mac that holds no image lists each image as not built or not fetched yet, and --json holds none'
 env: one-mac
 runs:
     - command: 'images'
@@ -6,7 +6,7 @@ runs:
       stdout: |
           ○	base-ubuntu				not built yet
           ○	base-debian				not built yet
-          ○	base-macos				not built yet
+          ○	base-macos				not fetched yet · station images update base-macos
     - command: 'images --json | /usr/bin/jq -c ''[.schema, .images]'''
       exit: 0
       stdout: |

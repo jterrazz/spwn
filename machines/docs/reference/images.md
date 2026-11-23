@@ -19,7 +19,7 @@ station images --on mac-mini    # that Mac's alone
 station images --json           # station.images.list/v1: name, version, distro, size_bytes, mac, vms, newest, deletable, building
 ```
 
-One row per version per Mac, This Mac first, then every other Mac that answers; an image no Mac holds is one row, `not built yet`. Images live on a Mac: inside a VM the family is refused (exit 2).
+One row per version per Mac, This Mac first, then every other Mac that answers; an image no Mac holds is one row, `not built yet`, or `not fetched yet` for a fetch-only one (`base-macos`), with the hint `station images update base-macos`. Images live on a Mac: inside a VM the family is refused (exit 2).
 
 A version is deletable when it is not the newest of its image, no machine was made from it and no build is making it; `Report.Unused` in `apps/engine/images/record.go` is that one rule, and `images.list` says it as `Deletable` (`deletable` in `--json`), the same rule that lists the versions [Disk](disk.md#what-nothing-uses) frees with the leftovers, through this delete.
 

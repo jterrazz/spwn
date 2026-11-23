@@ -9,4 +9,4 @@ runs:
           ●	base-ubuntu	2026.11.07	6.0 GB	macbook-pro	api
           ○	base-ubuntu	2026.11.01	5.0 GB	macbook-pro	older · station images delete base-ubuntu@2026.11.01
           ○	base-debian				not built yet
-          ○	base-macos				not built yet
+          ○	base-macos				not fetched yet · station images update base-macos

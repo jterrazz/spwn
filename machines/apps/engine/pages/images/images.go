@@ -88,10 +88,22 @@ func Section(reports []images.Report, known []catalog.Image, thisMac page.Contex
 		if slices.ContainsFunc(reports, func(r images.Report) bool { return r.Record.Name == img.Name }) {
 			continue
 		}
-		row := page.Row{ID: img.Name, Label: img.Name, Mark: page.Absent, Reason: page.Missing, Detail: page.Text("not built yet")}
+		row := page.Row{ID: img.Name, Label: img.Name, Mark: page.Absent, Reason: page.Missing, Detail: page.Text(notHeld(img))}
+		if img.Recipe == "" {
+			row.Hint = page.Cmd("station images update " + img.Name)
+		}
 		items = append(items, page.Item{Row: &row})
 	}
 	return page.Section{ID: "images", Title: "Images", Role: page.Banner, Columns: Columns(), Items: items}
+}
+
+// value: how an image no Mac holds is said: a fetch-only one is not
+// fetched yet, any other not built yet.
+func notHeld(img catalog.Image) string {
+	if img.Recipe == "" {
+		return "not fetched yet"
+	}
+	return "not built yet"
 }
 
 func madeFrom(vms []string) page.Value {
@@ -181,7 +193,7 @@ func firstLine(reports []images.Report, known []catalog.Image) page.Section {
 	}
 	for _, img := range known {
 		if !slices.ContainsFunc(reports, func(r images.Report) bool { return r.Record.Name == img.Name }) {
-			words = append(words, img.Name+" not built yet")
+			words = append(words, img.Name+" "+notHeld(img))
 		}
 	}
 	label := count(len(reports), "image", "images") + " on " + count(len(macs), "Mac", "Macs")

@@ -14,7 +14,7 @@ runs:
           ○       base-ubuntu     2026.10.20      3.0 GB  macbook-pro     older · station0
           ●       base-ubuntu     2026.11.01      4.0 GB  mac-mini        infra
           ○       base-debian                             not built yet
-          ○       base-macos                              not built yet
+          ○       base-macos                              not fetched yet · station images
     - command: '--version >/dev/null; /usr/bin/env -u NO_COLOR terminal "$STATION" images'
       stdin: |
           see not built yet
@@ -22,7 +22,7 @@ runs:
       exit: 0
       stdout: |
           3 images on 2 Macs · 1 older · base-debian not built yet
-            base-macos not built yet
+            base-macos not fetched yet
 
           Images
                            version       size  on
@@ -31,6 +31,7 @@ runs:
               → station images delete base-ubuntu@2026.10.20
             ● base-ubuntu  2026.11.01  4.0 GB  mac-mini  infra
             ○ base-debian                                not built yet
-            ○ base-macos                                 not built yet
+            ○ base-macos                                 not fetched yet
+              → station images update base-macos
 
           → station images update
