@@ -263,9 +263,8 @@ Today the public `install.sh` (spwn-web's, served at spwn.sh) is the only instal
 Starts with U1, the owner's go, and the answers above for U2 onward.
 
 ## Go code: lint and modernisation (audited 2026-11-16)
-An audit of `apps/engine` at `3e950d809` found the obvious libraries already in use, so the gains are two defects, stdlib modernisation and lint gaps, not new libraries (the architecture rules allow a third-party import only in adapters, `wire`, the presentation packages and `platform`).
+An audit of `apps/engine` at `3e950d809` found the obvious libraries already in use, so the gains are stdlib modernisation and lint gaps, not new libraries (the architecture rules allow a third-party import only in adapters, `wire`, the presentation packages and `platform`).
 
-- **Two defects**: `settings/diff.go` `script()` builds an `(n+1)x(m+1)` LCS table, about 72 MB for a 3,000-line `~/.zshrc`, on every `settings diff` and `plan`. `ui/atom/text.go` (`Middle`) and `value.go` (`path`) keep `width-1` runes but measure in cells, so a CJK or emoji name overflows its width.
 - **Lint gaps**: `make lint` runs `GOOS=linux` only, so 13 darwin files (1,002 lines, 3 cgo) are never linted; `modernize` is off (247 `errors.As`, 56 `range strings.Split`, 28 `sort.*`); no `govulncheck` runs anywhere. To add: `nolintlint`, `nilnesserr`, `errchkjson`, `bodyclose`, `noctx`, `fatcontext`, `usetesting`, `durationcheck`, `makezero`, `wastedassign`, `unparam`, each with its `value:` or `hazard:` comment. Not `depguard` nor `forbidigo`: `specs/architecture` owns imports and symbols.
 - **Hand-rolled on purpose**: semver ranges, YAML decode, schemas, atomic writes, process supervision, retries on an injected clock, TOML surgery, ssh, archives, XDG paths, the JSON-RPC frames and the tart adapter stay, because each does what its library does not (vendor versions, the owner's files kept as written, the fenced env, the wire contract) or sits in a layer that refuses third-party imports.
 - **Lots, in order, each one maker, each with a cold `make check` and goldens exact**:
