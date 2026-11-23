@@ -542,8 +542,8 @@ func TestAHandEditInsideTheBlockReadsDriftAndSurvivesUndo(t *testing.T) {
 	apply(t, a, "root", key(t, 1, "ci"))
 	m.write(rootAK, strings.Replace(m.content(rootAK), " ci\n", " mine\n", 1), 0o600)
 	o, err := a.Observe(context.Background(), setting())
-	if err != nil || o.State != catalog.StateDegraded || o.Diff == "" {
-		t.Fatalf("Observe = %+v, %v; want degraded with a diff", o, err)
+	if err != nil || o.State != catalog.StateDegraded || o.Diff == "" || o.Loose {
+		t.Fatalf("Observe = %+v, %v; want degraded with a diff, its content the owner's", o, err)
 	}
 	edited := m.content(rootAK)
 	change, err := a.Undo(context.Background(), setting())
@@ -599,8 +599,8 @@ func TestAFolderOrFileTheSignInServerIgnoresIsDrift(t *testing.T) {
 			t.Fatal(err)
 		}
 		o := seen(t)
-		if o.State != catalog.StateDegraded || o.Detail != want {
-			t.Fatalf("Observe with %s at %04o = %s %q; want degraded %q", rel, mode, o.State, o.Detail, want)
+		if o.State != catalog.StateDegraded || o.Detail != want || !o.Loose {
+			t.Fatalf("Observe with %s at %04o = %s %q, loose %v; want degraded %q, loose", rel, mode, o.State, o.Detail, o.Loose, want)
 		}
 		if err := (local.Beneath{}).Chmod(m.root, rel, strict); err != nil {
 			t.Fatal(err)

@@ -225,7 +225,7 @@ func (a *Applier) Observe(_ context.Context, it catalog.Setting) (settings.Obser
 			return settings.Observation{}, err
 		}
 		if l.why != "" {
-			o.State, o.Detail = catalog.StateDegraded, l.why
+			o.State, o.Detail, o.Loose = catalog.StateDegraded, l.why, true
 			o.Diff = settings.UnifiedDiff(l.want, l.have, "Machines' "+l.at, l.at)
 			have += "\x00" + l.have
 		}

@@ -75,6 +75,10 @@ type Observation struct {
 	Before, After []KeyValue
 	// value: an effect station cannot read back once done (the Dock reset).
 	Blind bool
+	// value: a drift only in what holds station's effect, a mode or an
+	// owner, the effect itself still exactly station's: off takes it away,
+	// since nothing of the owner's is inside it.
+	Loose bool
 }
 
 func (o Observation) Present() bool { return o.State == catalog.StateOK }

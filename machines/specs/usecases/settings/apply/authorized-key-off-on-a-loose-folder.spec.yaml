@@ -1,0 +1,29 @@
+description: 'off takes out a block whose only drift is a loose ~/.ssh: revoking the key wins over the drift'
+env:
+    - in-workspace
+    - engine
+runs:
+    - command: 'world admin on'
+      exit: 0
+    - command: '--version >/dev/null; /bin/mkdir -p root/root/.ssh; /bin/chmod 700 root/root/.ssh; /usr/bin/printf ''ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAkEtzSuDxnwCWQ+SAn1c32hnRVFJ87nBk/6cF8WymmM laptop\n'' > root/root/.ssh/authorized_keys; /bin/chmod 600 root/root/.ssh/authorized_keys'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | .out[0].Steps'''
+      stdin: |
+          {"v":2,"id":"1","call":"settings.apply","in":{"Names":["authorized-key"],"Values":{"authorized-key":{"user":"root","key":"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGZ2c8e4bOqkqO0+5N0VXlFz4sVJyDQzH+LVRG4RvMZb ci@deploy"}}}}
+      exit: 0
+      stdout: |
+          [{"Label":"/root/.ssh/authorized_keys","State":"ok","Detail":"written"}]
+    - command: '--version >/dev/null; /bin/chmod 755 root/root/.ssh'
+      exit: 0
+    - command: 'settings authorized-key | /usr/bin/sed -n 1p'
+      exit: 0
+      stdout: |
+          ◐	authorized-key	changed since just now	station settings diff authorized-key
+    - command: 'settings off authorized-key --yes'
+      exit: 0
+      stdout: |
+          ●	authorized-key	/root/.ssh/authorized_keys: removed
+    - command: '--version >/dev/null; /bin/cat root/root/.ssh/authorized_keys'
+      exit: 0
+      stdout: |
+          ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAkEtzSuDxnwCWQ+SAn1c32hnRVFJ87nBk/6cF8WymmM laptop

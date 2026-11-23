@@ -25,8 +25,9 @@ var Off = call.Call[Deps, OffIn, []settings.Change]{
 	Run: func(ctx context.Context, d Deps, in OffIn, _ call.Progress) (answer []settings.Change, err error) {
 		defer func() { answer = settings.Answered(answer) }()
 		// invariant: off never destroys a change of the owner's: only a
-		// setting still exactly as station applied it is undone; any other
-		// is left as it is, and every one is Off here after. A checked
+		// setting still exactly as station applied it is undone, or one whose
+		// only drift is in what holds it (Loose); any other is left as it is,
+		// and every one is Off here after. A checked
 		// setting Off here is only no longer checked here.
 		var pkgs []catalog.Setting
 		var checked []string
@@ -58,9 +59,9 @@ var Off = call.Call[Deps, OffIn, []settings.Change]{
 				Steps: []settings.ChangeStep{{Label: "off here", State: catalog.StateOK, Detail: "not checked on this machine"}}})
 		}
 		for _, it := range pkgs {
-			row, _ := judge(ctx, d, it, map[string]bool{})
+			row, now := judge(ctx, d, it, map[string]bool{})
 			change := settings.Change{Package: it.Name, Verb: "off", Result: catalog.StateOK}
-			if row.State == settings.StateApplied {
+			if row.State == settings.StateApplied || row.State == settings.StateChangedSince && now.Loose {
 				if a, ok := d.Appliers.For(it); ok {
 					undone, err := a.Undo(ctx, it)
 					switch {
