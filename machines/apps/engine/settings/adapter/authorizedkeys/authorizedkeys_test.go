@@ -406,8 +406,8 @@ func TestABlockTheOwnerChangedIsKeptWhenAnotherUserTakesIt(t *testing.T) {
 		t.Fatalf("steps %+v, root %q; want root's block kept as the owner left it", change.Steps, m.content(rootAK))
 	}
 	off, err := a.Undo(context.Background(), setting())
-	if err != nil || len(off.Steps) != 2 || off.Steps[0].Detail != "yours, kept" || off.Steps[1].Detail != "removed" || m.content(rootAK) != edited {
-		t.Fatalf("Undo = %+v, %v; want root's kept, ci's removed", off.Steps, err)
+	if err != nil || len(off.Steps) != 3 || off.Steps[0].Detail != "yours, kept" || off.Steps[1].Detail != "removed, and the empty file Machines made" || off.Steps[2].Label != "/home/ci/.ssh" || m.content(rootAK) != edited {
+		t.Fatalf("Undo = %+v, %v; want root's kept, ci's file and folder removed", off.Steps, err)
 	}
 }
 
@@ -671,6 +671,57 @@ func TestAnAccountThatDoesNotSignInIsRefused(t *testing.T) {
 		m.write("etc/passwd", "root:x:0:0:root:/root:/usr/sbin/nologin\n", 0o644)
 		if _, err := m.open().Apply(context.Background(), setting(), map[string]string{"user": "root", "key": key(t, 1, "")}); err != nil {
 			t.Fatalf("Apply for root = %v; want it taken", err)
+		}
+	})
+}
+
+// invariant: off leaves a home as station found it: the authorized_keys
+// and the ~/.ssh station made are taken away once they hold nothing else,
+// and what was there before, or what the owner added since, stays.
+func TestOffTakesAwayTheFileAndFolderItMadeOnceEmpty(t *testing.T) {
+	off := func(t *testing.T, m *machine) {
+		t.Helper()
+		if _, err := m.open().Undo(context.Background(), setting()); err != nil {
+			t.Fatalf("Undo: %v", err)
+		}
+	}
+	t.Run("both made, applied twice", func(t *testing.T) {
+		m := newMachine(t)
+		apply(t, m.open(), "ci", key(t, 1, ""))
+		apply(t, m.open(), "ci", key(t, 2, ""))
+		off(t, m)
+		if m.there("home/ci/.ssh") {
+			t.Fatalf("home/ci/.ssh is still there, %q in it", m.content(ciAK))
+		}
+	})
+	t.Run("the folder holds another file", func(t *testing.T) {
+		m := newMachine(t)
+		apply(t, m.open(), "ci", key(t, 1, ""))
+		m.write("home/ci/.ssh/known_hosts", "host\n", 0o600)
+		off(t, m)
+		if m.there(ciAK) || m.content("home/ci/.ssh/known_hosts") != "host\n" {
+			t.Fatalf("authorized_keys there %v, known_hosts %q; want the file gone, the folder kept", m.there(ciAK), m.content("home/ci/.ssh/known_hosts"))
+		}
+	})
+	t.Run("the owner added a line", func(t *testing.T) {
+		m := newMachine(t)
+		apply(t, m.open(), "ci", key(t, 1, ""))
+		m.write(ciAK, m.content(ciAK)+key(t, 9, "laptop")+"\n", 0o600)
+		off(t, m)
+		if got := m.content(ciAK); got != key(t, 9, "laptop")+"\n" {
+			t.Fatalf("authorized_keys = %q; want the owner's line kept", got)
+		}
+	})
+	t.Run("both there before", func(t *testing.T) {
+		m := newMachine(t)
+		m.mkdir("home/ci/.ssh", 0o700)
+		m.chown("home/ci/.ssh", m.ci)
+		m.write(ciAK, "", 0o600)
+		m.chown(ciAK, m.ci)
+		apply(t, m.open(), "ci", key(t, 1, ""))
+		off(t, m)
+		if !m.there(ciAK) || m.content(ciAK) != "" {
+			t.Fatalf("authorized_keys there %v, %q; want the empty file kept", m.there(ciAK), m.content(ciAK))
 		}
 	})
 }

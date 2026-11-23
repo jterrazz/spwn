@@ -22,10 +22,10 @@ methods:
 writes:
     - path: ~user/.ssh/authorized_keys
       level: settings
-      note: "the block station:authorized-key, between its two marker lines (`/root/.ssh` for root); the folder 0700, the file 0600, both the user's"
+      note: "the block station:authorized-key, between its two marker lines (`/root/.ssh` for root); the folder 0700, the file 0600, both the user's; off takes the file and the folder away once empty when station made them"
     - path: /var/lib/station/authorized-keys.json
       level: settings
-      note: "root's, 0600: every file station wrote the block in and the block's text, which drift and off read, whoever runs station"
+      note: "root's, 0600: every file station wrote the block in, the block's text and whether station made the file and its folder, which drift and off read, whoever runs station"
     - path: /var/lib/station/authorized-keys.lock
       level: settings
       note: "empty: the lock apply and off hold from their read of a user's file to its write"

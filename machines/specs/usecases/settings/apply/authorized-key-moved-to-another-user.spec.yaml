@@ -18,19 +18,23 @@ runs:
           {"v":2,"id":"1","call":"settings.apply","in":{"Names":["authorized-key"],"Values":{"authorized-key":{"user":"ci","key":"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGZ2c8e4bOqkqO0+5N0VXlFz4sVJyDQzH+LVRG4RvMZb ci@deploy"}}}}
       exit: 0
       stdout: |
-          [{"Label":"/srv/ci/.ssh/authorized_keys","State":"ok","Detail":"written"},{"Label":"/root/.ssh/authorized_keys","State":"ok","Detail":"removed"}]
-    - command: '--version >/dev/null; /usr/bin/wc -c < root/root/.ssh/authorized_keys; /bin/cat root/srv/ci/.ssh/authorized_keys'
+          [{"Label":"/srv/ci/.ssh/authorized_keys","State":"ok","Detail":"written"},{"Label":"/root/.ssh/authorized_keys","State":"ok","Detail":"removed, and the empty file Machines made"},{"Label":"/root/.ssh","State":"ok","Detail":"removed, the empty folder Machines made"}]
+    - command: '--version >/dev/null; /usr/bin/test -e root/root/.ssh || echo root has no .ssh; /bin/cat root/srv/ci/.ssh/authorized_keys'
       exit: 0
       stdout: |
-          0
+          root has no .ssh
           # >>> station:authorized-key >>>
           ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGZ2c8e4bOqkqO0+5N0VXlFz4sVJyDQzH+LVRG4RvMZb ci@deploy
           # <<< station:authorized-key <<<
     - command: 'settings off authorized-key --yes'
       exit: 0
       stdout: |
-          ●	authorized-key	/srv/ci/.ssh/authorized_keys: removed
-    - command: '--version >/dev/null; /usr/bin/wc -c < root/srv/ci/.ssh/authorized_keys'
+          ●	authorized-key
+          ●	/srv/ci/.ssh/authorized_keys	removed, and the empty file Machines made
+          ●	/srv/ci/.ssh	removed, the empty folder Machines made
+    - command: '--version >/dev/null; /usr/bin/find root/srv root/root'
       exit: 0
       stdout: |
-          0
+          root/srv
+          root/srv/ci
+          root/root

@@ -38,6 +38,7 @@ type Home interface {
 	Mkdir(base, rel string, perm fs.FileMode, o local.Owner) error
 	Chmod(base, rel string, perm fs.FileMode) error
 	Chown(base, rel string, o local.Owner) error
+	Remove(base, rel string) error
 }
 
 type Options struct {
@@ -83,15 +84,18 @@ const (
 )
 
 // value: every authorized_keys station wrote its block in and has not
-// taken it out of yet, as the system names it, with the block's text; the
-// last is the one the last apply wrote.
+// taken it out of yet, as the system names it, with the block's text and
+// whether station made the file and its ~/.ssh; the last is the one the
+// last apply wrote.
 type record struct {
 	Files []written `json:"files"`
 }
 
 type written struct {
-	File string `json:"file"`
-	Body string `json:"body"`
+	File       string `json:"file"`
+	Body       string `json:"body"`
+	MadeFile   bool   `json:"made_file,omitempty"`
+	MadeFolder bool   `json:"made_folder,omitempty"`
 }
 
 type account struct {
@@ -149,25 +153,51 @@ func (a *Applier) save(r record) error {
 // already, or taken out, is no longer station's to hold; one the owner
 // changed is kept as it is and stays recorded, and so does one in a file
 // station cannot read or write, with that error.
-func (a *Applier) takeOut(w written, id string) (settings.ChangeStep, bool, error) {
+func (a *Applier) takeOut(w written, id string) ([]settings.ChangeStep, bool, error) {
 	text, _, err := a.text(w.File)
 	if err != nil {
-		return settings.ChangeStep{Label: w.File, State: catalog.StateBroken, Detail: "not touched"}, true, err
+		return []settings.ChangeStep{{Label: w.File, State: catalog.StateBroken, Detail: "not touched"}}, true, err
 	}
 	have, state := settings.PackageBlock(text, id)
 	switch {
 	case state == settings.BlockAbsent:
-		return settings.ChangeStep{Label: w.File, State: catalog.StateOK, Detail: "already gone"}, false, nil
+		return []settings.ChangeStep{{Label: w.File, State: catalog.StateOK, Detail: "already gone"}}, false, nil
 	case state != settings.BlockHere || have != w.Body:
-		return settings.ChangeStep{Label: w.File, State: catalog.StateOK, Detail: "yours, kept"}, true, nil
+		return []settings.ChangeStep{{Label: w.File, State: catalog.StateOK, Detail: "yours, kept"}}, true, nil
 	}
 	updated, _ := settings.RemovePackageBlock(text, id)
 	base, rel := a.beneath(w.File)
+	if updated == "" && w.MadeFile {
+		return a.unmade(w, base, rel)
+	}
 	err = a.home.Replace(base, rel, []byte(updated), 0o600, local.Owner{})
 	if err != nil {
-		return settings.ChangeStep{Label: w.File, State: catalog.StateBroken, Detail: "not touched"}, true, a.linked(err)
+		return []settings.ChangeStep{{Label: w.File, State: catalog.StateBroken, Detail: "not touched"}}, true, a.linked(err)
 	}
-	return settings.ChangeStep{Label: w.File, State: catalog.StateOK, Detail: "removed"}, false, nil
+	return []settings.ChangeStep{{Label: w.File, State: catalog.StateOK, Detail: "removed"}}, false, nil
+}
+
+// invariant: a file station made that holds nothing once its block is out
+// is taken away, and so is the ~/.ssh station made once it is empty: off
+// leaves a home as station found it. A folder that holds anything else
+// stays.
+func (a *Applier) unmade(w written, base, rel string) ([]settings.ChangeStep, bool, error) {
+	err := a.home.Remove(base, rel)
+	if err != nil {
+		return []settings.ChangeStep{{Label: w.File, State: catalog.StateBroken, Detail: "not touched"}}, true, a.linked(err)
+	}
+	file := settings.ChangeStep{Label: w.File, State: catalog.StateOK, Detail: "removed, and the empty file Machines made"}
+	if !w.MadeFolder {
+		return []settings.ChangeStep{file}, false, nil
+	}
+	err = a.home.Remove(base, path.Dir(rel))
+	switch {
+	case errors.Is(err, local.ErrNotEmpty):
+		return []settings.ChangeStep{file}, false, nil
+	case err != nil:
+		return []settings.ChangeStep{file}, false, a.linked(err)
+	}
+	return []settings.ChangeStep{file, {Label: path.Dir(w.File), State: catalog.StateOK, Detail: "removed, the empty folder Machines made"}}, false, nil
 }
 
 // value: the folder of the system that holds the home of the
@@ -288,14 +318,21 @@ func (a *Applier) Apply(ctx context.Context, it catalog.Setting, values map[stri
 	}
 	// invariant: the record names the file before its block is written, so
 	// a run cut between the two leaves off a block it knows, never one it
-	// does not: a recorded block that never landed reads gone.
+	// does not: a recorded block that never landed reads gone. What station
+	// made, the file or its folder, stays recorded as made across applies.
+	now := written{File: file, Body: body, MadeFile: !there}
+	_, err = a.home.Lstat(base, ssh)
+	now.MadeFolder = errors.Is(err, fs.ErrNotExist)
 	var olds []written
 	for _, w := range rec.Files {
 		if w.File != file {
 			olds = append(olds, w)
+			continue
 		}
+		now.MadeFile = now.MadeFile || w.MadeFile
+		now.MadeFolder = now.MadeFolder || w.MadeFolder
 	}
-	err = a.save(record{Files: append(slices.Clone(olds), written{File: file, Body: body})})
+	err = a.save(record{Files: append(slices.Clone(olds), now)})
 	if err != nil {
 		return settings.Change{}, err
 	}
@@ -331,14 +368,14 @@ func (a *Applier) Apply(ctx context.Context, it catalog.Setting, values map[stri
 	var kept []written
 	var stays []error
 	for _, w := range olds {
-		step, keep, why := a.takeOut(w, k.Block)
-		steps = append(steps, step)
+		taken, keep, why := a.takeOut(w, k.Block)
+		steps = append(steps, taken...)
 		if keep {
 			kept = append(kept, w)
 		}
 		stays = append(stays, why)
 	}
-	err = a.save(record{Files: append(kept, written{File: file, Body: body})})
+	err = a.save(record{Files: append(kept, now)})
 	if err != nil {
 		return settings.Change{}, err
 	}
@@ -369,9 +406,9 @@ func (a *Applier) Undo(ctx context.Context, it catalog.Setting) (settings.Change
 	var kept []written
 	var stays []error
 	for _, w := range rec.Files {
-		step, keep, why := a.takeOut(w, k.Block)
-		if step.Detail != "already gone" {
-			steps = append(steps, step)
+		taken, keep, why := a.takeOut(w, k.Block)
+		if taken[0].Detail != "already gone" {
+			steps = append(steps, taken...)
 		}
 		if keep {
 			kept = append(kept, w)

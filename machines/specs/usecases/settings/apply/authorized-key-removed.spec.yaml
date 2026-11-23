@@ -1,4 +1,4 @@
-description: 'off removes the block authorized-key wrote, and the setting reads not applied'
+description: 'off removes the block authorized-key wrote, with the empty file and ~/.ssh it made'
 env:
     - in-workspace
     - engine
@@ -16,12 +16,13 @@ runs:
     - command: 'settings off authorized-key --yes'
       exit: 0
       stdout: |
-          ●	authorized-key	/root/.ssh/authorized_keys: removed
-    - command: '--version >/dev/null; /bin/cat root/root/.ssh/authorized_keys; /usr/bin/stat -c ''%a %n'' root/root/.ssh root/root/.ssh/authorized_keys'
+          ●	authorized-key
+          ●	/root/.ssh/authorized_keys	removed, and the empty file Machines made
+          ●	/root/.ssh	removed, the empty folder Machines made
+    - command: '--version >/dev/null; /usr/bin/find root/root'
       exit: 0
       stdout: |
-          700 root/root/.ssh
-          600 root/root/.ssh/authorized_keys
+          root/root
     - command: 'settings authorized-key | /usr/bin/sed -n 1p'
       exit: 0
       stdout: |

@@ -32,6 +32,8 @@ func TestALinkBeneathTheBaseIsNeverFollowed(t *testing.T) {
 		"read at the end":    func() error { _, err := b.ReadFile(base, "at-the-end"); return err }(),
 		"replace through":    b.Replace(base, "on-the-way/f", []byte("y"), 0o600, Self()),
 		"replace at the end": b.Replace(base, "at-the-end", []byte("y"), 0o600, Self()),
+		"remove through":     b.Remove(base, "on-the-way/f"),
+		"remove at the end":  b.Remove(base, "at-the-end"),
 		"a name that climbs": b.Chmod(base, "../x", 0o600),
 	} {
 		if err == nil {
@@ -92,5 +94,28 @@ func TestAReplaceKeepsAFilesModeAndMakesANewOneWithPerm(t *testing.T) {
 	}
 	if left, _ := os.ReadDir(base); len(left) != 1 {
 		t.Fatalf("the folder holds %d entries; want the file alone", len(left))
+	}
+}
+
+// invariant: a folder is removed only while it is empty; a file is.
+func TestRemoveTakesAFileAndOnlyAnEmptyFolder(t *testing.T) {
+	base := t.TempDir()
+	if err := os.MkdirAll(filepath.Join(base, "d", "e"), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(base, "d", "f"), []byte("x"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	b := Beneath{}
+	if err := b.Remove(base, "d"); err == nil {
+		t.Fatal("a folder that holds files was removed")
+	}
+	for _, rel := range []string{"d/f", "d/e", "d"} {
+		if err := b.Remove(base, rel); err != nil {
+			t.Fatalf("Remove(%s) = %v", rel, err)
+		}
+	}
+	if _, err := os.Lstat(filepath.Join(base, "d")); !errors.Is(err, fs.ErrNotExist) {
+		t.Fatalf("d is still there: %v", err)
 	}
 }

@@ -26,7 +26,10 @@ type Entry struct {
 	Owner
 }
 
-var ErrLink = errors.New("is a link")
+var (
+	ErrLink     = errors.New("is a link")
+	ErrNotEmpty = errors.New("is a folder that is not empty")
+)
 
 type Beneath struct {
 	// invariant: a path under base is reached from base one name at a time,
@@ -150,6 +153,38 @@ func fill(f *os.File, data []byte, perm fs.FileMode, o Owner) error {
 		err = f.Sync()
 	}
 	return errors.Join(err, f.Close())
+}
+
+func (Beneath) Remove(base, rel string) error {
+	// value: rel taken away: a file, or a folder only while it is empty
+	// (ErrNotEmpty otherwise); a link there is refused, never removed.
+	dir, name, at, err := parent(base, rel)
+	if err != nil {
+		return err
+	}
+	defer closeFD(dir)
+	var st unix.Stat_t
+	err = unix.Fstatat(dir, name, &st, unix.AT_SYMLINK_NOFOLLOW)
+	if err != nil {
+		return &fs.PathError{Op: "remove", Path: at, Err: err}
+	}
+	flags := 0
+	switch m := entryOf(&st).Mode; {
+	case m&fs.ModeSymlink != 0:
+		return &fs.PathError{Op: "remove", Path: at, Err: ErrLink}
+	case m.IsDir():
+		flags = unix.AT_REMOVEDIR
+	case !m.IsRegular():
+		return &fs.PathError{Op: "remove", Path: at, Err: errNotFile}
+	}
+	err = unix.Unlinkat(dir, name, flags)
+	if errors.Is(err, unix.ENOTEMPTY) || errors.Is(err, unix.EEXIST) {
+		err = ErrNotEmpty
+	}
+	if err != nil {
+		return &fs.PathError{Op: "remove", Path: at, Err: err}
+	}
+	return nil
 }
 
 func (Beneath) Chmod(base, rel string, perm fs.FileMode) error {
