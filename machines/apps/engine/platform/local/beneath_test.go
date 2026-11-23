@@ -40,8 +40,8 @@ func TestALinkBeneathTheBaseIsNeverFollowed(t *testing.T) {
 		"mkdir through":      b.Mkdir(base, "on-the-way/d", 0o700, Self()),
 		"chmod at the end":   f.ChmodFile("at-the-end", 0o644),
 		"read at the end":    func() error { _, _, err := f.ReadFile("at-the-end"); return err }(),
-		"replace at the end": f.Replace("at-the-end", []byte("y"), 0o600, Self()),
-		"remove at the end":  f.Remove("at-the-end"),
+		"replace at the end": f.Replace("at-the-end", Seen{}, []byte("y"), 0o600, Self()),
+		"remove at the end":  f.Remove("at-the-end", Seen{}),
 		"a name that climbs": func() error { _, err := b.Open(base, "../x"); return err }(),
 	} {
 		if err == nil {
@@ -84,13 +84,13 @@ func TestAFolderIsMadeWithItsModeAndOwner(t *testing.T) {
 func TestAReplaceKeepsAFilesModeAndMakesANewOneWithPerm(t *testing.T) {
 	base := t.TempDir()
 	f := opened(t, filepath.Dir(base), filepath.Base(base))
-	if err := f.Replace("new", []byte("a"), 0o600, Self()); err != nil {
+	if err := f.Replace("new", Seen{}, []byte("a"), 0o600, Self()); err != nil {
 		t.Fatal(err)
 	}
 	if err := os.Chmod(filepath.Join(base, "new"), 0o400); err != nil {
 		t.Fatal(err)
 	}
-	if err := f.Replace("new", []byte("b"), 0o600, Self()); err != nil {
+	if err := f.Replace("new", Seen{Data: []byte("a"), There: true}, []byte("b"), 0o600, Self()); err != nil {
 		t.Fatal(err)
 	}
 	data, e, err := f.ReadFile("new")
@@ -104,6 +104,33 @@ func TestAReplaceKeepsAFilesModeAndMakesANewOneWithPerm(t *testing.T) {
 
 // invariant: a file is removed; a folder removes itself only while it is
 // empty.
+// invariant: a replace or a remove of a name that no longer holds what
+// its writer read is refused, the name as the other writer left it.
+func TestAWriteOverANameChangedSinceItsReadIsRefused(t *testing.T) {
+	base := t.TempDir()
+	f := opened(t, filepath.Dir(base), filepath.Base(base))
+	if err := os.WriteFile(filepath.Join(base, "f"), []byte("theirs"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	stale := Seen{Data: []byte("read"), There: true}
+	for name, err := range map[string]error{
+		"replace":             f.Replace("f", stale, []byte("ours"), 0o600, Self()),
+		"remove":              f.Remove("f", stale),
+		"replace as if new":   f.Replace("f", Seen{}, []byte("ours"), 0o600, Self()),
+		"replace a gone name": f.Replace("gone", stale, []byte("ours"), 0o600, Self()),
+	} {
+		if !errors.Is(err, ErrChanged) {
+			t.Errorf("%s = %v; want ErrChanged", name, err)
+		}
+	}
+	if data, err := os.ReadFile(filepath.Join(base, "f")); err != nil || string(data) != "theirs" {
+		t.Fatalf("f = %q, %v; want theirs", data, err)
+	}
+	if left, _ := os.ReadDir(base); len(left) != 1 {
+		t.Fatalf("left %d names; want f alone, no temporary file", len(left))
+	}
+}
+
 func TestRemoveTakesAFileAndOnlyAnEmptyFolder(t *testing.T) {
 	base := t.TempDir()
 	if err := os.MkdirAll(filepath.Join(base, "d"), 0o700); err != nil {
@@ -116,7 +143,7 @@ func TestRemoveTakesAFileAndOnlyAnEmptyFolder(t *testing.T) {
 	if err := f.RemoveSelf(); !errors.Is(err, ErrNotEmpty) {
 		t.Fatalf("a folder that holds a file removed itself: %v", err)
 	}
-	if err := f.Remove("f"); err != nil {
+	if err := f.Remove("f", Seen{Data: []byte("x"), There: true}); err != nil {
 		t.Fatal(err)
 	}
 	if err := f.RemoveSelf(); err != nil {
@@ -148,7 +175,7 @@ func TestAHeldFolderKeepsAnotherHolderOutAcrossARename(t *testing.T) {
 	if err := os.MkdirAll(filepath.Join(base, "d"), 0o700); err != nil {
 		t.Fatal(err)
 	}
-	if err := f.Replace("f", []byte("x"), 0o600, Self()); err != nil {
+	if err := f.Replace("f", Seen{}, []byte("x"), 0o600, Self()); err != nil {
 		t.Fatal(err)
 	}
 	if data, err := os.ReadFile(filepath.Join(base, "moved", "f")); err != nil || string(data) != "x" {

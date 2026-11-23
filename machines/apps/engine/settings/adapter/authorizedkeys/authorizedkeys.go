@@ -179,10 +179,11 @@ func (a *Applier) takeOut(w written, h holding, id string) ([]settings.ChangeSte
 		return []settings.ChangeStep{{Label: w.File, State: catalog.StateOK, Detail: "yours, kept"}}, true, stillSigns(w.File, text, id)
 	}
 	updated, _ := settings.RemovePackageBlock(text, id)
+	seen := local.Seen{Data: []byte(text), There: true}
 	if updated == "" && w.MadeFile {
-		return a.unmade(w, h.folder)
+		return a.unmade(w, h.folder, seen)
 	}
-	err = h.folder.Replace(keysFile, []byte(updated), 0o600, local.Owner{})
+	err = h.folder.Replace(keysFile, seen, []byte(updated), 0o600, local.Owner{})
 	if err != nil {
 		return []settings.ChangeStep{{Label: w.File, State: catalog.StateBroken, Detail: "not touched"}}, true, a.linked(err)
 	}
@@ -233,8 +234,8 @@ func (a *Applier) Kept(_ context.Context, it catalog.Setting) error {
 // is taken away, and so is the ~/.ssh station made once it is empty: off
 // leaves a home as station found it. A folder that holds anything else
 // stays.
-func (a *Applier) unmade(w written, f *local.Folder) ([]settings.ChangeStep, bool, error) {
-	err := f.Remove(keysFile)
+func (a *Applier) unmade(w written, f *local.Folder, seen local.Seen) ([]settings.ChangeStep, bool, error) {
+	err := f.Remove(keysFile, seen)
 	if err != nil {
 		return []settings.ChangeStep{{Label: w.File, State: catalog.StateBroken, Detail: "not touched"}}, true, a.linked(err)
 	}
@@ -523,7 +524,7 @@ func (a *Applier) Apply(ctx context.Context, it catalog.Setting, values map[stri
 	}
 	recorded = true
 	if changed || !there {
-		err = f.Replace(keysFile, []byte(updated), 0o600, who.Owner)
+		err = f.Replace(keysFile, local.Seen{Data: []byte(text), There: there}, []byte(updated), 0o600, who.Owner)
 		if err != nil {
 			return settings.Change{}, a.linked(err)
 		}
@@ -762,7 +763,7 @@ func (a *Applier) unrecordedIn(file string, h holding, id string) (*settings.Cha
 	case settings.BlockHere:
 	}
 	updated, _ := settings.RemovePackageBlock(text, id)
-	err = h.folder.Replace(keysFile, []byte(updated), 0o600, local.Owner{})
+	err = h.folder.Replace(keysFile, local.Seen{Data: []byte(text), There: true}, []byte(updated), 0o600, local.Owner{})
 	if err != nil {
 		return nil, a.linked(err)
 	}
@@ -979,6 +980,8 @@ func (a *Applier) linked(err error) error {
 		return fmt.Errorf("%s is a link, not touched: Machines follows no link in a home", at)
 	case errors.Is(err, local.ErrHardLink):
 		return fmt.Errorf("%s has another name, a hard link, not touched: Machines writes keys only in a file of one name", at)
+	case errors.Is(err, local.ErrChanged):
+		return fmt.Errorf("%s changed since Machines read it, not touched: run it again to judge it as it is now", at)
 	}
 	return err
 }

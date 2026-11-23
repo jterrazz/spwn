@@ -144,6 +144,25 @@ func (f full) Replace(p string, data []byte, perm fs.FileMode) error {
 	return f.FS.Replace(p, data, perm)
 }
 
+// value: the disk, but the first replace of the record also writes text
+// in file, in place, as an editor that takes no lock would between
+// station's read of file and its write.
+type racing struct {
+	local.FS
+	record, file, text string
+	done               *bool
+}
+
+func (r racing) Replace(p string, data []byte, perm fs.FileMode) error {
+	if p == r.record && !*r.done {
+		*r.done = true
+		if err := os.WriteFile(r.file, []byte(r.text), 0o600); err != nil {
+			return err
+		}
+	}
+	return r.FS.Replace(p, data, perm)
+}
+
 const (
 	rootAK = "root/.ssh/authorized_keys"
 	ciAK   = "home/ci/.ssh/authorized_keys"
@@ -512,6 +531,20 @@ func TestAnApplyWhoseRecordFailsTakesAwayTheFolderItMade(t *testing.T) {
 	}
 	if m.there("root/.ssh") {
 		t.Fatal("Apply left the ~/.ssh it made with no record of it")
+	}
+}
+
+// invariant: a file that changed between station's read and its write,
+// by a writer that takes no lock, is refused with nothing touched: the
+// write is judged on the bytes it replaces.
+func TestAFileChangedAfterItsReadIsRefusedAndTheChangeKept(t *testing.T) {
+	m := newMachine(t)
+	m.mkdir("root/.ssh", 0o700)
+	m.write(rootAK, key(t, 9, "laptop")+"\n", 0o600)
+	edited := key(t, 9, "laptop") + "\n" + key(t, 8, "phone") + "\n"
+	_, err := m.openWith(racing{FS: m.disk, record: m.at(authorizedkeys.Record), file: m.at(rootAK), text: edited, done: new(bool)}).Apply(context.Background(), setting(), map[string]string{"user": "root", "key": key(t, 1, "")})
+	if err == nil || !strings.Contains(err.Error(), "/root/.ssh/authorized_keys changed since Machines read it, not touched") || m.content(rootAK) != edited {
+		t.Fatalf("Apply over a file changed since its read = %v; file %q; want it refused and the change kept", err, m.content(rootAK))
 	}
 }
 

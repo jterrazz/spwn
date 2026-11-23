@@ -246,6 +246,7 @@ func (s *Agent) writeKeys(ctx context.Context, home string, keys []string) error
 	if err != nil && !errors.Is(err, fs.ErrNotExist) {
 		return err
 	}
+	seen := local.Seen{Data: current, There: err == nil}
 	var kept []string
 	inside := false
 	for _, line := range strings.Split(strings.TrimRight(string(current), "\n"), "\n") {
@@ -259,7 +260,7 @@ func (s *Agent) writeKeys(ctx context.Context, home string, keys []string) error
 		}
 	}
 	lines := append(append(append(kept, KeysBegin), keys...), KeysEnd)
-	if err := f.Replace("authorized_keys", []byte(strings.Join(lines, "\n")+"\n"), 0o600, local.Self()); err != nil {
+	if err := f.Replace("authorized_keys", seen, []byte(strings.Join(lines, "\n")+"\n"), 0o600, local.Self()); err != nil {
 		return err
 	}
 	return f.ChmodFile("authorized_keys", 0o600)

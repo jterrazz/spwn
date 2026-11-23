@@ -1,6 +1,7 @@
 package local
 
 import (
+	"bytes"
 	"context"
 	"crypto/rand"
 	"errors"
@@ -35,6 +36,9 @@ var (
 	// value: a file with another name, a hard link, which a write or a mode
 	// change through this name would reach too.
 	ErrHardLink = errors.New("has another name, a hard link")
+	// value: a file whose bytes are no longer those its writer judged its
+	// write on.
+	ErrChanged = errors.New("changed since it was read")
 )
 
 type Beneath struct {
@@ -220,12 +224,21 @@ func (f *Folder) ChmodFile(name string, perm fs.FileMode) error {
 	return nil
 }
 
-func (f *Folder) Replace(name string, data []byte, perm fs.FileMode, o Owner) error {
+type Seen struct {
+	// value: what a writer read of a name before it judged its write there:
+	// its bytes, or that nothing was there.
+	Data  []byte
+	There bool
+}
+
+func (f *Folder) Replace(name string, seen Seen, data []byte, perm fs.FileMode, o Owner) error {
 	// invariant: name is replaced whole, at once and durably: data goes to a
 	// file of its own made beside it, synced, then renamed over it, and the
 	// folder synced. A file there keeps its mode and owner; one not there
 	// yet is made with perm and given o; a link, a file with another name
-	// or anything but a file there is refused.
+	// or anything but a file there is refused, and so is a name that no
+	// longer holds what was seen, read again just before the rename
+	// (ErrChanged).
 	at := path.Join(f.at, name)
 	var st unix.Stat_t
 	err := unix.Fstatat(f.fd, name, &st, unix.AT_SYMLINK_NOFOLLOW)
@@ -245,6 +258,9 @@ func (f *Folder) Replace(name string, data []byte, perm fs.FileMode, o Owner) er
 		return &fs.PathError{Op: "replace", Path: at, Err: err}
 	}
 	err = fill(os.NewFile(uintptr(fd), path.Join(f.at, tmp)), data, perm, o)
+	if err == nil {
+		err = f.still(name, seen)
+	}
 	if err == nil {
 		err = unix.Renameat(f.fd, tmp, f.fd, name)
 	}
@@ -269,9 +285,10 @@ func fill(file *os.File, data []byte, perm fs.FileMode, o Owner) error {
 	return errors.Join(err, file.Close())
 }
 
-func (f *Folder) Remove(name string) error {
-	// value: the file name holds taken away; a link or anything but a file
-	// there is refused, never removed.
+func (f *Folder) Remove(name string, seen Seen) error {
+	// value: the file name holds taken away; a link, anything but a file, or
+	// a file that no longer holds what was seen, read again just before the
+	// unlink (ErrChanged), is refused, never removed.
 	at := path.Join(f.at, name)
 	e, err := f.Lstat(name)
 	switch {
@@ -282,8 +299,28 @@ func (f *Folder) Remove(name string) error {
 	case !e.Mode.IsRegular():
 		return &fs.PathError{Op: "remove", Path: at, Err: errNotFile}
 	}
+	if err := f.still(name, seen); err != nil {
+		return &fs.PathError{Op: "remove", Path: at, Err: err}
+	}
 	if err := unix.Unlinkat(f.fd, name, 0); err != nil {
 		return &fs.PathError{Op: "remove", Path: at, Err: err}
+	}
+	return nil
+}
+
+// value: nil while name holds what was seen, the same bytes or nothing;
+// ErrChanged once it holds anything else.
+func (f *Folder) still(name string, seen Seen) error {
+	data, _, err := f.ReadFile(name)
+	switch {
+	case errors.Is(err, fs.ErrNotExist) && !seen.There:
+		return nil
+	case errors.Is(err, fs.ErrNotExist):
+		return ErrChanged
+	case err != nil:
+		return err
+	case !seen.There || !bytes.Equal(data, seen.Data):
+		return ErrChanged
 	}
 	return nil
 }
