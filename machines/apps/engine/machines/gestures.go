@@ -21,7 +21,11 @@ func GesturesOf(vm VM) []Gesture {
 	// running one stops, a running server also restarts, a stopped one
 	// starts, a broken server stops or restarts; a VM in any other state
 	// offers none. A VM whose create failed offers try-again whatever its
-	// state: that start finishes its create.
+	// state: that start finishes its create; none when no start can reach
+	// its guest, its delete the only cure.
+	if vm.Birth != nil && vm.Birth.Failed && vm.Birth.Gone {
+		return nil
+	}
 	if vm.Birth != nil && vm.Birth.Failed {
 		return []Gesture{GestureTryAgain}
 	}

@@ -178,7 +178,7 @@ func VerdictOf(s Summary, elsewhere *machines.RollUp) verdict.Verdict {
 				line = more(len(urgent)-1) + " " + line
 			}
 			sentence := down.Subject + " is down."
-			if down.Verb == VerbTryAgain {
+			if down.Mark == MarkNotCreated {
 				sentence = down.Subject + " was not created."
 			}
 			return verdict.Verdict{Tone: verdict.Bad, Sentence: sentence, Line: strings.TrimSpace(line + " " + tail)}

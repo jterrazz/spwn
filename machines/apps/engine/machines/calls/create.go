@@ -638,7 +638,8 @@ type made struct{ vm, record, undone, failed bool }
 
 // invariant: a create that failed from its first run on leaves its birth on
 // the record, failed at its step, with its cause and its console's last
-// lines, and no process making it, so it is deleted or started at once.
+// lines, gone when no start can reach its guest, and no process making it,
+// so it is deleted or started at once.
 func (s *Machinist) failBirth(name string, b model.Birth, cause error) {
 	var unhealthy *model.UnhealthyError
 	if errors.As(cause, &unhealthy) {
@@ -648,6 +649,7 @@ func (s *Machinist) failBirth(name string, b model.Birth, cause error) {
 	}
 	lines, _ := s.engine.Console(context.Background(), name, model.ConsoleWindow)
 	failed := model.FailedAt(b, cause.Error(), lines)
+	failed.Gone = unhealthy != nil && unhealthy.Gone
 	_ = s.writeBirth(name, func(stored *model.Record) { stored.Birth, stored.Owner = failed, nil })
 }
 

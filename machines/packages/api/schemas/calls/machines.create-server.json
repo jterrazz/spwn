@@ -42,6 +42,9 @@
         "failed": {
           "type": "boolean"
         },
+        "gone": {
+          "type": "boolean"
+        },
         "last_lines": {
           "items": {
             "type": "string"

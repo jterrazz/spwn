@@ -55,8 +55,9 @@ type Finding struct {
 	// tells none.
 	Detail string `json:",omitempty"`
 	Fix    Fix
-	// value: its fix runs again what failed to begin, as a create's start
-	// does, so a client words its button "Try again", not its call's.
+	// value: it is of what failed to begin, a create: a fix by its start
+	// runs it again, so a client words that button "Try again", not its
+	// call's.
 	Again   bool
 	Urgency Urgency
 	// value: when an expiring finding expires.

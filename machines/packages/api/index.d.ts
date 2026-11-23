@@ -1852,6 +1852,7 @@ export type MachinesBirth = {
     cause?: string;
     detail?: string;
     failed?: boolean;
+    gone?: boolean;
     last_lines?: string[];
     position: number;
     progress: number;

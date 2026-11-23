@@ -23,7 +23,7 @@ runs:
           ●	macbook-pro	Mac	macbook-pro	Engine running
           ○	mac-1	Workspace	macbook-pro	Stopped · ephemeral	4 CPU	8 GB	Failed at SSH 4 of 4
           # Needs you
-          ✗	mac-1	was not created: it failed at SSH	station machines start mac-1
+          ✗	mac-1	was not created: it failed at SSH	station machines delete mac-1
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs[.this_mac].vms["mac-1"] | {login: .guest.login, closed: .guest.closed, unlocked: .guest.unlocked, ran: [.guest.ran[]? | select(startswith("/usr/local/bin/station guest") | not) | sub("/tmp/station[.][A-Za-z0-9X]+"; "<folder>")]}'' world.json'
       exit: 0
       stdout: |

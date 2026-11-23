@@ -67,3 +67,15 @@ func TestAServerInALoopIsOfferedItsRestartAndABrokenOneStopsOrRestarts(t *testin
 		t.Errorf("a broken workspace offers %v; want none", got)
 	}
 }
+
+func TestAVMWhoseCreateNoStartCanFinishIsOfferedItsDeleteAlone(t *testing.T) {
+	ref := machine.Ref{Name: "mac-1", On: "mini"}
+	vm := VM{Name: "mac-1", Lifetime: Ephemeral, State: Stopped, Birth: &Birth{Failed: true, Gone: true, Step: BornSSH}}
+	f, ok := vmFinding(ref, vm, " --on mini", false)
+	if !ok || f.Severity != finding.Broken || !f.Again || f.Fix.Call != "" || f.Fix.Command != "station machines delete mac-1 --on mini" || f.Text != "mac-1 was not created: it failed at SSH" {
+		t.Errorf("a create no start can finish: %+v, %v", f, ok)
+	}
+	if got := GesturesOf(vm); got != nil {
+		t.Errorf("a create no start can finish offers %v; want none, its delete on its page", got)
+	}
+}

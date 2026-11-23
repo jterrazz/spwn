@@ -31,6 +31,9 @@ type Birth struct {
 	Failed    bool     `json:"failed,omitempty"`
 	Cause     string   `json:"cause,omitempty"`
 	LastLines []string `json:"last_lines,omitempty"`
+	// value: a failed create whose guest no start can reach to finish it,
+	// its lockdown gone past its retry: only a delete cures it.
+	Gone bool `json:"gone,omitempty"`
 }
 
 type BirthStep string
@@ -115,7 +118,7 @@ func (b Birth) Same(o Birth) bool {
 	// value: two births that say the same, their lines included.
 	return b.Progress == o.Progress && b.Step == o.Step && b.Position == o.Position && b.Steps == o.Steps &&
 		b.Detail == o.Detail && b.At.Equal(o.At) && b.Sentence == o.Sentence &&
-		b.Failed == o.Failed && b.Cause == o.Cause && slices.Equal(b.LastLines, o.LastLines)
+		b.Failed == o.Failed && b.Cause == o.Cause && slices.Equal(b.LastLines, o.LastLines) && b.Gone == o.Gone
 }
 
 const HalfMade = "was left half made"
