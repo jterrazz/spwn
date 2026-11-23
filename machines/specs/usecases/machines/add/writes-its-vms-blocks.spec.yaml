@@ -1,0 +1,19 @@
+description: 'adding a Mac writes the ssh blocks of the VMs it holds, with no bare machines after'
+env: stories
+runs:
+    - command: 'machines forget mac-mini --yes'
+      exit: 0
+      stdout: |
+          ●	mac-mini	forgotten · nothing changed on it
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].ssh.blocks // {} | keys'' world.json'
+      exit: 0
+      stdout: |
+          []
+    - command: 'machines add mac-mini --user you'
+      exit: 0
+      stdout: |
+          ●	mac-mini	added · ssh answers · station {{string}}
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].ssh.blocks | keys'' world.json'
+      exit: 0
+      stdout: |
+          ["agent-7f","api","infra","linux-1","linux-2","linux-3","mac-mini","macbook-air","review-bot"]

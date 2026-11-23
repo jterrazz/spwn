@@ -3,11 +3,11 @@ fixture:
     - ../../__fixtures__/far-mac/
 env: engine
 runs:
-    - command: '--version >/dev/null; "$STATION" machines add mac-mini --user jterrazz.agent --key "~/.ssh/agent_key" >/dev/null; /usr/bin/grep -c "IdentitiesOnly yes" .ssh/config'
+    - command: '--version >/dev/null; "$STATION" machines add mac-mini --user jterrazz.agent --key "~/.ssh/agent_key" >/dev/null; /usr/bin/sed -n "/^Host mac-mini$/,/<<< jterrazz machine mac-mini <<</p" .ssh/config | /usr/bin/grep -c "IdentitiesOnly yes"'
       exit: 0
       stdout: |
           1
-    - command: 'machines forget mac-mini --yes >/dev/null; "$STATION" machines add mac-mini >/dev/null; /usr/bin/grep -c "IdentitiesOnly" .ssh/config'
+    - command: 'machines forget mac-mini --yes >/dev/null; "$STATION" machines add mac-mini >/dev/null; /usr/bin/sed -n "/^Host mac-mini$/,/<<< jterrazz machine mac-mini <<</p" .ssh/config | /usr/bin/grep -c "IdentitiesOnly"'
       exit: 0
       stdout: |
           1

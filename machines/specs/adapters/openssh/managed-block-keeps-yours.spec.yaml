@@ -18,7 +18,10 @@ runs:
                   Host worker
                     HostName worker
                     User deploy
+                    IdentityAgent ~/.local/state/station/agent.sock
+                    IdentityFile ~/.local/state/station/device-key.pub
                     IdentityFile ~/.ssh/id_ed25519
+                    IdentitiesOnly yes
                     ServerAliveInterval 30
                     ServerAliveCountMax 3
                     UserKnownHostsFile ~/.local/state/station/known_hosts/worker
@@ -45,6 +48,7 @@ runs:
           .calls:
               equals: |
                   ssh -o BatchMode=yes -o ConnectTimeout=5 -o ServerAliveInterval=2 -o ServerAliveCountMax=2 mac-mini -- sh -c 'PATH="$HOME/.local/bin:/usr/local/bin:$PATH" exec station "$@"' station engine attach
+                  ssh -o BatchMode=yes -o ConnectTimeout=5 -o ServerAliveInterval=2 -o ServerAliveCountMax=2 worker -- sh -c 'PATH="$HOME/.local/bin:/usr/local/bin:$PATH" exec station "$@"' station engine attach
     - command: 'machines add mac-mini'
       exit: 2
       stderr: |
@@ -58,6 +62,7 @@ runs:
           .calls:
               equals: |
                   ssh -o BatchMode=yes -o ConnectTimeout=5 -o ServerAliveInterval=2 -o ServerAliveCountMax=2 mac-mini -- sh -c 'PATH="$HOME/.local/bin:/usr/local/bin:$PATH" exec station "$@"' station engine attach
+                  ssh -o BatchMode=yes -o ConnectTimeout=5 -o ServerAliveInterval=2 -o ServerAliveCountMax=2 worker -- sh -c 'PATH="$HOME/.local/bin:/usr/local/bin:$PATH" exec station "$@"' station engine attach
     - command: '--version >/dev/null; /usr/bin/cmp .ssh/config config-before && echo "byte for byte"'
       exit: 0
       stdout: |

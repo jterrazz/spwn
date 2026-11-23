@@ -32,6 +32,9 @@ var Add = call.Call[Deps, AddIn, machines.Added]{
 			_ = d.Machines.ForgetMac(ctx, in.Name)
 			return machines.Added{}, err
 		}
+		if all, err := d.Machines.AllMachinesAsItFills(ctx, false, func(machines.AllMachines) {}); err == nil {
+			_ = d.Machines.SSHBlocks(ctx, all)
+		}
 		return added, nil
 	},
 }
