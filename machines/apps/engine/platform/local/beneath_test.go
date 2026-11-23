@@ -28,6 +28,10 @@ func TestALinkBeneathTheBaseIsNeverFollowed(t *testing.T) {
 		"chmod at the end":   b.Chmod(base, "at-the-end", 0o644),
 		"chown at the end":   b.Chown(base, "at-the-end", Self()),
 		"mkdir through":      b.Mkdir(base, "on-the-way/d", 0o700, Self()),
+		"read through":       func() error { _, err := b.ReadFile(base, "on-the-way/f"); return err }(),
+		"read at the end":    func() error { _, err := b.ReadFile(base, "at-the-end"); return err }(),
+		"replace through":    b.Replace(base, "on-the-way/f", []byte("y"), 0o600, Self()),
+		"replace at the end": b.Replace(base, "at-the-end", []byte("y"), 0o600, Self()),
 		"a name that climbs": b.Chmod(base, "../x", 0o600),
 	} {
 		if err == nil {
@@ -42,6 +46,12 @@ func TestALinkBeneathTheBaseIsNeverFollowed(t *testing.T) {
 	}
 	if info, err := os.Stat(filepath.Join(away, "f")); err != nil || info.Mode().Perm() != 0o600 {
 		t.Errorf("the target moved: %v, %v", info.Mode(), err)
+	}
+	if data, err := os.ReadFile(filepath.Join(away, "f")); err != nil || string(data) != "x" {
+		t.Errorf("the target was written: %q, %v", data, err)
+	}
+	if e, err := b.Lstat(base, "at-the-end"); err != nil || e.Mode&fs.ModeSymlink == 0 {
+		t.Errorf("the link was replaced: %+v, %v", e, err)
 	}
 	if _, err := os.Stat(filepath.Join(away, "d")); !errors.Is(err, fs.ErrNotExist) {
 		t.Errorf("a folder was made through the link: %v", err)
@@ -59,5 +69,28 @@ func TestAFolderIsMadeWithItsModeAndOwner(t *testing.T) {
 	}
 	if err := (Beneath{}).Mkdir(base, "d", 0o700, Self()); !errors.Is(err, fs.ErrExist) {
 		t.Fatalf("a second Mkdir = %v; want ErrExist", err)
+	}
+}
+
+// invariant: a replace keeps a file's mode and owner, and gives a new one
+// perm and its owner.
+func TestAReplaceKeepsAFilesModeAndMakesANewOneWithPerm(t *testing.T) {
+	base, b := t.TempDir(), Beneath{}
+	if err := b.Replace(base, "new", []byte("a"), 0o600, Self()); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Chmod(filepath.Join(base, "new"), 0o400); err != nil {
+		t.Fatal(err)
+	}
+	if err := b.Replace(base, "new", []byte("b"), 0o600, Self()); err != nil {
+		t.Fatal(err)
+	}
+	e, err := b.Lstat(base, "new")
+	data, _ := b.ReadFile(base, "new")
+	if err != nil || e.Mode.Perm() != 0o400 || e.Owner != Self() || string(data) != "b" {
+		t.Fatalf("Lstat = %+v, %v, data %q; want b at 0400, %+v's", e, err, data, Self())
+	}
+	if left, _ := os.ReadDir(base); len(left) != 1 {
+		t.Fatalf("the folder holds %d entries; want the file alone", len(left))
 	}
 }

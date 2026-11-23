@@ -1,7 +1,9 @@
 package local
 
 import (
+	"crypto/rand"
 	"errors"
+	"io"
 	"io/fs"
 	"os"
 	"path"
@@ -71,6 +73,83 @@ func (Beneath) Mkdir(base, rel string, perm fs.FileMode, o Owner) error {
 		return &fs.PathError{Op: "chown", Path: at, Err: err}
 	}
 	return nil
+}
+
+func (Beneath) ReadFile(base, rel string) ([]byte, error) {
+	dir, name, at, err := parent(base, rel)
+	if err != nil {
+		return nil, err
+	}
+	defer closeFD(dir)
+	fd, err := openat(dir, name, unix.O_RDONLY, at)
+	if err != nil {
+		return nil, err
+	}
+	f := os.NewFile(uintptr(fd), at)
+	defer func() { _ = f.Close() }()
+	info, err := f.Stat()
+	if err != nil {
+		return nil, err
+	}
+	if !info.Mode().IsRegular() {
+		return nil, &fs.PathError{Op: "read", Path: at, Err: errNotFile}
+	}
+	return io.ReadAll(f)
+}
+
+var errNotFile = errors.New("is not a file")
+
+func (Beneath) Replace(base, rel string, data []byte, perm fs.FileMode, o Owner) error {
+	// invariant: rel is replaced whole, at once and durably: data goes to a
+	// file of its own made beside it, synced, then renamed over it, and the
+	// folder synced. A file there keeps its mode and owner; one not there
+	// yet is made with perm and given o; a link or anything but a file
+	// there is refused.
+	dir, name, at, err := parent(base, rel)
+	if err != nil {
+		return err
+	}
+	defer closeFD(dir)
+	var st unix.Stat_t
+	err = unix.Fstatat(dir, name, &st, unix.AT_SYMLINK_NOFOLLOW)
+	switch e := entryOf(&st); {
+	case err == nil && e.Mode&fs.ModeSymlink != 0:
+		return &fs.PathError{Op: "replace", Path: at, Err: ErrLink}
+	case err == nil && !e.Mode.IsRegular():
+		return &fs.PathError{Op: "replace", Path: at, Err: errNotFile}
+	case err == nil:
+		perm, o = e.Mode.Perm(), e.Owner
+	case !errors.Is(err, unix.ENOENT):
+		return &fs.PathError{Op: "replace", Path: at, Err: err}
+	}
+	tmp := "." + name + "." + rand.Text() + ".station"
+	fd, err := unix.Openat(dir, tmp, unix.O_WRONLY|unix.O_CREAT|unix.O_EXCL|unix.O_NOFOLLOW|unix.O_CLOEXEC, 0o600)
+	if err != nil {
+		return &fs.PathError{Op: "replace", Path: at, Err: err}
+	}
+	err = fill(os.NewFile(uintptr(fd), path.Join(path.Dir(at), tmp)), data, perm, o)
+	if err == nil {
+		err = unix.Renameat(dir, tmp, dir, name)
+	}
+	if err != nil {
+		_ = unix.Unlinkat(dir, tmp, 0)
+		return &fs.PathError{Op: "replace", Path: at, Err: err}
+	}
+	return unix.Fsync(dir)
+}
+
+func fill(f *os.File, data []byte, perm fs.FileMode, o Owner) error {
+	_, err := f.Write(data)
+	if err == nil {
+		err = f.Chmod(perm.Perm())
+	}
+	if err == nil {
+		err = f.Chown(o.UID, o.GID)
+	}
+	if err == nil {
+		err = f.Sync()
+	}
+	return errors.Join(err, f.Close())
 }
 
 func (Beneath) Chmod(base, rel string, perm fs.FileMode) error {

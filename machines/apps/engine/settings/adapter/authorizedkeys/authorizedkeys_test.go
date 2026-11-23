@@ -282,6 +282,41 @@ func TestALinkedSshFolderIsRefusedAndItsTargetUntouched(t *testing.T) {
 	}
 }
 
+// invariant: an authorized_keys that is a link is refused at apply and at
+// off: what it links to is neither read nor copied, and the link stays.
+func TestALinkedAuthorizedKeysIsNeitherReadNorReplaced(t *testing.T) {
+	shadow := "root:$6$hash:19000:0:99999:7:::\n"
+	for name, swap := range map[string]func(t *testing.T, m *machine, a *authorizedkeys.Applier) error{
+		"at apply": func(t *testing.T, m *machine, a *authorizedkeys.Applier) error {
+			m.mkdir("home/ci/.ssh", 0o700)
+			m.chown("home/ci/.ssh", m.ci)
+			m.link(m.at("etc/shadow"), ciAK)
+			_, err := a.Apply(context.Background(), setting(), map[string]string{"user": "ci", "key": key(t, 1, "")})
+			return err
+		},
+		"at off, swapped in after apply": func(t *testing.T, m *machine, a *authorizedkeys.Applier) error {
+			apply(t, a, "ci", key(t, 1, ""))
+			_ = m.disk.Remove(m.at(ciAK))
+			m.link(m.at("etc/shadow"), ciAK)
+			_, err := a.Undo(context.Background(), setting())
+			return err
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			m := newMachine(t)
+			m.write("etc/shadow", shadow, 0o600)
+			before := m.entry("etc/shadow")
+			err := swap(t, m, m.open())
+			if err == nil || !strings.Contains(err.Error(), "/home/ci/.ssh/authorized_keys is a link, not touched") {
+				t.Fatalf("got %v; want the link refused by name", err)
+			}
+			if m.entry(ciAK).Mode&fs.ModeSymlink == 0 || m.content("etc/shadow") != shadow || m.entry("etc/shadow") != before {
+				t.Fatalf("authorized_keys %v, target %q %+v; want the link kept and its target as it was", m.entry(ciAK).Mode, m.content("etc/shadow"), m.entry("etc/shadow"))
+			}
+		})
+	}
+}
+
 // invariant: a home that is a link, not the user's, or not there is
 // refused: Machines writes in a real home and never makes one.
 func TestAHomeThatIsNotTheUsersRealFolderIsRefused(t *testing.T) {

@@ -1,0 +1,20 @@
+description: 'an authorized_keys that is a link is refused: its target is neither read nor copied, the link kept'
+env:
+    - in-workspace
+    - engine
+runs:
+    - command: 'world admin on'
+      exit: 0
+    - command: '--version >/dev/null; /bin/mkdir -p root/root/.ssh root/etc && printf ''root:$6$hash:19000:0:99999:7:::\n'' > root/etc/shadow && /bin/ln -s "$PWD/root/etc/shadow" root/root/.ssh/authorized_keys'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error)'''
+      stdin: |
+          {"v":2,"id":"1","call":"settings.apply","in":{"Names":["authorized-key"],"Values":{"authorized-key":{"user":"root","key":"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGZ2c8e4bOqkqO0+5N0VXlFz4sVJyDQzH+LVRG4RvMZb ci@deploy"}}}}
+      exit: 0
+      stdout: |
+          {"v":2,"id":"1","out":[{"Package":"authorized-key","Verb":"apply","Result":"broken","Before":null,"After":null,"Steps":[{"Label":"failed","State":"broken","Detail":"/root/.ssh/authorized_keys is a link, not touched: Machines follows no link in a home"}]}]}
+    - command: '--version >/dev/null; /usr/bin/stat -c ''%F %n'' root/root/.ssh/authorized_keys; /bin/cat root/etc/shadow'
+      exit: 0
+      stdout: |
+          symbolic link root/root/.ssh/authorized_keys
+          root:$6$hash:19000:0:99999:7:::

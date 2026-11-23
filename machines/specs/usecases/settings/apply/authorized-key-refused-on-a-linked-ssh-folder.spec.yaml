@@ -12,7 +12,7 @@ runs:
           {"v":2,"id":"1","call":"settings.apply","in":{"Names":["authorized-key"],"Values":{"authorized-key":{"user":"root","key":"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGZ2c8e4bOqkqO0+5N0VXlFz4sVJyDQzH+LVRG4RvMZb ci@deploy"}}}}
       exit: 0
       stdout: |
-          {"v":2,"id":"1","out":[{"Package":"authorized-key","Verb":"apply","Result":"broken","Before":null,"After":null,"Steps":[{"Label":"failed","State":"broken","Detail":"/root/.ssh is a link, not touched: Machines writes only in a real folder"}]}]}
+          {"v":2,"id":"1","out":[{"Package":"authorized-key","Verb":"apply","Result":"broken","Before":null,"After":null,"Steps":[{"Label":"failed","State":"broken","Detail":"/root/.ssh is a link, not touched: Machines follows no link in a home"}]}]}
     - command: '--version >/dev/null; /bin/ls -A root/etc/ssh; /usr/bin/stat -c ''%a %n'' root/etc/ssh'
       exit: 0
       stdout: |

@@ -31,6 +31,8 @@ type Home interface {
 	// value: the files under a folder the system owns, a user's home among
 	// them, each reached without following a link (local.Beneath).
 	Lstat(base, rel string) (local.Entry, error)
+	ReadFile(base, rel string) ([]byte, error)
+	Replace(base, rel string, data []byte, perm fs.FileMode, o local.Owner) error
 	Mkdir(base, rel string, perm fs.FileMode, o local.Owner) error
 	Chmod(base, rel string, perm fs.FileMode) error
 	Chown(base, rel string, o local.Owner) error
@@ -101,13 +103,20 @@ func (a *Applier) last() (record, bool, error) {
 	return r, r.File != "", nil
 }
 
+// value: the folder of the system that holds the home of the
+// authorized_keys the system names file, and the file's path under it.
+func (a *Applier) beneath(file string) (base, rel string) {
+	home := path.Dir(path.Dir(file))
+	return a.at(path.Dir(home)), path.Join(path.Base(home), ".ssh", "authorized_keys")
+}
+
 func (a *Applier) text(file string) (text string, there bool, err error) {
-	data, err := a.files.ReadFile(a.at(file))
+	data, err := a.home.ReadFile(a.beneath(file))
 	switch {
 	case errors.Is(err, fs.ErrNotExist):
 		return "", false, nil
 	case err != nil:
-		return "", false, err
+		return "", false, a.linked(err)
 	}
 	return string(data), true, nil
 }
@@ -175,9 +184,10 @@ func (a *Applier) Apply(_ context.Context, it catalog.Setting, values map[string
 		return settings.Change{}, err
 	}
 	if changed || !there {
-		err = a.files.Replace(a.at(file), []byte(updated), 0o600)
+		_, rel := a.beneath(file)
+		err = a.home.Replace(base, rel, []byte(updated), 0o600, who.Owner)
 		if err != nil {
-			return settings.Change{}, err
+			return settings.Change{}, a.linked(err)
 		}
 	}
 	for _, p := range []struct {
@@ -236,9 +246,10 @@ func (a *Applier) Undo(_ context.Context, it catalog.Setting) (settings.Change, 
 		return settings.Change{Steps: []settings.ChangeStep{{Label: r.File, State: catalog.StateOK, Detail: "yours, kept"}}}, nil
 	}
 	updated, _ := settings.RemovePackageBlock(text, k.Block)
-	err = a.files.Replace(a.at(r.File), []byte(updated), 0o600)
+	base, rel := a.beneath(r.File)
+	err = a.home.Replace(base, rel, []byte(updated), 0o600, local.Owner{})
 	if err != nil {
-		return settings.Change{}, err
+		return settings.Change{}, a.linked(err)
 	}
 	err = a.files.Remove(a.o.Record)
 	if err != nil {
@@ -341,7 +352,7 @@ func (a *Applier) homeOf(who account) (string, error) {
 	case err != nil:
 		return "", a.linked(err)
 	case e.Mode&fs.ModeSymlink != 0:
-		return "", fmt.Errorf("%s is a link, not touched: Machines writes only in a real folder", who.home)
+		return "", fmt.Errorf("%s is a link, not touched: Machines follows no link in a home", who.home)
 	case !e.Mode.IsDir():
 		return "", fmt.Errorf("%s is not a folder, not touched", who.home)
 	case e.UID != who.UID:
@@ -360,7 +371,7 @@ func (a *Applier) folder(base, rel string, who account) error {
 	case err != nil:
 		return a.linked(err)
 	case e.Mode&fs.ModeSymlink != 0:
-		return fmt.Errorf("%s is a link, not touched: Machines writes only in a real folder", path.Join(path.Dir(who.home), rel))
+		return fmt.Errorf("%s is a link, not touched: Machines follows no link in a home", path.Join(path.Dir(who.home), rel))
 	case !e.Mode.IsDir():
 		return fmt.Errorf("%s is not a folder, not touched", path.Join(path.Dir(who.home), rel))
 	}
@@ -373,7 +384,7 @@ func (a *Applier) linked(err error) error {
 	var pe *fs.PathError
 	if errors.Is(err, local.ErrLink) && errors.As(err, &pe) {
 		at := strings.TrimPrefix(pe.Path, path.Join("/", a.o.Root))
-		return fmt.Errorf("%s is a link, not touched: Machines writes only in a real folder and file", path.Join("/", at))
+		return fmt.Errorf("%s is a link, not touched: Machines follows no link in a home", path.Join("/", at))
 	}
 	return err
 }
