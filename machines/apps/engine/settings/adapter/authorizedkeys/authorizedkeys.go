@@ -394,8 +394,7 @@ func (a *Applier) Apply(ctx context.Context, it catalog.Setting, values map[stri
 		return settings.Change{}, err
 	}
 	if _, state := settings.PackageBlock(text, k.Block); state == settings.BlockDamaged {
-		start, end := settings.BlockMarkers(k.Block)
-		return settings.Change{}, fmt.Errorf("%s holds a damaged %s block, a start with no end or two blocks, not touched: leave one `%s` line and one `%s` line around Machines' keys, then apply again", file, k.Block, start, end)
+		return settings.Change{}, fmt.Errorf("%s holds a damaged %s block, a start with no end or two blocks, not touched: delete %s of %s, then apply again", file, k.Block, strings.Join(settings.DamagedLines(text, k.Block), " and "), file)
 	}
 	updated, changed := settings.UpsertPackageBlock(text, k.Block, body)
 	// invariant: the record names the file before its block is written, so
@@ -626,7 +625,7 @@ func (a *Applier) unrecorded(ctx context.Context, it catalog.Setting, id string)
 	case settings.BlockAbsent:
 		return settings.Change{}, nil
 	case settings.BlockDamaged:
-		return settings.Change{}, fmt.Errorf("%s holds a damaged %s block Machines has no record of, not touched: remove it by hand", file, id)
+		return settings.Change{}, fmt.Errorf("%s holds a damaged %s block Machines has no record of, not touched: delete %s of %s, then the rest of the block", file, id, strings.Join(settings.DamagedLines(text, id), " and "), file)
 	case settings.BlockHere:
 	}
 	updated, _ := settings.RemovePackageBlock(text, id)

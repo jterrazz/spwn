@@ -12,13 +12,13 @@ runs:
           {"v":2,"id":"1","call":"settings.apply","in":{"Names":["authorized-key"],"Values":{"authorized-key":{"user":"root","key":"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGZ2c8e4bOqkqO0+5N0VXlFz4sVJyDQzH+LVRG4RvMZb ci@deploy"}}}}
       exit: 0
       stdout: |
-          "/root/.ssh/authorized_keys holds a damaged station:authorized-key block, a start with no end or two blocks, not touched: leave one `# >>> station:authorized-key >>>` line and one `# <<< station:authorized-key <<<` line around Machines' keys, then apply again"
+          "/root/.ssh/authorized_keys holds a damaged station:authorized-key block, a start with no end or two blocks, not touched: delete line 1 of /root/.ssh/authorized_keys, then apply again"
     - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | .out[0].Steps[0].Detail'''
       stdin: |
           {"v":2,"id":"1","call":"settings.apply","in":{"Names":["authorized-key"],"Values":{"authorized-key":{"user":"root","key":"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGZ2c8e4bOqkqO0+5N0VXlFz4sVJyDQzH+LVRG4RvMZb ci@deploy"}}}}
       exit: 0
       stdout: |
-          "/root/.ssh/authorized_keys holds a damaged station:authorized-key block, a start with no end or two blocks, not touched: leave one `# >>> station:authorized-key >>>` line and one `# <<< station:authorized-key <<<` line around Machines' keys, then apply again"
+          "/root/.ssh/authorized_keys holds a damaged station:authorized-key block, a start with no end or two blocks, not touched: delete line 1 of /root/.ssh/authorized_keys, then apply again"
     - command: '--version >/dev/null; /usr/bin/cmp before root/root/.ssh/authorized_keys && echo byte for byte'
       exit: 0
       stdout: |

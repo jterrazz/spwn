@@ -802,3 +802,14 @@ func TestAHolderOfTheSSHFolderKeepsApplyAndOffOutOfTheFile(t *testing.T) {
 		t.Fatalf("Undo with ~/.ssh held = %v; file %q; want it refused and the block kept", err, m.content(rootAK))
 	}
 }
+
+func TestAStrayStartAboveTheBlockIsRefusedWithItsLine(t *testing.T) {
+	m := newMachine(t)
+	m.mkdir("root/.ssh", 0o700)
+	text := key(t, 8, "a") + "\n# >>> station:authorized-key >>>\n" + key(t, 9, "b") + "\n" + block(key(t, 1, "old"))
+	m.write(rootAK, text, 0o600)
+	why := refused(t, m.open(), "root", key(t, 2, "new")).Error()
+	if m.content(rootAK) != text || !strings.Contains(why, "delete line 2 of /root/.ssh/authorized_keys") || strings.Contains(why, "around Machines' keys") {
+		t.Fatalf("Apply over a stray start = %q; file %q; want it refused, line 2 named and the file as it was", why, m.content(rootAK))
+	}
+}

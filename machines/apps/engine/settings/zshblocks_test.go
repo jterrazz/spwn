@@ -107,3 +107,17 @@ func TestAMainMarkerThatEndsTheFileGetsItsNewlineBeforeANewBlock(t *testing.T) {
 		t.Errorf("removal leaves %q; want the owner's lines with station's marker ended", back)
 	}
 }
+
+func TestAStartMetAgainBeforeItsEndIsDamage(t *testing.T) {
+	stray := "mine\n# >>> station:a >>>\nmine too\n# >>> station:a >>>\nk\n# <<< station:a <<<\n"
+	if _, state := PackageBlock(stray, "station:a"); state != BlockDamaged {
+		t.Fatalf("a stray start above a block = %v; want damaged", state)
+	}
+	if got := DamagedLines(stray, "station:a"); len(got) != 1 || got[0] != "line 2" {
+		t.Fatalf("DamagedLines = %q; want the stray start alone", got)
+	}
+	twice := "# >>> station:a >>>\nk\n# <<< station:a <<<\n# >>> station:a >>>\nk\n# <<< station:a <<<\n"
+	if got := DamagedLines(twice, "station:a"); len(got) != 1 || got[0] != "lines 4 to 6" {
+		t.Fatalf("DamagedLines = %q; want the second block", got)
+	}
+}

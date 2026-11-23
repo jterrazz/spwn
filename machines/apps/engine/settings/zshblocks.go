@@ -1,6 +1,9 @@
 package settings
 
-import "strings"
+import (
+	"strconv"
+	"strings"
+)
 
 const packageMarker = "station:"
 
@@ -27,6 +30,7 @@ type span struct {
 
 // invariant: a package block is found by its two marker lines alone, on
 // whole lines; the main block and the owner's lines are never part of one.
+// A start met again before its end leaves the first with no end.
 func spansOf(lines []string) []span {
 	var out []span
 	for i := 0; i < len(lines); i++ {
@@ -36,10 +40,12 @@ func spansOf(lines []string) []span {
 			continue
 		}
 		id = packageMarker + strings.TrimSuffix(id, " >>>")
-		_, end := BlockMarkers(id)
+		start, end := BlockMarkers(id)
 		s := span{id: id, start: i, end: -1}
 		for j := i + 1; j < len(lines); j++ {
-			if strings.TrimSpace(lines[j]) == end {
+			if t := strings.TrimSpace(lines[j]); t == start {
+				break
+			} else if t == end {
 				s.end = j
 				break
 			}
@@ -72,6 +78,27 @@ func PackageBlock(zshrc, id string) (string, BlockState) {
 	}
 	s := found[0]
 	return strings.Join(lines[s.start+1:s.end], "\n") + "\n", BlockHere
+}
+
+func DamagedLines(text, id string) []string {
+	// value: what one hand deletes of a damaged block of id to leave one
+	// block, by its lines counted from 1: each start with no end of its own
+	// ("line N"), and every whole block after the first ("lines N to M").
+	var out []string
+	whole := 0
+	for _, s := range spansOf(strings.Split(text, "\n")) {
+		switch {
+		case s.id != id:
+		case s.end < 0:
+			out = append(out, "line "+strconv.Itoa(s.start+1))
+		default:
+			whole++
+			if whole > 1 {
+				out = append(out, "lines "+strconv.Itoa(s.start+1)+" to "+strconv.Itoa(s.end+1))
+			}
+		}
+	}
+	return out
 }
 
 func PackageBlockIDs(zshrc string) []string {
