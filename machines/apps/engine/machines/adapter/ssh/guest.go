@@ -65,17 +65,22 @@ func (d dialer) pin(file, name string) func(ssh.PublicKey) error {
 		if err != nil {
 			return err
 		}
-		return d.files.WriteFile(file, append(known, knownhosts.Line([]string{name}, key)+"\n"...), 0o600)
+		return d.files.Replace(file, append(known, knownhosts.Line([]string{name}, key)+"\n"...), 0o600)
 	}
 }
 
 func Repin(files local.FS, file, name, printed string) error {
 	// invariant: a VM's known hosts hold the one host key its lockdown
-	// printed: every key pinned for it before is dropped, every other host
-	// kept.
-	key, _, _, _, err := ssh.ParseAuthorizedKey([]byte(printed))
-	if err != nil {
-		return fmt.Errorf("the host key %s's lockdown printed is none: %w", name, err)
+	// printed, its one line holding a key and nothing else: every key
+	// pinned for it before is dropped, every other host kept, the file
+	// replaced whole or not at all. Any other print pins nothing.
+	line := strings.TrimSuffix(printed, "\n")
+	if line == "" || strings.ContainsAny(line, "\r\n") {
+		return fmt.Errorf("%s's lockdown printed %q, not one line holding its host key", name, printed)
+	}
+	key, _, _, rest, err := ssh.ParseAuthorizedKey([]byte(line))
+	if err != nil || len(rest) > 0 {
+		return fmt.Errorf("%s's lockdown printed %q, not one line holding its host key", name, line)
 	}
 	if made := files.MkdirAll(filepath.Dir(file), 0o700); made != nil {
 		return made
@@ -92,7 +97,7 @@ func Repin(files local.FS, file, name, printed string) error {
 		}
 		kept = append(kept, line...)
 	}
-	return files.WriteFile(file, append(kept, knownhosts.Line([]string{name}, key)+"\n"...), 0o600)
+	return files.Replace(file, append(kept, knownhosts.Line([]string{name}, key)+"\n"...), 0o600)
 }
 
 // invariant: a known_hosts file that cannot be read refuses at the

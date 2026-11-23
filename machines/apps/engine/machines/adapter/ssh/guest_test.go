@@ -20,6 +20,7 @@ import (
 	"time"
 
 	"golang.org/x/crypto/ssh"
+	"golang.org/x/crypto/ssh/knownhosts"
 
 	"github.com/jterrazz/studio-station/apps/engine/machines/contract"
 	"github.com/jterrazz/studio-station/apps/engine/machines/contract/contracttest"
@@ -406,5 +407,55 @@ func TestAVMRepinnedToTheHostKeyItsLockdownPrintedIsLetInByThatKeyAlone(t *testi
 	}
 	if Repin(h.FS, known, "dev", "not a key") == nil {
 		t.Fatal("a printed line that is no host key was pinned")
+	}
+}
+
+func TestARepinReplacesTheVMsLinesAndKeepsEveryOtherHosts(t *testing.T) {
+	known := filepath.Join(t.TempDir(), "known_hosts")
+	old, other, made := newHostKey(t).PublicKey(), newHostKey(t).PublicKey(), newHostKey(t).PublicKey()
+	others := knownhosts.Line([]string{"build"}, other) + "\n" + "# a note the owner wrote\n" + knownhosts.Line([]string{"[dev]:2222"}, other) + "\n"
+	before := knownhosts.Line([]string{"dev"}, old) + "\n" + others + knownhosts.Line([]string{"dev"}, other) + "\n"
+	if err := os.WriteFile(known, []byte(before), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	h := local.New(nil, nil, io.Discard, io.Discard)
+	if err := Repin(h.FS, known, "dev", string(ssh.MarshalAuthorizedKey(made))); err != nil {
+		t.Fatalf("the printed host key was not pinned: %v", err)
+	}
+	after, err := os.ReadFile(known)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if want := others + knownhosts.Line([]string{"dev"}, made) + "\n"; string(after) != want {
+		t.Fatalf("known hosts after the repin:\n%s\nwant every other host's line kept and dev's one key last:\n%s", after, want)
+	}
+}
+
+func TestARepinTakesOneLineHoldingOneKeyAndNothingElse(t *testing.T) {
+	key := strings.TrimSuffix(string(ssh.MarshalAuthorizedKey(newHostKey(t).PublicKey())), "\n")
+	h := local.New(nil, nil, io.Discard, io.Discard)
+	for name, printed := range map[string]string{
+		"two keys":           key + "\n" + key + "\n",
+		"a key then a line":  key + "\nsomething else\n",
+		"a blank line first": "\n" + key + "\n",
+		"a blank line after": key + "\n\n",
+		"no key":             "not a key\n",
+		"nothing":            "\n",
+	} {
+		known := filepath.Join(t.TempDir(), "known_hosts")
+		if err := os.WriteFile(known, []byte("kept\n"), 0o600); err != nil {
+			t.Fatal(err)
+		}
+		if Repin(h.FS, known, "dev", printed) == nil {
+			t.Errorf("%s: printed %q was pinned", name, printed)
+		}
+		if got, _ := os.ReadFile(known); string(got) != "kept\n" {
+			t.Errorf("%s: a refused print changed known hosts to %q", name, got)
+		}
+	}
+	for _, printed := range []string{key + "\n", key} {
+		if err := Repin(h.FS, filepath.Join(t.TempDir(), "known_hosts"), "dev", printed); err != nil {
+			t.Errorf("one key line %q was refused: %v", printed, err)
+		}
 	}
 }
