@@ -66,9 +66,10 @@ func (Beneath) Lstat(base, rel string) (Entry, error) {
 	return entryOf(&st), nil
 }
 
-func (Beneath) Mkdir(base, rel string, perm fs.FileMode, o Owner) error {
+func (Beneath) Mkdir(base, rel string, perm fs.FileMode, o Owner) (err error) {
 	// value: the folder rel made with perm and given o; one there already is
-	// refused (fs.ErrExist).
+	// refused (fs.ErrExist), and one that fails after it is made is taken
+	// away again.
 	dir, name, at, err := parent(base, rel)
 	if err != nil {
 		return err
@@ -78,6 +79,11 @@ func (Beneath) Mkdir(base, rel string, perm fs.FileMode, o Owner) error {
 	if err != nil {
 		return &fs.PathError{Op: "mkdir", Path: at, Err: err}
 	}
+	defer func() {
+		if err != nil {
+			_ = unix.Unlinkat(dir, name, unix.AT_REMOVEDIR)
+		}
+	}()
 	fd, err := openat(dir, name, unix.O_RDONLY|unix.O_DIRECTORY, at)
 	if err != nil {
 		return err
