@@ -852,3 +852,18 @@ func TestOffOnAnEditedBlockSaysTheKeyStillSignsIn(t *testing.T) {
 		t.Fatalf("Undo of an edited block = %v; file %q; want it kept, and a refusal naming its lines", err, m.content(rootAK))
 	}
 }
+
+func TestWithoutAdminAndNoRecordTheReadIsNeverRefused(t *testing.T) {
+	m := newMachine(t)
+	if m.self.UID == 0 {
+		t.Skip("root reads every folder")
+	}
+	m.mkdir("root", 0o000)
+	t.Cleanup(func() { _ = m.disk.Chmod(m.at("root"), 0o700) })
+	it := setting()
+	it.Inputs = []catalog.Input{{Name: "user", Default: "root"}, {Name: "key"}}
+	o, err := m.open().Observe(context.Background(), it)
+	if err != nil || (o.State != catalog.StateAbsent && !o.Blind) {
+		t.Fatalf("Observe without admin = %+v, %v; want absent or blind", o, err)
+	}
+}

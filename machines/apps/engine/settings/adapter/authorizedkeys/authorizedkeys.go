@@ -354,7 +354,10 @@ func (a *Applier) Observe(_ context.Context, it catalog.Setting) (settings.Obser
 		r = rec.Files[len(rec.Files)-1]
 	}
 	text, _, err := a.text(r.File)
-	if err != nil {
+	switch {
+	case errors.Is(err, fs.ErrPermission):
+		return settings.Observation{State: catalog.StateUnknown, Detail: "needs admin to read " + r.File, Blind: true}, nil
+	case err != nil:
 		return settings.Observation{}, err
 	}
 	o := settings.Observation{Where: r.File}
