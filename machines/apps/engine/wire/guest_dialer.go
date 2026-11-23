@@ -6,7 +6,9 @@ import (
 	"io"
 	"io/fs"
 	"net/netip"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
@@ -40,22 +42,31 @@ func (g engineGuests) Dial(ctx context.Context, vm string, at netip.AddrPort) (p
 	return engineGuest{c}, nil
 }
 
+// value: how long a lockdown's script may run in its guest.
+const lockdownWait = 3 * time.Minute
+
 // invariant: a dial the VM's first login answers (machinescalls.FirstLoginOf)
-// runs its lockdown once, as the image's own account, then dials by the key
+// runs its lockdown as the image's own account, then dials by the key
 // again; a key dial to a VM whose image carries a lockdown is kept only
-// once its marker holds, the lockdown run again over it until it does.
+// once its marker holds, the lockdown run again over it when it does not.
+// A lockdown that cannot run or fails is a contract.LockdownError, the
+// guest probed for a login a start could run it again by; a dial the
+// guest did not answer stays the dial's own.
 func (g engineGuests) dial(ctx context.Context, t contract.GuestTarget) (contract.Guest, error) {
 	c, err := g.dialer.Dial(ctx, t)
 	if err != nil {
 		first, ok, why := g.vms.FirstLoginOf(ctx, t, err)
-		if !ok || why != nil {
-			return nil, errors.Join(err, why)
+		if why != nil {
+			return nil, &contract.LockdownError{Cause: why.Error()}
 		}
-		if ran := g.firstLogin(ctx, first); ran != nil {
-			return nil, errors.Join(err, ran)
+		if !ok {
+			return nil, err
+		}
+		if ran := g.firstLogin(ctx, first, t); ran != nil {
+			return nil, ran
 		}
 		if c, err = g.dialer.Dial(ctx, t); err != nil {
-			return nil, err
+			return nil, g.failed(ctx, t, first, errors.New("its lockdown ended, and its key is refused: "+err.Error()))
 		}
 	}
 	if held := g.locked(ctx, c, t); held != nil {
@@ -65,13 +76,39 @@ func (g engineGuests) dial(ctx context.Context, t contract.GuestTarget) (contrac
 	return c, nil
 }
 
-func (g engineGuests) firstLogin(ctx context.Context, l machinescalls.Lockdown) error {
+func (g engineGuests) firstLogin(ctx context.Context, l machinescalls.Lockdown, t contract.GuestTarget) error {
 	c, err := g.dialer.Dial(ctx, l.Login)
+	if errors.Is(err, contract.ErrLoginRefused) {
+		return &contract.LockdownError{Cause: "it takes neither station's key nor its image's login " + l.Login.User, Gone: true}
+	}
 	if err != nil {
-		return errors.New("its first login as " + l.Login.User + " was refused too: " + err.Error())
+		return err
 	}
 	defer func() { _ = c.Close() }()
-	return g.lockdown(ctx, c, l, l.Login)
+	if ran := g.lockdown(ctx, c, l, l.Login); ran != nil {
+		return g.failed(ctx, t, l, ran)
+	}
+	return nil
+}
+
+// value: a lockdown's failure, Gone when the guest now refuses both station's
+// key and its image's login.
+func (g engineGuests) failed(ctx context.Context, t contract.GuestTarget, l machinescalls.Lockdown, cause error) error {
+	gone := true
+	for _, by := range []contract.GuestTarget{t, l.Login} {
+		c, err := g.dialer.Dial(ctx, by)
+		if err == nil {
+			_ = c.Close()
+		}
+		if !errors.Is(err, contract.ErrLoginRefused) {
+			gone = false
+		}
+	}
+	why := cause.Error()
+	if gone {
+		why += "; it now takes neither station's key nor its image's login"
+	}
+	return &contract.LockdownError{Cause: why, Gone: gone}
 }
 
 func (g engineGuests) locked(ctx context.Context, c contract.Guest, t contract.GuestTarget) error {
@@ -87,17 +124,18 @@ func (g engineGuests) locked(ctx context.Context, c contract.Guest, t contract.G
 	}
 	l, _, err := g.vms.LockdownOf(ctx, t)
 	if err != nil {
-		return err
+		return &contract.LockdownError{Cause: err.Error()}
 	}
 	if ran := g.lockdown(ctx, c, l, t); ran != nil {
-		return errors.New(t.VM + " takes the key with its lockdown unfinished, and running it again failed: " + ran.Error())
+		return &contract.LockdownError{Cause: "its lockdown is unfinished, and running it again failed: " + ran.Error()}
 	}
 	return nil
 }
 
 // invariant: a lockdown makes the guest's host keys anew and prints its
 // ed25519 one as soon as it is made, which replaces every key the VM's
-// known hosts held, whether the lockdown ends 0 or not.
+// known hosts held, whether the lockdown ends 0 or not; its script runs
+// lockdownWait at most.
 func (g engineGuests) lockdown(ctx context.Context, c contract.Guest, l machinescalls.Lockdown, t contract.GuestTarget) error {
 	made, err := c.Exec(ctx, contract.GuestCommand{Line: catalog.LockdownFolder})
 	if err != nil {
@@ -113,7 +151,12 @@ func (g engineGuests) lockdown(ctx context.Context, c contract.Guest, l machines
 	if put := c.Put(ctx, dir+"/lockdown.sh", l.Script, 0o600); put != nil {
 		return put
 	}
-	res, err := c.Exec(ctx, contract.GuestCommand{Line: catalog.LockdownLine(dir), Stdin: strings.NewReader(l.Values)})
+	run, cancel := context.WithTimeout(ctx, lockdownWait)
+	defer cancel()
+	res, err := c.Exec(run, contract.GuestCommand{Line: catalog.LockdownLine(dir), Stdin: strings.NewReader(l.Values)})
+	if errors.Is(err, context.DeadlineExceeded) {
+		return errors.New("its lockdown did not finish in " + strconv.Itoa(int(lockdownWait.Minutes())) + " min")
+	}
 	if err != nil {
 		return err
 	}

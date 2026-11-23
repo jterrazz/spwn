@@ -184,6 +184,14 @@ const (
 	LocalNetworkBlock GuestBlock = "local-network"
 )
 
+type LockdownFailure struct {
+	// value: why its engine stopped a VM's run before its guest connected:
+	// its lockdown failed; and whether the guest takes neither station's key
+	// nor its image's login any more, so only a new create cures it.
+	Cause string `json:"cause"`
+	Gone  bool   `json:"gone,omitempty"`
+}
+
 type LocalNetwork string
 
 const (

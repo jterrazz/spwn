@@ -2,6 +2,8 @@ description: 'a fetched macOS workspace is reached once its first login put the 
 fixture: ../../__fixtures__/build/
 env: one-mac
 runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].preferences.vm_user = "you"'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
     - command: 'world upstream-login admin admin'
       exit: 0
     - command: 'images update base-macos'

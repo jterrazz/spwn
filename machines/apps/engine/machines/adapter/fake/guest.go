@@ -142,8 +142,11 @@ func (g *Guests) Dial(_ context.Context, t contract.GuestTarget) (contract.Guest
 		return nil, ErrNoGuest
 	}
 	g.w.Lock()
-	login := wg.Login
+	login, closed := wg.Login, wg.Closed
 	g.w.Unlock()
+	if closed {
+		return nil, fmt.Errorf("%w: %s takes no login since its lockdown was cut", contract.ErrLoginRefused, t.VM)
+	}
 	if login != nil && (t.Password == "" || t.User != login.User || t.Password != login.Password) {
 		return nil, fmt.Errorf("%w: %s takes only its image's own login", contract.ErrLoginRefused, t.VM)
 	}
@@ -273,8 +276,8 @@ func (c *guest) Exec(ctx context.Context, cmd contract.GuestCommand) (contract.G
 	if cmd.Line != "true" {
 		c.ran(cmd.Line)
 	}
-	if res, ok := c.lockdown(cmd); ok {
-		return res, nil
+	if res, ok, err := c.lockdown(cmd); ok {
+		return res, err
 	}
 	var in []byte
 	if cmd.Stdin != nil {
@@ -320,22 +323,25 @@ func (c *guest) Exec(ctx context.Context, cmd contract.GuestCommand) (contract.G
 const lockdownFolder = "/tmp/station.fake"
 
 // invariant: a guest plays its image's lockdown: the folder it is put in,
-// the script, which ends with the password closed and the key in, its
-// marker last, unless the world cuts it, and the marker's read.
-func (c *guest) lockdown(cmd contract.GuestCommand) (contract.GuestResult, bool) {
+// the script, which closes the image's login, then ends with the key in and
+// its marker last, unless the world cuts it, and the marker's read. A cut
+// before its lock leaves the image's login; one before its key, or one that
+// never finishes, leaves no login at all; one after it, the key without the
+// marker.
+func (c *guest) lockdown(cmd contract.GuestCommand) (contract.GuestResult, bool, error) {
 	switch cmd.Line {
 	case catalog.LockdownFolder:
-		return contract.GuestResult{Stdout: lockdownFolder + "\n"}, true
+		return contract.GuestResult{Stdout: lockdownFolder + "\n"}, true, nil
 	case catalog.LockedLine:
 		c.w.Lock()
 		defer c.w.Unlock()
-		if g := c.state(); g != nil && (g.Login != nil || g.Unlocked) {
-			return contract.GuestResult{Code: 1}, true
+		if g := c.state(); g != nil && (g.Login != nil || g.Unlocked || g.Closed) {
+			return contract.GuestResult{Code: 1}, true, nil
 		}
-		return contract.GuestResult{}, true
+		return contract.GuestResult{}, true, nil
 	case catalog.LockdownLine(lockdownFolder):
 	default:
-		return contract.GuestResult{}, false
+		return contract.GuestResult{}, false, nil
 	}
 	if cmd.Stdin != nil {
 		_, _ = io.ReadAll(cmd.Stdin)
@@ -344,23 +350,29 @@ func (c *guest) lockdown(cmd contract.GuestCommand) (contract.GuestResult, bool)
 	defer c.w.Unlock()
 	g := c.state()
 	if g == nil {
-		return contract.GuestResult{Code: 1, Stderr: "no guest\n"}, true
+		return contract.GuestResult{Code: 1, Stderr: "no guest\n"}, true, nil
 	}
 	cut := ""
 	if len(c.w.LockdownCuts) > 0 {
 		cut, c.w.LockdownCuts = c.w.LockdownCuts[0], c.w.LockdownCuts[1:]
 	}
 	switch cut {
+	case world.CutBeforeLock:
+		return contract.GuestResult{Code: 1, Stderr: "the lockdown was cut before its lock\n"}, true, nil
 	case world.CutBeforeKey:
-		return contract.GuestResult{Code: 1, Stderr: "the lockdown was cut before its key\n"}, true
+		g.Login, g.Closed = nil, true
+		return contract.GuestResult{Code: 1, Stderr: "the lockdown was cut before its key\n"}, true, nil
+	case world.CutNeverEnds:
+		g.Login, g.Closed = nil, true
+		return contract.GuestResult{}, true, context.DeadlineExceeded
 	case world.CutAfterKey:
-		g.Login, g.Unlocked = nil, true
+		g.Login, g.Unlocked, g.Closed = nil, true, false
 		g.HostKeys++
-		return contract.GuestResult{Code: 1, Stdout: hostKey(c.name, g.HostKeys), Stderr: "the lockdown was cut after its key\n"}, true
+		return contract.GuestResult{Code: 1, Stdout: hostKey(c.name, g.HostKeys), Stderr: "the lockdown was cut after its key\n"}, true, nil
 	}
-	g.Login, g.Unlocked = nil, false
+	g.Login, g.Unlocked, g.Closed = nil, false, false
 	g.HostKeys++
-	return contract.GuestResult{Stdout: hostKey(c.name, g.HostKeys)}, true
+	return contract.GuestResult{Stdout: hostKey(c.name, g.HostKeys)}, true, nil
 }
 
 // value: the ed25519 host key line a guest's nth lockdown makes, its 32

@@ -1,0 +1,31 @@
+description: 'a fetched macOS workspace keyed without its marker is stopped, its start runs it again by the key'
+fixture: ../../__fixtures__/build/
+env: one-mac
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].preferences.vm_user = "you"'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'world upstream-login admin admin'
+      exit: 0
+    - command: 'world lockdown-cut after-key'
+      exit: 0
+    - command: 'images update base-macos'
+      exit: 0
+      stdout: |
+          ●	base-macos	26.6.2	fetched
+    - command: 'machines create mac-1 --image base-macos'
+      exit: 1
+      stderr: |
+          Error: mac-1 is kept, failing SSH answers: its lockdown exited 1: the lockdown was cut after its key
+          Hint: station machines start mac-1, or station machines delete mac-1
+    - command: 'machines start mac-1'
+      exit: 0
+      stdout: |
+          ●	mac-1	started
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs[.this_mac].vms["mac-1"] | {login: .guest.login, closed: .guest.closed, unlocked: .guest.unlocked, ran: [.guest.ran[]? | select(startswith("/usr/local/bin/station guest") | not) | sub("/tmp/station[.][A-Za-z0-9X]+"; "<folder>")]}'' world.json'
+      exit: 0
+      stdout: |
+          {"login":null,"closed":null,"unlocked":null,"ran":["/usr/bin/mktemp -d <folder>","sudo -n /bin/bash <folder>/lockdown.sh","/bin/test -f /var/db/station/locked","/usr/bin/mktemp -d <folder>","sudo -n /bin/bash <folder>/lockdown.sh","/bin/test -f /var/db/station/locked"]}
+    - command: '--version >/dev/null; /bin/cat .local/state/station/known_hosts/mac-1'
+      exit: 0
+      stdout: |
+          mac-1 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBb8nh4zHySZaSVQdesiX1zRxZpp1Fik/x6mWbs0kM/e

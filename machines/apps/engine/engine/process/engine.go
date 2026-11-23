@@ -35,6 +35,9 @@ const (
 	serveEvery = 30
 	seenEvery  = time.Minute
 	guestReady = 60 * time.Second
+	// value: how much longer than guestReady a dial still in progress is
+	// waited for: a macOS guest's lockdown runs inside it.
+	dialWait   = 4 * time.Minute
 	certBudget = 120 * time.Second
 )
 

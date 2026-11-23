@@ -51,7 +51,8 @@ type World struct {
 	// with; nil when the world's pulled images take station's key.
 	UpstreamLogin *ImageLogin `json:"upstream_login,omitempty"`
 	// value: how each next lockdown run in a guest is cut, in order: before
-	// its key goes in, or after it and before its marker.
+	// it closes the image's login, before its key goes in, after it and
+	// before its marker, or never ending.
 	LockdownCuts []string `json:"lockdown_cuts,omitempty"`
 	// value: the failures injected into the fakes, in the order scripted.
 	Script []Fault `json:"script,omitempty"`
@@ -529,11 +530,16 @@ type Guest struct {
 	Unlocked bool `json:"unlocked,omitempty"`
 	// value: how many host keys its lockdowns made; it serves the last.
 	HostKeys int `json:"host_keys,omitempty"`
+	// value: takes no login at all: its lockdown closed the image's login
+	// and never put station's key in.
+	Closed bool `json:"closed,omitempty"`
 }
 
 const (
-	CutBeforeKey = "before-key"
-	CutAfterKey  = "after-key"
+	CutBeforeLock = "before-lock"
+	CutBeforeKey  = "before-key"
+	CutAfterKey   = "after-key"
+	CutNeverEnds  = "never-ends"
 )
 
 type ImageLogin struct {

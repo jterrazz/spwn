@@ -46,6 +46,9 @@
           },
           "type": "array"
         },
+        "lockdown": {
+          "$ref": "#/$defs/machines.LockdownFailure"
+        },
         "name": {
           "type": "string"
         },
@@ -141,6 +144,21 @@
       "required": [
         "at",
         "took"
+      ],
+      "type": "object"
+    },
+    "machines.LockdownFailure": {
+      "additionalProperties": false,
+      "properties": {
+        "cause": {
+          "type": "string"
+        },
+        "gone": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "cause"
       ],
       "type": "object"
     },

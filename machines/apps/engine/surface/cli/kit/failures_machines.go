@@ -110,6 +110,8 @@ func vmFailure(err error) (*fail.Error, bool) {
 		return usage(shrinks.Error(), shrinks.Name+" has "+strconv.FormatFloat(float64(shrinks.Has)/1e9, 'f', 1, 64)+" GB: ask for more"), true
 	case errors.As(err, &noBoot):
 		return failed(noBoot.Error(), keptFix(noBoot.Name), err), true
+	case errors.As(err, &unhealthy) && unhealthy.Gone:
+		return failed(unhealthy.Error(), "station machines delete "+unhealthy.Name+", then make it again", err), true
 	case errors.As(err, &unhealthy) && unhealthy.BlockedOn != "":
 		return failed(unhealthy.Error(), unhealthy.BlockedFix(), err), true
 	case errors.As(err, &unhealthy):

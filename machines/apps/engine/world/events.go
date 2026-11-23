@@ -58,7 +58,7 @@ func events() []event {
 		{"low-power", []string{"on|off"}, lowPower},
 		{"advance", []string{"<duration>"}, advance},
 		{"upstream-login", []string{"<user>", "<password>"}, upstreamLogin},
-		{"lockdown-cut", []string{"before-key|after-key", "[<n>]"}, lockdownCut},
+		{"lockdown-cut", []string{"before-lock|before-key|after-key|never-ends", "[<n>]"}, lockdownCut},
 		{"fault", []string{"<Contract>.<Method>", "[<n>]", "[times]"}, fault},
 		{"hold", []string{"<Contract>.<Method>"}, hold},
 		{"unhold", []string{"[<mac>]", "[<vm>]"}, unhold},
@@ -273,8 +273,8 @@ func upstreamLogin(w *World, args []string) error {
 }
 
 func lockdownCut(w *World, args []string) error {
-	if args[0] != CutBeforeKey && args[0] != CutAfterKey {
-		return fmt.Errorf("lockdown-cut takes before-key or after-key, not %q", args[0])
+	if !slices.Contains([]string{CutBeforeLock, CutBeforeKey, CutAfterKey, CutNeverEnds}, args[0]) {
+		return fmt.Errorf("lockdown-cut takes before-lock, before-key, after-key or never-ends, not %q", args[0])
 	}
 	n := 1
 	if len(args) > 1 {

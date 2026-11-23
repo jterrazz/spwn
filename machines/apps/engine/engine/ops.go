@@ -57,6 +57,9 @@ type VMView struct {
 	// value: what refused its guest's last connection, while nothing has
 	// connected since; empty when nothing did.
 	Blocked model.GuestBlock `json:"blocked,omitempty"`
+	// value: why its engine stopped its run before its guest connected, its
+	// lockdown having failed, until its next run; nil otherwise.
+	Lockdown *model.LockdownFailure `json:"lockdown,omitempty"`
 }
 
 func SocketPath(state string) string { return path.Join(state, "engine.sock") }

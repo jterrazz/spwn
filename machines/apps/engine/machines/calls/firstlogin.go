@@ -75,10 +75,15 @@ func (s *Machinist) Locks(ctx context.Context, vm string) (bool, error) {
 
 func (s *Machinist) LockdownOf(ctx context.Context, t contract.GuestTarget) (Lockdown, bool, error) {
 	// invariant: the lockdown of a VM whose image carries one, the image
-	// key made when it is missing; none for any other VM.
+	// key made when it is missing; none for any other VM. A VM user that is
+	// the image's own account, root or none is refused: the lockdown takes
+	// that account's login away, and the VM user's would go with it.
 	img, ok, err := s.lockdownImage(ctx, t.VM)
 	if err != nil || !ok {
 		return Lockdown{}, false, err
+	}
+	if t.User == "" || t.User == catalog.UpstreamLogin.User || t.User == "root" {
+		return Lockdown{}, false, errors.New("the VM user '" + t.User + "' cannot be a fetched macOS guest's, whose lockdown retires " + catalog.UpstreamLogin.User + " and root: set another vm_user in preferences.json, then start " + t.VM)
 	}
 	script, err := catalog.Recipes.ReadFile(img.FirstLogin)
 	if err != nil {

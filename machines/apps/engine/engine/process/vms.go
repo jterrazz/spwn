@@ -84,6 +84,10 @@ type vmState struct {
 	// value: what refused its guest's last dial, until one connects or its
 	// run ends.
 	blocked model.GuestBlock
+	// value: its session is inside a dial, a lockdown included; why the
+	// engine stopped this run, its lockdown having failed, until the next.
+	dialing  bool
+	lockdown *model.LockdownFailure
 }
 
 // invariant: a VM's record changes under d.mu, as a tick reads the store
@@ -219,6 +223,7 @@ func (d *Engine) start(ctx context.Context, v *vmState) error {
 	d.keepMounts(v, mounts)
 	d.mu.Lock()
 	v.run, v.end, v.state, v.detail, v.stopping, v.mounts, v.read = run, nil, engine.StateRunning, read.Why, false, mounts, true
+	v.lockdown = nil
 	v.bootAt, v.check = d.h.Now(), model.CheckStatus{}
 	if v.recordLocked().Lifetime == model.AlwaysOn && v.down && v.walk == nil {
 		v.walk = &model.RestartWalk{Step: 1, At: v.bootAt}
@@ -353,7 +358,7 @@ func (d *Engine) vmViews() []engine.VMView {
 		view := engine.VMView{
 			Name: name, State: v.state, RunPID: v.runPID(), Holder: v.holder(), Guest: v.guest, IP: v.ip, Detail: v.detail, SSH: v.ssh, Restarts: v.restarts, Check: v.check,
 			Latency: v.latency, Restart: v.walk, Cause: v.cause, LastLines: v.lastLines, ReadyAt: v.readyAt,
-			Drift: v.keptDriftLocked(), Blocked: v.blocked,
+			Drift: v.keptDriftLocked(), Blocked: v.blocked, Lockdown: v.lockdown,
 		}
 		if v.state == engine.StateRunning {
 			view.BootAt = v.bootAt
@@ -379,16 +384,18 @@ func (d *Engine) opRun(ctx context.Context, vm string) error {
 
 // invariant: run answers once the guest is connected (it has written the VM's
 // keys block and services.env), or when the run ended first (its end is the
-// supervision's), else guest_timeout after guestReady. A greeting the guest
-// is in is waited for before the guest is judged, each once, so how long a
-// greeting takes moves no poll.
+// supervision's, or its failed lockdown's, which it answers), else
+// guest_timeout after guestReady. A greeting the guest is in is waited for
+// before the guest is judged, each once, so how long a greeting takes moves
+// no poll; a dial in progress past guestReady, a lockdown, up to dialWait
+// more.
 func (d *Engine) awaitGuest(ctx context.Context, vm string) error {
 	v, err := d.find(vm)
 	if err != nil {
 		return err
 	}
 	var heard <-chan struct{}
-	for waited := time.Duration(0); waited < guestReady; waited += pollEvery {
+	for waited := time.Duration(0); waited < guestReady || d.inDial(v) && waited < guestReady+dialWait; waited += pollEvery {
 		if greeting := d.greetingOf(v); greeting != nil && greeting != heard {
 			heard = greeting
 			if err := d.h.Await(ctx, greeting, pollEvery); err != nil {
@@ -396,8 +403,11 @@ func (d *Engine) awaitGuest(ctx context.Context, vm string) error {
 			}
 		}
 		d.mu.Lock()
-		connected, ended := v.guest == engine.GuestConnected, v.over()
+		connected, ended, lockdown := v.guest == engine.GuestConnected, v.over(), v.lockdown
 		d.mu.Unlock()
+		if lockdown != nil && ended {
+			return fault(enginecalls.GuestAbsent, vm+"'s lockdown failed: "+lockdown.Cause, "station machines "+vm)
+		}
 		if connected || ended {
 			return nil
 		}
@@ -613,7 +623,18 @@ func (d *Engine) guestOnce(ctx context.Context, v *vmState, gen int) {
 		d.guestFailed(ctx, v, err.Error())
 		return
 	}
+	d.mu.Lock()
+	v.dialing = true
+	d.mu.Unlock()
 	client, err := d.guests.Dial(ctx, name, at)
+	d.mu.Lock()
+	v.dialing = false
+	d.mu.Unlock()
+	var lockdown *contract.LockdownError
+	if errors.As(err, &lockdown) {
+		d.lockdownFailed(ctx, v, gen, lockdown)
+		return
+	}
 	if err != nil {
 		d.guestFailed(ctx, v, err.Error())
 		d.blockedBy(v, gen, err)
@@ -672,6 +693,29 @@ func (d *Engine) mountFolders(ctx context.Context, v *vmState, client Guest) {
 		d.logf(v.name+" mounts", err.Error())
 	case ran.Code != 0:
 		d.logf(v.name+" mounts", "exited "+strconv.Itoa(ran.Code)+": "+strings.TrimSpace(ran.Stderr))
+	}
+}
+
+func (d *Engine) inDial(v *vmState) bool {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	return v.dialing
+}
+
+// invariant: a VM whose lockdown failed is stopped at once, its wish kept
+// stopped, and its session dials no more: a guest left half locked down
+// never stays up to be reached, and its lockdown runs once per start. Why
+// stays with the VM until its next run.
+func (d *Engine) lockdownFailed(ctx context.Context, v *vmState, gen int, failed *contract.LockdownError) {
+	if ctx.Err() != nil || !d.current(v, gen) {
+		return
+	}
+	d.mu.Lock()
+	v.lockdown = &model.LockdownFailure{Cause: failed.Cause, Gone: failed.Gone}
+	d.mu.Unlock()
+	d.logf(v.name+" guest", "its lockdown failed, so it is stopped: "+failed.Cause)
+	if err := d.halt(context.WithoutCancel(ctx), v, true); err != nil {
+		d.logf(v.name+" guest", "the stop after its failed lockdown: "+err.Error())
 	}
 }
 

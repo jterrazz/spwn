@@ -605,9 +605,14 @@ func (s *Machinist) setUp(ctx context.Context, img catalog.Image, r model.Create
 }
 
 // invariant: once its first run is asked, a VM is kept whatever fails
-// (CR-15, CR-16): a run the hypervisor never began did not boot; one that
-// runs failed the first health step that did not pass (SPEC §7.2).
+// (CR-15, CR-16): a run its engine stopped because its lockdown failed
+// failed SSH, by that lockdown's cause; a run the hypervisor never began
+// did not boot; one that runs failed the first health step that did not
+// pass (SPEC §7.2).
 func (s *Machinist) unhealthy(ctx context.Context, name string, cause error) error {
+	if live, err := s.engineAPI.VMs(ctx); err == nil && live[name].Lockdown != nil {
+		return &model.UnhealthyError{Name: name, Step: model.StepSSH, Detail: live[name].Lockdown.Cause, Gone: live[name].Lockdown.Gone}
+	}
 	if s.engineState(ctx, name) != contract.DiskRunning {
 		return &model.DidNotBootError{Name: name, Cause: cause}
 	}

@@ -149,6 +149,9 @@ type UnhealthyError struct {
 	// value: whether that Mac's engine runs from Spwn.app, which names the
 	// app its Local Network row asks for.
 	BlockedBundled bool
+	// value: its guest takes no login its start could run its lockdown by:
+	// only a delete and a new create cure it.
+	Gone bool
 }
 
 func (e *UnhealthyError) Error() string {

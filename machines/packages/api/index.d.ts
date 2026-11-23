@@ -1284,6 +1284,7 @@ export type EngineVMView = {
     ip: string;
     last_lines?: string[];
     latency?: MachinesLatencyPoint[];
+    lockdown?: MachinesLockdownFailure;
     name: string;
     ready_at?: string;
     restart?: MachinesRestartWalk;
@@ -2114,6 +2115,11 @@ export type MachinesKeptDrift = {
 export type MachinesLatencyPoint = {
     at: string;
     took: number;
+};
+
+export type MachinesLockdownFailure = {
+    cause: string;
+    gone?: boolean;
 };
 
 export type MachinesMacView = {

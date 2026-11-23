@@ -17,6 +17,16 @@ var (
 	ErrLoginRefused = errors.New("the guest refused the login")
 )
 
+type LockdownError struct {
+	// value: a dial its VM's lockdown failed at: why, and whether the guest
+	// now takes neither station's key nor its image's login, so no start
+	// can run the lockdown again.
+	Cause string
+	Gone  bool
+}
+
+func (e *LockdownError) Error() string { return e.Cause }
+
 type GuestDialer interface {
 	Dial(ctx context.Context, t GuestTarget) (Guest, error)
 }

@@ -1,0 +1,34 @@
+description: 'a fetched macOS workspace whose lockdown is cut before its lock is stopped, its start runs it again'
+fixture: ../../__fixtures__/build/
+env: one-mac
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].preferences.vm_user = "you"'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'world upstream-login admin admin'
+      exit: 0
+    - command: 'world lockdown-cut before-lock'
+      exit: 0
+    - command: 'images update base-macos'
+      exit: 0
+      stdout: |
+          ●	base-macos	26.6.2	fetched
+    - command: 'machines create mac-1 --image base-macos'
+      exit: 1
+      stderr: |
+          Error: mac-1 is kept, failing SSH answers: its lockdown exited 1: the lockdown was cut before its lock
+          Hint: station machines start mac-1, or station machines delete mac-1
+    - command: 'machines --this-mac'
+      exit: 0
+      stdout: |
+          ●	macbook-pro	Mac	macbook-pro	Engine running
+          ○	mac-1	Workspace	macbook-pro	Stopped · ephemeral	4 CPU	8 GB	Failed at SSH 4 of 4
+          # Needs you
+          ✗	mac-1	was not created: it failed at SSH	station machines start mac-1
+    - command: 'machines start mac-1'
+      exit: 0
+      stdout: |
+          ●	mac-1	started
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs[.this_mac].vms["mac-1"] | {login: .guest.login, closed: .guest.closed, unlocked: .guest.unlocked, ran: [.guest.ran[]? | select(startswith("/usr/local/bin/station guest") | not) | sub("/tmp/station[.][A-Za-z0-9X]+"; "<folder>")]}'' world.json'
+      exit: 0
+      stdout: |
+          {"login":null,"closed":null,"unlocked":null,"ran":["/usr/bin/mktemp -d <folder>","sudo -n /bin/bash <folder>/lockdown.sh","/usr/bin/mktemp -d <folder>","sudo -n /bin/bash <folder>/lockdown.sh","/bin/test -f /var/db/station/locked","/bin/test -f /var/db/station/locked"]}

@@ -375,6 +375,7 @@ func (d macEngine) VMs(ctx context.Context) (map[string]machinescalls.EngineVM, 
 		out[v.Name] = machinescalls.EngineVM{
 			State: v.State, Guest: v.Guest, IP: v.IP, Detail: v.Detail, SSH: v.SSH, Restarts: v.Restarts, Check: v.Check, BootAt: v.BootAt,
 			Latency: v.Latency, Restart: v.Restart, Cause: v.Cause, LastLines: v.LastLines, ReadyAt: v.ReadyAt, Drift: v.Drift, Blocked: v.Blocked,
+			Lockdown: v.Lockdown,
 		}
 	}
 	return out, nil
