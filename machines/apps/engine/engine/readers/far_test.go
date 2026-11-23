@@ -19,11 +19,19 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/engine/store"
 )
 
-// value: a clock whose sleeps end only when the test moves it.
+// value: a clock whose sleeps end only when the test moves it, and which
+// counts the sleeps begun so a test moves it once its sleeper is asleep.
 type turned struct {
 	mu    sync.Mutex
 	now   time.Time
 	moved chan struct{}
+	begun int
+}
+
+func (c *turned) sleeps() int {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	return c.begun
 }
 
 func (c *turned) Now() time.Time {
@@ -41,7 +49,10 @@ func (c *turned) advance(d time.Duration) {
 }
 
 func (c *turned) Sleep(ctx context.Context, d time.Duration) error {
-	until := c.Now().Add(d)
+	c.mu.Lock()
+	until := c.now.Add(d)
+	c.begun++
+	c.mu.Unlock()
 	for {
 		c.mu.Lock()
 		now, moved := c.now, c.moved
@@ -136,8 +147,14 @@ func TestASilentMacGoesStaleOnceAndIsDialledAgainOnTheBackoff(t *testing.T) {
 	mini.mu.Lock()
 	mini.down = true
 	mini.mu.Unlock()
+	eventually(t, "the watchdog is asleep", func() bool { return c.sleeps() == 1 })
 	c.advance(45 * time.Second)
 	eventually(t, "45 s with no frame marks the mini stale", func() bool { return st.Now().Slices[key].State == store.Stale })
+	eventually(t, "the silent mini's link is dropped", func() bool {
+		mu.Lock()
+		defer mu.Unlock()
+		return len(dropped) > 0
+	})
 	got := st.Now().Slices[key]
 	if got.Why != store.WhyUnreachable || got.Value == nil {
 		t.Fatalf("a silent mini's slice: why %q, value %v; want unreachable with its last value", got.Why, got.Value)
