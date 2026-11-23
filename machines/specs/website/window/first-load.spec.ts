@@ -19,9 +19,9 @@ describe('first load', () => {
     });
 
     test('A9 a refresh refused keeps the page as answered, and the toolbar says what the engine said and since when', async () => {
-        // Given - macbook-pro's Ports over stories, its reads asked again every half second, every ask of engine.read but the first refused
+        // Given - macbook-pro's Ports over stories, its link absent for a moment so its reads are asked again, every ask of engine.read but the first refused
         const result = await website.visit(
-            '/?world=stories&machine=macbook-pro&tab=Ports&stale=engine.read&every=500',
+            '/?world=stories&machine=macbook-pro&tab=Ports&stale=engine.read&link=blip',
             async (visitor) => {
                 const listening = region('What listens on this Mac');
                 await visitor.see(within(listening, content('ControlCenter', { exact: false })));

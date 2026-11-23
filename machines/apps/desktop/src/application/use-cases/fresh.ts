@@ -3,12 +3,6 @@ import type { CallName, EngineEventsOutput, EngineHello } from '@jterrazz/statio
 import type { EnginePort, Watch } from '../ports/engine.port';
 import type { PresencePort } from '../ports/presence.port';
 
-// value: how often every read a component shows is asked again while the window is shown. The engine reads its own
-// value: pages (machines, ports, accounts, needs) every 30 s, so a window asking more often reads the same answer.
-export const FRESH_EVERY = 30_000;
-
-export type Why = 'back' | 'notice' | 'tick';
-
 export type Held = { open: boolean; hello: EngineHello | undefined; subscribed: boolean };
 
 export function sameEngine(
@@ -30,62 +24,23 @@ function isNotice(out: EngineEventsOutput): boolean {
     return 'event' in out && out.event === 'notice';
 }
 
-type Timing = { every: number };
-
-// invariant: while the link is open and a component holds a read, the reads are asked again on one cadence while the
-// invariant: window is shown, at once when it is shown again or regains the focus, and on each notice of
-// invariant: engine.events where the engine's hello offers it; a notice names no read, so it asks them all.
+// invariant: while the link is open and a component holds a read, the reads are asked again on each notice of
+// invariant: engine.events the window is shown for, where the engine's hello offers it; a notice names no read, so
+// invariant: it asks them all. Nothing else asks them again: no timer, and no focus.
 export class Freshness {
     private readonly client: EnginePort;
     private readonly presence: PresencePort;
-    private readonly timing: Timing;
-    private readonly refresh: (why: Why) => void;
-    private held: Held = { hello: undefined, open: false, subscribed: false };
-    private timer: ReturnType<typeof setInterval> | undefined;
+    private readonly refresh: () => void;
     private events: undefined | { watch: Watch; of: EngineHello | undefined };
-    private unpresence: (() => void) | undefined;
 
-    constructor(
-        client: EnginePort,
-        presence: PresencePort,
-        timing: Timing,
-        refresh: (why: Why) => void,
-    ) {
+    constructor(client: EnginePort, presence: PresencePort, refresh: () => void) {
         this.client = client;
         this.presence = presence;
-        this.timing = timing;
         this.refresh = refresh;
     }
 
-    update(held: Held): void {
-        this.held = held;
-        this.settle();
-    }
-
-    private settle(): void {
-        const { hello, open, subscribed } = this.held;
-        const active = open && subscribed;
-        if (active) {
-            this.unpresence ??= this.presence.subscribe((seen) => {
-                this.seen(seen);
-            });
-        } else {
-            this.unpresence?.();
-            this.unpresence = undefined;
-        }
-        this.tick(active && this.presence.visible());
-        this.listen(active && offersEvents(hello) ? hello : undefined);
-    }
-
-    private tick(ticking: boolean): void {
-        if (ticking && this.timer === undefined) {
-            this.timer = setInterval(() => {
-                this.refresh('tick');
-            }, this.timing.every);
-        } else if (!ticking) {
-            clearInterval(this.timer);
-            this.timer = undefined;
-        }
+    update({ hello, open, subscribed }: Held): void {
+        this.listen(open && subscribed && offersEvents(hello) ? hello : undefined);
     }
 
     private listen(hello: EngineHello | undefined): void {
@@ -104,19 +59,11 @@ export class Freshness {
                 error: () => undefined,
                 out: (out) => {
                     if (isNotice(out) && this.presence.visible()) {
-                        this.refresh('notice');
+                        this.refresh();
                     }
                 },
             },
         );
         this.events = { of: hello, watch };
-    }
-
-    private seen(seen: 'back' | 'hidden'): void {
-        if (seen === 'back' && this.presence.visible()) {
-            this.tick(false);
-            this.refresh('back');
-        }
-        this.settle();
     }
 }

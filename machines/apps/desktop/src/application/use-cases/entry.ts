@@ -22,7 +22,7 @@ export type Asked =
     | { kind: 'read'; name: ReadName; input: In<ReadName>; target: Target | undefined }
     | { kind: 'watch'; name: WatchName; input: In<WatchName>; target: Target | undefined };
 
-// value: `asking` while a request is out and has not settled; `held`, a quiet re-ask's last out not shown yet; `kept`,
+// value: `asking` while a request is out and has not settled; `held`, a re-ask's last out not shown yet; `kept`,
 // value: past its grace with nobody holding it, its request stopped and its answer kept; `heardAt`, when an answer was
 // value: last heard, equal to the one shown or not, read off `now`.
 export type Entry = {

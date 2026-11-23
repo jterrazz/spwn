@@ -2,7 +2,17 @@ import { clock } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import type { Asked } from '../entry';
-import { DONE, EVERY, KEY, PENDING, RUNNING, settled, STOPPED, unsettled } from './fake-engine';
+import {
+    DONE,
+    KEEPS_MACHINES,
+    KEY,
+    later,
+    PENDING,
+    RUNNING,
+    settled,
+    STOPPED,
+    unsettled,
+} from './fake-engine';
 
 const ENGINE_READ: Asked = { input: {}, kind: 'read', name: 'engine.read', target: undefined };
 
@@ -23,10 +33,10 @@ describe('ask', () => {
         const { engine, store } = await settled();
 
         // When - the next re-ask is refused as unreachable, then the one after answers again
-        await clock.advance(EVERY);
+        await later(store);
         engine.answer('machines.list', { error: UNREACHABLE });
         const missed = store.reading(KEY);
-        await clock.advance(EVERY);
+        await later(store);
         engine.answer('machines.list', RUNNING, DONE);
 
         // Then - the answer stayed shown with the refusal as its stale mark, and the mark went with the new answer
@@ -51,8 +61,8 @@ describe('ask', () => {
         engine.answer('engine.read', RUNNING);
         const shown = store.reading(KEY);
 
-        // When - the cadence asks both again and the connection of each ends unanswered
-        await clock.advance(EVERY);
+        // When - a reread asks both again and the connection of each ends unanswered
+        await later(store);
         engine.end('machines.list');
         engine.end('engine.read');
         await clock.advance(1);
@@ -67,9 +77,10 @@ describe('ask', () => {
     });
 
     test('a watch whose connection ends after its answer never draws its pending outs again once reconnected', async () => {
-        // Given - machines.list asked for the first time, answered pending then running
+        // Given - machines.list, a view the engine keeps, asked for the first time and answered pending then running
         using _ = clock.run('2026-11-13T10:00:00Z');
         const { engine, store } = await unsettled();
+        engine.answer('engine.state', ...KEEPS_MACHINES);
         engine.answer('machines.list', PENDING, RUNNING);
 
         // When - its connection ends with no done, the client reconnects it, and the new stream answers pending first
@@ -93,7 +104,7 @@ describe('ask', () => {
         const { engine, store } = await settled();
 
         // When - the next re-ask is answered that the machine is not found
-        await clock.advance(EVERY);
+        await later(store);
         engine.answer('machines.list', {
             error: { code: 'unknown_vm', message: 'no such machine', type: 'not-found' },
         });

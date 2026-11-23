@@ -1,3 +1,5 @@
+import type { EngineHello } from '@jterrazz/station-api';
+
 import type { Recording } from '../../../infrastructure/outbound/engine-replay/replay';
 import { stagedReplay } from '../../../infrastructure/outbound/engine-replay/replay';
 
@@ -7,10 +9,13 @@ export const HELLO = {
     version: 'dev',
 };
 
+// value: an engine whose hello offers engine.events, so a notice asks its reads again.
+export const NOTICING = { ...HELLO, calls: ['engine.events'] };
+
 // value: a replay of `recording` whose engine is open from the start.
-export function opened(recording: Recording) {
+export function opened(recording: Recording, hello: EngineHello = HELLO) {
     return stagedReplay(recording, {
-        hello: HELLO,
+        hello,
         kind: 'open',
         refused: undefined,
         socket: 'replay',

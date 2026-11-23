@@ -29,6 +29,17 @@ export const KEY = 'watch machines.list {} {}';
 
 export const EVERY = 30_000;
 
+export const KEEPS_MACHINES = [
+    { out: { epoch: 'e', event: 'opened', fit: { app: 1, engine: 1, verdict: 'fits' }, rev: 1 } },
+    {
+        out: {
+            event: 'snapshot',
+            rev: 1,
+            slices: { 'machines.list': { state: 'unread', why: 'reading' } },
+        },
+    },
+] as const;
+
 export const RUNNING = { out: { State: 'running' } };
 export const PENDING = { out: { State: 'pending' } };
 export const STOPPED = { out: { State: 'stopped' } };
@@ -100,23 +111,13 @@ export function fakeEngine(hello: EngineHello) {
 
 export function fakePresence() {
     let visible = true;
-    const listeners = new Set<(seen: 'back' | 'hidden') => void>();
-    const presence: PresencePort = {
-        subscribe: (listener) => {
-            listeners.add(listener);
-            return () => {
-                listeners.delete(listener);
-            };
+    const presence: PresencePort = { visible: () => visible };
+    return {
+        presence,
+        set: (shown: boolean) => {
+            visible = shown;
         },
-        visible: () => visible,
     };
-    const set = (seen: 'back' | 'hidden') => {
-        visible = seen === 'back';
-        for (const listener of listeners) {
-            listener(seen);
-        }
-    };
-    return { listening: () => listeners.size, presence, set };
 }
 
 export async function unsettled(hello: EngineHello = HELLO, timing: Partial<StoreTiming> = {}) {
@@ -124,7 +125,6 @@ export async function unsettled(hello: EngineHello = HELLO, timing: Partial<Stor
     const seen = fakePresence();
     const client = new Client(engine.transport);
     const store = new ReadStore(client, seen.presence, new StateMirror(client), {
-        every: EVERY,
         grace: 500,
         ...timing,
     });
@@ -133,6 +133,7 @@ export async function unsettled(hello: EngineHello = HELLO, timing: Partial<Stor
         told += 1;
     });
     await clock.advance(1);
+    engine.answer('engine.state', ...KEEPS_MACHINES);
     return { engine, heard: () => told, leave, seen, store };
 }
 
@@ -140,6 +141,14 @@ export async function settled(hello: EngineHello = HELLO, timing: Partial<StoreT
     const asked = await unsettled(hello, timing);
     asked.engine.answer('machines.list', RUNNING, DONE);
     return asked;
+}
+
+// value: a re-ask EVERY later, as a gesture's rereads ask it.
+export async function later(...stores: readonly ReadStore[]): Promise<void> {
+    await clock.advance(EVERY);
+    for (const store of stores) {
+        store.reread(['machines.list', 'engine.read']);
+    }
 }
 
 export function rowsOf(reading: Reading<unknown>): readonly unknown[] {

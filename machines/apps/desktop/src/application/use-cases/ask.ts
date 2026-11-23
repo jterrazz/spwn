@@ -28,7 +28,7 @@ async function read(
     }
 }
 
-export function ask(client: EnginePort, entry: Entry): void {
+export function ask(client: EnginePort, entry: Entry, quiet: () => boolean): void {
     stop(entry);
     entry.asking = true;
     entry.mark = markOf(entry.key);
@@ -38,8 +38,9 @@ export function ask(client: EnginePort, entry: Entry): void {
         void read(client, entry, asked, current);
         return;
     }
-    // invariant: a re-ask over a settled answer holds its outs; so does a watch the client reconnects over any answer
-    // invariant: shown, since its new stream starts again from its first, pending out.
+    // invariant: a re-ask over a settled answer holds its outs, since a watch's every out before its end is a fill in
+    // invariant: progress; so does a quiet watch the client reconnects over any answer shown, since its new stream
+    // invariant: starts again from its first, pending out.
     let holds = reading.kind === 'read' && reading.done;
     let last: Heard | undefined;
     entry.watch = client.watch(
@@ -61,7 +62,7 @@ export function ask(client: EnginePort, entry: Entry): void {
                     const reconnects = error.wire === undefined;
                     entry.asking = reconnects;
                     if (reconnects && entry.reading.kind === 'read') {
-                        holds = true;
+                        holds = quiet();
                     } else {
                         failed(entry, error);
                     }

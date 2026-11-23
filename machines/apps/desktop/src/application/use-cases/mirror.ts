@@ -2,11 +2,11 @@ import type { EngineHello, EngineStateFrame, EngineStateSince } from '@jterrazz/
 
 import { STATE_REVISION } from '../../domain/fit';
 import type { Fit } from '../../domain/fit';
-import { isOfMachine, isView, VIEW_KEYS, viewNamed } from '../../domain/views';
+import { isOfMachine, isView, VIEW_KEYS } from '../../domain/views';
 import type { View } from '../../domain/views';
 import type { EnginePort, Link, Watch } from '../ports/engine.port';
 import { READING } from './entry';
-import type { Asked, Reading } from './entry';
+import type { Reading } from './entry';
 import { sameEngine } from './fresh';
 import { readingOf, refusedOf } from './sliced';
 
@@ -21,11 +21,6 @@ const DEFAULTS: MirrorTiming = { grace: 1500, lost: 45_000, retry: 1000 };
 // value: answers.
 const NOT_KEPT = 'not-kept';
 
-// value: the view a read is, by the engine's naming (`domain/views.ts`); undefined is a read asked by its call.
-export function viewOf(asked: Asked): undefined | View {
-    return viewNamed(asked.name, asked.input, asked.target);
-}
-
 // invariant: ADR-071's mirror: one held engine.state stream of the views, opened while a view or the verdict is held
 // invariant: and the link is open, its readings kept across a lost link and a restart, so a page once drawn never
 // invariant: blanks; a stream silent past `lost`, or cut, is asked again from the revision held, and answers what
@@ -39,6 +34,7 @@ export class StateMirror {
     private readonly listeners = new Map<View, Set<() => void>>();
     private readonly subscribers = new Map<View, (listener: () => void) => () => void>();
     private readonly judges = new Set<() => void>();
+    private readonly revisions = new Set<(views: readonly View[]) => void>();
     private verdict: Fit | undefined;
     private judgedOf: EngineHello | undefined;
     private open = false;
@@ -63,6 +59,15 @@ export class StateMirror {
 
     readonly fitOf = (hello: EngineHello | undefined): Fit | undefined =>
         sameEngine(this.judgedOf, hello) ? this.verdict : undefined;
+
+    readonly keeps = (view: View): boolean => this.kept?.has(view) === true;
+
+    readonly subscribeRevised = (listener: (views: readonly View[]) => void): (() => void) => {
+        this.revisions.add(listener);
+        return () => {
+            this.revisions.delete(listener);
+        };
+    };
 
     readonly subscribeFit = (listener: () => void): (() => void) => {
         this.judges.add(listener);
@@ -222,8 +227,10 @@ export class StateMirror {
         if (this.since) {
             this.since = { ...this.since, rev: frame.rev };
         }
+        const revised: View[] = [];
         for (const [key, slice] of Object.entries(frame.slices ?? {})) {
             if (isView(key)) {
+                revised.push(key);
                 kept.add(key);
                 this.refuse(key, refusedOf(slice, this.reading(key)));
                 this.show(key, readingOf(this.reading(key), slice));
@@ -236,6 +243,13 @@ export class StateMirror {
         }
         for (const view of this.listeners.keys()) {
             this.absent(view);
+        }
+        this.revise(revised);
+    }
+
+    private revise(views: readonly View[]): void {
+        for (const listener of this.revisions) {
+            listener(views);
         }
     }
 

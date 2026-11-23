@@ -1,7 +1,9 @@
 import type { EngineSliceOut } from '@jterrazz/station-api';
 
 import { EngineError } from '../../domain/engine-error';
-import type { Reading } from './entry';
+import { viewNamed } from '../../domain/views';
+import type { View } from '../../domain/views';
+import type { Asked, Reading } from './entry';
 import { replaceEqualDeep } from './equal';
 
 function staleOf(slice: EngineSliceOut): EngineError | undefined {
@@ -47,4 +49,9 @@ export function readingOf(before: Reading<unknown>, slice: EngineSliceOut): Read
     return stale
         ? { at, done: true, kind: 'read', out, stale }
         : { at, done: true, kind: 'read', out };
+}
+
+// value: the view a read is, by the engine's naming (`domain/views.ts`); undefined is a read asked by its call.
+export function viewOf(asked: Asked): undefined | View {
+    return viewNamed(asked.name, asked.input, asked.target);
 }

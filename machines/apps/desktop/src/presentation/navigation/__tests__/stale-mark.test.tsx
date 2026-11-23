@@ -13,12 +13,12 @@ import { Window } from '../window';
 
 const recordingFor = await recordingsOf('two-macs');
 
-const HELLO = { pid: 41, started_at: '2026-11-13T09:00:00Z', version: 'dev' };
-
-function focusAgain() {
-    globalThis.dispatchEvent(new Event('blur'));
-    globalThis.dispatchEvent(new Event('focus'));
-}
+const HELLO = {
+    calls: ['engine.events'],
+    pid: 41,
+    started_at: '2026-11-13T09:00:00Z',
+    version: 'dev',
+};
 
 describe('StaleMark', () => {
     test('a refresh refused keeps the page and marks the toolbar with the time of the answer still shown', async () => {
@@ -48,10 +48,10 @@ describe('StaleMark', () => {
             async (visitor) => {
                 await visitor.see(content(':5173'));
 
-                // When - a minute on, the window regains the focus and machines.ssh is refused as unreachable
+                // When - a minute on, the engine tells a notice and machines.ssh is refused as unreachable
                 now = new Date(2026, 10, 13, 10, 43);
                 count.refuse('machines.ssh');
-                focusAgain();
+                count.notice();
                 await waitUntil(() => count.refused() > 0, { why: 'machines.ssh refused' });
 
                 // Then - the page is drawn as answered, and the mark names the refusal and the answer's time

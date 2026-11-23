@@ -15,7 +15,7 @@ import { PAGES } from '../../screens/registry';
 import { EngineProvider, useRead } from '../dependencies';
 import { useGesture } from '../use-gesture';
 import { counted } from './counted';
-import { CHANGES, HELLO, opened, watched } from './over-a-replay';
+import { CHANGES, HELLO, NOTICING, opened, watched } from './over-a-replay';
 import { pushed, said } from './pushed';
 import { socketEnded } from './socket-ended';
 
@@ -86,18 +86,13 @@ async function answeredAgain(stage: ReturnType<typeof opened>, count: Counted, a
     });
 }
 
-function focusAgain() {
-    globalThis.dispatchEvent(new Event('blur'));
-    globalThis.dispatchEvent(new Event('focus'));
-}
-
 async function disturbed(stage: ReturnType<typeof opened>, count: Counted) {
     await answeredAgain(stage, count, () => {
-        stage.restart({ ...HELLO, pid: 42 });
+        stage.restart({ ...NOTICING, pid: 42 });
     });
     const restarted = pageDrawn();
     count.refuse('machines.ssh');
-    focusAgain();
+    count.notice();
     await waitUntil(() => count.refused() > 0, { why: 'machines.ssh refused' });
     await waitUntil(() => staleMarked() !== null, { why: 'the stale mark drawn' });
     return { marked: staleMarked(), refused: pageDrawn(), restarted };
@@ -210,7 +205,7 @@ describe('dependencies', () => {
 
     test('reads asked again change nothing visible, and draw no refreshing mark', async () => {
         // Given - the window on Home over two-macs, its answers counted as they come
-        const stage = opened(recordingFor('two-macs'));
+        const stage = opened(recordingFor('two-macs'), NOTICING);
         const count = counted(stage.transport);
         const { drawn, watcher } = watched();
         let before = '';
@@ -230,8 +225,8 @@ describe('dependencies', () => {
                 before = document.body.innerHTML;
                 watcher.observe(document.body, CHANGES);
 
-                // When - the window loses the focus and regains it, and every read it shows is answered again
-                await answeredAgain(stage, count, focusAgain);
+                // When - the engine tells a notice, and every read the window shows is answered again
+                await answeredAgain(stage, count, count.notice);
                 watcher.disconnect();
                 after = document.body.innerHTML;
             },
@@ -320,7 +315,7 @@ describe('dependencies', () => {
 
     test('a page once drawn is never blank again: an equal re-ask, a restart, a refusal and a revisit', async () => {
         // Given - linux-1's Ports over two-macs, each React commit counted, a grace of nothing so a revisit is kept
-        const stage = opened(recordingFor('two-macs'));
+        const stage = opened(recordingFor('two-macs'), NOTICING);
         const count = counted(stage.transport);
         const { drawn, watcher } = watched();
         let commits = 0;
@@ -356,7 +351,7 @@ describe('dependencies', () => {
 
                 // When - every read is answered again equal, the engine restarts, machines.ssh is refused, and Ports is left and drawn again
                 const committed = commits;
-                await answeredAgain(stage, count, focusAgain);
+                await answeredAgain(stage, count, count.notice);
                 seen.equal = commits - committed;
                 Object.assign(seen, await disturbed(stage, count));
                 roots.push(document.querySelector('main'));

@@ -1,7 +1,7 @@
 import { clock } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
-import { DONE, EVERY, KEY, rowsOf, settled } from './fake-engine';
+import { DONE, KEY, later, rowsOf, settled } from './fake-engine';
 
 const UNREACHABLE = {
     code: 'remote.unreachable',
@@ -18,8 +18,8 @@ describe('entry', () => {
         const shown = store.reading(KEY);
         const told = heard();
 
-        // When - the cadence passes and the engine answers the same state, as a new object
-        await clock.advance(EVERY);
+        // When - a reread asks it again and the engine answers the same state, as a new object
+        await later(store);
         engine.answer('machines.list', { out: { State: 'running' } }, DONE);
 
         // Then - it was asked again, and the reading is the one shown, its subscriber never told
@@ -36,12 +36,12 @@ describe('entry', () => {
             { Name: 'api', State: 'running' },
             { Name: 'web', State: 'running' },
         ];
-        await clock.advance(EVERY);
+        await later(store);
         engine.answer('machines.list', { out: rows }, DONE);
         const [, web] = rowsOf(store.reading(KEY));
 
-        // When - the next cadence answers api stopped and web as it was
-        await clock.advance(EVERY);
+        // When - the next reread answers api stopped and web as it was
+        await later(store);
         engine.answer(
             'machines.list',
             { out: [{ ...rows[0], State: 'stopped' }, { ...rows[1] }] },
@@ -55,16 +55,16 @@ describe('entry', () => {
     });
 
     test('an equal answer keeps the reading and its instant, and a stale mark carries the instant of the last answer heard', async () => {
-        // Given - machines.list settled on running, then answered equal on the next cadence
+        // Given - machines.list settled on running, then answered equal on the next reread
         using _ = clock.run('2026-11-13T10:00:00Z');
         const { engine, store } = await settled();
         const shown = store.reading(KEY);
-        await clock.advance(EVERY);
+        await later(store);
         engine.answer('machines.list', { out: { State: 'running' } }, DONE);
         const equal = store.reading(KEY);
 
-        // When - the cadence after is refused as a far Mac that missed the ask
-        await clock.advance(EVERY);
+        // When - the reread after is refused as a far Mac that missed the ask
+        await later(store);
         engine.answer('machines.list', { error: UNREACHABLE });
         const stale = store.reading(KEY);
 
@@ -98,14 +98,14 @@ describe('entry', () => {
         const missed = await settled();
         const lost = await settled();
         const refuse = async (error: object) => {
-            await clock.advance(EVERY);
+            await later(missed.store, lost.store);
             missed.engine.answer('machines.list', { error: UNREACHABLE });
             lost.engine.answer('machines.list', { error });
         };
         await refuse(NOT_FOUND);
         const shown = [missed.store.reading(KEY), lost.store.reading(KEY)];
 
-        // When - the next cadence is refused again, each in the same words as new objects
+        // When - the next reread is refused again, each in the same words as new objects
         await refuse({ ...NOT_FOUND });
 
         // Then - each reading is the one shown

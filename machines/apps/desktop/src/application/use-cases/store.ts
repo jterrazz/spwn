@@ -1,35 +1,36 @@
 import type { CallName } from '@jterrazz/station-api';
 
 import { keyOf } from '../../domain/request-key';
+import type { View } from '../../domain/views';
 import type { EnginePort, Link } from '../ports/engine.port';
 import type { PresencePort } from '../ports/presence.port';
 import { ask } from './ask';
 import { flush, READING, stop } from './entry';
 import type { Asked, Entry, Reading } from './entry';
-import { FRESH_EVERY, Freshness, sameEngine } from './fresh';
-import type { Why } from './fresh';
+import { Freshness, sameEngine } from './fresh';
 import type { StateMirror } from './mirror';
 import { judgedOf } from './reach';
 import type { Judged } from './reach';
+import { viewOf } from './sliced';
 
 // value: `grace`, how long a request nobody holds stays open; `keptFor` and `keptAtMost`, how long and how many of the
 // value: answers nobody holds are kept after it, so a page drawn again shows its answer at once; `now`, the clock an
 // value: answer's instant is read off.
 export type StoreTiming = {
     grace: number;
-    every: number;
     keptFor: number;
     keptAtMost: number;
     now: () => Date;
 };
 
 const DEFAULTS: StoreTiming = {
-    every: FRESH_EVERY,
     grace: 1500,
     keptAtMost: 50,
     keptFor: 600_000,
     now: () => new Date(),
 };
+
+type Mirrored = Pick<StateMirror, 'fitOf' | 'keeps' | 'subscribeFit' | 'subscribeRevised'>;
 
 export function askedKey(asked: Asked): string {
     const verb = asked.kind === 'read' ? 'call' : 'watch';
@@ -42,33 +43,35 @@ export function askedKey(asked: Asked): string {
 // invariant: sees it at once while it is asked again. Every entry still open is asked again when the link opens, or
 // invariant: opens on another engine (its hello's pid or start); a kept one is asked when it is held again. A link
 // invariant: the mirror judges incompatible is no open link: nothing is asked of its engine until another that fits.
-// invariant: An entry a component holds is asked again by `Freshness` once its answer has settled, and every ask
-// invariant: over a settled answer (the cadence's, a gesture's rereads, a relink's) is quiet: the answer stays shown,
-// invariant: and a watch's next outs are held until it ends or the next tick, so a re-ask never draws a pending
-// invariant: answer over a settled one; one still asking is never asked twice by the cadence.
+// invariant: An entry a component holds is asked again by `Freshness` once its answer has settled, never twice while
+// invariant: it asks. An ask over a settled answer (a notice's, a gesture's rereads, a relink's) never draws a fill in
+// invariant: progress over it: the answer stays shown, and the watch's outs are held until it ends, or, quiet for a
+// invariant: view the engine keeps, until the engine's next revision of that view; never by a timer. An ask over an
+// invariant: answer still filling is loud, its outs shown as they come.
 export class ReadStore {
     private readonly client: EnginePort;
     private readonly timing: StoreTiming;
     private readonly entries = new Map<string, Entry>();
     private readonly linkListeners = new Set<() => void>();
     private readonly freshness: Freshness;
-    private readonly judging: Pick<StateMirror, 'fitOf' | 'subscribeFit'>;
+    private readonly mirror: Mirrored;
     private heardLink: Link | undefined;
     private shown: Judged | undefined;
     private unlink: (() => void) | undefined;
     private unjudge: (() => void) | undefined;
+    private unrevise: (() => void) | undefined;
 
     constructor(
         client: EnginePort,
         presence: PresencePort,
-        judging: Pick<StateMirror, 'fitOf' | 'subscribeFit'>,
+        mirror: Mirrored,
         timing: Partial<StoreTiming> = {},
     ) {
         this.client = client;
-        this.judging = judging;
+        this.mirror = mirror;
         this.timing = { ...DEFAULTS, ...timing };
-        this.freshness = new Freshness(client, presence, this.timing, (why) => {
-            this.refresh(why);
+        this.freshness = new Freshness(client, presence, () => {
+            this.refresh();
         });
     }
 
@@ -85,7 +88,7 @@ export class ReadStore {
         if (entry.kept) {
             entry.kept = false;
             if (this.shown?.kind === 'open') {
-                ask(this.client, entry);
+                ask(this.client, entry, () => this.quiet(entry));
             }
         }
         this.fresh();
@@ -120,19 +123,28 @@ export class ReadStore {
         }
         for (const entry of this.entries.values()) {
             if (!entry.kept && names.includes(entry.asked.name)) {
-                ask(this.client, entry);
+                ask(this.client, entry, () => this.quiet(entry));
             }
         }
     };
 
-    private refresh(why: Why): void {
+    private refresh(): void {
         for (const entry of this.entries.values()) {
-            if (entry.listeners.size === 0) {
-                continue;
+            if (entry.listeners.size > 0 && !entry.asking) {
+                ask(this.client, entry, () => this.quiet(entry));
             }
-            if (!entry.asking) {
-                ask(this.client, entry);
-            } else if (why === 'tick') {
+        }
+    }
+
+    private quiet(entry: Entry): boolean {
+        const view = viewOf(entry.asked);
+        return view !== undefined && this.mirror.keeps(view);
+    }
+
+    private revised(views: readonly View[]): void {
+        for (const entry of this.entries.values()) {
+            const view = viewOf(entry.asked);
+            if (view !== undefined && views.includes(view)) {
                 flush(entry);
             }
         }
@@ -171,7 +183,7 @@ export class ReadStore {
         this.entries.set(key, entry);
         this.hold();
         if (this.shown?.kind === 'open') {
-            ask(this.client, entry);
+            ask(this.client, entry, () => this.quiet(entry));
         }
         return entry;
     }
@@ -207,8 +219,11 @@ export class ReadStore {
     }
 
     private hold(): void {
-        this.unjudge ??= this.judging.subscribeFit(() => {
+        this.unjudge ??= this.mirror.subscribeFit(() => {
             this.judge();
+        });
+        this.unrevise ??= this.mirror.subscribeRevised((views) => {
+            this.revised(views);
         });
         this.unlink ??= this.client.link((link) => {
             this.heardLink = link;
@@ -222,6 +237,8 @@ export class ReadStore {
             this.unlink = undefined;
             this.unjudge?.();
             this.unjudge = undefined;
+            this.unrevise?.();
+            this.unrevise = undefined;
             this.heardLink = undefined;
             this.shown = undefined;
             this.fresh();
@@ -233,7 +250,7 @@ export class ReadStore {
         if (heard?.kind !== 'open') {
             return heard;
         }
-        return judgedOf(heard, this.judging.fitOf(heard.hello));
+        return judgedOf(heard, this.mirror.fitOf(heard.hello));
     }
 
     private judge(): void {
@@ -255,7 +272,7 @@ export class ReadStore {
         if (link.kind === 'open' && (!wasOpen || !sameEngine(before.hello, link.hello))) {
             for (const entry of this.entries.values()) {
                 if (!entry.kept) {
-                    ask(this.client, entry);
+                    ask(this.client, entry, () => this.quiet(entry));
                 }
             }
         } else if (link.kind !== 'open' && wasOpen) {

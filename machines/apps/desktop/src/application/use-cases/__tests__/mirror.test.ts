@@ -2,7 +2,8 @@ import { clock } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { Client } from '../../../infrastructure/outbound/engine-link/client';
-import { StateMirror, viewOf } from '../mirror';
+import { StateMirror } from '../mirror';
+import { viewOf } from '../sliced';
 import { fakeEngine, HELLO } from './fake-engine';
 
 const EPOCH = '2026-11-21T09:00:00Z/4123';
