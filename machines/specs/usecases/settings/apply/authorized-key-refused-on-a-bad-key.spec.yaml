@@ -1,0 +1,35 @@
+description: 'a key that does not parse is refused before any write: the owner''s file keeps its bytes and its mode'
+env:
+    - in-workspace
+    - engine
+runs:
+    - command: 'world admin on'
+      exit: 0
+    - command: '--version >/dev/null; /bin/mkdir -p root/root/.ssh && /bin/chmod 755 root/root/.ssh && printf ''# my laptop\nssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOWNERownerOWNERownerOWNERownerOWNERowner owner@laptop'' > root/root/.ssh/authorized_keys && /bin/chmod 644 root/root/.ssh/authorized_keys && /bin/cp root/root/.ssh/authorized_keys before'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error)'''
+      stdin: |
+          {"v":2,"id":"1","call":"settings.apply","in":{"Names":["authorized-key"],"Values":{"authorized-key":{"user":"root","key":"ssh-ed25519 AAAAnot-a-key ci@deploy"}}}}
+      exit: 0
+      stdout: |
+          {"v":2,"id":"1","out":[{"Package":"authorized-key","Verb":"apply","Result":"broken","Before":null,"After":null,"Steps":[{"Label":"failed","State":"broken","Detail":"line 1 of the key is not a public key: `type base64 [comment]`"}]}]}
+    - command: '--version >/dev/null; /usr/bin/cmp before root/root/.ssh/authorized_keys && echo byte for byte'
+      exit: 0
+      stdout: |
+          byte for byte
+    - command: '--version >/dev/null; /bin/cat root/root/.ssh/authorized_keys; /usr/bin/stat -c ''%a %n'' root/root/.ssh root/root/.ssh/authorized_keys'
+      exit: 0
+      stdout: |
+          # my laptop
+          ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOWNERownerOWNERownerOWNERownerOWNERowner owner@laptop755 root/root/.ssh
+          644 root/root/.ssh/authorized_keys
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error)'''
+      stdin: |
+          {"v":2,"id":"1","call":"settings.apply","in":{"Names":["authorized-key"],"Values":{"authorized-key":{"user":"root","key":"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGZ2c8e4bOqkqO0+5N0VXlFz4sVJyDQzH+LVRG4RvMZb ci@deploy\nssh-rsa AAAA"}}}}
+      exit: 0
+      stdout: |
+          {"v":2,"id":"1","out":[{"Package":"authorized-key","Verb":"apply","Result":"broken","Before":null,"After":null,"Steps":[{"Label":"failed","State":"broken","Detail":"line 2 of the key is not a public key: `type base64 [comment]`"}]}]}
+    - command: '--version >/dev/null; /usr/bin/cmp before root/root/.ssh/authorized_keys && echo byte for byte'
+      exit: 0
+      stdout: |
+          byte for byte

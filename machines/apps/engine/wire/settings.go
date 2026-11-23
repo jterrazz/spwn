@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/jterrazz/studio-station/apps/engine/settings/adapter/authorizedkeys"
 	"github.com/jterrazz/studio-station/apps/engine/settings/adapter/gitaliases"
 	"github.com/jterrazz/studio-station/apps/engine/settings/adapter/zshblock"
 
@@ -93,6 +94,14 @@ func settingAppliers(m machine) []settingscontract.Applier {
 		dotfile.New(m.sys.FS, m.sys.Run, dotfile.Options{Home: m.sys.Env.Home(), Ours: files}),
 		neversleeps.New(m.stores.neverSleeps()),
 	}
+	// invariant: a world's files are the run's own: none is given away.
+	give := m.sys.FS.Chown
+	if m.world != nil {
+		give = func(string, int, int) error { return nil }
+	}
+	appliers = append(appliers, authorizedkeys.New(m.sys.FS, authorizedkeys.Options{
+		Root: m.systemRoot(), Record: filepath.Join(m.paths.State, "authorized-keys.json"), Give: give,
+	}))
 	if m.world != nil {
 		return append(appliers, m.world.procedureAppliers()...)
 	}

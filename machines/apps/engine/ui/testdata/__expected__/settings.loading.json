@@ -36,7 +36,7 @@
                 "items": [
                   {
                     "kind": "text",
-                    "text": "17 set by Machines here"
+                    "text": "18 set by Machines here"
                   },
                   {
                     "kind": "text",
@@ -126,6 +126,16 @@
             "id": "tmux-dotfiles",
             "mark": "pending",
             "label": "tmux-dotfiles",
+            "detail": {
+              "kind": "pending"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "authorized-key",
+            "mark": "pending",
+            "label": "authorized-key",
             "detail": {
               "kind": "pending"
             }
@@ -245,7 +255,7 @@
       "counts": [
         {
           "mark": "pending",
-          "n": 17
+          "n": 18
         }
       ],
       "pipe_counts": true

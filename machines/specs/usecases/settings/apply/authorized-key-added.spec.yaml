@@ -1,0 +1,31 @@
+description: 'authorized-key writes its block in root''s authorized_keys at 0700 and 0600, and once only'
+env:
+    - in-workspace
+    - engine
+runs:
+    - command: 'world admin on'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error)'''
+      stdin: |
+          {"v":2,"id":"1","call":"settings.apply","in":{"Names":["authorized-key"],"Values":{"authorized-key":{"user":"root","key":"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGZ2c8e4bOqkqO0+5N0VXlFz4sVJyDQzH+LVRG4RvMZb ci@deploy"}}}}
+      exit: 0
+      stdout: |
+          {"v":2,"id":"1","out":[{"Package":"authorized-key","Verb":"apply","Result":"ok","Before":null,"After":null,"Steps":[{"Label":"/root/.ssh/authorized_keys","State":"ok","Detail":"written"}]}]}
+    - command: '--version >/dev/null; /bin/cat root/root/.ssh/authorized_keys; /usr/bin/stat -c ''%a %n'' root/root/.ssh root/root/.ssh/authorized_keys'
+      exit: 0
+      stdout: |
+          # >>> station:authorized-key >>>
+          ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGZ2c8e4bOqkqO0+5N0VXlFz4sVJyDQzH+LVRG4RvMZb ci@deploy
+          # <<< station:authorized-key <<<
+          700 root/root/.ssh
+          600 root/root/.ssh/authorized_keys
+    - command: 'settings authorized-key | /usr/bin/sed -n 1p'
+      exit: 0
+      stdout: |
+          ●	authorized-key	applied · /root/.ssh/authorized_keys
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error)'''
+      stdin: |
+          {"v":2,"id":"1","call":"settings.apply","in":{"Names":["authorized-key"],"Values":{"authorized-key":{"user":"root","key":"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGZ2c8e4bOqkqO0+5N0VXlFz4sVJyDQzH+LVRG4RvMZb ci@deploy"}}}}
+      exit: 0
+      stdout: |
+          {"v":2,"id":"1","out":[{"Package":"authorized-key","Verb":"apply","Result":"ok","Before":null,"After":null,"Steps":[{"Label":"/root/.ssh/authorized_keys","State":"ok","Detail":"already there"}]}]}

@@ -15,6 +15,8 @@ runs:
           ●	remote-login	as expected · off
           ●	time-machine	as expected · last backup 2 d ago
           ●	macos-updates	as expected · up to date
+          # Not for this machine
+          –	1 not for this machine	VMs only
     - command: '--version >/dev/null; : > .off'
       exit: 0
     - command: 'settings | /usr/bin/sed -n ''/^# Checked/,$p'''
@@ -30,6 +32,8 @@ runs:
           ◐	remote-login	on · not expected on a laptop	System Settings > General > Sharing > Remote Login
           ◐	time-machine	no backup yet	System Settings > General > Time Machine
           ◐	macos-updates	1 update waiting	System Settings > General > Software Update
+          # Not for this machine
+          –	1 not for this machine	VMs only
     - command: '--version >/dev/null; : > .no-destination'
       exit: 0
     - command: 'settings | /usr/bin/grep time-machine'

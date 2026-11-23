@@ -1,24 +1,24 @@
 # Needs a look
 ◐	macbook-pro	git-shortcuts	changed since 2 d ago	station settings diff git-shortcuts
-◐	macbook-pro	dns	changed since 2 d ago	station settings diff dns
-◐	macbook-pro	zed-dotfiles	changed since 2 d ago	station settings diff zed-dotfiles
-◐	macbook-pro	tailscale-cli	changed since 2 d ago	station settings diff tailscale-cli
+◐	macbook-pro	authorized-key	changed since 2 d ago	station settings diff authorized-key
+◐	macbook-pro	ssh-key	changed since 2 d ago	station settings diff ssh-key
+◐	macbook-pro	tart-launcher	changed since 2 d ago	station settings diff tart-launcher
 ◐	macbook-pro	firewall	off	System Settings > Network > Firewall
 ◐	macbook-pro	screen-lock	locks after 10 min · expected 5 min	System Settings > Lock Screen
 ◐	mac-mini	git-shortcuts	changed since 2 d ago	station settings diff git-shortcuts --on mac-mini
-◐	mac-mini	dns	changed since 2 d ago	station settings diff dns --on mac-mini
-◐	mac-mini	zed-dotfiles	changed since 2 d ago	station settings diff zed-dotfiles --on mac-mini
-◐	mac-mini	tailscale-cli	changed since 2 d ago	station settings diff tailscale-cli --on mac-mini
+◐	mac-mini	authorized-key	changed since 2 d ago	station settings diff authorized-key --on mac-mini
+◐	mac-mini	ssh-key	changed since 2 d ago	station settings diff ssh-key --on mac-mini
+◐	mac-mini	tart-launcher	changed since 2 d ago	station settings diff tart-launcher --on mac-mini
 ◐	mac-mini	firewall	off	System Settings > Network > Firewall
 ◐	mac-mini	screen-lock	locks after 10 min · expected 5 min	System Settings > Lock Screen
 ◐	linux-1	git-shortcuts	changed since 2 d ago	station settings diff git-shortcuts --on linux-1
-◐	linux-1	dns	changed since 2 d ago	station settings diff dns --on linux-1
-◐	linux-1	zed-dotfiles	changed since 2 d ago	station settings diff zed-dotfiles --on linux-1
-◐	linux-1	tailscale-cli	changed since 2 d ago	station settings diff tailscale-cli --on linux-1
+◐	linux-1	authorized-key	changed since 2 d ago	station settings diff authorized-key --on linux-1
+◐	linux-1	ssh-key	changed since 2 d ago	station settings diff ssh-key --on linux-1
+◐	linux-1	tart-launcher	changed since 2 d ago	station settings diff tart-launcher --on linux-1
 ◐	api	git-shortcuts	changed since 2 d ago	station machines start api
-◐	api	dns	changed since 2 d ago	station machines start api
-◐	api	zed-dotfiles	changed since 2 d ago	station machines start api
-◐	api	tailscale-cli	changed since 2 d ago	station machines start api
+◐	api	authorized-key	changed since 2 d ago	station machines start api
+◐	api	ssh-key	changed since 2 d ago	station machines start api
+◐	api	tart-launcher	changed since 2 d ago	station machines start api
 # Machines
 ●	macbook-pro	Mac	read
 ●	mac-mini	Mac	read
@@ -27,10 +27,10 @@
 –	infra	Server	not checked: Machines does not manage its settings
 # Set by Machines
 ◐	git-shortcuts	◐	◐	◐	◐	0/4
-◐	dns	◐	◐	◐	◐	0/4
-◐	zed-dotfiles	◐	◐	◐	◐	0/4
-◐	tailscale-cli	◐	◐	◐	◐	0/4
-○	13 more	○ 4/10	○ 4/10	○ 4/10	○ 4/10	16/40
+◐	authorized-key	◐	◐	◐	◐	0/4
+◐	ssh-key	◐	◐	◐	◐	0/4
+◐	tart-launcher	◐	◐	◐	◐	0/4
+○	14 more	○ 4/11	○ 4/11	○ 4/11	○ 4/11	16/44
 # Always-on Mac
 ○	5 settings	○	○	–	–	–
 # Checked

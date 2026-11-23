@@ -8,4 +8,4 @@ runs:
           {"v":2,"id":"1","call":"settings.matrix","target":{},"in":{}}
       exit: 0
       stdout: |
-          {"shelf":{"Mine":{"Tone":"plain","Sentence":"3 settings are on your machines"},"Catalog":{"Tone":"plain","Sentence":"22 settings are in the catalog"}},"holds":[{"n":"firewall","holds":[true,true,false,false]}]}
+          {"shelf":{"Mine":{"Tone":"plain","Sentence":"3 settings are on your machines"},"Catalog":{"Tone":"plain","Sentence":"23 settings are in the catalog"}},"holds":[{"n":"firewall","holds":[true,true,false,false]}]}

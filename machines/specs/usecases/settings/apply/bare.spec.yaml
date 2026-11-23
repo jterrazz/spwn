@@ -28,6 +28,7 @@ runs:
           # Always-on Mac
           ○	Always-on Mac	5 · for a Mac that hosts servers
           # Checked	8 ●	1 ◐
+          # Not for this machine
     - command: 'settings apply'
       exit: 0
       stdout: |

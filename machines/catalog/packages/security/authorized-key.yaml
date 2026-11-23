@@ -1,0 +1,28 @@
+package: station.package/v1
+kind: setting
+name: authorized-key
+description: "Public keys allowed to sign in over ssh, in a block of a user's authorized_keys"
+needs: [sudo]
+reversible: true
+options:
+    - name: user
+      label: The account the keys sign in as
+      type: string
+      required: true
+      default: root
+    - name: key
+      label: 'The public keys, one per line: type base64 [comment]'
+      type: string
+      required: true
+sets:
+    - { key: ~user/.ssh/authorized_keys, value: the block station:authorized-key }
+methods:
+    - family: linux
+      authorized-keys: { block: station:authorized-key }
+writes:
+    - path: ~user/.ssh/authorized_keys
+      level: settings
+      note: "the block station:authorized-key, between its two marker lines (`/root/.ssh` for root); the folder 0700, the file 0600, both the user's"
+    - path: '{state}/station/authorized-keys.json'
+      level: settings
+      note: the file and the block station last wrote, which drift and off read

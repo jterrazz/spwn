@@ -1,0 +1,32 @@
+description: 'authorized-key keeps the owner''s lines byte for byte, and off gives the file back as it was'
+env:
+    - in-workspace
+    - engine
+runs:
+    - command: 'world admin on'
+      exit: 0
+    - command: '--version >/dev/null; /bin/mkdir -p root/root/.ssh && /bin/chmod 755 root/root/.ssh && printf ''# my laptop\nssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOWNERownerOWNERownerOWNERownerOWNERowner owner@laptop'' > root/root/.ssh/authorized_keys && /bin/chmod 644 root/root/.ssh/authorized_keys && /bin/cp root/root/.ssh/authorized_keys before'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error)'''
+      stdin: |
+          {"v":2,"id":"1","call":"settings.apply","in":{"Names":["authorized-key"],"Values":{"authorized-key":{"user":"root","key":"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGZ2c8e4bOqkqO0+5N0VXlFz4sVJyDQzH+LVRG4RvMZb ci@deploy"}}}}
+      exit: 0
+      stdout: |
+          {"v":2,"id":"1","out":[{"Package":"authorized-key","Verb":"apply","Result":"ok","Before":null,"After":null,"Steps":[{"Label":"/root/.ssh/authorized_keys","State":"ok","Detail":"written"}]}]}
+    - command: '--version >/dev/null; /bin/cat root/root/.ssh/authorized_keys; /usr/bin/stat -c ''%a %n'' root/root/.ssh root/root/.ssh/authorized_keys'
+      exit: 0
+      stdout: |
+          # my laptop
+          # >>> station:authorized-key >>>
+          ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGZ2c8e4bOqkqO0+5N0VXlFz4sVJyDQzH+LVRG4RvMZb ci@deploy
+          # <<< station:authorized-key <<<
+          ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOWNERownerOWNERownerOWNERownerOWNERowner owner@laptop700 root/root/.ssh
+          600 root/root/.ssh/authorized_keys
+    - command: 'settings off authorized-key --yes'
+      exit: 0
+      stdout: |
+          ●	authorized-key	/root/.ssh/authorized_keys: removed
+    - command: '--version >/dev/null; /usr/bin/cmp before root/root/.ssh/authorized_keys && echo byte for byte'
+      exit: 0
+      stdout: |
+          byte for byte

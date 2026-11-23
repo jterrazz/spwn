@@ -36,7 +36,7 @@
                 "items": [
                   {
                     "kind": "text",
-                    "text": "14 set by Machines here"
+                    "text": "15 set by Machines here"
                   },
                   {
                     "kind": "text",
@@ -91,9 +91,9 @@
         },
         {
           "row": {
-            "id": "dns",
+            "id": "authorized-key",
             "mark": "attention",
-            "label": "dns",
+            "label": "authorized-key",
             "cells": [
               {
                 "kind": "text",
@@ -102,15 +102,15 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station settings diff dns"
+              "command": "station settings diff authorized-key"
             }
           }
         },
         {
           "row": {
-            "id": "zed-dotfiles",
+            "id": "ssh-key",
             "mark": "attention",
-            "label": "zed-dotfiles",
+            "label": "ssh-key",
             "cells": [
               {
                 "kind": "text",
@@ -119,15 +119,15 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station settings diff zed-dotfiles"
+              "command": "station settings diff ssh-key"
             }
           }
         },
         {
           "row": {
-            "id": "tailscale-cli",
+            "id": "tart-launcher",
             "mark": "attention",
-            "label": "tailscale-cli",
+            "label": "tart-launcher",
             "cells": [
               {
                 "kind": "text",
@@ -136,7 +136,7 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station settings diff tailscale-cli"
+              "command": "station settings diff tart-launcher"
             }
           }
         },
@@ -234,9 +234,9 @@
         },
         {
           "row": {
-            "id": "dns",
+            "id": "authorized-key",
             "mark": "attention",
-            "label": "dns",
+            "label": "authorized-key",
             "cells": [
               {
                 "kind": "text",
@@ -245,15 +245,15 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station settings diff dns"
+              "command": "station settings diff authorized-key"
             }
           }
         },
         {
           "row": {
-            "id": "zed-dotfiles",
+            "id": "ssh-key",
             "mark": "attention",
-            "label": "zed-dotfiles",
+            "label": "ssh-key",
             "cells": [
               {
                 "kind": "text",
@@ -262,15 +262,15 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station settings diff zed-dotfiles"
+              "command": "station settings diff ssh-key"
             }
           }
         },
         {
           "row": {
-            "id": "tailscale-cli",
+            "id": "tart-launcher",
             "mark": "attention",
-            "label": "tailscale-cli",
+            "label": "tart-launcher",
             "cells": [
               {
                 "kind": "text",
@@ -279,7 +279,7 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station settings diff tailscale-cli"
+              "command": "station settings diff tart-launcher"
             }
           }
         },
@@ -301,9 +301,9 @@
         },
         {
           "row": {
-            "id": "git-signing",
+            "id": "dns",
             "mark": "absent",
-            "label": "git-signing",
+            "label": "dns",
             "cells": [
               {
                 "kind": "text",
@@ -311,15 +311,15 @@
               }
             ],
             "hint": {
-              "command": "station settings apply git-signing"
+              "command": "station settings apply dns"
             }
           }
         },
         {
           "row": {
-            "id": "backup-exclusions",
+            "id": "zed-dotfiles",
             "mark": "absent",
-            "label": "backup-exclusions",
+            "label": "zed-dotfiles",
             "cells": [
               {
                 "kind": "text",
@@ -327,7 +327,23 @@
               }
             ],
             "hint": {
-              "command": "station settings apply backup-exclusions"
+              "command": "station settings apply zed-dotfiles"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "tailscale-cli",
+            "mark": "absent",
+            "label": "tailscale-cli",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "not applied"
+              }
+            ],
+            "hint": {
+              "command": "station settings apply tailscale-cli"
             }
           }
         },
@@ -377,9 +393,9 @@
         },
         {
           "row": {
-            "id": "ssh-key",
+            "id": "spotlight-exclude",
             "mark": "ok",
-            "label": "ssh-key",
+            "label": "spotlight-exclude",
             "cells": [
               {
                 "kind": "list",
@@ -390,7 +406,7 @@
                   },
                   {
                     "kind": "text",
-                    "text": "~/.ssh-key"
+                    "text": "~/.spotlight-exclude"
                   }
                 ]
               }
@@ -399,9 +415,9 @@
         },
         {
           "row": {
-            "id": "tart-launcher",
+            "id": "dock-spacer",
             "mark": "ok",
-            "label": "tart-launcher",
+            "label": "dock-spacer",
             "cells": [
               {
                 "kind": "list",
@@ -412,7 +428,7 @@
                   },
                   {
                     "kind": "text",
-                    "text": "~/.tart-launcher"
+                    "text": "~/.dock-spacer"
                   }
                 ]
               }
@@ -434,9 +450,9 @@
         },
         {
           "row": {
-            "id": "github-login",
+            "id": "git-signing",
             "mark": "off-here",
-            "label": "github-login",
+            "label": "git-signing",
             "cells": [
               {
                 "kind": "text",
@@ -447,9 +463,9 @@
         },
         {
           "row": {
-            "id": "dock-reset",
+            "id": "backup-exclusions",
             "mark": "off-here",
-            "label": "dock-reset",
+            "label": "backup-exclusions",
             "cells": [
               {
                 "kind": "text",
@@ -470,7 +486,7 @@
         },
         {
           "mark": "absent",
-          "n": 3
+          "n": 4
         },
         {
           "mark": "off-here",
@@ -804,7 +820,7 @@
   "hints": [
     {
       "command": "station settings apply",
-      "text": "apply the 7"
+      "text": "apply the 8"
     },
     {
       "command": "station settings --all",
