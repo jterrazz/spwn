@@ -5,7 +5,8 @@
 # its marker is absent. Its values come on stdin, one per line, never in a command line. It is
 # idempotent. Once its binary is checked, it first closes what the image's login opens (sshd's
 # password login, the auto-login, Screen Sharing, the default password, its keys and sudo rule), so a run cut
-# anywhere after leaves no login of the image's; it makes the key reachable only once all of it is
+# after that block leaves no login of the image's (one cut inside it, before the password changes, leaves
+# the default password to a local login and su); it makes the key reachable only once all of it is
 # checked, then writes its marker last; its stdout is the guest's new ed25519 host key, printed as
 # soon as it is made, nothing else.
 set -euo pipefail
