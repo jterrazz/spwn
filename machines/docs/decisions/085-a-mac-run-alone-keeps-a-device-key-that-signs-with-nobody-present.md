@@ -31,4 +31,4 @@ The repository already says what a Mac run alone is. The Always-on Mac settings 
 - A Mac someone uses keeps Touch ID or the password on the first signature of each engine life.
 - Applying or undoing Never sleeps changes nothing about the key until the engine restarts. A running engine keeps the key it served at its start.
 - The old key is gone once the new one is kept. A far process that pinned the old public half, rather than reading `device-key.pub`, must be told again.
-- The Enclave's real refusal or acceptance of each access is not proved by the suites: the gate VMs have no Secure Enclave. The darwin test proves which protection class and flags each access asks for. The test of the adapter proves the swap with a fake Enclave. Whether a locked mini signs is proved by one acceptance run on the mini.
+- The darwin tests prove, on a throwaway macOS VM's own Secure Enclave, the protection class and flags each access asks for, and that an unattended key signs with no presence asked. The test of the adapter proves the swap with a fake Enclave. Whether the mini signs with its screen locked is proved by one acceptance run on the mini.

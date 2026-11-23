@@ -4,6 +4,9 @@ package darwin
 
 import (
 	"bytes"
+	"crypto/ecdsa"
+	"crypto/elliptic"
+	"crypto/sha256"
 	"errors"
 	"testing"
 	"time"
@@ -52,5 +55,33 @@ func TestAnUnattendedKeySignsAfterTheFirstUnlockWithNobodyPresentAndAnyOtherOnly
 		if err != nil || class != want.class || flags != want.flags {
 			t.Errorf("access %d: class %q flags %#x, %v; want %q %#x", access, class, flags, err, want.class, want.flags)
 		}
+	}
+}
+
+func TestAnUnattendedKeySignsWithNoPresenceAsked(t *testing.T) {
+	blob, err := EnclaveCreate(AccessUnattended)
+	var none *NoEnclaveError
+	if errors.As(err, &none) {
+		t.Skip("this Mac has no Secure Enclave")
+	}
+	if err != nil {
+		t.Fatal(err)
+	}
+	point, err := EnclavePublic(blob)
+	if err != nil {
+		t.Fatal(err)
+	}
+	pub, err := ecdsa.ParseUncompressedPublicKey(elliptic.P256(), point)
+	if err != nil {
+		t.Fatal(err)
+	}
+	message := []byte("signed with nobody at the Mac")
+	sig, err := EnclaveSign(blob, AccessUnattended, "a test", time.Nanosecond, message)
+	if err != nil {
+		t.Fatalf("an unattended key did not sign: %v", err)
+	}
+	digest := sha256.Sum256(message)
+	if !ecdsa.VerifyASN1(pub, digest[:], sig) {
+		t.Fatal("the unattended key's signature does not verify against its public half")
 	}
 }
