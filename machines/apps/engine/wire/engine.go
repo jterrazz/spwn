@@ -494,10 +494,20 @@ func (r reservationReleaser) ReleaseVM(ctx context.Context, vm string) error {
 }
 
 func (m machine) installer() engineInstaller {
-	return engineInstaller{m: m}
+	return engineInstaller{m: m, menuBar: darwin.Agents{}}
 }
 
-type engineInstaller struct{ m machine }
+type engineInstaller struct {
+	m       machine
+	menuBar loginItem
+}
+
+type loginItem interface {
+	// value: registers the login item of the app whose bundle holds this
+	// binary, named by its bundle identifier, which macOS starts now and at
+	// every login.
+	ShowLoginItem(identifier string) error
+}
 
 func (i engineInstaller) env() map[string]string {
 	env := map[string]string{"HOME": i.m.sys.Env.Home()}
@@ -547,9 +557,9 @@ func (i engineInstaller) install(ctx context.Context, jobs contract.Jobs) (engin
 // waited out of launchd and its definition deleted before the bundle
 // registers its own label, which no record of the bare jobs matches, and
 // the VMs outlive the restart and are adopted again (ADR-073). Then the
-// standalone menu bar goes, the engine job's start is recorded, and
-// ~/.local/bin/station links into the bundle; started tells whether what
-// the engine's job starts with changed.
+// standalone menu bar goes, the bundle's menu bar is shown once, the engine
+// job's start is recorded, and ~/.local/bin/station links into the bundle;
+// started tells whether what the engine's job starts with changed.
 func (i engineInstaller) intoTheBundle(ctx context.Context, bundle string) (started bool, err error) {
 	bundled := i.m.bundledJobs(process.JobBudget)
 	for _, job := range i.m.bareJobRefs() {
@@ -560,12 +570,11 @@ func (i engineInstaller) intoTheBundle(ctx context.Context, bundle string) (star
 			return false, retireErr
 		}
 	}
-	hadMenuBar, err := i.retireStandaloneMenuBar(ctx)
-	if err != nil {
-		return false, err
+	if standaloneErr := i.retireStandaloneMenuBar(ctx); standaloneErr != nil {
+		return false, standaloneErr
 	}
-	if hadMenuBar {
-		_ = darwin.Agents{}.ShowLoginItem(catalog.MenuBarBundle)
+	if shownErr := i.showMenuBarOnce(); shownErr != nil {
+		return false, shownErr
 	}
 	if started, err = i.writeJobStart(); err != nil {
 		return false, err
@@ -575,20 +584,36 @@ func (i engineInstaller) intoTheBundle(ctx context.Context, bundle string) (star
 
 // invariant: the menu bar an earlier release installed on its own leaves with
 // the bare jobs, since Spwn.app carries it: its own binary unregisters its
-// login item, its running copy quits, and its bundle is deleted; had tells
-// whether there was one, so the bundle's menu bar is shown in its place.
-func (i engineInstaller) retireStandaloneMenuBar(ctx context.Context) (had bool, err error) {
+// login item, its running copy quits, and its bundle is deleted.
+func (i engineInstaller) retireStandaloneMenuBar(ctx context.Context) error {
 	app := filepath.Join(i.m.sys.Env.Home(), catalog.StandaloneMenuBarPath)
 	bin := filepath.Join(app, "Contents", "MacOS", "StationMenuBar")
 	if _, statErr := i.m.sys.FS.Stat(bin); statErr != nil {
 		if errors.Is(statErr, fs.ErrNotExist) {
-			return false, nil
+			return nil
 		}
-		return false, statErr
+		return statErr
 	}
 	_, _ = i.m.sys.Run.Output(ctx, local.Cmd{Name: bin, Args: []string{"--unregister-login-item"}, Timeout: standaloneMenuBarBudget})
 	i.quitRunning(ctx, bin)
-	return true, i.m.sys.FS.RemoveAll(app)
+	return i.m.sys.FS.RemoveAll(app)
+}
+
+// invariant: the bundle's menu bar is on by default: the first start of the
+// bundle on a Mac shows it at every login, then records that it did, so no
+// later start, an update's among them, shows it again and the Off a person
+// chose in Settings stays. A refusal of macOS is recorded alike, since the
+// window reads what macOS holds and its switch alone changes it from there.
+func (i engineInstaller) showMenuBarOnce() error {
+	record := catalog.MenuBarOfferedPath(i.m.sys.Env.Home())
+	if _, err := i.m.sys.FS.Stat(record); err == nil || !errors.Is(err, fs.ErrNotExist) {
+		return err
+	}
+	_ = i.menuBar.ShowLoginItem(catalog.MenuBarBundle)
+	if err := i.m.sys.FS.MkdirAll(filepath.Dir(record), 0o700); err != nil {
+		return err
+	}
+	return i.m.sys.FS.Replace(record, nil, 0o600)
 }
 
 const standaloneMenuBarBudget = 5 * time.Second

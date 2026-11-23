@@ -249,7 +249,7 @@ The window checks its own release once, at its start, and offers it on Settings'
 
 ## The menu bar
 
-Spwn.app carries the menu bar, Spwn Menu, as its login item, and Settings' Menu bar panel switches it: On registers it with macOS, which starts it now and at every login, Off unregisters it ([ADR-073](../../docs/decisions/073-spwn-app-carries-the-engine-on-a-mac-with-a-screen.md)). The switch shows what macOS holds, read each time Settings is drawn and after each press. A window with no switch (a debug build, Linux, a page outside Tauri) draws no panel.
+Spwn.app carries the menu bar, Spwn Menu, as its login item, and Settings' Menu bar panel switches it: On registers it with macOS, which starts it now and at every login, Off unregisters it ([ADR-073](../../docs/decisions/073-spwn-app-carries-the-engine-on-a-mac-with-a-screen.md)). It is on by default: the engine's first start from the bundle registers it once, and from then on the switch alone changes it. The switch shows what macOS holds, read each time Settings is drawn and after each press. A window with no switch (a debug build, Linux, a page outside Tauri) draws no panel.
 
 | ID  | Scenario                            | Given                             | When                         | Then                                                                                           | Mockup |
 | --- | ----------------------------------- | --------------------------------- | ---------------------------- | ---------------------------------------------------------------------------------------------- | ------ |

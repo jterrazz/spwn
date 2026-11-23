@@ -188,6 +188,7 @@ var StationDisk = Disk{
 		noted(data("{state}/station/use/*"), "each terminal's machine (`station use`), forgotten after 7 days unused"),
 		noted(conf("~/Library/LaunchAgents/com.jterrazz.station.engine.plist", Mac), "the one engine's launchd agent, on a Mac without Spwn.app: with the app, its job is the bundle's, and moving to it deletes this file"),
 		noted(data("~/.local/state/station/"+JobStartFile, Mac), "on a Mac with Spwn.app, what its engine's job starts with, which its definition in the sealed bundle cannot hold: the environment `station engine start` ran in and the job's log; written by `station engine start`, always under the home, since a job starts with no XDG variable"),
+		noted(data("~/.local/state/station/"+MenuBarOfferedFile, Mac), "empty, on a Mac with Spwn.app: the bundle's first start showed its menu bar at every login, so no later start shows it again; written by `station engine start`, and deleting it shows the menu bar at the next start"),
 		noted(conf("{config}/station/preferences.json"), "here, hosts, vm_user, the ports policy"),
 		noted(conf("{config}/station/machinefiles/*.lock"), "each Machinefile's lock, written by `station apply` and `station upgrade`: deleting one makes the next apply write it from what is there"),
 		noted(conf("{config}/station/grants/*.env", Linux, MacOS), "mode 0600, the token of a program granted to it that reads one from its environment, sourced by the zsh block"),

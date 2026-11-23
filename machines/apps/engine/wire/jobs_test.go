@@ -2,6 +2,7 @@ package wire
 
 import (
 	"context"
+	"errors"
 	"io"
 	"os"
 	"path/filepath"
@@ -77,12 +78,8 @@ func TestTheMoveTakesTheStandaloneMenuBarAnEarlierReleaseInstalled(t *testing.T)
 		run.Spawn(4242)
 		run.Spawn(4243)
 		m.sys.FS, m.sys.Run = files, run
-		had, err := (engineInstaller{m: m}).retireStandaloneMenuBar(context.Background())
-		if err != nil {
+		if err := (engineInstaller{m: m}).retireStandaloneMenuBar(context.Background()); err != nil {
 			t.Fatal(err)
-		}
-		if had != installed {
-			t.Errorf("installed=%v: had = %v", installed, had)
 		}
 		if _, err := files.Stat(app); err == nil {
 			t.Errorf("installed=%v: %s is left", installed, app)
@@ -119,9 +116,8 @@ func TestTheMoveReturnsWhenTheStandaloneBuildNeverExits(t *testing.T) {
 	m.sys.Env = localtest.Env{HomeDir: home, OS: "darwin"}
 	ctx, cancel := context.WithTimeout(context.Background(), standaloneMenuBarBudget+5*time.Second)
 	defer cancel()
-	had, err := (engineInstaller{m: m}).retireStandaloneMenuBar(ctx)
-	if err != nil || !had {
-		t.Fatalf("had = %v, err = %v", had, err)
+	if err := (engineInstaller{m: m}).retireStandaloneMenuBar(ctx); err != nil {
+		t.Fatal(err)
 	}
 	if ctx.Err() != nil {
 		t.Errorf("the move waited past %v for a standalone build that never exits", standaloneMenuBarBudget+5*time.Second)
@@ -136,5 +132,56 @@ func TestTheMoveReturnsWhenTheStandaloneBuildNeverExits(t *testing.T) {
 	}
 	if m.sys.Run.Alive(pid) {
 		t.Errorf("the standalone build %d still runs", pid)
+	}
+}
+
+type loginItems struct {
+	shown []string
+	err   error
+}
+
+func (l *loginItems) ShowLoginItem(identifier string) error {
+	l.shown = append(l.shown, identifier)
+	return l.err
+}
+
+// value: a fresh Mac that runs the engine Spwn.app carries, over the real
+// files of a home of its own, and the menu bar's login item it asks macOS for.
+func freshBundledMac(t *testing.T, items *loginItems) (installer engineInstaller, home string) {
+	t.Helper()
+	home = t.TempDir()
+	m := machineRunning(t, true)
+	exe := m.sys.Env.Executable()
+	m.sys = local.New(nil, nil, io.Discard, io.Discard)
+	m.sys.Env = localtest.Env{Exe: exe, HomeDir: home, OS: "darwin", UID: 501}
+	return engineInstaller{m: m, menuBar: items}, home
+}
+
+func TestTheFirstMoveIntoTheBundleShowsTheMenuBarOnAFreshMac(t *testing.T) {
+	for _, refused := range []error{nil, errors.New("SMAppServiceErrorDomain 1: Operation not permitted")} {
+		items := &loginItems{err: refused}
+		i, home := freshBundledMac(t, items)
+		if _, err := i.intoTheBundle(context.Background(), i.m.bundle()); err != nil {
+			t.Fatal(err)
+		}
+		if len(items.shown) != 1 || items.shown[0] != "com.jterrazz.station.menubar" {
+			t.Errorf("refused=%v: the move asked macOS to show %v, want the menu bar once", refused, items.shown)
+		}
+		if _, err := i.m.sys.FS.Stat(filepath.Join(home, ".local", "state", "station", "menubar-offered")); err != nil {
+			t.Errorf("refused=%v: the move kept no record that it showed the menu bar: %v", refused, err)
+		}
+	}
+}
+
+func TestAnUpdateAfterTheMoveNeverShowsTheMenuBarAgainSoThePersonsOffIsKept(t *testing.T) {
+	items := &loginItems{}
+	i, _ := freshBundledMac(t, items)
+	for range 3 {
+		if _, err := i.intoTheBundle(context.Background(), i.m.bundle()); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if len(items.shown) != 1 {
+		t.Errorf("three starts of the bundle asked macOS to show the menu bar %d times, want once", len(items.shown))
 	}
 }

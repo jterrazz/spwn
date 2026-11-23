@@ -85,6 +85,12 @@ func JobStartPath(home string) string {
 	return path.Join(home, ".local", "state", StateFolder, JobStartFile)
 }
 
+const MenuBarOfferedFile = "menubar-offered" // value: the empty file, in ~/.local/state/station, that says the bundle's first start showed its menu bar, which no later start does again.
+
+func MenuBarOfferedPath(home string) string {
+	return path.Join(home, ".local", "state", StateFolder, MenuBarOfferedFile)
+}
+
 func BundledPlist(label string) string {
 	return "Contents/Library/LaunchAgents/" + label + ".plist"
 }
