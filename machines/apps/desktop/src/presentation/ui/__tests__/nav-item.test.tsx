@@ -34,4 +34,29 @@ describe('NavItem', () => {
         // Then - the item says it is the current page
         expect(result.html.text).toContain('aria-current="page"');
     });
+
+    test('a state other than fine is written beside its dot, out of the name the dot already gives', async () => {
+        // Given - two machines, one down, one up
+        const down = await component.render(
+            <NavItem
+                current={false}
+                label="relay"
+                onSelect={ignore}
+                state={{ tone: 'bad', word: 'down' }}
+            />,
+        );
+        const up = await component.render(
+            <NavItem
+                current={false}
+                label="mac-mini"
+                onSelect={ignore}
+                state={{ tone: 'ok', word: 'online' }}
+            />,
+        );
+
+        // Then - the one down writes its word, the one up shows its dot alone, and both keep their name
+        expect(down.content.text).toContain('down');
+        expect(down.tree.text).toBe('- button "relay down":\n  - text: relay\n  - img "down"');
+        expect(up.content.text).not.toContain('online');
+    });
 });

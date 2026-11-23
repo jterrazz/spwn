@@ -45,6 +45,11 @@ export function NavItem({
                     {count.value}
                 </span>
             ) : null}
+            {state && state.tone !== 'ok' ? (
+                <span aria-hidden="true" className={styles.word}>
+                    {state.word}
+                </span>
+            ) : null}
             {state ? <StateDot tone={state.tone} word={state.word} /> : null}
         </button>
     );

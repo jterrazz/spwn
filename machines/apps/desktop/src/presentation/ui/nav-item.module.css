@@ -58,3 +58,12 @@
     font-weight: var(--weight-medium);
     color: var(--warn);
 }
+.word {
+    flex: none;
+    max-width: 88px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: var(--text-label);
+    color: var(--t3);
+}
