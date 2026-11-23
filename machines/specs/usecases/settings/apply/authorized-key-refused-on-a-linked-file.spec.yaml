@@ -5,7 +5,7 @@ env:
 runs:
     - command: 'world admin on'
       exit: 0
-    - command: '--version >/dev/null; /bin/mkdir -p root/root/.ssh root/etc && printf ''root:$6$hash:19000:0:99999:7:::\n'' > root/etc/shadow && /bin/ln -s "$PWD/root/etc/shadow" root/root/.ssh/authorized_keys'
+    - command: '--version >/dev/null; umask 022; /bin/mkdir -p root/root/.ssh root/etc && printf ''root:$6$hash:19000:0:99999:7:::\n'' > root/etc/shadow && /bin/ln -s "$PWD/root/etc/shadow" root/root/.ssh/authorized_keys'
       exit: 0
     - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error)'''
       stdin: |

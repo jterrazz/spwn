@@ -5,7 +5,7 @@ env:
 runs:
     - command: 'world admin on'
       exit: 0
-    - command: '--version >/dev/null; /bin/mkdir -p root/root root/srv/ci root/etc && printf ''root:x:0:0:root:/root:/bin/bash\nci:x:1001:1001:CI:/srv/ci:/bin/bash\n'' > root/etc/passwd'
+    - command: '--version >/dev/null; umask 022; /bin/mkdir -p root/root root/srv/ci root/etc && printf ''root:x:0:0:root:/root:/bin/bash\nci:x:1001:1001:CI:/srv/ci:/bin/bash\n'' > root/etc/passwd'
       exit: 0
     - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | .out[0].Steps'''
       stdin: |

@@ -5,7 +5,7 @@ env:
 runs:
     - command: 'world admin on'
       exit: 0
-    - command: '--version >/dev/null; /bin/mkdir -p root/root/.ssh && /bin/chmod 755 root/root/.ssh && printf ''# my laptop\nssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOWNERownerOWNERownerOWNERownerOWNERowner owner@laptop'' > root/root/.ssh/authorized_keys && /bin/chmod 644 root/root/.ssh/authorized_keys && /bin/cp root/root/.ssh/authorized_keys before'
+    - command: '--version >/dev/null; umask 022; /bin/mkdir -p root/root/.ssh && /bin/chmod 755 root/root/.ssh && printf ''# my laptop\nssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOWNERownerOWNERownerOWNERownerOWNERowner owner@laptop'' > root/root/.ssh/authorized_keys && /bin/chmod 644 root/root/.ssh/authorized_keys && /bin/cp root/root/.ssh/authorized_keys before'
       exit: 0
     - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error)'''
       stdin: |

@@ -729,6 +729,10 @@ func (a *Applier) homeOf(who account) (string, error) {
 	if who.home == "/" {
 		return "", fmt.Errorf("%s has no home of its own (/): Machines writes only in a user's home", who.name)
 	}
+	err := a.above(who.home)
+	if err != nil {
+		return "", err
+	}
 	base := a.at(path.Dir(who.home))
 	e, err := a.home.Lstat(base, path.Base(who.home))
 	switch {
@@ -742,8 +746,41 @@ func (a *Applier) homeOf(who account) (string, error) {
 		return "", fmt.Errorf("%s is not a folder, not touched", who.home)
 	case e.UID != who.UID:
 		return "", fmt.Errorf("%s is not %s's (its owner is uid %d), not touched", who.home, who.name, e.UID)
+	case e.Mode.Perm()&0o022 != 0:
+		return "", fmt.Errorf("%s is writable by others (%s), not touched: sshd ignores keys under it, take the write away with %s", who.home, octal(e.Mode), catalog.AsRoot("chmod go-w "+who.home))
 	}
 	return base, nil
+}
+
+// invariant: every folder from / down to the one that holds home, / itself
+// aside, is root's (in a world, the run's) and writable by no one else:
+// whoever else could change one could swap the home under Machines.
+func (a *Applier) above(home string) error {
+	system := 0
+	if a.o.Run != nil {
+		system = a.o.Run.UID
+	}
+	at := "/"
+	for name := range strings.SplitSeq(strings.Trim(path.Dir(home), "/"), "/") {
+		if name == "" {
+			continue
+		}
+		e, err := a.home.Lstat(a.at(at), name)
+		at = path.Join(at, name)
+		switch {
+		case err != nil:
+			return a.linked(err)
+		case e.Mode&fs.ModeSymlink != 0:
+			return fmt.Errorf("%s is a link, not touched: Machines follows no link to a home", at)
+		case !e.Mode.IsDir():
+			return fmt.Errorf("%s is not a folder, not touched", at)
+		case e.UID != system:
+			return fmt.Errorf("%s is not root's (its owner is uid %d), not touched: Machines writes keys only under folders root alone can change", at, e.UID)
+		case e.Mode.Perm()&0o022 != 0:
+			return fmt.Errorf("%s is writable by others (%s), not touched: Machines writes keys only under folders root alone can change", at, octal(e.Mode))
+		}
+	}
+	return nil
 }
 
 // invariant: a key goes only to an account that signs in: one whose shell

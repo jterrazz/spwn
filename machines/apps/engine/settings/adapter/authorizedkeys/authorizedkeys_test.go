@@ -822,3 +822,21 @@ func TestASystemAccountIsRefused(t *testing.T) {
 		t.Fatalf("Apply for a system account = %q; want it refused, nothing made", why)
 	}
 }
+
+func TestAHomeUnderAFolderOthersCanWriteIsRefused(t *testing.T) {
+	m := newMachine(t)
+	m.mkdir("home", 0o777)
+	why := refused(t, m.open(), "ci", key(t, 1, "")).Error()
+	if !strings.Contains(why, "/home is writable by others") || m.there(ciAK) {
+		t.Fatalf("Apply under a /home others can write = %q; want it refused, nothing made", why)
+	}
+	if m.self.UID != 0 {
+		return
+	}
+	m.mkdir("home", 0o755)
+	m.chown("home", m.ci)
+	why = refused(t, m.open(), "ci", key(t, 1, "")).Error()
+	if !strings.Contains(why, "/home is not root's") || m.there(ciAK) {
+		t.Fatalf("Apply under a /home ci owns = %q; want it refused, nothing made", why)
+	}
+}
