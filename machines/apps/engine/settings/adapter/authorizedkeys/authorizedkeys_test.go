@@ -24,8 +24,8 @@ import (
 )
 
 // value: a machine on the real disk, its system root a folder of the
-// test's own: as root, ci is uid 1001 and every owner is the system's; as
-// any other user every account is the run's, as in a world.
+// test's own, where ci is uid 1001: as root every owner is the system's;
+// as any other user every account is the run's, as in a world.
 type machine struct {
 	t        *testing.T
 	root     string
@@ -45,7 +45,7 @@ func newMachine(t *testing.T) *machine {
 	} else {
 		m.run = &m.self
 	}
-	m.write("etc/passwd", "root:x:0:0:root:/root:/bin/bash\nci:x:"+strconv.Itoa(m.ci.UID)+":"+strconv.Itoa(m.ci.GID)+":CI:/home/ci:/bin/bash\n", 0o644)
+	m.write("etc/passwd", "root:x:0:0:root:/root:/bin/bash\nci:x:1001:1002:CI:/home/ci:/bin/bash\n", 0o644)
 	m.mkdir("root", 0o700)
 	m.mkdir("home/ci", 0o755)
 	m.chown("home/ci", m.ci)
@@ -472,7 +472,7 @@ func TestAHomeThatIsNotTheUsersRealFolderIsRefused(t *testing.T) {
 		}, "/home/ci is a link, not touched"},
 		"a file": {func(m *machine) { _ = m.disk.Remove(m.at("home/ci")); m.write("home/ci", "", 0o644) }, "/home/ci is not a folder, not touched"},
 		"the system's root": {func(m *machine) {
-			m.write("etc/passwd", "ci:x:"+strconv.Itoa(m.ci.UID)+":"+strconv.Itoa(m.ci.GID)+":CI:/:/bin/bash\n", 0o644)
+			m.write("etc/passwd", "ci:x:1001:1002:CI:/:/bin/bash\n", 0o644)
 		}, "ci has no home of its own (/): Machines writes only in a user's home"},
 	} {
 		t.Run(name, func(t *testing.T) {
@@ -661,7 +661,7 @@ func TestAnAccountThatDoesNotSignInIsRefused(t *testing.T) {
 	for _, shell := range []string{"/usr/sbin/nologin", "/sbin/nologin", "/bin/false", "/usr/bin/false"} {
 		t.Run(shell, func(t *testing.T) {
 			m := newMachine(t)
-			m.write("etc/passwd", "root:x:0:0:root:/root:/bin/bash\nci:x:"+strconv.Itoa(m.ci.UID)+":"+strconv.Itoa(m.ci.GID)+":CI:/home/ci:"+shell+"\n", 0o644)
+			m.write("etc/passwd", "root:x:0:0:root:/root:/bin/bash\nci:x:1001:1002:CI:/home/ci:"+shell+"\n", 0o644)
 			err := refused(t, m.open(), "ci", key(t, 1, ""))
 			if want := "ci does not sign in (its shell is " + shell + "), not touched"; !strings.Contains(err.Error(), want) {
 				t.Fatalf("Apply = %v; want %q", err, want)
@@ -811,5 +811,14 @@ func TestAStrayStartAboveTheBlockIsRefusedWithItsLine(t *testing.T) {
 	why := refused(t, m.open(), "root", key(t, 2, "new")).Error()
 	if m.content(rootAK) != text || !strings.Contains(why, "delete line 2 of /root/.ssh/authorized_keys") || strings.Contains(why, "around Machines' keys") {
 		t.Fatalf("Apply over a stray start = %q; file %q; want it refused, line 2 named and the file as it was", why, m.content(rootAK))
+	}
+}
+
+func TestASystemAccountIsRefused(t *testing.T) {
+	m := newMachine(t)
+	m.write("etc/passwd", "root:x:0:0:root:/root:/bin/bash\ndaemon:x:1:"+strconv.Itoa(m.ci.GID)+":daemon:/home/ci:/bin/bash\n", 0o644)
+	why := refused(t, m.open(), "daemon", key(t, 1, "")).Error()
+	if !strings.Contains(why, "daemon is a system account (uid 1)") || m.there(ciAK) {
+		t.Fatalf("Apply for a system account = %q; want it refused, nothing made", why)
 	}
 }

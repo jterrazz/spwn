@@ -99,8 +99,15 @@ type written struct {
 
 type account struct {
 	name, home, shell string
+	// value: the uid /etc/passwd gives the account, before a world makes
+	// every account the run's.
+	uid int
 	local.Owner
 }
+
+// value: the first uid Linux gives a person's account; every uid below it
+// but root's is the system's.
+const firstPerson = 1000
 
 func of(it catalog.Setting) (catalog.AuthorizedKeys, error) {
 	a, ok := it.Effect.(catalog.AuthorizedKeys)
@@ -741,7 +748,8 @@ func (a *Applier) homeOf(who account) (string, error) {
 
 // invariant: a key goes only to an account that signs in: one whose shell
 // is nologin or false never does, and a key there would still open its
-// tunnels; root is always taken.
+// tunnels; a system account, below the first person's uid, is refused
+// too; root is always taken.
 func signsIn(who account) error {
 	if who.name == "root" {
 		return nil
@@ -749,6 +757,9 @@ func signsIn(who account) error {
 	switch path.Base(who.shell) {
 	case "nologin", "false":
 		return fmt.Errorf("%s does not sign in (its shell is %s), not touched: Machines writes keys only for an account that signs in", who.name, who.shell)
+	}
+	if who.uid < firstPerson {
+		return fmt.Errorf("%s is a system account (uid %d), not touched: Machines writes keys only for root or a person's account, uid %d and above", who.name, who.uid, firstPerson)
 	}
 	return nil
 }
@@ -799,7 +810,7 @@ func (a *Applier) account(user string) (account, error) {
 		uid, uerr := strconv.Atoi(f[2])
 		gid, gerr := strconv.Atoi(f[3])
 		if uerr == nil && gerr == nil {
-			return a.as(account{name: user, home: path.Clean(f[5]), shell: f[6], Owner: local.Owner{UID: uid, GID: gid}}), nil
+			return a.as(account{name: user, home: path.Clean(f[5]), shell: f[6], uid: uid, Owner: local.Owner{UID: uid, GID: gid}}), nil
 		}
 	}
 	if user == "root" {
