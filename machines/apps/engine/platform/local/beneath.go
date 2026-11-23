@@ -39,7 +39,11 @@ var (
 	// value: a file whose bytes are no longer those its writer judged its
 	// write on.
 	ErrChanged = errors.New("changed since it was read")
+	// value: a file larger than MaxRead, which a Folder never reads.
+	ErrTooLarge = errors.New("is larger than 1 MiB")
 )
+
+const MaxRead = 1 << 20
 
 type Beneath struct {
 	// invariant: a path under base is reached from base one name at a time,
@@ -170,7 +174,8 @@ func (f *Folder) Lstat(name string) (Entry, error) {
 
 func (f *Folder) ReadFile(name string) ([]byte, Entry, error) {
 	// value: the file name holds, opened with O_NOFOLLOW, and what the same
-	// descriptor is: anything but a file of one name is refused.
+	// descriptor is: anything but a file of one name is refused, and so is
+	// one larger than MaxRead, never read past it.
 	at := path.Join(f.at, name)
 	fd, err := openat(f.fd, name, unix.O_RDONLY, at)
 	if err != nil {
@@ -186,7 +191,13 @@ func (f *Folder) ReadFile(name string) ([]byte, Entry, error) {
 	if refused := single(e); refused != nil {
 		return nil, Entry{}, &fs.PathError{Op: "read", Path: at, Err: refused}
 	}
-	data, err := io.ReadAll(file)
+	if st.Size > MaxRead {
+		return nil, Entry{}, &fs.PathError{Op: "read", Path: at, Err: ErrTooLarge}
+	}
+	data, err := io.ReadAll(io.LimitReader(file, MaxRead+1))
+	if err == nil && len(data) > MaxRead {
+		return nil, Entry{}, &fs.PathError{Op: "read", Path: at, Err: ErrTooLarge}
+	}
 	return data, e, err
 }
 

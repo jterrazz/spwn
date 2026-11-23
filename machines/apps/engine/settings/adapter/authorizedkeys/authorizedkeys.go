@@ -1157,6 +1157,8 @@ func (a *Applier) linked(err error) error {
 		return fmt.Errorf("%s is a link, not touched: Machines follows no link in a home", at)
 	case errors.Is(err, local.ErrHardLink):
 		return fmt.Errorf("%s has another name, a hard link, not touched: Machines writes keys only in a file of one name", at)
+	case errors.Is(err, local.ErrTooLarge):
+		return fmt.Errorf("%s is larger than 1 MiB, not touched: Machines reads an authorized_keys of 1 MiB at most", at)
 	case errors.Is(err, local.ErrChanged):
 		return fmt.Errorf("%s changed since Machines read it, not touched: run it again to judge it as it is now", at)
 	}

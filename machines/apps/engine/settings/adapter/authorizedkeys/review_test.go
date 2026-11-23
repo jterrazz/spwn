@@ -64,6 +64,17 @@ func TestAUserHoldingTheirSSHFolderKeepsOnlyTheirOwnAccount(t *testing.T) {
 	}
 }
 
+func TestAFileLargerThanAMebibyteIsRefusedUntouched(t *testing.T) {
+	m := newMachine(t)
+	m.mkdir("root/.ssh", 0o700)
+	big := strings.Repeat("#"+strings.Repeat("x", 1023)+"\n", 1024) + key(t, 9, "laptop") + "\n"
+	m.write(rootAK, big, 0o600)
+	why := refused(t, m.open(), "root", key(t, 1, "")).Error()
+	if !strings.Contains(why, "/root/.ssh/authorized_keys is larger than 1 MiB, not touched") || m.content(rootAK) != big {
+		t.Fatalf("Apply on a file of %d bytes = %q; want it refused, untouched", len(big), why)
+	}
+}
+
 func TestWithNoRecordALineMachinesDoesNotKnowKeepsTheBlock(t *testing.T) {
 	m := newMachine(t)
 	m.mkdir("root/.ssh", 0o700)
