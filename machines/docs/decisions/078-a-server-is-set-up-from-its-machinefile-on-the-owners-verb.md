@@ -3,7 +3,7 @@
 **Status:** Accepted
 **Date:** 2026-11-23
 
-Accepted by the owner on 2026-11-23, on his word, with the answers recorded below.
+Accepted by the owner on 2026-11-23, on the owner's word, with the answers recorded below.
 
 **Amends:** [ADR-017](017-servers-and-workspaces.md): station now sets a server up, from its Machinefile, at its creation and on `upgrade --on`.
 

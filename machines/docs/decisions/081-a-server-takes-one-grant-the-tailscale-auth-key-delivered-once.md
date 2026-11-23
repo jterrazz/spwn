@@ -3,7 +3,7 @@
 **Status:** Accepted
 **Date:** 2026-11-23
 
-Accepted by the owner on 2026-11-23, on his word, with the answers recorded below.
+Accepted by the owner on 2026-11-23, on the owner's word, with the answers recorded below.
 
 **Amends:** [ADR-049](049-a-vm-signs-itself-in-the-vault-grants-the-rest.md): a server, which takes no grant under it, takes the `tailscale` grant.
 

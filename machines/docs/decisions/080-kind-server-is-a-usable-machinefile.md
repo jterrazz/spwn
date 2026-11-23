@@ -3,7 +3,7 @@
 **Status:** Accepted
 **Date:** 2026-11-23
 
-Accepted by the owner on 2026-11-23, on his word, with the answers recorded below.
+Accepted by the owner on 2026-11-23, on the owner's word, with the answers recorded below.
 
 **Amends:** [ADR-033](033-a-machine-is-declared-by-its-machinefile.md): a Machinefile whose `machine.kind` is `server` is planned, applied and made into a server.
 

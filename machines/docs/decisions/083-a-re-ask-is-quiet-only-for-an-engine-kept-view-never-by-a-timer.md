@@ -3,7 +3,7 @@
 **Status:** Accepted
 **Date:** 2026-11-23
 
-Accepted by the owner on 2026-11-23, on his word.
+Accepted by the owner on 2026-11-23, on the owner's word.
 
 Amends [ADR-071](071-the-window-mirrors-engine-kept-state-never-blank.md).
 
