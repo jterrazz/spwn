@@ -145,7 +145,10 @@ func TestALockdownFolderIsTakenOnlyAsMktempPrintsIt(t *testing.T) {
 }
 
 func TestAVMUserIsTakenOnlyAsALowercaseShortNameNeverAdminNorRoot(t *testing.T) {
-	for _, user := range []string{"you", "_build", "dev-2", "a23456789012345678901234567890ab", "jterrazz", "jterrazz.ops", "jterrazz.agent", "a.b-c_d"} {
+	for _, user := range []string{"you", "dev-2", "a23456789012345678901234567890ab", "jterrazz", "jterrazz.ops", "jterrazz.agent", "a.b-c_d", "you_"} {
+		if err := machinescontract.CheckVMUser(user, false); err != nil {
+			t.Errorf("vm_user %q: %v; want it taken", user, err)
+		}
 		prefs := memoryPrefs{}
 		if err := machinescontract.VMUser(prefs).Set(user); err != nil {
 			t.Fatal(err)
@@ -154,7 +157,7 @@ func TestAVMUserIsTakenOnlyAsALowercaseShortNameNeverAdminNorRoot(t *testing.T) 
 			t.Errorf("vm_user %q read back %q, %v", user, got, err)
 		}
 	}
-	for _, user := range []string{"Admin", "admin", "ROOT", "root", "you\nroot", "you\n", "2you", "you me", "-you", ".you", "you.", "Jterrazz.ops", "you:x", "you/x", "a23456789012345678901234567890abc"} {
+	for _, user := range []string{"Admin", "admin", "ROOT", "root", "you\nroot", "you\n", "2you", "you me", "-you", ".you", "_build", "_you", "you.", "Jterrazz.ops", "you:x", "you/x", "a23456789012345678901234567890abc"} {
 		if err := machinescontract.CheckVMUser(user, false); err == nil || !strings.Contains(err.Error(), "vm_user") {
 			t.Errorf("vm_user %q: %v; want it refused, naming vm_user", user, err)
 		}

@@ -18,11 +18,29 @@ case "$*" in
             /bin/mv "$answers/attach.codes.next" "$answers/attach.codes"
             [ "$code" = 0 ] || exit "$code"
         fi
-        prev=''
-        for arg; do
-            if [ "$arg" = -- ]; then target=$prev; break; fi
-            prev=$arg
+        terminated=''
+        while [ $# -gt 0 ]; do
+            case $1 in
+                --) shift; terminated=1; break ;;
+                -[BbcDEeFIiJLlmOoPpQRSWw]) shift 2 ;;
+                -*) shift ;;
+                *) break ;;
+            esac
         done
+        target=$1
+        shift
+        while [ -z "$terminated" ] && [ $# -gt 0 ]; do
+            case $1 in
+                --) shift; break ;;
+                -[BbcDEeFIiJLlmOoPpQRSWw]) shift 2 ;;
+                -*) shift ;;
+                *) break ;;
+            esac
+        done
+        if [ "$1" != sh ]; then
+            echo "stub ssh: the far shell was given: $*" >&2
+            exit 97
+        fi
         far="$answers/api-$target"
         [ -d "$far" ] || exit 255
         version=$(/bin/cat "$far/version" 2>/dev/null)

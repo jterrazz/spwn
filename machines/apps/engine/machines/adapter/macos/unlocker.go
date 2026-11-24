@@ -38,6 +38,9 @@ func New(run local.Runner, dirs Dirs, knownHosts string) contract.Unlocker {
 func batch() []string { return []string{"-o", "ConnectTimeout=2", "-o", "BatchMode=yes"} }
 
 func (u *unlocker) Unlock(ctx context.Context, mac, lan string) error {
+	if why := contract.UnusableLAN(mac, lan); why != "" {
+		return errors.New(why)
+	}
 	if err := u.dirs.MkdirAll(u.knownHosts, 0o700); err != nil {
 		return err
 	}
@@ -52,7 +55,7 @@ func (u *unlocker) Unlock(ctx context.Context, mac, lan string) error {
 	if lan != "" {
 		preboot = append(preboot, "-o", "HostName="+lan)
 	}
-	out, err := u.run.Output(ctx, local.Cmd{Name: "ssh", Args: concat(batch(), preboot, []string{mac, "true"})})
+	out, err := u.run.Output(ctx, local.Cmd{Name: "ssh", Args: concat(batch(), preboot, []string{"--", mac, "true"})})
 	if err != nil {
 		return contract.ErrUnreachable
 	}
@@ -64,14 +67,14 @@ func (u *unlocker) Unlock(ctx context.Context, mac, lan string) error {
 	// outside: ssh disconnects as soon as the password unlocks the disk, so the
 	// session's own exit is the success path and carries no verdict.
 	_, err = u.run.Attach(ctx, local.Cmd{Name: "ssh", Args: concat(
-		[]string{"-o", "PreferredAuthentications=password", "-o", "PubkeyAuthentication=no"}, preboot, []string{mac},
+		[]string{"-o", "PreferredAuthentications=password", "-o", "PubkeyAuthentication=no"}, preboot, []string{"--", mac},
 	)}, local.ToStdout)
 	return err
 }
 
 func (u *unlocker) PlannedRestart(ctx context.Context, mac string) error {
 	out, err := u.run.Output(ctx, local.Cmd{
-		Name: "ssh", Args: concat(batch(), []string{mac, restartLine}),
+		Name: "ssh", Args: concat(batch(), []string{"--", mac, restartLine}),
 		Timeout: restartBudget,
 	})
 	if err != nil && !errors.Is(err, local.ErrTimeout) {

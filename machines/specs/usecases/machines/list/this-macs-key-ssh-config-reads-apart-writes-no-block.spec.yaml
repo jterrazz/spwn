@@ -1,0 +1,20 @@
+description: 'a key of This Mac that ssh_config would read apart writes no block, and the list says why'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs[.this_mac].preferences.macs[.this_mac] = {"key": "~/.ssh/k\n  ProxyCommand touch pwned"} | .macs[.this_mac].ssh.blocks = {}'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'machines'
+      exit: 0
+      stdout: |
+          ●	macbook-pro	Mac	macbook-pro	Engine running
+          ○	api	Workspace	macbook-pro	Stopped · persistent	4 CPU	8 GB
+          ●	linux-1	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB
+          ●	mac-mini	Mac	mac-mini	Engine running
+          ●	infra	Server	mac-mini	Running · always on	8 CPU	24 GB
+          	ssh config not refreshed: macbook-pro's key "~/.ssh/k\n  ProxyCommand touch pwned" holds a space, a quote, "#", "%", "\" or a control character, which ssh_config reads apart
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs[.this_mac].ssh.blocks'' world.json'
+      exit: 0
+      stdout: |
+          null

@@ -1,0 +1,26 @@
+description: 'a LAN address that is no address is never stored, and a hand-edited one leaves its Mac out'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["mac-mini"].facts["local-ip"].Value = "x$(touch FAKE000)"'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'machines >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].preferences.macs["mac-mini"].lan'' world.json'
+      exit: 0
+      stdout: |
+          null
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs[.this_mac].preferences.macs["mac-mini"].lan = "x$(touch FAKE000)"'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'machines'
+      exit: 0
+      stdout: |
+          ●	macbook-pro	Mac	macbook-pro	Engine running
+          ○	api	Workspace	macbook-pro	Stopped · persistent	4 CPU	8 GB
+          ●	linux-1	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB
+          # Needs you
+          ◐	mac-mini	is left out: mac-mini's LAN address "x$(touch FAKE000)" is neither an IP address nor a DNS name	correct it in ~/.config/station/preferences.json
+    - command: 'machines unlock mac-mini'
+      exit: 1
+      stderr: |
+          Error: mac-mini's LAN address "x$(touch FAKE000)" is neither an IP address nor a DNS name
+          Hint: correct it in ~/.config/station/preferences.json

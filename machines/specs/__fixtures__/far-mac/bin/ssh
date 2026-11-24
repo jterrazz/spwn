@@ -5,6 +5,28 @@
 printf 'ssh %s\n' "$*" >> "$HOME/.calls"
 case "$*" in
     *" station engine attach")
+        terminated=''
+        while [ $# -gt 0 ]; do
+            case $1 in
+                --) shift; terminated=1; break ;;
+                -[BbcDEeFIiJLlmOoPpQRSWw]) shift 2 ;;
+                -*) shift ;;
+                *) break ;;
+            esac
+        done
+        shift
+        while [ -z "$terminated" ] && [ $# -gt 0 ]; do
+            case $1 in
+                --) shift; break ;;
+                -[BbcDEeFIiJLlmOoPpQRSWw]) shift 2 ;;
+                -*) shift ;;
+                *) break ;;
+            esac
+        done
+        if [ "$1" != sh ]; then
+            echo "stub ssh: the far shell was given: $*" >&2
+            exit 97
+        fi
         /bin/mkdir -p "$HOME/far"
         cd "$HOME/far" && exec /usr/bin/env -i HOME="$HOME/far" PATH="$HOME/far/bin" TZ=UTC NO_COLOR=1 COLUMNS=80 \
             STATION_MACHINE_KIND=mac STATION_SYSTEM_DIRS= STATION_SYSTEM_ROOT="$HOME/far/root" STATION_POWER_STUB="$HOME/far/power" \

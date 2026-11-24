@@ -341,6 +341,7 @@
             "port.unknown-audience",
             "port.unknown-route",
             "range_full",
+            "remote.bad-mac-name",
             "remote.caller-too-old",
             "remote.far-too-old",
             "remote.no-station",

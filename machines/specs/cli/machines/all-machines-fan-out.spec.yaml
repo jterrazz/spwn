@@ -11,7 +11,7 @@ runs:
       files:
           .calls:
               equals: |
-                  ssh -o BatchMode=yes -o ConnectTimeout=5 -o ServerAliveInterval=2 -o ServerAliveCountMax=2 y -- sh -c 'PATH="$HOME/.local/bin:/usr/local/bin:$PATH" exec station "$@"' station engine attach
+                  ssh -o BatchMode=yes -o ConnectTimeout=5 -o ServerAliveInterval=2 -o ServerAliveCountMax=2 -- y sh -c 'PATH="$HOME/.local/bin:/usr/local/bin:$PATH" exec station "$@"' station engine attach
     - command: 'machines --json | /usr/bin/jq -r ''.macs[1].vms[0] | [.name, .state, .lifetime, .ip] | join(" ")'''
       exit: 0
       stdout: |

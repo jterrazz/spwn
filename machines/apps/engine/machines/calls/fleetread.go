@@ -61,10 +61,10 @@ func (s *Machinist) AllMachinesAsItFills(ctx context.Context, thisMacOnly bool, 
 	if thisMacOnly || s.o.ThisMachine != catalog.Mac {
 		return model.AllMachines{Macs: []model.MacView{thisMac}, Read: s.h.Now()}, nil
 	}
-	others := s.OtherMacs()
+	others, refused := s.otherMacs()
 	answers := map[string]model.MacView{}
 	allMachines := func(all bool) model.AllMachines {
-		f := model.AllMachines{Macs: []model.MacView{thisMac}, Read: s.h.Now()}
+		f := model.AllMachines{Macs: []model.MacView{thisMac}, Read: s.h.Now(), Refused: refused}
 		for _, n := range others {
 			if _, ok := answers[n]; ok || all {
 				f.Macs = append(f.Macs, s.view(n, cfg.Macs[n], nodes[n], answers))

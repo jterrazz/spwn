@@ -18,7 +18,7 @@ runs:
                     HostName y
                     User u
                     IdentityAgent ~/.local/state/station/agent.sock
-                    IdentityFile ~/.local/state/station/device-key.pub
+                    IdentityFile "~/.local/state/station/device-key.pub"
                     IdentitiesOnly yes
                     ServerAliveInterval 30
                     ServerAliveCountMax 3

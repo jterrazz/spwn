@@ -7,10 +7,15 @@ runs:
       exit: 2
       stderr: |
           Error: "Bad_Name" is not a valid name
-          Hint: use lowercase letters, digits and "-", 1 to 40 characters
+          Hint: use lowercase letters, digits and "-", 1 to 40 characters, never "-" first
     - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.error) | .error | {code, subject, message}'''
       stdin: |
           {"v":2,"id":"1","call":"machines.add","in":{"Name":"Bad_Name"}}
       exit: 0
       stdout: |
           {"code":"machines.bad-name","subject":"Bad_Name","message":"\"Bad_Name\" is not a valid name"}
+    - command: 'machines add -- -mini'
+      exit: 2
+      stderr: |
+          Error: "-mini" is not a valid name
+          Hint: use lowercase letters, digits and "-", 1 to 40 characters, never "-" first

@@ -139,6 +139,7 @@
             "port.unknown-audience",
             "port.unknown-route",
             "range_full",
+            "remote.bad-mac-name",
             "remote.caller-too-old",
             "remote.far-too-old",
             "remote.no-station",
@@ -353,6 +354,12 @@
         "Read": {
           "format": "date-time",
           "type": "string"
+        },
+        "Refused": {
+          "items": {
+            "$ref": "#/$defs/machines.RefusedMac"
+          },
+          "type": "array"
         },
         "Standing": {
           "$ref": "#/$defs/machines.RollUp"
@@ -725,6 +732,22 @@
         "Fit",
         "MemoryBytes",
         "Preset"
+      ],
+      "type": "object"
+    },
+    "machines.RefusedMac": {
+      "additionalProperties": false,
+      "properties": {
+        "Name": {
+          "type": "string"
+        },
+        "Why": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Name",
+        "Why"
       ],
       "type": "object"
     },

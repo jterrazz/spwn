@@ -9,11 +9,29 @@ answers="${0%/*}/../answers/ssh"
 printf 'ssh %s\n' "$*" >> "$HOME/.calls"
 case "$*" in
     *" station engine attach")
-        prev=''
-        for arg; do
-            if [ "$arg" = -- ]; then target=$prev; break; fi
-            prev=$arg
+        terminated=''
+        while [ $# -gt 0 ]; do
+            case $1 in
+                --) shift; terminated=1; break ;;
+                -[BbcDEeFIiJLlmOoPpQRSWw]) shift 2 ;;
+                -*) shift ;;
+                *) break ;;
+            esac
         done
+        target=$1
+        shift
+        while [ -z "$terminated" ] && [ $# -gt 0 ]; do
+            case $1 in
+                --) shift; break ;;
+                -[BbcDEeFIiJLlmOoPpQRSWw]) shift 2 ;;
+                -*) shift ;;
+                *) break ;;
+            esac
+        done
+        if [ "$1" != sh ]; then
+            echo "stub ssh: the far shell was given: $*" >&2
+            exit 97
+        fi
         far="$answers/api-$target"
         [ -d "$far" ] || exit 255
         version=$(/bin/cat "$far/version" 2>/dev/null)
@@ -29,7 +47,29 @@ case "$*" in
         done
         ;;
     *" true")
-        eval "name=\${$(($# - 1))}"
+        terminated=''
+        while [ $# -gt 0 ]; do
+            case $1 in
+                --) shift; terminated=1; break ;;
+                -[BbcDEeFIiJLlmOoPpQRSWw]) shift 2 ;;
+                -*) shift ;;
+                *) break ;;
+            esac
+        done
+        name=$1
+        shift
+        while [ -z "$terminated" ] && [ $# -gt 0 ]; do
+            case $1 in
+                --) shift; break ;;
+                -[BbcDEeFIiJLlmOoPpQRSWw]) shift 2 ;;
+                -*) shift ;;
+                *) break ;;
+            esac
+        done
+        if [ "$name" = -- ] || [ "$1" != true ] || [ $# -ne 1 ]; then
+            echo "stub ssh: the key check was given: $name $*" >&2
+            exit 97
+        fi
         known="$HOME/.local/state/station/known_hosts/$name"
         key=$(/bin/cat "$answers/hostkey")
         if [ -f "$known" ] && ! /usr/bin/grep -qF "$key" "$known"; then

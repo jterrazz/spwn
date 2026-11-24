@@ -78,7 +78,7 @@ func (c *sshFile) block(b contract.MachineBlock) string {
 		lines = append(lines, "  User "+b.User)
 	}
 	if c.o.Agent != "" {
-		lines = append(lines, "  IdentityAgent "+c.tilde(c.o.Agent), "  IdentityFile "+c.tilde(c.o.DeviceKey))
+		lines = append(lines, "  IdentityAgent "+c.tilde(c.o.Agent), "  IdentityFile "+quotedValue(c.tilde(c.o.DeviceKey)))
 	}
 	// invariant: only the keys the block names are offered, so an agent
 	// holding many keys never exhausts the server's attempts before them; the
@@ -89,7 +89,7 @@ func (c *sshFile) block(b contract.MachineBlock) string {
 		key = defaultKey
 	}
 	if key != "" {
-		lines = append(lines, "  IdentityFile "+key)
+		lines = append(lines, "  IdentityFile "+quotedValue(key))
 		named = true
 	}
 	if named {
@@ -132,6 +132,8 @@ func shellWord(s string) string {
 	}
 	return doubleQuoted(s)
 }
+
+func quotedValue(s string) string { return `"` + s + `"` }
 
 func doubleQuoted(s string) string {
 	var out strings.Builder

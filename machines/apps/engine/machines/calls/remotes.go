@@ -4,8 +4,10 @@ import (
 	"context"
 	"errors"
 	"maps"
+	"slices"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 
 	coremachine "github.com/jterrazz/studio-station/apps/engine/core/machine"
@@ -23,6 +25,9 @@ func (s *Machinist) lookup(name string) (Machine, error) {
 		return Machine{}, err
 	}
 	if h, ok := cfg.Macs[name]; ok {
+		if why := macRefused(cfg, name, h); why != "" {
+			return Machine{}, &model.BadSSHTargetError{Why: why}
+		}
 		return Machine{Name: name, Kind: catalog.Mac, ThisMachine: name == cfg.ThisMachine, User: h.User, Key: h.Key, LAN: h.LAN}, nil
 	}
 	records, err := s.records()
@@ -38,6 +43,9 @@ func (s *Machinist) lookup(name string) (Machine, error) {
 	// (mac-mini for sam-mac-mini).
 	if full := s.o.User + "-" + name; s.o.User != "" {
 		if h, ok := cfg.Macs[full]; ok {
+			if why := macRefused(cfg, full, h); why != "" {
+				return Machine{}, &model.BadSSHTargetError{Why: why}
+			}
 			return Machine{Name: full, Kind: catalog.Mac, ThisMachine: full == cfg.ThisMachine, User: h.User, Key: h.Key, LAN: h.LAN}, nil
 		}
 	}
@@ -169,19 +177,40 @@ func (s *Machinist) thisMac(cfg prefsView) string {
 
 func (s *Machinist) OtherMacs() []string {
 	// value: every host of the fleet but this one, by name.
+	others, _ := s.otherMacs()
+	return others
+}
+
+func (s *Machinist) otherMacs() ([]string, []model.RefusedMac) {
 	cfg, err := s.prefs()
 	if err != nil {
-		return nil
+		return nil, nil
 	}
 	thisMac := s.thisMac(cfg)
 	others := make([]string, 0, len(cfg.Macs))
-	for n := range cfg.Macs {
-		if n != thisMac && n != cfg.ThisMachine {
+	var refused []model.RefusedMac
+	for n, h := range cfg.Macs {
+		switch why := macRefused(cfg, n, h); {
+		case n == thisMac || n == cfg.ThisMachine:
+		case why != "":
+			refused = append(refused, model.RefusedMac{Name: n, Why: why})
+		default:
 			others = append(others, n)
 		}
 	}
 	sort.Strings(others)
-	return others
+	slices.SortFunc(refused, func(a, b model.RefusedMac) int { return strings.Compare(a.Name, b.Name) })
+	return others, refused
+}
+
+func macRefused(cfg prefsView, name string, h model.MacRecord) string {
+	if name == cfg.ThisMachine {
+		return ""
+	}
+	if why := contract.Unwritable(contract.MachineBlock{Name: name, User: h.User, Key: h.Key}); why != "" {
+		return why
+	}
+	return contract.UnusableLAN(name, h.LAN)
 }
 
 func (s *Machinist) Seen(name string) (model.MacRecord, bool) {
@@ -200,8 +229,10 @@ func (s *Machinist) Names() []string {
 		return nil
 	}
 	names := make([]string, 0, len(cfg.Macs))
-	for n := range cfg.Macs {
-		names = append(names, n)
+	for n, h := range cfg.Macs {
+		if macRefused(cfg, n, h) == "" {
+			names = append(names, n)
+		}
 	}
 	if records, err := s.records(); err == nil {
 		for _, r := range records {
@@ -233,7 +264,7 @@ func (s *Machinist) Remember(_ context.Context, f model.AllMachines) error {
 			hw := h.Hardware
 			known.Hardware = &hw
 		}
-		if h.LAN != "" {
+		if h.LAN != "" && contract.UnusableLAN(h.Name, h.LAN) == "" {
 			known.LAN = h.LAN
 		}
 		cfg.Macs[h.Name], changed = known, true

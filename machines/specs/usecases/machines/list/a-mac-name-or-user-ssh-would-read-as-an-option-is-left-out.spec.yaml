@@ -1,0 +1,27 @@
+description: 'a hand-edited Mac whose name or user ssh reads as an option is left out of the list, saying why'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs[.this_mac].preferences.macs["-oProxyCommand=FAKE000"] = {} | .macs[.this_mac].preferences.macs["mac-studio"] = {"user": "-vFAKE000"}'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'machines'
+      exit: 0
+      stdout: |
+          ●	macbook-pro	Mac	macbook-pro	Engine running
+          ○	api	Workspace	macbook-pro	Stopped · persistent	4 CPU	8 GB
+          ●	linux-1	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB
+          ●	mac-mini	Mac	mac-mini	Engine running
+          ●	infra	Server	mac-mini	Running · always on	8 CPU	24 GB
+          # Needs you
+          ◐	-oProxyCommand=FAKE000	is left out: the name "-oProxyCommand=FAKE000" is not one word of letters, digits, ".", "_" and "-"	correct it in ~/.config/station/preferences.json
+          ◐	mac-studio	is left out: mac-studio's user "-vFAKE000" starts with "-", which ssh reads as an option	correct it in ~/.config/station/preferences.json
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs[.this_mac].ssh.blocks | keys[]]'' world.json'
+      exit: 0
+      stdout: |
+          ["api","infra","linux-1","mac-mini"]
+    - command: 'machines unlock mac-studio'
+      exit: 1
+      stderr: |
+          Error: mac-studio's user "-vFAKE000" starts with "-", which ssh reads as an option
+          Hint: correct it in ~/.config/station/preferences.json

@@ -1,0 +1,27 @@
+description: 'add writes no key ssh_config would read apart, rolls back, and quotes the key it writes'
+fixture:
+    - ../../__fixtures__/far-mac/
+env: engine
+runs:
+    - command: '--version >/dev/null; "$STATION" machines add mac-mini --key "$(/usr/bin/printf "~/.ssh/k\n  ProxyCommand /usr/bin/touch pwned")"'
+      exit: 1
+      stderr: |
+          Error: updating the ssh config failed (registry rolled back): refusing to write {{workdir}}/.ssh/config: mac-mini's key "~/.ssh/k\n  ProxyCommand /usr/bin/touch pwned" holds a space, a quote, "#", "%", "\" or a control character, which ssh_config reads apart
+          Hint: check "{{workdir}}/.ssh/config" and run it again
+      files:
+          .ssh/config: absent
+          pwned: absent
+    - command: '--version >/dev/null; "$STATION" machines add mac-mini --key "~/.ssh/k%h" >/dev/null; /usr/bin/jq -c .macs .config/station/preferences.json'
+      exit: 0
+      stdout: |
+          {"x":{},"y":{}}
+      stderr: |
+          Error: updating the ssh config failed (registry rolled back): refusing to write {{workdir}}/.ssh/config: mac-mini's key "~/.ssh/k%h" holds a space, a quote, "#", "%", "\" or a control character, which ssh_config reads apart
+          Hint: check "{{workdir}}/.ssh/config" and run it again
+    - command: '--version >/dev/null; "$STATION" machines add mac-mini --key "~/.ssh/id_ed25519" >/dev/null; /usr/bin/grep IdentityFile .ssh/config'
+      exit: 0
+      stdout: |4
+            IdentityFile "~/.local/state/station/device-key.pub"
+            IdentityFile "~/.ssh/id_ed25519"
+            IdentityFile "~/.local/state/station/device-key.pub"
+            IdentityFile "~/.local/state/station/device-key.pub"

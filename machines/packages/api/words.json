@@ -997,6 +997,11 @@
       "Word": "No free port",
       "Tone": "plain"
     },
+    "remote.bad-mac-name": {
+      "Word": "bad Mac name",
+      "Detail": "remote",
+      "Tone": "plain"
+    },
     "remote.caller-too-old": {
       "Word": "caller too old",
       "Detail": "remote",

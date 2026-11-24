@@ -24,6 +24,9 @@ const (
 	CallerTooOld fail.Code = "remote.caller-too-old"
 	// value: a Mac whose ssh answers and that has no station to answer it.
 	NoStation fail.Code = "remote.no-station"
+	// value: a Mac name that is no ssh word, or that ssh reads as an option,
+	// refused before any ssh runs.
+	BadMacName fail.Code = "remote.bad-mac-name"
 )
 
 type local interface {

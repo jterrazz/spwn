@@ -167,6 +167,9 @@ func Findings(f AllMachines) []finding.Finding {
 			}
 		}
 	}
+	for _, r := range f.Refused {
+		out = append(out, finding.Finding{Machine: machine.Ref{Name: r.Name}, Section: section.Overview, Severity: finding.NeedsALook, Subject: r.Name, Text: r.Name + " is left out: " + r.Why, Fix: finding.Fix{Path: MacRecordFix}})
+	}
 	return finding.Rank(out)
 }
 

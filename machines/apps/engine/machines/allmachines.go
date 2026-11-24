@@ -189,6 +189,8 @@ const (
 
 const VMUserFix = "set another vm_user in ~/.config/station/preferences.json"
 
+const MacRecordFix = "correct it in ~/.config/station/preferences.json"
+
 func VMUserRefused(mac string) string { return mac + "'s VM user is one the rule refuses" }
 
 type LockdownFailure struct {
@@ -318,8 +320,11 @@ type AllMachines struct {
 	Read time.Time
 	// value: the roll-up of every Mac and its VMs (RollUpOf); judged by
 	// machines.list, absent in any other answer.
-	Standing *RollUp `json:",omitempty"`
+	Standing *RollUp      `json:",omitempty"`
+	Refused  []RefusedMac `json:",omitempty"`
 }
+
+type RefusedMac struct{ Name, Why string }
 
 type Unasked struct {
 	// value: a create asked for its machine file alone: that file, its

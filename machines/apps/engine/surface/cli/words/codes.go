@@ -515,7 +515,7 @@ func Codes() map[fail.Code]Wording {
 			return (&machines.BeingCreatedError{Name: e.Subject, Mac: e.Detail["mac"]}).Error(), "wait for its create to end, or interrupt it where it runs"
 		},
 		machinescalls.BadName: func(e *fail.Error) (string, string) {
-			return "\"" + e.Subject + "\" is not a valid name", "use lowercase letters, digits and \"-\", 1 to 40 characters"
+			return "\"" + e.Subject + "\" is not a valid name", "use lowercase letters, digits and \"-\", 1 to 40 characters, never \"-\" first"
 		},
 		machinescalls.NameTaken: func(e *fail.Error) (string, string) {
 			name, on := "\""+e.Subject+"\"", e.Detail["on"]
@@ -664,6 +664,9 @@ func Codes() map[fail.Code]Wording {
 		},
 		ports.CodeElsewhere: func(e *fail.Error) (string, string) {
 			return e.Subject + " runs on " + e.Detail["mac"], "add --on " + e.Detail["mac"]
+		},
+		call.BadMacName: func(e *fail.Error) (string, string) {
+			return e.Detail["why"], machines.MacRecordFix
 		},
 		call.NoStation: func(e *fail.Error) (string, string) {
 			return "station is not installed on " + cmp.Or(e.Detail["label"], e.Subject), "install it there (" + catalog.InstallLine + "), then add it again"

@@ -1,7 +1,7 @@
-description: 'machines ssh refuses a hand-edited Mac user that is no ssh word or reads as an option'
+description: 'machines ssh refuses a hand-edited Mac user that is no ssh word or reads as an option, and its VMs'
 env: two-macs
 runs:
-    - command: '--version >/dev/null; /usr/bin/jq ''.macs[.this_mac].preferences.macs["mac-mini"].user = "x -oProxyCommand=touch"'' world.json > w.json && /bin/mv w.json world.json'
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs[.this_mac].preferences.macs["mac-mini"] += {"user": "x -oProxyCommand=touch", "vms": [{"name": "infra", "kind": "linux", "lifetime": "always-on", "cpus": 8, "memory_bytes": 25769803776}]}'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
     - command: 'machines ssh mac-mini'
       exit: 1
