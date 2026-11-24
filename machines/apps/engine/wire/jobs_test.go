@@ -14,6 +14,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/background/contract"
 	"github.com/jterrazz/studio-station/apps/engine/platform/local"
 	"github.com/jterrazz/studio-station/apps/engine/platform/local/localtest"
+	"github.com/jterrazz/studio-station/apps/engine/setup"
 )
 
 // value: a machine whose binary is the engine Spwn.app carries, or the bare
@@ -145,6 +146,8 @@ func (l *loginItems) ShowLoginItem(identifier string) error {
 	return l.err
 }
 
+func (l *loginItems) HideLoginItem(string) error { return l.err }
+
 // value: a fresh Mac that runs the engine Spwn.app carries, over the real
 // files of a home of its own, and the menu bar's login item it asks macOS for.
 func freshBundledMac(t *testing.T, items *loginItems) (installer engineInstaller, home string) {
@@ -183,5 +186,68 @@ func TestAnUpdateAfterTheMoveNeverShowsTheMenuBarAgainSoThePersonsOffIsKept(t *t
 	}
 	if len(items.shown) != 1 {
 		t.Errorf("three starts of the bundle asked macOS to show the menu bar %d times, want once", len(items.shown))
+	}
+}
+
+// value: launchd's menu bar job, which macOS drops once its login item is
+// unregistered and loads, running, once it is registered again.
+type menuBarJobs struct {
+	installJobs
+	menuBar contract.Status
+	asked   []string
+}
+
+func (j *menuBarJobs) Read(ctx context.Context, r contract.Ref) contract.Status {
+	if r.Label == "com.jterrazz.station.menubar" {
+		return j.menuBar
+	}
+	return j.installJobs.Read(ctx, r)
+}
+
+func (j *menuBarJobs) ShowLoginItem(identifier string) error {
+	j.asked = append(j.asked, "show "+identifier)
+	j.menuBar = contract.Status{Loaded: true, State: "running", PID: 7002}
+	return nil
+}
+
+func (j *menuBarJobs) HideLoginItem(identifier string) error {
+	j.asked = append(j.asked, "hide "+identifier)
+	j.menuBar = contract.Status{}
+	return nil
+}
+
+func TestAnUpdateRestartsTheMenuBarThatRanSoItRunsTheBundlesBinaryAndLeavesOneThatDidNot(t *testing.T) {
+	station := Version()
+	restarted := []string{"hide com.jterrazz.station.menubar", "show com.jterrazz.station.menubar"}
+	for _, c := range []struct {
+		name    string
+		running string
+		menuBar contract.Status
+		want    []string
+	}{
+		{"the engine moves to the new version, the menu bar runs", station + "-older", contract.Status{Loaded: true, State: "running", PID: 7001}, restarted},
+		{"the engine moves to the new version, the menu bar was quit", station + "-older", contract.Status{Loaded: true, State: "not running"}, nil},
+		{"the engine moves to the new version, the menu bar is off", station + "-older", contract.Status{}, nil},
+		{"the engine already runs this version, the menu bar runs", station, contract.Status{Loaded: true, State: "running", PID: 7001}, nil},
+	} {
+		t.Run(c.name, func(t *testing.T) {
+			jobs := &menuBarJobs{installJobs: installJobs{loaded: true}, menuBar: c.menuBar}
+			i, home := freshBundledMac(t, &loginItems{})
+			i.menuBar = jobs
+			i.m.sys.Sockets = helloSockets{version: c.running}
+			i.m.paths = setup.Paths{State: filepath.Join(home, ".local", "state", "station")}
+			if err := os.MkdirAll(i.m.paths.State, 0o700); err != nil {
+				t.Fatal(err)
+			}
+			if err := os.WriteFile(filepath.Join(i.m.paths.State, "menubar-offered"), nil, 0o600); err != nil {
+				t.Fatal(err)
+			}
+			if _, err := i.install(context.Background(), jobs); err != nil {
+				t.Fatal(err)
+			}
+			if strings.Join(jobs.asked, ", ") != strings.Join(c.want, ", ") {
+				t.Errorf("the update asked macOS %v, want %v", jobs.asked, c.want)
+			}
+		})
 	}
 }

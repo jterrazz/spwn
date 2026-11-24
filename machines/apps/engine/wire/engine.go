@@ -508,6 +508,7 @@ type loginItem interface {
 	// binary, named by its bundle identifier, which macOS starts now and at
 	// every login.
 	ShowLoginItem(identifier string) error
+	HideLoginItem(identifier string) error
 }
 
 func (i engineInstaller) env() map[string]string {
@@ -543,15 +544,39 @@ func startFailed(cause error) error {
 
 func (i engineInstaller) install(ctx context.Context, jobs contract.Jobs) (engine.Installed, error) {
 	started := false
-	if bundle := i.m.bundle(); bundle != "" {
+	bundle := i.m.bundle()
+	if bundle != "" {
 		changed, err := i.intoTheBundle(ctx, bundle)
 		if err != nil {
 			return engine.Installed{}, startFailed(err)
 		}
 		started = changed
 	}
-	return i.installEngine(ctx, jobs, started)
+	done, err := i.installEngine(ctx, jobs, started)
+	if err == nil && bundle != "" && done.From != "" {
+		i.restartMenuBar(ctx, jobs)
+	}
+	return done, err
 }
+
+func (i engineInstaller) restartMenuBar(ctx context.Context, jobs contract.Jobs) {
+	job := contract.Ref{Domain: contract.Domain{UID: i.m.sys.Env.Euid()}, Label: catalog.MenuBarBundle}
+	if jobs.Read(ctx, job).PID == 0 {
+		return
+	}
+	_ = i.menuBar.HideLoginItem(catalog.MenuBarBundle)
+	for wait := 0; wait < menuBarPolls && jobs.Read(ctx, job).Loaded; wait++ {
+		if i.m.sys.Clock.Sleep(ctx, menuBarPoll) != nil {
+			break
+		}
+	}
+	_ = i.menuBar.ShowLoginItem(catalog.MenuBarBundle)
+}
+
+const (
+	menuBarPoll  = 100 * time.Millisecond
+	menuBarPolls = 200
+)
 
 // invariant: a Mac moves from the bare jobs to the bundle's once, at the
 // bundle's first start, and keeps nothing of them: each is booted out,
