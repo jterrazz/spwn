@@ -508,6 +508,7 @@ type loginItem interface {
 	// binary, named by its bundle identifier, which macOS starts now and at
 	// every login.
 	ShowLoginItem(identifier string) error
+	HideLoginItem(identifier string) error
 }
 
 func (i engineInstaller) env() map[string]string {
@@ -542,16 +543,60 @@ func startFailed(cause error) error {
 }
 
 func (i engineInstaller) install(ctx context.Context, jobs contract.Jobs) (engine.Installed, error) {
-	started := false
-	if bundle := i.m.bundle(); bundle != "" {
-		changed, err := i.intoTheBundle(ctx, bundle)
+	started, shown := false, false
+	bundle := i.m.bundle()
+	if bundle != "" {
+		changed, showed, err := i.intoTheBundle(ctx, bundle)
 		if err != nil {
 			return engine.Installed{}, startFailed(err)
 		}
-		started = changed
+		started, shown = changed, showed
 	}
-	return i.installEngine(ctx, jobs, started)
+	done, ran, err := i.installEngine(ctx, jobs, started)
+	if err == nil && bundle != "" && ran && !shown {
+		done.MenuBar = i.restartMenuBar(ctx, jobs)
+	}
+	return done, err
 }
+
+func (i engineInstaller) restartMenuBar(ctx context.Context, jobs contract.Jobs) engine.MenuBarLeft {
+	job := contract.Ref{Domain: contract.Domain{UID: i.m.sys.Env.Euid()}, Label: catalog.MenuBarBundle}
+	names := jobs.Names()
+	kick := names.Command + " kickstart -k gui/" + strconv.Itoa(job.UID) + "/" + job.Label
+	if jobs.Read(ctx, job).PID == 0 {
+		return engine.MenuBarLeft{}
+	}
+	if err := i.menuBar.HideLoginItem(catalog.MenuBarBundle); err != nil {
+		return engine.MenuBarLeft{Why: "still runs the copy the update moved away: " + err.Error(), Fix: kick}
+	}
+	held := true
+	for range menuBarPolls {
+		if held = jobs.Read(ctx, job).Loaded; !held || i.m.sys.Clock.Sleep(ctx, menuBarPoll) != nil {
+			break
+		}
+	}
+	var err error
+	for range menuBarShows {
+		if err = i.menuBar.ShowLoginItem(catalog.MenuBarBundle); err == nil {
+			break
+		}
+		_ = i.m.sys.Clock.Sleep(ctx, menuBarShowPause)
+	}
+	switch {
+	case err != nil:
+		return engine.MenuBarLeft{Why: "not shown again: " + err.Error(), Fix: "switch Show in menu bar on in Spwn's Settings"}
+	case held:
+		return engine.MenuBarLeft{Why: names.Manager + " still held it " + (menuBarPolls * menuBarPoll).String() + " after its unregister", Fix: kick}
+	}
+	return engine.MenuBarLeft{}
+}
+
+const (
+	menuBarPoll      = 100 * time.Millisecond
+	menuBarPolls     = 200
+	menuBarShows     = 3
+	menuBarShowPause = time.Second
+)
 
 // invariant: a Mac moves from the bare jobs to the bundle's once, at the
 // bundle's first start, and keeps nothing of them: each is booted out,
@@ -561,26 +606,26 @@ func (i engineInstaller) install(ctx context.Context, jobs contract.Jobs) (engin
 // standalone menu bar goes, the bundle's menu bar is shown once, the engine
 // job's start is recorded, and ~/.local/bin/station links into the bundle;
 // started tells whether what the engine's job starts with changed.
-func (i engineInstaller) intoTheBundle(ctx context.Context, bundle string) (started bool, err error) {
+func (i engineInstaller) intoTheBundle(ctx context.Context, bundle string) (started, shown bool, err error) {
 	bundled := i.m.bundledJobs(process.JobBudget)
 	for _, job := range i.m.bareJobRefs() {
 		if _, statErr := i.m.sys.FS.Stat(job.File); statErr != nil {
 			continue
 		}
 		if retireErr := bundled.Retire(ctx, job); retireErr != nil {
-			return false, retireErr
+			return false, false, retireErr
 		}
 	}
 	if standaloneErr := i.retireStandaloneMenuBar(ctx); standaloneErr != nil {
-		return false, standaloneErr
+		return false, false, standaloneErr
 	}
-	if shownErr := i.showMenuBarOnce(); shownErr != nil {
-		return false, shownErr
+	if shown, err = i.showMenuBarOnce(); err != nil {
+		return false, false, err
 	}
 	if started, err = i.writeJobStart(); err != nil {
-		return false, err
+		return false, false, err
 	}
-	return started, i.linkIntoTheBundle(filepath.Join(bundle, catalog.BundledEnginePath))
+	return started, shown, i.linkIntoTheBundle(filepath.Join(bundle, catalog.BundledEnginePath))
 }
 
 // invariant: the menu bar an earlier release installed on its own leaves with
@@ -605,16 +650,16 @@ func (i engineInstaller) retireStandaloneMenuBar(ctx context.Context) error {
 // later start, an update's among them, shows it again and the Off a person
 // chose in Settings stays. A refusal of macOS is recorded alike, since the
 // window reads what macOS holds and its switch alone changes it from there.
-func (i engineInstaller) showMenuBarOnce() error {
+func (i engineInstaller) showMenuBarOnce() (bool, error) {
 	record := catalog.MenuBarOfferedPath(i.m.sys.Env.Home())
 	if _, err := i.m.sys.FS.Stat(record); err == nil || !errors.Is(err, fs.ErrNotExist) {
-		return err
+		return false, err
 	}
 	_ = i.menuBar.ShowLoginItem(catalog.MenuBarBundle)
 	if err := i.m.sys.FS.MkdirAll(filepath.Dir(record), 0o700); err != nil {
-		return err
+		return true, err
 	}
-	return i.m.sys.FS.Replace(record, nil, 0o600)
+	return true, i.m.sys.FS.Replace(record, nil, 0o600)
 }
 
 const standaloneMenuBarBudget = 5 * time.Second
@@ -665,35 +710,35 @@ func (i engineInstaller) linkIntoTheBundle(engineFile string) error {
 	return i.m.sys.FS.Symlink(engineFile, link)
 }
 
-func (i engineInstaller) installEngine(ctx context.Context, jobs contract.Jobs, started bool) (engine.Installed, error) {
+func (i engineInstaller) installEngine(ctx context.Context, jobs contract.Jobs, started bool) (done engine.Installed, ran bool, err error) {
 	job := i.m.engineJobRef()
 	changed, err := jobs.Install(ctx, contract.JobSpec{
 		Label: job.Label, Program: append([]string{i.m.sys.Env.Executable()}, catalog.EngineArgs...), Env: i.env(),
 		AtLogin: true, KeepAlive: true, Log: filepath.Join(i.m.paths.State, "logs", "engine.log"), File: job.File,
 	})
 	if err != nil {
-		return engine.Installed{}, startFailed(err)
+		return engine.Installed{}, false, startFailed(err)
 	}
 	changed = changed || started
 	if !jobs.Read(ctx, job).Loaded {
 		for _, run := range []func(context.Context, contract.Ref) error{jobs.Load, jobs.Start} {
 			if runErr := run(ctx, job); runErr != nil {
-				return engine.Installed{}, startFailed(runErr)
+				return engine.Installed{}, false, startFailed(runErr)
 			}
 		}
-		return engine.Installed{Written: changed}, nil
+		return engine.Installed{Written: changed}, true, nil
 	}
 	running, err := i.m.engineAPI().Hello(ctx)
 	version := Version()
 	if changed || (err == nil && (running.Version != version || running.Agent.Unserved())) {
 		if kickErr := jobs.Restart(ctx, job); kickErr != nil {
-			return engine.Installed{}, startFailed(kickErr)
+			return engine.Installed{}, false, startFailed(kickErr)
 		}
-		done := engine.Installed{Restarted: true}
+		done = engine.Installed{Restarted: true}
 		if err == nil && running.Version != version {
 			done.From = running.Version
 		}
-		return done, nil
+		return done, true, nil
 	}
-	return engine.Installed{}, nil
+	return engine.Installed{}, false, nil
 }

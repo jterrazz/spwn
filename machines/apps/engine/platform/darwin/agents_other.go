@@ -18,3 +18,5 @@ func (Agents) Unregister(string) error { return errNoAppAgents }
 func (Agents) Registered(string) bool { return false }
 
 func (Agents) ShowLoginItem(string) error { return errNoAppAgents }
+
+func (Agents) HideLoginItem(string) error { return errNoAppAgents }

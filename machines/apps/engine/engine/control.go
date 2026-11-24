@@ -63,6 +63,14 @@ type Installed struct {
 	// before ("" when it did not answer).
 	Written, Restarted bool
 	From               string
+	// value: the menu bar the start restarted with the engine and could not
+	// bring back on the bundle's binary; zero when it did, or left it alone.
+	MenuBar MenuBarLeft `json:",omitzero"`
+}
+
+type MenuBarLeft struct {
+	// value: what went wrong, and the owner's step that brings it back.
+	Why, Fix string
 }
 
 type StartFailedError struct {

@@ -17,6 +17,7 @@ const (
 	Row             = "engine"
 	LocalNetworkRow = "local-network"
 	AgentRow        = "agent"
+	MenuBarRow      = "menubar"
 )
 
 func columns() []page.Column {
@@ -183,6 +184,12 @@ func Start(r engine.StartReport, thisMac page.Context) page.Page {
 		agent.Label = "SSH agent"
 		agent.Detail = page.Texts(agentWords(r.Agent)...)
 		rows = append(rows, agent)
+	}
+	if left := r.Installed.MenuBar; left != (engine.MenuBarLeft{}) {
+		menuBar := pages.Done(MenuBarRow, catalog.StateDegraded, "")
+		menuBar.Label = "menu bar"
+		menuBar.Detail = page.Texts("needs you", left.Why, left.Fix)
+		rows = append(rows, menuBar)
 	}
 	return pages.Outcome("engine start", thisMac, nil, rows, "engine to start")
 }

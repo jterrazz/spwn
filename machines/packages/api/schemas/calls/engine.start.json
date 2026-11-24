@@ -6,6 +6,9 @@
         "From": {
           "type": "string"
         },
+        "MenuBar": {
+          "$ref": "#/$defs/engine.MenuBarLeft"
+        },
         "Restarted": {
           "type": "boolean"
         },
@@ -17,6 +20,22 @@
         "From",
         "Restarted",
         "Written"
+      ],
+      "type": "object"
+    },
+    "engine.MenuBarLeft": {
+      "additionalProperties": false,
+      "properties": {
+        "Fix": {
+          "type": "string"
+        },
+        "Why": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Fix",
+        "Why"
       ],
       "type": "object"
     },

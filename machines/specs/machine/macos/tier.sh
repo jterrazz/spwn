@@ -545,8 +545,11 @@ case_pass
 # (ADR-073): mode B placed with a standalone menu bar running, then Spwn.app opened, after
 # which the engine's job runs the bundle's binary, the bare jobs and their plists are gone,
 # ~/.local/bin/station links into the bundle, the standalone menu bar is deleted and the
-# bundle's runs. The bundle is `make window`'s, built on a Mac with Xcode before the tier;
-# the guest-side body is bundle-move.sh.
+# bundle's runs; then an update to the next bundle, after which the engine and the menu bar
+# run its binaries. Both bundles are `make window`'s, built on a Mac with Xcode before the
+# tier, the next one into .artifacts/window/next/Spwn.app with an engine of another version
+# (`make window WINDOW_APP=.artifacts/window/next/Spwn.app ENGINE=<a build stamped vN>
+# ENGINE_VERSION=vN`); the guest-side body is bundle-move.sh.
 # invariant: the standalone menu bar is a release's, pinned by version and digest and fetched
 # once into .artifacts/e2e/: the move runs its `--unregister-login-item`, which only a menu
 # bar released on its own answers, the tree's opening a second menu bar instead.
@@ -555,6 +558,7 @@ standalone_version=v0.21.0-alpha.4
 standalone_digest=3dbb4d592c421008dabf03aed0df0866a346091601a9265b24ca21dd8eab8a4c
 standalone_zip="$repo/.artifacts/e2e/Station.app-$standalone_version.zip"
 [ -d "$repo/.artifacts/window/Spwn.app" ] || fail "no $repo/.artifacts/window/Spwn.app: run make window on a Mac with Xcode first"
+[ -d "$repo/.artifacts/window/next/Spwn.app" ] || fail "no $repo/.artifacts/window/next/Spwn.app: run make window WINDOW_APP=.artifacts/window/next/Spwn.app with an engine of another version first"
 if ! printf '%s  %s\n' "$standalone_digest" "$standalone_zip" | shasum -a 256 -c - > /dev/null 2>&1; then
   mkdir -p "$repo/.artifacts/e2e" && curl -fsSL -o "$standalone_zip" "https://github.com/jterrazz/spwn/releases/download/$standalone_version/Station.app.zip" >> "$log" 2>&1 || fail "download Station.app $standalone_version"
   printf '%s  %s\n' "$standalone_digest" "$standalone_zip" | shasum -a 256 -c - > /dev/null 2>&1 || fail "Station.app $standalone_version: $standalone_zip is not the pinned digest"
@@ -562,6 +566,7 @@ fi
 in_vm 'rm -rf /tmp/station-e2e && mkdir -p /tmp/station-e2e' || fail "scratch folder"
 scp "${ssh_opts[@]}" -i "$ssh_key" -q "$repo/.artifacts/go/station" "$user@$ip:/tmp/station-e2e/station" || fail "copy the binary"
 tar -C "$repo/.artifacts/window" -cf - Spwn.app | ssh "${ssh_opts[@]}" -i "$ssh_key" "$user@$ip" 'tar -C /tmp/station-e2e -xf -' || fail "copy Spwn.app"
+tar -C "$repo/.artifacts/window/next" -cf - Spwn.app | ssh "${ssh_opts[@]}" -i "$ssh_key" "$user@$ip" 'mkdir -p /tmp/station-e2e/next && tar -C /tmp/station-e2e/next -xf - && mv /tmp/station-e2e/next/Spwn.app /tmp/station-e2e/Spwn-next.app' || fail "copy the next Spwn.app"
 ssh "${ssh_opts[@]}" -i "$ssh_key" "$user@$ip" 'cat > /tmp/station-e2e/Station.app.zip && ditto -x -k /tmp/station-e2e/Station.app.zip /tmp/station-e2e/' < "$standalone_zip" || fail "copy Station.app $standalone_version"
 moved=$(ssh "${ssh_opts[@]}" -i "$ssh_key" "$user@$ip" 'bash -s' < "$suite/macos/bundle-move.sh")
 code=$?

@@ -22,11 +22,12 @@ static char *station_agent(const char *plist, int on) {
 	}
 }
 
-static char *station_login_item(const char *identifier) {
+static char *station_login_item(const char *identifier, int on) {
 	@autoreleasepool {
 		SMAppService *service = [SMAppService loginItemServiceWithIdentifier:[NSString stringWithUTF8String:identifier]];
 		NSError *err = nil;
-		if ([service registerAndReturnError:&err]) {
+		BOOL ok = on ? [service registerAndReturnError:&err] : [service unregisterAndReturnError:&err];
+		if (ok) {
 			return NULL;
 		}
 		NSString *why = [NSString stringWithFormat:@"%@ %ld: %@", err.domain, (long)err.code, err.localizedDescription];
@@ -68,10 +69,16 @@ func (Agents) Registered(plist string) bool {
 // value: registers the login item of the app whose bundle holds this
 // binary, named by its bundle identifier in Contents/Library/LoginItems,
 // which macOS starts now and at every login.
-func (Agents) ShowLoginItem(identifier string) error {
+func (Agents) ShowLoginItem(identifier string) error { return loginItem(identifier, 1) }
+
+// value: unregisters that login item, which macOS stops now and starts at no
+// later login.
+func (Agents) HideLoginItem(identifier string) error { return loginItem(identifier, 0) }
+
+func loginItem(identifier string, on C.int) error {
 	name := C.CString(identifier)
 	defer C.free(unsafe.Pointer(name))
-	why := C.station_login_item(name)
+	why := C.station_login_item(name, on)
 	if why == nil {
 		return nil
 	}

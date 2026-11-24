@@ -131,7 +131,7 @@ menubar: ## Build the menu bar's bundle, signed ad hoc, into $(MENUBAR_APP)
 	@apps/menubar/scripts/build.sh
 
 window: node_modules/.install $(if $(ENGINE),,build) menubar ## Build the window's bundle for darwin-arm64 with the engine and the menu bar inside (ENGINE=<path>, else this build's), signed ad hoc, into $(WINDOW_APP)
-	@mkdir -p .artifacts/window/engine && cp "$(or $(ENGINE),$(BUILD_PATH))" .artifacts/window/engine/station
+	@mkdir -p .artifacts/window/engine "$(dir $(WINDOW_APP))" && cp "$(or $(ENGINE),$(BUILD_PATH))" .artifacts/window/engine/station
 	@../scripts/app-icon-compile.sh apps/desktop/src-tauri/icons/spwn.icon Spwn $(WINDOW_ICON) $(WINDOW_ICON)/Spwn.plist
 	@cd apps/desktop && CARGO_TARGET_DIR=$(CURDIR)/$(WINDOW_CARGO) npx tauri build --ci --no-sign --target aarch64-apple-darwin --bundles app --config '{"version":"$(WINDOW_VERSION)"}'
 	@rm -rf $(WINDOW_APP)

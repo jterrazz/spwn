@@ -12,8 +12,10 @@ import (
 	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/background/contract"
+	"github.com/jterrazz/studio-station/apps/engine/engine"
 	"github.com/jterrazz/studio-station/apps/engine/platform/local"
 	"github.com/jterrazz/studio-station/apps/engine/platform/local/localtest"
+	"github.com/jterrazz/studio-station/apps/engine/setup"
 )
 
 // value: a machine whose binary is the engine Spwn.app carries, or the bare
@@ -145,6 +147,8 @@ func (l *loginItems) ShowLoginItem(identifier string) error {
 	return l.err
 }
 
+func (l *loginItems) HideLoginItem(string) error { return l.err }
+
 // value: a fresh Mac that runs the engine Spwn.app carries, over the real
 // files of a home of its own, and the menu bar's login item it asks macOS for.
 func freshBundledMac(t *testing.T, items *loginItems) (installer engineInstaller, home string) {
@@ -161,7 +165,7 @@ func TestTheFirstMoveIntoTheBundleShowsTheMenuBarOnAFreshMac(t *testing.T) {
 	for _, refused := range []error{nil, errors.New("SMAppServiceErrorDomain 1: Operation not permitted")} {
 		items := &loginItems{err: refused}
 		i, home := freshBundledMac(t, items)
-		if _, err := i.intoTheBundle(context.Background(), i.m.bundle()); err != nil {
+		if _, _, err := i.intoTheBundle(context.Background(), i.m.bundle()); err != nil {
 			t.Fatal(err)
 		}
 		if len(items.shown) != 1 || items.shown[0] != "com.jterrazz.station.menubar" {
@@ -177,11 +181,133 @@ func TestAnUpdateAfterTheMoveNeverShowsTheMenuBarAgainSoThePersonsOffIsKept(t *t
 	items := &loginItems{}
 	i, _ := freshBundledMac(t, items)
 	for range 3 {
-		if _, err := i.intoTheBundle(context.Background(), i.m.bundle()); err != nil {
+		if _, _, err := i.intoTheBundle(context.Background(), i.m.bundle()); err != nil {
 			t.Fatal(err)
 		}
 	}
 	if len(items.shown) != 1 {
 		t.Errorf("three starts of the bundle asked macOS to show the menu bar %d times, want once", len(items.shown))
+	}
+}
+
+// value: the job manager's menu bar job, which macOS drops once its login item is
+// unregistered and loads, running, once it is registered again; hideErr
+// refuses the unregister, hideKeepsLoaded keeps the job manager holding the job after
+// it, and each of showErrs refuses one register in turn.
+type menuBarJobs struct {
+	installJobs
+	menuBar         contract.Status
+	hideErr         error
+	hideKeepsLoaded bool
+	showErrs        []error
+	asked           []string
+}
+
+func (j *menuBarJobs) Names() contract.Names {
+	return contract.Names{Manager: "the job manager", Command: "jobctl"}
+}
+
+func (j *menuBarJobs) Read(ctx context.Context, r contract.Ref) contract.Status {
+	if r.Label == "com.jterrazz.station.menubar" {
+		return j.menuBar
+	}
+	return j.installJobs.Read(ctx, r)
+}
+
+func (j *menuBarJobs) ShowLoginItem(string) error {
+	j.asked = append(j.asked, "show")
+	if len(j.showErrs) > 0 {
+		err := j.showErrs[0]
+		j.showErrs = j.showErrs[1:]
+		if err != nil {
+			return err
+		}
+	}
+	j.menuBar = contract.Status{Loaded: true, State: "running", PID: 7002}
+	return nil
+}
+
+func (j *menuBarJobs) HideLoginItem(string) error {
+	j.asked = append(j.asked, "hide")
+	if j.hideErr != nil {
+		return j.hideErr
+	}
+	if !j.hideKeepsLoaded {
+		j.menuBar = contract.Status{}
+	}
+	return nil
+}
+
+func TestAnEngineStartedOntoTheBundleRestartsTheMenuBarThatRanAndLeavesOneThatDidNot(t *testing.T) {
+	station := Version()
+	older := station + "-older"
+	runs := contract.Status{Loaded: true, State: "running", PID: 7001}
+	refused := errors.New("SMAppServiceErrorDomain 1: Operation not permitted")
+	type menuBar struct {
+		status          contract.Status
+		hideErr         error
+		hideKeepsLoaded bool
+		showErrs        []error
+	}
+	for _, c := range []struct {
+		name          string
+		bare, fresh   bool
+		jobs          installJobs
+		running       string
+		menuBar       menuBar
+		want          []string
+		wantFix, lost string
+	}{
+		{name: "the engine moves to the new version, the menu bar runs", jobs: installJobs{loaded: true}, running: older, menuBar: menuBar{status: runs}, want: []string{"hide", "show"}},
+		{name: "the engine moves to the new version, the menu bar was quit", jobs: installJobs{loaded: true}, running: older, menuBar: menuBar{status: contract.Status{Loaded: true, State: "not running"}}},
+		{name: "the engine moves to the new version, the menu bar is off", jobs: installJobs{loaded: true}, running: older},
+		{name: "the engine already runs this version, the menu bar runs", jobs: installJobs{loaded: true}, running: station, menuBar: menuBar{status: runs}},
+		{name: "the engine was not loaded, the menu bar runs", running: "", menuBar: menuBar{status: runs}, want: []string{"hide", "show"}},
+		{name: "the engine does not answer and its start changed, the menu bar runs", jobs: installJobs{loaded: true, changed: true}, running: "", menuBar: menuBar{status: runs}, want: []string{"hide", "show"}},
+		{name: "the engine does not answer and nothing changed, the menu bar runs", jobs: installJobs{loaded: true}, running: "", menuBar: menuBar{status: runs}},
+		{name: "the move into the bundle shows the menu bar once and restarts nothing", fresh: true, jobs: installJobs{loaded: true}, running: older, menuBar: menuBar{status: runs}, want: []string{"show"}},
+		{name: "a Mac without Spwn.app has no menu bar to restart", bare: true, jobs: installJobs{loaded: true}, running: older, menuBar: menuBar{status: runs}},
+		{name: "the register is refused once, then taken", jobs: installJobs{loaded: true}, running: older, menuBar: menuBar{status: runs, showErrs: []error{refused}}, want: []string{"hide", "show", "show"}},
+		{name: "the register is refused every time", jobs: installJobs{loaded: true}, running: older, menuBar: menuBar{status: runs, showErrs: []error{refused, refused, refused}}, want: []string{"hide", "show", "show", "show"}, lost: "Operation not permitted", wantFix: "Show in menu bar"},
+		{name: "the unregister is refused", jobs: installJobs{loaded: true}, running: older, menuBar: menuBar{status: runs, hideErr: refused}, want: []string{"hide"}, lost: "Operation not permitted", wantFix: "jobctl kickstart -k gui/501/com.jterrazz.station.menubar"},
+		{name: "the job manager keeps the job after its unregister", jobs: installJobs{loaded: true}, running: older, menuBar: menuBar{status: runs, hideKeepsLoaded: true}, want: []string{"hide", "show"}, lost: "still held", wantFix: "jobctl kickstart -k gui/501/com.jterrazz.station.menubar"},
+	} {
+		t.Run(c.name, func(t *testing.T) {
+			jobs := &menuBarJobs{installJobs: c.jobs, menuBar: c.menuBar.status, hideErr: c.menuBar.hideErr, hideKeepsLoaded: c.menuBar.hideKeepsLoaded, showErrs: c.menuBar.showErrs}
+			i, home := freshBundledMac(t, &loginItems{})
+			if c.bare {
+				i.m = machineRunning(t, false)
+			}
+			i.menuBar = jobs
+			i.m.sys.Sockets = helloSockets{version: c.running}
+			i.m.sys.Clock = &localtest.Clock{}
+			i.m.paths = setup.Paths{State: filepath.Join(home, ".local", "state", "station")}
+			if !c.fresh {
+				if err := os.MkdirAll(i.m.paths.State, 0o700); err != nil {
+					t.Fatal(err)
+				}
+				if err := os.WriteFile(filepath.Join(i.m.paths.State, "menubar-offered"), nil, 0o600); err != nil {
+					t.Fatal(err)
+				}
+				if !c.bare {
+					if _, err := i.writeJobStart(); err != nil {
+						t.Fatal(err)
+					}
+				}
+			}
+			got, err := i.install(context.Background(), jobs)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if strings.Join(jobs.asked, " ") != strings.Join(c.want, " ") {
+				t.Errorf("the start asked macOS %v, want %v", jobs.asked, c.want)
+			}
+			if c.lost == "" && got.MenuBar != (engine.MenuBarLeft{}) {
+				t.Errorf("the start says the menu bar is left %+v, want nothing", got.MenuBar)
+			}
+			if c.lost != "" && (!strings.Contains(got.MenuBar.Why, c.lost) || !strings.Contains(got.MenuBar.Fix, c.wantFix)) {
+				t.Errorf("the start says the menu bar is left %+v, want why %q and fix %q", got.MenuBar, c.lost, c.wantFix)
+			}
+		})
 	}
 }

@@ -2,9 +2,12 @@
 # value: tier 3's move of a Mac from the bare jobs to Spwn.app's, played inside the guest:
 # mode B placed (the binary on the PATH, its engine kept by launchd, a standalone menu bar
 # running), then Spwn.app opened the way its owner opens it, so the window's own engine
-# start makes the move (ADR-073). It reads /tmp/station-e2e/{station,Spwn.app,Station.app};
-# each `miss <what>` line it prints is an assertion lost, a `setup <what>` line and exit 1
-# a step before any assertion.
+# start makes the move (ADR-073); then the update to the next version: the window quit, the
+# bundle moved away and the next one copied to its path, and `station engine start`, after
+# which the engine and the menu bar both run the next bundle's binaries and no window opened.
+# It reads /tmp/station-e2e/{station,Spwn.app,Spwn-next.app,Station.app}, Spwn-next.app's
+# engine of another version than Spwn.app's; each `miss <what>` line it prints is an
+# assertion lost, a `setup <what>` line and exit 1 a step before any assertion.
 set -uo pipefail
 e2e=/tmp/station-e2e
 uid=$(id -u)
@@ -92,6 +95,19 @@ within 30 job_runs com.jterrazz.station.menubar || miss "launchd keeps no pid fo
 menubar=$(job_pid com.jterrazz.station.menubar)
 [ -z "$menubar" ] || [ "$(exe_of "$menubar")" = "$nested" ] || miss "the menu bar's login item runs $(exe_of "$menubar"), not the one inside Spwn.app"
 say "after: plists $(ls "$agents" | grep jterrazz | tr '\n' ' '), ~/.local/bin/station -> $link, ~/Applications: $(ls "$HOME/Applications" | tr '\n' ' ')"
+
+window="$app/Contents/MacOS/spwn-window"
+moved=$e2e/moved/Spwn.app
+osascript -e 'quit app "Spwn"' > /dev/null 2>&1 || true
+within 30 eval '! running "$window"' || setup "the window never quit"
+mkdir -p $e2e/moved && rm -rf "$moved" && mv "$app" "$moved" && ditto $e2e/Spwn-next.app "$app" || setup "swap Spwn.app for the next version"
+next=$("$engine" --version)
+"$station" engine start > /dev/null || miss "station engine start after the update exited $?"
+within 30 eval '[ "$(exe_of "$(job_pid com.jterrazz.spwn.engine)")" = "$engine" ]' || miss "after the update the engine's job runs $(exe_of "$(job_pid com.jterrazz.spwn.engine)"), not the next bundle's"
+within 30 eval '[ "$(exe_of "$(job_pid com.jterrazz.station.menubar)")" = "$nested" ]' || miss "after the update the menu bar runs $(exe_of "$(job_pid com.jterrazz.station.menubar)"), not the next bundle's $nested"
+running "$window" && miss "the update's engine start opened a window"
+menubar=$(job_pid com.jterrazz.station.menubar)
+say "after the update to $next: the engine pid $(job_pid com.jterrazz.spwn.engine), the menu bar pid $menubar, $(exe_of "$menubar")"
 
 osascript -e 'quit app "Spwn"' > /dev/null 2>&1 || true
 [ -z "$menubar" ] || kill "$menubar" > /dev/null 2>&1 || true
