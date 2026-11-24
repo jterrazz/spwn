@@ -7,8 +7,7 @@ description: Use when running health checks across worlds and agents. Probe live
 
 ## Health Checks
 ```bash
-spwn status                       # Overall system status
-spwn ls                           # Running worlds
+spwn world list                 # Running worlds
 spwn agent ls                     # All agents
 ```
 

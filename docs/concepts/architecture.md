@@ -92,7 +92,7 @@ Host machine
 Two modes:
 
 - **Local CLI (direct)**: `spwn up` calls Docker directly from the host; no Architect container needed.
-- **Hosted Architect (containerized)**: `spwn architect start` launches the Architect in a long-lived socket-mounted container that creates and manages world containers as siblings. Channels connect here.
+- **Hosted Architect (containerized)**: the web API (`spwn web`) launches the Architect in a long-lived socket-mounted container that creates and manages world containers as siblings. Channels connect here.
 
 The [gate](gate.md) is a separate long-running host container that owns cookie-bearing tools and the shared browser primitive.
 

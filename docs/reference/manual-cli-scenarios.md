@@ -27,7 +27,6 @@ bash scripts/manual-harness.sh 31 40      # the Docker ones
 
 ## Out of scope (intentionally not in this pass)
 
-- `spwn architect start` (DooD setup is heavy; exercised by world E2E tests instead)
 - `spwn auth login` (interactive OAuth flow)
 - `spwn web` (browser launch)
 - Playwright web UI specs (separate bucket: `make test-web`)
@@ -152,27 +151,27 @@ spwn check                                   # → exit != 0
 
 ### Group B: Agent CRUD (11 to 20)
 
-#### 11. `spwn agent new` scaffolds the home tree
+#### 11. `spwn agent create` scaffolds the home tree
 
 ```bash
-spwn init && spwn agent new bob
+spwn init && spwn agent create bob
 ls spwn/agents/bob                           # → agent.yaml, SOUL.md, AGENTS.md, playbooks/, journal/
 ```
 
 **Asserts:** `new` zero · `agent.yaml` + `SOUL.md` both present.
 
-#### 12. Duplicate `spwn agent new` refuses without `--force`
+#### 12. Duplicate `spwn agent create` refuses without `--force`
 
 ```bash
-spwn init && spwn agent new bob
-spwn agent new bob                           # → exit != 0
-spwn agent new bob --force                   # → exit 0
+spwn init && spwn agent create bob
+spwn agent create bob                           # → exit != 0
+spwn agent create bob --force                   # → exit 0
 ```
 
 #### 13. `spwn agent ls` in plain + JSON
 
 ```bash
-spwn init && spwn agent new bob
+spwn init && spwn agent create bob
 spwn agent ls
 spwn agent ls --json                         # → valid JSON, contains bob + neo
 ```
@@ -188,7 +187,7 @@ spwn agent inspect does-not-exist            # → exit != 0
 #### 15. `spwn agent rm` happy + missing
 
 ```bash
-spwn init && spwn agent new bob
+spwn init && spwn agent create bob
 spwn agent rm bob                            # → exit 0
 spwn agent rm bob                            # → exit != 0
 ```
@@ -196,7 +195,7 @@ spwn agent rm bob                            # → exit != 0
 #### 16. `spwn agent export` produces a gzip archive
 
 ```bash
-spwn init && spwn agent new bob
+spwn init && spwn agent create bob
 spwn agent export bob                        # → bob*.tar.gz on disk
 file bob*.tar.gz                             # → "gzip compressed data"
 ```
@@ -204,7 +203,7 @@ file bob*.tar.gz                             # → "gzip compressed data"
 #### 17. `spwn agent import` round-trip
 
 ```bash
-spwn init && spwn agent new bob && spwn agent export bob
+spwn init && spwn agent create bob && spwn agent export bob
 spwn agent rm bob
 spwn agent import bob*.tar.gz                # → exit 0
 spwn agent ls --json                         # → contains bob
@@ -213,18 +212,17 @@ spwn agent ls --json                         # → contains bob
 #### 18. `spwn agent fork` clones identity + memory
 
 ```bash
-spwn init && spwn agent new bob
+spwn init && spwn agent create bob
 spwn agent fork bob bob-v2                   # → exit 0
 spwn agent ls --json                         # → contains bob and bob-v2
 ```
 
-#### 19. `spwn inspect` (project-wide and per-agent)
+#### 19. `spwn agent inspect`
 
 ```bash
-spwn init && spwn agent new bob
-spwn inspect                                 # → both agents
-spwn inspect bob                             # → just bob, exit 0
-spwn inspect does-not-exist                  # → exit != 0
+spwn init && spwn agent create bob
+spwn agent inspect bob                       # → just bob, exit 0
+spwn agent inspect does-not-exist            # → exit != 0
 ```
 
 #### 20. `spwn skill new / ls / rm`
@@ -251,7 +249,7 @@ grep python spwn.lock                        # → present
 #### 22. `spwn install node --agent bob`, scoped install
 
 ```bash
-spwn init && spwn agent new bob
+spwn init && spwn agent create bob
 spwn install node --agent bob
 # → bob's agent.yaml has spwn:node; neo's does NOT
 ```
@@ -328,11 +326,11 @@ These need `SPWN_BASE_IMAGE=spwn-test:latest`, the mock-claude test image built
 by `make test-image`. Without it, each `spwn up` burns ~5 minutes building
 a real production image.
 
-#### 31. matrix scaffold spawns; `spwn ls` shows running
+#### 31. matrix scaffold spawns; `spwn world list` shows running
 
 ```bash
 spwn init spwn:matrix && spwn up
-spwn ls                                      # → table contains "running"
+spwn world list                              # → table contains "running"
 spwn down
 ```
 
@@ -348,11 +346,11 @@ spwn world inspect $(docker ps --format '{{.Names}}' --filter name=world-)
 # → output includes ".../spwn/agents/<name>" path
 ```
 
-#### 33. `spwn world ls --json` is valid JSON
+#### 33. `spwn world list --json` is valid JSON
 
 ```bash
 spwn init spwn:matrix && spwn up
-spwn world ls --json                         # → parseable JSON, has "worlds" key
+spwn world list --json                       # → parseable JSON, has "worlds" key
 spwn down
 ```
 
@@ -363,11 +361,11 @@ spwn init spwn:matrix && spwn up
 spwn down world-matrix-<runtime-suffix>      # → exit 0
 ```
 
-#### 35. `spwn ls` shows nothing after `spwn down`
+#### 35. `spwn world list` shows nothing after `spwn down`
 
 ```bash
 spwn init spwn:matrix && spwn up && spwn down
-spwn ls --json 2>&1                          # → no "running"
+spwn world list --json 2>&1                # → no "running"
 ```
 
 #### 36. `spwn logs --world` (config name) + `spwn world logs <id>` (runtime id)
@@ -431,13 +429,13 @@ spwn check                                   # → exit != 0, mentions "yaml" or
 #### 42. Unicode agent name is handled cleanly
 
 ```bash
-spwn init && spwn agent new 日本              # rc ≤ 1 (reject or slugify, no crash)
+spwn init && spwn agent create 日本              # rc ≤ 1 (reject or slugify, no crash)
 ```
 
 #### 43. Very long agent name (>63 chars, slug boundary)
 
 ```bash
-spwn init && spwn agent new $(printf 'x%.0s' {1..80})   # rc ≤ 1
+spwn init && spwn agent create $(printf 'x%.0s' {1..80})   # rc ≤ 1
 ```
 
 #### 44. Empty `dependencies: []` is valid
@@ -468,8 +466,8 @@ spwn check                                   # → finds spwn.yaml two dirs up, 
 
 ```bash
 mkdir p1 p2
-(cd p1 && spwn init && spwn agent new alice)
-(cd p2 && spwn init && spwn agent new bob)
+(cd p1 && spwn init && spwn agent create alice)
+(cd p2 && spwn init && spwn agent create bob)
 cd p1 && spwn agent ls --json               # → alice present, bob absent
 ```
 

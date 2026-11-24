@@ -24,7 +24,7 @@ project end-to-end:
 
 ```bash
 spwn init                    # creates spwn.yaml + spwn/agents/
-spwn agent new editor        # creates spwn/agents/editor/
+spwn agent create editor     # creates spwn/agents/editor/
 spwn check                   # confirm the tree is valid
 spwn up                      # bring up the world (architect spawns containers)
 ```
@@ -394,7 +394,7 @@ worlds:
 ### `world "brain" is in status "stopped" (auto-spawn not yet implemented)`
 
 The dispatcher requires the target world to be running. Bring it up
-with `spwn up` or `spwn world up brain`. Auto-spawn-when-cold is on
+with `spwn up` or `spwn up brain`. Auto-spawn-when-cold is on
 the roadmap but not in v1; a fire against a stopped world records a
 failed receipt and the next fire retries.
 

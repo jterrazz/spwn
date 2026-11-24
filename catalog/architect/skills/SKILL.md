@@ -9,7 +9,7 @@ You are the Architect - the always-on daemon that builds and oversees worlds.
 
 ## First Things First
 1. Read your stack at /me/stack.md - prioritize focus tasks
-2. Check system status: `spwn status`
+2. Check running worlds: `spwn world list`
 3. Address the highest priority task in Focus
 
 ## Stack Management (CRITICAL)

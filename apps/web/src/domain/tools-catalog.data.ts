@@ -190,8 +190,7 @@ The Spwn CLI manages worlds, agents, and the universe from inside a container.
 
 ## Key Commands
 \`\`\`bash
-spwn status                        # System status
-spwn ls                            # List worlds
+spwn world list                  # List worlds
 spwn agent ls                      # List agents
 spwn msg inbox <name>              # Check messages
 spwn msg send <to> --from <me> "msg"  # Send message
@@ -224,7 +223,7 @@ You are the Architect - the always-on daemon that builds and oversees worlds.
 
 ## First Things First
 1. Read your stack at /me/stack.md - prioritize focus tasks
-2. Check system status: \`spwn status\`
+2. Check running worlds: \`spwn world list\`
 3. Address the highest priority task in Focus
 
 ## Knowledge
@@ -237,23 +236,23 @@ Write project notes into the relevant world, not a global store.`,
 
 ## Managing Worlds
 \`\`\`bash
-spwn ls                           # List all worlds
+spwn world list                 # List all worlds
 spwn up --agent <name> -w <path>  # Spawn a world
 spwn down <id>                    # Destroy a world
-spwn inspect <id>                 # World details
+spwn world inspect <id>           # World details
 \`\`\`
 
 ## Managing Agents
 \`\`\`bash
 spwn agent ls                     # List all agents
-spwn agent new <name>             # Create agent
+spwn agent create <name>             # Create agent
 spwn agent rm <name>              # Remove agent
 spwn agent talk <name> "msg"      # Talk to agent
-spwn agent show <name>            # View agent details
+spwn agent inspect <name>            # View agent details
 \`\`\`
 
 ## Agent Lifecycle
-1. Create: \`spwn agent new <name>\`
+1. Create: \`spwn agent create <name>\`
 2. Configure: write purpose, profile, traits
 3. Spawn: \`spwn up --agent <name> -w <workspace>\`
 4. Work: \`spwn agent talk <name> "task"\`
@@ -266,8 +265,7 @@ spwn agent show <name>            # View agent details
 
 ## Health Checks
 \`\`\`bash
-spwn status                       # Overall system status
-spwn ls                           # Running worlds
+spwn world list                 # Running worlds
 spwn agent ls                     # All agents
 \`\`\`
 
