@@ -3,6 +3,8 @@
 **Status:** Proposed
 **Date:** 2026-11-20
 
+Amended by [ADR-090](090-a-machine-is-reached-through-its-engines-door-never-through-openssh.md): the door of its own this record refused is built, on `x/crypto/ssh` and serving no shell.
+
 Amended by [ADR-077](077-a-workspace-trusts-its-macs-device-key-first.md): a VM authorizes its Mac's device key.
 
 Amended by [ADR-085](085-a-mac-run-alone-keeps-a-device-key-that-signs-with-nobody-present.md): a Mac whose Never sleeps is applied keeps a key that signs with nobody present.

@@ -142,5 +142,6 @@ The records of decisions this repository alone took go in [`decisions/`](decisio
 - [087 A fetched macOS guest takes its key at its first login](decisions/087-a-fetched-macos-guest-takes-its-key-at-its-first-login.md) (Proposed)
 - [088 Agents live in the one binary, as families reached by calls](decisions/088-agents-live-in-the-one-binary-as-families-reached-by-calls.md) (Accepted)
 - [089 An agent runs in a Herdr terminal on its own machine](decisions/089-an-agent-runs-in-a-herdr-terminal-on-its-own-machine.md) (Accepted)
+- [090 A machine is reached through its engine's door, never through OpenSSH](decisions/090-a-machine-is-reached-through-its-engines-door-never-through-openssh.md) (Accepted)
 
 A decision spanning several repositories is recorded by the corpus that spans them. What was left for later is `TODO.md` at the repository root.
