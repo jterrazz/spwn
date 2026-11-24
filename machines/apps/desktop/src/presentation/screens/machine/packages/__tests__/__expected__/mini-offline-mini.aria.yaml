@@ -9,7 +9,6 @@
     - tab "Packages" [selected]
     - tab "Ports"
     - tab "Sign-ins"
-    - tab "Storage"
   - heading "No verdict from the engine." [level=1]
   - paragraph:
     - img "not given yet"

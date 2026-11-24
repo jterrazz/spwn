@@ -1,22 +1,24 @@
-import type { MachinesRelease } from '@jterrazz/station-api';
+import type { MachinesMacView, MachinesRelease } from '@jterrazz/station-api';
 
 import { INSTALL_LINE } from '../../../domain/core';
 import { SEPARATOR } from '../../../domain/separator';
 import { dayAndClock } from '../../../domain/when';
-import { useHello, useOffers, useRead, useUpdate } from '../../dependencies/dependencies';
+import { useHello, useOffers, useReach, useRead, useUpdate } from '../../dependencies/dependencies';
 import { useGesture } from '../../dependencies/use-gesture';
 import { GestureButton, GestureOutcome } from '../../kit/gestures';
 import { Openable } from '../../kit/openable';
 import { OpenButton } from '../../kit/opens';
-import { NoVerdict, Unanswered, VerdictHead } from '../../kit/readings';
-import { Skeleton, SkeletonPanel } from '../../kit/skeleton';
-import { Button, Panel, Row, VerdictSkeleton } from '../../ui/index';
+import { Absent, NoVerdict, Unanswered, VerdictHead } from '../../kit/readings';
+import { Skeleton, SkeletonHead, SkeletonPanel } from '../../kit/skeleton';
+import { Button, MacSection, Panel, Row, Value, VerdictSkeleton } from '../../ui/index';
+import { Page } from '../../ui/page';
 import { shownOrWithheld } from '../../ui/secret';
+import { engineShown, macState } from '../../words/shown';
+import type { Shown } from '../../words/shown';
 import { RELEASE_WORDS } from '../../words/words';
 import { Fine, Mono } from './core-parts';
 import { UpdatePanel } from './update';
 
-import page from '../../ui/page.module.css';
 import styles from './core.module.css';
 
 const NO_NOTES = 'The engine names no release notes';
@@ -80,7 +82,7 @@ function Offer({ release }: { release: MachinesRelease }) {
     );
 }
 
-function Latest({ release }: { release: MachinesRelease }) {
+function Latest({ release, mac }: { release: MachinesRelease; mac: MachinesMacView }) {
     const check = useGesture('engine.refresh-release', {
         input: {},
         rereads: ['engine.read-release'],
@@ -89,6 +91,7 @@ function Latest({ release }: { release: MachinesRelease }) {
     const refused = check.state.kind === 'failed' ? undefined : refusedOf(release);
     return (
         <Panel title={ENGINE_TITLE}>
+            <EngineRow mac={mac} />
             <Row
                 below={<GestureOutcome gesture={check} />}
                 sentence={sentenceOf(release, refused)}
@@ -105,6 +108,30 @@ function Latest({ release }: { release: MachinesRelease }) {
     );
 }
 
+function stateOf(mac: MachinesMacView): Shown {
+    const { State } = mac.Engine;
+    return State === undefined ? macState(mac) : engineShown('EngineReadState', State);
+}
+
+function EngineRow({ mac }: { mac: MachinesMacView }) {
+    const { Version } = mac.Engine;
+    return (
+        <Row
+            state={stateOf(mac)}
+            title={ENGINE_TITLE}
+            value={Version === '' ? null : <Value>{Version}</Value>}
+        />
+    );
+}
+
+function FarEngine({ mac }: { mac: MachinesMacView }) {
+    return (
+        <Panel title={ENGINE_TITLE}>
+            <EngineRow mac={mac} />
+        </Panel>
+    );
+}
+
 function sentenceOf(release: MachinesRelease, refused: string | undefined): string | undefined {
     const checked = checkedOf(release);
     if (refused === undefined) {
@@ -113,43 +140,73 @@ function sentenceOf(release: MachinesRelease, refused: string | undefined): stri
     return checked === undefined ? refused : `${checked}${SEPARATOR}${refused}`;
 }
 
-function Release() {
+function Release({ mac }: { mac: MachinesMacView }) {
     const reading = useRead('engine.read-release', {});
     const { flow, state } = useUpdate();
     if (reading.kind === 'reading') {
         return (
             <Skeleton what="the latest release">
-                <VerdictSkeleton size="page" />
+                <VerdictSkeleton size="tab" />
                 <SkeletonPanel title={ENGINE_TITLE} trail="fit" />
             </Skeleton>
         );
     }
     if (reading.kind === 'failed') {
-        return <Unanswered error={reading.error} size="page" />;
+        return (
+            <>
+                <Unanswered error={reading.error} size="tab" />
+                <FarEngine mac={mac} />
+            </>
+        );
     }
     const release = reading.out;
     return (
         <>
-            <VerdictHead size="page" verdict={release.Head} />
+            <VerdictHead size="tab" verdict={release.Head} />
             {state.kind === 'idle' ? null : <UpdatePanel flow={flow} state={state} wide />}
             {state.kind === 'idle' && release.Behind ? <Offer release={release} /> : null}
-            <Latest release={release} />
+            <Latest mac={mac} release={release} />
         </>
     );
 }
 
-export function EnginePage() {
+// invariant: the release is This Mac's engine's to read and to update; another Mac's section says its engine's
+// invariant: state and version as the listing gives them.
+function ThisMac({ mac }: { mac: MachinesMacView }) {
     const offered = useOffers('engine.read-release');
+    return offered ? (
+        <Release mac={mac} />
+    ) : (
+        <>
+            <NoVerdict line="This engine reads no release: it is older than the call" size="tab" />
+            <FarEngine mac={mac} />
+        </>
+    );
+}
+
+export function EnginePage({ macs }: { macs: readonly MachinesMacView[] }) {
+    const reach = useReach();
+    if (reach.kind === 'unanswered' && macs.length === 0) {
+        return (
+            <Page>
+                <Absent reach={reach} />
+            </Page>
+        );
+    }
+    if (macs.length === 0) {
+        return (
+            <Page>
+                <SkeletonHead size="page" what="the Macs" />
+            </Page>
+        );
+    }
     return (
-        <div className={page.page}>
-            {offered ? (
-                <Release />
-            ) : (
-                <NoVerdict
-                    line="This engine reads no release: it is older than the call"
-                    size="page"
-                />
-            )}
-        </div>
+        <Page>
+            {macs.map((mac) => (
+                <MacSection key={mac.Name} name={mac.Name}>
+                    {mac.ThisMac ? <ThisMac mac={mac} /> : <FarEngine mac={mac} />}
+                </MacSection>
+            ))}
+        </Page>
     );
 }

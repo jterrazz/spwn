@@ -130,6 +130,16 @@ function Catalog({ place, carried }: { place: Place; carried: Carried }) {
     );
 }
 
+// invariant: Storage and Engine head the sidebar, above the machines: each shows every Mac at once.
+function Fleet({ place }: { place: Place }) {
+    return (
+        <div aria-label="Every Mac" className={styles.group} role="group">
+            <NavItem {...place('storage')} icon="disc" label="Storage" />
+            <NavItem {...place('engine')} icon="engine" label="Engine" />
+        </div>
+    );
+}
+
 const UNCARRIED: Carried = { apps: undefined, settings: undefined, skills: undefined };
 
 export function Sidebar({ carried, macs, route, go, onFind, quiet = false }: SidebarProps) {
@@ -151,6 +161,7 @@ export function Sidebar({ carried, macs, route, go, onFind, quiet = false }: Sid
                 <kbd aria-hidden="true">⌘K</kbd>
             </button>
             <div className={styles.list}>
+                <Fleet place={place} />
                 {quiet ? <QuietMachines /> : <Machines go={go} macs={macs} route={route} />}
                 <Catalog carried={quiet ? UNCARRIED : carried} place={place} />
             </div>

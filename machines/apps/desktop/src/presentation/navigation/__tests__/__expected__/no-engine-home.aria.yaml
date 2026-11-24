@@ -6,13 +6,15 @@
     - button "Agent soon" [disabled]
     - button "OS soon" [disabled]
   - button "Passwords" [disabled]
-  - button "Storage" [disabled]
   - button "Settings" [disabled]
   - img "not installed"
   - text: No engine on this Mac
 - navigation "Sidebar":
   - heading "Machine" [level=2]
   - button "Find" [disabled]
+  - group "Every Mac":
+    - button "Storage" [disabled]
+    - button "Engine" [disabled]
   - group "Machines":
     - heading "Machines" [level=2]
     - paragraph: None yet

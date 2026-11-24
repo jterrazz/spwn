@@ -8,6 +8,15 @@ import { recordingsOf } from '../../../../infrastructure/outbound/engine-replay/
 
 const recordingFor = await recordingsOf('creating', 'mini-offline', 'one-mac', 'two-macs');
 
+const THIS_MAC = region('macbook-pro');
+const MINI = region('mac-mini');
+const THIS_DISK = within(THIS_MAC, region('Disk'));
+const THIS_MACHINES = within(THIS_MAC, region('Machines'));
+const THIS_BY_APP = within(THIS_MAC, region('By app'));
+const THIS_IMAGES = within(THIS_MAC, region('Images'));
+const MINI_MACHINES = within(MINI, region('Machines'));
+const MINI_DISK = within(MINI, region('Disk'));
+
 function storageOver(world: string) {
     return pageOver(recordingFor(world), { page: 'storage' });
 }
@@ -62,8 +71,8 @@ describe('Storage', () => {
             async (visitor) => {
                 // When - its disk has been read
                 // Then - the figure is Used, not Total less Free (606 GB)
-                await visitor.see(within(region('Disk'), content('500 GB')));
-                await visitor.gone(within(region('Disk'), content('606 GB')));
+                await visitor.see(within(THIS_DISK, content('500 GB')));
+                await visitor.gone(within(THIS_DISK, content('606 GB')));
             },
         );
         expect(result.errors.text).toBe('');
@@ -76,13 +85,13 @@ describe('Storage', () => {
             pageOver(uncalled, { page: 'storage' }),
             async (visitor) => {
                 // When - the disks have been read
-                await visitor.see(within(region('Machines'), content('linux-1')));
+                await visitor.see(within(THIS_MACHINES, content('linux-1')));
 
                 // Then - no Free of the caches, and each machine says the engine's own sentence, no pill
                 await visitor.gone(button('Free 34.8 GB'));
                 await visitor.see(
                     within(
-                        region('Machines'),
+                        THIS_MACHINES,
                         button(
                             'linux-1 Caches hold 1.5 GB. Each app rebuilds its own when it needs it. 50 GB',
                         ),
@@ -97,12 +106,10 @@ describe('Storage', () => {
         // Given - Storage over two-macs, where one image version is used by nothing
         const result = await component.render(storageOver('two-macs'), async (visitor) => {
             // When - its disk has been read
-            const freed = region('Can be freed');
+            const freed = within(THIS_MAC, region('Can be freed'));
 
             // Then - Station's sentence in the Disk panel with its Free, its one row, and the caches Free beside it
-            await visitor.see(
-                within(region('Disk'), content('3.0 GB can be freed: 1 unused image.')),
-            );
+            await visitor.see(within(THIS_DISK, content('3.0 GB can be freed: 1 unused image.')));
             await visitor.see(within(freed, content('base-ubuntu@2026.10.20')));
             await visitor.see(within(freed, content('Unused image')));
             await visitor.see(within(freed, content('3 GB')));
@@ -132,18 +139,18 @@ describe('Storage', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test("a Mac's disk is its volume, what can be freed, its data to erase, its images and its machines", async () => {
+    test("a Mac's section is its volume, what can be freed, each app with its kinds, its images and its machines", async () => {
         // Given - Storage over two-macs
         const result = await component.render(storageOver('two-macs'), async (visitor) => {
             // When - This Mac's disk has been read to the end
-            await visitor.see(within(region('Your data'), content('ollama')));
+            await visitor.see(within(THIS_BY_APP, content('ollama')));
             await visitor.see(
-                within(region('Images'), content('2 machines made from it', { exact: false })),
+                within(THIS_IMAGES, content('2 machines made from it', { exact: false })),
             );
         });
 
-        // Then - the volume and its footer, the data its apps keep, the images and the machines with their sizes
-        expect(result.content.text).not.toContain('Move');
+        // Then - the volume and its footer, each app's kinds and gestures, the images and the machines with their
+        // Then - sizes
         expect(result.content.text).not.toContain('What holds the disk');
         await expect(result.tree).toMatch(file('./__expected__/two-macs-storage.aria.yaml'));
     });
@@ -163,9 +170,8 @@ describe('Storage', () => {
             ),
         };
 
-        const images = region('Images');
-        const older = within(images, button('Delete base-ubuntu 2026.10.20'));
-        const newest = within(images, button('Delete base-ubuntu 2026.11.01'));
+        const older = within(THIS_IMAGES, button('Delete base-ubuntu 2026.10.20'));
+        const newest = within(THIS_IMAGES, button('Delete base-ubuntu 2026.11.01'));
 
         // When - the answer is drawn as recorded, then with every Deletable reversed
         const asked = await component.render(storageOver('two-macs'), async (visitor) => {
@@ -218,11 +224,11 @@ describe('Storage', () => {
     test('a machine of the Mac opens its own Storage tab', async () => {
         // Given - Storage over two-macs
         const result = await component.render(storageOver('two-macs'), async (visitor) => {
-            await visitor.see(within(region('Machines'), content('linux-1')));
+            await visitor.see(within(THIS_MACHINES, content('linux-1')));
 
             // When - linux-1 is opened from the Machines panel
             await visitor.click(
-                within(region('Machines'), button('linux-1 1.5 GB of caches inside 50 GB')),
+                within(THIS_MACHINES, button('linux-1 1.5 GB of caches inside 50 GB')),
             );
 
             // Then - its own Storage tab is shown, with its disk
@@ -244,24 +250,52 @@ describe('Storage', () => {
         expect(result.content.text).not.toContain('CPU ·');
     });
 
-    test('a Mac the world holds no answer for shows that no answer came', async () => {
+    test('a Mac the world holds no answer for shows that no answer came in its own section', async () => {
         // Given - Storage over mini-offline, no read asked at the Mac mini ever answered
         const unanswered = unansweredAt(recordingFor('mini-offline'), 'mac-mini');
         const result = await component.render(
             pageOver(unanswered, { page: 'storage' }),
             async (visitor) => {
-                await visitor.see(heading('Nothing to free.'));
+                // When - both sections have been read
+                await visitor.see(within(THIS_MAC, heading('Nothing to free.')));
 
-                // When - the Mac mini, which does not answer, is chosen
-                await visitor.click(button('mac-mini'));
-
-                // Then - its disk is no answer, it has no verdict, and its machines are still listed
-                await visitor.see(heading('No answer from the engine.'));
-                await visitor.see(heading('No verdict from the engine.'));
-                await visitor.see(within(region('Machines'), content('infra')));
+                // Then - the Mac mini's disk is no answer, it has no verdict, and its machines are still listed
+                await visitor.see(within(MINI, heading('No answer from the engine.')));
+                await visitor.see(within(MINI, heading('No verdict from the engine.')));
+                await visitor.see(within(MINI_MACHINES, content('infra')));
             },
         );
         await expect(result.tree).toMatch(file('./__expected__/mini-offline-storage.aria.yaml'));
+    });
+
+    test('every Mac has its section on the page at once, with no choice of a Mac', async () => {
+        // Given - Storage over two-macs, whose mac-mini has nothing to free
+        const result = await component.render(storageOver('two-macs'), async (visitor) => {
+            // When - both disks have been read
+            await visitor.see(within(THIS_MAC, heading('3.0 GB can be freed.')));
+
+            // Then - the Mac mini's verdict and disk stand under it, and no Mac is a button to choose
+            await visitor.see(within(MINI, heading('Nothing to free.')));
+            await visitor.see(
+                within(MINI_DISK, content('Machines holds 84.0 GB', { exact: false })),
+            );
+            await visitor.gone(button('mac-mini'));
+            await visitor.gone(button('macbook-pro'));
+        });
+        expect(result.errors.text).toBe('');
+    });
+
+    test('the Mac itself is a line of its Machines that opens nothing, its disk being the section above', async () => {
+        // Given - Storage over two-macs, where This Mac holds 34.8 GB of caches
+        const result = await component.render(storageOver('two-macs'), async (visitor) => {
+            // When - its Machines have been read
+            await visitor.see(within(THIS_MACHINES, content('34.8 GB of caches inside')));
+
+            // Then - the Mac's line is no button, its VMs' lines are
+            await visitor.gone(within(THIS_MACHINES, button('macbook-pro', { exact: false })));
+            await visitor.see(within(THIS_MACHINES, button('api 50 GB')));
+        });
+        expect(result.errors.text).toBe('');
     });
 
     test('a volume the engine reads empty offers nothing to free', async () => {
@@ -274,5 +308,31 @@ describe('Storage', () => {
         // Then - the volume as the engine gave it, no Free and no image
         expect(result.content.text).not.toContain('Free 0');
         await expect(result.tree).toMatch(file('./__expected__/one-mac-storage.aria.yaml'));
+    });
+
+    test("a Mac's apps are one row each, with their kinds and gestures, under its section", async () => {
+        // Given - Storage over two-macs
+        const result = await component.render(storageOver('two-macs'), async (visitor) => {
+            // When - This Mac's disk has been read
+            await visitor.see(THIS_BY_APP);
+
+            // Then - freeing what can be rebuilt is offered, and an app holding a cache and data offers its Free
+            // Then - and its Erase… on one row
+            const freeAll = enabled(button('Free 34.8 GB'));
+            await visitor.see(within(THIS_MAC, freeAll));
+            await visitor.see(within(THIS_BY_APP, button('Free claude')));
+            await visitor.see(within(THIS_BY_APP, button('Erase… claude')));
+        });
+        expect(result.errors.text).toBe('');
+    });
+
+    test('a Mac whose disk the engine reads as holding no app says so', async () => {
+        // Given - Storage over one-mac, whose disk holds no row
+        const result = await component.render(storageOver('one-mac'), async (visitor) => {
+            // When - its disk has been read
+            // Then - its apps say nothing is listed
+            await visitor.see(within(THIS_BY_APP, content('Nothing listed on macbook-pro.')));
+        });
+        expect(result.errors.text).toBe('');
     });
 });

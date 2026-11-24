@@ -126,9 +126,10 @@ type DiskPanelProps = {
     name: string;
     sub: ReactNode;
     gestures: DiskGestures;
+    leads: boolean;
 };
 
-function DiskPanel({ reading, name, sub, gestures }: DiskPanelProps) {
+function DiskPanel({ reading, name, sub, gestures, leads }: DiskPanelProps) {
     const parts = listedOf(kindPartsOf(reading.Kinds));
     const unused = reading.Station?.CanFree;
     const reread = useReread();
@@ -148,13 +149,18 @@ function DiskPanel({ reading, name, sub, gestures }: DiskPanelProps) {
             <DiskBar label={`What holds the disk of ${name}`} parts={parts} total={reading.Total} />
             <Legend parts={parts} />
             {unused === undefined ? null : (
-                <UnusedFoot canFree={unused} gesture={gestures.freeUnused} name={name} />
+                <UnusedFoot
+                    canFree={unused}
+                    gesture={gestures.freeUnused}
+                    name={name}
+                    variant={leads ? 'primary' : 'plain'}
+                />
             )}
             <Foot
                 freeAll={gestures.freeAll}
                 name={name}
                 reading={reading}
-                variant={unused?.Call === undefined ? 'primary' : 'plain'}
+                variant={leads && unused?.Call === undefined ? 'primary' : 'plain'}
             />
             <ImageCacheFoot
                 freeImageCache={gestures.freeImageCache}
@@ -177,11 +183,14 @@ type DiskCardProps = {
     target: Target | undefined;
     sub?: ReactNode;
     children?: ReactNode;
+    // value: whether this card's Free leads the screen: a page of every Mac leads with This Mac's alone, since a
+    // value: screen has one primary button.
+    leads: boolean;
 };
 
 // invariant: every page that shows a machine's disk shows this one card: the same reading, the same parts, the
 // invariant: same gestures, so two pages never tell one disk two ways.
-export function DiskCard({ reading, name, target, sub, children }: DiskCardProps) {
+export function DiskCard({ reading, name, target, sub, children, leads }: DiskCardProps) {
     const gestures: DiskGestures = {
         freeAll: useFreeAll(target),
         freeImageCache: useFreeImageCache(reading, target),
@@ -192,6 +201,7 @@ export function DiskCard({ reading, name, target, sub, children }: DiskCardProps
         <>
             <DiskPanel
                 gestures={gestures}
+                leads={leads}
                 name={name}
                 reading={reading}
                 sub={sub ?? reading.Station?.Sentence}

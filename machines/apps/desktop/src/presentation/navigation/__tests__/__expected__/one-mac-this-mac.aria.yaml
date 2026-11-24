@@ -6,12 +6,14 @@
     - button "Agent soon" [disabled]
     - button "OS soon" [disabled]
   - button "Passwords"
-  - button "Storage"
   - button "Settings"
   - button "Engine running · dev"
 - navigation "Sidebar":
   - heading "Machine" [level=2]
   - button "Find"
+  - group "Every Mac":
+    - button "Storage"
+    - button "Engine"
   - group "Machines":
     - heading "Machines" [level=2]
     - button "macbook-pro online":
@@ -38,7 +40,6 @@
     - tab "Packages"
     - tab "Ports"
     - tab "Sign-ins"
-    - tab "Storage"
   - tabpanel "Overview":
     - heading "Online, with no machine running." [level=1]
     - text: CPU 0% Memory not given yet Disk not given yet Its machines 0machines

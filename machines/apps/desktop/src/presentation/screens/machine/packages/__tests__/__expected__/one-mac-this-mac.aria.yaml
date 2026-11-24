@@ -9,7 +9,6 @@
     - tab "Packages" [selected]
     - tab "Ports"
     - tab "Sign-ins"
-    - tab "Storage"
   - heading "Follows no machine file." [level=1]
   - paragraph:
     - img "not given yet"

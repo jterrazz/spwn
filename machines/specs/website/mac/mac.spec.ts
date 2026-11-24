@@ -14,6 +14,11 @@ import { website } from '../website.specification.js';
 
 const sidebar = navigation('Sidebar');
 const rail = navigation('Rail');
+const THIS_MAC = region('macbook-pro');
+
+const THIS_BY_APP = within(THIS_MAC, region('By app'));
+const THIS_DISK = within(THIS_MAC, region('Disk'));
+const THIS_DONE = within(THIS_MAC, region('Done here'));
 
 describe('mac', () => {
     test('M1 a Mac reads its name, online, its CPU, memory and disk', async () => {
@@ -190,70 +195,61 @@ describe('mac', () => {
     });
 
     test('M7 Free on one app frees its cache, and the bar and the verdict follow', async () => {
-        // Given - the Storage tab of This Mac over two-macs, 34.8 GB of caches
-        const result = await website.visit(
-            '/?world=two-macs&machine=macbook-pro&tab=Storage',
-            async (visitor) => {
-                await visitor.see(within(region('Disk'), content('606 GB', { exact: false })));
-                await visitor.see(within(region('By app'), button('Free go')));
+        // Given - This Mac's section of Storage over two-macs, 34.8 GB of caches
+        const result = await website.visit('/?world=two-macs&page=storage', async (visitor) => {
+            await visitor.see(within(THIS_DISK, content('606 GB', { exact: false })));
+            await visitor.see(within(THIS_BY_APP, button('Free go')));
 
-                // When - Free is pressed on go
-                await visitor.click(within(region('By app'), button('Free go')));
+            // When - Free is pressed on go
+            await visitor.click(within(THIS_BY_APP, button('Free go')));
 
-                // Then - what it held is freed, said under Done here, and the groups count less
-                await visitor.see(within(region('Done here'), content('19.4 GB freed')));
-                await visitor.see(within(region('Disk'), content('587 GB', { exact: false })));
-                await visitor.see(button('Free 15.4 GB'));
-                await visitor.gone(within(region('By app'), button('Free go')));
-                await visitor.see(within(region('By app'), button('Erase… xcode')));
-            },
-        );
+            // Then - what it held is freed, said under Done here, and the groups count less
+            await visitor.see(within(THIS_DONE, content('19.4 GB freed')));
+            await visitor.see(within(THIS_DISK, content('587 GB', { exact: false })));
+            await visitor.see(within(THIS_MAC, button('Free 15.4 GB')));
+            await visitor.gone(within(THIS_BY_APP, button('Free go')));
+            await visitor.see(within(THIS_BY_APP, button('Erase… xcode')));
+        });
         expect(result.errors.text).toBe('');
     });
 
     test('M7 the bar of a Mac holds what the disk holds, by the kinds the engine gives', async () => {
-        // Given - the Storage tab of This Mac over two-macs, whose disk.read gives system, apps, data, caches, machine disks, images and free
-        const result = await website.visit(
-            '/?world=two-macs&machine=macbook-pro&tab=Storage',
-            async (visitor) => {
-                // When - the tab is read
-                const disk = region('Disk');
+        // Given - This Mac's section of Storage over two-macs, whose disk.read gives system, apps, data, caches, machine disks, images and free
+        const result = await website.visit('/?world=two-macs&page=storage', async (visitor) => {
+            // When - the section is read
+            const disk = THIS_DISK;
 
-                // Then - each kind is named with its bytes, and the Mac says what it holds itself and what Machines
-                // Then - holds beside it
-                for (const kind of ['System', 'Your data', 'Caches', 'Machine disks', 'Images']) {
-                    await visitor.see(within(disk, content(kind)));
-                }
-                for (const size of ['21.4 GB', '443 GB', '100 GB', '7 GB']) {
-                    await visitor.see(within(disk, content(size)));
-                }
-                await visitor.see(
-                    within(
-                        disk,
-                        content(
-                            'This Mac itself holds 499 GB. Outside any machine, Machines holds 107 GB.',
-                        ),
+            // Then - each kind is named with its bytes, and the Mac says what it holds itself and what Machines
+            // Then - holds beside it
+            for (const kind of ['System', 'Your data', 'Caches', 'Machine disks', 'Images']) {
+                await visitor.see(within(disk, content(kind)));
+            }
+            for (const size of ['21.4 GB', '443 GB', '100 GB', '7 GB']) {
+                await visitor.see(within(disk, content(size)));
+            }
+            await visitor.see(
+                within(
+                    disk,
+                    content(
+                        'This Mac itself holds 499 GB. Outside any machine, Machines holds 107 GB.',
                     ),
-                );
-            },
-        );
+                ),
+            );
+        });
         expect(result.errors.text).toBe('');
     });
 
     test('M7 a cache freed is recorded in the History, by me', async () => {
-        // Given - the Storage tab of This Mac over two-macs, whose History holds no day but last night
-        const result = await website.visit(
-            '/?world=two-macs&machine=macbook-pro&tab=Storage',
-            async (visitor) => {
-                // When - Free is pressed on go, then the Inbox opened
-                await visitor.click(within(region('By app'), button('Free go')));
-                await visitor.see(within(region('Done here'), content('19.4 GB freed')));
-                await visitor.click(within(rail, button('Inbox', { exact: false })));
+        // Given - This Mac's section of Storage over two-macs, whose History holds no day but last night
+        const result = await website.visit('/?world=two-macs&page=storage', async (visitor) => {
+            // When - Free is pressed on go, then the Inbox opened
+            await visitor.click(within(THIS_BY_APP, button('Free go')));
+            await visitor.see(within(THIS_DONE, content('19.4 GB freed')));
+            await visitor.click(within(rail, button('Inbox', { exact: false })));
 
-                // Then - a Today group holds the engine's line of the free, its time first
-                await visitor.see(within(region('Today'), button('10:00 go freed by you')));
-            },
-        );
+            // Then - a Today group holds the engine's line of the free, its time first
+            await visitor.see(within(region('Today'), button('10:00 go freed by you')));
+        });
         expect(result.errors.text).toBe('');
     });
 

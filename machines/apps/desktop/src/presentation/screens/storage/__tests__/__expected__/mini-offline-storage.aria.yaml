@@ -1,19 +1,45 @@
 - main:
-  - heading "No verdict from the engine." [level=1]
-  - paragraph:
-    - img "not given yet"
-    - text: What follows is what the engine answers, with no sentence that sums it up
-  - group "Which Mac":
-    - button "macbook-pro"
-    - button "mac-mini" [pressed]
-  - heading "No answer from the engine." [level=1]
-  - paragraph:
-    - img "no answer"
-    - text: No answer
-  - region "Images":
-    - heading "Images a machine built in advance; a new machine starts as a copy of it" [level=2]
-    - paragraph: No image on mac-mini.
-  - region "Machines":
-    - heading "Machines what is inside one is on its own Storage tab" [level=2]
-    - button "mac-mini the Mac itself"
-    - button "infra"
+  - region "macbook-pro":
+    - heading "macbook-pro" [level=2]
+    - heading "Nothing to free." [level=1]
+    - paragraph:
+      - img "Nothing to free."
+      - text: "on macbook-pro: no machine and no file of yours is touched"
+    - region "Disk":
+      - heading "Disk" [level=2]
+      - button "Rescan"
+      - paragraph: This Mac itself holds 0 B. Outside any machine, Machines holds 100 GB.
+      - list "The parts":
+        - listitem: Machine disks 100 GB
+        - listitem: Free 0 B
+      - paragraph: Every image and every disk Machines holds is a machine's or the newest.
+      - paragraph: No cache to free. What is left is yours or the system's.
+    - region "By app":
+      - heading "By app each app says in the catalog which of its folders are cache, data or settings" [level=2]
+      - paragraph: Nothing listed on macbook-pro.
+      - paragraph: Data and settings are never freed here. Erasing an app's data is asked for by name.
+    - region "Images":
+      - heading "Images a machine built in advance; a new machine starts as a copy of it" [level=2]
+      - text: base-ubuntu 1 built 20 Oct · 12 GB · 2 machines made from it newest
+    - region "Machines":
+      - heading "Machines what is inside a VM is on its own Storage tab" [level=2]
+      - text: macbook-pro the Mac itself · No cache to free. What is left is yours or the system's. 0 B
+      - button "api 50 GB"
+      - button "linux-1 No cache to free. What is left is yours or the system's. 50 GB"
+  - region "mac-mini":
+    - heading "mac-mini" [level=2]
+    - heading "No verdict from the engine." [level=1]
+    - paragraph:
+      - img "not given yet"
+      - text: What follows is what the engine answers, with no sentence that sums it up
+    - heading "No answer from the engine." [level=1]
+    - paragraph:
+      - img "no answer"
+      - text: No answer
+    - region "Images":
+      - heading "Images a machine built in advance; a new machine starts as a copy of it" [level=2]
+      - paragraph: No image on mac-mini.
+    - region "Machines":
+      - heading "Machines what is inside a VM is on its own Storage tab" [level=2]
+      - text: mac-mini the Mac itself
+      - button "infra"

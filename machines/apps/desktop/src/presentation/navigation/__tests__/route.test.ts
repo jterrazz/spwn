@@ -7,7 +7,9 @@ import {
     machineRoute,
     navigate,
     replace,
+    settledRoute,
     startRoute,
+    tabsOf,
 } from '../route';
 import type { History } from '../route';
 
@@ -174,5 +176,50 @@ describe('route', () => {
         // Then - the file of api is shown, This Mac's one step back
         expect(other.current).toStrictEqual({ file: 'api', page: 'machine-files' });
         expect(goBack(other).current).toStrictEqual({ page: 'machine-files' });
+    });
+
+    test('a Mac has every tab but Storage, a VM the tabs of its sections', () => {
+        // Given - a Mac, a VM that sends no sections and a VM whose engine has no disk section
+        const sections = {
+            Accounts: true,
+            Activity: true,
+            Apps: true,
+            Awake: true,
+            Background: true,
+            Disk: false,
+            Overview: true,
+            Ports: true,
+            SSH: true,
+            Settings: true,
+        };
+
+        // When - the tabs of each are read
+        const shown = [tabsOf(undefined), tabsOf({}), tabsOf({ Sections: sections })];
+
+        // Then - the Mac's five, every tab, then every tab but Storage
+        expect(shown).toStrictEqual([
+            ['Overview', 'Activity', 'Packages', 'Ports', 'Sign-ins'],
+            ['Overview', 'Activity', 'Packages', 'Ports', 'Sign-ins', 'Storage'],
+            ['Overview', 'Activity', 'Packages', 'Ports', 'Sign-ins'],
+        ]);
+    });
+
+    test("a Mac's Storage tab settles on the Storage page, and a VM's stays its tab", () => {
+        // Given - the Storage tab of a Mac, of a VM, and a Mac's Ports tab
+        const mac = machineRoute('book', 'Storage');
+        const vm = machineRoute('linux-1', 'Storage');
+        const ports = machineRoute('book', 'Ports');
+
+        // When - each is settled
+        const settled = [
+            settledRoute(mac, true),
+            settledRoute(vm, false),
+            settledRoute(ports, true),
+        ];
+
+        // Then - the Storage page, then the VM's tab and the Mac's Ports unchanged
+        expect(settled[0]).toStrictEqual({ page: 'storage' });
+        expect(settled[1]).toBe(vm);
+        expect(settled[2]).toBe(ports);
     });
 });

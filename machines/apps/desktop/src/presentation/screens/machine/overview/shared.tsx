@@ -66,7 +66,7 @@ export function SignInsPanel({ found, vm, go }: Props) {
     const { input, target } = aimed(found, {});
     const listed = useWatch('accounts.list', input, target);
     const all = <AllOf go={go} label="All sign-ins" tab="Sign-ins" vm={vm} />;
-    if (!tabsOf(found.vm?.Sections).includes('Sign-ins') || listed.kind === 'reading') {
+    if (!tabsOf(found.vm).includes('Sign-ins') || listed.kind === 'reading') {
         return null;
     }
     if (listed.kind === 'failed') {

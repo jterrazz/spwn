@@ -99,7 +99,7 @@ function Body({ route, found, home, go, Gallery, newMachine, addMac }: PageProps
             return <StoragePage go={go} macs={home.macs} />;
         }
         case 'engine': {
-            return <EnginePage />;
+            return <EnginePage macs={home.macs} />;
         }
         case 'settings': {
             return <SettingsPage go={go} />;

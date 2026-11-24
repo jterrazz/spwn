@@ -20,6 +20,7 @@ import { Rail } from './rail';
 import { TAB_PANEL } from './route';
 import type { PlainPage, Route } from './route';
 import { RouterProvider, useRouter } from './router';
+import { useSettledRoute } from './settled';
 import { Sidebar } from './sidebar';
 import { isGlobal } from './spaces';
 import { useSpaceKeys } from './use-spaces';
@@ -224,6 +225,7 @@ function Frame({ Gallery, pages }: FrameProps) {
     });
     const { lost, dismiss } = useLost(router, macs, listed);
     const found = route.page === 'machine' ? findMachine(macs, route.machine) : undefined;
+    useSettledRoute(router, found);
     const area = { addMac, found, Gallery, go, home, newMachine, pages, route };
     const rail = { engine, go, needs, onSpace, quiet, route };
     const aside = { ...side, go, onFind: quiet ? NOWHERE : find, quiet, route };

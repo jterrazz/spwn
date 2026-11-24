@@ -19,19 +19,20 @@ export function opensNow(space: Space): boolean {
 }
 
 // value: where a page sits: the window's own places beside the space's sidebar, the global pages of the rail's foot
-// value: alone in the content, every other page the Machine space's.
+// value: alone in the content, every other page the Machine space's, Storage and Engine among them, which show
+// value: every Mac at once.
 const REACH: Readonly<Record<PlainPage, 'global' | 'space' | 'window'>> = {
     'catalog-apps': 'space',
     'catalog-settings': 'space',
     'catalog-skills': 'space',
-    engine: 'window',
+    engine: 'space',
     gallery: 'window',
     home: 'window',
     inbox: 'window',
     'machine-files': 'space',
     passwords: 'global',
     settings: 'global',
-    storage: 'global',
+    storage: 'space',
 };
 
 export function inSpace(route: Route): boolean {

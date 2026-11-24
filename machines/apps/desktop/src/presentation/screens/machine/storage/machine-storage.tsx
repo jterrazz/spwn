@@ -13,8 +13,6 @@ import { DISK_TITLE } from '../../../words/words';
 
 import styles from './machine-storage.module.css';
 
-const FOOT = "Data and settings are never freed here. Erasing an app's data is asked for by name.";
-
 type Go = (to: Route) => void;
 
 function Inside({ go }: { go: Go | undefined }) {
@@ -42,21 +40,21 @@ type ReadProps = {
     reading: DiskReading;
     name: string;
     target: Target | undefined;
-    vm: boolean;
     go: Go | undefined;
 };
 
-function Read({ reading, name, target, vm, go }: ReadProps) {
+function Read({ reading, name, target, go }: ReadProps) {
     return (
         <Screen>
             <Page>
                 <DiskCard
+                    leads
                     name={name}
                     reading={reading}
-                    sub={vm ? <Inside go={go} /> : undefined}
+                    sub={<Inside go={go} />}
                     target={target}
                 >
-                    <ByApp foot={FOOT} name={name} reading={reading} target={target} />
+                    <ByApp name={name} reading={reading} target={target} />
                 </DiskCard>
             </Page>
         </Screen>
@@ -66,11 +64,11 @@ function Read({ reading, name, target, vm, go }: ReadProps) {
 type StorageTabProps = {
     name: string;
     target: Target | undefined;
-    vm?: boolean;
     go?: Go | undefined;
 };
 
-export function StorageTab({ name, target, vm = false, go }: StorageTabProps) {
+// value: a VM's Storage tab: what is inside its disk; a Mac's own disk is its section of the Storage page.
+export function StorageTab({ name, target, go }: StorageTabProps) {
     const disk = useWatch('disk.read', {}, target);
     if (disk.kind === 'failed') {
         return (
@@ -88,5 +86,5 @@ export function StorageTab({ name, target, vm = false, go }: StorageTabProps) {
             </Page>
         );
     }
-    return <Read go={go} name={name} reading={disk.out} target={target} vm={vm} />;
+    return <Read go={go} name={name} reading={disk.out} target={target} />;
 }

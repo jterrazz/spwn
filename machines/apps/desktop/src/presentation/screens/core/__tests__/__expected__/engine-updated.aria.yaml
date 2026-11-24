@@ -6,12 +6,14 @@
     - button "Agent soon" [disabled]
     - button "OS soon" [disabled]
   - button "Passwords"
-  - button "Storage"
   - button "Settings"
   - button "Engine running · v0.21.0"
 - navigation "Sidebar":
   - heading "Machine" [level=2]
   - button "Find"
+  - group "Every Mac":
+    - button "Storage"
+    - button "Engine"
   - group "Machines":
     - heading "Machines" [level=2]
     - button "macbook-pro online":
@@ -40,15 +42,22 @@
   - button "Back" [disabled]
   - button "Forward" [disabled]
   - text: Engine
-  - heading "This Mac runs the latest release." [level=1]
-  - region "Update":
-    - text: updated
-    - heading "Updated." [level=1]
-    - paragraph: The installer is done and the engine restarted. The head of this page is what it says now.
-    - log "The installer's output": "Detecting the newest release... Version: v0.22.0 Downloading spwn_darwin_arm64.tar.gz... Downloading station-darwin-arm64... ✓ spwn v0.22.0 in /Users/you/.local/bin, also as spwn-agents ✓ station v0.22.0 in /Users/you/.local/bin, also as spwn-machines"
-    - log "What station engine start said": ✓ engine · installed, running · v0.22.0
-    - button "Done"
-  - region "Engine":
-    - heading "Engine" [level=2]
-    - text: Latest release Checked 4 Nov, 09:00
-    - button "Check now"
+  - region "macbook-pro":
+    - heading "macbook-pro" [level=2]
+    - heading "This Mac runs the latest release." [level=1]
+    - region "Update":
+      - text: updated
+      - heading "Updated." [level=1]
+      - paragraph: The installer is done and the engine restarted. The head of this page is what it says now.
+      - log "The installer's output": "Detecting the newest release... Version: v0.22.0 Downloading spwn_darwin_arm64.tar.gz... Downloading station-darwin-arm64... ✓ spwn v0.22.0 in /Users/you/.local/bin, also as spwn-agents ✓ station v0.22.0 in /Users/you/.local/bin, also as spwn-machines"
+      - log "What station engine start said": ✓ engine · installed, running · v0.22.0
+      - button "Done"
+    - region "Engine":
+      - heading "Engine" [level=2]
+      - text: Engine v0.21.0 running Latest release Checked 4 Nov, 09:00
+      - button "Check now"
+  - region "mac-mini":
+    - heading "mac-mini" [level=2]
+    - region "Engine":
+      - heading "Engine" [level=2]
+      - text: Engine dev running

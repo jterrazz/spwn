@@ -1,47 +1,119 @@
 - main:
-  - heading "3.0 GB can be freed." [level=1]
-  - paragraph:
-    - img "3.0 GB can be freed."
-    - text: "on macbook-pro: no machine and no file of yours is touched"
-  - group "Which Mac":
-    - button "macbook-pro" [pressed]
-    - button "mac-mini"
-  - region "Disk":
-    - heading "Disk" [level=2]
-    - paragraph: 606 GB of 994 GB used
-    - button "Rescan"
-    - paragraph: This Mac itself holds 499 GB. Outside any machine, Machines holds 107 GB.
-    - 'img "What holds the disk of macbook-pro: System 21.4 GB · Your data 443 GB · Caches 34.8 GB · Machine disks 100 GB · Images 7 GB · Free 388 GB"'
-    - list "The parts":
-      - listitem: System 21.4 GB
-      - listitem: Your data 443 GB
-      - listitem: Caches 34.8 GB
-      - listitem: Machine disks 100 GB
-      - listitem: Images 7 GB
-      - listitem: Free 388 GB
-    - paragraph: "3.0 GB can be freed: 1 unused image."
-    - button "Free 3 GB"
-    - paragraph: Caches hold 34.8 GB. Each app rebuilds its own when it needs it.
-    - button "Free 34.8 GB"
-  - region "Can be freed":
-    - heading "Can be freed" [level=2]
-    - text: base-ubuntu@2026.10.20 Unused image 3 GB
-  - region "Your data":
-    - heading "Your data 4" [level=2]
-    - text: xcode ~/Library/Developer/CoreSimulator/Devices 19.1 GB
-    - button "Erase… xcode": Erase…
-    - text: claude ~/.claude/projects 3.6 GB
-    - button "Erase… claude": Erase…
-    - text: ollama ~/.ollama/models 1.9 GB
-    - button "Erase… ollama": Erase…
-    - text: zed ~/Library/Application Support/Zed/db 1.2 GB
-    - button "Erase… zed": Erase…
-  - region "Images":
-    - heading "Images a machine built in advance; a new machine starts as a copy of it" [level=2]
-    - text: base-ubuntu 2026.11.01 built 1 Nov · 4 GB · 2 machines made from it newest base-ubuntu 2026.10.20 built 20 Oct · 3 GB · no machine made from it
-    - button "Delete base-ubuntu 2026.10.20": Delete · frees 3 GB
-  - region "Machines":
-    - heading "Machines what is inside one is on its own Storage tab" [level=2]
-    - button "macbook-pro the Mac itself 34.8 GB of caches inside 499 GB"
-    - button "api 50 GB"
-    - button "linux-1 1.5 GB of caches inside 50 GB"
+  - region "macbook-pro":
+    - heading "macbook-pro" [level=2]
+    - heading "3.0 GB can be freed." [level=1]
+    - paragraph:
+      - img "3.0 GB can be freed."
+      - text: "on macbook-pro: no machine and no file of yours is touched"
+    - region "Disk":
+      - heading "Disk" [level=2]
+      - paragraph: 606 GB of 994 GB used
+      - button "Rescan"
+      - paragraph: This Mac itself holds 499 GB. Outside any machine, Machines holds 107 GB.
+      - 'img "What holds the disk of macbook-pro: System 21.4 GB · Your data 443 GB · Caches 34.8 GB · Machine disks 100 GB · Images 7 GB · Free 388 GB"'
+      - list "The parts":
+        - listitem: System 21.4 GB
+        - listitem: Your data 443 GB
+        - listitem: Caches 34.8 GB
+        - listitem: Machine disks 100 GB
+        - listitem: Images 7 GB
+        - listitem: Free 388 GB
+      - paragraph: "3.0 GB can be freed: 1 unused image."
+      - button "Free 3 GB"
+      - paragraph: Caches hold 34.8 GB. Each app rebuilds its own when it needs it.
+      - button "Free 34.8 GB"
+    - region "Can be freed":
+      - heading "Can be freed" [level=2]
+      - text: base-ubuntu@2026.10.20 Unused image 3 GB
+    - region "By app":
+      - heading "By app each app says in the catalog which of its folders are cache, data or settings" [level=2]
+      - text: tart ~/.tart · to ~/.local/share/station/vms misplaced 73.3 GB
+      - button "Move tart": Move
+      - text: go ~/Library/Caches/go-build cache 19.4 GB
+      - button "Free go": Free
+      - text: xcode ~/Library/Developer/Xcode/DerivedData · ~/Library/Developer/CoreSimulator/Devices cache 5.8 GB data 19.1 GB
+      - button "Erase… xcode": Erase…
+      - button "Free xcode": Free
+      - text: homebrew ~/Library/Caches/Homebrew cache 2.1 GB
+      - button "Free homebrew": Free
+      - text: pnpm ~/Library/pnpm/store cache 1.8 GB
+      - button "Free pnpm": Free
+      - text: mise ~/Library/Caches/mise cache 1.2 GB
+      - button "Free mise": Free
+      - text: rust ~/.cargo/registry/cache cache 900 MB
+      - button "Free rust": Free
+      - text: node ~/.cache/npm cache 800 MB
+      - button "Free node": Free
+      - text: bun ~/Library/Caches/bun cache 600 MB
+      - button "Free bun": Free
+      - text: discord ~/Library/Application Support/discord/Cache cache 400 MB
+      - button "Free discord": Free
+      - text: ghostty ~/.cache/ghostty cache 400 MB
+      - button "Free ghostty": Free
+      - text: claude ~/.claude/cache · ~/.claude/projects cache 300 MB data 3.6 GB
+      - button "Erase… claude": Erase…
+      - button "Free claude": Free
+      - text: zed ~/Library/Logs/Zed · ~/Library/Application Support/Zed/db cache 300 MB data 1.2 GB
+      - button "Erase… zed": Erase…
+      - button "Free zed": Free
+      - text: cursor ~/Library/Application Support/Cursor/logs cache 200 MB
+      - button "Free cursor": Free
+      - text: notion ~/Library/Application Support/Notion/Partitions/notion/Cache cache 200 MB
+      - button "Free notion": Free
+      - text: codex ~/.codex/cache cache 100 MB
+      - button "Free codex": Free
+      - text: gh ~/.cache/gh cache 100 MB
+      - button "Free gh": Free
+      - text: helm ~/Library/Caches/helm cache 100 MB
+      - button "Free helm": Free
+      - text: starship ~/.cache/starship cache 100 MB
+      - button "Free starship": Free
+      - text: ollama ~/.ollama/models data 1.9 GB
+      - button "Erase… ollama": Erase…
+      - text: gpg ~/.gnupg never touched 200 KB ssh ~/.ssh never touched 100 KB
+      - paragraph: Data and settings are never freed here. Erasing an app's data is asked for by name.
+    - region "Images":
+      - heading "Images a machine built in advance; a new machine starts as a copy of it" [level=2]
+      - text: base-ubuntu 2026.11.01 built 1 Nov · 4 GB · 2 machines made from it newest base-ubuntu 2026.10.20 built 20 Oct · 3 GB · no machine made from it
+      - button "Delete base-ubuntu 2026.10.20": Delete · frees 3 GB
+    - region "Machines":
+      - heading "Machines what is inside a VM is on its own Storage tab" [level=2]
+      - text: macbook-pro the Mac itself 34.8 GB of caches inside 499 GB
+      - button "api 50 GB"
+      - button "linux-1 1.5 GB of caches inside 50 GB"
+  - region "mac-mini":
+    - heading "mac-mini" [level=2]
+    - heading "Nothing to free." [level=1]
+    - paragraph:
+      - img "Nothing to free."
+      - text: "on mac-mini: no machine and no file of yours is touched"
+    - region "Disk":
+      - heading "Disk" [level=2]
+      - paragraph: 375 GB of 2 TB used
+      - button "Rescan"
+      - paragraph: This Mac itself holds 291 GB. Outside any machine, Machines holds 84.0 GB.
+      - 'img "What holds the disk of mac-mini: Caches 1.1 GB · Machine disks 80 GB · Images 4 GB · Free 1.6 TB"'
+      - list "The parts":
+        - listitem: Caches 1.1 GB
+        - listitem: Machine disks 80 GB
+        - listitem: Images 4 GB
+        - listitem: Free 1.6 TB
+      - paragraph: Every image and every disk Machines holds is a machine's or the newest.
+      - paragraph: Caches hold 1.1 GB. Each app rebuilds its own when it needs it.
+      - button "Free 1.1 GB"
+    - region "By app":
+      - heading "By app each app says in the catalog which of its folders are cache, data or settings" [level=2]
+      - text: go ~/go · to ~/.local/share/go/bin misplaced 2.3 GB
+      - button "Move go": Move
+      - text: homebrew ~/Library/Caches/Homebrew cache 1.1 GB
+      - button "Free homebrew": Free
+      - text: claude ~/.claude/projects data 2 GB
+      - button "Erase… claude": Erase…
+      - paragraph: Data and settings are never freed here. Erasing an app's data is asked for by name.
+    - region "Images":
+      - heading "Images a machine built in advance; a new machine starts as a copy of it" [level=2]
+      - paragraph: No image on mac-mini.
+    - region "Machines":
+      - heading "Machines what is inside a VM is on its own Storage tab" [level=2]
+      - text: mac-mini the Mac itself 1.1 GB of caches inside 291 GB
+      - button "infra 80 GB"

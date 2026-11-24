@@ -4,9 +4,7 @@ import type {
     ImagesReport,
     MachinesMacView,
     MachinesVM,
-    Target,
 } from '@jterrazz/station-api';
-import { useState } from 'react';
 
 import { bytes, sentence } from '../../../domain/format';
 import { targetOf } from '../../../domain/machines/machines';
@@ -15,47 +13,48 @@ import { shortDay } from '../../../domain/when';
 import { useReach, useRead, useWatch } from '../../dependencies/dependencies';
 import type { Reading } from '../../dependencies/dependencies';
 import { DiskCard } from '../../features/disk/disk-card';
-import { groupOf, GroupPanel } from '../../features/disk/disk-view';
+import { ByApp } from '../../features/disk/disk-view';
 import { HeldOutcomes } from '../../kit/gestures';
 import { useIdentityOf } from '../../kit/identity';
 import { Absent, NoVerdict, Unanswered, VerdictHead } from '../../kit/readings';
 import { SkeletonHead } from '../../kit/skeleton';
 import { machineRoute } from '../../navigation/route';
 import type { Route } from '../../navigation/route';
-import { MachineIcon, Panel, Row, Switch } from '../../ui/index';
+import { MachineIcon, MacSection, Panel, Row } from '../../ui/index';
 import { Page } from '../../ui/page';
 import { countOf } from '../../words/engine-words';
-import { diskGestureOf, machineKindOf } from '../../words/provisional';
+import { machineKindOf } from '../../words/provisional';
 import { THE_MAC_ITSELF_WORD } from '../../words/words';
 import { BuildingLine } from './building-line';
-import { chosenMac, imagesOn } from './chosen';
 import { ImageLine } from './image-gesture';
+import { imagesOn } from './images-on';
 
 import styles from '../../ui/page.module.css';
 
 type Go = (to: Route) => void;
 
-type DiskOfProps = { reading: DiskReading; mac: string; target: Target | undefined };
+type DiskOfProps = { reading: DiskReading; mac: MachinesMacView };
 
-function DiskRead({ reading, mac, target }: DiskOfProps) {
-    const erasable = groupOf(reading, (row) => diskGestureOf(row.Group)?.call === 'disk.erase');
+// value: a Mac's disk is its volume, what Machines holds beside it, then each app with its kinds and gestures.
+function DiskRead({ reading, mac }: DiskOfProps) {
+    const target = targetOf({ mac });
     return (
-        <DiskCard name={mac} reading={reading} target={target}>
-            {erasable === undefined ? null : <GroupPanel group={erasable} target={target} />}
+        <DiskCard leads={mac.ThisMac} name={mac.Name} reading={reading} target={target}>
+            <ByApp name={mac.Name} reading={reading} target={target} />
         </DiskCard>
     );
 }
 
-type DiskOfMacProps = { disk: Reading<DiskReading>; mac: string; target: Target | undefined };
+type DiskOfMacProps = { disk: Reading<DiskReading>; mac: MachinesMacView };
 
-function DiskOf({ disk, mac, target }: DiskOfMacProps) {
+function DiskOf({ disk, mac }: DiskOfMacProps) {
     if (disk.kind === 'failed') {
         return <Unanswered error={disk.error} size="tab" />;
     }
     if (disk.kind === 'reading') {
-        return <SkeletonHead size="tab" what={`the disk of ${mac}`} />;
+        return <SkeletonHead size="tab" what={`the disk of ${mac.Name}`} />;
     }
-    return <DiskRead mac={mac} reading={disk.out} target={target} />;
+    return <DiskRead mac={mac} reading={disk.out} />;
 }
 
 function imageSentence(image: ImagesReport): string {
@@ -125,15 +124,12 @@ function sizeFrom(station: DiskStationPart | undefined, name: string): null | st
 
 type LineProps = { mac: MachinesMacView; station: DiskStationPart | undefined; go: Go };
 
-function MacLine({ mac, station, go }: LineProps) {
+function MacLine({ mac, station }: Omit<LineProps, 'go'>) {
     const caches = useCachesInside({ mac });
     return (
         <Row
             kind={caches.pill}
             lead={<MachineIcon kind="mac" />}
-            onOpen={() => {
-                go(machineRoute(mac.Name, 'Storage'));
-            }}
             sentence={sentence([THE_MAC_ITSELF_WORD, caches.said])}
             title={mac.Name}
             value={sizeFrom(station, mac.Name)}
@@ -160,8 +156,8 @@ function VmLine({ mac, vm, station, go }: LineProps & { vm: MachinesVM }) {
 
 function Machines({ mac, station, go }: LineProps) {
     return (
-        <Panel note="what is inside one is on its own Storage tab" title="Machines">
-            <MacLine go={go} mac={mac} station={station} />
+        <Panel note="what is inside a VM is on its own Storage tab" title="Machines">
+            <MacLine mac={mac} station={station} />
             {(mac.VMs ?? []).map((vm) => (
                 <VmLine go={go} key={vm.Name} mac={mac} station={station} vm={vm} />
             ))}
@@ -169,56 +165,35 @@ function Machines({ mac, station, go }: LineProps) {
     );
 }
 
-type OneMacProps = { disk: Reading<DiskReading>; mac: MachinesMacView; go: Go };
-
-function OneMac({ disk, mac, go }: OneMacProps) {
-    const images = useRead('images.list', {});
-    return (
-        <>
-            <DiskOf disk={disk} mac={mac.Name} target={targetOf({ mac })} />
-            <HeldOutcomes>
-                <Images images={images} mac={mac} />
-            </HeldOutcomes>
-            <Machines go={go} mac={mac} station={stationOf(disk)} />
-        </>
-    );
-}
-
 function stationOf(disk: Reading<DiskReading>): DiskStationPart | undefined {
     return disk.kind === 'read' ? disk.out.Station : undefined;
 }
 
-type ChosenProps = {
-    mac: MachinesMacView;
-    macs: readonly MachinesMacView[];
-    choose: (name: string) => void;
-    go: Go;
-};
+type OneMacProps = { mac: MachinesMacView; go: Go };
 
-function ChosenMac({ mac, macs, choose, go }: ChosenProps) {
+function OneMac({ mac, go }: OneMacProps) {
     const disk = useWatch('disk.read', {}, targetOf({ mac }));
+    const images = useRead('images.list', {});
     const station = stationOf(disk);
     return (
-        <>
+        <MacSection name={mac.Name}>
             {station === undefined ? (
-                <NoVerdict size="page" />
+                <NoVerdict size="tab" />
             ) : (
-                <VerdictHead size="page" verdict={station.Verdict} />
+                <VerdictHead size="tab" verdict={station.Verdict} />
             )}
-            <Switch
-                label="Which Mac"
-                onChange={choose}
-                options={macs.map((candidate) => ({ id: candidate.Name, label: candidate.Name }))}
-                value={mac.Name}
-            />
-            <OneMac disk={disk} go={go} mac={mac} />
-        </>
+            <DiskOf disk={disk} mac={mac} />
+            <HeldOutcomes>
+                <Images images={images} mac={mac} />
+            </HeldOutcomes>
+            <Machines go={go} mac={mac} station={station} />
+        </MacSection>
     );
 }
 
+// invariant: every Mac the engine lists has its section, in the listing's order, This Mac's first as listed.
 export function StoragePage({ macs, go }: { macs: readonly MachinesMacView[]; go: Go }) {
     const reach = useReach();
-    const [chosen, setChosen] = useState<string | undefined>(undefined);
     if (reach.kind === 'unanswered' && macs.length === 0) {
         return (
             <Page>
@@ -226,9 +201,7 @@ export function StoragePage({ macs, go }: { macs: readonly MachinesMacView[]; go
             </Page>
         );
     }
-    const name = chosenMac(macs, chosen);
-    const mac = macs.find((candidate) => candidate.Name === name);
-    if (!mac) {
+    if (macs.length === 0) {
         return (
             <Page>
                 <SkeletonHead size="page" what="the Macs" />
@@ -237,7 +210,9 @@ export function StoragePage({ macs, go }: { macs: readonly MachinesMacView[]; go
     }
     return (
         <Page>
-            <ChosenMac choose={setChosen} go={go} key={mac.Name} mac={mac} macs={macs} />
+            {macs.map((mac) => (
+                <OneMac go={go} key={mac.Name} mac={mac} />
+            ))}
         </Page>
     );
 }

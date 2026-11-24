@@ -1,45 +1,54 @@
 - main:
-  - heading "Nothing to free." [level=1]
-  - paragraph:
-    - img "Nothing to free."
-    - text: "on macbook-pro: no machine and no file of yours is touched"
-  - group "Which Mac":
-    - button "macbook-pro" [pressed]
-  - region "Disk":
-    - heading "Disk" [level=2]
-    - paragraph: 582 GB of 994 GB used
-    - button "Rescan"
-    - paragraph: This Mac itself holds 562 GB. Outside any machine, Machines holds 20.1 GB.
-    - 'img "What holds the disk of macbook-pro: System 21.4 GB · Your data 530 GB · Caches 10.2 GB · Machine disks 20 GB · Machines'' logs 120 MB · Free 412 GB"'
-    - list "The parts":
-      - listitem: System 21.4 GB
-      - listitem: Your data 530 GB
-      - listitem: Caches 10.2 GB
-      - listitem: Machine disks 20 GB
-      - listitem: Machines' logs 120 MB
-      - listitem: Free 412 GB
-    - paragraph: Every image and every disk Machines holds is a machine's or the newest.
-    - paragraph: Caches hold 10.3 GB. Each app rebuilds its own when it needs it.
-    - button "Free 10.3 GB"
-  - region "Your data":
-    - heading "Your data 2" [level=2]
-    - text: xcode ~/Library/Developer/CoreSimulator/Devices 6.3 GB
-    - button "Erase… xcode": Erase…
-    - text: claude ~/.claude/projects 2.1 GB
-    - button "Erase… claude": Erase…
-  - region "Images":
-    - heading "Images a machine built in advance; a new machine starts as a copy of it" [level=2]
-    - text: base-ubuntu 2026.11.04 Packages · Step 2 of 4
-    - img "Done"
-    - text: Base system
-    - img "Now"
-    - text: Packages
-    - img "Next"
-    - text: Settings
-    - img "Next"
-    - text: Seal
-  - region "Machines":
-    - heading "Machines what is inside one is on its own Storage tab" [level=2]
-    - button "macbook-pro the Mac itself 10.3 GB of caches inside 562 GB"
-    - button "linux-4 20 GB"
-    - button "linux-5 Lot shell, one block per package"
+  - region "macbook-pro":
+    - heading "macbook-pro" [level=2]
+    - heading "Nothing to free." [level=1]
+    - paragraph:
+      - img "Nothing to free."
+      - text: "on macbook-pro: no machine and no file of yours is touched"
+    - region "Disk":
+      - heading "Disk" [level=2]
+      - paragraph: 582 GB of 994 GB used
+      - button "Rescan"
+      - paragraph: This Mac itself holds 562 GB. Outside any machine, Machines holds 20.1 GB.
+      - 'img "What holds the disk of macbook-pro: System 21.4 GB · Your data 530 GB · Caches 10.2 GB · Machine disks 20 GB · Machines'' logs 120 MB · Free 412 GB"'
+      - list "The parts":
+        - listitem: System 21.4 GB
+        - listitem: Your data 530 GB
+        - listitem: Caches 10.2 GB
+        - listitem: Machine disks 20 GB
+        - listitem: Machines' logs 120 MB
+        - listitem: Free 412 GB
+      - paragraph: Every image and every disk Machines holds is a machine's or the newest.
+      - paragraph: Caches hold 10.3 GB. Each app rebuilds its own when it needs it.
+      - button "Free 10.3 GB"
+    - region "By app":
+      - heading "By app each app says in the catalog which of its folders are cache, data or settings" [level=2]
+      - text: go ~/Library/Caches/go-build cache 8.2 GB
+      - button "Free go": Free
+      - text: homebrew ~/Library/Caches/Homebrew cache 1.4 GB
+      - button "Free homebrew": Free
+      - text: node ~/.cache/npm cache 600 MB
+      - button "Free node": Free
+      - text: station ~/.local/state/station/logs/*.log cache 120 MB
+      - button "Free station": Free
+      - text: xcode ~/Library/Developer/CoreSimulator/Devices data 6.3 GB
+      - button "Erase… xcode": Erase…
+      - text: claude ~/.claude/projects data 2.1 GB
+      - button "Erase… claude": Erase…
+      - paragraph: Data and settings are never freed here. Erasing an app's data is asked for by name.
+    - region "Images":
+      - heading "Images a machine built in advance; a new machine starts as a copy of it" [level=2]
+      - text: base-ubuntu 2026.11.04 Packages · Step 2 of 4
+      - img "Done"
+      - text: Base system
+      - img "Now"
+      - text: Packages
+      - img "Next"
+      - text: Settings
+      - img "Next"
+      - text: Seal
+    - region "Machines":
+      - heading "Machines what is inside a VM is on its own Storage tab" [level=2]
+      - text: macbook-pro the Mac itself 10.3 GB of caches inside 562 GB
+      - button "linux-4 20 GB"
+      - button "linux-5 Lot shell, one block per package"

@@ -6,12 +6,14 @@
     - button "Agent soon" [disabled]
     - button "OS soon" [disabled]
   - button "Passwords"
-  - button "Storage"
   - button "Settings"
   - button "Engine running · v0.21.0"
 - navigation "Sidebar":
   - heading "Machine" [level=2]
   - button "Find"
+  - group "Every Mac":
+    - button "Storage"
+    - button "Engine"
   - group "Machines":
     - heading "Machines" [level=2]
     - button "macbook-pro online":
@@ -41,17 +43,24 @@
   - button "Back" [disabled]
   - button "Forward" [disabled]
   - text: Engine
-  - heading "Spwn v0.22.0 is out." [level=1]
-  - paragraph:
-    - img "Spwn v0.22.0 is out."
-    - text: This Mac runs v0.21.0.
-  - region "Update":
-    - heading "Update the public installer installs station and Spwn" [level=2]
-    - button "What changed"
-    - button "Update"
-    - text: curl -fsSL https://spwn.sh/install.sh | bash
-  - region "Engine":
-    - heading "Engine" [level=2]
-    - text: "Latest release Checked 4 Nov, 02:00 failed the latest release was not read: GitHub: dial tcp: connection refused."
-    - button "Dismiss"
-    - button "Check now"
+  - region "macbook-pro":
+    - heading "macbook-pro" [level=2]
+    - heading "Spwn v0.22.0 is out." [level=1]
+    - paragraph:
+      - img "Spwn v0.22.0 is out."
+      - text: This Mac runs v0.21.0.
+    - region "Update":
+      - heading "Update the public installer installs station and Spwn" [level=2]
+      - button "What changed"
+      - button "Update"
+      - text: curl -fsSL https://spwn.sh/install.sh | bash
+    - region "Engine":
+      - heading "Engine" [level=2]
+      - text: "Engine v0.21.0 running Latest release Checked 4 Nov, 02:00 failed the latest release was not read: GitHub: dial tcp: connection refused."
+      - button "Dismiss"
+      - button "Check now"
+  - region "mac-mini":
+    - heading "mac-mini" [level=2]
+    - region "Engine":
+      - heading "Engine" [level=2]
+      - text: Engine dev running

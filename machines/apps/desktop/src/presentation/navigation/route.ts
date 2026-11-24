@@ -13,9 +13,25 @@ const SECTIONS_OF: Readonly<Record<Tab, (sections: MachinesSections) => boolean>
     Storage: (sections) => sections.Disk,
 };
 
-// invariant: a machine's tabs are the ones its engine says it has sections for; a Mac sends none and has every tab.
-export function tabsOf(sections: MachinesSections | undefined): readonly Tab[] {
-    return sections === undefined ? TABS : TABS.filter((tab) => SECTIONS_OF[tab](sections));
+// value: a Mac's disk is a section of the Storage page, so a Mac has every tab but Storage.
+const MAC_TABS: readonly Tab[] = TABS.filter((tab) => tab !== 'Storage');
+
+// invariant: a VM's tabs are the ones its engine says it has sections for, every tab when it sends none.
+export function tabsOf(
+    vm: undefined | { Sections?: MachinesSections | undefined },
+): readonly Tab[] {
+    if (vm === undefined) {
+        return MAC_TABS;
+    }
+    const { Sections } = vm;
+    return Sections === undefined ? TABS : TABS.filter((tab) => SECTIONS_OF[tab](Sections));
+}
+
+// value: where a route of a Mac's tab opens: its Storage, from a link or a relaunch, is the Storage page.
+export function settledRoute(route: Route, isMac: boolean): Route {
+    return route.page === 'machine' && isMac && !MAC_TABS.includes(route.tab)
+        ? { page: 'storage' }
+        : route;
 }
 
 export function tabOf(value: unknown): Tab | undefined {

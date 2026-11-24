@@ -17,6 +17,10 @@ import { recordingsOf } from '../../../../infrastructure/outbound/engine-replay/
 const recordingFor = await recordingsOf('two-macs');
 
 const byApp = region('By app');
+const THIS_MAC = region('macbook-pro');
+const thisByApp = within(THIS_MAC, byApp);
+const thisDone = within(THIS_MAC, region('Done here'));
+const thisImages = within(THIS_MAC, region('Images'));
 
 function storageOver(world: string) {
     return pageOver(recordingFor(world), { page: 'storage' });
@@ -48,71 +52,50 @@ describe('disk gestures', () => {
     test('freeing what can be rebuilt on Storage frees every rebuildable row, and the footer leaves', async () => {
         // Given - Storage over two-macs, 34.8 GB that can be rebuilt
         const result = await component.render(storageOver('two-macs'), async (visitor) => {
-            await visitor.see(content('Caches hold 34.8 GB.', { exact: false }));
+            await visitor.see(within(THIS_MAC, content('Caches hold 34.8 GB.', { exact: false })));
 
             // When - the footer's gesture is clicked
-            await visitor.click(button('Free 34.8 GB'));
+            await visitor.click(within(THIS_MAC, button('Free 34.8 GB')));
 
             // Then - the engine's outcomes stay held once nothing is left to rebuild
-            const freed = region('Done here');
+            const freed = thisDone;
             await visitor.see(within(freed, content('homebrew')));
-            await visitor.gone(button('Free 34.8 GB'));
+            await visitor.gone(within(THIS_MAC, button('Free 34.8 GB')));
         });
         expect(result.errors.text).toBe('');
     });
 
     test("an app's Free frees that app alone", async () => {
-        // Given - This Mac's Storage tab over two-macs
-        const mac = tabOver('two-macs', 'macbook-pro');
+        // Given - This Mac's section of Storage over two-macs
+        const mac = storageOver('two-macs');
         const result = await component.render(mac, async (visitor) => {
-            await visitor.see(within(byApp, button('Free go')));
+            await visitor.see(within(thisByApp, button('Free go')));
 
             // When - go's Free is clicked
-            await visitor.click(within(byApp, button('Free go')));
+            await visitor.click(within(thisByApp, button('Free go')));
 
             // Then - go leaves what the engine reads again, the others stay, and what it freed is held
-            await visitor.gone(within(byApp, button('Free go')));
-            await visitor.see(within(byApp, button('Free homebrew')));
-            await visitor.see(within(region('Done here'), content('19.4 GB freed')));
+            await visitor.gone(within(thisByApp, button('Free go')));
+            await visitor.see(within(thisByApp, button('Free homebrew')));
+            await visitor.see(within(thisDone, content('19.4 GB freed')));
         });
         expect(result.errors.text).toBe('');
     });
 
     test('move takes a misplaced folder where its app looks, and its row leaves the page', async () => {
-        // Given - This Mac's Storage tab over two-macs, where ~/.tart is misplaced
-        const mac = tabOver('two-macs', 'macbook-pro');
+        // Given - This Mac's section of Storage over two-macs, where ~/.tart is misplaced
+        const mac = storageOver('two-macs');
         const result = await component.render(mac, async (visitor) => {
-            await visitor.see(within(byApp, content('misplaced 73.3 GB')));
+            await visitor.see(within(thisByApp, content('misplaced 73.3 GB')));
 
             // When - its Move is clicked
-            await visitor.click(button('Move tart'));
+            await visitor.click(within(thisByApp, button('Move tart')));
 
             // Then - disk.read read again lists nothing misplaced, and a move claims to free nothing
-            await visitor.gone(within(byApp, button('Move tart')));
+            await visitor.gone(within(thisByApp, button('Move tart')));
             await visitor.gone(dialog());
-            await visitor.see(within(region('Done here'), content('tart', { exact: false })));
-            await visitor.gone(within(region('Done here'), content('0 B freed')));
-        });
-        expect(result.errors.text).toBe('');
-    });
-
-    test("a machine's Storage tab erases an app's data from its By app row, by its name typed", async () => {
-        // Given - This Mac's Storage tab over two-macs, where ollama holds data alone
-        const mac = tabOver('two-macs', 'macbook-pro');
-        const result = await component.render(mac, async (visitor) => {
-            await visitor.see(within(byApp, button('Erase… ollama')));
-
-            // When - Erase… ollama is clicked and its name typed
-            await visitor.click(within(byApp, button('Erase… ollama')));
-            const asked = dialog('Erase ollama?');
-            await visitor.fill(within(asked, field('Type ollama to confirm')), 'ollama');
-            const erase = enabled(button('Erase'));
-            await visitor.click(within(asked, erase));
-
-            // Then - ollama leaves what the engine reads again, and what the erase did is held
-            await visitor.gone(asked);
-            await visitor.gone(within(byApp, button('Erase… ollama')));
-            await visitor.see(within(region('Done here'), content('ollama')));
+            await visitor.see(within(thisDone, content('tart', { exact: false })));
+            await visitor.gone(within(thisDone, content('0 B freed')));
         });
         expect(result.errors.text).toBe('');
     });
@@ -120,7 +103,7 @@ describe('disk gestures', () => {
     test('erase asks for the name typed, then the data leaves the page', async () => {
         // Given - Storage over two-macs
         const result = await component.render(storageOver('two-macs'), async (visitor) => {
-            const data = region('Your data');
+            const data = thisByApp;
             await visitor.see(within(data, button('Erase… ollama')));
 
             // When - Erase… ollama is clicked, a wrong name typed, then the right one, in a dialog whose verb is Erase
@@ -139,7 +122,7 @@ describe('disk gestures', () => {
             await visitor.gone(asked);
             await visitor.gone(within(data, button('Erase… ollama')));
             await visitor.see(within(data, button('Erase… claude')));
-            await visitor.see(within(region('Done here'), content('ollama')));
+            await visitor.see(within(thisDone, content('ollama')));
         });
         expect(result.errors.text).toBe('');
     });
@@ -173,7 +156,7 @@ describe('disk gestures', () => {
         const result = await component.render(
             pageOver(refusing, { page: 'storage' }),
             async (visitor) => {
-                const data = region('Your data');
+                const data = thisByApp;
 
                 // When - Erase… xcode is confirmed with its name typed
                 await visitor.click(within(data, button('Erase… xcode')));
@@ -226,7 +209,7 @@ describe('disk gestures', () => {
         const result = await component.render(
             pageOver(refusing, { page: 'storage' }),
             async (visitor) => {
-                const images = region('Images');
+                const images = thisImages;
                 await visitor.see(within(images, content('2026.10.20')));
 
                 // When - its Delete is clicked, then confirmed
@@ -250,7 +233,7 @@ describe('disk gestures', () => {
     test('delete of an image asks yes, then the image leaves the list and its outcome stays above it', async () => {
         // Given - Storage over two-macs, two versions of base-ubuntu built
         const result = await component.render(storageOver('two-macs'), async (visitor) => {
-            const images = region('Images');
+            const images = thisImages;
             await visitor.see(within(images, content('2026.10.20')));
 
             // When - its Delete is clicked, then confirmed
@@ -262,7 +245,7 @@ describe('disk gestures', () => {
             await visitor.gone(asked);
             await visitor.gone(within(images, content('2026.10.20')));
             await visitor.see(within(images, content('2026.11.01')));
-            await visitor.see(within(region('Done here'), content('base-ubuntu 2026.10.20')));
+            await visitor.see(within(thisDone, content('base-ubuntu 2026.10.20')));
         });
         expect(result.errors.text).toBe('');
     });

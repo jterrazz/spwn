@@ -3,45 +3,15 @@ import type { DiskReading, DiskRow, Target } from '@jterrazz/station-api';
 import { bytes, sentence } from '../../../domain/format';
 import { SEPARATOR } from '../../../domain/separator';
 import { AppIcon, Panel, TypeTag } from '../../ui/index';
-import { detailOf, wordOf } from '../../words/engine-words';
+import { detailOf } from '../../words/engine-words';
 import { diskGestureOf, freesWhole } from '../../words/provisional';
 import { DISK_PENDING_WORD } from '../../words/words';
 import { byApp, groupsOf, sizeOf } from './disk';
-import type { AppRow, Group } from './disk';
+import type { AppRow } from './disk';
 import { DiskLine, EraseLink } from './disk-gestures';
 
 import pageStyles from '../../ui/page.module.css';
 import styles from './disk.module.css';
-
-type GroupProps = { group: Group; target: Target | undefined };
-
-export function GroupPanel({ group, target }: GroupProps) {
-    return (
-        <Panel note={String(group.rows.length)} title={wordOf('DiskGroup', group.group).Word}>
-            {group.rows.map((row) => (
-                <DiskLine
-                    key={`${row.App}/${(row.Paths ?? []).join(':')}`}
-                    lead={<AppIcon name={row.App} />}
-                    row={row}
-                    sentence={sentence([
-                        row.Note,
-                        (row.Paths ?? []).join(SEPARATOR),
-                        row.MoveTo === '' ? undefined : `to ${row.MoveTo}`,
-                    ])}
-                    size={sizeOf(row)}
-                    target={target}
-                />
-            ))}
-        </Panel>
-    );
-}
-
-export function groupOf(
-    reading: DiskReading,
-    wanted: (row: DiskRow) => boolean,
-): Group | undefined {
-    return groupsOf((reading.Rows ?? []).filter(wanted))[0];
-}
 
 function chipSize(rows: readonly DiskRow[]): string {
     const [only] = rows;
@@ -95,9 +65,11 @@ function AppLine({ app, target }: { app: AppRow; target: Target | undefined }) {
     );
 }
 
-type ByAppProps = { reading: DiskReading; name: string; target: Target | undefined; foot: string };
+const FOOT = "Data and settings are never freed here. Erasing an app's data is asked for by name.";
 
-export function ByApp({ reading, name, target, foot }: ByAppProps) {
+type ByAppProps = { reading: DiskReading; name: string; target: Target | undefined };
+
+export function ByApp({ reading, name, target }: ByAppProps) {
     const apps = byApp(reading.Rows ?? []);
     return (
         <Panel
@@ -109,7 +81,7 @@ export function ByApp({ reading, name, target, foot }: ByAppProps) {
             ) : (
                 apps.map((app) => <AppLine app={app} key={app.key} target={target} />)
             )}
-            <p className={styles.more}>{foot}</p>
+            <p className={styles.more}>{FOOT}</p>
         </Panel>
     );
 }

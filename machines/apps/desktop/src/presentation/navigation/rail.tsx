@@ -238,7 +238,7 @@ function owedOf(needs: readonly OverviewNeed[]): PlaceProps['count'] {
         : undefined;
 }
 
-type Reached = 'home' | 'inbox' | 'passwords' | 'settings' | 'storage';
+type Reached = 'home' | 'inbox' | 'passwords' | 'settings';
 
 // invariant: the rail is the window's, whatever the space: Home and Inbox at its top, the spaces one choice of three
 // invariant: in its middle, the global pages and the engine at its foot.
@@ -272,7 +272,6 @@ export function Rail({ route, go, onSpace, needs, engine, quiet }: RailProps) {
             <Spaces onSpace={onSpace} quiet={quiet} route={route} />
             <div className={styles.foot}>
                 <Place {...at('passwords')} icon="key" label="Passwords" />
-                <Place {...at('storage')} icon="disc" label="Storage" />
                 <Place
                     {...at('settings')}
                     icon="gear"
