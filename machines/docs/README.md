@@ -141,5 +141,6 @@ The records of decisions this repository alone took go in [`decisions/`](decisio
 - [086 A VM reserves a package's port only when its Machinefile installs it](decisions/086-a-vm-reserves-a-packages-port-only-when-its-machinefile-installs-it.md) (Accepted)
 - [087 A fetched macOS guest takes its key at its first login](decisions/087-a-fetched-macos-guest-takes-its-key-at-its-first-login.md) (Proposed)
 - [088 Agents live in the one binary, as families reached by calls](decisions/088-agents-live-in-the-one-binary-as-families-reached-by-calls.md) (Accepted)
+- [089 An agent runs in a Herdr terminal on its own machine](decisions/089-an-agent-runs-in-a-herdr-terminal-on-its-own-machine.md) (Accepted)
 
 A decision spanning several repositories is recorded by the corpus that spans them. What was left for later is `TODO.md` at the repository root.
