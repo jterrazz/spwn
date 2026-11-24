@@ -20,12 +20,12 @@ type Input struct{ Key, Machinefile string }
 func Command(d Deps, env kit.Env) *cobra.Command {
 	return kit.Command(kit.Leaf[Input]{
 		Use:     "explain [<key>]",
-		Short:   "Each value of the machine's Machinefile, and the origin it comes from",
+		Short:   "Each value of a Machinefile, and the origin it comes from; <key> narrows it, --machinefile picks the file",
 		Example: "  station explain\n  station explain apps.jq\n  station explain vm --machinefile base-ubuntu",
 		Group:   kit.StationItself,
 		Args:    cobra.MaximumNArgs(1),
 		Declare: func(f *pflag.FlagSet, in *Input) {
-			f.StringVar(&in.Machinefile, "machinefile", "", "the Machinefile explained (default: the one named after the machine)")
+			f.StringVar(&in.Machinefile, "machinefile", "", "the Machinefile explained (default: the one this machine is bound to, else the one named after it)")
 		},
 		Bind: func(in *Input, args []string) error {
 			if len(args) == 1 {

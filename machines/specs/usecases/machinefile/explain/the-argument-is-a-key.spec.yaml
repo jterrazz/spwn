@@ -1,0 +1,12 @@
+description: 'explain''s argument is a key, and the help says --machinefile picks the file'
+env: two-macs
+runs:
+    - command: 'explain --help | /usr/bin/grep -c "<key> narrows it, --machinefile picks the file"'
+      exit: 0
+      stdout: |
+          1
+    - command: 'explain base-macos --machinefile base-macos'
+      exit: 2
+      stderr: |
+          Error: base-macos says nothing of base-macos
+          Hint: station explain --machinefile base-macos
