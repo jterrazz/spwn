@@ -1,5 +1,5 @@
 description: 'an admin setting without admin rights is refused with the sudo line, and nothing runs'
-env: two-macs
+env: bare-mac
 runs:
     - command: 'settings apply restart-after-power-cut'
       exit: 2

@@ -76,6 +76,7 @@ func settingsOf(m machine) *settingscalls.Catalogue {
 		ThisMachine: m.kind,
 		Admin:       m.sys.Env.Euid() == 0,
 		Has:         m.has,
+		Laptop:      m.profile.Caps.Battery,
 		Defaults:    settingsDefaults(m),
 		Appliers:    settingAppliers(m),
 	})

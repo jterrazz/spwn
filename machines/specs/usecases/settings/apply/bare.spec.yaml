@@ -25,8 +25,6 @@ runs:
           ○	ssh-key	not applied	station settings apply ssh-key
           ○	zed-dotfiles	not applied · needs zed	station apps install zed
           ○	tailscale-cli	not applied · needs tailscale	station apps install tailscale
-          # Always-on Mac
-          ○	Always-on Mac	5 · for a Mac that hosts servers
           # Checked	8 ●	1 ◐
           # Not for this machine
     - command: 'settings apply'

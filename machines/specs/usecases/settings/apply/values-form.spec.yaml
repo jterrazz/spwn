@@ -2,7 +2,7 @@ description: 'on a terminal, a setting with a value asks it in a form, the passw
 fixture:
     - ../../../__fixtures__/terminal/
 env:
-    - two-macs
+    - bare-mac
     - terminal
 runs:
     - command: 'world admin on'

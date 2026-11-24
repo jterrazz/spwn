@@ -1,5 +1,5 @@
 description: 'no gesture runs sudo: what needs root is refused with its command, and the world records no attempt'
-env: two-macs
+env: bare-mac
 runs:
     - command: 'settings apply sshd'
       exit: 2

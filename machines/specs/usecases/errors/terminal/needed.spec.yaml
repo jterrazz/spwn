@@ -6,8 +6,8 @@ runs:
       stderr: |
           Error: machines unlock needs a terminal
           Hint: run it in a terminal
-    - command: 'settings apply autologin </dev/null'
+    - command: 'settings apply ssh-key </dev/null'
       exit: 2
       stderr: |
-          Error: autologin asks a value: run it on a terminal
-          Hint: station settings apply autologin
+          Error: ssh-key asks a value: run it on a terminal
+          Hint: station settings apply ssh-key

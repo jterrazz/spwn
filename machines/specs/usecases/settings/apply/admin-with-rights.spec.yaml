@@ -1,5 +1,5 @@
 description: 'with admin rights on This Mac an admin setting is applied, and the Always-on Mac group unfolds there'
-env: two-macs
+env: bare-mac
 runs:
     - command: 'world admin on'
       exit: 0

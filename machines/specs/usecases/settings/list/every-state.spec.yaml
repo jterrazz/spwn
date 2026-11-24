@@ -23,6 +23,5 @@ runs:
           ○	dock-reset	not applied	station settings apply dock-reset
           ●	hushlogin	applied · ~/.hushlogin
           ⊘	dns	off here
-          # Always-on Mac
           # Checked	8 ●	1 ◐
           # Not for this machine

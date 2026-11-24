@@ -26,6 +26,9 @@ type CatalogueOptions struct {
 	Admin bool
 	// value: the app a setting requires is installed here.
 	Has func(app string) bool
+	// value: this Mac reports a battery, so it is a laptop, and no setting
+	// of the Always-on Mac group lives on it.
+	Laptop bool
 }
 
 type Catalogue struct {
@@ -52,7 +55,7 @@ type handler struct {
 func (s *Catalogue) Placed() []catalog.Setting {
 	var placed []catalog.Setting
 	for _, it := range s.packages {
-		if slices.Contains(it.Kinds, s.o.ThisMachine) {
+		if s.Lives(it) {
 			placed = append(placed, it)
 		}
 	}
@@ -61,7 +64,12 @@ func (s *Catalogue) Placed() []catalog.Setting {
 
 func (s *Catalogue) Packages() []catalog.Setting { return s.packages }
 
-func (s *Catalogue) Lives(it catalog.Setting) bool { return slices.Contains(it.Kinds, s.o.ThisMachine) }
+func (s *Catalogue) Lives(it catalog.Setting) bool {
+	// invariant: a setting lives on a machine of a kind it names, and the
+	// Always-on Mac group never on a laptop: a Mac that moves is not one a
+	// server is hosted on.
+	return slices.Contains(it.Kinds, s.o.ThisMachine) && (!s.o.Laptop || settings.GroupOf(it) != settings.AlwaysOnMac)
+}
 
 func (s *Catalogue) Needs(it catalog.Setting) string {
 	if s.applies(it) {
@@ -161,8 +169,8 @@ func (s *Catalogue) Find(names []string) ([]catalog.Setting, error) {
 		if !ok {
 			return nil, &settings.UnknownPackageError{Name: name}
 		}
-		if !slices.Contains(it.Kinds, s.o.ThisMachine) {
-			return nil, &settings.WrongLivesOnError{Package: name, Kinds: it.Kinds, ThisMachine: s.o.ThisMachine}
+		if !s.Lives(it) {
+			return nil, &settings.WrongLivesOnError{Package: name, Kinds: it.Kinds, ThisMachine: s.o.ThisMachine, Laptop: s.o.Laptop && settings.GroupOf(it) == settings.AlwaysOnMac}
 		}
 		found = append(found, it)
 	}
@@ -207,8 +215,8 @@ func (s *Catalogue) CheckUninstall(names []string) error {
 // facts, judged before any question and before any effect.
 func (s *Catalogue) admit(it catalog.Setting, verb string, interactive bool) error {
 	switch {
-	case !slices.Contains(it.Kinds, s.o.ThisMachine):
-		return &settings.WrongLivesOnError{Package: it.Name, Kinds: it.Kinds, ThisMachine: s.o.ThisMachine}
+	case !s.Lives(it):
+		return &settings.WrongLivesOnError{Package: it.Name, Kinds: it.Kinds, ThisMachine: s.o.ThisMachine, Laptop: s.o.Laptop && settings.GroupOf(it) == settings.AlwaysOnMac}
 	case verb == verbUninstall && !it.Reversible:
 		return &settings.NotReversibleError{Package: it.Name}
 	case verb == verbInstall && s.NeedsInput(it) && !interactive:

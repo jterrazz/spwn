@@ -15,7 +15,6 @@ runs:
           # Set by Machines	1 ●	15 ○	1 ⊘
           ●	dock-spacer	applied
           ⊘	hushlogin	off here
-          # Always-on Mac	5 ○
           # Checked	8 ●	1 ◐
           # Not for this machine
     - command: 'settings --on linux-1 --all | /usr/bin/grep -e "^#" -e "	dns	" -e "	tart-launcher	"'

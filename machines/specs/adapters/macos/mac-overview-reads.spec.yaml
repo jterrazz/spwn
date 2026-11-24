@@ -23,7 +23,7 @@ runs:
     - command: 'status --json | /usr/bin/jq -c ''.environment.security | map([.name, .state, .value])'''
       exit: 0
       stdout: |
-          [["filevault","ok","on"],["firewall","absent","off"],["sip","ok","on"],["gatekeeper","ok","on"],["remote-login","ok","on"],["encrypted-dns","absent","off"]]
+          [["filevault","ok","on"],["firewall","absent","off"],["sip","ok","on"],["gatekeeper","ok","on"],["encrypted-dns","absent","off"]]
     - command: 'status --json | /usr/bin/jq -c ''.environment.updates | map([.name, .state, .value, .detail])'''
       exit: 0
       stdout: |
