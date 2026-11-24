@@ -5,9 +5,14 @@ runs:
       exit: 2
       stderr: |
           Error: "Mac_1" is not a machine name
-          Hint: use lowercase letters, digits and -, 1 to 40 characters
+          Hint: use lowercase letters, digits and -, 1 to 40 characters, never - first
       files:
           .zshrc: absent
+    - command: 'init --name=-mac'
+      exit: 2
+      stderr: |
+          Error: "-mac" is not a machine name
+          Hint: use lowercase letters, digits and -, 1 to 40 characters, never - first
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].preferences'' world.json'
       exit: 0
       stdout: |

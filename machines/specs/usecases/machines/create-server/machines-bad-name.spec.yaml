@@ -5,4 +5,4 @@ runs:
       exit: 2
       stderr: |
           Error: "Web_1" is not a valid name
-          Hint: use lowercase letters, digits and "-", 1 to 40 characters
+          Hint: use lowercase letters, digits and "-", 1 to 40 characters, never "-" first

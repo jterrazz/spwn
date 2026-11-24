@@ -235,5 +235,5 @@ func validPurpose(purpose string) bool {
 }
 
 func validName(name string) bool {
-	return len(name) >= 1 && len(name) <= 40 && strings.IndexFunc(name, func(r rune) bool { return !nameChars(r) }) < 0
+	return len(name) >= 1 && len(name) <= 40 && name[0] != '-' && strings.IndexFunc(name, func(r rune) bool { return !nameChars(r) }) < 0
 }

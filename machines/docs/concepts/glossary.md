@@ -162,4 +162,4 @@ nothing; `erase` deletes data, always named and confirmed), `share/stop-sharing`
 
 A VM's default name is `<image>-<n>` (`linux-1`, `linux-2`, `macos-1`), `n` being the smallest integer from 1 that no VM record on any Mac uses and no Mac's name uses. A VM is not on Tailscale, so no node holds a VM's name.
 
-`--name` overrides it: lowercase letters, digits and `-`, 1 to 40 characters, refused if taken. A Mac's name is the owner's, asked at `station init`; the recommendation is the plain model name: `macbook`, `mac-mini`.
+`--name` overrides it: lowercase letters, digits and `-`, 1 to 40 characters, never `-` first, refused if taken. A Mac's name is the owner's, asked at `station init`; the recommendation is the plain model name: `macbook`, `mac-mini`.
