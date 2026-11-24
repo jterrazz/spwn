@@ -38,6 +38,8 @@ vm_user_rule='^[a-z]([a-z0-9_.-]{0,30}[a-z0-9_-])?$'
 [[ "$VM_USER" =~ $vm_user_rule ]] && [ "$VM_USER" != "$LOGIN_USER" ] && [ "$VM_USER" != root ] || { echo "the VM user '$VM_USER' is no lowercase short name, or the image's own account or root: a fetched macOS guest is made for another user" >&2; exit 1; }
 # outside: macOS's own accounts hold a uid under 500 (daemon's 1, the _ ones), but nobody's 4294967294; an account sysadminctl makes starts at 501.
 if vm_uid=$(/usr/bin/id -u "$VM_USER" 2>/dev/null) && { [ "$vm_uid" -lt 500 ] || [ "$vm_uid" -gt 60000 ]; }; then echo "the VM user '$VM_USER' is a system account of the image (uid $vm_uid): a fetched macOS guest is made for another user" >&2; exit 1; fi
+# outside: another name of the image's own account (a second RecordName, an alias) is that account, by its uid.
+if [ -n "${vm_uid:-}" ] && [ "$vm_uid" = "$(/usr/bin/id -u "$LOGIN_USER" 2>/dev/null)" ]; then echo "the VM user '$VM_USER' is the image's own account $LOGIN_USER by its uid ($vm_uid): a fetched macOS guest is made for another user" >&2; exit 1; fi
 # outside: sshd keeps the first value it reads, and macOS's sshd_config includes sshd_config.d/* before its own lines, in name order.
 /bin/cat > /etc/ssh/sshd_config.d/000-station.conf <<'CONF'
 PasswordAuthentication no

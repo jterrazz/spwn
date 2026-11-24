@@ -144,6 +144,7 @@ func lockdownClosesTheImageBeforeAnythingElse(t *testing.T, name, script string)
 		`[ "$VM_USER" != root ]`,
 		`vm_uid=$(/usr/bin/id -u "$VM_USER" 2>/dev/null)`,
 		`{ [ "$vm_uid" -lt 500 ] || [ "$vm_uid" -gt 60000 ]; }`,
+		`[ "$vm_uid" = "$(/usr/bin/id -u "$LOGIN_USER" 2>/dev/null)" ]`,
 	} {
 		at := strings.Index(script, step)
 		switch {
@@ -224,9 +225,13 @@ func TestTheLinuxPlumbingRefusesASystemAccountBeforeItTouchesIt(t *testing.T) {
 	if check < 0 || refusal < 0 {
 		t.Fatal("linux.sh never refuses a VM user that is an existing account outside 1000 to 60000, a system account (daemon, nobody)")
 	}
+	login := strings.Index(script, `[ "$vm_uid" = "$(id -u admin 2>/dev/null)" ]`)
+	if login < 0 {
+		t.Fatal("linux.sh never refuses a VM user that is the base's own admin account under another name, by its uid")
+	}
 	for _, step := range []string{"useradd", "/etc/sudoers.d/60-station-user", "authorized_keys"} {
-		if at := strings.Index(script, step); at >= 0 && at < refusal {
-			t.Errorf("linux.sh runs %q before it refuses a system account as its VM user", step)
+		if at := strings.Index(script, step); at >= 0 && (at < refusal || at < login) {
+			t.Errorf("linux.sh runs %q before it refuses a system account, or the base's admin, as its VM user", step)
 		}
 	}
 }
