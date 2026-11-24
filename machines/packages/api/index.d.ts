@@ -1132,6 +1132,7 @@ export type EngineHello = {
 
 export type EngineInstalled = {
     From: string;
+    MenuBar?: EngineMenuBarLeft;
     Restarted: boolean;
     Written: boolean;
 };
@@ -1156,6 +1157,11 @@ export type EngineLastSettingsOut = {
 export type EngineLog = {
     Empty?: string;
     Lines: string[] | null;
+};
+
+export type EngineMenuBarLeft = {
+    Fix: string;
+    Why: string;
 };
 
 export type EngineNotice = {
