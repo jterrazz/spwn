@@ -9,6 +9,8 @@ require (
 	spwn.sh/packages/dependency v0.0.0
 )
 
+require go.opentelemetry.io/otel/log v1.47.0 // indirect
+
 require (
 	github.com/Azure/go-ansiterm v0.0.0-20261006220739-8c912ac31dd4 // indirect
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
@@ -44,9 +46,9 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.71.0 // indirect
-	go.opentelemetry.io/otel v1.46.0 // indirect
-	go.opentelemetry.io/otel/metric v1.46.0 // indirect
-	go.opentelemetry.io/otel/trace v1.46.0 // indirect
+	go.opentelemetry.io/otel v1.47.0 // indirect
+	go.opentelemetry.io/otel/metric v1.47.0 // indirect
+	go.opentelemetry.io/otel/trace v1.47.0 // indirect
 	golang.org/x/sys v0.47.0 // indirect
 	spwn.sh/packages/runtimes v0.0.0
 )
