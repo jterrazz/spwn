@@ -160,12 +160,62 @@ func (s *Builder) ListOf(ctx context.Context, disks []contract.Disk) ([]images.R
 		if err != nil {
 			return nil, err
 		}
-		out = append(out, s.reports(img, held, users, making, sizes)...)
+		out = append(out, s.reports(img, false, held, users, making, sizes)...)
+	}
+	orphans, orphansErr := s.orphans(ctx, list, users, making, sizes)
+	if orphansErr != nil {
+		return nil, orphansErr
+	}
+	return append(out, orphans...), nil
+}
+
+// invariant: an image no catalog or Machinefile names but whose versions
+// are on disk is listed all the same, as an orphan; one whose record an
+// older station wrote is a row of its refused version, never a refusal of
+// the list, so the delete that ends it stays in reach.
+func (s *Builder) orphans(ctx context.Context, known []catalog.Image, users map[string][]string, making []images.Making, sizes map[string]int) ([]images.Report, error) {
+	names, err := s.store.Names(ctx)
+	if err != nil {
+		return nil, err
+	}
+	var out []images.Report
+	for _, name := range names {
+		if slices.ContainsFunc(known, func(img catalog.Image) bool { return img.Name == name }) {
+			continue
+		}
+		held, err := s.store.List(ctx, name)
+		var old *images.OldRecordError
+		if errors.As(err, &old) {
+			held, err = []images.Record{{Name: name, Version: old.Version}}, nil
+		}
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, s.reports(catalog.Image{Name: name}, true, held, users, making, sizes)...)
 	}
 	return out, nil
 }
 
-func (s *Builder) reports(img catalog.Image, held []images.Record, users map[string][]string, making []images.Making, sizes map[string]int) []images.Report {
+// invariant: the image a delete judges is one of the catalog's, a
+// template's, or an orphan: a name no source holds that has versions on
+// disk. Only a name with none is unknown.
+func (s *Builder) deletable(ctx context.Context, name string) (img catalog.Image, orphan bool, err error) {
+	img, err = s.image(ctx, name)
+	var unknown *images.UnknownError
+	if !errors.As(err, &unknown) {
+		return img, false, err
+	}
+	names, listErr := s.store.Names(ctx)
+	if listErr != nil {
+		return img, false, listErr
+	}
+	if slices.Contains(names, name) {
+		return catalog.Image{Name: name}, true, nil
+	}
+	return img, false, err
+}
+
+func (s *Builder) reports(img catalog.Image, orphan bool, held []images.Record, users map[string][]string, making []images.Making, sizes map[string]int) []images.Report {
 	// invariant: one report for each version held, the newest first, after
 	// one for each version a build is making that is not held yet: a build
 	// records its version before it clears its mark, and the version reads
@@ -182,7 +232,7 @@ func (s *Builder) reports(img catalog.Image, held []images.Record, users map[str
 		}
 		vms := users[r.Name+"@"+r.Version]
 		r.Name = img.Name
-		out = append(out, images.Report{Record: r, Newest: i == 0, VMs: vms, Mac: s.o.Mac}.Judged())
+		out = append(out, images.Report{Record: r, Newest: i == 0 && !orphan, Orphan: orphan, VMs: vms, Mac: s.o.Mac}.Judged())
 	}
 	return out
 }
@@ -213,7 +263,7 @@ func (s *Builder) old(ctx context.Context, image, version string) bool {
 }
 
 func (s *Builder) CheckDelete(ctx context.Context, image, version string) error {
-	img, err := s.image(ctx, image)
+	img, orphan, err := s.deletable(ctx, image)
 	var none *images.NoRecipeError
 	if err != nil && !errors.As(err, &none) {
 		return err
@@ -229,7 +279,7 @@ func (s *Builder) CheckDelete(ctx context.Context, image, version string) error 
 	if err != nil {
 		return err
 	}
-	for _, r := range s.reports(img, all, users, s.making(ctx), nil) {
+	for _, r := range s.reports(img, orphan, all, users, s.making(ctx), nil) {
 		asked := version == "" || r.Record.Version == version
 		if asked && (r.Building != nil || version != "" && !r.Unused()) {
 			return &images.InUseError{Image: image, Version: r.Record.Version, Newest: r.Newest, Building: r.Building != nil, VMs: r.VMs}
@@ -266,7 +316,7 @@ func (s *Builder) Delete(ctx context.Context, image, version string) ([]images.R
 	}
 	all := []images.Record{{Name: image, Version: version}}
 	if !s.old(ctx, image, version) {
-		img, _ := s.image(ctx, image)
+		img, _, _ := s.deletable(ctx, image)
 		var err error
 		if all, err = s.records(img); err != nil {
 			return nil, err

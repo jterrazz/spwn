@@ -1415,6 +1415,7 @@ export type ImagesReport = {
     Deletable: boolean;
     Mac: string;
     Newest: boolean;
+    Orphan: boolean;
     Record: ImagesRecord;
     VMs: string[] | null;
 };

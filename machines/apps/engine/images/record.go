@@ -48,6 +48,10 @@ type Report struct {
 	Mac string
 	// value: whether the gesture Delete is offered: it is Unused, the one rule.
 	Deletable bool
+	// value: the image's Machinefile is gone from every source and the
+	// catalog: the version is a record and a disk nothing can build again,
+	// so it is never the newest, and Delete is offered once no VM uses it.
+	Orphan bool
 	// value: the build that is making this version, nil once it is built.
 	Building *Building
 }

@@ -20,6 +20,8 @@ type ImageJSON struct {
 	VMs       []string       `json:"vms"`
 	Newest    bool           `json:"newest"`
 	Deletable bool           `json:"deletable"`
+	// value: its Machinefile is gone: nothing can build this version again.
+	Orphan bool `json:"orphan"`
 	// value: the step a build that is making this version is at, "Step 2 of 4".
 	Building string `json:"building,omitempty"`
 }
@@ -41,6 +43,7 @@ func ListContract(reports []images.Report) ListJSON {
 			VMs:       append([]string{}, r.VMs...),
 			Newest:    r.Newest,
 			Deletable: r.Unused(),
+			Orphan:    r.Orphan,
 		}
 		if r.Building != nil {
 			one.Building = r.Building.Sentence
@@ -75,6 +78,12 @@ func Section(reports []images.Report, known []catalog.Image, thisMac page.Contex
 			row.Mark, row.Reason = page.Absent, page.Missing
 			row.Cells[1] = page.Text("")
 			row.Detail = page.Text("building: " + r.Building.Step.Word() + ", " + r.Building.Sentence)
+		case r.Orphan:
+			row.Mark, row.Reason = page.Attention, page.Orphan
+			if r.Unused() {
+				row.Detail = page.Text("its Machinefile is gone, no VM made from it")
+				row.Hint = page.Cmd("station images delete " + r.Record.Name + "@" + r.Record.Version)
+			}
 		case !r.Newest:
 			row.Mark, row.Reason = page.Absent, page.Outdated
 			if r.Unused() {
@@ -180,16 +189,22 @@ func rows(records []images.Record, done string) []page.Row {
 // and the catalogue's images no Mac holds yet.
 func firstLine(reports []images.Report, known []catalog.Image) page.Section {
 	macs := map[string]bool{}
-	older := 0
+	older, orphans := 0, 0
 	for _, r := range reports {
 		macs[r.Mac] = true
-		if !r.Newest && r.Building == nil {
+		switch {
+		case r.Orphan:
+			orphans++
+		case !r.Newest && r.Building == nil:
 			older++
 		}
 	}
 	words := []string{}
 	if older > 0 {
 		words = append(words, count(older, "older", "older"))
+	}
+	if orphans > 0 {
+		words = append(words, count(orphans, "orphan", "orphans"))
 	}
 	for _, img := range known {
 		if !slices.ContainsFunc(reports, func(r images.Report) bool { return r.Record.Name == img.Name }) {

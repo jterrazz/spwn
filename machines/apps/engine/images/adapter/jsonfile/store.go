@@ -107,6 +107,34 @@ func (s *Store) List(_ context.Context, image string) ([]images.Record, error) {
 	return out, nil
 }
 
+func (s *Store) Names(_ context.Context) ([]string, error) {
+	entries, err := s.files.ReadDir(s.dir)
+	if errors.Is(err, fs.ErrNotExist) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	var out []string
+	for _, e := range entries {
+		if !e.IsDir() {
+			continue
+		}
+		versions, err := s.files.ReadDir(s.imageDir(e.Name()))
+		if errors.Is(err, fs.ErrNotExist) {
+			continue
+		}
+		if err != nil {
+			return nil, err
+		}
+		if slices.ContainsFunc(versions, func(v fs.DirEntry) bool { return !v.IsDir() && strings.HasSuffix(v.Name(), ".json") }) {
+			out = append(out, e.Name())
+		}
+	}
+	slices.Sort(out)
+	return out, nil
+}
+
 func (s *Store) Delete(_ context.Context, image, version string) error {
 	if err := s.files.Remove(s.file(image, version)); err != nil && !errors.Is(err, fs.ErrNotExist) {
 		return err

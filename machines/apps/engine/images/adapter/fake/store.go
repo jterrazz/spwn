@@ -119,6 +119,22 @@ func (s *Store) List(_ context.Context, image string) ([]images.Record, error) {
 	return out, nil
 }
 
+func (s *Store) Names(_ context.Context) ([]string, error) {
+	s.w.Lock()
+	defer s.w.Unlock()
+	seen := map[string]bool{}
+	for _, r := range *s.records() {
+		seen[r.Name] = true
+	}
+	for name := range s.w.Mac(s.mac).Files {
+		dir, file := path.Split(name)
+		if parent, image := path.Split(path.Clean(dir)); path.Clean(parent) == filedDir && strings.HasSuffix(file, ".json") {
+			seen[image] = true
+		}
+	}
+	return slices.Sorted(maps.Keys(seen)), nil
+}
+
 func (s *Store) Delete(_ context.Context, image, version string) error {
 	s.w.Lock()
 	defer s.w.Unlock()

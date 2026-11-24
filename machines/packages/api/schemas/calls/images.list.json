@@ -154,6 +154,9 @@
         "Newest": {
           "type": "boolean"
         },
+        "Orphan": {
+          "type": "boolean"
+        },
         "Record": {
           "$ref": "#/$defs/images.Record"
         },
@@ -172,6 +175,7 @@
         "Deletable",
         "Mac",
         "Newest",
+        "Orphan",
         "Record",
         "VMs"
       ],

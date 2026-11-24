@@ -1,0 +1,46 @@
+description: 'an image whose Machinefile is gone is listed as an orphan, an old record too'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'world edit macbook-pro images/station-linux/2026.11.17.json'
+      stdin: |
+          {
+              "name": "station-linux",
+              "version": "2026.11.17",
+              "distro": "ubuntu",
+              "distro_version": "24.04",
+              "base": "ghcr.io/cirruslabs/ubuntu:24.04",
+              "station": "v3.1.0",
+              "recipe_sha": "23e975f7",
+              "machinefile": "station-linux",
+              "built_at": "2026-11-17T03:01:36Z",
+              "size_gb": 5
+          }
+      exit: 0
+    - command: 'world edit macbook-pro images/linux/2026.11.10.json'
+      stdin: |
+          {
+              "name": "linux",
+              "version": "2026.11.10",
+              "base": "ghcr.io/cirruslabs/ubuntu:24.04",
+              "station": "v3.0.0",
+              "recipe_sha": "377d9009",
+              "built_at": "2026-11-10T17:56:26Z",
+              "size_gb": 4
+          }
+      exit: 0
+    - command: 'images --json | /usr/bin/jq -c ''[.images[] | select(.orphan) | [.name, .version, .newest, .deletable, .vms]]'''
+      exit: 0
+      stdout: |
+          [["linux","2026.11.10",false,true,[]],["station-linux","2026.11.17",false,true,[]]]
+    - command: 'images'
+      exit: 0
+      stdout: |
+          ●	base-ubuntu	2026.11.01	4.0 GB	macbook-pro	api · linux-1
+          ○	base-ubuntu	2026.10.20	3.0 GB	macbook-pro	older · station images delete base-ubuntu@2026.10.20
+          ◐	linux	2026.11.10	0 B	macbook-pro	its Machinefile is gone, no VM made from it · station images delete linux@2026.11.10
+          ◐	station-linux	2026.11.17	5.0 GB	macbook-pro	its Machinefile is gone, no VM made from it · station images delete station-linux@2026.11.17
+          ●	base-ubuntu	2026.11.01	4.0 GB	mac-mini	infra
+          ○	base-debian				not built yet
+          ○	base-macos				not fetched yet · station images update base-macos
