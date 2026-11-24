@@ -1,0 +1,11 @@
+description: 'restart of a stopped engine brings it back, and the VMs the stop stopped stay stopped'
+env: engine-stopped
+runs:
+    - command: 'engine restart'
+      exit: 0
+      stdout: |
+          ●	engine	restarted · {{string}} · 0 VMs
+    - command: 'engine --json | /usr/bin/jq -r .engine.state'
+      exit: 0
+      stdout: |
+          running

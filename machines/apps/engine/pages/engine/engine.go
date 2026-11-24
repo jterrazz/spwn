@@ -165,6 +165,16 @@ func Start(r engine.StartReport, thisMac page.Context) page.Page {
 	}
 	row := pages.Done(Row, catalog.StateOK, "running")
 	row.Detail = page.Texts(words...)
+	return pages.Outcome("engine start", thisMac, nil, startRows(row, r, thisMac), "engine to start")
+}
+
+func Restart(r engine.RestartReport, thisMac page.Context) page.Page {
+	row := pages.Done(Row, catalog.StateOK, "restarted")
+	row.Detail = page.Texts("restarted", r.Version, count(r.VMs, "VM"))
+	return pages.Outcome("engine restart", thisMac, nil, startRows(row, r.StartReport, thisMac), "engine to restart")
+}
+
+func startRows(row page.Row, r engine.StartReport, thisMac page.Context) []page.Row {
 	rows := []page.Row{row}
 	switch r.LocalNetwork {
 	case machines.LocalNetworkNotApproved:
@@ -191,7 +201,7 @@ func Start(r engine.StartReport, thisMac page.Context) page.Page {
 		menuBar.Detail = page.Texts("needs you", left.Why, left.Fix)
 		rows = append(rows, menuBar)
 	}
-	return pages.Outcome("engine start", thisMac, nil, rows, "engine to start")
+	return rows
 }
 
 func agentWords(a machines.Agent) []string {

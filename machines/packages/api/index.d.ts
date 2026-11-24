@@ -1087,6 +1087,8 @@ export type EngineCallsReadIn = Record<string, never>;
 
 export type EngineCallsReleaseIn = Record<string, never>;
 
+export type EngineCallsRestartIn = Record<string, never>;
+
 export type EngineCallsStartIn = Record<string, never>;
 
 export type EngineCallsStopIn = {
@@ -1202,6 +1204,17 @@ export type EngineReserveIn = {
     guest_port?: number;
     to?: 'local' | 'private' | 'public';
     vm?: string;
+};
+
+export type EngineRestartReport = {
+    Agent?: MachinesAgent;
+    Already: boolean;
+    Bundled?: boolean;
+    Installed: EngineInstalled;
+    LocalNetwork: string;
+    PID: number;
+    VMs: number;
+    Version: string;
 };
 
 export type EngineSliceOut = {
@@ -3455,6 +3468,8 @@ export type EngineReleaseInput = EngineReserveIn;
 export type EngineReleaseOutput = PortsReservation;
 export type EngineReserveInput = EngineReserveIn;
 export type EngineReserveOutput = PortsSharedPort;
+export type EngineRestartInput = EngineCallsRestartIn;
+export type EngineRestartOutput = EngineRestartReport;
 export type EngineSettingsKeepInput = EngineKeepSettingsIn;
 export type EngineSettingsKeepOutput = Record<string, never>;
 export type EngineSettingsLastInput = EngineVMIn;
@@ -3638,6 +3653,7 @@ export interface Calls {
     'engine.refresh-release': { in: EngineRefreshReleaseInput; out: EngineRefreshReleaseOutput; watch: false };
     'engine.release': { in: EngineReleaseInput; out: EngineReleaseOutput; watch: false; own: true };
     'engine.reserve': { in: EngineReserveInput; out: EngineReserveOutput; watch: false; own: true };
+    'engine.restart': { in: EngineRestartInput; out: EngineRestartOutput; watch: false };
     'engine.settings-keep': { in: EngineSettingsKeepInput; out: EngineSettingsKeepOutput; watch: false; own: true };
     'engine.settings-last': { in: EngineSettingsLastInput; out: EngineSettingsLastOutput; watch: false; own: true };
     'engine.start': { in: EngineStartInput; out: EngineStartOutput; watch: false };

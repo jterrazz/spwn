@@ -295,7 +295,7 @@ func TestAnEngineStartedOntoTheBundleRestartsTheMenuBarThatRanAndLeavesOneThatDi
 					}
 				}
 			}
-			got, err := i.install(context.Background(), jobs)
+			got, err := i.install(context.Background(), jobs, false)
 			if err != nil {
 				t.Fatal(err)
 			}

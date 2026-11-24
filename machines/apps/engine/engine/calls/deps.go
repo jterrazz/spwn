@@ -41,6 +41,9 @@ type Deps struct {
 
 type Installer interface {
 	Install(ctx context.Context) (engine.Installed, error)
+	// value: Install, with the engine's job restarted whether or not it
+	// changed; the VMs it runs keep running.
+	Restart(ctx context.Context) (engine.Installed, error)
 	// value: the engine's job is gone from this Mac's job manager, in either
 	// mode: a bare job's definition deleted, a bundled one unregistered.
 	Uninstall(ctx context.Context) error
@@ -70,5 +73,5 @@ var Applies machine.Applies = func(p machine.Profile) machine.Verdict {
 }
 
 func All(d Deps) []call.Handler {
-	return []call.Handler{call.Bind(Read, d), call.Bind(Start, d), call.Bind(Stop, d), call.Bind(ReadRelease, d), call.Bind(RefreshRelease, d), call.Bind(ReadLog, d), call.BindWatch(StateWatch, d)}
+	return []call.Handler{call.Bind(Read, d), call.Bind(Start, d), call.Bind(Restart, d), call.Bind(Stop, d), call.Bind(ReadRelease, d), call.Bind(RefreshRelease, d), call.Bind(ReadLog, d), call.BindWatch(StateWatch, d)}
 }

@@ -1,0 +1,8 @@
+description: 'restart on another Mac restarts that Mac''s engine through it'
+env: two-macs
+runs:
+    - command: 'engine restart --on mac-mini'
+      exit: 0
+      stdout: |
+          	On mac-mini:
+          ●	engine	restarted · {{string}} · 1 VM

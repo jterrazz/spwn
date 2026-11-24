@@ -34,6 +34,13 @@ func controlPages() []Fixture {
 		pageengine.Stop(stuck, thisMacContext()),
 		pageengine.Stop(stopped, thisMacContext()),
 	)...)
+	restarted := engine.RestartReport{StartReport: started, VMs: 2}
+	out = append(out, states("outcome-restart",
+		pending(pageengine.Restart(restarted, thisMacContext())),
+		pageengine.Restart(engine.RestartReport{StartReport: started}, thisMacContext()),
+		failure("outcome", "engine restart", "the engine did not start: launchctl bootstrap exited 5", "station engine"),
+		pageengine.Restart(restarted, thisMacContext()),
+	)...)
 	return append(out, states("outcome-start",
 		pending(pageengine.Start(started, thisMacContext())),
 		pageengine.Start(engine.StartReport{Already: true, Version: "v3.1.0", PID: 812}, thisMacContext()),

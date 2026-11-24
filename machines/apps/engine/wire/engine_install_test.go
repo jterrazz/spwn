@@ -98,21 +98,24 @@ func TestInstallRestartsTheEngineOnlyWhenItsDefinitionChangedItRunsAnotherVersio
 		jobs    installJobs
 		running string
 		agent   model.Agent
+		restart bool
 		want    engine.Installed
 	}{
-		{"the same binary, the same version, its agent socket held", installJobs{loaded: true}, station, held, engine.Installed{Restarted: true}},
-		{"the same binary, the same version, its agent failed", installJobs{loaded: true}, station, model.Agent{State: model.AgentFailed, Detail: "listen"}, engine.Installed{Restarted: true}},
-		{"the same binary, the same version, its agent served", installJobs{loaded: true}, station, model.Agent{State: model.AgentServed}, engine.Installed{}},
-		{"a newer binary, the same definition", installJobs{loaded: true}, older, model.Agent{}, engine.Installed{Restarted: true, From: older}},
-		{"a moved binary, the same version", installJobs{loaded: true, changed: true}, station, model.Agent{}, engine.Installed{Restarted: true}},
-		{"a moved binary, another version", installJobs{loaded: true, changed: true}, older, model.Agent{}, engine.Installed{Restarted: true, From: older}},
-		{"the same binary, the same version", installJobs{loaded: true}, station, model.Agent{}, engine.Installed{}},
-		{"an engine that does not answer, the same definition", installJobs{loaded: true}, "", model.Agent{}, engine.Installed{}},
-		{"an engine that does not answer, a moved binary", installJobs{loaded: true, changed: true}, "", model.Agent{}, engine.Installed{Restarted: true}},
-		{"a job not loaded yet", installJobs{changed: true}, "", model.Agent{}, engine.Installed{Written: true}},
+		{"the same binary, the same version, its agent socket held", installJobs{loaded: true}, station, held, false, engine.Installed{Restarted: true}},
+		{"the same binary, the same version, its agent failed", installJobs{loaded: true}, station, model.Agent{State: model.AgentFailed, Detail: "listen"}, false, engine.Installed{Restarted: true}},
+		{"the same binary, the same version, its agent served", installJobs{loaded: true}, station, model.Agent{State: model.AgentServed}, false, engine.Installed{}},
+		{"a newer binary, the same definition", installJobs{loaded: true}, older, model.Agent{}, false, engine.Installed{Restarted: true, From: older}},
+		{"a moved binary, the same version", installJobs{loaded: true, changed: true}, station, model.Agent{}, false, engine.Installed{Restarted: true}},
+		{"a moved binary, another version", installJobs{loaded: true, changed: true}, older, model.Agent{}, false, engine.Installed{Restarted: true, From: older}},
+		{"the same binary, the same version", installJobs{loaded: true}, station, model.Agent{}, false, engine.Installed{}},
+		{"an engine that does not answer, the same definition", installJobs{loaded: true}, "", model.Agent{}, false, engine.Installed{}},
+		{"an engine that does not answer, a moved binary", installJobs{loaded: true, changed: true}, "", model.Agent{}, false, engine.Installed{Restarted: true}},
+		{"a job not loaded yet", installJobs{changed: true}, "", model.Agent{}, false, engine.Installed{Written: true}},
+		{"the same binary, the same version, a restart asked", installJobs{loaded: true}, station, model.Agent{State: model.AgentServed}, true, engine.Installed{Restarted: true}},
+		{"a restart asked of an engine that does not answer", installJobs{loaded: true}, "", model.Agent{}, true, engine.Installed{Restarted: true}},
 	} {
 		t.Run(c.name, func(t *testing.T) {
-			got, err := installerOf(c.running, c.agent).install(context.Background(), &c.jobs)
+			got, err := installerOf(c.running, c.agent).install(context.Background(), &c.jobs, c.restart)
 			if err != nil || got != c.want {
 				t.Fatalf("install = %+v, %v; want %+v", got, err, c.want)
 			}
@@ -125,7 +128,7 @@ func TestInstallRestartsTheEngineOnlyWhenItsDefinitionChangedItRunsAnotherVersio
 
 func TestInstallWritesOneJobTheEnginesWhichRunsAtLoginAndIsKeptAlive(t *testing.T) {
 	jobs := &specJobs{}
-	if _, err := installerOf("").install(context.Background(), jobs); err != nil {
+	if _, err := installerOf("").install(context.Background(), jobs, false); err != nil {
 		t.Fatal(err)
 	}
 	if len(jobs.specs) != 1 {

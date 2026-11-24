@@ -1,0 +1,13 @@
+description: 'restart restarts the engine with its job unchanged, and the VMs that run keep running'
+env: two-macs
+runs:
+    - command: 'engine restart'
+      exit: 0
+      stdout: |
+          ●	engine	restarted · {{string}} · 1 VM
+    - command: 'machines --this-mac'
+      exit: 0
+      stdout: |
+          ●	macbook-pro	Mac	macbook-pro	Engine running
+          ○	api	Workspace	macbook-pro	Stopped · persistent	4 CPU	8 GB
+          ●	linux-1	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB
