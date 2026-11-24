@@ -112,32 +112,33 @@ try, merge or bin."
 
 ---
 
-## 4. Unleash untrusted code in a sealed room
+## 4. Read untrusted code inside a container
 
-Clone a repo you don't trust, ask an agent what it does, inside a
-container with no network and hard resource caps.
+Clone a repo you don't trust and ask an agent what it does, inside a
+Docker container rather than in your shell.
 
 ```bash
 git clone https://github.com/someone/sus-repo /tmp/sus && cd /tmp/sus
 spwn init
-spwn up                    # no network, CPU/mem/disk/time caps
+spwn up                    # a Docker container on the bridge network, 256 processes at most
 spwn agent talk neo "run every test and benchmark, tell me what the code actually does"
 ```
 
 What happened:
 
-- The spawned container inherits Docker host defaults for CPU,
-  memory, and disk: enough for real work, capped so a runaway
-  process can't melt the host.
-- No network interface means nothing in the container can phone home,
-  fetch payloads, or exfiltrate data.
-- The repo is mounted under `/workspaces/` read-write; everything else
-  on your machine is invisible.
+- The world is a container on Docker's bridge network, with outbound
+  access: the code inside can reach the internet.
+- Its one resource limit is 256 processes. CPU, memory, disk and time
+  are not capped, so a runaway process takes what the Docker host
+  gives it.
+- The repo is mounted under `/workspaces/` read-write; the rest of
+  your disk stays outside the container, except the other mounts the
+  world declares.
 
-**Limits today.** Per-world hard limits (explicit `cpu:` / `mem:`
-knobs) are planned but not wired; you get the Docker defaults. Don't
-use this for code you actively believe is hostile: it's a brake,
-not a vault.
+**Limits today.** A world is not a sealed room: no `cpu:`, `mem:` or
+network knob exists, and the code can change the mounted repo. Don't
+use it for code you believe is hostile; a VM is the stronger boundary,
+and running VMs is [Machines](../../machines/README.md)' job.
 
 ---
 

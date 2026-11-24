@@ -4,8 +4,8 @@ Every world has its own physics: the constants, laws, and elements that decide w
 
 ## The three pillars
 
-- **Constants** are finite resource limits: CPU, memory, disk, timeout. They are fixed for the world's lifetime.
-- **Laws** are rules the environment enforces: network policy, process limits, filesystem mounts. They cannot be circumvented from inside, only declared differently in the next world.
+- **Constants** are finite resource limits: CPU, memory, disk, timeout. None is wired today: a world runs with all four uncapped, whatever the Docker host allows.
+- **Laws** are rules the environment enforces: network policy, process limits, filesystem mounts. Today every world gets the same three: Docker's bridge network with outbound access, at most 256 processes, and the mounts it declares. They cannot be circumvented from inside, and no manifest key changes the network or the process limit yet.
 - **Elements** are the building blocks that exist: the tools and capabilities the composition declares. If an element is not declared, nothing in the world can be made from it.
 
 ## Input and output
@@ -46,7 +46,7 @@ The layers stack: a bridged capability needs both the law-level gate connection 
 
 ## Open question: timeout behaviour
 
-Undecided: what happens when a world hits its timeout constant. Hard kill (SIGKILL, no cleanup), graceful shutdown (SIGTERM, wait, SIGKILL, destroy), extend-and-warn (notify the agent, extend once, then shut down gracefully), or pause (freeze the world and wait for the operator). Leaning toward graceful shutdown with a configurable grace period.
+Undecided, since no world has a timeout yet: what happens when a world hits its timeout constant. Hard kill (SIGKILL, no cleanup), graceful shutdown (SIGTERM, wait, SIGKILL, destroy), extend-and-warn (notify the agent, extend once, then shut down gracefully), or pause (freeze the world and wait for the operator). Leaning toward graceful shutdown with a configurable grace period.
 
 ## Related
 
