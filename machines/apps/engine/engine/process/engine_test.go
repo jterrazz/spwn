@@ -430,6 +430,7 @@ func TestAStartSaysWhyItsMountsAreNotItsMachinefilesAndKeepsWhatItShared(t *test
 type answering struct {
 	speaksFirst
 	code  int
+	err   error
 	lines []string
 	then  func()
 }
@@ -439,7 +440,7 @@ func (g *answering) Exec(_ context.Context, line, _ string) (engine.GuestRan, er
 	if g.then != nil {
 		g.then()
 	}
-	return engine.GuestRan{Code: g.code}, nil
+	return engine.GuestRan{Code: g.code}, g.err
 }
 
 func stoppingVM(t *testing.T, kind catalog.MachineKind, code int) (harness, *answering) {
@@ -463,7 +464,7 @@ func TestAMacOSVMIsPoweredOffByMacOSsOwnShutdown(t *testing.T) {
 	if err := h.d.opStop(t.Context(), "vm", false); err != nil {
 		t.Fatal(err)
 	}
-	if want := []string{"sudo /sbin/shutdown -h now"}; !reflect.DeepEqual(g.lines, want) {
+	if want := []string{"sudo -n -l /sbin/shutdown -h now >/dev/null && (nohup sudo -n /sbin/shutdown -h now >/dev/null 2>&1 &)"}; !reflect.DeepEqual(g.lines, want) {
 		t.Errorf("the guest ran %q, want %q", g.lines, want)
 	}
 }
@@ -494,7 +495,21 @@ func (m afterPoweroff) Sleep(ctx context.Context, d time.Duration) error {
 }
 
 func TestAPoweroffTheGuestRefusesGoesStraightToTheHardStop(t *testing.T) {
-	h, _ := stoppingVM(t, catalog.MacOS, 1)
+	stoppedAtOnce(t, 1, nil)
+}
+
+func TestAConnectionThatDropsAfterARefusedLineGoesStraightToTheHardStop(t *testing.T) {
+	stoppedAtOnce(t, 1, errors.New("ssh: disconnect"))
+}
+
+func TestAConnectionThatDropsBeforeAnyAnswerGoesStraightToTheHardStop(t *testing.T) {
+	stoppedAtOnce(t, 0, errors.New("ssh: disconnect"))
+}
+
+func stoppedAtOnce(t *testing.T, code int, drop error) {
+	t.Helper()
+	h, g := stoppingVM(t, catalog.MacOS, code)
+	g.err = drop
 	done := make(chan struct{})
 	h.d.h = afterPoweroff{Mac: h.d.h, done: done}
 	h.m.off = func(vm string) {

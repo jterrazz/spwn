@@ -10,10 +10,12 @@ const Sudo = "sudo" // value: the one spelling of sudo outside the owner's words
 func AsRoot(line string) string { return Sudo + " " + line }
 
 func PoweroffLine(k MachineKind) string {
-	// value: the line that powers a guest off from inside, as root and without
-	// waiting: systemd's on a Linux guest, macOS's shutdown on a macOS one.
+	// value: the line that powers a guest off from inside, as root, answering
+	// before the guest goes: systemd's on a Linux guest; on a macOS one, the
+	// sudo rule is read in the foreground, so a refusal is the line's nonzero
+	// exit, then shutdown runs detached, since it drops the connection.
 	if k == MacOS {
-		return AsRoot("/sbin/shutdown -h now")
+		return Sudo + " -n -l /sbin/shutdown -h now >/dev/null && (nohup " + Sudo + " -n /sbin/shutdown -h now >/dev/null 2>&1 &)"
 	}
 	return AsRoot("systemctl --no-block poweroff")
 }
