@@ -150,6 +150,10 @@ type VM struct {
 	// value: what refuses its guest its connection, as its Mac's engine
 	// met it; empty when nothing does.
 	Blocked GuestBlock `json:",omitempty"`
+	// value: what its Mac's engine last met dialing its guest, while
+	// nothing has connected since, as the dial said it; empty when nothing
+	// failed.
+	GuestError string `json:",omitempty"`
 }
 
 type KeptDrift struct {

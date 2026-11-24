@@ -57,6 +57,9 @@ type VMView struct {
 	// value: what refused its guest's last connection, while nothing has
 	// connected since; empty when nothing did.
 	Blocked model.GuestBlock `json:"blocked,omitempty"`
+	// value: what its guest's last dial met, while nothing has connected
+	// since; empty when nothing failed.
+	GuestError string `json:"guest_error,omitempty"`
 	// value: why its engine stopped its run before its guest connected, its
 	// lockdown having failed, until its next run; nil otherwise.
 	Lockdown *model.LockdownFailure `json:"lockdown,omitempty"`

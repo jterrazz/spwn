@@ -1286,6 +1286,7 @@ export type EngineVMView = {
     detail: string;
     drift?: MachinesKeptDrift;
     guest: string;
+    guest_error?: string;
     holder?: number;
     ip: string;
     last_lines?: string[];
@@ -2313,6 +2314,7 @@ export type MachinesVM = {
     Drift?: MachinesKeptDrift;
     Gestures?: ('start' | 'stop' | 'restart' | 'try-again')[];
     Guest: string;
+    GuestError?: string;
     Head?: CoreVerdictVerdict;
     Health?: CoreVerdictVerdict;
     Hold?: MachinesHold;
@@ -2524,6 +2526,7 @@ export type OverviewSystem = {
 };
 
 export type OverviewVM = {
+    Failing: string;
     Name: string;
     Running: boolean;
 };

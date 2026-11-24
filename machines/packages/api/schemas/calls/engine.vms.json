@@ -29,6 +29,9 @@
         "guest": {
           "type": "string"
         },
+        "guest_error": {
+          "type": "string"
+        },
         "holder": {
           "type": "integer"
         },

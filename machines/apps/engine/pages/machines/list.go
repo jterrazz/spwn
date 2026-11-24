@@ -172,6 +172,9 @@ func listVMRow(mac string, vm model.VM) page.Row {
 			detail = page.Text(vm.Birth.Doing())
 		}
 	}
+	if failing, ok := model.GuestFailing(vm); ok {
+		row.Mark, row.Reason, detail = page.Attention, page.Failing, page.Text(failing)
+	}
 	if vm.Birth != nil && vm.Birth.Failed {
 		detail = page.Text(vm.Birth.Sentence)
 	}

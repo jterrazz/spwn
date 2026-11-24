@@ -360,6 +360,9 @@ func (d *Engine) vmViews() []engine.VMView {
 			Latency: v.latency, Restart: v.walk, Cause: v.cause, LastLines: v.lastLines, ReadyAt: v.readyAt,
 			Drift: v.keptDriftLocked(), Blocked: v.blocked, Lockdown: v.lockdown,
 		}
+		if v.guest != engine.GuestConnected {
+			view.GuestError = v.lastErr
+		}
 		if v.state == engine.StateRunning {
 			view.BootAt = v.bootAt
 		}

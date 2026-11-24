@@ -8,7 +8,7 @@ runs:
       stdout: |
           ●	macbook-pro	Mac	macbook-pro	Engine running
           ○	api	Workspace	macbook-pro	Stopped · persistent	4 CPU	8 GB
-          ●	linux-1	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB
+          ◐	linux-1	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB	SSH answers failing: the guest connection is refused, as the world scripted it
           # Needs you
           ◐	linux-1	fails SSH answers	station machines restart linux-1
     - command: 'machines linux-1'
@@ -20,3 +20,7 @@ runs:
           ●	Has an address	192.168.64.5
           ✗	SSH answers	failing
           ●	Size	4 CPU · 8 GB · 50 GB
+    - command: 'overview | /usr/bin/grep VMs'
+      exit: 0
+      stdout: |
+          	VMs	○ api stopped · ◐ linux-1 running · SSH answers failing: the guest connection is refused, as the world scripted it

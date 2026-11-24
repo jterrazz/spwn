@@ -8,7 +8,7 @@ runs:
       stdout: |
           ●	macbook-pro	Mac	macbook-pro	Engine running
           ○	api	Workspace	macbook-pro	Stopped · persistent	4 CPU	8 GB
-          ●	linux-1	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB
+          ◐	linux-1	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB	SSH answers failing: macbook-pro's VM user is one the rule refuses
           # Needs you
           ◐	linux-1	is unreachable: macbook-pro's VM user is one the rule refuses	set another vm_user in ~/.config/station/preferences.json
     - command: 'machines linux-1'

@@ -245,6 +245,10 @@ func partValue(p overview.Part) page.Value {
 func vmsValue(vms []overview.VM) page.Value {
 	parts := make([]page.Value, 0, len(vms))
 	for _, vm := range vms {
+		if vm.Failing != "" {
+			parts = append(parts, page.List(page.Labeled(string(page.Attention), page.Text(vm.Name+" running")), page.Text(vm.Failing)))
+			continue
+		}
 		if vm.Running {
 			parts = append(parts, page.Labeled(string(page.OK), page.Text(vm.Name+" running")))
 			continue

@@ -19,8 +19,9 @@ type SummaryMachineJSON struct {
 }
 
 type SummaryVMJSON struct {
-	Name  string `json:"name"`
-	State string `json:"state"`
+	Name    string `json:"name"`
+	State   string `json:"state"`
+	Failing string `json:"failing,omitempty"`
 }
 
 type SummaryJSON struct {
@@ -54,7 +55,7 @@ func SummaryContract(s overview.Summary, schema string) SummaryJSON {
 		if vm.Running {
 			state = "running"
 		}
-		out.VMs = append(out.VMs, SummaryVMJSON{Name: vm.Name, State: state})
+		out.VMs = append(out.VMs, SummaryVMJSON{Name: vm.Name, State: state, Failing: vm.Failing})
 	}
 	return out
 }
