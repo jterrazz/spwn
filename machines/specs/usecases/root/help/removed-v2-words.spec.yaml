@@ -1,0 +1,93 @@
+description: 'a v2 word that ran as a hidden alias is an unknown command now, exit 2, stdout empty'
+env: one-mac
+runs:
+    - command: 'status'
+      exit: 2
+      stderr: |
+          Error: unknown command "status"
+          Hint: station help
+    - command: 'status --json'
+      exit: 2
+      stdout: |
+          {
+            "schema": "station.error/v1",
+            "type": "refused",
+            "code": "usage.unknown-command",
+            "subject": "status",
+            "message": "unknown command \"status\"",
+            "hint": "station help",
+            "fix": null
+          }
+      stderr: |
+          Error: unknown command "status"
+          Hint: station help
+    - command: 'stop'
+      exit: 2
+      stderr: |
+          Error: unknown command "stop"
+          Hint: station help
+    - command: 'start'
+      exit: 2
+      stderr: |
+          Error: unknown command "start"
+          Hint: station help
+    - command: 'tools install git'
+      exit: 2
+      stderr: |
+          Error: unknown command "tools"
+          Hint: station help
+    - command: 'config'
+      exit: 2
+      stderr: |
+          Error: unknown command "config"
+          Hint: station help
+    - command: 'power awake --for 2h'
+      exit: 2
+      stderr: |
+          Error: unknown command "power"
+          Hint: station help
+    - command: 'services'
+      exit: 2
+      stderr: |
+          Error: unknown command "services"
+          Hint: station help
+    - command: 'tailnet'
+      exit: 2
+      stderr: |
+          Error: unknown command "tailnet"
+          Hint: station help
+    - command: 'setup'
+      exit: 2
+      stderr: |
+          Error: unknown command "setup"
+          Hint: station help
+    - command: 'run git wip'
+      exit: 2
+      stderr: |
+          Error: unknown command "run"
+          Hint: station help
+    - command: 'run docker rm'
+      exit: 2
+      stderr: |
+          Error: unknown command "run"
+          Hint: station help
+    - command: 'machines probe infra'
+      exit: 2
+      stderr: |
+          Error: unknown command "probe" for "station machines"
+          Hint: run station machines --help
+    - command: 'machines create --always-on box'
+      exit: 2
+      stderr: |
+          Error: unknown flag: --always-on
+          Hint: run station machines create --help
+    - command: 'machines create --permanent box'
+      exit: 2
+      stderr: |
+          Error: unknown flag: --permanent
+          Hint: run station machines create --help
+    - command: 'machines create --lifetime persistent box'
+      exit: 2
+      stderr: |
+          Error: unknown flag: --lifetime
+          Hint: run station machines create --help
