@@ -2,7 +2,7 @@ import { directory, file } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { cli } from '../cli.specification.js';
-import { worldOf } from './__setup__/world.js';
+import { labelsOf, worldOf } from './__setup__/world.js';
 
 // hazard: a document cannot read a container back: its labels, mounts, network and agent home are the claim
 
@@ -17,7 +17,9 @@ describe('world', () => {
         expect(result.exitCode).toBe(0);
         expect(result.stderr).toMatch(file('./__expected__/up.txt'));
         const neo = result.container('neo');
-        await expect(worldOf(neo)).resolves.toStrictEqual({
+        const world = await worldOf(neo);
+        expect(world).toStrictEqual({
+            image: expect.stringMatching(/^spwn\/world:[0-9a-f]{12}$/u) as unknown,
             inside: 'spwn\n.claude\n.claude.json\nAGENTS.md\nCLAUDE.md\nSOUL.md\nagent.yaml\njournal\nplaybooks\nworlds\nknowledge\n/usr/bin/bash\n/usr/bin/git\n',
             labels: {
                 config: 'neo',
@@ -35,6 +37,9 @@ describe('world', () => {
             pids: 256,
             running: true,
         });
+        expect(world.image).toBe(
+            `spwn/world:${labelsOf(neo.inspect.value)['sh.spwn.image-version']}`,
+        );
         const prompt = await neo.exec('cat /agents/neo/CLAUDE.md');
         expect(prompt.stdout).toMatch(`
             # neo, worker in world "world-neo-{{hex#world}}"
