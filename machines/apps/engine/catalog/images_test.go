@@ -236,6 +236,21 @@ func TestTheLinuxPlumbingRefusesASystemAccountBeforeItTouchesIt(t *testing.T) {
 	}
 }
 
+func TestTheLinuxPlumbingRefusesAdminByNameWhateverTheBaseHolds(t *testing.T) {
+	body, err := fs.ReadFile(catalog.Recipes, "images/linux.sh")
+	if err != nil {
+		t.Fatal(err)
+	}
+	script := string(body)
+	byName := strings.Index(script, `[ "$VM_USER" = admin ]`)
+	if byName < 0 {
+		t.Fatal("linux.sh never refuses the VM user admin by its name: on a base without that account it would make it, and linux-cleanup.sh would delete it")
+	}
+	if at := strings.Index(script, "useradd"); at >= 0 && at < byName {
+		t.Error("linux.sh makes the VM user before it refuses admin by name")
+	}
+}
+
 func TestADigestPinsAndATagDoesNot(t *testing.T) {
 	digest := "sha256:65c3133a633fda8753cf1f71f2d55727792d534a2125b0032466563dcc8e58fd"
 	for ref, want := range map[string]bool{

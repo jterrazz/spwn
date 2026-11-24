@@ -11,8 +11,6 @@ import (
 )
 
 const (
-	agentUser     = "jterrazz.agent"
-	agentHome     = "/Users/" + agentUser
 	loginWindow   = "/Library/Preferences/com.apple.loginwindow"
 	kcpasswordTo  = "/etc/kcpassword"
 	autologinHint = "verify end to end: station machines restart <name>"

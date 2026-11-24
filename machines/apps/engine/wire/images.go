@@ -10,6 +10,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	coremachine "github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/engine/process"
@@ -56,7 +57,7 @@ func (m machine) imageSource(hypervisor string) imagescontract.ImageSource {
 	if m.world != nil {
 		return m.world.imageSource(hypervisor)
 	}
-	return oci.New(m.sys.Net, "https://ghcr.io", "you", hypervisor)
+	return oci.New(m.sys.Net, "https://ghcr.io", catalog.ImageRegistryOwner, hypervisor)
 }
 
 func imagesCommand(env kit.Env, m machine) *cobra.Command {

@@ -154,7 +154,7 @@ Machines writes one managed block per machine in `~/.ssh/config` on every Mac, r
 ```text
 Host mac-mini # a host: its sshd, reached by its MagicDNS name
  HostName mac-mini
- User jterrazz.agent
+ User agent
  IdentityAgent ~/.local/state/station/agent.sock
  IdentityFile "~/.local/state/station/device-key.pub"
  IdentityFile "~/.ssh/id_ed25519"
