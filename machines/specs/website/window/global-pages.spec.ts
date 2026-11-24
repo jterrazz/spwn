@@ -1,4 +1,4 @@
-import { button, content, dialog, heading, navigation, region, within } from '@jterrazz/test';
+import { button, content, dialog, heading, main, navigation, region, within } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { website } from '../website.specification.js';
@@ -105,6 +105,23 @@ describe('global pages', () => {
 
                 // Then - the New machine sheet
                 await visitor.see(dialog('New machine on mac-mini'));
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
+
+    test('A17 the toolbar of a catalog page reads Catalog above it, and an item its shelf between', async () => {
+        // Given - the window on the app node of the Apps shelf over stories
+        const result = await website.visit(
+            '/?world=stories&page=catalog-apps&item=node',
+            async (visitor) => {
+                // When - the toolbar is read
+                // Then - Catalog stands first as words, then Apps, which opens the shelf again
+                await visitor.see(within(main(), content('Catalog')));
+                await visitor.gone(within(main(), button('Catalog')));
+                await visitor.click(within(main(), button('Apps')));
+                await visitor.see(region('Apps'));
+                await visitor.see(within(main(), content('Catalog')));
             },
         );
         expect(result.errors.text).toBe('');

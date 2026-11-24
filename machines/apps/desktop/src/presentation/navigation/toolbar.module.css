@@ -33,6 +33,9 @@
 .crumb:hover {
     color: var(--t1);
 }
+.heading {
+    color: var(--t3);
+}
 .stale {
     flex: none;
     display: inline-flex;

@@ -135,9 +135,10 @@ describe('catalog', () => {
             '/?world=stories&page=catalog-skills',
             async (visitor) => {
                 // When - the toolbar is read
-                // Then - it reads Skills, and no Catalog page stands above it
+                // Then - it reads Skills under Catalog, which is a heading and no page to open
                 await visitor.see(within(main(), content('Skills')));
-                await visitor.gone(content('Catalog ›'));
+                await visitor.see(within(main(), content('Catalog')));
+                await visitor.gone(within(main(), button('Catalog')));
             },
         );
         expect(result.errors.text).toBe('');

@@ -4,7 +4,8 @@ import { Button, IconButton } from '../ui/index';
 
 import styles from './toolbar.module.css';
 
-// value: `shown` draws the last crumb when a page names its item from the engine's answer.
+// value: `shown` draws the last crumb when a page names its item from the engine's answer; a crumb with no `open`
+// value: names a group that is no page, drawn as words.
 export type Crumb = { label: string; shown?: ReactNode; open?: (() => void) | undefined };
 
 // value: the one button at the toolbar's right: Home's New machine, the Passwords page's Add a password.
@@ -58,9 +59,13 @@ export function Toolbar({
             <div className={styles.title}>
                 {crumbs.slice(0, -1).map((crumb) => (
                     <span key={crumb.label}>
-                        <button className={styles.crumb} onClick={crumb.open} type="button">
-                            {crumb.label}
-                        </button>
+                        {crumb.open === undefined ? (
+                            <span className={styles.heading}>{crumb.label}</span>
+                        ) : (
+                            <button className={styles.crumb} onClick={crumb.open} type="button">
+                                {crumb.label}
+                            </button>
+                        )}
                         <span aria-hidden="true"> › </span>
                     </span>
                 ))}
