@@ -1,6 +1,6 @@
 # ADR-052: Station keeps no agents; another binary owns them
 
-**Status:** Accepted
+**Status:** Superseded by [ADR-088](088-agents-live-in-the-one-binary-as-families-reached-by-calls.md)
 **Date:** 2026-11-17
 
 ## Context
