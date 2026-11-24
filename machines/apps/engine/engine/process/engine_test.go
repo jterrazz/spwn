@@ -426,19 +426,29 @@ func TestAStartSaysWhyItsMountsAreNotItsMachinefilesAndKeepsWhatItShared(t *test
 	}
 }
 
-// value: a guest that answers every command with one exit code and keeps the lines it ran.
+// value: a guest that answers every command with one exit code, or a line of
+// replies with its own, and keeps the lines it ran.
 type answering struct {
 	speaksFirst
-	code  int
-	err   error
-	lines []string
-	then  func()
+	code    int
+	err     error
+	replies map[string]reply
+	lines   []string
+	then    func()
+}
+
+type reply struct {
+	code int
+	err  error
 }
 
 func (g *answering) Exec(_ context.Context, line, _ string) (engine.GuestRan, error) {
 	g.lines = append(g.lines, line)
 	if g.then != nil {
 		g.then()
+	}
+	if r, ok := g.replies[line]; ok {
+		return engine.GuestRan{Code: r.code}, r.err
 	}
 	return engine.GuestRan{Code: g.code}, g.err
 }
@@ -495,20 +505,57 @@ func (m afterPoweroff) Sleep(ctx context.Context, d time.Duration) error {
 }
 
 func TestAPoweroffTheGuestRefusesGoesStraightToTheHardStop(t *testing.T) {
-	stoppedAtOnce(t, 1, nil)
+	stoppedAtOnce(t, catalog.MacOS, 1, nil)
+}
+
+func TestALinuxGuestThatRefusesItsPoweroffAndIsNotGoingDownGoesStraightToTheHardStop(t *testing.T) {
+	stoppedAtOnce(t, catalog.Linux, 1, nil)
 }
 
 func TestAConnectionThatDropsAfterARefusedLineGoesStraightToTheHardStop(t *testing.T) {
-	stoppedAtOnce(t, 1, errors.New("ssh: disconnect"))
+	stoppedAtOnce(t, catalog.MacOS, 1, errors.New("ssh: disconnect"))
 }
 
 func TestAConnectionThatDropsBeforeAnyAnswerGoesStraightToTheHardStop(t *testing.T) {
-	stoppedAtOnce(t, 0, errors.New("ssh: disconnect"))
+	stoppedAtOnce(t, catalog.MacOS, 0, errors.New("ssh: disconnect"))
 }
 
-func stoppedAtOnce(t *testing.T, code int, drop error) {
+func TestALinuxGuestAlreadyGoingDownThatRefusesItsPoweroffIsLeftToItsOwnShutdown(t *testing.T) {
+	leftToItsShutdown(t, reply{code: 0})
+}
+
+func TestALinuxGuestThatRefusesItsPoweroffThenDropsTheConnectionIsLeftToItsOwnShutdown(t *testing.T) {
+	leftToItsShutdown(t, reply{code: 255, err: errors.New("ssh: disconnect")})
+}
+
+func leftToItsShutdown(t *testing.T, asked reply) {
 	t.Helper()
-	h, g := stoppingVM(t, catalog.MacOS, code)
+	h, g := stoppingVM(t, catalog.Linux, 0)
+	g.replies = map[string]reply{
+		catalog.PoweroffLine(catalog.Linux):  {code: 1},
+		catalog.GoingDownLine(catalog.Linux): asked,
+	}
+	g.then = func() {
+		if len(g.lines) == 2 {
+			h.hv.end("vm", model.RunEnd{})
+		}
+	}
+	if err := h.d.opStop(t.Context(), "vm", false); err != nil {
+		t.Fatal(err)
+	}
+	if want := []string{catalog.PoweroffLine(catalog.Linux), catalog.GoingDownLine(catalog.Linux)}; !reflect.DeepEqual(g.lines, want) {
+		t.Errorf("the guest ran %q, want %q", g.lines, want)
+	}
+	h.m.mu.Lock()
+	defer h.m.mu.Unlock()
+	if len(h.m.offed) != 0 {
+		t.Errorf("the hypervisor powered off %v, a guest going down by itself", h.m.offed)
+	}
+}
+
+func stoppedAtOnce(t *testing.T, kind catalog.MachineKind, code int, drop error) {
+	t.Helper()
+	h, g := stoppingVM(t, kind, code)
 	g.err = drop
 	done := make(chan struct{})
 	h.d.h = afterPoweroff{Mac: h.d.h, done: done}

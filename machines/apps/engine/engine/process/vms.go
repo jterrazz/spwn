@@ -446,10 +446,11 @@ func (d *Engine) opStart(ctx context.Context, vm string) error {
 }
 
 // invariant: a graceful stop is the guest's own poweroff, by its system's line,
-// sent on the VM's one ssh connection (the NAT ssh when it is down); a line the
-// guest refuses or cannot send goes straight to the hard stop, and the wait
-// comes only after a line it took; the run's end is the daemon's own, so it is
-// never read as a reboot.
+// sent on the VM's one ssh connection (the NAT ssh when it is down), then the
+// wait; a line it cannot send goes straight to the hard stop, and so does one
+// it refuses, unless it says it is going down already or drops the connection
+// before it says; the run's end is the daemon's own, so it is never read as a
+// reboot.
 func (d *Engine) opStop(ctx context.Context, vm string, want bool) error {
 	v, err := d.find(vm)
 	if err != nil {
@@ -488,12 +489,7 @@ func (d *Engine) endRun(ctx context.Context, v *vmState) error {
 	}
 	sent := false
 	if client != nil {
-		kind := catalog.Linux
-		if d.o.KindOf != nil {
-			kind = d.o.KindOf(ctx, vm)
-		}
-		ran, err := client.Exec(ctx, catalog.PoweroffLine(kind), "")
-		sent = err == nil && ran.Code == 0
+		sent = d.poweroff(ctx, vm, client)
 	}
 	if !sent {
 		if run == nil {
@@ -519,6 +515,26 @@ func (d *Engine) endRun(ctx context.Context, v *vmState) error {
 	d.vmStopped(ctx, vm)
 	d.setState(v, engine.StateStopped, "")
 	return nil
+}
+
+func (d *Engine) poweroff(ctx context.Context, vm string, client Guest) bool {
+	kind := catalog.Linux
+	if d.o.KindOf != nil {
+		kind = d.o.KindOf(ctx, vm)
+	}
+	ran, err := client.Exec(ctx, catalog.PoweroffLine(kind), "")
+	if err != nil {
+		return false
+	}
+	if ran.Code == 0 {
+		return true
+	}
+	down := catalog.GoingDownLine(kind)
+	if down == "" {
+		return false
+	}
+	ran, err = client.Exec(ctx, down, "")
+	return err != nil || ran.Code == 0
 }
 
 func (d *Engine) opDelete(ctx context.Context, vm string) error {
