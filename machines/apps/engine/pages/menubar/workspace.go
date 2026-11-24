@@ -68,9 +68,13 @@ func workspacePage(m Machine, h model.MacView, vm model.VM) page.Page {
 	p.Actions = append(p.Actions, shares.Actions...)
 	shell := openIn("--on", vm.Name)
 	shell.Key, shell.Icon, shell.Hud = "cmd+enter", "terminal", opened(vm.Name)
-	ssh := catalog.SSHCommand("", vm.Name)
-	p.Actions = append(p.Actions, shell, copied(ActionCopySSH, "Copy "+ssh, ssh), menu)
-	p.Footer = &page.Footer{Kind: page.FooterSSH, Copy: &page.Value{Kind: page.KindCommand, Text: ssh}, Buttons: []string{ActionOpenStation}}
+	p.Actions = append(p.Actions, shell)
+	p.Footer = &page.Footer{Kind: page.FooterSSH, Buttons: []string{ActionOpenStation}}
+	if ssh, err := catalog.SSHCommand("", vm.Name); err == nil {
+		p.Actions = append(p.Actions, copied(ActionCopySSH, "Copy "+ssh, ssh))
+		p.Footer.Copy = &page.Value{Kind: page.KindCommand, Text: ssh}
+	}
+	p.Actions = append(p.Actions, menu)
 	p.Live = pageLive(p)
 	return page.Seal(p)
 }

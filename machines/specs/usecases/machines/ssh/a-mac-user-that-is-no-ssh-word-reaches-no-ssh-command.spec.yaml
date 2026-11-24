@@ -1,0 +1,31 @@
+description: 'machines ssh refuses a hand-edited Mac user that is no ssh word or reads as an option'
+env: two-macs
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs[.this_mac].preferences.macs["mac-mini"].user = "x -oProxyCommand=touch"'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'machines ssh mac-mini'
+      exit: 1
+      stderr: |
+          Error: mac-mini's user "x -oProxyCommand=touch" is not one word of letters, digits, ".", "_" and "-"
+          Hint: correct it in ~/.config/station/preferences.json
+    - command: 'machines ssh infra'
+      exit: 1
+      stderr: |
+          Error: infra's user "x -oProxyCommand=touch" is not one word of letters, digits, ".", "_" and "-"
+          Hint: correct it in ~/.config/station/preferences.json
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs[.this_mac].preferences.macs["mac-mini"].user = "-oProxyCommand"'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'machines ssh mac-mini'
+      exit: 1
+      stderr: |
+          Error: mac-mini's user "-oProxyCommand" starts with "-", which ssh reads as an option
+          Hint: correct it in ~/.config/station/preferences.json
+    - command: 'machines ssh infra'
+      exit: 1
+      stderr: |
+          Error: infra's user "-oProxyCommand" starts with "-", which ssh reads as an option
+          Hint: correct it in ~/.config/station/preferences.json
+    - command: 'machines ssh api'
+      exit: 0
+      stdout: |
+          ssh you@api

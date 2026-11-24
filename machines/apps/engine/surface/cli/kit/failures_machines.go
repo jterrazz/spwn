@@ -91,6 +91,7 @@ func vmFailure(err error) (*fail.Error, bool) {
 	var noEngine *model.NoEngineError
 	var serverLifetime *model.ServerLifetimeError
 	var vmUser *model.BadVMUserError
+	var sshTarget *model.BadSSHTargetError
 	if f, ok := pipeFailure(err); ok {
 		return f, true
 	}
@@ -114,6 +115,8 @@ func vmFailure(err error) (*fail.Error, bool) {
 			return failed(vmUser.Error(), "set vm_user in ~/.config/station/preferences.json", err), true
 		}
 		return failed(vmUser.Error(), model.VMUserFix, err), true
+	case errors.As(err, &sshTarget):
+		return failed(sshTarget.Error(), "correct it in ~/.config/station/preferences.json", err), true
 	case errors.As(err, &noBoot):
 		return failed(noBoot.Error(), keptFix(noBoot.Name), err), true
 	case errors.As(err, &unhealthy) && unhealthy.Gone:

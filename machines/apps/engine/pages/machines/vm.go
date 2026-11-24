@@ -133,8 +133,8 @@ func serverRows(vm model.VM, sshRead bool) []page.Item {
 	if vm.Device != "" {
 		rows = append(rows, page.Row{ID: "device", Label: "Own " + catalog.TailnetProduct + " device", Mark: page.OK, Cells: []page.Value{page.Text(vm.Device)}})
 	}
-	if !sshRead {
-		rows = append(rows, page.Row{ID: string(coresection.SSH), Label: "SSH", Mark: page.OK, Cells: []page.Value{page.List(page.Command(catalog.SSHCommand("", vm.Name)), page.Text("for debugging"))}})
+	if ssh, err := catalog.SSHCommand("", vm.Name); !sshRead && err == nil {
+		rows = append(rows, page.Row{ID: string(coresection.SSH), Label: "SSH", Mark: page.OK, Cells: []page.Value{page.List(page.Command(ssh), page.Text("for debugging"))}})
 	}
 	items := make([]page.Item, 0, len(rows))
 	for i := range rows {

@@ -15,8 +15,21 @@ func TestTheSSHCommandIsOneShellWordWhateverItsUserAndHost(t *testing.T) {
 		{"it's", "a b", `ssh 'it'\''s'@'a b'`},
 		{"", "$(touch pwned)", "ssh '$(touch pwned)'"},
 	} {
-		if got := catalog.SSHCommand(c.user, c.host); got != c.want {
-			t.Errorf("SSHCommand(%q, %q) = %q; want %q", c.user, c.host, got, c.want)
+		if got, err := catalog.SSHCommand(c.user, c.host); err != nil || got != c.want {
+			t.Errorf("SSHCommand(%q, %q) = %q, %v; want %q", c.user, c.host, got, err, c.want)
+		}
+	}
+}
+
+func TestTheSSHCommandRefusesAUserOrAHostSSHWouldReadAsAnOption(t *testing.T) {
+	for _, c := range []struct{ user, host string }{
+		{"-oProxyCommand=touch pwned", "api"},
+		{"-v", "api"},
+		{"", "-oProxyCommand=x"},
+		{"you", "-v"},
+	} {
+		if got, err := catalog.SSHCommand(c.user, c.host); err == nil {
+			t.Errorf("SSHCommand(%q, %q) = %q; want it refused", c.user, c.host, got)
 		}
 	}
 }

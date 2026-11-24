@@ -182,6 +182,15 @@ func (e *BadVMUserError) Error() string {
 
 var ErrEngineDown = errors.New("the engine is not running")
 
+type BadSSHTargetError struct {
+	// value: why machines ssh names no command for a machine: its name or
+	// its user, as preferences.json holds them, would not reach ssh as one
+	// word.
+	Why string
+}
+
+func (e *BadSSHTargetError) Error() string { return e.Why }
+
 type NothingToChangeError struct{ Name string }
 
 func (e *NothingToChangeError) Error() string { return "say what to change on " + e.Name }

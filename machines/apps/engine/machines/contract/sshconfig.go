@@ -18,21 +18,32 @@ type MachineBlock struct {
 const sshWord = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._-"
 
 func Unwritable(b MachineBlock) string {
-	// invariant: a block's name, user and Mac each stand in ssh_config as
-	// one word, so none may hold a space, a newline, a quote or a shell
-	// character; the reason a block is refused, empty when it is written.
+	// invariant: a block's name, user and Mac each stand in ssh_config, and
+	// in the ssh command that reaches it, as one word, so none may hold a
+	// space, a newline, a quote or a shell character, nor start with "-",
+	// which ssh reads as an option; the reason a block is refused, empty
+	// when it is written.
 	if b.Name == "" || strings.Trim(b.Name, sshWord) != "" {
 		return "the name " + strconv.Quote(b.Name) + notOneWord
 	}
+	if strings.HasPrefix(b.Name, "-") {
+		return "the name " + strconv.Quote(b.Name) + anOption
+	}
 	for _, f := range []struct{ what, value string }{{"user", b.User}, {"Mac", b.Behind}} {
-		if strings.Trim(f.value, sshWord) != "" {
+		switch {
+		case strings.Trim(f.value, sshWord) != "":
 			return b.Name + "'s " + f.what + " " + strconv.Quote(f.value) + notOneWord
+		case strings.HasPrefix(f.value, "-"):
+			return b.Name + "'s " + f.what + " " + strconv.Quote(f.value) + anOption
 		}
 	}
 	return ""
 }
 
-const notOneWord = ` is not one word of letters, digits, ".", "_" and "-"`
+const (
+	notOneWord = ` is not one word of letters, digits, ".", "_" and "-"`
+	anOption   = ` starts with "-", which ssh reads as an option`
+)
 
 type SSHConfigError struct {
 	Path  string
