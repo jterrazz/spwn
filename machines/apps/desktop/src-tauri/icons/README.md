@@ -4,12 +4,12 @@
 
 ## What the document holds
 
-La pile: three floors growing with depth, the smallest on top with one ball resting on it, on a paper tile. Its parts follow Apple's layer rules: each layer is a square 1024 canvas with no tile, mask or shadow of its own, and the system draws those. The owner picked it on 2026-11-22: round 5's variant F, "Trois étages, ambre", in the colour appearances, and round 6's mix 2 in the clear and tinted ones.
+La pile, Argile: three floors growing with depth, the smallest on top with one ball resting on it, seen from above and flat, each floor parted from the next by a gap. The owner picked it on 2026-11-24: track A, "Argile", of the second icon round. Its parts follow Apple's layer rules: each layer is a square 1024 canvas with no tile, mask or shadow of its own, and the system draws those.
 
-- **Four glass groups**: `you`, the ball, then one group a floor from the top down, `f0`, `f1` and `f2`, each a top face and a side face, with specular light and no translucency; `f0` also holds the ball's contact shadow.
-- **In colour**, light and dark: an amber ball on a white top floor, then a light amber floor and a deep amber one.
-- **In clear and tinted**, light and dark: the top floor greyed under a solid white ball, so the ball stands apart from the floor it rests on, and the two floors below are white faces over empty walls. Each layer carries a default, a `-dark` and a `-tinted` picture, and the system turns the tinted one to clear or tinted glass over its own ground.
-- **The ground** is a gradient: Papier in the light appearance (white to `#e4e6ec`), graphite in the dark one (`#38353d` to `#0a0a0c`).
+- **Four groups**, one layer each, an SVG of one filled shape: `you`, the ball, then one group a floor from the top down, `f0`, `f1` and `f2`. Each floor's shape already carries its gap around the floors and the ball above it. No group has glass, specular light, shadow or translucency, so the drawing stays flat.
+- **In light**, an orange tile (`#E07E58` to `#D4683F`) under a warm white pile (`#FFFDF8`).
+- **In dark**, a dark tile (`#212120` to `#1C1C1B`) under an orange pile (`#DA7249`) and an ivory ball (`#F3F0E8`).
+- **In clear and tinted**, every layer is white, and the system turns it to clear or tinted glass over its own ground.
 
 `icon.json` is edited by hand or in Icon Composer (inside Xcode); `fill` and `fill-specializations` exclude each other, so every colour is a specialization list whose entry with no `appearance` is the default.
 

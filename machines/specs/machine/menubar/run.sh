@@ -163,18 +163,24 @@ if [ $capture -eq 1 ]; then
   [ -x "$venv/bin/python" ] || { python3 -m venv "$venv" && "$venv/bin/pip" install -q vncdotool pillow numpy scipy; } >> "$log" 2>&1 || fail "the capture's venv"
   "$venv/bin/python" -I "$suite/menubar/capture/measure_test.py" >> "$log" 2>&1 || fail "the measures' own test (capture/measure_test.py), see $log"
   sets=${STATION_CAPTURE_SET:-walls,behave,trial}
-  if [ "$sets" = bench ]; then
-    # invariant: the bench's engine is the tree's, built by the Go go.work names,
-    # its archive checked against the digest pinned here before it is unpacked.
-    go_version=$(awk '$1=="go"{print $2; exit}' "$repo/go.work")
-    case "$go_version" in
-      1.27.3) go_digest=dd3908cf20959d798c1e06ebe5b72213f0505ce01373b40ce3110975a6cd99c2 ;;
-      *) fail "no pinned digest for go $go_version: add it from go.dev/dl/?mode=json" ;;
-    esac
-    t=$SECONDS
-    in_vm "set -e; cd ~; curl -fsSLo go.tgz https://go.dev/dl/go$go_version.darwin-arm64.tar.gz; echo '$go_digest  go.tgz' | shasum -a 256 -c -; mkdir -p gotool cap; tar -xzf go.tgz -C gotool; cd $vm_root && make enclave && ~/gotool/go/bin/go build -o ~/cap/station ./apps/engine/cmd/station" >> "$log" 2>&1 || fail "build the engine in the VM"
-    say "-- built the engine in $((SECONDS - t)) s"
-  fi
+  case ",$sets," in
+    *,bench,* | *,dock,*)
+      # invariant: the engine the bench runs and the one Spwn.app carries are the tree's,
+      # built by the Go go.work names, its archive checked against the digest pinned here
+      # before it is unpacked; the dock set's engine is built by make window itself.
+      go_version=$(awk '$1=="go"{print $2; exit}' "$repo/go.work")
+      case "$go_version" in
+        1.27.3) go_digest=dd3908cf20959d798c1e06ebe5b72213f0505ce01373b40ce3110975a6cd99c2 ;;
+        *) fail "no pinned digest for go $go_version: add it from go.dev/dl/?mode=json" ;;
+      esac
+      t=$SECONDS
+      in_vm "set -e; cd ~; curl -fsSLo go.tgz https://go.dev/dl/go$go_version.darwin-arm64.tar.gz; echo '$go_digest  go.tgz' | shasum -a 256 -c -; mkdir -p gotool cap; tar -xzf go.tgz -C gotool" >> "$log" 2>&1 || fail "install go $go_version in the VM"
+      if [ "$sets" = bench ]; then
+        in_vm "set -e; cd $vm_root && make enclave && ~/gotool/go/bin/go build -o ~/cap/station ./apps/engine/cmd/station" >> "$log" 2>&1 || fail "build the engine in the VM"
+        say "-- built the engine in $((SECONDS - t)) s"
+      fi
+      ;;
+  esac
   t=$SECONDS
   in_vm "zsh -lc 'cd $vm_root && make menubar'" >> "$log" 2>&1 || fail "make menubar in the VM"
   say "-- built Station.app in $((SECONDS - t)) s"
@@ -184,7 +190,7 @@ if [ $capture -eq 1 ]; then
       # the image has none, as publish.yaml does on its runner; the pushed branch carries
       # no tag, so its version is given.
       t=$SECONDS
-      in_vm "zsh -lc 'command -v cargo >/dev/null || curl --proto \\=https --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal; . \$HOME/.cargo/env; cd $vm_root && make window WINDOW_VERSION=0.0.0-capture'" >> "$log" 2>&1 || fail "make window in the VM"
+      in_vm "zsh -lc 'command -v cargo >/dev/null || curl --proto \\=https --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal; . \$HOME/.cargo/env; cd $vm_root && export PATH=\$HOME/gotool/go/bin:\$PATH; make window WINDOW_VERSION=0.0.0-capture'" >> "$log" 2>&1 || fail "make window in the VM"
       say "-- built Spwn.app in $((SECONDS - t)) s"
       ;;
   esac
