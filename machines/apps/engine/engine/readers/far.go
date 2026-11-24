@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"iter"
 	"maps"
 	"slices"
 	"sync"
@@ -69,6 +70,7 @@ type link struct {
 	retry   time.Time
 	keys    map[store.Key]bool
 	heard   time.Time
+	self    string
 	// value: closed once the stream's first snapshot is copied, or it
 	// failed.
 	first chan struct{}
@@ -263,16 +265,20 @@ func (f *Far) copy(mac string, l *link, fr engine.StateFrame) {
 	// invariant: a snapshot is the whole of what the other Mac exports: a
 	// key it no longer names is dropped; a change names its keys gone.
 	f.mu.Lock()
+	if self := selfOf(maps.Keys(fr.Slices)); self != "" {
+		l.self = self
+	}
+	copied := renamed(mac, l.self, fr.Slices)
 	gone := slices.Collect(maps.Keys(l.keys))
 	if fr.Event == engine.StateChanged {
 		gone = nil
 	}
 	for _, k := range fr.Gone {
-		gone = append(gone, store.Key(k))
+		gone = append(gone, rename(mac, l.self, store.Key(k)))
 	}
-	for k := range fr.Slices {
-		l.keys[store.Key(k)] = true
-		gone = slices.DeleteFunc(gone, func(g store.Key) bool { return string(g) == k })
+	for k := range copied {
+		l.keys[k] = true
+		gone = slices.DeleteFunc(gone, func(g store.Key) bool { return g == k })
 	}
 	for _, k := range gone {
 		delete(l.keys, k)
@@ -283,8 +289,8 @@ func (f *Far) copy(mac string, l *link, fr engine.StateFrame) {
 		l.since.Rev = fr.Rev
 	}
 	f.mu.Unlock()
-	for _, k := range slices.Sorted(maps.Keys(fr.Slices)) {
-		f.apply(store.Key(k), fr.Slices[k])
+	for _, k := range slices.Sorted(maps.Keys(copied)) {
+		f.apply(k, copied[k])
 	}
 	for _, k := range gone {
 		f.Store.Drop(k)
@@ -327,15 +333,15 @@ func (f *Far) lost(mac string, l *link, why string) {
 	l.running = false
 	l.retry = f.Clock.Now().Add(farWait(l.fails))
 	l.fails++
-	held := f.held[mac]
+	held := renamed(mac, selfOf(maps.Keys(f.held[mac])), f.held[mac])
 	delete(f.held, mac)
 	for k := range held {
-		l.keys[store.Key(k)] = true
+		l.keys[k] = true
 	}
 	keys := slices.Collect(maps.Keys(l.keys))
 	f.mu.Unlock()
 	for _, k := range slices.Sorted(maps.Keys(held)) {
-		f.apply(store.Key(k), held[k])
+		f.apply(k, held[k])
 	}
 	if own := store.Of(store.FamilyMac, mac); !slices.Contains(keys, own) {
 		keys = append(keys, own)
@@ -347,6 +353,30 @@ func (f *Far) lost(mac string, l *link, why string) {
 	if f.Drop != nil {
 		f.Drop(mac)
 	}
+}
+
+func selfOf(keys iter.Seq[string]) string {
+	for k := range keys {
+		if key := store.Key(k); key.Family() == store.FamilyMac {
+			return key.Machine()
+		}
+	}
+	return ""
+}
+
+func renamed(mac, self string, in map[string]engine.SliceOut) map[store.Key]engine.SliceOut {
+	out := make(map[store.Key]engine.SliceOut, len(in))
+	for k, sl := range in {
+		out[rename(mac, self, store.Key(k))] = sl
+	}
+	return out
+}
+
+func rename(mac, self string, k store.Key) store.Key {
+	if self == "" || self == mac || !k.Family().PerMachine() || k.Machine() != self {
+		return k
+	}
+	return store.Of(k.Family(), mac)
 }
 
 func (f *Far) watchdog(ctx context.Context, mac string, l *link) {
