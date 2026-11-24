@@ -5,11 +5,13 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
+	"net/netip"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
+	core "github.com/jterrazz/studio-station/apps/engine/core/contract"
 	coremachine "github.com/jterrazz/studio-station/apps/engine/core/machine"
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
 	machinesfake "github.com/jterrazz/studio-station/apps/engine/machines/adapter/fake"
@@ -21,8 +23,12 @@ import (
 
 func lockingDown(t *testing.T) *machines.Machinist {
 	t.Helper()
+	return lockingDownOn(t, memoryPrefs{})
+}
+
+func lockingDownOn(t *testing.T, prefs core.Preferences) *machines.Machinist {
+	t.Helper()
 	w := &world.World{ThisMac: "mac"}
-	prefs := memoryPrefs{}
 	p := machines.Prefs{Name: setupcontract.Name(prefs), Macs: machinescontract.Macs(prefs), VMUser: machinescontract.VMUser(prefs)}
 	if err := p.Name.Set("mac"); err != nil {
 		t.Fatal(err)
@@ -66,6 +72,40 @@ func TestALockdownThatCannotBeReadIsNoLockdownFailure(t *testing.T) {
 	if err == nil || errors.As(err, new(*machinescontract.LockdownError)) {
 		t.Errorf("a VM its store does not hold came back %v; want its own error, no lockdown failure", err)
 	}
+}
+
+func TestPreferencesThatCannotBeReadAreTheDialsOwnErrorNeverARefusedVMUser(t *testing.T) {
+	at := netip.MustParseAddrPort("192.168.64.2:22")
+	for _, group := range []string{machinescontract.GroupMacs, machinescontract.GroupVMUser} {
+		prefs := &unreadableOnce{memoryPrefs: memoryPrefs{}}
+		m := lockingDownOn(t, prefs)
+		prefs.group = group
+		_, err := m.GuestTarget(t.Context(), "mac-1", at)
+		if err == nil || errors.As(err, new(*machinescontract.LockdownError)) || errors.As(err, new(*model.BadVMUserError)) || strings.Contains(err.Error(), "vm_user") {
+			t.Errorf("%s read once in error: GuestTarget came back %v; want the read's own error, so its VM is not stopped", group, err)
+		}
+	}
+	prefs := &unreadableOnce{memoryPrefs: memoryPrefs{}}
+	m := lockingDownOn(t, prefs)
+	if err := machinescontract.VMUser(prefs).Set("Admin"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := m.GuestTarget(t.Context(), "mac-1", at); !errors.As(err, new(*machinescontract.LockdownError)) {
+		t.Errorf("a refused vm_user: GuestTarget came back %v; want a lockdown failure, so its VM is stopped", err)
+	}
+}
+
+type unreadableOnce struct {
+	memoryPrefs
+	group string
+}
+
+func (p *unreadableOnce) Read(group string, v any) error {
+	if group == p.group {
+		p.group = ""
+		return errors.New("read preferences.json: input/output error")
+	}
+	return p.memoryPrefs.Read(group, v)
 }
 
 func TestALockdownsValuesCarryTheHashOfTheBinaryItPutsIn(t *testing.T) {

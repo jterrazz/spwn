@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
+	model "github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/machines/contract"
 )
 
@@ -46,10 +47,15 @@ func (s *Machinist) GuestTarget(ctx context.Context, vm string, at netip.AddrPor
 	// value: the target the engine dials a VM of this Mac by: its user and
 	// the image key, its host key pinned in its own known hosts. A VM user
 	// the rule refuses is no target; for a VM whose image carries a lockdown
-	// it is a contract.LockdownError, so its VM is stopped.
-	user, bad := s.VMUser()
-	if bad == nil {
+	// it is a contract.LockdownError, so its VM is stopped. Preferences that
+	// cannot be read are the dial's own error, met again at its next try.
+	user, err := s.VMUser()
+	if err == nil {
 		return contract.GuestTarget{VM: vm, Address: at, User: user, Key: s.KeyPath(), KnownHosts: s.KnownHostsPath(vm)}, nil
+	}
+	var bad *model.BadVMUserError
+	if !errors.As(err, &bad) {
+		return contract.GuestTarget{}, err
 	}
 	locks, err := s.Locks(ctx, vm)
 	if err != nil {
@@ -99,7 +105,10 @@ func (s *Machinist) LockdownOf(ctx context.Context, t contract.GuestTarget) (Loc
 	if err != nil || !ok {
 		return Lockdown{}, false, err
 	}
-	cfg, _ := s.prefs()
+	cfg, err := s.prefs()
+	if err != nil {
+		return Lockdown{}, false, err
+	}
 	if bad := contract.CheckVMUser(t.User, cfg.VMUser == ""); bad != nil {
 		return Lockdown{}, false, lockdownRefused(t.VM, bad)
 	}

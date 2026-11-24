@@ -32,7 +32,8 @@ import (
 
 func (m machine) images() *imagescalls.Builder {
 	user, account := m.sys.Env.User(), true
-	if current, err := m.stores.vmUser().Get(); err == nil && current != "" {
+	current, unread := m.stores.vmUser().Get()
+	if unread == nil && current != "" {
 		user, account = current, false
 	}
 	hypervisor := m.hypervisor()
@@ -45,6 +46,7 @@ func (m machine) images() *imagescalls.Builder {
 		Version: Version(),
 		User:    user,
 		Account: account,
+		Unread:  unread,
 		Mac:     m.profile.Ref.Name,
 	})
 }
