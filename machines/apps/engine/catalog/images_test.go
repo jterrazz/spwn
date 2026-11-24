@@ -125,8 +125,6 @@ func lockdownClosesTheImageBeforeAnythingElse(t *testing.T, name, script string)
 		`-passwd "/Users/$LOGIN_USER"`,
 		`: > "$login_home/.ssh/authorized_keys"`,
 		`rm -f "/etc/sudoers.d/$LOGIN_USER-nopasswd"`,
-		`[[ "$VM_USER" =~ ^[a-z_][a-z0-9_-]{0,31}$ ]]`,
-		`[ "$VM_USER" != "$LOGIN_USER" ]`,
 	} {
 		at := strings.Index(script, step)
 		switch {
@@ -136,6 +134,26 @@ func lockdownClosesTheImageBeforeAnythingElse(t *testing.T, name, script string)
 			t.Errorf("%s's first login runs %q before it checks its binary", name, step)
 		case at > firstOther:
 			t.Errorf("%s's first login sets the guest up before %q: a failure between leaves the image's login open", name, step)
+		}
+	}
+	lock := strings.Index(script, "/etc/ssh/sshd_config.d/000-station.conf")
+	for _, step := range []string{
+		"vm_user_rule='",
+		`[[ "$VM_USER" =~ $vm_user_rule ]]`,
+		`[ "$VM_USER" != "$LOGIN_USER" ]`,
+		`[ "$VM_USER" != root ]`,
+		`vm_uid=$(/usr/bin/id -u "$VM_USER" 2>/dev/null)`,
+		`{ [ "$vm_uid" -lt 500 ] || [ "$vm_uid" -gt 60000 ]; }`,
+		`[ "$vm_uid" = "$(/usr/bin/id -u "$LOGIN_USER" 2>/dev/null)" ]`,
+	} {
+		at := strings.Index(script, step)
+		switch {
+		case at < 0:
+			t.Errorf("%s's first login lacks %q, the VM user's rule", name, step)
+		case at < checked:
+			t.Errorf("%s's first login runs %q before it checks its binary", name, step)
+		case at > lock:
+			t.Errorf("%s's first login checks its VM user by %q after it locks the image's login: a refusal there leaves a guest no login opens", name, step)
 		}
 	}
 	for _, step := range []string{
@@ -192,6 +210,28 @@ func lockdownPutsTheKeyInLastAndItsMarkerAfterIt(t *testing.T, name, script stri
 	for _, line := range strings.Split(strings.TrimSpace(script[marker:]), "\n")[1:] {
 		if !strings.HasSuffix(strings.TrimSpace(line), ">&3") {
 			t.Errorf("%s's first login runs %q after its marker, which is its last step", name, line)
+		}
+	}
+}
+
+func TestTheLinuxPlumbingRefusesASystemAccountBeforeItTouchesIt(t *testing.T) {
+	body, err := fs.ReadFile(catalog.Recipes, "images/linux.sh")
+	if err != nil {
+		t.Fatal(err)
+	}
+	script := string(body)
+	check := strings.Index(script, `vm_uid=$(id -u "$VM_USER" 2>/dev/null)`)
+	refusal := strings.Index(script, `{ [ "$vm_uid" -lt 1000 ] || [ "$vm_uid" -gt 60000 ]; }`)
+	if check < 0 || refusal < 0 {
+		t.Fatal("linux.sh never refuses a VM user that is an existing account outside 1000 to 60000, a system account (daemon, nobody)")
+	}
+	login := strings.Index(script, `[ "$vm_uid" = "$(id -u admin 2>/dev/null)" ]`)
+	if login < 0 {
+		t.Fatal("linux.sh never refuses a VM user that is the base's own admin account under another name, by its uid")
+	}
+	for _, step := range []string{"useradd", "/etc/sudoers.d/60-station-user", "authorized_keys"} {
+		if at := strings.Index(script, step); at >= 0 && (at < refusal || at < login) {
+			t.Errorf("linux.sh runs %q before it refuses a system account, or the base's admin, as its VM user", step)
 		}
 	}
 }

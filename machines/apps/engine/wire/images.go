@@ -31,9 +31,10 @@ import (
 )
 
 func (m machine) images() *imagescalls.Builder {
-	user := m.sys.Env.User()
-	if current, err := m.stores.vmUser().Get(); err == nil && current != "" {
-		user = current
+	user, account := m.sys.Env.User(), true
+	current, unread := m.stores.vmUser().Get()
+	if unread == nil && current != "" {
+		user, account = current, false
 	}
 	hypervisor := m.hypervisor()
 	return imagescalls.NewBuilder(imagesMachine{h: m.sys, keys: openssh.NewKeyGen(m.sys.Run, m.sys.FS)}, imagescalls.Contracts{
@@ -44,6 +45,8 @@ func (m machine) images() *imagescalls.Builder {
 		Cache: m.paths.Cache, Key: filepath.Join(m.paths.State, "images", "key"),
 		Version: Version(),
 		User:    user,
+		Account: account,
+		Unread:  unread,
 		Mac:     m.profile.Ref.Name,
 	})
 }

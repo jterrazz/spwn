@@ -19,6 +19,11 @@ type BuilderOptions struct {
 	Cache, Key string
 	Version    string
 	User       string
+	// value: User is this Mac's account, taken since preferences.json sets no vm_user.
+	Account bool
+	// value: why preferences.json's vm_user could not be read, so no image
+	// is built for any user.
+	Unread error
 	// value: the Mac this service holds the images of.
 	Mac string
 }

@@ -1,0 +1,11 @@
+description: 'a build is refused for a vm_user that cannot be read, never made for this Mac''s account'
+fixture: ../../__fixtures__/build/
+env: two-macs
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs[.this_mac].preferences.vm_user = 42'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'images build base-ubuntu --binary $HOME/station-linux'
+      exit: 1
+      stderr: |
+          Error: json: cannot unmarshal number into Go value of type string
+          Hint: run station images build --help

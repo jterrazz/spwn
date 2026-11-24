@@ -1,5 +1,5 @@
 {"world": "standings", "station": "dev", "exchanges": [
-{"request":{"call":"machines.ssh","in":{"Name":"loop-1"}},"answers":[{"v":2,"out":{"User":"admin","Address":"loop-1","Command":"ssh admin@loop-1"}}]},
-{"request":{"call":"machines.ssh","in":{"Name":"restart-1"}},"answers":[{"v":2,"out":{"User":"admin","Address":"restart-1","Command":"ssh admin@restart-1"}}]},
-{"request":{"call":"machines.ssh","in":{"Name":"suspended-1"}},"answers":[{"v":2,"out":{"User":"admin","Address":"suspended-1","Command":"ssh admin@suspended-1"}}]}
+{"request":{"call":"machines.ssh","in":{"Name":"loop-1"}},"answers":[{"v":2,"out":{"User":"you","Address":"loop-1","Command":"ssh you@loop-1"}}]},
+{"request":{"call":"machines.ssh","in":{"Name":"restart-1"}},"answers":[{"v":2,"out":{"User":"you","Address":"restart-1","Command":"ssh you@restart-1"}}]},
+{"request":{"call":"machines.ssh","in":{"Name":"suspended-1"}},"answers":[{"v":2,"out":{"User":"you","Address":"suspended-1","Command":"ssh you@suspended-1"}}]}
 ]}

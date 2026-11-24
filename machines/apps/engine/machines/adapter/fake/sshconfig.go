@@ -59,6 +59,12 @@ func (c *SSHConfig) put(blocks []contract.MachineBlock) error {
 			}
 			continue
 		}
+		if why := contract.Unwritable(b); why != "" {
+			if refused == nil {
+				refused = &contract.SSHConfigError{Path: "~/.ssh/config", Cause: errors.New(why)}
+			}
+			continue
+		}
 		cfg.Blocks[b.Name] = world.SSHBlock{User: b.User, Key: b.Key, Behind: b.Behind, ThisMac: b.ThisMac}
 	}
 	return refused

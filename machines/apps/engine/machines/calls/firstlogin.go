@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
+	model "github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/machines/contract"
 )
 
@@ -42,10 +43,32 @@ func (l Lockdown) Failed(code int, stderr string) error {
 	return errors.New("its lockdown exited " + strconv.Itoa(code) + ": " + firstLine(stderr))
 }
 
-func (s *Machinist) GuestTarget(vm string, at netip.AddrPort) contract.GuestTarget {
+func (s *Machinist) GuestTarget(ctx context.Context, vm string, at netip.AddrPort) (contract.GuestTarget, error) {
 	// value: the target the engine dials a VM of this Mac by: its user and
-	// the image key, its host key pinned in its own known hosts.
-	return contract.GuestTarget{VM: vm, Address: at, User: s.VMUser(), Key: s.KeyPath(), KnownHosts: s.KnownHostsPath(vm)}
+	// the image key, its host key pinned in its own known hosts. A VM user
+	// the rule refuses is no target; for a VM whose image carries a lockdown
+	// it is a contract.LockdownError, so its VM is stopped. Preferences that
+	// cannot be read are the dial's own error, met again at its next try.
+	user, err := s.VMUser()
+	if err == nil {
+		return contract.GuestTarget{VM: vm, Address: at, User: user, Key: s.KeyPath(), KnownHosts: s.KnownHostsPath(vm)}, nil
+	}
+	var bad *model.BadVMUserError
+	if !errors.As(err, &bad) {
+		return contract.GuestTarget{}, err
+	}
+	locks, err := s.Locks(ctx, vm)
+	if err != nil {
+		return contract.GuestTarget{}, err
+	}
+	if !locks {
+		return contract.GuestTarget{}, bad
+	}
+	return contract.GuestTarget{}, lockdownRefused(vm, bad)
+}
+
+func lockdownRefused(vm string, bad error) error {
+	return &contract.LockdownError{Cause: bad.Error() + "; set vm_user in ~/.config/station/preferences.json, then start " + vm}
 }
 
 func (s *Machinist) FirstLoginOf(ctx context.Context, t contract.GuestTarget, refused error) (Lockdown, bool, error) {
@@ -75,18 +98,19 @@ func (s *Machinist) Locks(ctx context.Context, vm string) (bool, error) {
 
 func (s *Machinist) LockdownOf(ctx context.Context, t contract.GuestTarget) (Lockdown, bool, error) {
 	// invariant: the lockdown of a VM whose image carries one, the image
-	// key made when it is missing; none for any other VM. A VM user that is
-	// the image's own account or root, in any case, since macOS reads names
-	// whatever their case, or none is refused, a
-	// contract.LockdownError: the lockdown takes that account's login away,
-	// and the VM user's would go with it. What cannot be read for it is its
-	// own error.
+	// key made when it is missing; none for any other VM. A target user the
+	// rule refuses is a contract.LockdownError, so its VM is stopped. What
+	// cannot be read for it is its own error.
 	img, ok, err := s.lockdownImage(ctx, t.VM)
 	if err != nil || !ok {
 		return Lockdown{}, false, err
 	}
-	if t.User == "" || strings.EqualFold(t.User, catalog.UpstreamLogin.User) || strings.EqualFold(t.User, "root") {
-		return Lockdown{}, false, &contract.LockdownError{Cause: "the VM user '" + t.User + "' cannot be a fetched macOS guest's, whose lockdown retires " + catalog.UpstreamLogin.User + " and root: set another vm_user in preferences.json, then start " + t.VM}
+	cfg, err := s.prefs()
+	if err != nil {
+		return Lockdown{}, false, err
+	}
+	if bad := contract.CheckVMUser(t.User, cfg.VMUser == ""); bad != nil {
+		return Lockdown{}, false, lockdownRefused(t.VM, bad)
 	}
 	script, err := catalog.Recipes.ReadFile(img.FirstLogin)
 	if err != nil {

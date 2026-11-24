@@ -845,7 +845,7 @@
                         "review-bot:8000"
                     ]
                 },
-                "vm_user": "admin"
+                "vm_user": "you"
             },
             "self": {
                 "system": {
@@ -1117,7 +1117,7 @@
                         "user": "you"
                     }
                 },
-                "vm_user": "admin"
+                "vm_user": "you"
             },
             "self": {
                 "system": {
@@ -1499,7 +1499,7 @@
                         "agent-7f:6006"
                     ]
                 },
-                "vm_user": "admin"
+                "vm_user": "you"
             },
             "processes": [
                 {

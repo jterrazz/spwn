@@ -165,13 +165,31 @@ func (e *UnhealthyError) BlockedFix() string {
 	return LocalNetworkFix(e.BlockedOn, e.BlockedBundled) + "; start " + e.Name + " once approved"
 }
 
-type BadVMUserError struct{ User string }
+type BadVMUserError struct {
+	User string
+	// value: the name is this Mac's account, taken since preferences.json
+	// sets no vm_user.
+	Account bool
+}
 
 func (e *BadVMUserError) Error() string {
-	return "vm_user " + strconv.Quote(e.User) + " in preferences.json is not a VM user: a lowercase short name (a-z or _ first, then up to 31 of a-z, 0-9, _ and -), never root"
+	const rule = "a lowercase short name (a-z first, then up to 31 of a-z, 0-9, _, . and -, never a dot last), never admin or root"
+	if e.Account {
+		return "this Mac's account " + strconv.Quote(e.User) + " is not a VM user, and preferences.json sets no vm_user: a VM user is " + rule
+	}
+	return "vm_user " + strconv.Quote(e.User) + " in preferences.json is not a VM user: " + rule
 }
 
 var ErrEngineDown = errors.New("the engine is not running")
+
+type BadSSHTargetError struct {
+	// value: why machines ssh names no command for a machine: its name or
+	// its user, as preferences.json holds them, would not reach ssh as one
+	// word.
+	Why string
+}
+
+func (e *BadSSHTargetError) Error() string { return e.Why }
 
 type NothingToChangeError struct{ Name string }
 

@@ -1,0 +1,18 @@
+description: 'a Mac account holding a dot, with no vm_user set, makes a macOS workspace as that VM user'
+fixture: ../../__fixtures__/build/
+env: dotted-account
+runs:
+    - command: 'world upstream-login admin admin'
+      exit: 0
+    - command: 'images update base-macos'
+      exit: 0
+      stdout: |
+          ●	base-macos	26.6.2	fetched
+    - command: 'machines create mac-1 --image base-macos | /usr/bin/tail -1'
+      exit: 0
+      stdout: |
+          ●	mac-1	Created	Ephemeral · 4 CPU · 8 GB · 80 GB
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs[.this_mac] | {vm_user: .preferences.vm_user, user: .ssh.blocks["mac-1"].user, login: .vms["mac-1"].guest.login}'' world.json'
+      exit: 0
+      stdout: |
+          {"vm_user":null,"user":"jterrazz.ops","login":null}

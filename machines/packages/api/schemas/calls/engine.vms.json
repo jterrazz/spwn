@@ -5,7 +5,8 @@
       "properties": {
         "blocked": {
           "enum": [
-            "local-network"
+            "local-network",
+            "vm-user"
           ],
           "type": "string"
         },

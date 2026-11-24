@@ -193,7 +193,8 @@ func severityOf(t verdict.Tone) finding.Severity {
 
 // invariant: what a VM's finding says is read from its facts, its severity
 // from its standing (severityOf). A running VM its Mac's Local Network
-// blocks says so first, the cause of whatever else fails; a VM whose
+// or its Mac's refused VM user blocks says so first, the cause of whatever
+// else fails; a VM whose
 // create failed, its start the cure, or its delete when no start can reach
 // its guest; a server in a loop, broken, powered
 // off from inside, or whose check fails since it passed, a VM
@@ -208,6 +209,8 @@ func vmFinding(ref machine.Ref, vm VM, on string, bundled bool) (finding.Finding
 	switch {
 	case vm.State == Running && vm.Blocked == LocalNetworkBlock:
 		f.Text, f.Fix = vm.Name+" is unreachable: "+NotApproved(ref.On, bundled), finding.Fix{Path: LocalNetworkFix(ref.On, bundled)}
+	case vm.State == Running && vm.Blocked == VMUserBlock:
+		f.Text, f.Fix = vm.Name+" is unreachable: "+VMUserRefused(ref.On), finding.Fix{Path: VMUserFix}
 	case s == StandingNotCreated && vm.Birth.Gone:
 		f.Text, f.Again = vm.Name+" was not created: it failed at "+vm.Birth.Step.Noun(), true
 		f.Fix = finding.Fix{Command: "station machines delete " + vm.Name + on}

@@ -1,0 +1,28 @@
+description: 'a vm_user with a leading _, a macOS account of its own, is refused before any VM is made'
+fixture: ../../__fixtures__/build/
+env: one-mac
+runs:
+    - command: 'world upstream-login admin admin'
+      exit: 0
+    - command: 'images update base-macos'
+      exit: 0
+      stdout: |
+          ●	base-macos	26.6.2	fetched
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].preferences.vm_user = "_www"'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'machines create mac-1 --image base-macos'
+      exit: 1
+      stderr: |
+          Error: vm_user "_www" in preferences.json is not a VM user: a lowercase short name (a-z first, then up to 31 of a-z, 0-9, _, . and -, never a dot last), never admin or root
+          Hint: set another vm_user in ~/.config/station/preferences.json
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].preferences.vm_user = "_spotlight"'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'machines create mac-1 --image base-macos'
+      exit: 1
+      stderr: |
+          Error: vm_user "_spotlight" in preferences.json is not a VM user: a lowercase short name (a-z first, then up to 31 of a-z, 0-9, _, . and -, never a dot last), never admin or root
+          Hint: set another vm_user in ~/.config/station/preferences.json
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs[.this_mac].vms["mac-1"]'' world.json'
+      exit: 0
+      stdout: |
+          null

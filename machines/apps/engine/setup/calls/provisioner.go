@@ -25,7 +25,7 @@ const (
 
 type Registrar interface {
 	ThisMac() (string, bool)
-	Register(name string) error
+	Register(name string) (string, error)
 }
 
 type ProvisionerOptions struct {
@@ -167,10 +167,15 @@ func (s *Provisioner) name(r Request) (setup.Step, error) {
 	if err := s.p.Name.Set(name); err != nil {
 		return failed(stepName, err)
 	}
-	if err := s.reg.Register(name); err != nil {
+	note, err := s.reg.Register(name)
+	if err != nil {
 		return failed(stepName, err)
 	}
-	return setup.Step{Name: stepName, State: catalog.StateOK, Detail: name, Changed: true}, nil
+	detail := name
+	if note != "" {
+		detail += "; " + note
+	}
+	return setup.Step{Name: stepName, State: catalog.StateOK, Detail: detail, Changed: true}, nil
 }
 
 func failed(step string, cause error) (setup.Step, error) {

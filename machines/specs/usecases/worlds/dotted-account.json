@@ -1,0 +1,42 @@
+{
+    "now": "2026-11-04T10:00:00Z",
+    "this_mac": "macbook-pro",
+    "user": "jterrazz.ops",
+    "macs": {
+        "macbook-pro": {
+            "stores": {
+                "release": {
+                    "Read": "2026-11-04T10:00:00Z"
+                }
+            },
+            "engine": {},
+            "preferences": {
+                "name": "macbook-pro"
+            },
+            "power": {
+                "Lid": "open",
+                "Source": "ac",
+                "HasBattery": true,
+                "Percent": 96,
+                "Charging": true
+            }
+        },
+        "mac-mini": {
+            "stores": {
+                "release": {
+                    "Read": "2026-11-04T10:00:00Z"
+                }
+            },
+            "engine": {
+                "started_at": "2026-10-23T09:00:00Z"
+            },
+            "power": {
+                "Source": "ac"
+            },
+            "preferences": {
+                "name": "mac-mini",
+                "vm_user": "you"
+            }
+        }
+    }
+}

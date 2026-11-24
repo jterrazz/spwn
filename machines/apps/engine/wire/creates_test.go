@@ -140,7 +140,7 @@ func TestCreateChildProcess(t *testing.T) {
 	m := machinescalls.New(macSystem{sys}, machinesfake.HypervisorOf(w, "mac", "hypervisor", nil), p, store, nil, unbuilt{}, answering{}, nil, machinescalls.Options{
 		ThisMachine: catalog.Mac, Images: []catalog.Image{linux}, KnownHosts: filepath.Join(meet, me+".known_hosts"), Logs: filepath.Join(meet, me+".logs"),
 		Hardware:  func(context.Context) coremachine.Hardware { return coremachine.Hardware{Memory: 16 << 30, CPUs: 8} },
-		Processes: kernel.Processes{},
+		Processes: kernel.Processes{}, User: "you",
 	})
 	built := false
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)

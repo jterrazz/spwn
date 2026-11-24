@@ -6,6 +6,11 @@
 # image phase, which the build runs after it.
 set -euo pipefail
 
+# outside: Debian and Ubuntu keep the uids under 1000 and above 60000 (nobody's 65534) to the system's own accounts; the user an image makes gets one from 1000.
+if vm_uid=$(id -u "$VM_USER" 2>/dev/null) && { [ "$vm_uid" -lt 1000 ] || [ "$vm_uid" -gt 60000 ]; }; then echo "the VM user '$VM_USER' is a system account of the image (uid $vm_uid): an image is made for another user" >&2; exit 1; fi
+# outside: the base ships admin, the build's own login, which linux-cleanup.sh removes; another name of it is admin, by its uid.
+if [ -n "${vm_uid:-}" ] && [ "$vm_uid" = "$(id -u admin 2>/dev/null)" ]; then echo "the VM user '$VM_USER' is the base's own account admin by its uid ($vm_uid): an image is made for another user" >&2; exit 1; fi
+
 export DEBIAN_FRONTEND=noninteractive
 
 id "$VM_USER" >/dev/null 2>&1 || useradd --create-home --shell /bin/zsh "$VM_USER"

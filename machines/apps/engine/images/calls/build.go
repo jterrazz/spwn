@@ -105,6 +105,12 @@ func (s *Builder) selection(ctx context.Context, names []string) ([]wanted, erro
 }
 
 func (s *Builder) Build(ctx context.Context, r images.BuildRequest, progress func(images.Step)) ([]images.Record, error) {
+	if s.o.Unread != nil {
+		return nil, s.o.Unread
+	}
+	if err := contract.CheckVMUser(s.o.User, s.o.Account); err != nil {
+		return nil, err
+	}
 	wanted, err := s.selection(ctx, r.Images)
 	if err != nil || len(wanted) == 0 {
 		return nil, err

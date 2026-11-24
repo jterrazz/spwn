@@ -1,0 +1,31 @@
+description: 'a fetched macOS workspace is not run for a Mac account that is no VM user: it stays stopped'
+fixture: ../../__fixtures__/build/
+env: dotted-account
+runs:
+    - command: 'world upstream-login admin admin'
+      exit: 0
+    - command: 'world lockdown-cut before-lock'
+      exit: 0
+    - command: 'images update base-macos'
+      exit: 0
+      stdout: |
+          ●	base-macos	26.6.2	fetched
+    - command: 'machines create mac-1 --image base-macos'
+      exit: 1
+      stderr: |
+          Error: mac-1 is kept, failing SSH answers: its lockdown exited 1: the lockdown was cut before its lock
+          Hint: station machines start mac-1, or station machines delete mac-1
+    - command: '--version >/dev/null; /usr/bin/jq ''.user = "jterrazz."'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'machines start mac-1'
+      exit: 1
+      stderr: |
+          Error: this Mac's account "jterrazz." is not a VM user, and preferences.json sets no vm_user: a VM user is a lowercase short name (a-z first, then up to 31 of a-z, 0-9, _, . and -, never a dot last), never admin or root
+          Hint: set vm_user in ~/.config/station/preferences.json
+    - command: 'machines --this-mac'
+      exit: 0
+      stdout: |
+          ●	macbook-pro	Mac	macbook-pro	Engine running
+          ○	mac-1	Workspace	macbook-pro	Stopped · ephemeral	4 CPU	8 GB	Failed at SSH 4 of 4
+          # Needs you
+          ✗	mac-1	was not created: it failed at SSH	station machines start mac-1

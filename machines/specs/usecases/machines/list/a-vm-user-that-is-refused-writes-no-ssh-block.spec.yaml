@@ -1,0 +1,19 @@
+description: 'a refused vm_user leaves the ssh blocks as they were, and the list says why'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" machines >/dev/null && /usr/bin/jq -c ''.macs[.this_mac].ssh.blocks | map_values(.user)'' world.json'
+      exit: 0
+      stdout: |
+          {"api":"you","infra":"jterrazz.agent","linux-1":"you","mac-mini":"jterrazz.agent"}
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs[.this_mac].preferences.vm_user = "you\n  ProxyCommand /usr/bin/touch pwned"'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" machines | /usr/bin/grep "not refreshed"'
+      exit: 0
+      stdout: |
+          	ssh config not refreshed: vm_user "you\n  ProxyCommand /usr/bin/touch pwned" in preferences.json is not a VM user: a lowercase short name (a-z first, then up to 31 of a-z, 0-9, _, . and -, never a dot last), never admin or root
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs[.this_mac].ssh.blocks | map_values(.user)'' world.json'
+      exit: 0
+      stdout: |
+          {"api":"you","infra":"jterrazz.agent","linux-1":"you","mac-mini":"jterrazz.agent"}

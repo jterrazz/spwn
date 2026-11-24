@@ -1,0 +1,26 @@
+description: 'machines ssh refuses a refused vm_user for a VM of this Mac, never for a Mac or a far VM'
+env: two-macs
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs[.this_mac].preferences.vm_user = "you;touch pwned"'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'machines ssh api'
+      exit: 1
+      stderr: |
+          Error: vm_user "you;touch pwned" in preferences.json is not a VM user: a lowercase short name (a-z first, then up to 31 of a-z, 0-9, _, . and -, never a dot last), never admin or root
+          Hint: set another vm_user in ~/.config/station/preferences.json
+    - command: 'machines ssh mac-mini'
+      exit: 0
+      stdout: |
+          ssh jterrazz.agent@mac-mini
+    - command: 'machines ssh infra'
+      exit: 0
+      stdout: |
+          ssh jterrazz.agent@infra
+    - command: 'machines --this-mac'
+      exit: 0
+      stdout: |
+          ●	macbook-pro	Mac	macbook-pro	Engine running
+          ○	api	Workspace	macbook-pro	Stopped · persistent	4 CPU	8 GB
+          ●	linux-1	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB
+          # Needs you
+          ◐	linux-1	is unreachable: macbook-pro's VM user is one the rule refuses	set another vm_user in ~/.config/station/preferences.json

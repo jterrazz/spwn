@@ -166,7 +166,7 @@ func PlayWorld(base []byte) []byte {
 		if !h.Reachable && !h.ThisMac {
 			known[h.Name] = map[string]any{"user": h.User, "answered": h.Answered, "hardware": hw, "laptop": true, "asleep": true}
 			w.Macs[h.Name] = &playMac{Offline: true, Engine: &playEngine{Version: stationVer, StartedAt: storyNow.Add(-5 * 24 * time.Hour)},
-				Preferences: map[string]any{"vm_user": "admin"}, Self: &playSelf{Hardware: hw}, Stores: &playStores{Release: &engine.ReleaseKept{Read: storyNow}}}
+				Preferences: map[string]any{"vm_user": "you"}, Self: &playSelf{Hardware: hw}, Stores: &playStores{Release: &engine.ReleaseKept{Read: storyNow}}}
 			continue
 		}
 		known[h.Name] = map[string]any{"user": h.User, "lan": h.LAN}
@@ -175,7 +175,7 @@ func PlayWorld(base []byte) []byte {
 		}
 		m := &playMac{
 			Engine:      &playEngine{Version: stationVer, StartedAt: storyNow.Add(-macUp(f, h.Name))},
-			Preferences: map[string]any{"vm_user": "admin"},
+			Preferences: map[string]any{"vm_user": "you"},
 			Images:      []string{"ghcr.io/jterrazz/station-base-ubuntu:3"},
 			VMs:         map[string]*playVM{},
 			Self:        &playSelf{Hardware: hw},

@@ -1,0 +1,13 @@
+description: 'add writes no user that is no one ssh_config word, and rolls the preferences back'
+fixture:
+    - ../../__fixtures__/far-mac/
+env: engine
+runs:
+    - command: '--version >/dev/null; "$STATION" machines add mac-mini --user "$(/usr/bin/printf "agent\n  ProxyCommand /usr/bin/touch pwned")"'
+      exit: 1
+      stderr: |
+          Error: updating the ssh config failed (registry rolled back): refusing to write {{workdir}}/.ssh/config: mac-mini's user "agent\n  ProxyCommand /usr/bin/touch pwned" is not one word of letters, digits, ".", "_" and "-"
+          Hint: check "{{workdir}}/.ssh/config" and run it again
+      files:
+          .ssh/config: absent
+          pwned: absent

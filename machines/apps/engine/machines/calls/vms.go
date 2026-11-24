@@ -78,12 +78,18 @@ func (s *Machinist) Start(ctx context.Context, name string) error {
 	// retry: it runs the VM, then its set-up from its first boot on, as the
 	// create would have; its birth goes once the set-up answers, and
 	// otherwise holds the new failure (its step, cause and console lines
-	// replacing the old), which the start answers as its error.
+	// replacing the old), which the start answers as its error. A VM whose
+	// image carries a lockdown is not run for a VM user its rule refuses
+	// (lockdownUser).
 	rec, err := s.VM(name, engine.VMStart)
 	if err != nil {
 		return err
 	}
 	if err := s.EngineUp(ctx); err != nil {
+		return err
+	}
+	img, _ := s.imageOf(ctx, rec.Image)
+	if err := s.lockdownUser(img); err != nil {
 		return err
 	}
 	retry := rec.Birth != nil && rec.Birth.Failed
@@ -100,7 +106,6 @@ func (s *Machinist) Start(ctx context.Context, name string) error {
 	if !retry {
 		return nil
 	}
-	img, _ := s.imageOf(ctx, rec.Image)
 	if err := s.setUp(ctx, img, model.CreateRequest{Name: name, Lifetime: rec.Lifetime}); err != nil {
 		failed := &model.UnhealthyError{Name: name, Step: model.StepSSH, Detail: strings.TrimSpace(err.Error())}
 		if ctx.Err() == nil {
@@ -114,6 +119,21 @@ func (s *Machinist) Start(ctx context.Context, name string) error {
 			stored.Birth = nil
 		}
 	})
+}
+
+// invariant: a VM whose image carries a lockdown is not run for a VM user
+// its rule refuses: its start and its restart refuse it before the VM is
+// touched, as a create does.
+func (s *Machinist) lockdownUser(img catalog.Image) error {
+	if img.FirstLogin == "" {
+		return nil
+	}
+	cfg, err := s.prefs()
+	if err != nil {
+		return err
+	}
+	_, bad := s.vmUser(cfg)
+	return bad
 }
 
 func (s *Machinist) Stop(ctx context.Context, name string) error {
@@ -146,10 +166,15 @@ func (s *Machinist) StopDirect(ctx context.Context, name string) error {
 }
 
 func (s *Machinist) restartVM(ctx context.Context, name string, say func(phase, detail string)) (model.RestartReport, error) {
-	if _, err := s.VM(name, engine.VMRestart); err != nil {
-		return model.RestartReport{}, err
+	rec, found := s.VM(name, engine.VMRestart)
+	if found != nil {
+		return model.RestartReport{}, found
 	}
 	if err := s.EngineUp(ctx); err != nil {
+		return model.RestartReport{}, err
+	}
+	img, _ := s.imageOf(ctx, rec.Image)
+	if err := s.lockdownUser(img); err != nil {
 		return model.RestartReport{}, err
 	}
 	started := s.h.Now()

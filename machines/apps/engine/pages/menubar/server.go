@@ -535,19 +535,23 @@ func (s serverView) tooling() page.Section {
 }
 
 // value: the ssh that opens a shell on it, as its own line says it, else
-// as station names it.
-func (s serverView) ssh() string {
+// as station names it; none when ssh would read either as an option.
+func (s serverView) ssh() (string, bool) {
 	if s.m.Summary != nil {
 		for _, l := range s.m.Summary.Lines {
 			if l.Section == coresection.SSH && len(l.Parts) > 0 && l.Parts[0].Word != "" {
-				if user, at, found := strings.Cut(l.Parts[0].Word, "@"); found {
-					return catalog.SSHCommand(user, at)
+				user, at, found := strings.Cut(l.Parts[0].Word, "@")
+				if !found {
+					user, at = "", l.Parts[0].Word
 				}
-				return catalog.SSHCommand("", l.Parts[0].Word)
+				if ssh, err := catalog.SSHCommand(user, at); err == nil {
+					return ssh, true
+				}
 			}
 		}
 	}
-	return catalog.SSHCommand("", s.vm.Name)
+	ssh, err := catalog.SSHCommand("", s.vm.Name)
+	return ssh, err == nil
 }
 
 // value: the footer: its ssh to copy and Open in Terminal; while it
@@ -556,9 +560,11 @@ func (s serverView) footer() *page.Footer {
 	f := &page.Footer{Kind: page.FooterSSH, Buttons: []string{ActionOpenStation}}
 	switch s.state {
 	case serverUp:
-		ssh := page.Command(s.ssh())
-		f.Copy = &ssh
-		f.Buttons = []string{ActionCopySSH, ActionOpenStation}
+		if line, ok := s.ssh(); ok {
+			ssh := page.Command(line)
+			f.Copy = &ssh
+			f.Buttons = []string{ActionCopySSH, ActionOpenStation}
+		}
 	case serverRestarting:
 		f.Note = "Opens once SSH answers"
 	default:
@@ -591,8 +597,9 @@ func (s serverView) actions() []page.Action {
 	case serverUp, serverRestarting:
 	}
 	if s.state == serverUp {
-		ssh := s.ssh()
-		out = append(out, copied(ActionCopySSH, "Copy "+ssh, ssh))
+		if ssh, ok := s.ssh(); ok {
+			out = append(out, copied(ActionCopySSH, "Copy "+ssh, ssh))
+		}
 		for _, p := range s.served() {
 			id := s.vm.Name + ":" + strconv.Itoa(p.port)
 			out = append(out, page.Action{ID: "copy:" + id, Label: "Copy link to " + p.named.Name, Icon: "doc.on.doc", On: page.OnRow, Rows: []string{id}, Priority: 4,

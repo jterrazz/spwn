@@ -205,7 +205,9 @@ func lineValue(l overview.Line) page.Value {
 	case l.Unread != "":
 		return page.Text(l.Unread)
 	case l.Section == coresection.SSH && len(l.Parts) == 1:
-		return page.Text(catalog.SSHCommand("", l.Parts[0].Word))
+		if ssh, err := catalog.SSHCommand("", l.Parts[0].Word); err == nil {
+			return page.Text(ssh)
+		}
 	}
 	parts := make([]page.Value, 0, len(l.Parts))
 	for _, p := range l.Parts {

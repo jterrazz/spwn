@@ -28,13 +28,17 @@ func hudWords(t *testing.T, p page.Page, id string) []string {
 func TestTheHUDSaysWhatAGestureDidInTheWordsOfTheStories(t *testing.T) {
 	workspace := macPageOf(t, "linux-3", nil)
 	mac := macPageOf(t, miniMac, nil)
+	ssh, err := catalog.SSHCommand("", "linux-3")
+	if err != nil {
+		t.Fatal(err)
+	}
 	cases := []struct {
 		gesture string
 		p       page.Page
 		action  string
 		want    []string
 	}{
-		{"Copy the footer's command", workspace, ActionCopySSH, []string{"Copied " + catalog.SSHCommand("", "linux-3")}},
+		{"Copy the footer's command", workspace, ActionCopySSH, []string{"Copied " + ssh}},
 		{"Open in Terminal, the footer's button", workspace, ActionOpenStation, []string{"linux-3 opened in Terminal"}},
 		{"Attach from a Mac's row", mac, ActionAttach + "linux-3", []string{"linux-3 opened in Terminal"}},
 	}
@@ -43,7 +47,7 @@ func TestTheHUDSaysWhatAGestureDidInTheWordsOfTheStories(t *testing.T) {
 			t.Errorf("%s: the HUD says %q, want %q", c.gesture, got, c.want)
 		}
 	}
-	if got := actionOf(workspace, ActionCopySSH).Run; got == nil || got.Copy != catalog.SSHCommand("", "linux-3") {
+	if got := actionOf(workspace, ActionCopySSH).Run; got == nil || got.Copy != ssh {
 		t.Errorf("the footer's copy copies %+v, want its command", got)
 	}
 }

@@ -9,7 +9,7 @@
         "macbook-pro": {
             "preferences": {
                 "name": "macbook-pro",
-                "vm_user": "admin"
+                "vm_user": "you"
             },
             "power": {
                 "Lid": "open",

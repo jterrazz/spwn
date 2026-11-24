@@ -1,0 +1,28 @@
+description: 'a vm_user the rule refuses stops no command that makes no VM'
+env: two-macs
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs[.this_mac].preferences.vm_user = "Admin"'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'machines --this-mac'
+      exit: 0
+      stdout: |
+          ●	macbook-pro	Mac	macbook-pro	Engine running
+          ○	api	Workspace	macbook-pro	Stopped · persistent	4 CPU	8 GB
+          ●	linux-1	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB
+          # Needs you
+          ◐	linux-1	is unreachable: macbook-pro's VM user is one the rule refuses	set another vm_user in ~/.config/station/preferences.json
+    - command: 'machines linux-1'
+      exit: 0
+      stdout: |
+          	On linux-1:
+          # Health
+          ●	Running
+          ●	Has an address	192.168.64.5
+          ✗	SSH answers	failing · macbook-pro's VM user is one the rule refuses · set another vm_user in ~/.config/station/preferences.json
+          ●	Size	4 CPU · 8 GB · 50 GB
+
+    - command: 'machines create mac-1 --memory 2G'
+      exit: 1
+      stderr: |
+          Error: vm_user "Admin" in preferences.json is not a VM user: a lowercase short name (a-z first, then up to 31 of a-z, 0-9, _, . and -, never a dot last), never admin or root
+          Hint: set another vm_user in ~/.config/station/preferences.json

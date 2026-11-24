@@ -116,11 +116,18 @@ func macHeadRow(h model.MacView, thisVersion string) page.Row {
 		word, fix := "engine stopped", "station engine start"
 		switch {
 		case !h.ThisMac:
-			fix = catalog.SSHCommand("", h.Name) + " station engine start"
+			ssh, err := catalog.SSHCommand("", h.Name)
+			fix = ssh + " station engine start"
+			if err != nil {
+				fix = ""
+			}
 		case h.Engine.State == model.EngineNotInstalled:
 			row.Reason, word, fix = page.Missing, "engine not installed", "station engine start"
 		}
-		detail = page.List(page.Text(word), page.Command(fix))
+		detail = page.List(page.Text(word))
+		if fix != "" {
+			detail = page.List(page.Text(word), page.Command(fix))
+		}
 	}
 	role := ""
 	if h.ThisMac {
@@ -430,7 +437,9 @@ func Created(c model.Created, thisMac page.Context, refusal func(model.FirstStar
 		{Key: "detail", Kind: page.KindList, Keep: 20},
 	}
 	p := pages.Outcome("machines create", thisMac, columns, rows, "VMs")
-	p.Hints = []page.Hint{*page.Cmd(catalog.SSHCommand("", vm.Name))}
+	if ssh, err := catalog.SSHCommand("", vm.Name); err == nil {
+		p.Hints = []page.Hint{*page.Cmd(ssh)}
+	}
 	if b := c.Boot; b != nil && len(b.Drift) > 0 {
 		p.Hints = append(p.Hints, *page.Cmd("station images build " + b.Template))
 	}
@@ -513,7 +522,10 @@ func serverCreated(c model.Created, rows []page.Row, thisMac page.Context) page.
 		{Key: "detail", Kind: page.KindList, Keep: 20},
 	}
 	p := pages.Outcome("machines create", thisMac, columns, rows, "VMs")
-	p.Hints = []page.Hint{*page.Cmd(catalog.SSHCommand("", vm.Name)), *page.Cmd("station machines " + vm.Name)}
+	p.Hints = []page.Hint{*page.Cmd("station machines " + vm.Name)}
+	if ssh, err := catalog.SSHCommand("", vm.Name); err == nil {
+		p.Hints = []page.Hint{*page.Cmd(ssh), p.Hints[0]}
+	}
 	return p
 }
 

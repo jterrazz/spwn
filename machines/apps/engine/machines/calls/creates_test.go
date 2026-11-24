@@ -123,7 +123,7 @@ func creating(t *testing.T, built bool, hardware ...func(context.Context) corema
 	mac := &stillMac{at: time.Date(2026, 11, 13, 10, 0, 0, 0, time.UTC)}
 	m := machines.New(mac, machinesfake.HypervisorOf(w, "mac", "hypervisor", nil), p, store, noTailnet{}, img, e, nil, machines.Options{
 		ThisMachine: catalog.Mac, Images: []catalog.Image{linux}, KnownHosts: "/state/known_hosts", Logs: "/state/logs",
-		Hardware: hardware[0], Processes: procs,
+		Hardware: hardware[0], Processes: procs, User: "you",
 	})
 	return bench{m: m, store: store, img: img, engine: e, procs: procs, prefs: p, mac: mac, w: w}
 }

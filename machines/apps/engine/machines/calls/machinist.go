@@ -196,20 +196,23 @@ type Machine struct {
 	Lifetime model.Lifetime
 }
 
-func (s *Machinist) vmUser(cfg prefsView) string {
+func (s *Machinist) vmUser(cfg prefsView) (string, error) {
+	// invariant: the VM user is vm_user, or else this Mac's account, checked
+	// by the one rule wherever it is used, never where it is read: a
+	// refused name reaches no ssh command, block nor guest.
 	if cfg.VMUser != "" {
-		return cfg.VMUser
+		return cfg.VMUser, contract.CheckVMUser(cfg.VMUser, false)
 	}
-	return s.o.User
+	return s.o.User, contract.CheckVMUser(s.o.User, true)
 }
 
 // invariant: a guest's user is the OS user of the Mac it runs on, so a VM on
 // another Mac is reached as that Mac's recorded user; a record with no user falls
 // back to this Mac's VM user, the only one known.
-func (s *Machinist) guestUser(cfg prefsView, mac string) string {
+func (s *Machinist) guestUser(cfg prefsView, mac string) (string, error) {
 	if mac != cfg.ThisMachine {
 		if u := cfg.Macs[mac].User; u != "" {
-			return u
+			return u, nil
 		}
 	}
 	return s.vmUser(cfg)

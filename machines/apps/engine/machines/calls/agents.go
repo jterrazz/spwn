@@ -11,8 +11,11 @@ func (s *Machinist) KnownHostsPath(name string) string { return path.Join(s.o.Kn
 
 func (s *Machinist) KeyPath() string { return s.img.KeyPath() }
 
-func (s *Machinist) VMUser() string {
-	cfg, _ := s.prefs()
+func (s *Machinist) VMUser() (string, error) {
+	cfg, err := s.prefs()
+	if err != nil {
+		return "", err
+	}
 	return s.vmUser(cfg)
 }
 

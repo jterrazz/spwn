@@ -1,0 +1,34 @@
+description: 'a fetched macOS workspace dialed while preferences.json cannot be read keeps running'
+fixture: ../../__fixtures__/build/
+env: one-mac
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].preferences.vm_user = "you"'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'world upstream-login admin admin'
+      exit: 0
+    - command: 'images update base-macos'
+      exit: 0
+      stdout: |
+          ●	base-macos	26.6.2	fetched
+    - command: 'machines create mac-1 --image base-macos | /usr/bin/tail -1'
+      exit: 0
+      stdout: |
+          ●	mac-1	Created	Ephemeral · 4 CPU · 8 GB · 80 GB
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].preferences.macs'' world.json > macs.json && /usr/bin/jq ''.macs["macbook-pro"].preferences.macs = "macbook-pro"'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'machines --this-mac'
+      exit: 1
+      stderr: |
+          Error: json: cannot unmarshal string into Go value of type map[string]machines.MacRecord
+          Hint: run station machines --help
+    - command: '--version >/dev/null; /usr/bin/jq --slurpfile m macs.json ''.macs["macbook-pro"].preferences.macs = $m[0]'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'machines --this-mac'
+      exit: 0
+      stdout: |
+          ●	macbook-pro	Mac	macbook-pro	Engine running
+          ●	mac-1	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs[.this_mac].vms["mac-1"] | {want: .kept.want, down: (.down_at != null), lockdowns: ([.guest.ran[]? | select(endswith("/lockdown.sh"))] | length)}'' world.json'
+      exit: 0
+      stdout: |
+          {"want":null,"down":false,"lockdowns":1}
