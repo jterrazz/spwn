@@ -94,7 +94,8 @@ spwn init spwn:does-not-exist-xyz-987        # → exit != 0
 #### 6. `spwn up` outside any spwn.yaml (global-mode fallback)
 
 Global mode is the legacy fallback. Should **not crash**: either falls back
-to `~/.spwn/worlds/default.yaml` (rc 0) or errors cleanly (rc 1).
+to the default world config, `~/.spwn/worlds/default.yaml` or the built-in
+one when that file is absent (rc 0), or errors cleanly (rc 1).
 
 ```bash
 cd $TMP/s06                                  # no spwn.yaml here

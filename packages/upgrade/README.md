@@ -9,7 +9,7 @@ Owns `spwn upgrade`: fetches release metadata from GitHub, downloads the platfor
 ## Key types
 
 - `CLIVersion`: set at build time via `-ldflags`, defaults to `"dev"`. The CLI entrypoint propagates its own `Version` into this var at startup.
-- `CheckLatestVersion(maxAge)`: tag string from GitHub, file-cached under `~/.spwn/.version-check`. Returns `""` on any error so the caller can fall back silently.
+- `CheckLatestVersion(maxAge)`: tag string from GitHub, file-cached under `~/.spwn/.version-check` when `~/.spwn` exists; it never creates the directory. Returns `""` on any error so the caller can fall back silently.
 - `VersionInfo` / `GetVersionInfo(maxAge)`: structured current/latest/update-available/release-url.
 - `Version`: parsed semver type (`Major.Minor.Patch[-prerelease]`) + `ParseVersion(s)`.
 - `GitHubClient` / `CheckForUpdate(ctx, client, current, opts)`, returning a `Plan`: the release-fetch + planning surface.
