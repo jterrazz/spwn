@@ -37,9 +37,8 @@ type worldListRow struct {
 }
 
 var listCmd = &cobra.Command{
-	Use:     "list",
-	Aliases: []string{"ls"},
-	Short:   "List declared worlds and their running status",
+	Use:   "list",
+	Short: "List declared worlds and their running status",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 		s := ui.New()

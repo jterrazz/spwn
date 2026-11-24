@@ -16,10 +16,6 @@ Each layer refuses what the one above it does: a unit test never starts a contai
 | Go Docker         | `packages/world/tests/e2e/`, `packages/compile/e2e/`, `packages/container/backend/`, `packages/architect/` | world lifecycles and image builds, through the Go API               | `make test-go-e2e`, `make test-compile-e2e` |
 | Smoke             | `specs/cli/up/real-build.spec.ts`, `specs/cli/up/upgrade-cycle.spec.ts`                                    | a real image build, with no simulator in place                      | `make test-smoke`                           |
 
-## What both specifications share
-
-`specs/__setup__/` holds what the `cli` and the `website` specifications both read: `architect.ts`, the lock a spec holds while it drives the one architect container (`withoutArchitect`). The lock is a folder in the system's temporary directory holding its holder's pid; a holder that died, or never wrote its pid, leaves a lock the next spec takes over.
-
 ## The CLI specification
 
 `specs/cli/cli.specification.ts` declares the one runner, `cli`, bound to `.artifacts/go/spwn`. Under it, one folder per domain of the CLI (`agent/`, `check/`, `up/`, `world/` and the rest) holds that domain's documents and chains, and the ground they stand on:

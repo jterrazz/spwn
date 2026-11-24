@@ -1,6 +1,6 @@
 'use client';
 
-import { IconHexagonFilled, IconPlayerPlay, IconTerminal2 } from '@tabler/icons-react';
+import { IconHexagonFilled, IconPlayerPlay } from '@tabler/icons-react';
 
 /** The architect page while the architect is offline: what it does, and the button that starts it. */
 export function OfflineView({ onStart, disabled }: { onStart: () => void; disabled: boolean }) {
@@ -33,11 +33,6 @@ export function OfflineView({ onStart, disabled }: { onStart: () => void; disabl
                         Start Architect
                     </span>
                 </button>
-
-                <div className="text-muted-foreground/25 mt-6 flex items-center gap-2 font-mono text-[11px]">
-                    <IconTerminal2 size={13} />
-                    <span>spwn architect start</span>
-                </div>
             </div>
         </div>
     );

@@ -25,9 +25,8 @@ func init() {
 }
 
 var initCmd = &cobra.Command{
-	Use:     "create [name]",
-	Aliases: []string{"new"},
-	Short:   "Create a new agent (SOUL.md + 2-layer Mind)",
+	Use:   "create [name]",
+	Short: "Create a new agent (SOUL.md + 2-layer Mind)",
 	Long: `Create a new agent with a SOUL.md at the agent root and the
 two Mind layer directories (playbooks/journal). Skills aren't a Mind
 layer; they're build-time dependencies resolved via the skill/ form

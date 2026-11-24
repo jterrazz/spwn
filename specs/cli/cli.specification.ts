@@ -8,7 +8,6 @@ const SPWN_BIN = resolve(import.meta.dirname, '../../.artifacts/go/spwn');
 export const { cli, cleanup } = await specification.cli(SPWN_BIN, {
     commands: [
         'agent',
-        'architect',
         'auth',
         'automation',
         'build',
@@ -18,7 +17,6 @@ export const { cli, cleanup } = await specification.cli(SPWN_BIN, {
         'daemon',
         'default',
         'deploy',
-        'destroy',
         'disable',
         'down',
         'dream',

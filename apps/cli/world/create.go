@@ -22,7 +22,7 @@ var createCmd = &cobra.Command{
 	Long: `Append a worlds.<name> entry to the project's spwn.yaml.
 
 This is a pure config write - no container is created. Once declared,
-spawn the world with "spwn world start <name>" or "spwn world <name>".
+spawn the world with "spwn up <name>".
 
 The agents listed via --agent must already exist on disk under
 spwn/agents/<name>/. Use "spwn agent create" first if they don't.`,
@@ -58,13 +58,12 @@ spwn/agents/<name>/. Use "spwn agent create" first if they don't.`,
 }
 
 var rmCmd = &cobra.Command{
-	Use:     "rm <name>",
-	Aliases: []string{"remove"},
-	Short:   "Remove a world declaration from spwn.yaml",
+	Use:   "rm <name>",
+	Short: "Remove a world declaration from spwn.yaml",
 	Long: `Remove the worlds.<name> entry from spwn.yaml.
 
 This only edits config - it does NOT stop a running container. If
-the world is currently running, stop it first with "spwn world stop
+the world is currently running, stop it first with "spwn down
 <name>".
 
 The agents listed by the world stay on disk; their minds are
@@ -83,7 +82,7 @@ preserved. Other worlds may still reference them.`,
 			if errors.Is(err, project.ErrWorldNotFound) {
 				return s.FailHint("Not found",
 					fmt.Errorf("no world named %q in spwn.yaml", name),
-					"Run \"spwn world ls\" to see declared worlds")
+					"Run \"spwn world list\" to see declared worlds")
 			}
 			return s.FailHint("Remove failed", err, "")
 		}

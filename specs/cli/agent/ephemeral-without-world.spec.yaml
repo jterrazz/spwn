@@ -6,5 +6,5 @@ runs:
       stderr: |4+
           
             ✗ Ephemeral requires --world no world specified
-              Run "spwn ls" to see active worlds
+              Run "spwn world list" to see active worlds
 

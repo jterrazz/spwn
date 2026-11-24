@@ -9,7 +9,7 @@
 //     start container, sync agents.
 //   - (*Architect).Destroy(ctx, worldID): stop + remove container,
 //     sync memory back, persist state.
-//   - StartDaemon / StopDaemon / GetDaemonStatus / TalkExecArgs:
+//   - StartDaemonWithOpts / StopDaemon / GetDaemonStatus:
 //     lifecycle for the always-on `spwn-architect` container that
 //     hosts the CLI inside Docker-over-Docker.
 //

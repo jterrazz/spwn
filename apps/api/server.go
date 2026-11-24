@@ -1339,8 +1339,12 @@ func (s *Server) handleArchitectTalk(w http.ResponseWriter, r *http.Request) {
 		bgCtx := context.Background()
 		startCmd := exec.CommandContext(bgCtx, "docker", "start", containerName)
 		if startErr := startCmd.Run(); startErr != nil {
-			spwnCmd := exec.CommandContext(bgCtx, "spwn", "architect", "start")
-			if spwnErr := spwnCmd.Run(); spwnErr != nil {
+			if s.spawnArchitectFn == nil {
+				jsonError(w, "failed to start architect: no spawner wired", 500)
+				return
+			}
+			_, spwnErr := s.spawnArchitectFn(bgCtx, ArchitectSpawnOpts{ImageOverride: os.Getenv("SPWN_ARCHITECT_IMAGE")})
+			if spwnErr != nil && !strings.Contains(spwnErr.Error(), "already running") {
 				jsonError(w, "failed to start architect: "+spwnErr.Error(), 500)
 				return
 			}

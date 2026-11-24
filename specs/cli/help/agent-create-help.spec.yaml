@@ -21,9 +21,6 @@ runs:
           Usage:
             spwn agent create [name] [flags]
 
-          Aliases:
-            create, new
-
           Flags:
             -f, --force         Re-scaffold any missing Mind files without complaining if the agent already exists
             -h, --help          help for create

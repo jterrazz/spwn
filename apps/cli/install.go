@@ -35,9 +35,8 @@ Examples:
 func uninstallCmd() *cobra.Command {
 	var agentFilter string
 	cmd := &cobra.Command{
-		Use:     "uninstall <ref>",
-		Aliases: []string{"remove"},
-		Short:   "Remove a dependency from the project",
+		Use:   "uninstall <ref>",
+		Short: "Remove a dependency from the project",
 		Long: `Remove a dependency from agent manifests. When no agent still carries the
 ref, the lockfile pin is dropped too.
 

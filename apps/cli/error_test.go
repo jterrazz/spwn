@@ -21,8 +21,8 @@ func TestCLI_UnknownCommandNoUsageDump(t *testing.T) {
 	}
 }
 
-func TestCLI_ErrorNoUsageDump_WorldDestroyMissingArg(t *testing.T) {
-	_, stderr, err := executeCommand("world", "destroy")
+func TestCLI_ErrorNoUsageDump_WorldInspectMissingArg(t *testing.T) {
+	_, stderr, err := executeCommand("world", "inspect")
 	if err == nil {
 		t.Fatal("expected error for missing argument")
 	}
@@ -33,8 +33,8 @@ func TestCLI_ErrorNoUsageDump_WorldDestroyMissingArg(t *testing.T) {
 	}
 }
 
-func TestCLI_ErrorNoUsageDump_AgentShowMissingArg(t *testing.T) {
-	_, stderr, err := executeCommand("agent", "show")
+func TestCLI_ErrorNoUsageDump_AgentInspectMissingArg(t *testing.T) {
+	_, stderr, err := executeCommand("agent", "inspect")
 	if err == nil {
 		t.Fatal("expected error for missing argument")
 	}
@@ -98,17 +98,6 @@ func TestCLI_AgentHelpGrouped(t *testing.T) {
 	}
 }
 
-func TestCLI_WorldHelpShowsSpawnFlags(t *testing.T) {
-	out, _, err := executeCommand("world", "--help")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	for _, flag := range []string{"--agent", "--workspace", "--interactive"} {
-		assertContains(t, out, flag, "world spawn flags")
-	}
-}
-
 func TestCLI_InstallHelpShowsAgentFlag(t *testing.T) {
 	out, _, err := executeCommand("install", "--help")
 	if err != nil {
@@ -128,7 +117,7 @@ func TestCLI_RootHelpSections(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	for _, section := range []string{"Quick Start:", "Entities:", "Building blocks:", "Shortcuts:", "Coordination:", "System:"} {
+	for _, section := range []string{"Quick Start:", "Entities:", "Building blocks:", "Worlds:", "Coordination:", "System:"} {
 		assertContains(t, out, section, "root help sections")
 	}
 }

@@ -11,7 +11,7 @@ runs:
             ✓ Layers copied            playbooks, journal
             ✓ Added world to spwn.yaml neo-clone
 
-    - command: agent show neo-clone
+    - command: agent inspect neo-clone
       exit: 0
       stderr: |4+
           

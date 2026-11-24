@@ -10,7 +10,7 @@ runs:
 
             ✓ Spawn with: spwn up --agent neo
 
-    - command: agent show neo
+    - command: agent inspect neo
       exit: 0
       stderr: |4+
           

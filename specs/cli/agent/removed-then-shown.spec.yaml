@@ -17,7 +17,7 @@ runs:
             → Deleting agent "temp"...
             ✓ Deleted agent            temp
 
-    - command: agent show temp
+    - command: agent inspect temp
       exit: 1
       stderr: |4+
           

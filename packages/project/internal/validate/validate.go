@@ -326,7 +326,7 @@ func ruleAgentDirsExist(in Input) []Issue {
 		out = append(out, Issue{
 			Level: LevelError, Path: relPath(in.Root, a.Path),
 			Message: "agent directory not found: " + a.Name,
-			Hint:    "create it with `spwn agent new " + a.Name + "`",
+			Hint:    "create it with `spwn agent create " + a.Name + "`",
 		})
 	}
 	return out
@@ -356,7 +356,7 @@ func ruleAgentStructure(in Input) []Issue {
 				out = append(out, Issue{
 					Level: r.level, Path: relPath(in.Root, full),
 					Message: "missing " + r.rel,
-					Hint:    "regenerate with `spwn agent new " + a.Name + " --force`",
+					Hint:    "regenerate with `spwn agent create " + a.Name + " --force`",
 				})
 				continue
 			}

@@ -1,9 +1,0 @@
-description: inspect errors cleanly when the named agent is missing
-fixture: ../__fixtures__/single-agent/
-runs:
-    - command: inspect ghost --offline
-      exit: 1
-      stderr: |4+
-          
-            Error: agent "ghost" not found in this project
-

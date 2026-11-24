@@ -15,10 +15,9 @@ func init() {
 }
 
 var deleteCmd = &cobra.Command{
-	Use:     "rm <agent-name>",
-	Aliases: []string{"delete"},
-	Short:   "Remove an agent and its Mind directory",
-	Args:    cobra.ExactArgs(1),
+	Use:   "rm <agent-name>",
+	Short: "Remove an agent and its Mind directory",
+	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
 		s := ui.New()
