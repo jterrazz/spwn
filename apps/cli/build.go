@@ -15,6 +15,7 @@ import (
 	"spwn.sh/apps/cli/ui"
 	"spwn.sh/packages/compile"
 	"spwn.sh/packages/container/backend"
+	"spwn.sh/packages/platform"
 	"spwn.sh/packages/project"
 	_ "spwn.sh/packages/runtimes/defaults"
 	"spwn.sh/packages/transpile"
@@ -27,7 +28,7 @@ func init() {
 	buildCmd.Flags().StringVar(&buildAgent, "agent", "", "Compile only the named agent (tree-only mode)")
 
 	buildCmd.Flags().StringVar(&buildTag, "tag", "", "Image tag (default: spwn-<project>:latest)")
-	buildCmd.Flags().StringVar(&buildBase, "base", "", "Base image to derive from (default: $SPWN_BASE_IMAGE, else spwn-world:latest); on a Linux host it needs a spwn user and passwordless sudo")
+	buildCmd.Flags().StringVar(&buildBase, "base", "", "Base image to derive from (required unless $SPWN_BASE_IMAGE is set); on a Linux host it needs a spwn user and passwordless sudo")
 	buildCmd.Flags().BoolVar(&buildNoCache, "no-cache", false, "Disable Docker build cache")
 
 	buildCmd.Flags().BoolVar(&buildTreeOnly, "tree-only", false, "Stop after the compile step; write the Tree to --output instead of building a Docker image")
@@ -74,7 +75,8 @@ var buildCmd = &cobra.Command{
 	Long: `Transpile the project with the target runtime (default: claude-code)
 and compile the result into a derived Docker compile.
 
-The image is FROM spwn-world:latest by default, with the transpiled
+The image is FROM the --base image (or $SPWN_BASE_IMAGE; no default
+exists, a world image is tagged by its hash), with the transpiled
 tree COPY'd to /world/. The resulting image carries the project's
 name and the runtime name as Docker labels, so it's push-ready and
 reproducible.
@@ -90,7 +92,7 @@ check --deep' to run the transpile dry-run as part of validation.
 Examples:
   spwn build                                  # transpile + image, tag spwn-<project>:latest
   spwn build --tag spwn-myproj:v1
-  spwn build --base spwn-world:2.1
+  spwn build --base spwn/world:<hash>
   spwn build --runtime claude-code
   spwn build --world <name>                   # multi-world projects
   spwn build --no-cache
@@ -240,19 +242,25 @@ func runBuildTreeOnly(cmd *cobra.Command, runtimeName, worldID string, tree *tra
 	return nil
 }
 
+func resolveBaseImage(flag, env string) (string, error) {
+	if flag != "" {
+		return flag, nil
+	}
+	if env != "" {
+		return env, nil
+	}
+	return "", fmt.Errorf("no base image: pass --base or set SPWN_BASE_IMAGE (world images are tagged %s:<hash>, there is no default tag)", platform.WorldImageRepository)
+}
+
 func runBuildImage(cmd *cobra.Command, p *project.Project, runtimeName, worldID string, tree *transpile.Tree) error {
 	tag := buildTag
 	if tag == "" {
 		tag = fmt.Sprintf("spwn-%s:latest", p.Manifest.Name)
 	}
 
-	baseImage := buildBase
-	if baseImage == "" {
-		if env := os.Getenv("SPWN_BASE_IMAGE"); env != "" {
-			baseImage = env
-		} else {
-			baseImage = "spwn-world:latest"
-		}
+	baseImage, err := resolveBaseImage(buildBase, os.Getenv("SPWN_BASE_IMAGE"))
+	if err != nil {
+		return err
 	}
 
 	labels := map[string]string{

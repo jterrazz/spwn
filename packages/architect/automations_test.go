@@ -101,10 +101,11 @@ func TestAutomationDispatcher_FindsRunningWorldByConfigName(t *testing.T) {
 	// Expect at least 1 exec: the runtime dispatch. A prelaunch
 	// shell call may precede it (per-fire credentials refresh), so
 	// the dispatch is the LAST exec, not the first.
-	if len(f.mb.execCalls) < 1 {
-		t.Fatalf("exec calls = %d, want ≥1", len(f.mb.execCalls))
+	calls := f.mb.execs()
+	if len(calls) < 1 {
+		t.Fatalf("exec calls = %d, want ≥1", len(calls))
 	}
-	dispatch := f.mb.execCalls[len(f.mb.execCalls)-1]
+	dispatch := calls[len(calls)-1]
 	if dispatch.containerID != "mock-1" {
 		t.Errorf("container = %q", dispatch.containerID)
 	}
@@ -128,7 +129,7 @@ func TestAutomationDispatcher_NoSuchWorldErrors(t *testing.T) {
 	if !strings.Contains(err.Error(), "no running world") {
 		t.Errorf("error should mention missing world: %v", err)
 	}
-	if len(f.mb.execCalls) != 0 {
+	if len(f.mb.execs()) != 0 {
 		t.Errorf("dispatch should not exec when world missing")
 	}
 }
@@ -147,7 +148,7 @@ func TestAutomationDispatcher_AgentNotInWorldErrors(t *testing.T) {
 	if !strings.Contains(err.Error(), "is not in world") {
 		t.Errorf("error should mention agent missing: %v", err)
 	}
-	if len(f.mb.execCalls) != 0 {
+	if len(f.mb.execs()) != 0 {
 		t.Error("dispatch should not exec when agent missing")
 	}
 }

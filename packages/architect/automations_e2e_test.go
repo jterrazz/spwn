@@ -234,10 +234,11 @@ func TestE2E_CronFireDispatchesIntoBackend(t *testing.T) {
 	// Backend was called at least once. A prelaunch credentials
 	// refresh may precede the actual dispatch; the dispatch is the
 	// LAST exec, not the first.
-	if len(f.mb.execCalls) < 1 {
-		t.Fatalf("exec calls = %d, want ≥1", len(f.mb.execCalls))
+	calls := f.mb.execs()
+	if len(calls) < 1 {
+		t.Fatalf("exec calls = %d, want ≥1", len(calls))
 	}
-	cmd := f.mb.execCalls[len(f.mb.execCalls)-1].cfg.Cmd
+	cmd := calls[len(calls)-1].cfg.Cmd
 	joined := strings.Join(cmd, " ")
 	if !strings.Contains(joined, "2026-05-01") {
 		t.Errorf("rendered prompt missing date: %s", joined)
@@ -301,7 +302,8 @@ func TestE2E_FSFireDispatchesIntoBackend(t *testing.T) {
 	}
 
 	// Last exec is the dispatch (a prelaunch refresh may precede it).
-	cmd := f.mb.execCalls[len(f.mb.execCalls)-1].cfg.Cmd
+	calls := f.mb.execs()
+	cmd := calls[len(calls)-1].cfg.Cmd
 	joined := strings.Join(cmd, " ")
 	if !strings.Contains(joined, "foo.md") {
 		t.Errorf("rendered prompt missing fs event filename: %s", joined)
