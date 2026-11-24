@@ -57,7 +57,8 @@ func NewProxyElement(p mcp.Provider) (*ProxyElement, error) {
 
 	e := &ProxyElement{provider: p, upstream: upstream}
 	e.proxy = &httputil.ReverseProxy{
-		Director: func(req *http.Request) {
+		Rewrite: func(pr *httputil.ProxyRequest) {
+			req := pr.Out
 			req.URL.Scheme = upstream.Scheme
 			req.URL.Host = upstream.Host
 			req.URL.Path = upstreamPath + req.URL.Path
