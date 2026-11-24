@@ -22,8 +22,11 @@ async function captured(
         chunks.push(String(chunk));
         return true;
     });
-    await run();
-    spy.mockRestore();
+    try {
+        await run();
+    } finally {
+        spy.mockRestore();
+    }
     const code = process.exitCode;
     process.exitCode = undefined;
     return { code, text: chunks.join('') };
@@ -70,16 +73,37 @@ function answered(status: number, body: unknown) {
     return { body: JSON.stringify(body), status, type: 'application/json' };
 }
 
+const SERVE_ATTEMPTS = 5;
+
+function dropAdded(signal: NodeJS.Signals, before: readonly unknown[]): void {
+    for (const listener of process.listeners(signal)) {
+        if (!before.includes(listener)) {
+            process.removeListener(signal, listener);
+        }
+    }
+}
+
 async function served() {
-    const port = await freePort();
-    vi.stubEnv('GATE_TOOL_PORT', String(port));
     const signals = { SIGINT: process.listeners('SIGINT'), SIGTERM: process.listeners('SIGTERM') };
-    let server: Server | undefined;
-    const { text } = await captured(process.stderr, async () => {
-        server = await demo().run(['mcp-serve']);
-        await once(server ?? probeFailed(), 'listening');
-    });
-    return { announced: text, port, server: server ?? probeFailed(), signals };
+    for (let attempt = 1; ; attempt += 1) {
+        const port = await freePort();
+        vi.stubEnv('GATE_TOOL_PORT', String(port));
+        let server: Server | undefined;
+        try {
+            const { text } = await captured(process.stderr, async () => {
+                server = await demo().run(['mcp-serve']);
+                await once(server ?? probeFailed(), 'listening');
+            });
+            return { announced: text, port, server: server ?? probeFailed(), signals };
+        } catch (error) {
+            dropAdded('SIGINT', signals.SIGINT);
+            dropAdded('SIGTERM', signals.SIGTERM);
+            const taken = error instanceof Error && 'code' in error && error.code === 'EADDRINUSE';
+            if (!taken || attempt >= SERVE_ATTEMPTS) {
+                throw error;
+            }
+        }
+    }
 }
 
 describe('Tool', () => {
