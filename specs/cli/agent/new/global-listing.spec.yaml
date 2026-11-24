@@ -1,6 +1,6 @@
 description: in a home with no project, the roster table lists a new agent unattached
 runs:
-    - command: agent new neo
+    - command: agent create neo
       exit: 0
       stderr: |4+
           

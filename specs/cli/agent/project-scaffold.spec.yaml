@@ -23,7 +23,7 @@ runs:
             ✓ Initialised Spwn project {{string}}
 
 
-    - command: agent new trinity
+    - command: agent create trinity
       exit: 0
       stderr: |4+
           

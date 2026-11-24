@@ -14,7 +14,6 @@ rules (network, filesystem, tools), and each agent keeps its Mind
 ```
 
 - [spwn agent](#spwn-agent): Spawn an agent into a world, or open a session with one.
-- [spwn architect](#spwn-architect): Your always-on world builder.
 - [spwn auth](#spwn-auth): Manage credentials: dashboard, login, use, logout, disable.
 - [spwn automation](#spwn-automation): Trigger-driven agent wakeups (cron + filesystem).
 - [spwn build](#spwn-build): Transpile the project and compile it into a Docker image.
@@ -23,12 +22,9 @@ rules (network, filesystem, tools), and each agent keeps its Mind
 - [spwn down](#spwn-down): Destroy a world.
 - [spwn gate](#spwn-gate): Manage the host-side credential broker (start/stop/status/logs/restart).
 - [spwn init](#spwn-init): Scaffold a Spwn project in the current directory.
-- [spwn inspect](#spwn-inspect): Show per-agent composition: deps, skills, hooks.
 - [spwn install](#spwn-install): Install a dependency into the project.
 - [spwn logs](#spwn-logs): Show the system event log across worlds and agents.
-- [spwn ls](#spwn-ls): Agent-centric status (running / stopped / orphan).
 - [spwn skill](#spwn-skill): Author bare-markdown skill files.
-- [spwn status](#spwn-status): Show the full status of your Spwn environment.
 - [spwn uninstall](#spwn-uninstall): Remove a dependency from the project.
 - [spwn up](#spwn-up): Spawn a world - an isolated container for agents.
 - [spwn upgrade](#spwn-upgrade): Upgrade Spwn to the latest version.
@@ -269,113 +265,6 @@ spwn agent talk <agent-name> [message] [flags]
 ```text
       --output-format string   Output format: text (default) or stream-json
       --world string           World ID to target (disambiguates when the same agent exists in multiple worlds)
-```
-
-## spwn architect
-
-Your always-on world builder.
-
-```text
-The Architect is your always-on world builder. It manages worlds and the agents in them.
-```
-
-- [spwn architect logs](#spwn-architect-logs): Show the Architect daemon's event log.
-- [spwn architect start](#spwn-architect-start): Start the Architect daemon.
-- [spwn architect status](#spwn-architect-status): Show Architect status - worlds, agents.
-- [spwn architect stop](#spwn-architect-stop): Stop the Architect daemon.
-- [spwn architect talk](#spwn-architect-talk): Talk to the Architect - ask it to manage worlds and agents.
-
-## spwn architect logs
-
-Show the Architect daemon's event log.
-
-```text
-spwn architect logs [flags]
-```
-
-```text
-  -n, --limit int   Number of events to show (default 50)
-```
-
-## spwn architect start
-
-Start the Architect daemon.
-
-```text
-Start the Architect daemon in a Docker container.
-```
-
-```text
-The Architect runs the spwn binary inside a long-lived container with the
-host's Docker socket mounted (DooD - Docker-outside-of-Docker), allowing it
-to create and manage world containers as siblings.
-```
-
-```text
-The container mounts:
-  /var/run/docker.sock    Docker daemon access (sibling containers, not nested)
-  ~/.spwn/                Shared configuration and state
-```
-
-```text
-The Architect's identity is defined in /world/ARCHITECT.md inside the container,
-which describes its capabilities and role as the always-on world builder.
-```
-
-```text
-spwn architect start
-```
-
-## spwn architect status
-
-Show Architect status - worlds, agents.
-
-```text
-Query Docker to show whether the Architect container is running, its uptime, and active worlds.
-```
-
-```text
-spwn architect status
-```
-
-## spwn architect stop
-
-Stop the Architect daemon.
-
-```text
-Stop the Architect daemon and remove the container.
-```
-
-```text
-spwn architect stop
-```
-
-## spwn architect talk
-
-Talk to the Architect - ask it to manage worlds and agents.
-
-```text
-Send a message to the Architect (Claude Code running inside Docker).
-```
-
-```text
-If a message is provided, runs a one-shot query and prints the response.
-If no message is provided, opens an interactive Claude session.
-```
-
-```text
-Examples:
-  spwn architect talk "list all agents"
-  spwn architect talk "create a new agent called neo"
-  spwn architect talk                    # interactive mode
-```
-
-```text
-spwn architect talk [message] [flags]
-```
-
-```text
-      --output-format string   Output format: text (default) or stream-json
 ```
 
 ## spwn auth
@@ -863,50 +752,13 @@ into the current directory. Bare names resolve through the catalog:
 ```
 
 ```text
-Use --global to instead seed ~/.spwn/ with a world config (legacy
-user-home mode, kept for backward compatibility).
-```
-
-```text
 spwn init [example-ref] [flags]
 ```
 
 ```text
       --backend string   Pin the scaffolded agent to a runtime backend (e.g. claude-code, codex). Leave empty to let Spwn resolve at spawn time.
   -f, --force            Overwrite existing spwn.yaml
-      --global           Initialise ~/.spwn/ (legacy user-home mode)
       --name string      Project name (default: current directory name)
-```
-
-## spwn inspect
-
-Show per-agent composition: deps, skills, hooks.
-
-```text
-Inspect a Spwn project: one block per agent, showing the
-resolved dependency tree (with transitive (*)-dedup and composition
-badges), the skills contributed by tool deps, and the hooks bound
-to the agent.
-```
-
-```text
-Mirrors the kubectl describe / cargo tree convention: key-value
-header, section titles with counts, whitespace-separated sections.
-```
-
-```text
-Examples:
-  spwn inspect            # every agent
-  spwn inspect neo        # one agent
-  spwn inspect --offline  # skip live world-status lookup
-```
-
-```text
-spwn inspect [agent] [flags]
-```
-
-```text
-      --offline   Skip live world-status lookup (faster, no Docker calls)
 ```
 
 ## spwn install
@@ -953,7 +805,6 @@ snapshots, messages, and every other discrete thing that happened.
 Scope it with --world or --agent, or use the per-entity shortcuts:
   spwn world logs <id>        events for one world
   spwn agent logs <name>      events for one agent
-  spwn architect logs         architect daemon events
 ```
 
 ```text
@@ -965,19 +816,6 @@ spwn logs [flags]
   -n, --limit int                    Number of events to show (default 20)
   -t, --type string                  Filter by event type (e.g. agent.dreamed)
   -w, --world spwn world logs <id>   Filter by world config name (e.g. 'matrix' from spwn.yaml#worlds). Use spwn world logs <id> to filter by a runtime world ID.
-```
-
-## spwn ls
-
-Agent-centric status (running / stopped / orphan).
-
-```text
-spwn ls [flags]
-```
-
-```text
-      --json           Emit results as structured JSON on stdout
-      --world string   Filter agents by world ID
 ```
 
 ## spwn skill
@@ -1043,14 +881,6 @@ Display a skill file.
 
 ```text
 spwn skill show <skill-name>
-```
-
-## spwn status
-
-Show the full status of your Spwn environment.
-
-```text
-spwn status
 ```
 
 ## spwn uninstall
@@ -1143,23 +973,7 @@ spwn upgrade [flags]
 
 Manage worlds - ephemeral runtime instances for agents.
 
-```text
-spwn world [name] [flags]
-```
-
-```text
-  -a, --agent stringArray       Agent name (repeatable; first agent becomes chief in multi-agent worlds)
-      --backend string          Override the runtime backend for this spawn (e.g. claude-code, codex). Skips the auth-state auto-resolver.
-  -c, --config string           Named world config (default: default)
-      --force-rebuild           Ignore the image cache and rebuild the world image from scratch
-  -i, --interactive             Drop into the agent's session after spawn
-  -n, --name string             Display name for the world
-  -w, --workspace stringArray   Host directory to mount. Repeatable. Forms: "path", "name=path", "name=path:ro". Omit for ephemeral.
-  -u, --world string            Explicit path to a YAML config file
-```
-
 - [spwn world create](#spwn-world-create): Declare a new world in spwn.yaml.
-- [spwn world destroy](#spwn-world-destroy): Destroy a world.
 - [spwn world enter](#spwn-world-enter): Open an interactive shell inside a running world.
 - [spwn world inspect](#spwn-world-inspect): Inspect a running world - agents, workspaces, status.
 - [spwn world knowledge](#spwn-world-knowledge): Read a world's shared knowledge.
@@ -1168,9 +982,6 @@ spwn world [name] [flags]
 - [spwn world rename](#spwn-world-rename): Rename a world (omit name to clear).
 - [spwn world rm](#spwn-world-rm): Remove a world declaration from spwn.yaml.
 - [spwn world snap](#spwn-world-snap): World snapshots - save, ls, restore, rm.
-- [spwn world start](#spwn-world-start): Start a world (alias for `spwn up`).
-- [spwn world stop](#spwn-world-stop): Stop a world (alias for `spwn down`).
-- [spwn world up](#spwn-world-up): Spawn a world - an isolated container for agents.
 
 ## spwn world create
 
@@ -1182,7 +993,7 @@ Append a worlds.<name> entry to the project's spwn.yaml.
 
 ```text
 This is a pure config write - no container is created. Once declared,
-spawn the world with "spwn world start <name>" or "spwn world <name>".
+spawn the world with "spwn up <name>".
 ```
 
 ```text
@@ -1197,18 +1008,6 @@ spwn world create <name> [flags]
 ```text
   -a, --agent stringArray       Agent name (repeatable). Must already exist under spwn/agents/
   -w, --workspace stringArray   Workspace mount. Forms: "path", "name=path", "name=path:ro"
-```
-
-## spwn world destroy
-
-Destroy a world.
-
-```text
-spwn world destroy [world-id] [flags]
-```
-
-```text
-      --all   Destroy all running worlds
 ```
 
 ## spwn world enter
@@ -1298,7 +1097,7 @@ Remove the worlds.<name> entry from spwn.yaml.
 
 ```text
 This only edits config - it does NOT stop a running container. If
-the world is currently running, stop it first with "spwn world stop
+the world is currently running, stop it first with "spwn down
 <name>".
 ```
 
@@ -1372,69 +1171,4 @@ spwn world snap save <world-id> [flags]
 
 ```text
       --name string   Name for the snapshot
-```
-
-## spwn world start
-
-Start a world (alias for `spwn up`).
-
-```text
-spwn world start [name] [flags]
-```
-
-```text
-  -a, --agent stringArray       Agent name (repeatable; first agent becomes chief in multi-agent worlds)
-      --backend string          Override the runtime backend for this spawn (e.g. claude-code, codex). Skips the auth-state auto-resolver.
-  -c, --config string           Named world config (default: default)
-      --force-rebuild           Ignore the image cache and rebuild the world image from scratch
-  -i, --interactive             Drop into the agent's session after spawn
-  -n, --name string             Display name for the world
-  -w, --workspace stringArray   Host directory to mount. Repeatable. Forms: "path", "name=path", "name=path:ro". Omit for ephemeral.
-  -u, --world string            Explicit path to a YAML config file
-```
-
-## spwn world stop
-
-Stop a world (alias for `spwn down`).
-
-```text
-spwn world stop [name-or-id] [flags]
-```
-
-```text
-      --all   Destroy all running worlds
-```
-
-## spwn world up
-
-Spawn a world - an isolated container for agents.
-
-```text
-Spawn a world: an isolated container and the agents declared in it.
-```
-
-```text
-Inside a Spwn project:
-  spwn up             brings up every world declared in spwn.yaml
-  spwn up <name>      brings up a specific world from spwn.yaml
-```
-
-```text
-Outside a project, the legacy global-mode flags still work and spawn
-a one-off world from ~/.spwn/worlds/<config>.yaml.
-```
-
-```text
-spwn world up [name] [flags]
-```
-
-```text
-  -a, --agent stringArray       Agent name (repeatable; first agent becomes chief in multi-agent worlds)
-      --backend string          Override the runtime backend for this spawn (e.g. claude-code, codex). Skips the auth-state auto-resolver.
-  -c, --config string           Named world config (default: default)
-      --force-rebuild           Ignore the image cache and rebuild the world image from scratch
-  -i, --interactive             Drop into the agent's session after spawn
-  -n, --name string             Display name for the world
-  -w, --workspace stringArray   Host directory to mount. Repeatable. Forms: "path", "name=path", "name=path:ro". Omit for ephemeral.
-  -u, --world string            Explicit path to a YAML config file
 ```

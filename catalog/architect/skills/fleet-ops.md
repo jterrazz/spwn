@@ -7,23 +7,23 @@ description: Use when managing the full fleet of worlds. List, spawn, stop, insp
 
 ## Managing Worlds
 ```bash
-spwn ls                           # List all worlds
+spwn world list                 # List all worlds
 spwn up --agent <name> -w <path>  # Spawn a world
 spwn down <id>                    # Destroy a world
-spwn inspect <id>                 # World details
+spwn world inspect <id>           # World details
 ```
 
 ## Managing Agents
 ```bash
 spwn agent ls                     # List all agents
-spwn agent new <name>             # Create agent
+spwn agent create <name>             # Create agent
 spwn agent rm <name>              # Remove agent
 spwn agent talk <name> "msg"      # Talk to agent
 spwn agent inspect <name>         # View agent composition and identity
 ```
 
 ## Agent Lifecycle
-1. Create: `spwn agent new <name>`
+1. Create: `spwn agent create <name>`
 2. Configure: write identity (profile, purpose, traits)
 3. Spawn: `spwn up --agent <name> -w <workspace>`
 4. Work: `spwn agent talk <name> "task"`

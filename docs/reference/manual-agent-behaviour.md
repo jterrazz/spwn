@@ -516,9 +516,9 @@ Spwn, it is HH:MM:SS".
 
 ---
 
-#### Scenario 24: `spwn inspect <agent>` matches what the agent self-reports
+#### Scenario 24: `spwn agent inspect <agent>` matches what the agent self-reports
 
-**Before spawn:** run `spwn inspect neo` on host; note deps + skills.
+**Before spawn:** run `spwn agent inspect neo` on host; note deps + skills.
 
 **Inside agent prompt:**
 
@@ -859,7 +859,7 @@ inside-container convention.
 **Setup:** spawn a world with ceo only. Then on host:
 
 ```bash
-spwn agent new trinity
+spwn agent create trinity
 # edit spwn.yaml to add trinity to worlds.matrix.agents
 spwn agent deploy trinity   # or whatever the hot-deploy CLI is
 ```
@@ -886,7 +886,7 @@ not be live; this is a known limitation of the current architecture.
 
 #### Scenario 42: Dropped agent cleanup
 
-**Setup:** spwn:startup world. Bring one down: `spwn agent stop analyst`
+**Setup:** spwn:startup world. Bring one down: `spwn down`
 (or equivalent).
 
 **Prompts to ceo:**

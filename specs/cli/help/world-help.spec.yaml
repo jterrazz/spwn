@@ -10,9 +10,7 @@ runs:
             spwn world [command]
 
           Lifecycle:
-            up                               Spawn a world (see Spawn Flags below)
-            ls                               List active worlds
-            down <id>                        Destroy a world (agent survives)
+            list                             List active worlds
             rename <id> <name>               Rename (empty name clears)
 
           Observe:
@@ -30,15 +28,8 @@ runs:
             knowledge ls <id>                List a world's knowledge files
             knowledge show <id> <path>       Read a knowledge file
 
-          Spawn Flags:
-            -a, --agent <name>               Agent (repeatable; first is chief)
-            -w, --workspace <path>           Host dir to mount (repeatable)
-            -c, --config <name>              Named world config
-            -n, --name <name>                Display name
-            -i, --interactive                Drop into the agent's session after spawn
-
           Examples:
             spwn up --agent neo -w .         Spawn neo in current dir
             spwn up --agent morpheus --agent neo -w .
-            spwn ls                          See what's running
+            spwn world list                  See what's running
 

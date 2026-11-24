@@ -8,31 +8,28 @@ runs:
 
           Quick Start:
             spwn init                        Scaffold a new project
-            spwn agent new neo               Create an agent (auto-creates a single-agent world)
+            spwn agent create neo            Create an agent (auto-creates a single-agent world)
             spwn up                          Bring up every world in spwn.yaml
             spwn agent neo                   Start the world that contains neo
 
           Entities:
-            agent                            Composed minds (new, ls, start, stop, inspect, add, fork, talk)
-            world                            Deployable groupings (start, stop, ls, inspect, enter, snap)
+            agent                            Composed minds (create, ls, inspect, fork, talk)
+            world                            Deployable groupings (list, inspect, enter, snap)
 
           Building blocks:
             install <ref>                    Install a dependency (spwn:unix, github.com/...)
             uninstall <ref>                  Remove a dependency
             skill                            Author skill files (new, edit, show, rm, ls)
 
-          Shortcuts:
-            up [name]                        Start every world (or one) (alias: world start)
-            ls                               Agent-centric status (running, deployed, orphan)
-            down [name]                      Stop every world (or one) (alias: world stop)
+          Worlds:
+            up [name]                        Start every world (or one)
+            down [name]                      Stop every world (or one)
 
           Coordination:
-            architect                        Always-on orchestration daemon
             logs                             System event log (--world, --agent, --type)
 
           System:
             init                             Create default configs
-            status                           Show running state
             auth                             Manage credentials
             upgrade                          Update the CLI
 

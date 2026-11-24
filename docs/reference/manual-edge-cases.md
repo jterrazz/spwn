@@ -37,7 +37,7 @@ documented caveat · ⚪ not run.
 **Hypothesis:** one wins, the other fails cleanly; no zombie
 containers; state.json not corrupted.
 **Probe:** launch two `spwn up` in background, wait both, count
-containers + check `spwn ls` state, re-run `spwn check --json`.
+containers + check `spwn world list` state, re-run `spwn check --json`.
 **Failure:** 2 containers for 1 world, or state.json parse error.
 
 ### A2. `spwn down` mid-spawn
@@ -146,10 +146,10 @@ message.
 
 ### C18. `spwn up` after `docker rm <container>` (manual)
 
-**Hypothesis:** state.json has stale entry; `spwn ls` flags it;
+**Hypothesis:** state.json has stale entry; `spwn world list` flags it;
 re-running `up` either resurrects or re-creates.
 
-### C19. Host reboot: `spwn ls` shows stale worlds
+### C19. Host reboot: `spwn world list` shows stale worlds
 
 **Hypothesis:** containers gone, state says running; hydrate-from-
 labels detects + marks stopped.
@@ -160,7 +160,7 @@ labels detects + marks stopped.
 
 ### C21. Orphan container (world-xxx exists but Spwn doesn't know)
 
-**Hypothesis:** `spwn ls` shows orphan or ignores silently.
+**Hypothesis:** `spwn world list` shows orphan or ignores silently.
 
 ### C22. Label mismatch (container has v1 labels, state.json v2)
 
@@ -181,12 +181,12 @@ journals scoped by world-id; no cross-contamination.
 
 ### D25. Agent name with spaces
 
-**Probe:** `spwn agent new "my agent"`.
+**Probe:** `spwn agent create "my agent"`.
 **Hypothesis:** either refused with format rule, or slugified.
 
 ### D26. Agent name with slashes / null bytes
 
-**Probe:** `spwn agent new "foo/bar"`, `spwn agent new $'a\x00b'`.
+**Probe:** `spwn agent create "foo/bar"`, `spwn agent create $'a\x00b'`.
 **Hypothesis:** rejected at validation.
 
 ### D27. Agent name equal to reserved ("architect", "system")
@@ -382,7 +382,7 @@ talk errors clear.
 
 **Hypothesis:** clean exit; session state preserved for next resume.
 
-### I63. `spwn ls` with 100 worlds
+### I63. `spwn world list` with 100 worlds
 
 **Hypothesis:** table paginates or renders full; no truncation crash.
 
@@ -396,8 +396,8 @@ talk errors clear.
 
 ### I66. `spwn --json` on every command that should support it
 
-**Probe:** survey of JSON support across `ls / inspect / agent ls /
-world ls / check / auth / status`.
+**Probe:** survey of JSON support across `agent ls / agent inspect /
+world list / check / auth`.
 
 ---
 

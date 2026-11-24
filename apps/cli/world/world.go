@@ -27,10 +27,6 @@ var (
 )
 
 func init() {
-	registerSpawnFlags(Cmd)
-	registerSpawnFlags(upCmd)
-
-	Cmd.AddCommand(upCmd)
 	Cmd.SetHelpFunc(worldHelp)
 }
 
@@ -66,9 +62,7 @@ func worldHelp(cmd *cobra.Command, args []string) {
 		ui.Strong("⬡ world")+" "+ui.Faint("- ephemeral runtime instances"),
 		[]ui.HelpGroup{
 			{Title: "Lifecycle", Commands: []ui.HelpEntry{
-				{Name: "up", Desc: "Spawn a world " + ui.Faint("(see Spawn Flags below)")},
-				{Name: "ls", Desc: "List active worlds"},
-				{Name: "down <id>", Desc: "Destroy a world " + ui.Faint("(agent survives)")},
+				{Name: "list", Desc: "List active worlds"},
 				{Name: "rename <id> <name>", Desc: "Rename " + ui.Faint("(empty name clears)")},
 			}},
 			{Title: "Observe", Commands: []ui.HelpEntry{
@@ -86,17 +80,10 @@ func worldHelp(cmd *cobra.Command, args []string) {
 				{Name: "knowledge ls <id>", Desc: "List a world's knowledge files"},
 				{Name: "knowledge show <id> <path>", Desc: "Read a knowledge file"},
 			}},
-			{Title: "Spawn Flags", Commands: []ui.HelpEntry{
-				{Name: "-a, --agent <name>", Desc: "Agent " + ui.Faint("(repeatable; first is chief)")},
-				{Name: "-w, --workspace <path>", Desc: "Host dir to mount " + ui.Faint("(repeatable)")},
-				{Name: "-c, --config <name>", Desc: "Named world config"},
-				{Name: "-n, --name <name>", Desc: "Display name"},
-				{Name: "-i, --interactive", Desc: "Drop into the agent's session after spawn"},
-			}},
 			{Title: "Examples", Commands: []ui.HelpEntry{
 				{Name: "spwn up --agent neo -w .", Desc: "Spawn neo in current dir"},
 				{Name: "spwn up --agent morpheus --agent neo -w .", Desc: ""},
-				{Name: "spwn ls", Desc: "See what's running"},
+				{Name: "spwn world list", Desc: "See what's running"},
 			}},
 		},
 		"spwn world [command]",
@@ -104,35 +91,13 @@ func worldHelp(cmd *cobra.Command, args []string) {
 	)
 }
 
-// Cmd is the parent for `spwn world ...`. Bare `spwn world` shows help.
-// `spwn world <name>` is a compose-style shortcut that starts the
-// named world from spwn.yaml (equivalent to `spwn world start <name>`).
-// `spwn world --agent neo` (with at least one spawn flag) also still
-// acts as a shortcut for `spwn world up --agent neo`.
 var Cmd = &cobra.Command{
-	Use:   "world [name]",
+	Use:   "world",
 	Short: "Manage worlds - ephemeral runtime instances for agents",
-	Args:  cobra.ArbitraryArgs,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		spawnFlagNames := []string{"config", "name", "agent", "workspace", "world", "interactive"}
-		anySet := false
-		for _, n := range spawnFlagNames {
-			if cmd.Flags().Changed(n) {
-				anySet = true
-				break
-			}
-		}
-		if !anySet && len(args) == 0 {
-			return cmd.Help()
-		}
-		if !anySet && len(args) == 1 {
-			return composeUpRunE(cmd, args)
-		}
-		return spawnRunE(cmd, args)
-	},
 }
 
-var upCmd = &cobra.Command{
+// UpCmd is `spwn up`, the one spelling that brings worlds up.
+var UpCmd = &cobra.Command{
 	Use:   "up [name]",
 	Short: "Spawn a world - an isolated container for agents",
 	Long: `Spawn a world: an isolated container and the agents declared in it.
@@ -146,8 +111,8 @@ a one-off world from ~/.spwn/worlds/<config>.yaml.`,
 	Args: cobra.MaximumNArgs(1),
 	Example: `  spwn up                                          Bring up every world in spwn.yaml
   spwn up neo                                      Start the "neo" world
-  spwn world up --agent neo -w .                  Single agent in current dir
-  spwn world up --agent morpheus --agent neo -w .  Multi-agent (morpheus is chief)`,
+  spwn up --agent neo -w .                         Single agent in current dir
+  spwn up --agent morpheus --agent neo -w .        Multi-agent (morpheus is chief)`,
 	RunE: composeUpRunE,
 }
 
@@ -527,13 +492,13 @@ func spawnHint(err error, agentName string, agents []architect.AgentSpec) string
 		if len(agents) > 0 {
 			name = agents[0].Name
 		}
-		return fmt.Sprintf("Run \"spwn agent new %s\" to create the agent first", name)
+		return fmt.Sprintf("Run \"spwn agent create %s\" to create the agent first", name)
 	case strings.Contains(msg, "missing the core"):
 		name := agentName
 		if len(agents) > 0 {
 			name = agents[0].Name
 		}
-		return fmt.Sprintf("Run \"spwn agent new %s\" to set up the agent layers", name)
+		return fmt.Sprintf("Run \"spwn agent create %s\" to set up the agent layers", name)
 	case strings.Contains(msg, "passwordless sudo"):
 		return "Give the image a spwn user and passwordless sudo, or derive it from a spwn/world image"
 	case strings.Contains(msg, "image") && strings.Contains(msg, "not found"):

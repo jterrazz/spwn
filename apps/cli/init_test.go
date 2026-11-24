@@ -83,7 +83,6 @@ func TestRunInitExample_InstallsFromCatalog(t *testing.T) {
 
 	initName = ""
 	initForce = false
-	initGlobal = false
 
 	cmd := &cobra.Command{}
 	cmd.SetOut(new(bytes.Buffer))
@@ -110,7 +109,6 @@ func TestRunInitExample_RejectsBadRef(t *testing.T) {
 
 	initName = ""
 	initForce = false
-	initGlobal = false
 
 	cmd := &cobra.Command{}
 	cmd.SetOut(new(bytes.Buffer))
@@ -135,7 +133,6 @@ func TestRunInitExample_AcceptsBareGallerySlug(t *testing.T) {
 
 	initName = ""
 	initForce = false
-	initGlobal = false
 
 	cmd := &cobra.Command{}
 	cmd.SetOut(new(bytes.Buffer))
@@ -154,7 +151,6 @@ func TestRunInitExample_RejectsNameFlag(t *testing.T) {
 
 	initName = "custom"
 	initForce = false
-	initGlobal = false
 	t.Cleanup(func() { initName = "" })
 
 	cmd := &cobra.Command{}

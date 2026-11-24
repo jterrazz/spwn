@@ -1,6 +1,6 @@
 // Package logs implements `spwn logs` - the system-wide semantic event log.
 // It tails ~/.spwn/activity.jsonl and is the top of a small family of
-// per-scope event viewers (spwn world logs, spwn agent logs, spwn architect logs).
+// per-scope event viewers (spwn world logs, spwn agent logs).
 package logs
 
 import (
@@ -64,8 +64,7 @@ snapshots, messages, and every other discrete thing that happened.
 
 Scope it with --world or --agent, or use the per-entity shortcuts:
   spwn world logs <id>        events for one world
-  spwn agent logs <name>      events for one agent
-  spwn architect logs         architect daemon events`,
+  spwn agent logs <name>      events for one agent`,
 	RunE: runLogs,
 }
 
@@ -93,7 +92,7 @@ func runLogs(cmd *cobra.Command, args []string) error {
 }
 
 // RunOpts is the parameter set for Run, shared with scoped subcommands in
-// other packages (world/agent/architect) that want to reuse the rendering.
+// other packages (world/agent) that want to reuse the rendering.
 type RunOpts struct {
 	Limit   int
 	Type    string

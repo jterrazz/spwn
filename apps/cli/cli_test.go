@@ -42,7 +42,7 @@ func TestCLI_Help(t *testing.T) {
 	// help. `web` was dropped from this list when the command was hidden
 	// pending a richer dashboard; it remains invokable by name (covered
 	// separately in TestCLI_WebHelp below).
-	for _, sub := range []string{"world", "agent", "skill", "install", "architect", "init"} {
+	for _, sub := range []string{"world", "agent", "skill", "install", "init"} {
 		assertContains(t, out, sub, "root help")
 	}
 }
@@ -70,7 +70,7 @@ func TestCLI_WorldHelp(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	for _, sub := range []string{"up", "ls", "inspect", "logs", "enter", "down"} {
+	for _, sub := range []string{"list", "inspect", "logs", "enter"} {
 		assertContains(t, out, sub, "world help")
 	}
 }
@@ -100,26 +100,13 @@ func TestCLI_AgentTalkHelp(t *testing.T) {
 }
 
 func TestCLI_AgentDeleteHelp(t *testing.T) {
-	out, _, err := executeCommand("agent", "delete", "--help")
+	out, _, err := executeCommand("agent", "rm", "--help")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	assertContains(t, out, "delete", "agent rm help")
+	assertContains(t, out, "rm", "agent rm help")
 	assertContains(t, out, "agent-name", "agent rm usage")
-}
-
-// --- Architect help ---
-
-func TestCLI_ArchitectHelp(t *testing.T) {
-	out, _, err := executeCommand("architect", "--help")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	for _, sub := range []string{"start", "stop", "status"} {
-		assertContains(t, out, sub, "architect help")
-	}
 }
 
 // --- Install help ---
@@ -166,4 +153,3 @@ func TestCLI_UnknownCommand(t *testing.T) {
 		t.Error("expected error for unknown command")
 	}
 }
-

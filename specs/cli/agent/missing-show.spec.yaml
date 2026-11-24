@@ -1,6 +1,6 @@
 description: show on a missing agent errors cleanly
 runs:
-    - command: agent show ghost
+    - command: agent inspect ghost
       exit: 1
       stderr: |4+
           

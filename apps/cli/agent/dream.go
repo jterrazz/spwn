@@ -13,10 +13,9 @@ func init() {
 }
 
 var dreamCmd = &cobra.Command{
-	Use:     "dream <agent-name>",
-	Aliases: []string{"reflect"},
-	Short:   "Analyze experience, discover patterns, promote playbooks",
-	Args:    cobra.ExactArgs(1),
+	Use:   "dream <agent-name>",
+	Short: "Analyze experience, discover patterns, promote playbooks",
+	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
 		s := ui.New()

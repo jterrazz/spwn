@@ -7,15 +7,12 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/pflag"
 
 	"spwn.sh/apps/cli/agent"
-	"spwn.sh/apps/cli/architect"
 	"spwn.sh/apps/cli/authentication"
 	"spwn.sh/apps/cli/automation"
 	"spwn.sh/apps/cli/cookiesync"
 	"spwn.sh/apps/cli/gate"
-	"spwn.sh/apps/cli/inspect"
 	"spwn.sh/apps/cli/logs"
 	"spwn.sh/apps/cli/organization"
 	"spwn.sh/apps/cli/skill"
@@ -40,9 +37,6 @@ rules (network, filesystem, tools), and each agent keeps its Mind
 	SilenceUsage:  true,
 	SilenceErrors: true,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-		if isArchitectMode() {
-			return validateArchitectCommand(cmd)
-		}
 		if err := runMigrations(); err != nil {
 			return err
 		}
@@ -57,7 +51,6 @@ func init() {
 	rootCmd.SetHelpFunc(customHelp)
 
 	rootCmd.AddCommand(world.UpCmd)
-	rootCmd.AddCommand(smartLsCmd())
 	rootCmd.AddCommand(world.DownCmd)
 
 	world.Cmd.AddCommand(snap.Cmd)
@@ -71,11 +64,9 @@ func init() {
 	rootCmd.AddCommand(team.Cmd)
 	rootCmd.AddCommand(organization.Cmd)
 
-	rootCmd.AddCommand(inspect.Cmd)
 	rootCmd.AddCommand(automation.Cmd)
 
 	rootCmd.AddCommand(authentication.Cmd)
-	rootCmd.AddCommand(architect.Cmd)
 	rootCmd.AddCommand(gate.Cmd)
 	rootCmd.AddCommand(cookiesync.Cmd)
 	rootCmd.AddCommand(web.Cmd)
@@ -88,17 +79,13 @@ func init() {
 // Fires even on error returns, subcommand-help short-circuits, or
 // Handlers that os.Exit without returning. The pre-hook kicks off the
 // Version check (synchronous cache read + async refresh); the deferred
-// Post-hook renders the banner. Both short-circuit in architect mode
-// And the post-hook also skips when the user just ran `spwn upgrade`
-// (the upgrade command prints its own progress, stacking a banner on
-// Top would be redundant noise).
+// Post-hook renders the banner, and skips it when the user just ran
+// `spwn upgrade` (the upgrade command prints its own progress, stacking
+// A banner on top would be redundant noise).
 func Execute() error {
-	skipBanner := isArchitectMode()
-	if !skipBanner {
-		startVersionCheck()
-	}
+	startVersionCheck()
 	defer func() {
-		if skipBanner || ranUpgradeCommand() {
+		if ranUpgradeCommand() {
 			return
 		}
 		printUpgradeHint()
@@ -133,18 +120,6 @@ func GetRootCmd() *cobra.Command {
 	return rootCmd
 }
 
-func smartLsCmd() *cobra.Command {
-	c := &cobra.Command{
-		Use:   "ls",
-		Short: "Agent-centric status (running / stopped / orphan)",
-		RunE:  agent.LsCmd.RunE,
-	}
-	agent.LsCmd.Flags().VisitAll(func(f *pflag.Flag) {
-		c.Flags().AddFlag(f)
-	})
-	return c
-}
-
 func printHelpCmd(w io.Writer, name, desc string) {
 	if desc == "" {
 		fmt.Fprintf(w, "%s%s\n", ui.Indent, ui.ColorizeHelpName(name))
@@ -167,14 +142,14 @@ func customHelp(cmd *cobra.Command, args []string) {
 
 	fmt.Fprintf(w, "%s\n", ui.Strong("Quick Start:"))
 	printHelpCmd(w, "spwn init", "Scaffold a new project")
-	printHelpCmd(w, "spwn agent new neo", "Create an agent (auto-creates a single-agent world)")
+	printHelpCmd(w, "spwn agent create neo", "Create an agent (auto-creates a single-agent world)")
 	printHelpCmd(w, "spwn up", "Bring up every world in spwn.yaml")
 	printHelpCmd(w, "spwn agent neo", "Start the world that contains neo")
 	fmt.Fprintln(w)
 
 	fmt.Fprintf(w, "%s\n", ui.Strong("Entities:"))
-	printHelpCmd(w, "agent", "Composed minds "+ui.Faint("(new, ls, start, stop, inspect, add, fork, talk)"))
-	printHelpCmd(w, "world", "Deployable groupings "+ui.Faint("(start, stop, ls, inspect, enter, snap)"))
+	printHelpCmd(w, "agent", "Composed minds "+ui.Faint("(create, ls, inspect, fork, talk)"))
+	printHelpCmd(w, "world", "Deployable groupings "+ui.Faint("(list, inspect, enter, snap)"))
 	fmt.Fprintln(w)
 
 	fmt.Fprintf(w, "%s\n", ui.Strong("Building blocks:"))
@@ -183,20 +158,17 @@ func customHelp(cmd *cobra.Command, args []string) {
 	printHelpCmd(w, "skill", "Author skill files "+ui.Faint("(new, edit, show, rm, ls)"))
 	fmt.Fprintln(w)
 
-	fmt.Fprintf(w, "%s\n", ui.Strong("Shortcuts:"))
-	printHelpCmd(w, "up [name]", "Start every world (or one) "+ui.Faint("(alias: world start)"))
-	printHelpCmd(w, "ls", "Agent-centric status "+ui.Faint("(running, deployed, orphan)"))
-	printHelpCmd(w, "down [name]", "Stop every world (or one) "+ui.Faint("(alias: world stop)"))
+	fmt.Fprintf(w, "%s\n", ui.Strong("Worlds:"))
+	printHelpCmd(w, "up [name]", "Start every world (or one)")
+	printHelpCmd(w, "down [name]", "Stop every world (or one)")
 	fmt.Fprintln(w)
 
 	fmt.Fprintf(w, "%s\n", ui.Strong("Coordination:"))
-	printHelpCmd(w, "architect", "Always-on orchestration daemon")
 	printHelpCmd(w, "logs", "System event log "+ui.Faint("(--world, --agent, --type)"))
 	fmt.Fprintln(w)
 
 	fmt.Fprintf(w, "%s\n", ui.Strong("System:"))
 	printHelpCmd(w, "init", "Create default configs")
-	printHelpCmd(w, "status", "Show running state")
 	printHelpCmd(w, "auth", "Manage credentials")
 	printHelpCmd(w, "upgrade", "Update the CLI")
 	fmt.Fprintln(w)

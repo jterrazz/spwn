@@ -28,7 +28,7 @@ var enterCmd = &cobra.Command{
 
 		if _, err := arc.Inspect(ctx, worldID); err != nil {
 			return s.FailHint("Enter failed", err,
-				"Check running worlds with \"spwn world ls\"")
+				"Check running worlds with \"spwn world list\"")
 		}
 
 		s.Blank()

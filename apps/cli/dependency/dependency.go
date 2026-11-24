@@ -47,10 +47,9 @@ var installCmd = &cobra.Command{
 var uninstallAgentFilter string
 
 var uninstallCmd = &cobra.Command{
-	Use:     "uninstall <ref>",
-	Aliases: []string{"rm", "remove"},
-	Short:   "Uninstall a dependency from the project",
-	Args:    cobra.ExactArgs(1),
+	Use:   "uninstall <ref>",
+	Short: "Uninstall a dependency from the project",
+	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return RunUninstall(cmd, args[0], uninstallAgentFilter)
 	},
@@ -226,7 +225,7 @@ func filterAgents(all []project.AgentRef, filter string) ([]project.AgentRef, er
 		}
 	}
 	if len(available) == 0 {
-		return nil, fmt.Errorf("no agents declared in this project: add one with `spwn agent new`")
+		return nil, fmt.Errorf("no agents declared in this project: add one with `spwn agent create`")
 	}
 	if filter == "" {
 		return available, nil

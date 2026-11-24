@@ -79,14 +79,6 @@ func CopyGateTools(refName, gateToolsRoot string) ([]string, error) {
 	return spwn.CopyGateTools(refName, gateToolsRoot)
 }
 
-// LoadLocalTool reads spwn/tools/<name>/ inside projectRoot and
-// returns a Tool. Used by `spwn inspect` to render local
-// compositions and by the spawn pipeline to register locals.
-// Returns an error with a clear hint when tool.yaml is missing.
-func LoadLocalTool(projectRoot, name string) (tool.Tool, error) {
-	return local.LoadTool(projectRoot, name)
-}
-
 // HydrateLocals filters a dep ref list for `tool/<name>` entries,
 // loads each from <projectRoot>/spwn/tools/<name>/, registers it
 // into target, and returns the rewritten list where each `tool/`

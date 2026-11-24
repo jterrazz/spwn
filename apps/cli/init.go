@@ -12,13 +12,10 @@ import (
 
 	"spwn.sh/packages/dependency"
 	"spwn.sh/packages/dependency/refs"
-	"spwn.sh/packages/platform"
 	"spwn.sh/packages/project"
-	"spwn.sh/packages/world"
 )
 
 func init() {
-	initCmd.Flags().BoolVar(&initGlobal, "global", false, "Initialise ~/.spwn/ (legacy user-home mode)")
 	initCmd.Flags().BoolVarP(&initForce, "force", "f", false, "Overwrite existing spwn.yaml")
 	initCmd.Flags().StringVar(&initName, "name", "", "Project name (default: current directory name)")
 	initCmd.Flags().StringVar(&initBackend, "backend", "", "Pin the scaffolded agent to a runtime backend (e.g. claude-code, codex). Leave empty to let Spwn resolve at spawn time.")
@@ -26,7 +23,6 @@ func init() {
 }
 
 var (
-	initGlobal  bool
 	initForce   bool
 	initName    string
 	initBackend string
@@ -46,15 +42,9 @@ A positional example ref installs one of the bundled gallery entries
 into the current directory. Bare names resolve through the catalog:
 
     spwn init matrix          # shorthand for spwn init spwn:matrix
-    spwn init spwn:matrix     # explicit form
-
-Use --global to instead seed ~/.spwn/ with a world config (legacy
-user-home mode, kept for backward compatibility).`,
+    spwn init spwn:matrix     # explicit form`,
 	Args: cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if initGlobal {
-			return runInitGlobal(cmd)
-		}
 		if len(args) == 1 {
 			return runInitExample(cmd, args[0])
 		}
@@ -204,27 +194,6 @@ func runInitExample(cmd *cobra.Command, ref string) error {
 	fmt.Fprintln(out, "")
 	fmt.Fprintln(out, "  Next:")
 	fmt.Fprintln(out, "    spwn up                        # spawn the world")
-	s.Blank()
-
-	return nil
-}
-
-func runInitGlobal(cmd *cobra.Command) error {
-	s := ui.New()
-
-	baseDir := platform.BaseDir()
-	if err := os.MkdirAll(baseDir, 0o755); err != nil {
-		return fmt.Errorf("cannot create %s: %w", baseDir, err)
-	}
-
-	s.Blank()
-	if err := world.CreateDefaultConfig(); err != nil {
-		s.Log("default.yaml already exists, skipping")
-	} else {
-		s.Done("Created config", "default.yaml")
-	}
-	s.Blank()
-	s.Success("Ready")
 	s.Blank()
 
 	return nil

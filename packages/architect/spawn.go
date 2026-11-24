@@ -322,7 +322,6 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 
 	var env []string
 	if opts.IsArchitect {
-		env = append(env, "SPWN_ARCHITECT_MODE=1")
 		env = append(env, "SPWN_HOME=/home/spwn/.spwn")
 	}
 

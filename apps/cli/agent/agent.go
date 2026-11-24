@@ -18,7 +18,6 @@ var (
 	spawnImport   string
 	spawnBackend  string
 	ephemeralTask string
-	npcTaskCompat string
 )
 
 func init() {
@@ -27,8 +26,6 @@ func init() {
 	Cmd.Flags().StringVar(&spawnImport, "import", "", "Import Mind from tar.gz before spawning")
 	Cmd.Flags().StringVar(&spawnBackend, "backend", "", "Override the runtime backend for this session (e.g. claude-code, codex).")
 	Cmd.Flags().StringVar(&ephemeralTask, "ephemeral", "", "Run as ephemeral agent - no Mind, no memory, just execute this task")
-	Cmd.Flags().StringVar(&npcTaskCompat, "npc", "", "Run as ephemeral agent (deprecated: use --ephemeral)")
-	_ = Cmd.Flags().MarkHidden("npc")
 
 	Cmd.SetHelpFunc(agentHelp)
 }
@@ -53,7 +50,6 @@ func agentHelp(cmd *cobra.Command, args []string) {
 				{Name: "talk <name> [msg]", Desc: "Open a session with a running agent " + ui.Faint("(sync)")},
 			}},
 			{Title: "Observe", Commands: []ui.HelpEntry{
-				{Name: "show <name>", Desc: "Show agent details " + ui.Faint("(alias of inspect)")},
 				{Name: "inspect <name>", Desc: "Inspect composition, memory, and history"},
 				{Name: "logs <name>", Desc: "Show the event log for this agent"},
 			}},
@@ -105,28 +101,23 @@ in that world.`,
   spwn agent --ephemeral "run tests"  Fire-and-forget ephemeral task`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) == 1 && !cmd.Flags().Changed("name") && !cmd.Flags().Changed("world") &&
-			!cmd.Flags().Changed("ephemeral") && !cmd.Flags().Changed("npc") && !cmd.Flags().Changed("import") {
+			!cmd.Flags().Changed("ephemeral") && !cmd.Flags().Changed("import") {
 			return runInteractiveSession(cmd, args[0])
 		}
 		if !cmd.Flags().Changed("name") && !cmd.Flags().Changed("world") &&
-			!cmd.Flags().Changed("ephemeral") && !cmd.Flags().Changed("npc") && !cmd.Flags().Changed("import") {
+			!cmd.Flags().Changed("ephemeral") && !cmd.Flags().Changed("import") {
 			return cmd.Help()
 		}
 
 		ctx := context.Background()
 		s := ui.New()
 
-		task := ephemeralTask
-		if task == "" {
-			task = npcTaskCompat
-		}
-
-		if task != "" {
+		if ephemeralTask != "" {
 			worldID := spawnWorld
 			if worldID == "" {
 				s.Blank()
 				return s.FailHint("Ephemeral requires --world", fmt.Errorf("no world specified"),
-					"Run \"spwn ls\" to see active worlds")
+					"Run \"spwn world list\" to see active worlds")
 			}
 			arc, err := architect.NewFromEnv()
 			if err != nil {
@@ -134,9 +125,9 @@ in that world.`,
 				return s.FailHint("Docker", err, "Start Docker Desktop or OrbStack, then try again")
 			}
 			s.Blank()
-			s.Done("Ephemeral dispatched", fmt.Sprintf("%q → %s", task, worldID))
+			s.Done("Ephemeral dispatched", fmt.Sprintf("%q → %s", ephemeralTask, worldID))
 			s.Blank()
-			return arc.SpawnNPC(ctx, worldID, task)
+			return arc.SpawnNPC(ctx, worldID, ephemeralTask)
 		}
 
 		agentName := "default"

@@ -10,7 +10,6 @@ runs:
           Scope it with --world or --agent, or use the per-entity shortcuts:
             spwn world logs <id>        events for one world
             spwn agent logs <name>      events for one agent
-            spwn architect logs         architect daemon events
 
           Usage:
             spwn logs [flags]

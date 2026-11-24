@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"strings"
 	"time"
 
 	cerrdefs "github.com/containerd/errdefs"
@@ -15,7 +14,6 @@ import (
 	"spwn.sh/packages/authentication"
 	"spwn.sh/packages/container/backend"
 	"spwn.sh/packages/platform"
-	"spwn.sh/packages/runtimes"
 	"spwn.sh/packages/world/labels"
 )
 
@@ -59,23 +57,6 @@ func (o *StartDaemonOpts) writer() io.Writer {
 		return o.LogWriter
 	}
 	return io.Discard
-}
-
-// StartDaemon creates and starts the spwn-architect Docker container.
-// It returns the container ID. If the container is already running,
-// it returns an error indicating that.
-//
-// This is the back-compat shim. New code should call
-// StartDaemonWithOpts so it can subscribe to progress events.
-func StartDaemon(ctx context.Context, imageOverride string, logWriters ...io.Writer) (string, error) {
-	var lw io.Writer
-	if len(logWriters) > 0 {
-		lw = logWriters[0]
-	}
-	return StartDaemonWithOpts(ctx, StartDaemonOpts{
-		ImageOverride: imageOverride,
-		LogWriter:     lw,
-	})
 }
 
 // StartDaemonWithOpts is the rich entry point. It emits an OnProgress
@@ -258,55 +239,4 @@ func GetDaemonStatus(ctx context.Context) (*DaemonInfo, error) {
 	}
 
 	return result, nil
-}
-
-// TalkExecArgs returns the docker exec arguments needed to talk to
-// the Architect. The caller is responsible for executing the command
-// (so it can handle interactive vs one-shot modes and streaming).
-//
-// If message is non-empty a one-shot --print invocation is returned;
-// otherwise an interactive Claude session is returned.
-func TalkExecArgs(message string) ([]string, error) {
-	args := []string{"exec"}
-
-	if message == "" {
-		args = append(args, "-it")
-	}
-
-	args = append(args, "-u", "architect", "-w", "/me")
-	args = append(args, "-e", "SPWN_HOME=/home/spwn/.spwn")
-
-	_ = authentication.SyncCredentials()
-
-	args = append(args, platform.ArchitectContainerName())
-
-	claudeArgs := []string{"claude", "--dangerously-skip-permissions"}
-	if message != "" {
-		claudeArgs = append(claudeArgs, "-p", message, "--print",
-			"--append-system-prompt",
-			"You are the Architect. Read /me/ARCHITECT.md for your identity. "+
-				"IMPORTANT: When a user asks you to do something, you MUST include a [STACK_PUSH] marker in your response. "+
-				"Format: [STACK_PUSH] Short task title\\nPriority: blocking|queued\\nBrief description. "+
-				"Also update /me/stack.md with the new task. "+
-				"When completing a task use [STACK_POP] Short task title. "+
-				"Read /me/skills/ for detailed guides.")
-	}
-
-	escaped := make([]string, len(claudeArgs))
-	for i, arg := range claudeArgs {
-		escaped[i] = "'" + strings.ReplaceAll(arg, "'", "'\\''") + "'"
-	}
-
-	setupParts := []string{"source /credentials/.env 2>/dev/null"}
-	for _, a := range runtimes.All() {
-		if a.Spawn == nil {
-			continue
-		}
-		if s := a.Spawn.PrelaunchShell(); s != "" {
-			setupParts = append(setupParts, s)
-		}
-	}
-	shellCmd := strings.Join(setupParts, "; ") + "; exec " + strings.Join(escaped, " ")
-	args = append(args, "bash", "-c", shellCmd)
-	return args, nil
 }

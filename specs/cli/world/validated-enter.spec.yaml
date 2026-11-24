@@ -27,5 +27,5 @@ runs:
       exit: 1
       stderr: |4+
             ✗ Enter failed             world nonexistent not found
-              Check running worlds with "spwn world ls"
+              Check running worlds with "spwn world list"
 

@@ -1,21 +1,23 @@
 import { button, heading } from '@jterrazz/test';
+import { spawnSync } from 'node:child_process';
 import { describe, expect, test } from 'vitest';
 
-import { withoutArchitect } from '../../__setup__/architect.js';
 import { website } from '../website.specification.js';
 
-describe('architect', () => {
-    test('an offline architect offers to start, from the page and from the terminal', async () => {
-        // Given - a spwn home whose architect never started
-        const result = await withoutArchitect(
-            async () =>
-                await website.visit('/architect', async (visitor) => {
-                    await visitor.see(heading('Architect is offline'));
-                    await visitor.see(button('Docker status: v', { exact: false }));
-                }),
-        );
+function removeArchitect(): void {
+    spawnSync('docker', ['rm', '-f', 'spwn-architect'], { encoding: 'utf8', timeout: 60_000 });
+}
 
-        // Then - the start button and the command that does the same
+describe('architect', () => {
+    test('an offline architect offers to start from the page', async () => {
+        // Given - a spwn home whose architect never started
+        removeArchitect();
+        const result = await website.visit('/architect', async (visitor) => {
+            await visitor.see(heading('Architect is offline'));
+            await visitor.see(button('Docker status: v', { exact: false }));
+        });
+
+        // Then - the start button
         expect(result.tree).toMatch(`
             - link "⬡ spwn":
               - /url: /
@@ -90,8 +92,6 @@ describe('architect', () => {
               - button "Start Architect":
                 - img
                 - text: Start Architect
-              - img
-              - text: spwn architect start
             - button "Open glossary":
               - img
             - alert`);

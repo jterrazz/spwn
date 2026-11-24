@@ -1,5 +1,0 @@
-
-  Architect:   not running
-
-  Start with: spwn architect start
-

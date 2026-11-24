@@ -107,7 +107,7 @@ func Init(dir string, opts Opts) error {
 
 // AddAgentWorld inserts a `worlds.<agent>: { agents: [<agent>], workspaces: [.] }`
 // entry into spwn.yaml. Idempotent: a no-op if the entry already
-// exists. Used by `spwn agent new <name>` (unless --no-world).
+// exists. Used by `spwn agent create <name>` (unless --no-world).
 func AddAgentWorld(manifestPath, agentName string) error {
 	data, err := os.ReadFile(manifestPath)
 	if err != nil {

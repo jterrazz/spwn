@@ -93,7 +93,7 @@ func RenderGroupedHelp(w io.Writer, header string, groups []HelpGroup, usage str
 // in custom HelpFunc implementations instead of cobra's default (which
 // inserts blank lines around every section).
 //
-// Sections rendered: description, usage, aliases, examples, subcommands,
+// Sections rendered: description, usage, examples, subcommands,
 // local flags, global flags. Sections are omitted when empty.
 func MinimalHelp(cmd *cobra.Command, args []string) {
 	w := cmd.OutOrStdout()
@@ -115,12 +115,6 @@ func MinimalHelp(cmd *cobra.Command, args []string) {
 		if cmd.HasAvailableSubCommands() {
 			fmt.Fprintf(w, "%s%s\n", Indent, Faint(cmd.CommandPath()+" [command]"))
 		}
-		fmt.Fprintln(w)
-	}
-
-	if len(cmd.Aliases) > 0 {
-		fmt.Fprintf(w, "%s\n", Strong("Aliases:"))
-		fmt.Fprintf(w, "%s%s\n", Indent, cmd.NameAndAliases())
 		fmt.Fprintln(w)
 	}
 

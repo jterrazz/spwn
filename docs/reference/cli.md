@@ -4,11 +4,11 @@ The `spwn` binary (`apps/cli`) is a thin surface over the domain packages: parse
 
 ## Grammar
 
-**`spwn <noun> <verb>`**, plus three top-level shortcuts (`up`, `ls`, `down`/`talk`) and name-only shortcuts (`spwn agent neo`, `spwn world default`). With no args, the shortcuts act on every world declared in `spwn.yaml`.
+**`spwn <noun> <verb>`**, plus two top-level verbs (`up`, `down`) that bring every world declared in `spwn.yaml` up and down, and one name-only shortcut: `spwn agent neo` starts the world that holds `neo` and opens a session with it.
 
 Design rules:
 
-- Strict noun-first grammar. The only top-level verbs are the shortcuts `up`, `ls`, `talk`.
+- Strict noun-first grammar. The only top-level verbs are `up` and `down`, and no command has an alias.
 - `rm` is contextual: `spwn agent rm neo` deletes the agent; `spwn agent rm neo --dependency X` removes a dep from it.
 - Inside a project, commands resolve against `./spwn/` first. Outside a project, they operate on user-level paths.
 - Names for creation, IDs for reference: creation takes a name, and a running instance is addressed by the ID it was given ([Concepts](../concepts/domain-model.md#ids)).
@@ -23,25 +23,18 @@ Two invariants hold across the surface. Commands speak the domain's vocabulary (
 spwn init                     # scaffold spwn.yaml + ./spwn/ + .spwn/
 spwn check                    # validate the tree
 spwn build --tree-only        # render the project tree to ./dist (preview/debug)
-spwn build --base <image>      # transpile + compile into a project-specific Docker image (or set SPWN_BASE_IMAGE)
-spwn up                       # spawn a world from the current project
-
-# ── Compose-style shortcuts ──────────────────────────────────────
-spwn up [name]                # bring up every world (or one by name)
-spwn agent neo                # start the world that contains neo
-spwn ls                       # agent-centric status (running/stopped/orphan)
-spwn down                     # stop every world
+spwn build --base <image>     # transpile + compile into a project-specific Docker image (or set SPWN_BASE_IMAGE)
+spwn up [name]                # bring up every world in spwn.yaml (or one by name)
+spwn agent neo                # spawn the world that contains neo and open a session
+spwn down [name]              # stop every world (or one)
 
 # ── Agents ───────────────────────────────────────────────────────
-spwn agent new neo            # create a blank agent in ./spwn/agents/
+spwn agent create neo         # create a blank agent in ./spwn/agents/
 spwn agent ls                 # list project agents
 spwn agent inspect neo        # inspect composition, memory, history
 spwn agent fork neo neo-v2    # clone memory + composition
 spwn agent rm neo             # delete an agent
-spwn agent talk  neo "..."      # interactive session (full form of `spwn talk`)
-spwn agent send  neo "..." --from morpheus   # async message to an agent's inbox
-spwn agent inbox neo          # show neo's inbox
-spwn agent watch neo          # tail neo's inbox live
+spwn agent talk  neo "..."    # interactive session
 spwn agent dream neo          # analyze experience, promote playbooks
 spwn agent sleep neo          # consolidate memory, prune stale patterns
 
@@ -56,9 +49,7 @@ spwn uninstall python --agent neo              # detach from one agent
 spwn skill new|edit|show|rm <name>             # bare-markdown skill authoring
 
 # ── Worlds ───────────────────────────────────────────────────────
-spwn world start [name]       # start a world (no arg: every world in spwn.yaml)
-spwn world stop  [name]       # stop a world
-spwn world ls                 # list running worlds
+spwn world list               # list running worlds
 spwn world inspect <id>       # inspect a running world
 spwn world enter   <id>       # interactive shell inside the world
 spwn world snap save|ls|restore|rm   # world snapshots
@@ -70,15 +61,12 @@ spwn automation logs [-f] [-n N]   # tail .spwn/runs.jsonl receipts
 spwn automation daemon        # run the engine until interrupted
 
 # ── System ───────────────────────────────────────────────────────
-spwn architect start|stop|status|talk|logs   # always-on orchestration daemon
 spwn gate start|stop|status   # host-side broker for cookie-bearing tools (see the Gate concept)
 spwn web                      # open the local web UI
 spwn auth login|logout|token  # provider credentials
 
 # ── Registry (planned) ───────────────────────────────────────────
-spwn agent   get github:community/sci   # install a shared agent   [planned]
 spwn install github:acme/fuzzer         # install from GitHub      [planned]
-spwn *       publish <name>             # push to registry         [planned]
 ```
 
 ## Related

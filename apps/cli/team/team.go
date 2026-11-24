@@ -75,9 +75,8 @@ var newCmd = &cobra.Command{
 }
 
 var lsCmd = &cobra.Command{
-	Use:     "ls",
-	Aliases: []string{"list"},
-	Short:   "List all teams",
+	Use:   "ls",
+	Short: "List all teams",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		teams, err := project.ListTeams()
 		if err != nil {
@@ -151,10 +150,9 @@ func init() {
 }
 
 var rmCmd = &cobra.Command{
-	Use:     "rm <slug>",
-	Aliases: []string{"remove", "delete"},
-	Short:   "Delete a team (agents become solo)",
-	Args:    cobra.ExactArgs(1),
+	Use:   "rm <slug>",
+	Short: "Delete a team (agents become solo)",
+	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		s := ui.New()
 		slug := args[0]

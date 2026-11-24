@@ -19,8 +19,8 @@ runs:
           Examples:
             spwn up                                          Bring up every world in spwn.yaml
             spwn up neo                                      Start the "neo" world
-            spwn world up --agent neo -w .                  Single agent in current dir
-            spwn world up --agent morpheus --agent neo -w .  Multi-agent (morpheus is chief)
+            spwn up --agent neo -w .                         Single agent in current dir
+            spwn up --agent morpheus --agent neo -w .        Multi-agent (morpheus is chief)
 
           Flags:
             -a, --agent stringArray       Agent name (repeatable; first agent becomes chief in multi-agent worlds)

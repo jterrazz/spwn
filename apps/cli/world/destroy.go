@@ -12,11 +12,6 @@ import (
 
 var destroyAll bool
 
-func init() {
-	Cmd.AddCommand(destroyCmd)
-	destroyCmd.Flags().BoolVar(&destroyAll, "all", false, "Destroy all running worlds")
-}
-
 func composeDownRunE(cmd *cobra.Command, args []string) error {
 	if destroyAll || len(args) > 0 {
 		return destroyCmd.RunE(cmd, args)

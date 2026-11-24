@@ -54,15 +54,9 @@ type agentWorldInfo struct {
 	Status  string
 }
 
-// LsCmd is exported so the root command can reuse the agent-centric
-// smart listing as the top-level `spwn ls` shortcut when a project
-// is active.
-var LsCmd = listCmd
-
 var listCmd = &cobra.Command{
-	Use:     "ls",
-	Aliases: []string{"list"},
-	Short:   "List all agents on this Host",
+	Use:   "ls",
+	Short: "List all agents on this Host",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if cwd, werr := os.Getwd(); werr == nil {
 			if p, perr := project.Find(cwd); perr == nil && p != nil {
@@ -95,7 +89,7 @@ var listCmd = &cobra.Command{
 			}
 			s.Blank()
 			s.Success("No agents yet.")
-			s.Log("Create one with: spwn agent new <name>")
+			s.Log("Create one with: spwn agent create <name>")
 			s.Blank()
 			return nil
 		}
@@ -176,7 +170,7 @@ func renderSmartAgentList(cmd *cobra.Command, p *project.Project) error {
 		}
 		s.Blank()
 		s.Success("No agents yet.")
-		s.Log("Create one with: spwn agent new <name>")
+		s.Log("Create one with: spwn agent create <name>")
 		s.Blank()
 		return nil
 	}

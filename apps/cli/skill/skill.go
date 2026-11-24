@@ -70,9 +70,8 @@ func skillHelp(cmd *cobra.Command, args []string) {
 }
 
 var lsCmd = &cobra.Command{
-	Use:     "ls",
-	Aliases: []string{"list"},
-	Short:   "List skill files",
+	Use:   "ls",
+	Short: "List skill files",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		dir := platform.SkillsDir()
 		entries, err := os.ReadDir(dir)
@@ -187,10 +186,9 @@ var showCmd = &cobra.Command{
 }
 
 var rmCmd = &cobra.Command{
-	Use:     "rm <skill-name>",
-	Aliases: []string{"remove", "delete"},
-	Short:   "Delete a skill file",
-	Args:    cobra.ExactArgs(1),
+	Use:   "rm <skill-name>",
+	Short: "Delete a skill file",
+	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
 		path := filepath.Join(platform.SkillsDir(), name+".md")

@@ -13,7 +13,7 @@ func TestStopDaemon_ReturnsBeforeTheGracePeriod(t *testing.T) {
 	t.Setenv("SPWN_HOME", t.TempDir())
 	t.Setenv("SPWN_ARCHITECT_CONTAINER_SUFFIX", "stop-init-test")
 	ctx := context.Background()
-	if _, err := StartDaemon(ctx, "spwn-test:latest"); err != nil {
+	if _, err := StartDaemonWithOpts(ctx, StartDaemonOpts{ImageOverride: "spwn-test:latest"}); err != nil {
 		t.Fatalf("start: %v", err)
 	}
 	t.Cleanup(func() { _ = StopDaemon(ctx) })
