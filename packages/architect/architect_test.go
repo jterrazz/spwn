@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -50,6 +51,7 @@ type mockBackend struct {
 	startedIDs       []string
 	stoppedIDs       []string
 	removedIDs       []string
+	execMu           sync.Mutex
 	execCalls        []execCall
 	copyToCalls      []copyToCall
 	copyDirToCalls   []copyDirToCall
@@ -139,7 +141,9 @@ func (m *mockBackend) Remove(_ context.Context, containerID string) error {
 }
 
 func (m *mockBackend) Exec(_ context.Context, containerID string, cfg backend.ExecConfig) (int, error) {
+	m.execMu.Lock()
 	m.execCalls = append(m.execCalls, execCall{containerID, cfg})
+	m.execMu.Unlock()
 	// Honour the test-injected stdout payload so the automation E2E
 	// suite can assert "the dispatcher captured the runtime's
 	// output" without a real container. Stderr left empty:
@@ -152,6 +156,12 @@ func (m *mockBackend) Exec(_ context.Context, containerID string, cfg backend.Ex
 		return 1, m.execErr
 	}
 	return 0, nil
+}
+
+func (m *mockBackend) execs() []execCall {
+	m.execMu.Lock()
+	defer m.execMu.Unlock()
+	return append([]execCall(nil), m.execCalls...)
 }
 
 func (m *mockBackend) ExecOutput(_ context.Context, _ string, _ []string) (string, error) {
