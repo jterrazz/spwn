@@ -177,6 +177,8 @@ export const FAILED_CREATE_WORDS = {
 } as const;
 
 // value: the New machine sheet's own field titles; what each field asks and refuses is the engine's.
+export const NEW_MACHINE_WORD = 'New machine';
+
 export const NEW_MACHINE_WORDS = { called: 'What it is called', purpose: 'Purpose' } as const;
 
 export const BATTERY_WORDS = { charging: 'charging', onBattery: 'on battery' } as const;

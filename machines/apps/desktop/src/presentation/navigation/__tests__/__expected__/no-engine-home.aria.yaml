@@ -11,6 +11,7 @@
   - text: No engine on this Mac
 - navigation "Sidebar":
   - heading "Machine" [level=2]
+  - button "New machine" [disabled]
   - button "Find" [disabled]
   - group "Every Mac":
     - button "Storage" [disabled]

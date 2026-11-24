@@ -1,4 +1,4 @@
-import { button, content, heading, navigation, region, within } from '@jterrazz/test';
+import { button, content, dialog, heading, navigation, region, within } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { website } from '../website.specification.js';
@@ -88,6 +88,23 @@ describe('global pages', () => {
                 // Then - the Storage page, with the Mac mini's section beside This Mac's
                 await visitor.see(within(MINI, heading('Nothing to free.')));
                 await visitor.gone(heading('macbook-pro online'));
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
+
+    test("A16 the sidebar's + opens New machine", async () => {
+        // Given - the window on the Apps shelf over two-macs, which has no New machine of its own
+        const result = await website.visit(
+            '/?world=two-macs&page=catalog-apps',
+            async (visitor) => {
+                await visitor.see(region('Apps'));
+
+                // When - the + beside the space's name is pressed
+                await visitor.click(within(sidebar, button('New machine')));
+
+                // Then - the New machine sheet
+                await visitor.see(dialog('New machine on mac-mini'));
             },
         );
         expect(result.errors.text).toBe('');

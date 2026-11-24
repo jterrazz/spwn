@@ -6,6 +6,7 @@ import {
     disabled,
     field,
     heading,
+    main,
     region,
     within,
 } from '@jterrazz/test';
@@ -24,6 +25,7 @@ const recordingFor = await recordingsOf('one-mac', 'two-macs', 'mini-offline');
 const onThisMac = dialog('New machine on macbook-pro');
 const thisMac = button('macbook-pro');
 const onMini = dialog('New machine on mac-mini');
+const NEW_MACHINE = within(main(), button('New machine'));
 
 const HOME: Route = { page: 'home' };
 
@@ -41,7 +43,7 @@ describe('New machine', () => {
         // Given - the window over two-macs, where the mini has the most room
         const result = await component.render(windowOver('two-macs'), async (visitor) => {
             // When - New machine is opened from Home
-            await visitor.click(button('New machine'));
+            await visitor.click(NEW_MACHINE);
 
             // Then - the sheet is on the mini, offers both Macs, the presets the engine judges and both lifetimes
             await visitor.see(within(onMini, field('Name')));
@@ -56,7 +58,7 @@ describe('New machine', () => {
     test('a workspace on This Mac is launched there, and the sheet hands over to its page', async () => {
         // Given - the New machine sheet over two-macs, opened on the mini
         const result = await component.render(windowOver('two-macs'), async (visitor) => {
-            await visitor.click(button('New machine'));
+            await visitor.click(NEW_MACHINE);
             await visitor.see(onMini);
 
             // When - This Mac is picked, gate5 named ephemeral, then launched and confirmed
@@ -97,7 +99,7 @@ describe('New machine', () => {
     test('a name the engine finds taken is refused under the name field, in its words', async () => {
         // Given - the New machine sheet over two-macs, where the mini holds infra
         const result = await component.render(windowOver('two-macs'), async (visitor) => {
-            await visitor.click(button('New machine'));
+            await visitor.click(NEW_MACHINE);
 
             // When - infra is launched on the mini
             await visitor.fill(within(onMini, field('Name')), 'infra');
@@ -115,7 +117,7 @@ describe('New machine', () => {
     test("a name the template's chain already bears is refused under the name field, in the engine's sentence", async () => {
         // Given - the New machine sheet over two-macs, following base-ubuntu
         const result = await component.render(windowOver('two-macs'), async (visitor) => {
-            await visitor.click(button('New machine'));
+            await visitor.click(NEW_MACHINE);
 
             // When - base-ubuntu is launched on the mini
             await visitor.fill(within(onMini, field('Name')), 'base-ubuntu');
@@ -134,7 +136,7 @@ describe('New machine', () => {
     test('a name the engine finds malformed is refused under the name field', async () => {
         // Given - the New machine sheet over two-macs
         const result = await component.render(windowOver('two-macs'), async (visitor) => {
-            await visitor.click(button('New machine'));
+            await visitor.click(NEW_MACHINE);
 
             // When - Bad_Name is launched on the mini
             await visitor.fill(within(onMini, field('Name')), 'Bad_Name');
@@ -151,7 +153,7 @@ describe('New machine', () => {
     test('a purpose the engine refuses is drawn under the purpose field', async () => {
         // Given - the New machine sheet over two-macs
         const result = await component.render(windowOver('two-macs'), async (visitor) => {
-            await visitor.click(button('New machine'));
+            await visitor.click(NEW_MACHINE);
 
             // When - a purpose of 121 characters is launched
             await visitor.fill(within(onMini, field('What is it for?')), 'x'.repeat(121));
@@ -170,7 +172,7 @@ describe('New machine', () => {
     test('a server is asked of machines.create-server with the image the engine names', async () => {
         // Given - the New machine sheet over two-macs, on This Mac
         const result = await component.render(windowOver('two-macs'), async (visitor) => {
-            await visitor.click(button('New machine'));
+            await visitor.click(NEW_MACHINE);
             await visitor.click(within(region('On'), thisMac));
 
             // When - the kind is turned to Server under Options, web named and launched
@@ -192,7 +194,7 @@ describe('New machine', () => {
         // Given - the window over one-mac, whose Mac has said no memory
         const result = await component.render(windowOver('one-mac'), async (visitor) => {
             // When - New machine is opened
-            await visitor.click(button('New machine'));
+            await visitor.click(NEW_MACHINE);
 
             // Then - no On row, the engine's sentence stands under Memory, and Launch cannot be pressed
             await visitor.gone(region('On'));
@@ -207,7 +209,7 @@ describe('New machine', () => {
         // Given - the New machine sheet over two-macs, on the mini
         const purpose = 'x'.repeat(121);
         const result = await component.render(windowOver('two-macs'), async (visitor) => {
-            await visitor.click(button('New machine'));
+            await visitor.click(NEW_MACHINE);
 
             // When - a purpose of 121 characters is launched
             await visitor.fill(within(onMini, field('What is it for?')), purpose);
@@ -227,7 +229,7 @@ describe('New machine', () => {
         // Given - the window over mini-offline
         const result = await component.render(windowOver('mini-offline'), async (visitor) => {
             // When - New machine is opened
-            await visitor.click(button('New machine'));
+            await visitor.click(NEW_MACHINE);
 
             // Then - the sheet is on This Mac, and the mini's card is shut with the engine's sentence
             await visitor.see(onThisMac);

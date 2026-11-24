@@ -2,11 +2,11 @@ import type { MachinesMacView } from '@jterrazz/station-api';
 
 import { machineNamesOf } from '../../domain/machines/machines';
 import { useCore, useReach } from '../dependencies/dependencies';
-import { identityOf, MachineIcon, NavItem } from '../ui/index';
+import { IconButton, identityOf, MachineIcon, NavItem } from '../ui/index';
 import { FIT_MACHINES_WORDS } from '../words/fit';
 import { machineKindOf } from '../words/provisional';
 import { macState, vmState } from '../words/shown';
-import { CORE_MACHINES_WORDS } from '../words/words';
+import { CORE_MACHINES_WORDS, NEW_MACHINE_WORD } from '../words/words';
 import type { Carried } from './carried';
 import { onListKey } from './keys';
 import { ReleaseRow } from './release-row';
@@ -22,6 +22,7 @@ export type SidebarProps = {
     route: Route;
     go: (to: Route) => void;
     onFind: () => void;
+    onNewMachine: () => void;
     quiet?: boolean;
 };
 
@@ -142,12 +143,19 @@ function Fleet({ place }: { place: Place }) {
 
 const UNCARRIED: Carried = { apps: undefined, settings: undefined, skills: undefined };
 
-export function Sidebar({ carried, macs, route, go, onFind, quiet = false }: SidebarProps) {
+export function Sidebar(props: SidebarProps) {
+    const { carried, macs, route, go, onFind, onNewMachine, quiet = false } = props;
     const place = placeOf(route, go, quiet);
     return (
         <nav aria-label="Sidebar" className={styles.sidebar} onKeyDown={onListKey}>
             <div className={styles.lights} data-tauri-drag-region="deep">
                 <h2 className={styles.space}>{SPACE_WORDS.machine.name}</h2>
+                <IconButton
+                    disabled={quiet}
+                    icon="plus"
+                    label={NEW_MACHINE_WORD}
+                    onClick={onNewMachine}
+                />
             </div>
             <button
                 aria-keyshortcuts="Meta+K"

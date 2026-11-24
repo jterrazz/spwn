@@ -5,6 +5,7 @@ import {
     disabled,
     field,
     heading,
+    main,
     navigation,
     region,
     testId,
@@ -21,7 +22,7 @@ describe('new machine', () => {
     test('H7 a machine launched with what it is for opens running, and says it', async () => {
         // Given - the New machine sheet opened from Home over two-macs, on mac-mini
         const result = await website.visit(TWO_MACS, async (visitor) => {
-            await visitor.click(button('New machine'));
+            await visitor.click(within(main(), button('New machine')));
             const sheet = dialog('New machine on mac-mini');
 
             // When - what it is for is said, and linux-2 is launched and confirmed
@@ -42,7 +43,7 @@ describe('new machine', () => {
         const result = await website.visit(
             `${TWO_MACS}&held=machines.create-workspace`,
             async (visitor) => {
-                await visitor.click(button('New machine'));
+                await visitor.click(within(main(), button('New machine')));
                 const sheet = dialog('New machine on mac-mini');
 
                 // When - linux-2 is launched for what it is for
@@ -69,7 +70,7 @@ describe('new machine', () => {
     test('H8 a preset sets the memory, the figure and what it leaves follow, and no size above what is free is offered', async () => {
         // Given - the New machine sheet opened from Home over two-macs, on the Mac with 36 GB free
         const result = await website.visit(TWO_MACS, async (visitor) => {
-            await visitor.click(button('New machine'));
+            await visitor.click(within(main(), button('New machine')));
             const sheet = dialog('New machine on mac-mini');
             await visitor.see(within(sheet, content('leaves 28 GB free on mac-mini')));
 
@@ -96,7 +97,7 @@ describe('new machine', () => {
     test('H8 a drag across the free squares lights the squares taken among those held, the figure and what it leaves follow, and it stops at what is free', async () => {
         // Given - the New machine sheet over two-macs, on the Mac with 36 GB free: its 64 squares are macOS 4, infra 24, the 8 chosen and the 28 free, two rows of 32
         const result = await website.visit(TWO_MACS, async (visitor) => {
-            await visitor.click(button('New machine'));
+            await visitor.click(within(main(), button('New machine')));
             const sheet = dialog('New machine on mac-mini');
             // testId: the memory grid is an img, a role no locator of the visitor names
             const grid = within(sheet, testId('memory-grid'));
@@ -133,7 +134,7 @@ describe('new machine', () => {
     test('H15 a name the file it follows already bears is refused under the Name field, the sheet kept', async () => {
         // Given - the New machine sheet opened from Home over two-macs, on mac-mini, following base-ubuntu
         const result = await website.visit(TWO_MACS, async (visitor) => {
-            await visitor.click(button('New machine'));
+            await visitor.click(within(main(), button('New machine')));
             const sheet = dialog('New machine on mac-mini');
 
             // When - base-ubuntu is named, launched and confirmed
@@ -154,7 +155,7 @@ describe('new machine', () => {
     test('H15 a name taken on the Mac is refused under the Name field', async () => {
         // Given - the New machine sheet opened from Home over two-macs, on mac-mini, which holds infra
         const result = await website.visit(TWO_MACS, async (visitor) => {
-            await visitor.click(button('New machine'));
+            await visitor.click(within(main(), button('New machine')));
             const sheet = dialog('New machine on mac-mini');
 
             // When - infra is named, launched and confirmed

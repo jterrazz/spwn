@@ -10,6 +10,7 @@
   - button "Engine running · dev"
 - navigation "Sidebar":
   - heading "Machine" [level=2]
+  - button "New machine"
   - button "Find"
   - group "Every Mac":
     - button "Storage"

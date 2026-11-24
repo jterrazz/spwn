@@ -10,6 +10,7 @@
   - button "Engine running · v4.0.0"
 - navigation "Sidebar":
   - heading "Machine" [level=2]
+  - button "New machine"
   - button "Find"
   - group "Every Mac":
     - button "Storage"

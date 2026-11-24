@@ -26,6 +26,7 @@ const NAMES: readonly IconName[] = [
     'agent',
     'os',
     'engine',
+    'plus',
     'check',
     'close',
     'chevron',

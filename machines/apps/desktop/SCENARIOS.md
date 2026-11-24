@@ -12,7 +12,7 @@ What the desktop window must let its user do, page by page: one row is one scena
 | A workspace              | W1 to W32                                         |
 | A server                 | S1 to S6                                          |
 | Library and Storage      | D1 to D38                                         |
-| The window itself        | A1 to A15                                         |
+| The window itself        | A1 to A16                                         |
 | No engine on this Mac    | E1 to E9                                          |
 | The engine's release     | U1 to U4                                          |
 | The window's release     | R1 to R7                                          |
@@ -209,6 +209,7 @@ A scenario is a test of `specs/website/`, a visit of the window's proof build ov
 | A13 | Walk back through the global pages              | I opened Storage, then Engine                       | I press Back twice, then Forward                      | Back opens Storage, then the page I started from; Forward opens Storage again, the sidebar still there                                                                                                                          | no     |
 | A14 | Open a global page from a link                  | a link to Engine or Storage                         | I open it                                             | the page opens beside the sidebar, with its toggle                                                                                                                                                                              | no     |
 | A15 | Follow an old link to a Mac's Storage tab       | a link or a relaunch that names a Mac's Storage tab | I open it                                             | Storage opens, the Mac's disk in its section, beside the others                                                                                                                                                                 | no     |
+| A16 | Add a machine from anywhere in the space        | any page of the Machine space                       | I press the + beside the sidebar's name               | the New machine sheet opens                                                                                                                                                                                                     | no     |
 
 ## No engine on this Mac
 

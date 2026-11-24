@@ -11,6 +11,7 @@
   - text: This app older than the engine
 - navigation "Sidebar":
   - heading "Machine" [level=2]
+  - button "New machine" [disabled]
   - button "Find" [disabled]
   - group "Every Mac":
     - button "Storage" [disabled]
