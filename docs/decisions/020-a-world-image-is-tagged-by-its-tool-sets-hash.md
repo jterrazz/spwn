@@ -16,11 +16,15 @@ One slow holder then stalled every parallel `spwn up`. The CLI specification bri
 A world image is tagged `spwn/world:<hash>`, the hash its build already computed, and a world is created from that tag.
 
 - **Two tool sets never share a tag**, so no build moves the tag another spawn creates from, and the machine-wide lock over the spawn is gone.
-- **One build of a tag runs at a time.** `packages/compile` holds a flock per tag in the temp folder around the cache check and the build only, never across the rest of a spawn. Its wait is bounded at 10 minutes, past which the build fails and names the tag. It keeps concurrent spawns of one tool set from building it twice, and a forced rebuild from untagging it under a sibling's build.
+- **One build of a tag runs at a time.** `packages/compile` holds an exclusive flock per tag in the temp folder around the cache check and the build only, never across the rest of a spawn. Its wait is bounded at 10 minutes, past which the build fails and names the tag. It keeps concurrent spawns of one tool set from building it twice.
+- **A forced rebuild never untags.** `--force-rebuild` builds with no cache and lets the new image take the tag; the old image stays, untagged, for any container still using it, and a sibling spawn about to create from the tag finds the new one.
+- **A spawn holds its tag in use** from its build to its container's creation: a shared flock per tag, which any number of spawns take at once, waiting only through the instant a prune removes that very tag.
+- **A new tag prunes the others.** After a build that wrote a new tag (not a cache hit), every other `spwn/world:<hash>` is removed unless a spawn holds it in use, which the pruner learns by taking that tag's in-use flock exclusive without waiting, or a container, running or stopped, was created from it, which Docker refuses to remove without force. A prune is best-effort: each removal is written to the build log, and no failure fails the spawn.
+- **The locks belong to the user**: their files carry the uid in their name and mode 0600. They are never removed, since unlinking a flock file another process has open would let a third lock a new file beside it.
 - **An explicit image is untouched**: `--image` and `SPWN_BASE_IMAGE` name a tag the user owns.
 
 ## Consequences
 
-- A machine keeps one image per tool set it has spawned, where it kept one tag and dangling layers. Nothing prunes `spwn/world` yet.
-- A forced rebuild still untags its own hash for the time of its build, so a spawn of the same tool set that already built and has not yet created its container can find the tag missing.
-- `spwn/world:latest`, left by earlier versions, is no longer read and nothing removes it.
+- A machine keeps the world image of each tool set a container was created from, and drops the others at the next new build. A tool set spawned again after its image was pruned builds again.
+- The temp folder keeps two empty lock files per tag ever built.
+- `spwn/world:latest`, left by earlier versions, is no longer read, and the first new build prunes it like any other tag once no container uses it.

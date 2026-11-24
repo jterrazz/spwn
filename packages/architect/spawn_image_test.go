@@ -63,6 +63,12 @@ func (b *imageStepBackend) EnsureImageWithContext(ctx context.Context, tag, vers
 
 func (b *imageStepBackend) ImageRemove(context.Context, string) error { return nil }
 
+func (b *imageStepBackend) ImageRemoveUnused(context.Context, string) error { return nil }
+
+func (b *imageStepBackend) ImageList(context.Context, string) ([]backend.ImageInfo, error) {
+	return nil, nil
+}
+
 func (b *imageStepBackend) Create(_ context.Context, cfg backend.ContainerConfig) (string, error) {
 	b.mu.Lock()
 	b.nextID++

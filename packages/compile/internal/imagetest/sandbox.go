@@ -59,6 +59,7 @@ func SpinUp(t *testing.T, reg *resolver.Registry, tools ...string) *Sandbox {
 		Image: result.Tag,
 		Name:  containerName,
 	})
+	result.Release()
 	if err != nil {
 		t.Fatalf("create container: %v", err)
 	}

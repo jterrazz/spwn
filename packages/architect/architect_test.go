@@ -220,6 +220,14 @@ func (m *mockBackend) ImageRemove(_ context.Context, _ string) error {
 	return m.imageRemoveE
 }
 
+func (m *mockBackend) ImageRemoveUnused(_ context.Context, _ string) error {
+	return m.imageRemoveE
+}
+
+func (m *mockBackend) RebuildImage(_ context.Context, _ string, _ []byte, _ map[string][]byte, _ io.Writer) error {
+	return m.ensureImgErr
+}
+
 func (m *mockBackend) Inspect(_ context.Context, nameOrID string) (*backend.ContainerInfo, error) {
 	return &backend.ContainerInfo{ID: nameOrID, Running: true}, nil
 }

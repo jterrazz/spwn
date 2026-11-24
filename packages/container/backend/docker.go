@@ -458,15 +458,29 @@ func (d *Docker) EnsureImageWithContext(ctx context.Context, tag string, expecte
 		fmt.Fprintf(logw, "Rebuilding %s (v%s → v%s)...\n", tag, currentVersion, expectedVersion)
 		_ = d.ImageRemove(ctx, tag)
 	}
+	if err := d.buildImage(ctx, tag, dockerfile, extraFiles, false, logw); err != nil {
+		return false, err
+	}
+	return true, nil
+}
 
+func (d *Docker) RebuildImage(ctx context.Context, tag string, dockerfile []byte, extraFiles map[string][]byte, logw io.Writer) error {
+	if logw == nil {
+		logw = io.Discard
+	}
+	fmt.Fprintf(logw, "Rebuilding %s from scratch...\n", tag)
+	return d.buildImage(ctx, tag, dockerfile, extraFiles, true, logw)
+}
+
+func (d *Docker) buildImage(ctx context.Context, tag string, dockerfile []byte, extraFiles map[string][]byte, noCache bool, logw io.Writer) error {
 	buf := new(bytes.Buffer)
 	tw := tar.NewWriter(buf)
 	hdr := &tar.Header{Name: "Dockerfile", Size: int64(len(dockerfile)), Mode: 0644}
 	if err := tw.WriteHeader(hdr); err != nil {
-		return false, fmt.Errorf("tar header: %w", err)
+		return fmt.Errorf("tar header: %w", err)
 	}
 	if _, err := tw.Write(dockerfile); err != nil {
-		return false, fmt.Errorf("tar write: %w", err)
+		return fmt.Errorf("tar write: %w", err)
 	}
 
 	names := make([]string, 0, len(extraFiles))
@@ -484,7 +498,7 @@ func (d *Docker) EnsureImageWithContext(ctx context.Context, tag string, expecte
 				dirs[d] = true
 				dirHdr := &tar.Header{Name: d + "/", Typeflag: tar.TypeDir, Mode: 0755}
 				if err := tw.WriteHeader(dirHdr); err != nil {
-					return false, fmt.Errorf("tar header %s: %w", d, err)
+					return fmt.Errorf("tar header %s: %w", d, err)
 				}
 			}
 		}
@@ -493,24 +507,25 @@ func (d *Docker) EnsureImageWithContext(ctx context.Context, tag string, expecte
 		content := extraFiles[name]
 		fileHdr := &tar.Header{Name: name, Size: int64(len(content)), Mode: 0755}
 		if err := tw.WriteHeader(fileHdr); err != nil {
-			return false, fmt.Errorf("tar header %s: %w", name, err)
+			return fmt.Errorf("tar header %s: %w", name, err)
 		}
 		if _, err := tw.Write(content); err != nil {
-			return false, fmt.Errorf("tar write %s: %w", name, err)
+			return fmt.Errorf("tar write %s: %w", name, err)
 		}
 	}
 
 	if err := tw.Close(); err != nil {
-		return false, fmt.Errorf("tar close: %w", err)
+		return fmt.Errorf("tar close: %w", err)
 	}
 
 	resp, err := d.client.ImageBuild(ctx, buf, client.ImageBuildOptions{
 		Tags:       []string{tag},
 		Dockerfile: "Dockerfile",
 		Remove:     true,
+		NoCache:    noCache,
 	})
 	if err != nil {
-		return false, fmt.Errorf("build image: %w", err)
+		return fmt.Errorf("build image: %w", err)
 	}
 	defer resp.Body.Close()
 
@@ -525,14 +540,14 @@ func (d *Docker) EnsureImageWithContext(ctx context.Context, tag string, expecte
 			break
 		}
 		if msg.Error != "" {
-			return false, fmt.Errorf("image build: %s", msg.Error)
+			return fmt.Errorf("image build: %s", msg.Error)
 		}
 		if msg.Stream != "" {
 			fmt.Fprint(logw, msg.Stream)
 		}
 	}
 
-	return true, nil
+	return nil
 }
 
 func (d *Docker) ExecDetached(ctx context.Context, containerID string, cfg ExecConfig) error {
@@ -584,6 +599,11 @@ func (d *Docker) ImageList(ctx context.Context, prefix string) ([]ImageInfo, err
 
 func (d *Docker) ImageRemove(ctx context.Context, imageTag string) error {
 	_, err := d.client.ImageRemove(ctx, imageTag, client.ImageRemoveOptions{Force: true})
+	return err
+}
+
+func (d *Docker) ImageRemoveUnused(ctx context.Context, imageTag string) error {
+	_, err := d.client.ImageRemove(ctx, imageTag, client.ImageRemoveOptions{})
 	return err
 }
 

@@ -79,6 +79,10 @@ func (m *MockBackend) ImageList(ctx context.Context, prefix string) ([]backend.I
 	return nil, nil
 }
 func (m *MockBackend) ImageRemove(ctx context.Context, tag string) error { return nil }
+func (m *MockBackend) ImageRemoveUnused(ctx context.Context, tag string) error { return nil }
+func (m *MockBackend) RebuildImage(ctx context.Context, tag string, df []byte, extra map[string][]byte, w io.Writer) error {
+	return nil
+}
 func (m *MockBackend) Inspect(ctx context.Context, nameOrID string) (*backend.ContainerInfo, error) {
 	return &backend.ContainerInfo{ID: nameOrID, Running: true, StartedAt: time.Now()}, nil
 }

@@ -242,6 +242,8 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	}
 	opts.progress("tools_resolved", strings.Join(resolvedNames, ", "))
 
+	releaseImage := func() {}
+	defer func() { releaseImage() }()
 	if !explicitImage {
 		opts.progress("image_resolving", image)
 
@@ -268,6 +270,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 			return nil, fmt.Errorf("build world image: %w", err)
 		}
 		image = buildResult.Tag
+		releaseImage = buildResult.Release
 		if buildResult.Cached {
 			opts.progress("image_cached", image)
 		} else {
@@ -415,6 +418,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	}
 
 	containerID, err := a.backend.Create(ctx, containerCfg)
+	releaseImage()
 	if err != nil {
 		return nil, fmt.Errorf("create container: %w", err)
 	}
