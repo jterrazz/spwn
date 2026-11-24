@@ -1,8 +1,13 @@
-description: '--yes never answers a typed question: a delete with it is refused, nothing deleted'
+description: '--yes never answers a typed question: refused saying so, nothing deleted'
 env: two-macs
 runs:
     - command: 'machines delete linux-1 --yes'
       exit: 2
       stderr: |
-          Error: unknown flag: --yes
-          Hint: run station machines delete --help
+          Error: machines delete asks its name typed: --yes answers nothing
+          Hint: re-run with --confirm=<name>
+    - command: 'machines delete linux-1 -y'
+      exit: 2
+      stderr: |
+          Error: machines delete asks its name typed: --yes answers nothing
+          Hint: re-run with --confirm=<name>

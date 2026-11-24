@@ -420,7 +420,21 @@ func Refuse(message, hint string) error {
 }
 
 func FlagError(c *cobra.Command, err error) error {
+	if strings.Contains(err.Error(), "--yes") || strings.Contains(err.Error(), "shorthand flag: 'y'") {
+		return answerRefused(c)
+	}
 	return usage(err.Error(), helpHint(c))
+}
+
+func answerRefused(c *cobra.Command) error {
+	// invariant: one rule for what answers a question off a terminal: a
+	// command that asks yes or no takes --yes, one that asks the name typed
+	// takes --confirm=<name> and no --yes, one that asks nothing takes
+	// neither; a --yes refused says which of the three it met.
+	if c.Flags().Lookup("confirm") != nil {
+		return usage(path(c)+" asks its name typed: --yes answers nothing", "re-run with --confirm=<name>")
+	}
+	return usage(path(c)+" asks nothing: --yes does not apply", "run "+path(c)+" without it")
 }
 
 func helpHint(c *cobra.Command) string {

@@ -9,8 +9,8 @@ runs:
     - command: 'disk erase xcode --yes'
       exit: 2
       stderr: |
-          Error: unknown flag: --yes
-          Hint: run station disk erase --help
+          Error: disk erase asks its name typed: --yes answers nothing
+          Hint: re-run with --confirm=<name>
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].disk.files | {derived: .["~/Library/Developer/Xcode/DerivedData/Station-abc/Build/x"], devices: .["~/Library/Developer/CoreSimulator/Devices/A/data"]}'' world.json'
       exit: 0
       stdout: |
