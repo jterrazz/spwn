@@ -1,0 +1,27 @@
+description: 'create --from a file never replaces your Machinefile of its name, and makes nothing'
+env: two-macs
+runs:
+    - command: 'world edit macbook-pro machinefiles/qa.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: qa
+          machine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }
+          extends: [base-ubuntu]
+      exit: 0
+    - command: 'world edit macbook-pro downloads/qa.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: qa
+          machine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }
+          extends: [base-ubuntu]
+          apps: [jq]
+      exit: 0
+    - command: 'machines create web --from downloads/qa.machine.yaml'
+      exit: 2
+      stderr: |
+          Error: machinefiles/qa.machine.yaml already holds another qa: Machines never replaces your Machinefile
+          Hint: edit that file, or remove it to copy downloads/qa.machine.yaml instead
+    - command: 'machines --json | /usr/bin/jq -c ''[.macs[].vms[].name | select(. == "web")]'''
+      exit: 0
+      stdout: |
+          []

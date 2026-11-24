@@ -21,6 +21,7 @@ import (
 	coremachine "github.com/jterrazz/studio-station/apps/engine/core/machine"
 	enginecalls "github.com/jterrazz/studio-station/apps/engine/engine/calls"
 	imagescalls "github.com/jterrazz/studio-station/apps/engine/images/calls"
+	machinefilecalls "github.com/jterrazz/studio-station/apps/engine/machinefile/calls"
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/machines/adapter/kernel"
 	"github.com/jterrazz/studio-station/apps/engine/machines/adapter/macos"
@@ -232,6 +233,13 @@ func machinesCommand(env kit.Env, m machine) *cobra.Command {
 			},
 			Admit: func() error {
 				return call.Gate(call.Meta{Name: machinescalls.CreateWorkspace.Name, Applies: machinescalls.CreateWorkspace.Applies, Needs: machinescalls.CreateWorkspace.Needs}, m.profile)
+			},
+			Machinefile: func(ctx context.Context, from string) (string, error) {
+				if !machinefilecalls.IsPath(from) {
+					return from, nil
+				}
+				name, err := machinefilecalls.Keep(ctx, m.machinefileDeps(nil), from)
+				return name, machinefilecalls.Worded(err)
 			},
 			AllMachines: func(ctx context.Context) (model.AllMachines, error) { return vms.AllMachines(ctx, false) },
 			Session:     m.vars["STATION_SESSION"],

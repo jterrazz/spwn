@@ -53,7 +53,7 @@ In the app, the three spaces are distinct. A switch between them comes first, wi
 ```sh
 spwn-machines init                                          # make this machine known
 spwn-machines machines                                      # all machines: every Mac, its VMs, what needs you
-spwn-machines machines create qa --from qa.machine.yaml     # a machine from its Machinefile
+spwn-machines machines create web --from qa.machine.yaml    # a machine from its Machinefile
 spwn-machines apply                                         # carry out this machine's Machinefile
 spwn-machines overview                                      # this machine at a glance
 ```
