@@ -76,7 +76,7 @@ function GestureLine({ line, gesture, worded, frees }: ShownProps) {
             lead={lead}
             outcome={<Settled frees={frees} gesture={gesture} />}
             sentence={sentence}
-            title={row.App}
+            title={row.Label ?? row.App}
             trail={
                 <Trail chips={chips}>
                     <GestureButton
@@ -101,7 +101,7 @@ function PlainLine({ line, button }: { line: LineProps; button?: ReactNode }) {
         <Row
             lead={lead}
             sentence={sentence}
-            title={row.App}
+            title={row.Label ?? row.App}
             trail={chips === undefined && button === undefined ? undefined : trail}
             value={size}
         />

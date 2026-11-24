@@ -13,6 +13,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/engine/process"
 	"github.com/jterrazz/studio-station/apps/engine/platform/local"
 	enginecmd "github.com/jterrazz/studio-station/apps/engine/surface/cli/engine"
+	enginerestart "github.com/jterrazz/studio-station/apps/engine/surface/cli/engine/restart"
 	enginestart "github.com/jterrazz/studio-station/apps/engine/surface/cli/engine/start"
 	enginestop "github.com/jterrazz/studio-station/apps/engine/surface/cli/engine/stop"
 	"github.com/jterrazz/studio-station/apps/engine/surface/cli/kit"
@@ -91,6 +92,7 @@ func (f fileRecord) Write(r engine.Record) error {
 func engineCommands(env kit.Env, m machine) []*cobra.Command {
 	return []*cobra.Command{
 		enginestart.Command(enginestart.Deps{ThisMachine: m.where}, env),
+		enginerestart.Command(enginerestart.Deps{ThisMachine: m.where}, env),
 		enginestop.Command(enginestop.Deps{ThisMachine: m.where}, env),
 	}
 }

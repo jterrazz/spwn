@@ -32,12 +32,17 @@ func (startControl) Start(context.Context) (engine.StartReport, error) {
 type startInstaller struct {
 	installed *bool
 	ran       int
+	restarted int
 }
 
 func (i *startInstaller) Install(context.Context) (engine.Installed, error) {
 	i.ran++
 	*i.installed = true
 	return engine.Installed{Written: true}, nil
+}
+func (i *startInstaller) Restart(context.Context) (engine.Installed, error) {
+	i.restarted++
+	return engine.Installed{Restarted: true}, nil
 }
 func (*startInstaller) Uninstall(context.Context) error { return nil }
 
@@ -54,5 +59,29 @@ func TestStartMovesTheJobsAtAnEqualVersion(t *testing.T) {
 	}
 	if installer.ran != 1 || !report.Installed.Written {
 		t.Fatalf("the jobs were not moved: installs %d, installed %+v", installer.ran, report.Installed)
+	}
+}
+
+func TestRestartAsksTheInstallerAndReportsTheVMsThatRun(t *testing.T) {
+	installed := true
+	installer := &startInstaller{installed: &installed}
+	d := Deps{
+		Control:   startControl{reading: engine.Reading{State: machines.EngineRunning, Version: "1.2.3", Station: "1.2.3", VMs: 2}, installed: &installed},
+		Installer: installer,
+	}
+	report, err := Restart.Run(context.Background(), d, RestartIn{}, nil)
+	if err != nil {
+		t.Fatalf("restart: %v", err)
+	}
+	if installer.restarted != 1 || installer.ran != 0 || !report.Installed.Restarted || report.VMs != 2 {
+		t.Fatalf("restarts %d, installs %d, report %+v; want one restart, no install, 2 VMs", installer.restarted, installer.ran, report)
+	}
+}
+
+func TestRestartRefusesAnEngineThatIsNotInstalled(t *testing.T) {
+	installed := false
+	installer := &startInstaller{installed: &installed}
+	if _, err := Restart.Run(context.Background(), Deps{Control: startControl{installed: &installed}, Installer: installer}, RestartIn{}, nil); err == nil || installer.restarted != 0 {
+		t.Fatalf("restart of an engine not installed: err %v, restarts %d", err, installer.restarted)
 	}
 }

@@ -1,7 +1,9 @@
 # ADR-073: Spwn.app carries the engine on a Mac with a screen; install.sh is the headless install
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-11-21
+
+Accepted by the owner on 2026-11-24, on the owner's word.
 
 Amended by [ADR-076](076-spwn-on-a-machine-one-active-app-one-background-job-the-engine-updates.md): mode B leaves macOS after one release, and the engine, not the Tauri updater, updates the app.
 

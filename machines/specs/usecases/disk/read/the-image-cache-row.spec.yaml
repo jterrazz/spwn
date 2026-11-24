@@ -1,0 +1,9 @@
+description: 'the hypervisor''s Can rebuild row is its image cache, named tart cache'
+env: two-macs
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].disk.files["~/.local/share/station/vms/cache/OCIs/ghcr.io/cirruslabs/macos/disk.img"] = 113000000000'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'disk | /usr/bin/grep -c "tart cache"'
+      exit: 0
+      stdout: |
+          1

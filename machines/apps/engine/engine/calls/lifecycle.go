@@ -60,6 +60,36 @@ func startError(err error) error {
 	return err
 }
 
+type RestartIn struct{}
+
+var Restart = call.Call[Deps, RestartIn, engine.RestartReport]{
+	Name: "engine.restart", Where: call.AtTarget, Applies: Applies,
+	Errors: []fail.Code{StartFailed},
+	Run: func(ctx context.Context, d Deps, _ RestartIn, _ call.Progress) (engine.RestartReport, error) {
+		// invariant: the engine's job restarts and the VMs it runs keep
+		// running: they are processes of their own, adopted again by the
+		// engine that comes back.
+		if err := d.Control.Check(); err != nil {
+			return engine.RestartReport{}, err
+		}
+		installed, err := d.Installer.Restart(ctx)
+		if err != nil {
+			return engine.RestartReport{}, startError(err)
+		}
+		started, err := d.Control.Start(ctx)
+		if err != nil {
+			return engine.RestartReport{}, startError(err)
+		}
+		started.Installed = installed
+		started.Already = false
+		reading, err := d.Control.Read(ctx)
+		if err != nil {
+			return engine.RestartReport{}, err
+		}
+		return engine.RestartReport{StartReport: started, VMs: reading.VMs}, nil
+	},
+}
+
 type StopIn struct {
 	Confirm string
 	// value: what asked the stop, as a reading names it: the command, or

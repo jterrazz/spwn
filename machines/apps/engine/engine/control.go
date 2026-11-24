@@ -57,6 +57,12 @@ type StartReport struct {
 	Agent   model.Agent `json:",omitzero"`
 }
 
+type RestartReport struct {
+	StartReport
+	// value: the VMs the engine runs once it answers again.
+	VMs int
+}
+
 type Installed struct {
 	// value: what bringing the engine's job to this station changed: written
 	// for the first time (or changed), restarted, and the version it ran

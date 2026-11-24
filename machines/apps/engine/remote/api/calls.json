@@ -401,6 +401,16 @@
       "own": true
     },
     {
+      "name": "engine.restart",
+      "schema": "station.engine.restart/v1",
+      "where": "at-target",
+      "errors": [
+        "engine.start-failed"
+      ],
+      "in": "RestartIn",
+      "out": "RestartReport"
+    },
+    {
       "name": "engine.settings-keep",
       "schema": "station.engine.settings-keep/v1",
       "where": "in-engine",

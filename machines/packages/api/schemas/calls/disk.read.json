@@ -237,6 +237,9 @@
           ],
           "type": "string"
         },
+        "Label": {
+          "type": "string"
+        },
         "MoveTo": {
           "type": "string"
         },

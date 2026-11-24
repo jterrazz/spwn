@@ -524,12 +524,20 @@ func (i engineInstaller) env() map[string]string {
 // invariant: ONE engine per system; it restarts the engine only when its
 // plist changed or it runs another version, and the VMs survive that restart.
 func (i engineInstaller) Install(ctx context.Context) (engine.Installed, error) {
+	return i.run(ctx, false)
+}
+
+func (i engineInstaller) Restart(ctx context.Context) (engine.Installed, error) {
+	return i.run(ctx, true)
+}
+
+func (i engineInstaller) run(ctx context.Context, restart bool) (engine.Installed, error) {
 	jobs := i.m.jobs(0)
 	if !jobs.Present() {
 		names := jobs.Names()
 		return engine.Installed{}, &enginecalls.NoJobManagerError{Manager: names.Manager, Command: names.Command}
 	}
-	return i.install(ctx, jobs)
+	return i.install(ctx, jobs, restart)
 }
 
 // invariant: the engine's job goes in the mode this Mac is in, and a job
@@ -542,7 +550,7 @@ func startFailed(cause error) error {
 	return &engine.StartFailedError{Last: cause.Error(), Cause: cause}
 }
 
-func (i engineInstaller) install(ctx context.Context, jobs contract.Jobs) (engine.Installed, error) {
+func (i engineInstaller) install(ctx context.Context, jobs contract.Jobs, restart bool) (engine.Installed, error) {
 	started, shown := false, false
 	bundle := i.m.bundle()
 	if bundle != "" {
@@ -552,7 +560,7 @@ func (i engineInstaller) install(ctx context.Context, jobs contract.Jobs) (engin
 		}
 		started, shown = changed, showed
 	}
-	done, ran, err := i.installEngine(ctx, jobs, started)
+	done, ran, err := i.installEngine(ctx, jobs, started || restart)
 	if err == nil && bundle != "" && ran && !shown {
 		done.MenuBar = i.restartMenuBar(ctx, jobs)
 	}

@@ -1,6 +1,7 @@
 package disk
 
 import (
+	"cmp"
 	"strconv"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
@@ -145,7 +146,7 @@ func Row(r disk.Row) page.Row {
 	if r.Bytes < 0 {
 		cell = page.Unknown()
 	}
-	row := page.Row{ID: string(r.Group) + "/" + r.App, Label: r.App, Mark: page.OK, Cells: []page.Value{cell, page.Texts(r.Paths...)}}
+	row := page.Row{ID: string(r.Group) + "/" + r.App, Label: cmp.Or(r.Label, r.App), Mark: page.OK, Cells: []page.Value{cell, page.Texts(r.Paths...)}}
 	if r.Group == disk.Misplaced {
 		row.ID, row.Label = string(disk.Misplaced)+"/"+r.Paths[0], r.Paths[0]
 		row.Mark, row.Reason = page.Attention, page.Misplaced
