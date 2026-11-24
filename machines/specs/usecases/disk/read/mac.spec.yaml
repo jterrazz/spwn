@@ -34,3 +34,8 @@ runs:
           # Never touched
           ●	gpg	200 KB
           ●	ssh	100 KB
+          # VM disks
+          ●	api	50.0 GB	machine
+          ●	linux-1	50.0 GB	machine
+          ●	station-image-base-ubuntu-2026.11.01	4.0 GB	image
+          ●	station-image-base-ubuntu-2026.10.20	3.0 GB	image

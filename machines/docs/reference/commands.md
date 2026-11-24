@@ -117,7 +117,7 @@ A setting that needs values asks them in a form on a terminal and is refused els
 ### `station disk`
 
 ```bash
-station disk [--json] # the volume, then Misplaced, Can rebuild, Your data, Never touched, with sizes; nothing runs
+station disk [--json] # the volume, then Misplaced, Can rebuild, Your data, Never touched, with sizes, then every VM disk the hypervisor holds; nothing runs
 station disk free [<app...>] # empty what an app can rebuild with its own command; bare = every Can rebuild row
 station disk erase <app> [--confirm=<app>] # erase an app's data, back to factory; its name typed
 station disk move <folder> # move a misplaced folder where its app expects it

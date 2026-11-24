@@ -1,0 +1,9 @@
+description: 'disk lists every VM disk the hypervisor holds, the gates'' cache named'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].vms["by-hand"] = {"disk": true, "size": {"CPUs": 0, "Memory": 0, "Disk": 7000000000}} | .macs["macbook-pro"].vms["station-e2e-xcode-e6a11b9cb78a"] = {"disk": true, "size": {"CPUs": 0, "Memory": 0, "Disk": 83000000000}}'' world.json > w.json && /bin/mv w.json world.json; "$STATION" disk --json | /usr/bin/jq -c ''.vm_disks | map([.name, .kind, .bytes, .note])'''
+      exit: 0
+      stdout: |
+          [["api","machine-disks",50000000000,null],["linux-1","machine-disks",50000000000,null],["station-image-base-ubuntu-2026.11.01","images",4000000000,null],["station-image-base-ubuntu-2026.10.20","images",3000000000,null],["station-e2e-xcode-e6a11b9cb78a","other-vms",83000000000,"the gates' cache"],["by-hand","other-vms",7000000000,null]]

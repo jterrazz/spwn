@@ -272,6 +272,15 @@
         "CanFree": {
           "$ref": "#/$defs/disk.CanFree"
         },
+        "Disks": {
+          "items": {
+            "$ref": "#/$defs/disk.VMDisk"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
         "Kept": {
           "items": {
             "$ref": "#/$defs/disk.Kept"
@@ -296,9 +305,46 @@
       },
       "required": [
         "CanFree",
+        "Disks",
         "Machines",
         "Sentence",
         "Verdict"
+      ],
+      "type": "object"
+    },
+    "disk.VMDisk": {
+      "additionalProperties": false,
+      "properties": {
+        "Bytes": {
+          "type": "integer"
+        },
+        "Kind": {
+          "enum": [
+            "system",
+            "apps",
+            "your-data",
+            "caches",
+            "machine-disks",
+            "images",
+            "other-vms",
+            "leftovers",
+            "image-cache",
+            "logs",
+            "free"
+          ],
+          "type": "string"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "Note": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Bytes",
+        "Kind",
+        "Name"
       ],
       "type": "object"
     },

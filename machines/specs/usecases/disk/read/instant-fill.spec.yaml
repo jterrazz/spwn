@@ -52,6 +52,14 @@ runs:
                      size
             ◌ gpg  200 KB
             ◌ ssh  100 KB
+          VM disks
+                          size  what
+            ● api      50.0 GB  machine
+            ● linux-1  50.0 GB  machine
+            ● station-image-base-ubuntu-2026.11.01
+              4.0 GB  image
+            ● station-image-base-ubuntu-2026.10.20
+              3.0 GB  image
 
           → station disk free  frees every Can rebuild row, nothing is lost
           This Mac · 388 GB free of 994 GB · 1 misplaced folder
@@ -89,5 +97,13 @@ runs:
                      size
             ● gpg  200 KB
             ● ssh  100 KB
+          VM disks
+                          size  what
+            ● api      50.0 GB  machine
+            ● linux-1  50.0 GB  machine
+            ● station-image-base-ubuntu-2026.11.01
+              4.0 GB  image
+            ● station-image-base-ubuntu-2026.10.20
+              3.0 GB  image
 
           → station disk free  frees every Can rebuild row, nothing is lost

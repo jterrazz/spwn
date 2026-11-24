@@ -288,12 +288,11 @@ minor removes them, with the `machines supervise` retirement shim and the
 retired preference names (`here`, `hosts`, `services`), once
 `studio doctor` reads `station.overview.read/v1`.
 
-## The test VMs show in Disk
-Tier 3 (`specs/machine/macos/tier.sh`) makes its macOS VM with tart directly,
-so the engine never knows it: `station-e2e-macos-<hash>` held 31 GB and showed
-nowhere in the app (2026-11-10). Disk lists a `station-e2e-*` or
-`station-play` VM as a test VM, with its size and erase; it never becomes a
-machine. Starts with the next tier 3 run.
+## The test VMs' erase
+Disk lists every VM disk the hypervisor holds, a `station-e2e-*` one as the
+gates' cache (83 GB for the Xcode gate base on 2026-11-24), but offers no
+gesture on it: it is deleted with `tart delete` by hand. A gesture of Disk that
+frees it, its name typed, is what is left.
 
 ## The goldens stay small
 The menu bar's snapshot goldens weighed 2.8 GB across history and pushed the
