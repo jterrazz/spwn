@@ -8,8 +8,8 @@ const (
 	GitHubDomain  = "github.com"
 	GitHubSSHKeys = "https://github.com/settings/ssh/new"
 	GitHubGPGKeys = "https://github.com/settings/gpg/new"
-	// value: the openclaw script the lock-after-login agent runs.
-	LockAfterLoginScript = "/Users/jterrazz.agent/.openclaw/scripts/lock-after-login.sh"
+	// value: the openclaw script the lock-after-login agent runs, under the home of the user the Mac logs in.
+	LockAfterLoginScript = ".openclaw/scripts/lock-after-login.sh"
 )
 
 const DNSProfile = `<?xml version="1.0" encoding="UTF-8"?>

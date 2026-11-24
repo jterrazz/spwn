@@ -12,9 +12,9 @@ methods:
       machine: computer
       builtin: lock-after-login
 writes:
-    - path: /Users/jterrazz.agent/Library/LaunchAgents/ai.jterrazz.lock-after-login.plist
+    - path: ~user/Library/LaunchAgents/ai.jterrazz.lock-after-login.plist
       level: settings
-      note: the agent user's `lock-after-login.plist`
-    - path: /Users/jterrazz.agent/.openclaw/logs
+      note: the login user's `lock-after-login.plist`
+    - path: ~user/.openclaw/logs
       level: cache
       note: its logs
