@@ -72,22 +72,27 @@ describe('played', () => {
         const tasks: string[] = [];
 
         // When - the stop is sent, and the engine read once its first progress comes
-        const read = await new Promise((resolve) => {
-            void client.call(
-                'engine.stop',
-                { Confirm: 'yes' },
-                {
-                    progress: (progress) => {
-                        tasks.push(progress.task);
-                        resolve(client.call('engine.read', {}));
-                    },
+        const first = Promise.withResolvers<unknown>();
+        const stop = client.call(
+            'engine.stop',
+            { Confirm: 'yes' },
+            {
+                progress: (progress) => {
+                    tasks.push(progress.task);
+                    first.resolve(client.call('engine.read', {}));
                 },
-            );
-        });
+            },
+        );
+        const read = await first.promise;
 
         // Then - one frame, the stop still open, and the read as recorded during it
         expect(tasks).toStrictEqual(['Stopping the engine']);
         expect(read).toStrictEqual({ State: 'stopping' });
         expect(stage.open()).toBe(1);
+
+        // And - the engine closing the connection ends the held stop as lost, so no timer outlives the test
+        stage.drop();
+        await expect(stop).rejects.toMatchObject({ fate: 'lost', wire: undefined });
+        expect(stage.open()).toBe(0);
     });
 });

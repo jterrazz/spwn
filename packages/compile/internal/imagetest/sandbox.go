@@ -38,12 +38,17 @@ func SpinUp(t *testing.T, reg *resolver.Registry, tools ...string) *Sandbox {
 	builder := ib.New(reg, docker)
 	tag := fmt.Sprintf("spwn-test:%d", time.Now().UnixNano())
 
-	result, err := builder.Build(ctx, ib.BuildRequest{
-		BaseDockerfile: baseimages.WorldDockerfile,
-		Tools:          tools,
-		Tag:            tag,
-		SkipVerify:     true,
-		LogWriter:      testWriter{t},
+	var result *ib.BuildResult
+	err = retry(ctx, buildAttempts, buildBackoff, func() error {
+		var buildErr error
+		result, buildErr = builder.Build(ctx, ib.BuildRequest{
+			BaseDockerfile: baseimages.WorldDockerfile,
+			Tools:          tools,
+			Tag:            tag,
+			SkipVerify:     true,
+			LogWriter:      testWriter{t},
+		})
+		return buildErr
 	})
 	if err != nil {
 		t.Fatalf("build image: %v", err)

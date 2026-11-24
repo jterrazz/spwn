@@ -20,6 +20,9 @@ const (
 	ImageName     = "spwn-gate:latest"
 	ContainerName = "spwn-gate"
 	HostPort      = "9000"
+
+	adoptWindow = 2 * time.Second
+	adoptPoll   = 50 * time.Millisecond
 )
 
 // EnsureRunning brings the gate to a "running" state idempotently:
@@ -80,16 +83,28 @@ func ensureRunning(ctx context.Context, w io.Writer, forceRebuild bool) error {
 	return createOrAdopt(func() error { return runContainer(ctx) }, func() (bool, error) { return containerExists(ctx) })
 }
 
-// invariant: the gate container's name is one per host, so of two concurrent creates one fails on the name; the loser adopts the winner's container
+// invariant: the gate container's name is one per host, so of two concurrent creates one fails on the name; the loser adopts the winner's container, polling because Docker holds the name before the container is inspectable
 func createOrAdopt(create func() error, exists func() (bool, error)) error {
 	err := create()
 	if err == nil {
 		return nil
 	}
-	if adopted, existsErr := exists(); existsErr == nil && adopted {
-		return nil
+	if !strings.Contains(err.Error(), "is already in use") {
+		if adopted, existsErr := exists(); existsErr == nil && adopted {
+			return nil
+		}
+		return err
 	}
-	return err
+	deadline := time.Now().Add(adoptWindow)
+	for {
+		if adopted, existsErr := exists(); existsErr == nil && adopted {
+			return nil
+		}
+		if !time.Now().Before(deadline) {
+			return err
+		}
+		time.Sleep(adoptPoll)
+	}
 }
 
 func removeImage(ctx context.Context) error {

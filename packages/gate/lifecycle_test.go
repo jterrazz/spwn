@@ -44,3 +44,33 @@ func TestCreateOrAdopt_SucceedsWithoutReadingExistenceWhenCreateSucceeds(t *test
 		t.Fatalf("createOrAdopt() = %v, want nil", err)
 	}
 }
+
+func TestCreateOrAdopt_AdoptsAContainerThatBecomesInspectableAfterTheConflict(t *testing.T) {
+	conflict := errors.New(`docker run: exit status 125 (Conflict. The container name "/spwn-gate" is already in use by container "66b1f1c0")`)
+	reads := 0
+
+	err := createOrAdopt(
+		func() error { return conflict },
+		func() (bool, error) {
+			reads++
+			return reads >= 3, nil
+		},
+	)
+
+	if err != nil {
+		t.Fatalf("createOrAdopt() = %v after %d reads, want nil once the winner's container is inspectable", err, reads)
+	}
+}
+
+func TestCreateOrAdopt_ReportsAConflictWhoseContainerNeverAppears(t *testing.T) {
+	conflict := errors.New(`docker run: exit status 125 (Conflict. The container name "/spwn-gate" is already in use by container "66b1f1c0")`)
+
+	err := createOrAdopt(
+		func() error { return conflict },
+		func() (bool, error) { return false, nil },
+	)
+
+	if !errors.Is(err, conflict) {
+		t.Fatalf("createOrAdopt() = %v, want %v", err, conflict)
+	}
+}
