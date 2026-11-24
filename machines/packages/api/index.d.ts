@@ -1042,6 +1042,7 @@ export type DiskRow = {
     App: string;
     Bytes: number;
     Group: 'misplaced' | 'can-rebuild' | 'your-data' | 'never-touched';
+    Label?: string;
     MoveTo: string;
     Note?: string;
     Paths: string[] | null;

@@ -40,6 +40,10 @@ type Row struct {
 	// value: what the owner is told of the row beyond its group: the image
 	// cache's row says what freeing it costs.
 	Note string `json:",omitempty"`
+	// value: the name the row shows when it is not the app's: the image
+	// cache's row is "<app> cache", since it counts the app's OCI pull cache
+	// alone; the app's name stays the key a free is asked by.
+	Label string `json:",omitempty"`
 	// value: the walk has not answered: Bytes is the last size known.
 	Pending bool
 }
@@ -146,7 +150,7 @@ func Classify(s Survey) []Row {
 		}
 		for _, g := range Groups()[1:] {
 			if bytes[g] > 0 || (t.Unmeasured && frees && g == CanRebuild) {
-				out = append(out, Row{App: t.Entry.Name, Group: g, Paths: append([]string{}, paths[g]...), Bytes: bytes[g], Note: noteOf(s, t.Entry.Name, g), Pending: t.Pending})
+				out = append(out, Row{App: t.Entry.Name, Group: g, Paths: append([]string{}, paths[g]...), Bytes: bytes[g], Note: noteOf(s, t.Entry.Name, g), Label: labelOf(s, t.Entry.Name, g), Pending: t.Pending})
 			}
 		}
 	}
@@ -159,6 +163,13 @@ func Classify(s Survey) []Row {
 const Station = "station"
 
 const imageCacheNote = "the image cache: the next image built or fetched from one downloads it again"
+
+func labelOf(s Survey, app string, g Group) string {
+	if noteOf(s, app, g) != "" {
+		return app + " cache"
+	}
+	return ""
+}
 
 func noteOf(s Survey, app string, g Group) string {
 	if g == CanRebuild && s.Hypervisor != "" && app == s.Hypervisor {

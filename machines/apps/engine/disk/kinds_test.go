@@ -217,6 +217,21 @@ func TestTheImageCachesRowSaysWhatFreeingItCosts(t *testing.T) {
 	}
 }
 
+func TestTheImageCachesRowIsNamedForWhatItCounts(t *testing.T) {
+	if got := labelOf(Survey{Hypervisor: "hv"}, "hv", CanRebuild); got != "hv cache" {
+		t.Fatalf("hv's Can rebuild row is labeled %q, want \"hv cache\"", got)
+	}
+	for _, c := range []struct {
+		s   Survey
+		app string
+		g   Group
+	}{{Survey{Hypervisor: "hv"}, "go", CanRebuild}, {Survey{Hypervisor: "hv"}, "hv", Misplaced}, {Survey{}, "hv", CanRebuild}} {
+		if got := labelOf(c.s, c.app, c.g); got != "" {
+			t.Errorf("%s %s is labeled %q, want none", c.app, c.g, got)
+		}
+	}
+}
+
 func TestTheCachesCanFreeNamesItsGestureOnlyWhenThereIsSomething(t *testing.T) {
 	if got := canFree(10); got.Call != FreeCall {
 		t.Fatalf("caches of 10 B: %+v, want disk.free", got)
