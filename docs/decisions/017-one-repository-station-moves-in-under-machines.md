@@ -3,6 +3,8 @@
 **Status:** Accepted
 **Date:** 2026-11-18
 
+Amended by [ADR-021](021-one-program-spwn-one-command-for-everything.md): one installed name, `spwn`, with no long names and no aliases.
+
 An agent leaves the status `Proposed`; only the owner writes `Accepted`.
 
 ## Context
