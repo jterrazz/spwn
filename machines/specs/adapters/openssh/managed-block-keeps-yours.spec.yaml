@@ -63,6 +63,6 @@ runs:
                   ssh -o BatchMode=yes -o ConnectTimeout=5 -o ServerAliveInterval=2 -o ServerAliveCountMax=2 -- mac-mini sh -c 'PATH="$HOME/.local/bin:/usr/local/bin:$PATH" exec station "$@"' station engine attach
                   ssh -o BatchMode=yes -o ConnectTimeout=5 -o ServerAliveInterval=2 -o ServerAliveCountMax=2 -- worker sh -c 'PATH="$HOME/.local/bin:/usr/local/bin:$PATH" exec station "$@"' station engine attach
     - command: '--version >/dev/null; /usr/bin/cmp .ssh/config config-before && echo "byte for byte"'
-      exit: 1
+      exit: 0
       stdout: |
-          .ssh/config config-before differ: char 172, line 9
+          byte for byte
