@@ -182,7 +182,7 @@ describe('home', () => {
             await visitor.click(within(startHere, button('Open the file')));
 
             // Then - Machine files opens, and Start here is left behind
-            await visitor.see(heading('no Machinefile named macbook-pro.'));
+            await visitor.see(content('give this machine one: station init --machinefile <name>'));
             await visitor.gone(startHere);
         });
         expect(result.errors.text).toBe('');

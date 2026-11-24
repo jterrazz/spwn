@@ -144,7 +144,10 @@ function Following({ explain }: { explain: Reading<MachinefileExplainOutput> }) 
     if (explain.kind === 'read') {
         return null;
     }
-    return <Waiting reading={explain} size="tab" what="the machine file This Mac follows" />;
+    if (explain.kind === 'failed') {
+        return <Unanswered error={explain.error} size="panel" />;
+    }
+    return <SkeletonHead size="tab" what="the machine file This Mac follows" />;
 }
 
 export function MachineFilesPage({
