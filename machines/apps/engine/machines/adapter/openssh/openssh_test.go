@@ -130,8 +130,8 @@ func TestABlockOnAMacOffersTheDeviceKeyThroughStationsAgentThenTheOwnersKeyAndNo
 	}
 	got := string(read(t, f))
 	for _, want := range []string{
-		"Host mac-mini\n  HostName mac-mini\n  IdentityAgent ~/.local/state/station/agent.sock\n  IdentityFile ~/.local/state/station/device-key.pub\n  IdentityFile ~/.ssh/id_ed25519\n  IdentitiesOnly yes\n",
-		"Host linux-1\n  HostName linux-1\n  IdentityAgent ~/.local/state/station/agent.sock\n  IdentityFile ~/.local/state/station/device-key.pub\n  IdentityFile ~/.ssh/agent_key\n  IdentitiesOnly yes\n",
+		"Host mac-mini\n  HostName mac-mini\n  IdentityAgent ~/.local/state/station/agent.sock\n  IdentityFile \"~/.local/state/station/device-key.pub\"\n  IdentityFile \"~/.ssh/id_ed25519\"\n  IdentitiesOnly yes\n",
+		"Host linux-1\n  HostName linux-1\n  IdentityAgent ~/.local/state/station/agent.sock\n  IdentityFile \"~/.local/state/station/device-key.pub\"\n  IdentityFile \"~/.ssh/agent_key\"\n  IdentitiesOnly yes\n",
 	} {
 		if !strings.Contains(got, want) {
 			t.Errorf("the block lacks\n%s\nin\n%s", want, got)
@@ -145,7 +145,7 @@ func TestABlockOffTheMacNamesNoAgent(t *testing.T) {
 		t.Fatal(err)
 	}
 	got := string(read(t, f))
-	if strings.Contains(got, "IdentityAgent") || strings.Contains(got, "device-key") || !strings.Contains(got, "  IdentityFile ~/.ssh/id_ed25519\n  IdentitiesOnly yes\n") {
+	if strings.Contains(got, "IdentityAgent") || strings.Contains(got, "device-key") || !strings.Contains(got, "  IdentityFile \"~/.ssh/id_ed25519\"\n  IdentitiesOnly yes\n") {
 		t.Errorf("block:\n%s", got)
 	}
 }
@@ -180,8 +180,8 @@ func TestABlockNamesNoDefaultKeyThatIsNotOnThisMac(t *testing.T) {
 		t.Errorf("a block names a key this Mac lacks:\n%s", got)
 	}
 	for _, want := range []string{
-		"Host linux-1\n  HostName linux-1\n  IdentityAgent ~/.local/state/station/agent.sock\n  IdentityFile ~/.local/state/station/device-key.pub\n  IdentitiesOnly yes\n",
-		"Host linux-2\n  HostName linux-2\n  IdentityAgent ~/.local/state/station/agent.sock\n  IdentityFile ~/.local/state/station/device-key.pub\n  IdentityFile ~/.ssh/agent_key\n  IdentitiesOnly yes\n",
+		"Host linux-1\n  HostName linux-1\n  IdentityAgent ~/.local/state/station/agent.sock\n  IdentityFile \"~/.local/state/station/device-key.pub\"\n  IdentitiesOnly yes\n",
+		"Host linux-2\n  HostName linux-2\n  IdentityAgent ~/.local/state/station/agent.sock\n  IdentityFile \"~/.local/state/station/device-key.pub\"\n  IdentityFile \"~/.ssh/agent_key\"\n  IdentitiesOnly yes\n",
 	} {
 		if !strings.Contains(got, want) {
 			t.Errorf("the block lacks\n%s\nin\n%s", want, got)
@@ -196,5 +196,15 @@ func TestABlockOffTheMacWithNoKeyNamesNoIdentityAtAll(t *testing.T) {
 	}
 	if got := string(read(t, f)); strings.Contains(got, "Identity") {
 		t.Errorf("block:\n%s", got)
+	}
+}
+
+func TestAKeySSHConfigWouldReadApartIsNeverWritten(t *testing.T) {
+	for _, key := range []string{"~/.ssh/k\n  ProxyCommand touch /tmp/pwn", "~/.ssh/my key", `~/.ssh/k"`, "~/.ssh/k'", "~/.ssh/k#x", "~/.ssh/k%h", `~/.ssh/k\`, "~/.ssh/k\tx"} {
+		f := files{}
+		err := adapter(f).Put(context.Background(), []contract.MachineBlock{{Name: "mac-mini", Key: key}})
+		if err == nil || read(t, f) != nil {
+			t.Errorf("a block with the key %q = %v and wrote\n%s\nwant it refused", key, err, read(t, f))
+		}
 	}
 }

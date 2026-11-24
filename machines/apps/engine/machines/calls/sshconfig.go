@@ -21,6 +21,9 @@ func (s *Machinist) SSHBlocks(ctx context.Context, f model.AllMachines) error {
 	var blocks []contract.MachineBlock
 	complete := true
 	key := cfg.Macs[cfg.ThisMachine].Key
+	if why := contract.UnwritableKey(cfg.ThisMachine, key); why != "" {
+		return &model.BadSSHTargetError{Why: why}
+	}
 	for _, mac := range f.Macs {
 		complete = complete && mac.Reachable
 		if !mac.ThisMac {

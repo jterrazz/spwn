@@ -207,7 +207,7 @@ func macRefused(cfg prefsView, name string, h model.MacRecord) string {
 	if name == cfg.ThisMachine {
 		return ""
 	}
-	if why := contract.Unwritable(contract.MachineBlock{Name: name, User: h.User}); why != "" {
+	if why := contract.Unwritable(contract.MachineBlock{Name: name, User: h.User, Key: h.Key}); why != "" {
 		return why
 	}
 	return contract.UnusableLAN(name, h.LAN)
