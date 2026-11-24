@@ -11,8 +11,6 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/engine/adapter/github"
 	"github.com/jterrazz/studio-station/apps/engine/engine/feeds"
 	"github.com/jterrazz/studio-station/apps/engine/page"
-	"github.com/jterrazz/studio-station/apps/engine/settings/adapter/docker"
-	"github.com/jterrazz/studio-station/apps/engine/settings/adapter/gitaliases"
 	"github.com/jterrazz/studio-station/apps/engine/ui/token"
 
 	accountscalls "github.com/jterrazz/studio-station/apps/engine/accounts/calls"
@@ -54,7 +52,7 @@ func (m machine) registry(env kit.Env) *call.Registry {
 	if env.Interactive {
 		named = setupAsk{setup: setupOf, ask: env.Prompt}
 	}
-	sections := statusDeps(env, m)
+	sections := statusDeps(m)
 	thisMac := &localCalls{profile: m.profile, late: m.far}
 	sections.Calls, sections.Kind = thisMac, kind
 	registry, err := call.NewRegistry(
@@ -77,7 +75,7 @@ func (m machine) registry(env kit.Env) *call.Registry {
 		setupcalls.All(setupcalls.Deps{Setup: setupInit{setupOf}, Ask: named}),
 		settingscalls.All(settingscalls.Deps{
 			Settings: settings, Appliers: settings.Appliers(), Applied: m.stores.applied, OffThisMac: settingscontract.OffHere(m.stores.prefs),
-			Now: m.sys.Clock.Now, Ask: ask, Shortcuts: docker.New(m.sys.Run), GitAliases: gitaliases.NewShortcuts(m.sys.Run), Shell: m.shell(), Kind: kind,
+			Now: m.sys.Clock.Now, Ask: ask, Shell: m.shell(), Kind: kind,
 			Origin: machinefile.OriginsOf(m.cat), Facts: m.facts(), Caps: m.profile.Caps, Admin: m.sys.Env.Euid() == 0, Mac: m.profile.Ref.Name, All: settingsAllMachines{m}, Public: settingsPublic{thisMac},
 		}),
 	)

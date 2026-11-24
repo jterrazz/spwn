@@ -32,7 +32,7 @@ func TestEveryCallThatChangesAMachineMakesItsReadingDue(t *testing.T) {
 	got := driftChanges()
 	for _, name := range []string{
 		"machinefile.apply", "machinefile.upgrade", "apps.install", "apps.remove", "apps.update", "apps.move",
-		"settings.apply", "settings.off", "settings.run-containers",
+		"settings.apply", "settings.off",
 	} {
 		if !slices.Contains(got, name) {
 			t.Errorf("%s ends on a machine without making its reading due: %v", name, got)

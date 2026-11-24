@@ -40,7 +40,6 @@ import (
 	machinesforget "github.com/jterrazz/studio-station/apps/engine/surface/cli/machines/forget"
 	machineslog "github.com/jterrazz/studio-station/apps/engine/surface/cli/machines/log"
 	machinespipe "github.com/jterrazz/studio-station/apps/engine/surface/cli/machines/pipe"
-	machinesprobe "github.com/jterrazz/studio-station/apps/engine/surface/cli/machines/probe"
 	machinesremind "github.com/jterrazz/studio-station/apps/engine/surface/cli/machines/remind"
 	machinesrestart "github.com/jterrazz/studio-station/apps/engine/surface/cli/machines/restart"
 	machinesstart "github.com/jterrazz/studio-station/apps/engine/surface/cli/machines/start"
@@ -218,7 +217,7 @@ func (m machine) port(fallback int, names ...string) int {
 func machinesCommand(env kit.Env, m machine) *cobra.Command {
 	vms := m.machines(env.Interactive)
 	overview := func(ctx context.Context, io kit.IO) error {
-		return overviewcmd.Run(ctx, m.overviewDeps(false), env, false, io)
+		return overviewcmd.Run(ctx, m.overviewDeps(), env, false, io)
 	}
 	return machinescmd.Command(machinescmd.Deps{ThisMachine: m.where, Names: vms.Names, Overview: overview}, env,
 		machinescreate.Command(machinescreate.Deps{
@@ -245,7 +244,6 @@ func machinesCommand(env kit.Env, m machine) *cobra.Command {
 		}, Pausing: m.pausing(env), ThisMachine: m.where}, env),
 		machinesdelete.Command(machinesdelete.Deps{Names: vms.Names, ThisMachine: m.where}, env),
 		machinesedit.Command(machinesedit.Deps{Names: vms.Names, Resources: model.ParseResources, ThisMachine: m.where}, env),
-		machinesprobe.Alias(machinesprobe.Deps{Names: vms.Names, Overview: overview}, env),
 		machinescmd.SSHCommand(machinescmd.SSHDeps{Names: vms.Names, ThisMachine: m.where}, env),
 		machineslog.Command(machineslog.Deps{Names: vms.Names}, env),
 		machinescleanup.Command(machinescleanup.Deps{Names: vms.Names, ThisMachine: m.where}, env),

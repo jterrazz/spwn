@@ -1,7 +1,7 @@
 description: 'with --json a refusal is station.error/v1 on stdout and the same block on stderr, exit 2'
 env: two-macs
 runs:
-    - command: 'machines probe nope --json'
+    - command: 'machines nope --json'
       exit: 2
       stdout: |
           {

@@ -1,4 +1,4 @@
-description: 'completion offers the commands of the help, in its order, never a hidden alias or plumbing'
+description: 'completion offers the commands of the help, in its order, never plumbing'
 env: one-mac
 runs:
     - command: '__complete "" 2>/dev/null | /usr/bin/grep -v "^:" | /usr/bin/cut -f1'

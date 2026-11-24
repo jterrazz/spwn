@@ -15,9 +15,3 @@ runs:
       exit: 0
       stdout: |
           [null,{"Tone":"plain","Sentence":"api is stopped.","Line":"Start it to read its pages."}]
-    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | [.error.code, .out.V2.Err]'''
-      stdin: |
-          {"v":2,"id":"1","call":"overview.read","target":{"name":"api"},"in":{"V2":true}}
-      exit: 0
-      stdout: |
-          ["vm_stopped",null]

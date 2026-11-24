@@ -181,12 +181,6 @@ const GitShortcutsSetting = "git-shortcuts"
 
 const TailscaleCLISetting = "tailscale-cli"
 
-const GitShortcutsGroup = "git" // value: the group of v2's run shortcuts, now git's own aliases, and the program each alias is said with.
-
-func GitShortcutLine(alias string) string { return GitShortcutsGroup + " " + alias }
-
-const ContainerShortcutsWas = "docker"
-
 const ContainerSource = "docker"
 
 func (p Procedure) Known() bool {

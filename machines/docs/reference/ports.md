@@ -102,7 +102,7 @@ The engine reads the file again when it changes. [Preferences](preferences.md) h
 
 ## Serve and HTTPS
 
-Every shared port leaves the Mac through Tailscale Serve. Serve is **on** when `tailscale status --json` lists a certificate domain (`CertDomains`: the admin has enabled HTTPS certificates, which Serve needs); the tailnet logged out or absent is off. The engine reads it at its start, at each VM run and every 30 s; `station status` shows it as the `Tailscale Serve` gateway and `ports --json` as each Mac's `serve` (`on` or `off`).
+Every shared port leaves the Mac through Tailscale Serve. Serve is **on** when `tailscale status --json` lists a certificate domain (`CertDomains`: the admin has enabled HTTPS certificates, which Serve needs); the tailnet logged out or absent is off. The engine reads it at its start, at each VM run and every 30 s; `ports --json` shows it as each Mac's `serve` (`on` or `off`).
 
 To turn it on, once per tailnet: in the [admin console's DNS page](https://login.tailscale.com/admin/dns), MagicDNS on, then HTTPS Certificates (machine names then appear in Certificate Transparency logs), and Serve where the console asks for it.
 

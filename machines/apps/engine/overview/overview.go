@@ -1,7 +1,6 @@
 package overview
 
 import (
-	"path"
 	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/activity"
@@ -108,79 +107,4 @@ type Workspace[Misplaced any] struct {
 type AwakeState struct {
 	Held, Lid bool
 	Until     time.Time
-}
-
-func Late(name string, budget time.Duration) Check {
-	// invariant: a row past its budget answers unknown, whatever its tool says.
-	return Check{Name: name, State: catalog.StateUnknown, Value: "?", Detail: "no answer in " + budget.String()}
-}
-
-func rank(s catalog.State) int {
-	switch s {
-	case catalog.StateOK:
-		return 0
-	case catalog.StateUnknown:
-		return 1
-	case catalog.StateDegraded:
-		return 2
-	case catalog.StateAbsent:
-		return 3
-	case catalog.StateBroken:
-		return 4
-	case catalog.StatePending:
-	}
-	return 1
-}
-
-func Worse(a, than catalog.State) bool { return rank(a) > rank(than) }
-
-func SetupOf(steps []Step) Setup {
-	state := catalog.StateOK
-	for _, step := range steps {
-		if Worse(step.State, state) {
-			state = step.State
-		}
-	}
-	if steps == nil {
-		steps = []Step{}
-	}
-	return Setup{State: state, Steps: steps}
-}
-
-func Gateways(thisMac catalog.MachineKind, t ports.Status) []Check {
-	// invariant: the tailnet's Serve is the way every VM service leaves the host, so a
-	// host whose tailnet is connected says whether it is on, and the admin step
-	// when it is not.
-	if thisMac != catalog.Mac || !t.Connected {
-		return []Check{}
-	}
-	if t.ServeOn {
-		return []Check{{Name: catalog.ServeRow, State: catalog.StateOK, Value: "on"}}
-	}
-	return []Check{{Name: catalog.ServeRow, State: catalog.StateDegraded, Value: "off", Detail: catalog.ServeOffDetail}}
-}
-
-func Protection(item catalog.State, name string) Check {
-	// invariant: a protection a config item installs is read from that item's own state,
-	// so status and `station config` can never disagree about it.
-	switch item {
-	case catalog.StateOK:
-		return Check{Name: name, State: catalog.StateOK, Value: "on"}
-	case catalog.StateAbsent:
-		return Check{Name: name, State: catalog.StateAbsent, Value: "off"}
-	case catalog.StateDegraded, catalog.StateBroken, catalog.StateUnknown, catalog.StatePending:
-	}
-	return Check{Name: name, State: catalog.StateUnknown}
-}
-
-func Protections() [][2]string {
-	// value: the config items whose state is a protection row, and its name.
-	return [][2]string{{"sshd", "remote-login"}, {"dns", "encrypted-dns"}}
-}
-
-func ShellName(shell string) string {
-	if shell == "" {
-		return ""
-	}
-	return path.Base(shell)
 }

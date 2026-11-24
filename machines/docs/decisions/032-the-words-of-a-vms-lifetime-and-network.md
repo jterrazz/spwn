@@ -31,7 +31,7 @@ A build between two releases counts as the release it follows, so it may be sent
 
 The machine store's record moves to version 2: its Migrator, run by `station init`, rewrites a record that wrote the old lifetime words, and an older station refuses a record at version 2 as a newer one.
 
-`station.status/v1` keeps its words byte for byte ([ADR-004](004-station-status-json-is-a-contract.md)); it leaves with v2's other words.
+`station.status/v1`, which kept its words byte for byte ([ADR-004](004-station-status-json-is-a-contract.md)), has left with v2's other hidden aliases.
 
 ## Consequences
 

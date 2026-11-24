@@ -1,13 +1,12 @@
-description: 'a typed token echoed by an alias note or an error says withheld; a long machine name reads in clear'
+description: 'a typed token echoed by an error says withheld; a long machine name reads in clear'
 env: two-macs
 runs:
-    - command: 'machines probe sk-station-story-not-a-real-key'
+    - command: 'machines sk-station-story-not-a-real-key'
       exit: 2
       stderr: |
-          → now: station machines withheld
           Error: no machine named "withheld"
           Hint: station machines
-    - command: 'machines probe sk-station-story-not-a-real-key --json'
+    - command: 'machines sk-station-story-not-a-real-key --json'
       exit: 2
       stdout: |
           {
@@ -22,9 +21,8 @@ runs:
       stderr: |
           Error: no machine named "withheld"
           Hint: station machines
-    - command: 'machines probe station-gate-cold-2026-11-13-redaction'
+    - command: 'machines station-gate-cold-2026-11-13-redaction'
       exit: 2
       stderr: |
-          → now: station machines station-gate-cold-2026-11-13-redaction
           Error: no machine named "station-gate-cold-2026-11-13-redaction"
           Hint: station machines

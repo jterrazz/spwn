@@ -15,10 +15,10 @@ runs:
           go: absent
           .npm/_cacache/x: exists
           .calls: absent
-    - command: 'status --json | /usr/bin/jq -c ''.workspace.strays | map(.name)'''
+    - command: 'overview </dev/null | /usr/bin/grep "is misplaced"'
       exit: 0
       stdout: |
-          ["node"]
+          ◐	~/.npm is misplaced	station disk move ~/.npm
     - command: 'disk move ~/.npm'
       exit: 0
       stdout: |
@@ -26,10 +26,10 @@ runs:
       files:
           .npm: absent
           .calls: absent
-    - command: 'status --json | /usr/bin/jq -c ''.workspace.strays'''
-      exit: 0
+    - command: 'overview </dev/null | /usr/bin/grep -c "is misplaced"'
+      exit: 1
       stdout: |
-          []
+          0
     - command: 'disk free go'
       exit: 0
       stdout: |

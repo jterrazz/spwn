@@ -362,7 +362,7 @@ func pageStates() []string { return []string{"loading", "empty", "error", "full"
 func pageFamilies() []string {
 	return []string{
 		"home", "home-all", "apps", "settings", "settings-matrix", "background", "disk", "all-machines", "machines", "images", "ports",
-		"outcome-apps-install", "outcome-settings-apply", "outcome-disk-free", "setup", "run", "kitchen-sink", "accounts", "outcome-stop", "outcome-start", "engine", "keep-awake", "outcome-keep-awake", "awake", "activity", "menubar", "ssh", "overview", "machinefile", "journal",
+		"outcome-apps-install", "outcome-settings-apply", "outcome-disk-free", "setup", "kitchen-sink", "accounts", "outcome-stop", "outcome-start", "engine", "keep-awake", "outcome-keep-awake", "awake", "activity", "menubar", "ssh", "overview", "machinefile", "journal",
 	}
 }
 
@@ -445,7 +445,7 @@ func TestEveryPageHasItsFourFixtures(t *testing.T) {
 	})
 	t.Run("bites", func(t *testing.T) {
 		gone := func(f string) bool {
-			return f == "ports.error" || strings.HasPrefix(f, "run.") || f == "menubar.home.infra-down"
+			return f == "ports.error" || strings.HasPrefix(f, "setup.") || f == "menubar.home.infra-down"
 		}
 		got := missingPages(append(slices.Clone(packages), "mutant"), pageFamilies(), append(slices.DeleteFunc(slices.Clone(fixtures), gone), "outcome-tools.full"))
 		if !slices.ContainsFunc(got, func(f finding) bool { return f.where == "apps/engine/pages/mutant" }) {
@@ -457,7 +457,7 @@ func TestEveryPageHasItsFourFixtures(t *testing.T) {
 		if !slices.ContainsFunc(got, func(f finding) bool { return strings.HasSuffix(f.where, "menubar.home.infra-down.json") }) {
 			t.Error("the fixtures rule did not report a missing world fixture")
 		}
-		if !slices.ContainsFunc(got, func(f finding) bool { return strings.HasSuffix(f.where, "run.loading.json") }) {
+		if !slices.ContainsFunc(got, func(f finding) bool { return strings.HasSuffix(f.where, "setup.loading.json") }) {
 			t.Error("the fixtures rule did not report a listed family with no fixture at all")
 		}
 		if !slices.ContainsFunc(got, func(f finding) bool { return strings.Contains(f.where, "/outcome-tools.*") }) {

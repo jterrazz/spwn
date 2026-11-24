@@ -97,15 +97,6 @@ func awakeCommand(env kit.Env, m machine) *cobra.Command {
 	return awakecmd.Command(m.awakeCmdDeps(env), env, awakeoff.Command(awakeoff.Deps{ThisMachine: m.where, Label: m.label}, env))
 }
 
-// value: station power, power awake and power sleep, the words v2 gave
-// awake, a keep-awake and awake off.
-func awakeAliases(env kit.Env, m machine) []*cobra.Command {
-	return []*cobra.Command{kit.Alias("power", awakecmd.Command(m.awakeCmdDeps(env), env,
-		awakecmd.PowerAwakeAlias(m.awakeCmdDeps(env), env),
-		kit.Alias("sleep", awakeoff.Command(awakeoff.Deps{ThisMachine: m.where, Label: m.label}, env), "off"),
-	), "awake")}
-}
-
 // invariant: This Mac first, then every other Mac that answers, each Mac's
 // own Awake through its engine; a Mac that does not answer is said so, and
 // This Mac's own refusal is the command's.

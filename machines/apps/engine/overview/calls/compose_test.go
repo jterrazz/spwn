@@ -59,8 +59,8 @@ func (noFacts) Read(context.Context, catalog.Fact) (settings.Fact, error) {
 	return settings.Fact{}, errors.New("down")
 }
 
-func readerOf(kind machine.Kind, gate <-chan struct{}) *Reader[struct{}, struct{}, struct{}] {
-	return New(Deps[struct{}, struct{}, struct{}]{
+func readerOf(kind machine.Kind, gate <-chan struct{}) *Reader[struct{}] {
+	return New(Deps[struct{}]{
 		Calls: downRouter{gate: gate}, Kind: kind, ThisMac: ThisMac{Hostname: "macbook-pro"},
 		Name: setupcontract.Name(noPrefs{}), Settings: noSettings{gate: gate}, Facts: noFacts{},
 	})
@@ -144,7 +144,7 @@ func (registered) Write(string, any) error { return nil }
 
 func TestTheOverviewsHeadNamesThisMacAsEveryCallDoes(t *testing.T) {
 	for _, c := range []struct{ registered, want string }{{"mac-studio", "mac-studio"}, {"", "reading-mac.lan"}} {
-		r := New(Deps[struct{}, struct{}, struct{}]{
+		r := New(Deps[struct{}]{
 			Calls: downRouter{}, Kind: machine.Server, ThisMac: ThisMac{Hostname: "Reading-Mac.lan"},
 			Name: setupcontract.Name(registered(c.registered)), Settings: noSettings{}, Facts: noFacts{},
 		})

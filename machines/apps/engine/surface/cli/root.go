@@ -26,7 +26,7 @@ func NewRoot(env kit.Env, overview *cobra.Command, children ...*cobra.Command) *
 		overview.SetContext(c.Context())
 		return overview.RunE(overview, nil)
 	}
-	root.PersistentPreRunE = kit.Aliased(env, kit.Using(env, kit.RefuseOn(env)))
+	root.PersistentPreRunE = kit.Using(env, kit.RefuseOn(env))
 	var machine string
 	target := &machine
 	if env.On != nil {

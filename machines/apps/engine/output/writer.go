@@ -1,7 +1,6 @@
 package output
 
 import (
-	"bytes"
 	"errors"
 	"io"
 	"sort"
@@ -76,25 +75,6 @@ func (w *Writer) Note(parts ...string) {
 	secret.Tripwire([]byte(line))
 	w.settle()
 	_, _ = io.WriteString(w.stderr.W, line)
-}
-
-func (w *Writer) Now(command string) {
-	// value: the one muted line a hidden alias leaves on stderr, naming the
-	// command it ran (SPEC §4.3).
-	w.settle()
-	c := Detect(w.stderr, w.env, false)
-	command = secret.Kept(command)
-	line := tty.NowLine(command, c.Mode == TTY, c.Dark)
-	secret.Tripwire([]byte(line))
-	_, _ = io.WriteString(w.colored(w.stderr, c), line)
-}
-
-func (w *Writer) Menu(render func(io.Writer)) {
-	w.settle()
-	var menu bytes.Buffer
-	render(&menu)
-	secret.Tripwire(menu.Bytes())
-	_, _ = w.stderr.W.Write(menu.Bytes())
 }
 
 func (w *Writer) Wait(label string) func() {

@@ -1,8 +1,0 @@
-#!/bin/sh
-case "$*" in
-    -sr) echo "Linux 6.8.0" ;;
-    *)
-        echo "stub ${0##*/}: unexpected invocation: $*" >&2
-        exit 97
-        ;;
-esac

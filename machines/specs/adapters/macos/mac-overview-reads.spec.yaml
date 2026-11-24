@@ -1,47 +1,24 @@
-description: 'on a Mac every overview read runs its own command, and launchd is only listed and printed'
+description: 'on a Mac the background list runs its own commands, and launchd is only listed and printed'
 fixture:
     - ./__fixtures__/status-tools-mixed/
-    - ../../__fixtures__/status-mac/
+    - ./__fixtures__/status-mac/
     - ./__fixtures__/status-processes/
-    - ../../__fixtures__/status-registered/
+    - ./__fixtures__/status-registered/
 env:
     - USER=tester
     - SHELL=/bin/zsh
 runs:
-    - command: 'status --json | /usr/bin/jq -c ''.system | [.uptime, .battery, .memory.total_bytes]'''
+    - command: 'background --json | /usr/bin/jq -c ''.tasks | map([.label, .group, .state, .scope, .owner])'''
       exit: 0
       stdout: |
-          ["3d 4h","92% charging",34359738368]
-    - command: 'status --json | /usr/bin/jq -c ''.system | [.cpu, .memory.top]'''
+          [["TC3Q7MAJXF.com.adguard.safari.AdGuard.Helper","known","running","user","AdGuard"],["ai.example.gone","orphan","not-loaded","user",""],["ai.example.x","unknown","running","user",""],["ai.example.y","unknown","failing","user",""],["com.docker.vmnetd","orphan","not-loaded","root","Docker.app"],["dev.orbstack.OrbStack.privhelper","known","loaded","root","OrbStack"]]
+    - command: 'background --json | /usr/bin/jq -r ''.tasks[] | select(.fix != null) | .fix.command'' | /usr/bin/sed ''s|gui/[0-9]*/|gui/UID/|'''
       exit: 0
       stdout: |
-          [[{"pid":301,"name":"Google Chrome Helper","value":45.5},{"pid":302,"name":"node","value":12}],[{"pid":302,"name":"node","value":2147483648},{"pid":301,"name":"Google Chrome Helper","value":536870912}]]
-    - command: 'status --json | /usr/bin/jq -c ''.environment.network | map([.name, .state, .value])'''
-      exit: 0
-      stdout: |
-          [["local ip","ok","192.168.1.2"],["dns","ok","9.9.9.9, 149.112.112.112"]]
-    - command: 'status --json | /usr/bin/jq -c ''.environment.security | map([.name, .state, .value])'''
-      exit: 0
-      stdout: |
-          [["filevault","ok","on"],["firewall","absent","off"],["sip","ok","on"],["gatekeeper","ok","on"],["remote-login","ok","on"],["encrypted-dns","absent","off"]]
-    - command: 'status --json | /usr/bin/jq -c ''.environment.updates | map([.name, .state, .value, .detail])'''
-      exit: 0
-      stdout: |
-          [["macos","degraded","1 pending","softwareupdate -l"],["brew","degraded","3 outdated","station apps update --manager brew"]]
-    - command: 'status --json | /usr/bin/jq -c ''.environment.ports | map([.pid, .name, .port])'''
-      exit: 0
-      stdout: |
-          [[100,"node","3000"],[101,"postgres","5432"]]
-    - command: 'status --json | /usr/bin/jq -c ''.background | map([.label, .group, .state, .mark, .scope, .owner, .program])'''
-      exit: 0
-      stdout: |
-          [["TC3Q7MAJXF.com.adguard.safari.AdGuard.Helper","known","running","ok","user","AdGuard",""],["ai.example.gone","orphan","not-loaded","attention","user","","/opt/gone/bin/agent"],["ai.example.x","unknown","running","ok","user","",""],["ai.example.y","unknown","failing","broken","user","",""],["com.docker.vmnetd","orphan","not-loaded","attention","root","Docker.app","/Library/PrivilegedHelperTools/com.docker.vmnetd"],["dev.orbstack.OrbStack.privhelper","known","idle","ok","root","OrbStack","/Library/PrivilegedHelperTools/dev.orbstack.OrbStack.privhelper"]]
-    - command: 'status --json | /usr/bin/jq -r ''.background[] | select(.removal != "") | .removal'' | /usr/bin/sed ''s|gui/[0-9]*/|gui/UID/|'''
-      exit: 0
-      stdout: |
-          launchctl bootout gui/UID/ai.example.gone && rm ~/Library/LaunchAgents/ai.example.gone.plist
-          launchctl bootout gui/UID/ai.example.y && rm ~/Library/LaunchAgents/ai.example.y.plist
+          station background remove ai.example.gone
+          station background remove ai.example.y
           sudo launchctl bootout system/com.docker.vmnetd && sudo rm /Library/LaunchDaemons/com.docker.vmnetd.plist
+          sudo launchctl bootout system/dev.orbstack.OrbStack.privhelper && sudo rm /Library/LaunchDaemons/dev.orbstack.OrbStack.privhelper.plist
     - command: 'background --all | /usr/bin/sed -e ''s|gui/[0-9]*/|gui/UID/|'''
       exit: 0
       stdout: |
@@ -56,20 +33,6 @@ runs:
           # Unknown	1 ●
           ●	ai.example.x	user	running · pid 12		~/Library/LaunchAgents/ai.example.x.plist
     - command: '--version >/dev/null; /usr/bin/grep "^launchctl" .calls | /usr/bin/grep -c -v -E "^launchctl (list|print|print-disabled) ?"'
-      exit: 1
-      stdout: |
-          0
-    - command: '--version >/dev/null; /usr/bin/grep -q "^softwareupdate -l$" .calls && echo ran'
-      exit: 0
-      stdout: |
-          ran
-    - command: '--version >/dev/null; /bin/rm .calls; /bin/mkdir -p root/Library/Preferences && : > root/Library/Preferences/com.apple.SoftwareUpdate.plist'
-      exit: 0
-    - command: 'status --json | /usr/bin/jq -c ''.environment.updates[] | select(.name == "macos") | [.state, .value, .detail]'''
-      exit: 0
-      stdout: |
-          ["degraded","2 pending","checked 1h ago"]
-    - command: '--version >/dev/null; /bin/cat .calls 2>/dev/null | /usr/bin/grep -c softwareupdate'
       exit: 1
       stdout: |
           0

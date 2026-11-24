@@ -4,26 +4,23 @@ env: two-macs
 runs:
     - command: 'world upgrade linux-1 v0.0.9'
       exit: 0
-    - command: 'run docker rm --yes --on linux-1'
+    - command: 'disk free docker --on linux-1'
       exit: 1
       stderr: |
-          → now: dclean
           Error: linux-1 runs station v0.0.9: this station speaks only to its own release
           Hint: station images build base-ubuntu, then make linux-1 again from it: station machines delete linux-1 --confirm=linux-1, then station machines create linux-1 --image base-ubuntu
     - command: 'world upgrade linux-1 v0.99.0'
       exit: 0
-    - command: 'run docker rm --yes --on linux-1'
+    - command: 'disk free docker --on linux-1'
       exit: 2
       stderr: |
-          → now: dclean
           Error: linux-1 runs station v0.99.0: this station speaks only to its own release
           Hint: update station here (curl -fsSL https://spwn.sh/install.sh | bash)
     - command: 'world upgrade linux-1 ""'
       exit: 0
-    - command: 'run docker rm --yes --on linux-1'
+    - command: 'disk free docker --on linux-1'
       exit: 0
       stdout: |
           	On linux-1:
-          ●	containers	2 removed
-      stderr: |
-          → now: dclean
+          ○	docker	not installed
+          ●	Freed	0 B	nothing is lost

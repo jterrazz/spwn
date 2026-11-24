@@ -361,28 +361,6 @@ func gate(verb, kept string, ask func() (bool, error), o IO) error {
 	}
 }
 
-func Group(use, short, groupID string, env Env, children ...*cobra.Command) *cobra.Command {
-	cmd := &cobra.Command{
-		Use:         use,
-		Short:       short,
-		GroupID:     groupID,
-		Args:        cobra.ArbitraryArgs,
-		Annotations: map[string]string{owned: "group"},
-	}
-	cmd.AddCommand(children...)
-	cmd.RunE = func(c *cobra.Command, args []string) error {
-		if len(args) == 0 {
-			return Menu(env, c)
-		}
-		hint := helpHint(c)
-		if s := c.SuggestionsFor(args[0]); len(s) > 0 {
-			hint += didYouMean(s)
-		}
-		return usage("unknown command \""+args[0]+"\" for \""+c.CommandPath()+"\"", hint)
-	}
-	return cmd
-}
-
 func Entry(verb, row string, names func() []string) func(string) error {
 	return func(word string) error {
 		if !slices.Contains(names(), word) {
@@ -404,15 +382,6 @@ func wanted(use string) string {
 		return ""
 	}
 	return strings.TrimSuffix(what, "...")
-}
-
-func Menu(env Env, cmd *cobra.Command) error {
-	env.Out.Menu(func(w io.Writer) {
-		cmd.SetOut(w)
-		defer cmd.SetOut(nil)
-		_ = cmd.Help()
-	})
-	return fail.Silent(fail.ExitUsage)
 }
 
 func Refuse(message, hint string) error {

@@ -8,7 +8,6 @@ import (
 	awakecalls "github.com/jterrazz/studio-station/apps/engine/awake/calls"
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
-	"github.com/jterrazz/studio-station/apps/engine/overview"
 	"github.com/jterrazz/studio-station/apps/engine/page"
 	pagekeepawake "github.com/jterrazz/studio-station/apps/engine/pages/keepawake"
 	"github.com/jterrazz/studio-station/apps/engine/settings"
@@ -58,23 +57,4 @@ func (m machine) macNeverSleeps(ctx context.Context) bool {
 	defer cancel()
 	got, err := m.facts().Read(ctx, catalog.FactSystemSleep)
 	return err == nil && settings.NeverSleeps(got)
-}
-
-type statusAwake struct{ s *awakecalls.Waker }
-
-func (p statusAwake) Session(ctx context.Context) (overview.AwakeState, bool) {
-	if p.s.Check() != nil {
-		return overview.AwakeState{}, false
-	}
-	var last awake.Report
-	for r := range p.s.Read(ctx) {
-		last = r
-	}
-	if last.Engine != awake.EngineRunning {
-		return overview.AwakeState{}, false
-	}
-	if last.Session == nil {
-		return overview.AwakeState{}, true
-	}
-	return overview.AwakeState{Held: true, Lid: last.Session.Lid, Until: last.Session.Until}, true
 }

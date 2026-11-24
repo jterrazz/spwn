@@ -6,29 +6,21 @@ import (
 	"io/fs"
 	"path"
 
-	setupcalls "github.com/jterrazz/studio-station/apps/engine/setup/calls"
-
-	"github.com/jterrazz/studio-station/apps/engine/disk"
-
 	"github.com/spf13/cobra"
 
 	activitylinux "github.com/jterrazz/studio-station/apps/engine/activity/adapter/linux"
 	activitymacos "github.com/jterrazz/studio-station/apps/engine/activity/adapter/macos"
 	activitycontract "github.com/jterrazz/studio-station/apps/engine/activity/contract"
-	"github.com/jterrazz/studio-station/apps/engine/apps/adapter/brew"
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	coremachine "github.com/jterrazz/studio-station/apps/engine/core/machine"
-	diskcalls "github.com/jterrazz/studio-station/apps/engine/disk/calls"
 
 	"github.com/jterrazz/studio-station/apps/engine/engine"
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
-	"github.com/jterrazz/studio-station/apps/engine/overview"
 	overviewcalls "github.com/jterrazz/studio-station/apps/engine/overview/calls"
 	"github.com/jterrazz/studio-station/apps/engine/platform/darwin"
 	"github.com/jterrazz/studio-station/apps/engine/platform/local"
 	"github.com/jterrazz/studio-station/apps/engine/remote/adapter/unix"
 	"github.com/jterrazz/studio-station/apps/engine/settings"
-	settingscli "github.com/jterrazz/studio-station/apps/engine/settings/adapter/cli"
 	settingslinux "github.com/jterrazz/studio-station/apps/engine/settings/adapter/linux"
 	settingsmacos "github.com/jterrazz/studio-station/apps/engine/settings/adapter/macos"
 	settingscalls "github.com/jterrazz/studio-station/apps/engine/settings/calls"
@@ -38,22 +30,18 @@ import (
 )
 
 func overviewCommand(env kit.Env, m machine) *cobra.Command {
-	return overviewcmd.Command(m.overviewDeps(false), env)
+	return overviewcmd.Command(m.overviewDeps(), env)
 }
 
 // value: the one Overview `overview --on <vm>` and `machines <vm>` both
 // print (MA-06): a VM is read from All machines.
-func (m machine) overviewDeps(status bool) overviewcmd.Deps {
-	return overviewcmd.Deps{ThisMachine: m.where, Status: status, AllMachines: func(ctx context.Context) (model.AllMachines, error) {
+func (m machine) overviewDeps() overviewcmd.Deps {
+	return overviewcmd.Deps{ThisMachine: m.where, AllMachines: func(ctx context.Context) (model.AllMachines, error) {
 		return m.machines(false).AllMachines(ctx, false)
 	}}
 }
 
-func statusCommand(env kit.Env, m machine) *cobra.Command {
-	return kit.Alias("status", overviewcmd.Command(m.overviewDeps(true), env), "overview")
-}
-
-func statusDeps(env kit.Env, m machine) overviewcalls.Sections {
+func statusDeps(m machine) overviewcalls.Sections {
 	h := m.sys
 	d := overviewcalls.Sections{
 		Pool:    m.pool,
@@ -65,27 +53,14 @@ func statusDeps(env kit.Env, m machine) overviewcalls.Sections {
 			Home: h.Env.Home(), Root: m.systemRoot(), Version: Version(), Commit: Commit(),
 			Agent: m.engineInstalled,
 		},
-		Name:       m.stores.name(),
-		Identity:   m.stores.identity(),
-		Owner:      settingscli.New(h.Run, h.FS, settingscli.Options{Home: h.Env.Home(), Pool: m.pool}),
-		Tailnet:    m.tailnetStatus(),
-		Awake:      statusAwake{s: m.awakeWaker()},
-		Apps:       appsOf(env, m),
-		Settings:   settingsRead{settingsOf(m), m.stores.applied},
-		Setup:      setupRead{setupOf(env, m)},
-		Disk:       diskRead{m.diskOf(env)},
-		Engine:     m.macEngine(),
-		Hypervisor: m.hypervisor(),
+		Name:     m.stores.name(),
+		Settings: settingsRead{settingsOf(m), m.stores.applied},
+		Facts:    m.facts(),
+		Meter:    m.meter(),
 	}
-	meter := m.meter()
-	listening := m.listeners("/")
-	facts := m.facts()
 	if m.kind != catalog.Linux {
-		// value: the status page reads listeners, jobs and app updates on a Mac only.
-		d.Listeners, d.Jobs, d.Updates = listening, m.jobs(overviewcalls.ReadBudget), brew.New(h.Run)
 		d.Servers = hostedServers{d: m.macEngine()}
 	}
-	d.Facts, d.Meter, d.Battery = facts, meter, m.powerPort
 	return d
 }
 
@@ -144,59 +119,6 @@ func (s settingsRead) Recorded(ctx context.Context, setting string) bool {
 	}
 	_, err := s.applied.Get(ctx, setting)
 	return err == nil
-}
-
-type setupRead struct{ s *setupcalls.Provisioner }
-
-func (r setupRead) Check(ctx context.Context) ([]overview.Step, error) {
-	report, err := r.s.Check(ctx)
-	if err != nil {
-		return nil, err
-	}
-	steps := make([]overview.Step, 0, len(report.Steps))
-	for _, s := range report.Steps {
-		steps = append(steps, overview.Step{Name: s.Name, State: s.State, Detail: s.Detail})
-	}
-	return steps, nil
-}
-
-type diskRead struct{ s *diskcalls.Surveyor }
-
-func (r diskRead) Watch(ctx context.Context) <-chan overviewcalls.DiskReading[disk.MisplacedReport] {
-	out := make(chan overviewcalls.DiskReading[disk.MisplacedReport])
-	go func() {
-		defer close(out)
-		for report := range r.s.Watch(ctx) {
-			select {
-			case out <- diskOf(report):
-			case <-ctx.Done():
-				return
-			}
-		}
-	}()
-	return out
-}
-
-const levelInstalled catalog.Level = "installed"
-
-// invariant: one row per storage row and level it holds bytes at, then its
-// installed size, then `other`, the caches no row claims.
-func diskOf(report disk.Survey) overviewcalls.DiskReading[disk.MisplacedReport] {
-	rows := []overview.Disk{}
-	for _, r := range report.Rows {
-		for _, level := range []catalog.Level{catalog.LevelCache, catalog.LevelData} {
-			if b := r.Bytes[level]; b > 0 {
-				rows = append(rows, overview.Disk{Name: r.Entry.Name, Level: level, Bytes: b})
-			}
-		}
-		if r.Install > 0 {
-			rows = append(rows, overview.Disk{Name: r.Entry.Name, Level: levelInstalled, Bytes: r.Install})
-		}
-	}
-	if report.Other > 0 {
-		rows = append(rows, overview.Disk{Name: "other", Level: catalog.LevelCache, Bytes: report.Other})
-	}
-	return overviewcalls.DiskReading[disk.MisplacedReport]{Rows: rows, Misplaced: append(make([]disk.MisplacedReport, 0, len(report.Misplaced)), report.Misplaced...)}
 }
 
 // value: the machine's files under its root, as the Linux Meter reads /proc.

@@ -19,9 +19,6 @@ import (
 
 type Deps struct {
 	ThisMachine page.Context
-	// value: the hidden status alias, whose --json keeps station.status/v1
-	// for the scripts that decode it (SPEC §11.4).
-	Status bool
 	// value: All machines, read once a target names a VM: its Overview is
 	// its Mac's view of it; nil reads every target as a machine of its own.
 	AllMachines func(ctx context.Context) (machines.AllMachines, error)
@@ -50,9 +47,6 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 func Run(ctx context.Context, d Deps, env kit.Env, all bool, io kit.IO) error {
 	if vm, ok := d.vm(ctx, env); ok {
 		return far(ctx, d, env, vm, all, io)
-	}
-	if d.Status && io.JSON {
-		return status(ctx, env, io)
 	}
 	if io.CanLive() {
 		updates, err := call.Follow(ctx, env.Calls, env.Target(), overviewcalls.Read, overviewcalls.ReadIn{}, nil)
@@ -113,19 +107,6 @@ func far(ctx context.Context, d Deps, env kit.Env, vm pagemachines.VMOverview, a
 		return alone()
 	}
 	return io.Page(pagemachines.VMPage(vm, &out.Summary, d.ThisMachine, all), pagemachines.VMContract(vm, &out.Summary, schema))
-}
-
-// value: station status --json, station.status/v1 from the v2 reading,
-// for the scripts that decode it (SPEC §11.4).
-func status(ctx context.Context, env kit.Env, io kit.IO) error {
-	out, err := call.Read(ctx, env.Calls, env.Target(), overviewcalls.Read, overviewcalls.ReadIn{V2: true}, nil)
-	if err == nil && out.V2 != nil {
-		err = out.V2.Err
-	}
-	if err != nil {
-		return err
-	}
-	return io.Page(pagehome.Snapshot(*out.V2, page.Context{}, false), pagehome.SnapshotContract(*out.V2))
 }
 
 // value: the VM a target names, found in All machines; this machine, or

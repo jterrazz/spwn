@@ -14,7 +14,8 @@ runs:
       files:
           go/bin/foo: exists
           go/pkg: absent
-    - command: 'status --json | /usr/bin/jq -c ''.workspace.strays | map([.name, .path, .repair])'''
+    - command: 'overview </dev/null | /usr/bin/grep "is misplaced"'
       exit: 0
       stdout: |
-          [["go","~/go","station disk move ~/go"],["node","~/.npm","station disk move ~/.npm"]]
+          ◐	~/go is misplaced	station disk move ~/go
+          ◐	~/.npm is misplaced	station disk move ~/.npm

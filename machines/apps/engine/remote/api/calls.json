@@ -1095,29 +1095,6 @@
       "in": "OffIn"
     },
     {
-      "name": "settings.run-containers",
-      "schema": "station.settings.run-containers/v1",
-      "section": "settings",
-      "where": "at-target",
-      "confirm": "remove",
-      "consequence": "%s leaves this machine; its data stays.",
-      "errors": [
-        "confirm.yes-needed"
-      ],
-      "in": "ContainersIn",
-      "out": "ContainersOutcome"
-    },
-    {
-      "name": "settings.run-git",
-      "schema": "station.settings.run-git/v1",
-      "section": "settings",
-      "where": "in-process",
-      "errors": [
-        "setting.not-applied"
-      ],
-      "in": "GitIn"
-    },
-    {
       "name": "settings.show",
       "schema": "station.settings.show/v1",
       "section": "settings",

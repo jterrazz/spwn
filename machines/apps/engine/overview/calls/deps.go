@@ -5,15 +5,10 @@ import (
 	"time"
 
 	activitycontract "github.com/jterrazz/studio-station/apps/engine/activity/contract"
-	"github.com/jterrazz/studio-station/apps/engine/awake"
-	backgroundcontract "github.com/jterrazz/studio-station/apps/engine/background/contract"
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	"github.com/jterrazz/studio-station/apps/engine/core/call/lanes"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
-	"github.com/jterrazz/studio-station/apps/engine/overview"
-	"github.com/jterrazz/studio-station/apps/engine/ports"
-	portscontract "github.com/jterrazz/studio-station/apps/engine/ports/contract"
 	settingscontract "github.com/jterrazz/studio-station/apps/engine/settings/contract"
 	setupcontract "github.com/jterrazz/studio-station/apps/engine/setup/contract"
 )
@@ -38,9 +33,8 @@ type ThisMac struct {
 
 type Clock interface{ Now() time.Time }
 
-type Deps[App, Item, Misplaced any] struct {
-	// value: the reads Overview composes. Tool, Item and Stray are the rows of
-	// the Apps, Settings and Disk reads, until those reads are their families' calls.
+type Deps[Item any] struct {
+	// value: the lanes pool, whose shared readings a reload forgets.
 	Pool *lanes.Pool
 	// value: the catalog this run reads: which settings need root.
 	Catalog catalog.Catalog
@@ -54,67 +48,18 @@ type Deps[App, Item, Misplaced any] struct {
 	Clock   Clock
 	ThisMac ThisMac
 	Name    setupcontract.NamePrefs
-	// value: the git identity the owner's preferences expect.
-	Identity setupcontract.IdentityPrefs
 	// value: the facts of this machine (its kernel, network, protections and
-	// updates), and those of its owner (git, gpg, GitHub, the ssh key).
-	Facts, Owner settingscontract.Inspector
-	Meter        activitycontract.Meter
-	// value: this Mac's battery, as Power reads it; nil where there is none.
-	Battery   Battery
-	Listeners portscontract.Listeners
-	Jobs      backgroundcontract.Jobs
-	// value: the app updates waiting, on a Mac; nil elsewhere.
-	Updates Updates
-	Tailnet Tailnet
-	Engine  Engine
-	Awake   Awake
+	// updates).
+	Facts settingscontract.Inspector
+	Meter activitycontract.Meter
 	// value: the servers this Mac runs; nil where none can run.
-	Servers    Servers
-	Hypervisor Hypervisor
-	Apps       Apps[App]
-	Settings   Settings[Item]
-	Setup      Setup
-	Disk       Disk[Misplaced]
-}
-
-type Updates interface {
-	// value: the manager's name, and how many of its installs have a newer
-	// version; apps contract.ErrMissing where the manager is not installed.
-	Manager() string
-	Behind(ctx context.Context) (int, error)
-}
-
-type Tailnet interface {
-	Status(ctx context.Context) (ports.Status, error)
-}
-
-type Engine interface {
-	Ping(ctx context.Context) (version string, err error)
-}
-
-type Awake interface {
-	// value: this Mac's keep-awake, held by its engine; ok false where it
-	// cannot be read (a VM, no power management, the engine down).
-	Session(ctx context.Context) (s overview.AwakeState, ok bool)
+	Servers  Servers
+	Settings Settings[Item]
 }
 
 type Servers interface {
 	// value: whether one of this Mac's VMs says it is a server.
 	Hosted(ctx context.Context) bool
-}
-
-type Battery interface {
-	Read() (awake.Reading, error)
-}
-
-type Hypervisor interface {
-	Name() string
-	Installed() bool
-}
-
-type Apps[App any] interface {
-	Inventory(ctx context.Context) ([]App, error)
 }
 
 type Settings[Item any] interface {
@@ -123,18 +68,4 @@ type Settings[Item any] interface {
 	Placed(r Item) (pkg string, state catalog.State)
 	// value: Machines keeps a record of applying the setting on this machine.
 	Recorded(ctx context.Context, setting string) bool
-}
-
-type Setup interface {
-	Check(ctx context.Context) ([]overview.Step, error)
-}
-
-type DiskReading[Misplaced any] struct {
-	Rows      []overview.Disk
-	Misplaced []Misplaced
-}
-
-type Disk[Misplaced any] interface {
-	// invariant: each reading is the whole disk read so far; the last is final.
-	Watch(ctx context.Context) <-chan DiskReading[Misplaced]
 }

@@ -3,19 +3,16 @@ package calls
 import (
 	"context"
 
-	"github.com/jterrazz/studio-station/apps/engine/apps"
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	"github.com/jterrazz/studio-station/apps/engine/core/section"
-	"github.com/jterrazz/studio-station/apps/engine/disk"
 	"github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/overview"
 	"github.com/jterrazz/studio-station/apps/engine/settings"
 )
 
 type (
-	Snapshot = overview.Snapshot[apps.Report, settings.Report, disk.MisplacedReport]
-	Sections = Deps[apps.Report, settings.Report, disk.MisplacedReport]
-	Overview = Reader[apps.Report, settings.Report, disk.MisplacedReport]
+	Sections = Deps[settings.Report]
+	Overview = Reader[settings.Report]
 )
 
 func All(d Sections) []call.Handler {
@@ -26,9 +23,6 @@ type ReadIn struct {
 	// value: every shared reading of the run dropped first, so the whole
 	// machine is read again.
 	Fresh bool
-	// value: the v2 reading instead, which only the status alias's
-	// station.status/v1 still draws.
-	V2 bool
 	// value: the other Macs asked too, their roll-up said in the verdict:
 	// the estate's head.
 	Elsewhere bool
@@ -36,7 +30,6 @@ type ReadIn struct {
 
 type ReadOut struct {
 	Summary overview.Summary
-	V2      *Snapshot
 	// value: a VM whose create still runs, read from its Mac's record
 	// since its guest does not answer yet: how far its create is, its
 	// Summary empty.
@@ -49,10 +42,7 @@ var Read = call.Watch[*Overview, ReadIn, ReadOut]{
 		if in.Fresh {
 			r.Forget()
 		}
-		if !in.V2 {
-			return call.Updates(ctx, mapped(ctx, r.Compose(ctx, in.Elsewhere), func(s overview.Summary) ReadOut { return ReadOut{Summary: s} })), nil
-		}
-		return call.Updates(ctx, mapped(ctx, r.Watch(ctx), func(s Snapshot) ReadOut { return ReadOut{V2: &s} })), nil
+		return call.Updates(ctx, mapped(ctx, r.Compose(ctx, in.Elsewhere), func(s overview.Summary) ReadOut { return ReadOut{Summary: s} })), nil
 	},
 }
 

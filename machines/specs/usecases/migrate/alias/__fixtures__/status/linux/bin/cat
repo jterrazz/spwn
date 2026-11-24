@@ -1,9 +1,0 @@
-#!/bin/sh
-# cat of /etc/resolv.conf, served from the fixture.
-case "$*" in
-    /etc/resolv.conf) /bin/cat "${0%/*}/../resolv.conf" ;;
-    *)
-        echo "stub ${0##*/}: unexpected invocation: $*" >&2
-        exit 97
-        ;;
-esac

@@ -242,11 +242,3 @@ type MisplacedJSON struct {
 	Bytes  int64  `json:"bytes"`
 	Repair string `json:"repair"`
 }
-
-func MisplacedContract(misplaced []disk.MisplacedReport) []MisplacedJSON {
-	out := make([]MisplacedJSON, 0, len(misplaced))
-	for _, s := range misplaced {
-		out = append(out, MisplacedJSON{Name: s.Name, Path: s.Path, Bytes: s.Bytes, Repair: s.Repair})
-	}
-	return out
-}

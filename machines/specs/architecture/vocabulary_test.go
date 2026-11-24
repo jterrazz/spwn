@@ -67,18 +67,6 @@ func saysBanned(list []banned, texts []string) []string {
 // repo-relative.
 type corpusText struct{ dir, at, text string }
 
-// invariant: a hidden alias says its old word on purpose (SPEC §4.3): the
-// name kit.Alias registers, and a function named for the alias it builds,
-// its texts with it.
-func aliasCall(call *ast.CallExpr) bool {
-	sel, ok := call.Fun.(*ast.SelectorExpr)
-	return ok && (sel.Sel.Name == "Alias" || sel.Sel.Name == "AliasArgs")
-}
-
-func aliasName(name string) bool {
-	return strings.HasSuffix(name, "Alias") || strings.HasSuffix(name, "Aliases")
-}
-
 // invariant: another program's own text is not station's vocabulary: a
 // file's location (`~/.ssh/config`, `{config}/gh/hosts.yml`), a URL, a
 // launchd label or a bundle id, a menu bar story's id (`sheet.share-port`,
@@ -219,7 +207,7 @@ func sourceTexts(w *world) []corpusText {
 		}
 		foreignLiterals(f.syntax, skip)
 		for _, d := range f.syntax.Decls {
-			if fn, ok := d.(*ast.FuncDecl); legacyDecl(f.syntax, d) != "" || ok && aliasName(fn.Name.Name) {
+			if legacyDecl(f.syntax, d) != "" {
 				ast.Inspect(d, func(n ast.Node) bool {
 					switch x := n.(type) {
 					case *ast.BasicLit:
@@ -234,11 +222,8 @@ func sourceTexts(w *world) []corpusText {
 			}
 		}
 		ast.Inspect(f.syntax, func(n ast.Node) bool {
-			if call, ok := n.(*ast.CallExpr); ok && aliasCall(call) {
-				skip[call.Args[0]] = true
-			}
 			x, ok := n.(*ast.Ident)
-			if !ok || skip[x] || x == f.syntax.Name || f.info.Defs[x] == nil || aliasName(x.Name) || holdsPowerContract(f.info.Defs[x]) {
+			if !ok || skip[x] || x == f.syntax.Name || f.info.Defs[x] == nil || holdsPowerContract(f.info.Defs[x]) {
 				return true
 			}
 			out = append(out, corpusText{dir, f.at(x.Pos()), splitText(x.Name)})
@@ -302,11 +287,11 @@ func docTexts(root string) ([]corpusText, error) {
 }
 
 // invariant: a spec document says its words in its description and in its
-// path; specs/usecases/migrate/ proves the hidden aliases by their old words.
+// path.
 func specTexts(root string) ([]corpusText, error) {
 	var out []corpusText
 	err := walk(root, "specs", func(rel string) bool {
-		return strings.HasSuffix(rel, ".spec.yaml") && !strings.HasPrefix(rel, "specs/usecases/migrate/")
+		return strings.HasSuffix(rel, ".spec.yaml")
 	}, func(rel, body string) {
 		dir := filepath.Dir(rel)
 		out = append(out, corpusText{dir, rel, splitText(strings.TrimSuffix(strings.TrimPrefix(rel, "specs/"), ".spec.yaml"))})
@@ -602,23 +587,13 @@ func f() {
 }
 
 // invariant: the legacy encodings, each a declaration marked "value: alias
-// of": station.status/v1 (the OS connector's, byte for byte one release),
-// its rows and its kind word; v2's hidden commands that are no kit.Alias.
+// of".
 func legacyEncodings() []string {
 	return []string{
-		"apps/engine/catalog StatusV1Kind",
 		"apps/engine/engine/process hello",
-		"apps/engine/pages/apps AppStatusJSON",
-		"apps/engine/pages/apps statusV1Category",
-		"apps/engine/pages/home SnapshotJSON",
-		"apps/engine/pages/home awakeJSON",
-		"apps/engine/pages/home stationJSON",
-		"apps/engine/pages/home workspaceJSON",
-		"apps/engine/pages/settings PackageJSON",
 		"apps/engine/ports Reservation",
 		"apps/engine/ports VMLivesOn",
 		"apps/engine/ports/adapter/guest Hello",
 		"apps/engine/ports/adapter/jsonfile ReservationsSchema",
-		"apps/engine/surface/cli/settings containerShortcuts",
 	}
 }
