@@ -185,3 +185,16 @@ func (m machine) signedIn(ctx context.Context, vm string) (map[string]bool, erro
 	}
 	return out, nil
 }
+
+// value: the kind of machine a VM is: its image's, and Linux for an image
+// built from a Machinefile or one no longer known.
+func (m machine) vmKind(ctx context.Context, vm string) catalog.MachineKind {
+	rec, err := m.stores.machines.Get(ctx, vm)
+	if err != nil {
+		return catalog.Linux
+	}
+	if img, ok := m.cat.Image(rec.Image); ok {
+		return img.Kind
+	}
+	return catalog.Linux
+}

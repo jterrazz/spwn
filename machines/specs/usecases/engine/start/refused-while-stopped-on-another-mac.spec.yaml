@@ -20,7 +20,7 @@ runs:
       exit: 0
       stdout: |
           	On mac-mini:
-          ◐	engine	stopped · since 10:01 by station engine stop	station engine start
+          ◐	engine	stopped · since 10:00 by station engine stop	station engine start
     - command: 'engine start --on mac-mini'
       exit: 0
       stdout: |

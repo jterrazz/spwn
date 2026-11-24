@@ -9,6 +9,15 @@ const Sudo = "sudo" // value: the one spelling of sudo outside the owner's words
 
 func AsRoot(line string) string { return Sudo + " " + line }
 
+func PoweroffLine(k MachineKind) string {
+	// value: the line that powers a guest off from inside, as root and without
+	// waiting: systemd's on a Linux guest, macOS's shutdown on a macOS one.
+	if k == MacOS {
+		return AsRoot("/sbin/shutdown -h now")
+	}
+	return AsRoot("systemctl --no-block poweroff")
+}
+
 const SudoUser, SudoUID, SudoGID = "SUDO_USER", "SUDO_UID", "SUDO_GID" // value: the variables sudo sets for the account that typed its line: its name, its uid and its gid.
 
 const InstallDir = "~/.local/bin" // value: the folder the one public installer puts station in when it is given no other; `~` is the home. The installer is another repository's, so a window reads what the engine records for the folder it really runs from, and this only when none is recorded.

@@ -98,7 +98,10 @@ type Options struct {
 	// value: the folders of this Mac a VM shares, read at each of its
 	// starts, with why they are not its Machinefile's; an error refuses the
 	// start, and nil Mounts shares none.
-	Mounts  func(ctx context.Context, vm string) (model.MountsRead, error)
+	Mounts func(ctx context.Context, vm string) (model.MountsRead, error)
+	// value: the kind of machine a VM is, by its image; nil reads every VM as
+	// Linux.
+	KindOf  func(ctx context.Context, vm string) catalog.MachineKind
 	Version string
 	// value: the abilities its hello lists (engine.Abilities); nil lists
 	// none, so a caller asks none of it.

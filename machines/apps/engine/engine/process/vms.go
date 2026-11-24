@@ -445,9 +445,11 @@ func (d *Engine) opStart(ctx context.Context, vm string) error {
 	return d.m.Save(d.editRecord(v, func(rec *model.VMRecord) { rec.Want = model.WantRunning }))
 }
 
-// invariant: a graceful stop is the guest's own poweroff, sent on the VM's one
-// ssh connection (the NAT ssh when it is down); the hard stop comes only after
-// the wait; the run's end is the daemon's own, so it is never read as a reboot.
+// invariant: a graceful stop is the guest's own poweroff, by its system's line,
+// sent on the VM's one ssh connection (the NAT ssh when it is down); a line the
+// guest refuses or cannot send goes straight to the hard stop, and the wait
+// comes only after a line it took; the run's end is the daemon's own, so it is
+// never read as a reboot.
 func (d *Engine) opStop(ctx context.Context, vm string, want bool) error {
 	v, err := d.find(vm)
 	if err != nil {
@@ -486,8 +488,12 @@ func (d *Engine) endRun(ctx context.Context, v *vmState) error {
 	}
 	sent := false
 	if client != nil {
-		_, err := client.Exec(ctx, catalog.AsRoot("systemctl --no-block poweroff"), "")
-		sent = err == nil
+		kind := catalog.Linux
+		if d.o.KindOf != nil {
+			kind = d.o.KindOf(ctx, vm)
+		}
+		ran, err := client.Exec(ctx, catalog.PoweroffLine(kind), "")
+		sent = err == nil && ran.Code == 0
 	}
 	if !sent {
 		if run == nil {

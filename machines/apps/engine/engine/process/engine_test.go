@@ -26,6 +26,8 @@ type fakeMachines struct {
 	records []model.VMRecord
 	saved   []model.VMRecord
 	saveErr error
+	off     func(vm string)
+	offed   []string
 }
 
 func (f *fakeMachines) Records() ([]model.VMRecord, error) { return f.records, nil }
@@ -44,7 +46,16 @@ func (f *fakeMachines) Remove(context.Context, string) (model.DeleteReport, erro
 	return model.DeleteReport{}, nil
 }
 
-func (f *fakeMachines) PowerOff(context.Context, string) error { return nil }
+func (f *fakeMachines) PowerOff(_ context.Context, vm string) error {
+	f.mu.Lock()
+	f.offed = append(f.offed, vm)
+	off := f.off
+	f.mu.Unlock()
+	if off != nil {
+		off(vm)
+	}
+	return nil
+}
 
 func (f *fakeMachines) EngineRunning(_ context.Context, name string) bool { return f.stuck[name] }
 
@@ -412,5 +423,96 @@ func TestAStartSaysWhyItsMountsAreNotItsMachinefilesAndKeepsWhatItShared(t *test
 	}
 	if n := len(h.m.saved); n != 1 || !slices.Equal(h.m.saved[n-1].Mounts, shared) {
 		t.Errorf("saved %v; want the record keeping %v", h.m.saved, shared)
+	}
+}
+
+// value: a guest that answers every command with one exit code and keeps the lines it ran.
+type answering struct {
+	speaksFirst
+	code  int
+	lines []string
+	then  func()
+}
+
+func (g *answering) Exec(_ context.Context, line, _ string) (engine.GuestRan, error) {
+	g.lines = append(g.lines, line)
+	if g.then != nil {
+		g.then()
+	}
+	return engine.GuestRan{Code: g.code}, nil
+}
+
+func stoppingVM(t *testing.T, kind catalog.MachineKind, code int) (harness, *answering) {
+	t.Helper()
+	h := newHarness(t, model.VMRecord{Name: "vm", Lifetime: model.Persistent, Want: model.WantRunning})
+	h.d.o.KindOf = func(context.Context, string) catalog.MachineKind { return kind }
+	v, _ := h.d.find("vm")
+	if err := h.d.start(cancelled(t), v); err != nil {
+		t.Fatal(err)
+	}
+	g := &answering{code: code}
+	h.d.mu.Lock()
+	v.client = g
+	h.d.mu.Unlock()
+	return h, g
+}
+
+func TestAMacOSVMIsPoweredOffByMacOSsOwnShutdown(t *testing.T) {
+	h, g := stoppingVM(t, catalog.MacOS, 0)
+	g.then = func() { h.hv.end("vm", model.RunEnd{}) }
+	if err := h.d.opStop(t.Context(), "vm", false); err != nil {
+		t.Fatal(err)
+	}
+	if want := []string{"sudo /sbin/shutdown -h now"}; !reflect.DeepEqual(g.lines, want) {
+		t.Errorf("the guest ran %q, want %q", g.lines, want)
+	}
+}
+
+func TestALinuxVMIsPoweredOffBySystemd(t *testing.T) {
+	h, g := stoppingVM(t, catalog.Linux, 0)
+	g.then = func() { h.hv.end("vm", model.RunEnd{}) }
+	if err := h.d.opStop(t.Context(), "vm", false); err != nil {
+		t.Fatal(err)
+	}
+	if want := []string{"sudo systemctl --no-block poweroff"}; !reflect.DeepEqual(g.lines, want) {
+		t.Errorf("the guest ran %q, want %q", g.lines, want)
+	}
+}
+
+// value: a Mac whose clock waits, once, for the hypervisor's power-off to have run, which the engine starts beside its wait.
+type afterPoweroff struct {
+	Mac
+	done <-chan struct{}
+}
+
+func (m afterPoweroff) Sleep(ctx context.Context, d time.Duration) error {
+	select {
+	case <-m.done:
+	case <-ctx.Done():
+	}
+	return m.Mac.Sleep(ctx, d)
+}
+
+func TestAPoweroffTheGuestRefusesGoesStraightToTheHardStop(t *testing.T) {
+	h, _ := stoppingVM(t, catalog.MacOS, 1)
+	done := make(chan struct{})
+	h.d.h = afterPoweroff{Mac: h.d.h, done: done}
+	h.m.off = func(vm string) {
+		h.hv.end(vm, model.RunEnd{})
+		close(done)
+	}
+	start := h.clock.At
+	ctx, cancel := context.WithTimeout(t.Context(), 5*time.Second)
+	defer cancel()
+	if err := h.d.opStop(ctx, "vm", false); err != nil {
+		t.Fatal(err)
+	}
+	if got := h.clock.At.Sub(start); got >= stopWait {
+		t.Errorf("the stop waited %s after a refused poweroff, want less than %s", got, stopWait)
+	}
+	h.m.mu.Lock()
+	defer h.m.mu.Unlock()
+	if !reflect.DeepEqual(h.m.offed, []string{"vm"}) {
+		t.Errorf("the hypervisor powered off %v, want [vm]", h.m.offed)
 	}
 }
