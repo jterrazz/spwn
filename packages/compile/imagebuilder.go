@@ -55,13 +55,14 @@ type BuildRequest struct {
 	// consult that file at runtime.
 	Policies map[string]ToolPolicy
 
-	// Tag is the Docker image tag to apply.
-	Tag string
+	// Repository names the image; the build tags it
+	// <Repository>:<content hash of the generated Dockerfile and its
+	// extra files>, so two tool sets never share a tag.
+	Repository string
 
-	// ForceRebuild bypasses the content hash cache check and rebuilds
-	// from scratch. The default is content-addressed caching: if the
-	// generated Dockerfile + extra-files bytes match what the
-	// currently tagged image was built from, the build is a no-op.
+	// ForceRebuild bypasses the cache check and rebuilds the tag. The
+	// default is content-addressed caching: a tag that already exists
+	// holds this exact build, so the build is a no-op.
 	ForceRebuild bool
 
 	// SkipVerify disables post-build verification.
@@ -78,8 +79,8 @@ func (req *BuildRequest) Validate() error {
 	if len(req.BaseDockerfile) == 0 {
 		return fmt.Errorf("BuildRequest.BaseDockerfile is required")
 	}
-	if req.Tag == "" {
-		return fmt.Errorf("BuildRequest.Tag is required")
+	if req.Repository == "" {
+		return fmt.Errorf("BuildRequest.Repository is required")
 	}
 	return nil
 }
@@ -146,25 +147,30 @@ func (b *Builder) Build(ctx context.Context, req BuildRequest) (*BuildResult, er
 	dfNoLabel := dockerfile.Generate(req.BaseDockerfile, toolInputs, "")
 	version := hashBuildContext(dfNoLabel, extraFiles)
 	df := dockerfile.Generate(req.BaseDockerfile, toolInputs, version)
+	tag := req.Repository + ":" + version
 
-	if req.ForceRebuild {
-		_ = b.backend.ImageRemove(ctx, req.Tag)
-	}
-
-	rebuilt, err := b.backend.EnsureImageWithContext(ctx, req.Tag, version, df, extraFiles, logw)
+	release, err := lockTag(ctx, tag)
 	if err != nil {
-		return nil, &BuildError{Tag: req.Tag, Cause: err}
+		return nil, &BuildError{Tag: tag, Cause: err}
+	}
+	if req.ForceRebuild {
+		_ = b.backend.ImageRemove(ctx, tag)
+	}
+	rebuilt, err := b.backend.EnsureImageWithContext(ctx, tag, version, df, extraFiles, logw)
+	release()
+	if err != nil {
+		return nil, &BuildError{Tag: tag, Cause: err}
 	}
 
 	if !req.SkipVerify {
 		fmt.Fprintf(logw, "Verifying tools...\n")
-		if err := b.verify(ctx, req.Tag, resolved, logw); err != nil {
+		if err := b.verify(ctx, tag, resolved, logw); err != nil {
 			return nil, err
 		}
 	}
 
 	result := &BuildResult{
-		Tag:    req.Tag,
+		Tag:    tag,
 		Tools:  resolvedNames,
 		Cached: !rebuilt,
 	}

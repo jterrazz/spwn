@@ -188,7 +188,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		}
 	}
 
-	image := platform.WorldImage
+	image := platform.WorldImageRepository
 	explicitImage := false
 	if envImage := os.Getenv("SPWN_BASE_IMAGE"); envImage != "" {
 		image = envImage
@@ -242,14 +242,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	}
 	opts.progress("tools_resolved", strings.Join(resolvedNames, ", "))
 
-	releaseImage := func() {}
-	defer func() { releaseImage() }()
 	if !explicitImage {
-		release, lockErr := lockWorldImage(ctx)
-		if lockErr != nil {
-			return nil, fmt.Errorf("wait for the world image: %w", lockErr)
-		}
-		releaseImage = release
 		opts.progress("image_resolving", image)
 
 		builder := ib.New(reg, a.backend)
@@ -266,7 +259,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 			Tools:          toolList,
 			Policies:       buildPolicyMap(opts.Manifest.DepPolicies),
 
-			Tag:          image,
+			Repository:   image,
 			ForceRebuild: opts.ForceRebuild,
 			SkipVerify:   true,
 			LogWriter:    buildLogWriter,
@@ -274,6 +267,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		if err != nil {
 			return nil, fmt.Errorf("build world image: %w", err)
 		}
+		image = buildResult.Tag
 		if buildResult.Cached {
 			opts.progress("image_cached", image)
 		} else {
@@ -421,7 +415,6 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	}
 
 	containerID, err := a.backend.Create(ctx, containerCfg)
-	releaseImage()
 	if err != nil {
 		return nil, fmt.Errorf("create container: %w", err)
 	}

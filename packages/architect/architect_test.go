@@ -89,7 +89,7 @@ type execCall struct {
 func newMockBackend() *mockBackend {
 	return &mockBackend{
 		containers:   make(map[string]*mockContainer),
-		images:       map[string]bool{"spwn/world:latest": true},
+		images:       map[string]bool{"spwn/world:0123456789ab": true},
 		isRunningVal: true,
 		imageExistsV: true,
 		execOutput:   "bash\nsh\ngit",
@@ -271,7 +271,7 @@ func seedWorld(mb *mockBackend, w models.World) {
 	}
 	cfg := backend.ContainerConfig{
 		Name:   w.ID,
-		Image:  "spwn/world:latest",
+		Image:  "spwn/world:0123456789ab",
 		Labels: labels.WorldLabels(w),
 	}
 	mb.containers[id] = &mockContainer{id: id, config: cfg, running: true}

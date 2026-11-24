@@ -36,7 +36,7 @@ func SpinUp(t *testing.T, reg *resolver.Registry, tools ...string) *Sandbox {
 	}
 
 	builder := ib.New(reg, docker)
-	tag := fmt.Sprintf("spwn-test:%d", time.Now().UnixNano())
+	repository := fmt.Sprintf("spwn-sandbox-%d", time.Now().UnixNano())
 
 	var result *ib.BuildResult
 	err = retry(ctx, buildAttempts, buildBackoff, func() error {
@@ -44,7 +44,7 @@ func SpinUp(t *testing.T, reg *resolver.Registry, tools ...string) *Sandbox {
 		result, buildErr = builder.Build(ctx, ib.BuildRequest{
 			BaseDockerfile: baseimages.WorldDockerfile,
 			Tools:          tools,
-			Tag:            tag,
+			Repository:     repository,
 			SkipVerify:     true,
 			LogWriter:      testWriter{t},
 		})
