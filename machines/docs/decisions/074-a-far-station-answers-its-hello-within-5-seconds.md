@@ -3,6 +3,8 @@
 **Status:** Proposed
 **Date:** 2026-11-22
 
+Amended by [ADR-090](090-a-machine-is-reached-through-its-engines-door-never-through-openssh.md): the keepalive is the door's, and the hello budget is unchanged.
+
 ## Context
 
 Another Mac is reached by one `ssh <mac> station engine attach`, and the first frame of that connection is `hello`. A QA run joined two Mac homes and made the far side's ssh connect and then say nothing, as a frozen far station or a link that stops passing data after TCP is up does. `station overview --on beta`, `ports --on beta`, `apps --on beta` and `machines beta` never ended: each stayed until `timeout 45` killed it, one until a SIGKILL at 102 s. Its goroutine dump showed the wait in `api.(*Conn).Hello`, which waited on its answer or on its caller's context, and a command's context carries no deadline. `station machines` alone was bounded, by the 5 s each Mac is given there (`each.Budget`).

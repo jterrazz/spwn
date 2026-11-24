@@ -3,6 +3,8 @@
 **Status:** Proposed
 **Date:** 2026-11-06
 
+Amended by [ADR-090](090-a-machine-is-reached-through-its-engines-door-never-through-openssh.md): between Macs there is the engine's door, no longer ssh, and the engine listens on that one TCP port.
+
 Written 2026-11-06 from the owner's round 9 and 13 decisions and the code that carries them.
 
 ## Context

@@ -104,7 +104,7 @@ The records of decisions this repository alone took go in [`decisions/`](decisio
 - [049 A VM signs itself in, and the vault grants the rest](decisions/049-a-vm-signs-itself-in-the-vault-grants-the-rest.md) (Proposed)
 - [050 The desktop app is laid out as a hexagon](decisions/050-the-desktop-app-is-laid-out-as-a-hexagon.md) (Accepted)
 - [051 A machine is a base and its Machinefiles, one base per distro](decisions/051-a-machine-is-a-base-and-its-machinefiles.md) (Accepted)
-- [052 Station keeps no agents; another binary owns them](decisions/052-station-keeps-no-agents.md) (Accepted)
+- [052 Station keeps no agents; another binary owns them](decisions/052-station-keeps-no-agents.md) (Superseded by 088)
 - [053 The panel is the untinted system glass over a hue-free grey, with no white card](decisions/053-the-panel-is-untinted-glass-over-a-grey-ground.md) (Accepted)
 - [054 A machine's standing is one rule at each level, and every verdict reads it](decisions/054-a-machines-standing-is-one-rule-at-each-level.md) (Accepted)
 - [055 Station reads only its current state, and retires no older one](decisions/055-station-reads-only-its-current-state.md) (Proposed)
@@ -140,5 +140,8 @@ The records of decisions this repository alone took go in [`decisions/`](decisio
 - [085 A Mac run alone keeps a device key that signs with nobody present](decisions/085-a-mac-run-alone-keeps-a-device-key-that-signs-with-nobody-present.md) (Accepted)
 - [086 A VM reserves a package's port only when its Machinefile installs it](decisions/086-a-vm-reserves-a-packages-port-only-when-its-machinefile-installs-it.md) (Accepted)
 - [087 A fetched macOS guest takes its key at its first login](decisions/087-a-fetched-macos-guest-takes-its-key-at-its-first-login.md) (Proposed)
+- [088 Agents live in the one binary, as families reached by calls](decisions/088-agents-live-in-the-one-binary-as-families-reached-by-calls.md) (Accepted)
+- [089 An agent runs in a Herdr terminal on its own machine](decisions/089-an-agent-runs-in-a-herdr-terminal-on-its-own-machine.md) (Accepted)
+- [090 A machine is reached through its engine's door, never through OpenSSH](decisions/090-a-machine-is-reached-through-its-engines-door-never-through-openssh.md) (Accepted)
 
 A decision spanning several repositories is recorded by the corpus that spans them. What was left for later is `TODO.md` at the repository root.
