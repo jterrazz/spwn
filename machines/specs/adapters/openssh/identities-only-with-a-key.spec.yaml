@@ -1,4 +1,4 @@
-description: 'a Mac added with a key offers only that key; one added without a key only the default'
+description: 'a Mac added with a key or without one offers only the device key'
 fixture:
     - ../../__fixtures__/far-mac/
 env: engine

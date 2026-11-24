@@ -14,9 +14,13 @@ import (
 const (
 	sshKey         = "~/.ssh/id_ed25519"
 	sshConfig      = "~/.ssh/config"
-	sshKeyStanza   = "\nHost *\n  AddKeysToAgent yes\n  UseKeychain yes\n  IdentityFile ~/.ssh/id_ed25519\n"
 	keychainStanza = "the Keychain stanza"
 )
+
+// invariant: the key is named for GitHub alone: ssh adds the IdentityFile
+// of every Host that matches, so a `Host *` stanza would offer this key
+// before the device key to every machine a block names (ADR-091).
+const sshKeyStanza = "\nHost " + catalog.GitHubDomain + "\n  AddKeysToAgent yes\n  UseKeychain yes\n  IdentityFile ~/.ssh/id_ed25519\n"
 
 func (m *Mac) observeSSHKey(_ context.Context, want []settings.KeyValue) settings.Observation {
 	now := m.sshKeyValues()
@@ -30,7 +34,7 @@ func (m *Mac) observeSSHKey(_ context.Context, want []settings.KeyValue) setting
 func (m *Mac) sshKeyValues() []settings.KeyValue {
 	text, _ := m.files.ReadFile(m.home(sshConfig))
 	stanza := "none"
-	if strings.Contains(string(text), "AddKeysToAgent yes") {
+	if strings.Contains(string(text), sshKeyStanza[1:]) {
 		stanza = keychainStanza
 	}
 	return []settings.KeyValue{{Key: sshKey, Value: presence(m.exists(m.home(sshKey)))}, {Key: sshConfig, Value: stanza}}
@@ -59,7 +63,7 @@ func (m *Mac) applySSHKey(ctx context.Context) (settings.Change, error) {
 	if err != nil && !errors.Is(err, fs.ErrNotExist) {
 		return change, err
 	}
-	if strings.Contains(string(existing), "AddKeysToAgent yes") {
+	if strings.Contains(string(existing), sshKeyStanza[1:]) {
 		change.Steps = append(change.Steps, done(sshConfig, "already configured"))
 	} else {
 		if fault := m.files.WriteFile(file, append(existing, sshKeyStanza...), 0o600); fault != nil {

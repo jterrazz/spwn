@@ -1,4 +1,4 @@
-description: 'add writes no key ssh_config would read apart, rolls back, and quotes the key it writes'
+description: 'add writes no key ssh_config would read apart, rolls back, and on a Mac names the device key alone'
 fixture:
     - ../../__fixtures__/far-mac/
 env: engine
@@ -22,6 +22,5 @@ runs:
       exit: 0
       stdout: |4
             IdentityFile "~/.local/state/station/device-key.pub"
-            IdentityFile "~/.ssh/id_ed25519"
             IdentityFile "~/.local/state/station/device-key.pub"
             IdentityFile "~/.local/state/station/device-key.pub"

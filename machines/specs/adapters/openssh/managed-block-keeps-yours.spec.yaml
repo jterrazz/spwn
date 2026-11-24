@@ -37,7 +37,6 @@ runs:
                     User jterrazz.agent
                     IdentityAgent ~/.local/state/station/agent.sock
                     IdentityFile "~/.local/state/station/device-key.pub"
-                    IdentityFile "~/.ssh/agent_key"
                     IdentitiesOnly yes
                     ServerAliveInterval 30
                     ServerAliveCountMax 3

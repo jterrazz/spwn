@@ -1,0 +1,12 @@
+description: 'beside your file key and the ssh-key stanza, ssh offers a managed machine the device key alone'
+fixture:
+    - ../../__fixtures__/far-mac/
+    - ./__fixtures__/owner-file-key/
+env: engine
+runs:
+    - command: '--version >/dev/null; "$STATION" machines add mac-mini --user jterrazz.agent >/dev/null; /usr/bin/ssh -T -o IgnoreUnknown=UseKeychain -F .ssh/config -G mac-mini | /usr/bin/grep -E "^identit(yfile|iesonly)"; /usr/bin/ssh -T -o IgnoreUnknown=UseKeychain -F .ssh/config -G github.com | /usr/bin/grep "^identityfile"'
+      exit: 0
+      stdout: |
+          identitiesonly yes
+          identityfile ~/.local/state/station/device-key.pub
+          identityfile ~/.ssh/id_ed25519

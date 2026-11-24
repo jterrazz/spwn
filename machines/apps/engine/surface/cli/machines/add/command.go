@@ -31,7 +31,7 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 		Declare: func(f *pflag.FlagSet, in *Input) {
 			f.StringVar(&in.Name, "name", "", "the Mac's name, as station v3.0 took it")
 			f.StringVar(&in.User, "user", "", "the login on that Mac, when it differs from yours")
-			f.StringVar(&in.Key, "key", "", "the ssh key file (default ~/.ssh/id_ed25519)")
+			f.StringVar(&in.Key, "key", "", "the ssh key file a block offers where no device key is (default ~/.ssh/id_ed25519); on a Mac a block offers the device key alone")
 		},
 		Bind: func(in *Input, args []string) error {
 			if len(args) == 1 {

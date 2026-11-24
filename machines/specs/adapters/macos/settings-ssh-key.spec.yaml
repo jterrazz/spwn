@@ -1,4 +1,4 @@
-description: 'on a terminal, ssh-key keeps the key, adds the Keychain stanza once and leaves the lines it found'
+description: 'on a terminal, ssh-key keeps the key, adds the GitHub Keychain stanza once, keeps your lines'
 fixture:
     - ../../__fixtures__/terminal/
     - ./__fixtures__/settings-ssh-key/
@@ -18,7 +18,7 @@ runs:
                   Host work
                     User w
 
-                  Host *
+                  Host github.com
                     AddKeysToAgent yes
                     UseKeychain yes
                     IdentityFile ~/.ssh/id_ed25519

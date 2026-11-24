@@ -119,7 +119,7 @@ func TestTheFileStationCreatedIsRemovedWithItsLastBlockNeverLeftEmpty(t *testing
 	}
 }
 
-func TestABlockOnAMacOffersTheDeviceKeyThroughStationsAgentThenTheOwnersKeyAndNothingElse(t *testing.T) {
+func TestABlockOnAMacOffersTheDeviceKeyThroughStationsAgentAndNothingElse(t *testing.T) {
 	f := files{home + "/.ssh/id_ed25519": []byte("key")}
 	c := New(f, Options{
 		Home: home, KnownHosts: home + "/.local/state/station/known_hosts", Executable: "/bin/station",
@@ -130,8 +130,8 @@ func TestABlockOnAMacOffersTheDeviceKeyThroughStationsAgentThenTheOwnersKeyAndNo
 	}
 	got := string(read(t, f))
 	for _, want := range []string{
-		"Host mac-mini\n  HostName mac-mini\n  IdentityAgent ~/.local/state/station/agent.sock\n  IdentityFile \"~/.local/state/station/device-key.pub\"\n  IdentityFile \"~/.ssh/id_ed25519\"\n  IdentitiesOnly yes\n",
-		"Host linux-1\n  HostName linux-1\n  IdentityAgent ~/.local/state/station/agent.sock\n  IdentityFile \"~/.local/state/station/device-key.pub\"\n  IdentityFile \"~/.ssh/agent_key\"\n  IdentitiesOnly yes\n",
+		"Host mac-mini\n  HostName mac-mini\n  IdentityAgent ~/.local/state/station/agent.sock\n  IdentityFile \"~/.local/state/station/device-key.pub\"\n  IdentitiesOnly yes\n",
+		"Host linux-1\n  HostName linux-1\n  IdentityAgent ~/.local/state/station/agent.sock\n  IdentityFile \"~/.local/state/station/device-key.pub\"\n  IdentitiesOnly yes\n",
 	} {
 		if !strings.Contains(got, want) {
 			t.Errorf("the block lacks\n%s\nin\n%s", want, got)
@@ -181,11 +181,21 @@ func TestABlockNamesNoDefaultKeyThatIsNotOnThisMac(t *testing.T) {
 	}
 	for _, want := range []string{
 		"Host linux-1\n  HostName linux-1\n  IdentityAgent ~/.local/state/station/agent.sock\n  IdentityFile \"~/.local/state/station/device-key.pub\"\n  IdentitiesOnly yes\n",
-		"Host linux-2\n  HostName linux-2\n  IdentityAgent ~/.local/state/station/agent.sock\n  IdentityFile \"~/.local/state/station/device-key.pub\"\n  IdentityFile \"~/.ssh/agent_key\"\n  IdentitiesOnly yes\n",
+		"Host linux-2\n  HostName linux-2\n  IdentityAgent ~/.local/state/station/agent.sock\n  IdentityFile \"~/.local/state/station/device-key.pub\"\n  IdentitiesOnly yes\n",
 	} {
 		if !strings.Contains(got, want) {
 			t.Errorf("the block lacks\n%s\nin\n%s", want, got)
 		}
+	}
+}
+
+func TestABlockOffTheMacWritesItsKeyUnderTheHomeAsTilde(t *testing.T) {
+	f := files{}
+	if err := adapter(f).Put(context.Background(), []contract.MachineBlock{{Name: "mac-mini", Key: home + "/.ssh/agent_key"}}); err != nil {
+		t.Fatal(err)
+	}
+	if got := string(read(t, f)); !strings.Contains(got, "  IdentityFile \"~/.ssh/agent_key\"\n  IdentitiesOnly yes\n") {
+		t.Errorf("block:\n%s", got)
 	}
 }
 

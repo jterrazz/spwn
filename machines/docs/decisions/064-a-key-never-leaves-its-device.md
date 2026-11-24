@@ -9,6 +9,8 @@ Amended by [ADR-085](085-a-mac-run-alone-keeps-a-device-key-that-signs-with-nobo
 
 Amended by [ADR-076](076-spwn-on-a-machine-one-active-app-one-background-job-the-engine-updates.md): the key agent is served by the engine, not by a launchd job of its own.
 
+Amended by [ADR-091](091-a-block-on-a-mac-offers-the-device-key-alone.md): a block on a Mac offers the device key alone, and the `ssh-key` setting names its key for GitHub only.
+
 Written 2026-11-20 from the connection architecture's design (option C, "hardened status quo") and its lot L2.
 
 ## Context

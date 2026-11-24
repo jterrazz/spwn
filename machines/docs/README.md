@@ -140,5 +140,6 @@ The records of decisions this repository alone took go in [`decisions/`](decisio
 - [085 A Mac run alone keeps a device key that signs with nobody present](decisions/085-a-mac-run-alone-keeps-a-device-key-that-signs-with-nobody-present.md) (Accepted)
 - [086 A VM reserves a package's port only when its Machinefile installs it](decisions/086-a-vm-reserves-a-packages-port-only-when-its-machinefile-installs-it.md) (Accepted)
 - [087 A fetched macOS guest takes its key at its first login](decisions/087-a-fetched-macos-guest-takes-its-key-at-its-first-login.md) (Proposed)
+- [091 A block on a Mac offers the device key alone](decisions/091-a-block-on-a-mac-offers-the-device-key-alone.md) (Proposed)
 
 A decision spanning several repositories is recorded by the corpus that spans them. What was left for later is `TODO.md` at the repository root.

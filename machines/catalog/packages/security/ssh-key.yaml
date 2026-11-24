@@ -17,4 +17,4 @@ writes:
       level: kept
     - path: ~/.ssh/config
       level: settings
-      note: 'the `Host *` stanza: `UseKeychain yes`, `IdentityFile ~/.ssh/id_ed25519`'
+      note: 'the `Host github.com` stanza: `UseKeychain yes`, `IdentityFile ~/.ssh/id_ed25519`'

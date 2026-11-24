@@ -77,23 +77,21 @@ func (c *sshFile) block(b contract.MachineBlock) string {
 	if b.User != "" {
 		lines = append(lines, "  User "+b.User)
 	}
-	if c.o.Agent != "" {
-		lines = append(lines, "  IdentityAgent "+c.tilde(c.o.Agent), "  IdentityFile "+quotedValue(c.tilde(c.o.DeviceKey)))
-	}
-	// invariant: only the keys the block names are offered, so an agent
-	// holding many keys never exhausts the server's attempts before them; the
-	// default key is named only where its file exists.
-	named := c.o.Agent != ""
+	// invariant: on a Mac a block offers the device key alone, so every
+	// machine it names asks the owner's presence; a key file is offered only
+	// where no agent serves a device key, the block's own or else the default
+	// one where its file exists. ssh also adds the IdentityFile of any other
+	// Host that matches, which is why the ssh-key setting names its key for
+	// GitHub alone (ADR-091).
 	key := b.Key
 	if key == "" && c.exists(defaultKey) {
 		key = defaultKey
 	}
-	if key != "" {
-		lines = append(lines, "  IdentityFile "+quotedValue(key))
-		named = true
-	}
-	if named {
-		lines = append(lines, "  IdentitiesOnly yes")
+	switch {
+	case c.o.Agent != "":
+		lines = append(lines, "  IdentityAgent "+c.tilde(c.o.Agent), "  IdentityFile "+quotedValue(c.tilde(c.o.DeviceKey)), "  IdentitiesOnly yes")
+	case key != "":
+		lines = append(lines, "  IdentityFile "+quotedValue(c.tilde(key)), "  IdentitiesOnly yes")
 	}
 	lines = append(lines,
 		"  ServerAliveInterval 30",
