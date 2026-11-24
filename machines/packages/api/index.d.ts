@@ -1838,6 +1838,7 @@ export type MachinesAgent = {
 export type MachinesAllMachines = {
     Macs: MachinesMacView[] | null;
     Read: string;
+    Refused?: MachinesRefusedMac[];
     Standing?: MachinesRollUp;
 };
 
@@ -2154,6 +2155,11 @@ export type MachinesPresetOn = {
     Fit: 'fits' | 'no-room';
     MemoryBytes: number;
     Preset: 'small' | 'workspace' | 'gate';
+};
+
+export type MachinesRefusedMac = {
+    Name: string;
+    Why: string;
 };
 
 export type MachinesRelease = {

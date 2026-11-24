@@ -320,8 +320,11 @@ type AllMachines struct {
 	Read time.Time
 	// value: the roll-up of every Mac and its VMs (RollUpOf); judged by
 	// machines.list, absent in any other answer.
-	Standing *RollUp `json:",omitempty"`
+	Standing *RollUp      `json:",omitempty"`
+	Refused  []RefusedMac `json:",omitempty"`
 }
+
+type RefusedMac struct{ Name, Why string }
 
 type Unasked struct {
 	// value: a create asked for its machine file alone: that file, its

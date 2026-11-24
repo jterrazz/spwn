@@ -355,6 +355,12 @@
           "format": "date-time",
           "type": "string"
         },
+        "Refused": {
+          "items": {
+            "$ref": "#/$defs/machines.RefusedMac"
+          },
+          "type": "array"
+        },
         "Standing": {
           "$ref": "#/$defs/machines.RollUp"
         }
@@ -726,6 +732,22 @@
         "Fit",
         "MemoryBytes",
         "Preset"
+      ],
+      "type": "object"
+    },
+    "machines.RefusedMac": {
+      "additionalProperties": false,
+      "properties": {
+        "Name": {
+          "type": "string"
+        },
+        "Why": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Name",
+        "Why"
       ],
       "type": "object"
     },

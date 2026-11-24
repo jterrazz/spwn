@@ -1,8 +1,10 @@
 package calls
 
 import (
+	"cmp"
 	"context"
 	"errors"
+	"slices"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
@@ -30,6 +32,9 @@ func (s *Machinist) SSH(ctx context.Context, name string) (model.SSHTarget, erro
 			}
 			return sshTarget(user, name)
 		}
+		if bad := s.heldByARefusedMac(cfg, name); bad != nil {
+			return model.SSHTarget{}, bad
+		}
 	}
 	if err != nil {
 		return model.SSHTarget{}, err
@@ -56,4 +61,16 @@ func sshTarget(user, name string) (model.SSHTarget, error) {
 		return model.SSHTarget{}, &model.BadSSHTargetError{Why: err.Error()}
 	}
 	return model.SSHTarget{User: user, Address: name, Command: command}, nil
+}
+
+func (s *Machinist) heldByARefusedMac(cfg prefsView, vm string) error {
+	_, refused := s.otherMacs()
+	for _, r := range refused {
+		if !slices.ContainsFunc(cfg.Macs[r.Name].VMs, func(v model.SeenVM) bool { return v.Name == vm }) {
+			continue
+		}
+		why := contract.Unwritable(contract.MachineBlock{Name: vm, User: cfg.Macs[r.Name].User})
+		return &model.BadSSHTargetError{Why: cmp.Or(why, r.Why)}
+	}
+	return nil
 }
