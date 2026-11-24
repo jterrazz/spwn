@@ -46,7 +46,7 @@ describe('terminal', () => {
             await visitor.see(enabled(button('Open in Terminal')));
         });
         expect(invoked).toStrictEqual([
-            { args: { command: 'ssh admin@linux-1' }, command: 'open_in_terminal' },
+            { args: { command: 'ssh you@linux-1' }, command: 'open_in_terminal' },
         ]);
         expect(result.content.text).not.toContain('Done');
         expect(result.errors.text).toBe('');

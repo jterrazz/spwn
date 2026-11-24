@@ -342,7 +342,7 @@ describe('gestures', () => {
                 await visitor.gone(button('Restart'));
             },
         );
-        expect(shows).toBe('ssh admin@linux-1');
+        expect(shows).toBe('ssh you@linux-1');
         expect(result.html.text).not.toMatch(/class="[^"]*primary/u);
         expect(result.errors.text).toBe('');
     });
