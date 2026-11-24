@@ -1,7 +1,9 @@
 # ADR-087: A fetched macOS guest takes its key at its first login
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-11-23
+
+Accepted by the owner on 2026-11-24, on the owner's word.
 
 Amends [ADR-084](084-base-macos-is-fetched-from-cirrus-labs-pinned-by-digest.md).
 

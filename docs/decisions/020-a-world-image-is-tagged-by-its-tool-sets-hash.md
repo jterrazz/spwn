@@ -1,9 +1,9 @@
 # ADR-020: A world image is tagged by its tool set's hash
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-11-24
 
-An agent leaves the status `Proposed`; only the owner writes `Accepted`.
+Accepted by the owner on 2026-11-24, on the owner's word.
 
 ## Context
 
