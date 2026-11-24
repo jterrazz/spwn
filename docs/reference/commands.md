@@ -620,7 +620,8 @@ and compile the result into a derived Docker compile.
 ```
 
 ```text
-The image is FROM spwn-world:latest by default, with the transpiled
+The image is FROM the --base image (or $SPWN_BASE_IMAGE; no default
+exists, a world image is tagged by its hash), with the transpiled
 tree COPY'd to /world/. The resulting image carries the project's
 name and the runtime name as Docker labels, so it's push-ready and
 reproducible.
@@ -642,7 +643,7 @@ check --deep' to run the transpile dry-run as part of validation.
 Examples:
   spwn build                                  # transpile + image, tag spwn-<project>:latest
   spwn build --tag spwn-myproj:v1
-  spwn build --base spwn-world:2.1
+  spwn build --base spwn/world:<hash>
   spwn build --runtime claude-code
   spwn build --world <name>                   # multi-world projects
   spwn build --no-cache
@@ -659,7 +660,7 @@ spwn build [flags]
 
 ```text
       --agent string     Compile only the named agent (tree-only mode)
-      --base string      Base image to derive from (default: $SPWN_BASE_IMAGE, else spwn-world:latest); on a Linux host it needs a spwn user and passwordless sudo
+      --base string      Base image to derive from (required unless $SPWN_BASE_IMAGE is set); on a Linux host it needs a spwn user and passwordless sudo
       --dry-run          Print paths that would be written, don't touch disk (requires --tree-only)
       --force            Overwrite existing files in --output without prompting (requires --tree-only)
       --json             Emit a machine-readable build report on stdout

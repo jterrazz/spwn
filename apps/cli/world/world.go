@@ -535,7 +535,7 @@ func spawnHint(err error, agentName string, agents []architect.AgentSpec) string
 		}
 		return fmt.Sprintf("Run \"spwn agent new %s\" to set up the agent layers", name)
 	case strings.Contains(msg, "passwordless sudo"):
-		return "Give the image a spwn user and passwordless sudo, or derive it from spwn-world:latest"
+		return "Give the image a spwn user and passwordless sudo, or derive it from a spwn/world image"
 	case strings.Contains(msg, "image") && strings.Contains(msg, "not found"):
 		return "Check that the image exists locally or pull it manually"
 	case strings.Contains(msg, "workspace") && strings.Contains(msg, "not found"):

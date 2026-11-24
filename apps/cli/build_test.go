@@ -187,3 +187,34 @@ func Test_safeRemoveOutDir(t *testing.T) {
 		}
 	})
 }
+
+func Test_resolveBaseImage(t *testing.T) {
+	cases := []struct {
+		name    string
+		flag    string
+		env     string
+		want    string
+		wantErr string
+	}{
+		{name: "flag wins over env", flag: "img:flag", env: "img:env", want: "img:flag"},
+		{name: "env when no flag", env: "img:env", want: "img:env"},
+		{name: "no default base", wantErr: "no base image"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			got, err := resolveBaseImage(tc.flag, tc.env)
+			if tc.wantErr != "" {
+				if err == nil || !strings.Contains(err.Error(), tc.wantErr) {
+					t.Fatalf("err = %v, want containing %q", err, tc.wantErr)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if got != tc.want {
+				t.Fatalf("got %q, want %q", got, tc.want)
+			}
+		})
+	}
+}
