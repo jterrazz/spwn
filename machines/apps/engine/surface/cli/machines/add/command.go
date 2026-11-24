@@ -26,7 +26,7 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 	cmd := kit.Command(kit.Leaf[Input]{
 		Use:     "add <mac>",
 		Short:   "Add another Mac by its " + catalog.TailnetProduct + " name, once its ssh and its station answer",
-		Example: "  station machines add mac-mini --user jterrazz.agent --key ~/.ssh/id_ed25519",
+		Example: "  station machines add mac-mini --user agent --key ~/.ssh/id_ed25519",
 		Args:    cobra.MaximumNArgs(1),
 		Declare: func(f *pflag.FlagSet, in *Input) {
 			f.StringVar(&in.Name, "name", "", "the Mac's name, as station v3.0 took it")

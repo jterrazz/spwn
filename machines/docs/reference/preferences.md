@@ -13,7 +13,7 @@ Machines keeps its own choices in one file, `~/.config/station/preferences.json`
 {
     "name": "macbook",
     "macs": {
-        "mac-mini": { "user": "jterrazz.agent", "key": "~/.ssh/id_ed25519", "lan": "192.168.1.20" }
+        "mac-mini": { "user": "agent", "key": "~/.ssh/id_ed25519", "lan": "192.168.1.20" }
     },
     "vm_user": "you",
     "user_email": "you@example.com",
