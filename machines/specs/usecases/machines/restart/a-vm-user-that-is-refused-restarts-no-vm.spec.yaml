@@ -1,0 +1,14 @@
+description: 'a linux VM is not restarted for a vm_user the rule refuses: nothing is run'
+env: two-macs
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs[.this_mac].preferences.vm_user = "admin"'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'machines restart linux-1'
+      exit: 1
+      stderr: |
+          Error: vm_user "admin" in preferences.json is not a VM user: a lowercase short name (a-z first, then up to 31 of a-z, 0-9, _, . and -, never a dot last), never admin or root
+          Hint: set another vm_user in ~/.config/station/preferences.json
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].vms["linux-1"] | {pid, booted}'' world.json'
+      exit: 0
+      stdout: |
+          {"pid":1001,"booted":null}

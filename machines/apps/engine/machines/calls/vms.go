@@ -122,7 +122,7 @@ func (s *Machinist) Start(ctx context.Context, name string) error {
 
 // invariant: no VM is run for a VM user its rule refuses, whatever its
 // image: its start and its restart refuse it before the VM is touched, as a
-// create does, since a guest that refuses it would only end in a timeout.
+// create does.
 func (s *Machinist) vmUserRefused() error {
 	cfg, err := s.prefs()
 	if err != nil {
