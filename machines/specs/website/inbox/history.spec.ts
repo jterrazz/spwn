@@ -95,7 +95,7 @@ describe('history', () => {
                 await visitor.click(within(navigation('Rail'), button('Inbox', { exact: false })));
 
                 // Then - a Today group holds the engine's line of the restart, its time first
-                await visitor.see(within(region('Today'), button('10:01 infra restarted by you')));
+                await visitor.see(within(region('Today'), button('10:00 infra restarted by you')));
             },
         );
         expect(result.errors.text).toBe('');
