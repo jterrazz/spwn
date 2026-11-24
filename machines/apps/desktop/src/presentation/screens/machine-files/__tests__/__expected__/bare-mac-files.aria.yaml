@@ -1,9 +1,6 @@
 - main:
   - heading "No machine follows a file." [level=1]
-  - heading "no Machinefile named macbook-pro." [level=1]
-  - paragraph:
-    - img "not found"
-    - text: "Not found · give this machine one: station init --machinefile <name>"
+  - text: "not found no Machinefile named macbook-pro. give this machine one: station init --machinefile <name>"
   - paragraph: Shipped with Machines
   - group "Shipped with Machines":
     - button "base-debian" [pressed]

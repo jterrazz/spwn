@@ -13,7 +13,7 @@ type ThisMac interface {
 	Home() string
 	UID() int
 	User() string
-	Hostname() string
+	DefaultName() string
 	Exists(path string) bool
 	// value: the names in dir, an error when it cannot be read.
 	Names(dir string) ([]string, error)

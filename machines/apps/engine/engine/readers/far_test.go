@@ -208,3 +208,67 @@ func TestARememberedMacComesBackOnlyWhenItDoesNotAnswer(t *testing.T) {
 		t.Fatalf("a mini that does not answer: %s %q %s; want its remembered slice, stale as unreachable", got.State, got.Why, got.Raw)
 	}
 }
+
+func TestAMacIsCopiedUnderTheNameThisMacRegisteredItUnder(t *testing.T) {
+	c := &turned{now: time.Date(2026, 11, 24, 9, 0, 0, 0, time.UTC), moved: make(chan struct{})}
+	st := store.New(store.EpochOf(c.now, 1), c.now, word)
+	mini := &farMac{}
+	far := &readers.Far{Calls: mini, Macs: func() []string { return []string{"mac-mini-new"} }}
+	set := readers.New(readers.Options{Store: st, Clock: c, Run: func(f func()) { f() }, Far: far})
+	set.Tick(t.Context(), false)
+
+	registered, self := store.Of(store.FamilyMac, "mac-mini-new"), store.Of(store.FamilyMac, "mac-001.lan")
+	ports, selfPorts := store.Of(store.FamilyPorts, "mac-mini-new"), store.Of(store.FamilyPorts, "mac-001.lan")
+	vm := store.Of(store.FamilyOverview, "development-linux-mini")
+	fit := engine.FitOf(engine.StateRevision, engine.StateRevision)
+	mini.send(t, engine.StateFrame{Event: engine.StateOpened, Epoch: "e/1", Fit: &fit})
+	mini.send(t, engine.StateFrame{Event: engine.StateSnapshot, Rev: 3, Slices: map[string]engine.SliceOut{
+		string(self):      {Value: json.RawMessage(`{"Name":"mac-001.lan","ThisMac":true}`), State: string(store.Fresh)},
+		string(selfPorts): {Value: json.RawMessage(`{"name":"mac-001.lan"}`), State: string(store.Fresh)},
+		string(vm):        {Value: json.RawMessage(`{}`), State: string(store.Fresh)},
+	}})
+	eventually(t, "the mini's answer is copied", func() bool {
+		return st.Now().Slices[selfPorts].State == store.Fresh || st.Now().Slices[ports].State == store.Fresh
+	})
+
+	now := st.Now()
+	for _, k := range []store.Key{registered, ports, vm} {
+		if now.Slices[k].State != store.Fresh {
+			t.Errorf("%s: %q, want fresh: a Mac's answer is This Mac's under the name it registered", k, now.Slices[k].State)
+		}
+	}
+	for _, k := range []store.Key{self, selfPorts} {
+		if _, held := now.Slices[k]; held {
+			t.Errorf("%s is held: the name a Mac gives itself names no Mac of This Mac", k)
+		}
+	}
+
+	mini.send(t, engine.StateFrame{Event: engine.StateChanged, Rev: 4, Slices: map[string]engine.SliceOut{
+		string(self): {Value: json.RawMessage(`{"Name":"mac-001.lan","ThisMac":true,"Asleep":true}`), State: string(store.Fresh)},
+	}})
+	eventually(t, "the change is copied", func() bool {
+		return strings.Contains(string(st.Now().Slices[registered].Raw), "Asleep")
+	})
+	if _, held := st.Now().Slices[self]; held {
+		t.Errorf("%s is held after a change: a change names the Mac as its snapshot did", self)
+	}
+}
+
+func TestARememberedMacComesBackUnderTheNameThisMacRegisteredItUnder(t *testing.T) {
+	c := &turned{now: time.Date(2026, 11, 24, 9, 0, 0, 0, time.UTC), moved: make(chan struct{})}
+	st := store.New(store.EpochOf(c.now, 1), c.now, word)
+	self, registered := store.Of(store.FamilyMac, "mac-001.lan"), store.Of(store.FamilyMac, "mac-mini-new")
+	held := engine.Held{"mac-mini-new": {string(self): {Value: json.RawMessage(`{"Name":"mac-001.lan"}`), State: string(store.Fresh), ReadAt: "2026-11-24T08:59:00Z"}}}
+	far := &readers.Far{Calls: &farMac{down: true}, Macs: func() []string { return []string{"mac-mini-new"} }}
+	set := readers.New(readers.Options{Store: st, Clock: c, Run: func(f func()) { f() }, Far: far})
+	set.Remember(held)
+	set.Tick(t.Context(), false)
+
+	got := st.Now()
+	if sl := got.Slices[registered]; sl.State != store.Stale || sl.Value == nil {
+		t.Errorf("%s: %q with value %v, want its remembered slice, stale", registered, sl.State, sl.Value)
+	}
+	if _, ok := got.Slices[self]; ok {
+		t.Errorf("%s is held: a remembered copy comes back under the registered name", self)
+	}
+}

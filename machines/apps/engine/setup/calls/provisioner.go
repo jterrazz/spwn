@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"path"
-	"strings"
 	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/disk"
@@ -92,26 +91,11 @@ func (s *Provisioner) CheckName(name string) error {
 }
 
 func (s *Provisioner) DefaultName(ctx context.Context) string {
-	raw := s.m.Hostname()
-	if out, code, err := s.m.Output(ctx, "scutil", []string{"--get", "LocalHostName"}, 2*time.Second); err == nil && code == 0 && strings.TrimSpace(out) != "" {
-		raw = strings.TrimSpace(out)
+	var local string
+	if out, code, err := s.m.Output(ctx, "scutil", []string{"--get", "LocalHostName"}, 2*time.Second); err == nil && code == 0 {
+		local = out
 	}
-	return sanitize(raw)
-}
-
-func sanitize(raw string) string {
-	label, _, _ := strings.Cut(strings.ToLower(raw), ".")
-	label = strings.Map(func(r rune) rune {
-		if (r >= 'a' && r <= 'z') || (r >= '0' && r <= '9') {
-			return r
-		}
-		return '-'
-	}, label)
-	label = strings.Trim(label, "-")
-	if len(label) > 40 {
-		label = strings.TrimRight(label[:40], "-")
-	}
-	return label
+	return setup.DefaultName(local, s.m.Hostname())
 }
 
 func (s *Provisioner) Run(ctx context.Context, r Request) (setup.Report, error) {

@@ -159,7 +159,7 @@ func (r *Reader[App, Item, Misplaced]) fact(ctx context.Context, f catalog.Fact)
 
 func (r *Reader[App, Item, Misplaced]) label() string {
 	registered, _ := r.d.Name.Get()
-	name := machines.ThisMacName(registered, r.d.ThisMac.Hostname)
+	name := machines.ThisMacName(registered, r.d.ThisMac.DefaultName)
 	if short, ok := strings.CutPrefix(name, r.d.ThisMac.User+"-"); ok && short != "" && r.d.ThisMac.User != "" {
 		return short
 	}

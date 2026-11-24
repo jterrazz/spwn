@@ -56,7 +56,7 @@ const (
 
 func (m machine) machines(_ bool) *machinescalls.Machinist {
 	knownHosts := filepath.Join(m.paths.State, "known_hosts")
-	return machinescalls.New(macSystem{m.sys}, m.hypervisor(), machinescalls.Prefs{Name: m.stores.name(), Macs: m.stores.macs(), VMUser: m.stores.vmUser()}, m.stores.machines, macNodes{tailnet: m.tailnet()}, allMachinesImages{images: m.images(), cat: m.cat}, machinesEngine{m.macEngine()}, reservationReleaser{m: m}, machinescalls.Options{
+	return machinescalls.New(macSystem{h: m.sys, named: m.named}, m.hypervisor(), machinescalls.Prefs{Name: m.stores.name(), Macs: m.stores.macs(), VMUser: m.stores.vmUser()}, m.stores.machines, macNodes{tailnet: m.tailnet()}, allMachinesImages{images: m.images(), cat: m.cat}, machinesEngine{m.macEngine()}, reservationReleaser{m: m}, machinescalls.Options{
 		Images:      m.cat.Images,
 		ThisMachine: m.kind,
 		KnownHosts:  knownHosts, Logs: filepath.Join(m.paths.State, "logs"),

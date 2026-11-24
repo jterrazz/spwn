@@ -271,10 +271,10 @@ describe('Machine files', () => {
         const result = await component.render(windowOver('bare-mac'), async (visitor) => {
             // When - machinefile.files has answered and machinefile.explain has refused
             await visitor.see(button('base-macos'));
-            await visitor.see(heading('no Machinefile named macbook-pro.'));
+            await visitor.see(content('give this machine one: station init --machinefile <name>'));
         });
 
-        // Then - the files are cards, and the refusal with the hint the engine gave sits beside them
+        // Then - the files are cards, and the refusal is one finding row under the page's head, never a headline
         await expect(result.tree).toMatch(file('./__expected__/bare-mac-files.aria.yaml'));
     });
 });
