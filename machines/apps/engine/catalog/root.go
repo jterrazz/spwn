@@ -9,6 +9,28 @@ const Sudo = "sudo" // value: the one spelling of sudo outside the owner's words
 
 func AsRoot(line string) string { return Sudo + " " + line }
 
+func PoweroffLine(k MachineKind) string {
+	// value: the line that powers a guest off from inside, as root, answering
+	// before the guest goes: systemd's on a Linux guest; on a macOS one, the
+	// sudo rule is read in the foreground, so a refusal is the line's nonzero
+	// exit, then shutdown runs detached, since it drops the connection.
+	if k == MacOS {
+		return Sudo + " -n -l /sbin/shutdown -h now >/dev/null && (nohup " + Sudo + " -n /sbin/shutdown -h now >/dev/null 2>&1 &)"
+	}
+	return AsRoot("systemctl --no-block poweroff")
+}
+
+func GoingDownLine(k MachineKind) string {
+	// value: the line that exits 0 when a guest is already powering itself
+	// off: systemd stopping, or logind holding a poweroff for its delay locks,
+	// when it refuses a second one; a macOS guest refuses its poweroff line
+	// only for its sudo rule, so it has none.
+	if k == MacOS {
+		return ""
+	}
+	return `[ "$(systemctl is-system-running)" = stopping ] || busctl get-property org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager PreparingForShutdown | grep -qx "b true"`
+}
+
 const SudoUser, SudoUID, SudoGID = "SUDO_USER", "SUDO_UID", "SUDO_GID" // value: the variables sudo sets for the account that typed its line: its name, its uid and its gid.
 
 const InstallDir = "~/.local/bin" // value: the folder the one public installer puts station in when it is given no other; `~` is the home. The installer is another repository's, so a window reads what the engine records for the folder it really runs from, and this only when none is recorded.

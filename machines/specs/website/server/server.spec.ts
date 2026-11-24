@@ -117,7 +117,7 @@ describe('server', () => {
 
                 // Then - Today holds the engine's line of this restart, beside the one of the morning
                 const today = region('Today');
-                await visitor.see(within(today, button('10:31 infra restarted by you')));
+                await visitor.see(within(today, button('10:30 infra restarted by you')));
                 await visitor.see(within(today, button('09:05 infra restarted by you')));
             },
         );
