@@ -10,7 +10,7 @@
 
   Image
     ├ tools: spwn:unix, spwn:git, spwn:claude-code
-    ✓ {{any}} spwn/world:latest
+    ✓ {{any}} spwn/world:{{sha}}
 
   Spawn
     ✓ Created container      world-neo-{{hex#world}}

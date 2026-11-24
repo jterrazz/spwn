@@ -60,6 +60,10 @@ func (noContainersBackend) ImageList(context.Context, string) ([]backend.ImageIn
 	return nil, nil
 }
 func (noContainersBackend) ImageRemove(context.Context, string) error { return nil }
+func (noContainersBackend) ImageRemoveUnused(context.Context, string) error { return nil }
+func (noContainersBackend) RebuildImage(context.Context, string, []byte, map[string][]byte, io.Writer) error {
+	return nil
+}
 func (noContainersBackend) Inspect(context.Context, string) (*backend.ContainerInfo, error) {
 	return nil, nil
 }

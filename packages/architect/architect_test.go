@@ -89,7 +89,7 @@ type execCall struct {
 func newMockBackend() *mockBackend {
 	return &mockBackend{
 		containers:   make(map[string]*mockContainer),
-		images:       map[string]bool{"spwn/world:latest": true},
+		images:       map[string]bool{"spwn/world:0123456789ab": true},
 		isRunningVal: true,
 		imageExistsV: true,
 		execOutput:   "bash\nsh\ngit",
@@ -220,6 +220,14 @@ func (m *mockBackend) ImageRemove(_ context.Context, _ string) error {
 	return m.imageRemoveE
 }
 
+func (m *mockBackend) ImageRemoveUnused(_ context.Context, _ string) error {
+	return m.imageRemoveE
+}
+
+func (m *mockBackend) RebuildImage(_ context.Context, _ string, _ []byte, _ map[string][]byte, _ io.Writer) error {
+	return m.ensureImgErr
+}
+
 func (m *mockBackend) Inspect(_ context.Context, nameOrID string) (*backend.ContainerInfo, error) {
 	return &backend.ContainerInfo{ID: nameOrID, Running: true}, nil
 }
@@ -271,7 +279,7 @@ func seedWorld(mb *mockBackend, w models.World) {
 	}
 	cfg := backend.ContainerConfig{
 		Name:   w.ID,
-		Image:  "spwn/world:latest",
+		Image:  "spwn/world:0123456789ab",
 		Labels: labels.WorldLabels(w),
 	}
 	mb.containers[id] = &mockContainer{id: id, config: cfg, running: true}

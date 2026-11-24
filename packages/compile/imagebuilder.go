@@ -9,6 +9,8 @@ import (
 	"sort"
 	"strings"
 
+	cerrdefs "github.com/containerd/errdefs"
+
 	"spwn.sh/packages/compile/internal/dockerfile"
 	"spwn.sh/packages/container/backend"
 	"spwn.sh/packages/dependency/resolver"
@@ -55,13 +57,16 @@ type BuildRequest struct {
 	// consult that file at runtime.
 	Policies map[string]ToolPolicy
 
-	// Tag is the Docker image tag to apply.
-	Tag string
+	// Repository names the image; the build tags it
+	// <Repository>:<content hash of the generated Dockerfile and its
+	// extra files>, so two tool sets never share a tag.
+	Repository string
 
-	// ForceRebuild bypasses the content hash cache check and rebuilds
-	// from scratch. The default is content-addressed caching: if the
-	// generated Dockerfile + extra-files bytes match what the
-	// currently tagged image was built from, the build is a no-op.
+	// ForceRebuild bypasses the cache check and rebuilds the tag with
+	// no build cache; the new image takes the tag, and the old one
+	// stays for whatever still uses it. The default is
+	// content-addressed caching: a tag that already exists holds this
+	// exact build, so the build is a no-op.
 	ForceRebuild bool
 
 	// SkipVerify disables post-build verification.
@@ -78,17 +83,18 @@ func (req *BuildRequest) Validate() error {
 	if len(req.BaseDockerfile) == 0 {
 		return fmt.Errorf("BuildRequest.BaseDockerfile is required")
 	}
-	if req.Tag == "" {
-		return fmt.Errorf("BuildRequest.Tag is required")
+	if req.Repository == "" {
+		return fmt.Errorf("BuildRequest.Repository is required")
 	}
 	return nil
 }
 
 // BuildResult describes the outcome of a successful build.
 type BuildResult struct {
-	Tag    string
-	Tools  []string
-	Cached bool
+	Tag     string
+	Tools   []string
+	Cached  bool
+	Release func()
 }
 
 // Build resolves tools, generates a Dockerfile, builds the image, and verifies it.
@@ -146,30 +152,79 @@ func (b *Builder) Build(ctx context.Context, req BuildRequest) (*BuildResult, er
 	dfNoLabel := dockerfile.Generate(req.BaseDockerfile, toolInputs, "")
 	version := hashBuildContext(dfNoLabel, extraFiles)
 	df := dockerfile.Generate(req.BaseDockerfile, toolInputs, version)
+	tag := req.Repository + ":" + version
 
-	if req.ForceRebuild {
-		_ = b.backend.ImageRemove(ctx, req.Tag)
-	}
-
-	rebuilt, err := b.backend.EnsureImageWithContext(ctx, req.Tag, version, df, extraFiles, logw)
+	release, err := holdTag(ctx, tag)
 	if err != nil {
-		return nil, &BuildError{Tag: req.Tag, Cause: err}
+		return nil, &BuildError{Tag: tag, Cause: err}
+	}
+	rebuilt, err := b.ensure(ctx, req, tag, version, df, extraFiles, logw)
+	if err != nil {
+		release()
+		return nil, &BuildError{Tag: tag, Cause: err}
+	}
+	if rebuilt {
+		b.pruneOthers(ctx, req.Repository, tag, logw)
 	}
 
 	if !req.SkipVerify {
 		fmt.Fprintf(logw, "Verifying tools...\n")
-		if err := b.verify(ctx, req.Tag, resolved, logw); err != nil {
+		if err := b.verify(ctx, tag, resolved, logw); err != nil {
+			release()
 			return nil, err
 		}
 	}
 
 	result := &BuildResult{
-		Tag:    req.Tag,
-		Tools:  resolvedNames,
-		Cached: !rebuilt,
+		Tag:     tag,
+		Tools:   resolvedNames,
+		Cached:  !rebuilt,
+		Release: release,
 	}
 
 	return result, nil
+}
+
+func (b *Builder) ensure(ctx context.Context, req BuildRequest, tag, version string, df []byte, extraFiles map[string][]byte, logw io.Writer) (bool, error) {
+	release, err := lockTag(ctx, tag)
+	if err != nil {
+		return false, err
+	}
+	defer release()
+	if req.ForceRebuild {
+		return true, b.backend.RebuildImage(ctx, tag, df, extraFiles, logw)
+	}
+	return b.backend.EnsureImageWithContext(ctx, tag, version, df, extraFiles, logw)
+}
+
+func (b *Builder) pruneOthers(ctx context.Context, repository, keep string, logw io.Writer) {
+	images, err := b.backend.ImageList(ctx, repository+":")
+	if err != nil {
+		fmt.Fprintf(logw, "Prune %s: list images: %v\n", repository, err)
+		return
+	}
+	for _, image := range images {
+		if image.Tag == keep {
+			continue
+		}
+		release, claimed, err := claimTag(image.Tag)
+		if err != nil {
+			fmt.Fprintf(logw, "Prune %s: %v\n", image.Tag, err)
+			continue
+		}
+		if !claimed {
+			continue
+		}
+		err = b.backend.ImageRemoveUnused(ctx, image.Tag)
+		release()
+		switch {
+		case err == nil:
+			fmt.Fprintf(logw, "Pruned %s\n", image.Tag)
+		case cerrdefs.IsConflict(err):
+		default:
+			fmt.Fprintf(logw, "Prune %s: %v\n", image.Tag, err)
+		}
+	}
 }
 
 func hashBuildContext(dockerfile []byte, extraFiles map[string][]byte) string {

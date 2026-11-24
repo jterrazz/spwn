@@ -8,7 +8,7 @@ const (
 )
 
 const (
-	WorldImage            = "spwn/world:latest"
+	WorldImageRepository  = "spwn/world"
 	ArchitectImage        = "spwn/architect:latest"
 	ArchitectImageVersion = "1.1.0"
 	ArchitectMount        = "/home/spwn/.spwn"

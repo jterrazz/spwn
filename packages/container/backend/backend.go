@@ -86,6 +86,7 @@ type Backend interface {
 	ImageExists(ctx context.Context, image string) (bool, error)
 	EnsureImage(ctx context.Context, tag string, expectedVersion string, dockerfile []byte, logw io.Writer) (bool, error)
 	EnsureImageWithContext(ctx context.Context, tag string, expectedVersion string, dockerfile []byte, extraFiles map[string][]byte, logw io.Writer) (bool, error)
+	RebuildImage(ctx context.Context, tag string, dockerfile []byte, extraFiles map[string][]byte, logw io.Writer) error
 	ImageVersion(ctx context.Context, image string, label string) (string, error)
 	ExecDetached(ctx context.Context, containerID string, cfg ExecConfig) error
 
@@ -94,6 +95,7 @@ type Backend interface {
 	ImageList(ctx context.Context, prefix string) ([]ImageInfo, error)
 
 	ImageRemove(ctx context.Context, imageTag string) error
+	ImageRemoveUnused(ctx context.Context, imageTag string) error
 
 	Inspect(ctx context.Context, nameOrID string) (*ContainerInfo, error)
 

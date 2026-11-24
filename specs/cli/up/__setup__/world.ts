@@ -34,6 +34,7 @@ export async function worldOf(container: Container) {
         "sh -c 'id -un && ls -A /agents/neo && ls -A /world && command -v bash && command -v git'",
     );
     return {
+        image: fieldOf(fieldOf(inspected, 'Config'), 'Image'),
         inside: inside.stdout.text,
         labels: {
             config: labels['sh.spwn.world.config'],

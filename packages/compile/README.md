@@ -6,7 +6,7 @@ The compile layer: Docker-touching image assembly.
 
 Two entry points live here because they share the Dockerfile generator and the container backend:
 
-1. **`compile.New(registry, backend)` then `Builder.Build(req)`**: the shared base world image. Resolves a dependency set into a Dockerfile, runs `docker build`, probes the result to verify every tool works. Cached on a content-addressed version label. Called by `packages/architect` at spawn time.
+1. **`compile.New(registry, backend)` then `Builder.Build(req)`**: the base world image of one dependency set. Resolves the set into a Dockerfile, runs `docker build`, probes the result to verify every tool works. The image is tagged `<repository>:<content hash>` (`spwn/world:<hash>` at spawn time), so two dependency sets never share a tag. One build of a tag runs at a time on the machine, through a flock in the temp folder whose wait is bounded; the result holds the tag in use until its `Release`, and a build that writes a new tag removes the other tags of its repository that nothing holds and no container uses. A forced rebuild builds with no cache and never untags first. Called by `packages/architect` at spawn time.
 2. **`compile.BuildFromBase(ctx, cli, req)`**: project-specific derived images. Takes a base image plus a transpiled `Tree` (from `packages/transpile`) and produces `FROM <base> / COPY tree/ /world/` as a pushable artifact. Called by `spwn build`.
 
 ```text
@@ -25,7 +25,7 @@ Dependency resolution (the `Registry`, transitive expansion, topological sort) a
 
 ## Key types
 
-- `Builder` / `compile.New(registry, backend)` / `Builder.Build(req)`: resolve deps, generate the Dockerfile, `docker build`, verify. Result cached on content-addressed version label.
+- `Builder` / `compile.New(registry, backend)` / `Builder.Build(req)`: resolve deps, generate the Dockerfile, `docker build`, verify. The tag is the content hash, so a tag that exists is the cache.
 - `BuildFromBase(ctx, cli, req)`: compose a `TreeTarballer` onto a base image. Interface (not concrete `*transpile.Tree`) to avoid a cycle from compile through transpile back to compile.
 - `BuildError`, `VerifyError`: typed errors for build failures and post-build verification failures.
 - `GenerateDockerfile`, `ToolsToInputs`, `GenerateOpts`: generator seams used by both entry points.
