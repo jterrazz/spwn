@@ -104,8 +104,8 @@ describe('Rail', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test("the rail's foot opens Passwords, Storage and Settings, pages of the whole window with no space's sidebar", async () => {
-        // Given - the window on agent-7f over two-macs
+    test("the rail's foot opens Passwords and Settings, pages of the whole window with no space's sidebar", async () => {
+        // Given - the window on linux-1 over two-macs
         const result = await component.render(
             windowOn(machineRoute('linux-1'), 'two-macs'),
             async (visitor) => {
@@ -120,10 +120,7 @@ describe('Rail', () => {
                 await visitor.gone(sidebar);
                 await visitor.gone(TOGGLE);
 
-                // When - the rail's Storage, then its Settings, is pressed
-                await visitor.click(within(rail, button('Storage')));
-                await visitor.see(heading('3.0 GB can be freed.'));
-                await visitor.gone(sidebar);
+                // When - the rail's Settings is pressed
                 await visitor.click(within(rail, button('Settings')));
 
                 // Then - Settings with no sidebar, and Machine brings the sidebar back where it was
@@ -137,24 +134,27 @@ describe('Rail', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test("the Machine space's sidebar holds the machines and its Catalog, Machine files among it, and no global page", async () => {
+    test("the Machine space's sidebar heads with Storage and Engine, then the machines and its Catalog, and no window-wide page", async () => {
         // Given - the window on Home over two-macs
         const result = await component.render(
             windowOn({ page: 'home' }, 'two-macs'),
             async (visitor) => {
                 await visitor.see(sidebar);
 
-                // When - the Catalog's Machine files is pressed
+                // When - the sidebar's Storage is pressed, then the Catalog's Machine files
                 await visitor.see(within(sidebar, button('Apps 10')));
                 await visitor.see(within(sidebar, button('Machine settings 3')));
+                await visitor.click(within(sidebar, button('Storage')));
+                await visitor.see(heading('3.0 GB can be freed.'));
+                await visitor.see(within(sidebar, heading('Machine')));
                 await visitor.click(within(sidebar, button('Machine files')));
 
-                // Then - Machine files beside the sidebar, which names neither Passwords nor Storage
-                await visitor.see(within(sidebar, heading('Machine')));
+                // Then - Machine files beside the sidebar, which names Engine but not Passwords, and the rail
+                // Then - no Storage
+                await visitor.see(within(sidebar, button('Engine')));
                 await visitor.gone(within(sidebar, button('Passwords')));
-                await visitor.gone(within(sidebar, button('Storage')));
                 await visitor.see(within(rail, button('Passwords')));
-                await visitor.see(within(rail, button('Storage')));
+                await visitor.gone(within(rail, button('Storage')));
             },
         );
         expect(result.errors.text).toBe('');

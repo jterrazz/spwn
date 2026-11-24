@@ -1,4 +1,13 @@
-import { button, component, content, file, heading, navigation, within } from '@jterrazz/test';
+import {
+    button,
+    component,
+    content,
+    file,
+    heading,
+    navigation,
+    region,
+    within,
+} from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import type { Link } from '../../../../application/ports/engine.port';
@@ -208,5 +217,27 @@ describe('EnginePage', () => {
 
         // Then - no Update offered anywhere
         await expect(result.tree).toMatch(file('./__expected__/engine-older.aria.yaml'));
+    });
+
+    test("every Mac stands in its own section, This Mac's release first, the others their engine alone", async () => {
+        // Given - the engine of stories, where macbook-air sleeps and has never said its version
+        const result = await component.render(
+            engineOver(recordingFor('stories')),
+            async (visitor) => {
+                // When - the page has read the release
+                await visitor.see(
+                    within(region('macbook-pro'), heading('The latest release is not known yet.')),
+                );
+
+                // Then - the mini's engine with its version, the Air asleep, and no Check now but This Mac's
+                const mini = within(region('mac-mini'), region('Engine'));
+                await visitor.see(within(mini, content('v4.0.0')));
+                const air = within(region('macbook-air'), region('Engine'));
+                await visitor.see(within(air, content('asleep')));
+                await visitor.gone(within(region('mac-mini'), button('Check now')));
+                await visitor.gone(within(region('macbook-air'), button('Check now')));
+            },
+        );
+        expect(result.errors.text).toBe('');
     });
 });

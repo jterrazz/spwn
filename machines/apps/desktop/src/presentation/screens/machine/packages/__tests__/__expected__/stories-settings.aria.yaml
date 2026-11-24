@@ -9,7 +9,6 @@
     - tab "Packages" [selected]
     - tab "Ports"
     - tab "Sign-ins"
-    - tab "Storage"
   - heading "2 differences from macbook-pro." [level=1]:
     - text: 2 differences from
     - button "macbook-pro"

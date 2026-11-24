@@ -9,7 +9,6 @@
     - tab "Packages"
     - tab "Ports"
     - tab "Sign-ins"
-    - tab "Storage"
   - 'heading "Disk almost full: 4 % free." [level=1]'
   - paragraph:
     - 'img "Disk almost full: 4 % free"'

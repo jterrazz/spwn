@@ -1,5 +1,5 @@
 import type { Request, Target } from '@jterrazz/station-api';
-import { button, disabled, enabled, region } from '@jterrazz/test';
+import { button, disabled, enabled, region, within } from '@jterrazz/test';
 
 import { pageOver } from '../../../../composition/__tests__/page-over';
 import { isRecord } from '../../../../domain/request-key';
@@ -18,10 +18,12 @@ export const SUBJECT = 'base-ubuntu@2026.10.20, old-vm';
 
 export const NAMES = ['base-ubuntu@2026.10.20', 'old-vm'];
 
-export const disk = region('Disk');
-export const freed = region('Can be freed');
-export const kept = region('Kept');
-export const done = region('Done here');
+export const THIS_MAC = region('macbook-pro');
+export const MINI = region('mac-mini');
+export const disk = within(THIS_MAC, region('Disk'));
+export const freed = within(THIS_MAC, region('Can be freed'));
+export const kept = within(THIS_MAC, region('Kept'));
+export const done = within(THIS_MAC, region('Done here'));
 export const freeIt = enabled(button('Free'));
 export const freeHeld = disabled(button('Free'));
 export const freeStation = enabled(button('Free 12 GB'));

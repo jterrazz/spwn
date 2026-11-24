@@ -1,4 +1,4 @@
-import { button, component, disabled, enabled } from '@jterrazz/test';
+import { button, component, content, disabled, enabled } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { Button, Screen } from '../../ui/index';
@@ -91,5 +91,37 @@ describe('Toolbar', () => {
         await expect(render).rejects.toThrow(
             'One primary button per screen: a second one was drawn.',
         );
+    });
+
+    test('a crumb that names a group is words, and the shelf above an item opens it', async () => {
+        // Given - the toolbar of a catalog item: Catalog, then Apps, then jq
+        const opened: string[] = [];
+        const result = await component.render(
+            <Toolbar
+                canGoBack={false}
+                canGoForward={false}
+                crumbs={[
+                    { label: 'Catalog' },
+                    {
+                        label: 'Apps',
+                        open: () => {
+                            opened.push('Apps');
+                        },
+                    },
+                    { label: 'jq' },
+                ]}
+                onBack={IDLE}
+                onForward={IDLE}
+            />,
+            async (visitor) => {
+                // When - Apps is pressed
+                await visitor.see(content('Catalog'));
+                await visitor.click(button('Apps'));
+            },
+        );
+
+        // Then - Apps opened, and Catalog is no button
+        expect(opened).toStrictEqual(['Apps']);
+        expect(result.html.text).not.toContain('>Catalog</button>');
     });
 });

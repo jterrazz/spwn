@@ -6,12 +6,15 @@
     - button "Agent soon" [disabled]
     - button "OS soon" [disabled]
   - button "Passwords"
-  - button "Storage"
   - button "Settings"
   - button "Engine running · v0.21.0"
 - navigation "Sidebar":
   - heading "Machine" [level=2]
+  - button "New machine"
   - button "Find"
+  - group "Every Mac":
+    - button "Storage"
+    - button "Engine"
   - group "Machines":
     - heading "Machines" [level=2]
     - button "macbook-pro online":
@@ -40,7 +43,17 @@
   - button "Back" [disabled]
   - button "Forward" [disabled]
   - text: Engine
-  - heading "No verdict from the engine." [level=1]
-  - paragraph:
-    - img "not given yet"
-    - text: "This engine reads no release: it is older than the call"
+  - region "macbook-pro":
+    - heading "macbook-pro" [level=2]
+    - heading "No verdict from the engine." [level=1]
+    - paragraph:
+      - img "not given yet"
+      - text: "This engine reads no release: it is older than the call"
+    - region "Engine":
+      - heading "Engine" [level=2]
+      - text: Engine v0.21.0 running
+  - region "mac-mini":
+    - heading "mac-mini" [level=2]
+    - region "Engine":
+      - heading "Engine" [level=2]
+      - text: Engine dev running

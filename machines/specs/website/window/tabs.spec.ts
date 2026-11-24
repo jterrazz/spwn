@@ -6,16 +6,17 @@ import { website } from '../website.specification.js';
 const TABS = ['Overview', 'Activity', 'Packages', 'Ports', 'Sign-ins', 'Storage'];
 
 describe('tabs', () => {
-    test('A6 a Mac carries the six tabs', async () => {
+    test('A6 a Mac carries five tabs, its disk being its section of Storage', async () => {
         // Given - the window on This Mac's page over two-macs
         const result = await website.visit(
             '/?world=two-macs&machine=macbook-pro&tab=Activity',
             async (visitor) => {
                 // When - its tabs are read
-                // Then - the six are there
-                for (const tab of TABS) {
+                // Then - the five are there, and no Storage
+                for (const tab of TABS.filter((one) => one !== 'Storage')) {
                     await visitor.see(within(main(), content(tab)));
                 }
+                await visitor.gone(within(main(), content('Storage')));
             },
         );
         expect(result.errors.text).toBe('');

@@ -5,6 +5,7 @@ import {
     dialog,
     field,
     focused,
+    main,
     navigation,
     within,
 } from '@jterrazz/test';
@@ -108,7 +109,7 @@ describe('Find', () => {
     test('while a dialog is open, ⌘K and ⌘[ do nothing, so the draft stays', async () => {
         // Given - New machine opened from Home, a name typed in it
         const result = await component.render(windowOnHome(), async (visitor) => {
-            await visitor.click(button('New machine'));
+            await visitor.click(within(main(), button('New machine')));
             const sheet = dialog('New machine on mac-mini');
             await visitor.see(sheet);
             await visitor.fill(within(sheet, field('Name')), 'gate5');

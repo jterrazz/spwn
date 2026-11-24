@@ -35,6 +35,8 @@ import { Icon } from '../../ui/icon';
 import { IconButton } from '../../ui/icon-button';
 import { ICON_BUTTON_STORIES } from '../../ui/icon-button.stories';
 import { ICON_STORIES } from '../../ui/icon.stories';
+import { MacSection } from '../../ui/mac-section';
+import { MAC_SECTION_STORIES } from '../../ui/mac-section.stories';
 import { MachineChip } from '../../ui/machine-chip';
 import { MACHINE_CHIP_STORIES } from '../../ui/machine-chip.stories';
 import { MachineIcon } from '../../ui/machine-icon';
@@ -158,6 +160,11 @@ export const ENTRIES: readonly Entry[] = [
         stories: CHOICE_CARD_STORIES,
     }),
     entry('Panel', 'Containers', { Component: Panel, frame: 'block', stories: PANEL_STORIES }),
+    entry('MacSection', 'Containers', {
+        Component: MacSection,
+        frame: 'block',
+        stories: MAC_SECTION_STORIES,
+    }),
     entry('Row', 'Containers', { Component: Row, frame: 'block', stories: ROW_STORIES }),
     entry('RowHead', 'Containers', {
         Component: RowHead,

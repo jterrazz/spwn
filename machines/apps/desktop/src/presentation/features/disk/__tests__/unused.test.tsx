@@ -1,4 +1,4 @@
-import { button, component, content, dialog, field, heading, within } from '@jterrazz/test';
+import { button, component, content, dialog, field, heading, region, within } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { recordingsOf } from '../../../../infrastructure/outbound/engine-replay/recordings';
@@ -16,6 +16,7 @@ import {
     freeStation,
     HELLO_AGAIN,
     kept,
+    MINI,
     NAMES,
     narrowedTo,
     readsAsked,
@@ -24,6 +25,7 @@ import {
     storageOn,
     storageOver,
     SUBJECT,
+    THIS_MAC,
     withStation,
 } from './unused-stage';
 
@@ -208,7 +210,7 @@ describe('unused', () => {
         }));
         const result = await component.render(storageOver(unreadable), async (visitor) => {
             // When - its disk has been read
-            await visitor.see(heading('A machine record cannot be read.'));
+            await visitor.see(within(THIS_MAC, heading('A machine record cannot be read.')));
 
             // Then - the engine's sentence, no Free of what nothing uses, the caches Free as the primary
             await visitor.see(within(disk, content(reason)));
@@ -240,8 +242,8 @@ describe('unused', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test('the other Mac, chosen once a question is cancelled, is sent its own names and never the first', async () => {
-        // Given - Storage over two-macs, the mini holding an image of its own to free
+    test("the other Mac's Free, pressed once a question is cancelled, sends its own names and never the first", async () => {
+        // Given - Storage over two-macs, the mini's section holding an image of its own to free
         const own = 'base-ubuntu@2026.10.20';
         const other = 'mini-image@2026.10.01';
         const stage = staged(eachAsking(recordingFor('two-macs'), own, other));
@@ -250,10 +252,10 @@ describe('unused', () => {
             const asked = dialog('Free 3 GB on macbook-pro?');
             await visitor.see(within(asked, field(`Type ${own} to confirm`)));
 
-            // When - the question is cancelled (its modal covers the picker), the mini chosen, its Free pressed
+            // When - the question is cancelled, then the Free of the mini's own section pressed
             await visitor.click(within(asked, button('Cancel')));
-            await visitor.click(button('mac-mini'));
-            await visitor.click(within(disk, button('Free 2 GB')));
+            const miniDisk = within(MINI, region('Disk'));
+            await visitor.click(within(miniDisk, button('Free 2 GB')));
             const miniAsked = dialog('Free 2 GB on mac-mini?');
             await visitor.see(within(miniAsked, field(`Type ${other} to confirm`)));
         });

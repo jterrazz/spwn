@@ -17,7 +17,6 @@
     - tab "Packages"
     - tab "Ports"
     - tab "Sign-ins"
-    - tab "Storage"
   - heading "Online, with 1 machine running." [level=1]
   - paragraph:
     - img "Online, with 1 machine running."

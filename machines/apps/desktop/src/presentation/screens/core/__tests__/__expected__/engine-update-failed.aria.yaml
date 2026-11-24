@@ -6,12 +6,15 @@
     - button "Agent soon" [disabled]
     - button "OS soon" [disabled]
   - button "Passwords"
-  - button "Storage"
   - button "Settings"
   - button "Engine running · v0.21.0"
 - navigation "Sidebar":
   - heading "Machine" [level=2]
+  - button "New machine"
   - button "Find"
+  - group "Every Mac":
+    - button "Storage"
+    - button "Engine"
   - group "Machines":
     - heading "Machines" [level=2]
     - button "macbook-pro online":
@@ -41,18 +44,25 @@
   - button "Back" [disabled]
   - button "Forward" [disabled]
   - text: Engine
-  - heading "Spwn v0.22.0 is out." [level=1]
-  - paragraph:
-    - img "Spwn v0.22.0 is out."
-    - text: This Mac runs v0.21.0.
-  - region "Update":
-    - text: failed
-    - 'heading "Error: station-darwin-arm64 does not match its checksum, nothing installed" [level=1]'
-    - paragraph: The installer ended with exit code 1. Its output is kept below.
-    - log "The installer's output": "Detecting the newest release... Version: v0.22.0 Downloading spwn_darwin_arm64.tar.gz... Downloading station-darwin-arm64... Error: station-darwin-arm64 does not match its checksum, nothing installed"
-    - button "Retry"
-    - button "Done"
-  - region "Engine":
-    - heading "Engine" [level=2]
-    - text: Latest release Checked 4 Nov, 09:00
-    - button "Check now"
+  - region "macbook-pro":
+    - heading "macbook-pro" [level=2]
+    - heading "Spwn v0.22.0 is out." [level=1]
+    - paragraph:
+      - img "Spwn v0.22.0 is out."
+      - text: This Mac runs v0.21.0.
+    - region "Update":
+      - text: failed
+      - 'heading "Error: station-darwin-arm64 does not match its checksum, nothing installed" [level=1]'
+      - paragraph: The installer ended with exit code 1. Its output is kept below.
+      - log "The installer's output": "Detecting the newest release... Version: v0.22.0 Downloading spwn_darwin_arm64.tar.gz... Downloading station-darwin-arm64... Error: station-darwin-arm64 does not match its checksum, nothing installed"
+      - button "Retry"
+      - button "Done"
+    - region "Engine":
+      - heading "Engine" [level=2]
+      - text: Engine v0.21.0 running Latest release Checked 4 Nov, 09:00
+      - button "Check now"
+  - region "mac-mini":
+    - heading "mac-mini" [level=2]
+    - region "Engine":
+      - heading "Engine" [level=2]
+      - text: Engine dev running

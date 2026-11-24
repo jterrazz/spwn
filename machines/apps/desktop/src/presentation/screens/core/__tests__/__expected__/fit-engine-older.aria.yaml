@@ -6,13 +6,16 @@
     - button "Agent soon" [disabled]
     - button "OS soon" [disabled]
   - button "Passwords" [disabled]
-  - button "Storage" [disabled]
   - button "Settings" [disabled]
   - img "engine older than this app"
   - text: Engine older than this app
 - navigation "Sidebar":
   - heading "Machine" [level=2]
+  - button "New machine" [disabled]
   - button "Find" [disabled]
+  - group "Every Mac":
+    - button "Storage" [disabled]
+    - button "Engine" [disabled]
   - group "Machines":
     - heading "Machines" [level=2]
     - paragraph: Update station to see them

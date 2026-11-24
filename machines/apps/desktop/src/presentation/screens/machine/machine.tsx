@@ -37,14 +37,8 @@ export function MachineTab({ found, tab, go }: Props) {
             return <SignInsTab found={found} go={go} key={name} />;
         }
         case 'Storage': {
-            return (
-                <StorageTab
-                    go={go}
-                    key={name}
-                    name={name}
-                    target={targetOf(found)}
-                    vm={found.vm !== undefined}
-                />
+            return found.vm === undefined ? null : (
+                <StorageTab go={go} key={name} name={name} target={targetOf(found)} />
             );
         }
     }

@@ -2,6 +2,7 @@ import type { CallName, DiskCanFree, DiskKept, Target } from '@jterrazz/station-
 
 import { bytes } from '../../../domain/format';
 import { useGesture } from '../../dependencies/use-gesture';
+import type { ButtonVariant } from '../../ui/button';
 import { Icon } from '../../ui/icon';
 import { Panel, Row } from '../../ui/index';
 import { wordOfSent } from '../../words/engine-words';
@@ -22,9 +23,14 @@ export function useFreeUnused(canFree: DiskCanFree | undefined, target: Target |
     });
 }
 
-type FootProps = { canFree: DiskCanFree; gesture: DiskGesture; name: string };
+type FootProps = {
+    canFree: DiskCanFree;
+    gesture: DiskGesture;
+    name: string;
+    variant: ButtonVariant;
+};
 
-export function UnusedFoot({ canFree, gesture, name }: FootProps) {
+export function UnusedFoot({ canFree, gesture, name, variant }: FootProps) {
     const label = `${DISK_GESTURE_LABELS['disk.free-unused']} ${bytes(canFree.Bytes)}`;
     return (
         <div className={styles.foot}>
@@ -34,7 +40,7 @@ export function UnusedFoot({ canFree, gesture, name }: FootProps) {
                     gesture={gesture}
                     label={label}
                     name={name}
-                    variant="primary"
+                    variant={variant}
                     verb={DISK_GESTURE_VERBS['disk.free-unused']}
                 />
             )}

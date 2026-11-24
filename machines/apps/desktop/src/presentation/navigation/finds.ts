@@ -99,11 +99,11 @@ function machinesOf(held: Held): readonly Result[] {
 
 function tabsFound(held: Held): readonly Result[] {
     const machines = held.macs.flatMap((mac) => [
-        { name: mac.Name, sections: undefined },
-        ...(mac.VMs ?? []).map((vm) => ({ name: vm.Name, sections: vm.Sections })),
+        { name: mac.Name, vm: undefined },
+        ...(mac.VMs ?? []).map((vm) => ({ name: vm.Name, vm })),
     ]);
-    return machines.flatMap(({ name, sections }) =>
-        tabsOf(sections).map((tab): Result => ({
+    return machines.flatMap(({ name, vm }) =>
+        tabsOf(vm).map((tab): Result => ({
             detail: '',
             kind: 'Tabs',
             label: `${name} › ${tab}`,

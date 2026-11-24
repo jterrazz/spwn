@@ -6,12 +6,15 @@
     - button "Agent soon" [disabled]
     - button "OS soon" [disabled]
   - button "Passwords"
-  - button "Storage"
   - button "Settings"
   - button "Engine running · dev"
 - navigation "Sidebar":
   - heading "Machine" [level=2]
+  - button "New machine"
   - button "Find"
+  - group "Every Mac":
+    - button "Storage"
+    - button "Engine"
   - group "Machines":
     - heading "Machines" [level=2]
     - button "macbook-pro online":

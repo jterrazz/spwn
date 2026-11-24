@@ -164,8 +164,8 @@ describe('catalog item', () => {
                 // When - Storage is pressed
                 await visitor.click(within(kept, button('Storage')));
 
-                // Then - the Storage page opens
-                await visitor.see(region('Disk'));
+                // Then - the Storage page opens, This Mac's disk in its section
+                await visitor.see(within(region('macbook-pro'), region('Disk')));
             },
         );
         expect(result.errors.text).toBe('');

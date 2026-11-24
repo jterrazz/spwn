@@ -6,7 +6,6 @@
     - button "Agent soon" [disabled]
     - button "OS soon" [disabled]
   - button "Passwords"
-  - button "Storage"
   - button "Settings"
   - button "Engine running · v4.0.0"
 - main:

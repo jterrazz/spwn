@@ -108,6 +108,8 @@ const PATHS = {
             <path d="M5.5 4h1.7c1.2 0 1.9.7 2.3 1.7l.5 1.1M5.5 12h1.7c1.2 0 1.9-.7 2.3-1.7l.5-1.1" />
         </>
     ),
+    engine: <path d="M9 1.8L3.8 9h3.7l-.8 5.2L12.2 7H8.4z" />,
+    plus: <path d="M8 3v10M3 8h10" />,
     check: <path d="M3.5 8.5l3 3 6-7" />,
     close: <path d="M4 4l8 8M12 4l-8 8" />,
     chevron: <path d="M6 3.5L10.5 8 6 12.5" />,

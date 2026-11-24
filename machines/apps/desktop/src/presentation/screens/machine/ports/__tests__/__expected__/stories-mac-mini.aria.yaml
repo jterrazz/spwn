@@ -9,7 +9,6 @@
     - tab "Packages"
     - tab "Ports" [selected]
     - tab "Sign-ins"
-    - tab "Storage"
   - heading "7 ports listen." [level=1]
   - paragraph:
     - img "7 ports listen."

@@ -20,6 +20,7 @@ import { Rail } from './rail';
 import { TAB_PANEL } from './route';
 import type { PlainPage, Route } from './route';
 import { RouterProvider, useRouter } from './router';
+import { useSettledRoute } from './settled';
 import { Sidebar } from './sidebar';
 import { isGlobal } from './spaces';
 import { useSpaceKeys } from './use-spaces';
@@ -184,6 +185,9 @@ function useSheets() {
     const newMachine = useCallback((opening: Opening = {}) => {
         setSheet({ kind: 'new-machine', opening });
     }, []);
+    const newBlank = useCallback(() => {
+        setSheet({ kind: 'new-machine', opening: {} });
+    }, []);
     const addMac = useCallback(() => {
         setSheet({ kind: 'add-mac' });
     }, []);
@@ -193,7 +197,17 @@ function useSheets() {
     const toggleSidebar = useCallback(() => {
         setSidebar((open) => !open);
     }, []);
-    return { addMac, addPassword, close, find, newMachine, sheet, sidebar, toggleSidebar };
+    return {
+        addMac,
+        addPassword,
+        close,
+        find,
+        newBlank,
+        newMachine,
+        sheet,
+        sidebar,
+        toggleSidebar,
+    };
 }
 
 type FrameProps = { Gallery?: ComponentType | undefined; pages: Pages };
@@ -216,19 +230,19 @@ function Frame({ Gallery, pages }: FrameProps) {
     const { drawn, engine, home, listed, macs, needs, side } = useStation();
     const held = useHeld(drawn);
     const quiet = held !== undefined;
-    const { addMac, addPassword, close, find, newMachine, sheet, sidebar, toggleSidebar } =
-        useSheets();
-    const onSpace = useSpaceKeys(router, macs, find, {
-        on: !quiet,
-        withGallery: Gallery !== undefined,
-    });
+    const sheets = useSheets();
+    const { addMac, newMachine } = sheets;
+    const withGallery = Gallery !== undefined;
+    const onSpace = useSpaceKeys(router, macs, sheets.find, { on: !quiet, withGallery });
     const { lost, dismiss } = useLost(router, macs, listed);
     const found = route.page === 'machine' ? findMachine(macs, route.machine) : undefined;
+    useSettledRoute(router, found);
     const area = { addMac, found, Gallery, go, home, newMachine, pages, route };
     const rail = { engine, go, needs, onSpace, quiet, route };
-    const aside = { ...side, go, onFind: quiet ? NOWHERE : find, quiet, route };
+    const onFind = quiet ? NOWHERE : sheets.find;
+    const aside = { ...side, go, onFind, onNewMachine: sheets.newBlank, quiet, route };
     const spaced = quiet || !isGlobal(route);
-    const shown = spaced && sidebar;
+    const shown = spaced && sheets.sidebar;
     return (
         <Screen>
             <div className={`${styles.window} ${shown ? '' : styles.collapsed}`}>
@@ -239,11 +253,9 @@ function Frame({ Gallery, pages }: FrameProps) {
                         found={found}
                         ItemName={pages.ItemName}
                         macs={macs}
-                        onAddPassword={addPassword}
-                        onNewMachine={() => {
-                            newMachine();
-                        }}
-                        onToggleSidebar={spaced ? toggleSidebar : undefined}
+                        onAddPassword={sheets.addPassword}
+                        onNewMachine={sheets.newBlank}
+                        onToggleSidebar={spaced ? sheets.toggleSidebar : undefined}
                         quiet={quiet}
                         router={router}
                     />
@@ -259,10 +271,10 @@ function Frame({ Gallery, pages }: FrameProps) {
                     macs={macs}
                     needs={needs}
                     onAddMac={addMac}
-                    onClose={close}
+                    onClose={sheets.close}
                     pages={pages}
-                    sheet={sheet}
-                    withGallery={Gallery !== undefined}
+                    sheet={sheets.sheet}
+                    withGallery={withGallery}
                 />
             )}
             <pages.Confirm />

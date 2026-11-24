@@ -25,6 +25,7 @@ export { IconButton } from './icon-button';
 export { IDENTITIES, type Identity, identityOf } from './identity';
 export { MachineChip } from './machine-chip';
 export { MachineIcon } from './machine-icon';
+export { MacSection } from './mac-section';
 export type { Measured } from './measure';
 export { MemoryGrid, type MemoryHolder } from './memory-grid';
 export { MemoryTrack, type TrackSegment } from './memory-track';

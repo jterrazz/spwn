@@ -1,6 +1,7 @@
 import type { MachinesMacView } from '@jterrazz/station-api';
 
 import { engineViewStopped } from '../words/shown';
+import { NEW_MACHINE_WORD } from '../words/words';
 import type { Route } from './route';
 import type { ToolbarAction } from './toolbar';
 
@@ -25,7 +26,7 @@ export function actionOf({
     addPassword,
 }: Opens): ToolbarAction | undefined {
     if (route.page === 'home') {
-        return { label: 'New machine', leads: newMachineLeads(macs), onClick: newMachine };
+        return { label: NEW_MACHINE_WORD, leads: newMachineLeads(macs), onClick: newMachine };
     }
     if (route.page === 'passwords' && route.item === undefined) {
         return { label: 'Add a password', leads: false, onClick: addPassword };

@@ -9,7 +9,6 @@
     - tab "Packages"
     - tab "Ports"
     - tab "Sign-ins"
-    - tab "Storage"
   - heading "Online, with no machine running." [level=1]
   - text: CPU 0% Memory not given yet Disk 582GB
   - meter "Disk used of its total"

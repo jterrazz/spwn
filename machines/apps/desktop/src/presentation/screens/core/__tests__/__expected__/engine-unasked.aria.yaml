@@ -6,12 +6,15 @@
     - button "Agent soon" [disabled]
     - button "OS soon" [disabled]
   - button "Passwords"
-  - button "Storage"
   - button "Settings"
   - button "Engine stopped"
 - navigation "Sidebar":
   - heading "Machine" [level=2]
+  - button "New machine"
   - button "Find"
+  - group "Every Mac":
+    - button "Storage"
+    - button "Engine"
   - group "Machines":
     - heading "Machines" [level=2]
     - button "macbook-pro engine stopped":
@@ -40,8 +43,15 @@
   - button "Back" [disabled]
   - button "Forward" [disabled]
   - text: Engine
-  - heading "The latest release is not known yet." [level=1]
-  - region "Engine":
-    - heading "Engine" [level=2]
-    - text: Latest release
-    - button "Check now"
+  - region "macbook-pro":
+    - heading "macbook-pro" [level=2]
+    - heading "The latest release is not known yet." [level=1]
+    - region "Engine":
+      - heading "Engine" [level=2]
+      - text: Engine stopped Latest release
+      - button "Check now"
+  - region "mac-mini":
+    - heading "mac-mini" [level=2]
+    - region "Engine":
+      - heading "Engine" [level=2]
+      - text: Engine dev running

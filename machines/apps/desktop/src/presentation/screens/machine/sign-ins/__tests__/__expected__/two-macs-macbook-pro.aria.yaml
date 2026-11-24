@@ -9,7 +9,6 @@
     - tab "Packages"
     - tab "Ports"
     - tab "Sign-ins" [selected]
-    - tab "Storage"
   - heading "Signed in to 3 of 4 programs." [level=1]
   - region "Sign-ins":
     - heading "Sign-ins 4" [level=2]
