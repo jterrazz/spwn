@@ -52,7 +52,7 @@ func Argv(mac string) ([]string, error) {
 		return nil, fail.New(fail.Refused, call.BadMacName, mac, map[string]string{"why": why})
 	}
 	return []string{"-o", "BatchMode=yes", "-o", "ConnectTimeout=" + strconv.Itoa(connectWait),
-		"-o", "ServerAliveInterval=" + strconv.Itoa(aliveEvery), "-o", "ServerAliveCountMax=" + strconv.Itoa(aliveMissed), "--", mac, "--", "sh", "-c", attach, "station", "engine", "attach"}, nil
+		"-o", "ServerAliveInterval=" + strconv.Itoa(aliveEvery), "-o", "ServerAliveCountMax=" + strconv.Itoa(aliveMissed), "--", mac, "sh", "-c", attach, "station", "engine", "attach"}, nil
 }
 
 func (d Dialer) Dial(ctx context.Context, mac string) (contract.Endpoint, error) {

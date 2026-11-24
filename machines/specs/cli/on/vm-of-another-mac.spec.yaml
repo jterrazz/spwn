@@ -10,8 +10,8 @@ runs:
           exit 1
           1
           0
-          ssh -o BatchMode=yes -o ConnectTimeout=5 -o ServerAliveInterval=2 -o ServerAliveCountMax=2 -- x -- sh -c 'PATH="$HOME/.local/bin:/usr/local/bin:$PATH" exec station "$@"' station engine attach
-          ssh -o BatchMode=yes -o ConnectTimeout=5 -o ServerAliveInterval=2 -o ServerAliveCountMax=2 -- y -- sh -c 'PATH="$HOME/.local/bin:/usr/local/bin:$PATH" exec station "$@"' station engine attach
+          ssh -o BatchMode=yes -o ConnectTimeout=5 -o ServerAliveInterval=2 -o ServerAliveCountMax=2 -- x sh -c 'PATH="$HOME/.local/bin:/usr/local/bin:$PATH" exec station "$@"' station engine attach
+          ssh -o BatchMode=yes -o ConnectTimeout=5 -o ServerAliveInterval=2 -o ServerAliveCountMax=2 -- y sh -c 'PATH="$HOME/.local/bin:/usr/local/bin:$PATH" exec station "$@"' station engine attach
     - command: 'apps --on nope; echo "exit $?"; /usr/bin/grep -c nope .calls'
       exit: 1
       stdout: |
