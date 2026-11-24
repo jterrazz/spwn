@@ -76,6 +76,9 @@ run_tier() {
 ssh_opts=(-F /dev/null -o IdentitiesOnly=yes -o IdentityAgent=none -o BatchMode=yes
   -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR
   -o ConnectTimeout=5 -o ServerAliveInterval=15)
+# invariant: a tier reaches no ssh agent: an ssh that read the Mac's own config would load
+# this run's key into it (make unexports SSH_AUTH_SOCK; specs/architecture/agent_test.go).
+[ -z "${SSH_AUTH_SOCK:-}" ] || fail "SSH_AUTH_SOCK is set: run the tier through make e2e-machine, which reaches no ssh agent"
 
 # value: the footprint test over one VM's listings: $1 the folder of the listings
 # (0-before.txt, then one per step), $2 the disk --json of the guest, $3 the

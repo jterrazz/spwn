@@ -1,5 +1,9 @@
 .PHONY: help install build build-linux enclave lint fix test check menubar-check menubar window catalog catalog-open catalog-export catalog-gallery e2e-machine e2e-binaries provision deprovision generate clean
 
+# invariant: no recipe reaches an ssh agent: a test's ssh reads the owner's ~/.ssh/config, whose
+# AddKeysToAgent would load its keys into that agent (specs/architecture/agent_test.go holds it).
+unexport SSH_AUTH_SOCK
+
 BINARY       := station
 BUILD_PATH   := .artifacts/go/$(BINARY)
 LINUX_PATH   := .artifacts/go/$(BINARY)-linux-arm64
