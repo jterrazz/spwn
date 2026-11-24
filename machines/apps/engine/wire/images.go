@@ -52,7 +52,7 @@ func (m machine) images() *imagescalls.Builder {
 	})
 }
 
-// value: where station's images are published: ghcr, under the namespace the catalog names.
+// value: where station's images are published: ghcr, the owner's packages.
 func (m machine) imageSource(hypervisor string) imagescontract.ImageSource {
 	if m.world != nil {
 		return m.world.imageSource(hypervisor)
