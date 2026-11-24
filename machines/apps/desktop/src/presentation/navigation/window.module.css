@@ -1,20 +1,19 @@
 .window {
-    --horizon: var(--space-machine);
+    --rail-width: 56px;
     height: 100%;
     display: grid;
-    grid-template-columns: 76px 244px minmax(0, 1fr);
+    grid-template-columns: var(--rail-width) 224px minmax(0, 1fr);
     background: var(--ground-window);
     overflow: hidden;
 }
+:global(html[data-chrome='overlay']) .window {
+    --rail-width: 76px;
+}
 .collapsed {
-    grid-template-columns: 76px minmax(0, 1fr);
+    grid-template-columns: var(--rail-width) minmax(0, 1fr);
 }
 .main {
-    background: linear-gradient(
-        180deg,
-        color-mix(in srgb, var(--horizon) 15%, var(--ground)),
-        var(--ground) 150px
-    );
+    background: var(--ground);
     display: flex;
     flex-direction: column;
     min-width: 0;

@@ -218,7 +218,7 @@ describe('needs', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test('N11 the sidebar holds Home, Inbox, Machine files, Passwords, the machines, the Catalog and Storage', async () => {
+    test('N11 the rail holds Home, Inbox, Passwords and Storage, the sidebar the machines and the Catalog with Machine files', async () => {
         // Given - the window over two-macs
         const result = await website.visit('/?world=two-macs&page=home', async (visitor) => {
             // When - I read the sidebar
@@ -227,8 +227,8 @@ describe('needs', () => {
             // Then - the fleet's places are there, Inbox with its count of the lines that need me, the Catalog with its counts
             await visitor.see(within(rail, button('Home')));
             await visitor.see(within(rail, button('Inbox 2')));
-            await visitor.see(within(sidebar, button('Machine files')));
-            await visitor.see(within(sidebar, button('Passwords')));
+            await visitor.see(within(rail, button('Passwords')));
+            await visitor.see(within(rail, button('Storage')));
             await visitor.see(within(sidebar, button('macbook-pro online')));
             await visitor.see(within(sidebar, button('api stopped')));
             await visitor.see(within(sidebar, button('linux-1 running')));
@@ -237,7 +237,7 @@ describe('needs', () => {
             await visitor.see(within(sidebar, button('Apps 10')));
             await visitor.see(within(sidebar, button('Skills 0')));
             await visitor.see(within(sidebar, button('Machine settings 3')));
-            await visitor.see(within(sidebar, button('Storage')));
+            await visitor.see(within(sidebar, button('Machine files')));
         });
         expect(result.errors.text).toBe('');
     });

@@ -54,15 +54,6 @@ function QuietMachines() {
     );
 }
 
-function Places({ place }: { place: Place }) {
-    return (
-        <div className={styles.group}>
-            <NavItem {...place('machine-files')} icon="file" label="Machine files" />
-            <NavItem {...place('passwords')} icon="key" label="Passwords" />
-        </div>
-    );
-}
-
 function Machines({ macs, route, go }: Pick<SidebarProps, 'go' | 'macs' | 'route'>) {
     const on = (machine: string) => route.page === 'machine' && route.machine === machine;
     const listed = machineNamesOf(macs);
@@ -106,14 +97,6 @@ function Machines({ macs, route, go }: Pick<SidebarProps, 'go' | 'macs' | 'route
     );
 }
 
-function Storage({ place }: { place: Place }) {
-    return (
-        <div className={styles.pinned}>
-            <NavItem {...place('storage')} icon="disc" label="Storage" />
-        </div>
-    );
-}
-
 function countOf(value: number | undefined) {
     return value === undefined ? undefined : { urgent: false, value };
 }
@@ -142,6 +125,7 @@ function Catalog({ place, carried }: { place: Place; carried: Carried }) {
                 icon="settings"
                 label="Machine settings"
             />
+            <NavItem {...place('machine-files')} icon="file" label="Machine files" />
         </div>
     );
 }
@@ -167,11 +151,9 @@ export function Sidebar({ carried, macs, route, go, onFind, quiet = false }: Sid
                 <kbd aria-hidden="true">⌘K</kbd>
             </button>
             <div className={styles.list}>
-                <Places place={place} />
                 {quiet ? <QuietMachines /> : <Machines go={go} macs={macs} route={route} />}
                 <Catalog carried={quiet ? UNCARRIED : carried} place={place} />
             </div>
-            <Storage place={place} />
             {quiet ? null : <ReleaseRow go={go} />}
         </nav>
     );

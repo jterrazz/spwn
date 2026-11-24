@@ -9,15 +9,16 @@ import { machineRoute } from '../route';
 import type { Route } from '../route';
 import { Window } from '../window';
 
-const recordingFor = await recordingsOf('stories');
+const recordingFor = await recordingsOf('stories', 'two-macs');
 
 const rail = navigation('Rail');
 const sidebar = navigation('Sidebar');
 const machine = button('Machine');
 const AGENT_7F = heading('agent-7f running');
+const TOGGLE = button('Show or hide the sidebar');
 
-function windowOn(initial: Route) {
-    const dependencies = composeReplay({ recording: recordingFor('stories') });
+function windowOn(initial: Route, world = 'stories') {
+    const dependencies = composeReplay({ recording: recordingFor(world) });
     return (
         <EngineProvider dependencies={dependencies}>
             <Window initial={initial} pages={PAGES} />
@@ -50,7 +51,7 @@ describe('Rail', () => {
 
                 // Then - Inbox, the sidebar still the Machine space's
                 await visitor.see(within(sidebar, heading('Machine')));
-                await visitor.see(within(sidebar, button('Machine files')));
+                await visitor.see(within(sidebar, button('Apps', { exact: false })));
                 await visitor.gone(AGENT_7F);
 
                 // When - the Machine segment is pressed
@@ -100,6 +101,78 @@ describe('Rail', () => {
                 await visitor.see(within(region('Engine'), content('Engine running · v4.0.0')));
             },
         );
+        expect(result.errors.text).toBe('');
+    });
+
+    test("the rail's foot opens Passwords, Storage and Settings, pages of the whole window with no space's sidebar", async () => {
+        // Given - the window on agent-7f over two-macs
+        const result = await component.render(
+            windowOn(machineRoute('linux-1'), 'two-macs'),
+            async (visitor) => {
+                await visitor.see(heading('linux-1 running'));
+                await visitor.see(sidebar);
+
+                // When - the rail's Passwords is pressed
+                await visitor.click(within(rail, button('Passwords')));
+
+                // Then - the vault, with no sidebar and no toggle for it
+                await visitor.see(heading('Passwords on macbook-pro'));
+                await visitor.gone(sidebar);
+                await visitor.gone(TOGGLE);
+
+                // When - the rail's Storage, then its Settings, is pressed
+                await visitor.click(within(rail, button('Storage')));
+                await visitor.see(heading('3.0 GB can be freed.'));
+                await visitor.gone(sidebar);
+                await visitor.click(within(rail, button('Settings')));
+
+                // Then - Settings with no sidebar, and Machine brings the sidebar back where it was
+                await visitor.see(region('Engine'));
+                await visitor.gone(sidebar);
+                await visitor.click(within(rail, machine));
+                await visitor.see(heading('linux-1 running'));
+                await visitor.see(within(sidebar, heading('Machine')));
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
+
+    test("the Machine space's sidebar holds the machines and its Catalog, Machine files among it, and no global page", async () => {
+        // Given - the window on Home over two-macs
+        const result = await component.render(
+            windowOn({ page: 'home' }, 'two-macs'),
+            async (visitor) => {
+                await visitor.see(sidebar);
+
+                // When - the Catalog's Machine files is pressed
+                await visitor.see(within(sidebar, button('Apps 10')));
+                await visitor.see(within(sidebar, button('Machine settings 3')));
+                await visitor.click(within(sidebar, button('Machine files')));
+
+                // Then - Machine files beside the sidebar, which names neither Passwords nor Storage
+                await visitor.see(within(sidebar, heading('Machine')));
+                await visitor.gone(within(sidebar, button('Passwords')));
+                await visitor.gone(within(sidebar, button('Storage')));
+                await visitor.see(within(rail, button('Passwords')));
+                await visitor.see(within(rail, button('Storage')));
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
+
+    test("the sidebar's toggle hides and shows the space's sidebar", async () => {
+        // Given - the window on Home over stories
+        const result = await component.render(windowOn({ page: 'home' }), async (visitor) => {
+            await visitor.see(sidebar);
+
+            // When - the toggle is pressed, then pressed again
+            await visitor.click(TOGGLE);
+            await visitor.gone(sidebar);
+            await visitor.click(TOGGLE);
+
+            // Then - the sidebar is back
+            await visitor.see(within(sidebar, heading('Machine')));
+        });
         expect(result.errors.text).toBe('');
     });
 });

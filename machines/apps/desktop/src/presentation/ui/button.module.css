@@ -25,14 +25,14 @@
     transform: var(--motion-press);
 }
 .primary {
-    background: linear-gradient(var(--primary-top), var(--primary-bottom));
+    background: var(--primary);
     color: var(--on-primary);
     font-weight: var(--weight-medium);
     box-shadow: var(--shadow-primary);
 }
 .primary:hover,
 .primary:active {
-    background: var(--primary-top);
+    background: var(--primary);
 }
 .link,
 .danger {
@@ -96,7 +96,7 @@
     box-shadow: none;
 }
 .destroy:disabled {
-    background: linear-gradient(var(--primary-top), var(--primary-bottom));
+    background: var(--primary);
     color: var(--on-primary);
     font-weight: var(--weight-medium);
     box-shadow: none;

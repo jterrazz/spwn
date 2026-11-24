@@ -5,13 +5,13 @@
     - button "Machine" [pressed]
     - button "Agent soon" [disabled]
     - button "OS soon" [disabled]
+  - button "Passwords"
+  - button "Storage"
   - button "Settings"
   - button "Engine running · dev"
 - navigation "Sidebar":
   - heading "Machine" [level=2]
   - button "Find"
-  - button "Machine files"
-  - button "Passwords"
   - group "Machines":
     - heading "Machines" [level=2]
     - button "macbook-pro online":
@@ -34,7 +34,7 @@
     - button "Apps 9"
     - button "Skills 0"
     - button "Machine settings 0"
-  - button "Storage"
+    - button "Machine files"
 - main:
   - button "Show or hide the sidebar"
   - button "Back"
