@@ -10,6 +10,8 @@ const (
 	GitHubGPGKeys = "https://github.com/settings/gpg/new"
 	// value: the openclaw script the lock-after-login agent runs, under the home of the user the Mac logs in.
 	LockAfterLoginScript = ".openclaw/scripts/lock-after-login.sh"
+	// value: the ghcr.io namespace Machines publishes its images under.
+	ImageRegistryOwner = "jterrazz"
 )
 
 const DNSProfile = `<?xml version="1.0" encoding="UTF-8"?>
