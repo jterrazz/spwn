@@ -195,8 +195,11 @@ func HealthVerdict(vm VM, bundled bool) *verdict.Verdict {
 		v = verdict.Verdict{Tone: verdict.Warn, Sentence: SentenceNoAddress}
 	case !steps.SSH:
 		v = verdict.Verdict{Tone: verdict.Bad, Sentence: SentenceNoSSH}
-		if vm.Blocked == LocalNetworkBlock {
+		switch vm.Blocked {
+		case LocalNetworkBlock:
 			v.Line = NotApproved(vm.Mac, bundled) + "."
+		case VMUserBlock:
+			v.Line = VMUserRefused(vm.Mac) + ": " + VMUserFix + "."
 		}
 	case vm.Check == "":
 		v.Line = LineNoCheck

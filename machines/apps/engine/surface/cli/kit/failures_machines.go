@@ -113,7 +113,7 @@ func vmFailure(err error) (*fail.Error, bool) {
 		if vmUser.Account {
 			return failed(vmUser.Error(), "set vm_user in ~/.config/station/preferences.json", err), true
 		}
-		return failed(vmUser.Error(), "set another vm_user in ~/.config/station/preferences.json", err), true
+		return failed(vmUser.Error(), model.VMUserFix, err), true
 	case errors.As(err, &noBoot):
 		return failed(noBoot.Error(), keptFix(noBoot.Name), err), true
 	case errors.As(err, &unhealthy) && unhealthy.Gone:

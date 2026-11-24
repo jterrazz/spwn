@@ -1273,7 +1273,7 @@ export type EngineVMIn = {
 };
 
 export type EngineVMView = {
-    blocked?: 'local-network';
+    blocked?: 'local-network' | 'vm-user';
     boot_at?: string;
     cause?: string;
     check?: MachinesCheckStatus;
@@ -2289,7 +2289,7 @@ export type MachinesUptimeStrip = {
 
 export type MachinesVM = {
     Birth: MachinesBirth | null;
-    Blocked?: 'local-network';
+    Blocked?: 'local-network' | 'vm-user';
     BootAt: string;
     Cause: string;
     Check: string;

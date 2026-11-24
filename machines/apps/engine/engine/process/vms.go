@@ -744,8 +744,9 @@ func (d *Engine) guestFailed(ctx context.Context, v *vmState, reason string) {
 	}
 }
 
-// invariant: a VM is blocked by its Mac's Local Network from the dial that
-// was refused so until one that is not, read in this run's session only.
+// invariant: a VM is blocked by its Mac's Local Network, or by its Mac's
+// refused VM user, from the dial that was refused so until one that is
+// not, read in this run's session only.
 func (d *Engine) blockedBy(v *vmState, gen int, err error) {
 	d.mu.Lock()
 	defer d.mu.Unlock()
@@ -753,8 +754,11 @@ func (d *Engine) blockedBy(v *vmState, gen int, err error) {
 		return
 	}
 	v.blocked = ""
-	if errors.Is(err, contract.ErrLocalNetwork) {
+	switch {
+	case errors.Is(err, contract.ErrLocalNetwork):
 		v.blocked = model.LocalNetworkBlock
+	case errors.As(err, new(*model.BadVMUserError)):
+		v.blocked = model.VMUserBlock
 	}
 }
 

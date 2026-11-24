@@ -85,11 +85,16 @@ func vmCaption(o VMOverview, s *overview.Summary) []page.Value {
 func Steps(vm model.VM) []page.Row {
 	// value: SPEC §7.2's health steps of a VM, in their order: running, an
 	// address, ssh answering, then a server's own check when it has one.
+	// SSH refused for its Mac's VM user says so, and what lifts it.
 	health := model.HealthOf(vm)
+	ssh := step(string(coresection.SSH), model.StepSSH, health.SSH, health.Running, "")
+	if ssh.Reason == page.Failing && vm.Blocked == model.VMUserBlock {
+		ssh.Cells[0] = page.List(page.Text("failing"), page.Text(model.VMUserRefused(vm.Mac)), page.Text(model.VMUserFix))
+	}
 	steps := []page.Row{
 		step("running", model.StepRunning, health.Running, health.Running, ""),
 		step("address", model.StepAddress, health.Address, health.Running, vm.IP),
-		step(string(coresection.SSH), model.StepSSH, health.SSH, health.Running, ""),
+		ssh,
 	}
 	if vm.Lifetime == model.AlwaysOn && vm.Check != "" {
 		steps = append(steps, checkStep(vm, health.Running))

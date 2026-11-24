@@ -182,7 +182,14 @@ const (
 	// value: what refuses a VM's guest its connection, as its Mac's engine
 	// met it: its Mac has not approved station for Local Network.
 	LocalNetworkBlock GuestBlock = "local-network"
+	// value: its Mac's VM user is one the rule refuses, so its engine
+	// dials its guest as no one.
+	VMUserBlock GuestBlock = "vm-user"
 )
+
+const VMUserFix = "set another vm_user in ~/.config/station/preferences.json"
+
+func VMUserRefused(mac string) string { return mac + "'s VM user is one the rule refuses" }
 
 type LockdownFailure struct {
 	// value: why its engine stopped a VM's run before its guest connected:
