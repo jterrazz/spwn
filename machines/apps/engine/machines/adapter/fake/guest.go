@@ -50,13 +50,21 @@ type VM struct {
 }
 
 func NewVM() *VM {
-	return &VM{answers: map[string]Answer{}, poweroffs: map[string]bool{}, received: map[string][]byte{}, files: map[string]File{}, listeners: map[int]string{}}
+	// invariant: a guest's system powers its VM off by its own poweroff line,
+	// unless the world scripts that line another answer.
+	v := &VM{answers: map[string]Answer{}, poweroffs: map[string]bool{}, received: map[string][]byte{}, files: map[string]File{}, listeners: map[int]string{}}
+	for _, k := range []catalog.MachineKind{catalog.Linux, catalog.MacOS} {
+		v.answers[catalog.PoweroffLine(k)] = Answer{}
+		v.poweroffs[catalog.PoweroffLine(k)] = true
+	}
+	return v
 }
 
 func (v *VM) Program(line string, a Answer) {
 	v.mu.Lock()
 	defer v.mu.Unlock()
 	v.answers[line] = a
+	delete(v.poweroffs, line)
 }
 
 func (v *VM) Serve(port int, greeting string) {

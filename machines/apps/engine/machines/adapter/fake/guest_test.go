@@ -4,8 +4,11 @@ import (
 	"io/fs"
 	"testing"
 
+	"github.com/jterrazz/studio-station/apps/engine/catalog"
+	"github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/machines/contract"
 	"github.com/jterrazz/studio-station/apps/engine/machines/contract/contracttest"
+	"github.com/jterrazz/studio-station/apps/engine/world"
 )
 
 func TestTheFakeGuestKeepsTheContract(t *testing.T) {
@@ -28,4 +31,22 @@ func TestTheFakeGuestKeepsTheContract(t *testing.T) {
 			Path: "/tmp/station",
 		}
 	})
+}
+
+func TestAFakeGuestPowersItsVMOffByItsSystemsPoweroffLine(t *testing.T) {
+	for _, kind := range []catalog.MachineKind{catalog.Linux, catalog.MacOS} {
+		w := &world.World{ThisMac: "this-mac"}
+		w.Mac("this-mac").VMs["dev"] = &world.VM{PID: 1001, Guest: &world.Guest{}}
+		g, err := GuestsOf(w).Dial(t.Context(), contract.GuestTarget{VM: "dev"})
+		if err != nil {
+			t.Fatal(err)
+		}
+		ran, err := g.Exec(t.Context(), contract.GuestCommand{Line: catalog.PoweroffLine(kind)})
+		if err != nil || ran.Code != 0 {
+			t.Fatalf("%s: the poweroff line answered %d, %v; want 0", kind, ran.Code, err)
+		}
+		if v := w.Macs["this-mac"].VMs["dev"]; v.Running() || v.Ended == nil || v.Ended.Reason != machines.GuestPoweroff {
+			t.Errorf("%s: the VM is %+v after its poweroff line, want it ended by a guest poweroff", kind, v)
+		}
+	}
 }
