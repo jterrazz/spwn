@@ -12,7 +12,7 @@ case "$*" in
     *" station engine attach")
         prev=''
         for arg; do
-            if [ "$arg" = -- ]; then target=$prev; break; fi
+            if [ "$arg" = -- ] && [ "$prev" != -- ]; then target=$prev; fi
             prev=$arg
         done
         far="$answers/api-$target"

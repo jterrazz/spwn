@@ -11,7 +11,7 @@ runs:
     - command: '--version >/dev/null; /usr/bin/sed "s|=/.*/known_hosts/|=~/known_hosts/|" .calls'
       exit: 0
       stdout: |
-          ssh -o BatchMode=yes -o ConnectTimeout=5 -o ServerAliveInterval=2 -o ServerAliveCountMax=2 y -- sh -c 'PATH="$HOME/.local/bin:/usr/local/bin:$PATH" exec station "$@"' station engine attach
-          ssh -o ConnectTimeout=2 -o BatchMode=yes -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=~/known_hosts/y.preboot -o HostName=192.168.1.20 y true
-          ssh -o PreferredAuthentications=password -o PubkeyAuthentication=no -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=~/known_hosts/y.preboot -o HostName=192.168.1.20 y
-          ssh -o BatchMode=yes -o ConnectTimeout=5 -o ServerAliveInterval=2 -o ServerAliveCountMax=2 y -- sh -c 'PATH="$HOME/.local/bin:/usr/local/bin:$PATH" exec station "$@"' station engine attach
+          ssh -o BatchMode=yes -o ConnectTimeout=5 -o ServerAliveInterval=2 -o ServerAliveCountMax=2 -- y -- sh -c 'PATH="$HOME/.local/bin:/usr/local/bin:$PATH" exec station "$@"' station engine attach
+          ssh -o ConnectTimeout=2 -o BatchMode=yes -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=~/known_hosts/y.preboot -o HostName=192.168.1.20 -- y true
+          ssh -o PreferredAuthentications=password -o PubkeyAuthentication=no -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=~/known_hosts/y.preboot -o HostName=192.168.1.20 -- y
+          ssh -o BatchMode=yes -o ConnectTimeout=5 -o ServerAliveInterval=2 -o ServerAliveCountMax=2 -- y -- sh -c 'PATH="$HOME/.local/bin:/usr/local/bin:$PATH" exec station "$@"' station engine attach

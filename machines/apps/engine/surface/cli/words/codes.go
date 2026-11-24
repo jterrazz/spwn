@@ -665,6 +665,9 @@ func Codes() map[fail.Code]Wording {
 		ports.CodeElsewhere: func(e *fail.Error) (string, string) {
 			return e.Subject + " runs on " + e.Detail["mac"], "add --on " + e.Detail["mac"]
 		},
+		call.BadMacName: func(e *fail.Error) (string, string) {
+			return e.Detail["why"], machines.MacRecordFix
+		},
 		call.NoStation: func(e *fail.Error) (string, string) {
 			return "station is not installed on " + cmp.Or(e.Detail["label"], e.Subject), "install it there (" + catalog.InstallLine + "), then add it again"
 		},

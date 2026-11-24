@@ -91,7 +91,7 @@ func TestAnotherMacIsReachedOnlyThroughItsEngineInBatchMode(t *testing.T) {
 		t.Fatal(err)
 	}
 	_ = ep.Close()
-	want := []string{"ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=5", "-o", "ServerAliveInterval=2", "-o", "ServerAliveCountMax=2", "mac-mini", "--", "sh", "-c"}
+	want := []string{"ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=5", "-o", "ServerAliveInterval=2", "-o", "ServerAliveCountMax=2", "--", "mac-mini", "--", "sh", "-c"}
 	if len(s.ran) != 1 || !slices.Equal(s.ran[0][:len(want)], want) || !strings.HasSuffix(strings.Join(s.ran[0], " "), " station engine attach") {
 		t.Errorf("dialing mac-mini ran %q, want one BatchMode ssh with keepalives to its `station engine attach`", s.ran)
 	}
@@ -108,5 +108,19 @@ func TestAMacThatAnswersWithoutStationIsToldApartFromOneThatDoesNotAnswer(t *tes
 	var e *fail.Error
 	if !errors.As(err, &e) || e.Code != call.NoStation || e.Subject != "mac-mini" {
 		t.Fatalf("Hello = %v, want mac-mini's missing station told as %s", err, call.NoStation)
+	}
+}
+
+func TestAMacNameSSHWouldReadAsAnOptionNeverReachesSSH(t *testing.T) {
+	for _, mac := range []string{"-oProxyCommand=/usr/bin/touch FAKE000", "-oProxyCommand=FAKE000", "mac-mini;touch FAKE000", ""} {
+		s := &ssh{far: serve.Local(contracttest.Far(), contracttest.Mini, contracttest.Version)}
+		ep, err := sshstdio.New(s, contracttest.Version).Dial(t.Context(), mac)
+		if err == nil {
+			_ = ep.Close()
+		}
+		var e *fail.Error
+		if !errors.As(err, &e) || e.Code != call.BadMacName || e.Subject != mac || len(s.ran) != 0 {
+			t.Errorf("dialing %q = %v and ran %q, want it refused as %s before any ssh", mac, err, s.ran, call.BadMacName)
+		}
 	}
 }

@@ -17,7 +17,7 @@
 | From                  | To                   | How                                                                                                                                                         |
 | --------------------- | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | a process of this Mac | this Mac's engine    | the unix socket `~/.local/state/station/engine.sock`, mode 0600 (`remote/adapter/unix`)                                                                     |
-| this Mac              | another Mac's engine | `ssh -o BatchMode=yes <mac> station engine attach`, which bridges ssh's stdio to that Mac's socket (`remote/adapter/sshstdio`)                              |
+| this Mac              | another Mac's engine | `ssh -o BatchMode=yes -- <mac> station engine attach`, which bridges ssh's stdio to that Mac's socket (`remote/adapter/sshstdio`)                           |
 | a Mac's engine        | a VM's guest         | `station guest serve --stdio`, run over the engine's one guest connection to the VM                                                                         |
 | a process in a VM     | its Mac's engine     | the guest's socket `~/.local/state/station/guest.sock` inside the VM, relayed to its Mac's engine over that same connection; the VM holds no key to its Mac |
 

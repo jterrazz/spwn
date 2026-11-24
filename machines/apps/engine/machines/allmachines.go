@@ -189,6 +189,8 @@ const (
 
 const VMUserFix = "set another vm_user in ~/.config/station/preferences.json"
 
+const MacRecordFix = "correct it in ~/.config/station/preferences.json"
+
 func VMUserRefused(mac string) string { return mac + "'s VM user is one the rule refuses" }
 
 type LockdownFailure struct {
