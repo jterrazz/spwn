@@ -1,6 +1,7 @@
 package macos
 
 import (
+	"context"
 	"io/fs"
 	"slices"
 	"sync"
@@ -105,4 +106,23 @@ func TestTheMacOSUnlockerKeepsTheContract(t *testing.T) {
 			Restarts: func(mac string) int { return m.count(m.restarts, mac) },
 		}
 	})
+}
+
+func TestALANAddressThatIsNoAddressNeverReachesSSH(t *testing.T) {
+	for _, lan := range []string{"x$(touch FAKE000)", "x`touch FAKE000`", "x;touch FAKE000", "a b", "%h", "-oProxyCommand=FAKE000", "fe80::1%en0"} {
+		var ran [][]string
+		u := New(local.Played(func(c local.Cmd) (local.Output, error) {
+			ran = append(ran, c.Args)
+			return local.Output{}, nil
+		}, "ssh"), dirs{}, knownHosts)
+		if err := u.Unlock(context.Background(), "mac-mini", lan); err == nil || len(ran) != 0 {
+			t.Errorf("unlocking mac-mini at %q = %v and ran %q, want it refused before any ssh", lan, err, ran)
+		}
+	}
+	for _, lan := range []string{"192.168.1.20", "fe80::1", "mac-mini.local"} {
+		u := New(local.Played(func(local.Cmd) (local.Output, error) { return local.Output{}, nil }, "ssh"), dirs{}, knownHosts)
+		if err := u.Unlock(context.Background(), "mac-mini", lan); err != nil {
+			t.Errorf("unlocking mac-mini at %q = %v, want it dialed", lan, err)
+		}
+	}
 }

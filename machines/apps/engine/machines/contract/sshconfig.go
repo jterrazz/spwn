@@ -40,6 +40,30 @@ func Unwritable(b MachineBlock) string {
 	return ""
 }
 
+func UnusableLAN(mac, lan string) string {
+	if lan == "" || dnsName(lan) || ipv6(lan) {
+		return ""
+	}
+	return mac + "'s LAN address " + strconv.Quote(lan) + " is neither an IP address nor a DNS name"
+}
+
+func dnsName(s string) bool {
+	if len(s) > 253 {
+		return false
+	}
+	for _, label := range strings.Split(s, ".") {
+		if label == "" || len(label) > 63 || strings.HasPrefix(label, "-") || strings.HasSuffix(label, "-") ||
+			strings.Trim(label, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-") != "" {
+			return false
+		}
+	}
+	return true
+}
+
+func ipv6(s string) bool {
+	return len(s) <= 45 && strings.Count(s, ":") >= 2 && strings.Trim(s, "0123456789abcdefABCDEF:.") == ""
+}
+
 const (
 	notOneWord = ` is not one word of letters, digits, ".", "_" and "-"`
 	anOption   = ` starts with "-", which ssh reads as an option`

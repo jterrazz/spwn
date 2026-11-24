@@ -207,7 +207,10 @@ func macRefused(cfg prefsView, name string, h model.MacRecord) string {
 	if name == cfg.ThisMachine {
 		return ""
 	}
-	return contract.Unwritable(contract.MachineBlock{Name: name, User: h.User})
+	if why := contract.Unwritable(contract.MachineBlock{Name: name, User: h.User}); why != "" {
+		return why
+	}
+	return contract.UnusableLAN(name, h.LAN)
 }
 
 func (s *Machinist) Seen(name string) (model.MacRecord, bool) {
@@ -261,7 +264,7 @@ func (s *Machinist) Remember(_ context.Context, f model.AllMachines) error {
 			hw := h.Hardware
 			known.Hardware = &hw
 		}
-		if h.LAN != "" {
+		if h.LAN != "" && contract.UnusableLAN(h.Name, h.LAN) == "" {
 			known.LAN = h.LAN
 		}
 		cfg.Macs[h.Name], changed = known, true

@@ -38,6 +38,9 @@ func New(run local.Runner, dirs Dirs, knownHosts string) contract.Unlocker {
 func batch() []string { return []string{"-o", "ConnectTimeout=2", "-o", "BatchMode=yes"} }
 
 func (u *unlocker) Unlock(ctx context.Context, mac, lan string) error {
+	if why := contract.UnusableLAN(mac, lan); why != "" {
+		return errors.New(why)
+	}
 	if err := u.dirs.MkdirAll(u.knownHosts, 0o700); err != nil {
 		return err
 	}
