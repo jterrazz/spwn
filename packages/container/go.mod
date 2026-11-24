@@ -1,6 +1,6 @@
 module spwn.sh/packages/container
 
-go 1.25.0
+go 1.26.0
 
 require (
 	github.com/moby/moby/api v1.56.1
