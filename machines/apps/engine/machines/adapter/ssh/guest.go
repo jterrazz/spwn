@@ -185,7 +185,7 @@ func (d dialer) Dial(ctx context.Context, t contract.GuestTarget) (contract.Gues
 	addr := t.Address.String()
 	conn, err := d.sockets.DialTCP(ctx, addr, 10*time.Second)
 	if local.BlockedByLocalNetwork(d.goos, err) {
-		return nil, fmt.Errorf("%w: %w", contract.ErrLocalNetwork, err)
+		return nil, &contract.NoRouteError{Err: err}
 	}
 	if err != nil {
 		return nil, err

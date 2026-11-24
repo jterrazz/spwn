@@ -3,7 +3,6 @@ package process
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net/netip"
 	"testing"
 	"time"
@@ -24,6 +23,7 @@ func (addressed) Address(context.Context, string, time.Duration) (netip.Addr, er
 type dialing struct {
 	err   error
 	guest Guest
+	grant model.LocalNetwork
 }
 
 func (g *dialing) Dial(context.Context, string, netip.AddrPort) (Guest, error) {
@@ -40,13 +40,15 @@ func (unattached) Attach(context.Context, string) (Session, error) {
 }
 func (unattached) Close() error { return nil }
 
-var errRefusedByLocalNetwork = fmt.Errorf("%w: dial tcp 192.168.64.3:22: connect", contract.ErrLocalNetwork)
+var errNoRoute = &contract.NoRouteError{Err: errors.New("dial tcp 192.168.64.3:22: connect: no route to host")}
 
 func blockedHarness(t *testing.T) (harness, *dialing, *vmState) {
 	t.Helper()
 	h := newHarness(t, model.VMRecord{Name: "api", Lifetime: model.Persistent, Want: model.WantRunning})
-	g := &dialing{err: errRefusedByLocalNetwork}
+	g := &dialing{err: errNoRoute, grant: model.LocalNetworkNotApproved}
 	h.d.hv, h.d.guests = addressed{h.hv}, g
+	h.d.o.LocalNetwork = func(context.Context) model.LocalNetwork { return g.grant }
+	h.clock.At = h.clock.At.Add(localNetworkSettling)
 	h.hv.outlived("api")
 	v, _ := h.d.find("api")
 	v.run, _ = h.hv.Adopt(t.Context(), "api")
@@ -73,6 +75,24 @@ func TestADialItsMacRefusesForLocalNetworkBlocksTheVMUntilOneConnects(t *testing
 	h.d.guestOnce(t.Context(), v, v.gen)
 	if got := blockOf(h); got != "" {
 		t.Errorf("after a dial that connected: blocked %q, want none", got)
+	}
+}
+
+func TestADialWithNoRouteWhileTheGrantReadsApprovedIsNoBlockAndSaysOnlyWhatItMet(t *testing.T) {
+	for name, grant := range map[string]model.LocalNetwork{"approved": model.LocalNetworkApproved, "unreadable": ""} {
+		t.Run(name, func(t *testing.T) {
+			h, g, v := blockedHarness(t)
+			g.grant = grant
+			h.d.guestOnce(t.Context(), v, v.gen)
+			if got := blockOf(h); got != "" {
+				t.Errorf("a dial with no route, the grant reading %q: blocked %q, want none", grant, got)
+			}
+			for _, view := range h.d.vmViews() {
+				if want := "dial tcp 192.168.64.3:22: connect: no route to host"; view.Name == "api" && view.GuestError != want {
+					t.Errorf("guest error %q, want the dial's own %q", view.GuestError, want)
+				}
+			}
+		})
 	}
 }
 

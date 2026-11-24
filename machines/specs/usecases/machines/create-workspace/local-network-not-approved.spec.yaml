@@ -13,7 +13,7 @@ runs:
       stdout: |
           ●	macbook-pro	Mac	macbook-pro	Engine running
           ○	api	Workspace	macbook-pro	Stopped · persistent	4 CPU	8 GB
-          ◐	linux-1	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB	SSH answers failing: the Mac has not approved Machines for Local Network: dial 192.168.64.5:22
+          ◐	linux-1	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB	SSH answers failing: dial tcp 192.168.64.5:22: connect: no route to address
           ◐	linux-2	Workspace	macbook-pro	Running · ephemeral	4 CPU	4 GB	Failed at SSH 4 of 4
           # Needs you
           ✗	linux-2	is unreachable: macbook-pro has not approved station for Local Network	approve station on macbook-pro's screen, or in System Settings > Privacy & Security > Local Network
