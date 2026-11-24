@@ -23,7 +23,7 @@ Two invariants hold across the surface. Commands speak the domain's vocabulary (
 spwn init                     # scaffold spwn.yaml + ./spwn/ + .spwn/
 spwn check                    # validate the tree
 spwn build --tree-only        # render the project tree to ./dist (preview/debug)
-spwn build                    # transpile + compile into a project-specific Docker image
+spwn build --base <image>      # transpile + compile into a project-specific Docker image (or set SPWN_BASE_IMAGE)
 spwn up                       # spawn a world from the current project
 
 # ── Compose-style shortcuts ──────────────────────────────────────
