@@ -33,7 +33,7 @@ func (m *stillMac) Sleep(_ context.Context, d time.Duration) error {
 func (*stillMac) Home() string                   { return "/home" }
 func (*stillMac) UID() int                       { return 501 }
 func (*stillMac) User() string                   { return "owner" }
-func (*stillMac) Hostname() string               { return "mac" }
+func (*stillMac) DefaultName() string            { return "mac" }
 func (*stillMac) Exists(string) bool             { return false }
 func (*stillMac) Names(string) ([]string, error) { return nil, nil }
 func (*stillMac) Remove(string) error            { return nil }

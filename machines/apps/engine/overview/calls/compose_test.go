@@ -61,7 +61,7 @@ func (noFacts) Read(context.Context, catalog.Fact) (settings.Fact, error) {
 
 func readerOf(kind machine.Kind, gate <-chan struct{}) *Reader[struct{}, struct{}, struct{}] {
 	return New(Deps[struct{}, struct{}, struct{}]{
-		Calls: downRouter{gate: gate}, Kind: kind, ThisMac: ThisMac{Hostname: "macbook-pro"},
+		Calls: downRouter{gate: gate}, Kind: kind, ThisMac: ThisMac{Hostname: "macbook-pro", DefaultName: func() string { return "macbook-pro" }},
 		Name: setupcontract.Name(noPrefs{}), Settings: noSettings{gate: gate}, Facts: noFacts{},
 	})
 }
@@ -143,9 +143,9 @@ func (r registered) Read(_ string, into any) error {
 func (registered) Write(string, any) error { return nil }
 
 func TestTheOverviewsHeadNamesThisMacAsEveryCallDoes(t *testing.T) {
-	for _, c := range []struct{ registered, want string }{{"mac-studio", "mac-studio"}, {"", "reading-mac.lan"}} {
+	for _, c := range []struct{ registered, want string }{{"mac-studio", "mac-studio"}, {"", "reading-mac"}} {
 		r := New(Deps[struct{}, struct{}, struct{}]{
-			Calls: downRouter{}, Kind: machine.Server, ThisMac: ThisMac{Hostname: "Reading-Mac.lan"},
+			Calls: downRouter{}, Kind: machine.Server, ThisMac: ThisMac{Hostname: "Reading-Mac.lan", DefaultName: func() string { return "reading-mac" }},
 			Name: setupcontract.Name(registered(c.registered)), Settings: noSettings{}, Facts: noFacts{},
 		})
 		var last overview.Summary
@@ -153,7 +153,7 @@ func TestTheOverviewsHeadNamesThisMacAsEveryCallDoes(t *testing.T) {
 			last = u
 		}
 		if last.Head.Name != c.want {
-			t.Errorf("registered %q, hostname Reading-Mac.lan: the head names %q, want %q", c.registered, last.Head.Name, c.want)
+			t.Errorf("registered %q, default name reading-mac: the head names %q, want %q", c.registered, last.Head.Name, c.want)
 		}
 	}
 }

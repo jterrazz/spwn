@@ -4,22 +4,40 @@ import (
 	"context"
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
 	"path/filepath"
+	"sync"
 	"time"
 
 	machinescalls "github.com/jterrazz/studio-station/apps/engine/machines/calls"
 	"github.com/jterrazz/studio-station/apps/engine/platform/local"
+	"github.com/jterrazz/studio-station/apps/engine/setup"
 )
 
-type macSystem struct{ h local.System }
+type macSystem struct {
+	h     local.System
+	named func() string
+}
+
+func defaultName(h local.System, inWorld bool) func() string {
+	return sync.OnceValue(func() string {
+		var localName string
+		if !inWorld && h.Env.GOOS() == "darwin" {
+			out, err := h.Run.Output(context.Background(), local.Cmd{Name: "scutil", Args: []string{"--get", "LocalHostName"}, Timeout: 2 * time.Second})
+			if err == nil && out.ExitCode == 0 {
+				localName = out.Stdout
+			}
+		}
+		return setup.DefaultName(localName, h.Env.Hostname())
+	})
+}
 
 func (t macSystem) Now() time.Time { return t.h.Clock.Now() }
 func (t macSystem) Sleep(ctx context.Context, d time.Duration) error {
 	return t.h.Clock.Sleep(ctx, d)
 }
-func (t macSystem) Home() string     { return t.h.Env.Home() }
-func (t macSystem) UID() int         { return t.h.Env.Euid() }
-func (t macSystem) User() string     { return t.h.Env.User() }
-func (t macSystem) Hostname() string { return t.h.Env.Hostname() }
+func (t macSystem) Home() string        { return t.h.Env.Home() }
+func (t macSystem) UID() int            { return t.h.Env.Euid() }
+func (t macSystem) User() string        { return t.h.Env.User() }
+func (t macSystem) DefaultName() string { return t.named() }
 func (t macSystem) Exists(path string) bool {
 	_, err := t.h.FS.Stat(path)
 	return err == nil

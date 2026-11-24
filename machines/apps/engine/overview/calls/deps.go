@@ -29,6 +29,7 @@ type ThisMac struct {
 	Kind catalog.MachineKind
 	// value: what the process knows of this machine without asking it.
 	Hostname, OS, Arch, User, Shell string
+	DefaultName                     func() string
 	// value: the owner's home and the system root, so a path reads as the owner types it.
 	Home, Root      string
 	Version, Commit string

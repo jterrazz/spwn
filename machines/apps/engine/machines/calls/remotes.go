@@ -172,7 +172,7 @@ func (s *Machinist) ForgetMac(ctx context.Context, name string) error {
 }
 
 func (s *Machinist) thisMac(cfg prefsView) string {
-	return model.ThisMacName(cfg.ThisMachine, s.h.Hostname())
+	return model.ThisMacName(cfg.ThisMachine, s.h.DefaultName)
 }
 
 func (s *Machinist) OtherMacs() []string {

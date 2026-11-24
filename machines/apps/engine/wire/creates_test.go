@@ -137,7 +137,7 @@ func TestCreateChildProcess(t *testing.T) {
 	records := filepath.Join(meet, "vms")
 	store := machinesjsonfile.New(&lockstep{lockable: lockable{sys.FS}, sys: sys, meet: meet, me: me, other: other, recordsDir: records}, records)
 	linux := catalog.Image{Name: "base-ubuntu", Kind: catalog.Linux, Defaults: catalog.ImageDefaults{CPUs: 4, MemoryBytes: 4 << 30, DiskBytes: 20e9}}
-	m := machinescalls.New(macSystem{sys}, machinesfake.HypervisorOf(w, "mac", "hypervisor", nil), p, store, nil, unbuilt{}, answering{}, nil, machinescalls.Options{
+	m := machinescalls.New(macSystem{h: sys, named: func() string { return "mac" }}, machinesfake.HypervisorOf(w, "mac", "hypervisor", nil), p, store, nil, unbuilt{}, answering{}, nil, machinescalls.Options{
 		ThisMachine: catalog.Mac, Images: []catalog.Image{linux}, KnownHosts: filepath.Join(meet, me+".known_hosts"), Logs: filepath.Join(meet, me+".logs"),
 		Hardware:  func(context.Context) coremachine.Hardware { return coremachine.Hardware{Memory: 16 << 30, CPUs: 8} },
 		Processes: kernel.Processes{}, User: "you",

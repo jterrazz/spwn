@@ -319,6 +319,7 @@ type machine struct {
 	paths   setup.Paths
 	stores  *stores
 	where   page.Context
+	named   func() string
 }
 
 func resolve(raw local.System, door darwin.Door, vars map[string]string, world *worldMac, cat catalog.Catalog) machine {
@@ -358,7 +359,8 @@ func resolve(raw local.System, door darwin.Door, vars map[string]string, world *
 		// read, never the pin every document runs with.
 		pin, self, m.powerPort = "", world.self(), world.power()
 	}
-	name := model.ThisMacName(registered, h.Env.Hostname())
+	m.named = defaultName(h, world != nil)
+	name := model.ThisMacName(registered, m.named)
 	m.profile = profileOf(context.Background(), self, pin, name, m.powerPort, m.providers)
 	m.kind = legacyKind(m.profile)
 	m.where = page.Context{Machine: name, Kind: string(m.profile.Kind), Registered: registered != ""}
