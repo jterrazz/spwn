@@ -12,9 +12,9 @@
     - tab "Ports"
     - tab "Sign-ins" [selected]
     - tab "Storage"
-  - heading "Signed in to 2 of 4 programs." [level=1]
+  - heading "Signed in to 2 of 5 programs." [level=1]
   - region "Sign-ins":
-    - heading "Sign-ins 4" [level=2]
+    - heading "Sign-ins 5" [level=2]
     - text: gh signed out
     - button "Sign in gh": Sign in
     - text: npm from the password npm publish signed in
@@ -24,6 +24,7 @@
     - button "Sign out claude": Sign out
     - text: wrangler Refused at the provider needs signing in again
     - button "Sign in again wrangler": Sign in again
+    - text: codex signed out Grant it a password from its Mac
     - paragraph:
       - text: 1 password from this Mac is granted to linux-1 ·
       - button "Passwords"

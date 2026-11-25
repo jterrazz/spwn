@@ -44,7 +44,7 @@ describe('sign-ins', () => {
             signInsOver('two-macs', 'linux-1'),
             async (visitor) => {
                 // When - accounts.list has answered
-                await visitor.see(heading('Signed in to 2 of 4 programs.'));
+                await visitor.see(heading('Signed in to 2 of 5 programs.'));
 
                 // Then - one row a program, each with the gesture its Action names
                 const signIns = region('Sign-ins');
@@ -66,8 +66,8 @@ describe('sign-ins', () => {
             signInsOver('two-macs', 'macbook-pro'),
             async (visitor) => {
                 // When - accounts.list has answered
-                // Then - its verdict and its four programs
-                await visitor.see(heading('Signed in to 3 of 4 programs.'));
+                // Then - its verdict and its five programs
+                await visitor.see(heading('Signed in to 3 of 5 programs.'));
                 await visitor.see(within(region('Sign-ins'), button('Sign in again npm')));
             },
         );
@@ -126,7 +126,7 @@ describe('sign-ins', () => {
             await visitor.see(region('Sign-ins'));
         });
         expect(result.errors.text).toBe('');
-        expect(result.content.text.split('A server keeps its own sign-ins')).toHaveLength(5);
+        expect(result.content.text.split('A server keeps its own sign-ins')).toHaveLength(6);
         expect(result.content.text).not.toContain('Sign out');
     });
 

@@ -9,9 +9,9 @@
     - tab "Packages"
     - tab "Ports"
     - tab "Sign-ins" [selected]
-  - heading "Signed in to 3 of 4 programs." [level=1]
+  - heading "Signed in to 3 of 5 programs." [level=1]
   - region "Sign-ins":
-    - heading "Sign-ins 4" [level=2]
+    - heading "Sign-ins 5" [level=2]
     - text: gh you · repo · signed in by itself signed in
     - button "Sign out gh": Sign out
     - text: npm you · signed in by itself · The token is refused by registry.npmjs.org needs signing in again
@@ -20,3 +20,4 @@
     - button "Sign out claude": Sign out
     - text: wrangler you@example.com · signed in by itself signed in
     - button "Sign out wrangler": Sign out
+    - text: codex signed out Sign it in with its own login in a terminal

@@ -181,11 +181,26 @@ describe('add password sheet', () => {
         const result = await component.render(vaultOver(), async (visitor) => {
             await visitor.click(within(SHEET, button('Typed', { exact: false })));
 
+            // When - Codex is picked
+            await visitor.click(within(SHEET, button('Codex')));
+
+            // Then - no kind to choose
+            await visitor.gone(within(SHEET, button('API key')));
+        });
+        expect(result.errors.text).toBe('');
+    });
+
+    test('a program with two kinds offers both: Claude takes an OAuth token or an API key', async () => {
+        // Given - the sheet over two-macs, the typed way
+        const result = await component.render(vaultOver(), async (visitor) => {
+            await visitor.click(within(SHEET, button('Typed', { exact: false })));
+
             // When - Claude is picked
             await visitor.click(within(SHEET, button('Claude')));
 
-            // Then - no kind to choose
-            await visitor.gone(within(SHEET, button('OAuth token')));
+            // Then - both its kinds are offered
+            await visitor.see(within(SHEET, button('OAuth token')));
+            await visitor.see(within(SHEET, button('API key')));
         });
         expect(result.errors.text).toBe('');
     });

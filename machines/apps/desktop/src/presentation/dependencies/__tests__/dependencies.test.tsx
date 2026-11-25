@@ -356,7 +356,7 @@ describe('dependencies', () => {
                 Object.assign(seen, await disturbed(stage, count));
                 roots.push(document.querySelector('main'));
                 await visitor.click(content('Sign-ins'));
-                await visitor.see(content('Signed in to 2 of 4 programs.'));
+                await visitor.see(content('Signed in to 2 of 5 programs.'));
                 drawn.length = 0;
                 await visitor.click(content('Ports'));
                 await visitor.see(content(':5173'));
