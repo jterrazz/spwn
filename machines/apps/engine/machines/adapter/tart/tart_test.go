@@ -414,6 +414,31 @@ func TestTheConsoleIsItsLastMeaningfulLinesThenTheHypervisorsOwn(t *testing.T) {
 	}
 }
 
+func TestTheConsoleReadsWordsNotTheEscapesOfTheGuestsTerminal(t *testing.T) {
+	m := newMachine(t)
+	esc := "\x1b"
+	_ = m.fs.WriteFile(state+"/consoles/dev", []byte(esc+"[0;32m  OK  "+esc+"[0m Started k3s.service.\r\n"+esc+"[?25h\n"), 0o600)
+	lines, err := m.hypervisor().Console(t.Context(), "dev", 0)
+	if err != nil || !slices.Equal(lines, []string{"  OK   Started k3s.service."}) {
+		t.Errorf("console = %q (%v), want the words alone", lines, err)
+	}
+}
+
+func TestABootStartsTheHypervisorsLogAfreshSoTheLogIsOneRun(t *testing.T) {
+	m := newMachine(t)
+	m.boot("dev")
+	_ = m.fs.WriteFile(state+"/logs/dev.log", []byte("guest has stopped the virtual machine\n"), 0o600)
+	r, err := m.hypervisor().Boot(t.Context(), "dev", contract.BootOptions{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if lines, _ := m.hypervisor().Console(t.Context(), "dev", 0); len(lines) != 0 {
+		t.Errorf("the log of the run before is still read: %q", lines)
+	}
+	m.end(r, machines.GuestPoweroff)
+	<-r.Ended()
+}
+
 func TestAVMMadeByHandIsNeverOneTheAdapterCloned(t *testing.T) {
 	m := newMachine(t)
 	m.disks["by-hand"] = "stopped"
