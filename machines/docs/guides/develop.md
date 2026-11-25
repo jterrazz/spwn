@@ -4,7 +4,7 @@ How to work on `station` itself: build it, run it from the checkout, and know wh
 
 | Section             | Answers                                     |
 | ------------------- | ------------------------------------------- |
-| Working from source | The clone, Go 1.26+, and the loop           |
+| Working from source | The clone, Go 1.27+, and the loop           |
 | The make targets    | Every gesture the Makefile offers           |
 | Where a change goes | Which file to open for which kind of change |
 | What a change owes  | What must land in the same commit           |

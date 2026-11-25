@@ -6,7 +6,7 @@ How Spwn is changed: the toolchain a clone needs, the loop a change runs through
 
 | Tool         | Why                                                                                                             |
 | ------------ | --------------------------------------------------------------------------------------------------------------- |
-| **Go 1.25+** | Every domain package and the `spwn` binary; wired by `go.work`                                                  |
+| **Go 1.27+** | Every domain package and the `spwn` binary; wired by `go.work`                                                  |
 | **Docker**   | Worlds are containers, and every E2E layer needs a daemon                                                       |
 | **Node 24+** | The TypeScript E2E suites and the web UI, driven by pnpm; the floor `@jterrazz/test` declares, and what CI runs |
 | **Turbo 2**  | One task graph over both toolchains; a pnpm dev dependency, never installed by hand                             |

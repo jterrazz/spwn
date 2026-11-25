@@ -1,6 +1,6 @@
 module spwn.sh/packages/upgrade
 
-go 1.26.0
+go 1.27.3
 
 require spwn.sh/packages/platform v0.0.0
 
