@@ -6,6 +6,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/jterrazz/studio-station/apps/engine/accounts/adapter/keychain"
+	coremachine "github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/devices"
 	devicescalls "github.com/jterrazz/studio-station/apps/engine/devices/calls"
 	"github.com/jterrazz/studio-station/apps/engine/platform/darwin"
@@ -18,7 +19,35 @@ import (
 func (m machine) devicesDeps() devicescalls.Deps {
 	return devicescalls.Deps{
 		Store: m.stores.devices, Sealer: devicescalls.Sealer{Key: m.deviceKey(), Mac: m.profile.Ref.Name},
-		Presence: m.devicePresence, Now: m.sys.Clock.Now,
+		Presence: m.devicePresence, Now: m.sys.Clock.Now, Changed: m.bookChanged,
+	}
+}
+
+func (m machine) bookChanged() {
+	if m.far.engine != nil {
+		m.far.engine.Rehello()
+	}
+}
+
+// invariant: a VM of this Mac trusts the book's entries that may open
+// pipe and whose seal holds against this Mac's device key; an empty book
+// never asks the device key, and a book or a key that cannot be read
+// trusts none.
+func (m machine) pipeKeys() func() []string {
+	if m.profile.Kind != coremachine.Computer {
+		return nil
+	}
+	return func() []string {
+		ctx := context.Background()
+		book, err := m.stores.devices.Read(ctx)
+		if err != nil || len(book.Devices) == 0 {
+			return nil
+		}
+		own, err := m.deviceKey().Public(ctx)
+		if err != nil {
+			return nil
+		}
+		return devices.Check(book, m.profile.Ref.Name, own).Opening(devices.ChannelPipe)
 	}
 }
 

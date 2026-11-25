@@ -124,7 +124,7 @@ func (m machine) engine(env kit.Env) *process.Engine {
 		ForgetStops: func(vms []string) error {
 			return portscalls.ForgetStopsBut(m.stores.ports(), vms)
 		},
-		State: m.paths.State, DeviceKey: deviceKey, Agent: m.agentOpener(), ThisMachine: m.kind, Ports: m.cat.Ports(), Rights: m.portRights, Installs: m.vmInstalls, Mounts: m.vmMounts, KindOf: m.vmKind, Version: m.engineVersion(), Abilities: m.engineAbilities(), Page: page.Revision, StartedAt: m.engineStarted(), PID: os.Getpid(), GuestPort: m.guestPort(),
+		State: m.paths.State, DeviceKey: deviceKey, BookKeys: m.pipeKeys(), Agent: m.agentOpener(), ThisMachine: m.kind, Ports: m.cat.Ports(), Rights: m.portRights, Installs: m.vmInstalls, Mounts: m.vmMounts, KindOf: m.vmKind, Version: m.engineVersion(), Abilities: m.engineAbilities(), Page: page.Revision, StartedAt: m.engineStarted(), PID: os.Getpid(), GuestPort: m.guestPort(),
 		Power: m.powerPort, KeepAwakePage: m.keepAwakePage, Executable: m.sys.Env.Executable(), Records: m.engineRecords(), Commands: local.Ran,
 		NeverSleeps: func() bool { on, _ := m.stores.neverSleeps().Get(); return on },
 		GrantsOwed:  owed, Peer: m.engineAPI(),

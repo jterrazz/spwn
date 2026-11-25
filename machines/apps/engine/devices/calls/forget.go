@@ -46,6 +46,7 @@ var Forget = call.Call[Deps, ForgetIn, Forgotten]{
 		if err != nil {
 			return Forgotten{}, err
 		}
+		d.changed()
 		return Forgotten{Name: in.Name}, nil
 	},
 }

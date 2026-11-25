@@ -63,6 +63,7 @@ var Add = call.Call[Deps, AddIn, devices.Row]{
 		if err != nil {
 			return devices.Row{}, err
 		}
+		d.changed()
 		return devices.RowOf(sealed), nil
 	},
 }

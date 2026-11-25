@@ -78,3 +78,13 @@ func (b *Book) Readmit(d Device, own, mac string, key *ecdsa.PublicKey) error {
 	}), d)
 	return nil
 }
+
+func (c Checked) Opening(ch Channel) []string {
+	var keys []string
+	for _, d := range c.Trusted {
+		if slices.Contains(d.Channels, ch) {
+			keys = append(keys, d.Key)
+		}
+	}
+	return keys
+}

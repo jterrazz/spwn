@@ -13,6 +13,15 @@ type Deps struct {
 	Sealer   Sealer
 	Presence devices.Presence
 	Now      func() time.Time
+	// value: tells the engine the book changed, so its VMs trust what it
+	// says now; nil tells nobody.
+	Changed func()
+}
+
+func (d Deps) changed() {
+	if d.Changed != nil {
+		d.Changed()
+	}
 }
 
 func All(d Deps) []call.Handler {

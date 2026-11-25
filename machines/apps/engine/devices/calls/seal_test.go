@@ -6,6 +6,7 @@ import (
 	"crypto/elliptic"
 	"crypto/rand"
 	"crypto/sha256"
+	"slices"
 	"testing"
 	"time"
 
@@ -119,5 +120,27 @@ func TestABrokenEntryGivesWayWhenItsDeviceIsAddedAgain(t *testing.T) {
 	}
 	if err = book.Readmit(sealed(t, s), line, s.Mac, own); err == nil {
 		t.Fatal("readmit over a trusted entry of the same name: want devices.duplicate")
+	}
+}
+
+func TestOnlyTrustedEntriesThatMayOpenAChannelOpenIt(t *testing.T) {
+	s := calls.Sealer{Key: newKey(t), Mac: "mac-mini"}
+	own, err := s.Key.Public(t.Context())
+	if err != nil {
+		t.Fatal(err)
+	}
+	piped := sealed(t, s)
+	api, err := devices.Entry("tablet", "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGmY0fN5lE8XqXhcG0OB1oCw0SYqC0f6M1bM1jR5e9wz", []string{"spwn-api"}, piped.Added)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if api, err = s.Seal(t.Context(), api); err != nil {
+		t.Fatal(err)
+	}
+	broken := piped
+	broken.Name = "stranger"
+	got := devices.Check(devices.Book{Devices: []devices.Device{piped, api, broken}}, s.Mac, own).Opening(devices.ChannelPipe)
+	if want := []string{piped.Key}; !slices.Equal(got, want) {
+		t.Fatalf("pipe keys %q, want %q", got, want)
 	}
 }

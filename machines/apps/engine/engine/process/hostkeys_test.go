@@ -60,11 +60,11 @@ var errNoFile = errors.New("no such file")
 
 const deviceKeyLine = "ecdsa-sha2-nistp256 AAAAE2FIXTURE station device key"
 
-func keyedEngine(t *testing.T, deviceKey string, files map[string]string) (*Engine, *vmState, *filedMac, *heardStream) {
+func keyedEngine(t *testing.T, deviceKey string, files map[string]string, book func() []string) (*Engine, *vmState, *filedMac, *heardStream) {
 	t.Helper()
 	h := newHarness(t, model.VMRecord{Name: "api", Lifetime: model.Persistent, Want: model.WantRunning})
 	mac := &filedMac{fakeMac: h.mac, files: files}
-	d := New(mac, h.hv, nil, h.m, &fakeTailnet{}, memStores(), Options{State: "/s", ThisMachine: catalog.Mac, DeviceKey: deviceKey})
+	d := New(mac, h.hv, nil, h.m, &fakeTailnet{}, memStores(), Options{State: "/s", ThisMachine: catalog.Mac, DeviceKey: deviceKey, BookKeys: book})
 	v, _ := d.find("api")
 	heard := &heardStream{}
 	d.mu.Lock()
@@ -73,27 +73,40 @@ func keyedEngine(t *testing.T, deviceKey string, files map[string]string) (*Engi
 	return d, v, mac, heard
 }
 
-func TestAHostsKeysAreItsDeviceKeyFirstThenItsPersonalKeyThenItsAuthorizedKeysEachOnce(t *testing.T) {
+func TestAHostsKeysAreItsDeviceKeyThenItsBooksEachOnceAndNoKeyOfTheMacsOwn(t *testing.T) {
+	book := func() []string { return []string{"ssh-ed25519 LAPTOP", "ssh-ed25519 LAPTOP", "ssh-ed25519 PHONE"} }
 	d, _, _, _ := keyedEngine(t, "/s/device-key.pub", map[string]string{
 		"/s/device-key.pub":            deviceKeyLine + "\n",
 		"/home/u/.ssh/id_ed25519.pub":  "ssh-ed25519 PERSONAL me@here\n",
-		"/home/u/.ssh/authorized_keys": "# a comment\nssh-ed25519 PERSONAL me@here\nssh-ed25519 FAR far@there\n\n",
-	})
-	want := []string{deviceKeyLine, "ssh-ed25519 PERSONAL me@here", "ssh-ed25519 FAR far@there"}
+		"/home/u/.ssh/authorized_keys": "ssh-ed25519 FAR far@there\n",
+	}, book)
+	want := []string{deviceKeyLine, "ssh-ed25519 LAPTOP", "ssh-ed25519 PHONE"}
 	if got := d.hostKeys(); !slices.Equal(got, want) {
 		t.Fatalf("keys %q, want %q", got, want)
 	}
 }
 
-func TestAHostWithNoDeviceKeyFileSendsTheKeysItHadBefore(t *testing.T) {
-	d, _, _, _ := keyedEngine(t, "", map[string]string{"/home/u/.ssh/id_ed25519.pub": "ssh-ed25519 PERSONAL me@here\n"})
-	if got, want := d.hostKeys(), []string{"ssh-ed25519 PERSONAL me@here"}; !slices.Equal(got, want) {
-		t.Fatalf("keys %q, want %q", got, want)
+func TestAHostWithNoDeviceKeyAndNoBookTrustsNothing(t *testing.T) {
+	d, _, _, _ := keyedEngine(t, "", map[string]string{"/home/u/.ssh/id_ed25519.pub": "ssh-ed25519 PERSONAL me@here\n"}, nil)
+	if got := d.hostKeys(); len(got) != 0 {
+		t.Fatalf("keys %q, want none", got)
+	}
+}
+
+func TestABookChangeReachesEveryConnectedGuestAtOnce(t *testing.T) {
+	kept := []string{"ssh-ed25519 LAPTOP"}
+	d, v, _, heard := keyedEngine(t, "", map[string]string{}, func() []string { return kept })
+	d.hello(v)
+	kept = nil
+	d.Rehello()
+	said := heard.heard()
+	if len(said) != 2 || !strings.Contains(said[0], "LAPTOP") || strings.Contains(said[1], "LAPTOP") {
+		t.Fatalf("hellos %q, want the second to drop the forgotten key", said)
 	}
 }
 
 func TestADeviceKeyWrittenAfterTheGuestConnectedReachesItOnTheNextWalk(t *testing.T) {
-	d, v, mac, heard := keyedEngine(t, "/s/device-key.pub", map[string]string{})
+	d, v, mac, heard := keyedEngine(t, "/s/device-key.pub", map[string]string{}, nil)
 	d.hello(v)
 	mac.put("/s/device-key.pub", deviceKeyLine+"\n")
 	d.rehello(v)
