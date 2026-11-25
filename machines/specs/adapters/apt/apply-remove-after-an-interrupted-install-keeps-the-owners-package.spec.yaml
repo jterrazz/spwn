@@ -15,7 +15,7 @@ runs:
       stdout: |
           # To install
           ○       foo     apt
-          # To adopt
+          # Adopted
           ?       apt     apt     the manager of foo · on PATH, not managed by apt
           ^C◐     apt             apt     the manager of foo · adopted · on PATH, not mant
           ●       foo     1.0     apt

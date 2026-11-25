@@ -110,11 +110,11 @@ func (FileSide) Enum() []string { return []string{string(FileShared), string(Fil
 // stay as they are. Only apply --remove takes an extra back.
 
 type Applying struct {
-	Install, Adopt, Leave int
-	Sentence              string
-	Extras                []string
-	Left                  string
-	Stays                 string
+	Install, Leave int
+	Sentence       string
+	Extras         []string
+	Left           string
+	Stays          string
 }
 
 // value: what a VM's Mac holds of what its Machinefile gives it: each port
@@ -143,7 +143,8 @@ func DriftOf(p Plan, access *Access) Drift {
 	// that does not read present, every block of ~/.zshrc of a listed
 	// package that does not, and every extra and extra block; each counts
 	// in the chapter of its package, an extra in apps. A package matches
-	// when it reads present and none of its blocks differs.
+	// when it reads present, or is adopted (there outside its method, a
+	// state and no difference), and none of its blocks differs.
 	chapters := map[Chapter]*ChapterDrift{ChapterApps: {Chapter: ChapterApps}, ChapterSettings: {Chapter: ChapterSettings}}
 	of := map[string]Chapter{}
 	for _, l := range p.Lines {
@@ -152,7 +153,7 @@ func DriftOf(p Plan, access *Access) Drift {
 	var apply Applying
 	differs := map[string]bool{}
 	for _, l := range p.Lines {
-		if l.Seen.Condition == Present {
+		if l.Seen.Condition == Present || l.Adopted() {
 			continue
 		}
 		differs[l.Step.Package] = true
@@ -280,11 +281,9 @@ func (a *Applying) count(act Action) {
 	switch act {
 	case Install, Set:
 		a.Install++
-	case Adopt:
-		a.Adopt++
 	case Leave:
 		a.Leave++
-	case Keep, LeaveExtra, Remove:
+	case Keep, Adopt, LeaveExtra, Remove:
 	}
 }
 
@@ -308,9 +307,9 @@ func (a Applying) worded(matching int) Applying {
 	}
 
 	// value: the mockup's sentence: each verb with its count, in the order
-	// install, adopt, remove, leave; nothing to apply when apply would only
-	// leave lines as they are.
-	if a.Install+a.Adopt == 0 {
+	// install, remove, leave; nothing to apply when apply would only leave
+	// lines as they are.
+	if a.Install == 0 {
 		a.Sentence = "Nothing to apply."
 		return a
 	}
@@ -318,7 +317,7 @@ func (a Applying) worded(matching int) Applying {
 	for _, v := range []struct {
 		verb string
 		n    int
-	}{{"install", a.Install}, {"adopt", a.Adopt}, {"leave", a.Leave}} {
+	}{{"install", a.Install}, {"leave", a.Leave}} {
 		if v.n > 0 {
 			parts = append(parts, v.verb+" "+strconv.Itoa(v.n))
 		}

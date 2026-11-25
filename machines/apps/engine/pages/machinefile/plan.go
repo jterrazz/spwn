@@ -192,7 +192,7 @@ func head(label string, mark page.Mark, words []string) page.Section {
 
 func Plan(p machinefile.Plan, thisMac page.Context) page.Page {
 	// invariant: a plan opens with what it asks of the owner, then what it
-	// installs, sets and adopts, what it leaves as it is, what is extra,
+	// installs and sets, the apps adopted (there outside their method), what it leaves as it is, what is extra,
 	// the owner's lines its phase runs, each shown before it runs, and what
 	// has to happen once applied, each once; it ends on apply.
 	byAction := func(a machinefile.Action) []page.Row {
@@ -211,7 +211,7 @@ func Plan(p machinefile.Plan, thisMac page.Context) page.Page {
 	}{
 		{machinefile.Install, "install", "To install", "to install", ""},
 		{machinefile.Set, "set", "To set", "to set", ""},
-		{machinefile.Adopt, "adopt", "To adopt", "to adopt", ""},
+		{machinefile.Adopt, "adopt", "Adopted", "adopted", ""},
 		{machinefile.Leave, "leave", "Left as it is", "left as it is", ""},
 	} {
 		if rows := byAction(part.action); len(rows) > 0 {
@@ -287,7 +287,11 @@ func Drift(d machinefile.Drift, thisMac page.Context) page.Page {
 	p := d.Plan
 	rows := make([]page.Row, 0, len(p.Lines)+len(p.Extra))
 	for _, l := range p.Lines {
-		rows = append(rows, lineRow(l, condition(l.Seen.Condition)))
+		word := condition(l.Seen.Condition)
+		if l.Adopted() {
+			word = "adopted"
+		}
+		rows = append(rows, lineRow(l, word))
 	}
 	for _, b := range p.Blocks {
 		if b.Condition != machinefile.Extra {

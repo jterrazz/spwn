@@ -25,7 +25,7 @@ runs:
           {"v":2,"id":"1","call":"machinefile.drift","target":{},"in":{}}
       exit: 0
       stdout: |
-          {"Install":0,"Adopt":0,"Leave":0,"Sentence":"Nothing to apply.","Extras":["fd"],"Left":"fd stays: Apply leaves extras.","Stays":"Nothing is removed. 3 apps stay as they are."}
+          {"Install":0,"Leave":0,"Sentence":"Nothing to apply.","Extras":["fd"],"Left":"fd stays: Apply leaves extras.","Stays":"Nothing is removed. 3 apps stay as they are."}
     - command: 'machinefile apply'
       exit: 0
       stdout: |

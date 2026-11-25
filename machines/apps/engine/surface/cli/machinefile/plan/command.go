@@ -57,7 +57,7 @@ func Diffs(ctx context.Context, env kit.Env, p machinefile.Plan) string {
 func Command(d Deps, env kit.Env) *cobra.Command {
 	return kit.Command(kit.Leaf[Input]{
 		Use:     "plan",
-		Short:   "What station machinefile apply would do here: what it asks of you, installs, sets and adopts",
+		Short:   "What station machinefile apply would do here: what it asks of you, installs and sets, and what is adopted",
 		Example: "  station machinefile plan\n  station machinefile plan --diff\n  station machinefile plan --machinefile base-macos",
 		Declare: func(f *pflag.FlagSet, in *Input) {
 			f.StringVar(&in.Machinefile, "machinefile", "", "the Machinefile planned, by its name or its file (default: the one this machine carries)")

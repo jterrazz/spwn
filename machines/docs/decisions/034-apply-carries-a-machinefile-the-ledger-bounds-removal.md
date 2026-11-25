@@ -2,6 +2,7 @@
 
 **Status:** Accepted
 **Date:** 2026-11-11
+**Amended by:** [ADR-091](091-an-adopted-app-is-a-state-never-work.md): an adopted app is a state, never work.
 
 ## Context
 

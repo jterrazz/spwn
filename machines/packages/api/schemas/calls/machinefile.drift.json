@@ -660,9 +660,6 @@
     "machinefile.Applying": {
       "additionalProperties": false,
       "properties": {
-        "Adopt": {
-          "type": "integer"
-        },
         "Extras": {
           "items": {
             "type": "string"
@@ -689,7 +686,6 @@
         }
       },
       "required": [
-        "Adopt",
         "Extras",
         "Install",
         "Leave",
