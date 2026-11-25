@@ -69,8 +69,9 @@ Implemented in `packages/upgrade/`. It runs in two steps. **CheckForUpdate** fin
 ### Background version check
 
 Every CLI invocation spawns a background goroutine that calls
-`base.CheckLatestVersion(24h)`. It writes to `~/.spwn/.version-check`
-(timestamp + latest tag, 24h TTL). When a newer version exists, a single
+`base.CheckLatestVersion(24h)`. It caches the answer in
+`~/.spwn/.version-check` (timestamp + latest tag, 24h TTL) when `~/.spwn`
+already exists, and never creates it. When a newer version exists, a single
 yellow hint is printed after the command output:
 
 ```text

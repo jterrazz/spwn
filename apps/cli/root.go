@@ -41,7 +41,7 @@ rules (network, filesystem, tools), and each agent keeps its Mind
 			return err
 		}
 		discoverProject()
-		return ensureDefaults()
+		return nil
 	},
 }
 

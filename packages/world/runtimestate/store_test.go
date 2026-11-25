@@ -1,6 +1,8 @@
 package runtimestate
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 
 	"spwn.sh/packages/world/models"
@@ -148,3 +150,27 @@ func TestSetDisplayName_Persists(t *testing.T) {
 	}
 }
 
+func TestStore_ReadsOnAMissingDirWriteNothing(t *testing.T) {
+	dir := filepath.Join(t.TempDir(), "world-states")
+	s, err := NewStoreAt(dir)
+	if err != nil {
+		t.Fatalf("NewStoreAt: %v", err)
+	}
+
+	if f, err := s.Load("w-1"); err != nil || len(f.Agents) != 0 || f.DisplayName != "" {
+		t.Errorf("Load on a missing dir = %+v, %v; want empty", f, err)
+	}
+	if err := s.GC(nil); err != nil {
+		t.Errorf("GC on a missing dir: %v", err)
+	}
+	if _, err := os.Stat(dir); !os.IsNotExist(err) {
+		t.Fatalf("reads created %s (stat err %v)", dir, err)
+	}
+
+	if err := s.SetSessionID("w-1", "neo", "sess-abc"); err != nil {
+		t.Fatalf("SetSessionID: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(dir, "w-1", "runtime.json")); err != nil {
+		t.Errorf("the first write did not create its file: %v", err)
+	}
+}

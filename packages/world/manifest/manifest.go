@@ -11,6 +11,20 @@ import (
 	"spwn.sh/packages/world/models"
 )
 
+const defaultName = "default"
+
+const defaultContent = `# Default world config.
+# Docs: https://spwn.sh/docs/cli/spwn-world
+
+# Available tools (spwn:unix = bash, grep, sed, awk, etc.)
+dependencies:
+  - "spwn:unix"          # Core Unix tools
+  - "spwn:git"           # Git version control
+  # - "spwn:node"        # Node.js + npm
+  # - "spwn:python"      # Python 3
+  # - "spwn:build"       # make, gcc, g++
+`
+
 type rawManifest struct {
 	Deps yaml.Node `yaml:"dependencies"`
 }
@@ -18,7 +32,14 @@ type rawManifest struct {
 // Load reads a named world config from ~/.spwn/worlds/{name}.yaml.
 func Load(name string) (models.Manifest, error) {
 	path := filepath.Join(platform.WorldsDir(), name+".yaml")
-	return LoadPath(path)
+	data, err := os.ReadFile(path)
+	if os.IsNotExist(err) && name == defaultName {
+		data, err = []byte(defaultContent), nil
+	}
+	if err != nil {
+		return models.Manifest{}, fmt.Errorf("read config %s: %w", path, err)
+	}
+	return parse(path, data)
 }
 
 // LoadPath reads a world config from an explicit file path.
@@ -27,7 +48,10 @@ func LoadPath(path string) (models.Manifest, error) {
 	if err != nil {
 		return models.Manifest{}, fmt.Errorf("read config %s: %w", path, err)
 	}
+	return parse(path, data)
+}
 
+func parse(path string, data []byte) (models.Manifest, error) {
 	var raw rawManifest
 	if err := yaml.Unmarshal(data, &raw); err != nil {
 		return models.Manifest{}, fmt.Errorf("parse config %s: %w", path, err)
@@ -80,23 +104,12 @@ func CreateDefault() error {
 		return err
 	}
 
-	path := filepath.Join(dir, "default.yaml")
+	path := filepath.Join(dir, defaultName+".yaml")
 	if _, err := os.Stat(path); err == nil {
 		return fmt.Errorf("default.yaml already exists.\nEdit it at %s or remove it first", path)
 	}
 
-	content := `# Default world config.
-# Docs: https://spwn.sh/docs/cli/spwn-world
-
-# Available tools (spwn:unix = bash, grep, sed, awk, etc.)
-dependencies:
-  - "spwn:unix"          # Core Unix tools
-  - "spwn:git"           # Git version control
-  # - "spwn:node"        # Node.js + npm
-  # - "spwn:python"      # Python 3
-  # - "spwn:build"       # make, gcc, g++
-`
-	return os.WriteFile(path, []byte(content), 0644)
+	return os.WriteFile(path, []byte(defaultContent), 0644)
 }
 
 // CreateConfig scaffolds a new named config.

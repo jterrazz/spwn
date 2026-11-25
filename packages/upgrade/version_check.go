@@ -96,7 +96,7 @@ func CheckLatestVersion(maxAge time.Duration) string {
 	}
 	latest := rest[start : start+end]
 
-	if err := os.MkdirAll(cacheDir, 0755); err == nil {
+	if info, err := os.Stat(cacheDir); err == nil && info.IsDir() {
 		cacheContent := time.Now().UTC().Format(time.RFC3339) + "\n" + latest
 		_ = os.WriteFile(cachePath, []byte(cacheContent), 0644)
 	}

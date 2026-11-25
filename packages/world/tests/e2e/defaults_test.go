@@ -13,7 +13,7 @@ import (
 )
 
 func TestDefaults_SpawnWorksWithoutInit(t *testing.T) {
-	// Given - default config and default agent are created (simulating ensureDefaults)
+	// Given - default config and default agent are created
 	world.CreateDefaultConfig()
 	agent.InitMind("default")
 

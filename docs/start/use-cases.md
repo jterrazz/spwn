@@ -45,13 +45,13 @@ spwn agent rm neo-migration
 
 > The only AI assistant that lets you `git checkout -b` your agent. Run a destructive refactor in a branch; keep or discard based on the diff. **Natural selection for behavior.**
 
-## Unleash untrusted code in a sealed room
+## Read untrusted code inside a container
 
 ```bash
 git clone https://github.com/someone/sus-repo /tmp/sus && cd /tmp/sus
 spwn init
-spwn up                    # no network, hard limits on CPU/mem/disk/time
+spwn up                    # a Docker container on the bridge network, 256 processes at most
 spwn agent talk neo "run every test and benchmark, tell me what the code actually does"
 ```
 
-> No network interface means the sandbox **can't phone home**. Kernel-enforced CPU, memory, disk, and time caps mean it **can't melt your machine**. A safe room for running code you don't yet trust. **Security by absence.**
+> The code runs in a Docker container, not in your shell, and on your disk it reaches only the mounts the world declares. It is not a sealed room: the world has outbound network through Docker's bridge, the repo is mounted read-write, and its one resource limit is 256 processes, with CPU, memory, disk and time uncapped. A VM is the stronger boundary, and running VMs is [Machines](../../machines/README.md)' job.

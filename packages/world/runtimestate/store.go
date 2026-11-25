@@ -90,20 +90,13 @@ func NewStore() (*Store, error) {
 	if err != nil {
 		return nil, fmt.Errorf("docker backend: %w", err)
 	}
-	dir := filepath.Join(platform.LocalStateDir(), "world-states")
-	if err := os.MkdirAll(dir, 0o755); err != nil {
-		return nil, fmt.Errorf("create world-states dir: %w", err)
-	}
-	return &Store{dir: dir, backend: docker}, nil
+	return &Store{dir: filepath.Join(platform.LocalStateDir(), "world-states"), backend: docker}, nil
 }
 
 // NewStoreWith creates a Store from an explicit backend + root dir.
 // Used by tests and by callers that already hold a backend (notably
 // apps/api's test fixtures).
 func NewStoreWith(b backend.Backend, dir string) (*Store, error) {
-	if err := os.MkdirAll(dir, 0o755); err != nil {
-		return nil, fmt.Errorf("create world-states dir: %w", err)
-	}
 	return &Store{dir: dir, backend: b}, nil
 }
 
@@ -111,9 +104,6 @@ func NewStoreWith(b backend.Backend, dir string) (*Store, error) {
 // for tests that only exercise mutable-state methods. Calls to List
 // and Get error with "no backend configured".
 func NewStoreAt(dir string) (*Store, error) {
-	if err := os.MkdirAll(dir, 0o755); err != nil {
-		return nil, fmt.Errorf("create world-states dir: %w", err)
-	}
 	return &Store{dir: dir}, nil
 }
 
