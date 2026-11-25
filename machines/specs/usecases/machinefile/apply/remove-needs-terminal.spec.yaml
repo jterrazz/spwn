@@ -22,7 +22,7 @@ runs:
       exit: 0
     - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].apps.cask.installed["corp-vpn"] = "4.2.0" | .macs["macbook-pro"].stores.ledger = [{package: "corp-vpn", method: "cask", machinefile: "macbook-pro", at: "2026-11-01T09:00:00Z"}]'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
-    - command: 'apply --remove --yes'
+    - command: 'machinefile apply --remove --yes'
       exit: 2
       stdout: |
           # To install
@@ -31,7 +31,7 @@ runs:
           ?	corp-vpn	cask	installed by Machines for macbook-pro, listed no longer · asks your password once
       stderr: |
           Error: corp-vpn asks your password: apply asks it on a terminal, and this run has none
-          Hint: run station apply on a terminal
+          Hint: run station machinefile apply on a terminal
     - command: 'apps | /usr/bin/grep -e "	fd	" -e "	corp-vpn	"'
       exit: 0
       stdout: |

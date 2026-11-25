@@ -3,12 +3,12 @@ fixture:
     - ./__fixtures__/stub/
     - ./__fixtures__/source/
 runs:
-    - command: 'explain machine.kind --machinefile base-macos'
+    - command: 'machinefile explain machine.kind --machinefile base-macos'
       exit: 0
       stdout: |
           # base-macos
           	machine.kind	workspace	built-in	base-macos
-    - command: 'explain machine.kind --machinefile base-macos'
+    - command: 'machinefile explain machine.kind --machinefile base-macos'
       exit: 0
       stdout: |
           # base-macos

@@ -10,7 +10,7 @@ runs:
             mounts:
               - { computer: ~/Library/Keychains, guest: ~/keys }
       exit: 0
-    - command: 'apply --yes'
+    - command: 'machinefile apply --yes'
       exit: 2
       stderr: |
           Error: ~/.config/station/machinefiles/linux-1.machine.yaml:4: mount folder "~/Library/Keychains" of the computer is in ~/Library, the Mac's own data, which no mount reaches

@@ -11,7 +11,7 @@ runs:
           machine: { kind: computer, system: { os: macos } }
           apps: [postgres]
       exit: 0
-    - command: 'plan --diff'
+    - command: 'machinefile plan --diff'
       exit: 0
       stdout: |
           --- ~/.zshrc [station:postgres/path]
@@ -20,13 +20,13 @@ runs:
           +[[ -d /opt/homebrew/opt/postgresql@18/bin ]] && path=(/opt/homebrew/opt/postgresql@18/bin $path)
     - command: 'init --yes > /dev/null'
       exit: 0
-    - command: 'apply > /dev/null'
+    - command: 'machinefile apply > /dev/null'
       exit: 0
-    - command: 'plan --diff'
+    - command: 'machinefile plan --diff'
       exit: 0
     - command: '--version >/dev/null; /usr/bin/sed -i.bak ''s/opt\/homebrew\/opt/opt\/mine/g'' .zshrc'
       exit: 0
-    - command: 'plan --diff'
+    - command: 'machinefile plan --diff'
       exit: 0
       stdout: |
           --- ~/.zshrc [station:postgres/path]
@@ -34,8 +34,8 @@ runs:
           @@ -1,1 +1,1 @@
           -[[ -d /opt/mine/postgresql@18/bin ]] && path=(/opt/mine/postgresql@18/bin $path)
           +[[ -d /opt/homebrew/opt/postgresql@18/bin ]] && path=(/opt/homebrew/opt/postgresql@18/bin $path)
-    - command: 'plan'
+    - command: 'machinefile plan'
       exit: 0
       stdout: |
           # Left as it is
-          ◐	postgres	shell	~/.zshrc [station:postgres/path] · edited by hand: station plan --diff shows how
+          ◐	postgres	shell	~/.zshrc [station:postgres/path] · edited by hand: station machinefile plan --diff shows how

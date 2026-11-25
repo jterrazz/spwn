@@ -25,16 +25,16 @@ runs:
           machine: { kind: computer, system: { os: macos } }
           apps: [{ name: served, options: { endpoint: sk-station-story-not-a-real-key } }]
       exit: 0
-    - command: 'plan --json | /usr/bin/jq -c ''.lines[] | select(.package == "served") | .values'''
+    - command: 'machinefile plan --json | /usr/bin/jq -c ''.lines[] | select(.package == "served") | .values'''
       exit: 0
       stdout: |
           {"endpoint":"withheld"}
-    - command: 'explain apps.served.endpoint'
+    - command: 'machinefile explain apps.served.endpoint'
       exit: 0
       stdout: |
           # macbook-pro
           	apps.served.endpoint	withheld	user	macbook-pro
-    - command: 'plan'
+    - command: 'machinefile plan'
       exit: 0
       stdout: |
           # To install

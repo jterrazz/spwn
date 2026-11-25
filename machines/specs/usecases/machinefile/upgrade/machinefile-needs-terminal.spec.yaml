@@ -21,11 +21,11 @@ runs:
           machine: { kind: computer, system: { os: macos } }
           apps: [rooted]
       exit: 0
-    - command: 'upgrade'
+    - command: 'machinefile update'
       exit: 2
       stderr: |
-          Error: rooted asks your password: upgrade asks it on a terminal, and this run has none
-          Hint: run station upgrade on a terminal
+          Error: rooted asks your password: update asks it on a terminal, and this run has none
+          Hint: run station machinefile update on a terminal
     - command: 'apps | /usr/bin/grep "	rooted	"'
       exit: 0
       stdout: |

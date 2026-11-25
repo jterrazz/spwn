@@ -1,4 +1,4 @@
-package upgrade
+package update
 
 import (
 	"context"
@@ -21,12 +21,11 @@ type Input struct{ Machinefile string }
 
 func Command(d Deps, env kit.Env) *cobra.Command {
 	return kit.Command(kit.Leaf[Input]{
-		Use:     "upgrade",
+		Use:     "update",
 		Short:   "Update every app the machine's Machinefile carries, the managers first, and write the lock anew",
-		Example: "  station upgrade\n  station upgrade --json",
-		Group:   kit.StationItself,
+		Example: "  station machinefile update\n  station machinefile update --json",
 		Declare: func(f *pflag.FlagSet, in *Input) {
-			f.StringVar(&in.Machinefile, "machinefile", "", "the Machinefile upgraded, by its name (default: the one this machine carries)")
+			f.StringVar(&in.Machinefile, "machinefile", "", "the Machinefile updated, by its name (default: the one this machine carries)")
 		},
 		Pages: true,
 		Run: func(ctx context.Context, in *Input, io kit.IO) error {
@@ -56,7 +55,7 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 				}
 			}
 			if failed > 0 {
-				return kit.PartialFailure{Failed: failed, Total: total, Noun: noun, FirstHint: "station upgrade"}
+				return kit.PartialFailure{Failed: failed, Total: total, Noun: noun, FirstHint: "station machinefile update"}
 			}
 			return nil
 		},

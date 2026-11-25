@@ -2,7 +2,7 @@ description: 'apply of a Machinefile no source holds changes nothing and names t
 fixture: ../../__fixtures__/homebrew/
 env: two-macs
 runs:
-    - command: 'apply --machinefile nope'
+    - command: 'machinefile apply --machinefile nope'
       exit: 2
       stderr: |
           Error: no Machinefile named nope

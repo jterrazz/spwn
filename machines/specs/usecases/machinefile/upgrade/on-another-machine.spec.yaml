@@ -9,7 +9,7 @@ runs:
           machine: { kind: computer, system: { os: macos } }
           apps: [jq]
       exit: 0
-    - command: 'apply --on mac-mini'
+    - command: 'machinefile apply --on mac-mini'
       exit: 0
       stdout: |
           	On mac-mini:
@@ -18,7 +18,7 @@ runs:
           	On mac-mini:
           ●	homebrew	5.0.1	script	the manager of jq
           ●	jq	1.0.0	brew
-    - command: 'upgrade --on mac-mini'
+    - command: 'machinefile update --on mac-mini'
       exit: 0
       stdout: |
           	On mac-mini:

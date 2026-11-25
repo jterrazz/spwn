@@ -1,0 +1,29 @@
+description: 'bare machinefile lists each Machinefile by its shelf: what it makes, where it is read, its machines'
+env:
+    - stories
+    - engine
+runs:
+    - command: 'machinefile'
+      exit: 0
+      stdout: |
+          # Yours
+          	base	workspace	user	No machine follows it.
+          	linux-1	workspace · ubuntu	user	No machine follows it.
+          ◐	linux-dev	workspace · ubuntu	user	2 machines differ.
+          ◐	macbook-pro	computer · macos	user	1 machine differs.
+          	studio-linux	workspace · ubuntu	user	No machine follows it.
+          # Shipped
+          	base-debian	workspace · debian	built-in	No machine follows it.
+          	base-macos	workspace · macos	built-in	No machine follows it.
+          	base-ubuntu	workspace · ubuntu	built-in	No machine follows it.
+    - command: 'machinefile --json | /usr/bin/jq -c ''.schema, .verdict, (.files[] | select(.name == "macbook-pro"))'''
+      exit: 0
+      stdout: |
+          "station.machinefile.files/v1"
+          "2 files differ from their machines."
+          {"name":"macbook-pro","shelf":"yours","origin":"user","path":"~/.config/station/machinefiles/macbook-pro.machine.yaml","kind":"computer","os":"macos","followers":[{"machine":"macbook-pro","mac":"macbook-pro","state":"differs"}],"verdict":"1 machine differs.","tone":"warn"}
+    - command: 'machinefile --on linux-1'
+      exit: 2
+      stderr: |
+          Error: --on does not apply to "machinefile"
+          Hint: run it on linux-1 itself: ssh linux-1

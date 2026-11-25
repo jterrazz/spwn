@@ -107,7 +107,7 @@ func (n Nights) findings(m machine.Ref) []finding.Finding {
 	// owner, each fixed by the owner's own upgrade but a waiting version,
 	// fixed by its line of the Machinefile.
 	var out []finding.Finding
-	upgrade := finding.Fix{Command: "station upgrade"}
+	upgrade := finding.Fix{Command: "station machinefile update"}
 	said := func(severity finding.Severity, subject, text string, fix finding.Fix) {
 		out = append(out, finding.Finding{Machine: m, Section: section.Apps, Severity: severity, Subject: subject, Text: text, Fix: fix})
 	}
@@ -124,7 +124,7 @@ func (n Nights) findings(m machine.Ref) []finding.Finding {
 		said(finding.Broken, app, app+" failed its update last night", upgrade)
 	}
 	for _, app := range n.Left {
-		said(finding.NeedsALook, app, app+" waits for your station upgrade: its update asks you", upgrade)
+		said(finding.NeedsALook, app, app+" waits for your station machinefile update: its update asks you", upgrade)
 	}
 	for _, w := range n.Waiting {
 		file := w.File

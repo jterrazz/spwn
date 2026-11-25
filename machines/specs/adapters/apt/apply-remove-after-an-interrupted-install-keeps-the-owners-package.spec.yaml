@@ -6,7 +6,7 @@ fixture:
     - ./__fixtures__/install-hangs/
 env: terminal
 runs:
-    - command: '--version >/dev/null; terminal /usr/bin/env STATION_MACHINE_KIND=linux "$STATION" apply --machinefile ci.machine.yaml --yes'
+    - command: '--version >/dev/null; terminal /usr/bin/env STATION_MACHINE_KIND=linux "$STATION" machinefile apply --machinefile ci.machine.yaml --yes'
       stdin: |
           file apt-hung
           send \x03
@@ -26,7 +26,7 @@ runs:
           foo-extra	1.0
     - command: '--version >/dev/null; /usr/bin/sed -i.bak "s/apps: \[foo\]/apps: []/" .config/station/machinefiles/ci.machine.yaml'
       exit: 0
-    - command: '--version >/dev/null; STATION_MACHINE_KIND=linux "$STATION" apply --remove --yes'
+    - command: '--version >/dev/null; STATION_MACHINE_KIND=linux "$STATION" machinefile apply --remove --yes'
       exit: 0
       stdout: |
           # Extra

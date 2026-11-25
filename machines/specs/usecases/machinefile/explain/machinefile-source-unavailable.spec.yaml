@@ -3,7 +3,7 @@ env: two-macs
 runs:
     - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].preferences.machinefile = {source: {name: "studio", url: "https://example.com/studio.git"}}'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
-    - command: 'explain --machinefile base-macos'
+    - command: 'machinefile explain --machinefile base-macos'
       exit: 1
       stderr: |
           Error: the source studio cannot be read: no repository at its url

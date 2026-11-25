@@ -20,7 +20,7 @@ const (
 	// value: brew refreshes its index before an install or a listing of
 	// what is outdated on its own, so a bundle would update every formula
 	// the index moved and a read would relink them; station's calls take
-	// the index as it is, and only `station upgrade` refreshes it, through
+	// the index as it is, and only `station machinefile update` refreshes it, through
 	// homebrew's own upgrade line (`brew update`).
 	noAutoUpdate = "HOMEBREW_NO_AUTO_UPDATE=1"
 )

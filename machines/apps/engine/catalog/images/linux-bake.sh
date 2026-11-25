@@ -5,6 +5,6 @@
 # wrote after the line `--- station lock`.
 set -euo pipefail
 
-/usr/local/bin/station apply --machinefile "$MACHINEFILE" --phase image </dev/null
+/usr/local/bin/station machinefile apply --machinefile "$MACHINEFILE" --phase image </dev/null
 echo '--- station lock'
 cat "$HOME/.config/station/machinefiles/$MACHINEFILE.lock" 2>/dev/null || true

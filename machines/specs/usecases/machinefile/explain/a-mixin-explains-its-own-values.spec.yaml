@@ -8,7 +8,7 @@ runs:
           apps: [git, jq]
           accounts: { signins: [gh] }
       exit: 0
-    - command: 'explain --machinefile dev-tools'
+    - command: 'machinefile explain --machinefile dev-tools'
       exit: 0
       stdout: |
           # dev-tools

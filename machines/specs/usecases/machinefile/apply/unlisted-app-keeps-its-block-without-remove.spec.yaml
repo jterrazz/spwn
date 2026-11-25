@@ -13,7 +13,7 @@ runs:
       exit: 0
     - command: 'init --yes > /dev/null'
       exit: 0
-    - command: 'apply > /dev/null'
+    - command: 'machinefile apply > /dev/null'
       exit: 0
     - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
       stdin: |
@@ -22,7 +22,7 @@ runs:
           machine: { kind: computer, system: { os: macos } }
           apps: [jq]
       exit: 0
-    - command: 'apply'
+    - command: 'machinefile apply'
       exit: 0
       stdout: |
           # Extra
@@ -38,7 +38,7 @@ runs:
       exit: 0
       stdout: |
           ●	postgres	18.1	brew
-    - command: 'drift'
+    - command: 'machinefile drift'
       exit: 0
       stdout: |
           # Packages

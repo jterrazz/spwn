@@ -10,7 +10,7 @@ runs:
           apps: [jq, fd]
           settings: { git-shortcuts: {} }
       exit: 0
-    - command: 'apply'
+    - command: 'machinefile apply'
       exit: 0
       stdout: |
           # To install
@@ -25,7 +25,7 @@ runs:
       exit: 0
       stdout: |
           ["fd"]
-    - command: 'apply'
+    - command: 'machinefile apply'
       exit: 0
       stdout: |
           ●	git-shortcuts		git-aliases	~/.gitconfig [alias]

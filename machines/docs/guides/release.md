@@ -22,7 +22,7 @@ A released `Spwn.app` is signed with the Developer ID, its menu bar inside it, n
 
 ## How a machine takes it
 
-A machine takes the release through the one-line install of [Getting started](../start/getting-started.md), which downloads the asset named for its platform; re-running it is Machines' own upgrade. What its Machinefile carries is upgraded by `station upgrade`, which leaves Machines itself alone ([Machinefiles](../reference/machinefiles.md#upgrade)).
+A machine takes the release through the one-line install of [Getting started](../start/getting-started.md), which downloads the asset named for its platform; re-running it is Machines' own upgrade. What its Machinefile carries is upgraded by `station machinefile update`, which leaves Machines itself alone ([Machinefiles](../reference/machinefiles.md#upgrade)).
 
 A Mac takes the menu bar with Spwn.app, which carries it as its login item and updates it with itself: no catalog app installs it on its own, and the app's first start deletes the `~/Applications/Station.app` an earlier release installed, its login item unregistered first ([ADR-073](../decisions/073-spwn-app-carries-the-engine-on-a-mac-with-a-screen.md)).
 

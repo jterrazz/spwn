@@ -426,10 +426,10 @@ steps+=("$n:init --machinefile, interrupted")
 first_log
 say "   interrupted run: $(in_vm 'tr -d "\r" < /tmp/station-e2e/first.log | grep -E "interrupted|not run" | head -3' | tr '\n' ' ')"
 [ "$(in_vm 'cat /tmp/station-e2e/first.exit')" = 130 ] || miss "the interrupted apply exited $(in_vm 'cat /tmp/station-e2e/first.exit'), not 130"
-in_vm 'grep -q "station apply resumes" /tmp/station-e2e/first.log' || miss "the interrupted apply did not say station apply resumes"
+in_vm 'grep -q "station machinefile apply resumes" /tmp/station-e2e/first.log' || miss "the interrupted apply did not say station machinefile apply resumes"
 in_vm 'grep -q "e2e-apply" ~/.config/station/preferences.json' || miss "init --machinefile bound no Machinefile"
-step "apply resumes" "$password | script -q /tmp/station-e2e/second.log $station apply > /dev/null"
-drift=$(in_vm "$station drift --json")
+step "apply resumes" "$password | script -q /tmp/station-e2e/second.log $station machinefile apply > /dev/null"
+drift=$(in_vm "$station machinefile drift --json")
 say "   drift: $(jq -c '[.lines[] | [.package, .condition]]' <<< "$drift")"
 [ "$(jq '[.lines[] | select(.condition != "present")] | length' <<< "$drift")" = 0 ] || miss "drift is not clean after the resumed apply"
 in_vm 'cat ~/.local/state/station/ledger.json' > "$fp/ledger.json" || miss "apply kept no ledger"

@@ -9,7 +9,7 @@ runs:
           machine: { kind: computer, system: { os: macos } }
           apps: [fd]
       exit: 0
-    - command: 'apply'
+    - command: 'machinefile apply'
       exit: 0
       stdout: |
           # To install
@@ -23,7 +23,7 @@ runs:
           machine: { kind: computer, system: { os: macos } }
           apps: [jq]
       exit: 0
-    - command: 'apply --remove'
+    - command: 'machinefile apply --remove'
       exit: 2
       stdout: |
           # Extra

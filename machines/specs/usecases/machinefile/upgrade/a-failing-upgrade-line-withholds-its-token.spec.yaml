@@ -12,10 +12,10 @@ runs:
       exit: 0
     - command: 'world fault Shell.Run'
       exit: 0
-    - command: 'upgrade'
+    - command: 'machinefile update'
       exit: 1
       stdout: |
           ✗	run.upgrade		linux-1	1 line · exited 1: bash: line 1: the line failed; station: exit 1 at: export API_KEY=withheld
       stderr: |
           Error: 1 of 1 steps failed
-          Hint: station upgrade
+          Hint: station machinefile update

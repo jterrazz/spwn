@@ -128,19 +128,19 @@ func Upgraded(u machinefile.Upgraded, done []Worded, thisMac page.Context) page.
 			failed++
 		}
 	}
-	r := pages.Run{Command: "upgrade", Columns: []page.Column{{Key: "name", Kind: page.KindText, Keep: 100}, {Key: "version", Kind: page.KindVersion, Keep: 50}, {Key: "method", Kind: page.KindList, Keep: 30}}, Steps: steps, Empty: "apps there in " + u.Plan.Name, Extra: slices.Concat(unpulledSection(u.Unpulled), lockSection(u.Lock), waitingSection(u.Waiting))}
+	r := pages.Run{Command: "machinefile update", Columns: []page.Column{{Key: "name", Kind: page.KindText, Keep: 100}, {Key: "version", Kind: page.KindVersion, Keep: 50}, {Key: "method", Kind: page.KindList, Keep: 30}}, Steps: steps, Empty: "apps there in " + u.Plan.Name, Extra: slices.Concat(unpulledSection(u.Unpulled), lockSection(u.Lock), waitingSection(u.Waiting))}
 	switch {
 	case interrupted:
 		r.Head = &pages.RunHead{Label: u.Plan.Name + " interrupted", Mark: page.Broken}
-		r.Next = []page.Hint{{Command: "station upgrade", Text: "resumes"}}
+		r.Next = []page.Hint{{Command: "station machinefile update", Text: "resumes"}}
 	case failed > 0:
 		r.Head = &pages.RunHead{Label: counted(failed, "of "+strconv.Itoa(len(steps))+" failed upgrading "+u.Plan.Name), Mark: page.Broken}
-		r.Next = []page.Hint{{Command: "station upgrade", Text: "tries what failed again"}}
+		r.Next = []page.Hint{{Command: "station machinefile update", Text: "tries what failed again"}}
 	default:
 		r.Head = &pages.RunHead{Label: "Upgraded " + u.Plan.Name, Mark: page.OK}
 	}
 	if u.Unbound {
-		r.Next = append(r.Next, page.Hint{Command: "station apply --machinefile " + u.Plan.Name, Text: "binds this machine: no night upgrades it until then"})
+		r.Next = append(r.Next, page.Hint{Command: "station machinefile apply --machinefile " + u.Plan.Name, Text: "binds this machine: no night upgrades it until then"})
 	}
 	words := []string{counted(updated, "updated")}
 	if u.Lock.Empty() {

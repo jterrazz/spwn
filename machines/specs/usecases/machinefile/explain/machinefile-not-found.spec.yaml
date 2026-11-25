@@ -1,7 +1,7 @@
 description: 'a machine no Machinefile is named after says which name it looked for, and how to name another'
 env: two-macs
 runs:
-    - command: 'explain'
+    - command: 'machinefile explain'
       exit: 2
       stderr: |
           Error: no Machinefile named macbook-pro

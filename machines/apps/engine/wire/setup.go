@@ -15,9 +15,9 @@ import (
 	settingscalls "github.com/jterrazz/studio-station/apps/engine/settings/calls"
 	"github.com/jterrazz/studio-station/apps/engine/setup"
 	setupcalls "github.com/jterrazz/studio-station/apps/engine/setup/calls"
-	"github.com/jterrazz/studio-station/apps/engine/surface/cli/apply"
 	initcmd "github.com/jterrazz/studio-station/apps/engine/surface/cli/init"
 	"github.com/jterrazz/studio-station/apps/engine/surface/cli/kit"
+	"github.com/jterrazz/studio-station/apps/engine/surface/cli/machinefile/apply"
 )
 
 func initCommands(env kit.Env, m machine) []*cobra.Command {

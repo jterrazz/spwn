@@ -8,7 +8,7 @@ runs:
           machine: { kind: computer, system: { os: macos } }
           apps: [{ name: node, version: '>=22' }]
       exit: 0
-    - command: 'explain'
+    - command: 'machinefile explain'
       exit: 2
       stderr: |
           Error: ~/.config/station/machinefiles/macbook-pro.machine.yaml: unmarshal errors: line 4: version ">=22" is no version: latest, 24, 24.11, 24.11.3, ^24.2.0 or ~24.11.0

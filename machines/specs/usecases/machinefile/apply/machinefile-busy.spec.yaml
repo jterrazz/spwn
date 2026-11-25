@@ -11,12 +11,12 @@ runs:
       exit: 0
     - command: '--version >/dev/null; /usr/bin/jq ''.script = [{call: "Turn.Take", times: 1}]'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
-    - command: 'apply'
+    - command: 'machinefile apply'
       exit: 2
       stderr: |
           Error: another station run holds this machine (an apply, an upgrade or the night's upgrade): one runs at a time
           Hint: run it again once that one ends
-    - command: 'apply'
+    - command: 'machinefile apply'
       exit: 0
       stdout: |
           ●	homebrew	5.0.1	script	the manager of jq

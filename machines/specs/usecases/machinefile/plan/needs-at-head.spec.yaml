@@ -9,7 +9,7 @@ runs:
           apps: [jq, fd, eza]
           settings: { git-shortcuts: {} }
       exit: 0
-    - command: 'plan'
+    - command: 'machinefile plan'
       exit: 0
       stdout: |
           # Asks you

@@ -17,7 +17,7 @@ import (
 type Deps struct {
 	ThisMachine page.Context
 	// value: the Machinefile named, resolved and read with the state its
-	// apply needs, as `station apply --machinefile` refuses it; init runs it
+	// apply needs, as `station machinefile apply --machinefile` refuses it; init runs it
 	// before any step.
 	Resolve func(ctx context.Context, machinefile string) error
 	// value: the plan of the Machinefile named, then its run, as `station

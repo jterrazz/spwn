@@ -12,11 +12,11 @@ runs:
             boot: |
               export API_KEY=sk-station-story-not-a-real-key
       exit: 0
-    - command: 'plan --on mac-mini --json | /usr/bin/jq -c ''{machinefile, run}'''
+    - command: 'machinefile plan --on mac-mini --json | /usr/bin/jq -c ''{machinefile, run}'''
       exit: 0
       stdout: |
           {"machinefile":"mac-mini","run":null}
-    - command: 'plan --on mac-mini --phase boot --json | /usr/bin/jq -c .run'
+    - command: 'machinefile plan --on mac-mini --phase boot --json | /usr/bin/jq -c .run'
       exit: 0
       stdout: |
           {"phase":"boot","machinefile":"mac-mini","lines":["export API_KEY=withheld"]}

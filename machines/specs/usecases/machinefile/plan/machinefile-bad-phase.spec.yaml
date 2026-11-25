@@ -8,8 +8,8 @@ runs:
           machine: { kind: workspace, system: { os: ubuntu } }
           apps: [jq]
       exit: 0
-    - command: 'plan --phase install'
+    - command: 'machinefile plan --phase install'
       exit: 2
       stderr: |
           Error: no phase install: a Machinefile's phases are image, boot, apply
-          Hint: station apply --phase image
+          Hint: station machinefile apply --phase image

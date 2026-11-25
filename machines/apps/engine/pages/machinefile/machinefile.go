@@ -54,9 +54,9 @@ func Explain(name, key string, values []machinefile.Value, thisMac page.Context)
 	if len(items) == 0 {
 		items = append(items, page.Item{Empty: &page.Empty{Text: name + " carries nothing yet"}})
 	}
-	command := "explain --machinefile " + name
+	command := "machinefile explain --machinefile " + name
 	if key != "" {
-		command = "explain " + key + " --machinefile " + name
+		command = "machinefile explain " + key + " --machinefile " + name
 	}
 	return page.Seal(page.Page{ID: ID, Command: command, Context: thisMac, Sections: []page.Section{{ID: "values", Title: name, Columns: cols, Items: items}}})
 }

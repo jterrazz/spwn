@@ -239,19 +239,19 @@ func Plan(p machinefile.Plan, thisMac page.Context) page.Page {
 		removes := p.RemovesBlocks() || slices.ContainsFunc(p.Extra, machinefile.ExtraLine.Removes)
 		_, runs := p.Script()
 		if p.WritesBlocks() || runs || slices.ContainsFunc(p.Lines, machinefile.Line.Acts) {
-			hints = append(hints, page.Hint{Command: "station apply", Text: "carries it out"})
+			hints = append(hints, page.Hint{Command: "station machinefile apply", Text: "carries it out"})
 		}
 		switch {
 		case removes:
-			hints = append(hints, page.Hint{Command: "station apply --remove", Text: "also removes what is extra"})
+			hints = append(hints, page.Hint{Command: "station machinefile apply --remove", Text: "also removes what is extra"})
 		case slices.ContainsFunc(p.Extra, machinefile.ExtraLine.Forgets), slices.ContainsFunc(p.Blocks, machinefile.Block.Forgets):
-			hints = append(hints, page.Hint{Command: "station apply --remove", Text: "lets go of what is yours now"})
+			hints = append(hints, page.Hint{Command: "station machinefile apply --remove", Text: "lets go of what is yours now"})
 		}
 	case len(words) == 0:
 		words = []string{"nothing to do"}
 	}
 	sections = append([]page.Section{head(p.Name, mark, words)}, sections...)
-	return page.Seal(page.Page{ID: ID, Command: "plan", Context: thisMac, Sections: sections, Hints: hints})
+	return page.Seal(page.Page{ID: ID, Command: "machinefile plan", Context: thisMac, Sections: sections, Hints: hints})
 }
 
 // value: the owner's lines the plan's phase runs, one row a line, each
@@ -301,13 +301,13 @@ func Drift(d machinefile.Drift, thisMac page.Context) page.Page {
 	var hints []page.Hint
 	if d.Differences > 0 {
 		mark, words = page.Attention, []string{counted(d.Differences, "drifted"), counted(len(rows)+len(access)-d.Differences, "present")}
-		hints = []page.Hint{{Command: "station plan", Text: "what apply would do"}}
+		hints = []page.Hint{{Command: "station machinefile plan", Text: "what apply would do"}}
 	}
 	sections := []page.Section{head(p.Name, mark, words), section("packages", "Packages", rows)}
 	if len(access) > 0 {
 		sections = append(sections, section("access", "Ports and accounts", access))
 	}
-	return page.Seal(page.Page{ID: ID, Command: "drift", Context: thisMac, Sections: sections, Hints: hints})
+	return page.Seal(page.Page{ID: ID, Command: "machinefile drift", Context: thisMac, Sections: sections, Hints: hints})
 }
 
 // value: each port and account of a VM held otherwise than its file
@@ -427,15 +427,15 @@ func Applied(a machinefile.Applied, done, removed []Worded, thisMac page.Context
 			changed++
 		}
 	}
-	r := pages.Run{Command: "apply", Columns: []page.Column{{Key: "name", Kind: page.KindText, Keep: 100}, {Key: "version", Kind: page.KindVersion, Keep: 50}, {Key: "method", Kind: page.KindList, Keep: 30}}, Steps: steps, Empty: "packages in " + a.Plan.Name, Extra: restartsSection(a.Plan.Restarts)}
+	r := pages.Run{Command: "machinefile apply", Columns: []page.Column{{Key: "name", Kind: page.KindText, Keep: 100}, {Key: "version", Kind: page.KindVersion, Keep: 50}, {Key: "method", Kind: page.KindList, Keep: 30}}, Steps: steps, Empty: "packages in " + a.Plan.Name, Extra: restartsSection(a.Plan.Restarts)}
 	var words []string
 	switch {
 	case interrupted:
 		r.Head = &pages.RunHead{Label: a.Plan.Name + " interrupted", Mark: page.Broken}
-		r.Next = []page.Hint{{Command: "station apply", Text: "resumes"}}
+		r.Next = []page.Hint{{Command: "station machinefile apply", Text: "resumes"}}
 	case failed > 0:
 		r.Head = &pages.RunHead{Label: counted(failed, "of "+strconv.Itoa(len(steps))+" failed applying "+a.Plan.Name), Mark: page.Broken}
-		r.Next = []page.Hint{{Command: "station apply", Text: "tries what failed again"}}
+		r.Next = []page.Hint{{Command: "station machinefile apply", Text: "tries what failed again"}}
 	default:
 		r.Head = &pages.RunHead{Label: "Applied " + a.Plan.Name, Mark: page.OK}
 	}

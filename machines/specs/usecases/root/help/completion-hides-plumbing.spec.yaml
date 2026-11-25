@@ -19,11 +19,7 @@ runs:
           engine
           use
           init
-          plan
-          apply
-          drift
-          upgrade
-          explain
+          machinefile
           help
     - command: 'completion zsh | /usr/bin/grep -c "compdef _station station"'
       exit: 0

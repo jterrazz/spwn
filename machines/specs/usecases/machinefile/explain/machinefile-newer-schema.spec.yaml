@@ -7,7 +7,7 @@ runs:
           name: macbook-pro
           horizon: far
       exit: 0
-    - command: 'explain'
+    - command: 'machinefile explain'
       exit: 2
       stderr: |
           Error: ~/.config/station/machinefiles/macbook-pro.machine.yaml is station.machinefile/v2, newer than this station reads (station.machinefile/v1)

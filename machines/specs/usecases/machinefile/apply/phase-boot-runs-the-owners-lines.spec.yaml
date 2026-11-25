@@ -11,7 +11,7 @@ runs:
             boot: |
               git clone https://github.com/jterrazz/studio-os.git ~/Developer/studio-os
       exit: 0
-    - command: 'apply --phase boot --yes'
+    - command: 'machinefile apply --phase boot --yes'
       exit: 0
       stdout: |
           # Left as it is

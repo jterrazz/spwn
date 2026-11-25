@@ -54,7 +54,7 @@ func blockRows(p machinefile.Plan, a machinefile.Action) []page.Row {
 		case a == machinefile.Set:
 			rows = append(rows, blockRow(b, blockWhere(b)+": "+lines(b.Zsh)))
 		case a == machinefile.Leave:
-			rows = append(rows, blockRow(b, blockWhere(b), "edited by hand: station plan --diff shows how"))
+			rows = append(rows, blockRow(b, blockWhere(b), "edited by hand: station machinefile plan --diff shows how"))
 		}
 	}
 	return rows

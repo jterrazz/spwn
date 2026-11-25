@@ -9,7 +9,7 @@ runs:
           machine: { kind: computer, system: { os: macos } }
           apps: [gh]
       exit: 0
-    - command: 'apply --machinefile mac-mini --on mac-mini'
+    - command: 'machinefile apply --machinefile mac-mini --on mac-mini'
       exit: 0
       stdout: |
           	On mac-mini:

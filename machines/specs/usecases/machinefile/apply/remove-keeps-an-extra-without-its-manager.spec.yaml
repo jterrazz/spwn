@@ -11,12 +11,12 @@ runs:
       exit: 0
     - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].stores.ledger = [{package: "ripgrep", method: "brew", machinefile: "macbook-pro", at: "2026-11-01T09:00:00Z"}] | .macs["macbook-pro"].apps.brew.absent = true'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
-    - command: 'plan'
+    - command: 'machinefile plan'
       exit: 0
       stdout: |
           # Extra
           ?	ripgrep	brew	installed by Machines for macbook-pro, its manager homebrew is missing: kept
-    - command: 'apply --remove --yes'
+    - command: 'machinefile apply --remove --yes'
       exit: 0
       stdout: |
           # Extra

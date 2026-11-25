@@ -15,7 +15,7 @@ runs:
       exit: 0
     - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].stores.ledger = [{package: "lazygit", method: "brew", machinefile: "macbook-pro", at: "2026-11-01T09:00:00Z"}]'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
-    - command: '--version >/dev/null; terminal /usr/bin/env -u NO_COLOR "$STATION" apply --remove; "$STATION" apps lazygit | /usr/bin/head -1'
+    - command: '--version >/dev/null; terminal /usr/bin/env -u NO_COLOR "$STATION" machinefile apply --remove; "$STATION" apps lazygit | /usr/bin/head -1'
       stdin: |
           see Remove what the Machinefile lists no longer?
           send y
@@ -27,7 +27,7 @@ runs:
           Extra  ? lazygit · brew
                    installed by Machines for macbook-pro, listed no longer
 
-          → station apply --remove  also removes what is extra
+          → station machinefile apply --remove  also removes what is extra
           ┃ Remove what the Machinefile lists no longer?
           ┃
           ✓ Applied macbook-pro · 1 changed

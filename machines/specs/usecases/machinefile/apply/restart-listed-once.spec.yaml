@@ -31,7 +31,7 @@ runs:
           machine: { kind: computer, system: { os: macos } }
           settings: { dock-left: {}, dock-small: {} }
       exit: 0
-    - command: 'apply'
+    - command: 'machinefile apply'
       exit: 0
       stdout: |
           # To set

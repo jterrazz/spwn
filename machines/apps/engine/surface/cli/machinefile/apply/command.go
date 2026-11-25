@@ -27,8 +27,7 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 	return kit.Command(kit.Leaf[Input]{
 		Use:     "apply",
 		Short:   "Carry out the plan: install, set and adopt what the machine's Machinefile lists",
-		Example: "  station apply\n  station apply --machinefile macbook-pro\n  station apply --remove --yes",
-		Group:   kit.StationItself,
+		Example: "  station machinefile apply\n  station machinefile apply --machinefile macbook-pro\n  station machinefile apply --remove --yes",
 		Declare: func(f *pflag.FlagSet, in *Input) {
 			f.StringVar(&in.Machinefile, "machinefile", "", "the Machinefile, by its name or its file, which this machine then carries (default: the one it carries)")
 			f.BoolVar(&in.Remove, "remove", false, "also remove what Machines installed here that the Machinefile lists no longer")
@@ -53,7 +52,7 @@ func Resolve(ctx context.Context, env kit.Env, in Input) error {
 }
 
 func Run(ctx context.Context, d Deps, env kit.Env, in Input, io kit.IO) error {
-	// value: the plan, then the run: what `station apply` and `station init
+	// value: the plan, then the run: what `station machinefile apply` and `station init
 	// --machinefile` print.
 	p, err := planned(ctx, env, in)
 	if err != nil {
@@ -98,7 +97,7 @@ func Run(ctx context.Context, d Deps, env kit.Env, in Input, io kit.IO) error {
 		}
 	}
 	if failed > 0 {
-		return kit.PartialFailure{Failed: failed, Total: total, Noun: noun, FirstHint: "station apply"}
+		return kit.PartialFailure{Failed: failed, Total: total, Noun: noun, FirstHint: "station machinefile apply"}
 	}
 	return nil
 }

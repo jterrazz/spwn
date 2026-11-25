@@ -15,7 +15,7 @@ runs:
             upgrade: |
               cd ~/Developer/studio-os && git pull --ff-only
       exit: 0
-    - command: 'plan --phase boot'
+    - command: 'machinefile plan --phase boot'
       exit: 0
       stdout: |
           # Left as it is
@@ -24,17 +24,17 @@ runs:
           # To run
           ○	git clone https://github.com/jterrazz/studio-os.git ~/Developer/studio-os	run.boot	linux-1
           ○	cd ~/Developer/studio-os && make install	run.boot	linux-1
-    - command: 'plan --phase boot --json | /usr/bin/jq -c .run'
+    - command: 'machinefile plan --phase boot --json | /usr/bin/jq -c .run'
       exit: 0
       stdout: |
           {"phase":"boot","machinefile":"linux-1","lines":["git clone https://github.com/jterrazz/studio-os.git ~/Developer/studio-os","cd ~/Developer/studio-os && make install"]}
-    - command: 'plan'
+    - command: 'machinefile plan'
       exit: 0
       stdout: |
           # To install
           ○	apt	apt	the manager of jq
           ○	jq	apt
-    - command: 'explain run'
+    - command: 'machinefile explain run'
       exit: 0
       stdout: |
           # linux-1

@@ -191,7 +191,7 @@ func Codes() map[fail.Code]Wording {
 		},
 		machinefilecalls.NotFound: func(e *fail.Error) (string, string) {
 			if by := e.Detail["by"]; by != "" {
-				return by + " extends " + e.Subject + ", which no source holds", "station explain --machinefile " + by
+				return by + " extends " + e.Subject + ", which no source holds", "station machinefile explain --machinefile " + by
 			}
 			if e.Detail["path"] != "" {
 				return "no Machinefile at " + e.Subject, "name its file by a path that holds it"
@@ -206,17 +206,17 @@ func Codes() map[fail.Code]Wording {
 		},
 		machinefilecalls.NeedsTerminal: func(e *fail.Error) (string, string) {
 			verb := cmp.Or(e.Detail["verb"], "apply")
-			return e.Subject + " " + needsWords(e.Detail["needs"]) + ": " + verb + " asks it on a terminal, and this run has none", "run station " + verb + " on a terminal"
+			return e.Subject + " " + needsWords(e.Detail["needs"]) + ": " + verb + " asks it on a terminal, and this run has none", "run station machinefile " + verb + " on a terminal"
 		},
 		machinefilecalls.BadPhase: func(e *fail.Error) (string, string) {
 			if e.Detail["remove"] != "" {
-				return "--remove takes back what apply's phase lists no longer, and the " + e.Subject + " phase carries a part of it", "station apply --remove"
+				return "--remove takes back what apply's phase lists no longer, and the " + e.Subject + " phase carries a part of it", "station machinefile apply --remove"
 			}
-			return "no phase " + e.Subject + ": a Machinefile's phases are " + e.Detail["phases"], "station apply --phase image"
+			return "no phase " + e.Subject + ": a Machinefile's phases are " + e.Detail["phases"], "station machinefile apply --phase image"
 		},
 		machinefilecalls.Invalid: func(e *fail.Error) (string, string) {
 			if strings.HasSuffix(e.Subject, catalog.LockSuffix) {
-				return e.Detail["problem"], "remove it: the next station apply writes it anew from what is there"
+				return e.Detail["problem"], "remove it: the next station machinefile apply writes it anew from what is there"
 			}
 			if e.Detail["rename"] != "" {
 				return e.Detail["problem"], "rename it " + e.Detail["rename"] + ": Machines reads a Machinefile by that name alone"
@@ -233,7 +233,7 @@ func Codes() map[fail.Code]Wording {
 			return e.Subject + " is " + e.Detail["schema"] + ", newer than this station reads (" + e.Detail["reads"] + ")", updateStation
 		},
 		machinefilecalls.NotATemplate: func(e *fail.Error) (string, string) {
-			return (&machinefile.NotTemplateError{Name: e.Subject}).Error(), "station explain --machinefile " + e.Subject
+			return (&machinefile.NotTemplateError{Name: e.Subject}).Error(), "station machinefile explain --machinefile " + e.Subject
 		},
 		machinefilecalls.Mixin: func(e *fail.Error) (string, string) {
 			return e.Subject + " is a mixin (it says no machine): it is extended, never applied", "extend it from a Machinefile that says its machine"
@@ -265,19 +265,19 @@ func Codes() map[fail.Code]Wording {
 		machinefilecalls.UnknownPackage: func(e *fail.Error) (string, string) {
 			where := cmp.Or(e.Detail["at"], e.Detail["by"])
 			if is := e.Detail["is"]; is != "" {
-				return e.Subject + " is " + is + " (" + where + ")", "station explain"
+				return e.Subject + " is " + is + " (" + where + ")", "station machinefile explain"
 			}
 			return "the catalog has no package " + e.Subject + " (" + where + ")", "station apps"
 		},
 		machinefilecalls.BadValue: func(e *fail.Error) (string, string) {
 			at := " (" + e.Detail["at"] + ")"
 			if k := e.Detail["key"]; k != "" {
-				return e.Subject + "'s " + k + ": " + e.Detail["problem"] + at, "station explain"
+				return e.Subject + "'s " + k + ": " + e.Detail["problem"] + at, "station machinefile explain"
 			}
-			return e.Subject + ": " + e.Detail["problem"] + at, "station explain"
+			return e.Subject + ": " + e.Detail["problem"] + at, "station machinefile explain"
 		},
 		machinefilecalls.UnknownKey: func(e *fail.Error) (string, string) {
-			return e.Detail["name"] + " says nothing of " + e.Subject, "station explain --machinefile " + e.Detail["name"]
+			return e.Detail["name"] + " says nothing of " + e.Subject, "station machinefile explain --machinefile " + e.Detail["name"]
 		},
 		machinefilecalls.Unavailable: func(e *fail.Error) (string, string) {
 			return "the source " + e.Subject + " cannot be read: " + e.Detail["cause"], "check its url in ~/.config/station/preferences.json"

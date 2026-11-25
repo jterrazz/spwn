@@ -9,7 +9,7 @@ runs:
           machine: { kind: computer, system: { os: macos } }
           apps: [jq]
       exit: 0
-    - command: 'apply --on mac-mini'
+    - command: 'machinefile apply --on mac-mini'
       exit: 0
       stdout: |
           	On mac-mini:

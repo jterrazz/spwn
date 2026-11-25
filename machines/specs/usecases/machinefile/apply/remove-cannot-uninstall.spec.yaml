@@ -11,7 +11,7 @@ runs:
       exit: 0
     - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].apps.script = {installed: {"https://claude.ai/install.sh": "2.0.14"}} | .macs["macbook-pro"].stores.ledger = [{package: "claude", method: "script", machinefile: "macbook-pro", at: "2026-11-01T09:00:00Z"}]'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
-    - command: 'apply --remove --yes'
+    - command: 'machinefile apply --remove --yes'
       exit: 0
       stdout: |
           # Extra
@@ -19,7 +19,7 @@ runs:
           ●	homebrew	5.0.1	script	the manager of jq
           ●	jq	1.8.1	brew
           ●	claude	2.0.14	script	Machines cannot uninstall it: kept, and yours: remove it by hand if you want
-    - command: 'apply --remove --yes'
+    - command: 'machinefile apply --remove --yes'
       exit: 0
       stdout: |
           ●	homebrew	5.0.1	script	the manager of jq

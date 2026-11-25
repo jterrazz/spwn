@@ -24,6 +24,7 @@ runs:
           accounts
           background
           awake
+          machinefile
     - command: 'help | /usr/bin/sed -n "/^  A MAC/,/^  THIS TERMINAL/p" | /usr/bin/grep -oE "^    [a-z]+ " | /usr/bin/tr -d " "'
       exit: 0
       stdout: |

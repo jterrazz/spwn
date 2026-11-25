@@ -15,7 +15,7 @@ runs:
       exit: 0
     - command: 'world hold Installer.Install'
       exit: 0
-    - command: '--version >/dev/null; terminal /usr/bin/env -u NO_COLOR "$STATION" apply'
+    - command: '--version >/dev/null; terminal /usr/bin/env -u NO_COLOR "$STATION" machinefile apply'
       stdin: |
           see Installing tart
           send \x03
@@ -26,12 +26,12 @@ runs:
 
           To install  ○ tart · shell
 
-          → station apply  carries it out
+          → station machinefile apply  carries it out
           ✗ macbook-pro interrupted · 1 changed
 
           Changes  ● tart · 1.0.0 · shell
 
-          → station apply  resumes
+          → station machinefile apply  resumes
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].stores.ledger | map([.package, .method])'' world.json'
       exit: 0
       stdout: |

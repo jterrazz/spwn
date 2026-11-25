@@ -25,7 +25,7 @@ runs:
           command -v station >/dev/null 2>&1 && eval "$(station shell zsh)"
           # <<< station <<<
           alias ll="ls -l"
-    - command: 'apply'
+    - command: 'machinefile apply'
       exit: 0
       stdout: |
           # To install
@@ -50,7 +50,7 @@ runs:
           [[ -d /opt/homebrew/opt/postgresql@18/bin ]] && path=(/opt/homebrew/opt/postgresql@18/bin $path)
           # <<< station:postgres/path <<<
           alias ll="ls -l"
-    - command: 'apply'
+    - command: 'machinefile apply'
       exit: 0
       stdout: |
           ●	homebrew	5.0.1	script	the manager of postgres

@@ -74,7 +74,7 @@ func upgrade(ctx context.Context, d Deps, in UpgradeIn, p call.Progress) (machin
 		func() (func(), bool, string) { return pull(ctx, d) },
 		func(p machinefile.Plan) error {
 			if asked := p.UpgradeNeeds(); offTerminal && len(asked) > 0 {
-				return refusedOffTerminal(asked, "upgrade")
+				return refusedOffTerminal(asked, "update")
 			}
 			return nil
 		})
@@ -261,7 +261,7 @@ func update(ctx context.Context, d Deps, l machinefile.Line, p call.Progress) ma
 		var refused *fail.Error
 		done.State, done.Detail = catalog.StateBroken, err.Error()
 		if errors.As(err, &refused) && refused.Code == appscalls.NotInstalled {
-			done.State, done.Detail = catalog.StateAbsent, "not installed: station apply installs it"
+			done.State, done.Detail = catalog.StateAbsent, "not installed: station machinefile apply installs it"
 		}
 		return done
 	}

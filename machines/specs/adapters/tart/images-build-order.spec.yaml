@@ -34,7 +34,7 @@ runs:
               equals: |
                   MACHINEFILE=base-ubuntu
           .bake.stdin:
-              contains: '/usr/local/bin/station apply --machinefile "$MACHINEFILE" --phase image </dev/null'
+              contains: '/usr/local/bin/station machinefile apply --machinefile "$MACHINEFILE" --phase image </dev/null'
           .cleanup.stdin:
               contains:
                   - 'pkill -KILL -u admin'

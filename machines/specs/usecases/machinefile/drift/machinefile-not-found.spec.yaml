@@ -2,7 +2,7 @@ description: 'drift of a machine with no Machinefile names the gesture that give
 fixture: ../../__fixtures__/homebrew/
 env: two-macs
 runs:
-    - command: 'drift'
+    - command: 'machinefile drift'
       exit: 2
       stderr: |
           Error: no Machinefile named macbook-pro

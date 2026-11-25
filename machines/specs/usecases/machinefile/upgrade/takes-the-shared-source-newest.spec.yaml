@@ -4,19 +4,19 @@ env: two-macs
 runs:
     - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].preferences.machinefile = {source: {name: "studio", url: "https://example.com/studio.git"}} | .sources = {"https://example.com/studio.git": {head: "1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d", commits: {"1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d": {"machinefiles/macbook-pro.machine.yaml": "machinefile: station.machinefile/v1\nname: macbook-pro\nmachine: { kind: computer, system: { os: macos } }\napps: [jq]\n"}, "ffffffffffffffffffffffffffffffffffffffff": {"machinefiles/macbook-pro.machine.yaml": "machinefile: station.machinefile/v1\nname: macbook-pro\nmachine: { kind: computer, system: { os: macos } }\napps: [jq, gh]\n"}}, parents: {"ffffffffffffffffffffffffffffffffffffffff": "1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d"}}}'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
-    - command: 'apply'
+    - command: 'machinefile apply'
       exit: 0
       stdout: |
           ●	homebrew	5.0.1	script	the manager of jq
           ●	jq	1.8.1	brew
     - command: '--version >/dev/null; /usr/bin/jq ''.sources["https://example.com/studio.git"].head = "ffffffffffffffffffffffffffffffffffffffff"'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
-    - command: 'apply'
+    - command: 'machinefile apply'
       exit: 0
       stdout: |
           ●	homebrew	5.0.1	script	the manager of jq
           ●	jq	1.8.1	brew
-    - command: 'upgrade'
+    - command: 'machinefile update'
       exit: 0
       stdout: |
           ●	homebrew	5.0.1	script
@@ -25,7 +25,7 @@ runs:
           # Lock
           ●	gh		added, 2.98.0 by brew
           ●	shared source		studio@fffffff, was studio@1a2b3c4
-    - command: 'apply'
+    - command: 'machinefile apply'
       exit: 0
       stdout: |
           ●	homebrew	5.0.1	script	the manager of jq

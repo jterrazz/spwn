@@ -9,11 +9,11 @@ runs:
           settings:
               autologin: { colour: blue }
       exit: 0
-    - command: 'explain'
+    - command: 'machinefile explain'
       exit: 2
       stderr: |
           Error: autologin's colour: no option of autologin (~/.config/station/machinefiles/macbook-pro.machine.yaml:5)
-          Hint: station explain
+          Hint: station machinefile explain
     - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
@@ -22,11 +22,11 @@ runs:
           settings:
               autologin: { password: hunter2 }
       exit: 0
-    - command: 'explain'
+    - command: 'machinefile explain'
       exit: 2
       stderr: |
           Error: autologin's password: a secret is a vault: reference (`vault:<name>`), never written out (~/.config/station/machinefiles/macbook-pro.machine.yaml:5)
-          Hint: station explain
+          Hint: station machinefile explain
     - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
@@ -35,7 +35,7 @@ runs:
           settings:
               autologin: { password: "vault:agent-password" }
       exit: 0
-    - command: 'explain settings.autologin'
+    - command: 'machinefile explain settings.autologin'
       exit: 0
       stdout: |
           # macbook-pro

@@ -16,7 +16,7 @@ runs:
           machine: { kind: computer, system: { os: macos } }
           apps: [jq, fd]
       exit: 0
-    - command: 'apply --machinefile downloads/laptop.machine.yaml'
+    - command: 'machinefile apply --machinefile downloads/laptop.machine.yaml'
       exit: 2
       stdout: |
           # To install
@@ -45,7 +45,7 @@ runs:
           machine: { kind: computer, system: { os: macos } }
           apps: [jq]
       exit: 0
-    - command: 'apply --machinefile downloads/laptop.machine.yaml'
+    - command: 'machinefile apply --machinefile downloads/laptop.machine.yaml'
       exit: 0
       stdout: |
           ●	homebrew	5.0.1	script	the manager of jq

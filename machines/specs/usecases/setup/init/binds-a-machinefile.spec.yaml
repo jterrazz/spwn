@@ -28,14 +28,14 @@ runs:
       exit: 0
       stdout: |
           [{"name":"laptop","bound_at":"string"},["downloads/laptop.machine.yaml","machinefiles/laptop.lock","machinefiles/laptop.machine.yaml"]]
-    - command: 'drift'
+    - command: 'machinefile drift'
       exit: 0
       stdout: |
           # Packages
           ●	homebrew	script	present
           ●	jq	brew	present
           ●	fd	brew	present
-    - command: 'explain apps.fd'
+    - command: 'machinefile explain apps.fd'
       exit: 0
       stdout: |
           # laptop

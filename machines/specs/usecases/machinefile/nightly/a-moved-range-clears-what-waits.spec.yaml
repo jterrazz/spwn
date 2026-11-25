@@ -9,7 +9,7 @@ runs:
           machine: { kind: computer, system: { os: macos } }
           apps: [{ name: node, version: '22' }]
       exit: 0
-    - command: 'apply --machinefile macbook-pro'
+    - command: 'machinefile apply --machinefile macbook-pro'
       exit: 0
       stdout: |
           ●	homebrew	5.0.1	script	the manager of mise
@@ -28,7 +28,7 @@ runs:
           machine: { kind: computer, system: { os: macos } }
           apps: [{ name: node, version: '25' }]
       exit: 0
-    - command: 'apply'
+    - command: 'machinefile apply'
       exit: 0
       stdout: |
           ●	homebrew	5.0.1	script	the manager of mise

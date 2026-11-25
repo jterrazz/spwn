@@ -11,7 +11,7 @@ runs:
               - { computer: ~/notes, guest: ~/notes }
               - { computer: ~/data, guest: /home/admin/notes }
       exit: 0
-    - command: 'apply --yes'
+    - command: 'machinefile apply --yes'
       exit: 2
       stderr: |
           Error: ~/.config/station/machinefiles/linux-1.machine.yaml:4: two mounts share the guest folder "/home/admin/notes"

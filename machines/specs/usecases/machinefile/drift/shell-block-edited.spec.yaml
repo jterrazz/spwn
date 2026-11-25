@@ -13,9 +13,9 @@ runs:
       exit: 0
     - command: 'init --yes > /dev/null'
       exit: 0
-    - command: 'apply > /dev/null'
+    - command: 'machinefile apply > /dev/null'
       exit: 0
-    - command: 'drift'
+    - command: 'machinefile drift'
       exit: 0
       stdout: |
           # Packages
@@ -24,18 +24,18 @@ runs:
           ●	postgres	shell	present · ~/.zshrc [station:postgres/path]
     - command: '--version >/dev/null; /usr/bin/sed -i.bak ''s/-d /-e /'' .zshrc'
       exit: 0
-    - command: 'drift'
+    - command: 'machinefile drift'
       exit: 0
       stdout: |
           # Packages
           ●	homebrew	script	present
           ●	postgres	brew	present
           ◐	postgres	shell	changed · ~/.zshrc [station:postgres/path]
-    - command: 'apply'
+    - command: 'machinefile apply'
       exit: 0
       stdout: |
           # Left as it is
-          ◐	postgres	shell	~/.zshrc [station:postgres/path] · edited by hand: station plan --diff shows how
+          ◐	postgres	shell	~/.zshrc [station:postgres/path] · edited by hand: station machinefile plan --diff shows how
           ●	homebrew	5.0.1	script	the manager of postgres
           ●	postgres	18.1	brew
           ◐	postgres		shell	~/.zshrc [station:postgres/path]: edited by hand: left as it is
@@ -50,7 +50,7 @@ runs:
           export PATH="$HOME/.local/bin:$PATH"
           command -v station >/dev/null 2>&1 && eval "$(station shell zsh)"
           # <<< station <<<
-    - command: 'apply'
+    - command: 'machinefile apply'
       exit: 0
       stdout: |
           # To set
@@ -58,7 +58,7 @@ runs:
           ●	homebrew	5.0.1	script	the manager of postgres
           ●	postgres	18.1	brew
           ●	postgres		shell	~/.zshrc [station:postgres/path]: written
-    - command: 'drift'
+    - command: 'machinefile drift'
       exit: 0
       stdout: |
           # Packages

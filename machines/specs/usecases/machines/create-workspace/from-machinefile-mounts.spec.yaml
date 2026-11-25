@@ -29,4 +29,4 @@ runs:
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].vms["web"] | {folders: .booted.folders, ran: [.guest.ran[]? | select(startswith("/usr/local/bin/station guest serve") | not)]}'' world.json'
       exit: 0
       stdout: |
-          {"folders":["{{workdir}}/Developer/notes:ro,tag=station-1","{{workdir}}/data:tag=station-2"],"ran":["sudo bash -s -- \"$HOME\" \"$(id -un)\" 'station-1' '~/notes' ro 'station-2' '/data' rw","sudo bash -s","sudo bash -s -- \"$HOME\" \"$(id -un)\" 'station-1' '~/notes' ro 'station-2' '/data' rw","bash -s","/usr/local/bin/station apply --machinefile 'studio-linux' --phase boot </dev/null"]}
+          {"folders":["{{workdir}}/Developer/notes:ro,tag=station-1","{{workdir}}/data:tag=station-2"],"ran":["sudo bash -s -- \"$HOME\" \"$(id -un)\" 'station-1' '~/notes' ro 'station-2' '/data' rw","sudo bash -s","sudo bash -s -- \"$HOME\" \"$(id -un)\" 'station-1' '~/notes' ro 'station-2' '/data' rw","bash -s","/usr/local/bin/station machinefile apply --machinefile 'studio-linux' --phase boot </dev/null"]}

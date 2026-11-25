@@ -9,7 +9,7 @@ runs:
           machine: { kind: computer, system: { os: macos } }
           settings: { git-shortcuts: {} }
       exit: 0
-    - command: 'plan --diff | /usr/bin/head -4'
+    - command: 'machinefile plan --diff | /usr/bin/head -4'
       exit: 0
       stdout: |
           --- ~/.gitconfig [alias]
@@ -23,7 +23,7 @@ runs:
           +++ ~/.gitconfig [alias]
           @@ -1,13 +1,0 @@
           -# >>> station git-shortcuts >>>
-    - command: 'plan --diff --json | /usr/bin/jq -r .schema'
+    - command: 'machinefile plan --diff --json | /usr/bin/jq -r .schema'
       exit: 0
       stdout: |
           station.machinefile.plan/v2

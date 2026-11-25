@@ -13,7 +13,7 @@ runs:
       exit: 0
     - command: 'init --yes > /dev/null'
       exit: 0
-    - command: 'apply > /dev/null'
+    - command: 'machinefile apply > /dev/null'
       exit: 0
     - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].stores.ledger |= map(if .package == "postgres" then .machinefile = "work" else . end)'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
@@ -24,14 +24,14 @@ runs:
           machine: { kind: computer, system: { os: macos } }
           apps: [jq]
       exit: 0
-    - command: 'apply --remove --yes'
+    - command: 'machinefile apply --remove --yes'
       exit: 0
       stdout: |
           ●	homebrew	5.0.1	script	the manager of jq
           ●	jq	1.8.1	brew
     - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].stores.ledger |= map(select(.package != "postgres"))'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
-    - command: 'apply --remove --yes'
+    - command: 'machinefile apply --remove --yes'
       exit: 0
       stdout: |
           ●	homebrew	5.0.1	script	the manager of jq

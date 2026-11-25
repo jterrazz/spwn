@@ -28,7 +28,7 @@ runs:
       exit: 0
     - command: 'init --yes > /dev/null'
       exit: 0
-    - command: 'apply > /dev/null'
+    - command: 'machinefile apply > /dev/null'
       exit: 0
     - command: '--version >/dev/null; /bin/cat .zshrc'
       exit: 0

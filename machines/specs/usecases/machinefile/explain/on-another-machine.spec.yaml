@@ -8,7 +8,7 @@ runs:
           machine: { kind: computer, system: { os: macos } }
           apps: [tart]
       exit: 0
-    - command: 'explain apps --on mac-mini'
+    - command: 'machinefile explain apps --on mac-mini'
       exit: 0
       stdout: |
           	On mac-mini:

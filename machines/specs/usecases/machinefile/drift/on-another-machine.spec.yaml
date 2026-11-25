@@ -9,7 +9,7 @@ runs:
           machine: { kind: computer, system: { os: macos } }
           apps: [jq]
       exit: 0
-    - command: 'drift --on mac-mini'
+    - command: 'machinefile drift --on mac-mini'
       exit: 0
       stdout: |
           	On mac-mini:

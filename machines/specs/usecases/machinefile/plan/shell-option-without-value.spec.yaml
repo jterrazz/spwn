@@ -29,11 +29,11 @@ runs:
           machine: { kind: computer, system: { os: macos } }
           apps: [served]
       exit: 0
-    - command: 'plan'
+    - command: 'machinefile plan'
       exit: 2
       stderr: |
           Error: served's shell: station:served: option port has no value (~/.config/station/machinefiles/macbook-pro.machine.yaml)
-          Hint: station explain
+          Hint: station machinefile explain
     - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
@@ -43,7 +43,7 @@ runs:
       exit: 0
     - command: 'init --yes > /dev/null'
       exit: 0
-    - command: 'apply > /dev/null'
+    - command: 'machinefile apply > /dev/null'
       exit: 0
     - command: '--version >/dev/null; /bin/cat .zshrc | /usr/bin/grep SERVED'
       exit: 0

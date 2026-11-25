@@ -8,7 +8,7 @@ runs:
           machine: { kind: computer, system: { os: macos } }
           apps: [nope]
       exit: 0
-    - command: 'explain'
+    - command: 'machinefile explain'
       exit: 2
       stderr: |
           Error: the catalog has no package nope (~/.config/station/machinefiles/macbook-pro.machine.yaml:4)
@@ -20,11 +20,11 @@ runs:
           machine: { kind: computer, system: { os: macos } }
           apps: [hushlogin]
       exit: 0
-    - command: 'explain'
+    - command: 'machinefile explain'
       exit: 2
       stderr: |
           Error: hushlogin is a setting: list it under settings (~/.config/station/machinefiles/macbook-pro.machine.yaml:4)
-          Hint: station explain
+          Hint: station machinefile explain
     - command: 'world edit macbook-pro machinefiles/studio-linux.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
@@ -32,7 +32,7 @@ runs:
           machine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }
           vm: { image: { bake: [node, nope] } }
       exit: 0
-    - command: 'explain --machinefile studio-linux'
+    - command: 'machinefile explain --machinefile studio-linux'
       exit: 2
       stderr: |
           Error: the catalog has no package nope (~/.config/station/machinefiles/studio-linux.machine.yaml)
@@ -44,7 +44,7 @@ runs:
           machine: { kind: computer, system: { os: macos } }
           settings: { claude-token: {} }
       exit: 0
-    - command: 'explain'
+    - command: 'machinefile explain'
       exit: 2
       stderr: |
           Error: the catalog has no package claude-token (~/.config/station/machinefiles/macbook-pro.machine.yaml:4)

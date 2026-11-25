@@ -11,7 +11,7 @@ runs:
               export API_KEY=sk-station-story-not-a-real-key
               make install
       exit: 0
-    - command: 'explain run'
+    - command: 'machinefile explain run'
       exit: 0
       stdout: |
           # linux-1
