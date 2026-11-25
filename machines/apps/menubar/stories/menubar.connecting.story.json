@@ -1,7 +1,7 @@
 {
     "group": "shell",
     "id": "menubar.connecting",
-    "note": "The status item while a connection is made: the bottom floor solid, the floors above it and the dot at 32 %.",
+    "note": "The status item while a connection is made: the nearest dot behind solid, the farthest one and the front dot at 32 %.",
     "pages": ["pages/machines.fine.menubar.json"],
     "schema": "station.story/v1",
     "ui": {

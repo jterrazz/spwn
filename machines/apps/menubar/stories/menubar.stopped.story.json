@@ -1,7 +1,7 @@
 {
     "group": "shell",
     "id": "menubar.stopped",
-    "note": "The status item with the engine stopped: the floors and the dot at 45 % under a solid slash.",
+    "note": "The status item with the engine stopped: the three dots at 45 % under a solid slash.",
     "pages": ["pages/machines.fine.menubar.json"],
     "schema": "station.story/v1",
     "ui": {

@@ -8,8 +8,8 @@ public struct MenuBarIcon: Equatable, Sendable {
     }
 
     // value: how the mark is drawn, the six states of the item: the
-    // floors plain, faded under a grown dot, lighting in turn, dimmed and
-    // slashed, the bottom one alone solid. The sixth, the menu open, is the
+    // dots behind you plain, faded under a grown front dot, lighting in
+    // turn, dimmed and slashed, the nearest one alone solid. The sixth, the menu open, is the
     // plain mark on the system's highlight, which the system paints.
     public enum Face: Equatable, Sendable {
         case plain, needs, waving, away, connecting
@@ -26,12 +26,12 @@ public struct MenuBarIcon: Equatable, Sendable {
     }
 
     // invariant: SPEC A3: the item draws the page's badge and never judges
-    // it: the floors faded under a grown dot while a server is down or a
-    // port exposed, lighting in turn while a server restarts or a call
-    // runs, and the words VoiceOver reads are the badge's own. The engine
-    // stopped or not installed dims and slashes the mark, so its silence is
-    // never mistaken for all good; a connection being made keeps the bottom
-    // floor alone solid.
+    // it: the dots behind faded under a grown front dot while a server is
+    // down or a port exposed, lighting in turn while a server restarts or a
+    // call runs, and the words VoiceOver reads are the badge's own. The
+    // engine stopped or not installed dims and slashes the mark, so its
+    // silence is never mistaken for all good; a connection being made keeps
+    // the nearest dot behind alone solid.
     public static func of(connection: Connection, page: Page?) -> MenuBarIcon {
         switch connection {
         case .connecting: return MenuBarIcon(.connecting)
@@ -67,14 +67,14 @@ public struct MenuBarIcon: Equatable, Sendable {
     public var turning: Bool { face == .waving }
 }
 
-// value: the spwn mark, three floors growing with depth and the dot on top (`Token.Icon`).
+// value: the spwn mark, three dots one behind the other, the front one you (`Token.Icon`).
 public enum SpwnMark {
-    // value: a floor's opacity at a turn of the loop (0 to 1): it runs from
-    // `Token.Icon.low` up to 1 and back, peaking `Token.Icon.peak` of the
-    // way through its own run, eased in and out both ways; each floor's run
-    // starts `Token.Icon.stagger` seconds after the one below it.
-    public static func light(floor: Int, turn: Double) -> Double {
-        var phase = turn - Double(floor) * Token.Icon.stagger / Token.Busy.period
+    // value: a dot behind's opacity at a turn of the loop (0 to 1): it runs
+    // from `Token.Icon.low` up to 1 and back, peaking `Token.Icon.peak` of
+    // the way through its own run, eased in and out both ways; each dot's
+    // run starts `Token.Icon.stagger` seconds after the one nearer you.
+    public static func light(behind: Int, turn: Double) -> Double {
+        var phase = turn - Double(behind) * Token.Icon.stagger / Token.Busy.period
         phase -= phase.rounded(.down)
         let peak = Token.Icon.peak
         let rise = phase < peak ? phase / peak : 1 - (phase - peak) / (1 - peak)
@@ -82,14 +82,14 @@ public enum SpwnMark {
         return Token.Icon.low + (1 - Token.Icon.low) * eased
     }
 
-    // value: a floor's opacity in a face, floor 0 the bottom one.
-    public static func opacity(floor: Int, face: MenuBarIcon.Face, turn: Double) -> Double {
+    // value: a dot behind's opacity in a face, 0 the one nearest you.
+    public static func opacity(behind: Int, face: MenuBarIcon.Face, turn: Double) -> Double {
         switch face {
         case .plain: return 1
         case .needs: return Token.Icon.faded
         case .away: return Token.Icon.dimmed
-        case .waving: return light(floor: floor, turn: turn)
-        case .connecting: return floor == 0 ? 1 : Token.Icon.resting
+        case .waving: return light(behind: behind, turn: turn)
+        case .connecting: return behind == 0 ? 1 : Token.Icon.resting
         }
     }
 
@@ -105,16 +105,6 @@ public enum SpwnMark {
         face == .needs ? Token.Icon.needsDot : Token.Icon.dot
     }
 
-    // value: a floor of `Token.Icon.floors`, on the box's middle line.
-    public static func floor(_ floor: (y: CGFloat, width: CGFloat, height: CGFloat)) -> Path {
-        let side = floor.width / 2.squareRoot()
-        let square = Path(roundedRect: CGRect(x: -side / 2, y: -side / 2, width: side, height: side), cornerRadius: floor.width * Token.Icon.corner)
-        let turn = CGAffineTransform(rotationAngle: .pi / 4)
-            .concatenating(CGAffineTransform(scaleX: 1, y: floor.height / floor.width))
-            .concatenating(CGAffineTransform(translationX: Token.Icon.box.width / 2, y: floor.y))
-        return square.applying(turn)
-    }
-
     public static func circle(_ dot: (x: CGFloat, y: CGFloat, r: CGFloat), grown: CGFloat = 0) -> Path {
         let r = dot.r + grown
         return Path(ellipseIn: CGRect(x: dot.x - r, y: dot.y - r, width: r * 2, height: r * 2))
@@ -123,7 +113,7 @@ public enum SpwnMark {
 
 // invariant: the item has no colour of its own, in any state: macOS paints
 // it white on a dark bar, black on a light one, and its states are told by
-// the opacity of its floors and its dot, the dot's size and a slash alone.
+// the opacity of its dots, the front dot's size and a slash alone.
 public struct StatusItem: View {
     let icon: MenuBarIcon
     let scheme: ColorScheme
@@ -149,17 +139,12 @@ public struct StatusItem: View {
             line.move(to: Token.Icon.slashFrom)
             line.addLine(to: Token.Icon.slashTo)
             context.drawLayer { layer in
-                let floors = Token.Icon.floors
-                for (i, slab) in floors.enumerated() {
-                    layer.drawLayer { floor in
-                        floor.fill(SpwnMark.floor(slab), with: .color(ink.opacity(SpwnMark.opacity(floor: i, face: face, turn: turn))))
-                        floor.blendMode = .destinationOut
-                        floor.fill(SpwnMark.circle(dot, grown: Token.Icon.dotGap), with: .color(ink))
-                        if i + 1 < floors.count {
-                            let above = SpwnMark.floor(floors[i + 1])
-                            floor.fill(above, with: .color(ink))
-                            floor.stroke(above, with: .color(ink), lineWidth: Token.Icon.gap * 2)
-                        }
+                let behind = Token.Icon.behind
+                for (i, back) in behind.enumerated() {
+                    layer.drawLayer { crescent in
+                        crescent.fill(SpwnMark.circle(back), with: .color(ink.opacity(SpwnMark.opacity(behind: i, face: face, turn: turn))))
+                        crescent.blendMode = .destinationOut
+                        crescent.fill(SpwnMark.circle(i == 0 ? dot : behind[i - 1], grown: Token.Icon.gap), with: .color(ink))
                     }
                 }
                 layer.fill(SpwnMark.circle(dot), with: .color(ink.opacity(SpwnMark.dotOpacity(face))))

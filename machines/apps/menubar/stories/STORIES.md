@@ -36,7 +36,7 @@ Each story gives: what it shows; the data the page needs (what the engine must s
 ![menubar.down](stories/menubar.down.png) ![menubar.down light](stories/menubar.down.light.png)
 
 - **Capture**: [dark](stories/menubar.down.png), [light](stories/menubar.down.light.png)
-- **Shows**: A server down or a port exposed: the status item's three floors faded to 34 % under its dot, grown and solid, in the bar's one ink, never red; aria-label "Spwn Menu, infra down".
+- **Shows**: A server down or a port exposed: the status item's two dots behind faded to 34 % under its front dot, grown and solid, in the bar's one ink, never red; aria-label "Spwn Menu, infra down".
 - **Data**: a server in state down
 - **Enters**: #hud: CSS hud 2600 ms linear
 
@@ -45,7 +45,7 @@ Each story gives: what it shows; the data the page needs (what the engine must s
 ![menubar.restarting](stories/menubar.restarting.png)
 
 - **Capture**: [dark](stories/menubar.restarting.png)
-- **Shows**: A server boots: the three floors light in turn, bottom to top, each 0.4 s after the one below, a 1.2 s loop that runs under Reduce Motion too, the dot solid; aria-label "infra restarting, n of 4 checks".
+- **Shows**: A server boots: the two dots behind light in turn, from the one nearest the front, each 0.6 s after the other, a 1.2 s loop that runs under Reduce Motion too, the front dot solid; aria-label "infra restarting, n of 4 checks".
 - **Data**: a server in state restarting with its step index
 - **Enters**: .busy: CSS spin 800 ms linear; #hud: CSS hud 2600 ms linear
 
@@ -54,7 +54,7 @@ Each story gives: what it shows; the data the page needs (what the engine must s
 ![menubar.fine](stories/menubar.fine.png) ![menubar.fine light](stories/menubar.fine.light.png)
 
 - **Capture**: [dark](stories/menubar.fine.png), [light](stories/menubar.fine.light.png)
-- **Shows**: Nothing is down: the three floors, growing with depth, and the dot on top, plain; aria-label "all machines are fine".
+- **Shows**: Nothing is down: the three dots, one behind the other, plain; aria-label "all machines are fine".
 - **Data**: needs() empty
 - **Enters**: #hud: CSS hud 2600 ms linear
 
@@ -70,12 +70,12 @@ Each story gives: what it shows; the data the page needs (what the engine must s
 
 ### `menubar.stopped`
 
-- **Shows**: The engine stopped or station not installed: the floors and the dot at 45 % opacity under a solid slash cut out of them, so silence is never mistaken for all good; aria-label "station: engine stopped".
+- **Shows**: The engine stopped or station not installed: the three dots at 45 % opacity under a solid slash cut out of them, so silence is never mistaken for all good; aria-label "station: engine stopped".
 - **Data**: the engine's socket absent
 
 ### `menubar.connecting`
 
-- **Shows**: A connection being made: the bottom floor solid, the two floors above it and the dot at 32 % opacity; aria-label "station: connecting".
+- **Shows**: A connection being made: the nearest dot behind solid, the farthest one and the front dot at 32 % opacity; aria-label "station: connecting".
 - **Data**: the socket present, no page yet
 
 ## All machines (home)
