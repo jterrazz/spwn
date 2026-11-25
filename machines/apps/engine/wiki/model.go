@@ -299,6 +299,7 @@ func (q Query) MarshalJSON() ([]byte, error) {
 type Finding struct {
 	Rule  string `json:"rule"`
 	Hard  bool   `json:"hard"`
+	Level Level  `json:"level,omitempty"`
 	Page  string `json:"page"`
 	Block string `json:"block,omitempty"`
 	Line  int    `json:"line"`
