@@ -72,3 +72,11 @@ func TestAnEntryCountsWhatItsRemovalEnds(t *testing.T) {
 		}
 	}
 }
+
+func TestEveryProgramStationSignsInNamesTheVariableThatMovesItsStore(t *testing.T) {
+	for _, p := range accounts.Programs() {
+		if d, _ := p.Delivery(); d.Store == "" {
+			t.Errorf("%s names no store variable", p)
+		}
+	}
+}

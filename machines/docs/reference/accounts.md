@@ -64,6 +64,8 @@ A grant gives one entry to one machine. It has no end of its own: the owner deci
 - **It leaves** at `grants.remove`, or when the VM's guest connects after a removal it could not receive, by the program's own Remove: a logout, or the deletion of the line or file that holds the secret. A program that reads an env file stops in new shells only, and the sentence of `grants.remove` says so.
 - **It is refused**, before anything is read, for a server, a VM of another Mac, a stopped VM, a VM already signed in, and a secret that cannot be delivered. The refusals of `vault.add` carry `Field` (`label` or `value`) so a form marks the input at fault; those of `grants.add` name none.
 
+Each delivery also names the variable that moves its program's own store, its sign-in among it: `GH_CONFIG_DIR`, `NPM_CONFIG_USERCONFIG` (a file), `CLAUDE_CONFIG_DIR`, `CODEX_HOME`, and for wrangler `XDG_CONFIG_HOME`, which moves every XDG program's folder with it. No call reads it yet: it is the mask an agent that is not given the program gets, an empty folder of its own ([ADR-022](../../../docs/decisions/022-an-agent-is-given-apps-its-machine-is-the-wall.md)), and `codex` refuses a `CODEX_HOME` that does not exist, so the folder is made first.
+
 Deleting a VM ends its grants with its disk. It is not a revocation: see below.
 
 ## Where to revoke

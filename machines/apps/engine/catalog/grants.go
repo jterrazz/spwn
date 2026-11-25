@@ -25,6 +25,11 @@ type Delivery struct {
 	// value: the kinds a token typed for the program may be, the first the
 	// one offered by default, by the wire name of a key kind.
 	Kinds []string
+	// value: the variable that moves the program's own store, its sign-in
+	// among it, to another folder (npm's, to another file); the one an
+	// agent that is not given the program has pointed at an empty one of
+	// its own (ADR-022).
+	Store string
 }
 
 type EnvVar struct {
@@ -47,12 +52,12 @@ func (d Delivery) EnvOf(kind string) string {
 const npmRegistryLine = `^//registry.npmjs.org/:_authToken=`
 
 var Deliveries = []Delivery{
-	{Program: "gh", Inject: GuestPath + "; gh auth login --with-token -h github.com", Remove: GuestPath + "; gh auth logout -h github.com", Capture: []string{"gh", "auth", "token", "-h", "github.com"}, CaptureKind: "oauth-token", Kinds: []string{"fine-grained", "token"}},
+	{Program: "gh", Inject: GuestPath + "; gh auth login --with-token -h github.com", Remove: GuestPath + "; gh auth logout -h github.com", Capture: []string{"gh", "auth", "token", "-h", "github.com"}, CaptureKind: "oauth-token", Kinds: []string{"fine-grained", "token"}, Store: "GH_CONFIG_DIR"},
 	{Program: "npm",
 		Inject: `umask 077; IFS= read -r t; f="$HOME/.npmrc"; touch "$f"; { grep -v '` + npmRegistryLine + `' "$f"; printf '//registry.npmjs.org/:_authToken=%s\n' "$t"; } > "$f.station" && mv "$f.station" "$f"`,
 		Remove: `f="$HOME/.npmrc"; [ -f "$f" ] || exit 0; umask 077; grep -v '` + npmRegistryLine + `' "$f" > "$f.station"; mv "$f.station" "$f"`,
-		Kinds:  []string{"token", "fine-grained"}},
-	{Program: "claude", Env: []EnvVar{{Kind: "oauth-token", Name: "CLAUDE_CODE_OAUTH_TOKEN"}, {Kind: "api-key", Name: "ANTHROPIC_API_KEY"}}, Kinds: []string{"oauth-token", "api-key"}},
-	{Program: "wrangler", Env: []EnvVar{{Kind: "token", Name: "CLOUDFLARE_API_TOKEN"}, {Kind: "fine-grained", Name: "CLOUDFLARE_API_TOKEN"}}, Kinds: []string{"token", "fine-grained"}},
-	{Program: "codex", Inject: GuestPath + "; codex login --with-api-key", Remove: GuestPath + "; codex logout", Kinds: []string{"api-key"}},
+		Kinds:  []string{"token", "fine-grained"}, Store: "NPM_CONFIG_USERCONFIG"},
+	{Program: "claude", Env: []EnvVar{{Kind: "oauth-token", Name: "CLAUDE_CODE_OAUTH_TOKEN"}, {Kind: "api-key", Name: "ANTHROPIC_API_KEY"}}, Kinds: []string{"oauth-token", "api-key"}, Store: "CLAUDE_CONFIG_DIR"},
+	{Program: "wrangler", Env: []EnvVar{{Kind: "token", Name: "CLOUDFLARE_API_TOKEN"}, {Kind: "fine-grained", Name: "CLOUDFLARE_API_TOKEN"}}, Kinds: []string{"token", "fine-grained"}, Store: "XDG_CONFIG_HOME"},
+	{Program: "codex", Inject: GuestPath + "; codex login --with-api-key", Remove: GuestPath + "; codex logout", Kinds: []string{"api-key"}, Store: "CODEX_HOME"},
 }
