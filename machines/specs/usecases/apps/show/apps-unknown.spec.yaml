@@ -5,4 +5,4 @@ runs:
       exit: 2
       stderr: |
           Error: no app named "jqq"
-          Hint: station apps for every app here
+          Hint: Did you mean jq?

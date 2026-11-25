@@ -5,4 +5,4 @@ runs:
       exit: 2
       stderr: |
           Error: unknown command "instal" for "station apps"
-          Hint: run station apps --help
+          Hint: station apps install

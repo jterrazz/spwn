@@ -248,6 +248,37 @@ func ruleConfirmInUsecase(w *world) []finding {
 	return out
 }
 
+// invariant: rule json-never-asks: a surface asks only as kit lets its run
+// ask. kit.IO's Interactive is false under --json; kit.Env's is the
+// terminal's alone, so no surface outside kit reads it.
+func ruleJSONNeverAsks(w *world) []finding {
+	var out []finding
+	for _, f := range w.files {
+		if f.test || topOf(f.pkg) != "surface" || f.pkg == "surface/cli/kit" {
+			continue
+		}
+		ast.Inspect(f.syntax, func(node ast.Node) bool {
+			n, isSel := node.(*ast.SelectorExpr)
+			if !isSel || n.Sel.Name != "Interactive" {
+				return true
+			}
+			sel := f.info.Selections[n]
+			if sel == nil {
+				return true
+			}
+			recv := sel.Recv()
+			if p, isPtr := recv.(*types.Pointer); isPtr {
+				recv = p.Elem()
+			}
+			if named, ok := recv.(*types.Named); ok && named.Obj().Pkg() != nil && named.Obj().Pkg().Path() == module+"/surface/cli/kit" && named.Obj().Name() == "Env" {
+				out = append(out, finding{"json-never-asks", f.at(n.Pos()), "a surface reads the terminal's Interactive (kit.Env): a run under --json would ask; read the run's kit.IO"})
+			}
+			return true
+		})
+	}
+	return out
+}
+
 // invariant: rule every-code-worded (ER-07): every fail.Code constant the
 // tree declares is worded in surface/cli/words, and raised: named by code
 // outside surface/cli/words, whose table and declarations are no raise.
@@ -321,6 +352,8 @@ func TestNoLeafPutsAQuestionOutsideItsLeafAsk(t *testing.T) {
 }
 func TestEveryCodeWorded(t *testing.T)       { judge(t, "EveryCodeWorded") }
 func TestEveryCodeWordedRaised(t *testing.T) { judge(t, "EveryCodeWordedRaised") }
+
+func TestNoSurfaceReadsTheTerminalAlone(t *testing.T) { judge(t, "JSONNeverAsks") }
 
 // value: the reference profiles of the worlds: a laptop Mac, a desktop
 // Mac, a workspace, a server.

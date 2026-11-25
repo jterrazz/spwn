@@ -16,6 +16,9 @@ const (
 func usage() map[fail.Code]Wording {
 	return map[fail.Code]Wording{
 		UnknownCommand: func(e *fail.Error) (string, string) {
+			if near := strings.Fields(e.Detail["suggest"]); len(near) > 0 {
+				return "unknown command \"" + e.Subject + "\"", Try("", near)
+			}
 			return "unknown command \"" + e.Subject + "\"", "station help"
 		},
 		MissingArgument: func(e *fail.Error) (string, string) {
@@ -29,6 +32,17 @@ func usage() map[fail.Code]Wording {
 			return e.Subject + " needs a terminal", "run it in a terminal"
 		},
 	}
+}
+
+func Try(path string, commands []string) string {
+	// value: the commands a refusal offers in place of a word the tree does
+	// not know, each one pasteable: `station <path> <word>`.
+	prefix := strings.TrimSpace("station " + path)
+	said := make([]string, 0, len(commands))
+	for _, c := range commands {
+		said = append(said, prefix+" "+c)
+	}
+	return strings.Join(said, ", or ")
 }
 
 func article(noun string) string {

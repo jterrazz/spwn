@@ -25,3 +25,8 @@ runs:
       stderr: |
           Error: unknown flag: --name
           Hint: run station machines --help
+    - command: 'machines delet x'
+      exit: 2
+      stderr: |
+          Error: unknown command "delet" for "station machines"
+          Hint: station machines delete

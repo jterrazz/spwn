@@ -1,0 +1,24 @@
+description: 'under --json a create on a terminal never asks which Mac: it is refused, naming --on'
+fixture:
+    - ../../../__fixtures__/terminal/
+env:
+    - two-macs
+    - terminal
+runs:
+    - command: '--version >/dev/null; terminal --size 100x20 /usr/bin/env -u NO_COLOR COLUMNS=100 "$STATION" machines create qa-1 --memory 2G --json'
+      stdin: |
+          within 20 exit 2
+          screen
+      exit: 2
+      stdout: |
+          {
+            "schema": "station.error/v1",
+            "type": "refused",
+            "code": null,
+            "subject": null,
+            "message": "which Mac to create on: --json never asks",
+            "hint": "station machines create qa-1 --on \u003cmac\u003e",
+            "fix": null
+          }
+          Error: which Mac to create on: --json never asks
+          Hint: station machines create qa-1 --on <mac>
