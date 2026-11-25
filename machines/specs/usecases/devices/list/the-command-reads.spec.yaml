@@ -1,0 +1,20 @@
+description: 'station devices reads the book, as a page, a pipe and a document, here and on another Mac'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'devices'
+      exit: 0
+      stdout: |
+          # macbook-pro
+          key	SHA256:p6ujsfeY+BbEFHPXRJeDMYee6VC5+03g3B1aOP9LT4g
+          # May reach macbook-pro
+          	none
+    - command: 'devices --json | /usr/bin/jq -c ''{schema, mac, key: (.key | split(" ") | .[0]), devices, broken}'''
+      exit: 0
+      stdout: |
+          {"schema":"station.devices.list/v1","mac":"macbook-pro","key":"ecdsa-sha2-nistp256","devices":[],"broken":[]}
+    - command: 'devices --on mac-mini --json | /usr/bin/jq -c ''{schema, mac, devices}'''
+      exit: 0
+      stdout: |
+          {"schema":"station.devices.list/v1","mac":"mac-mini","devices":[]}

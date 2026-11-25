@@ -14,6 +14,11 @@
     "consequence": "%s leaves this machine; its data stays.",
     "form": "yes-no"
   },
+  "devices.forget": {
+    "confirm": "forget-device",
+    "consequence": "%s can no longer reach this Mac or its VMs; it is added again with its key and your presence.",
+    "form": "type-name"
+  },
   "disk.erase": {
     "confirm": "erase",
     "consequence": "The data of %s is deleted for good.",

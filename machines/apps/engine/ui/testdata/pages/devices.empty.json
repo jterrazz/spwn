@@ -1,0 +1,72 @@
+{
+  "schema": "station.page/v1",
+  "id": "devices",
+  "command": "devices",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "key",
+      "title": "mac-mini",
+      "items": [
+        {
+          "fact": {
+            "key": "key",
+            "value": {
+              "kind": "text",
+              "text": "SHA256:GEYRWz+2psSUXNZ4oViX+9301BOK1gUENHLS5F0QCo4"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "devices",
+      "title": "May reach mac-mini",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "fingerprint",
+          "label": "key",
+          "kind": "text",
+          "keep": 30
+        },
+        {
+          "key": "channels",
+          "label": "may open",
+          "kind": "text",
+          "keep": 60
+        },
+        {
+          "key": "added",
+          "label": "added",
+          "kind": "text",
+          "keep": 80,
+          "whole": true
+        }
+      ],
+      "items": [
+        {
+          "empty": {
+            "text": "No other device added",
+            "hint": {
+              "command": "station devices add <name> <its key>"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "hints": [
+    {
+      "command": "station devices --json",
+      "text": "the key line another device adds is its key"
+    }
+  ]
+}

@@ -1,0 +1,175 @@
+{
+  "schema": "station.page/v1",
+  "id": "devices",
+  "command": "devices",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "key",
+      "title": "mac-mini",
+      "items": [
+        {
+          "fact": {
+            "key": "key",
+            "value": {
+              "kind": "text",
+              "text": "SHA256:GEYRWz+2psSUXNZ4oViX+9301BOK1gUENHLS5F0QCo4"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "devices",
+      "title": "May reach mac-mini",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "fingerprint",
+          "label": "key",
+          "kind": "text",
+          "keep": 30
+        },
+        {
+          "key": "channels",
+          "label": "may open",
+          "kind": "text",
+          "keep": 60
+        },
+        {
+          "key": "added",
+          "label": "added",
+          "kind": "text",
+          "keep": 80,
+          "whole": true
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "macbook-pro",
+            "mark": "ok",
+            "label": "macbook-pro",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "SHA256:cT5hNh5Eo/0cBgMbx4JlmcPYDZoZXd37eJaUqyKQd2M"
+              },
+              {
+                "kind": "text",
+                "text": "spwn-api, pipe, herdr"
+              },
+              {
+                "kind": "text",
+                "text": "2026-10-31"
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "phone",
+            "mark": "ok",
+            "label": "phone",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "SHA256:Qm3vLx9rT2kPz8YwHc1nB6dF4sJ0aE7gU5iO3lK2mN8"
+              },
+              {
+                "kind": "text",
+                "text": "pipe"
+              },
+              {
+                "kind": "text",
+                "text": "2026-10-31"
+              }
+            ]
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 2
+        }
+      ]
+    },
+    {
+      "id": "broken",
+      "title": "Seal broken: reaches nothing",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "fingerprint",
+          "label": "key",
+          "kind": "text",
+          "keep": 30
+        },
+        {
+          "key": "channels",
+          "label": "may open",
+          "kind": "text",
+          "keep": 60
+        },
+        {
+          "key": "added",
+          "label": "added",
+          "kind": "text",
+          "keep": 80,
+          "whole": true
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "old-laptop",
+            "mark": "broken",
+            "label": "old-laptop",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "SHA256:8b0p1yQ7cE2wR5tV9xZ3aS6dF4gH1jK0lM2nB5vC7xQ"
+              },
+              {
+                "kind": "text",
+                "text": "pipe"
+              },
+              {
+                "kind": "text",
+                "text": "2026-10-21"
+              }
+            ],
+            "reason": "failing",
+            "hint": {
+              "command": "station devices add old-laptop <its key> --channels pipe"
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "broken",
+          "n": 1
+        }
+      ]
+    }
+  ],
+  "hints": [
+    {
+      "command": "station devices --json",
+      "text": "the key line another device adds is its key"
+    }
+  ]
+}

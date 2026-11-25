@@ -1,0 +1,17 @@
+description: 'an rsa key is refused before anything is asked'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out else .error | {code, subject, message, hint} end'''
+      stdin: |
+          {"v":2,"id":"1","call":"devices.add","in":{"Name":"laptop","Key":"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC7 laptop@home"}}
+      exit: 0
+      stdout: |
+          {"code":"devices.bad-key","subject":"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC7 laptop@home","message":"that is no device key: a key is one ecdsa-sha2-nistp256 or ssh-ed25519 line","hint":"on the other device run station devices --json, then add its key"}
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out | {mac, devices: [.devices[] | [.name, .fingerprint, .channels]], broken: [.broken[] | .name]}'''
+      stdin: |
+          {"v":2,"id":"1","call":"devices.list","in":{}}
+      exit: 0
+      stdout: |
+          {"mac":"macbook-pro","devices":[],"broken":[]}

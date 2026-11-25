@@ -49,3 +49,29 @@ func (b *Book) Forget(name string) bool {
 	b.Devices = slices.DeleteFunc(b.Devices, func(d Device) bool { return d.Name == name })
 	return len(b.Devices) != before
 }
+
+type Row struct {
+	// value: an entry as a reader sees it: its key's fingerprint beside the
+	// key, and never its seal.
+	Name        string    `json:"name"`
+	Key         string    `json:"key"`
+	Fingerprint string    `json:"fingerprint"`
+	Channels    []Channel `json:"channels"`
+	Added       time.Time `json:"added"`
+}
+
+func RowOf(d Device) Row {
+	return Row{Name: d.Name, Key: d.Key, Fingerprint: Fingerprint(d.Key), Channels: d.Channels, Added: d.Added}
+}
+
+type Listing struct {
+	// invariant: Devices are the entries this Mac trusts, Broken the ones
+	// whose seal failed, which reach nothing until they are added again;
+	// both are empty lists, never absent.
+	Mac string `json:"mac"`
+	// value: this Mac's own device key line, the one another device adds;
+	// empty on a Mac that has nowhere to keep one.
+	Key     string `json:"key"`
+	Devices []Row  `json:"devices"`
+	Broken  []Row  `json:"broken"`
+}

@@ -1,0 +1,18 @@
+description: 'station devices add keeps the device, then the read lists it'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'devices add laptop ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGmY0fN5lE8XqXhcG0OB1oCw0SYqC0f6M1bM1jR5e9wz laptop@home --channels pipe,spwn-api'
+      exit: 0
+      stdout: |
+          ●	laptop may reach macbook-pro	SHA256:cT5hNh5Eo/0cBgMbx4JlmcPYDZoZXd37eJaUqyKQd2M, by pipe, spwn-api
+    - command: 'devices | /bin/grep laptop'
+      exit: 0
+      stdout: |
+          ●	laptop	SHA256:cT5hNh5Eo/0cBgMbx4JlmcPYDZoZXd37eJaUqyKQd2M	pipe, spwn-api	2026-11-04
+    - command: 'devices add laptop ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGmY0fN5lE8XqXhcG0OB1oCw0SYqC0f6M1bM1jR5e9wz'
+      exit: 2
+      stderr: |
+          Error: this Mac lets laptop reach it already, by that name or that key
+          Hint: station devices

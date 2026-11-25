@@ -13,11 +13,9 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/devices/calls"
 )
 
-// value: a device key held in memory, as the Enclave's would be; asked
-// counts each ask of its public half.
+// value: a device key held in memory, as the Enclave's would be.
 type memoryKey struct {
-	key   *ecdsa.PrivateKey
-	asked int
+	key *ecdsa.PrivateKey
 }
 
 func newKey(t *testing.T) *memoryKey {
@@ -30,7 +28,6 @@ func newKey(t *testing.T) *memoryKey {
 }
 
 func (k *memoryKey) Public(context.Context) (*ecdsa.PublicKey, error) {
-	k.asked++
 	return &k.key.PublicKey, nil
 }
 
@@ -56,11 +53,11 @@ func sealed(t *testing.T, s calls.Sealer) devices.Device {
 
 func check(t *testing.T, s calls.Sealer, d devices.Device) devices.Checked {
 	t.Helper()
-	got, err := s.Check(t.Context(), devices.Book{Devices: []devices.Device{d}})
+	own, err := s.Key.Public(t.Context())
 	if err != nil {
 		t.Fatal(err)
 	}
-	return got
+	return devices.Check(devices.Book{Devices: []devices.Device{d}}, s.Mac, own)
 }
 
 func TestASealedEntryIsTrusted(t *testing.T) {
@@ -100,10 +97,27 @@ func TestAnEntryWhoseSealFailsIsIgnoredAndReported(t *testing.T) {
 	}
 }
 
-func TestAnEmptyBookAsksNothingOfTheDeviceKey(t *testing.T) {
-	key := newKey(t)
-	got, err := calls.Sealer{Key: key, Mac: "mac-mini"}.Check(t.Context(), devices.Book{})
-	if err != nil || key.asked != 0 || len(got.Trusted) != 0 {
-		t.Fatalf("Check = %+v, %v, asked %d; want nothing asked", got, err, key.asked)
+func TestABrokenEntryGivesWayWhenItsDeviceIsAddedAgain(t *testing.T) {
+	s := calls.Sealer{Key: newKey(t), Mac: "mac-mini"}
+	own, err := s.Key.Public(t.Context())
+	if err != nil {
+		t.Fatal(err)
+	}
+	line, err := devices.LineOf(own)
+	if err != nil {
+		t.Fatal(err)
+	}
+	broken := sealed(t, s)
+	broken.Channels = devices.AllChannels()
+	book := devices.Book{Devices: []devices.Device{broken}}
+	again := sealed(t, s)
+	if err = book.Readmit(again, line, s.Mac, own); err != nil {
+		t.Fatalf("readmit over a broken entry: %v", err)
+	}
+	if got := devices.Check(book, s.Mac, own); len(got.Trusted) != 1 || len(got.Broken) != 0 {
+		t.Fatalf("checked %+v; want the new entry alone, trusted", got)
+	}
+	if err = book.Readmit(sealed(t, s), line, s.Mac, own); err == nil {
+		t.Fatal("readmit over a trusted entry of the same name: want devices.duplicate")
 	}
 }

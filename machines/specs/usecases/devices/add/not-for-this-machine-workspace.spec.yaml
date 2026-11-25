@@ -1,0 +1,13 @@
+description: 'A workspace keeps no device book: its Mac''s says who reaches it'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.this_mac = "linux-1"'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out else .error | {code, subject, message, hint} end'''
+      stdin: |
+          {"v":2,"id":"1","call":"devices.add","in":{"Name":"laptop","Key":"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGmY0fN5lE8XqXhcG0OB1oCw0SYqC0f6M1bM1jR5e9wz"}}
+      exit: 0
+      stdout: |
+          {"code":"section.not-for-this-machine","subject":"linux-1","message":"the device book is a Mac's","hint":"run station overview for what linux-1 has"}

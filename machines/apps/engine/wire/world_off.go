@@ -17,6 +17,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/call/lanes"
 	corecontract "github.com/jterrazz/studio-station/apps/engine/core/contract"
+	"github.com/jterrazz/studio-station/apps/engine/devices"
 	diskcontract "github.com/jterrazz/studio-station/apps/engine/disk/contract"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
 	enginecontract "github.com/jterrazz/studio-station/apps/engine/engine/contract"
@@ -115,3 +116,5 @@ func (*worldMac) holdsFar() bool                      { return true }
 func (*worldMac) absent(string) bool                  { return false }
 func (*worldMac) stationVersion() string              { return "" }
 func (*worldMac) engineStarted() time.Time            { return time.Time{} }
+
+func (*worldMac) presence() devices.Answer { return devices.Absent }

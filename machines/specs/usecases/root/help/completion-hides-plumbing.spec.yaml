@@ -15,6 +15,7 @@ runs:
           awake
           machines
           journal
+          devices
           images
           engine
           use

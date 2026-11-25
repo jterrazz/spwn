@@ -58,3 +58,15 @@ func (k *DeviceKey) Sign(_ context.Context, message []byte) ([]byte, error) {
 	digest := sha256.Sum256(message)
 	return ecdsa.SignASN1(rand.Reader, key, digest[:])
 }
+
+func DeviceKeyFor(mac string) *DeviceKey {
+	// invariant: a world Mac's device key is the same in every process of a
+	// story, made from its name alone, so what one run seals the next one
+	// checks.
+	scalar := sha256.Sum256([]byte("world device key\n" + mac))
+	key, err := ecdsa.ParseRawPrivateKey(elliptic.P256(), scalar[:])
+	if err != nil {
+		return &DeviceKey{}
+	}
+	return DeviceKeyOf(key)
+}

@@ -1,0 +1,20 @@
+description: 'station devices forget asks the name typed, then takes the device out'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'devices add laptop ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGmY0fN5lE8XqXhcG0OB1oCw0SYqC0f6M1bM1jR5e9wz >/dev/null'
+      exit: 0
+    - command: 'devices forget laptop --yes'
+      exit: 2
+      stderr: |
+          Error: devices forget asks its name typed: --yes answers nothing
+          Hint: re-run with --confirm=<name>
+    - command: 'devices forget laptop --confirm=laptop'
+      exit: 0
+      stdout: |
+          ●	laptop no longer reaches macbook-pro
+    - command: 'devices --json | /usr/bin/jq -c .devices'
+      exit: 0
+      stdout: |
+          []

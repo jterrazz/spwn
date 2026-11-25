@@ -54,6 +54,7 @@ import (
 	corecontract "github.com/jterrazz/studio-station/apps/engine/core/contract"
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 	coremachine "github.com/jterrazz/studio-station/apps/engine/core/machine"
+	"github.com/jterrazz/studio-station/apps/engine/devices"
 	devicesfake "github.com/jterrazz/studio-station/apps/engine/devices/adapter/fake"
 	diskfake "github.com/jterrazz/studio-station/apps/engine/disk/adapter/fake"
 	diskcontract "github.com/jterrazz/studio-station/apps/engine/disk/contract"
@@ -395,7 +396,7 @@ func (m *worldMac) imageSource(hypervisor string) imagescontract.ImageSource {
 	return imagesfake.SourceOf(m.run.w, hypervisor)
 }
 func (m *worldMac) sshConfig() contract.SSHConfig { return machinesfake.SSHConfigOf(m.run.w, m.name) }
-func (*worldMac) deviceKey() contract.DeviceKey   { return &machinesfake.DeviceKey{} }
+func (m *worldMac) deviceKey() contract.DeviceKey { return machinesfake.DeviceKeyFor(m.name) }
 
 // invariant: outside a world the spec build never reaches a Secure Enclave:
 // its device key is the one kept in the file STATION_DEVICE_KEY_STUB names,
@@ -1794,4 +1795,14 @@ func (r rootless) Start(c local.Cmd, logPath string) (int, error) {
 		return 0, errRoot
 	}
 	return r.Runner.Start(c, logPath)
+}
+
+func (m *worldMac) presence() devices.Answer {
+	switch m.run.w.Mac(m.name).Presence {
+	case "refused":
+		return devices.Refused
+	case "absent":
+		return devices.Absent
+	}
+	return devices.Given
 }

@@ -189,6 +189,7 @@ func Build(args, env []string, stdin, stdout, stderr *os.File) (p *Program, exit
 		awakeCommand(kenv, thisMac),
 		machinesCommand(kenv, thisMac),
 		journalCommand(kenv, thisMac),
+		devicesCommand(kenv, thisMac),
 		imagesCommand(kenv, thisMac),
 		engineCommand(kenv, thisMac),
 		useCommand(kenv, thisMac),

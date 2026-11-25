@@ -1,0 +1,12 @@
+[1;38;2;76;79;105mmac-mini[m
+  [1;38;2;76;79;105mkey[m  [38;2;76;79;105mSHA256:GEYRWz+2psSUXNZ4oViX+9301BOK1gUENHLS5F0QCo4[m
+[1;38;2;76;79;105mMay reach mac-mini[m
+[38;2;108;111;133m                 key                                              may open               added[m
+  [38;2;156;160;176m[m[38;2;64;160;43m●[m [1;38;2;76;79;105mmacbook-pro[m  [38;2;76;79;105mSHA256:cT5hNh5Eo/0cBgMbx4JlmcPYDZoZXd37eJaUqyK…[m  [38;2;76;79;105mspwn-api, pipe, herdr[m  [38;2;76;79;105m2026-10-31[m
+  [38;2;156;160;176m[m[38;2;64;160;43m●[m [1;38;2;76;79;105mphone[m        [38;2;76;79;105mSHA256:Qm3vLx9rT2kPz8YwHc1nB6dF4sJ0aE7gU5iO3lK…[m  [38;2;76;79;105mpipe[m                   [38;2;76;79;105m2026-10-31[m
+[1;38;2;76;79;105mSeal broken: reaches nothing[m
+[38;2;108;111;133m                key                                                 may open  added[m
+  [38;2;156;160;176m[m[38;2;210;15;57m✗[m [1;38;2;76;79;105mold-laptop[m  [38;2;76;79;105mSHA256:8b0p1yQ7cE2wR5tV9xZ3aS6dF4gH1jK0lM2nB5vC7xQ[m  [38;2;76;79;105mpipe[m      [38;2;76;79;105m2026-10-21[m
+    [38;2;108;111;133m→ [m[38;2;76;79;105mstation devices add old-laptop <its key> --channels pipe[m
+
+[38;2;108;111;133m→ [m[38;2;76;79;105mstation devices --json[m  [38;2;108;111;133mthe key line another device adds is its key[m

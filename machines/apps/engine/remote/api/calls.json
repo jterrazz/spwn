@@ -215,6 +215,45 @@
       "out": "Task"
     },
     {
+      "name": "devices.add",
+      "schema": "station.devices.add/v1",
+      "where": "in-engine",
+      "errors": [
+        "devices.add-here-only",
+        "devices.bad-channels",
+        "devices.bad-key",
+        "devices.bad-name",
+        "devices.duplicate",
+        "devices.no-presence",
+        "devices.own-key",
+        "devices.presence-refused"
+      ],
+      "in": "AddIn",
+      "out": "Row",
+      "journal": true
+    },
+    {
+      "name": "devices.forget",
+      "schema": "station.devices.forget/v1",
+      "where": "in-engine",
+      "confirm": "forget-device",
+      "consequence": "%s can no longer reach this Mac or its VMs; it is added again with its key and your presence.",
+      "errors": [
+        "confirm.mismatch",
+        "confirm.needed",
+        "devices.unknown"
+      ],
+      "in": "ForgetIn",
+      "out": "Forgotten",
+      "journal": true
+    },
+    {
+      "name": "devices.list",
+      "schema": "station.devices.list/v1",
+      "where": "at-target",
+      "out": "Listing"
+    },
+    {
       "name": "disk.erase",
       "schema": "station.disk.erase/v1",
       "section": "disk",

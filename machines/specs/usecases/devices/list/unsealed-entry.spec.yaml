@@ -1,0 +1,19 @@
+description: 'an entry written by hand carries no seal this Mac made: it is listed broken and trusted nowhere'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out else .error | {code, subject, message, hint} end'''
+      stdin: |
+          {"v":2,"id":"1","call":"devices.add","in":{"Name":"laptop","Key":"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGmY0fN5lE8XqXhcG0OB1oCw0SYqC0f6M1bM1jR5e9wz","Channels":["pipe"]}}
+      exit: 0
+      stdout: |
+          {"name":"laptop","key":"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGmY0fN5lE8XqXhcG0OB1oCw0SYqC0f6M1bM1jR5e9wz","fingerprint":"SHA256:cT5hNh5Eo/0cBgMbx4JlmcPYDZoZXd37eJaUqyKQd2M","channels":["pipe"],"added":"{{iso8601}}"}
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].stores.devices += [{"name":"stranger","key":"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBERERERERERERERERERERERERERERERERERERERERER","channels":["pipe"],"added":"2026-11-26T10:00:00Z"}] | .macs["macbook-pro"].stores.devices[0].channels = ["herdr","pipe","spwn-api"]'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out | {mac, devices: [.devices[] | [.name, .fingerprint, .channels]], broken: [.broken[] | .name]}'''
+      stdin: |
+          {"v":2,"id":"1","call":"devices.list","in":{}}
+      exit: 0
+      stdout: |
+          {"mac":"macbook-pro","devices":[],"broken":["laptop","stranger"]}

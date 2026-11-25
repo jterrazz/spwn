@@ -1,0 +1,6 @@
+mac-mini
+  key  SHA256:GEYRWz+2psSUXNZ4oViX+9301BOK1gUENHLS5F0QCo4
+May reach mac-mini
+  No other device added  → station devices add <name> <its key>
+
+→ station devices --json  the key line another device adds is its key

@@ -60,3 +60,21 @@ func Check(b Book, mac string, own *ecdsa.PublicKey) Checked {
 	}
 	return out
 }
+
+func (b Book) Admits(d Device, own, mac string, key *ecdsa.PublicKey) error {
+	// invariant: a broken entry reaches nothing, so it never blocks adding
+	// its device again: the trusted entries judge the new one, which then
+	// takes the place of every broken entry of its name or its key.
+	trusted := Book{Devices: Check(b, mac, key).Trusted}
+	return trusted.Admit(d, own)
+}
+
+func (b *Book) Readmit(d Device, own, mac string, key *ecdsa.PublicKey) error {
+	if err := b.Admits(d, own, mac, key); err != nil {
+		return err
+	}
+	b.Devices = append(slices.DeleteFunc(slices.Clone(b.Devices), func(kept Device) bool {
+		return kept.Name == d.Name || sameKey(kept.Key, d.Key)
+	}), d)
+	return nil
+}
