@@ -36,7 +36,7 @@
                 "items": [
                   {
                     "kind": "text",
-                    "text": "4 programs"
+                    "text": "5 programs"
                   },
                   {
                     "kind": "text",
@@ -190,12 +190,39 @@
               }
             ]
           }
+        },
+        {
+          "row": {
+            "id": "macbook-pro/codex",
+            "mark": "absent",
+            "label": "codex",
+            "short": "Codex",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "signed out"
+              },
+              {
+                "kind": "none"
+              },
+              {
+                "kind": "none"
+              },
+              {
+                "kind": "none"
+              },
+              {
+                "kind": "text",
+                "text": "Sign it in with its own login in a terminal"
+              }
+            ]
+          }
         }
       ],
       "counts": [
         {
           "mark": "absent",
-          "n": 4
+          "n": 5
         }
       ]
     }

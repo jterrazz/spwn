@@ -6,9 +6,9 @@ runs:
       stdout: |
           "station.accounts.list/v1"
           "This Mac"
-          ["This Mac","computer",null,4,null]
+          ["This Mac","computer",null,5,null]
           ["api","workspace","macbook-pro",0,{"type":"refused","code":null,"message":"api is stopped"}]
-          ["linux-1","workspace","macbook-pro",4,null]
+          ["linux-1","workspace","macbook-pro",5,null]
           ["mac-mini","computer",null,0,{"type":"unreachable","code":null,"message":"does not answer"}]
           []
     - command: 'activity --all-machines --json | /usr/bin/jq -c ''.machines[] | select(.machine.this_mac | not) | select(.machine.kind == "computer") | [.machine.label, .error]'''

@@ -8,4 +8,4 @@ runs:
           {"v":2,"id":"1","watch":"accounts.list","in":{"Machine":"api"}}
       exit: 0
       stdout: |
-          {"verdict":"api is stopped: its sign-ins are read when it runs","tone":"warn","rows":[["gh","signed-out",null,"none","Start the machine first",null],["npm","signed-out",null,"none","Start the machine first",null],["claude","signed-out",null,"none","Start the machine first",null],["wrangler","signed-out",null,"none","Start the machine first",null]]}
+          {"verdict":"api is stopped: its sign-ins are read when it runs","tone":"warn","rows":[["gh","signed-out",null,"none","Start the machine first",null],["npm","signed-out",null,"none","Start the machine first",null],["claude","signed-out",null,"none","Start the machine first",null],["wrangler","signed-out",null,"none","Start the machine first",null],["codex","signed-out",null,"none","Start the machine first",null]]}

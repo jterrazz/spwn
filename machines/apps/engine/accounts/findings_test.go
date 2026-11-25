@@ -25,3 +25,12 @@ func TestABrokenSignInIsFixedBySigningInToThatProgramAgain(t *testing.T) {
 		t.Errorf("fix %+v", f)
 	}
 }
+
+func TestABrokenSignInMachinesOnlyGrantsCarriesNoLoginFix(t *testing.T) {
+	byGrant := aProgramSignedInOnlyByAGrant(t)
+	read := accounts.ProgramsRead{Programs: []accounts.ProgramRow{{Program: byGrant, State: accounts.ProgramBroken, Line: "Refused at the provider"}}}
+	got := accounts.Findings(read, machine.Ref{Name: "linux-1"})
+	if len(got) != 1 || got[0].Fix.Call != "" || got[0].Text != string(byGrant)+" sign-in fails: Refused at the provider" {
+		t.Fatalf("findings %+v; want the broken one, with no login to run", got)
+	}
+}

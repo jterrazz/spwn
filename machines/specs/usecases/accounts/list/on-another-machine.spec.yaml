@@ -10,4 +10,4 @@ runs:
           {"v":2,"id":"1","watch":"accounts.list","in":{}}
       exit: 0
       stdout: |
-          {"verdict":"Signed in to no program","tone":"plain","rows":[["gh","signed-out",null,"sign-in",null,null],["npm","signed-out",null,"sign-in",null,null],["claude","signed-out",null,"sign-in",null,null],["wrangler","signed-out",null,"sign-in",null,null]]}
+          {"verdict":"Signed in to no program","tone":"plain","rows":[["gh","signed-out",null,"sign-in",null,null],["npm","signed-out",null,"sign-in",null,null],["claude","signed-out",null,"sign-in",null,null],["wrangler","signed-out",null,"sign-in",null,null],["codex","signed-out",null,"none","Sign it in with its own login in a terminal",null]]}

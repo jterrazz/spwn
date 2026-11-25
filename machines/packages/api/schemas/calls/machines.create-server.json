@@ -278,6 +278,7 @@
             "local_network",
             "login.already-signed-in",
             "login.busy",
+            "login.by-grant",
             "login.code-refused",
             "login.expired",
             "login.failed",

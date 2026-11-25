@@ -36,7 +36,7 @@
                 "items": [
                   {
                     "kind": "text",
-                    "text": "4 programs"
+                    "text": "5 programs"
                   },
                   {
                     "kind": "text",
@@ -198,12 +198,39 @@
               }
             ]
           }
+        },
+        {
+          "row": {
+            "id": "macbook-pro/codex",
+            "mark": "pending",
+            "label": "codex",
+            "short": "Codex",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "reading"
+              },
+              {
+                "kind": "none"
+              },
+              {
+                "kind": "none"
+              },
+              {
+                "kind": "none"
+              },
+              {
+                "kind": "text",
+                "text": "Reading"
+              }
+            ]
+          }
         }
       ],
       "counts": [
         {
           "mark": "pending",
-          "n": 4
+          "n": 5
         }
       ]
     }

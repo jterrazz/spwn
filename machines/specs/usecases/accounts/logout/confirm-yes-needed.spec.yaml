@@ -14,4 +14,4 @@ runs:
           {"v":2,"id":"1","watch":"accounts.list","in":{}}
       exit: 0
       stdout: |
-          {"verdict":"Signed in to 3 of 4 programs","tone":"plain","rows":[["gh","signed-in","own","sign-out",null,"Sign out of GitHub? The token stays valid at GitHub."],["npm","signed-out",null,"sign-in",null,null],["claude","signed-in","own","sign-out",null,"Sign out of Claude? The token stays valid at Claude."],["wrangler","signed-in","own","sign-out",null,"Sign out of Cloudflare? The token stays valid at Cloudflare."]]}
+          {"verdict":"Signed in to 3 of 5 programs","tone":"plain","rows":[["gh","signed-in","own","sign-out",null,"Sign out of GitHub? The token stays valid at GitHub."],["npm","signed-out",null,"sign-in",null,null],["claude","signed-in","own","sign-out",null,"Sign out of Claude? The token stays valid at Claude."],["wrangler","signed-in","own","sign-out",null,"Sign out of Cloudflare? The token stays valid at Cloudflare."],["codex","signed-out",null,"none","Sign it in with its own login in a terminal",null]]}

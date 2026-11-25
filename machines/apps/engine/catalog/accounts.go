@@ -1,5 +1,7 @@
 package catalog
 
+import "strings"
+
 type Provider struct {
 	// value: a brand the owner's accounts are drawn by: its id and the label
 	// a login program carries for it.
@@ -22,7 +24,8 @@ type LoginProgram struct {
 	Detect []string
 	Reads  SignInRead
 	// value: its own login, run with no terminal; it prints the code or the
-	// link and waits for the owner at Site.
+	// link and waits for the owner at Site. Empty for a program signed in
+	// only by a grant from the vault, whose Site is where its key is made.
 	Login []string
 	// value: the one-time code its login prints, as the first group of Code,
 	// read on a line after one holding CodeAfter (any line when empty).
@@ -81,9 +84,25 @@ var LoginPrograms = []LoginProgram{
 		Code:  `^\s*([A-Za-z0-9]{8})\s*$`, CodeAfter: "enter the code",
 		Remove: []string{"logout"},
 	},
+	{
+		Name: "codex", Label: "Codex", Site: "platform.openai.com",
+		Detect: []string{"login", "status"}, Reads: SignInRead{Out: "Not logged in", Who: `^(API key) configured`},
+		Remove: []string{"logout"},
+	},
 }
 
-const LoginBinary = `PATH="$HOME/.local/bin:$PATH"; p=$(command -v "$0") || exit 127; case "$p" in */shims/*) p=$(mise which "$0") || exit 127; PATH="${p%/*}:$PATH";; esac` // value: how a sign-in's line finds its program: on the machine's PATH and the owner's own bin folder, and through the version manager when PATH holds only its shim, since a shim is not the program a signal must reach.
+var LoginBinary = `PATH="` + homeBins() + `:$PATH"; p=$(command -v "$0") || exit 127; case "$p" in */shims/*) p=$(mise which "$0") || exit 127; PATH="${p%/*}:$PATH";; esac` // value: how a sign-in's line finds its program: on the machine's PATH, the owner's own bin folder and the global bins a package manager installs into, and through the version manager when PATH holds only its shim, since a shim is not the program a signal must reach.
+
+// value: the owner's own bin folder, then the global bins under home, as a
+// PATH a line runs under before the machine's own.
+func homeBins() string {
+	bins := make([]string, 0, 1+len(GlobalBins))
+	bins = append(bins, "$HOME/.local/bin")
+	for _, b := range GlobalBins {
+		bins = append(bins, "$HOME/"+b)
+	}
+	return strings.Join(bins, ":")
+}
 
 const (
 	ProviderGitHub     = "github"

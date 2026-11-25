@@ -71,6 +71,10 @@ func overlayOf(r *rand.Rand) catalog.Machinefile {
 		cut := r.IntN(len(programs) + 1)
 		accounts := &catalog.AccountsSpec{}
 		for _, p := range programs[:cut] {
+			if i := slices.IndexFunc(catalog.LoginPrograms, func(l catalog.LoginProgram) bool { return l.Name == p }); len(catalog.LoginPrograms[i].Login) == 0 {
+				accounts.Grants = append(accounts.Grants, catalog.ProgramName(p))
+				continue
+			}
 			accounts.SignIns = append(accounts.SignIns, catalog.ProgramName(p))
 		}
 		for _, p := range programs[cut:] {

@@ -5,6 +5,7 @@ import "github.com/jterrazz/studio-station/apps/engine/core/fail"
 const (
 	LoginUnknownProgram  fail.Code = "login.unknown-program"
 	LoginNotInstalled    fail.Code = "login.not-installed"
+	LoginByGrant         fail.Code = "login.by-grant"
 	LoginAlreadySignedIn fail.Code = "login.already-signed-in"
 	LoginMachineStopped  fail.Code = "login.machine-stopped"
 	LoginBusy            fail.Code = "login.busy"

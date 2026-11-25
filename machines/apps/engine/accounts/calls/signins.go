@@ -39,17 +39,21 @@ type LoginIn struct {
 
 var Login = call.Watch[Deps, LoginIn, accounts.LoginRead]{
 	Name: "accounts.login", Section: section.Accounts, Where: call.InEngine, Applies: accounts.Applies,
-	Errors: []fail.Code{accounts.LoginUnknownProgram, accounts.LoginNotInstalled, accounts.LoginAlreadySignedIn, accounts.LoginMachineStopped, accounts.LoginBusy, accounts.LoginSiteRefused, accounts.LoginExpired, accounts.LoginFailed, accounts.LoginOtherMac},
+	Errors: []fail.Code{accounts.LoginUnknownProgram, accounts.LoginByGrant, accounts.LoginNotInstalled, accounts.LoginAlreadySignedIn, accounts.LoginMachineStopped, accounts.LoginBusy, accounts.LoginSiteRefused, accounts.LoginExpired, accounts.LoginFailed, accounts.LoginOtherMac},
 	Run: func(ctx context.Context, d Deps, in LoginIn, _ call.Progress) (<-chan call.Update[accounts.LoginRead], error) {
 		// invariant: a sign-in runs in the engine of the machine's own Mac,
 		// which holds the program's run, its link and its input until the
 		// exchange ends, so a later accounts.open or accounts.answer finds
 		// them; a VM's own station answers a call at its exit, too late for
-		// a step. A program station does not know is refused, before
-		// anything runs. A server a Mac holds keeps its own sign-ins: the
-		// section's rule refuses it here as it does inside the server.
+		// a step. A program station does not know, or one it signs in
+		// only by a grant, is refused before anything runs. A server a Mac
+		// holds keeps its own sign-ins: the section's rule refuses it here
+		// as it does inside the server.
 		if !in.Program.Known() {
 			return nil, accounts.Refusal(fail.NotFound, accounts.LoginUnknownProgram, string(in.Program))
+		}
+		if !in.Program.SignsInItself() {
+			return nil, accounts.Refusal(fail.Refused, accounts.LoginByGrant, string(in.Program))
 		}
 		if where, known := d.SignIns.Where(ctx, in.Machine); known && in.Machine != "" && where.FarMac == "" {
 			if err := call.Gate(call.Meta{Name: "accounts.login", Section: section.Accounts, Applies: accounts.Applies}, machine.Profile{Ref: machine.Ref{Name: in.Machine}, Kind: where.Kind}); err != nil {

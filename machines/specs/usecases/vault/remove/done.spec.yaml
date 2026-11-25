@@ -14,4 +14,4 @@ runs:
           {"v":2,"id":"1","watch":"accounts.list","in":{"Machine":"linux-1"}}
       exit: 0
       stdout: |
-          {"verdict":"Signed in to 1 of 4 programs","tone":"plain","rows":[["gh","signed-out",null,"sign-in",null,null],["npm","signed-out",null,"sign-in",null,null],["claude","signed-in","own","sign-out",null,"Sign out of Claude? The token stays valid at Claude."],["wrangler","broken",null,"sign-in-again","Refused at the provider",null]]}
+          {"verdict":"Signed in to 1 of 5 programs","tone":"plain","rows":[["gh","signed-out",null,"sign-in",null,null],["npm","signed-out",null,"sign-in",null,null],["claude","signed-in","own","sign-out",null,"Sign out of Claude? The token stays valid at Claude."],["wrangler","broken",null,"sign-in-again","Refused at the provider",null],["codex","signed-out",null,"none","Grant it a password from its Mac",null]]}

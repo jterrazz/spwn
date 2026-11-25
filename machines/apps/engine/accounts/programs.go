@@ -82,6 +82,13 @@ func (t Program) Site() string {
 	return known.Site
 }
 
+func (t Program) SignsInItself() bool {
+	// value: whether the program has a login of its own to run on a
+	// machine; one without is signed in only by a grant from the vault.
+	known, _ := t.login()
+	return len(known.Login) > 0
+}
+
 func (t Program) Captures() bool {
 	// invariant: a program's sign-in can be taken into the vault exactly
 	// when its delivery names the command that prints its token.
@@ -282,8 +289,14 @@ func Describe(f Facts, w Where) ProgramRow {
 		row.Action, row.Line = ActionNone, "Sign in from "+w.FarMac
 	case f.State == ProgramReading || f.State == ProgramWaiting:
 		row.Action, row.Line = ActionNone, "Reading"
+	case f.State == ProgramSignedOut && !f.Program.SignsInItself() && w.Kind == machine.Computer:
+		row.Action, row.Line = ActionNone, lineByHand
+	case f.State == ProgramSignedOut && !f.Program.SignsInItself():
+		row.Action, row.Line = ActionNone, lineByGrant
 	case f.State == ProgramSignedOut:
 		row.Action = ActionSignIn
+	case f.State == ProgramBroken && !f.Program.SignsInItself():
+		row.Action = ActionNone
 	case f.State == ProgramBroken:
 		row.Action = ActionSignInAgain
 	case f.How == HowGranted:
