@@ -28,7 +28,7 @@ Three facts bound the design:
     - no name and no key appears twice;
     - its key is not this Mac's own device key;
     - its channels are a non-empty subset of `spwn-api`, `pipe` and `herdr`, all three by default.
-3. **The commands follow ADR-021's table.** `spwn devices` reads the book (`--json`, `spwn.devices/v1`), and works with the engine down and `--on` another machine. `spwn devices add <name> --key '<public key>' [--channels …]` adds an entry. `spwn devices forget <name> --confirm=<name>` takes one away. `add` and `forget` are the engine's calls, each one line of the journal.
+3. **The commands follow ADR-021's table.** `spwn devices` reads the book (`--json`), and works with the engine down and `--on` another machine. `spwn devices add <name> <public key> [--channels …]` adds an entry, its key written as a `.pub` file holds it. `spwn devices forget <name> --confirm=<name>` takes one away. `add` and `forget` are the engine's calls, each one line of the journal.
 4. **`add` asks the owner's presence, every time**, with a reason that names the device and its key's fingerprint, never riding the engine's open key session. Refused or absent, nothing is written. `add` is refused when the request comes from another machine (`devices.add-here-only`): a key is added only by the owner present at the machine that accepts it.
 5. **`forget` asks no presence and works from afar.** Taking trust away is the safe direction, and a headless Mac must be able to drop a stolen laptop at once.
 6. **A frame from another machine is marked by the transport that carried it.** A server that serves another machine's frames (`engine attach` today) marks every frame it reads as far, and the mark rides every hop after it. A frame may set the mark, never clear it, so a local process that leaves it out gains nothing: it still meets presence.
@@ -49,7 +49,7 @@ Three facts bound the design:
 
 ## Consequences
 
-- After this lands, another Mac's ssh to this Mac's VMs is refused until the owner runs `spwn devices add <that mac> --key …` here, with presence. The empty book's hint says so. No compatibility path is kept.
+- After this lands, another Mac's ssh to this Mac's VMs is refused until the owner runs `spwn devices add <that mac> <its key>` here, with presence. The empty book's hint says so. No compatibility path is kept.
 - The book never writes a Mac's `~/.ssh/authorized_keys`: Mac-to-Mac through OpenSSH is unchanged until the door turns that sshd off.
 - A VM block that still offers `~/.ssh/id_ed25519` costs one refused attempt after the device key; the held branch `fix/ssh-device-key-only` removes it.
 - On a present-owner Mac, `add` can show two sheets in one gesture: the presence it asks, then the Enclave's own when the engine's key session is not open yet to sign the seal.
