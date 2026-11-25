@@ -7,6 +7,7 @@ import { machineNamesOf } from '../../domain/machines/machines';
 import { useWatch } from '../dependencies/dependencies';
 import { moved } from '../ui/focus';
 import { AppIcon, identityOf, MachineIcon, Modal } from '../ui/index';
+import { useMovedPointer } from '../ui/moved-pointer';
 import { everything, matching, resultKey } from './finds';
 import type { Group, Result } from './finds';
 import type { PlainPage, Route } from './route';
@@ -62,21 +63,6 @@ type ListProps = {
     onPick: (result: Result) => void;
     onHover: (event: MouseEvent, index: number) => void;
 };
-
-type Pointer = { x: number; y: number };
-
-// hazard: Chromium sends a mousemove to whatever comes to lie under a resting pointer when the list redraws, so
-// hazard: only a pointer that moved since its last event, and not the first event heard, chooses a row.
-function useHover(onChoose: (index: number) => void): (event: MouseEvent, index: number) => void {
-    const last = useRef<Pointer | undefined>(undefined);
-    return (event, index) => {
-        const before = last.current;
-        last.current = { x: event.clientX, y: event.clientY };
-        if (before !== undefined && (before.x !== event.clientX || before.y !== event.clientY)) {
-            onChoose(index);
-        }
-    };
-}
 
 function startsOf(groups: readonly Group[]): readonly number[] {
     return groups.map((_, at) =>
@@ -176,7 +162,7 @@ export function Find(props: FindProps) {
     const [chosen, setChosen] = useState(0);
     const id = useId();
     const list = useRef<HTMLDivElement>(null);
-    const hover = useHover(setChosen);
+    const hover = useMovedPointer(setChosen);
     const groups = matching(all, query);
     const flat = groups.flatMap((group) => group.results);
     const at = Math.min(chosen, flat.length - 1);
