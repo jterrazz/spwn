@@ -9,7 +9,7 @@ WORLDS is the one list of the worlds the window records, each a world of specs/u
 needs that it lacks: machinefiles on This Mac, the fake binaries of a fixture of specs/usecases/__fixtures__/, and
 edits of its machines (a sign-in in progress, a program signed out or broken, an accounts switch the fake reads in
 apps/engine/world/accounts.go, as the presence check a grant asks, a failed sign-in or a failing background task
-dropped, what a Mac's engine keeps of Awake, what a Mac's journal keeps, a VM working hard on every core of its Mac, a workspace whose create failed at its boot); a world of WORLDS may be a world of specs/usecases/worlds/ under another name, seeded otherwise. A world no
+dropped, what a Mac's engine keeps of Awake, what a Mac's journal keeps, a VM working hard on every core of its Mac, a workspace whose create failed at its boot, the wiki a Mac declares); a world of WORLDS may be a world of specs/usecases/worlds/ under another name, seeded otherwise. A world no
 entry names is served as specs/usecases/worlds/ holds it.
 
 Every folder a sandbox or a seed makes is removed when the process exits, by its end, an exception or SIGTERM.
@@ -290,6 +290,18 @@ def journaled(mac, lines):
     return edit
 
 
+WIKI_CORPUS = ROOT / "apps" / "engine" / "wiki" / "testdata" / "corpus"
+
+
+def wiki_of(mac, folder):
+    """The wiki a Mac declares, as the engine's own stories seed it (specs/usecases/wiki/read/): every file of a folder
+    by its slash path, at one commit its head."""
+    def edit(content):
+        files = {path.relative_to(folder).as_posix(): path.read_text() for path in sorted(folder.rglob("*")) if path.is_file()}
+        content["macs"][mac]["wiki"] = {"commits": {"c1": files}, "head": "c1"}
+    return edit
+
+
 def engine_logged(mac, lines):
     """The lines a Mac's engine log holds, as the world seeds them (specs/usecases/engine/log/): a text shaped like a
     secret is withheld by the engine when it answers."""
@@ -487,6 +499,7 @@ WORLDS = {
         "refused": {"At": "2026-11-04T09:50:00Z", "Message": "GitHub: dial tcp: connection refused"}})]),
     "release-never-asked": ("two-macs", None, {}, [never_asked("macbook-pro", "v0.21.0", "v0.22.0")]),
     "release-first-refused": ("two-macs", None, {}, [first_refused("macbook-pro", "v0.21.0", "v0.22.0")]),
+    "os-wiki": ("one-mac", None, {}, [wiki_of("macbook-pro", WIKI_CORPUS)]),
 }
 
 

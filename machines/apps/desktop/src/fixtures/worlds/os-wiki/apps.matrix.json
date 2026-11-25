@@ -1,0 +1,3 @@
+{"world": "os-wiki", "station": "dev", "exchanges": [
+{"request":{"call":"apps.matrix","in":{}},"answers":[{"v":2,"out":{"Columns":[{"Name":"macbook-pro","Ref":{"Name":"macbook-pro","On":""},"ThisMachine":true,"Mac":true,"Away":"","Answered":"0001-01-01T00:00:00Z","Read":"2026-11-04T10:00:03Z","Why":""}],"Servers":null,"Rows":[{"Name":"github-release","Cells":[{"State":"ok","Version":"","Newest":"","NotHere":false,"Holds":true}],"Carry":1,"Of":1}],"Verdict":{"Mine":{"Tone":"ok","Sentence":"Every app follows its rule"},"Catalog":{"Tone":"ok","Sentence":"Every app follows its rule"}},"Skills":{"Mine":{"Tone":"plain","Sentence":"0 skills are on your machines"},"Catalog":{"Tone":"plain","Sentence":"17 skills are in the catalog"}}}}]}
+]}

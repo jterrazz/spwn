@@ -64,7 +64,9 @@ import sys
 
 import door as doors
 from door import UNENDED, Door, born, callOf
-from world import ROOT, WORLDS, build_digest, seeded, world_binary
+from world import ROOT, WIKI_CORPUS, WORLDS, build_digest, seeded, world_binary
+
+WIKI_PAGES = sorted(path.relative_to(WIKI_CORPUS).with_suffix("").as_posix() for path in WIKI_CORPUS.rglob("*.md"))
 
 out_root = ROOT / "apps" / "desktop" / "src" / "fixtures" / "worlds"
 GRAPHS = (360 * 10**9, 3600 * 10**9, 86400 * 10**9)
@@ -177,6 +179,11 @@ ALSO = {
         {"call": "machinefile.explain", "in": {"Machinefile": "linux-dev"}},
         {"watch": "machines.new", "in": {"From": "linux-dev"}},
         {"watch": "machines.new", "in": {"From": "base-ubuntu"}},
+    ],
+    "os-wiki": [
+        {"call": "wiki.read", "in": {}},
+        *[{"call": "wiki.read", "in": {"Page": page, **({"Budget": budget} if budget else {})}}
+          for page in WIKI_PAGES for budget in ("", "30s", "2min", "10min")],
     ],
 }
 
@@ -546,7 +553,7 @@ def hashed(digest, paths):
 def key():
     """Everything a run over every world reads and writes, by content in sorted order and never by date: the world
     build's sources (world.py's build_digest), the Go toolchain that would build it, the scripts of this folder (the
-    recorder, world.py's WORLDS and seeds), every world of specs/usecases/worlds/ a seed is read from, the fake
+    recorder, world.py's WORLDS and seeds), every world of specs/usecases/worlds/ a seed is read from, the wiki corpus a world declares, the fake
     binaries of every fixture WORLDS names, and every file the recordings' folder holds now."""
     digest = hashlib.sha256(build_digest().encode())
     go = shutil.which("go")
@@ -556,6 +563,7 @@ def key():
     hashed(digest, [
         *sorted(pathlib.Path(__file__).parent.glob("*.py")),
         *sorted((ROOT / "specs" / "usecases" / "worlds").glob("*.json")),
+        *sorted(path for path in WIKI_CORPUS.rglob("*") if path.is_file()),
         *[path for fixture in fixtures
           for path in sorted((ROOT / "specs" / "usecases" / "__fixtures__" / fixture / "bin").rglob("*")) if path.is_file()],
     ])
