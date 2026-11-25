@@ -1406,9 +1406,9 @@
   },
   "MachinefileAction": {
     "adopt": {
-      "Word": "adopt it",
-      "Heading": "To adopt",
-      "Tone": "new"
+      "Word": "adopted",
+      "Heading": "Adopted",
+      "Tone": "plain"
     },
     "extra": {
       "Word": "stays",

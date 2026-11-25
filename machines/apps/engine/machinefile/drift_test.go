@@ -78,6 +78,25 @@ func TestDriftOfAMatchingMachineIsCalm(t *testing.T) {
 	}
 }
 
+func TestADeclaredAppThereOutsideItsMethodIsAdoptedAndDoesNotDrift(t *testing.T) {
+	p := machinefile.Plan{Name: "linux-dev", Lines: []machinefile.Line{line("tree", catalog.KindApp, machinefile.NotManaged, machinefile.Adopt)}}
+
+	d := machinefile.DriftOf(p, nil)
+
+	if d.Differences != 0 || d.Verdict != (verdict.Verdict{Tone: verdict.OK, Sentence: "Matches linux-dev."}) {
+		t.Errorf("drift: %d, %+v", d.Differences, d.Verdict)
+	}
+	if apps := chapter(t, d, machinefile.ChapterApps); apps.Listed != 1 || apps.Matching != 1 || len(apps.Differing) != 0 {
+		t.Errorf("apps: %+v", apps)
+	}
+	if !p.Calm() || d.Apply.Sentence != "Nothing to apply." {
+		t.Errorf("calm %v, apply %q", p.Calm(), d.Apply.Sentence)
+	}
+	if got := d.Plan.Lines[0].Seen.Condition; got != machinefile.NotManaged {
+		t.Errorf("the fact is kept: %q", got)
+	}
+}
+
 func TestDriftSaysWhatApplyWouldDo(t *testing.T) {
 	for _, c := range []struct {
 		name  string
@@ -94,7 +113,7 @@ func TestDriftSaysWhatApplyWouldDo(t *testing.T) {
 			line("tree", catalog.KindApp, machinefile.NotManaged, machinefile.Adopt),
 			line("node", catalog.KindApp, machinefile.Changed, machinefile.Leave),
 		}, Extra: []machinefile.ExtraLine{{Installed: machinefile.Installed{Method: "pkg"}, Line: machinefile.Line{Step: machinefile.Step{Package: "jq"}, Seen: machinefile.Seen{Condition: machinefile.Present, Method: "pkg"}, Action: machinefile.LeaveExtra}}}},
-			"Apply will install 1, adopt 1 and leave 1."},
+			"Apply will install 1 and leave 1."},
 		{"only what is left", machinefile.Plan{Lines: []machinefile.Line{line("node", catalog.KindApp, machinefile.Changed, machinefile.Leave)}}, "Nothing to apply."},
 		{"none", machinefile.Plan{}, "Nothing to apply."},
 	} {

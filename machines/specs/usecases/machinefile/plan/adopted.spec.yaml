@@ -12,12 +12,12 @@ runs:
     - command: 'machinefile plan'
       exit: 0
       stdout: |
-          # To adopt
+          # Adopted
           ?	ripgrep	brew	on PATH, not managed by brew
     - command: 'machinefile apply'
       exit: 0
       stdout: |
-          # To adopt
+          # Adopted
           ?	ripgrep	brew	on PATH, not managed by brew
           ●	homebrew	5.0.1	script	the manager of jq
           ●	jq	1.8.1	brew
@@ -26,3 +26,15 @@ runs:
       exit: 0
       stdout: |
           ?	ripgrep		brew	on PATH, not managed by brew
+    - command: 'machinefile plan'
+      exit: 0
+      stdout: |
+          # Adopted
+          ?	ripgrep	brew	on PATH, not managed by brew
+    - command: 'machinefile drift'
+      exit: 0
+      stdout: |
+          # Packages
+          ●	homebrew	script	present
+          ●	jq	brew	present
+          ?	ripgrep	brew	adopted · on PATH, not managed by brew

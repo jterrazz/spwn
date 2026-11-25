@@ -12,7 +12,17 @@ import (
 // and absent from `pmset -g custom`, so they are neither set nor checked.
 func (m *Mac) observeRestart(ctx context.Context, want []settings.KeyValue) settings.Observation {
 	current, _ := m.pmset(ctx)
-	return judged(restartValues(current, want), want, "restarts after a power cut", "partly applied")
+	return judged(restartValues(current, want), want, restartDetail(current), "partly applied")
+}
+
+// value: what a Mac that restarts reads as, naming the key that starts it
+// when autorestart itself reads 0.
+func restartDetail(current map[string]string) string {
+	const ok = "restarts after a power cut"
+	if current[restartOnLoss] == "0" && current[restartAtConnect] == "1" {
+		return ok + ": starts when plugged in (autorestartatconnect 1, autorestart 0)"
+	}
+	return ok
 }
 
 func (m *Mac) applyRestart(ctx context.Context, it catalog.Setting, _ map[string]string) (settings.Change, error) {

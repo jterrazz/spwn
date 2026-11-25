@@ -454,3 +454,12 @@ becomes the bottleneck.
 - `walk` (`apps/engine/engine/process/keep.go:128`) reads the result of the check `keep` runs in a goroutine right after starting it, so a server's uptime record starts on the check's tick or on the next one, by scheduling; the worlds pin it by seeding `stores.uptime.infra.since`. Starts with the next change to keep: walk waits for the check it started.
 - An engine upgraded by spwn-web's `public/install.sh` keeps running the old binary, since the script restarts no job (it makes no `launchctl` call), and on the owner's Mac after alpha.2 a `launchctl kickstart -k` was refused, `OS_REASON_CODESIGNING` ("needs LWCR update"), until the binary was replaced on a fresh inode (`cp` then `mv`); the Mac mini's upgrade took one `kickstart -k`. The engine's own restart boots its job out and in since e562644ec. HYPOTHESIS (2026-11-21): launchd's recorded code requirement for a job loaded from an ad hoc build refuses a Developer-ID binary at the same inode; settled on a VM by an engine job from a local build, then install.sh of a release, then `kickstart -k`. Starts with U5 (the engine as its own updater) or mode B of "One Spwn on a Mac", whichever lands first: the upgrade restarts the job by bootout and bootstrap.
 - `go work sync` on main rewrites seven `go.sum` files: HYPOTHESIS (2026-11-21, seen by the uid lot), settled by `go work sync && git status --porcelain` at main's tip on development-linux; if it holds, one commit syncs them, as a866d0102 did for `specs/`.
+
+## The restart-after-power-cut equivalence is unproven
+`restart-after-power-cut` reads as in place when `autorestartatconnect` is 1
+and `autorestart` is 0 (what System Settings writes on macOS 27, the new
+mini's own `pmset`), and says so in its detail (2026-11-25, the
+orchestrator under the owner's delegation). Nothing proves that
+`autorestartatconnect` restarts a Mac after a power cut. Starts it: a real
+power cut on a Mac whose `autorestart` is 0, the owner's physical test. If
+that Mac stays off, the setting must require `autorestart 1`.

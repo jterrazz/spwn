@@ -1,4 +1,4 @@
-description: 'drift reads each package as a condition, an app there by another way not managed'
+description: 'drift reads an app there by another way as adopted'
 fixture: ../../__fixtures__/rg-by-hand/
 env: two-macs
 runs:
@@ -17,7 +17,7 @@ runs:
           ●	jq	brew	present
           ◐	gh	brew	outdated
           ○	fd	brew	absent
-          ?	ripgrep	brew	not managed · on PATH, not managed by brew
+          ?	ripgrep	brew	adopted · on PATH, not managed by brew
     - command: 'machinefile drift --json | /usr/bin/jq -c "[.lines[] | [.package, .condition]]"'
       exit: 0
       stdout: |

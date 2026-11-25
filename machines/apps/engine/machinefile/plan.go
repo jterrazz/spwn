@@ -419,6 +419,12 @@ func (l Line) Method() string {
 	return l.Step.Method
 }
 
+func (l Line) Adopted() bool {
+	// value: whether the app is there outside its method, which the plan
+	// states and apply leaves as it is: no work, and no difference.
+	return l.Action == Adopt && l.Seen.Condition == NotManaged
+}
+
 func (l Line) Acts() bool {
 	// value: whether apply changes the machine for the line: an install or a
 	// setting set.

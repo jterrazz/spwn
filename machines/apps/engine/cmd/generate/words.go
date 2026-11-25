@@ -202,7 +202,7 @@ func wordedEnums() []worded {
 		{machinefile.Action(""), map[string]word{
 			string(machinefile.Install):    {Word: "install it", Heading: "To install", Tone: verdict.New},
 			string(machinefile.Set):        {Word: "set it", Heading: "To set", Tone: verdict.New},
-			string(machinefile.Adopt):      {Word: "adopt it", Heading: "To adopt", Tone: verdict.New},
+			string(machinefile.Adopt):      {Word: "adopted", Heading: "Adopted", Tone: verdict.Plain},
 			string(machinefile.Keep):       {Word: "keep it", Heading: "Unchanged", Tone: verdict.New},
 			string(machinefile.Leave):      {Word: "leave it", Heading: "Left as is", Tone: verdict.New},
 			string(machinefile.LeaveExtra): {Word: "stays", Heading: "Extra", Tone: verdict.Plain},

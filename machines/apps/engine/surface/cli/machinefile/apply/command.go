@@ -26,7 +26,7 @@ type Input struct {
 func Command(d Deps, env kit.Env) *cobra.Command {
 	return kit.Command(kit.Leaf[Input]{
 		Use:     "apply",
-		Short:   "Carry out the plan: install, set and adopt what the machine's Machinefile lists",
+		Short:   "Carry out the plan: install and set what the machine's Machinefile lists",
 		Example: "  station machinefile apply\n  station machinefile apply --machinefile macbook-pro\n  station machinefile apply --remove --yes",
 		Declare: func(f *pflag.FlagSet, in *Input) {
 			f.StringVar(&in.Machinefile, "machinefile", "", "the Machinefile, by its name or its file, which this machine then carries (default: the one it carries)")
