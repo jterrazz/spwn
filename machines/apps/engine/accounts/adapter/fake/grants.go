@@ -115,7 +115,7 @@ func (g *Grants) Add(_ context.Context, in contract.GrantIn) (accounts.Granted, 
 		return accounts.Granted{}, accounts.Refusal(fail.Refused, accounts.GrantSignedInHere, in.To)
 	}
 	own := state(mac(g.w, g.mac))
-	switch own.Presence {
+	switch mac(g.w, g.mac).Presence {
 	case "refused":
 		return accounts.Granted{}, accounts.Refusal(fail.Refused, accounts.GrantPresenceRefused, in.Entry)
 	case "absent":

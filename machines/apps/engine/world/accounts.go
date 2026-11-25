@@ -18,8 +18,6 @@ type Accounts struct {
 	Passwords []accounts.VaultEntry `json:"passwords,omitempty"`
 	// value: the sites this Mac's engine opened for the owner, in order, never a URL.
 	Opened []string `json:"opened,omitempty"`
-	// value: how the Mac's presence check answers a grant: empty says yes, refused says no, absent has no way to ask.
-	Presence string `json:"presence,omitempty"`
 	// value: a delivery into a machine that fails, by machine.
 	Undeliverable []string `json:"undeliverable,omitempty"`
 }

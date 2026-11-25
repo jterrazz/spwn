@@ -224,6 +224,10 @@ type Mac struct {
 	// value: the hardware address each Wake-on-LAN packet this Mac sent
 	// named, in order.
 	WakeSent []string `json:"wake_sent,omitempty"`
+	// value: how this Mac's presence check answers whatever asks it (a
+	// grant, a device added): empty says yes, refused says no, absent has no
+	// way to ask.
+	Presence string `json:"presence,omitempty"`
 	// value: how this Mac stands with macOS's Local Network approval of
 	// station; empty, a read that cannot tell. While not approved, its
 	// engine's dial to any of its VMs is refused.
