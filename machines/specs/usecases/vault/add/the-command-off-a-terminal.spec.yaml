@@ -1,0 +1,10 @@
+description: 'station accounts add of a typed password off a terminal is refused: its value is never an argument'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'accounts add gh'
+      exit: 2
+      stderr: |
+          Error: station accounts add needs a terminal
+          Hint: run it in a terminal

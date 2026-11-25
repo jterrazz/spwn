@@ -1,0 +1,10 @@
+description: 'station accounts remove of a word that names no password of the vault removes nothing'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'accounts remove nothing-here --yes'
+      exit: 2
+      stderr: |
+          Error: no password nothing-here in this Mac's vault
+          Hint: read the vault for what it keeps

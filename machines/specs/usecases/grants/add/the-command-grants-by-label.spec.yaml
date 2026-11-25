@@ -1,0 +1,16 @@
+description: 'station accounts grant names a password by its label and gives it to a VM until it is removed'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'accounts grant "GitHub deploy" --on linux-1'
+      exit: 0
+      stdout: |
+          	On linux-1:
+          ●	GitHub deploy	granted to linux-1 · until it is removed
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out | [.Entries[] | [.Label, [.Grants[] | .To]]]'''
+      stdin: |
+          {"v":2,"id":"1","watch":"vault.list","in":{}}
+      exit: 0
+      stdout: |
+          [["GitHub deploy",["linux-1"]],["npm publish",["linux-1"]],["Claude Max",[]]]

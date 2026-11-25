@@ -1,0 +1,16 @@
+description: 'station accounts logout off a terminal without --yes signs nothing out and says how to confirm'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'accounts logout gh'
+      exit: 2
+      stderr: |
+          Error: refusing to sign out without --yes
+          Hint: re-run with --yes
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out | [.Programs[] | select(.Program == "gh") | .State]'''
+      stdin: |
+          {"v":2,"id":"1","watch":"accounts.list","in":{}}
+      exit: 0
+      stdout: |
+          ["signed-in"]

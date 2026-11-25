@@ -1,0 +1,26 @@
+description: 'on a terminal, station accounts add asks the value in a hidden field and keeps it under its label'
+fixture:
+    - ../../../__fixtures__/terminal/
+env:
+    - two-macs
+    - engine
+    - terminal
+runs:
+    - command: '--version >/dev/null; terminal --size 100x20 /usr/bin/env -u NO_COLOR COLUMNS=100 "$STATION" accounts add gh --label "docs deploy"'
+      stdin: |
+          within 10 see GitHub
+          send correct horse\r
+          within 20 exit 0
+          screen
+      exit: 0
+      stdout: |
+          It is kept in macbook-pro's Keychain; you can then grant it to a machine.
+          ┃ GitHub: a fine-grained token
+          ✓ docs deploy · kept in macbook-pro's vault
+            station accounts grant "docs deploy" --on <machine> gives it to a VM
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out | [.Entries[] | [.ID, .Label, .Program, .Kind]]'''
+      stdin: |
+          {"v":2,"id":"1","watch":"vault.list","in":{}}
+      exit: 0
+      stdout: |
+          [["pw-1","GitHub deploy","gh","fine-grained"],["pw-2","npm publish","npm","token"],["pw-3","Claude Max","claude","oauth-token"],["pw-4","docs deploy","gh","fine-grained"]]
