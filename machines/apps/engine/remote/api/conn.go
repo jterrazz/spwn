@@ -181,7 +181,7 @@ func (c *Conn) Hello(ctx context.Context) (Hello, error) {
 }
 
 func (c *Conn) Invoke(ctx context.Context, target machine.Ref, name string, in json.RawMessage, p call.Progress) (json.RawMessage, error) {
-	id, ch, err := c.send(Frame{Call: name, Target: TargetOf(target), In: in, By: byOf(ctx), Far: call.Far(ctx)})
+	id, ch, err := c.send(Frame{Call: name, Target: TargetOf(target), In: in, By: ByOf(ctx), Far: call.Far(ctx)})
 	if err != nil {
 		return nil, err
 	}
@@ -207,7 +207,7 @@ func (c *Conn) Invoke(ctx context.Context, target machine.Ref, name string, in j
 }
 
 func (c *Conn) Watch(ctx context.Context, target machine.Ref, name string, in json.RawMessage, p call.Progress) (<-chan call.Update[json.RawMessage], error) {
-	id, ch, err := c.send(Frame{Watch: name, Target: TargetOf(target), In: in, By: byOf(ctx), Far: call.Far(ctx)})
+	id, ch, err := c.send(Frame{Watch: name, Target: TargetOf(target), In: in, By: ByOf(ctx), Far: call.Far(ctx)})
 	if err != nil {
 		return nil, err
 	}
