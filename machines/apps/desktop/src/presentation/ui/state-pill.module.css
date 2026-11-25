@@ -9,7 +9,8 @@
     font-size: var(--text-label);
     font-weight: var(--weight-medium);
     color: var(--c);
-    background: color-mix(in srgb, var(--c) 16%, transparent);
+    background: color-mix(in srgb, var(--c) var(--tone-fill), transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--c) var(--tone-line), transparent);
     white-space: nowrap;
     flex: none;
 }
