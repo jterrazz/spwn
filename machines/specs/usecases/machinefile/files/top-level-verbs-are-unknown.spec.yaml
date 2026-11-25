@@ -15,12 +15,12 @@ runs:
             "code": "usage.unknown-command",
             "subject": "apply",
             "message": "unknown command \"apply\"",
-            "hint": "station help",
+            "hint": "station apps",
             "fix": null
           }
       stderr: |
           Error: unknown command "apply"
-          Hint: station help
+          Hint: station apps
     - command: 'drift'
       exit: 2
       stderr: |

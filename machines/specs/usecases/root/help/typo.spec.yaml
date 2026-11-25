@@ -1,0 +1,43 @@
+description: 'an unknown word is answered with the word it meant, at every level'
+env: two-macs
+runs:
+    - command: 'machnies'
+      exit: 2
+      stderr: |
+          Error: unknown command "machnies"
+          Hint: station machines
+    - command: 'machines delet linux-1'
+      exit: 2
+      stderr: |
+          Error: unknown command "delet" for "station machines"
+          Hint: station machines delete
+    - command: 'machines linux1'
+      exit: 2
+      stderr: |
+          Error: no machine named "linux1"
+          Hint: Did you mean linux-1?
+    - command: 'apps install chatgtp'
+      exit: 2
+      stderr: |
+          Error: no app named "chatgtp"
+          Hint: Did you mean chatgpt?
+    - command: 'apps search chatgpt'
+      exit: 2
+      stderr: |
+          Error: unknown command "search" for "station apps"
+          Hint: station apps chatgpt
+    - command: 'machines linux1 --json'
+      exit: 2
+      stdout: |
+          {
+            "schema": "station.error/v1",
+            "type": "refused",
+            "code": null,
+            "subject": null,
+            "message": "no machine named \"linux1\"",
+            "hint": "Did you mean linux-1?",
+            "fix": null
+          }
+      stderr: |
+          Error: no machine named "linux1"
+          Hint: Did you mean linux-1?

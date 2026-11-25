@@ -5,4 +5,4 @@ runs:
       exit: 2
       stderr: |
           Error: no app named "nope"
-          Hint: station apps for every app here
+          Hint: Did you mean node?

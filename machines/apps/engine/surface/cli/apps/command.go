@@ -2,7 +2,6 @@ package appscmd
 
 import (
 	"context"
-	"errors"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -32,7 +31,10 @@ func Command(d Deps, env kit.Env, children ...*cobra.Command) *cobra.Command {
 		Group:   kit.Machine,
 		Args: func(c *cobra.Command, args []string) error {
 			if len(args) > 1 {
-				return errors.New("unknown command \"" + args[0] + "\" for \"" + c.CommandPath() + "\"")
+				if args[0] == "search" {
+					return kit.UnknownCommand(c, "search", args[1])
+				}
+				return kit.UnknownCommand(c, args[0])
 			}
 			return nil
 		},

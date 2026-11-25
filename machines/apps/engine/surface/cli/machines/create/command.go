@@ -123,7 +123,7 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 		},
 		Run: func(ctx context.Context, in *Input, io kit.IO) error {
 			if d.Ask != nil {
-				if err := ask(ctx, d, in); err != nil {
+				if err := ask(ctx, d, in, io, env.Far()); err != nil {
 					return err
 				}
 			}
@@ -182,7 +182,7 @@ func from(in *Input) error {
 	return nil
 }
 
-func ask(ctx context.Context, d Deps, in *Input) error {
+func ask(ctx context.Context, d Deps, in *Input, io kit.IO, far bool) error {
 	var macs []pagemachines.MacChoice
 	if allMachines, allMachinesErr := d.AllMachines(ctx); allMachinesErr == nil {
 		for _, h := range allMachines.Macs {
@@ -193,6 +193,14 @@ func ask(ctx context.Context, d Deps, in *Input) error {
 	}
 	answers := map[string]string{}
 	if form := pagemachines.CreateForm(string(in.request.Lifetime), macs); len(form.Fields) > 0 {
+		if !io.Interactive {
+			// invariant: --json never asks: the Mac the question picks is
+			// named by --on, or the call is refused.
+			if far {
+				return nil
+			}
+			return kit.Refuse("which Mac to create on: --json never asks", "station machines create "+cmp.Or(in.Name, "<name>")+" --on <mac>")
+		}
 		asked, err := d.Ask.Form(form)
 		if err != nil {
 			return err

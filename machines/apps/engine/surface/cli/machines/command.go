@@ -2,7 +2,6 @@ package machinescmd
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -34,7 +33,7 @@ func Command(d Deps, env kit.Env, children ...*cobra.Command) *cobra.Command {
 		Example: "  station machines\n  station machines linux-1\n  station machines --json",
 		Args: func(c *cobra.Command, args []string) error {
 			if len(args) > 1 {
-				return fmt.Errorf("unknown command %q for %q", args[0], c.CommandPath())
+				return kit.UnknownCommand(c, args[0])
 			}
 			return nil
 		},

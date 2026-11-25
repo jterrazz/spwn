@@ -360,3 +360,66 @@ func TestEveryExampleRuns(t *testing.T) {
 		}
 	})
 }
+
+// value: a noun with its first two different neighbors after its first
+// letter swapped, the typo a hurried hand makes: two edits from the word.
+func transposed(noun string) string {
+	r := []rune(noun)
+	for i := 1; i+1 < len(r); i++ {
+		if r[i] != r[i+1] {
+			r[i], r[i+1] = r[i+1], r[i]
+			break
+		}
+	}
+	return string(r)
+}
+
+// invariant: rule typo-answered (ADR-021 rule 7): a word the tree does not
+// know is refused, exit 2, with the noun it meant as a command to paste.
+func typoRefusals(r ran, noun string) []finding {
+	where := strings.Join(r.words, " ")
+	var out []finding
+	if r.exit != 2 {
+		out = append(out, finding{"typo-answered", where, "a typo that exits " + strconv.Itoa(r.exit) + ", not 2"})
+	}
+	_, hint, _ := strings.Cut(r.stderr, "\nHint: ")
+	hint, _, _ = strings.Cut(hint, "\n")
+	if !slices.Contains(strings.Split(hint, ", or "), "station "+noun) {
+		out = append(out, finding{"typo-answered", where, "a typo whose hint does not name station " + noun})
+	}
+	return out
+}
+
+func TestATypoIsAnsweredWithItsWord(t *testing.T) {
+	t.Parallel()
+	t.Run("holds", func(t *testing.T) {
+		bin := specBinary(t)
+		var mu sync.Mutex
+		var out []finding
+		root := commandTree(t)
+		t.Run("runs", func(t *testing.T) {
+			for _, noun := range treeNouns() {
+				if c, _, _ := root.Find([]string{noun}); c == root || c.Name() != noun || !c.IsAvailableCommand() {
+					continue
+				}
+				t.Run(noun, func(t *testing.T) {
+					t.Parallel()
+					found := typoRefusals(runOverWorld(t, bin, []string{transposed(noun)}), noun)
+					mu.Lock()
+					out = append(out, found...)
+					mu.Unlock()
+				})
+			}
+		})
+		excuse(t, out, nil)
+	})
+	t.Run("bites", func(t *testing.T) {
+		dropped := ran{words: []string{"mcahines"}, exit: 2, stderr: "Error: unknown command \"mcahines\"\nHint: station help\n"}
+		bites(t, "typo-answered", typoRefusals(dropped, "machines"), "mcahines")
+		answered := ran{words: []string{"mcahines"}, exit: 2, stderr: "Error: unknown command \"mcahines\"\nHint: station machines\n"}
+		if found := typoRefusals(answered, "machines"); len(found) > 0 {
+			t.Errorf("the typo rule refused an answered typo: %v", found)
+		}
+		bites(t, "typo-answered", typoRefusals(ran{words: dropped.words, exit: 1, stderr: answered.stderr}, "machines"), "mcahines")
+	})
+}

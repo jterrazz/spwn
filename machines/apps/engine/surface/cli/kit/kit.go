@@ -5,17 +5,20 @@ import (
 	"errors"
 	"io"
 	"slices"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
+	appscalls "github.com/jterrazz/studio-station/apps/engine/apps/calls"
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	"github.com/jterrazz/studio-station/apps/engine/core/confirm"
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/core/secret"
+	model "github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/output"
 	"github.com/jterrazz/studio-station/apps/engine/page"
 	"github.com/jterrazz/studio-station/apps/engine/surface/cli/words"
@@ -212,6 +215,9 @@ func Command[I any](l Leaf[I], env Env) *cobra.Command {
 			if what := wanted(c.Use); what != "" && len(a) == 0 {
 				return fail.New(fail.Refused, words.MissingArgument, c.CommandPath(), map[string]string{"what": what})
 			}
+			if strings.HasPrefix(err.Error(), "unknown command ") {
+				return unknownCommand(err.Error(), path(c), helpHint(c))
+			}
 			return usage(err.Error(), helpHint(c))
 		}
 		return nil
@@ -242,7 +248,7 @@ func Command[I any](l Leaf[I], env Env) *cobra.Command {
 			JSON:          wantJSON,
 			PageJSON:      wantPage,
 			Yes:           yes,
-			Interactive:   env.Interactive,
+			Interactive:   env.Interactive && !wantJSON && !wantPage,
 			Prompt:        env.Prompt,
 			ZshCompletion: c.Root().GenZshCompletion,
 			out:           env.Out,
@@ -276,7 +282,7 @@ func Command[I any](l Leaf[I], env Env) *cobra.Command {
 			return env.Out.Finding(page.Broken, append([]string{Translate(err, path(c)).Message}, lastAnswer(c.Context(), env, err)...)...)
 		}
 		if err != nil {
-			return Translate(err, path(c))
+			return meant(Translate(err, path(c)), err, c, l, a)
 		}
 		if env.Far() {
 			env.On.refresh(c.Context(), path(c))
@@ -414,10 +420,6 @@ func path(c *cobra.Command) string {
 	return strings.TrimSpace(strings.TrimPrefix(c.CommandPath(), c.Root().Name()))
 }
 
-func didYouMean(suggestions []string) string {
-	return " (did you mean \"" + strings.Join(suggestions, "\" or \"") + "\"?)"
-}
-
 func Updates[T any](updates <-chan call.Update[T], build func(T) page.Page) <-chan page.Page {
 	// invariant: an update in error draws nothing; the stream is still read
 	// to its end, so its producer never blocks.
@@ -468,3 +470,64 @@ func (s *Spinner) Step(task, detail string) {
 func (*Spinner) Done(string, error) {}
 
 func (s *Spinner) Stop() { s.stop() }
+
+func UnknownCommand(c *cobra.Command, word string, meant ...string) error {
+	// value: the error cobra gives a word its command does not know, its
+	// suggestions what the caller says was meant, else the subcommands
+	// within two edits of it.
+	message := "unknown command " + strconv.Quote(word) + " for " + strconv.Quote(c.CommandPath())
+	near := meant
+	if len(near) == 0 {
+		near = c.SuggestionsFor(word)
+	}
+	if len(near) > 0 {
+		message += "\n\nDid you mean this?\n\t" + strings.Join(near, "\n\t") + "\n"
+	}
+	return errors.New(message)
+}
+
+func meant[I any](worded *fail.Error, err error, c *cobra.Command, l Leaf[I], args []string) *fail.Error {
+	// invariant: a name the machine does not know is answered with the names
+	// it knows, those its leaf completes, when one is near and the leaf
+	// completes names of that kind.
+	word, kind, unknown := unknownName(err)
+	if !unknown || l.Complete == nil || worded == nil || completes(noun(c)) != kind {
+		return worded
+	}
+	near := Suggest(word, l.Complete(args, ""))
+	if len(near) == 0 {
+		return worded
+	}
+	said := *worded
+	said.Hint = "Did you mean " + strings.Join(near, " or ") + "?"
+	return &said
+}
+
+func noun(c *cobra.Command) string {
+	first, _, _ := strings.Cut(path(c), " ")
+	return first
+}
+
+// value: what the names a leaf completes are, by the noun it stands under:
+// the apps of `apps`, the machines of `machines`.
+func completes(noun string) string {
+	switch noun {
+	case "apps":
+		return "app"
+	case "machines":
+		return "machine"
+	}
+	return ""
+}
+
+func unknownName(err error) (word, kind string, found bool) {
+	var machineName *model.UnknownMachineError
+	if errors.As(err, &machineName) {
+		return machineName.Name, "machine", true
+	}
+	var worded *fail.Error
+	if errors.As(err, &worded) && worded.Code == appscalls.Unknown {
+		return worded.Subject, "app", true
+	}
+	return "", "", false
+}

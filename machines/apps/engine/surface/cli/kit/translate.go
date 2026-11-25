@@ -69,16 +69,25 @@ func Translate(err error, path string) *fail.Error {
 	}
 	message := err.Error()
 	if strings.HasPrefix(message, "unknown command ") {
-		first, suggestions, _ := strings.Cut(message, "\n\nDid you mean this?\n")
-		if word, ok := strings.CutSuffix(strings.TrimSpace(first), " for \"station\""); ok {
-			return Translate(fail.New(fail.Refused, words.UnknownCommand, strings.Trim(strings.TrimPrefix(word, "unknown command "), "\""), nil), path)
-		}
-		if s := strings.Fields(suggestions); len(s) > 0 {
-			hint += didYouMean(s)
-		}
-		return usage(strings.TrimSpace(first), hint)
+		return unknownCommand(message, path, hint)
 	}
 	return failed(message, hint, err)
+}
+
+func unknownCommand(message, path, hint string) *fail.Error {
+	// invariant: a word the tree does not know is answered with the words it
+	// meant, at the root and under a noun alike, as commands to paste.
+	first, listed, _ := strings.Cut(message, "\n\nDid you mean this?\n")
+	first = strings.TrimSpace(first)
+	near := strings.Fields(listed)
+	if word, ok := strings.CutSuffix(first, " for \"station\""); ok {
+		detail := map[string]string{"suggest": strings.Join(near, " ")}
+		return Translate(fail.New(fail.Refused, words.UnknownCommand, strings.Trim(strings.TrimPrefix(word, "unknown command "), "\""), detail), path)
+	}
+	if len(near) > 0 {
+		hint = words.Try(path, near)
+	}
+	return usage(first, hint)
 }
 
 func Refusal(code fail.Code, subject string) string {
