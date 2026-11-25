@@ -8,7 +8,7 @@ runs:
           {"v":2,"id":"1","call":"devices.add","far":true,"in":{"Name":"laptop","Key":"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGmY0fN5lE8XqXhcG0OB1oCw0SYqC0f6M1bM1jR5e9wz"}}
       exit: 0
       stdout: |
-          {"code":"devices.add-here-only","subject":"laptop","message":"a device is added only at the Mac that lets it in, never from another machine","hint":"run station devices add on that Mac, with you at it"}
+          {"code":"devices.add-here-only","subject":"laptop","message":"a device is added only from the Mac that lets it in, never through engine attach or --on","hint":"run station devices add on that Mac, with you at it"}
     - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out | {mac, devices: [.devices[] | [.name, .fingerprint, .channels]], broken: [.broken[] | .name]}'''
       stdin: |
           {"v":2,"id":"1","call":"devices.list","in":{}}

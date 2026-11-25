@@ -121,3 +121,22 @@ func TestADeviceKeyMadeAfterTheGuestConnectedReachesItOnTheNextWalk(t *testing.T
 		t.Fatalf("hellos %q, want the file written by another process never sent, and the key once made", said)
 	}
 }
+
+func TestAGuestAwayAtAForgetIsToldTheBookAsItIsWhenItConnects(t *testing.T) {
+	kept := []string{"ssh-ed25519 LAPTOP"}
+	d, v, _, heard := keyedEngine(t, nil, map[string]string{}, func() []string { return kept })
+	d.hello(v)
+	d.mu.Lock()
+	v.guest = engine.GuestAbsent
+	d.mu.Unlock()
+	kept = nil
+	d.Rehello()
+	if said := heard.heard(); len(said) != 1 {
+		t.Fatalf("a guest away was told %q", said[1:])
+	}
+	d.hello(v)
+	said := heard.heard()
+	if len(said) != 2 || !strings.Contains(said[0], "LAPTOP") || strings.Contains(said[1], "LAPTOP") {
+		t.Fatalf("hellos %q, want the hello at its connect without the forgotten key", said)
+	}
+}

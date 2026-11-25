@@ -26,5 +26,5 @@ func Reason(d Device) string {
 		channels = append(channels, string(c))
 	}
 	slices.Sort(channels)
-	return "let " + d.Name + " (" + Fingerprint(d.Key) + ") reach this Mac by " + strings.Join(channels, ", ")
+	return "let " + d.Name + " (" + Fingerprint(d.Key) + ") into this Mac's VMs by " + strings.Join(channels, ", ")
 }

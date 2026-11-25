@@ -77,7 +77,7 @@ func Page(l devices.Listing, thisMac page.Context) page.Page {
 }
 
 func Added(r devices.Row, mac string, thisMac page.Context) page.Page {
-	row := page.Row{ID: r.Name, Label: r.Name + " may reach " + mac, Mark: page.OK, Detail: page.Text(r.Fingerprint + ", by " + channelsOf(r))}
+	row := page.Row{ID: r.Name, Label: r.Name + " may reach " + mac + "'s VMs", Mark: page.OK, Detail: page.Text(r.Fingerprint + ", by " + channelsOf(r))}
 	return pages.Outcome("devices add", thisMac, nil, []page.Row{row}, "device")
 }
 
@@ -86,6 +86,6 @@ func Forgotten(name, mac string, thisMac page.Context) page.Page {
 	// the VMs, and what it leaves: a session already open, and this Mac's
 	// own sshd, which the book never writes.
 	row := page.Row{ID: name, Label: name + " opens no new login into " + mac + "'s VMs", Mark: page.OK,
-		Detail: page.Text("a session already open stays until it ends; " + mac + "'s ~/.ssh/authorized_keys is not touched")}
+		Detail: page.Text("a session already open stays until it ends; " + mac + "'s ~/.ssh/authorized_keys is not touched, so a login into " + mac + " still reaches its VMs")}
 	return pages.Outcome("devices forget", thisMac, nil, []page.Row{row}, "device")
 }
