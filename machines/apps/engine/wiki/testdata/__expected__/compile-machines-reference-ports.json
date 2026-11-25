@@ -1,0 +1,182 @@
+{
+  "id": "machines/reference/ports",
+  "faces": {
+    "word": "Ports",
+    "line": "`station ports` lists every TCP port that listens on a Mac or a VM, each in the class of who reaches it.",
+    "paragraph": "`station ports` lists every TCP port that listens on a Mac or a VM, each in the class of who reaches it. Which ports a VM may open, and to whom, are its [rights](#right): a port that starts listening inside them is shared with their audience within seconds, one outside them is flagged and never shared.",
+    "icon": ""
+  },
+  "title": {
+    "from": 1,
+    "to": 1
+  },
+  "sections": [
+    {
+      "heading": null,
+      "items": [
+        {
+          "t": "prose",
+          "markdown": "`station ports` lists every TCP port that listens on a Mac or a VM, each in the class of who reaches it. Which ports a VM may open, and to whom, are its [rights](#right): a port that starts listening inside them is shared with their audience within seconds, one outside them is flagged and never shared.",
+          "span": {
+            "from": 3,
+            "to": 3
+          }
+        }
+      ]
+    },
+    {
+      "heading": {
+        "level": 2,
+        "text": "Rights and audiences",
+        "anchor": "rights-and-audiences",
+        "at": {
+          "line": 5,
+          "col": 1
+        }
+      },
+      "items": [
+        {
+          "t": "prose",
+          "markdown": "A VM's rights are the `ports` of its Machinefile ([Machinefiles](machinefiles.md)): which ports it may open, and to whom.",
+          "span": {
+            "from": 7,
+            "to": 7
+          }
+        },
+        {
+          "t": "block",
+          "id": "right",
+          "kind": "term",
+          "address": "machines/reference/ports#right",
+          "props": {
+            "id": "right",
+            "means": "what a machine may open and to whom, its Machinefile's `ports`: `open`, `to` (its audience), `except`, `audiences`"
+          },
+          "faces": {
+            "word": "right",
+            "line": "what a machine may open and to whom, its Machinefile's `ports`: `open`, `to` (its audience), `except`, `audiences`",
+            "icon": "term"
+          },
+          "at": {
+            "line": 9,
+            "col": 1
+          },
+          "span": {
+            "from": 9,
+            "to": 9
+          }
+        },
+        {
+          "t": "block",
+          "id": "audience",
+          "kind": "term",
+          "address": "machines/reference/ports#audience",
+          "props": {
+            "id": "audience",
+            "means": "who a right, or the owner's `ports share --to`, shares a port with: local, private or public"
+          },
+          "faces": {
+            "word": "audience",
+            "line": "who a right, or the owner's `ports share --to`, shares a port with: local, private or public",
+            "icon": "term"
+          },
+          "at": {
+            "line": 11,
+            "col": 1
+          },
+          "span": {
+            "from": 11,
+            "to": 14
+          }
+        },
+        {
+          "t": "group",
+          "id": "what-is-flagged",
+          "title": "What is flagged",
+          "intent": "guard",
+          "fold": false,
+          "props": {
+            "id": "what-is-flagged",
+            "title": "What is flagged",
+            "intent": "guard"
+          },
+          "items": [
+            {
+              "t": "block",
+              "id": "flagged-never-shared",
+              "kind": "rule",
+              "address": "machines/reference/ports#flagged-never-shared",
+              "props": {
+                "id": "flagged-never-shared",
+                "says": "A port that listens outside the rights is flagged, never shared.",
+                "force": "hard",
+                "guards": {
+                  "ref": "machines/reference/ports"
+                },
+                "proof": "spwn:machines/specs/usecases/engine/share/flags-outside-rights.spec.yaml"
+              },
+              "faces": {
+                "word": "flagged-never-shared",
+                "line": "A port that listens outside the rights is flagged, never shared.",
+                "icon": "hard"
+              },
+              "at": {
+                "line": 18,
+                "col": 1
+              },
+              "span": {
+                "from": 18,
+                "to": 24
+              }
+            },
+            {
+              "t": "block",
+              "id": "port-is-a-right",
+              "kind": "decision",
+              "address": "machines/reference/ports#port-is-a-right",
+              "props": {
+                "id": "port-is-a-right",
+                "adr": "spwn:machines/docs/decisions/035-a-port-is-a-right-with-an-audience.md",
+                "decides": "A port is a right with an audience."
+              },
+              "faces": {
+                "word": "port-is-a-right",
+                "line": "A port is a right with an audience.",
+                "icon": "decision"
+              },
+              "at": {
+                "line": 26,
+                "col": 1
+              },
+              "span": {
+                "from": 26,
+                "to": 30
+              }
+            }
+          ],
+          "at": {
+            "line": 16,
+            "col": 1
+          },
+          "tag": {
+            "from": 16,
+            "to": 16
+          },
+          "span": {
+            "from": 16,
+            "to": 32
+          }
+        },
+        {
+          "t": "prose",
+          "markdown": "A row of a port names its label from the catalog's packages' `ports` (5173 `Vite`, 3000 `Node or Next`, 8081 `Expo`, 5432 `Postgres`) as a hint of what probably serves it, never a decision.",
+          "span": {
+            "from": 34,
+            "to": 34
+          }
+        }
+      ]
+    }
+  ],
+  "findings": []
+}

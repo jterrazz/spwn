@@ -27,10 +27,67 @@
     {
       "heading": {
         "level": 2,
+        "text": "The category it refuses",
+        "anchor": "the-category-it-refuses",
+        "at": {
+          "line": 8,
+          "col": 1
+        }
+      },
+      "items": [
+        {
+          "t": "prose",
+          "markdown": "Spwn is not sold as an agent framework, an AI platform or a tool that makes more output. Each of\nthose is judged by how much it produces, and production is what became cheap\n([what changed](../blueprint/vision.md#what-changed)). Spwn is judged by whether you still\nunderstand and own what was produced: the one enemy is\n[losing your thread](../blueprint/vision.md#the-enemy-losing-your-thread).",
+          "span": {
+            "from": 10,
+            "to": 14
+          }
+        },
+        {
+          "t": "block",
+          "id": "lead-with-the-thread",
+          "kind": "rule",
+          "address": "growth/positioning#lead-with-the-thread",
+          "props": {
+            "id": "lead-with-the-thread",
+            "says": "A comparison never leads with speed, model quality or the number of integrations.",
+            "force": "soft",
+            "guards": {
+              "ref": "growth/positioning"
+            },
+            "read_at": "studio-os:home/spwn/wiki/growth/positioning.md"
+          },
+          "faces": {
+            "word": "lead-with-the-thread",
+            "line": "A comparison never leads with speed, model quality or the number of integrations.",
+            "icon": "soft"
+          },
+          "at": {
+            "line": 16,
+            "col": 1
+          },
+          "span": {
+            "from": 16,
+            "to": 22
+          }
+        },
+        {
+          "t": "prose",
+          "markdown": "It leads with what the alternative does to your thread.",
+          "span": {
+            "from": 24,
+            "to": 24
+          }
+        }
+      ]
+    },
+    {
+      "heading": {
+        "level": 2,
         "text": "The alternatives",
         "anchor": "the-alternatives",
         "at": {
-          "line": 8,
+          "line": 26,
           "col": 1
         }
       },
@@ -64,12 +121,12 @@
                 "icon": "alternative"
               },
               "at": {
-                "line": 12,
+                "line": 30,
                 "col": 1
               },
               "span": {
-                "from": 12,
-                "to": 12
+                "from": 30,
+                "to": 30
               }
             },
             {
@@ -88,12 +145,12 @@
                 "icon": "alternative"
               },
               "at": {
-                "line": 14,
+                "line": 32,
                 "col": 1
               },
               "span": {
-                "from": 14,
-                "to": 18
+                "from": 32,
+                "to": 36
               }
             },
             {
@@ -112,12 +169,12 @@
                 "icon": "alternative"
               },
               "at": {
-                "line": 20,
+                "line": 38,
                 "col": 1
               },
               "span": {
-                "from": 20,
-                "to": 20
+                "from": 38,
+                "to": 38
               }
             },
             {
@@ -136,26 +193,26 @@
                 "icon": "alternative"
               },
               "at": {
-                "line": 22,
+                "line": 40,
                 "col": 1
               },
               "span": {
-                "from": 22,
-                "to": 22
+                "from": 40,
+                "to": 40
               }
             }
           ],
           "at": {
-            "line": 10,
+            "line": 28,
             "col": 1
           },
           "tag": {
-            "from": 10,
-            "to": 10
+            "from": 28,
+            "to": 28
           },
           "span": {
-            "from": 10,
-            "to": 24
+            "from": 28,
+            "to": 42
           }
         },
         {
@@ -185,20 +242,80 @@
             "caption": "Each costs either scale or authorship."
           },
           "at": {
-            "line": 26,
+            "line": 44,
             "col": 1
           },
           "span": {
-            "from": 26,
-            "to": 26
+            "from": 44,
+            "to": 44
+          }
+        },
+        {
+          "t": "block",
+          "id": "all",
+          "kind": "table",
+          "address": "growth/positioning#all",
+          "props": {
+            "id": "all",
+            "of": "alternative",
+            "in": {
+              "ref": "growth/positioning#alternatives"
+            },
+            "columns": [
+              "gives",
+              "costs"
+            ]
+          },
+          "faces": {
+            "word": "all",
+            "line": "",
+            "icon": "table"
+          },
+          "view": {
+            "of": "alternative",
+            "in": "growth/positioning#alternatives",
+            "where": null,
+            "columns": [
+              "gives",
+              "costs"
+            ]
+          },
+          "at": {
+            "line": 46,
+            "col": 1
+          },
+          "span": {
+            "from": 46,
+            "to": 46
           }
         },
         {
           "t": "prose",
           "markdown": "Each costs either scale or authorship. Spwn's answer is to keep both: the work goes to agents, the\ndecisions stay with you, on your machines, from one place for each fact\n([the stack](../product/stack.md)).",
           "span": {
-            "from": 28,
-            "to": 30
+            "from": 48,
+            "to": 50
+          }
+        }
+      ]
+    },
+    {
+      "heading": {
+        "level": 2,
+        "text": "Rests on",
+        "anchor": "rests-on",
+        "at": {
+          "line": 52,
+          "col": 1
+        }
+      },
+      "items": [
+        {
+          "t": "prose",
+          "markdown": "What is not settled: whether \"the category it refuses\" is said in public, and how, is a\npositioning call the owner has not made; it is on\n[open questions](./open-questions.md#positioning-audience-and-pricing). The four alternatives and\ntheir costs are this page's argument; the brief the owner confirmed on 2026-11-21 did not list\nthem, so he has not ruled on them.",
+          "span": {
+            "from": 54,
+            "to": 58
           }
         }
       ]

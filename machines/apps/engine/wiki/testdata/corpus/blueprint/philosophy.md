@@ -40,3 +40,63 @@ broken_by="A surface that asks you about everything, or one that hides the detai
 
 - **Example.** At the end of a day the chief shows what was done and asks you the two questions
   only you can answer; everything else was settled by the owners of each domain.
+
+## 3. Rules live in the world, not in the agent
+
+<Conviction
+id="rules-in-the-world"
+says="Rules live in the world, not in the agent."
+opposite="Give the agent every access and ask it, in its instructions, to be careful."
+carried_in={[ref("product/stack#machines"), ref("product/stack#agents")]}
+broken_by="A guardrail in a prompt used as the security boundary, or a default that hands a VM the credentials of the Mac above it."
+/>
+
+- **Example.** An agent cannot break your computer: it is not on it.
+
+## 4. Declared, never improvised
+
+<Conviction
+id="declared"
+says="Declared, never improvised."
+opposite="Configure by hand, as you go, and forget what you did."
+carried_in={[ref("product/stack#machines"), ref("product/stack#agents")]}
+broken_by="A setting reachable only by a click with no file behind it, or a state the stack holds that no file explains."
+/>
+
+- **Example.** `qa.machine.yaml` gives `qa-1`, set up before its first command.
+
+## 5. Done means proven
+
+<Conviction
+id="proven"
+says="Done means proven."
+opposite="“It seems to work”, said by whoever did the work."
+carried_in={[ref("product/stack#specs")]}
+broken_by="A status of done set by the agent that did the work, with no check behind it."
+/>
+
+- **Example.** A request comes back with its proof, or it does not come back as done.
+
+## 6. Taste is a system
+
+<Conviction
+id="taste-is-a-system"
+says="Taste is a system."
+opposite="Each screen designed on its own, to the taste of the day."
+carried_in={[ref("product/stack#design")]}
+broken_by="A component drawn by hand for one page when the kit has the piece."
+/>
+
+- **Example.** The site's canvas kit: one box, one arrow, one title, the same everywhere.
+
+## 7. The stack learns. You don't repeat yourself
+
+<Conviction
+id="learns"
+says="The stack learns. You don't repeat yourself."
+opposite="Every session starts from nothing."
+carried_in={[ref("product/stack#agents"), ref("product/stack#wiki")]}
+broken_by="A memory that lives only in a session's context, or a lesson written where no agent will read it."
+/>
+
+- **Example.** A correction given once becomes a rule the next agent reads.
