@@ -10,7 +10,7 @@ runs:
             mounts:
               - { computer: Developer/notes, guest: ~/notes }
       exit: 0
-    - command: 'apply --yes'
+    - command: 'machinefile apply --yes'
       exit: 2
       stderr: |
           Error: ~/.config/station/machinefiles/linux-1.machine.yaml:4: mount folder "Developer/notes" of the computer is not a path from / or ~/

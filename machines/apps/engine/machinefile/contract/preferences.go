@@ -26,7 +26,7 @@ func NewSourcePrefs(p corecontract.Preferences) SourcePrefs { return SourcePrefs
 type group struct {
 	Source *SharedSource `json:"source,omitempty"`
 	// value: the Machinefile this machine carries, bound by
-	// `station init --machinefile` and `station apply --machinefile`.
+	// `station init --machinefile` and `station machinefile apply --machinefile`.
 	Name string `json:"name,omitempty"`
 	// value: when it was bound: the engine's first night is past it.
 	BoundAt time.Time `json:"bound_at,omitzero"`

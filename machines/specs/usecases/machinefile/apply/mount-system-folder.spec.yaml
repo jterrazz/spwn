@@ -10,7 +10,7 @@ runs:
             mounts:
               - { computer: ~/notes, guest: /etc/notes }
       exit: 0
-    - command: 'apply --yes'
+    - command: 'machinefile apply --yes'
       exit: 2
       stderr: |
           Error: ~/.config/station/machinefiles/linux-1.machine.yaml:4: mount folder "/etc/notes" of the VM is in the system folder /etc: mount under /srv, /opt, /mnt, /data or the home

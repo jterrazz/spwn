@@ -9,7 +9,7 @@ runs:
           accounts:
               share: [npm]
       exit: 0
-    - command: 'explain'
+    - command: 'machinefile explain'
       exit: 2
       stderr: |
           Error: ~/.config/station/machinefiles/macbook-pro.machine.yaml: unmarshal errors: line 5: accounts.share is no key: the programs a workspace is granted are accounts.grants (`grants: [npm]`)
@@ -22,7 +22,7 @@ runs:
           accounts:
               keep: [gh]
       exit: 0
-    - command: 'explain'
+    - command: 'machinefile explain'
       exit: 2
       stderr: |
           Error: ~/.config/station/machinefiles/macbook-pro.machine.yaml: unmarshal errors: line 5: accounts.keep is no key: the programs a machine signs in to are accounts.signins (`signins: [gh]`)
@@ -35,7 +35,7 @@ runs:
           accounts:
               grants: [figma]
       exit: 0
-    - command: 'explain'
+    - command: 'machinefile explain'
       exit: 2
       stderr: |
           Error: ~/.config/station/machinefiles/macbook-pro.machine.yaml:4: grants names "figma", none of gh, npm, claude, wrangler
@@ -48,7 +48,7 @@ runs:
           accounts:
               signins: ['']
       exit: 0
-    - command: 'explain'
+    - command: 'machinefile explain'
       exit: 2
       stderr: |
           Error: ~/.config/station/machinefiles/macbook-pro.machine.yaml:4: signins names "", none of gh, npm, claude, wrangler
@@ -61,7 +61,7 @@ runs:
           accounts:
               signins: [gh, gh]
       exit: 0
-    - command: 'explain'
+    - command: 'machinefile explain'
       exit: 2
       stderr: |
           Error: ~/.config/station/machinefiles/macbook-pro.machine.yaml:4: signins lists gh twice
@@ -75,7 +75,7 @@ runs:
               signins: [gh]
               grants: [gh]
       exit: 0
-    - command: 'explain'
+    - command: 'machinefile explain'
       exit: 2
       stderr: |
           Error: ~/.config/station/machinefiles/macbook-pro.machine.yaml:4: gh is both signed in and granted: a machine signed in to a program is not granted it

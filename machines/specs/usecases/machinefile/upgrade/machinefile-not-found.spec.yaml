@@ -2,7 +2,7 @@ description: 'upgrade on a machine with no Machinefile names the gesture that gi
 fixture: ../../__fixtures__/homebrew/
 env: two-macs
 runs:
-    - command: 'upgrade'
+    - command: 'machinefile update'
       exit: 2
       stderr: |
           Error: no Machinefile named macbook-pro

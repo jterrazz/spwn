@@ -1,0 +1,10 @@
+description: 'station accounts logout gh --yes signs gh out and prints its row signed out'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'accounts logout gh --yes'
+      exit: 0
+      stdout: |
+          # Accounts
+          ○	gh	signed out

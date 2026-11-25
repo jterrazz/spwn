@@ -22,8 +22,7 @@ func Command(deps Deps, env kit.Env) *cobra.Command {
 	return kit.Command(kit.Leaf[Input]{
 		Use:     "drift",
 		Short:   "How this machine differs from its Machinefile: each package present, absent, outdated, changed, not managed, extra",
-		Example: "  Machines drift\n  Machines drift --json",
-		Group:   kit.StationItself,
+		Example: "  station machinefile drift\n  station machinefile drift --json",
 		Declare: func(f *pflag.FlagSet, in *Input) {
 			f.StringVar(&in.Machinefile, "machinefile", "", "the Machinefile read, by its name or its file (default: the one this machine carries)")
 		},

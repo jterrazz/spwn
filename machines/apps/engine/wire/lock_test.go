@@ -268,7 +268,7 @@ func TestAnUpgradeLeavesTheLockOfWhatItUpdated(t *testing.T) {
 
 func TestALockedVersionThatCannotInstallHasAWayOut(t *testing.T) {
 	// invariant: a locked version that no longer installs is no dead end:
-	// apply's failure names `station upgrade`, which installs the app the
+	// apply's failure names `station machinefile update`, which installs the app the
 	// lock holds but the machine does not, at the newest the Machinefile
 	// allows, and the lock follows what it installed.
 	ctx := context.Background()
@@ -279,8 +279,8 @@ func TestALockedVersionThatCannotInstallHasAWayOut(t *testing.T) {
 	b.w.Script = []world.Fault{{Call: "Installer.Install", Times: 1}}
 	out := b.apply(t)
 	i := slices.IndexFunc(out.Done, func(d machinefile.Done) bool { return d.Line.Step.Package == "node" })
-	if i < 0 || out.Done[i].State != catalog.StateBroken || !strings.Contains(out.Done[i].Detail, "station upgrade") {
-		t.Fatalf("apply ended %+v; want node broken, naming station upgrade", out.Done)
+	if i < 0 || out.Done[i].State != catalog.StateBroken || !strings.Contains(out.Done[i].Detail, "station machinefile update") {
+		t.Fatalf("apply ended %+v; want node broken, naming station machinefile update", out.Done)
 	}
 	if got, _ := lockedOf(b.lock(t), "node"); got.Version != "22.11.0" {
 		t.Fatalf("the failed install moved the lock to %+v", got)

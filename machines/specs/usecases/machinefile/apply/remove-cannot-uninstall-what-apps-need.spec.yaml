@@ -11,12 +11,12 @@ runs:
       exit: 0
     - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].apps.script = {installed: {"https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh": "5.0.1", "https://claude.ai/install.sh": "2.0.14"}} | .macs["macbook-pro"].stores.ledger = [{package: "homebrew", method: "script", machinefile: "macbook-pro", at: "2026-11-01T09:00:00Z"}]'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
-    - command: 'plan'
+    - command: 'machinefile plan'
       exit: 0
       stdout: |
           # Extra
           ?	homebrew	script	installed by Machines for macbook-pro, required by mise, ghostty, bat, jq, gh, lazygit: kept
-    - command: 'apply --remove --yes'
+    - command: 'machinefile apply --remove --yes'
       exit: 0
       stdout: |
           # Extra

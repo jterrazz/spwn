@@ -43,7 +43,7 @@ runs:
       exit: 0
     - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].apps.shell = {installed: {"install-scripted": "1.2.0", "install-byhand": "1.0.0"}} | .macs["macbook-pro"].stores.ledger = [{package: "scripted", method: "shell", machinefile: "macbook-pro", at: "2026-11-01T09:00:00Z"}]'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
-    - command: 'apply --remove --yes'
+    - command: 'machinefile apply --remove --yes'
       exit: 0
       stdout: |
           # Extra

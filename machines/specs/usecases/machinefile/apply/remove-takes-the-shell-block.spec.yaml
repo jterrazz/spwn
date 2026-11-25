@@ -15,7 +15,7 @@ runs:
       exit: 0
     - command: '--version >/dev/null; printf ''alias ll="ls -l"\n'' >> .zshrc'
       exit: 0
-    - command: 'apply > /dev/null'
+    - command: 'machinefile apply > /dev/null'
       exit: 0
     - command: '--version >/dev/null; /bin/cat .zshrc'
       exit: 0
@@ -35,13 +35,13 @@ runs:
           machine: { kind: computer, system: { os: macos } }
           apps: [jq]
       exit: 0
-    - command: 'plan'
+    - command: 'machinefile plan'
       exit: 0
       stdout: |
           # Extra
           ?	postgres	brew	installed by Machines for macbook-pro, listed no longer
           ?	postgres	shell	~/.zshrc [station:postgres/path] · written by Machines, goes with postgres
-    - command: 'apply --remove --yes'
+    - command: 'machinefile apply --remove --yes'
       exit: 0
       stdout: |
           # Extra

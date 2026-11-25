@@ -8,7 +8,7 @@ runs:
           machine: { kind: computer, system: { os: macos } }
           apps: [jq]
       exit: 0
-    - command: 'explain apps.jq'
+    - command: 'machinefile explain apps.jq'
       exit: 0
       stdout: |
           # macbook-pro
@@ -26,7 +26,7 @@ runs:
               - os: any
                 mise: { name: jq, version: latest }
       exit: 0
-    - command: 'explain apps.jq'
+    - command: 'machinefile explain apps.jq'
       exit: 0
       stdout: |
           # macbook-pro

@@ -26,7 +26,7 @@ func imagesFailure(err error) (*fail.Error, bool) {
 	case errors.As(err, &noBinary), errors.As(err, &missing), errors.As(err, &noEngine), errors.As(err, &noRecipe), errors.As(err, &old):
 		return Translate(imagescalls.Worded(err), ""), true
 	case errors.As(err, &template):
-		return usage(template.Error(), "station explain --machinefile "+template.Image), true
+		return usage(template.Error(), "station machinefile explain --machinefile "+template.Image), true
 	case errors.As(err, &version):
 		return usage(version.Error(), "station images lists the versions"), true
 	case errors.As(err, &notBuilt):

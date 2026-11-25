@@ -10,7 +10,7 @@ runs:
             mounts:
               - { computer: ~/notes, guest: '~/notes$(reboot)' }
       exit: 0
-    - command: 'apply --yes'
+    - command: 'machinefile apply --yes'
       exit: 2
       stderr: |
           Error: ~/.config/station/machinefiles/linux-1.machine.yaml:4: mount "~/notes" at "~/notes$(reboot)": a mount's folders hold letters, digits, ., _, - and / alone

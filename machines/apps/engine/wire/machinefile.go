@@ -22,12 +22,13 @@ import (
 	overviewcalls "github.com/jterrazz/studio-station/apps/engine/overview/calls"
 	"github.com/jterrazz/studio-station/apps/engine/platform/local"
 	"github.com/jterrazz/studio-station/apps/engine/remote/each"
-	"github.com/jterrazz/studio-station/apps/engine/surface/cli/apply"
-	"github.com/jterrazz/studio-station/apps/engine/surface/cli/drift"
-	"github.com/jterrazz/studio-station/apps/engine/surface/cli/explain"
 	"github.com/jterrazz/studio-station/apps/engine/surface/cli/kit"
-	"github.com/jterrazz/studio-station/apps/engine/surface/cli/plan"
-	"github.com/jterrazz/studio-station/apps/engine/surface/cli/upgrade"
+	machinefilecmd "github.com/jterrazz/studio-station/apps/engine/surface/cli/machinefile"
+	"github.com/jterrazz/studio-station/apps/engine/surface/cli/machinefile/apply"
+	"github.com/jterrazz/studio-station/apps/engine/surface/cli/machinefile/drift"
+	"github.com/jterrazz/studio-station/apps/engine/surface/cli/machinefile/explain"
+	"github.com/jterrazz/studio-station/apps/engine/surface/cli/machinefile/plan"
+	"github.com/jterrazz/studio-station/apps/engine/surface/cli/machinefile/update"
 )
 
 // value: the owner's files, ~/.config/station/{catalog,machinefiles}; in
@@ -274,15 +275,12 @@ func machineOf(p coremachine.Profile) machinefile.Machine {
 	return machinefile.Machine{Name: p.Ref.Name, Kind: catalog.MachineRole(p.Kind), System: catalog.SystemSpec{OS: os, Version: p.System.Version, Arch: catalog.Arch(p.System.Arch)}}
 }
 
-func explainCommand(env kit.Env, m machine) *cobra.Command {
-	return explain.Command(explain.Deps{ThisMachine: m.where}, env)
-}
-
-func machinefileCommands(env kit.Env, m machine) []*cobra.Command {
-	return []*cobra.Command{
+func machinefileCommand(env kit.Env, m machine) *cobra.Command {
+	return machinefilecmd.Command(machinefilecmd.Deps{ThisMachine: m.where}, env,
 		plan.Command(plan.Deps{ThisMachine: m.where}, env),
 		apply.Command(apply.Deps{ThisMachine: m.where}, env),
 		drift.Command(drift.Deps{ThisMachine: m.where}, env),
-		upgrade.Command(upgrade.Deps{ThisMachine: m.where}, env),
-	}
+		update.Command(update.Deps{ThisMachine: m.where}, env),
+		explain.Command(explain.Deps{ThisMachine: m.where}, env),
+	)
 }

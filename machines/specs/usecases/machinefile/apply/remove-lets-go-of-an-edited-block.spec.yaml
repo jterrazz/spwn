@@ -13,7 +13,7 @@ runs:
       exit: 0
     - command: 'init --yes > /dev/null'
       exit: 0
-    - command: 'apply > /dev/null'
+    - command: 'machinefile apply > /dev/null'
       exit: 0
     - command: '--version >/dev/null; /usr/bin/sed -i.bak ''s|^\[\[ -d /opt/homebrew/opt/postgresql@18/bin \]\].*|path=(/opt/pg/bin $path)|'' .zshrc'
       exit: 0
@@ -24,7 +24,7 @@ runs:
           machine: { kind: computer, system: { os: macos } }
           apps: [jq]
       exit: 0
-    - command: 'drift'
+    - command: 'machinefile drift'
       exit: 0
       stdout: |
           # Packages
@@ -32,7 +32,7 @@ runs:
           ●	jq	brew	present
           ?	postgres	brew	extra · installed by Machines for macbook-pro, listed no longer
           ?	postgres	shell	extra · ~/.zshrc [station:postgres/path] · edited by hand since Machines wrote it: kept, and yours
-    - command: 'apply --remove --yes'
+    - command: 'machinefile apply --remove --yes'
       exit: 0
       stdout: |
           # Extra
@@ -48,5 +48,5 @@ runs:
           # >>> station:postgres/path >>>
           path=(/opt/pg/bin $path)
           []
-    - command: 'plan'
+    - command: 'machinefile plan'
       exit: 0

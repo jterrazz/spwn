@@ -9,7 +9,7 @@ runs:
           vm: { image: { bake: [jq] } }
           apps: [jq, playwright-mcp]
       exit: 0
-    - command: 'apply --phase image --yes'
+    - command: 'machinefile apply --phase image --yes'
       exit: 0
       stdout: |
           # To install
@@ -26,7 +26,7 @@ runs:
           ○	node		mise	required by playwright-mcp
           ○	bun		mise	the manager of playwright-mcp
           ○	playwright-mcp		bun
-    - command: 'drift'
+    - command: 'machinefile drift'
       exit: 0
       stdout: |
           # Packages

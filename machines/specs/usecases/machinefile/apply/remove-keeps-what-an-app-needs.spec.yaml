@@ -9,7 +9,7 @@ runs:
           machine: { kind: computer, system: { os: macos } }
           apps: [jq, mas]
       exit: 0
-    - command: 'apply'
+    - command: 'machinefile apply'
       exit: 0
       stdout: |
           # To install
@@ -28,12 +28,12 @@ runs:
           machine: { kind: computer, system: { os: macos } }
           apps: [jq]
       exit: 0
-    - command: 'plan'
+    - command: 'machinefile plan'
       exit: 0
       stdout: |
           # Extra
           ?	mas	brew	installed by Machines for macbook-pro, required by keynote: kept
-    - command: 'apply --remove --yes'
+    - command: 'machinefile apply --remove --yes'
       exit: 0
       stdout: |
           # Extra

@@ -1,7 +1,7 @@
 description: 'a built-in Machinefile explained: every value built-in, git skipped where it has no method'
 env: two-macs
 runs:
-    - command: 'explain --machinefile base-ubuntu'
+    - command: 'machinefile explain --machinefile base-ubuntu'
       exit: 0
       stdout: |
           # base-ubuntu

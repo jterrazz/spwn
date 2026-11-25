@@ -16,7 +16,7 @@ runs:
           apps:
               - { name: ripgrep, method: brew, version: 14.0.0 }
       exit: 0
-    - command: 'upgrade'
+    - command: 'machinefile update'
       exit: 0
       stdout: |
           ●	homebrew	5.0.1	script
@@ -37,5 +37,5 @@ runs:
                 method: brew
                 version: 1.0.0
 
-    - command: 'plan'
+    - command: 'machinefile plan'
       exit: 0

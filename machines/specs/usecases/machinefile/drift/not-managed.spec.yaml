@@ -9,7 +9,7 @@ runs:
           machine: { kind: computer, system: { os: macos } }
           apps: [jq, gh, fd, ripgrep]
       exit: 0
-    - command: 'drift'
+    - command: 'machinefile drift'
       exit: 0
       stdout: |
           # Packages
@@ -18,7 +18,7 @@ runs:
           ◐	gh	brew	outdated
           ○	fd	brew	absent
           ?	ripgrep	brew	not managed · on PATH, not managed by brew
-    - command: 'drift --json | /usr/bin/jq -c "[.lines[] | [.package, .condition]]"'
+    - command: 'machinefile drift --json | /usr/bin/jq -c "[.lines[] | [.package, .condition]]"'
       exit: 0
       stdout: |
           [["homebrew","present"],["jq","present"],["gh","outdated"],["fd","absent"],["ripgrep","not-managed"]]

@@ -55,10 +55,10 @@ func Reasons(lines []string) []string {
 	return out
 }
 
-// value: how a line of `station apply` or `station upgrade` reads when its
+// value: how a line of `station machinefile apply` or `station machinefile update` reads when its
 // run stopped there or before it, and the gesture that resumes it.
 const (
 	ApplyNotRun    = "not run"
-	ApplyResumes   = "station apply resumes"
-	UpgradeResumes = "station upgrade resumes"
+	ApplyResumes   = "station machinefile apply resumes"
+	UpgradeResumes = "station machinefile update resumes"
 )

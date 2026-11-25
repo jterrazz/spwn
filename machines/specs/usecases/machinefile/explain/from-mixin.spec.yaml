@@ -22,7 +22,7 @@ runs:
           overrides: macbook-pro
           apps: { add: [lazygit], remove: [jq] }
       exit: 0
-    - command: 'explain'
+    - command: 'machinefile explain'
       exit: 0
       stdout: |
           # macbook-pro

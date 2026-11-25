@@ -11,13 +11,13 @@ runs:
       exit: 0
     - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].stores.ledger = [{package: "fd", method: "brew", machinefile: "macbook-pro", at: "2026-11-01T09:00:00Z"}, {package: "ripgrep", method: "brew", machinefile: "macbook-pro", at: "2026-11-01T09:00:00Z"}, {package: "bat", method: "brew", machinefile: "old-laptop", at: "2026-11-01T09:00:00Z"}]'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
-    - command: 'plan'
+    - command: 'machinefile plan'
       exit: 0
       stdout: |
           # Extra
           ?	fd	brew	installed by Machines for macbook-pro, already gone
           ?	ripgrep	brew	installed by Machines for macbook-pro, present another way since Machines installed it: kept, and yours
-    - command: 'apply --remove --yes'
+    - command: 'machinefile apply --remove --yes'
       exit: 0
       stdout: |
           # Extra

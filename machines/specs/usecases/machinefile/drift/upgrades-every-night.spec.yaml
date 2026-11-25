@@ -9,7 +9,7 @@ runs:
           machine: { kind: computer, system: { os: macos } }
           apps: [gh, { name: node, version: '22' }]
       exit: 0
-    - command: 'apply --machinefile macbook-pro'
+    - command: 'machinefile apply --machinefile macbook-pro'
       exit: 0
       stdout: |
           ●	homebrew	5.0.1	script	the manager of gh

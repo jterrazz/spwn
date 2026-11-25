@@ -8,12 +8,12 @@ runs:
           machine: { kind: workspace, system: { os: ubuntu } }
           apps: [jq]
       exit: 0
-    - command: 'apply --phase install --yes'
+    - command: 'machinefile apply --phase install --yes'
       exit: 2
       stderr: |
           Error: no phase install: a Machinefile's phases are image, boot, apply
-          Hint: station apply --phase image
-    - command: 'apply --phase image --remove --yes'
+          Hint: station machinefile apply --phase image
+    - command: 'machinefile apply --phase image --remove --yes'
       exit: 2
       stdout: |
           # Left as it is
@@ -21,8 +21,8 @@ runs:
           ○	jq	apt
       stderr: |
           Error: --remove takes back what apply's phase lists no longer, and the image phase carries a part of it
-          Hint: station apply --remove
-    - command: 'drift'
+          Hint: station machinefile apply --remove
+    - command: 'machinefile drift'
       exit: 0
       stdout: |
           # Packages

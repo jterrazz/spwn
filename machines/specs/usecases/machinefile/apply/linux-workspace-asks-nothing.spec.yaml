@@ -8,7 +8,7 @@ runs:
           machine: { kind: workspace, system: { os: ubuntu } }
           apps: [jq, playwright-mcp]
       exit: 0
-    - command: 'plan'
+    - command: 'machinefile plan'
       exit: 0
       stdout: |
           # To install
@@ -18,7 +18,7 @@ runs:
           ○	node	mise	required by playwright-mcp
           ○	bun	mise	the manager of playwright-mcp
           ○	playwright-mcp	bun
-    - command: 'apply --yes'
+    - command: 'machinefile apply --yes'
       exit: 0
       stdout: |
           # To install

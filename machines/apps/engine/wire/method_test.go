@@ -159,7 +159,7 @@ func benchOf(t *testing.T, kind catalog.MachineKind, entry string, edits ...func
 	return bench{w: w, shelf: shelf, cat: lib.Catalog, lib: lib, files: files, calls: calls}
 }
 
-// value: `station apply` of the Machinefile m on a terminal, with
+// value: `station machinefile apply` of the Machinefile m on a terminal, with
 // --remove and its yes when remove says so.
 func (b bench) apply(t *testing.T, remove bool) machinefile.Applied {
 	t.Helper()
@@ -174,7 +174,7 @@ func (b bench) apply(t *testing.T, remove bool) machinefile.Applied {
 	return applied
 }
 
-// value: the line of package in the plan of m as `station plan` reads it.
+// value: the line of package in the plan of m as `station machinefile plan` reads it.
 func (b bench) planned(t *testing.T, pkg string) machinefile.Line {
 	t.Helper()
 	b.shelf.Forget()
@@ -285,7 +285,7 @@ func entries(cat catalog.Catalog, a catalog.App, kind catalog.MachineKind) []str
 func TestTheMethodApplyRunsIsTheMethodThePlanShows(t *testing.T) {
 	// invariant: for every app of the catalog, on every kind of machine,
 	// for every entry a Machinefile may write of it, the method its step
-	// names is the one `station apply` installs it by at the version
+	// names is the one `station machinefile apply` installs it by at the version
 	// asked, the one the ledger records and the read after it names, the
 	// one a named update, a bulk update of its manager and a removal
 	// reach; and the plan then keeps it, neither installing nor adopting.

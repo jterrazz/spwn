@@ -8,7 +8,7 @@ runs:
           machine: { kind: workspace, system: { os: debian, version: '13' } }
           apps: [ansible, bat, build-essential, eza, fd, gh, git, jq, postgres, ripgrep, sd, tmux, zoxide]
       exit: 0
-    - command: 'plan'
+    - command: 'machinefile plan'
       exit: 0
       stdout: |
           # To install

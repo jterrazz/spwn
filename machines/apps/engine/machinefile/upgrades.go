@@ -35,11 +35,11 @@ type Nights struct {
 
 func UpgradesOf(machine, file string, mac bool, n Nights) Upgrades {
 	// invariant: only a Mac's engine runs a night, and only for the
-	// Machinefile the Mac is bound to; a VM moves at a station upgrade run
+	// Machinefile the Mac is bound to; a VM moves at a station machinefile update run
 	// inside it. The last night is said only when it ran that file.
 	switch {
 	case !mac:
-		return Upgrades{File: file, Sentence: "Never by itself: station upgrade inside " + machine + " moves it."}
+		return Upgrades{File: file, Sentence: "Never by itself: station machinefile update inside " + machine + " moves it."}
 	case n.Bound == "":
 		return Upgrades{Sentence: "Never by itself: " + machine + " is bound to no Machinefile."}
 	case n.Bound != file:

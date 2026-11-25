@@ -11,7 +11,7 @@ runs:
           machine: { kind: computer, system: { os: macos } }
           apps: [jq, fd, eza]
       exit: 0
-    - command: 'apply > /dev/null'
+    - command: 'machinefile apply > /dev/null'
       exit: 0
     - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
       stdin: |
@@ -26,7 +26,7 @@ runs:
       exit: 0
       stdout: |
           {"Install":0,"Adopt":0,"Leave":0,"Sentence":"Nothing to apply.","Extras":["fd"],"Left":"fd stays: Apply leaves extras.","Stays":"Nothing is removed. 3 apps stay as they are."}
-    - command: 'apply'
+    - command: 'machinefile apply'
       exit: 0
       stdout: |
           # Extra

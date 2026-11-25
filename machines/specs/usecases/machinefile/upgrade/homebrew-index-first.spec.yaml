@@ -10,7 +10,7 @@ runs:
           machine: { kind: workspace, system: { os: macos } }
           apps: [jq]
       exit: 0
-    - command: 'apply --yes'
+    - command: 'machinefile apply --yes'
       exit: 0
       stdout: |
           # To install
@@ -18,7 +18,7 @@ runs:
           ○	jq	brew
           ●	homebrew	1.0.0	script	the manager of jq
           ●	jq	1.0.0	brew
-    - command: 'upgrade'
+    - command: 'machinefile update'
       exit: 0
       stdout: |
           ●	homebrew	1.0.0	script

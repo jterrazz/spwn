@@ -8,7 +8,7 @@ runs:
           machine: { kind: computer, system: { os: macos } }
           extends: [base-macos]
       exit: 0
-    - command: 'explain'
+    - command: 'machinefile explain'
       exit: 2
       stderr: |
           Error: macbook-pro is a computer, and built-in/machinefiles/base-macos.machine.yaml says vm: vm is a workspace's or a server's

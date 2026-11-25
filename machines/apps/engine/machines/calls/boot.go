@@ -29,7 +29,7 @@ const (
 // its first start, once it answers ssh: the folders it shares with its
 // Mac mounted first, then its Machinefile's chain and lock,
 // as this Mac reads them now, replace the image's copies in the VM user's
-// folder, then `station apply --phase boot` runs as that user, a
+// folder, then `station machinefile apply --phase boot` runs as that user, a
 // secret named only by its `vault:` reference, which the guest resolves;
 // each program the Machinefile grants is granted, as grants.add does, and
 // each it signs in to that the workspace is not signed in to is left to
@@ -149,7 +149,7 @@ func (s *Machinist) applyBoot(ctx context.Context, name string, t model.Template
 // apply of its Machinefile, its boot phase alone, the owner's run.boot
 // lines last.
 func bootLine(t model.Template) string {
-	return guestStationBin + " apply --machinefile " + quote(t.Name) + " --phase boot </dev/null"
+	return guestStationBin + " machinefile apply --machinefile " + quote(t.Name) + " --phase boot </dev/null"
 }
 
 func quote(v string) string { return "'" + strings.ReplaceAll(v, "'", `'\''`) + "'" }

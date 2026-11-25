@@ -71,6 +71,10 @@ func refusesOn(path string) bool {
 	case "shell", "completion", "help", "guest", "use":
 		return true
 	}
+	if len(fields) == 1 && fields[0] == "machinefile" {
+		// invariant: the Machinefiles listed are the ones this Mac reads.
+		return true
+	}
 	return len(fields) > 1 && (fields[0] == "machines" && fields[1] == "pipe" ||
 		fields[0] == "engine" && (fields[1] == "run" || fields[1] == "attach"))
 }

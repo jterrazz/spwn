@@ -11,7 +11,7 @@ runs:
       exit: 0
       stdout: |
           [{"Tone":"warn","Sentence":"Running, with 8 differences from its file.","Line":"Lot L2.5, settings from a machine file. Up 2 h."},null]
-    - command: 'apply --on linux-1 --yes >/dev/null'
+    - command: 'machinefile apply --on linux-1 --yes >/dev/null'
       exit: 0
     - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | [.out.All.Macs[].VMs[]? | select(.Name == "linux-1") | [.Head, .Pending]][0]'' | /usr/bin/tail -1'
       stdin: |

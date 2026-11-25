@@ -19,7 +19,7 @@ runs:
           machine: { kind: computer, system: { os: macos } }
           apps: [{ name: jq, version: '1.7' }]
       exit: 0
-    - command: 'explain'
+    - command: 'machinefile explain'
       exit: 2
       stderr: |
           Error: jq 1.7: brew holds only its newest, never 1.7 (~/.config/station/machinefiles/macbook-pro.machine.yaml:4)
@@ -31,7 +31,7 @@ runs:
           machine: { kind: computer, system: { os: macos } }
           apps: [{ name: jq, version: '1.7', manager: mise }]
       exit: 0
-    - command: 'explain apps.jq'
+    - command: 'machinefile explain apps.jq'
       exit: 0
       stdout: |
           # macbook-pro

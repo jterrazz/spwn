@@ -1,7 +1,7 @@
 {
   "schema": "station.page/v1",
   "id": "machinefile",
-  "command": "explain --machinefile studio-linux",
+  "command": "machinefile explain --machinefile studio-linux",
   "context": {
     "kind": "computer"
   },

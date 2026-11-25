@@ -59,7 +59,7 @@ In the app, the three spaces are distinct. A switch between them comes first, wi
 station init                                        # make this machine known
 station machines                                    # all machines: every Mac, its VMs, what needs you
 station machines create web --from qa.machine.yaml  # a machine from its Machinefile
-station apply                                       # carry out this machine's Machinefile
+station machinefile apply                           # carry out this machine's Machinefile
 station overview                                    # this machine at a glance
 ```
 

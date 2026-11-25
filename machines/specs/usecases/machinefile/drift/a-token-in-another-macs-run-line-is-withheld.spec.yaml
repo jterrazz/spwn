@@ -12,7 +12,7 @@ runs:
             boot: |
               export API_KEY=sk-station-story-not-a-real-key
       exit: 0
-    - command: 'drift --on mac-mini'
+    - command: 'machinefile drift --on mac-mini'
       exit: 0
       stdout: |
           	On mac-mini:

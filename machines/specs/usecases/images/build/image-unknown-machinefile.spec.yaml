@@ -17,4 +17,4 @@ runs:
       exit: 2
       stderr: |
           Error: base makes no image: its Machinefile says no vm.image.from
-          Hint: station explain --machinefile base
+          Hint: station machinefile explain --machinefile base

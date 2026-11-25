@@ -16,8 +16,8 @@ runs:
           apps:
               - { name: jq }
       exit: 0
-    - command: 'apply'
+    - command: 'machinefile apply'
       exit: 2
       stderr: |
           Error: ~/.config/station/machinefiles/macbook-pro.lock: an app with no name or no method
-          Hint: remove it: the next station apply writes it anew from what is there
+          Hint: remove it: the next station machinefile apply writes it anew from what is there

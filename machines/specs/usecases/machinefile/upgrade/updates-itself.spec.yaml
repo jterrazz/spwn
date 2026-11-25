@@ -9,12 +9,12 @@ runs:
           machine: { kind: computer, system: { os: macos } }
           apps: [ghostty]
       exit: 0
-    - command: 'apply'
+    - command: 'machinefile apply'
       exit: 0
       stdout: |
           ●	homebrew	5.0.1	script	the manager of ghostty
           ●	ghostty	1.2.0	cask	updates itself
-    - command: 'upgrade'
+    - command: 'machinefile update'
       exit: 0
       stdout: |
           ●	homebrew	5.0.1	script

@@ -1,0 +1,43 @@
+description: 'plan, apply, drift, explain and upgrade at the top are unknown commands, exit 2'
+env: one-mac
+runs:
+    - command: 'plan'
+      exit: 2
+      stderr: |
+          Error: unknown command "plan"
+          Hint: station help
+    - command: 'apply --json'
+      exit: 2
+      stdout: |
+          {
+            "schema": "station.error/v1",
+            "type": "refused",
+            "code": "usage.unknown-command",
+            "subject": "apply",
+            "message": "unknown command \"apply\"",
+            "hint": "station help",
+            "fix": null
+          }
+      stderr: |
+          Error: unknown command "apply"
+          Hint: station help
+    - command: 'drift'
+      exit: 2
+      stderr: |
+          Error: unknown command "drift"
+          Hint: station help
+    - command: 'explain'
+      exit: 2
+      stderr: |
+          Error: unknown command "explain"
+          Hint: station help
+    - command: 'upgrade'
+      exit: 2
+      stderr: |
+          Error: unknown command "upgrade"
+          Hint: station help
+    - command: 'machinefile upgrade'
+      exit: 2
+      stderr: |
+          Error: unknown command "upgrade" for "station machinefile"
+          Hint: run station machinefile --help

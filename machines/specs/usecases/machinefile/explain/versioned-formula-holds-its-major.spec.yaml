@@ -9,7 +9,7 @@ runs:
           machine: { kind: computer, system: { os: macos } }
           apps: [{ name: postgres, version: '17' }]
       exit: 0
-    - command: 'explain apps.postgres'
+    - command: 'machinefile explain apps.postgres'
       exit: 2
       stderr: |
           Error: postgres 17: brew holds only its newest of 18 (postgresql@18), never 17 (~/.config/station/machinefiles/macbook-pro.machine.yaml:4)
@@ -21,14 +21,14 @@ runs:
           machine: { kind: computer, system: { os: macos } }
           apps: [{ name: postgres, version: '18' }]
       exit: 0
-    - command: 'explain apps.postgres'
+    - command: 'machinefile explain apps.postgres'
       exit: 0
       stdout: |
           # macbook-pro
           	apps.postgres	18	user	macbook-pro
           	apps.postgres.method	brew	built-in	postgres
           	apps.postgres.because	its one method for macos	built-in	postgres
-    - command: 'apply'
+    - command: 'machinefile apply'
       exit: 0
       stdout: |
           # To install

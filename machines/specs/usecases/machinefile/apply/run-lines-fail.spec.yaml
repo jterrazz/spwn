@@ -12,7 +12,7 @@ runs:
       exit: 0
     - command: 'world fault Shell.Run'
       exit: 0
-    - command: 'apply --phase boot --yes'
+    - command: 'machinefile apply --phase boot --yes'
       exit: 1
       stdout: |
           # To run
@@ -20,4 +20,4 @@ runs:
           ✗	run.boot		linux-1	1 line · exited 1: bash: line 1: the line failed; station: exit 1 at: git clone https://github.com/jterrazz/studio-os.git ~/Developer/studio-os
       stderr: |
           Error: 1 of 1 steps failed
-          Hint: station apply
+          Hint: station machinefile apply

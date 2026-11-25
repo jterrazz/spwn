@@ -14,7 +14,7 @@ runs:
           machine: { kind: computer, system: { os: macos } }
           extends: [base]
       exit: 0
-    - command: 'explain'
+    - command: 'machinefile explain'
       exit: 2
       stderr: |
           Error: a cycle in extends: macbook-pro extends base extends macbook-pro

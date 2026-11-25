@@ -3,7 +3,7 @@ env: two-macs
 runs:
     - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].preferences.machinefile = {source: {name: "studio", url: "https://example.com/studio.git"}} | .sources = {"https://example.com/studio.git": {head: "1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d", commits: {"1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d": {"machinefiles/macbook-pro.machine.yaml": "machinefile: station.machinefile/v1\nname: macbook-pro\nmachine: { kind: computer, system: { os: macos } }\napps: [gh]\n"}}}}'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
-    - command: 'explain apps'
+    - command: 'machinefile explain apps'
       exit: 0
       stdout: |
           # macbook-pro
@@ -20,7 +20,7 @@ runs:
           machine: { kind: computer, system: { os: macos } }
           apps: [jq]
       exit: 0
-    - command: 'explain apps'
+    - command: 'machinefile explain apps'
       exit: 0
       stdout: |
           # macbook-pro

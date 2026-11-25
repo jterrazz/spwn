@@ -1,0 +1,15 @@
+description: 'station accounts add --from-sign-in keeps the token of this Mac''s gh sign-in, labelled as proposed'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'accounts add gh --from-sign-in'
+      exit: 0
+      stdout: |
+          ●	GitHub · you	kept in macbook-pro's vault · station accounts grant "GitHub · you" --on <machine> gives it to a VM
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out | [.Entries[] | [.ID, .Label, .Program, .Kind]]'''
+      stdin: |
+          {"v":2,"id":"1","watch":"vault.list","in":{}}
+      exit: 0
+      stdout: |
+          [["pw-1","GitHub deploy","gh","fine-grained"],["pw-2","npm publish","npm","token"],["pw-3","Claude Max","claude","oauth-token"],["pw-4","GitHub · you","gh","oauth-token"]]

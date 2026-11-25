@@ -11,7 +11,7 @@ runs:
             upgrade: |
               git -C ~/Developer/studio-os pull --ff-only
       exit: 0
-    - command: 'apply --yes'
+    - command: 'machinefile apply --yes'
       exit: 0
       stdout: |
           # To install
@@ -19,7 +19,7 @@ runs:
           ○	jq	apt
           ●	apt	1.0.0	apt	the manager of jq
           ●	jq	1.0.0	apt
-    - command: 'upgrade'
+    - command: 'machinefile update'
       exit: 0
       stdout: |
           ●	apt	1.0.0	apt

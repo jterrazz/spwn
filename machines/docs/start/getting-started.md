@@ -24,10 +24,10 @@ station init --name macbook
 
 ```sh
 station init --machinefile macbook-pro
-station drift
+station machinefile drift
 ```
 
-`--machinefile` binds this Mac to a Machinefile, by its name or its file (a file is copied among yours, `~/.config/station/machinefiles/`), prints its plan, then applies it: what it asks of you first (`homebrew  asks your password once`), then each app installed and each setting set, one at a time. An app already there by another way is adopted, never installed again. Interrupted, it says `station apply resumes`, and `station apply` finishes it; `station drift` says, package by package, how the Mac differs from it since. The format is [Machinefiles](../reference/machinefiles.md).
+`--machinefile` binds this Mac to a Machinefile, by its name or its file (a file is copied among yours, `~/.config/station/machinefiles/`), prints its plan, then applies it: what it asks of you first (`homebrew  asks your password once`), then each app installed and each setting set, one at a time. An app already there by another way is adopted, never installed again. Interrupted, it says `station machinefile apply resumes`, and `station machinefile apply` finishes it; `station machinefile drift` says, package by package, how the Mac differs from it since. The format is [Machinefiles](../reference/machinefiles.md).
 
 ## 4. Or the engine, the apps, then the settings, one at a time
 

@@ -20,12 +20,12 @@ runs:
           machine: { kind: computer, system: { os: macos } }
           apps: [{ name: jq, manager: mise }]
       exit: 0
-    - command: 'plan'
+    - command: 'machinefile plan'
       exit: 0
       stdout: |
           # To adopt
           ●	jq	brew
-    - command: 'apply'
+    - command: 'machinefile apply'
       exit: 0
       stdout: |
           # To adopt

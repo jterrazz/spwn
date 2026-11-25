@@ -1,0 +1,16 @@
+description: 'station accounts remove on a VM ends its grant and keeps the password in the vault'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'accounts remove "npm publish" --on linux-1 --yes'
+      exit: 0
+      stdout: |
+          	On linux-1:
+          ●	npm publish	no longer granted to linux-1 · The token stays valid at npm; revoke it there to end it everywhere
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out | [.Entries[] | [.Label, [.Grants[] | .To]]]'''
+      stdin: |
+          {"v":2,"id":"1","watch":"vault.list","in":{}}
+      exit: 0
+      stdout: |
+          [["GitHub deploy",[]],["npm publish",[]],["Claude Max",[]]]

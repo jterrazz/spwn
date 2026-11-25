@@ -9,7 +9,7 @@ runs:
           machine: { kind: computer, system: { os: macos } }
           apps: [jq, fd]
       exit: 0
-    - command: 'apply'
+    - command: 'machinefile apply'
       exit: 0
       stdout: |
           # To install
@@ -24,9 +24,9 @@ runs:
           machine: { kind: computer, system: { os: macos } }
           apps: [jq, { name: fd, manager: mise, optional: true }]
       exit: 0
-    - command: 'plan'
+    - command: 'machinefile plan'
       exit: 0
-    - command: 'apply --remove --yes'
+    - command: 'machinefile apply --remove --yes'
       exit: 0
       stdout: |
           ●	homebrew	5.0.1	script	the manager of jq

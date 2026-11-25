@@ -69,7 +69,7 @@ var Apply = call.Call[Deps, ApplyIn, machinefile.Applied]{
 		// --remove, those of each extra it uninstalls), the removal's
 		// confirmation, a copy that would replace the owner's file. Then
 		// the machine is bound, so an interrupted run is resumed by a bare
-		// `station apply`. One run of the machine at a time: an upgrade or
+		// `station machinefile apply`. One run of the machine at a time: an upgrade or
 		// the night's holding it is waited for, a while. An apply run to its
 		// end reads the last night's waiting versions against the ranges it
 		// applied, so a range moved past one clears it at once.
@@ -294,14 +294,14 @@ func (r *run) line(ctx context.Context, l machinefile.Line) machinefile.Done {
 }
 
 // invariant: an install at a locked version that failed names the way
-// out, which the lock itself cannot: `station upgrade <app>` installs the
+// out, which the lock itself cannot: `station machinefile update <app>` installs the
 // newest the Machinefile allows and relocks it, and the lock's line may be
 // edited by hand.
 func (r *run) wayOut(l machinefile.Line, done machinefile.Done) machinefile.Done {
 	if l.Step.Locked == "" || done.State != catalog.StateBroken || done.Reason != "" {
 		return done
 	}
-	hint := "locked at " + l.Step.Locked + " in " + l.Step.Lock + ": station upgrade installs the newest the Machinefile allows, or edit that line"
+	hint := "locked at " + l.Step.Locked + " in " + l.Step.Lock + ": station machinefile update installs the newest the Machinefile allows, or edit that line"
 	if done.Detail != "" {
 		hint = done.Detail + "; " + hint
 	}

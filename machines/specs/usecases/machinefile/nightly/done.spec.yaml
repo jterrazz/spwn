@@ -9,7 +9,7 @@ runs:
           machine: { kind: computer, system: { os: macos } }
           apps: [gh, { name: node, version: '22' }]
       exit: 0
-    - command: 'apply --machinefile macbook-pro'
+    - command: 'machinefile apply --machinefile macbook-pro'
       exit: 0
       stdout: |
           ●	homebrew	5.0.1	script	the manager of gh
@@ -60,7 +60,7 @@ runs:
       exit: 0
       stdout: |
           {"machinefile":"macbook-pro","moved":[{"app":"node","was":"22.11.0","now":"22.14.0","range":"22"},{"app":"gh","was":"2.97.0","now":"2.98.0","range":"latest"}],"waiting":[{"app":"node","newest":"25.1.0","range":"22","moved":"25","file":"~/.config/station/machinefiles/macbook-pro.machine.yaml"}]}
-    - command: 'upgrade'
+    - command: 'machinefile update'
       exit: 0
       stdout: |
           ●	homebrew	5.0.1	script

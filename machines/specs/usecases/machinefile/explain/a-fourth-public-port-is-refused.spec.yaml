@@ -8,7 +8,7 @@ runs:
           machine: { kind: computer, system: { os: macos } }
           ports: { open: [3000, 3001], to: public, audiences: { 3001: local, 5432: public } }
       exit: 0
-    - command: 'explain ports'
+    - command: 'machinefile explain ports'
       exit: 0
       stdout: |
           # macbook-pro
@@ -26,7 +26,7 @@ runs:
               to: public
               audiences: { 5432: public }
       exit: 0
-    - command: 'explain'
+    - command: 'machinefile explain'
       exit: 2
       stderr: |
           Error: ~/.config/station/machinefiles/macbook-pro.machine.yaml:4: public opens 3 ports at most

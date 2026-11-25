@@ -31,7 +31,7 @@ runs:
       exit: 0
     - command: 'init --yes > /dev/null'
       exit: 0
-    - command: 'apply > /dev/null'
+    - command: 'machinefile apply > /dev/null'
       exit: 0
     - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
       stdin: |
@@ -40,19 +40,19 @@ runs:
           machine: { kind: computer, system: { os: macos } }
           apps: [{ name: served, options: { port: 9090 } }]
       exit: 0
-    - command: 'drift'
+    - command: 'machinefile drift'
       exit: 0
       stdout: |
           # Packages
           ●	homebrew	script	present
           ●	served	brew	present · port 9090
           ○	served	shell	outdated · ~/.zshrc [station:served]
-    - command: 'plan'
+    - command: 'machinefile plan'
       exit: 0
       stdout: |
           # To set
           ○	served	shell	~/.zshrc [station:served]: 1 line · Machines' earlier text, written anew
-    - command: 'plan --diff'
+    - command: 'machinefile plan --diff'
       exit: 0
       stdout: |
           --- ~/.zshrc [station:served]
@@ -60,7 +60,7 @@ runs:
           @@ -1,1 +1,1 @@
           -export SERVED_PORT=8080
           +export SERVED_PORT=9090
-    - command: 'apply'
+    - command: 'machinefile apply'
       exit: 0
       stdout: |
           # To set
@@ -81,11 +81,11 @@ runs:
           machine: { kind: computer, system: { os: macos } }
           apps: [{ name: served, options: { port: 8080 } }]
       exit: 0
-    - command: 'apply'
+    - command: 'machinefile apply'
       exit: 0
       stdout: |
           # Left as it is
-          ◐	served	shell	~/.zshrc [station:served] · edited by hand: station plan --diff shows how
+          ◐	served	shell	~/.zshrc [station:served] · edited by hand: station machinefile plan --diff shows how
           ●	homebrew	5.0.1	script	the manager of served
           ●	served	0.23.4	brew	port 8080
           ◐	served		shell	~/.zshrc [station:served]: edited by hand: left as it is

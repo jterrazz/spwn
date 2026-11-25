@@ -8,7 +8,7 @@ runs:
           machine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }
           apps: [ghostty]
       exit: 0
-    - command: 'explain --machinefile studio-linux'
+    - command: 'machinefile explain --machinefile studio-linux'
       exit: 2
       stderr: |
           Error: ghostty has no method for ubuntu 24.04 (listed, ~/.config/station/machinefiles/studio-linux.machine.yaml:4)

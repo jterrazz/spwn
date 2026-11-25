@@ -2,7 +2,7 @@ description: 'a machine with no Machinefile of its name and none bound is told h
 fixture: ../../__fixtures__/homebrew/
 env: two-macs
 runs:
-    - command: 'plan'
+    - command: 'machinefile plan'
       exit: 2
       stderr: |
           Error: no Machinefile named macbook-pro

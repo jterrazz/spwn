@@ -8,7 +8,7 @@ runs:
           machine: { kind: computer, system: { os: macos } }
           apps: [jq]
       exit: 0
-    - command: 'plan'
+    - command: 'machinefile plan'
       exit: 2
       stderr: |
           Error: ~/.config/station/machinefiles/laptop.yaml: is no Machinefile: a Machinefile is machinefiles/<name>.machine.yaml

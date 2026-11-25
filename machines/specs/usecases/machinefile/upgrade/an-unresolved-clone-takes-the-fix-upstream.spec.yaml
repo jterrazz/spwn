@@ -4,7 +4,7 @@ env: two-macs
 runs:
     - command: '--version >/dev/null; /usr/bin/jq ''.script = [{call: "Source.Pull", times: 1}] | .macs["macbook-pro"].preferences.machinefile = {source: {name: "studio", url: "https://example.com/studio.git"}} | .macs["macbook-pro"].clones = {"https://example.com/studio.git": "1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d"} | .sources = {"https://example.com/studio.git": {head: "ffffffffffffffffffffffffffffffffffffffff", commits: {"1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d": {"machinefiles/macbook-pro.machine.yaml": "machinefile: station.machinefile/v1\nname: macbook-pro\nmachine: { kind: computer, system: { os: macos } }\napps: [jq, no-such-app]\n"}, "ffffffffffffffffffffffffffffffffffffffff": {"machinefiles/macbook-pro.machine.yaml": "machinefile: station.machinefile/v1\nname: macbook-pro\nmachine: { kind: computer, system: { os: macos } }\napps: [jq]\n"}}, parents: {"ffffffffffffffffffffffffffffffffffffffff": "1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d"}}}'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
-    - command: 'upgrade'
+    - command: 'machinefile update'
       exit: 2
       stderr: |
           Error: the catalog has no package no-such-app (studio@1a2b3c4/machinefiles/macbook-pro.machine.yaml:4)
@@ -13,7 +13,7 @@ runs:
       exit: 0
       stdout: |
           {"https://example.com/studio.git":"1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d"}
-    - command: 'upgrade'
+    - command: 'machinefile update'
       exit: 0
       stdout: |
           ●	homebrew	5.0.1	script
