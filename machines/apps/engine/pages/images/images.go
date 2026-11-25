@@ -3,6 +3,7 @@ package images
 import (
 	"slices"
 	"strconv"
+	"strings"
 
 	"github.com/jterrazz/studio-station/apps/engine/images"
 
@@ -80,8 +81,8 @@ func Section(reports []images.Report, known []catalog.Image, thisMac page.Contex
 			row.Detail = page.Text("building: " + r.Building.Step.Word() + ", " + r.Building.Sentence)
 		case r.Orphan:
 			row.Mark, row.Reason = page.Attention, page.Orphan
+			row.Detail = page.Text("its Machinefile is gone, " + orphanUse(r.VMs))
 			if r.Unused() {
-				row.Detail = page.Text("its Machinefile is gone, no VM made from it")
 				row.Hint = page.Cmd("station images delete " + r.Record.Name + "@" + r.Record.Version)
 			}
 		case !r.Newest:
@@ -113,6 +114,15 @@ func notHeld(img catalog.Image) string {
 		return "not fetched yet"
 	}
 	return "not built yet"
+}
+
+// value: what an orphan is still held for, said after why it is marked:
+// the VMs made from it, or none.
+func orphanUse(vms []string) string {
+	if len(vms) == 0 {
+		return "no VM made from it"
+	}
+	return strings.Join(vms, ", ") + " made from it"
 }
 
 func madeFrom(vms []string) page.Value {
