@@ -23,7 +23,7 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 	return kit.Command(kit.Leaf[Input]{
 		Use:     "logout <program>",
 		Short:   "Sign a program out on a machine, by its own logout: its token stays valid at its provider",
-		Example: "  station accounts logout <program>\n  station accounts logout <program> --on linux-1 --yes",
+		Example: "  station accounts logout gh\n  station accounts logout gh --on linux-1 --yes",
 		Args:    cobra.ExactArgs(1),
 		Bind:    func(in *Input, args []string) error { in.Program = args[0]; return nil },
 		Asks:    true,

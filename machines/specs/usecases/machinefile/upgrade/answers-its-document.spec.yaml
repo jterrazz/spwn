@@ -1,0 +1,20 @@
+description: 'update --json answers station.machinefile.upgrade/v2: its Machinefile and what moved in the lock'
+fixture: ../../__fixtures__/homebrew/
+env: versions
+runs:
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [gh]
+      exit: 0
+    - command: 'machinefile apply'
+      exit: 0
+      stdout: |
+          ●	homebrew	5.0.1	script	the manager of gh
+          ◐	gh	2.97.0	brew	outdated
+    - command: 'machinefile update --json | /usr/bin/jq -r ''[.schema, .machinefile, (.lock[] | .app + ": " + .was + " -> " + .now)] | @tsv'''
+      exit: 0
+      stdout: |
+          station.machinefile.upgrade/v2	macbook-pro	gh: 2.97.0 by brew -> 2.98.0 by brew

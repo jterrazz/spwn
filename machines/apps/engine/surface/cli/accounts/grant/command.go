@@ -23,7 +23,7 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 	return kit.Command(kit.Leaf[Input]{
 		Use:     "grant <entry>",
 		Short:   "Give a password of this Mac's vault to a VM, by its label, until it is removed; Touch ID asks first",
-		Example: "  station accounts grant <entry> --on linux-1",
+		Example: "  station accounts grant pw-1 --on linux-1",
 		Args:    cobra.ExactArgs(1),
 		Bind:    func(in *Input, args []string) error { in.Entry = args[0]; return nil },
 		Run: func(ctx context.Context, in *Input, io kit.IO) error {

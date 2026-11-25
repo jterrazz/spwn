@@ -32,6 +32,7 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 			}
 			return nil
 		},
+		Read:  func(*Input) bool { return true },
 		Pages: true,
 		Run: func(ctx context.Context, in *Input, io kit.IO) error {
 			out, err := call.Invoke(ctx, env.Calls, env.Target(), machinefilecalls.Explain, machinefilecalls.ExplainIn{Key: in.Key, Machinefile: in.Machinefile}, nil)

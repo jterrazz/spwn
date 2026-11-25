@@ -29,7 +29,7 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 	return kit.Command(kit.Leaf[Input]{
 		Use:     "add <program>",
 		Short:   "Keep a password in this Mac's vault: typed into a hidden prompt, or taken from this Mac's sign-in; never an argument",
-		Example: "  station accounts add <program> --label \"GitHub deploy\"\n  station accounts add <program> --from-sign-in",
+		Example: "  station accounts add gh --label gh-deploy\n  station accounts add gh --from-sign-in",
 		Args:    cobra.ExactArgs(1),
 		Declare: func(f *pflag.FlagSet, in *Input) {
 			f.StringVar(&in.Label, "label", "", "the password's name in the vault (default: the program's, or the one its sign-in proposes)")

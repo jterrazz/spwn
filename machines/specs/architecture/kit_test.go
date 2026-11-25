@@ -1,6 +1,7 @@
 package architecture_test
 
 import (
+	"encoding/json"
 	"fmt"
 	"go/ast"
 	"go/types"
@@ -10,8 +11,12 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"sync"
 	"testing"
 
+	command "github.com/spf13/cobra"
+
+	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 	uitoken "github.com/jterrazz/studio-station/apps/engine/ui/token"
 )
 
@@ -463,5 +468,315 @@ func TestEveryPageHasItsFourFixtures(t *testing.T) {
 		if !slices.ContainsFunc(got, func(f finding) bool { return strings.Contains(f.where, "/outcome-tools.*") }) {
 			t.Error("the fixtures rule did not report a family the spec does not list")
 		}
+	})
+}
+
+// value: ADR-021 rule 1: the words at the top of the tree that act on Spwn
+// itself rather than on a noun.
+func spwnWords() []string { return []string{"init", "use", "update", "doctor", "uninstall", "help"} }
+
+// value: ADR-021 rule 2's nouns, and the nouns of Machines that stand at the
+// top of the tree.
+func treeNouns() []string {
+	return []string{
+		"machines", "agents", "apps", "teams", "engine", "disk", "journal", "machinefile", "project",
+		"overview", "activity", "settings", "ports", "accounts", "background", "awake", "images",
+	}
+}
+
+// value: ADR-021 rule 3: one verb per meaning, from one closed table, then
+// the acts a noun has of its own.
+func verbTable() []string {
+	return []string{
+		"create", "delete", "start", "stop", "restart", "install", "update", "remove",
+		"plan", "apply", "drift", "add", "forget", "edit", "login", "logout", "log",
+		"talk", "dream", "sleep", "fork", "share", "free", "erase", "build", "ssh",
+	}
+}
+
+// value: the verbs the glossary defines, each a noun's own act once it does
+// (ADR-021 rule 3): the backquoted words of its "The verbs" section.
+func glossaryVerbs(t *testing.T) []string {
+	t.Helper()
+	data, err := os.ReadFile(filepath.Join(repoRoot(t), "docs", "concepts", "glossary.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, section, ok := strings.Cut(string(data), "\n## The verbs\n")
+	if !ok {
+		t.Fatal("docs/concepts/glossary.md has no section The verbs")
+	}
+	section, _, _ = strings.Cut(section, "\n## ")
+	var out []string
+	for _, m := range regexp.MustCompile("`([^`]+)`").FindAllStringSubmatch(section, -1) {
+		for _, v := range strings.Split(m[1], "/") {
+			out = append(out, strings.TrimSpace(v))
+		}
+	}
+	return out
+}
+
+// invariant: rule verb-table (ADR-021 rules 1 to 3): the top of the tree is a
+// noun or a word acting on Spwn, and every command under a noun is a verb of
+// the table or one the glossary defines.
+func ruleVerbTable(root *command.Command, defined []string) []finding {
+	var out []finding
+	for _, c := range typedCommands(root) {
+		switch {
+		case top(c) && !slices.Contains(treeNouns(), c.Name()) && !slices.Contains(spwnWords(), c.Name()):
+			out = append(out, finding{"verb-table", commandPath(c), "a word at the top of the tree that is no noun and does not act on Spwn"})
+		case !top(c) && !slices.Contains(verbTable(), c.Name()) && !slices.Contains(defined, c.Name()):
+			out = append(out, finding{"verb-table", commandPath(c), "a verb outside the table that the glossary does not define"})
+		}
+	}
+	return out
+}
+
+// value: the breaches of the verb table the tree holds today, each with the
+// lot of the single-program plan that removes it: D0b's one glossary defines
+// each verb as its noun's own act or renames it.
+func verbExceptions() []exception {
+	defined := []string{
+		"apps move", "disk move", "settings diff", "settings off", "awake off",
+		"ports declare", "ports undeclare", "ports https",
+		"machines cleanup", "machines unlock", "machines wake", "machines remind",
+		"machinefile explain",
+	}
+	out := make([]exception, 0, len(defined))
+	for _, w := range defined {
+		out = append(out, exception{"verb-table", w, "D0b", "2026-11-25"})
+	}
+	return out
+}
+
+// invariant: rule no-alias (ADR-021 rule 3): a command has one name; no
+// alias, shown or hidden, ever answers for it.
+func ruleNoAlias(root *command.Command) []finding {
+	var out []finding
+	var walk func(c *command.Command)
+	walk = func(c *command.Command) {
+		if len(c.Aliases) > 0 {
+			out = append(out, finding{"no-alias", commandPath(c), "a command with an alias: " + strings.Join(c.Aliases, ", ")})
+		}
+		for _, sub := range c.Commands() {
+			walk(sub)
+		}
+	}
+	walk(root)
+	return out
+}
+
+func TestTheTreeSaysOneVerbPerMeaning(t *testing.T) {
+	t.Parallel()
+	defined := glossaryVerbs(t)
+	t.Run("holds", func(t *testing.T) { excuse(t, ruleVerbTable(commandTree(t), defined), verbExceptions()) })
+	t.Run("bites", func(t *testing.T) {
+		root := commandTree(t)
+		apps, _, _ := root.Find([]string{"apps"})
+		apps.AddCommand(&command.Command{Use: "list", Run: func(*command.Command, []string) {}})
+		root.AddCommand(&command.Command{Use: "status", Run: func(*command.Command, []string) {}})
+		found := ruleVerbTable(root, defined)
+		bites(t, "verb-table", found, "apps list")
+		bites(t, "verb-table", found, "status")
+	})
+}
+
+func TestNoCommandHasAnAlias(t *testing.T) {
+	t.Parallel()
+	t.Run("holds", func(t *testing.T) { excuse(t, ruleNoAlias(commandTree(t)), nil) })
+	t.Run("bites", func(t *testing.T) {
+		root := commandTree(t)
+		c, _, _ := root.Find([]string{"machines", "delete"})
+		c.Aliases = []string{"rm"}
+		guest, _, _ := root.Find([]string{"guest"})
+		guest.Aliases = []string{"g"}
+		found := ruleNoAlias(root)
+		bites(t, "no-alias", found, "machines delete")
+		bites(t, "no-alias", found, "guest")
+	})
+}
+
+// value: the verbs of the tree that read and change nothing; with the root
+// and every bare noun, the reads ADR-021 rule 6 gives --json.
+func treeReadVerbs() []string { return []string{"log", "plan", "drift", "diff", "explain"} }
+
+func treeReads(root *command.Command) []*command.Command {
+	out := []*command.Command{root}
+	for _, c := range typedCommands(root) {
+		if c.Runnable() && (top(c) && slices.Contains(treeNouns(), c.Name()) || slices.Contains(treeReadVerbs(), c.Name())) {
+			out = append(out, c)
+		}
+	}
+	return out
+}
+
+// invariant: rule reads-take-json (ADR-021 rule 6): every read answers its
+// document with --json.
+func ruleReadsTakeJSON(root *command.Command) []finding {
+	var out []finding
+	for _, c := range treeReads(root) {
+		if c.Flags().Lookup("json") == nil {
+			where := commandPath(c)
+			if where == "" {
+				where = root.Name()
+			}
+			out = append(out, finding{"reads-take-json", where, "a read with no --json"})
+		}
+	}
+	return out
+}
+
+// value: the verbs that destroy what cannot be had back: a machine, data, an
+// app, a registration, a sign-in.
+func destroyingVerbs() []string {
+	return []string{"delete", "erase", "remove", "forget", "uninstall", "cleanup", "logout"}
+}
+
+// invariant: rule destroying-asks (ADR-021 rule 6, core/confirm): a verb that
+// destroys asks on a terminal, and a script answers it with --yes or
+// --confirm=<name>.
+func ruleDestroyingAsks(root *command.Command) []finding {
+	var out []finding
+	for _, c := range typedCommands(root) {
+		if c.Runnable() && slices.Contains(destroyingVerbs(), c.Name()) && c.Flags().Lookup("yes") == nil && c.Flags().Lookup("confirm") == nil {
+			out = append(out, finding{"destroying-asks", commandPath(c), "a destroying verb a script cannot answer: no --yes, no --confirm"})
+		}
+	}
+	return out
+}
+
+func TestEveryReadTakesJSON(t *testing.T) {
+	t.Parallel()
+	excepted := []exception{{"reads-take-json", "settings diff", "D0b", "2026-11-25"}}
+	t.Run("holds", func(t *testing.T) { excuse(t, ruleReadsTakeJSON(commandTree(t)), excepted) })
+	t.Run("bites", func(t *testing.T) {
+		root := commandTree(t)
+		for _, path := range [][]string{{"journal"}, {"machines", "log"}} {
+			c, _, _ := root.Find(path)
+			c.ResetFlags()
+		}
+		found := ruleReadsTakeJSON(root)
+		bites(t, "reads-take-json", found, "journal")
+		bites(t, "reads-take-json", found, "machines log")
+	})
+}
+
+func TestEveryDestroyingVerbIsAnsweredInAScript(t *testing.T) {
+	t.Parallel()
+	t.Run("holds", func(t *testing.T) { excuse(t, ruleDestroyingAsks(commandTree(t)), nil) })
+	t.Run("bites", func(t *testing.T) {
+		root := commandTree(t)
+		for _, path := range [][]string{{"machines", "delete"}, {"apps", "remove"}} {
+			c, _, _ := root.Find(path)
+			c.ResetFlags()
+		}
+		found := ruleDestroyingAsks(root)
+		bites(t, "destroying-asks", found, "machines delete")
+		bites(t, "destroying-asks", found, "apps remove")
+	})
+}
+
+// value: ADR-021 rule 7's one failure document under --json.
+const errorSchema = "spwn.error/v1"
+
+// value: the runs that make a command fail under --json before any effect:
+// a flag it does not have, and, for a read that names what it reads, no name.
+func failingRuns(root *command.Command) [][]string {
+	out := [][]string{{"--json", "--not-a-flag"}}
+	for _, c := range typedCommands(root) {
+		if !c.Runnable() || c.DisableFlagParsing {
+			continue
+		}
+		words := strings.Fields(commandPath(c))
+		out = append(out, append(slices.Clone(words), "--json", "--not-a-flag"))
+		use := strings.Fields(c.Use)
+		if c.Flags().Lookup("json") != nil && len(use) > 1 && strings.HasPrefix(use[1], "<") {
+			out = append(out, append(slices.Clone(words), "--json"))
+		}
+	}
+	return out
+}
+
+// value: why a --json failure is not the one failure shape: exit 2, one
+// error document on stdout, and its block on stderr.
+func errorDocumentRefusals(r ran, want string) []finding {
+	where := strings.Join(r.words, " ")
+	var out []finding
+	say := func(what string) { out = append(out, finding{"error-document", where, what}) }
+	if r.exit != 2 {
+		say("a refusal before any effect that exits " + strconv.Itoa(r.exit) + ", not 2")
+	}
+	if !strings.Contains(r.stderr, "Error: ") || !strings.Contains(r.stderr, "\nHint: ") {
+		say("a failure whose block on stderr is not Error: then Hint:")
+	}
+	dec := json.NewDecoder(strings.NewReader(r.stdout))
+	var doc map[string]any
+	if err := dec.Decode(&doc); err != nil || dec.More() {
+		say("a --json failure whose stdout is not one document")
+		return out
+	}
+	if got, _ := doc["schema"].(string); got != want {
+		out = append(out, finding{"error-document", "schema " + got, "a --json failure that says " + got + ", not " + want})
+	}
+	for _, key := range []string{"type", "code", "subject", "message", "hint"} {
+		if _, ok := doc[key]; !ok {
+			say("an error document with no " + key)
+		}
+	}
+	if kind, _ := doc["type"].(string); !slices.Contains(fail.Type("").Enum(), kind) {
+		say("an error document whose type " + kind + " is none of core/fail's")
+	}
+	for _, key := range []string{"message", "hint"} {
+		if text, _ := doc[key].(string); text == "" {
+			say("an error document with an empty " + key)
+		}
+	}
+	return out
+}
+
+// invariant: rule error-document (ADR-021 rule 7): every command, refused
+// before any effect under --json, prints the one error document on stdout
+// and its block on stderr, exit 2.
+func ruleErrorDocument(t *testing.T, root *command.Command) []finding {
+	bin := specBinary(t)
+	var mu sync.Mutex
+	var out []finding
+	t.Run("runs", func(t *testing.T) {
+		for _, words := range failingRuns(root) {
+			t.Run(strings.Join(words, "_"), func(t *testing.T) {
+				t.Parallel()
+				found := errorDocumentRefusals(runOverWorld(t, bin, words), errorSchema)
+				mu.Lock()
+				out = append(out, found...)
+				mu.Unlock()
+			})
+		}
+	})
+	return out
+}
+
+func TestEveryFailureUnderJSONIsTheErrorDocument(t *testing.T) {
+	t.Parallel()
+	excepted := []exception{{"error-document", "schema station.error/v1", "M3", "2026-11-25"}}
+	t.Run("holds", func(t *testing.T) { excuse(t, ruleErrorDocument(t, commandTree(t)), excepted) })
+	t.Run("bites", func(t *testing.T) {
+		good := ran{words: []string{"apps", "--json", "--not-a-flag"}, exit: 2,
+			stdout: `{"schema":"spwn.error/v1","type":"refused","code":null,"subject":null,"message":"unknown flag: --not-a-flag","hint":"run station apps --help"}`,
+			stderr: "Error: unknown flag: --not-a-flag\nHint: run station apps --help\n"}
+		if found := errorDocumentRefusals(good, errorSchema); len(found) > 0 {
+			t.Errorf("the error-document rule refused the one failure shape: %v", found)
+		}
+		for _, mutant := range []ran{
+			{words: good.words, exit: 1, stdout: good.stdout, stderr: good.stderr},
+			{words: good.words, exit: 2, stdout: "", stderr: good.stderr},
+			{words: good.words, exit: 2, stdout: good.stdout + good.stdout, stderr: good.stderr},
+			{words: good.words, exit: 2, stdout: strings.Replace(good.stdout, `"refused"`, `"oops"`, 1), stderr: good.stderr},
+			{words: good.words, exit: 2, stdout: strings.Replace(good.stdout, `"hint":"run station apps --help"`, `"hint":""`, 1), stderr: good.stderr},
+			{words: good.words, exit: 2, stdout: good.stdout, stderr: "unknown flag\n"},
+		} {
+			bites(t, "error-document", errorDocumentRefusals(mutant, errorSchema), "apps --json --not-a-flag")
+		}
+		renamed := ran{words: good.words, exit: 2, stdout: strings.Replace(good.stdout, "spwn.error", "station.error", 1), stderr: good.stderr}
+		bites(t, "error-document", errorDocumentRefusals(renamed, errorSchema), "schema station.error/v1")
 	})
 }

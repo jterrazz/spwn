@@ -24,7 +24,7 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 	return kit.Command(kit.Leaf[Input]{
 		Use:     "remove <entry>",
 		Short:   "Take a password out of a machine: a VM's grant of it ends, or on a Mac it leaves the vault with every grant made from it",
-		Example: "  station accounts remove <entry> --on linux-1 --yes\n  station accounts remove <entry> --yes",
+		Example: "  station accounts remove pw-2 --on linux-1 --yes\n  station accounts remove pw-1 --yes",
 		Args:    cobra.ExactArgs(1),
 		Bind:    func(in *Input, args []string) error { in.Entry = args[0]; return nil },
 		Asks:    true,

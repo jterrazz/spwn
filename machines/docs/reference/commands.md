@@ -181,7 +181,7 @@ station machinefile plan [--machinefile <name|path>] [--phase image|boot|apply] 
 station machinefile apply [--machinefile <name|path>] [--phase image|boot|apply] [--remove] [--yes]
 station machinefile drift [--machinefile <name|path>] [--json]
 station machinefile update [--machinefile <name>] [--json]
-station machinefile explain [<key>] [--machinefile <name>]
+station machinefile explain [<key>] [--machinefile <name>] [--json]
 ```
 
 Bare `machinefile` is `machinefile.files` of this Mac: one section per shelf (Yours, Mixins, Shipped), one row per Machinefile with what it makes (`workspace · ubuntu`, or `mixin`), where it is read (`user`, `shared`, `built-in`) and how the machines that follow it stand with it (`1 machine differs.`, `Every machine matches.`, `No machine follows it.`), the page's verdict under the first section. It changes nothing; the files are the ones this Mac reads, so `--on` is refused, exit 2. `--json` prints `station.machinefile.files/v1`: the page's `verdict` and `tone`, and each file's `name`, `shelf`, `origin`, `path`, `kind` (`mixin` for a mixin), `os`, `followers` (`machine`, `mac`, `state`), `verdict` and `tone`.

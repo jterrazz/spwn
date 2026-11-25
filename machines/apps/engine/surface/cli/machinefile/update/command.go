@@ -27,6 +27,7 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 		Declare: func(f *pflag.FlagSet, in *Input) {
 			f.StringVar(&in.Machinefile, "machinefile", "", "the Machinefile updated, by its name (default: the one this machine carries)")
 		},
+		Read:  func(*Input) bool { return false },
 		Pages: true,
 		Run: func(ctx context.Context, in *Input, io kit.IO) error {
 			steps := kit.Steps(io)
