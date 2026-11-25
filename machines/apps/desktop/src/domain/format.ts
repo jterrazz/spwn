@@ -1,5 +1,3 @@
-import type { CoreFindingFix } from '@jterrazz/station-api';
-
 import { SEPARATOR } from './separator';
 
 // invariant: station's rule of the numbers, as its Go prints them (apps/engine/activity/words.go): disk and network sizes
@@ -25,10 +23,6 @@ function decimal(value: number): string {
 
 export function sentence(parts: readonly (string | undefined)[]): string {
     return parts.filter((part) => part !== undefined && part !== '').join(SEPARATOR);
-}
-
-export function fixLine(fix: CoreFindingFix | undefined): string {
-    return fix ? sentence([fix.Command, fix.Call, fix.Path]) : '';
 }
 
 export function bytes(value: number): string {
