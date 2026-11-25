@@ -133,7 +133,7 @@ type worldMac struct {
 	// first caller that needs it, from any of the engines' goroutines.
 	serving sync.Mutex
 	start   func() *process.Engine
-	// invariant: mu guards starting, engine, began, tick and leave: an
+	// invariant: mu guards starting, engine, began, tick, leave and home: an
 	// engine's own goroutines (its surfaces, a guest session, another Mac's
 	// engine) ask for this Mac's engine while the command ends it, and a
 	// reader takes the pointer once under mu, never twice. It is never held
@@ -149,7 +149,8 @@ type worldMac struct {
 	bound  map[int]bool
 	// value: this machine as its own binary builds it inside a VM of the
 	// world, once per run.
-	vm *farMac
+	vmOnce sync.Once
+	vm     *farMac
 	// value: the run's home, where the world's ~/ files are.
 	home string
 	// value: ends the surfaces the world holds open on the running engine.
@@ -308,7 +309,9 @@ func (m *worldMac) runs() bool { mac := m.slice(); return mac.EngineRuns() }
 func (m *worldMac) system(h local.System, cat catalog.Catalog) local.System {
 	foot := appsfake.FootprintOf(m.run.w, m.name, cat)
 	h.Run = appsfake.Seen{Runner: rootless{Runner: h.Run, w: m.run.w}, Foot: foot, Home: h.Env.Home()}
+	m.mu.Lock()
 	m.home = h.Env.Home()
+	m.mu.Unlock()
 	h.FS = worldFS{FS: appsfake.SeenFS{FS: h.FS, Foot: foot, Home: h.Env.Home()}, m: m, plist: catalog.EnginePlist(h.Env.Home()), files: m.files()}
 	h.Env = worldEnv{Env: h.Env, thisMac: m.name, user: m.run.w.User, admin: m.run.w.Admin && m.name == m.run.w.ThisMac || m.slice().Root}
 	h.Clock = m.run.clock()
@@ -433,7 +436,12 @@ func (m *worldMac) jobs() backgroundcontract.Jobs { return backgroundfake.New(m.
 func (m *worldMac) meter() activitycontract.Meter { return activityfake.MeterOf(m.run.w, m.name) }
 func (m *worldMac) disk() diskcontract.DiskUsage  { return m.files() }
 
-func (m *worldMac) files() *diskfake.Usage        { return diskfake.UsageOf(m.run.w, m.name).At(m.home) }
+func (m *worldMac) files() *diskfake.Usage {
+	m.mu.Lock()
+	home := m.home
+	m.mu.Unlock()
+	return diskfake.UsageOf(m.run.w, m.name).At(home)
+}
 func (m *worldMac) tailnet() sharingNode          { return portsfake.TailnetOf(m.run.w, m.name) }
 func (m *worldMac) funnel() funnel.Funnel         { return portsfake.TailnetOf(m.run.w, m.name) }
 func (m *worldMac) bundler() appscontract.Bundler { return appsfake.BundlerOf(m.run.w, m.name) }
@@ -1622,10 +1630,10 @@ func (m *worldMac) placement() (ports.VMLivesOn, bool) {
 }
 
 func (m *worldMac) inVM() farMac {
-	if m.vm == nil {
+	m.vmOnce.Do(func() {
 		far := m.run.far(m)
 		m.vm = &far
-	}
+	})
 	return *m.vm
 }
 

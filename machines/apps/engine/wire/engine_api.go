@@ -82,7 +82,8 @@ func (m machine) engineServer(d *process.Engine, registry *call.Registry, far ca
 			s.Conn(ctx, conn)
 			return
 		}
-		serving.Guest = guest
-		process.Server(d, serving).Conn(ctx, conn)
+		guested := serving
+		guested.Guest = guest
+		process.Server(d, guested).Conn(ctx, conn)
 	}
 }
