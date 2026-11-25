@@ -3,6 +3,8 @@
 **Status:** Accepted
 **Date:** 2026-11-11
 
+Amended by [ADR-096](096-spwn-is-one-app-its-menu-bar-notifications-and-engine-live-while-it-runs.md) (Proposed): the panel is hosted in Spwn's own process.
+
 ## Context
 
 The owner chose the M1 contrast direction: the system glass stays the panel's frame, dark enough that text holds 4.5:1 over any wallpaper. Commit `459cb381` reached that density with a fill, an 80 % plate under the content, laid over the window `MenuBarExtra(.window)` draws. The window's background is already the system glass, and the owner read the plate as a double background. He asked for a panel that feels native.

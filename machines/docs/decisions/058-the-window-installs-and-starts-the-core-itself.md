@@ -4,6 +4,8 @@
 **Date:** 2026-11-19
 **Amended 2026-11-20:** the installer's record, `station/installed.json` (`station.install-record/v1`), is a fourth place, read before the install folder: an installer told to write elsewhere than `~/.local/bin` leaves the only trace of where `station` is.
 
+Amended by [ADR-096](096-spwn-is-one-app-its-menu-bar-notifications-and-engine-live-while-it-runs.md) (Proposed): superseded on a Mac; the window runs its own engine and installs or starts no core on a press.
+
 ## Context
 
 The window, named Spwn, is a client of the engine's socket: until now a Mac with no engine showed it every page's
