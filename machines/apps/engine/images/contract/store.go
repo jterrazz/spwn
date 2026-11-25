@@ -15,6 +15,10 @@ type ImageStore interface {
 	Put(ctx context.Context, r images.Record) error
 	// invariant: every version of the image, the newest first.
 	List(ctx context.Context, image string) ([]images.Record, error)
+	// invariant: every image name that holds a version on disk, readable or
+	// not, in name order: the names a catalog or a Machinefile no longer
+	// holds too.
+	Names(ctx context.Context) ([]string, error)
 	// invariant: deleting a version never put changes nothing.
 	Delete(ctx context.Context, image, version string) error
 }

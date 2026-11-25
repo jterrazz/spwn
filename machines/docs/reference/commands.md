@@ -19,7 +19,7 @@ Every command of `station`, grouped as `station help` groups them. The words are
 - A bare noun lists (`apps`, `settings`, `disk`, `machines`, `ports`, `images`, `accounts`). A verb whose argument is missing is refused, its hint the command with it: `station apps install` hints `station apps install <app>`.
 - An existing thing is a positional (`machines stop api`); a new thing is described by options (`machines create api --persistent`).
 - One verb per meaning, the [Glossary](../concepts/glossary.md#the-verbs)'s: `apps` install, update, remove; `settings` apply, diff, off; `disk` free, erase, move; a VM create, start, stop, restart, edit, delete.
-- Every read takes `--json`. Every destructive action asks on a terminal or takes `--yes`.
+- Every read takes `--json`. Every destructive action asks on a terminal, and what answers it in a script is the question's: `--yes` for a yes or no (`images delete`, `apps remove`), `--confirm=<name>` for one that asks the name typed (`machines delete`, `disk erase`), neither where nothing is asked (`images build`). A `--yes` given to a typed question or to none is refused, exit 2, naming which it met; `--yes` never answers a typed one.
 - Every refusal exits 2 before any question; every failure is one `Error:` and one `Hint:`. With `--json`, the same refusal or failure is also the `station.error/v1` document on stdout (`schema`, `type`, `code`, `subject`, `message`, `hint`, `fix`), the exit code unchanged. A question answered no is `Error: <what> kept: you said no`, exit 1.
 - A command that needs an app this Mac lacks is refused before anything runs, exit 2, naming the app and what needs it: `Error: tart is required by machines`, `Hint: station apps install tart`. The needs are the [Glossary](../concepts/glossary.md)'s: the VM verbs that make or run a VM and the image verbs need tart, `ports share` needs Tailscale. On a terminal the refusal is one line, `○ tart is required by machines · station apps install tart`, then `Install tart now?`: yes installs it as `apps install` does and runs the command again; no ends there, exit 2. A need Machines installs none of (the studio CLI) is the refusal on a terminal too.
 - A word Machines does not know is `Error: unknown command "<word>"` / `Hint: station help`, exit 2; so is `station help <word>`.
@@ -116,7 +116,7 @@ A setting that needs values asks them in a form on a terminal and is refused els
 ### `station disk`
 
 ```bash
-station disk [--json] # the volume, then Misplaced, Can rebuild, Your data, Never touched, with sizes; nothing runs
+station disk [--json] # the volume, then Misplaced, Can rebuild, Your data, Never touched, with sizes, then every VM disk the hypervisor holds; nothing runs
 station disk free [<app...>] # empty what an app can rebuild with its own command; bare = every Can rebuild row
 station disk erase <app> [--confirm=<app>] # erase an app's data, back to factory; its name typed
 station disk move <folder> # move a misplaced folder where its app expects it
@@ -180,7 +180,7 @@ station images update [<image...>] # the newest released version
 station images delete <image>[@<version>] [--yes]
 ```
 
-An image is named after the Machinefile it is built from (`base-ubuntu`, `studio-linux`); `linux`, `station-linux` and `macos` name no image. A bare `build` builds every image that is missing or whose recipe, Machinefile or lock changed; a bare `update` updates every image this Mac holds. A name no source holds a Machinefile of is `no image "debian"`, and a Machinefile that makes no image is refused naming why (both exit 2). See [Images](images.md).
+An image is named after the Machinefile it is built from (`base-ubuntu`, `studio-linux`); `linux`, `station-linux` and `macos` name no image. A bare `build` builds every image that is missing or whose recipe, Machinefile or lock changed; a bare `update` updates every image this Mac holds. A name no source holds a Machinefile of, and no record of, is `no image "debian"`, and a Machinefile that makes no image is refused naming why (both exit 2). See [Images](images.md).
 
 ### `station engine`
 

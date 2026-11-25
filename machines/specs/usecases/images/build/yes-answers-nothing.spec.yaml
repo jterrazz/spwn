@@ -1,0 +1,8 @@
+description: 'a build asks nothing, so --yes is refused saying so'
+env: two-macs
+runs:
+    - command: 'images build base-ubuntu --yes'
+      exit: 2
+      stderr: |
+          Error: images build asks nothing: --yes does not apply
+          Hint: run images build without it

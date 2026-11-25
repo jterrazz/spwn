@@ -105,4 +105,28 @@ func ImageStore(t *testing.T, open func(t *testing.T) contract.ImageStore) {
 			t.Errorf("List after Delete = %+v, %v; want the other version alone", list, err)
 		}
 	})
+
+	t.Run("every image holding a version is named, the unreadable ones too, none once emptied", func(t *testing.T) {
+		s := open(t)
+		old := built("2026.10.20")
+		old.Distro = ""
+		other := built("2026.11.02")
+		other.Name = "base-macos"
+		for _, r := range []images.Record{built("2026.11.01"), old, other} {
+			if err := s.Put(ctx, r); err != nil {
+				t.Fatalf("Put %s: %v", r.Version, err)
+			}
+		}
+		if names, err := s.Names(ctx); err != nil || !reflect.DeepEqual(names, []string{"base-macos", "linux"}) {
+			t.Errorf("Names = %v, %v; want base-macos and linux", names, err)
+		}
+		for _, v := range []string{"2026.10.20", "2026.11.01"} {
+			if err := s.Delete(ctx, "linux", v); err != nil {
+				t.Fatalf("Delete %s: %v", v, err)
+			}
+		}
+		if names, err := s.Names(ctx); err != nil || !reflect.DeepEqual(names, []string{"base-macos"}) {
+			t.Errorf("Names after the last version is deleted = %v, %v; want base-macos alone", names, err)
+		}
+	})
 }

@@ -1043,10 +1043,18 @@ export type DiskRow = {
 
 export type DiskStationPart = {
     CanFree: DiskCanFree;
+    Disks: DiskVMDisk[] | null;
     Kept?: DiskKept[];
     Machines: DiskMachineDisk[] | null;
     Sentence: string;
     Verdict: CoreVerdictVerdict;
+};
+
+export type DiskVMDisk = {
+    Bytes: number;
+    Kind: 'system' | 'apps' | 'your-data' | 'caches' | 'machine-disks' | 'images' | 'other-vms' | 'leftovers' | 'image-cache' | 'logs' | 'free';
+    Name: string;
+    Note?: string;
 };
 
 export type DoneFrame = {
@@ -1414,6 +1422,7 @@ export type ImagesReport = {
     Deletable: boolean;
     Mac: string;
     Newest: boolean;
+    Orphan: boolean;
     Record: ImagesRecord;
     VMs: string[] | null;
 };

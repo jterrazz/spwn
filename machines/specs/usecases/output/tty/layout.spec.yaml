@@ -146,6 +146,14 @@ runs:
               + 15 more   7.5 GB
           Your data · 25.8 GB · xcode 19.1, claude 3.6, ollama 1.9, zed 1.2
           Never touched · 300 KB · gpg 200, ssh 100
+          VM disks
+                          size  what
+            ● api      50.0 GB  machine
+            ● linux-1  50.0 GB  machine
+            ● station-image-base-ubuntu-2026.11.01
+              4.0 GB  image
+            ● station-image-base-ubuntu-2026.10.20
+              3.0 GB  image
 
           → station disk free  frees every Can rebuild row, nothing is lost
     - command: '--version >/dev/null; terminal --size 80x60 /usr/bin/env -u NO_COLOR COLUMNS=80 "$STATION" machines'

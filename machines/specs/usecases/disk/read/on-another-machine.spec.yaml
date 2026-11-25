@@ -12,3 +12,6 @@ runs:
           ●	homebrew	1.1 GB
           # Your data
           ●	claude	2.0 GB
+          # VM disks
+          ●	infra	80.0 GB	machine
+          ●	station-image-base-ubuntu-2026.11.01	4.0 GB	image

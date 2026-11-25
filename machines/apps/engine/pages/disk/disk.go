@@ -42,16 +42,31 @@ type RowJSON struct {
 	MoveTo string   `json:"move_to,omitempty"`
 }
 
+type VMDiskJSON struct {
+	Name  string `json:"name"`
+	Kind  string `json:"kind"`
+	Bytes int64  `json:"bytes"`
+	Note  string `json:"note,omitempty"`
+}
+
 type ReadJSON struct {
 	Schema   string         `json:"schema"`
 	Findings []finding.JSON `json:"findings"`
 	Free     int64          `json:"free_bytes"`
 	Total    int64          `json:"total_bytes"`
 	Rows     []RowJSON      `json:"rows"`
+	// value: every VM disk the Mac's hypervisor holds, whoever it belongs
+	// to; empty on a machine with none.
+	VMDisks []VMDiskJSON `json:"vm_disks"`
 }
 
 func ReadContract(r disk.Reading) ReadJSON {
-	out := ReadJSON{Schema: "station.disk.read/v1", Findings: finding.Doc(disk.Findings(r, machine.Ref{})), Free: r.Free, Total: r.Total, Rows: make([]RowJSON, 0, len(r.Rows))}
+	out := ReadJSON{Schema: "station.disk.read/v1", Findings: finding.Doc(disk.Findings(r, machine.Ref{})), Free: r.Free, Total: r.Total, Rows: make([]RowJSON, 0, len(r.Rows)), VMDisks: []VMDiskJSON{}}
+	if r.Station != nil {
+		for _, d := range r.Station.Disks {
+			out.VMDisks = append(out.VMDisks, VMDiskJSON{Name: d.Name, Kind: string(d.Kind), Bytes: d.Bytes, Note: d.Note})
+		}
+	}
 	for _, row := range r.Rows {
 		out.Rows = append(out.Rows, RowJSON{App: row.App, Group: string(row.Group), Bytes: row.Bytes, Paths: row.Paths, MoveTo: row.MoveTo})
 	}
@@ -99,6 +114,9 @@ func Read(r disk.Reading, thisMac page.Context, all bool) page.Page {
 		}
 		p.Sections = append(p.Sections, group(g, rows, items, all))
 	}
+	if r.Station != nil && len(r.Station.Disks) > 0 {
+		p.Sections = append(p.Sections, vmDisks(r.Station.Disks))
+	}
 	if disk.Sum(r.Of(disk.CanRebuild)) > 0 {
 		p.Hints = append(p.Hints, page.Hint{Command: "station disk free", Text: "frees every Can rebuild row, nothing is lost"})
 	}
@@ -125,6 +143,41 @@ func group(g disk.Group, rows []disk.Row, items []page.Item, all bool) page.Sect
 		s.Rest = &page.Item{Row: &page.Row{ID: string(g) + "/more", Label: "+ " + strconv.Itoa(len(rest)) + " more", Cells: []page.Value{page.Size(disk.Sum(rest))}}}
 	}
 	return s
+}
+
+// value: what a VM disk is, said as the Disk bar's kinds say it.
+func kindWord(k disk.Kind) string {
+	switch k {
+	case disk.KindMachineDisks:
+		return "machine"
+	case disk.KindImages:
+		return "image"
+	case disk.KindOtherVMs:
+		return "other VM"
+	case disk.KindLeftovers:
+		return "leftover"
+	case disk.KindSystem, disk.KindApps, disk.KindYourData, disk.KindCaches, disk.KindImageCache, disk.KindLogs, disk.KindFree:
+	}
+	return string(k)
+}
+
+// invariant: the VM disks section lists every disk the hypervisor holds,
+// each once, beside the apps' groups, so no VM's bytes are in no row.
+func vmDisks(disks []disk.VMDisk) page.Section {
+	items := make([]page.Item, 0, len(disks))
+	for _, d := range disks {
+		what := kindWord(d.Kind)
+		if d.Note != "" {
+			what += ", " + d.Note
+		}
+		row := page.Row{ID: "vm-disks/" + d.Name, Label: d.Name, Mark: page.OK, Cells: []page.Value{page.Size(d.Bytes), page.Text(what)}}
+		items = append(items, page.Item{Row: &row})
+	}
+	return page.Section{ID: "vm-disks", Title: "VM disks", Fold: page.Open, Uncounted: true, Columns: []page.Column{
+		{Key: "name", Kind: page.KindText, Keep: 100},
+		{Key: "size", Label: "size", Kind: page.KindSize, Keep: 90},
+		{Key: "what", Label: "what", Kind: page.KindText, Keep: 60},
+	}, Items: items}
 }
 
 func sized(n int64, unit string) page.Value {

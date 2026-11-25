@@ -1,6 +1,8 @@
 package disk
 
 import (
+	"cmp"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -45,10 +47,17 @@ func KeptOf(folder, into string, vms []string) Kept {
 	}
 }
 
+func GateCache(name string) bool {
+	// value: the disk the machine gates keep to start from, a test VM
+	// named station-e2e-<hash>: a cache of the gates, rebuilt by the next
+	// gate run.
+	return strings.HasPrefix(name, "station-e2e-")
+}
+
 func TestVM(name string) bool {
 	// value: a VM the machine tiers make with the hypervisor directly, under
 	// these names; it is never a leftover, and its disk is another VM's.
-	return strings.HasPrefix(name, "station-e2e-") || name == "station-play"
+	return GateCache(name) || name == "station-play"
 }
 
 type FreeableKind string
@@ -113,6 +122,46 @@ func sumDisks(disks []MachineDisk) int64 {
 	return total
 }
 
+type VMDisk struct {
+	// value: one disk the hypervisor holds in Machines' home, by the kind
+	// it counts in (machine-disks, images, other-vms, leftovers), and what
+	// the owner is told of it beyond its kind: the gates' cache says so.
+	Name  string
+	Kind  Kind
+	Bytes int64
+	Note  string `json:",omitempty"`
+}
+
+func (h Held) disks() []VMDisk {
+	// invariant: every disk the hypervisor lists is there once, each group
+	// largest first: the machines', the images', the other VMs', then the
+	// leftovers'.
+	var out []VMDisk
+	add := func(kind Kind, disks []MachineDisk) {
+		group := make([]VMDisk, 0, len(disks))
+		for _, d := range disks {
+			one := VMDisk{Name: d.Name, Kind: kind, Bytes: d.Bytes}
+			if GateCache(d.Name) {
+				one.Note = "the gates' cache"
+			}
+			group = append(group, one)
+		}
+		slices.SortStableFunc(group, func(a, b VMDisk) int { return cmp.Compare(b.Bytes, a.Bytes) })
+		out = append(out, group...)
+	}
+	add(KindMachineDisks, h.Machines)
+	add(KindImages, h.Images)
+	add(KindOtherVMs, h.Others)
+	var leftovers []MachineDisk
+	for _, f := range h.Unused {
+		if f.Kind == FreeDisk {
+			leftovers = append(leftovers, MachineDisk{Name: f.Name, Bytes: f.Bytes})
+		}
+	}
+	add(KindLeftovers, leftovers)
+	return out
+}
+
 type StationPart struct {
 	// value: what the Mac itself holds and what Machines holds on it
 	// outside any machine's own files, said; each machine's size, the Mac
@@ -120,7 +169,9 @@ type StationPart struct {
 	// are the reading's Kinds.
 	Sentence string
 	Machines []MachineDisk
-	CanFree  CanFree
+	// value: each VM disk the hypervisor holds, whatever holds it.
+	Disks   []VMDisk
+	CanFree CanFree
 	// value: the old folders station never frees, each with why.
 	Kept    []Kept `json:",omitempty"`
 	Verdict verdict.Verdict
@@ -139,6 +190,7 @@ func StationOf(total, free, logs, imageCache int64, h Held, mac string) StationP
 	return StationPart{
 		Sentence: "This Mac itself holds " + size.Bytes(itself) + ". Outside any machine, Machines holds " + size.Bytes(held) + ".",
 		Machines: machines,
+		Disks:    h.disks(),
 		CanFree:  can,
 		Kept:     h.Kept,
 		Verdict:  freeable(can, h.Unread, mac),
