@@ -12,6 +12,7 @@ import (
 	corejsonfile "github.com/jterrazz/studio-station/apps/engine/core/adapter/jsonfile"
 	corecontract "github.com/jterrazz/studio-station/apps/engine/core/contract"
 	devicesjsonfile "github.com/jterrazz/studio-station/apps/engine/devices/adapter/jsonfile"
+	deviceskeychain "github.com/jterrazz/studio-station/apps/engine/devices/adapter/keychain"
 	devicescontract "github.com/jterrazz/studio-station/apps/engine/devices/contract"
 	enginejsonfile "github.com/jterrazz/studio-station/apps/engine/engine/adapter/jsonfile"
 	enginecontract "github.com/jterrazz/studio-station/apps/engine/engine/contract"
@@ -67,7 +68,7 @@ type stores struct {
 	asking sync.Mutex
 }
 
-func newStores(files local.FS, p setup.Paths) *stores {
+func newStores(files local.FS, p setup.Paths, anchor devicescontract.Anchor) *stores {
 	return &stores{
 		prefs:        corejsonfile.NewPreferences(files, p.Prefs, preferenceGroups()),
 		machines:     machinesjsonfile.New(lockable{files}, filepath.Join(p.State, "vms")),
@@ -81,7 +82,7 @@ func newStores(files local.FS, p setup.Paths) *stores {
 		ledger:       machinefilejsonfile.NewLedger(lockable{files}, filepath.Join(p.State, "ledger.json")),
 		release:      enginejsonfile.NewReleaseCache(files, filepath.Join(p.Cache, "release.json")),
 		journal:      journaljsonfile.New(lockable{files}, filepath.Join(p.State, "journal.jsonl")),
-		devices:      devicesjsonfile.New(lockable{files}, filepath.Join(p.State, "devices.json")),
+		devices:      devicesjsonfile.New(lockable{files}, filepath.Join(p.State, "devices.json"), anchor),
 	}
 }
 
@@ -102,4 +103,15 @@ func (s *stores) vmUser() machinescontract.VMUserPrefs  { return machinescontrac
 func (s *stores) ports() portscontract.PortsPrefs { return portscontract.Ports(s.prefs) }
 func (s *stores) neverSleeps() awakecontract.NeverSleepsPrefs {
 	return awakecontract.NeverSleeps(s.prefs)
+}
+
+// invariant: the device book's head is anchored in the login keychain, the
+// store the vault keeps its secrets in, never in the state folder; the spec
+// build outside a world anchors it in the file STATION_DEVICE_ANCHOR_STUB
+// names.
+func deviceAnchor(h local.System, vars map[string]string) devicescontract.Anchor {
+	if a := specDeviceAnchor(vars); a != nil {
+		return a
+	}
+	return deviceskeychain.New(h.Run)
 }

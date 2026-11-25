@@ -32,8 +32,10 @@ type Device struct {
 
 type Book struct {
 	// invariant: one machine's device book, in the order the entries were
-	// added; this machine's own device key is never in it.
-	Devices []Device `json:"devices"`
+	// added; this machine's own device key is never in it. Generation is
+	// the change that wrote it, 0 for a book never written.
+	Generation int      `json:"generation,omitempty"`
+	Devices    []Device `json:"devices"`
 }
 
 func (b Book) Find(name string) (Device, bool) {
@@ -69,6 +71,10 @@ type Listing struct {
 	// whose seal failed, which reach nothing until they are added again;
 	// both are empty lists, never absent.
 	Mac string `json:"mac"`
+	// value: the book is not the one this Mac last wrote (a copy from
+	// before, written back, or a book this Mac never wrote): every entry is
+	// broken, and the first add starts a new book.
+	Stale bool `json:"stale"`
 	// value: this Mac's own device key line, the one another device adds;
 	// empty on a Mac that has nowhere to keep one.
 	Key     string `json:"key"`

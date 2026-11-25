@@ -369,8 +369,15 @@ type Stores struct {
 	Release *engine.ReleaseKept `json:"release,omitempty"`
 	// value: what was done on this Mac and its VMs, oldest first.
 	Journal []journal.Line `json:"journal,omitempty"`
-	// value: the other devices this Mac lets reach it, its device book.
-	Devices []devices.Device `json:"devices,omitempty"`
+	// value: the other devices this Mac lets reach it, its device book,
+	// and the change that wrote it.
+	Devices           []devices.Device `json:"devices,omitempty"`
+	DevicesGeneration int              `json:"devices_generation,omitempty"`
+	// value: the book's head as this Mac's login keychain keeps it,
+	// "<generation> <digest>"; empty, none kept. Unreadable fails every
+	// read of it, as a locked keychain does.
+	DevicesAnchor           string `json:"devices_anchor,omitempty"`
+	DevicesAnchorUnreadable bool   `json:"devices_anchor_unreadable,omitempty"`
 }
 
 func (m *Mac) Store() *Stores {

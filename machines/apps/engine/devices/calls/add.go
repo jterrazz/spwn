@@ -32,7 +32,7 @@ var Add = call.Call[Deps, AddIn, devices.Row]{
 		if err != nil {
 			return devices.Row{}, err
 		}
-		own, err := d.Sealer.Key.Public(ctx)
+		own, err := d.Sealer.Key.Kept(ctx)
 		if err != nil {
 			return devices.Row{}, err
 		}
@@ -40,11 +40,11 @@ var Add = call.Call[Deps, AddIn, devices.Row]{
 		if err != nil {
 			return devices.Row{}, err
 		}
-		book, err := d.Store.Read(ctx)
+		book, anchored, err := d.Store.Read(ctx)
 		if err != nil {
 			return devices.Row{}, err
 		}
-		if err = book.Admits(entry, line, d.Sealer.Mac, own); err != nil {
+		if err = devices.Base(book, anchored).Admits(entry, line, d.Sealer.Mac, own); err != nil {
 			return devices.Row{}, err
 		}
 		if answer := d.Presence(ctx, devices.Reason(entry)); answer != devices.Given {

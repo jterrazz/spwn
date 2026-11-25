@@ -12,12 +12,12 @@ import (
 var List = call.Call[Deps, struct{}, devices.Listing]{
 	Name: "devices.list", Where: call.AtTarget, Applies: devices.OnAMac,
 	Run: func(ctx context.Context, d Deps, _ struct{}, _ call.Progress) (devices.Listing, error) {
-		book, err := d.Store.Read(ctx)
+		book, anchored, err := d.Store.Read(ctx)
 		if err != nil {
 			return devices.Listing{}, err
 		}
 		out := devices.Listing{Mac: d.Sealer.Mac, Devices: []devices.Row{}, Broken: []devices.Row{}}
-		own, err := d.Sealer.Key.Public(ctx)
+		own, err := d.Sealer.Key.Kept(ctx)
 		var none *contract.NoDeviceKeyError
 		switch {
 		case errors.As(err, &none):
@@ -28,7 +28,8 @@ var List = call.Call[Deps, struct{}, devices.Listing]{
 				return devices.Listing{}, err
 			}
 		}
-		checked := devices.Check(book, d.Sealer.Mac, own)
+		checked := devices.Check(book, anchored, d.Sealer.Mac, own)
+		out.Stale = checked.Stale
 		for _, e := range checked.Trusted {
 			out.Devices = append(out.Devices, devices.RowOf(e))
 		}

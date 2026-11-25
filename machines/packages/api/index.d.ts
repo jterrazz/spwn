@@ -978,6 +978,7 @@ export type DevicesListing = {
     devices: DevicesRow[] | null;
     key: string;
     mac: string;
+    stale: boolean;
 };
 
 export type DevicesRow = {

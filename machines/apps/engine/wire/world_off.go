@@ -18,6 +18,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/call/lanes"
 	corecontract "github.com/jterrazz/studio-station/apps/engine/core/contract"
 	"github.com/jterrazz/studio-station/apps/engine/devices"
+	devicescontract "github.com/jterrazz/studio-station/apps/engine/devices/contract"
 	diskcontract "github.com/jterrazz/studio-station/apps/engine/disk/contract"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
 	enginecontract "github.com/jterrazz/studio-station/apps/engine/engine/contract"
@@ -118,3 +119,5 @@ func (*worldMac) stationVersion() string              { return "" }
 func (*worldMac) engineStarted() time.Time            { return time.Time{} }
 
 func (*worldMac) presence() devices.Answer { return devices.Absent }
+
+func specDeviceAnchor(map[string]string) devicescontract.Anchor { return nil }

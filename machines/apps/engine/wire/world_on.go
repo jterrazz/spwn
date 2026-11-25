@@ -56,6 +56,7 @@ import (
 	coremachine "github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/devices"
 	devicesfake "github.com/jterrazz/studio-station/apps/engine/devices/adapter/fake"
+	devicescontract "github.com/jterrazz/studio-station/apps/engine/devices/contract"
 	diskfake "github.com/jterrazz/studio-station/apps/engine/disk/adapter/fake"
 	diskcontract "github.com/jterrazz/studio-station/apps/engine/disk/contract"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
@@ -427,6 +428,36 @@ func specDeviceKey(vars map[string]string) contract.DeviceKey {
 	}
 	return machinesfake.DeviceKeyOf(key)
 }
+
+// invariant: outside a world the spec build never reaches a keychain: the
+// device book's head is kept in the file STATION_DEVICE_ANCHOR_STUB names,
+// "<generation> <digest>"; without that variable the real keychain's
+// adapter runs, over whatever `security` the document puts on PATH.
+func specDeviceAnchor(vars map[string]string) devicescontract.Anchor {
+	file := vars["STATION_DEVICE_ANCHOR_STUB"]
+	if !filepath.IsAbs(file) {
+		return nil
+	}
+	return fileAnchor(file)
+}
+
+type fileAnchor string
+
+func (f fileAnchor) Read(context.Context) (devices.Head, error) {
+	data, err := os.ReadFile(string(f))
+	if errors.Is(err, fs.ErrNotExist) {
+		return devices.Head{}, nil
+	}
+	if err != nil {
+		return devices.Head{}, err
+	}
+	return devices.ParseHead(string(data))
+}
+
+func (f fileAnchor) Write(_ context.Context, h devices.Head) error {
+	return os.WriteFile(string(f), []byte(h.String()+"\n"), 0o600)
+}
+
 func (m *worldMac) unlocker() contract.Unlocker { return machinesfake.MacsOf(m.run.w) }
 func (m *worldMac) waker() contract.Waker       { return machinesfake.WakerOf(m.run.w, m.name) }
 func (m *worldMac) processes(kernel contract.Processes) contract.Processes {

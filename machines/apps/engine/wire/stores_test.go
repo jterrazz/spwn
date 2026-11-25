@@ -8,7 +8,7 @@ import (
 )
 
 func TestNeverSleepsIsStillOnAfterAnotherPreferenceIsWritten(t *testing.T) {
-	s := newStores(localtest.NewFS(), setup.Paths{Prefs: "/home/u/.config/station", State: "/home/u/.local/state/station"})
+	s := newStores(localtest.NewFS(), setup.Paths{Prefs: "/home/u/.config/station", State: "/home/u/.local/state/station"}, nil)
 
 	if err := s.neverSleeps().Set(true); err != nil {
 		t.Fatal(err)

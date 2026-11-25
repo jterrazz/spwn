@@ -26,13 +26,17 @@
         },
         "mac": {
           "type": "string"
+        },
+        "stale": {
+          "type": "boolean"
         }
       },
       "required": [
         "broken",
         "devices",
         "key",
-        "mac"
+        "mac",
+        "stale"
       ],
       "type": "object"
     },

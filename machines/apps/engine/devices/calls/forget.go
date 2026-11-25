@@ -24,10 +24,11 @@ var Forget = call.Call[Deps, ForgetIn, Forgotten]{
 	Name: "devices.forget", Where: call.InEngine, Applies: devices.OnAMac, Confirm: confirm.ForgetDevice, Journal: keptForget,
 	Errors: []fail.Code{devices.Unknown, confirm.Needed, confirm.Mismatch},
 	Run: func(ctx context.Context, d Deps, in ForgetIn, _ call.Progress) (Forgotten, error) {
-		// invariant: taking trust away asks no presence and runs from afar,
-		// so a Mac with nobody at it drops a stolen device at once; a broken
-		// entry is forgotten like a trusted one.
-		book, err := d.Store.Read(ctx)
+		// invariant: taking trust away asks no presence, signs nothing and
+		// runs from afar, so a Mac with nobody at it drops a stolen device at
+		// once; a broken entry is forgotten like a trusted one, and a book
+		// that is not the anchored one is written again empty of it.
+		book, _, err := d.Store.Read(ctx)
 		if err != nil {
 			return Forgotten{}, err
 		}
@@ -38,9 +39,7 @@ var Forget = call.Call[Deps, ForgetIn, Forgotten]{
 			return Forgotten{}, err
 		}
 		err = d.Store.Change(ctx, func(b *devices.Book) error {
-			if !b.Forget(in.Name) {
-				return devices.Refusal(fail.NotFound, devices.Unknown, in.Name)
-			}
+			b.Forget(in.Name)
 			return nil
 		})
 		if err != nil {

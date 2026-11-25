@@ -41,7 +41,8 @@ func again(r devices.Row) string {
 func Page(l devices.Listing, thisMac page.Context) page.Page {
 	// invariant: this Mac's own key first, the line another device adds;
 	// then the devices it trusts; then the broken entries, each with the
-	// command that adds it again.
+	// command that adds it again, under a title that says when the whole
+	// book is not the one this Mac last wrote.
 	sections := []page.Section{}
 	if l.Key != "" {
 		own := page.Fact{Key: "key", Value: page.Text(devices.Fingerprint(l.Key))}
@@ -58,7 +59,11 @@ func Page(l devices.Listing, thisMac page.Context) page.Page {
 	}
 	sections = append(sections, trusted)
 	if len(l.Broken) > 0 {
-		broken := page.Section{ID: "broken", Title: "Seal broken: reaches nothing", Columns: columns()}
+		title := "Seal broken: reaches nothing"
+		if l.Stale {
+			title = "Not the book this Mac last wrote: reaches nothing until added again"
+		}
+		broken := page.Section{ID: "broken", Title: title, Columns: columns()}
 		for _, r := range l.Broken {
 			row := rowOf(r, page.Broken)
 			row.Reason = page.Failing

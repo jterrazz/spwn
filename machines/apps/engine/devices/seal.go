@@ -42,14 +42,24 @@ func Sealed(mac string, own *ecdsa.PublicKey, d Device) bool {
 }
 
 type Checked struct {
-	// invariant: every entry of a book, either trusted (its seal verifies
-	// against this Mac's device key) or broken, never both; a broken entry
-	// reaches nothing until it is added again.
+	// invariant: every entry of a book, either trusted (the book is the one
+	// this Mac last wrote and the entry's seal verifies against this Mac's
+	// device key) or broken, never both; a broken entry reaches nothing
+	// until it is added again. Stale is a book that is not the anchored
+	// one, every entry of it broken.
 	Trusted []Device
 	Broken  []Device
+	Stale   bool
 }
 
-func Check(b Book, mac string, own *ecdsa.PublicKey) Checked {
+func Check(b Book, anchored Head, mac string, own *ecdsa.PublicKey) Checked {
+	if !b.Anchored(anchored) {
+		return Checked{Trusted: []Device{}, Broken: clone(b.Devices), Stale: true}
+	}
+	return sealed(b, mac, own)
+}
+
+func sealed(b Book, mac string, own *ecdsa.PublicKey) Checked {
 	out := Checked{Trusted: []Device{}, Broken: []Device{}}
 	for _, d := range b.Devices {
 		if own != nil && Sealed(mac, own, d) {
@@ -62,10 +72,11 @@ func Check(b Book, mac string, own *ecdsa.PublicKey) Checked {
 }
 
 func (b Book) Admits(d Device, own, mac string, key *ecdsa.PublicKey) error {
-	// invariant: a broken entry reaches nothing, so it never blocks adding
-	// its device again: the trusted entries judge the new one, which then
-	// takes the place of every broken entry of its name or its key.
-	trusted := Book{Devices: Check(b, mac, key).Trusted}
+	// invariant: b is the book a change starts from (Base); a broken entry
+	// reaches nothing, so it never blocks adding its device again: the
+	// entries whose seal holds judge the new one, which then takes the
+	// place of every broken entry of its name or its key.
+	trusted := Book{Devices: sealed(b, mac, key).Trusted}
 	return trusted.Admit(d, own)
 }
 

@@ -6,6 +6,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"sync"
 	"testing"
 
 	"github.com/jterrazz/studio-station/apps/engine/core/store"
@@ -34,14 +35,158 @@ func (h holding) Replace(path string, data []byte, perm fs.FileMode) error {
 	return h.FS.Replace(path, data, perm)
 }
 
-func open(at string, torn bool) *jsonfile.Store {
-	return jsonfile.New(holding{FS: local.New(nil, nil, nil, nil).FS, torn: torn}, at)
+// value: a login keychain in memory: the head it keeps, how often it was
+// read, and a refusal every write meets when set.
+type keychain struct {
+	mu      sync.Mutex
+	head    devices.Head
+	reads   int
+	refused error
 }
+
+func (k *keychain) Read(context.Context) (devices.Head, error) {
+	k.mu.Lock()
+	defer k.mu.Unlock()
+	k.reads++
+	return k.head, nil
+}
+
+func (k *keychain) Write(_ context.Context, h devices.Head) error {
+	k.mu.Lock()
+	defer k.mu.Unlock()
+	if k.refused != nil {
+		return k.refused
+	}
+	k.head = h
+	return nil
+}
+
+func (k *keychain) set(h devices.Head) {
+	k.mu.Lock()
+	defer k.mu.Unlock()
+	k.head = h
+}
+
+func openOn(at string, torn bool, k *keychain) *jsonfile.Store {
+	return jsonfile.New(holding{FS: local.New(nil, nil, nil, nil).FS, torn: torn}, at, k)
+}
+
+func open(at string, torn bool) *jsonfile.Store { return openOn(at, torn, &keychain{}) }
 
 func TestStore(t *testing.T) {
 	contracttest.Store(t, func(t *testing.T) contract.Store {
 		return open(filepath.Join(t.TempDir(), "station", "devices.json"), false)
 	})
+}
+
+func files() local.FS { return local.New(nil, nil, nil, nil).FS }
+
+func TestABookWrittenBackFromBeforeAForgetIsNotTheAnchoredOne(t *testing.T) {
+	at := filepath.Join(t.TempDir(), "station", "devices.json")
+	k := &keychain{}
+	if err := openOn(at, false, k).Change(t.Context(), add("laptop")); err != nil {
+		t.Fatal(err)
+	}
+	before, err := files().ReadFile(at)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = openOn(at, false, k).Change(t.Context(), func(b *devices.Book) error { b.Forget("laptop"); return nil }); err != nil {
+		t.Fatal(err)
+	}
+	if err = files().WriteFile(at, before, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	book, head, err := openOn(at, false, k).Read(t.Context())
+	if err != nil || len(book.Devices) != 1 || book.Anchored(head) {
+		t.Fatalf("Read = %+v, %+v, %v; want the copy read and not anchored", book, head, err)
+	}
+	if got := devices.Check(book, head, "mini", nil); !got.Stale || len(got.Trusted) != 0 || len(got.Broken) != 1 {
+		t.Fatalf("checked %+v; want every entry of the copy broken", got)
+	}
+	if err = openOn(at, false, k).Change(t.Context(), add("tablet")); err != nil {
+		t.Fatal(err)
+	}
+	if book, head, err = openOn(at, false, k).Read(t.Context()); err != nil || !book.Anchored(head) || len(book.Devices) != 1 || book.Devices[0].Name != "tablet" {
+		t.Fatalf("Read = %+v, %v; want a new book of tablet alone, anchored", book, err)
+	}
+}
+
+func TestTheAnchorIsWrittenBeforeTheFile(t *testing.T) {
+	at := filepath.Join(t.TempDir(), "station", "devices.json")
+	k := &keychain{}
+	if err := openOn(at, false, k).Change(t.Context(), add("mini")); err != nil {
+		t.Fatal(err)
+	}
+	k.refused = errors.New("the keychain is locked")
+	if err := openOn(at, false, k).Change(t.Context(), add("laptop")); !errors.Is(err, k.refused) {
+		t.Fatalf("Change = %v; want the keychain's refusal", err)
+	}
+	book, head, err := openOn(at, false, k).Read(t.Context())
+	if err != nil || !book.Anchored(head) || len(book.Devices) != 1 {
+		t.Fatalf("Read = %+v, %v; want the book before, still anchored", book, err)
+	}
+	k.refused = nil
+	if err = openOn(at, true, k).Change(t.Context(), add("laptop")); err == nil {
+		t.Fatal("a torn write answered no error")
+	}
+	if book, head, err = openOn(at, false, k).Read(t.Context()); err != nil || book.Anchored(head) {
+		t.Fatalf("Read = %+v, %+v, %v; want a write cut after the anchor to leave a book anchored nowhere", book, head, err)
+	}
+}
+
+func TestAProcessReadsTheAnchorOnlyWhenTheBooksGenerationMoves(t *testing.T) {
+	at := filepath.Join(t.TempDir(), "station", "devices.json")
+	k := &keychain{}
+	writer, reader := openOn(at, false, k), openOn(at, false, k)
+	if err := writer.Change(t.Context(), add("mini")); err != nil {
+		t.Fatal(err)
+	}
+	for range 3 {
+		if _, _, err := reader.Read(t.Context()); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := writer.Change(t.Context(), add("laptop")); err != nil {
+		t.Fatal(err)
+	}
+	reads := k.reads
+	for range 3 {
+		if _, _, err := writer.Read(t.Context()); err != nil {
+			t.Fatal(err)
+		}
+	}
+	book, head, err := reader.Read(t.Context())
+	if err != nil || !book.Anchored(head) || len(book.Devices) != 2 {
+		t.Fatalf("Read = %+v, %v; want the writer's book, anchored", book, err)
+	}
+	if k.reads != reads+1 {
+		t.Fatalf("%d reads of the anchor after the change; want one, the reader's", k.reads-reads)
+	}
+}
+
+func TestAnAnchorRolledBackBelowWhatThisProcessWroteIsNotBelieved(t *testing.T) {
+	at := filepath.Join(t.TempDir(), "station", "devices.json")
+	k := &keychain{}
+	s := openOn(at, false, k)
+	if err := s.Change(t.Context(), add("laptop")); err != nil {
+		t.Fatal(err)
+	}
+	before, err := files().ReadFile(at)
+	if err != nil {
+		t.Fatal(err)
+	}
+	old := k.head
+	if err = s.Change(t.Context(), func(b *devices.Book) error { b.Forget("laptop"); return nil }); err != nil {
+		t.Fatal(err)
+	}
+	if err = files().WriteFile(at, before, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	k.set(old)
+	if book, head, err := s.Read(t.Context()); err != nil || book.Anchored(head) {
+		t.Fatalf("Read = %+v, %+v, %v; want the book and the keychain rolled back together refused by the process that wrote past them", book, head, err)
+	}
 }
 
 func add(name string) func(*devices.Book) error {
@@ -71,7 +216,7 @@ func TestAWriteThatFailsLeavesTheBookItReplaces(t *testing.T) {
 	if err := open(at, true).Change(t.Context(), add("macbook-pro")); !errors.As(err, &unwritable) {
 		t.Fatalf("Change = %v; want the write refused", err)
 	}
-	got, err := open(at, false).Read(t.Context())
+	got, _, err := open(at, false).Read(t.Context())
 	if err != nil || len(got.Devices) != 1 || got.Devices[0].Name != "mini" {
 		t.Fatalf("Read = %+v, %v; want the book before the failed write", got, err)
 	}
@@ -83,7 +228,7 @@ func TestABookOfANewerSpwnIsRefused(t *testing.T) {
 		t.Fatal(err)
 	}
 	var newer *store.NewerError
-	if _, err := open(at, false).Read(t.Context()); !errors.As(err, &newer) {
+	if _, _, err := open(at, false).Read(t.Context()); !errors.As(err, &newer) {
 		t.Fatalf("Read = %v; want a newer book refused", err)
 	}
 }

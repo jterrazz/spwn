@@ -28,6 +28,8 @@ func newKey(t *testing.T) *memoryKey {
 	return &memoryKey{key: k}
 }
 
+func (k *memoryKey) Kept(ctx context.Context) (*ecdsa.PublicKey, error) { return k.Public(ctx) }
+
 func (k *memoryKey) Public(context.Context) (*ecdsa.PublicKey, error) {
 	return &k.key.PublicKey, nil
 }
@@ -58,7 +60,8 @@ func check(t *testing.T, s calls.Sealer, d devices.Device) devices.Checked {
 	if err != nil {
 		t.Fatal(err)
 	}
-	return devices.Check(devices.Book{Devices: []devices.Device{d}}, s.Mac, own)
+	b := devices.Book{Generation: 1, Devices: []devices.Device{d}}
+	return devices.Check(b, b.Head(), s.Mac, own)
 }
 
 func TestASealedEntryIsTrusted(t *testing.T) {
@@ -115,7 +118,7 @@ func TestABrokenEntryGivesWayWhenItsDeviceIsAddedAgain(t *testing.T) {
 	if err = book.Readmit(again, line, s.Mac, own); err != nil {
 		t.Fatalf("readmit over a broken entry: %v", err)
 	}
-	if got := devices.Check(book, s.Mac, own); len(got.Trusted) != 1 || len(got.Broken) != 0 {
+	if got := devices.Check(book, book.Head(), s.Mac, own); len(got.Trusted) != 1 || len(got.Broken) != 0 {
 		t.Fatalf("checked %+v; want the new entry alone, trusted", got)
 	}
 	if err = book.Readmit(sealed(t, s), line, s.Mac, own); err == nil {
@@ -139,7 +142,8 @@ func TestOnlyTrustedEntriesThatMayOpenAChannelOpenIt(t *testing.T) {
 	}
 	broken := piped
 	broken.Name = "stranger"
-	got := devices.Check(devices.Book{Devices: []devices.Device{piped, api, broken}}, s.Mac, own).Opening(devices.ChannelPipe)
+	book := devices.Book{Generation: 1, Devices: []devices.Device{piped, api, broken}}
+	got := devices.Check(book, book.Head(), s.Mac, own).Opening(devices.ChannelPipe)
 	if want := []string{piped.Key}; !slices.Equal(got, want) {
 		t.Fatalf("pipe keys %q, want %q", got, want)
 	}

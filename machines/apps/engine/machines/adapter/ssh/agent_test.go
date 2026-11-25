@@ -42,6 +42,8 @@ func (k *deviceKey) private() (*ecdsa.PrivateKey, error) {
 	return k.key, nil
 }
 
+func (k *deviceKey) Kept(ctx context.Context) (*ecdsa.PublicKey, error) { return k.Public(ctx) }
+
 func (k *deviceKey) Public(context.Context) (*ecdsa.PublicKey, error) {
 	key, err := k.private()
 	if err != nil {

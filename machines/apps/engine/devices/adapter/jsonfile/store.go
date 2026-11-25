@@ -6,6 +6,7 @@ import (
 	"errors"
 	"io/fs"
 	"path"
+	"sync"
 
 	"github.com/jterrazz/studio-station/apps/engine/core/store"
 	"github.com/jterrazz/studio-station/apps/engine/devices"
@@ -26,21 +27,43 @@ type Files interface {
 type Store struct {
 	// invariant: the device book is one file of mode 0600,
 	// `~/.local/state/station/devices.json`, replaced whole, beside the lock
-	// every change takes, `devices.json.lock`.
-	files Files
-	at    string
+	// every change takes, `devices.json.lock`; its head is the anchor's.
+	files  Files
+	at     string
+	anchor contract.Anchor
+	mu     sync.Mutex
+	// value: the highest head this process read from the anchor or wrote
+	// to it. While the file's generation is that head's, the anchor is not
+	// read again, so a walk costs no read of it; an anchor read lower than
+	// it is never believed.
+	held  devices.Head
+	known bool
 }
 
 var _ contract.Store = (*Store)(nil)
 
-func New(files Files, at string) *Store { return &Store{files: files, at: at} }
+func New(files Files, at string, anchor contract.Anchor) *Store {
+	return &Store{files: files, at: at, anchor: anchor}
+}
 
 type file struct {
 	V int `json:"v,omitempty"`
 	devices.Book
 }
 
-func (s *Store) Read(context.Context) (devices.Book, error) {
+func (s *Store) Read(ctx context.Context) (devices.Book, devices.Head, error) {
+	book, err := s.book()
+	if err != nil {
+		return devices.Book{}, devices.Head{}, err
+	}
+	anchored, err := s.anchored(ctx, book.Generation)
+	if err != nil {
+		return devices.Book{}, devices.Head{}, err
+	}
+	return book, anchored, nil
+}
+
+func (s *Store) book() (devices.Book, error) {
 	data, err := s.files.ReadFile(s.at)
 	if errors.Is(err, fs.ErrNotExist) {
 		return devices.Book{Devices: []devices.Device{}}, nil
@@ -61,6 +84,27 @@ func (s *Store) Read(context.Context) (devices.Book, error) {
 	return f.Book, nil
 }
 
+func (s *Store) anchored(ctx context.Context, generation int) (devices.Head, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.known && s.held.Generation == generation {
+		return s.held, nil
+	}
+	return s.read(ctx)
+}
+
+func (s *Store) read(ctx context.Context) (devices.Head, error) {
+	got, err := s.anchor.Read(ctx)
+	if err != nil {
+		return devices.Head{}, err
+	}
+	if got.Generation >= s.held.Generation {
+		s.held = got
+	}
+	s.known = true
+	return s.held, nil
+}
+
 func (s *Store) Change(ctx context.Context, edit func(*devices.Book) error) error {
 	if err := s.files.MkdirAll(path.Dir(s.at), 0o700); err != nil {
 		return &store.UnwritableError{Path: s.at, Cause: err}
@@ -70,17 +114,24 @@ func (s *Store) Change(ctx context.Context, edit func(*devices.Book) error) erro
 		return &store.UnwritableError{Path: s.at, Cause: err}
 	}
 	defer release()
-	kept, err := s.Read(ctx)
+	kept, anchored, err := s.Read(ctx)
 	if err != nil {
 		return err
 	}
-	if refused := edit(&kept); refused != nil {
-		return refused
-	}
-	data, err := json.MarshalIndent(file{Book: kept}, "", "  ")
+	next, err := devices.Next(kept, anchored, edit)
 	if err != nil {
 		return err
 	}
+	data, err := json.MarshalIndent(file{Book: next}, "", "  ")
+	if err != nil {
+		return err
+	}
+	if err := s.anchor.Write(ctx, next.Head()); err != nil {
+		return err
+	}
+	s.mu.Lock()
+	s.held, s.known = next.Head(), true
+	s.mu.Unlock()
 	if err := s.files.Replace(s.at, append(data, '\n'), 0o600); err != nil {
 		return &store.UnwritableError{Path: s.at, Cause: err}
 	}

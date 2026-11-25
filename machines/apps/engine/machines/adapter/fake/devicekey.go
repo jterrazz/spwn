@@ -47,6 +47,15 @@ func (k *DeviceKey) Public(context.Context) (*ecdsa.PublicKey, error) {
 	return &key.PublicKey, nil
 }
 
+func (k *DeviceKey) Kept(context.Context) (*ecdsa.PublicKey, error) {
+	k.mu.Lock()
+	defer k.mu.Unlock()
+	if k.Absent || k.key == nil {
+		return nil, &contract.NoDeviceKeyError{Why: "none is kept yet"}
+	}
+	return &k.key.PublicKey, nil
+}
+
 func (k *DeviceKey) Sign(_ context.Context, message []byte) ([]byte, error) {
 	key, err := k.private()
 	if err != nil {

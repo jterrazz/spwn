@@ -33,7 +33,7 @@ func TestTheAgentRelaysTheSessionsAgentButNeverItself(t *testing.T) {
 }
 
 func TestAMacWhoseNeverSleepsIsAppliedKeepsAnUnattendedDeviceKey(t *testing.T) {
-	m := machine{stores: newStores(localtest.NewFS(), setup.Paths{Prefs: "/home/u/.config/station", State: "/home/u/.local/state/station"})}
+	m := machine{stores: newStores(localtest.NewFS(), setup.Paths{Prefs: "/home/u/.config/station", State: "/home/u/.local/state/station"}, nil)}
 	if got := m.keyAccess(); got != darwin.AccessPresent {
 		t.Fatalf("a Mac with no Never sleeps keeps access %d; want the present owner's", got)
 	}

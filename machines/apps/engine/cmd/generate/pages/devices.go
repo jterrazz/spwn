@@ -8,8 +8,7 @@ import (
 )
 
 // value: the mini's book: the laptop that may open everything, a phone
-// that may open a pipe, and an entry restored from an old backup whose
-// seal no longer verifies.
+// that may open a pipe, and an entry whose seal no longer verifies.
 func devicesListing() devices.Listing {
 	added := keepAwakeNow.Add(-72 * time.Hour)
 	return devices.Listing{

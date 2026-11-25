@@ -343,6 +343,8 @@ type machine struct {
 	stores  *stores
 	where   page.Context
 	named   func() string
+	// value: this process's one device key, made at its first ask.
+	key *heldKey
 }
 
 func resolve(raw local.System, door darwin.Door, vars map[string]string, world *worldMac, cat catalog.Catalog) machine {
@@ -351,7 +353,7 @@ func resolve(raw local.System, door darwin.Door, vars map[string]string, world *
 		h = world.system(raw, cat)
 	}
 	paths := pathsOf(h.Env.Home(), vars)
-	st := newStores(h.FS, paths)
+	st := newStores(h.FS, paths, deviceAnchor(h, vars))
 	if world != nil {
 		world.logAt(paths.State)
 		world.stores(st)
@@ -373,6 +375,7 @@ func resolve(raw local.System, door darwin.Door, vars map[string]string, world *
 		vars:   vars,
 		paths:  paths,
 		stores: st,
+		key:    &heldKey{},
 	}
 	pin := vars["STATION_MACHINE_KIND"]
 	self := selfOf(h, pin)

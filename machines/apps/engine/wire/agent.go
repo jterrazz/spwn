@@ -4,6 +4,7 @@ import (
 	"context"
 	"path"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/accounts/adapter/keychain"
@@ -21,10 +22,27 @@ func AgentSocket(state string) string { return path.Join(state, "agent.sock") }
 
 func DeviceKeyFile(state string) string { return path.Join(state, "device-key.pub") }
 
+// invariant: a process holds one device key, made at its first ask with
+// the access Never sleeps then says, so it serves, seals and lists with the
+// key it started with for its whole life, and reads its public half from
+// the Enclave once.
+type heldKey struct {
+	once sync.Once
+	key  contract.DeviceKey
+}
+
 func (m machine) deviceKey() contract.DeviceKey {
 	if m.world != nil {
 		return m.world.deviceKey()
 	}
+	if m.key == nil {
+		return m.newDeviceKey()
+	}
+	m.key.once.Do(func() { m.key.key = m.newDeviceKey() })
+	return m.key.key
+}
+
+func (m machine) newDeviceKey() contract.DeviceKey {
 	if key := specDeviceKey(m.vars); key != nil {
 		return key
 	}

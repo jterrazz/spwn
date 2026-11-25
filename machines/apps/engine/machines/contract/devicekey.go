@@ -10,6 +10,10 @@ type DeviceKey interface {
 	// was made, made again when whom it signs for changes: its public half
 	// and its signatures leave the device, the private half never does.
 	Public(ctx context.Context) (*ecdsa.PublicKey, error)
+	// invariant: the public half of the key already kept, never making one
+	// nor swapping its access, so a read, a walk or a listing changes no
+	// key; none kept is a NoDeviceKeyError.
+	Kept(ctx context.Context) (*ecdsa.PublicKey, error)
 	// value: an ASN.1 ECDSA signature over the SHA-256 digest of message.
 	Sign(ctx context.Context, message []byte) ([]byte, error)
 }

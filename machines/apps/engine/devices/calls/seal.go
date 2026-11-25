@@ -15,7 +15,7 @@ type Sealer struct {
 }
 
 func (s Sealer) Seal(ctx context.Context, d devices.Device) (devices.Device, error) {
-	pub, err := s.Key.Public(ctx)
+	pub, err := s.Key.Kept(ctx)
 	if err != nil {
 		return devices.Device{}, err
 	}
