@@ -79,8 +79,8 @@ type World struct {
 
 	// Automations is the per-world map of trigger-driven agent wakeups.
 	// Each entry binds an event (cron or filesystem) to one of the
-	// world's agents and renders a prompt. The architect daemon owns
-	// the engine: automations only fire while architect is running.
+	// world's agents and renders a prompt. `spwn automation daemon` owns
+	// the engine: automations only fire while it is running.
 	// See packages/automation/ for the runtime.
 	Automations map[string]Automation `yaml:"automations,omitempty"`
 }

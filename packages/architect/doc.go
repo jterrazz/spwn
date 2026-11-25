@@ -9,9 +9,6 @@
 //     start container, sync agents.
 //   - (*Architect).Destroy(ctx, worldID): stop + remove container,
 //     sync memory back, persist state.
-//   - StartDaemonWithOpts / StopDaemon / GetDaemonStatus:
-//     lifecycle for the always-on `spwn-architect` container that
-//     hosts the CLI inside Docker-over-Docker.
 //
 // Everything else in the package is helpers composed by Spawn:
 // workspace resolution, image caching, deploy-tree materialise,

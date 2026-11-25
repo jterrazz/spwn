@@ -15,11 +15,10 @@ runtime renderer.
 
 ## What lives here
 
-| File           | Content                                                                                               |
-| -------------- | ----------------------------------------------------------------------------------------------------- |
-| `physics.go`   | `GeneratePhysics`, `GenerateFaculties`: the world filesystem rules and the verified-tools briefing.   |
-| `context.go`   | `GenerateRoster` (who else is in this world) plus its `ColonyAgentSpec` value type.                   |
-| `architect.go` | `ArchitectIdentity`, `ArchitectSystemFiles`, architect skills (fleet ops, task planning, monitoring). |
+| File         | Content                                                                                             |
+| ------------ | --------------------------------------------------------------------------------------------------- |
+| `physics.go` | `GeneratePhysics`, `GenerateFaculties`: the world filesystem rules and the verified-tools briefing. |
+| `context.go` | `GenerateRoster` (who else is in this world) plus its `ColonyAgentSpec` value type.                 |
 
 ## What does NOT live here
 
@@ -31,7 +30,6 @@ runtime renderer.
 ## Consumers
 
 - `packages/runtimes/claudecode/render.go`: calls `GeneratePhysics`, `GenerateFaculties`, `GenerateRoster` for the inlined sections of each agent's CLAUDE.md.
-- `packages/architect/build.go`: bakes `ArchitectSystemFiles()` into the architect image.
 
 ## Related
 

@@ -130,13 +130,5 @@ func stopSpwnWorkloads(ctx context.Context, s *ui.Stepper) error {
 		}
 		s.Done("Stopped", label)
 	}
-	if info, statusErr := architect.GetDaemonStatus(ctx); statusErr == nil && info.Running {
-		s.Start("Stopping architect...")
-		if stopErr := architect.StopDaemon(ctx); stopErr != nil {
-			s.Warn("Warning", fmt.Sprintf("failed to stop architect: %v", stopErr))
-		} else {
-			s.Done("Architect stopped", "")
-		}
-	}
 	return nil
 }
