@@ -31,6 +31,7 @@ apps/engine/
              a Machinefile against the catalog into the steps of a plan, explain, and plan, apply
              and drift, which read and act through apps' and settings' calls, never their adapters;
              the ledger of what apply installed
+  wiki/      the wiki's model: a page's tags read and compiled to typed records, never executed
 
   agents/    an agent and the Mind it keeps on its machine, by project (the contract Minds), the
              family of the Agent space; its real adapter wraps Agents' spwn.sh/packages/agent
