@@ -1,0 +1,153 @@
+wiki: spwn.wiki/v1
+floors:
+    - id: intention
+      name: Intention
+      question: Why does this exist?
+    - id: product
+      name: Produit
+      question: "What do we build, and for whom?"
+    - id: domains
+      name: Domaines
+      question: "What things does it handle, in which words?"
+    - id: architecture
+      name: Architecture
+      question: "Where is the code, and what may it touch?"
+    - id: code
+      name: Code
+      question: Which lines carry it?
+floor_of:
+    blueprint/: 0
+    product/: 1
+    growth/: 1
+    engineering/: 3
+    machines/: 3
+seats:
+    - id: blueprint
+      name: Vision
+      path: [blueprint/]
+      reads: [tell, define, decide]
+      home: blueprint/philosophy
+      plan: true
+    - id: product
+      name: Produit
+      path: [product/]
+      reads: [tell, define, decide, locate]
+      home: product/boundaries
+    - id: engineering
+      name: Technique
+      path: [engineering/, machines/]
+      reads: [define, decide, locate, guard, prove]
+      home: machines/reference/ports
+    - id: growth
+      name: Croissance
+      path: [growth/]
+      reads: [tell, define]
+      home: growth/positioning
+mounts:
+    - at: machines
+      repo: spwn
+      path: ../work/repositories/spwn/machines/docs
+repos:
+    spwn: ../work/repositories/spwn
+    studio-os: ../../..
+budget: 2min
+kinds:
+    conviction:
+        title:
+            en: Conviction
+            fr: Conviction
+        icon: conviction
+        weighs: 1
+        fields:
+            says:
+                type: sentence
+                max: 160
+                required: true
+            opposite:
+                type: sentence
+                max: 200
+                required: true
+            carried_in:
+                type: list<ref>
+                to: part
+                required: true
+            broken_by:
+                type: sentence
+                max: 200
+                required: true
+            adr:
+                type: anchor
+        faces:
+            word: "{id}"
+            line: "{says}"
+    alternative:
+        fields:
+            gives:
+                type: sentence
+                required: true
+            costs:
+                type: sentence
+                required: true
+            loses:
+                type: enum
+                values: [scale, authorship]
+        faces:
+            line: "{costs}"
+    part:
+        state: state
+        fields:
+            space:
+                type: enum
+                values: [machine, agent, os]
+                required: true
+            lets_go:
+                type: sentence
+                required: true
+            keeps:
+                type: sentence
+                required: true
+            state:
+                type: enum
+                values: [shipped, making]
+                required: true
+        faces:
+            line: "{keeps}"
+    refusal:
+        fields:
+            by:
+                type: ref
+                to: part
+            refuses:
+                type: sentence
+                required: true
+            because:
+                type: ref|anchor|sentence
+                required: true
+        faces:
+            line: "{refuses}"
+icons:
+    conviction:
+        - "..#.."
+        - ".###."
+        - "#####"
+        - ".###."
+        - "..#.."
+    blueprint:
+        - "#####"
+        - "#...#"
+        - "#.#.#"
+        - "#...#"
+        - "#####"
+    product:
+        - "#.#.#"
+        - ".#.#."
+        - "#.#.#"
+    engineering:
+        - "##.##"
+        - "#...#"
+        - "##.##"
+    growth:
+        - "....#"
+        - "...##"
+        - "..###"
+        - ".####"

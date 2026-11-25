@@ -112,7 +112,7 @@ func strict(file string, body []byte, f format, v any) (*yaml.Node, error) {
 	return doc, nil
 }
 
-var unknownField = regexp.MustCompile(`^line \d+: field (\S+) not found in type `)
+var unknownField = regexp.MustCompile(`^line \d+: field (.+) not found in type `)
 
 func unknownKey(err error) string {
 	var typed *yaml.TypeError

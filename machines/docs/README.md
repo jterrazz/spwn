@@ -45,6 +45,7 @@ Machines is the Spwn app that sets up and runs a Mac, its VMs and your other Mac
 | [Apps and skills](reference/apps-and-skills.md)      | The catalog, the method table, mise, skills as apps, the toolbelt                              |
 | [Images](reference/images.md)                        | The VM images, the recipe, the binary inside                                                   |
 | [Dotfiles](reference/dotfiles.md)                    | The embedded application configs and the `~/.zshrc` block                                      |
+| [The wiki's format](reference/wiki.md)               | `wiki.yaml`: its schema, every key, the refusals, the rules a page is written by               |
 | [The API](reference/api.md)                          | `station.api/v2`: the transport, the frames, `calls.json`, the engine's own calls              |
 | [Footprint](reference/footprint.md)                  | Everything `station` and the apps write on a machine, generated from the table                 |
 
