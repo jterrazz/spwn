@@ -26,6 +26,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/page"
 	"github.com/jterrazz/studio-station/apps/engine/platform/darwin"
 	"github.com/jterrazz/studio-station/apps/engine/platform/local"
+	"github.com/jterrazz/studio-station/apps/engine/remote"
 	"github.com/jterrazz/studio-station/apps/engine/setup"
 	"github.com/jterrazz/studio-station/apps/engine/surface/cli"
 	appsinstall "github.com/jterrazz/studio-station/apps/engine/surface/cli/apps/install"
@@ -35,7 +36,66 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/ui/token"
 )
 
+type Program struct {
+	// value: the command tree a run answers with, and what closes after it.
+	root     *cobra.Command
+	writer   *output.Writer
+	session  *worldRun
+	thisMac  machine
+	router   *remote.Router
+	reported func()
+	vars     map[string]string
+}
+
 func Run(args, env []string, stdin, stdout, stderr *os.File) int {
+	p, code := Build(args, env, stdin, stdout, stderr)
+	if p == nil {
+		return code
+	}
+	writer := p.writer
+	err := fang.Execute(call.WithBy(context.Background(), p.vars["STATION_SESSION"]), p.Root(),
+		fang.WithVersion(Version()),
+		fang.WithCommit(Commit()),
+		fang.WithErrorHandler(func(_ io.Writer, _ fang.Styles, err error) {
+			worded := kit.Translate(err, "")
+			if wantsJSON(args) {
+				writer.FailureJSON(worded)
+			}
+			writer.Failure(worded)
+		}),
+		fang.WithColorSchemeFunc(help.FangScheme),
+		fang.WithNotifySignal(os.Interrupt, syscall.SIGTERM),
+	)
+	closed := p.Close()
+	p.reported()
+	if closed != nil && err == nil {
+		err = closed
+		writer.Failure(kit.Translate(err, ""))
+	}
+	if err == nil {
+		return int(fail.ExitOK)
+	}
+	return int(fail.ExitOf(kit.Translate(err, "")))
+}
+
+func (p *Program) Root() *cobra.Command { return p.root }
+
+func (p *Program) Close() error {
+	// invariant: a world's engines take their turn on the command before its
+	// pool closes, as a real engine runs beside a live one: a night's upgrade
+	// reads this machine's apps.
+	var closed error
+	if p.session != nil {
+		closed = p.session.close(context.Background())
+	}
+	p.thisMac.pool.Close()
+	p.router.Close()
+	return closed
+}
+
+func Build(args, env []string, stdin, stdout, stderr *os.File) (p *Program, exit int) {
+	// value: a run's tree built as Run builds it, never executed; nil and the
+	// exit code when this machine could not be read.
 	env = asBundledJob(args, env)
 	env = withAppBins(env, len(args) > 0 && args[0] == "guest")
 	frames, frameIn := stdout, stdin
@@ -66,7 +126,7 @@ func Run(args, env []string, stdin, stdout, stderr *os.File) int {
 	)
 	if opened != nil {
 		writer.Failure(kit.Translate(opened, ""))
-		return int(fail.ExitFailure)
+		return nil, int(fail.ExitFailure)
 	}
 	var world *worldMac
 	if session != nil {
@@ -75,7 +135,7 @@ func Run(args, env []string, stdin, stdout, stderr *os.File) int {
 	builtin, loaded := catalog.Builtin()
 	if loaded != nil {
 		writer.Failure(kit.Translate(loaded, ""))
-		return int(fail.ExitFailure)
+		return nil, int(fail.ExitFailure)
 	}
 	// invariant: the owner's packages are layered before the search is built,
 	// so the folders an owner's package lands its commands in (`path:`) are
@@ -99,7 +159,6 @@ func Run(args, env []string, stdin, stdout, stderr *os.File) int {
 	}
 	thisMac.refused = refusalOf(broken)
 	router := thisMac.router(kenv)
-	defer router.Close()
 	kenv.Calls = router
 	kenv.Install = func(ctx context.Context, pkg string, o kit.IO) error {
 		return appsinstall.Run(ctx, appsinstall.Deps{ThisMachine: thisMac.where, Now: thisMac.sys.Clock.Now}, kenv, []string{pkg}, o)
@@ -149,37 +208,7 @@ func Run(args, env []string, stdin, stdout, stderr *os.File) int {
 	root.SetIn(stdin)
 	root.SetOut(stdout)
 	root.SetErr(stderr)
-
-	err := fang.Execute(call.WithBy(context.Background(), vars["STATION_SESSION"]), root,
-		fang.WithVersion(Version()),
-		fang.WithCommit(Commit()),
-		fang.WithErrorHandler(func(_ io.Writer, _ fang.Styles, err error) {
-			worded := kit.Translate(err, "")
-			if wantsJSON(args) {
-				writer.FailureJSON(worded)
-			}
-			writer.Failure(worded)
-		}),
-		fang.WithColorSchemeFunc(help.FangScheme),
-		fang.WithNotifySignal(os.Interrupt, syscall.SIGTERM),
-	)
-	// invariant: a world's engines take their turn on the command before its
-	// pool closes, as a real engine runs beside a live one: a night's
-	// upgrade reads this machine's apps.
-	var closed error
-	if session != nil {
-		closed = session.close(context.Background())
-	}
-	thisMac.pool.Close()
-	reported()
-	if closed != nil && err == nil {
-		err = closed
-		writer.Failure(kit.Translate(err, ""))
-	}
-	if err == nil {
-		return int(fail.ExitOK)
-	}
-	return int(fail.ExitOf(kit.Translate(err, "")))
+	return &Program{root: root, writer: writer, session: session, thisMac: thisMac, router: router, reported: reported, vars: vars}, 0
 }
 
 // value: a run that asked --json, before any `--`: its refusal is a

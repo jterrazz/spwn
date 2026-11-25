@@ -23,7 +23,7 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 	return kit.Command(kit.Leaf[Input]{
 		Use:     "login <program>",
 		Short:   "Sign a program in on a machine: its code or link is printed, and you finish at its site",
-		Example: "  station accounts login <program>\n  station accounts login <program> --on linux-1",
+		Example: "  station accounts login gh\n  station accounts login gh --on linux-1",
 		Args:    cobra.ExactArgs(1),
 		Bind:    func(in *Input, args []string) error { in.Program = args[0]; return nil },
 		Run: func(ctx context.Context, in *Input, io kit.IO) error {
