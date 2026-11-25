@@ -54,6 +54,7 @@ import (
 	corecontract "github.com/jterrazz/studio-station/apps/engine/core/contract"
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 	coremachine "github.com/jterrazz/studio-station/apps/engine/core/machine"
+	devicesfake "github.com/jterrazz/studio-station/apps/engine/devices/adapter/fake"
 	diskfake "github.com/jterrazz/studio-station/apps/engine/disk/adapter/fake"
 	diskcontract "github.com/jterrazz/studio-station/apps/engine/disk/contract"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
@@ -346,6 +347,7 @@ func (m *worldMac) stores(st *stores) {
 	st.ledger = machinefilefake.LedgerOf(w, m.name)
 	st.release = enginefake.ReleaseCacheOf(w, m.name)
 	st.journal = journalfake.Of(w, m.name)
+	st.devices = devicesfake.StoreOf(w, m.name)
 }
 
 func (m *worldMac) releases() enginecontract.Releases { return enginefake.ReleasesOf(m.run.w) }

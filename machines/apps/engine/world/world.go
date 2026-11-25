@@ -14,6 +14,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/journal"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
+	"github.com/jterrazz/studio-station/apps/engine/devices"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
 	"github.com/jterrazz/studio-station/apps/engine/images"
 	"github.com/jterrazz/studio-station/apps/engine/machinefile"
@@ -364,6 +365,8 @@ type Stores struct {
 	Release *engine.ReleaseKept `json:"release,omitempty"`
 	// value: what was done on this Mac and its VMs, oldest first.
 	Journal []journal.Line `json:"journal,omitempty"`
+	// value: the other devices this Mac lets reach it, its device book.
+	Devices []devices.Device `json:"devices,omitempty"`
 }
 
 func (m *Mac) Store() *Stores {

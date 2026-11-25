@@ -460,6 +460,31 @@
       "Detail": "confirm",
       "Tone": "plain"
     },
+    "devices.bad-channels": {
+      "Word": "bad channels",
+      "Detail": "devices",
+      "Tone": "plain"
+    },
+    "devices.bad-key": {
+      "Word": "bad key",
+      "Detail": "devices",
+      "Tone": "plain"
+    },
+    "devices.bad-name": {
+      "Word": "bad name",
+      "Detail": "devices",
+      "Tone": "plain"
+    },
+    "devices.duplicate": {
+      "Word": "duplicate",
+      "Detail": "devices",
+      "Tone": "plain"
+    },
+    "devices.own-key": {
+      "Word": "own key",
+      "Detail": "devices",
+      "Tone": "plain"
+    },
     "disk.app-running": {
       "Word": "app running",
       "Detail": "disk",
