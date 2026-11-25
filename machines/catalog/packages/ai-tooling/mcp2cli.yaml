@@ -1,0 +1,17 @@
+package: station.package/v1
+kind: app
+name: mcp2cli
+description: Any MCP server exposed as command-line subcommands
+provides: [mcp2cli]
+requires: [uv]
+version-read:
+    pattern: (\d+\.\d+\.\d+)
+methods:
+    - os: macos
+      machine: [workspace, server]
+      uv: mcp2cli
+    - family: linux
+      script:
+          check: mcp2cli --version
+          run: uv tool install mcp2cli
+          undo: uv tool uninstall mcp2cli

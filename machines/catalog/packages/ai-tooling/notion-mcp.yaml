@@ -1,0 +1,26 @@
+package: station.package/v1
+kind: app
+name: notion-mcp
+description: Notion's hosted MCP server as a command, through mcp2cli
+provides: [notion-mcp]
+requires: [mcp2cli]
+methods:
+    - os: macos
+      machine: [workspace, server]
+      script:
+          check: test -x "$HOME/.local/bin/notion-mcp"
+          undo: rm -f "$HOME/.local/bin/notion-mcp"
+          run: |
+              set -eu
+              mkdir -p "$HOME/.local/bin"
+              printf '%s\n' '#!/bin/bash' 'exec mcp2cli --mcp "https://mcp.notion.com/mcp" --oauth "$@"' > "$HOME/.local/bin/notion-mcp"
+              chmod 0755 "$HOME/.local/bin/notion-mcp"
+    - family: linux
+      script:
+          check: test -x "$HOME/.local/bin/notion-mcp"
+          undo: rm -f "$HOME/.local/bin/notion-mcp"
+          run: |
+              set -eu
+              mkdir -p "$HOME/.local/bin"
+              printf '%s\n' '#!/bin/bash' 'exec mcp2cli --mcp "https://mcp.notion.com/mcp" --oauth "$@"' > "$HOME/.local/bin/notion-mcp"
+              chmod 0755 "$HOME/.local/bin/notion-mcp"
