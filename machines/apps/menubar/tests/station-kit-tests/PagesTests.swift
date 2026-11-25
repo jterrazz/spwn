@@ -59,53 +59,52 @@ final class PagesTests: XCTestCase {
         }
     }
 
-    // invariant: LC-24: Stop on linux-1 asks yes or no and sends yes.
-    func testWorkspaceStopSheetYesNo() async throws {
+    // invariant: ADR-097: Stop on linux-1, a workspace, asks nothing and
+    // sends no answer: its disk is kept and it starts again.
+    func testWorkspaceStopAsksNothing() async throws {
         let stop = try XCTUnwrap(Tree.page("menubar.vm.linux-1").action("stop"))
-        let confirm = try XCTUnwrap(stop.confirm)
-        XCTAssertNil(confirm.type)
-        XCTAssertEqual(confirm.question, "Stop linux-1 on This Mac?")
+        XCTAssertNil(stop.confirm)
         let (frame, started) = try await sent(stop, label: "mb-stop-ws")
         XCTAssertEqual(frame.call, "machines.stop")
-        XCTAssertEqual(frame.input, ["VM": "linux-1", "Confirm": "yes"])
+        XCTAssertEqual(frame.input, ["VM": "linux-1"])
         XCTAssertNil(frame.target)
         XCTAssertEqual(started, [])
     }
 
-    // invariant: SPEC A5: Delete… on linux-1, an ephemeral workspace, asks yes or no;
-    // its yes sends the name the delete call checks.
-    func testEphemeralDeleteAsksYesOrNoAndSendsItsName() async throws {
+    // invariant: ADR-097: Delete… on linux-1, an ephemeral workspace that
+    // runs, asks its name typed; the typed name is the delete call's answer.
+    func testRunningEphemeralDeleteAsksItsNameTyped() async throws {
         let delete = try XCTUnwrap(Tree.page("menubar.vm.linux-1").action("delete"))
         let confirm = try XCTUnwrap(delete.confirm)
-        XCTAssertNil(confirm.type)
+        XCTAssertEqual(confirm.type, "linux-1")
         XCTAssertEqual(texts(confirm.lines), ["This can't be undone. It goes with its disk (20 GB), 2 shared ports and 2 grants made to it."])
-        let (frame, _) = try await sent(delete, label: "mb-delete")
+        let (frame, _) = try await sent(delete, answers: [ActionRunner.typedKey: "linux-1"], label: "mb-delete")
         XCTAssertEqual(frame.call, "machines.delete")
         XCTAssertEqual(frame.input, ["VM": "linux-1", "Confirm": "linux-1"])
     }
 
-    // invariant: LC-24: Stop… on infra is a typed sheet, sent to the Mac
-    // that holds infra.
-    func testServerStopSheetTyped() async throws {
+    // invariant: ADR-097: Stop… on infra asks yes or no, sent to the Mac
+    // that holds infra with its yes.
+    func testServerStopAsksYesOrNo() async throws {
         let stop = try XCTUnwrap(Tree.page("menubar.vm.infra").action("stop"))
-        XCTAssertEqual(stop.confirm?.type, "infra")
+        XCTAssertNil(stop.confirm?.type)
         XCTAssertEqual(texts(stop.confirm?.lines).first, "infra stays stopped until you start it.")
-        let (frame, _) = try await sent(stop, answers: [ActionRunner.typedKey: "infra"], label: "mb-stop-srv")
+        let (frame, _) = try await sent(stop, label: "mb-stop-srv")
         XCTAssertEqual(frame.call, "machines.stop")
-        XCTAssertEqual(frame.input, ["VM": "infra", "Confirm": "infra"])
+        XCTAssertEqual(frame.input, ["VM": "infra", "Confirm": "yes"])
         XCTAssertEqual(frame.target, ["name": "mac-mini"])
     }
 
-    // invariant: SPEC A5: Restart on infra is a typed sheet as machines.restart
-    // asks it, and its yes runs on infra's Mac with the name typed.
-    func testServerRestartSheetTyped() async throws {
+    // invariant: ADR-097: Restart on infra, a server that is up, asks yes or
+    // no as machines.restart asks it, and its yes runs on infra's Mac.
+    func testServerRestartAsksYesOrNo() async throws {
         let restart = try XCTUnwrap(Tree.page("menubar.vm.infra").action("restart"))
         XCTAssertEqual(restart.confirm?.question, "Restart infra on mac-mini?")
-        XCTAssertEqual(restart.confirm?.type, "infra")
+        XCTAssertNil(restart.confirm?.type)
         XCTAssertNil(restart.form)
-        let (frame, started) = try await sent(restart, answers: [ActionRunner.typedKey: "infra"], label: "mb-restart")
+        let (frame, started) = try await sent(restart, label: "mb-restart")
         XCTAssertEqual(frame.call, "machines.restart")
-        XCTAssertEqual(frame.input, ["Name": "infra", "Confirm": "infra"])
+        XCTAssertEqual(frame.input, ["Name": "infra", "Confirm": "yes"])
         XCTAssertEqual(frame.target, ["name": "mac-mini"])
         XCTAssertEqual(started, [])
     }
