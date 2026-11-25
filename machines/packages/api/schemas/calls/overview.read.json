@@ -280,6 +280,9 @@
             "try-again",
             "update",
             "remove",
+            "delete",
+            "upgrade",
+            "wake",
             "move",
             "start-engine",
             "fix"

@@ -26,7 +26,7 @@ runs:
     - command: 'overview | /usr/bin/grep "night"'
       exit: 0
       stdout: |
-          ✗	the night's upgrade of macbook-pro failed: the catalog has no package no-such-app (~/.config/station/machinefiles/macbook-pro.machine.yaml:4)	station machinefile update
+          ✗	the night's upgrade of macbook-pro failed: the catalog has no package no-such-app (~/.config/station/machinefiles/macbook-pro.machine.yaml:4)	station machinefile upgrade --machinefile macbook-pro
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].stores.night | del(.at)'' world.json'
       exit: 0
       stdout: |

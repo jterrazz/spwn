@@ -137,10 +137,10 @@ func buildsDiffer(own, peer string) bool {
 }
 
 func Findings(f AllMachines) []finding.Finding {
-	thisMac := ""
+	thisMac, own := "", ""
 	for _, h := range f.Macs {
 		if h.ThisMac {
-			thisMac = h.StationVersion
+			thisMac, own = h.StationVersion, h.Name
 		}
 	}
 	var out []finding.Finding
@@ -159,6 +159,8 @@ func Findings(f AllMachines) []finding.Finding {
 			case !macsServer(h) && s == MacAsleep:
 			case h.LAN != "" && macsServer(h):
 				add(mac, severityOf(s.Tone()), label, label+" does not answer", "station machines unlock "+label)
+			case s == MacAsleep && h.Hardware.Ether != "":
+				out = append(out, finding.Finding{Machine: mac, Section: section.Overview, Severity: severityOf(s.Tone()), Subject: label, Text: label + " does not answer", Fix: finding.Fix{Call: "machines.wake", Args: map[string]string{"Name": h.Name}, On: own}})
 			default:
 				add(mac, severityOf(s.Tone()), label, label+" does not answer", "")
 			}
@@ -232,7 +234,7 @@ func vmFinding(ref machine.Ref, vm VM, on string, bundled bool) (finding.Finding
 		f.Text, f.Fix = vm.Name+" is unreachable: "+VMUserRefused(ref.On), finding.Fix{Path: VMUserFix}
 	case s == StandingNotCreated && vm.Birth.Gone:
 		f.Text, f.Again = vm.Name+" was not created: it failed at "+vm.Birth.Step.Noun(), true
-		f.Fix = finding.Fix{Command: "station machines delete " + vm.Name + on}
+		f.Fix = finding.Fix{Call: "machines.delete", Args: map[string]string{"VM": vm.Name}, On: ref.On, Confirm: vm.Name, Command: "station machines delete " + vm.Name + on}
 	case s == StandingNotCreated:
 		f.Text, f.Again = vm.Name+" was not created: it failed at "+vm.Birth.Step.Noun(), true
 		f.Fix = finding.Fix{Call: "machines.start", Args: map[string]string{"VM": vm.Name}, On: ref.On, Command: "station machines start " + vm.Name + on}
@@ -240,22 +242,22 @@ func vmFinding(ref machine.Ref, vm VM, on string, bundled bool) (finding.Finding
 		f.Text = vm.Name + " is in a loop: " + vm.Restarts.InALoop()
 		f.Fix = finding.Fix{Call: "machines.restart", Args: map[string]string{"Name": vm.Name}, On: ref.On, Confirm: vm.Name}
 	case server && vm.State == Stopped && vm.Detail == PoweredOffInside:
-		f.Text, f.Fix = vm.Name+" "+PoweredOffInside, finding.Fix{Command: "station machines start " + vm.Name + on}
+		f.Text, f.Fix = vm.Name+" "+PoweredOffInside, finding.Fix{Call: "machines.start", Args: map[string]string{"VM": vm.Name}, On: ref.On, Command: "station machines start " + vm.Name + on}
 	case server && vm.State == Running && vm.CheckStatus.State == CheckFailing:
 		f.Text = vm.Name + " check failing since " + vm.CheckStatus.Since.Local().Format("15:04")
 		f.Fix = finding.Fix{Call: "machines.restart", Args: map[string]string{"Name": vm.Name}, On: ref.On, Confirm: vm.Name}
 		f.Detail = downDetail(ref.On, vm)
 	case vm.State == Stale:
-		f.Text, f.Fix = vm.Name+" ended unexpectedly", finding.Fix{Command: "station machines start " + vm.Name + on}
+		f.Text, f.Fix = vm.Name+" ended unexpectedly", finding.Fix{Call: "machines.start", Args: map[string]string{"VM": vm.Name}, On: ref.On, Command: "station machines start " + vm.Name + on}
 	case server && vm.State == Broken:
 		f.Text = vm.Name + " is broken: " + vm.Detail
 		f.Fix = finding.Fix{Call: "machines.restart", Args: map[string]string{"Name": vm.Name}, On: ref.On, Confirm: vm.Name}
 	case vm.State == Broken:
-		f.Text, f.Fix = vm.Name+" "+vm.Detail+", stopped", finding.Fix{Command: "station machines delete " + vm.Name + on}
+		f.Text, f.Fix = vm.Name+" "+vm.Detail+", stopped", finding.Fix{Call: "machines.delete", Args: map[string]string{"VM": vm.Name}, On: ref.On, Confirm: vm.Name, Command: "station machines delete " + vm.Name + on}
 	case vm.State == Running && !HealthOf(vm).SSH && vm.Guest == "absent":
-		f.Text, f.Fix = vm.Name+" fails "+StepSSH, finding.Fix{Command: "station machines restart " + vm.Name + on}
+		f.Text, f.Fix = vm.Name+" fails "+StepSSH, finding.Fix{Call: "machines.restart", Args: map[string]string{"Name": vm.Name}, On: ref.On, Confirm: vm.Name, Command: "station machines restart " + vm.Name + on}
 	case s == StandingDown:
-		f.Text, f.Fix = vm.Name+" is down", finding.Fix{Command: "station machines start " + vm.Name + on}
+		f.Text, f.Fix = vm.Name+" is down", finding.Fix{Call: "machines.start", Args: map[string]string{"VM": vm.Name}, On: ref.On, Command: "station machines start " + vm.Name + on}
 	default:
 		return finding.Finding{}, false
 	}

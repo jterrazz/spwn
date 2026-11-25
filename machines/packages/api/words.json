@@ -1867,6 +1867,10 @@
     }
   },
   "OverviewVerb": {
+    "delete": {
+      "Word": "Delete",
+      "Tone": "plain"
+    },
     "fix": {
       "Word": "Fix",
       "Tone": "plain"
@@ -1901,6 +1905,14 @@
     },
     "update": {
       "Word": "Update",
+      "Tone": "plain"
+    },
+    "upgrade": {
+      "Word": "Upgrade",
+      "Tone": "plain"
+    },
+    "wake": {
+      "Word": "Wake it",
       "Tone": "plain"
     }
   },

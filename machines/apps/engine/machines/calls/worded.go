@@ -6,6 +6,7 @@ import (
 
 	"github.com/jterrazz/studio-station/apps/engine/core/confirm"
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
+	"github.com/jterrazz/studio-station/apps/engine/core/finding"
 	imagescalls "github.com/jterrazz/studio-station/apps/engine/images/calls"
 	"github.com/jterrazz/studio-station/apps/engine/machines"
 )
@@ -54,7 +55,7 @@ func Worded(err error) error {
 	if err == nil {
 		return nil
 	}
-	refused := func(t fail.Type, code fail.Code, subject string, detail map[string]string) error {
+	refused := func(t fail.Type, code fail.Code, subject string, detail map[string]string) *fail.Error {
 		e := fail.New(t, code, subject, detail)
 		e.Cause = err
 		return e
@@ -109,7 +110,11 @@ func Worded(err error) error {
 	case errors.As(err, &bad):
 		return refused(fail.Refused, BadName, bad.Name, nil)
 	case errors.As(err, &taken):
-		return refused(fail.Refused, NameTaken, taken.Name, map[string]string{"by": takenBy(taken), "on": taken.On})
+		named := refused(fail.Refused, NameTaken, taken.Name, map[string]string{"by": takenBy(taken), "on": taken.On})
+		if takenBy(taken) == "added" {
+			named.Fix = finding.Fix{Call: "machines.forget", Args: map[string]string{"Name": taken.Name}}
+		}
+		return named
 	case errors.As(err, &little):
 		return refused(fail.Refused, TooLittle, strconv.FormatInt(little.AskedBytes, 10), nil)
 	case errors.As(err, &why):

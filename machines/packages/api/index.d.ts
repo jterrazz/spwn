@@ -2430,7 +2430,7 @@ export type OverviewNeed = {
     Subject: string;
     Text: string;
     Upkeep: 'needs-you' | 'can-wait';
-    Verb: 'review' | 'restart' | 'start' | 'try-again' | 'update' | 'remove' | 'move' | 'start-engine' | 'fix';
+    Verb: 'review' | 'restart' | 'start' | 'try-again' | 'update' | 'remove' | 'delete' | 'upgrade' | 'wake' | 'move' | 'start-engine' | 'fix';
 };
 
 export type OverviewPart = {
@@ -3724,7 +3724,7 @@ export type OverviewMark = 'exposed' | 'down' | 'not-created' | 'needs-you' | 'c
 
 export type OverviewUpkeep = 'needs-you' | 'can-wait';
 
-export type OverviewVerb = 'review' | 'restart' | 'start' | 'try-again' | 'update' | 'remove' | 'move' | 'start-engine' | 'fix';
+export type OverviewVerb = 'review' | 'restart' | 'start' | 'try-again' | 'update' | 'remove' | 'delete' | 'upgrade' | 'wake' | 'move' | 'start-engine' | 'fix';
 
 export type PageNoun = 'machine' | 'skill' | 'listener' | 'quiet-listener' | 'restart' | 'line' | 'package' | 'app' | 'setting' | 'password' | 'grant';
 

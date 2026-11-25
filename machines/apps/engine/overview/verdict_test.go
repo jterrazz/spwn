@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/jterrazz/studio-station/apps/engine/activity"
 	"github.com/jterrazz/studio-station/apps/engine/awake"
 	"github.com/jterrazz/studio-station/apps/engine/core/finding"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
@@ -104,6 +105,11 @@ func TestOnlyWhatIsRedNeedsYouAndEachNeedHasItsVerb(t *testing.T) {
 		"a task failing":     {finding.Finding{Section: section.Background, Severity: finding.Broken, Fix: finding.Fix{Call: "background.remove"}}, overview.NeedsYou, overview.VerbRemove},
 		"a setting off":      {finding.Finding{Section: section.Settings, Severity: finding.NeedsALook}, overview.CanWait, overview.VerbFix},
 		"updates":            {finding.Finding{Section: section.Apps, Severity: finding.NeedsALook, Fix: finding.Fix{Call: "apps.update"}}, overview.CanWait, overview.VerbUpdate},
+		"a VM deleted":       {finding.Finding{Section: section.Overview, Severity: finding.Broken, Fix: finding.Fix{Call: "machines.delete", Args: map[string]string{"VM": "linux-2"}, Confirm: "linux-2"}}, overview.NeedsYou, overview.VerbDelete},
+		"a Mac woken":        {finding.Finding{Section: section.Overview, Severity: finding.NeedsALook, Fix: finding.Fix{Call: "machines.wake", Args: map[string]string{"Name": "mac-mini"}}}, overview.CanWait, overview.VerbWake},
+		"a night to redo":    {finding.Finding{Section: section.Apps, Severity: finding.Broken, Fix: finding.Fix{Call: "machinefile.upgrade", Args: map[string]string{"Machinefile": "macbook-pro"}}}, overview.NeedsYou, overview.VerbUpgrade},
+		"memory pressure":    {finding.Finding{Section: section.Activity, Subject: "memory", Severity: finding.Broken, Fix: finding.Fix{Command: "station activity"}}, overview.NeedsYou, overview.VerbReview},
+		"a disk full":        {finding.Finding{Section: section.Activity, Subject: activity.SubjectDisk, Severity: finding.Broken, Fix: finding.Fix{Command: "station disk"}}, overview.NeedsYou, overview.VerbFix},
 	} {
 		if got := overview.UpkeepOf(c.f); got != c.upkeep {
 			t.Errorf("%s: %s; want %s", name, got, c.upkeep)
