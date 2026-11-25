@@ -162,6 +162,9 @@ func TestAMacSetByHandToStartWhenPowerIsConnectedRestartsAfterAPowerCut(t *testi
 	if err != nil || o.State != catalog.StateOK {
 		t.Fatalf("autorestartatconnect 1 with autorestart 0 reads %s %q (%v), want in place", o.State, o.Detail, err)
 	}
+	if want := "restarts after a power cut: starts when plugged in (autorestartatconnect 1, autorestart 0)"; o.Detail != want {
+		t.Fatalf("detail %q, want %q", o.Detail, want)
+	}
 }
 
 func TestAMacThatRestartsOnPowerLossAloneRestartsAfterAPowerCut(t *testing.T) {
