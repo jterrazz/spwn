@@ -1,15 +1,6 @@
-description: an event appears in the log after an agent is created
+description: a recorded event appears in the log
+fixture: ./__fixtures__/one-agent/
 runs:
-    - command: agent create neo
-      exit: 0
-      stderr: |4+
-          
-            → Creating agent "neo"...
-            ✓ Created agent            neo
-            ✓ Created soul             SOUL.md
-
-            ✓ Spawn with: spwn up --agent neo
-
     - command: logs
       exit: 0
       stdout: |4

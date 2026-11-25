@@ -58,7 +58,7 @@ If no message is provided, opens an interactive session inside the container.`,
 		s := ui.New()
 
 		if err := agent.ValidateMind(name); err != nil {
-			return fmt.Errorf("agent %q not found\n\n  Create one with: spwn agent create %s", name, name)
+			return fmt.Errorf("agent %q not found\n\n  Create one with: station agents create %s", name, name)
 		}
 
 		containerID, worldID, w, arc, err := findAgentContainer(name, talkWorldID)

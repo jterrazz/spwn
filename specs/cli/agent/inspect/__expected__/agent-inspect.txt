@@ -1,9 +1,0 @@
-
-  Agent:       neo
-  Path:        {{workdir}}/spwn/agents/neo
-  World:       world-neo-{{hex#world}}
-  Status:      idle
-
-  playbooks/   .gitkeep (0B)
-  journal/     .gitkeep (0B), world-neo-{{hex#world}}.json (126B)
-

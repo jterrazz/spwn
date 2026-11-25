@@ -105,62 +105,6 @@ func Init(dir string, opts Opts) error {
 	return nil
 }
 
-// AddAgentWorld inserts a `worlds.<agent>: { agents: [<agent>], workspaces: [.] }`
-// entry into spwn.yaml. Idempotent: a no-op if the entry already
-// exists. Used by `spwn agent create <name>` (unless --no-world).
-func AddAgentWorld(manifestPath, agentName string) error {
-	data, err := os.ReadFile(manifestPath)
-	if err != nil {
-		return fmt.Errorf("read %s: %w", manifestPath, err)
-	}
-	var doc yaml.Node
-	if err := yaml.Unmarshal(data, &doc); err != nil {
-		return fmt.Errorf("parse %s: %w", manifestPath, err)
-	}
-	if doc.Kind != yaml.DocumentNode || len(doc.Content) == 0 {
-		return fmt.Errorf("unexpected yaml structure in %s", manifestPath)
-	}
-	root := doc.Content[0]
-	if root.Kind != yaml.MappingNode {
-		return fmt.Errorf("spwn.yaml root must be a mapping")
-	}
-
-	worlds := findMapValue(root, "worlds")
-	if worlds == nil {
-		worlds = &yaml.Node{Kind: yaml.MappingNode, Tag: "!!map"}
-		root.Content = append(root.Content,
-			&yaml.Node{Kind: yaml.ScalarNode, Tag: "!!str", Value: "worlds"},
-			worlds,
-		)
-	}
-	if worlds.Kind != yaml.MappingNode {
-		return fmt.Errorf("spwn.yaml#worlds must be a mapping")
-	}
-	if findMapValue(worlds, agentName) != nil {
-		return nil
-	}
-
-	entry := &yaml.Node{Kind: yaml.MappingNode, Tag: "!!map"}
-	entry.Content = append(entry.Content,
-		&yaml.Node{Kind: yaml.ScalarNode, Tag: "!!str", Value: "agents"},
-		flowSeq([]string{agentName}),
-		&yaml.Node{Kind: yaml.ScalarNode, Tag: "!!str", Value: "workspaces"},
-		flowSeq([]string{"."}),
-		&yaml.Node{Kind: yaml.ScalarNode, Tag: "!!str", Value: "knowledge"},
-		&yaml.Node{Kind: yaml.ScalarNode, Tag: "!!str", Value: "./spwn/knowledge"},
-	)
-	worlds.Content = append(worlds.Content,
-		&yaml.Node{Kind: yaml.ScalarNode, Tag: "!!str", Value: agentName},
-		entry,
-	)
-
-	out, err := yaml.Marshal(&doc)
-	if err != nil {
-		return fmt.Errorf("re-encode %s: %w", manifestPath, err)
-	}
-	return os.WriteFile(manifestPath, out, 0o644)
-}
-
 // AddWorldOpts configures AddWorld. All fields are optional except
 // the world name passed as a separate argument.
 type AddWorldOpts struct {
@@ -267,68 +211,6 @@ func RemoveWorld(manifestPath, name string) error {
 // ErrWorldNotFound is returned by RemoveWorld when the named world
 // does not exist in spwn.yaml.
 var ErrWorldNotFound = fmt.Errorf("world not found in spwn.yaml")
-
-// RemoveAgentFromManifest strips every reference to the named agent
-// from spwn.yaml#worlds. If a world ends up with zero agents, the
-// whole world entry is dropped so `spwn check` doesn't complain
-// about an empty agents list. Idempotent: a no-op if the agent is
-// not referenced anywhere.
-//
-// Used by `spwn agent rm` to keep the manifest consistent with disk
-// state (symmetric with AddAgentWorld which `agent create` uses).
-func RemoveAgentFromManifest(manifestPath, agentName string) error {
-	data, err := os.ReadFile(manifestPath)
-	if err != nil {
-		return fmt.Errorf("read %s: %w", manifestPath, err)
-	}
-	var doc yaml.Node
-	if err := yaml.Unmarshal(data, &doc); err != nil {
-		return fmt.Errorf("parse %s: %w", manifestPath, err)
-	}
-	if doc.Kind != yaml.DocumentNode || len(doc.Content) == 0 {
-		return fmt.Errorf("unexpected yaml structure in %s", manifestPath)
-	}
-	root := doc.Content[0]
-	worlds := findMapValue(root, "worlds")
-	if worlds == nil || worlds.Kind != yaml.MappingNode {
-		return nil
-	}
-
-	changed := false
-	for i := len(worlds.Content) - 2; i >= 0; i -= 2 {
-		entry := worlds.Content[i+1]
-		if entry.Kind != yaml.MappingNode {
-			continue
-		}
-		agents := findMapValue(entry, "agents")
-		if agents == nil || agents.Kind != yaml.SequenceNode {
-			continue
-		}
-		kept := agents.Content[:0]
-		for _, n := range agents.Content {
-			if n.Value == agentName {
-				changed = true
-				continue
-			}
-			kept = append(kept, n)
-		}
-		agents.Content = kept
-		if len(agents.Content) == 0 {
-			worlds.Content = append(worlds.Content[:i], worlds.Content[i+2:]...)
-			changed = true
-		}
-	}
-
-	if !changed {
-		return nil
-	}
-
-	out, err := yaml.Marshal(&doc)
-	if err != nil {
-		return fmt.Errorf("re-encode %s: %w", manifestPath, err)
-	}
-	return os.WriteFile(manifestPath, out, 0o644)
-}
 
 func flowSeq(values []string) *yaml.Node {
 	n := &yaml.Node{Kind: yaml.SequenceNode, Tag: "!!seq", Style: yaml.FlowStyle}

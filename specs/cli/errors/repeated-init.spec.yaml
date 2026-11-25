@@ -1,4 +1,4 @@
-description: a second init refuses to overwrite and the commands after it still work
+description: a second init refuses to overwrite the project
 runs:
     - command: init
       exit: 0
@@ -29,23 +29,4 @@ runs:
           
             Error: spwn.yaml already exists at {{workdir}}/spwn.yaml.
           Use --force to overwrite
-
-    - command: agent create testbot
-      exit: 0
-      stderr: |4+
-          
-            → Creating agent "testbot"...
-            ✓ Created agent            testbot
-            ✓ Created soul             SOUL.md
-            ✓ Added world to spwn.yaml testbot
-
-            ✓ Spawn with: spwn up --agent testbot
-
-    - command: agent ls
-      exit: 0
-      stderr: |4+
-          
-            AGENT     STATUS                  WORLD     
-            neo       ○ ○ deployed, stopped   neo       
-            testbot   ○ ○ deployed, stopped   testbot   
 

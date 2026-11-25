@@ -10,7 +10,7 @@ The Spwn CLI manages worlds, agents, and the universe from inside a container.
 ## Key Commands
 ```bash
 spwn world list                  # List worlds
-spwn agent ls                      # List agents
+station agents                      # List agents
 spwn msg inbox <name>              # Check messages
 spwn msg send <to> --from <me> "msg"  # Send message
 ```

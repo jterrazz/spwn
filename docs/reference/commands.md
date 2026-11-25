@@ -59,49 +59,9 @@ spwn agent [name] [flags]
   -u, --world string       Target world ID
 ```
 
-- [spwn agent create](#spwn-agent-create): Create a new agent (SOUL.md + 2-layer Mind).
 - [spwn agent deploy](#spwn-agent-deploy): Deploy an agent to a running world.
-- [spwn agent dream](#spwn-agent-dream): Analyze experience, discover patterns, promote playbooks.
-- [spwn agent export](#spwn-agent-export): [experimental] Export an agent as tar.gz.
-- [spwn agent fork](#spwn-agent-fork): [experimental] Clone a Mind from one agent to another.
-- [spwn agent import](#spwn-agent-import): [experimental] Import an agent from a tar.gz archive.
-- [spwn agent inspect](#spwn-agent-inspect): Inspect an agent - composition, memory, world status, history.
 - [spwn agent logs](#spwn-agent-logs): Show the event log for a specific agent.
-- [spwn agent ls](#spwn-agent-ls): List all agents on this Host.
-- [spwn agent rm](#spwn-agent-rm): Remove an agent and its Mind directory.
-- [spwn agent sleep](#spwn-agent-sleep): Archive stale playbooks and delete old journal files.
 - [spwn agent talk](#spwn-agent-talk): Talk to a running agent - interactive or one-shot.
-
-## spwn agent create
-
-Create a new agent (SOUL.md + 2-layer Mind).
-
-```text
-Create a new agent with a SOUL.md at the agent root and the
-two Mind layer directories (playbooks/journal). Skills aren't a Mind
-layer; they're build-time dependencies resolved via the skill/ form
-or shipped by tools, injected into /world/skills/ at image time.
-Knowledge is world-scoped, not agent-scoped: it lives at
-/world/knowledge/ when a world opts in via spwn.yaml's
-worlds.<name>.knowledge key, which resolves to a host path under the
-project root. If no name is provided, a random name is picked from a
-curated dictionary.
-```
-
-```text
-With --force, an existing agent's Mind is re-scaffolded: any missing
-files are recreated and the command exits zero even if the agent
-already exists.
-```
-
-```text
-spwn agent create [name] [flags]
-```
-
-```text
-  -f, --force         Re-scaffold any missing Mind files without complaining if the agent already exists
-      --team string   Assign agent to a team (slug)
-```
 
 ## spwn agent deploy
 
@@ -125,84 +85,6 @@ spwn agent deploy <agent-name> <world-id> [flags]
       --role string   Agent role in the world organization (default "worker")
 ```
 
-## spwn agent dream
-
-Analyze experience, discover patterns, promote playbooks.
-
-```text
-spwn agent dream <agent-name>
-```
-
-## spwn agent export
-
-[experimental] Export an agent as tar.gz.
-
-```text
-[experimental] Export an agent as tar.gz
-```
-
-```text
-⚠ Experimental: this command is in development and may change or break without notice.
-```
-
-```text
-spwn agent export <agent-name> [flags]
-```
-
-```text
-      --exclude strings   Exclude layers (e.g., journal, sessions)
-      --output string     Output directory (default ".")
-```
-
-## spwn agent fork
-
-[experimental] Clone a Mind from one agent to another.
-
-```text
-[experimental] Clone a Mind from one agent to another
-```
-
-```text
-⚠ Experimental: this command is in development and may change or break without notice.
-```
-
-```text
-spwn agent fork <source> <target>
-```
-
-## spwn agent import
-
-[experimental] Import an agent from a tar.gz archive.
-
-```text
-Import an agent's Mind from a previously exported tar.gz archive.
-```
-
-```text
-The agent name is derived from the archive filename (e.g., neo.tar.gz gives neo).
-The archive must contain at least a SOUL.md at the agent root.
-```
-
-```text
-⚠ Experimental: this command is in development and may change or break without notice.
-```
-
-```text
-spwn agent import <path-to-tar.gz> [flags]
-```
-
-```text
-      --as string   Rename the agent on import (instead of using the archive filename)
-```
-
-## spwn agent inspect
-
-Inspect an agent - composition, memory, world status, history.
-
-```text
-spwn agent inspect <agent-name>
-```
-
 ## spwn agent logs
 
 Show the event log for a specific agent.
@@ -213,35 +95,6 @@ spwn agent logs <agent-name> [flags]
 
 ```text
   -n, --limit int   Number of events to show (default 50)
-```
-
-## spwn agent ls
-
-List all agents on this Host.
-
-```text
-spwn agent ls [flags]
-```
-
-```text
-      --json           Emit results as structured JSON on stdout
-      --world string   Filter agents by world ID
-```
-
-## spwn agent rm
-
-Remove an agent and its Mind directory.
-
-```text
-spwn agent rm <agent-name>
-```
-
-## spwn agent sleep
-
-Archive stale playbooks and delete old journal files.
-
-```text
-spwn agent sleep <agent-name>
 ```
 
 ## spwn agent talk
@@ -940,7 +793,7 @@ spawn the world with "spwn up <name>".
 
 ```text
 The agents listed via --agent must already exist on disk under
-spwn/agents/<name>/. Use "spwn agent create" first if they don't.
+spwn/agents/<name>/. Use "station agents create" first if they don't.
 ```
 
 ```text

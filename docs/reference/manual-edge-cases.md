@@ -180,12 +180,12 @@ journals scoped by world-id; no cross-contamination.
 
 ### D25. Agent name with spaces
 
-**Probe:** `spwn agent create "my agent"`.
+**Probe:** `station agents create "my agent"`.
 **Hypothesis:** either refused with format rule, or slugified.
 
 ### D26. Agent name with slashes / null bytes
 
-**Probe:** `spwn agent create "foo/bar"`, `spwn agent create $'a\x00b'`.
+**Probe:** `station agents create "foo/bar"`, `station agents create $'a\x00b'`.
 **Hypothesis:** rejected at validation.
 
 ### D27. Agent name equal to reserved ("architect", "system")
@@ -395,7 +395,7 @@ talk errors clear.
 
 ### I66. `spwn --json` on every command that should support it
 
-**Probe:** survey of JSON support across `agent ls / agent inspect /
+**Probe:** survey of JSON support across `station agents / station agents <name> /
 world list / check / auth`.
 
 ---

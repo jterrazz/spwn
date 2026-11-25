@@ -41,29 +41,19 @@ func agentHelp(cmd *cobra.Command, args []string) {
 		ui.Strong("⬡ agent")+" "+ui.Faint("- composed minds: SOUL.md at root + 2 Mind layers (playbooks/journal); skills and knowledge are world-scoped"),
 		[]ui.HelpGroup{
 			{Title: "Lifecycle", Commands: []ui.HelpEntry{
-				{Name: "create <name>", Desc: "Create a blank agent (auto-creates a single-agent world)"},
 				{Name: "<name>", Desc: "Open an interactive session with <name> " + ui.Faint("(shortcut)")},
-				{Name: "ls", Desc: "List agents"},
-				{Name: "rm <name>", Desc: "Delete an agent"},
 			}},
 			{Title: "Conversation", Commands: []ui.HelpEntry{
 				{Name: "talk <name> [msg]", Desc: "Open a session with a running agent " + ui.Faint("(sync)")},
 			}},
 			{Title: "Observe", Commands: []ui.HelpEntry{
-				{Name: "inspect <name>", Desc: "Inspect composition, memory, and history"},
 				{Name: "logs <name>", Desc: "Show the event log for this agent"},
 			}},
-			{Title: "Evolution", Commands: []ui.HelpEntry{
-				{Name: "dream <name>", Desc: "Analyze experience, promote playbooks"},
-				{Name: "sleep <name>", Desc: "Consolidate memory, prune stale strategies"},
-				{Name: "fork <src> <dst>", Desc: "Clone an agent with everything it knows"},
-			}},
-			{Title: "Portability", Commands: []ui.HelpEntry{
-				{Name: "export <name>", Desc: "Export as tar.gz"},
-				{Name: "import <path>", Desc: "Import from tar.gz"},
+			{Title: "Mind", Commands: []ui.HelpEntry{
+				{Name: "station agents", Desc: "List, create, edit, delete, fork, export, import, dream and sleep an agent"},
 			}},
 			{Title: "Examples", Commands: []ui.HelpEntry{
-				{Name: "spwn agent create neo", Desc: ""},
+				{Name: "station agents create neo", Desc: ""},
 				{Name: "spwn install python --agent neo", Desc: ""},
 				{Name: "spwn install skill/paper-reading --agent neo", Desc: ""},
 				{Name: "spwn agent neo", Desc: ""},
@@ -95,7 +85,7 @@ world when the manifest opts in via worlds.<name>.knowledge; the path
 resolves relative to the project root and is shared across every agent
 in that world.`,
 	Args: cobra.ArbitraryArgs,
-	Example: `  spwn agent create neo              Create a blank agent
+	Example: `  station agents create neo          Create a blank agent
   spwn agent neo                     Open an interactive session with neo
   spwn agent -n neo -u w-abc123      Legacy: spawn named agent into world
   spwn agent --ephemeral "run tests"  Fire-and-forget ephemeral task`,
@@ -187,7 +177,7 @@ in that world.`,
 
 func runInteractiveSession(cmd *cobra.Command, agentName string) error {
 	if err := agent.ValidateMind(agentName); err != nil {
-		return fmt.Errorf("agent %q not found\n\n  Create one with: spwn agent create %s", agentName, agentName)
+		return fmt.Errorf("agent %q not found\n\n  Create one with: station agents create %s", agentName, agentName)
 	}
 	worldName, err := findWorldForAgent(agentName)
 	if err != nil {

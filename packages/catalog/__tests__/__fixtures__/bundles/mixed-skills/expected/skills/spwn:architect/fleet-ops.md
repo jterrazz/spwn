@@ -15,17 +15,17 @@ spwn world inspect <id>           # World details
 
 ## Managing Agents
 ```bash
-spwn agent ls                     # List all agents
-spwn agent create <name>             # Create agent
-spwn agent rm <name>              # Remove agent
+station agents                     # List all agents
+station agents create <name>             # Create agent
+station agents delete <name> --confirm=<name>              # Remove agent
 spwn agent talk <name> "msg"      # Talk to agent
-spwn agent inspect <name>         # View agent composition and identity
+station agents <name>         # View agent composition and identity
 ```
 
 ## Agent Lifecycle
-1. Create: `spwn agent create <name>`
+1. Create: `station agents create <name>`
 2. Configure: write identity (profile, purpose, traits)
 3. Spawn: `spwn up --agent <name> -w <workspace>`
 4. Work: `spwn agent talk <name> "task"`
-5. Dream: `spwn agent dream <name>` (promote patterns)
-6. Sleep: `spwn agent sleep <name>` (consolidate)
+5. Dream: `station agents dream <name>` (promote patterns)
+6. Sleep: `station agents sleep <name>` (consolidate)

@@ -124,7 +124,7 @@ func (m *Manifest) UnmarshalYAML(node *yaml.Node) error {
 
 // MarshalYAML round-trips the parsed form back to the wire format:
 // mapping entries for policied deps, scalars for everything else.
-// Keeps `spwn agent inspect` and Save() output stable.
+// Keeps `station agents <name>` and Save() output stable.
 func (m Manifest) MarshalYAML() (any, error) {
 	out := struct {
 		Name        string        `yaml:"name,omitempty"`

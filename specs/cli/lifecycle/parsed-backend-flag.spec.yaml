@@ -6,5 +6,5 @@ runs:
           
             Error: agent "nonexistent" not found
 
-            Create one with: spwn agent create nonexistent
+            Create one with: station agents create nonexistent
 

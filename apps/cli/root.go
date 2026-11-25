@@ -136,13 +136,13 @@ func customHelp(cmd *cobra.Command, args []string) {
 
 	fmt.Fprintf(w, "%s\n", ui.Strong("Quick Start:"))
 	printHelpCmd(w, "spwn init", "Scaffold a new project")
-	printHelpCmd(w, "spwn agent create neo", "Create an agent (auto-creates a single-agent world)")
+	printHelpCmd(w, "station agents create neo", "Create an agent")
 	printHelpCmd(w, "spwn up", "Bring up every world in spwn.yaml")
 	printHelpCmd(w, "spwn agent neo", "Start the world that contains neo")
 	fmt.Fprintln(w)
 
 	fmt.Fprintf(w, "%s\n", ui.Strong("Entities:"))
-	printHelpCmd(w, "agent", "Composed minds "+ui.Faint("(create, ls, inspect, fork, talk)"))
+	printHelpCmd(w, "agent", "Composed minds "+ui.Faint("(talk, logs)"))
 	printHelpCmd(w, "world", "Deployable groupings "+ui.Faint("(list, inspect, enter)"))
 	fmt.Fprintln(w)
 

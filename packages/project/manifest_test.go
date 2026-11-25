@@ -419,26 +419,3 @@ worlds:
 		}
 	}
 }
-
-func TestAddAgentToManifest_appendsWorld(t *testing.T) {
-	dir := t.TempDir()
-	if err := Init(dir, InitOpts{Name: "addtest"}); err != nil {
-		t.Fatal(err)
-	}
-	// Create a second agent dir.
-	if err := os.MkdirAll(filepath.Join(dir, "spwn", "agents", "trinity"), 0o755); err != nil {
-		t.Fatal(err)
-	}
-	manifestPath := filepath.Join(dir, "spwn.yaml")
-	if err := AddAgentToManifest(manifestPath, "trinity"); err != nil {
-		t.Fatalf("AddAgentToManifest: %v", err)
-	}
-	data, _ := os.ReadFile(manifestPath)
-	if !strings.Contains(string(data), "trinity") {
-		t.Errorf("expected trinity entry in manifest, got:\n%s", data)
-	}
-	// Idempotency: second call should not error or duplicate.
-	if err := AddAgentToManifest(manifestPath, "trinity"); err != nil {
-		t.Fatalf("idempotent AddAgentToManifest: %v", err)
-	}
-}

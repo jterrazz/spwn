@@ -1,25 +1,6 @@
 description: agent logs <name> is a shortcut for --agent
+fixture: ./__fixtures__/three-agents/
 runs:
-    - command: agent create neo
-      exit: 0
-      stderr: |4+
-          
-            → Creating agent "neo"...
-            ✓ Created agent            neo
-            ✓ Created soul             SOUL.md
-
-            ✓ Spawn with: spwn up --agent neo
-
-    - command: agent create morpheus
-      exit: 0
-      stderr: |4+
-          
-            → Creating agent "morpheus"...
-            ✓ Created agent            morpheus
-            ✓ Created soul             SOUL.md
-
-            ✓ Spawn with: spwn up --agent morpheus
-
     - command: agent logs neo
       exit: 0
       stdout: |4

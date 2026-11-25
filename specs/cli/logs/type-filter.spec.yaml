@@ -1,22 +1,6 @@
 description: --type keeps one event type and drops the rest
+fixture: ./__fixtures__/created-then-deleted/
 runs:
-    - command: agent create neo
-      exit: 0
-      stderr: |4+
-          
-            → Creating agent "neo"...
-            ✓ Created agent            neo
-            ✓ Created soul             SOUL.md
-
-            ✓ Spawn with: spwn up --agent neo
-
-    - command: agent rm neo
-      exit: 0
-      stderr: |4+
-          
-            → Deleting agent "neo"...
-            ✓ Deleted agent            neo
-
     - command: logs --type agent.created
       exit: 0
       stdout: |4

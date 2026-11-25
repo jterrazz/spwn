@@ -1,8 +1,0 @@
-description: agent rm with no name is refused by arity
-runs:
-    - command: agent rm
-      exit: 1
-      stderr: |4+
-          
-            Error: accepts 1 arg(s), received 0
-

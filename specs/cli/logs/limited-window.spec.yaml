@@ -1,55 +1,6 @@
 description: --limit restricts the number of events rendered
+fixture: ./__fixtures__/five-agents/
 runs:
-    - command: agent create a
-      exit: 0
-      stderr: |4+
-          
-            → Creating agent "a"...
-            ✓ Created agent            a
-            ✓ Created soul             SOUL.md
-
-            ✓ Spawn with: spwn up --agent a
-
-    - command: agent create b
-      exit: 0
-      stderr: |4+
-          
-            → Creating agent "b"...
-            ✓ Created agent            b
-            ✓ Created soul             SOUL.md
-
-            ✓ Spawn with: spwn up --agent b
-
-    - command: agent create c
-      exit: 0
-      stderr: |4+
-          
-            → Creating agent "c"...
-            ✓ Created agent            c
-            ✓ Created soul             SOUL.md
-
-            ✓ Spawn with: spwn up --agent c
-
-    - command: agent create d
-      exit: 0
-      stderr: |4+
-          
-            → Creating agent "d"...
-            ✓ Created agent            d
-            ✓ Created soul             SOUL.md
-
-            ✓ Spawn with: spwn up --agent d
-
-    - command: agent create e
-      exit: 0
-      stderr: |4+
-          
-            → Creating agent "e"...
-            ✓ Created agent            e
-            ✓ Created soul             SOUL.md
-
-            ✓ Spawn with: spwn up --agent e
-
     - command: logs --limit 2
       exit: 0
       stdout: |4

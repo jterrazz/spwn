@@ -12,7 +12,7 @@ describe('missing-agent', () => {
             .fixture(directory('../__fixtures__/docker-pilot/'))
             .exec('up --agent ghost');
 
-        // Then - non-zero with the "agent create" hint (full stderr golden) and no container left behind
+        // Then - non-zero with the "station agents create" hint (full stderr golden) and no container left behind
         expect(result.exitCode).toBe(1);
         expect(result.stderr).toMatch(file('./__expected__/missing-agent.txt'));
         expect(result.containerIds).toStrictEqual([]);

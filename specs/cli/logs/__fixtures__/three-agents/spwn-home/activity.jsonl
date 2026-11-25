@@ -1,0 +1,3 @@
+{"id":"0a01","timestamp":"2026-11-25T10:00:01Z","type":"agent.created","actor":"user","verb":"created","target":"neo","phrase":"You created neo","agent_id":"neo"}
+{"id":"0a02","timestamp":"2026-11-25T10:00:02Z","type":"agent.created","actor":"user","verb":"created","target":"morpheus","phrase":"You created morpheus","agent_id":"morpheus"}
+{"id":"0a03","timestamp":"2026-11-25T10:00:03Z","type":"agent.created","actor":"user","verb":"created","target":"trinity","phrase":"You created trinity","agent_id":"trinity"}
