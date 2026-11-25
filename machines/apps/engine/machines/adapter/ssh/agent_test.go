@@ -133,7 +133,7 @@ func TestTheAgentSignsWithTheDeviceKey(t *testing.T) {
 	if len(keys) != 1 || keys[0].Comment != DeviceKeyComment || keys[0].Format != ssh.KeyAlgoECDSA256 {
 		t.Fatalf("List = %v; want the device key alone, %s", keys, ssh.KeyAlgoECDSA256)
 	}
-	data := []byte("session")
+	data := login(keys[0], "session")
 	sig, err := c.Sign(keys[0], data)
 	if err != nil {
 		t.Fatal(err)
@@ -157,7 +157,7 @@ func TestTheAgentRelaysTheSessionsOtherKeys(t *testing.T) {
 	if len(keys) != 2 || keys[0].Comment != DeviceKeyComment || keys[1].Comment != "id_ed25519" {
 		t.Fatalf("List = %v; want the device key, then the session's", keys)
 	}
-	data := []byte("session")
+	data := login(theirs, "session")
 	sig, err := c.Sign(theirs, data)
 	if err != nil {
 		t.Fatal(err)
