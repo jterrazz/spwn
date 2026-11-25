@@ -1,6 +1,7 @@
 package architecture_test
 
 import (
+	"encoding/json"
 	"fmt"
 	"go/ast"
 	"go/types"
@@ -10,10 +11,12 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"sync"
 	"testing"
 
 	command "github.com/spf13/cobra"
 
+	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 	uitoken "github.com/jterrazz/studio-station/apps/engine/ui/token"
 )
 
@@ -674,5 +677,110 @@ func TestEveryDestroyingVerbIsAnsweredInAScript(t *testing.T) {
 		found := ruleDestroyingAsks(root)
 		bites(t, "destroying-asks", found, "machines delete")
 		bites(t, "destroying-asks", found, "apps remove")
+	})
+}
+
+// value: ADR-021 rule 7's one failure document under --json.
+const errorSchema = "spwn.error/v1"
+
+// value: the runs that make a command fail under --json before any effect:
+// a flag it does not have, and, for a read that names what it reads, no name.
+func failingRuns(root *command.Command) [][]string {
+	out := [][]string{{"--json", "--not-a-flag"}}
+	for _, c := range typedCommands(root) {
+		if !c.Runnable() || c.DisableFlagParsing {
+			continue
+		}
+		words := strings.Fields(commandPath(c))
+		out = append(out, append(slices.Clone(words), "--json", "--not-a-flag"))
+		use := strings.Fields(c.Use)
+		if c.Flags().Lookup("json") != nil && len(use) > 1 && strings.HasPrefix(use[1], "<") {
+			out = append(out, append(slices.Clone(words), "--json"))
+		}
+	}
+	return out
+}
+
+// value: why a --json failure is not the one failure shape: exit 2, one
+// error document on stdout, and its block on stderr.
+func errorDocumentRefusals(r ran, want string) []finding {
+	where := strings.Join(r.words, " ")
+	var out []finding
+	say := func(what string) { out = append(out, finding{"error-document", where, what}) }
+	if r.exit != 2 {
+		say("a refusal before any effect that exits " + strconv.Itoa(r.exit) + ", not 2")
+	}
+	if !strings.Contains(r.stderr, "Error: ") || !strings.Contains(r.stderr, "\nHint: ") {
+		say("a failure whose block on stderr is not Error: then Hint:")
+	}
+	dec := json.NewDecoder(strings.NewReader(r.stdout))
+	var doc map[string]any
+	if err := dec.Decode(&doc); err != nil || dec.More() {
+		say("a --json failure whose stdout is not one document")
+		return out
+	}
+	if got, _ := doc["schema"].(string); got != want {
+		out = append(out, finding{"error-document", "schema " + got, "a --json failure that says " + got + ", not " + want})
+	}
+	for _, key := range []string{"type", "code", "subject", "message", "hint"} {
+		if _, ok := doc[key]; !ok {
+			say("an error document with no " + key)
+		}
+	}
+	if kind, _ := doc["type"].(string); !slices.Contains(fail.Type("").Enum(), kind) {
+		say("an error document whose type " + kind + " is none of core/fail's")
+	}
+	for _, key := range []string{"message", "hint"} {
+		if text, _ := doc[key].(string); text == "" {
+			say("an error document with an empty " + key)
+		}
+	}
+	return out
+}
+
+// invariant: rule error-document (ADR-021 rule 7): every command, refused
+// before any effect under --json, prints the one error document on stdout
+// and its block on stderr, exit 2.
+func ruleErrorDocument(t *testing.T, root *command.Command) []finding {
+	bin := specBinary(t)
+	var mu sync.Mutex
+	var out []finding
+	t.Run("runs", func(t *testing.T) {
+		for _, words := range failingRuns(root) {
+			t.Run(strings.Join(words, "_"), func(t *testing.T) {
+				t.Parallel()
+				found := errorDocumentRefusals(runOverWorld(t, bin, words), errorSchema)
+				mu.Lock()
+				out = append(out, found...)
+				mu.Unlock()
+			})
+		}
+	})
+	return out
+}
+
+func TestEveryFailureUnderJSONIsTheErrorDocument(t *testing.T) {
+	t.Parallel()
+	excepted := []exception{{"error-document", "schema station.error/v1", "M3", "2026-11-25"}}
+	t.Run("holds", func(t *testing.T) { excuse(t, ruleErrorDocument(t, commandTree(t)), excepted) })
+	t.Run("bites", func(t *testing.T) {
+		good := ran{words: []string{"apps", "--json", "--not-a-flag"}, exit: 2,
+			stdout: `{"schema":"spwn.error/v1","type":"refused","code":null,"subject":null,"message":"unknown flag: --not-a-flag","hint":"run station apps --help"}`,
+			stderr: "Error: unknown flag: --not-a-flag\nHint: run station apps --help\n"}
+		if found := errorDocumentRefusals(good, errorSchema); len(found) > 0 {
+			t.Errorf("the error-document rule refused the one failure shape: %v", found)
+		}
+		for _, mutant := range []ran{
+			{words: good.words, exit: 1, stdout: good.stdout, stderr: good.stderr},
+			{words: good.words, exit: 2, stdout: "", stderr: good.stderr},
+			{words: good.words, exit: 2, stdout: good.stdout + good.stdout, stderr: good.stderr},
+			{words: good.words, exit: 2, stdout: strings.Replace(good.stdout, `"refused"`, `"oops"`, 1), stderr: good.stderr},
+			{words: good.words, exit: 2, stdout: strings.Replace(good.stdout, `"hint":"run station apps --help"`, `"hint":""`, 1), stderr: good.stderr},
+			{words: good.words, exit: 2, stdout: good.stdout, stderr: "unknown flag\n"},
+		} {
+			bites(t, "error-document", errorDocumentRefusals(mutant, errorSchema), "apps --json --not-a-flag")
+		}
+		renamed := ran{words: good.words, exit: 2, stdout: strings.Replace(good.stdout, "spwn.error", "station.error", 1), stderr: good.stderr}
+		bites(t, "error-document", errorDocumentRefusals(renamed, errorSchema), "schema station.error/v1")
 	})
 }
