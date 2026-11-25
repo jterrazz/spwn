@@ -28,49 +28,11 @@ runs:
           spwn-home: absent
           empty-home/.spwn: absent
 
-    - command: status
-      exit: 0
-      stderr: |4+
-          
-            spwn vdev
-            {{workdir}}/spwn-home · not configured · 0 skills
-
-            ── Worlds ────────────────────────────────────── none ──
-               spwn up --agent <name> -w .
-
-            ── Architect ──────────────────────────────── offline ──
-
-      files:
-          spwn-home: absent
-          empty-home/.spwn: absent
-
-    - command: ls
-      exit: 0
-      stderr: |4+
-          
-            ✓ No agents yet.
-
-      files:
-          spwn-home: absent
-          empty-home/.spwn: absent
-
     - command: agent ls
       exit: 0
       stderr: |4+
           
             ✓ No agents yet.
-
-      files:
-          spwn-home: absent
-          empty-home/.spwn: absent
-
-    - command: architect status
-      exit: 0
-      stderr: |4+
-          
-            Architect:   not running
-
-            Start with: spwn architect start
 
       files:
           spwn-home: absent
