@@ -33,6 +33,15 @@ export { MemoryPick } from './memory-pick';
 export { Missing, MissingMark } from './missing';
 export { NavItem } from './nav-item';
 export { Panel } from './panel';
+export {
+    Popover,
+    type PopoverFilter,
+    type PopoverOpener,
+    type PopoverProps,
+    type PopoverRow,
+    type PopoverSection,
+    usePopover,
+} from './popover';
 export { type Pick, Picks } from './picks';
 export { ProgressLine } from './progress-line';
 export { type RadioRow, RadioRows } from './radio-rows';

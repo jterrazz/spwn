@@ -101,6 +101,19 @@ export default defineConfig({
                     },
                 },
                 {
+                    files: ['src/presentation/ui/popover-list.tsx'],
+                    reason: "a popover's list is a listbox named active by aria-activedescendant from its filter or from itself, which holds the focus and the keys, so an option takes neither, and a click picks it",
+                    rules: {
+                        'jsx-a11y/click-events-have-key-events': 'off',
+                        'jsx-a11y/interactive-supports-focus': 'off',
+                    },
+                },
+                {
+                    files: ['src/presentation/ui/popover.tsx'],
+                    reason: 'a popover is a non-modal dialog that closes on the Escape, the Tab and the focus leaving that its filter and its list bubble up to it',
+                    rules: { 'jsx-a11y/no-noninteractive-element-interactions': 'off' },
+                },
+                {
                     files: ['src/presentation/ui/code-block.tsx'],
                     reason: 'a code block, a log among them, is a scrolling region the keyboard must reach to scroll it, so the box takes the Tab focus',
                     rules: { 'jsx-a11y/no-noninteractive-tabindex': 'off' },

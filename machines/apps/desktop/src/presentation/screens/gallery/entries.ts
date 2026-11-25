@@ -55,6 +55,7 @@ import { Panel } from '../../ui/panel';
 import { PANEL_STORIES } from '../../ui/panel.stories';
 import { Picks } from '../../ui/picks';
 import { PICKS_STORIES } from '../../ui/picks.stories';
+import { POPOVER_STORIES, PopoverSample } from '../../ui/popover.stories';
 import { ProgressLine } from '../../ui/progress-line';
 import { PROGRESS_LINE_STORIES } from '../../ui/progress-line.stories';
 import { QrCode } from '../../ui/qr-code';
@@ -204,5 +205,10 @@ export const ENTRIES: readonly Entry[] = [
         Component: ConfirmDialog,
         frame: 'dialog',
         stories: CONFIRM_DIALOG_STORIES,
+    }),
+    entry('Popover', 'Dialogs', {
+        Component: PopoverSample,
+        frame: 'block',
+        stories: POPOVER_STORIES,
     }),
 ];

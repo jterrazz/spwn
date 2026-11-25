@@ -1,0 +1,5 @@
+- button "linux-1" [expanded]
+- dialog "Machines":
+  - combobox "Filter machines" [expanded]: gate9
+  - listbox "Machines":
+    - paragraph: No machine matches

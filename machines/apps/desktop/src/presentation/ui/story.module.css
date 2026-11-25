@@ -5,3 +5,31 @@
     border-radius: var(--radius-panel);
     color: var(--t2);
 }
+.popover {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    height: 460px;
+    padding: var(--space-12);
+    overflow: hidden;
+    transform: translateZ(0);
+    border-radius: var(--radius-panel);
+    background: var(--canvas);
+}
+.popoverEnd {
+    justify-content: flex-end;
+}
+.opener {
+    all: unset;
+    box-sizing: border-box;
+    cursor: pointer;
+    height: 30px;
+    padding: 0 var(--space-10);
+    border-radius: var(--radius-control);
+    color: var(--t1);
+    font-size: var(--text-body);
+    font-weight: var(--weight-medium);
+}
+.opener[aria-expanded='true'] {
+    background: var(--raise);
+}

@@ -1,7 +1,7 @@
 import { useEffect, useId, useLayoutEffect, useRef } from 'react';
 import type { KeyboardEvent, ReactNode } from 'react';
 
-import { focusablesIn, moveFocus } from './focus';
+import { focusablesIn, holdFocus, moveFocus } from './focus';
 
 import styles from './dialog.module.css';
 
@@ -22,10 +22,7 @@ export type ModalProps = {
 
 type OpensOn = 'dialog' | 'field';
 
-function opening(pop: HTMLElement | null, on: OpensOn): HTMLElement | undefined {
-    if (!pop) {
-        return undefined;
-    }
+function opening(pop: HTMLElement, on: OpensOn): HTMLElement {
     if (on === 'dialog') {
         return pop;
     }
@@ -61,14 +58,11 @@ export function Modal({
         close.current = onClose;
     });
     useLayoutEffect(() => {
-        const opener = document.activeElement;
         open += 1;
-        opening(pop.current, on.current)?.focus();
+        const release = holdFocus(pop.current, (element) => opening(element, on.current));
         return () => {
             open -= 1;
-            if (opener instanceof HTMLElement && opener.isConnected) {
-                opener.focus();
-            }
+            release();
         };
     }, []);
     return (
