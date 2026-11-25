@@ -25,7 +25,7 @@ type Manifest struct {
 	// for, the equivalent of the `description:` field in the skill
 	// frontmatter convention. `spwn check` flags an empty description
 	// as LevelError so every agent in a project has a human-readable
-	// purpose line that the inspector, web UI, and external tooling
+	// purpose line that the inspector and external tooling
 	// can render without opening AGENTS.md.
 	Description string        `yaml:"description,omitempty"`
 	Role        string        `yaml:"role,omitempty"`

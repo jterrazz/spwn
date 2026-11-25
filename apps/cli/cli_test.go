@@ -39,9 +39,7 @@ func TestCLI_Help(t *testing.T) {
 	}
 
 	// Verify the stable top-level subcommands are listed in the grouped
-	// help. `web` was dropped from this list when the command was hidden
-	// pending a richer dashboard; it remains invokable by name (covered
-	// separately in TestCLI_WebHelp below).
+	// help.
 	for _, sub := range []string{"world", "agent", "skill", "install", "init"} {
 		assertContains(t, out, sub, "root help")
 	}
@@ -118,19 +116,6 @@ func TestCLI_InstallHelp(t *testing.T) {
 	}
 
 	assertContains(t, out, "spwn install", "install help")
-}
-
-// --- Web help ---
-
-func TestCLI_WebHelp(t *testing.T) {
-	out, _, err := executeCommand("web", "--help")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	assertContains(t, out, "web", "web help usage")
-	assertContains(t, out, "--port", "web help port flag")
-	assertContains(t, out, "--no-open", "web help no-open flag")
 }
 
 // --- Init help ---

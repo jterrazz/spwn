@@ -6,15 +6,13 @@ Where every suite of Spwn lives, what each one proves, and what it stands on. Ho
 
 Each layer refuses what the one above it does: a unit test never starts a container, and no Docker suite calls a provider's API.
 
-| Layer             | Where                                                                                                      | Proves                                                              | Runs in                                     |
-| ----------------- | ---------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- | ------------------------------------------- |
-| Static            | `.golangci.yml`, the TypeScript toolchain                                                                  | the layer map, the lint rulebook, the names, the docs               | `make lint`                                 |
-| Unit and golden   | `*_test.go` beside every Go file; `__tests__/` of `apps/web`, `apps/gate/sdk`                              | one module's contract, renderer output byte for byte                | `make test`                                 |
-| Local integration | `apps/api/*_test.go`, through the production `Handler()`                                                   | every API route, on the router the server itself mounts             | `make test`                                 |
-| CLI               | `specs/cli/`                                                                                               | the compiled binary, a terminal session at a time, worlds in Docker | `make test`                                 |
-| Website           | `specs/website/`                                                                                           | the web UI, rendered in a headless Chromium against `spwn web`      | `make test`                                 |
-| Go Docker         | `packages/world/tests/e2e/`, `packages/compile/e2e/`, `packages/container/backend/`, `packages/architect/` | world lifecycles and image builds, through the Go API               | `make test-go-e2e`, `make test-compile-e2e` |
-| Smoke             | `specs/cli/up/real-build.spec.ts`, `specs/cli/up/upgrade-cycle.spec.ts`                                    | a real image build, with no simulator in place                      | `make test-smoke`                           |
+| Layer           | Where                                                                                                      | Proves                                                              | Runs in                                     |
+| --------------- | ---------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- | ------------------------------------------- |
+| Static          | `.golangci.yml`, the TypeScript toolchain                                                                  | the layer map, the lint rulebook, the names, the docs               | `make lint`                                 |
+| Unit and golden | `*_test.go` beside every Go file; `__tests__/` of `apps/gate/sdk`                                          | one module's contract, renderer output byte for byte                | `make test`                                 |
+| CLI             | `specs/cli/`                                                                                               | the compiled binary, a terminal session at a time, worlds in Docker | `make test`                                 |
+| Go Docker       | `packages/world/tests/e2e/`, `packages/compile/e2e/`, `packages/container/backend/`, `packages/architect/` | world lifecycles and image builds, through the Go API               | `make test-go-e2e`, `make test-compile-e2e` |
+| Smoke           | `specs/cli/up/real-build.spec.ts`, `specs/cli/up/upgrade-cycle.spec.ts`                                    | a real image build, with no simulator in place                      | `make test-smoke`                           |
 
 ## The CLI specification
 
@@ -25,15 +23,6 @@ Each layer refuses what the one above it does: a unit test never starts a contai
 - `__setup__/`: code a domain's chains share, such as `up/__setup__/world.ts`, which reads a world's labels back.
 
 The runner's defaults isolate every run: `SPWN_HOME` is a folder of the run's working directory, the keychain and the providers' tokens are unset, and live credential validation is skipped. One environment is named for a document's `env:`, `sealed`, which also points `HOME` at an empty folder of the run, for a command that reads the user's home (`~/.codex`, `~/.claude`). Every container a run starts carries the run's label, `sh.spwn.test.run`, and the runner removes them at scope exit.
-
-## The website specification
-
-The UI is the run's, the API is each file's:
-
-- the UI, built once per run by the project's global setup (`__setup__/ui.global-setup.ts`): `next build` in `apps/web` with `NEXT_PUBLIC_API_URL` set to a free loopback port, then `next start`, the production server `spwn web` itself starts;
-- the API, `spwn web --no-open`, started by `specs/website/website.specification.ts` for each file on that port, serving a fresh project that `__setup__/project.ts` writes to a temporary directory: the `matrix` and `startup` worlds, their agents copied from `catalog/`, a Spwn home past the onboarding wizard. The client reads its API address from the build, so the files take turns on it.
-
-One folder per area of the UI (`worlds/`, `agents/`, `navigation/`), one file per page. A page is read whole through its accessibility tree, the Docker version a `{{semver}}` token. The page calls the API on a port of its own, so cross-origin requests are allowed.
 
 ## The simulators
 

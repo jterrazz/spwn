@@ -59,8 +59,7 @@ func (c *spawner) Available() bool       { return true }
 //     doesn't ask for streaming. ParseOneShotResult unmarshals it.
 //
 //   - `--output-format stream-json --verbose`: one JSONL event per
-//     turn as it happens. Used by the web UI's SSE relay so users
-//     see live token arrival. Each line is its own JSON envelope
+//     turn as it happens. Each line is its own JSON envelope
 //     with a session_id repeated on every event; the talk path
 //     scans the stream in-flight via extractSessionID.
 //

@@ -30,7 +30,6 @@ Everything this repository knows about itself, by what the reader came to do. Wh
 | [Physics](concepts/physics.md)             | Constants, laws, elements, and the world context an agent reads at startup   |
 | [The Mind](concepts/mind.md)               | Identity, skills, memory; Dream, Sleep, and versioning a Mind                |
 | [Gate](concepts/gate.md)                   | The host-side broker: cookies, MCP routing, the browser sidecar              |
-| [Observatory](concepts/observatory.md)     | The web UI and the API behind it                                             |
 | [Update system](concepts/update-system.md) | How Spwn ships and updates itself, from the git tag to the binary swap       |
 
 ## Reference

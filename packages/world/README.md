@@ -25,5 +25,5 @@ Runtime adapters live in `packages/runtimes/`: they were moved out of `world/run
 
 ## Related
 
-- **Imported by**: `apps/api`, `apps/cli`, `packages/architect`
+- **Imported by**: `apps/cli`, `packages/architect`
 - **Imports**: `packages/agent`, `packages/container` (Docker backend), `packages/platform`, `packages/activity`

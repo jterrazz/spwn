@@ -31,5 +31,5 @@ The spawn pipeline is data-driven on runtime choice. `SpawnOpts.RuntimeName` sel
 
 ## Related
 
-- **Imported by**: `apps/api`, `apps/cli`
+- **Imported by**: `apps/cli`
 - **Imports**: `packages/world` (state, labels, models, runtimestate), `packages/container/backend` (Docker adapter), `packages/compile` (image build), `packages/dependency` + `packages/dependency/resolver` (dep-resolution), `packages/transpile` + `packages/transpile/worldbook` (render + Spwn content), `packages/runtimes` (+ `runtimes/defaults` for the built-in adapter set), `packages/agent`, `packages/activity`, `packages/authentication`, `packages/platform`

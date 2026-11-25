@@ -19,7 +19,6 @@ import (
 	"spwn.sh/apps/cli/snap"
 	"spwn.sh/apps/cli/team"
 	"spwn.sh/apps/cli/ui"
-	"spwn.sh/apps/cli/web"
 	"spwn.sh/apps/cli/world"
 	"spwn.sh/packages/upgrade"
 )
@@ -69,7 +68,6 @@ func init() {
 	rootCmd.AddCommand(authentication.Cmd)
 	rootCmd.AddCommand(gate.Cmd)
 	rootCmd.AddCommand(cookiesync.Cmd)
-	rootCmd.AddCommand(web.Cmd)
 	rootCmd.AddCommand(logs.Cmd)
 }
 

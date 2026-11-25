@@ -28,8 +28,6 @@ bash scripts/manual-harness.sh 31 40      # the Docker ones
 ## Out of scope (intentionally not in this pass)
 
 - `spwn auth login` (interactive OAuth flow)
-- `spwn web` (browser launch)
-- Playwright web UI specs (separate bucket: `make test-web`)
 
 ---
 

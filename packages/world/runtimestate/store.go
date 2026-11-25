@@ -94,8 +94,7 @@ func NewStore() (*Store, error) {
 }
 
 // NewStoreWith creates a Store from an explicit backend + root dir.
-// Used by tests and by callers that already hold a backend (notably
-// apps/api's test fixtures).
+// Used by tests and by callers that already hold a backend.
 func NewStoreWith(b backend.Backend, dir string) (*Store, error) {
 	return &Store{dir: dir, backend: b}, nil
 }

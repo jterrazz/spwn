@@ -87,7 +87,7 @@ Every command, and where each goes in the one grammar: [the CLI](docs/reference/
 
 ```text
 machines/     Machines: its code and its own manual, machines/docs/
-apps/         Agents' surfaces: cli (the command), api, gate, web, spwn-cookie-sync
+apps/         Agents' surfaces: cli (the command), gate, spwn-cookie-sync
 packages/     Agents: the packages behind them
 catalog/      Agents: the blocks an agent is made of
 docs/         the manual of the repository and of Agents

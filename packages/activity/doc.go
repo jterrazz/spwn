@@ -7,5 +7,5 @@
 //
 // Use Log to append, Read (with ReadOpts for filtering) to query,
 // and the Phrase* helpers to produce the human-readable summaries
-// the web UI and `spwn logs` render.
+// `spwn logs` renders.
 package activity

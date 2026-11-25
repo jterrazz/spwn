@@ -105,28 +105,12 @@ the same URL with the same key and look up `darwin-aarch64`, find nothing.
 The window checks once at its start, offers a newer version, and swaps its
 bundle and relaunches on a press.
 
-No workflow builds, signs or publishes the desktop bundles of `apps/web` today, and the shared `release-tauri.yaml` is deleted. What follows is the design the desktop job must meet when it returns; a release carries one `latest.json`, the window's, so that job writes its platforms into it rather than a second manifest.
-
-The desktop app uses the official
-[`tauri-plugin-updater`](https://v2.tauri.app/plugin/updater/) plugin,
-which:
-
-1. On app launch (wired in `components/app-shell.tsx`, calling `checkForUpdatesOnStartup()`)
-2. Fetches the manifest URL from `tauri.conf.json`:
-   `https://github.com/jterrazz/spwn/releases/latest/download/latest.json`
-3. Compares against the running app's bundled version.
-4. If newer, verifies the **Ed25519 signature** against the public key
-   embedded in the app.
-5. Shows a native confirmation dialog; on approval, downloads, installs,
-   and relaunches.
-
 ### Signing keys (one-time setup)
 
 Generate the keypair once:
 
 ```bash
-cd apps/web
-pnpm tauri signer generate -w ~/.tauri/spwn-web.key
+npx tauri signer generate -w ~/.tauri/spwn-web.key
 ```
 
 This produces two files:
@@ -225,7 +209,7 @@ Verify the version, platform URLs, and that signatures are populated.
 
 - **Never commit `~/.tauri/spwn-web.key`.** It's the only thing
   between the public and arbitrary code execution inside every user's
-  web UI instance. Infisical is its home, read by the job that signs.
+  window. Infisical is its home, read by the job that signs.
 - **Pub-key rotation.** If the private key is ever leaked, publish a new
   release with a rotated pubkey AND tell users to reinstall manually (the
   old app cannot verify signatures from the new key).
@@ -243,12 +227,7 @@ Verify the version, platform URLs, and that signatures are populated.
 apps/cli/upgrade.go                     # spwn upgrade command
 apps/cli/version_check.go               # background version check
 packages/upgrade/                 # reusable update logic + tests
-apps/web/src-tauri/tauri.conf.json        # updater endpoint + pubkey
-apps/web/src-tauri/Cargo.toml             # tauri-plugin-updater dep
-apps/web/src-tauri/src/desktop.rs         # plugin registration
-apps/web/src-tauri/capabilities/default.json  # updater:default
-apps/web/src/tauri/updater.ts         # frontend check + dialog
-apps/web/src/components/app-shell.tsx     # startup hook
+machines/apps/desktop/src-tauri/tauri.conf.json  # updater endpoint + pubkey
 docs/concepts/update-system.md   # this file
 docs/guides/release.md          # release runbook
 ```

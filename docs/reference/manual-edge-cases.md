@@ -448,5 +448,3 @@ new world has stale role.md but otherwise fine.
 - DoS / adversarial workloads (testing against a malicious agent).
 - Cross-platform beyond the world user's uid on Linux, which
   [Worlds](../concepts/worlds.md) covers (Spwn is macOS-first today).
-- HTTP API auth edges (apps/api is same-machine only).
-- Web UI specifics (Playwright suite).

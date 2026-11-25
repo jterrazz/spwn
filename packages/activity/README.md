@@ -4,7 +4,7 @@ System-wide event log for spwn.
 
 ## Role
 
-Every meaningful lifecycle event (world spawned, agent joined, session ended and so on) is appended as a JSONL record to `~/.spwn/activity.jsonl`. The log is the single source of truth for "what happened on this machine, and when": the CLI's `spwn logs` view and the web UI feed off it. Writes are best-effort: if the filesystem is unreachable the caller is never blocked, activity is just dropped.
+Every meaningful lifecycle event (world spawned, agent joined, session ended and so on) is appended as a JSONL record to `~/.spwn/activity.jsonl`. The log is the single source of truth for "what happened on this machine, and when": the CLI's `spwn logs` view feeds off it. Writes are best-effort: if the filesystem is unreachable the caller is never blocked, activity is just dropped.
 
 ## Key types
 
@@ -15,5 +15,5 @@ Every meaningful lifecycle event (world spawned, agent joined, session ended and
 
 ## Related
 
-- **Imported by**: `apps/api`, `apps/cli`, `packages/agent`, `packages/architect`
+- **Imported by**: `apps/cli`, `packages/agent`, `packages/architect`
 - **Imports**: `packages/platform` (for `~/.spwn/` paths)

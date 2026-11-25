@@ -126,7 +126,6 @@ spwn automation daemon        # run the engine until interrupted
 
 # ── System ───────────────────────────────────────────────────────
 spwn gate start|stop|status   # host-side broker for cookie-bearing tools (see the Gate concept)
-spwn web                      # open the local web UI
 spwn auth login|logout|token  # provider credentials
 
 # ── Registry (planned) ───────────────────────────────────────────
