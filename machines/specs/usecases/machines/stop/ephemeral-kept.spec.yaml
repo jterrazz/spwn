@@ -1,4 +1,4 @@
-description: 'a stop from station keeps an ephemeral workspace, stopped with its disk; it starts again (SP-5)'
+description: 'a stop keeps an ephemeral workspace with its disk, and --yes, needed no more, is still taken (SP-5)'
 env: two-macs
 runs:
     - command: 'machines stop linux-1 --yes'

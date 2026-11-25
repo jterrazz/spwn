@@ -2384,8 +2384,6 @@
             "text": "infra is unreachable for about a minute while it boots. Its health checks run again after the boot."
           }
         ],
-        "danger": true,
-        "type": "infra",
         "yes": "Restart infra",
         "no": "Cancel",
         "icon": "app"
@@ -2395,6 +2393,7 @@
       "run": {
         "call": "machines.restart",
         "in": {
+          "Confirm": "yes",
           "Name": "infra"
         },
         "target": {
@@ -2693,8 +2692,6 @@
             "text": "infra is unreachable for about a minute while it boots. Its health checks run again after the boot."
           }
         ],
-        "danger": true,
-        "type": "infra",
         "yes": "Restart infra",
         "no": "Cancel",
         "icon": "app"
@@ -2704,6 +2701,7 @@
       "run": {
         "call": "machines.restart",
         "in": {
+          "Confirm": "yes",
           "Name": "infra"
         },
         "target": {

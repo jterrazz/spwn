@@ -4,7 +4,6 @@ import (
 	"errors"
 	"strconv"
 
-	"github.com/jterrazz/studio-station/apps/engine/core/confirm"
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 	imagescalls "github.com/jterrazz/studio-station/apps/engine/images/calls"
 	"github.com/jterrazz/studio-station/apps/engine/machines"
@@ -36,7 +35,7 @@ const (
 // create adds those only it can end in, and a missing hypervisor is their
 // need, refused before they run.
 func createRefusals() []fail.Code {
-	return []fail.Code{confirm.YesNeeded, NotEnoughMemory, NoImage, EngineDown, BadName, NameTaken, BadCreator, BadPurpose, TooLittle, UnknownImage, BadNetwork, imagescalls.NoLinuxBinary}
+	return []fail.Code{NotEnoughMemory, NoImage, EngineDown, BadName, NameTaken, BadCreator, BadPurpose, TooLittle, UnknownImage, BadNetwork, imagescalls.NoLinuxBinary}
 }
 
 func workspaceRefusals() []fail.Code {

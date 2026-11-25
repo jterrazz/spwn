@@ -28,9 +28,11 @@ export const IDLE = { kind: 'idle' } as const;
 
 const YES = 'yes';
 
+// invariant: a yes to a question the engine asked answers with the name it asked about, so the engine
+// invariant: refuses it as a mismatch once what it names has changed (`confirm.Require` takes either).
 export function answerOf(ask: Ask, typed: string): string | undefined {
     if (ask.form === 'yes') {
-        return YES;
+        return ask.refusal !== undefined && ask.name !== '' ? ask.name : YES;
     }
     return typed === ask.name ? typed : undefined;
 }

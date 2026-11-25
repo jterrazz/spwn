@@ -370,6 +370,44 @@
       ],
       "type": "object"
     },
+    "machines.Asks": {
+      "additionalProperties": false,
+      "properties": {
+        "Delete": {
+          "enum": [
+            "",
+            "none",
+            "yes-no",
+            "type-name"
+          ],
+          "type": "string"
+        },
+        "Restart": {
+          "enum": [
+            "",
+            "none",
+            "yes-no",
+            "type-name"
+          ],
+          "type": "string"
+        },
+        "Stop": {
+          "enum": [
+            "",
+            "none",
+            "yes-no",
+            "type-name"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "Delete",
+        "Restart",
+        "Stop"
+      ],
+      "type": "object"
+    },
     "machines.Birth": {
       "additionalProperties": false,
       "properties": {
@@ -1046,6 +1084,9 @@
     "machines.VM": {
       "additionalProperties": false,
       "properties": {
+        "Asks": {
+          "$ref": "#/$defs/machines.Asks"
+        },
         "Birth": {
           "anyOf": [
             {

@@ -101,7 +101,7 @@ var VaultRemove = call.Call[Deps, VaultRemoveIn, accounts.Removed]{
 		if err := d.Passwords.Check(ctx, in.ID); err != nil {
 			return accounts.Removed{}, err
 		}
-		if err := confirm.Require(confirm.For(confirm.RemovePassword, d.Kind), in.ID, in.Confirm); err != nil {
+		if err := confirm.Require(confirm.Of(confirm.RemovePassword, d.Kind), in.ID, in.Confirm); err != nil {
 			return accounts.Removed{}, err
 		}
 		ended, err := d.Passwords.Remove(ctx, in.ID)

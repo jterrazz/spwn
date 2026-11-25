@@ -34,7 +34,7 @@ type ReserverOptions struct {
 	// value: each other host's own services, from those that answered.
 	Ask func(ctx context.Context, macs []string) map[string]ports.MacPorts
 	// value: a VM's port released by the host it runs on.
-	ReleaseOn func(ctx context.Context, mac string, t ports.Target, yes bool) (ports.Reservation, error)
+	ReleaseOn func(ctx context.Context, mac string, t ports.Target) (ports.Reservation, error)
 	VMMac     func(ctx context.Context, vm string) (mac string, thisMac bool, err error)
 	Exposure  func(ctx context.Context) ports.Exposure
 	// value: whether this Mac's engine is installed, read when it does not
@@ -318,9 +318,9 @@ func (s *Reserver) CheckRelease(ctx context.Context, t ports.Target) (mac string
 	return "", nil
 }
 
-func (s *Reserver) Release(ctx context.Context, t ports.Target, mac string, yes bool) (ports.Reservation, error) {
+func (s *Reserver) Release(ctx context.Context, t ports.Target, mac string) (ports.Reservation, error) {
 	if mac != "" {
-		return s.o.ReleaseOn(ctx, mac, t, yes)
+		return s.o.ReleaseOn(ctx, mac, t)
 	}
 	l, err := s.d.Release(ctx, t.VM, t.Port)
 	if s.inVM() && err != nil && errors.Is(err, ports.ErrEngineDown) {

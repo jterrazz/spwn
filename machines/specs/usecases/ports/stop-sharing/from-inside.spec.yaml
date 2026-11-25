@@ -1,7 +1,7 @@
 description: 'inside linux-1, stop sharing its own port runs on its Mac: released and remembered there'
 env: in-linux-1
 runs:
-    - command: 'ports stop-sharing 7000 --yes'
+    - command: 'ports stop-sharing 7000'
       exit: 0
       stdout: |
           ●	linux-1:7000	not shared

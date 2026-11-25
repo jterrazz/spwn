@@ -95,7 +95,7 @@ func TestAwakeNamesMacsAsHomeDoes(t *testing.T) {
 		{Mac: "macbook-pro", Caps: machine.Capabilities{Thermal: true}},
 		{Mac: "mac-mini", NeverSleeps: true},
 	}}
-	p := Awake(f, page.Context{})
+	p := Awake(f, page.Context{}, nil)
 	if got := p.Sections[len(p.Sections)-1].Title; got != "mac-mini" {
 		t.Fatalf("other Mac named %q", got)
 	}

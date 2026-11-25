@@ -14,7 +14,7 @@ runs:
       exit: 1
       stdout: |
           ┃ Type xcode to erase its data:
-          Error: not erased: you typed "xcod", not "xcode"
+          not erased: you typed "xcod", not "xcode"
           Hint: station disk erase xcode
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].disk.files | {derived: .["~/Library/Developer/Xcode/DerivedData/Station-abc/Build/x"], devices: .["~/Library/Developer/CoreSimulator/Devices/A/data"]}'' world.json'
       exit: 0

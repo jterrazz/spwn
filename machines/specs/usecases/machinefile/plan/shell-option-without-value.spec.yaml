@@ -41,7 +41,7 @@ runs:
           machine: { kind: computer, system: { os: macos } }
           apps: [{ name: served, options: { port: 8080 } }]
       exit: 0
-    - command: 'init --yes > /dev/null'
+    - command: 'init > /dev/null'
       exit: 0
     - command: 'machinefile apply > /dev/null'
       exit: 0

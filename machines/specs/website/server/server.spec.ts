@@ -204,7 +204,7 @@ describe('server', () => {
                 await visitor.gone(
                     within(
                         remove,
-                        content('Always on. Stopping it needs its name typed.', { exact: false }),
+                        content('Always on. Stopping it asks yes or no.', { exact: false }),
                     ),
                 );
             },

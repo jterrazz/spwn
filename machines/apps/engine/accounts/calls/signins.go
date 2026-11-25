@@ -95,7 +95,7 @@ var Logout = call.Call[Deps, LogoutIn, accounts.ProgramRow]{
 		if err := d.SignIns.CheckSignOut(ctx, in.Machine, in.Program); err != nil {
 			return accounts.ProgramRow{}, err
 		}
-		if err := confirm.Require(confirm.For(confirm.SignOut, d.Kind), in.Program.Label(), in.Confirm); err != nil {
+		if err := confirm.Require(confirm.Of(confirm.SignOut, d.Kind), in.Program.Label(), in.Confirm); err != nil {
 			return accounts.ProgramRow{}, err
 		}
 		return d.SignIns.SignOut(ctx, in.Machine, in.Program)

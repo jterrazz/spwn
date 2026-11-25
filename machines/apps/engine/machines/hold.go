@@ -1,5 +1,7 @@
 package machines
 
+import "github.com/jterrazz/studio-station/apps/engine/core/confirm"
+
 type HoldState string
 
 // value: what keeps a VM, and so whether it is safe to delete: always on
@@ -37,7 +39,7 @@ func HoldOf(vm VM) Hold {
 	case vm.State == UnknownState:
 		return Hold{State: HoldNotSeen, Sentence: "Not seen: its Mac does not answer, so nothing says what holds it."}
 	case vm.Lifetime == AlwaysOn:
-		return Hold{State: HoldAlwaysOn, Sentence: "Always on. Stopping it needs its name typed."}
+		return Hold{State: HoldAlwaysOn, Sentence: "Always on. Stopping it asks yes or no."}
 	case vm.State == Creating:
 		return Hold{State: HoldHeld, By: holder(vm, session), Sentence: "Being created" + by(vm, session) + ". It cannot be deleted until its create ends."}
 	case vm.State == Running && vm.Lifetime == Ephemeral && session:
@@ -64,9 +66,41 @@ func by(vm VM, session bool) string {
 	return ""
 }
 
-func DeleteAsks(l Lifetime, running bool, h Hold) bool {
-	// invariant: a delete asks the name typed by what it destroys: a VM
-	// that runs, one someone holds, or one that is not a throwaway; only a
-	// stopped ephemeral one nobody holds goes with no question.
-	return l != Ephemeral || running || h.State == HoldHeld
+func FactsOf(vm VM) []confirm.Fact {
+	// value: what a confirmation of a gesture on vm is graded by
+	// (confirm.Of), the same for its call and for every page that asks it:
+	// an ephemeral VM, one that runs or whose run is unread, one someone
+	// holds, a server already down.
+	var out []confirm.Fact
+	if vm.Lifetime == Ephemeral {
+		out = append(out, confirm.Ephemeral)
+	}
+	if vm.State == Running || vm.State == UnknownState {
+		out = append(out, confirm.Running)
+	}
+	if HoldOf(vm).State == HoldHeld {
+		out = append(out, confirm.Held)
+	}
+	if Down(vm) {
+		out = append(out, confirm.Down)
+	}
+	return out
+}
+
+type Asks struct {
+	// value: what each gesture of a VM's page asks, as its call grades it
+	// (confirm.Of over FactsOf), so a window draws the question the call
+	// asks.
+	Stop    confirm.Level
+	Restart confirm.Level
+	Delete  confirm.Level
+}
+
+func AsksOf(vm VM) Asks {
+	kind, facts := vm.Lifetime.Kind(), FactsOf(vm)
+	restart := confirm.Restart
+	if vm.Lifetime == AlwaysOn {
+		restart = confirm.RestartServer
+	}
+	return Asks{Stop: confirm.Of(confirm.Stop, kind, facts...), Restart: confirm.Of(restart, kind, facts...), Delete: confirm.Of(confirm.Delete, kind, facts...)}
 }

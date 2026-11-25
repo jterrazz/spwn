@@ -270,6 +270,8 @@ func Judged(f AllMachines) AllMachines {
 			vms[j].Head, vms[j].Pending, vms[j].Standing = &head, pending, StandingOf(vms[j])
 			hold, sections := HoldOf(vms[j]), SectionsOf(vms[j])
 			vms[j].Hold, vms[j].Sections, vms[j].Gestures = &hold, &sections, GesturesOf(vms[j])
+			asks := AsksOf(vms[j])
+			vms[j].Asks = &asks
 			if strip, ok := vms[j].Uptime.Strip(f.Read); ok {
 				vms[j].Strip = &strip
 			}

@@ -146,7 +146,7 @@ describe('shown', () => {
             },
             { Sentence: 'Stopped. Safe to delete.', State: 'free' },
             { Sentence: 'Yours. Stays until you delete it.', State: 'yours' },
-            { Sentence: 'Always on. Stopping it needs its name typed.', State: 'always-on' },
+            { Sentence: 'Always on. Stopping it asks yes or no.', State: 'always-on' },
             {
                 Sentence: 'Not seen: its Mac does not answer, so nothing says what holds it.',
                 State: 'not-seen',

@@ -1,0 +1,11 @@
+description: 'off a terminal, undeclare asks nothing: the declaration is forgotten at once'
+env: two-macs
+runs:
+    - command: 'ports undeclare infra 443'
+      exit: 0
+      stdout: |
+          ●	443 on infra	not declared
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].stores.declarations'' world.json'
+      exit: 0
+      stdout: |
+          null

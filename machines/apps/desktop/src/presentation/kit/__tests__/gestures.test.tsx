@@ -131,10 +131,8 @@ describe('gestures', () => {
             async (visitor) => {
                 await visitor.see(region('Port 5173'));
 
-                // When - its share is stopped and the stop confirmed
+                // When - its share is stopped, which asks nothing
                 await visitor.click(within(region('Port 5173'), button('Stop sharing')));
-                const asked = dialog('Stop sharing linux-1:5173?');
-                await visitor.click(within(asked, button('Stop sharing')));
 
                 // Then - the row is gone from the list, and its outcome is held above it
                 await visitor.gone(region('Port 5173'));

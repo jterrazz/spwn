@@ -54,7 +54,7 @@ var Forget = call.Call[Deps, ForgetIn, struct{}]{
 		if _, err := d.Machines.CheckRemoteMac(in.Name, "forget"); err != nil {
 			return struct{}{}, err
 		}
-		if err := confirm.Require(confirm.For(confirm.Forget, d.Kind), in.Name, in.Confirm); err != nil {
+		if err := confirm.Require(confirm.Of(confirm.Forget, d.Kind), in.Name, in.Confirm); err != nil {
 			return struct{}{}, err
 		}
 		return struct{}{}, d.Machines.ForgetMac(ctx, in.Name)
@@ -164,7 +164,7 @@ var RestartMac = call.Call[Deps, RestartMacIn, machines.Back]{
 		if err != nil {
 			return machines.Back{}, err
 		}
-		if err = confirm.Require(confirm.For(confirm.RestartMac, d.Kind), in.Name, in.Confirm); err != nil {
+		if err = confirm.Require(confirm.Of(confirm.RestartMac, d.Kind), in.Name, in.Confirm); err != nil {
 			return machines.Back{}, err
 		}
 		paused, _ := d.Machines.VMsOf(ctx, mac)

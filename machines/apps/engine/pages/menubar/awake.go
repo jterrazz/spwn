@@ -39,7 +39,7 @@ const untilHours = 8
 
 func isThisMac(f pageawake.AllMachines, r awake.Report) bool { return f.This != "" && r.Mac == f.This }
 
-func Awake(f pageawake.AllMachines, ctx page.Context) page.Page {
+func Awake(f pageawake.AllMachines, ctx page.Context, asks Levels) page.Page {
 	// invariant: SPEC A4 Awake · All Macs: This Mac first, its switch, the
 	// picker, Lid closed and On battery only where its capabilities have
 	// them (E1), then the running work that pauses while it sleeps; then
@@ -66,7 +66,7 @@ func Awake(f pageawake.AllMachines, ctx page.Context) page.Page {
 			continue
 		}
 		name := label(f, r.Mac)
-		a, ok := change(r, name)
+		a, ok := change(r, name, asks)
 		row := otherMac(r, f.Zone)
 		if ok && r.Mode() != awake.AwakeUntil {
 			row.Verb = a.ID
@@ -314,9 +314,10 @@ func untilField(now time.Time, zone *time.Location) page.Field {
 }
 
 // invariant: AW-21: Change… on a Mac that never sleeps lets it sleep again,
-// a y/n that names each server it hosts, which pauses while it sleeps; on
+// asked at the level the engine grades (asks): a y/n that names each server
+// it hosts, which pauses while it sleeps, and nothing when it hosts none; on
 // one that sleeps it keeps it awake for good. It runs on that Mac.
-func change(r awake.Report, name string) (page.Action, bool) {
+func change(r awake.Report, name string, asks Levels) (page.Action, bool) {
 	if r.Engine == awake.EngineReading || r.EngineDown() {
 		return page.Action{}, false
 	}
@@ -324,7 +325,11 @@ func change(r awake.Report, name string) (page.Action, bool) {
 	a := page.Action{ID: ActionChange + r.Mac, Label: "Change", On: page.OnRow, Rows: []string{r.Mac}, Priority: 2, Mutates: true, Run: run}
 	if r.Mode() == awake.NeverSleeps {
 		run.Call = CallSettingsOff
-		return letSleep(name, r.Servers).action(yesOrNo, a), true
+		if asks == nil {
+			asks = yesOrNo
+		}
+		delete(run.In, "Confirm")
+		return letSleep(name, r.Servers).action(asks, a), true
 	}
 	run.Call = CallSettingsApply
 	a.Confirm = &page.Confirm{Question: "Keep " + name + " awake for good?", Lines: []page.Value{page.Text("Never sleeps: the always-on Mac policy, until you change it again.")}, Yes: "Never sleep", No: "Cancel"}

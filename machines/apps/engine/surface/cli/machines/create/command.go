@@ -3,6 +3,7 @@ package machinescreate
 import (
 	"cmp"
 	"context"
+	"errors"
 	"strconv"
 
 	"github.com/spf13/cobra"
@@ -21,11 +22,10 @@ import (
 type Deps struct {
 	// value: the flags' sizes, parsed as the hypervisor takes them.
 	Resources func(cpus int, memory, disk string) (machines.Resources, error)
-	// value: every refusal a question cannot answer; unbuilt when the only
-	// one is the image, not built yet, which the call asks to build first.
+	// value: every refusal of the request; unbuilt when the only one is the
+	// image, not on the Mac it is sent to, which the call builds first, or
+	// refuses when station only fetches it.
 	Check func(ctx context.Context, r machines.CreateRequest) (unbuilt bool, err error)
-	// value: the refusal of an image not built, off a terminal without --yes.
-	NotBuilt func(image string) error
 	// value: refuses this machine when the call's rule says no, before any
 	// check of the request.
 	Admit func() error
@@ -53,6 +53,9 @@ type Input struct {
 	request machines.CreateRequest
 	// value: another Mac chosen on a terminal, the create sent there.
 	mac string
+	// value: the image is not built on the Mac the create is sent to, which
+	// builds it first.
+	unbuilt bool
 }
 
 func Command(d Deps, env kit.Env) *cobra.Command {
@@ -64,11 +67,6 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 			"  station machines create web --from studio-linux\n" +
 			"  station machines create infra --server --check https://infra:6443/readyz --on mac-mini",
 		Args: cobra.MaximumNArgs(1),
-		Asks: true,
-		Ask: func(in *Input) (bool, error) {
-			return env.Prompt.Confirm(pagemachines.BuildConfirm(in.request.Image))
-		},
-		Refuse: func(in *Input) error { return d.NotBuilt(in.request.Image) },
 		Declare: func(f *pflag.FlagSet, in *Input) {
 			f.BoolVar(&in.Persistent, "persistent", false, "kept until you delete it; without it, deleted when it powers off from inside")
 			f.BoolVar(&in.Server, "server", false, "a server: always on, set up by your own tooling, never by Machines (default 4 CPU, 8G, 50G)")
@@ -116,7 +114,10 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 					in.request.Image, in.request.From = name, name
 				}
 			}
-			if unbuilt, err := d.Check(ctx, in.request); !unbuilt {
+			unbuilt, err := d.Check(ctx, in.request)
+			missing := new(machines.NoImageError)
+			in.unbuilt = unbuilt && errors.As(err, &missing) && !missing.Fetched
+			if !unbuilt {
 				return err
 			}
 			return nil
@@ -131,27 +132,28 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 			if in.mac != "" {
 				target = machine.Ref{Name: in.mac}
 			}
+			if in.unbuilt && in.mac == "" {
+				io.Note(in.request.Image + " is built first, which takes several minutes")
+			}
 			steps := kit.Steps(io)
 			var created machines.Created
 			schema := machinescalls.CreateWorkspace.Schema()
 			if in.Server {
 				schema = machinescalls.CreateServer.Schema()
 			}
-			err := io.Confirmed(func(answer string) (err error) {
-				r := in.request
-				if r.Lifetime == machines.Ephemeral {
-					// invariant: the default lifetime travels as none, which
-					// the create of every station reads as its own default,
-					// an older one's included (ADR-032).
-					r.Lifetime = ""
-				}
-				if in.Server {
-					created, err = call.Invoke(ctx, env.Calls, target, machinescalls.CreateServer, machinescalls.CreateServerIn{Name: r.Name, Image: r.Image, Network: r.Network, Size: r.Size, Check: r.Check, Purpose: r.Purpose, Creator: r.Creator, Confirm: answer}, steps)
-				} else {
-					created, err = call.Invoke(ctx, env.Calls, target, machinescalls.CreateWorkspace, machinescalls.CreateIn{Request: r, Confirm: answer}, steps)
-				}
-				return err
-			})
+			r := in.request
+			if r.Lifetime == machines.Ephemeral {
+				// invariant: the default lifetime travels as none, which
+				// the create of every station reads as its own default,
+				// an older one's included (ADR-032).
+				r.Lifetime = ""
+			}
+			var err error
+			if in.Server {
+				created, err = call.Invoke(ctx, env.Calls, target, machinescalls.CreateServer, machinescalls.CreateServerIn{Name: r.Name, Image: r.Image, Network: r.Network, Size: r.Size, Check: r.Check, Purpose: r.Purpose, Creator: r.Creator}, steps)
+			} else {
+				created, err = call.Invoke(ctx, env.Calls, target, machinescalls.CreateWorkspace, machinescalls.CreateIn{Request: r}, steps)
+			}
 			steps.Stop()
 			if err != nil {
 				return err

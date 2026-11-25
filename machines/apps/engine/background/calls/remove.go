@@ -40,7 +40,7 @@ var Remove = call.Call[Deps, RemoveIn, background.Task]{
 		if task.Scope == background.ScopeRoot {
 			return task, fail.New(fail.Refused, RootScope, in.Label, map[string]string{"command": job.Removal})
 		}
-		if err := confirm.Require(confirm.For(confirm.Remove, d.Kind), in.Label, in.Confirm); err != nil {
+		if err := confirm.Require(confirm.Of(confirm.Remove, d.Kind), in.Label, in.Confirm); err != nil {
 			return task, err
 		}
 		return task, d.Jobs.Remove(ctx, contract.Ref{Domain: d.Domain, Label: job.Label, File: job.File})

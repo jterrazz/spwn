@@ -35,17 +35,8 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 			}
 			return nil
 		},
-		Asks: true,
-		Verb: func(in *Input) string { return "stop sharing " + strings.TrimPrefix(in.VM+":"+in.Port, ":") },
-		Confirm: func(in *Input) string {
-			return "Stop sharing " + strings.TrimPrefix(in.VM+":"+in.Port, ":") + "? it is not shared again when it listens, until you share it"
-		},
 		Run: func(ctx context.Context, in *Input, io kit.IO) error {
-			var out portscalls.StopSharingOut
-			err := io.Confirmed(func(answer string) (err error) {
-				out, err = call.Invoke(ctx, env.Calls, env.Target(), portscalls.StopSharing, portscalls.StopSharingIn{VM: in.VM, Port: in.Port, Confirm: answer}, nil)
-				return err
-			})
+			out, err := call.Invoke(ctx, env.Calls, env.Target(), portscalls.StopSharing, portscalls.StopSharingIn{VM: in.VM, Port: in.Port}, nil)
 			if err != nil {
 				return err
 			}

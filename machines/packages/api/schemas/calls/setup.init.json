@@ -88,9 +88,6 @@
     "setup.calls.InitIn": {
       "additionalProperties": false,
       "properties": {
-        "Confirm": {
-          "type": "string"
-        },
         "Interactive": {
           "type": "boolean"
         },

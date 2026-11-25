@@ -239,20 +239,6 @@ func ServerStarted(name string, thisMac page.Context) page.Page {
 	return pages.Outcome("machines start", thisMac, nil, []page.Row{row}, "machines")
 }
 
-func StopServerForm(name string) page.Form {
-	return page.Form{
-		Title:  "Stop " + name + "? It will not start at its Mac's boot nor restart until you start it",
-		Fields: []page.Field{{Key: "name", Label: "Type " + name + " to stop it:", Kind: page.FieldText}},
-	}
-}
-
-func RestartServerForm(name string) page.Form {
-	return page.Form{
-		Title:  "Restart " + name + "? What it serves is down until it answers again",
-		Fields: []page.Field{{Key: "name", Label: "Type " + name + " to restart it:", Kind: page.FieldText}},
-	}
-}
-
 func Added(a model.Added, thisMac page.Context) page.Page {
 	// value: the Mac added, as ssh and its station answered; a station of
 	// another version is one more row, with what brings them to one.
@@ -569,10 +555,6 @@ func CreateForm(lifetime string, macs []MacChoice) page.Form {
 		f.Fields = append(f.Fields, field)
 	}
 	return f
-}
-
-func BuildConfirm(image string) page.Confirm {
-	return page.Confirm{Question: "Image " + image + " is not built on This Mac. Build " + image + " now? (~3 min)"}
 }
 
 type SSHJSON struct {

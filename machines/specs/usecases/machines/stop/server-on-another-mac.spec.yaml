@@ -1,11 +1,11 @@
-description: 'a stop sent with --on is judged on the server''s own Mac, with the typed name it carries'
+description: 'a stop sent with --on is judged on the server''s own Mac: only its own name answers'
 env: two-macs
 runs:
     - command: 'machines stop infra --on mac-mini --confirm=linux-1'
       exit: 2
       stderr: |
-          Error: not stopped: you typed "linux-1", not "infra"
-          Hint: in a script: --confirm=infra
+          Error: refusing to stop without --yes
+          Hint: re-run with --yes
     - command: 'machines stop infra --on mac-mini --confirm=infra'
       exit: 0
       stdout: |

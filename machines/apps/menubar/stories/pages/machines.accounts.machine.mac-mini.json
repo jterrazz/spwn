@@ -4305,26 +4305,12 @@
       "rows": [
         "linux-3:8080"
       ],
-      "confirm": {
-        "question": "Stop sharing linux-3:8080?",
-        "lines": [
-          {
-            "kind": "text",
-            "text": "The link stops answering on your tailnet. What answers on it keeps running inside the VM."
-          }
-        ],
-        "danger": true,
-        "yes": "Stop sharing",
-        "no": "Cancel",
-        "icon": "app"
-      },
       "priority": 3,
       "mutates": true,
       "id": "stop-sharing:linux-3:8080",
       "run": {
         "call": "ports.stop-sharing",
         "in": {
-          "Confirm": "yes",
           "Mac": "\"mac-mini\"",
           "Port": "\"8080\"",
           "VM": "\"linux-3\""
@@ -4511,7 +4497,6 @@
           }
         ],
         "danger": true,
-        "type": "mac-mini",
         "yes": "Restart mac-mini",
         "no": "Cancel",
         "icon": "app"
@@ -4747,8 +4732,6 @@
             "text": "infra is unreachable for about a minute while it boots. Its health checks run again after the boot."
           }
         ],
-        "danger": true,
-        "type": "infra",
         "yes": "Restart infra",
         "no": "Cancel",
         "icon": "app"
@@ -4759,14 +4742,14 @@
       "run": {
         "call": "machines.restart",
         "in": {
+          "Confirm": "yes",
           "Name": "infra"
         },
         "target": {
           "name": "mac-mini"
         }
       },
-      "icon": "arrow.clockwise",
-      "destructive": true
+      "icon": "arrow.clockwise"
     },
     {
       "label": "Stop",
@@ -4780,7 +4763,6 @@
           }
         ],
         "danger": true,
-        "type": "infra",
         "yes": "Stop infra",
         "no": "Cancel",
         "icon": "app"
@@ -4791,6 +4773,7 @@
       "run": {
         "call": "machines.stop",
         "in": {
+          "Confirm": "yes",
           "VM": "infra"
         },
         "target": {
@@ -4989,32 +4972,28 @@
     {
       "label": "Stop",
       "on": "menu",
-      "confirm": {
-        "question": "Stop linux-3 on mac-mini?",
-        "lines": [
-          {
-            "kind": "text",
-            "text": "Its disk is kept. 1 shared port stops answering until it starts again."
-          }
-        ],
-        "yes": "Stop linux-3",
-        "no": "Cancel",
-        "icon": "app"
-      },
       "priority": 1,
       "mutates": true,
       "id": "stop@linux-3",
       "run": {
         "call": "machines.stop",
         "in": {
-          "Confirm": "yes",
           "VM": "linux-3"
         },
         "target": {
           "name": "mac-mini"
         }
       },
-      "icon": "stop"
+      "icon": "stop",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "linux-3 is stopping"
+          }
+        ]
+      }
     },
     {
       "label": "Delete",
@@ -5028,6 +5007,7 @@
           }
         ],
         "danger": true,
+        "type": "linux-3",
         "yes": "Delete linux-3",
         "no": "Cancel",
         "icon": "app"
@@ -5038,7 +5018,6 @@
       "run": {
         "call": "machines.delete",
         "in": {
-          "Confirm": "\"linux-3\"",
           "VM": "linux-3"
         },
         "target": {
@@ -5171,32 +5150,28 @@
     {
       "label": "Stop",
       "on": "menu",
-      "confirm": {
-        "question": "Stop review-bot on mac-mini?",
-        "lines": [
-          {
-            "kind": "text",
-            "text": "Its disk is kept."
-          }
-        ],
-        "yes": "Stop review-bot",
-        "no": "Cancel",
-        "icon": "app"
-      },
       "priority": 1,
       "mutates": true,
       "id": "stop@review-bot",
       "run": {
         "call": "machines.stop",
         "in": {
-          "Confirm": "yes",
           "VM": "review-bot"
         },
         "target": {
           "name": "mac-mini"
         }
       },
-      "icon": "stop"
+      "icon": "stop",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "review-bot is stopping"
+          }
+        ]
+      }
     },
     {
       "label": "Delete",

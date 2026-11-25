@@ -3,11 +3,8 @@ package calls
 import (
 	"context"
 	"errors"
-	"strings"
 
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
-	"github.com/jterrazz/studio-station/apps/engine/core/confirm"
-	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 	"github.com/jterrazz/studio-station/apps/engine/core/section"
 	"github.com/jterrazz/studio-station/apps/engine/core/store"
 	"github.com/jterrazz/studio-station/apps/engine/ports"
@@ -59,7 +56,6 @@ var Declare = call.Call[Deps, DeclareIn, DeclareOut]{
 type UndeclareIn struct {
 	Machine string
 	Port    string
-	Confirm string
 }
 
 type UndeclareOut struct {
@@ -67,11 +63,11 @@ type UndeclareOut struct {
 }
 
 var Undeclare = call.Call[Deps, UndeclareIn, UndeclareOut]{
-	// invariant: an undeclare asks yes or no, then forgets the declaration
-	// on the Mac that keeps it; the port is red again while it still listens
-	// where something outside the tailnet reaches it.
-	Name: "ports.undeclare", Section: section.Ports, Where: call.AtTarget, Applies: ports.DeclaredOnAMac, Confirm: confirm.Undeclare,
-	Errors: []fail.Code{confirm.YesNeeded},
+	// invariant: an undeclare asks nothing (ADR-097: a declare gives it
+	// back), and forgets the declaration on the Mac that keeps it; the port
+	// is red again while it still listens where something outside the
+	// tailnet reaches it.
+	Name: "ports.undeclare", Section: section.Ports, Where: call.AtTarget, Applies: ports.DeclaredOnAMac,
 	Run: func(ctx context.Context, d Deps, in UndeclareIn, _ call.Progress) (UndeclareOut, error) {
 		port, err := d.Ports.ParsePort(in.Port)
 		if err != nil {
@@ -90,9 +86,6 @@ var Undeclare = call.Call[Deps, UndeclareIn, UndeclareOut]{
 			return UndeclareOut{}, ports.NotDeclared(name, port)
 		}
 		if err != nil {
-			return UndeclareOut{}, err
-		}
-		if err := confirm.Require(confirm.For(confirm.Undeclare, d.Kind), strings.TrimPrefix(decl.Key(), ":"), in.Confirm); err != nil {
 			return UndeclareOut{}, err
 		}
 		return UndeclareOut{Declaration: decl}, d.Declarations.Delete(ctx, name, port)

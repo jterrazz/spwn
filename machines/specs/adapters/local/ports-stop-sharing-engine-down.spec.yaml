@@ -4,7 +4,7 @@ fixture:
     - ../../__fixtures__/vm-api/
     - ./__fixtures__/ports-api-leases/
 runs:
-    - command: 'ports stop-sharing api:3000 --yes; /usr/bin/jq -c "[.leases[] | .guest_port]" .local/state/station/leases.json'
+    - command: 'ports stop-sharing api:3000; /usr/bin/jq -c "[.leases[] | .guest_port]" .local/state/station/leases.json'
       exit: 0
       stdout: |
           ●	api:3000	not shared

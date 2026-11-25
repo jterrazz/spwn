@@ -317,8 +317,8 @@ func (f Scene) draw() []Fixture {
 	r := f.reading()
 	out := []Fixture{
 		{Name: "menubar", Page: pagemenubar.Page(r, thisMac)},
-		{Name: "ports", Page: pagemenubar.Ports(f.portsOf(""), pagemenubar.PortsOf{Machines: &f.All}, thisMac)},
-		{Name: "awake", Page: pagemenubar.Awake(f.awakeAll(), thisMac)},
+		{Name: "ports", Page: pagemenubar.Ports(f.portsOf(""), pagemenubar.PortsOf{Machines: &f.All, Asks: Levels}, thisMac)},
+		{Name: "awake", Page: pagemenubar.Awake(f.awakeAll(), thisMac, Levels)},
 		{Name: "activity", Page: pagemenubar.Activity(f.Activity, thisMac)},
 		{Name: "needs", Page: pagemenubar.NeedsPage(f.needs(), "", thisMac)},
 		{Name: "find", Page: pagemenubar.Find(f.find(), thisMac)},
@@ -328,7 +328,7 @@ func (f Scene) draw() []Fixture {
 		out = append(out, Fixture{Name: "machine." + h.Name, Page: pagemenubar.MachinePage(f.machine(h.Name))})
 		if h.Reachable {
 			out = append(out, Fixture{Name: "needs." + h.Name, Page: pagemenubar.NeedsPage(f.needs(), h.Name, thisMac)})
-			of := pagemenubar.PortsOf{Machine: h.Name}
+			of := pagemenubar.PortsOf{Machine: h.Name, Asks: Levels}
 			if h.ThisMac {
 				of.Machine = ""
 			}

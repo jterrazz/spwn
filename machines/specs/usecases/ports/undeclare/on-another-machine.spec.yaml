@@ -1,7 +1,7 @@
 description: 'an undeclare sent with --on forgets the declaration that Mac keeps'
 env: two-macs
 runs:
-    - command: 'ports undeclare infra 443 --yes --on mac-mini'
+    - command: 'ports undeclare infra 443 --on mac-mini'
       exit: 0
       stdout: |
           	On mac-mini:

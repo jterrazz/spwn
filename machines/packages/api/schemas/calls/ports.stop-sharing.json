@@ -57,9 +57,6 @@
     "ports.calls.StopSharingIn": {
       "additionalProperties": false,
       "properties": {
-        "Confirm": {
-          "type": "string"
-        },
         "Mac": {
           "type": "string"
         },

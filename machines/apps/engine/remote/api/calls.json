@@ -254,8 +254,7 @@
       "confirm": "free-unused",
       "consequence": "Deleted for good: %s. No machine and no file of yours is touched.",
       "errors": [
-        "confirm.mismatch",
-        "confirm.needed",
+        "confirm.yes-needed",
         "disk.names-needed",
         "disk.not-freeable",
         "disk.record-unreadable"
@@ -771,10 +770,7 @@
       "name": "machines.create-server",
       "schema": "station.machines.create-server/v1",
       "where": "in-engine",
-      "confirm": "build-image",
-      "consequence": "%s is built first, which takes several minutes.",
       "errors": [
-        "confirm.yes-needed",
         "image.no-linux-binary",
         "machines.bad-check",
         "machines.bad-creator",
@@ -798,10 +794,7 @@
       "name": "machines.create-workspace",
       "schema": "station.machines.create-workspace/v1",
       "where": "in-engine",
-      "confirm": "build-image",
-      "consequence": "%s is built first, which takes several minutes.",
       "errors": [
-        "confirm.yes-needed",
         "image.no-linux-binary",
         "machines.bad-creator",
         "machines.bad-lifetime",
@@ -904,8 +897,6 @@
         "workspace": "restart"
       },
       "errors": [
-        "confirm.mismatch",
-        "confirm.needed",
         "confirm.yes-needed"
       ],
       "in": "RestartIn",
@@ -946,8 +937,6 @@
       "confirm": "stop",
       "consequence": "%s stops: what it serves stops until you start it again.",
       "errors": [
-        "confirm.mismatch",
-        "confirm.needed",
         "confirm.yes-needed"
       ],
       "in": "StopIn",
@@ -1023,11 +1012,6 @@
       "schema": "station.ports.stop-sharing/v1",
       "section": "ports",
       "where": "in-engine",
-      "confirm": "stop-sharing",
-      "consequence": "%s is no longer shared, and its reserved port is released.",
-      "errors": [
-        "confirm.yes-needed"
-      ],
       "in": "StopSharingIn",
       "out": "StopSharingOut"
     },
@@ -1036,11 +1020,6 @@
       "schema": "station.ports.undeclare/v1",
       "section": "ports",
       "where": "at-target",
-      "confirm": "undeclare",
-      "consequence": "%s is no longer declared, so a listener on it is flagged again.",
-      "errors": [
-        "confirm.yes-needed"
-      ],
       "in": "UndeclareIn",
       "out": "UndeclareOut"
     },
@@ -1126,11 +1105,6 @@
       "name": "setup.init",
       "schema": "station.setup.init/v1",
       "where": "at-target",
-      "confirm": "relocate",
-      "consequence": "Moved where each app now looks, one rename each: %s.",
-      "errors": [
-        "confirm.yes-needed"
-      ],
       "in": "InitIn",
       "out": "Report"
     },

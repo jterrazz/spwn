@@ -9,15 +9,23 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/page"
 )
 
-// value: the facts an alert's level is graded by, by the words of the
-// engine's confirmation rule (confirm.Fact).
 const (
-	FactEphemeral   = "ephemeral"
+	// value: the fact a Mac's alert is graded by, by the words of the
+	// engine's confirmation rule (confirm.Fact); a VM's facts are its own,
+	// model.FactsOf's, the ones its call reads.
 	FactHostsServer = "hosts-server"
 )
 
-// value: the level of a gesture whose call asks yes or no of every machine
-// (ports.stop-sharing): a page that holds no rule draws it so.
+func factsOf(vm model.VM) []string {
+	facts := model.FactsOf(vm)
+	out := make([]string, 0, len(facts))
+	for _, f := range facts {
+		out = append(out, string(f))
+	}
+	return out
+}
+
+// value: the level of a gesture on a page that is handed no rule: yes or no.
 func yesOrNo(string, machine.Kind, ...string) string { return LevelYesNo }
 
 const IconApp = "app"
@@ -55,20 +63,13 @@ func (a alert) confirm(levels Levels) *page.Confirm {
 	return c
 }
 
-// value: the call's input once the alert is answered: the answer its call
-// asks for at its own level, which the page fixes when the alert asked
-// otherwise; nothing when the owner types the name the call checks.
-func (a alert) answered(levels Levels, c *page.Confirm, in map[string]string) map[string]string {
-	if c == nil {
-		return in
-	}
-	switch levels(a.Gesture, a.Kind) {
-	case LevelYesNo:
+// value: the call's input once the alert is answered: yes for a yes or
+// no; nothing for a typed one, whose name the owner types.
+// invariant: the alert asks at the level its call asks, graded by the same
+// facts, so a page never answers a typed question for the owner.
+func (a alert) answered(c *page.Confirm, in map[string]string) map[string]string {
+	if c != nil && c.Type == "" {
 		in["Confirm"] = yes
-	case LevelTypeName:
-		if c.Type == "" {
-			in["Confirm"] = strconv.Quote(a.Name)
-		}
 	}
 	return in
 }
@@ -76,7 +77,7 @@ func (a alert) answered(levels Levels, c *page.Confirm, in map[string]string) ma
 func (a alert) action(levels Levels, act page.Action) page.Action {
 	act.Confirm = a.confirm(levels)
 	if act.Run != nil {
-		act.Run.In = a.answered(levels, act.Confirm, act.Run.In)
+		act.Run.In = a.answered(act.Confirm, act.Run.In)
 	}
 	return act
 }
@@ -114,7 +115,7 @@ func site(vm model.VM) string {
 }
 
 func restartServer(vm model.VM, on string) alert {
-	return alert{Gesture: "restart-server", Kind: machine.Server, Name: vm.Name, Question: "Restart " + vm.Name + " on " + on + "?",
+	return alert{Gesture: "restart-server", Kind: machine.Server, Name: vm.Name, Facts: factsOf(vm), Question: "Restart " + vm.Name + " on " + on + "?",
 		Says: []string{vm.Name + " is unreachable for about a minute while it boots.", "Its health checks run again after the boot."}, Verb: "Restart " + vm.Name}
 }
 
@@ -123,7 +124,7 @@ func stopServer(vm model.VM, on string) alert {
 	if s := site(vm); s != "" {
 		says = append(says, s+" goes offline.")
 	}
-	return alert{Gesture: "stop", Kind: machine.Server, Name: vm.Name, Question: "Stop " + vm.Name + " on " + on + "?", Says: says, Verb: "Stop " + vm.Name, Danger: true}
+	return alert{Gesture: "stop", Kind: machine.Server, Name: vm.Name, Facts: factsOf(vm), Question: "Stop " + vm.Name + " on " + on + "?", Says: says, Verb: "Stop " + vm.Name, Danger: true}
 }
 
 func deleteServer(vm model.VM, ports int) alert {
@@ -137,19 +138,7 @@ func deleteServer(vm model.VM, ports int) alert {
 	} else {
 		says += "."
 	}
-	return alert{Gesture: "delete", Kind: machine.Server, Name: vm.Name, Question: "Delete " + vm.Name + "?", Says: []string{says}, Verb: "Delete " + vm.Name, Danger: true}
-}
-
-func stopWorkspace(vm model.VM, on string, shared int) alert {
-	says := []string{"Its disk is kept."}
-	if shared > 0 {
-		says = append(says, counted(shared, "shared port", "shared ports")+" "+pluralVerb(shared, "stops", "stop")+" answering until it starts again.")
-	}
-	a := alert{Gesture: "stop", Kind: vm.Lifetime.Kind(), Name: vm.Name, Question: "Stop " + vm.Name + " on " + on + "?", Says: says, Verb: "Stop " + vm.Name}
-	if vm.Lifetime == model.Ephemeral {
-		a.Facts = []string{FactEphemeral}
-	}
-	return a
+	return alert{Gesture: "delete", Kind: machine.Server, Name: vm.Name, Facts: factsOf(vm), Question: "Delete " + vm.Name + "?", Says: []string{says}, Verb: "Delete " + vm.Name, Danger: true}
 }
 
 func deleteWorkspace(vm model.VM, shared, grants int) alert {
@@ -162,9 +151,7 @@ func deleteWorkspace(vm model.VM, shared, grants int) alert {
 	}
 	says := []string{"This can't be undone. It goes with " + and(goes) + "."}
 	a := alert{Gesture: "delete", Kind: vm.Lifetime.Kind(), Name: vm.Name, Question: "Delete " + vm.Name + "?", Says: says, Verb: "Delete " + vm.Name, Danger: true}
-	if vm.Lifetime == model.Ephemeral {
-		a.Facts = []string{FactEphemeral}
-	}
+	a.Facts = factsOf(vm)
 	return a
 }
 
@@ -187,7 +174,6 @@ func restartMac(label string, servers []string) alert {
 	a := alert{Gesture: "restart-mac", Kind: machine.Computer, Name: label, Question: "Restart " + label + "?",
 		Says: []string{"Its VMs pause while it restarts, about 2 min."}, Verb: "Restart " + label, Danger: true}
 	if len(servers) > 0 {
-		a.Facts = []string{FactHostsServer}
 		a.Says = []string{pluralVerb(len(servers), "It hosts a server.", "It hosts servers."), and(servers) + " " + pluralVerb(len(servers), "is", "are") + " down while " + label + " restarts, about 2 min."}
 	}
 	return a

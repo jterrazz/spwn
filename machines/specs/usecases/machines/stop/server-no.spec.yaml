@@ -1,4 +1,4 @@
-description: 'on a terminal, a server stop asks its name typed; a wrong name stops nothing and exits 1'
+description: 'on a terminal, a server stop asks yes or no; no changes nothing, exits 1, with no error'
 fixture:
     - ../../../__fixtures__/terminal/
 env:
@@ -7,16 +7,15 @@ env:
 runs:
     - command: '--version >/dev/null; terminal --size 100x20 /usr/bin/env -u NO_COLOR COLUMNS=100 "$STATION" machines stop infra --on mac-mini'
       stdin: |
-          within 10 see Type infra
-          send inf\r
+          within 10 see Stop infra?
+          send n
           within 20 exit 1
           screen
       exit: 1
       stdout: |
-          Stop infra? It will not start at its Mac's boot nor restart until you start it
-          ┃ Type infra to stop it:
-          Error: not stopped: you typed "inf", not "infra"
-          Hint: in a script: --confirm=infra
+          ┃ Stop infra? What it serves stops until you start it again.
+          ┃
+          Nothing changed.
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].vms.infra | {running: (.pid > 0), want: .kept.want}'' world.json'
       exit: 0
       stdout: |

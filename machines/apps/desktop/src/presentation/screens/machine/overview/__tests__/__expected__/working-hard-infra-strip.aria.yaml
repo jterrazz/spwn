@@ -70,7 +70,7 @@
     - term: Created
     - definition: 2 Nov, by you
     - term: Hold
-    - definition: Always on. Stopping it needs its name typed.
+    - definition: Always on. Stopping it asks yes or no.
     - term: Check
     - definition: https://example.com/healthz
   - region "Busiest now":

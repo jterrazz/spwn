@@ -6,8 +6,3 @@ runs:
       stderr: |
           Error: image base-macos is not on macbook-pro
           Hint: station images update base-macos
-    - command: 'machines create --image base-macos --memory 4G --yes'
-      exit: 2
-      stderr: |
-          Error: image base-macos is not on macbook-pro
-          Hint: station images update base-macos

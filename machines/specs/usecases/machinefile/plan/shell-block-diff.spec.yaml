@@ -18,7 +18,7 @@ runs:
           +++ Machines' ~/.zshrc [station:postgres/path]
           @@ -1,0 +1,1 @@
           +[[ -d /opt/homebrew/opt/postgresql@18/bin ]] && path=(/opt/homebrew/opt/postgresql@18/bin $path)
-    - command: 'init --yes > /dev/null'
+    - command: 'init > /dev/null'
       exit: 0
     - command: 'machinefile apply > /dev/null'
       exit: 0

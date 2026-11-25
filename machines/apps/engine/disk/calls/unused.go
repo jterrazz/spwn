@@ -27,7 +27,7 @@ var FreeUnused = call.Call[Deps, FreeUnusedIn, []disk.Outcome]{
 	// read again here, and refused before anything goes when nothing-uses
 	// no longer holds it.
 	Name: "disk.free-unused", Section: section.Disk, Where: call.AtTarget, Applies: AppliesOnAMac, Confirm: confirm.FreeUnused, Journal: keptFreeUnused,
-	Errors: []fail.Code{NamesNeeded, NotFreeable, RecordUnreadable, confirm.Needed, confirm.Mismatch},
+	Errors: []fail.Code{NamesNeeded, NotFreeable, RecordUnreadable, confirm.YesNeeded},
 	Run: func(ctx context.Context, d Deps, in FreeUnusedIn, _ call.Progress) ([]disk.Outcome, error) {
 		var names []string
 		for _, name := range in.Names {
@@ -50,7 +50,7 @@ var FreeUnused = call.Call[Deps, FreeUnusedIn, []disk.Outcome]{
 			}
 			pick = append(pick, unused[i])
 		}
-		if err := confirm.Require(confirm.For(confirm.FreeUnused, d.Kind), strings.Join(names, ", "), in.Confirm); err != nil {
+		if err := confirm.Require(confirm.Of(confirm.FreeUnused, d.Kind), strings.Join(names, ", "), in.Confirm); err != nil {
 			return nil, err
 		}
 		return d.Disk.FreeUnused(ctx, pick), nil

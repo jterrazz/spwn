@@ -40,7 +40,7 @@ runs:
     - command: 'overview --on mac-mini | /usr/bin/grep infra'
       exit: 0
       stdout: |
-          ✗	infra is in a loop: ↺ 5 in 10 min	station machines restart infra --confirm=infra --on mac-mini
+          ✗	infra is in a loop: ↺ 5 in 10 min	station machines restart infra --on mac-mini
           	VMs	● infra running
     - command: 'machines infra | /usr/bin/grep Restarts'
       exit: 0

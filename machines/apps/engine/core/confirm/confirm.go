@@ -55,6 +55,34 @@ const (
 	TypeName Level = "type-name"
 )
 
+func (Level) Enum() []string { return []string{string(None), string(YesNo), string(TypeName)} }
+
+type Consequence string
+
+const (
+	// value: what an act can lose, which decides what it asks (ADR-097): a
+	// reversible act loses nothing, or removes what held nothing kept; one
+	// that stops others ends what other machines or people use; one that
+	// destroys deletes data nothing gives back.
+	Reversible  Consequence = "reversible"
+	StopsOthers Consequence = "stops-others"
+	Destroys    Consequence = "destroys"
+)
+
+func (c Consequence) Level() Level {
+	// invariant: ADR-097: a reversible act asks nothing and says its undo,
+	// one that stops others asks one yes or no naming them, one that
+	// destroys asks the name typed.
+	switch c {
+	case Reversible:
+		return None
+	case StopsOthers:
+		return YesNo
+	case Destroys:
+	}
+	return TypeName
+}
+
 const Yes = "yes"
 
 const (
@@ -64,50 +92,71 @@ const (
 	Declined  fail.Code = "confirm.declined"
 )
 
-func For(a Action, k machine.Kind) Level {
-	// invariant: SPEC §7.5, the graded confirmations of every surface. An
-	// action of no row asks yes or no.
-	switch a {
-	case Install, Share, Start, Restart, Edit:
-		return None
-	case Delete, Erase, RestartServer, FreeUnused:
-		return TypeName
-	case Stop:
-		if k == machine.Server {
-			return TypeName
-		}
-		return YesNo
-	default:
-		return YesNo
-	}
-}
-
 type Fact string
 
 const (
+	// value: what is true of the machine a gesture acts on, beyond its
+	// kind, that changes what the gesture can lose: an ephemeral VM, one
+	// that runs (or whose run is unread), one someone holds, a server
+	// already down, a Mac hosting a server.
 	Ephemeral   Fact = "ephemeral"
+	Running     Fact = "running"
+	Held        Fact = "held"
+	Down        Fact = "down"
 	HostsServer Fact = "hosts-server"
 )
 
-func Of(a Action, k machine.Kind, facts ...Fact) Level {
-	// invariant: SPEC A5: the menu bar's alert asks at the level its facts
-	// grade, facts the page that asks it knows beyond the machine's kind: a
-	// ephemeral's delete yes or no, a Mac hosting a server its name typed
-	// to restart.
-	// With no fact, the level is the call's own, For's.
+func Actions() []Action {
+	return []Action{Install, Share, Start, Restart, Edit, Remove, StopSharing, SignOut, RemovePassword, RemoveGrant, Undeclare, OffHere,
+		Overwrite, Forget, DeleteImage, RestartMac, RestartServer, StopEngine, Stop, Delete, Erase, BuildImage, Cleanup, FreeUnused, Relocate}
+}
+
+func ConsequenceOf(a Action, k machine.Kind, facts ...Fact) Consequence {
+	// invariant: ADR-097, the one table of every surface: the command line,
+	// the window and the menu bar all ask what this grades. An action of
+	// no row destroys, so a new one asks the most until it is graded.
 	has := func(f Fact) bool { return slices.Contains(facts, f) }
-	switch {
-	case a == Delete && k == machine.Workspace && has(Ephemeral):
-		return YesNo
-	case a == RestartMac && has(HostsServer):
-		return TypeName
+	switch a {
+	case Install, Share, Start, Restart, Edit, StopSharing, Undeclare, BuildImage, Relocate:
+		return Reversible
+	case Stop:
+		if k == machine.Server {
+			return StopsOthers
+		}
+		return Reversible
+	case OffHere:
+		if has(HostsServer) {
+			return StopsOthers
+		}
+		return Reversible
+	case RestartServer:
+		if has(Down) {
+			return Reversible
+		}
+		return StopsOthers
+	case Delete:
+		if has(Ephemeral) && !has(Running) && !has(Held) {
+			return Reversible
+		}
+		return Destroys
+	case Remove, SignOut, RemovePassword, RemoveGrant, Overwrite, Forget, DeleteImage, RestartMac, StopEngine, Cleanup, FreeUnused:
+		return StopsOthers
+	case Erase:
 	}
-	return For(a, k)
+	return Destroys
+}
+
+func Of(a Action, k machine.Kind, facts ...Fact) Level {
+	// value: the level a gesture asks at, its consequence's, on a machine
+	// of kind k whose facts are known; with no fact, a delete grades the
+	// VM as one that runs.
+	return ConsequenceOf(a, k, facts...).Level()
 }
 
 func Require(l Level, name, given string) error {
 	// invariant: given is what the caller answered: Yes for a yes-or-no
-	// question, the typed name for a typed one. Yes never answers a typed one.
+	// question, the typed name for a typed one. Yes never answers a typed
+	// one; the name, naming what the act affects, answers both.
 	detail := map[string]string{"level": string(l), "name": name, "typed": given}
 	switch l {
 	case None:
@@ -121,19 +170,19 @@ func Require(l Level, name, given string) error {
 		}
 		return fail.New(fail.NeedsConfirmation, Mismatch, name, detail)
 	default:
-		if given == Yes {
+		if given == Yes || given == name && name != "" {
 			return nil
 		}
 		return fail.New(fail.NeedsConfirmation, YesNeeded, name, detail)
 	}
 }
 
-func Ask(a Action, k machine.Kind, os machine.OS, name, given string) error {
+func Ask(a Action, k machine.Kind, os machine.OS, name, given string, facts ...Fact) error {
 	// value: Require for the gesture a on a machine of kind k whose system
-	// is os, its refusal naming all three, so its words can say what was
-	// not done and call the machine by its word (a Linux computer is no
-	// Mac).
-	err := Require(For(a, k), name, given)
+	// is os and whose facts are known, its refusal naming all three, so its
+	// words can say what was not done and call the machine by its word (a
+	// Linux computer is no Mac).
+	err := Require(Of(a, k, facts...), name, given)
 	var e *fail.Error
 	if errors.As(err, &e) {
 		e.Detail["action"], e.Detail["kind"] = string(a), string(k)

@@ -100,8 +100,8 @@ func Codes() map[fail.Code]Wording {
 		confirm.YesNeeded: func(e *fail.Error) (string, string) {
 			return "refusing without --yes: " + e.Subject, "re-run with --yes"
 		},
-		confirm.Declined: func(e *fail.Error) (string, string) {
-			return e.Subject + " kept: you said no", "--yes skips the question"
+		confirm.Declined: func(*fail.Error) (string, string) {
+			return "Nothing changed.", ""
 		},
 		call.NotForThisMachine: func(e *fail.Error) (string, string) {
 			if why, fix := e.Detail["why"], e.Detail["fix"]; why != "" && fix != "" {

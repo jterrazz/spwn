@@ -22,7 +22,7 @@ const RESTART = {
     Broken: true,
     Call: 'machines.restart',
     Command: '',
-    Confirm: 'infra',
+    Confirm: '',
     Machine: 'infra',
     Mark: 'down',
     Noun: 'Overview',
@@ -202,9 +202,10 @@ describe('NeedLine', () => {
                 // When - the Restart of its need is clicked
                 await visitor.click(within(needs, button('Restart infra')));
 
-                // Then - the dialog of its page asks the name typed
+                // Then - the dialog of its page asks yes or no, no name typed
                 const asked = dialog('Restart infra?');
-                await visitor.see(within(asked, field('Type infra to confirm')));
+                await visitor.see(within(asked, button('Restart')));
+                await visitor.gone(within(asked, field('Type infra to confirm')));
             },
         );
 

@@ -10,6 +10,7 @@ import {
 } from 'react';
 import type { ReactNode } from 'react';
 
+import type { Instead } from '../../application/use-cases/gesture-store';
 import type { EngineError } from '../../domain/engine-error';
 import { useGestureStore } from '../dependencies/dependencies';
 import type { Gesture } from '../dependencies/use-gesture';
@@ -33,6 +34,7 @@ type GestureButtonProps = {
     name?: string;
     destroys?: boolean;
     yields?: boolean;
+    instead?: Instead | undefined;
 };
 
 export function marked(gesture: Gesture<unknown>, mark: () => void): Gesture<unknown> {
@@ -51,17 +53,19 @@ type Asking = {
     consequence?: string | undefined;
     held?: string | undefined;
     destroys: boolean;
+    instead?: Instead | undefined;
 };
 
 export function useStart(): (gesture: Gesture<unknown>, asking: Asking) => void {
     const gestures = useGestureStore();
-    return (gesture, { title, verb, consequence, held, destroys }) => {
+    return (gesture, { title, verb, consequence, held, destroys, instead }) => {
         gestures.askedBy({
             cancel: gesture.cancel,
             confirm: gesture.confirm,
             consequence: (ask) => consequence ?? gesture.consequence(ask),
             destroys,
             held,
+            instead,
             key: gesture.key,
             title,
             verb,
@@ -81,10 +85,11 @@ export function GestureButton({
     name,
     destroys = variant === 'danger',
     yields = false,
+    instead,
 }: GestureButtonProps) {
     const started = useStart();
     const start = () => {
-        started(gesture, { consequence, destroys, held, title, verb });
+        started(gesture, { consequence, destroys, held, instead, title, verb });
     };
     return (
         <Button
@@ -110,6 +115,7 @@ export function GestureConfirm() {
         <ConfirmDialog
             destroys={asked.destroys}
             held={asked.held ?? ask.refusal?.wire?.detail?.holder}
+            instead={asked.instead}
             key={asked.key}
             onCancel={asked.cancel}
             onConfirm={asked.confirm}

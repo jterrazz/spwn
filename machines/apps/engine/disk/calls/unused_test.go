@@ -23,30 +23,26 @@ func freeUnused(s *Surveyor, in FreeUnusedIn) ([]disk.Outcome, error) {
 	return FreeUnused.Run(context.Background(), Deps{Disk: s, Kind: machine.Computer, Name: "mbp"}, in, nil)
 }
 
-func TestFreeUnusedAsksTheNamesTypedThenFreesThem(t *testing.T) {
+func TestFreeUnusedAsksYesOrNoNamingTheSetThenFreesIt(t *testing.T) {
 	station := unusedStation()
 	both := []string{"base-ubuntu@2026.10.20", "gone", "gone"}
-	_, err := freeUnused(onMac(station), FreeUnusedIn{Names: both, Confirm: confirm.Yes})
+	_, err := freeUnused(onMac(station), FreeUnusedIn{Names: both})
 	var asked *fail.Error
-	if !errors.As(err, &asked) || asked.Code != confirm.Needed || asked.Subject != "base-ubuntu@2026.10.20, gone" || len(station.freed) != 0 {
-		t.Fatalf("answered yes: %v, freed %v; want the names asked typed, each once, and nothing freed", err, station.freed)
+	if !errors.As(err, &asked) || asked.Code != confirm.YesNeeded || asked.Subject != "base-ubuntu@2026.10.20, gone" || len(station.freed) != 0 {
+		t.Fatalf("unanswered: %v, freed %v; want yes or no asked of the names, each once, and nothing freed", err, station.freed)
 	}
-	answer, ok := confirm.Answer(err)
-	if !ok || answer != "base-ubuntu@2026.10.20, gone" {
-		t.Fatalf("the asking side answers %q (%v), want the names it was shown", answer, ok)
-	}
-	out, err := freeUnused(onMac(station), FreeUnusedIn{Names: both, Confirm: answer})
+	out, err := freeUnused(onMac(station), FreeUnusedIn{Names: both, Confirm: confirm.Yes})
 	if err != nil || len(out) != 2 || !slices.Equal(station.freed, []string{"base-ubuntu@2026.10.20", "gone"}) {
-		t.Fatalf("typed: %v %+v, freed %v; want both freed once", err, out, station.freed)
+		t.Fatalf("answered yes: %v %+v, freed %v; want both freed once", err, out, station.freed)
 	}
 }
 
-func TestATypedAnswerFreesOnlyTheSetItNamed(t *testing.T) {
+func TestAnAnswerNamingPartOfTheSetFreesNothing(t *testing.T) {
 	station := unusedStation()
 	_, err := freeUnused(onMac(station), FreeUnusedIn{Names: []string{"base-ubuntu@2026.10.20", "gone"}, Confirm: "gone"})
 	var refused *fail.Error
-	if !errors.As(err, &refused) || refused.Code != confirm.Mismatch || len(station.freed) != 0 {
-		t.Fatalf("typed gone for both: %v, freed %v; want a mismatch and nothing freed", err, station.freed)
+	if !errors.As(err, &refused) || refused.Code != confirm.YesNeeded || len(station.freed) != 0 {
+		t.Fatalf("answered gone for both: %v, freed %v; want yes or no asked again and nothing freed", err, station.freed)
 	}
 }
 

@@ -1,7 +1,7 @@
 description: 'stop sharing is remembered: the next listen is not shared, until a share shares it again'
 env: two-macs
 runs:
-    - command: 'ports stop-sharing linux-1 7000 --yes'
+    - command: 'ports stop-sharing linux-1 7000'
       exit: 0
       stdout: |
           ●	linux-1:7000	not shared

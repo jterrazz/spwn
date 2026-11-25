@@ -53,11 +53,11 @@ type StopOut struct {
 
 var Stop = call.Call[Deps, StopIn, StopOut]{
 	// invariant: a stop keeps the VM, ephemeral, persistent or always on
-	// (SP-5); a workspace asks yes or no first, a server its name typed, and
+	// (SP-5); a workspace asks nothing, a server yes or no (confirm.Of), and
 	// the rule is checked here, on the VM's own Mac, whoever sent the call.
 	// One already stopped asks nothing.
 	Name: "machines.stop", Where: call.InEngine, Applies: machine.Anywhere, Confirm: confirm.Stop, Journal: keptStop,
-	Errors: []fail.Code{confirm.YesNeeded, confirm.Needed, confirm.Mismatch},
+	Errors: []fail.Code{confirm.YesNeeded},
 	Run: func(ctx context.Context, d Deps, in StopIn, _ call.Progress) (StopOut, error) {
 		if err := d.Machines.CheckStop(in.VM); err != nil {
 			return StopOut{}, err
@@ -88,22 +88,17 @@ var Delete = call.Call[Deps, DeleteIn, machines.DeleteReport]{
 		if err := d.Machines.CheckDelete(in.VM); err != nil {
 			return machines.DeleteReport{}, Worded(err)
 		}
-		lifetime := d.Machines.LifetimeOf(in.VM)
-		hold, _ := d.Machines.HoldOf(ctx, in.VM)
-		running, runErr := d.Machines.Running(ctx, in.VM)
-		running = running || runErr != nil
+		vm := seen(ctx, d, in.VM)
+		err := confirm.Ask(confirm.Delete, vm.Lifetime.Kind(), "", in.VM, in.Confirm, machines.FactsOf(vm)...)
 		// invariant: the question says who holds the VM it asks to delete.
-		if machines.DeleteAsks(lifetime, running, hold) {
-			err := confirm.Ask(confirm.Delete, lifetime.Kind(), "", in.VM, in.Confirm)
-			var asked *fail.Error
-			if errors.As(err, &asked) && hold.State == machines.HoldHeld {
-				asked.Detail["holder"] = hold.Sentence
-			}
-			if err != nil {
-				return machines.DeleteReport{}, err
-			}
+		var asked *fail.Error
+		if hold := machines.HoldOf(vm); errors.As(err, &asked) && hold.State == machines.HoldHeld {
+			asked.Detail["holder"] = hold.Sentence
 		}
-		if err := d.Machines.EngineUp(ctx); err != nil {
+		if err != nil {
+			return machines.DeleteReport{}, err
+		}
+		if err = d.Machines.EngineUp(ctx); err != nil {
 			return machines.DeleteReport{}, err
 		}
 		report, err := d.Machines.Delete(ctx, in.VM)
@@ -121,7 +116,7 @@ type RestartIn struct {
 var Restart = call.Call[Deps, RestartIn, machines.RestartReport]{
 	Name: "machines.restart", Where: call.AtTarget, Applies: machine.Anywhere, Confirm: confirm.RestartMac,
 	ConfirmBy: map[machine.Kind]confirm.Action{machine.Server: RestartConfirm(machine.Server), machine.Workspace: RestartConfirm(machine.Workspace)},
-	Errors:    []fail.Code{confirm.YesNeeded, confirm.Needed, confirm.Mismatch}, Journal: keptRestart,
+	Errors:    []fail.Code{confirm.YesNeeded}, Journal: keptRestart,
 	Run: func(ctx context.Context, d Deps, in RestartIn, _ call.Progress) (machines.RestartReport, error) {
 		if err := d.Machines.CheckMac(); err != nil {
 			return machines.RestartReport{}, err
@@ -130,7 +125,11 @@ var Restart = call.Call[Deps, RestartIn, machines.RestartReport]{
 		if err != nil {
 			return machines.RestartReport{}, err
 		}
-		if err := confirm.Ask(RestartConfirm(kind), kind, "", in.Name, in.Confirm); err != nil {
+		var facts []confirm.Fact
+		if kind != machine.Computer {
+			facts = machines.FactsOf(seen(ctx, d, in.Name))
+		}
+		if err := confirm.Ask(RestartConfirm(kind), kind, "", in.Name, in.Confirm, facts...); err != nil {
 			return machines.RestartReport{}, err
 		}
 		return d.Machines.Restart(ctx, in.Name)
@@ -138,8 +137,9 @@ var Restart = call.Call[Deps, RestartIn, machines.RestartReport]{
 }
 
 func RestartConfirm(kind machine.Kind) confirm.Action {
-	// invariant: a Mac's restart asks a yes, a server's its name typed (S4),
-	// a workspace's nothing: the confirmation Restart's ConfirmBy declares.
+	// invariant: the confirmation Restart's ConfirmBy declares, graded by
+	// confirm.Of: a Mac's restart and an up server's ask yes or no, a down
+	// server's and a workspace's nothing.
 	switch kind {
 	case machine.Server:
 		return confirm.RestartServer
@@ -187,4 +187,14 @@ var Edit = call.Call[Deps, EditIn, machines.Edited]{
 		}
 		return d.Machines.Edit(ctx, in.VM, change)
 	},
+}
+
+func seen(ctx context.Context, d Deps, name string) machines.VM {
+	// value: the VM of this Mac a confirmation grades, as machines.list says
+	// it now; one it cannot read is graded as running, unread, so a delete
+	// of it asks.
+	if vm, ok := d.Machines.VMSeen(ctx, name); ok {
+		return vm
+	}
+	return machines.VM{Name: name, Lifetime: d.Machines.LifetimeOf(name), State: machines.UnknownState}
 }

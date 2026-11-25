@@ -1705,27 +1705,23 @@
     {
       "label": "Stop",
       "on": "page",
-      "confirm": {
-        "question": "Stop agent-7f on This Mac?",
-        "lines": [
-          {
-            "kind": "text",
-            "text": "Its disk is kept."
-          }
-        ],
-        "yes": "Stop agent-7f",
-        "no": "Cancel",
-        "icon": "app"
-      },
       "priority": 1,
       "mutates": true,
       "id": "stop",
       "run": {
         "call": "machines.stop",
         "in": {
-          "Confirm": "yes",
           "VM": "agent-7f"
         }
+      },
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "agent-7f is stopping"
+          }
+        ]
       }
     },
     {
@@ -1740,6 +1736,7 @@
           }
         ],
         "danger": true,
+        "type": "agent-7f",
         "yes": "Delete agent-7f",
         "no": "Cancel",
         "icon": "app"
@@ -1750,7 +1747,6 @@
       "run": {
         "call": "machines.delete",
         "in": {
-          "Confirm": "\"agent-7f\"",
           "VM": "agent-7f"
         }
       }
@@ -2120,29 +2116,25 @@
     {
       "label": "Stop",
       "on": "menu",
-      "confirm": {
-        "question": "Stop agent-7f on This Mac?",
-        "lines": [
-          {
-            "kind": "text",
-            "text": "Its disk is kept."
-          }
-        ],
-        "yes": "Stop agent-7f",
-        "no": "Cancel",
-        "icon": "app"
-      },
       "priority": 1,
       "mutates": true,
       "id": "stop@menu",
       "run": {
         "call": "machines.stop",
         "in": {
-          "Confirm": "yes",
           "VM": "agent-7f"
         }
       },
-      "icon": "stop"
+      "icon": "stop",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "agent-7f is stopping"
+          }
+        ]
+      }
     },
     {
       "label": "Delete",
@@ -2156,6 +2148,7 @@
           }
         ],
         "danger": true,
+        "type": "agent-7f",
         "yes": "Delete agent-7f",
         "no": "Cancel",
         "icon": "app"
@@ -2166,7 +2159,6 @@
       "run": {
         "call": "machines.delete",
         "in": {
-          "Confirm": "\"agent-7f\"",
           "VM": "agent-7f"
         }
       },

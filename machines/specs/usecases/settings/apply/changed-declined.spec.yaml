@@ -15,14 +15,13 @@ runs:
       stdin: |
           see yours is lost
           send n
-          see Error:
+          see Nothing changed.
           screen
       exit: 1
       stdout: |
           ┃ Apply tart-launcher? A setting changed since is overwritten: yours is lost
           ┃
-          Error: tart-launcher kept: you said no
-          Hint: --yes skips the question
+          Nothing changed.
     - command: '--version >/dev/null; /usr/bin/tail -1 .local/bin/tart'
       exit: 0
       stdout: |

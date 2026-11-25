@@ -46,6 +46,7 @@ type portsScope struct {
 	VM   string
 	Self string
 	Now  time.Time
+	Asks Levels
 }
 
 type portsBody struct {
@@ -279,7 +280,7 @@ func (b *portsBody) sharedRow(s ports.SharedPort, a ports.Answer, h ports.MacPor
 	if unanswered(&row, a) {
 		return page.Item{Row: &row}
 	}
-	stop := stopSharing(s, h.Name)
+	stop := stopSharing(s, h.Name, sc.Asks)
 	stop.ID, stop.Rows = ActionStopSharing+key, []string{key}
 	if mark != page.OK {
 		flagShare(&row, mark, state)
@@ -472,7 +473,7 @@ func macPorts(m Machine, h model.MacView) portsBody {
 		row := page.Row{ID: "reading", Label: "reading", Mark: page.Awaiting}
 		return portsBody{Sections: []page.Section{{ID: SectionPrivate, Title: TitlePrivate, Segment: SegmentPorts, Items: []page.Item{{Row: &row}}}}}
 	}
-	b := portsOf(*m.Ports, portsScope{Mac: h.Name, Self: m.self(), Now: m.Now})
+	b := portsOf(*m.Ports, portsScope{Mac: h.Name, Self: m.self(), Now: m.Now, Asks: m.Asks})
 	for _, mp := range m.Ports.Macs {
 		if mp.Name == h.Name {
 			s, a := httpsSection(mp, model.Label(*m.All, h), m.self())
@@ -489,5 +490,5 @@ func workspacePorts(m Machine, vm model.VM) portsBody {
 		row := page.Row{ID: "reading", Label: "reading", Mark: page.Awaiting}
 		return portsBody{Sections: []page.Section{{ID: SectionPrivate, Title: TitlePrivate, Segment: SegmentPorts, Items: []page.Item{{Row: &row}}}}}
 	}
-	return segmented(portsOf(*m.Ports, portsScope{VM: vm.Name, Self: m.self(), Now: m.Now}), SegmentPorts)
+	return segmented(portsOf(*m.Ports, portsScope{VM: vm.Name, Self: m.self(), Now: m.Now, Asks: m.Asks}), SegmentPorts)
 }

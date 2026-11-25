@@ -24,7 +24,7 @@ var Erase = call.Call[Deps, EraseIn, disk.Outcome]{
 		if err := d.Disk.CheckRunning(ctx, in.App); err != nil {
 			return disk.Outcome{}, coded(err)
 		}
-		if err := confirm.Require(confirm.For(confirm.Erase, d.Kind), in.App, in.Confirm); err != nil {
+		if err := confirm.Require(confirm.Of(confirm.Erase, d.Kind), in.App, in.Confirm); err != nil {
 			return disk.Outcome{}, err
 		}
 		out, err := d.Disk.Erase(ctx, in.App)

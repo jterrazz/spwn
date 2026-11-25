@@ -51,7 +51,11 @@ func (w *Writer) Failure(err error) {
 	}
 	w.settle()
 	c := Detect(w.stderr, w.env, false)
-	block := tty.ErrorBlock(page.Error{Message: secret.Kept(e.Message), Hint: secret.Kept(e.Hint)}, c.Mode == TTY, c.Dark)
+	said := page.Error{Message: secret.Kept(e.Message), Hint: secret.Kept(e.Hint)}
+	block := tty.ErrorBlock(said, c.Mode == TTY, c.Dark)
+	if e.Type == fail.Declined {
+		block = tty.DeclinedBlock(said, c.Mode == TTY, c.Dark)
+	}
 	secret.Tripwire([]byte(block))
 	_, _ = io.WriteString(w.colored(w.stderr, c), block)
 }

@@ -1,4 +1,4 @@
-description: 'a server of another Mac restarts through that Mac, its name typed: a new run, still wanted running'
+description: 'a server of another Mac restarts through that Mac, its name answering its yes or no'
 env: two-macs
 runs:
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].vms.infra | {pid, want: .kept.want}'' world.json'

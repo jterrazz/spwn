@@ -93,7 +93,7 @@ var Apply = call.Call[Deps, ApplyIn, machinefile.Applied]{
 			}
 		}
 		if in.Remove && len(extra) > 0 {
-			if err := confirm.Require(confirm.For(confirm.Remove, d.Kind), strings.Join(extra, ", "), in.Confirm); err != nil {
+			if err := confirm.Require(confirm.Of(confirm.Remove, d.Kind), strings.Join(extra, ", "), in.Confirm); err != nil {
 				return out, err
 			}
 		}

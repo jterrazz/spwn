@@ -1,7 +1,7 @@
 description: 'init on another Mac runs there, its steps read back here'
 env: two-macs
 runs:
-    - command: 'init --yes --on mac-mini'
+    - command: 'init --on mac-mini'
       exit: 0
       stdout: |
           	On mac-mini:

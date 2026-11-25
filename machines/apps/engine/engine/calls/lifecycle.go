@@ -122,7 +122,7 @@ var Stop = call.Call[Deps, StopIn, StopOut]{
 			return StopOut{}, err
 		}
 		if !work.Empty() {
-			if refused := confirm.Require(confirm.For(confirm.StopEngine, d.Kind), "stop", in.Confirm); refused != nil {
+			if refused := confirm.Require(confirm.Of(confirm.StopEngine, d.Kind), "stop", in.Confirm); refused != nil {
 				return StopOut{Work: work}, refused
 			}
 		}

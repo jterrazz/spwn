@@ -22,6 +22,14 @@ func ErrorBlock(e page.Error, colored, dark bool) string {
 	return block
 }
 
+func DeclinedBlock(e page.Error, colored, dark bool) string {
+	block := strings.Join(molecule.DeclinedLines(token.New(dark), e), "\n") + "\n"
+	if !colored {
+		return ansi.Strip(block)
+	}
+	return block
+}
+
 func AheadLine(label string, colored, dark bool) string {
 	// value: a step said before a program asks on the terminal, its `▸`
 	// Muted; without color, the glyph and words alone.

@@ -1,5 +1,5 @@
 import type { Request, Target } from '@jterrazz/station-api';
-import { button, disabled, enabled, region, within } from '@jterrazz/test';
+import { button, enabled, region, within } from '@jterrazz/test';
 
 import { pageOver } from '../../../../composition/__tests__/page-over';
 import { isRecord } from '../../../../domain/request-key';
@@ -25,7 +25,6 @@ export const freed = within(THIS_MAC, region('Can be freed'));
 export const kept = within(THIS_MAC, region('Kept'));
 export const done = within(THIS_MAC, region('Done here'));
 export const freeIt = enabled(button('Free'));
-export const freeHeld = disabled(button('Free'));
 export const freeStation = enabled(button('Free 12 GB'));
 export const freeCaches = enabled(button('Free 34.8 GB'));
 
@@ -101,16 +100,16 @@ export function withStation(
     };
 }
 
-export function refusal(subject: string, code: string, typed: string) {
+export function refusal(subject: string, typed: string) {
     return {
         v: 2,
         error: {
             type: 'needs-confirmation',
-            code,
+            code: 'confirm.yes-needed',
             subject,
-            detail: { level: 'type-name', name: subject, typed },
-            message: `refusing without the name typed: ${subject}`,
-            hint: `in a script: --confirm=${subject}`,
+            detail: { level: 'yes-no', name: subject, typed },
+            message: `refusing without --yes: ${subject}`,
+            hint: 're-run with --yes',
         },
     };
 }
@@ -174,10 +173,10 @@ export function eachAsking(recording: Recording, own: string, other: string): Re
         ...withOther,
         gestures: [
             ...(withOther.gestures ?? []),
-            gestureAnswering({ in: { Names: [own] } }, refusal(own, 'confirm.needed', '')),
+            gestureAnswering({ in: { Names: [own] } }, refusal(own, '')),
             gestureAnswering(
                 { in: { Names: [other] }, target: { name: 'mac-mini' } },
-                refusal(other, 'confirm.needed', ''),
+                refusal(other, ''),
             ),
         ],
     };
@@ -189,10 +188,7 @@ export function narrowedTo(recording: Recording, first: string, typed: string): 
             { Bytes: 3_000_000_000, Holder: 'images', Kind: 'image', Name: first },
         ]),
         gestures: [
-            gestureAnswering(
-                { in: { Confirm: typed, Names: [first] } },
-                refusal(first, 'confirm.mismatch', typed),
-            ),
+            gestureAnswering({ in: { Confirm: typed, Names: [first] } }, refusal(first, typed)),
         ],
     };
 }

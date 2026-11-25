@@ -13,7 +13,7 @@ runs:
           screen
       exit: 0
       stdout: |
-          ┃ Restart mac-mini? infra pauses until it is back
+          ┃ Restart mac-mini? infra pauses until it is back.
           ┃
           ✓ mac-mini · back · infra running
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].engine.started_at > "2026-11-04"'' world.json'

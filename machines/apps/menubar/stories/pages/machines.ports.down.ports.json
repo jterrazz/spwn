@@ -337,26 +337,12 @@
       "rows": [
         "linux-1:5173"
       ],
-      "confirm": {
-        "question": "Stop sharing linux-1:5173?",
-        "lines": [
-          {
-            "kind": "text",
-            "text": "The link stops answering on your tailnet. What answers on it keeps running inside the VM."
-          }
-        ],
-        "danger": true,
-        "yes": "Stop sharing",
-        "no": "Cancel",
-        "icon": "app"
-      },
       "priority": 3,
       "mutates": true,
       "id": "stop-sharing:linux-1:5173",
       "run": {
         "call": "ports.stop-sharing",
         "in": {
-          "Confirm": "yes",
           "Mac": "\"macbook-pro\"",
           "Port": "\"5173\"",
           "VM": "\"linux-1\""
@@ -409,26 +395,12 @@
       "rows": [
         "linux-1:3000"
       ],
-      "confirm": {
-        "question": "Stop sharing linux-1:3000?",
-        "lines": [
-          {
-            "kind": "text",
-            "text": "The link stops answering on your tailnet. What answers on it keeps running inside the VM."
-          }
-        ],
-        "danger": true,
-        "yes": "Stop sharing",
-        "no": "Cancel",
-        "icon": "app"
-      },
       "priority": 3,
       "mutates": true,
       "id": "stop-sharing:linux-1:3000",
       "run": {
         "call": "ports.stop-sharing",
         "in": {
-          "Confirm": "yes",
           "Mac": "\"macbook-pro\"",
           "Port": "\"3000\"",
           "VM": "\"linux-1\""
@@ -531,26 +503,12 @@
       "rows": [
         "linux-3:8080"
       ],
-      "confirm": {
-        "question": "Stop sharing linux-3:8080?",
-        "lines": [
-          {
-            "kind": "text",
-            "text": "The link stops answering on your tailnet. What answers on it keeps running inside the VM."
-          }
-        ],
-        "danger": true,
-        "yes": "Stop sharing",
-        "no": "Cancel",
-        "icon": "app"
-      },
       "priority": 3,
       "mutates": true,
       "id": "stop-sharing:linux-3:8080",
       "run": {
         "call": "ports.stop-sharing",
         "in": {
-          "Confirm": "yes",
           "Mac": "\"mac-mini\"",
           "Port": "\"8080\"",
           "VM": "\"linux-3\""
