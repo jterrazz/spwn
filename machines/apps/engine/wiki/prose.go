@@ -96,6 +96,16 @@ func numbered(line string) int {
 	return i + 2
 }
 
+func plainOf(line string) string {
+	// invariant: a line Face is served as the words a reader reads, its
+	// marks dropped: a link keeps its words, code its text.
+	var b strings.Builder
+	for _, r := range runs(line) {
+		b.WriteString(r.Text)
+	}
+	return b.String()
+}
+
 func runs(text string) []Run {
 	var out []Run
 	var plain strings.Builder

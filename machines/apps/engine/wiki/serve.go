@@ -328,7 +328,7 @@ func (s *server) floor(i int) FloorHead {
 
 func (s *server) head(p *Page) PageHead {
 	r := s.reading(p.ID)
-	h := PageHead{ID: p.ID, Seat: r.Seat, Floor: r.Floor, Word: p.Faces.Word, Line: p.Faces.Line, Icon: p.Faces.Icon}
+	h := PageHead{ID: p.ID, Seat: r.Seat, Floor: r.Floor, Word: p.Faces.Word, Line: plainOf(p.Faces.Line), Icon: p.Faces.Icon}
 	for _, f := range s.c.Report.Findings {
 		if f.Page != p.ID {
 			continue
@@ -406,7 +406,7 @@ func (s *server) block(p *Page, b *Block) *ServedBlock {
 	kind, _ := s.c.Schema.kind(b.Kind)
 	out := &ServedBlock{
 		ID: b.ID, Address: b.Address, Kind: b.Kind, Title: titleOf(kind, b.Kind), Icon: cmp.Or(b.Faces.Icon, kind.Icon, b.Kind),
-		Word: b.Faces.Word, Line: b.Faces.Line, Floor: r.Floor,
+		Word: b.Faces.Word, Line: plainOf(b.Faces.Line), Floor: r.Floor,
 	}
 	if r.Weight != nil {
 		out.Tier, out.Score, out.Why = r.Weight.Tier, r.Weight.Score, r.Weight.Why

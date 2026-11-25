@@ -97,7 +97,7 @@ At the corpus budget a page shows at most seven lines (S11): at `10min` a quiet 
 The answer carries every judgement the window draws, and the window decides none:
 
 - the page's head, its paragraph Face, its floor, the seats bar (each seat, its home, the active one) and every page of the corpus with its counts of hard and soft findings;
-- each section's items in reading order: prose as paragraphs, list items, quotes and table lines, each its runs (strong, code, a link and where it points); a group with its intent, the seats that read it and why it opens folded (`author`, `seat` or `budget`); a block with its kind, Faces, tier, score and causes, its fields in its kind's order with each ref resolved, and `Shown`;
+- each section's items in reading order: prose as paragraphs, list items, quotes and table lines, each its runs (strong, code, a link and where it points); a group with its intent, the seats that read it and why it opens folded (`author`, `seat` or `budget`); a block with its kind, Faces (a line Face as the words it reads, its marks dropped, as a page's is), tier, score and causes, its fields in its kind's order with each ref resolved, and `Shown`;
 - `Shown`, the budget's table of S11 per block: at `10min` a lead is a `tile`, a normal block a `card`, a quiet one a `line`; at `2min` a lead is a `card`, a normal block a `line`, a quiet one `counted`; at `30s` none is shown. A table, a figure and a sub-page are a `tile` but at `30s`;
 - a table's rows found and their cells by its columns, a sub-page's child's head, a figure's form, parts and caption, and the findings that sit on each block and on the page.
 
