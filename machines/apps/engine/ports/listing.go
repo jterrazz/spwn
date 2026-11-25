@@ -81,7 +81,7 @@ type MacPorts struct {
 	// kept from sharing (the VM at its most, the range taken), one count
 	// per VM: they are never told port by port.
 	NotShared []NotShared `json:"not_shared,omitempty"`
-	// value: the listeners of each VM on ports the system keeps for itself,
+	// value: the listeners of each VM on short-lived ports,
 	// present now, one count per VM: never shared by themselves, never told
 	// port by port.
 	Quiet []Quiet `json:"quiet,omitempty"`

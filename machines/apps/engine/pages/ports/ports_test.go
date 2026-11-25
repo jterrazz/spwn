@@ -67,7 +67,7 @@ func TestAVMsQuietListenersAreOneLine(t *testing.T) {
 		t.Fatalf("private %+v, want one line", private)
 	}
 	row := private.Items[0].Row
-	if row.ID != "linux-1:quiet" || row.Mark != page.Attention || row.Cells[3].Items[0].Text != "3 listeners on ports the system keeps for itself" || row.Cells[3].Items[1].Text != "station ports share linux-1 <port> to share one" {
+	if row.ID != "linux-1:quiet" || row.Mark != page.Attention || row.Cells[3].Items[0].Text != "3 listeners on short-lived ports" || row.Cells[3].Items[1].Text != "station ports share linux-1 <port> to share one" {
 		t.Fatalf("row %+v", row)
 	}
 }

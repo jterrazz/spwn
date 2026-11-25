@@ -1,4 +1,4 @@
-description: 'a Mac counts its listeners on ports the system keeps for itself, and an exposed one stays listed'
+description: 'a Mac counts its listeners on short-lived ports, and an exposed one stays listed'
 env:
     - two-macs
     - engine
@@ -19,7 +19,7 @@ runs:
           ●	linux-1	5173	private	https://macbook-pro.tail1234.ts.net:40001	shared	node	probably Vite
           ●	linux-1	7000	private	macbook-pro.tail1234.ts.net:40002	shared	server
           	Reserved on This Mac: 2 of 1000 (40000-40999), 998 free
-          	2 more listen on ports the system keeps for itself
+          	2 more listen on short-lived ports
     - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | [.out.verdict.Line, .out.all.macs[0].mac_quiet]'''
       stdin: |
           {"v":2,"id":"1","call":"ports.list","in":{"AllMachines":true}}
