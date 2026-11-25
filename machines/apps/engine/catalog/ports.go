@@ -8,11 +8,11 @@ import (
 type PortDefaults struct {
 	RangeLow, RangeHigh, MaxPerVM int
 	HTTPS                         string
-	Idle, Grace                   time.Duration
+	Idle, FleetingIdle, Grace     time.Duration
 }
 
 var PortPolicy = PortDefaults{
-	RangeLow: 40000, RangeHigh: 40999, MaxPerVM: 20, HTTPS: "port", Idle: 7 * 24 * time.Hour, Grace: 5 * time.Second,
+	RangeLow: 40000, RangeHigh: 40999, MaxPerVM: 20, HTTPS: "port", Idle: 7 * 24 * time.Hour, FleetingIdle: time.Hour, Grace: 5 * time.Second,
 }
 
 // value: the lowest port that is not the system's: a VM's guest reports a

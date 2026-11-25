@@ -203,6 +203,8 @@ func (d *Engine) tickShares(ctx context.Context) {
 	}
 	for _, s := range d.svcsInOrder() {
 		var acts []ports.Action
+		i := d.reservationIndex(s.vm, s.port)
+		s.st.Fleeting = i >= 0 && d.reservations[i].Fleeting()
 		s.st, acts = ports.Next(s.st, ports.EvTick, now)
 		d.apply(ctx, s, acts)
 		_, told := d.heard[s.vm]

@@ -379,6 +379,32 @@ func TestAnIdleReleaseAtTheFirstTickAfterARestartUnfunnelsItsPort(t *testing.T) 
 	}
 }
 
+// invariant: a lease its VM's rights made for a listener heard at one
+// report only is released an hour after, while one that listened for a
+// while keeps its week.
+func TestALeaseHeardAtOneReportGoesAnHourAfterAndALongerOneStays(t *testing.T) {
+	h := newHarness(t, model.VMRecord{Name: "api", Lifetime: model.Persistent})
+	h.d.o.Rights = func(_ context.Context, _ string) (*catalog.PortRights, string, error) {
+		return &catalog.PortRights{Open: catalog.PortSet{{From: 3000, To: 3001}}, To: catalog.AudiencePrivate}, "", nil
+	}
+	ctx := t.Context()
+	yes := true
+	seen := h.clock.At.Add(-2 * time.Hour)
+	h.d.reservations = []ports.Reservation{
+		{VM: "api", GuestPort: 3000, MacPort: 40000, By: ports.ByRights, HTTP: &yes, ReservedAt: seen, LastSeenAt: seen},
+		{VM: "api", GuestPort: 3001, MacPort: 40001, By: ports.ByRights, HTTP: &yes, ReservedAt: seen, LastSeenAt: seen.Add(30 * time.Minute)},
+	}
+	h.d.refreshSelf(ctx)
+	h.d.adopt(ctx)
+	h.d.tickShares(ctx)
+	if i := h.d.reservationIndex("api", 3000); i >= 0 {
+		t.Errorf("the lease heard once, two hours ago, stays: %+v", h.d.reservations[i])
+	}
+	if i := h.d.reservationIndex("api", 3001); i < 0 {
+		t.Error("the lease heard for half an hour went with the other")
+	}
+}
+
 // invariant: a release between an HTTPS mode switch and the tick that
 // judges it unshares the entry in the mode it was served in.
 func TestAReleaseBeforeTheTickOfAModeSwitchUnsharesTheModeItWasServedIn(t *testing.T) {

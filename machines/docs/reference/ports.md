@@ -30,7 +30,7 @@ For each reported port its rights allow, the engine takes a **reserved port**: t
 | `machines delete`, an ephemeral poweroff | released, its serve entry removed                                                           |
 | a create fails after its first run       | its ports stay reserved with its record, its start needs them; a delete releases them       |
 | `station ports stop-sharing`             | released and remembered: not shared again until a share                                     |
-| 7 days without listening                 | released                                                                                    |
+| 7 days without listening                 | released; heard at one report only: after an hour                                           |
 | the range is full, or the VM holds 20    | not shared: one `◐ N ports not shared` line per VM, with the cause, gone with its listeners |
 | the port of the Mac is busy              | the next free port, and the row says so                                                     |
 | the Mac reboots                          | the engine shares every reserved port again as the guests report                            |

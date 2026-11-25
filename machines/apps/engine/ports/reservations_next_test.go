@@ -32,3 +32,34 @@ func TestTheLifecycleKeepsReservationsAndIdlesOnlyUnpinnedOnes(t *testing.T) {
 		t.Fatalf("a port not allowed was shared by a listen: %+v %v", kept, more)
 	}
 }
+
+func TestAListenerHeardOnceIdlesOutAfterAnHourWhileOneKeptSeenKeepsItsWeek(t *testing.T) {
+	t0 := time.Date(2026, 11, 1, 9, 0, 0, 0, time.UTC)
+	waiting := State{Phase: PhaseWaiting, LastSeenAt: t0}
+	hour := t0.Add(time.Hour + time.Minute)
+	if gone, acts := Next(State{Phase: waiting.Phase, LastSeenAt: t0, Fleeting: true}, EvTick, hour); gone.Phase != PhaseGone || !slices.Equal(acts, []Action{ActRelease}) {
+		t.Fatalf("a fleeting lease after an hour: %+v %v", gone, acts)
+	}
+	if kept, acts := Next(waiting, EvTick, hour); kept.Phase != PhaseWaiting || acts != nil {
+		t.Fatalf("a lease that listened for a while was released after an hour: %+v %v", kept, acts)
+	}
+}
+
+func TestOnlyALeaseHeardAtOneReportIsFleeting(t *testing.T) {
+	t0 := time.Date(2026, 11, 1, 9, 0, 0, 0, time.UTC)
+	for name, c := range map[string]struct {
+		l    Reservation
+		want bool
+	}{
+		"made by rights, heard once":         {Reservation{By: ByRights, ReservedAt: t0, LastSeenAt: t0}, true},
+		"made by rights, heard again":        {Reservation{By: ByRights, ReservedAt: t0, LastSeenAt: t0.Add(time.Minute)}, false},
+		"made for a package's env, unheard":  {Reservation{By: ByRights, ReservedAt: t0}, false},
+		"shared by the owner":                {Reservation{By: ByOwner, ReservedAt: t0, LastSeenAt: t0}, false},
+		"given an audience by the owner":     {Reservation{By: ByRights, Chosen: "public", ReservedAt: t0, LastSeenAt: t0}, false},
+		"made before the by key was written": {Reservation{ReservedAt: t0, LastSeenAt: t0}, false},
+	} {
+		if got := c.l.Fleeting(); got != c.want {
+			t.Errorf("%s: Fleeting = %v, want %v", name, got, c.want)
+		}
+	}
+}

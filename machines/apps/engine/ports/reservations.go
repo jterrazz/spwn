@@ -116,13 +116,24 @@ type State struct {
 	Phase      Phase
 	Since      time.Time
 	LastSeenAt time.Time
+	// value: a lease its VM's rights made that was heard at one report
+	// only, as its reservation says (Reservation.Fleeting).
+	Fleeting bool
+}
+
+func idleOf(st State) time.Duration {
+	if st.Fleeting {
+		return catalog.PortPolicy.FleetingIdle
+	}
+	return catalog.PortPolicy.Idle
 }
 
 func Next(st State, ev Event, now time.Time) (State, []Action) {
 	// invariant: the lifecycle of one service (N5): a stop of listening unpublishes
 	// only after the grace, a re-listen inside it keeps everything; a lease outlives
-	// its listener and idles out after 7 days; a port not allowed is never
-	// shared by a listen.
+	// its listener and idles out after 7 days, one heard at a single report
+	// (a fleeting one) after an hour; a port not allowed is never shared by
+	// a listen.
 	switch ev {
 	case EvListen:
 		st.LastSeenAt = now
@@ -148,7 +159,7 @@ func Next(st State, ev Event, now time.Time) (State, []Action) {
 		case st.Phase == PhaseClosing && now.Sub(st.Since) >= catalog.PortPolicy.Grace:
 			st.Phase, st.Since = PhaseWaiting, now
 			return st, []Action{ActUnpublish}
-		case st.Phase == PhaseWaiting && !st.LastSeenAt.IsZero() && now.Sub(st.LastSeenAt) > catalog.PortPolicy.Idle:
+		case st.Phase == PhaseWaiting && !st.LastSeenAt.IsZero() && now.Sub(st.LastSeenAt) > idleOf(st):
 			st.Phase = PhaseGone
 			return st, []Action{ActRelease}
 		}
