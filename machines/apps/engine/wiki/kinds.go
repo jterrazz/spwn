@@ -3,17 +3,77 @@ package wiki
 import (
 	"maps"
 	"slices"
+	"strconv"
 	"strings"
 )
 
 type Schema struct {
-	// value: what a wiki.yaml declares that the compiler reads, the corpus's
-	// own kinds by id.
-	Kinds map[string]Kind
+	// value: the file the schema was read from, which a finding about it names.
+	File string
+	// invariant: five, in order; a floor's number is its index.
+	Floors []Floor
+	// value: the floor of a page by the folder it sits in, the longest path
+	// that holds it winning.
+	FloorOf []FloorOf
+	Seats   []Seat
+	// value: the corpus's own kinds, by id.
+	Kinds  map[string]Kind
+	Icons  []Icon
+	Repos  []Repo
+	Mounts []Mount
+	Budget Budget
 }
+
+type Floor struct {
+	ID       string
+	Name     string
+	Question string
+}
+
+type FloorOf struct {
+	Path  string
+	Floor int
+}
+
+type Seat struct {
+	ID    string
+	Name  string
+	Paths []string
+	Reads []Intent
+	Home  string
+	// value: the blueprint: a reader's seat, not an owning seat of the doctrine.
+	Plan bool
+	Line int
+}
+
+type Icon struct {
+	Name string
+	Rows []string
+	Line int
+}
+
+type Repo struct {
+	Name string
+	Path string
+}
+
+type Mount struct {
+	At   string
+	Repo string
+	Path string
+}
+
+type Budget string
+
+const (
+	Budget30s   Budget = "30s"
+	Budget2min  Budget = "2min"
+	Budget10min Budget = "10min"
+)
 
 type Kind struct {
 	ID     string
+	Title  map[string]string
 	Icon   string
 	Weighs int
 	// value: the field `state("...")` reads on a block of this kind; empty
@@ -23,6 +83,7 @@ type Kind struct {
 	Faces  FaceTemplates
 	// value: an engine kind that holds no fact and is never counted in the cap.
 	Structural bool
+	Line       int
 }
 
 type Field struct {
@@ -32,6 +93,19 @@ type Field struct {
 	Max      int
 	Values   []string
 	To       string
+}
+
+func (k Kind) field(name string) (Field, bool) {
+	for _, f := range k.Fields {
+		if f.Name == name {
+			return f, true
+		}
+	}
+	return Field{}, false
+}
+
+func intents() []Intent {
+	return []Intent{IntentTell, IntentDefine, IntentDecide, IntentLocate, IntentGuard, IntentProve}
 }
 
 type FaceTemplates struct {
@@ -45,47 +119,75 @@ type FaceTemplates struct {
 // value: the attributes every kind takes besides its own fields.
 func commonFields() []string { return []string{"id", "floor", "rests_on", "weight", "icon"} }
 
+// value: a field written `name:type`, `!` after the type when it is
+// required, `=a,b` for an enum's values, `@n` for a sentence's cap.
 func fields(specs ...string) []Field {
 	out := make([]Field, 0, len(specs))
 	for _, s := range specs {
 		name, typ, _ := strings.Cut(s, ":")
-		required := strings.HasSuffix(typ, "!")
-		out = append(out, Field{Name: name, Type: strings.TrimSuffix(typ, "!"), Required: required})
+		typ, limit, _ := strings.Cut(typ, "@")
+		typ, values, _ := strings.Cut(typ, "=")
+		f := Field{Name: name, Type: strings.TrimSuffix(typ, "!"), Required: strings.HasSuffix(typ, "!")}
+		if values != "" {
+			f.Values = strings.Split(values, ",")
+		}
+		if limit != "" {
+			f.Max, _ = strconv.Atoi(limit)
+		}
+		out = append(out, f)
 	}
 	return out
 }
 
 // invariant: the engine's kinds, SPEC-v1 §5: eight content kinds and five
-// structural ones. A field written `name:type!` is required.
+// structural ones, their enums r8's (SPEC-primitives, "The Kind schemas").
 func builtinKinds() map[string]Kind {
 	return map[string]Kind{
 		"term": {ID: "term", Fields: fields("means:sentence!", "not:sentence", "code:anchor", "retired:date", "replaced_by:ref"),
 			Faces: FaceTemplates{Word: "{id}", Line: "{means}"}},
-		"rule": {ID: "rule", Fields: fields("says:sentence!", "force:enum!", "guards:ref|glob!", "proof:anchor", "read_at:anchor", "precedents:list<precedent>", "waived:object", "waiver:sentence"),
+		"rule": {ID: "rule", Fields: fields("says:sentence!@160", "force:enum!=hard,soft,hardened", "guards:ref|glob!", "proof:anchor", "read_at:anchor", "precedents:list<object>", "waived:object", "waiver:sentence"),
 			Faces: FaceTemplates{Word: "{id}", Line: "{says}", Icon: "{force}"}},
 		"scenario": {ID: "scenario", Fields: fields("of:ref!", "given:sentence", "when:sentence", "then:sentence", "proof:anchor"),
 			Faces: FaceTemplates{Word: "{id}", Line: "{when}: {then}"}},
-		"component": {ID: "component", Fields: fields("level:enum!", "aims:sentence!", "source:anchor!", "made_of:list<ref>"),
+		"component": {ID: "component", Fields: fields("level:enum!="+strings.Join(levels(), ","), "aims:sentence!", "source:anchor!", "made_of:list<ref>"),
 			Faces: FaceTemplates{Word: "{id}", Line: "{aims}", Icon: "{level}"}},
-		"claim": {ID: "claim", Fields: fields("says:text!", "carried_by:anchor!", "certainty:enum!", "because:ref"),
+		"claim": {ID: "claim", Fields: fields("says:text!", "carried_by:anchor!", "certainty:enum!=decided,trial", "because:ref"),
 			Faces: FaceTemplates{Word: "{id}", Line: "{says}"}},
 		"folder": {ID: "folder", Fields: fields("path:anchor!", "holds:sentence!", "writes:list<ref|anchor>", "written_by:ref"),
 			Faces: FaceTemplates{Word: "{id}", Line: "{holds}"}},
-		"link": {ID: "link", Fields: fields("from:ref|glob!", "to:ref|glob|text!", "right:enum!", "because:ref|sentence!", "proof:anchor"),
+		"link": {ID: "link", Fields: fields("from:ref|glob!", "to:ref|glob|text!", "right:enum!=allowed,refused", "because:ref|sentence!", "proof:anchor"),
 			Faces: FaceTemplates{Word: "{id}", Line: "{from} {right} {to}", Icon: "{right}"}},
 		"decision": {ID: "decision", Fields: fields("adr:anchor!", "decides:sentence!"),
 			Faces: FaceTemplates{Word: "{id}", Line: "{decides}"}},
-		"group": {ID: "group", Structural: true, Fields: fields("title:sentence!", "intent:enum!", "fold:bool"),
+		"group": {ID: "group", Structural: true, Fields: fields("title:sentence!", "intent:enum!=tell,define,decide,locate,guard,prove", "fold:bool"),
 			Faces: FaceTemplates{Word: "{title}"}},
 		"table": {ID: "table", Structural: true, Fields: fields("of:text!", "in:ref!", "columns:list<text>!", "where:query", "sort:text"),
 			Faces: FaceTemplates{Word: "{id}"}},
-		"page": {ID: "page", Structural: true, Fields: fields("face:enum"),
+		"page": {ID: "page", Structural: true, Fields: fields("face:enum=line,card,open"),
 			Faces: FaceTemplates{Word: "{id}"}},
-		"figure": {ID: "figure", Structural: true, Fields: fields("form:enum!", "shows:ref!", "caption:sentence!", "parts:list<object>", "centre:text", "wall:text", "stop:text", "x:text", "y:text"),
+		"figure": {ID: "figure", Structural: true, Fields: fields("form:enum!="+strings.Join(forms(), ","), "shows:ref!", "caption:text!", "parts:list<object>", "centre:text", "wall:text", "stop:text", "x:text", "y:text"),
 			Faces: FaceTemplates{Word: "{id}", Line: "{caption}"}},
 		"lens": {ID: "lens", Structural: true, Fields: fields("of:text", "from:text"),
 			Faces: FaceTemplates{Word: "{id}"}},
 	}
+}
+
+// value: a component's levels, lowest first: the folders of
+// machines/apps/engine/ui/.
+func levels() []string { return []string{"token", "atom", "molecule", "organism", "template"} }
+
+func forms() []string { return []string{"orbit", "gate", "flow", "stack", "quad"} }
+
+// value: the engine's content kinds, which count in the cap with the corpus's.
+func contentKinds() []string {
+	var out []string
+	for id, k := range builtinKinds() {
+		if !k.Structural {
+			out = append(out, id)
+		}
+	}
+	slices.Sort(out)
+	return out
 }
 
 // invariant: an engine kind wins over a corpus kind of the same id; that a

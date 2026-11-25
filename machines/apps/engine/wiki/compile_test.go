@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"testing"
 
 	"github.com/jterrazz/studio-station/apps/engine/wiki"
@@ -15,60 +16,56 @@ import (
 var update = flag.Bool("update", false, "rewrite testdata/__expected__ from the compiler")
 
 const (
-	pagesDir  = "testdata/pages"
+	corpusDir = "testdata/corpus"
+	formsPage = "testdata/pages/forms.md"
 	goldenDir = "testdata/__expected__"
 )
 
-// value: the kinds of the spwn corpus's wiki.yaml, SPEC-v1 §5.
+// value: the fixture corpus's pages, by id: the five pages of the first
+// slice in tag form, the path of each under the corpus its id.
+func corpusPages() []string {
+	return []string{"blueprint/philosophy", "product/stack", "product/boundaries", "growth/positioning", "machines/reference/ports"}
+}
+
+// value: the schema of the fixture corpus, read from its wiki.yaml.
+var spwnSchema = sync.OnceValues(func() (wiki.Schema, error) {
+	body, err := os.ReadFile(filepath.Join(corpusDir, "wiki.yaml"))
+	if err != nil {
+		return wiki.Schema{}, err
+	}
+	return wiki.ReadSchema("wiki.yaml", body)
+})
+
 func spwnKinds() wiki.Schema {
-	return wiki.Schema{Kinds: map[string]wiki.Kind{
-		"conviction": {Icon: "conviction", Weighs: 1, Fields: []wiki.Field{
-			{Name: "says", Type: "sentence", Max: 160, Required: true},
-			{Name: "opposite", Type: "sentence", Max: 200, Required: true},
-			{Name: "carried_in", Type: "list<ref>", To: "part", Required: true},
-			{Name: "broken_by", Type: "sentence", Max: 200, Required: true},
-			{Name: "adr", Type: "anchor"},
-		}, Faces: wiki.FaceTemplates{Word: "{id}", Line: "{says}"}},
-		"alternative": {Fields: []wiki.Field{
-			{Name: "gives", Type: "sentence", Required: true},
-			{Name: "costs", Type: "sentence", Required: true},
-			{Name: "loses", Type: "enum", Values: []string{"scale", "authorship"}},
-		}, Faces: wiki.FaceTemplates{Line: "{costs}"}},
-		"part": {State: "state", Fields: []wiki.Field{
-			{Name: "space", Type: "enum", Values: []string{"machine", "agent", "os"}, Required: true},
-			{Name: "lets_go", Type: "sentence", Required: true},
-			{Name: "keeps", Type: "sentence", Required: true},
-			{Name: "state", Type: "enum", Values: []string{"shipped", "making"}, Required: true},
-		}, Faces: wiki.FaceTemplates{Line: "{keeps}"}},
-		"refusal": {Fields: []wiki.Field{
-			{Name: "by", Type: "ref", To: "part"},
-			{Name: "refuses", Type: "sentence", Required: true},
-			{Name: "because", Type: "ref|anchor|sentence", Required: true},
-		}, Faces: wiki.FaceTemplates{Line: "{refuses}"}},
-	}}
+	s, err := spwnSchema()
+	if err != nil {
+		panic(err)
+	}
+	return s
 }
 
 type fixture struct {
 	name, id, source string
 }
 
-func fixtures(t *testing.T) []fixture {
+func read(t *testing.T, path string) string {
 	t.Helper()
-	entries, err := os.ReadDir(pagesDir)
+	body, err := os.ReadFile(path)
 	if err != nil {
 		t.Fatal(err)
 	}
-	ids := map[string]string{"philosophy": "blueprint/philosophy", "boundaries": "product/boundaries", "positioning": "growth/positioning", "forms": "forms"}
-	out := make([]fixture, 0, len(entries))
-	for _, e := range entries {
-		body, err := os.ReadFile(filepath.Join(pagesDir, e.Name()))
-		if err != nil {
-			t.Fatal(err)
-		}
-		name := strings.TrimSuffix(e.Name(), ".md")
-		out = append(out, fixture{name: name, id: ids[name], source: string(body)})
+	return string(body)
+}
+
+// value: every page the compile is proved on: the corpus's, then one
+// synthetic page of every form.
+func fixtures(t *testing.T) []fixture {
+	t.Helper()
+	out := make([]fixture, 0, len(corpusPages())+1)
+	for _, id := range corpusPages() {
+		out = append(out, fixture{name: strings.ReplaceAll(id, "/", "-"), id: id, source: read(t, filepath.Join(corpusDir, id+".md"))})
 	}
-	return out
+	return append(out, fixture{name: "forms", id: "forms", source: read(t, formsPage)})
 }
 
 func TestEachPageCompilesToItsGolden(t *testing.T) {
@@ -81,7 +78,7 @@ func TestEachPageCompilesToItsGolden(t *testing.T) {
 			t.Fatal(err)
 		}
 		got := buf.String()
-		path := filepath.Join(goldenDir, f.name+".json")
+		path := filepath.Join(goldenDir, "compile-"+f.name+".json")
 		if *update {
 			if err := os.WriteFile(path, buf.Bytes(), 0o600); err != nil {
 				t.Fatal(err)

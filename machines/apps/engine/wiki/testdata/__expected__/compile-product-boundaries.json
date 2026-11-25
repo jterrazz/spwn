@@ -61,6 +61,30 @@
         },
         {
           "t": "block",
+          "id": "not-vibe-coding",
+          "kind": "refusal",
+          "address": "product/boundaries#not-vibe-coding",
+          "props": {
+            "id": "not-vibe-coding",
+            "refuses": "a vibe-coding tool",
+            "because": "it does not promise more output; it promises that you stay the author of the output"
+          },
+          "faces": {
+            "word": "not-vibe-coding",
+            "line": "a vibe-coding tool",
+            "icon": "refusal"
+          },
+          "at": {
+            "line": 12,
+            "col": 1
+          },
+          "span": {
+            "from": 12,
+            "to": 12
+          }
+        },
+        {
+          "t": "block",
           "id": "not-a-cloud-service",
           "kind": "refusal",
           "address": "product/boundaries#not-a-cloud-service",
@@ -75,12 +99,12 @@
             "icon": "refusal"
           },
           "at": {
-            "line": 12,
+            "line": 14,
             "col": 1
           },
           "span": {
-            "from": 12,
-            "to": 12
+            "from": 14,
+            "to": 14
           }
         },
         {
@@ -99,12 +123,44 @@
             "icon": "refusal"
           },
           "at": {
-            "line": 14,
+            "line": 16,
             "col": 1
           },
           "span": {
-            "from": 14,
-            "to": 14
+            "from": 16,
+            "to": 16
+          }
+        },
+        {
+          "t": "block",
+          "id": "not-a-method",
+          "kind": "refusal",
+          "address": "product/boundaries#not-a-method",
+          "props": {
+            "id": "not-a-method",
+            "refuses": "a method of work imposed",
+            "because": "it carries your taste and your context, not a way of working someone else chose"
+          },
+          "faces": {
+            "word": "not-a-method",
+            "line": "a method of work imposed",
+            "icon": "refusal"
+          },
+          "at": {
+            "line": 18,
+            "col": 1
+          },
+          "span": {
+            "from": 18,
+            "to": 18
+          }
+        },
+        {
+          "t": "prose",
+          "markdown": "Each line is the edge of the one enemy,\n[losing your thread](../blueprint/vision.md#the-enemy-losing-your-thread): a stack that replaced you, produced for its own sake, kept your context in someone else's place,\nlocked you to one vendor or worked in someone else's style would be a stack you are not the\nauthor of.",
+          "span": {
+            "from": 20,
+            "to": 23
           }
         }
       ]
@@ -115,7 +171,7 @@
         "text": "What each app refuses",
         "anchor": "what-each-app-refuses",
         "at": {
-          "line": 16,
+          "line": 25,
           "col": 1
         }
       },
@@ -151,12 +207,12 @@
                 "icon": "refusal"
               },
               "at": {
-                "line": 20,
+                "line": 29,
                 "col": 1
               },
               "span": {
-                "from": 20,
-                "to": 25
+                "from": 29,
+                "to": 34
               }
             },
             {
@@ -178,26 +234,26 @@
                 "icon": "refusal"
               },
               "at": {
-                "line": 27,
+                "line": 36,
                 "col": 1
               },
               "span": {
-                "from": 27,
-                "to": 32
+                "from": 36,
+                "to": 41
               }
             }
           ],
           "at": {
-            "line": 18,
+            "line": 27,
             "col": 1
           },
           "tag": {
-            "from": 18,
-            "to": 18
+            "from": 27,
+            "to": 27
           },
           "span": {
-            "from": 18,
-            "to": 34
+            "from": 27,
+            "to": 43
           }
         },
         {
@@ -246,20 +302,163 @@
             ]
           },
           "at": {
-            "line": 36,
+            "line": 45,
             "col": 1
           },
           "span": {
-            "from": 36,
-            "to": 36
+            "from": 45,
+            "to": 45
+          }
+        },
+        {
+          "t": "block",
+          "id": "no-model",
+          "kind": "refusal",
+          "address": "product/boundaries#no-model",
+          "props": {
+            "id": "no-model",
+            "by": {
+              "ref": "product/stack#agents"
+            },
+            "refuses": "to run a model: no inference happens inside Spwn, an agent's harness calls its provider",
+            "because": "spwn:docs/concepts/domain-model.md"
+          },
+          "faces": {
+            "word": "no-model",
+            "line": "to run a model: no inference happens inside Spwn, an agent's harness calls its provider",
+            "icon": "refusal"
+          },
+          "at": {
+            "line": 47,
+            "col": 1
+          },
+          "span": {
+            "from": 47,
+            "to": 52
+          }
+        },
+        {
+          "t": "block",
+          "id": "no-security-in-instructions",
+          "kind": "refusal",
+          "address": "product/boundaries#no-security-in-instructions",
+          "props": {
+            "id": "no-security-in-instructions",
+            "by": {
+              "ref": "product/stack#agents"
+            },
+            "refuses": "to hold security in an agent's instructions: what is forbidden does not exist in the world",
+            "because": "studio-os:home/spwn/wiki/engineering/decisions/001-security-as-physics.md"
+          },
+          "faces": {
+            "word": "no-security-in-instructions",
+            "line": "to hold security in an agent's instructions: what is forbidden does not exist in the world",
+            "icon": "refusal"
+          },
+          "at": {
+            "line": 54,
+            "col": 1
+          },
+          "span": {
+            "from": 54,
+            "to": 59
+          }
+        },
+        {
+          "t": "block",
+          "id": "no-computer",
+          "kind": "refusal",
+          "address": "product/boundaries#no-computer",
+          "props": {
+            "id": "no-computer",
+            "by": {
+              "ref": "product/stack#agents"
+            },
+            "refuses": "to prepare the computer an agent runs on: that is Machines' space",
+            "because": {
+              "ref": "product/stack"
+            },
+            "rests_on": "reading"
+          },
+          "faces": {
+            "word": "no-computer",
+            "line": "to prepare the computer an agent runs on: that is Machines' space",
+            "icon": "refusal"
+          },
+          "at": {
+            "line": 61,
+            "col": 1
+          },
+          "span": {
+            "from": 61,
+            "to": 67
+          }
+        },
+        {
+          "t": "block",
+          "id": "wiki-decides-nothing",
+          "kind": "refusal",
+          "address": "product/boundaries#wiki-decides-nothing",
+          "props": {
+            "id": "wiki-decides-nothing",
+            "by": {
+              "ref": "product/stack#wiki"
+            },
+            "refuses": "to decide what is true: you write the facts, agents read them",
+            "because": {
+              "ref": "blueprint/philosophy#taste"
+            }
+          },
+          "faces": {
+            "word": "wiki-decides-nothing",
+            "line": "to decide what is true: you write the facts, agents read them",
+            "icon": "refusal"
+          },
+          "at": {
+            "line": 69,
+            "col": 1
+          },
+          "span": {
+            "from": 69,
+            "to": 69
+          }
+        },
+        {
+          "t": "block",
+          "id": "os-holds-no-facts",
+          "kind": "refusal",
+          "address": "product/boundaries#os-holds-no-facts",
+          "props": {
+            "id": "os-holds-no-facts",
+            "by": {
+              "ref": "product/stack#os"
+            },
+            "refuses": "to be a second place where facts live, or to hide the detail with no way down to it",
+            "because": {
+              "ref": "blueprint/philosophy#delegating"
+            },
+            "rests_on": "reading"
+          },
+          "faces": {
+            "word": "os-holds-no-facts",
+            "line": "to be a second place where facts live, or to hide the detail with no way down to it",
+            "icon": "refusal"
+          },
+          "at": {
+            "line": 71,
+            "col": 1
+          },
+          "span": {
+            "from": 71,
+            "to": 77
           }
         },
         {
           "t": "prose",
           "markdown": "The rows of the four apps being made are derived from the convictions; none of those apps has a\ndesign yet, so each row is a constraint on the design to come, not a description of it.",
           "span": {
-            "from": 38,
-            "to": 39
+            "from": 79,
+            "to": 80
           }
         }
       ]
@@ -270,7 +469,7 @@
         "text": "Rests on",
         "anchor": "rests-on",
         "at": {
-          "line": 41,
+          "line": 82,
           "col": 1
         }
       },
@@ -279,8 +478,8 @@
           "t": "prose",
           "markdown": "Two rows are this page's reading rather than the owner's word or a record: Agents refusing to\nprepare a computer, and the OS refusing to hold facts of its own. Both follow from the spaces; the\nowner has not ruled on either.",
           "span": {
-            "from": 43,
-            "to": 45
+            "from": 84,
+            "to": 86
           }
         }
       ]
