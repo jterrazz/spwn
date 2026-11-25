@@ -1,0 +1,208 @@
+{
+  "id": "growth/positioning",
+  "faces": {
+    "word": "Positioning",
+    "line": "Where Spwn stands against what a person uses today instead, for anyone writing a comparison, a pitch or an answer to \"how is it different\": the category it refuses, the four alternatives and what each costs.",
+    "paragraph": "Where Spwn stands against what a person uses today instead, for anyone writing a comparison, a pitch or an answer to \"how is it different\": the category it refuses, the four alternatives and what each costs. What Spwn is, in one sentence, is [the vision](../blueprint/vision.md#the-definition)'s and is not restated here.",
+    "icon": ""
+  },
+  "title": {
+    "from": 1,
+    "to": 1
+  },
+  "sections": [
+    {
+      "heading": null,
+      "items": [
+        {
+          "t": "prose",
+          "markdown": "Where Spwn stands against what a person uses today instead, for anyone writing a comparison, a\npitch or an answer to \"how is it different\": the category it refuses, the four alternatives and\nwhat each costs. What Spwn is, in one sentence, is [the vision](../blueprint/vision.md#the-definition)'s\nand is not restated here.",
+          "span": {
+            "from": 3,
+            "to": 6
+          }
+        }
+      ]
+    },
+    {
+      "heading": {
+        "level": 2,
+        "text": "The alternatives",
+        "anchor": "the-alternatives",
+        "at": {
+          "line": 8,
+          "col": 1
+        }
+      },
+      "items": [
+        {
+          "t": "group",
+          "id": "alternatives",
+          "title": "What a person uses today",
+          "intent": "define",
+          "fold": true,
+          "props": {
+            "id": "alternatives",
+            "title": "What a person uses today",
+            "intent": "define",
+            "fold": true
+          },
+          "items": [
+            {
+              "t": "block",
+              "id": "by-hand",
+              "kind": "alternative",
+              "address": "growth/positioning#by-hand",
+              "props": {
+                "id": "by-hand",
+                "gives": "you know every line",
+                "costs": "you are the bottleneck: what gets built is bounded by your hours"
+              },
+              "faces": {
+                "word": "by-hand",
+                "line": "you are the bottleneck: what gets built is bounded by your hours",
+                "icon": "alternative"
+              },
+              "at": {
+                "line": 12,
+                "col": 1
+              },
+              "span": {
+                "from": 12,
+                "to": 12
+              }
+            },
+            {
+              "t": "block",
+              "id": "one-big-agent",
+              "kind": "alternative",
+              "address": "growth/positioning#one-big-agent",
+              "props": {
+                "id": "one-big-agent",
+                "gives": "speed, and one place to ask",
+                "costs": "the only safety is its instructions; one context holds everything, and you stop knowing what it did"
+              },
+              "faces": {
+                "word": "one-big-agent",
+                "line": "the only safety is its instructions; one context holds everything, and you stop knowing what it did",
+                "icon": "alternative"
+              },
+              "at": {
+                "line": 14,
+                "col": 1
+              },
+              "span": {
+                "from": 14,
+                "to": 18
+              }
+            },
+            {
+              "t": "block",
+              "id": "managed-platform",
+              "kind": "alternative",
+              "address": "growth/positioning#managed-platform",
+              "props": {
+                "id": "managed-platform",
+                "gives": "someone else runs the agents",
+                "costs": "your context, machines and credentials live in their place, worked in their method"
+              },
+              "faces": {
+                "word": "managed-platform",
+                "line": "your context, machines and credentials live in their place, worked in their method",
+                "icon": "alternative"
+              },
+              "at": {
+                "line": 20,
+                "col": 1
+              },
+              "span": {
+                "from": 20,
+                "to": 20
+              }
+            },
+            {
+              "t": "block",
+              "id": "unrelated-tools",
+              "kind": "alternative",
+              "address": "growth/positioning#unrelated-tools",
+              "props": {
+                "id": "unrelated-tools",
+                "gives": "each tool is good at its part",
+                "costs": "each keeps its own copy of your context, and you are the integration between them"
+              },
+              "faces": {
+                "word": "unrelated-tools",
+                "line": "each keeps its own copy of your context, and you are the integration between them",
+                "icon": "alternative"
+              },
+              "at": {
+                "line": 22,
+                "col": 1
+              },
+              "span": {
+                "from": 22,
+                "to": 22
+              }
+            }
+          ],
+          "at": {
+            "line": 10,
+            "col": 1
+          },
+          "tag": {
+            "from": 10,
+            "to": 10
+          },
+          "span": {
+            "from": 10,
+            "to": 24
+          }
+        },
+        {
+          "t": "block",
+          "id": "two-costs",
+          "kind": "figure",
+          "address": "growth/positioning#two-costs",
+          "props": {
+            "id": "two-costs",
+            "form": "quad",
+            "shows": {
+              "ref": "growth/positioning#alternatives"
+            },
+            "x": "scale",
+            "y": "authorship",
+            "caption": "Each costs either scale or authorship."
+          },
+          "faces": {
+            "word": "two-costs",
+            "line": "Each costs either scale or authorship.",
+            "icon": "figure"
+          },
+          "view": {
+            "form": "quad",
+            "shows": "growth/positioning#alternatives",
+            "parts": [],
+            "caption": "Each costs either scale or authorship."
+          },
+          "at": {
+            "line": 26,
+            "col": 1
+          },
+          "span": {
+            "from": 26,
+            "to": 26
+          }
+        },
+        {
+          "t": "prose",
+          "markdown": "Each costs either scale or authorship. Spwn's answer is to keep both: the work goes to agents, the\ndecisions stay with you, on your machines, from one place for each fact\n([the stack](../product/stack.md)).",
+          "span": {
+            "from": 28,
+            "to": 30
+          }
+        }
+      ]
+    }
+  ],
+  "findings": []
+}
