@@ -3,7 +3,6 @@ package machinescreate
 import (
 	"cmp"
 	"context"
-	"errors"
 	"strconv"
 
 	"github.com/spf13/cobra"
@@ -23,8 +22,8 @@ type Deps struct {
 	// value: the flags' sizes, parsed as the hypervisor takes them.
 	Resources func(cpus int, memory, disk string) (machines.Resources, error)
 	// value: every refusal of the request; unbuilt when the only one is the
-	// image, not on the Mac it is sent to, which the call builds first, or
-	// refuses when station only fetches it.
+	// image, not on this Mac, which the call builds first or refuses when
+	// station only fetches it; with --on the Mac it is sent to judges it.
 	Check func(ctx context.Context, r machines.CreateRequest) (unbuilt bool, err error)
 	// value: refuses this machine when the call's rule says no, before any
 	// check of the request.
@@ -53,9 +52,25 @@ type Input struct {
 	request machines.CreateRequest
 	// value: another Mac chosen on a terminal, the create sent there.
 	mac string
-	// value: the image is not built on the Mac the create is sent to, which
-	// builds it first.
-	unbuilt bool
+}
+
+// invariant: a create asks nothing before the build of its image (ADR-097),
+// so it says it once, as a note on a terminal or a pipe alike, when the Mac
+// it was sent to starts it, --on included.
+type saysBuild struct {
+	*kit.Spinner
+	io    kit.IO
+	image string
+	said  bool
+}
+
+func (s *saysBuild) Step(task, detail string) {
+	if !s.said && task == machinescalls.BuildStep(s.image) {
+		s.said = true
+		s.Stop()
+		s.io.Note(s.image + " is built first, which takes several minutes")
+	}
+	s.Spinner.Step(task, detail)
 }
 
 func Command(d Deps, env kit.Env) *cobra.Command {
@@ -115,8 +130,6 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 				}
 			}
 			unbuilt, err := d.Check(ctx, in.request)
-			missing := new(machines.NoImageError)
-			in.unbuilt = unbuilt && errors.As(err, &missing) && !missing.Fetched
 			if !unbuilt {
 				return err
 			}
@@ -132,10 +145,7 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 			if in.mac != "" {
 				target = machine.Ref{Name: in.mac}
 			}
-			if in.unbuilt && in.mac == "" {
-				io.Note(in.request.Image + " is built first, which takes several minutes")
-			}
-			steps := kit.Steps(io)
+			steps := &saysBuild{Spinner: kit.Steps(io), io: io, image: in.request.Image}
 			var created machines.Created
 			schema := machinescalls.CreateWorkspace.Schema()
 			if in.Server {

@@ -126,9 +126,15 @@ func missingBuild(ctx context.Context, d Deps, r machines.CreateRequest) ImageBu
 		return nil
 	}
 	return func(ctx context.Context, step func(label string)) error {
-		step("Building " + image)
+		step(BuildStep(image))
 		return imagescalls.Worded(d.Images.Build(ctx, image, step))
 	}
+}
+
+func BuildStep(image string) string {
+	// value: the step a create's build of its missing image starts with,
+	// which a surface says once, before the build runs.
+	return "Building " + image
 }
 
 func create(ctx context.Context, d Deps, r machines.CreateRequest, b ImageBuild, p call.Progress) (machines.Created, error) {

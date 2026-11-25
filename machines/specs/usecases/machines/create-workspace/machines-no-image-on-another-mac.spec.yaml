@@ -1,8 +1,9 @@
-description: 'a create --on a Mac without the image asks nothing: that Mac builds the image first'
+description: 'a create --on a Mac without the image asks nothing, and says that Mac builds the image first'
 env: mini-no-image
 runs:
     - command: 'machines create box --on mac-mini'
       exit: 2
       stderr: |
+          base-ubuntu is built first, which takes several minutes
           Error: this station is not a released version: there is no release binary to put in the image
           Hint: download station-linux-arm64 from https://github.com/jterrazz/spwn/releases, then station images build base-ubuntu --binary <that file>
