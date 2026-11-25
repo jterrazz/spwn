@@ -4,7 +4,7 @@ CLI self-upgrade + version-check.
 
 ## Role
 
-Owns `spwn upgrade`: fetches release metadata from GitHub, downloads the platform-appropriate binary, verifies it against the SHA256SUMS published with the release, and atomically replaces the current binary. Also exposes a lightweight version-check used by the CLI startup banner and the web UI's "upgrade available" badge. Split from `packages/migration` so self-upgrade and state migration stay independently composable: one pulls a newer binary, the other walks in-place state forward.
+Owns `spwn upgrade`: fetches release metadata from GitHub, downloads the platform-appropriate binary, verifies it against the SHA256SUMS published with the release, and atomically replaces the current binary. Also exposes a lightweight version-check used by the CLI startup banner. Split from `packages/migration` so self-upgrade and state migration stay independently composable: one pulls a newer binary, the other walks in-place state forward.
 
 ## Key types
 
@@ -17,5 +17,5 @@ Owns `spwn upgrade`: fetches release metadata from GitHub, downloads the platfor
 
 ## Related
 
-- **Imported by**: `apps/cli` (`spwn upgrade`, startup version banner), `apps/api` (web UI version badge)
+- **Imported by**: `apps/cli` (`spwn upgrade`, startup version banner)
 - **Imports**: `packages/platform` (for `~/.spwn/` cache path)

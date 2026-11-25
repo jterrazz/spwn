@@ -1,6 +1,5 @@
 // This file is the init-template face of the catalog: the
-// List/Get/Install surface used by `spwn init <slug>` and the web UI
-// gallery. Every catalog entry is a raw directory (no spwn/ nesting);
+// List/Get/Install surface used by `spwn init <slug>`. Every catalog entry is a raw directory (no spwn/ nesting);
 // the subset with a `worlds:` section in its spwn.yaml is what the
 // gallery surfaces as a ready-to-scaffold project.
 //

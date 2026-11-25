@@ -13,7 +13,7 @@
 //
 // Sub-packages:
 //
-//   - base/:    embedded world.Dockerfile / architect.Dockerfile.
+//   - base/:    embedded world.Dockerfile.
 //   - e2e/:     Docker-backed integration tests (build tag: e2e).
 //   - internal/dockerfile/: Dockerfile generator internals.
 //   - internal/imagetest/:  integration-test harness.

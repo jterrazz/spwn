@@ -7,16 +7,8 @@ export default defineConfig({
     platform: 'node',
     presets: [test()],
     typescript: {
-        knip: {
-            entry: {
-                'website/__setup__/project.ts':
-                    'the throwaway project the server command of the website specification runs with node before `spwn web`',
-            },
-        },
         roots: {
             cli: 'the cli specification: this member IS the specs tree, so its specification folders sit at its root',
-            website:
-                'the website specification: this member IS the specs tree, so its specification folders sit at its root',
         },
     },
     test: {
@@ -32,12 +24,6 @@ export default defineConfig({
                 reason: 'this member IS the specs tree, so its specifications sit at its root, where the derived globs (specs/cli/...) do not look; a docker-aware spec spawns real containers, two minutes at most; a smoke spec builds a world image from scratch, so only `make test-smoke` (SPWN_SMOKE=1) runs them, one file at a time',
                 serial: SMOKE,
                 timeout: SMOKE ? 600_000 : 120_000,
-            },
-            website: {
-                include: ['website/**/*.spec.ts'],
-                reason: 'this member IS the specs tree, so its specifications sit at its root, where the derived globs do not look; the run builds and serves the UI once, with the one API address its client is built with, and every file starts its own `spwn web` on that address, so the files run one at a time',
-                serial: true,
-                setup: ['website/__setup__/ui.global-setup.ts'],
             },
         },
     },

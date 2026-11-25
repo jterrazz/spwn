@@ -30,7 +30,6 @@ Everything this repository knows about itself, by what the reader came to do. Wh
 | [Physics](concepts/physics.md)             | Constants, laws, elements, and the world context an agent reads at startup   |
 | [The Mind](concepts/mind.md)               | Identity, skills, memory; Dream, Sleep, and versioning a Mind                |
 | [Gate](concepts/gate.md)                   | The host-side broker: cookies, MCP routing, the browser sidecar              |
-| [Observatory](concepts/observatory.md)     | The web UI and the API behind it                                             |
 | [Update system](concepts/update-system.md) | How Spwn ships and updates itself, from the git tag to the binary swap       |
 
 ## Reference
@@ -44,7 +43,7 @@ Everything this repository knows about itself, by what the reader came to do. Wh
 | [Test architecture](reference/test-architecture.md)                 | Every suite, what it proves, the runners and the simulators                  |
 | [Manual pass: CLI scenarios](reference/manual-cli-scenarios.md)     | Fifty command sequences the harness drives                                   |
 | [Manual pass: agent behaviour](reference/manual-agent-behaviour.md) | Fifty scenarios that need a live, authenticated runtime                      |
-| [Manual pass: edge cases](reference/manual-edge-cases.md)           | Seventy-two cases of concurrency, partial failure and filesystem edges       |
+| [Manual pass: edge cases](reference/manual-edge-cases.md)           | Sixty-seven cases of concurrency, partial failure and filesystem edges       |
 
 ## Machines
 

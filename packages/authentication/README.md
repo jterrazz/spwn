@@ -16,5 +16,5 @@ Resolves host-side AI-provider credentials (Anthropic, OpenAI, Google) from thei
 
 ## Related
 
-- **Imported by**: `apps/api`, `apps/cli`, `packages/architect`
+- **Imported by**: `apps/cli`, `packages/architect`
 - **Imports**: `packages/platform` (for `~/.spwn/credentials/` and provider-cache paths)

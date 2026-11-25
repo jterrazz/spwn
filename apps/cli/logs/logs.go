@@ -21,7 +21,6 @@ import (
 var knownEventTypes = []coreactivity.Type{
 	coreactivity.TypeWorldSpawned,
 	coreactivity.TypeWorldDestroyed,
-	coreactivity.TypeWorldSnapshot,
 	coreactivity.TypeWorldStateChange,
 	coreactivity.TypeAgentCreated,
 	coreactivity.TypeAgentDeleted,

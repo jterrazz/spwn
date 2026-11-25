@@ -29,7 +29,7 @@ Dependency resolution (the `Registry`, transitive expansion, topological sort) a
 - `BuildFromBase(ctx, cli, req)`: compose a `TreeTarballer` onto a base image. Interface (not concrete `*transpile.Tree`) to avoid a cycle from compile through transpile back to compile.
 - `BuildError`, `VerifyError`: typed errors for build failures and post-build verification failures.
 - `GenerateDockerfile`, `ToolsToInputs`, `GenerateOpts`: generator seams used by both entry points.
-- `base/`: embedded `world.Dockerfile`, `architect.Dockerfile`, `test.Dockerfile` templates plus `entrypoint.sh`.
+- `base/`: embedded `world.Dockerfile` and `test.Dockerfile` templates.
 - `internal/dockerfile/`: the generic Dockerfile generator fed by the tool registry.
 - `internal/imagetest/`: E2E sandbox helpers for image-level tests.
 

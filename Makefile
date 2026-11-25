@@ -8,7 +8,7 @@ TURBO            := GOLANGCI_VERSION=$(GOLANGCI_VERSION) PATH="$(shell go env GO
 GO_PACKAGES      := 'go-workspace...'
 
 .PHONY: help install build fix lint test mutation check
-.PHONY: generate uninstall clean docs test-pkg test-image test-go-e2e test-compile-e2e test-smoke web-dev
+.PHONY: generate uninstall clean docs test-pkg test-image test-go-e2e test-compile-e2e test-smoke
 .PHONY: machines-check machines-build
 
 help: ## Show this help
@@ -34,7 +34,7 @@ lint: ## golangci-lint across go.work, every gate of the TypeScript toolchain, t
 	@$(TURBO) run lint --filter='!go-workspace'
 	@scripts/gates/test.sh
 
-test: build test-image ## Go unit tests, the web and gate module tests, the cli and website specs
+test: build test-image ## Go unit tests, the gate module tests, the cli specs
 	@$(TURBO) run test --filter='!go-workspace'
 
 mutation: ## The mutation verdict over the change, member by member
@@ -54,7 +54,6 @@ test-image: ## Build spwn-test:latest, the base image holding the mock Claude an
 test-go-e2e: generate test-image ## Go world E2E (//go:build e2e), Docker required
 	cd packages/world && go test -v -tags=e2e -timeout=30m ./tests/e2e/...
 	cd packages/container && go test -v -tags=e2e -timeout=5m ./backend/...
-	cd packages/architect && go test -v -tags=e2e -timeout=10m -run TestStopDaemon ./...
 
 test-compile-e2e: generate ## Go image-build E2E (compile and Dockerfile rendering), Docker required
 	cd packages/compile && go test -v -tags=e2e -timeout=15m ./e2e/...
@@ -73,9 +72,6 @@ clean: ## Remove .artifacts/, the turbo cache included
 
 docs: generate ## Regenerate docs/reference/commands.md from the Cobra tree
 	cd apps/cli && go run ./cmd/gen-docs ../../docs/reference/commands.md
-
-web-dev: ## Next.js dev server
-	@pnpm -C apps/web dev
 
 machines-check: ## Machines' own `make check`, run inside machines/ with its toolchain
 	@$(MAKE) -C machines check

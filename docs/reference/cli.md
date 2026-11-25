@@ -116,7 +116,6 @@ spwn skill new|edit|show|rm <name>             # bare-markdown skill authoring
 spwn world list               # list running worlds
 spwn world inspect <id>       # inspect a running world
 spwn world enter   <id>       # interactive shell inside the world
-spwn world snap save|ls|restore|rm   # world snapshots
 
 # ── Automations ──────────────────────────────────────────────────
 spwn automation ls            # list declared automations + last-fired
@@ -126,7 +125,6 @@ spwn automation daemon        # run the engine until interrupted
 
 # ── System ───────────────────────────────────────────────────────
 spwn gate start|stop|status   # host-side broker for cookie-bearing tools (see the Gate concept)
-spwn web                      # open the local web UI
 spwn auth login|logout|token  # provider credentials
 
 # ── Registry (planned) ───────────────────────────────────────────

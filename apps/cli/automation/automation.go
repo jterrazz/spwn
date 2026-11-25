@@ -9,9 +9,7 @@
 //	status  engine state snapshot: how many automations are
 //	          registered per world, last fire times, freshness.
 //	daemon  run the engine for the current project and block until
-//	          interrupted. The architect daemon (long-running) is the
-//	          eventual home; for now this is the simplest "run my
-//	          automations" path.
+//	          interrupted.
 //
 // All four are read-only against the project filesystem except
 // `daemon`, which writes receipts + state.
@@ -28,7 +26,7 @@ var Cmd = &cobra.Command{
 	Use:   "automation",
 	Short: "Trigger-driven agent wakeups (cron + filesystem)",
 	Long: `Automations bind a trigger (cron expression or filesystem watch)
-to one of your project's agents. The architect daemon fires them as
+to one of your project's agents. The command "spwn automation daemon" fires them as
 events arrive and writes a receipt for every dispatch.
 
 Declare automations under spwn.yaml#worlds.<name>.automations. See

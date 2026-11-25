@@ -1,7 +1,7 @@
 {
     "$schema": "https://docs.renovatebot.com/renovate-schema.json",
     "description": [
-        "The estate's base-image rule, plus Playwright as one group: the gate's image ships the Chromium one playwright release drives, the image installs that release globally, the sidecar imports it, and CI provisions the browser specs/ resolves, so all four move in one PR or the gate launches no browser.",
+        "The estate's base-image rule, plus Playwright as one group: the gate's image ships the Chromium one playwright release drives, the image installs that release globally, and the sidecar imports it, so all three move in one PR or the gate launches no browser.",
         "npm runs for playwright alone, and Go modules and Cargo crates for the security lane alone (the estate preset's rule for npm): every other dependency stays the owner's to move."
     ],
     "extends": ["github>jterrazz/studio-actions//renovate/apps"],

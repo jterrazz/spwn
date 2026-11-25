@@ -20,7 +20,6 @@ runs:
               architect.talked
               world.destroyed
               world.session_ended
-              world.snapshot
               world.spawned
               world.state_changed
 

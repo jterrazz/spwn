@@ -74,7 +74,6 @@ func (m *MockBackend) ImageVersion(ctx context.Context, image, label string) (st
 func (m *MockBackend) ExecDetached(ctx context.Context, id string, cfg backend.ExecConfig) error {
 	return nil
 }
-func (m *MockBackend) Commit(ctx context.Context, id string, tag string) error { return nil }
 func (m *MockBackend) ImageList(ctx context.Context, prefix string) ([]backend.ImageInfo, error) {
 	return nil, nil
 }

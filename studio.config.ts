@@ -16,10 +16,6 @@ export default defineConfig({
         },
         knip: {
             entry: {
-                'apps/spwn-cookie-sync/background.js':
-                    'the extension service worker, which Chrome loads by the path manifest.json names',
-                'apps/spwn-cookie-sync/popup.js':
-                    'the extension popup script, which Chrome loads from popup.html',
                 'catalog/x/tools/x/index.js':
                     'the X tool the gate runs by the path its tool.yaml names',
             },
@@ -29,13 +25,9 @@ export default defineConfig({
             },
             ignoreBinaries: {
                 pgrep: 'a system binary of macOS and Linux, never a package',
-                playwright:
-                    'CI runs it through `pnpm -C specs exec` to install the headless browser, from the specs member that declares it',
             },
             ignoreDependencies: {
                 turbo: 'the Makefile runs it as `pnpm exec turbo`; no source imports it',
-                playwright:
-                    'the optional peer @jterrazz/test imports at run time when a website specification visits a page',
             },
         },
         roots: {

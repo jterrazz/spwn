@@ -35,7 +35,6 @@ type mockBackend struct {
 	imageExistsV  bool
 	imageExistsE  error
 	ensureImgErr  error
-	commitErr     error
 	imageList     []backend.ImageInfo
 	imageListErr  error
 	imageRemoveE  error
@@ -216,10 +215,6 @@ func (m *mockBackend) ImageVersion(_ context.Context, image string, label string
 
 func (m *mockBackend) ExecDetached(_ context.Context, _ string, _ backend.ExecConfig) error {
 	return m.execDetachErr
-}
-
-func (m *mockBackend) Commit(_ context.Context, _ string, _ string) error {
-	return m.commitErr
 }
 
 func (m *mockBackend) ImageList(_ context.Context, _ string) ([]backend.ImageInfo, error) {
@@ -603,79 +598,8 @@ func TestDestroyAll_EmptyState(t *testing.T) {
 	}
 }
 
-func TestSnapshot_Success(t *testing.T) {
-	mb := newMockBackend()
-	arch, store := newTestArchitect(t, mb)
-
-	w := models.World{
-		ID:          "w-snap-22222",
-		ContainerID: "mock-snap-ctr",
-		Status:      models.StatusIdle,
-	}
-	seedWorld(mb, w)
-	_ = store
-
-	tag, err := arch.Snapshot(context.Background(), "w-snap-22222", "mysnap")
-	if err != nil {
-		t.Fatalf("Snapshot() error: %v", err)
-	}
-	if !strings.Contains(tag, "spwn-snapshot:") {
-		t.Errorf("expected snapshot tag, got %s", tag)
-	}
-	if !strings.Contains(tag, "mysnap") {
-		t.Errorf("expected tag to contain 'mysnap', got %s", tag)
-	}
-}
-
-func TestSnapshot_WorldNotFound(t *testing.T) {
-	mb := newMockBackend()
-	arch, _ := newTestArchitect(t, mb)
-
-	_, err := arch.Snapshot(context.Background(), "w-nope-00000", "test")
-	if err == nil {
-		t.Fatal("expected error for nonexistent world")
-	}
-}
-
-func TestSnapshot_CommitError(t *testing.T) {
-	mb := newMockBackend()
-	mb.commitErr = fmt.Errorf("disk full")
-	arch, store := newTestArchitect(t, mb)
-
-	seedWorld(mb, models.World{ID: "w-err-33333", ContainerID: "ctr-1", Status: models.StatusIdle})
-	_ = store
-
-	_, err := arch.Snapshot(context.Background(), "w-err-33333", "test")
-	if err == nil {
-		t.Fatal("expected error when commit fails")
-	}
-	if !strings.Contains(err.Error(), "disk full") {
-		t.Errorf("error should propagate cause, got: %v", err)
-	}
-}
-
 func TestMockBackendImplementsInterface(t *testing.T) {
 	// Compile-time check that mockBackend satisfies backend.Backend
 	var _ backend.Backend = (*mockBackend)(nil)
 }
 
-func TestDeleteSnapshot_Success(t *testing.T) {
-	mb := newMockBackend()
-	arch, _ := newTestArchitect(t, mb)
-
-	err := arch.DeleteSnapshot(context.Background(), "spwn-snapshot:w-test--mysnap")
-	if err != nil {
-		t.Fatalf("DeleteSnapshot() error: %v", err)
-	}
-}
-
-func TestDeleteSnapshot_Error(t *testing.T) {
-	mb := newMockBackend()
-	mb.imageRemoveE = fmt.Errorf("image in use")
-	arch, _ := newTestArchitect(t, mb)
-
-	err := arch.DeleteSnapshot(context.Background(), "spwn-snapshot:test")
-	if err == nil {
-		t.Fatal("expected error")
-	}
-}

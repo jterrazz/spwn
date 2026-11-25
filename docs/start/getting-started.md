@@ -101,7 +101,7 @@ spwn/agents/neo/
 
 `spwn init` drops the scaffold into any directory, the way `git init` or `docker init` do; see [the layout](#the-layout) it lays down. Whoever clones the repo gets the same agents with the same tools, byte-for-byte. No imperative setup scripts, no "works on my machine".
 
-**`~/.spwn/` holds only your user identity** - credentials, daemon state, activity log. It's the equivalent of `~/.aws/` or `~/.docker/config.json`: personal to the machine, never the source of truth for what runs. To share an agent across projects, export it (`spwn agent export`) and import the archive in the next repo (`spwn agent import`).
+**`~/.spwn/` holds only your user identity** - credentials, activity log. It's the equivalent of `~/.aws/` or `~/.docker/config.json`: personal to the machine, never the source of truth for what runs. To share an agent across projects, export it (`spwn agent export`) and import the archive in the next repo (`spwn agent import`).
 
 ### A world is one `spwn up` away
 

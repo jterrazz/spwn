@@ -4,7 +4,7 @@ Everything an agent is made of is a declarative file, reviewed in PRs and pinned
 
 ## The project on disk
 
-A Spwn project is per-repo: everything an agent is made of is committed beside the code it works on. `~/.spwn/` holds only user-level credentials and daemon state, and nothing a teammate needs to reproduce the project.
+A Spwn project is per-repo: everything an agent is made of is committed beside the code it works on. `~/.spwn/` holds only user-level credentials and the activity log, and nothing a teammate needs to reproduce the project.
 
 ```text
 my-project/
@@ -38,8 +38,7 @@ spwn/
 ```text
 ~/.spwn/                         # USER-LEVEL only, never per-project
 ├── credentials/                 # auth material surfaced to containers at /credentials
-├── activity.jsonl               # global activity log
-└── state/                       # architect daemon state
+└── activity.jsonl               # global activity log
 ```
 
 The two manifests compose. `spwn.yaml` declares project-wide `dependencies:`, an optional `runtime.backend` default, and the inline `worlds:` map; `agent.yaml` declares one agent's `dependencies:` and its `runtime.backend`. An agent's deps are **unioned** with the project-wide pool (it can add to that pool, never remove from it), and the union is exactly what materializes inside that agent's container.

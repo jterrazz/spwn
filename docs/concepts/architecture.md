@@ -1,6 +1,6 @@
 # Architecture
 
-Spwn is a polyglot monorepo (Go domain modules plus a Next.js/Tauri web UI) wired together with Go workspaces (`go.work`), pnpm (`pnpm-workspace.yaml`), and a top-level `Makefile` that is the single entry point for both toolchains. CI calls the Makefile's gestures directly, one per job of [`.github/workflows/check.yaml`](../../.github/workflows/check.yaml).
+Spwn is a polyglot monorepo (Go domain modules plus the gate's Node sidecar) wired together with Go workspaces (`go.work`), pnpm (`pnpm-workspace.yaml`), and a top-level `Makefile` that is the single entry point for both toolchains. CI calls the Makefile's gestures directly, one per job of [`.github/workflows/check.yaml`](../../.github/workflows/check.yaml).
 
 ## Repository layout
 
@@ -9,10 +9,7 @@ The surfaces end users reach are `apps/`, at layer L7:
 ```text
 apps/
 ├── cli/                 # Go: the `spwn` binary (cmd/spwn, cobra commands, ui)
-├── api/                 # Go: the HTTP server behind the web UI
-├── web/                 # Next.js (src/) + the Tauri shell (src-tauri/, Rust)
-├── gate/                # the host-side broker, its Node SDK and its browser sidecar
-└── spwn-cookie-sync/    # the Chrome extension feeding the gate
+└── gate/                # the host-side broker, its Node SDK and its browser sidecar
 ```
 
 The Go domain modules they import are `packages/`:
@@ -31,7 +28,7 @@ packages/
 └── world/ architect/                   # container lifecycle and labels; the orchestration daemon
 ```
 
-Beside them, `catalog/` holds the shipped worlds and the `spwn:*` blocks, `specs/` the CLI and website specifications ([Test architecture](../reference/test-architecture.md)), `docker/` the test image, and `docs/` this manual. `go.work`, `pnpm-workspace.yaml` and the `Makefile` tie them together.
+Beside them, `catalog/` holds the shipped worlds and the `spwn:*` blocks, `specs/` the CLI specification ([Test architecture](../reference/test-architecture.md)), `docker/` the test image, and `docs/` this manual. `go.work`, `pnpm-workspace.yaml` and the `Makefile` tie them together.
 
 `machines/` is the other product of the repository, Machines, the `station` binary that sets up and runs a Mac and its VMs. It is a repository of its own nested here with its history ([ADR-017](../decisions/017-one-repository-station-moves-in-under-machines.md)): its own `go.work`, npm workspace, Turborepo graph and `Makefile`, which none of the root's lists name, and its own manual at [`machines/docs/`](../../machines/docs/README.md).
 
@@ -46,7 +43,7 @@ Imports flow **downward only**, across seven layers. This is enforced at three l
 3. **This document**: review-time ground truth for intent.
 
 ```text
-L7 Surface     apps/cli · apps/api · apps/web · apps/gate      (imports anything)
+L7 Surface     apps/cli · apps/gate                            (imports anything)
    ──────────────────────────────────────────────────────────────────────────
 L6 Runtime     world · architect                               (orchestration hub)
    ──────────────────────────────────────────────────────────────────────────
@@ -84,15 +81,8 @@ Spwn uses **DooD**, not DinD ([ADR-012](../decisions/012-dood-over-dind.md)). Th
 ```text
 Host machine
 └── Docker daemon (/var/run/docker.sock)
-    ├── Architect container (always-on, socket-mounted)
-    ├── World containers (siblings, created by the Architect)
-    └── Desktop App container (sibling)
+    └── World containers (siblings, created by `spwn up` from the host)
 ```
-
-Two modes:
-
-- **Local CLI (direct)**: `spwn up` calls Docker directly from the host; no Architect container needed.
-- **Hosted Architect (containerized)**: the web API (`spwn web`) launches the Architect in a long-lived socket-mounted container that creates and manages world containers as siblings. Channels connect here.
 
 The [gate](gate.md) is a separate long-running host container that owns cookie-bearing tools and the shared browser primitive.
 
@@ -120,7 +110,7 @@ The boundaries are as load-bearing as the layers:
 
 ## Planned surfaces
 
-Thin SDKs are designed, not shipped: language wrappers (TypeScript first, then Python) over the same domain APIs the CLI consumes, so code can act as an operator (spawn a world, assign a task, collect the result) without shelling out. Today the shipped operator surfaces are the CLI and the web UI.
+Thin SDKs are designed, not shipped: language wrappers (TypeScript first, then Python) over the same domain APIs the CLI consumes, so code can act as an operator (spawn a world, assign a task, collect the result) without shelling out. Today the shipped operator surface is the CLI.
 
 The runtime stack has further designed-but-unshipped layers, each with its own record: a runtime normalization layer inside worlds ([ADR-007](../decisions/007-rivet-runtime-layer.md)), multi-provider and subscription auth behind it ([ADR-009](../decisions/009-pi-mono-multi-provider.md)), and the Architect's messaging channels ([ADR-008](../decisions/008-zeroclaw-as-claw.md), [ADR-011](../decisions/011-organization-manifest.md)).
 

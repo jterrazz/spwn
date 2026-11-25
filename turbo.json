@@ -31,7 +31,7 @@
         "test": {
             "dependsOn": ["dependency#generate"]
         },
-        // invariant: the cli and website specs drive the compiled binary at .artifacts/go/spwn.
+        // invariant: the cli specs drive the compiled binary at .artifacts/go/spwn.
         "spwn-specs#test": {
             "dependsOn": ["cli#build"],
             "cache": false

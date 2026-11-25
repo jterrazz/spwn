@@ -32,7 +32,7 @@ Powers two delivery shapes, sharing the transpile phase verbatim:
 - `Runtime` interface: `Name()` + `Render(Input)`, which returns a `*Tree`. Pure. Implementations live in `packages/runtimes/<name>/`.
 - `Compile(name, input)`, returning `*Tree`: look up the registered runtime and render.
 - `source/` sub-package: `Load(root)` walks a project directory into a `ProjectSource`; `ToCompileInput(source, worldName)` projects it onto an `Input`.
-- `worldbook/` sub-package: Spwn's opinionated world content (physics, faculties, roster, architect identity + skills). Runtime-neutral; imported by every runtime renderer and by `packages/architect` for image-build + hot-deploy.
+- `worldbook/` sub-package: Spwn's opinionated world content (physics, faculties, roster). Runtime-neutral; imported by every runtime renderer and by `packages/architect` for image-build + hot-deploy.
 
 ## Related
 

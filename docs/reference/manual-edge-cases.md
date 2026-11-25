@@ -17,7 +17,6 @@ These are the **complicated** scenarios the prior two suites
 - **Auth**: missing/expired/wrong-provider credentials.
 - **CLI UX**: TTY vs pipe, SIGINT, partial JSON, completion.
 - **Resource limits**: PidsLimit, disk, memory.
-- **Snapshot/restore**: cross-version, overlapping IDs, many snaps.
 - **Multi-agent**: name collision with system reserved, inbox
   overflow, circular messages.
 
@@ -401,39 +400,16 @@ world list / check / auth`.
 
 ---
 
-## J. Resource & snapshot (67-72)
+## J. Resource limits (67)
 
 ### J67. PidsLimit=256 exceeded
 
 **Probe:** agent spawns 300 processes; container should OOM or
 kernel-block.
 
-### J68. Snapshot of running container
-
-**Probe:** `spwn up`, `spwn world snap save <id> s1`, verify image
-tagged.
-
-### J69. Restore snapshot into a new world
-
-**Probe:** `spwn world snap restore <snap-id>`; new world comes
-online with preserved state.
-
-### J70. Restore snapshot with project gone
-
-**Hypothesis:** snapshot restore works even if project dir moved;
-new world has stale role.md but otherwise fine.
-
-### J71. Many snapshots (100+): GC / cleanup
-
-**Hypothesis:** no auto-GC today; document.
-
-### J72. Delete snapshot that's in use by a running world
-
-**Hypothesis:** `docker rmi` fails with "in use" error; clean.
-
 ---
 
-## Total: 72 edge-case scenarios
+## Total: 67 edge-case scenarios
 
 ## Execution plan
 
@@ -448,5 +424,3 @@ new world has stale role.md but otherwise fine.
 - DoS / adversarial workloads (testing against a malicious agent).
 - Cross-platform beyond the world user's uid on Linux, which
   [Worlds](../concepts/worlds.md) covers (Spwn is macOS-first today).
-- HTTP API auth edges (apps/api is same-machine only).
-- Web UI specifics (Playwright suite).

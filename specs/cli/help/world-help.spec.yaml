@@ -18,16 +18,6 @@ runs:
             logs <id>                        Show event log for a world
             enter <id>                       Open an interactive shell inside a world
 
-          Snapshots:
-            snap save <id>                   Save world state
-            snap ls                          List snapshots
-            snap restore <snap-id>           Rollback to a snapshot
-            snap rm <snap-id>                Remove a snapshot
-
-          Knowledge:
-            knowledge ls <id>                List a world's knowledge files
-            knowledge show <id> <path>       Read a knowledge file
-
           Examples:
             spwn up --agent neo -w .         Spawn neo in current dir
             spwn up --agent morpheus --agent neo -w .

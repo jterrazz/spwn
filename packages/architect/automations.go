@@ -251,9 +251,7 @@ type AutomationEngineConfig struct {
 //
 // Returns the engine; the caller is responsible for Register +
 // Start + Stop. The factory does the wiring; lifecycle is the
-// caller's. This separation lets the architect daemon hold one
-// engine per project while the spwn-up CLI path can build a
-// transient engine without daemonising.
+// caller's.
 func (a *Architect) NewAutomationEngine(cfg AutomationEngineConfig) (*automation.Engine, error) {
 	if cfg.ProjectRoot == "" {
 		return nil, fmt.Errorf("automations: ProjectRoot required")

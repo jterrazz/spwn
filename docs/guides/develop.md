@@ -4,13 +4,12 @@ How Spwn is changed: the toolchain a clone needs, the loop a change runs through
 
 ## The toolchain
 
-| Tool         | Why                                                                                                             |
-| ------------ | --------------------------------------------------------------------------------------------------------------- |
-| **Go 1.27+** | Every domain package and the `spwn` binary; wired by `go.work`                                                  |
-| **Docker**   | Worlds are containers, and every E2E layer needs a daemon                                                       |
-| **Node 24+** | The TypeScript E2E suites and the web UI, driven by pnpm; the floor `@jterrazz/test` declares, and what CI runs |
-| **Turbo 2**  | One task graph over both toolchains; a pnpm dev dependency, never installed by hand                             |
-| **Rust**     | Only `apps/web/src-tauri`, the desktop shell                                                                    |
+| Tool         | Why                                                                                                                   |
+| ------------ | --------------------------------------------------------------------------------------------------------------------- |
+| **Go 1.27+** | Every domain package and the `spwn` binary; wired by `go.work`                                                        |
+| **Docker**   | Worlds are containers, and every E2E layer needs a daemon                                                             |
+| **Node 24+** | The TypeScript E2E suites and the gate sidecar, driven by pnpm; the floor `@jterrazz/test` declares, and what CI runs |
+| **Turbo 2**  | One task graph over both toolchains; a pnpm dev dependency, never installed by hand                                   |
 
 ```bash
 git clone https://github.com/jterrazz/spwn.git
@@ -26,7 +25,7 @@ The `Makefile` is the single entry point for both toolchains, and CI calls its g
 ```bash
 make fix             # every fixer of the TypeScript toolchain
 make lint            # golangci-lint over go.work, every gate of the TypeScript toolchain, the gate scripts' test
-make test            # every member's tests, the cli and website specifications included
+make test            # every member's tests, the cli specification included
 make check           # lint, test and mutation: what CI runs
 ```
 
@@ -85,7 +84,7 @@ Then add a blank import to `packages/runtimes/defaults/defaults.go`, which is wh
 - **Errors read as two lines**: `error: lowercase message.\nActionable hint.`
 - **Types avoid stutter**: `world.World`, not `world.WorldInstance`; `agent.Info`, not `agent.AgentInfo`. The package name already carries the context.
 - **Domain modules own all business logic**; a surface is a wrapper.
-- **Commit messages are imperative and lowercase**, prefixed by the kind of change: `feat: add world snapshot restore`, `fix: agent talk skips dead containers`, `test: add messaging inbox E2E specs`, `docs: update CLI reference`.
+- **Commit messages are imperative and lowercase**, prefixed by the kind of change: `feat: add world rename`, `fix: agent talk skips dead containers`, `test: add messaging inbox E2E specs`, `docs: update CLI reference`.
 
 ## What a change owes
 

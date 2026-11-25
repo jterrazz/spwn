@@ -14,7 +14,6 @@ func TestDockerfileVersionMatchesConstant(t *testing.T) {
 		dockerfile []byte
 	}{
 		{"world.Dockerfile", WorldDockerfile},
-		{"architect.Dockerfile", ArchitectDockerfile},
 	}
 
 	for _, tc := range cases {

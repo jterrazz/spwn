@@ -13,7 +13,7 @@ make mutation           # the mutation verdict over the change
 make check              # lint, test and mutation: everything CI runs
 ```
 
-`make test` is one Turborepo graph over both toolchains: the Go unit tests of every module in `go.work`, the module tests of `apps/web` and `apps/gate/sdk`, and the two specifications under `specs/`: `cli`, the compiled binary in Docker, and `website`, the web UI in a headless Chromium.
+`make test` is one Turborepo graph over both toolchains: the Go unit tests of every module in `go.work`, the module tests of `apps/gate/sdk`, and the specification under `specs/`: `cli`, the compiled binary in Docker.
 
 Three suites stay outside it, because each costs minutes and a Docker daemon of its own:
 
@@ -29,7 +29,6 @@ make test-pkg PKG=agent # one Go module, verbose
 - **Docker**, for every suite that starts a world, the `cli` specification included.
 - **The test image**, `spwn-test:latest`, which `make test` builds from `docker/spwn-test/`: the base image with the mock Claude and Codex runtimes in place of the real ones.
 - **The binary**, `.artifacts/go/spwn`, which `make test` builds first.
-- **Chromium's headless shell**, for the `website` specification: `pnpm -C specs exec playwright install chromium-headless-shell`. No run opens a window.
 
 ## Adding a test
 
@@ -50,13 +49,9 @@ A `specs/cli/<domain>/<case>.spec.yaml` document by default: the ground it stand
 
 A chain, `<aspect>.spec.ts`, is for what a document cannot state: a container read back, a session that starts one (the chain scopes it with `await using`), JSON judged by its structure, a command run inside a world, two runs compared, a long-running process. It opens, below its imports, with that reason, written as a `// hazard: a document cannot …` comment: what a document would lose. Everything else, an exit code, both streams, a file on disk whole, is a document.
 
-### A website specification
-
-A `specs/website/<domain>/<page>.spec.ts` visits one page of the UI, drives it through the visitor's verbs, and compares the outline (the accessibility tree) whole. The run builds the UI once and serves it with `next start`, as `spwn web` does, and each file starts its own `spwn web` on a fresh project, on the one API address that build was given, so the files run one at a time.
-
 ### A module test
 
-A `__tests__/<module>.test.ts` beside a TypeScript module of `apps/web` or `apps/gate/sdk`: the module called directly, its network stated at the HTTP boundary, never a stubbed `fetch`.
+A `__tests__/<module>.test.ts` beside a TypeScript module of `apps/gate/sdk`: the module called directly, its network stated at the HTTP boundary, never a stubbed `fetch`.
 
 ## The manual passes
 

@@ -1,7 +1,6 @@
 go 1.27.3
 
 use (
-	./apps/api
 	./apps/cli
 	./apps/gate
 	./packages/activity

@@ -13,7 +13,7 @@ GitHub Release, and a user's `spwn upgrade` or the Tauri updater does the rest.
 
 ### 1. The Tauri updater key
 
-They sign the window's update, `Spwn.app.tar.gz`. The public half is the one `apps/web` carries, copied into `machines/apps/desktop/src-tauri/tauri.conf.json`; the `machines-darwin` job signs the archive with the private half and fails unless the signature verifies against that public key. They live beside the signing secrets, in Infisical (§2), and a job that signs the update reads them alone, naming them to `.github/actions/signing-secrets`.
+They sign the window's update, `Spwn.app.tar.gz`. The public half is copied into `machines/apps/desktop/src-tauri/tauri.conf.json`; the `machines-darwin` job signs the archive with the private half and fails unless the signature verifies against that public key. They live beside the signing secrets, in Infisical (§2), and a job that signs the update reads them alone, naming them to `.github/actions/signing-secrets`.
 
 | Secret                               | Purpose                                          |
 | ------------------------------------ | ------------------------------------------------ |
@@ -23,8 +23,7 @@ They sign the window's update, `Spwn.app.tar.gz`. The public half is the one `ap
 Generate the keypair:
 
 ```bash
-cd apps/web
-pnpm tauri signer generate -w ~/.tauri/spwn-web.key
+npx tauri signer generate -w ~/.tauri/spwn-web.key
 ```
 
 Output:
@@ -37,7 +36,7 @@ Public:  dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6...
 
 Paste the **private** key contents into the Infisical secret `TAURI_SIGNING_PRIVATE_KEY`, and its passphrase into `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`, in the folder §2 names.
 
-Paste the **public** key into `machines/apps/desktop/src-tauri/tauri.conf.json` (`plugins.updater.pubkey`); `apps/web/src-tauri/tauri.conf.json` holds the same key:
+Paste the **public** key into `machines/apps/desktop/src-tauri/tauri.conf.json` (`plugins.updater.pubkey`):
 
 ```json
 "plugins": {
@@ -111,15 +110,7 @@ marked a pre-release, so the stable channel's `releases/latest` returns it.
   The window follows the same `releases/latest`, so it takes an alpha as soon
   as it is tagged, by semver order.
 
-### 2. Bump version files (optional but recommended)
-
-Keep these in sync with the tag you're about to push:
-
-```bash
-# desktop Tauri app
-vim apps/web/src-tauri/tauri.conf.json   # "version"
-vim apps/web/src-tauri/Cargo.toml        # [package] version
-```
+### 2. Version files
 
 The CLI version is injected at build time via ldflags, so no source file
 bump is needed for the Go binary.
@@ -150,9 +141,7 @@ both products of the repository, Spwn and the engine (`machines/`):
 The release is opened once, by GoReleaser, and only after both Machines jobs
 succeeded, so a failed job leaves no release behind. Machines' binaries
 carry its version through `-X .../apps/engine/wire.version=<tag>`, as its own
-release did. The window's `Spwn.app` is built by `make window` and versioned the same way, from `git describe`; it carries that version in its binary and updates itself from `releases/latest/download/latest.json`, whose one platform is `darwin-aarch64-window`, so the old spwn desktop apps polling the same URL find nothing for them. The desktop app of `apps/web` has no job: the shared
-`release-tauri.yaml` they called is deleted, and a job that builds them
-again signs them as the macOS job does.
+release did. The window's `Spwn.app` is built by `make window` and versioned the same way, from `git describe`; it carries that version in its binary and updates itself from `releases/latest/download/latest.json`, whose one platform is `darwin-aarch64-window`, so the old spwn desktop apps polling the same URL find nothing for them.
 
 A manual run of the workflow (`workflow_dispatch`) is a dry run: every job
 builds, signed and notarized on `main`, unsigned on any other branch,
@@ -210,14 +199,6 @@ goreleaser release --snapshot --clean
 GoReleaser reads Machines' files from `.artifacts/station/` as extra files,
 and a glob that matches nothing is an error, so a local snapshot needs at
 least one station binary there.
-
-### Tauri build (no upload)
-
-```bash
-cd apps/web
-pnpm tauri build
-# Bundles land in .artifacts/cargo/release/bundle/
-```
 
 The window is built by `make -C machines window`, on a Mac with Rust and
 Node, into `machines/.artifacts/window/Spwn.app`, signed ad hoc. Its update
@@ -283,8 +264,7 @@ If the Tauri private key leaks:
 
 1. Generate a new keypair.
 2. Update `TAURI_SIGNING_PRIVATE_KEY` in Infisical.
-3. Update `pubkey` in both `machines/apps/desktop/src-tauri/tauri.conf.json`
-   and `apps/web/src-tauri/tauri.conf.json`.
+3. Update `pubkey` in `machines/apps/desktop/src-tauri/tauri.conf.json`.
 4. Cut a new release - users running the old app **cannot** auto-update
    to it (signatures won't verify with the old pubkey): a rotated key
    strands every installed window on its version, and it must be

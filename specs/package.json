@@ -7,7 +7,6 @@
         "test": "vitest --run"
     },
     "devDependencies": {
-        "@types/node": "^26.6.5",
-        "playwright": "1.63.0"
+        "@types/node": "^26.6.5"
     }
 }

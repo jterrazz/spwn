@@ -70,16 +70,6 @@ func worldHelp(cmd *cobra.Command, args []string) {
 				{Name: "logs <id>", Desc: "Show event log for a world"},
 				{Name: "enter <id>", Desc: "Open an interactive shell inside a world"},
 			}},
-			{Title: "Snapshots", Commands: []ui.HelpEntry{
-				{Name: "snap save <id>", Desc: "Save world state"},
-				{Name: "snap ls", Desc: "List snapshots"},
-				{Name: "snap restore <snap-id>", Desc: "Rollback to a snapshot"},
-				{Name: "snap rm <snap-id>", Desc: "Remove a snapshot"},
-			}},
-			{Title: "Knowledge", Commands: []ui.HelpEntry{
-				{Name: "knowledge ls <id>", Desc: "List a world's knowledge files"},
-				{Name: "knowledge show <id> <path>", Desc: "Read a knowledge file"},
-			}},
 			{Title: "Examples", Commands: []ui.HelpEntry{
 				{Name: "spwn up --agent neo -w .", Desc: "Spawn neo in current dir"},
 				{Name: "spwn up --agent morpheus --agent neo -w .", Desc: ""},

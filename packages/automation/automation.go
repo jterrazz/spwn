@@ -1,7 +1,7 @@
 // Package automation is the trigger-driven agent wakeup engine.
 //
-// The architect daemon owns the engine: automations only fire while
-// architect is running. The engine reads a project's spwn.yaml,
+// `spwn automation daemon` owns the engine: automations only fire while
+// it is running. The engine reads a project's spwn.yaml,
 // registers each declared automation, and dispatches a "wake the
 // agent with this prompt" call when the trigger fires.
 //
@@ -107,7 +107,7 @@ func defaultLogger() Logger {
 }
 
 // Engine is the in-process trigger scheduler. One Engine per
-// architect daemon: Register tracked automations before Start, then
+// `spwn automation daemon`: Register tracked automations before Start, then
 // Stop on shutdown.
 type Engine struct {
 	clock      Clock

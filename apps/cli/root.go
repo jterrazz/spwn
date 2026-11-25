@@ -11,15 +11,12 @@ import (
 	"spwn.sh/apps/cli/agent"
 	"spwn.sh/apps/cli/authentication"
 	"spwn.sh/apps/cli/automation"
-	"spwn.sh/apps/cli/cookiesync"
 	"spwn.sh/apps/cli/gate"
 	"spwn.sh/apps/cli/logs"
 	"spwn.sh/apps/cli/organization"
 	"spwn.sh/apps/cli/skill"
-	"spwn.sh/apps/cli/snap"
 	"spwn.sh/apps/cli/team"
 	"spwn.sh/apps/cli/ui"
-	"spwn.sh/apps/cli/web"
 	"spwn.sh/apps/cli/world"
 	"spwn.sh/packages/upgrade"
 )
@@ -53,7 +50,6 @@ func init() {
 	rootCmd.AddCommand(world.UpCmd)
 	rootCmd.AddCommand(world.DownCmd)
 
-	world.Cmd.AddCommand(snap.Cmd)
 	rootCmd.AddCommand(world.Cmd)
 	rootCmd.AddCommand(agent.Cmd)
 
@@ -68,8 +64,6 @@ func init() {
 
 	rootCmd.AddCommand(authentication.Cmd)
 	rootCmd.AddCommand(gate.Cmd)
-	rootCmd.AddCommand(cookiesync.Cmd)
-	rootCmd.AddCommand(web.Cmd)
 	rootCmd.AddCommand(logs.Cmd)
 }
 
@@ -149,7 +143,7 @@ func customHelp(cmd *cobra.Command, args []string) {
 
 	fmt.Fprintf(w, "%s\n", ui.Strong("Entities:"))
 	printHelpCmd(w, "agent", "Composed minds "+ui.Faint("(create, ls, inspect, fork, talk)"))
-	printHelpCmd(w, "world", "Deployable groupings "+ui.Faint("(list, inspect, enter, snap)"))
+	printHelpCmd(w, "world", "Deployable groupings "+ui.Faint("(list, inspect, enter)"))
 	fmt.Fprintln(w)
 
 	fmt.Fprintf(w, "%s\n", ui.Strong("Building blocks:"))
