@@ -430,3 +430,43 @@ func TestAFrameMaySetTheFarMarkAndNeverClearIt(t *testing.T) {
 		t.Fatal("a frame read from afar lost its mark")
 	}
 }
+
+func TestTheSocketMarksAFrameFarWhenItSaysSo(t *testing.T) {
+	run := func(frame string) (called, watched bool) {
+		ran := call.Bind(call.Call[struct{}, struct{}, struct{}]{
+			Name: "devices.add", Where: call.InEngine, Applies: machine.Anywhere,
+			Run: func(ctx context.Context, _ struct{}, _ struct{}, _ call.Progress) (struct{}, error) {
+				called = call.Far(ctx)
+				return struct{}{}, nil
+			},
+		}, struct{}{})
+		watch := call.BindWatch(call.Watch[struct{}, struct{}, struct{}]{
+			Name: "devices.watch", Where: call.AtTarget, Applies: machine.Anywhere,
+			Run: func(ctx context.Context, _ struct{}, _ struct{}, _ call.Progress) (<-chan call.Update[struct{}], error) {
+				watched = call.Far(ctx)
+				out := make(chan call.Update[struct{}])
+				close(out)
+				return out, nil
+			},
+		}, struct{}{})
+		s := serve.Server{ThisMachine: laptop, Calls: func(name string) (call.Handler, bool) {
+			switch name {
+			case "devices.add":
+				return ran, true
+			case "devices.watch":
+				return watch, true
+			}
+			return nil, false
+		}}
+		var out strings.Builder
+		s.Conn(t.Context(), pipe{Reader: strings.NewReader(`{"v":2,"id":"1","call":"devices.add"` + frame + "}\n"), Writer: &out})
+		s.Conn(t.Context(), pipe{Reader: strings.NewReader(`{"v":2,"id":"2","watch":"devices.watch"` + frame + "}\n"), Writer: &out})
+		return called, watched
+	}
+	if called, watched := run(""); called || watched {
+		t.Fatalf("a frame that says nothing ran far: call %v, watch %v", called, watched)
+	}
+	if called, watched := run(`,"far":true`); !called || !watched {
+		t.Fatalf("a frame marked far ran here: call %v, watch %v", called, watched)
+	}
+}
