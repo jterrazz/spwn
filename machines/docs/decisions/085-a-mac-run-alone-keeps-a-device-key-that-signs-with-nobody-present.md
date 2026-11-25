@@ -5,6 +5,8 @@
 
 Amends [ADR-064](064-a-key-never-leaves-its-device.md).
 
+Amended by [ADR-092](092-a-machines-device-book-says-who-may-reach-it.md): the hello sends the line of the key the engine holds; `device-key.pub` is an export only.
+
 Accepted by the owner on 2026-11-23, on the owner's word.
 
 ## Context
