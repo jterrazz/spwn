@@ -61,7 +61,6 @@ func TestAMachinesKindIsClosedInTheSchemasTheWindowReads(t *testing.T) {
 	files := apiFiles(root(t))
 	for file, at := range map[string]string{
 		"machines.list.json": "machines.VM",
-		"overview.read.json": "overview.Machine",
 	} {
 		var doc struct {
 			Defs map[string]struct {

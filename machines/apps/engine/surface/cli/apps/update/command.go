@@ -118,17 +118,6 @@ func partial(outcomes []apps.Outcome, repair string) error {
 	return kit.PartialFailure{Failed: n, Total: len(outcomes), Noun: "apps", FirstHint: repair + first}
 }
 
-func Via(cmd *cobra.Command) *cobra.Command {
-	// value: update as the hidden v2 upgrade takes it: --via is --manager.
-	cmd.Flags().SetNormalizeFunc(func(_ *pflag.FlagSet, name string) pflag.NormalizedName {
-		if name == "via" {
-			name = "manager"
-		}
-		return pflag.NormalizedName(name)
-	})
-	return cmd
-}
-
 func first(list []string) string {
 	if len(list) == 0 {
 		return ""

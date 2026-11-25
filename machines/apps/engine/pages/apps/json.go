@@ -7,20 +7,6 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 )
 
-type AppStatusJSON struct {
-	// value: alias of station.status/v1's row, kept byte for byte one release.
-	Name     string   `json:"name"`
-	Category string   `json:"category"`
-	Method   string   `json:"method"`
-	LivesOn  []string `json:"places"`
-	State    string   `json:"state"`
-	Version  string   `json:"version"`
-	Managed  bool     `json:"managed"`
-	Provides []string `json:"provides"`
-	Detail   string   `json:"detail"`
-	Use      string   `json:"use"`
-}
-
 type AppJSON struct {
 	Name     string `json:"name"`
 	Category string `json:"category"`
@@ -57,41 +43,6 @@ func ListContract(schema string, reports []apps.Report, known []catalog.App) Lis
 		})
 	}
 	return body
-}
-
-func statusV1Category(c catalog.Category) string {
-	// value: alias of v2's name of the command line category, which
-	// station.status/v1 keeps byte for byte.
-	if c == catalog.CategoryCLIApps {
-		return "CLI Tools"
-	}
-	return string(c)
-}
-
-func AppObject(r apps.Report) AppStatusJSON {
-	kinds := r.App.LivesOn()
-	livesOn := make([]string, 0, len(kinds))
-	for _, k := range kinds {
-		livesOn = append(livesOn, catalog.StatusV1Kind(k))
-	}
-	detail := r.Detail
-	if detail == "" {
-		detail = r.Live
-	}
-	return AppStatusJSON{
-		Name:     r.App.Name,
-		Category: statusV1Category(r.App.Category),
-		Method:   string(r.Method),
-		LivesOn:  livesOn,
-		State:    string(r.State),
-		Version:  r.Version,
-		Managed:  r.Managed,
-		Provides: append([]string{}, r.App.Provides...),
-		Detail:   detail,
-		// value: the field status/v1's readers still parse; no app comes
-		// with init, which installs none, so every row reads exploration.
-		Use: "exploration",
-	}
 }
 
 func installed(version string) *string {

@@ -556,22 +556,6 @@ func ShowContract(r settings.Row) ShowJSON {
 	return ShowJSON{Schema: "station.settings.show/v1", Setting: Object(r)}
 }
 
-func Removed(o settings.ContainersOutcome, command string, thisMac page.Context) page.Page {
-	// value: what one of the Docker shortcuts removed, by what it removes,
-	// under the command that ran it.
-	rows := make([]page.Row, 0, len(o.Removals))
-	for _, r := range o.Removals {
-		detail := page.Text("none to remove")
-		if r.Count > 0 {
-			detail = page.Count(int64(r.Count), "removed")
-		}
-		row := pages.Done(r.What, catalog.StateOK, "")
-		row.Detail = detail
-		rows = append(rows, row)
-	}
-	return pages.Outcome(command, thisMac, nil, rows, "steps")
-}
-
 func Diff(name, diff string, thisMac page.Context) page.Page {
 	// value: a file's unified diff as a page, one line per line, for the
 	// renderers that cannot print it raw.

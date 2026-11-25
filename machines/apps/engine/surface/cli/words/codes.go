@@ -558,9 +558,6 @@ func Codes() map[fail.Code]Wording {
 			}
 			return e.Subject + " needs admin rights", line
 		},
-		settingscalls.NotApplied: func(e *fail.Error) (string, string) {
-			return e.Subject + " is not applied here", "station settings apply " + e.Subject
-		},
 		settingscalls.NeedsTerminal: func(e *fail.Error) (string, string) {
 			return e.Subject + " asks a value: run it on a terminal", "station settings apply " + e.Subject
 		},

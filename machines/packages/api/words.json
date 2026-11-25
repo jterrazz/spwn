@@ -1047,11 +1047,6 @@
       "Detail": "setting",
       "Tone": "plain"
     },
-    "setting.not-applied": {
-      "Word": "not applied",
-      "Detail": "setting",
-      "Tone": "plain"
-    },
     "setting.not-for-this-machine": {
       "Word": "not for this machine",
       "Detail": "setting",

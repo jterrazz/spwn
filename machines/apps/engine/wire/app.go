@@ -137,15 +137,9 @@ func Run(args, env []string, stdin, stdout, stderr *os.File) int {
 	commands = append(commands, initCommands(kenv, thisMac)...)
 	commands = append(commands, machinefileCommands(kenv, thisMac)...)
 	commands = append(commands, explainCommand(kenv, thisMac),
-		statusCommand(kenv, thisMac),
-		appsAlias(kenv, thisMac),
 		guestCommand(kenv, thisMac),
-		runCommand(kenv, thisMac),
 		shellcmd.Command(kenv),
 	)
-	commands = append(commands, engineAliases(kenv, thisMac)...)
-	commands = append(commands, settingsAliases(kenv, thisMac)...)
-	commands = append(commands, awakeAliases(kenv, thisMac)...)
 	if session != nil {
 		commands = append(commands, session.command())
 	}

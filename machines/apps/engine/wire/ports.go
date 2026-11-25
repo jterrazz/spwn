@@ -75,24 +75,14 @@ func (m machine) placement(g *guest.Agent) ports.VMLivesOn {
 	return g.Placement()
 }
 
-// invariant: station ports, and its old words for one release (SPEC 4.3):
-// services with url and release, and tailnet, whose state is the first
-// line of the ports.
 func portsCommands(env kit.Env, m machine) []*cobra.Command {
-	list := func(children ...*cobra.Command) *cobra.Command {
-		return portscmd.Command(portscmd.Deps{ThisMachine: m.where, Catalog: m.cat}, env, children...)
-	}
-	share := func() *cobra.Command { return portsshare.Command(portsshare.Deps{ThisMachine: m.where}, env) }
-	stop := func() *cobra.Command {
-		return portsstopsharing.Command(portsstopsharing.Deps{ThisMachine: m.where}, env)
-	}
+	share := portsshare.Command(portsshare.Deps{ThisMachine: m.where}, env)
+	stop := portsstopsharing.Command(portsstopsharing.Deps{ThisMachine: m.where}, env)
 	declare := portsdeclare.Command(portsdeclare.Deps{ThisMachine: m.where}, env)
 	undeclare := portsundeclare.Command(portsundeclare.Deps{ThisMachine: m.where}, env)
 	https := portshttps.Command(portshttps.Deps{ThisMachine: m.where}, env)
 	return []*cobra.Command{
-		list(share(), stop(), declare, undeclare, https),
-		kit.Alias("services", list(kit.Alias("url", share(), "share"), kit.Alias("release", stop(), "stop-sharing")), "ports"),
-		kit.Alias("tailnet", list(), "ports"),
+		portscmd.Command(portscmd.Deps{ThisMachine: m.where, Catalog: m.cat}, env, share, stop, declare, undeclare, https),
 	}
 }
 

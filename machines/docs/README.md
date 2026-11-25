@@ -46,7 +46,6 @@ Machines is the Spwn app that sets up and runs a Mac, its VMs and your other Mac
 | [Images](reference/images.md)                        | The VM images, the recipe, the binary inside                                                   |
 | [Dotfiles](reference/dotfiles.md)                    | The embedded application configs and the `~/.zshrc` block                                      |
 | [The API](reference/api.md)                          | `station.api/v2`: the transport, the frames, `calls.json`, the engine's own calls              |
-| [The status contract](reference/status-json.md)      | `station.status/v1`, kept for one release behind the hidden `station status --json`            |
 | [Footprint](reference/footprint.md)                  | Everything `station` and the apps write on a machine, generated from the table                 |
 
 ## Decisions

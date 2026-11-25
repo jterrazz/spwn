@@ -28,7 +28,7 @@ func TestAMachinefileTheApplyWouldRefuseStopsInitBeforeAnyStep(t *testing.T) {
 		Resolve: func(context.Context, string) error { return refusal },
 		Apply:   func(context.Context, string, kit.IO) error { t.Error("apply ran after a refused resolve"); return nil },
 	}
-	leaf := Leaf(d, kit.Env{Calls: calls}, "")
+	leaf := Leaf(d, kit.Env{Calls: calls})
 	err := leaf.Run(t.Context(), &Input{Name: "macbook", Machinefile: "nonexistent"}, kit.IO{})
 	if !errors.Is(err, refusal) {
 		t.Errorf("init = %v; want the resolve's refusal", err)

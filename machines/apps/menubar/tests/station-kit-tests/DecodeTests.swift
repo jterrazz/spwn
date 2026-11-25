@@ -24,7 +24,7 @@ final class DecodeTests: XCTestCase {
     }
 
     func testADocumentOfAnotherSchemaIsRefused() {
-        XCTAssertThrowsError(try Page.decode(Data(#"{"schema":"station.status/v1"}"#.utf8)))
+        XCTAssertThrowsError(try Page.decode(Data(#"{"schema":"station.overview.read/v1"}"#.utf8)))
     }
 
     func testUnknownKeysAreIgnored() throws {

@@ -21,13 +21,6 @@ type TailnetJSON struct {
 	CLI          string `json:"cli"`
 }
 
-func TailnetObject(s ports.Status) TailnetJSON {
-	return TailnetJSON{
-		State: string(s.State), Connected: s.Connected, BackendState: s.BackendState,
-		Name: s.Name, DNSName: s.DNSName, IP: s.IP, Variant: s.Variant, CLI: s.CLI,
-	}
-}
-
 func tailnetColumns() []page.Column {
 	return []page.Column{{Key: "name", Kind: page.KindText, Keep: 100}, {Key: "value", Kind: page.KindList, Keep: 50}}
 }

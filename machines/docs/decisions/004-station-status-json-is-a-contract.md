@@ -1,6 +1,6 @@
 # ADR-004: station status --json is a contract
 
-**Status:** Accepted
+**Status:** Superseded: the hidden `station status` and `station.status/v1` were deleted with v2's other aliases; `studio doctor` reads `station overview --json`, `station.overview.read/v1`
 **Date:** 2026-10-31
 
 ## Context

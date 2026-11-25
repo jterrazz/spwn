@@ -14,8 +14,6 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/surface/cli/kit"
 )
 
-const SetupMoved = "apps and settings no longer come with setup: station apps install <app>, station settings apply <setting>"
-
 type Deps struct {
 	ThisMachine page.Context
 	// value: the Machinefile named, resolved and read with the state its
@@ -28,12 +26,10 @@ type Deps struct {
 }
 
 func Command(d Deps, env kit.Env) *cobra.Command {
-	return kit.Command(Leaf(d, env, ""), env)
+	return kit.Command(Leaf(d, env), env)
 }
 
-func Leaf(d Deps, env kit.Env, note string) kit.Leaf[Input] {
-	// value: init's leaf; a note, when set, is said on stderr before it
-	// runs, never with --json or --page, which keep stderr for the script.
+func Leaf(d Deps, env kit.Env) kit.Leaf[Input] {
 	return kit.Leaf[Input]{
 		Use:     "init",
 		Short:   "Make this machine known to station: its name, the ~/.zshrc block, the XDG folders",
@@ -47,9 +43,6 @@ func Leaf(d Deps, env kit.Env, note string) kit.Leaf[Input] {
 		Confirm: func(*Input) string { return "Move them?" },
 		Verb:    func(*Input) string { return "move the apps' files" },
 		Run: func(ctx context.Context, in *Input, io kit.IO) error {
-			if note != "" && !io.JSON && !io.PageJSON {
-				io.Note(note)
-			}
 			if in.Machinefile != "" {
 				if err := d.Resolve(ctx, in.Machinefile); err != nil {
 					return err

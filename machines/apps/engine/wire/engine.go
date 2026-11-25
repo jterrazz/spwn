@@ -218,7 +218,7 @@ func unbound(err error, vm string) bool {
 func driftChanges() []string {
 	return []string{
 		machinefilecalls.Apply.Name, machinefilecalls.Upgrade.Name, appscalls.Install.Name, appscalls.Remove.Name, appscalls.Update.Name,
-		appscalls.Move.Name, settingscalls.Apply.Name, settingscalls.Off.Name, settingscalls.Containers.Name,
+		appscalls.Move.Name, settingscalls.Apply.Name, settingscalls.Off.Name,
 	}
 }
 

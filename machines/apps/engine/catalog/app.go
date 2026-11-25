@@ -13,15 +13,6 @@ const (
 	MacOS MachineKind = "macos"
 )
 
-func StatusV1Kind(k MachineKind) string {
-	// value: alias of v2's kind word for a Mac, which station.status/v1 keeps
-	// byte for byte.
-	if k == Mac {
-		return "host"
-	}
-	return string(k)
-}
-
 func (k MachineKind) Article() string {
 	if k == Mac {
 		return "a Mac"

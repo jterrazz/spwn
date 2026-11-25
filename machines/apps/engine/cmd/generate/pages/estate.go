@@ -54,7 +54,7 @@ func failure(id page.ID, command, message, hint string) page.Page {
 
 func Estate() []Fixture {
 	var out []Fixture
-	for _, f := range [][]Fixture{homes(), overviewPages(), settingsPages(), settingsMatrix(), disks(), allMachinesStates(), machineLists(), sshPages(), imageLists(), machinefilePages(), portLists(), portsByAudience(), outcomes(), setups(), runs(), accountPages(), backgroundPages(), controlPages(), keepAwakePages(), awakePages(), activityPages(), journalPages(), menubarPages(), menubarOwnPages()} {
+	for _, f := range [][]Fixture{homes(), overviewPages(), settingsPages(), settingsMatrix(), disks(), allMachinesStates(), machineLists(), sshPages(), imageLists(), machinefilePages(), portLists(), portsByAudience(), outcomes(), setups(), accountPages(), backgroundPages(), controlPages(), keepAwakePages(), awakePages(), activityPages(), journalPages(), menubarPages(), menubarOwnPages()} {
 		out = append(out, f...)
 	}
 	return out
@@ -504,15 +504,6 @@ func setups() []Fixture {
 		pagesetup.Outcome(setup.Report{}, thisMacContext(), ""),
 		failure("outcome", "setup", "a VM is named by its Mac", "station init on its Mac"),
 		pagesetup.Outcome(setupReport(), thisMacContext(), ""))
-}
-
-func runs() []Fixture {
-	run := settings.ContainersOutcome{Shortcut: "dreset", Removals: []settings.ContainersRemoval{{What: "containers", Count: 3}, {What: "images", Count: 12}}}
-	return states("run",
-		pending(pagesettings.Removed(run, "run dreset", thisMacContext())),
-		pagesettings.Removed(settings.ContainersOutcome{Shortcut: "dreset"}, "run dreset", thisMacContext()),
-		failure("outcome", "run dreset", "docker ps failed: Docker is not running", "start Docker, then run it again"),
-		pagesettings.Removed(run, "run dreset", thisMacContext()))
 }
 
 // value: the catalog station ships, which the page fixtures are drawn over;

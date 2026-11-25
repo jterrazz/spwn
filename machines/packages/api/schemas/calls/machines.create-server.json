@@ -351,7 +351,6 @@
             "setting.checked",
             "setting.needs-admin",
             "setting.needs-terminal",
-            "setting.not-applied",
             "setting.not-for-this-machine",
             "setting.unknown",
             "unknown_op",

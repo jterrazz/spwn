@@ -281,12 +281,10 @@ An audit of `apps/engine` at `3e950d809` found the obvious libraries already in 
 
 Starts with L1 and L3, then L4 to L6, then L2 and L7 to L9, L10 only if the owner wants the feature.
 
-## The next minor release: the v2 words go
-The hidden aliases (`status`, `start`, `stop`, `tools`, `config`,
-`run`, `probe`, `--always-on`) and `station.status/v1` are kept for one release ([Commands](docs/reference/commands.md#hidden-aliases)). The next
-minor removes them, with the `machines supervise` retirement shim and the
-retired preference names (`here`, `hosts`, `services`), once
-`studio doctor` reads `station.overview.read/v1`.
+## The next minor release: the retired shims go
+The `machines supervise` retirement shim and the retired preference names
+(`here`, `hosts`, `services`) are kept for one release. The next minor removes
+them.
 
 ## The test VMs show in Disk
 Tier 3 (`specs/machine/macos/tier.sh`) makes its macOS VM with tart directly,

@@ -14,7 +14,7 @@ runs:
       files:
           elsewhere/pkg/mod/x/f: exists
           elsewhere/bin: exists
-    - command: 'status --json | /usr/bin/jq -c ''.workspace.strays | map(.name)'''
+    - command: 'overview </dev/null | /usr/bin/grep "is misplaced"'
       exit: 0
       stdout: |
-          ["node"]
+          ◐	~/.npm is misplaced	station disk move ~/.npm

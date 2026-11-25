@@ -42,7 +42,6 @@ The corpus is `docs/` + `README.md`, mapped by `docs/README.md`. Do not duplicat
 | VM images and their recipe                             | `docs/reference/images.md`          |
 | The shell block, the embedded dotfiles                 | `docs/reference/dotfiles.md`        |
 | `station.api/v2`, `calls.json`, the engine's calls     | `docs/reference/api.md`             |
-| The `station.status/v1` contract (one release)         | `docs/reference/status-json.md`     |
 | What Machines writes on a machine                      | `docs/reference/footprint.md`       |
 | Why a choice was made                                  | `docs/decisions/`                   |
 | What is left for later                                 | `TODO.md`                           |

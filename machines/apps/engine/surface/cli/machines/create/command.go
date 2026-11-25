@@ -43,13 +43,7 @@ type Input struct {
 	// value: what the VM is for, free text.
 	Purpose            string
 	Persistent, Server bool
-	// value: v3's --permanent, kept hidden for one release: --persistent.
-	Permanent bool
-	CPUs      int
-	// value: v2's --always-on, kept hidden for one release (SPEC §4.3).
-	AlwaysOn bool
-	// value: v2's --lifetime, kept hidden for one release (SPEC §4.3).
-	Lifetime string
+	CPUs               int
 	// value: the Machinefile the workspace is made from.
 	From    string
 	flags   *pflag.FlagSet
@@ -73,11 +67,9 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 		},
 		Refuse: func(in *Input) error { return d.NotBuilt(in.request.Image) },
 		Declare: func(f *pflag.FlagSet, in *Input) {
-			f.BoolVar(&in.Permanent, "permanent", false, "--persistent")
 			f.BoolVar(&in.Persistent, "persistent", false, "kept until you delete it; without it, deleted when it powers off from inside")
 			f.BoolVar(&in.Server, "server", false, "a server: always on, set up by your own tooling, never by Machines (default 4 CPU, 8G, 50G)")
 			f.StringVar(&in.Check, "check", "", "a server's health check: a URL (https://infra:6443/readyz) or host:port")
-			f.BoolVar(&in.AlwaysOn, "always-on", false, "a server (--server)")
 			in.flags = f
 			f.StringVar(&in.Image, "image", "base-ubuntu", "the image the workspace is made from")
 			f.StringVar(&in.From, "from", "", "the Machinefile the workspace is made from: the image built from it, and how its vm says it runs")
@@ -87,31 +79,15 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 			f.StringVar(&in.Purpose, "for", "", "what it is for, in your words, kept with the VM")
 			f.StringVar(&in.Network, "network", machines.NetworkNAT, "nat: behind its Mac, no address on your LAN; bridged: its own address on your LAN (macOS images only)")
 			f.StringVar(&in.Name, "name", "", "the workspace's name")
-			f.StringVar(&in.Lifetime, "lifetime", "", "ephemeral or persistent (--persistent)")
-			_ = f.MarkHidden("permanent")
 			_ = f.MarkHidden("name")
-			_ = f.MarkHidden("lifetime")
-			_ = f.MarkHidden("always-on")
 		},
 		Read: func(*Input) bool { return false },
 		Bind: func(in *Input, args []string) error {
 			if len(args) == 1 {
 				in.Name = args[0]
 			}
-			if in.Permanent {
-				in.Persistent = true
-				env.Out.Now(nowWords(in))
-			}
-			if in.AlwaysOn {
-				in.Server = true
-				env.Out.Now(serverWords(in))
-			}
-			if in.Server && (in.Persistent || in.Lifetime != "") {
-				flag := "persistent"
-				if !in.Persistent {
-					flag = "lifetime"
-				}
-				return &machines.ServerLifetimeError{Name: cmp.Or(in.Name, "<name>"), Flag: flag}
+			if in.Server && in.Persistent {
+				return &machines.ServerLifetimeError{Name: cmp.Or(in.Name, "<name>"), Flag: "persistent"}
 			}
 			r, err := d.Resources(in.CPUs, in.Memory, in.Disk)
 			if err != nil {
@@ -120,12 +96,6 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 			lifetime := machines.Ephemeral
 			if in.Persistent {
 				lifetime = machines.Persistent
-			}
-			if in.Lifetime != "" {
-				lifetime = machines.Lifetime(in.Lifetime)
-				if lifetime == machines.Persistent {
-					env.Out.Now(nowWords(in))
-				}
 			}
 			in.request = machines.CreateRequest{Image: in.Image, Name: in.Name, Lifetime: lifetime, Network: catalog.Network(in.Network), Size: r, Check: in.Check, Server: in.Server, Purpose: in.Purpose, Creator: d.Session}
 			return from(in)
@@ -200,25 +170,6 @@ func from(in *Input) error {
 		in.request.Network = ""
 	}
 	return nil
-}
-
-// value: the v3 words of a create written with v2's --always-on.
-func serverWords(in *Input) string {
-	words := "station machines create"
-	if in.Name != "" {
-		words += " " + in.Name
-	}
-	return words + " --server"
-}
-
-// value: the words of a create written with v2's --lifetime lasting or
-// v3's --permanent.
-func nowWords(in *Input) string {
-	words := "station machines create"
-	if in.Name != "" {
-		words += " " + in.Name
-	}
-	return words + " --persistent"
 }
 
 func ask(ctx context.Context, d Deps, in *Input) error {

@@ -127,12 +127,6 @@ func TestTripwireCatches(t *testing.T) {
 		{"a page the CLI prints", func(*testing.T) {
 			_ = output.NewWriter(output.Stream{W: io.Discard}, output.Stream{W: io.Discard}, nil).Page(page.Page{Command: "station " + planted}, nil, output.Want{Page: true})
 		}},
-		{"the alias line of the CLI", func(*testing.T) {
-			output.NewWriter(output.Stream{W: io.Discard}, output.Stream{W: io.Discard}, nil).Now("station " + planted)
-		}},
-		{"a menu of the CLI", func(*testing.T) {
-			output.NewWriter(output.Stream{W: io.Discard}, output.Stream{W: io.Discard}, nil).Menu(func(w io.Writer) { _, _ = io.WriteString(w, planted) })
-		}},
 		{"a wait of the CLI", func(*testing.T) {
 			output.NewWriter(output.Stream{W: io.Discard}, output.Stream{W: io.Discard, IsTerminal: true}, nil).Wait("reading " + planted)()
 		}},

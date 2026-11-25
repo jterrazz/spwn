@@ -51,16 +51,6 @@ func settingsCommand(env kit.Env, m machine) *cobra.Command {
 	return settingscmd.Command(settingscmd.Deps{Names: all, ThisMachine: m.where, Now: m.sys.Clock.Now, Label: m.label, Setting: m.cat.Setting}, env, children()...)
 }
 
-// value: station config, config install and config uninstall, the words v2
-// gave settings, settings apply and settings off.
-func settingsAliases(env kit.Env, m machine) []*cobra.Command {
-	all := func() []string { return nil }
-	return []*cobra.Command{kit.Alias("config", settingscmd.Command(settingscmd.Deps{Names: all, ThisMachine: m.where, Now: m.sys.Clock.Now, Label: m.label, Setting: m.cat.Setting}, env,
-		kit.Alias("install", settingsapply.Command(settingsapply.Deps{Catalog: m.cat, Names: all, ThisMachine: m.where, Now: m.sys.Clock.Now}, env), "apply"),
-		kit.Alias("uninstall", settingsoff.Command(settingsoff.Deps{Names: all, ThisMachine: m.where}, env), "off"),
-	), "settings")}
-}
-
 // value: a package's values asked in a form at the owner's terminal.
 type settingsAsk struct {
 	settings *settingscalls.Catalogue

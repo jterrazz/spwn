@@ -9,23 +9,6 @@ import (
 	settingsmodel "github.com/jterrazz/studio-station/apps/engine/settings"
 )
 
-type PackageJSON struct {
-	// value: alias of station.status/v1's row, kept byte for byte one release.
-	Name     string   `json:"name"`
-	Category string   `json:"category"`
-	LivesOn  []string `json:"places"`
-	State    string   `json:"state"`
-	Detail   string   `json:"detail"`
-}
-
-func PackageObject(r settingsmodel.Report) PackageJSON {
-	livesOn := make([]string, len(r.Package.Kinds))
-	for i, p := range r.Package.Kinds {
-		livesOn[i] = catalog.StatusV1Kind(p)
-	}
-	return PackageJSON{Name: r.Package.Name, Category: string(r.Package.Category), LivesOn: livesOn, State: string(r.State), Detail: r.Detail}
-}
-
 func ReportColumns() []page.Column {
 	return []page.Column{
 		{Key: "name", Kind: page.KindText, Keep: 100},

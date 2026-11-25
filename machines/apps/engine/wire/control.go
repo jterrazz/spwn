@@ -100,11 +100,3 @@ func engineCommands(env kit.Env, m machine) []*cobra.Command {
 func engineNoun(env kit.Env, m machine, plumbing ...*cobra.Command) *cobra.Command {
 	return enginecmd.Command(enginecmd.Deps{ThisMachine: m.where, Zone: time.Local}, env, append(engineCommands(env, m), plumbing...)...)
 }
-
-// value: station stop and station start, the words v2 gave them.
-func engineAliases(env kit.Env, m machine) []*cobra.Command {
-	return []*cobra.Command{
-		kit.Alias("stop", enginestop.Command(enginestop.Deps{ThisMachine: m.where}, env), "engine stop"),
-		kit.Alias("start", enginestart.Command(enginestart.Deps{ThisMachine: m.where}, env), "engine start"),
-	}
-}

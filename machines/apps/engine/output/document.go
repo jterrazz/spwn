@@ -21,10 +21,6 @@ type Envelope struct {
 	Machine Machine
 }
 
-// value: a document kept for one release in the shape it had (SPEC §11.4):
-// the connector that reads it decodes its fields, not the envelope.
-func kept(schema string) bool { return schema == "station.status/v1" }
-
 type member struct {
 	key   string
 	value json.RawMessage
@@ -47,7 +43,7 @@ func Document(contract any, e *Envelope) ([]byte, error) {
 		got[m.key] = m.value
 	}
 	var schema string
-	if json.Unmarshal(got["schema"], &schema) != nil || schema == "" || schema == ErrorSchema || kept(schema) {
+	if json.Unmarshal(got["schema"], &schema) != nil || schema == "" || schema == ErrorSchema {
 		return indent(body)
 	}
 	at, _ := json.Marshal(e.At.UTC().Format(time.RFC3339))

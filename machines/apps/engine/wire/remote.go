@@ -95,11 +95,11 @@ func (m machine) unborn(ctx context.Context, vm, name string) (<-chan any, bool)
 }
 
 // invariant: a VM of this Mac that its engine holds stopped answers its
-// Overview from its Mac's record, its head saying it is stopped; the v2
-// reading, and any other call, goes to its guest, which refuses it.
+// Overview from its Mac's record, its head saying it is stopped; any
+// other call goes to its guest, which refuses it.
 func (m machine) stopped(ctx context.Context, vm, name string, in json.RawMessage) (any, bool) {
 	var read overviewcalls.ReadIn
-	if name != overviewcalls.Read.Name || len(in) > 0 && json.Unmarshal(in, &read) != nil || read.V2 {
+	if name != overviewcalls.Read.Name || len(in) > 0 && json.Unmarshal(in, &read) != nil {
 		return nil, false
 	}
 	live, err := m.macEngine().VMs(ctx)

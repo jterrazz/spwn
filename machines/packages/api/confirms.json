@@ -123,11 +123,6 @@
     "consequence": "Machines stops applying %s on this machine; its value now stays.",
     "form": "yes-no"
   },
-  "settings.run-containers": {
-    "confirm": "remove",
-    "consequence": "%s leaves this machine; its data stays.",
-    "form": "yes-no"
-  },
   "setup.init": {
     "confirm": "relocate",
     "consequence": "Moved where each app now looks, one rename each: %s.",

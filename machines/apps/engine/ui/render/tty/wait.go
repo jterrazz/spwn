@@ -22,15 +22,6 @@ func ErrorBlock(e page.Error, colored, dark bool) string {
 	return block
 }
 
-func NowLine(command string, colored, dark bool) string {
-	// value: the one Muted line an old word prints on stderr: the command it is now.
-	line := token.New(dark).Muted.Render(token.Arrow+" now: "+command) + "\n"
-	if !colored {
-		return ansi.Strip(line)
-	}
-	return line
-}
-
 func AheadLine(label string, colored, dark bool) string {
 	// value: a step said before a program asks on the terminal, its `▸`
 	// Muted; without color, the glyph and words alone.
