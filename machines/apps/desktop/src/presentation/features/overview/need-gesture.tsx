@@ -23,6 +23,7 @@ import { Button, Row } from '../../ui/index';
 import type { RowProps } from '../../ui/row';
 import { wordOf } from '../../words/engine-words';
 import {
+    deleteInputOf,
     loginProgramOf,
     machineKindOf,
     moveInputOf,
@@ -31,6 +32,8 @@ import {
     startInputOf,
     startVmInputOf,
     updateInputOf,
+    upgradeInputOf,
+    wakeInputOf,
 } from '../../words/provisional';
 import type { NeedCall } from '../../words/provisional';
 import { needState } from '../../words/shown';
@@ -41,6 +44,8 @@ const UPDATE_REREADS: readonly CallName[] = ['overview.read', 'apps.list'];
 const REMOVE_REREADS: readonly CallName[] = ['overview.read', 'background.list'];
 const MOVE_REREADS: readonly CallName[] = ['overview.read', 'disk.read'];
 const START_REREADS: readonly CallName[] = ['engine.read', 'overview.read'];
+
+const UPGRADE_REREADS: readonly CallName[] = ['overview.read', 'machinefile.drift'];
 
 const LIFECYCLE_REREADS: readonly CallName[] = ['overview.read'];
 
@@ -165,6 +170,28 @@ function Call(props: Props) {
     const move = moveInputOf(need);
     if (move) {
         return <Fix {...props} call="disk.move" input={move} rereads={MOVE_REREADS} />;
+    }
+    const erase = deleteInputOf(need);
+    if (erase) {
+        return (
+            <Fix
+                {...props}
+                call="machines.delete"
+                input={erase}
+                rereads={LIFECYCLE_REREADS}
+                subject={erase.VM}
+            />
+        );
+    }
+    const upgrade = upgradeInputOf(need);
+    if (upgrade) {
+        return (
+            <Fix {...props} call="machinefile.upgrade" input={upgrade} rereads={UPGRADE_REREADS} />
+        );
+    }
+    const wake = wakeInputOf(need);
+    if (wake) {
+        return <Fix {...props} call="machines.wake" input={wake} rereads={LIFECYCLE_REREADS} />;
     }
     const start = startInputOf(need);
     if (start) {

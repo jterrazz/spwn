@@ -12,11 +12,13 @@ import type { ReactNode } from 'react';
 
 import type { EngineError } from '../../domain/engine-error';
 import { useGestureStore } from '../dependencies/dependencies';
+import { useGesture } from '../dependencies/use-gesture';
 import type { Gesture } from '../dependencies/use-gesture';
 import type { ButtonVariant } from '../ui/button';
 import { Button, ConfirmDialog, Panel, ProgressLine, Row, StatePill } from '../ui/index';
 import type { RowProps } from '../ui/row';
 import { shownOrWithheld } from '../ui/secret';
+import { forgetInputOf } from '../words/provisional';
 import { ownState } from '../words/shown';
 import { Unanswered } from './readings';
 
@@ -141,6 +143,28 @@ export function Unknown({ error, onDismiss }: { error: EngineError; onDismiss: (
     );
 }
 
+function ForgetFix({ name }: { name: string }) {
+    const forget = useGesture('machines.forget', {
+        input: { Name: name },
+        rereads: ['machines.list', 'overview.read'],
+        subject: name,
+    });
+    return (
+        <GestureButton
+            gesture={forget}
+            label={`Forget ${name} first`}
+            title={`Forget ${name}?`}
+            verb="Forget"
+        />
+    );
+}
+
+function fixOf(error: EngineError): ReactNode {
+    const fix = error.wire?.fix;
+    const forget = fix ? forgetInputOf(fix) : undefined;
+    return forget?.Name === undefined ? undefined : <ForgetFix name={forget.Name} />;
+}
+
 export function GestureOutcome({ gesture }: { gesture: Gesture<unknown> }) {
     const { state } = gesture;
     if (state.kind === 'running') {
@@ -157,7 +181,7 @@ export function GestureOutcome({ gesture }: { gesture: Gesture<unknown> }) {
     if (state.kind === 'failed') {
         return (
             <span className={styles.outcome}>
-                <Unanswered error={state.error} size="panel" />
+                <Unanswered action={fixOf(state.error)} error={state.error} size="panel" />
                 <Button onClick={gesture.dismiss} variant="link">
                     Dismiss
                 </Button>

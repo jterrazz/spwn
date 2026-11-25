@@ -90,16 +90,19 @@ function saidOf(error: EngineError): Said {
 export function Unanswered({
     error,
     size,
+    action,
 }: {
     error: EngineError;
     size: 'page' | 'panel' | 'tab';
+    action?: ReactNode;
 }) {
     const said = saidOf(error);
     const command = error.wire?.fix?.Command ?? '';
     const fix =
-        command === '' ? undefined : (
+        action ??
+        (command === '' ? undefined : (
             <CopyButton label="Copy the command" name="Copy the command" text={command} />
-        );
+        ));
     if (size === 'panel') {
         return (
             <div className={styles.unanswered}>
