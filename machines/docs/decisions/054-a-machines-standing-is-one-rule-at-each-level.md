@@ -3,6 +3,8 @@
 **Status:** Accepted
 **Date:** 2026-11-18
 
+Amended by [ADR-096](096-spwn-is-one-app-its-menu-bar-notifications-and-engine-live-while-it-runs.md) (Proposed): on a Mac `engine-stopped` reads "Spwn is not open" and `engine-not-installed` leaves macOS.
+
 ## Context
 
 A VM's status was said in four places by three predicates. `HeadOf` judged down with a private `down()`: the public

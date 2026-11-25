@@ -3,6 +3,8 @@
 **Status:** Accepted
 **Date:** 2026-11-17
 
+Amended by [ADR-096](096-spwn-is-one-app-its-menu-bar-notifications-and-engine-live-while-it-runs.md) (Proposed): the panel is hosted in Spwn's own process.
+
 ## Context
 
 The owner read the menu bar panel as washed white-bluish, and asked for a rendering as natural as macOS itself (2026-11-17). Two things of ours sat on the system's glass. The glass carried a tint of its own, white at 65 % in light and near-black at 65 % in dark ([ADR-036](036-the-menu-bar-owns-its-glass-panel.md), Decision 2), chosen so that second-tone text held 4.5:1 over any wallpaper. The boxes on it were white cards: a tile white at 58 % in light, a raised button at 80 %, a card at 30 %.

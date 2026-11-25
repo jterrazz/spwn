@@ -7,6 +7,8 @@ Amends [ADR-064](064-a-key-never-leaves-its-device.md).
 
 Accepted by the owner on 2026-11-23, on the owner's word.
 
+Amended by [ADR-096](096-spwn-is-one-app-its-menu-bar-notifications-and-engine-live-while-it-runs.md) (Proposed): "once per engine life" reads "once per Spwn launch".
+
 ## Context
 
 ADR-064 §1 makes every device key with `[.privateKeyUsage, .userPresence]` under `kSecAttrAccessibleWhenUnlockedThisDeviceOnly` (`apps/engine/platform/darwin/enclave.swift`), so every signature needs an owner present at an unlocked Mac. Its Consequences left open what an unattended Mac does. The new Mac mini answered it on 2026-11-23: with its screen locked, `ssh development-linux-mini` on the mini itself was refused, `agent refused operation`, the agent logging `OSStatus error -25308`. The first ssh after a start had also waited on a password sheet on the mini's screen, which nobody watches. A Mac run alone can never ssh into its own VMs.

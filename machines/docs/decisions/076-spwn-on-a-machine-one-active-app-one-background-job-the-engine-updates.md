@@ -5,6 +5,8 @@
 
 Accepted by the owner on 2026-11-22, directly, answering the target architecture's proposal. His words are quoted beside each decision.
 
+Amended by [ADR-096](096-spwn-is-one-app-its-menu-bar-notifications-and-engine-live-while-it-runs.md) (Proposed): no background job on a Mac; the engine is Spwn's child and lives while Spwn runs, which opens at login.
+
 ## Context
 
 [ADR-073](073-spwn-app-carries-the-engine-on-a-mac-with-a-screen.md) proposed two install modes on a Mac, the app (mode A) and the bare binary (mode B), and [ADR-065](065-the-window-updates-itself-through-the-tauri-updater.md) gave the window its own updater. [ADR-064](064-a-key-never-leaves-its-device.md) put the key agent in a second launchd job. Together they leave two update channels, two background jobs and two ways to install on one Mac. The owner answered the proposal point by point and added rules for the install and the command.

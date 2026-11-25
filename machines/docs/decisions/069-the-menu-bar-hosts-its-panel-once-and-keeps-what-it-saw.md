@@ -4,6 +4,8 @@
 **Date:** 2026-11-21
 **Amended:** 2026-11-21, decisions 4 and 6, accepted under the owner's standing go of 2026-11-21
 
+Amended by [ADR-096](096-spwn-is-one-app-its-menu-bar-notifications-and-engine-live-while-it-runs.md) (Proposed): the panel is hosted in Spwn's own process.
+
 ## Context
 
 [ADR-036](036-the-menu-bar-owns-its-glass-panel.md), decision 1, hosts the SwiftUI panel anew on each opening, so that no state of the last opening shows. The menu bar architecture audit of 2026-11-21 traced the flicker of an opening to that choice and to three that ride on it:

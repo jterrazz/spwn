@@ -7,6 +7,8 @@ Amends [ADR-016](016-api-v2-and-remote-by-api.md), [ADR-064](064-a-key-never-lea
 
 Accepted by the owner on 2026-11-24, on the owner's word, on one condition: nothing of it is built before the probes PT1 to PT5 and PH1 to PH3 pass.
 
+Amended by [ADR-096](096-spwn-is-one-app-its-menu-bar-notifications-and-engine-live-while-it-runs.md) (Proposed): the client's presence is asked once per Spwn launch, and the door is up while Spwn is open.
+
 ## Context
 
 Another Mac is reached by `ssh -o BatchMode=yes -- <mac> station engine attach`, bridged to its engine's socket ([ADR-016](016-api-v2-and-remote-by-api.md)). It needs Remote Login and an `authorized_keys` line on every far Mac. A VM is reached through its Mac's engine, in process, by `golang.org/x/crypto/ssh` to the VM's sshd, and is never on Tailscale. The owner's own `ssh`, editors and Herdr ride managed `~/.ssh/config` blocks whose ProxyCommand is `station machines pipe <vm>`. The engine listens on its unix socket only, held by the rule `engine-no-tcp`.

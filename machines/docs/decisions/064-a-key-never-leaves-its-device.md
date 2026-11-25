@@ -13,6 +13,8 @@ Amended by [ADR-076](076-spwn-on-a-machine-one-active-app-one-background-job-the
 
 Written 2026-11-20 from the connection architecture's design (option C, "hardened status quo") and its lot L2.
 
+Amended by [ADR-096](096-spwn-is-one-app-its-menu-bar-notifications-and-engine-live-while-it-runs.md) (Proposed): presence is asked once per Spwn launch, an engine restart asking again.
+
 ## Context
 
 Every link between the owner's machines that is not a socket of this Mac is OpenSSH: another Mac's engine over `ssh -o BatchMode=yes`, the owner's own `ssh`, editors, `scp` and `git` to a VM through its block's ProxyCommand. Each of them signs with `~/.ssh/id_ed25519`, a private key on disk, made by the `ssh-key` setting, its passphrase in the Keychain. Any process running as the owner can read that file, and one key copied anywhere opens every machine. Replacing OpenSSH with a door of station's own (an mTLS port on the tailnet) was weighed and refused: it trades OpenSSH's audited auth for code station would write, and a shell would then depend on the engine. A permanent Secure Enclave key lives in the data-protection keychain, which refuses a binary without the keychain entitlement: a throwaway macOS VM answered OSStatus -34018 for an ad-hoc-signed and for an unsigned station alike (2026-11-20).
