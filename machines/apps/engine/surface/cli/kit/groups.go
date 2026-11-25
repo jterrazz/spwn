@@ -3,20 +3,20 @@ package kit
 import "github.com/spf13/cobra"
 
 const (
-	Machines        = "machines"
-	OnAMachine      = "on-a-machine"
-	ImagesAndEngine = "images-and-engine"
-	ThisTerminal    = "this-terminal"
-	StationItself   = "station-itself"
+	Machine = "machine"
+	Agent   = "agent"
+	OS      = "os"
+	Spwn    = "spwn"
 )
 
 func Groups() []*cobra.Group {
-	// value: the help map's groups, in their one order (SPEC §4.1).
+	// value: the help's four groups, the three spaces then Spwn itself, in
+	// their one order (docs/reference/cli.md, "The help"); a group with no
+	// command is not drawn.
 	return []*cobra.Group{
-		{ID: Machines, Title: "Machines"},
-		{ID: OnAMachine, Title: "On a machine"},
-		{ID: ImagesAndEngine, Title: "A Mac's images and engine"},
-		{ID: ThisTerminal, Title: "This terminal"},
-		{ID: StationItself, Title: "Machines itself"},
+		{ID: Machine, Title: "Machine"},
+		{ID: Agent, Title: "Agent"},
+		{ID: OS, Title: "OS"},
+		{ID: Spwn, Title: "Spwn"},
 	}
 }

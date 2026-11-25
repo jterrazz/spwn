@@ -216,7 +216,7 @@ jobs:
                   fetch-depth: 0
             - uses: actions/setup-go@v5
               with:
-                  go-version: '1.26'
+                  go-version-file: go.work
                   cache-dependency-path: apps/cli/go.sum
             - uses: actions/download-artifact@v4
               with:

@@ -31,7 +31,7 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 		Use:     "overview",
 		Short:   "This machine at a glance: what needs you first, then each section",
 		Example: "  station overview\n  station overview --all\n  station overview --json",
-		Group:   kit.OnAMachine,
+		Group:   kit.Spwn,
 		Declare: func(f *pflag.FlagSet, in *Input) {
 			f.BoolVar(&in.All, "all", false, "unfold every section, not only what needs you")
 		},

@@ -21,7 +21,7 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 		Use:     "journal",
 		Short:   "What was done on every Mac and its VMs, by day, kept thirty days",
 		Example: "  station journal\n  station journal --on mac-mini\n  station journal --json",
-		Group:   kit.Machines,
+		Group:   kit.Spwn,
 		Read:    func(*struct{}) bool { return true },
 		Pages:   true,
 		Run: func(ctx context.Context, _ *struct{}, io kit.IO) error {

@@ -26,7 +26,7 @@ func Command(d Deps, env kit.Env, children ...*cobra.Command) *cobra.Command {
 		Use:     "background",
 		Short:   "The background tasks of this machine: failing, orphans, Machines', the apps', unknown",
 		Example: "  station background\n  station background --all\n  station background --json",
-		Group:   kit.OnAMachine,
+		Group:   kit.Machine,
 		Args:    cobra.NoArgs,
 		Declare: func(f *pflag.FlagSet, in *Input) {
 			f.BoolVar(&in.All, "all", false, "unfold every group on a terminal (a pipe lists every row already)")

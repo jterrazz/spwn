@@ -20,7 +20,7 @@ func Command(d Deps, env kit.Env, children ...*cobra.Command) *cobra.Command {
 		Use:     "machinefile",
 		Short:   "The Machinefiles this Mac reads: what each makes, where it is read, and whether its machines match it",
 		Example: "  station machinefile\n  station machinefile --json\n  station machinefile apply",
-		Group:   kit.OnAMachine,
+		Group:   kit.Spwn,
 		Read:    func(*struct{}) bool { return true },
 		Pages:   true,
 		Run: func(ctx context.Context, _ *struct{}, io kit.IO) error {

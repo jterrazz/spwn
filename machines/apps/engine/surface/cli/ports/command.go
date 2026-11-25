@@ -28,7 +28,7 @@ func Command(d Deps, env kit.Env, children ...*cobra.Command) *cobra.Command {
 		Short: "What listens on your machines, who reaches it, and what your VMs share on " + catalog.TailnetProduct,
 		Example: "  station ports\n  station ports --all-machines\n  station ports --all\n  station ports --json\n" +
 			"  station ports share linux-1 3000\n  station ports stop-sharing linux-1 3000",
-		Group: kit.OnAMachine,
+		Group: kit.Machine,
 		Declare: func(f *pflag.FlagSet, in *Input) {
 			f.BoolVar(&in.AllMachines, "all-machines", false, "every Mac's ports")
 			f.BoolVar(&in.All, "all", false, "the ports that listen on their machine only, too")

@@ -29,7 +29,7 @@ func Command(d Deps, env kit.Env, children ...*cobra.Command) *cobra.Command {
 		Use:     "apps [<app>]",
 		Short:   "The catalogue's apps on this machine, agent skills included; one app's detail",
 		Example: "  station apps\n  station apps --all\n  station apps gh\n  station apps --json",
-		Group:   kit.OnAMachine,
+		Group:   kit.Machine,
 		Args: func(c *cobra.Command, args []string) error {
 			if len(args) > 1 {
 				return errors.New("unknown command \"" + args[0] + "\" for \"" + c.CommandPath() + "\"")

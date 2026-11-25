@@ -1,11 +1,13 @@
-description: 'completion offers the commands of the help, in its order, never plumbing'
+description: 'completion offers the commands of the help, the bare overview first, never plumbing'
 env: one-mac
 runs:
     - command: '__complete "" 2>/dev/null | /usr/bin/grep -v "^:" | /usr/bin/cut -f1'
       exit: 0
       stdout: |
           overview
-          activity
+          machines
+          images
+          engine
           apps
           settings
           disk
@@ -13,12 +15,10 @@ runs:
           accounts
           background
           awake
-          machines
-          journal
-          images
-          engine
-          use
+          activity
           init
+          use
+          journal
           machinefile
           help
     - command: 'completion zsh | /usr/bin/grep -c "compdef _station station"'

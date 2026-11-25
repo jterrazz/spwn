@@ -1,4 +1,4 @@
-description: 'station help lists its groups and commands in the map''s one order, never an alias or plumbing'
+description: 'station help lists its groups and commands in one order, never an alias, never an empty group'
 env: one-mac
 runs:
     - command: 'help | /usr/bin/grep -E "^  [A-Z]" | /usr/bin/sed -E "s/ +$//"'
@@ -6,17 +6,15 @@ runs:
       stdout: |4
             Set up and run this Mac, its VMs and your other Macs
             USAGE
-            MACHINES
-            ON A MACHINE
-            A MAC'S IMAGES AND ENGINE
-            THIS TERMINAL
-            MACHINES ITSELF
+            MACHINE
+            SPWN
             FLAGS
-    - command: 'help | /usr/bin/sed -n "/^  ON A MACHINE/,/^  A MAC/p" | /usr/bin/grep -oE "^    [a-z]+ " | /usr/bin/tr -d " "'
+    - command: 'help | /usr/bin/sed -n "/^  MACHINE/,/^  SPWN/p" | /usr/bin/grep -oE "^    [a-z]+ " | /usr/bin/tr -d " "'
       exit: 0
       stdout: |
-          overview
-          activity
+          machines
+          images
+          engine
           apps
           settings
           disk
@@ -24,16 +22,16 @@ runs:
           accounts
           background
           awake
-          machinefile
-    - command: 'help | /usr/bin/sed -n "/^  A MAC/,/^  THIS TERMINAL/p" | /usr/bin/grep -oE "^    [a-z]+ " | /usr/bin/tr -d " "'
+          activity
+    - command: 'help | /usr/bin/sed -n "/^  SPWN/,/^  FLAGS/p" | /usr/bin/grep -oE "^    [a-z]+ " | /usr/bin/tr -d " "'
       exit: 0
       stdout: |
-          images
-          engine
-    - command: 'help | /usr/bin/sed -n "/^  THIS TERMINAL/,/^  MACHINES/p" | /usr/bin/grep -oE "^    [a-z]+ " | /usr/bin/tr -d " "'
-      exit: 0
-      stdout: |
+          overview
+          init
           use
+          journal
+          machinefile
+          help
     - command: '--help | /usr/bin/grep -cwE "^    (status|start|stop|shell|daemon|guest|completion|man|world|pipe|supervise)"'
       exit: 1
       stdout: |

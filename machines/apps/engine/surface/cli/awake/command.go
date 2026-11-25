@@ -47,7 +47,7 @@ func Command(d Deps, env kit.Env, children ...*cobra.Command) *cobra.Command {
 		Use:     "awake [<for>]",
 		Short:   "Keep a Mac from sleeping: every Mac's mode, a keep-awake for a while, or off",
 		Example: "  station awake\n  station awake 4h --lid\n  station awake until 18:00\n  station awake off",
-		Group:   kit.OnAMachine,
+		Group:   kit.Machine,
 		Args:    cobra.MaximumNArgs(2),
 		Declare: func(f *pflag.FlagSet, in *Input) {
 			f.BoolVar(&in.Lid, "lid", false, "stay awake with the lid closed too (the screen still turns off)")

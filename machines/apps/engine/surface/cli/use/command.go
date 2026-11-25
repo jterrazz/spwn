@@ -27,7 +27,7 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 		Use:      "use [<machine>|-]",
 		Short:    "Choose the machine this terminal's commands run on",
 		Example:  "  station use linux-1\n  station use -",
-		Group:    kit.ThisTerminal,
+		Group:    kit.Spwn,
 		Args:     cobra.MaximumNArgs(1),
 		Bind:     bind,
 		Complete: func([]string, string) []string { return append([]string{thisMac, "-"}, d.Names()...) },

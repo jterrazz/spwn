@@ -1,6 +1,6 @@
 module spwn.sh/packages/compile
 
-go 1.26.0
+go 1.27.3
 
 require (
 	github.com/moby/moby/api v1.56.1
