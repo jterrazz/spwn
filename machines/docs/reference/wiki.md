@@ -1,12 +1,15 @@
 # The wiki's format
 
-A wiki is a corpus of Markdown pages whose facts are tags, read by one file at its root, `wiki.yaml`, in the schema `spwn.wiki/v1`. This page is that file's every key and the rules a page is written by; why tags compile to data and never run is [ADR-095](../decisions/095-the-wiki-is-an-engine-family.md).
+A wiki is a corpus of Markdown pages whose facts are tags, read by one file at its root, `wiki.yaml`, in the schema `spwn.wiki/v1`. This page is that file's every key, the rules a page is written by, and what the engine judges and weighs of a corpus; why tags compile to data and never run is [ADR-095](../decisions/095-the-wiki-is-an-engine-family.md).
 
-| Section        | Answers                                                   |
-| -------------- | --------------------------------------------------------- |
-| The file       | How strictly `wiki.yaml` is read, and what a refusal says |
-| Its keys       | Every key, what it declares, and what the engine refuses  |
-| Writing a page | The rules the formatter and the grammar impose on a tag   |
+| Section         | Answers                                                              |
+| --------------- | -------------------------------------------------------------------- |
+| The file        | How strictly `wiki.yaml` is read, and what a refusal says            |
+| Its keys        | Every key, what it declares, and what the engine refuses             |
+| Writing a page  | The rules the formatter and the grammar impose on a tag              |
+| What is judged  | The rules the engine judges a corpus by, and the ones left for later |
+| What is weighed | A block's weight, its tier, and what a page shows at the budget      |
+| Beyond the spec | Every reading of SPEC-v1 the engine made on its own                  |
 
 ## The file
 
@@ -38,3 +41,70 @@ A question that holds a comma is quoted, since a comma ends an entry of a flow m
 - A tag spans 12 lines at most, the line rule's limit.
 - A value holds no em or en dash: the prose rule reads tag lines too.
 - A value holds no `"`, since the grammar has no escape: write typographic quotes, “ and ”.
+
+## What is judged
+
+The engine's `Check` (`apps/engine/wiki/check.go`) judges the compiled pages of a corpus and its schema, and nothing else: no git, no file past the pages it is given, no network, no engine state. Each finding names its rule, its page, its line and column, and its level: a hard rule has none, and a soft one is `ambient`, `remark` or `needs-you`. Every rule is once in the registry, `apps/engine/wiki/rules.go`.
+
+| Rules                     | Judge                                                                                                       |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| H1, H22, H38 to H41       | the compile: a kind that exists, a tag that reads, a braced value, a group's bounds, each attribute         |
+| H2, H3, H4, H5, H6        | each field's type, enum and presence, a ref's `to`; ids; refs; an anchor's repository; a rule's proof       |
+| H8, H9, H10, H12, H14     | a term defined once and a retired one written nowhere; floors; `needs`; an authored Face; a component       |
+| H15 to H17, H35           | `weight`, one written lead per set, `intent`, `fold`                                                        |
+| H19, H20, H36, H23 to H25 | a table's kind, columns and `where`; a sub-page that is a page, a child, and set once                       |
+| H26, H28 to H33           | a figure's form and caption; icons and their grids; every page under one seat, every seat owning a page     |
+| S2 to S4, S6, S8, S29     | a soft rule broken twice, a refused link or a scenario with no proof, a reading, prose only, a waiver       |
+| S11 to S18                | the budget, a written weight against its score, a lead, a group's size, a table's scope and width, children |
+| S21, S22, S26, S28        | an icon missing, an intent read by no seat, a tag past 12 lines, a markdown table shaped like a kind        |
+
+Left for later lots, since each reads what the pure core may not:
+
+- H5's other half (the file and the symbol in the clone), H7, H11 and H13 read another repository's files.
+- H43 and S25 read the bucket; S1 and S19 read `wiki.lock` and git.
+- S5, S7 and S27 read an anchor's file, an ADR's status line, or whether a clone is there.
+- S9 and S20 wait for prose links compiled to Links; S10 reads the briefs; S23 waits for the map.
+- A tombstone reused (H3's last clause) and the floor of a child page under its parent (H9's page half) read git and the parent's `skip`, which SPEC-v1 does not define.
+
+## What is weighed
+
+A block of a content kind has a weight: its score is the sum of its causes, SPEC-v1 §7.
+
+| Cause           | Points        | When                                                                        |
+| --------------- | ------------- | --------------------------------------------------------------------------- |
+| `prose-leans`   | 2             | the page's prose links to it, `(#id)`                                       |
+| `illustrated`   | 3             | a figure of the page shows it; that figure's ref is not counted as `linked` |
+| `linked`        | 1 each, 2 max | other blocks of the page carry a ref to it                                  |
+| `guard-hard`    | 2             | a rule whose force is hard or hardened                                      |
+| `guard-soft`    | 1             | a soft rule                                                                 |
+| `decided-claim` | 2             | a claim of certainty `decided`                                              |
+| `decision`      | 1             | a decision                                                                  |
+| `scenario`      | 1             | a scenario                                                                  |
+| `kind`          | `weighs`      | a block of a corpus kind                                                    |
+| `anchored`      | 1             | it carries `code`, `proof`, `carried_by`, `adr`, `path` or `source`         |
+| `needs-you`     | 3             | it raises a needs-you finding, S6 or S29                                    |
+| `broken`        | 3             | it has a hard finding                                                       |
+
+The blocks of one group are weighed together, and outside a group those of one section on one floor. The lead is the written `lead`, else the highest score at 3 or more, the first in reading order on a tie; a block is quiet when written so or scored 1 or less, and normal otherwise. A group, a table, a lens, a figure and a sub-page have no weight. A page's seat is the seat whose folders hold its id, and its floor its frontmatter `floor`, else `floor_of`; a block is on its page's floor unless it writes its own.
+
+At the corpus budget a page shows at most seven lines (S11): at `10min` a quiet block is a line, at `2min` a normal one, at `30s` none, a group its page's seat does not read is one line and hides its blocks, and at `30s` every group is one line.
+
+## Beyond the spec
+
+Each reading the engine made where SPEC-v1 is silent:
+
+- A block's `floor` and a page's frontmatter `floor` are a number, 0 to 4, like `floor_of`.
+- A value `null` is a value not written.
+- A union `ref|anchor|sentence` reads a string of the anchor form (`repo:path[#symbol]`) as an anchor, any other string as a sentence.
+- `rests_on` is `"reading"` or a ref; frontmatter `needs` is one page or a list, `[a, b]`.
+- A frontmatter key outside `kind`, `floor`, `needs`, `line`, `word`, `icon`, `rests_on` and `retired` is H41.
+- A term is defined once across pages (H8); twice in one page is H3, an id twice.
+- A retired term's words are its id, its dashes read as spaces, and they are found in prose only.
+- `where` takes `has` on a list field only and `is` on a single value only (H36).
+- `weight` written on a group, a table, a lens, a figure or a sub-page is H15; a second written lead is H16 outside a group too, in the section and floor its blocks are weighed in.
+- The built-in icons are names: each engine kind, each intent, each rule force, link right and component level; their grids are the window's. A kind's icon is its `icon` key, a seat's the icon named its id.
+- A sub-page's child is a page under its folder, or one whose `needs` names it.
+- A markdown table asks for blocks (S28) when it has two columns or more, each a field of one content kind.
+- S13 and S18 count a page's weighed blocks.
+- Weight causes are listed with their points, and a page's own `## Rests on` section or `rests_on` frontmatter raises S6 on the page.
+- A finding about `wiki.yaml` names that file and its line, column 1.

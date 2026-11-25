@@ -32,7 +32,7 @@ apps/engine/
              and drift, which read and act through apps' and settings' calls, never their adapters;
              the ledger of what apply installed
   wiki/      the wiki's model: wiki.yaml read into its schema (its strict shape the catalog's), a page's tags
-             read and compiled to typed records, never executed
+             read and compiled to typed records, never executed, and the corpus judged by its rules and weighed
 
   setup/     setup.init, the call that makes a machine known (the verb `init`: Go names no package
              init), and the preferences groups it writes
