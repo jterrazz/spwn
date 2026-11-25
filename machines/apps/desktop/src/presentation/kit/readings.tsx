@@ -3,11 +3,12 @@ import type { ReactNode } from 'react';
 
 import type { Reach } from '../../application/use-cases/reach';
 import type { EngineError } from '../../domain/engine-error';
-import { clock, fixLine, sentence } from '../../domain/format';
+import { clock, sentence } from '../../domain/format';
 import { SEPARATOR } from '../../domain/separator';
 import type { Tone } from '../../domain/tone';
+import { unlessCommand } from '../ui/command';
 import { CopyButton } from '../ui/copy-button';
-import { asSentence, capitalised, Missing, Panel, StatePill, Value, Verdict } from '../ui/index';
+import { asSentence, capitalised, Missing, Panel, StatePill, Verdict } from '../ui/index';
 import { shownOrWithheld } from '../ui/secret';
 import { failedState } from '../words/failed';
 import { ownState, verdictShown } from '../words/shown';
@@ -68,22 +69,20 @@ export function SummaryHead({
     );
 }
 
-type Said = { word: string; tone: Tone; message: string; hint: string; fix: string };
+type Said = { word: string; tone: Tone; message: string; hint: string };
 
 function saidOf(error: EngineError): Said {
     const { wire, message } = error;
     if (!wire) {
         return {
             ...failedState(error),
-            fix: '',
-            hint: shownOrWithheld(message),
+            hint: unlessCommand(shownOrWithheld(message)),
             message: 'No answer from the engine',
         };
     }
     return {
         ...failedState(error),
-        fix: fixLine(wire.fix),
-        hint: shownOrWithheld(wire.hint ?? ''),
+        hint: unlessCommand(shownOrWithheld(wire.hint ?? '')),
         message: shownOrWithheld(wire.message),
     };
 }
@@ -97,15 +96,9 @@ export function Unanswered({
 }) {
     const said = saidOf(error);
     const command = error.wire?.fix?.Command ?? '';
-    const copied = command === '' ? said.fix : command;
     const fix =
-        said.fix === '' ? undefined : (
-            <span className={styles.fix}>
-                <Value>{said.fix}</Value>
-                {shownOrWithheld(said.fix) === said.fix ? (
-                    <CopyButton name={`Copy ${copied}`} text={copied} />
-                ) : null}
-            </span>
+        command === '' ? undefined : (
+            <CopyButton label="Copy the command" name="Copy the command" text={command} />
         );
     if (size === 'panel') {
         return (

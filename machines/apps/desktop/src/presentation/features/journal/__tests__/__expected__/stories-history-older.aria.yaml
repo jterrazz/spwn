@@ -19,11 +19,9 @@
     - button "Upkeep 2 brew updates waiting macbook-pro · Apps"
     - button "Update brew": Update
     - 'button "Upkeep node 25.1.0 available: change ''24'' to ''25'' macbook-pro · Apps"'
-    - text: ~/.config/station/machinefiles/macbook-pro.machine.yaml
-    - button "Copy ~/.config/station/machinefiles/macbook-pro.machine.yaml": Copy
+    - text: Fix
     - 'button "Upkeep Firewall: off macbook-pro · Settings"'
-    - text: System Settings > Network > Firewall
-    - button "Copy System Settings > Network > Firewall": Copy
+    - text: Fix
   - region "History":
     - heading "History what happened, newest first" [level=2]
     - region "Today":

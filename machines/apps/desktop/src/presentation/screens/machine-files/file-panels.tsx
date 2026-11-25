@@ -56,7 +56,7 @@ export function Own({ view }: { view: MachinefileFileView }) {
         return null;
     }
     return (
-        <Panel note={Local.Path} title="This Mac's own changes">
+        <Panel note={Local.Path.split('/').at(-1)} title="This Mac's own changes">
             <div className={styles.rows}>
                 {(Local.AppsAdded ?? []).map((name) => (
                     <Row

@@ -18,4 +18,4 @@
     - paragraph: What the engine answered is below
   - region "Apps":
     - heading "Apps by file, a later one wins" [level=2]
-    - text: unreachable mac-mini does not answer. station machines mac-mini
+    - text: unreachable mac-mini does not answer.

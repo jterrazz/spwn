@@ -20,19 +20,15 @@
     - button "Upkeep 1 brew update waiting macbook-pro · Apps"
     - button "Update brew": Update
     - 'button "Upkeep Firewall: off macbook-pro · Settings"'
-    - text: System Settings > Network > Firewall
-    - button "Copy System Settings > Network > Firewall": Copy
+    - text: Fix
     - button "Upkeep ~/.tart is misplaced macbook-pro · Disk"
     - button "Move ~/.tart": Move
     - button "Upkeep com.bjango.istatmenus.installer is left over macbook-pro · Background"
-    - text: sudo launchctl bootout system/com.bjango.istatmenus.installer && sudo rm /Library/LaunchDaemons/com.bjango.istatmenus.installer.plist
-    - button "Copy sudo launchctl bootout system/com.bjango.istatmenus.installer && sudo rm /Library/LaunchDaemons/com.bjango.istatmenus.installer.plist": Copy
+    - button "Copy the command"
     - button "Upkeep com.docker.socket is left over macbook-pro · Background"
-    - text: sudo launchctl bootout system/com.docker.socket && sudo rm /Library/LaunchDaemons/com.docker.socket.plist
-    - button "Copy sudo launchctl bootout system/com.docker.socket && sudo rm /Library/LaunchDaemons/com.docker.socket.plist": Copy
+    - button "Copy the command"
     - button "Upkeep com.docker.vmnetd is left over macbook-pro · Background"
-    - text: sudo launchctl bootout system/com.docker.vmnetd && sudo rm /Library/LaunchDaemons/com.docker.vmnetd.plist
-    - button "Copy sudo launchctl bootout system/com.docker.vmnetd && sudo rm /Library/LaunchDaemons/com.docker.vmnetd.plist": Copy
+    - button "Copy the command"
   - region "History":
     - heading "History what happened, newest first" [level=2]
     - region "Last night":

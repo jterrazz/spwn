@@ -271,7 +271,7 @@ describe('Machine files', () => {
         const result = await component.render(windowOver('bare-mac'), async (visitor) => {
             // When - machinefile.files has answered and machinefile.explain has refused
             await visitor.see(button('base-macos'));
-            await visitor.see(content('give this machine one: station init --machinefile <name>'));
+            await visitor.see(content('no Machinefile named macbook-pro.', { exact: false }));
         });
 
         // Then - the files are cards, and the refusal is one finding row under the page's head, never a headline

@@ -11,6 +11,7 @@ import { stagedReplay } from '../../infrastructure/outbound/engine-replay/replay
 import type { Pace, Recording, Stage } from '../../infrastructure/outbound/engine-replay/replay';
 import { NO_OPENER } from '../../infrastructure/outbound/opener-tauri/tauri-opener';
 import { EngineProvider } from '../../presentation/dependencies/dependencies';
+import type { Dependencies } from '../../presentation/dependencies/dependencies';
 import type { Route } from '../../presentation/navigation/route';
 import { RouterProvider, useRouter } from '../../presentation/navigation/router';
 import { PageArea, useStation } from '../../presentation/navigation/window';
@@ -39,6 +40,21 @@ export function pageOver(recording: Recording, initial: Route, opener?: OpenerPo
             </RouterProvider>
         </EngineProvider>
     );
+}
+
+export type Staged = { dependencies: Dependencies; stage: Stage };
+
+// value: a world whose exchanges the spec can count, so it knows when what it draws is drawn.
+export function stagedOver(recording: Recording): Staged {
+    const stage = stagedReplay(recording);
+    return {
+        dependencies: {
+            engine: new Client(stage.transport),
+            opener: NO_OPENER,
+            presence: documentPresence(),
+        },
+        stage,
+    };
 }
 
 export type HeldPage = { ui: ReactElement; held: HeldRead; stage: Stage };

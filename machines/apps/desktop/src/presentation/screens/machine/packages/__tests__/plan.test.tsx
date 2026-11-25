@@ -120,7 +120,7 @@ describe('Plan', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test("an apply the engine refuses shows the engine's refusal and its hint", async () => {
+    test("an apply the engine refuses shows the engine's refusal, with no command", async () => {
         // Given - the plan of api over machinefile-differs, api stopped
         const result = await component.render(
             planOver('machinefile-differs', 'api', { name: 'api' }),
@@ -129,8 +129,9 @@ describe('Plan', () => {
                 await visitor.click(button('Apply'));
                 await visitor.click(within(asked('api'), button('Apply')));
 
-                // Then - the gesture fails on the engine's own hint, never one of the window's, and can be dismissed
-                await visitor.see(content('station machines start api'));
+                // Then - the gesture fails with the engine's words, its hint that is a command never drawn, and can be dismissed
+                await visitor.see(heading('api is stopped.'));
+                await visitor.gone(content('station machines start api'));
                 await visitor.see(button('Dismiss'));
                 await visitor.gone(content('done'));
             },

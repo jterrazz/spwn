@@ -127,7 +127,7 @@ describe('disk gestures', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test('an erase the engine refuses shows its words and its hint, and the row stays', async () => {
+    test('an erase the engine refuses shows its words and withholds a hint that is a command, and the row stays', async () => {
         // Given - Storage over two-macs, where the engine answers the erase of xcode with disk.app-running
         const recording = recordingFor('two-macs');
         const refusing = {
@@ -169,7 +169,7 @@ describe('disk gestures', () => {
                     exact: false,
                 });
                 await visitor.see(within(data, said));
-                await visitor.see(
+                await visitor.gone(
                     within(data, content('quit Xcode, then station disk erase xcode')),
                 );
                 await visitor.see(within(data, button('Erase… xcode')));
@@ -178,7 +178,7 @@ describe('disk gestures', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test('a delete of an image the engine refuses as in use shows its sentence and its hint, and the row as it was', async () => {
+    test('a delete of an image the engine refuses as in use shows its sentence and withholds a hint that is a command, and the row as it was', async () => {
         // Given - Storage over two-macs, where the engine answers the delete with image.in-use
         const recording = recordingFor('two-macs');
         const refusing = {
@@ -221,7 +221,7 @@ describe('disk gestures', () => {
                 await visitor.see(
                     within(images, content('has machines made from it: linux-1', { exact: false })),
                 );
-                await visitor.see(
+                await visitor.gone(
                     within(images, content('station images lists the versions you can delete')),
                 );
                 await visitor.see(within(images, button('Delete base-ubuntu 2026.10.20')));

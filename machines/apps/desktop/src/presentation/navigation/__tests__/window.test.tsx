@@ -19,6 +19,7 @@ import { EngineProvider } from '../../dependencies/dependencies';
 import { PAGES } from '../../screens/registry';
 import type { Route } from '../route';
 import { Window } from '../window';
+import { commandsDrawnOver, WORLDS } from './walk';
 
 const recordingFor = await recordingsOf(
     'bare-mac',
@@ -275,4 +276,18 @@ describe('Window', () => {
         );
         expect(result.errors.text).toBe('');
     });
+
+    test.each(WORLDS)(
+        '%s draws no command to copy and never the old name',
+        async (world) => {
+            // Given - every page of the world, and every tab of each Mac and each machine it lists
+
+            // When - each is drawn once its exchanges have played
+            const found = await commandsDrawnOver(world);
+
+            // Then - no line of any page carries a command
+            expect(found).toStrictEqual([]);
+        },
+        120_000,
+    );
 });

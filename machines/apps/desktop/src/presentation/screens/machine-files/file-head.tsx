@@ -103,7 +103,6 @@ export function FileHead({
                 </span>
                 <div className={styles.named}>
                     <h2 className={styles.name}>{named}</h2>
-                    {view.Path === '' ? null : <span className={styles.path}>{view.Path}</span>}
                 </div>
                 <span className={styles.actions}>
                     <Switch

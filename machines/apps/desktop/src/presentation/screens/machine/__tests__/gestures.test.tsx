@@ -256,7 +256,7 @@ describe('gestures', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test('a gesture the engine fails shows its error and its hint, and the machine as it was', async () => {
+    test('a gesture the engine fails shows its error and withholds a hint that is a command, and the machine as it was', async () => {
         // Given - linux-1's page over engine-stopped, where This Mac's engine is stopped
         const result = await component.render(
             machineOver('engine-stopped', 'linux-1'),
@@ -271,7 +271,7 @@ describe('gestures', () => {
                     exact: false,
                 });
                 await visitor.see(said);
-                await visitor.see(content('station engine start'));
+                await visitor.gone(content('station engine start'));
                 await visitor.click(button('Dismiss'));
                 await visitor.gone(said);
             },

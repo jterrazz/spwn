@@ -20,7 +20,6 @@
     - button "base-ubuntu"
   - region "macbook-pro.machine.yaml":
     - heading "macbook-pro.machine.yaml" [level=2]
-    - text: ~/.config/station/machinefiles/macbook-pro.machine.yaml
     - group "How the file is shown":
       - button "Fields" [pressed]
       - button "YAML"
@@ -52,5 +51,5 @@
       - button "homebrew manager macOS package manager takes every version"
       - button "jq Command-line JSON processor takes every version"
   - region "This Mac's own changes":
-    - heading "This Mac's own changes ~/.config/station/machinefiles/macbook-pro.local.yaml" [level=2]
+    - heading "This Mac's own changes macbook-pro.local.yaml" [level=2]
     - text: bat an app added on this Mac only added lazygit an app the files declare, left out here removed

@@ -15,7 +15,7 @@
   - heading "api is stopped." [level=1]
   - paragraph:
     - img "refused"
-    - text: Refused · station machines start api
+    - text: Refused
   - region "What api prints":
     - heading "What api prints its console, then its hypervisor" [level=2]
     - group "Which log":

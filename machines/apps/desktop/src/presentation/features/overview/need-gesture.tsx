@@ -18,7 +18,7 @@ import { useGesture } from '../../dependencies/use-gesture';
 import { GestureButton, GestureRow } from '../../kit/gestures';
 import { LoginSheet } from '../../kit/login-sheet';
 import { CopyButton } from '../../ui/copy-button';
-import { Button, Row, Value } from '../../ui/index';
+import { Button, Row } from '../../ui/index';
 import type { RowProps } from '../../ui/row';
 import { wordOf } from '../../words/engine-words';
 import {
@@ -33,7 +33,6 @@ import {
 } from '../../words/provisional';
 import type { NeedCall } from '../../words/provisional';
 import { needState } from '../../words/shown';
-import { gestureOf } from './needs';
 
 import styles from './needs.module.css';
 
@@ -212,22 +211,13 @@ function Login(props: Props & { found: Found; program: AccountsProgram }) {
     );
 }
 
-function Command({ text }: { text: string }) {
-    return (
-        <span className={styles.command}>
-            <Value>{text}</Value>
-            <CopyButton name={`Copy ${text}`} text={text} />
-        </span>
-    );
-}
-
 function Said(props: Props) {
-    const gesture = gestureOf(props.need);
+    const { Command } = props.need;
     const said =
-        gesture !== undefined && 'text' in gesture ? (
-            <Command text={gesture.text} />
-        ) : (
+        Command === '' ? (
             <span className={styles.verb}>{verbOf(props.need)}</span>
+        ) : (
+            <CopyButton label="Copy the command" name="Copy the command" text={Command} />
         );
     return <Row {...rowOf(props, said)} />;
 }
