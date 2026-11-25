@@ -79,9 +79,10 @@ type Options struct {
 	// value: the engine's own state folder: its socket and its children.
 	State       string
 	ThisMachine catalog.MachineKind
-	// value: the file of this Mac's device key's public half, the first key a
-	// VM trusts; empty when this Mac has no device key.
-	DeviceKey string
+	// value: this Mac's device key's line, read from the key the engine
+	// holds and never from a file, the first key a VM trusts; nil, or an
+	// empty line, when this Mac has no device key.
+	DeviceKey func() string
 	// value: the keys of the other devices this Mac's book lets open pipe,
 	// whose seals hold: the only keys a VM trusts beside the device key;
 	// nil trusts none.
@@ -715,10 +716,8 @@ func (d *Engine) hostKeys() []string {
 			keys = append(keys, line)
 		}
 	}
-	if d.o.DeviceKey != "" {
-		if pub, err := d.h.ReadFile(d.o.DeviceKey); err == nil {
-			add(string(pub))
-		}
+	if d.o.DeviceKey != nil {
+		add(d.o.DeviceKey())
 	}
 	if d.o.BookKeys != nil {
 		for _, line := range d.o.BookKeys() {

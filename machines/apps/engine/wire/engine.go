@@ -113,9 +113,9 @@ func (m machine) engine(env kit.Env) *process.Engine {
 	}
 	jobs := append([]process.Tick{sample.Run}, m.macJobs(calls)...)
 	state := m.readers(calls, report, func() awake.View { return d.AwakeView() })
-	var deviceKey string
+	var deviceKey func() string
 	if m.profile.Kind == coremachine.Computer {
-		deviceKey = DeviceKeyFile(m.paths.State)
+		deviceKey = m.deviceKeyLine
 	}
 	d = process.New(engineMac{m.sys}, engineHypervisor{m.hypervisor()}, guests, m.machines(false), tailnet, process.Stores{Ports: m.stores.ports(), Reservations: m.stores.reservations}, process.Options{
 		Remember: func(vm string, port int, stopped bool) error {

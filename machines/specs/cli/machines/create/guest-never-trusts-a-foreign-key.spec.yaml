@@ -1,4 +1,4 @@
-description: 'a VM never trusts its Mac''s personal key nor a key its Mac''s own sshd lets in'
+description: 'a VM trusts no personal key of its Mac nor a device-key.pub another process wrote: nothing at all'
 fixture:
     - ../../../__fixtures__/vms/
     - ./__fixtures__/fresh-mac/
@@ -10,5 +10,4 @@ runs:
       exit: 0
       stdout: |
           # >>> station hosts >>>
-          ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBFixtureDeviceKeyOfTheSpecMac station device key
           # <<< station hosts <<<

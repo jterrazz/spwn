@@ -9,6 +9,7 @@ import (
 
 	"github.com/jterrazz/studio-station/apps/engine/accounts/adapter/keychain"
 	"github.com/jterrazz/studio-station/apps/engine/background/adapter/launchd"
+	"github.com/jterrazz/studio-station/apps/engine/devices"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/machines/adapter/macos"
@@ -47,6 +48,22 @@ func (m machine) newDeviceKey() contract.DeviceKey {
 		return key
 	}
 	return macos.NewDeviceKey(m.sys.FS, m.paths.State, keychain.PresenceBudget, m.keyAccess())
+}
+
+// invariant: the device key's line a VM trusts is read from the key this
+// process holds, the Enclave's, never from device-key.pub, which is an
+// export for OpenSSH's blocks and is never read back; a key not made yet
+// gives no line.
+func (m machine) deviceKeyLine() string {
+	pub, err := m.deviceKey().Kept(context.Background())
+	if err != nil {
+		return ""
+	}
+	line, err := devices.LineOf(pub)
+	if err != nil {
+		return ""
+	}
+	return line + " " + ssh.DeviceKeyComment
 }
 
 // invariant: a Mac run alone is one whose Never sleeps is applied, the
