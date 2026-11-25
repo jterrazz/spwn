@@ -72,3 +72,23 @@ export function moveFocus(
     next?.focus();
     return next;
 }
+
+// invariant: the opener gets the keyboard back only while it is still inside what closes or nowhere: a focus that
+// invariant: already moved on, by a click or a Tab elsewhere, is left where it went.
+export function holdFocus(
+    within: HTMLElement | null,
+    first: (within: HTMLElement) => HTMLElement,
+): () => void {
+    if (!within) {
+        return () => undefined;
+    }
+    const opener = document.activeElement;
+    first(within).focus({ preventScroll: true });
+    return () => {
+        const now = document.activeElement;
+        const unmoved = now === null || now === document.body || within.contains(now);
+        if (unmoved && opener instanceof HTMLElement && opener.isConnected) {
+            opener.focus({ preventScroll: true });
+        }
+    };
+}
