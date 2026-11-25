@@ -138,25 +138,19 @@ public enum Token {
         }
     }
 
-    // value: the menu bar icon: the spwn mark, three floors growing with
-    // depth and the dot on top, the app icon's silhouette, in the one ink
-    // the system paints, on the bar's 18 pt box in points; `glyph` and
-    // `weight` draw the bar's own symbols beside it in the stories and the tests.
+    // value: the menu bar icon: the spwn mark, three dots one behind the
+    // other shrinking away from the big one, the app icon's drawing, in the
+    // one ink the system paints, on the bar's 18 pt box in points; `glyph`
+    // and `weight` draw the bar's own symbols beside it in the stories and the tests.
     public enum Icon {
         public static let box = CGSize(width: 18, height: 18)
-        // value: the floors, bottom first, each a slab seen from above: a
-        // square rounded by `corner` of its width, turned a quarter,
-        // flattened to its `width` and `height` and centred at `y` on the
-        // box's middle line; each floor is cut out of around the one above
-        // it by a band `gap` wide.
-        public static let floors: [(y: CGFloat, width: CGFloat, height: CGFloat)] = [(12.4, 16.7, 8), (9.5, 12, 5.9), (6.9, 8, 4)]
-        public static let corner: CGFloat = 0.09
+        // value: the dot in front, you; while something needs you it grows to `needsDot`.
+        public static let dot = (x: CGFloat(6.12), y: CGFloat(11.88), r: CGFloat(4.62))
+        public static let needsDot = (x: CGFloat(6.12), y: CGFloat(11.88), r: CGFloat(5.5))
+        // value: the dots behind it, nearest first, each a crescent: its
+        // circle cut out of around the dot in front of it by a band `gap` wide.
+        public static let behind: [(x: CGFloat, y: CGFloat, r: CGFloat)] = [(10.73, 7.27, 3.46), (14.19, 3.81, 2.31)]
         public static let gap: CGFloat = 1
-        // value: the dot on the top floor, cut out of the floors by a band
-        // `dotGap` wide; while something needs you it grows to `needsDot`.
-        public static let dot = (x: CGFloat(9), y: CGFloat(3.2), r: CGFloat(2.1))
-        public static let needsDot = (x: CGFloat(9), y: CGFloat(2.8), r: CGFloat(2.6))
-        public static let dotGap: CGFloat = 0.9
         // value: the slash, one line across the box from `slashFrom` to
         // `slashTo`, round caps: the glyph is cut out of by a band `cut`
         // wide, and the stroke `stroke` wide is drawn on top of the cut.
@@ -166,19 +160,19 @@ public enum Token {
         public static let stroke: CGFloat = 1.3
         public static let glyph: CGFloat = 15
         public static let weight = Font.Weight.medium
-        // value: the stopped mark: the floors and the dot at this opacity, the slash solid.
+        // value: the stopped mark: the three dots at this opacity, the slash solid.
         public static let dimmed = 0.45
-        // value: the needs-you mark: the floors at this opacity, the dot solid and grown.
+        // value: the needs-you mark: the dots behind at this opacity, the front one solid and grown.
         public static let faded = 0.34
-        // value: the connecting mark: the floors above the bottom one and the dot at this opacity.
+        // value: the connecting mark: the front dot and the farthest one at this opacity.
         public static let resting = 0.32
-        // value: the busy wave: each floor's opacity runs `low` to 1 to
+        // value: the busy wave: each dot behind runs its opacity `low` to 1 to
         // `low` once per `Token.Busy.period`, at its peak `peak` of the way
-        // through, eased in and out, each floor `stagger` seconds, a third
-        // of the loop, after the one below it.
+        // through, eased in and out, each `stagger` seconds, half the loop,
+        // after the one nearer you.
         public static let low = 0.3
         public static let peak = 0.35
-        public static let stagger = Token.Busy.period / 3
+        public static let stagger = Token.Busy.period / 2
 
         public static func needs(_ scheme: ColorScheme) -> Color { Token.hex(scheme == .dark ? 0xFFAD1F : 0xF29D0B) }
         public static func down(_ scheme: ColorScheme) -> Color { Token.hex(scheme == .dark ? 0xFF4F45 : 0xEC3B30) }

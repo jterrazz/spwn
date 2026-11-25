@@ -1,7 +1,7 @@
 {
     "group": "shell",
     "id": "menubar.down",
-    "note": "The status item while infra is down: the floors faded under a grown dot, in the bar's one ink.",
+    "note": "The status item while infra is down: the dots behind faded under a grown front dot, in the bar's one ink.",
     "pages": ["pages/machines.down.menubar.json"],
     "schema": "station.story/v1",
     "tags": ["a11y"],
