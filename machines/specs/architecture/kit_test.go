@@ -596,3 +596,83 @@ func TestNoCommandHasAnAlias(t *testing.T) {
 		bites(t, "no-alias", found, "guest")
 	})
 }
+
+// value: the verbs of the tree that read and change nothing; with the root
+// and every bare noun, the reads ADR-021 rule 6 gives --json.
+func treeReadVerbs() []string { return []string{"log", "plan", "drift", "diff", "explain"} }
+
+func treeReads(root *command.Command) []*command.Command {
+	out := []*command.Command{root}
+	for _, c := range typedCommands(root) {
+		if c.Runnable() && (top(c) && slices.Contains(treeNouns(), c.Name()) || slices.Contains(treeReadVerbs(), c.Name())) {
+			out = append(out, c)
+		}
+	}
+	return out
+}
+
+// invariant: rule reads-take-json (ADR-021 rule 6): every read answers its
+// document with --json.
+func ruleReadsTakeJSON(root *command.Command) []finding {
+	var out []finding
+	for _, c := range treeReads(root) {
+		if c.Flags().Lookup("json") == nil {
+			where := commandPath(c)
+			if where == "" {
+				where = root.Name()
+			}
+			out = append(out, finding{"reads-take-json", where, "a read with no --json"})
+		}
+	}
+	return out
+}
+
+// value: the verbs that destroy what cannot be had back: a machine, data, an
+// app, a registration, a sign-in.
+func destroyingVerbs() []string {
+	return []string{"delete", "erase", "remove", "forget", "uninstall", "cleanup", "logout"}
+}
+
+// invariant: rule destroying-asks (ADR-021 rule 6, core/confirm): a verb that
+// destroys asks on a terminal, and a script answers it with --yes or
+// --confirm=<name>.
+func ruleDestroyingAsks(root *command.Command) []finding {
+	var out []finding
+	for _, c := range typedCommands(root) {
+		if c.Runnable() && slices.Contains(destroyingVerbs(), c.Name()) && c.Flags().Lookup("yes") == nil && c.Flags().Lookup("confirm") == nil {
+			out = append(out, finding{"destroying-asks", commandPath(c), "a destroying verb a script cannot answer: no --yes, no --confirm"})
+		}
+	}
+	return out
+}
+
+func TestEveryReadTakesJSON(t *testing.T) {
+	t.Parallel()
+	excepted := []exception{{"reads-take-json", "settings diff", "D0b", "2026-11-25"}}
+	t.Run("holds", func(t *testing.T) { excuse(t, ruleReadsTakeJSON(commandTree(t)), excepted) })
+	t.Run("bites", func(t *testing.T) {
+		root := commandTree(t)
+		for _, path := range [][]string{{"journal"}, {"machines", "log"}} {
+			c, _, _ := root.Find(path)
+			c.ResetFlags()
+		}
+		found := ruleReadsTakeJSON(root)
+		bites(t, "reads-take-json", found, "journal")
+		bites(t, "reads-take-json", found, "machines log")
+	})
+}
+
+func TestEveryDestroyingVerbIsAnsweredInAScript(t *testing.T) {
+	t.Parallel()
+	t.Run("holds", func(t *testing.T) { excuse(t, ruleDestroyingAsks(commandTree(t)), nil) })
+	t.Run("bites", func(t *testing.T) {
+		root := commandTree(t)
+		for _, path := range [][]string{{"machines", "delete"}, {"apps", "remove"}} {
+			c, _, _ := root.Find(path)
+			c.ResetFlags()
+		}
+		found := ruleDestroyingAsks(root)
+		bites(t, "destroying-asks", found, "machines delete")
+		bites(t, "destroying-asks", found, "apps remove")
+	})
+}

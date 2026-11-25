@@ -213,7 +213,7 @@ station plan [--machinefile <name|path>] [--phase image|boot|apply] [--diff] [--
 station apply [--machinefile <name|path>] [--phase image|boot|apply] [--remove] [--yes]
 station drift [--machinefile <name|path>] [--json]
 station upgrade [--machinefile <name>] [--json]
-station explain [<key>] [--machinefile <name>]
+station explain [<key>] [--machinefile <name>] [--json]
 station --version
 station help [command]
 ```

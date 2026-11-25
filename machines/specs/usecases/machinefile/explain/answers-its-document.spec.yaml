@@ -1,0 +1,9 @@
+description: 'explain --json answers station.machinefile.explain/v1: each value with its origin'
+env: two-macs
+runs:
+    - command: 'explain vm.network --machinefile base-ubuntu --json | /usr/bin/jq -r ''.schema, .machinefile, (.values[] | [.key, .value, .origin, .from] | @tsv)'''
+      exit: 0
+      stdout: |
+          station.machinefile.explain/v1
+          base-ubuntu
+          vm.network	nat	built-in	base-ubuntu
