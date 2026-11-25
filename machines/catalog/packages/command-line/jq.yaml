@@ -3,6 +3,9 @@ kind: app
 name: jq
 description: Command-line JSON processor
 provides: [jq]
+version-read:
+    args: [jq, --version]
+    pattern: jq-(\S+)
 methods:
     - os: macos
       brew: jq
