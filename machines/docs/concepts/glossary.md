@@ -2,12 +2,13 @@
 
 One word per concept, one concept per word: the words below are the only ones the code, the help, the docs and the output use for these concepts.
 
-| Section               | Answers                                            |
-| --------------------- | -------------------------------------------------- |
-| The words             | Every term, what it means, and the words it is not |
-| The words of the code | The architecture's words, in Go and the docs only  |
-| The verbs             | One verb per meaning, and which one destroys       |
-| Default names         | How a VM and a Mac get their name                  |
+| Section                      | Answers                                                  |
+| ---------------------------- | -------------------------------------------------------- |
+| The words                    | Every term, what it means, and the words it is not       |
+| The words of the Agent space | Agent, team, project, harness, Mind and the acts on them |
+| The words of the code        | The architecture's words, in Go and the docs only        |
+| The verbs                    | One verb per meaning, and which one destroys             |
+| Default names                | How a VM and a Mac get their name                        |
 
 Code identifiers follow the words (`Computer`, `VM`, `Lifetime`, `LivesOn`). A word listed as rejected never appears for that concept, and the words v3 retired are refused everywhere by `specs/architecture/banned_test.go`; every other page links here and defines nothing. The one spelling rule: `catalog`, in Go, in paths and in prose; a page that still says "catalogue" means the same word.
 
@@ -16,7 +17,8 @@ Code identifiers follow the words (`Computer`, `VM`, `Lifetime`, `LivesOn`). A w
 | Word                     | Means (one line)                                                                                                                                                                                                                                                                                                                                                                                                                                              | Rejected, and why                                                                                                  |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
 | **Machines**             | the app's name wherever a person reads it: the CLI's and the engine's words, the pages, the menu bar's panel and the docs; the menu bar app itself is **Spwn Menu** and the window **Spwn**                                                                                                                                                                                                                                                                   | `Station` (its name until 2026-11-20), Spwn Machines                                                               |
-| **station**              | the command and the binary of Machines, and every identifier named after it: its folders (`~/.config/station`), schemas (`station.*/v1`), variables (`STATION_*`) and launchd labels                                                                                                                                                                                                                                                                          | workstation (D0)                                                                                                   |
+| **spwn**                 | the one program and the one command a person types, whose grammar is [the CLI](../../../docs/reference/cli.md); until it is built, `station` runs the Machine space and the old `spwn` runs the Agent space ([ADR-021](../../../docs/decisions/021-one-program-spwn-one-command-for-everything.md))                                                                                                                                                           | `spwn-agents`, `spwn-machines`, and the aliases `agents` and `machines` (void since ADR-021)                       |
+| **station**              | until the one program is built, the command and the binary of Machines, and every identifier named after it: its folders (`~/.config/station`), schemas (`station.*/v1`), variables (`STATION_*`) and launchd labels                                                                                                                                                                                                                                          | workstation (D0)                                                                                                   |
 | **machine**              | any computer Machines knows: a Mac or a VM                                                                                                                                                                                                                                                                                                                                                                                                                    | node (Tailscale's word for a Mac's identity, below), box (slang), device (Apple's word for the iPhone)             |
 | **Mac**                  | a physical Mac the owner owns, the kind `computer` on the system macOS; it runs station and its engine, and may run VMs                                                                                                                                                                                                                                                                                                                                       | pilot/worker, client/server, role (every Mac is equal), metal, hypervisor (names the software)                     |
 | **Local Network**        | macOS's approval that lets Machines reach the devices of its Mac's local network, its VMs among them; a Mac that has not approved Machines leaves each VM unreachable, and the owner approves it on that Mac's screen or in System Settings > Privacy & Security > Local Network                                                                                                                                                                              | allowed, permitted, granted (the word is approved), Private/Public network (another setting)                       |
@@ -122,6 +124,24 @@ Code identifiers follow the words (`Computer`, `VM`, `Lifetime`, `LivesOn`). A w
 | **Progress**             | Machines' own work in progress, what a running call reports to its caller                                                                                                                                                                                                                                                                                                                                                                                     | a task (that word is a background task's)                                                                          |
 | **use**                  | `station use <machine>`: the machine this terminal's commands run on; `--on` names it for one command                                                                                                                                                                                                                                                                                                                                                         | switch, context                                                                                                    |
 
+## The words of the Agent space
+
+The words of Agents, the Spwn app that runs one agent, or a team with a chief and workers, in any harness. The grammar that carries them is [the CLI](../../../docs/reference/cli.md)'s; a command below is its form in that grammar, decided by [ADR-021](../../../docs/decisions/021-one-program-spwn-one-command-for-everything.md) and built command by command.
+
+| Word           | Means (one line)                                                                                                                                                                                  | Rejected, and why                                            |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| **agent**      | a persistent mind with a role, composed from skills and an identity; it runs on a machine: `spwn agents start neo --on linux-1`                                                                   | bot, assistant                                               |
+| **team**       | the declared grouping of agents, in the file; no command edits it for you                                                                                                                         | world (the grouping is the team's)                           |
+| **project**    | the folder holding `spwn.yaml` and `./spwn/`; a singleton that acts on the folder where it runs, so it refuses `--on`: `spwn project plan`                                                        | workspace                                                    |
+| **harness**    | the program an agent runs on, Claude Code or Codex; named by `--harness`                                                                                                                          | backend, runtime (the old flags `--backend` and `--runtime`) |
+| **Mind**       | what persists of an agent across its runs: its `SOUL.md`, `playbooks/` and `journal/`, on the machine the agent runs on                                                                           | memory bank                                                  |
+| **role**       | what an agent declares it is: `chief`, `manager`, `worker` or `npc`; a chief delegates, a worker has its own Mind, an npc has none                                                                |                                                              |
+| **skill**      | in the Agent space, a `SKILL.md` folder or a bare markdown file an agent is made of: `spwn skills`; the catalog sense is the `skill` row above                                                    |                                                              |
+| **automation** | a declared wake-up of one agent, on a cron tick or a filesystem event; the engine runs it: `spwn automations`                                                                                     | cron job, trigger                                            |
+| **given app**  | a catalog app an agent lists under `apps:`; it is a mask over its machine, and the machine is the wall ([ADR-022](../../../docs/decisions/022-an-agent-is-given-apps-its-machine-is-the-wall.md)) | injected program, dependency                                 |
+
+Three words still ship in the old Agent program and leave with it: **world** (the container an agent runs in; an agent will run on a machine), **dependency** and **architect**. [The domain model](../../../docs/concepts/domain-model.md) says what each is today, and defines nothing else.
+
 ## The words of the code
 
 The architecture has its own words, used in Go and in the docs, never in the interface ([Architecture](architecture.md)):
@@ -157,6 +177,16 @@ DESTROYED; `delete` is the only destroying machine verb), `start/stop/restart`
 (images), `free/erase` (Disk: `free` empties what can be rebuilt and asks
 nothing; `erase` deletes data, always named and confirmed), `share/stop-sharing`
 (ports; `ports share` reserves one and prints its URL).
+
+The Agent space's verbs come from the same table, with no new synonym:
+
+- `create/delete` (an agent: `delete` destroys its Mind, so it takes `--confirm=<name>`).
+- `start/stop/restart` (an agent's run on a machine; never destroys).
+- `edit` (an agent's or a project's file by flags: `--team`, `--harness`, `--app`, and their `--no-` forms).
+- `plan/apply/drift` (a Machinefile or a project's `spwn.yaml`: what would change, make it so, what diverged; `drift` refuses nothing).
+- `login/logout` (an account's sign-in).
+- `log` (what ran).
+- An agent's own acts: `talk` (a session), `dream` (analyze its experience, promote playbooks), `sleep` (tidy its Mind: stale playbooks archived, old journal files deleted, a dated summary written; it stops nothing), `fork` (clone it with everything it knows).
 
 ## Default names
 
