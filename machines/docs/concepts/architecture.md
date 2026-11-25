@@ -263,6 +263,7 @@ The binary holds the catalog; the machine holds its own state, in the XDG folder
 | `MachineStore`     | `machines`    | `~/.local/state/station/vms/`                                                                                                  |
 | `ImageStore`       | `images`      | `~/.local/state/station/images/`                                                                                               |
 | `BookStore`        | `accounts`    | `~/.local/state/station/vault.json`: the vault's entries and their grants, never a value                                       |
+| `Store`            | `devices`     | `~/.local/state/station/devices.json`: the device book, each entry sealed by this Mac's device key                             |
 | `ReservationStore` | `ports`       | `~/.local/state/station/leases.json`                                                                                           |
 | `AppliedStore`     | `settings`    | `~/.local/state/station/applied/`                                                                                              |
 | `Ledger`           | `machinefile` | `~/.local/state/station/ledger.json`: what `apply` installed and the `~/.zshrc` blocks it wrote, which bounds `apply --remove` |

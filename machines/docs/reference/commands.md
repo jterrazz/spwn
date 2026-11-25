@@ -5,7 +5,7 @@ Every command of `station`, grouped as `station help` groups them. The words are
 | Section                   | Answers                                                                                                       |
 | ------------------------- | ------------------------------------------------------------------------------------------------------------- |
 | Rules                     | What holds for every command                                                                                  |
-| Machines                  | `machines`, `journal`                                                                                         |
+| Machines                  | `machines`, `journal`, `devices`                                                                              |
 | On a machine              | `overview`, `activity`, `apps`, `settings`, `disk`, `ports`, `accounts`, `background`, `awake`, `machinefile` |
 | A Mac's images and engine | `images`, `engine`                                                                                            |
 | This terminal             | `use`                                                                                                         |
@@ -63,6 +63,16 @@ station journal --on <mac> [--json] # that Mac and its VMs alone
 ```
 
 The last seven days of every Mac's journal, newest first: a section per day, a night's upgrade apart from its day with what it moved summed, each line with its time, the machines it concerns and who did it; then the Macs not heard from, each with why. With `--on`, one Mac's lines and its VMs', unsummed. `--json` prints `station.journal.read/v1`. A VM keeps no journal, so it is refused there. See [Journal](journal.md).
+
+### `station devices`
+
+```sh
+station devices [--json] # this Mac's own key, then the other devices it lets reach it and its VMs
+station devices add <name> <public key> [--channels spwn-api,pipe,herdr]
+station devices forget <name> [--confirm=<name>]
+```
+
+The device book of this Mac, or with `--on` another Mac's; it reads with the engine down. `add` asks for you at this Mac every time and is refused from another machine (`devices.add-here-only`, exit 2); refused or with nobody to ask, it exits 1 and writes nothing. `forget` asks no presence and works with `--on`. An entry whose seal broke is listed apart with the command that adds it again. `--json` prints `station.devices.list/v1`. A VM keeps no book, so it is refused there. See [Machines](machines.md#the-device-book).
 
 ## On a machine
 
