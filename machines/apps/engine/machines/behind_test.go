@@ -71,3 +71,19 @@ func TestBehindFollowsTheSkewOfTheReleases(t *testing.T) {
 		}
 	}
 }
+
+func TestTwoDifferentBuildsOfNoReleaseAreToldAndOneBuildIsNot(t *testing.T) {
+	same := "run the same build on both Macs"
+	for _, c := range []struct{ peer, own, fix string }{
+		{"dry-run-34e7dd4", "dry-run-64344f5", same},
+		{"dev", "dry-run-64344f5", same},
+		{"dry-run-64344f5", "dry-run-64344f5", ""},
+		{"dev", "dev", ""},
+		{"", "dry-run-64344f5", ""},
+	} {
+		fix, ok := Behind(MacView{StationVersion: c.peer}, c.own)
+		if fix != c.fix || ok != (c.fix != "") {
+			t.Errorf("Behind(%q here, %q there) = %q, %v; want %q", c.own, c.peer, fix, ok, c.fix)
+		}
+	}
+}

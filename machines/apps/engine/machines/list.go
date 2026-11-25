@@ -112,12 +112,28 @@ func Behind(h MacView, thisMac string) (fix string, differs bool) {
 	}
 	switch SkewOf(thisMac, h.StationVersion) {
 	case Speaks:
+		if buildsDiffer(thisMac, h.StationVersion) {
+			return "run the same build on both Macs", true
+		}
 		return "", false
 	case HereBehind:
 		return "update station here (" + catalog.InstallLine + ")", true
 	case FarBehind:
 	}
 	return "update station there (" + catalog.InstallLine + ")", true
+}
+
+// invariant: two builds of no release serve each other whatever they are,
+// but a Mac on another build than this one is told, since neither is known
+// to be the older: a release is judged by its own order.
+func buildsDiffer(own, peer string) bool {
+	if _, release := releaseOf(own); release {
+		return false
+	}
+	if _, release := releaseOf(peer); release {
+		return false
+	}
+	return own != peer
 }
 
 func Findings(f AllMachines) []finding.Finding {
