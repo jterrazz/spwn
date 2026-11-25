@@ -5,6 +5,7 @@ import (
 	"errors"
 	iofs "io/fs"
 	"path"
+	"regexp"
 	"strconv"
 	"strings"
 	"sync"
@@ -65,6 +66,11 @@ func (h *hypervisor) Boot(ctx context.Context, vm string, o contract.BootOptions
 	}
 	// invariant: tart opens --serial-path for reading and writing and refuses to run when the file is missing.
 	if err := h.fs.WriteFile(console, nil, 0o600); err != nil {
+		return nil, err
+	}
+	// invariant: the hypervisor's log is one run's, as the console is: a log
+	// that kept every run told the stops of runs long over after the console's lines.
+	if err := h.fs.WriteFile(h.files.log(vm), nil, 0o600); err != nil {
 		return nil, err
 	}
 	_ = h.fs.Remove(h.files.exit(vm))
@@ -206,6 +212,10 @@ func (h *hypervisor) reasonOf(vm string) machines.RunEnd {
 	return machines.RunEnd{Reason: machines.Crashed, ExitCode: code}
 }
 
+// invariant: a console line is text: the colors and cursor moves a guest's
+// terminal writes are left out, so a pipe reads words.
+var escapes = regexp.MustCompile(`\x1b\[[0-9;?]*[\x20-\x2f]*[\x40-\x7e]`)
+
 func (h *hypervisor) Console(_ context.Context, vm string, n int) ([]string, error) {
 	var out []string
 	for _, file := range []string{h.files.console(vm), h.files.log(vm)} {
@@ -218,7 +228,7 @@ func (h *hypervisor) Console(_ context.Context, vm string, n int) ([]string, err
 		}
 		var kept []string
 		for _, line := range strings.Split(string(data), "\n") {
-			if line = strings.TrimRight(line, "\r"); machines.Meaningful(line) && strings.TrimSpace(line) != poweroffIntent {
+			if line = escapes.ReplaceAllString(strings.TrimRight(line, "\r"), ""); machines.Meaningful(line) && strings.TrimSpace(line) != poweroffIntent {
 				kept = append(kept, line)
 			}
 		}

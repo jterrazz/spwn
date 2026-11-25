@@ -1,0 +1,11 @@
+description: 'disk and background say their --all unfolds a terminal, and that a pipe already lists every row'
+env: two-macs
+runs:
+    - command: 'disk --help | /usr/bin/grep -c "on a terminal (a pipe lists every row already)"'
+      exit: 0
+      stdout: |
+          1
+    - command: 'background --help | /usr/bin/grep -c "on a terminal (a pipe lists every row already)"'
+      exit: 0
+      stdout: |
+          1

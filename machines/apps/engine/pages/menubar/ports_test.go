@@ -419,7 +419,7 @@ func TestAVMsQuietListenersAreOneLineOfItsCard(t *testing.T) {
 	f := ports.AllMachines{Macs: []ports.MacPorts{{Name: proMac, ThisMac: true, Reachable: true, HTTPS: ports.HTTPSOff, Quiet: []ports.Quiet{{VM: "linux-1", Count: 3}}}}}
 	p := fleetPorts(t, f, PortsOf{})
 	rows := rowsOf(p, SectionPrivate)
-	if len(rows) != 1 || rows[0].Label != "3 listeners on ports the system keeps for itself" || words(rows[0].Detail) != "station ports share linux-1 <port> to share one" {
+	if len(rows) != 1 || rows[0].Label != "3 listeners on short-lived ports" || words(rows[0].Detail) != "station ports share linux-1 <port> to share one" {
 		t.Fatalf("rows %+v", rows)
 	}
 }

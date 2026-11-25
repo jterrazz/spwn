@@ -151,7 +151,7 @@ func RestartConfirm(kind machine.Kind) confirm.Action {
 }
 
 type LogOut struct {
-	// value: SPEC B5.5: every meaningful line the VM's runs wrote, its
+	// value: SPEC B5.5: every meaningful line the VM's last run wrote, its
 	// console's then its hypervisor's own.
 	Lines []string
 }

@@ -46,6 +46,14 @@ const (
 
 func (r Reservation) Owned() bool { return r.By == ByOwner }
 
+func (r Reservation) Fleeting() bool {
+	// invariant: a lease its VM's rights made for a listener, no owner chose
+	// it, and never heard again after the report that made it: a listener that
+	// passed through, which keeps no URL worth a week. One made for a package's
+	// env has no last_seen_at at all and is never fleeting.
+	return r.By == ByRights && r.Chosen == "" && !r.LastSeenAt.IsZero() && !r.LastSeenAt.After(r.ReservedAt)
+}
+
 type Declaration struct {
 	// value: a port of a machine declared public, and the route that reaches it.
 	Machine string `json:"machine"`

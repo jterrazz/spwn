@@ -93,6 +93,24 @@ func TestStateAShimThatAnswersIsDegraded(t *testing.T) {
 	}
 }
 
+func TestStateTheJqMacOSShipsIsPresentNotAbsent(t *testing.T) {
+	cat, err := catalog.Builtin()
+	if err != nil {
+		t.Fatal(err)
+	}
+	jq, ok := cat.App("jq")
+	if !ok {
+		t.Fatal("the catalog has no jq")
+	}
+	m := machine{paths: map[string]string{"jq": "/usr/bin/jq"}, probes: map[string]probed{"/usr/bin/jq --version": {"jq-1.7.1\n", 0}}}
+
+	got := reportOf(t, jq, &fake.State{Absent: true}, m)
+
+	if got.State != catalog.StateDegraded || got.Version != "1.7.1" {
+		t.Fatalf("report %+v, want the system's jq 1.7.1 present beside its manager", got)
+	}
+}
+
 func TestStateAManagerHoldsWhatNoAppOfTheCatalogInstalls(t *testing.T) {
 	// invariant: what a manager's methods list beyond the catalog's own
 	// apps is the owner's, by key; a list that cannot be read is unread.

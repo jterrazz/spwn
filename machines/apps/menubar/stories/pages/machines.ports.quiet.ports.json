@@ -156,7 +156,7 @@
           "row": {
             "id": "linux-1:quiet",
             "mark": "attention",
-            "label": "3 listeners on ports the system keeps for itself",
+            "label": "3 listeners on short-lived ports",
             "detail": {
               "kind": "text",
               "text": "station ports share linux-1 <port> to share one"

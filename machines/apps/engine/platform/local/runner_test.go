@@ -134,3 +134,42 @@ func TestAChildGivenAnEnvironmentHasItAloneAndIsFoundOnItsPath(t *testing.T) {
 		t.Errorf("the child printed %q (%v); want %q", out.Stdout, err, want)
 	}
 }
+
+func TestALogPastItsCapIsKeptAsItsPreviousGenerationAndStartedAgain(t *testing.T) {
+	dir := t.TempDir()
+	log := filepath.Join(dir, "station-build-linux.log")
+	old := bytes.Repeat([]byte("x"), logCap+1)
+	if err := os.WriteFile(log, old, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, "station-build-linux.1.log"), []byte("older"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	files, err := appendTo([]string{log})
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, _ = files.writer().Write([]byte("new run\n"))
+	files.close()
+	if got, _ := os.ReadFile(log); string(got) != "new run\n" {
+		t.Errorf("the log reads %d bytes, want the new run's line alone", len(got))
+	}
+	if got, _ := os.ReadFile(filepath.Join(dir, "station-build-linux.1.log")); !bytes.Equal(got, old) {
+		t.Errorf("the previous generation holds %d bytes, want the %d of the log it replaced", len(got), len(old))
+	}
+}
+
+func TestALogUnderItsCapIsAppendedToAsBefore(t *testing.T) {
+	log := filepath.Join(t.TempDir(), "claude.log")
+	for _, line := range []string{"first\n", "second\n"} {
+		files, err := appendTo([]string{log})
+		if err != nil {
+			t.Fatal(err)
+		}
+		_, _ = files.writer().Write([]byte(line))
+		files.close()
+	}
+	if got, _ := os.ReadFile(log); string(got) != "first\nsecond\n" {
+		t.Errorf("the log reads %q, want both runs", got)
+	}
+}

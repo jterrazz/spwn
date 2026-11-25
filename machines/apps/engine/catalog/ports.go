@@ -8,11 +8,11 @@ import (
 type PortDefaults struct {
 	RangeLow, RangeHigh, MaxPerVM int
 	HTTPS                         string
-	Idle, Grace                   time.Duration
+	Idle, FleetingIdle, Grace     time.Duration
 }
 
 var PortPolicy = PortDefaults{
-	RangeLow: 40000, RangeHigh: 40999, MaxPerVM: 20, HTTPS: "port", Idle: 7 * 24 * time.Hour, Grace: 5 * time.Second,
+	RangeLow: 40000, RangeHigh: 40999, MaxPerVM: 20, HTTPS: "port", Idle: 7 * 24 * time.Hour, FleetingIdle: time.Hour, Grace: 5 * time.Second,
 }
 
 // value: the lowest port that is not the system's: a VM's guest reports a
@@ -66,25 +66,25 @@ func NotSharedWords(n int) string {
 	return strconv.Itoa(n) + " ports not shared"
 }
 
-// value: the one line that tells a VM's listeners on the
-// ports its system keeps for itself, which nothing shares by itself, and how to share one.
+// value: the one line that tells a VM's listeners on short-lived ports,
+// which nothing shares by itself, and how to share one.
 
 func QuietWords(n int) string {
 	if n == 1 {
-		return "1 listener on a port the system keeps for itself"
+		return "1 listener on a short-lived port"
 	}
-	return strconv.Itoa(n) + " listeners on ports the system keeps for itself"
+	return strconv.Itoa(n) + " listeners on short-lived ports"
 }
 
 var StoppedByYou = []string{"stopped by you", "stays closed until you share it again"} // value: a port the owner stopped sharing, as its row says it.
 
 func QuietHere(n int) string {
-	// value: a Mac's own listeners on ports the system keeps for itself, a
+	// value: a Mac's own listeners on short-lived ports, a
 	// count beside the reserved ports: a Mac's port is never shared.
 	if n == 1 {
-		return "1 more listens on a port the system keeps for itself"
+		return "1 more listens on a short-lived port"
 	}
-	return strconv.Itoa(n) + " more listen on ports the system keeps for itself"
+	return strconv.Itoa(n) + " more listen on short-lived ports"
 }
 
 func QuietHow(vm string) string { return "station ports share " + vm + " <port> to share one" }

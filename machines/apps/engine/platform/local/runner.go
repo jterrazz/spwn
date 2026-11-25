@@ -297,14 +297,33 @@ func (h *heard) Write(p []byte) (int, error) {
 
 type logFiles struct{ files []*os.File }
 
+// value: the size past which a log is kept as its previous generation and
+// started again, a log the next run would otherwise grow for ever.
+const logCap = 1 << 20
+
+func previousLog(p string) string {
+	if base, ok := strings.CutSuffix(p, ".log"); ok {
+		return base + ".1.log"
+	}
+	return p + ".1"
+}
+
 // invariant: a log is appended to, never truncated, and created owner-only
-// with its folder, so a second run keeps what the first one said.
+// with its folder, so a second run keeps what the first one said; one past
+// logCap when a run opens it becomes its previous generation, the one before
+// that gone, so a log is never more than two generations on disk.
 func appendTo(paths []string) (logFiles, error) {
 	var l logFiles
 	for _, p := range paths {
 		if err := os.MkdirAll(filepath.Dir(p), 0o700); err != nil {
 			l.close()
 			return logFiles{}, err
+		}
+		if info, err := os.Stat(p); err == nil && info.Size() > logCap {
+			if err := os.Rename(p, previousLog(p)); err != nil {
+				l.close()
+				return logFiles{}, err
+			}
 		}
 		f, err := os.OpenFile(p, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o600)
 		if err != nil {
