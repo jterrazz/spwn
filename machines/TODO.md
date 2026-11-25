@@ -379,6 +379,31 @@ relays every key it does not hold. The door ([ADR-090](docs/decisions/090-a-mach
   `station devices` shows each device's last connection.
 - **The relay goes** (`Agent.relay`, `keyring.upstream`, `wire.sessionAgent`) once no Mac-to-Mac OpenSSH remains.
 
+## The device book's security lots (review of 2026-11-26)
+Three holes a process running code as the owner opens, each its own lot ([ADR-092](docs/decisions/092-a-machines-device-book-says-who-may-reach-it.md), "What the seal is worth").
+
+- **The anchor moved forward.** `jsonfile.Store.read` believes any anchor generation at or above the one it
+  holds, so a process that runs `security` writes a book mixing entries this Mac once sealed (a forgotten
+  device's included) at a higher generation, with its head, and the running engine sends that key to every
+  VM. "Believe only the engine's own writes" does not hold as such: `devices add` and `forget` are
+  `in-engine` calls that the CLI runs in its own process (the Router's engine row is set by no
+  production caller, and `router_test.go` pins an `in-engine` call for this machine to this process), so
+  the CLI writes the book while the engine runs. Either they go through `engine.sock` (the
+  `engineAPI` client exists) and the engine trusts only its own writes, or each entry's seal binds the
+  generation of its add and a running engine believes a newer book only when every entry is one it held
+  or was sealed past its generation. Either way the owner is told "the device book changed outside Spwn".
+  Across an engine restart a book of old entries is still trusted until the item is written through the
+  Security framework by the signed engine, with an access list that leaves `/usr/bin/security` out,
+  which needs the engine to be a child of the signed app (the one-app lots).
+- **A device key blob of any access.** `machines/adapter/macos/devicekey.go` loads whatever
+  `device-key.enclave` holds and `enclave.swift` opens it without reading its access control, so a key the
+  attacker made with none becomes this Mac's own at the next engine start. The fix: refuse at load a blob
+  whose access control is not the one the Mac's Never sleeps asks, and anchor the device key's public half.
+- **`security` by its absolute path.** The anchor and the vault exec `security` through PATH
+  (`devices/adapter/keychain/anchor.go`, `accounts/adapter/keychain/keychain.go`). `/usr/bin/security`
+  needs the adapter specs' stub (found on PATH today, `.calls` asserting `security -i`) reached another
+  way, then a conformance rule that no adapter execs a bare `security`.
+
 ## Network isolation
 Tart Softnet for VMs that need no LAN. Until then a VM behind its Mac reaches
 what its Mac binds on every interface, and the other VMs of its Mac (sshd,
