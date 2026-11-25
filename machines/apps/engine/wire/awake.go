@@ -98,8 +98,9 @@ func awakeCommand(env kit.Env, m machine) *cobra.Command {
 }
 
 // invariant: This Mac first, then every other Mac that answers, each Mac's
-// own Awake through its engine; a Mac that does not answer is said so, and
-// This Mac's own refusal is the command's.
+// own Awake through its engine, under the name This Mac added it by; a Mac
+// that does not answer is said so, and This Mac's own refusal is the
+// command's.
 func (m machine) everyMacAwake(ctx context.Context, env kit.Env) (pageawake.AllMachines, error) {
 	f := pageawake.AllMachines{Now: m.sys.Clock.Now(), Zone: time.Local, This: m.where.Machine}
 	thisMac, err := call.Read(ctx, env.Calls, env.Self, awakecalls.Read, awakecalls.ReadIn{}, nil)
@@ -118,7 +119,9 @@ func (m machine) everyMacAwake(ctx context.Context, env kit.Env) (pageawake.AllM
 			f.Silent = append(f.Silent, silentAwake(known.Seen, mac, err))
 			continue
 		}
-		f.Reports = append(f.Reports, got[mac].Value)
+		r := got[mac].Value
+		r.Mac = mac
+		f.Reports = append(f.Reports, r)
 	}
 	return f, nil
 }

@@ -1,0 +1,13 @@
+description: 'a Mac whose engine goes by another name is listed awake under the name This Mac added it by'
+env: far-self-named
+runs:
+    - command: 'awake'
+      exit: 0
+      stdout: |
+          ○	macbook-pro	Sleeps normally
+          ●	mac-mini	Never sleeps · always-on Mac policy	last slept: never in 12d 1h · hosts infra (server)
+          # This Mac
+          lid	open
+          power source	AC · 96 % · charging
+          thermal	nominal
+          screen	always turns off
