@@ -1,0 +1,23 @@
+description: 'a Mac whose engine goes by another name has its lines read under the name This Mac added it by'
+env:
+    - far-self-named
+    - engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["mac-mini"].stores.journal = [{"At":"2026-11-04T03:00:00Z","Machine":"mac-001","Text":"node","Detail":"","By":"the night","Outcome":"done","Subject":{"Kind":"app","Name":"node"},"Upgrade":{"From":"24.11.0","To":"24.11.1"},"Night":"2026-11-04T03:00:00Z"},{"At":"2026-11-04T03:01:00Z","Machine":"mac-001","Text":"ripgrep","Detail":"download timed out","By":"the night","Outcome":"failed","Subject":{"Kind":"app","Name":"ripgrep"},"Night":"2026-11-04T03:00:00Z","Retry":{"Call":"apps.update","Args":{"Names":"ripgrep"},"On":"mac-001"}},{"At":"2026-11-04T08:00:00Z","Machine":"infra","Text":"infra restarted","Detail":"","By":"you","Outcome":"done","Subject":{"Kind":"machine","Name":"infra"}}]'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''[.out.Groups[] | {t: .Title, l: [.Lines[] | {t: .Text, on: .On, r: .Retry.On}]}], .out.Unheard'''
+      stdin: |
+          {"v":2,"id":"1","call":"journal.read","target":{},"in":{}}
+      exit: 0
+      stdout: |
+          [{"t":"Today","l":[{"t":"infra restarted","on":["infra"],"r":null}]},{"t":"Last night","l":[{"t":"ripgrep","on":["mac-mini"],"r":"mac-mini"},{"t":"node","on":["mac-mini"],"r":null}]}]
+          null
+    - command: 'journal --on mac-mini'
+      exit: 0
+      stdout: |
+          	On mac-mini:
+          # Today
+          ●	infra restarted	08:00	infra	you
+          # Last night
+          ✗	ripgrep	03:01	mac-mini		download timed out
+          ●	node	03:00	mac-mini		24.11.0 to 24.11.1

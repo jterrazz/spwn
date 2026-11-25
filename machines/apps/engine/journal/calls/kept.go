@@ -19,6 +19,9 @@ type KeptIn struct {
 type KeptOut struct {
 	// value: this Mac's lines, newest first.
 	Lines []journal.Line
+	// value: the name this Mac's engine goes by, the one its own lines name
+	// it by; the asker reads them under the name it added this Mac by.
+	Mac string `json:",omitempty"`
 }
 
 var Kept = call.Call[Deps, KeptIn, KeptOut]{
@@ -29,6 +32,6 @@ var Kept = call.Call[Deps, KeptIn, KeptOut]{
 		if err != nil {
 			return KeptOut{}, coded(err)
 		}
-		return KeptOut{Lines: journal.Kept(lines, d.Now())}, nil
+		return KeptOut{Lines: journal.Kept(lines, d.Now()), Mac: d.Self}, nil
 	},
 }

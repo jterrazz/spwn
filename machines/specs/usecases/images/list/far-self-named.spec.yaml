@@ -1,0 +1,15 @@
+description: 'a Mac whose engine goes by another name lists its images under the name This Mac added it by'
+env: far-self-named
+runs:
+    - command: 'images'
+      exit: 0
+      stdout: |
+          ●	base-ubuntu	2026.11.01	4.0 GB	macbook-pro	api · linux-1
+          ○	base-ubuntu	2026.10.20	3.0 GB	macbook-pro	older · station images delete base-ubuntu@2026.10.20
+          ●	base-ubuntu	2026.11.01	4.0 GB	mac-mini	infra
+          ○	base-debian				not built yet
+          ○	base-macos				not fetched yet · station images update base-macos
+    - command: 'images --json | /usr/bin/jq -c ''[.images[].mac] | unique'''
+      exit: 0
+      stdout: |
+          ["mac-mini","macbook-pro"]

@@ -24,7 +24,7 @@ func journalCommand(env kit.Env, m machine) *cobra.Command {
 }
 
 func (m machine) journalDeps() journalcalls.Deps {
-	return journalcalls.Deps{Journal: m.stores.journal, Now: m.sys.Clock.Now, Macs: journalMacs{m}, Known: knownTo(m.cat)}
+	return journalcalls.Deps{Journal: m.stores.journal, Now: m.sys.Clock.Now, Self: m.thisMac(), Macs: journalMacs{m}, Known: knownTo(m.cat)}
 }
 
 // invariant: a gesture that ran is kept on This Mac's journal: one that
@@ -59,7 +59,7 @@ func (j journalMacs) Kept(ctx context.Context, macs []string, in journalcalls.Ke
 		if err == nil && out.Lines == nil {
 			out.Lines = []corejournal.Line{}
 		}
-		return out.Lines, err
+		return relabeled(out, mac), err
 	})
 	out := make(map[string]journalcalls.Answer, len(macs))
 	for mac, a := range got {
@@ -85,4 +85,24 @@ func knownTo(cat catalog.Catalog) func(corejournal.Subject) bool {
 		}
 		return slices.ContainsFunc(cat.Apps, func(c catalog.App) bool { return c.Name == s.Name })
 	}
+}
+
+// invariant: another Mac's own lines read under the name This Mac added it
+// by, whatever name its engine goes by: the Mac a line concerns and the
+// Mac its retry runs on; a line of one of its VMs stands as it came.
+func relabeled(out journalcalls.KeptOut, mac string) []corejournal.Line {
+	if out.Mac == "" || out.Mac == mac {
+		return out.Lines
+	}
+	for i, l := range out.Lines {
+		if l.Machine == out.Mac {
+			out.Lines[i].Machine = mac
+		}
+		if l.Retry != nil && l.Retry.On == out.Mac {
+			retry := *l.Retry
+			retry.On = mac
+			out.Lines[i].Retry = &retry
+		}
+	}
+	return out.Lines
 }
