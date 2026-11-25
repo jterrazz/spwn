@@ -1,4 +1,0 @@
-
-  WORLD             NAME         SIZE{{string}}CREATED   
-  world-neo-{{hex}}   round-trip   {{string}}{{duration}} ago{{string}}
-

@@ -569,14 +569,6 @@ func (d *Docker) ExecDetached(ctx context.Context, containerID string, cfg ExecC
 	return err
 }
 
-func (d *Docker) Commit(ctx context.Context, containerID string, imageTag string) error {
-	_, err := d.client.ContainerCommit(ctx, containerID, client.ContainerCommitOptions{
-		Reference: imageTag,
-		Comment:   "spwn world snapshot",
-	})
-	return err
-}
-
 func (d *Docker) ImageList(ctx context.Context, prefix string) ([]ImageInfo, error) {
 	images, err := d.client.ImageList(ctx, client.ImageListOptions{})
 	if err != nil {

@@ -13,7 +13,6 @@ type Type string
 const (
 	TypeWorldSpawned     Type = "world.spawned"
 	TypeWorldDestroyed   Type = "world.destroyed"
-	TypeWorldSnapshot    Type = "world.snapshot"
 	TypeWorldStateChange Type = "world.state_changed"
 	TypeAgentCreated     Type = "agent.created"
 	TypeAgentDeleted     Type = "agent.deleted"

@@ -427,7 +427,7 @@ Trigger-driven agent wakeups (cron + filesystem).
 
 ```text
 Automations bind a trigger (cron expression or filesystem watch)
-to one of your project's agents. The architect daemon fires them as
+to one of your project's agents. The command "spwn automation daemon" fires them as
 events arrive and writes a receipt for every dispatch.
 ```
 
@@ -976,12 +976,10 @@ Manage worlds - ephemeral runtime instances for agents.
 - [spwn world create](#spwn-world-create): Declare a new world in spwn.yaml.
 - [spwn world enter](#spwn-world-enter): Open an interactive shell inside a running world.
 - [spwn world inspect](#spwn-world-inspect): Inspect a running world - agents, workspaces, status.
-- [spwn world knowledge](#spwn-world-knowledge): Read a world's shared knowledge.
 - [spwn world list](#spwn-world-list): List declared worlds and their running status.
 - [spwn world logs](#spwn-world-logs): Show the event log for a specific world.
 - [spwn world rename](#spwn-world-rename): Rename a world (omit name to clear).
 - [spwn world rm](#spwn-world-rm): Remove a world declaration from spwn.yaml.
-- [spwn world snap](#spwn-world-snap): World snapshots - save, ls, restore, rm.
 
 ## spwn world create
 
@@ -1024,35 +1022,6 @@ Inspect a running world - agents, workspaces, status.
 
 ```text
 spwn world inspect <world-id>
-```
-
-## spwn world knowledge
-
-Read a world's shared knowledge.
-
-```text
-Each world carries its own knowledge base at /world/knowledge/ inside the
-container - shared notes, decisions, and context for the agents working there.
-Knowledge is per-world; destroy the world and its knowledge goes with it.
-```
-
-- [spwn world knowledge ls](#spwn-world-knowledge-ls): List all knowledge files in a world.
-- [spwn world knowledge show](#spwn-world-knowledge-show): Show the contents of a knowledge file.
-
-## spwn world knowledge ls
-
-List all knowledge files in a world.
-
-```text
-spwn world knowledge ls <world-id>
-```
-
-## spwn world knowledge show
-
-Show the contents of a knowledge file.
-
-```text
-spwn world knowledge show <world-id> <path>
 ```
 
 ## spwn world list
@@ -1108,67 +1077,4 @@ preserved. Other worlds may still reference them.
 
 ```text
 spwn world rm <name>
-```
-
-## spwn world snap
-
-World snapshots - save, ls, restore, rm.
-
-```text
-Save, list, restore, and remove world snapshots.
-```
-
-```text
-spwn world snap
-```
-
-- [spwn world snap ls](#spwn-world-snap-ls): List all snapshots.
-- [spwn world snap restore](#spwn-world-snap-restore): Restore a world from a snapshot.
-- [spwn world snap rm](#spwn-world-snap-rm): Remove a snapshot.
-- [spwn world snap save](#spwn-world-snap-save): Save world state as a snapshot.
-
-## spwn world snap ls
-
-List all snapshots.
-
-```text
-spwn world snap ls
-```
-
-## spwn world snap restore
-
-Restore a world from a snapshot.
-
-```text
-Creates a new world from a previously saved snapshot. The snapshot format is: w-{id}--{name}
-```
-
-```text
-spwn world snap restore <snapshot> [flags]
-```
-
-```text
-  -a, --agent string            Agent name (omit for an empty world)
-  -c, --config string           Named world config (default: default)
-  -w, --workspace stringArray   Host dir to mount. Repeatable: "path", "name=path", "name=path:ro". Omit for ephemeral.
-```
-
-## spwn world snap rm
-
-Remove a snapshot.
-
-```text
-spwn world snap rm <snapshot>
-```
-
-## spwn world snap save
-
-Save world state as a snapshot.
-
-```text
-spwn world snap save <world-id> [flags]
-```
-
-```text
-      --name string   Name for the snapshot
 ```

@@ -143,11 +143,3 @@ runs:
       files:
           spwn-home: absent
           empty-home/.spwn: absent
-
-    - command: world snap ls
-      exit: 0
-      stderr: |4
-            ✓ No snapshots.
-      files:
-          spwn-home: absent
-          empty-home/.spwn: absent

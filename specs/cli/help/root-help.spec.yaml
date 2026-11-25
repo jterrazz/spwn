@@ -14,7 +14,7 @@ runs:
 
           Entities:
             agent                            Composed minds (create, ls, inspect, fork, talk)
-            world                            Deployable groupings (list, inspect, enter, snap)
+            world                            Deployable groupings (list, inspect, enter)
 
           Building blocks:
             install <ref>                    Install a dependency (spwn:unix, github.com/...)

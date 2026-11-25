@@ -138,8 +138,3 @@ func PhraseSessionEnded(agentName, worldID, uptime, outcome string) string {
 	}
 	return fmt.Sprintf("%s %s in %s after %s", agentName, verb, world, uptime)
 }
-
-// PhraseWorldSnapshot: "Saturn saved as snapshot-12345"
-func PhraseWorldSnapshot(worldID, snapshotName string) string {
-	return fmt.Sprintf("%s saved as %s", extractName(worldID), snapshotName)
-}

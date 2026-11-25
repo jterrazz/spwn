@@ -80,7 +80,7 @@ func TestCLI_WorldHelpGrouped(t *testing.T) {
 	}
 
 	// Should show grouped sections
-	for _, section := range []string{"Lifecycle:", "Observe:", "Knowledge:"} {
+	for _, section := range []string{"Lifecycle:", "Observe:"} {
 		assertContains(t, out, section, "world help sections")
 	}
 }
@@ -142,7 +142,7 @@ func TestCLI_WorldListHelp(t *testing.T) {
 	// Should show list-specific help, NOT the grouped world help
 	assertContains(t, out, "list", "world list help")
 	// Should NOT contain the section headers from grouped help
-	if strings.Contains(out, "Snapshots:") {
+	if strings.Contains(out, "Observe:") {
 		t.Error("world list --help should show list help, not parent grouped help")
 	}
 }

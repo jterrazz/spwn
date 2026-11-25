@@ -84,7 +84,7 @@ Then add a blank import to `packages/runtimes/defaults/defaults.go`, which is wh
 - **Errors read as two lines**: `error: lowercase message.\nActionable hint.`
 - **Types avoid stutter**: `world.World`, not `world.WorldInstance`; `agent.Info`, not `agent.AgentInfo`. The package name already carries the context.
 - **Domain modules own all business logic**; a surface is a wrapper.
-- **Commit messages are imperative and lowercase**, prefixed by the kind of change: `feat: add world snapshot restore`, `fix: agent talk skips dead containers`, `test: add messaging inbox E2E specs`, `docs: update CLI reference`.
+- **Commit messages are imperative and lowercase**, prefixed by the kind of change: `feat: add world rename`, `fix: agent talk skips dead containers`, `test: add messaging inbox E2E specs`, `docs: update CLI reference`.
 
 ## What a change owes
 

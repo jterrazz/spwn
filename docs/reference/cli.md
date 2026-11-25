@@ -116,7 +116,6 @@ spwn skill new|edit|show|rm <name>             # bare-markdown skill authoring
 spwn world list               # list running worlds
 spwn world inspect <id>       # inspect a running world
 spwn world enter   <id>       # interactive shell inside the world
-spwn world snap save|ls|restore|rm   # world snapshots
 
 # ── Automations ──────────────────────────────────────────────────
 spwn automation ls            # list declared automations + last-fired

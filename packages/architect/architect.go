@@ -3,9 +3,7 @@ package architect
 import (
 	"context"
 	"fmt"
-	"time"
 
-	"spwn.sh/packages/activity"
 	"spwn.sh/packages/container/backend"
 	"spwn.sh/packages/world/models"
 	"spwn.sh/packages/world/runtimestate"
@@ -72,50 +70,6 @@ func (a *Architect) Inspect(ctx context.Context, worldID string) (*models.World,
 // empty name clears the override and restores the label default.
 func (a *Architect) Rename(ctx context.Context, worldID, name string) error {
 	return a.rstate.SetDisplayName(worldID, name)
-}
-
-// Snapshot commits the current state of a world's container as a Docker image.
-func (a *Architect) Snapshot(ctx context.Context, worldID, name string) (string, error) {
-	u, err := a.rstate.Get(worldID)
-	if err != nil {
-		return "", fmt.Errorf("world %s not found.\nRun 'spwn list' to see active worlds", worldID)
-	}
-
-	tag := fmt.Sprintf("spwn-snapshot:%s--%s", worldID, name)
-	if name == "" {
-		tag = fmt.Sprintf("spwn-snapshot:%s--%s", worldID, time.Now().Format("2006-01-02T15-04"))
-	}
-
-	if err := a.backend.Commit(ctx, u.ContainerID, tag); err != nil {
-		return "", fmt.Errorf("snapshot failed: %w", err)
-	}
-
-	activity.Log(activity.Event{
-		Type:    activity.TypeWorldSnapshot,
-		Actor:   "user",
-		Verb:    "snapshotted",
-		Target:  worldID,
-		Phrase:  activity.PhraseWorldSnapshot(worldID, tag),
-		WorldID: worldID,
-	})
-
-	return tag, nil
-}
-
-// ListSnapshots returns all snapshot images.
-func (a *Architect) ListSnapshots(ctx context.Context) ([]backend.ImageInfo, error) {
-	return a.backend.ImageList(ctx, "spwn-snapshot:")
-}
-
-// RestoreSnapshot creates a new world from a snapshot image.
-func (a *Architect) RestoreSnapshot(ctx context.Context, snapshotTag string, opts SpawnOpts) (*SpawnResult, error) {
-	opts.Image = snapshotTag
-	return a.Spawn(ctx, opts)
-}
-
-// DeleteSnapshot removes a snapshot image.
-func (a *Architect) DeleteSnapshot(ctx context.Context, snapshotTag string) error {
-	return a.backend.ImageRemove(ctx, snapshotTag)
 }
 
 // Attach opens an interactive shell into a running world.

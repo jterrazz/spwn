@@ -90,8 +90,6 @@ type Backend interface {
 	ImageVersion(ctx context.Context, image string, label string) (string, error)
 	ExecDetached(ctx context.Context, containerID string, cfg ExecConfig) error
 
-	Commit(ctx context.Context, containerID string, imageTag string) error
-
 	ImageList(ctx context.Context, prefix string) ([]ImageInfo, error)
 
 	ImageRemove(ctx context.Context, imageTag string) error

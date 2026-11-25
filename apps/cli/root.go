@@ -16,7 +16,6 @@ import (
 	"spwn.sh/apps/cli/logs"
 	"spwn.sh/apps/cli/organization"
 	"spwn.sh/apps/cli/skill"
-	"spwn.sh/apps/cli/snap"
 	"spwn.sh/apps/cli/team"
 	"spwn.sh/apps/cli/ui"
 	"spwn.sh/apps/cli/world"
@@ -52,7 +51,6 @@ func init() {
 	rootCmd.AddCommand(world.UpCmd)
 	rootCmd.AddCommand(world.DownCmd)
 
-	world.Cmd.AddCommand(snap.Cmd)
 	rootCmd.AddCommand(world.Cmd)
 	rootCmd.AddCommand(agent.Cmd)
 
@@ -147,7 +145,7 @@ func customHelp(cmd *cobra.Command, args []string) {
 
 	fmt.Fprintf(w, "%s\n", ui.Strong("Entities:"))
 	printHelpCmd(w, "agent", "Composed minds "+ui.Faint("(create, ls, inspect, fork, talk)"))
-	printHelpCmd(w, "world", "Deployable groupings "+ui.Faint("(list, inspect, enter, snap)"))
+	printHelpCmd(w, "world", "Deployable groupings "+ui.Faint("(list, inspect, enter)"))
 	fmt.Fprintln(w)
 
 	fmt.Fprintf(w, "%s\n", ui.Strong("Building blocks:"))
