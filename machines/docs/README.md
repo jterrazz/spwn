@@ -146,6 +146,7 @@ The records of decisions this repository alone took go in [`decisions/`](decisio
 - [092 A machine's device book says who may reach it](decisions/092-a-machines-device-book-says-who-may-reach-it.md) (Proposed)
 - [093 The window is a path bar over a cool dark](decisions/093-the-window-is-a-path-bar-over-a-cool-dark.md) (Proposed)
 - [094 Machines' Turborepo leaves Go to the Makefile](decisions/094-machines-turborepo-leaves-go-to-the-makefile.md) (Proposed)
+- [095 The wiki is an engine family; its tags compile to data and are never executed](decisions/095-the-wiki-is-an-engine-family.md) (Proposed)
 - [096 Spwn is one app: its menu bar, its notifications and its engine live while it runs](decisions/096-spwn-is-one-app-its-menu-bar-notifications-and-engine-live-while-it-runs.md) (Proposed)
 - [097 A confirmation follows its consequence](decisions/097-a-confirmation-follows-its-consequence.md) (Proposed)
 - [098 A long act is guided by the engine; a Guide is a projection of what its call reports](decisions/098-a-long-act-is-guided-by-the-engine-a-guide-is-a-projection-of-what-its-call-reports.md) (Proposed)

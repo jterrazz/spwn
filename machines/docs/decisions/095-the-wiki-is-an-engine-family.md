@@ -1,0 +1,25 @@
+# ADR-095: The wiki is an engine family; its tags compile to data and are never executed
+
+**Status:** Proposed
+**Date:** 2026-11-25
+
+## Context
+
+The spwn OS wiki writes its facts as tags in Markdown pages (a Rule, a Term, a Decision, a Table of a kind), and a checker judges them: types, references, weights, seats and floors (SPEC-v1 of the OS wiki programme). Two forms were open. A page could be MDX, its tags components a JavaScript runtime renders and runs, or its tags could be a closed grammar the engine reads into records.
+
+MDX runs the code a page carries: a check of a page would then execute it, a corpus could no longer be judged without a Node runtime, and a page could compute what it claims. The checker needs the opposite: a page is a statement, read the same way by the engine, the window and an agent.
+
+Machines already reads its own declarative files this way. A Machinefile and a catalog package are strict YAML, decoded by the catalog into a model's values, and every refusal names its line ([Machinefiles](../reference/machinefiles.md)).
+
+## Decision
+
+The wiki is an engine family, `apps/engine/wiki/`, like `machinefile/`: a model, with the layers of every family. Its schema is `wiki.yaml`, `spwn.wiki/v1`, whose strict shape the catalog decodes and whose meaning the family judges. A page's tags are a closed grammar, compiled to typed records (a page, its sections, its blocks, their props and their findings), and nothing in a page is ever executed: an attribute is a literal, a `ref()` or a query, and the grammar has no expression.
+
+The check is a pure function over the compiled pages and the schema. What it needs of git, of the file system past the pages it is given, or of the network is a later call over a contract, never the core.
+
+## Consequences
+
+- A page is judged with no runtime of its own: the same records serve the CLI, the window and an agent.
+- A tag can compute nothing: a table, a figure and a weight are derived by the engine from the facts, never written as code.
+- The grammar is the engine's to grow, release by release; a corpus that needs a form the grammar lacks asks for it rather than writing it.
+- A writing rule follows from the closed grammar and the formatter: an attribute value has no escape, so a quote in it is typographic, and the rules a page is written by are the family's reference page.
