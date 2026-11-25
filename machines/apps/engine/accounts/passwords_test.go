@@ -39,7 +39,7 @@ func TestEveryProgramStationSignsInHasAWayInAndOutOfAVM(t *testing.T) {
 		if !ok {
 			t.Fatalf("%s has no delivery", p)
 		}
-		if (d.Env == "") == (d.Inject == "" || d.Remove == "") {
+		if (len(d.Env) == 0) == (d.Inject == "" || d.Remove == "") {
 			t.Errorf("%s: an environment variable or both lines, never neither nor both: %+v", p, d)
 		}
 	}
@@ -48,8 +48,8 @@ func TestEveryProgramStationSignsInHasAWayInAndOutOfAVM(t *testing.T) {
 func TestARemovalSaysAnEnvironmentFileProgramLeavesNewShellsOnly(t *testing.T) {
 	for _, d := range catalog.Deliveries {
 		got := accounts.RevokedSentence(accounts.Program(d.Program))
-		if strings.Contains(got, "New shells no longer see it") != (d.Env != "") {
-			t.Errorf("%s (variable %q): %q", d.Program, d.Env, got)
+		if strings.Contains(got, "New shells no longer see it") != (len(d.Env) > 0) {
+			t.Errorf("%s (variables %v): %q", d.Program, d.Env, got)
 		}
 	}
 }

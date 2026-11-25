@@ -140,7 +140,7 @@ func RevokedSentence(t Program) string {
 	// station cannot do; a program that reads it from an environment file
 	// loses it in new shells only, and the sentence says so.
 	line := "The token stays valid at " + t.Label() + "; revoke it there to end it everywhere"
-	if d, ok := t.Delivery(); ok && d.Env != "" {
+	if d, ok := t.Delivery(); ok && len(d.Env) > 0 {
 		line += ". New shells no longer see it; a shell open now keeps it until it closes"
 	}
 	return line

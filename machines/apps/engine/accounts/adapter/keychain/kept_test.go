@@ -36,11 +36,11 @@ func pick(fits func(catalog.Delivery) bool) catalog.Delivery {
 func own() catalog.Delivery { return pick(func(d catalog.Delivery) bool { return len(d.Capture) > 0 }) }
 
 // value: a program that reads its token from an environment file.
-func env() catalog.Delivery { return pick(func(d catalog.Delivery) bool { return d.Env != "" }) }
+func env() catalog.Delivery { return pick(func(d catalog.Delivery) bool { return len(d.Env) > 0 }) }
 
 // value: a program of its own store whose token cannot be taken.
 func bare() catalog.Delivery {
-	return pick(func(d catalog.Delivery) bool { return d.Env == "" && len(d.Capture) == 0 })
+	return pick(func(d catalog.Delivery) bool { return len(d.Env) == 0 && len(d.Capture) == 0 })
 }
 
 type sent struct{ vm, line, stdin string }
@@ -147,7 +147,12 @@ func (r *rig) GuestExec(_ context.Context, vm, line, stdin string) (int, error) 
 
 func (r *rig) add(t *testing.T, program accounts.Program, label string) string {
 	t.Helper()
-	id, err := r.vault.Passwords().Add(t.Context(), contract.PasswordIn{Label: label, Program: program, Kind: accounts.KeyFineGrained, From: accounts.FromTyped, Value: secret.Sent{Value: secret.Hold("", []byte(fakeValue))}})
+	return r.addKind(t, program, program.Kinds()[0], label)
+}
+
+func (r *rig) addKind(t *testing.T, program accounts.Program, kind accounts.KeyKind, label string) string {
+	t.Helper()
+	id, err := r.vault.Passwords().Add(t.Context(), contract.PasswordIn{Label: label, Program: program, Kind: kind, From: accounts.FromTyped, Value: secret.Sent{Value: secret.Hold("", []byte(fakeValue))}})
 	if err != nil {
 		t.Fatalf("Add: %v", err)
 	}
@@ -255,7 +260,7 @@ func TestAnEnvironmentFileProgramGetsAFileOfItsOwnAndLosesItByName(t *testing.T)
 	}
 	line := r.sent[0].line
 	file := `"$HOME/.config/station/grants/` + env().Program + `.env"`
-	for _, want := range []string{"umask 077", file, "export " + env().Env + "="} {
+	for _, want := range []string{"umask 077", file, "export " + env().EnvOf(env().Kinds[0]) + "="} {
 		if !strings.Contains(line, want) {
 			t.Errorf("inject %q; want %q", line, want)
 		}
@@ -266,6 +271,33 @@ func TestAnEnvironmentFileProgramGetsAFileOfItsOwnAndLosesItByName(t *testing.T)
 	}
 	if got := r.sent[1].line; got != "rm -f "+file {
 		t.Errorf("remove %q", got)
+	}
+}
+
+func TestEachKindOfAnEnvironmentFileProgramIsExportedAsItsOwnVariable(t *testing.T) {
+	for _, d := range catalog.Deliveries {
+		if len(d.Env) == 0 {
+			continue
+		}
+		for _, kind := range d.Kinds {
+			r := newRig(t)
+			id := r.addKind(t, accounts.Program(d.Program), accounts.KeyKind(kind), d.Program+" "+kind)
+			if _, err := r.vault.Grants().Add(t.Context(), contract.GrantIn{Entry: id, To: "linux-1"}); err != nil {
+				t.Fatalf("%s %s: Add: %v", d.Program, kind, err)
+			}
+			if want := `printf "export ` + d.EnvOf(kind) + `='%s'\n"`; d.EnvOf(kind) == "" || !strings.Contains(r.sent[0].line, want) {
+				t.Errorf("%s %s: inject %q; want %q", d.Program, kind, r.sent[0].line, want)
+			}
+		}
+	}
+}
+
+func TestAKindAnEnvironmentFileProgramNamesNoVariableForIsNeverSent(t *testing.T) {
+	r := newRig(t)
+	id := r.addKind(t, accounts.Program(env().Program), accounts.KeyPassword, "Claude password")
+	_, err := r.vault.Grants().Add(t.Context(), contract.GrantIn{Entry: id, To: "linux-1"})
+	if codeOf(err) != accounts.GrantCannotDeliver || len(r.sent) != 0 {
+		t.Fatalf("Add = %v, sent %+v; want %s and nothing sent", err, r.sent, accounts.GrantCannotDeliver)
 	}
 }
 
