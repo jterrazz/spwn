@@ -1,0 +1,11 @@
+description: 'station agents dream of an agent with no journal says there was nothing to dream of'
+env: two-macs
+runs:
+    - command: 'agents create neo'
+      exit: 0
+      stdout: |
+          ●	neo	created	~/.spwn/agents/neo
+    - command: 'agents dream neo'
+      exit: 0
+      stdout: |
+          ●	neo	no dream: no journal entries

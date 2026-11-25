@@ -4,6 +4,11 @@
     "consequence": "%s is signed out on this machine; its token stays valid at its provider.",
     "form": "yes-no"
   },
+  "agents.delete": {
+    "confirm": "delete-agent",
+    "consequence": "%s's Mind, every layer of it, is deleted for good.",
+    "form": "type-name"
+  },
   "apps.remove": {
     "confirm": "remove",
     "consequence": "%s leaves this machine; its data stays.",

@@ -50,14 +50,14 @@ Another machine is reached through the `spwn` on it, never through an OpenSSH th
 
 ## Interim: two programs
 
-The grammar above is decided, and built only in part. Today the install puts two programs on the path, and each command exists once, in one of them; as a command moves, it is deleted from the other.
+The grammar above is decided, and built only in part. Today the install puts two programs on the path, and each command exists once, in one of them, but an agent's file half, in both until `spwn agent` is deleted; as a command moves, it is deleted from the other.
 
-| Program   | Holds today                                                                                                                                                                        | Grammar                          |
-| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
-| `station` | The Machine space: `machines`, `apps`, `settings`, `disk`, `ports`, `accounts`, `images`, `engine` and the rest of [Machines' commands](../../machines/docs/reference/commands.md) | The grammar, apart from the name |
-| `spwn`    | Every Agent command, as the map below lists them                                                                                                                                   | The old grammar, below           |
+| Program   | Holds today                                                                                                                                                                                      | Grammar                          |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------- |
+| `station` | The Machine space: `machines`, `apps`, `settings`, `disk`, `ports`, `accounts`, `images`, `engine` and the rest of [Machines' commands](../../machines/docs/reference/commands.md), and `agents` | The grammar, apart from the name |
+| `spwn`    | Every other Agent command, as the map below lists them; `spwn agent` keeps the file half too, until it is deleted                                                                                | The old grammar, below           |
 
-`station help` already draws the four groups, Machine and Spwn holding its commands; the Agent and the OS groups hold no command yet, so the help draws neither. Nothing of the Agent space is in `station` yet. The order decided is: the file half first (`agents`, `teams`, `skills`, `automations`, `project`), then the run half (`agents start`, `stop`, `talk`, `log`), then the old `spwn` is deleted and `station` takes the name `spwn`. Until the last step, `spwn` means Agents' program and the names `spwn-agents` and `spwn-machines`, with the shell aliases `agents` and `machines`, are the installer's old names: [ADR-021](../decisions/021-one-program-spwn-one-command-for-everything.md) voids them, and they never ship again once it is built.
+`station help` draws the four groups: Machine and Spwn hold its commands, Agent holds `station agents`, an agent's Mind (its list and detail, `create`, `edit`, `delete`, `fork`, `export`, `import`, `dream`, `sleep`), and OS holds no command yet, so the help does not draw it. The order decided is: the file half first (`agents`, `teams`, `skills`, `automations`, `project`), then the run half (`agents start`, `stop`, `talk`, `log`), then the old `spwn` is deleted and `station` takes the name `spwn`. Until the last step, `spwn` means Agents' program and the names `spwn-agents` and `spwn-machines`, with the shell aliases `agents` and `machines`, are the installer's old names: [ADR-021](../decisions/021-one-program-spwn-one-command-for-everything.md) voids them, and they never ship again once it is built.
 
 ### Where today's Agent commands go
 

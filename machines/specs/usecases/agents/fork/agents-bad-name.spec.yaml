@@ -1,0 +1,17 @@
+description: 'station agents fork to a name an agent cannot take, or to none, is refused'
+env: two-macs
+runs:
+    - command: 'agents create neo'
+      exit: 0
+      stdout: |
+          ●	neo	created	~/.spwn/agents/neo
+    - command: 'agents fork neo --as Trinity'
+      exit: 2
+      stderr: |
+          Error: "Trinity" is not a name an agent takes
+          Hint: lowercase letters, digits and dashes, a letter first, and no verb of agents
+    - command: 'agents fork neo'
+      exit: 2
+      stderr: |
+          Error: the new agent needs a name
+          Hint: --as <name>

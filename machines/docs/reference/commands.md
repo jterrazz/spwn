@@ -1,11 +1,12 @@
 # Commands
 
-Every command of `station`, grouped as `station help` groups them: the four groups of [the grammar](../../../docs/reference/cli.md#the-help), of which the Agent and the OS groups hold no command yet, so the help draws neither. The words are the [Glossary](../concepts/glossary.md)'s.
+Every command of `station`, grouped as `station help` groups them: the four groups of [the grammar](../../../docs/reference/cli.md#the-help), of which the OS group holds no command yet, so the help does not draw it. The words are the [Glossary](../concepts/glossary.md)'s.
 
 | Section    | Answers                                                                                                            |
 | ---------- | ------------------------------------------------------------------------------------------------------------------ |
 | Rules      | What holds for every command                                                                                       |
 | Machine    | `machines`, `images`, `engine`, `apps`, `settings`, `disk`, `ports`, `accounts`, `background`, `awake`, `activity` |
+| Agent      | `agents`                                                                                                           |
 | Spwn       | `overview`, `init`, `--version`, `use`, `journal`, `machinefile`, `help`                                           |
 | Plumbing   | The hidden commands the machine runs for itself                                                                    |
 | Exit codes | What 0, 1, 2 and 130 mean                                                                                          |
@@ -173,6 +174,26 @@ station activity [--all-machines] [--json [--history]]
 ```
 
 What a machine is doing now: CPU and load, memory and its pressure, swap, free space, disk and network rates and totals, thermal and battery on a Mac, uptime, and the busiest processes; `--all-machines` is one row per machine and gathers every machine's findings (refused with `--on`, exit 2). `--json` prints `station.activity.read/v1`; `--history` adds the engine's 24 h series and needs `--json` (exit 2 without). Where each value comes from, and the history, are [Activity](activity.md)'s.
+
+## Agent
+
+These commands act on the agents of a project: the project of the folder a command runs in, found by its `spwn.yaml` from that folder up, or the user's own agents outside any project. The words are the [grammar's](../../../docs/reference/cli.md).
+
+### `station agents`
+
+```sh
+station agents [<agent>] [--json] # the agents by name, their team and harness; one agent's Mind: its folder, its layers, its newest journal entries
+station agents create <name> [--team <team>] [--harness <harness>] # a blank Mind
+station agents edit <agent> [--team <team>] [--harness <harness>] # an empty value clears the field
+station agents delete <agent> [--confirm=<agent>] # its Mind, every layer of it, for good
+station agents fork <agent> --as <name> # a new agent with a copy of every layer, its journal left behind
+station agents export <agent> [--to <folder>] # one archive, <agent>.tar.gz, the Mind left as it is
+station agents import <archive> [--as <name>] # an agent from an archive, named as the archive
+station agents dream <agent> # its journal read into a playbook of its Mind
+station agents sleep <agent> # stale playbooks archived, old sessions pruned, the day logged
+```
+
+A name is lowercase letters, digits and dashes, a letter first, and no verb of `agents`; a name taken, a harness the catalog does not hold, and an archive no export wrote are refused, exit 2. `delete` asks the agent's name typed on a terminal and needs `--confirm=<agent>` off one. With `--on` a VM of this Mac, each command acts on that VM's agents: the project of this folder is the guest folder a share of the VM's start puts it at, and a project no share reaches, or `--on` another Mac, is refused, exit 2, with the Machinefile's `vm.mounts` to add it to. `--json` is `station.agents.list/v1`, or `station.agents.show/v1` for one agent.
 
 ## Spwn
 

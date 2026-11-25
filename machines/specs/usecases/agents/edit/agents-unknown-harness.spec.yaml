@@ -1,0 +1,12 @@
+description: 'station agents edit to a harness the catalog does not hold is refused, and the agent keeps its own'
+env: two-macs
+runs:
+    - command: 'agents create neo'
+      exit: 0
+      stdout: |
+          ●	neo	created	~/.spwn/agents/neo
+    - command: 'agents edit neo --harness vim'
+      exit: 2
+      stderr: |
+          Error: "vim" is not a harness
+          Hint: --harness claude-code or codex

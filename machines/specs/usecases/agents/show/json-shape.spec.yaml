@@ -1,0 +1,38 @@
+description: 'station agents <agent> --json prints its Mind'
+env: two-macs
+runs:
+    - command: 'agents create neo'
+      exit: 0
+      stdout: |
+          ●	neo	created	~/.spwn/agents/neo
+    - command: 'agents neo --json'
+      exit: 0
+      stdout: |
+          {
+            "schema": "station.agents.show/v1",
+            "generated_at": "{{iso8601}}",
+            "machine": {
+              "name": "macbook-pro",
+              "label": "This Mac",
+              "kind": "computer",
+              "on": null,
+              "this_mac": true
+            },
+            "findings": [],
+            "name": "neo",
+            "description": "A blank-slate agent; replace this one-liner with what neo is for.",
+            "team": "",
+            "harness": "claude-code",
+            "path": "~/.spwn/agents/neo",
+            "layers": [
+              {
+                "name": "journal",
+                "files": []
+              },
+              {
+                "name": "playbooks",
+                "files": []
+              }
+            ],
+            "journal": []
+          }

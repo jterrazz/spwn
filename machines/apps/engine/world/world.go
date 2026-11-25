@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/activity"
+	"github.com/jterrazz/studio-station/apps/engine/agents"
 	"github.com/jterrazz/studio-station/apps/engine/awake"
 	"github.com/jterrazz/studio-station/apps/engine/background"
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
@@ -364,6 +365,11 @@ type Stores struct {
 	Release *engine.ReleaseKept `json:"release,omitempty"`
 	// value: what was done on this Mac and its VMs, oldest first.
 	Journal []journal.Line `json:"journal,omitempty"`
+	// value: the agents' Minds kept on this machine, by the project root
+	// they belong to ("" for the user's own), each list by name.
+	Agents map[string][]agents.Mind `json:"agents,omitempty"`
+	// value: the agents' archives written on this machine, by path.
+	AgentArchives map[string]agents.Mind `json:"agent_archives,omitempty"`
 }
 
 func (m *Mac) Store() *Stores {

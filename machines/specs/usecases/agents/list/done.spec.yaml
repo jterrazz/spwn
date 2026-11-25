@@ -1,0 +1,17 @@
+description: 'station agents lists the agents of this folder by name, with their team and harness'
+env: two-macs
+runs:
+    - command: 'agents create neo'
+      exit: 0
+      stdout: |
+          ●	neo	created	~/.spwn/agents/neo
+    - command: 'agents create trinity --team web --harness codex'
+      exit: 0
+      stdout: |
+          ●	trinity	created	~/.spwn/agents/trinity
+    - command: 'agents'
+      exit: 0
+      stdout: |
+          # Agents
+          ●	neo		claude-code	A blank-slate agent; replace this one-liner with what neo is for.
+          ●	trinity	web	codex	A blank-slate agent; replace this one-liner with what trinity is for.

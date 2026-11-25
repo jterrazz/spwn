@@ -1,0 +1,29 @@
+description: 'station agents import makes an agent from an archive, named as the archive unless --as says'
+env: two-macs
+runs:
+    - command: 'agents create neo'
+      exit: 0
+      stdout: |
+          ●	neo	created	~/.spwn/agents/neo
+    - command: 'agents export neo --to backups'
+      exit: 0
+      stdout: |
+          ●	neo	exported	backups/neo.tar.gz
+    - command: 'agents delete neo --confirm=neo'
+      exit: 0
+      stdout: |
+          ●	neo	deleted
+    - command: 'agents import backups/neo.tar.gz'
+      exit: 0
+      stdout: |
+          ●	neo	imported	~/.spwn/agents/neo
+    - command: 'agents import backups/neo.tar.gz --as trinity'
+      exit: 0
+      stdout: |
+          ●	trinity	imported	~/.spwn/agents/trinity
+    - command: 'agents'
+      exit: 0
+      stdout: |
+          # Agents
+          ●	neo		claude-code	A blank-slate agent; replace this one-liner with what neo is for.
+          ●	trinity		claude-code	A blank-slate agent; replace this one-liner with what neo is for.

@@ -1,0 +1,13 @@
+description: 'station agents import of a file no export wrote is refused, and no agent is left behind'
+env: two-macs
+runs:
+    - command: 'agents import backups/neo.tar.gz'
+      exit: 2
+      stderr: |
+          Error: backups/neo.tar.gz is not an agent's archive
+          Hint: station agents export <agent> --to <folder> writes one
+    - command: 'agents'
+      exit: 0
+      stdout: |
+          # Agents
+          	none

@@ -41,6 +41,8 @@ import (
 	activityfake "github.com/jterrazz/studio-station/apps/engine/activity/adapter/fake"
 	activitycalls "github.com/jterrazz/studio-station/apps/engine/activity/calls"
 	activitycontract "github.com/jterrazz/studio-station/apps/engine/activity/contract"
+	agentsfake "github.com/jterrazz/studio-station/apps/engine/agents/adapter/fake"
+	agentscontract "github.com/jterrazz/studio-station/apps/engine/agents/contract"
 	appsfake "github.com/jterrazz/studio-station/apps/engine/apps/adapter/fake"
 	appscontract "github.com/jterrazz/studio-station/apps/engine/apps/contract"
 	awakefake "github.com/jterrazz/studio-station/apps/engine/awake/adapter/fake"
@@ -429,6 +431,7 @@ func (m *worldMac) waker() contract.Waker       { return machinesfake.WakerOf(m.
 func (m *worldMac) processes(kernel contract.Processes) contract.Processes {
 	return machinesfake.ProcessesOf(m.run.w, m.name, kernel)
 }
+func (m *worldMac) minds() agentscontract.Minds   { return agentsfake.Of(m.run.w, m.name) }
 func (m *worldMac) jobs() backgroundcontract.Jobs { return backgroundfake.New(m.run.w, m.name) }
 func (m *worldMac) meter() activitycontract.Meter { return activityfake.MeterOf(m.run.w, m.name) }
 func (m *worldMac) disk() diskcontract.DiskUsage  { return m.files() }

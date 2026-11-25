@@ -1,0 +1,83 @@
+{
+  "schema": "station.page/v1",
+  "id": "agents",
+  "command": "agents",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "agents",
+      "title": "Agents",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "team",
+          "label": "team",
+          "kind": "text",
+          "keep": 50
+        },
+        {
+          "key": "harness",
+          "label": "harness",
+          "kind": "text",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "neo",
+            "mark": "ok",
+            "label": "neo",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "web"
+              },
+              {
+                "kind": "text",
+                "text": "claude-code"
+              }
+            ],
+            "detail": {
+              "kind": "text",
+              "text": "Reviews the pull requests of the web team."
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "trinity",
+            "mark": "ok",
+            "label": "trinity",
+            "cells": [
+              {
+                "kind": "none"
+              },
+              {
+                "kind": "text",
+                "text": "codex"
+              }
+            ],
+            "detail": {
+              "kind": "text",
+              "text": "Keeps the release notes."
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 2
+        }
+      ]
+    }
+  ]
+}

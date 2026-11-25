@@ -1,0 +1,8 @@
+description: 'station agents with no agent says how one is made'
+env: two-macs
+runs:
+    - command: 'agents'
+      exit: 0
+      stdout: |
+          # Agents
+          	none

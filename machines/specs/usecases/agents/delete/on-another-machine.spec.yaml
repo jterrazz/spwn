@@ -1,0 +1,13 @@
+description: 'station agents delete --on a VM deletes the agent kept on that VM'
+env: two-macs
+runs:
+    - command: 'agents create neo --on linux-1'
+      exit: 0
+      stdout: |
+          	On linux-1:
+          ●	neo	created	~/.spwn/agents/neo
+    - command: 'agents delete neo --confirm=neo --on linux-1'
+      exit: 0
+      stdout: |
+          	On linux-1:
+          ●	neo	deleted

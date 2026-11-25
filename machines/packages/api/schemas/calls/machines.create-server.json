@@ -207,6 +207,13 @@
       "properties": {
         "Code": {
           "enum": [
+            "agents.bad-archive",
+            "agents.bad-name",
+            "agents.exists",
+            "agents.not-found",
+            "agents.not-shared",
+            "agents.nothing-asked",
+            "agents.unknown-harness",
             "apps.lives-elsewhere",
             "apps.no-method",
             "apps.not-installed",

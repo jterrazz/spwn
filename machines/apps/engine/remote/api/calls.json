@@ -92,6 +92,114 @@
       "out": "Reading"
     },
     {
+      "name": "agents.create",
+      "schema": "station.agents.create/v1",
+      "where": "at-target",
+      "errors": [
+        "agents.bad-name",
+        "agents.exists",
+        "agents.unknown-harness"
+      ],
+      "in": "CreateIn",
+      "out": "Mind"
+    },
+    {
+      "name": "agents.delete",
+      "schema": "station.agents.delete/v1",
+      "where": "at-target",
+      "confirm": "delete-agent",
+      "consequence": "%s's Mind, every layer of it, is deleted for good.",
+      "errors": [
+        "agents.not-found",
+        "confirm.mismatch",
+        "confirm.needed"
+      ],
+      "in": "DeleteIn",
+      "out": "Agent"
+    },
+    {
+      "name": "agents.dream",
+      "schema": "station.agents.dream/v1",
+      "where": "at-target",
+      "errors": [
+        "agents.not-found"
+      ],
+      "in": "DreamIn",
+      "out": "Dreamed"
+    },
+    {
+      "name": "agents.edit",
+      "schema": "station.agents.edit/v1",
+      "where": "at-target",
+      "errors": [
+        "agents.not-found",
+        "agents.nothing-asked",
+        "agents.unknown-harness"
+      ],
+      "in": "EditIn",
+      "out": "Agent"
+    },
+    {
+      "name": "agents.export",
+      "schema": "station.agents.export/v1",
+      "where": "at-target",
+      "errors": [
+        "agents.not-found"
+      ],
+      "in": "ExportIn",
+      "out": "Exported"
+    },
+    {
+      "name": "agents.fork",
+      "schema": "station.agents.fork/v1",
+      "where": "at-target",
+      "errors": [
+        "agents.bad-name",
+        "agents.exists",
+        "agents.not-found"
+      ],
+      "in": "ForkIn",
+      "out": "Forked"
+    },
+    {
+      "name": "agents.import",
+      "schema": "station.agents.import/v1",
+      "where": "at-target",
+      "errors": [
+        "agents.bad-archive",
+        "agents.bad-name",
+        "agents.exists"
+      ],
+      "in": "ImportIn",
+      "out": "Mind"
+    },
+    {
+      "name": "agents.list",
+      "schema": "station.agents.list/v1",
+      "where": "at-target",
+      "in": "ListIn"
+    },
+    {
+      "name": "agents.show",
+      "schema": "station.agents.show/v1",
+      "where": "at-target",
+      "errors": [
+        "agents.not-found"
+      ],
+      "in": "ShowIn",
+      "out": "Mind"
+    },
+    {
+      "name": "agents.sleep",
+      "schema": "station.agents.sleep/v1",
+      "where": "at-target",
+      "errors": [
+        "agents.not-found"
+      ],
+      "in": "SleepIn",
+      "out": "Slept"
+    },
+    {
       "name": "apps.install",
       "schema": "station.apps.install/v1",
       "section": "apps",

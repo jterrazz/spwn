@@ -1,0 +1,13 @@
+description: 'station agents create refuses a name an agent cannot take: not lowercase, or a verb of agents'
+env: two-macs
+runs:
+    - command: 'agents create Neo'
+      exit: 2
+      stderr: |
+          Error: "Neo" is not a name an agent takes
+          Hint: lowercase letters, digits and dashes, a letter first, and no verb of agents
+    - command: 'agents create edit'
+      exit: 2
+      stderr: |
+          Error: "edit" is not a name an agent takes
+          Hint: lowercase letters, digits and dashes, a letter first, and no verb of agents

@@ -1,0 +1,16 @@
+description: 'station agents fork to a name taken is refused, exit 2'
+env: two-macs
+runs:
+    - command: 'agents create neo'
+      exit: 0
+      stdout: |
+          ●	neo	created	~/.spwn/agents/neo
+    - command: 'agents create trinity'
+      exit: 0
+      stdout: |
+          ●	trinity	created	~/.spwn/agents/trinity
+    - command: 'agents fork neo --as trinity'
+      exit: 2
+      stderr: |
+          Error: an agent named "trinity" exists
+          Hint: pick another name

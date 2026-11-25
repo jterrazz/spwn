@@ -1,0 +1,14 @@
+description: 'station agents --on a VM from a project its start shares acts on the project at its guest folder'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ".macs[\"macbook-pro\"].vms[\"linux-1\"].kept.mounts = [{\"computer\": env.HOME, \"guest\": \"/srv/work\"}]" world.json > shared.json && /bin/mv shared.json world.json && /bin/mkdir site && /usr/bin/touch site/spwn.yaml && cd site && "$STATION" agents create neo --on linux-1'
+      exit: 0
+      stdout: |
+          	On linux-1:
+          ●	neo	created	/srv/work/site/spwn/agents/neo
+    - command: '--version >/dev/null; /usr/bin/jq -c ".macs[\"linux-1\"].stores.agents | keys" world.json'
+      exit: 0
+      stdout: |
+          ["/srv/work/site"]

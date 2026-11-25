@@ -7,9 +7,10 @@ runs:
             Set up and run this Mac, its VMs and your other Macs
             USAGE
             MACHINE
+            AGENT
             SPWN
             FLAGS
-    - command: 'help | /usr/bin/sed -n "/^  MACHINE/,/^  SPWN/p" | /usr/bin/grep -oE "^    [a-z]+ " | /usr/bin/tr -d " "'
+    - command: 'help | /usr/bin/sed -n "/^  MACHINE/,/^  AGENT/p" | /usr/bin/grep -oE "^    [a-z]+ " | /usr/bin/tr -d " "'
       exit: 0
       stdout: |
           machines
@@ -23,6 +24,10 @@ runs:
           background
           awake
           activity
+    - command: 'help | /usr/bin/sed -n "/^  AGENT/,/^  SPWN/p" | /usr/bin/grep -oE "^    [a-z]+ " | /usr/bin/tr -d " "'
+      exit: 0
+      stdout: |
+          agents
     - command: 'help | /usr/bin/sed -n "/^  SPWN/,/^  FLAGS/p" | /usr/bin/grep -oE "^    [a-z]+ " | /usr/bin/tr -d " "'
       exit: 0
       stdout: |

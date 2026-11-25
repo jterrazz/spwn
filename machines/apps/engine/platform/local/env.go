@@ -55,3 +55,8 @@ func (i identity) Hostname() string {
 func (i identity) Euid() int      { return os.Geteuid() }
 func (i identity) GOOS() string   { return runtime.GOOS }
 func (i identity) GOARCH() string { return runtime.GOARCH }
+
+func WorkingDir() string {
+	dir, _ := os.Getwd()
+	return dir
+}

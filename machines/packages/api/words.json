@@ -338,6 +338,41 @@
     }
   },
   "CoreFailCode": {
+    "agents.bad-archive": {
+      "Word": "bad archive",
+      "Detail": "agents",
+      "Tone": "plain"
+    },
+    "agents.bad-name": {
+      "Word": "bad name",
+      "Detail": "agents",
+      "Tone": "plain"
+    },
+    "agents.exists": {
+      "Word": "exists",
+      "Detail": "agents",
+      "Tone": "plain"
+    },
+    "agents.not-found": {
+      "Word": "not found",
+      "Detail": "agents",
+      "Tone": "plain"
+    },
+    "agents.not-shared": {
+      "Word": "not shared",
+      "Detail": "agents",
+      "Tone": "plain"
+    },
+    "agents.nothing-asked": {
+      "Word": "nothing asked",
+      "Detail": "agents",
+      "Tone": "plain"
+    },
+    "agents.unknown-harness": {
+      "Word": "unknown harness",
+      "Detail": "agents",
+      "Tone": "plain"
+    },
     "apps.lives-elsewhere": {
       "Word": "lives elsewhere",
       "Detail": "apps",

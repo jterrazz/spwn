@@ -34,7 +34,9 @@ const (
 	StopEngine    Action = "stop-engine"
 	Stop          Action = "stop"
 	Delete        Action = "delete"
-	Erase         Action = "erase"
+	// value: an agent's Mind is deleted, every layer of it.
+	DeleteAgent Action = "delete-agent"
+	Erase       Action = "erase"
 	// value: build the image a create needs first, when this Mac has none.
 	BuildImage Action = "build-image"
 	// value: delete the stopped ephemeral workspaces, in one question.
@@ -70,7 +72,7 @@ func For(a Action, k machine.Kind) Level {
 	switch a {
 	case Install, Share, Start, Restart, Edit:
 		return None
-	case Delete, Erase, RestartServer, FreeUnused:
+	case Delete, DeleteAgent, Erase, RestartServer, FreeUnused:
 		return TypeName
 	case Stop:
 		if k == machine.Server {
@@ -204,6 +206,8 @@ func (a Action) Consequence() string {
 		return "%s stops: what it serves stops until you start it again."
 	case Delete:
 		return "%s and everything on its disk are deleted for good."
+	case DeleteAgent:
+		return "%s's Mind, every layer of it, is deleted for good."
 	case Erase:
 		return "The data of %s is deleted for good."
 	case BuildImage:

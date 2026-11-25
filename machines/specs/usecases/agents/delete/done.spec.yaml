@@ -1,0 +1,16 @@
+description: 'station agents delete --confirm=<agent> deletes its Mind for good'
+env: two-macs
+runs:
+    - command: 'agents create neo'
+      exit: 0
+      stdout: |
+          ●	neo	created	~/.spwn/agents/neo
+    - command: 'agents delete neo --confirm=neo'
+      exit: 0
+      stdout: |
+          ●	neo	deleted
+    - command: 'agents'
+      exit: 0
+      stdout: |
+          # Agents
+          	none

@@ -1,0 +1,16 @@
+description: 'station agents import to a name taken is refused, exit 2'
+env: two-macs
+runs:
+    - command: 'agents create neo'
+      exit: 0
+      stdout: |
+          ●	neo	created	~/.spwn/agents/neo
+    - command: 'agents export neo --to backups'
+      exit: 0
+      stdout: |
+          ●	neo	exported	backups/neo.tar.gz
+    - command: 'agents import backups/neo.tar.gz'
+      exit: 2
+      stderr: |
+          Error: an agent named "neo" exists
+          Hint: pick another name

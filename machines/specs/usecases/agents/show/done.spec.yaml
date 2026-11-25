@@ -1,0 +1,14 @@
+description: 'station agents <agent> shows its Mind: its team, harness, folder and layers'
+env: two-macs
+runs:
+    - command: 'agents create neo'
+      exit: 0
+      stdout: |
+          ●	neo	created	~/.spwn/agents/neo
+    - command: 'agents neo'
+      exit: 0
+      stdout: |
+          ●	neo		claude-code	~/.spwn/agents/neo	A blank-slate agent; replace this one-liner with what neo is for.
+          # Layers
+          ●	journal	empty
+          ●	playbooks	empty

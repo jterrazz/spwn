@@ -1,0 +1,13 @@
+description: 'station agents export --on a VM writes the archive on that VM'
+env: two-macs
+runs:
+    - command: 'agents create neo --on linux-1'
+      exit: 0
+      stdout: |
+          	On linux-1:
+          ●	neo	created	~/.spwn/agents/neo
+    - command: 'agents export neo --to backups --on linux-1'
+      exit: 0
+      stdout: |
+          	On linux-1:
+          ●	neo	exported	backups/neo.tar.gz

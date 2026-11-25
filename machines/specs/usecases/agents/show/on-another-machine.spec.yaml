@@ -1,0 +1,16 @@
+description: 'station agents <agent> --on a VM reads the Mind kept on that VM'
+env: two-macs
+runs:
+    - command: 'agents create neo --on linux-1'
+      exit: 0
+      stdout: |
+          	On linux-1:
+          ●	neo	created	~/.spwn/agents/neo
+    - command: 'agents neo --on linux-1'
+      exit: 0
+      stdout: |
+          	On linux-1:
+          ●	neo		claude-code	~/.spwn/agents/neo	A blank-slate agent; replace this one-liner with what neo is for.
+          # Layers
+          ●	journal	empty
+          ●	playbooks	empty

@@ -1,0 +1,8 @@
+description: 'station agents import to a name an agent cannot take is refused, exit 2'
+env: two-macs
+runs:
+    - command: 'agents import backups/neo.tar.gz --as Neo'
+      exit: 2
+      stderr: |
+          Error: "Neo" is not a name an agent takes
+          Hint: lowercase letters, digits and dashes, a letter first, and no verb of agents
