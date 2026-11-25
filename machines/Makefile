@@ -97,7 +97,8 @@ fix: node_modules/.install ## Every fixer: gofmt over Go, then typescript fix
 VZ_SUITES    := usecases/machines usecases/engine/keep
 
 test: node_modules/.install enclave ## The Go tests (modules and the boundary), then the CLI specs against a fresh build of station and the window's scenarios against its proof build, then the VM suites again over vz
-	@$(TURBO) run test --filter='!go-workspace' --filter='!studio-station-specs'
+	@$(TURBO) run test --filter='!studio-station-specs'
+	@go test ./apps/engine/... ./catalog/... ./specs/...
 	@go test -race -tags $(SPEC_TAGS) -run TestWorldMac ./apps/engine/wire
 	@go build -tags $(SPEC_TAGS) -ldflags "$(SPEC_LDFLAGS)" -o $(TEST_PATH) ./apps/engine/cmd/station && touch $(TEST_PATH)
 	@$(TURBO) run build:proof --filter=station-desktop
