@@ -39,7 +39,7 @@ func UpgradesOf(machine, file string, mac bool, n Nights) Upgrades {
 	// inside it. The last night is said only when it ran that file.
 	switch {
 	case !mac:
-		return Upgrades{File: file, Sentence: "Never by itself: station machinefile update inside " + machine + " moves it."}
+		return Upgrades{File: file, Sentence: machine + " upgrades only when you ask."}
 	case n.Bound == "":
 		return Upgrades{Sentence: "Never by itself: " + machine + " is bound to no Machinefile."}
 	case n.Bound != file:

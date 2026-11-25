@@ -1,6 +1,6 @@
 machinefile: station.machinefile/v1
 name: base-debian
-description: A Debian 13 machine with station's plumbing and nothing else
+description: A Debian 13 machine with Spwn's plumbing and nothing else
 machine:
     kind: workspace
     system: { os: debian, version: '13', arch: arm64 }
