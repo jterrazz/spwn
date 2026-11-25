@@ -1,0 +1,181 @@
+{
+  "id": "blueprint/philosophy",
+  "faces": {
+    "word": "Philosophy",
+    "line": "The seven convictions Spwn is built on, written as principles a newcomer can apply to a design choice; [the vision](./vision.md) holds the case they serve, and this page holds the rules.",
+    "paragraph": "The seven convictions Spwn is built on, written as principles a newcomer can apply to a design choice; [the vision](./vision.md) holds the case they serve, and this page holds the rules. The owner confirmed the seven on 2026-11-21 ([his answer](./owner-words.md#why-spwn-exists)).",
+    "icon": ""
+  },
+  "title": {
+    "from": 1,
+    "to": 1
+  },
+  "sections": [
+    {
+      "heading": null,
+      "items": [
+        {
+          "t": "prose",
+          "markdown": "The seven convictions Spwn is built on, written as principles a newcomer can apply to a design\nchoice; [the vision](./vision.md) holds the case they serve, and this page holds the rules. The\nowner confirmed the seven on 2026-11-21 ([his answer](./owner-words.md#why-spwn-exists)).",
+          "span": {
+            "from": 3,
+            "to": 5
+          }
+        },
+        {
+          "t": "block",
+          "id": "all",
+          "kind": "table",
+          "address": "blueprint/philosophy#all",
+          "props": {
+            "id": "all",
+            "of": "conviction",
+            "in": {
+              "ref": "blueprint/philosophy"
+            },
+            "columns": [
+              "says",
+              "carried_in"
+            ]
+          },
+          "faces": {
+            "word": "all",
+            "line": "",
+            "icon": "table"
+          },
+          "view": {
+            "of": "conviction",
+            "in": "blueprint/philosophy",
+            "where": null,
+            "columns": [
+              "says",
+              "carried_in"
+            ]
+          },
+          "at": {
+            "line": 7,
+            "col": 1
+          },
+          "span": {
+            "from": 7,
+            "to": 7
+          }
+        },
+        {
+          "t": "prose",
+          "markdown": "Each conviction is written in the same six parts: the statement, the sensible opposite (what a\nreasonable product does instead, which is why the conviction says something), the argument, where\nthe product carries it, one example, and the decision that would break it. A page that cites a\nconviction cites its number and links here.",
+          "span": {
+            "from": 9,
+            "to": 12
+          }
+        }
+      ]
+    },
+    {
+      "heading": {
+        "level": 2,
+        "text": "1. You bring the taste. The stack brings the hands",
+        "anchor": "1-you-bring-the-taste-the-stack-brings-the-hands",
+        "at": {
+          "line": 14,
+          "col": 1
+        }
+      },
+      "items": [
+        {
+          "t": "block",
+          "id": "taste",
+          "kind": "conviction",
+          "address": "blueprint/philosophy#taste",
+          "props": {
+            "id": "taste",
+            "says": "You bring the taste. The stack brings the hands.",
+            "opposite": "The tool decides the style and the context for you: a house prompt, a default voice, a template of how work should be done.",
+            "carried_in": [
+              {
+                "ref": "product/stack#wiki"
+              }
+            ],
+            "broken_by": "Shipping a built-in persona or style that overrides what you wrote, or letting one fact live in two places, so that an agent reads the stale copy."
+          },
+          "faces": {
+            "word": "taste",
+            "line": "You bring the taste. The stack brings the hands.",
+            "icon": "conviction"
+          },
+          "at": {
+            "line": 16,
+            "col": 1
+          },
+          "span": {
+            "from": 16,
+            "to": 22
+          }
+        },
+        {
+          "t": "prose",
+          "markdown": "- **Argument.** What an agent cannot supply is what makes the work yours: your taste, your vision,\n  your context from outside the screen. The owner's point is not to write down how he works but to\n  bring his taste and his context while working at the high level\n  ([the problem](./owner-words.md#the-problem), 2026-11-14).\n- **Example.** An agent opening a repository reads your vision and your decisions first, not a\n  generic instruction.",
+          "span": {
+            "from": 24,
+            "to": 29
+          }
+        }
+      ]
+    },
+    {
+      "heading": {
+        "level": 2,
+        "text": "2. Delegating is a craft, not a prompt",
+        "anchor": "2-delegating-is-a-craft-not-a-prompt",
+        "at": {
+          "line": 31,
+          "col": 1
+        }
+      },
+      "items": [
+        {
+          "t": "block",
+          "id": "delegating",
+          "kind": "conviction",
+          "address": "blueprint/philosophy#delegating",
+          "props": {
+            "id": "delegating",
+            "says": "Delegating is a craft, not a prompt.",
+            "opposite": "One strong agent, given every task in one long conversation.",
+            "carried_in": [
+              {
+                "ref": "product/stack#agents"
+              },
+              {
+                "ref": "product/stack#os"
+              }
+            ],
+            "broken_by": "A surface that asks you about everything, or one that hides the detail with no way to open it."
+          },
+          "faces": {
+            "word": "delegating",
+            "line": "Delegating is a craft, not a prompt.",
+            "icon": "conviction"
+          },
+          "at": {
+            "line": 33,
+            "col": 1
+          },
+          "span": {
+            "from": 33,
+            "to": 39
+          }
+        },
+        {
+          "t": "prose",
+          "markdown": "- **Example.** At the end of a day the chief shows what was done and asks you the two questions\n  only you can answer; everything else was settled by the owners of each domain.",
+          "span": {
+            "from": 41,
+            "to": 42
+          }
+        }
+      ]
+    }
+  ],
+  "findings": []
+}
