@@ -132,6 +132,9 @@ Modern replacements are on every machine; prefer them over the defaults:
 - **browser-use**: AI agent library for browser automation
 - **inferrs**: TurboQuant LLM inference server
 - **markitdown**: Convert files to Markdown for LLMs
+- **mcp2cli**: Any MCP server exposed as command-line subcommands
+- **mempalace**: Local memory palace CLI with persistent notes across sessions
+- **notion-mcp**: Notion's hosted MCP server as a command, through mcp2cli
 - **ollama**: Run large language models locally, on the Mac's GPU
 - **plannotator**: Review AI agent plans and code before committing
 - **playwright-browsers**: Chromium runtime for website specs (@jterrazz/test)

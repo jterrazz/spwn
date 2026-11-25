@@ -1,0 +1,17 @@
+package: station.package/v1
+kind: app
+name: mempalace
+description: Local memory palace CLI with persistent notes across sessions
+provides: [mempalace]
+requires: [uv]
+version-read:
+    pattern: (\d+\.\d+\.\d+)
+methods:
+    - os: macos
+      machine: [workspace, server]
+      uv: mempalace
+    - family: linux
+      script:
+          check: mempalace --version
+          run: uv tool install mempalace
+          undo: uv tool uninstall mempalace
