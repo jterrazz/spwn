@@ -29,7 +29,7 @@ A VM keeps no journal: inside a server or a workspace both calls are refused as 
 
 ## Reading it
 
-`journal.read` asks each Mac you know for its lines (`journal.kept`, four Macs at a time) and answers them grouped:
+`journal.read` asks each Mac you know for its lines (`journal.kept`, four Macs at a time) and answers them grouped. Another Mac's own lines, and the `Retry` that runs on it, read under the name you added it by, whatever name its engine goes by.
 
 - **By day, newest first.** Each group carries its `Day` (`YYYY-MM-DD`) and its `Title`: `Today`, `Yesterday`, else the day in words.
 - **A night apart from its day.** A night's lines are their own group, `Last night` for the newest, `Night of <day>` before it, with a `Sum` (`2 moved, 1 failed`). Its lines that read alike on several machines (the same subject, upgrade and outcome) are one line whose `On` names each; a failed line stays per machine, so its `Retry` names it.

@@ -13,7 +13,9 @@ import (
 type Deps struct {
 	Journal contract.Journal
 	Now     func() time.Time
-	Macs    AllMacs
+	// value: the name This Mac's engine goes by.
+	Self string
+	Macs AllMacs
 	// value: whether the catalog still knows an app, a setting, a skill or
 	// an image a line names.
 	Known func(journal.Subject) bool

@@ -1439,6 +1439,7 @@ export type JournalCallsKeptIn = {
 
 export type JournalCallsKeptOut = {
     Lines: CoreJournalLine[] | null;
+    Mac?: string;
 };
 
 export type JournalCallsReadIn = {
