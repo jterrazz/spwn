@@ -16,37 +16,13 @@ Knowledge is **world-scoped**, not held in the Mind: declare a host path via `wo
 
 ## Vocabulary
 
-### Entities
+The words of Agents (agent, team, project, harness, Mind, role, skill, automation, dream, sleep, fork) are defined once, in [the glossary](../../machines/docs/concepts/glossary.md#the-words-of-the-agent-space). Three words below ship in today's `spwn` and leave with it ([the CLI](../reference/cli.md#interim-two-programs)); the glossary does not define them as they stand.
 
-- **Agent**: a persistent mind, composed from tools, skills, and an identity. Has memory and evolution history. The main thing you create and ship.
-- **World**: a runtime instance. Ephemeral. Where an agent actually runs: a Docker container with filesystem, tools, and lifecycle. Dies when stopped.
+- **World**: a runtime instance. Ephemeral. Where an agent runs today: a Docker container with filesystem, tools, and lifecycle. Dies when stopped. An agent will run on a machine instead.
+- **Dependency**: the distribution unit. A `spwn.yaml` manifest (catalog or GitHub repo) shipping any combination of tools, skills, hooks, and agents. Installed via `spwn install`, pinned in `spwn.lock`. What an agent is given is becoming `apps:` ([ADR-022](../decisions/022-an-agent-is-given-apps-its-machine-is-the-wall.md)).
 - **Architect**: the always-on orchestration daemon, connected to all channels. Creates and destroys worlds; self-manages via spwn.
 
-### Building blocks (composable, reusable)
-
-- **Dependency**: the distribution unit. A `spwn.yaml` manifest (catalog or GitHub repo) shipping any combination of tools, skills, hooks, and agents. Installed via `spwn install`, pinned in `spwn.lock`.
-- **Skill (bare form)**: a `spwn/skills/<name>.md` file. The simplest authoring path for "write a paragraph of instructions."
-- **Automation**: a `worlds.<name>.automations.<id>` entry that wakes one agent on a trigger (cron expression or filesystem watch). Receipts land at `<root>/.spwn/runs.jsonl`. Engine in `packages/automation`; user guide in [Automations](../guides/automations.md).
-
-### Agent internals
-
-- **Soul**: who the agent is (purpose, voice, values) in a single file at `spwn/agents/<name>/SOUL.md`. Persists across world restarts.
-- **Memory**: journal and sessions. Persists across worlds, grows with experience. (Knowledge is world-scoped, not agent-scoped.)
-- **Composition**: an agent's active dependencies (tools, skills, hooks), declared as one `dependencies:` list in `agent.yaml` using the `spwn:` / `skill:` / `tool:` / `hook:` schemes.
-
-### Hierarchy (inside a world)
-
-- **Chief**: lead agent inside a world. Decomposes tasks, delegates to workers, aggregates results.
-- **Worker**: persistent worker agent with its own identity and memory.
-- **NPC**: ephemeral agent, no persistent memory. Single task, fire-and-forget.
-
-Each agent declares one of these as its `role:`: `chief`, `manager`, `worker`, or `npc` ([Primitives](../reference/primitives.md)). These are the ones the manifests and the CLI accept.
-
-### Evolution
-
-- **Dream**: analyze experience, discover patterns, promote successes to playbooks. `spwn agent dream <name>`
-- **Sleep**: tidy the Mind on the host. Playbooks untouched for 30 days move to `archive/playbooks/`, journal files older than 90 days are deleted, and a dated summary is written to the journal. It stops nothing. `spwn agent sleep <name>`
-- **Fork**: clone an agent with everything it knows. `spwn agent fork <src> <dst>`
+Two more terms of the file formats stay here, since only [Primitives](../reference/primitives.md) uses them: **composition** (an agent's active dependencies, one `dependencies:` list in `agent.yaml`) and **soul** (`spwn/agents/<name>/SOUL.md`).
 
 ## IDs
 

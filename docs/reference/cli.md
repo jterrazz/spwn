@@ -1,22 +1,86 @@
 # CLI
 
-The `spwn` binary (`apps/cli`) is a thin surface over the domain packages: parse flags, call a domain API, format output. This chapter is the grammar and a task-oriented map. The **per-command reference is generated** from Cobra into [`reference/`](./); regenerate it with `make docs`, never hand-edit those pages.
+Spwn has one command line: the program `spwn`, whose every command follows one grammar. This page owns that grammar; [the glossary](../../machines/docs/concepts/glossary.md) owns every word in it, and [ADR-021](../decisions/021-one-program-spwn-one-command-for-everything.md) is the record that decided it.
 
-## Grammar
+| Section                  | Answers                                                          |
+| ------------------------ | ---------------------------------------------------------------- |
+| The grammar              | The nine rules every command holds                               |
+| The help                 | The four groups, and which noun sits in which                    |
+| Reaching another machine | `--on` and `--all-machines`                                      |
+| Interim: two programs    | What runs today, and where each command goes                     |
+| The command reference    | Where each program's every command is listed, and how it is made |
 
-**`spwn <noun> <verb>`**, plus two top-level verbs (`up`, `down`) that bring every world declared in `spwn.yaml` up and down, and one name-only shortcut: `spwn agent neo` starts the world that holds `neo` and opens a session with it.
+## The grammar
 
-Design rules:
+1. **Noun first.** `spwn <noun> [<verb>] [<name>...] [--flags]`. No verb stands at the top level, except the words that act on Spwn itself: `init`, `use`, `update`, `doctor`, `uninstall`, `help` and `--version`. Bare `spwn` is this machine's overview.
+2. **A noun is a collection or a singleton.** A collection is plural (`machines`, `agents`, `apps`, `teams`); a singleton is not (`engine`, `disk`, `journal`, `machinefile`, `project`). A bare noun reads. `spwn <noun> <name>` is one entry's detail. `ls`, `list`, `show`, `inspect` and `status` exist nowhere.
+3. **One verb per meaning, from one closed table, and no alias.** The table is [the glossary's verbs](../../machines/docs/concepts/glossary.md#the-verbs).
+4. **An existing thing is a positional; a new thing is described by options.** A value that could be a secret is never an argv flag.
+5. **The file is the input.** A Machinefile and a project's `spwn.yaml` each take `plan`, `apply` and `drift`. No command edits the declared grouping for you, so changing reality means changing the file and applying it.
+6. **Four shared flags.**
+    - `--json` on every read, answering `spwn.<noun>.<verb>/v1`.
+    - `--yes` on an action that asks; `--confirm=<name>` on one that destroys named data.
+    - `--on <machine>`.
+    - `--all-machines` on a read that spans machines.
+    - `--harness` names an agent's harness; `--backend` and `--runtime` do not exist.
+7. **One failure shape and one exit table.** `Error:` and a pasteable `Hint:`, as the `spwn.error/v1` document under `--json`. Exit 0 is done, 1 failed or declined, 2 refused before any effect, 130 interrupted.
+8. **A command stands alone.** What it needs is its refusal, and the hint is the command that provides it. No command starts a long-running process: the engine runs what runs.
+9. **One vocabulary, one guard, read over the whole tree.** One conformance suite walks the one tree and fails on a verb outside the table, an alias, a read without `--json`, a destroying leaf without `--yes` or `--confirm`, a visible leaf without an Example, a noun in no help group, and a `--json` failure that is not `spwn.error/v1`.
 
-- Strict noun-first grammar. The only top-level verbs are `up` and `down`, and no command has an alias.
-- `rm` is contextual: `spwn agent rm neo` deletes the agent; `spwn agent rm neo --dependency X` removes a dep from it.
-- Inside a project, commands resolve against `./spwn/` first. Outside a project, they operate on user-level paths.
-- Names for creation, IDs for reference: creation takes a name, and a running instance is addressed by the ID it was given ([Concepts](../concepts/domain-model.md#ids)).
-- `--json` wherever output is worth consuming programmatically.
+Two invariants follow from rule 5 and rule 8. Commands speak the domain's words, never a backend's. And the declared file is the input while what runs is the output: no command changes a running thing in place.
 
-Two invariants hold across the surface. Commands speak the domain's vocabulary (worlds, agents, souls, dreams), never the backend's. And the manifest is the input while the running world is the output: no command mutates a world image in place, so changing reality means changing `spwn.yaml` or a block file and rebuilding.
+## The help
 
-## Command map
+The help has four groups: the three spaces of [ADR-019](../decisions/019-the-product-is-three-spaces-machine-agent-and-os.md), then Spwn itself.
+
+| Group       | Holds                                                                                                                      |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------- |
+| **Machine** | `machines`, `images`, `engine`, `apps`, `settings`, `disk`, `ports`, `accounts`, `background`, `awake`, `activity`         |
+| **Agent**   | `agents`, `teams`, `skills`, `automations`, `project`                                                                      |
+| **OS**      | one muted line, "being made", and no command until it runs                                                                 |
+| **Spwn**    | `init`, `use`, `update`, `doctor`, `uninstall`, `help`, `--version`, and the `machinefile`, `journal` and `overview` reads |
+
+Where an agent runs, and how its project and its Mind follow it, is decided: an agent runs on a machine (`spwn agents start neo --on linux-1`), its project and Mind live on that machine, and the noun `world` is gone ([ADR-021](../decisions/021-one-program-spwn-one-command-for-everything.md), decisions 4 and 5). What an agent is given on that machine is [ADR-022](../decisions/022-an-agent-is-given-apps-its-machine-is-the-wall.md)'s.
+
+## Reaching another machine
+
+`--on <machine>` runs any command on another machine: this binary routes the call to the `spwn` on that machine, which runs it, and this binary renders the answer, so `--json` is identical wherever the call ran. `spwn use <machine>` makes every later command of one terminal run there. `spwn project` acts on the folder where it runs, so it refuses `--on`.
+
+Another machine is reached through the `spwn` on it, never through an OpenSSH the user keeps ([Machines' ADR-090](../../machines/docs/decisions/090-a-machine-is-reached-through-its-engines-door-never-through-openssh.md)). Interactive `spwn agents talk <agent> --on <machine>` is launched by `spwn` itself, in the agent's Herdr terminal there ([Machines' ADR-089](../../machines/docs/decisions/089-an-agent-runs-in-a-herdr-terminal-on-its-own-machine.md)). How the binary is built, with Agents' commands as families of the engine, is [Machines' ADR-088](../../machines/docs/decisions/088-agents-live-in-the-one-binary-as-families-reached-by-calls.md).
+
+## Interim: two programs
+
+The grammar above is decided, and built only in part. Today the install puts two programs on the path, and each command exists once, in one of them; as a command moves, it is deleted from the other.
+
+| Program   | Holds today                                                                                                                                                                        | Grammar                          |
+| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
+| `station` | The Machine space: `machines`, `apps`, `settings`, `disk`, `ports`, `accounts`, `images`, `engine` and the rest of [Machines' commands](../../machines/docs/reference/commands.md) | The grammar, apart from the name |
+| `spwn`    | Every Agent command, as the map below lists them                                                                                                                                   | The old grammar, below           |
+
+Nothing of the Agent space is in `station` yet. The order decided is: the file half first (`agents`, `teams`, `skills`, `automations`, `project`), then the run half (`agents start`, `stop`, `talk`, `log`), then the old `spwn` is deleted and `station` takes the name `spwn`. Until the last step, `spwn` means Agents' program and the names `spwn-agents` and `spwn-machines`, with the shell aliases `agents` and `machines`, are the installer's old names: [ADR-021](../decisions/021-one-program-spwn-one-command-for-everything.md) voids them, and they never ship again once it is built.
+
+### Where today's Agent commands go
+
+Decided in ADR-021 and ADR-022, and not built until each command is a family of the engine.
+
+| Today                                        | The grammar's form                                                                                       |
+| -------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `spwn init`                                  | `spwn project create`                                                                                    |
+| `spwn check`                                 | `spwn project plan` and `spwn project drift`                                                             |
+| `spwn build`                                 | gone: the world image leaves, and `project apply` renders the project                                    |
+| `spwn up`, `spwn down`, `spwn world *`       | `spwn agents start`, `spwn agents stop`, on a machine (`--on`); the noun `world` goes                    |
+| `spwn agent neo`, `spwn agent talk neo`      | `spwn agents talk neo`                                                                                   |
+| `spwn agent create\|fork\|dream\|sleep`      | `spwn agents create\|fork\|dream\|sleep`                                                                 |
+| `spwn agent ls`, `spwn agent inspect neo`    | `spwn agents`, `spwn agents neo`                                                                         |
+| `spwn agent rm neo`                          | `spwn agents delete neo --confirm=neo`                                                                   |
+| `spwn install`, `spwn uninstall`             | gone: `spwn agents edit --app <app>` and `spwn project edit --app <app>`; `install` means onto a machine |
+| `spwn skill *`                               | `spwn skills`                                                                                            |
+| `spwn automation *`                          | `spwn automations`; the engine runs them, so `automation daemon` goes                                    |
+| `spwn gate`, `spwn auth`, `spwn cookie-sync` | `spwn accounts`, the one credential noun with one vault                                                  |
+| `spwn web`                                   | gone: Spwn.app is the one GUI                                                                            |
+| `spwn upgrade`                               | `spwn update`                                                                                            |
+
+### Agents' commands today
 
 ```bash
 # ── Project workflow ─────────────────────────────────────────────
@@ -69,9 +133,18 @@ spwn auth login|logout|token  # provider credentials
 spwn install github:acme/fuzzer         # install from GitHub      [planned]
 ```
 
+These follow the old grammar: noun then verb, `rm` for delete, `ls` for list, `up` and `down` at the top. They are what the table above retires.
+
+## The command reference
+
+Each program's every command is listed by a page generated from its own command tree, never hand-edited:
+
+- `station`: [Machines' commands](../../machines/docs/reference/commands.md).
+- `spwn`, today's Agents: [Commands](commands.md), regenerated with `make docs`.
+
 ## Related
 
-- [`reference/`](./): the generated per-command reference (regenerate with `make docs`).
-- [Concepts](../concepts/domain-model.md): what the nouns mean.
-- [Primitives](primitives.md): the `install` targets (`spwn:`, `skill/`, `tool/`, `hook/`, `command/`).
+- [The glossary](../../machines/docs/concepts/glossary.md): every word of the grammar, and the closed table of verbs.
+- [Concepts](../concepts/domain-model.md): what the Agent nouns mean.
+- [Primitives](primitives.md): the files an agent and a project are made of.
 - [Automations](../guides/automations.md): the automation subsystem in depth.

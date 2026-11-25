@@ -35,16 +35,16 @@ Everything this repository knows about itself, by what the reader came to do. Wh
 
 ## Reference
 
-| Page                                                                | Answers                                                                     |
-| ------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| [CLI](reference/cli.md)                                             | The `spwn <noun> <verb>` grammar and the command map                        |
-| [Commands](reference/commands.md)                                   | Every command, projected from the Cobra tree by `make docs`                 |
-| [Primitives](reference/primitives.md)                               | `spwn.yaml`, agents, tools, skills, hooks, commands, the dependency grammar |
-| [Dependency catalog](reference/dependency-catalog.md)               | The built-in `spwn:*` entries and how to author your own                    |
-| [Test architecture](reference/test-architecture.md)                 | Every suite, what it proves, the runners and the simulators                 |
-| [Manual pass: CLI scenarios](reference/manual-cli-scenarios.md)     | Fifty command sequences the harness drives                                  |
-| [Manual pass: agent behaviour](reference/manual-agent-behaviour.md) | Fifty scenarios that need a live, authenticated runtime                     |
-| [Manual pass: edge cases](reference/manual-edge-cases.md)           | Seventy-two cases of concurrency, partial failure and filesystem edges      |
+| Page                                                                | Answers                                                                      |
+| ------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| [CLI](reference/cli.md)                                             | The one `spwn` grammar, the interim of two programs, where each command goes |
+| [Commands](reference/commands.md)                                   | Every command, projected from the Cobra tree by `make docs`                  |
+| [Primitives](reference/primitives.md)                               | `spwn.yaml`, agents, tools, skills, hooks, commands, the dependency grammar  |
+| [Dependency catalog](reference/dependency-catalog.md)               | The built-in `spwn:*` entries and how to author your own                     |
+| [Test architecture](reference/test-architecture.md)                 | Every suite, what it proves, the runners and the simulators                  |
+| [Manual pass: CLI scenarios](reference/manual-cli-scenarios.md)     | Fifty command sequences the harness drives                                   |
+| [Manual pass: agent behaviour](reference/manual-agent-behaviour.md) | Fifty scenarios that need a live, authenticated runtime                      |
+| [Manual pass: edge cases](reference/manual-edge-cases.md)           | Seventy-two cases of concurrency, partial failure and filesystem edges       |
 
 ## Machines
 

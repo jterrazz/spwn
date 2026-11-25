@@ -20,7 +20,10 @@ Spwn is a stack of apps and abstractions that lets one person build at the scale
 curl -fsSL https://spwn.sh/install.sh | bash
 ```
 
-Two commands, one per running app: `spwn-machines` (short: `machines`) and `spwn-agents` (short: `agents`). One install puts both on your path.
+One program, `spwn`, and one grammar for everything: `spwn <noun> [<verb>] [<name>...]`. [The CLI](docs/reference/cli.md) owns the grammar and [the glossary](machines/docs/concepts/glossary.md) owns every word in it, as [ADR-021](docs/decisions/021-one-program-spwn-one-command-for-everything.md) decided.
+
+> [!NOTE]
+> **Interim.** The one program is being built, command by command. Until it is, the install puts two programs on your path: `station` runs the Machine space, and today's `spwn` still holds every Agent command. The blocks below are what runs today; [the CLI](docs/reference/cli.md#interim-two-programs) says which command moves where.
 
 > [!NOTE]
 > **Alpha.** Two apps run today, Machines and Agents. Wiki, Specs and Design, which live in the OS space, are being made: their rows say so, and nothing here claims more. Expect rough edges, and [open an issue](https://github.com/jterrazz/spwn/issues) where you hit one.
@@ -35,27 +38,29 @@ Two commands, one per running app: `spwn-machines` (short: `machines`) and `spwn
 
 Each space is made of apps. Wiki, Specs and Design live inside the OS space.
 
-| App                                | What it does                 | State        | Command         | Folder                        |
-| ---------------------------------- | ---------------------------- | ------------ | --------------- | ----------------------------- |
-| [**Machines**](machines/README.md) | Machines built from one file | **Running**  | `spwn-machines` | `machines/`                   |
-| [**Agents**](docs/README.md)       | One agent, any harness       | **Running**  | `spwn-agents`   | `apps/cli/` (later `agents/`) |
-| **Wiki**                           | Each fact in one place       | _Being made_ | ·               | ·                             |
-| **Specs**                          | Proof it is as asked         | _Being made_ | ·               | ·                             |
-| **Design**                         | One family of shapes         | _Being made_ | ·               | ·                             |
+| App                                | What it does                 | State        | Runs today as | Folder                        |
+| ---------------------------------- | ---------------------------- | ------------ | ------------- | ----------------------------- |
+| [**Machines**](machines/README.md) | Machines built from one file | **Running**  | `station`     | `machines/`                   |
+| [**Agents**](docs/README.md)       | One agent, any harness       | **Running**  | `spwn`        | `apps/cli/` (later `agents/`) |
+| **Wiki**                           | Each fact in one place       | _Being made_ | ·             | ·                             |
+| **Specs**                          | Proof it is as asked         | _Being made_ | ·             | ·                             |
+| **Design**                         | One family of shapes         | _Being made_ | ·             | ·                             |
+
+Every app ends up under the one command `spwn`, in the help group of its space: Machine, Agent, OS, then Spwn itself.
 
 In the app, the three spaces are distinct. A switch between them comes first, with Agent and OS greyed until they run.
 
-## Commands, by app
+## Commands, by app, as they run today
 
 <details open>
-<summary><b>Machines</b> · <code>spwn-machines</code> · machines built from one file</summary>
+<summary><b>Machines</b> · <code>station</code> · machines built from one file</summary>
 
 ```sh
-spwn-machines init                                          # make this machine known
-spwn-machines machines                                      # all machines: every Mac, its VMs, what needs you
-spwn-machines machines create web --from qa.machine.yaml    # a machine from its Machinefile
-spwn-machines apply                                         # carry out this machine's Machinefile
-spwn-machines overview                                      # this machine at a glance
+station init                                        # make this machine known
+station machines                                    # all machines: every Mac, its VMs, what needs you
+station machines create web --from qa.machine.yaml  # a machine from its Machinefile
+station apply                                       # carry out this machine's Machinefile
+station overview                                    # this machine at a glance
 ```
 
 Every command: [Machines' command reference](machines/docs/reference/commands.md) · it runs on a Mac, and its VMs run on a hypervisor (`tart` today), see [the glossary](machines/docs/concepts/glossary.md).
@@ -63,18 +68,18 @@ Every command: [Machines' command reference](machines/docs/reference/commands.md
 </details>
 
 <details>
-<summary><b>Agents</b> · <code>spwn-agents</code> · one agent, any harness</summary>
+<summary><b>Agents</b> · <code>spwn</code> · one agent, any harness</summary>
 
 ```sh
-spwn-agents auth            # check your agent runtime sign-in
-spwn-agents init            # a project and its first agent, neo
-spwn-agents agent neo       # talk to neo, in a sandboxed world
-spwn-agents build           # one portable artifact
-spwn-agents up              # bring a world up; down tears it down
-spwn-agents check           # bad refs, missing files, lockfile drift
+spwn auth            # check your agent runtime sign-in
+spwn init            # a project and its first agent, neo
+spwn agent neo       # talk to neo, in a sandboxed world
+spwn build           # one portable artifact
+spwn up              # bring a world up; down tears it down
+spwn check           # bad refs, missing files, lockfile drift
 ```
 
-Every command: [Agents' command reference](docs/reference/commands.md) · runs on Claude Code or Codex · needs Docker · first steps in [Getting started](docs/start/getting-started.md).
+Every command, and where each goes in the one grammar: [the CLI](docs/reference/cli.md) · [Agents' command reference](docs/reference/commands.md) · runs on Claude Code or Codex · needs Docker · first steps in [Getting started](docs/start/getting-started.md).
 
 </details>
 
