@@ -16,10 +16,6 @@ export default defineConfig({
         },
         knip: {
             entry: {
-                'apps/spwn-cookie-sync/background.js':
-                    'the extension service worker, which Chrome loads by the path manifest.json names',
-                'apps/spwn-cookie-sync/popup.js':
-                    'the extension popup script, which Chrome loads from popup.html',
                 'catalog/x/tools/x/index.js':
                     'the X tool the gate runs by the path its tool.yaml names',
             },

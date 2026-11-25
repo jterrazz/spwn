@@ -1,6 +1,6 @@
 # Gate
 
-> **Experimental.** The gate container, the `gate:` block, the Node SDK, and the cookie-sync extension are in active development: schema, CLI, and behaviour will change without notice. Don't depend on it in production.
+> **Experimental.** The gate container, the `gate:` block, and the Node SDK are in active development: schema, CLI, and behaviour will change without notice. Don't depend on it in production.
 
 The gate is the one sanctioned crossing between the host and a world. Everything else about a world is closed by construction; the gate is where declared, scoped capability enters: a host service surfaced inside the world as an ordinary command, so the agent sees an element that exists and never an endpoint ([Physics](physics.md)).
 
@@ -8,7 +8,7 @@ Four concerns sit behind that: **capability bridging** (external services as pla
 
 The shipped implementation is a long-running Docker container on the host (`spwn gate start`). It owns three concerns no individual world should:
 
-1. **Cookie sync**: receives session cookies from the `spwn-cookie-sync` Chrome extension at `/sync/<provider>` and persists them under `~/.spwn/credentials/<provider>/cookies.json`.
+1. **Cookie sync**: receives session cookies pushed to `/sync/<provider>` and persists them under `~/.spwn/credentials/<provider>/cookies.json`.
 2. **MCP routing**: exposes `/mcp/<element>/*` for every registered element (Notion proxy, Gmail/Gcal via `gws`, every catalog tool loaded from `~/.spwn/gate/tools/`).
 3. **Browser primitive**: a Playwright Chromium sidecar (`apps/gate/browser/`, in-container `127.0.0.1:9001`) that catalog tools call to drive a cookie-loaded browser without shipping their own Chromium.
 
@@ -45,7 +45,7 @@ install:
       WRAPPER
 ```
 
-At startup the gate scans `/gate/tools/`, auto-registers each tool's `CookieProvider` with cookie-sync (the extension picks it up next refresh), spawns its MCP subprocess on a port from `9100+`, and reverse-proxies `/mcp/<name>/*` into it. Adding a new site (LinkedIn, Reddit and so on) is one new directory, with no edits to `packages/gate/`.
+At startup the gate scans `/gate/tools/`, auto-registers each tool's `CookieProvider` with cookie sync, spawns its MCP subprocess on a port from `9100+`, and reverse-proxies `/mcp/<name>/*` into it. Adding a new site (LinkedIn, Reddit and so on) is one new directory, with no edits to `packages/gate/`.
 
 ## The Node SDK
 

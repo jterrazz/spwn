@@ -9,8 +9,7 @@ The surfaces end users reach are `apps/`, at layer L7:
 ```text
 apps/
 ├── cli/                 # Go: the `spwn` binary (cmd/spwn, cobra commands, ui)
-├── gate/                # the host-side broker, its Node SDK and its browser sidecar
-└── spwn-cookie-sync/    # the Chrome extension feeding the gate
+└── gate/                # the host-side broker, its Node SDK and its browser sidecar
 ```
 
 The Go domain modules they import are `packages/`:

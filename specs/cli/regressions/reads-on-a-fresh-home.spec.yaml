@@ -96,27 +96,6 @@ runs:
           spwn-home: absent
           empty-home/.spwn: absent
 
-    - command: cookie-sync providers
-      exit: 0
-      stdout: |4+
-          
-            0 provider(s) registered:
-
-
-      files:
-          spwn-home: absent
-          empty-home/.spwn: absent
-
-    - command: cookie-sync status
-      exit: 0
-      stdout: |4+
-          
-            · no providers registered (no gate elements use cookies yet)
-
-      files:
-          spwn-home: absent
-          empty-home/.spwn: absent
-
     - command: logs
       exit: 0
       stdout: |
