@@ -67,7 +67,7 @@ func (c Client) Call(ctx context.Context, name string, target machine.Ref, in, o
 	if err != nil {
 		return err
 	}
-	conn, r, err := c.open(ctx, Frame{Call: name, Target: TargetOf(target), In: raw, By: byOf(ctx)})
+	conn, r, err := c.open(ctx, Frame{Call: name, Target: TargetOf(target), In: raw, By: byOf(ctx), Far: call.Far(ctx)})
 	if err != nil {
 		return err
 	}
@@ -132,7 +132,7 @@ func (c Client) Watch(ctx context.Context, name string, in any) (<-chan json.Raw
 	if err != nil {
 		return nil, err
 	}
-	conn, r, err := c.open(ctx, Frame{Watch: name, In: raw, By: byOf(ctx)})
+	conn, r, err := c.open(ctx, Frame{Watch: name, In: raw, By: byOf(ctx), Far: call.Far(ctx)})
 	if err != nil {
 		return nil, err
 	}

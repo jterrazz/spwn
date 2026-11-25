@@ -110,6 +110,9 @@ func answer(ctx context.Context, f api.Frame, out *writer, calls Calls, word cal
 			return
 		}
 		ctx = call.WithBy(ctx, f.By)
+		if f.Far {
+			ctx = call.WithFar(ctx)
+		}
 	}
 	switch {
 	case f.Hello != nil:

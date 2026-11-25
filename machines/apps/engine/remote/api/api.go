@@ -54,7 +54,10 @@ type Frame struct {
 	Target *Target `json:"target,omitempty"`
 	// value: the session a request is done for, by its name; absent is the
 	// owner.
-	By       string          `json:"by,omitempty"`
+	By string `json:"by,omitempty"`
+	// value: the request came from another machine, as the transport that
+	// first read it said; absent says nothing, and never clears a mark.
+	Far      bool            `json:"far,omitempty"`
 	In       json.RawMessage `json:"in,omitempty"`
 	Progress *Progress       `json:"progress,omitempty"`
 	Out      json.RawMessage `json:"out,omitempty"`

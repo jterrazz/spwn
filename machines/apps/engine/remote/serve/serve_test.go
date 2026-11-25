@@ -396,3 +396,37 @@ func TestAWatchOverTheSocketEndsOnItsDoneBeforeItsConnectionCloses(t *testing.T)
 		t.Fatalf("the socket answered %v, want %v: a client cannot tell a watch's end from a dropped connection", got, want)
 	}
 }
+
+func TestAFrameMaySetTheFarMarkAndNeverClearIt(t *testing.T) {
+	run := func(ctx context.Context, frame string) bool {
+		var far bool
+		registry, err := call.NewRegistry([]call.Handler{call.Bind(call.Call[struct{}, struct{}, struct{}]{
+			Name: "ports.declare", Where: call.AtTarget, Applies: machine.Anywhere,
+			Run: func(ctx context.Context, _ struct{}, _ struct{}, _ call.Progress) (struct{}, error) {
+				far = call.Far(ctx)
+				return struct{}{}, nil
+			},
+		}, struct{}{})})
+		if err != nil {
+			t.Fatal(err)
+		}
+		in := `{"v":2,"id":"1","call":"ports.declare"` + frame + "}\n"
+		var out strings.Builder
+		if err := serve.Stream(ctx, strings.NewReader(in), &out, serve.Local(registry, laptop, "v0.21.0"), func(error) *fail.Error { return nil }); err != nil {
+			t.Fatal(err)
+		}
+		return far
+	}
+	if run(t.Context(), "") {
+		t.Fatal("a local frame that says nothing ran far")
+	}
+	if !run(t.Context(), `,"far":true`) {
+		t.Fatal("a frame marked far ran here")
+	}
+	if !run(call.WithFar(t.Context()), `,"far":false`) {
+		t.Fatal("a frame cleared the mark its transport gave")
+	}
+	if !run(call.WithFar(t.Context()), "") {
+		t.Fatal("a frame read from afar lost its mark")
+	}
+}

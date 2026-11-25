@@ -29,6 +29,9 @@
         "call": {
           "type": "string"
         },
+        "far": {
+          "type": "boolean"
+        },
         "id": {
           "type": "string"
         },
@@ -251,6 +254,9 @@
         "by": {
           "pattern": "^[a-z0-9-]{1,40}$",
           "type": "string"
+        },
+        "far": {
+          "type": "boolean"
         },
         "id": {
           "type": "string"

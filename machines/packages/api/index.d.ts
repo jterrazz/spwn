@@ -493,6 +493,7 @@ export type BackgroundTask = {
 export type CallFrame = {
     by?: string;
     call: string;
+    far?: boolean;
     id: string;
     in?: unknown;
     target?: Target;
@@ -3270,6 +3271,7 @@ export type VaultCallsVaultRemoveIn = {
 
 export type WatchFrame = {
     by?: string;
+    far?: boolean;
     id: string;
     in?: unknown;
     target?: Target;

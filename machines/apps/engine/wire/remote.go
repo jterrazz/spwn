@@ -314,6 +314,9 @@ type served struct {
 type door struct {
 	far func(coremachine.Ref) bool
 	up  func() bool
+	// value: the door serves another machine's frames (engine attach, the
+	// end of ssh): each frame it reads is marked far.
+	attached bool
 }
 
 // invariant: a far frame is answered by the engine's socket, so with This
@@ -358,6 +361,9 @@ func (s served) Watch(ctx context.Context, target coremachine.Ref, name string, 
 
 func serveFrames(env kit.Env, d door) func(ctx context.Context, in io.Reader, out io.Writer) error {
 	return func(ctx context.Context, in io.Reader, out io.Writer) error {
+		if d.attached {
+			ctx = call.WithFar(ctx)
+		}
 		r, _ := env.Calls.(*remote.Router)
 		return serve.Stream(ctx, in, out, served{r: r, door: d}, func(err error) *fail.Error { return kit.Translate(err, "") })
 	}
@@ -382,7 +388,7 @@ func (m machine) socketDoor() door {
 }
 
 func engineCommand(env kit.Env, m machine) *cobra.Command {
-	return engineNoun(env, m, engineRunCommand(env, m), engineattach.Command(engineattach.Deps{Serve: serveFrames(env, door{})}, env))
+	return engineNoun(env, m, engineRunCommand(env, m), engineattach.Command(engineattach.Deps{Serve: serveFrames(env, door{attached: true})}, env))
 }
 
 // value: a run that serves frames on its stdout: nothing else of it may write there.

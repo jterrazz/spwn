@@ -70,6 +70,9 @@ func (s Server) Conn(ctx context.Context, conn io.ReadWriteCloser) {
 			continue
 		}
 		fctx := call.WithBy(ctx, f.By)
+		if f.Far {
+			fctx = call.WithFar(fctx)
+		}
 		if f.Watch != "" {
 			s.watch(fctx, conn, scanner, w, f)
 			return
