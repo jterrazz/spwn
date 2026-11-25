@@ -38,6 +38,11 @@ const EXEMPT: readonly Exempt[] = [
         rule: 'a table keyed by a wire code',
         why: "a need's section to the machine tab it opens is routing (README, the engine-owes table)",
     },
+    {
+        file: /^presentation\/screens\/wiki\/(?:items|looks|prose)\.tsx$/u,
+        rule: 'a wire field compared with one of its codes',
+        why: "a paragraph's form, a figure's form and a group's fold choose where the engine's answer is drawn, never a word or a tone (README, the wiki)",
+    },
 ];
 
 function sourcesUnder(folder: string): string[] {

@@ -4,7 +4,7 @@
   - group "Spaces":
     - button "Machine" [pressed]
     - button "Agent soon" [disabled]
-    - button "OS soon" [disabled]
+    - button "OS"
   - button "Passwords"
   - button "Settings"
   - button "Engine running · v0.21.0"

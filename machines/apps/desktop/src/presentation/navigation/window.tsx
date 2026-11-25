@@ -22,7 +22,7 @@ import type { PlainPage, Route } from './route';
 import { RouterProvider, useRouter } from './router';
 import { useSettledRoute } from './settled';
 import { Sidebar } from './sidebar';
-import { isGlobal } from './spaces';
+import { standsAlone } from './spaces';
 import { useSpaceKeys } from './use-spaces';
 
 import styles from './window.module.css';
@@ -212,7 +212,7 @@ function useSheets() {
 
 type FrameProps = { Gallery?: ComponentType | undefined; pages: Pages };
 
-// invariant: a space opens where this window last was in it; only Machine opens today, Agent and OS wait.
+// invariant: a space opens where this window last was in it; Machine and the OS's wiki open today, Agent waits.
 const NOWHERE = () => undefined;
 
 function Content({ area, held }: { area: AreaProps; held: Held | undefined }) {
@@ -241,7 +241,7 @@ function Frame({ Gallery, pages }: FrameProps) {
     const rail = { engine, go, needs, onSpace, quiet, route };
     const onFind = quiet ? NOWHERE : sheets.find;
     const aside = { ...side, go, onFind, onNewMachine: sheets.newBlank, quiet, route };
-    const spaced = quiet || !isGlobal(route);
+    const spaced = quiet || !standsAlone(route);
     const shown = spaced && sheets.sidebar;
     return (
         <Screen>

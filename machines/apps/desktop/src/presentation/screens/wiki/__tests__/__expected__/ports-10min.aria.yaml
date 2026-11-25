@@ -1,0 +1,61 @@
+- main:
+  - navigation "Seats":
+    - button "All"
+    - button "Vision"
+    - button "Produit"
+    - button "Technique" [pressed]
+    - button "Croissance"
+  - article "Ports":
+    - text: Floor 3 · Architecture Where is the code, and what may it touch?
+    - group "Reading time":
+      - button "30s"
+      - button "2min"
+      - button "10min" [pressed]
+    - heading "Ports" [level=1]
+    - paragraph:
+      - code: station ports
+      - text: "lists every TCP port that listens on a Mac or a VM, each in the class of who reaches it. Which ports a VM may open, and to whom, are its rights: a port that starts listening inside them is shared with their audience within seconds, one outside them is flagged and never shared."
+    - region "Rights and audiences":
+      - heading "Rights and audiences" [level=2]
+      - paragraph:
+        - text: A VM's rights are the
+        - code: ports
+        - text: "of its Machinefile (Machinefiles): which ports it may open, and to whom."
+      - article "Term right":
+        - text: Term right
+        - paragraph: "what a machine may open and to whom, its Machinefile's ports: open, to (its audience), except, audiences"
+        - term: means
+        - definition: "what a machine may open and to whom, its Machinefile's `ports`: `open`, `to` (its audience), `except`, `audiences`"
+      - list:
+        - listitem:
+          - 'button "audience who a right, or the owner''s ports share --to, shares a port with: local, private or public"'
+      - region "What is flagged":
+        - heading "What is flagged" [level=3]
+        - text: guard · 2 blocks
+        - article "Rule flagged-never-shared":
+          - text: Rule flagged-never-shared
+          - paragraph: A port that listens outside the rights is flagged, never shared.
+          - term: force
+          - definition: hard
+          - term: guards
+          - definition:
+            - button "Ports"
+          - term: proof
+          - definition: spwn:machines/specs/usecases/engine/share/flags-outside-rights.spec.yaml
+        - article "Decision port-is-a-right":
+          - text: Decision port-is-a-right
+          - paragraph: A port is a right with an audience.
+          - term: adr
+          - definition: spwn:machines/docs/decisions/035-a-port-is-a-right-with-an-audience.md
+      - paragraph:
+        - text: A row of a port names its label from the catalog's packages'
+        - code: ports
+        - text: (5173
+        - code: Vite
+        - text: ", 3000"
+        - code: Node or Next
+        - text: ", 8081"
+        - code: Expo
+        - text: ", 5432"
+        - code: Postgres
+        - text: ) as a hint of what probably serves it, never a decision.

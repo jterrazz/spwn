@@ -15,13 +15,13 @@ export const SPACE_WORDS: Readonly<Record<Space, { name: string; line: string }>
 export const SOON_WORD = 'Soon';
 
 export function opensNow(space: Space): boolean {
-    return space === 'machine';
+    return space !== 'agent';
 }
 
 // value: where a page sits: the window's own places beside the space's sidebar, the global pages of the rail's foot
-// value: alone in the content, every other page the Machine space's, Storage and Engine among them, which show
-// value: every Mac at once.
-const REACH: Readonly<Record<PlainPage, 'global' | 'space' | 'window'>> = {
+// value: alone in the content, the wiki the OS space's, alone too as the OS has no sidebar yet, every other page the
+// value: Machine space's, Storage and Engine among them, which show every Mac at once.
+const REACH: Readonly<Record<PlainPage, 'global' | 'os' | 'space' | 'window'>> = {
     'catalog-apps': 'space',
     'catalog-settings': 'space',
     'catalog-skills': 'space',
@@ -33,14 +33,24 @@ const REACH: Readonly<Record<PlainPage, 'global' | 'space' | 'window'>> = {
     passwords: 'global',
     settings: 'global',
     storage: 'space',
+    wiki: 'os',
 };
 
 export function inSpace(route: Route): boolean {
     return route.page === 'machine' || REACH[route.page] === 'space';
 }
 
-export function isGlobal(route: Route): boolean {
-    return route.page !== 'machine' && REACH[route.page] === 'global';
+export function spaceOf(route: Route): Space | undefined {
+    if (inSpace(route)) {
+        return 'machine';
+    }
+    return route.page !== 'machine' && REACH[route.page] === 'os' ? 'os' : undefined;
+}
+
+export function standsAlone(route: Route): boolean {
+    return (
+        route.page !== 'machine' && (REACH[route.page] === 'global' || REACH[route.page] === 'os')
+    );
 }
 
 // value: where the Machine space opens: the last of its pages this window showed, else the first Mac listed, else

@@ -42,8 +42,11 @@ function obey(shortcut: Shortcut, router: Router, { onFind, onSpace }: Acts): vo
             onSpace('machine');
             return;
         }
-        case 'space-agent':
         case 'space-os': {
+            onSpace('os');
+            return;
+        }
+        case 'space-agent': {
             return;
         }
         case 'gallery': {

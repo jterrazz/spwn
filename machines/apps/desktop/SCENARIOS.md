@@ -17,6 +17,7 @@ What the desktop window must let its user do, page by page: one row is one scena
 | The engine's release     | U1 to U4                                          |
 | The window's release     | R1 to R7                                          |
 | The menu bar             | B1 to B6                                          |
+| The OS's wiki            | O1 to O4                                          |
 
 ## How a scenario is proved
 
@@ -265,3 +266,14 @@ Spwn.app carries the menu bar, Spwn Menu, as its login item, and Settings' Menu 
 | B4  | Read why the switch failed              | macOS refuses the item                                 | I press On                   | "The menu bar could not be switched." with the shell's message, and the switch still reads Off | no     |
 | B5  | Read that the menu bar is off           | the menu bar is hidden                                 | I open Settings              | the switch reads Off, and the panel says "Spwn Menu is off: it is not in the menu bar."        | no     |
 | B6  | Approve the menu bar the install showed | the install registered it, macOS holds it for approval | I open Settings              | the switch reads On, and the panel says to allow Spwn in System Settings, General, Login Items | no     |
+
+## The OS's wiki
+
+The rail's OS opens the wiki of this Mac's engine: its home lists every page under the seat that reads it, and a page is drawn as the engine served it at the reading time asked, every tier, fold and order decided by the engine (`wiki.read`, [the wiki](../../docs/reference/wiki.md)).
+
+| ID  | Scenario                    | Given                   | When                   | Then                                                                                      | Mockup |
+| --- | --------------------------- | ----------------------- | ---------------------- | ----------------------------------------------------------------------------------------- | ------ |
+| O1  | Open the wiki from the rail | the window is on Home   | I press OS in the rail | the wiki's home lists the pages under Vision, Produit, Technique and Croissance           | no     |
+| O2  | Open a page of the wiki     | the wiki's home is open | I press a page's tile  | the page is drawn, its seat chosen in the seats bar, at the reading time the engine chose | no     |
+| O3  | Read a page for longer      | a page is open at 2 min | I pick 10min           | the page is served again for ten minutes, the blocks it counted shown as lines and cards  | no     |
+| O4  | Move to another seat        | a page is open          | I press a seat         | the seat's home page opens, that seat chosen                                              | no     |

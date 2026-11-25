@@ -52,16 +52,19 @@ export const PLAIN_PAGES = [
     'passwords',
     'settings',
     'storage',
+    'wiki',
 ] as const;
 
 export type PlainPage = (typeof PLAIN_PAGES)[number];
 
-// value: the pages that open on one of their items, a catalog item or a vault entry, named in the route's `item`.
+// value: the pages that open on one of their items, a catalog item, a vault entry or a wiki page, named in the
+// value: route's `item`.
 export const OPENS_AN_ITEM: ReadonlySet<PlainPage> = new Set<PlainPage>([
     'catalog-apps',
     'catalog-settings',
     'catalog-skills',
     'passwords',
+    'wiki',
 ]);
 
 type PlainRoute = { page: PlainPage; file?: string | undefined; item?: string | undefined };

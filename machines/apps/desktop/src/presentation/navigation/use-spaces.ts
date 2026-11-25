@@ -30,6 +30,9 @@ export function useSpaceKeys(
             if (space === 'machine') {
                 go(landingOf(last.current, firstMac));
             }
+            if (space === 'os') {
+                go({ page: 'wiki' });
+            }
         },
         [go, firstMac],
     );

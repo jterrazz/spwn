@@ -65,6 +65,7 @@ export const BRIDGED = [
     'vault.list',
     'vault.new',
     'vault.remove',
+    'wiki.read',
 ] as const satisfies readonly CallName[];
 
 export type Bridged = (typeof BRIDGED)[number];

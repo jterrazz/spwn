@@ -1,0 +1,24 @@
+- main:
+  - navigation "Seats":
+    - button "All" [pressed]
+    - button "Vision"
+    - button "Produit"
+    - button "Technique"
+    - button "Croissance"
+  - article "Wiki":
+    - heading "Wiki" [level=1]
+    - paragraph: Every page of this Mac’s wiki, by the seat that reads it.
+    - paragraph: 5 pages · 0 hard findings · 8 remarks
+    - region "Vision":
+      - heading "Vision" [level=2]
+      - button "Philosophy The seven convictions Spwn is built on, written as principles a newcomer can apply to a design choice; the vision holds the case they serve, and this page holds the rules. Floor 0"
+    - region "Produit":
+      - heading "Produit" [level=2]
+      - button "Boundaries What Spwn is not, and what each of its parts refuses to be, for anyone weighing a feature that sits near an edge. Floor 1 · 3 remarks"
+      - 'button "The stack Spwn''s three spaces and what lives in each, for anyone deciding what a part of the app is for or where it goes: per space, what you let go of, what you keep, and whether it runs today. Floor 1 · 1 remark"'
+    - region "Technique":
+      - heading "Technique" [level=2]
+      - button "Ports station ports lists every TCP port that listens on a Mac or a VM, each in the class of who reaches it. Floor 3"
+    - region "Croissance":
+      - heading "Croissance" [level=2]
+      - 'button "Positioning Where Spwn stands against what a person uses today instead, for anyone writing a comparison, a pitch or an answer to \"how is it different\": the category it refuses, the four alternatives and what each costs. Floor 1 · 1 remark"'

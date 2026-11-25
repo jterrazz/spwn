@@ -412,6 +412,11 @@ func wordedEnums() []worded {
 			string(page.NounSetting):       {Word: "Settings", One: "setting", Other: "settings", Tone: verdict.Plain},
 			string(page.NounPassword):      {Word: "Passwords", One: "password", Other: "passwords", Tone: verdict.Plain},
 			string(page.NounGrant):         {Word: "Grants", One: "grant", Other: "grants", Tone: verdict.Plain},
+			string(page.NounBlock):         {Word: "Blocks", One: "block", Other: "blocks", Tone: verdict.Plain},
+			string(page.NounQuietBlock):    {Word: "Quiet blocks", One: "quiet block", Other: "quiet blocks", Tone: verdict.Plain},
+			string(page.NounWikiPage):      {Word: "Pages", One: "page", Other: "pages", Tone: verdict.Plain},
+			string(page.NounRemark):        {Word: "Remarks", One: "remark", Other: "remarks", Tone: verdict.Plain},
+			string(page.NounHardFinding):   {Word: "Hard findings", One: "hard finding", Other: "hard findings", Tone: verdict.Plain},
 		}},
 		{catalog.OS(""), map[string]word{
 			string(catalog.OSMacOS):  plain("macOS"),

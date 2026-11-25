@@ -17,6 +17,7 @@ export const TITLES: Record<PlainPage, string> = {
     'catalog-settings': 'Machine settings',
     engine: 'Engine',
     gallery: 'Gallery',
+    wiki: 'Wiki',
 };
 
 type Crumbed = {

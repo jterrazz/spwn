@@ -23,6 +23,7 @@ import { PasswordsPage } from './passwords/passwords';
 import { PlaceholderPage } from './placeholder';
 import { SettingsPage } from './settings/settings';
 import { StoragePage } from './storage/storage';
+import { WikiPage } from './wiki/wiki';
 
 function Shelf({
     shelf,
@@ -128,6 +129,9 @@ function Body({ route, found, home, go, Gallery, newMachine, addMac }: PageProps
         }
         case 'gallery': {
             return <GalleryPage Gallery={Gallery} />;
+        }
+        case 'wiki': {
+            return <WikiPage go={go} item={route.item} key={route.item ?? ''} />;
         }
     }
 }

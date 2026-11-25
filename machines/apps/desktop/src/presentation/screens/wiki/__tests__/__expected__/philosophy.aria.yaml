@@ -1,0 +1,121 @@
+- main:
+  - navigation "Seats":
+    - button "All"
+    - button "Vision" [pressed]
+    - button "Produit"
+    - button "Technique"
+    - button "Croissance"
+  - article "Philosophy":
+    - text: Floor 0 · Intention Why does this exist?
+    - group "Reading time":
+      - button "30s"
+      - button "2min" [pressed]
+      - button "10min"
+    - heading "Philosophy" [level=1]
+    - paragraph: The seven convictions Spwn is built on, written as principles a newcomer can apply to a design choice; the vision holds the case they serve, and this page holds the rules. The owner confirmed the seven on 2026-11-21 (his answer).
+    - region "Philosophy":
+      - region "Table all":
+        - text: Table conviction
+        - button "Philosophy"
+        - table:
+          - rowgroup:
+            - row "Conviction says carried in":
+              - columnheader "Conviction"
+              - columnheader "says"
+              - columnheader "carried in"
+          - rowgroup:
+            - row "taste You bring the taste. The stack brings the hands. wiki":
+              - rowheader "taste"
+              - cell "You bring the taste. The stack brings the hands."
+              - cell "wiki":
+                - button "wiki"
+            - row "delegating Delegating is a craft, not a prompt. agents os":
+              - rowheader "delegating"
+              - cell "Delegating is a craft, not a prompt."
+              - cell "agents os":
+                - button "agents"
+                - button "os"
+            - row "rules-in-the-world Rules live in the world, not in the agent. machines agents":
+              - rowheader "rules-in-the-world"
+              - cell "Rules live in the world, not in the agent."
+              - cell "machines agents":
+                - button "machines"
+                - button "agents"
+            - row "declared Declared, never improvised. machines agents":
+              - rowheader "declared"
+              - cell "Declared, never improvised."
+              - cell "machines agents":
+                - button "machines"
+                - button "agents"
+            - row "proven Done means proven. specs":
+              - rowheader "proven"
+              - cell "Done means proven."
+              - cell "specs":
+                - button "specs"
+            - row "taste-is-a-system Taste is a system. design":
+              - rowheader "taste-is-a-system"
+              - cell "Taste is a system."
+              - cell "design":
+                - button "design"
+            - row "learns The stack learns. You don't repeat yourself. agents wiki":
+              - rowheader "learns"
+              - cell "The stack learns. You don't repeat yourself."
+              - cell "agents wiki":
+                - button "agents"
+                - button "wiki"
+      - paragraph: "Each conviction is written in the same six parts: the statement, the sensible opposite (what a reasonable product does instead, which is why the conviction says something), the argument, where the product carries it, one example, and the decision that would break it. A page that cites a conviction cites its number and links here."
+    - region "1. You bring the taste. The stack brings the hands":
+      - heading "1. You bring the taste. The stack brings the hands" [level=2]
+      - paragraph: 1 quiet block
+      - list:
+        - listitem:
+          - strong: Argument.
+          - text: "What an agent cannot supply is what makes the work yours: your taste, your vision, your context from outside the screen. The owner's point is not to write down how he works but to bring his taste and his context while working at the high level (the problem, 2026-11-14)."
+        - listitem:
+          - strong: Example.
+          - text: An agent opening a repository reads your vision and your decisions first, not a generic instruction.
+    - region "2. Delegating is a craft, not a prompt":
+      - heading "2. Delegating is a craft, not a prompt" [level=2]
+      - paragraph: 1 quiet block
+      - list:
+        - listitem:
+          - strong: Example.
+          - text: At the end of a day the chief shows what was done and asks you the two questions only you can answer; everything else was settled by the owners of each domain.
+    - region "3. Rules live in the world, not in the agent":
+      - heading "3. Rules live in the world, not in the agent" [level=2]
+      - paragraph: 1 quiet block
+      - list:
+        - listitem:
+          - strong: Example.
+          - text: "An agent cannot break your computer: it is not on it."
+    - region "4. Declared, never improvised":
+      - heading "4. Declared, never improvised" [level=2]
+      - paragraph: 1 quiet block
+      - list:
+        - listitem:
+          - strong: Example.
+          - code: qa.machine.yaml
+          - text: gives
+          - code: qa-1
+          - text: ", set up before its first command."
+    - region "5. Done means proven":
+      - heading "5. Done means proven" [level=2]
+      - paragraph: 1 quiet block
+      - list:
+        - listitem:
+          - strong: Example.
+          - text: A request comes back with its proof, or it does not come back as done.
+    - region "6. Taste is a system":
+      - heading "6. Taste is a system" [level=2]
+      - paragraph: 1 quiet block
+      - list:
+        - listitem:
+          - strong: Example.
+          - text: "The site's canvas kit: one box, one arrow, one title, the same everywhere."
+    - region "7. The stack learns. You don't repeat yourself":
+      - heading "7. The stack learns. You don't repeat yourself" [level=2]
+      - paragraph: 1 quiet block
+      - list:
+        - listitem:
+          - strong: Example.
+          - text: A correction given once becomes a rule the next agent reads.

@@ -3892,7 +3892,7 @@ export type OverviewUpkeep = 'needs-you' | 'can-wait';
 
 export type OverviewVerb = 'review' | 'restart' | 'start' | 'try-again' | 'update' | 'remove' | 'move' | 'start-engine' | 'fix';
 
-export type PageNoun = 'machine' | 'skill' | 'listener' | 'quiet-listener' | 'restart' | 'line' | 'package' | 'app' | 'setting' | 'password' | 'grant';
+export type PageNoun = 'machine' | 'skill' | 'listener' | 'quiet-listener' | 'restart' | 'line' | 'package' | 'app' | 'setting' | 'password' | 'grant' | 'block' | 'quiet-block' | 'wiki-page' | 'remark' | 'hard-finding';
 
 export type SettingsState = 'applied' | 'changed-since' | 'not-applied' | 'off-here' | 'not-for-this-machine' | 'reading' | 'checked';
 

@@ -1,0 +1,101 @@
+- main:
+  - navigation "Seats":
+    - button "All"
+    - button "Vision"
+    - button "Produit" [pressed]
+    - button "Technique"
+    - button "Croissance"
+  - article "The stack":
+    - text: Floor 1 · Produit What do we build, and for whom?
+    - group "Reading time":
+      - button "30s"
+      - button "2min" [pressed]
+      - button "10min"
+    - heading "The stack" [level=1]
+    - paragraph: "Spwn's three spaces and what lives in each, for anyone deciding what a part of the app is for or where it goes: per space, what you let go of, what you keep, and whether it runs today. The structure is the owner's, decided on 2026-11-22 (his words); the record is ADR-003. It replaces the six-rung ladder of ADR-002."
+    - list "Findings":
+      - listitem:
+        - img "needs you"
+        - text: "needs you \"product/stack\" rests on this page's reading: you have not ruled"
+    - region "The three spaces":
+      - heading "The three spaces" [level=2]
+      - paragraph: "The layers of the Spwn app are three great concepts, and in the future three distinct spaces in its GUI. The owner drew each as the running of a company:"
+      - table:
+        - rowgroup:
+          - row "Space The company it is the parallel of State":
+            - columnheader "Space"
+            - columnheader "The company it is the parallel of"
+            - columnheader "State"
+        - rowgroup:
+          - 'row "Machine The environment: the fleet of machines, the premises, the access, the security, the documents shipped"':
+            - cell "Machine"
+            - 'cell "The environment: the fleet of machines, the premises, the access, the security, the documents"'
+            - cell "shipped"
+          - 'row "Agent The staff: their personalities, roles, focus and responsibilities shipped"':
+            - cell "Agent"
+            - 'cell "The staff: their personalities, roles, focus and responsibilities"'
+            - cell "shipped"
+          - 'row "OS The flows: which project, which vision, which product, which system runs inside; it steers the flows, the system and the abstractions being made"':
+            - cell "OS"
+            - 'cell "The flows: which project, which vision, which product, which system runs inside; it steers the flows, the system and the abstractions"'
+            - cell "being made"
+      - paragraph: "Each space is one step of the method: a piece of work handed to the stack, a decision kept by you. What you let go of and keep, space by space, in the parts that exist:"
+      - region "The parts and what you keep":
+        - heading "The parts and what you keep" [level=3]
+        - text: define · 6 blocks
+        - paragraph: 6 quiet blocks
+      - region "Table all":
+        - text: Table part
+        - button "The stack"
+        - table:
+          - rowgroup:
+            - row "Part space lets go keeps state":
+              - columnheader "Part"
+              - columnheader "space"
+              - columnheader "lets go"
+              - columnheader "keeps"
+              - columnheader "state"
+          - rowgroup:
+            - row "machines machine preparing a computer the file that describes it shipped":
+              - rowheader "machines"
+              - cell "machine"
+              - cell "preparing a computer"
+              - cell "the file that describes it"
+              - cell "shipped"
+            - row "agents agent doing the work who does what, in which world shipped":
+              - rowheader "agents"
+              - cell "agent"
+              - cell "doing the work"
+              - cell "who does what, in which world"
+              - cell "shipped"
+            - row "wiki os repeating your context the facts and the decisions making":
+              - rowheader "wiki"
+              - cell "os"
+              - cell "repeating your context"
+              - cell "the facts and the decisions"
+              - cell "making"
+            - row "specs os checking by hand what done means making":
+              - rowheader "specs"
+              - cell "os"
+              - cell "checking by hand"
+              - cell "what done means"
+              - cell "making"
+            - row "design os drawing each screen your taste, as a system making":
+              - rowheader "design"
+              - cell "os"
+              - cell "drawing each screen"
+              - cell "your taste, as a system"
+              - cell "making"
+            - row "os os holding it all together the intention, and the last word making":
+              - rowheader "os"
+              - cell "os"
+              - cell "holding it all together"
+              - cell "the intention, and the last word"
+              - cell "making"
+      - paragraph: The column "you keep" is the part no space may take away; the boundaries say what each part refuses for that reason.
+    - region "How the spaces stack":
+      - heading "How the spaces stack" [level=2]
+      - paragraph: A space leans on the ones before it and never needs the ones after. Agents runs in machines Machines can build; in the OS space, Wiki is what agents read, Specs proves the work against what you and Wiki asked for, Design turns your taste into rules the work is held to, and the OS is the one place you steer from.
+    - region "Rests on":
+      - heading "Rests on" [level=2]
+      - paragraph: "One claim here is this page's reading, not the owner's word: that a space leans only on the spaces before it (\"How the spaces stack\"). The placement of Wiki, Specs and Design in the OS space is his; the \"you let go of\" and \"you keep\" columns come from the brief he confirmed on 2026-11-21."

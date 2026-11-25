@@ -64,19 +64,18 @@ describe('Rail', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test('the Agent and OS segments are named soon and say what they will hold', async () => {
+    test('the Agent segment is named soon and says what it will hold; the OS segment opens the wiki', async () => {
         // Given - the window on Home over stories
         const result = await component.render(windowOn({ page: 'home' }), async (visitor) => {
             await visitor.see(content('2 things need you.'));
 
-            // When - Agent, then OS, is hovered
+            // When - Agent is hovered, then OS is pressed
             await visitor.hover(within(rail, button('Agent soon')));
             await visitor.see(content('The workforce: personalities, roles, focus'));
-            await visitor.hover(within(rail, button('OS soon')));
+            await visitor.click(within(rail, button('OS')));
 
-            // Then - OS says what it will hold, and Home stays
-            await visitor.see(content('Flows, projects, vision'));
-            await visitor.see(content('2 things need you.'));
+            // Then - Home is left for the OS space's wiki
+            await visitor.gone(content('2 things need you.'));
         });
         expect(result.errors.text).toBe('');
     });

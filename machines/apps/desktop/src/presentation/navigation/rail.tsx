@@ -13,7 +13,7 @@ import type { Shown } from '../words/shown';
 import { CORE_FOOT_WORDS } from '../words/words';
 import { useEngineLine } from './engine-line';
 import type { Route } from './route';
-import { inSpace, opensNow, SOON_WORD, SPACE_WORDS, SPACES } from './spaces';
+import { opensNow, SOON_WORD, SPACE_WORDS, spaceOf, SPACES } from './spaces';
 import type { Space } from './spaces';
 
 import styles from './rail.module.css';
@@ -151,13 +151,14 @@ function Segment({
 }
 
 function Spaces({ route, onSpace, quiet }: Pick<RailProps, 'onSpace' | 'quiet' | 'route'>) {
-    const active = !quiet && inSpace(route);
+    const at = spaceOf(route);
+    const active = !quiet && at !== undefined;
     return (
         <div aria-label="Spaces" className={styles.places} role="group">
             {SPACES.map((space) => (
                 <Segment
                     active={active}
-                    chosen={space === 'machine'}
+                    chosen={space === (at ?? 'machine')}
                     key={space}
                     onSpace={onSpace}
                     space={space}

@@ -93,6 +93,11 @@ export default defineConfig({
                     rules: { 'react/no-array-index-key': 'off' },
                 },
                 {
+                    files: ['src/presentation/screens/wiki/prose.tsx'],
+                    reason: 'a run of a paragraph, a paragraph of a section and a cell of a row are their place in the prose the engine served: never reordered, and two may say the same words',
+                    rules: { 'react/no-array-index-key': 'off' },
+                },
+                {
                     files: ['src/presentation/navigation/find.tsx'],
                     reason: 'the palette is a combobox: an option is chosen through the input that keeps the focus and names it by aria-activedescendant, so the option itself takes neither focus nor keys, and a click picks it',
                     rules: {

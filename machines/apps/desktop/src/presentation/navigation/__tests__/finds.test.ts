@@ -18,6 +18,7 @@ const TITLES: Record<PlainPage, string> = {
     passwords: 'Passwords',
     settings: 'Settings',
     storage: 'Storage',
+    wiki: 'Wiki',
 };
 
 const NEED: OverviewNeed = {
