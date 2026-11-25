@@ -14,7 +14,7 @@
     max-height: var(--popover-height, none);
     display: flex;
     flex-direction: column;
-    background: var(--panel);
+    background: var(--side);
     border: 1px solid var(--line-2);
     border-radius: var(--radius-card);
     box-shadow: var(--shadow-pop);
@@ -115,7 +115,7 @@
     color: var(--t1);
 }
 .row[data-active] {
-    background: var(--raise);
+    background: var(--panel);
     color: var(--t1);
 }
 .row[aria-disabled='true'] {
