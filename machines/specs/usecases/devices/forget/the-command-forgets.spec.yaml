@@ -13,7 +13,7 @@ runs:
     - command: 'devices forget laptop --confirm=laptop'
       exit: 0
       stdout: |
-          ●	laptop no longer reaches macbook-pro
+          ●	laptop opens no new login into macbook-pro's VMs	a session already open stays until it ends; macbook-pro's ~/.ssh/authorized_keys is not touched
     - command: 'devices --json | /usr/bin/jq -c .devices'
       exit: 0
       stdout: |

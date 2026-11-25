@@ -369,7 +369,12 @@ relays every key it does not hold. The door ([ADR-090](docs/decisions/090-a-mach
 
 - **The channels as the door's allowlist**: a device opens `spwn-api` or `herdr` only when its entry says so.
 - **Forget closes a live session**: `devices.forget` ends that device's open door sessions, as it already
-  pushes the VMs' keys.
+  pushes the VMs' keys. Until then an ssh session opened into a VM with the forgotten key outlives the
+  guest's rewrite of `authorized_keys`: ending it needs the guest to know which key opened each sshd
+  session (`ExposeAuthInfo` or sshd's log), not built; the forget's words say the session stays.
+- **A device in the book is never a key of this Mac's own**: `devices.add` refuses this Mac's device key
+  but not the image key (`images/key`, trusted in every VM as `station-image`) nor a key a VM holds; it
+  matters once `spwn-api` and `herdr` open anything, when a VM's key in the book would reach its Mac.
 - **Attribution**: a frame through the door names its device, the journal says "by <device>", and
   `station devices` shows each device's last connection.
 - **The relay goes** (`Agent.relay`, `keyring.upstream`, `wire.sessionAgent`) once no Mac-to-Mac OpenSSH remains.

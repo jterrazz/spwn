@@ -195,7 +195,7 @@ func (a Action) Consequence() string {
 	case Forget:
 		return "%s leaves your machines; nothing on it changes."
 	case ForgetDevice:
-		return "%s can no longer reach this Mac or its VMs; it is added again with its key and your presence."
+		return "%s can open no new login into this Mac's VMs; a session it already holds stays open, and a key of it in this Mac's ~/.ssh/authorized_keys still opens this Mac. It is added again with its key and your presence."
 	case DeleteImage:
 		return "%s is deleted; the next create that needs it builds it again."
 	case RestartMac:

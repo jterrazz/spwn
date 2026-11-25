@@ -9,7 +9,7 @@ runs:
       exit: 0
       stdout: |
           	On mac-mini:
-          ●	laptop no longer reaches mac-mini
+          ●	laptop opens no new login into mac-mini's VMs	a session already open stays until it ends; mac-mini's ~/.ssh/authorized_keys is not touched
     - command: 'devices --on mac-mini --json | /usr/bin/jq -c ''{devices, broken}'''
       exit: 0
       stdout: |

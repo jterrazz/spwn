@@ -3556,7 +3556,7 @@ export interface Calls {
     'background.list': { in: BackgroundListInput; out: BackgroundListOutput; watch: false };
     'background.remove': { in: BackgroundRemoveInput; out: BackgroundRemoveOutput; watch: false; confirm: 'remove'; consequence: '%s leaves this machine; its data stays.' };
     'devices.add': { in: DevicesAddInput; out: DevicesAddOutput; watch: false };
-    'devices.forget': { in: DevicesForgetInput; out: DevicesForgetOutput; watch: false; confirm: 'forget-device'; consequence: '%s can no longer reach this Mac or its VMs; it is added again with its key and your presence.' };
+    'devices.forget': { in: DevicesForgetInput; out: DevicesForgetOutput; watch: false; confirm: 'forget-device'; consequence: '%s can open no new login into this Mac\'s VMs; a session it already holds stays open, and a key of it in this Mac\'s ~/.ssh/authorized_keys still opens this Mac. It is added again with its key and your presence.' };
     'devices.list': { in: DevicesListInput; out: DevicesListOutput; watch: false };
     'disk.erase': { in: DiskEraseInput; out: DiskEraseOutput; watch: false; confirm: 'erase'; consequence: 'The data of %s is deleted for good.' };
     'disk.free': { in: DiskFreeInput; out: DiskFreeOutput; watch: false };

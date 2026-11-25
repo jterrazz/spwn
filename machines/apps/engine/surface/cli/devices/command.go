@@ -19,7 +19,7 @@ type Deps struct {
 func Command(d Deps, env kit.Env, children ...*cobra.Command) *cobra.Command {
 	cmd := kit.Command(kit.Leaf[struct{}]{
 		Use:     "devices",
-		Short:   "The other devices this Mac lets reach it and its VMs, and this Mac's own key",
+		Short:   "The other devices this Mac lets into its VMs, and this Mac's own key",
 		Example: "  station devices\n  station devices --on mac-mini\n  station devices --json",
 		Group:   kit.Machines,
 		Read:    func(*struct{}) bool { return true },

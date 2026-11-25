@@ -28,7 +28,7 @@ type Input struct {
 func Command(d Deps, env kit.Env) *cobra.Command {
 	return kit.Command(kit.Leaf[Input]{
 		Use:     "add <name> <public key>",
-		Short:   "Let another device reach this Mac and its VMs, by its public key; asks you to confirm at this Mac",
+		Short:   "Let another device into this Mac's VMs, by its public key; asks you to confirm at this Mac",
 		Example: "  station devices add laptop ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGmY0fN5lE8XqXhcG0OB1oCw0SYqC0f6M1bM1jR5e9wz laptop@home\n  station devices add phone ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGmY0fN5lE8XqXhcG0OB1oCw0SYqC0f6M1bM1jR5e9wz --channels pipe",
 		Args:    cobra.MinimumNArgs(3),
 		Declare: func(f *pflag.FlagSet, in *Input) {

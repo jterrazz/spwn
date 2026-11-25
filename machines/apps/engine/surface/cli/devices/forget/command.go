@@ -27,7 +27,7 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 	// terminal the question, in a script --confirm=<name>.
 	return kit.Command(kit.Leaf[Input]{
 		Use:     "forget <name>",
-		Short:   "Take a device out of this Mac's device book: it reaches neither this Mac nor its VMs",
+		Short:   "Take a device out of this Mac's device book: it opens no new login into this Mac's VMs",
 		Example: "  station devices forget macbook-pro --confirm=macbook-pro\n  station devices forget phone --on mac-mini --confirm=phone",
 		Args:    cobra.ExactArgs(1),
 		Declare: func(f *pflag.FlagSet, in *Input) {

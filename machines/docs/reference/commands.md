@@ -67,7 +67,7 @@ The last seven days of every Mac's journal, newest first: a section per day, a n
 ### `station devices`
 
 ```sh
-station devices [--json] # this Mac's own key, then the other devices it lets reach it and its VMs
+station devices [--json] # this Mac's own key, then the other devices it lets into its VMs
 station devices add <name> <public key> [--channels spwn-api,pipe,herdr]
 station devices forget <name> [--confirm=<name>]
 ```

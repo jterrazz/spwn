@@ -82,6 +82,10 @@ func Added(r devices.Row, mac string, thisMac page.Context) page.Page {
 }
 
 func Forgotten(name, mac string, thisMac page.Context) page.Page {
-	row := page.Row{ID: name, Label: name + " no longer reaches " + mac, Mark: page.OK}
+	// invariant: the outcome says what forget cuts today, new logins into
+	// the VMs, and what it leaves: a session already open, and this Mac's
+	// own sshd, which the book never writes.
+	row := page.Row{ID: name, Label: name + " opens no new login into " + mac + "'s VMs", Mark: page.OK,
+		Detail: page.Text("a session already open stays until it ends; " + mac + "'s ~/.ssh/authorized_keys is not touched")}
 	return pages.Outcome("devices forget", thisMac, nil, []page.Row{row}, "device")
 }

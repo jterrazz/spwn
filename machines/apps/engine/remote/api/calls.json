@@ -237,7 +237,7 @@
       "schema": "station.devices.forget/v1",
       "where": "in-engine",
       "confirm": "forget-device",
-      "consequence": "%s can no longer reach this Mac or its VMs; it is added again with its key and your presence.",
+      "consequence": "%s can open no new login into this Mac's VMs; a session it already holds stays open, and a key of it in this Mac's ~/.ssh/authorized_keys still opens this Mac. It is added again with its key and your presence.",
       "errors": [
         "confirm.mismatch",
         "confirm.needed",
