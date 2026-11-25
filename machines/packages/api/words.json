@@ -1122,6 +1122,26 @@
     "vm_stopped": {
       "Word": "Machine stopped",
       "Tone": "plain"
+    },
+    "wiki.bad-budget": {
+      "Word": "bad budget",
+      "Detail": "wiki",
+      "Tone": "plain"
+    },
+    "wiki.none": {
+      "Word": "none",
+      "Detail": "wiki",
+      "Tone": "plain"
+    },
+    "wiki.unknown-page": {
+      "Word": "unknown page",
+      "Detail": "wiki",
+      "Tone": "plain"
+    },
+    "wiki.unreadable": {
+      "Word": "unreadable",
+      "Detail": "wiki",
+      "Tone": "plain"
     }
   },
   "CoreFailField": {

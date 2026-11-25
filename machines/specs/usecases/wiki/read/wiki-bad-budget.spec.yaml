@@ -1,0 +1,11 @@
+description: 'wiki.read at a budget that is none of 30s, 2min or 10min is refused before the wiki is read'
+env:
+    - one-mac
+    - engine
+runs:
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.error | {code, subject}'''
+      stdin: |
+          {"v":2,"id":"1","call":"wiki.read","target":{},"in":{"Budget":"5min"}}
+      exit: 0
+      stdout: |
+          {"code":"wiki.bad-budget","subject":"5min"}

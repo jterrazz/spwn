@@ -36,6 +36,7 @@ import (
 	setupcalls "github.com/jterrazz/studio-station/apps/engine/setup/calls"
 	"github.com/jterrazz/studio-station/apps/engine/surface/cli/kit"
 	vaultcalls "github.com/jterrazz/studio-station/apps/engine/vault/calls"
+	wikicalls "github.com/jterrazz/studio-station/apps/engine/wiki/calls"
 )
 
 // invariant: the one registry of this process, every family's All with its
@@ -68,6 +69,7 @@ func (m machine) registry(env kit.Env) *call.Registry {
 		enginecalls.All(m.engineDeps()),
 		imagescalls.All(imagescalls.Deps{Images: imageBuilder{m.images()}, Kind: kind}),
 		journalcalls.All(m.journalDeps()),
+		wikicalls.All(wikicalls.Deps{Corpus: m.wikiCorpus()}),
 		machinefilecalls.All(m.machinefileDeps(thisMac)),
 		machinescalls.All(machinescalls.Deps{Machines: machineCalls{Machinist: m.machines(env.Interactive), m: m}, Images: createImages{imageBuilder{m.images()}}, Kind: kind, OS: m.profile.System.OS, Laptop: m.profile.Caps.Battery, Holdings: holdings{m}, Now: m.sys.Clock.Now}),
 		portscalls.All(portscalls.Deps{Ports: m.portsOf(env), Tailnet: m.tailnetStatus(), Kind: kind,

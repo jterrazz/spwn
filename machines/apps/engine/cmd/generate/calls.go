@@ -19,6 +19,7 @@ import (
 	settingscalls "github.com/jterrazz/studio-station/apps/engine/settings/calls"
 	setupcalls "github.com/jterrazz/studio-station/apps/engine/setup/calls"
 	vaultcalls "github.com/jterrazz/studio-station/apps/engine/vault/calls"
+	wikicalls "github.com/jterrazz/studio-station/apps/engine/wiki/calls"
 )
 
 const callsPath = "apps/engine/remote/api/calls.json"
@@ -29,7 +30,7 @@ func registry() *call.Registry {
 		accountscalls.All(accountscalls.Deps{}), activitycalls.All(activitycalls.Deps{}), appscalls.All(appscalls.Deps{}),
 		awakecalls.All(awakecalls.Deps{}), backgroundcalls.All(backgroundcalls.Deps{}), diskcalls.All(diskcalls.Deps{}), enginecalls.All(enginecalls.Deps{}),
 		imagescalls.All(imagescalls.Deps{}), journalcalls.All(journalcalls.Deps{}), machinefilecalls.All(machinefilecalls.Deps{}), machinescalls.All(machinescalls.Deps{}), overviewcalls.All(overviewcalls.Sections{}),
-		portscalls.All(portscalls.Deps{}), settingscalls.All(settingscalls.Deps{}), setupcalls.All(setupcalls.Deps{}), vaultcalls.All(vaultcalls.Deps{}), grantscalls.All(grantscalls.Deps{}),
+		portscalls.All(portscalls.Deps{}), settingscalls.All(settingscalls.Deps{}), setupcalls.All(setupcalls.Deps{}), vaultcalls.All(vaultcalls.Deps{}), grantscalls.All(grantscalls.Deps{}), wikicalls.All(wikicalls.Deps{}),
 	)
 	if err != nil {
 		panic(err)

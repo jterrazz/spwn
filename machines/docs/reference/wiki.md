@@ -9,6 +9,7 @@ A wiki is a corpus of Markdown pages whose facts are tags, read by one file at i
 | Writing a page  | The rules the formatter and the grammar impose on a tag              |
 | What is judged  | The rules the engine judges a corpus by, and the ones left for later |
 | What is weighed | A block's weight, its tier, and what a page shows at the budget      |
+| What is served  | The call that answers a page with its reading, and where it is found |
 | Beyond the spec | Every reading of SPEC-v1 the engine made on its own                  |
 
 ## The file
@@ -88,6 +89,19 @@ A block of a content kind has a weight: its score is the sum of its causes, SPEC
 The blocks of one group are weighed together, and outside a group those of one section on one floor. The lead is the written `lead`, else the highest score at 3 or more, the first in reading order on a tie; a block is quiet when written so or scored 1 or less, and normal otherwise. A group, a table, a lens, a figure and a sub-page have no weight. A page's seat is the seat whose folders hold its id, and its floor its frontmatter `floor`, else `floor_of`; a block is on its page's floor unless it writes its own.
 
 At the corpus budget a page shows at most seven lines (S11): at `10min` a quiet block is a line, at `2min` a normal one, at `30s` none, a group its page's seat does not read is one line and hides its blocks, and at `30s` every group is one line.
+
+## What is served
+
+`wiki.read`, a call of this process applied on a Mac, answers one page of the corpus that Mac declares, read whole and checked at each ask: `Page`, its id, the first seat's home when empty, at `Budget`, `30s`, `2min` or `10min`, the corpus's own when empty. A Mac declares no wiki until a Machinefile can name one, so outside a world it answers `wiki.none`; a world seeds a Mac's corpus as its `wiki`, a repository's files at its head.
+
+The answer carries every judgement the window draws, and the window decides none:
+
+- the page's head, its paragraph Face, its floor, the seats bar (each seat, its home, the active one) and every page of the corpus with its counts of hard and soft findings;
+- each section's items in reading order: prose as paragraphs, list items, quotes and table lines, each its runs (strong, code, a link and where it points); a group with its intent, the seats that read it and why it opens folded (`author`, `seat` or `budget`); a block with its kind, Faces, tier, score and causes, its fields in its kind's order with each ref resolved, and `Shown`;
+- `Shown`, the budget's table of S11 per block: at `10min` a lead is a `tile`, a normal block a `card`, a quiet one a `line`; at `2min` a lead is a `card`, a normal block a `line`, a quiet one `counted`; at `30s` none is shown. A table, a figure and a sub-page are a `tile` but at `30s`;
+- a table's rows found and their cells by its columns, a sub-page's child's head, a figure's form, parts and caption, and the findings that sit on each block and on the page.
+
+Its refusals are `wiki.none`, `wiki.unknown-page`, `wiki.unreadable` (`wiki.yaml` absent or refused, its finding said) and `wiki.bad-budget`, each told in `specs/usecases/wiki/read/`.
 
 ## Beyond the spec
 

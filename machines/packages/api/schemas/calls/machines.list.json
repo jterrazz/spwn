@@ -164,7 +164,11 @@
             "vault.label-taken",
             "vault.not-signed-in",
             "vault.unknown",
-            "vm_stopped"
+            "vm_stopped",
+            "wiki.bad-budget",
+            "wiki.none",
+            "wiki.unknown-page",
+            "wiki.unreadable"
           ],
           "type": "string"
         },

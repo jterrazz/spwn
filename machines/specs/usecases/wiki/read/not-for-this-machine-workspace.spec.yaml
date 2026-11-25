@@ -1,0 +1,11 @@
+description: 'inside a workspace, the wiki is refused: its Mac reads it'
+env:
+    - in-workspace
+    - engine
+runs:
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.error.code'''
+      stdin: |
+          {"v":2,"id":"1","call":"wiki.read","target":{},"in":{}}
+      exit: 0
+      stdout: |
+          "section.not-for-this-machine"
