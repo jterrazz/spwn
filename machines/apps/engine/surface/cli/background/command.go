@@ -28,9 +28,11 @@ func Command(d Deps, env kit.Env, children ...*cobra.Command) *cobra.Command {
 		Example: "  station background\n  station background --all\n  station background --json",
 		Group:   kit.OnAMachine,
 		Args:    cobra.NoArgs,
-		Declare: func(f *pflag.FlagSet, in *Input) { f.BoolVar(&in.All, "all", false, "unfold every group") },
-		Read:    func(*Input) bool { return true },
-		Pages:   true,
+		Declare: func(f *pflag.FlagSet, in *Input) {
+			f.BoolVar(&in.All, "all", false, "unfold every group on a terminal (a pipe lists every row already)")
+		},
+		Read:  func(*Input) bool { return true },
+		Pages: true,
 		Run: func(ctx context.Context, in *Input, io kit.IO) error {
 			tasks, err := call.Invoke(ctx, env.Calls, env.Target(), backgroundcalls.List, backgroundcalls.ListIn{}, nil)
 			if err != nil {

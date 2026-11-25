@@ -31,7 +31,7 @@ func Command(d Deps, env kit.Env, children ...*cobra.Command) *cobra.Command {
 		Example: "  station disk\n  station disk --all\n  station disk --json",
 		Group:   kit.OnAMachine,
 		Declare: func(f *pflag.FlagSet, in *Input) {
-			f.BoolVar(&in.All, "all", false, "unfold every group, every row")
+			f.BoolVar(&in.All, "all", false, "unfold every group, every row, on a terminal (a pipe lists every row already)")
 		},
 		Read:  func(*Input) bool { return true },
 		Live:  true,

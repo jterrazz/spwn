@@ -116,13 +116,13 @@ A setting that needs values asks them in a form on a terminal and is refused els
 ### `station disk`
 
 ```bash
-station disk [--json] # the volume, then Misplaced, Can rebuild, Your data, Never touched, with sizes, then every VM disk the hypervisor holds; nothing runs
+station disk [--all] [--json] # the volume, then Misplaced, Can rebuild, Your data, Never touched, with sizes, then every VM disk the hypervisor holds; nothing runs
 station disk free [<app...>] # empty what an app can rebuild with its own command; bare = every Can rebuild row
 station disk erase <app> [--confirm=<app>] # erase an app's data, back to factory; its name typed
 station disk move <folder> # move a misplaced folder where its app expects it
 ```
 
-`free` and `move` ask nothing: nothing is lost. `erase` is always one app, its name typed, and refuses while the app runs or on a Never touched row. A stale VM goes with `station machines delete`, an old image version with `station images delete`. `station disk free docker` prunes Docker's unused data. See [Disk](disk.md).
+`--all` unfolds every group on a terminal, as `station background --all` does: a pipe lists every row already, so it changes nothing there. `free` and `move` ask nothing: nothing is lost. `erase` is always one app, its name typed, and refuses while the app runs or on a Never touched row. A stale VM goes with `station machines delete`, an old image version with `station images delete`. `station disk free docker` prunes Docker's unused data. See [Disk](disk.md).
 
 ### `station ports`
 
