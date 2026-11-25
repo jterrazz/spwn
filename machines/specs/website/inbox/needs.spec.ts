@@ -59,7 +59,7 @@ describe('needs', () => {
         const line = button('Exposed port 5000 is reachable outside Tailscale macbook-pro · Ports');
         const result = await website.visit('/?world=stories&page=inbox', async (visitor) => {
             await visitor.see(within(needs, line));
-            await visitor.see(within(needs, content('Review')));
+            await visitor.gone(within(needs, content('Review')));
 
             // When - its line is pressed
             await visitor.click(within(needs, line));

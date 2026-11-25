@@ -7,6 +7,7 @@ import type { Recording } from '../../../infrastructure/outbound/engine-replay/r
 import { EngineProvider } from '../../dependencies/dependencies';
 import { PAGES } from '../../screens/registry';
 import { carriesCommand } from '../../ui/command';
+import { codesOf, wordOf } from '../../words/engine-words';
 import { machineRoute, PLAIN_PAGES, TABS, tabsOf } from '../route';
 import type { Route } from '../route';
 import { Window } from '../window';
@@ -27,10 +28,16 @@ const DATA: readonly RegExp[] = [
     /^\s*- button "Free station"/u,
 ];
 
+const VERBS = new Set(codesOf('OverviewVerb').map((code) => wordOf('OverviewVerb', code).Word));
+
 function findingsIn(text: string): string[] {
     return text
         .split('\n')
-        .filter((line) => carriesCommand(line) && !DATA.some((data) => data.test(line)))
+        .filter(
+            (line) =>
+                (carriesCommand(line) && !DATA.some((data) => data.test(line))) ||
+                VERBS.has(line.trim()),
+        )
         .map((line) => line.trim());
 }
 
@@ -64,7 +71,7 @@ function nameOf(route: Route): string {
     return route.page === 'machine' ? `${route.machine} ${route.tab}` : route.page;
 }
 
-// value: every line of every page and tab of one world that carries a command, the old name or a config path.
+// value: every line of every page and tab of one world that carries a command, the old name, a config path or a bare verb.
 export async function commandsDrawnOver(world: string): Promise<string[]> {
     const recording = EVERY_WORLD.get(world);
     if (recording === undefined) {

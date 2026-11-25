@@ -55,6 +55,25 @@ const TRY_AGAIN = {
     Verb: 'try-again',
 };
 
+const PATH_ONLY = {
+    Args: null,
+    Broken: false,
+    Call: '',
+    Command: '',
+    Confirm: '',
+    Machine: 'macbook-pro',
+    Mark: 'needs-you',
+    Noun: 'Settings',
+    On: 'macbook-pro',
+    Path: 'System Settings > Network > Firewall',
+    Section: 'settings',
+    Severity: 'needs-a-look',
+    Subject: 'firewall',
+    Text: 'Firewall: off',
+    Upkeep: 'needs-you',
+    Verb: 'fix',
+};
+
 function recordOf(value: unknown): Record<string, unknown> | undefined {
     return typeof value === 'object' && value !== null
         ? Object.fromEntries(Object.entries(value))
@@ -239,6 +258,20 @@ describe('NeedLine', () => {
                 const sheet = dialog('Sign in to npm on macbook-pro');
                 await visitor.see(sheet);
                 await visitor.gone(sheet);
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
+
+    test('a need whose fix is a path alone draws the path under its sentence and no verb', async () => {
+        // Given - the Inbox over two-macs, its one need a firewall that is off, fixed by a path alone
+        const recording = withNeeds(recordingFor('two-macs'), [PATH_ONLY]);
+        const result = await component.render(
+            pageOver(recording, { page: 'inbox' }),
+            async (visitor) => {
+                // Then - the path is read as a quiet line, and nothing stands for a verb
+                await visitor.see(within(needs, content('System Settings > Network > Firewall')));
+                await visitor.gone(within(needs, content('Fix')));
             },
         );
         expect(result.errors.text).toBe('');

@@ -1,3 +1,7 @@
-.verb {
+.path {
     color: var(--t3);
+    font-size: var(--text-label);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }

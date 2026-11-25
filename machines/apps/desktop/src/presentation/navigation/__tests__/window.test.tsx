@@ -278,14 +278,14 @@ describe('Window', () => {
     });
 
     test.each(WORLDS)(
-        '%s draws no command to copy and never the old name',
+        '%s draws no command to copy, never the old name and no verb as inert text',
         async (world) => {
             // Given - every page of the world, and every tab of each Mac and each machine it lists
 
             // When - each is drawn once its exchanges have played
             const found = await commandsDrawnOver(world);
 
-            // Then - no line of any page carries a command
+            // Then - no line of any page carries a command or stands as a bare verb
             expect(found).toStrictEqual([]);
         },
         120_000,

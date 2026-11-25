@@ -19,8 +19,7 @@
     - button "Update mise": Update
     - button "Upkeep 1 brew update waiting macbook-pro · Apps"
     - button "Update brew": Update
-    - 'button "Upkeep Firewall: off macbook-pro · Settings"'
-    - text: Fix
+    - 'button "Upkeep Firewall: off macbook-pro · Settings System Settings > Network > Firewall"'
     - button "Upkeep ~/.tart is misplaced macbook-pro · Disk"
     - button "Move ~/.tart": Move
     - button "Upkeep com.bjango.istatmenus.installer is left over macbook-pro · Background"

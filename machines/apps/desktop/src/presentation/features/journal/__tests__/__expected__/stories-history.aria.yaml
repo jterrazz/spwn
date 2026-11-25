@@ -11,7 +11,6 @@
   - region "Needs you":
     - heading "Needs you a gesture is due" [level=2]
     - button "Exposed port 5000 is reachable outside Tailscale macbook-pro · Ports"
-    - text: Review
     - button "Needs you com.example.brain.x-snapshot is failing, last exit 2 macbook-pro · Background"
     - button "Remove com.example.brain.x-snapshot": Remove
   - region "Upkeep":
@@ -19,9 +18,7 @@
     - button "Upkeep 2 brew updates waiting macbook-pro · Apps"
     - button "Update brew": Update
     - 'button "Upkeep node 25.1.0 available: change ''24'' to ''25'' macbook-pro · Apps"'
-    - text: Fix
-    - 'button "Upkeep Firewall: off macbook-pro · Settings"'
-    - text: Fix
+    - 'button "Upkeep Firewall: off macbook-pro · Settings System Settings > Network > Firewall"'
   - region "History":
     - heading "History what happened, newest first" [level=2]
     - region "Today":

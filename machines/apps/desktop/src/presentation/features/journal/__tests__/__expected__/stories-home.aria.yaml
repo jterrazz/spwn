@@ -13,7 +13,6 @@
   - region "Needs you":
     - heading "Needs you 2" [level=2]
     - button "Exposed port 5000 is reachable outside Tailscale macbook-pro · Ports"
-    - text: Review
     - button "Needs you com.example.brain.x-snapshot is failing, last exit 2 macbook-pro · Background"
     - button "Remove com.example.brain.x-snapshot": Remove
   - region "Machines":

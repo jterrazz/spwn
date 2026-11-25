@@ -17,6 +17,7 @@ import type { Found } from '../../../domain/machines/machines';
 import { useGesture } from '../../dependencies/use-gesture';
 import { GestureButton, GestureRow } from '../../kit/gestures';
 import { LoginSheet } from '../../kit/login-sheet';
+import { carriesCommand } from '../../ui/command';
 import { CopyButton } from '../../ui/copy-button';
 import { Button, Row } from '../../ui/index';
 import type { RowProps } from '../../ui/row';
@@ -212,14 +213,27 @@ function Login(props: Props & { found: Found; program: AccountsProgram }) {
 }
 
 function Said(props: Props) {
-    const { Command } = props.need;
-    const said =
-        Command === '' ? (
-            <span className={styles.verb}>{verbOf(props.need)}</span>
-        ) : (
-            <CopyButton label="Copy the command" name="Copy the command" text={Command} />
+    const { Command, Path } = props.need;
+    if (Command !== '') {
+        return (
+            <Row
+                {...rowOf(
+                    props,
+                    <CopyButton label="Copy the command" name="Copy the command" text={Command} />,
+                )}
+            />
         );
-    return <Row {...rowOf(props, said)} />;
+    }
+    return (
+        <Row
+            {...rowOf(props, null)}
+            below={
+                Path === '' || carriesCommand(Path) ? null : (
+                    <span className={styles.path}>{Path}</span>
+                )
+            }
+        />
+    );
 }
 
 export function NeedLine(props: Props) {
