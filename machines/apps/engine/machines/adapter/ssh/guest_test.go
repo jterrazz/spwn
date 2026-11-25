@@ -388,22 +388,22 @@ func dialRefused(t *testing.T, goos string, err error) error {
 
 func TestADialTheMacRefusesForLocalNetworkSaysSo(t *testing.T) {
 	err := dialRefused(t, "darwin", localtest.Unreachable())
-	if !errors.Is(err, contract.ErrLocalNetwork) {
-		t.Fatalf("Dial = %v; want the Local Network block", err)
+	if !errors.As(err, new(*contract.NoRouteError)) {
+		t.Fatalf("Dial = %v; want the no-route refusal", err)
 	}
-	if !strings.Contains(err.Error(), "no route to host") {
-		t.Errorf("Dial = %v; want the dial's own error kept beside the block", err)
+	if strings.Contains(err.Error(), "approved") || !strings.Contains(err.Error(), "no route to host") {
+		t.Errorf("Dial = %v; want the dial's own error alone, naming no cause", err)
 	}
 }
 
 func TestAnUnreachableRouteOffAMacIsNoLocalNetworkBlock(t *testing.T) {
-	if err := dialRefused(t, "linux", localtest.Unreachable()); errors.Is(err, contract.ErrLocalNetwork) {
+	if err := dialRefused(t, "linux", localtest.Unreachable()); errors.As(err, new(*contract.NoRouteError)) {
 		t.Fatalf("Dial on linux = %v; want a plain refusal", err)
 	}
 }
 
 func TestARefusedDialOnAMacIsNoLocalNetworkBlock(t *testing.T) {
-	if err := dialRefused(t, "darwin", localtest.Refused()); errors.Is(err, contract.ErrLocalNetwork) {
+	if err := dialRefused(t, "darwin", localtest.Refused()); errors.As(err, new(*contract.NoRouteError)) {
 		t.Fatalf("Dial = %v; want a plain refusal", err)
 	}
 }

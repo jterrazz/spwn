@@ -209,6 +209,27 @@ func HealthVerdict(vm VM, bundled bool) *verdict.Verdict {
 	return &v
 }
 
+func GuestFailing(vm VM) (string, bool) {
+	// invariant: a running VM whose engine dialed its guest and met no
+	// answer says its first failing step and why, in the dial's own words;
+	// a VM still connecting, or stopped, says nothing.
+	steps := HealthOf(vm)
+	if vm.State != Running || steps.SSH || vm.Guest != "absent" {
+		return "", false
+	}
+	step := StepSSH
+	if !steps.Address {
+		step = StepAddress
+	}
+	switch {
+	case vm.Blocked == VMUserBlock:
+		return step + " failing: " + VMUserRefused(vm.Mac), true
+	case vm.GuestError == "":
+		return step + " failing", true
+	}
+	return step + " failing: " + vm.GuestError, true
+}
+
 func passes(vm VM) bool {
 	// value: a running server passes every step past its state: it has an
 	// address, its SSH answers, and its check, when set, has answered.

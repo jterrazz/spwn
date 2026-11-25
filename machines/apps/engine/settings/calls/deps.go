@@ -98,7 +98,7 @@ func find(d Deps, name string, living bool) (catalog.Setting, error) {
 			continue
 		}
 		if living && !d.Settings.Lives(it) {
-			return it, fail.New(fail.NotForThisMachine, NotForThisMachine, name, map[string]string{"why": settings.LivesOnReason(it.Kinds)})
+			return it, fail.New(fail.NotForThisMachine, NotForThisMachine, name, map[string]string{"why": settings.WhyNotHere(it, d.Caps.Battery)})
 		}
 		return it, nil
 	}
@@ -147,6 +147,9 @@ func judge(ctx context.Context, d Deps, it catalog.Setting, off map[string]bool)
 		}
 	}
 	row := settings.JudgeSet(it, lives, record(ctx, d, it.Name), now, off[it.Name])
+	if !lives {
+		row.Why = settings.WhyNotHere(it, d.Caps.Battery)
+	}
 	row.Origin = originOf(d, it.Name)
 	if row.State == settings.StateNotApplied {
 		row.Needs = d.Settings.Needs(it)

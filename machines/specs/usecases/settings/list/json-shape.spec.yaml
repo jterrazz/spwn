@@ -13,4 +13,4 @@ runs:
       exit: 0
       stdout: |
           {"name":"hushlogin","label":"Silence the terminal login message","group":"set","state":"applied","applied_at":true,"where":"~/.hushlogin","admin":false}
-          {"name":"restart-after-power-cut","label":"Restarts after a power cut, and wakes for the network","group":"always-on-mac","state":"not-applied","applied_at":false,"admin":true}
+          {"name":"restart-after-power-cut","label":"Restarts after a power cut, and wakes for the network","group":"always-on-mac","state":"not-for-this-machine","applied_at":false,"why":"Always-on Macs only","admin":true}

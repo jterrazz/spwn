@@ -66,4 +66,4 @@ runs:
     - command: 'settings --json | /usr/bin/jq -r ''.settings[] | select(.name == "sshd") | .state'''
       exit: 0
       stdout: |
-          not-applied
+          not-for-this-machine

@@ -18,9 +18,15 @@ type WrongLivesOnError struct {
 	Package     string
 	Kinds       []catalog.MachineKind
 	ThisMachine catalog.MachineKind
+	// value: the package lives on Macs, and this one is a laptop, which
+	// the Always-on Mac group does not reach.
+	Laptop bool
 }
 
 func (e *WrongLivesOnError) Error() string {
+	if e.Laptop {
+		return e.Package + " is for an always-on Mac; this Mac is a laptop"
+	}
 	kinds := make([]string, len(e.Kinds))
 	for i, p := range e.Kinds {
 		kinds[i] = string(p)

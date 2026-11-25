@@ -22,8 +22,6 @@ runs:
           ○	dock-spacer	not applied	station settings apply dock-spacer
           ○	tart-launcher	not applied	station settings apply tart-launcher
           ○	tailscale-cli	not applied · needs tailscale	station apps install tailscale
-          # Always-on Mac
-          ○	Always-on Mac	5 · for a Mac that hosts servers
           # Checked	8 ●	1 ◐
           ◐	firewall	off	System Settings > Network > Firewall
           ●	filevault	as expected · on
@@ -35,4 +33,4 @@ runs:
           ●	time-machine	as expected · last backup 2 d ago
           ●	macos-updates	as expected · up to date
           # Not for this machine
-          –	1 not for this machine	VMs only
+          –	6 not for this machine	VMs only · Always-on Macs only

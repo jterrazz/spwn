@@ -41,9 +41,10 @@ runs:
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].root = true'' world.json > next.json && /bin/mv next.json world.json'
       exit: 0
     - command: 'settings apply sshd --on macbook-pro'
-      exit: 0
-      stdout: |
-          ●	sshd	sshd: applied
+      exit: 2
+      stderr: |
+          Error: sshd is for Always-on Macs only
+          Hint: station settings
     - command: 'ports --on macbook-pro | /usr/bin/grep -w 22'
       exit: 0
       stdout: |

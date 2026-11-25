@@ -9,9 +9,6 @@ import (
 )
 
 var (
-	// value: a dial its Mac refused because it has not approved station for
-	// Local Network; the dial's own error is wrapped beside it.
-	ErrLocalNetwork = errors.New("the Mac has not approved Machines for Local Network")
 	// value: a guest that answered and took none of the keys or the password
 	// it was offered.
 	ErrLoginRefused = errors.New("the guest refused the login")
@@ -19,6 +16,17 @@ var (
 	// VM's known hosts pin.
 	ErrHostKeyChanged = errors.New("the guest answered with another host key")
 )
+
+type NoRouteError struct {
+	// value: a dial a Mac refused with the errno macOS answers a process
+	// it keeps off the local network, as the dial said it. It says nothing
+	// of why: only a read of the Mac's Local Network approval does.
+	Err error
+}
+
+func (e *NoRouteError) Error() string { return e.Err.Error() }
+
+func (e *NoRouteError) Unwrap() error { return e.Err }
 
 type LockdownError struct {
 	// value: a dial its VM's lockdown failed at: why, and whether no start

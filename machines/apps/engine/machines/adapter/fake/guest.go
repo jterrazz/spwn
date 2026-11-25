@@ -138,13 +138,13 @@ func (g *Guests) answering(vm string) (*world.Guest, bool) {
 
 func (g *Guests) Dial(_ context.Context, t contract.GuestTarget) (contract.Guest, error) {
 	g.w.Lock()
-	refused := g.w.Fails("Guest.Dial")
+	refused, noRoute := g.w.Fails("Guest.Dial"), g.w.Fails("Guest.NoRoute")
 	g.w.Unlock()
 	if refused {
 		return nil, ErrRefused
 	}
-	if g.notApproved(t.VM) {
-		return nil, fmt.Errorf("%w: dial %s", contract.ErrLocalNetwork, t.Address)
+	if noRoute || g.notApproved(t.VM) {
+		return nil, &contract.NoRouteError{Err: fmt.Errorf("dial tcp %s: connect: no route to address", t.Address)}
 	}
 	wg, ok := g.answering(t.VM)
 	if !ok {

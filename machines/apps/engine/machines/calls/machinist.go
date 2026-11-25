@@ -108,6 +108,9 @@ type EngineVM struct {
 	Drift *model.KeptDrift
 	// value: what refused its guest's last connection; empty when nothing did.
 	Blocked model.GuestBlock
+	// value: what its guest's last dial met, while nothing has connected
+	// since; empty when nothing failed.
+	GuestError string
 	// value: why its engine stopped its run, its lockdown having failed;
 	// nil otherwise.
 	Lockdown *model.LockdownFailure

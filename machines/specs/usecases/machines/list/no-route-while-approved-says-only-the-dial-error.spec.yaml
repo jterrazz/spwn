@@ -1,0 +1,13 @@
+description: 'a dial with no route on a Mac read as approved says the dial error and no cause'
+env: two-macs
+runs:
+    - command: 'world fault Guest.NoRoute'
+      exit: 0
+    - command: 'machines --this-mac'
+      exit: 0
+      stdout: |
+          ●	macbook-pro	Mac	macbook-pro	Engine running
+          ○	api	Workspace	macbook-pro	Stopped · persistent	4 CPU	8 GB
+          ◐	linux-1	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB	SSH answers failing: dial tcp 192.168.64.5:22: connect: no route to address
+          # Needs you
+          ◐	linux-1	fails SSH answers	station machines restart linux-1

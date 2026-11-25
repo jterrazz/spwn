@@ -125,6 +125,9 @@ type Part struct {
 type VM struct {
 	Name    string
 	Running bool
+	// value: the step a running VM fails and why, as a sentence; empty
+	// when none fails.
+	Failing string
 }
 
 type Read struct {

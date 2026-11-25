@@ -20,7 +20,7 @@ runs:
     - command: 'settings restart-after-power-cut'
       exit: 0
       stdout: |
-          ○	restart-after-power-cut	not applied	station settings apply restart-after-power-cut
+          –	restart-after-power-cut	not for this machine · Always-on Macs only
           # Detail
           group	Set by Machines · Always-on Mac
           does	Restarts after a power cut, and wakes for the network

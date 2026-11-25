@@ -1,0 +1,39 @@
+description: 'the Always-on Mac group is not for a laptop, and stays offered on the always-on mini'
+env: two-macs
+runs:
+    - command: 'world admin on'
+      exit: 0
+    - command: 'settings apply sshd'
+      exit: 2
+      stderr: |
+          Error: sshd is for Always-on Macs only
+          Hint: station settings
+    - command: 'settings never-sleeps'
+      exit: 0
+      stdout: |
+          –	never-sleeps	not for this machine · Always-on Macs only
+          # Detail
+          group	Set by Machines · Always-on Mac
+          does	Never sleeps: the engine keeps this Mac awake, its servers with it
+          lives on	Macs
+    - command: 'settings --all | /usr/bin/grep -E "Always-on|sshd|autologin"'
+      exit: 0
+      stdout: |
+          –	autologin	not for this machine · Always-on Macs only
+          –	lock-after-login	not for this machine · Always-on Macs only
+          –	never-sleeps	not for this machine · Always-on Macs only
+          –	restart-after-power-cut	not for this machine · Always-on Macs only
+          –	sshd	not for this machine · Always-on Macs only
+    - command: 'settings --on mac-mini | /usr/bin/grep -E "sshd|autologin|never-sleeps|restart-after-power-cut|lock-after-login"'
+      exit: 0
+      stdout: |
+          ○	lock-after-login	not applied	station settings apply lock-after-login
+          ○	sshd	not applied	station settings apply sshd
+          ●	autologin	applied
+          ●	never-sleeps	applied
+          ●	restart-after-power-cut	applied
+    - command: 'settings --all-machines --all | /usr/bin/grep -E "sshd|never-sleeps"'
+      exit: 0
+      stdout: |
+          ●	never-sleeps	–	●	–	?	1/1
+          ○	sshd	–	○	–	?	0/1

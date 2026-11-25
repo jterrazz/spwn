@@ -432,6 +432,9 @@
     "overview.VM": {
       "additionalProperties": false,
       "properties": {
+        "Failing": {
+          "type": "string"
+        },
         "Name": {
           "type": "string"
         },
@@ -440,6 +443,7 @@
         }
       },
       "required": [
+        "Failing",
         "Name",
         "Running"
       ],

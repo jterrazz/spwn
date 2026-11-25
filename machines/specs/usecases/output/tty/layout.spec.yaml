@@ -58,9 +58,8 @@ runs:
           Needs a look
             ◐ firewall  off  → System Settings > Network > Firewall
           Set by Machines  ○ 17 · docker-shortcuts, git-shortcuts, ghostty-dotfiles, …
-          Always-on Mac    ○ 5 · for a Mac that hosts servers
           Checked          ● 8  ◐ 1 · firewall, filevault, sip, automatic-updates, …
-          – 1 not for this machine · VMs only
+          – 6 not for this machine · VMs only · Always-on Macs only
 
           → station settings apply  apply the 17
           → station settings --all  for every row
@@ -79,7 +78,7 @@ runs:
             ○ 18 settings  ○ 0/17    ○ 0/17    ○ 0/7    ?    0/41
           Always-on Mac
                           This Mac  mac-mini  linux-1  api  OK
-            ○ 5 settings  ○         ○ 3/5     –        ?    3/5
+            ○ 5 settings  –         ○ 3/5     –        ?    3/5
           Checked
                         This Mac  mac-mini  linux-1  api  OK
             ◐ firewall  ◐         ●         –        ?    1/2

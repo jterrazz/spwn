@@ -13,7 +13,7 @@ runs:
           # Set by Machines
           ○	18 settings	○ 0/17	?	○ 0/7	?	0/24
           # Always-on Mac
-          ○	5 settings	○	?	–	?	–
+          –	5 settings	–	?	–	?	–
           # Checked
           ?	9 settings	? 0/9	?	–	?	0/9
     - command: 'settings --all-machines --json | /usr/bin/jq -c ''.findings'''

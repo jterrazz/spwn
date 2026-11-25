@@ -360,6 +360,9 @@ func (d *Engine) vmViews() []engine.VMView {
 			Latency: v.latency, Restart: v.walk, Cause: v.cause, LastLines: v.lastLines, ReadyAt: v.readyAt,
 			Drift: v.keptDriftLocked(), Blocked: v.blocked, Lockdown: v.lockdown,
 		}
+		if v.guest != engine.GuestConnected {
+			view.GuestError = v.lastErr
+		}
 		if v.state == engine.StateRunning {
 			view.BootAt = v.bootAt
 		}
@@ -669,11 +672,11 @@ func (d *Engine) guestOnce(ctx context.Context, v *vmState, gen int) {
 	}
 	if err != nil {
 		d.guestFailed(ctx, v, err.Error())
-		d.blockedBy(v, gen, err)
+		d.blockedBy(ctx, v, gen, err)
 		return
 	}
 	defer func() { _ = client.Close() }()
-	d.blockedBy(v, gen, nil)
+	d.blockedBy(ctx, v, gen, nil)
 	d.mountFolders(ctx, v, client)
 	d.mu.Lock()
 	if v.gen != gen {
@@ -768,8 +771,14 @@ func (d *Engine) guestFailed(ctx context.Context, v *vmState, reason string) {
 
 // invariant: a VM is blocked by its Mac's Local Network, or by its Mac's
 // refused VM user, from the dial that was refused so until one that is
-// not, read in this run's session only.
-func (d *Engine) blockedBy(v *vmState, gen int, err error) {
+// not, read in this run's session only. A dial with no route is the
+// Local Network's block only when the Mac's approval, read again now,
+// says it has not approved; the errno alone says nothing of why.
+func (d *Engine) blockedBy(ctx context.Context, v *vmState, gen int, err error) {
+	noRoute := errors.As(err, new(*contract.NoRouteError))
+	if noRoute {
+		d.readLocalNetwork(ctx)
+	}
 	d.mu.Lock()
 	defer d.mu.Unlock()
 	if v.gen != gen {
@@ -777,7 +786,7 @@ func (d *Engine) blockedBy(v *vmState, gen int, err error) {
 	}
 	v.blocked = ""
 	switch {
-	case errors.Is(err, contract.ErrLocalNetwork):
+	case noRoute && d.localNetwork == model.LocalNetworkNotApproved:
 		v.blocked = model.LocalNetworkBlock
 	case errors.As(err, new(*model.BadVMUserError)):
 		v.blocked = model.VMUserBlock

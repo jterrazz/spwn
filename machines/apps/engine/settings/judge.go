@@ -136,6 +136,18 @@ func GroupOf(it catalog.Setting) Group {
 	return SetByStation
 }
 
+const LaptopReason = "Always-on Macs only"
+
+func WhyNotHere(it catalog.Setting, laptop bool) string {
+	// value: "not for this machine"'s reason for one setting here: the
+	// Always-on Mac group on a laptop says so, any other the kinds it
+	// lives on.
+	if laptop && GroupOf(it) == AlwaysOnMac {
+		return LaptopReason
+	}
+	return LivesOnReason(it.Kinds)
+}
+
 func LivesOnReason(livesOn []catalog.MachineKind) string {
 	// value: "not for this machine" with the kinds it lives on, in the
 	// owner's words.

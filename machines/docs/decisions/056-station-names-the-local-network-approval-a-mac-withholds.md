@@ -3,6 +3,8 @@
 **Status:** Proposed
 **Date:** 2026-11-18
 
+Amended 2026-11-24: H5 was false, so the dial alone is no longer the block (below).
+
 ## Context
 
 macOS lets a process reach its Mac's local network only once that Mac has approved it for Local Network, and the
@@ -18,7 +20,7 @@ Five facts the design leans on are HYPOTHESES, not yet proved on a real Mac:
 - H2: an approved Mac sends it without an error.
 - H3: an approval the owner declined fails the same way, so station cannot tell declined from not asked yet.
 - H4: an ad-hoc signed binary is asked again after each upgrade.
-- H5: on an approved Mac, a booting guest's dial fails `ECONNREFUSED` or times out, never `EHOSTUNREACH`.
+- H5: on an approved Mac, a booting guest's dial fails `ECONNREFUSED` or times out, never `EHOSTUNREACH`. False on 2026-11-24: a MacBook the owner had approved logged `dial tcp 192.168.64.239:22: connect: no route to host` for development-linux.
 
 ## Decision
 
@@ -30,8 +32,11 @@ The engine reads the approval itself and every surface names the Mac:
   gate). Its hello carries it, `local_network`: `approved`, `not-approved`, `checking`, or absent where it cannot tell
   (off a Mac, a read that does not end). The read is one adapter (`wire/localnetwork.go`), so its
   trigger changes alone if H1 or H2 fails.
-- A guest dial a Mac refuses with `EHOSTUNREACH` is the block, on a Mac only. The engine keeps the VM `blocked:
-local-network` until a dial connects or its run ends, and answers a run it cannot reach `local_network`.
+- A guest dial a Mac refuses with `EHOSTUNREACH` is the block only when the engine's read of the approval, taken at
+  that dial, says not approved. The engine keeps the VM `blocked: local-network` until a dial connects or its run
+  ends, and answers a run it cannot reach `local_network`. With the read approved, checking or unable to tell, the dial
+  is no block: the VM says the dial's own error and its address, and no cause. The engine knows no other read of the
+  approval than that datagram; whether macOS exposes one is a HYPOTHESIS left unproved.
 - `station engine start` waits 5 s at most for a `checking` read to settle, then exits 0 with the row `◐ local network
 needs you · approve station on <mac>'s screen, or in System Settings > Privacy & Security > Local Network`, or
   `◐ local network checking · if macOS asks, <the same fix>` while the read still checks: the engine runs, and a VM created meanwhile is started once approved, its first boot never having run ([ADR-062](062-a-failed-create-stays-on-the-record-until-its-start-or-its-delete.md)).

@@ -291,7 +291,8 @@ func thisMacsVMs(f machines.AllMachines) ([]finding.Finding, []overview.VM) {
 	}
 	vms := []overview.VM{}
 	for _, vm := range machines.Ordered(h.VMs) {
-		vms = append(vms, overview.VM{Name: vm.Name, Running: vm.State == machines.Running})
+		failing, _ := machines.GuestFailing(vm)
+		vms = append(vms, overview.VM{Name: vm.Name, Running: vm.State == machines.Running, Failing: failing})
 	}
 	return own, vms
 }

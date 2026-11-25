@@ -1107,6 +1107,9 @@
         "Guest": {
           "type": "string"
         },
+        "GuestError": {
+          "type": "string"
+        },
         "Head": {
           "$ref": "#/$defs/core.verdict.Verdict"
         },
