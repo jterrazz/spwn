@@ -239,3 +239,63 @@ func (k Kind) takes(attr string) bool {
 	}
 	return slices.ContainsFunc(k.Fields, func(f Field) bool { return f.Name == attr })
 }
+
+func (k Kind) fieldNames() []string {
+	out := make([]string, 0, len(k.Fields))
+	for _, f := range k.Fields {
+		out = append(out, f.Name)
+	}
+	return out
+}
+
+// value: the floor a page path takes, by the longest folder of FloorOf that
+// holds it, 0 when none does.
+func (s Schema) floorOf(path string) int {
+	best, floor := -1, 0
+	for _, f := range s.FloorOf {
+		if strings.HasPrefix(path, f.Path) && len(f.Path) > best {
+			best, floor = len(f.Path), f.Floor
+		}
+	}
+	return floor
+}
+
+// value: the seat whose folders hold a page path, empty when none does.
+func (s Schema) seatOf(path string) string {
+	for _, seat := range s.Seats {
+		for _, p := range seat.Paths {
+			if strings.HasPrefix(path, p) {
+				return seat.ID
+			}
+		}
+	}
+	return ""
+}
+
+// value: the icons the engine ships by name: one per engine kind, per intent
+// and per value a built-in icon Face renders (a rule's force, a component's
+// level, a link's right). Their grids are the window's to draw.
+func builtinIcons() []string {
+	out := slices.Collect(maps.Keys(builtinKinds()))
+	for _, i := range intents() {
+		out = append(out, string(i))
+	}
+	out = append(out, "hard", "soft", "hardened", "allowed", "refused")
+	return append(out, levels()...)
+}
+
+func (s Schema) iconExists(name string) bool {
+	return slices.Contains(builtinIcons(), name) || slices.ContainsFunc(s.Icons, func(i Icon) bool { return i.Name == name })
+}
+
+// value: the content kinds a corpus reads: the engine's and its own.
+func (s Schema) contentKindIDs() []string {
+	out := contentKinds()
+	for id := range s.Kinds {
+		if !slices.Contains(out, id) {
+			out = append(out, id)
+		}
+	}
+	slices.Sort(out)
+	return out
+}

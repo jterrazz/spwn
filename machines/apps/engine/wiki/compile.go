@@ -115,7 +115,7 @@ func (c *compiler) run() {
 }
 
 func (c *compiler) refuse(rule, block string, at At, says string) {
-	c.findings = append(c.findings, Finding{Rule: rule, Hard: true, Page: c.page.ID, Block: block, Line: at.Line, Col: at.Col, Says: says})
+	c.findings = append(c.findings, finding(rule, c.page.ID, block, at, says))
 }
 
 // value: the first line after the frontmatter, 0 when the page has none.
