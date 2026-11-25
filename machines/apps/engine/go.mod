@@ -17,6 +17,9 @@ require (
 	go.yaml.in/yaml/v3 v3.0.5
 	golang.org/x/crypto v0.59.0
 	golang.org/x/sys v0.50.0
+	spwn.sh/packages/activity v0.0.0
+	spwn.sh/packages/agent v0.0.0
+	spwn.sh/packages/platform v0.0.0
 )
 
 require (
@@ -242,4 +245,9 @@ tool (
 	golang.org/x/tools/cmd/deadcode
 )
 
-replace github.com/jterrazz/studio-station/catalog => ../../catalog
+replace (
+	github.com/jterrazz/studio-station/catalog => ../../catalog
+	spwn.sh/packages/activity => ../../../packages/activity
+	spwn.sh/packages/agent => ../../../packages/agent
+	spwn.sh/packages/platform => ../../../packages/platform
+)

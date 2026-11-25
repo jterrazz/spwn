@@ -209,6 +209,29 @@ func ruleFamilyImports(w *world) []finding {
 	return out
 }
 
+// value: the module path every package of Agents' tree, at the repository
+// root, lives under.
+const agentsModules = "spwn.sh/"
+
+// invariant: ADR-088: only an adapter imports an Agents package; its family's
+// model, calls, pages and surface see the family's own types, so the domain
+// code stays behind the one adapter that wraps it, and a world never runs it.
+func ruleAgentsPackages(w *world) []finding {
+	var out []finding
+	for _, f := range w.files {
+		p, ok := placeOf(f.pkg)
+		for i, ip := range f.imports {
+			if !strings.HasPrefix(ip, agentsModules) || ok && p.row == rowAdapter && p.tech != "fake" {
+				continue
+			}
+			out = append(out, finding{"imports", f.at(f.syntax.Imports[i].Pos()), fmt.Sprintf("%q imports %q: only a family's real adapter imports an Agents package", f.pkg, ip)})
+		}
+	}
+	return out
+}
+
+func TestOnlyAnAdapterImportsAnAgentsPackage(t *testing.T) { judge(t, "AgentsPackages") }
+
 func TestFamilyImports(t *testing.T)                 { judge(t, "FamilyImports") }
 func TestAFamilyModelReachesNoPlatform(t *testing.T) { judge(t, "FamilyImportsPlatform") }
 func TestASurfaceReachesTheEngineOnlyThroughItsCalls(t *testing.T) {

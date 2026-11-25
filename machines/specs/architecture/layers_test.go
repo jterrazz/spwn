@@ -757,6 +757,7 @@ func rules() []rule {
 		{"TreeInside", ruleTree, "apps/engine/apps/helpers/mutant.go", "package helpers\n", "apps/engine/apps/helpers"},
 		{"TreeApplies", ruleTree, "apps/engine/awake/applies.go", "package awake\n", "apps/engine/awake"},
 		{"TreeAppliesElsewhere", ruleTree, "apps/engine/awake/mutant_gate.go", "package awake\n\nimport \"" + module + "/core/machine\"\n\nvar Applies = machine.Anywhere\n", "apps/engine/awake"},
+		{"AgentsPackages", ruleAgentsPackages, "apps/engine/apps/mutant_agents.go", "package apps\n\nimport _ \"spwn.sh/packages/platform\"\n", "apps/engine/apps/mutant_agents.go"},
 		{"FamilyImports", ruleFamilyImports, "apps/engine/apps/mutant_imports.go", "package apps\n\nimport _ \"os/exec\"\n", "apps/engine/apps/mutant_imports.go"},
 		{"FamilyImportsPlatform", ruleFamilyImports, "apps/engine/disk/mutant_imports_platform.go", "package disk\n\nimport _ \"" + module + "/platform/local\"\n", "apps/engine/disk/mutant_imports_platform.go"},
 		{"FamilyImportsSurfaceEngine", ruleFamilyImports, "apps/engine/surface/cli/start/mutant_engine.go", "package startcmd\n\nimport _ \"" + module + "/engine\"\n", "apps/engine/surface/cli/start/mutant_engine.go"},
