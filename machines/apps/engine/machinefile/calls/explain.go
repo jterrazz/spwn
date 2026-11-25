@@ -123,9 +123,11 @@ var Explain = call.Call[Deps, ExplainIn, ExplainOut]{
 	},
 }
 
-// value: whether the owner named a Machinefile by its path rather than
-// its name: a name is lower-case words joined by dashes.
-func isPath(s string) bool { return strings.ContainsRune(s, '/') || strings.HasSuffix(s, ".yaml") }
+func IsPath(s string) bool {
+	// invariant: a name is lower-case words joined by dashes, so a slash or
+	// a .yaml suffix names a Machinefile by its path.
+	return strings.ContainsRune(s, '/') || strings.HasSuffix(s, ".yaml")
+}
 
 // invariant: the Machinefile read is the one named, else the one this
 // machine is bound to, else the one named after the machine. One named by
@@ -139,7 +141,7 @@ func named(ctx context.Context, d Deps, asked string) (name string, path *machin
 	if asked == "" {
 		return d.Name, nil, nil
 	}
-	if !isPath(asked) {
+	if !IsPath(asked) {
 		return asked, nil, nil
 	}
 	body, err := d.Owned.Read(ctx, asked)

@@ -29,6 +29,9 @@ type Deps struct {
 	// value: refuses this machine when the call's rule says no, before any
 	// check of the request.
 	Admit func() error
+	// value: the name of the Machinefile --from names: a name as it is, a
+	// file of this Mac copied among the owner's Machinefiles first.
+	Machinefile func(ctx context.Context, from string) (string, error)
 	// value: All machines, for the Mac question; read only.
 	AllMachines func(ctx context.Context) (machines.AllMachines, error)
 	// value: the session this command runs for, by its name
@@ -104,6 +107,13 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 			if !env.Far() {
 				if err := d.Admit(); err != nil {
 					return err
+				}
+				if in.From != "" {
+					name, err := d.Machinefile(ctx, in.From)
+					if err != nil {
+						return err
+					}
+					in.request.Image, in.request.From = name, name
 				}
 			}
 			if unbuilt, err := d.Check(ctx, in.request); !unbuilt {

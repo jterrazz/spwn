@@ -203,24 +203,33 @@ func refusedOffTerminal(asked []machinefile.Asked, verb string) error {
 	return fail.New(fail.NeedsTerminal, NeedsTerminal, strings.Join(pkgs, ", "), detail)
 }
 
-// invariant: a Machinefile named by its path is copied into the owner's
-// folder under its name, so every later read finds it among the
-// owner's own files; the machine is bound to the name, never to the path.
+// invariant: the machine is bound to the Machinefile's name, never to its
+// path.
 func bind(ctx context.Context, d Deps, asked, name string) error {
-	if isPath(asked) {
-		_, tree, err := named(ctx, d, asked)
-		if err != nil {
-			return err
-		}
-		var kept *contract.KeptError
-		switch err := d.Owned.Keep(ctx, name, tree.Files[0].Body); {
-		case errors.As(err, &kept):
-			return fail.New(fail.Refused, NameTaken, asked, map[string]string{"name": kept.Name, "path": kept.Path})
-		case err != nil:
+	if IsPath(asked) {
+		if _, err := Keep(ctx, d, asked); err != nil {
 			return err
 		}
 	}
 	return d.Prefs.Bind(name, d.Now())
+}
+
+func Keep(ctx context.Context, d Deps, path string) (string, error) {
+	// invariant: a Machinefile named by its path is copied into the owner's
+	// folder under its name, so every later read finds it among the owner's
+	// own files; a name that folder holds with other bytes is never replaced.
+	name, tree, err := named(ctx, d, path)
+	if err != nil {
+		return "", err
+	}
+	var kept *contract.KeptError
+	switch err := d.Owned.Keep(ctx, name, tree.Files[0].Body); {
+	case errors.As(err, &kept):
+		return "", fail.New(fail.Refused, NameTaken, path, map[string]string{"name": kept.Name, "path": kept.Path})
+	case err != nil:
+		return "", err
+	}
+	return name, nil
 }
 
 type run struct {

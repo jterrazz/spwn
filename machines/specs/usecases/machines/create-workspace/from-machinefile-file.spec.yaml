@@ -1,0 +1,32 @@
+description: 'create --from a file copies it among yours and makes the workspace from it, by its name'
+fixture: ../../__fixtures__/build/
+env: two-macs
+runs:
+    - command: 'world edit macbook-pro downloads/qa.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: qa
+          machine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }
+          extends: [base-ubuntu]
+          vm: { lifetime: persistent, resources: { cpus: 6, memory: 3G, disk: 30G } }
+          apps: [jq]
+      exit: 0
+    - command: 'machines create web --from downloads/qa.machine.yaml'
+      exit: 2
+      stderr: |
+          Error: image qa is not built on macbook-pro
+          Hint: station images build qa
+    - command: 'images build qa --binary $HOME/station-linux >/dev/null'
+      exit: 0
+    - command: 'machines create web --from downloads/qa.machine.yaml'
+      exit: 0
+      stdout: |
+          ●	Running
+          ●	Has an address	192.168.64.5
+          ●	SSH answers
+          ●	Boot phase	qa
+          ●	web	Created	Persistent · 6 CPU · 3 GB · 30 GB
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"] | [{image: .vms["web"].kept.image, template: .vms["web"].kept.template}, .files["machinefiles/qa.machine.yaml"] == .files["downloads/qa.machine.yaml"]]'' world.json'
+      exit: 0
+      stdout: |
+          [{"image":"qa","template":"qa"},true]
