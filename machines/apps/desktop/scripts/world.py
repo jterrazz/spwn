@@ -7,8 +7,8 @@ environment: HOME, PATH and every station path in a temporary folder, never the 
 
 WORLDS is the one list of the worlds the window records, each a world of specs/usecases/worlds/ and what a page
 needs that it lacks: machinefiles on This Mac, the fake binaries of a fixture of specs/usecases/__fixtures__/, and
-edits of its machines (a sign-in in progress, a program signed out or broken, an accounts switch the fake reads in
-apps/engine/world/accounts.go, as the presence check a grant asks, a failed sign-in or a failing background task
+edits of its machines (a sign-in in progress, a program signed out or broken, the answer This Mac's presence check
+gives a grant, a failed sign-in or a failing background task
 dropped, what a Mac's engine keeps of Awake, what a Mac's journal keeps, a VM working hard on every core of its Mac, a workspace whose create failed at its boot); a world of WORLDS may be a world of specs/usecases/worlds/ under another name, seeded otherwise. A world no
 entry names is served as specs/usecases/worlds/ holds it.
 
@@ -152,9 +152,10 @@ def broken(name, program, who, reason):
     return edit
 
 
-def switched(name, value):
+def presence(value):
+    """How This Mac's presence check answers whatever asks it, the field apps/engine/world/world.go reads: refused or absent."""
     def edit(content):
-        content["macs"][content["this_mac"]].setdefault("accounts", {})[name] = value
+        content["macs"][content["this_mac"]]["presence"] = value
     return edit
 
 
@@ -457,7 +458,7 @@ WORLDS = {
     "ranged-apps": ("two-macs", "homebrew",
                     applied(["lazygit", "{ name: node, version: '24' }", "{ name: go, version: '1.25' }",
                              "{ name: ripgrep, optional: true }"]), []),
-    "presence-refused": ("two-macs", None, {}, [switched("presence", "refused")]),
+    "presence-refused": ("two-macs", None, {}, [presence("refused")]),
     "working-hard": ("stories", None, {}, [working_hard("macbook-pro", "linux-1", 92, 95, BUSIEST)]),
     "stories-file":("stories", "homebrew", machine("macbook-pro", ["gh", "lazygit", "ghostty"], "settings: { git-shortcuts: {} }\n"), []),
     "leftovers": ("two-macs", None, {}, [leftover("macbook-pro", "old-vm", 9000000000),
