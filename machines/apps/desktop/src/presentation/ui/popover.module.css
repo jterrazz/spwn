@@ -1,0 +1,176 @@
+.layer {
+    position: fixed;
+    inset: 0;
+    z-index: 4;
+    pointer-events: none;
+}
+.popover {
+    position: absolute;
+    left: var(--popover-x, 0);
+    top: var(--popover-y, 0);
+    box-sizing: border-box;
+    width: 304px;
+    max-width: calc(100% - 16px);
+    max-height: var(--popover-height, none);
+    display: flex;
+    flex-direction: column;
+    background: var(--panel);
+    border: 1px solid var(--line-2);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-pop);
+    overflow: hidden;
+    pointer-events: auto;
+    opacity: 0;
+}
+.popover[data-side] {
+    opacity: 1;
+    animation: opening var(--motion-hover);
+}
+.popover[data-side='above'] {
+    animation-name: opening-above;
+}
+.popover:focus {
+    outline: none;
+}
+@keyframes opening {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+}
+@keyframes opening-above {
+    from {
+        opacity: 0;
+        transform: translateY(4px);
+    }
+}
+.filter {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: var(--space-8);
+    margin: var(--space-8) var(--space-8) var(--space-4);
+    padding: 0 var(--space-10);
+    height: 32px;
+    border-radius: var(--radius-control);
+    background: var(--inset);
+    color: var(--t3);
+}
+.filter:focus-within {
+    box-shadow: inset 0 0 0 1.5px var(--new);
+}
+.filter svg {
+    width: 14px;
+    height: 14px;
+    flex: none;
+    stroke-width: 1.4;
+}
+.input {
+    all: unset;
+    flex: 1;
+    min-width: 0;
+    color: var(--t1);
+    font-size: var(--text-body);
+    user-select: text;
+}
+.input::placeholder {
+    color: var(--t3);
+}
+.list {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    padding: var(--space-4) var(--space-6) var(--space-6);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+.list:focus {
+    outline: none;
+}
+.section {
+    margin: 0;
+    padding: var(--space-8) var(--space-8) var(--space-4);
+    font-size: 11px;
+    font-weight: var(--weight-medium);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--t3);
+}
+.row {
+    position: relative;
+    box-sizing: border-box;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    min-height: 32px;
+    padding: var(--space-4) var(--space-8);
+    border-radius: var(--radius-control);
+    color: var(--t2);
+    min-width: 0;
+}
+.row[aria-selected='true'] {
+    background: var(--wash);
+    color: var(--t1);
+}
+.row[data-active] {
+    background: var(--raise);
+    color: var(--t1);
+}
+.row[aria-disabled='true'] {
+    cursor: default;
+    color: var(--t4);
+}
+.row[aria-disabled='true'] > svg {
+    color: var(--t4);
+}
+.indent {
+    margin-left: 22px;
+}
+.indent::before {
+    content: '';
+    position: absolute;
+    left: -4px;
+    top: -1px;
+    bottom: -1px;
+    width: 1px;
+    background: var(--line-2);
+}
+.row > svg {
+    width: 16px;
+    height: 16px;
+    flex: none;
+    color: var(--t3);
+    stroke-width: 1.4;
+}
+.words {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+.label,
+.description {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.description {
+    font-size: var(--text-label);
+    color: var(--t3);
+}
+.word {
+    flex: none;
+    max-width: 88px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: var(--text-label);
+    color: var(--t3);
+}
+.none {
+    margin: 0;
+    padding: var(--space-10) var(--space-8);
+    color: var(--t3);
+}

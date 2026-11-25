@@ -1,0 +1,95 @@
+- button "macbook-pro" [expanded]
+- dialog "Machines":
+  - combobox "Filter machines" [expanded]
+  - listbox "Machines":
+    - group "Machines":
+      - option "linux-1 Running":
+        - text: linux-1
+        - img "Running"
+      - option "linux-2 Running":
+        - text: linux-2
+        - img "Running"
+      - option "linux-3 Running":
+        - text: linux-3
+        - img "Running"
+      - option "linux-4 Stopped":
+        - text: linux-4
+        - img "Stopped"
+      - option "linux-5 Running":
+        - text: linux-5
+        - img "Running"
+      - option "linux-6 Running":
+        - text: linux-6
+        - img "Running"
+      - option "linux-7 Running":
+        - text: linux-7
+        - img "Running"
+      - option "linux-8 Running":
+        - text: linux-8
+        - img "Running"
+      - option "linux-9 Running":
+        - text: linux-9
+        - img "Running"
+      - option "linux-10 Running":
+        - text: linux-10
+        - img "Running"
+      - option "linux-11 Stopped":
+        - text: linux-11
+        - img "Stopped"
+      - option "linux-12 Running":
+        - text: linux-12
+        - img "Running"
+      - option "linux-13 Running":
+        - text: linux-13
+        - img "Running"
+      - option "linux-14 Running":
+        - text: linux-14
+        - img "Running"
+      - option "linux-15 Running":
+        - text: linux-15
+        - img "Running"
+      - option "linux-16 Running":
+        - text: linux-16
+        - img "Running"
+      - option "linux-17 Running":
+        - text: linux-17
+        - img "Running"
+      - option "linux-18 Stopped":
+        - text: linux-18
+        - img "Stopped"
+      - option "linux-19 Running":
+        - text: linux-19
+        - img "Running"
+      - option "linux-20 Running":
+        - text: linux-20
+        - img "Running"
+      - option "linux-21 Running":
+        - text: linux-21
+        - img "Running"
+      - option "linux-22 Running":
+        - text: linux-22
+        - img "Running"
+      - option "linux-23 Running":
+        - text: linux-23
+        - img "Running"
+      - option "linux-24 Running":
+        - text: linux-24
+        - img "Running"
+      - option "linux-25 Stopped":
+        - text: linux-25
+        - img "Stopped"
+      - option "linux-26 Running":
+        - text: linux-26
+        - img "Running"
+      - option "linux-27 Running":
+        - text: linux-27
+        - img "Running"
+      - option "linux-28 Running":
+        - text: linux-28
+        - img "Running"
+      - option "linux-29 Running":
+        - text: linux-29
+        - img "Running"
+      - option "linux-30 Running":
+        - text: linux-30
+        - img "Running"

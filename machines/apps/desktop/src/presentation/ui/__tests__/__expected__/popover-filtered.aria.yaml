@@ -1,0 +1,14 @@
+- button "linux-1" [expanded]
+- dialog "Machines":
+  - combobox "Filter machines" [expanded]: lin
+  - listbox "Machines":
+    - group "Machines":
+      - option "linux-1 Running" [selected]:
+        - text: linux-1
+        - img "Running"
+      - option "linux-2 Creating":
+        - text: linux-2
+        - img "Creating"
+      - option "linux-3 Running":
+        - text: linux-3
+        - img "Running"

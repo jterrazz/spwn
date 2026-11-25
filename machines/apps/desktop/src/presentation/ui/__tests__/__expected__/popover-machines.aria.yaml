@@ -1,0 +1,35 @@
+- button "linux-1" [expanded]
+- dialog "Machines":
+  - combobox "Filter machines" [expanded]
+  - listbox "Machines":
+    - group "Machines":
+      - option "macbook-pro Up":
+        - text: macbook-pro
+        - img "Up"
+      - option "agent-7f Running":
+        - text: agent-7f
+        - img "Running"
+      - option "api Stopped":
+        - text: api
+        - img "Stopped"
+      - option "linux-1 Running" [selected]:
+        - text: linux-1
+        - img "Running"
+      - option "linux-2 Creating":
+        - text: linux-2
+        - img "Creating"
+      - option "mac-mini Up":
+        - text: mac-mini
+        - img "Up"
+      - option "infra Down":
+        - text: infra
+        - img "Down"
+      - option "linux-3 Running":
+        - text: linux-3
+        - img "Running"
+      - option "review-bot Running":
+        - text: review-bot
+        - img "Running"
+      - option "macbook-air Asleep":
+        - text: macbook-air
+        - img "Asleep"
