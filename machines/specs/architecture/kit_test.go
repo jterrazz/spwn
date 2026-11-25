@@ -12,6 +12,8 @@ import (
 	"strings"
 	"testing"
 
+	command "github.com/spf13/cobra"
+
 	uitoken "github.com/jterrazz/studio-station/apps/engine/ui/token"
 )
 
@@ -463,5 +465,134 @@ func TestEveryPageHasItsFourFixtures(t *testing.T) {
 		if !slices.ContainsFunc(got, func(f finding) bool { return strings.Contains(f.where, "/outcome-tools.*") }) {
 			t.Error("the fixtures rule did not report a family the spec does not list")
 		}
+	})
+}
+
+// value: ADR-021 rule 1: the words at the top of the tree that act on Spwn
+// itself rather than on a noun.
+func spwnWords() []string { return []string{"init", "use", "update", "doctor", "uninstall", "help"} }
+
+// value: ADR-021 rule 2's nouns, and the nouns of Machines that stand at the
+// top of the tree.
+func treeNouns() []string {
+	return []string{
+		"machines", "agents", "apps", "teams", "engine", "disk", "journal", "machinefile", "project",
+		"overview", "activity", "settings", "ports", "accounts", "background", "awake", "images",
+	}
+}
+
+// value: ADR-021 rule 3: one verb per meaning, from one closed table, then
+// the acts a noun has of its own.
+func verbTable() []string {
+	return []string{
+		"create", "delete", "start", "stop", "restart", "install", "update", "remove",
+		"plan", "apply", "drift", "add", "forget", "edit", "login", "logout", "log",
+		"talk", "dream", "sleep", "fork", "share", "free", "erase", "build", "ssh",
+	}
+}
+
+// value: the verbs the glossary defines, each a noun's own act once it does
+// (ADR-021 rule 3): the backquoted words of its "The verbs" section.
+func glossaryVerbs(t *testing.T) []string {
+	t.Helper()
+	data, err := os.ReadFile(filepath.Join(repoRoot(t), "docs", "concepts", "glossary.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, section, ok := strings.Cut(string(data), "\n## The verbs\n")
+	if !ok {
+		t.Fatal("docs/concepts/glossary.md has no section The verbs")
+	}
+	section, _, _ = strings.Cut(section, "\n## ")
+	var out []string
+	for _, m := range regexp.MustCompile("`([^`]+)`").FindAllStringSubmatch(section, -1) {
+		for _, v := range strings.Split(m[1], "/") {
+			out = append(out, strings.TrimSpace(v))
+		}
+	}
+	return out
+}
+
+// invariant: rule verb-table (ADR-021 rules 1 to 3): the top of the tree is a
+// noun or a word acting on Spwn, and every command under a noun is a verb of
+// the table or one the glossary defines.
+func ruleVerbTable(root *command.Command, defined []string) []finding {
+	var out []finding
+	for _, c := range typedCommands(root) {
+		switch {
+		case top(c) && !slices.Contains(treeNouns(), c.Name()) && !slices.Contains(spwnWords(), c.Name()):
+			out = append(out, finding{"verb-table", commandPath(c), "a word at the top of the tree that is no noun and does not act on Spwn"})
+		case !top(c) && !slices.Contains(verbTable(), c.Name()) && !slices.Contains(defined, c.Name()):
+			out = append(out, finding{"verb-table", commandPath(c), "a verb outside the table that the glossary does not define"})
+		}
+	}
+	return out
+}
+
+// value: the breaches of the verb table the tree holds today, each with the
+// lot of the single-program plan that removes it: M2 moves the Machinefile's
+// verbs under the machinefile noun; D0b's one glossary defines each other
+// verb as its noun's own act or renames it.
+func verbExceptions() []exception {
+	moved := []string{"plan", "apply", "drift", "upgrade", "explain"}
+	defined := []string{
+		"apps move", "disk move", "settings diff", "settings off", "awake off",
+		"ports declare", "ports undeclare", "ports https",
+		"machines cleanup", "machines unlock", "machines wake", "machines remind",
+	}
+	out := make([]exception, 0, len(moved)+len(defined))
+	for _, w := range moved {
+		out = append(out, exception{"verb-table", w, "M2", "2026-11-25"})
+	}
+	for _, w := range defined {
+		out = append(out, exception{"verb-table", w, "D0b", "2026-11-25"})
+	}
+	return out
+}
+
+// invariant: rule no-alias (ADR-021 rule 3): a command has one name; no
+// alias, shown or hidden, ever answers for it.
+func ruleNoAlias(root *command.Command) []finding {
+	var out []finding
+	var walk func(c *command.Command)
+	walk = func(c *command.Command) {
+		if len(c.Aliases) > 0 {
+			out = append(out, finding{"no-alias", commandPath(c), "a command with an alias: " + strings.Join(c.Aliases, ", ")})
+		}
+		for _, sub := range c.Commands() {
+			walk(sub)
+		}
+	}
+	walk(root)
+	return out
+}
+
+func TestTheTreeSaysOneVerbPerMeaning(t *testing.T) {
+	t.Parallel()
+	defined := glossaryVerbs(t)
+	t.Run("holds", func(t *testing.T) { excuse(t, ruleVerbTable(commandTree(t), defined), verbExceptions()) })
+	t.Run("bites", func(t *testing.T) {
+		root := commandTree(t)
+		apps, _, _ := root.Find([]string{"apps"})
+		apps.AddCommand(&command.Command{Use: "list", Run: func(*command.Command, []string) {}})
+		root.AddCommand(&command.Command{Use: "status", Run: func(*command.Command, []string) {}})
+		found := ruleVerbTable(root, defined)
+		bites(t, "verb-table", found, "apps list")
+		bites(t, "verb-table", found, "status")
+	})
+}
+
+func TestNoCommandHasAnAlias(t *testing.T) {
+	t.Parallel()
+	t.Run("holds", func(t *testing.T) { excuse(t, ruleNoAlias(commandTree(t)), nil) })
+	t.Run("bites", func(t *testing.T) {
+		root := commandTree(t)
+		c, _, _ := root.Find([]string{"machines", "delete"})
+		c.Aliases = []string{"rm"}
+		guest, _, _ := root.Find([]string{"guest"})
+		guest.Aliases = []string{"g"}
+		found := ruleNoAlias(root)
+		bites(t, "no-alias", found, "machines delete")
+		bites(t, "no-alias", found, "guest")
 	})
 }

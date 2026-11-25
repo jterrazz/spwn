@@ -79,17 +79,40 @@ type exception struct{ rule, where, lot, since string }
 
 func excuse(t *testing.T, found []finding, excepted []exception) {
 	t.Helper()
-	slices.SortFunc(found, func(a, b finding) int { return strings.Compare(a.where+a.what, b.where+b.what) })
-	found = slices.Compact(found)
+	open, stale := judged(found, excepted)
+	for _, f := range open {
+		t.Errorf("%s: %s", f.where, f.what)
+	}
+	for _, e := range stale {
+		t.Errorf("%s: the %s exception %s owns (written %s) holds no longer: delete its line", e.where, e.rule, e.lot, e.since)
+	}
+}
+
+func judged(found []finding, excepted []exception) (open []finding, stale []exception) {
+	matches := func(e exception, f finding) bool { return e.rule == f.rule && e.where == f.where }
 	for _, f := range found {
-		if !slices.ContainsFunc(excepted, func(e exception) bool { return e.rule == f.rule && e.where == f.where }) {
-			t.Errorf("%s: %s", f.where, f.what)
+		if !slices.ContainsFunc(excepted, func(e exception) bool { return matches(e, f) }) && !slices.Contains(open, f) {
+			open = append(open, f)
 		}
 	}
 	for _, e := range excepted {
-		if !slices.ContainsFunc(found, func(f finding) bool { return e.rule == f.rule && e.where == f.where }) {
-			t.Errorf("%s: the %s exception %s owns (written %s) holds no longer: delete its line", e.where, e.rule, e.lot, e.since)
+		if !slices.ContainsFunc(found, func(f finding) bool { return matches(e, f) }) {
+			stale = append(stale, e)
 		}
+	}
+	return open, stale
+}
+
+func TestAnExceptionHoldsOnlyWhileItsBreachDoes(t *testing.T) {
+	t.Parallel()
+	found := []finding{{"verb-table", "apps move", "a verb"}, {"verb-table", "apps list", "a verb"}}
+	excepted := []exception{{"verb-table", "apps move", "D0b", "2026-11-25"}, {"verb-table", "disk move", "D0b", "2026-11-25"}}
+	open, stale := judged(found, excepted)
+	if len(open) != 1 || open[0].where != "apps list" {
+		t.Errorf("a breach no exception names was not reported: %v", open)
+	}
+	if len(stale) != 1 || stale[0].where != "disk move" {
+		t.Errorf("an exception whose breach is gone was not reported: %v", stale)
 	}
 }
 
