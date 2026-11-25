@@ -30,15 +30,6 @@ var _ contract.Anchor = Anchor{}
 
 func New(run Runner) Anchor { return Anchor{run: run} }
 
-type UnreadableError struct {
-	// value: why the login keychain did not give the book's head.
-	Cause string
-}
-
-func (e *UnreadableError) Error() string {
-	return "the device book's head is not readable in the login keychain: " + e.Cause
-}
-
 func cause(out local.Output, err error) string {
 	if err != nil {
 		return err.Error()
@@ -50,15 +41,15 @@ func (a Anchor) Read(ctx context.Context) (devices.Head, error) {
 	out, err := a.run.Output(ctx, local.Cmd{Name: command, Args: []string{"find-generic-password", "-s", itemName, "-a", account, "-w"}})
 	switch {
 	case err != nil:
-		return devices.Head{}, &UnreadableError{Cause: cause(out, err)}
+		return devices.Head{}, &contract.AnchorUnreadableError{Cause: cause(out, err)}
 	case out.ExitCode == notFound:
 		return devices.Head{}, nil
 	case out.ExitCode != 0:
-		return devices.Head{}, &UnreadableError{Cause: cause(out, nil)}
+		return devices.Head{}, &contract.AnchorUnreadableError{Cause: cause(out, nil)}
 	}
 	h, err := devices.ParseHead(out.Stdout)
 	if err != nil {
-		return devices.Head{}, &UnreadableError{Cause: err.Error()}
+		return devices.Head{}, &contract.AnchorUnreadableError{Cause: err.Error()}
 	}
 	return h, nil
 }

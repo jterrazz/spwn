@@ -91,7 +91,7 @@ func TestTheHeadIsAnItemOfItsOwnNeverAVaultSecret(t *testing.T) {
 }
 
 func TestALockedKeychainIsAnErrorNeverNoHead(t *testing.T) {
-	var unreadable *keychain.UnreadableError
+	var unreadable *contract.AnchorUnreadableError
 	if _, err := keychain.New(&login{locked: true}).Read(t.Context()); !errors.As(err, &unreadable) {
 		t.Fatalf("Read = %v; want the keychain unreadable", err)
 	}

@@ -30,11 +30,14 @@ var _ contract.Anchor = Anchor{}
 
 func AnchorOf(w *world.World, mac string) Anchor { return Anchor{w: w, mac: mac} }
 
-var errLocked = errors.New("the login keychain is locked")
+// outside: what `security` says on a keychain it may not open.
+const locked = "security: SecKeychainSearchCopyNext: User interaction is not allowed."
+
+var errLocked = errors.New("the login keychain refused the device book's head")
 
 func anchored(st *world.Stores) (devices.Head, error) {
 	if st.DevicesAnchorUnreadable {
-		return devices.Head{}, errLocked
+		return devices.Head{}, &contract.AnchorUnreadableError{Cause: locked}
 	}
 	if st.DevicesAnchor == "" {
 		return devices.Head{}, nil

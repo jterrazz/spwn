@@ -42,12 +42,16 @@ type keychain struct {
 	head    devices.Head
 	reads   int
 	refused error
+	locked  error
 }
 
 func (k *keychain) Read(context.Context) (devices.Head, error) {
 	k.mu.Lock()
 	defer k.mu.Unlock()
 	k.reads++
+	if k.locked != nil {
+		return devices.Head{}, k.locked
+	}
 	return k.head, nil
 }
 
@@ -230,5 +234,17 @@ func TestABookOfANewerSpwnIsRefused(t *testing.T) {
 	var newer *store.NewerError
 	if _, _, err := open(at, false).Read(t.Context()); !errors.As(err, &newer) {
 		t.Fatalf("Read = %v; want a newer book refused", err)
+	}
+}
+
+func TestAnAnchorThatCannotBeReadAnswersNoBook(t *testing.T) {
+	at := filepath.Join(t.TempDir(), "station", "devices.json")
+	if err := openOn(at, false, &keychain{}).Change(t.Context(), add("laptop")); err != nil {
+		t.Fatal(err)
+	}
+	locked := errors.New("the keychain is locked")
+	book, head, err := openOn(at, false, &keychain{locked: locked}).Read(t.Context())
+	if !errors.Is(err, locked) || len(book.Devices) != 0 || head != (devices.Head{}) {
+		t.Fatalf("Read = %+v, %+v, %v; want the keychain's refusal and no book", book, head, err)
 	}
 }

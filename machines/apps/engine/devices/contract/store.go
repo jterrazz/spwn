@@ -27,3 +27,12 @@ type Anchor interface {
 	Read(ctx context.Context) (devices.Head, error)
 	Write(ctx context.Context, h devices.Head) error
 }
+
+type AnchorUnreadableError struct {
+	// value: why the login keychain did not give the book's head.
+	Cause string
+}
+
+func (e *AnchorUnreadableError) Error() string {
+	return "the device book's head is not readable in the login keychain: " + e.Cause
+}
