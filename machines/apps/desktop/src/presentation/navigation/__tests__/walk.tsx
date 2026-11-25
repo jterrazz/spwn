@@ -15,7 +15,7 @@ export const WORLDS = Object.keys(
     import.meta.glob('../../../fixtures/worlds/*/engine.read.json'),
 ).map((path) => path.split('/').at(-2) ?? '');
 
-export const EVERY_WORLD = new Map(
+const EVERY_WORLD = new Map(
     await Promise.all(WORLDS.map(async (world) => [world, await recordingFor(world)] as const)),
 );
 
@@ -27,7 +27,7 @@ const DATA: readonly RegExp[] = [
     /^\s*- button "Free station"/u,
 ];
 
-export function findingsIn(text: string): string[] {
+function findingsIn(text: string): string[] {
     return text
         .split('\n')
         .filter((line) => carriesCommand(line) && !DATA.some((data) => data.test(line)))

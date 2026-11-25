@@ -42,7 +42,7 @@ export function pageOver(recording: Recording, initial: Route, opener?: OpenerPo
     );
 }
 
-export type Staged = { dependencies: Dependencies; stage: Stage };
+type Staged = { dependencies: Dependencies; stage: Stage };
 
 // value: a world whose exchanges the spec can count, so it knows when what it draws is drawn.
 export function stagedOver(recording: Recording): Staged {
