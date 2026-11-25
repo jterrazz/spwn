@@ -32,6 +32,27 @@ Weighed and left: the machine alone as the boundary (it does not answer "injecte
 - **This is a mask, and the machine is the wall.** An agent that must not reach something runs on a machine that does not have it. No new kind of grant: an agent that needs authority of its own runs on a machine of its own, and a grant to that machine is its grant.
 - **The commands**: `spwn agents edit <agent> [--app <app>]... [--no-app <app>]...` and `spwn project edit [--app <app>]... [--no-app <app>]...`; an app the catalog does not know is refused with exit 2 and `Hint: spwn apps --all`. `project install`, `project remove` and today's `spwn install` and `uninstall` are deleted, so `install` means one thing: onto a machine. `agents start` takes no `--app`: the file is the input.
 
+## The twins
+
+Each tool entry of the root catalog is deleted, mapped to its twin in Machines' catalog (`machines/catalog/packages/<category>/<name>.yaml`). A twin is installed by the machine's lock, never pinned by an agent.
+
+| Root entry   | Twin                                               | Left behind                                                                                                    |
+| ------------ | -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `architect`  | none                                               | The fleet daemon and its skills are not an app; the lot that deletes the world carries them                    |
+| `build`      | `build-essential` (command-line)                   |                                                                                                                |
+| `cli`        | none                                               | The machine's own `spwn` is the program; its skill is carried by the lot that deletes the world                |
+| `docker-cli` | `docker` (containers-vms)                          |                                                                                                                |
+| `gh`         | `gh` (git)                                         | `gh-mcp` and `@modelcontextprotocol/server-github`: the CLI is the whole app                                   |
+| `git`        | `git` (git)                                        |                                                                                                                |
+| `mcp2cli`    | `mcp2cli` (ai-tooling), new                        | `spwn-policy-check` and its per-agent method policy: they belong to the world image and leave with it          |
+| `mempalace`  | `mempalace` (ai-tooling), new                      | Its skill: an agent's own local `skill/` file                                                                  |
+| `node`       | `node` (runtimes)                                  | Node 20 pinned by an agent: the machine's lock decides the version                                             |
+| `notion`     | `notion-mcp` (ai-tooling), new                     | The host-bind-mounted token cache: the account is the machine's. `notion` stays the desktop app                |
+| `python`     | `python` (runtimes)                                | The `python` link and `pip3`: the app provides `python3`                                                       |
+| `qmd`        | `qmd` (ai-tooling), and `qmd-skill` (agent-skills) |                                                                                                                |
+| `unix`       | none                                               | The base system carries bash, coreutils, grep, sed, awk and curl; `jq` (command-line) is the one an agent asks |
+| `x`          | none yet                                           | Its gate element waits for H2's gate                                                                           |
+
 ## Consequences
 
 - The invariant "Security comes from what the world image lacks" is rewritten: security comes from what the machine lacks; what an agent is given is a mask over it.
