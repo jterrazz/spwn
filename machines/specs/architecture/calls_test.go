@@ -13,6 +13,7 @@ import (
 
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/core/section"
+	"github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/surface/cli/words"
 )
 
@@ -248,6 +249,36 @@ func ruleConfirmInUsecase(w *world) []finding {
 	return out
 }
 
+// invariant: rule delete-asks-by-consequence: a call that names the delete
+// confirmation decides whether it asks by machines.DeleteAsks, the one rule
+// of what a delete destroys, and by nothing of its own.
+func ruleDeleteAsksByConsequence(w *world) []finding {
+	var out []finding
+	for _, c := range callValues(w) {
+		sel, named := c.fields["Confirm"].(*ast.SelectorExpr)
+		if named && sel.Sel.Name == "Delete" && !calls(c.fields["Run"], c.f.info, module+"/machines", "DeleteAsks") {
+			out = append(out, finding{"delete-asks-by-consequence", c.f.at(c.lit.Pos()), c.name + " asks a delete by a rule of its own: machines.DeleteAsks is the one"})
+		}
+	}
+	return out
+}
+
+// value: the Run of fn calls the function name of the package pkg.
+func calls(fn ast.Node, info *types.Info, pkg, name string) bool {
+	found := false
+	ast.Inspect(fn, func(n ast.Node) bool {
+		if ce, ok := n.(*ast.CallExpr); ok {
+			if sel, ok := ce.Fun.(*ast.SelectorExpr); ok {
+				if obj := info.Uses[sel.Sel]; obj != nil && obj.Pkg() != nil && obj.Pkg().Path() == pkg && obj.Name() == name {
+					found = true
+				}
+			}
+		}
+		return !found
+	})
+	return found
+}
+
 // invariant: rule every-code-worded (ER-07): every fail.Code constant the
 // tree declares is worded in surface/cli/words, and raised: named by code
 // outside surface/cli/words, whose table and declarations are no raise.
@@ -322,6 +353,8 @@ func TestNoLeafPutsAQuestionOutsideItsLeafAsk(t *testing.T) {
 func TestEveryCodeWorded(t *testing.T)       { judge(t, "EveryCodeWorded") }
 func TestEveryCodeWordedRaised(t *testing.T) { judge(t, "EveryCodeWordedRaised") }
 
+func TestDeleteAsksByConsequence(t *testing.T) { judge(t, "DeleteAsksByConsequence") }
+
 // value: the reference profiles of the worlds: a laptop Mac, a desktop
 // Mac, a workspace, a server.
 func referenceProfiles() []machine.Profile {
@@ -344,6 +377,31 @@ func TestEveryCallIsRegisteredOnceAndShowsItsSectionWhereverItApplies(t *testing
 			if m.Section != "" && m.Applies(p).OK && !slices.Contains(section.For(p.Kind), m.Section) {
 				t.Errorf("%s lets a %s through, which has no %s section", m.Name, p.Kind, m.Section)
 			}
+		}
+	}
+}
+
+func TestADeleteAsksByWhatItDestroys(t *testing.T) {
+	t.Parallel()
+	held := machines.Hold{State: machines.HoldHeld}
+	free := machines.Hold{State: machines.HoldFree}
+	cases := []struct {
+		name    string
+		life    machines.Lifetime
+		running bool
+		hold    machines.Hold
+		asks    bool
+	}{
+		{"a stopped ephemeral nobody holds", machines.Ephemeral, false, free, false},
+		{"a running ephemeral", machines.Ephemeral, true, free, true},
+		{"a held ephemeral", machines.Ephemeral, false, held, true},
+		{"a stopped persistent", machines.Persistent, false, free, true},
+		{"a running persistent", machines.Persistent, true, free, true},
+		{"a server", machines.AlwaysOn, false, free, true},
+	}
+	for _, c := range cases {
+		if got := machines.DeleteAsks(c.life, c.running, c.hold); got != c.asks {
+			t.Errorf("%s: asks %v, want %v", c.name, got, c.asks)
 		}
 	}
 }

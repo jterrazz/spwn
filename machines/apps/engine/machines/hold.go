@@ -63,3 +63,10 @@ func by(vm VM, session bool) string {
 	}
 	return ""
 }
+
+func DeleteAsks(l Lifetime, running bool, h Hold) bool {
+	// invariant: a delete asks the name typed by what it destroys: a VM
+	// that runs, one someone holds, or one that is not a throwaway; only a
+	// stopped ephemeral one nobody holds goes with no question.
+	return l != Ephemeral || running || h.State == HoldHeld
+}

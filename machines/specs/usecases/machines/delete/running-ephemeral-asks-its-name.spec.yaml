@@ -1,0 +1,18 @@
+description: 'a running ephemeral workspace asks its name typed to be deleted: --confirm answers'
+env: two-macs
+runs:
+    - command: 'machines delete linux-1'
+      exit: 2
+      stderr: |
+          Error: refusing without the name typed: linux-1
+          Hint: in a script: --confirm=linux-1
+    - command: 'machines --this-mac'
+      exit: 0
+      stdout: |
+          ●	macbook-pro	Mac	macbook-pro	Engine running
+          ○	api	Workspace	macbook-pro	Stopped · persistent	4 CPU	8 GB
+          ●	linux-1	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB
+    - command: 'machines delete linux-1 --confirm=linux-1'
+      exit: 0
+      stdout: |
+          ●	linux-1	deleted

@@ -1,6 +1,8 @@
-description: 'an ephemeral workspace nobody holds is deleted with no name typed'
+description: 'a stopped ephemeral workspace nobody holds is deleted with no name typed'
 env: two-macs
 runs:
+    - command: 'machines stop linux-1 --yes >/dev/null'
+      exit: 0
     - command: 'machines delete linux-1'
       exit: 0
       stdout: |

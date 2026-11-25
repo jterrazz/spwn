@@ -90,10 +90,10 @@ var Delete = call.Call[Deps, DeleteIn, machines.DeleteReport]{
 		}
 		lifetime := d.Machines.LifetimeOf(in.VM)
 		hold, _ := d.Machines.HoldOf(ctx, in.VM)
-		// invariant: a throwaway nobody holds is deleted with no question; a
-		// permanent one, or one someone works in, asks its name typed, and
-		// the question says who holds it.
-		if lifetime != machines.Ephemeral || hold.State == machines.HoldHeld {
+		running, runErr := d.Machines.Running(ctx, in.VM)
+		running = running || runErr != nil
+		// invariant: the question says who holds the VM it asks to delete.
+		if machines.DeleteAsks(lifetime, running, hold) {
 			err := confirm.Ask(confirm.Delete, lifetime.Kind(), "", in.VM, in.Confirm)
 			var asked *fail.Error
 			if errors.As(err, &asked) && hold.State == machines.HoldHeld {
