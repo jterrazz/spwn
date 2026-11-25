@@ -457,7 +457,9 @@ func (m *worldMac) managers(adapters map[catalog.Method]appscontract.Installer) 
 	for method, real := range adapters {
 		named[method] = appsfake.Named(real)
 	}
+	m.run.w.Lock()
 	m.run.w.Managers = named
+	m.run.w.Unlock()
 }
 func (m *worldMac) vault() accountscontract.Vault { return accountsfake.NewVault(m.run.w, m.name) }
 func (m *worldMac) signIns(now func() time.Time, sleep func(context.Context, time.Duration) error) accountscontract.SignIns {

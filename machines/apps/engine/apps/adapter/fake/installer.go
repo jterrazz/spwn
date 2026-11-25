@@ -89,10 +89,17 @@ func manager(w *world.World, mac string, m catalog.Method) *world.Manager {
 
 func (f *Installer) Method() catalog.Method { return f.method }
 
+func (f *Installer) named() (world.Named, bool) {
+	f.w.Lock()
+	defer f.w.Unlock()
+	named, ok := f.w.Managers[f.method]
+	return named, ok
+}
+
 func (f *Installer) Manager() contract.Manager {
 	// invariant: a manager is the one the real adapter names
 	// (World.Managers), else its method's name and an app of that name.
-	if named, ok := f.w.Managers[f.method]; ok {
+	if named, ok := f.named(); ok {
 		return contract.Manager{Name: named.Name, App: named.App}
 	}
 	if !f.method.KeepsList() {
@@ -114,7 +121,7 @@ func (f *Installer) Can() contract.Abilities {
 	// `undo`, a command another package provides only installs, an app bundle
 	// is the owner's; a world that names its managers gives their
 	// abilities too.
-	if named, ok := f.w.Managers[f.method]; ok {
+	if named, ok := f.named(); ok {
 		return contract.Abilities{Install: named.Install, Update: named.Update, Remove: named.Remove, UpdateAll: named.UpdateAll}
 	}
 	switch f.method {
