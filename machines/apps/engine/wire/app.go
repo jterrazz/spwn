@@ -177,7 +177,9 @@ func Build(args, env []string, stdin, stdout, stderr *os.File) (p *Program, exit
 	}
 
 	commands := []*cobra.Command{
-		activityCommand(kenv, thisMac),
+		machinesCommand(kenv, thisMac),
+		imagesCommand(kenv, thisMac),
+		engineCommand(kenv, thisMac),
 		appsCommand(kenv, thisMac),
 		settingsCommand(kenv, thisMac),
 		diskCommand(kenv, thisMac),
@@ -187,14 +189,10 @@ func Build(args, env []string, stdin, stdout, stderr *os.File) (p *Program, exit
 		accountsCommand(kenv, thisMac),
 		backgroundCommand(kenv, thisMac),
 		awakeCommand(kenv, thisMac),
-		machinesCommand(kenv, thisMac),
-		journalCommand(kenv, thisMac),
-		imagesCommand(kenv, thisMac),
-		engineCommand(kenv, thisMac),
-		useCommand(kenv, thisMac),
+		activityCommand(kenv, thisMac),
 	)
 	commands = append(commands, initCommands(kenv, thisMac)...)
-	commands = append(commands, machinefileCommand(kenv, thisMac),
+	commands = append(commands, useCommand(kenv, thisMac), journalCommand(kenv, thisMac), machinefileCommand(kenv, thisMac),
 		guestCommand(kenv, thisMac),
 		shellcmd.Command(kenv),
 	)

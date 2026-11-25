@@ -45,7 +45,7 @@ func Command(d Deps, env kit.Env, children ...*cobra.Command) *cobra.Command {
 			return nil
 		},
 		Complete: func([]string, string) []string { return d.Names() },
-		Group:    kit.Machines,
+		Group:    kit.Machine,
 		Declare: func(f *pflag.FlagSet, in *Input) {
 			f.BoolVar(&in.ThisMacOnly, "this-mac", false, "This Mac only, without asking the other Macs")
 		},

@@ -16,7 +16,7 @@ func Help() *cobra.Command {
 		Use:     "help [command]",
 		Short:   "The help of station, or of one command",
 		Example: "  station help\n  station help machines create",
-		GroupID: StationItself,
+		GroupID: Spwn,
 		RunE: func(c *cobra.Command, args []string) error {
 			target, rest, err := c.Root().Find(args)
 			if err != nil || target == nil || len(rest) > 0 || (len(args) > 0 && target == c.Root()) {

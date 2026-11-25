@@ -27,7 +27,7 @@ func Command(d Deps, env kit.Env, children ...*cobra.Command) *cobra.Command {
 		Use:     "images",
 		Short:   "The VM images of every Mac, with their versions and the VMs made from each",
 		Example: "  station images\n  station images --json",
-		Group:   kit.ImagesAndEngine,
+		Group:   kit.Machine,
 		Read:    func(*struct{}) bool { return true },
 		Pages:   true,
 		Run: func(ctx context.Context, _ *struct{}, io kit.IO) error {

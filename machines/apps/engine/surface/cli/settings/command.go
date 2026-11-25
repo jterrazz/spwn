@@ -39,7 +39,7 @@ func Command(d Deps, env kit.Env, children ...*cobra.Command) *cobra.Command {
 		Use:     "settings [<setting>]",
 		Short:   "What Machines sets on this machine: applied, changed since, off here",
 		Example: "  station settings\n  station settings starship-dotfiles\n  station settings --all-machines\n  station settings --json",
-		Group:   kit.OnAMachine,
+		Group:   kit.Machine,
 		Args:    cobra.MaximumNArgs(1),
 		Declare: func(f *pflag.FlagSet, in *Input) {
 			f.BoolVar(&in.All, "all", false, "unfold every group")

@@ -29,7 +29,7 @@ func Command(d Deps, env kit.Env, children ...*cobra.Command) *cobra.Command {
 		Use:     "disk",
 		Short:   "What each app keeps on this machine: misplaced, can rebuild, your data, never touched",
 		Example: "  station disk\n  station disk --all\n  station disk --json",
-		Group:   kit.OnAMachine,
+		Group:   kit.Machine,
 		Declare: func(f *pflag.FlagSet, in *Input) {
 			f.BoolVar(&in.All, "all", false, "unfold every group, every row, on a terminal (a pipe lists every row already)")
 		},

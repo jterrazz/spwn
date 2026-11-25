@@ -1,17 +1,14 @@
 # Commands
 
-Every command of `station`, grouped as `station help` groups them. The words are the [Glossary](../concepts/glossary.md)'s.
+Every command of `station`, grouped as `station help` groups them: the four groups of [the grammar](../../../docs/reference/cli.md#the-help), of which the Agent and the OS groups hold no command yet, so the help draws neither. The words are the [Glossary](../concepts/glossary.md)'s.
 
-| Section                   | Answers                                                                                                       |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| Rules                     | What holds for every command                                                                                  |
-| Machines                  | `machines`, `journal`                                                                                         |
-| On a machine              | `overview`, `activity`, `apps`, `settings`, `disk`, `ports`, `accounts`, `background`, `awake`, `machinefile` |
-| A Mac's images and engine | `images`, `engine`                                                                                            |
-| This terminal             | `use`                                                                                                         |
-| Machines itself           | `init`, `--version`, `help`                                                                                   |
-| Plumbing                  | The hidden commands the machine runs for itself                                                               |
-| Exit codes                | What 0, 1, 2 and 130 mean                                                                                     |
+| Section    | Answers                                                                                                            |
+| ---------- | ------------------------------------------------------------------------------------------------------------------ |
+| Rules      | What holds for every command                                                                                       |
+| Machine    | `machines`, `images`, `engine`, `apps`, `settings`, `disk`, `ports`, `accounts`, `background`, `awake`, `activity` |
+| Spwn       | `overview`, `init`, `--version`, `use`, `journal`, `machinefile`, `help`                                           |
+| Plumbing   | The hidden commands the machine runs for itself                                                                    |
+| Exit codes | What 0, 1, 2 and 130 mean                                                                                          |
 
 ## Rules
 
@@ -28,7 +25,9 @@ Every command of `station`, grouped as `station help` groups them. The words are
 - `station use <machine>` makes every later command of this terminal run there, as `--on` would; `--on` still wins for one command. See [Machines](machines.md#this-terminals-machine).
 - A value a command needs from you is never an argv flag when it could be a secret: a setting asks in a form on a terminal ([Settings](settings.md)).
 
-## Machines
+## Machine
+
+These commands act on the target machine: the one `--on` names, else the one `station use` chose for this terminal, else This Mac. Each lists only what the machine's kind allows; a section its kind does not have is refused, exit 2, with the reason in words.
 
 ### `station machines`
 
@@ -55,34 +54,27 @@ station machines remind <mac>
 
 `--this-mac` lists This Mac only, without asking the other Macs. `unlock` is for a Mac waiting at FileVault after a power cut: a Mac that answers already says so (exit 0); otherwise it needs a terminal and dials the Mac on your LAN, at the address it last answered with (Tailscale starts only once its disk is unlocked), where you type the password into macOS's own pre-boot prompt, then waits for the Mac on Tailscale again. `wake` sends a Wake-on-LAN packet from this Mac to the hardware address the Mac's last answer said (a Mac that answers already says so, exit 0; one never heard has none, exit 1); `--tell` also tells you once, `mac_back`, the moment it answers again. `remind` is that ask alone (the menu bar's Tell me when it wakes): it sends nothing, so a Mac never heard can be asked too; one that answers already says so and nothing is armed. `restart <mac>` asks yes or no naming the VMs that pause, sends a planned restart that unlocks itself, waits for its station to answer again (`did not come back`, exit 1, past 3 minutes), starts those VMs again and says how they are. `create` makes an ephemeral workspace unless `--persistent` is given, or a server with `--server` (always on, named, behind its Mac, 4 CPU · 8 GB · 50 GB by default; `--check` is its health check, refused on a workspace); and asks the Mac on a terminal when two answer; piped it needs no question. A new VM's name is one no Mac and no VM of any machine holds; a create with no name takes the first `<image>-<n>` free so. `stop` asks a workspace yes or no and a server its name typed (`--confirm=<name>`; `--yes` never answers it), and the VM's own Mac judges the answer. `add` writes the Mac's ssh block, then reaches it as every later call will, then writes the blocks of the VMs every Mac now holds, the new one's included: a Mac that does not answer, or answers with no station, is not added and nothing stays written; one that runs another station version is added, with how to bring the two to one. `delete` is the only verb that destroys a machine; `forget` only unregisters a Mac, here, whatever `--on` says: it never reaches that Mac, and refuses This Mac and a VM. VMs are made and run on Macs, so these commands are refused on a VM. `create`, `start`, `stop`, `restart`, `edit` and `delete` need the Mac's engine (`Hint: station engine start`). `log` prints the lines a VM's runs wrote, its console's then its hypervisor's own, on the VM's own Mac. `cleanup` deletes, after one yes or no, every ephemeral workspace of the Mac that is stopped (or only those named), each with its disk, its ports and its grants, and names the VMs still running, which stay; naming one that may not go is refused before any goes. `station machines <machine>` is that machine's Overview. `--network bridged` is for macOS VMs only. See [Machines](machines.md).
 
-### `station journal`
+### `station images`
 
 ```sh
-station journal [--json] # what was done on every Mac and its VMs, by day
-station journal --on <mac> [--json] # that Mac and its VMs alone
+station images [--json] # every Mac's, one row per version per Mac
+station images build [<machinefile...>] [--binary <linux station binary>]
+station images update [<image...>] # the newest released version
+station images delete <image>[@<version>] [--yes]
 ```
 
-The last seven days of every Mac's journal, newest first: a section per day, a night's upgrade apart from its day with what it moved summed, each line with its time, the machines it concerns and who did it; then the Macs not heard from, each with why. With `--on`, one Mac's lines and its VMs', unsummed. `--json` prints `station.journal.read/v1`. A VM keeps no journal, so it is refused there. See [Journal](journal.md).
+An image is named after the Machinefile it is built from (`base-ubuntu`, `studio-linux`); `linux`, `station-linux` and `macos` name no image. A bare `build` builds every image that is missing or whose recipe, Machinefile or lock changed; a bare `update` updates every image this Mac holds. A name no source holds a Machinefile of, and no record of, is `no image "debian"`, and a Machinefile that makes no image is refused naming why (both exit 2). See [Images](images.md).
 
-## On a machine
-
-These commands act on the target machine: the one `--on` names, else the one `station use` chose for this terminal, else This Mac. Each lists only what the machine's kind allows; a section its kind does not have is refused, exit 2, with the reason in words.
-
-### `station overview`
+### `station engine`
 
 ```sh
-station overview [--all] [--json]
+station engine [--json] # running, its version, up, the VMs it runs, Awake; or stopped, since when and by what
+station engine stop [--yes] [--remove] # Stop everything on this Mac: every running workspace stopped, its disk kept; Awake and the sharing end; then the engine, unless a server runs: it is skipped, and the engine keeps running for it; `--remove` then takes the engine's job from the job manager too
+station engine start # the engine installed when it is not, restarted when it runs another version or serves no ssh agent, bootstrapped again; the VMs it stopped stay stopped
+station engine restart # restart the engine's job, whatever it runs: the VMs that run keep running, the engine adopts them again, and with Spwn.app the menu bar restarts with it; it says the version and how many VMs run
 ```
 
-This machine at a glance (SPEC §5.1): a first line that sums it up (`This Mac · macbook-pro · 5 things need you · Engine running`; a VM's names its kind and how long it has run), then Needs you, every section's findings ranked broken first and then by the one section order, five of them unless `--all`; then one line per section the machine has, in that order (a Mac: Activity, Apps, Settings, Disk, Ports, Accounts, Background, Awake, then its VMs; a workspace: the sections it has; a server: Activity, Ports and SSH, and `Apps, settings, accounts: not managed by station`); Activity's line is CPU, memory, free space and network in, from the engine's history when it spans a rate, else one sample now, and its findings join Needs you; then one or two `→` next steps. Each line is that section's own read, so its counts equal what the section's own command prints. A fix that is a call prints as the command that runs it: the input it acts on is its word, each other input a flag, `--confirm=<name>` answers a question it asks typed, and `--on <machine>` names where it runs when that is not the machine reading (`station machines restart infra --confirm=infra --on mac-mini`). `station overview --on <vm>` and `station machines <vm>` print the same bytes: `On <vm>:`, the VM's first line from its Mac (`linux-1 · Workspace on This Mac · Ephemeral · up 2 h`), the sections it reads inside it, then its Health; a VM that does not run, or whose guest does not answer, shows its first line and Health alone. `--json` prints `station.overview.read/v1`: `machine`, `findings[]` (each `fix` one of `call`, `command`, `path`) and `sections[]` with their counts. On a terminal, `overview`, `apps` and `disk` draw every row at once and fill each as its read answers ([instant reads](../concepts/design-system.md#instant-reads)); piped or with `--json` they print one complete document.
-
-### `station activity`
-
-```sh
-station activity [--all-machines] [--json [--history]]
-```
-
-What a machine is doing now: CPU and load, memory and its pressure, swap, free space, disk and network rates and totals, thermal and battery on a Mac, uptime, and the busiest processes; `--all-machines` is one row per machine and gathers every machine's findings (refused with `--on`, exit 2). `--json` prints `station.activity.read/v1`; `--history` adds the engine's 24 h series and needs `--json` (exit 2 without). Where each value comes from, and the history, are [Activity](activity.md)'s.
+`--json` is `station.engine.read/v1`: `{schema, engine: {state, version, up_s, vms, stopped_at, stopped_by}}`, `state` `running`, `stopped` or `not-installed`. An engine running another version than station names both and `station engine start`. `--remove` ends the engine's life on this Mac once it has stopped: without Spwn.app it deletes both agents' plists and boots them out, with it it unregisters both bundled agents from SMAppService, and `station engine` then reads `not-installed`; it removes nothing else ([Getting started](../start/getting-started.md#5-remove-what-it-put-down) lists the rest), and an engine kept running for a server keeps its jobs. A Mac only; `--on <mac>` runs it on another Mac. A start the job manager refuses ends in `the engine did not start: <its last word>` (exit 1). See [Machines](machines.md#the-engine).
 
 ### `station apps`
 
@@ -173,6 +165,55 @@ station awake off # end the keep-awake now; Never sleeps stays
 
 A Mac only; a guard already past its threshold refuses the start (exit 1). Piped, one record per row: the session (`on`, its flags, until in RFC 3339, who asked), the guards, then the reading as `key<TAB>value`. The modes, the guards and Never sleeps are [Awake](awake.md)'s.
 
+### `station activity`
+
+```sh
+station activity [--all-machines] [--json [--history]]
+```
+
+What a machine is doing now: CPU and load, memory and its pressure, swap, free space, disk and network rates and totals, thermal and battery on a Mac, uptime, and the busiest processes; `--all-machines` is one row per machine and gathers every machine's findings (refused with `--on`, exit 2). `--json` prints `station.activity.read/v1`; `--history` adds the engine's 24 h series and needs `--json` (exit 2 without). Where each value comes from, and the history, are [Activity](activity.md)'s.
+
+## Spwn
+
+These commands act on Spwn itself, or read across what it did: this machine at a glance, its setup, the machine a terminal uses, the journal and the Machinefiles.
+
+### `station overview`
+
+```sh
+station overview [--all] [--json]
+```
+
+This machine at a glance (SPEC §5.1): a first line that sums it up (`This Mac · macbook-pro · 5 things need you · Engine running`; a VM's names its kind and how long it has run), then Needs you, every section's findings ranked broken first and then by the one section order, five of them unless `--all`; then one line per section the machine has, in that order (a Mac: Activity, Apps, Settings, Disk, Ports, Accounts, Background, Awake, then its VMs; a workspace: the sections it has; a server: Activity, Ports and SSH, and `Apps, settings, accounts: not managed by station`); Activity's line is CPU, memory, free space and network in, from the engine's history when it spans a rate, else one sample now, and its findings join Needs you; then one or two `→` next steps. Each line is that section's own read, so its counts equal what the section's own command prints. A fix that is a call prints as the command that runs it: the input it acts on is its word, each other input a flag, `--confirm=<name>` answers a question it asks typed, and `--on <machine>` names where it runs when that is not the machine reading (`station machines restart infra --confirm=infra --on mac-mini`). `station overview --on <vm>` and `station machines <vm>` print the same bytes: `On <vm>:`, the VM's first line from its Mac (`linux-1 · Workspace on This Mac · Ephemeral · up 2 h`), the sections it reads inside it, then its Health; a VM that does not run, or whose guest does not answer, shows its first line and Health alone. `--json` prints `station.overview.read/v1`: `machine`, `findings[]` (each `fix` one of `call`, `command`, `path`) and `sections[]` with their counts. On a terminal, `overview`, `apps` and `disk` draw every row at once and fill each as its read answers ([instant reads](../concepts/design-system.md#instant-reads)); piped or with `--json` they print one complete document.
+
+### `station init`
+
+```sh
+station init [--name <name>] [--machinefile <name|path>] [--yes]
+station --version
+station help [command]
+```
+
+`init` makes this machine known to Machines, safe to run again: it names this Mac (asking the name on a terminal, taking `--name` otherwise; off a terminal, a Mac with no name yet is refused, exit 2, `Hint: station init --name <name>`), writes the one managed block of `~/.zshrc`, writes the apps' own files (`relocate`), then moves what the apps left at the home root where those files point ([Disk](disk.md#relocation)). Before it moves anything it prints `# To move`, one row per move (`~/.bun/bin  to ~/.local/share/bun/bin  52 MB`, or a file it deletes, `deleted: its app writes it again`), then asks `Move them?` on a terminal; a no ends it there, exit 1, every file and every step as it was (`init kept: you said no`). Off a terminal it is refused, exit 2, before any step (`Error: refusing to move the apps' files without --yes`), and `--yes` answers it; with nothing to move it prints and asks nothing. It installs no app, runs no package manager and asks no password; the engine comes with the first VM command on a Mac with tart, or `station engine start`. On a terminal it opens on a line that sums it up and ends on the empty state of what the machine carries (`Machinefile  none bound by init: init --machinefile binds one`), then at most two next steps: `exec zsh` when it wrote the block, `station init --machinefile <name>`, `station apps install <app>`. `--machinefile` then binds this machine to that Machinefile and runs `apply` on it: init's page names it (`Machinefile  downloads/laptop.machine.yaml: applied below, which binds it`) and drops the step that says how to bind one, then come its plan and the run. Inside a workspace it writes the block and the layout only; inside a server it sets nothing up, the server's own tooling keeps it. `--version` prints `station <version> (<commit>)`. See [Getting started](../start/getting-started.md) and [Dotfiles](dotfiles.md).
+
+### `station use`
+
+```sh
+station use <machine> # every later command of this terminal runs there, as --on would
+station use - # back to the machine used before
+station use # the machine this terminal uses, and since when
+```
+
+`--on` still wins for its one command; other terminals stay where they are. See [Machines](machines.md#this-terminals-machine).
+
+### `station journal`
+
+```sh
+station journal [--json] # what was done on every Mac and its VMs, by day
+station journal --on <mac> [--json] # that Mac and its VMs alone
+```
+
+The last seven days of every Mac's journal, newest first: a section per day, a night's upgrade apart from its day with what it moved summed, each line with its time, the machines it concerns and who did it; then the Macs not heard from, each with why. With `--on`, one Mac's lines and its VMs', unsummed. `--json` prints `station.journal.read/v1`. A VM keeps no journal, so it is refused there. See [Journal](journal.md).
+
 ### `station machinefile`
 
 ```sh
@@ -199,52 +240,6 @@ Bare `machinefile` is `machinefile.files` of this Mac: one section per shelf (Yo
 `update` reads its plan where the shared source's clone stands, refuses before any effect what it cannot run here, then moves the source forward to its default branch's newest commit and reads the plan there, going on from the clone as it stood when the source does not move (offline, a rewritten branch, a commit that does not resolve: a `Source` section says why); a clone whose own commit no longer resolves is moved first and read at the newest commit alone, so a fix pushed upstream is taken; then it moves every app the Machinefile lists that reads there by one of its methods as far as its `version` lets it ([Versions](machinefiles.md#versions)), by that method, the managers first (homebrew's index by `brew update`, mise, node) and then the rest, each in the plan's order, then writes the lock anew and prints what moved in it (`gh  2.98.0 by brew, was 2.97.0 by brew`, the shared source's commit). An app of mise's or bun's is installed again at its range (`within 22`, `held at 22.11.0`), one exact version of apt's or a release's is kept, `pinned 2.43.0 by <machinefile>: kept`, and a newer version past a range is said waiting, with the line that takes it (`node  25.1.0 available: change '22' to '25' in <file>`); a copy no method holds is yours and left as it is, and an app not there is apply's, except one the lock holds: a locked version that can no longer install is no dead end, so update installs that app by the lock's method at the newest the Machinefile allows and the lock follows (`ripgrep  1.0.0 by brew, was 14.0.0 by brew`). Off a terminal, an update whose updates ask you anything is refused before any effect, exit 2, `Hint: run station machinefile update on a terminal`; an interruption marks the app it stopped at and each one after it, exit 130, `station machinefile update resumes`. It updates neither Machines itself (re-run the install, [Release](../guides/release.md)) nor what the Machinefile does not list (`station apps update`). `--json` prints `station.machinefile.upgrade/v2`: each `line` as it ended, the `lock`'s moves (`app`, `was`, `now`), the `source` when it moved, each version `waiting` (`app`, `newest`, `range`, `moved`, `file`), `interrupted`, and `unpulled`, why the shared source did not move, when it did not. One apply, update or night runs on a machine at a time: a run that finds another holding it waits a few seconds, then is refused, exit 2, `Hint: run it again once that one ends`; one interrupted while it waits exits 130.
 
 `explain` resolves the Machinefile this machine is bound to (else the one named after it), or `--machinefile <name>`, against the catalog, and prints each value with its origin (`user`, `shared`, `built-in`, `overlay`, `this machine`, `lock`) and the Machinefile or package that says it; a key (`vm`, `apps.jq`) explains itself and every key under it. Every refusal of the resolution exits 2 with its own words: no Machinefile of that name, a file refused at its line, a newer schema (`update station`), `vm` on a computer, a cycle, a package with no method for the system or a range its method cannot hold, a package the catalog does not hold, a value that is none of the package's options, a key it says nothing of; a mixin (a Machinefile that says no `machine:`) answers the values its own chain says, with no step judged against a machine; a shared source that cannot be read exits 1. `--json` prints `station.machinefile.explain/v1`. The format is [Machinefiles](machinefiles.md).
-
-## A Mac's images and engine
-
-### `station images`
-
-```sh
-station images [--json] # every Mac's, one row per version per Mac
-station images build [<machinefile...>] [--binary <linux station binary>]
-station images update [<image...>] # the newest released version
-station images delete <image>[@<version>] [--yes]
-```
-
-An image is named after the Machinefile it is built from (`base-ubuntu`, `studio-linux`); `linux`, `station-linux` and `macos` name no image. A bare `build` builds every image that is missing or whose recipe, Machinefile or lock changed; a bare `update` updates every image this Mac holds. A name no source holds a Machinefile of, and no record of, is `no image "debian"`, and a Machinefile that makes no image is refused naming why (both exit 2). See [Images](images.md).
-
-### `station engine`
-
-```sh
-station engine [--json] # running, its version, up, the VMs it runs, Awake; or stopped, since when and by what
-station engine stop [--yes] [--remove] # Stop everything on this Mac: every running workspace stopped, its disk kept; Awake and the sharing end; then the engine, unless a server runs: it is skipped, and the engine keeps running for it; `--remove` then takes the engine's job from the job manager too
-station engine start # the engine installed when it is not, restarted when it runs another version or serves no ssh agent, bootstrapped again; the VMs it stopped stay stopped
-station engine restart # restart the engine's job, whatever it runs: the VMs that run keep running, the engine adopts them again, and with Spwn.app the menu bar restarts with it; it says the version and how many VMs run
-```
-
-`--json` is `station.engine.read/v1`: `{schema, engine: {state, version, up_s, vms, stopped_at, stopped_by}}`, `state` `running`, `stopped` or `not-installed`. An engine running another version than station names both and `station engine start`. `--remove` ends the engine's life on this Mac once it has stopped: without Spwn.app it deletes both agents' plists and boots them out, with it it unregisters both bundled agents from SMAppService, and `station engine` then reads `not-installed`; it removes nothing else ([Getting started](../start/getting-started.md#5-remove-what-it-put-down) lists the rest), and an engine kept running for a server keeps its jobs. A Mac only; `--on <mac>` runs it on another Mac. A start the job manager refuses ends in `the engine did not start: <its last word>` (exit 1). See [Machines](machines.md#the-engine).
-
-## This terminal
-
-### `station use`
-
-```sh
-station use <machine> # every later command of this terminal runs there, as --on would
-station use - # back to the machine used before
-station use # the machine this terminal uses, and since when
-```
-
-`--on` still wins for its one command; other terminals stay where they are. See [Machines](machines.md#this-terminals-machine).
-
-## Machines itself
-
-```sh
-station init [--name <name>] [--machinefile <name|path>] [--yes]
-station --version
-station help [command]
-```
-
-`init` makes this machine known to Machines, safe to run again: it names this Mac (asking the name on a terminal, taking `--name` otherwise; off a terminal, a Mac with no name yet is refused, exit 2, `Hint: station init --name <name>`), writes the one managed block of `~/.zshrc`, writes the apps' own files (`relocate`), then moves what the apps left at the home root where those files point ([Disk](disk.md#relocation)). Before it moves anything it prints `# To move`, one row per move (`~/.bun/bin  to ~/.local/share/bun/bin  52 MB`, or a file it deletes, `deleted: its app writes it again`), then asks `Move them?` on a terminal; a no ends it there, exit 1, every file and every step as it was (`init kept: you said no`). Off a terminal it is refused, exit 2, before any step (`Error: refusing to move the apps' files without --yes`), and `--yes` answers it; with nothing to move it prints and asks nothing. It installs no app, runs no package manager and asks no password; the engine comes with the first VM command on a Mac with tart, or `station engine start`. On a terminal it opens on a line that sums it up and ends on the empty state of what the machine carries (`Machinefile  none bound by init: init --machinefile binds one`), then at most two next steps: `exec zsh` when it wrote the block, `station init --machinefile <name>`, `station apps install <app>`. `--machinefile` then binds this machine to that Machinefile and runs `apply` on it: init's page names it (`Machinefile  downloads/laptop.machine.yaml: applied below, which binds it`) and drops the step that says how to bind one, then come its plan and the run. Inside a workspace it writes the block and the layout only; inside a server it sets nothing up, the server's own tooling keeps it. `--version` prints `station <version> (<commit>)`. See [Getting started](../start/getting-started.md) and [Dotfiles](dotfiles.md).
 
 ## Plumbing
 

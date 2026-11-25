@@ -30,7 +30,7 @@ func Command(d Deps, env kit.Env, children ...*cobra.Command) *cobra.Command {
 		Use:     "accounts",
 		Short:   "Who is signed in on a machine, and what the vault granted it: names and scopes, never a token",
 		Example: "  station accounts\n  station accounts --on linux-1\n  station accounts --all-machines\n  station accounts --json",
-		Group:   kit.OnAMachine,
+		Group:   kit.Machine,
 		Declare: func(f *pflag.FlagSet, in *Input) {
 			f.BoolVar(&in.AllMachines, "all-machines", false, "every Mac and workspace, each with its own sign-ins and grants")
 		},

@@ -35,7 +35,7 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 		Use:     "activity",
 		Short:   "What a machine is doing now: CPU, memory, disk, network, thermal, battery, the busiest processes",
 		Example: "  station activity\n  station activity --on linux-1\n  station activity --all-machines\n  station activity --json --history",
-		Group:   kit.OnAMachine,
+		Group:   kit.Machine,
 		Declare: func(f *pflag.FlagSet, in *Input) {
 			f.BoolVar(&in.AllMachines, "all-machines", false, "one row per machine")
 			f.BoolVar(&in.History, "history", false, "with --json: the 24 h series the engine keeps")
