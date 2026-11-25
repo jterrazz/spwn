@@ -1,6 +1,7 @@
 package readers
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -367,9 +368,51 @@ func selfOf(keys iter.Seq[string]) string {
 func renamed(mac, self string, in map[string]engine.SliceOut) map[store.Key]engine.SliceOut {
 	out := make(map[store.Key]engine.SliceOut, len(in))
 	for k, sl := range in {
+		if self != "" && self != mac && store.Key(k).Family().PerMachine() {
+			sl.Value = relabel(sl.Value, self, mac)
+		}
 		out[rename(mac, self, store.Key(k))] = sl
 	}
 	return out
+}
+
+// invariant: in a per-machine slice another Mac exports, every value that
+// is its engine's own name is the name This Mac added it by, wherever it
+// sits; a sentence its engine wrote, and a tailnet's or a record's slice,
+// are held as they came.
+func relabel(raw json.RawMessage, self, mac string) json.RawMessage {
+	if raw == nil {
+		return nil
+	}
+	dec := json.NewDecoder(bytes.NewReader(raw))
+	dec.UseNumber()
+	var v any
+	if dec.Decode(&v) != nil {
+		return raw
+	}
+	out, err := json.Marshal(swap(v, self, mac))
+	if err != nil {
+		return raw
+	}
+	return out
+}
+
+func swap(v any, self, mac string) any {
+	switch t := v.(type) {
+	case string:
+		if t == self {
+			return mac
+		}
+	case []any:
+		for i := range t {
+			t[i] = swap(t[i], self, mac)
+		}
+	case map[string]any:
+		for k := range t {
+			t[k] = swap(t[k], self, mac)
+		}
+	}
+	return v
 }
 
 func rename(mac, self string, k store.Key) store.Key {
