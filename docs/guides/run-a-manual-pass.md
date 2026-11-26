@@ -10,7 +10,7 @@ What the automated suites prove, and where, is [Test architecture](../reference/
 | --------------------------------------------------------- | --------- | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
 | [CLI scenarios](../reference/manual-cli-scenarios.md)     | 50        | `scripts/manual-harness.sh` | Realistic command sequences a user runs in a day: init, up, talk, down. Uses `mock-claude`; mostly automatable.                    |
 | [Agent behaviour](../reference/manual-agent-behaviour.md) | 50        | Human + live Claude         | Whether the host-side setup (CLAUDE.md, playbooks, skills, hooks, tools, knowledge, roster, messaging) actually reaches the agent. |
-| [Edge cases](../reference/manual-edge-cases.md)           | 67        | Mixed (bash + human)        | Concurrency, partial failure, state-machine holes, filesystem edges, tool-install failure modes.                                   |
+| [Edge cases](../reference/manual-edge-cases.md)           | 68        | Mixed (bash + human)        | Concurrency, partial failure, state-machine holes, filesystem edges, tool-install failure modes, the outside-path ask on a terminal. |
 
 Only the agent-behaviour catalog needs a live session: it asks what the agent _sees_, and `mock-claude` sees nothing.
 
