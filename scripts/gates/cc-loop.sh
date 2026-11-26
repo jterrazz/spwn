@@ -9,6 +9,10 @@ rm -f "$R/$L-cc.end"; echo $$ > "$pidf"
 trap 'kill $(jobs -p) 2>/dev/null; rm -rf "${W:?}/$L-node"; rm -f "$pidf"; echo "END $(date +%T)" > "$R/$L-cc.end"' EXIT
 trap 'exit 143' TERM HUP INT
 disk_ok(){ local d u; for d in ~ "$W"; do mkdir -p "$d"; u=$(df --output=pcent "$d" | tail -1 | tr -dc 0-9); [ "${u:-100}" -lt 90 ] || { echo "DISK $d at ${u}%: free it (old *-node, clones, logs) before rerunning"; exit 86; }; done; }
+# invariant: a clone folder on a RAM disk the other lots filled is swapped, once, for $R/clones on the VM's disk (slower, never refused); only the VM's own disk above the guard refuses.
+fs_of(){ df --output=source "$1" | tail -1; }
+mkdir -p "$W"; u=$(df --output=pcent "$W" | tail -1 | tr -dc 0-9)
+if [ "${u:-100}" -ge 90 ] && [ "$(fs_of "$W")" != "$(fs_of ~)" ]; then echo "RAM-DISK $W at ${u}% (other lots' clones): this run clones under $R/clones on the VM's disk, slower"; W=$R/clones; fi
 disk_ok
 one(){ local n=$1 sha=$2 step=$3 suffix=$4 f=$R/$L-cc$1 t0=$SECONDS; shift 4
   rm -f "$f$suffix.out" "$f$suffix.rc"; [ -z "$suffix" ] && rm -f "$R/$L-drift$n.patch"

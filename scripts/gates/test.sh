@@ -50,7 +50,7 @@ EOF
 for p; do :; done
 case $p in "$HOME"/ram*) k=ram; s=ramfs ;; *) k=disk; s=vda1 ;; esac
 v=$(cat "$HOME/df.$k" 2>/dev/null || echo 10)
-case $* in *--output=pcent*) printf 'Use%%\n %s%%\n' "$v" ;; *--output=source,pcent*) printf 'Filesystem Use%%\n%s %s%%\n' "$s" "$v" ;; *) echo "$s 1G 1G 1G $v% $p" ;; esac
+case $* in *--output=source) printf "Filesystem\n%s\n" "$s" ;; *--output=pcent*) printf 'Use%%\n %s%%\n' "$v" ;; *--output=source,pcent*) printf 'Filesystem Use%%\n%s %s%%\n' "$s" "$v" ;; *) echo "$s 1G 1G 1G $v% $p" ;; esac
 EOF
   chmod +x "$d/bin/ssh" "$d/bin/scp" "$d/bin/sleep" "$d/bin/df"
   git init -q -b b "$d/w"; local g=(-c user.name=t -c user.email=t@t); git -C "$d/w" "${g[@]}" commit -q --allow-empty -m c0; git -C "$d/w" "${g[@]}" commit -q --allow-empty -m c1
@@ -104,7 +104,7 @@ regen_case regen-all-red 1 all 3
 cc_sb() { sb "$1"
   cat > "$T/$1/r/scripts/gates/cc-remote.sh" <<'EOF'
 #!/bin/bash
-echo "CHEAP-SEEN[$CHEAP]" >> "$HOME/cheap.seen"
+echo "CHEAP-SEEN[$CHEAP]" >> "$HOME/cheap.seen"; echo "$CC_WORK" > "$HOME/work.seen"
 echo "GOFMT[]"; echo VET-OK; echo SPECSVET-OK; echo LINT=$(cat "$HOME/lint.rc" 2>/dev/null || echo 0); echo "CC-DONE $3"
 EOF
 }
@@ -159,5 +159,14 @@ cc_sb attach; mkdir -p "$T/attach/home/spwn-gates"
 printf '%s\n' "VERDICT lab 1 abc GREEN - took=1s tier=heavy" "SUMMARY lab: 1 commits, 1 GREEN, 0 FLAKE, 0 RED" > "$T/attach/home/spwn-gates/lab-cc.log"; echo END > "$T/attach/home/spwn-gates/lab-cc.end"
 out=$(in_sb attach timeout 120 env ATTACH=1 bash cc.sh "$T/attach/w" "$(git -C "$T/attach/w" rev-parse b~1)" lab 2>&1); rc=$?
 [ $rc = 0 ] || bad "cc.sh ATTACH=1 on a finished loop: exit $rc"
+ram_case() { local n=$1 ram=$2 disk=$3 want_rc=$4 want_work=$5 want=$6; cc_sb "$n"; echo "$ram" > "$T/$n/home/df.ram"; echo "$disk" > "$T/$n/home/df.disk"
+  out=$(cc_run "$n" env -u CHEAP); rc=$?
+  [ $rc = "$want_rc" ] || bad "cc.sh ram $ram disk $disk: exit $rc, wanted $want_rc"
+  [ "$(cat "$T/$n/home/work.seen" 2>/dev/null)" = "${want_work/#@/$T/$n/home/}" ] || bad "cc.sh ram $ram disk $disk: clones under $(cat "$T/$n/home/work.seen" 2>/dev/null), wanted $want_work"
+  case $out in *"$want"*) ;; *) bad "cc.sh ram $ram disk $disk: no '$want' in: $(echo "$out" | head -4)" ;; esac
+}
+ram_case ram-ok 50 10 0 @ram "VERDICT lab 1"
+ram_case ram-full 97 10 0 @spwn-gates/clones "RAM-DISK"
+ram_case ram-disk-full 97 95 86 "" "DISK stubvm at 95%"
 [ $fail = 0 ] && echo "gate scripts: ok"
 exit $fail
