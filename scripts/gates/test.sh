@@ -129,5 +129,9 @@ cheap_case "" 0 heavy ""
 cheap_case unset 0 heavy ""
 cheap_case maybe 2 refused ""
 cheap_case 2 2 refused ""
+NOFOLDER=1 dp_case dp-nofolder 0 "GREEN steps=-" NPMCI=0 TSC=0 VITEST=0 PROOF=0 WEBSITE=0 TSCHECK=0 ARCH=0 MAKELINT=0 DT-DONE
+NOFOLDER=1 cheap_case 0 0 heavy ""
+NOFOLDER=1 cold_case cold-nofolder 0
+NOFOLDER=1 regen_case regen-nofolder 0 one 0
 [ $fail = 0 ] && echo "gate scripts: ok"
 exit $fail
