@@ -1,6 +1,7 @@
 import type { WikiServedBlock, WikiServedFigure, WikiServedTable } from '@jterrazz/station-api';
 
 import { SEPARATOR } from '../../../domain/separator';
+import { Bar } from '../../ui/index';
 import { WIKI_WORDS } from '../../words/wiki';
 import { DotIcon } from './dot-icon';
 import { attentionOf, FieldValue, placeOf, Ref } from './fields';
@@ -107,9 +108,29 @@ function Quad({ figure }: { figure: WikiServedFigure }) {
     );
 }
 
+// value: a stack draws each part's count as a bar against the largest, the engine's order kept.
+function Stack({ figure }: { figure: WikiServedFigure }) {
+    const parts = figure.Parts ?? [];
+    const most = Math.max(1, ...parts.map((part) => part.n ?? 0));
+    return (
+        <ol className={styles.stack}>
+            {parts.map((part) => (
+                <li className={styles.stackRow} key={part.name}>
+                    <span className={styles.partName}>{part.name}</span>
+                    <Bar label={part.name} percent={((part.n ?? 0) / most) * 100} />
+                    <span className={styles.partN}>{part.n ?? 0}</span>
+                </li>
+            ))}
+        </ol>
+    );
+}
+
 function Parts({ figure }: { figure: WikiServedFigure }) {
     if (figure.Form === 'quad') {
         return <Quad figure={figure} />;
+    }
+    if (figure.Form === 'stack') {
+        return <Stack figure={figure} />;
     }
     return (
         <ol className={styles.figureParts}>

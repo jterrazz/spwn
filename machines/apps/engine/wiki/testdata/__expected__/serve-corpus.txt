@@ -1,4 +1,4 @@
-page blueprint/philosophy @30s floor=0 Intention seats=[blueprint],product,engineering,growth needs-you=0 unshown=8
+page blueprint/philosophy @30s floor=0 Intention seats=[blueprint],product,engineering,growth needs-you=0 unshown=9
   floors [0:7] 1:0 2:0 3:0 4:0
   paragraph "The seven convictions Spwn is built on, written as principles a newcomer can apply to a design choice; [the vision](./vision.md) holds the case they serve, and this page holds the rules. The owner confirmed the seven on 2026-11-21 ([his answer](./owner-words.md#why-spwn-exists))."
     block blueprint/philosophy#all table icon=table tier= shown=none ""
@@ -10,6 +10,14 @@ page blueprint/philosophy @30s floor=0 Intention seats=[blueprint],product,engin
         row blueprint/philosophy#proven says="Done means proven." carried_in="" refs=product/stack#specs
         row blueprint/philosophy#taste-is-a-system says="Taste is a system." carried_in="" refs=product/stack#design
         row blueprint/philosophy#learns says="The stack learns. You don't repeat yourself." carried_in="" refs=product/stack#agents,product/stack#wiki
+    block blueprint/philosophy#who-carries figure icon=figure tier= shown=none "Who carries them: how many of the seven each part of the stack carries."
+      figure stack shows=blueprint/philosophy#all "Who carries them: how many of the seven each part of the stack carries."
+        part "agents" at= n=4
+        part "wiki" at= n=2
+        part "machines" at= n=2
+        part "os" at= n=1
+        part "specs" at= n=1
+        part "design" at= n=1
   section 1-you-bring-the-taste-the-stack-brings-the-hands "1. You bring the taste. The stack brings the hands" rests=false
     block blueprint/philosophy#taste conviction icon=conviction tier=quiet shown=none "You bring the taste. The stack brings the hands."
       field says "You bring the taste. The stack brings the hands." 
@@ -65,6 +73,14 @@ page blueprint/philosophy @2min floor=0 Intention seats=[blueprint],product,engi
         row blueprint/philosophy#proven says="Done means proven." carried_in="" refs=product/stack#specs
         row blueprint/philosophy#taste-is-a-system says="Taste is a system." carried_in="" refs=product/stack#design
         row blueprint/philosophy#learns says="The stack learns. You don't repeat yourself." carried_in="" refs=product/stack#agents,product/stack#wiki
+    block blueprint/philosophy#who-carries figure icon=figure tier= shown=tile "Who carries them: how many of the seven each part of the stack carries."
+      figure stack shows=blueprint/philosophy#all "Who carries them: how many of the seven each part of the stack carries."
+        part "agents" at= n=4
+        part "wiki" at= n=2
+        part "machines" at= n=2
+        part "os" at= n=1
+        part "specs" at= n=1
+        part "design" at= n=1
     plain "Each conviction is written in the same six parts: the statement, the sensible opposite (what a reasonable product does instead, which is why the conviction says something), the argument, where the product carries it, one example, and the decision that would break it. A page that cites a conviction cites its number and links here."
   section 1-you-bring-the-taste-the-stack-brings-the-hands "1. You bring the taste. The stack brings the hands" rests=false
     block blueprint/philosophy#taste conviction icon=conviction tier=quiet shown=counted "You bring the taste. The stack brings the hands."
@@ -129,6 +145,14 @@ page blueprint/philosophy @10min floor=0 Intention seats=[blueprint],product,eng
         row blueprint/philosophy#proven says="Done means proven." carried_in="" refs=product/stack#specs
         row blueprint/philosophy#taste-is-a-system says="Taste is a system." carried_in="" refs=product/stack#design
         row blueprint/philosophy#learns says="The stack learns. You don't repeat yourself." carried_in="" refs=product/stack#agents,product/stack#wiki
+    block blueprint/philosophy#who-carries figure icon=figure tier= shown=tile "Who carries them: how many of the seven each part of the stack carries."
+      figure stack shows=blueprint/philosophy#all "Who carries them: how many of the seven each part of the stack carries."
+        part "agents" at= n=4
+        part "wiki" at= n=2
+        part "machines" at= n=2
+        part "os" at= n=1
+        part "specs" at= n=1
+        part "design" at= n=1
     plain "Each conviction is written in the same six parts: the statement, the sensible opposite (what a reasonable product does instead, which is why the conviction says something), the argument, where the product carries it, one example, and the decision that would break it. A page that cites a conviction cites its number and links here."
   section 1-you-bring-the-taste-the-stack-brings-the-hands "1. You bring the taste. The stack brings the hands" rests=false
     block blueprint/philosophy#taste conviction icon=conviction tier=quiet shown=line "You bring the taste. The stack brings the hands."
@@ -571,9 +595,9 @@ page growth/positioning @30s floor=1 Produit seats=blueprint,product,engineering
         field costs "each keeps its own copy of your context, and you are the integration between them" 
     block growth/positioning#two-costs figure icon=figure tier= shown=none "Each costs either scale or authorship."
       figure quad shows=growth/positioning#alternatives "Each costs either scale or authorship."
-        part "by hand" at=y
-        part "one big agent" at=x
-        part "spwn" at=xy
+        part "by hand" at=y n=0
+        part "one big agent" at=x n=0
+        part "spwn" at=xy n=0
     block growth/positioning#all table icon=table tier= shown=none ""
       table alternative in=growth/positioning#alternatives where="" columns=gives,costs
         row growth/positioning#by-hand gives="you know every line" costs="you are the bottleneck: what gets built is bounded by your hours"
@@ -611,9 +635,9 @@ page growth/positioning @2min floor=1 Produit seats=blueprint,product,engineerin
         field costs "each keeps its own copy of your context, and you are the integration between them" 
     block growth/positioning#two-costs figure icon=figure tier= shown=tile "Each costs either scale or authorship."
       figure quad shows=growth/positioning#alternatives "Each costs either scale or authorship."
-        part "by hand" at=y
-        part "one big agent" at=x
-        part "spwn" at=xy
+        part "by hand" at=y n=0
+        part "one big agent" at=x n=0
+        part "spwn" at=xy n=0
     block growth/positioning#all table icon=table tier= shown=tile ""
       table alternative in=growth/positioning#alternatives where="" columns=gives,costs
         row growth/positioning#by-hand gives="you know every line" costs="you are the bottleneck: what gets built is bounded by your hours"
@@ -653,9 +677,9 @@ page growth/positioning @10min floor=1 Produit seats=blueprint,product,engineeri
         field costs "each keeps its own copy of your context, and you are the integration between them" 
     block growth/positioning#two-costs figure icon=figure tier= shown=tile "Each costs either scale or authorship."
       figure quad shows=growth/positioning#alternatives "Each costs either scale or authorship."
-        part "by hand" at=y
-        part "one big agent" at=x
-        part "spwn" at=xy
+        part "by hand" at=y n=0
+        part "one big agent" at=x n=0
+        part "spwn" at=xy n=0
     block growth/positioning#all table icon=table tier= shown=tile ""
       table alternative in=growth/positioning#alternatives where="" columns=gives,costs
         row growth/positioning#by-hand gives="you know every line" costs="you are the bottleneck: what gets built is bounded by your hours"

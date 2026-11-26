@@ -103,7 +103,7 @@ func outline(s wiki.Served) string {
 				if k.Figure != nil {
 					line(depth+1, "figure", k.Figure.Form, "shows="+k.Figure.Shows.Address, strconv.Quote(k.Figure.Caption))
 					for _, p := range k.Figure.Parts {
-						line(depth+2, "part", strconv.Quote(p.Name), "at="+p.At)
+						line(depth+2, "part", strconv.Quote(p.Name), "at="+p.At, "n="+strconv.Itoa(p.N))
 					}
 				}
 				if d := k.Decision; d != nil {

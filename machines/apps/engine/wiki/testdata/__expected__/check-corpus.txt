@@ -12,6 +12,7 @@ findings
 readings
   blueprint/philosophy seat=blueprint floor=0
     blueprint/philosophy#all table floor=0 rows=blueprint/philosophy#taste,blueprint/philosophy#delegating,blueprint/philosophy#rules-in-the-world,blueprint/philosophy#declared,blueprint/philosophy#proven,blueprint/philosophy#taste-is-a-system,blueprint/philosophy#learns
+    blueprint/philosophy#who-carries figure floor=0
     blueprint/philosophy#taste conviction floor=0 score=1 tier=quiet why=kind:1
     blueprint/philosophy#delegating conviction floor=0 score=1 tier=quiet why=kind:1
     blueprint/philosophy#rules-in-the-world conviction floor=0 score=1 tier=quiet why=kind:1

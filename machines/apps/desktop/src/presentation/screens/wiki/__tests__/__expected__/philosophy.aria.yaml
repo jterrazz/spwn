@@ -71,6 +71,35 @@
               - cell "agents wiki":
                 - button "agents"
                 - button "wiki"
+      - figure "Figure who-carries":
+        - text: Figure stack
+        - button "all"
+        - list:
+          - listitem:
+            - text: agents
+            - meter "agents"
+            - text: "4"
+          - listitem:
+            - text: wiki
+            - meter "wiki"
+            - text: "2"
+          - listitem:
+            - text: machines
+            - meter "machines"
+            - text: "2"
+          - listitem:
+            - text: os
+            - meter "os"
+            - text: "1"
+          - listitem:
+            - text: specs
+            - meter "specs"
+            - text: "1"
+          - listitem:
+            - text: design
+            - meter "design"
+            - text: "1"
+        - text: "Who carries them: how many of the seven each part of the stack carries."
       - paragraph: "Each conviction is written in the same six parts: the statement, the sensible opposite (what a reasonable product does instead, which is why the conviction says something), the argument, where the product carries it, one example, and the decision that would break it. A page that cites a conviction cites its number and links here."
     - region "1. You bring the taste. The stack brings the hands":
       - heading "1. You bring the taste. The stack brings the hands" [level=2]

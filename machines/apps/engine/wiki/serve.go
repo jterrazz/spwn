@@ -674,6 +674,9 @@ func (s *server) parts(v *FigureView) []FigurePart {
 	if len(v.Parts) > 0 {
 		return v.Parts
 	}
+	if counted := s.counted(v); counted != nil {
+		return counted
+	}
 	if b, ok := s.blocks[v.Shows]; ok {
 		return []FigurePart{{Name: cmp.Or(b.Faces.Word, b.ID)}}
 	}
@@ -687,6 +690,45 @@ func (s *server) parts(v *FigureView) []FigurePart {
 			out = append(out, FigurePart{Name: cmp.Or(b.Faces.Word, b.ID)})
 		}
 	}
+	return out
+}
+
+// invariant: a stack with no parts written that shows a table counts what
+// the table says: for each page or block its rows' refs name, how many rows
+// name it, the most named first, ties in the order they are first named.
+func (s *server) counted(v *FigureView) []FigurePart {
+	b, ok := s.blocks[v.Shows]
+	if !ok || v.Form != "stack" {
+		return nil
+	}
+	t, ok := b.View.(*TableView)
+	if !ok {
+		return nil
+	}
+	var out []FigurePart
+	at := map[string]int{}
+	for _, row := range s.readings[v.Shows].Rows {
+		rb, ok := s.blocks[row]
+		if !ok {
+			continue
+		}
+		for _, col := range t.Columns {
+			value, ok := rb.Props.Get(col)
+			if !ok {
+				continue
+			}
+			for _, ref := range s.field(col, value).Refs {
+				i, seen := at[ref.Address]
+				if !seen {
+					i = len(out)
+					at[ref.Address] = i
+					out = append(out, FigurePart{Name: ref.Word})
+				}
+				out[i].N++
+			}
+		}
+	}
+	slices.SortStableFunc(out, func(a, b FigurePart) int { return cmp.Compare(b.N, a.N) })
 	return out
 }
 
