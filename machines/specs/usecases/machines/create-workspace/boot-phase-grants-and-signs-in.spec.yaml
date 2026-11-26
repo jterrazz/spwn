@@ -18,7 +18,7 @@ runs:
     - command: 'machines create --memory 4G web --from studio-linux | /usr/bin/grep -E "Boot|claude|gh|npm|wrangler|Created"'
       exit: 0
       stdout: |
-          ●	Boot phase	studio-linux	8 apps installed · 2 settings set
+          ●	Boot phase	studio-linux	7 apps installed · 2 settings set
           ●	npm	granted
           ◐	wrangler	not granted: no password for wrangler in this Mac's vault
           ◐	gh	not signed in: station accounts login gh --on web

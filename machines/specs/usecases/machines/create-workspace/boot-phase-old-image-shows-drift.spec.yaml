@@ -28,8 +28,8 @@ runs:
           ●	Running
           ●	Has an address	192.168.64.5
           ●	SSH answers
-          ●	Boot phase	studio-linux	6 apps installed · 2 settings set
-          ◐	Drift	its image is behind its Machinefile	jq is not baked into the image
+          ●	Boot phase	studio-linux	5 apps installed · 2 settings set
+          ◐	Drift	its image is behind its Machinefile	jq is not baked into the image · linux-kernel is not baked into the image
           ●	web	Created	Ephemeral · 4 CPU · 4 GB · 20 GB
     - command: 'machines delete web --confirm=web'
       exit: 0
@@ -38,4 +38,4 @@ runs:
     - command: 'machines create --memory 4G web --from studio-linux --json | /usr/bin/jq -c ''{template, applied: [.boot.applied[].name], unfinished: .boot.unfinished, drift: .boot.drift}'''
       exit: 0
       stdout: |
-          {"template":"studio-linux","applied":["ohmyzsh","docker","linux-kernel","build-essential","playwright-deps","jq"],"unfinished":[],"drift":["jq is not baked into the image"]}
+          {"template":"studio-linux","applied":["ohmyzsh","docker","build-essential","playwright-deps","jq"],"unfinished":[],"drift":["jq is not baked into the image","linux-kernel is not baked into the image"]}

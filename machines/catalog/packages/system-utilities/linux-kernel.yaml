@@ -2,6 +2,7 @@ package: station.package/v1
 kind: app
 name: linux-kernel
 description: The one kernel a Linux VM boots, Ubuntu's hardware-enablement kernel without the firmware and headers of a physical machine
+phase: image
 methods:
     - os: ubuntu
       version: '24.04'

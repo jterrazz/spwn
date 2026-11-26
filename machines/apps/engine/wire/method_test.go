@@ -56,6 +56,9 @@ type bench struct {
 	// value: the owner's files, which apply reads afresh at each run.
 	files map[string]string
 	calls *benchCalls
+	// value: the phase apply and plan carry out, apply's by default: an
+	// app of the image phase is installed by that phase alone.
+	phase catalog.Phase
 }
 
 // value: this machine's calls as apply reaches them: apps' over the
@@ -163,7 +166,7 @@ func benchOf(t *testing.T, kind catalog.MachineKind, entry string, edits ...func
 // --remove and its yes when remove says so.
 func (b bench) apply(t *testing.T, remove bool) machinefile.Applied {
 	t.Helper()
-	in := machinefilecalls.ApplyIn{Interactive: true, Remove: remove}
+	in := machinefilecalls.ApplyIn{Interactive: true, Remove: remove, Phase: b.phase}
 	if remove {
 		in.Confirm = confirm.Yes
 	}
@@ -178,7 +181,7 @@ func (b bench) apply(t *testing.T, remove bool) machinefile.Applied {
 func (b bench) planned(t *testing.T, pkg string) machinefile.Line {
 	t.Helper()
 	b.shelf.Forget()
-	p, err := call.Invoke(context.Background(), b.calls, coremachine.Ref{}, machinefilecalls.Plan, machinefilecalls.PlanIn{}, nil)
+	p, err := call.Invoke(context.Background(), b.calls, coremachine.Ref{}, machinefilecalls.Plan, machinefilecalls.PlanIn{Phase: b.phase}, nil)
 	if err != nil {
 		t.Fatalf("plan: %v", err)
 	}
@@ -285,7 +288,8 @@ func entries(cat catalog.Catalog, a catalog.App, kind catalog.MachineKind) []str
 func TestTheMethodApplyRunsIsTheMethodThePlanShows(t *testing.T) {
 	// invariant: for every app of the catalog, on every kind of machine,
 	// for every entry a Machinefile may write of it, the method its step
-	// names is the one `station machinefile apply` installs it by at the version
+	// names is the one `station machinefile apply` (with `--phase image` for
+	// an app of that phase) installs it by at the version
 	// asked, the one the ledger records and the read after it names, the
 	// one a named update, a bulk update of its manager and a removal
 	// reach; and the plan then keeps it, neither installing nor adopting.
@@ -303,6 +307,9 @@ func TestTheMethodApplyRunsIsTheMethodThePlanShows(t *testing.T) {
 					about := string(kind) + " " + entry
 					b := benchOf(t, kind, entry)
 					step := b.step(t, a.Name)
+					if step.Phase == catalog.PhaseImage {
+						b.phase = step.Phase
+					}
 					method := catalog.Method(step.Method)
 					in, _ := a.InstallBy(kind, method)
 					done := doneOf(t, b.apply(t, false).Done, a.Name)

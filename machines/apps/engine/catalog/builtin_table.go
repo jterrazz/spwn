@@ -8503,6 +8503,7 @@ func builtinCatalog() (Catalog, error) {
 					Kind:        "app",
 					Name:        "linux-kernel",
 					Description: "The one kernel a Linux VM boots, Ubuntu's hardware-enablement kernel without the firmware and headers of a physical machine",
+					Phase:       "image",
 					Methods: []MethodSpec{
 						{
 							Selector: Selector{

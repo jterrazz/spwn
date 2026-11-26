@@ -50,9 +50,10 @@ type Step struct {
 	// cannot pin it, which the install does not take.
 	Locked, Recorded, Lock string
 	Phase                  catalog.Phase
-	// value: the step is baked into the VM image (vm.image.bake, and what
-	// a baked package requires): `apply --phase image` runs it, and a bare
-	// apply carries it as any other.
+	// value: the step is baked into the VM image (vm.image.bake, each
+	// step of the image phase, and what a baked package requires): `apply
+	// --phase image` runs it, and a bare apply carries it as any other but
+	// a step of the image phase, which it leaves.
 	Baked bool
 	Needs []catalog.Need
 	// value: what has to happen once it is applied for it to take (the
@@ -588,9 +589,11 @@ func packageOrigin(it catalog.Placed) Origin {
 	return Origin{Name: it.Package.Name, Kind: OriginKind(it.Origin), File: it.File}
 }
 
-// invariant: what the image bakes is its bake list and, step by step,
-// what a baked step requires (its requires, its provider, its manager),
-// so `apply --phase image` never runs a package whose requirement it left.
+// invariant: what the image bakes is its bake list, each step of the
+// image phase whatever that list says (a child's list replaces its
+// parent's, never the parent's kernel), and, step by step, what a baked
+// step requires (its requires, its provider, its manager), so `apply
+// --phase image` never runs a package whose requirement it left.
 func (p *planner) baked(steps []Step, bake []listed[struct{}]) []Step {
 	at := make(map[string]int, len(steps))
 	for i, s := range steps {
@@ -599,6 +602,11 @@ func (p *planner) baked(steps []Step, bake []listed[struct{}]) []Step {
 	queue := make([]string, 0, len(bake))
 	for _, b := range bake {
 		queue = append(queue, b.name)
+	}
+	for _, s := range steps {
+		if s.Phase == catalog.PhaseImage {
+			queue = append(queue, s.Package)
+		}
 	}
 	for len(queue) > 0 {
 		name := queue[0]
