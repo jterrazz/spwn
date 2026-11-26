@@ -487,6 +487,7 @@
             "vm_stopped",
             "wiki.bad-budget",
             "wiki.none",
+            "wiki.too-large",
             "wiki.unknown-page",
             "wiki.unreadable"
           ],

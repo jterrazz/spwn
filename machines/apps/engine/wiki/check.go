@@ -133,7 +133,7 @@ func Check(ctx context.Context, schema Schema, pages []Page) (Report, error) {
 		}
 		readings = append(readings, k.weigh(p))
 	}
-	findings := append(append([]Finding{}, k.compiled...), capped(k.findings)...)
+	findings := append(append([]Finding{}, k.compiled...), capped(k.findings, k.said)...)
 	sortFindings(findings)
 	return Report{Findings: findings, Readings: readings}, nil
 }
@@ -206,8 +206,11 @@ func (k *checker) mark(address, id string, t target) {
 }
 
 func (k *checker) add(rule, page, block string, at At, says string) {
-	k.said[ruleOn{page, rule}]++
-	k.findings = append(k.findings, finding(rule, page, block, at, says))
+	on := ruleOn{page, rule}
+	k.said[on]++
+	if k.said[on] <= maxFindings+1 {
+		k.findings = append(k.findings, finding(rule, page, block, at, says))
+	}
 }
 
 // value: whether a page already has as many findings of a rule as are
@@ -298,7 +301,8 @@ func (k *checker) retiredTerm(term *Block) {
 			line, col, read := pr.Span.From, 1, 0
 			for _, m := range pattern.FindAllStringIndex(pr.Markdown, -1) {
 				for _, r := range pr.Markdown[read:m[0]] {
-					if col++; r == '\n' {
+					col++
+					if r == '\n' {
 						line, col = line+1, 1
 					}
 				}

@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -20,7 +21,7 @@ func longTag() string {
 	var b strings.Builder
 	b.WriteString("<Term")
 	for i := 0; b.Len() < 1<<20-16; i++ {
-		fmt.Fprintf(&b, " a%d", i)
+		b.WriteString(" a" + strconv.Itoa(i))
 	}
 	return b.String() + "\n"
 }
@@ -54,37 +55,50 @@ func atMostAHundredAndOne(t *testing.T, findings []wiki.Finding) {
 	}
 }
 
+// value: each worst input's budget, at least five times its time measured
+// on the development VM at a load of 18 or less, and far under the tens of
+// seconds the quadratic paths took on the same input (2026-11-26).
+const (
+	budgetClique   = 20 * time.Millisecond
+	budgetLayered  = 250 * time.Millisecond
+	budgetLongTag  = 500 * time.Millisecond
+	budgetBraces   = 600 * time.Millisecond
+	budgetRetired  = 500 * time.Millisecond
+	budgetServing  = 100 * time.Millisecond
+	budgetBrackets = 50 * time.Millisecond
+)
+
 func TestATagOfAMegabyteOfAttributesCompilesInLinearTime(t *testing.T) {
-	src := longTag()
+	src, schema := longTag(), spwnKinds()
 	var p wiki.Page
-	within(t, 400*time.Millisecond, "a 1 MiB tag of attributes", func() { p = wiki.Compile("blueprint/t", src, spwnKinds()) })
+	within(t, budgetLongTag, "a 1 MiB tag of attributes", func() { p = wiki.Compile("blueprint/t", src, schema) })
 	atMostAHundredAndOne(t, p.Findings)
 }
 
 func TestAPageOfBracesNeverClosedCompilesInLinearTime(t *testing.T) {
-	src := unclosedBraces()
+	src, schema := unclosedBraces(), spwnKinds()
 	var p wiki.Page
-	within(t, 400*time.Millisecond, "a 1 MiB page of braces never closed", func() { p = wiki.Compile("blueprint/b", src, spwnKinds()) })
+	within(t, budgetBraces, "a 1 MiB page of braces never closed", func() { p = wiki.Compile("blueprint/b", src, schema) })
 	atMostAHundredAndOne(t, p.Findings)
 }
 
 func TestARetiredTermWrittenHalfAMillionTimesIsSaidAHundredTimesAndCounted(t *testing.T) {
-	pages := retiredEverywhere()
+	pages, schema := retiredEverywhere(), spwnKinds()
 	var report wiki.Report
-	within(t, 400*time.Millisecond, "a retired term written 500k times", func() { report = checkAll(pages) })
+	within(t, budgetRetired, "a retired term written 500k times", func() { report = checkWith(schema, pages) })
 	got := ruled(report, "H8")
 	if want := fmt.Sprintf("blueprint/r and %d more like it on this page", retiredTimes-100); len(got) != 101 || got[100] != want {
 		t.Errorf("H8 findings %d, the last %q; want 100, then %q", len(got), got[len(got)-1], want)
 	}
 	atMostAHundredAndOne(t, report.Findings)
-	corpus := wiki.Corpus{Schema: spwnKinds(), Pages: pages, Report: report}
-	within(t, 400*time.Millisecond, "serving the page of 500k findings", func() { _, _ = corpus.Serve("blueprint/r", wiki.Budget10min) })
+	corpus := wiki.Corpus{Schema: schema, Pages: pages, Report: report}
+	within(t, budgetServing, "serving the page of 500k findings", func() { _, _ = corpus.Serve("blueprint/r", wiki.Budget10min) })
 }
 
 func TestAProseOfBracketsIsReadInLinearTime(t *testing.T) {
 	src := brackets()
 	var out []wiki.Paragraph
-	within(t, 200*time.Millisecond, "1 MiB of brackets", func() { out = wiki.Paragraphs(src) })
+	within(t, budgetBrackets, "1 MiB of brackets", func() { out = wiki.Paragraphs(src) })
 	if len(out) != 1 {
 		t.Errorf("one line of brackets gives %d paragraphs, want 1", len(out))
 	}
@@ -179,17 +193,24 @@ func FuzzReadSchema(f *testing.F) {
 }
 
 func BenchmarkTheWorstPages(b *testing.B) {
+	schema := spwnKinds()
 	for name, src := range map[string]string{"long-tag": longTag(), "unclosed-braces": unclosedBraces()} {
 		b.Run(name, func(b *testing.B) {
 			for b.Loop() {
-				wiki.Compile("blueprint/x", src, spwnKinds())
+				wiki.Compile("blueprint/x", src, schema)
 			}
 		})
 	}
 	retired := retiredEverywhere()
 	b.Run("retired-term", func(b *testing.B) {
 		for b.Loop() {
-			checkAll(retired)
+			checkWith(schema, retired)
+		}
+	})
+	corpus := wiki.Corpus{Schema: schema, Pages: retired, Report: checkWith(schema, retired)}
+	b.Run("serving", func(b *testing.B) {
+		for b.Loop() {
+			_, _ = corpus.Serve("blueprint/r", wiki.Budget10min)
 		}
 	})
 	src := brackets()

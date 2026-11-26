@@ -3,10 +3,9 @@ package contracttest
 import (
 	"context"
 	"errors"
-	"fmt"
 	"maps"
 	"slices"
-	"strings"
+	"strconv"
 	"testing"
 
 	"github.com/jterrazz/studio-station/apps/engine/wiki"
@@ -51,7 +50,7 @@ func Corpus(t *testing.T, declared func(t *testing.T) Subject, none func(t *test
 	t.Run("a page past its limit is sized and never read", func(t *testing.T) {
 		s := declared(t)
 		s.Put("wiki.yaml", "wiki: spwn.wiki/v1\n")
-		s.Put("blueprint/huge.md", strings.Repeat("a", wiki.MaxPageBytes+1))
+		s.Put("blueprint/huge.md", string(make([]byte, wiki.MaxPageBytes+1)))
 		got, err := s.Corpus.Files(ctx)
 		if err != nil {
 			t.Fatalf("Files: %v", err)
@@ -65,7 +64,7 @@ func Corpus(t *testing.T, declared func(t *testing.T) Subject, none func(t *test
 		s := declared(t)
 		s.Put("wiki.yaml", "wiki: spwn.wiki/v1\n")
 		for i := range wiki.MaxPages + 1 {
-			s.Put(fmt.Sprintf("blueprint/p%04d.md", i), "# P\n")
+			s.Put("blueprint/p"+strconv.Itoa(i)+".md", "# P\n")
 		}
 		var past *wiki.TooLarge
 		if _, err := s.Corpus.Files(ctx); !errors.As(err, &past) {

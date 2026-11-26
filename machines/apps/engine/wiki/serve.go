@@ -265,8 +265,8 @@ func Read(ctx context.Context, files map[string]File) (Corpus, error) {
 	pages := make([]Page, 0, len(ids))
 	records := map[string]Record{}
 	for _, id := range ids {
-		if err := ctx.Err(); err != nil {
-			return Corpus{}, err
+		if stopped := ctx.Err(); stopped != nil {
+			return Corpus{}, stopped
 		}
 		f := files[id+".md"]
 		if f.Body == nil && f.Size > MaxPageBytes {

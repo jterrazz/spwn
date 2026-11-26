@@ -116,14 +116,20 @@ func runs(text string) []Run {
 		}
 		out = append(out, s)
 	}
-	// invariant: the next "](" and the ")" after it are found once and
-	// reused until reading passes them, so a line of "[" is read once.
+	// invariant: the next "](" and the next ")" after it are each found
+	// once and reused until reading passes them, and a search that finds
+	// none is never made again, so a line of "[" or of "[](" is read once.
 	mid, end := -1, -1
 	link := func(i int) (int, int) {
 		if mid < i {
-			mid, end = len(text), len(text)
+			mid = len(text)
 			if m := strings.Index(text[i:], "]("); m >= 0 {
 				mid = i + m
+			}
+		}
+		if end < mid+2 {
+			end = len(text)
+			if mid+2 <= len(text) {
 				if e := strings.IndexByte(text[mid+2:], ')'); e >= 0 {
 					end = mid + 2 + e
 				}

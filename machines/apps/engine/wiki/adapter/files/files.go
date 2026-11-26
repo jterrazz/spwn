@@ -4,9 +4,10 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
-	"fmt"
+	"io"
 	"io/fs"
 	"path/filepath"
+	"strconv"
 
 	"spwn.sh/packages/platform"
 
@@ -79,10 +80,11 @@ func (c *Corpus) Signature(ctx context.Context) (string, error) {
 		if err != nil {
 			return &contract.Unreadable{Path: filepath.ToSlash(p), Err: err}
 		}
-		if files++; files > wiki.MaxPages+1 {
+		files++
+		if files > wiki.MaxPages+1 {
 			return &wiki.TooLarge{Pages: files}
 		}
-		fmt.Fprintf(h, "%s %d %d\n", filepath.ToSlash(p), info.Size(), info.ModTime().UnixNano())
+		_, _ = h.Write([]byte(filepath.ToSlash(p) + " " + strconv.FormatInt(info.Size(), 10) + " " + strconv.FormatInt(info.ModTime().UnixNano(), 10) + "\n"))
 		return nil
 	})
 	if walked != nil {
@@ -112,7 +114,12 @@ func (r *reading) take(p string, d fs.DirEntry) error {
 	if slash != "wiki.yaml" {
 		r.pages++
 	}
-	info, err := r.tree.Stat(p)
+	f, err := r.tree.Open(p)
+	if err != nil {
+		return &contract.Unreadable{Path: slash, Err: err}
+	}
+	defer func() { _ = f.Close() }()
+	info, err := f.Stat()
 	if err != nil {
 		return &contract.Unreadable{Path: slash, Err: err}
 	}
@@ -120,7 +127,9 @@ func (r *reading) take(p string, d fs.DirEntry) error {
 		r.out[slash] = wiki.File{Size: info.Size()}
 		return r.within()
 	}
-	body, err := r.tree.ReadFile(p)
+	// invariant: the read stops one byte past the limit, so a file that
+	// grows after it was sized is never held whole.
+	body, err := io.ReadAll(io.LimitReader(f, wiki.MaxPageBytes+1))
 	if err != nil {
 		return &contract.Unreadable{Path: slash, Err: err}
 	}

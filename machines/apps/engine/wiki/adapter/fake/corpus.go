@@ -4,9 +4,9 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
-	"fmt"
 	"maps"
 	"slices"
+	"strconv"
 
 	"github.com/jterrazz/studio-station/apps/engine/wiki"
 	"github.com/jterrazz/studio-station/apps/engine/wiki/contract"
@@ -33,8 +33,8 @@ func (c *Corpus) Signature(context.Context) (string, error) {
 	}
 	h := sha256.New()
 	for _, p := range slices.Sorted(maps.Keys(repo.Commits[repo.Head])) {
-		if contract.Reads(p) {
-			fmt.Fprintf(h, "%s %d %s\n", p, len(repo.Commits[repo.Head][p]), repo.Commits[repo.Head][p])
+		if body := repo.Commits[repo.Head][p]; contract.Reads(p) {
+			_, _ = h.Write([]byte(p + " " + strconv.Itoa(len(body)) + "\n" + body + "\n"))
 		}
 	}
 	return hex.EncodeToString(h.Sum(nil)), nil

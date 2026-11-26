@@ -4,6 +4,7 @@ import (
 	"cmp"
 	"slices"
 	"strconv"
+	"sync"
 )
 
 type Level string
@@ -31,9 +32,13 @@ func rules() map[string]Level {
 	}
 }
 
+// invariant: the table is built once, as a page of half a million findings
+// looks it up for each; no caller writes to it.
+var ruleLevels = sync.OnceValue(rules)
+
 // value: the finding of a rule, hard when the rule has no level.
 func finding(rule, page, block string, at At, says string) Finding {
-	level, ok := rules()[rule]
+	level, ok := ruleLevels()[rule]
 	if !ok {
 		panic("wiki: no rule " + rule)
 	}
@@ -42,8 +47,8 @@ func finding(rule, page, block string, at At, says string) Finding {
 
 func Rules() []string {
 	// value: the codes of the registry, hard first, each in its number's order.
-	out := make([]string, 0, len(rules()))
-	for code := range rules() {
+	out := make([]string, 0, len(ruleLevels()))
+	for code := range ruleLevels() {
 		out = append(out, code)
 	}
 	slices.SortFunc(out, func(a, b string) int {

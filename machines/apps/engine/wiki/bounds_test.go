@@ -104,19 +104,19 @@ func layered() []wiki.Page {
 }
 
 func TestFifteenPagesNeedingEachOtherAreCheckedInMilliseconds(t *testing.T) {
-	pages := clique()
+	pages, schema := clique(), spwnKinds()
 	var report wiki.Report
-	within(t, 20*time.Millisecond, "a clique of fifteen needs", func() { report = checkAll(pages) })
+	within(t, budgetClique, "a clique of fifteen needs", func() { report = checkWith(schema, pages) })
 	want := []string{"blueprint/a01 needs: blueprint/a01 -> blueprint/a02 -> blueprint/a01"}
 	if got := ruled(report, "H10"); strings.Join(got, "\n") != strings.Join(want, "\n") {
 		t.Errorf("cycles %q, want %q", got, want)
 	}
 }
 
-func TestTwoThousandPagesInLayersAreCheckedUnderFiftyMilliseconds(t *testing.T) {
-	pages := layered()
+func TestTwoThousandPagesInLayersAreCheckedInLinearTime(t *testing.T) {
+	pages, schema := layered(), spwnKinds()
 	var report wiki.Report
-	within(t, 50*time.Millisecond, "a corpus of 100 layers of 20 pages", func() { report = checkAll(pages) })
+	within(t, budgetLayered, "a corpus of 100 layers of 20 pages", func() { report = checkWith(schema, pages) })
 	if got := ruled(report, "H10"); len(got) != 0 {
 		t.Errorf("a layered corpus has no cycle; got %q", got)
 	}
@@ -140,16 +140,16 @@ func TestEachSetOfPagesNeedingEachOtherIsSaidOnceFromItsFirstPage(t *testing.T) 
 }
 
 func BenchmarkTheWorstNeeds(b *testing.B) {
-	pages := clique()
+	pages, schema := clique(), spwnKinds()
 	b.Run("clique", func(b *testing.B) {
 		for b.Loop() {
-			checkAll(pages)
+			checkWith(schema, pages)
 		}
 	})
 	layers := layered()
 	b.Run("layered", func(b *testing.B) {
 		for b.Loop() {
-			checkAll(layers)
+			checkWith(schema, layers)
 		}
 	})
 }

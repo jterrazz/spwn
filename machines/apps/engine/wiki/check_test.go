@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"slices"
 	"strconv"
 	"strings"
@@ -295,6 +296,33 @@ func TestEveryRuleOfTheRegistryHasACase(t *testing.T) {
 	for _, code := range wiki.Rules() {
 		if !named[code] {
 			t.Errorf("rule %s has no case in checkCases", code)
+		}
+	}
+}
+
+func TestEveryRuleTheEngineNamesIsInTheRegistry(t *testing.T) {
+	registered := map[string]bool{}
+	for _, code := range wiki.Rules() {
+		registered[code] = true
+	}
+	sources, err := os.ReadDir(".")
+	if err != nil {
+		t.Fatal(err)
+	}
+	named := regexp.MustCompile(`"([HS]\d+)"`)
+	for _, entry := range sources {
+		file := entry.Name()
+		if !strings.HasSuffix(file, ".go") || strings.HasSuffix(file, "_test.go") {
+			continue
+		}
+		body, err := os.ReadFile(file)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, m := range named.FindAllStringSubmatch(string(body), -1) {
+			if !registered[m[1]] {
+				t.Errorf("%s names rule %s, which the registry does not hold: its finding would panic", file, m[1])
+			}
 		}
 	}
 }

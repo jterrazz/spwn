@@ -5,6 +5,7 @@ import (
 	"errors"
 	"maps"
 	"slices"
+	"strings"
 	"sync"
 	"testing"
 
@@ -31,11 +32,11 @@ func (c *counted) Signature(context.Context) (string, error) {
 	if c.refusal != nil {
 		return "", c.refusal
 	}
-	sig := ""
+	var sig strings.Builder
 	for _, p := range slices.Sorted(maps.Keys(c.files)) {
-		sig += p + "=" + c.files[p] + ";"
+		sig.WriteString(p + "=" + c.files[p] + ";")
 	}
-	return sig, nil
+	return sig.String(), nil
 }
 
 func localMac() machine.Profile { return machine.Profile{Caps: machine.Capabilities{Engine: true}} }
@@ -51,7 +52,7 @@ func (c *counted) Files(context.Context) (map[string]wiki.File, error) {
 	return out, nil
 }
 
-const yaml = "wiki: spwn.wiki/v1\nbudget: 2min\nseats:\n  - id: blueprint\n    name: Blueprint\n    home: blueprint/a\n"
+const yaml = "wiki: spwn.wiki/v1\nfloors:\n  - {id: intention, name: Intention, question: Why}\n  - {id: product, name: Product, question: What}\n  - {id: domains, name: Domains, question: Which words}\n  - {id: architecture, name: Architecture, question: Where}\n  - {id: code, name: Code, question: Which lines}\nseats:\n  - {id: vision, name: Vision, path: [blueprint/], reads: [tell, define], home: blueprint/a}\nbudget: 2min\n"
 
 func read(t *testing.T, h call.Handler, page string) error {
 	t.Helper()

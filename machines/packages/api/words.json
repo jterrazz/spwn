@@ -1313,6 +1313,11 @@
       "Detail": "wiki",
       "Tone": "plain"
     },
+    "wiki.too-large": {
+      "Word": "too large",
+      "Detail": "wiki",
+      "Tone": "plain"
+    },
     "wiki.unknown-page": {
       "Word": "unknown page",
       "Detail": "wiki",

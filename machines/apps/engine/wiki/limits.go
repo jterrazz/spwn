@@ -41,17 +41,23 @@ func tooLong(id string, size int64, schema Schema) Page {
 	return p
 }
 
-// value: whether a corpus of these pages and bytes is past a limit.
-func Past(pages int, bytes int64) bool { return pages > MaxPages || bytes > MaxCorpusBytes }
+func Past(pages int, bytes int64) bool {
+	// value: whether a corpus of these pages and bytes is past a limit.
+	return pages > MaxPages || bytes > MaxCorpusBytes
+}
 
 type ruleOn struct{ page, rule string }
 
 // value: findings as made, each page's first maxFindings of each rule, then
-// one that says how many more there are, where the first of them is.
-func capped(findings []Finding) []Finding {
-	total := map[ruleOn]int{}
-	for _, f := range findings {
-		total[ruleOn{f.Page, f.Rule}]++
+// one that says how many more there are, where the first of them is; the
+// count of each is total's when given, as a checker keeps no finding past
+// the first maxFindings+1, else the findings'.
+func capped(findings []Finding, total map[ruleOn]int) []Finding {
+	if total == nil {
+		total = map[ruleOn]int{}
+		for _, f := range findings {
+			total[ruleOn{f.Page, f.Rule}]++
+		}
 	}
 	seen := map[ruleOn]int{}
 	out := make([]Finding, 0, len(findings))
