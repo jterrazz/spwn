@@ -1,0 +1,15 @@
+description: 'station project plan prints the hint of an issue after its message'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" world project "$HOME/site" info spwn.yaml "world neo has no knowledge path" hint: "add knowledge: ./knowledge"'
+      exit: 0
+    - command: '--version >/dev/null; /bin/mkdir site && cd site && "$STATION" project plan'
+      exit: 0
+      stdout: |
+          ●	{{workdir}}/site/spwn.yaml	valid
+          # Issues
+          	spwn.yaml	world neo has no knowledge path · add knowledge: ./knowledge
+          # To apply
+          	none

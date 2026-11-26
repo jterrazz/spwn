@@ -74,7 +74,7 @@ func events() []event {
 		{"agent", []string{"<mac>", "served|held", "[<pid>]", "[<executable>]", "[<label>]"}, agentSocket},
 		{"admin", []string{"on|off"}, admin},
 		{"release", []string{"<tag>", "[no-asset]"}, releaseTag},
-		{"project", []string{"<root>", "[error|warning|info|drift|render|edit|link]", "[<agent>|<path>]", "[<path>|<message>|<content>|<target>]", "[<content>]"}, declareProject},
+		{"project", []string{"<root>", "[error|warning|info|drift|render|edit|link]", "[<agent>|<path>]", "[<path>|<message>|<content>|<target>]", "[<content>|hint:]", "[<hint>]"}, declareProject},
 	}
 }
 
@@ -704,7 +704,11 @@ func declareProject(w *World, args []string) error {
 		if len(args) < 4 && args[1] != "edit" {
 			return fmt.Errorf("project %s takes a level, a path and a message", root)
 		}
-		issue := project.Issue{Level: project.Level(args[1]), Path: args[2], Message: strings.Join(args[3:], " "), Source: project.SourceManifest}
+		said, hint := args[3:], []string(nil)
+		if i := slices.Index(said, "hint:"); i >= 0 {
+			said, hint = said[:i], said[i+1:]
+		}
+		issue := project.Issue{Level: project.Level(args[1]), Path: args[2], Message: strings.Join(said, " "), Hint: strings.Join(hint, " "), Source: project.SourceManifest}
 		switch {
 		case args[1] == "render":
 			declareRender(&kept, args[2], args[3], args[4:])
