@@ -1,7 +1,8 @@
 #!/bin/bash
 # invariant: The linux image's base plumbing: run as root (sudo bash -s) over the build
 # VM's NAT session, as the base's admin user. Its inputs are the environment variables
-# station sets: VM_USER, IMAGE_KEY (the host's image public key) and the station
+# station sets: VM_USER, IMAGE_KEY (the host's image public key), APT_LOCK_WAIT (the
+# seconds an apt run waits for another's lock, catalog.AptLockWait) and the station
 # binary already copied to /tmp/station. What the image carries is its Machinefile's
 # image phase, which the build runs after it.
 set -euo pipefail
@@ -13,6 +14,17 @@ if vm_uid=$(id -u "$VM_USER" 2>/dev/null) && { [ "$vm_uid" -lt 1000 ] || [ "$vm_
 if [ -n "${vm_uid:-}" ] && [ "$vm_uid" = "$(id -u admin 2>/dev/null)" ]; then echo "the VM user '$VM_USER' is the base's own account admin by its uid ($vm_uid): an image is made for another user" >&2; exit 1; fi
 
 export DEBIAN_FRONTEND=noninteractive
+
+# outside: apt-get waits for the lock another package operation holds only when told, and the upstream tells apt alone; an install script inside a VM (docker's) runs apt-get itself.
+printf 'DPkg::Lock::Timeout "%s";\n' "$APT_LOCK_WAIT" > /etc/apt/apt.conf.d/60-station-lock-wait
+# outside: the upstream's daily apt timers are overdue at every boot of a clone, and the unattended upgrade they start holds dpkg's lock for minutes. The build stops them for its own boot only, so the image keeps them enabled and a VM made from it its security updates; a run already started is waited for, never killed, since a killed upgrade leaves dpkg half configured.
+systemctl stop apt-daily.timer apt-daily-upgrade.timer
+for _ in $(seq 1 "$APT_LOCK_WAIT"); do
+    case " $(systemctl show --property=ActiveState --value apt-daily.service apt-daily-upgrade.service | tr '\n' ' ')" in
+        *" active "* | *" activating "* | *" deactivating "*) sleep 1 ;;
+        *) break ;;
+    esac
+done
 
 id "$VM_USER" >/dev/null 2>&1 || useradd --create-home --shell /bin/zsh "$VM_USER"
 # hazard: sudo's includedir skips a file whose name holds a dot, and a user's name may hold one: the rule lives in a file of a fixed name.

@@ -1,0 +1,17 @@
+description: 'an apt install whose lock stays held past its wait fails the app, its log saying the lock was held'
+fixture:
+    - ./__fixtures__/ubuntu/
+    - ./__fixtures__/lock-held-on/
+env:
+    - STATION_MACHINE_KIND=linux
+runs:
+    - command: 'apps install jq'
+      exit: 1
+      stdout: |
+          ✗	jq		apt	~/.local/state/station/logs/jq.log
+      stderr: |
+          Error: 1 of 1 apps failed
+          Hint: station apps install jq
+      files:
+          .local/state/station/logs/jq.log:
+              contains: "another package operation held apt's lock past 5 min: apt-get install exited 100: E: Unable to acquire the dpkg frontend lock (/var/lib/dpkg/lock-frontend), is another process using it?"

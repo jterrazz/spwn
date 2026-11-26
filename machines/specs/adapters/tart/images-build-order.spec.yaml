@@ -17,13 +17,14 @@ runs:
                     tart clone ghcr.io/cirruslabs/ubuntu:24.04 station-build-base-ubuntu
                     tart ip station-build-base-ubuntu --wait 60
                   - "vm-sshd exec /bin/cat > '/tmp/station' && /bin/chmod 755 '/tmp/station'"
-                  - "vm-sshd exec sudo env VM_USER='dev' IMAGE_KEY='ssh-ed25519 AAAAstub station-image' bash -s"
+                  - "vm-sshd exec sudo env VM_USER='dev' IMAGE_KEY='ssh-ed25519 AAAAstub station-image' APT_LOCK_WAIT=300 bash -s"
                   - "vm-sshd exec env MACHINEFILE='base-ubuntu' bash -s"
                   - 'vm-sshd exec sudo bash -s'
           .recipe.env:
               equals: |
                   VM_USER=dev
                   IMAGE_KEY=ssh-ed25519 AAAAstub station-image
+                  APT_LOCK_WAIT=300
           .recipe.stdin:
               contains:
                   - 'cloud-guest-utils libatomic1'

@@ -1,0 +1,22 @@
+description: 'a failed image phase names its two packages, keeps their logs, and leaves no build VM'
+fixture: ../../__fixtures__/build/
+env: image-phase-fails
+runs:
+    - command: 'images build base-ubuntu --binary $HOME/station-linux'
+      exit: 1
+      stderr: |
+          Error: image base-ubuntu: the image phase failed: 2 of 3 packages failed: docker, playwright-deps
+            docker: ~/.local/state/station/logs/station-build-base-ubuntu.docker.log
+            playwright-deps: ~/.local/state/station/logs/station-build-base-ubuntu.playwright-deps.log
+          Hint: read the log of each, copied from the build VM, then station images build base-ubuntu
+      files:
+          .local/state/station/logs/station-build-base-ubuntu.docker.log:
+              equals: |
+                  docker: the install script exited 100
+          .local/state/station/logs/station-build-base-ubuntu.playwright-deps.log:
+              equals: |
+                  E: Unable to locate package libgbm1
+    - command: '--version > /dev/null; /usr/bin/jq -r ''[.macs."macbook-pro".vms // {} | keys[]] | length'' world.json'
+      exit: 0
+      stdout: |
+          0

@@ -38,8 +38,16 @@ type dpkg struct {
 	// value: an install the runner reports cancelled, as it does a child
 	// ctrl-c ended before station's own context is, which stays live.
 	signaled bool
+	// value: refreshes that fail before the lists read, as a mirror that
+	// blinks does; an install apt ends on the lock another operation held
+	// past its wait; and a sudo that refuses every line.
+	blinks   int
+	locked   bool
+	refusing bool
 	calls    []string
 }
+
+const lockedWords = "E: Unable to acquire the dpkg frontend lock (/var/lib/dpkg/lock-frontend), is another process using it?"
 
 func (d *dpkg) play(c local.Cmd) (local.Output, error) {
 	args := strings.Join(c.Args, " ")
@@ -63,6 +71,13 @@ func (d *dpkg) play(c local.Cmd) (local.Output, error) {
 		return local.Output{Stdout: out.String()}, nil
 	case c.Name != "sudo":
 		return local.Output{ExitCode: 97}, nil
+	case d.refusing:
+		return local.Output{ExitCode: 1, Stderr: "sudo: a password is required"}, nil
+	case slices.Contains(c.Args, "update") && d.blinks > 0:
+		d.blinks--
+		return local.Output{ExitCode: 100, Stderr: "E: Failed to fetch http://ports.ubuntu.com/ubuntu-ports/dists/noble/InRelease  Temporary failure resolving 'ports.ubuntu.com'"}, nil
+	case slices.Contains(c.Args, "install") && d.locked:
+		return local.Output{ExitCode: 100, Stderr: "E: Could not get lock /var/lib/dpkg/lock-frontend. It is held by process 9954 (unattended-upgr)\n" + lockedWords}, nil
 	case slices.Contains(c.Args, "update") && d.refreshing != nil:
 		d.refreshing(d)
 		return local.Output{}, nil
@@ -183,11 +198,11 @@ func TestEveryRunIsRootAndAsksNothing(t *testing.T) {
 		if strings.HasPrefix(c, "dpkg-query ") || strings.HasPrefix(c, "apt-get -s ") {
 			continue
 		}
-		if !strings.HasPrefix(c, "sudo -n env DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold ") {
+		if !strings.HasPrefix(c, "sudo -n env DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold -o DPkg::Lock::Timeout=300 ") {
 			t.Errorf("ran %q; want every change as root, asking nothing", c)
 		}
 	}
-	if !slices.Contains(d.calls, "sudo -n env DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold remove -o APT::Get::AutomaticRemove=false -- bat") {
+	if !slices.Contains(d.calls, "sudo -n env DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold -o DPkg::Lock::Timeout=300 remove -o APT::Get::AutomaticRemove=false -- bat") {
 		t.Errorf("ran %q; want the removal never to autoremove", d.calls)
 	}
 }
@@ -713,7 +728,76 @@ func TestAFailedRefreshIsNotRemembered(t *testing.T) {
 
 	_ = a.InstallFor(ctx, apply("x"), foo, nil)
 	_ = a.InstallFor(ctx, apply("y"), foo, nil)
-	if n := updates(d); n != 2 {
-		t.Errorf("two installs after a failed refresh ran %d updates; want 2", n)
+	if n := updates(d); n != 6 {
+		t.Errorf("two installs after a failed refresh ran %d updates; want 6, each refresh tried three times", n)
+	}
+}
+
+func TestEveryAptRunThatTakesTheLockWaitsForIt(t *testing.T) {
+	// invariant: every apt-get the adapter runs waits out a lock another
+	// package operation holds, whichever verb built its argv; only the
+	// simulation, which takes no lock, is let off.
+	d := &dpkg{held: map[string]string{"bat": "1.0"}}
+	a := played(d)
+	ctx := context.Background()
+	for _, run := range []func() error{
+		func() error {
+			return a.InstallFor(ctx, word("fd-find"), []catalog.Install{catalog.AptInstall{Packages: []string{"fd-find"}}}, nil)
+		},
+		func() error {
+			return a.Update(ctx, []catalog.Install{catalog.AptInstall{Packages: []string{"bat"}}}, nil)
+		},
+		func() error {
+			return a.RemoveFor(ctx, word("bat"), []catalog.Install{catalog.AptInstall{Packages: []string{"bat"}}}, nil)
+		},
+	} {
+		if err := run(); err != nil {
+			t.Fatal(err)
+		}
+	}
+	ran := 0
+	for _, c := range d.calls {
+		if !strings.Contains(c, "apt-get ") || strings.HasPrefix(c, "apt-get -s ") {
+			continue
+		}
+		ran++
+		if !strings.Contains(c, " -o DPkg::Lock::Timeout=300 ") {
+			t.Errorf("ran %q; want it to wait 300 s for a lock another package operation holds", c)
+		}
+	}
+	if ran < 4 {
+		t.Errorf("ran %d apt-get lines; want the refresh, the install, the upgrade and the removal", ran)
+	}
+}
+
+func TestAnInstallPastAHeldLockSaysTheLockWasHeld(t *testing.T) {
+	err := played(&dpkg{held: map[string]string{}, locked: true}).InstallFor(context.Background(), word("jq"), []catalog.Install{catalog.AptInstall{Packages: []string{"jq"}}}, nil)
+
+	var lock *apt.LockHeldError
+	want := "another package operation held apt's lock past 5 min: apt-get install exited 100: " + lockedWords
+	if !errors.As(err, &lock) || err.Error() != want {
+		t.Fatalf("failed as %v; want %q", err, want)
+	}
+}
+
+func TestARefreshAMirrorBreaksOffIsRunAgainAfterAWait(t *testing.T) {
+	d := &dpkg{held: map[string]string{}, blinks: 2}
+	clock := &localtest.Clock{At: time.Unix(1e9, 0)}
+	a := apt.New(local.Played(d.play, "apt-get", "dpkg-query", "apt-cache", "sudo"), localtest.NewFS(), aptStore, false, clock)
+
+	if err := a.InstallFor(context.Background(), word("jq"), []catalog.Install{catalog.AptInstall{Packages: []string{"jq"}}}, nil); err != nil {
+		t.Fatal(err)
+	}
+	if n, waited := updates(d), clock.At.Sub(time.Unix(1e9, 0)); n != 3 || waited != 40*time.Second || d.held["jq"] != "1.0" {
+		t.Errorf("ran %d updates over %v, jq %q; want 3 over 40s, then jq installed", n, waited, d.held["jq"])
+	}
+}
+
+func TestARefreshSudoRefusesIsNotRunAgain(t *testing.T) {
+	d := &dpkg{held: map[string]string{}, refusing: true}
+
+	_ = played(d).InstallFor(context.Background(), word("jq"), []catalog.Install{catalog.AptInstall{Packages: []string{"jq"}}}, nil)
+	if n := updates(d); n != 1 {
+		t.Errorf("ran %d updates; want 1: a refusal of sudo is no blink", n)
 	}
 }

@@ -271,6 +271,22 @@ func TestARowHintOfWordsIsPrintedWithNoArrow(t *testing.T) {
 	}
 }
 
+func TestAnErrorOfSeveralLinesIsDrawnLineByLine(t *testing.T) {
+	failed := page.Seal(page.Page{ID: "images.build", Command: "station images build", Error: &page.Error{
+		Message: "image base-ubuntu: the image phase failed: 2 of 3 packages failed: git, jq\n  git: ~/.local/state/station/logs/station-build-base-ubuntu.git.log\n  jq: E: Unable to locate package jq",
+		Hint:    "station images build base-ubuntu",
+	}})
+
+	got := ansi.Strip(string(tty.Render(failed, tty.Options{Width: 200, Dark: true})))
+	want := "Error: image base-ubuntu: the image phase failed: 2 of 3 packages failed: git, jq\n" +
+		"  git: ~/.local/state/station/logs/station-build-base-ubuntu.git.log\n" +
+		"  jq: E: Unable to locate package jq\n" +
+		"Hint: station images build base-ubuntu\n"
+	if !strings.Contains(got, want) {
+		t.Errorf("drew\n%q\nwant\n%q", got, want)
+	}
+}
+
 // invariant: G5: a hint on its own line starts at its row's label column, in
 // every section, medium and width, whatever the section's widest cell.
 func TestAWrappedHintSitsAtTheLabelColumn(t *testing.T) {

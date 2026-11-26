@@ -16,6 +16,7 @@ func imagesFailure(err error) (*fail.Error, bool) {
 	var registry *images.RegistryError
 	var fetch *images.FetchFailedError
 	var build *images.BuildFailedError
+	var packages *images.PackagesFailedError
 	var template *images.NotTemplateError
 	var noBinary *images.NoLinuxBinaryError
 	var missing *images.BinaryNotFoundError
@@ -44,6 +45,9 @@ func imagesFailure(err error) (*fail.Error, bool) {
 	case errors.As(err, &fetch):
 		return failed(fetch.Error(), "station images update "+fetch.Image, err), true
 	case errors.As(err, &build):
+		if errors.As(err, &packages) && packages.Kept() {
+			return failed(build.Error(), "read the log of each, copied from the build VM, then station images build "+build.Image, err), true
+		}
 		return failed(build.Error(), "station images build "+build.Image, err), true
 	}
 	return nil, false

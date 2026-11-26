@@ -233,10 +233,15 @@ func TestTheLinuxImageBootsWithoutWhatAVMNeverUses(t *testing.T) {
 		}
 	}
 	// invariant: unattended-upgrades and the apt timers that run it are a VM's
-	// only security updates: the night upgrades a Mac's Machinefile apps.
-	for _, kept := range []string{"unattended-upgrades", "apt-daily"} {
-		if strings.Contains(body, kept) {
-			t.Errorf("the linux recipe touches %s, a VM's only source of security updates", kept)
+	// only security updates: the night upgrades a Mac's Machinefile apps. The
+	// build may stop the timers for its own boot; it never turns them off.
+	for line := range strings.Lines(body) {
+		for _, kept := range []string{"unattended-upgrades", "apt-daily"} {
+			for _, off := range []string{"disable", "mask", "purge", "remove"} {
+				if strings.Contains(line, kept) && strings.Contains(line, off) {
+					t.Errorf("the linux recipe turns %s off, a VM's only source of security updates: %s", kept, strings.TrimSpace(line))
+				}
+			}
 		}
 	}
 }

@@ -27,9 +27,16 @@ const (
 )
 
 // invariant: apt never asks a question: debconf takes its defaults, and a
-// configuration file the owner changed is kept, the package's own beside it.
+// configuration file the owner changed is kept, the package's own beside it;
+// and it waits out the lock another package operation holds, as long as
+// catalog.AptLockWait, where apt-get alone would fail at once.
 func quiet() []string {
-	return []string{"env", "DEBIAN_FRONTEND=noninteractive", command, "-y", "-o", "Dpkg::Options::=--force-confdef", "-o", "Dpkg::Options::=--force-confold"}
+	return []string{"env", "DEBIAN_FRONTEND=noninteractive", command, "-y", "-o", "Dpkg::Options::=--force-confdef", "-o", "Dpkg::Options::=--force-confold", "-o", lockWait()}
+}
+
+// value: apt's own option for that wait, in seconds.
+func lockWait() string {
+	return "DPkg::Lock::Timeout=" + strconv.Itoa(int(catalog.AptLockWait/time.Second))
 }
 
 // invariant: a removal takes back the packages it names and nothing apt
@@ -484,12 +491,31 @@ func (a *Apt) refresh(ctx context.Context, logs contract.Logs) error {
 	if !a.refreshed.IsZero() && sources == a.sources && a.clock.Now().Sub(a.refreshed) < listsFresh {
 		return nil
 	}
-	if err := a.root(ctx, logs, slices.Concat(quiet(), []string{"update"})...); err != nil {
+	err := a.root(ctx, logs, slices.Concat(quiet(), []string{"update"})...)
+	for _, wait := range refreshRetries() {
+		var exit *local.ExitError
+		if !errors.As(err, &exit) || exit.Code != aptFailed || interrupted(ctx, err) {
+			break
+		}
+		if a.clock.Sleep(ctx, wait) != nil {
+			break
+		}
+		err = a.root(ctx, logs, slices.Concat(quiet(), []string{"update"})...)
+	}
+	if err != nil {
 		return err
 	}
 	a.refreshed, a.sources = a.clock.Now(), sources
 	return nil
 }
+
+// value: the waits before a refresh apt failed is run again: a mirror that
+// blinked at the machine's boot, or the lists another apt run held, whose
+// lock apt-get's own wait may not cover; sudo's refusal is never retried.
+func refreshRetries() []time.Duration { return []time.Duration{10 * time.Second, 30 * time.Second} }
+
+// value: the exit code apt-get fails with, whatever the cause.
+const aptFailed = 100
 
 func (a *Apt) sourceList() string {
 	var b strings.Builder
@@ -510,7 +536,8 @@ func (a *Apt) sourceList() string {
 
 func (a *Apt) root(ctx context.Context, logs contract.Logs, argv ...string) error {
 	// invariant: a run fails in apt's words, `apt-get install exited 100`,
-	// sudo's own last line kept (`a password is required` off a terminal).
+	// sudo's own last line kept (`a password is required` off a terminal);
+	// one that ends on a lock apt waited for in vain says the lock was held.
 	verb := command + " " + argv[len(quiet())]
 	if !a.terminal {
 		argv = append([]string{"-n"}, argv...)
@@ -521,6 +548,8 @@ func (a *Apt) root(ctx context.Context, logs contract.Logs, argv ...string) erro
 	switch {
 	case err != nil:
 		return fmt.Errorf("%s: %w", catalog.Sudo, err)
+	case ran.ExitCode == aptFailed && held(ran.LastStderr):
+		return &LockHeldError{Exit: &local.ExitError{Step: verb, Code: ran.ExitCode, LastStderr: ran.LastStderr}}
 	case ran.ExitCode != 0:
 		return &local.ExitError{Step: verb, Code: ran.ExitCode, LastStderr: ran.LastStderr}
 	}
@@ -572,3 +601,20 @@ type TakesMoreError struct {
 func (e *TakesMoreError) Error() string {
 	return "removing " + strings.Join(e.Asked, ", ") + " would remove " + strings.Join(e.Also, ", ") + " too: nothing removed"
 }
+
+// value: the lock files apt names in its last line when another package
+// operation holds one, in apt's words whatever language the machine speaks,
+// since a path is never translated: dpkg's, its frontend's, the lists' and
+// the downloads'.
+func held(last string) bool {
+	locks := []string{"/var/lib/dpkg/lock", "/var/lib/apt/lists/", "/var/cache/apt/archives/lock"}
+	return slices.ContainsFunc(locks, func(l string) bool { return strings.Contains(last, l) })
+}
+
+type LockHeldError struct{ Exit *local.ExitError }
+
+func (e *LockHeldError) Error() string {
+	return "another package operation held apt's lock past " + strconv.Itoa(int(catalog.AptLockWait/time.Minute)) + " min: " + e.Exit.Error() + ": " + e.Exit.LastStderr
+}
+
+func (e *LockHeldError) Unwrap() error { return e.Exit }

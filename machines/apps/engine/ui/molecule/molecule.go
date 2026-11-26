@@ -57,7 +57,15 @@ func DeclinedLines(st token.Styles, e page.Error) []string {
 }
 
 func ErrorLines(st token.Styles, e page.Error) []string {
-	lines := []string{st.Error.Render("Error:") + " " + st.Text.Render(e.Message)}
+	// invariant: a message of several lines, a failure and a line for each
+	// thing it names, is drawn line by line, none padded to the widest.
+	first, rest, _ := strings.Cut(e.Message, "\n")
+	lines := []string{st.Error.Render("Error:") + " " + st.Text.Render(first)}
+	for line := range strings.SplitSeq(rest, "\n") {
+		if line != "" {
+			lines = append(lines, st.Text.Render(line))
+		}
+	}
 	if e.Hint != "" {
 		lines = append(lines, st.Muted.Render("Hint:")+" "+st.Text.Render(e.Hint))
 	}

@@ -49,6 +49,8 @@ func (m machine) images() *imagescalls.Builder {
 		Account: account,
 		Unread:  unread,
 		Mac:     m.profile.Ref.Name,
+		Logs:    filepath.Join(m.paths.State, "logs"),
+		Home:    m.sys.Env.Home(),
 	})
 }
 
@@ -149,6 +151,12 @@ func (i imagesMachine) Keep(p string, data []byte) error {
 		return err
 	}
 	return i.h.FS.WriteFile(p, data, 0o755)
+}
+func (i imagesMachine) Note(p string, data []byte) error {
+	if err := i.h.FS.MkdirAll(filepath.Dir(p), 0o700); err != nil {
+		return err
+	}
+	return i.h.FS.WriteFile(p, data, 0o600)
 }
 func (i imagesMachine) Get(ctx context.Context, url string) (status int, body []byte, err error) {
 	return i.h.Net.Get(ctx, url, nil)

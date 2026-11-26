@@ -236,6 +236,45 @@ func TestTheLinuxPlumbingRefusesASystemAccountBeforeItTouchesIt(t *testing.T) {
 	}
 }
 
+func TestALinuxBuildIsRacedByNoDailyAptRunAndTheImageKeepsItsUpdates(t *testing.T) {
+	// invariant: before its first apt-get, the plumbing makes every apt run
+	// of the image wait for another's lock, stops the upstream's daily apt
+	// timers for the build's boot and waits for a run they started; no
+	// script of the image disables or masks them, so a VM made from it
+	// keeps its security updates.
+	body, err := fs.ReadFile(catalog.Recipes, "images/linux.sh")
+	if err != nil {
+		t.Fatal(err)
+	}
+	script := string(body)
+	first := strings.Index(script, "\napt-get ")
+	for _, step := range []string{
+		`printf 'DPkg::Lock::Timeout "%s";\n' "$APT_LOCK_WAIT" > /etc/apt/apt.conf.d/60-station-lock-wait`,
+		"systemctl stop apt-daily.timer apt-daily-upgrade.timer",
+		"--value apt-daily.service apt-daily-upgrade.service",
+	} {
+		if at := strings.Index(script, step); at < 0 || first < 0 || at > first {
+			t.Errorf("linux.sh does not run %q before its first apt-get", step)
+		}
+	}
+	for line := range strings.Lines(script) {
+		if code := strings.TrimSpace(line); !strings.HasPrefix(code, "#") && (strings.Contains(code, "kill") || strings.Contains(code, "systemctl stop")) && strings.Contains(code, ".service") {
+			t.Errorf("linux.sh stops a run in flight, which may be a daily apt run: a killed unattended upgrade leaves dpkg half configured: %s", code)
+		}
+	}
+	for _, file := range []string{"images/linux.sh", "images/linux-bake.sh", "images/linux-cleanup.sh", "images/linux-firstboot.sh"} {
+		body, err := fs.ReadFile(catalog.Recipes, file)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for line := range strings.Lines(string(body)) {
+			if strings.Contains(line, "apt-daily") && (strings.Contains(line, "disable") || strings.Contains(line, "mask")) {
+				t.Errorf("%s turns the daily apt timers off for good: %s", file, strings.TrimSpace(line))
+			}
+		}
+	}
+}
+
 func TestTheLinuxPlumbingRefusesAdminByNameWhateverTheBaseHolds(t *testing.T) {
 	body, err := fs.ReadFile(catalog.Recipes, "images/linux.sh")
 	if err != nil {

@@ -1,6 +1,9 @@
 package images
 
-import "strings"
+import (
+	"strconv"
+	"strings"
+)
 
 type UnknownVersionError struct{ Image, Version string }
 
@@ -137,3 +140,55 @@ func (e *BuildFailedError) Error() string {
 }
 
 func (e *BuildFailedError) Unwrap() error { return e.Cause }
+
+const FailedNamed = 8 // value: the most failed lines an image phase's error names, each with its log; the rest are counted.
+
+type FailedPackage struct {
+	// value: a line the image phase's apply marked failed, by its name, the
+	// words it gave, and where this Mac keeps the copy of its log from the
+	// build VM; empty when no log was copied.
+	Name, Reason, Log string
+}
+
+type PackagesFailedError struct {
+	// value: the apply's own summary ("4 of 12 packages failed"), each line
+	// it marked failed, and why the logs of the build VM were not copied,
+	// when they were not.
+	Said   string
+	Failed []FailedPackage
+	Unkept string
+}
+
+func (e *PackagesFailedError) Error() string {
+	named := e.Failed[:min(len(e.Failed), FailedNamed)]
+	names := make([]string, 0, len(named))
+	for _, p := range named {
+		names = append(names, p.Name)
+	}
+	message := e.Said + ": " + strings.Join(names, ", ")
+	if more := len(e.Failed) - len(named); more > 0 {
+		message += ", and " + strconv.Itoa(more) + " more"
+	}
+	for _, p := range named {
+		switch {
+		case p.Log != "":
+			message += "\n  " + p.Name + ": " + p.Log
+		case p.Reason != "":
+			message += "\n  " + p.Name + ": " + p.Reason
+		}
+	}
+	if e.Unkept != "" {
+		message += "\n  the build VM's logs were not copied: " + e.Unkept
+	}
+	return message
+}
+
+func (e *PackagesFailedError) Kept() bool {
+	// value: whether this Mac holds the log of a failed line.
+	for _, p := range e.Failed {
+		if p.Log != "" {
+			return true
+		}
+	}
+	return false
+}

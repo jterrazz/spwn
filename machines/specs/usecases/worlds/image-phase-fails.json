@@ -1,0 +1,45 @@
+{
+    "now": "2026-11-04T10:00:00Z",
+    "this_mac": "macbook-pro",
+    "user": "you",
+    "macs": {
+        "macbook-pro": {
+            "stores": {
+                "release": {
+                    "Read": "2026-11-04T10:00:00Z"
+                }
+            },
+            "engine": {},
+            "preferences": {
+                "name": "macbook-pro",
+                "vm_user": "you"
+            },
+            "power": {
+                "Source": "ac"
+            },
+            "fresh": {
+                "size": {
+                    "CPUs": 4,
+                    "Memory": 8589934592,
+                    "Disk": 4000000000
+                },
+                "guest": {
+                    "answers": {
+                        "sudo env *": {},
+                        "env MACHINEFILE=*": {
+                            "code": 1,
+                            "stdout": "# To install\n○\tgit\t\tapt\n○\tdocker\t\tscript\n○\tplaywright-deps\t\tapt\n●\tgit\t2.43.0\tapt\n✗\tdocker\t\tscript\t~/.local/state/station/logs/docker.log\n✗\tplaywright-deps\t\tapt\t~/.local/state/station/logs/playwright-deps.log\n--- station failed\ndocker\t\tscript\t~/.local/state/station/logs/docker.log\nplaywright-deps\t\tapt\t~/.local/state/station/logs/playwright-deps.log\n",
+                            "stderr": "Error: 2 of 3 packages failed\nHint: station machinefile apply\n"
+                        },
+                        "bash -s": {
+                            "stdout": "docker ZG9ja2VyOiB0aGUgaW5zdGFsbCBzY3JpcHQgZXhpdGVkIDEwMAo=\nplaywright-deps RTogVW5hYmxlIHRvIGxvY2F0ZSBwYWNrYWdlIGxpYmdibTEK\n"
+                        },
+                        "sudo bash -s": {
+                            "poweroff": true
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
