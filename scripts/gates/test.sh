@@ -54,11 +54,16 @@ wait
 GATE_SLOT_PRIORITY=urgent bash ./gate-slot.sh true > /dev/null 2>&1; [ $? = 2 ] || bad "an unknown priority is accepted"
 [ -z "$(ls "$T/slot/gate-slots/wanted" 2>/dev/null)" ] || bad "a waiter left its mark"
 unset GATE_RUN_DIR GATE_SLOT_POLL GATE_SLOT_MAX_LOAD
-H=$T/home; R=$T/routes; mkdir -p "$H/.ssh" "$H/k" "$H/bin" "$R"; chmod 700 "$R"
+umask 077
+H=$T/home; R=$T/routes; mkdir -p "$H/.ssh" "$H/k" "$H/bin" "$R"
 : > "$H/k/vm_key"; : > "$H/k/hop_key"; : > "$H/.ssh/id_ed25519"; : > "$H/.ssh/other_key"
 ln -s "$H/k/vm_key" "$H/k/link_key"; ln "$H/.ssh/other_key" "$H/k/hard_key"
 mkdir -p "$H/.ssh/sub/deep"; : > "$H/.ssh/sub/deep/id2"; : > "$H/.ssh/.hidden"; ln "$H/.ssh/sub/deep/id2" "$H/k/hard_sub"; ln "$H/.ssh/.hidden" "$H/k/hard_dot"
-printf '#!/bin/sh\n' > "$H/bin/station"; chmod 755 "$H/bin/station"; : > "$H/bin/plain"
+printf '#!/bin/sh\nenv > %s\n' "$T/proxy.env" > "$H/bin/station"; chmod 755 "$H/bin/station"
+mkdir -p "$H/nx" "$H/ww" "$H/wd" "$H/st" "$H/Apps/Spwn.app/Contents/MacOS" "$H/Other"; : > "$H/nx/station"
+cp "$H/bin/station" "$H/ww/station"; chmod 777 "$H/ww/station"; cp "$H/bin/station" "$H/wd/station"; chmod 777 "$H/wd"
+cp "$H/bin/station" "$H/Apps/Spwn.app/Contents/MacOS/Spwn Engine"; cp "$H/bin/station" "$H/Other/Spwn Engine"
+ln -s /usr/bin/env "$H/st/station"; ln -s "$H/Apps/Spwn.app/Contents/MacOS/Spwn Engine" "$H/st/app"; ln -s "$H/Other/Spwn Engine" "$H/st/other"
 eval "pw=~$(id -un)"
 route() { local n=$1; shift; printf '%s\n' "$@" > "$R/$n.env"; chmod 600 "$R/$n.env"; }
 route vm-a "KEY=$H/k/vm_key"
@@ -95,7 +100,10 @@ route vm-proxy-nostation "KEY=$H/k/vm_key" PROXY=station-pipe
 route vm-proxy-rel "KEY=$H/k/vm_key" PROXY=station-pipe STATION=bin/station
 route vm-proxy-text "KEY=$H/k/vm_key" PROXY=station-pipe 'STATION=/bin/sh -c evil'
 route vm-proxy-pct "KEY=$H/k/vm_key" PROXY=station-pipe "STATION=$H/bin/st%h"
-route vm-proxy-noexec "KEY=$H/k/vm_key" PROXY=station-pipe "STATION=$H/bin/plain"
+route vm-proxy-noexec "KEY=$H/k/vm_key" PROXY=station-pipe "STATION=$H/nx/station"
+for s in env:/usr/bin/env ssh:/usr/bin/ssh link:$H/st/station ww:$H/ww/station wd:$H/wd/station app:$H/st/app other:$H/st/other; do
+  route "vm-st-${s%%:*}" "KEY=$H/k/vm_key" PROXY=station-pipe "STATION=${s#*:}" "KNOWN_HOSTS=$H/kh"
+done
 route vm-station-alone "KEY=$H/k/vm_key" "STATION=$H/bin/station"
 route vm-badhost "KEY=$H/k/vm_key" HOSTNAME=-oProxyCommand=x
 route vm-baduser "KEY=$H/k/vm_key" 'USER=a b'
@@ -116,7 +124,7 @@ refused() {
 argv() { printf '%s\n' "$@"; }
 common=$(argv -F /dev/null -o BatchMode=yes -o StrictHostKeyChecking=yes -o IdentitiesOnly=yes -o IdentityAgent=none -o ForwardAgent=no -o ControlMaster=no -o ControlPath=none -o PermitLocalCommand=no)
 b64_of() { tail -n 1 | sed -n "s/.*printf %s \([A-Za-z0-9+\/=]*\) | base64 -d.*/\1/p" | base64 -d; }
-child=()
+child=(/usr/bin/env -i PATH=/usr/bin:/bin:/usr/sbin:/sbin "HOME=$H")
 ssh_w() { argv ${child[@]+"${child[@]}"} /usr/bin/ssh -a; echo "$common"; }
 scp_w() { argv ${child[@]+"${child[@]}"} /usr/bin/scp; echo "$common"; }
 sshg() { local a i; mapfile -t a; for i in "${!a[@]}"; do [ "${a[$i]}" = /usr/bin/ssh ] && break; done; /usr/bin/ssh -G "${a[@]:$((i + 1))}" 2>&1; }
@@ -127,7 +135,7 @@ got=$(gate_ssh rsh vm-a true); [ "$got" = "$want" ] || bad "direct rsh argv: $go
 got=$(env -i PATH="$PATH" HOME=/nonexistent GATE_ROUTES_DIR="$R" GATE_SSH_DRYRUN=1 bash ./gate-ssh.sh rsh vm-a true); [ "$(grep -v '^HOME=' <<< "$got")" = "$(grep -v '^HOME=' <<< "$want")" ] || bad "a direct route needs \$HOME: $got"
 want=$(scp_w; argv -o "IdentityFile=$H/k/vm_key" -q -- a.txt vm-a:dir/)
 got=$(gate_ssh scp -q a.txt vm-a:dir/); [ "$got" = "$want" ] || bad "direct scp argv: $got"
-proxied=(-o "IdentityFile=$H/k/vm_key" -o "UserKnownHostsFile=$H/kh" -o HostName=vm-p.internal -o User=gate -o Port=2222 -o "ProxyCommand=$H/bin/station machines pipe vm-p")
+proxied=(-o "IdentityFile=$H/k/vm_key" -o "UserKnownHostsFile=$H/kh" -o HostName=vm-p.internal -o User=gate -o Port=2222 -o "ProxyCommand='$H/bin/station' machines pipe vm-p")
 want=$(ssh_w; argv "${proxied[@]}" -- vm-p true)
 got=$(gate_ssh ssh vm-p true); [ "$got" = "$want" ] || bad "proxied ssh argv: $got"
 want=$(scp_w; argv "${proxied[@]}" -- a.txt vm-p:dir/)
@@ -142,7 +150,7 @@ for o in "-J evil@jump" "-o ProxyCommand=evil" "-i /x" "-A" "-F /x" "-oIdentityA
   grep -qE '^(proxyjump|proxycommand) ' <<< "$cfg" && bad "ssh -G: a proxy after '$o': $(grep -E '^(proxyjump|proxycommand) ' <<< "$cfg")"
 done
 cfg=$(gate_ssh ssh vm-p true | sshg)
-grep -qx "proxycommand $H/bin/station machines pipe vm-p" <<< "$cfg" && grep -qx 'hostname vm-p.internal' <<< "$cfg" && grep -qx 'user gate' <<< "$cfg" && grep -qx 'port 2222' <<< "$cfg" && grep -qx "userknownhostsfile $H/kh" <<< "$cfg" && grep -qx 'stricthostkeychecking true' <<< "$cfg" || bad "ssh -G: the proxied route is not what the route file says: $cfg"
+grep -qx "proxycommand '$H/bin/station' machines pipe vm-p" <<< "$cfg" && grep -qx 'hostname vm-p.internal' <<< "$cfg" && grep -qx 'user gate' <<< "$cfg" && grep -qx 'port 2222' <<< "$cfg" && grep -qx "userknownhostsfile $H/kh" <<< "$cfg" && grep -qx 'stricthostkeychecking true' <<< "$cfg" || bad "ssh -G: the proxied route is not what the route file says: $cfg"
 got=$(gate_ssh ssh vm-gone true); rm -f "$H/k/gone_key"; cfg=$(sshg <<< "$got")
 [ "$(grep '^identityfile ' <<< "$cfg")" = "identityfile $H/k/gone_key" ] || bad "ssh -G: a key gone at launch leaves ssh another identity: $(grep '^identityfile ' <<< "$cfg" | tr '\n' ' ')"
 refused "KEY holds a character outside" gate_ssh ssh vm-pct true
@@ -182,6 +190,20 @@ refused "needs STATION=<absolute path" gate_ssh ssh vm-proxy-rel true
 refused "STATION holds a character" gate_ssh ssh vm-proxy-text true
 refused "STATION holds a character" gate_ssh ssh vm-proxy-pct true
 refused "is not an executable file" gate_ssh ssh vm-proxy-noexec true
+for h in vm-st-env vm-st-ssh vm-st-link vm-st-other; do refused "the two names the installer ships" gate_ssh ssh $h true; done
+for h in vm-st-ww vm-st-wd; do refused "or is writable by someone else" gate_ssh ssh $h true; done
+[ "$(gate_ssh ssh vm-st-app true | grep '^ProxyCommand=')" = "ProxyCommand='$H/Apps/Spwn.app/Contents/MacOS/Spwn Engine' machines pipe vm-st-app" ] || bad "Spwn.app's engine is not the proxy, quoted: $(gate_ssh ssh vm-st-app true 2>&1 | grep -i proxy)"
+[ "$(gate_ssh ssh vm-st-app true | sshg | grep '^proxycommand ')" = "proxycommand '$H/Apps/Spwn.app/Contents/MacOS/Spwn Engine' machines pipe vm-st-app" ] || bad "ssh -G: Spwn.app's engine is not one word"
+refused "the two names the installer ships" env -i PATH="$PATH" HOME="$H" GATE_ROUTES_DIR="$R" SSH_AUTH_SOCK=/run/presence.sock SSH_ASKPASS=/usr/bin/true bash ./gate-ssh.sh ssh vm-st-env true
+rm -f "$T/proxy.env"
+env -i PATH="$PATH" HOME="$H" GATE_ROUTES_DIR="$R" SSH_AUTH_SOCK=/run/presence.sock SSH_ASKPASS=/usr/bin/true SSH_ASKPASS_REQUIRE=force DISPLAY=:0 timeout 20 bash ./gate-ssh.sh ssh -o ConnectTimeout=5 vm-p true > /dev/null 2>&1
+[ -f "$T/proxy.env" ] || bad "the proxy never ran, so its environment is unproven"
+grep -E '^(SSH_AUTH_SOCK|SSH_ASKPASS|SSH_ASKPASS_REQUIRE|DISPLAY|GATE_ROUTES_DIR)=' "$T/proxy.env" && bad "the proxy inherits the caller's agent, askpass or display"
+grep -qx 'PATH=/usr/bin:/bin:/usr/sbin:/sbin' "$T/proxy.env" && grep -qx "HOME=$H" "$T/proxy.env" || bad "the proxy's PATH or HOME is not the fixed one: $(grep -E '^(PATH|HOME)=' "$T/proxy.env")"
+for c in ssh scp; do
+  w=(); [ $c = scp ] && w=(a.txt vm-a:b) || w=(vm-a true)
+  [ "$(env -i PATH="$PATH" HOME="$H" GATE_ROUTES_DIR="$R" SSH_AUTH_SOCK=/x GATE_SSH_DRYRUN=1 bash ./gate-ssh.sh $c "${w[@]}" | head -n 2)" = "$(printf '/usr/bin/env\n-i\n')" ] || bad "$c is not launched with a scrubbed environment"
+done
 refused "STATION is read only with PROXY" gate_ssh ssh vm-station-alone true
 refused "HOSTNAME is not a plain host name" gate_ssh ssh vm-badhost true
 refused "USER is not a plain user name" gate_ssh ssh vm-baduser true

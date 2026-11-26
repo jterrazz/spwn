@@ -237,12 +237,16 @@ A route file is `KEY=value` lines, each key once; a line starting with `#` is sk
 | `USER`        | direct  | The remote user                                                                                                         |
 | `PORT`        | direct  | The port                                                                                                                |
 | `PROXY`       | direct  | `station-pipe` or nothing: the proxy is `<STATION> machines pipe <host>`, built by the script, never text from the file |
-| `STATION`     | direct  | With `PROXY=station-pipe` only: the absolute path of the station binary, an executable of `A-Z a-z 0-9 . _ / -`         |
+| `STATION`     | direct  | With `PROXY=station-pipe` only: a path value that resolves to `station` or Spwn.app's `Spwn Engine` (below)             |
 | `KNOWN_HOSTS` | both    | The host keys ssh checks the host against, an absolute file path of `A-Z a-z 0-9 . _ / -`; unset, `~/.ssh/known_hosts`  |
 | `HOP`         | two-hop | `user@host` of the hop; the VM's own key lives there and the remote command travels as base64                           |
 | `HOP_KEY`     | two-hop | The hop's identity file, under the same rule as `KEY`                                                                   |
 
 A two-hop route sets `HOP`, `HOP_KEY` and `KNOWN_HOSTS` and nothing else: no interactive login, `scp -r` or two remote paths on it. Its second hop runs on the hop as a plain `ssh -o BatchMode=yes -- <host>`, so it authenticates with the hop account's own key, reading the hop's own config; the Mac's agent never reaches it, since the first hop names no agent and forwards none. A route file and its folder are owned by the user and writable by no one else, and neither is a symbolic link.
+
+The proxy of `PROXY=station-pipe` is `'<resolved STATION>' machines pipe <host>`, and only the two binaries the installer ships may run there: a resolved path ending in `/station`, or `Spwn.app/Contents/MacOS/Spwn Engine`, which `~/.local/bin/station` links to on a Mac with the window. The file and its folder are owned by the user or root and writable by no one else, so `STATION=/usr/bin/env` or `/usr/bin/ssh` is refused.
+
+Every child (ssh, scp, and through ssh the proxy) starts under `env -i` with `PATH=/usr/bin:/bin:/usr/sbin:/sbin`, `HOME` and `LANG` alone. The stricter of the two scrubs was chosen because the route still works with it: ssh reads nothing else once `-F /dev/null` and the route's files name everything, and `station machines pipe` finds the engine from `HOME`. So the caller's `SSH_AUTH_SOCK`, `SSH_ASKPASS` and `DISPLAY` never reach a child, nor does any variable not named here.
 
 With no route file, an unknown key or a key set twice, a path value with a character outside its class, a key under `~/.ssh` or one hard-linked to a file there, a loose mode or a foreign owner, or a route that mixes both shapes, the script exits 92 with the sentence that says what to set; it never falls back to plain `ssh`, so a refusal is the signal and never a reason to unset anything. `GATE_SSH_DRYRUN=1` prints the final command, one word per line, without running it. The tools it calls (`id`, `ls`, `base64`, `dirname`) are taken from the system path by `command -p`, not from `PATH`; an attacker who already runs code as the user is outside what the script defends. The per-commit gate is `cc.sh`; no other `cc` script belongs to the gates.
 

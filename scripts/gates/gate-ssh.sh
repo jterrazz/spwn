@@ -31,6 +31,11 @@ private() {
   read -r perm _ uid _ <<< "$(command -p ls -ldn "$1" 2> /dev/null)"
   [ "$uid" = "$ME" ] && [ "${perm:5:1}" = - ] && [ "${perm:8:1}" = - ]
 }
+sound() {
+  local perm uid
+  read -r perm _ uid _ <<< "$(command -p ls -ldn "$1" 2> /dev/null)"
+  { [ "$uid" = "$ME" ] || [ "$uid" = 0 ]; } && [ "${perm:5:1}" = - ] && [ "${perm:8:1}" = - ]
+}
 
 owner_home() {
   local u h
@@ -68,7 +73,7 @@ check_known_hosts() {
 }
 
 load_route() {
-  local host=$1 line k v seen=" "
+  local host=$1 line k v r seen=" "
   case $host in "" | -* | *[!A-Za-z0-9._-]*) refuse "'$host' is not a plain host name: name the gate host with GATE_VM_LINUX" ;; esac
   [ -d "$ROUTES" ] || refuse "no route for $host: set GATE_ROUTES_DIR to the folder that holds $host.env; this script never falls back to plain ssh"
   [ ! -L "$ROUTES" ] || refuse "route folder $ROUTES is a symbolic link: name the folder itself"
@@ -127,14 +132,28 @@ load_route() {
     station-pipe)
       case $STATION in /*) ;; *) refuse "route file $f: PROXY=station-pipe needs STATION=<absolute path of the station binary>" ;; esac
       case $STATION in *[!A-Za-z0-9._/-]*) refuse "route file $f: STATION holds a character outside A-Z a-z 0-9 . _ / -" ;; esac
-      [ -f "$STATION" ] && [ -x "$STATION" ] || refuse "route file $f: STATION $STATION is not an executable file"
-      ROUTE+=(-o "ProxyCommand=$STATION machines pipe $host")
+      r=$(resolve "$STATION") || refuse "route file $f: STATION $STATION is not an executable file"
+      case $r in
+        */station | */Spwn.app/Contents/MacOS/"Spwn Engine") ;;
+        *) refuse "route file $f: STATION $STATION is $r, which is neither a station binary nor Spwn.app's Spwn Engine, the two names the installer ships" ;;
+      esac
+      case ${r%/*} in *[!A-Za-z0-9._/-]*) refuse "route file $f: STATION resolves to $r, whose folder holds a character outside A-Z a-z 0-9 . _ / -" ;; esac
+      [ -f "$r" ] && [ -x "$r" ] || refuse "route file $f: STATION $STATION is not an executable file"
+      sound "$r" && sound "${r%/*}" || refuse "route file $f: STATION $r or its folder is not owned by you or root, or is writable by someone else"
+      ROUTE+=(-o "ProxyCommand='$r' machines pipe $host")
       ;;
     *) refuse "route file $f: PROXY is station-pipe or unset" ;;
   esac
 }
 
-launch() { if [ -n "${GATE_SSH_DRYRUN:-}" ]; then printf '%s\n' "$@"; exit 0; fi; exec "$@"; }
+launch() {
+  local keep=(PATH=/usr/bin:/bin:/usr/sbin:/sbin)
+  [ -z "${HOME:-}" ] || keep+=("HOME=$HOME")
+  [ -z "${LANG:-}" ] || keep+=("LANG=$LANG")
+  set -- /usr/bin/env -i "${keep[@]}" "$@"
+  if [ -n "${GATE_SSH_DRYRUN:-}" ]; then printf '%s\n' "$@"; exit 0; fi
+  exec "$@"
+}
 
 ssh_mode() {
   local flags=() host= rest=() b cmd
