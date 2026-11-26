@@ -76,7 +76,7 @@ resumes at the next scheduled time.`,
 		if err != nil {
 			return err
 		}
-		allowed, err := cliproject.Consent(p.Root, reaches, daemonYes, stdinIsTerminal(),cmd.InOrStdin(), cmd.ErrOrStderr())
+		allowed, err := cliproject.Consent(p.Root, reaches, daemonYes, stdinIsTerminal(), cmd.InOrStdin(), cmd.ErrOrStderr())
 		if err != nil {
 			return fmt.Errorf("%w\n%s", err, daemonRefusalHint)
 		}
