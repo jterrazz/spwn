@@ -1,0 +1,5 @@
+#!/bin/sh
+# markitdown as its tool says its version: the one uv installed last.
+version=0.1.2
+[ ! -f "$HOME/.markitdown" ] || version=$(/bin/cat "$HOME/.markitdown")
+echo "markitdown $version"

@@ -1,0 +1,20 @@
+#!/bin/sh
+# uv as uv 0.13.10 answers it on Linux: what it installed is left as it is by
+# `uv tool install` ("already installed", exit 0), and moved to its newest by
+# `uv tool install --upgrade`. markitdown is installed at 0.1.2, its newest 0.1.7.
+line='uv'
+for arg in "$@"; do line="$line $arg"; done
+printf '%s\n' "$line" >> "$HOME/.calls"
+case "$*" in
+"--version") echo "uv 0.13.10" ;;
+"tool install --upgrade markitdown[all]")
+    echo "0.1.7" > "$HOME/.markitdown"
+    echo " + markitdown==0.1.7"
+    echo "Installed 1 executable: markitdown"
+    ;;
+"tool install markitdown[all]") echo '`markitdown` is already installed' >&2 ;;
+*)
+    echo "stub uv: unexpected invocation: $*" >&2
+    exit 97
+    ;;
+esac

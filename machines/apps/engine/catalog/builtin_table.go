@@ -2868,7 +2868,7 @@ func builtinCatalog() (Catalog, error) {
 						Kinds: []MachineKind{
 							"linux"},
 						Install: ShellInstall{
-							Line:  "uv tool install browser-use",
+							Line:  "uv tool install --upgrade browser-use",
 							Check: "ANONYMIZED_TELEMETRY=false browser-use --version",
 							Undo:  "uv tool uninstall browser-use"}},
 					{
@@ -2914,7 +2914,7 @@ func builtinCatalog() (Catalog, error) {
 						Kinds: []MachineKind{
 							"linux"},
 						Install: ShellInstall{
-							Line:  "uv tool install 'markitdown[all]'",
+							Line:  "uv tool install --upgrade 'markitdown[all]'",
 							Check: "markitdown --version",
 							Undo:  "uv tool uninstall markitdown"}},
 					{
@@ -2939,7 +2939,7 @@ func builtinCatalog() (Catalog, error) {
 						Kinds: []MachineKind{
 							"linux"},
 						Install: ShellInstall{
-							Line:  "uv tool install mcp2cli",
+							Line:  "uv tool install --upgrade mcp2cli",
 							Check: "mcp2cli --version",
 							Undo:  "uv tool uninstall mcp2cli"}},
 					{
@@ -2964,7 +2964,7 @@ func builtinCatalog() (Catalog, error) {
 						Kinds: []MachineKind{
 							"linux"},
 						Install: ShellInstall{
-							Line:  "uv tool install mempalace",
+							Line:  "uv tool install --upgrade mempalace",
 							Check: "mempalace --version",
 							Undo:  "uv tool uninstall mempalace"}},
 					{
@@ -7508,7 +7508,7 @@ func builtinCatalog() (Catalog, error) {
 								Family: "linux"},
 							Script: &ScriptMethod{
 								Check: "ANONYMIZED_TELEMETRY=false browser-use --version",
-								Run:   "uv tool install browser-use",
+								Run:   "uv tool install --upgrade browser-use",
 								Undo:  "uv tool uninstall browser-use"}}}},
 				Folder: "ai-tooling",
 				File:   "packages/ai-tooling/browser-use.yaml",
@@ -7555,7 +7555,7 @@ func builtinCatalog() (Catalog, error) {
 								Family: "linux"},
 							Script: &ScriptMethod{
 								Check: "markitdown --version",
-								Run:   "uv tool install 'markitdown[all]'",
+								Run:   "uv tool install --upgrade 'markitdown[all]'",
 								Undo:  "uv tool uninstall markitdown"}}}},
 				Folder: "ai-tooling",
 				File:   "packages/ai-tooling/markitdown.yaml",
@@ -7585,7 +7585,7 @@ func builtinCatalog() (Catalog, error) {
 								Family: "linux"},
 							Script: &ScriptMethod{
 								Check: "mcp2cli --version",
-								Run:   "uv tool install mcp2cli",
+								Run:   "uv tool install --upgrade mcp2cli",
 								Undo:  "uv tool uninstall mcp2cli"}}}},
 				Folder: "ai-tooling",
 				File:   "packages/ai-tooling/mcp2cli.yaml",
@@ -7615,7 +7615,7 @@ func builtinCatalog() (Catalog, error) {
 								Family: "linux"},
 							Script: &ScriptMethod{
 								Check: "mempalace --version",
-								Run:   "uv tool install mempalace",
+								Run:   "uv tool install --upgrade mempalace",
 								Undo:  "uv tool uninstall mempalace"}}}},
 				Folder: "ai-tooling",
 				File:   "packages/ai-tooling/mempalace.yaml",

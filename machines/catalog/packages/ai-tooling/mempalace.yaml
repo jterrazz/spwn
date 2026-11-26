@@ -13,5 +13,5 @@ methods:
     - family: linux
       script:
           check: mempalace --version
-          run: uv tool install mempalace
+          run: uv tool install --upgrade mempalace
           undo: uv tool uninstall mempalace

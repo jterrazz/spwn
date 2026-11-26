@@ -1,0 +1,15 @@
+description: 'on a linux VM an update of what uv installed moves it to its newest'
+fixture:
+    - ../__fixtures__/shell-real/
+    - ./__fixtures__/installed-behind/
+env:
+    - STATION_MACHINE_KIND=linux
+runs:
+    - command: 'apps update markitdown'
+      exit: 0
+      stdout: |
+          ●	markitdown	0.1.7	shell
+      files:
+          .calls:
+              contains:
+                  - 'uv tool install --upgrade markitdown[all]'
