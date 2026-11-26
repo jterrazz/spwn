@@ -5,9 +5,9 @@ env:
 runs:
     - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c -s ''{epoch: (.[] | select(.out.event == "opened") | .out.epoch), rev: (.[] | select(.out.event == "snapshot") | .out.rev)}'' > held.json'
       stdin: |
-          {"v":2,"id":"1","watch":"engine.state","in":{"keys":["local"],"revision":1}}
+          {"v":2,"id":"1","watch":"engine.state","in":{"keys":["local"],"revision":2}}
       exit: 0
-    - command: '--version >/dev/null; /usr/bin/jq -c ''{v: 2, id: "1", watch: "engine.state", in: {keys: ["local", "machines.list"], revision: 1, since: .}}'' held.json | "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out.event) | [.out.event, (.out.slices // {} | keys)]'''
+    - command: '--version >/dev/null; /usr/bin/jq -c ''{v: 2, id: "1", watch: "engine.state", in: {keys: ["local", "machines.list"], revision: 2, since: .}}'' held.json | "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out.event) | [.out.event, (.out.slices // {} | keys)]'''
       exit: 0
       stdout: |
           ["opened",[]]

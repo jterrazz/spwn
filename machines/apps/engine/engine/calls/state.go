@@ -101,7 +101,7 @@ var StateWatch = call.Watch[Deps, engine.StateIn, engine.StateFrame]{
 		// from a read: a snapshot, or the keys changed since the revision
 		// the client names; held, a change per gathered revision and a tick
 		// every 15 s.
-		patterns, err := patternsOf(in.Keys, d.Views)
+		patterns, err := judgedOf(in, d.Views)
 		if err != nil {
 			return nil, err
 		}
@@ -150,6 +150,17 @@ type asked struct {
 	slices []store.Pattern
 	views  []string
 	of     *Projections
+}
+
+func judgedOf(in engine.StateIn, views *Projections) (asked, error) {
+	// invariant: a client of another revision is judged before its keys
+	// are read: it names them in its revision's words, which this engine
+	// may not hold, so its answer is the verdict alone, never a refusal of
+	// a key.
+	if engine.FitOf(engine.StateRevision, in.Revision).Verdict != engine.Fits {
+		return asked{of: views}, nil
+	}
+	return patternsOf(in.Keys, views)
 }
 
 func patternsOf(keys []string, views *Projections) (asked, error) {

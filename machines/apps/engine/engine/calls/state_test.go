@@ -3,6 +3,7 @@ package calls
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -169,6 +170,38 @@ func TestAResumeOfThisEngineIsTheChangeAndOfAnotherASnapshot(t *testing.T) {
 	}
 	if snapshot.Event != engine.StateSnapshot || len(snapshot.Slices) != 3 {
 		t.Fatalf("another engine's resume %q with %d keys, want a snapshot of three", snapshot.Event, len(snapshot.Slices))
+	}
+}
+
+func TestAClientOfAnotherRevisionIsAnsweredItsVerdictWhateverKeysItAsks(t *testing.T) {
+	h := newHeld(t)
+	views := Projected(listView{})
+	keys := []string{"machines", "engine.a-later-view"}
+	for _, c := range []struct {
+		revision int
+		want     engine.FitVerdict
+	}{{engine.StateRevision + 1, engine.EngineOlder}, {engine.StateRevision - 1, engine.AppOlder}, {0, engine.AppOlder}} {
+		in := engine.StateIn{Keys: keys, Revision: c.revision, Hold: true}
+		asked, err := judgedOf(in, views)
+		if err != nil {
+			t.Fatalf("a client of revision %d was refused %v, want its verdict", c.revision, err)
+		}
+		ctx, cancel := context.WithCancel(t.Context())
+		out := make(chan call.Update[engine.StateFrame])
+		go stream(ctx, h, 5, asked, in, out)
+		opened := next(t, out)
+		if opened.Event != engine.StateOpened || opened.Fit == nil || opened.Fit.Verdict != c.want {
+			t.Fatalf("a client of revision %d opened %+v, want the verdict %s", c.revision, opened, c.want)
+		}
+		if _, more := <-out; more {
+			t.Fatalf("a client of revision %d was sent a frame after its verdict", c.revision)
+		}
+		cancel()
+	}
+
+	_, err := judgedOf(engine.StateIn{Keys: keys, Revision: engine.StateRevision}, views)
+	if e := new(fail.Error); !errors.As(err, &e) || e.Code != StateUnknownKey {
+		t.Fatalf("a fitting client asking an unknown view got %v, want %s", err, StateUnknownKey)
 	}
 }
 

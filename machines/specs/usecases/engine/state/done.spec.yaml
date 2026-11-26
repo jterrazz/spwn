@@ -5,8 +5,8 @@ env:
 runs:
     - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .error then .error | {code, field} elif .out.event == "opened" then [.out.event, .out.stream, .out.state, .out.fit.verdict] else [.out.event, (.out.slices | to_entries | map([.key, .value.state, (.value.value != null)]))] end'''
       stdin: |
-          {"v":2,"id":"1","watch":"engine.state","in":{"keys":["local"],"revision":1}}
+          {"v":2,"id":"1","watch":"engine.state","in":{"keys":["local"],"revision":2}}
       exit: 0
       stdout: |
-          ["opened","station.state/v1",1,"fits"]
+          ["opened","station.state/v1",2,"fits"]
           ["snapshot",[["activity:linux-1","fresh",true],["activity:macbook-pro","fresh",true],["awake:macbook-pro","fresh",true],["mac:macbook-pro","fresh",true],["overview:linux-1","fresh",true],["overview:macbook-pro","fresh",true],["ports:macbook-pro","fresh",true],["signins:api","fresh",true],["signins:linux-1","fresh",true],["signins:macbook-pro","fresh",true]]]
