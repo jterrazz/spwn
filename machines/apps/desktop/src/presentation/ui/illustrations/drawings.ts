@@ -174,7 +174,7 @@ function boot(applying: boolean): Drawing {
 function bootFailed(): Drawing {
     const iso = new Iso();
     machine(iso, true);
-    badge(iso, [-4, -2, 60], 12, 'bad');
+    badge(iso, [-4, -2, 92], 12, 'bad');
     return iso.drawing();
 }
 
