@@ -27,6 +27,7 @@ import (
 	machinescalls "github.com/jterrazz/studio-station/apps/engine/machines/calls"
 	"github.com/jterrazz/studio-station/apps/engine/ports"
 	settingscalls "github.com/jterrazz/studio-station/apps/engine/settings/calls"
+	skillscalls "github.com/jterrazz/studio-station/apps/engine/skills/calls"
 )
 
 type Wording func(e *fail.Error) (message, hint string)
@@ -50,7 +51,7 @@ func typedGesture(action string) (doing, done string, ok bool) {
 	switch confirm.Action(action) {
 	case confirm.Stop:
 		return "stopping", "stopped", true
-	case confirm.Delete, confirm.DeleteAgent:
+	case confirm.Delete, confirm.DeleteAgent, confirm.DeleteSkill:
 		return "deleting", "deleted", true
 	case confirm.RestartServer:
 		return "restarting", "restarted", true
@@ -558,6 +559,15 @@ func Codes() map[fail.Code]Wording {
 		},
 		agentscalls.BadArchive: func(e *fail.Error) (string, string) {
 			return e.Subject + " is not an agent's archive", "station agents export <agent> --to <folder> writes one"
+		},
+		skillscalls.NotFound: func(e *fail.Error) (string, string) {
+			return "no skill named \"" + e.Subject + "\"", "station skills"
+		},
+		skillscalls.Exists: func(e *fail.Error) (string, string) {
+			return "a skill named \"" + e.Subject + "\" exists", "pick another name"
+		},
+		skillscalls.BadName: func(e *fail.Error) (string, string) {
+			return "\"" + e.Subject + "\" is not a name a skill takes", "lowercase letters, digits and dashes, a letter first, and no verb of skills"
 		},
 		backgroundcalls.Unknown: func(e *fail.Error) (string, string) {
 			return "no background task \"" + e.Subject + "\"", "station background"

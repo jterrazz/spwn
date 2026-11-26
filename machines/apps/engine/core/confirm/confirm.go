@@ -36,6 +36,8 @@ const (
 	Delete        Action = "delete"
 	// value: an agent's Mind is deleted, every layer of it.
 	DeleteAgent Action = "delete-agent"
+	// value: a skill file is deleted.
+	DeleteSkill Action = "delete-skill"
 	Erase       Action = "erase"
 	// value: build the image a create needs first, when this Mac has none.
 	BuildImage Action = "build-image"
@@ -72,7 +74,7 @@ func For(a Action, k machine.Kind) Level {
 	switch a {
 	case Install, Share, Start, Restart, Edit:
 		return None
-	case Delete, DeleteAgent, Erase, RestartServer, FreeUnused:
+	case Delete, DeleteAgent, DeleteSkill, Erase, RestartServer, FreeUnused:
 		return TypeName
 	case Stop:
 		if k == machine.Server {
@@ -208,6 +210,8 @@ func (a Action) Consequence() string {
 		return "%s and everything on its disk are deleted for good."
 	case DeleteAgent:
 		return "%s's Mind, every layer of it, is deleted for good."
+	case DeleteSkill:
+		return "%s is deleted for good."
 	case Erase:
 		return "The data of %s is deleted for good."
 	case BuildImage:

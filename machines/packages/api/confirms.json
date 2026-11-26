@@ -133,6 +133,11 @@
     "consequence": "Moved where each app now looks, one rename each: %s.",
     "form": "yes-no"
   },
+  "skills.delete": {
+    "confirm": "delete-skill",
+    "consequence": "%s is deleted for good.",
+    "form": "type-name"
+  },
   "vault.remove": {
     "confirm": "remove-password",
     "consequence": "%s leaves this Mac's vault, and every grant made from it ends.",

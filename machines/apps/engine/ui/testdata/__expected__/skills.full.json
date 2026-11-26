@@ -1,0 +1,51 @@
+{
+  "schema": "station.page/v1",
+  "id": "skills",
+  "command": "skills",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "skills",
+      "title": "Skills",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "paper-reading",
+            "mark": "ok",
+            "label": "paper-reading",
+            "detail": {
+              "kind": "text",
+              "text": "How to read a paper and keep its claims."
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "refactoring",
+            "mark": "ok",
+            "label": "refactoring",
+            "detail": {
+              "kind": "none"
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 2
+        }
+      ]
+    }
+  ]
+}

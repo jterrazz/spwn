@@ -11,10 +11,10 @@ runs:
       stderr: |
           Error: unknown command "workstation"
           Hint: station help
-    - command: 'skills install x'
+    - command: 'packages install x'
       exit: 2
       stderr: |
-          Error: unknown command "skills"
+          Error: unknown command "packages"
           Hint: station help
     - command: 'clean --all --yes'
       exit: 2

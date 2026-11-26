@@ -1,0 +1,29 @@
+{
+  "schema": "station.page/v1",
+  "id": "skills",
+  "command": "skills",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "skills",
+      "title": "Skills",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        }
+      ],
+      "items": [
+        {
+          "empty": {
+            "text": "No skill yet: station skills create <name> makes one."
+          }
+        }
+      ]
+    }
+  ]
+}

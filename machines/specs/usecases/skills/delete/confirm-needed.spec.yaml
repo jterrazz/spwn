@@ -1,0 +1,22 @@
+description: 'station skills delete piped without --confirm is refused and the file kept; --yes answers nothing'
+env: two-macs
+runs:
+    - command: 'skills create paper-reading'
+      exit: 0
+      stdout: |
+          ●	paper-reading	created	~/.spwn/skills/paper-reading.md
+    - command: 'skills delete paper-reading'
+      exit: 2
+      stderr: |
+          Error: refusing without the name typed: paper-reading
+          Hint: in a script: --confirm=paper-reading
+    - command: 'skills delete paper-reading --yes'
+      exit: 2
+      stderr: |
+          Error: skills delete asks its name typed: --yes answers nothing
+          Hint: re-run with --confirm=<name>
+    - command: 'skills'
+      exit: 0
+      stdout: |
+          # Skills
+          ●	paper-reading	One-line description of what this skill does.

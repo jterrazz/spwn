@@ -1,0 +1,50 @@
+{
+  "schema": "station.page/v1",
+  "id": "skills",
+  "command": "skills",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "loading",
+  "sections": [
+    {
+      "id": "skills",
+      "title": "Skills",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "paper-reading",
+            "mark": "pending",
+            "label": "paper-reading",
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "refactoring",
+            "mark": "pending",
+            "label": "refactoring",
+            "detail": {
+              "kind": "none"
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "pending",
+          "n": 2
+        }
+      ]
+    }
+  ]
+}

@@ -21,6 +21,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/ports"
 	"github.com/jterrazz/studio-station/apps/engine/settings"
+	"github.com/jterrazz/studio-station/apps/engine/skills"
 )
 
 type World struct {
@@ -370,6 +371,9 @@ type Stores struct {
 	Agents map[string][]agents.Mind `json:"agents,omitempty"`
 	// value: the agents' archives written on this machine, by path.
 	AgentArchives map[string]agents.Mind `json:"agent_archives,omitempty"`
+	// value: the skill files kept on this machine, by the project root they
+	// belong to ("" for the user's own), each list by name.
+	Skills map[string][]skills.Skill `json:"skills,omitempty"`
 }
 
 func (m *Mac) Store() *Stores {

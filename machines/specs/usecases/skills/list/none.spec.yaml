@@ -1,0 +1,8 @@
+description: 'station skills with no skill says how one is made'
+env: two-macs
+runs:
+    - command: 'skills'
+      exit: 0
+      stdout: |
+          # Skills
+          	none

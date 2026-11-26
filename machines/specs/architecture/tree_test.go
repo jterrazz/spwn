@@ -10,7 +10,7 @@ import (
 
 // invariant: ARCHITECTURE 13.1: the top level of apps/engine/ names what station does.
 func families() []string {
-	return []string{"machines", "activity", "apps", "settings", "disk", "ports", "accounts", "vault", "grants", "background", "awake", "images", "overview", "setup", "engine", "machinefile", "journal", "agents"}
+	return []string{"machines", "activity", "apps", "settings", "disk", "ports", "accounts", "vault", "grants", "background", "awake", "images", "overview", "setup", "engine", "machinefile", "journal", "agents", "skills"}
 }
 
 func plumbing() []string {

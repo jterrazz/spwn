@@ -31,6 +31,7 @@ import (
 	portscontract "github.com/jterrazz/studio-station/apps/engine/ports/contract"
 	remotecontract "github.com/jterrazz/studio-station/apps/engine/remote/contract"
 	settingscontract "github.com/jterrazz/studio-station/apps/engine/settings/contract"
+	skillscontract "github.com/jterrazz/studio-station/apps/engine/skills/contract"
 )
 
 // invariant: the release build knows no world: openWorld answers none, so
@@ -69,6 +70,7 @@ func (*worldMac) unlocker() contract.Unlocker                                   
 func (*worldMac) waker() contract.Waker                                             { return nil }
 func (*worldMac) processes(kernel contract.Processes) contract.Processes            { return kernel }
 func (*worldMac) minds() agentscontract.Minds                                       { return nil }
+func (*worldMac) skillFiles() skillscontract.Files                                  { return nil }
 func (*worldMac) jobs() backgroundcontract.Jobs                                     { return nil }
 func (*worldMac) releases() enginecontract.Releases                                 { return nil }
 func (*worldMac) inspector() settingscontract.Inspector                             { return nil }

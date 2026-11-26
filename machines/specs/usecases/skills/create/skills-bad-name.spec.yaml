@@ -1,0 +1,13 @@
+description: 'station skills create refuses a name a skill cannot take: not lowercase, or a verb of skills'
+env: two-macs
+runs:
+    - command: 'skills create Paper'
+      exit: 2
+      stderr: |
+          Error: "Paper" is not a name a skill takes
+          Hint: lowercase letters, digits and dashes, a letter first, and no verb of skills
+    - command: 'skills create delete'
+      exit: 2
+      stderr: |
+          Error: "delete" is not a name a skill takes
+          Hint: lowercase letters, digits and dashes, a letter first, and no verb of skills

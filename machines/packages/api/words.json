@@ -1092,6 +1092,21 @@
       "Detail": "setting",
       "Tone": "plain"
     },
+    "skills.bad-name": {
+      "Word": "bad name",
+      "Detail": "skills",
+      "Tone": "plain"
+    },
+    "skills.exists": {
+      "Word": "exists",
+      "Detail": "skills",
+      "Tone": "plain"
+    },
+    "skills.not-found": {
+      "Word": "not found",
+      "Detail": "skills",
+      "Tone": "plain"
+    },
     "unknown_op": {
       "Word": "Unknown operation",
       "Tone": "plain"

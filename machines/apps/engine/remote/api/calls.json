@@ -1243,6 +1243,47 @@
       "out": "Report"
     },
     {
+      "name": "skills.create",
+      "schema": "station.skills.create/v1",
+      "where": "at-target",
+      "errors": [
+        "skills.bad-name",
+        "skills.exists"
+      ],
+      "in": "CreateIn",
+      "out": "Skill"
+    },
+    {
+      "name": "skills.delete",
+      "schema": "station.skills.delete/v1",
+      "where": "at-target",
+      "confirm": "delete-skill",
+      "consequence": "%s is deleted for good.",
+      "errors": [
+        "confirm.mismatch",
+        "confirm.needed",
+        "skills.not-found"
+      ],
+      "in": "DeleteIn",
+      "out": "Skill"
+    },
+    {
+      "name": "skills.list",
+      "schema": "station.skills.list/v1",
+      "where": "at-target",
+      "in": "ListIn"
+    },
+    {
+      "name": "skills.show",
+      "schema": "station.skills.show/v1",
+      "where": "at-target",
+      "errors": [
+        "skills.not-found"
+      ],
+      "in": "ShowIn",
+      "out": "Skill"
+    },
+    {
       "name": "vault.add",
       "schema": "station.vault.add/v1",
       "section": "accounts",

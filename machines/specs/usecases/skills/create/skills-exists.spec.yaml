@@ -1,0 +1,12 @@
+description: 'station skills create of a name taken is refused, exit 2'
+env: two-macs
+runs:
+    - command: 'skills create paper-reading'
+      exit: 0
+      stdout: |
+          ●	paper-reading	created	~/.spwn/skills/paper-reading.md
+    - command: 'skills create paper-reading'
+      exit: 2
+      stderr: |
+          Error: a skill named "paper-reading" exists
+          Hint: pick another name

@@ -6,7 +6,7 @@ Every command of `station`, grouped as `station help` groups them: the four grou
 | ---------- | ------------------------------------------------------------------------------------------------------------------ |
 | Rules      | What holds for every command                                                                                       |
 | Machine    | `machines`, `images`, `engine`, `apps`, `settings`, `disk`, `ports`, `accounts`, `background`, `awake`, `activity` |
-| Agent      | `agents`                                                                                                           |
+| Agent      | `agents`, `skills`                                                                                                 |
 | Spwn       | `overview`, `init`, `--version`, `use`, `journal`, `machinefile`, `help`                                           |
 | Plumbing   | The hidden commands the machine runs for itself                                                                    |
 | Exit codes | What 0, 1, 2 and 130 mean                                                                                          |
@@ -177,7 +177,7 @@ What a machine is doing now: CPU and load, memory and its pressure, swap, free s
 
 ## Agent
 
-These commands act on the agents of a project: the project of the folder a command runs in, found by its `spwn.yaml` from that folder up, or the user's own agents outside any project. The words are the [grammar's](../../../docs/reference/cli.md).
+These commands act on the agents of a project and on the skill files they are made of: the project of the folder a command runs in, found by its `spwn.yaml` from that folder up, or the user's own agents outside any project. The words are the [grammar's](../../../docs/reference/cli.md).
 
 ### `station agents`
 
@@ -194,6 +194,16 @@ station agents sleep <agent> # stale playbooks archived, old sessions pruned, th
 ```
 
 A name is lowercase letters, digits and dashes, a letter first, and no verb of `agents`; a name taken, a harness the catalog does not hold, and an archive no export wrote are refused, exit 2. `delete` asks the agent's name typed on a terminal and needs `--confirm=<agent>` off one. With `--on` a VM of this Mac, each command acts on that VM's agents: the project of this folder is the guest folder a share of the VM's start puts it at, and a project no share reaches, or `--on` another Mac, is refused, exit 2, with the Machinefile's `vm.mounts` to add it to. `--json` is `station.agents.list/v1`, or `station.agents.show/v1` for one agent.
+
+### `station skills`
+
+```sh
+station skills [<skill>] [--json] # the skill files by name, with their description; one skill's file, its text as written
+station skills create <name> # a markdown file made from a template, spwn/skills/<name>.md
+station skills delete <skill> [--confirm=<skill>] # its file, for good
+```
+
+A skill is a bare markdown file, `spwn/skills/<name>.md` in the project, or `~/.spwn/skills/<name>.md` outside one; its description is the `description:` line of its frontmatter. A name is lowercase letters, digits and dashes, a letter first, and no verb of `skills`; a name taken is refused, exit 2. A skill's text is changed by opening its file: no command edits it. `delete` asks the skill's name typed on a terminal and needs `--confirm=<skill>` off one. `--on` reads the project as `station agents` does. `--json` is `station.skills.list/v1`, or `station.skills.show/v1` for one skill.
 
 ## Spwn
 

@@ -35,6 +35,7 @@ import (
 	settingscalls "github.com/jterrazz/studio-station/apps/engine/settings/calls"
 	settingscontract "github.com/jterrazz/studio-station/apps/engine/settings/contract"
 	setupcalls "github.com/jterrazz/studio-station/apps/engine/setup/calls"
+	skillscalls "github.com/jterrazz/studio-station/apps/engine/skills/calls"
 	"github.com/jterrazz/studio-station/apps/engine/surface/cli/kit"
 	vaultcalls "github.com/jterrazz/studio-station/apps/engine/vault/calls"
 )
@@ -60,6 +61,7 @@ func (m machine) registry(env kit.Env) *call.Registry {
 		activitycalls.All(m.activityDeps(sections.Meter)),
 		overviewcalls.All(sections),
 		agentscalls.All(agentscalls.Deps{Minds: m.minds(), Kind: kind, Home: m.sys.Env.Home()}),
+		skillscalls.All(skillscalls.Deps{Files: m.skillFiles(), Kind: kind, Home: m.sys.Env.Home()}),
 		accountscalls.All(accountscalls.Deps{SignIns: m.signIns(), Kind: kind}),
 		vaultcalls.All(vaultcalls.Deps{Passwords: m.passwords(), SignIns: m.signIns(), Mac: m.where.Machine, Separator: token.Sep, Kind: kind}),
 		grantscalls.All(grantscalls.Deps{Grants: m.grants(), Kind: kind}),

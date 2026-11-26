@@ -1,0 +1,16 @@
+description: 'station skills delete --confirm=<skill> deletes its file for good'
+env: two-macs
+runs:
+    - command: 'skills create paper-reading'
+      exit: 0
+      stdout: |
+          ●	paper-reading	created	~/.spwn/skills/paper-reading.md
+    - command: 'skills delete paper-reading --confirm=paper-reading'
+      exit: 0
+      stdout: |
+          ●	paper-reading	deleted
+    - command: 'skills'
+      exit: 0
+      stdout: |
+          # Skills
+          	none

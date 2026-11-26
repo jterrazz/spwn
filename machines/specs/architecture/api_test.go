@@ -25,6 +25,7 @@ import (
 	portscalls "github.com/jterrazz/studio-station/apps/engine/ports/calls"
 	settingscalls "github.com/jterrazz/studio-station/apps/engine/settings/calls"
 	setupcalls "github.com/jterrazz/studio-station/apps/engine/setup/calls"
+	skillscalls "github.com/jterrazz/studio-station/apps/engine/skills/calls"
 	vaultcalls "github.com/jterrazz/studio-station/apps/engine/vault/calls"
 )
 
@@ -36,6 +37,7 @@ func allCalls(t *testing.T) *call.Registry {
 		diskcalls.All(diskcalls.Deps{}), imagescalls.All(imagescalls.Deps{}), journalcalls.All(journalcalls.Deps{}), machinefilecalls.All(machinefilecalls.Deps{}), machinescalls.All(machinescalls.Deps{}),
 		portscalls.All(portscalls.Deps{}), settingscalls.All(settingscalls.Deps{}), setupcalls.All(setupcalls.Deps{}), vaultcalls.All(vaultcalls.Deps{}), grantscalls.All(grantscalls.Deps{}),
 		agentscalls.All(agentscalls.Deps{}),
+		skillscalls.All(skillscalls.Deps{}),
 		activitycalls.All(activitycalls.Deps{}), enginecalls.All(enginecalls.Deps{}), overviewcalls.All(overviewcalls.Sections{}),
 	)
 	if err != nil {

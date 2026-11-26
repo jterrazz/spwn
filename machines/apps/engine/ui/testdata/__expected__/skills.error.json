@@ -1,0 +1,13 @@
+{
+  "schema": "station.page/v1",
+  "id": "skills",
+  "command": "skills",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "failed",
+  "error": {
+    "message": "the skills of ~/Developer/site cannot be read",
+    "hint": "station skills"
+  }
+}

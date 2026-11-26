@@ -1,0 +1,29 @@
+description: 'station skills --json prints each skill with its file and description'
+env: two-macs
+runs:
+    - command: 'skills create paper-reading'
+      exit: 0
+      stdout: |
+          ●	paper-reading	created	~/.spwn/skills/paper-reading.md
+    - command: 'skills --json'
+      exit: 0
+      stdout: |
+          {
+            "schema": "station.skills.list/v1",
+            "generated_at": "{{iso8601}}",
+            "machine": {
+              "name": "macbook-pro",
+              "label": "This Mac",
+              "kind": "computer",
+              "on": null,
+              "this_mac": true
+            },
+            "findings": [],
+            "skills": [
+              {
+                "name": "paper-reading",
+                "path": "~/.spwn/skills/paper-reading.md",
+                "description": "One-line description of what this skill does."
+              }
+            ]
+          }
