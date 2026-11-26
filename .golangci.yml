@@ -137,8 +137,8 @@ linters:
             - linters:
                   - forbidigo
               path-except: ^packages/(architect/|automation/|project/|transpile/source/|dependency/(refs/|lockfile\.go|internal/manifest/|internal/adapters/local/)|agent/(manifest\.go|internal/(manifest|journal|session)/)|world/runtimestate/)
-            # outside: not yet rooted: a Mind's journal and session files are read plainly (spwn agent logs, a resumed
-            # session); their writes go through platform.DataFiles.
+            # outside: not yet rooted: a Mind's journal is read plainly by the machines engine's agents.show and by Dream,
+            # its session files by no production caller; their writes go through platform.DataFiles.
             - linters:
                   - forbidigo
               path: ^packages/agent/internal/(journal|session)/

@@ -1109,7 +1109,7 @@ func ruleKnowledgePath(in Input) []Issue {
 				Level:   LevelError,
 				Path:    "spwn.yaml#worlds." + name + ".knowledge",
 				Message: fmt.Sprintf("knowledge path %q leaves the project", path),
-				Hint:    "keep the world's knowledge in a folder of the project, e.g. `knowledge: ./knowledge`",
+				Hint:    "keep the world's knowledge in a folder of the project, e.g. `knowledge: ./knowledge`; `spwn up` mounts this one only once you allow it, asked on a terminal",
 			})
 			continue
 		}
