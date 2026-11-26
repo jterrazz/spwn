@@ -1,10 +1,25 @@
 version: '2'
 run:
     modules-download-mode: readonly
+    # invariant: every exclusion path below is relative to this file, whichever module the run starts in.
+    relative-path-mode: cfg
 linters:
     enable:
         - depguard
+        - forbidigo
     settings:
+        forbidigo:
+            # invariant: a read of a project goes through a root opened at its folder (packages/platform's Tree and
+            # FS), never a plain call that a name, a "..", an absolute path or a link of the declaration could direct
+            # outside it; the packages it binds are the scope rule of the exclusions below.
+            analyze-types: true
+            forbid:
+                - pattern: ^os\.(Open|OpenFile|ReadFile|ReadDir|Stat|Lstat|DirFS)$
+                  pkg: ^os$
+                  msg: a project is read through platform.Within or platform.FS, never a plain os read
+                - pattern: ^filepath\.(Walk|WalkDir|Glob)$
+                  pkg: ^path/filepath$
+                  msg: a project is walked through platform.Tree's WalkDir, never a plain filepath walk
         depguard:
             # invariant: each rule denies a layer the imports of the layers above it.
             # L1 platform imports nothing; L2 activity, authentication, upgrade import L1;
@@ -106,6 +121,28 @@ linters:
             - linters:
                   - errcheck
               path: _test\.go
+            # invariant: forbidigo binds the packages that read a project: its loader, the transpiler's source, and
+            # the dependency packages that read spwn.lock, spwn/tools/ and a tool's files.
+            - linters:
+                  - forbidigo
+              path-except: ^packages/(project/|transpile/source/|dependency/(refs/|lockfile\.go|internal/manifest/|internal/adapters/local/))
+            # outside: a test builds the project it reads, and reads it back to judge what the code read.
+            - linters:
+                  - forbidigo
+              path: _test\.go
+            # outside: the organization and team files live in ~/.spwn, the user's own, never in a project.
+            - linters:
+                  - forbidigo
+              path: ^packages/project/(organization|team)\.go$
+            # outside: the scaffold writes a new project and reads back only what it wrote there.
+            - linters:
+                  - forbidigo
+              path: ^packages/project/internal/scaffold/
+            # outside: discovery searches upward from a folder for the spwn.yaml that makes a project, before there
+            # is a project folder to root a read at.
+            - linters:
+                  - forbidigo
+              path: ^packages/project/internal/discovery/
         paths:
             - third_party$
             - examples$

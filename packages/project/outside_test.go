@@ -54,6 +54,65 @@ func replaceIn(t *testing.T, path, old, new string) {
 	}
 }
 
+// TestAWatchPathOutsideTheProjectIsOnlyAnAdvice: a watch path outside the
+// project is the one advice that it is not checked, never an error of its
+// existence: plan time asks nothing of it, whether it is there, missing
+// or a file, and behind a folder no one may search.
+func TestAWatchPathOutsideTheProjectIsOnlyAnAdvice(t *testing.T) {
+	const world = "    knowledge: ./spwn/knowledge"
+	const field = "spwn.yaml#worlds.neo.automations.watch.on.fs.path"
+	for name, path := range map[string]func(outside string) string{
+		"absolute": func(o string) string { return filepath.Join(o, "watched") },
+		"climbing": func(string) string { return "../outside/watched" },
+	} {
+		t.Run(name, func(t *testing.T) {
+			var said []string
+			for _, state := range []string{"folder", "missing", "file", "unsearchable"} {
+				root, outside := outsideProject(t)
+				watched := filepath.Join(outside, "watched")
+				switch state {
+				case "missing":
+					if err := os.RemoveAll(outside); err != nil {
+						t.Fatal(err)
+					}
+				case "file":
+					if err := os.Remove(watched); err != nil {
+						t.Fatal(err)
+					}
+					if err := os.WriteFile(watched, []byte(outsideSecret), 0o000); err != nil {
+						t.Fatal(err)
+					}
+				case "unsearchable":
+					if err := os.Chmod(outside, 0o000); err != nil {
+						t.Fatal(err)
+					}
+					t.Cleanup(func() { _ = os.Chmod(outside, 0o755) })
+				}
+				replaceIn(t, filepath.Join(root, "spwn.yaml"), world, world+fmt.Sprintf("\n    automations:\n      watch:\n        on:\n          fs:\n            path: %q\n        agent: neo\n        prompt: go", path(outside)))
+				p, err := Load(filepath.Join(root, "spwn.yaml"))
+				if err != nil {
+					t.Fatalf("Load: %v", err)
+				}
+				var at []Issue
+				for _, is := range Validate(p) {
+					if is.Path == field {
+						at = append(at, is)
+					}
+				}
+				if len(at) != 1 || at[0].Level != LevelInfo || !strings.Contains(at[0].Message, "outside the project: not checked") {
+					t.Errorf("%s: issues at %s = %+v; want only the advice that it is not checked", state, field, at)
+				}
+				said = append(said, strings.ReplaceAll(fmt.Sprint(at), filepath.Dir(root), "DIR"))
+			}
+			for i := range said {
+				if said[i] != said[0] {
+					t.Errorf("the issues tell the state of the outside path:\n %s\n %s", said[0], said[i])
+				}
+			}
+		})
+	}
+}
+
 // TestEachPathOfTheDeclarationThatLeavesTheProjectIsSaidAndNeverOpened:
 // every name or path the manifest, an agent.yaml or a prompt gives, as
 // "..", an absolute path, a separator or a NUL, is an issue of its field,
