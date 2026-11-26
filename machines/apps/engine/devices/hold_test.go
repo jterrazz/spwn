@@ -15,6 +15,9 @@ func TestABookAwaitingItsCheckIsANeedOnlyWhenItHoldsADevice(t *testing.T) {
 	if got := awaiting.Standing(laptop, false); got != devices.Unchecked {
 		t.Fatalf("a book of one device awaiting its check stands %q, want unchecked", got)
 	}
+	if got := awaiting.Standing(devices.Book{}, true); got != devices.Unchecked {
+		t.Fatalf("an unreadable book awaiting its check stands %q, want unchecked", got)
+	}
 	if got := awaiting.Settle(`{"devices":[]}`, devices.Head{}); got.State != devices.Unheld {
 		t.Fatalf("a book written while awaiting settles to %+v, want it held for nothing", got)
 	}

@@ -296,6 +296,21 @@ func TestABookAtTheLastGenerationLeavesTheNextWriteAHeadTheKeychainReadsBack(t *
 	}
 }
 
+func TestABookMadeUnreadableWhileTheEngineAwaitsItsKeychainIsNotCheckedYet(t *testing.T) {
+	at := filepath.Join(t.TempDir(), "station", "devices.json")
+	k := &keychain{}
+	forgottenLaptop(t, at, k)
+	k.locked = errors.New("the keychain is locked")
+	engine := openOn(at, false, k)
+	engine.Sole(t.Context())
+	if err := files().WriteFile(at, []byte("garbage"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if _, standing, ok := engine.Held(t.Context()); standing != devices.Unchecked || !ok {
+		t.Fatalf("held %q, %v; want an unreadable book not checked yet", standing, ok)
+	}
+}
+
 type lyingPeer struct{ head devices.Head }
 
 func (p lyingPeer) Held(context.Context) (devices.Head, bool, error) { return p.head, true, nil }
