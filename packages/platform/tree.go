@@ -359,11 +359,8 @@ func (t *Tree) MkdirAll(p string, perm fs.FileMode) error {
 	return nil
 }
 
-// linkOut is the error of an open the root refused: ErrLink naming, by
-// its name under the Tree, the first component of rel that is a link, when one is and the refusal is
-// neither a missing name nor a permission, else err itself. It reads the
-// links alone, never their targets, so it says the same whatever is
-// outside.
+// invariant: linkOut reads the links on rel alone, never their targets,
+// so the refusal it names reads the same whatever is outside.
 func (t *Tree) linkOut(p, rel string, err error) error {
 	if errors.Is(err, fs.ErrNotExist) || errors.Is(err, fs.ErrPermission) {
 		return err
