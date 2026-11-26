@@ -24,6 +24,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	"github.com/jterrazz/studio-station/apps/engine/core/guide"
 	coremachine "github.com/jterrazz/studio-station/apps/engine/core/machine"
+	devicescalls "github.com/jterrazz/studio-station/apps/engine/devices/calls"
 	diskcalls "github.com/jterrazz/studio-station/apps/engine/disk/calls"
 	enginecalls "github.com/jterrazz/studio-station/apps/engine/engine/calls"
 	grantscalls "github.com/jterrazz/studio-station/apps/engine/grants/calls"
@@ -68,6 +69,7 @@ func (m machine) registry(env kit.Env) *call.Registry {
 		accountscalls.All(accountscalls.Deps{SignIns: m.signIns(), Kind: kind}),
 		vaultcalls.All(vaultcalls.Deps{Passwords: m.passwords(), SignIns: m.signIns(), Mac: m.where.Machine, Separator: token.Sep, Kind: kind}),
 		grantscalls.All(grantscalls.Deps{Grants: m.grants(), Kind: kind}),
+		devicescalls.All(m.devicesDeps()),
 		appscalls.All(appscalls.Deps{Apps: appsOf(env, m), Known: m.cat.Apps, Origin: machinefile.OriginsOf(m.cat), Kind: kind, All: appsAllMachines{m}, Now: m.sys.Clock.Now}),
 		awakecalls.All(m.awakeDeps()),
 		backgroundcalls.All(m.backgroundDeps()),

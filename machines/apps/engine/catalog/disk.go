@@ -185,6 +185,8 @@ var StationDisk = Disk{
 		noted(data("{state}/station/journal.jsonl.lock", Mac), "empty: the lock every write of the journal takes"),
 		noted(data("{state}/station/vault.json", Mac), "the vault's book: each password's label, program, kind and grants, never a value (the values are Machines' Keychain items)"),
 		noted(data("{state}/station/vault.json.lock", Mac), "empty: the lock every change of the vault's book takes"),
+		noted(data("{state}/station/devices.json", Mac), "the device book, mode 0600: the other devices this Mac lets its VMs trust, each sealed by its device key, its generation and digest anchored in the login keychain's `station-devices` item; deleting it, or writing back an older copy, lets none in until each is added again"),
+		noted(data("{state}/station/devices.json.lock", Mac), "empty: the lock every change of the device book takes"),
 		noted(data("{state}/station/vms/.records.lock"), "empty: the lock a create and the engine take in turn to write a VM record"),
 		noted(data("{state}/station/use/*"), "each terminal's machine (`station use`), forgotten after 7 days unused"),
 		noted(conf("~/Library/LaunchAgents/com.jterrazz.station.engine.plist", Mac), "the one engine's launchd agent, on a Mac without Spwn.app: with the app, its job is the bundle's, and moving to it deletes this file"),

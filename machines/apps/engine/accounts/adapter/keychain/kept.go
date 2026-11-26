@@ -13,6 +13,8 @@ type Options struct {
 	// value: this Mac's name, whose vault it is.
 	Mac string
 	Now func() time.Time
+	// value: the system root `security` is read under; empty on a Mac.
+	Root string
 }
 
 type Kept struct {
@@ -27,7 +29,7 @@ type Kept struct {
 }
 
 func NewKept(run Runner, book contract.BookStore, o Options, d GrantDeps) *Kept {
-	return &Kept{keys: New(run), run: run, book: book, o: o, d: d}
+	return &Kept{keys: New(run, o.Root), run: run, book: book, o: o, d: d}
 }
 
 func (k *Kept) Passwords() *Passwords { return &Passwords{k} }

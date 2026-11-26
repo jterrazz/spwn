@@ -1,0 +1,46 @@
+description: 'a book and head moved forward under a running engine are trusted nowhere, and said'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'devices add laptop ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGmY0fN5lE8XqXhcG0OB1oCw0SYqC0f6M1bM1jR5e9wz --channels pipe >/dev/null'
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].stores.devices[0]'' world.json > laptop.json'
+      exit: 0
+    - command: 'devices add desk ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBERERERERERERERERERERERERERERERERERERERERER --channels pipe >/dev/null'
+      exit: 0
+    - command: 'devices forget laptop --confirm=laptop >/dev/null'
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq -cj --slurpfile l laptop.json ''{generation: 8, devices: ($l + .macs["macbook-pro"].stores.devices)}'' world.json > book.json && d=$(/usr/bin/sha256sum book.json | /usr/bin/cut -d " " -f 1) && /usr/bin/jq --slurpfile b book.json --arg a "8 $d" ''.macs["macbook-pro"].stores += {devices: $b[0].devices, devices_generation: 8, devices_anchor: $a}'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out | {stale, devices: [.devices[] | .name], broken: [.broken[] | .name], keys: [.broken[] | .key]}'''
+      stdin: |
+          {"v":2,"id":"1","call":"devices.list","in":{}}
+      exit: 0
+      stdout: |
+          {"stale":true,"devices":[],"broken":["laptop","desk"],"keys":[null,null]}
+    - command: 'devices'
+      exit: 0
+      stdout: |
+          # macbook-pro
+          key	SHA256:p6ujsfeY+BbEFHPXRJeDMYee6VC5+03g3B1aOP9LT4g
+          # The device book changed outside Spwn
+          what	a book or a keychain head the engine did not write or could not parse, or a write of it cut short; nothing of it is trusted, and no VM is given its keys
+          repair	add each device again with station devices add, you at this Mac, taking its key from the device itself, never from this list
+          # May reach macbook-pro
+          	none
+          # Of that book: reaches nothing until added again
+          ✗	laptop	SHA256:cT5hNh5Eo/0cBgMbx4JlmcPYDZoZXd37eJaUqyKQd2M	pipe	2026-11-04	station devices add laptop <its key> --channels pipe
+          ✗	desk	SHA256:SQfC+vTbLURn9cTkVxIS8fGQ3FKNAJWeB0o139+gV4M	pipe	2026-11-04	station devices add desk <its key> --channels pipe
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out.Summary | [.Needs[] | select(.Subject == "devices") | [.Text, .Upkeep, .Detail]]'' | /usr/bin/tail -1'
+      stdin: |
+          {"v":2,"id":"1","watch":"overview.read","in":{}}
+      exit: 0
+      stdout: |
+          [["The device book changed outside Spwn","needs-you",""]]
+    - command: 'devices add tablet ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGmY0fN5lE8XqXhcG0OB1oCw0SYqC0f6M1bM1jR5e9wz >/dev/null'
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].stores | {devices: [.devices[] | .name], devices_generation}'' world.json'
+      exit: 0
+      stdout: |
+          {"devices":["tablet"],"devices_generation":4}

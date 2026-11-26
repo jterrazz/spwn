@@ -135,3 +135,34 @@ func TestAMacRunAloneReplacesItsKeyByOneThatSignsWithNobodyPresentAndBackWhenSom
 	kept(darwin.AccessPresent, true)
 	kept(darwin.AccessUnattended, false)
 }
+
+func TestAReadOfTheDeviceKeyNeverMakesOneNorSwapsItsAccess(t *testing.T) {
+	files, state := stateDir(t)
+	enclave := &memoryEnclave{keys: map[string]*ecdsa.PrivateKey{}}
+	started := func(access darwin.Access) *DeviceKey {
+		k := NewDeviceKey(files, state, time.Second, access)
+		k.enclave = enclave
+		return k
+	}
+	var none *contract.NoDeviceKeyError
+	if _, err := started(darwin.AccessPresent).Kept(t.Context()); !errors.As(err, &none) {
+		t.Fatalf("Kept on a Mac with no key = %v; want none kept", err)
+	}
+	if len(enclave.keys) != 0 {
+		t.Fatal("a read made a key")
+	}
+	served := started(darwin.AccessPresent)
+	made, err := served.Public(t.Context())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = started(darwin.AccessUnattended).Kept(t.Context()); !errors.As(err, &none) {
+		t.Fatalf("Kept with Never sleeps applied since = %v; want none kept, the swap left to the engine's start", err)
+	}
+	if _, err = files.Stat(DeviceKeyBlob(state, darwin.AccessPresent)); err != nil || len(enclave.keys) != 1 {
+		t.Fatalf("a read swapped the key: %v, %d keys", err, len(enclave.keys))
+	}
+	if got, err := served.Kept(t.Context()); err != nil || !got.Equal(made) {
+		t.Fatalf("Kept = %v; want the key the process serves", err)
+	}
+}

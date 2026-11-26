@@ -1,0 +1,33 @@
+{
+  "generation": 1,
+  "devices": [
+    {
+      "name": "laptop",
+      "key": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIM2YVXASS8sB/pj6wiyhO+rcd6cu2XD471y3ottjrd40",
+      "channels": [
+        "pipe",
+        "spwn-api"
+      ],
+      "added": "2026-11-26T10:00:00Z",
+      "seal": "MEYCIQCSniB9aHWYXCLH2j2OHwNLyEkEKhbFLp3VvBrgIbuRGAIhAJOT6BKCGx6+Kyz9+N6tHUe5wTt5lsUL2nORUTNfOBEC"
+    },
+    {
+      "name": "tablet",
+      "key": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAkNKFSe+1eS0LoFWLY7ho5oD3VqL/vYgHwTDBTOSkgj",
+      "channels": [
+        "spwn-api"
+      ],
+      "added": "2026-11-26T10:00:00Z",
+      "seal": "MEUCIQCn0jP7c0Gsg6oxhiHdfKA9CxqFRles4no5Tz9+h4c+0AIgWoDewHe8pOkQ2DkG68euxhNDb544sxBeLMBt1FA5tr0="
+    },
+    {
+      "name": "stranger",
+      "key": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEmiWIBtxsD5hx5n7ikKyvCNk6li1qvRYqpC1WOrRU9K",
+      "channels": [
+        "pipe"
+      ],
+      "added": "2026-11-26T10:00:00Z",
+      "seal": "MEUCIQCWqcoiTu1wdILPhsAFuy2kctvOffhyw1Vc0S6DF+nIIAIgCbTaisIrbOSLEIXlHILy2ReU6RmSdvdtR9wzpi0bDZE="
+    }
+  ]
+}

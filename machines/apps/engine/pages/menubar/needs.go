@@ -10,6 +10,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/finding"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/core/section"
+	"github.com/jterrazz/studio-station/apps/engine/devices"
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/overview"
 	"github.com/jterrazz/studio-station/apps/engine/page"
@@ -107,6 +108,11 @@ func needsOf(r NeedsReading, self string) (needs, upkeep []Need) {
 	}
 	for _, s := range r.Overviews {
 		upkeep = append(upkeep, w.upkeep(s)...)
+		for _, n := range s.Needs {
+			if n.Section == section.Overview && n.Subject == overview.DevicesSubject {
+				needs = append(needs, w.outside(s.Head.Name, n.Text))
+			}
+		}
 	}
 	of := func(n Need) finding.Finding { return n.Finding }
 	return finding.RankBy(needs, of), finding.RankUpkeep(upkeep, of)
@@ -169,6 +175,31 @@ func (w needSaid) exposed(mac string, p ports.Port) Need {
 		Key:     key, Glyph: symbol("exclamationmark.shield", page.SignalFailing), Hero: "Port " + strconv.Itoa(p.Port) + " is exposed", Subject: "Port " + strconv.Itoa(p.Port), What: catalog.ReachableOutside, Said: said,
 		Find: []string{"Port " + strconv.Itoa(p.Port) + " is exposed"}, Facts: facts, Nav: page.ID(string(PortsID) + ":" + mac), Scope: scope,
 		Verb: page.Action{ID: key, Label: VerbReview, On: page.OnRow, Rows: []string{key}, Default: true},
+	}
+}
+
+// invariant: a device book the engine did not write is a need, red: what
+// happened, that nothing of it is trusted, and the gesture that repairs,
+// each device added again with the owner present; one it could not check
+// yet says the keychain to unlock instead, and blames no one; one whose
+// file cannot be read, or a newer Spwn wrote, says that, and no add.
+func (w needSaid) outside(mac, text string) Need {
+	key := "devices:" + mac
+	severity, hero, what, detail := finding.Broken, devices.ChangedOutside, "device book changed outside Spwn", []string{devices.ChangedWhy, devices.ChangedRepair}
+	switch text {
+	case devices.NotChecked:
+		severity, hero, what, detail = finding.NeedsALook, devices.NotChecked, "device book not checked yet", []string{devices.NotCheckedWhy, devices.NotCheckedRepair}
+	case devices.CannotRead:
+		hero, what, detail = devices.CannotRead, "device book unreadable", []string{devices.CannotReadWhy, devices.CannotReadRepair}
+	case devices.ByNewer:
+		hero, what, detail = devices.ByNewer, "device book of a newer Spwn", []string{devices.ByNewerWhy, devices.ByNewerRepair}
+	}
+	return Need{
+		Finding: finding.Finding{Machine: machine.Ref{Name: mac}, Section: section.Overview, Severity: severity, Urgency: finding.Red, Subject: overview.DevicesSubject, Text: hero},
+		Key:     key, Glyph: symbol("exclamationmark.shield", page.SignalFailing), Hero: hero, Subject: w.mac(mac), What: what,
+		Find: []string{hero + " on " + w.mac(mac)}, Facts: []page.Value{page.Text("trusts nothing of it"), page.Text("on " + w.mac(mac))},
+		Detail: detail, Nav: machinePage(mac), Scope: []string{mac},
+		Verb: page.Action{ID: key, Label: VerbShow, On: page.OnRow, Rows: []string{key}, Default: true, Run: &page.Run{Terminal: true, Argv: onMac([]string{"devices"}, mac, w.self)}},
 	}
 }
 

@@ -117,6 +117,9 @@ func (e endpoint) Hello(context.Context) (contract.Hello, error) {
 }
 
 func (e endpoint) Invoke(ctx context.Context, target machine.Ref, name string, in json.RawMessage, p call.Progress) (json.RawMessage, error) {
+	// invariant: that Mac reads every request as engine attach reads it at
+	// the end of ssh: marked far.
+	ctx = call.WithFar(ctx)
 	if err := e.broken(); err != nil {
 		return nil, err
 	}
@@ -143,6 +146,7 @@ func (e endpoint) Invoke(ctx context.Context, target machine.Ref, name string, i
 }
 
 func (e endpoint) Watch(ctx context.Context, target machine.Ref, name string, in json.RawMessage, p call.Progress) (<-chan call.Update[json.RawMessage], error) {
+	ctx = call.WithFar(ctx)
 	if err := e.broken(); err != nil {
 		return nil, err
 	}

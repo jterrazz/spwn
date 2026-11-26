@@ -15,6 +15,7 @@ import (
 	awakecalls "github.com/jterrazz/studio-station/apps/engine/awake/calls"
 	backgroundcalls "github.com/jterrazz/studio-station/apps/engine/background/calls"
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
+	devicescalls "github.com/jterrazz/studio-station/apps/engine/devices/calls"
 	diskcalls "github.com/jterrazz/studio-station/apps/engine/disk/calls"
 	enginecalls "github.com/jterrazz/studio-station/apps/engine/engine/calls"
 	grantscalls "github.com/jterrazz/studio-station/apps/engine/grants/calls"
@@ -39,6 +40,7 @@ func allCalls(t *testing.T) *call.Registry {
 		portscalls.All(portscalls.Deps{}), settingscalls.All(settingscalls.Deps{}), setupcalls.All(setupcalls.Deps{}), vaultcalls.All(vaultcalls.Deps{}), grantscalls.All(grantscalls.Deps{}),
 		agentscalls.All(agentscalls.Deps{}), teamscalls.All(teamscalls.Deps{}), automationscalls.All(automationscalls.Deps{}),
 		activitycalls.All(activitycalls.Deps{}), enginecalls.All(enginecalls.Deps{}), overviewcalls.All(overviewcalls.Sections{}),
+		devicescalls.All(devicescalls.Deps{}),
 	)
 	if err != nil {
 		t.Fatal(err)

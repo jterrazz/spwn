@@ -3,7 +3,7 @@ package process
 import (
 	"context"
 	"errors"
-	"path"
+	"maps"
 	"reflect"
 	"slices"
 	"sort"
@@ -79,9 +79,17 @@ type Options struct {
 	// value: the engine's own state folder: its socket and its children.
 	State       string
 	ThisMachine catalog.MachineKind
-	// value: the file of this Mac's device key's public half, the first key a
-	// VM trusts; empty when this Mac has no device key.
-	DeviceKey string
+	// value: this Mac's device key's line, read from the key the engine
+	// holds and never from a file, the first key a VM trusts; nil, or an
+	// empty line, when this Mac has no device key.
+	DeviceKey func() string
+	// value: the keys of the other devices this Mac's book lets open pipe,
+	// whose seals hold: the only keys a VM trusts beside the device key;
+	// nil trusts none.
+	BookKeys func() []string
+	// value: the device book's head this engine holds and how the book on
+	// disk stands with it (engine.Hello's Book); nil holds none.
+	Book func() (head string, standing engine.BookState)
 	// value: opens this Mac's ssh key agent, each refusal before its socket
 	// opens, and returns what serves it until ctx ends; nil opens none.
 	Agent func(ctx context.Context) (func(context.Context) error, error)
@@ -702,25 +710,33 @@ func (d *Engine) closeAll() {
 }
 
 func (d *Engine) hostKeys() []string {
-	home := d.h.Home()
+	// invariant: a VM trusts its Mac's device key, then the devices its
+	// Mac's book lets open pipe, each once, and nothing else of the Mac:
+	// neither its personal key nor whoever its own sshd lets in.
 	var keys []string
 	add := func(line string) {
 		if line = strings.TrimSpace(line); line != "" && !strings.HasPrefix(line, "#") && !slices.Contains(keys, line) {
 			keys = append(keys, line)
 		}
 	}
-	for _, file := range []string{d.o.DeviceKey, path.Join(home, ".ssh", "id_ed25519.pub")} {
-		if file == "" {
-			continue
-		}
-		if pub, err := d.h.ReadFile(file); err == nil {
-			add(string(pub))
-		}
+	if d.o.DeviceKey != nil {
+		add(d.o.DeviceKey())
 	}
-	if auth, err := d.h.ReadFile(path.Join(home, ".ssh", "authorized_keys")); err == nil {
-		for _, line := range strings.Split(string(auth), "\n") {
+	if d.o.BookKeys != nil {
+		for _, line := range d.o.BookKeys() {
 			add(line)
 		}
 	}
 	return keys
+}
+
+func (d *Engine) Rehello() {
+	// invariant: a change of the book reaches every connected guest at once,
+	// never at the next walk, so a forgotten device loses its VMs now.
+	d.mu.Lock()
+	vms := slices.Collect(maps.Values(d.vms))
+	d.mu.Unlock()
+	for _, v := range vms {
+		d.rehello(v)
+	}
 }

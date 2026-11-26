@@ -12,6 +12,19 @@
         "agent": {
           "$ref": "#/$defs/machines.Agent"
         },
+        "book": {
+          "type": "string"
+        },
+        "book_state": {
+          "enum": [
+            "",
+            "changed",
+            "unchecked",
+            "unreadable",
+            "newer"
+          ],
+          "type": "string"
+        },
         "calls": {
           "items": {
             "type": "string"

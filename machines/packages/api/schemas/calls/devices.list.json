@@ -1,0 +1,98 @@
+{
+  "$defs": {
+    "devices.Listing": {
+      "additionalProperties": false,
+      "properties": {
+        "broken": {
+          "items": {
+            "$ref": "#/$defs/devices.Row"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "devices": {
+          "items": {
+            "$ref": "#/$defs/devices.Row"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "key": {
+          "type": "string"
+        },
+        "mac": {
+          "type": "string"
+        },
+        "stale": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "broken",
+        "devices",
+        "key",
+        "mac",
+        "stale"
+      ],
+      "type": "object"
+    },
+    "devices.Row": {
+      "additionalProperties": false,
+      "properties": {
+        "added": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "channels": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "fingerprint": {
+          "type": "string"
+        },
+        "key": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "added",
+        "channels",
+        "fingerprint",
+        "name"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/spwn/blob/main/machines/packages/api/schemas/calls/devices.list.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call devices.list of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "additionalProperties": false,
+      "properties": {},
+      "type": "object"
+    },
+    "out": {
+      "$ref": "#/$defs/devices.Listing"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "devices.list",
+  "type": "object"
+}

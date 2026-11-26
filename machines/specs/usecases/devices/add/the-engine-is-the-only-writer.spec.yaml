@@ -1,0 +1,29 @@
+description: 'with the engine stopped, add and forget are refused with its start, nothing written'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'devices add laptop ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGmY0fN5lE8XqXhcG0OB1oCw0SYqC0f6M1bM1jR5e9wz >/dev/null'
+      exit: 0
+    - command: 'engine stop --yes >/dev/null'
+      exit: 0
+    - command: 'devices add desk ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBERERERERERERERERERERERERERERERERERERERERER'
+      exit: 1
+      stderr: |
+          Error: the engine is not running
+          Hint: station engine start
+    - command: 'devices forget laptop --confirm=laptop'
+      exit: 1
+      stderr: |
+          Error: the engine is not running
+          Hint: station engine start
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.error) | .error | {code, message, hint}'''
+      stdin: |
+          {"v":2,"id":"1","call":"devices.forget","in":{"Name":"laptop","Confirm":"laptop"}}
+      exit: 0
+      stdout: |
+          {"code":null,"message":"the engine is not running","hint":"station engine start"}
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].stores | {devices: [.devices[] | .name], devices_generation}'' world.json'
+      exit: 0
+      stdout: |
+          {"devices":["laptop"],"devices_generation":1}

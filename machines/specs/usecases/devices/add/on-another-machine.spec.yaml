@@ -1,0 +1,14 @@
+description: 'a device is never added to another Mac from this one: --on reaches it far, and far is refused'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'devices add laptop ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGmY0fN5lE8XqXhcG0OB1oCw0SYqC0f6M1bM1jR5e9wz --on mac-mini'
+      exit: 2
+      stderr: |
+          Error: a device is added only from the Mac that lets it in, never through engine attach or --on
+          Hint: run station devices add on that Mac, with you at it
+    - command: 'devices --on mac-mini --json | /usr/bin/jq -c .devices'
+      exit: 0
+      stdout: |
+          []

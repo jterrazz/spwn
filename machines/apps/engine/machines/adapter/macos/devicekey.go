@@ -56,8 +56,10 @@ type DeviceKey struct {
 	within time.Duration
 	mu     sync.Mutex
 	// value: the blob as this process first read or made it, so the key it
-	// serves stays the key it listed.
+	// serves stays the key it listed, and its public half once the Enclave
+	// gave it: neither changes for the life of the process.
 	held []byte
+	pub  *ecdsa.PublicKey
 }
 
 func NewDeviceKey(files local.FS, state string, within time.Duration, access darwin.Access) *DeviceKey {
@@ -91,7 +93,7 @@ func (k *DeviceKey) blob(create bool) ([]byte, error) {
 		return blob, err
 	}
 	if !create {
-		return nil, errors.New("this Mac's device key is gone: " + file)
+		return nil, &goneError{file: file}
 	}
 	made, err := k.enclave.create(k.access)
 	if err != nil {
@@ -115,16 +117,42 @@ func (k *DeviceKey) blob(create bool) ([]byte, error) {
 }
 
 func (k *DeviceKey) Public(context.Context) (*ecdsa.PublicKey, error) {
-	blob, err := k.blob(true)
+	return k.public(true)
+}
+
+func (k *DeviceKey) Kept(context.Context) (*ecdsa.PublicKey, error) {
+	return k.public(false)
+}
+
+func (k *DeviceKey) public(create bool) (*ecdsa.PublicKey, error) {
+	blob, err := k.blob(create)
+	var gone *goneError
+	if errors.As(err, &gone) {
+		return nil, &contract.NoDeviceKeyError{Why: "none is kept yet in " + gone.file + "; the engine makes it at its start"}
+	}
 	if err != nil {
 		return nil, err
+	}
+	k.mu.Lock()
+	defer k.mu.Unlock()
+	if k.pub != nil {
+		return k.pub, nil
 	}
 	point, err := k.enclave.public(blob)
 	if err != nil {
 		return nil, refusal(err)
 	}
-	return ecdsa.ParseUncompressedPublicKey(elliptic.P256(), point)
+	pub, err := ecdsa.ParseUncompressedPublicKey(elliptic.P256(), point)
+	if err != nil {
+		return nil, err
+	}
+	k.pub = pub
+	return pub, nil
 }
+
+type goneError struct{ file string }
+
+func (e *goneError) Error() string { return "this Mac's device key is gone: " + e.file }
 
 func (k *DeviceKey) Sign(_ context.Context, message []byte) ([]byte, error) {
 	blob, err := k.blob(false)

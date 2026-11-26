@@ -5,6 +5,8 @@
 
 Amends [ADR-016](016-api-v2-and-remote-by-api.md), [ADR-064](064-a-key-never-leaves-its-device.md) and [ADR-074](074-a-far-station-answers-its-hello-within-5-seconds.md).
 
+Amended by [ADR-092](092-a-machines-device-book-says-who-may-reach-it.md): the gesture is `spwn devices add`, not `allow`, and `hello` is no channel.
+
 Accepted by the owner on 2026-11-24, on the owner's word, on one condition: nothing of it is built before the probes PT1 to PT5 and PH1 to PH3 pass.
 
 Amended by [ADR-096](096-spwn-is-one-app-its-menu-bar-notifications-and-engine-live-while-it-runs.md) (Proposed): the client's presence is asked once per Spwn launch, and the door is up while Spwn is open.

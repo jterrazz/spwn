@@ -1,0 +1,27 @@
+description: 'a book unreadable while the engine awaits its keychain refuses the read and add'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'devices add laptop ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGmY0fN5lE8XqXhcG0OB1oCw0SYqC0f6M1bM1jR5e9wz --channels pipe >/dev/null'
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].stores.devices_anchor_unreadable = true'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'world engine-crash macbook-pro'
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].stores.devices_unreadable = true'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'devices'
+      exit: 1
+      stderr: |
+          Error: cannot read "~/.local/state/station/devices.json": invalid character 'g' looking for beginning of value
+          Hint: repair the JSON of "~/.local/state/station/devices.json", or move it away to start afresh
+    - command: 'devices add phone ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGmY0fN5lE8XqXhcG0OB1oCw0SYqC0f6M1bM1jR5e9wz phone@home'
+      exit: 1
+      stderr: |
+          Error: cannot read ~/.local/state/station/devices.json: invalid character 'g' looking for beginning of value
+          Hint: station machines
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].stores | {devices: [.devices[] | .name], devices_generation, devices_unreadable}'' world.json'
+      exit: 0
+      stdout: |
+          {"devices":["laptop"],"devices_generation":1,"devices_unreadable":true}

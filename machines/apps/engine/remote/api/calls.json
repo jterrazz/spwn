@@ -357,6 +357,45 @@
       "out": "Task"
     },
     {
+      "name": "devices.add",
+      "schema": "station.devices.add/v1",
+      "where": "in-engine",
+      "errors": [
+        "devices.add-here-only",
+        "devices.bad-channels",
+        "devices.bad-key",
+        "devices.bad-name",
+        "devices.duplicate",
+        "devices.no-presence",
+        "devices.own-key",
+        "devices.presence-refused"
+      ],
+      "in": "AddIn",
+      "out": "Added",
+      "journal": true
+    },
+    {
+      "name": "devices.forget",
+      "schema": "station.devices.forget/v1",
+      "where": "in-engine",
+      "confirm": "forget-device",
+      "consequence": "%s can open no new login into this Mac's VMs; a session it already holds stays open, and a key of it in this Mac's ~/.ssh/authorized_keys still opens this Mac, and from this Mac its VMs. It is added again with its key and your presence.",
+      "errors": [
+        "confirm.mismatch",
+        "confirm.needed",
+        "devices.unknown"
+      ],
+      "in": "ForgetIn",
+      "out": "Forgotten",
+      "journal": true
+    },
+    {
+      "name": "devices.list",
+      "schema": "station.devices.list/v1",
+      "where": "at-target",
+      "out": "Listing"
+    },
+    {
       "name": "disk.erase",
       "schema": "station.disk.erase/v1",
       "section": "disk",

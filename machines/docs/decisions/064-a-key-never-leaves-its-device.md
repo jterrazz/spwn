@@ -3,6 +3,8 @@
 **Status:** Proposed
 **Date:** 2026-11-20
 
+Amended by [ADR-092](092-a-machines-device-book-says-who-may-reach-it.md): the `id_ed25519` line leaves guest trust; the relay of §4 stays until the door's cut.
+
 Amended by [ADR-090](090-a-machine-is-reached-through-its-engines-door-never-through-openssh.md): the door of its own this record refused is built, on `x/crypto/ssh` and serving no shell.
 
 Amended by [ADR-077](077-a-workspace-trusts-its-macs-device-key-first.md): a VM authorizes its Mac's device key.

@@ -6,6 +6,7 @@ runs:
       stdout: |
           overview
           machines
+          devices
           images
           engine
           apps

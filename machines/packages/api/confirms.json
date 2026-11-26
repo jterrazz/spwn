@@ -19,6 +19,11 @@
     "consequence": "%s leaves this machine; its data stays.",
     "form": "yes-no"
   },
+  "devices.forget": {
+    "confirm": "forget-device",
+    "consequence": "%s can open no new login into this Mac's VMs; a session it already holds stays open, and a key of it in this Mac's ~/.ssh/authorized_keys still opens this Mac, and from this Mac its VMs. It is added again with its key and your presence.",
+    "form": "type-name"
+  },
   "disk.erase": {
     "confirm": "erase",
     "consequence": "The data of %s is deleted for good.",

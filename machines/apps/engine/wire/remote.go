@@ -64,6 +64,9 @@ func (m machine) router(env kit.Env) *remote.Router {
 		Stopped: m.stopped,
 		Kept:    m.kept(),
 	})
+	if m.profile.Kind == coremachine.Computer {
+		r.WithEngine(m.bookWriter(), devicesWrites()...)
+	}
 	m.far.router = r
 	return r
 }
@@ -313,6 +316,9 @@ type door struct {
 	// value: the act board a guided call run at this door is kept on, as
 	// the engine socket keeps it; nil off a world's Mac.
 	acts serve.Acts
+	// value: the door serves another machine's frames (engine attach, the
+	// end of ssh): each frame it reads is marked far.
+	attached bool
 }
 
 func (s served) Guide(target coremachine.Ref, name string) (string, serve.Acts) {
@@ -364,6 +370,9 @@ func (s served) Watch(ctx context.Context, target coremachine.Ref, name string, 
 
 func serveFrames(env kit.Env, d door) func(ctx context.Context, in io.Reader, out io.Writer) error {
 	return func(ctx context.Context, in io.Reader, out io.Writer) error {
+		if d.attached {
+			ctx = call.WithFar(ctx)
+		}
 		r, _ := env.Calls.(*remote.Router)
 		return serve.Stream(ctx, in, out, served{r: r, door: d}, func(err error) *fail.Error { return kit.Translate(err, "") })
 	}
@@ -388,7 +397,7 @@ func (m machine) socketDoor() door {
 }
 
 func engineCommand(env kit.Env, m machine) *cobra.Command {
-	return engineNoun(env, m, engineRunCommand(env, m), engineattach.Command(engineattach.Deps{Serve: serveFrames(env, door{})}, env))
+	return engineNoun(env, m, engineRunCommand(env, m), engineattach.Command(engineattach.Deps{Serve: serveFrames(env, door{attached: true})}, env))
 }
 
 // value: a run that serves frames on its stdout: nothing else of it may write there.

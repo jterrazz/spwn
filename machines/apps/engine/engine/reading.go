@@ -20,6 +20,9 @@ type Reading struct {
 	// value: set while the engine is stopped by the owner: when, and by what.
 	Stopped StopMark
 	Agent   model.Agent
+	// value: how the running engine says its Mac's device book stands
+	// (Hello's BookState).
+	BookState BookState
 }
 
 func (r Reading) Skewed() bool {

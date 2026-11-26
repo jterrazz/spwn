@@ -17,6 +17,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/core/section"
 	"github.com/jterrazz/studio-station/apps/engine/core/store"
+	"github.com/jterrazz/studio-station/apps/engine/devices"
 	diskcalls "github.com/jterrazz/studio-station/apps/engine/disk/calls"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
 	enginecalls "github.com/jterrazz/studio-station/apps/engine/engine/calls"
@@ -271,6 +272,30 @@ func engineOf(head overview.Head, r *engine.Reading) (overview.Engine, []finding
 		return overview.EngineStopped, []finding.Finding{{Machine: mac, Section: section.Overview, Severity: finding.NeedsALook, Urgency: finding.Red, Subject: "engine",
 			Text: "Engine not installed", Fix: finding.Fix{Call: "engine.start"}}}
 	case machines.EngineRunning:
+	}
+	switch r.BookState {
+	case engine.BookChanged:
+		// invariant: a device book its engine did not write is never
+		// silent: it is a need, red, until each device is added again.
+		return overview.EngineRunning, []finding.Finding{{Machine: mac, Section: section.Overview, Severity: finding.Broken, Urgency: finding.Red, Subject: overview.DevicesSubject,
+			Text: devices.ChangedOutside, Fix: finding.Fix{Command: "station devices"}}}
+	case engine.BookUnchecked:
+		// invariant: a book its engine could not check yet is a need too,
+		// for it reaches no VM, in words that blame no one: the keychain
+		// to unlock.
+		return overview.EngineRunning, []finding.Finding{{Machine: mac, Section: section.Overview, Severity: finding.NeedsALook, Urgency: finding.Red, Subject: overview.DevicesSubject,
+			Text: devices.NotChecked, Fix: finding.Fix{Command: "station devices"}}}
+	case engine.BookUnreadable, engine.BookNewer:
+		// invariant: a book's file its engine cannot read, or a newer
+		// Spwn's book, is a need too, red, in its own words: adding again
+		// repairs neither.
+		text := devices.CannotRead
+		if r.BookState == engine.BookNewer {
+			text = devices.ByNewer
+		}
+		return overview.EngineRunning, []finding.Finding{{Machine: mac, Section: section.Overview, Severity: finding.Broken, Urgency: finding.Red, Subject: overview.DevicesSubject,
+			Text: text, Fix: finding.Fix{Command: "station devices"}}}
+	case engine.BookKept:
 	}
 	return overview.EngineRunning, nil
 }

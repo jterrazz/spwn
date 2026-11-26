@@ -2,14 +2,14 @@
 
 Every command of `station`, grouped as `station help` groups them: the four groups of [the grammar](../../../docs/reference/cli.md#the-help), of which the OS group holds no command yet, so the help does not draw it. The words are the [Glossary](../concepts/glossary.md)'s.
 
-| Section    | Answers                                                                                                            |
-| ---------- | ------------------------------------------------------------------------------------------------------------------ |
-| Rules      | What holds for every command                                                                                       |
-| Machine    | `machines`, `images`, `engine`, `apps`, `settings`, `disk`, `ports`, `accounts`, `background`, `awake`, `activity` |
-| Agent      | `agents`, `teams`, `automations`                                                                                   |
-| Spwn       | `overview`, `init`, `--version`, `use`, `journal`, `machinefile`, `help`                                           |
-| Plumbing   | The hidden commands the machine runs for itself                                                                    |
-| Exit codes | What 0, 1, 2 and 130 mean                                                                                          |
+| Section    | Answers                                                                                                                       |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| Rules      | What holds for every command                                                                                                  |
+| Machine    | `machines`, `devices`, `images`, `engine`, `apps`, `settings`, `disk`, `ports`, `accounts`, `background`, `awake`, `activity` |
+| Agent      | `agents`, `teams`, `automations`                                                                                              |
+| Spwn       | `overview`, `init`, `--version`, `use`, `journal`, `machinefile`, `help`                                                      |
+| Plumbing   | The hidden commands the machine runs for itself                                                                               |
+| Exit codes | What 0, 1, 2 and 130 mean                                                                                                     |
 
 ## Rules
 
@@ -55,6 +55,16 @@ station machines remind <mac>
 ```
 
 `--this-mac` lists This Mac only, without asking the other Macs. `unlock` is for a Mac waiting at FileVault after a power cut: a Mac that answers already says so (exit 0); otherwise it needs a terminal and dials the Mac on your LAN, at the address it last answered with (Tailscale starts only once its disk is unlocked), where you type the password into macOS's own pre-boot prompt, then waits for the Mac on Tailscale again. `wake` sends a Wake-on-LAN packet from this Mac to the hardware address the Mac's last answer said (a Mac that answers already says so, exit 0; one never heard has none, exit 1); `--tell` also tells you once, `mac_back`, the moment it answers again. `remind` is that ask alone (the menu bar's Tell me when it wakes): it sends nothing, so a Mac never heard can be asked too; one that answers already says so and nothing is armed. `restart <mac>` asks yes or no naming the VMs that pause, sends a planned restart that unlocks itself, waits for its station to answer again (`did not come back`, exit 1, past 3 minutes), starts those VMs again and says how they are. `create` makes an ephemeral workspace unless `--persistent` is given, or a server with `--server` (always on, named, behind its Mac, 4 CPU · 8 GB · 50 GB by default; `--check` is its health check, refused on a workspace); and asks the Mac on a terminal when two answer; piped it needs no question. An image not built on that Mac is built first, with no question, and the create says so on stderr before the build starts (`base-ubuntu is built first, which takes several minutes`). A new VM's name is one no Mac and no VM of any machine holds; a create with no name takes the first `<image>-<n>` free so. `stop` asks a workspace nothing and prints how to start it again (`station machines start <vm>`), and asks a server one yes or no that says what it serves stops (`--yes`, or its name with `--confirm=<name>`); the VM's own Mac judges the answer ([ADR-097](../decisions/097-a-confirmation-follows-its-consequence.md)). `add` writes the Mac's ssh block, then reaches it as every later call will, then writes the blocks of the VMs every Mac now holds, the new one's included: a Mac that does not answer, or answers with no station, is not added and nothing stays written; one that runs another station version is added, with how to bring the two to one. `delete` is the only verb that destroys a machine; `forget` only unregisters a Mac, here, whatever `--on` says: it never reaches that Mac, and refuses This Mac and a VM. VMs are made and run on Macs, so these commands are refused on a VM. `create`, `start`, `stop`, `restart`, `edit` and `delete` need the Mac's engine (`Hint: station engine start`). `log` prints the lines a VM's runs wrote, its console's then its hypervisor's own, on the VM's own Mac. `cleanup` deletes, after one yes or no, every ephemeral workspace of the Mac that is stopped (or only those named), each with its disk, its ports and its grants, and names the VMs still running, which stay; naming one that may not go is refused before any goes. `station machines <machine>` is that machine's Overview. `--network bridged` is for macOS VMs only. See [Machines](machines.md).
+
+### `station devices`
+
+```sh
+station devices [--json] # this Mac's own key, then the other devices it lets into its VMs
+station devices add <name> <public key> [--channels spwn-api,pipe,herdr]
+station devices forget <name> [--confirm=<name>]
+```
+
+The device book of this Mac, or with `--on` another Mac's; it reads with the engine down. `add` asks for you at this Mac every time and is refused from another machine (`devices.add-here-only`, exit 2); refused or with nobody to ask, it exits 1 and writes nothing. `forget` asks no presence and works with `--on`. An entry whose seal broke, or every entry of a book that is not the one this Mac last wrote, is listed apart with the command that adds it again. `--json` prints `station.devices.list/v1`. A VM keeps no book, so it is refused there. See [Machines](machines.md#the-device-book).
 
 ### `station images`
 

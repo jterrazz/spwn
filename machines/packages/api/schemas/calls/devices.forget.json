@@ -1,0 +1,46 @@
+{
+  "$defs": {
+    "devices.calls.ForgetIn": {
+      "additionalProperties": false,
+      "properties": {
+        "Confirm": {
+          "type": "string"
+        },
+        "Name": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "devices.calls.Forgotten": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/spwn/blob/main/machines/packages/api/schemas/calls/devices.forget.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call devices.forget of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/devices.calls.ForgetIn"
+    },
+    "out": {
+      "$ref": "#/$defs/devices.calls.Forgotten"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "devices.forget",
+  "type": "object"
+}

@@ -5,6 +5,8 @@
 
 Amends [ADR-064](064-a-key-never-leaves-its-device.md).
 
+Amended by [ADR-092](092-a-machines-device-book-says-who-may-reach-it.md): its VM half leaves; a VM trusts its Mac's device key and the device book's entries, never the Mac's `authorized_keys` or `id_ed25519.pub`.
+
 ## Context
 
 ADR-064 §3 makes every block on a Mac offer the device key first, and says nowhere that a VM authorizes it. The guest was told only of the Mac's `~/.ssh/id_ed25519.pub` and of every line of its `~/.ssh/authorized_keys`, the copy ADR-010 started. On a fresh Mac there is no `id_ed25519`: ssh offered the device key, the guest refused it, and `ssh <workspace>` answered `Permission denied (publickey,password)` (the new Mac mini, 2026-11-22).

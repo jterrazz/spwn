@@ -1,13 +1,14 @@
-description: 'a fresh Mac has no personal key: its VM trusts its device key'
+description: 'a fresh Mac: its VM trusts the device key the engine holds, and no device of a book never anchored'
 fixture:
     - ../../../__fixtures__/vms/
     - ./__fixtures__/fresh-mac/
+    - ./__fixtures__/book-mac/
 env: engine
 serve: sshd
 runs:
-    - command: '--version >/dev/null; /usr/bin/sed -i.bak ''s/"vm_user": "vmu"/"vm_user": "vmu", "ports": {"range": "42140-42159"}/'' .config/station/preferences.json; echo 2 > vm/boot-seconds; "$STATION" engine run 2>/dev/null & d=$!; n=0; while [ ! -S .local/state/station/engine.sock ] && [ $n -lt 50 ]; do /bin/sleep 0.1; n=$((n+1)); done; "$STATION" machines create --persistent --name api > /dev/null; /bin/cat vm/.ssh/authorized_keys; "$STATION" machines stop api --yes > /dev/null; kill $d; wait $d'
+    - command: '--version >/dev/null; /usr/bin/sed -i.bak ''s/"vm_user": "vmu"/"vm_user": "vmu", "ports": {"range": "42140-42159"}/'' .config/station/preferences.json; echo 2 > vm/boot-seconds; STATION_DEVICE_KEY_STUB="$HOME/device-key.pem" "$STATION" engine run 2>/dev/null & d=$!; n=0; while [ ! -S .local/state/station/engine.sock ] && [ $n -lt 50 ]; do /bin/sleep 0.1; n=$((n+1)); done; "$STATION" machines create --persistent --name api > /dev/null; /bin/cat vm/.ssh/authorized_keys; "$STATION" machines stop api --yes > /dev/null; kill $d; wait $d'
       exit: 0
       stdout: |
           # >>> station hosts >>>
-          ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBFixtureDeviceKeyOfTheSpecMac station device key
+          ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBEu8U5aPgjEyLIXKghN2Y17GTEUEQNIco+Ye2QlojicGAlebmpcPFd3X2dXI/LMuI/o0wN1LDrFXUe5ag87nyaM= station device key
           # <<< station hosts <<<

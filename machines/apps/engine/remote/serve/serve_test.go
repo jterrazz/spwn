@@ -107,6 +107,30 @@ func TestARefusalComesBackAsTheErrorItWasRaisedAs(t *testing.T) {
 	}
 }
 
+// value: an adapter's error that carries its own words and repair.
+type worded struct{}
+
+func (worded) Error() string { return "the keychain is locked" }
+func (worded) Unwrap() error {
+	return &fail.Said{Message: "the keychain is locked", Hint: "unlock it, then run it again"}
+}
+
+func TestAnErrorThatSaysItsRepairKeepsItOverTheSocket(t *testing.T) {
+	read := call.Bind(call.Call[struct{}, struct{}, struct{}]{
+		Name: "devices.forget", Where: call.InEngine, Applies: machine.Anywhere,
+		Run: func(context.Context, struct{}, struct{}, call.Progress) (struct{}, error) {
+			return struct{}{}, worded{}
+		},
+	}, struct{}{})
+	s := serve.Server{Calls: func(name string) (call.Handler, bool) { return read, name == "devices.forget" }, ThisMachine: laptop, Hint: "station machines"}
+	err := dialed(t.Context(), s).Call(t.Context(), "devices.forget", machine.Ref{}, struct{}{}, nil, nil)
+	var e *fail.Error
+	var said *fail.Said
+	if !errors.As(err, &e) || e.Hint == s.Hint || !errors.As(err, &said) || said.Message != "the keychain is locked" || said.Hint != "unlock it, then run it again" {
+		t.Fatalf("a worded error over the socket: %#v, want its own words and repair, never the server's default hint", err)
+	}
+}
+
 func TestALineThatIsNoFrameIsRefusedAndTheConnectionAnswersTheNext(t *testing.T) {
 	inR, inW := io.Pipe()
 	outR, outW := io.Pipe()
@@ -394,5 +418,79 @@ func TestAWatchOverTheSocketEndsOnItsDoneBeforeItsConnectionCloses(t *testing.T)
 	}
 	if want := []string{`1 "pending"`, `1 "whole"`, "1 done"}; strings.Join(got, ",") != strings.Join(want, ",") {
 		t.Fatalf("the socket answered %v, want %v: a client cannot tell a watch's end from a dropped connection", got, want)
+	}
+}
+
+func TestAFrameMaySetTheFarMarkAndNeverClearIt(t *testing.T) {
+	run := func(ctx context.Context, frame string) bool {
+		var far bool
+		registry, err := call.NewRegistry([]call.Handler{call.Bind(call.Call[struct{}, struct{}, struct{}]{
+			Name: "ports.declare", Where: call.AtTarget, Applies: machine.Anywhere,
+			Run: func(ctx context.Context, _ struct{}, _ struct{}, _ call.Progress) (struct{}, error) {
+				far = call.Far(ctx)
+				return struct{}{}, nil
+			},
+		}, struct{}{})})
+		if err != nil {
+			t.Fatal(err)
+		}
+		in := `{"v":2,"id":"1","call":"ports.declare"` + frame + "}\n"
+		var out strings.Builder
+		if err := serve.Stream(ctx, strings.NewReader(in), &out, serve.Local(registry, laptop, "v0.21.0"), func(error) *fail.Error { return nil }); err != nil {
+			t.Fatal(err)
+		}
+		return far
+	}
+	if run(t.Context(), "") {
+		t.Fatal("a local frame that says nothing ran far")
+	}
+	if !run(t.Context(), `,"far":true`) {
+		t.Fatal("a frame marked far ran here")
+	}
+	if !run(call.WithFar(t.Context()), `,"far":false`) {
+		t.Fatal("a frame cleared the mark its transport gave")
+	}
+	if !run(call.WithFar(t.Context()), "") {
+		t.Fatal("a frame read from afar lost its mark")
+	}
+}
+
+func TestTheSocketMarksAFrameFarWhenItSaysSo(t *testing.T) {
+	run := func(frame string) (called, watched bool) {
+		ran := call.Bind(call.Call[struct{}, struct{}, struct{}]{
+			Name: "devices.add", Where: call.InEngine, Applies: machine.Anywhere,
+			Run: func(ctx context.Context, _ struct{}, _ struct{}, _ call.Progress) (struct{}, error) {
+				called = call.Far(ctx)
+				return struct{}{}, nil
+			},
+		}, struct{}{})
+		watch := call.BindWatch(call.Watch[struct{}, struct{}, struct{}]{
+			Name: "devices.watch", Where: call.AtTarget, Applies: machine.Anywhere,
+			Run: func(ctx context.Context, _ struct{}, _ struct{}, _ call.Progress) (<-chan call.Update[struct{}], error) {
+				watched = call.Far(ctx)
+				out := make(chan call.Update[struct{}])
+				close(out)
+				return out, nil
+			},
+		}, struct{}{})
+		s := serve.Server{ThisMachine: laptop, Calls: func(name string) (call.Handler, bool) {
+			switch name {
+			case "devices.add":
+				return ran, true
+			case "devices.watch":
+				return watch, true
+			}
+			return nil, false
+		}}
+		var out strings.Builder
+		s.Conn(t.Context(), pipe{Reader: strings.NewReader(`{"v":2,"id":"1","call":"devices.add"` + frame + "}\n"), Writer: &out})
+		s.Conn(t.Context(), pipe{Reader: strings.NewReader(`{"v":2,"id":"2","watch":"devices.watch"` + frame + "}\n"), Writer: &out})
+		return called, watched
+	}
+	if called, watched := run(""); called || watched {
+		t.Fatalf("a frame that says nothing ran far: call %v, watch %v", called, watched)
+	}
+	if called, watched := run(`,"far":true`); !called || !watched {
+		t.Fatalf("a frame marked far ran here: call %v, watch %v", called, watched)
 	}
 }

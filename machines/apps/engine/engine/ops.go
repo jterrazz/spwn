@@ -23,6 +23,31 @@ type Hello struct {
 	// station, as the engine last read it; empty where it cannot tell.
 	LocalNetwork model.LocalNetwork `json:"local_network,omitempty"`
 	Agent        model.Agent        `json:"agent,omitzero"`
+	// value: the head of the device book this engine holds,
+	// "<generation> <digest>", the one it read first or wrote last, "0 "
+	// for a book never written; empty before it read the book, and on a
+	// machine with none.
+	Book string `json:"book,omitempty"`
+	// value: how the book on disk stands with the head this engine holds:
+	// empty when it is that one; changed outside Spwn, or not checked yet
+	// for a login keychain unreadable since the engine started; or its file
+	// unreadable, or written by a newer Spwn, refused and written over by
+	// nothing; any way trusted for nothing.
+	BookState BookState `json:"book_state,omitempty"`
+}
+
+type BookState string
+
+const (
+	BookKept       BookState = ""
+	BookChanged    BookState = "changed"
+	BookUnchecked  BookState = "unchecked"
+	BookUnreadable BookState = "unreadable"
+	BookNewer      BookState = "newer"
+)
+
+func (BookState) Enum() []string {
+	return []string{string(BookKept), string(BookChanged), string(BookUnchecked), string(BookUnreadable), string(BookNewer)}
 }
 
 type VMView struct {

@@ -1,0 +1,12 @@
+mac-mini
+  key  SHA256:GEYRWz+2psSUXNZ4oViX+9301BOK1gUENHLS5F0QCo4
+May reach mac-mini
+                 key                          may open               added
+  ● macbook-pro  SHA256:cT5hNh5Eo/0cBgMbx4J…  spwn-api, pipe, herdr  2026-10-31
+  ● phone        SHA256:Qm3vLx9rT2kPz8YwHc1…  pipe                   2026-10-31
+Seal broken: reaches nothing
+                key                                        may open  added
+  ✗ old-laptop  SHA256:8b0p1yQ7cE2wR5tV9xZ3aS6dF4gH1jK0l…  pipe      2026-10-21
+    → station devices add old-laptop <its key> --channels pipe
+
+→ station devices --json  the key line another device adds is its key

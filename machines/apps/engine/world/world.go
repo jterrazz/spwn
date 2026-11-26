@@ -16,6 +16,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/journal"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
+	"github.com/jterrazz/studio-station/apps/engine/devices"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
 	"github.com/jterrazz/studio-station/apps/engine/images"
 	"github.com/jterrazz/studio-station/apps/engine/machinefile"
@@ -226,6 +227,10 @@ type Mac struct {
 	// value: the hardware address each Wake-on-LAN packet this Mac sent
 	// named, in order.
 	WakeSent []string `json:"wake_sent,omitempty"`
+	// value: how this Mac's presence check answers whatever asks it (a
+	// grant, a device added): empty says yes, refused says no, absent has no
+	// way to ask.
+	Presence string `json:"presence,omitempty"`
 	// value: how this Mac stands with macOS's Local Network approval of
 	// station; empty, a read that cannot tell. While not approved, its
 	// engine's dial to any of its VMs is refused.
@@ -385,6 +390,18 @@ type Stores struct {
 	AutomationManifestErrors map[string]string `json:"automation_manifest_errors,omitempty"`
 	// value: how many lines of a project's receipts file are no receipt, by its root.
 	AutomationUnreadable map[string]int `json:"automation_unreadable,omitempty"`
+	// value: the other devices this Mac lets reach it, its device book,
+	// and the change that wrote it.
+	Devices           []devices.Device `json:"devices,omitempty"`
+	DevicesGeneration int              `json:"devices_generation,omitempty"`
+	// value: the book's file does not parse: a reader sees a file of that
+	// name and never a book, until a change writes it again.
+	DevicesUnreadable bool `json:"devices_unreadable,omitempty"`
+	// value: the book's head as this Mac's login keychain keeps it,
+	// "<generation> <digest>"; empty, none kept. Unreadable fails every
+	// read of it, as a locked keychain does.
+	DevicesAnchor           string `json:"devices_anchor,omitempty"`
+	DevicesAnchorUnreadable bool   `json:"devices_anchor_unreadable,omitempty"`
 }
 
 func (m *Mac) Store() *Stores {
@@ -414,6 +431,10 @@ type Engine struct {
 	Memory engine.Memory `json:"memory,omitempty"`
 	// value: what the engine holds of Awake between two commands.
 	Awake *engine.AwakeKept `json:"awake,omitempty"`
+	// value: what the engine holds of its Mac's device book in its memory
+	// between two commands, from its start read on; its successor after a
+	// restart reads it again.
+	Book *devices.Hold `json:"book,omitempty"`
 	// value: what the exposure job knows between two commands.
 	Exposure *engine.ExposureKept `json:"exposure,omitempty"`
 	// value: the activity the engine holds in its memory between two

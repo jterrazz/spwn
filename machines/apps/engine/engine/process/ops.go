@@ -31,7 +31,11 @@ func (d *Engine) Hello() engine.Hello {
 	d.mu.Lock()
 	ln, agent := d.localNetwork, d.agent
 	d.mu.Unlock()
-	return engine.Hello{Version: d.o.Version, Page: d.o.Page, PID: d.o.PID, StartedAt: d.started, Executable: d.o.Executable, Abilities: d.o.Abilities, LocalNetwork: ln, Agent: agent}
+	h := engine.Hello{Version: d.o.Version, Page: d.o.Page, PID: d.o.PID, StartedAt: d.started, Executable: d.o.Executable, Abilities: d.o.Abilities, LocalNetwork: ln, Agent: agent}
+	if d.o.Book != nil {
+		h.Book, h.BookState = d.o.Book()
+	}
+	return h
 }
 
 func (d *Engine) VMs() []engine.VMView { return d.vmViews() }

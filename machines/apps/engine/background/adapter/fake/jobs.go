@@ -105,7 +105,7 @@ func (j *Jobs) run(on bool) {
 		m.Engine = &world.Engine{Stopped: true}
 	}
 	if on && m.Engine.Stopped {
-		m.Engine.StartedAt = j.w.Now
+		m.Engine.StartedAt, m.Engine.Book = j.w.Now, nil
 	}
 	m.Engine.Stopped = !on
 }

@@ -13,11 +13,11 @@ import (
 // its book in the book's store; grants reach a VM through the guest given,
 // the socket's for a call, the engine's own for its expiry.
 func (m machine) vaultKept(guest localGuest) *keychain.Kept {
-	return keychain.NewKept(m.sys.Run, m.stores.book, keychain.Options{Mac: m.where.Machine, Now: m.sys.Clock.Now}, keychain.GrantDeps{Guest: grantGuest{guest}, Machines: m.grantMachines, Presence: askPresence})
+	return keychain.NewKept(m.sys.Run, m.stores.book, keychain.Options{Mac: m.where.Machine, Now: m.sys.Clock.Now, Root: securityRoot(m.vars)}, keychain.GrantDeps{Guest: grantGuest{guest}, Machines: m.grantMachines, Presence: askPresence})
 }
 
-func askPresence(_ context.Context, reason string) keychain.Answer {
-	switch darwin.AskPresence(reason, keychain.PresenceBudget) {
+func askPresence(ctx context.Context, reason string) keychain.Answer {
+	switch askedPresence(ctx, reason) {
 	case darwin.PresenceGiven:
 		return keychain.Given
 	case darwin.PresenceRefused:

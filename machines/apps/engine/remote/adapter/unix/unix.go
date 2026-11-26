@@ -63,7 +63,7 @@ func (e endpoint) Hello(context.Context) (contract.Hello, error) { return e.this
 func (e endpoint) Close() error { return nil }
 
 func (e endpoint) Invoke(ctx context.Context, target machine.Ref, name string, in json.RawMessage, p call.Progress) (json.RawMessage, error) {
-	frames, err := e.exchange(ctx, target, api.Frame{Call: name, Target: api.TargetOf(target), In: in})
+	frames, err := e.exchange(ctx, target, api.Frame{Call: name, Target: api.TargetOf(target), In: in, By: api.ByOf(ctx), Far: call.Far(ctx)})
 	if err != nil {
 		return nil, err
 	}
@@ -81,7 +81,7 @@ func (e endpoint) Invoke(ctx context.Context, target machine.Ref, name string, i
 }
 
 func (e endpoint) Watch(ctx context.Context, target machine.Ref, name string, in json.RawMessage, p call.Progress) (<-chan call.Update[json.RawMessage], error) {
-	frames, err := e.exchange(ctx, target, api.Frame{Watch: name, Target: api.TargetOf(target), In: in})
+	frames, err := e.exchange(ctx, target, api.Frame{Watch: name, Target: api.TargetOf(target), In: in, By: api.ByOf(ctx), Far: call.Far(ctx)})
 	if err != nil {
 		return nil, err
 	}

@@ -12,6 +12,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/remote/adapter/unix"
+	"github.com/jterrazz/studio-station/apps/engine/remote/api"
 	"github.com/jterrazz/studio-station/apps/engine/remote/contract"
 	"github.com/jterrazz/studio-station/apps/engine/remote/contract/contracttest"
 	"github.com/jterrazz/studio-station/apps/engine/remote/serve"
@@ -166,5 +167,20 @@ func TestAGuestThatLacksAnAbilityTheInputAsksIsRefusedBeforeTheRequestReachesIt(
 	}
 	if len(e.stdin) != 1 || strings.Contains(e.stdin[0], "apps.install") {
 		t.Errorf("the guest that lacks the ability was sent %q, want its hello alone", e.stdin)
+	}
+}
+
+func TestAFarMarkAndTheSessionRideTheHopIntoTheGuest(t *testing.T) {
+	e := &engine{vm: serve.Local(contracttest.Far(), contracttest.Mini, contracttest.Version)}
+	ep, _ := unix.New(e, func() contract.Hello { return contract.Hello{Version: contracttest.Version} }, nil, nil).Dial(t.Context(), "macbook-pro")
+	ctx := call.WithBy(call.WithFar(t.Context()), "review-1")
+	_, _ = ep.Invoke(ctx, machine.Ref{Name: "linux-1"}, "apps.install", nil, nil)
+	_, _ = ep.Watch(ctx, machine.Ref{Name: "linux-1"}, "apps.install", nil, nil)
+	for _, i := range []int{1, 3} {
+		var sent api.Frame
+		lines := strings.Split(strings.TrimSpace(e.stdin[i]), "\n")
+		if len(lines) != 2 || json.Unmarshal([]byte(lines[1]), &sent) != nil || !sent.Far || sent.By != "review-1" {
+			t.Errorf("the frame into the guest %q; want it marked far, by review-1", e.stdin[i])
+		}
 	}
 }

@@ -19,6 +19,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/call/lanes"
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 	coremachine "github.com/jterrazz/studio-station/apps/engine/core/machine"
+	"github.com/jterrazz/studio-station/apps/engine/engine"
 	"github.com/jterrazz/studio-station/apps/engine/engine/process"
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/output"
@@ -160,7 +161,7 @@ func Build(args, env []string, stdin, stdout, stderr *os.File) (p *Program, exit
 		return appsinstall.Run(ctx, appsinstall.Deps{ThisMachine: thisMac.where, Now: thisMac.sys.Clock.Now}, kenv, []string{pkg}, o)
 	}
 	if session != nil {
-		world.engineFrom(func() *process.Engine { return thisMac.engine(kenv) })
+		world.engineFrom(func() *process.Engine { return thisMac.startedEngine(kenv) })
 		session.farFrom(func(w *worldMac) farMac { return thisMac.farMac(kenv, w) })
 	}
 	kenv.On.Refresh = func(ctx context.Context) error {
@@ -174,6 +175,7 @@ func Build(args, env []string, stdin, stdout, stderr *os.File) (p *Program, exit
 
 	commands := []*cobra.Command{
 		machinesCommand(kenv, thisMac),
+		devicesCommand(kenv, thisMac),
 		imagesCommand(kenv, thisMac),
 		engineCommand(kenv, thisMac),
 		appsCommand(kenv, thisMac),
@@ -341,6 +343,8 @@ type machine struct {
 	sleep *sleepTimer
 	where page.Context
 	named func() string
+	// value: this process's one device key, made at its first ask.
+	key *heldKey
 }
 
 func resolve(raw local.System, door darwin.Door, vars map[string]string, world *worldMac, cat catalog.Catalog) machine {
@@ -349,7 +353,7 @@ func resolve(raw local.System, door darwin.Door, vars map[string]string, world *
 		h = world.system(raw, cat)
 	}
 	paths := pathsOf(h.Env.Home(), vars)
-	st := newStores(h.FS, paths)
+	st := newStores(h.FS, paths, deviceAnchor(h, vars), enginePeer{socketAPI(h, engine.SocketPath(paths.State))})
 	if world != nil {
 		world.logAt(paths.State)
 		world.stores(st)
@@ -371,6 +375,7 @@ func resolve(raw local.System, door darwin.Door, vars map[string]string, world *
 		vars:   vars,
 		paths:  paths,
 		stores: st,
+		key:    &heldKey{},
 	}
 	pin := vars["STATION_MACHINE_KIND"]
 	self := selfOf(h, pin)
@@ -424,8 +429,10 @@ func (m machine) or(name, fallback string) string {
 // value: the root absolute catalogue paths (/Applications, /opt/homebrew,
 // /Library, /usr/local) are read under; the spec harness points it into the
 // sandbox.
-func (m machine) systemRoot() string {
-	if r := m.vars["STATION_SYSTEM_ROOT"]; filepath.IsAbs(r) {
+func (m machine) systemRoot() string { return systemRootOf(m.vars) }
+
+func systemRootOf(vars map[string]string) string {
+	if r := vars["STATION_SYSTEM_ROOT"]; filepath.IsAbs(r) {
 		return r
 	}
 	return ""

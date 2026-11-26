@@ -23,11 +23,13 @@ const (
 	// value: a password leaves this Mac's vault, and the grants made from it end.
 	RemovePassword Action = "remove-password"
 	// value: a grant ends; the password stays in the vault.
-	RemoveGrant   Action = "remove-grant"
-	Undeclare     Action = "undeclare"
-	OffHere       Action = "off-here"
-	Overwrite     Action = "overwrite"
-	Forget        Action = "forget"
+	RemoveGrant Action = "remove-grant"
+	Undeclare   Action = "undeclare"
+	OffHere     Action = "off-here"
+	Overwrite   Action = "overwrite"
+	Forget      Action = "forget"
+	// value: a device leaves this Mac's device book.
+	ForgetDevice  Action = "forget-device"
 	DeleteImage   Action = "delete-image"
 	RestartMac    Action = "restart-mac"
 	RestartServer Action = "restart-server"
@@ -110,7 +112,7 @@ const (
 
 func Actions() []Action {
 	return []Action{Install, Share, Start, Restart, Edit, Remove, StopSharing, SignOut, RemovePassword, RemoveGrant, Undeclare, OffHere,
-		Overwrite, Forget, DeleteImage, RestartMac, RestartServer, StopEngine, Stop, Delete, DeleteAgent, Erase, BuildImage, Cleanup, FreeUnused, Relocate}
+		Overwrite, Forget, ForgetDevice, DeleteImage, RestartMac, RestartServer, StopEngine, Stop, Delete, DeleteAgent, Erase, BuildImage, Cleanup, FreeUnused, Relocate}
 }
 
 func ConsequenceOf(a Action, k machine.Kind, facts ...Fact) Consequence {
@@ -143,7 +145,7 @@ func ConsequenceOf(a Action, k machine.Kind, facts ...Fact) Consequence {
 		return Destroys
 	case Remove, SignOut, RemovePassword, RemoveGrant, Overwrite, Forget, DeleteImage, RestartMac, StopEngine, Cleanup, FreeUnused:
 		return StopsOthers
-	case Erase, DeleteAgent:
+	case Erase, DeleteAgent, ForgetDevice:
 	}
 	return Destroys
 }
@@ -243,6 +245,8 @@ func (a Action) Consequence() string {
 		return "Your value of %s is replaced by the one the file asks."
 	case Forget:
 		return "%s leaves your machines; nothing on it changes."
+	case ForgetDevice:
+		return "%s can open no new login into this Mac's VMs; a session it already holds stays open, and a key of it in this Mac's ~/.ssh/authorized_keys still opens this Mac, and from this Mac its VMs. It is added again with its key and your presence."
 	case DeleteImage:
 		return "%s is deleted; the next create that needs it builds it again."
 	case RestartMac:

@@ -1,0 +1,11 @@
+description: 'a Mac with no device added lets no other device reach it, and shows its own key'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out | {mac, key: (.key | split(" ") | .[0]), devices, broken}'''
+      stdin: |
+          {"v":2,"id":"1","call":"devices.list","in":{}}
+      exit: 0
+      stdout: |
+          {"mac":"macbook-pro","key":"ecdsa-sha2-nistp256","devices":[],"broken":[]}

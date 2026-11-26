@@ -18,9 +18,27 @@ type sockets struct{}
 type listener struct {
 	l    net.Listener
 	sock string
+	// value: on a unix socket, the uid every peer must run as, this
+	// process's; -1 on TCP, which asks none.
+	uid int
 }
 
-func (l listener) Accept() (Conn, error) { return l.l.Accept() }
+func (l listener) Accept() (Conn, error) {
+	// invariant: a unix socket serves this process's own user, and root,
+	// which reaches whatever that user does anyway, alone: a peer of any
+	// other uid, or one whose uid cannot be read, is closed at accept and
+	// never read from.
+	for {
+		c, err := l.l.Accept()
+		if err != nil || l.uid < 0 {
+			return c, err
+		}
+		if uid, ok := uidOf(c); ok && (uid == l.uid || uid == 0) {
+			return c, nil
+		}
+		_ = c.Close()
+	}
+}
 func (l listener) Close() error {
 	err := l.l.Close()
 	if l.sock != "" {
@@ -66,6 +84,26 @@ func viaShort(path string, call func(string) error) error {
 }
 
 func (sockets) ListenUnix(path string) (Listener, error) {
+	return listenUnix(path, os.Getuid())
+}
+
+func listenUnix(path string, uid int) (Listener, error) {
+	// invariant: a unix socket is bound in a folder of mode 0700, made or
+	// set so first, so no other user reaches it between its bind and its
+	// own chmod to 0600.
+	dir := filepath.Dir(path)
+	if err := os.MkdirAll(dir, 0o700); err != nil {
+		return nil, err
+	}
+	folder, err := os.Open(dir)
+	if err != nil {
+		return nil, err
+	}
+	err = folder.Chmod(0o700)
+	_ = folder.Close()
+	if err != nil {
+		return nil, err
+	}
 	var l net.Listener
 	if err := viaShort(path, func(p string) (err error) {
 		l, err = net.Listen("unix", p)
@@ -81,7 +119,7 @@ func (sockets) ListenUnix(path string) (Listener, error) {
 	if len(path) >= sunPathMax {
 		sock = path
 	}
-	return listener{l: l, sock: sock}, nil
+	return listener{l: l, sock: sock, uid: uid}, nil
 }
 
 func (sockets) DialTCP(ctx context.Context, address string, timeout time.Duration) (net.Conn, error) {
@@ -110,7 +148,7 @@ func (sockets) ListenTCP(ip string, port int) (Listener, error) {
 	if err != nil {
 		return nil, err
 	}
-	return listener{l: l}, nil
+	return listener{l: l, uid: -1}, nil
 }
 
 func (sockets) SendUDP(ctx context.Context, address string, payload []byte) error {

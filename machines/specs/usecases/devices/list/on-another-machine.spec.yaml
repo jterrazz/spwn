@@ -1,0 +1,9 @@
+description: 'the device book of another Mac is read from this one'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'devices --on mac-mini --json | /usr/bin/jq -c ''{schema, mac, key: (.key | split(" ") | .[0]), devices, broken}'''
+      exit: 0
+      stdout: |
+          {"schema":"station.devices.list/v1","mac":"mac-mini","key":"ecdsa-sha2-nistp256","devices":[],"broken":[]}

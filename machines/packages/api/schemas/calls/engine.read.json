@@ -13,6 +13,16 @@
             "null"
           ]
         },
+        "BookState": {
+          "enum": [
+            "",
+            "changed",
+            "unchecked",
+            "unreadable",
+            "newer"
+          ],
+          "type": "string"
+        },
         "State": {
           "enum": [
             "running",
@@ -40,6 +50,7 @@
       "required": [
         "Agent",
         "AwakeUntil",
+        "BookState",
         "State",
         "Station",
         "Stopped",

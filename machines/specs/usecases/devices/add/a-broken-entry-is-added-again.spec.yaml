@@ -1,0 +1,25 @@
+description: 'a device whose seal broke is added again with the owner present'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out.name else .error | {code, subject} end'''
+      stdin: |
+          {"v":2,"id":"1","call":"devices.add","in":{"Name":"laptop","Key":"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGmY0fN5lE8XqXhcG0OB1oCw0SYqC0f6M1bM1jR5e9wz","Channels":["pipe"]}}
+      exit: 0
+      stdout: |
+          "laptop"
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].stores.devices[0].channels = ["herdr","pipe","spwn-api"]'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out.name else .error | {code, subject} end'''
+      stdin: |
+          {"v":2,"id":"1","call":"devices.add","in":{"Name":"laptop","Key":"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGmY0fN5lE8XqXhcG0OB1oCw0SYqC0f6M1bM1jR5e9wz","Channels":["pipe"]}}
+      exit: 0
+      stdout: |
+          "laptop"
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out | {devices: [.devices[] | [.name, .channels]], broken: [.broken[] | .name]}'''
+      stdin: |
+          {"v":2,"id":"1","call":"devices.list","in":{}}
+      exit: 0
+      stdout: |
+          {"devices":[["laptop",["pipe"]]],"broken":[]}

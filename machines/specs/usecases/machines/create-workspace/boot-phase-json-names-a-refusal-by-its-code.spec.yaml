@@ -13,7 +13,7 @@ runs:
       exit: 0
     - command: 'images build studio-linux --binary $HOME/station-linux >/dev/null'
       exit: 0
-    - command: '--version >/dev/null; /usr/bin/jq ''.macs["web"] = .macs["linux-1"] | .macs["macbook-pro"].accounts.presence = "refused"'' world.json > w.json && /bin/mv w.json world.json'
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["web"] = .macs["linux-1"] | .macs["macbook-pro"].presence = "refused"'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
     - command: 'machines create --memory 4G web --from studio-linux --json | /usr/bin/jq -c .boot.grants'
       exit: 0

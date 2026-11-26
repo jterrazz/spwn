@@ -39,6 +39,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 
+	devicescontract "github.com/jterrazz/studio-station/apps/engine/devices/contract"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
 	enginelog "github.com/jterrazz/studio-station/apps/engine/engine/adapter/log"
 	enginecalls "github.com/jterrazz/studio-station/apps/engine/engine/calls"
@@ -113,9 +114,10 @@ func (m machine) engine(env kit.Env) *process.Engine {
 	}
 	jobs := append([]process.Tick{sample.Run}, m.macJobs(calls)...)
 	state := m.readers(calls, report, func() awake.View { return d.AwakeView() })
-	var deviceKey string
+	var deviceKey func() string
+	var book func() (string, engine.BookState)
 	if m.profile.Kind == coremachine.Computer {
-		deviceKey = DeviceKeyFile(m.paths.State)
+		deviceKey, book = m.deviceKeyLine, m.heldBook
 	}
 	d = process.New(engineMac{m.sys}, engineHypervisor{m.hypervisor()}, guests, m.machines(false), tailnet, process.Stores{Ports: m.stores.ports(), Reservations: m.stores.reservations}, process.Options{
 		Remember: func(vm string, port int, stopped bool) error {
@@ -124,7 +126,7 @@ func (m machine) engine(env kit.Env) *process.Engine {
 		ForgetStops: func(vms []string) error {
 			return portscalls.ForgetStopsBut(m.stores.ports(), vms)
 		},
-		State: m.paths.State, DeviceKey: deviceKey, Agent: m.agentOpener(), ThisMachine: m.kind, Ports: m.cat.Ports(), Rights: m.portRights, Installs: m.vmInstalls, Mounts: m.vmMounts, KindOf: m.vmKind, Version: m.engineVersion(), Abilities: m.engineAbilities(), Page: page.Revision, StartedAt: m.engineStarted(), PID: os.Getpid(), GuestPort: m.guestPort(),
+		State: m.paths.State, DeviceKey: deviceKey, BookKeys: m.pipeKeys(), Book: book, Agent: m.agentOpener(), ThisMachine: m.kind, Ports: m.cat.Ports(), Rights: m.portRights, Installs: m.vmInstalls, Mounts: m.vmMounts, KindOf: m.vmKind, Version: m.engineVersion(), Abilities: m.engineAbilities(), Page: page.Revision, StartedAt: m.engineStarted(), PID: os.Getpid(), GuestPort: m.guestPort(),
 		Power: m.powerPort, KeepAwakePage: m.keepAwakePage, Executable: m.sys.Env.Executable(), Records: m.engineRecords(), Commands: local.Ran,
 		NeverSleeps: func() bool { on, _ := m.stores.neverSleeps().Get(); return on },
 		GrantsOwed:  owed, Peer: m.engineAPI(),
@@ -312,7 +314,27 @@ func (m machine) engineStarted() time.Time {
 }
 
 func engineRunCommand(env kit.Env, m machine) *cobra.Command {
-	return enginerun.Command(enginerun.Deps{Engine: m.engine(env)}, env)
+	return enginerun.Command(enginerun.Deps{Engine: soleEngine{Engine: m.engine(env), book: m.stores.devices}}, env)
+}
+
+// invariant: the process that runs the engine is the device book's only
+// writer from its start: it reads the book and its anchor once, before it
+// serves, and believes nothing but its own writes after.
+type soleEngine struct {
+	enginerun.Engine
+	book devicescontract.Store
+}
+
+func (e soleEngine) Run(ctx context.Context, note func(string)) error {
+	e.book.Sole(ctx)
+	return e.Engine.Run(ctx, note)
+}
+
+// invariant: a world's engine starts as the real one does: its start read
+// of the device book is taken before it serves.
+func (m machine) startedEngine(env kit.Env) *process.Engine {
+	m.stores.devices.Sole(context.Background())
+	return m.engine(env)
 }
 
 // invariant: the retry job takes out the removals a grant still owes a

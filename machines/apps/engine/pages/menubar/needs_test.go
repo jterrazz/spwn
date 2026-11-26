@@ -10,6 +10,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/finding"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/core/section"
+	"github.com/jterrazz/studio-station/apps/engine/devices"
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/overview"
 	"github.com/jterrazz/studio-station/apps/engine/page"
@@ -221,5 +222,55 @@ func TestARefusedFileOfTheOwnerIsUpkeepNamingItsFileAndLine(t *testing.T) {
 	if n.Hero != "A file of yours is refused on This Mac" || n.Verb.Label != VerbShow ||
 		!slices.Equal(n.Detail, []string{"~/.config/station/catalog/apps/jq.yaml:3: unknown key", "fix ~/.config/station/catalog/apps/jq.yaml: Machines reads the built-in packages meanwhile"}) {
 		t.Errorf("the refused file says %q, %q, %q", n.Hero, n.Verb.Label, n.Detail)
+	}
+}
+
+func TestADeviceBookNotCheckedYetIsANeedSayingTheKeychainToUnlock(t *testing.T) {
+	r := needsFleet()
+	r.Overviews[0].Needs = []overview.Need{{Machine: needsPro, Section: section.Overview, Severity: finding.NeedsALook, Subject: overview.DevicesSubject, Text: devices.NotChecked}}
+	needs, _ := needsOf(r, needsPro)
+	i := slices.IndexFunc(needs, func(n Need) bool { return n.Subject == "This Mac" && n.Hero == devices.NotChecked })
+	if i < 0 {
+		t.Fatalf("needs %d; want the book not checked yet among what needs you", len(needs))
+	}
+	if n := needs[i]; !slices.Equal(n.Detail, []string{devices.NotCheckedWhy, devices.NotCheckedRepair}) || n.Finding.Severity != finding.NeedsALook {
+		t.Errorf("the unchecked book says %q, %v; want the keychain to unlock, blaming no one", n.Detail, n.Finding.Severity)
+	}
+}
+
+func TestADeviceBookItsEngineCannotReadIsANeedSayingWhyAndNoAdd(t *testing.T) {
+	for hero, detail := range map[string][]string{
+		devices.CannotRead: {devices.CannotReadWhy, devices.CannotReadRepair},
+		devices.ByNewer:    {devices.ByNewerWhy, devices.ByNewerRepair},
+	} {
+		r := needsFleet()
+		r.Overviews[0].Needs = []overview.Need{{Machine: needsPro, Section: section.Overview, Broken: true, Severity: finding.Broken, Subject: overview.DevicesSubject, Text: hero}}
+		needs, _ := needsOf(r, needsPro)
+		i := slices.IndexFunc(needs, func(n Need) bool { return n.Subject == "This Mac" && n.Hero == hero })
+		if i < 0 {
+			t.Fatalf("needs %d; want %q among what needs you", len(needs), hero)
+		}
+		if n := needs[i]; !slices.Equal(n.Detail, detail) || n.Finding.Severity != finding.Broken {
+			t.Errorf("%q says %q, %v; want %q, broken", hero, n.Detail, n.Finding.Severity, detail)
+		}
+	}
+}
+
+func TestADeviceBookChangedOutsideSpwnIsANeedSayingWhatIsTrustedAndTheGestureThatRepairs(t *testing.T) {
+	r := needsFleet()
+	r.Overviews[0].Needs = []overview.Need{{Machine: needsPro, Section: section.Overview, Broken: true, Severity: finding.Broken, Subject: overview.DevicesSubject, Text: devices.ChangedOutside}}
+	needs, upkeep := needsOf(r, needsPro)
+	i := slices.IndexFunc(needs, func(n Need) bool { return n.Subject == "This Mac" && n.Hero == devices.ChangedOutside })
+	if i < 0 {
+		t.Fatalf("needs %d, upkeep %d; want the book changed outside Spwn among what needs you", len(needs), len(upkeep))
+	}
+	n := needs[i]
+	if n.Finding.Urgency != finding.Red || !slices.Equal(n.Detail, []string{devices.ChangedWhy, devices.ChangedRepair}) || n.Verb.Run == nil || !slices.Equal(n.Verb.Run.Argv, []string{"devices"}) {
+		t.Errorf("the changed book says %v, %q, %+v; want it red, what is trusted and the repair, its verb station devices", n.Finding.Urgency, n.Detail, n.Verb.Run)
+	}
+	for _, u := range upkeep {
+		if u.Hero == devices.ChangedOutside {
+			t.Errorf("the changed book is upkeep too; want it a need alone")
+		}
 	}
 }

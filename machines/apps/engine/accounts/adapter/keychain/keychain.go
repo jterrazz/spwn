@@ -12,7 +12,9 @@ import (
 )
 
 const (
-	command = "security"
+	// value: the system's own, never one a PATH set by another process
+	// names; read under the system root a spec points into its sandbox.
+	command = "/usr/bin/security"
 	entry   = "station"
 	// outside: `security` exits 44 when the item is not in the keychain.
 	notFound = 44
@@ -24,14 +26,17 @@ type Runner interface {
 	Output(ctx context.Context, c local.Cmd) (local.Output, error)
 }
 
-type Keychain struct{ run Runner }
+type Keychain struct {
+	run  Runner
+	path string
+}
 
 var _ contract.Vault = Keychain{}
 
-func New(run Runner) Keychain { return Keychain{run: run} }
+func New(run Runner, root string) Keychain { return Keychain{run: run, path: root + command} }
 
 func (k Keychain) security(ctx context.Context, stdin string, args ...string) (local.Output, error) {
-	return k.run.Output(ctx, local.Cmd{Name: command, Args: args, Stdin: stdin})
+	return k.run.Output(ctx, local.Cmd{Name: k.path, Args: args, Stdin: stdin})
 }
 
 func failed(name string, out local.Output, err error) error {

@@ -1,0 +1,16 @@
+description: 'another Mac forgets a device from afar, no presence asked: a stolen laptop is dropped at once'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["mac-mini"].presence = "absent" | .macs["mac-mini"].stores.devices = [{"name":"laptop","key":"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBERERERERERERERERERERERERERERERERERERERERER","channels":["pipe"],"added":"2026-11-01T10:00:00Z"}]'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'devices forget laptop --on mac-mini --confirm=laptop'
+      exit: 0
+      stdout: |
+          	On mac-mini:
+          ●	laptop opens no new login into mac-mini's VMs	a session already open stays until it ends; mac-mini's ~/.ssh/authorized_keys is not touched, so a login into mac-mini still reaches its VMs
+    - command: 'devices --on mac-mini --json | /usr/bin/jq -c ''{devices, broken}'''
+      exit: 0
+      stdout: |
+          {"devices":[],"broken":[]}

@@ -58,6 +58,9 @@ import (
 	corecontract "github.com/jterrazz/studio-station/apps/engine/core/contract"
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 	coremachine "github.com/jterrazz/studio-station/apps/engine/core/machine"
+	"github.com/jterrazz/studio-station/apps/engine/devices"
+	devicesfake "github.com/jterrazz/studio-station/apps/engine/devices/adapter/fake"
+	devicescontract "github.com/jterrazz/studio-station/apps/engine/devices/contract"
 	diskfake "github.com/jterrazz/studio-station/apps/engine/disk/adapter/fake"
 	diskcontract "github.com/jterrazz/studio-station/apps/engine/disk/contract"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
@@ -355,6 +358,7 @@ func (m *worldMac) stores(st *stores) {
 	st.ledger = machinefilefake.LedgerOf(w, m.name)
 	st.release = enginefake.ReleaseCacheOf(w, m.name)
 	st.journal = journalfake.Of(w, m.name)
+	st.devices = devicesfake.StoreOf(w, m.name)
 }
 
 func (m *worldMac) releases() enginecontract.Releases { return enginefake.ReleasesOf(m.run.w) }
@@ -402,7 +406,7 @@ func (m *worldMac) imageSource(hypervisor string) imagescontract.ImageSource {
 	return imagesfake.SourceOf(m.run.w, hypervisor)
 }
 func (m *worldMac) sshConfig() contract.SSHConfig { return machinesfake.SSHConfigOf(m.run.w, m.name) }
-func (*worldMac) deviceKey() contract.DeviceKey   { return &machinesfake.DeviceKey{} }
+func (m *worldMac) deviceKey() contract.DeviceKey { return machinesfake.DeviceKeyFor(m.name) }
 
 // invariant: outside a world the spec build never reaches a Secure Enclave:
 // its device key is the one kept in the file STATION_DEVICE_KEY_STUB names,
@@ -433,6 +437,40 @@ func specDeviceKey(vars map[string]string) contract.DeviceKey {
 	}
 	return machinesfake.DeviceKeyOf(key)
 }
+
+// value: the root the spec build reads `security` under, the sandbox's;
+// the release build has none.
+func securityRoot(vars map[string]string) string { return systemRootOf(vars) }
+
+// invariant: outside a world the spec build never reaches a keychain: the
+// device book's head is kept in the file STATION_DEVICE_ANCHOR_STUB names,
+// "<generation> <digest>"; without that variable the real keychain's
+// adapter runs, over whatever `security` the document puts on PATH.
+func specDeviceAnchor(vars map[string]string) devicescontract.Anchor {
+	file := vars["STATION_DEVICE_ANCHOR_STUB"]
+	if !filepath.IsAbs(file) {
+		return nil
+	}
+	return fileAnchor(file)
+}
+
+type fileAnchor string
+
+func (f fileAnchor) Read(context.Context) (devices.Head, error) {
+	data, err := os.ReadFile(string(f))
+	if errors.Is(err, fs.ErrNotExist) {
+		return devices.Head{}, nil
+	}
+	if err != nil {
+		return devices.Head{}, err
+	}
+	return devices.ParseHead(string(data))
+}
+
+func (f fileAnchor) Write(_ context.Context, h devices.Head) error {
+	return os.WriteFile(string(f), []byte(h.String()+"\n"), 0o600)
+}
+
 func (m *worldMac) unlocker() contract.Unlocker { return machinesfake.MacsOf(m.run.w) }
 func (m *worldMac) waker() contract.Waker       { return machinesfake.WakerOf(m.run.w, m.name) }
 func (m *worldMac) processes(kernel contract.Processes) contract.Processes {
@@ -1813,4 +1851,14 @@ func (r rootless) Start(c local.Cmd, logPath string) (int, error) {
 		return 0, errRoot
 	}
 	return r.Runner.Start(c, logPath)
+}
+
+func (m *worldMac) presence() devices.Answer {
+	switch m.run.w.Mac(m.name).Presence {
+	case "refused":
+		return devices.Refused
+	case "absent":
+		return devices.Absent
+	}
+	return devices.Given
 }

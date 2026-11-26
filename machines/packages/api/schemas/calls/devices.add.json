@@ -1,0 +1,77 @@
+{
+  "$defs": {
+    "devices.Added": {
+      "additionalProperties": false,
+      "properties": {
+        "added": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "channels": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "fingerprint": {
+          "type": "string"
+        },
+        "key": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "starts_again": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "added",
+        "channels",
+        "fingerprint",
+        "name"
+      ],
+      "type": "object"
+    },
+    "devices.calls.AddIn": {
+      "additionalProperties": false,
+      "properties": {
+        "Channels": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "Key": {
+          "type": "string"
+        },
+        "Name": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/spwn/blob/main/machines/packages/api/schemas/calls/devices.add.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call devices.add of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/devices.calls.AddIn"
+    },
+    "out": {
+      "$ref": "#/$defs/devices.Added"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "devices.add",
+  "type": "object"
+}

@@ -361,12 +361,47 @@ line), those packages and the key dropped from the MacBook's Machinefile
 unless the permanent machine reuses them, and optionally the Mac's host key
 removed from the iPhone app.
 
-## The device book (lot L3 of [ADR-064](docs/decisions/064-a-key-never-leaves-its-device.md))
-The VM's managed block drops the authorized_keys copy and the `id_ed25519.pub` line for the device book
-([ADR-077](docs/decisions/077-a-workspace-trusts-its-macs-device-key-first.md)), the device keys of the owner's known Macs.
-Red-first proof: `specs/cli/machines/create/guest-never-trusts-a-foreign-key.spec.yaml`, where the Mac's `authorized_keys`
-holds `ssh-ed25519 AAAA… stranger@elsewhere` and the guest's block does not. It rewrites
-`guest-trusts-device-key-first.spec.yaml` on purpose.
+## What the door owes the device book ([ADR-092](docs/decisions/092-a-machines-device-book-says-who-may-reach-it.md))
+The book landed: `station devices`, `add` with presence and here-only, `forget` from afar, the seal, and a
+VM trusting its Mac's device key and the book's `pipe` entries alone. What it decides stops at the VMs: a
+Mac itself is still reached through its own sshd and `~/.ssh/authorized_keys`, and the key agent still
+relays every key it does not hold. The door ([ADR-090](docs/decisions/090-a-machine-is-reached-through-its-engines-door-never-through-openssh.md)) owes the rest:
+
+- **The channels as the door's allowlist**: a device opens `spwn-api` or `herdr` only when its entry says so.
+- **Forget closes a live session**: `devices.forget` ends that device's open door sessions, as it already
+  pushes the VMs' keys. Until then an ssh session opened into a VM with the forgotten key outlives the
+  guest's rewrite of `authorized_keys`: ending it needs the guest to know which key opened each sshd
+  session (`ExposeAuthInfo` or sshd's log), not built; the forget's words say the session stays.
+- **A device in the book is never a key of this Mac's own**: `devices.add` refuses this Mac's device key
+  but not the image key (`images/key`, trusted in every VM as `station-image`) nor a key a VM holds; it
+  matters once `spwn-api` and `herdr` open anything, when a VM's key in the book would reach its Mac.
+- **Attribution**: a frame through the door names its device, the journal says "by <device>", and
+  `station devices` shows each device's last connection.
+- **The relay goes** (`Agent.relay`, `keyring.upstream`, `wire.sessionAgent`) once no Mac-to-Mac OpenSSH remains.
+
+## The device book's security lots (review of 2026-11-26)
+What a process running code as the owner still opens, and what is left of the fix, each its own lot ([ADR-092](docs/decisions/092-a-machines-device-book-says-who-may-reach-it.md), "What the seal is worth").
+
+- **The anchor across an engine restart.** While the engine runs it believes only the books it wrote
+  (`devices add` and `forget` routed to it, `jsonfile.Store.Sole`, its start read final even when it
+  fails), so a book and a head moved forward
+  by a process that runs `security` raise "The device book changed outside Spwn" and reach nothing. A
+  new engine has only the keychain, so the same book written while no engine ran is trusted. It closes
+  when the item is written through the Security framework by the signed engine, with an access list
+  that leaves `/usr/bin/security` out, which needs the engine to be a child of the signed app (the
+  one-app lots). Binding each seal to the generation of its add does not close it: the forged book
+  holds the forgotten entry at its old generation, which a newer book holds lawfully too, so the seal
+  would have to cover the forgets, which sign nothing.
+- **The other `in-engine` calls still run in the asking process** (machines' lifecycle, the vault,
+  `ports.share`, the grants, Awake): only the devices family is routed through `remote.Router.WithEngine`.
+  Each has its own engine-down meaning (`machines start` starts the engine), so each moves as its own
+  lot, its stopped-engine story first.
+- **A device key blob of any access.** `machines/adapter/macos/devicekey.go` loads whatever
+  `device-key.enclave` holds and `enclave.swift` opens it without reading its access control, so a key the
+  attacker made with none becomes this Mac's own at the next engine start. The fix: refuse at load a blob
+  whose access control is not the one the Mac's Never sleeps asks, and anchor the device key's public half.
+- **No adapter execs a bare `security`.** The anchor and the vault now run `/usr/bin/security` under the
+  system root; a conformance rule that refuses a bare `security` in any adapter is not written.
 
 ## Network isolation
 Tart Softnet for VMs that need no LAN. Until then a VM behind its Mac reaches

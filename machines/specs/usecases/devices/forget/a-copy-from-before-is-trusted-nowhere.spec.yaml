@@ -1,0 +1,27 @@
+description: 'a book written back from before a forget is trusted nowhere: the forgotten device stays out'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out.name else .error | {code, subject} end'''
+      stdin: |
+          {"v":2,"id":"1","call":"devices.add","in":{"Name":"laptop","Key":"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGmY0fN5lE8XqXhcG0OB1oCw0SYqC0f6M1bM1jR5e9wz","Channels":["pipe"]}}
+      exit: 0
+      stdout: |
+          "laptop"
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].stores | {devices, devices_generation}'' world.json > before.json'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out else .error | {code, subject} end'''
+      stdin: |
+          {"v":2,"id":"1","call":"devices.forget","far":true,"in":{"Name":"laptop","Confirm":"laptop"}}
+      exit: 0
+      stdout: |
+          {"name":"laptop"}
+    - command: '--version >/dev/null; /usr/bin/jq --slurpfile b before.json ''.macs["macbook-pro"].stores += $b[0]'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out | {stale, devices: [.devices[] | .name], broken: [.broken[] | .name]}'''
+      stdin: |
+          {"v":2,"id":"1","call":"devices.list","in":{}}
+      exit: 0
+      stdout: |
+          {"stale":true,"devices":[],"broken":["laptop"]}

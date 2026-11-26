@@ -1,0 +1,18 @@
+description: 'a device forgotten leaves the running VM''s trusted keys at once'
+fixture:
+    - ../../../__fixtures__/vms/
+    - ./__fixtures__/fresh-mac/
+    - ./__fixtures__/book-mac/
+env: engine
+serve: sshd
+runs:
+    - command: '--version >/dev/null; /usr/bin/sed -i.bak ''s/"vm_user": "vmu"/"vm_user": "vmu", "ports": {"range": "42140-42159"}/'' .config/station/preferences.json; echo 2 > vm/boot-seconds; export STATION_DEVICE_KEY_STUB="$HOME/device-key.pem" STATION_DEVICE_ANCHOR_STUB="$HOME/device-book.anchor"; "$STATION" engine run 2>/dev/null & d=$!; n=0; while [ ! -S .local/state/station/engine.sock ] && [ $n -lt 50 ]; do /bin/sleep 0.1; n=$((n+1)); done; "$STATION" machines create --persistent --name api > /dev/null; /bin/cat vm/.ssh/authorized_keys; "$STATION" devices forget laptop --confirm=laptop > /dev/null; n=0; while /bin/grep -q rd40 vm/.ssh/authorized_keys && [ $n -lt 50 ]; do /bin/sleep 0.1; n=$((n+1)); done; /bin/cat vm/.ssh/authorized_keys; "$STATION" machines stop api --yes > /dev/null; kill $d; wait $d'
+      exit: 0
+      stdout: |
+          # >>> station hosts >>>
+          ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBEu8U5aPgjEyLIXKghN2Y17GTEUEQNIco+Ye2QlojicGAlebmpcPFd3X2dXI/LMuI/o0wN1LDrFXUe5ag87nyaM= station device key
+          ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIM2YVXASS8sB/pj6wiyhO+rcd6cu2XD471y3ottjrd40
+          # <<< station hosts <<<
+          # >>> station hosts >>>
+          ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBEu8U5aPgjEyLIXKghN2Y17GTEUEQNIco+Ye2QlojicGAlebmpcPFd3X2dXI/LMuI/o0wN1LDrFXUe5ag87nyaM= station device key
+          # <<< station hosts <<<

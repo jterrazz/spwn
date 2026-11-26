@@ -746,6 +746,9 @@ func Codes() map[fail.Code]Wording {
 	for code, word := range usage() {
 		all[code] = word
 	}
+	for code, word := range devicesWords() {
+		all[code] = word
+	}
 	return all
 }
 

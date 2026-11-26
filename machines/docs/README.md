@@ -143,6 +143,7 @@ The records of decisions this repository alone took go in [`decisions/`](decisio
 - [089 An agent runs in a Herdr terminal on its own machine](decisions/089-an-agent-runs-in-a-herdr-terminal-on-its-own-machine.md) (Accepted)
 - [090 A machine is reached through its engine's door, never through OpenSSH](decisions/090-a-machine-is-reached-through-its-engines-door-never-through-openssh.md) (Accepted)
 - [091 An adopted app is a state, never work](decisions/091-an-adopted-app-is-a-state-never-work.md) (Proposed)
+- [092 A machine's device book says who may reach it](decisions/092-a-machines-device-book-says-who-may-reach-it.md) (Proposed)
 - [093 The window is a path bar over a cool dark](decisions/093-the-window-is-a-path-bar-over-a-cool-dark.md) (Proposed)
 - [094 Machines' Turborepo leaves Go to the Makefile](decisions/094-machines-turborepo-leaves-go-to-the-makefile.md) (Proposed)
 - [096 Spwn is one app: its menu bar, its notifications and its engine live while it runs](decisions/096-spwn-is-one-app-its-menu-bar-notifications-and-engine-live-while-it-runs.md) (Proposed)

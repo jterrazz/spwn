@@ -73,6 +73,9 @@ func (s Server) Conn(ctx context.Context, conn io.ReadWriteCloser) {
 			continue
 		}
 		fctx := call.WithBy(ctx, f.By)
+		if f.Far {
+			fctx = call.WithFar(fctx)
+		}
 		if f.Watch != "" {
 			s.watch(fctx, conn, scanner, w, f)
 			return
@@ -228,7 +231,12 @@ func (s Server) fault(err error) *call.WireError { return call.ToWire(err, s.wor
 
 func (s Server) wording(err error) *fail.Error {
 	var e *fail.Error
-	if !errors.As(err, &e) {
+	var said *fail.Said
+	switch {
+	case errors.As(err, &e):
+	case errors.As(err, &said):
+		e = &fail.Error{Type: fail.Failed, Code: "internal", Message: said.Message, Hint: said.Hint}
+	default:
 		e = &fail.Error{Type: fail.Failed, Code: "internal", Message: err.Error()}
 	}
 	out := *e

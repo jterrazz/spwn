@@ -50,7 +50,7 @@ runs:
       exit: 2
       stderr: |
           Error: unknown command "services"
-          Hint: station help
+          Hint: station devices
     - command: 'tailnet'
       exit: 2
       stderr: |

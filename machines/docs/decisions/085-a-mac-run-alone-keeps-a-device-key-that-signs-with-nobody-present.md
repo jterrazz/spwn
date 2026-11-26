@@ -5,6 +5,8 @@
 
 Amends [ADR-064](064-a-key-never-leaves-its-device.md).
 
+Amended by [ADR-092](092-a-machines-device-book-says-who-may-reach-it.md): the hello sends the line of the key the engine holds; `device-key.pub` is an export only.
+
 Accepted by the owner on 2026-11-23, on the owner's word.
 
 Amended by [ADR-096](096-spwn-is-one-app-its-menu-bar-notifications-and-engine-live-while-it-runs.md) (Proposed): "once per engine life" reads "once per Spwn launch".
