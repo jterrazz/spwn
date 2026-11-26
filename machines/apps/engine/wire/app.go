@@ -338,8 +338,10 @@ type machine struct {
 	kind    catalog.MachineKind
 	paths   setup.Paths
 	stores  *stores
-	where   page.Context
-	named   func() string
+	// value: the engine's kept reading of this Mac's sleep timer.
+	sleep *sleepTimer
+	where page.Context
+	named func() string
 }
 
 func resolve(raw local.System, door darwin.Door, vars map[string]string, world *worldMac, cat catalog.Catalog) machine {
@@ -383,6 +385,7 @@ func resolve(raw local.System, door darwin.Door, vars map[string]string, world *
 	name := model.ThisMacName(registered, m.named)
 	m.profile = profileOf(context.Background(), self, pin, name, m.powerPort, m.providers)
 	m.kind = legacyKind(m.profile)
+	m.sleep = newSleepTimer(h.Clock, m.readMacNeverSleeps)
 	m.where = page.Context{Machine: name, Kind: string(m.profile.Kind), Registered: registered != ""}
 	return m
 }

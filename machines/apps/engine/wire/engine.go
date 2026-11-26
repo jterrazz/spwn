@@ -82,7 +82,7 @@ func (m machine) engine(env kit.Env) *process.Engine {
 	pages := feeds.Pages{ThisMachine: m.where}
 	report := func(v awake.View) *awake.Report {
 		return &awake.Report{Now: m.sys.Clock.Now(), Zone: time.Local, Engine: awake.EngineRunning, Caps: m.profile.Caps, Reading: v.Reading, Session: v.Session, LastEnd: v.LastEnd, Guards: v.Guards,
-			NeverSleeps: v.NeverSleeps, NeverSince: v.NeverSince, NeverHeld: v.NeverHeld, MacNeverSleeps: m.macNeverSleeps(context.Background())}
+			NeverSleeps: v.NeverSleeps, NeverSince: v.NeverSince, NeverHeld: v.NeverHeld, MacNeverSleeps: m.sleep.Kept(context.Background())}
 	}
 	guests := engineGuests{dialer: m.guestDialer(), vms: m.machines(false), files: m.sys.FS}
 	notifier := func(write func(subject, text string)) process.Notifier { return enginelog.New(write) }

@@ -60,7 +60,7 @@ So a Mac mini, which reports no battery and no lid, has no battery or lid guard;
 
 ## Never sleeps
 
-`never-sleeps` is a setting of the Always-on Mac group ([Settings](settings.md#the-packages)): applied, it writes `never_sleeps` to [`preferences.json`](preferences.md), and the engine's `awake` job holds the Mac awake from its next tick, a second on, for as long as it runs, its servers with it; no admin, applied from any Mac. `station awake off` ends a keep-awake only; Never sleeps stays until `station settings off never-sleeps`. Its [Mac readiness](machines.md#mac-readiness) lists it, and reads a Mac whose own sleep is off in System Settings (`pmset` sleep 0) as never sleeping too, set in System Settings, with the setting not applied; so does its `awake` verdict, `Never sleeps, set in System Settings.`
+`never-sleeps` is a setting of the Always-on Mac group ([Settings](settings.md#the-packages)): applied, it writes `never_sleeps` to [`preferences.json`](preferences.md), and the engine's `awake` job holds the Mac awake from its next tick, a second on, for as long as it runs, its servers with it; no admin, applied from any Mac. `station awake off` ends a keep-awake only; Never sleeps stays until `station settings off never-sleeps`. Its [Mac readiness](machines.md#mac-readiness) lists it, and reads a Mac whose own sleep is off in System Settings (`pmset` sleep 0) as never sleeping too, set in System Settings, with the setting not applied; so does its `awake` verdict, `Never sleeps, set in System Settings.` The engine holds that reading of `pmset` for 30 seconds, so a change made in System Settings reaches its slices and the menu bar within that time; `awake.read` reads it at once and renews the held one.
 
 ## Related
 
