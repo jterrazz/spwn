@@ -15,11 +15,25 @@
     --dot: rgb(255 255 255 / 13%);
     --wash: rgb(255 255 255 / 5%);
 
-    --t1: #f7f7f8;
-    --t2: #c8c9cc;
-    --t3: #9b9ca1;
-    /* value: decoration only (a disabled label, a plain dot, a chart's mark): 3:1 on --panel, under the 4.5:1 text asks */
-    --t4: #6f7176;
+    --s0: #131417;
+    --s1: #1a1b1f;
+    --s2: #222328;
+    --s3: #2c2d33;
+    --s3-hover: #36373e;
+    --s3-press: #3d3e45;
+
+    --hair: rgb(255 255 255 / 6%);
+    --edge: rgb(255 255 255 / 9%);
+
+    --t1: #f4f4f5;
+    --t2: #b8bac0;
+    --t3: #9699a1;
+    /* value: decoration only (a disabled label, a plain dot, a chart's mark): 3:1 on --s0 to --s2, under the 4.5:1 text asks, and never drawn on --s3, where it falls to 2.69:1 */
+    --t4: #6b6e76;
+
+    --you: #ff9f0a;
+    --on-you: #1c1100;
+    --busy: #4cc2f5;
 
     --ok: #4ad68a;
     --warn: #f6b24a;
@@ -28,7 +42,7 @@
     --new: #4cc2f5;
     --accent: #ff9f0a;
     --on-accent: #1b1003;
-    --on-bad: #2a0c0a;
+    --on-bad: #1c0806;
     --tone-fill: 8%;
     --tone-line: 24%;
 
@@ -37,10 +51,14 @@
     --warn-on-primary: #a86200;
     --bad-on-primary: #cf2b20;
     --new-on-primary: #0766cc;
-    --primary: #f3f3f3;
-    --scrim: rgb(8 9 12 / 62%);
-    --shadow-pop: 0 30px 80px rgb(0 0 0 / 50%);
-    --shadow-primary: 0 6px 16px rgb(0 0 0 / 32%);
+    --primary: #f4f4f5;
+    --primary-hover: #ffffff;
+    --primary-press: #dcdde0;
+    --scrim: rgb(6 7 9 / 58%);
+    --lift-1: 0 1px 0 rgb(255 255 255 / 4%) inset;
+    --lift-2: 0 12px 32px rgb(0 0 0 / 38%), 0 2px 6px rgb(0 0 0 / 30%);
+    --lift-3: 0 30px 80px rgb(0 0 0 / 55%), 0 4px 12px rgb(0 0 0 / 30%);
+    --lift-primary: 0 1px 0 rgb(255 255 255 / 30%) inset, 0 4px 12px rgb(0 0 0 / 30%);
 
     --art-ink: #e3e4e8;
     --art-dim: #8a8c93;

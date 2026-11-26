@@ -22,11 +22,15 @@ function colourOf(name: string) {
 
 type Measure = readonly [name: string, ratio: number];
 
-const GROUNDS = ['canvas', 'side', 'panel'] as const;
+const GROUNDS = ['s0', 's1', 's2', 's3'] as const;
+
+const QUIET_GROUNDS = ['s0', 's1', 's2'] as const;
 
 const TEXTS = ['t1', 't2', 't3'] as const;
 
-const TONES = ['ok', 'warn', 'bad', 'new'] as const;
+const MARKS = ['ok', 'bad', 'you', 'busy', 't3'] as const;
+
+const TONES = ['ok', 'you', 'bad', 'busy'] as const;
 
 const TEXT_BAR = 4.5;
 
@@ -38,73 +42,98 @@ function below(bar: number, measures: readonly Measure[]): string[] {
         .map(([name, found]) => `${name} ${found.toFixed(2)}`);
 }
 
-function overGrounds(of: string, over: (ground: string) => number): Measure[] {
-    return GROUNDS.map((ground) => [`--${of} on --${ground}`, over(ground)]);
+function overGrounds(
+    of: string,
+    over: (ground: string) => number,
+    grounds: readonly string[] = GROUNDS,
+): Measure[] {
+    return grounds.map((ground) => [`--${of} on --${ground}`, over(ground)]);
+}
+
+function onGrounds(name: string, grounds: readonly string[] = GROUNDS): Measure[] {
+    return overGrounds(name, (ground) => ratio(colourOf(name), colourOf(ground)), grounds);
 }
 
 describe('contrast', () => {
-    test('the three text levels read at 4.5:1 on each ground the window draws', () => {
-        // Given - each text level of tokens.css on the canvas, the column and the card grounds
-        const measures = TEXTS.flatMap((text) =>
-            overGrounds(text, (ground) => ratio(colourOf(text), colourOf(ground))),
-        );
+    test('the three text levels read at 4.5:1 on each of the four surface steps', () => {
+        // Given - each text level of tokens.css on s0 to s3
+        const measures = TEXTS.flatMap((text) => onGrounds(text));
 
         // Then - none is below the bar of text
         expect(below(TEXT_BAR, measures)).toStrictEqual([]);
     });
 
-    test('a tone reads at 4.5:1 on its own pill over each ground', () => {
-        // Given - each tone as text on its fill, the tone at its share over each ground
-        const share = Number.parseFloat(tokenOf('tone-fill')) / 100;
-        const measures = TONES.flatMap((tone) =>
-            overGrounds(`${tone} on its pill over`, (ground) =>
-                ratio(colourOf(tone), mixed(colourOf(ground), colourOf(tone), share)),
-            ),
-        );
+    test('the decorative level holds 3:1 on s0 to s2, and s3 is the step it is never drawn on', () => {
+        // Given - the decoration level on the three steps it may sit on, and on s3
+        const decoration = onGrounds('t4', QUIET_GROUNDS);
+        const onS3: Measure = ['--t4 on --s3', ratio(colourOf('t4'), colourOf('s3'))];
 
-        // Then - none is below the bar of text
-        expect(below(TEXT_BAR, measures)).toStrictEqual([]);
-    });
-
-    test('the primary button label reads at 4.5:1 and the decorative level holds 3:1 on each ground', () => {
-        // Given - the dark label on the light fill, and the decoration level on each ground
-        const label: Measure = [
-            '--on-primary on --primary',
-            ratio(colourOf('on-primary'), colourOf('primary')),
-        ];
-        const decoration = overGrounds('t4', (ground) => ratio(colourOf('t4'), colourOf(ground)));
-
-        // Then - the label holds the bar of text, and the decoration the bar of a mark
-        expect(below(TEXT_BAR, [label])).toStrictEqual([]);
+        // Then - it holds the bar of a mark on the three, and falls under it on s3
         expect(below(MARK_BAR, decoration)).toStrictEqual([]);
+        expect(below(MARK_BAR, [onS3])).toStrictEqual([`--t4 on --s3 ${onS3[1].toFixed(2)}`]);
     });
 
-    test('the accent and the drawings ink hold the bar of a mark on each ground, and a mark on the accent reads', () => {
-        // Given - the accent and the drawings' line on each ground, the dark mark on the accent
-        const marks = [
-            ...overGrounds('accent', (ground) => ratio(colourOf('accent'), colourOf(ground))),
-            ...overGrounds('art-ink', (ground) => ratio(colourOf('art-ink'), colourOf(ground))),
-            ...overGrounds('art-dim', (ground) => ratio(colourOf('art-dim'), colourOf(ground))),
-        ];
-        const onAccent: Measure = [
-            '--on-accent on --accent',
-            ratio(colourOf('on-accent'), colourOf('accent')),
+    test('each mark holds the bar of a mark on each of the four surface steps', () => {
+        // Given - the five marks of a state on s0 to s3
+        const measures = MARKS.flatMap((mark) => onGrounds(mark));
+
+        // Then - none is below the bar of a mark
+        expect(below(MARK_BAR, measures)).toStrictEqual([]);
+    });
+
+    test('the two colours drawn as text read at 4.5:1 on each of the four surface steps', () => {
+        // Given - the orange and the red as text on s0 to s3
+        const measures = ['you', 'bad'].flatMap((text) => onGrounds(text));
+
+        // Then - none is below the bar of text
+        expect(below(TEXT_BAR, measures)).toStrictEqual([]);
+    });
+
+    test('a label on its fill reads at 4.5:1: the primary, the destroy, the orange, and a control at hover', () => {
+        // Given - each dark label on its fill, and the text on the hovered control
+        const labels: Measure[] = [
+            ['--on-primary on --primary', ratio(colourOf('on-primary'), colourOf('primary'))],
+            ['--on-bad on --bad', ratio(colourOf('on-bad'), colourOf('bad'))],
+            ['--on-you on --you', ratio(colourOf('on-you'), colourOf('you'))],
+            ['--t1 on --s3-hover', ratio(colourOf('t1'), colourOf('s3-hover'))],
         ];
 
-        // Then - each holds the bar of a mark, and the mark on the accent the bar of text
+        // Then - each holds the bar of text
+        expect(below(TEXT_BAR, labels)).toStrictEqual([]);
+    });
+
+    test('the drawings ink holds the bar of a mark on each of the four surface steps', () => {
+        // Given - the drawings' line on s0 to s3
+        const marks = [...onGrounds('art-ink'), ...onGrounds('art-dim')];
+
+        // Then - each holds the bar of a mark
         expect(below(MARK_BAR, marks)).toStrictEqual([]);
-        expect(below(TEXT_BAR, [onAccent])).toStrictEqual([]);
     });
 
     test("a state's mark holds 3:1 on the column's current row, the light pill", () => {
         // Given - each tone's mark as the current row draws it, on --primary
-        const measures = TONES.map((tone): Measure => [
+        const measures = ['ok', 'warn', 'bad', 'new'].map((tone): Measure => [
             `--${tone}-on-primary on --primary`,
             ratio(colourOf(`${tone}-on-primary`), colourOf('primary')),
         ]);
 
         // Then - none is below the bar of a mark
         expect(below(MARK_BAR, measures)).toStrictEqual([]);
+    });
+
+    test('a tone reads at 4.5:1 on its own pill over s0 to s2, the steps a pill sits on', () => {
+        // Given - each tone as text on its fill, the tone at its share over s0 to s2
+        const share = Number.parseFloat(tokenOf('tone-fill')) / 100;
+        const measures = TONES.flatMap((tone) =>
+            overGrounds(
+                `${tone} on its pill over`,
+                (ground) => ratio(colourOf(tone), mixed(colourOf(ground), colourOf(tone), share)),
+                QUIET_GROUNDS,
+            ),
+        );
+
+        // Then - none is below the bar of text
+        expect(below(TEXT_BAR, measures)).toStrictEqual([]);
     });
 
     test('the pill is drawn at 8 % of its tone, and its line at 24 %', () => {
