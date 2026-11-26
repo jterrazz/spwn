@@ -17,6 +17,7 @@ runs:
           scrollback
       exit: 1
       stdout: |
+          ✓ pulling ghcr.io/cirruslabs/ubuntu:24.04 · <1s
           Error: image base-ubuntu: cloning the base failed: context canceled
           Hint: station images build base-ubuntu
     - command: '--version >/dev/null; /bin/cat seen'
