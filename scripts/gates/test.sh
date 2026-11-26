@@ -99,6 +99,7 @@ route vm-keyroot KEY=/etc/ssh/ssh_host_ed25519_key
 route vm-a "KEY=$H/k/vm_key"
 : > "$H/k/gone_key"; route vm-gone "KEY=$H/k/gone_key"
 route vm-pct "KEY=$H/k/%d/vm_key"
+mkdir -p "$H/k/A b"; : > "$H/k/A b/key"; ln -s "$H/k/A b" "$H/k/plain"; route vm-resolved-class "KEY=$H/k/plain/key"
 mkdir -p "$H/k/A\${HOME}/.ssh"; : > "$H/k/A\${HOME}/.ssh/id_ed25519"; route vm-var "KEY=$H/k/A\${HOME}/.ssh/id_ed25519"
 route vm-hopvar HOP=ops@hop-host "HOP_KEY=$H/k/A\${HOME}/.ssh/id_ed25519"
 : > "$H/kh"
@@ -194,6 +195,18 @@ got=$(gate_ssh ssh vm-gone true); rm -f "$H/k/gone_key"; cfg=$(sshg <<< "$got")
 refused "KEY holds a character outside" gate_ssh ssh vm-pct true
 refused "KEY holds a character outside" gate_ssh ssh vm-var true
 refused "HOP_KEY holds a character outside" gate_ssh ssh vm-hopvar true
+refused "KEY holds a character outside" gate_ssh ssh vm-resolved-class true
+printf '%s\n' 'Host *' '  IdentityFile ~/.ssh/owner_id' '  CertificateFile ~/.ssh/owner_id-cert.pub' '  IdentitiesOnly no' '  IdentityAgent /tmp/evil-agent.sock' '  ForwardAgent yes' \
+  '  ProxyCommand /bin/false evil' '  SendEnv SSH_AUTH_SOCK' '  SetEnv EVIL=1' '  LocalForward 4444 127.0.0.1:22' '  UserKnownHostsFile ~/.ssh/known_hosts' '  GlobalKnownHostsFile ~/.ssh/global_hosts' \
+  '  StrictHostKeyChecking no' '  UpdateHostKeys yes' '  ControlMaster auto' '  ControlPath ~/.ssh/cm-%C' '  PermitLocalCommand yes' '  LocalCommand touch /tmp/evil-local' '  Hostname evil.example' '  User evil' '  Port 2200' > "$T/hostile.conf"
+cfg=$(/usr/bin/ssh -G -F "$T/hostile.conf" vm-a 2>&1)
+grep -qx 'hostname evil.example' <<< "$cfg" && grep -qx 'sendenv SSH_AUTH_SOCK' <<< "$cfg" || bad "the hostile config stand-in is not live, so its contrast proves nothing: $cfg"
+cfg=$(gate_ssh ssh vm-a true | { mapfile -t a; for i in "${!a[@]}"; do [ "${a[$i]}" = /usr/bin/ssh ] && break; done; /usr/bin/ssh -G -F "$T/hostile.conf" "${a[@]:$((i + 1))}" 2>&1; })
+grep -E '^(sendenv|setenv|localforward|certificatefile|proxycommand|proxyjump|localcommand) |^(hostname evil\.example|user evil|port 2200)$' <<< "$cfg" && bad "ssh -G: a config read before the guard's options adds to the route"
+[ "$(grep '^identityfile ' <<< "$cfg")" = "identityfile $H/k/vm_key" ] || bad "ssh -G: a config read before the guard's options adds an identity: $(grep '^identityfile ' <<< "$cfg" | tr '\n' ' ')"
+for l in 'identityagent none' 'identitiesonly yes' 'forwardagent no' "userknownhostsfile $H/kh" 'globalknownhostsfile /dev/null' 'stricthostkeychecking true' 'updatehostkeys false' 'controlmaster false' 'permitlocalcommand no'; do
+  grep -qx "$l" <<< "$cfg" || bad "ssh -G: a config read before the guard's options changes '$l': $(grep "^${l%% *} " <<< "$cfg")"
+done
 got=$(gate_ssh ssh -n vm-b 'echo "a b"; ls')
 want=$(ssh_w; argv -o "IdentityFile=$H/k/hop_key" -o "UserKnownHostsFile=$H/kh" -n -- ops@hop-host)
 [ "$(sed '$d' <<< "$got")" = "$want" ] || bad "hop ssh argv: $got"
