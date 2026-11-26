@@ -37,7 +37,8 @@ apps/engine/
   setup/     setup.init, the call that makes a machine known (the verb `init`: Go names no package
              init), and the preferences groups it writes
   engine/    the engine's model (its events, its own calls), engine/calls, engine/contract (the Notifier)
-    process/ the engine itself: its runs, its guest connections, its jobs, its socket and its server
+    process/ the engine itself: its runs, its guest connections, its jobs, its socket and its server,
+             and the board of the long acts it guides, kept in acts.json
     jobs/    the sample job, which feeds Activity's history, and the nightly job, which
              upgrades a Mac's bound Machinefile every night
     feeds/   the menu bar's pages and the window's views, each a pure function of one snapshot of the store
@@ -56,6 +57,7 @@ The shared kernel, which does no I/O:
     finding/   one Needs you line, and finding.Rank, its one order
     confirm/   the graded confirmations: confirm.For(action, kind) and confirm.Require
     call/      a use case as a Call or a Watch, Bind and Gate, the Registry, the Router; lanes/, the read pool
+    guide/     a Guide, the view of a long act, and the Phase a guided call reports through its Progress
     contract/  the contracts every family shares: Self, Preferences
     store/     what every store shares: its errors, its version, refused when it is not this station's
     fail/      the error: its type, its code, its words
@@ -175,6 +177,8 @@ So there is one way into a VM (its Mac's engine and its one `Guest` connection) 
 A reading that is slow or fans out to every Mac is KEPT by a job, never read inside a watch: the `drift` job reads a workspace's `machinefile.drift` beside the loop, one reading per VM at a time and bound by 2 min, keeps it with the VM (`engine.VMView.Drift`, nil until its first reading since the boot), and `machines.list` judges each VM's `Head` from it. What makes a reading due early is a call that changes a VM ending on it: the `unix` endpoint tells the engine the call each guest exchange carries (`engine.guest-exec`'s `call`), and a call of `Options.Changes` (`machinefile.apply`, `machinefile.upgrade`, `apps.install`, `apps.remove`, `apps.update`, `apps.move`, `settings.apply`, `settings.off`, `settings.run-containers`) makes that VM's reading due at the next step. A change made inside the VM by any other way (a shell in it, a package manager run by hand) goes through no guest exchange, so its head tells it at the next 10-min reading. The Router stays transport: a VM's answer reaches its client as its guest said it.
 
 An event is the one channel the `Notifier` and the menu bar read, a `notice` of the closed list `engine.Notifies` holds: `server_restarting`, `server_loop`, `server_powered_off`, `server_back`, `awake_ended`, `port_exposed`, `disk_low`, and the menu bar's own, `vm_ready` and `mac_back` (the `back` job). Each carries its kind, the SF Symbol its HUD draws and its words ([The API](../reference/api.md#the-engines-own-calls)). The menu bar's pages are projected from the store in `engine/feeds`, once per revision for every watch of them, and streamed to it as `station.page/v1`.
+
+A long act is guided by the engine, never by a client: a call whose `Meta` names a `Guide` family (`machines.create-workspace`'s is `machines.create`) reports each step it reaches as a `guide.Phase` through its Progress, the engine's server tees that Phase to its act board (`process.Acts`), and the board ends the act with the call: `done`, `failed` with the call's error, or `interrupted` when the call was cancelled or its owner process no longer runs at the engine's start. Each write of the board puts the slice `acts:<mac>` into the store at once, so a step reaches a watcher of the view `engine.guides` within the store's 250 ms, never at the next tick; `engine/feeds` projects each act by its family's function (`feeds.Guided`, `machines.CreateGuide`) over the VM its subject names, and the rule `guides` holds the guided families of `calls.json` to those functions, and the pictures and statuses of `core/guide` to the window's component.
 
 ## The fake world
 

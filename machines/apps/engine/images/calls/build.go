@@ -157,7 +157,7 @@ func (s *Builder) buildOne(ctx context.Context, w wanted, binary string, progres
 	defer s.clear(img.Name)
 	at := func(step images.BuildStep, label string) {
 		s.mark(images.Making{Image: img.Name, Version: version, Step: step, Owner: owner})
-		progress(images.Step{Label: label})
+		progress(images.Step{Label: label, Step: step})
 	}
 	sha, err := s.recipeSHA(img)
 	if err != nil {

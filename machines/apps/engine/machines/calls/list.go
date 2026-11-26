@@ -7,7 +7,9 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	"github.com/jterrazz/studio-station/apps/engine/core/confirm"
+	"github.com/jterrazz/studio-station/apps/engine/core/guide"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
+	"github.com/jterrazz/studio-station/apps/engine/images"
 	imagescalls "github.com/jterrazz/studio-station/apps/engine/images/calls"
 	"github.com/jterrazz/studio-station/apps/engine/machines"
 )
@@ -74,7 +76,7 @@ type CreateIn struct {
 var CreateWorkspace = call.Call[Deps, CreateIn, machines.Created]{
 	// invariant: a workspace, ephemeral or persistent; always on is a server's.
 	Name: "machines.create-workspace", Where: call.InEngine, Applies: machines.CanCreate, Needs: machines.VMNeeds(), Confirm: confirm.BuildImage,
-	Errors: workspaceRefusals(), Journal: keptWorkspace,
+	Errors: workspaceRefusals(), Journal: keptWorkspace, Guide: machines.GuideCreate,
 	Run: func(ctx context.Context, d Deps, in CreateIn, p call.Progress) (machines.Created, error) {
 		r := in.Request
 		r.Server = false
@@ -140,7 +142,7 @@ func missingImage(ctx context.Context, d Deps, r machines.CreateRequest) string 
 // value: the build of image on this Mac, which the create runs once its
 // record holds the VM.
 func builds(d Deps, image string) ImageBuild {
-	return func(ctx context.Context, step func(label string)) error {
+	return func(ctx context.Context, step func(images.Step)) error {
 		return imagescalls.Worded(d.Images.Build(ctx, image, step))
 	}
 }
@@ -148,6 +150,10 @@ func builds(d Deps, image string) ImageBuild {
 func create(ctx context.Context, d Deps, r machines.CreateRequest, b ImageBuild, p call.Progress) (machines.Created, error) {
 	last := ""
 	created, err := d.Machines.Create(ctx, r, b, func(s machines.Step) {
+		if s.Phase != nil {
+			guide.Report(p, *s.Phase)
+			return
+		}
 		if last != "" {
 			p.Done(last, nil)
 		}

@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	imagemodel "github.com/jterrazz/studio-station/apps/engine/images"
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
 	machinesfake "github.com/jterrazz/studio-station/apps/engine/machines/adapter/fake"
 	machinescontract "github.com/jterrazz/studio-station/apps/engine/machines/contract"
@@ -205,9 +206,9 @@ func TestACreateHoldsItsRecordWhileItsImageIsBuilt(t *testing.T) {
 	b := creating(t, false)
 	var before, during model.VM
 	var held int64
-	build := func(_ context.Context, step func(string)) error {
+	build := func(_ context.Context, step func(imagemodel.Step)) error {
 		before, held = readVM(t, b, "web")
-		step("image 2 of 3")
+		step(imagemodel.Step{Label: "image 2 of 3", Step: imagemodel.BuildPackages})
 		during, _ = readVM(t, b, "web")
 		b.img.built = true
 		return nil
@@ -231,7 +232,7 @@ func TestACreateWithNoRoomIsRefusedBeforeItsImageIsBuilt(t *testing.T) {
 	ctx := context.Background()
 	b := creating(t, false)
 	built := false
-	build := func(context.Context, func(string)) error {
+	build := func(context.Context, func(imagemodel.Step)) error {
 		built = true
 		return nil
 	}
@@ -264,8 +265,8 @@ func TestABuildThatFailsLeavesNoRecord(t *testing.T) {
 	ctx := context.Background()
 	b := creating(t, false)
 	failing := errors.New("the recipe failed")
-	_, err := b.m.Create(ctx, model.CreateRequest{Image: "base-ubuntu", Name: "web"}, func(_ context.Context, step func(string)) error {
-		step("image 1 of 3")
+	_, err := b.m.Create(ctx, model.CreateRequest{Image: "base-ubuntu", Name: "web"}, func(_ context.Context, step func(imagemodel.Step)) error {
+		step(imagemodel.Step{Label: "image 1 of 3", Step: imagemodel.BuildBaseSystem})
 		return failing
 	}, nil)
 	if !errors.Is(err, failing) {
@@ -285,8 +286,8 @@ func TestACreateInterruptedDuringItsBuildLeavesNoRecord(t *testing.T) {
 	building := make(chan struct{})
 	done := make(chan error, 1)
 	go func() {
-		_, err := b.m.Create(ctx, model.CreateRequest{Image: "base-ubuntu", Name: "web"}, func(ctx context.Context, step func(string)) error {
-			step("image 1 of 3")
+		_, err := b.m.Create(ctx, model.CreateRequest{Image: "base-ubuntu", Name: "web"}, func(ctx context.Context, step func(imagemodel.Step)) error {
+			step(imagemodel.Step{Label: "image 1 of 3", Step: imagemodel.BuildBaseSystem})
 			close(building)
 			select {
 			case <-ctx.Done():
@@ -383,13 +384,13 @@ func TestAVMIsNotDeletedWhileItsCreateRunsAndAGoneRecordIsNeverMadeAgain(t *test
 	ctx := context.Background()
 	b := creating(t, false)
 	var refused, deleted error
-	_, err := b.m.Create(ctx, model.CreateRequest{Image: "base-ubuntu", Name: "web"}, func(_ context.Context, step func(string)) error {
+	_, err := b.m.Create(ctx, model.CreateRequest{Image: "base-ubuntu", Name: "web"}, func(_ context.Context, step func(imagemodel.Step)) error {
 		refused = b.m.CheckDelete("web")
 		_, deleted = b.m.Delete(ctx, "web")
 		if err := b.store.Delete(ctx, "web"); err != nil {
 			return err
 		}
-		step("image 2 of 3")
+		step(imagemodel.Step{Label: "image 2 of 3", Step: imagemodel.BuildPackages})
 		b.img.built = true
 		return nil
 	}, nil)
@@ -500,7 +501,7 @@ func TestTwoCreatesAtOnceNeverBothTakeTheMemoryLeft(t *testing.T) {
 		for _, name := range []string{"api", "web"} {
 			go func() {
 				ctx := context.WithValue(context.Background(), caller{}, name)
-				_, err := b.m.Create(ctx, model.CreateRequest{Image: "base-ubuntu", Name: name, Size: model.Resources{MemoryBytes: 8 << 30}}, func(context.Context, func(string)) error {
+				_, err := b.m.Create(ctx, model.CreateRequest{Image: "base-ubuntu", Name: name, Size: model.Resources{MemoryBytes: 8 << 30}}, func(context.Context, func(imagemodel.Step)) error {
 					building <- name
 					select {
 					case <-release:

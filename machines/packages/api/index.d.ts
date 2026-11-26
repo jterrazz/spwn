@@ -963,6 +963,64 @@ export type CoreFindingFixInput = {
     Path?: string;
 };
 
+export type CoreGuideGesture = {
+    args?: Record<string, string>;
+    call?: string;
+    confirm?: string;
+    label: string;
+    nav?: string;
+    on?: string;
+};
+
+export type CoreGuideGuide = {
+    act: string;
+    ended?: 'done' | 'failed' | 'interrupted';
+    id: string;
+    line: string;
+    live: boolean;
+    steps: CoreGuideStep[] | null;
+    subject: string;
+    view: CoreGuideView;
+};
+
+export type CoreGuideGuides = {
+    guides: CoreGuideGuide[] | null;
+};
+
+export type CoreGuideHeadline = {
+    next: string;
+    now: string;
+};
+
+export type CoreGuideProgress = {
+    kind: 'live';
+    line: string;
+};
+
+export type CoreGuidePrompt = {
+    lead: string;
+    quote: string;
+};
+
+export type CoreGuideStep = {
+    detail?: string;
+    id: string;
+    label: string;
+    status: 'done' | 'now' | 'waiting' | 'failed' | 'next';
+};
+
+export type CoreGuideView = {
+    action?: CoreGuideGesture;
+    headline: CoreGuideHeadline;
+    illustration: 'install-engine' | 'fetch-image' | 'build-1' | 'build-2' | 'build-3' | 'build-4' | 'build-failed' | 'boot' | 'boot-failed' | 'apply-file' | 'system-settings' | 'touch-id' | 'mac-search' | 'mac-link' | 'mac-joined' | 'device-key' | 'done';
+    kept?: string;
+    move: 'engine' | 'owner';
+    progress?: CoreGuideProgress;
+    prompt?: CoreGuidePrompt;
+    quiet?: CoreGuideGesture;
+    sentence: string;
+};
+
 export type CoreJournalGroup = {
     Day: string;
     Lines: CoreJournalReadLine[] | null;
@@ -3178,9 +3236,11 @@ export type PortsVerified = {
 };
 
 export type Progress = {
+    act?: string;
     detail?: string;
     done?: boolean;
     error?: CoreCallWireError;
+    step?: string;
     task: string;
 };
 
@@ -3471,6 +3531,8 @@ export type EngineEventsInput = Record<string, never>;
 export type EngineEventsOutput = EngineOpened | NoticeEvent;
 export type EngineGuestExecInput = EngineExecIn;
 export type EngineGuestExecOutput = EngineExecOut;
+export type EngineGuidesInput = Record<string, never>;
+export type EngineGuidesOutput = CoreGuideGuides;
 export type EngineHelloInput = Record<string, never>;
 export type EngineHelloOutput = EngineHello;
 export type EngineLogInput = EngineCallsLogIn;
@@ -3671,6 +3733,7 @@ export interface Calls {
     'engine.awake-off': { in: EngineAwakeOffInput; out: EngineAwakeOffOutput; watch: false; own: true };
     'engine.events': { in: EngineEventsInput; out: EngineEventsOutput; watch: true; own: true };
     'engine.guest-exec': { in: EngineGuestExecInput; out: EngineGuestExecOutput; watch: false; own: true };
+    'engine.guides': { in: EngineGuidesInput; out: EngineGuidesOutput; watch: false };
     'engine.hello': { in: EngineHelloInput; out: EngineHelloOutput; watch: false; own: true };
     'engine.log': { in: EngineLogInput; out: EngineLogOutput; watch: false };
     'engine.ports': { in: EnginePortsInput; out: EnginePortsOutput; watch: false; own: true };
@@ -3804,6 +3867,16 @@ export type CoreFailType = 'refused' | 'not-found' | 'not-for-this-machine' | 'n
 
 export type CoreFindingSeverity = 'broken' | 'needs-a-look';
 
+export type CoreGuideEnded = 'done' | 'failed' | 'interrupted';
+
+export type CoreGuideMove = 'engine' | 'owner';
+
+export type CoreGuidePicture = 'install-engine' | 'fetch-image' | 'build-1' | 'build-2' | 'build-3' | 'build-4' | 'build-failed' | 'boot' | 'boot-failed' | 'apply-file' | 'system-settings' | 'touch-id' | 'mac-search' | 'mac-link' | 'mac-joined' | 'device-key' | 'done';
+
+export type CoreGuideProgressKind = 'live';
+
+export type CoreGuideStatus = 'done' | 'now' | 'waiting' | 'failed' | 'next';
+
 export type CoreJournalKind = 'app' | 'machine' | 'setting' | 'skill' | 'image';
 
 export type CoreJournalOutcome = 'done' | 'failed' | 'held';
@@ -3909,6 +3982,11 @@ export type StationWords = {
     CoreFailField: Record<CoreFailField, StationWord>;
     CoreFailType: Record<CoreFailType, StationWord>;
     CoreFindingSeverity: Record<CoreFindingSeverity, StationWord>;
+    CoreGuideEnded: Record<CoreGuideEnded, StationWord>;
+    CoreGuideMove: Record<CoreGuideMove, StationWord>;
+    CoreGuidePicture: Record<CoreGuidePicture, StationWord>;
+    CoreGuideProgressKind: Record<CoreGuideProgressKind, StationWord>;
+    CoreGuideStatus: Record<CoreGuideStatus, StationWord>;
     CoreJournalKind: Record<CoreJournalKind, StationWord>;
     CoreJournalOutcome: Record<CoreJournalOutcome, StationWord>;
     CoreSectionID: Record<CoreSectionID, StationWord>;

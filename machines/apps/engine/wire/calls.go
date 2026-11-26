@@ -21,6 +21,7 @@ import (
 	awakecalls "github.com/jterrazz/studio-station/apps/engine/awake/calls"
 	backgroundcalls "github.com/jterrazz/studio-station/apps/engine/background/calls"
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
+	"github.com/jterrazz/studio-station/apps/engine/core/guide"
 	coremachine "github.com/jterrazz/studio-station/apps/engine/core/machine"
 	diskcalls "github.com/jterrazz/studio-station/apps/engine/disk/calls"
 	enginecalls "github.com/jterrazz/studio-station/apps/engine/engine/calls"
@@ -185,6 +186,11 @@ func (m machine) engineDeps() enginecalls.Deps {
 		Forward: func(ctx context.Context, in engine.StateIn) (<-chan json.RawMessage, error) {
 			frames, err := m.engineAPI().c.Watch(ctx, enginecalls.StateWatch.Name, in)
 			return frames, downAs(err, &enginecalls.DownError{})
+		},
+		Guided: func(ctx context.Context) (guide.Guides, error) {
+			var out guide.Guides
+			err := m.engineAPI().do(ctx, enginecalls.Guides.Name, struct{}{}, &out)
+			return out, err
 		},
 	}
 	if m.world != nil {

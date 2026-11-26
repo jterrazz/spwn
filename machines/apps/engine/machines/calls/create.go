@@ -11,11 +11,13 @@ import (
 
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
 
+	"github.com/jterrazz/studio-station/apps/engine/images"
 	imagescontract "github.com/jterrazz/studio-station/apps/engine/images/contract"
 	"github.com/jterrazz/studio-station/apps/engine/machines/contract"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
+	"github.com/jterrazz/studio-station/apps/engine/core/guide"
 	"github.com/jterrazz/studio-station/apps/engine/core/secret"
 	"github.com/jterrazz/studio-station/apps/engine/core/store"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
@@ -498,13 +500,28 @@ func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, build Ima
 		return failed(err)
 	}
 	made.record = true
+	rail := model.CreateRail(nil)
+	if build != nil {
+		rail = model.CreateRail(buildRail())
+	}
+	// invariant: a create reports each step it reaches as a phase of its
+	// act, under the name its claim settled, its rail with the first.
+	phase := func(step, line string) {
+		if progress == nil {
+			return
+		}
+		ph := guide.Phase{Subject: r.Name, Step: step, Line: line, Rail: rail}
+		rail = nil
+		progress(model.Step{Phase: &ph})
+	}
 
 	if build != nil {
 		building, stop := context.WithCancel(ctx)
 		var gone error
-		err = build(building, func(label string) {
-			say(label)
-			if moved := born(model.BornBuilding, label); moved != nil && gone == nil {
+		err = build(building, func(st images.Step) {
+			phase(string(st.Step), st.Label)
+			say(st.Label)
+			if moved := born(model.BornBuilding, st.Label); moved != nil && gone == nil {
 				gone = moved
 				stop()
 			}
@@ -523,6 +540,7 @@ func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, build Ima
 		s.undoCreate(ctx, r.Name, made)
 		return failed(err)
 	}
+	phase(string(model.BornCloning), "cloning "+disk)
 	say("cloning " + disk)
 	if err = born(model.BornCloning, ""); err != nil {
 		return fail("the record", err)
@@ -537,6 +555,7 @@ func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, build Ima
 	if err = s.writeBirth(r.Name, func(stored *model.Record) { stored.Version, stored.Want = version, want }); err != nil {
 		return fail("the record", err)
 	}
+	phase(string(model.BornBooting), model.StepRunning)
 	say(model.StepRunning)
 	if err = born(model.BornBooting, ""); err != nil {
 		return fail("the record", err)
@@ -544,6 +563,7 @@ func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, build Ima
 	if err = s.engineAPI.Do(ctx, engine.VMRun, r.Name); err != nil {
 		return keep(s.unhealthy(ctx, r.Name, err))
 	}
+	phase(string(model.BornAddress), model.StepAddress)
 	say(model.StepAddress)
 	if err = born(model.BornAddress, ""); err != nil {
 		return failed(&model.UnknownMachineError{Name: r.Name})
@@ -553,6 +573,7 @@ func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, build Ima
 		return keep(&model.UnhealthyError{Name: r.Name, Step: model.StepAddress, Detail: "none after 60 s"})
 	}
 	ip := addr.String()
+	phase(string(model.BornSSH), model.StepSSH)
 	say(model.StepSSH)
 	if err = born(model.BornSSH, ""); err != nil {
 		return failed(&model.UnknownMachineError{Name: r.Name})
@@ -562,6 +583,7 @@ func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, build Ima
 	}
 	var boot *model.FirstStart
 	if t != nil {
+		phase(string(model.BornSSH), model.StepBoot)
 		say(model.StepBoot)
 		boot = s.bootPhase(ctx, r.Name, version, *t)
 	}
@@ -638,6 +660,17 @@ func (s *Machinist) sshFails(ctx context.Context, name, detail string) error {
 }
 
 type made struct{ vm, record, undone, failed bool }
+
+// value: the steps of an image's build, as a create that builds its image
+// first declares them on its rail.
+func buildRail() []guide.Rung {
+	steps := images.BuildSteps()
+	out := make([]guide.Rung, len(steps))
+	for i, s := range steps {
+		out[i] = guide.Rung{ID: string(s), Label: s.Word()}
+	}
+	return out
+}
 
 // invariant: a create that failed from its first run on leaves its birth on
 // the record, failed at its step, with its cause and its console's last

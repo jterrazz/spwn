@@ -441,6 +441,12 @@
       "own": true
     },
     {
+      "name": "engine.guides",
+      "schema": "station.engine.guides/v1",
+      "where": "in-engine",
+      "out": "Guides"
+    },
+    {
       "name": "engine.hello",
       "schema": "station.engine.hello/v1",
       "where": "in-engine",
@@ -929,7 +935,8 @@
       ],
       "in": "CreateIn",
       "out": "Created",
-      "journal": true
+      "journal": true,
+      "guide": "machines.create"
     },
     {
       "name": "machines.delete",

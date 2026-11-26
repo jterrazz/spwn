@@ -189,7 +189,7 @@ func (b imageBuild) Run(ctx context.Context, as imagescalls.Login, line, stdin s
 // value: the image a create builds first, once the owner said yes.
 type createImages struct{ b imageBuilder }
 
-func (c createImages) Build(ctx context.Context, image string, step func(label string)) error {
-	_, err := c.b.Build(ctx, []string{image}, "", step)
+func (c createImages) Build(ctx context.Context, image string, step func(model.Step)) error {
+	_, err := c.b.Builder.Build(ctx, model.BuildRequest{Images: []string{image}}, step)
 	return err
 }

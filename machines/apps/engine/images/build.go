@@ -7,7 +7,12 @@ type BuildRequest struct {
 	Binary string
 }
 
-type Step struct{ Label string }
+type Step struct {
+	Label string
+	// value: the stage of the build the step belongs to; empty for a step
+	// of no build (an update's).
+	Step BuildStep
+}
 
 // value: the Machinefile an image is made from, as a build reads it: its
 // name (the image's), the image its disk starts from, its system, what it

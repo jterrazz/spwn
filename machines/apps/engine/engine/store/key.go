@@ -21,6 +21,9 @@ const (
 	FamilyRecords  Family = "records"
 	FamilyVault    Family = "vault"
 	FamilyNode     Family = "node"
+	// value: the acts the engine guides on a Mac (process.Acts), written by
+	// its board, never by a reader.
+	FamilyActs Family = "acts"
 )
 
 func Of(f Family, machine string) Key {
@@ -33,7 +36,7 @@ func Of(f Family, machine string) Key {
 
 func (f Family) PerMachine() bool {
 	switch f {
-	case FamilyMac, FamilyPorts, FamilyOverview, FamilyAwake, FamilyActivity, FamilySignins:
+	case FamilyMac, FamilyPorts, FamilyOverview, FamilyAwake, FamilyActivity, FamilySignins, FamilyActs:
 		return true
 	default:
 		return false

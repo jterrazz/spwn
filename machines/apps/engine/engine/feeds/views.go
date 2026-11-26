@@ -47,7 +47,7 @@ type OverviewView struct {
 
 func (o Pages) Known(name string) bool {
 	switch name {
-	case ViewMachines, ViewOverview, ViewOverviewElsewhere, ViewPorts, ViewAccounts, ViewAwake:
+	case ViewMachines, ViewOverview, ViewOverviewElsewhere, ViewPorts, ViewAccounts, ViewAwake, ViewGuides:
 		return true
 	}
 	for _, kind := range []string{viewOverviewOf, viewPortsOf, viewAccountsOf, viewAwakeOf} {
@@ -92,6 +92,9 @@ func (o Pages) Project(s *store.Snapshot, asked func(name string) bool) map[stri
 		if sl, sum, ok := v.overviewOf(k.Machine()); ok {
 			out[name] = viewOf(sl, OverviewView{Summary: sum})
 		}
+	}
+	if asked(ViewGuides) {
+		out[ViewGuides] = v.guides(all)
 	}
 	v.portsViews(all, asked, out)
 	v.ownViews(asked, out)

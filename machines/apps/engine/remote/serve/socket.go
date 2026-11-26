@@ -43,6 +43,9 @@ type Server struct {
 	// value: where a gesture this server runs on this machine is kept; nil
 	// keeps none.
 	Kept call.Keeper
+	// value: where the phases of a guided call this server runs on this
+	// machine are kept; nil keeps none.
+	Acts Acts
 }
 
 func (s Server) Conn(ctx context.Context, conn io.ReadWriteCloser) {
@@ -107,7 +110,14 @@ func (s Server) call(ctx context.Context, w *writer, f api.Frame) api.Frame {
 	if err != nil {
 		return api.Frame{ID: f.ID, Error: s.fault(err)}
 	}
-	out, err := h.Invoke(ctx, s.ThisMachine, f.In, progress{id: f.ID, out: w, word: s.wording})
+	plain := progress{id: f.ID, out: w, word: s.wording}
+	var p call.Progress = plain
+	g := &guided{progress: plain, family: h.Meta().Guide, acts: s.Acts}
+	if g.family != "" && s.Acts != nil {
+		p = g
+	}
+	out, err := h.Invoke(ctx, s.ThisMachine, f.In, p)
+	g.end(err)
 	s.Kept.Keep(ctx, s.ThisMachine, s.ThisMachine.Ref, h.Meta(), f.In, out, err)
 	if err != nil {
 		return api.Frame{ID: f.ID, Error: s.fault(err)}

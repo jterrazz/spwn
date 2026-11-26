@@ -382,7 +382,7 @@ func TestWorldMacGuestSocketsAnswerEachConnectionAsItsOwnGuest(t *testing.T) {
 	}
 	for range 200 {
 		d := process.New(quietMac{}, nil, nil, quietMachines{}, quietTailnet{}, process.Stores{Ports: quietPolicy{}, Reservations: quietReservations{}}, process.Options{ThisMachine: catalog.Mac, State: "/state", Rights: closed})
-		serve := machine{sys: local.System{Clock: quietMac{}}}.engineServer(d, nil, nil)
+		serve := machine{sys: local.System{Clock: quietMac{}}}.engineServer(d, nil, nil, nil)
 		barrier := make(chan struct{})
 		said := make([][]string, len(guests))
 		errs := make([]error, len(guests))

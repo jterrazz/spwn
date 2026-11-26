@@ -384,6 +384,16 @@ func (r *Router) Asks(name string, in json.RawMessage) []string {
 	return r.registry.Asks(name, in)
 }
 
+func (r *Router) Guide(target machine.Ref, name string) string {
+	// value: the act family a call run on this machine is guided as, by
+	// this binary's registry; none for a call at another machine.
+	h, ok := r.registry.Lookup(name)
+	if !ok || (!r.local(target) && target.Name != r.thisMac.Ref.Name) {
+		return ""
+	}
+	return h.Meta().Guide
+}
+
 func (r *Router) Served() contract.Hello {
 	return serve.Local(r.registry, r.thisMac, r.reach.Version).Hello()
 }
