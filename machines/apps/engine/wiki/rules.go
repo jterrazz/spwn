@@ -22,7 +22,7 @@ func rules() map[string]Level {
 		"H1": "", "H2": "", "H3": "", "H4": "", "H5": "", "H6": "", "H8": "", "H9": "", "H10": "",
 		"H12": "", "H14": "", "H15": "", "H16": "", "H17": "", "H19": "", "H20": "", "H22": "",
 		"H23": "", "H24": "", "H25": "", "H26": "", "H28": "", "H29": "", "H30": "", "H31": "",
-		"H32": "", "H33": "", "H35": "", "H36": "", "H38": "", "H39": "", "H40": "", "H41": "",
+		"H32": "", "H33": "", "H35": "", "H36": "", "H38": "", "H39": "", "H40": "", "H41": "", "H44": "",
 		"S2": LevelRemark, "S3": LevelRemark, "S4": LevelAmbient, "S6": LevelNeedsYou,
 		"S8": LevelAmbient, "S11": LevelAmbient, "S12": LevelRemark, "S13": LevelAmbient,
 		"S14": LevelAmbient, "S15": LevelRemark, "S16": LevelAmbient, "S17": LevelRemark,

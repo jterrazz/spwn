@@ -2,7 +2,9 @@ package wiki
 
 import (
 	"cmp"
+	"context"
 	"errors"
+	"fmt"
 	"path"
 	"slices"
 	"strconv"
@@ -233,32 +235,55 @@ type Corpus struct {
 	Records map[string]Record
 }
 
-func Read(files map[string][]byte) (Corpus, error) {
-	body, ok := files[schemaFile]
+func Read(ctx context.Context, files map[string]File) (Corpus, error) {
+	// invariant: a corpus past MaxPages or MaxCorpusBytes is refused whole,
+	// a page past MaxPageBytes is served with its finding and nothing it
+	// holds, and an abandoned ask stops between two pages.
+	f, ok := files[schemaFile]
 	if !ok {
 		return Corpus{}, ErrNoSchema
 	}
-	schema, err := ReadSchema(schemaFile, body)
+	if f.Size > MaxPageBytes {
+		return Corpus{}, fmt.Errorf("%s is %d bytes, %d at most", schemaFile, f.Size, MaxPageBytes)
+	}
+	schema, err := ReadSchema(schemaFile, f.Body)
 	if err != nil {
 		return Corpus{}, err
 	}
 	var ids []string
-	for p := range files {
+	var bytes int64
+	for p, f := range files {
+		bytes += int64(len(f.Body))
 		if strings.HasSuffix(p, ".md") && path.Base(p) != "README.md" {
 			ids = append(ids, strings.TrimSuffix(p, ".md"))
 		}
+	}
+	if Past(len(ids), bytes) {
+		return Corpus{}, &TooLarge{Pages: len(ids), Bytes: bytes}
 	}
 	slices.Sort(ids)
 	pages := make([]Page, 0, len(ids))
 	records := map[string]Record{}
 	for _, id := range ids {
-		body := string(files[id+".md"])
+		if err := ctx.Err(); err != nil {
+			return Corpus{}, err
+		}
+		f := files[id+".md"]
+		if f.Body == nil && f.Size > MaxPageBytes {
+			pages = append(pages, tooLong(id, f.Size, schema))
+			continue
+		}
+		body := string(f.Body)
 		pages = append(pages, Compile(id, body, schema))
 		if r, ok := readRecord(id, body); ok {
 			records[id] = r
 		}
 	}
-	return Corpus{Schema: schema, Pages: pages, Report: Check(schema, pages), Records: records}, nil
+	report, err := Check(ctx, schema, pages)
+	if err != nil {
+		return Corpus{}, err
+	}
+	return Corpus{Schema: schema, Pages: pages, Report: report, Records: records}, nil
 }
 
 func (c Corpus) Home() string {

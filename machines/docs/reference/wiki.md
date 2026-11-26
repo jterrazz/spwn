@@ -49,7 +49,7 @@ The engine's `Check` (`apps/engine/wiki/check.go`) judges the compiled pages of 
 
 | Rules                     | Judge                                                                                                       |
 | ------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| H1, H22, H38 to H41       | the compile: a kind that exists, a tag that reads, a braced value, a group's bounds, each attribute         |
+| H1, H22, H38 to H41, H44  | the compile: a kind that exists, a tag that reads, a braced value, a group's bounds, each attribute, size   |
 | H2, H3, H4, H5, H6        | each field's type, enum and presence, a ref's `to`; ids; refs; an anchor's repository; a rule's proof       |
 | H8, H9, H10, H12, H14     | a term defined once and a retired one written nowhere; floors; `needs`; an authored Face; a component       |
 | H15 to H17, H35           | `weight`, one written lead per set, `intent`, `fold`                                                        |
@@ -105,7 +105,18 @@ The answer carries every judgement the window draws, and the window decides none
 - what asks for the reader's eye, in one order wherever it is listed (needs-you first, then hard, then remarks, then ambient): a block's findings in that order, `NeedsYou` on a block or group one of whose findings needs the owner, and the page's `Attention`, every finding served on the page and its blocks, each with the word of what it is about and `At`, the address of its block, or of the folded group that holds it, empty for the page's head, and `Found`, when this reading time draws neither that block nor its folded group, the first reading time that does, which the window opens;
 - the head's two counts, `NeedsYou`, the needs-you findings of `Attention`, and `Unshown`, the blocks this budget does not show, a folded group counting all of its own.
 
-Its refusals are `wiki.none`, `wiki.unknown-page`, `wiki.unreadable` (`wiki.yaml` absent or refused, its finding said) and `wiki.bad-budget`, each told in `specs/usecases/wiki/read/`.
+Its refusals are `wiki.none`, `wiki.unknown-page`, `wiki.unreadable` (`wiki.yaml` absent or refused, its finding said; or a file of the folder its read refuses, a link out of it or a FIFO, named by its path inside the wiki only), `wiki.too-large` and `wiki.bad-budget`, each told in `specs/usecases/wiki/read/`.
+
+### The limits
+
+The read is bounded, each limit a constant of `apps/engine/wiki/limits.go`:
+
+- a page file past 1 MiB is sized and never read: it is served with no content and its one hard finding, H44, naming its size;
+- a corpus past 2,000 pages or 64 MiB of files read is refused whole, `wiki.too-large`; the folder's walk stops at the limit;
+- a page shows at most 100 findings of one rule, then one more of that rule that counts the rest;
+- an abandoned ask stops the read between two pages, compiled or checked.
+
+The corpus last read is kept in memory by its signature (each file's path, size and modification time; in the fake world, its bytes' hash), so an unchanged corpus is served without a file read; any change reads and compiles it anew.
 
 ## Beyond the spec
 

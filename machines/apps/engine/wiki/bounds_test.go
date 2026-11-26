@@ -106,7 +106,7 @@ func layered() []wiki.Page {
 func TestFifteenPagesNeedingEachOtherAreCheckedInMilliseconds(t *testing.T) {
 	pages := clique()
 	var report wiki.Report
-	within(t, 20*time.Millisecond, "a clique of fifteen needs", func() { report = wiki.Check(spwnKinds(), pages) })
+	within(t, 20*time.Millisecond, "a clique of fifteen needs", func() { report = checkAll(pages) })
 	want := []string{"blueprint/a01 needs: blueprint/a01 -> blueprint/a02 -> blueprint/a01"}
 	if got := ruled(report, "H10"); strings.Join(got, "\n") != strings.Join(want, "\n") {
 		t.Errorf("cycles %q, want %q", got, want)
@@ -116,7 +116,7 @@ func TestFifteenPagesNeedingEachOtherAreCheckedInMilliseconds(t *testing.T) {
 func TestTwoThousandPagesInLayersAreCheckedUnderFiftyMilliseconds(t *testing.T) {
 	pages := layered()
 	var report wiki.Report
-	within(t, 50*time.Millisecond, "a corpus of 100 layers of 20 pages", func() { report = wiki.Check(spwnKinds(), pages) })
+	within(t, 50*time.Millisecond, "a corpus of 100 layers of 20 pages", func() { report = checkAll(pages) })
 	if got := ruled(report, "H10"); len(got) != 0 {
 		t.Errorf("a layered corpus has no cycle; got %q", got)
 	}
@@ -134,7 +134,7 @@ func TestEachSetOfPagesNeedingEachOtherIsSaidOnceFromItsFirstPage(t *testing.T) 
 		"blueprint/a needs: blueprint/a -> blueprint/b -> blueprint/a",
 		"blueprint/s needs: blueprint/s -> blueprint/s",
 	}
-	if got := ruled(wiki.Check(spwnKinds(), compiledAll(sources)), "H10"); strings.Join(got, "\n") != strings.Join(want, "\n") {
+	if got := ruled(checkAll(compiledAll(sources)), "H10"); strings.Join(got, "\n") != strings.Join(want, "\n") {
 		t.Errorf("cycles %q, want %q", got, want)
 	}
 }
@@ -143,13 +143,13 @@ func BenchmarkTheWorstNeeds(b *testing.B) {
 	pages := clique()
 	b.Run("clique", func(b *testing.B) {
 		for b.Loop() {
-			wiki.Check(spwnKinds(), pages)
+			checkAll(pages)
 		}
 	})
 	layers := layered()
 	b.Run("layered", func(b *testing.B) {
 		for b.Loop() {
-			wiki.Check(spwnKinds(), layers)
+			checkAll(layers)
 		}
 	})
 }

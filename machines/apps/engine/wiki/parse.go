@@ -10,24 +10,57 @@ import (
 // value: the deepest a braced value may nest its arrays and objects.
 const maxDepth = 32
 
+// value: how far apart the index marks the runes counted, so a column is
+// counted from a mark at most this many bytes back, not from its line's start.
+const runeMark = 256
+
 type lineIndex struct {
 	src    string
 	starts []int
+	// value: the runes before each line's start, and before each mark.
+	lineRunes []int
+	marks     []runeAt
+	// value: the brace that closes each brace a scan has read, -1 when the
+	// page ends first.
+	braces map[int]int
 }
 
+type runeAt struct{ off, runes int }
+
 func indexLines(src string) lineIndex {
-	starts := []int{0}
-	for i := range len(src) {
-		if src[i] == '\n' {
-			starts = append(starts, i+1)
+	// invariant: one pass decodes the page as utf8.RuneCountInString does,
+	// so a count from any mark or line start equals the count from the page's
+	// start less the runes before it.
+	x := lineIndex{src: src, starts: []int{0}, lineRunes: []int{0}, braces: map[int]int{}}
+	runes := 0
+	for i := 0; i < len(src); {
+		for len(x.marks)*runeMark <= i {
+			x.marks = append(x.marks, runeAt{off: i, runes: runes})
 		}
+		_, size := utf8.DecodeRuneInString(src[i:])
+		if src[i] == '\n' {
+			x.starts = append(x.starts, i+1)
+			x.lineRunes = append(x.lineRunes, runes+1)
+		}
+		i += size
+		runes++
 	}
-	return lineIndex{src: src, starts: starts}
+	if len(x.marks) == 0 {
+		x.marks = append(x.marks, runeAt{})
+	}
+	return x
 }
 
 func (x lineIndex) at(off int) At {
 	line := sort.Search(len(x.starts), func(i int) bool { return x.starts[i] > off }) - 1
-	return At{Line: line + 1, Col: utf8.RuneCountInString(x.src[x.starts[line]:off]) + 1}
+	m := x.marks[min(off/runeMark, len(x.marks)-1)]
+	if m.off > off {
+		m = x.marks[off/runeMark-1]
+	}
+	if m.off < x.starts[line] {
+		m = runeAt{off: x.starts[line], runes: x.lineRunes[line]}
+	}
+	return At{Line: line + 1, Col: m.runes - x.lineRunes[line] + utf8.RuneCountInString(x.src[m.off:off]) + 1}
 }
 
 type tag struct {
@@ -63,6 +96,7 @@ func parseTag(x lineIndex, off int) (tag, *refusal) {
 	}
 	p.name = p.src[start:p.pos]
 	t := tag{name: p.name, at: p.at}
+	written := map[string]bool{}
 	for {
 		spaced, blank := p.skipSpace()
 		switch {
@@ -83,9 +117,10 @@ func parseTag(x lineIndex, off int) (tag, *refusal) {
 		if r != nil {
 			return t, r
 		}
-		if _, twice := t.props.Get(prop.Name); twice {
+		if written[prop.Name] {
 			return t, &refusal{rule: "H38", at: prop.At, says: fmt.Sprintf("<%s at line %d: %q is written twice", p.name, p.at.Line, prop.Name)}
 		}
+		written[prop.Name] = true
 		t.props = append(t.props, prop)
 	}
 }
@@ -182,7 +217,7 @@ func (p *tagParser) stringBody() (string, bool) {
 
 func (p *tagParser) braced() (Value, *refusal) {
 	open := p.pos
-	end, ok := matchingBrace(p.src, open)
+	end, ok := p.x.matchingBrace(open)
 	if !ok {
 		return Value{}, p.neverClosed()
 	}
@@ -203,26 +238,41 @@ func (p *tagParser) braced() (Value, *refusal) {
 
 // value: the offset of the brace that closes the one at open, strings
 // skipped; false when the page ends first.
-func matchingBrace(src string, open int) (int, bool) {
-	depth := 0
+// invariant: a scan from a brace reads what a scan from any brace it holds
+// would, so each brace it reads is answered once for the page, and a page of
+// braces never closed is scanned once, not once per brace.
+func (x lineIndex) matchingBrace(open int) (int, bool) {
+	if end, ok := x.braces[open]; ok {
+		return end, end >= 0
+	}
+	src := x.src
+	var held []int
+	unclosed := func() (int, bool) {
+		for _, b := range held {
+			x.braces[b] = -1
+		}
+		return 0, false
+	}
 	for i := open; i < len(src); i++ {
 		switch src[i] {
 		case '"':
 			end := strings.IndexAny(src[i+1:], "\"\n")
 			if end < 0 {
-				return 0, false
+				return unclosed()
 			}
 			i += 1 + end
 		case '{':
-			depth++
+			held = append(held, i)
 		case '}':
-			depth--
-			if depth == 0 {
+			b := held[len(held)-1]
+			held = held[:len(held)-1]
+			x.braces[b] = i
+			if len(held) == 0 {
 				return i, true
 			}
 		}
 	}
-	return 0, false
+	return unclosed()
 }
 
 func collapse(s string) string { return strings.Join(strings.Fields(s), " ") }

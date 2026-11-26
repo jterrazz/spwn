@@ -43,6 +43,9 @@ func Compile(id, source string, schema Schema) Page {
 	// invariant: a pure function of its arguments: it reads no file, runs
 	// nothing, and the same source gives the same Page. A page with a finding
 	// still compiles as far as it reads; its findings say what was refused.
+	if len(source) > MaxPageBytes {
+		return tooLong(id, int64(len(source)), schema)
+	}
 	source = strings.ReplaceAll(source, "\r\n", "\n")
 	c := &compiler{
 		page:    &Page{ID: id, Sections: []Section{{Items: []Item{}}}},
@@ -54,10 +57,7 @@ func Compile(id, source string, schema Schema) Page {
 	}
 	c.section = &c.page.Sections[0]
 	c.run()
-	c.page.Findings = c.findings
-	if c.page.Findings == nil {
-		c.page.Findings = []Finding{}
-	}
+	c.page.Findings = capped(c.findings)
 	c.faces()
 	return *c.page
 }

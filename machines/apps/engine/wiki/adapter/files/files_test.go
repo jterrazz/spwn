@@ -58,4 +58,9 @@ func TestAPageLinkedOutOfTheCorpusIsNeverRead(t *testing.T) {
 	if there.Error() != missing.Error() {
 		t.Fatalf("refusal %q differs from %q: it tells whether the outside target exists", there, missing)
 	}
+	t.Logf("the refusal reads %q, its cause %q", there, errors.Unwrap(there))
+	var unread *contract.Unreadable
+	if !errors.As(there, &unread) || unread.Path != "blueprint/secret.md" || there.Error() != "blueprint/secret.md cannot be read" {
+		t.Fatalf("refusal %q; want it to name blueprint/secret.md, the path inside the wiki, and nothing else", there)
+	}
 }

@@ -2,6 +2,7 @@ package wiki
 
 import (
 	"cmp"
+	"context"
 	"fmt"
 	"regexp"
 	"slices"
@@ -103,41 +104,55 @@ type checker struct {
 	needsYou  map[string]bool
 	rows      map[*Block][]string
 	kids      map[string][]string
-	findings  []Finding
+	// value: the findings of each page's compile, then the check's own, and
+	// how many of the check's each page has of each rule.
+	compiled []Finding
+	findings []Finding
+	said     map[ruleOn]int
 }
 
-func Check(schema Schema, pages []Page) Report {
+func Check(ctx context.Context, schema Schema, pages []Page) (Report, error) {
 	// invariant: a pure function of its arguments, like Compile: the corpus
 	// is the pages given and its schema; no file, no git, no network and no
 	// engine state is read, so a proof's freshness and a reader's last visit
-	// are not judged here.
+	// are not judged here. Only an abandoned ask ends it early, between two
+	// pages, with the context's error.
 	k := newChecker(schema, pages)
 	k.corpus()
 	for _, p := range k.pages {
+		if err := ctx.Err(); err != nil {
+			return Report{}, err
+		}
 		k.page(p)
 	}
 	k.schemaRules()
 	readings := make([]Reading, 0, len(k.pages))
 	for _, p := range k.pages {
+		if err := ctx.Err(); err != nil {
+			return Report{}, err
+		}
 		readings = append(readings, k.weigh(p))
 	}
-	slices.SortStableFunc(k.findings, func(a, b Finding) int {
+	findings := append(append([]Finding{}, k.compiled...), capped(k.findings)...)
+	sortFindings(findings)
+	return Report{Findings: findings, Readings: readings}, nil
+}
+
+func sortFindings(findings []Finding) {
+	slices.SortStableFunc(findings, func(a, b Finding) int {
 		return cmp.Or(cmp.Compare(a.Page, b.Page), cmp.Compare(a.Line, b.Line), cmp.Compare(a.Col, b.Col), cmp.Compare(a.Rule, b.Rule))
 	})
-	if k.findings == nil {
-		k.findings = []Finding{}
-	}
-	return Report{Findings: k.findings, Readings: readings}
 }
 
 func newChecker(schema Schema, pages []Page) *checker {
 	k := &checker{
 		schema: schema, byID: map[string]*Page{}, blocks: map[string][]held{}, groups: map[string][]heldGroup{},
 		targets: map[string]target{}, floors: map[string]int{}, needsYou: map[string]bool{}, rows: map[*Block][]string{},
+		said: map[ruleOn]int{},
 	}
 	for i := range pages {
 		p := &pages[i]
-		k.findings = append(k.findings, p.Findings...)
+		k.compiled = append(k.compiled, p.Findings...)
 		if _, twice := k.byID[p.ID]; twice {
 			k.add("H3", p.ID, "", At{Line: 1, Col: 1}, fmt.Sprintf("page %q is read twice: a page id is its path, once in the corpus", p.ID))
 			continue
@@ -191,8 +206,13 @@ func (k *checker) mark(address, id string, t target) {
 }
 
 func (k *checker) add(rule, page, block string, at At, says string) {
+	k.said[ruleOn{page, rule}]++
 	k.findings = append(k.findings, finding(rule, page, block, at, says))
 }
+
+// value: whether a page already has as many findings of a rule as are
+// shown, so what the next would say need not be worked out.
+func (k *checker) full(rule, page string) bool { return k.said[ruleOn{page, rule}] >= maxFindings }
 
 func (k *checker) addSchema(rule string, line int, says string) {
 	k.add(rule, k.schema.File, "", At{Line: line, Col: 1}, says)
@@ -275,10 +295,14 @@ func (k *checker) retiredTerm(term *Block) {
 	}
 	for _, p := range k.pages {
 		forProse(p, func(pr *Prose) {
+			line, col, read := pr.Span.From, 1, 0
 			for _, m := range pattern.FindAllStringIndex(pr.Markdown, -1) {
-				before := pr.Markdown[:m[0]]
-				line := pr.Span.From + strings.Count(before, "\n")
-				col := len([]rune(before[strings.LastIndexByte(before, '\n')+1:])) + 1
+				for _, r := range pr.Markdown[read:m[0]] {
+					if col++; r == '\n' {
+						line, col = line+1, 1
+					}
+				}
+				read = m[0]
 				k.add("H8", p.ID, "", At{Line: line, Col: col}, says)
 			}
 		})
@@ -638,6 +662,10 @@ func (k *checker) narrowed(p *Page, id string, kind Kind, f Field, v Value, at A
 // of one (H4), and says the nearest address when one is two edits away.
 func (k *checker) resolve(p *Page, id string, r Value, at At) {
 	if _, ok := k.targets[r.Text]; ok {
+		return
+	}
+	if k.full("H4", p.ID) {
+		k.add("H4", p.ID, id, at, "")
 		return
 	}
 	page, _, block := strings.Cut(r.Text, "#")

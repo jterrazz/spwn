@@ -1,6 +1,7 @@
 package wiki_test
 
 import (
+	"context"
 	"errors"
 	"os"
 	"path/filepath"
@@ -21,6 +22,14 @@ func corpusFiles(t *testing.T) map[string][]byte {
 		out[id+".md"] = []byte(source)
 	}
 	return out
+}
+
+func readAll(files map[string][]byte) (wiki.Corpus, error) {
+	out := make(map[string]wiki.File, len(files))
+	for p, body := range files {
+		out[p] = wiki.File{Size: int64(len(body)), Body: body}
+	}
+	return wiki.Read(context.Background(), out)
 }
 
 func outline(s wiki.Served) string {
@@ -168,7 +177,7 @@ func refs(rs []wiki.ServedRef) string {
 }
 
 func TestEveryPageIsServedToItsGoldenAtEachBudget(t *testing.T) {
-	c, err := wiki.Read(corpusFiles(t))
+	c, err := readAll(corpusFiles(t))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -199,7 +208,7 @@ func TestEveryPageIsServedToItsGoldenAtEachBudget(t *testing.T) {
 }
 
 func TestAFindingOnABlockThisReadingTimeDoesNotDrawSaysWhichOneDoes(t *testing.T) {
-	c, err := wiki.Read(corpusFiles(t))
+	c, err := readAll(corpusFiles(t))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -227,7 +236,7 @@ func TestAFindingOnABlockThisReadingTimeDoesNotDrawSaysWhichOneDoes(t *testing.T
 }
 
 func TestACorpusIsOpenedAtItsFirstSeatsHomeAndItsOwnBudget(t *testing.T) {
-	c, err := wiki.Read(corpusFiles(t))
+	c, err := readAll(corpusFiles(t))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -238,7 +247,7 @@ func TestACorpusIsOpenedAtItsFirstSeatsHomeAndItsOwnBudget(t *testing.T) {
 }
 
 func TestAPageNoFileHoldsIsUnknown(t *testing.T) {
-	c, err := wiki.Read(corpusFiles(t))
+	c, err := readAll(corpusFiles(t))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -248,7 +257,7 @@ func TestAPageNoFileHoldsIsUnknown(t *testing.T) {
 }
 
 func TestACorpusWithNoSchemaIsNotRead(t *testing.T) {
-	if _, err := wiki.Read(map[string][]byte{"a.md": []byte("# A\n")}); !errors.Is(err, wiki.ErrNoSchema) {
+	if _, err := readAll(map[string][]byte{"a.md": []byte("# A\n")}); !errors.Is(err, wiki.ErrNoSchema) {
 		t.Fatalf("Read = %v; want ErrNoSchema", err)
 	}
 }
@@ -276,7 +285,7 @@ func TestAFigureWithNoPartsWrittenIsDrawnFromTheGroupItShowsByItsTitle(t *testin
 	files := corpusFiles(t)
 	files["growth/positioning.md"] = []byte(strings.Replace(string(files["growth/positioning.md"]),
 		`parts={[{ name: "by hand", at: "y" }, { name: "one big agent", at: "x" }, { name: "spwn", at: "xy" }]}`, "", 1))
-	c, err := wiki.Read(files)
+	c, err := readAll(files)
 	if err != nil {
 		t.Fatal(err)
 	}

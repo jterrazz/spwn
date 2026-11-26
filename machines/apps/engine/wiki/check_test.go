@@ -1,6 +1,8 @@
 package wiki_test
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -33,7 +35,25 @@ func checked(schema wiki.Schema, sources map[string]string) wiki.Report {
 	for _, id := range ids {
 		pages = append(pages, wiki.Compile(id, sources[id], schema))
 	}
-	return wiki.Check(schema, pages)
+	return checkWith(schema, pages)
+}
+
+func checkWith(schema wiki.Schema, pages []wiki.Page) wiki.Report {
+	r, err := wiki.Check(context.Background(), schema, pages)
+	if err != nil {
+		panic(err)
+	}
+	return r
+}
+
+func checkAll(pages []wiki.Page) wiki.Report { return checkWith(spwnKinds(), pages) }
+
+func TestAnAbandonedCheckEndsWithItsContextsError(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	if _, err := wiki.Check(ctx, spwnKinds(), []wiki.Page{wiki.Compile("blueprint/a", "# A\n", spwnKinds())}); !errors.Is(err, context.Canceled) {
+		t.Errorf("err = %v, want context.Canceled", err)
+	}
 }
 
 func line(f wiki.Finding) string {
@@ -236,6 +256,7 @@ func checkCases() []checkCase {
 		{name: "a refused link with no proof", pages: caseOf(`<Link id="x" from={ref("blueprint/case")} to="the cloud" right="refused" because="r." />`), want: []string{c + `3:1 S3 remark link "x" is refused and names no proof: nothing would catch it`}},
 		{name: "a scenario with no proof", pages: caseOf(`<Scenario id="x" of={ref("blueprint/case")} given="g." when="w." then="t." />`), want: []string{c + `3:1 S4 ambient scenario "x" has no proof: shown as pending`}},
 		{name: "a block resting on a reading", pages: caseOf(`<Term id="x" means="m." rests_on="reading" />`), want: []string{c + `3:25 S6 needs-you "x" rests on this page's reading: you have not ruled`}},
+		{name: "a page past 1 MiB", pages: caseOf(strings.Repeat("a", 1<<20)), want: []string{c + `1:1 H44 hard blueprint/case.md is 1048584 bytes, past the 1048576 a page is compiled from: split it`, c + `1:1 S8 ambient page "blueprint/case" is prose only`}},
 		{name: "a page of prose only", pages: caseOf("Only prose."), want: []string{c + `1:1 S8 ambient page "blueprint/case" is prose only`}},
 		{name: "a page past its budget, none leading", pages: caseOf(eight(`<Decision id="dN" adr="spwn:a.md" decides="d." />`)), want: []string{c + `1:1 S11 ambient page "blueprint/case" does not fit 2min: 8 lines`, c + `1:1 S13 ambient page "blueprint/case": 8 blocks, none leads`}},
 		{name: "a group of eight blocks", pages: caseOf("<Group id=\"g\" title=\"G\" intent=\"tell\">\n\n" + eight(`<Term id="dN" means="m." />`) + "</Group>"), want: []string{c + `1:1 S13 ambient page "blueprint/case": 8 blocks, none leads`, c + `3:1 S15 remark group "g" holds 8 blocks: split it`}},

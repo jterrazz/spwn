@@ -116,6 +116,21 @@ func runs(text string) []Run {
 		}
 		out = append(out, s)
 	}
+	// invariant: the next "](" and the ")" after it are found once and
+	// reused until reading passes them, so a line of "[" is read once.
+	mid, end := -1, -1
+	link := func(i int) (int, int) {
+		if mid < i {
+			mid, end = len(text), len(text)
+			if m := strings.Index(text[i:], "]("); m >= 0 {
+				mid = i + m
+				if e := strings.IndexByte(text[mid+2:], ')'); e >= 0 {
+					end = mid + 2 + e
+				}
+			}
+		}
+		return mid, end
+	}
 	for i := 0; i < len(text); {
 		rest := text[i:]
 		switch {
@@ -132,12 +147,10 @@ func runs(text string) []Run {
 				continue
 			}
 		case rest[0] == '[':
-			if mid := strings.Index(rest, "]("); mid > 0 {
-				if end := strings.IndexByte(rest[mid+2:], ')'); end >= 0 {
-					emit(Run{Text: rest[1:mid], Link: rest[mid+2 : mid+2+end]})
-					i += mid + 3 + end
-					continue
-				}
+			if m, e := link(i); m > i && e < len(text) {
+				emit(Run{Text: text[i+1 : m], Link: text[m+2 : e]})
+				i = e + 1
+				continue
 			}
 		}
 		plain.WriteByte(text[i])
