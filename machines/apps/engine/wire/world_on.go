@@ -1130,10 +1130,52 @@ func (m *worldMac) serveLocked() *remotefake.Dialer {
 	if m.served == nil {
 		far := m.run.far(m)
 		m.served = remotefake.New()
-		m.served.Serve(m.name, remotefake.Mac{Registry: far.registry, Profile: far.profile, Version: cmp.Or(m.stationVersion(), Version()), Lacks: m.slice().Lacks, Word: func(err error) *fail.Error { return kit.Translate(err, "") }, Relay: far.relay, Kept: far.kept})
+		m.served.Serve(m.name, remotefake.Mac{Registry: far.registry, Profile: far.profile, Version: cmp.Or(m.stationVersion(), Version()), Lacks: m.slice().Lacks, Word: func(err error) *fail.Error { return kit.Translate(err, "") }, Relay: far.relay, Kept: far.kept, Answers: m.answers()})
 		m.start = far.start
 	}
 	return m.served
+}
+
+// value: how this Mac's binary garbles its answers, from the world's
+// answers_vm_state: every VM it answers, an object with a Name, a Lifetime
+// and a State, says that state; nil when the world sets none.
+func (m *worldMac) answers() func(json.RawMessage) json.RawMessage {
+	state := m.slice().AnswersVMState
+	if state == nil {
+		return nil
+	}
+	var garble func(v any) any
+	garble = func(v any) any {
+		switch t := v.(type) {
+		case map[string]any:
+			_, named := t["Name"]
+			_, lived := t["Lifetime"]
+			if _, stated := t["State"]; named && lived && stated {
+				t["State"] = *state
+			}
+			for k, item := range t {
+				t[k] = garble(item)
+			}
+		case []any:
+			for i, item := range t {
+				t[i] = garble(item)
+			}
+		}
+		return v
+	}
+	return func(raw json.RawMessage) json.RawMessage {
+		dec := json.NewDecoder(bytes.NewReader(raw))
+		dec.UseNumber()
+		var v any
+		if dec.Decode(&v) != nil {
+			return raw
+		}
+		out, err := json.Marshal(garble(v))
+		if err != nil {
+			return raw
+		}
+		return out
+	}
 }
 
 // invariant: another Mac of the world answers while it is on the tailnet,

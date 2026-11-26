@@ -163,6 +163,10 @@ type Mac struct {
 	Station string `json:"station,omitempty"`
 	// value: the calls that older station does not serve, until an upgrade.
 	Lacks []string `json:"lacks,omitempty"`
+	// value: the state this Mac's station answers for each of its VMs in
+	// place of its own, as a broken or hostile binary sends it: a value off
+	// the wire's enum, empty included; absent answers its own.
+	AnswersVMState *string `json:"answers_vm_state,omitempty"`
 	// value: what station keeps in this Mac's preferences, by group.
 	Preferences map[string]json.RawMessage `json:"preferences,omitempty"`
 	// value: station's own files as text, by name, while no store has read

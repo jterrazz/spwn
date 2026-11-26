@@ -202,6 +202,24 @@ func TestFindIndexesTheFleetsMachinesPortsSectionsAndActions(t *testing.T) {
 	}
 }
 
+// invariant: a VM another Mac answered in a state off the enum, empty or
+// blank included, is found as a VM whose state is unknown; the index still
+// draws.
+func TestFindSaysUnknownOfAStateOffTheEnum(t *testing.T) {
+	for _, state := range []model.VMState{"", "   ", "exploded", model.UnknownState} {
+		r := findFleet()
+		r.All.Macs[1].VMs[1].State = state
+		p := Find(r, page.Context{Machine: findPro, Kind: "computer"})
+		if err := page.Check(p); err != nil {
+			t.Fatalf("with linux-3 %q the Find index fails its checks: %v", state, err)
+		}
+		row := findRow(p, FindMachines, "linux-3")
+		if row == nil || words(row.Detail) != "unknown | mac-mini" || !strings.Contains(words(row.Cells[0]), "unknown") {
+			t.Errorf("linux-3 %q is found as %+v, want unknown on mac-mini, by the tag unknown", state, row)
+		}
+	}
+}
+
 // invariant: SPEC A6 [find.down]: while infra is down Find leads with
 // Restart infra, run once its name is typed, and says since when it is down.
 func TestFindLeadsWithRestartInfraWhileItIsDown(t *testing.T) {

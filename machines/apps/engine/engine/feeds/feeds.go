@@ -104,11 +104,7 @@ func (v view) machines() *machines.AllMachines {
 		fresh := held && sl.State == store.Fresh
 		h := machines.ViewOf(n, records[n], nodes[n], far, fresh)
 		if held && !fresh {
-			h.VMs = nil
-			for _, vm := range far.VMs {
-				vm.Mac = n
-				h.VMs = append(h.VMs, vm)
-			}
+			h.VMs = machines.AnsweredVMs(n, far.VMs)
 			if sl.ReadAt.After(h.Answered) {
 				h.Answered = sl.ReadAt
 			}

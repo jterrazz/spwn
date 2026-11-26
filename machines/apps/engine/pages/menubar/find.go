@@ -226,7 +226,7 @@ func (f finder) vm(h model.MacView, vm model.VM) entry {
 		glyph = "server"
 	}
 	row := page.Row{ID: vm.Name, Label: vm.Name, Detail: page.Texts(word, f.mac(h.Name)), Glyph: page.Glyph{Kind: glyph, Signal: signal, Dot: dot}, Nav: machinePage(vm.Name)}
-	tags := []string{strings.Fields(word)[0], "vm", strings.ToLower(model.KindWord(kind))}
+	tags := []string{firstWord(word), "vm", strings.ToLower(model.KindWord(kind))}
 	e := entry{row: row, tags: tags, verb: opens("open:"+vm.Name, "")}
 	if kind != machine.Server && vm.State == model.Running {
 		attach := attachOf(vm)
@@ -245,7 +245,7 @@ func (f finder) state(vm model.VM) (string, page.Signal, page.Dot) {
 		}
 		return "down", page.SignalFailing, page.DotFill
 	case vm.State != model.Running:
-		return string(vm.State), page.SignalQuiet, page.DotRing
+		return stateWord(vm.State), page.SignalQuiet, page.DotRing
 	case vm.Lifetime == model.AlwaysOn:
 		if h := health(vm); h != "healthy" {
 			return h, page.SignalWaits, page.DotFill
@@ -253,6 +253,22 @@ func (f finder) state(vm model.VM) (string, page.Signal, page.Dot) {
 		return "healthy", page.SignalWell, page.DotFill
 	}
 	return string(vm.State), page.SignalWell, page.DotFill
+}
+
+// value: a state off the enum, empty included, in the word of a VM whose
+// state is not known.
+func stateWord(s model.VMState) string {
+	if !slices.Contains(s.Enum(), string(s)) {
+		return string(model.UnknownState)
+	}
+	return string(s)
+}
+
+func firstWord(said string) string {
+	if words := strings.Fields(said); len(words) > 0 {
+		return words[0]
+	}
+	return string(model.UnknownState)
 }
 
 func attachOf(vm model.VM) page.Action {

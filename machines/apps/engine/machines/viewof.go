@@ -30,12 +30,24 @@ func ViewOf(name string, rec MacRecord, node Node, far MacView, answered bool) M
 		Name: name, User: rec.User, StationVersion: far.StationVersion, Reachable: true, LAN: far.LAN, Node: far.Node, Engine: far.Engine,
 		Hardware: far.Hardware, Laptop: far.Laptop, Asleep: far.Asleep, Awake: far.Awake, SilentHypervisor: far.SilentHypervisor, SilentPackage: far.SilentPackage,
 	}
-	for _, vm := range far.VMs {
-		vm.Mac = name
-		view.VMs = append(view.VMs, vm)
-	}
+	view.VMs = AnsweredVMs(name, far.VMs)
 	if node.IP != "" || node.Online {
 		view.Node = node
 	}
 	return view
+}
+
+func AnsweredVMs(mac string, vms []VM) []VM {
+	// invariant: the VMs another Mac answered, each on that Mac; one
+	// answered with no name is left out, as a broken or hostile binary
+	// may send it: no page draws a row it cannot name.
+	var out []VM
+	for _, vm := range vms {
+		if vm.Name == "" {
+			continue
+		}
+		vm.Mac = mac
+		out = append(out, vm)
+	}
+	return out
 }
