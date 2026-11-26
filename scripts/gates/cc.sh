@@ -24,7 +24,7 @@ if [ -z "$ATTACH" ]; then
   i=0; : > $RUN/$L-cc.items
   for sha in $(git -C "$W" rev-list --reverse "$BASE..$B"); do i=$((i+1)); [ "$i" -lt "${FROM:-1}" ] && continue; [ -n "$PICK" ] && ! echo " $PICK " | grep -q " $i " && continue; echo "$i $sha" >> $RUN/$L-cc.items; done
   [ -s $RUN/$L-cc.items ] || { echo "no commit in $BASE..$B"; exit 2; }
-  w=0; until ! { [ -e $RUN/vm-hold/$VM ] || [ -e $RUN/vm-hold/all ]; } && "$GATE_SSH" ssh -n -o ConnectTimeout=10 $VM true 2>/dev/null; do [ $w -ge 180 ] && { echo "VM $VM not free after 60 min"; exit 87; }; [ $w = 0 ] && echo "waiting for $VM (hold or ssh) $(date +%T)"; w=$((w+1)); sleep 20; done
+  w=0; until ! { [ -e $RUN/vm-hold/$VM ] || [ -e $RUN/vm-hold/all ]; } && "$GATE_SSH" ssh -n -o ConnectTimeout=10 $VM true 2>/dev/null; do [ $w -ge 180 ] && { echo "VM $VM not free after 60 min"; exit 87; }; [ $w = 0 ] && echo "waiting for $VM (hold or unreachable) $(date +%T)"; w=$((w+1)); sleep 20; done
   if "${SSHP[@]}" $VM "[ -e $R/$L-cc.pid ] && kill -0 \$(cat $R/$L-cc.pid) 2>/dev/null"; then echo "refused: $L already runs on $VM (ATTACH=1 waits on it)"; exit 88; fi
   "${SSHP[@]}" $VM "mkdir -p $R && find $R -maxdepth 1 -name '*.bundle' -mmin +1440 -delete; df -h ~ | tail -1"
   u=$("${SSHP[@]}" $VM "df --output=pcent ~ | tail -1 | tr -dc 0-9"); [ "${u:-100}" -lt 90 ] || { echo "DISK $VM at ${u}%: free it (old clones, logs) before rerunning"; exit 86; }

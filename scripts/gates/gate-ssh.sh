@@ -1,40 +1,119 @@
 #!/bin/bash
 set -u
-SELF=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")
+SELF=$(cd "$(command -p dirname "${BASH_SOURCE[0]}")" && pwd -P)/$(command -p basename "${BASH_SOURCE[0]}")
 ROUTES=${GATE_ROUTES_DIR:-$HOME/.config/spwn/gate-routes}
 refuse() { echo "gate-ssh: $*" >&2; exit 92; }
-usage() { echo "usage: gate-ssh.sh ssh|rsh [-n] [-q] [-o ConnectTimeout=N] <host> [command...]; gate-ssh.sh scp [-q] <source>... <destination>" >&2; exit 2; }
-# invariant: the three options below lead every argv; the first value ssh reads for an option wins, so nothing a caller or ~/.ssh/config says can reach an ssh agent or a default identity.
-GUARD=(-o BatchMode=yes -o IdentitiesOnly=yes -o IdentityAgent=none)
+usage() { echo "usage: gate-ssh.sh ssh|rsh [-n] [-q] [-T] [-o ConnectTimeout=N] <host> [command...]; gate-ssh.sh scp [-q] <source>... <destination>" >&2; exit 2; }
+# invariant: -F /dev/null keeps every ssh_config out, so the options below and the route file's are the whole configuration: no agent, no default identity, no proxy or jump the route did not name.
+COMMON=(-F /dev/null -o BatchMode=yes -o StrictHostKeyChecking=yes -o IdentitiesOnly=yes -o IdentityAgent=none -o ForwardAgent=no -o ControlMaster=no -o ControlPath=none -o PermitLocalCommand=no)
+SSH_GUARD=(-a "${COMMON[@]}")
+ME=$(command -p id -u)
 
 expand() { case $1 in "~/"*) echo "$HOME/${1#\~/}" ;; *) echo "$1" ;; esac; }
+quote() { printf "'%s'" "${1//\'/\'\\\'\'}"; }
+private() {
+  local perm uid
+  read -r perm _ uid _ <<< "$(command -p ls -ldn "$1" 2> /dev/null)"
+  [ "$uid" = "$ME" ] && [ "${perm:5:1}" = - ] && [ "${perm:8:1}" = - ]
+}
+
+owner_home() {
+  local u h
+  u=$(command -p id -un)
+  case $u in "" | -* | *[!A-Za-z0-9._-]*) refuse "the user name '$u' is not plain: cannot find its home in the passwd database" ;; esac
+  eval "h=~$u"
+  case $h in /*) echo "$h" ;; *) refuse "no home for $u in the passwd database" ;; esac
+}
+
+check_key() {
+  local name=$1 k=$2 d r h hr s x
+  case $k in /*) ;; *) refuse "route file $f: $name $k is not an absolute path" ;; esac
+  [ ! -L "$k" ] || refuse "route file $f: $name $k is a symbolic link: name the key file itself"
+  d=$(cd "$(command -p dirname "$k")" 2> /dev/null && pwd -P) || d=$(command -p dirname "$k")
+  r=$d/$(command -p basename "$k")
+  for h in "$(owner_home)" "$HOME"; do
+    hr=$(cd "$h" 2> /dev/null && pwd -P) || hr=$h
+    s=$(cd "$hr/.ssh" 2> /dev/null && pwd -P) || s=$hr/.ssh
+    case $r in "$hr"/.ssh/* | "$s"/*) refuse "route file $f: $name $r lies under $hr/.ssh, where the owner's own identities live: a gate route takes a dedicated key kept outside ~/.ssh, so this route is refused until one exists, and creating and authorising that key is the owner's gesture (this script never creates, copies or moves a key)" ;; esac
+    if [ -d "$s" ]; then
+      for x in "$s"/*; do
+        [ -e "$x" ] || continue
+        ! [ "$r" -ef "$x" ] || refuse "route file $f: $name $r is the same file as $x, an identity of the owner: a dedicated key only"
+      done
+    fi
+  done
+  [ -f "$r" ] && [ -r "$r" ] || refuse "route file $f: $name $r is not a readable file"
+}
 
 load_route() {
-  local host=$1 f line perm
-  case $host in "" | *[!A-Za-z0-9._-]*) refuse "'$host' is not a plain host name: name the gate host with GATE_VM_LINUX" ;; esac
+  local host=$1 line k v seen=" "
+  case $host in "" | -* | *[!A-Za-z0-9._-]*) refuse "'$host' is not a plain host name: name the gate host with GATE_VM_LINUX" ;; esac
+  [ -d "$ROUTES" ] || refuse "no route for $host: set GATE_ROUTES_DIR to the folder that holds $host.env; this script never falls back to plain ssh"
+  [ ! -L "$ROUTES" ] || refuse "route folder $ROUTES is a symbolic link: name the folder itself"
+  private "$ROUTES" || refuse "route folder $ROUTES is not yours alone: it must be owned by you and writable by no one else"
   f=$ROUTES/$host.env
-  [ -f "$f" ] || refuse "no route for $host: set GATE_ROUTES_DIR to the folder that holds $host.env (KEY=<identity file>, or HOP=<user@host> and HOP_KEY=<identity file> for a two-hop route); this script never falls back to plain ssh"
-  perm=$(ls -ld "$f" | cut -c1-10)
-  [ "${perm:5:1}" = - ] && [ "${perm:8:1}" = - ] || refuse "route file $f is writable by others: chmod go-w it"
-  KEY=; HOP=; HOP_KEY=
+  [ ! -L "$f" ] || refuse "route file $f is a symbolic link: write the file itself"
+  [ -f "$f" ] || refuse "no route for $host: set GATE_ROUTES_DIR to the folder that holds $host.env (KEY=, HOSTNAME=, USER=, PORT= and PROXY=station-pipe with STATION=; or HOP= and HOP_KEY=); this script never falls back to plain ssh"
+  private "$f" || refuse "route file $f is not yours alone: it must be owned by you and writable by no one else"
+  KEY=; HOSTNAME_=; USER_=; PORT=; PROXY=; STATION=; KNOWN_HOSTS=; HOP=; HOP_KEY=
   while IFS= read -r line || [ -n "$line" ]; do
-    case $line in
-      "" | "#"*) ;;
-      KEY=*) KEY=$(expand "${line#KEY=}") ;;
-      HOP=*) HOP=${line#HOP=} ;;
-      HOP_KEY=*) HOP_KEY=$(expand "${line#HOP_KEY=}") ;;
-      *) refuse "route file $f holds a line that is not KEY=, HOP= or HOP_KEY=" ;;
+    case $line in "" | "#"*) continue ;; esac
+    k=${line%%=*}; v=${line#*=}
+    [ "$k" != "$line" ] || refuse "route file $f holds a line that is not KEY=value"
+    case $seen in *" $k "*) refuse "route file $f sets $k twice" ;; esac
+    seen="$seen$k "
+    case $k in
+      KEY) KEY=$(expand "$v") ;;
+      HOSTNAME) HOSTNAME_=$v ;;
+      USER) USER_=$v ;;
+      PORT) PORT=$v ;;
+      PROXY) PROXY=$v ;;
+      STATION) STATION=$v ;;
+      HOP) HOP=$v ;;
+      KNOWN_HOSTS) KNOWN_HOSTS=$(expand "$v") ;;
+      HOP_KEY) HOP_KEY=$(expand "$v") ;;
+      *) refuse "route file $f holds $k, which is none of KEY, HOSTNAME, USER, PORT, PROXY, STATION, KNOWN_HOSTS, HOP, HOP_KEY" ;;
     esac
   done < "$f"
-  if [ -n "$HOP" ]; then
-    [ -z "$KEY" ] && [ -n "$HOP_KEY" ] || refuse "route file $f: a two-hop route sets HOP and HOP_KEY and no KEY"
-    case $HOP in "" | -* | *[!A-Za-z0-9._@-]*) refuse "route file $f: HOP is not user@host" ;; esac
-    [ -r "$HOP_KEY" ] || refuse "route file $f: HOP_KEY $HOP_KEY is not a readable file"
-  else
-    [ -n "$KEY" ] && [ -z "$HOP_KEY" ] || refuse "route file $f: a direct route sets KEY and nothing else"
-    [ -r "$KEY" ] || refuse "route file $f: KEY $KEY is not a readable file"
-    case $KEY in "$HOME"/.ssh/id_*) refuse "route file $f: KEY is a default identity of the owner: a dedicated key only" ;; esac
+  ROUTE=()
+  if [ -n "$KNOWN_HOSTS" ]; then
+    case $KNOWN_HOSTS in /*) ;; *) refuse "route file $f: KNOWN_HOSTS $KNOWN_HOSTS is not an absolute path" ;; esac
+    case $KNOWN_HOSTS in *[!A-Za-z0-9._/-]*) refuse "route file $f: KNOWN_HOSTS holds a character outside A-Z a-z 0-9 . _ / -" ;; esac
+    [ -f "$KNOWN_HOSTS" ] || refuse "route file $f: KNOWN_HOSTS $KNOWN_HOSTS is not a file"
+    ROUTE+=(-o "UserKnownHostsFile=$KNOWN_HOSTS")
   fi
+  if [ -n "$HOP" ]; then
+    [ -z "$KEY$HOSTNAME_$USER_$PORT$PROXY$STATION" ] && [ -n "$HOP_KEY" ] || refuse "route file $f: a two-hop route sets HOP, HOP_KEY and KNOWN_HOSTS and nothing else"
+    case $HOP in *@*@* | -* | *[!A-Za-z0-9._@-]*) refuse "route file $f: HOP is not user@host" ;; esac
+    case $HOP in [A-Za-z0-9._]*@[A-Za-z0-9._]*) ;; *) refuse "route file $f: HOP is not user@host" ;; esac
+    check_key HOP_KEY "$HOP_KEY"
+    return
+  fi
+  [ -n "$KEY" ] && [ -z "$HOP_KEY" ] || refuse "route file $f: a direct route sets KEY, and HOP_KEY only with HOP"
+  check_key KEY "$KEY"
+  if [ -n "$HOSTNAME_" ]; then
+    case $HOSTNAME_ in -* | *[!A-Za-z0-9._-]*) refuse "route file $f: HOSTNAME is not a plain host name" ;; esac
+    ROUTE+=(-o "HostName=$HOSTNAME_")
+  fi
+  if [ -n "$USER_" ]; then
+    case $USER_ in -* | *[!A-Za-z0-9._-]*) refuse "route file $f: USER is not a plain user name" ;; esac
+    ROUTE+=(-o "User=$USER_")
+  fi
+  if [ -n "$PORT" ]; then
+    case $PORT in "" | 0* | *[!0-9]*) refuse "route file $f: PORT is not a port number" ;; esac
+    [ "$PORT" -le 65535 ] || refuse "route file $f: PORT is not a port number"
+    ROUTE+=(-o "Port=$PORT")
+  fi
+  case $PROXY in
+    "") [ -z "$STATION" ] || refuse "route file $f: STATION is read only with PROXY=station-pipe" ;;
+    station-pipe)
+      case $STATION in /*) ;; *) refuse "route file $f: PROXY=station-pipe needs STATION=<absolute path of the station binary>" ;; esac
+      case $STATION in *[!A-Za-z0-9._/-]*) refuse "route file $f: STATION holds a character outside A-Z a-z 0-9 . _ / -" ;; esac
+      [ -f "$STATION" ] && [ -x "$STATION" ] || refuse "route file $f: STATION $STATION is not an executable file"
+      ROUTE+=(-o "ProxyCommand=$STATION machines pipe $host")
+      ;;
+    *) refuse "route file $f: PROXY is station-pipe or unset" ;;
+  esac
 }
 
 launch() { if [ -n "${GATE_SSH_DRYRUN:-}" ]; then printf '%s\n' "$@"; exit 0; fi; exec "$@"; }
@@ -52,17 +131,17 @@ ssh_mode() {
   [ -n "$host" ] || usage
   load_route "$host"
   if [ -z "$HOP" ]; then
-    launch /usr/bin/ssh "${GUARD[@]}" -i "$KEY" ${flags[@]+"${flags[@]}"} "$host" ${rest[@]+"${rest[@]}"}
+    launch /usr/bin/ssh "${SSH_GUARD[@]}" -i "$KEY" ${ROUTE[@]+"${ROUTE[@]}"} ${flags[@]+"${flags[@]}"} -- "$host" ${rest[@]+"${rest[@]}"}
   fi
   [ ${#rest[@]} -gt 0 ] || { echo "gate-ssh: a two-hop route has no interactive login" >&2; exit 2; }
   cmd="${rest[*]}"
-  b=$(printf %s "$cmd" | base64 | tr -d '\n')
-  launch /usr/bin/ssh "${GUARD[@]}" -i "$HOP_KEY" ${flags[@]+"${flags[@]}"} "$HOP" \
-    "ssh -o BatchMode=yes $host 'eval \"\$(printf %s $b | base64 -d)\"'"
+  b=$(printf %s "$cmd" | command -p base64 | command -p tr -d '\n')
+  launch /usr/bin/ssh "${SSH_GUARD[@]}" -i "$HOP_KEY" ${ROUTE[@]+"${ROUTE[@]}"} ${flags[@]+"${flags[@]}"} -- "$HOP" \
+    "ssh -o BatchMode=yes -- $host 'eval \"\$(printf %s $b | base64 -d)\"'"
 }
 
 scp_mode() {
-  local flags=() paths=() host= remote a h m dst srcs s rd d out rs
+  local flags=() paths=() host= a h m dst srcs s rd out rs rc remotes=0
   while [ $# -gt 0 ]; do
     case $1 in
       -q) flags+=("$1"); shift ;;
@@ -73,28 +152,28 @@ scp_mode() {
   [ ${#paths[@]} -ge 2 ] || usage
   for a in "${paths[@]}"; do
     case $a in
-      *:*) h=${a%%:*}; [ -z "$host" ] && host=$h; [ "$h" = "$host" ] || refuse "scp names two hosts: $host and $h" ;;
+      *:*) h=${a%%:*}; remotes=$((remotes + 1)); [ -z "$host" ] && host=$h; [ "$h" = "$host" ] || refuse "scp names two hosts: $host and $h" ;;
     esac
   done
   [ -n "$host" ] || usage
+  m=${#paths[@]}; dst=${paths[$((m-1))]}; srcs=("${paths[@]:0:$((m-1))}")
+  if [[ $dst == *:* ]]; then [ "$remotes" = 1 ] || refuse "scp between two remote paths is not routed"; fi
   load_route "$host"
   if [ -z "$HOP" ]; then
-    launch /usr/bin/scp "${GUARD[@]}" -i "$KEY" ${flags[@]+"${flags[@]}"} "${paths[@]}"
+    launch /usr/bin/scp "${COMMON[@]}" -i "$KEY" ${ROUTE[@]+"${ROUTE[@]}"} ${flags[@]+"${flags[@]}"} -- "${paths[@]}"
   fi
-  m=${#paths[@]}; dst=${paths[$((m-1))]}; srcs=("${paths[@]:0:$((m-1))}")
-  if [[ $dst == $host:* ]]; then
+  if [[ $dst == "$host":* ]]; then
     rd=${dst#"$host":}; [ -n "$rd" ] || rd=.
     for s in "${srcs[@]}"; do
-      [[ $s != *:* ]] || refuse "scp between two remote paths is not routed"
       [ -f "$s" ] || { echo "gate-ssh: $s: no such file" >&2; exit 1; }
-      "$SELF" ssh "$host" "d=$rd; if [ -d \"\$d\" ]; then d=\"\$d/$(basename "$s")\"; fi; cat > \"\$d\"" < "$s" || exit $?
+      "$SELF" ssh "$host" "d=$(quote "$rd"); if [ -d \"\$d\" ]; then d=\"\$d\"/$(quote "$(command -p basename "$s")"); fi; cat > \"\$d\"" < "$s" || exit $?
     done
     exit 0
   fi
   [ ${#srcs[@]} -eq 1 ] || { echo "gate-ssh: a two-hop route copies one remote source at a time" >&2; exit 2; }
   rs=${srcs[0]#"$host":}; out=$dst
-  [ -d "$out" ] && out="$out/$(basename "$rs")"
-  "$SELF" ssh -n "$host" "cat $rs" > "$out" || { rd=$?; rm -f "$out"; exit $rd; }
+  [ -d "$out" ] && out="$out/$(command -p basename "$rs")"
+  "$SELF" ssh -n "$host" "cat -- $(quote "$rs")" > "$out" || { rc=$?; rm -f "$out"; exit $rc; }
 }
 
 mode=${1:-}; shift || usage
