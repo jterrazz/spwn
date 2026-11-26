@@ -45,11 +45,12 @@ func TestEveryGuidedCallHasItsProjection(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	projected := feeds.GuidedFamilies()
-	slices.Sort(projected)
-	for _, family := range projected {
+	// invariant: each family a call names has its projection, and each
+	// projection is named by a call: the create's, a workspace's, first.
+	projected := []string{machines.GuideCreate}
+	for _, family := range got {
 		if _, ok := feeds.Guided(family); !ok {
-			t.Errorf("guides: feeds names %s guided and projects it by nothing", family)
+			t.Errorf("guides: calls.json guides %s, which feeds projects by nothing", family)
 		}
 	}
 	if !slices.Equal(got, projected) {
@@ -61,6 +62,9 @@ func TestEveryGuidedCallHasItsProjection(t *testing.T) {
 	}
 	if slices.Equal(mutant, projected) {
 		t.Error("guides: a create that names no guide passes the rule")
+	}
+	if _, ok := feeds.Guided("machines.unknown"); ok {
+		t.Error("guides: feeds projects a family no call names")
 	}
 }
 

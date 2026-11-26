@@ -15,12 +15,6 @@ const (
 	ViewGuides = "engine.guides"
 )
 
-func GuidedFamilies() []string {
-	// value: the act families a Guide is projected for; the calls that name
-	// one and these are one list (rule guides).
-	return []string{machines.GuideCreate}
-}
-
 func Guided(family string) (func(a guide.Act, vm *machines.VM) guide.Guide, bool) {
 	// value: the projection of an act family, by the family a call's Guide
 	// names; false for a family no projection knows.
