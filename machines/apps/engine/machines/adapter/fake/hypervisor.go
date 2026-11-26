@@ -46,6 +46,8 @@ func HypervisorOf(w *world.World, mac, name string, install catalog.Install) *Hy
 }
 
 func (h *Hypervisor) Name() string {
+	h.w.Lock()
+	defer h.w.Unlock()
 	if n := h.thisMac().Hypervisor; n != "" && n != "none" {
 		return n
 	}
@@ -55,6 +57,8 @@ func (h *Hypervisor) Name() string {
 func (h *Hypervisor) Installed() bool {
 	// invariant: a Mac of no hypervisor has one once the catalogue's package
 	// for it is installed in the world, as the real one lands on the path.
+	h.w.Lock()
+	defer h.w.Unlock()
 	m := h.thisMac()
 	if m.Hypervisor != "none" {
 		return true
