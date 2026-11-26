@@ -278,6 +278,31 @@
       "journal": true
     },
     {
+      "name": "automations.list",
+      "schema": "station.automations.list/v1",
+      "where": "at-target",
+      "in": "ListIn"
+    },
+    {
+      "name": "automations.log",
+      "schema": "station.automations.log/v1",
+      "where": "at-target",
+      "errors": [
+        "automations.not-found"
+      ],
+      "in": "LogIn"
+    },
+    {
+      "name": "automations.show",
+      "schema": "station.automations.show/v1",
+      "where": "at-target",
+      "errors": [
+        "automations.not-found"
+      ],
+      "in": "ShowIn",
+      "out": "Automation"
+    },
+    {
       "name": "awake.keep",
       "schema": "station.awake.keep/v1",
       "where": "in-engine",

@@ -1,0 +1,104 @@
+{
+  "schema": "station.page/v1",
+  "id": "automations",
+  "command": "automations",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "automations",
+      "title": "Automations",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "agent",
+          "label": "agent",
+          "kind": "text",
+          "keep": 70
+        },
+        {
+          "key": "trigger",
+          "label": "trigger",
+          "kind": "text",
+          "keep": 60
+        },
+        {
+          "key": "last-fired",
+          "label": "last fired",
+          "kind": "text",
+          "keep": 40
+        },
+        {
+          "key": "runs",
+          "label": "runs",
+          "kind": "text",
+          "keep": 30
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "inbox",
+            "mark": "ok",
+            "label": "inbox",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "trinity"
+              },
+              {
+                "kind": "text",
+                "text": "fs ./inbox"
+              },
+              {
+                "kind": "text",
+                "text": "never"
+              },
+              {
+                "kind": "text",
+                "text": "none"
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "morning",
+            "mark": "ok",
+            "label": "morning",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "neo"
+              },
+              {
+                "kind": "text",
+                "text": "cron 0 6 * * *"
+              },
+              {
+                "kind": "text",
+                "text": "2026-05-02 06:00:00"
+              },
+              {
+                "kind": "text",
+                "text": "2, 1 failed"
+              }
+            ]
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 2
+        }
+      ]
+    }
+  ]
+}

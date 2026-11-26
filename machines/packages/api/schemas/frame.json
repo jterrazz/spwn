@@ -290,6 +290,7 @@
             "apps.not-installed",
             "apps.unknown",
             "apps.unpinnable",
+            "automations.not-found",
             "awake.no-battery",
             "awake.no-lid",
             "awake.out-of-bounds",

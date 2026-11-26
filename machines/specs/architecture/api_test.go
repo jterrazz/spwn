@@ -11,6 +11,7 @@ import (
 	activitycalls "github.com/jterrazz/studio-station/apps/engine/activity/calls"
 	agentscalls "github.com/jterrazz/studio-station/apps/engine/agents/calls"
 	appscalls "github.com/jterrazz/studio-station/apps/engine/apps/calls"
+	automationscalls "github.com/jterrazz/studio-station/apps/engine/automations/calls"
 	awakecalls "github.com/jterrazz/studio-station/apps/engine/awake/calls"
 	backgroundcalls "github.com/jterrazz/studio-station/apps/engine/background/calls"
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
@@ -36,7 +37,7 @@ func allCalls(t *testing.T) *call.Registry {
 		accountscalls.All(accountscalls.Deps{}), appscalls.All(appscalls.Deps{}), awakecalls.All(awakecalls.Deps{}), backgroundcalls.All(backgroundcalls.Deps{}),
 		diskcalls.All(diskcalls.Deps{}), imagescalls.All(imagescalls.Deps{}), journalcalls.All(journalcalls.Deps{}), machinefilecalls.All(machinefilecalls.Deps{}), machinescalls.All(machinescalls.Deps{}),
 		portscalls.All(portscalls.Deps{}), settingscalls.All(settingscalls.Deps{}), setupcalls.All(setupcalls.Deps{}), vaultcalls.All(vaultcalls.Deps{}), grantscalls.All(grantscalls.Deps{}),
-		agentscalls.All(agentscalls.Deps{}), teamscalls.All(teamscalls.Deps{}),
+		agentscalls.All(agentscalls.Deps{}), teamscalls.All(teamscalls.Deps{}), automationscalls.All(automationscalls.Deps{}),
 		activitycalls.All(activitycalls.Deps{}), enginecalls.All(enginecalls.Deps{}), overviewcalls.All(overviewcalls.Sections{}),
 	)
 	if err != nil {

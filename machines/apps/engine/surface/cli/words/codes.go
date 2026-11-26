@@ -9,6 +9,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/accounts"
 	agentscalls "github.com/jterrazz/studio-station/apps/engine/agents/calls"
 	appscalls "github.com/jterrazz/studio-station/apps/engine/apps/calls"
+	automationscalls "github.com/jterrazz/studio-station/apps/engine/automations/calls"
 	awakecalls "github.com/jterrazz/studio-station/apps/engine/awake/calls"
 	backgroundcalls "github.com/jterrazz/studio-station/apps/engine/background/calls"
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
@@ -562,6 +563,9 @@ func Codes() map[fail.Code]Wording {
 		},
 		teamscalls.NotFound: func(e *fail.Error) (string, string) {
 			return "no team named \"" + e.Subject + "\"", "station teams"
+		},
+		automationscalls.NotFound: func(e *fail.Error) (string, string) {
+			return "no automation named \"" + e.Subject + "\"", "station automations"
 		},
 		backgroundcalls.Unknown: func(e *fail.Error) (string, string) {
 			return "no background task \"" + e.Subject + "\"", "station background"

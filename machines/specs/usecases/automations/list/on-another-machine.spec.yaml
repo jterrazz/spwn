@@ -1,0 +1,16 @@
+description: 'station automations --on a VM reads what that VM declares; This Mac keeps none'
+env: two-macs
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ".macs[\"linux-1\"].stores.automations = {\"\": [{\"Name\":\"morning\",\"Agent\":\"neo\",\"Trigger\":{\"Kind\":\"cron\",\"Spec\":\"0 6 * * *\"}}]}" world.json > seeded.json && /bin/mv seeded.json world.json'
+      exit: 0
+    - command: 'automations --on linux-1'
+      exit: 0
+      stdout: |
+          	On linux-1:
+          # Automations
+          ●	morning	neo	cron 0 6 * * *	never	none
+    - command: 'automations'
+      exit: 0
+      stdout: |
+          # Automations
+          	none

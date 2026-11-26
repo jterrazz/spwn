@@ -13,6 +13,7 @@ import (
 	activitycontract "github.com/jterrazz/studio-station/apps/engine/activity/contract"
 	agentscontract "github.com/jterrazz/studio-station/apps/engine/agents/contract"
 	appscontract "github.com/jterrazz/studio-station/apps/engine/apps/contract"
+	automationscontract "github.com/jterrazz/studio-station/apps/engine/automations/contract"
 	awakecontract "github.com/jterrazz/studio-station/apps/engine/awake/contract"
 	backgroundcontract "github.com/jterrazz/studio-station/apps/engine/background/contract"
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
@@ -71,6 +72,7 @@ func (*worldMac) waker() contract.Waker                                         
 func (*worldMac) processes(kernel contract.Processes) contract.Processes            { return kernel }
 func (*worldMac) minds() agentscontract.Minds                                       { return nil }
 func (*worldMac) teams() teamscontract.Teams                                        { return nil }
+func (*worldMac) automations() automationscontract.Automations                      { return nil }
 func (*worldMac) jobs() backgroundcontract.Jobs                                     { return nil }
 func (*worldMac) releases() enginecontract.Releases                                 { return nil }
 func (*worldMac) inspector() settingscontract.Inspector                             { return nil }

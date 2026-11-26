@@ -398,6 +398,11 @@
       "Detail": "apps",
       "Tone": "plain"
     },
+    "automations.not-found": {
+      "Word": "not found",
+      "Detail": "automations",
+      "Tone": "plain"
+    },
     "awake.no-battery": {
       "Word": "no battery",
       "Detail": "awake",

@@ -1,0 +1,8 @@
+description: 'station automations with none declared says where one is declared'
+env: two-macs
+runs:
+    - command: 'automations'
+      exit: 0
+      stdout: |
+          # Automations
+          	none

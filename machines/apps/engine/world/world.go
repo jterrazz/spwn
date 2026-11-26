@@ -10,6 +10,7 @@ import (
 
 	"github.com/jterrazz/studio-station/apps/engine/activity"
 	"github.com/jterrazz/studio-station/apps/engine/agents"
+	"github.com/jterrazz/studio-station/apps/engine/automations"
 	"github.com/jterrazz/studio-station/apps/engine/awake"
 	"github.com/jterrazz/studio-station/apps/engine/background"
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
@@ -374,6 +375,11 @@ type Stores struct {
 	// value: the teams declared for this machine's user, by slug; their
 	// members are read from Agents, never kept here.
 	Teams []teams.Team `json:"teams,omitempty"`
+	// value: the automations a project declares, by the project root they
+	// belong to; what their runs say is read from AutomationRuns.
+	Automations map[string][]automations.Automation `json:"automations,omitempty"`
+	// value: the runs written for a project, by its root, oldest first.
+	AutomationRuns map[string][]automations.Run `json:"automation_runs,omitempty"`
 }
 
 func (m *Mac) Store() *Stores {

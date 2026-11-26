@@ -1,0 +1,12 @@
+description: 'station automations lists an automation named like a command, flagged'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; /bin/mkdir site && /usr/bin/touch site/spwn.yaml && P="$PWD/site" /usr/bin/jq ".macs[\"macbook-pro\"].stores.automations = {(env.P): [{\"Name\":\"log\",\"Agent\":\"neo\",\"Trigger\":{\"Kind\":\"cron\",\"Spec\":\"0 6 * * *\"}}]}" world.json > seeded.json && /bin/mv seeded.json world.json'
+      exit: 0
+    - command: '--version >/dev/null; cd site && "$STATION" automations'
+      exit: 0
+      stdout: |
+          # Automations
+          ◐	log	neo	cron 0 6 * * *	never	none	its name is a command's: station automations log log reads its runs, and no detail can be asked for it

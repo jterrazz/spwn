@@ -1,0 +1,8 @@
+description: 'station automations log <automation> of a name the project does not declare is refused, exit 2'
+env: two-macs
+runs:
+    - command: 'automations log morning'
+      exit: 2
+      stderr: |
+          Error: no automation named "morning"
+          Hint: station automations

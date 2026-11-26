@@ -6,7 +6,7 @@ Every command of `station`, grouped as `station help` groups them: the four grou
 | ---------- | ------------------------------------------------------------------------------------------------------------------ |
 | Rules      | What holds for every command                                                                                       |
 | Machine    | `machines`, `images`, `engine`, `apps`, `settings`, `disk`, `ports`, `accounts`, `background`, `awake`, `activity` |
-| Agent      | `agents`, `teams`                                                                                                  |
+| Agent      | `agents`, `teams`, `automations`                                                                                   |
 | Spwn       | `overview`, `init`, `--version`, `use`, `journal`, `machinefile`, `help`                                           |
 | Plumbing   | The hidden commands the machine runs for itself                                                                    |
 | Exit codes | What 0, 1, 2 and 130 mean                                                                                          |
@@ -202,6 +202,15 @@ station teams [<team>] [--json] # the teams declared for you by slug, with the a
 ```
 
 A team is a file, `~/.spwn/teams/<team>.yaml`, declared for every project of the user; an agent belongs to it by the `team` of its `agent.yaml`, which `station agents edit <agent> --team <team>` writes. No command writes a team. A slug no team file has is refused, exit 2. With `--on` a VM of this Mac, it reads that VM's teams and the agents of the project's guest folder, refused like `station agents` when no share reaches the project. `--json` is `station.teams.list/v1`, or `station.teams.show/v1` for one team.
+
+### `station automations`
+
+```sh
+station automations [<automation>] [--json] # the automations this folder's project declares, with when each last ran and how often; one automation's detail
+station automations log [<automation>] [--last <n>] [--json] # the runs written for the project, oldest first; one automation's when it is named
+```
+
+An automation is declared in the project's `spwn.yaml`, bound to one of its agents by a cron schedule or a watched folder. These commands only read: they list the declarations and the runs recorded in `.spwn/runs.jsonl`, and schedule, fire and enable nothing, since Spwn runs an automation only while it is open and that is not built yet. A folder with no project, or a project with no automation, lists none. A name the project does not declare is refused, exit 2. An automation named `log` is listed with a finding and has no detail, `automations log` being the command; its runs are `automations log log`. `--last` keeps the newest runs, 50 when not given. With `--on` a VM of this Mac, they read that VM's project at the guest folder, refused like `station agents` when no share reaches it. `--json` is `station.automations.list/v1`, `station.automations.show/v1` or `station.automations.log/v1`.
 
 ## Spwn
 

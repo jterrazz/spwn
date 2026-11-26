@@ -31,10 +31,14 @@ apps/engine/
              a Machinefile against the catalog into the steps of a plan, explain, and plan, apply
              and drift, which read and act through apps' and settings' calls, never their adapters;
              the ledger of what apply installed
+
   agents/    an agent and the Mind it keeps on its machine, by project (the contract Minds), the
              family of the Agent space; its real adapter wraps Agents' spwn.sh/packages/agent
   teams/     the teams declared for the user (the contract Teams, read only) and the agents of a project
              that name each; its real adapter wraps Agents' spwn.sh/packages/project
+  automations/ the automations a project declares and the runs written for them (the contract
+             Automations, read only: nothing schedules or fires one); its real adapter wraps
+             Agents' spwn.sh/packages/project and spwn.sh/packages/automation
 
   setup/     setup.init, the call that makes a machine known (the verb `init`: Go names no package
              init), and the preferences groups it writes
@@ -136,6 +140,7 @@ Each contract has a real adapter, a fake in its family's `adapter/fake/`, and a 
 | `machinefile` | `Source`, `Follows`, `Owned`, `Ledger`, `Password`, `Turn`                                                                    | `files` (the owner's `~/.config/station`, the embedded built-in; the owner's folder a Machinefile named by its path is copied into; the machine's turn, one flock of Machines' state), `git` (the shared source's clone at its default branch, moved forward only); `jsonfile` (the ledger); `sudoers` (whether its rule asks a password for a line run as root, by `sudo -k -n true`) |
 | `agents`      | `Minds`                                                                                                                       | `mind` (Agents' `spwn.sh/packages/agent` over the project's `spwn/agents/`, or `~/.spwn/agents/` outside a project)                                                                                                                                                                                                                                                                    |
 | `teams`       | `Teams`                                                                                                                       | `files` (Agents' `spwn.sh/packages/project` over `~/.spwn/teams/`, and the project's `spwn/agents/` for the members)                                                                                                                                                                                                                                                                   |
+| `automations` | `Automations`                                                                                                                 | `receipts` (Agents' `spwn.sh/packages/project` over the project's `spwn.yaml`, and `spwn.sh/packages/automation` over its `.spwn/runs.jsonl`)                                                                                                                                                                                                                                          |
 | `remote`      | `Endpoint` and `EndpointDialer`                                                                                               | `unix` (this Mac's engine socket), `sshstdio` (another Mac: `ssh <mac> station engine attach`)                                                                                                                                                                                                                                                                                         |
 | `core`        | `Self`, `Preferences`                                                                                                         | `macos`, `linux`; `jsonfile` (`preferences.json`)                                                                                                                                                                                                                                                                                                                                      |
 

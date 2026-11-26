@@ -192,6 +192,7 @@ func Build(args, env []string, stdin, stdout, stderr *os.File) (p *Program, exit
 		activityCommand(kenv, thisMac),
 		agentsCommand(kenv, thisMac),
 		teamsCommand(kenv, thisMac),
+		automationsCommand(kenv, thisMac),
 	)
 	commands = append(commands, initCommands(kenv, thisMac)...)
 	commands = append(commands, useCommand(kenv, thisMac), journalCommand(kenv, thisMac), machinefileCommand(kenv, thisMac),

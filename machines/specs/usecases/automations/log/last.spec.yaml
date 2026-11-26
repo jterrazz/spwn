@@ -1,0 +1,13 @@
+description: 'station automations log --last keeps only the newest runs'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; /bin/mkdir site && /usr/bin/touch site/spwn.yaml && P="$PWD/site" /usr/bin/jq ".macs[\"macbook-pro\"].stores.automations = {(env.P): [{\"Name\":\"morning\",\"Agent\":\"neo\",\"Trigger\":{\"Kind\":\"cron\",\"Spec\":\"0 6 * * *\"}}]} | .macs[\"macbook-pro\"].stores.automation_runs = {(env.P): [{\"Name\":\"morning\",\"At\":\"2026-05-01T06:00:00Z\",\"OK\":true},{\"Name\":\"morning\",\"At\":\"2026-05-02T06:00:00Z\",\"OK\":true},{\"Name\":\"morning\",\"At\":\"2026-05-03T06:00:00Z\",\"OK\":true}]}" world.json > seeded.json && /bin/mv seeded.json world.json'
+      exit: 0
+    - command: '--version >/dev/null; cd site && "$STATION" automations log --last 2'
+      exit: 0
+      stdout: |
+          # Runs
+          ●	2026-05-02 06:00:00	morning	ok
+          ●	2026-05-03 06:00:00	morning	ok

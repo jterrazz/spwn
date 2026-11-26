@@ -1,0 +1,16 @@
+description: 'station automations log --on a VM reads the runs that VM wrote'
+env: two-macs
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ".macs[\"linux-1\"].stores.automations = {\"\": [{\"Name\":\"morning\",\"Agent\":\"neo\",\"Trigger\":{\"Kind\":\"cron\",\"Spec\":\"0 6 * * *\"}}]} | .macs[\"linux-1\"].stores.automation_runs = {\"\": [{\"Name\":\"morning\",\"At\":\"2026-05-01T06:00:00Z\",\"OK\":true}]}" world.json > seeded.json && /bin/mv seeded.json world.json'
+      exit: 0
+    - command: 'automations log --on linux-1'
+      exit: 0
+      stdout: |
+          	On linux-1:
+          # Runs
+          ●	2026-05-01 06:00:00	morning	ok
+    - command: 'automations log'
+      exit: 0
+      stdout: |
+          # Runs
+          	none

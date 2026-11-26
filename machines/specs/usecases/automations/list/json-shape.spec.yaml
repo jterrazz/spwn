@@ -1,0 +1,46 @@
+description: 'station automations --json prints each automation with its trigger, last run and counts'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; /bin/mkdir site && /usr/bin/touch site/spwn.yaml && P="$PWD/site" /usr/bin/jq ".macs[\"macbook-pro\"].stores.automations = {(env.P): [{\"Name\":\"inbox\",\"Agent\":\"trinity\",\"Trigger\":{\"Kind\":\"fs\",\"Spec\":\"./inbox\"}},{\"Name\":\"morning\",\"Agent\":\"neo\",\"Trigger\":{\"Kind\":\"cron\",\"Spec\":\"0 6 * * *\"}}]} | .macs[\"macbook-pro\"].stores.automation_runs = {(env.P): [{\"Name\":\"morning\",\"Scheduled\":\"2026-05-01T06:00:00Z\",\"At\":\"2026-05-01T06:00:00Z\",\"OK\":true,\"Output\":\"brief written\"},{\"Name\":\"morning\",\"Scheduled\":\"2026-05-02T06:00:00Z\",\"At\":\"2026-05-02T06:00:00Z\",\"OK\":false,\"Error\":\"no running world\"}]}" world.json > seeded.json && /bin/mv seeded.json world.json'
+      exit: 0
+    - command: '--version >/dev/null; cd site && "$STATION" automations --json'
+      exit: 0
+      stdout: |
+          {
+            "schema": "station.automations.list/v1",
+            "generated_at": "{{iso8601}}",
+            "machine": {
+              "name": "macbook-pro",
+              "label": "This Mac",
+              "kind": "computer",
+              "on": null,
+              "this_mac": true
+            },
+            "findings": [],
+            "automations": [
+              {
+                "name": "inbox",
+                "agent": "trinity",
+                "trigger": {
+                  "kind": "fs",
+                  "spec": "./inbox"
+                },
+                "last_fired": null,
+                "fires": 0,
+                "failed": 0
+              },
+              {
+                "name": "morning",
+                "agent": "neo",
+                "trigger": {
+                  "kind": "cron",
+                  "spec": "0 6 * * *"
+                },
+                "last_fired": "2026-05-02T06:00:00Z",
+                "fires": 2,
+                "failed": 1
+              }
+            ]
+          }

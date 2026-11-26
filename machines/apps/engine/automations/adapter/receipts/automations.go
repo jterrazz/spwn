@@ -1,0 +1,151 @@
+package receipts
+
+import (
+	"context"
+	"errors"
+	"io/fs"
+	"path/filepath"
+	"slices"
+	"strings"
+
+	"spwn.sh/packages/automation"
+	"spwn.sh/packages/project"
+
+	"github.com/jterrazz/studio-station/apps/engine/automations"
+	"github.com/jterrazz/studio-station/apps/engine/automations/contract"
+)
+
+type Automations struct{}
+
+var _ contract.Automations = Automations{}
+
+// value: where a project's manifest and the receipts of its runs lie, from its root.
+const (
+	manifestFile = "spwn.yaml"
+	receiptsDir  = ".spwn"
+	receiptsFile = "runs.jsonl"
+)
+
+type declared struct {
+	group string
+	auto  automations.Automation
+}
+
+func declaredIn(root string) ([]declared, error) {
+	// invariant: the automations are read as the manifest declares them,
+	// under each group it keeps them in; no root, or none with a manifest,
+	// declares none.
+	if root == "" {
+		return nil, nil
+	}
+	p, err := project.Load(filepath.Join(root, manifestFile))
+	if errors.Is(err, fs.ErrNotExist) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	var out []declared
+	for group, w := range p.Manifest.Worlds {
+		for name, a := range w.Automations {
+			out = append(out, declared{group: group, auto: automations.Automation{Name: name, Agent: a.Agent, Trigger: trigger(a.On)}})
+		}
+	}
+	slices.SortFunc(out, func(a, b declared) int {
+		if c := strings.Compare(a.auto.Name, b.auto.Name); c != 0 {
+			return c
+		}
+		return strings.Compare(a.group, b.group)
+	})
+	return out, nil
+}
+
+func trigger(on project.Trigger) automations.Trigger {
+	switch {
+	case on.Cron != "":
+		return automations.Trigger{Kind: automations.Cron, Spec: on.Cron}
+	case on.FS != nil:
+		return automations.Trigger{Kind: automations.FS, Spec: on.FS.Path}
+	}
+	return automations.Trigger{}
+}
+
+func receiptsOf(root string) ([]automation.Receipt, error) {
+	if root == "" {
+		return nil, nil
+	}
+	return automation.ReadReceipts(filepath.Join(root, receiptsDir, receiptsFile))
+}
+
+func read(all []declared, rows []automation.Receipt) []automations.Automation {
+	out := make([]automations.Automation, 0, len(all))
+	for _, d := range all {
+		a := d.auto
+		for _, r := range rows {
+			if r.World != d.group || r.Automation != a.Name {
+				continue
+			}
+			a.Fires++
+			if !r.OK {
+				a.Failed++
+			}
+			if r.Fired.After(a.LastFired) {
+				a.LastFired = r.Fired
+			}
+		}
+		out = append(out, a)
+	}
+	return out
+}
+
+func (Automations) List(_ context.Context, root string) ([]automations.Automation, error) {
+	all, err := declaredIn(root)
+	if err != nil || len(all) == 0 {
+		return []automations.Automation{}, err
+	}
+	rows, err := receiptsOf(root)
+	if err != nil {
+		return nil, err
+	}
+	return read(all, rows), nil
+}
+
+func (a Automations) Automation(ctx context.Context, root, name string) (automations.Automation, error) {
+	// invariant: when two groups declare one name, the first by group answers.
+	all, err := a.List(ctx, root)
+	if err != nil {
+		return automations.Automation{}, err
+	}
+	for _, found := range all {
+		if found.Name == name {
+			return found, nil
+		}
+	}
+	return automations.Automation{}, automations.ErrNotFound
+}
+
+func (a Automations) Log(ctx context.Context, root, name string, last int) ([]automations.Run, error) {
+	if name != "" {
+		if _, err := a.Automation(ctx, root, name); err != nil {
+			return nil, err
+		}
+	}
+	rows, err := receiptsOf(root)
+	if err != nil {
+		return nil, err
+	}
+	var out []automations.Run
+	for _, r := range rows {
+		if name == "" || r.Automation == name {
+			out = append(out, run(r))
+		}
+	}
+	if last > 0 && len(out) > last {
+		out = out[len(out)-last:]
+	}
+	return out, nil
+}
+
+func run(r automation.Receipt) automations.Run {
+	return automations.Run{Name: r.Automation, Scheduled: r.Scheduled, At: r.Fired, OK: r.OK, Error: r.Error, Output: r.Output}
+}

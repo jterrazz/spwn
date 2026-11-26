@@ -1,0 +1,60 @@
+description: 'station automations log prints the runs written for the project, oldest first'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; /bin/mkdir site && /usr/bin/touch site/spwn.yaml && P="$PWD/site" /usr/bin/jq ".macs[\"macbook-pro\"].stores.automations = {(env.P): [{\"Name\":\"inbox\",\"Agent\":\"trinity\",\"Trigger\":{\"Kind\":\"fs\",\"Spec\":\"./inbox\"}},{\"Name\":\"morning\",\"Agent\":\"neo\",\"Trigger\":{\"Kind\":\"cron\",\"Spec\":\"0 6 * * *\"}}]} | .macs[\"macbook-pro\"].stores.automation_runs = {(env.P): [{\"Name\":\"morning\",\"Scheduled\":\"2026-05-01T06:00:00Z\",\"At\":\"2026-05-01T06:00:00Z\",\"OK\":true,\"Output\":\"brief written\"},{\"Name\":\"inbox\",\"At\":\"2026-05-01T11:23:14Z\",\"OK\":true},{\"Name\":\"morning\",\"Scheduled\":\"2026-05-02T06:00:00Z\",\"At\":\"2026-05-02T06:00:00Z\",\"OK\":false,\"Error\":\"no running world\"}]}" world.json > seeded.json && /bin/mv seeded.json world.json'
+      exit: 0
+    - command: '--version >/dev/null; cd site && "$STATION" automations log'
+      exit: 0
+      stdout: |
+          # Runs
+          ●	2026-05-01 06:00:00	morning	ok	brief written
+          ●	2026-05-01 11:23:14	inbox	ok
+          ✗	2026-05-02 06:00:00	morning	failed: no running world
+    - command: '--version >/dev/null; cd site && "$STATION" automations log inbox'
+      exit: 0
+      stdout: |
+          # Runs
+          ●	2026-05-01 11:23:14	inbox	ok
+    - command: '--version >/dev/null; cd site && "$STATION" automations log --json'
+      exit: 0
+      stdout: |
+          {
+            "schema": "station.automations.log/v1",
+            "generated_at": "{{iso8601}}",
+            "machine": {
+              "name": "macbook-pro",
+              "label": "This Mac",
+              "kind": "computer",
+              "on": null,
+              "this_mac": true
+            },
+            "findings": [],
+            "runs": [
+              {
+                "automation": "morning",
+                "scheduled": "2026-05-01T06:00:00Z",
+                "at": "2026-05-01T06:00:00Z",
+                "ok": true,
+                "error": "",
+                "output": "brief written"
+              },
+              {
+                "automation": "inbox",
+                "scheduled": null,
+                "at": "2026-05-01T11:23:14Z",
+                "ok": true,
+                "error": "",
+                "output": ""
+              },
+              {
+                "automation": "morning",
+                "scheduled": "2026-05-02T06:00:00Z",
+                "at": "2026-05-02T06:00:00Z",
+                "ok": false,
+                "error": "no running world",
+                "output": ""
+              }
+            ]
+          }
