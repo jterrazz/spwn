@@ -1,6 +1,7 @@
 package jsonfile_test
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -308,6 +309,63 @@ func TestABookMadeUnreadableWhileTheEngineAwaitsItsKeychainIsNotCheckedYet(t *te
 	}
 	if _, standing, ok := engine.Held(t.Context()); standing != devices.Unchecked || !ok {
 		t.Fatalf("held %q, %v; want an unreadable book not checked yet", standing, ok)
+	}
+}
+
+func TestAChangeWhileTheEngineAwaitsItsKeychainIsRefusedAndWritesNothing(t *testing.T) {
+	at := filepath.Join(t.TempDir(), "station", "devices.json")
+	k := &keychain{}
+	forgottenLaptop(t, at, k)
+	before, err := files().ReadFile(at)
+	if err != nil {
+		t.Fatal(err)
+	}
+	head := k.head
+	locked := errors.New("the keychain is locked")
+	k.locked = locked
+	engine := openOn(at, false, k)
+	engine.Sole(t.Context())
+	forget := func(b *devices.Book) error { b.Forget("laptop"); return nil }
+	for name, edit := range map[string]func(*devices.Book) error{"add": add("tablet"), "forget": forget} {
+		if changeErr := engine.Change(t.Context(), edit); !errors.Is(changeErr, locked) {
+			t.Fatalf("%s while the engine awaits = %v; want the keychain's refusal", name, changeErr)
+		}
+	}
+	after, err := files().ReadFile(at)
+	if err != nil || !bytes.Equal(after, before) || k.head != head {
+		t.Fatalf("the book or the keychain moved (%v, head %+v); want nothing written", err, k.head)
+	}
+}
+
+func TestAKeychainHeadMalformedWhileTheEngineAwaitsTrustsNothingUntilItWrites(t *testing.T) {
+	at := filepath.Join(t.TempDir(), "station", "devices.json")
+	k := &keychain{}
+	forgottenLaptop(t, at, k)
+	k.locked = errors.New("the keychain is locked")
+	engine := openOn(at, false, k)
+	engine.Sole(t.Context())
+	k.locked = &contract.AnchorUnreadableError{Cause: "a head Spwn never writes", Malformed: true}
+	trustsNothing(t, engine, devices.Changed)
+	k.locked = nil
+	if err := files().Remove(at); err != nil {
+		t.Fatal(err)
+	}
+	trustsNothing(t, engine, devices.Changed)
+}
+
+func TestAnEngineThatTrustsNothingWritesPastTheGenerationOfTheBookItFound(t *testing.T) {
+	at := filepath.Join(t.TempDir(), "station", "devices.json")
+	k := &keychain{}
+	forgottenLaptop(t, at, k)
+	k.locked = &contract.AnchorUnreadableError{Cause: "a head Spwn never writes", Malformed: true}
+	engine := openOn(at, false, k)
+	engine.Sole(t.Context())
+	k.locked = nil
+	if err := engine.Change(t.Context(), add("tablet")); err != nil {
+		t.Fatal(err)
+	}
+	if book, head, err := engine.Read(t.Context()); err != nil || !book.Anchored(head) || head.Generation != 3 {
+		t.Fatalf("Read = %+v, %+v, %v; want a new book one past the generation 2 found at the start", book, head, err)
 	}
 }
 

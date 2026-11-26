@@ -86,9 +86,7 @@ func (h Hold) Standing(b Book, unreadable bool) Standing {
 			return Kept
 		}
 		return Unchecked
-	case Unheld:
-		return Changed
-	case Holding:
+	case Holding, Unheld:
 	}
 	if unreadable || !b.Anchored(h.Head) {
 		return Changed
