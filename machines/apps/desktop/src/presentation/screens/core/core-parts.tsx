@@ -12,16 +12,6 @@ import { coreState } from '../../words/shown';
 
 import styles from './core.module.css';
 
-export function Mark() {
-    return (
-        <svg aria-hidden="true" className={styles.mark} fill="currentColor" viewBox="0 0 48 44">
-            <circle cx="10" cy="35" r="8" />
-            <circle cx="31.86" cy="23.37" r="5.6" />
-            <circle cx="42.81" cy="5.85" r="3.9" />
-        </svg>
-    );
-}
-
 export function Pill({ kind }: { kind: CoreKind }) {
     return (
         <span className={styles.pill}>

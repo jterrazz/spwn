@@ -16,48 +16,6 @@
     min-height: 160px;
     overflow-y: auto;
 }
-.lights {
-    flex: none;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-.space {
-    margin: 0;
-    font-size: 13px;
-    font-weight: var(--weight-strong);
-    color: var(--t1);
-}
-:global(html[data-chrome='overlay']) .sidebar {
-    padding-top: 0;
-}
-:global(html[data-chrome='overlay']) .lights {
-    height: var(--chrome-row);
-    margin-bottom: -18px;
-}
-.find {
-    all: unset;
-    box-sizing: border-box;
-    cursor: pointer;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    height: 32px;
-    padding: 0 var(--space-10);
-    border-radius: var(--radius-well);
-    background: var(--panel);
-    color: var(--t3);
-    flex: none;
-    transition: background var(--motion-hover);
-}
-.find:hover {
-    background: var(--raise);
-}
-.find kbd {
-    font-family: var(--font-mono);
-    font-size: var(--text-label);
-    color: var(--t3);
-}
 .group {
     display: flex;
     flex-direction: column;
@@ -75,11 +33,6 @@
     padding: 0 var(--space-8);
     font-size: var(--text-label);
     color: var(--t4);
-}
-.find:disabled {
-    cursor: default;
-    color: var(--t4);
-    background: var(--panel);
 }
 .release {
     flex: none;

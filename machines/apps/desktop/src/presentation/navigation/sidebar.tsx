@@ -1,28 +1,28 @@
-import type { MachinesMacView } from '@jterrazz/station-api';
+import type { EngineReadOutput, MachinesMacView } from '@jterrazz/station-api';
 
 import { machineNamesOf } from '../../domain/machines/machines';
 import { useCore, useReach } from '../dependencies/dependencies';
-import { IconButton, identityOf, MachineIcon, NavItem } from '../ui/index';
+import type { Reading } from '../dependencies/dependencies';
+import { identityOf, MachineIcon, NavItem } from '../ui/index';
 import { FIT_MACHINES_WORDS } from '../words/fit';
 import { machineKindOf } from '../words/provisional';
 import { macState, vmState } from '../words/shown';
-import { CORE_MACHINES_WORDS, NEW_MACHINE_WORD } from '../words/words';
+import { CORE_MACHINES_WORDS } from '../words/words';
 import type { Carried } from './carried';
+import { EngineFoot } from './engine-foot';
 import { onListKey } from './keys';
 import { ReleaseRow } from './release-row';
 import { machineRoute } from './route';
 import type { PlainPage, Route } from './route';
-import { SPACE_WORDS } from './spaces';
 
 import styles from './sidebar.module.css';
 
 export type SidebarProps = {
     carried: Carried;
     macs: readonly MachinesMacView[];
+    engine: Reading<EngineReadOutput>;
     route: Route;
     go: (to: Route) => void;
-    onFind: () => void;
-    onNewMachine: () => void;
     quiet?: boolean;
 };
 
@@ -102,11 +102,11 @@ function countOf(value: number | undefined) {
     return value === undefined ? undefined : { urgent: false, value };
 }
 
-function Catalog({ place, carried }: { place: Place; carried: Carried }) {
+function Library({ place, carried }: { place: Place; carried: Carried }) {
     return (
-        <div aria-labelledby="side-catalog" className={styles.group} role="group">
-            <h2 className={styles.caption} id="side-catalog">
-                Catalog
+        <div aria-labelledby="side-library" className={styles.group} role="group">
+            <h2 className={styles.caption} id="side-library">
+                Library
             </h2>
             <NavItem
                 {...place('catalog-apps')}
@@ -127,6 +127,7 @@ function Catalog({ place, carried }: { place: Place; carried: Carried }) {
                 label="Machine settings"
             />
             <NavItem {...place('machine-files')} icon="file" label="Machine files" />
+            <NavItem {...place('passwords')} icon="key" label="Passwords" />
         </div>
     );
 }
@@ -144,35 +145,16 @@ function Fleet({ place }: { place: Place }) {
 const UNCARRIED: Carried = { apps: undefined, settings: undefined, skills: undefined };
 
 export function Sidebar(props: SidebarProps) {
-    const { carried, macs, route, go, onFind, onNewMachine, quiet = false } = props;
+    const { carried, macs, engine, route, go, quiet = false } = props;
     const place = placeOf(route, go, quiet);
     return (
         <nav aria-label="Sidebar" className={styles.sidebar} onKeyDown={onListKey}>
-            <div className={styles.lights} data-tauri-drag-region="deep">
-                <h2 className={styles.space}>{SPACE_WORDS.machine.name}</h2>
-                <IconButton
-                    disabled={quiet}
-                    icon="plus"
-                    label={NEW_MACHINE_WORD}
-                    onClick={onNewMachine}
-                />
-            </div>
-            <button
-                aria-keyshortcuts="Meta+K"
-                aria-label="Find"
-                className={styles.find}
-                disabled={quiet}
-                onClick={onFind}
-                type="button"
-            >
-                <span>Find</span>
-                <kbd aria-hidden="true">⌘K</kbd>
-            </button>
             <div className={styles.list}>
                 <Fleet place={place} />
                 {quiet ? <QuietMachines /> : <Machines go={go} macs={macs} route={route} />}
-                <Catalog carried={quiet ? UNCARRIED : carried} place={place} />
+                <Library carried={quiet ? UNCARRIED : carried} place={place} />
             </div>
+            <EngineFoot engine={engine} go={go} quiet={quiet} />
             {quiet ? null : <ReleaseRow go={go} />}
         </nav>
     );

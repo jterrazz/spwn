@@ -1,16 +1,13 @@
 .window {
-    --rail-width: 56px;
     height: 100%;
     display: grid;
-    grid-template-columns: var(--rail-width) 224px minmax(0, 1fr);
+    grid-template-rows: var(--chrome-row) minmax(0, 1fr);
+    grid-template-columns: 224px minmax(0, 1fr);
     background: var(--ground-window);
     overflow: hidden;
 }
-:global(html[data-chrome='overlay']) .window {
-    --rail-width: 76px;
-}
 .collapsed {
-    grid-template-columns: var(--rail-width) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr);
 }
 .main {
     background: var(--ground);

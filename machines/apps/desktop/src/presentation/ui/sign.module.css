@@ -1,0 +1,11 @@
+.sign {
+    display: block;
+    width: 32px;
+    height: 32px;
+    flex: none;
+    user-select: none;
+}
+.large {
+    width: 40px;
+    height: 40px;
+}

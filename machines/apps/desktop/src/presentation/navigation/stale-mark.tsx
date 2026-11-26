@@ -6,9 +6,9 @@ import { StateDot } from '../ui/state-dot';
 import { ownState } from '../words/shown';
 import { asOfWord } from '../words/words';
 
-import styles from './toolbar.module.css';
+import styles from './path-bar.module.css';
 
-// value: one dimmed dot in the toolbar while a read drawn keeps an answer its refresh could not replace, named by
+// value: one dimmed dot in the bar while a read drawn keeps an answer its refresh could not replace, named by
 // value: what the engine said of each refusal, and the time of the oldest answer still shown beside it; the page
 // value: itself stays drawn as it was answered.
 export function StaleMark() {

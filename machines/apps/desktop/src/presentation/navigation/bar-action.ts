@@ -3,7 +3,9 @@ import type { MachinesMacView } from '@jterrazz/station-api';
 import { engineViewStopped } from '../words/shown';
 import { NEW_MACHINE_WORD } from '../words/words';
 import type { Route } from './route';
-import type { ToolbarAction } from './toolbar';
+
+// value: the one button at the bar's right: Home's New machine, the Passwords page's Add a password.
+export type BarAction = { label: string; onClick: () => void; leads: boolean };
 
 // value: while this Mac's engine is stopped, Start the engine leads Home and New machine stands back.
 export function newMachineLeads(macs: readonly MachinesMacView[]): boolean {
@@ -18,13 +20,8 @@ export type Opens = {
     addPassword: () => void;
 };
 
-// value: Home's toolbar leads with New machine; the vault's list offers Add a password, which leads nothing.
-export function actionOf({
-    route,
-    macs,
-    newMachine,
-    addPassword,
-}: Opens): ToolbarAction | undefined {
+// value: Home's bar leads with New machine; the vault's list offers Add a password, which leads nothing.
+export function actionOf({ route, macs, newMachine, addPassword }: Opens): BarAction | undefined {
     if (route.page === 'home') {
         return { label: NEW_MACHINE_WORD, leads: newMachineLeads(macs), onClick: newMachine };
     }
