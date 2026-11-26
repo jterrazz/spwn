@@ -347,6 +347,16 @@ func (t *Tree) Lstat(p string) (fs.FileInfo, error) {
 	return t.root.Lstat(rel)
 }
 
+// Readlink is the text of the link p inside the Tree, read as itself and
+// never followed: where it points is not opened.
+func (t *Tree) Readlink(p string) (string, error) {
+	rel, err := t.Rel(p)
+	if err != nil {
+		return "", err
+	}
+	return t.root.Readlink(rel)
+}
+
 // MkdirAll is os.MkdirAll of the folder p inside the Tree.
 func (t *Tree) MkdirAll(p string, perm fs.FileMode) error {
 	rel, err := t.Rel(p)

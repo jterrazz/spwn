@@ -52,7 +52,7 @@ func registerSpawnFlags(c *cobra.Command) {
 	c.Flags().StringVar(&spawnBackend, "backend", "", "Override the runtime backend for this spawn (e.g. claude-code, codex). Skips the auth-state auto-resolver.")
 	c.Flags().BoolVarP(&spawnInteractive, "interactive", "i", false, "Drop into the agent's session after spawn")
 	c.Flags().BoolVar(&spawnForceRebuild, "force-rebuild", false, "Ignore the image cache and rebuild the world image from scratch")
-	c.Flags().BoolVar(&spawnYes, "yes", false, "Allow, for this project, the host paths outside it that spwn.yaml mounts, without asking")
+	c.Flags().BoolVar(&spawnYes, "yes", false, "Allow, for this run only, the host paths outside the project that spwn.yaml mounts, printing each; never kept")
 }
 
 func worldHelp(cmd *cobra.Command, args []string) {
@@ -188,6 +188,7 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 	if projectErr != nil {
 		return s.FailHint("Project", projectErr, "Check spwn.yaml or pick an existing world name")
 	}
+	var allowed cliproject.Allowed
 	if pw != nil {
 		var reaches []cliproject.Reach
 		for _, r := range pw.Outside {
@@ -196,9 +197,11 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 			}
 			reaches = append(reaches, r)
 		}
-		if err := cliproject.Consent(pw.Project.Root, reaches, spawnYes, cliproject.StdinIsTerminal(), cmd.InOrStdin(), cmd.ErrOrStderr()); err != nil {
+		var err error
+		allowed, err = cliproject.Consent(pw.Project.Root, reaches, spawnYes, cliproject.StdinIsTerminal(), cmd.InOrStdin(), cmd.ErrOrStderr())
+		if err != nil {
 			return s.FailHint("Outside the project", err,
-				"Run `spwn up` in a terminal to be asked once, or `spwn up --yes` to allow these paths for this project")
+				"Run `spwn up` in a terminal to be asked once (a yes is kept), or `spwn up --yes` to allow these paths for this run only")
 		}
 	}
 
@@ -247,6 +250,9 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 	if wsErr != nil {
 		return s.FailHint("Invalid workspace", wsErr,
 			`Expected: "path", "name=path", or "name=path:ro"`)
+	}
+	if pw != nil && !cmd.Flags().Changed("workspace") && len(spawnWorkspaces) == 0 {
+		workspaces = pw.Workspaces
 	}
 
 	s.Blank()
@@ -364,6 +370,9 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		buildProgress.CompleteCurrent()
 		return s.SubFailHint("Spawn failed", err, spawnHint(err, agentName, agents))
+	}
+	if err := allowed.Keep(); err != nil {
+		s.Warn("Grants", fmt.Sprintf("the yes was not kept in %s: %v", cliproject.GrantsPath(), err))
 	}
 
 	u := result.World
@@ -542,9 +551,6 @@ func applyProjectDefaults(cmd *cobra.Command, requestedName, backendOverride str
 	}
 	if !cmd.Flags().Changed("agent") && len(spawnAgents) == 0 {
 		spawnAgents = append(spawnAgents, pw.Agents...)
-	}
-	if !cmd.Flags().Changed("workspace") && len(spawnWorkspaces) == 0 && len(pw.Workspaces) > 0 {
-		spawnWorkspaces = append(spawnWorkspaces, pw.Workspaces...)
 	}
 	return pw, nil
 }

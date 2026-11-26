@@ -50,7 +50,7 @@ type projectWorld struct {
 	Project    *project.Project
 	Name       string
 	Agents     []string
-	Workspaces []string
+	Workspaces []world.Workspace
 	// Outside is each host path of Workspaces and Knowledge that leaves
 	// the project, which spwn up mounts only once it is granted.
 	Outside  []cliproject.Reach
@@ -99,12 +99,18 @@ func resolveProjectWorld(p *project.Project, name, backendOverride string) (*pro
 	if err := platform.CheckName("world", name); err != nil {
 		return nil, err
 	}
+	if err := cliproject.CheckText("world name", name); err != nil {
+		return nil, err
+	}
 	w, ok := p.Manifest.Worlds[name]
 	if !ok {
 		return nil, fmt.Errorf("world %q is not defined in spwn.yaml", name)
 	}
 	for _, aname := range w.Agents {
 		if err := platform.CheckName("agent", aname); err != nil {
+			return nil, fmt.Errorf("world %q: %w", name, err)
+		}
+		if err := cliproject.CheckText("agent name", aname); err != nil {
 			return nil, fmt.Errorf("world %q: %w", name, err)
 		}
 	}
@@ -154,35 +160,55 @@ func resolveProjectWorld(p *project.Project, name, backendOverride string) (*pro
 	var outside []cliproject.Reach
 	var knowledge string
 	if kp := strings.TrimSpace(w.Knowledge); kp != "" {
+		if err := cliproject.CheckHostPath("knowledge path", kp); err != nil {
+			return nil, fmt.Errorf("world %q: %w", name, err)
+		}
 		resolved, leaves := cliproject.Resolve(p.Root, kp)
 		knowledge = resolved
 		if leaves {
 			outside = append(outside, cliproject.Reach{Path: resolved, Access: "read-write", Grants: fmt.Sprintf("read-write mount at /world/knowledge in world %q", name)})
 		}
 	}
-	workspaces, err := parseWorkspaceFlags(w.Workspaces)
-	if err != nil {
-		return nil, fmt.Errorf("world %q: %w", name, err)
-	}
-	entries := make([]string, 0, len(workspaces))
-	for i, ws := range workspaces {
-		wsName := ws.Name
-		if !strings.Contains(w.Workspaces[i], "=") {
+	var entries []world.Workspace
+	seen := map[string]bool{}
+	for i, raw := range w.Workspaces {
+		if err := cliproject.CheckText("workspace", raw); err != nil {
+			return nil, fmt.Errorf("world %q: %w", name, err)
+		}
+		parsed, err := parseWorkspaceFlags([]string{raw})
+		if err != nil {
+			return nil, fmt.Errorf("world %q: workspace #%d has empty path", name, i+1)
+		}
+		if len(parsed) == 0 {
+			continue
+		}
+		ws := parsed[0]
+		if err := cliproject.CheckHostPath("workspace path", ws.Path); err != nil {
+			return nil, fmt.Errorf("world %q: %w", name, err)
+		}
+		if !strings.Contains(raw, "=") {
 			lexical := ws.Path
 			if !filepath.IsAbs(lexical) {
 				lexical = filepath.Join(p.Root, lexical)
 			}
-			wsName = world.AutoWorkspaceName(lexical, i)
+			ws.Name = world.AutoWorkspaceName(lexical, i)
 		}
+		if err := project.ValidateWorkspaceName(ws.Name); err != nil {
+			return nil, fmt.Errorf("world %q: %w", name, err)
+		}
+		if seen[ws.Name] {
+			return nil, fmt.Errorf("world %q: duplicate workspace name %q", name, ws.Name)
+		}
+		seen[ws.Name] = true
 		resolved, leaves := cliproject.Resolve(p.Root, ws.Path)
-		access, suffix := "read-write", ""
+		access := "read-write"
 		if ws.ReadOnly {
-			access, suffix = "read-only", ":ro"
+			access = "read-only"
 		}
 		if leaves {
-			outside = append(outside, cliproject.Reach{Path: resolved, Access: access, Grants: fmt.Sprintf("%s mount at /workspaces/%s in world %q", access, wsName, name)})
+			outside = append(outside, cliproject.Reach{Path: resolved, Access: access, Grants: fmt.Sprintf("%s mount at /workspaces/%s in world %q", access, ws.Name, name)})
 		}
-		entries = append(entries, wsName+"="+resolved+suffix)
+		entries = append(entries, world.Workspace{Name: ws.Name, Path: resolved, ReadOnly: ws.ReadOnly})
 	}
 
 	var runtimeName string

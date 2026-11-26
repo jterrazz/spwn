@@ -2,9 +2,11 @@ package automation
 
 import (
 	"fmt"
+	"maps"
 	"os"
 	"os/signal"
 	"path/filepath"
+	"slices"
 	"syscall"
 
 	"github.com/spf13/cobra"
@@ -18,8 +20,10 @@ import (
 
 var daemonYes bool
 
+var stdinIsTerminal = cliproject.StdinIsTerminal
+
 func init() {
-	daemonCmd.Flags().BoolVar(&daemonYes, "yes", false, "Allow, for this project, the watch folders outside it that spwn.yaml names, without asking")
+	daemonCmd.Flags().BoolVar(&daemonYes, "yes", false, "Allow, for this run only, the watch folders outside the project that spwn.yaml names, printing each; never kept")
 }
 
 var daemonCmd = &cobra.Command{
@@ -68,22 +72,13 @@ resumes at the next scheduled time.`,
 		}
 		defer releaseDaemonLock(lockFile)
 
-		var reaches []cliproject.Reach
-		for wname, w := range p.Manifest.Worlds {
-			for aname, a := range w.Automations {
-				if a.On.FS == nil || a.On.FS.Path == "" {
-					continue
-				}
-				resolved, leaves := cliproject.Resolve(p.Root, a.On.FS.Path)
-				a.On.FS.Path = resolved
-				if leaves {
-					reaches = append(reaches, cliproject.Reach{Path: resolved, Access: "names and times listed",
-						Grants: fmt.Sprintf("watched by automation %q of world %q: the names and times of its files are listed", aname, wname)})
-				}
-			}
+		reaches, err := watchReaches(p)
+		if err != nil {
+			return err
 		}
-		if err := cliproject.Consent(p.Root, reaches, daemonYes, cliproject.StdinIsTerminal(), cmd.InOrStdin(), cmd.ErrOrStderr()); err != nil {
-			return fmt.Errorf("%w\nRun `spwn automation daemon` in a terminal to be asked once, or `spwn automation daemon --yes` to allow these paths for this project", err)
+		allowed, err := cliproject.Consent(p.Root, reaches, daemonYes, stdinIsTerminal(),cmd.InOrStdin(), cmd.ErrOrStderr())
+		if err != nil {
+			return fmt.Errorf("%w\n%s", err, daemonRefusalHint)
 		}
 
 		arc, err := architect.NewFromEnv()
@@ -117,6 +112,9 @@ resumes at the next scheduled time.`,
 		if err := eng.Start(ctx); err != nil {
 			return fmt.Errorf("start engine: %w", err)
 		}
+		if err := allowed.Keep(); err != nil {
+			fmt.Fprintf(cmd.ErrOrStderr(), "the yes was not kept in %s: %v\n", cliproject.GrantsPath(), err)
+		}
 
 		<-ctx.Done()
 		fmt.Fprintln(cmd.OutOrStdout(), "\nstopping engine...")
@@ -124,6 +122,36 @@ resumes at the next scheduled time.`,
 		fmt.Fprintln(cmd.OutOrStdout(), "stopped")
 		return nil
 	},
+}
+
+const daemonRefusalHint = "Run `spwn automation daemon` in a terminal to be asked once (a yes is kept), or `spwn automation daemon --yes` to allow these paths for this run only"
+
+func watchReaches(p *project.Project) ([]cliproject.Reach, error) {
+	var reaches []cliproject.Reach
+	for _, wname := range slices.Sorted(maps.Keys(p.Manifest.Worlds)) {
+		w := p.Manifest.Worlds[wname]
+		for _, aname := range slices.Sorted(maps.Keys(w.Automations)) {
+			a := w.Automations[aname]
+			if a.On.FS == nil || a.On.FS.Path == "" {
+				continue
+			}
+			for what, text := range map[string]string{"world name": wname, "automation name": aname} {
+				if err := cliproject.CheckText(what, text); err != nil {
+					return nil, err
+				}
+			}
+			if err := cliproject.CheckHostPath("watch path", a.On.FS.Path); err != nil {
+				return nil, fmt.Errorf("automation %q of world %q: %w", aname, wname, err)
+			}
+			resolved, leaves := cliproject.Resolve(p.Root, a.On.FS.Path)
+			a.On.FS.Path = resolved
+			if leaves {
+				reaches = append(reaches, cliproject.Reach{Path: resolved, Access: "names and times recorded",
+					Grants: fmt.Sprintf("watched by automation %q of world %q: its files' names and times are recorded in the receipts and passed to the project's agent", aname, wname)})
+			}
+		}
+	}
+	return reaches, nil
 }
 
 func countAutomations(p *project.Project) int {
