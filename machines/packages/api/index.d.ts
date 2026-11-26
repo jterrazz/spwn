@@ -3693,6 +3693,10 @@ export type WatchFrame = {
     watch: string;
 };
 
+export type WikiCallsMapIn = {
+    Open?: string;
+};
+
 export type WikiCallsReadIn = {
     Page?: string;
 };
@@ -3713,6 +3717,53 @@ export type WikiFloorHead = {
     Index: number;
     Name: string;
     Question: string;
+};
+
+export type WikiMap = {
+    Floors: WikiMapFloor[] | null;
+    Home: WikiMapHome;
+    Icons: Record<string, string[] | null> | null;
+    Nodes: WikiMapNode[] | null;
+    Open: string;
+    Roots: string[] | null;
+};
+
+export type WikiMapFloor = {
+    Index: number;
+    Label: string;
+    Name: string;
+    Question: string;
+};
+
+export type WikiMapHome = {
+    Hard: number;
+    Line: string;
+    Needs: number;
+    NeedsPages: number;
+    Pages: number;
+    Seats: number;
+    Soft: number;
+    Word: string;
+};
+
+export type WikiMapNode = {
+    Band: number;
+    Count?: number;
+    Depth: number;
+    Home?: string;
+    ID: string;
+    Icon: string;
+    Kicker?: string;
+    Kids: string[] | null;
+    Kind: '' | 'seat' | 'page' | 'section' | 'block' | 'group' | 'prose';
+    Label: string;
+    Line?: string;
+    Marks: boolean[] | null;
+    More?: number;
+    Needs: number;
+    Parent: string | null;
+    Ref: string;
+    Title?: string;
 };
 
 export type WikiPageHead = {
@@ -4174,6 +4225,8 @@ export type VaultNewInput = VaultCallsVaultNewIn;
 export type VaultNewOutput = AccountsVaultOffer;
 export type VaultRemoveInput = VaultCallsVaultRemoveIn;
 export type VaultRemoveOutput = AccountsRemoved;
+export type WikiMapInput = WikiCallsMapIn;
+export type WikiMapOutput = WikiMap;
 export type WikiReadInput = WikiCallsReadIn;
 export type WikiReadOutput = WikiServed;
 
@@ -4315,6 +4368,7 @@ export interface Calls {
     'vault.list': { in: VaultListInput; out: VaultListOutput; watch: true };
     'vault.new': { in: VaultNewInput; out: VaultNewOutput; watch: true };
     'vault.remove': { in: VaultRemoveInput; out: VaultRemoveOutput; watch: false; confirm: 'remove-password'; consequence: '%s leaves this Mac\'s vault, and every grant made from it ends.' };
+    'wiki.map': { in: WikiMapInput; out: WikiMapOutput; watch: false };
     'wiki.read': { in: WikiReadInput; out: WikiReadOutput; watch: false };
 }
 
@@ -4446,7 +4500,7 @@ export type OverviewUpkeep = 'needs-you' | 'can-wait';
 
 export type OverviewVerb = 'review' | 'restart' | 'start' | 'try-again' | 'update' | 'remove' | 'delete' | 'upgrade' | 'wake' | 'move' | 'start-engine' | 'open-settings' | 'in-terminal' | 'fix';
 
-export type PageNoun = 'machine' | 'skill' | 'listener' | 'quiet-listener' | 'restart' | 'line' | 'package' | 'app' | 'setting' | 'password' | 'grant' | 'block' | 'quiet-block' | 'wiki-page' | 'remark' | 'hard-finding' | 'row';
+export type PageNoun = 'machine' | 'skill' | 'listener' | 'quiet-listener' | 'restart' | 'line' | 'package' | 'app' | 'setting' | 'password' | 'grant' | 'block' | 'quiet-block' | 'wiki-page' | 'remark' | 'hard-finding' | 'row' | 'wiki-seat' | 'wiki-section' | 'wiki-finding';
 
 export type SettingsState = 'applied' | 'changed-since' | 'not-applied' | 'off-here' | 'not-for-this-machine' | 'reading' | 'checked';
 

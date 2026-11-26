@@ -118,6 +118,16 @@ A label is always round: `Seconds` is the exact value, and the label rounds it t
 
 Its refusals are `wiki.none`, `wiki.unknown-page` and `wiki.unreadable` (`wiki.yaml` absent or refused, its finding said), each told in `specs/usecases/wiki/read/`.
 
+### The map
+
+`wiki.map`, beside it, answers the graph the window's canvas navigates the corpus by, in one answer, so the window derives none of it. It reads the same compiled corpus as `wiki.read`.
+
+- **Its nodes** are the seats, `S:<seat>`, in the schema's order and listed as `Roots`; each seat's pages, `P:<page>`, lowest floor first, the records after the other pages of their floor, then by word; and under the page `Open` names, its sections, `C:<page>:<i>` with `i` the section's index in `wiki.read`'s `Sections` (a section with nothing in it is left out), and what each holds, its blocks, groups and paragraphs, `B:<page>:<id>`. A page not open is served with no kids. `Ref` is the id `wiki.read` serves a node by: the seat's, the page's, the section's anchor (empty for the opening) or the block's, the group's or the prose's, `p<section>.<n>`.
+- **Each node** carries its `Depth` (1 for a seat to 4 for a block, a group or a paragraph), `Parent` (null for a seat) and `Kids` in reading order; `Needs`, the needs-you findings under it, its kids' and its own (a page owns those on its head, a block its own, a group its blocks'); `Marks`, one per kid, true where that kid holds one (a group marks its blocks), eleven at most, `More` counting the rest; `Band`, the canvas row of its seat, the lowest floor of the seat's pages; and its words: `Label`, then `Title`, `Kicker` and `Line` when they say more than the label, its `Icon` and `Count`, what it holds, said with its kind's noun (pages, sections, a section's blocks, a group's blocks). A seat names its `Home`, the node of the page it opens at.
+- **The head** is `Home`, the root's word and line, the pages and seats it holds, the needs-you findings and the pages they sit on, and the corpus's hard and soft findings; `Floors` are the ladder, each with its band's `Label`, `E1 · Produit`; `Icons` the dot icons its nodes are drawn with.
+
+A map open at no page of its own is refused `wiki.unknown-page`; its other refusals are `wiki.read`'s, each told in `specs/usecases/wiki/map/`.
+
 ## Beyond the spec
 
 Each reading the engine made where SPEC-v1 is silent:

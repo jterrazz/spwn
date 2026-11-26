@@ -1,0 +1,13 @@
+description: 'wiki.map with no page open holds every seat and page, each counted and marked, its sections none'
+env:
+    - one-mac
+    - engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].wiki = {"head":"c1","commits":{"c1":{"wiki.yaml":"wiki: spwn.wiki/v1\nfloors:\n    - id: intention\n      name: Intention\n      question: Why\n    - id: product\n      name: Product\n      question: What\n    - id: domains\n      name: Domains\n      question: Which words\n    - id: architecture\n      name: Architecture\n      question: Where\n    - id: code\n      name: Code\n      question: Which lines\nseats:\n    - id: vision\n      name: Vision\n      path: [blueprint/]\n      reads: [tell, define]\n      home: blueprint/home\nbudget: 2min\n","blueprint/home.md":"# Home\n\nThe one page of the wiki.\n\n<Term id=\"seat\" means=\"who a page is written for\" />\n","blueprint/notes.png":"png"}}}'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.out | {home: [.Home.Word, .Home.Pages, .Home.Seats, .Home.Needs], floor: .Floors[0].Label, roots: .Roots, open: .Open, nodes: [.Nodes[] | [.ID, .Depth, .Kind, .Parent, .Kids, .Label, .Needs, .Marks, .Band, .Count, .Home]]}'''
+      stdin: |
+          {"v":2,"id":"1","call":"wiki.map","target":{},"in":{}}
+      exit: 0
+      stdout: |
+          {"home":["Wiki",1,1,0],"floor":"E0 · Intention","roots":["S:vision"],"open":"","nodes":[["S:vision",1,"seat",null,["P:blueprint/home"],"Vision",0,[false],0,1,"P:blueprint/home"],["P:blueprint/home",2,"page","S:vision",[],"Home",0,[false],0,1,null]]}

@@ -33,7 +33,8 @@ apps/engine/
              the ledger of what apply installed
   wiki/      the wiki's model: wiki.yaml read into its schema (its strict shape the catalog's), a page's tags
              read and compiled to typed records, never executed, and the corpus judged by its rules and weighed;
-             a page served with its reading (wiki.read), from the corpus a Mac declares (the contract Corpus)
+             a page served with its reading (wiki.read) and the graph of the corpus (wiki.map), from the
+             corpus a Mac declares (the contract Corpus)
 
   agents/    an agent and the Mind it keeps on its machine, by project (the contract Minds), the
              family of the Agent space; its real adapter wraps Agents' spwn.sh/packages/agent

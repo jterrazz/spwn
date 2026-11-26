@@ -2338,10 +2338,28 @@
       "Other": "skills",
       "Tone": "plain"
     },
+    "wiki-finding": {
+      "Word": "Findings",
+      "One": "finding",
+      "Other": "findings",
+      "Tone": "plain"
+    },
     "wiki-page": {
       "Word": "Pages",
       "One": "page",
       "Other": "pages",
+      "Tone": "plain"
+    },
+    "wiki-seat": {
+      "Word": "Seats",
+      "One": "seat",
+      "Other": "seats",
+      "Tone": "plain"
+    },
+    "wiki-section": {
+      "Word": "Sections",
+      "One": "section",
+      "Other": "sections",
       "Tone": "plain"
     }
   },

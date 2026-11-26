@@ -1472,6 +1472,18 @@
       "out": "Removed"
     },
     {
+      "name": "wiki.map",
+      "schema": "station.wiki.map/v1",
+      "where": "in-process",
+      "errors": [
+        "wiki.none",
+        "wiki.unknown-page",
+        "wiki.unreadable"
+      ],
+      "in": "MapIn",
+      "out": "Map"
+    },
+    {
       "name": "wiki.read",
       "schema": "station.wiki.read/v1",
       "where": "in-process",

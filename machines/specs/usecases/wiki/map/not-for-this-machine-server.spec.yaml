@@ -1,0 +1,11 @@
+description: 'inside a server, the wiki''s map is refused: its Mac reads it'
+env:
+    - in-server
+    - engine
+runs:
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.error.code'''
+      stdin: |
+          {"v":2,"id":"1","call":"wiki.map","target":{},"in":{}}
+      exit: 0
+      stdout: |
+          "section.not-for-this-machine"

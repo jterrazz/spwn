@@ -439,6 +439,9 @@ func wordedEnums() []worded {
 			string(page.NounRemark):        {Word: "Remarks", One: "remark", Other: "remarks", Tone: verdict.Plain},
 			string(page.NounHardFinding):   {Word: "Hard findings", One: "hard finding", Other: "hard findings", Tone: verdict.Plain},
 			string(page.NounRow):           {Word: "Rows", One: "row", Other: "rows", Tone: verdict.Plain},
+			string(page.NounWikiSeat):      {Word: "Seats", One: "seat", Other: "seats", Tone: verdict.Plain},
+			string(page.NounWikiSection):   {Word: "Sections", One: "section", Other: "sections", Tone: verdict.Plain},
+			string(page.NounWikiFinding):   {Word: "Findings", One: "finding", Other: "findings", Tone: verdict.Plain},
 		}},
 		{wiki.Detail(""), wordsOf(wiki.Detail("").Enum(), func(v string) string { return v })},
 		{catalog.OS(""), map[string]word{

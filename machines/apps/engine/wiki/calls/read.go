@@ -22,7 +22,7 @@ type Deps struct {
 }
 
 func All(d Deps) []call.Handler {
-	return []call.Handler{call.Bind(Read, d)}
+	return []call.Handler{call.Bind(Read, d), call.Bind(Map, d)}
 }
 
 func Applies(p machine.Profile) machine.Verdict {
@@ -44,16 +44,9 @@ var Read = call.Call[Deps, ReadIn, wiki.Served]{
 	Name: "wiki.read", Where: call.InProcess, Applies: Applies,
 	Errors: []fail.Code{None, UnknownPage, Unreadable},
 	Run: func(ctx context.Context, d Deps, in ReadIn, _ call.Progress) (wiki.Served, error) {
-		files, err := d.Corpus.Files(ctx)
-		if errors.Is(err, contract.ErrNone) {
-			return wiki.Served{}, fail.New(fail.NotFound, None, "", nil)
-		}
+		corpus, err := compiled(ctx, d)
 		if err != nil {
 			return wiki.Served{}, err
-		}
-		corpus, err := wiki.Read(files)
-		if err != nil {
-			return wiki.Served{}, fail.New(fail.Failed, Unreadable, err.Error(), nil)
 		}
 		page := in.Page
 		if page == "" {
