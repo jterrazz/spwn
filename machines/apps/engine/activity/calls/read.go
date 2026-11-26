@@ -6,6 +6,7 @@ import (
 
 	"github.com/jterrazz/studio-station/apps/engine/activity"
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
+	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 	"github.com/jterrazz/studio-station/apps/engine/core/finding"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/core/section"
@@ -32,9 +33,19 @@ type ReadIn struct {
 	Run bool `json:"run,omitempty"`
 }
 
+const (
+	// value: the widest window a graph is drawn over: a wider one would
+	// fold into more buckets than any screen draws.
+	MaxGraph = 30 * 24 * time.Hour
+)
+
 var Read = call.Watch[Deps, ReadIn, activity.Report]{
 	Name: "activity.read", Section: section.Activity, Where: call.AtTarget, Applies: activity.Applies,
+	Errors: []fail.Code{call.TooLarge},
 	Run: func(ctx context.Context, d Deps, in ReadIn, _ call.Progress) (<-chan call.Update[activity.Report], error) {
+		if in.Graph > MaxGraph {
+			return nil, call.OverBound("activity.read", "graph", "30 days")
+		}
 		out := make(chan activity.Report, 1)
 		r := d.read(ctx, in)
 		r.Verdict = activity.VerdictOf(r)

@@ -141,6 +141,9 @@ func Codes() map[fail.Code]Wording {
 		call.BadInput: func(e *fail.Error) (string, string) {
 			return e.Subject + " cannot read its input", "check the request against " + e.Detail["in"]
 		},
+		call.TooLarge: func(e *fail.Error) (string, string) {
+			return e.Subject + " takes a " + e.Detail["in"] + " of " + e.Detail["max"] + " at most", "ask again with a " + e.Detail["in"] + " of " + e.Detail["max"] + " or less"
+		},
 		call.BadOutput: func(e *fail.Error) (string, string) {
 			return e.Subject + " answered what it cannot write", "report it: Machines --version"
 		},

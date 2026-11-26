@@ -80,6 +80,9 @@
       "schema": "station.activity.read/v1",
       "section": "activity",
       "where": "at-target",
+      "errors": [
+        "call.too-large"
+      ],
       "in": "ReadIn",
       "out": "Report",
       "watch": true

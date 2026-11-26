@@ -321,6 +321,7 @@
             "call.bad-input",
             "call.bad-output",
             "call.needs",
+            "call.too-large",
             "call.unknown",
             "catalog.invalid",
             "catalog.newer-schema",

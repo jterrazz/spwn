@@ -480,6 +480,11 @@
       "Detail": "call",
       "Tone": "plain"
     },
+    "call.too-large": {
+      "Word": "too large",
+      "Detail": "call",
+      "Tone": "plain"
+    },
     "call.unknown": {
       "Word": "unknown",
       "Detail": "call",
