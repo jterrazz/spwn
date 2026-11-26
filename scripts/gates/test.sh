@@ -311,6 +311,23 @@ if [ -n "$B32" ]; then
 else
   echo "SKIP: no bash 3.2 here (set GATE_BASH32 or put bash-3.2 on PATH): gate-ssh.sh is NOT proved under the Mac's /bin/bash"
 fi
+launcher() {
+  local t0 t1 ms err rc
+  t0=$EPOCHREALTIME
+  err=$(env -i PATH="$PATH" HOME="$H" GATE_ROUTES_DIR="$R" GATE_RUN_DIR="$T/lrun" GATE_VM_LINUX=vm-nope timeout 10 "$@" 2>&1 > /dev/null); rc=$?
+  t1=$EPOCHREALTIME; ms=$(((10#${t1//[.,]/} - 10#${t0//[.,]/}) / 1000))
+  [ $rc = 92 ] && [[ $err == *"no route for vm-nope"* ]] || bad "a launcher does not stop on gate-ssh's refusal (exit $rc): $* -> $err"
+  [ $ms -lt 1000 ] || bad "a launcher took $ms ms to stop on gate-ssh's refusal: $*"
+}
+G=$T/repo; git init -q -b main "$G"; for m in a b; do git -C "$G" -c user.name=t -c user.email=t@t.invalid commit -q --allow-empty -m $m; done
+printf '1 %s\n' "$(git -C "$G" rev-parse HEAD)" > "$T/regen.map"
+launcher bash ./cc.sh "$G" HEAD~1 lbl
+launcher bash ./cold-gate.sh "$G" main lbl
+launcher bash ./desktop-proof.sh "$G" lbl
+launcher bash ./regen.sh one "$G" HEAD lbl
+launcher bash ./regen.sh all "$G" "$T/regen.map" lbl 1 ""
+launcher env GATE_SLOT_VM=vm-nope bash ./gate-slot.sh true
+launcher env STATION_VM=vm-nope bash ../../machines/apps/desktop/scripts/look.sh lot src/x.test.ts
 if command -v sshd > /dev/null && command -v ssh-keygen > /dev/null && command -v python3 > /dev/null; then
   S=$T/sd; O=$T/owner; mkdir -p "$S" "$O/.ssh"; chmod 700 "$S" "$O" "$O/.ssh"
   ssh-keygen -q -t ed25519 -N '' -f "$S/host"; ssh-keygen -q -t ed25519 -N '' -f "$S/client"; ssh-keygen -q -t ed25519 -N '' -C synthetic-owner -f "$O/.ssh/id_ed25519"

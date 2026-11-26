@@ -1,6 +1,7 @@
 #!/bin/bash
 # invariant: GEN through STORIES run behind the VM-wide story slot; a child of the gate never inherits a lock's descriptor (see nl in cc-remote.sh).
 . "$(dirname "$0")/env.sh"
+gate_route "$VM_LINUX"
 W=$1; B=$2; L=$3; H=$(git -C "$W" rev-parse "$B")
 sub=$(git -C "$W" rev-parse --show-prefix)  # "" at a repo root, "machines/" in a subdir
 [ -z "$sub" ] && [ -d "$W/machines/apps/engine" ] && sub=machines/

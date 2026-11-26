@@ -6,6 +6,7 @@ ok(){ case $1 in "" | *[!A-Za-z0-9._-]*) echo "bad name: $1"; exit 2 ;; esac; }
 case $1 in
 one)
   [ $# -ge 4 ] || usage; W=$2; SHA=$3; L=$4; ARIA=$5; ok "$L"; B=regen-$L-tmp; VM=$VM_LINUX; RS=$VM_DIR/; R='$HOME'/$VM_DIR
+  gate_route "$VM"
   rm -f "${RUN:?}/$L-regen.end"; trap 'echo END > "$RUN/$L-regen.end"' EXIT
   git -C "$W" branch -f $B $SHA >/dev/null || exit 89
   git -C "$W" bundle create $RUN/$L-regen.bundle "$B" --tags >/dev/null 2>&1 || exit 90
@@ -16,6 +17,7 @@ one)
   git -C "$W" branch -D $B >/dev/null ;;
 all)
   [ $# -eq 6 ] || usage; W=$2; MAP=$3; P=$4; ok "$P"; [ -f "$MAP" ] || { echo "no map file $MAP"; exit 2; }
+  gate_route "$VM_LINUX"
   rm -f "${RUN:?}/$P-regen-all.end"; trap 'echo END > "$RUN/$P-regen-all.end"' EXIT
   sha(){ awk -v n=$1 '$1==n{print $2}' "$MAP"; }
   lane(){ for n in $1; do echo "== c$n $(sha $n) $(date +%T)"; bash $GATE_DIR/regen.sh one $W $(sha $n) $P-c$n > $RUN/station-$P-regen-c$n.log 2>&1; echo "== c$n done rc=$? $(date +%T)"; done; }

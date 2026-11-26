@@ -4,6 +4,7 @@
 [ $# -ge 2 ] || { echo "usage: desktop-proof.sh <worktree> <label> [branch]" >&2; exit 2; }
 W=$1; L=$2; VM=$VM_LINUX; RS=$VM_DIR/; R='$HOME'/$VM_DIR
 case $L in "" | *[!A-Za-z0-9._-]*) echo "bad label: $L"; exit 2 ;; esac
+gate_route "$VM"
 rm -f "${RUN:?}/$L-dt.end"; trap 'echo "END $(date +%T)" > $RUN/$L-dt.end' EXIT
 B=${3:-$(git -C "$W" rev-parse --abbrev-ref HEAD)} || exit 2
 git -C "$W" bundle create $RUN/$L.bundle "$B" --tags >/dev/null 2>&1 || exit 90

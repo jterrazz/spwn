@@ -3,6 +3,7 @@
 [ $# -ge 3 ] || { echo "usage: cc.sh <worktree> <base> <label> [vitest filters...]" >&2; exit 2; }
 W=$1; BASE=$2; L=$3; shift 3; VM=$VM_LINUX
 case $L in "" | *[!A-Za-z0-9._-]*) echo "bad label: $L"; exit 2 ;; esac
+gate_route "$VM"
 LOCK=$VM-$L; R='$HOME'/$VM_DIR; RS=$VM_DIR/
 mkdir -p $RUN/vm-lock; o=$(cat $RUN/vm-lock/$LOCK 2>/dev/null)
 if [ -n "$o" ] && kill -0 "$o" 2>/dev/null; then echo "refused: $LOCK already runs loop pid $o"; exit 88; fi

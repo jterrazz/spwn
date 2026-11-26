@@ -5,6 +5,7 @@ D=$RUN/gate-slots
 mkdir -p "$D/wanted"
 rank() { case $1 in landing) echo 3 ;; low) echo 1 ;; normal | "") echo 2 ;; *) echo "gate-slot: unknown priority $1 (landing, normal or low)" >&2; return 1 ;; esac; }
 prio=${GATE_SLOT_PRIORITY:-normal}; me=$(rank "$prio") || exit 2
+[ -z "${GATE_SLOT_VM:-}" ] || gate_route "$GATE_SLOT_VM"
 { echo "$prio"; echo "$*" | cut -c1-200; } > "$D/wanted/$$"
 trap 'rm -f "$D/wanted/$$"' EXIT
 load() {
