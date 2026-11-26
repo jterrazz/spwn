@@ -1,10 +1,13 @@
 .page {
-    max-width: 980px;
-    margin: 0 auto;
-    padding: 20px var(--space-24) 48px;
+    padding: 20px 40px 48px;
     display: flex;
     flex-direction: column;
     gap: var(--space-16);
+}
+@media (width < 900px) {
+    .page {
+        padding-inline: var(--space-24);
+    }
 }
 .tiles {
     display: grid;
