@@ -2,6 +2,7 @@ package project_test
 
 import (
 	"errors"
+	"maps"
 	"testing"
 
 	"github.com/jterrazz/studio-station/apps/engine/project"
@@ -79,6 +80,23 @@ func TestARecordedPathOutsideARunFolderIsNeverReadNorRemoved(t *testing.T) {
 	}
 	if !project.InRunFolder(project.RunFolder("neo") + "/CLAUDE.md") {
 		t.Error("a file of a run folder is not in it")
+	}
+}
+
+func TestAnApplyStoppedKeepsWhatItWroteBeforeForEveryChangeNotMade(t *testing.T) {
+	old, now := project.Digest(file("CLAUDE.md", "old")), project.Digest(file("CLAUDE.md", "now"))
+	was := project.Record{".spwn/agents/neo/a.md": old, ".spwn/agents/neo/b.md": old, ".spwn/agents/neo/c.md": old}
+	next := project.Record{".spwn/agents/neo/a.md": now, ".spwn/agents/neo/b.md": now, ".spwn/agents/neo/new.md": now}
+	changes := []project.Change{
+		{Path: ".spwn/agents/neo/a.md", Kind: project.Overwrite},
+		{Path: ".spwn/agents/neo/b.md", Kind: project.Overwrite},
+		{Path: ".spwn/agents/neo/c.md", Kind: project.Remove},
+		{Path: ".spwn/agents/neo/new.md", Kind: project.Add},
+	}
+	kept := project.Kept(was, next, changes, 1)
+	want := project.Record{".spwn/agents/neo/a.md": now, ".spwn/agents/neo/b.md": old, ".spwn/agents/neo/c.md": old}
+	if !maps.Equal(kept, want) {
+		t.Errorf("Kept = %v; want %v: the one written, and each file not reached as apply wrote it before, so c.md is still removed next time", kept, want)
 	}
 }
 

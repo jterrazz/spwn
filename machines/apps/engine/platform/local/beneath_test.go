@@ -312,3 +312,32 @@ func TestALinkIsMadeReadAndRemovedAsALink(t *testing.T) {
 		t.Errorf("the link's target = %q, %v; want it untouched", data, err)
 	}
 }
+
+// invariant: a FIFO no writer holds is refused as no file, at once: no
+// open through a Folder waits on one.
+func TestAFIFOIsRefusedAndNoOpenWaitsOnIt(t *testing.T) {
+	base := t.TempDir()
+	if err := os.Mkdir(filepath.Join(base, "d"), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	if err := unix.Mkfifo(filepath.Join(base, "d", "pipe"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	f := opened(t, base, "d")
+	for name, call := range map[string]func() error{
+		"ReadFile":  func() error { _, _, err := f.ReadFile("pipe"); return err },
+		"ChmodFile": func() error { return f.ChmodFile("pipe", os.Geteuid(), func(m fs.FileMode) fs.FileMode { return m }) },
+		"Replace":   func() error { return f.Replace("pipe", Seen{}, []byte("x"), 0o600, Self()) },
+	} {
+		done := make(chan error, 1)
+		go func() { done <- call() }()
+		select {
+		case err := <-done:
+			if !errors.Is(err, errNotFile) {
+				t.Errorf("%s = %v; want it refused as not a file", name, err)
+			}
+		case <-time.After(5 * time.Second):
+			t.Fatalf("%s waited 5 s on the FIFO", name)
+		}
+	}
+}
