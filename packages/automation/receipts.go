@@ -1,8 +1,10 @@
 package automation
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"sync"
@@ -296,4 +298,52 @@ func (w *MemoryReceiptWriter) Receipts() []Receipt {
 	out := make([]Receipt, len(w.receipts))
 	copy(out, w.receipts)
 	return out
+}
+
+func ReadReceipts(path string) ([]Receipt, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	defer f.Close()
+	return decodeReceipts(f)
+}
+
+const maxReceiptLineBytes = 4 * 1024 * 1024
+
+func decodeReceipts(r io.Reader) ([]Receipt, error) {
+	var out []Receipt
+	br := bufio.NewReader(r)
+	for {
+		line, err := br.ReadBytes('\n')
+		trimmed := dropTrailingNewline(line)
+		switch {
+		case len(trimmed) == 0:
+		case len(trimmed) > maxReceiptLineBytes:
+		default:
+			var row Receipt
+			if jerr := json.Unmarshal(trimmed, &row); jerr == nil {
+				out = append(out, row)
+			}
+		}
+		if err == io.EOF {
+			return out, nil
+		}
+		if err != nil {
+			return out, err
+		}
+	}
+}
+
+func dropTrailingNewline(b []byte) []byte {
+	if n := len(b); n > 0 && b[n-1] == '\n' {
+		b = b[:n-1]
+	}
+	if n := len(b); n > 0 && b[n-1] == '\r' {
+		b = b[:n-1]
+	}
+	return b
 }
