@@ -1,0 +1,18 @@
+- dialog "Set up this Mac macbook-pro":
+  - heading "Set up this Mac macbook-pro" [level=2]
+  - list "Steps":
+    - listitem: Install the engine , done
+    - listitem: Allow Local Network , done
+    - listitem: Allow notifications , done
+    - listitem: Sign in to GitHub , waits for you
+    - listitem: Sign in to Claude
+    - listitem: First machine
+    - listitem: Ready
+  - paragraph: 4 of 7
+  - button "Hide"
+  - heading "GitHub is next. Finish it in your browser." [level=3]
+  - paragraph: Your machines use this sign-in to clone and push. The guide moves on once you are in.
+  - paragraph: waiting for the browser
+  - button "Sign in to GitHub ↗"
+  - button "Skip"
+  - status "GitHub is next. Finish it in your browser."

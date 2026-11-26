@@ -1,0 +1,15 @@
+- dialog "Set up this Mac macbook-pro":
+  - heading "Set up this Mac macbook-pro" [level=2]
+  - list "Steps":
+    - listitem: Install the engine , done
+    - listitem: Allow Local Network , waits for you
+    - listitem: Sign in a program
+    - listitem: Ready
+  - paragraph: 2 of 4
+  - button "Hide"
+  - heading "Spwn needs Local Network. Turn it on in System Settings." [level=3]
+  - paragraph: Without it, this Mac cannot see your other Macs. The guide moves on by itself once it is on.
+  - paragraph: watching for the switch
+  - button "Open System Settings ↗"
+  - button "Skip"
+  - status "Spwn needs Local Network. Turn it on in System Settings."

@@ -18,9 +18,14 @@ export type ModalProps = {
     labelledBy?: string | undefined;
     className?: string | undefined;
     opensOn?: OpensOn | undefined;
+    place?: Place | undefined;
 };
 
 type OpensOn = 'dialog' | 'field';
+
+// value: where a modal stands: under the top bar like a sheet of the page, or centred under the bar, which it leaves
+// value: uncovered, as the guide of a long act does.
+type Place = 'centre' | 'top';
 
 function opening(pop: HTMLElement, on: OpensOn): HTMLElement {
     if (on === 'dialog') {
@@ -50,6 +55,7 @@ export function Modal({
     labelledBy,
     className,
     opensOn = 'field',
+    place = 'top',
 }: ModalProps) {
     const pop = useRef<HTMLDivElement>(null);
     const close = useRef(onClose);
@@ -67,7 +73,7 @@ export function Modal({
     }, []);
     return (
         <div
-            className={styles.veil}
+            className={`${styles.veil} ${place === 'centre' ? styles.centre : ''}`}
             onKeyDown={(event) => {
                 trapped(event, pop.current, close.current);
             }}

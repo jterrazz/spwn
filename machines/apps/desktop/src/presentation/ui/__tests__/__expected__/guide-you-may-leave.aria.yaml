@@ -1,0 +1,15 @@
+- dialog "New machine linux-5":
+  - heading "New machine linux-5" [level=2]
+  - list "Steps":
+    - listitem: Get the image
+    - listitem: Build it
+    - listitem: Boot
+    - listitem: Apply its file
+    - listitem: Ready
+  - paragraph: 1 of 5
+  - button "Hide"
+  - heading "Getting the image. Ubuntu 24.04, from the catalog." [level=3]
+  - paragraph: Fetched once for this Mac. Every next linux machine starts from it.
+  - progressbar "Get the image"
+  - button "Hide, it keeps going"
+  - status "Getting the image. Ubuntu 24.04, from the catalog."

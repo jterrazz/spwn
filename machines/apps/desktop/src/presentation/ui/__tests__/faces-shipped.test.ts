@@ -16,7 +16,9 @@ const FONTSOURCE = [
     '@fontsource/geist-mono/500.css',
 ];
 const SHIPPED = /-(?:latin|latin-ext|symbols2)-\d+-normal\.woff2/u;
-const SYSTEM_GLYPHS = new Set([0x21_92, 0x21_e7, 0x23_18, 0x23_03, 0x23_04, 0x25_d0, 0x27_13]);
+const SYSTEM_GLYPHS = new Set([
+    0x21_92, 0x21_97, 0x21_e7, 0x23_18, 0x23_03, 0x23_04, 0x25_d0, 0x27_13,
+]);
 
 interface Face {
     file: string;

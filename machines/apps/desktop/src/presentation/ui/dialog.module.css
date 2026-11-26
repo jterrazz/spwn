@@ -19,6 +19,15 @@
     display: flex;
     flex-direction: column;
 }
+.centre {
+    top: var(--chrome-row);
+    align-items: center;
+}
+.centre .pop {
+    width: auto;
+    max-width: 100%;
+    border-radius: var(--radius-panel);
+}
 .pop:focus {
     outline: none;
 }

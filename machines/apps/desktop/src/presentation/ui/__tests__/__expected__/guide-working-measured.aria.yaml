@@ -1,0 +1,15 @@
+- dialog "New machine linux-5":
+  - heading "New machine linux-5" [level=2]
+  - list "Steps":
+    - listitem: Get the image , done
+    - listitem: Build it Packages · 2 of 4
+    - listitem: Boot
+    - listitem: Apply its file
+    - listitem: Ready
+  - paragraph: 2 of 5
+  - button "Hide"
+  - heading "Building the image. Packages, 2 of 4." [level=3]
+  - paragraph: The first machine of an image takes longest. The next ones start from it in seconds.
+  - progressbar "Build it"
+  - button "Hide, it keeps going"
+  - status "Building the image. Packages, 2 of 4."

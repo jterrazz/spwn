@@ -1,0 +1,15 @@
+- dialog "Set up this Mac macbook-pro":
+  - heading "Set up this Mac macbook-pro" [level=2]
+  - list "Steps":
+    - listitem: 6 steps done
+    - listitem: Add macbook-air
+    - listitem: First machine
+    - listitem: Its file
+    - listitem: Ready
+  - paragraph: 7 of 10
+  - button "Hide"
+  - heading "Installing Spwn on macbook-air. Nothing to do over there." [level=3]
+  - paragraph: The same version as this Mac. macbook-air keeps running what it runs.
+  - progressbar "Add macbook-air"
+  - button "Hide, it keeps going"
+  - status "Installing Spwn on macbook-air. Nothing to do over there."
