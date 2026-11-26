@@ -238,13 +238,12 @@ function Frame({ Gallery, pages, memory }: FrameProps) {
     const { drawn, engine, home, listed, macs, needs, side, standing } = useStation();
     const held = useHeld(drawn);
     const quiet = held !== undefined;
-    const sheets = useSheets();
+    const { opened } = useSheets();
     const column = useMemo(() => new ColumnState(memory, globalThis.innerWidth), [memory]);
-    const { opened } = sheets;
     const { addMac, guide, newMachine } = opened;
     const withGallery = Gallery !== undefined;
     const spaced = quiet || !isGlobal(route);
-    const { onSpace, soon } = useSpaceKeys(
+    const { card, onSpace, soon } = useSpaceKeys(
         router,
         macs,
         { onColumn: spaced ? column.toggle : NOWHERE, onFind: opened.find },
@@ -259,6 +258,8 @@ function Frame({ Gallery, pages, memory }: FrameProps) {
         <Screen>
             <div className={styles.window}>
                 <PathBar
+                    card={card}
+                    carried={side.carried}
                     column={spaced ? column : undefined}
                     engine={engine}
                     found={found}

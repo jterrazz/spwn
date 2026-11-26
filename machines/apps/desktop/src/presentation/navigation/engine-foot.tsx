@@ -73,9 +73,9 @@ export function EngineFoot({ engine, quiet, go }: EngineSaid & Go) {
     );
 }
 
-// invariant: the bar marks the engine only when it is not fine: absent, connecting, refused, incompatible or in a
-// invariant: state of its own that is not ok; a read still under way marks nothing.
-function marked({ engine, quiet }: EngineSaid, line: EngineLine): boolean {
+// invariant: the bar and the card mark the engine only when it is not fine: absent, connecting, refused,
+// invariant: incompatible or in a state of its own that is not ok; a read still under way marks nothing.
+export function engineMarked({ engine, quiet }: EngineSaid, line: EngineLine): boolean {
     if (quiet || !line.opens || engine.kind === 'failed') {
         return true;
     }
@@ -86,7 +86,7 @@ function marked({ engine, quiet }: EngineSaid, line: EngineLine): boolean {
 // value: the column's foot does, and opens the Engine page when there is one to open.
 export function EngineMark({ engine, quiet, go }: EngineSaid & Go) {
     const line = useFrameLine({ engine, quiet });
-    if (!marked({ engine, quiet }, line)) {
+    if (!engineMarked({ engine, quiet }, line)) {
         return null;
     }
     const dot = (

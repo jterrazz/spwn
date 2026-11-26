@@ -10,14 +10,20 @@ import type { Shortcut } from './shortcut';
 import type { Space } from './spaces';
 
 export type Acts = {
+    onCard: () => void;
     onColumn: () => void;
     onFind: () => void;
     onSpace: (space: Space) => void;
 };
 
-function obey(shortcut: Shortcut, router: Router, { onColumn, onFind, onSpace }: Acts): void {
+function obey(shortcut: Shortcut, router: Router, acts: Acts): void {
+    const { onCard, onColumn, onFind, onSpace } = acts;
     const { route, go, back, forward } = router;
     switch (shortcut) {
+        case 'card': {
+            onCard();
+            return;
+        }
         case 'column': {
             onColumn();
             return;

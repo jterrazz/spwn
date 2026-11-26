@@ -8,7 +8,8 @@
   - button "Forward" [disabled]
   - navigation "Path":
     - list:
-      - listitem: Settings
+      - listitem:
+        - button "Settings"
   - button "Inbox 2"
   - button "Find"
   - button "Settings"

@@ -247,6 +247,14 @@ describe('contrast', () => {
         expect(below(TEXT_BAR, measures)).toStrictEqual([]);
     });
 
+    test("each mark of a state holds the bar of a mark on glass over the four surface steps, as a popover's rows draw it", () => {
+        // Given - the five marks of a state on the glass composited over s0 to s3
+        const measures = MARKS.flatMap((mark) => onGlass(mark, GROUNDS));
+
+        // Then - none is below the bar of a mark
+        expect(below(MARK_BAR, measures)).toStrictEqual([]);
+    });
+
     test('over the white primary button, the brightest thing glass floats over, a name and its meta keep 4.5:1 and the third level 3:1', () => {
         // Given - the text levels on the glass composited over the primary at rest and at hover, pure white
         const grounds = ['primary', 'primary-hover'];

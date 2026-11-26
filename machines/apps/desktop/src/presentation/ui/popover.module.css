@@ -170,3 +170,31 @@
     padding: var(--space-12) var(--space-8);
     color: var(--t3);
 }
+.card {
+    width: 600px;
+}
+.columns {
+    display: grid;
+    grid-template-columns: 1fr 1.15fr;
+    gap: var(--space-8);
+}
+.columns > .group {
+    min-width: 0;
+}
+.columns > .group + .group {
+    padding-left: var(--space-8);
+    box-shadow: -1px 0 0 var(--hair);
+}
+.columns .section {
+    display: flex;
+    justify-content: space-between;
+}
+.section > span {
+    letter-spacing: 0;
+    text-transform: none;
+}
+.hint {
+    flex: none;
+    font-size: var(--text-meta);
+    color: var(--t3);
+}

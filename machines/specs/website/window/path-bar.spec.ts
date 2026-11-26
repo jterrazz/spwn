@@ -3,6 +3,7 @@ import {
     button,
     content,
     dialog,
+    field,
     focused,
     heading,
     navigation,
@@ -20,6 +21,11 @@ const spaces = navigation('Spaces');
 const column = navigation('Column');
 const AGENT_7F = heading('agent-7f running');
 const SPACES_LIST = dialog('Spaces');
+const CARD_FILTER = field('Go to a section or a machine');
+const THIS_MAC = region('macbook-pro');
+
+// value: from Storage on the card, one ↓ per row passed: Passwords, Engine, macbook-pro, api, linux-1, then mac-mini.
+const DOWN_TO_MAC_MINI = Array.from({ length: 6 }, () => 'ArrowDown');
 
 // value: the words the bar's Spaces navigation draws pressed in the page as last drawn: one, or none.
 function pressedSpaces(html: string): string[] {
@@ -106,6 +112,88 @@ describe('path bar', () => {
                 await visitor.see(within(path, button('mac-mini', { exact: false })));
                 await visitor.see(within(path, button('infra', { exact: false })));
                 await visitor.gone(within(path, button('macbook-pro', { exact: false })));
+            });
+        expect(result.errors.text).toBe('');
+    });
+
+    test('A23 from linux-1, ⌘L and sto open Storage; the card again, ↓ into the fleet, Enter opens mac-mini', async () => {
+        // Given - the proof build on linux-1 of macbook-pro over two-macs
+        const result = await website
+            .storage(PINNED)
+            .visit('/?world=two-macs&machine=linux-1&tab=Overview', async (visitor) => {
+                await visitor.see(heading('linux-1 running'));
+
+                // When - ⌘L, sto typed, Enter
+                await visitor.press('Meta+l');
+                await visitor.see(focused(CARD_FILTER));
+                await visitor.fill(CARD_FILTER, 'sto');
+                await visitor.press('Enter');
+
+                // Then - Storage, its segment the path's first
+                await visitor.see(within(path, button('Storage')));
+                await visitor.see(within(THIS_MAC, heading('3.0 GB can be freed.')));
+
+                // When - the card again, ↓ from Storage past Passwords and Engine into the fleet, on to mac-mini
+                await visitor.press('Meta+l');
+                await visitor.see(dialog('Storage'));
+                for (const key of DOWN_TO_MAC_MINI) {
+                    await visitor.press(key);
+                }
+                await visitor.press('Enter');
+
+                // Then - mac-mini opens under Fleet
+                await visitor.see(within(path, button('Fleet')));
+                await visitor.see(within(path, button('mac-mini', { exact: false })));
+            });
+        expect(result.errors.text).toBe('');
+    });
+
+    test('A23 a press on the first segment opens the card, and a filter narrows it to a machine', async () => {
+        // Given - the proof build on Storage over two-macs
+        const result = await website
+            .storage(PINNED)
+            .visit('/?world=two-macs&page=storage', async (visitor) => {
+                await visitor.see(within(THIS_MAC, heading('3.0 GB can be freed.')));
+
+                // When - Storage's segment is pressed, then infra typed and chosen
+                await visitor.click(within(path, button('Storage')));
+                await visitor.see(within(dialog('Storage'), option('Passwords', { exact: false })));
+                await visitor.see(within(dialog('Storage'), option('linux-1', { exact: false })));
+                await visitor.fill(CARD_FILTER, 'infra');
+                await visitor.gone(within(dialog('Storage'), option('linux-1', { exact: false })));
+                await visitor.see(within(dialog('Storage'), content('No section matches')));
+                await visitor.click(within(dialog('Storage'), option('infra', { exact: false })));
+
+                // Then - infra opens, its path Fleet, mac-mini, infra
+                await visitor.see(heading('infra healthy'));
+                await visitor.see(within(path, button('Fleet')));
+                await visitor.see(within(path, button('mac-mini', { exact: false })));
+            });
+        expect(result.errors.text).toBe('');
+    });
+
+    test("A23 from a machine's page the card's sections are a press away, and from a section its Fleet returns", async () => {
+        // Given - the proof build on linux-1's Ports over two-macs
+        const result = await website
+            .storage(PINNED)
+            .visit('/?world=two-macs&machine=linux-1&tab=Ports', async (visitor) => {
+                await visitor.see(within(path, button('linux-1', { exact: false })));
+
+                // When - Fleet's card, then its Passwords
+                await visitor.click(within(path, button('Fleet')));
+                await visitor.click(within(dialog('Fleet'), option('Passwords', { exact: false })));
+
+                // Then - Passwords opens, the path's first segment its own
+                await visitor.see(within(path, button('Passwords')));
+                await visitor.gone(within(path, button('Fleet')));
+
+                // When - Passwords' card, then its Fleet
+                await visitor.click(within(path, button('Passwords')));
+                await visitor.click(within(dialog('Passwords'), option('Fleet', { exact: false })));
+
+                // Then - linux-1 again
+                await visitor.see(within(path, button('Fleet')));
+                await visitor.see(within(path, button('linux-1', { exact: false })));
             });
         expect(result.errors.text).toBe('');
     });

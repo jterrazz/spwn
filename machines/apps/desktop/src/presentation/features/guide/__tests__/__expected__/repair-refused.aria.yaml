@@ -9,7 +9,8 @@
   - button "Forward" [disabled]
   - navigation "Path":
     - list:
-      - listitem: Home
+      - listitem:
+        - button "Home"
   - button "New machine"
   - button "Inbox 2"
   - button "Find"

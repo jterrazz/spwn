@@ -8,6 +8,8 @@ import { Icon } from '../ui/icon';
 import { Button, IconButton, Sign } from '../ui/index';
 import type { Shown } from '../words/shown';
 import { actionOf } from './bar-action';
+import type { Card } from './card';
+import type { Carried } from './carried';
 import { ColumnToggle } from './column';
 import type { ColumnState } from './column-state';
 import { EngineMark } from './engine-foot';
@@ -32,6 +34,8 @@ export type PathBarProps = {
     standing: Shown | undefined;
     onSpace: (space: Space) => void;
     soon: Soon;
+    card: Card;
+    carried: Carried;
     onFind: () => void;
     column: ColumnState | undefined;
     onAddPassword: () => void;
@@ -133,6 +137,7 @@ function End({ router, quiet, macs, needs, engine, onFind, ...props }: PathBarPr
 // invariant: portal outside it.
 export function PathBar(props: PathBarProps) {
     const { router, quiet, found, macs, standing, onSpace, soon, column, ItemName } = props;
+    const { card, carried, engine } = props;
     const { route, go, back, forward, canGoBack, canGoForward } = router;
     const segments = segmentsOf({ found, route }, quiet);
     return (
@@ -172,6 +177,9 @@ export function PathBar(props: PathBarProps) {
                 shortcut="⌘]"
             />
             <PathNav
+                card={card}
+                carried={carried}
+                engine={engine}
                 found={found}
                 go={go}
                 ItemName={ItemName}

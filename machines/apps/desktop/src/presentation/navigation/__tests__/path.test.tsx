@@ -19,7 +19,7 @@ import { wordOfSent } from '../../words/engine-words';
 import { NO_STATE_WORD } from '../../words/words';
 import { machineRoute } from '../route';
 import type { PlainPage } from '../route';
-import { PLACES } from '../segments';
+import { SECTIONS } from '../segments';
 import { TITLES } from '../titles';
 import { Window } from '../window';
 import { PINNED } from './pinned';
@@ -128,18 +128,20 @@ describe('PathNav', () => {
                 async (visitor) => {
                     await visitor.see(within(path, content(TITLES.home)));
 
-                    // When - Storage is opened from the column, then every place from the place segment's popover
+                    // When - Storage is opened from the column, then every other section from the card
                     await visitor.click(within(column, button(TITLES.storage, { exact: false })));
                     await visitor.see(within(path, button(TITLES.storage)));
                     let at: string = TITLES.storage;
-                    for (const place of PLACES) {
-                        await choose(visitor, {
-                            exact: true,
-                            filter: 'Filter places',
-                            name: TITLES[place],
-                            segment: at,
-                        });
-                        at = TITLES[place];
+                    for (const section of SECTIONS.machine) {
+                        if (section !== 'fleet' && section !== 'storage') {
+                            await choose(visitor, {
+                                exact: true,
+                                filter: 'Go to a section or a machine',
+                                name: TITLES[section],
+                                segment: at,
+                            });
+                            at = TITLES[section];
+                        }
                     }
 
                     // When - the first Mac is opened from the column, then every machine from its Mac's segment
