@@ -218,12 +218,14 @@ rm -rf "$T/sbx"; mkdir -p "$T/sbx/dir x"; printf x > "$T/it's a.txt"; printf x >
 got=$(gate_ssh scp "$T/it's a.txt" "vm-b:dir x/"); [ "$(grep -c '^/usr/bin/ssh$' <<< "$got")" = 1 ] || bad "hop scp upload is not one ssh: $got"
 remote=$(b64_of <<< "$got"); (cd "$T/sbx" && printf y | sh -c "$remote"); [ "$(cat "$T/sbx/dir x/it's a.txt" 2> /dev/null)" = y ] || bad "hop scp upload names another file: $remote"
 remote=$(gate_ssh scp "$T/up.txt" 'vm-b:$(touch pwned)' | b64_of); (cd "$T/sbx" && printf y | sh -c "$remote"); [ ! -e "$T/sbx/pwned" ] && [ -f "$T/sbx/\$(touch pwned)" ] || bad "hop scp upload runs its destination: $remote"
-gate_ssh scp 'vm-b:a b;touch pwned' "$T/down.txt"; [ "$(b64_of < "$T/down.txt")" = "/bin/cat -- 'a b;touch pwned'" ] || bad "hop scp download runs its source or a cat from PATH: $(tail -n 1 "$T/down.txt")"
+rm -f "$T/down.txt"; got=$(gate_ssh scp 'vm-b:a b;touch pwned' "$T/down.txt"); [ "$(b64_of <<< "$got")" = "/bin/cat -- 'a b;touch pwned'" ] || bad "hop scp download runs its source or a cat from PATH: $(tail -n 1 <<< "$got")"
+[ ! -e "$T/down.txt" ] || bad "a dry run of a hop download writes its destination"
+printf keep > "$T/down-keep.txt"; gate_ssh scp vm-b:x "$T/down-keep.txt" > /dev/null; [ "$(cat "$T/down-keep.txt")" = keep ] || bad "a dry run of a hop download overwrites its destination"
 case $(gate_ssh scp "$T/up.txt" vm-b:x | b64_of) in *'/bin/cat > "$d"') ;; *) bad "hop scp upload runs a cat from PATH" ;; esac
 nl_name="q'"$'\n'"touch pwned-nl"; printf x > "$T/$nl_name"; rm -f "$T/sbx/pwned-nl"
 remote=$(gate_ssh scp "$T/$nl_name" "vm-b:dir x/" | b64_of); (cd "$T/sbx" && printf y | sh -c "$remote" 2> /dev/null)
 [ ! -e "$T/sbx/pwned-nl" ] && [ "$(cat "$T/sbx/dir x/$nl_name" 2> /dev/null)" = y ] || bad "hop scp upload of a name with a quote and a newline runs a line of it or names another file: $remote"
-printf z > "$T/sbx/$nl_name"; gate_ssh scp "vm-b:$nl_name" "$T/down-nl.txt"; remote=$(b64_of < "$T/down-nl.txt")
+printf z > "$T/sbx/$nl_name"; remote=$(gate_ssh scp "vm-b:$nl_name" "$T/down-nl.txt" | b64_of)
 [ "$(cd "$T/sbx" && sh -c "$remote" 2> /dev/null)" = z ] && [ ! -e "$T/sbx/pwned-nl" ] || bad "hop scp download of a name with a quote and a newline reads another file or runs a line of it: $remote"
 E=$T/evil; mkdir -p "$E"; for c in base64 tr ls id dirname basename cut readlink find head rm; do printf '#!/bin/sh\necho evil\n' > "$E/$c"; chmod 755 "$E/$c"; done
 printf x > "$T/dl.out"; env -i PATH="$E:$PATH" HOME="$H" GATE_ROUTES_DIR="$R" timeout 30 "$GSH" ./gate-ssh.sh scp vm-dl:x "$T/dl.out" > /dev/null 2>&1; rc=$?

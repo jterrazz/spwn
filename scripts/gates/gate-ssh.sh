@@ -239,6 +239,7 @@ scp_mode() {
   [ ${#srcs[@]} -eq 1 ] || { echo "gate-ssh: a two-hop route copies one remote source at a time" >&2; exit 2; }
   rs=${srcs[0]#"$host":}; out=$dst
   [ -d "$out" ] && out="$out/$(command -p basename "$rs")"
+  if [ -n "${GATE_SSH_DRYRUN:-}" ]; then "$BASH" "$SELF" ssh -n "$host" "/bin/cat -- $(quote "$rs")"; exit $?; fi
   "$BASH" "$SELF" ssh -n "$host" "/bin/cat -- $(quote "$rs")" > "$out" || { rc=$?; command -p rm -f "$out"; exit $rc; }
 }
 
