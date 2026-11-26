@@ -36,7 +36,7 @@
 .title {
     margin: 0;
     font-size: var(--text-headline);
-    font-weight: var(--weight-strong);
+    font-weight: var(--weight-medium);
     line-height: 1.2;
     color: var(--t1);
     overflow-wrap: anywhere;

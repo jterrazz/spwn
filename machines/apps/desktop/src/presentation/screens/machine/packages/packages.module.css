@@ -83,7 +83,7 @@
     margin: 0;
     line-height: 1.15;
     font-size: var(--text-headline);
-    font-weight: var(--weight-strong);
+    font-weight: var(--weight-medium);
     letter-spacing: -0.02em;
 }
 .planLine {

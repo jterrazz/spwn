@@ -14,7 +14,7 @@
 .name {
     margin: 0;
     font-size: var(--text-headline);
-    font-weight: var(--weight-strong);
+    font-weight: var(--weight-medium);
     letter-spacing: -0.02em;
     display: flex;
     align-items: center;

@@ -4,7 +4,7 @@
 .title {
     margin: 0;
     line-height: 1.15;
-    font-weight: var(--weight-strong);
+    font-weight: var(--weight-medium);
     letter-spacing: -0.02em;
     text-wrap: balance;
 }
