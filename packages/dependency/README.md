@@ -9,7 +9,7 @@ Every Spwn dependency, whether shipped in the built-in catalog or authored under
 ## Key types
 
 - `Schema`: on-disk shape of `tool.yaml` (name, version, dependencies, install spec, files, verify).
-- `Parse(Resolver, ParseOptions)`, returning `*Parsed`: the single entry point. `DirResolver` reads from disk; `EmbedResolver` reads from `embed.FS`.
+- `Parse(Resolver, ParseOptions)`, returning `*Parsed`: the single entry point. `FSResolver` reads an `fs.FS`: the embedded catalog, or a project's folder through its root (`platform.FS`); a `files:` source that leaves the tool's folder is refused by its name (`ErrLeavesTheTool`) before anything is read.
 - `Ref`, `ParseRef(string)` returning a `Ref`: classify a ref as `KindSpwnBuiltin`, `KindRegistry`, `KindLocalSkill`, `KindLocalTool`, `KindLocalHook`, or `KindInvalid` (bare names, unknown schemes).
 - `SplitVersion`, `Canonical`: strip and normalise `@version` suffixes.
 - `ResolveTool` / `ResolveSkill`: check whether a ref resolves to a real on-disk target.
@@ -19,4 +19,4 @@ Every Spwn dependency, whether shipped in the built-in catalog or authored under
 
 - **Imported by**: `apps/cli`, `catalog`, `packages/architect`, `packages/compile` (adapter), `packages/project` (validator), `packages/runtimes`
 - **Subpackage `builtin`**: the built-in tool catalog (`BuiltinTools`, `RegisterBuiltins`, `CopyGateTools`, `HydrateLocals`), the only reader of the generated `internal/adapters/spwn/content`; imported by `apps/cli`, `packages/architect` and the catalog and compile tests, never by `project`, `transpile`, `runtimes` or `automation`
-- **Imports**: stdlib only
+- **Imports**: `packages/platform` (its `Tree` and `FS`, the rooted reads of a project), `gopkg.in/yaml.v3` and the standard library

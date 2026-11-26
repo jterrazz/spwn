@@ -118,6 +118,38 @@ func TestATreeWalksAsWalkDirDoes(t *testing.T) {
 	}
 }
 
+func TestATreesFSRefusesWhatTheTreeRefuses(t *testing.T) {
+	tree, dir := treeBeside(t)
+	if err := os.Symlink(filepath.Join(dir, "outside.md"), filepath.Join(tree.Dir(), "spwn", "away.md")); err != nil {
+		t.Fatal(err)
+	}
+	fsys := FS(tree.Dir())
+	if data, err := fs.ReadFile(fsys, "spwn.yaml"); err != nil || string(data) != "version: 1\n" {
+		t.Errorf("ReadFile(spwn.yaml) = %q, %v; want the project's file", data, err)
+	}
+	for _, name := range []string{"../outside.md", "/" + filepath.ToSlash(filepath.Join(dir, "outside.md")), "spwn/away.md"} {
+		if data, err := fs.ReadFile(fsys, name); err == nil {
+			t.Errorf("ReadFile(%q) = %q; want it refused", name, data)
+		}
+	}
+	got := make(chan error, 1)
+	go func() { _, err := fs.ReadFile(fsys, "pipe.md"); got <- err }()
+	select {
+	case err := <-got:
+		if !errors.Is(err, ErrNotAFile) {
+			t.Errorf("ReadFile of a FIFO = %v; want ErrNotAFile", err)
+		}
+	case <-time.After(10 * time.Second):
+		t.Fatal("ReadFile of the FS waited on a FIFO")
+	}
+	if entries, err := fs.ReadDir(fsys, "spwn/agents"); err != nil || len(entries) != 1 || entries[0].Name() != "neo" {
+		t.Errorf("ReadDir(spwn/agents) = %v, %v; want [neo]", entries, err)
+	}
+	if info, err := fs.Stat(fsys, "spwn"); err != nil || !info.IsDir() {
+		t.Errorf("Stat(spwn) = %v, %v; want a folder", info, err)
+	}
+}
+
 func TestATreeOfAFolderThatIsNotThereReadsNothing(t *testing.T) {
 	tree := Within(filepath.Join(t.TempDir(), "not-there"))
 	defer tree.Close()

@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"spwn.sh/packages/dependency/internal/manifest"
+	"spwn.sh/packages/platform"
 )
 
 func writeManifest(t *testing.T, dir, body string) {
@@ -29,7 +30,7 @@ verify:
   - command -v git
 `)
 
-	parsed, err := manifest.Parse(manifest.DirResolver{Root: dir}, manifest.ParseOptions{})
+	parsed, err := manifest.Parse(manifest.FSResolver{FS: platform.FS(dir)}, manifest.ParseOptions{})
 	if err != nil {
 		t.Fatalf("parse: %v", err)
 	}
@@ -52,7 +53,7 @@ func TestParse_defaults(t *testing.T) {
     apt: [curl]
 `)
 
-	parsed, err := manifest.Parse(manifest.DirResolver{Root: dir}, manifest.ParseOptions{
+	parsed, err := manifest.Parse(manifest.FSResolver{FS: platform.FS(dir)}, manifest.ParseOptions{
 		DefaultName:    "local-tool",
 		DefaultVersion: "0.0.0-local",
 	})
@@ -79,7 +80,7 @@ verify:
   - command -v claude
 `)
 
-	parsed, err := manifest.Parse(manifest.DirResolver{Root: dir}, manifest.ParseOptions{})
+	parsed, err := manifest.Parse(manifest.FSResolver{FS: platform.FS(dir)}, manifest.ParseOptions{})
 	if err != nil {
 		t.Fatalf("parse: %v", err)
 	}
@@ -107,7 +108,7 @@ verify:
 		t.Fatal(err)
 	}
 
-	parsed, err := manifest.Parse(manifest.DirResolver{Root: dir}, manifest.ParseOptions{})
+	parsed, err := manifest.Parse(manifest.FSResolver{FS: platform.FS(dir)}, manifest.ParseOptions{})
 	if err != nil {
 		t.Fatalf("parse: %v", err)
 	}
@@ -137,7 +138,7 @@ verify:
 		t.Fatal(err)
 	}
 
-	parsed, err := manifest.Parse(manifest.DirResolver{Root: dir}, manifest.ParseOptions{})
+	parsed, err := manifest.Parse(manifest.FSResolver{FS: platform.FS(dir)}, manifest.ParseOptions{})
 	if err != nil {
 		t.Fatalf("parse: %v", err)
 	}
@@ -152,7 +153,7 @@ func TestParse_missingNameErrors(t *testing.T) {
   packages:
     apt: [git]
 `)
-	if _, err := manifest.Parse(manifest.DirResolver{Root: dir}, manifest.ParseOptions{}); err == nil {
+	if _, err := manifest.Parse(manifest.FSResolver{FS: platform.FS(dir)}, manifest.ParseOptions{}); err == nil {
 		t.Fatal("want error for missing name + no default")
 	}
 }

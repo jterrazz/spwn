@@ -3,12 +3,13 @@ package local
 import (
 	"fmt"
 	"io/fs"
-	"os"
+	"path"
 	"path/filepath"
 
 	"spwn.sh/packages/dependency/internal/manifest"
 	"spwn.sh/packages/dependency/refs"
 	"spwn.sh/packages/dependency/tool"
+	"spwn.sh/packages/platform"
 )
 
 const localToolDir = "tools"
@@ -49,19 +50,22 @@ func (t *wrappedLocalTool) Dependencies() []string {
 // shared packyaml parser and wraps the result so Name() returns
 // "local:<name>". Missing manifest is a crisp authoring error: an
 // empty local dependency would render to nothing and the user would
-// spend an afternoon debugging a no-op.
+// spend an afternoon debugging a no-op. Every read goes through a root
+// opened at the project's folder, and a `files:` source that leaves the
+// tool's folder is refused before anything is read.
 func LoadTool(projectRoot, name string) (tool.Tool, error) {
-	pkgDir := filepath.Join(projectRoot, "spwn", localToolDir, name)
-	info, err := os.Stat(pkgDir)
+	pkgDir := path.Join("spwn", localToolDir, name)
+	project := platform.FS(projectRoot)
+	info, err := fs.Stat(project, pkgDir)
 	if err != nil {
 		return nil, fmt.Errorf("local dependency %q: %w", name, err)
 	}
 	if !info.IsDir() {
-		return nil, fmt.Errorf("local dependency %q: %s is not a directory", name, pkgDir)
+		return nil, fmt.Errorf("local dependency %q: %s is not a directory", name, filepath.Join(projectRoot, filepath.FromSlash(pkgDir)))
 	}
 
 	parsed, err := manifest.Parse(
-		manifest.DirResolver{Root: pkgDir},
+		manifest.FSResolver{FS: project, Root: pkgDir},
 		manifest.ParseOptions{
 			DefaultName:    name,
 			DefaultVersion: "0.0.0-local",

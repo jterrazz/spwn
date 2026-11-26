@@ -96,7 +96,7 @@ L1 starts once the owner has read ADR-073: mode A gives one Local Network row, i
 
 ## The project's reads not yet through its root (2026-11-26)
 
-ADR-099 decision 6 reads the declaration through `platform.Tree`. Left as plain reads: the package cache's (`packages/dependency/internal/manifest/loader.go`'s `DirResolver` and `SkillsFS`, `internal/adapters/local/hydrate.go`), which reads what an install wrote, not the project; the `~/.spwn` organization and team files (`packages/project/organization.go`, `team.go`); the upward search for `spwn.yaml` (`internal/discovery/`). The record's FIFO and size refusals at `.spwn/applied.json` (`local.ErrTooLarge` for the size) reach the surface as raw errors, with no code of their own. Proof owed: a real-disk test per read once each goes through a root, and a coded refusal for the record.
+ADR-099 decision 6 reads the declaration through `platform.Tree`, and `spwn up` reads a project's tools under `spwn/tools/` through `platform.FS` (`packages/dependency/internal/adapters/local/hydrate.go`), refusing a `files:` source that leaves the tool's folder. Left as plain reads: the `~/.spwn` organization and team files (`packages/project/organization.go`, `team.go`); the upward search for `spwn.yaml` (`internal/discovery/`). The record's FIFO and size refusals at `.spwn/applied.json` (`local.ErrTooLarge` for the size) reach the surface as raw errors, with no code of their own. Proof owed: a real-disk test per read once each goes through a root, and a coded refusal for the record.
 
 ## `station uninstall` undoes its own writes
 

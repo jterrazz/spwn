@@ -59,7 +59,7 @@ func loadYAMLTools() ([]tool.Tool, error) {
 	for _, loc := range locs {
 		canonical := "spwn:" + loc.tool
 		parsed, err := manifest.Parse(
-			manifest.EmbedResolver{
+			manifest.FSResolver{
 				FS:         catalogFS,
 				Root:       path.Join(contentRoot, loc.entry, "tools", loc.tool),
 				SkillsRoot: path.Join(contentRoot, loc.entry, "skills"),

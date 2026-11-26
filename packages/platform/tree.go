@@ -132,6 +132,60 @@ func (t *Tree) open(p string, folder bool) (*os.File, error) {
 	return f, nil
 }
 
+// FS is the folder dir as an fs.FS whose every call reads through a Tree
+// opened at dir for that call and closed after it, so the FS holds no
+// root open between calls and refuses what the Tree refuses.
+func FS(dir string) fs.FS { return treeFS(dir) }
+
+type treeFS string
+
+func (d treeFS) name(op, name string) (string, error) {
+	if !fs.ValidPath(name) {
+		return "", &fs.PathError{Op: op, Path: name, Err: fs.ErrInvalid}
+	}
+	return filepath.FromSlash(name), nil
+}
+
+func (d treeFS) Open(name string) (fs.File, error) {
+	p, err := d.name("open", name)
+	if err != nil {
+		return nil, err
+	}
+	t := Within(string(d))
+	defer t.Close()
+	return t.open(p, true)
+}
+
+func (d treeFS) ReadFile(name string) ([]byte, error) {
+	p, err := d.name("open", name)
+	if err != nil {
+		return nil, err
+	}
+	t := Within(string(d))
+	defer t.Close()
+	return t.ReadFile(p)
+}
+
+func (d treeFS) ReadDir(name string) ([]fs.DirEntry, error) {
+	p, err := d.name("open", name)
+	if err != nil {
+		return nil, err
+	}
+	t := Within(string(d))
+	defer t.Close()
+	return t.ReadDir(p)
+}
+
+func (d treeFS) Stat(name string) (fs.FileInfo, error) {
+	p, err := d.name("stat", name)
+	if err != nil {
+		return nil, err
+	}
+	t := Within(string(d))
+	defer t.Close()
+	return t.Stat(p)
+}
+
 // ReadFile is os.ReadFile of the file p inside the Tree.
 func (t *Tree) ReadFile(p string) ([]byte, error) {
 	f, err := t.open(p, false)
