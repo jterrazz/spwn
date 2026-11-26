@@ -31,7 +31,7 @@ The engine reads the approval itself and every surface names the Mac:
   refuses the first read of a bundle it has just seen replaced ([ADR-073](073-spwn-app-carries-the-engine-on-a-mac-with-a-screen.md)'s
   gate). Its hello carries it, `local_network`: `approved`, `not-approved`, `checking`, or absent where it cannot tell
   (off a Mac, a read that does not end). The read is one adapter (`approvals/adapter/macos`, the
-  approvals family's probe), so its
+  approvals family's probe, [ADR-105](105-macos-approvals-have-one-owner-the-engines-approvals-table.md)), so its
   trigger changes alone if H1 or H2 fails.
 - A guest dial a Mac refuses with `EHOSTUNREACH` is the block only when the engine's read of the approval, taken at
   that dial, says not approved. The engine keeps the VM `blocked: local-network` until a dial connects or its run
