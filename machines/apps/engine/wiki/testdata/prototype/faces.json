@@ -1,0 +1,1185 @@
+{
+ "blueprint/philosophy": {
+  "title": "Philosophy",
+  "short": "Philosophy",
+  "headFirst": "The seven convictions Spwn is built on, written as principles a newcomer can apply to a design choice; the vision holds the case they serve, and this page holds the rules.",
+  "decision": null,
+  "sections": [
+   {
+    "label": "Top",
+    "icon": "home",
+    "headed": false
+   },
+   {
+    "label": "1. You bring the taste. The stack brings the hands",
+    "icon": "define",
+    "headed": true
+   },
+   {
+    "label": "2. Delegating is a craft, not a prompt",
+    "icon": "define",
+    "headed": true
+   },
+   {
+    "label": "3. Rules live in the world, not in the agent",
+    "icon": "define",
+    "headed": true
+   },
+   {
+    "label": "4. Declared, never improvised",
+    "icon": "define",
+    "headed": true
+   },
+   {
+    "label": "5. Done means proven",
+    "icon": "define",
+    "headed": true
+   },
+   {
+    "label": "6. Taste is a system",
+    "icon": "define",
+    "headed": true
+   },
+   {
+    "label": "7. The stack learns. You don't repeat yourself",
+    "icon": "define",
+    "headed": true
+   }
+  ],
+  "words": [
+   105,
+   183,
+   421,
+   691
+  ],
+  "labels": [
+   "≈ 25 s",
+   "≈ 50 s",
+   "≈ 2 min",
+   "≈ 3 min"
+  ],
+  "faces": [
+   "word",
+   "line",
+   "card",
+   "full"
+  ],
+  "blocks": 9,
+  "items": [
+   {
+    "si": 0,
+    "key": "b:all",
+    "kind": "table",
+    "ranks": [
+     0,
+     2,
+     3,
+     3
+    ],
+    "rows": 7
+   },
+   {
+    "si": 0,
+    "key": "b:who-carries",
+    "kind": "figure",
+    "ranks": [
+     0,
+     2,
+     3,
+     3
+    ]
+   },
+   {
+    "si": 0,
+    "key": "p:0:0",
+    "ranks": [
+     0,
+     1,
+     2,
+     2
+    ],
+    "first": "Each conviction is written in the same six parts:",
+    "more": true
+   },
+   {
+    "si": 1,
+    "key": "b:taste",
+    "kind": "conviction",
+    "ranks": [
+     0,
+     1,
+     1,
+     2
+    ]
+   },
+   {
+    "si": 1,
+    "key": "p:1:0",
+    "ranks": [
+     0,
+     1,
+     2,
+     2
+    ],
+    "first": "Argument.",
+    "more": true
+   },
+   {
+    "si": 2,
+    "key": "b:delegating",
+    "kind": "conviction",
+    "ranks": [
+     0,
+     1,
+     1,
+     2
+    ]
+   },
+   {
+    "si": 2,
+    "key": "p:2:0",
+    "ranks": [
+     0,
+     1,
+     2,
+     2
+    ],
+    "first": "Example.",
+    "more": true
+   },
+   {
+    "si": 3,
+    "key": "b:rules-in-the-world",
+    "kind": "conviction",
+    "ranks": [
+     0,
+     1,
+     1,
+     2
+    ]
+   },
+   {
+    "si": 3,
+    "key": "p:3:0",
+    "ranks": [
+     0,
+     1,
+     2,
+     2
+    ],
+    "first": "Example.",
+    "more": true
+   },
+   {
+    "si": 4,
+    "key": "b:declared",
+    "kind": "conviction",
+    "ranks": [
+     0,
+     1,
+     1,
+     2
+    ]
+   },
+   {
+    "si": 4,
+    "key": "p:4:0",
+    "ranks": [
+     0,
+     1,
+     2,
+     2
+    ],
+    "first": "Example.",
+    "more": true
+   },
+   {
+    "si": 5,
+    "key": "b:proven",
+    "kind": "conviction",
+    "ranks": [
+     0,
+     1,
+     1,
+     2
+    ]
+   },
+   {
+    "si": 5,
+    "key": "p:5:0",
+    "ranks": [
+     0,
+     1,
+     2,
+     2
+    ],
+    "first": "Example.",
+    "more": true
+   },
+   {
+    "si": 6,
+    "key": "b:taste-is-a-system",
+    "kind": "conviction",
+    "ranks": [
+     0,
+     1,
+     1,
+     2
+    ]
+   },
+   {
+    "si": 6,
+    "key": "p:6:0",
+    "ranks": [
+     0,
+     1,
+     2,
+     2
+    ],
+    "first": "Example.",
+    "more": true
+   },
+   {
+    "si": 7,
+    "key": "b:learns",
+    "kind": "conviction",
+    "ranks": [
+     0,
+     1,
+     1,
+     2
+    ]
+   },
+   {
+    "si": 7,
+    "key": "p:7:0",
+    "ranks": [
+     0,
+     1,
+     2,
+     2
+    ],
+    "first": "Example.",
+    "more": true
+   }
+  ]
+ },
+ "growth/positioning": {
+  "title": "Positioning",
+  "short": "Positioning",
+  "headFirst": "Where Spwn stands against what a person uses today instead, for anyone writing a comparison, a pitch or an answer to \"how is it different\":",
+  "decision": null,
+  "sections": [
+   {
+    "label": "Top",
+    "icon": "home",
+    "headed": false
+   },
+   {
+    "label": "The category it refuses",
+    "icon": "define",
+    "headed": true
+   },
+   {
+    "label": "The alternatives",
+    "icon": "define",
+    "headed": true
+   },
+   {
+    "label": "Rests on",
+    "icon": "rests",
+    "headed": true
+   }
+  ],
+  "words": [
+   83,
+   188,
+   381,
+   475
+  ],
+  "labels": [
+   "≈ 20 s",
+   "≈ 50 s",
+   "≈ 2 min",
+   "≈ 2 min"
+  ],
+  "faces": [
+   "word",
+   "line",
+   "card",
+   "full"
+  ],
+  "blocks": 7,
+  "items": [
+   {
+    "si": 1,
+    "key": "p:1:0",
+    "ranks": [
+     0,
+     1,
+     2,
+     2
+    ],
+    "first": "Spwn is not sold as an agent framework, an AI platform or a tool that makes more output.",
+    "more": true
+   },
+   {
+    "si": 1,
+    "key": "b:lead-with-the-thread",
+    "kind": "rule",
+    "ranks": [
+     0,
+     1,
+     1,
+     2
+    ]
+   },
+   {
+    "si": 1,
+    "key": "p:1:1",
+    "ranks": [
+     0,
+     1,
+     2,
+     2
+    ],
+    "first": "It leads with what the alternative does to your thread.",
+    "more": false
+   },
+   {
+    "si": 2,
+    "key": "g:alternatives",
+    "ranks": [
+     0,
+     1,
+     2,
+     2
+    ],
+    "mirroredBy": "all",
+    "mirrored": [
+     false,
+     true,
+     true,
+     true
+    ],
+    "kids": [
+     {
+      "key": "b:by-hand",
+      "kind": "alternative",
+      "ranks": [
+       0,
+       1,
+       1,
+       2
+      ]
+     },
+     {
+      "key": "b:one-big-agent",
+      "kind": "alternative",
+      "ranks": [
+       0,
+       1,
+       1,
+       2
+      ]
+     },
+     {
+      "key": "b:managed-platform",
+      "kind": "alternative",
+      "ranks": [
+       0,
+       1,
+       1,
+       2
+      ]
+     },
+     {
+      "key": "b:unrelated-tools",
+      "kind": "alternative",
+      "ranks": [
+       0,
+       1,
+       1,
+       2
+      ]
+     }
+    ]
+   },
+   {
+    "si": 2,
+    "key": "b:two-costs",
+    "kind": "figure",
+    "ranks": [
+     0,
+     2,
+     3,
+     3
+    ]
+   },
+   {
+    "si": 2,
+    "key": "b:all",
+    "kind": "table",
+    "ranks": [
+     0,
+     2,
+     3,
+     3
+    ],
+    "rows": 4,
+    "mirrors": "alternatives"
+   },
+   {
+    "si": 2,
+    "key": "p:2:0",
+    "ranks": [
+     0,
+     1,
+     2,
+     2
+    ],
+    "first": "Each costs either scale or authorship.",
+    "more": true
+   },
+   {
+    "si": 3,
+    "key": "p:3:0",
+    "ranks": [
+     0,
+     1,
+     2,
+     2
+    ],
+    "first": "What is not settled:",
+    "more": true
+   }
+  ]
+ },
+ "machines/decisions/035-a-port-is-a-right-with-an-audience": {
+  "title": "ADR-035 · A port is a right with an audience",
+  "short": "ADR-035",
+  "headFirst": "Status:",
+  "decision": {
+   "Page": "machines/decisions/035-a-port-is-a-right-with-an-audience",
+   "Number": "ADR-035",
+   "Title": "A port is a right with an audience",
+   "Status": "Accepted",
+   "Date": "2026-11-11",
+   "Accepted": true,
+   "AmendedBy": [
+    "ADR-086"
+   ],
+   "Amends": [
+    "ADR-018"
+   ],
+   "Decides": "A port is a right with an audience.",
+   "Resolves": true
+  },
+  "sections": [
+   {
+    "label": "Top",
+    "icon": "home",
+    "headed": false
+   },
+   {
+    "label": "Decision",
+    "icon": "define",
+    "headed": true
+   }
+  ],
+  "words": [
+   12,
+   15,
+   18,
+   18
+  ],
+  "labels": [
+   "≈ 5 s",
+   "≈ 5 s",
+   "≈ 5 s",
+   "≈ 5 s"
+  ],
+  "faces": [
+   "word",
+   "line",
+   "card",
+   "full"
+  ],
+  "blocks": 0,
+  "items": [
+   {
+    "si": 0,
+    "key": "p:0:0",
+    "ranks": [
+     0,
+     1,
+     2,
+     2
+    ],
+    "first": "Amends ADR-018.",
+    "more": true
+   },
+   {
+    "si": 1,
+    "key": "p:1:0",
+    "ranks": [
+     0,
+     1,
+     2,
+     2
+    ],
+    "first": "A machine's ports are rights, never an inventory.",
+    "more": false
+   }
+  ]
+ },
+ "machines/reference/ports": {
+  "title": "Ports",
+  "short": "Ports",
+  "headFirst": "station ports lists every TCP port that listens on a Mac or a VM, each in the class of who reaches it.",
+  "decision": null,
+  "sections": [
+   {
+    "label": "Top",
+    "icon": "home",
+    "headed": false
+   },
+   {
+    "label": "Rights and audiences",
+    "icon": "guard",
+    "headed": true
+   }
+  ],
+  "words": [
+   76,
+   172,
+   217,
+   234
+  ],
+  "labels": [
+   "≈ 20 s",
+   "≈ 45 s",
+   "≈ 1 min",
+   "≈ 1 min"
+  ],
+  "faces": [
+   "word",
+   "line",
+   "card",
+   "full"
+  ],
+  "blocks": 4,
+  "items": [
+   {
+    "si": 1,
+    "key": "p:1:0",
+    "ranks": [
+     0,
+     1,
+     2,
+     2
+    ],
+    "first": "A VM's rights are the ports of its Machinefile (Machinefiles):",
+    "more": true
+   },
+   {
+    "si": 1,
+    "key": "b:right",
+    "kind": "term",
+    "ranks": [
+     0,
+     1,
+     2,
+     2
+    ]
+   },
+   {
+    "si": 1,
+    "key": "b:audience",
+    "kind": "term",
+    "ranks": [
+     0,
+     1,
+     1,
+     2
+    ]
+   },
+   {
+    "si": 1,
+    "key": "g:what-is-flagged",
+    "ranks": [
+     0,
+     1,
+     2,
+     2
+    ],
+    "mirroredBy": null,
+    "mirrored": [
+     false,
+     false,
+     false,
+     false
+    ],
+    "kids": [
+     {
+      "key": "b:flagged-never-shared",
+      "kind": "rule",
+      "ranks": [
+       0,
+       2,
+       3,
+       3
+      ]
+     },
+     {
+      "key": "b:port-is-a-right",
+      "kind": "decision",
+      "ranks": [
+       0,
+       1,
+       2,
+       2
+      ]
+     }
+    ]
+   },
+   {
+    "si": 1,
+    "key": "p:1:1",
+    "ranks": [
+     0,
+     1,
+     2,
+     2
+    ],
+    "first": "A row of a port names its label from the catalog's packages' ports (5173 Vite, 3000 Node or Next, 8081 Expo, 5432 Postgres) as a hint of what probably serves it, never a decision.",
+    "more": false
+   }
+  ]
+ },
+ "product/boundaries": {
+  "title": "Boundaries",
+  "short": "Boundaries",
+  "headFirst": "What Spwn is not, and what each of its parts refuses to be, for anyone weighing a feature that sits near an edge.",
+  "decision": null,
+  "sections": [
+   {
+    "label": "Top",
+    "icon": "home",
+    "headed": false
+   },
+   {
+    "label": "What Spwn is not",
+    "icon": "define",
+    "headed": true
+   },
+   {
+    "label": "What each app refuses",
+    "icon": "guard",
+    "headed": true
+   },
+   {
+    "label": "Rests on",
+    "icon": "rests",
+    "headed": true
+   }
+  ],
+  "words": [
+   133,
+   278,
+   395,
+   555
+  ],
+  "labels": [
+   "≈ 35 s",
+   "≈ 1 min",
+   "≈ 2 min",
+   "≈ 2 min"
+  ],
+  "faces": [
+   "word",
+   "line",
+   "card",
+   "full"
+  ],
+  "blocks": 14,
+  "items": [
+   {
+    "si": 0,
+    "key": "b:one-stack",
+    "kind": "decision",
+    "ranks": [
+     1,
+     2,
+     3,
+     3
+    ]
+   },
+   {
+    "si": 1,
+    "key": "b:not-a-replacement",
+    "kind": "refusal",
+    "ranks": [
+     0,
+     1,
+     1,
+     2
+    ]
+   },
+   {
+    "si": 1,
+    "key": "b:not-vibe-coding",
+    "kind": "refusal",
+    "ranks": [
+     0,
+     1,
+     1,
+     2
+    ]
+   },
+   {
+    "si": 1,
+    "key": "b:not-a-cloud-service",
+    "kind": "refusal",
+    "ranks": [
+     0,
+     1,
+     1,
+     2
+    ]
+   },
+   {
+    "si": 1,
+    "key": "b:not-one-vendor",
+    "kind": "refusal",
+    "ranks": [
+     0,
+     1,
+     1,
+     2
+    ]
+   },
+   {
+    "si": 1,
+    "key": "b:not-a-method",
+    "kind": "refusal",
+    "ranks": [
+     0,
+     1,
+     1,
+     2
+    ]
+   },
+   {
+    "si": 1,
+    "key": "p:1:0",
+    "ranks": [
+     0,
+     1,
+     2,
+     2
+    ],
+    "first": "Each line is the edge of the one enemy, losing your thread:",
+    "more": true
+   },
+   {
+    "si": 2,
+    "key": "g:machines-refuses",
+    "ranks": [
+     0,
+     1,
+     2,
+     2
+    ],
+    "mirroredBy": "machines",
+    "mirrored": [
+     false,
+     true,
+     true,
+     true
+    ],
+    "kids": [
+     {
+      "key": "b:no-running-agent",
+      "kind": "refusal",
+      "ranks": [
+       0,
+       1,
+       1,
+       2
+      ]
+     },
+     {
+      "key": "b:no-ungranted-port",
+      "kind": "refusal",
+      "ranks": [
+       0,
+       1,
+       1,
+       2
+      ]
+     }
+    ]
+   },
+   {
+    "si": 2,
+    "key": "b:machines",
+    "kind": "table",
+    "ranks": [
+     0,
+     2,
+     3,
+     3
+    ],
+    "rows": 2,
+    "mirrors": "machines-refuses"
+   },
+   {
+    "si": 2,
+    "key": "b:no-model",
+    "kind": "refusal",
+    "ranks": [
+     0,
+     1,
+     1,
+     2
+    ]
+   },
+   {
+    "si": 2,
+    "key": "b:no-security-in-instructions",
+    "kind": "refusal",
+    "ranks": [
+     0,
+     1,
+     1,
+     2
+    ]
+   },
+   {
+    "si": 2,
+    "key": "b:no-computer",
+    "kind": "refusal",
+    "ranks": [
+     1,
+     2,
+     3,
+     3
+    ]
+   },
+   {
+    "si": 2,
+    "key": "b:wiki-decides-nothing",
+    "kind": "refusal",
+    "ranks": [
+     0,
+     1,
+     1,
+     2
+    ]
+   },
+   {
+    "si": 2,
+    "key": "b:os-holds-no-facts",
+    "kind": "refusal",
+    "ranks": [
+     0,
+     1,
+     2,
+     2
+    ]
+   },
+   {
+    "si": 2,
+    "key": "p:2:0",
+    "ranks": [
+     0,
+     1,
+     2,
+     2
+    ],
+    "first": "The rows of the four apps being made are derived from the convictions; none of those apps has a design yet, so each row is a constraint on the design to come, not a description of it.",
+    "more": false
+   },
+   {
+    "si": 3,
+    "key": "p:3:0",
+    "ranks": [
+     0,
+     1,
+     2,
+     2
+    ],
+    "first": "Two rows are this page's reading rather than the owner's word or a record:",
+    "more": true
+   }
+  ]
+ },
+ "product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder": {
+  "title": "ADR-002 · Spwn is one stack of six apps on one ladder",
+  "short": "ADR-002",
+  "headFirst": "Status:",
+  "decision": {
+   "Page": "product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder",
+   "Number": "ADR-002",
+   "Title": "Spwn is one stack of six apps on one ladder",
+   "Status": "Accepted",
+   "Date": "2026-11-21",
+   "Accepted": true,
+   "AmendedBy": [
+    "ADR-003"
+   ],
+   "Amends": [
+    "growth ADR-007"
+   ],
+   "Decides": "Spwn is one stack of six apps on one ladder.",
+   "Resolves": true
+  },
+  "sections": [
+   {
+    "label": "Top",
+    "icon": "home",
+    "headed": false
+   },
+   {
+    "label": "Decision",
+    "icon": "define",
+    "headed": true
+   }
+  ],
+  "words": [
+   21,
+   32,
+   38,
+   38
+  ],
+  "labels": [
+   "≈ 5 s",
+   "≈ 10 s",
+   "≈ 10 s",
+   "≈ 10 s"
+  ],
+  "faces": [
+   "word",
+   "line",
+   "card",
+   "full"
+  ],
+  "blocks": 0,
+  "items": [
+   {
+    "si": 0,
+    "key": "p:0:0",
+    "ranks": [
+     0,
+     1,
+     2,
+     2
+    ],
+    "first": "An agent leaves the status Proposed; only the owner writes Accepted.",
+    "more": false
+   },
+   {
+    "si": 1,
+    "key": "p:1:0",
+    "ranks": [
+     0,
+     1,
+     2,
+     2
+    ],
+    "first": "Six apps, in this order on one ladder:",
+    "more": true
+   }
+  ]
+ },
+ "product/stack": {
+  "title": "The stack",
+  "short": "The stack",
+  "headFirst": "Spwn's three spaces and what lives in each, for anyone deciding what a part of the app is for or where it goes:",
+  "decision": null,
+  "sections": [
+   {
+    "label": "Top",
+    "icon": "home",
+    "headed": false
+   },
+   {
+    "label": "The three spaces",
+    "icon": "define",
+    "headed": true
+   },
+   {
+    "label": "How the spaces stack",
+    "icon": "define",
+    "headed": true
+   },
+   {
+    "label": "Rests on",
+    "icon": "rests",
+    "headed": true
+   }
+  ],
+  "words": [
+   112,
+   178,
+   430,
+   491
+  ],
+  "labels": [
+   "≈ 30 s",
+   "≈ 45 s",
+   "≈ 2 min",
+   "≈ 2 min"
+  ],
+  "faces": [
+   "word",
+   "line",
+   "card",
+   "full"
+  ],
+  "blocks": 7,
+  "items": [
+   {
+    "si": 1,
+    "key": "p:1:0",
+    "ranks": [
+     0,
+     1,
+     2,
+     2
+    ],
+    "first": "The layers of the Spwn app are three great concepts, and in the future three distinct spaces in its GUI.",
+    "more": true
+   },
+   {
+    "si": 1,
+    "key": "g:parts",
+    "ranks": [
+     0,
+     1,
+     2,
+     2
+    ],
+    "mirroredBy": "all",
+    "mirrored": [
+     false,
+     true,
+     true,
+     true
+    ],
+    "kids": [
+     {
+      "key": "b:machines",
+      "kind": "part",
+      "ranks": [
+       0,
+       1,
+       1,
+       2
+      ]
+     },
+     {
+      "key": "b:agents",
+      "kind": "part",
+      "ranks": [
+       0,
+       1,
+       1,
+       2
+      ]
+     },
+     {
+      "key": "b:wiki",
+      "kind": "part",
+      "ranks": [
+       0,
+       1,
+       1,
+       2
+      ]
+     },
+     {
+      "key": "b:specs",
+      "kind": "part",
+      "ranks": [
+       0,
+       1,
+       1,
+       2
+      ]
+     },
+     {
+      "key": "b:design",
+      "kind": "part",
+      "ranks": [
+       0,
+       1,
+       1,
+       2
+      ]
+     },
+     {
+      "key": "b:os",
+      "kind": "part",
+      "ranks": [
+       0,
+       1,
+       1,
+       2
+      ]
+     }
+    ]
+   },
+   {
+    "si": 1,
+    "key": "b:all",
+    "kind": "table",
+    "ranks": [
+     0,
+     2,
+     3,
+     3
+    ],
+    "rows": 6,
+    "mirrors": "parts"
+   },
+   {
+    "si": 1,
+    "key": "p:1:1",
+    "ranks": [
+     0,
+     1,
+     2,
+     2
+    ],
+    "first": "The column \"you keep\" is the part no space may take away; the boundaries say what each part refuses for that reason.",
+    "more": false
+   },
+   {
+    "si": 2,
+    "key": "p:2:0",
+    "ranks": [
+     0,
+     1,
+     2,
+     2
+    ],
+    "first": "A space leans on the ones before it and never needs the ones after.",
+    "more": true
+   },
+   {
+    "si": 3,
+    "key": "p:3:0",
+    "ranks": [
+     0,
+     1,
+     2,
+     2
+    ],
+    "first": "One claim here is this page's reading, not the owner's word:",
+    "more": true
+   }
+  ]
+ }
+}
