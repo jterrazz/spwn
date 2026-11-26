@@ -1621,9 +1621,19 @@ func (g worldGuests) hostKey(t contract.GuestTarget) error {
 
 func (g worldGuest) Exec(ctx context.Context, cmd contract.GuestCommand) (contract.GuestResult, error) {
 	// invariant: a guest is another process: what the Mac's context carries
-	// (the steps its act records) never reaches it, only its end does.
+	// (the steps its act records) never reaches it, only its end does, and
+	// the world's clock, which is one for every process of the world: the
+	// guest of a run marked as waiting on it (waits, pooled) waits on it as
+	// that run would, never leaping it.
 	asked := ctx
-	ctx, stop := context.WithCancel(context.Background())
+	ctx = context.Background()
+	if asked.Value(waits{}) != nil {
+		ctx = context.WithValue(ctx, waits{}, true)
+	}
+	if asked.Value(pooled{}) != nil {
+		ctx = context.WithValue(ctx, pooled{}, true)
+	}
+	ctx, stop := context.WithCancel(ctx)
 	defer stop()
 	defer context.AfterFunc(asked, stop)()
 	g.r.w.Lock()
@@ -1697,7 +1707,8 @@ func copied(slice *world.Mac, script []byte) {
 // time its guest is asked: a Linux workspace or server, sized as its disk
 // was, its user's sudo asking no password as station's image makes it,
 // following the Machinefile it was made from, which its image was built
-// from: the files of the Machinefiles its Mac holds, as its build copied
+// from: the files of the Machinefiles its Mac held at that build
+// (world.Mac.Built), or holds now when it built none, as the build copied
 // them in, and the name of the one to bake (bakeSlice), empty for a VM
 // made from no Machinefile; false for any other VM. The caller holds the
 // world's lock.
@@ -1722,7 +1733,11 @@ func madeSlice(w *world.World, vm string) (*world.Mac, string, bool) {
 			slice.Preferences = map[string]json.RawMessage{"machinefile": named}
 		}
 	}
-	for at, body := range w.Macs[holder].Files {
+	files, built := w.Macs[holder].Built[v.Kept.Template]
+	if !built {
+		files = w.Macs[holder].Files
+	}
+	for at, body := range files {
 		if strings.HasPrefix(at, "machinefiles/") {
 			if slice.Files == nil {
 				slice.Files = map[string]string{}

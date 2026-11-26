@@ -503,7 +503,7 @@ func bootRows(vm string, b *model.FirstStart, refusal func(model.FirstStartGrant
 		rows = append(rows, attention("signin/"+s.Program, s.Program, "not signed in: "+s.Command))
 	}
 	if len(b.Drift) > 0 {
-		row := attention("drift", "Drift", "from its image")
+		row := attention("drift", "Drift", "its image is behind its Machinefile")
 		items := make([]page.Value, 0, len(b.Drift))
 		for _, d := range b.Drift {
 			items = append(items, page.Text(d))

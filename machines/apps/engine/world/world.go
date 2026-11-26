@@ -168,6 +168,10 @@ type Mac struct {
 	// value: station's own files as text, by name, while no store has read
 	// them: a file edited by hand, a file station v2 left.
 	Files map[string]string `json:"files,omitempty"`
+	// value: the Machinefiles' files (Files under machinefiles/) as they
+	// were when this Mac last built an image from each Machinefile, by its
+	// name: what that build copied into its VM and baked.
+	Built map[string]map[string]string `json:"built,omitempty"`
 	// value: the commit each shared source's clone is at, by the source's
 	// url.
 	Clones map[string]string `json:"clones,omitempty"`

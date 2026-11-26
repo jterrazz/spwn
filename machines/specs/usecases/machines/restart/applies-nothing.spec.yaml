@@ -1,4 +1,4 @@
-description: 'a restart of a workspace from a Machinefile applies nothing: its apps and lock stay as made'
+description: 'a restart applies nothing: an app its Machinefile gained since stays missing'
 fixture: ../../__fixtures__/build/
 env: two-macs
 runs:
@@ -15,10 +15,19 @@ runs:
       exit: 0
     - command: 'machines create --memory 4G web --from studio-linux >/dev/null'
       exit: 0
-    - command: '--version >/dev/null; /usr/bin/jq -S ''.macs["web"] | {apps, files, stores}'' world.json > before.json'
+    - command: 'world edit macbook-pro machinefiles/studio-linux.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: studio-linux
+          machine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }
+          extends: [base-ubuntu]
+          vm: { lifetime: persistent, resources: { memory: 4G } }
+          apps: [jq, ripgrep, fd]
       exit: 0
-    - command: 'world fault Installer.Install'
+    - command: '--version >/dev/null; /usr/bin/jq -S ''.macs["web"] | {apps, files, stores}'' world.json > before.json; /usr/bin/jq -c ''.macs["web"].apps.apt.installed // {} | [has("jq"), has("fd-find")]'' world.json'
       exit: 0
+      stdout: |
+          [true,false]
     - command: 'machines restart web'
       exit: 0
       stdout: |
