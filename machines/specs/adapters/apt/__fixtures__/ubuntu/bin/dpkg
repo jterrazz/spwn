@@ -1,0 +1,14 @@
+#!/bin/sh
+# dpkg: records its line; `--configure -a` (after the forced options) configures every package dpkg.db holds half done, refused unless noninteractive.
+printf 'dpkg %s\n' "$*" >> "$HOME/.calls"
+if [ "$DEBIAN_FRONTEND" != noninteractive ]; then
+    echo "stub dpkg: run noninteractive: $*" >&2
+    exit 98
+fi
+case " $* " in
+    *" --configure -a "*) ;;
+    *) echo "stub dpkg: unexpected $*" >&2; exit 97 ;;
+esac
+db="$HOME/dpkg.db"
+[ -f "$db" ] || exit 0
+/usr/bin/awk -F'\t' '{ printf "%s\t%s\n", $1, $2 }' "$db" > "$db.new" && /bin/mv "$db.new" "$db"

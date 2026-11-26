@@ -334,8 +334,8 @@ func TestAptIsReadInItsOwnWords(t *testing.T) {
 	_, _ = a.Outdated(ctx, []string{"bat"})
 	_ = a.RemoveFor(ctx, word("bat"), []catalog.Install{catalog.AptInstall{Packages: []string{"bat"}}}, nil)
 
-	if len(reads) != 4 {
-		t.Fatalf("read %d times; want dpkg-query, apt-cache policy, then dpkg-query and apt-get -s remove", len(reads))
+	if len(reads) != 5 {
+		t.Fatalf("read %d times; want dpkg-query, apt-cache policy, then the half-done read, dpkg-query and apt-get -s remove", len(reads))
 	}
 	for _, c := range reads {
 		if !slices.Contains(c.Env, "LC_ALL=C") {

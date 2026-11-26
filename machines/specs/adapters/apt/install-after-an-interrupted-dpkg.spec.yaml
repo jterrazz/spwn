@@ -1,0 +1,21 @@
+description: 'an install after one killed mid-transaction first configures what dpkg left half done, then installs'
+fixture:
+    - ./__fixtures__/ubuntu/
+    - ./__fixtures__/dpkg-interrupted/
+env:
+    - STATION_MACHINE_KIND=linux
+runs:
+    - command: 'apps install jq'
+      exit: 0
+      stdout: |
+          ●	jq	1.0	apt
+      files:
+          .calls:
+              contains:
+                  - 'sudo -n env DEBIAN_FRONTEND=noninteractive dpkg --force-confdef --force-confold --configure -a'
+                  - 'sudo -n env DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold install -- jq'
+    - command: '--version >/dev/null; /bin/cat dpkg.db'
+      exit: 0
+      stdout: |
+          foo	1.0
+          jq	1.0
