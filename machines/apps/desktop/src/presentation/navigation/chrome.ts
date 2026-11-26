@@ -2,7 +2,6 @@ export type Place = 'mac' | 'overlaid' | 'plain';
 
 export type Dress = {
     chrome: 'overlay' | undefined;
-    material: 'vibrant' | undefined;
 };
 
 export type Viewport = {
@@ -28,15 +27,12 @@ export function fillsTheScreen(view: Viewport): boolean {
 
 export function dressOf(place: Place, fullscreen: boolean): Dress {
     const overlaid = place === 'overlaid' || (place === 'mac' && !fullscreen);
-    return {
-        chrome: overlaid ? 'overlay' : undefined,
-        material: place === 'mac' ? 'vibrant' : undefined,
-    };
+    return { chrome: overlaid ? 'overlay' : undefined };
 }
 
 export type Root = Pick<Element, 'removeAttribute' | 'setAttribute'>;
 
-function put(root: Root, name: 'chrome' | 'material', value: string | undefined): void {
+function put(root: Root, name: keyof Dress, value: string | undefined): void {
     if (value === undefined) {
         root.removeAttribute(`data-${name}`);
     } else {
@@ -46,9 +42,7 @@ function put(root: Root, name: 'chrome' | 'material', value: string | undefined)
 
 export function wearDress(root: Root, place: Place, view: View): void {
     const wear = (): void => {
-        const dress = dressOf(place, place === 'mac' && fillsTheScreen(view));
-        put(root, 'chrome', dress.chrome);
-        put(root, 'material', dress.material);
+        put(root, 'chrome', dressOf(place, place === 'mac' && fillsTheScreen(view)).chrome);
     };
     wear();
     if (place === 'mac') {

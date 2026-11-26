@@ -7,7 +7,7 @@
     gap: var(--space-8);
     padding: 0 var(--space-16) 0 var(--space-12);
     border-bottom: 1px solid var(--hair);
-    background: var(--ground-sidebar);
+    background: var(--s1);
 }
 :global(html[data-chrome='overlay']) .bar {
     padding-left: 84px;

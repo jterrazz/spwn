@@ -405,13 +405,12 @@ The window names itself Spwn, on the owner's word of 2026-11-18, with a capital 
 
 ## The window's chrome on a Mac
 
-On a Mac the window is drawn as a native app with a unified toolbar: its traffic lights sit in the top bar's row, over a discreet vibrancy. Everywhere else (the Linux bench's WebKitGTK, a headless capture, a page outside Tauri) it is drawn opaque, as before.
+On a Mac the window is drawn as a native app with a unified toolbar: its traffic lights sit in the top bar's row. It is opaque on a Mac as everywhere else (the Linux bench's WebKitGTK, a headless capture, a page outside Tauri): what floats is glass inside the page ([the design rules](#the-design-rules)), never the window over the desktop.
 
 - The top bar's row is one token, `--chrome-row` (52 px, `src/presentation/ui/tokens.css`): the path bar's height, across the whole window over the column and the page, a deep drag region whose every segment and button stays clickable. The lights are placed by `trafficLightPosition` (`src-tauri/tauri.conf.json`) at `x: 18`, the inset Finder's own lights have on macOS 26, and `y: 28.5`, which centres them on that row: `tao` grows the title bar to the button's height plus `y`, and the button's centre lands 2.5 pt above `y` (measured on macOS 26.6, `y: 16` drew it at 13.5 pt). A row height that changes moves `y` by the same half.
 - The lights sit in the bar's first 84 px: their last button ends at 72 px, so the bar's first control starts at 84 px under `html[data-chrome='overlay']` and at 12 px without it (`src/presentation/navigation/path-bar.module.css`). In fullscreen the lights are gone, so `wearDress` (`src/presentation/navigation/chrome.ts`) drops `data-chrome` while the window fills the screen, and the bar draws its plain 12 px, as off a Mac.
-- The material is one `underWindowBackground` effect under the whole window, its state following the window's (`windowEffects`), on a window made `transparent` and dark (`theme`, so the effect is the dark material whatever the system's appearance). Over it the canvas is drawn at `--material-canvas` (86 %) and the pinned column at `--material-sidebar` (72 %), through `--ground` and `--ground-sidebar`, the peeked column opaque on `--side`; panels, wells and every colour token stay opaque, so text keeps its contrast.
-- `data-material="vibrant"` is set by `wearDress` in the Tauri window on a Mac alone (the user agent says `Macintosh`), so the translucent tokens apply nowhere else, and no golden moves.
-- Transparency uses macOS's private API, which `tauri` enables unconditionally since 2.12.1 (`macOSPrivateApi` is a no-op there), hence `tauri = "2.12.1"` in `Cargo.toml`: the window is not for the App Store. No capability and no CSP changed.
+- The window is dark (`theme`) and not transparent, with no window effect; its `backgroundColor` is `--s0`'s value, so what shows behind the web view before its first paint and in a resize's uncovered strip is the page's own ground. `src/presentation/navigation/__tests__/chrome.test.ts` holds the two to the same colour.
+- `tauri = "2.12.1"` in `Cargo.toml` was pinned for the transparency it no longer uses; lifting the pin is the next dependency pass's.
 
 ## The window shows itself at its first data
 
@@ -423,7 +422,7 @@ The window opens hidden (`"visible": false`, `src-tauri/tauri.conf.json`) and sh
 - Only the Latin faces ship. `FACES_SHIPPED` (`src/presentation/ui/faces-shipped.ts`, the PostCSS pass beside the other) keeps of each `@fontsource` face the `latin` and `latin-ext` subsets and Geist Mono's `symbols2`, in `woff2` alone: five faces (the variable Geist's two and Geist Mono's three; the symbols face is small enough for the build to inline in the stylesheet, so four files are emitted), of the eleven faces the two imports declare. Text in Cyrillic or Vietnamese is drawn by the system's face, and `src/presentation/ui/__tests__/faces-shipped.test.ts` fails when the source draws a character only a dropped subset holds, or one no face of the kit holds that is not named there as the system's (⌘ ⌃ → among them).
 - The show is the shell's command `window_ready` (`src-tauri/src/window.rs`), reached through `tauriShow` (`src/infrastructure/outbound/launch-tauri/`); a proof build has no window to show, and its `NO_SHOW` asks nothing. Like the other commands it needs no capability.
 - The shell holds its own cap, `HARD_CAP` (1.5 s from its setup): past it the shell shows the window whatever the page did, so a page that never ran, threw first or was refused its show still shows. On a Mac, a click on the Dock while no window is on screen shows the window, unminimized and focused (`RunEvent::Reopen`).
-- The Linux bench proves the rule by its specs and the shell by its tests; that the first frame a Mac shows holds the page is the owner's eye at the next release, since the vibrancy window is drawn on a Mac alone.
+- The Linux bench proves the rule by its specs and the shell by its tests; that the first frame a Mac shows holds the page is the owner's eye at the next release, since the native window and its WKWebView are drawn on a Mac alone.
 
 ## The rules a page meets first
 

@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import { placeOf, wearDress } from '../chrome';
@@ -46,7 +48,7 @@ function worn(place: Place, view = viewOf(1728, 1117)): Map<string, string> {
 }
 
 describe('chrome', () => {
-    test('the Tauri window on a Mac wears the overlay and the material, and nowhere else does', () => {
+    test('the Tauri window on a Mac wears the overlay, a proof page asks for it, and nothing else does', () => {
         // Given - the four places the page can open in
         const places = {
             linuxTauri: placeOf(true, LINUX, false),
@@ -55,15 +57,12 @@ describe('chrome', () => {
             proof: placeOf(false, LINUX, true),
         };
 
-        // Then - only the Mac's window is translucent, and a proof page asks the overlay alone
+        // Then - the Mac's window and a proof page keep the lights' row, and no place sets anything more
         expect(
             Object.fromEntries(Object.entries(places).map(([k, p]) => [k, worn(p)])),
         ).toStrictEqual({
             linuxTauri: new Map(),
-            mac: new Map([
-                ['data-chrome', 'overlay'],
-                ['data-material', 'vibrant'],
-            ]),
+            mac: new Map([['data-chrome', 'overlay']]),
             page: new Map(),
             proof: new Map([['data-chrome', 'overlay']]),
         });
@@ -78,13 +77,31 @@ describe('chrome', () => {
         // When - it fills the screen
         view.resize(1728, 1117);
 
-        // Then - the lights are hidden, so no row is kept for them; the material stays
-        expect(root.held).toStrictEqual(new Map([['data-material', 'vibrant']]));
+        // Then - the lights are hidden, so no row is kept for them
+        expect(root.held).toStrictEqual(new Map());
 
         // When - it leaves fullscreen
         view.resize(1400, 900);
 
         // Then - the row comes back
         expect(root.held.get('data-chrome')).toBe('overlay');
+    });
+
+    test('the native window is opaque, and its ground is the s0 step of the page', () => {
+        // Given - the main window as tauri.conf.json declares it, and the s0 step tokens.css declares
+        const desktop = join(import.meta.dirname, '..', '..', '..', '..');
+        const config: unknown = JSON.parse(
+            readFileSync(join(desktop, 'src-tauri', 'tauri.conf.json'), 'utf8'),
+        );
+        const tokens = readFileSync(
+            join(desktop, 'src', 'presentation', 'ui', 'tokens.css'),
+            'utf8',
+        );
+        const s0 = /--s0:\s*(?<value>#[0-9a-f]{6});/u.exec(tokens)?.groups?.value;
+
+        // Then - no transparency and no effect under it, and what shows behind the web view is s0
+        expect(config).not.toHaveProperty(['app', 'windows', 0, 'transparent']);
+        expect(config).not.toHaveProperty(['app', 'windows', 0, 'windowEffects']);
+        expect(config).toHaveProperty(['app', 'windows', 0, 'backgroundColor'], s0);
     });
 });
