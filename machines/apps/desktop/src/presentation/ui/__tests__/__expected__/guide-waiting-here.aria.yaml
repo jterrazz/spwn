@@ -1,0 +1,15 @@
+- dialog "Add a Mac mac-mini":
+  - heading "Add a Mac mac-mini" [level=2]
+  - list "Steps":
+    - listitem: Reach mac-mini , done
+    - listitem: Sign as this Mac , waits for you
+    - listitem: Install Spwn there
+    - listitem: Joined
+  - paragraph: 2 of 4
+  - button "Hide"
+  - heading "Touch ID is next. Sign once to reach mac-mini." [level=3]
+  - paragraph: This Mac signs in to mac-mini with its own key. Your fingerprint never leaves this Mac.
+  - paragraph: "macOS will ask: “Spwn Engine wants to sign in over ssh as this Mac.”"
+  - button "Sign with Touch ID →"
+  - button "Not now"
+  - status "Touch ID is next. Sign once to reach mac-mini."

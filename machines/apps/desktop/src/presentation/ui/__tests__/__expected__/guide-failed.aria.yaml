@@ -1,0 +1,16 @@
+- dialog "New machine linux-5":
+  - heading "New machine linux-5" [level=2]
+  - list "Steps":
+    - listitem: Get the image , done
+    - listitem: Build it , done
+    - listitem: Boot , failed
+    - listitem: Apply its file
+    - listitem: Ready
+  - paragraph: 3 of 5
+  - button "Hide"
+  - heading "linux-5 did not boot. Try the boot again." [level=3]
+  - paragraph: It gave no answer on the network in 3 min.
+  - paragraph: "The image and the disk are kept: a retry starts at the boot."
+  - button "Try the boot again →"
+  - button "See the log"
+  - status "linux-5 did not boot. Try the boot again."

@@ -1,0 +1,12 @@
+- dialog "Update Spwn 0.42 → 0.43":
+  - heading "Update Spwn 0.42 → 0.43" [level=2]
+  - list "Steps":
+    - listitem: Download 0.43 31 of 52 MB
+    - listitem: Restart the engine
+  - paragraph: 1 of 2
+  - button "Hide"
+  - heading "Downloading 0.43. Your machines keep running." [level=3]
+  - paragraph: The engine restarts once it is here. Nothing you run stops.
+  - progressbar "Download 0.43"
+  - button "Hide, it keeps going"
+  - status "Downloading 0.43. Your machines keep running."

@@ -1,0 +1,14 @@
+- dialog "New machine linux-5":
+  - heading "New machine linux-5" [level=2]
+  - list "Steps":
+    - listitem: Get the image , done
+    - listitem: Build it , done
+    - listitem: Boot , done
+    - listitem: Apply its file , done
+    - listitem: Ready , done
+  - paragraph: Done in 3 min 40 s
+  - heading "linux-5 is ready. Open it in your terminal." [level=3]
+  - paragraph: Ubuntu 24.04, 11 apps from its file, 4 GB of memory. It starts again with this Mac.
+  - button "Open in Terminal →"
+  - button "Done"
+  - status "linux-5 is ready. Open it in your terminal."

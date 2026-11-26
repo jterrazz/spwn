@@ -1,0 +1,15 @@
+- dialog "New machine linux-5":
+  - heading "New machine linux-5" [level=2]
+  - list "Steps":
+    - listitem: Get the image , done
+    - listitem: Build it , done
+    - listitem: Boot
+    - listitem: Apply its file
+    - listitem: Ready
+  - paragraph: 3 of 5
+  - button "Hide"
+  - heading "Booting linux-5. Waiting for its address." [level=3]
+  - paragraph: The machine is up. Spwn waits for it to answer on the network, usually under a minute.
+  - paragraph: asked for an address 9 s ago
+  - button "Hide, it keeps going"
+  - status "Booting linux-5. Waiting for its address."
