@@ -42,7 +42,7 @@ function HomeNeeds({ summary, macs, go }: { summary: Summary; macs: HomeProps['m
                 go={go}
                 macs={macs}
                 needs={needsYou(summary.Needs ?? [])}
-                standsBack={newMachineLeads(macs)}
+                standsBack={newMachineLeads(macs, summary.Needs ?? [])}
                 title="Needs you"
             />
         </HeldOutcomes>

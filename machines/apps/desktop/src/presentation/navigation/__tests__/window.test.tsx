@@ -16,11 +16,12 @@ import { composeReplay } from '../../../composition/compose';
 import { recordingsOf } from '../../../infrastructure/outbound/engine-replay/recordings';
 import type { Recording } from '../../../infrastructure/outbound/engine-replay/replay';
 import { EngineProvider } from '../../dependencies/dependencies';
+import { RESTART, withNeeds } from '../../features/overview/__tests__/need-gesture.fixtures';
 import { PAGES } from '../../screens/registry';
 import type { Route } from '../route';
 import { Window } from '../window';
 import { PINNED } from './pinned';
-import { commandsDrawnOver, WORLDS } from './walk';
+import { commandsDrawnOver, primariesDrawnOver, WORLDS } from './walk';
 
 const recordingFor = await recordingsOf(
     'bare-mac',
@@ -35,13 +36,23 @@ const back = button('Back');
 const forward = button('Forward');
 const HOME: Route = { page: 'home' };
 
-function windowOver(world: string, initial: Route) {
-    const dependencies = composeReplay({ recording: recordingFor(world) });
+function windowOverRecording(recording: Recording, initial: Route) {
+    const dependencies = composeReplay({ recording });
     return (
         <EngineProvider dependencies={dependencies}>
             <Window initial={initial} memory={PINNED} pages={PAGES} />
         </EngineProvider>
     );
+}
+
+function windowOver(world: string, initial: Route) {
+    return windowOverRecording(recordingFor(world), initial);
+}
+
+function brightNames(): string[] {
+    return [...document.querySelectorAll('button')]
+        .filter((one) => one.className.includes('primary'))
+        .map((one) => one.getAttribute('aria-label') ?? one.textContent ?? '');
 }
 
 describe('Window', () => {
@@ -54,6 +65,28 @@ describe('Window', () => {
 
         // Then - Home holds the verdict, the lines and the machines the engine answered
         await expect(result.tree).toMatch(file('./__expected__/two-macs-home.aria.yaml'));
+    });
+
+    test("home's white button is the gesture that fixes its broken need, and New machine stands plain beside it", async () => {
+        // Given - the window on Home over two-macs, once with one need, infra's failing check, and once with none
+        let withNeed: string[] = [];
+        let withNone: string[] = [];
+        const broken = withNeeds(recordingFor('two-macs'), [RESTART]);
+        const calm = withNeeds(recordingFor('two-macs'), []);
+
+        // When - each Home has drawn
+        await component.render(windowOverRecording(broken, HOME), async (visitor) => {
+            await visitor.see(within(region('Needs you'), button('Restart infra')));
+            withNeed = brightNames();
+        });
+        await component.render(windowOverRecording(calm, HOME), async (visitor) => {
+            await visitor.see(button('New machine'));
+            withNone = brightNames();
+        });
+
+        // Then - with the need the fix alone is white, and with none New machine leads
+        expect(withNeed).toStrictEqual(['Restart infra']);
+        expect(withNone).toStrictEqual(['New machine']);
     });
 
     test("a stopped machine's Overview is quiet: its file's chapters and its delete", async () => {
@@ -286,6 +319,20 @@ describe('Window', () => {
             const found = await commandsDrawnOver(world);
 
             // Then - no line of any page carries a command or stands as a bare verb
+            expect(found).toStrictEqual([]);
+        },
+        120_000,
+    );
+
+    test.each(WORLDS)(
+        '%s draws at most one white primary button on any page or tab',
+        async (world) => {
+            // Given - every page of the world, and every tab of each Mac and each machine it lists
+
+            // When - each is drawn once its exchanges have played
+            const found = await primariesDrawnOver(world);
+
+            // Then - none draws a second white button, the bar's and the page's together
             expect(found).toStrictEqual([]);
         },
         120_000,

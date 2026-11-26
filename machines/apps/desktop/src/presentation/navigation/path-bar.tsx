@@ -79,6 +79,7 @@ function End({ router, quiet, macs, needs, engine, onFind, ...props }: PathBarPr
         : actionOf({
               addPassword: props.onAddPassword,
               macs,
+              needs,
               newMachine: props.onNewMachine,
               route,
           });

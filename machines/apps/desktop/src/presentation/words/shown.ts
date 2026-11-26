@@ -23,6 +23,7 @@ import type {
 
 import type { CoreKind } from '../../application/use-cases/core-flow';
 import type { UpdateKind } from '../../application/use-cases/update-flow';
+import { isNeedsYou } from '../../domain/overview/upkeep';
 import type { Tone } from '../../domain/tone';
 import { wordOf } from './engine-words';
 import type { CodeOf, Worded } from './engine-words';
@@ -269,4 +270,8 @@ export function shelfWord(chapter: MachinefileChapter): string {
 
 export function stepBoxed(step: MachinefileStep): string {
     return step.Version === '' ? step.Rule : step.Version;
+}
+
+export function leadingNeed(needs: readonly OverviewNeed[]): number {
+    return needs.findIndex((need) => isNeedsYou(need) && needState(need).tone === 'bad');
 }
