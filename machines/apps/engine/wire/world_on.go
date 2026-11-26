@@ -584,10 +584,10 @@ func (m *worldMac) doorLocked(at machine) {
 	}
 }
 
-func (m *worldMac) doorAdmit(engine bool) remotedoor.Admit {
+func (m *worldMac) doorAdmit(byEngine bool) remotedoor.Admit {
 	m.serving.Lock()
 	defer m.serving.Unlock()
-	if engine {
+	if byEngine {
 		return m.admit
 	}
 	return m.outside
@@ -598,10 +598,10 @@ func (m *worldMac) doorAdmit(engine bool) remotedoor.Admit {
 // process: the door judges with what that Mac's running engine holds, or,
 // with `not-the-engine`, with what a process of that Mac that is not its
 // engine holds, and a Mac whose engine does not run does not answer.
-func (r *worldRun) knock(ctx context.Context, mac, from string, engine bool) (string, error) {
+func (r *worldRun) knock(ctx context.Context, mac, from string, byEngine bool) (string, error) {
 	m := r.mac(mac)
 	_, up := m.up(ctx)
-	admit := m.doorAdmit(engine)
+	admit := m.doorAdmit(byEngine)
 	if !up || admit == nil {
 		return "door: " + mac + " does not answer", nil
 	}
