@@ -6,7 +6,10 @@
 .toggle {
     all: unset;
     cursor: pointer;
-    color: var(--new);
+    color: var(--t1);
+    text-decoration: underline;
+    text-decoration-color: var(--t4);
+    text-underline-offset: 3px;
     font-size: var(--text-label);
     align-self: flex-start;
 }

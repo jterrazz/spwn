@@ -11,11 +11,11 @@
     transition: background var(--motion-hover);
 }
 .button:hover {
-    background: var(--panel);
+    background: var(--s1);
     color: var(--t1);
 }
 .button:active {
-    background: var(--raise-2);
+    background: var(--s3-press);
     color: var(--t1);
 }
 .button:disabled {
@@ -28,6 +28,6 @@
     stroke-width: 1.5;
 }
 .button[aria-pressed='true'] {
-    background: var(--raise);
+    background: var(--s3);
     color: var(--t1);
 }

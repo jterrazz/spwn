@@ -13,13 +13,13 @@
     height: 34px;
     padding: 0 var(--space-10);
     border-radius: var(--radius-well);
-    background: var(--inset);
+    background: var(--s0);
     font-size: var(--text-body);
     color: var(--t1);
     user-select: text;
 }
 .input:focus {
-    box-shadow: inset 0 0 0 1.5px var(--new);
+    box-shadow: inset 0 0 0 1.5px var(--you);
 }
 .input::placeholder {
     color: var(--t4);

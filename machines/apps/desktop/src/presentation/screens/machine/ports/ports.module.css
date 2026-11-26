@@ -4,7 +4,7 @@
     gap: var(--space-8);
 }
 .shared {
-    border-top: 1px solid var(--line);
+    border-top: 1px solid var(--hair);
     padding-bottom: var(--space-8);
 }
 .shared > :first-child {
@@ -26,5 +26,5 @@
     margin: 0;
     color: var(--t3);
     padding: var(--space-8) 0 var(--space-12);
-    border-top: 1px solid var(--line);
+    border-top: 1px solid var(--hair);
 }

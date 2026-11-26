@@ -1,19 +1,7 @@
 :root {
     color-scheme: dark;
 
-    --desk: #0e0f12;
-    --canvas: #17181c;
-    --side: #1b1c20;
-    --panel: #26272b;
-    --inset: #121316;
-    --raise: #303136;
-    --raise-2: #3b3c42;
     --system: #45474b;
-
-    --line: rgb(255 255 255 / 7%);
-    --line-2: rgb(255 255 255 / 13%);
-    --dot: rgb(255 255 255 / 13%);
-    --wash: rgb(255 255 255 / 5%);
 
     --s0: #131417;
     --s1: #1a1b1f;
@@ -36,12 +24,8 @@
     --busy: #4cc2f5;
 
     --ok: #4ad68a;
-    --warn: #f6b24a;
     --bad: #ff6d63;
     --bad-hover: #ff8a82;
-    --new: #4cc2f5;
-    --accent: #ff9f0a;
-    --on-accent: #1b1003;
     --on-bad: #1c0806;
     --tone-fill: 8%;
     --tone-line: 24%;
@@ -126,9 +110,9 @@
 
     --chrome-row: 52px;
 
-    --ground-window: var(--canvas);
-    --ground: var(--canvas);
-    --ground-sidebar: var(--side);
+    --ground-window: var(--s0);
+    --ground: var(--s0);
+    --ground-sidebar: var(--s1);
 }
 
 html[data-material='vibrant'] {
@@ -136,8 +120,8 @@ html[data-material='vibrant'] {
     --material-sidebar: 72%;
 
     --ground-window: transparent;
-    --ground: color-mix(in srgb, var(--canvas) var(--material-canvas), transparent);
-    --ground-sidebar: color-mix(in srgb, var(--side) var(--material-sidebar), transparent);
+    --ground: color-mix(in srgb, var(--s0) var(--material-canvas), transparent);
+    --ground-sidebar: color-mix(in srgb, var(--s1) var(--material-sidebar), transparent);
 }
 
 [data-identity='blue'] {

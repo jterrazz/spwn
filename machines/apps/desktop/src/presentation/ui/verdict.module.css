@@ -30,7 +30,7 @@
     width: 7px;
     height: 7px;
     border-radius: 50%;
-    background: var(--raise);
+    background: var(--s2);
 }
 .action {
     margin-top: var(--space-14);

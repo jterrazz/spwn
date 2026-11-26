@@ -29,7 +29,7 @@
     align-items: baseline;
     gap: var(--space-8);
     padding: var(--space-8) var(--space-24);
-    border-bottom: 1px solid var(--line);
+    border-bottom: 1px solid var(--hair);
     color: var(--t2);
     flex: none;
 }

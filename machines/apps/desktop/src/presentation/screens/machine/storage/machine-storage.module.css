@@ -11,6 +11,6 @@
     text-decoration-color: var(--t1);
 }
 .storageLink:focus-visible {
-    outline: 2px solid var(--new);
+    outline: 2px solid var(--you);
     outline-offset: 2px;
 }

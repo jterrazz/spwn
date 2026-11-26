@@ -24,7 +24,7 @@
     gap: var(--space-8);
     align-items: baseline;
     padding: var(--space-14) 0 var(--space-6);
-    border-top: 1px solid var(--line);
+    border-top: 1px solid var(--hair);
     font-size: var(--text-label);
     font-weight: var(--weight-regular);
     color: var(--t2);
@@ -34,7 +34,7 @@
 }
 .older {
     padding-top: var(--space-14);
-    border-top: 1px solid var(--line);
+    border-top: 1px solid var(--hair);
 }
 .dayHead + * {
     border-top: 0;

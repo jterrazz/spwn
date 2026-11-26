@@ -1,5 +1,5 @@
 .panel {
-    background: var(--panel);
+    background: var(--s1);
     border-radius: var(--radius-panel);
     padding: var(--space-14) var(--space-16) var(--space-6);
     display: flex;

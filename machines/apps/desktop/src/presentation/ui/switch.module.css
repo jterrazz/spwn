@@ -1,7 +1,7 @@
 .switch {
     display: inline-flex;
     gap: var(--space-2);
-    background: var(--panel);
+    background: var(--s1);
     border-radius: var(--radius-well);
     padding: 3px;
     max-width: 100%;
@@ -22,7 +22,7 @@
     text-align: center;
 }
 .inPanel {
-    background: var(--inset);
+    background: var(--s0);
 }
 .bare {
     background: none;
@@ -43,7 +43,7 @@
     height: 6px;
     margin-left: var(--space-6);
     border-radius: var(--radius-tick);
-    background: var(--warn);
+    background: var(--you);
     vertical-align: 1px;
 }
 .option {
@@ -62,12 +62,12 @@
     color: var(--t1);
 }
 .option:active {
-    background: var(--raise-2);
+    background: var(--s3-press);
     color: var(--t1);
 }
 .option[aria-selected='true'],
 .option[aria-pressed='true'] {
-    background: var(--raise-2);
+    background: var(--s3);
     color: var(--t1);
 }
 .count {
@@ -81,7 +81,7 @@
 }
 .option:disabled[aria-pressed='true'],
 .option:disabled[aria-selected='true'] {
-    background: var(--raise);
+    background: var(--s3);
     color: var(--t3);
 }
 .option[aria-busy='true'] {
@@ -95,7 +95,7 @@
     vertical-align: -1px;
     box-sizing: border-box;
     border-radius: 50%;
-    border: 1.5px solid var(--line-2);
+    border: 1.5px solid var(--edge);
     border-top-color: var(--t2);
     animation: turn 0.8s linear infinite;
 }

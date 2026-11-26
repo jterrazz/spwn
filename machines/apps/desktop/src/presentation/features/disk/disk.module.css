@@ -26,7 +26,7 @@
     gap: var(--space-12);
     margin-top: var(--space-12);
     padding: var(--space-14) 0 var(--space-2);
-    border-top: 1px solid var(--line);
+    border-top: 1px solid var(--hair);
 }
 .foot > p {
     flex: 1 1 260px;
@@ -40,7 +40,7 @@
     width: 24px;
     height: 24px;
     border-radius: var(--radius-control);
-    background: var(--raise);
+    background: var(--s2);
     color: var(--t2);
     display: grid;
     place-items: center;
@@ -71,7 +71,7 @@
 .more {
     margin: 0;
     padding: var(--space-10) 0;
-    border-top: 1px solid var(--line);
+    border-top: 1px solid var(--hair);
     font-size: var(--text-label);
     color: var(--t3);
 }
@@ -106,7 +106,7 @@
     font-variant-numeric: tabular-nums;
 }
 .free .swatch {
-    background: var(--raise-2);
+    background: var(--s3);
 }
 .swatch {
     display: inline-block;

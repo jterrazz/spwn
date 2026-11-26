@@ -2,7 +2,7 @@
     flex: 1;
     height: 4px;
     border-radius: var(--radius-tick);
-    background: var(--raise-2);
+    background: var(--s3);
     overflow: hidden;
     min-width: 20px;
 }
@@ -17,13 +17,13 @@
     background: var(--ok);
 }
 .warn .fill {
-    background: var(--warn);
+    background: var(--you);
 }
 .bad .fill {
     background: var(--bad);
 }
 .new .fill {
-    background: var(--new);
+    background: var(--busy);
 }
 .fixed {
     flex: none;
@@ -40,7 +40,7 @@
 .part {
     flex: var(--size) 1 0;
     border-radius: var(--radius-tick);
-    background: var(--c, var(--raise-2));
+    background: var(--c, var(--s3));
     min-width: 2px;
 }
 .whole {
@@ -58,6 +58,6 @@
 }
 .whole .rest {
     flex-grow: 1;
-    background: var(--inset);
-    box-shadow: inset 0 0 0 1px var(--line);
+    background: var(--s0);
+    box-shadow: inset 0 0 0 1px var(--hair);
 }

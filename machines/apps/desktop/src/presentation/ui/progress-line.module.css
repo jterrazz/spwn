@@ -23,8 +23,8 @@
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    border: 1.5px solid var(--line-2);
-    border-top-color: var(--new);
+    border: 1.5px solid var(--edge);
+    border-top-color: var(--busy);
     animation: turn 0.8s linear infinite;
 }
 @keyframes turn {

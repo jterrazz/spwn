@@ -37,7 +37,7 @@ button {
 }
 
 html :focus-visible {
-    outline: 2px solid var(--new);
+    outline: 2px solid var(--you);
     outline-offset: 1px;
 }
 
@@ -55,7 +55,7 @@ main :is(button, label, dt, th, kbd, header, [role='tab'], [role='option']),
 }
 
 ::selection {
-    background: color-mix(in srgb, var(--new) 32%, transparent);
+    background: color-mix(in srgb, var(--you) 32%, transparent);
 }
 
 [hidden] {

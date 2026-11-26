@@ -10,7 +10,7 @@
     stroke-linecap: round;
 }
 .art [data-paint='accent'] {
-    fill: var(--accent);
+    fill: var(--you);
 }
 .art [data-paint='bad'] {
     fill: var(--bad);
@@ -43,13 +43,13 @@
     fill: var(--t2);
 }
 .art [data-paint='off'] {
-    fill: var(--raise-2);
+    fill: var(--s3);
 }
 .art [data-paint='onBad'] {
     fill: var(--on-bad);
 }
 .art [data-paint='panel'] {
-    fill: var(--panel);
+    fill: var(--s1);
 }
 .art [data-paint='right'] {
     fill: var(--art-right);
@@ -70,10 +70,10 @@
     stroke: var(--art-dim);
 }
 .art [data-ink='accent'] {
-    stroke: var(--accent);
+    stroke: var(--you);
 }
 .art [data-ink='onAccent'] {
-    stroke: var(--on-accent);
+    stroke: var(--on-you);
 }
 .art [data-ink='onBad'] {
     stroke: var(--on-bad);

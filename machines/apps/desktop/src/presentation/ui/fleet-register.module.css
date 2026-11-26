@@ -27,13 +27,13 @@
     content: '';
     position: absolute;
     inset: 0 8px auto;
-    border-top: 1px solid var(--line);
+    border-top: 1px solid var(--hair);
 }
 .mac {
     padding-top: 13px;
 }
 .mac::before {
-    border-top-color: var(--line-2);
+    border-top-color: var(--edge);
 }
 .group:first-child > .mac {
     padding-top: 2px;
@@ -48,7 +48,7 @@
 .machine:hover,
 .machine:has(.opener:focus-visible),
 .machine[data-open] {
-    background: var(--wash);
+    background: var(--s2);
 }
 .name {
     display: flex;
@@ -118,13 +118,13 @@
     color: var(--t3);
 }
 .warn {
-    color: var(--warn);
+    color: var(--you);
 }
 .bad {
     color: var(--bad);
 }
 .new {
-    color: var(--new);
+    color: var(--busy);
 }
 .figure {
     font-family: var(--font-mono);

@@ -9,11 +9,11 @@
     color: var(--t3);
 }
 .warn {
-    color: var(--warn);
+    color: var(--you);
 }
 .bad {
     color: var(--bad);
 }
 .new {
-    color: var(--new);
+    color: var(--busy);
 }

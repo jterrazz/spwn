@@ -52,7 +52,7 @@
     gap: var(--space-8);
 }
 .step {
-    background: var(--inset);
+    background: var(--s0);
     border-radius: var(--radius-well);
     padding: var(--space-10) var(--space-12);
     display: flex;
@@ -75,27 +75,27 @@
     height: 30px;
 }
 .strip i {
-    background: var(--raise-2);
+    background: var(--s3);
     border-radius: 3px;
 }
 .strip button {
     all: unset;
     cursor: pointer;
-    background: var(--raise-2);
+    background: var(--s3);
     border-radius: 3px;
 }
 .strip button:active {
     transform: var(--motion-press);
 }
 .strip button:focus-visible {
-    outline: 2px solid var(--new);
+    outline: 2px solid var(--you);
     outline-offset: 2px;
 }
 .strip .ok {
-    background: color-mix(in srgb, var(--ok) 70%, var(--inset));
+    background: color-mix(in srgb, var(--ok) 70%, var(--s0));
 }
 .strip .warn {
-    background: var(--warn);
+    background: var(--you);
 }
 .strip .bad {
     background: var(--bad);

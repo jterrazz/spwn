@@ -7,7 +7,7 @@
     width: 100%;
     margin: 0;
     height: 18px;
-    accent-color: var(--new);
+    accent-color: var(--t1);
 }
 .options {
     display: flex;
@@ -23,7 +23,10 @@
 .toggle {
     all: unset;
     cursor: pointer;
-    color: var(--new);
+    color: var(--t1);
+    text-decoration: underline;
+    text-decoration-color: var(--t4);
+    text-underline-offset: 3px;
 }
 .summary {
     color: var(--t3);

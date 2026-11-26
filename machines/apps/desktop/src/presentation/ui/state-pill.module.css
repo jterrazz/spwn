@@ -25,7 +25,7 @@
     --c: var(--ok);
 }
 .new {
-    --c: var(--new);
+    --c: var(--busy);
 }
 .new::before {
     animation: pulse 1.4s ease-in-out infinite;
@@ -37,7 +37,7 @@
     border-radius: var(--radius-hair);
 }
 .warn {
-    --c: var(--warn);
+    --c: var(--you);
 }
 .warn::before {
     border-radius: var(--radius-hair);

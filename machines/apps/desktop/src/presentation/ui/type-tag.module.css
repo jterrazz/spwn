@@ -1,7 +1,7 @@
 .type {
     font-size: var(--text-label);
     color: var(--t3);
-    border: 1px solid var(--line-2);
+    border: 1px solid var(--edge);
     border-radius: var(--radius-pill);
     padding: 0 7px;
     line-height: 18px;

@@ -38,10 +38,10 @@
 .link {
     all: unset;
     cursor: pointer;
-    color: var(--new);
-}
-.link:hover {
+    color: var(--t1);
     text-decoration: underline;
+    text-decoration-color: var(--t4);
+    text-underline-offset: 3px;
 }
 .actions {
     display: flex;
