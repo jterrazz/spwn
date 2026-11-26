@@ -19,7 +19,7 @@ import type { Reading } from '../../dependencies/dependencies';
 import { Absent, Unanswered, VerdictHead } from '../../kit/readings';
 import { SkeletonHead } from '../../kit/skeleton';
 import type { Route } from '../../navigation/route';
-import { AppIcon, Row, StatePill, Value } from '../../ui/index';
+import { AppIcon, Row, StateMark, Value } from '../../ui/index';
 import { Page } from '../../ui/page';
 import { countOf } from '../../words/engine-words';
 import { appUpdate, kindChipWord } from '../../words/shown';
@@ -91,7 +91,7 @@ function AppRow({
                     version
                 ) : (
                     <span className={styles.update}>
-                        <StatePill {...update} />
+                        <StateMark {...update} />
                         {version}
                     </span>
                 )

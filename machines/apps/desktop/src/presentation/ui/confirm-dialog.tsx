@@ -5,7 +5,7 @@ import { asSentence } from './case';
 import { Dialog } from './dialog';
 import { FormField } from './form-field';
 import { shownOrWithheld } from './secret';
-import { StateSign } from './state-sign';
+import { StateMark } from './state-mark';
 
 import styles from './confirm-dialog.module.css';
 
@@ -27,7 +27,7 @@ function Held({ held }: { held: string | undefined }) {
     }
     return (
         <p className={styles.held}>
-            <StateSign tone="warn" />
+            <StateMark said="beside" tone="warn" />
             <span>{shownOrWithheld(held ?? '')}</span>
         </p>
     );

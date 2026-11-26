@@ -43,7 +43,7 @@ export function rowShown(row: AccountsProgramRow, withLine: boolean) {
     return {
         lead: <AppIcon name={row.Program} />,
         sentence: secondLine(row, withLine),
-        state: { ...engineShown('AccountsProgramState', row.State), calm: 'pill' as const },
+        state: engineShown('AccountsProgramState', row.State),
         title: row.Program,
         trailSize: 'wide' as const,
     };

@@ -32,7 +32,9 @@
     - heading "Machines 4" [level=2]
     - group "Macs":
       - button "macbook-pro · 3 machines · 1 machine not created": macbook-pro 3 machines 1 machine not created
-      - button "mac-mini · 1 machine · all running": mac-mini 1 machine all running
+      - button "mac-mini · 1 machine · all running":
+        - text: mac-mini 1 machine
+        - img "all running"
       - text: 1 machine not created This Mac
     - button "macbook-pro"
     - text: 1 machine not created 34 %
@@ -42,18 +44,19 @@
     - text: stopped
     - img "Memory of api"
     - button "linux-1"
-    - text: running
+    - img "running"
     - img "Memory of linux-1"
     - text: of 8
     - button "linux-2"
     - text: Lot shell not created
     - img "Memory of linux-2"
     - button "mac-mini"
+    - img "all running"
     - text: 21 %
     - img "Memory of mac-mini"
     - text: 36 free
     - button "infra"
-    - text: healthy
+    - img "healthy"
     - img "Memory of infra"
     - text: of 24
     - button "Add a Mac"

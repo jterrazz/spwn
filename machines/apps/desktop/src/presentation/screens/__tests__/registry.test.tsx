@@ -41,9 +41,9 @@ const HOME: Route = { page: 'home' };
 const BUDGETS = {
     activityTab: { commits: 4, renders: 326 },
     find: { commits: 1, renders: 25 },
-    guideOpens: { commits: 4, renders: 293 },
-    homeCalm: { commits: 8, renders: 535 },
-    homeStories: { commits: 8, renders: 795 },
+    guideOpens: { commits: 4, renders: 294 },
+    homeCalm: { commits: 8, renders: 543 },
+    homeStories: { commits: 8, renders: 801 },
     newMachine: { commits: 2, renders: 39 },
     peek: { commits: 1, renders: 75 },
     pin: { commits: 1, renders: 74 },

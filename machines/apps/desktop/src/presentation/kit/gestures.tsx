@@ -16,7 +16,7 @@ import { useGestureStore } from '../dependencies/dependencies';
 import { useGesture } from '../dependencies/use-gesture';
 import type { Gesture } from '../dependencies/use-gesture';
 import type { ButtonVariant } from '../ui/button';
-import { Button, ConfirmDialog, Panel, ProgressLine, Row, StatePill } from '../ui/index';
+import { Button, ConfirmDialog, Panel, ProgressLine, Row, StateMark } from '../ui/index';
 import type { RowProps } from '../ui/row';
 import { forgetInputOf } from '../words/provisional';
 import { ownState } from '../words/shown';
@@ -176,7 +176,7 @@ export function GestureOutcome({ gesture }: { gesture: Gesture<unknown> }) {
     if (state.kind === 'unknown') {
         return <Unknown error={state.error} onDismiss={gesture.dismiss} />;
     }
-    return state.kind === 'done' ? <StatePill {...ownState('done')} /> : null;
+    return state.kind === 'done' ? <StateMark said="after" {...ownState('done')} /> : null;
 }
 
 export type Held = { title: string; shown: ReactNode; sentence?: string };

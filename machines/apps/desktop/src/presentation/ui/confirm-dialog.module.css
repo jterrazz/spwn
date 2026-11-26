@@ -12,6 +12,6 @@
     user-select: text;
 }
 
-.held svg {
-    margin-top: 2px;
+.held > :first-child {
+    margin-top: 5px;
 }

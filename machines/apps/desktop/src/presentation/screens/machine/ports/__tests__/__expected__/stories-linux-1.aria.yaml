@@ -1,5 +1,7 @@
 - main:
-  - heading "linux-1 running" [level=2]
+  - heading "linux-1 running" [level=2]:
+    - text: linux-1
+    - img "running"
   - paragraph:
     - text: workspace · ephemeral · on
     - button "macbook-pro"
@@ -20,6 +22,7 @@
     - heading "Shared" [level=2]
     - region "Port 3000":
       - text: :3000 Node or Next node https://macbook-pro.tail77a797.ts.net:443
+      - img "shared"
       - group "Who reaches linux-1:3000":
         - button "Local"
         - button "Private"
@@ -32,6 +35,7 @@
       - button "QR code"
     - region "Port 5173":
       - text: :5173 Vite node https://macbook-pro.tail77a797.ts.net:40001
+      - img "shared"
       - group "Who reaches linux-1:5173":
         - button "Local"
         - button "Private" [pressed]

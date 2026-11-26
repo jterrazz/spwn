@@ -77,25 +77,8 @@
 .said {
     display: flex;
     align-items: center;
-    gap: var(--space-8);
-    font-size: var(--text-meta);
-    line-height: 17px;
+    min-height: 17px;
     margin-top: var(--space-8);
-}
-.ok {
-    color: var(--t2);
-}
-.plain {
-    color: var(--t3);
-}
-.warn {
-    color: var(--you);
-}
-.bad {
-    color: var(--bad);
-}
-.new {
-    color: var(--busy);
 }
 .foot {
     display: flex;

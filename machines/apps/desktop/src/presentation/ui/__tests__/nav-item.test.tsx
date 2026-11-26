@@ -6,23 +6,25 @@ import { NavItem } from '../nav-item';
 function ignore(): void {}
 
 describe('NavItem', () => {
-    test('its state dot carries the state word as label and title', async () => {
-        // Given - the relay's item, its machine down
+    test('a calm state is its mark alone, which carries the state word as name and title', async () => {
+        // Given - the relay's item, its machine online
         const result = await component.render(
             <NavItem
                 current={false}
                 label="relay"
                 onSelect={ignore}
-                state={{ tone: 'bad', word: 'Down' }}
+                state={{ tone: 'ok', word: 'Online' }}
             />,
             async (visitor) => {
-                await visitor.see(button('relay Down'));
+                await visitor.see(button('relay Online'));
             },
         );
 
-        // Then - the dot is an image named by its word, inside the item's name
-        expect(result.tree.text).toBe('- button "relay Down":\n  - text: relay\n  - img "Down"');
-        expect(result.html.text).toContain('title="Down"');
+        // Then - the mark is an image named by its word, inside the item's name
+        expect(result.tree.text).toBe(
+            '- button "relay Online":\n  - text: relay\n  - img "Online"',
+        );
+        expect(result.html.text).toContain('title="Online"');
     });
 
     test('the current place is marked as the page', async () => {
@@ -35,7 +37,7 @@ describe('NavItem', () => {
         expect(result.html.text).toContain('aria-current="page"');
     });
 
-    test('a state other than fine is written beside its dot, out of the name the dot already gives', async () => {
+    test('a state other than calm is written beside its mark, which the reader is spared', async () => {
         // Given - two machines, one down, one up
         const down = await component.render(
             <NavItem
@@ -54,9 +56,12 @@ describe('NavItem', () => {
             />,
         );
 
-        // Then - the one down writes its word, the one up shows its dot alone, and both keep their name
+        // Then - the one down writes its word, the one up shows its mark alone, and both keep their name
         expect(down.content.text).toContain('down');
-        expect(down.tree.text).toBe('- button "relay down":\n  - text: relay\n  - img "down"');
+        expect(down.tree.text).toBe('- button "relay down"');
         expect(up.content.text).not.toContain('online');
+        expect(up.tree.text).toBe(
+            '- button "mac-mini online":\n  - text: mac-mini\n  - img "online"',
+        );
     });
 });

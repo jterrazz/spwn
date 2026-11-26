@@ -22,9 +22,7 @@
     - button "macbook-pro online":
       - text: macbook-pro
       - img "online"
-    - button "api stopped":
-      - text: api
-      - img "stopped"
+    - button "api stopped"
     - button "linux-1 running":
       - text: linux-1
       - img "running"
@@ -64,10 +62,16 @@
   - region "Machines":
     - heading "Machines 3" [level=2]
     - group "Macs":
-      - button "macbook-pro · 2 machines · all running": macbook-pro 2 machines all running
-      - button "mac-mini · 1 machine · all running": mac-mini 1 machine all running
-      - text: all running This Mac
+      - button "macbook-pro · 2 machines · all running":
+        - text: macbook-pro 2 machines
+        - img "all running"
+      - button "mac-mini · 1 machine · all running":
+        - text: mac-mini 1 machine
+        - img "all running"
+      - img "all running"
+      - text: This Mac
     - button "macbook-pro"
+    - img "all running"
     - text: 34 %
     - img "Memory of macbook-pro"
     - text: 4 free
@@ -75,15 +79,16 @@
     - text: stopped
     - img "Memory of api"
     - button "linux-1"
-    - text: running
+    - img "running"
     - img "Memory of linux-1"
     - text: of 8
     - button "mac-mini"
+    - img "all running"
     - text: 21 %
     - img "Memory of mac-mini"
     - text: 36 free
     - button "infra"
-    - text: healthy
+    - img "healthy"
     - img "Memory of infra"
     - text: of 24
     - button "Add a Mac"

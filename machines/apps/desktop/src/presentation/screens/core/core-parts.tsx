@@ -6,7 +6,7 @@ import type { CoreKind } from '../../../application/use-cases/core-flow';
 import { INSTALL_LINE } from '../../../domain/core';
 import { CopyButton } from '../../ui/copy-button';
 import { Icon } from '../../ui/icon';
-import { StatePill } from '../../ui/index';
+import { StateMark } from '../../ui/index';
 import { shownOrWithheld } from '../../ui/secret';
 import { coreState } from '../../words/shown';
 
@@ -15,7 +15,7 @@ import styles from './core.module.css';
 export function Pill({ kind }: { kind: CoreKind }) {
     return (
         <span className={styles.pill}>
-            <StatePill {...coreState(kind)} />
+            <StateMark {...coreState(kind)} />
         </span>
     );
 }

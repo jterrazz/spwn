@@ -24,9 +24,7 @@
     - button "macbook-pro online":
       - text: macbook-pro
       - img "online"
-    - button "api stopped":
-      - text: api
-      - img "stopped"
+    - button "api stopped"
     - button "linux-1 running":
       - text: linux-1
       - img "running"
@@ -53,10 +51,13 @@
     - heading "The latest release is not known yet." [level=1]
     - region "Engine":
       - heading "Engine" [level=2]
-      - text: "Engine v0.21.0 running Latest release GitHub: dial tcp: connection refused (4 Nov, 10:00)"
+      - text: Engine v0.21.0
+      - img "running"
+      - text: "Latest release GitHub: dial tcp: connection refused (4 Nov, 10:00)"
       - button "Check now"
   - region "mac-mini":
     - heading "mac-mini" [level=2]
     - region "Engine":
       - heading "Engine" [level=2]
-      - text: Engine dev running
+      - text: Engine dev
+      - img "running"

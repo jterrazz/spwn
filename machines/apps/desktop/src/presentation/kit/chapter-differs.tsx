@@ -3,7 +3,7 @@ import type { MachinefileDiffering } from '@jterrazz/station-api';
 import { driftAsked } from '../../domain/machines/machines';
 import type { Found } from '../../domain/machines/machines';
 import { useRead } from '../dependencies/dependencies';
-import { AppIcon, Panel, StatePill, Value } from '../ui/index';
+import { AppIcon, Panel, StateMark, Value } from '../ui/index';
 import { differingLeftOut, differingSide } from '../words/shown';
 import type { DifferingSide, SharedChapter } from '../words/shown';
 
@@ -50,7 +50,7 @@ function Side({
     return (
         <div className={styles.item}>
             <Lead chapter={chapter} differing={differing} name={name} />
-            <StatePill {...shown} dotted={false} />
+            <StateMark {...shown} />
         </div>
     );
 }

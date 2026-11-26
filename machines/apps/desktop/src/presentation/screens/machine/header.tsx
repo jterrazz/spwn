@@ -8,7 +8,7 @@ import { useIdentityOf } from '../../kit/identity';
 import { machineRoute, TAB_PANEL, tabsOf } from '../../navigation/route';
 import type { Route, Tab } from '../../navigation/route';
 import type { Opening } from '../../navigation/window';
-import { Button, MachineIcon, StatePill, Switch } from '../../ui/index';
+import { Button, MachineIcon, StateMark, Switch } from '../../ui/index';
 import { machineKindOf } from '../../words/provisional';
 import { macState, vmKindWord, vmLifetimeWord, vmState } from '../../words/shown';
 import { THIS_MAC_WORD } from '../../words/words';
@@ -108,7 +108,7 @@ export function MachineHeader({ found, tab, go, onGuide, onNewMachine }: Props) 
                         <div>
                             <h2 className={styles.name}>
                                 {name}
-                                <StatePill {...(vm ? vmState(vm) : macState(mac))} />
+                                <StateMark {...(vm ? vmState(vm) : macState(mac))} />
                             </h2>
                             {vm ? <VmLine found={found} go={go} /> : <MacLine mac={mac} />}
                         </div>

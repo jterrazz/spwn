@@ -12,9 +12,7 @@
       - option "linux-3 Running":
         - text: linux-3
         - img "Running"
-      - option "linux-4 Stopped":
-        - text: linux-4
-        - img "Stopped"
+      - option "linux-4 Stopped"
       - option "linux-5 Running":
         - text: linux-5
         - img "Running"
@@ -33,9 +31,7 @@
       - option "linux-10 Running":
         - text: linux-10
         - img "Running"
-      - option "linux-11 Stopped":
-        - text: linux-11
-        - img "Stopped"
+      - option "linux-11 Stopped"
       - option "linux-12 Running":
         - text: linux-12
         - img "Running"
@@ -54,9 +50,7 @@
       - option "linux-17 Running":
         - text: linux-17
         - img "Running"
-      - option "linux-18 Stopped":
-        - text: linux-18
-        - img "Stopped"
+      - option "linux-18 Stopped"
       - option "linux-19 Running":
         - text: linux-19
         - img "Running"
@@ -75,9 +69,7 @@
       - option "linux-24 Running":
         - text: linux-24
         - img "Running"
-      - option "linux-25 Stopped":
-        - text: linux-25
-        - img "Stopped"
+      - option "linux-25 Stopped"
       - option "linux-26 Running":
         - text: linux-26
         - img "Running"

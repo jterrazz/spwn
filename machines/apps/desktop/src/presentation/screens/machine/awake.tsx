@@ -10,7 +10,7 @@ import type { Gesture } from '../../dependencies/use-gesture';
 import { GestureButton, GestureOutcome, useStart } from '../../kit/gestures';
 import { Unanswered } from '../../kit/readings';
 import { Skeleton, SkeletonRows } from '../../kit/skeleton';
-import { Button, Dialog, StateSign, Switch } from '../../ui/index';
+import { Button, Dialog, StateMark, Switch } from '../../ui/index';
 import { AWAKE_GESTURE_WORDS } from '../../words/words';
 
 import styles from './machine.module.css';
@@ -71,7 +71,7 @@ function AwakeState({ verdict }: { verdict: CoreVerdictVerdict | undefined }) {
     return (
         <div className={styles.awakeState}>
             <p className={styles.awakeSentence}>
-                <StateSign tone={verdict.Tone} />
+                <StateMark said="beside" tone={verdict.Tone} />
                 {verdict.Sentence}
             </p>
             {line === '' ? null : <p className={styles.awakeLine}>{line}</p>}

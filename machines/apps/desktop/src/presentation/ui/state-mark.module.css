@@ -1,0 +1,68 @@
+.mark {
+    flex: none;
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+.mark[data-mark='ok'] {
+    background: var(--ok);
+}
+.mark[data-mark='off'] {
+    box-shadow: inset 0 0 0 1.5px var(--t3);
+}
+.mark[data-mark='bad'] {
+    width: 7.5px;
+    height: 7.5px;
+    border-radius: var(--radius-mark);
+    background: var(--bad);
+}
+.mark[data-mark='busy'] {
+    background: conic-gradient(var(--busy) 0 50%, transparent 0);
+    box-shadow: inset 0 0 0 1.5px var(--busy);
+    animation: pulse 1.4s ease-in-out infinite;
+}
+.mark[data-mark='you'] {
+    width: 7px;
+    height: 7px;
+    border-radius: var(--radius-mark);
+    background: var(--you);
+    transform: rotate(45deg);
+}
+.state {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-8);
+    min-width: 0;
+    white-space: nowrap;
+}
+.before {
+    flex-direction: row-reverse;
+}
+.word {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: var(--text-body);
+    font-weight: var(--weight-regular);
+    color: var(--t2);
+}
+.before,
+.after {
+    flex: none;
+}
+.before .word {
+    max-width: 88px;
+    font-size: var(--text-meta);
+}
+.word[data-mark='you'] {
+    color: var(--you);
+}
+.word[data-mark='bad'] {
+    color: var(--bad);
+}
+@keyframes pulse {
+    50% {
+        opacity: 0.3;
+    }
+}

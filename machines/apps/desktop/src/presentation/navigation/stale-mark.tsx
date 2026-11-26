@@ -2,7 +2,7 @@ import { clock } from '../../domain/format';
 import { SEPARATOR } from '../../domain/separator';
 import { useStale } from '../dependencies/dependencies';
 import { shownOrWithheld } from '../ui/secret';
-import { StateDot } from '../ui/state-dot';
+import { StateMark } from '../ui/state-mark';
 import { ownState } from '../words/shown';
 import { asOfWord } from '../words/words';
 
@@ -28,7 +28,7 @@ export function StaleMark() {
         <span className={styles.stale}>
             <span aria-label={named} role="status">
                 <span aria-hidden="true">
-                    <StateDot tone={tone} word={named} />
+                    <StateMark said="name" tone={tone} word={named} />
                 </span>
             </span>
             <span className={styles.asOf}>{asOfWord(clock(oldest) ?? '')}</span>

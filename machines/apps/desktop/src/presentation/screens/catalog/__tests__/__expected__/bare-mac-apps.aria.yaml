@@ -27,7 +27,9 @@
   - region "Apps":
     - paragraph: Package Managers 8
     - button "cocoapods Dependency manager for iOS and macOS projects not installed"
-    - button "github-release manager 1 of 1 machine Commands from a project's GitHub releases, fetched and checked by Machines itself installed"
+    - button "github-release manager 1 of 1 machine Commands from a project's GitHub releases, fetched and checked by Machines itself installed":
+      - text: github-release manager 1 of 1 machine Commands from a project's GitHub releases, fetched and checked by Machines itself
+      - img "installed"
     - button "homebrew manager macOS package manager not installed"
     - button "mas manager Mac App Store command line not installed"
     - 'button "mise manager Polyglot runtime manager: node, go, python, bun, rust, java not installed"'

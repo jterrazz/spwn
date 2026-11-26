@@ -12,5 +12,10 @@ export function Missing({ children }: { children: ReactNode }) {
 }
 
 export function MissingMark({ children = 'not given yet' }: { children?: string }) {
-    return <span className={styles.mark}>{children}</span>;
+    return (
+        <span className={styles.mark}>
+            <span aria-hidden="true">—</span>
+            <span>{children}</span>
+        </span>
+    );
 }

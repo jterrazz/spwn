@@ -89,8 +89,8 @@ describe('catalog item', () => {
                 const changes = region('What it changes');
                 await visitor.see(heading('autologin setting'));
 
-                // Then - it can be undone, and each file says which part is station's
-                await visitor.see(within(applied, content('can be undone')));
+                // Then - each file says which part is station's
+                await visitor.see(applied);
                 await visitor.see(
                     within(
                         changes,
@@ -102,6 +102,9 @@ describe('catalog item', () => {
                 );
             },
         );
+
+        // And - that it can be undone is calm, a mark named by its word
+        expect(result.html.text).toContain('aria-label="can be undone"');
         expect(result.errors.text).toBe('');
     });
 

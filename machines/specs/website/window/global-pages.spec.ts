@@ -14,7 +14,7 @@ import { describe, expect, test } from 'vitest';
 import { PINNED, website } from '../website.specification.js';
 
 const column = navigation('Column');
-const ENGINE = within(column, button('Engine', { exact: false }));
+const ENGINE = within(column, within(region('Engine state'), button('Engine', { exact: false })));
 const path = navigation('Path');
 const THIS_MAC = region('macbook-pro');
 const MINI = region('mac-mini');
@@ -51,11 +51,15 @@ describe('global pages', () => {
                     within(THIS_MAC, heading('The latest release is not known yet.')),
                 );
                 await visitor.see(within(THIS_MAC, button('Check now')));
-                await visitor.see(within(MINI_ENGINE, content('running')));
                 await visitor.see(within(MINI_ENGINE, content('v4.0.0')));
                 await visitor.see(within(AIR_ENGINE, content('asleep')));
                 await visitor.gone(within(MINI, button('Check now')));
             });
+
+        // And - the Mac mini's running engine is calm, a mark named by its word
+        expect(result.html.text).toMatch(
+            />mac-mini<\/span>(?:(?!<section)[^])*<section aria-label="Engine"(?:(?!<\/section>)[^])*?aria-label="running"/u,
+        );
         expect(result.errors.text).toBe('');
     });
 

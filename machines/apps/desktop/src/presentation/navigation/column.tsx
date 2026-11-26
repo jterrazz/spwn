@@ -4,7 +4,7 @@ import { useEffect, useSyncExternalStore } from 'react';
 import { needsYou } from '../../domain/overview/upkeep';
 import type { Reading } from '../dependencies/dependencies';
 import { Icon } from '../ui/icon';
-import { IconButton, NavItem, StateDot } from '../ui/index';
+import { IconButton, NavItem, StateMark } from '../ui/index';
 import { wordOf } from '../words/engine-words';
 import { needState } from '../words/shown';
 import type { Carried } from './carried';
@@ -85,7 +85,7 @@ function Needs({ needs, go, routeOfNeed }: Pick<ColumnProps, 'go' | 'needs' | 'r
                     label={need.Text}
                     lead={
                         <span aria-hidden="true" className={styles.need}>
-                            <StateDot {...needState(need)} />
+                            <StateMark said="name" {...needState(need)} />
                         </span>
                     }
                     onSelect={() => {

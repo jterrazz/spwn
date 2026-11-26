@@ -2,9 +2,5 @@
 - dialog "Needs":
   - listbox "Needs":
     - group "Needs you":
-      - option "neo waits for your yes Waiting":
-        - text: neo waits for your yes
-        - img "Waiting"
-      - option "port 5000 is reachable outside the tailnet Exposed":
-        - text: port 5000 is reachable outside the tailnet
-        - img "Exposed"
+      - option "neo waits for your yes Waiting"
+      - option "port 5000 is reachable outside the tailnet Exposed"

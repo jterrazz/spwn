@@ -1,5 +1,7 @@
 - main:
-  - heading "linux-1 running" [level=2]
+  - heading "linux-1 running" [level=2]:
+    - text: linux-1
+    - img "running"
   - paragraph:
     - text: workspace · ephemeral · on
     - button "macbook-pro"
@@ -17,10 +19,12 @@
     - heading "Sign-ins 5" [level=2]
     - text: gh signed out
     - button "Sign in gh": Sign in
-    - text: npm from the password npm publish signed in
+    - text: npm from the password npm publish
+    - img "signed in"
     - button "Open the password npm publish": npm publish
     - button "Remove npm": Remove
-    - text: claude you@example.com · Max plan · signed in by itself signed in
+    - text: claude you@example.com · Max plan · signed in by itself
+    - img "signed in"
     - button "Sign out claude": Sign out
     - text: wrangler Refused at the provider needs signing in again
     - button "Sign in again wrangler": Sign in again

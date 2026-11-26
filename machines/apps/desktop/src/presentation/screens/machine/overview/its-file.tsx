@@ -6,7 +6,7 @@ import { useRead } from '../../../dependencies/dependencies';
 import { Unanswered } from '../../../kit/readings';
 import { machineRoute } from '../../../navigation/route';
 import type { Route, Tab } from '../../../navigation/route';
-import { Button, Panel, Row, StatePill } from '../../../ui/index';
+import { Button, Panel, Row, StateMark } from '../../../ui/index';
 import { verdictShown } from '../../../words/shown';
 
 import styles from './overview.module.css';
@@ -22,7 +22,7 @@ const FILE_ROWS: readonly { chapter: MachinefileChapter; tab: Tab; about: string
 
 function stateOf(drift: MachinefileDrift | undefined, chapter: MachinefileChapter) {
     const read = (drift?.Chapters ?? []).find((one) => one.Chapter === chapter);
-    return read === undefined ? null : { ...verdictShown(read.Verdict), calm: 'pill' as const };
+    return read === undefined ? null : verdictShown(read.Verdict);
 }
 
 export function FileChapters({
@@ -38,7 +38,7 @@ export function FileChapters({
         <Panel
             action={
                 <span className={styles.fileHead}>
-                    {drift === undefined ? null : <StatePill {...verdictShown(drift.Verdict)} />}
+                    {drift === undefined ? null : <StateMark {...verdictShown(drift.Verdict)} />}
                     <Button
                         onClick={() => {
                             go(machineRoute(vm, 'Packages'));

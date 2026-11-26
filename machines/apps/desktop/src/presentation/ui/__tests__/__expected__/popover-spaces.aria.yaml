@@ -2,8 +2,6 @@
 - dialog "Spaces":
   - listbox "Spaces":
     - group "Spaces":
-      - option "Machine Down" [selected]:
-        - text: Machine
-        - img "Down"
+      - option "Machine Down" [selected]
       - option "Agent" [disabled]
       - option "OS" [disabled]

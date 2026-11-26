@@ -13,15 +13,6 @@ export function rgbOf(hex: string): Rgb {
     };
 }
 
-export function mixed(over: Rgb, tone: Rgb, share: number): Rgb {
-    const part = (under: number, above: number) => under * (1 - share) + above * share;
-    return {
-        blue: part(over.blue, tone.blue),
-        green: part(over.green, tone.green),
-        red: part(over.red, tone.red),
-    };
-}
-
 function linear(channel: number): number {
     const unit = channel / 255;
     return unit <= 0.04045 ? unit / 12.92 : ((unit + 0.055) / 1.055) ** 2.4;

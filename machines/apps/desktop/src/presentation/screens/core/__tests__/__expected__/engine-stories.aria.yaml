@@ -28,31 +28,23 @@
     - button "agent-7f running":
       - text: agent-7f
       - img "running"
-    - button "api stopped":
-      - text: api
-      - img "stopped"
+    - button "api stopped"
     - button "linux-1 running":
       - text: linux-1
       - img "running"
-    - button "linux-2 creating":
-      - text: linux-2
-      - img "creating"
+    - button "linux-2 creating"
     - button "mac-mini's machines" [expanded]
     - button "mac-mini online":
       - text: mac-mini
       - img "online"
-    - button "infra down":
-      - text: infra
-      - img "down"
+    - button "infra down"
     - button "linux-3 running":
       - text: linux-3
       - img "running"
     - button "review-bot running":
       - text: review-bot
       - img "running"
-    - button "macbook-air asleep":
-      - text: macbook-air
-      - img "asleep"
+    - button "macbook-air asleep"
   - group "Library":
     - text: Library
     - button "Apps 6"
@@ -69,13 +61,16 @@
     - heading "The latest release is not known yet." [level=1]
     - region "Engine":
       - heading "Engine" [level=2]
-      - text: Engine v4.0.0 running Latest release Checked 7 Nov, 10:30
+      - text: Engine v4.0.0
+      - img "running"
+      - text: Latest release Checked 7 Nov, 10:30
       - button "Check now"
   - region "mac-mini":
     - heading "mac-mini" [level=2]
     - region "Engine":
       - heading "Engine" [level=2]
-      - text: Engine v4.0.0 running
+      - text: Engine v4.0.0
+      - img "running"
   - region "macbook-air":
     - heading "macbook-air" [level=2]
     - region "Engine":

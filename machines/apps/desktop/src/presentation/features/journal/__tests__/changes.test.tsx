@@ -23,10 +23,10 @@ describe('changes', () => {
         // Then - Today, Last night and Yesterday, each line with its time, who, what moved and on how many machines
         await expect(result.tree).toMatch(file('./__expected__/stories-history.aria.yaml'));
 
-        // And - a held line draws the engine's word as a plain tag, a failed one as a pill
-        expect(result.html.text).toMatch(/<span class="[^"]*_end_[^"]*">held</u);
-        expect(result.html.text).not.toMatch(/_pill_[^>]*>held</u);
-        expect(result.html.text).toMatch(/_pill_[^>]*>failed</u);
+        // And - a held line and a failed one write the engine's word by their mark, and a line done draws neither
+        expect(result.html.text).toMatch(/data-mark="you">held</u);
+        expect(result.html.text).toMatch(/data-mark="bad">failed</u);
+        expect(result.html.text).not.toMatch(/"done"|>done</u);
     });
 
     test("pressing Show older draws the engine's older page below, and goes once no older page is left", async () => {

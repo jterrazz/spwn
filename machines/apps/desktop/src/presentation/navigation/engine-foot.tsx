@@ -2,7 +2,7 @@ import type { EngineReadOutput } from '@jterrazz/station-api';
 
 import { useCore, useReach } from '../dependencies/dependencies';
 import type { Reading } from '../dependencies/dependencies';
-import { StateDot } from '../ui/index';
+import { StateMark } from '../ui/index';
 import { fitFootWord, fitState } from '../words/fit';
 import { coreState, ownState } from '../words/shown';
 import { CORE_FOOT_WORDS } from '../words/words';
@@ -41,7 +41,7 @@ function FootLine({ line, go }: Go & { line: EngineLine }) {
     if (!line.opens) {
         return (
             <div className={styles.foot}>
-                <StateDot tone={line.dot.tone} word={line.dot.word} />
+                <StateMark said="name" tone={line.dot.tone} word={line.dot.word} />
                 <span>{line.said}</span>
             </div>
         );
@@ -55,7 +55,7 @@ function FootLine({ line, go }: Go & { line: EngineLine }) {
             type="button"
         >
             <span aria-hidden="true">
-                <StateDot tone={line.dot.tone} word={line.dot.word} />
+                <StateMark said="name" tone={line.dot.tone} word={line.dot.word} />
             </span>
             <span>{line.said}</span>
         </button>
@@ -91,7 +91,7 @@ export function EngineMark({ engine, quiet, go }: EngineSaid & Go) {
     }
     const dot = (
         <span aria-hidden="true">
-            <StateDot tone={line.dot.tone} word={line.dot.word} />
+            <StateMark said="name" tone={line.dot.tone} word={line.dot.word} />
         </span>
     );
     if (!line.opens) {

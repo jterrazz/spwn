@@ -9,12 +9,12 @@ import type { ReactNode } from 'react';
 
 import { clock } from '../../../domain/format';
 import { findMachine, targetOf } from '../../../domain/machines/machines';
+import type { Tone } from '../../../domain/tone';
 import { useGesture } from '../../dependencies/use-gesture';
 import { GestureButton, GestureRow } from '../../kit/gestures';
 import type { Route } from '../../navigation/route';
-import { Row, StatePill } from '../../ui/index';
+import { Row, StateMark } from '../../ui/index';
 import type { RowProps } from '../../ui/row';
-import { isCalm } from '../../ui/state-pill';
 import { updateInputOf } from '../../words/provisional';
 import { engineShown } from '../../words/shown';
 import { changeOf, endOf, routeOfLine } from './model';
@@ -27,13 +27,17 @@ type Go = (to: Route) => void;
 
 type LineProps = { line: CoreJournalReadLine; macs: readonly MachinesMacView[]; go: Go };
 
+// invariant: a past event that went well draws nothing: a held or failed line draws its mark and its word.
+function wentWrong(tone: Tone): boolean {
+    return tone === 'warn' || tone === 'bad';
+}
+
 function Tail({ line }: { line: CoreJournalReadLine }) {
     const shown = engineShown('CoreJournalOutcome', line.Outcome);
     const end = endOf(line);
     return (
         <span className={styles.tail}>
-            {isCalm(shown.tone) || shown.tone === 'warn' ? null : <StatePill {...shown} />}
-            {shown.tone === 'warn' ? <span className={styles.end}>{shown.word}</span> : null}
+            {wentWrong(shown.tone) ? <StateMark said="after" {...shown} /> : null}
             {end === '' ? null : <span className={styles.end}>{end}</span>}
         </span>
     );

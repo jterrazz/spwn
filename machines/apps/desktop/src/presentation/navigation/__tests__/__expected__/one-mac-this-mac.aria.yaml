@@ -33,7 +33,9 @@
   - region "Engine state":
     - button "Engine running · dev"
 - main:
-  - heading "macbook-pro online" [level=2]
+  - heading "macbook-pro online" [level=2]:
+    - text: macbook-pro
+    - img "online"
   - paragraph: This Mac · Engine running. Sleeps normally.
   - button "Keep macbook-pro awake": Awake…
   - button "New machine on macbook-pro": New machine

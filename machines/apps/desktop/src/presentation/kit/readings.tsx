@@ -8,7 +8,7 @@ import { SEPARATOR } from '../../domain/separator';
 import type { Tone } from '../../domain/tone';
 import { unlessCommand } from '../ui/command';
 import { CopyButton } from '../ui/copy-button';
-import { asSentence, Button, capitalised, Missing, Panel, StatePill, Verdict } from '../ui/index';
+import { asSentence, Button, capitalised, Missing, Panel, StateMark, Verdict } from '../ui/index';
 import { shownOrWithheld } from '../ui/secret';
 import { failedState } from '../words/failed';
 import { ownState, verdictShown } from '../words/shown';
@@ -106,7 +106,7 @@ export function Unanswered({
     if (size === 'panel') {
         return (
             <div className={styles.unanswered}>
-                <StatePill tone={said.tone} word={said.word} />
+                <StateMark tone={said.tone} word={said.word} />
                 <span className={styles.said}>
                     {asSentence(said.message)}
                     {said.hint === '' ? null : <span className={styles.hint}>{said.hint}</span>}
@@ -161,7 +161,7 @@ export function Unknown({ error, onDismiss }: { error: EngineError; onDismiss: (
     return (
         <span className={styles.outcome}>
             <span className={styles.unanswered}>
-                <StatePill {...ownState('unknown')} />
+                <StateMark {...ownState('unknown')} />
                 <span className={styles.said}>
                     {UNKNOWN_SAID}
                     <span className={styles.hint}>{shownOrWithheld(error.message)}</span>

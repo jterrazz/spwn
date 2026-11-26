@@ -1,5 +1,7 @@
 - main:
-  - heading "mac-mini online" [level=2]
+  - heading "mac-mini online" [level=2]:
+    - text: mac-mini
+    - img "online"
   - paragraph: Engine running. Never sleeps.
   - button "Keep mac-mini awake": Awake…
   - dialog "Keep mac-mini awake":
@@ -36,7 +38,9 @@
     - text: 4 macOS 24 infra 36 free
   - region "Its machines":
     - heading "Its machines" [level=2]
-    - button "infra by you healthy"
+    - button "infra by you healthy":
+      - text: infra by you
+      - img "healthy"
   - region "Packages":
     - heading "Packages" [level=2]
     - text: not found no Machinefile named mac-mini.

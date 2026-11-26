@@ -24,9 +24,7 @@
     - button "macbook-pro online":
       - text: macbook-pro
       - img "online"
-    - button "api stopped":
-      - text: api
-      - img "stopped"
+    - button "api stopped"
     - button "linux-1 running":
       - text: linux-1
       - img "running"
@@ -52,7 +50,7 @@
     - heading "macbook-pro" [level=2]
     - heading "This Mac runs the latest release." [level=1]
     - region "Update":
-      - text: updated
+      - img "updated"
       - heading "Updated." [level=1]
       - paragraph: The installer is done and the engine restarted. The head of this page is what it says now.
       - log "The installer's output": "Detecting the newest release... Version: v0.22.0 Downloading spwn_darwin_arm64.tar.gz... Downloading station-darwin-arm64... ✓ spwn v0.22.0 in /Users/you/.local/bin, also as spwn-agents ✓ station v0.22.0 in /Users/you/.local/bin, also as spwn-machines"
@@ -60,10 +58,13 @@
       - button "Done"
     - region "Engine":
       - heading "Engine" [level=2]
-      - text: Engine v0.21.0 running Latest release Checked 4 Nov, 09:00
+      - text: Engine v0.21.0
+      - img "running"
+      - text: Latest release Checked 4 Nov, 09:00
       - button "Check now"
   - region "mac-mini":
     - heading "mac-mini" [level=2]
     - region "Engine":
       - heading "Engine" [level=2]
-      - text: Engine dev running
+      - text: Engine dev
+      - img "running"

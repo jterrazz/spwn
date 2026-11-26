@@ -5,7 +5,7 @@ import { SEPARATOR } from '../../domain/separator';
 import { FleetRegister, Glow } from './fleet-register';
 import type { FleetMac, FleetState } from './fleet-register';
 import { Panel } from './panel';
-import { StateSign } from './state-sign';
+import { StateMark } from './state-mark';
 
 import styles from './fleet-board.module.css';
 
@@ -32,9 +32,8 @@ const CARD_LOOKS = {
 
 function Said({ state }: { state: FleetState }) {
     return (
-        <span className={`${styles.said} ${styles[state.tone]}`}>
-            <StateSign tone={state.tone} />
-            {state.word}
+        <span className={styles.said}>
+            <StateMark tone={state.tone} word={state.word} />
         </span>
     );
 }

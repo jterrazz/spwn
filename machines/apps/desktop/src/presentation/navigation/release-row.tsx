@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 
 import { useOffers, useRead, useWindowUpdate } from '../dependencies/dependencies';
-import { StateDot } from '../ui/index';
+import { StateMark } from '../ui/index';
 import { ownState, verdictShown } from '../words/shown';
 import type { Shown } from '../words/shown';
 import { RELEASE_WORDS, WINDOW_RELEASE_WORDS, windowAvailableWord } from '../words/words';
@@ -17,7 +17,7 @@ function Foot({ go, dot, said, verb }: FootProps) {
     return (
         <button className={styles.release} onClick={go} type="button">
             <span aria-hidden="true">
-                <StateDot {...dot} />
+                <StateMark said="name" {...dot} />
             </span>
             <span className={styles.releaseText}>{said}</span>
             <span className={styles.releaseGo}>{verb}</span>

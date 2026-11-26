@@ -159,7 +159,7 @@ describe('ConfirmDialog', () => {
             />linux-1 and everything on its disk are deleted for good\.<\/p>/u,
         );
         expect(result.html.text).toMatch(
-            /<p class="[^"]*held[^"]*"><svg[^>]*class="[^"]*warn[^"]*"[\s\S]*?<\/svg><span>It is held by its lot, by studio-os-43: work may be in progress\.<\/span><\/p>/u,
+            /<p class="[^"]*held[^"]*"><span aria-hidden="true" class="[^"]*" data-mark="you"><\/span><span>It is held by its lot, by studio-os-43: work may be in progress\.<\/span><\/p>/u,
         );
     });
 

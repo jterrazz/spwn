@@ -73,7 +73,11 @@ describe('machine', () => {
     test("a Mac that holds its file and one whose file asks more each say the engine's verdict of the file it follows", async () => {
         // Given - This Mac's Overview over machinefile-kept, then over machinefile-differs
         const kept = await component.render(overviewOver('machinefile-kept'), async (visitor) => {
-            await visitor.see(content('Matches macbook-pro.'));
+            await visitor.see(
+                button(
+                    'Follows macbook-pro its apps, settings and the values you set are read in Machine files Matches macbook-pro.',
+                ),
+            );
         });
         const differs = await component.render(
             overviewOver('machinefile-differs'),
@@ -169,6 +173,6 @@ describe('machine', () => {
         );
 
         // Then - running and its uptime share the state's place, as the engine's word and "up 2 h"
-        expect(result.html.text).toContain('>running · up 2 h<');
+        expect(result.html.text).toContain('aria-label="running · up 2 h"');
     });
 });

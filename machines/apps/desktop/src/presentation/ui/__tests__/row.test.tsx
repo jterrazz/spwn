@@ -16,14 +16,6 @@ function leftOf(text: string): number {
     );
 }
 
-function heightOf(text: string): number {
-    return (
-        [...document.querySelectorAll('span')]
-            .find((one) => one.textContent === text)
-            ?.getBoundingClientRect().height ?? 0
-    );
-}
-
 describe('Row', () => {
     test('a row that opens keeps its link a gesture of its own, named apart', async () => {
         // Given - an account row that opens, its machine as a chip in its link slot
@@ -75,24 +67,17 @@ describe('Row', () => {
         expect(result.html.text).not.toContain(`title="${SHORT}"`);
     });
 
-    test('a calm state asked as a pill is a plain pill, and a quiet word otherwise', async () => {
-        // Given - two rows whose state is calm, one asking for a pill
-        let heights = { pill: 0, word: 0 };
-        await component.render(
+    test('a calm state is its mark alone, named by its word, and a state at rest writes its word', async () => {
+        // Given - a row whose state is calm, and one whose state is at rest
+        const result = await component.render(
             <div style={{ width: 640 }}>
-                <Row state={{ calm: 'pill', tone: 'ok', word: 'Matches' }} title="Packages" />
                 <Row state={{ tone: 'ok', word: 'Present' }} title="mise" />
+                <Row state={{ tone: 'plain', word: 'Stopped' }} title="api" />
             </div>,
-            async (visitor) => {
-                // When - both are drawn
-                await visitor.see(content('Present'));
-                heights = { pill: heightOf('Matches'), word: heightOf('Present') };
-            },
         );
 
-        // Then - the pill stands 22 px, the quiet word only its line
-        expect(heights.pill).toBe(22);
-        expect(heights.word).toBeLessThan(22);
+        // Then - the calm word is the mark's name, never its text, and the word at rest is text
+        expect(result.tree.text).toBe('- text: mise\n- img "Present"\n- text: api Stopped');
     });
 
     test('a nested row moves its mark and name in, and keeps its cells in their columns', async () => {

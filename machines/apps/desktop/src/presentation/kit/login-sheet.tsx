@@ -9,7 +9,7 @@ import type { Found } from '../../domain/machines/machines';
 import { useReread } from '../dependencies/dependencies';
 import { useGesture } from '../dependencies/use-gesture';
 import { CopyButton } from '../ui/copy-button';
-import { AppIcon, Button, Dialog, Screen, StateDot, StatePill } from '../ui/index';
+import { AppIcon, Button, Dialog, Screen, StateMark } from '../ui/index';
 import { detailOf, stepHeadingOf } from '../words/engine-words';
 import { engineShown } from '../words/shown';
 import { GestureButton, GestureOutcome } from './gestures';
@@ -25,7 +25,7 @@ function Status({ line, left }: { line: string; left: string }) {
     return (
         <p className={styles.status}>
             <span>
-                <StateDot {...engineShown('AccountsProgramState', 'waiting')} /> {line}
+                <StateMark said="name" {...engineShown('AccountsProgramState', 'waiting')} /> {line}
             </span>
             <span>
                 expires in <span className={styles.left}>{left}</span>
@@ -140,7 +140,7 @@ function Expired({ step, error }: { step: AccountsStep; error: EngineError }) {
                 <span className={`${styles.code} ${styles.struck}`}>
                     {step.Code ?? step.Site ?? ''}
                 </span>
-                <StatePill {...engineShown('CoreFailCode', 'login.expired')} />
+                <StateMark {...engineShown('CoreFailCode', 'login.expired')} />
             </div>
             <p className={styles.said}>{error.message}</p>
         </div>

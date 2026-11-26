@@ -125,7 +125,7 @@ export function Followers({ view, go }: { view: MachinefileFileView; go: (to: Ro
                                 appliedOf(follower.Applied),
                             ])}
                             size="slim"
-                            state={{ ...followerState(follower), calm: 'pill' }}
+                            state={followerState(follower)}
                             title={follower.Machine}
                         />
                     ))}

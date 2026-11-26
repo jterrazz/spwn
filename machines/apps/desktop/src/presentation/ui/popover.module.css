@@ -173,15 +173,6 @@
     font-size: var(--text-meta);
     color: var(--t3);
 }
-.word {
-    flex: none;
-    max-width: 88px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    font-size: var(--text-meta);
-    color: var(--t3);
-}
 .none {
     margin: 0;
     padding: var(--space-12) var(--space-8);

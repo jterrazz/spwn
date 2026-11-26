@@ -1,6 +1,6 @@
 import type { UpdateFlow, UpdateState } from '../../../application/use-cases/update-flow';
 import { START_LINE } from '../../../domain/core';
-import { Button, StatePill } from '../../ui/index';
+import { Button, StateMark } from '../../ui/index';
 import { shownOrWithheld } from '../../ui/secret';
 import { updateState } from '../../words/shown';
 import { Acts, Head, Output, Progress, Status } from './core-parts';
@@ -118,7 +118,7 @@ export function UpdatePanel({
             className={wide ? `${styles.panel} ${styles.wide}` : styles.panel}
         >
             <span className={styles.pill}>
-                <StatePill {...updateState(state.kind)} />
+                <StateMark {...updateState(state.kind)} />
             </span>
             <Head title={title}>{lead}</Head>
             {install.length > 0 ? <Output label={INSTALLER} lines={install} /> : null}

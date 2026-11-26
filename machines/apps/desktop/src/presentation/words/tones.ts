@@ -55,6 +55,9 @@ export const AWAKE_ON_TONE = 'ok' satisfies Tone;
 
 export const REVERSIBLE_TONE: Tone = 'ok';
 
+// value: a file's verdict that raises no flag on its tab: every machine matches it, or none follows it to compare.
+export const UNFLAGGED_FILE_TONES: ReadonlySet<Tone> = new Set(['ok', 'plain']);
+
 // outside: a grey of the neutral ramp is ui/'s type (ui/bar.tsx's Step), which words/ never imports: these are the
 // outside: four the Disk bar's kinds take, named by the token that draws them, and the bar checks each it is handed.
 export type DiskStep = 's3' | 't2' | 't3' | 't4';

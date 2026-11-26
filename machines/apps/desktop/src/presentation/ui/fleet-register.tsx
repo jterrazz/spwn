@@ -5,8 +5,7 @@ import { Button } from './button';
 import type { Identity } from './identity';
 import { MemoryTrack } from './memory-track';
 import type { TrackSegment } from './memory-track';
-import { isCalm } from './state-pill';
-import { StateSign } from './state-sign';
+import { StateMark } from './state-mark';
 
 import styles from './fleet-register.module.css';
 
@@ -89,8 +88,8 @@ function MacLine({ mac, onOpenMac }: { mac: FleetMac; onOpenMac: (name: string) 
                 </button>
             </span>
             <span />
-            <span className={`${styles.state} ${styles[mac.state.tone]}`}>
-                {isCalm(mac.state.tone) ? null : mac.state.word}
+            <span className={styles.state}>
+                <StateMark tone={mac.state.tone} word={mac.state.word} />
             </span>
             <span className={styles.figure}>{mac.cpu}</span>
             <Track
@@ -149,9 +148,8 @@ function MachineLine({ machine, measured, opened, onToggle, onOpen }: MachineLin
                     </button>
                 </span>
                 <span className={styles.what}>{machine.purpose}</span>
-                <span className={`${styles.state} ${styles[machine.state.tone]}`}>
-                    <StateSign tone={machine.state.tone} />
-                    {machine.state.word}
+                <span className={styles.state}>
+                    <StateMark tone={machine.state.tone} word={machine.state.word} />
                 </span>
                 <span className={styles.figure}>{machine.cpu}</span>
                 <Track name={machine.name} segments={measured ? segmentOf(machine) : undefined} />
