@@ -1157,7 +1157,7 @@ export type EngineHello = {
     abilities?: string[];
     agent?: MachinesAgent;
     book?: string;
-    book_state?: '' | 'changed' | 'unchecked';
+    book_state?: '' | 'changed' | 'unchecked' | 'unreadable' | 'newer';
     calls?: string[];
     executable?: string;
     local_network?: string;
@@ -1226,7 +1226,7 @@ export type EnginePagesIn = {
 export type EngineReading = {
     Agent: MachinesAgent;
     AwakeUntil: string | null;
-    BookState: '' | 'changed' | 'unchecked';
+    BookState: '' | 'changed' | 'unchecked' | 'unreadable' | 'newer';
     State: 'running' | 'stopped' | 'not-installed';
     Station: string;
     Stopped: EngineStopMark;

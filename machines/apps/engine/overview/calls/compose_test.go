@@ -15,6 +15,8 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/core/section"
 	"github.com/jterrazz/studio-station/apps/engine/core/store"
+	"github.com/jterrazz/studio-station/apps/engine/devices"
+	"github.com/jterrazz/studio-station/apps/engine/engine"
 	enginecalls "github.com/jterrazz/studio-station/apps/engine/engine/calls"
 	machinefilecalls "github.com/jterrazz/studio-station/apps/engine/machinefile/calls"
 	"github.com/jterrazz/studio-station/apps/engine/machines"
@@ -117,6 +119,16 @@ func TestARefusedFileOfTheOwnerIsANeedWithTheFileToFix(t *testing.T) {
 	}
 	if none := summarize(head, nil, nil, nil, nil, &machines.RollUp{}, nil).Needs; len(none) != 0 {
 		t.Errorf("no refused file, yet needs %+v", none)
+	}
+}
+
+func TestADeviceBookItsEngineCannotReadIsARedNeedInItsOwnWords(t *testing.T) {
+	head := overview.Head{Name: "laptop", Kind: machine.Computer, ThisMac: true}
+	for state, text := range map[engine.BookState]string{engine.BookUnreadable: devices.CannotRead, engine.BookNewer: devices.ByNewer} {
+		_, got := engineOf(head, &engine.Reading{State: machines.EngineRunning, BookState: state})
+		if len(got) != 1 || got[0].Text != text || got[0].Severity != finding.Broken || got[0].Urgency != finding.Red || got[0].Subject != overview.DevicesSubject {
+			t.Errorf("a book %q gives %+v; want one red need saying %q", state, got, text)
+		}
 	}
 }
 

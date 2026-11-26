@@ -62,7 +62,7 @@ func New(files Files, at string, anchor contract.Anchor, peer Peer) *Store {
 }
 
 func (s *Store) Sole(ctx context.Context) {
-	book, sum, err := s.book()
+	book, sum, _, err := s.book()
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.sole = true
@@ -82,14 +82,14 @@ func (s *Store) Sole(ctx context.Context) {
 }
 
 func (s *Store) Held(ctx context.Context) (devices.Head, devices.Standing, bool) {
-	book, sum, err := s.book()
+	book, sum, found, _ := s.book()
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if !s.sole {
 		return devices.Head{}, devices.Kept, false
 	}
 	_, _ = s.settled(ctx, sum)
-	return s.hold.Head, s.hold.Standing(book, err != nil), true
+	return s.hold.Head, s.hold.Standing(book, found), true
 }
 
 type file struct {
@@ -98,9 +98,9 @@ type file struct {
 }
 
 func (s *Store) Read(ctx context.Context) (devices.Book, devices.Head, error) {
-	book, sum, err := s.book()
+	book, sum, found, err := s.book()
 	if err != nil {
-		if head, ok := s.past(); ok {
+		if head, ok := s.past(); ok && found == devices.NotABook {
 			return devices.Book{Devices: []devices.Device{}}, head, nil
 		}
 		return devices.Book{}, devices.Head{}, err
@@ -112,26 +112,30 @@ func (s *Store) Read(ctx context.Context) (devices.Book, devices.Head, error) {
 	return book, anchored, nil
 }
 
-func (s *Store) book() (devices.Book, string, error) {
+func (s *Store) book() (devices.Book, string, devices.Found, error) {
 	data, err := s.files.ReadFile(s.at)
 	if errors.Is(err, fs.ErrNotExist) {
-		return devices.Book{Devices: []devices.Device{}}, devices.Sum(nil), nil
+		return devices.Book{Devices: []devices.Device{}}, devices.Sum(nil), devices.ABook, nil
 	}
 	if err != nil {
-		return devices.Book{}, "", &store.UnreadableError{Path: s.at, Cause: err}
+		return devices.Book{}, "", devices.Unread, &store.UnreadableError{Path: s.at, Cause: err}
 	}
 	sum := devices.Sum(data)
 	var f file
 	if err := json.Unmarshal(data, &f); err != nil {
-		return devices.Book{}, sum, &store.UnreadableError{Path: s.at, Cause: err, Line: store.LineOf(data, err)}
+		return devices.Book{}, sum, devices.NotABook, &store.UnreadableError{Path: s.at, Cause: err, Line: store.LineOf(data, err)}
 	}
 	if err := store.Current(f.V, Version); err != nil {
-		return devices.Book{}, sum, &store.UnreadableError{Path: s.at, Cause: err}
+		found := devices.Unread
+		if store.OnlyNewer(err) != nil {
+			found = devices.ANewer
+		}
+		return devices.Book{}, sum, found, &store.UnreadableError{Path: s.at, Cause: err}
 	}
 	if f.Devices == nil {
 		f.Devices = []devices.Device{}
 	}
-	return f.Book, sum, nil
+	return f.Book, sum, devices.ABook, nil
 }
 
 func (s *Store) settled(ctx context.Context, sum string) (devices.Head, error) {
@@ -220,9 +224,11 @@ func (s *Store) Change(ctx context.Context, edit func(*devices.Book) error) erro
 }
 
 func (s *Store) past() (devices.Head, bool) {
-	// value: the engine past its wait reads a book it cannot read as an
-	// empty one under the head it holds: it trusts nothing of it, and the
-	// next change starts from an empty book and writes past the file.
+	// value: the engine past its wait reads a file whose bytes do not
+	// parse as a book as an empty one under the head it holds: it trusts
+	// nothing of it, and the next change starts from an empty book and
+	// writes past the file; a file it cannot read, or a book of another
+	// version, stays refused, so nothing is written over it.
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	return s.hold.Head, s.sole && s.hold.State != devices.Awaiting

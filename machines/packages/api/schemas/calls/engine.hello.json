@@ -19,7 +19,9 @@
           "enum": [
             "",
             "changed",
-            "unchecked"
+            "unchecked",
+            "unreadable",
+            "newer"
           ],
           "type": "string"
         },

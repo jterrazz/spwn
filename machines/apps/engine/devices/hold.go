@@ -15,6 +15,25 @@ const (
 	Kept      Standing = ""
 	Changed   Standing = "changed"
 	Unchecked Standing = "unchecked"
+	// value: the book's file the engine cannot read at all, its permissions
+	// or its disk refusing, or holding a version of the book this Spwn does
+	// not read; or one a newer Spwn wrote. Either is refused, never read as
+	// empty, so nothing is written over it.
+	Unreadable Standing = "unreadable"
+	Newer      Standing = "newer"
+)
+
+type Found string
+
+const (
+	// value: what reading the book's file met: a book of this version, an
+	// absent file included; bytes that do not parse as a book; a book a
+	// newer Spwn wrote; or a file it could not read, or a version of the
+	// book it does not know.
+	ABook    Found = ""
+	NotABook Found = "not-a-book"
+	ANewer   Found = "newer"
+	Unread   Found = "unread"
 )
 
 type HoldState string
@@ -76,7 +95,15 @@ func (h Hold) Settle(now string, anchored Head) Hold {
 	return Keep(anchored)
 }
 
-func (h Hold) Standing(b Book, unreadable bool) Standing {
+func (h Hold) Standing(b Book, found Found) Standing {
+	switch found {
+	case ANewer:
+		return Newer
+	case Unread:
+		return Unreadable
+	case ABook, NotABook:
+	}
+	unreadable := found == NotABook
 	switch h.State {
 	case Awaiting:
 		// invariant: a readable book with no device waiting for its check

@@ -32,6 +32,18 @@ const (
 	NotCheckedRepair = "unlock this Mac's login keychain; the book is checked again on its own"
 )
 
+// value: the finding a book's file the engine cannot read at all is, and
+// the one a newer Spwn's book is: each refused, never read as empty, so
+// nothing is written over it; neither is repaired by adding again.
+const (
+	CannotRead       = "The device book cannot be read"
+	CannotReadWhy    = "the engine could not read its file: its permissions, the disk, or a version of the book Spwn never writes; nothing of it is trusted, no VM is given its keys, and nothing is written over it"
+	CannotReadRepair = "run station devices to see what refused it, then make the file readable by you again"
+	ByNewer          = "The device book was written by a newer Spwn"
+	ByNewerWhy       = "this Spwn does not know its version, so it reads none of it and writes nothing over it; no VM is given its keys"
+	ByNewerRepair    = "update station on this Mac; the book is read again once its engine restarts"
+)
+
 func Refusal(t fail.Type, code fail.Code, subject string) *fail.Error {
 	return fail.New(t, code, subject, nil)
 }

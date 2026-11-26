@@ -197,6 +197,7 @@ func TestTheEngineRunsWithItsBookSole(t *testing.T) {
 func TestABooksStandingCrossesTheWireInItsOwnWords(t *testing.T) {
 	for standing, said := range map[devices.Standing]engine.BookState{
 		devices.Kept: engine.BookKept, devices.Changed: engine.BookChanged, devices.Unchecked: engine.BookUnchecked,
+		devices.Unreadable: engine.BookUnreadable, devices.Newer: engine.BookNewer,
 	} {
 		if engine.BookState(standing) != said {
 			t.Fatalf("the standing %q crosses as %q, want %q", standing, engine.BookState(standing), said)

@@ -210,5 +210,9 @@ func (s *Store) Held(context.Context) (devices.Head, devices.Standing, bool) {
 	}
 	_, _ = held(m)
 	st := m.Store()
-	return m.Engine.Book.Head, m.Engine.Book.Standing(bookOf(st), st.DevicesUnreadable), true
+	found := devices.ABook
+	if st.DevicesUnreadable {
+		found = devices.NotABook
+	}
+	return m.Engine.Book.Head, m.Engine.Book.Standing(bookOf(st), found), true
 }

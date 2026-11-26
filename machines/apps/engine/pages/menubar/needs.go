@@ -110,7 +110,7 @@ func needsOf(r NeedsReading, self string) (needs, upkeep []Need) {
 		upkeep = append(upkeep, w.upkeep(s)...)
 		for _, n := range s.Needs {
 			if n.Section == section.Overview && n.Subject == overview.DevicesSubject {
-				needs = append(needs, w.outside(s.Head.Name, n.Text == devices.NotChecked))
+				needs = append(needs, w.outside(s.Head.Name, n.Text))
 			}
 		}
 	}
@@ -181,12 +181,18 @@ func (w needSaid) exposed(mac string, p ports.Port) Need {
 // invariant: a device book the engine did not write is a need, red: what
 // happened, that nothing of it is trusted, and the gesture that repairs,
 // each device added again with the owner present; one it could not check
-// yet says the keychain to unlock instead, and blames no one.
-func (w needSaid) outside(mac string, unchecked bool) Need {
+// yet says the keychain to unlock instead, and blames no one; one whose
+// file cannot be read, or a newer Spwn wrote, says that, and no add.
+func (w needSaid) outside(mac, text string) Need {
 	key := "devices:" + mac
 	severity, hero, what, detail := finding.Broken, devices.ChangedOutside, "device book changed outside Spwn", []string{devices.ChangedWhy, devices.ChangedRepair}
-	if unchecked {
+	switch text {
+	case devices.NotChecked:
 		severity, hero, what, detail = finding.NeedsALook, devices.NotChecked, "device book not checked yet", []string{devices.NotCheckedWhy, devices.NotCheckedRepair}
+	case devices.CannotRead:
+		hero, what, detail = devices.CannotRead, "device book unreadable", []string{devices.CannotReadWhy, devices.CannotReadRepair}
+	case devices.ByNewer:
+		hero, what, detail = devices.ByNewer, "device book of a newer Spwn", []string{devices.ByNewerWhy, devices.ByNewerRepair}
 	}
 	return Need{
 		Finding: finding.Finding{Machine: machine.Ref{Name: mac}, Section: section.Overview, Severity: severity, Urgency: finding.Red, Subject: overview.DevicesSubject, Text: hero},

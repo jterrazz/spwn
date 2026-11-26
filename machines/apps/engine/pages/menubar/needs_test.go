@@ -238,6 +238,24 @@ func TestADeviceBookNotCheckedYetIsANeedSayingTheKeychainToUnlock(t *testing.T) 
 	}
 }
 
+func TestADeviceBookItsEngineCannotReadIsANeedSayingWhyAndNoAdd(t *testing.T) {
+	for hero, detail := range map[string][]string{
+		devices.CannotRead: {devices.CannotReadWhy, devices.CannotReadRepair},
+		devices.ByNewer:    {devices.ByNewerWhy, devices.ByNewerRepair},
+	} {
+		r := needsFleet()
+		r.Overviews[0].Needs = []overview.Need{{Machine: needsPro, Section: section.Overview, Broken: true, Severity: finding.Broken, Subject: overview.DevicesSubject, Text: hero}}
+		needs, _ := needsOf(r, needsPro)
+		i := slices.IndexFunc(needs, func(n Need) bool { return n.Subject == "This Mac" && n.Hero == hero })
+		if i < 0 {
+			t.Fatalf("needs %d; want %q among what needs you", len(needs), hero)
+		}
+		if n := needs[i]; !slices.Equal(n.Detail, detail) || n.Finding.Severity != finding.Broken {
+			t.Errorf("%q says %q, %v; want %q, broken", hero, n.Detail, n.Finding.Severity, detail)
+		}
+	}
+}
+
 func TestADeviceBookChangedOutsideSpwnIsANeedSayingWhatIsTrustedAndTheGestureThatRepairs(t *testing.T) {
 	r := needsFleet()
 	r.Overviews[0].Needs = []overview.Need{{Machine: needsPro, Section: section.Overview, Broken: true, Severity: finding.Broken, Subject: overview.DevicesSubject, Text: devices.ChangedOutside}}

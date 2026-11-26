@@ -285,6 +285,16 @@ func engineOf(head overview.Head, r *engine.Reading) (overview.Engine, []finding
 		// to unlock.
 		return overview.EngineRunning, []finding.Finding{{Machine: mac, Section: section.Overview, Severity: finding.NeedsALook, Urgency: finding.Red, Subject: overview.DevicesSubject,
 			Text: devices.NotChecked, Fix: finding.Fix{Command: "station devices"}}}
+	case engine.BookUnreadable, engine.BookNewer:
+		// invariant: a book's file its engine cannot read, or a newer
+		// Spwn's book, is a need too, red, in its own words: adding again
+		// repairs neither.
+		text := devices.CannotRead
+		if r.BookState == engine.BookNewer {
+			text = devices.ByNewer
+		}
+		return overview.EngineRunning, []finding.Finding{{Machine: mac, Section: section.Overview, Severity: finding.Broken, Urgency: finding.Red, Subject: overview.DevicesSubject,
+			Text: text, Fix: finding.Fix{Command: "station devices"}}}
 	case engine.BookKept:
 	}
 	return overview.EngineRunning, nil
