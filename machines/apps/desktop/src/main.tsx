@@ -11,6 +11,7 @@ import { startRoute } from './presentation/navigation/route';
 import type { Route } from './presentation/navigation/route';
 import { recalled, remember } from './presentation/navigation/route-memory';
 import type { Memory } from './presentation/navigation/route-memory';
+import { markVisibility } from './presentation/navigation/visibility';
 import { Window } from './presentation/navigation/window';
 import { PAGES } from './presentation/screens/registry';
 
@@ -60,6 +61,7 @@ wearDress(
     placeOf(inTauri, navigator.userAgent, proof && query.get('chrome') === 'overlay'),
     globalThis,
 );
+markVisibility(document.documentElement, document);
 
 const root = document.querySelector('#root');
 if (root) {
