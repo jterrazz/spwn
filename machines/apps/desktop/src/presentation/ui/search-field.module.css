@@ -5,7 +5,7 @@
     align-items: center;
     gap: var(--space-8);
     background: var(--s1);
-    border-radius: var(--radius-well);
+    border-radius: var(--radius-control);
     padding: 0 var(--space-12);
     height: 34px;
     color: var(--t3);

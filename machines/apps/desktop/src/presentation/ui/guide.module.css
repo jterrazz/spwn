@@ -17,7 +17,7 @@
 }
 .act {
     margin: 0;
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
     font-weight: var(--weight-regular);
     line-height: 1.35;
     color: var(--t3);
@@ -38,9 +38,9 @@
     position: relative;
     display: grid;
     grid-template-columns: 18px minmax(0, 1fr);
-    gap: var(--space-10);
+    gap: var(--space-12);
     align-items: start;
-    padding: var(--space-6) 0;
+    padding: var(--space-8) 0;
     font-size: var(--text-body);
     color: var(--t3);
 }
@@ -68,9 +68,9 @@
 }
 .detail {
     display: block;
-    margin-top: var(--space-2);
+    margin-top: var(--space-4);
     font-family: var(--font-mono);
-    font-size: 11px;
+    font-size: var(--text-meta);
     font-weight: var(--weight-regular);
     color: var(--t3);
 }
@@ -118,11 +118,11 @@
     box-shadow: none;
     background: var(--bad);
     color: var(--on-bad);
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
     font-weight: 700;
 }
 .fold {
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
 }
 .fold .knob {
     box-shadow: none;
@@ -134,14 +134,14 @@
 .foot {
     margin: auto 0 0;
     font-family: var(--font-mono);
-    font-size: 11px;
+    font-size: var(--text-meta);
     color: var(--t3);
 }
 .body {
     position: relative;
     display: flex;
     flex-direction: column;
-    gap: var(--space-14);
+    gap: var(--space-16);
     min-width: 0;
     padding: 26px 36px 30px 40px;
 }
@@ -152,15 +152,15 @@
     right: var(--space-16);
     display: flex;
     align-items: center;
-    gap: var(--space-6);
+    gap: var(--space-8);
     height: 26px;
-    padding: 0 var(--space-10);
+    padding: 0 var(--space-12);
     border-radius: var(--radius-pill);
     background: var(--s2);
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
     color: var(--t3);
     cursor: pointer;
-    transition: background var(--motion-hover);
+    transition: background var(--motion-hover) var(--ease);
 }
 .hide:hover {
     color: var(--t1);
@@ -186,7 +186,7 @@
 }
 .headline {
     margin: 0;
-    font-size: var(--text-tab-verdict);
+    font-size: var(--text-headline);
     font-weight: var(--weight-medium);
     line-height: 1.2;
     letter-spacing: -0.012em;
@@ -199,7 +199,7 @@
 .sentence {
     margin: 0;
     max-width: 370px;
-    font-size: 13.5px;
+    font-size: var(--text-body);
     line-height: 1.5;
     color: var(--t3);
 }
@@ -210,7 +210,7 @@
 }
 .track {
     height: 3px;
-    border-radius: 3px;
+    border-radius: var(--radius-mark);
     background: var(--s3);
     overflow: hidden;
 }
@@ -218,14 +218,14 @@
     display: block;
     width: var(--fill);
     height: 100%;
-    border-radius: 3px;
+    border-radius: var(--radius-mark);
     background: var(--t1);
 }
 .figure,
 .live {
     margin: 0;
     font-family: var(--font-mono);
-    font-size: 11.5px;
+    font-size: var(--text-meta);
     color: var(--t3);
 }
 .live {
@@ -256,12 +256,12 @@
     max-width: 380px;
     display: flex;
     align-items: center;
-    gap: var(--space-10);
+    gap: var(--space-12);
     padding: 9px var(--space-12);
-    border-radius: var(--radius-well);
+    border-radius: var(--radius-control);
     background: var(--s0);
     box-shadow: inset 0 0 0 1px var(--hair);
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
     line-height: 1.45;
     color: var(--t2);
 }
@@ -297,7 +297,7 @@
     height: 36px;
     padding: 0 var(--space-16);
     border-radius: var(--radius-pill);
-    font-size: 13.5px;
+    font-size: var(--text-body);
 }
 .quiet {
     all: unset;
@@ -305,10 +305,10 @@
     align-items: center;
     color: var(--t3);
     cursor: pointer;
-    transition: background var(--motion-hover);
+    transition: background var(--motion-hover) var(--ease);
 }
 .actions .quiet {
-    padding: 0 var(--space-6);
+    padding: 0 var(--space-8);
     margin-left: -6px;
     font-size: var(--text-body);
 }

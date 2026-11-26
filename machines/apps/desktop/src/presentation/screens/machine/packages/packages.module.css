@@ -11,7 +11,7 @@
     min-height: 26px;
     border-top: 0;
     color: var(--t3);
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
 }
 .item {
     display: flex;
@@ -21,11 +21,11 @@
 }
 .name {
     color: var(--t1);
-    font-size: var(--text-row);
+    font-size: var(--text-body);
 }
 .muted {
     color: var(--t3);
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -37,7 +37,7 @@
 .said {
     display: flex;
     flex-direction: column;
-    gap: var(--space-2);
+    gap: var(--space-4);
     min-width: 0;
 }
 .foot {
@@ -77,19 +77,19 @@
     padding: var(--space-8) 0 var(--space-12);
 }
 .planHead {
-    padding: var(--space-14) var(--space-4) var(--space-4);
+    padding: var(--space-16) var(--space-4) var(--space-4);
 }
 .planTitle {
     margin: 0;
     line-height: 1.15;
-    font-size: var(--text-tab-verdict);
+    font-size: var(--text-headline);
     font-weight: var(--weight-strong);
     letter-spacing: -0.02em;
 }
 .planLine {
     margin: var(--space-8) 0 0;
     color: var(--t3);
-    font-size: var(--text-row);
+    font-size: var(--text-body);
 }
 .step {
     display: flex;

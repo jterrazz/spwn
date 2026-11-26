@@ -1,8 +1,8 @@
 .switch {
     display: inline-flex;
-    gap: var(--space-2);
+    gap: var(--space-4);
     background: var(--s1);
-    border-radius: var(--radius-well);
+    border-radius: var(--radius-control);
     padding: 3px;
     max-width: 100%;
     overflow-x: auto;
@@ -32,8 +32,8 @@
     display: inline-block;
     width: 7px;
     height: 7px;
-    margin-right: var(--space-6);
-    border-radius: var(--radius-tick);
+    margin-right: var(--space-8);
+    border-radius: var(--radius-mark);
     background: var(--c);
     vertical-align: 1px;
 }
@@ -41,8 +41,8 @@
     display: inline-block;
     width: 6px;
     height: 6px;
-    margin-left: var(--space-6);
-    border-radius: var(--radius-tick);
+    margin-left: var(--space-8);
+    border-radius: var(--radius-mark);
     background: var(--you);
     vertical-align: 1px;
 }
@@ -53,10 +53,10 @@
     border-radius: var(--radius-control);
     color: var(--t3);
     white-space: nowrap;
-    transition: color var(--motion-hover);
+    transition: color var(--motion-hover) var(--ease);
 }
 .filter .option {
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
 }
 .option:hover {
     color: var(--t1);
@@ -72,8 +72,8 @@
 }
 .count {
     color: var(--t3);
-    margin-left: var(--space-6);
-    font-size: var(--text-label);
+    margin-left: var(--space-8);
+    font-size: var(--text-meta);
 }
 .option:disabled {
     cursor: default;
@@ -91,7 +91,7 @@
     display: inline-block;
     width: 10px;
     height: 10px;
-    margin-right: var(--space-6);
+    margin-right: var(--space-8);
     vertical-align: -1px;
     box-sizing: border-box;
     border-radius: 50%;

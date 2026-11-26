@@ -5,23 +5,23 @@
 .cards {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--space-14);
+    gap: var(--space-16);
 }
 .card {
     display: flex;
     flex-direction: column;
-    gap: var(--space-10);
+    gap: var(--space-12);
     padding-bottom: var(--space-12);
 }
 .figure {
-    font-size: var(--text-metric);
+    font-size: var(--text-headline);
     line-height: 1;
     font-weight: var(--weight-strong);
     letter-spacing: -0.02em;
     white-space: nowrap;
 }
 .unit {
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
     font-weight: var(--weight-regular);
     color: var(--t3);
     letter-spacing: 0;
@@ -31,27 +31,27 @@
     display: flex;
     justify-content: space-between;
     color: var(--t3);
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
 }
 .none {
     margin: 0;
     color: var(--t3);
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
     padding-top: var(--space-8);
 }
 .meta {
     color: var(--t3);
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
     text-align: right;
 }
 .busy {
     display: flex;
     align-items: center;
-    gap: var(--space-10);
+    gap: var(--space-12);
 }
 .share {
     font-family: var(--font-mono);
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
     color: var(--t2);
     min-width: 5ch;
     text-align: right;

@@ -2,7 +2,7 @@
     margin: 0;
     padding: var(--space-24);
     background: var(--s1);
-    border-radius: var(--radius-panel);
+    border-radius: var(--radius-tile);
     color: var(--t2);
 }
 .popover {
@@ -13,7 +13,7 @@
     padding: var(--space-12);
     overflow: hidden;
     transform: translateZ(0);
-    border-radius: var(--radius-panel);
+    border-radius: var(--radius-tile);
     background: var(--s0);
 }
 .popoverEnd {
@@ -24,7 +24,7 @@
     box-sizing: border-box;
     cursor: pointer;
     height: 30px;
-    padding: 0 var(--space-10);
+    padding: 0 var(--space-12);
     border-radius: var(--radius-control);
     color: var(--t1);
     font-size: var(--text-body);

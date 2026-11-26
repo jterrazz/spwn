@@ -1,6 +1,6 @@
 .path {
     color: var(--t3);
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;

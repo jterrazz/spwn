@@ -2,11 +2,11 @@
     display: block;
     width: 124px;
     height: 124px;
-    border-radius: var(--radius-well);
+    border-radius: var(--radius-control);
     margin: var(--space-8) 0 var(--space-4);
 }
 .long {
     margin: var(--space-4) 0;
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
     color: var(--t3);
 }

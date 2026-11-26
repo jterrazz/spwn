@@ -29,7 +29,7 @@
     width: 256px;
     display: flex;
     border: 1px solid var(--edge);
-    border-radius: var(--radius-card);
+    border-radius: var(--radius-row);
     background: var(--s1);
     box-shadow: var(--lift-2);
     animation: slide 160ms ease-out;
@@ -45,14 +45,14 @@
     min-width: 0;
     display: flex;
     flex-direction: column;
-    gap: var(--space-14);
-    padding: var(--space-14) var(--space-10) var(--space-10);
+    gap: var(--space-16);
+    padding: var(--space-16) var(--space-12) var(--space-12);
     overflow-y: auto;
 }
 .list {
     display: flex;
     flex-direction: column;
-    gap: var(--space-10);
+    gap: var(--space-12);
     flex: 1 1 0;
     min-height: 160px;
     overflow-y: auto;
@@ -60,19 +60,19 @@
 .group {
     display: flex;
     flex-direction: column;
-    gap: var(--space-2);
+    gap: var(--space-4);
 }
 .list > .group + .group {
-    margin: 0 calc(-1 * var(--space-10));
-    padding: var(--space-10) var(--space-10) 0;
+    margin: 0 calc(-1 * var(--space-12));
+    padding: var(--space-12) var(--space-12) 0;
     border-top: 1px solid var(--hair);
 }
 .caption {
     display: flex;
     justify-content: space-between;
     margin: 0;
-    padding: 0 var(--space-8) var(--space-6);
-    font-size: var(--text-label);
+    padding: 0 var(--space-8) var(--space-8);
+    font-size: var(--text-meta);
     font-weight: var(--weight-medium);
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -85,7 +85,7 @@
 .none {
     margin: 0;
     padding: 0 var(--space-8);
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
     color: var(--t4);
 }
 .need {
@@ -100,7 +100,7 @@
 .mac {
     display: flex;
     flex-direction: column;
-    gap: var(--space-2);
+    gap: var(--space-4);
 }
 .macRow {
     display: flex;
@@ -129,13 +129,13 @@
 .fold:focus-visible {
     outline: 2px solid var(--you);
     outline-offset: -2px;
-    border-radius: var(--radius-tick);
+    border-radius: var(--radius-mark);
 }
 .fold > svg {
     width: 10px;
     height: 10px;
     stroke-width: 1.8;
-    transition: transform var(--motion-hover);
+    transition: transform var(--motion-hover) var(--ease);
 }
 .fold[aria-expanded='true'] > svg {
     transform: rotate(90deg);
@@ -143,7 +143,7 @@
 .vms {
     display: flex;
     flex-direction: column;
-    gap: var(--space-2);
+    gap: var(--space-4);
     margin-left: 20px;
     padding-left: var(--space-8);
     border-left: 1px solid var(--edge);
@@ -174,7 +174,7 @@
     align-items: center;
     gap: var(--space-8);
     height: 32px;
-    padding: 0 var(--space-10);
+    padding: 0 var(--space-12);
     border-radius: var(--radius-control);
     background: var(--s1);
     color: var(--t1);
@@ -198,7 +198,7 @@
 }
 .pin > kbd {
     font: inherit;
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
     color: var(--t3);
 }
 .release {
@@ -207,13 +207,13 @@
     gap: var(--space-8);
     align-items: center;
     margin: var(--space-8) 0 0;
-    padding: var(--space-6) var(--space-8);
+    padding: var(--space-8) var(--space-8);
     border: 1px solid color-mix(in srgb, var(--you) 45%, transparent);
     border-radius: var(--radius-control);
     background: color-mix(in srgb, var(--you) 10%, transparent);
     color: var(--t1);
     font: inherit;
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
     text-align: left;
     cursor: pointer;
 }

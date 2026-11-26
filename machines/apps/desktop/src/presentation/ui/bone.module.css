@@ -11,7 +11,7 @@
     content: '';
     position: absolute;
     inset: 0.14lh 0;
-    border-radius: var(--radius-cell);
+    border-radius: var(--radius-mark);
     background: var(--s2);
     animation: wait var(--motion-wait);
 }

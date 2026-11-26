@@ -1,9 +1,9 @@
 .memory {
     display: flex;
     flex-direction: column;
-    gap: var(--space-10);
+    gap: var(--space-12);
     padding: var(--space-12);
-    border-radius: var(--radius-card);
+    border-radius: var(--radius-row);
     background: var(--s0);
 }
 .head {
@@ -18,7 +18,7 @@
 }
 .head span {
     color: var(--t3);
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
 }
 .head em {
     font-style: normal;
@@ -31,7 +31,7 @@
 }
 .cell {
     aspect-ratio: 1;
-    border-radius: var(--radius-cell);
+    border-radius: var(--radius-mark);
     background: var(--c, var(--s2));
 }
 .cell.free {
@@ -46,20 +46,20 @@
 .legend {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-4) var(--space-14);
+    gap: var(--space-4) var(--space-16);
     color: var(--t3);
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
 }
 .legend span {
     display: inline-flex;
     align-items: center;
-    gap: var(--space-6);
+    gap: var(--space-8);
 }
 .legend span::before {
     content: '';
     width: 8px;
     height: 8px;
-    border-radius: var(--radius-tick);
+    border-radius: var(--radius-mark);
     background: var(--c, var(--s2));
 }
 .legend b {

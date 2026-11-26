@@ -1,12 +1,12 @@
 .list {
     background: var(--s1);
-    border-radius: var(--radius-panel);
-    padding: var(--space-14) var(--space-16) var(--space-10);
+    border-radius: var(--radius-tile);
+    padding: var(--space-16) var(--space-16) var(--space-12);
     min-width: 0;
 }
 .group + .group {
-    margin-top: var(--space-10);
-    padding-top: var(--space-14);
+    margin-top: var(--space-12);
+    padding-top: var(--space-16);
     border-top: 1px solid var(--hair);
 }
 .bar {
@@ -16,11 +16,11 @@
     min-width: 0;
 }
 .foot {
-    margin: var(--space-10) 0 0;
-    padding-top: var(--space-14);
+    margin: var(--space-12) 0 0;
+    padding-top: var(--space-16);
     border-top: 1px solid var(--hair);
     color: var(--t3);
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
 }
 .update {
     display: flex;

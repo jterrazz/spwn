@@ -1,10 +1,32 @@
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import { mixed, ratio, rgbOf } from '../contrast';
 
 const TOKENS = readFileSync(join(import.meta.dirname, '..', 'tokens.css'), 'utf8');
+
+const PRESENTATION = join(import.meta.dirname, '..', '..');
+
+const SCALES = ['text', 'radius', 'space', 'motion'] as const;
+
+function stylesUnder(dir: string): string[] {
+    return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+        const path = join(dir, entry.name);
+        if (entry.isDirectory()) {
+            return stylesUnder(path);
+        }
+        return path.endsWith('.css') ? [readFileSync(path, 'utf8')] : [];
+    });
+}
+
+const STYLES = stylesUnder(PRESENTATION).join('\n');
+
+function scaleNames(source: string, around: 'declared' | 'drawn'): Set<string> {
+    const name = `--(?:${SCALES.join('|')})-[a-z0-9-]+`;
+    const pattern = around === 'drawn' ? `var\\((${name})` : `(${name}):`;
+    return new Set([...source.matchAll(new RegExp(pattern, 'gu'))].map((each) => each[1] ?? ''));
+}
 
 const DARK = TOKENS.slice(0, TOKENS.indexOf("html[data-material='vibrant']"));
 
@@ -154,5 +176,15 @@ describe('contrast', () => {
 
         // Then - they are the record's
         expect(shares).toStrictEqual(['8%', '24%']);
+    });
+
+    test('every scale token a rule draws is declared in tokens.css, and every one declared is drawn', () => {
+        // Given - the text, radius, space and motion tokens the style sheets draw, and the ones tokens.css declares
+        const drawn = scaleNames(STYLES, 'drawn');
+        const declared = scaleNames(TOKENS, 'declared');
+
+        // Then - none is drawn undeclared, and none stands unused, so a renamed step leaves nothing behind
+        expect([...drawn].filter((name) => !declared.has(name))).toStrictEqual([]);
+        expect([...declared].filter((name) => !drawn.has(name))).toStrictEqual([]);
     });
 });

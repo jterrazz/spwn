@@ -6,9 +6,9 @@
 .held {
     display: flex;
     flex-direction: column;
-    gap: var(--space-14);
+    gap: var(--space-16);
     opacity: 0.55;
-    transition: opacity var(--motion-hover);
+    transition: opacity var(--motion-hover) var(--ease);
 }
 .said {
     position: absolute;

@@ -8,7 +8,7 @@
     place-items: center;
     color: var(--t3);
     flex: none;
-    transition: background var(--motion-hover);
+    transition: background var(--motion-hover) var(--ease);
 }
 .button:hover {
     background: var(--s2);

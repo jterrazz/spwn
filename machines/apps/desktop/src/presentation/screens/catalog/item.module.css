@@ -2,7 +2,7 @@
     display: flex;
     align-items: center;
     gap: var(--space-16);
-    padding: var(--space-14) var(--space-4);
+    padding: var(--space-16) var(--space-4);
 }
 .named {
     flex: 1;
@@ -13,12 +13,12 @@
 }
 .name {
     margin: 0;
-    font-size: 26px;
+    font-size: var(--text-headline);
     font-weight: var(--weight-strong);
     letter-spacing: -0.02em;
     display: flex;
     align-items: center;
-    gap: var(--space-10);
+    gap: var(--space-12);
     flex-wrap: wrap;
 }
 .about {
@@ -28,19 +28,19 @@
 .two {
     display: grid;
     grid-template-columns: minmax(0, 2.5fr) minmax(0, 1fr);
-    gap: var(--space-14);
+    gap: var(--space-16);
     align-items: start;
 }
 .main {
     display: flex;
     flex-direction: column;
-    gap: var(--space-14);
+    gap: var(--space-16);
     min-width: 0;
 }
 .rail {
     background: var(--s1);
-    border-radius: var(--radius-panel);
-    padding: var(--space-14) var(--space-16) var(--space-16);
+    border-radius: var(--radius-tile);
+    padding: var(--space-16) var(--space-16) var(--space-16);
     min-width: 0;
 }
 .installs {
@@ -54,33 +54,33 @@
     grid-template-columns: 120px auto minmax(0, 1fr);
     gap: var(--space-12);
     align-items: baseline;
-    padding: var(--space-6) 0;
+    padding: var(--space-8) 0;
 }
 .systems {
     color: var(--t3);
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
 }
 .target {
     font-family: var(--font-mono);
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
     color: var(--t2);
     overflow-wrap: anywhere;
 }
 .chips {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-6);
+    gap: var(--space-8);
 }
 .chip {
     all: unset;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
-    gap: var(--space-6);
-    padding: var(--space-2) var(--space-8) var(--space-2) var(--space-2);
+    gap: var(--space-8);
+    padding: var(--space-4) var(--space-8) var(--space-4) var(--space-4);
     border-radius: var(--radius-control);
     background: var(--s3);
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
 }
 .chip:hover {
     background: var(--s3-hover);

@@ -2,7 +2,7 @@
     --c: var(--t2);
     display: flex;
     align-items: flex-end;
-    gap: var(--space-2);
+    gap: var(--space-4);
     flex: none;
 }
 .tile {
@@ -18,7 +18,7 @@
 .mark {
     width: 4px;
     height: var(--height);
-    border-radius: var(--radius-tick);
+    border-radius: var(--radius-mark);
     background: var(--t4);
     min-height: 3px;
 }

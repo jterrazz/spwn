@@ -2,11 +2,11 @@
     --c: var(--t3);
     display: inline-flex;
     align-items: center;
-    gap: var(--space-6);
+    gap: var(--space-8);
     height: 22px;
     padding: 0 9px;
     border-radius: var(--radius-pill);
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
     font-weight: var(--weight-medium);
     color: var(--c);
     background: color-mix(in srgb, var(--c) var(--tone-fill), transparent);
@@ -34,13 +34,13 @@
     --c: var(--bad);
 }
 .bad::before {
-    border-radius: var(--radius-hair);
+    border-radius: var(--radius-mark);
 }
 .warn {
     --c: var(--you);
 }
 .warn::before {
-    border-radius: var(--radius-hair);
+    border-radius: var(--radius-mark);
     transform: rotate(45deg);
 }
 .plain::before,
@@ -53,7 +53,7 @@
     }
 }
 .quiet {
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
     color: var(--t3);
     white-space: nowrap;
     overflow: hidden;

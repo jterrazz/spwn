@@ -87,7 +87,7 @@
 }
 .meters {
     --column-cells: 112px 150px;
-    column-gap: var(--space-10);
+    column-gap: var(--space-12);
     min-height: 40px;
     padding-block: var(--space-4);
 }
@@ -100,7 +100,7 @@
     column-gap: var(--space-16);
 }
 .passwords.head > :last-child {
-    padding-inline-end: calc(14px + var(--space-10));
+    padding-inline-end: calc(14px + var(--space-12));
 }
 .hasStart.hasTrail {
     --column-trail: minmax(0, 260px);
@@ -116,9 +116,9 @@
     width: calc(100% + 2 * var(--space-8));
     margin: 0 calc(-1 * var(--space-8));
     padding-inline: var(--space-8);
-    border-radius: var(--radius-well);
+    border-radius: var(--radius-control);
     border-top: 1px solid transparent;
-    transition: background var(--motion-hover);
+    transition: background var(--motion-hover) var(--ease);
 }
 .open:hover {
     background: var(--s2);
@@ -138,7 +138,7 @@
     flex-direction: column;
 }
 .title {
-    font-size: var(--text-row);
+    font-size: var(--text-body);
     color: var(--t1);
     overflow: hidden;
     text-overflow: ellipsis;
@@ -153,7 +153,7 @@
 .hint {
     flex: none;
     color: var(--t3);
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
 }
 .slim .title {
     font-size: var(--text-body);
@@ -167,7 +167,7 @@
 }
 .sentence {
     color: var(--t3);
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -205,7 +205,7 @@
 .end {
     min-width: 0;
     display: flex;
-    gap: var(--space-10);
+    gap: var(--space-12);
     align-items: center;
     justify-content: flex-end;
 }
@@ -213,7 +213,7 @@
     border-top: 0;
     min-height: 26px;
     color: var(--t3);
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
 }
 .right {
     text-align: right;
@@ -238,8 +238,8 @@
     min-width: 0;
     margin-left: calc(-1 * var(--space-8));
     padding: var(--space-4) var(--space-8);
-    border-radius: var(--radius-well);
-    transition: background var(--motion-hover);
+    border-radius: var(--radius-control);
+    transition: background var(--motion-hover) var(--ease);
 }
 .linked > .opener {
     align-self: stretch;
@@ -260,5 +260,5 @@
     flex: none;
     display: flex;
     align-items: center;
-    gap: var(--space-6);
+    gap: var(--space-8);
 }

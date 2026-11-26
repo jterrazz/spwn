@@ -1,7 +1,7 @@
 .login {
     display: flex;
     flex-direction: column;
-    gap: var(--space-10);
+    gap: var(--space-12);
 }
 .toggle {
     all: unset;
@@ -10,7 +10,7 @@
     text-decoration: underline;
     text-decoration-color: var(--t4);
     text-underline-offset: 3px;
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
     align-self: flex-start;
 }
 .fields {

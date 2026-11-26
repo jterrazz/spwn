@@ -6,12 +6,12 @@
     min-width: 0;
 }
 .stage {
-    border-radius: var(--radius-card);
+    border-radius: var(--radius-row);
     background-color: var(--s0);
     background-image: radial-gradient(circle, var(--edge) 1px, transparent 1.5px);
     background-size: 16px 16px;
     background-position: 8px 8px;
-    padding: 30px var(--space-16) var(--space-14);
+    padding: 30px var(--space-16) var(--space-16);
     display: flex;
     flex-direction: column;
     gap: var(--space-24);
@@ -21,24 +21,24 @@
     flex-wrap: wrap;
     justify-content: center;
     align-items: flex-start;
-    gap: var(--space-10);
+    gap: var(--space-12);
 }
 .card {
     all: unset;
     width: 168px;
     box-sizing: border-box;
     background: var(--s2);
-    border-radius: var(--radius-well);
-    padding: var(--space-10) var(--space-12);
+    border-radius: var(--radius-control);
+    padding: var(--space-12) var(--space-12);
     display: flex;
     flex-direction: column;
-    gap: var(--space-2);
+    gap: var(--space-4);
     text-align: left;
     color: var(--t1);
     cursor: pointer;
     transition:
-        background var(--motion-hover),
-        box-shadow var(--motion-hover);
+        background var(--motion-hover) var(--ease),
+        box-shadow var(--motion-hover) var(--ease);
 }
 .card:hover {
     background: var(--s3-hover);
@@ -57,7 +57,7 @@
     background: var(--s3);
 }
 .cardName {
-    font-size: var(--text-row);
+    font-size: var(--text-body);
     font-weight: var(--weight-strong);
     line-height: 19px;
     display: flex;
@@ -73,17 +73,17 @@
     text-overflow: ellipsis;
 }
 .kind {
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
     line-height: 17px;
     color: var(--t3);
 }
 .said {
     display: flex;
     align-items: center;
-    gap: var(--space-6);
-    font-size: var(--text-label);
+    gap: var(--space-8);
+    font-size: var(--text-meta);
     line-height: 17px;
-    margin-top: var(--space-6);
+    margin-top: var(--space-8);
 }
 .ok {
     color: var(--t2);
@@ -106,7 +106,7 @@
     align-items: center;
     gap: var(--space-12);
     flex-wrap: wrap;
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
     line-height: 17px;
     color: var(--t3);
 }

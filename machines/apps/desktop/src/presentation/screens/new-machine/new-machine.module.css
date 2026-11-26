@@ -1,7 +1,7 @@
 .field {
     display: flex;
     flex-direction: column;
-    gap: var(--space-6);
+    gap: var(--space-8);
 }
 .range {
     width: 100%;
@@ -12,13 +12,13 @@
 .options {
     display: flex;
     flex-direction: column;
-    gap: var(--space-10);
+    gap: var(--space-12);
 }
 .fold {
     display: flex;
     align-items: baseline;
-    gap: var(--space-10);
-    font-size: var(--text-label);
+    gap: var(--space-12);
+    font-size: var(--text-meta);
 }
 .toggle {
     all: unset;

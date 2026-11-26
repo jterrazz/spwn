@@ -1,7 +1,7 @@
 .icon {
     width: 20px;
     height: 20px;
-    border-radius: var(--radius-icon);
+    border-radius: var(--radius-small);
     flex: none;
     display: grid;
     place-items: center;
@@ -16,7 +16,7 @@
 .large {
     width: 36px;
     height: 36px;
-    border-radius: var(--radius-well);
+    border-radius: var(--radius-control);
 }
 .large svg {
     width: 18px;
