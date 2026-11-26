@@ -516,7 +516,7 @@ func (a *Apt) root(ctx context.Context, logs contract.Logs, argv ...string) erro
 		argv = append([]string{"-n"}, argv...)
 	}
 	c := local.Command(catalog.Sudo, argv...)
-	c.Logs = logs
+	c.Logs, c.Unattended = logs, !a.terminal
 	ran, err := a.run.Attach(ctx, c, local.ToStderr)
 	switch {
 	case err != nil:

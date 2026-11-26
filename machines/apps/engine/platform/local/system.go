@@ -42,6 +42,10 @@ type Cmd struct {
 	// value: the files an attached command's stdout and stderr are appended
 	// to, one per item it serves, in place of the terminal; its stdin stays.
 	Logs []string
+	// value: an attached command that reads no terminal (sudo -n): it leads
+	// its own process group, so the end of its context stops all it started,
+	// never its direct child alone (bounded).
+	Unattended bool
 }
 
 type Output struct {

@@ -176,7 +176,7 @@ func (r *runner) Output(ctx context.Context, c Cmd) (Output, error) {
 	}
 	defer cancel()
 	if c.Timeout > 0 && c.Track == "" {
-		bounded(cmd)
+		bounded(cmd, time.Second)
 	}
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout, cmd.Stderr = &stdout, &stderr
@@ -187,19 +187,25 @@ func (r *runner) Output(ctx context.Context, c Cmd) (Output, error) {
 	return Output{Stdout: stdout.String(), Stderr: stderr.String(), ExitCode: code}, err
 }
 
-// invariant: a command read within a bound leads its own process group:
-// past the bound the whole group is told to stop (SIGTERM), killed a second
-// later (SIGKILL), and its pipes closed then, so nothing it started holds
-// the read past its bound.
-func bounded(cmd *exec.Cmd) {
+// invariant: a command read within a bound, or attached unattended, leads
+// its own process group: at the end of its context the whole group is told
+// to stop (SIGTERM, which sudo relays to what it runs as root), killed past
+// the grace (SIGKILL), and its pipes closed then, so nothing it started
+// holds the run past its end.
+func bounded(cmd *exec.Cmd, grace time.Duration) {
 	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
-	cmd.WaitDelay = time.Second
+	cmd.WaitDelay = grace
 	cmd.Cancel = func() error {
 		group := -cmd.Process.Pid
-		time.AfterFunc(time.Second, func() { _ = syscall.Kill(group, syscall.SIGKILL) })
+		time.AfterFunc(grace, func() { _ = syscall.Kill(group, syscall.SIGKILL) })
 		return syscall.Kill(group, syscall.SIGTERM)
 	}
 }
+
+// value: how long an unattended command told to stop at the end of its
+// context has to end (a package manager to leave its database whole)
+// before it is killed.
+const stopGrace = 5 * time.Second
 
 func (r *runner) Attach(ctx context.Context, c Cmd, out Stream) (Attached, error) {
 	ctx, cmd, cancel, err := r.command(ctx, c)
@@ -207,6 +213,9 @@ func (r *runner) Attach(ctx context.Context, c Cmd, out Stream) (Attached, error
 		return Attached{}, err
 	}
 	defer cancel()
+	if c.Unattended && c.Track == "" {
+		bounded(cmd, stopGrace)
+	}
 	logs, err := appendTo(c.Logs)
 	if err != nil {
 		return Attached{}, err
