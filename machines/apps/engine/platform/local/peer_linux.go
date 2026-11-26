@@ -16,6 +16,14 @@ func peerPID(fd int) int {
 	return int(cred.Pid)
 }
 
+func peerUID(fd int) (int, bool) {
+	cred, err := unix.GetsockoptUcred(fd, unix.SOL_SOCKET, unix.SO_PEERCRED)
+	if err != nil {
+		return 0, false
+	}
+	return int(cred.Uid), true
+}
+
 func ExecutableOf(pid int) string {
 	if pid <= 0 {
 		return ""

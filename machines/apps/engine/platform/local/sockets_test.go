@@ -2,6 +2,7 @@ package local
 
 import (
 	"context"
+	"errors"
 	"net"
 	"os"
 	"path/filepath"
@@ -9,6 +10,43 @@ import (
 	"testing"
 	"time"
 )
+
+func TestAUnixSocketIsMode0600InAFolderOfMode0700AndServesItsOwnUserAlone(t *testing.T) {
+	dir := filepath.Join(t.TempDir(), "station")
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	sock := filepath.Join(dir, "engine.sock")
+	l, err := listenUnix(sock, os.Getuid()+1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for at, want := range map[string]os.FileMode{dir: 0o700, sock: 0o600} {
+		if info, statErr := os.Stat(at); statErr != nil || info.Mode().Perm() != want {
+			t.Fatalf("%s: %v, %v; want mode %o", at, info, statErr, want)
+		}
+	}
+	accepted := make(chan Conn, 1)
+	go func() {
+		c, _ := l.Accept()
+		accepted <- c
+	}()
+	c, err := sockets{}.DialUnix(context.Background(), sock, time.Second)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if nc, ok := c.(net.Conn); ok {
+		_ = nc.SetReadDeadline(time.Now().Add(5 * time.Second))
+	}
+	if n, readErr := c.Read(make([]byte, 1)); n != 0 || readErr == nil || errors.Is(readErr, os.ErrDeadlineExceeded) {
+		t.Fatalf("a peer of another uid read %d, %v; want it closed at accept", n, readErr)
+	}
+	_ = c.Close()
+	_ = l.Close()
+	if got := <-accepted; got != nil {
+		t.Fatal("a peer of another uid was handed to the server")
+	}
+}
 
 func TestALongSocketPathIsServedAndLeavesNothingInTheTempFolder(t *testing.T) {
 	home := t.TempDir()
