@@ -104,6 +104,7 @@ type Reach struct {
 	Path   string
 	Access string
 	Grants string
+	World  string
 }
 
 // NotGrantedError refuses the reaches no answer has granted, off a
@@ -249,6 +250,19 @@ func (a Allowed) Keep(of []Reach) error {
 	return rememberGrants(a.root, kept)
 }
 
+func agentsOf(asked []Reach) string {
+	var worlds []string
+	for _, r := range asked {
+		if !slices.Contains(worlds, r.World) {
+			worlds = append(worlds, r.World)
+		}
+	}
+	if len(worlds) > 1 {
+		return "These worlds' agents"
+	}
+	return "The world's agents"
+}
+
 // Consent allows the reaches of the project at root: one already kept for
 // this project folder, path and access passes silently; with yes the rest
 // are allowed for this run only and each is printed to out, never kept;
@@ -284,7 +298,7 @@ func Consent(root string, reaches []Reach, yes, terminal bool, in io.Reader, out
 	for _, r := range asked {
 		fmt.Fprintf(out, "    %q\n      %s\n", r.Path, ui.Clean(r.Grants))
 	}
-	fmt.Fprintf(out, "  The world's agents run what this project gives them, with this access.\n")
+	fmt.Fprintf(out, "  %s run what this project gives them, with this access.\n", ui.Clean(agentsOf(asked)))
 	fmt.Fprintf(out, "  Allow them for this project folder? A yes is kept in %s. [y/N] ", ui.Clean(GrantsPath()))
 	line, _ := bufio.NewReader(in).ReadString('\n')
 	if a := strings.ToLower(strings.TrimSpace(line)); a != "y" && a != "yes" {

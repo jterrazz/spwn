@@ -253,3 +253,21 @@ func TestOnATerminalThePathsAreShownQuotedOnceAndAsked(t *testing.T) {
 	}
 	noGrantsFile(t)
 }
+
+func TestTheAskNamesTheAgentsOfOneWorldOrOfSeveral(t *testing.T) {
+	a, _, outside := projects(t)
+	for worlds, want := range map[string]string{"neo": "The world's agents run", "neo trinity": "These worlds' agents run"} {
+		var reaches []Reach
+		for i, w := range strings.Fields(worlds) {
+			reaches = append(reaches, Reach{Path: filepath.Join(outside, strconv.Itoa(i)), Access: "read-only", Grants: "read-only mount", World: w},
+				Reach{Path: filepath.Join(outside, "k"+strconv.Itoa(i)), Access: "read-only", Grants: "read-only mount", World: w})
+		}
+		var out bytes.Buffer
+		if _, err := Consent(a, reaches, false, true, strings.NewReader("n\n"), &out); err == nil {
+			t.Fatal("a no was taken as a yes")
+		}
+		if !strings.Contains(out.String(), "\n  "+want+" what this project gives them") {
+			t.Errorf("worlds %q: the ask reads %q, want %q", worlds, out.String(), want)
+		}
+	}
+}

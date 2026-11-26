@@ -157,7 +157,7 @@ func watchReaches(p *project.Project) ([]cliproject.Reach, []cliproject.Declared
 			a.On.FS.Path = resolved
 			if leaves {
 				reaches = append(reaches, cliproject.Reach{Path: resolved, Access: "names and times recorded",
-					Grants: fmt.Sprintf("watched by automation %q of world %q: its files' names and times are recorded in the receipts and passed to the project's agent", aname, wname)})
+					Grants: fmt.Sprintf("watched by automation %q of world %q: its files' names and times are recorded in the receipts and passed to the project's agent", aname, wname), World: wname})
 			}
 		}
 	}

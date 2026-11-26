@@ -173,7 +173,7 @@ func resolveProjectWorld(p *project.Project, name, backendOverride string) (*pro
 		knowledge = resolved
 		declaredKnowledge = append(declaredKnowledge, cliproject.Declared{Text: kp, Resolved: resolved})
 		if leaves {
-			outside = append(outside, cliproject.Reach{Path: resolved, Access: "read-write", Grants: fmt.Sprintf("read-write mount at /world/knowledge in world %q", name)})
+			outside = append(outside, cliproject.Reach{Path: resolved, Access: "read-write", Grants: fmt.Sprintf("read-write mount at /world/knowledge in world %q", name), World: name})
 		}
 	}
 	var entries []world.Workspace
@@ -213,7 +213,7 @@ func resolveProjectWorld(p *project.Project, name, backendOverride string) (*pro
 			access = "read-only"
 		}
 		if leaves {
-			outside = append(outside, cliproject.Reach{Path: resolved, Access: access, Grants: fmt.Sprintf("%s mount at /workspaces/%s in world %q", access, ws.Name, name)})
+			outside = append(outside, cliproject.Reach{Path: resolved, Access: access, Grants: fmt.Sprintf("%s mount at /workspaces/%s in world %q", access, ws.Name, name), World: name})
 		}
 		entries = append(entries, world.Workspace{Name: ws.Name, Path: resolved, ReadOnly: ws.ReadOnly})
 		declaredWorkspaces = append(declaredWorkspaces, cliproject.Declared{Text: ws.Path, Resolved: resolved})
