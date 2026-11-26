@@ -25,7 +25,7 @@ import (
 func applying(t *testing.T) (d calls.Deps, folder, root string) {
 	t.Helper()
 	t.Setenv("SPWN_HOME", t.TempDir())
-	d = calls.Deps{Projects: manifest.New(local.New(nil, nil, nil, nil).FS)}
+	d = calls.Deps{Projects: manifest.New()}
 	folder = t.TempDir()
 	made, err := d.Projects.Create(t.Context(), folder, "site", catalog.Harnesses()[0], "")
 	if err != nil {
@@ -305,7 +305,7 @@ func TestASkillMadeAsItsTemplatePlansValidAndListingSkillsWritesNoHome(t *testin
 
 func TestANameThatHoldsADanglingLinkExists(t *testing.T) {
 	t.Setenv("SPWN_HOME", t.TempDir())
-	d := calls.Deps{Projects: manifest.New(local.New(nil, nil, nil, nil).FS)}
+	d := calls.Deps{Projects: manifest.New()}
 	folder := t.TempDir()
 	if err := local.New(nil, nil, nil, nil).FS.Symlink(filepath.Join(folder, "nowhere"), filepath.Join(folder, "site")); err != nil {
 		t.Fatal(err)
@@ -317,6 +317,28 @@ func TestANameThatHoldsADanglingLinkExists(t *testing.T) {
 	}
 	if _, err := (local.Beneath{}).Lstat(folder, "nowhere"); !errors.Is(err, fs.ErrNotExist) {
 		t.Errorf("the link's target was made: %v", err)
+	}
+}
+
+func TestANameThatHoldsALinkToAFolderExistsAndNothingIsWrittenThere(t *testing.T) {
+	t.Setenv("SPWN_HOME", t.TempDir())
+	d := calls.Deps{Projects: manifest.New()}
+	folder, elsewhere := t.TempDir(), t.TempDir()
+	if err := machine.FS.Symlink(elsewhere, filepath.Join(folder, "site")); err != nil {
+		t.Fatal(err)
+	}
+	for _, from := range []string{"", catalog.Examples()[0]} {
+		if _, err := calls.Create.Run(t.Context(), d, calls.CreateIn{Folder: folder, Name: "site", From: from}, nil); !refusedWith(err, calls.Exists) {
+			t.Errorf("Create (from %q) over a link to a folder = %v; want project.exists", from, err)
+		}
+	}
+	there, err := local.Beneath{}.Open(filepath.Dir(elsewhere), filepath.Base(elsewhere))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer there.Close()
+	if names, err := there.Names(); err != nil || len(names) != 0 {
+		t.Errorf("the link's folder holds %v, %v; want nothing written through the link", names, err)
 	}
 }
 
@@ -392,7 +414,7 @@ func TestAnApplyStoppedByAFolderItCannotWriteInRecordsWhatItWrote(t *testing.T) 
 		t.Skip("root writes in a folder without its write bit")
 	}
 	t.Setenv("SPWN_HOME", t.TempDir())
-	d := calls.Deps{Projects: manifest.New(machine.FS)}
+	d := calls.Deps{Projects: manifest.New()}
 	made, err := calls.Create.Run(t.Context(), d, calls.CreateIn{Folder: t.TempDir(), From: "severance"}, nil)
 	if err != nil {
 		t.Fatal(err)
@@ -446,7 +468,7 @@ func TestEachExampleOfTheCatalogPlansValidAndApplies(t *testing.T) {
 	for _, example := range catalog.Examples() {
 		t.Run(example, func(t *testing.T) {
 			t.Setenv("SPWN_HOME", t.TempDir())
-			d := calls.Deps{Projects: manifest.New(local.New(nil, nil, nil, nil).FS)}
+			d := calls.Deps{Projects: manifest.New()}
 			made, err := calls.Create.Run(t.Context(), d, calls.CreateIn{Folder: t.TempDir(), From: example}, nil)
 			if err != nil || made.Name != example || len(made.Agents) == 0 {
 				t.Fatalf("Create = %+v, %v; want the example's project named for it, with its agents", made, err)

@@ -151,6 +151,13 @@ func Init(dir string, opts InitOpts) error {
 	})
 }
 
+// Scaffold returns the files Init writes for a project named name, by
+// slash path from its root, without writing any: the caller writes them
+// where and how it decides. Its .gitignore is not among them.
+func Scaffold(name, backend string) (map[string][]byte, error) {
+	return scaffold.Files(name, backend)
+}
+
 // AddWorldOpts configures AddWorld.
 type AddWorldOpts = scaffold.AddWorldOpts
 
@@ -168,12 +175,12 @@ func RemoveWorld(manifestPath, name string) error {
 	return scaffold.RemoveWorld(manifestPath, name)
 }
 
-// AppendGitignore adds a `.spwn/` entry to <root>/.gitignore, creating
-// the file when missing and idempotent when already present. Used by
-// Init and by the engine's copy of an example, so
-// `station project create --from` drops a consistent gitignore too.
-func AppendGitignore(root string) error {
-	return scaffold.AppendGitignore(root)
+// Gitignore returns the bytes of a project's .gitignore that held
+// existing, with the `.spwn/` entry Init writes added when it is not
+// there yet. The engine's project create writes it beside Scaffold's
+// files, or an example's.
+func Gitignore(existing []byte) []byte {
+	return scaffold.Gitignore(existing)
 }
 
 // ErrWorldNotFound is returned by RemoveWorld when the named world

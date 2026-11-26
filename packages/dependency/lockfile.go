@@ -55,6 +55,27 @@ func EmptyLockfile() *Lockfile {
 	}
 }
 
+// Encode returns the bytes of spwn.lock for l: its header, then one
+// line per dependency, sorted by reference.
+func (l *Lockfile) Encode() []byte {
+	var b strings.Builder
+	b.WriteString("# spwn.lock: DO NOT EDIT\n")
+	keys := make([]string, 0, len(l.Deps))
+	for k := range l.Deps {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	for _, k := range keys {
+		e := l.Deps[k]
+		version := e.Version
+		if version == "" {
+			version = "latest"
+		}
+		fmt.Fprintf(&b, "%s %s %s\n", k, version, e.Source)
+	}
+	return []byte(b.String())
+}
+
 // Path returns the canonical lockfile location for a project root.
 func LockfilePath(projectRoot string) string {
 	return filepath.Join(projectRoot, LockFileName)
@@ -118,22 +139,7 @@ func SaveLockfile(projectRoot string, l *Lockfile) error {
 	if l == nil {
 		return fmt.Errorf("nil lockfile")
 	}
-	var b strings.Builder
-	b.WriteString("# spwn.lock: DO NOT EDIT\n")
-	keys := make([]string, 0, len(l.Deps))
-	for k := range l.Deps {
-		keys = append(keys, k)
-	}
-	sort.Strings(keys)
-	for _, k := range keys {
-		e := l.Deps[k]
-		version := e.Version
-		if version == "" {
-			version = "latest"
-		}
-		fmt.Fprintf(&b, "%s %s %s\n", k, version, e.Source)
-	}
-	if err := os.WriteFile(LockfilePath(projectRoot), []byte(b.String()), 0o644); err != nil {
+	if err := os.WriteFile(LockfilePath(projectRoot), l.Encode(), 0o644); err != nil {
 		return fmt.Errorf("write %s: %w", LockFileName, err)
 	}
 	return nil

@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
+	"maps"
 	"path"
 	"path/filepath"
 	"regexp"
@@ -28,22 +29,15 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/project/contract"
 )
 
-type disk interface {
-	MkdirAll(path string, perm fs.FileMode) error
-	WriteFile(path string, data []byte, perm fs.FileMode) error
-}
-
 type Projects struct {
-	// value: the disk of the machine a new project's folder is made on.
-	fs disk
-	// value: every run folder and the record, reached from the project's
-	// root one name at a time, never through a link.
+	// value: a new project's folder and files, every run folder and the
+	// record, reached one name at a time, never through a link.
 	under local.Beneath
 }
 
 var _ contract.Projects = Projects{}
 
-func New(fsys disk) Projects { return Projects{fs: fsys} }
+func New() Projects { return Projects{} }
 
 // value: err as the project names it: the path from root it is about, a
 // link or a file of two names there said as project.ErrLink.
@@ -172,44 +166,73 @@ func (p Projects) Show(_ context.Context, root string) (project.Project, error) 
 
 var manifestName = regexp.MustCompile(`(?m)^name:.*$`)
 
-// invariant: an example's files are copied as they are, its manifest
-// renamed to the project's name; the folder is made before any file.
-func (p Projects) copyExample(root, name, example string) error {
-	files, ok := catalog.Example(example)
-	if !ok {
-		return fmt.Errorf("no example named %q", example)
+// value: the files a project named name starts with, by slash path from
+// its root: an example's as they are, its manifest renamed to name, or
+// else the scaffold's for harness; and its .gitignore holding `.spwn/`.
+func starting(name, harness, example string) (map[string][]byte, error) {
+	if example == "" {
+		files, err := spwnproject.Scaffold(name, "spwn:"+harness)
+		if err != nil {
+			return nil, err
+		}
+		files[".gitignore"] = spwnproject.Gitignore(files[".gitignore"])
+		return files, nil
 	}
-	return p.copyFolder(files, ".", root, name)
+	from, ok := catalog.Example(example)
+	if !ok {
+		return nil, fmt.Errorf("no example named %q", example)
+	}
+	files := map[string][]byte{}
+	if err := held(from, ".", files); err != nil {
+		return nil, err
+	}
+	if declared, ok := files[project.ManifestName]; ok {
+		files[project.ManifestName] = manifestName.ReplaceAll(declared, []byte("name: "+name))
+	}
+	files[".gitignore"] = spwnproject.Gitignore(files[".gitignore"])
+	return files, nil
 }
 
-func (p Projects) copyFolder(files fs.FS, dir, root, name string) error {
-	entries, err := fs.ReadDir(files, dir)
+// value: files filled with every file under dir of from, by slash path.
+func held(from fs.FS, dir string, files map[string][]byte) error {
+	entries, err := fs.ReadDir(from, dir)
 	if err != nil {
 		return err
 	}
 	for _, e := range entries {
-		at := e.Name()
-		if dir != "." {
-			at = dir + "/" + at
-		}
-		target := filepath.Join(root, filepath.FromSlash(at))
+		at := path.Join(dir, e.Name())
 		if e.IsDir() {
-			if err := p.fs.MkdirAll(target, 0o755); err != nil {
-				return err
-			}
-			if err := p.copyFolder(files, at, root, name); err != nil {
-				return err
-			}
-			continue
+			err = held(from, at, files)
+		} else {
+			files[at], err = fs.ReadFile(from, at)
 		}
-		data, err := fs.ReadFile(files, at)
 		if err != nil {
 			return err
 		}
-		if at == project.ManifestName {
-			data = manifestName.ReplaceAll(data, []byte("name: "+name))
+	}
+	return nil
+}
+
+// invariant: a new project's folder is made by one mkdir that fails on
+// any name there, a link included, and each of its files is written from
+// the folder that holds it, every name on the way opened without
+// following a link, as a name nothing held: a link swapped in at the
+// folder's name or under it after the mkdir is refused, never written
+// through.
+func (p Projects) lay(folder, name string, files map[string][]byte) error {
+	paths := slices.Sorted(maps.Keys(files))
+	for _, at := range paths {
+		dir := path.Join(name, path.Dir(at))
+		if err := p.under.Folders(folder, dir, 0o755, local.Self()); err != nil {
+			return err
 		}
-		if err := p.fs.WriteFile(target, data, 0o644); err != nil {
+		f, err := p.under.Open(folder, dir)
+		if err != nil {
+			return err
+		}
+		err = f.Replace(path.Base(at), local.Seen{}, files[at], 0o644, local.Self())
+		f.Close()
+		if err != nil {
 			return err
 		}
 	}
@@ -219,23 +242,18 @@ func (p Projects) copyFolder(files fs.FS, dir, root, name string) error {
 func (p Projects) Create(_ context.Context, folder, name, harness, example string) (project.Project, error) {
 	root := filepath.Join(folder, name)
 	return in(root, func() (project.Project, error) {
-		switch _, err := p.under.Lstat(folder, name); {
-		case err == nil:
+		files, err := starting(name, harness, example)
+		if err != nil {
+			return project.Project{}, err
+		}
+		switch err = p.under.Mkdir(folder, name, 0o755, local.Self()); {
+		case errors.Is(err, fs.ErrExist):
 			return project.Project{}, project.ErrExists
-		case !errors.Is(err, fs.ErrNotExist):
+		case err != nil:
 			return project.Project{}, err
 		}
-		if err := p.fs.MkdirAll(root, 0o755); err != nil {
-			return project.Project{}, err
-		}
-		if example != "" {
-			if err := p.copyExample(root, name, example); err != nil {
-				return project.Project{}, err
-			}
-			if err := spwnproject.AppendGitignore(root); err != nil {
-				return project.Project{}, err
-			}
-		} else if err := spwnproject.Init(root, spwnproject.InitOpts{Name: name, Backend: "spwn:" + harness}); err != nil {
+		err = p.lay(folder, name, files)
+		if err != nil {
 			return project.Project{}, err
 		}
 		found, err := p.load(root)

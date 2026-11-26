@@ -23,7 +23,7 @@ import (
 
 func open(t *testing.T) contract.Projects {
 	t.Setenv("SPWN_HOME", t.TempDir())
-	return manifest.New(local.New(nil, nil, nil, nil).FS)
+	return manifest.New()
 }
 
 func TestProjects(t *testing.T) {

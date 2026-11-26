@@ -18,7 +18,7 @@ func (m machine) projects() contract.Projects {
 	if m.world != nil {
 		return m.world.projects()
 	}
-	return manifest.New(m.sys.FS)
+	return manifest.New()
 }
 
 func projectCommand(env kit.Env, m machine) *cobra.Command {

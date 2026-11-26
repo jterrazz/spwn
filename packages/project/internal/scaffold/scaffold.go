@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"text/template"
 
@@ -55,45 +56,23 @@ func Init(dir string, opts Opts) error {
 	if name == "" {
 		name = defaultName(absDir)
 	}
-	data := templateData{Name: name, Backend: opts.Backend}
-
-	files := []fileSpec{
-		{"templates/spwn.yaml.tmpl", "spwn.yaml"},
-		{"templates/agent.yaml.tmpl", "spwn/agents/neo/agent.yaml"},
-		{"templates/AGENTS.md.tmpl", "spwn/agents/neo/AGENTS.md"},
-		{"templates/SOUL.md.tmpl", "spwn/agents/neo/SOUL.md"},
-		{"templates/skill.focus.md.tmpl", "spwn/skills/focus.md"},
-		{"templates/tool.greet.yaml.tmpl", "spwn/tools/greet/tool.yaml"},
-		{"templates/hook.session-banner.yaml.tmpl", "spwn/hooks/session-banner.yaml"},
-		{"templates/command.refactor.md.tmpl", "spwn/commands/refactor.md"},
+	files, err := Files(name, opts.Backend)
+	if err != nil {
+		return err
 	}
-	for _, f := range files {
-		if err := writeTemplate(absDir, f.src, f.dst, data); err != nil {
-			return err
-		}
+	rels := make([]string, 0, len(files))
+	for rel := range files {
+		rels = append(rels, rel)
 	}
-
-	layerDirs := []string{
-		"spwn/agents/neo/playbooks",
-		"spwn/agents/neo/journal",
-		"spwn/knowledge",
-	}
-	for _, rel := range layerDirs {
-		dst := filepath.Join(absDir, rel, ".gitkeep")
+	sort.Strings(rels)
+	for _, rel := range rels {
+		dst := filepath.Join(absDir, filepath.FromSlash(rel))
 		if err := os.MkdirAll(filepath.Dir(dst), 0o755); err != nil {
-			return fmt.Errorf("mkdir %s: %w", rel, err)
+			return fmt.Errorf("mkdir for %s: %w", rel, err)
 		}
-		if err := os.WriteFile(dst, nil, 0o644); err != nil {
-			return fmt.Errorf("write %s: %w", dst, err)
+		if err := os.WriteFile(dst, files[rel], 0o644); err != nil {
+			return fmt.Errorf("write %s: %w", rel, err)
 		}
-	}
-
-	initialLock := dependency.EmptyLockfile()
-	for _, ref := range []string{"spwn:unix", "spwn:git", "spwn:python"} {
-		initialLock.Add(ref, dependency.LockEntry{Source: dependency.SourceBuiltin})
-	}
-	if err := dependency.SaveLockfile(absDir, initialLock); err != nil {
-		return fmt.Errorf("seed lockfile: %w", err)
 	}
 
 	if !opts.NoGitignore {
@@ -250,27 +229,55 @@ type templateData struct {
 	Backend string
 }
 
-func writeTemplate(root, srcRel, dstRel string, data templateData) error {
+// Files returns the files of a fresh project named name, by slash path
+// from its root: the templates rendered, a .gitkeep in each layer folder
+// and the seeded spwn.lock. Its .gitignore is not among them. backend, when
+// non-empty, is the starter agent's runtime.backend.
+func Files(name, backend string) (map[string][]byte, error) {
+	data := templateData{Name: name, Backend: backend}
+	templates := []fileSpec{
+		{"templates/spwn.yaml.tmpl", "spwn.yaml"},
+		{"templates/agent.yaml.tmpl", "spwn/agents/neo/agent.yaml"},
+		{"templates/AGENTS.md.tmpl", "spwn/agents/neo/AGENTS.md"},
+		{"templates/SOUL.md.tmpl", "spwn/agents/neo/SOUL.md"},
+		{"templates/skill.focus.md.tmpl", "spwn/skills/focus.md"},
+		{"templates/tool.greet.yaml.tmpl", "spwn/tools/greet/tool.yaml"},
+		{"templates/hook.session-banner.yaml.tmpl", "spwn/hooks/session-banner.yaml"},
+		{"templates/command.refactor.md.tmpl", "spwn/commands/refactor.md"},
+	}
+	out := map[string][]byte{}
+	for _, f := range templates {
+		b, err := renderTemplate(f.src, data)
+		if err != nil {
+			return nil, err
+		}
+		out[f.dst] = b
+	}
+	for _, rel := range []string{"spwn/agents/neo/playbooks", "spwn/agents/neo/journal", "spwn/knowledge"} {
+		out[rel+"/.gitkeep"] = []byte{}
+	}
+	lock := dependency.EmptyLockfile()
+	for _, ref := range []string{"spwn:unix", "spwn:git", "spwn:python"} {
+		lock.Add(ref, dependency.LockEntry{Source: dependency.SourceBuiltin})
+	}
+	out[dependency.LockFileName] = lock.Encode()
+	return out, nil
+}
+
+func renderTemplate(srcRel string, data templateData) ([]byte, error) {
 	raw, err := templatesFS.ReadFile(srcRel)
 	if err != nil {
-		return fmt.Errorf("load template %s: %w", srcRel, err)
+		return nil, fmt.Errorf("load template %s: %w", srcRel, err)
 	}
 	tmpl, err := template.New(srcRel).Parse(string(raw))
 	if err != nil {
-		return fmt.Errorf("parse template %s: %w", srcRel, err)
+		return nil, fmt.Errorf("parse template %s: %w", srcRel, err)
 	}
 	var buf bytes.Buffer
 	if err := tmpl.Execute(&buf, data); err != nil {
-		return fmt.Errorf("render template %s: %w", srcRel, err)
+		return nil, fmt.Errorf("render template %s: %w", srcRel, err)
 	}
-	dst := filepath.Join(root, dstRel)
-	if err := os.MkdirAll(filepath.Dir(dst), 0o755); err != nil {
-		return fmt.Errorf("mkdir for %s: %w", dstRel, err)
-	}
-	if err := os.WriteFile(dst, buf.Bytes(), 0o644); err != nil {
-		return fmt.Errorf("write %s: %w", dstRel, err)
-	}
-	return nil
+	return buf.Bytes(), nil
 }
 
 func defaultName(absDir string) string {
@@ -291,23 +298,13 @@ func defaultName(absDir string) string {
 	return slug
 }
 
-// AppendGitignore appends the `.spwn/` entry to <root>/.gitignore
-// when it's not already present. Idempotent and file-creating. Used
-// by Init (for blank scaffolds) and by the engine's copy of an example
-// (so `station project create --from` also gets the entry).
-func AppendGitignore(root string) error {
-	return appendGitignore(root)
-}
-
-func appendGitignore(root string) error {
-	path := filepath.Join(root, ".gitignore")
-	existing, err := os.ReadFile(path)
-	if err != nil && !os.IsNotExist(err) {
-		return err
-	}
+// Gitignore returns the bytes of a .gitignore that held existing, with
+// the `.spwn/` entry added when it is not there yet; existing itself
+// when it is.
+func Gitignore(existing []byte) []byte {
 	needle := ".spwn/"
 	if bytes.Contains(existing, []byte("\n"+needle)) || bytes.HasPrefix(existing, []byte(needle+"\n")) || bytes.Equal(existing, []byte(needle)) {
-		return nil
+		return existing
 	}
 	var out bytes.Buffer
 	out.Write(existing)
@@ -320,5 +317,18 @@ func appendGitignore(root string) error {
 	}
 	out.WriteString(needle)
 	out.WriteByte('\n')
-	return os.WriteFile(path, out.Bytes(), 0o644)
+	return out.Bytes()
+}
+
+func appendGitignore(root string) error {
+	path := filepath.Join(root, ".gitignore")
+	existing, err := os.ReadFile(path)
+	if err != nil && !os.IsNotExist(err) {
+		return err
+	}
+	out := Gitignore(existing)
+	if bytes.Equal(out, existing) {
+		return nil
+	}
+	return os.WriteFile(path, out, 0o644)
 }
