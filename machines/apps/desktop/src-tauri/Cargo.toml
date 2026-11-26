@@ -21,3 +21,11 @@ tauri = { version = "2.12.1", features = ["test"] }
 objc2 = "0.6"
 objc2-foundation = "0.3"
 objc2-service-management = "0.3"
+
+# value: the release's size profile (README, Its bundle): what the window ships is this binary, signed.
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = "s"
+panic = "abort"
+strip = "debuginfo"
