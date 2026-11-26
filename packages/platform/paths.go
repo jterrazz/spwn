@@ -157,3 +157,17 @@ func OrganizationsDir() string {
 func OrgPath() string {
 	return filepath.Join(UserDir(), "org.yaml")
 }
+
+// invariant: one act holds the project root from the root it sets to its
+// last read, so two acts in one process never see each other's root.
+var actMu sync.Mutex
+
+// WithProjectRoot runs act with root as the process's project root, under a
+// lock every caller of it shares, and clears the root when act returns.
+func WithProjectRoot[T any](root string, act func() (T, error)) (T, error) {
+	actMu.Lock()
+	defer actMu.Unlock()
+	SetProjectRoot(root)
+	defer SetProjectRoot("")
+	return act()
+}

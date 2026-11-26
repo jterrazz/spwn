@@ -5,7 +5,6 @@ import (
 	"errors"
 	"slices"
 	"strings"
-	"sync"
 
 	"spwn.sh/packages/agent"
 	"spwn.sh/packages/platform"
@@ -27,18 +26,6 @@ type Minds struct {
 }
 
 var _ contract.Minds = Minds{}
-
-// invariant: Agents' packages resolve every path from one process-global
-// project root, so one act holds it from the root it sets to its last read.
-var rooted sync.Mutex
-
-func in[T any](project string, act func() (T, error)) (T, error) {
-	rooted.Lock()
-	defer rooted.Unlock()
-	platform.SetProjectRoot(project)
-	defer platform.SetProjectRoot("")
-	return act()
-}
 
 func exists(name string) bool {
 	_, err := agent.InspectAgent(name)
@@ -109,7 +96,7 @@ func mindOf(name string) (agents.Mind, error) {
 }
 
 func (Minds) List(_ context.Context, project string) ([]agents.Agent, error) {
-	return in(project, func() ([]agents.Agent, error) {
+	return platform.WithProjectRoot(project, func() ([]agents.Agent, error) {
 		infos, err := agent.ListAgents()
 		if err != nil {
 			return nil, err
@@ -128,7 +115,7 @@ func (Minds) List(_ context.Context, project string) ([]agents.Agent, error) {
 }
 
 func (Minds) Mind(_ context.Context, project, name string) (agents.Mind, error) {
-	return in(project, func() (agents.Mind, error) {
+	return platform.WithProjectRoot(project, func() (agents.Mind, error) {
 		if err := found(name); err != nil {
 			return agents.Mind{}, err
 		}
@@ -137,7 +124,7 @@ func (Minds) Mind(_ context.Context, project, name string) (agents.Mind, error) 
 }
 
 func (Minds) Create(_ context.Context, project, name string, e agents.Edit) (agents.Mind, error) {
-	return in(project, func() (agents.Mind, error) {
+	return platform.WithProjectRoot(project, func() (agents.Mind, error) {
 		if exists(name) {
 			return agents.Mind{}, agents.ErrExists
 		}
@@ -154,7 +141,7 @@ func (Minds) Create(_ context.Context, project, name string, e agents.Edit) (age
 }
 
 func (Minds) Edit(_ context.Context, project, name string, e agents.Edit) (agents.Agent, error) {
-	return in(project, func() (agents.Agent, error) {
+	return platform.WithProjectRoot(project, func() (agents.Agent, error) {
 		if err := found(name); err != nil {
 			return agents.Agent{}, err
 		}
@@ -163,7 +150,7 @@ func (Minds) Edit(_ context.Context, project, name string, e agents.Edit) (agent
 }
 
 func (Minds) Delete(_ context.Context, project, name string) error {
-	_, err := in(project, func() (struct{}, error) {
+	_, err := platform.WithProjectRoot(project, func() (struct{}, error) {
 		if err := found(name); err != nil {
 			return struct{}{}, err
 		}
@@ -173,7 +160,7 @@ func (Minds) Delete(_ context.Context, project, name string) error {
 }
 
 func (Minds) Fork(_ context.Context, project, from, to string) (agents.Forked, error) {
-	return in(project, func() (agents.Forked, error) {
+	return platform.WithProjectRoot(project, func() (agents.Forked, error) {
 		if err := found(from); err != nil {
 			return agents.Forked{}, err
 		}
@@ -189,7 +176,7 @@ func (Minds) Fork(_ context.Context, project, from, to string) (agents.Forked, e
 }
 
 func (Minds) Export(_ context.Context, project, name, folder string) (agents.Exported, error) {
-	return in(project, func() (agents.Exported, error) {
+	return platform.WithProjectRoot(project, func() (agents.Exported, error) {
 		if err := found(name); err != nil {
 			return agents.Exported{}, err
 		}
@@ -205,7 +192,7 @@ func (m Minds) Import(_ context.Context, project, archive, as string) (agents.Mi
 	if as == "" {
 		as = agents.ArchiveName(archive)
 	}
-	return in(project, func() (agents.Mind, error) {
+	return platform.WithProjectRoot(project, func() (agents.Mind, error) {
 		if exists(as) {
 			return agents.Mind{}, agents.ErrExists
 		}
@@ -221,7 +208,7 @@ func (m Minds) Import(_ context.Context, project, archive, as string) (agents.Mi
 }
 
 func (Minds) Dream(_ context.Context, project, name string) (agents.Dreamed, error) {
-	return in(project, func() (agents.Dreamed, error) {
+	return platform.WithProjectRoot(project, func() (agents.Dreamed, error) {
 		if err := found(name); err != nil {
 			return agents.Dreamed{}, err
 		}
@@ -238,7 +225,7 @@ func (Minds) Dream(_ context.Context, project, name string) (agents.Dreamed, err
 }
 
 func (Minds) Sleep(_ context.Context, project, name string) (agents.Slept, error) {
-	return in(project, func() (agents.Slept, error) {
+	return platform.WithProjectRoot(project, func() (agents.Slept, error) {
 		if err := found(name); err != nil {
 			return agents.Slept{}, err
 		}

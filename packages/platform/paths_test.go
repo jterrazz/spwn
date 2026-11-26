@@ -1,8 +1,11 @@
 package platform
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
+	"runtime"
+	"sync"
 	"testing"
 )
 
@@ -68,5 +71,41 @@ func TestSkillsDir(t *testing.T) {
 	got := SkillsDir()
 	if got != want {
 		t.Errorf("SkillsDir() = %q, want %q", got, want)
+	}
+}
+
+func TestWithProjectRoot_TwoGoroutinesNeverSeeEachOthersRoot(t *testing.T) {
+	roots := []string{filepath.Join(t.TempDir(), "a"), filepath.Join(t.TempDir(), "b")}
+	var wg sync.WaitGroup
+	for _, root := range roots {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for range 200 {
+				seen, err := WithProjectRoot(root, func() (string, error) {
+					runtime.Gosched()
+					return ProjectRoot(), nil
+				})
+				if err != nil || seen != root {
+					t.Errorf("act under %q saw root %q, err %v", root, seen, err)
+					return
+				}
+			}
+		}()
+	}
+	wg.Wait()
+	if got := ProjectRoot(); got != "" {
+		t.Errorf("root after the acts = %q, want it cleared", got)
+	}
+}
+
+func TestWithProjectRoot_ReturnsTheActsError(t *testing.T) {
+	want := errors.New("boom")
+	_, err := WithProjectRoot("/p", func() (int, error) { return 0, want })
+	if !errors.Is(err, want) {
+		t.Errorf("err = %v, want %v", err, want)
+	}
+	if got := ProjectRoot(); got != "" {
+		t.Errorf("root after a failing act = %q, want it cleared", got)
 	}
 }
