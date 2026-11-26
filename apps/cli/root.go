@@ -133,7 +133,7 @@ func customHelp(cmd *cobra.Command, args []string) {
 	fmt.Fprintln(w)
 
 	fmt.Fprintf(w, "%s\n", ui.Strong("Quick Start:"))
-	printHelpCmd(w, "spwn init", "Scaffold a new project")
+	printHelpCmd(w, "station project create site", "Make a new project")
 	printHelpCmd(w, "station agents create neo", "Create an agent")
 	printHelpCmd(w, "spwn up", "Bring up every world in spwn.yaml")
 	printHelpCmd(w, "spwn agent neo", "Start the world that contains neo")
@@ -159,7 +159,6 @@ func customHelp(cmd *cobra.Command, args []string) {
 	fmt.Fprintln(w)
 
 	fmt.Fprintf(w, "%s\n", ui.Strong("System:"))
-	printHelpCmd(w, "init", "Create default configs")
 	printHelpCmd(w, "auth", "Manage credentials")
 	printHelpCmd(w, "upgrade", "Update the CLI")
 	fmt.Fprintln(w)

@@ -42,6 +42,15 @@ func TestAnExampleIsTheFilesOfAProject(t *testing.T) {
 	}
 }
 
+func TestTheSeveranceExampleShipsItsKnowledge(t *testing.T) {
+	files, _ := catalog.Example("severance")
+	for _, p := range []string{"spwn/knowledge/handbook.md", "spwn/knowledge/raw/note-001.md", "spwn/knowledge/raw/.gitkeep"} {
+		if _, err := fs.Stat(files, p); err != nil {
+			t.Errorf("missing %s: %v", p, err)
+		}
+	}
+}
+
 func TestAnExampleTheCatalogDoesNotHoldIsNotFound(t *testing.T) {
 	if files, ok := catalog.Example("nope"); ok || files != nil {
 		t.Errorf("Example(nope) = %v, %v; want none", files, ok)

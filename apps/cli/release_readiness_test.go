@@ -9,6 +9,8 @@ import (
 	"runtime"
 	"strings"
 	"testing"
+
+	"spwn.sh/packages/project"
 )
 
 // spwnBinary is the absolute path to the real CLI binary used by every
@@ -100,16 +102,12 @@ func freshEnv(t *testing.T) (env []string, home string) {
 	return []string{"SPWN_HOME=" + home}, home
 }
 
-// mustInit scaffolds a fresh project at wd with the given name.
-func mustInit(t *testing.T, env []string, wd, name string) {
+// mustInit scaffolds a fresh project at wd with the given name, as
+// `station project create` does: through project.Init.
+func mustInit(t *testing.T, _ []string, wd, name string) {
 	t.Helper()
-	args := []string{"init"}
-	if name != "" {
-		args = append(args, "--name", name)
-	}
-	stdout, stderr, code := runCLI(t, env, wd, args...)
-	if code != 0 {
-		t.Fatalf("init failed: code=%d\nstdout=%s\nstderr=%s", code, stdout, stderr)
+	if err := project.Init(wd, project.InitOpts{Name: name}); err != nil {
+		t.Fatalf("project.Init: %v", err)
 	}
 }
 
@@ -136,7 +134,7 @@ func TestReleaseReadiness(t *testing.T) {
 	// --------------------------------------------------------------------
 
 	t.Run("01_init_name_flag_writes_manifest", func(t *testing.T) {
-		// A01: `init --name acme` creates spwn.yaml containing that name.
+		// A01: a scaffold named acme writes spwn.yaml containing that name.
 		t.Parallel()
 		env, _ := freshEnv(t)
 		wd := t.TempDir()
@@ -225,34 +223,6 @@ func TestReleaseReadiness(t *testing.T) {
 			if !strings.Contains(lock, ref) {
 				t.Errorf("lockfile missing %q:\n%s", ref, lock)
 			}
-		}
-	})
-
-	t.Run("06_init_refuses_overwrite", func(t *testing.T) {
-		// A06: re-running init without --force exits 1 when spwn.yaml exists.
-		t.Parallel()
-		env, _ := freshEnv(t)
-		wd := t.TempDir()
-		mustInit(t, env, wd, "acme")
-		_, stderr, code := runCLI(t, env, wd, "init", "--name", "acme")
-		if code == 0 {
-			t.Fatalf("second init should fail, got exit 0.\nstderr=%s", stderr)
-		}
-	})
-
-	t.Run("07_init_force_overwrites", func(t *testing.T) {
-		// A07: `--force` replaces spwn.yaml with the new name.
-		t.Parallel()
-		env, _ := freshEnv(t)
-		wd := t.TempDir()
-		mustInit(t, env, wd, "acme")
-		_, stderr, code := runCLI(t, env, wd, "init", "--name", "zeta", "--force")
-		if code != 0 {
-			t.Fatalf("init --force failed: code=%d\nstderr=%s", code, stderr)
-		}
-		m := readFile(t, filepath.Join(wd, "spwn.yaml"))
-		if !strings.Contains(m, "name: zeta") {
-			t.Fatalf("overwrite did not take effect:\n%s", m)
 		}
 	})
 
@@ -642,31 +612,6 @@ func TestReleaseReadiness(t *testing.T) {
 	})
 
 	// ── K. Regression tests for bugs surfaced this session ───────────
-
-	t.Run("51_catalog_install_ships_knowledge_dir", func(t *testing.T) {
-		// Regression for commit 6319e3a6: `spwn init spwn:<name>` used
-		// to drop the catalog's knowledge/ dir on the floor: the
-		// installer only copied agents/tools/hooks/files under spwn/.
-		// After the fix, the knowledge/ tree ships too, so seed
-		// handbooks + starter notes actually materialise. The path
-		// moved from ./knowledge/ (project root) to ./spwn/knowledge/
-		// so the whole spwn project tree is self-contained.
-		t.Parallel()
-		env, _ := freshEnv(t)
-		wd := t.TempDir()
-		_, stderr, code := runCLI(t, env, wd, "init", "spwn:severance")
-		if code != 0 {
-			t.Fatalf("init spwn:severance failed (code=%d): %s", code, stderr)
-		}
-		for _, rel := range []string{
-			"spwn/knowledge/handbook.md",
-			"spwn/knowledge/raw/note-001.md",
-		} {
-			if _, err := os.Stat(filepath.Join(wd, rel)); err != nil {
-				t.Errorf("expected %s on disk after init, got: %v", rel, err)
-			}
-		}
-	})
 
 	t.Run("55_migration_backup_tolerates_broken_symlink", func(t *testing.T) {
 		// Regression for a794d543: the pre-migration backup walked a

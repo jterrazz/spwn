@@ -18,7 +18,6 @@ rules (network, filesystem, tools), and each agent keeps its Mind
 - [spwn automation](#spwn-automation): Trigger-driven agent wakeups (cron + filesystem).
 - [spwn down](#spwn-down): Destroy a world.
 - [spwn gate](#spwn-gate): Manage the host-side credential broker (start/stop/status/logs/restart).
-- [spwn init](#spwn-init): Scaffold a Spwn project in the current directory.
 - [spwn install](#spwn-install): Install a dependency into the project.
 - [spwn logs](#spwn-logs): Show the system event log across worlds and agents.
 - [spwn uninstall](#spwn-uninstall): Remove a dependency from the project.
@@ -437,39 +436,6 @@ Stop and remove the gate container (image stays on disk).
 
 ```text
 spwn gate stop
-```
-
-## spwn init
-
-Scaffold a Spwn project in the current directory.
-
-```text
-Scaffold a Spwn project in the current directory.
-```
-
-```text
-Without arguments, creates a blank spwn.yaml plus a default ./spwn/
-tree (one world, one agent) and adds .spwn/ to .gitignore.
-```
-
-```text
-A positional example ref installs one of the bundled gallery entries
-into the current directory. Bare names resolve through the catalog:
-```
-
-```text
-    spwn init matrix          # shorthand for spwn init spwn:matrix
-    spwn init spwn:matrix     # explicit form
-```
-
-```text
-spwn init [example-ref] [flags]
-```
-
-```text
-      --backend string   Pin the scaffolded agent to a runtime backend (e.g. claude-code, codex). Leave empty to let Spwn resolve at spawn time.
-  -f, --force            Overwrite existing spwn.yaml
-      --name string      Project name (default: current directory name)
 ```
 
 ## spwn install

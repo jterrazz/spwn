@@ -19,7 +19,6 @@ export const { cli, cleanup } = await specification.cli(SPWN_BIN, {
         'enable',
         'enter',
         'gate',
-        'init',
         'inspect',
         'install',
         'list',

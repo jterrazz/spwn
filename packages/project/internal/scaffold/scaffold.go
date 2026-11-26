@@ -1,7 +1,7 @@
 // Package scaffold materializes a fresh spwn project on disk.
 //
 // The templates live next to this file as *.tmpl and are embedded at
-// build time, so spwn init needs no network access and no external
+// build time, so a new project needs no network access and no external
 // template files to work.
 package scaffold
 
@@ -293,8 +293,8 @@ func defaultName(absDir string) string {
 
 // AppendGitignore appends the `.spwn/` entry to <root>/.gitignore
 // when it's not already present. Idempotent and file-creating. Used
-// by Init (for blank scaffolds) and by the example installer (so
-// `spwn init spwn:<slug>` in a fresh dir also gets the entry).
+// by Init (for blank scaffolds) and by the engine's copy of an example
+// (so `station project create --from` also gets the entry).
 func AppendGitignore(root string) error {
 	return appendGitignore(root)
 }

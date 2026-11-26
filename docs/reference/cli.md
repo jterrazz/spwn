@@ -65,7 +65,7 @@ Decided in ADR-021 and ADR-022. A row whose left column is `station` is built, u
 
 | Today                                             | The grammar's form                                                                                       |
 | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `spwn init`, `station project create`             | `spwn project create`                                                                                    |
+| `station project create`, `--from <example>`      | `spwn project create`, `--from <example>`; `spwn init` (deleted) is gone                                 |
 | `station project plan\|apply\|drift`              | `spwn project plan`, `spwn project apply` and `spwn project drift`                                       |
 | `spwn build` (deleted)                            | gone: `spwn project apply` renders each agent into its run folder; the world image leaves `build`        |
 | `spwn up`, `spwn down`, `spwn world *`            | `spwn agents start`, `spwn agents stop`, on a machine (`--on`); the noun `world` goes                    |
@@ -84,11 +84,13 @@ Decided in ADR-021 and ADR-022. A row whose left column is `station` is built, u
 
 `station project apply` renders each agent into its run folder, `.spwn/agents/<agent>/`, and makes the whole declaration true, so what the deleted `spwn build` offered is lost on purpose: `--output` and `--force` (the folder is fixed; apply removes only what it wrote and asks before it overwrites a file edited by hand), `--agent` (no filter), `--runtime` (an agent declares its harness, and a sign-in never picks one), `--world` (each agent renders in the first grouping that holds it), `--dry-run` (`station project plan` lists what apply would write), and the image: `--tag`, `--base`, `--no-cache` and `SPWN_BASE_IMAGE` have no heir in the engine. `spwn up` builds its world image through the architect until `spwn up` is deleted, and an agent on a machine runs in its run folder, with no image.
 
+`station project create` makes a new folder, `./<name>`, from the scaffold or, with `--from`, from one of the catalog's six examples, so what the deleted `spwn init` offered is lost on purpose: a project in the current folder, and over a `spwn.yaml` already there (`--force`; create refuses a folder that exists), `--name` (the folder is the name), `--backend` and its `spwn:` form (`--harness` names a harness bare, and an example's agents declare their own), the `spwn:<example>` form of an example (the name is bare), and the report of the worlds and agents an example added. The smoke pass, `make test-smoke`, no longer builds a real image of each example, since a spec reads only the fixtures of its own tree; `packages/catalog` still checks that every `spwn:` dependency an example declares is a tool of the built-in catalog.
+
 ### Agents' commands today
 
 ```bash
 # ── Project workflow ─────────────────────────────────────────────
-spwn init                     # scaffold spwn.yaml + ./spwn/ + .spwn/
+station project create site   # a new folder ./site: spwn.yaml + ./spwn/ + .spwn/ ignored
 station project plan          # validate the tree
 station project apply         # render each agent into .spwn/agents/<agent>/ (what plan lists)
 spwn up [name]                # bring up every world in spwn.yaml (or one by name)

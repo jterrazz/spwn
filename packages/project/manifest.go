@@ -170,8 +170,8 @@ func RemoveWorld(manifestPath, name string) error {
 
 // AppendGitignore adds a `.spwn/` entry to <root>/.gitignore, creating
 // the file when missing and idempotent when already present. Used by
-// Init and by the catalog example installer so `spwn init spwn:<slug>`
-// drops a consistent gitignore too.
+// Init and by the engine's copy of an example, so
+// `station project create --from` drops a consistent gitignore too.
 func AppendGitignore(root string) error {
 	return scaffold.AppendGitignore(root)
 }

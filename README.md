@@ -72,7 +72,7 @@ Every command: [Machines' command reference](machines/docs/reference/commands.md
 
 ```sh
 spwn auth            # check your agent runtime sign-in
-spwn init            # a project and its first agent, neo
+station project create site # a new folder ./site, a project and its first agent, neo
 spwn agent neo       # talk to neo, in a sandboxed world
 station project apply # render each agent into .spwn/agents/
 spwn up              # bring a world up; down tears it down

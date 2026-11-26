@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io/fs"
 	"os"
+	"path"
 	"path/filepath"
 	"testing"
 
@@ -132,6 +133,29 @@ func TestAPlanWithAnErrorAppliesNothing(t *testing.T) {
 	}
 }
 
+func holdsEveryFileOf(t *testing.T, files fs.FS, dir, root string) {
+	t.Helper()
+	want, err := fs.ReadDir(files, dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, err := os.ReadDir(filepath.Join(root, filepath.FromSlash(dir)))
+	if err != nil {
+		t.Fatalf("the project lacks %s of the example: %v", dir, err)
+	}
+	held := map[string]bool{}
+	for _, e := range got {
+		held[e.Name()] = true
+	}
+	for _, e := range want {
+		if !held[e.Name()] {
+			t.Errorf("the project lacks %s/%s of the example", dir, e.Name())
+		} else if e.IsDir() {
+			holdsEveryFileOf(t, files, path.Join(dir, e.Name()), root)
+		}
+	}
+}
+
 func TestEachExampleOfTheCatalogPlansValidAndApplies(t *testing.T) {
 	for _, example := range catalog.Examples() {
 		t.Run(example, func(t *testing.T) {
@@ -141,6 +165,8 @@ func TestEachExampleOfTheCatalogPlansValidAndApplies(t *testing.T) {
 			if err != nil || made.Name != example || len(made.Agents) == 0 {
 				t.Fatalf("Create = %+v, %v; want the example's project named for it, with its agents", made, err)
 			}
+			files, _ := catalog.Example(example)
+			holdsEveryFileOf(t, files, ".", made.Root)
 			plan, err := calls.Plan.Run(t.Context(), d, calls.PlanIn{Folder: made.Root}, nil)
 			if err != nil || !plan.Valid || len(plan.Changes) == 0 {
 				t.Fatalf("Plan = %+v, %v; want valid, with files to apply", plan, err)

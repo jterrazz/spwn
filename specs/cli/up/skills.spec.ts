@@ -1,3 +1,4 @@
+import { directory } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { cli } from '../cli.specification.js';
@@ -6,8 +7,11 @@ import { cli } from '../cli.specification.js';
 
 describe('skills', () => {
     test('a claude-code agent finds its resolved skills under its own .claude/skills', async () => {
-        // Given - a project scaffolded for claude-code, then brought up
-        await using result = await cli.exec(['init --backend claude-code', 'up']);
+        // Given - the scaffold with neo pinned to claude-code, brought up
+        await using result = await cli
+            .fixture(directory('./__fixtures__/scaffolded-project/'))
+            .fixture(directory('./__fixtures__/claude-code-neo/'))
+            .exec('up');
 
         // Then - the starter skill sits in the agent's native skills tree inside the container
         expect(result.exitCode).toBe(0);

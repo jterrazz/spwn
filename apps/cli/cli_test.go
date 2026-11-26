@@ -40,7 +40,7 @@ func TestCLI_Help(t *testing.T) {
 
 	// Verify the stable top-level subcommands are listed in the grouped
 	// help.
-	for _, sub := range []string{"world", "agent", "install", "init"} {
+	for _, sub := range []string{"world", "agent", "install"} {
 		assertContains(t, out, sub, "root help")
 	}
 }
@@ -106,18 +106,6 @@ func TestCLI_InstallHelp(t *testing.T) {
 	}
 
 	assertContains(t, out, "spwn install", "install help")
-}
-
-// --- Init help ---
-
-func TestCLI_InitHelp(t *testing.T) {
-	out, _, err := executeCommand("init", "--help")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	assertContains(t, out, "init", "init help")
-	assertContains(t, out, ".spwn", "init help mentions config dir")
 }
 
 // --- Unknown command ---

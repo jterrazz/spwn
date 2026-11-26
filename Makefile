@@ -58,7 +58,7 @@ test-go-e2e: generate test-image ## Go world E2E (//go:build e2e), Docker requir
 test-compile-e2e: generate ## Go image-build E2E (compile and Dockerfile rendering), Docker required
 	cd packages/compile && go test -v -tags=e2e -timeout=15m ./e2e/...
 
-test-smoke: build ## Real image builds: spwn init, up, tool probe (~10 minutes cold)
+test-smoke: build ## Real image builds: the scaffold brought up, tool probe (~10 minutes cold)
 	SPWN_SMOKE=1 pnpm -C specs exec vitest --run --project cli
 
 install-binary: build ## Install the built binary into ~/.local/bin

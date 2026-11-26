@@ -30,7 +30,7 @@ dependencies:
   - "spwn:unix"
   - "spwn:git"
   - "spwn:python"
-  # Local blocks scaffolded by `spwn init`, one of each form so you
+  # Local blocks scaffolded by `station project create`, one of each form so you
   # can see how they're authored and used. Keep, edit, or delete them;
   # `station project plan` is happy either way.
   - "skill/focus"           # ./spwn/skills/focus.md

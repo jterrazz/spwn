@@ -18,5 +18,5 @@ Every Spwn dependency, whether shipped in the built-in catalog or authored under
 ## Related
 
 - **Imported by**: `apps/cli`, `catalog`, `packages/architect`, `packages/compile` (adapter), `packages/project` (validator), `packages/runtimes`
-- **Subpackage `builtin`**: the built-in tool catalog and the init gallery (`BuiltinTools`, `RegisterBuiltins`, `Gallery`, `Install`, `CopyGateTools`, `HydrateLocals`), the only reader of the generated `internal/adapters/spwn/content`; imported by `apps/cli`, `packages/architect` and the catalog and compile tests, never by `project`, `transpile`, `runtimes` or `automation`
+- **Subpackage `builtin`**: the built-in tool catalog (`BuiltinTools`, `RegisterBuiltins`, `CopyGateTools`, `HydrateLocals`), the only reader of the generated `internal/adapters/spwn/content`; imported by `apps/cli`, `packages/architect` and the catalog and compile tests, never by `project`, `transpile`, `runtimes` or `automation`
 - **Imports**: stdlib only

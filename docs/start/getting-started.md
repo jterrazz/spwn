@@ -10,19 +10,19 @@ curl -fsSL https://spwn.sh/install.sh | bash
 
 Three commands, one working agent. It needs Docker.
 
-| Step | Command          | What it does                                                                                                   |
-| ---- | ---------------- | -------------------------------------------------------------------------------------------------------------- |
-| 01   | `spwn auth`      | Checks you're signed in to Claude Code (or any supported runtime).                                             |
-| 02   | `spwn init`      | Drops `spwn.yaml` + a starter `neo` agent into the current directory.                                          |
-| 03   | `spwn agent neo` | Opens an interactive session with neo inside a sandboxed Docker world. Container lifecycle is handled for you. |
+| Step | Command                                              | What it does                                                                                                   |
+| ---- | ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| 01   | `spwn auth`                                          | Checks you're signed in to Claude Code (or any supported runtime).                                             |
+| 02   | `station project create my-project && cd my-project` | Makes a new folder `./my-project` holding `spwn.yaml` + a starter `neo` agent.                                 |
+| 03   | `spwn agent neo`                                     | Opens an interactive session with neo inside a sandboxed Docker world. Container lifecycle is handled for you. |
 
 Removing what the installer put down is [machines' getting started](../../machines/docs/start/getting-started.md#5-remove-what-it-put-down)'s recipe; `spwn uninstall <ref>` only detaches a dependency from an agent.
 
-Prefer a bundled demo? `spwn init matrix` drops a ready-made multi-agent world into the current directory (swap `matrix` for any template slug in the [catalog](../../catalog/)).
+Prefer a bundled demo? `station project create --from matrix` makes `./matrix`, a ready-made project of one of the six examples of the [catalog](../../machines/catalog/projects/) (`station project create --help` names them).
 
 ## The layout
 
-What `spwn init` lays down:
+What `station project create` lays down:
 
 ```text
 my-project/
@@ -99,7 +99,7 @@ spwn/agents/neo/
 
 **Your agents and their composition are declarative files committed alongside your code** - reviewed in PRs, versioned in git, diffed like any other config. Think Terraform for infrastructure, `docker-compose.yaml` for services, `package.json` for dependencies. Spwn plays the same role for the agents that work on your repo.
 
-`spwn init` drops the scaffold into any directory, the way `git init` or `docker init` do; see [the layout](#the-layout) it lays down. Whoever clones the repo gets the same agents with the same tools, byte-for-byte. No imperative setup scripts, no "works on my machine".
+`station project create <name>` makes the scaffold in a new folder of that name; see [the layout](#the-layout) it lays down. Whoever clones the repo gets the same agents with the same tools, byte-for-byte. No imperative setup scripts, no "works on my machine".
 
 **`~/.spwn/` holds only your user identity** - credentials, activity log. It's the equivalent of `~/.aws/` or `~/.docker/config.json`: personal to the machine, never the source of truth for what runs. To share an agent across projects, export it (`station agents export`) and import the archive in the next repo (`station agents import`).
 

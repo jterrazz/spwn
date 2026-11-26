@@ -171,7 +171,7 @@ func TestInit_scaffoldsLocalRefExamples(t *testing.T) {
 
 // TestInit_defaultScaffoldOmitsRuntimeBackend pins the 2026-04 decision
 // to ship a blank scaffold without pinning runtime.backend: agents
-// resolve their backend at spawn time, so `spwn init` should not
+// resolve their backend at spawn time, so `station project create` should not
 // hard-pick one on the user's behalf. Regressions here would bring
 // back the opinionated default and silently lock new projects to
 // claude-code even when the user is logged into codex.

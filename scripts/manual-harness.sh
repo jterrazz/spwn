@@ -68,26 +68,36 @@ scenario() {
     rm -rf "$d"; mkdir -p "$d"; cd "$d" || exit
 }
 
+start_project() {
+    if [ "$1" = --from ]; then
+        "$STATION" project create --from "$2" && cd "$2"
+    else
+        "$STATION" project create p && cd p
+    fi
+}
+
 
 s1() {
-    scenario 1 "fresh init + check"
-    run "s1.init"   expect_zero "$SPWN" init
+    scenario 1 "a new project plans valid"
+    run "s1.create" expect_zero "$STATION" project create p
+    cd p || return
     run "s1.check"  expect_zero "$STATION" project plan
     local json; json=$("$STATION" project plan --json 2>&1)
     checkstr "s1.checkjson-valid" '"valid": true' "$json"
 }
 
 s2() {
-    scenario 2 "init into non-empty dir refuses without --force"
-    echo "version: 1" > spwn.yaml
-    run "s2.init-no-force" expect_nonzero "$SPWN" init
-    run "s2.init-force"    expect_zero    "$SPWN" init --force
-    run "s2.check"         expect_zero    "$STATION" project plan
+    scenario 2 "a project is never created over a folder that exists"
+    run "s2.create"       expect_zero    "$STATION" project create p
+    run "s2.create-again" expect_nonzero "$STATION" project create p
+    cd p || return
+    run "s2.check"        expect_zero    "$STATION" project plan
 }
 
 s3() {
-    scenario 3 "init spwn:matrix scaffold"
-    run "s3.init-matrix" expect_zero "$SPWN" init spwn:matrix
+    scenario 3 "a project from the matrix example"
+    run "s3.create-matrix" expect_zero "$STATION" project create --from matrix
+    cd matrix || return
     if [ -d "spwn/agents/neo" ]; then
         PASS=$((PASS+1)); RESULTS+=("PASS  s3.neo-present")
     else
@@ -97,8 +107,9 @@ s3() {
 }
 
 s4() {
-    scenario 4 "init spwn:startup (3 agents)"
-    run "s4.init-startup" expect_zero "$SPWN" init spwn:startup
+    scenario 4 "a project from the startup example (3 agents)"
+    run "s4.create-startup" expect_zero "$STATION" project create --from startup
+    cd startup || return
     run "s4.check"        expect_zero "$STATION" project plan
     local out; out=$("$STATION" agents --json 2>&1)
     checkstr "s4.ceo"     "ceo"     "$out"
@@ -107,8 +118,8 @@ s4() {
 }
 
 s5() {
-    scenario 5 "init bogus ref errors"
-    run "s5.init-bogus" expect_nonzero "$SPWN" init spwn:does-not-exist-xyz-987
+    scenario 5 "an example the catalog does not hold is refused"
+    run "s5.create-bogus" expect_nonzero "$STATION" project create --from does-not-exist-xyz-987
 }
 
 s6() {
@@ -125,7 +136,8 @@ s6() {
 
 s7() {
     scenario 7 "double spwn up (idempotent), using matrix scaffold"
-    run "s7.init" expect_zero "$SPWN" init spwn:matrix
+    run "s7.create" expect_zero "$STATION" project create --from matrix
+    cd matrix || return
     run "s7.up-1" expect_zero "$SPWN" up
     "$SPWN" up > /dev/null 2>&1
     local rc=$?
@@ -139,7 +151,8 @@ s7() {
 
 s8() {
     scenario 8 "spwn down with no worlds"
-    run "s8.init" expect_zero "$SPWN" init
+    run "s8.create" expect_zero "$STATION" project create p
+    cd p || return
     "$SPWN" down > /dev/null 2>&1
     local rc=$?
     if [ $rc -le 1 ]; then
@@ -157,7 +170,7 @@ s9() {
 
 s10() {
     scenario 10 "invalid dep ref in agent.yaml"
-    "$SPWN" init > /dev/null 2>&1
+    start_project > /dev/null 2>&1
     local f="spwn/agents/neo/agent.yaml"
     python3 -c "
 import sys
@@ -170,7 +183,7 @@ with open('$f', 'w') as fh: fh.write(t)
 
 s11() {
     scenario 11 "agents create"
-    "$SPWN" init > /dev/null 2>&1
+    start_project > /dev/null 2>&1
     run "s11.new" expect_zero "$STATION" agents create bob
     [ -f "spwn/agents/bob/agent.yaml" ] && [ -f "spwn/agents/bob/SOUL.md" ] \
         && { PASS=$((PASS+1)); RESULTS+=("PASS  s11.files-exist"); } \
@@ -179,14 +192,14 @@ s11() {
 
 s12() {
     scenario 12 "agents create duplicate refuses"
-    "$SPWN" init > /dev/null 2>&1
+    start_project > /dev/null 2>&1
     "$STATION" agents create bob > /dev/null 2>&1
     run "s12.dup-no-force" expect_nonzero "$STATION" agents create bob
 }
 
 s13() {
     scenario 13 "agents + --json"
-    "$SPWN" init > /dev/null 2>&1
+    start_project > /dev/null 2>&1
     "$STATION" agents create bob > /dev/null 2>&1
     run "s13.ls"     expect_zero "$STATION" agents
     local json; json=$("$STATION" agents --json 2>&1)
@@ -196,14 +209,14 @@ s13() {
 
 s14() {
     scenario 14 "agents <name> / missing agent"
-    "$SPWN" init > /dev/null 2>&1
+    start_project > /dev/null 2>&1
     run "s14.inspect-neo"     expect_zero    "$STATION" agents neo
     run "s14.inspect-missing" expect_nonzero "$STATION" agents does-not-exist
 }
 
 s15() {
     scenario 15 "agents delete"
-    "$SPWN" init > /dev/null 2>&1
+    start_project > /dev/null 2>&1
     "$STATION" agents create bob > /dev/null 2>&1
     run "s15.rm"         expect_zero    "$STATION" agents delete bob --confirm=bob
     run "s15.rm-missing" expect_nonzero "$STATION" agents delete bob --confirm=bob
@@ -211,7 +224,7 @@ s15() {
 
 s16() {
     scenario 16 "agents export produces tar.gz"
-    "$SPWN" init > /dev/null 2>&1
+    start_project > /dev/null 2>&1
     "$STATION" agents create bob > /dev/null 2>&1
     run "s16.export" expect_zero "$STATION" agents export bob --to .
     local tar
@@ -225,7 +238,7 @@ s16() {
 
 s17() {
     scenario 17 "agents import round-trip"
-    "$SPWN" init > /dev/null 2>&1
+    start_project > /dev/null 2>&1
     "$STATION" agents create bob > /dev/null 2>&1
     "$STATION" agents export bob --to . > /dev/null 2>&1
     local tar
@@ -238,7 +251,7 @@ s17() {
 
 s18() {
     scenario 18 "agents fork"
-    "$SPWN" init > /dev/null 2>&1
+    start_project > /dev/null 2>&1
     "$STATION" agents create bob > /dev/null 2>&1
     run "s18.fork" expect_zero "$STATION" agents fork bob --as bob-v2
     local json; json=$("$STATION" agents --json 2>&1)
@@ -248,7 +261,7 @@ s18() {
 
 s19() {
     scenario 19 "spwn inspect project and single agent"
-    "$SPWN" init > /dev/null 2>&1
+    start_project > /dev/null 2>&1
     "$STATION" agents create bob > /dev/null 2>&1
     run "s19.inspect-all" expect_zero "$SPWN" inspect
     run "s19.inspect-one" expect_zero "$SPWN" inspect bob
@@ -257,7 +270,7 @@ s19() {
 
 s20() {
     scenario 20 "skills create / list / delete"
-    "$SPWN" init > /dev/null 2>&1
+    start_project > /dev/null 2>&1
     run "s20.skill-new" expect_zero "$STATION" skills create daily-standup
     [ -f "spwn/skills/daily-standup.md" ] \
         && { PASS=$((PASS+1)); RESULTS+=("PASS  s20.file-exists"); } \
@@ -271,7 +284,7 @@ s20() {
 
 s21() {
     scenario 21 "install python globally"
-    "$SPWN" init > /dev/null 2>&1
+    start_project > /dev/null 2>&1
     run "s21.install" expect_zero "$SPWN" install python
     grep -q "spwn:python" spwn/agents/neo/agent.yaml \
         && { PASS=$((PASS+1)); RESULTS+=("PASS  s21.in-agent-yaml"); } \
@@ -283,7 +296,7 @@ s21() {
 
 s22() {
     scenario 22 "install python --agent bob only"
-    "$SPWN" init > /dev/null 2>&1
+    start_project > /dev/null 2>&1
     "$STATION" agents create bob > /dev/null 2>&1
     run "s22.install-agent" expect_zero "$SPWN" install node --agent bob
     grep -q "spwn:node" spwn/agents/bob/agent.yaml \
@@ -296,7 +309,7 @@ s22() {
 
 s23() {
     scenario 23 "uninstall removes dep"
-    "$SPWN" init > /dev/null 2>&1
+    start_project > /dev/null 2>&1
     "$SPWN" install python > /dev/null 2>&1
     run "s23.uninstall" expect_zero "$SPWN" uninstall python
     grep -q "spwn:python" spwn/agents/neo/agent.yaml \
@@ -306,7 +319,7 @@ s23() {
 
 s24() {
     scenario 24 "install bogus ref errors"
-    "$SPWN" init > /dev/null 2>&1
+    start_project > /dev/null 2>&1
     run "s24.install-bogus" expect_nonzero "$SPWN" install spwn:does-not-exist-xyz
     grep -q "does-not-exist-xyz" spwn.lock 2>/dev/null \
         && { FAIL=$((FAIL+1)); RESULTS+=("FAIL  s24.lock-polluted"); } \
@@ -315,13 +328,13 @@ s24() {
 
 s25() {
     scenario 25 "install local skill without file errors"
-    "$SPWN" init > /dev/null 2>&1
+    start_project > /dev/null 2>&1
     run "s25.install-missing-skill" expect_nonzero "$SPWN" install skill:does-not-exist --agent neo
 }
 
 s26() {
     scenario 26 "install bare name → spwn: scheme"
-    "$SPWN" init > /dev/null 2>&1
+    start_project > /dev/null 2>&1
     run "s26.install-bare" expect_zero "$SPWN" install node
     grep -qE "spwn:node|node" spwn/agents/neo/agent.yaml \
         && { PASS=$((PASS+1)); RESULTS+=("PASS  s26.resolved-to-spwn-node"); } \
@@ -330,7 +343,7 @@ s26() {
 
 s27() {
     scenario 27 "install github:ref planned/error (not crash)"
-    "$SPWN" init > /dev/null 2>&1
+    start_project > /dev/null 2>&1
     "$SPWN" install github:jterrazz/does-not-exist > /dev/null 2>&1
     local rc=$?
     if [ $rc -eq 0 ] || [ $rc -eq 1 ]; then
@@ -342,14 +355,14 @@ s27() {
 
 s28() {
     scenario 28 "install local ref without --agent requires --agent"
-    "$SPWN" init > /dev/null 2>&1
+    start_project > /dev/null 2>&1
     echo "# test" > spwn/skills/myskill.md
     run "s28.local-no-agent" expect_nonzero "$SPWN" install skill:myskill
 }
 
 s29() {
     scenario 29 "lockfile determinism"
-    "$SPWN" init > /dev/null 2>&1
+    start_project > /dev/null 2>&1
     "$SPWN" install python > /dev/null 2>&1
     "$SPWN" install node > /dev/null 2>&1
     local sorted
@@ -365,7 +378,7 @@ s29() {
 
 s30() {
     scenario 30 "check after multiple installs"
-    "$SPWN" init > /dev/null 2>&1
+    start_project > /dev/null 2>&1
     "$SPWN" install python > /dev/null 2>&1
     "$SPWN" install node > /dev/null 2>&1
     "$SPWN" install git > /dev/null 2>&1
@@ -375,7 +388,7 @@ s30() {
 
 s31() {
     scenario 31 "matrix world spawn, ls shows running"
-    "$SPWN" init spwn:matrix > /dev/null 2>&1
+    start_project --from matrix > /dev/null 2>&1
     run "s31.up" expect_zero "$SPWN" up
     local out; out=$("$SPWN" ls 2>&1)
     checkstr "s31.running" "running" "$out"
@@ -384,7 +397,7 @@ s31() {
 
 s32() {
     scenario 32 "world inspect shows project-rooted agent home"
-    "$SPWN" init spwn:matrix > /dev/null 2>&1
+    start_project --from matrix > /dev/null 2>&1
     "$SPWN" up > /dev/null 2>&1
     local id; id=$("$SPWN" world ls --json 2>&1 | python3 -c 'import sys,json; d=json.load(sys.stdin); w=d.get("worlds") or d; print(w[0]["id"] if isinstance(w,list) and w else (w[0].get("id") or w[0].get("name")))' 2>/dev/null)
     if [ -z "$id" ]; then
@@ -406,7 +419,7 @@ s32() {
 
 s33() {
     scenario 33 "world ls --json shape"
-    "$SPWN" init spwn:matrix > /dev/null 2>&1
+    start_project --from matrix > /dev/null 2>&1
     "$SPWN" up > /dev/null 2>&1
     local out; out=$("$SPWN" world ls --json 2>&1)
     if echo "$out" | python3 -c 'import sys,json; json.load(sys.stdin)' 2>/dev/null; then
@@ -420,7 +433,7 @@ s33() {
 
 s34() {
     scenario 34 "down individual world"
-    "$SPWN" init spwn:matrix > /dev/null 2>&1
+    start_project --from matrix > /dev/null 2>&1
     "$SPWN" up > /dev/null 2>&1
     local id; id=$(docker ps --format '{{.Names}}' --filter 'name=world-' | head -1)
     if [ -n "$id" ]; then
@@ -432,7 +445,7 @@ s34() {
 
 s35() {
     scenario 35 "ls shows nothing after down"
-    "$SPWN" init spwn:matrix > /dev/null 2>&1
+    start_project --from matrix > /dev/null 2>&1
     "$SPWN" up > /dev/null 2>&1
     "$SPWN" down > /dev/null 2>&1
     local json; json=$("$SPWN" ls --json 2>&1)
@@ -445,7 +458,7 @@ s35() {
 
 s36() {
     scenario 36 "world logs via both forms (config name + runtime id)"
-    "$SPWN" init spwn:matrix > /dev/null 2>&1
+    start_project --from matrix > /dev/null 2>&1
     "$SPWN" up > /dev/null 2>&1
     local id; id=$(docker ps --format '{{.Names}}' --filter 'name=world-' | head -1)
     run "s36.logs-by-config" expect_zero "$SPWN" logs --world matrix
@@ -457,7 +470,7 @@ s36() {
 
 s37() {
     scenario 37 "world inspect exit code 0 for valid id, nonzero for invalid"
-    "$SPWN" init spwn:matrix > /dev/null 2>&1
+    start_project --from matrix > /dev/null 2>&1
     "$SPWN" up > /dev/null 2>&1
     local id; id=$(docker ps --format '{{.Names}}' --filter 'name=world-' | head -1)
     if [ -n "$id" ]; then
@@ -469,7 +482,7 @@ s37() {
 
 s38() {
     scenario 38 "knowledge path propagates into container"
-    "$SPWN" init spwn:matrix > /dev/null 2>&1
+    start_project --from matrix > /dev/null 2>&1
     mkdir -p knowledge
     echo "test fact" > knowledge/fact.md
     python3 - <<'PY'
@@ -496,7 +509,7 @@ PY
 
 s39() {
     scenario 39 "workspace mounted read-write"
-    "$SPWN" init spwn:matrix > /dev/null 2>&1
+    start_project --from matrix > /dev/null 2>&1
     "$SPWN" up -w . > /dev/null 2>&1
     local id; id=$(docker ps --format '{{.Names}}' --filter 'name=world-' | head -1)
     if [ -n "$id" ]; then
@@ -514,7 +527,7 @@ s39() {
 
 s40() {
     scenario 40 "container goes away after down (project-scoped)"
-    "$SPWN" init spwn:matrix > /dev/null 2>&1
+    start_project --from matrix > /dev/null 2>&1
     "$SPWN" up > /dev/null 2>&1
     local id_before; id_before=$(docker ps --format '{{.Names}}' --filter 'name=world-matrix' | head -1)
     "$SPWN" down > /dev/null 2>&1
@@ -546,7 +559,7 @@ s41() {
 
 s42() {
     scenario 42 "unicode agent name"
-    "$SPWN" init > /dev/null 2>&1
+    start_project > /dev/null 2>&1
     "$STATION" agents create "日本" > /dev/null 2>&1
     local rc=$?
     if [ $rc -le 1 ]; then
@@ -558,7 +571,7 @@ s42() {
 
 s43() {
     scenario 43 "very long agent name (slug boundary)"
-    "$SPWN" init > /dev/null 2>&1
+    start_project > /dev/null 2>&1
     local name; name=$(printf 'x%.0s' {1..80})
     "$STATION" agents create "$name" > /dev/null 2>&1
     local rc=$?
@@ -571,7 +584,7 @@ s43() {
 
 s44() {
     scenario 44 "empty dependencies list"
-    "$SPWN" init > /dev/null 2>&1
+    start_project > /dev/null 2>&1
     cat > spwn/agents/neo/agent.yaml <<'YAML'
 name: neo
 description: minimal agent with no deps
@@ -584,7 +597,7 @@ YAML
 
 s45() {
     scenario 45 "corrupted spwn.lock"
-    "$SPWN" init > /dev/null 2>&1
+    start_project > /dev/null 2>&1
     printf "garbage content\n" > spwn.lock
     "$STATION" project plan > /dev/null 2>&1
     local rc=$?
@@ -598,7 +611,7 @@ s45() {
 
 s46() {
     scenario 46 "project discovery walks upward"
-    "$SPWN" init > /dev/null 2>&1
+    start_project > /dev/null 2>&1
     mkdir -p a/b/c
     cd a/b/c || return
     run "s46.check-from-subdir" expect_zero "$STATION" project plan
@@ -606,9 +619,8 @@ s46() {
 
 s47() {
     scenario 47 "sibling projects isolated"
-    mkdir p1 p2
-    (cd p1 && "$SPWN" init > /dev/null 2>&1 && "$STATION" agents create alice > /dev/null 2>&1)
-    (cd p2 && "$SPWN" init > /dev/null 2>&1 && "$STATION" agents create bob > /dev/null 2>&1)
+    "$STATION" project create p1 > /dev/null 2>&1 && (cd p1 && "$STATION" agents create alice > /dev/null 2>&1)
+    "$STATION" project create p2 > /dev/null 2>&1 && (cd p2 && "$STATION" agents create bob > /dev/null 2>&1)
     cd p1 || return
     local j; j=$("$STATION" agents --json 2>&1)
     if echo "$j" | grep -q bob; then
@@ -635,7 +647,7 @@ s49() {
 
 s50() {
     scenario 50 "sanity: the 3 core verbs work end-to-end"
-    "$SPWN" init spwn:matrix > /dev/null 2>&1
+    start_project --from matrix > /dev/null 2>&1
     run "s50.check" expect_zero "$STATION" project plan
     run "s50.up"    expect_zero "$SPWN" up
     local id; id=$(docker ps --format '{{.Names}}' --filter 'name=world-matrix' | head -1)

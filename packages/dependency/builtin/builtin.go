@@ -6,24 +6,9 @@ import (
 	"spwn.sh/packages/dependency/tool"
 )
 
-// GalleryEntry is the public-facing description of one catalog
-// entry that ships a `worlds:` section, installable as a project
-// template via `spwn init <slug>`. Adapter-backed type aliased
-// through so external callers stay on one import.
-type GalleryEntry = spwn.Example
-
-// InstallReport describes everything Install wrote to disk.
-type InstallReport = spwn.InstallReport
-
-// ErrNotFound is returned by gallery lookups when the slug doesn't
-// match any entry. Callers compare with errors.Is (or == since the
-// underlying is a plain sentinel).
-var ErrNotFound = spwn.ErrNotFound
-
 // BuiltinTools returns every builtin tool shipped in the compiled binary
 // (the spwn: catalog). These are ref-by-name installables:
-// spwn:unix, spwn:python, etc. Project-template entries (matrix,
-// severance, ...) are excluded; see Gallery for those.
+// spwn:unix, spwn:python, etc.
 func BuiltinTools() []tool.Tool { return spwn.All }
 
 // RegisterBuiltins registers every builtin tool into the given
@@ -39,32 +24,6 @@ func RegisterBuiltins(target tool.Registry) error {
 	}
 	return nil
 }
-
-// Gallery returns every init-able catalog entry with metadata,
-// sorted in canonical display order (startup first, then matrix,
-// then the rest alphabetically).
-func Gallery() ([]GalleryEntry, error) { return spwn.List() }
-
-// GalleryEntryBySlug returns one gallery entry's metadata or
-// ErrNotFound when the slug is not a gallery entry (either it
-// doesn't exist or it's a dep-only entry without `worlds:`).
-func GalleryEntryBySlug(slug string) (GalleryEntry, error) { return spwn.Get(slug) }
-
-// GallerySlugs returns just the slug names of gallery entries,
-// the bare-name lookup set for `spwn init <slug>` resolution.
-// Sorted in display order.
-func GallerySlugs() []string { return spwn.ShippedSlugs() }
-
-// Install materialises a gallery entry into baseDir as a new
-// project tree. Existing files are never overwritten (re-install
-// is idempotent). Returns an InstallReport listing what was added
-// vs skipped.
-func Install(slug, baseDir string) (InstallReport, error) { return spwn.Install(slug, baseDir) }
-
-// InstallInto installs into the active project root when one is
-// discoverable, else into the user-global ~/.spwn (legacy global
-// mode). Convenience wrapper for the CLI.
-func InstallInto(slug string) (InstallReport, error) { return spwn.InstallInto(slug) }
 
 // CopyGateTools materialises every catalog tool under spwn:<refName>
 // that has a `gate:` section into `<gateToolsRoot>/<short>/`. Called

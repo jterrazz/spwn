@@ -23,7 +23,7 @@ container. Before you write your first automation, scaffold the
 project end-to-end:
 
 ```bash
-spwn init                    # creates spwn.yaml + spwn/agents/
+station project create site && cd site # creates ./site: spwn.yaml + spwn/agents/
 station agents create editor     # creates spwn/agents/editor/
 station project plan         # confirm the tree is valid
 spwn up                      # bring up the world (architect spawns containers)
@@ -277,7 +277,7 @@ Per-`<world>/<name>` cursor of the last successful fire's
 runs 2h late advances the cursor to the slot it covered, preventing
 the next catch-up from re-detecting it).
 
-Both files are gitignored by `spwn init`'s default `.gitignore`.
+Both files are gitignored by the `.gitignore` `station project create` writes.
 
 ---
 

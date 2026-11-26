@@ -7,7 +7,7 @@ runs:
           ⬡ spwn - the building blocks of agent intelligence
 
           Quick Start:
-            spwn init                        Scaffold a new project
+            station project create site      Make a new project
             station agents create neo        Create an agent
             spwn up                          Bring up every world in spwn.yaml
             spwn agent neo                   Start the world that contains neo
@@ -28,7 +28,6 @@ runs:
             logs                             System event log (--world, --agent, --type)
 
           System:
-            init                             Create default configs
             auth                             Manage credentials
             upgrade                          Update the CLI
 
