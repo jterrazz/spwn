@@ -347,7 +347,7 @@ func (k *checker) page(p *Page) {
 		k.add("S8", p.ID, "", at, fmt.Sprintf("page %q is prose only", p.ID))
 	}
 	for _, sec := range p.Sections {
-		if sec.Heading != nil && strings.EqualFold(sec.Heading.Text, "rests on") {
+		if sec.Heading != nil && restsOn(sec.Heading.Text) {
 			k.add("S6", p.ID, "", sec.Heading.At, fmt.Sprintf("%q rests on this page's reading: you have not ruled", p.ID))
 			k.needsYou[p.ID] = true
 		}

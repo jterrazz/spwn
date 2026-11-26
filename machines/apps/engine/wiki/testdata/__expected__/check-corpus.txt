@@ -1,5 +1,5 @@
 findings
-  growth/positioning:52:1 S6 needs-you "growth/positioning" rests on this page's reading: you have not ruled
+  growth/positioning:60:1 S6 needs-you "growth/positioning" rests on this page's reading: you have not ruled
   product/boundaries:66:1 S6 needs-you "no-computer" rests on this page's reading: you have not ruled
   product/boundaries:76:1 S6 needs-you "os-holds-no-facts" rests on this page's reading: you have not ruled
   product/boundaries:82:1 S6 needs-you "product/boundaries" rests on this page's reading: you have not ruled

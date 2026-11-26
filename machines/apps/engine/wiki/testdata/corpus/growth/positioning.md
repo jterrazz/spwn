@@ -41,7 +41,15 @@ costs="the only safety is its instructions; one context holds everything, and yo
 
 </Group>
 
-<Figure id="two-costs" form="quad" shows={ref("growth/positioning#alternatives")} x="scale" y="authorship" caption="Each costs either scale or authorship." />
+<Figure
+id="two-costs"
+form="quad"
+shows={ref("growth/positioning#alternatives")}
+x="scale"
+y="authorship"
+parts={[{ name: "by hand", at: "y" }, { name: "one big agent", at: "x" }, { name: "spwn", at: "xy" }]}
+caption="Each costs either scale or authorship."
+/>
 
 <Table id="all" of="alternative" in={ref("growth/positioning#alternatives")} columns={["gives", "costs"]} />
 

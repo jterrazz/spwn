@@ -62,7 +62,10 @@ type Verdict struct{ Hard, Soft int }
 type ServedSection struct {
 	Heading string
 	Anchor  string
-	Items   []ServedItem
+	// value: the page's own "Rests on" section, the one S6 reads: what the
+	// page stands on, served where it is written.
+	Rests bool
+	Items []ServedItem
 }
 
 type ServedItem struct {
@@ -230,7 +233,7 @@ func (c Corpus) Serve(id string, budget Budget) (Served, error) {
 	if budget == "" {
 		budget = c.Schema.Budget
 	}
-	s := server{c: c, budget: budget, readings: map[string]BlockReading{}, pages: map[string]*Page{}, blocks: map[string]*Block{}}
+	s := server{c: c, budget: budget, readings: map[string]BlockReading{}, pages: map[string]*Page{}, blocks: map[string]*Block{}, groups: map[string]*Group{}}
 	s.index()
 	p := &c.Pages[i]
 	reading := s.reading(p.ID)
@@ -253,20 +256,23 @@ func (c Corpus) Serve(id string, budget Budget) (Served, error) {
 		} else {
 			out.Verdict.Soft++
 		}
-		if f.Page == p.ID && f.Block == "" {
+		if f.Page == p.ID && f.Block == "" && s.signals(f) {
 			out.Findings = append(out.Findings, served(f))
 		}
 	}
 	for si, sec := range p.Sections {
 		ss := ServedSection{}
 		if sec.Heading != nil {
-			ss.Heading, ss.Anchor = sec.Heading.Text, sec.Heading.Anchor
+			ss.Heading, ss.Anchor, ss.Rests = sec.Heading.Text, sec.Heading.Anchor, restsOn(sec.Heading.Text)
 		}
 		if si == 0 && sec.Heading == nil {
 			sec.Items = s.afterParagraph(sec.Items, p.Faces.Paragraph)
 		}
 		for _, it := range sec.Items {
-			ss.Items = append(ss.Items, s.item(p, reading, it))
+			if _, prose := it.(*Prose); prose && budget == Budget30s {
+				continue
+			}
+			ss.Items = append(ss.Items, s.item(p, reading, it, false))
 		}
 		out.Sections = append(out.Sections, ss)
 	}
@@ -279,6 +285,7 @@ type server struct {
 	readings map[string]BlockReading
 	pages    map[string]*Page
 	blocks   map[string]*Block
+	groups   map[string]*Group
 }
 
 func (s *server) index() {
@@ -292,19 +299,20 @@ func (s *server) index() {
 		s.pages[p.ID] = p
 		for _, sec := range p.Sections {
 			for _, it := range sec.Items {
-				s.indexItem(it)
+				s.indexItem(p.ID, it)
 			}
 		}
 	}
 }
 
-func (s *server) indexItem(it Item) {
+func (s *server) indexItem(page string, it Item) {
 	switch it := it.(type) {
 	case *Block:
 		s.blocks[it.Address] = it
 	case *Group:
+		s.groups[page+"#"+it.ID] = it
 		for _, inner := range it.Items {
-			s.indexItem(inner)
+			s.indexItem(page, inner)
 		}
 	}
 }
@@ -365,17 +373,31 @@ func (s *server) afterParagraph(items []Item, paragraph string) []Item {
 	return append([]Item{&trimmed}, items[1:]...)
 }
 
-func (s *server) item(p *Page, r Reading, it Item) ServedItem {
+func (s *server) item(p *Page, r Reading, it Item, grouped bool) ServedItem {
 	switch it := it.(type) {
 	case *Prose:
 		return ServedItem{Prose: Paragraphs(it.Markdown)}
 	case *Group:
 		return ServedItem{Group: s.group(p, r, it)}
 	case *Block:
-		return ServedItem{Block: s.block(p, it)}
+		return ServedItem{Block: s.block(p, it, grouped)}
 	}
 	return ServedItem{}
 }
+
+// invariant: SPEC-v1 §15: at 30 s only needs-you Signals show, at 2 min
+// remarks too, at 10 min ambient as well; a hard finding shows at every budget.
+func (s *server) signals(f Finding) bool {
+	switch {
+	case f.Hard || f.Level == LevelNeedsYou:
+		return true
+	case f.Level == LevelRemark:
+		return s.budget != Budget30s
+	}
+	return s.budget == Budget10min
+}
+
+func restsOn(heading string) bool { return strings.EqualFold(heading, "rests on") }
 
 func (s *server) group(p *Page, r Reading, g *Group) *ServedGroup {
 	gr := s.readings[p.ID+"#"+g.ID]
@@ -389,7 +411,7 @@ func (s *server) group(p *Page, r Reading, g *Group) *ServedGroup {
 		out.Folded = FoldSeat
 	}
 	for _, inner := range g.Items {
-		si := s.item(p, r, inner)
+		si := s.item(p, r, inner, true)
 		if si.Block != nil && si.Block.Tier != "" {
 			out.Blocks++
 		}
@@ -401,7 +423,7 @@ func (s *server) group(p *Page, r Reading, g *Group) *ServedGroup {
 	return out
 }
 
-func (s *server) block(p *Page, b *Block) *ServedBlock {
+func (s *server) block(p *Page, b *Block, grouped bool) *ServedBlock {
 	r := s.readings[b.Address]
 	kind, _ := s.c.Schema.kind(b.Kind)
 	out := &ServedBlock{
@@ -411,9 +433,9 @@ func (s *server) block(p *Page, b *Block) *ServedBlock {
 	if r.Weight != nil {
 		out.Tier, out.Score, out.Why = r.Weight.Tier, r.Weight.Score, r.Weight.Why
 	}
-	out.Shown = shown(out.Tier, s.budget)
+	out.Shown = shown(out.Tier, s.budget, grouped)
 	for _, f := range s.c.Report.Findings {
-		if f.Page == p.ID && f.Block == b.ID {
+		if f.Page == p.ID && f.Block == b.ID && s.signals(f) {
 			out.Finding = append(out.Finding, served(f))
 		}
 	}
@@ -428,7 +450,7 @@ func (s *server) block(p *Page, b *Block) *ServedBlock {
 			out.Sub = &PageHead{ID: v.Child}
 		}
 	case *FigureView:
-		out.Figure = &ServedFigure{Form: v.Form, Caption: v.Caption, Shows: s.ref(v.Shows), Parts: v.Parts, X: textOf(b.Props, "x"), Y: textOf(b.Props, "y")}
+		out.Figure = &ServedFigure{Form: v.Form, Caption: v.Caption, Shows: s.ref(v.Shows), Parts: s.parts(v), X: textOf(b.Props, "x"), Y: textOf(b.Props, "y")}
 	default:
 		out.Fields = s.fields(kind, b.Props)
 	}
@@ -441,8 +463,12 @@ func titleOf(k Kind, id string) string {
 
 // invariant: SPEC-v1 §15's table: the budget shows a lead, a normal and a
 // quiet block each at its size; a block that has no weight (a table, a
-// figure, a sub-page) shows whole but at 30 s.
-func shown(t Tier, b Budget) Shown {
+// figure, a sub-page) shows whole but at 30 s. At 30 s a group's one line
+// carries its lead, and a lead no group holds is its own tile.
+func shown(t Tier, b Budget, grouped bool) Shown {
+	if b == Budget30s && t == TierLead && !grouped {
+		return ShownTile
+	}
 	if b == Budget30s {
 		return ShownNone
 	}
@@ -476,6 +502,9 @@ func (s *server) ref(address string) ServedRef {
 	}
 	if p, ok := s.pages[address]; ok {
 		return ServedRef{Address: address, Word: p.Faces.Word, Resolves: true}
+	}
+	if g, ok := s.groups[address]; ok {
+		return ServedRef{Address: address, Word: cmp.Or(g.Title, g.ID), Resolves: true}
 	}
 	return ServedRef{Address: address, Word: address}
 }
@@ -517,7 +546,7 @@ func (s *server) table(v *TableView, rows []string) *ServedTable {
 	kind, _ := s.c.Schema.kind(v.Of)
 	out := &ServedTable{Of: v.Of, Title: titleOf(kind, v.Of), In: s.ref(v.In), Columns: v.Columns}
 	if v.Where != nil {
-		out.Where = v.Where.Field + " " + string(v.Where.Op) + " " + v.Where.Operand.Text
+		out.Where = s.where(v.Where)
 	}
 	for _, address := range rows {
 		b, ok := s.blocks[address]
@@ -530,6 +559,40 @@ func (s *server) table(v *TableView, rows []string) *ServedTable {
 			row.Cells = append(row.Cells, s.cell(col, b, r))
 		}
 		out.Rows = append(out.Rows, row)
+	}
+	return out
+}
+
+// invariant: a table's filter is served as the words it reads, its field
+// then what it names: `by is ref("product/stack#machines")` reads "by
+// Machines", `carried_in has ref("product/stack#wiki")` "carried in Wiki".
+func (s *server) where(q *Query) string {
+	operand := text(q.Operand)
+	if q.Operand.Kind == ValueRef {
+		operand = s.ref(q.Operand.Text).Word
+	}
+	return strings.ReplaceAll(q.Field, "_", " ") + " " + operand
+}
+
+// invariant: a figure states nothing its shows does not (SPEC-v1 §11), so a
+// figure with no parts written is drawn from what it shows: a group's
+// blocks, or the one block it names, each by its word.
+func (s *server) parts(v *FigureView) []FigurePart {
+	if len(v.Parts) > 0 {
+		return v.Parts
+	}
+	if b, ok := s.blocks[v.Shows]; ok {
+		return []FigurePart{{Name: cmp.Or(b.Faces.Word, b.ID)}}
+	}
+	g, ok := s.groups[v.Shows]
+	if !ok {
+		return nil
+	}
+	var out []FigurePart
+	for _, inner := range g.Items {
+		if b, ok := inner.(*Block); ok {
+			out = append(out, FigurePart{Name: cmp.Or(b.Faces.Word, b.ID)})
+		}
 	}
 	return out
 }

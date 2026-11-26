@@ -32,9 +32,13 @@
         - button "one-big-agent"
         - button "managed-platform"
         - button "unrelated-tools"
-      - figure "Figure two-costs": Figure quad growth/positioning#alternatives authorship scale Each costs either scale or authorship.
+      - figure "Figure two-costs":
+        - text: Figure quad
+        - button "What a person uses today"
+        - text: authorship by hand y one big agent x spwn xy scale Each costs either scale or authorship.
       - region "Table all":
-        - text: Table alternative growth/positioning#alternatives
+        - text: Table alternative
+        - button "What a person uses today"
         - table:
           - rowgroup:
             - row "Alternative gives costs":

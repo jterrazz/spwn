@@ -228,6 +228,20 @@
             },
             "x": "scale",
             "y": "authorship",
+            "parts": [
+              {
+                "name": "by hand",
+                "at": "y"
+              },
+              {
+                "name": "one big agent",
+                "at": "x"
+              },
+              {
+                "name": "spwn",
+                "at": "xy"
+              }
+            ],
             "caption": "Each costs either scale or authorship."
           },
           "faces": {
@@ -238,7 +252,20 @@
           "view": {
             "form": "quad",
             "shows": "growth/positioning#alternatives",
-            "parts": [],
+            "parts": [
+              {
+                "name": "by hand",
+                "at": "y"
+              },
+              {
+                "name": "one big agent",
+                "at": "x"
+              },
+              {
+                "name": "spwn",
+                "at": "xy"
+              }
+            ],
             "caption": "Each costs either scale or authorship."
           },
           "at": {
@@ -247,7 +274,7 @@
           },
           "span": {
             "from": 44,
-            "to": 44
+            "to": 52
           }
         },
         {
@@ -281,20 +308,20 @@
             ]
           },
           "at": {
-            "line": 46,
+            "line": 54,
             "col": 1
           },
           "span": {
-            "from": 46,
-            "to": 46
+            "from": 54,
+            "to": 54
           }
         },
         {
           "t": "prose",
           "markdown": "Each costs either scale or authorship. Spwn's answer is to keep both: the work goes to agents, the\ndecisions stay with you, on your machines, from one place for each fact\n([the stack](../product/stack.md)).",
           "span": {
-            "from": 48,
-            "to": 50
+            "from": 56,
+            "to": 58
           }
         }
       ]
@@ -305,7 +332,7 @@
         "text": "Rests on",
         "anchor": "rests-on",
         "at": {
-          "line": 52,
+          "line": 60,
           "col": 1
         }
       },
@@ -314,8 +341,8 @@
           "t": "prose",
           "markdown": "What is not settled: whether \"the category it refuses\" is said in public, and how, is a\npositioning call the owner has not made; it is on\n[open questions](./open-questions.md#positioning-audience-and-pricing). The four alternatives and\ntheir costs are this page's argument; the brief the owner confirmed on 2026-11-21 did not list\nthem, so he has not ruled on them.",
           "span": {
-            "from": 54,
-            "to": 58
+            "from": 62,
+            "to": 66
           }
         }
       ]

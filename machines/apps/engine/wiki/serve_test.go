@@ -76,6 +76,9 @@ func outline(s wiki.Served) string {
 				}
 				if k.Figure != nil {
 					line(depth+1, "figure", k.Figure.Form, "shows="+k.Figure.Shows.Address, strconv.Quote(k.Figure.Caption))
+					for _, p := range k.Figure.Parts {
+						line(depth+2, "part", strconv.Quote(p.Name), "at="+p.At)
+					}
 				}
 				for _, f := range k.Finding {
 					line(depth+1, "finding", string(f.Level), f.Rule, f.Says)
@@ -85,7 +88,7 @@ func outline(s wiki.Served) string {
 	}
 	for _, sec := range s.Sections {
 		if sec.Heading != "" {
-			line(1, "section", sec.Anchor, strconv.Quote(sec.Heading))
+			line(1, "section", sec.Anchor, strconv.Quote(sec.Heading), "rests="+strconv.FormatBool(sec.Rests))
 		}
 		items(2, sec.Items)
 	}
@@ -205,5 +208,36 @@ func TestProseIsReadAsParagraphsItemsAndRuns(t *testing.T) {
 	}
 	if !slices.Equal(lines, want) {
 		t.Fatalf("Paragraphs =\n%s\nwant\n%s", strings.Join(lines, "\n"), strings.Join(want, "\n"))
+	}
+}
+
+func TestAFigureWithNoPartsWrittenIsDrawnFromTheGroupItShowsByItsTitle(t *testing.T) {
+	files := corpusFiles(t)
+	files["growth/positioning.md"] = []byte(strings.Replace(string(files["growth/positioning.md"]),
+		`parts={[{ name: "by hand", at: "y" }, { name: "one big agent", at: "x" }, { name: "spwn", at: "xy" }]}`, "", 1))
+	c, err := wiki.Read(files)
+	if err != nil {
+		t.Fatal(err)
+	}
+	s, err := c.Serve("growth/positioning", wiki.Budget2min)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var names []string
+	for _, sec := range s.Sections {
+		for _, it := range sec.Items {
+			if it.Block != nil && it.Block.Figure != nil {
+				if shows := it.Block.Figure.Shows; !shows.Resolves || shows.Word != "What a person uses today" {
+					t.Errorf("shows = %+v; want the group, by its title", shows)
+				}
+				for _, p := range it.Block.Figure.Parts {
+					names = append(names, p.Name+"@"+p.At)
+				}
+			}
+		}
+	}
+	want := []string{"by-hand@", "one-big-agent@", "managed-platform@", "unrelated-tools@"}
+	if !slices.Equal(names, want) {
+		t.Fatalf("parts = %v; want %v", names, want)
 	}
 }

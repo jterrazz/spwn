@@ -30,7 +30,7 @@
         - button "no-running-agent"
         - button "no-ungranted-port"
       - region "Table machines":
-        - text: Table refusal where by is product/stack#machines
+        - text: Table refusal where by machines
         - button "Boundaries"
         - table:
           - rowgroup:

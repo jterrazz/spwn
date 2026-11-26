@@ -3424,6 +3424,7 @@ export type WikiServedSection = {
     Anchor: string;
     Heading: string;
     Items: WikiServedItem[] | null;
+    Rests: boolean;
 };
 
 export type WikiServedTable = {

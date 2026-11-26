@@ -682,12 +682,16 @@
             "array",
             "null"
           ]
+        },
+        "Rests": {
+          "type": "boolean"
         }
       },
       "required": [
         "Anchor",
         "Heading",
-        "Items"
+        "Items",
+        "Rests"
       ],
       "type": "object"
     },
