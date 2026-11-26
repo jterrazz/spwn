@@ -48,7 +48,7 @@ func declaredIn(root string) ([]declared, error) {
 	var out []declared
 	for group, w := range p.Manifest.Worlds {
 		for name, a := range w.Automations {
-			out = append(out, declared{group: group, auto: automations.Automation{Name: name, Agent: a.Agent, Trigger: trigger(a.On)}})
+			out = append(out, declared{group: group, auto: automations.Automation{Group: group, Name: name, Agent: a.Agent, Trigger: trigger(a.On)}})
 		}
 	}
 	slices.SortFunc(out, func(a, b declared) int {
@@ -81,6 +81,7 @@ func read(all []declared, rows []automation.Receipt) []automations.Automation {
 	out := make([]automations.Automation, 0, len(all))
 	for _, d := range all {
 		a := d.auto
+		a.Group = d.group
 		for _, r := range rows {
 			if r.World != d.group || r.Automation != a.Name {
 				continue
@@ -95,7 +96,7 @@ func read(all []declared, rows []automation.Receipt) []automations.Automation {
 		}
 		out = append(out, a)
 	}
-	return out
+	return automations.Mark(out)
 }
 
 func (Automations) List(_ context.Context, root string) ([]automations.Automation, error) {
@@ -110,25 +111,22 @@ func (Automations) List(_ context.Context, root string) ([]automations.Automatio
 	return read(all, rows), nil
 }
 
-func (a Automations) Automation(ctx context.Context, root, name string) (automations.Automation, error) {
-	// invariant: when two groups declare one name, the first by group answers.
+func (a Automations) Automation(ctx context.Context, root, ref string) (automations.Automation, error) {
 	all, err := a.List(ctx, root)
 	if err != nil {
 		return automations.Automation{}, err
 	}
-	for _, found := range all {
-		if found.Name == name {
-			return found, nil
-		}
-	}
-	return automations.Automation{}, automations.ErrNotFound
+	return automations.Select(all, ref)
 }
 
-func (a Automations) Log(ctx context.Context, root, name string, last int) ([]automations.Run, error) {
-	if name != "" {
-		if _, err := a.Automation(ctx, root, name); err != nil {
+func (a Automations) Log(ctx context.Context, root, ref string, last int) ([]automations.Run, error) {
+	var chosen automations.Automation
+	if ref != "" {
+		found, err := a.Automation(ctx, root, ref)
+		if err != nil {
 			return nil, err
 		}
+		chosen = found
 	}
 	rows, err := receiptsOf(root)
 	if err != nil {
@@ -136,7 +134,7 @@ func (a Automations) Log(ctx context.Context, root, name string, last int) ([]au
 	}
 	var out []automations.Run
 	for _, r := range rows {
-		if name == "" || r.Automation == name {
+		if ref == "" || (r.World == chosen.Group && r.Automation == chosen.Name) {
 			out = append(out, run(r))
 		}
 	}
@@ -147,5 +145,5 @@ func (a Automations) Log(ctx context.Context, root, name string, last int) ([]au
 }
 
 func run(r automation.Receipt) automations.Run {
-	return automations.Run{Name: r.Automation, Scheduled: r.Scheduled, At: r.Fired, OK: r.OK, Error: r.Error, Output: r.Output}
+	return automations.Run{Group: r.World, Name: r.Automation, Scheduled: r.Scheduled, At: r.Fired, OK: r.OK, Error: r.Error, Output: r.Output}
 }

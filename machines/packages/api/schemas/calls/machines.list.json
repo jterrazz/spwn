@@ -18,6 +18,7 @@
             "apps.unknown",
             "apps.unpinnable",
             "automations.not-found",
+            "automations.not-unique",
             "awake.no-battery",
             "awake.no-lid",
             "awake.out-of-bounds",

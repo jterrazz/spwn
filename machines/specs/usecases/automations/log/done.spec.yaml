@@ -33,6 +33,7 @@ runs:
             "findings": [],
             "runs": [
               {
+                "group": "",
                 "automation": "morning",
                 "scheduled": "2026-05-01T06:00:00Z",
                 "at": "2026-05-01T06:00:00Z",
@@ -41,6 +42,7 @@ runs:
                 "output": "brief written"
               },
               {
+                "group": "",
                 "automation": "inbox",
                 "scheduled": null,
                 "at": "2026-05-01T11:23:14Z",
@@ -49,6 +51,7 @@ runs:
                 "output": ""
               },
               {
+                "group": "",
                 "automation": "morning",
                 "scheduled": "2026-05-02T06:00:00Z",
                 "at": "2026-05-02T06:00:00Z",

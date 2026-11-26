@@ -288,7 +288,8 @@
       "schema": "station.automations.log/v1",
       "where": "at-target",
       "errors": [
-        "automations.not-found"
+        "automations.not-found",
+        "automations.not-unique"
       ],
       "in": "LogIn"
     },
@@ -297,7 +298,8 @@
       "schema": "station.automations.show/v1",
       "where": "at-target",
       "errors": [
-        "automations.not-found"
+        "automations.not-found",
+        "automations.not-unique"
       ],
       "in": "ShowIn",
       "out": "Automation"

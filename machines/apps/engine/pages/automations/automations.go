@@ -43,12 +43,26 @@ func runs(a automations.Automation) string {
 	return strconv.Itoa(a.Fires) + ", " + strconv.Itoa(a.Failed) + " failed"
 }
 
+func label(a automations.Automation) string {
+	if a.Shared {
+		return a.Qualified()
+	}
+	return a.Name
+}
+
+func reservedSentence(a automations.Automation) string {
+	if a.Group == "" {
+		return "its name is a command's: station automations log " + a.Name + " reads its runs, and no detail can be asked for it"
+	}
+	return "its name is a command's: station automations " + a.Qualified() + " shows it, and station automations log " + a.Qualified() + " reads its runs"
+}
+
 func row(a automations.Automation) page.Row {
-	r := page.Row{ID: a.Name, Label: a.Name, Mark: page.OK,
+	r := page.Row{ID: label(a), Label: label(a), Mark: page.OK,
 		Cells: []page.Value{page.Text(a.Agent), page.Text(trigger(a.Trigger)), page.Text(lastFired(a)), page.Text(runs(a))}}
 	if automations.Reserved(a.Name) {
 		r.Mark = page.Attention
-		r.Detail = page.Text("its name is a command's: station automations log " + a.Name + " reads its runs, and no detail can be asked for it")
+		r.Detail = page.Text(reservedSentence(a))
 	}
 	return r
 }
@@ -71,7 +85,7 @@ func Show(a automations.Automation, thisMac page.Context) page.Page {
 	// invariant: the automation alone, what its runs say of it on its row;
 	// its runs are those of `automations log <automation>`.
 	r := row(a)
-	head := page.Section{ID: a.Name, Title: a.Name, Role: page.Banner, Uncounted: true, Columns: columns(), Items: []page.Item{{Row: &r}}}
+	head := page.Section{ID: label(a), Title: label(a), Role: page.Banner, Uncounted: true, Columns: columns(), Items: []page.Item{{Row: &r}}}
 	return page.Seal(page.Page{ID: "automations-show", Command: "automations", Context: thisMac, Sections: []page.Section{head}})
 }
 
@@ -89,7 +103,7 @@ func Log(all []automations.Run, thisMac page.Context) page.Page {
 			mark, outcome = page.Broken, "failed: "+oneLine(run.Error)
 		}
 		r := page.Row{ID: strconv.Itoa(i), Label: run.At.UTC().Format(time.DateTime), Mark: mark,
-			Cells: []page.Value{page.Text(run.Name), page.Text(outcome)}, Detail: page.Text(oneLine(run.Output))}
+			Cells: []page.Value{page.Text(run.Qualified()), page.Text(outcome)}, Detail: page.Text(oneLine(run.Output))}
 		s.Items = append(s.Items, page.Item{Row: &r})
 	}
 	if len(all) == 0 {
@@ -109,6 +123,7 @@ type TriggerJSON struct {
 }
 
 type AutomationJSON struct {
+	Group     string      `json:"group"`
 	Name      string      `json:"name"`
 	Agent     string      `json:"agent"`
 	Trigger   TriggerJSON `json:"trigger"`
@@ -118,6 +133,7 @@ type AutomationJSON struct {
 }
 
 type RunJSON struct {
+	Group      string     `json:"group"`
 	Automation string     `json:"automation"`
 	Scheduled  *time.Time `json:"scheduled"`
 	At         time.Time  `json:"at"`
@@ -150,7 +166,7 @@ func instant(t time.Time) *time.Time {
 }
 
 func automationJSON(a automations.Automation) AutomationJSON {
-	return AutomationJSON{Name: a.Name, Agent: a.Agent, Trigger: TriggerJSON{Kind: a.Trigger.Kind, Spec: a.Trigger.Spec},
+	return AutomationJSON{Group: a.Group, Name: a.Name, Agent: a.Agent, Trigger: TriggerJSON{Kind: a.Trigger.Kind, Spec: a.Trigger.Spec},
 		LastFired: instant(a.LastFired), Fires: a.Fires, Failed: a.Failed}
 }
 
@@ -169,7 +185,7 @@ func ShowContract(schema string, a automations.Automation) ShowJSON {
 func LogContract(schema string, all []automations.Run) LogJSON {
 	out := LogJSON{Schema: schema, Runs: make([]RunJSON, 0, len(all))}
 	for _, r := range all {
-		out.Runs = append(out.Runs, RunJSON{Automation: r.Name, Scheduled: instant(r.Scheduled), At: r.At.UTC(), OK: r.OK, Error: r.Error, Output: r.Output})
+		out.Runs = append(out.Runs, RunJSON{Group: r.Group, Automation: r.Name, Scheduled: instant(r.Scheduled), At: r.At.UTC(), OK: r.OK, Error: r.Error, Output: r.Output})
 	}
 	return out
 }

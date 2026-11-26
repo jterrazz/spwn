@@ -51,7 +51,7 @@ func Automations(t *testing.T, open Opener) {
 			{Name: "inbox", Agent: "trinity", Trigger: inbox.Trigger},
 			{Name: "morning", Agent: "neo", Trigger: morning.Trigger},
 		}
-		if err != nil || !slices.Equal(got, want) {
+		if err != nil || !slices.Equal(ungrouped(got), want) {
 			t.Fatalf("List = %+v, %v; want %+v", got, err, want)
 		}
 	})
@@ -140,4 +140,12 @@ func same(a, b automations.Automation) bool {
 
 func sameRun(a, b automations.Run) bool {
 	return a.Name == b.Name && a.Scheduled.Equal(b.Scheduled) && a.At.Equal(b.At) && a.OK == b.OK && a.Error == b.Error && a.Output == b.Output
+}
+
+func ungrouped(all []automations.Automation) []automations.Automation {
+	out := slices.Clone(all)
+	for i := range out {
+		out[i].Group = ""
+	}
+	return out
 }

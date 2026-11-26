@@ -29,13 +29,20 @@ func All(d Deps) []call.Handler {
 	return []call.Handler{call.Bind(List, d), call.Bind(Show, d), call.Bind(Log, d)}
 }
 
-const NotFound fail.Code = "automations.not-found"
+const (
+	NotFound  fail.Code = "automations.not-found"
+	NotUnique fail.Code = "automations.not-unique"
+)
 
-func coded(err error, name string) error {
+func coded(err error, name, verb string) error {
 	// invariant: a refusal of the Automations travels as its code, worded by
-	// the binary that prints it.
-	if errors.Is(err, automations.ErrNotFound) {
+	// the binary that prints it; verb is the command the hint is typed with.
+	var many *automations.NotUniqueError
+	switch {
+	case errors.Is(err, automations.ErrNotFound):
 		return fail.New(fail.NotFound, NotFound, name, nil)
+	case errors.As(err, &many):
+		return fail.New(fail.Refused, NotUnique, name, map[string]string{"groups": strings.Join(many.Groups, ", "), "first": many.Groups[0], "verb": verb})
 	}
 	return err
 }

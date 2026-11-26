@@ -12,12 +12,18 @@
         "Fires": {
           "type": "integer"
         },
+        "Group": {
+          "type": "string"
+        },
         "LastFired": {
           "format": "date-time",
           "type": "string"
         },
         "Name": {
           "type": "string"
+        },
+        "Shared": {
+          "type": "boolean"
         },
         "Trigger": {
           "$ref": "#/$defs/automations.Trigger"
@@ -27,8 +33,10 @@
         "Agent",
         "Failed",
         "Fires",
+        "Group",
         "LastFired",
         "Name",
+        "Shared",
         "Trigger"
       ],
       "type": "object"

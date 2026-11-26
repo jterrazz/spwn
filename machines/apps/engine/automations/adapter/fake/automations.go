@@ -29,7 +29,7 @@ func (a *Automations) store() *world.Stores { return a.w.Mac(a.machine).Store() 
 func (a *Automations) read(declared automations.Automation, project string) automations.Automation {
 	declared.LastFired, declared.Fires, declared.Failed = time.Time{}, 0, 0
 	for _, run := range a.store().AutomationRuns[project] {
-		if run.Name != declared.Name {
+		if run.Group != declared.Group || run.Name != declared.Name {
 			continue
 		}
 		declared.Fires++
@@ -43,38 +43,47 @@ func (a *Automations) read(declared automations.Automation, project string) auto
 	return declared
 }
 
-func (a *Automations) List(_ context.Context, project string) ([]automations.Automation, error) {
-	a.w.Lock()
-	defer a.w.Unlock()
+func (a *Automations) all(project string) []automations.Automation {
 	declared := a.store().Automations[project]
 	out := make([]automations.Automation, 0, len(declared))
 	for _, d := range declared {
 		out = append(out, a.read(d, project))
 	}
-	slices.SortFunc(out, func(x, y automations.Automation) int { return strings.Compare(x.Name, y.Name) })
-	return out, nil
-}
-
-func (a *Automations) Automation(_ context.Context, project, name string) (automations.Automation, error) {
-	a.w.Lock()
-	defer a.w.Unlock()
-	for _, d := range a.store().Automations[project] {
-		if d.Name == name {
-			return a.read(d, project), nil
+	slices.SortFunc(out, func(x, y automations.Automation) int {
+		if c := strings.Compare(x.Name, y.Name); c != 0 {
+			return c
 		}
-	}
-	return automations.Automation{}, automations.ErrNotFound
+		return strings.Compare(x.Group, y.Group)
+	})
+	return automations.Mark(out)
 }
 
-func (a *Automations) Log(_ context.Context, project, name string, last int) ([]automations.Run, error) {
+func (a *Automations) List(_ context.Context, project string) ([]automations.Automation, error) {
 	a.w.Lock()
 	defer a.w.Unlock()
-	if name != "" && !slices.ContainsFunc(a.store().Automations[project], func(d automations.Automation) bool { return d.Name == name }) {
-		return nil, automations.ErrNotFound
+	return a.all(project), nil
+}
+
+func (a *Automations) Automation(_ context.Context, project, ref string) (automations.Automation, error) {
+	a.w.Lock()
+	defer a.w.Unlock()
+	return automations.Select(a.all(project), ref)
+}
+
+func (a *Automations) Log(_ context.Context, project, ref string, last int) ([]automations.Run, error) {
+	a.w.Lock()
+	defer a.w.Unlock()
+	var chosen automations.Automation
+	if ref != "" {
+		found, err := automations.Select(a.all(project), ref)
+		if err != nil {
+			return nil, err
+		}
+		chosen = found
 	}
 	var out []automations.Run
 	for _, run := range a.store().AutomationRuns[project] {
-		if name == "" || run.Name == name {
+		if ref == "" || (run.Group == chosen.Group && run.Name == chosen.Name) {
 			out = append(out, run)
 		}
 	}

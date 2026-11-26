@@ -21,6 +21,7 @@ runs:
             "findings": [],
             "automations": [
               {
+                "group": "",
                 "name": "inbox",
                 "agent": "trinity",
                 "trigger": {
@@ -32,6 +33,7 @@ runs:
                 "failed": 0
               },
               {
+                "group": "",
                 "name": "morning",
                 "agent": "neo",
                 "trigger": {

@@ -1,0 +1,25 @@
+description: 'station automations log <name> of a name two groups declare is refused, group/name logs one'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; /bin/mkdir site && /usr/bin/touch site/spwn.yaml && P="$PWD/site" /usr/bin/jq ".macs[\"macbook-pro\"].stores.automations = {(env.P): [{\"Group\":\"a\",\"Name\":\"same\",\"Agent\":\"neo\",\"Trigger\":{\"Kind\":\"cron\",\"Spec\":\"0 6 * * *\"}},{\"Group\":\"b\",\"Name\":\"same\",\"Agent\":\"trinity\",\"Trigger\":{\"Kind\":\"cron\",\"Spec\":\"0 7 * * *\"}}]} | .macs[\"macbook-pro\"].stores.automation_runs = {(env.P): [{\"Group\":\"a\",\"Name\":\"same\",\"At\":\"2026-05-01T06:00:00Z\",\"OK\":true},{\"Group\":\"b\",\"Name\":\"same\",\"At\":\"2026-05-01T07:00:00Z\",\"OK\":true},{\"Group\":\"b\",\"Name\":\"same\",\"At\":\"2026-05-02T07:00:00Z\",\"OK\":false,\"Error\":\"no running world\"}]}" world.json > seeded.json && /bin/mv seeded.json world.json'
+      exit: 0
+    - command: '--version >/dev/null; cd site && "$STATION" automations log same'
+      exit: 2
+      stderr: |
+          Error: "same" is declared by more than one group: a, b
+          Hint: station automations log a/same
+    - command: '--version >/dev/null; cd site && "$STATION" automations log b/same'
+      exit: 0
+      stdout: |
+          # Runs
+          ●	2026-05-01 07:00:00	b/same	ok
+          ✗	2026-05-02 07:00:00	b/same	failed: no running world
+    - command: '--version >/dev/null; cd site && "$STATION" automations log'
+      exit: 0
+      stdout: |
+          # Runs
+          ●	2026-05-01 06:00:00	a/same	ok
+          ●	2026-05-01 07:00:00	b/same	ok
+          ✗	2026-05-02 07:00:00	b/same	failed: no running world

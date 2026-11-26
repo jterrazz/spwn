@@ -567,6 +567,9 @@ func Codes() map[fail.Code]Wording {
 		automationscalls.NotFound: func(e *fail.Error) (string, string) {
 			return "no automation named \"" + e.Subject + "\"", "station automations"
 		},
+		automationscalls.NotUnique: func(e *fail.Error) (string, string) {
+			return "\"" + e.Subject + "\" is declared by more than one group: " + e.Detail["groups"], "station " + e.Detail["verb"] + " " + e.Detail["first"] + "/" + e.Subject
+		},
 		backgroundcalls.Unknown: func(e *fail.Error) (string, string) {
 			return "no background task \"" + e.Subject + "\"", "station background"
 		},

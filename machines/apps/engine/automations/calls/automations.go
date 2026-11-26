@@ -36,10 +36,10 @@ type ShowIn struct {
 
 var Show = call.Call[Deps, ShowIn, automations.Automation]{
 	Name: "automations.show", Where: call.AtTarget, Applies: machine.Anywhere,
-	Errors: []fail.Code{NotFound},
+	Errors: []fail.Code{NotFound, NotUnique},
 	Run: func(ctx context.Context, d Deps, in ShowIn, _ call.Progress) (automations.Automation, error) {
 		a, err := d.Automations.Automation(ctx, d.root(in.Project), in.Automation)
-		return a, coded(err, in.Automation)
+		return a, coded(err, in.Automation, "automations")
 	},
 }
 
@@ -53,13 +53,13 @@ type LogIn struct {
 
 var Log = call.Call[Deps, LogIn, []automations.Run]{
 	Name: "automations.log", Where: call.AtTarget, Applies: machine.Anywhere,
-	Errors: []fail.Code{NotFound},
+	Errors: []fail.Code{NotFound, NotUnique},
 	Run: func(ctx context.Context, d Deps, in LogIn, _ call.Progress) ([]automations.Run, error) {
 		last := in.Last
 		if last <= 0 {
 			last = DefaultLast
 		}
 		runs, err := d.Automations.Log(ctx, d.root(in.Project), in.Automation, last)
-		return runs, coded(err, in.Automation)
+		return runs, coded(err, in.Automation, "automations log")
 	},
 }

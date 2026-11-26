@@ -1,11 +1,14 @@
 package receipts_test
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
+	"slices"
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"spwn.sh/packages/automation"
 
@@ -70,19 +73,53 @@ func TestARootWithoutAManifestDeclaresNone(t *testing.T) {
 	})
 }
 
-func TestTwoGroupsDeclaringOneNameAreBothListed(t *testing.T) {
+func twoGroups(t *testing.T) string {
+	t.Helper()
 	t.Setenv("SPWN_HOME", t.TempDir())
 	root := t.TempDir()
 	body := "version: 1\nname: site\nworlds:\n  a:\n    agents: [neo]\n    automations:\n      same:\n        on:\n          cron: \"0 6 * * *\"\n        agent: neo\n        prompt: go\n  b:\n    agents: [neo]\n    automations:\n      same:\n        on:\n          cron: \"0 7 * * *\"\n        agent: neo\n        prompt: go\n"
 	if err := os.WriteFile(filepath.Join(root, "spwn.yaml"), []byte(body), 0o600); err != nil {
 		t.Fatal(err)
 	}
-	got, err := receipts.Automations{}.List(t.Context(), root)
-	if err != nil || len(got) != 2 || got[0].Trigger.Spec != "0 6 * * *" || got[1].Trigger.Spec != "0 7 * * *" {
-		t.Fatalf("List = %+v, %v; want both, group a first", got, err)
+	writer := automation.NewFileReceiptWriter(filepath.Join(root, ".spwn", "runs.jsonl"))
+	at := time.Date(2026, time.May, 1, 6, 0, 0, 0, time.UTC)
+	for i, group := range []string{"a", "b", "b"} {
+		if err := writer.Write(automation.Receipt{World: group, Automation: "same", Trigger: "cron", Fired: at.Add(time.Duration(i) * time.Hour), OK: true, Reason: "on-time"}); err != nil {
+			t.Fatal(err)
+		}
 	}
-	first, err := receipts.Automations{}.Automation(t.Context(), root, "same")
-	if err != nil || first.Trigger.Spec != "0 6 * * *" {
-		t.Fatalf("Automation = %+v, %v; want the first group's", first, err)
+	return root
+}
+
+func TestTwoGroupsDeclaringOneNameAreBothListedWithTheirGroup(t *testing.T) {
+	root := twoGroups(t)
+	got, err := receipts.Automations{}.List(t.Context(), root)
+	if err != nil || len(got) != 2 || got[0].Group != "a" || got[1].Group != "b" || !got[0].Shared || !got[1].Shared {
+		t.Fatalf("List = %+v, %v; want both, shared, group a first", got, err)
+	}
+	if got[0].Fires != 1 || got[1].Fires != 2 {
+		t.Fatalf("List = %+v; want each group's own runs counted", got)
+	}
+}
+
+func TestANameTwoGroupsDeclareIsNotUniqueUntilQualified(t *testing.T) {
+	root := twoGroups(t)
+	var many *automations.NotUniqueError
+	if _, err := (receipts.Automations{}).Automation(t.Context(), root, "same"); !errors.As(err, &many) || !slices.Equal(many.Groups, []string{"a", "b"}) {
+		t.Fatalf("Automation(same) = %v; want not unique in a, b", err)
+	}
+	if _, err := (receipts.Automations{}).Log(t.Context(), root, "same", 0); !errors.As(err, &many) {
+		t.Fatalf("Log(same) = %v; want not unique", err)
+	}
+	b, err := receipts.Automations{}.Automation(t.Context(), root, "b/same")
+	if err != nil || b.Group != "b" || b.Trigger.Spec != "0 7 * * *" {
+		t.Fatalf("Automation(b/same) = %+v, %v; want group b", b, err)
+	}
+	runs, err := receipts.Automations{}.Log(t.Context(), root, "b/same", 0)
+	if err != nil || len(runs) != 2 || runs[0].Group != "b" || runs[1].Group != "b" {
+		t.Fatalf("Log(b/same) = %+v, %v; want the two runs of b", runs, err)
+	}
+	if _, err := (receipts.Automations{}).Automation(t.Context(), root, "c/same"); !errors.Is(err, automations.ErrNotFound) {
+		t.Fatalf("Automation(c/same) = %v; want ErrNotFound", err)
 	}
 }
