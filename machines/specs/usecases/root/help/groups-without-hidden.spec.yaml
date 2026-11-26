@@ -17,6 +17,7 @@ runs:
           devices
           images
           engine
+          approvals
           apps
           settings
           disk

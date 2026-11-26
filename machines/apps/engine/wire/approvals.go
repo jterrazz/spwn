@@ -3,12 +3,20 @@ package wire
 import (
 	"context"
 
+	"github.com/spf13/cobra"
+
 	"github.com/jterrazz/studio-station/apps/engine/approvals"
 	approvalsmacos "github.com/jterrazz/studio-station/apps/engine/approvals/adapter/macos"
 	approvalscalls "github.com/jterrazz/studio-station/apps/engine/approvals/calls"
 	enginecalls "github.com/jterrazz/studio-station/apps/engine/engine/calls"
 	"github.com/jterrazz/studio-station/apps/engine/engine/feeds"
+	approvalscmd "github.com/jterrazz/studio-station/apps/engine/surface/cli/approvals"
+	"github.com/jterrazz/studio-station/apps/engine/surface/cli/kit"
 )
+
+func approvalsCommand(env kit.Env, m machine) *cobra.Command {
+	return approvalscmd.Command(approvalscmd.Deps{ThisMachine: m.where}, env)
+}
 
 // invariant: the engine's Local Network read is the approvals family's
 // probe: the world's under one, macOS's on a Mac, none off it.

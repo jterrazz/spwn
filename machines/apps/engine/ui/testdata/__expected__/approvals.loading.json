@@ -1,0 +1,61 @@
+{
+  "schema": "station.page/v1",
+  "id": "approvals",
+  "command": "approvals",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "loading",
+  "sections": [
+    {
+      "id": "approvals",
+      "title": "mac-mini",
+      "columns": [
+        {
+          "key": "approval",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "state",
+          "label": "state",
+          "kind": "text",
+          "keep": 90
+        },
+        {
+          "key": "lets",
+          "label": "lets",
+          "kind": "text",
+          "keep": 40,
+          "whole": true
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "local-network",
+            "mark": "pending",
+            "label": "Local Network",
+            "cells": [
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "pending",
+          "n": 1
+        }
+      ]
+    }
+  ]
+}
