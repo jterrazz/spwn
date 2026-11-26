@@ -46,7 +46,7 @@ func words(line string) []string {
 
 func (l *login) Output(_ context.Context, c local.Cmd) (local.Output, error) {
 	l.argv = append(l.argv, append([]string{c.Name}, c.Args...))
-	if c.Name != "security" {
+	if c.Name != "/usr/bin/security" {
 		return local.Output{}, errors.New("not security: " + c.Name)
 	}
 	if l.locked {
@@ -71,13 +71,13 @@ func (l *login) Output(_ context.Context, c local.Cmd) (local.Output, error) {
 }
 
 func TestAnchor(t *testing.T) {
-	contracttest.Anchor(t, func(*testing.T) contract.Anchor { return keychain.New(&login{items: map[string]string{}}) })
+	contracttest.Anchor(t, func(*testing.T) contract.Anchor { return keychain.New(&login{items: map[string]string{}}, "") })
 }
 
 func TestTheHeadIsAnItemOfItsOwnNeverAVaultSecret(t *testing.T) {
 	l := &login{items: map[string]string{}}
 	h := devices.Book{Generation: 2}.Head()
-	if err := keychain.New(l).Write(t.Context(), h); err != nil {
+	if err := keychain.New(l, "").Write(t.Context(), h); err != nil {
 		t.Fatal(err)
 	}
 	if got := l.items["station-devices/head"]; got != h.String() {
@@ -92,11 +92,11 @@ func TestTheHeadIsAnItemOfItsOwnNeverAVaultSecret(t *testing.T) {
 
 func TestALockedKeychainIsAnErrorNeverNoHead(t *testing.T) {
 	var unreadable *contract.AnchorUnreadableError
-	if _, err := keychain.New(&login{locked: true}).Read(t.Context()); !errors.As(err, &unreadable) {
+	if _, err := keychain.New(&login{locked: true}, "").Read(t.Context()); !errors.As(err, &unreadable) {
 		t.Fatalf("Read = %v; want the keychain unreadable", err)
 	}
 	l := &login{items: map[string]string{"station-devices/head": "not a head"}}
-	if _, err := keychain.New(l).Read(t.Context()); !errors.As(err, &unreadable) {
+	if _, err := keychain.New(l, "").Read(t.Context()); !errors.As(err, &unreadable) {
 		t.Fatalf("Read of a damaged head = %v; want it unreadable", err)
 	}
 }

@@ -18,7 +18,7 @@ func (m machine) vault() contract.Vault {
 	if m.world != nil {
 		return m.world.vault()
 	}
-	return keychain.New(m.sys.Run)
+	return keychain.New(m.sys.Run, m.systemRoot())
 }
 
 type noVault struct{}

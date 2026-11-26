@@ -102,14 +102,14 @@ func newRig(_ *testing.T) *rig {
 	r := &rig{login: &login{items: map[string]string{}}, signedIn: map[string]bool{}, now: time.Date(2026, 11, 14, 10, 0, 0, 0, time.UTC)}
 	run := local.Played(func(c local.Cmd) (local.Output, error) {
 		r.steps = append(r.steps, c.Name+" "+strings.Join(c.Args, " "))
-		if c.Name != "security" {
+		if c.Name != "/usr/bin/security" {
 			if r.captured == "" {
 				return local.Output{ExitCode: 1, Stderr: "not logged in"}, nil
 			}
 			return local.Output{Stdout: r.captured + "\n"}, nil
 		}
 		return r.login.play(c)
-	}, "security", own().Capture[0])
+	}, "/usr/bin/security", own().Capture[0])
 	r.kept = &memBook{}
 	r.vault = keychain.NewKept(run, r.kept, keychain.Options{Mac: "mac-mini", Now: func() time.Time { return r.now }}, keychain.GrantDeps{
 		Guest: r,

@@ -113,5 +113,5 @@ func deviceAnchor(h local.System, vars map[string]string) devicescontract.Anchor
 	if a := specDeviceAnchor(vars); a != nil {
 		return a
 	}
-	return deviceskeychain.New(h.Run)
+	return deviceskeychain.New(h.Run, systemRootOf(vars))
 }

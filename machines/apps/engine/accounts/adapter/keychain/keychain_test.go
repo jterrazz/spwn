@@ -97,14 +97,14 @@ func (l *login) play(c local.Cmd) (local.Output, error) {
 func TestVault(t *testing.T) {
 	contracttest.Vault(t, func(*testing.T) contract.Vault {
 		l := &login{items: map[string]string{}}
-		return keychain.New(local.Played(l.play, "security"))
+		return keychain.New(local.Played(l.play, "/usr/bin/security"), "")
 	})
 }
 
 func TestASecretTravelsOnStdinNeverInArgv(t *testing.T) {
 	const kept = "sk-ant-oat01-SENTINEL"
 	l := &login{items: map[string]string{}}
-	v := keychain.New(local.Played(l.play, "security"))
+	v := keychain.New(local.Played(l.play, "/usr/bin/security"), "")
 	if err := v.Put(t.Context(), "operator:claude:oauth-token", []byte(kept)); err != nil {
 		t.Fatalf("Put: %v", err)
 	}
@@ -120,7 +120,7 @@ func TestASecretTravelsOnStdinNeverInArgv(t *testing.T) {
 
 func TestAMultilineSecretIsRefusedBeforeSecurityRuns(t *testing.T) {
 	l := &login{items: map[string]string{}}
-	v := keychain.New(local.Played(l.play, "security"))
+	v := keychain.New(local.Played(l.play, "/usr/bin/security"), "")
 	if err := v.Put(t.Context(), "session:a", []byte("one\ntwo")); err == nil {
 		t.Fatal("a secret holding a newline was put")
 	}

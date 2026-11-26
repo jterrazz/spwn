@@ -399,10 +399,8 @@ What a process running code as the owner still opens, and what is left of the fi
   `device-key.enclave` holds and `enclave.swift` opens it without reading its access control, so a key the
   attacker made with none becomes this Mac's own at the next engine start. The fix: refuse at load a blob
   whose access control is not the one the Mac's Never sleeps asks, and anchor the device key's public half.
-- **`security` by its absolute path.** The anchor and the vault exec `security` through PATH
-  (`devices/adapter/keychain/anchor.go`, `accounts/adapter/keychain/keychain.go`). `/usr/bin/security`
-  needs the adapter specs' stub (found on PATH today, `.calls` asserting `security -i`) reached another
-  way, then a conformance rule that no adapter execs a bare `security`.
+- **No adapter execs a bare `security`.** The anchor and the vault now run `/usr/bin/security` under the
+  system root; a conformance rule that refuses a bare `security` in any adapter is not written.
 
 ## Network isolation
 Tart Softnet for VMs that need no LAN. Until then a VM behind its Mac reaches
