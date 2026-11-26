@@ -7,6 +7,7 @@ import (
 	"path"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/jterrazz/studio-station/apps/engine/ports"
 )
@@ -20,6 +21,9 @@ type Proc interface {
 type Procnet struct {
 	proc Proc
 	root string
+
+	mu      sync.Mutex
+	holders map[string]holder
 }
 
 func New(proc Proc, root string) *Procnet { return &Procnet{proc: proc, root: root} }
@@ -76,20 +80,76 @@ func parse(tables ...[]byte) (out []ports.Listener, inodes []string) {
 	return out, inodes
 }
 
+// invariant: a listener's owner is found by walking every process's file
+// descriptors once, when an inode this reader has not met listens; each read
+// after it checks the owner it found with one readlink of its descriptor and
+// walks again only when a listener is new or its owner no longer holds the
+// socket. An inode the walk could not place (a socket of another user's
+// process) stays unplaced until the walk runs for a new listener.
 func (p *Procnet) owners(ls []ports.Listener, inodes []string) {
-	byInode := map[string][]int{}
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	known := map[string]holder{}
+	var unmet bool
+	for _, inode := range inodes {
+		if inode == "" || inode == "0" {
+			continue
+		}
+		key := "socket:[" + inode + "]"
+		h, seen := p.holders[key]
+		if !seen {
+			unmet = true
+			continue
+		}
+		if h.pid != 0 && !p.holds(h, key) {
+			unmet = true
+			continue
+		}
+		known[key] = h
+	}
+	if unmet {
+		known = p.walk(inodes)
+	}
+	p.holders = known
 	for i, inode := range inodes {
-		if inode != "" && inode != "0" {
-			key := "socket:[" + inode + "]"
-			byInode[key] = append(byInode[key], i)
+		if h := known["socket:["+inode+"]"]; h.pid != 0 {
+			ls[i].PID, ls[i].Process = h.pid, p.program(strconv.Itoa(h.pid))
 		}
 	}
-	if len(byInode) == 0 {
-		return
+}
+
+type holder struct {
+	pid int
+	fd  string
+}
+
+func (p *Procnet) holds(h holder, key string) bool {
+	link, err := p.proc.Readlink(p.at(path.Join("/proc", strconv.Itoa(h.pid), "fd", h.fd)))
+	if err != nil {
+		data, readErr := p.proc.ReadFile(p.at(path.Join("/proc", strconv.Itoa(h.pid), "fd", h.fd)))
+		if readErr != nil {
+			return false
+		}
+		link = strings.TrimSpace(string(data))
+	}
+	return link == key
+}
+
+func (p *Procnet) walk(inodes []string) map[string]holder {
+	found := map[string]holder{}
+	want := map[string]bool{}
+	for _, inode := range inodes {
+		if inode != "" && inode != "0" {
+			want["socket:["+inode+"]"] = true
+			found["socket:["+inode+"]"] = holder{}
+		}
+	}
+	if len(want) == 0 {
+		return found
 	}
 	entries, err := p.proc.ReadDir(p.at("/proc"))
 	if err != nil {
-		return
+		return found
 	}
 	for _, e := range entries {
 		pid, err := strconv.Atoi(e.Name())
@@ -109,11 +169,12 @@ func (p *Procnet) owners(ls []ports.Listener, inodes []string) {
 				}
 				link = strings.TrimSpace(string(data))
 			}
-			for _, i := range byInode[link] {
-				ls[i].PID, ls[i].Process = pid, p.program(e.Name())
+			if want[link] {
+				found[link] = holder{pid: pid, fd: fd.Name()}
 			}
 		}
 	}
+	return found
 }
 
 // invariant: a process is named by its program, argv[0]'s base name, since
