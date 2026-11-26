@@ -72,10 +72,12 @@ H=$T/home; R=$T/routes; mkdir -p "$H/.ssh" "$H/k" "$H/bin" "$R"
 : > "$H/k/vm_key"; : > "$H/k/hop_key"; : > "$H/.ssh/id_ed25519"; : > "$H/.ssh/other_key"
 ln -s "$H/k/vm_key" "$H/k/link_key"; ln "$H/.ssh/other_key" "$H/k/hard_key"
 mkdir -p "$H/.ssh/sub/deep"; : > "$H/.ssh/sub/deep/id2"; : > "$H/.ssh/.hidden"; ln "$H/.ssh/sub/deep/id2" "$H/k/hard_sub"; ln "$H/.ssh/.hidden" "$H/k/hard_dot"
+mkdir -p "$H/.ssh/a/b/c/d/e"; : > "$H/.ssh/a/b/c/d/e/id_deep"; ln "$H/.ssh/a/b/c/d/e/id_deep" "$H/k/hard_deep"; ln -s "$H/.ssh" "$H/sshalias"
 printf '#!/bin/sh\nenv > %s\n' "$T/proxy.env" > "$H/bin/station"; chmod 755 "$H/bin/station"
 mkdir -p "$H/nx" "$H/ww" "$H/wd" "$H/st" "$H/Apps/Spwn.app/Contents/MacOS" "$H/Other"; : > "$H/nx/station"
 cp "$H/bin/station" "$H/ww/station"; chmod 777 "$H/ww/station"; cp "$H/bin/station" "$H/wd/station"; chmod 777 "$H/wd"
 cp "$H/bin/station" "$H/Apps/Spwn.app/Contents/MacOS/Spwn Engine"; cp "$H/bin/station" "$H/Other/Spwn Engine"
+mkdir -p "$H/.ssh/bin" "$H/hl"; cp "$H/bin/station" "$H/.ssh/bin/station"; ln "$H/.ssh/bin/station" "$H/hl/station"
 ln -s /usr/bin/env "$H/st/station"; ln -s "$H/Apps/Spwn.app/Contents/MacOS/Spwn Engine" "$H/st/app"; ln -s "$H/Other/Spwn Engine" "$H/st/other"
 eval "pw=~$(id -un)"
 route_bare() { local n=$1; shift; printf '%s\n' "$@" > "$R/$n.env"; chmod 600 "$R/$n.env"; }
@@ -83,6 +85,9 @@ route() { local n=$1 a kh="KNOWN_HOSTS=$H/kh"; shift; for a in "$@"; do case $a 
 route_bare vm-nokh "KEY=$H/k/vm_key"
 route_bare vm-hopnokh HOP=ops@hop-host "HOP_KEY=$H/k/hop_key"
 : > "$H/.ssh/known_hosts"; route vm-kh-ssh "KEY=$H/k/vm_key" "KNOWN_HOSTS=$H/.ssh/known_hosts"
+ln "$H/.ssh/known_hosts" "$H/kh-hard"; route vm-kh-hard "KEY=$H/k/vm_key" "KNOWN_HOSTS=$H/kh-hard"
+route vm-kh-alias "KEY=$H/k/vm_key" "KNOWN_HOSTS=$H/sshalias/known_hosts"
+route vm-key-alias "KEY=$H/sshalias/gate-ssh-absent-key"
 : > "$H/kh-ww"; chmod 666 "$H/kh-ww"; route vm-kh-ww "KEY=$H/k/vm_key" "KNOWN_HOSTS=$H/kh-ww"
 route vm-kh-root "KEY=$H/k/vm_key" KNOWN_HOSTS=/etc/passwd
 ln -s "$H/kh" "$H/kh-link"; route vm-kh-link "KEY=$H/k/vm_key" "KNOWN_HOSTS=$H/kh-link"
@@ -114,6 +119,7 @@ route vm-link "KEY=$H/k/link_key"
 route vm-hard "KEY=$H/k/hard_key"
 route vm-hard-sub "KEY=$H/k/hard_sub"
 route vm-hard-dot "KEY=$H/k/hard_dot"
+route vm-hard-deep "KEY=$H/k/hard_deep"
 route vm-rel KEY=k/vm_key
 route vm-mixed "KEY=$H/k/vm_key" HOP=ops@hop-host
 route vm-hopextra HOP=ops@hop-host "HOP_KEY=$H/k/hop_key" PORT=22
@@ -126,7 +132,7 @@ route vm-proxy-rel "KEY=$H/k/vm_key" PROXY=station-pipe STATION=bin/station
 route vm-proxy-text "KEY=$H/k/vm_key" PROXY=station-pipe 'STATION=/bin/sh -c evil'
 route vm-proxy-pct "KEY=$H/k/vm_key" PROXY=station-pipe "STATION=$H/bin/st%h"
 route vm-proxy-noexec "KEY=$H/k/vm_key" PROXY=station-pipe "STATION=$H/nx/station"
-for s in env:/usr/bin/env ssh:/usr/bin/ssh link:$H/st/station ww:$H/ww/station wd:$H/wd/station app:$H/st/app other:$H/st/other; do
+for s in env:/usr/bin/env ssh:/usr/bin/ssh link:$H/st/station ww:$H/ww/station wd:$H/wd/station app:$H/st/app other:$H/st/other inssh:$H/.ssh/bin/station hl:$H/hl/station; do
   route "vm-st-${s%%:*}" "KEY=$H/k/vm_key" PROXY=station-pipe "STATION=${s#*:}" "KNOWN_HOSTS=$H/kh"
 done
 route vm-station-alone "KEY=$H/k/vm_key" "STATION=$H/bin/station"
@@ -210,7 +216,16 @@ refused "scp names a URI" gate_ssh scp 'scp://vm-a/x' "$T/dl.out"
 got=$(env -i PATH="$E:$PATH" HOME="$H" GATE_ROUTES_DIR="$R" GATE_SSH_DRYRUN=1 bash ./gate-ssh.sh ssh vm-b 'echo hi' 2>&1); [ "$(b64_of <<< "$got")" = 'echo hi' ] || bad "gate-ssh takes a tool from PATH: $got"
 refused "no route for vm-nope" gate_ssh ssh vm-nope true
 for h in vm-def vm-dslash vm-dot vm-other vm-hopdef vm-hopdot; do refused "where the owner's own identities live" gate_ssh ssh $h true; done
-refused "$pw/.ssh/gate-ssh-absent-key lies under" env -i PATH="$PATH" HOME=/nonexistent GATE_ROUTES_DIR="$R" GATE_SSH_DRYRUN=1 bash ./gate-ssh.sh ssh vm-pw true
+if [ -d "$pw/.ssh" ]; then
+  refused "$pw/.ssh/gate-ssh-absent-key lies under" env -i PATH="$PATH" HOME=/nonexistent GATE_ROUTES_DIR="$R" GATE_SSH_DRYRUN=1 bash ./gate-ssh.sh ssh vm-pw true
+else
+  echo "skip: the passwd home has no ~/.ssh here (the passwd-home test)"
+fi
+refused "KEY $H/.ssh/gate-ssh-absent-key lies under $H/.ssh" gate_ssh ssh vm-key-alias true
+refused "KNOWN_HOSTS $H/.ssh/known_hosts lies under $H/.ssh" gate_ssh ssh vm-kh-alias true
+refused "KNOWN_HOSTS $H/kh-hard is the same file as $H/.ssh/known_hosts" gate_ssh ssh vm-kh-hard true
+refused "STATION $H/.ssh/bin/station lies under $H/.ssh" gate_ssh ssh vm-st-inssh true
+refused "STATION $H/hl/station is the same file as $H/.ssh/bin/station" gate_ssh ssh vm-st-hl true
 refused "is a symbolic link: name the file itself" gate_ssh ssh vm-link true
 refused "KNOWN_HOSTS is unset" gate_ssh ssh vm-nokh true
 refused "KNOWN_HOSTS is unset" gate_ssh ssh vm-hopnokh true
@@ -229,7 +244,7 @@ else
 fi
 cfg=$(gate_ssh ssh vm-a true | sshg)
 grep -qx 'updatehostkeys false' <<< "$cfg" && grep -qx 'globalknownhostsfile /dev/null' <<< "$cfg" && grep -qx "userknownhostsfile $H/kh" <<< "$cfg" || bad "ssh -G: a gate connection may write or read known hosts beside the route's: $(grep -E '^(updatehostkeys|globalknownhostsfile|userknownhostsfile) ' <<< "$cfg" | tr '\n' ' ')"
-for h in vm-hard vm-hard-sub vm-hard-dot; do refused "is the same file as" gate_ssh ssh $h true; done
+for h in vm-hard vm-hard-sub vm-hard-dot vm-hard-deep; do refused "is the same file as" gate_ssh ssh $h true; done
 refused "is not an absolute path" gate_ssh ssh vm-rel true
 refused "a two-hop route sets HOP, HOP_KEY and KNOWN_HOSTS and nothing else" gate_ssh ssh vm-mixed true
 refused "a two-hop route sets HOP, HOP_KEY and KNOWN_HOSTS and nothing else" gate_ssh ssh vm-hopextra true

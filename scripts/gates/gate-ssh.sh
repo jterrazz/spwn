@@ -44,43 +44,47 @@ secret() {
 }
 
 ssh_folders() {
-  local u oh h hr s
+  local u oh
   u=$(command -p id -un)
   case $u in "" | -* | *[!A-Za-z0-9._-]*) refuse "the user name '$u' is not plain: cannot find its home in the passwd database" ;; esac
   eval "oh=~$u"
   case $oh in /*) ;; *) refuse "no home for $u in the passwd database" ;; esac
-  SSH_DIRS=()
-  for h in "$oh" "${HOME:-}"; do
-    [ -n "$h" ] || continue
-    hr=$(cd -P "$h" 2> /dev/null && pwd -P) || hr=$h
-    SSH_DIRS+=("$hr/.ssh")
-    s=$(cd -P "$hr/.ssh" 2> /dev/null && pwd -P) && SSH_DIRS+=("$s")
+  SSH_DIRS=("$oh/.ssh")
+  [ -z "${HOME:-}" ] || [ "$HOME/.ssh" -ef "$oh/.ssh" ] || SSH_DIRS+=("$HOME/.ssh")
+}
+
+outside_ssh() {
+  local name=$1 r=$2 d=${2%/*} s x
+  while :; do
+    for s in "${SSH_DIRS[@]}"; do
+      [ ! "$d" -ef "$s" ] || refuse "route file $f: $name $r lies under $s, where the owner's own identities live: $3"
+    done
+    [ -n "$d" ] || break
+    d=${d%/*}
+  done
+  for s in "${SSH_DIRS[@]}"; do
+    [ -d "$s" ] || continue
+    x=$(command -p find -L "$s" -samefile "$r" 2> /dev/null | command -p head -n 1)
+    [ -z "$x" ] || refuse "route file $f: $name $r is the same file as $x, a file of the owner's ~/.ssh: $3"
   done
 }
 
 route_file() {
-  local name=$1 p=$2 r s
+  local name=$1 p=$2 r
   plain_path "$name" "$p"
   [ ! -L "$p" ] || refuse "route file $f: $name $p is a symbolic link: name the file itself"
   r=$(resolve "$p") || r=$p
   plain_path "$name" "$r"
-  for s in "${SSH_DIRS[@]}"; do
-    case $r in "$s"/*) refuse "route file $f: $name $r lies under $s, where the owner's own identities live: $3" ;; esac
-  done
+  outside_ssh "$name" "$r" "$3"
   [ -f "$r" ] || refuse "route file $f: $name $p is not a file"
   sound "${r%/*}" || refuse "route file $f: the folder of $name $r is not owned by you or root, or is writable by someone else"
   RESOLVED=$r
 }
 
 check_key() {
-  local name=$1 r s x
+  local name=$1 r
   route_file "$name" "$2" "a gate route takes a dedicated key kept outside ~/.ssh, so this route is refused until one exists, and creating and authorising that key is the owner's gesture (this script never creates, copies or moves a key)"
   r=$RESOLVED
-  for s in "${SSH_DIRS[@]}"; do
-    [ -d "$s" ] || continue
-    x=$(command -p find -L "$s" -maxdepth 4 -samefile "$r" 2> /dev/null | command -p head -n 1)
-    [ -z "$x" ] || refuse "route file $f: $name $r is the same file as $x, an identity of the owner: a dedicated key only"
-  done
   secret "$r" || refuse "route file $f: $name $r must be owned by you and readable by you alone (mode 600 or 400)"
   [ -r "$r" ] || refuse "route file $f: $name $r is not a readable file"
   ROUTE+=(-o "IdentityFile=$r")
@@ -160,6 +164,7 @@ load_route() {
         *) refuse "route file $f: STATION $STATION is $r, which is neither a station binary nor Spwn.app's Spwn Engine, the two names the installer ships" ;;
       esac
       case ${r%/*} in *[!A-Za-z0-9._/-]*) refuse "route file $f: STATION resolves to $r, whose folder holds a character outside A-Z a-z 0-9 . _ / -" ;; esac
+      outside_ssh STATION "$r" "the proxy is the binary the installer ships, never a file of ~/.ssh"
       [ -f "$r" ] && [ -x "$r" ] || refuse "route file $f: STATION $STATION is not an executable file"
       sound "$r" && sound "${r%/*}" || refuse "route file $f: STATION $r or its folder is not owned by you or root, or is writable by someone else"
       ROUTE+=(-o "ProxyCommand='$r' machines pipe $host")
