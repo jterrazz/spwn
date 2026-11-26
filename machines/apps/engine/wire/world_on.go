@@ -225,7 +225,7 @@ func armTripwire(w *world.World) {
 			}
 		}
 	}
-	secret.Arm(secrets, func(said string) { panic("tripwire: " + said) })
+	secret.Arm(secrets, func(said string) { panic(secret.Tripped("tripwire: " + said)) })
 }
 
 // invariant: a call held in a run that writes its world back writes it back

@@ -52,11 +52,21 @@ func Seal(p Page) Page {
 		p.State = Ready
 	}
 	if err := Check(p); err != nil && strict {
-		panic(err)
+		panic(Unsealed{err})
 	}
 	secret.TripwireJSON(p)
 	return p
 }
+
+// Unsealed is the value a strict Seal panics with; it is fatal: no helper of
+// core/goes recovers it, so a page the seal refuses always ends the run.
+type Unsealed struct{ Err error }
+
+func (Unsealed) FatalBreak() {}
+
+func (u Unsealed) Error() string { return u.Err.Error() }
+
+func (u Unsealed) Unwrap() error { return u.Err }
 
 func screenedError(e *Error) *Error {
 	if e == nil {

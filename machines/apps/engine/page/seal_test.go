@@ -45,8 +45,13 @@ func TestSealRefusesWhatNoPageMayHold(t *testing.T) {
 	page.Strict(true)
 	defer page.Strict(false)
 	defer func() {
-		if recover() == nil {
+		v := recover()
+		if v == nil {
 			t.Error("a strict Seal kept a page it refuses")
+			return
+		}
+		if _, fatal := v.(interface{ FatalBreak() }); !fatal {
+			t.Errorf("a strict Seal panicked with %T, which a goes helper would recover", v)
 		}
 	}()
 	page.Seal(cases["carries a mark"])
