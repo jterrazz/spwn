@@ -9,6 +9,7 @@ import (
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
+	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 	coremachine "github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/machinefile"
 	machinefilecalls "github.com/jterrazz/studio-station/apps/engine/machinefile/calls"
@@ -16,6 +17,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/remote/api"
 	"github.com/jterrazz/studio-station/apps/engine/remote/contract"
 	"github.com/jterrazz/studio-station/apps/engine/remote/serve"
+	"github.com/jterrazz/studio-station/apps/engine/surface/cli/kit"
 )
 
 const applyWireVersion = "v0.21.0"
@@ -33,7 +35,7 @@ func (g guestEngine) Dial(ctx context.Context, _ string) (contract.Endpoint, err
 	inR, inW := io.Pipe()
 	outR, outW := io.Pipe()
 	go func() {
-		_ = serve.Stream(context.WithoutCancel(ctx), inR, outW, serve.Local(g.registry, applyWireGuest, applyWireVersion), nil)
+		_ = serve.Stream(context.WithoutCancel(ctx), inR, outW, serve.Local(g.registry, applyWireGuest, applyWireVersion), func(err error) *fail.Error { return kit.Translate(err, "") })
 		_ = outW.Close()
 	}()
 	return api.NewConn(outR, inW, inW.Close, func(err error) error { return err }, applyWireVersion), nil
