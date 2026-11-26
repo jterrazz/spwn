@@ -1,17 +1,21 @@
-- navigation "Rail":
+- banner:
   - button "Home"
-  - button "Inbox 2"
-  - group "Spaces":
-    - button "Machine" [pressed]
-    - button "Agent soon" [disabled]
-    - button "OS soon" [disabled]
-  - button "Passwords"
-  - button "Settings"
+  - button "Show or hide the sidebar"
+  - button "Back" [disabled]
+  - button "Forward" [disabled]
+  - navigation "Path":
+    - list:
+      - listitem:
+        - button "Machine 1 Mac with its engine stopped":
+          - text: Machine
+          - img "1 Mac with its engine stopped"
+      - listitem:
+        - button "Engine"
   - button "Engine stopped"
-- navigation "Sidebar":
-  - heading "Machine" [level=2]
-  - button "New machine"
+  - button "Inbox 2"
   - button "Find"
+  - button "Settings"
+- navigation "Sidebar":
   - group "Every Mac":
     - button "Storage"
     - button "Engine"
@@ -32,17 +36,15 @@
     - button "infra healthy":
       - text: infra
       - img "healthy"
-  - group "Catalog":
-    - heading "Catalog" [level=2]
+  - group "Library":
+    - heading "Library" [level=2]
     - button "Apps 9"
     - button "Skills 0"
     - button "Machine settings 3"
     - button "Machine files"
+    - button "Passwords"
+  - button "Engine stopped"
 - main:
-  - button "Show or hide the sidebar"
-  - button "Back" [disabled]
-  - button "Forward" [disabled]
-  - text: Engine
   - region "macbook-pro":
     - heading "macbook-pro" [level=2]
     - heading "The latest release is not known yet." [level=1]

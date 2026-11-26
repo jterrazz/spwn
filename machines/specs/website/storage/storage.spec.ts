@@ -1,13 +1,4 @@
-import {
-    button,
-    content,
-    dialog,
-    field,
-    heading,
-    navigation,
-    region,
-    within,
-} from '@jterrazz/test';
+import { banner, button, content, dialog, field, heading, region, within } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { website } from '../website.specification.js';
@@ -85,7 +76,7 @@ describe('storage', () => {
             await visitor.fill(within(asked, field(`Type ${subject} to confirm`)), subject);
             await visitor.click(within(asked, button('Free')));
             await visitor.see(within(THIS_MAC, heading('Nothing to free.')));
-            await visitor.click(within(navigation('Rail'), button('Inbox', { exact: false })));
+            await visitor.click(within(banner(), button('Inbox', { exact: false })));
 
             // Then - a Today group holds the engine's line of each name it freed
             const today = region('Today');

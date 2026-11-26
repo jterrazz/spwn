@@ -28,7 +28,7 @@ function keyOf(need: OverviewNeed): string {
 
 // invariant: a need the engine no longer lists after its gesture takes its outcome to the page's HeldOutcomes,
 // invariant: so every page that draws this panel holds it inside one.
-// invariant: a page whose toolbar leads with its own button asks the panel to stand back, so no need draws a second
+// invariant: a page whose bar leads with its own button asks the panel to stand back, so no need draws a second
 // invariant: primary on the screen.
 export function Needs({ needs, title, macs, go, none, note, standsBack = false }: NeedsProps) {
     if (needs.length === 0 && none === undefined) {

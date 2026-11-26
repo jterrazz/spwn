@@ -1,4 +1,4 @@
-import { button, component, content, heading, navigation, within } from '@jterrazz/test';
+import { button, component, content, heading } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { composeReplay } from '../../../composition/compose';
@@ -28,19 +28,18 @@ describe('Boundary', () => {
                 <Window initial={{ page: 'home' }} pages={THROWING} />
             </EngineProvider>,
             async (visitor) => {
-                const rail = navigation('Rail');
                 await visitor.see(content('Home is drawn'));
 
                 // When - Inbox is opened
-                await visitor.click(within(rail, button('Inbox 2')));
+                await visitor.click(button('Inbox 2'));
 
                 // Then - its frame says what broke and where, with a Reload
                 await visitor.see(heading('The window could not draw Inbox.'));
                 await visitor.see(content('needs is not iterable'));
                 await visitor.see(button('Reload'));
 
-                // When - Home is opened from the sidebar that survived
-                await visitor.click(within(rail, button('Home')));
+                // When - Home is opened from the bar that survived
+                await visitor.click(button('Home'));
 
                 // Then - Home is drawn again
                 await visitor.see(content('Home is drawn'));

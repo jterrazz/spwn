@@ -1,17 +1,20 @@
-- navigation "Rail":
+- banner:
   - button "Home"
+  - button "Show or hide the sidebar"
+  - button "Back" [disabled]
+  - button "Forward" [disabled]
+  - navigation "Path":
+    - list:
+      - listitem:
+        - button "Machine all running":
+          - text: Machine
+          - img "all running"
+      - listitem:
+        - button "Engine"
   - button "Inbox 1"
-  - group "Spaces":
-    - button "Machine" [pressed]
-    - button "Agent soon" [disabled]
-    - button "OS soon" [disabled]
-  - button "Passwords"
-  - button "Settings"
-  - button "Engine running · v0.21.0"
-- navigation "Sidebar":
-  - heading "Machine" [level=2]
-  - button "New machine"
   - button "Find"
+  - button "Settings"
+- navigation "Sidebar":
   - group "Every Mac":
     - button "Storage"
     - button "Engine"
@@ -32,17 +35,15 @@
     - button "infra healthy":
       - text: infra
       - img "healthy"
-  - group "Catalog":
-    - heading "Catalog" [level=2]
+  - group "Library":
+    - heading "Library" [level=2]
     - button "Apps 9"
     - button "Skills 0"
     - button "Machine settings 3"
     - button "Machine files"
+    - button "Passwords"
+  - button "Engine running · v0.21.0"
 - main:
-  - button "Show or hide the sidebar"
-  - button "Back" [disabled]
-  - button "Forward" [disabled]
-  - text: Engine
   - region "macbook-pro":
     - heading "macbook-pro" [level=2]
     - heading "No verdict from the engine." [level=1]

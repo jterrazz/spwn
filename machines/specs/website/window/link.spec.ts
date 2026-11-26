@@ -1,11 +1,10 @@
-import { button, content, dialog, heading, navigation, within } from '@jterrazz/test';
+import { banner, button, content, dialog, heading, navigation, within } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { website } from '../website.specification.js';
 
 const sidebar = navigation('Sidebar');
-const rail = navigation('Rail');
-const SAID = within(rail, content('No engine answers at replay of two-macs'));
+const SAID = within(sidebar, content('No engine answers at replay of two-macs'));
 
 describe('link', () => {
     test('E7 an engine absent for a moment leaves the page drawn and its sheet open', async () => {
@@ -14,7 +13,7 @@ describe('link', () => {
             '/?world=two-macs&page=home&link=blip',
             async (visitor) => {
                 await visitor.see(heading('2 things need you.'));
-                await visitor.click(within(sidebar, button('Find')));
+                await visitor.click(within(banner(), button('Find')));
 
                 // When - the engine goes, then answers again
                 await visitor.see(SAID);

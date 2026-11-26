@@ -30,7 +30,6 @@ const recordingFor = await recordingsOf(
 );
 
 const sidebar = navigation('Sidebar');
-const rail = navigation('Rail');
 const back = button('Back');
 const forward = button('Forward');
 const HOME: Route = { page: 'home' };
@@ -162,7 +161,7 @@ describe('Window', () => {
             </EngineProvider>,
             async (visitor) => {
                 // When - the window has heard from its transport
-                await visitor.see(within(rail, content('Engine connecting')));
+                await visitor.see(within(sidebar, content('Engine connecting')));
             },
         );
 
@@ -201,7 +200,7 @@ describe('Window', () => {
                 <Window initial={HOME} pages={PAGES} />
             </EngineProvider>,
             async (visitor) => {
-                await visitor.see(within(rail, content('the engine is stopping')));
+                await visitor.see(within(sidebar, content('the engine is stopping')));
             },
         );
 

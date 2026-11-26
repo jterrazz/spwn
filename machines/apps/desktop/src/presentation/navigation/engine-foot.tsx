@@ -1,0 +1,108 @@
+import type { EngineReadOutput } from '@jterrazz/station-api';
+
+import { useCore, useReach } from '../dependencies/dependencies';
+import type { Reading } from '../dependencies/dependencies';
+import { StateDot } from '../ui/index';
+import { fitFootWord, fitState } from '../words/fit';
+import { coreState, ownState } from '../words/shown';
+import { CORE_FOOT_WORDS } from '../words/words';
+import { useEngineLine } from './engine-line';
+import type { EngineLine } from './engine-line';
+import type { Route } from './route';
+
+import styles from './path-bar.module.css';
+
+export type EngineSaid = { engine: Reading<EngineReadOutput>; quiet: boolean };
+
+// value: the engine's line as the frame says it: with no engine, what the core or the verdict says, else the
+// value: engine's own line.
+export function useFrameLine({ engine, quiet }: EngineSaid): EngineLine {
+    const { state } = useCore();
+    const reach = useReach();
+    const line = useEngineLine(engine);
+    if (!quiet) {
+        return line;
+    }
+    if (reach.kind === 'incompatible') {
+        return {
+            dot: fitState(reach.fit),
+            opens: false,
+            said: fitFootWord(reach.fit),
+            version: '',
+        };
+    }
+    const dot = state.kind === 'installed' ? ownState('not-started') : coreState(state.kind);
+    return { dot, opens: false, said: CORE_FOOT_WORDS[state.kind], version: '' };
+}
+
+type Go = { go: (to: Route) => void };
+
+// value: the engine's line at the sidebar's foot: its state's dot and its words, opening the Engine page.
+export function EngineFoot({ engine, quiet, go }: EngineSaid & Go) {
+    const line = useFrameLine({ engine, quiet });
+    if (!line.opens) {
+        return (
+            <div className={styles.foot}>
+                <StateDot tone={line.dot.tone} word={line.dot.word} />
+                <span>{line.said}</span>
+            </div>
+        );
+    }
+    return (
+        <button
+            className={styles.foot}
+            onClick={() => {
+                go({ page: 'engine' });
+            }}
+            type="button"
+        >
+            <span aria-hidden="true">
+                <StateDot tone={line.dot.tone} word={line.dot.word} />
+            </span>
+            <span>{line.said}</span>
+        </button>
+    );
+}
+
+// invariant: the bar marks the engine only when it is not fine: absent, connecting, refused, incompatible or in a
+// invariant: state of its own that is not ok; a read still under way marks nothing.
+function marked({ engine, quiet }: EngineSaid, line: EngineLine): boolean {
+    if (quiet || !line.opens || engine.kind === 'failed') {
+        return true;
+    }
+    return engine.kind === 'read' && line.dot.tone !== 'ok';
+}
+
+// value: the engine's mark at the bar's right, so its absence is said with the sidebar hidden; it names itself as
+// value: the sidebar's foot does, and opens the Engine page when there is one to open.
+export function EngineMark({ engine, quiet, go }: EngineSaid & Go) {
+    const line = useFrameLine({ engine, quiet });
+    if (!marked({ engine, quiet }, line)) {
+        return null;
+    }
+    const dot = (
+        <span aria-hidden="true">
+            <StateDot tone={line.dot.tone} word={line.dot.word} />
+        </span>
+    );
+    if (!line.opens) {
+        return (
+            <span aria-label={line.said} className={styles.mark} role="status" title={line.said}>
+                {dot}
+            </span>
+        );
+    }
+    return (
+        <button
+            aria-label={line.said}
+            className={styles.mark}
+            onClick={() => {
+                go({ page: 'engine' });
+            }}
+            title={line.said}
+            type="button"
+        >
+            {dot}
+        </button>
+    );
+}

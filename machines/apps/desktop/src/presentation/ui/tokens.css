@@ -87,7 +87,7 @@
     --motion-press: scale(0.97);
     --motion-wait: 2.4s ease-in-out infinite;
 
-    --chrome-row: 46px;
+    --chrome-row: 52px;
 
     --ground-window: var(--canvas);
     --ground: var(--canvas);

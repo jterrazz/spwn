@@ -18,9 +18,8 @@ export function opensNow(space: Space): boolean {
     return space === 'machine';
 }
 
-// value: where a page sits: the window's own places beside the space's sidebar, the global pages of the rail's foot
-// value: alone in the content, every other page the Machine space's, Storage and Engine among them, which show
-// value: every Mac at once.
+// value: where a page sits: the window's own places beside the space's sidebar, Settings alone in the content, every
+// value: other page the Machine space's, Storage, Engine and Passwords among them.
 const REACH: Readonly<Record<PlainPage, 'global' | 'space' | 'window'>> = {
     'catalog-apps': 'space',
     'catalog-settings': 'space',
@@ -30,7 +29,7 @@ const REACH: Readonly<Record<PlainPage, 'global' | 'space' | 'window'>> = {
     home: 'window',
     inbox: 'window',
     'machine-files': 'space',
-    passwords: 'global',
+    passwords: 'space',
     settings: 'global',
     storage: 'space',
 };

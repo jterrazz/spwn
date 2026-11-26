@@ -1,5 +1,6 @@
 import { TABS } from './route';
 import type { Tab } from './route';
+import { SPACES } from './spaces';
 
 export type Keystroke = { key: string; metaKey: boolean; ctrlKey: boolean; shiftKey: boolean };
 
@@ -27,11 +28,9 @@ const COMMANDS: Readonly<
     k: 'find',
 };
 
-const SPACE_KEYS: Readonly<Record<string, 'space-agent' | 'space-machine' | 'space-os'>> = {
-    '1': 'space-machine',
-    '2': 'space-agent',
-    '3': 'space-os',
-};
+// value: ⌘ with a digit is a space, one per member of SPACES, in their order.
+const SPACE_KEYS: Readonly<Record<string, 'space-agent' | 'space-machine' | 'space-os'>> =
+    Object.fromEntries(SPACES.map((space, at) => [String(at + 1), `space-${space}` as const]));
 
 const MOUSE_BUTTONS: Readonly<Record<number, 'back' | 'forward'>> = { 3: 'back', 4: 'forward' };
 
@@ -53,7 +52,7 @@ export function shortcutOf(stroke: Keystroke, withGallery: boolean): Shortcut | 
     if (Object.hasOwn(COMMANDS, key)) {
         return COMMANDS[key];
     }
-    if (!stroke.metaKey) {
+    if (stroke.metaKey) {
         return SPACE_KEYS[key];
     }
     return /^[1-9]$/u.test(key) ? TABS[Number(key) - 1] : undefined;

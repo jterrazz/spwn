@@ -1,0 +1,259 @@
+.bar {
+    grid-column: 1 / -1;
+    height: var(--chrome-row);
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--space-6);
+    padding: 0 var(--space-14) 0 var(--space-12);
+    border-bottom: 1px solid var(--line);
+    background: var(--ground-sidebar);
+}
+:global(html[data-chrome='overlay']) .bar {
+    padding-left: 84px;
+}
+.sign {
+    all: unset;
+    box-sizing: border-box;
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    flex: none;
+    border-radius: var(--radius-control);
+    cursor: pointer;
+}
+.sign:focus-visible,
+.segment:focus-visible,
+.inbox:focus-visible,
+.find:focus-visible,
+.mark:focus-visible,
+.foot:focus-visible {
+    outline: 2px solid var(--new);
+    outline-offset: 1px;
+}
+.path {
+    flex: 1 1 0;
+    min-width: 0;
+    margin-left: var(--space-6);
+    overflow: hidden;
+}
+.levels {
+    display: flex;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    white-space: nowrap;
+}
+.level {
+    display: flex;
+    align-items: center;
+    flex: none;
+    min-width: 0;
+}
+.slash {
+    flex: none;
+    padding: 0 var(--space-6);
+    color: var(--t4);
+}
+.level:last-child {
+    flex: 0 1 auto;
+}
+.segment {
+    all: unset;
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-8);
+    min-width: 0;
+    height: 30px;
+    padding: 0 var(--space-8) 0 var(--space-6);
+    border-radius: var(--radius-control);
+    color: var(--t2);
+    font-size: var(--text-body);
+    cursor: pointer;
+    transition:
+        background var(--motion-hover),
+        color var(--motion-hover);
+}
+.segment > svg {
+    width: 16px;
+    height: 16px;
+    stroke-width: 1.35;
+    flex: none;
+}
+.segment:hover,
+.segment[aria-expanded='true'] {
+    background: var(--wash);
+    color: var(--t1);
+}
+.segment:active {
+    background: var(--raise-2);
+}
+.segment[aria-current='page'] {
+    color: var(--t1);
+    font-weight: var(--weight-medium);
+}
+.name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.chevron {
+    display: grid;
+    place-items: center;
+    width: 14px;
+    height: 14px;
+    flex: none;
+    color: var(--t3);
+}
+.chevron svg {
+    width: 14px;
+    height: 14px;
+    stroke-width: 1.5;
+}
+.well {
+    display: grid;
+    place-items: center;
+    width: 20px;
+    height: 20px;
+    flex: none;
+    border-radius: var(--radius-icon);
+    background: color-mix(in srgb, var(--t3) 22%, transparent);
+    color: var(--t3);
+}
+.well svg {
+    width: 12px;
+    height: 12px;
+    stroke-width: 1.6;
+}
+.words {
+    padding: 0 var(--space-6);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--t1);
+    font-size: var(--text-body);
+    font-weight: var(--weight-medium);
+}
+.end {
+    display: flex;
+    align-items: center;
+    gap: var(--space-6);
+    flex: none;
+}
+.inbox,
+.mark {
+    all: unset;
+    box-sizing: border-box;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-6);
+    height: 28px;
+    padding: 0 var(--space-6);
+    border-radius: var(--radius-control);
+    color: var(--t3);
+    cursor: pointer;
+    transition:
+        background var(--motion-hover),
+        color var(--motion-hover);
+}
+.inbox > svg {
+    width: 16px;
+    height: 16px;
+    stroke-width: 1.35;
+}
+.inbox:hover:not(:disabled),
+.mark:is(button):hover {
+    background: var(--wash);
+    color: var(--t1);
+}
+.inbox:disabled {
+    cursor: default;
+    color: var(--t4);
+}
+.mark:is(span) {
+    cursor: help;
+}
+.count {
+    font-size: var(--text-label);
+    font-weight: var(--weight-medium);
+    font-variant-numeric: tabular-nums;
+    color: var(--t3);
+}
+.urgent {
+    color: var(--warn);
+}
+.find {
+    all: unset;
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-8);
+    width: 120px;
+    height: 28px;
+    padding: 0 var(--space-8);
+    border-radius: var(--radius-control);
+    background: var(--panel);
+    color: var(--t3);
+    font-size: var(--text-body);
+    cursor: pointer;
+    transition: background var(--motion-hover);
+}
+.find > svg {
+    width: 14px;
+    height: 14px;
+    stroke-width: 1.35;
+    flex: none;
+}
+.find > span {
+    flex: 1;
+}
+.find kbd {
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    color: var(--t4);
+}
+.find:hover:not(:disabled) {
+    background: var(--raise);
+}
+.find:disabled {
+    cursor: default;
+    color: var(--t4);
+}
+.stale {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-6);
+    padding: var(--space-6);
+    cursor: help;
+}
+.asOf {
+    color: var(--t3);
+    font-size: var(--text-body);
+    font-weight: var(--weight-regular);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+.foot {
+    all: unset;
+    box-sizing: border-box;
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: var(--space-8);
+    margin-top: var(--space-8);
+    padding: var(--space-6) var(--space-8);
+    border-radius: var(--radius-control);
+    color: var(--t3);
+    font-size: var(--text-label);
+}
+.foot:is(button) {
+    cursor: pointer;
+}
+.foot:is(button):hover {
+    background: var(--wash);
+    color: var(--t1);
+}

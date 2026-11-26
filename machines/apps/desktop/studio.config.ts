@@ -124,6 +124,11 @@ export default defineConfig({
                     rules: { 'jsx-a11y/no-noninteractive-element-interactions': 'off' },
                 },
                 {
+                    files: ['src/presentation/navigation/path.tsx'],
+                    reason: 'the path is a navigation landmark whose segments move by arrows: the landmark listens for the arrows its buttons bubble up',
+                    rules: { 'jsx-a11y/no-noninteractive-element-interactions': 'off' },
+                },
+                {
                     files: ['scripts/capture.ts'],
                     reason: 'the capture script drives headless Chromium through Playwright, the browser the component specs run in, to photograph the proof pages',
                     rules: { 'jterrazz/no-test-code-in-production': 'off' },

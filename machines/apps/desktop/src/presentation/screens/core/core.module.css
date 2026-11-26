@@ -23,12 +23,6 @@
     max-width: none;
 }
 
-.mark {
-    width: 30px;
-    height: 28px;
-    color: var(--t1);
-}
-
 .pill {
     display: flex;
 }

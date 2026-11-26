@@ -6,7 +6,6 @@ import {
     disabled,
     field,
     heading,
-    main,
     region,
     within,
 } from '@jterrazz/test';
@@ -25,7 +24,7 @@ const recordingFor = await recordingsOf('one-mac', 'two-macs', 'mini-offline');
 const onThisMac = dialog('New machine on macbook-pro');
 const thisMac = button('macbook-pro');
 const onMini = dialog('New machine on mac-mini');
-const NEW_MACHINE = within(main(), button('New machine'));
+const NEW_MACHINE = button('New machine');
 
 const HOME: Route = { page: 'home' };
 

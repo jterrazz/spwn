@@ -1,17 +1,14 @@
-- navigation "Rail":
+- banner:
   - button "Home"
-  - button "Inbox 2"
-  - group "Spaces":
-    - button "Machine" [pressed]
-    - button "Agent soon" [disabled]
-    - button "OS soon" [disabled]
-  - button "Passwords"
-  - button "Settings"
-  - button "Engine running · v4.0.0"
-- main:
   - button "Back" [disabled]
   - button "Forward" [disabled]
-  - text: Settings
+  - navigation "Path":
+    - list:
+      - listitem: Settings
+  - button "Inbox 2"
+  - button "Find"
+  - button "Settings"
+- main:
   - region "Menu bar":
     - heading "Menu bar" [level=2]
     - text: "Show in menu bar Spwn Menu, at every login Spwn Menu is off: it is not in the menu bar."

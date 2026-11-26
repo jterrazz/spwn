@@ -7,24 +7,24 @@ import type { Found } from '../../domain/machines/machines';
 import { useRead, useWatch } from '../dependencies/dependencies';
 import type { Reading } from '../dependencies/dependencies';
 import { Screen } from '../ui/index';
+import { rollUpState } from '../words/shown';
 import { Boundary } from './boundary';
 import { useCarried } from './carried';
-import { TITLES } from './crumbs';
 import { Find } from './find';
-import { FrameToolbar } from './frame-toolbar';
 import { onTabKey } from './keys';
 import { Lost, useLost } from './lost';
 import { NoEngine, useHeld } from './no-engine';
 import type { Held } from './no-engine';
 import { Opened } from './opened';
 import type { Opening } from './opened';
-import { Rail } from './rail';
+import { PathBar } from './path-bar';
 import { TAB_PANEL } from './route';
 import type { PlainPage, Route } from './route';
 import { RouterProvider, useRouter } from './router';
 import { useSettledRoute } from './settled';
 import { Sidebar } from './sidebar';
 import { isGlobal } from './spaces';
+import { TITLES } from './titles';
 import { useSpaceKeys } from './use-spaces';
 
 import styles from './window.module.css';
@@ -120,7 +120,9 @@ export function useStation() {
     const home: Station = { macs, overview };
     const drawn = machines.kind === 'read';
     const listed = drawn && machines.done;
-    return { drawn, engine, home, listed, macs, needs, side: { carried, macs } };
+    const rollUp = machines.kind === 'read' ? machines.out.All.Standing : undefined;
+    const standing = rollUp === undefined ? undefined : rollUpState(rollUp);
+    return { drawn, engine, home, listed, macs, needs, side: { carried, macs }, standing };
 }
 
 type SheetsProps = {
@@ -192,7 +194,7 @@ function Content({ area, held }: { area: AreaProps; held: Held | undefined }) {
 function Frame({ Gallery, pages }: FrameProps) {
     const router = useRouter();
     const { route, go } = router;
-    const { drawn, engine, home, listed, macs, needs, side } = useStation();
+    const { drawn, engine, home, listed, macs, needs, side, standing } = useStation();
     const held = useHeld(drawn);
     const quiet = held !== undefined;
     const sheets = useSheets();
@@ -204,27 +206,29 @@ function Frame({ Gallery, pages }: FrameProps) {
     const found = route.page === 'machine' ? findMachine(macs, route.machine) : undefined;
     useSettledRoute(router, found);
     const area = { addMac, found, Gallery, go, home, newMachine, pages, route };
-    const rail = { engine, go, needs, onSpace, quiet, route };
-    const onFind = quiet ? NOWHERE : opened.find;
-    const aside = { ...side, go, onFind, onNewMachine: opened.newBlank, quiet, route };
+    const aside = { ...side, engine, go, quiet, route };
     const spaced = quiet || !isGlobal(route);
     const shown = spaced && sheets.sidebar;
     return (
         <Screen>
             <div className={`${styles.window} ${shown ? '' : styles.collapsed}`}>
-                <Rail {...rail} />
+                <PathBar
+                    engine={engine}
+                    found={found}
+                    ItemName={pages.ItemName}
+                    macs={macs}
+                    needs={needs}
+                    onAddPassword={opened.addPassword}
+                    onFind={quiet ? NOWHERE : opened.find}
+                    onNewMachine={opened.newBlank}
+                    onSpace={onSpace}
+                    onToggleSidebar={spaced ? sheets.toggleSidebar : undefined}
+                    quiet={quiet}
+                    router={router}
+                    standing={standing}
+                />
                 {shown ? <Sidebar {...aside} /> : null}
                 <main className={styles.main}>
-                    <FrameToolbar
-                        found={found}
-                        ItemName={pages.ItemName}
-                        macs={macs}
-                        onAddPassword={opened.addPassword}
-                        onNewMachine={opened.newBlank}
-                        onToggleSidebar={spaced ? sheets.toggleSidebar : undefined}
-                        quiet={quiet}
-                        router={router}
-                    />
                     {lost === undefined || quiet ? null : (
                         <Lost machine={lost} onDismiss={dismiss} />
                     )}

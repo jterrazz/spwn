@@ -1,4 +1,4 @@
-import { component, content, heading } from '@jterrazz/test';
+import { button, component, content, heading, navigation, within } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { composeReplay } from '../../../../composition/compose';
@@ -21,8 +21,9 @@ describe('name', () => {
                 // When - the vault has answered
                 await visitor.see(heading('npm publish'));
 
-                // Then - the toolbar names it by its label
-                await visitor.see(content('Passwords › npm publish', { exact: false }));
+                // Then - the path names it by its label, under its shelf
+                await visitor.see(within(navigation('Path'), button('Passwords')));
+                await visitor.see(within(navigation('Path'), content('npm publish')));
             },
         );
         expect(result.errors.text).toBe('');

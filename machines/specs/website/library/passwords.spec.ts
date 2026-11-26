@@ -16,11 +16,11 @@ import { website } from '../website.specification.js';
 const SHEET = dialog('Add a password');
 
 describe('passwords', () => {
-    test("D27 the rail's Passwords lists this Mac's vault under the engine's verdict", async () => {
+    test("D27 the sidebar's Passwords lists this Mac's vault under the engine's verdict", async () => {
         // Given - the window on Home over two-macs
         const result = await website.visit('/?world=two-macs&page=home', async (visitor) => {
-            // When - Passwords is pressed at the rail's foot
-            await visitor.click(within(navigation('Rail'), button('Passwords')));
+            // When - Passwords is pressed in the sidebar's Library
+            await visitor.click(within(navigation('Sidebar'), button('Passwords')));
 
             // Then - the page names this Mac, and each password says what it is and where it is granted
             await visitor.see(heading('Passwords on macbook-pro'));

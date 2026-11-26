@@ -1,17 +1,22 @@
-- navigation "Rail":
+- banner:
   - button "Home"
+  - button "Show or hide the sidebar"
+  - button "Back" [disabled]
+  - button "Forward" [disabled]
+  - navigation "Path":
+    - list:
+      - listitem:
+        - button "Machine no machine yet":
+          - text: Machine
+          - img "no machine yet"
+      - listitem:
+        - button "macbook-pro online":
+          - text: macbook-pro
+          - img "online"
   - button "Inbox"
-  - group "Spaces":
-    - button "Machine" [pressed]
-    - button "Agent soon" [disabled]
-    - button "OS soon" [disabled]
-  - button "Passwords"
-  - button "Settings"
-  - button "Engine running · dev"
-- navigation "Sidebar":
-  - heading "Machine" [level=2]
-  - button "New machine"
   - button "Find"
+  - button "Settings"
+- navigation "Sidebar":
   - group "Every Mac":
     - button "Storage"
     - button "Engine"
@@ -20,17 +25,15 @@
     - button "macbook-pro online":
       - text: macbook-pro
       - img "online"
-  - group "Catalog":
-    - heading "Catalog" [level=2]
+  - group "Library":
+    - heading "Library" [level=2]
     - button "Apps 1"
     - button "Skills 0"
     - button "Machine settings 0"
     - button "Machine files"
+    - button "Passwords"
+  - button "Engine running · dev"
 - main:
-  - button "Show or hide the sidebar"
-  - button "Back" [disabled]
-  - button "Forward" [disabled]
-  - text: macbook-pro
   - heading "macbook-pro online" [level=2]
   - paragraph: This Mac · Engine running. Sleeps normally.
   - button "Keep macbook-pro awake": Awake…

@@ -9,7 +9,7 @@ import type { Space } from './spaces';
 
 export type KeysOn = { on: boolean; withGallery: boolean };
 
-// invariant: a space opens where this window last was in it, so ⌃1 and the Machine segment return to the page left
+// invariant: a space opens where this window last was in it, so ⌘1 and the space popover's Machine return to the page left
 // invariant: for Home or Inbox.
 export function useSpaceKeys(
     router: Router,

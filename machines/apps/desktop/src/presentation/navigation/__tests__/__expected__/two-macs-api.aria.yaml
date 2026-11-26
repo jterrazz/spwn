@@ -1,17 +1,26 @@
-- navigation "Rail":
+- banner:
   - button "Home"
+  - button "Show or hide the sidebar"
+  - button "Back"
+  - button "Forward" [disabled]
+  - navigation "Path":
+    - list:
+      - listitem:
+        - button "Machine all running":
+          - text: Machine
+          - img "all running"
+      - listitem:
+        - button "macbook-pro online":
+          - text: macbook-pro
+          - img "online"
+      - listitem:
+        - button "api stopped":
+          - text: api
+          - img "stopped"
   - button "Inbox 2"
-  - group "Spaces":
-    - button "Machine" [pressed]
-    - button "Agent soon" [disabled]
-    - button "OS soon" [disabled]
-  - button "Passwords"
-  - button "Settings"
-  - button "Engine running · dev"
-- navigation "Sidebar":
-  - heading "Machine" [level=2]
-  - button "New machine"
   - button "Find"
+  - button "Settings"
+- navigation "Sidebar":
   - group "Every Mac":
     - button "Storage"
     - button "Engine"
@@ -32,18 +41,15 @@
     - button "infra healthy":
       - text: infra
       - img "healthy"
-  - group "Catalog":
-    - heading "Catalog" [level=2]
+  - group "Library":
+    - heading "Library" [level=2]
     - button "Apps 10"
     - button "Skills 0"
     - button "Machine settings 3"
     - button "Machine files"
+    - button "Passwords"
+  - button "Engine running · dev"
 - main:
-  - button "Show or hide the sidebar"
-  - button "Back"
-  - button "Forward" [disabled]
-  - button "macbook-pro"
-  - text: api
   - heading "api stopped" [level=2]
   - paragraph:
     - text: workspace · persistent · on

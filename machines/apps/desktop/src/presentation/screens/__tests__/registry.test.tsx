@@ -1,4 +1,4 @@
-import { button, component, content, main, navigation, within } from '@jterrazz/test';
+import { banner, button, component, content, navigation, within } from '@jterrazz/test';
 import { Profiler } from 'react';
 import { describe, expect, test } from 'vitest';
 
@@ -27,12 +27,12 @@ const HOME: Route = { page: 'home' };
 // value: each the count measured when it was last lowered: a change that costs more fails here, one that costs less
 // value: lowers it.
 const BUDGETS = {
-    activityTab: { commits: 4, renders: 318 },
+    activityTab: { commits: 4, renders: 315 },
     find: { commits: 1, renders: 25 },
-    homeCalm: { commits: 8, renders: 570 },
-    homeStories: { commits: 8, renders: 815 },
+    homeCalm: { commits: 8, renders: 515 },
+    homeStories: { commits: 8, renders: 760 },
     newMachine: { commits: 2, renders: 39 },
-    storage: { commits: 2, renders: 412 },
+    storage: { commits: 2, renders: 406 },
     unchangedRevision: { commits: 0, renders: 0 },
 } as const satisfies Record<string, Budget>;
 
@@ -113,9 +113,9 @@ describe('registry', () => {
         // Given - the window on Home over stories, drawn whole
         const over = talliedOver('stories', HOME);
 
-        // When - Home's New machine is clicked
+        // When - the bar's New machine is clicked
         const cost = await costOf(over, async (visitor) => {
-            await visitor.click(within(main(), button('New machine')));
+            await visitor.click(within(banner(), button('New machine')));
         });
 
         // Then - it cost no more than its budget
