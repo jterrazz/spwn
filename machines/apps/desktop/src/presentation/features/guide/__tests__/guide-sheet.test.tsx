@@ -91,7 +91,9 @@ describe('guide-sheet', () => {
             await launched(visitor);
 
             // When - the engine has made it, and its action is pressed
-            await visitor.see(within(guide, heading('linux-2 is ready')));
+            await visitor.see(
+                within(guide, heading('linux-2 is ready. Open it in your terminal.')),
+            );
             await visitor.click(within(guide, button('Open linux-2')));
 
             // Then - the Guide is gone and the machine's page is open
@@ -106,7 +108,9 @@ describe('guide-sheet', () => {
         const result = await component.render(windowOver('create-held'), async (visitor) => {
             // When - it is launched
             await launched(visitor);
-            await visitor.see(within(guide, heading('linux-2 is ready')));
+            await visitor.see(
+                within(guide, heading('linux-2 is ready. Open it in your terminal.')),
+            );
         });
 
         // Then - the tree holds the Guide with its live region

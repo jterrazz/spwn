@@ -71,7 +71,7 @@ describe('New machine', () => {
             // Then - the sheet is gone and gate5's Guide reads it made, its action opening gate5's page
             await visitor.gone(onThisMac);
             const guide = dialog('New machine gate5');
-            await visitor.see(within(guide, heading('gate5 is ready')));
+            await visitor.see(within(guide, heading('gate5 is ready. Open it in your terminal.')));
             await visitor.click(within(guide, button('Open gate5')));
             await visitor.see(heading('gate5 running'));
         });

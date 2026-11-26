@@ -52,7 +52,9 @@ describe('create-guide', () => {
             await launched(visitor);
 
             // Then - its Guide says it is ready, and Open linux-2 opens its page
-            await visitor.see(within(guide, heading('linux-2 is ready')));
+            await visitor.see(
+                within(guide, heading('linux-2 is ready. Open it in your terminal.')),
+            );
             await visitor.click(within(guide, button('Open linux-2')));
             await visitor.see(heading('linux-2 running'));
         });

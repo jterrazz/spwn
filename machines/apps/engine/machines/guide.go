@@ -71,7 +71,7 @@ func CreateGuide(a guide.Act, vm *VM) guide.Guide {
 	case guide.EndedDone:
 		g.Line = a.Subject + " is ready"
 		g.View = guide.View{
-			Illustration: guide.PictureDone, Headline: guide.Headline{Now: a.Subject + " is ready", Next: ""},
+			Illustration: guide.PictureDone, Headline: guide.Headline{Now: a.Subject + " is ready.", Next: "Open it in your terminal."},
 			Sentence: readyWords(a.Subject, vm), Move: guide.MoveOwner,
 			Action: &guide.Gesture{Label: "Open " + a.Subject, Nav: "machine:" + a.Subject},
 		}

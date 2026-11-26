@@ -95,7 +95,7 @@
     - listitem: SSH , done
   - paragraph: Done
   - button "Hide"
-  - heading "linux-2 is ready" [level=3]
+  - heading "linux-2 is ready. Open it in your terminal." [level=3]
   - paragraph: linux-2 runs on macbook-pro.
   - button "Open linux-2"
-  - status "linux-2 is ready"
+  - status "linux-2 is ready. Open it in your terminal."
