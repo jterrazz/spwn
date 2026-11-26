@@ -41,7 +41,7 @@ type DeclaredError struct {
 
 func (e *DeclaredError) Error() string { return e.code + ": " + e.msg }
 
-// Code is ControlCode or TildeCode.
+// Code is ControlCode, TildeCode or ColonCode.
 func (e *DeclaredError) Code() string { return e.code }
 
 // CheckText refuses a name or a path of spwn.yaml that holds a control
@@ -61,8 +61,14 @@ func CheckText(what, s string) error {
 	return nil
 }
 
+// ColonCode is the code of the refusal of a host path that holds a colon
+// once spwn.yaml's `name=path:ro` grammar is read off it.
+const ColonCode = "spwn-yaml.colon"
+
 // CheckHostPath refuses a host path of spwn.yaml that CheckText refuses,
-// or that starts with ~: spwn.yaml never expands it.
+// that starts with ~ (spwn.yaml never expands it), or that holds a `:`:
+// Docker reads a bind as `source:target:mode`, so a colon in the source
+// would bind a prefix of the path that was resolved.
 func CheckHostPath(what, p string) error {
 	if err := CheckText(what, p); err != nil {
 		return err
@@ -70,7 +76,25 @@ func CheckHostPath(what, p string) error {
 	if strings.HasPrefix(strings.TrimSpace(p), "~") {
 		return &DeclaredError{code: TildeCode, msg: fmt.Sprintf("%s %q starts with ~, which spwn.yaml never expands: write the absolute path (one outside the project is asked for once)", what, p)}
 	}
+	if strings.Contains(p, ":") {
+		return &DeclaredError{code: ColonCode, msg: fmt.Sprintf("%s %q holds a colon, which a mount's source cannot: only `name=path:ro` ends a workspace with one", what, p)}
+	}
 	return nil
+}
+
+// ResolveHostPath checks a host path of spwn.yaml, resolves it against the
+// project at root, and refuses what it resolved to if it holds a colon,
+// since a link's text of the project can bring one the declared text did
+// not hold.
+func ResolveHostPath(root, what, p string) (resolved string, outside bool, err error) {
+	if err := CheckHostPath(what, p); err != nil {
+		return "", false, err
+	}
+	resolved, outside = Resolve(root, p)
+	if strings.Contains(resolved, ":") {
+		return "", false, &DeclaredError{code: ColonCode, msg: fmt.Sprintf("%s %q resolved %q through the project's links, which holds a colon, which a mount's source cannot", what, p, resolved)}
+	}
+	return resolved, outside, nil
 }
 
 // Reach is a host path spwn.yaml names that leaves the project, as far as

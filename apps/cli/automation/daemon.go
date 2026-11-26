@@ -149,10 +149,10 @@ func watchReaches(p *project.Project) ([]cliproject.Reach, []cliproject.Declared
 					return nil, nil, err
 				}
 			}
-			if err := cliproject.CheckHostPath("watch path", a.On.FS.Path); err != nil {
+			resolved, leaves, err := cliproject.ResolveHostPath(p.Root, "watch path", a.On.FS.Path)
+			if err != nil {
 				return nil, nil, fmt.Errorf("automation %q of world %q: %w", aname, wname, err)
 			}
-			resolved, leaves := cliproject.Resolve(p.Root, a.On.FS.Path)
 			declared = append(declared, cliproject.Declared{Text: a.On.FS.Path, Resolved: resolved})
 			a.On.FS.Path = resolved
 			if leaves {

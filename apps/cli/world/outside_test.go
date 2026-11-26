@@ -89,15 +89,20 @@ func TestAWorldsHostPathsThatLeaveTheProjectAreNamedResolved(t *testing.T) {
 }
 
 func TestTheAccessAskedIsTheAccessMounted(t *testing.T) {
-	p, _, outside := projectWith(t, "version: 1\nname: site\nworlds:\n  neo:\n    agents: []\n    workspaces: [\"a=../outside/:ro/\", \"b=../outside/x:ro\", \"c=../outside/:ro :ro\", \"\", \"d=../outside/y\"]\n")
+	for _, entry := range []string{"a=../outside/:ro/", "c=../outside/:ro :ro"} {
+		p, _, _ := projectWith(t, "version: 1\nname: site\nworlds:\n  neo:\n    agents: []\n    workspaces: [\""+entry+"\"]\n")
+		var refused *cliproject.DeclaredError
+		if _, err := resolveProjectWorld(p, "neo", ""); !errors.As(err, &refused) || refused.Code() != cliproject.ColonCode {
+			t.Errorf("%q: %v, want %s", entry, err, cliproject.ColonCode)
+		}
+	}
+	p, _, outside := projectWith(t, "version: 1\nname: site\nworlds:\n  neo:\n    agents: []\n    workspaces: [\"b=../outside/x:ro\", \"\", \"d=../outside/y\"]\n")
 	pw, err := resolveProjectWorld(p, "neo", "")
 	if err != nil {
 		t.Fatal(err)
 	}
 	want := []world.Workspace{
-		{Name: "a", Path: filepath.Join(outside, ":ro")},
 		{Name: "b", Path: filepath.Join(outside, "x"), ReadOnly: true},
-		{Name: "c", Path: filepath.Join(outside, ":ro"), ReadOnly: true},
 		{Name: "d", Path: filepath.Join(outside, "y")},
 	}
 	if !slices.Equal(pw.Workspaces, want) {

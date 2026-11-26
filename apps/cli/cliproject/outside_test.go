@@ -116,6 +116,32 @@ func TestCheckRefusesControlCharactersAndATilde(t *testing.T) {
 	}
 }
 
+func TestAColonInAHostPathIsRefusedDeclaredOrResolved(t *testing.T) {
+	a, _, _ := projects(t)
+	for _, p := range []string{"a:", "x:/workspaces/n", "../outside/:ro"} {
+		var refused *DeclaredError
+		if _, _, err := ResolveHostPath(a, "workspace path", p); !errors.As(err, &refused) || refused.Code() != ColonCode {
+			t.Errorf("ResolveHostPath(%q) = %v, want %s", p, err, ColonCode)
+		}
+	}
+	const want = "spwn-yaml.colon: knowledge path \"a:\" holds a colon, which a mount's source cannot: only `name=path:ro` ends a workspace with one"
+	if err := CheckHostPath("knowledge path", "a:"); err == nil || err.Error() != want {
+		t.Errorf("refusal = %v, want %q", err, want)
+	}
+
+	if err := os.Symlink("inside/b:c", filepath.Join(a, "kn")); err != nil {
+		t.Fatal(err)
+	}
+	_, _, err := ResolveHostPath(a, "knowledge path", "kn")
+	var refused *DeclaredError
+	if !errors.As(err, &refused) || refused.Code() != ColonCode || !strings.Contains(err.Error(), `knowledge path "kn" resolved `) {
+		t.Fatalf("a link whose text holds a colon: %v, want %s naming kn", err, ColonCode)
+	}
+	if resolved, leaves, err := ResolveHostPath(a, "knowledge path", "inside"); err != nil || leaves || resolved != filepath.Join(a, "inside") {
+		t.Errorf("a plain inside path: %q %v %v", resolved, leaves, err)
+	}
+}
+
 func TestConsentOffATerminalRefusesNamingThePathAndTheWay(t *testing.T) {
 	a, _, outside := projects(t)
 	reach := Reach{Path: outside, Access: "read-write", Grants: `read-write mount at /workspaces/home in world "neo"`}

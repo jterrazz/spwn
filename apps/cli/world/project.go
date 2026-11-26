@@ -166,10 +166,10 @@ func resolveProjectWorld(p *project.Project, name, backendOverride string) (*pro
 	var knowledge string
 	var declaredKnowledge, declaredWorkspaces []cliproject.Declared
 	if kp := strings.TrimSpace(w.Knowledge); kp != "" {
-		if err := cliproject.CheckHostPath("knowledge path", kp); err != nil {
+		resolved, leaves, err := cliproject.ResolveHostPath(p.Root, "knowledge path", kp)
+		if err != nil {
 			return nil, fmt.Errorf("world %q: %w", name, err)
 		}
-		resolved, leaves := cliproject.Resolve(p.Root, kp)
 		knowledge = resolved
 		declaredKnowledge = append(declaredKnowledge, cliproject.Declared{Text: kp, Resolved: resolved})
 		if leaves {
@@ -190,7 +190,8 @@ func resolveProjectWorld(p *project.Project, name, backendOverride string) (*pro
 			continue
 		}
 		ws := parsed[0]
-		if err := cliproject.CheckHostPath("workspace path", ws.Path); err != nil {
+		resolved, leaves, err := cliproject.ResolveHostPath(p.Root, "workspace path", ws.Path)
+		if err != nil {
 			return nil, fmt.Errorf("world %q: %w", name, err)
 		}
 		if !strings.Contains(raw, "=") {
@@ -207,7 +208,6 @@ func resolveProjectWorld(p *project.Project, name, backendOverride string) (*pro
 			return nil, fmt.Errorf("world %q: duplicate workspace name %q", name, ws.Name)
 		}
 		seen[ws.Name] = true
-		resolved, leaves := cliproject.Resolve(p.Root, ws.Path)
 		access := "read-write"
 		if ws.ReadOnly {
 			access = "read-only"
