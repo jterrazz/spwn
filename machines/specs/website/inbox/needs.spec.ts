@@ -1,10 +1,20 @@
-import { button, content, dialog, heading, main, navigation, region, within } from '@jterrazz/test';
+import {
+    banner,
+    button,
+    content,
+    dialog,
+    heading,
+    main,
+    navigation,
+    region,
+    within,
+} from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { website } from '../website.specification.js';
 
 const sidebar = navigation('Sidebar');
-const rail = navigation('Rail');
+const bar = banner();
 const needs = region('Needs you');
 const canWait = region('Upkeep');
 
@@ -13,7 +23,7 @@ describe('needs', () => {
         // Given - the window on Home over engine-stopped, whose one line that needs me is the stopped engine
         const start = button('Start the engine', { exact: false });
         const result = await website.visit('/?world=engine-stopped&page=home', async (visitor) => {
-            await visitor.see(within(rail, button('Inbox 1')));
+            await visitor.see(within(bar, button('Inbox 1')));
             await visitor.see(heading('Needs you 1'));
             await visitor.see(heading('The engine is stopped.'));
 
@@ -22,7 +32,7 @@ describe('needs', () => {
 
             // Then - the line has left, and the sidebar no longer counts it
             await visitor.gone(within(needs, start));
-            await visitor.see(within(rail, button('Inbox')));
+            await visitor.see(within(bar, button('Inbox')));
         });
         expect(result.errors.text).toBe('');
     });
@@ -218,17 +228,17 @@ describe('needs', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test('N11 the rail holds Home, Inbox and Passwords, the sidebar Storage and Engine, the machines and the Catalog with Machine files', async () => {
+    test('N11 the bar holds Home and Inbox, the sidebar Storage and Engine, the machines and the Library with Machine files and Passwords', async () => {
         // Given - the window over two-macs
         const result = await website.visit('/?world=two-macs&page=home', async (visitor) => {
             // When - I read the sidebar
             await visitor.see(sidebar);
 
-            // Then - the fleet's places are there, Inbox with its count of the lines that need me, the Catalog with its counts
-            await visitor.see(within(rail, button('Home')));
-            await visitor.see(within(rail, button('Inbox 2')));
-            await visitor.see(within(rail, button('Passwords')));
-            await visitor.gone(within(rail, button('Storage')));
+            // Then - the fleet's places are there, Inbox with its count of the lines that need me, the Library with its counts
+            await visitor.see(within(bar, button('Home')));
+            await visitor.see(within(bar, button('Inbox 2')));
+            await visitor.see(within(sidebar, button('Passwords')));
+            await visitor.gone(within(bar, button('Storage')));
             await visitor.see(within(sidebar, button('Storage')));
             await visitor.see(within(sidebar, button('Engine')));
             await visitor.see(within(sidebar, button('macbook-pro online')));

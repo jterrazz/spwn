@@ -23,11 +23,11 @@ describe('engine', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test("U2 a Mac not behind shows no row, and the rail's Engine line opens a page that says what the engine says", async () => {
+    test("U2 a Mac not behind shows no row, and the sidebar's Engine line opens a page that says what the engine says", async () => {
         // Given - the proof build over an engine whose reading is not behind
         const result = await website.visit('/?world=stories&page=home', async (visitor) => {
-            // When - the rail's Engine line is pressed
-            await visitor.click(within(navigation('Rail'), ENGINE_LINE));
+            // When - the sidebar's Engine line is pressed
+            await visitor.click(within(sidebar, ENGINE_LINE));
 
             // Then - the Engine page, when it last checked, and no Update row at the foot
             await visitor.see(heading('The latest release is not known yet.'));

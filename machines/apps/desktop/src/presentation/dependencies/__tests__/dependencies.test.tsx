@@ -364,7 +364,7 @@ describe('dependencies', () => {
             },
         );
 
-        // Then - no commit on the equal answer, the page unmoved by the restart and the refusal, which the toolbar marks
+        // Then - no commit on the equal answer, the page unmoved by the restart and the refusal, which the bar marks
         // Then - in the engine's words, on one root, and never reading
         expect(seen.equal).toBe(0);
         expect([seen.restarted, seen.refused]).toStrictEqual([before, before]);

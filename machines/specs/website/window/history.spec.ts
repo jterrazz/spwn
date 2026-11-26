@@ -63,7 +63,7 @@ describe('history', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test('A4 ⌘[ and ⌘] walk the history as the toolbar buttons do', async () => {
+    test('A4 ⌘[ and ⌘] walk the history as the two buttons of the bar do', async () => {
         // Given - the window on Home over two-macs
         const result = await website.visit(HOME, async (visitor) => {
             // When - This Mac is opened, then ⌘[ and ⌘] pressed

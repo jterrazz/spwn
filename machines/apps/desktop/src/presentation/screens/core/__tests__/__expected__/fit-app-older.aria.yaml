@@ -1,35 +1,32 @@
-- navigation "Rail":
+- banner:
   - button "Home"
+  - button "Show or hide the sidebar"
+  - button "Back" [disabled]
+  - button "Forward" [disabled]
+  - navigation "Path":
+    - list:
+      - listitem: Home
+  - status "This app older than the engine"
   - button "Inbox" [disabled]
-  - group "Spaces":
-    - button "Machine" [pressed]
-    - button "Agent soon" [disabled]
-    - button "OS soon" [disabled]
-  - button "Passwords" [disabled]
-  - button "Settings" [disabled]
-  - img "this app older than the engine"
-  - text: This app older than the engine
-- navigation "Sidebar":
-  - heading "Machine" [level=2]
-  - button "New machine" [disabled]
   - button "Find" [disabled]
+  - button "Settings" [disabled]
+- navigation "Sidebar":
   - group "Every Mac":
     - button "Storage" [disabled]
     - button "Engine" [disabled]
   - group "Machines":
     - heading "Machines" [level=2]
     - paragraph: Update Spwn to see them
-  - group "Catalog":
-    - heading "Catalog" [level=2]
+  - group "Library":
+    - heading "Library" [level=2]
     - button "Apps" [disabled]
     - button "Skills" [disabled]
     - button "Machine settings" [disabled]
     - button "Machine files" [disabled]
+    - button "Passwords" [disabled]
+  - img "this app older than the engine"
+  - text: This app older than the engine
 - main:
-  - button "Show or hide the sidebar"
-  - button "Back" [disabled]
-  - button "Forward" [disabled]
-  - text: Home
   - region "The engine on this Mac":
     - text: this app older than the engine
     - heading "Update Spwn" [level=1]

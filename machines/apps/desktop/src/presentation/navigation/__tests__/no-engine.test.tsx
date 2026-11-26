@@ -25,7 +25,6 @@ import { Window } from '../window';
 const recordingFor = await recordingsOf('two-macs');
 
 const sidebar = navigation('Sidebar');
-const rail = navigation('Rail');
 const SOCKET = 'replay of two-macs';
 const ABSENT: Link = {
     kind: 'absent',
@@ -39,7 +38,7 @@ const OPEN: Link = {
     refused: undefined,
     socket: SOCKET,
 };
-const SAID = within(rail, content(`No engine answers at ${SOCKET}`));
+const SAID = within(sidebar, content(`No engine answers at ${SOCKET}`));
 const VERDICT = content('2 things need you.');
 const FIND = dialog('Find');
 
@@ -95,7 +94,7 @@ describe('no engine', () => {
         let draft: string | undefined;
         const result = await component.render(windowOver(stage), async (visitor) => {
             await visitor.see(VERDICT);
-            await visitor.click(within(sidebar, button('Find')));
+            await visitor.click(button('Find'));
             await visitor.fill(query, 'linux');
 
             // When - the link is declared absent, then opens again

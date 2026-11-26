@@ -1,14 +1,4 @@
-import {
-    button,
-    component,
-    content,
-    dialog,
-    field,
-    focused,
-    main,
-    navigation,
-    within,
-} from '@jterrazz/test';
+import { button, component, content, dialog, field, focused, within } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { composeReplay } from '../../../composition/compose';
@@ -56,7 +46,7 @@ describe('Find', () => {
     test('the arrows move the choice and wrap at both ends', async () => {
         // Given - the palette holding linux-1's Activity, Packages and Accounts, in the tab bar's order
         const result = await component.render(windowOnHome(), async (visitor) => {
-            await visitor.click(within(navigation('Sidebar'), button('Find')));
+            await visitor.click(button('Find'));
             await visitor.fill(query, 'linux-1 › ac');
 
             // When - down three times, wrapping to Activity, then up twice, wrapping back through Accounts
@@ -74,9 +64,9 @@ describe('Find', () => {
     });
 
     test('escape closes it and gives the keyboard back to its opener', async () => {
-        // Given - the palette opened from the sidebar's Find
+        // Given - the palette opened from the bar's Find
         const result = await component.render(windowOnHome(), async (visitor) => {
-            const opener = within(navigation('Sidebar'), button('Find'));
+            const opener = button('Find');
             await visitor.click(opener);
             await visitor.see(focused(query));
 
@@ -109,7 +99,7 @@ describe('Find', () => {
     test('while a dialog is open, ⌘K and ⌘[ do nothing, so the draft stays', async () => {
         // Given - New machine opened from Home, a name typed in it
         const result = await component.render(windowOnHome(), async (visitor) => {
-            await visitor.click(within(main(), button('New machine')));
+            await visitor.click(button('New machine'));
             const sheet = dialog('New machine on mac-mini');
             await visitor.see(sheet);
             await visitor.fill(within(sheet, field('Name')), 'gate5');

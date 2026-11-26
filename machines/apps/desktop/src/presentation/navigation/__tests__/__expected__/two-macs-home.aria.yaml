@@ -1,17 +1,16 @@
-- navigation "Rail":
+- banner:
   - button "Home"
-  - button "Inbox 2"
-  - group "Spaces":
-    - button "Machine" [pressed]
-    - button "Agent soon" [disabled]
-    - button "OS soon" [disabled]
-  - button "Passwords"
-  - button "Settings"
-  - button "Engine running · dev"
-- navigation "Sidebar":
-  - heading "Machine" [level=2]
+  - button "Show or hide the sidebar"
+  - button "Back" [disabled]
+  - button "Forward" [disabled]
+  - navigation "Path":
+    - list:
+      - listitem: Home
   - button "New machine"
+  - button "Inbox 2"
   - button "Find"
+  - button "Settings"
+- navigation "Sidebar":
   - group "Every Mac":
     - button "Storage"
     - button "Engine"
@@ -32,18 +31,15 @@
     - button "infra healthy":
       - text: infra
       - img "healthy"
-  - group "Catalog":
-    - heading "Catalog" [level=2]
+  - group "Library":
+    - heading "Library" [level=2]
     - button "Apps 10"
     - button "Skills 0"
     - button "Machine settings 3"
     - button "Machine files"
+    - button "Passwords"
+  - button "Engine running · dev"
 - main:
-  - button "Show or hide the sidebar"
-  - button "Back" [disabled]
-  - button "Forward" [disabled]
-  - text: Home
-  - button "New machine"
   - heading "2 things need you." [level=1]
   - paragraph:
     - img "2 things need you."

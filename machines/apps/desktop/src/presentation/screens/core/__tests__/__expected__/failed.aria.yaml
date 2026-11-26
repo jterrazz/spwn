@@ -1,35 +1,32 @@
-- navigation "Rail":
+- banner:
   - button "Home"
+  - button "Show or hide the sidebar"
+  - button "Back" [disabled]
+  - button "Forward" [disabled]
+  - navigation "Path":
+    - list:
+      - listitem: Home
+  - status "No engine on this Mac"
   - button "Inbox" [disabled]
-  - group "Spaces":
-    - button "Machine" [pressed]
-    - button "Agent soon" [disabled]
-    - button "OS soon" [disabled]
-  - button "Passwords" [disabled]
-  - button "Settings" [disabled]
-  - img "failed"
-  - text: No engine on this Mac
-- navigation "Sidebar":
-  - heading "Machine" [level=2]
-  - button "New machine" [disabled]
   - button "Find" [disabled]
+  - button "Settings" [disabled]
+- navigation "Sidebar":
   - group "Every Mac":
     - button "Storage" [disabled]
     - button "Engine" [disabled]
   - group "Machines":
     - heading "Machines" [level=2]
     - paragraph: None yet
-  - group "Catalog":
-    - heading "Catalog" [level=2]
+  - group "Library":
+    - heading "Library" [level=2]
     - button "Apps" [disabled]
     - button "Skills" [disabled]
     - button "Machine settings" [disabled]
     - button "Machine files" [disabled]
+    - button "Passwords" [disabled]
+  - img "failed"
+  - text: No engine on this Mac
 - main:
-  - button "Show or hide the sidebar"
-  - button "Back" [disabled]
-  - button "Forward" [disabled]
-  - text: Home
   - region "Spwn on this Mac":
     - text: failed
     - 'heading "Error: station-darwin-arm64 does not match its checksum, nothing installed" [level=1]'

@@ -21,7 +21,7 @@ const HELLO = {
 };
 
 describe('StaleMark', () => {
-    test('a refresh refused keeps the page and marks the toolbar with the time of the answer still shown', async () => {
+    test('a refresh refused keeps the page and marks the bar with the time of the answer still shown', async () => {
         // Given - linux-1's Ports over two-macs, on a store whose clock says 10:42 then 10:43
         const stage = stagedReplay(recordingFor('two-macs'), {
             hello: HELLO,

@@ -1,9 +1,20 @@
-import { button, content, dialog, heading, main, navigation, region, within } from '@jterrazz/test';
+import {
+    banner,
+    button,
+    content,
+    dialog,
+    heading,
+    navigation,
+    option,
+    region,
+    within,
+} from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { website } from '../website.specification.js';
 
 const sidebar = navigation('Sidebar');
+const path = navigation('Path');
 const THIS_MAC = region('macbook-pro');
 const MINI = region('mac-mini');
 const MINI_ENGINE = within(MINI, region('Engine'));
@@ -19,7 +30,7 @@ describe('global pages', () => {
             // Then - This Mac's verdict and the Mac mini's, each in its section, the sidebar still there
             await visitor.see(within(THIS_MAC, heading('3.0 GB can be freed.')));
             await visitor.see(within(MINI, heading('Nothing to free.')));
-            await visitor.see(within(sidebar, heading('Machine')));
+            await visitor.see(within(sidebar, heading('Machines')));
         });
         expect(result.errors.text).toBe('');
     });
@@ -59,7 +70,7 @@ describe('global pages', () => {
 
             // Then - Storage again, with the sidebar
             await visitor.see(within(THIS_MAC, heading('3.0 GB can be freed.')));
-            await visitor.see(within(sidebar, heading('Machine')));
+            await visitor.see(within(sidebar, heading('Machines')));
         });
         expect(result.errors.text).toBe('');
     });
@@ -93,35 +104,36 @@ describe('global pages', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test("A16 the sidebar's + opens New machine", async () => {
-        // Given - the window on the Apps shelf over two-macs, which has no New machine of its own
-        const result = await website.visit(
-            '/?world=two-macs&page=catalog-apps',
-            async (visitor) => {
-                await visitor.see(region('Apps'));
+    test("A16 the bar's New machine on Home opens the sheet", async () => {
+        // Given - the window on Home over two-macs
+        const result = await website.visit('/?world=two-macs&page=home', async (visitor) => {
+            await visitor.see(content('2 things need you.'));
 
-                // When - the + beside the space's name is pressed
-                await visitor.click(within(sidebar, button('New machine')));
+            // When - the bar's New machine is pressed
+            await visitor.click(within(banner(), button('New machine')));
 
-                // Then - the New machine sheet
-                await visitor.see(dialog('New machine on mac-mini'));
-            },
-        );
+            // Then - the New machine sheet
+            await visitor.see(dialog('New machine on mac-mini'));
+        });
         expect(result.errors.text).toBe('');
     });
 
-    test('A17 the toolbar of a catalog page reads Catalog above it, and an item its shelf between', async () => {
+    test('A17 the path of a catalog item reads Machine, its shelf, then the item, and the shelf lists the places', async () => {
         // Given - the window on the app node of the Apps shelf over stories
         const result = await website.visit(
             '/?world=stories&page=catalog-apps&item=node',
             async (visitor) => {
-                // When - the toolbar is read
-                // Then - Catalog stands first as words, then Apps, which opens the shelf again
-                await visitor.see(within(main(), content('Catalog')));
-                await visitor.gone(within(main(), button('Catalog')));
-                await visitor.click(within(main(), button('Apps')));
+                // When - the path is read, then its shelf pressed
+                await visitor.see(within(path, button('Machine', { exact: false })));
+                await visitor.see(within(path, content('node')));
+                await visitor.gone(within(path, button('node')));
+                await visitor.click(within(path, button('Apps')));
+
+                // Then - the space's places, and Apps opens the shelf again
+                await visitor.see(within(dialog('Places'), option('Skills', { exact: false })));
+                await visitor.click(within(dialog('Places'), option('Apps', { exact: false })));
                 await visitor.see(region('Apps'));
-                await visitor.see(within(main(), content('Catalog')));
+                await visitor.gone(within(path, content('node')));
             },
         );
         expect(result.errors.text).toBe('');

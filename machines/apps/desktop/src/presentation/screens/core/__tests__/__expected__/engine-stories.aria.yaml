@@ -1,17 +1,20 @@
-- navigation "Rail":
+- banner:
   - button "Home"
+  - button "Show or hide the sidebar"
+  - button "Back" [disabled]
+  - button "Forward" [disabled]
+  - navigation "Path":
+    - list:
+      - listitem:
+        - button "Machine 1 machine down":
+          - text: Machine
+          - img "1 machine down"
+      - listitem:
+        - button "Engine"
   - button "Inbox 2"
-  - group "Spaces":
-    - button "Machine" [pressed]
-    - button "Agent soon" [disabled]
-    - button "OS soon" [disabled]
-  - button "Passwords"
-  - button "Settings"
-  - button "Engine running · v4.0.0"
-- navigation "Sidebar":
-  - heading "Machine" [level=2]
-  - button "New machine"
   - button "Find"
+  - button "Settings"
+- navigation "Sidebar":
   - group "Every Mac":
     - button "Storage"
     - button "Engine"
@@ -47,17 +50,15 @@
     - button "macbook-air asleep":
       - text: macbook-air
       - img "asleep"
-  - group "Catalog":
-    - heading "Catalog" [level=2]
+  - group "Library":
+    - heading "Library" [level=2]
     - button "Apps 6"
     - button "Skills 0"
     - button "Machine settings 3"
     - button "Machine files"
+    - button "Passwords"
+  - button "Engine running · v4.0.0"
 - main:
-  - button "Show or hide the sidebar"
-  - button "Back" [disabled]
-  - button "Forward" [disabled]
-  - text: Engine
   - region "macbook-pro":
     - heading "macbook-pro" [level=2]
     - heading "The latest release is not known yet." [level=1]

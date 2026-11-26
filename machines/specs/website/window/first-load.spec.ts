@@ -18,7 +18,7 @@ describe('first load', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test('A9 a refresh refused keeps the page as answered, and the toolbar says what the engine said and since when', async () => {
+    test('A9 a refresh refused keeps the page as answered, and the bar says what the engine said and since when', async () => {
         // Given - macbook-pro's Ports over stories, its link absent for a moment so its reads are asked again, every ask of engine.read but the first refused
         const result = await website.visit(
             '/?world=stories&machine=macbook-pro&tab=Ports&stale=engine.read&link=blip',

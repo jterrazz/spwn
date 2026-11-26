@@ -83,7 +83,7 @@ function fieldOf({ input, drawn }: Seen) {
 }
 
 describe('add password sheet', () => {
-    test("the vault's toolbar offers Add a password, which opens its sheet", async () => {
+    test("the vault's bar offers Add a password, which opens its sheet", async () => {
         // Given - the window on Passwords over two-macs
         const dependencies = composeReplay({ recording: recordingFor('two-macs') });
         const result = await component.render(
@@ -91,7 +91,7 @@ describe('add password sheet', () => {
                 <Window initial={{ page: 'passwords' }} pages={PAGES} />
             </EngineProvider>,
             async (visitor) => {
-                // When - Add a password is pressed in the toolbar
+                // When - Add a password is pressed in the bar
                 await visitor.click(button('Add a password'));
 
                 // Then - the sheet opens on the engine's offer, its intro under the title

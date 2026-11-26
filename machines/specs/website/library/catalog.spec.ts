@@ -1,4 +1,4 @@
-import { button, content, field, heading, main, navigation, region, within } from '@jterrazz/test';
+import { button, content, field, heading, navigation, region, within } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { website } from '../website.specification.js';
@@ -129,16 +129,16 @@ describe('catalog', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test('D25 the toolbar of a catalog page names its nature', async () => {
+    test('D25 the path of a catalog page names its nature', async () => {
         // Given - the window on Skills over stories
         const result = await website.visit(
             '/?world=stories&page=catalog-skills',
             async (visitor) => {
-                // When - the toolbar is read
-                // Then - it reads Skills under Catalog, which is a heading and no page to open
-                await visitor.see(within(main(), content('Skills')));
-                await visitor.see(within(main(), content('Catalog')));
-                await visitor.gone(within(main(), button('Catalog')));
+                // When - the path is read
+                // Then - it reads Machine, then Skills
+                const path = navigation('Path');
+                await visitor.see(within(path, button('Machine', { exact: false })));
+                await visitor.see(within(path, button('Skills')));
             },
         );
         expect(result.errors.text).toBe('');
