@@ -65,7 +65,19 @@ cp "$H/bin/station" "$H/ww/station"; chmod 777 "$H/ww/station"; cp "$H/bin/stati
 cp "$H/bin/station" "$H/Apps/Spwn.app/Contents/MacOS/Spwn Engine"; cp "$H/bin/station" "$H/Other/Spwn Engine"
 ln -s /usr/bin/env "$H/st/station"; ln -s "$H/Apps/Spwn.app/Contents/MacOS/Spwn Engine" "$H/st/app"; ln -s "$H/Other/Spwn Engine" "$H/st/other"
 eval "pw=~$(id -un)"
-route() { local n=$1; shift; printf '%s\n' "$@" > "$R/$n.env"; chmod 600 "$R/$n.env"; }
+route_bare() { local n=$1; shift; printf '%s\n' "$@" > "$R/$n.env"; chmod 600 "$R/$n.env"; }
+route() { local n=$1 a kh="KNOWN_HOSTS=$H/kh"; shift; for a in "$@"; do case $a in KNOWN_HOSTS=*) kh= ;; esac; done; route_bare "$n" "$@" ${kh:+"$kh"}; }
+route_bare vm-nokh "KEY=$H/k/vm_key"
+route_bare vm-hopnokh HOP=ops@hop-host "HOP_KEY=$H/k/hop_key"
+: > "$H/.ssh/known_hosts"; route vm-kh-ssh "KEY=$H/k/vm_key" "KNOWN_HOSTS=$H/.ssh/known_hosts"
+: > "$H/kh-ww"; chmod 666 "$H/kh-ww"; route vm-kh-ww "KEY=$H/k/vm_key" "KNOWN_HOSTS=$H/kh-ww"
+route vm-kh-root "KEY=$H/k/vm_key" KNOWN_HOSTS=/etc/passwd
+ln -s "$H/kh" "$H/kh-link"; route vm-kh-link "KEY=$H/k/vm_key" "KNOWN_HOSTS=$H/kh-link"
+mkdir -p "$H/khd"; : > "$H/khd/kh"; chmod 777 "$H/khd"; route vm-kh-dir "KEY=$H/k/vm_key" "KNOWN_HOSTS=$H/khd/kh"
+for m in 644 640 400; do : > "$H/k/key$m"; chmod $m "$H/k/key$m"; route vm-key$m "KEY=$H/k/key$m"; done
+route vm-hopkey644 HOP=ops@hop-host "HOP_KEY=$H/k/key644"
+mkdir -p "$H/kd"; : > "$H/kd/key"; chmod 777 "$H/kd"; route vm-keydir "KEY=$H/kd/key"
+route vm-keyroot KEY=/etc/ssh/ssh_host_ed25519_key
 route vm-a "KEY=$H/k/vm_key"
 : > "$H/k/gone_key"; route vm-gone "KEY=$H/k/gone_key"
 route vm-pct "KEY=$H/k/%d/vm_key"
@@ -122,18 +134,18 @@ refused() {
   [ $rc = 92 ] && [[ $err == *"$want"* ]] || bad "not refused with '$want' (exit $rc): $* -> $err"
 }
 argv() { printf '%s\n' "$@"; }
-common=$(argv -F /dev/null -o BatchMode=yes -o StrictHostKeyChecking=yes -o IdentitiesOnly=yes -o IdentityAgent=none -o ForwardAgent=no -o ControlMaster=no -o ControlPath=none -o PermitLocalCommand=no)
+common=$(argv -F /dev/null -o BatchMode=yes -o StrictHostKeyChecking=yes -o UpdateHostKeys=no -o GlobalKnownHostsFile=/dev/null -o IdentitiesOnly=yes -o IdentityAgent=none -o ForwardAgent=no -o ControlMaster=no -o ControlPath=none -o PermitLocalCommand=no)
 b64_of() { tail -n 1 | sed -n "s/.*printf %s \([A-Za-z0-9+\/=]*\) | base64 -d.*/\1/p" | base64 -d; }
 child=(/usr/bin/env -i PATH=/usr/bin:/bin:/usr/sbin:/sbin "HOME=$H")
 ssh_w() { argv ${child[@]+"${child[@]}"} /usr/bin/ssh -a; echo "$common"; }
 scp_w() { argv ${child[@]+"${child[@]}"} /usr/bin/scp; echo "$common"; }
 sshg() { local a i; mapfile -t a; for i in "${!a[@]}"; do [ "${a[$i]}" = /usr/bin/ssh ] && break; done; /usr/bin/ssh -G "${a[@]:$((i + 1))}" 2>&1; }
-want=$(ssh_w; argv -o "IdentityFile=$H/k/vm_key" -n -o ConnectTimeout=10 -- vm-a true)
+want=$(ssh_w; argv -o "IdentityFile=$H/k/vm_key" -o "UserKnownHostsFile=$H/kh" -n -o ConnectTimeout=10 -- vm-a true)
 got=$(gate_ssh ssh -n -o ConnectTimeout=10 vm-a true); [ "$got" = "$want" ] || bad "direct ssh argv: $got"
-want=$(ssh_w; argv -o "IdentityFile=$H/k/vm_key" -- vm-a true)
+want=$(ssh_w; argv -o "IdentityFile=$H/k/vm_key" -o "UserKnownHostsFile=$H/kh" -- vm-a true)
 got=$(gate_ssh rsh vm-a true); [ "$got" = "$want" ] || bad "direct rsh argv: $got"
 got=$(env -i PATH="$PATH" HOME=/nonexistent GATE_ROUTES_DIR="$R" GATE_SSH_DRYRUN=1 bash ./gate-ssh.sh rsh vm-a true); [ "$(grep -v '^HOME=' <<< "$got")" = "$(grep -v '^HOME=' <<< "$want")" ] || bad "a direct route needs \$HOME: $got"
-want=$(scp_w; argv -o "IdentityFile=$H/k/vm_key" -q -- a.txt vm-a:dir/)
+want=$(scp_w; argv -o "IdentityFile=$H/k/vm_key" -o "UserKnownHostsFile=$H/kh" -q -- a.txt vm-a:dir/)
 got=$(gate_ssh scp -q a.txt vm-a:dir/); [ "$got" = "$want" ] || bad "direct scp argv: $got"
 proxied=(-o "IdentityFile=$H/k/vm_key" -o "UserKnownHostsFile=$H/kh" -o HostName=vm-p.internal -o User=gate -o Port=2222 -o "ProxyCommand='$H/bin/station' machines pipe vm-p")
 want=$(ssh_w; argv "${proxied[@]}" -- vm-p true)
@@ -142,7 +154,7 @@ want=$(scp_w; argv "${proxied[@]}" -- a.txt vm-p:dir/)
 got=$(gate_ssh scp a.txt vm-p:dir/); [ "$got" = "$want" ] || bad "proxied scp argv: $got"
 for o in "-J evil@jump" "-o ProxyCommand=evil" "-i /x" "-A" "-F /x" "-oIdentityAgent=/x"; do
   got=$(gate_ssh ssh vm-a $o true)
-  want=$(ssh_w; argv -o "IdentityFile=$H/k/vm_key" -- vm-a $o true)
+  want=$(ssh_w; argv -o "IdentityFile=$H/k/vm_key" -o "UserKnownHostsFile=$H/kh" -- vm-a $o true)
   [ "$got" = "$want" ] || bad "an option after the host is not a remote word: $o -> $got"
   cfg=$(sshg <<< "$got")
   [ "$(grep '^identityfile ' <<< "$cfg")" = "identityfile $H/k/vm_key" ] || bad "ssh -G: an identity beside the route's after '$o': $(grep '^identityfile ' <<< "$cfg")"
@@ -157,7 +169,7 @@ refused "KEY holds a character outside" gate_ssh ssh vm-pct true
 refused "KEY holds a character outside" gate_ssh ssh vm-var true
 refused "HOP_KEY holds a character outside" gate_ssh ssh vm-hopvar true
 got=$(gate_ssh ssh -n vm-b 'echo "a b"; ls')
-want=$(ssh_w; argv -o "IdentityFile=$H/k/hop_key" -n -- ops@hop-host)
+want=$(ssh_w; argv -o "IdentityFile=$H/k/hop_key" -o "UserKnownHostsFile=$H/kh" -n -- ops@hop-host)
 [ "$(sed '$d' <<< "$got")" = "$want" ] || bad "hop ssh argv: $got"
 [ "$(b64_of <<< "$got")" = 'echo "a b"; ls' ] || bad "hop ssh command does not round-trip: $(tail -n 1 <<< "$got")"
 case $(tail -n 1 <<< "$got") in "ssh -o BatchMode=yes -- vm-b 'eval "*) ;; *) bad "hop ssh second hop: $(tail -n 1 <<< "$got")" ;; esac
@@ -173,7 +185,24 @@ got=$(env -i PATH="$E:$PATH" HOME="$H" GATE_ROUTES_DIR="$R" GATE_SSH_DRYRUN=1 ba
 refused "no route for vm-nope" gate_ssh ssh vm-nope true
 for h in vm-def vm-dslash vm-dot vm-other vm-hopdef vm-hopdot; do refused "where the owner's own identities live" gate_ssh ssh $h true; done
 refused "$pw/.ssh/gate-ssh-absent-key lies under" env -i PATH="$PATH" HOME=/nonexistent GATE_ROUTES_DIR="$R" GATE_SSH_DRYRUN=1 bash ./gate-ssh.sh ssh vm-pw true
-refused "is a symbolic link: name the key file itself" gate_ssh ssh vm-link true
+refused "is a symbolic link: name the file itself" gate_ssh ssh vm-link true
+refused "KNOWN_HOSTS is unset" gate_ssh ssh vm-nokh true
+refused "KNOWN_HOSTS is unset" gate_ssh ssh vm-hopnokh true
+refused "a gate route keeps its host keys outside ~/.ssh" gate_ssh ssh vm-kh-ssh true
+refused "KNOWN_HOSTS $H/kh-ww is not yours alone" gate_ssh ssh vm-kh-ww true
+refused "KNOWN_HOSTS /etc/passwd is not yours alone" gate_ssh ssh vm-kh-root true
+refused "KNOWN_HOSTS $H/kh-link is a symbolic link" gate_ssh ssh vm-kh-link true
+refused "the folder of KNOWN_HOSTS" gate_ssh ssh vm-kh-dir true
+for h in vm-key644 vm-key640 vm-hopkey644; do refused "must be owned by you and readable by you alone" gate_ssh ssh $h true; done
+refused "the folder of KEY" gate_ssh ssh vm-keydir true
+[ "$(gate_ssh ssh vm-key400 true | grep '^IdentityFile=')" = "IdentityFile=$H/k/key400" ] || bad "a key of mode 400 is refused"
+if [ -f /etc/ssh/ssh_host_ed25519_key ]; then
+  refused "KEY /etc/ssh/ssh_host_ed25519_key must be owned by you" gate_ssh ssh vm-keyroot true
+else
+  echo "skip: no root-owned key of mode 600 here (the key owner test)"
+fi
+cfg=$(gate_ssh ssh vm-a true | sshg)
+grep -qx 'updatehostkeys false' <<< "$cfg" && grep -qx 'globalknownhostsfile /dev/null' <<< "$cfg" && grep -qx "userknownhostsfile $H/kh" <<< "$cfg" || bad "ssh -G: a gate connection may write or read known hosts beside the route's: $(grep -E '^(updatehostkeys|globalknownhostsfile|userknownhostsfile) ' <<< "$cfg" | tr '\n' ' ')"
 for h in vm-hard vm-hard-sub vm-hard-dot; do refused "is the same file as" gate_ssh ssh $h true; done
 refused "is not an absolute path" gate_ssh ssh vm-rel true
 refused "a two-hop route sets HOP, HOP_KEY and KNOWN_HOSTS and nothing else" gate_ssh ssh vm-mixed true

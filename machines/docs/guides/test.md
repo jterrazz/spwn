@@ -224,9 +224,11 @@ The scripts that prove a change on the shared Linux VM live in `scripts/gates/` 
 | `gate-slot.sh <command>`                                | The one workstation-wide slot a full gate takes, by priority                                                                                                                                                                   |
 | `gate-ssh.sh`                                           | The one route every launcher takes to a VM, called as `"$GATE_SSH" ssh`, `scp` or `rsh`; it refuses (exit 92) rather than fall back to plain `ssh`                                                                             |
 
-A launcher never runs `ssh`, `scp` or `rsync` to a VM itself: it calls `gate-ssh.sh`, which reads the route of the host from `$GATE_ROUTES_DIR/<host>.env` (default `~/.config/spwn/gate-routes`). Every command it runs starts with `-F /dev/null`, so no `ssh_config` is read (an `IdentityFile` or a proxy from a `Host` block would otherwise join the route's), then `-o BatchMode=yes -o StrictHostKeyChecking=yes -o IdentitiesOnly=yes -o IdentityAgent=none -o ForwardAgent=no` (and `-a` for `ssh`), and puts `--` before the host, so a word after it is the remote command's and never an option. No ssh agent, default identity or proxy the route did not name is reachable.
+A launcher never runs `ssh`, `scp` or `rsync` to a VM itself: it calls `gate-ssh.sh`, which reads the route of the host from `$GATE_ROUTES_DIR/<host>.env` (default `~/.config/spwn/gate-routes`). Every command it runs starts with `-F /dev/null`, so no `ssh_config` is read (an `IdentityFile` or a proxy from a `Host` block would otherwise join the route's), then `-o BatchMode=yes -o StrictHostKeyChecking=yes -o UpdateHostKeys=no -o GlobalKnownHostsFile=/dev/null -o IdentitiesOnly=yes -o IdentityAgent=none -o ForwardAgent=no` (and `-a` for `ssh`), and puts `--` before the host, so a word after it is the remote command's and never an option. No ssh agent, default identity or proxy the route did not name is reachable.
 
 The key reaches ssh as `-o IdentityFile=<the resolved path>`, never `-i`. A path value is held to `A-Z a-z 0-9 . _ / -` because ssh expands `%d`, `${HOME}` and the like in it after the script has checked it, so a path the script checked could name another file once expanded. And `-i` with a file gone at launch leaves ssh no identity, so it falls back to the default `~/.ssh/id_*`; an `IdentityFile` option keeps the route's file the only one, and a key gone at launch fails the login.
+
+The files a route names are held to their owner and mode. The key is yours and readable by you alone (mode 600 or 400), in a folder owned by you or root that no one else may write. `KNOWN_HOSTS` is required on every route: it is yours, writable by no one else, and lies outside `~/.ssh`. With `UpdateHostKeys=no`, `GlobalKnownHostsFile=/dev/null` and `StrictHostKeyChecking=yes`, ssh reads that one file and writes none, so a gate connection never touches the owner's `~/.ssh/known_hosts`.
 
 A route file is `KEY=value` lines, each key once; a line starting with `#` is skipped:
 
@@ -238,7 +240,7 @@ A route file is `KEY=value` lines, each key once; a line starting with `#` is sk
 | `PORT`        | direct  | The port                                                                                                                |
 | `PROXY`       | direct  | `station-pipe` or nothing: the proxy is `<STATION> machines pipe <host>`, built by the script, never text from the file |
 | `STATION`     | direct  | With `PROXY=station-pipe` only: a path value that resolves to `station` or Spwn.app's `Spwn Engine` (below)             |
-| `KNOWN_HOSTS` | both    | The host keys ssh checks the host against, an absolute file path of `A-Z a-z 0-9 . _ / -`; unset, `~/.ssh/known_hosts`  |
+| `KNOWN_HOSTS` | both    | Required: the host keys ssh checks the host against, a path value outside `~/.ssh`, yours alone; ssh never writes it    |
 | `HOP`         | two-hop | `user@host` of the hop; the VM's own key lives there and the remote command travels as base64                           |
 | `HOP_KEY`     | two-hop | The hop's identity file, under the same rule as `KEY`                                                                   |
 
