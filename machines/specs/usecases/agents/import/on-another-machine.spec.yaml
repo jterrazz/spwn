@@ -1,0 +1,18 @@
+description: 'station agents import --on a VM reads the archive on that VM'
+env: two-macs
+runs:
+    - command: 'agents create neo --on linux-1'
+      exit: 0
+      stdout: |
+          	On linux-1:
+          ●	neo	created	~/.spwn/agents/neo
+    - command: 'agents export neo --to backups --on linux-1'
+      exit: 0
+      stdout: |
+          	On linux-1:
+          ●	neo	exported	backups/neo.tar.gz
+    - command: 'agents import backups/neo.tar.gz --as trinity --on linux-1'
+      exit: 0
+      stdout: |
+          	On linux-1:
+          ●	trinity	imported	~/.spwn/agents/trinity

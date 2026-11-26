@@ -85,13 +85,13 @@ destructive shutdowns lose them.
 the agent if it worked, delete it if it didn't.
 
 ```bash
-spwn agent fork neo neo-migration       # clone composition + memory
+station agents fork neo --as neo-migration       # clone composition + memory
 spwn up --agent neo-migration
 spwn agent talk neo-migration "migrate the whole repo from Jest to Vitest"
 
 # worked?  keep neo-migration.
 # didn't?  neo is untouched, no regrets.
-spwn agent rm neo-migration
+station agents delete neo-migration --confirm=neo-migration
 ```
 
 What happened:
@@ -102,7 +102,7 @@ What happened:
 - `spwn up --agent neo-migration` boots the fork into its own
   container: neo and neo-migration run in parallel without touching
   each other's state.
-- `spwn agent rm neo-migration` deletes the directory and the world
+- `station agents delete neo-migration --confirm=neo-migration` deletes the directory and the world
   entry. If anything from the experiment is worth keeping, copy the
   playbooks back into neo before removing.
 
@@ -159,8 +159,8 @@ worlds:
 ```
 
 ```bash
-spwn agent create morpheus
-spwn agent create neo
+station agents create morpheus
+station agents create neo
 # edit spwn.yaml to list both under one world (see above)
 spwn up
 spwn agent talk morpheus "delegate the API audit to neo"

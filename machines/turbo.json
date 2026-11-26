@@ -1,18 +1,12 @@
 {
     "$schema": "https://turborepo.dev/schema.json",
     "agentGuidance": false,
-    "futureFlags": {
-        "experimentalGoWorkspaces": true
-    },
     "cacheDir": ".artifacts/turbo",
     "tasks": {
         "//#lint": {
             "cache": false
         },
-        "test": {},
-        "specs#test": {
-            "cache": false
-        }
+        "test": {}
     },
     "globalPassThroughEnv": [
         "STATION_SPEC_BUILT",

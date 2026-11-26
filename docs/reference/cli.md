@@ -37,7 +37,7 @@ The help has four groups: the three spaces of [ADR-019](../decisions/019-the-pro
 | ----------- | -------------------------------------------------------------------------------------------------------------------------- |
 | **Machine** | `machines`, `images`, `engine`, `apps`, `settings`, `disk`, `ports`, `accounts`, `background`, `awake`, `activity`         |
 | **Agent**   | `agents`, `teams`, `skills`, `automations`, `project`                                                                      |
-| **OS**      | one muted line, "being made", and no command until it runs                                                                 |
+| **OS**      | no command yet, so the help draws nothing for it                                                                           |
 | **Spwn**    | `init`, `use`, `update`, `doctor`, `uninstall`, `help`, `--version`, and the `machinefile`, `journal` and `overview` reads |
 
 Where an agent runs, and how its project and its Mind follow it, is decided: an agent runs on a machine (`spwn agents start neo --on linux-1`), its project and Mind live on that machine, and the noun `world` is gone ([ADR-021](../decisions/021-one-program-spwn-one-command-for-everything.md), decisions 4 and 5). What an agent is given on that machine is [ADR-022](../decisions/022-an-agent-is-given-apps-its-machine-is-the-wall.md)'s.
@@ -52,16 +52,16 @@ Another machine is reached through the `spwn` on it, never through an OpenSSH th
 
 The grammar above is decided, and built only in part. Today the install puts two programs on the path, and each command exists once, in one of them; as a command moves, it is deleted from the other.
 
-| Program   | Holds today                                                                                                                                                                        | Grammar                          |
-| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
-| `station` | The Machine space: `machines`, `apps`, `settings`, `disk`, `ports`, `accounts`, `images`, `engine` and the rest of [Machines' commands](../../machines/docs/reference/commands.md) | The grammar, apart from the name |
-| `spwn`    | Every Agent command, as the map below lists them                                                                                                                                   | The old grammar, below           |
+| Program   | Holds today                                                                                                                                                                                      | Grammar                          |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------- |
+| `station` | The Machine space: `machines`, `apps`, `settings`, `disk`, `ports`, `accounts`, `images`, `engine` and the rest of [Machines' commands](../../machines/docs/reference/commands.md), and `agents` | The grammar, apart from the name |
+| `spwn`    | Every other Agent command, as the map below lists them                                                                                                                                           | The old grammar, below           |
 
-`station help` already draws the four groups, Machine and Spwn holding its commands; the Agent and the OS groups hold no command yet, so the help draws neither. Nothing of the Agent space is in `station` yet. The order decided is: the file half first (`agents`, `teams`, `skills`, `automations`, `project`), then the run half (`agents start`, `stop`, `talk`, `log`), then the old `spwn` is deleted and `station` takes the name `spwn`. Until the last step, `spwn` means Agents' program and the names `spwn-agents` and `spwn-machines`, with the shell aliases `agents` and `machines`, are the installer's old names: [ADR-021](../decisions/021-one-program-spwn-one-command-for-everything.md) voids them, and they never ship again once it is built.
+`station help` draws the four groups: Machine and Spwn hold its commands, Agent holds `station agents`, an agent's Mind (its list and detail, `create`, `edit`, `delete`, `fork`, `export`, `import`, `dream`, `sleep`), and OS holds no command yet, so the help does not draw it. The order decided is: the file half first (`agents`, `teams`, `skills`, `automations`, `project`), then the run half (`agents start`, `stop`, `talk`, `log`), then the old `spwn` is deleted and `station` takes the name `spwn`. Until the last step, `spwn` means Agents' program and the names `spwn-agents` and `spwn-machines`, with the shell aliases `agents` and `machines`, are the installer's old names: [ADR-021](../decisions/021-one-program-spwn-one-command-for-everything.md) voids them, and they never ship again once it is built.
 
 ### Where today's Agent commands go
 
-Decided in ADR-021 and ADR-022, and not built until each command is a family of the engine.
+Decided in ADR-021 and ADR-022. A row whose left column is `station` is built, under that name until `station` takes the name `spwn`; every other row is not built until its command is a family of the engine.
 
 | Today                                        | The grammar's form                                                                                       |
 | -------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
@@ -70,9 +70,9 @@ Decided in ADR-021 and ADR-022, and not built until each command is a family of 
 | `spwn build`                                 | gone: the world image leaves, and `project apply` renders the project                                    |
 | `spwn up`, `spwn down`, `spwn world *`       | `spwn agents start`, `spwn agents stop`, on a machine (`--on`); the noun `world` goes                    |
 | `spwn agent neo`, `spwn agent talk neo`      | `spwn agents talk neo`                                                                                   |
-| `spwn agent create\|fork\|dream\|sleep`      | `spwn agents create\|fork\|dream\|sleep`                                                                 |
-| `spwn agent ls`, `spwn agent inspect neo`    | `spwn agents`, `spwn agents neo`                                                                         |
-| `spwn agent rm neo`                          | `spwn agents delete neo --confirm=neo`                                                                   |
+| `station agents create\|fork\|dream\|sleep`  | `spwn agents create\|fork\|dream\|sleep`                                                                 |
+| `station agents`, `station agents neo`       | `spwn agents`, `spwn agents neo`                                                                         |
+| `station agents delete neo --confirm=neo`    | `spwn agents delete neo --confirm=neo`                                                                   |
 | `spwn install`, `spwn uninstall`             | gone: `spwn agents edit --app <app>` and `spwn project edit --app <app>`; `install` means onto a machine |
 | `spwn skill *`                               | `spwn skills`                                                                                            |
 | `spwn automation *`                          | `spwn automations`; the engine runs them, so `automation daemon` goes                                    |
@@ -93,14 +93,14 @@ spwn agent neo                # spawn the world that contains neo and open a ses
 spwn down [name]              # stop every world (or one)
 
 # ── Agents ───────────────────────────────────────────────────────
-spwn agent create neo         # create a blank agent in ./spwn/agents/
-spwn agent ls                 # list project agents
-spwn agent inspect neo        # inspect composition, memory, history
-spwn agent fork neo neo-v2    # clone memory + composition
-spwn agent rm neo             # delete an agent
+station agents create neo     # create a blank agent in ./spwn/agents/
+station agents                # list project agents
+station agents neo            # inspect composition, memory, history
+station agents fork neo --as neo-v2  # clone memory + composition
+station agents delete neo --confirm=neo  # delete an agent
 spwn agent talk  neo "..."    # interactive session
-spwn agent dream neo          # analyze experience, promote playbooks
-spwn agent sleep neo          # consolidate memory, prune stale patterns
+station agents dream neo      # analyze experience, promote playbooks
+station agents sleep neo      # consolidate memory, prune stale patterns
 
 # ── Dependencies (compose) ───────────────────────────────────────
 spwn install python                            # catalog dep, every agent

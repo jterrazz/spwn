@@ -326,7 +326,7 @@ func ruleAgentDirsExist(in Input) []Issue {
 		out = append(out, Issue{
 			Level: LevelError, Path: relPath(in.Root, a.Path),
 			Message: "agent directory not found: " + a.Name,
-			Hint:    "create it with `spwn agent create " + a.Name + "`",
+			Hint:    "create it with `station agents create " + a.Name + "`",
 		})
 	}
 	return out
@@ -356,7 +356,7 @@ func ruleAgentStructure(in Input) []Issue {
 				out = append(out, Issue{
 					Level: r.level, Path: relPath(in.Root, full),
 					Message: "missing " + r.rel,
-					Hint:    "regenerate with `spwn agent create " + a.Name + " --force`",
+					Hint:    "restore it from version control",
 				})
 				continue
 			}
@@ -1006,7 +1006,7 @@ func ruleOrphanAgents(in Input) []Issue {
 		out = append(out, Issue{
 			Level: LevelInfo, Path: relPath(in.Root, o.Path),
 			Message: "agent " + o.Name + " is not referenced by any world",
-			Hint:    "add it to a worlds: entry, or `spwn agent rm " + o.Name + "`",
+			Hint:    "add it to a worlds: entry, or `station agents delete " + o.Name + " --confirm=" + o.Name + "`",
 		})
 	}
 	return out

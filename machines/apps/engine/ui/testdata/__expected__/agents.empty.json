@@ -1,0 +1,41 @@
+{
+  "schema": "station.page/v1",
+  "id": "agents",
+  "command": "agents",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "agents",
+      "title": "Agents",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "team",
+          "label": "team",
+          "kind": "text",
+          "keep": 50
+        },
+        {
+          "key": "harness",
+          "label": "harness",
+          "kind": "text",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "empty": {
+            "text": "No agent yet: station agents create <name> makes one."
+          }
+        }
+      ]
+    }
+  ]
+}

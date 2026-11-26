@@ -24,7 +24,7 @@ project end-to-end:
 
 ```bash
 spwn init                    # creates spwn.yaml + spwn/agents/
-spwn agent create editor     # creates spwn/agents/editor/
+station agents create editor     # creates spwn/agents/editor/
 spwn check                   # confirm the tree is valid
 spwn up                      # bring up the world (architect spawns containers)
 ```

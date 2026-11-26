@@ -482,13 +482,13 @@ func spawnHint(err error, agentName string, agents []architect.AgentSpec) string
 		if len(agents) > 0 {
 			name = agents[0].Name
 		}
-		return fmt.Sprintf("Run \"spwn agent create %s\" to create the agent first", name)
+		return fmt.Sprintf("Run \"station agents create %s\" to create the agent first", name)
 	case strings.Contains(msg, "missing the core"):
 		name := agentName
 		if len(agents) > 0 {
 			name = agents[0].Name
 		}
-		return fmt.Sprintf("Run \"spwn agent create %s\" to set up the agent layers", name)
+		return fmt.Sprintf("Run \"station agents create %s\" to set up the agent layers", name)
 	case strings.Contains(msg, "passwordless sudo"):
 		return "Give the image a spwn user and passwordless sudo, or derive it from a spwn/world image"
 	case strings.Contains(msg, "image") && strings.Contains(msg, "not found"):

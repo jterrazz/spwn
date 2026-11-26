@@ -8,13 +8,13 @@ description: Use when running health checks across worlds and agents. Probe live
 ## Health Checks
 ```bash
 spwn world list                 # Running worlds
-spwn agent ls                     # All agents
+station agents                     # All agents
 ```
 
 ## Agent Health
 Check an agent's journal for recent activity:
 ```bash
-spwn agent inspect <name>         # Composition, memory, recent journal
+station agents <name>         # Composition, memory, recent journal
 spwn agent logs <name>            # Event log for this agent
 ```
 

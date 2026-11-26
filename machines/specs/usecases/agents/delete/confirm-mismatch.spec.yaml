@@ -1,0 +1,17 @@
+description: 'station agents delete with another name typed is refused and the agent is kept'
+env: two-macs
+runs:
+    - command: 'agents create neo'
+      exit: 0
+      stdout: |
+          ●	neo	created	~/.spwn/agents/neo
+    - command: 'agents delete neo --confirm=trinity'
+      exit: 2
+      stderr: |
+          Error: you typed "trinity", not "neo"
+          Hint: in a script: --confirm=neo
+    - command: 'agents'
+      exit: 0
+      stdout: |
+          # Agents
+          ●	neo		claude-code	A blank-slate agent; replace this one-liner with what neo is for.

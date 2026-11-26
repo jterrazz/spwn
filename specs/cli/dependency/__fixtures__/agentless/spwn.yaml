@@ -1,0 +1,6 @@
+# Spwn - project manifest
+version: 1
+name: agentless
+
+dependencies:
+  - "spwn:unix"

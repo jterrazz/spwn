@@ -7,5 +7,5 @@
     → Checking credentials...
     ✓ Credentials            none · not configured
     ✗ Spawn failed           agent "ghost" not found
-      Run "spwn agent create ghost" to create the agent first
+      Run "station agents create ghost" to create the agent first
 

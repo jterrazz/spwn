@@ -1,0 +1,18 @@
+description: 'station agents fork makes a new agent with a copy of every layer of the first'
+env: two-macs
+runs:
+    - command: 'agents create neo --team web'
+      exit: 0
+      stdout: |
+          ●	neo	created	~/.spwn/agents/neo
+    - command: 'agents fork neo --as trinity'
+      exit: 0
+      stdout: |
+          ●	trinity	forked from neo
+    - command: 'agents trinity'
+      exit: 0
+      stdout: |
+          ●	trinity	web	claude-code	~/.spwn/agents/trinity	A blank-slate agent; replace this one-liner with what neo is for.
+          # Layers
+          ●	journal	empty
+          ●	playbooks	empty

@@ -28,16 +28,6 @@ runs:
           spwn-home: absent
           empty-home/.spwn: absent
 
-    - command: agent ls
-      exit: 0
-      stderr: |4+
-          
-            ✓ No agents yet.
-
-      files:
-          spwn-home: absent
-          empty-home/.spwn: absent
-
     - command: automation ls
       exit: 1
       stderr: |4+

@@ -3,6 +3,8 @@
 **Status:** Proposed
 **Date:** 2026-11-13
 
+**Amended by:** [ADR-094](094-machines-turborepo-leaves-go-to-the-makefile.md): Machines' Turborepo runs the npm members alone, and the Makefile runs Go's lint and tests.
+
 ## Context
 
 The repository grew from one Go module with an engine at `src/`, a Swift app at `apps/menubar`, a catalog embedded from inside the engine's package, the specs at `specs/`, and a root that declares a `cli` kind. The engine's folder is called nothing but `src`, the data the engine embeds lives under the code that reads it, and the next members (the window, the file-format schemas, the API's package) have no place that says what they are. [ADR-001](001-station-mirrors-the-studio-cli-layers.md) and [ADR-014](014-families-and-contracts.md) cut the code into layers and families inside one tree; neither says what a member of the repository is. The estate's other repository that spans Go and Node, Spwn, has a shape for it.

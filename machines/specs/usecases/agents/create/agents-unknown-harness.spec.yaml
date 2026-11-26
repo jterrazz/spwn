@@ -1,0 +1,12 @@
+description: 'station agents create with a harness the catalog does not hold is refused, and no agent is made'
+env: two-macs
+runs:
+    - command: 'agents create neo --harness vim'
+      exit: 2
+      stderr: |
+          Error: "vim" is not a harness
+          Hint: --harness claude-code or codex
+    - command: '--version >/dev/null; /usr/bin/jq -c ".macs[\"macbook-pro\"].stores.agents // {} | length" world.json'
+      exit: 0
+      stdout: |
+          0

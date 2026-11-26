@@ -1,0 +1,8 @@
+description: 'station agents create --on a VM makes the agent on that VM'
+env: two-macs
+runs:
+    - command: 'agents create neo --on linux-1'
+      exit: 0
+      stdout: |
+          	On linux-1:
+          ●	neo	created	~/.spwn/agents/neo

@@ -1,0 +1,13 @@
+description: 'station agents dream of an agent with a journal scores its sessions and names its reflexion'
+env: two-macs
+runs:
+    - command: 'agents create neo'
+      exit: 0
+      stdout: |
+          ●	neo	created	~/.spwn/agents/neo
+    - command: '--version >/dev/null; /usr/bin/jq ".macs[\"macbook-pro\"].stores.agents[\"\"][0].Journal = [{\"At\": \"2026-11-20T10:00:00Z\", \"World\": \"w-1\", \"Outcome\": \"completed\", \"Code\": 0}, {\"At\": \"2026-11-20T11:00:00Z\", \"World\": \"w-2\", \"Outcome\": \"failed\", \"Code\": 1}, {\"At\": \"2026-11-20T12:00:00Z\", \"World\": \"w-3\", \"Outcome\": \"destroyed\", \"Code\": -1}]" world.json > journal.json && /bin/mv journal.json world.json'
+      exit: 0
+    - command: 'agents dream neo'
+      exit: 0
+      stdout: |
+          ●	neo	3 entries, 50 % completed	~/.spwn/agents/neo/playbooks/auto-reflexion.md

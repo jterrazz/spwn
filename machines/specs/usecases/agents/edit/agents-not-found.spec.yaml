@@ -1,0 +1,8 @@
+description: 'station agents edit of a name no agent has is refused, exit 2'
+env: two-macs
+runs:
+    - command: 'agents edit neo --team web'
+      exit: 2
+      stderr: |
+          Error: no agent named "neo"
+          Hint: station agents

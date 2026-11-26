@@ -1,0 +1,13 @@
+description: 'station agents sleep --on a VM tidies the agent kept on that VM'
+env: two-macs
+runs:
+    - command: 'agents create neo --on linux-1'
+      exit: 0
+      stdout: |
+          	On linux-1:
+          ●	neo	created	~/.spwn/agents/neo
+    - command: 'agents sleep neo --on linux-1'
+      exit: 0
+      stdout: |
+          	On linux-1:
+          ●	neo	0 playbooks archived, 0 sessions pruned

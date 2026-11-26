@@ -1,0 +1,4 @@
+Agents
+             team  harness
+  ● neo      web   claude-code  Reviews the pull requests of the web team.
+  ● trinity        codex        Keeps the release notes.

@@ -1,0 +1,13 @@
+description: 'station agents dream --on a VM dreams the agent kept on that VM'
+env: two-macs
+runs:
+    - command: 'agents create neo --on linux-1'
+      exit: 0
+      stdout: |
+          	On linux-1:
+          ●	neo	created	~/.spwn/agents/neo
+    - command: 'agents dream neo --on linux-1'
+      exit: 0
+      stdout: |
+          	On linux-1:
+          ●	neo	no dream: no journal entries

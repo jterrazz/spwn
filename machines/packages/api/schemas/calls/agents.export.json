@@ -1,0 +1,53 @@
+{
+  "$defs": {
+    "agents.Exported": {
+      "additionalProperties": false,
+      "properties": {
+        "Agent": {
+          "type": "string"
+        },
+        "Archive": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Agent",
+        "Archive"
+      ],
+      "type": "object"
+    },
+    "agents.calls.ExportIn": {
+      "additionalProperties": false,
+      "properties": {
+        "Agent": {
+          "type": "string"
+        },
+        "To": {
+          "type": "string"
+        },
+        "project": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/spwn/blob/main/machines/packages/api/schemas/calls/agents.export.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call agents.export of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/agents.calls.ExportIn"
+    },
+    "out": {
+      "$ref": "#/$defs/agents.Exported"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "agents.export",
+  "type": "object"
+}

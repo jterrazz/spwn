@@ -1,0 +1,22 @@
+description: 'station agents delete piped without --confirm is refused and the agent kept; --yes answers nothing'
+env: two-macs
+runs:
+    - command: 'agents create neo'
+      exit: 0
+      stdout: |
+          ●	neo	created	~/.spwn/agents/neo
+    - command: 'agents delete neo'
+      exit: 2
+      stderr: |
+          Error: refusing without the name typed: neo
+          Hint: in a script: --confirm=neo
+    - command: 'agents delete neo --yes'
+      exit: 2
+      stderr: |
+          Error: agents delete asks its name typed: --yes answers nothing
+          Hint: re-run with --confirm=<name>
+    - command: 'agents'
+      exit: 0
+      stdout: |
+          # Agents
+          ●	neo		claude-code	A blank-slate agent; replace this one-liner with what neo is for.

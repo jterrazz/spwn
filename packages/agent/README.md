@@ -10,7 +10,7 @@ Owns everything an "agent" is on disk. The composition manifest (`agent.yaml`), 
 
 - `Manifest`: parsed `agent.yaml` with `Name`, `Role`, `Team`, `Runtime` config, `Deps` list. `LoadManifest` / `SaveManifest` / `AddDependency` / `RemoveDependency` for CLI-level edits.
 - `Info`: summary view of an agent's on-disk state (dir, layers present, journal length). Populated by `InspectAgent(name)`.
-- `InitMind` / `DeleteAgent` / `ListAgents` / `ValidateMind` / `RepairMind`: lifecycle verbs over the mind tree.
+- `InitMind` / `DeleteAgent` / `ListAgents` / `ValidateMind`: lifecycle verbs over the mind tree.
 - `Session` / `LoadSession` / `SaveSession`: per-world conversation state, used to drive runtime `--resume`.
 - `Dream` / `Reflect` / `Sleep` / `Fork`: evolution operations (promote playbooks, consolidate memory, clone agents).
 - `ExportMind` / `ImportMind`: tar.gz export for sharing an agent across machines.

@@ -94,7 +94,7 @@ func TestApplyLatestVersion_SemverCompare(t *testing.T) {
 }
 
 // TestStartVersionCheck_FreshCacheSetsPendingSynchronously pins the
-// Fix for fast commands (`spwn agent ls`, `spwn world list`) that used to exit
+// Fix for fast commands (`spwn agent talk`, `spwn world list`) that used to exit
 // Before the background goroutine set pendingUpgrade. A fresh cache
 // Pointing at a NEWER version must land in pendingUpgrade *before*
 // StartVersionCheck returns.
@@ -161,7 +161,7 @@ func TestRanUpgradeCommand(t *testing.T) {
 	}{
 		{"bare upgrade", []string{"spwn", "upgrade"}, true},
 		{"upgrade with --check", []string{"spwn", "upgrade", "--check"}, true},
-		{"agent is not upgrade", []string{"spwn", "agent", "ls"}, false},
+		{"agent is not upgrade", []string{"spwn", "agent", "talk"}, false},
 		{"world is not upgrade", []string{"spwn", "world", "list"}, false},
 		{"flag before subcommand", []string{"spwn", "--json", "upgrade"}, true},
 		{"no args", []string{"spwn"}, false},

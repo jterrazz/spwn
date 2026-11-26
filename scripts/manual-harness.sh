@@ -3,6 +3,7 @@
 set -o pipefail
 
 SPWN=${SPWN:-$(cd "$(dirname "$0")/.." && pwd)/.artifacts/go/spwn}
+STATION=${STATION:-$(cd "$(dirname "$0")/.." && pwd)/machines/.artifacts/go/station}
 TMP_ROOT=${TMP_ROOT:-/tmp/qa-50}
 export SPWN_HOME="$TMP_ROOT/spwn_home"
 export SPWN_BASE_IMAGE=${SPWN_BASE_IMAGE:-spwn-test:latest}
@@ -99,7 +100,7 @@ s4() {
     scenario 4 "init spwn:startup (3 agents)"
     run "s4.init-startup" expect_zero "$SPWN" init spwn:startup
     run "s4.check"        expect_zero "$SPWN" check
-    local out; out=$("$SPWN" agent ls --json 2>&1)
+    local out; out=$("$STATION" agents --json 2>&1)
     checkstr "s4.ceo"     "ceo"     "$out"
     checkstr "s4.devops"  "devops"  "$out"
     checkstr "s4.analyst" "analyst" "$out"
@@ -168,52 +169,51 @@ with open('$f', 'w') as fh: fh.write(t)
 }
 
 s11() {
-    scenario 11 "agent new"
+    scenario 11 "agents create"
     "$SPWN" init > /dev/null 2>&1
-    run "s11.new" expect_zero "$SPWN" agent new bob
+    run "s11.new" expect_zero "$STATION" agents create bob
     [ -f "spwn/agents/bob/agent.yaml" ] && [ -f "spwn/agents/bob/SOUL.md" ] \
         && { PASS=$((PASS+1)); RESULTS+=("PASS  s11.files-exist"); } \
         || { FAIL=$((FAIL+1)); RESULTS+=("FAIL  s11.files-exist"); }
 }
 
 s12() {
-    scenario 12 "agent new duplicate refuses without --force"
+    scenario 12 "agents create duplicate refuses"
     "$SPWN" init > /dev/null 2>&1
-    "$SPWN" agent new bob > /dev/null 2>&1
-    run "s12.dup-no-force" expect_nonzero "$SPWN" agent new bob
-    run "s12.dup-force"    expect_zero    "$SPWN" agent new bob --force
+    "$STATION" agents create bob > /dev/null 2>&1
+    run "s12.dup-no-force" expect_nonzero "$STATION" agents create bob
 }
 
 s13() {
-    scenario 13 "agent ls + --json"
+    scenario 13 "agents + --json"
     "$SPWN" init > /dev/null 2>&1
-    "$SPWN" agent new bob > /dev/null 2>&1
-    run "s13.ls"     expect_zero "$SPWN" agent ls
-    local json; json=$("$SPWN" agent ls --json 2>&1)
+    "$STATION" agents create bob > /dev/null 2>&1
+    run "s13.ls"     expect_zero "$STATION" agents
+    local json; json=$("$STATION" agents --json 2>&1)
     checkstr "s13.ls-json-bob"  "bob"  "$json"
     checkstr "s13.ls-json-neo"  "neo"  "$json"
 }
 
 s14() {
-    scenario 14 "agent inspect / missing agent"
+    scenario 14 "agents <name> / missing agent"
     "$SPWN" init > /dev/null 2>&1
-    run "s14.inspect-neo"     expect_zero    "$SPWN" agent inspect neo
-    run "s14.inspect-missing" expect_nonzero "$SPWN" agent inspect does-not-exist
+    run "s14.inspect-neo"     expect_zero    "$STATION" agents neo
+    run "s14.inspect-missing" expect_nonzero "$STATION" agents does-not-exist
 }
 
 s15() {
-    scenario 15 "agent rm"
+    scenario 15 "agents delete"
     "$SPWN" init > /dev/null 2>&1
-    "$SPWN" agent new bob > /dev/null 2>&1
-    run "s15.rm"         expect_zero    "$SPWN" agent rm bob
-    run "s15.rm-missing" expect_nonzero "$SPWN" agent rm bob
+    "$STATION" agents create bob > /dev/null 2>&1
+    run "s15.rm"         expect_zero    "$STATION" agents delete bob --confirm=bob
+    run "s15.rm-missing" expect_nonzero "$STATION" agents delete bob --confirm=bob
 }
 
 s16() {
-    scenario 16 "agent export produces tar.gz"
+    scenario 16 "agents export produces tar.gz"
     "$SPWN" init > /dev/null 2>&1
-    "$SPWN" agent new bob > /dev/null 2>&1
-    run "s16.export" expect_zero "$SPWN" agent export bob
+    "$STATION" agents create bob > /dev/null 2>&1
+    run "s16.export" expect_zero "$STATION" agents export bob --to .
     local tar
     tar=$(ls bob*.tar.gz 2>/dev/null | head -1)
     if [ -n "$tar" ] && file "$tar" | grep -qi gzip; then
@@ -224,24 +224,24 @@ s16() {
 }
 
 s17() {
-    scenario 17 "agent import round-trip"
+    scenario 17 "agents import round-trip"
     "$SPWN" init > /dev/null 2>&1
-    "$SPWN" agent new bob > /dev/null 2>&1
-    "$SPWN" agent export bob > /dev/null 2>&1
+    "$STATION" agents create bob > /dev/null 2>&1
+    "$STATION" agents export bob --to . > /dev/null 2>&1
     local tar
     tar=$(ls bob*.tar.gz 2>/dev/null | head -1)
-    "$SPWN" agent rm bob > /dev/null 2>&1
-    run "s17.import" expect_zero "$SPWN" agent import "$tar"
-    local json; json=$("$SPWN" agent ls --json 2>&1)
+    "$STATION" agents delete bob --confirm=bob > /dev/null 2>&1
+    run "s17.import" expect_zero "$STATION" agents import "$tar"
+    local json; json=$("$STATION" agents --json 2>&1)
     checkstr "s17.bob-back" "bob" "$json"
 }
 
 s18() {
-    scenario 18 "agent fork"
+    scenario 18 "agents fork"
     "$SPWN" init > /dev/null 2>&1
-    "$SPWN" agent new bob > /dev/null 2>&1
-    run "s18.fork" expect_zero "$SPWN" agent fork bob bob-v2
-    local json; json=$("$SPWN" agent ls --json 2>&1)
+    "$STATION" agents create bob > /dev/null 2>&1
+    run "s18.fork" expect_zero "$STATION" agents fork bob --as bob-v2
+    local json; json=$("$STATION" agents --json 2>&1)
     checkstr "s18.original" "bob"    "$json"
     checkstr "s18.forked"   "bob-v2" "$json"
 }
@@ -249,7 +249,7 @@ s18() {
 s19() {
     scenario 19 "spwn inspect project and single agent"
     "$SPWN" init > /dev/null 2>&1
-    "$SPWN" agent new bob > /dev/null 2>&1
+    "$STATION" agents create bob > /dev/null 2>&1
     run "s19.inspect-all" expect_zero "$SPWN" inspect
     run "s19.inspect-one" expect_zero "$SPWN" inspect bob
     run "s19.inspect-missing" expect_nonzero "$SPWN" inspect does-not-exist
@@ -284,7 +284,7 @@ s21() {
 s22() {
     scenario 22 "install python --agent bob only"
     "$SPWN" init > /dev/null 2>&1
-    "$SPWN" agent new bob > /dev/null 2>&1
+    "$STATION" agents create bob > /dev/null 2>&1
     run "s22.install-agent" expect_zero "$SPWN" install node --agent bob
     grep -q "spwn:node" spwn/agents/bob/agent.yaml \
         && { PASS=$((PASS+1)); RESULTS+=("PASS  s22.bob-has"); } \
@@ -547,7 +547,7 @@ s41() {
 s42() {
     scenario 42 "unicode agent name"
     "$SPWN" init > /dev/null 2>&1
-    "$SPWN" agent new "日本" > /dev/null 2>&1
+    "$STATION" agents create "日本" > /dev/null 2>&1
     local rc=$?
     if [ $rc -le 1 ]; then
         PASS=$((PASS+1)); RESULTS+=("PASS  s42.unicode-clean")
@@ -560,7 +560,7 @@ s43() {
     scenario 43 "very long agent name (slug boundary)"
     "$SPWN" init > /dev/null 2>&1
     local name; name=$(printf 'x%.0s' {1..80})
-    "$SPWN" agent new "$name" > /dev/null 2>&1
+    "$STATION" agents create "$name" > /dev/null 2>&1
     local rc=$?
     if [ $rc -le 1 ]; then
         PASS=$((PASS+1)); RESULTS+=("PASS  s43.long-name-clean")
@@ -607,10 +607,10 @@ s46() {
 s47() {
     scenario 47 "sibling projects isolated"
     mkdir p1 p2
-    (cd p1 && "$SPWN" init > /dev/null 2>&1 && "$SPWN" agent new alice > /dev/null 2>&1)
-    (cd p2 && "$SPWN" init > /dev/null 2>&1 && "$SPWN" agent new bob > /dev/null 2>&1)
+    (cd p1 && "$SPWN" init > /dev/null 2>&1 && "$STATION" agents create alice > /dev/null 2>&1)
+    (cd p2 && "$SPWN" init > /dev/null 2>&1 && "$STATION" agents create bob > /dev/null 2>&1)
     cd p1 || return
-    local j; j=$("$SPWN" agent ls --json 2>&1)
+    local j; j=$("$STATION" agents --json 2>&1)
     if echo "$j" | grep -q bob; then
         FAIL=$((FAIL+1)); RESULTS+=("FAIL  s47.p1-isolated")
     else

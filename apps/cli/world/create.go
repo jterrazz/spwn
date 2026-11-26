@@ -25,7 +25,7 @@ This is a pure config write - no container is created. Once declared,
 spawn the world with "spwn up <name>".
 
 The agents listed via --agent must already exist on disk under
-spwn/agents/<name>/. Use "spwn agent create" first if they don't.`,
+spwn/agents/<name>/. Use "station agents create" first if they don't.`,
 	Example: `  spwn world create matrix --agent neo --agent trinity
   spwn world create alignment --agent clippy --workspace data=./data`,
 	Args: cobra.ExactArgs(1),

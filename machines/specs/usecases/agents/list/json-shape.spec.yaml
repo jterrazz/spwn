@@ -1,0 +1,30 @@
+description: 'station agents --json prints each agent with its team and harness'
+env: two-macs
+runs:
+    - command: 'agents create neo --team web'
+      exit: 0
+      stdout: |
+          ●	neo	created	~/.spwn/agents/neo
+    - command: 'agents --json'
+      exit: 0
+      stdout: |
+          {
+            "schema": "station.agents.list/v1",
+            "generated_at": "{{iso8601}}",
+            "machine": {
+              "name": "macbook-pro",
+              "label": "This Mac",
+              "kind": "computer",
+              "on": null,
+              "this_mac": true
+            },
+            "findings": [],
+            "agents": [
+              {
+                "name": "neo",
+                "description": "A blank-slate agent; replace this one-liner with what neo is for.",
+                "team": "web",
+                "harness": "claude-code"
+              }
+            ]
+          }

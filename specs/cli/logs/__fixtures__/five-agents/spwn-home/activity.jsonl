@@ -1,0 +1,5 @@
+{"id":"0b01","timestamp":"2026-11-25T10:00:01Z","type":"agent.created","actor":"user","verb":"created","target":"a","phrase":"You created a","agent_id":"a"}
+{"id":"0b02","timestamp":"2026-11-25T10:00:02Z","type":"agent.created","actor":"user","verb":"created","target":"b","phrase":"You created b","agent_id":"b"}
+{"id":"0b03","timestamp":"2026-11-25T10:00:03Z","type":"agent.created","actor":"user","verb":"created","target":"c","phrase":"You created c","agent_id":"c"}
+{"id":"0b04","timestamp":"2026-11-25T10:00:04Z","type":"agent.created","actor":"user","verb":"created","target":"d","phrase":"You created d","agent_id":"d"}
+{"id":"0b05","timestamp":"2026-11-25T10:00:05Z","type":"agent.created","actor":"user","verb":"created","target":"e","phrase":"You created e","agent_id":"e"}

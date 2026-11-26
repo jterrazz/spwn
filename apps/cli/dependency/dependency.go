@@ -225,7 +225,7 @@ func filterAgents(all []project.AgentRef, filter string) ([]project.AgentRef, er
 		}
 	}
 	if len(available) == 0 {
-		return nil, fmt.Errorf("no agents declared in this project: add one with `spwn agent create`")
+		return nil, fmt.Errorf("no agents declared in this project: add one with `station agents create`")
 	}
 	if filter == "" {
 		return available, nil

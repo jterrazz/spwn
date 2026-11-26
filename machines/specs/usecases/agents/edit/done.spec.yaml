@@ -1,0 +1,15 @@
+description: 'station agents edit changes the team and harness asked; an empty value clears it'
+env: two-macs
+runs:
+    - command: 'agents create neo'
+      exit: 0
+      stdout: |
+          ●	neo	created	~/.spwn/agents/neo
+    - command: 'agents edit neo --team web --harness codex'
+      exit: 0
+      stdout: |
+          ●	neo	team web, harness codex
+    - command: 'agents edit neo --team ""'
+      exit: 0
+      stdout: |
+          ●	neo	team none, harness codex

@@ -10,29 +10,19 @@ runs:
             spwn agent [command]
 
           Lifecycle:
-            create <name>                    Create a blank agent (auto-creates a single-agent world)
             <name>                           Open an interactive session with <name> (shortcut)
-            ls                               List agents
-            rm <name>                        Delete an agent
 
           Conversation:
             talk <name> [msg]                Open a session with a running agent (sync)
 
           Observe:
-            inspect <name>                   Inspect composition, memory, and history
             logs <name>                      Show the event log for this agent
 
-          Evolution:
-            dream <name>                     Analyze experience, promote playbooks
-            sleep <name>                     Consolidate memory, prune stale strategies
-            fork <src> <dst>                 Clone an agent with everything it knows
-
-          Portability:
-            export <name>                    Export as tar.gz
-            import <path>                    Import from tar.gz
+          Mind:
+            station agents                   List, create, edit, delete, fork, export, import, dream and sleep an agent
 
           Examples:
-            spwn agent create neo
+            station agents create neo
             spwn install python --agent neo
             spwn install skill/paper-reading --agent neo
             spwn agent neo

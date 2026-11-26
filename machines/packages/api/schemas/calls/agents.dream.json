@@ -1,0 +1,74 @@
+{
+  "$defs": {
+    "agents.Dreamed": {
+      "additionalProperties": false,
+      "properties": {
+        "Agent": {
+          "type": "string"
+        },
+        "Completed": {
+          "type": "integer"
+        },
+        "Destroyed": {
+          "type": "integer"
+        },
+        "Entries": {
+          "type": "integer"
+        },
+        "Failed": {
+          "type": "integer"
+        },
+        "Rate": {
+          "type": "number"
+        },
+        "Skipped": {
+          "type": "string"
+        },
+        "Written": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Agent",
+        "Completed",
+        "Destroyed",
+        "Entries",
+        "Failed",
+        "Rate",
+        "Skipped",
+        "Written"
+      ],
+      "type": "object"
+    },
+    "agents.calls.DreamIn": {
+      "additionalProperties": false,
+      "properties": {
+        "Agent": {
+          "type": "string"
+        },
+        "project": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/spwn/blob/main/machines/packages/api/schemas/calls/agents.dream.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call agents.dream of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/agents.calls.DreamIn"
+    },
+    "out": {
+      "$ref": "#/$defs/agents.Dreamed"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "agents.dream",
+  "type": "object"
+}

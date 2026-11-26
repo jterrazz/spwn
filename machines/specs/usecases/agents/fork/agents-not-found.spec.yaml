@@ -1,0 +1,8 @@
+description: 'station agents fork of a name no agent has is refused, exit 2'
+env: two-macs
+runs:
+    - command: 'agents fork neo --as trinity'
+      exit: 2
+      stderr: |
+          Error: no agent named "neo"
+          Hint: station agents

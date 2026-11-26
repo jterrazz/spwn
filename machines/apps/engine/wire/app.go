@@ -190,6 +190,7 @@ func Build(args, env []string, stdin, stdout, stderr *os.File) (p *Program, exit
 		backgroundCommand(kenv, thisMac),
 		awakeCommand(kenv, thisMac),
 		activityCommand(kenv, thisMac),
+		agentsCommand(kenv, thisMac),
 	)
 	commands = append(commands, initCommands(kenv, thisMac)...)
 	commands = append(commands, useCommand(kenv, thisMac), journalCommand(kenv, thisMac), machinefileCommand(kenv, thisMac),

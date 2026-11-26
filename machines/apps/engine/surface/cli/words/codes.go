@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/jterrazz/studio-station/apps/engine/accounts"
+	agentscalls "github.com/jterrazz/studio-station/apps/engine/agents/calls"
 	appscalls "github.com/jterrazz/studio-station/apps/engine/apps/calls"
 	awakecalls "github.com/jterrazz/studio-station/apps/engine/awake/calls"
 	backgroundcalls "github.com/jterrazz/studio-station/apps/engine/background/calls"
@@ -49,7 +50,7 @@ func typedGesture(action string) (doing, done string, ok bool) {
 	switch confirm.Action(action) {
 	case confirm.Stop:
 		return "stopping", "stopped", true
-	case confirm.Delete:
+	case confirm.Delete, confirm.DeleteAgent:
 		return "deleting", "deleted", true
 	case confirm.RestartServer:
 		return "restarting", "restarted", true
@@ -529,6 +530,34 @@ func Codes() map[fail.Code]Wording {
 		},
 		machinescalls.NotFinished: func(e *fail.Error) (string, string) {
 			return e.Subject + " stays: only a stopped ephemeral workspace is deleted by a cleanup", "station machines cleanup"
+		},
+		agentscalls.NotFound: func(e *fail.Error) (string, string) {
+			return "no agent named \"" + e.Subject + "\"", "station agents"
+		},
+		agentscalls.Exists: func(e *fail.Error) (string, string) {
+			return "an agent named \"" + e.Subject + "\" exists", "pick another name"
+		},
+		agentscalls.BadName: func(e *fail.Error) (string, string) {
+			if e.Subject == "" {
+				return "the new agent needs a name", "--as <name>"
+			}
+			return "\"" + e.Subject + "\" is not a name an agent takes", "lowercase letters, digits and dashes, a letter first, and no verb of agents"
+		},
+		agentscalls.UnknownHarness: func(e *fail.Error) (string, string) {
+			return "\"" + e.Subject + "\" is not a harness", "--harness " + strings.Join(catalog.Harnesses(), " or ")
+		},
+		agentscalls.NothingAsked: func(e *fail.Error) (string, string) {
+			return "nothing to change on " + e.Subject, "--team <team> or --harness <harness>"
+		},
+		agentscalls.NotShared: func(e *fail.Error) (string, string) {
+			said := "the project at " + e.Detail["path"] + " is not shared with " + e.Subject
+			if e.Detail["vm"] == "" {
+				return said, "run it on " + e.Subject + ", from a project of its own"
+			}
+			return said, "add it to " + e.Subject + "'s Machinefile vm.mounts"
+		},
+		agentscalls.BadArchive: func(e *fail.Error) (string, string) {
+			return e.Subject + " is not an agent's archive", "station agents export <agent> --to <folder> writes one"
 		},
 		backgroundcalls.Unknown: func(e *fail.Error) (string, string) {
 			return "no background task \"" + e.Subject + "\"", "station background"

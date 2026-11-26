@@ -1,0 +1,8 @@
+description: 'station agents delete of a name no agent has is refused before any question'
+env: two-macs
+runs:
+    - command: 'agents delete neo --confirm=neo'
+      exit: 2
+      stderr: |
+          Error: no agent named "neo"
+          Hint: station agents

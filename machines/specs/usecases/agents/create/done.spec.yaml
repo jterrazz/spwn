@@ -1,0 +1,11 @@
+description: 'station agents create makes a blank Mind with its two layers, its team and harness as asked'
+env: two-macs
+runs:
+    - command: 'agents create neo --team web --harness codex'
+      exit: 0
+      stdout: |
+          ●	neo	created	~/.spwn/agents/neo
+    - command: '--version >/dev/null; /usr/bin/jq -c ".macs[\"macbook-pro\"].stores.agents[\"\"][0] | [.Name, .Team, .Harness, .Path, (.Layers | map(.Name))]" world.json'
+      exit: 0
+      stdout: |
+          ["neo","web","codex","~/.spwn/agents/neo",["journal","playbooks"]]

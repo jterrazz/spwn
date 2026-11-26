@@ -1,0 +1,15 @@
+description: 'station agents export writes the Mind into one archive named for the agent'
+env: two-macs
+runs:
+    - command: 'agents create neo'
+      exit: 0
+      stdout: |
+          ●	neo	created	~/.spwn/agents/neo
+    - command: 'agents export neo --to backups'
+      exit: 0
+      stdout: |
+          ●	neo	exported	backups/neo.tar.gz
+    - command: '--version >/dev/null; /usr/bin/jq -c ".macs[\"macbook-pro\"].stores.agent_archives | keys" world.json'
+      exit: 0
+      stdout: |
+          ["backups/neo.tar.gz"]

@@ -1,0 +1,139 @@
+{
+  "$defs": {
+    "agents.Entry": {
+      "additionalProperties": false,
+      "properties": {
+        "At": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "Code": {
+          "type": "integer"
+        },
+        "Outcome": {
+          "type": "string"
+        },
+        "Took": {
+          "type": "integer"
+        },
+        "World": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "At",
+        "Code",
+        "Outcome",
+        "Took",
+        "World"
+      ],
+      "type": "object"
+    },
+    "agents.Layer": {
+      "additionalProperties": false,
+      "properties": {
+        "Files": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Files",
+        "Name"
+      ],
+      "type": "object"
+    },
+    "agents.Mind": {
+      "additionalProperties": false,
+      "properties": {
+        "Description": {
+          "type": "string"
+        },
+        "Harness": {
+          "type": "string"
+        },
+        "Journal": {
+          "items": {
+            "$ref": "#/$defs/agents.Entry"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Layers": {
+          "items": {
+            "$ref": "#/$defs/agents.Layer"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Name": {
+          "type": "string"
+        },
+        "Path": {
+          "type": "string"
+        },
+        "Team": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Description",
+        "Harness",
+        "Journal",
+        "Layers",
+        "Name",
+        "Path",
+        "Team"
+      ],
+      "type": "object"
+    },
+    "agents.calls.CreateIn": {
+      "additionalProperties": false,
+      "properties": {
+        "Agent": {
+          "type": "string"
+        },
+        "Harness": {
+          "type": "string"
+        },
+        "Team": {
+          "type": "string"
+        },
+        "project": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/spwn/blob/main/machines/packages/api/schemas/calls/agents.create.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call agents.create of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/agents.calls.CreateIn"
+    },
+    "out": {
+      "$ref": "#/$defs/agents.Mind"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "agents.create",
+  "type": "object"
+}

@@ -1,4 +1,4 @@
-description: talk to a non-existent agent hints at agent create
+description: talk to a non-existent agent hints at station agents create
 fixture: ../__fixtures__/docker-pilot/
 runs:
     - command: agent talk does-not-exist hello
@@ -7,5 +7,5 @@ runs:
           
             Error: agent "does-not-exist" not found
 
-            Create one with: spwn agent create does-not-exist
+            Create one with: station agents create does-not-exist
 

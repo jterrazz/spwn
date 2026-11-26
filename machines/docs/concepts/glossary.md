@@ -186,7 +186,7 @@ The Agent space's verbs come from the same table, with no new synonym:
 - `plan/apply/drift` (a Machinefile or a project's `spwn.yaml`: what would change, make it so, what diverged; `drift` refuses nothing).
 - `login/logout` (an account's sign-in).
 - `log` (what ran).
-- An agent's own acts: `talk` (a session), `dream` (analyze its experience, promote playbooks), `sleep` (tidy its Mind: stale playbooks archived, old journal files deleted, a dated summary written; it stops nothing), `fork` (clone it with everything it knows).
+- An agent's own acts: `talk` (a session), `dream` (analyze its experience, promote playbooks), `sleep` (tidy its Mind: stale playbooks archived, old journal files deleted, a dated summary written; it stops nothing), `fork` (clone it with everything it knows), `export` (write its Mind into one archive, the Mind left as it is), `import` (make an agent from such an archive).
 
 ## Default names
 

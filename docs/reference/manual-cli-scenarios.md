@@ -75,7 +75,7 @@ spwn check                                   # → exit 0
 cd $TMP/s04
 spwn init spwn:startup
 spwn check
-spwn agent ls --json                         # → includes ceo, devops, analyst
+station agents --json                         # → includes ceo, devops, analyst
 ```
 
 **Asserts:** init zero · check zero · `ceo`/`devops`/`analyst` each in JSON.
@@ -150,78 +150,77 @@ spwn check                                   # → exit != 0
 
 ### Group B: Agent CRUD (11 to 20)
 
-#### 11. `spwn agent create` scaffolds the home tree
+#### 11. `station agents create` scaffolds the home tree
 
 ```bash
-spwn init && spwn agent create bob
+spwn init && station agents create bob
 ls spwn/agents/bob                           # → agent.yaml, SOUL.md, AGENTS.md, playbooks/, journal/
 ```
 
 **Asserts:** `new` zero · `agent.yaml` + `SOUL.md` both present.
 
-#### 12. Duplicate `spwn agent create` refuses without `--force`
+#### 12. Duplicate `station agents create` refuses
 
 ```bash
-spwn init && spwn agent create bob
-spwn agent create bob                           # → exit != 0
-spwn agent create bob --force                   # → exit 0
+spwn init && station agents create bob
+station agents create bob                           # → exit != 0
 ```
 
-#### 13. `spwn agent ls` in plain + JSON
+#### 13. `station agents` in plain + JSON
 
 ```bash
-spwn init && spwn agent create bob
-spwn agent ls
-spwn agent ls --json                         # → valid JSON, contains bob + neo
+spwn init && station agents create bob
+station agents
+station agents --json                         # → valid JSON, contains bob + neo
 ```
 
-#### 14. `spwn agent inspect` happy + missing
+#### 14. `station agents <name>` happy + missing
 
 ```bash
 spwn init
-spwn agent inspect neo                       # → exit 0
-spwn agent inspect does-not-exist            # → exit != 0
+station agents neo                       # → exit 0
+station agents does-not-exist            # → exit != 0
 ```
 
-#### 15. `spwn agent rm` happy + missing
+#### 15. `station agents delete` happy + missing
 
 ```bash
-spwn init && spwn agent create bob
-spwn agent rm bob                            # → exit 0
-spwn agent rm bob                            # → exit != 0
+spwn init && station agents create bob
+station agents delete bob --confirm=bob                            # → exit 0
+station agents delete bob --confirm=bob                            # → exit != 0
 ```
 
-#### 16. `spwn agent export` produces a gzip archive
+#### 16. `station agents export` produces a gzip archive
 
 ```bash
-spwn init && spwn agent create bob
-spwn agent export bob                        # → bob*.tar.gz on disk
+spwn init && station agents create bob
+station agents export bob --to .                        # → bob*.tar.gz on disk
 file bob*.tar.gz                             # → "gzip compressed data"
 ```
 
-#### 17. `spwn agent import` round-trip
+#### 17. `station agents import` round-trip
 
 ```bash
-spwn init && spwn agent create bob && spwn agent export bob
-spwn agent rm bob
-spwn agent import bob*.tar.gz                # → exit 0
-spwn agent ls --json                         # → contains bob
+spwn init && station agents create bob && station agents export bob --to .
+station agents delete bob --confirm=bob
+station agents import bob*.tar.gz                # → exit 0
+station agents --json                         # → contains bob
 ```
 
-#### 18. `spwn agent fork` clones identity + memory
+#### 18. `station agents fork` clones identity + memory
 
 ```bash
-spwn init && spwn agent create bob
-spwn agent fork bob bob-v2                   # → exit 0
-spwn agent ls --json                         # → contains bob and bob-v2
+spwn init && station agents create bob
+station agents fork bob --as bob-v2                   # → exit 0
+station agents --json                         # → contains bob and bob-v2
 ```
 
-#### 19. `spwn agent inspect`
+#### 19. `station agents <name>`
 
 ```bash
-spwn init && spwn agent create bob
-spwn agent inspect bob                       # → just bob, exit 0
-spwn agent inspect does-not-exist            # → exit != 0
+spwn init && station agents create bob
+station agents bob                       # → just bob, exit 0
+station agents does-not-exist            # → exit != 0
 ```
 
 #### 20. `spwn skill new / ls / rm`
@@ -248,7 +247,7 @@ grep python spwn.lock                        # → present
 #### 22. `spwn install node --agent bob`, scoped install
 
 ```bash
-spwn init && spwn agent create bob
+spwn init && station agents create bob
 spwn install node --agent bob
 # → bob's agent.yaml has spwn:node; neo's does NOT
 ```
@@ -428,13 +427,13 @@ spwn check                                   # → exit != 0, mentions "yaml" or
 #### 42. Unicode agent name is handled cleanly
 
 ```bash
-spwn init && spwn agent create 日本              # rc ≤ 1 (reject or slugify, no crash)
+spwn init && station agents create 日本              # rc ≤ 1 (reject or slugify, no crash)
 ```
 
 #### 43. Very long agent name (>63 chars, slug boundary)
 
 ```bash
-spwn init && spwn agent create $(printf 'x%.0s' {1..80})   # rc ≤ 1
+spwn init && station agents create $(printf 'x%.0s' {1..80})   # rc ≤ 1
 ```
 
 #### 44. Empty `dependencies: []` is valid
@@ -465,9 +464,9 @@ spwn check                                   # → finds spwn.yaml two dirs up, 
 
 ```bash
 mkdir p1 p2
-(cd p1 && spwn init && spwn agent create alice)
-(cd p2 && spwn init && spwn agent create bob)
-cd p1 && spwn agent ls --json               # → alice present, bob absent
+(cd p1 && spwn init && station agents create alice)
+(cd p2 && spwn init && station agents create bob)
+cd p1 && station agents --json               # → alice present, bob absent
 ```
 
 #### 48. `spwn --version`

@@ -1,4 +1,4 @@
-description: the activity log is created only by the first real event
+description: a command that records no event leaves no activity log
 runs:
     - command: --version
       exit: 0
@@ -6,15 +6,3 @@ runs:
           spwn version {{string}}
       files:
           spwn-home/activity.jsonl: absent
-    - command: agent create neo
-      exit: 0
-      stderr: |4+
-          
-            → Creating agent "neo"...
-            ✓ Created agent            neo
-            ✓ Created soul             SOUL.md
-
-            ✓ Spawn with: spwn up --agent neo
-
-      files:
-          spwn-home/activity.jsonl: { contains: 'agent.created' }

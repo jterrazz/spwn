@@ -8,12 +8,12 @@ runs:
 
           Quick Start:
             spwn init                        Scaffold a new project
-            spwn agent create neo            Create an agent (auto-creates a single-agent world)
+            station agents create neo        Create an agent
             spwn up                          Bring up every world in spwn.yaml
             spwn agent neo                   Start the world that contains neo
 
           Entities:
-            agent                            Composed minds (create, ls, inspect, fork, talk)
+            agent                            Composed minds (talk, logs)
             world                            Deployable groupings (list, inspect, enter)
 
           Building blocks:

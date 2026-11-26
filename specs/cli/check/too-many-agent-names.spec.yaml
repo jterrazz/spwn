@@ -1,8 +1,0 @@
-description: agent create with three positional args is refused by arity
-runs:
-    - command: agent create a b c
-      exit: 1
-      stderr: |4+
-          
-            Error: accepts at most 1 arg(s), received 3
-

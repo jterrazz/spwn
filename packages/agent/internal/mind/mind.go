@@ -121,52 +121,6 @@ You are a Spwn agent - a persistent AI worker living inside an isolated world.
 	return dir, nil
 }
 
-// Repair re-creates any missing layer directories and the default
-// profile for an already-existing Mind. Unlike Init, Repair never
-// errors when the agent directory already exists; it is idempotent
-// and only writes what is missing, making it safe for --force
-// re-scaffold platform.
-func Repair(name string) error {
-	dir := AgentDir(name)
-	if _, err := os.Stat(dir); err != nil {
-		if os.IsNotExist(err) {
-			return fmt.Errorf("agent %q not found", name)
-		}
-		return err
-	}
-
-	for _, layer := range platform.MindLayers {
-		if err := os.MkdirAll(filepath.Join(dir, layer), 0755); err != nil {
-			return fmt.Errorf("create %s: %w", layer, err)
-		}
-	}
-
-	soulPath := filepath.Join(dir, platform.SoulFileName)
-	if _, err := os.Stat(soulPath); err != nil && os.IsNotExist(err) {
-		soul := `# Default Soul
-
-You are a Spwn agent - a persistent AI worker living inside an isolated world.
-`
-		if err := os.WriteFile(soulPath, []byte(soul), 0644); err != nil {
-			return fmt.Errorf("create soul: %w", err)
-		}
-	}
-
-	agentYAMLPath := filepath.Join(dir, "agent.yaml")
-	if _, err := os.Stat(agentYAMLPath); err != nil && os.IsNotExist(err) {
-		if err := os.WriteFile(agentYAMLPath, renderTmpl(defaultAgentYAMLTmpl, name), 0644); err != nil {
-			return fmt.Errorf("create agent.yaml: %w", err)
-		}
-	}
-	entryPath := filepath.Join(dir, "AGENTS.md")
-	if _, err := os.Stat(entryPath); err != nil && os.IsNotExist(err) {
-		if err := os.WriteFile(entryPath, renderTmpl(defaultAgentMDTmpl, name), 0644); err != nil {
-			return fmt.Errorf("create AGENTS.md: %w", err)
-		}
-	}
-	return nil
-}
-
 // Validate checks that a Mind directory exists and has a SOUL.md.
 func Validate(name string) error {
 	dir := AgentDir(name)

@@ -1,0 +1,18 @@
+description: 'station agents --on a VM reads the agents kept on that VM; This Mac keeps none'
+env: two-macs
+runs:
+    - command: 'agents create neo --on linux-1'
+      exit: 0
+      stdout: |
+          	On linux-1:
+          ●	neo	created	~/.spwn/agents/neo
+    - command: 'agents --on linux-1'
+      exit: 0
+      stdout: |
+          	On linux-1:
+          # Agents
+          ●	neo		claude-code	A blank-slate agent; replace this one-liner with what neo is for.
+    - command: '--version >/dev/null; /usr/bin/jq -c "[(.macs[\"linux-1\"].stores.agents[\"\"] | map(.Name)), (.macs[\"macbook-pro\"].stores.agents // {} | length)]" world.json'
+      exit: 0
+      stdout: |
+          [["neo"],0]

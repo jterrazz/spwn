@@ -11,7 +11,7 @@ import (
 // scalar string ("spwn:x") for the no-policy case, or a mapping
 // ({name: spwn:x, deny: [...], allow: [...]}) when a policy is
 // declared. The unmarshaller must accept both, mixed in any order,
-// and round-trip cleanly so `spwn agent inspect` doesn't lose the
+// and round-trip cleanly so `station agents <name>` doesn't lose the
 // allow/deny lists.
 
 func TestManifest_UnmarshalYAML_PoliciedDeps(t *testing.T) {

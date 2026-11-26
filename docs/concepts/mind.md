@@ -68,7 +68,7 @@ An agent that only accumulates degrades: the journal grows unbounded, new learni
 
 ### What Sleep does today
 
-`spwn agent sleep <name>` runs no model and stops no world. It does three things, in this order:
+`station agents sleep <name>` runs no model and stops no world. It does three things, in this order:
 
 1. **Archive**: every file of `playbooks/` not modified for 30 days moves to `archive/playbooks/`.
 2. **Prune**: every file of `journal/` not modified for 90 days is deleted.
@@ -119,7 +119,7 @@ Undecided: which of those becomes the default when two branches touched the same
 
 ### What is shipped
 
-Dream, Sleep, and Fork ship today (`spwn agent dream|sleep|fork`), built on filesystem snapshots. Merge and richer branching are ahead; content-addressable storage is a later option if the snapshots get expensive.
+Dream, Sleep, and Fork ship today (`station agents dream|sleep|fork`), built on filesystem snapshots. Merge and richer branching are ahead; content-addressable storage is a later option if the snapshots get expensive.
 
 Designed, not shipped: agents that fork, experiment, and merge without an operator in the loop.
 

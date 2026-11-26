@@ -81,7 +81,7 @@ func TestCLI_AgentHelp(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	for _, sub := range []string{"create", "ls", "rm", "talk", "inspect", "dream", "sleep", "fork"} {
+	for _, sub := range []string{"talk", "logs", "station agents"} {
 		assertContains(t, out, sub, "agent help")
 	}
 }
@@ -95,16 +95,6 @@ func TestCLI_AgentTalkHelp(t *testing.T) {
 	assertContains(t, out, "talk", "agent talk help")
 	assertContains(t, out, "agent-name", "agent talk usage")
 	assertContains(t, out, "interactive", "agent talk description")
-}
-
-func TestCLI_AgentDeleteHelp(t *testing.T) {
-	out, _, err := executeCommand("agent", "rm", "--help")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	assertContains(t, out, "rm", "agent rm help")
-	assertContains(t, out, "agent-name", "agent rm usage")
 }
 
 // --- Install help ---

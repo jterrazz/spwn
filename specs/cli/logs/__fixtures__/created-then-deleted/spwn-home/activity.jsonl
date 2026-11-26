@@ -1,0 +1,2 @@
+{"id":"0c01","timestamp":"2026-11-25T10:00:01Z","type":"agent.created","actor":"user","verb":"created","target":"neo","phrase":"You created neo","agent_id":"neo"}
+{"id":"0c02","timestamp":"2026-11-25T10:00:02Z","type":"agent.deleted","actor":"user","verb":"deleted","target":"neo","phrase":"neo was deleted","agent_id":"neo"}

@@ -1,0 +1,63 @@
+{
+  "$defs": {
+    "agents.Forked": {
+      "additionalProperties": false,
+      "properties": {
+        "From": {
+          "type": "string"
+        },
+        "Layers": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "To": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "From",
+        "Layers",
+        "To"
+      ],
+      "type": "object"
+    },
+    "agents.calls.ForkIn": {
+      "additionalProperties": false,
+      "properties": {
+        "Agent": {
+          "type": "string"
+        },
+        "As": {
+          "type": "string"
+        },
+        "project": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/spwn/blob/main/machines/packages/api/schemas/calls/agents.fork.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call agents.fork of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/agents.calls.ForkIn"
+    },
+    "out": {
+      "$ref": "#/$defs/agents.Forked"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "agents.fork",
+  "type": "object"
+}

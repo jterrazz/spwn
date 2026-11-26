@@ -33,17 +33,6 @@ func TestCLI_ErrorNoUsageDump_WorldInspectMissingArg(t *testing.T) {
 	}
 }
 
-func TestCLI_ErrorNoUsageDump_AgentInspectMissingArg(t *testing.T) {
-	_, stderr, err := executeCommand("agent", "inspect")
-	if err == nil {
-		t.Fatal("expected error for missing argument")
-	}
-
-	if strings.Contains(stderr, "Available Commands:") {
-		t.Error("missing arg should NOT dump full usage")
-	}
-}
-
 // --- DisplayedError ---
 
 func TestDisplayedError_Wraps(t *testing.T) {
@@ -91,9 +80,7 @@ func TestCLI_AgentHelpGrouped(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// Composition lives on `spwn install`/`spwn uninstall` now;
-	// The Compose section was retired when agent add/remove were.
-	for _, section := range []string{"Lifecycle:", "Conversation:", "Evolution:", "Portability:"} {
+	for _, section := range []string{"Lifecycle:", "Conversation:", "Observe:", "Mind:"} {
 		assertContains(t, out, section, "agent help sections")
 	}
 }
@@ -145,22 +132,6 @@ func TestCLI_WorldListHelp(t *testing.T) {
 	if strings.Contains(out, "Observe:") {
 		t.Error("world list --help should show list help, not parent grouped help")
 	}
-}
-
-func TestCLI_AgentCreateHelp(t *testing.T) {
-	out, _, err := executeCommand("agent", "create", "--help")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	assertContains(t, out, "create", "agent create help")
-	// QA finding #31: the help long description used to lie about
-	// a "6-layer Mind". The truth is now: SOUL.md at the agent root
-	// plus two Mind layer directories (playbooks/journal). Knowledge
-	// moved to world scope; identity collapsed into SOUL.md; skills
-	// moved to build-time dependencies at /world/skills/.
-	assertContains(t, out, "SOUL.md", "agent create description")
-	assertContains(t, out, "playbooks/journal", "agent create description")
 }
 
 // --- Bare command shows help ---

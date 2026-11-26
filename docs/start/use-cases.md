@@ -35,12 +35,12 @@ git push
 ## Fork a mind, throw it away if it breaks
 
 ```bash
-spwn agent fork neo neo-migration       # clone composition + memory
+station agents fork neo --as neo-migration       # clone composition + memory
 spwn up --agent neo-migration
 spwn agent talk neo-migration "migrate the whole repo from Jest to Vitest"
 
 # worked? promote.  didn't? neo is untouched, no regrets.
-spwn agent rm neo-migration
+station agents delete neo-migration --confirm=neo-migration
 ```
 
 > The only AI assistant that lets you `git checkout -b` your agent. Run a destructive refactor in a branch; keep or discard based on the diff. **Natural selection for behavior.**

@@ -516,9 +516,9 @@ Spwn, it is HH:MM:SS".
 
 ---
 
-#### Scenario 24: `spwn agent inspect <agent>` matches what the agent self-reports
+#### Scenario 24: `station agents <agent>` matches what the agent self-reports
 
-**Before spawn:** run `spwn agent inspect neo` on host; note deps + skills.
+**Before spawn:** run `station agents neo` on host; note deps + skills.
 
 **Inside agent prompt:**
 
@@ -859,7 +859,7 @@ inside-container convention.
 **Setup:** spawn a world with ceo only. Then on host:
 
 ```bash
-spwn agent create trinity
+station agents create trinity
 # edit spwn.yaml to add trinity to worlds.matrix.agents
 spwn agent deploy trinity   # or whatever the hot-deploy CLI is
 ```
