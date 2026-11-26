@@ -141,10 +141,10 @@ type FigureView struct {
 }
 
 type FigurePart struct {
-	Name string `json:"name"`
-	To   string `json:"to,omitempty"`
-	N    int    `json:"n,omitempty"`
-	At   string `json:"at,omitempty"`
+	Name string
+	To   string `json:",omitempty"`
+	N    int    `json:",omitempty"`
+	At   string `json:",omitempty"`
 }
 
 func (*TableView) view()   {}

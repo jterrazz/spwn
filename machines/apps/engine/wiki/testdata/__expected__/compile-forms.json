@@ -208,13 +208,13 @@
             "shows": "forms#values",
             "parts": [
               {
-                "name": "draft",
-                "to": "checks"
+                "Name": "draft",
+                "To": "checks"
               },
               {
-                "name": "page",
-                "n": 2,
-                "at": "xy"
+                "Name": "page",
+                "N": 2,
+                "At": "xy"
               }
             ],
             "caption": "One thing becomes another."

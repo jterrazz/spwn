@@ -12,6 +12,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	"github.com/jterrazz/studio-station/apps/engine/core/verdict"
 	"github.com/jterrazz/studio-station/apps/engine/machines"
+	"github.com/jterrazz/studio-station/apps/engine/wiki"
 )
 
 const (
@@ -266,15 +267,18 @@ func (r *reflector) zeroable(t reflect.Type, s map[string]any) map[string]any {
 // counts it. A verdict always carries its tone, the one closed enum that
 // is not worded, since it is how a word is drawn. A VM's state is always
 // set: the list reads every VM as one of its values, unknown when unread.
-// The worlds' answers are
+// A served wiki page always says how each block is shown, and each group's
+// intent, tell when its own does not exist; a budget is empty where a
+// finding is shown at every one. The worlds' answers are
 // held to these schemas by specs/architecture.
 func neverZero() []reflect.Type {
 	enums := wordedEnums()
-	out := make([]reflect.Type, 0, len(enums)+2)
+	out := make([]reflect.Type, 0, len(enums)+4)
 	for _, w := range enums {
 		out = append(out, reflect.TypeOf(w.of))
 	}
-	return append(out, reflect.TypeFor[verdict.Tone](), reflect.TypeFor[machines.VMState]())
+	return append(out, reflect.TypeFor[verdict.Tone](), reflect.TypeFor[machines.VMState](),
+		reflect.TypeFor[wiki.Shown](), reflect.TypeFor[wiki.Intent]())
 }
 
 // invariant: what call.Encode writes for a value of t that is not

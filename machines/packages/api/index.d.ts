@@ -3694,20 +3694,20 @@ export type WatchFrame = {
 };
 
 export type WikiCallsReadIn = {
-    Budget?: string;
+    Budget?: '10min' | '2min' | '30s';
     Page?: string;
 };
 
 export type WikiCause = {
-    cause: string;
-    points: number;
+    Name: string;
+    Points: number;
 };
 
 export type WikiFigurePart = {
-    at?: string;
-    n?: number;
-    name: string;
-    to?: string;
+    At?: string;
+    N?: number;
+    Name: string;
+    To?: string;
 };
 
 export type WikiFloorHead = {
@@ -3751,8 +3751,8 @@ export type WikiSeatHead = {
 
 export type WikiServed = {
     Attention: WikiServedFinding[] | null;
-    Budget: string;
-    Budgets: string[] | null;
+    Budget: '' | '10min' | '2min' | '30s';
+    Budgets: ('10min' | '2min' | '30s')[] | null;
     Findings: WikiServedFinding[] | null;
     Floor: WikiFloorHead;
     Floors: WikiServedFloor[] | null;
@@ -3781,10 +3781,10 @@ export type WikiServedBlock = {
     NeedsYou: boolean;
     OwnFloor: WikiFloorHead | null;
     Score: number;
-    Shown: '' | 'card' | 'counted' | 'line' | 'none' | 'tile';
+    Shown: 'card' | 'counted' | 'line' | 'none' | 'tile';
     Sub: WikiPageHead | null;
     Table: WikiServedTable | null;
-    Tier: string;
+    Tier: '' | 'lead' | 'normal' | 'quiet';
     Title: string;
     Why: WikiCause[] | null;
     Word: string;
@@ -3820,7 +3820,7 @@ export type WikiServedFigure = {
 
 export type WikiServedFinding = {
     At: string;
-    Found: string;
+    Found: '' | '10min' | '2min' | '30s';
     Hard: boolean;
     Level: '' | 'ambient' | 'needs-you' | 'remark';
     Line: number;
@@ -3842,7 +3842,7 @@ export type WikiServedGroup = {
     Blocks: number;
     Folded: '' | 'author' | 'budget' | 'seat';
     ID: string;
-    Intent: string;
+    Intent: 'decide' | 'define' | 'guard' | 'locate' | 'prove' | 'tell';
     Items: WikiServedItem[] | null;
     Lead: string;
     NeedsYou: boolean;

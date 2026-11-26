@@ -323,7 +323,7 @@ func (c *compiler) openGroup(t tag, span Span) {
 	}
 	kind, _ := c.schema.kind("group")
 	c.attributes(kind, t)
-	g := &Group{T: "group", ID: idOf(t.props), Title: textOf(t.props, "title"), Intent: Intent(textOf(t.props, "intent")), Props: t.props, Items: []Item{}, At: t.at, Tag: span, Span: span}
+	g := &Group{T: "group", ID: idOf(t.props), Title: textOf(t.props, "title"), Intent: intentOf(textOf(t.props, "intent")), Props: t.props, Items: []Item{}, At: t.at, Tag: span, Span: span}
 	if v, ok := t.props.Get("fold"); ok && v.Kind == ValueBool {
 		g.Fold = v.Bool
 	}

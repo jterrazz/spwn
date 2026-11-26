@@ -543,7 +543,7 @@ func (k *checker) group(p *Page, h heldGroup) {
 	k.idForm(p, g.ID, "Group", g.At)
 	k.fields(p, g.ID, kind, g.Props, g.At, "intent", "fold")
 	k.common(p, g.ID, kind, g.Props, g.At)
-	if v, ok := g.Props.Get("intent"); ok && !slices.Contains(intents(), Intent(text(v))) {
+	if v, ok := g.Props.Get("intent"); ok && !isNamed(intents(), text(v)) {
 		k.add("H17", p.ID, g.ID, g.Props.at("intent", g.At), fmt.Sprintf("intent: %s does not exist: tell, define, decide, locate, guard or prove", text(v)))
 	}
 	if v, ok := g.Props.Get("fold"); ok && v.Kind != ValueBool {

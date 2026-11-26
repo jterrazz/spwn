@@ -24,8 +24,8 @@ type Weight struct {
 }
 
 type Cause struct {
-	Name   string `json:"cause"`
-	Points int    `json:"points"`
+	Name   string
+	Points int
 }
 
 // invariant: a table finds its rows, never holds them: the blocks of kind
@@ -272,8 +272,8 @@ func (k *checker) weightOf(b *Block, leans, illustrated map[string]bool, linkers
 	if broken[b.ID] {
 		cause("broken", 3)
 	}
-	if v := textOf(b.Props, "weight"); v == string(TierLead) || v == string(TierQuiet) {
-		w.By = Tier(v)
+	if by, ok := named([]Tier{TierLead, TierQuiet}, textOf(b.Props, "weight")); ok {
+		w.By = by
 	}
 	return w
 }
