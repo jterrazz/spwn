@@ -110,4 +110,18 @@ final class TokenTests: XCTestCase {
         }
         XCTAssertEqual(failures, [])
     }
+
+    // invariant: the menu bar's palette is the system's (ADR-053) and stays
+    // so; its dark orange alone is the window's `--you`, the one colour that
+    // says something needs you.
+    func testTheDarkOrangeIsTheWindowsYou() throws {
+        let css = try String(contentsOf: Tree.root.appendingPathComponent("apps/desktop/src/presentation/ui/tokens.css"), encoding: .utf8)
+        let line = try XCTUnwrap(css.components(separatedBy: "\n").first { $0.trimmingCharacters(in: .whitespaces).hasPrefix("--you:") })
+        let hex = try XCTUnwrap(line.split(separator: "#").last?.prefix(6))
+        let value = try XCTUnwrap(UInt32(hex, radix: 16))
+        let orange = Token.resolved(scheme: .dark).color.orange.resolve(in: EnvironmentValues())
+        XCTAssertEqual(Double(orange.red) * 255, Double((value >> 16) & 0xFF), accuracy: 0.5)
+        XCTAssertEqual(Double(orange.green) * 255, Double((value >> 8) & 0xFF), accuracy: 0.5)
+        XCTAssertEqual(Double(orange.blue) * 255, Double(value & 0xFF), accuracy: 0.5)
+    }
 }

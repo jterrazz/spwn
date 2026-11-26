@@ -148,7 +148,7 @@ public struct ActivityCharts: View {
                 LineMark(x: .value("t", Double(i)), y: .value("v", lead[i]), series: .value("s", "anomaly"))
                     .interpolationMethod(.monotone)
                     .lineStyle(StrokeStyle(lineWidth: c.anomalyLine, lineCap: .round, lineJoin: .round))
-                    .foregroundStyle(tokens.color.orange)
+                    .foregroundStyle(tokens.color.t1)
             }
         }
         if let i = picked {
@@ -162,7 +162,7 @@ public struct ActivityCharts: View {
                 PointMark(x: .value("t", Double(i)), y: .value("v", lead[i]))
                     .symbol {
                         Circle().fill(tokens.color.panelSolid)
-                            .overlay(Circle().stroke(anomaly == nil ? tokens.color.accent : tokens.color.orange, lineWidth: c.peakStroke))
+                            .overlay(Circle().stroke(anomaly == nil ? tokens.color.accent : tokens.color.t1, lineWidth: c.peakStroke))
                             .frame(width: c.peakDot, height: c.peakDot)
                     }
             }
@@ -252,9 +252,9 @@ public struct ActivityCharts: View {
             let hot = anomaly != nil
             Text([Format.show(at.value ?? Value()), at.at ?? ""].filter { !$0.isEmpty }.joined(separator: Token.Glyph.sep))
                 .font(.system(size: c.ends, weight: .semibold).monospacedDigit())
-                .foregroundStyle(hot ? tokens.color.orangeText : tokens.color.t2)
+                .foregroundStyle(hot ? tokens.color.t1 : tokens.color.t2)
                 .padding(c.chipPadding)
-                .background(RoundedRectangle(cornerRadius: c.chipRadius, style: .continuous).fill(hot ? tokens.color.orange.opacity(c.chipTint) : tokens.color.q))
+                .background(RoundedRectangle(cornerRadius: c.chipRadius, style: .continuous).fill(hot ? tokens.color.t1.opacity(c.chipTint) : tokens.color.q))
                 .fixedSize()
                 .position(x: ChartScale.edge(plot.minX + x, width: width), y: -c.chips / 2)
                 .allowsHitTesting(false)

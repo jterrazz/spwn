@@ -25,7 +25,7 @@ public struct Spark: View {
 
     @ViewBuilder var drawing: some View {
         let c = Token.Metric.Chart.self
-        let ink = hot ? tokens.color.orange : tint ?? tokens.color.accent
+        let ink = hot ? tokens.color.t1 : tint ?? tokens.color.accent
         let shown = Array(ChartScale.eased(points).enumerated())
         let last = Double(max(points.count - 1, 1))
         let pad = last * Double(c.sparkDot) / Double(c.spark.width)

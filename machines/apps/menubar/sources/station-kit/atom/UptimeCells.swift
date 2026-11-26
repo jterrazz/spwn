@@ -10,7 +10,7 @@ public struct UptimeCells: View {
         let c = Token.Metric.Chart.self
         return switch mark {
         case "ok": tokens.color.t2.opacity(c.uptimeShare)
-        case "restart": tokens.color.orange.opacity(c.uptimeMarkShare)
+        case "restart": tokens.color.t1.opacity(c.uptimeMarkShare)
         case "down": tokens.color.red.opacity(c.uptimeMarkShare)
         default: tokens.color.t4
         }
