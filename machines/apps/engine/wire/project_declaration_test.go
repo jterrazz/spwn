@@ -56,8 +56,11 @@ func mkfifo(t *testing.T, at string) {
 	}
 }
 
-// value: the error of read, failing the test when it waits past within.
-func within(t *testing.T, name string, d time.Duration, read func() error) error {
+// value: the error of read, failing the test when it waits past d. A read
+// held on the FIFO at fifo holds the process-wide act lock of every
+// project, so a writer opens the FIFO until the read lets go, and the tests
+// after this one still run.
+func within(t *testing.T, name, fifo string, d time.Duration, read func() error) error {
 	t.Helper()
 	ready, got := make(chan struct{}), make(chan error, 1)
 	go func() { got <- read(); close(ready) }()
@@ -66,9 +69,20 @@ func within(t *testing.T, name string, d time.Duration, read func() error) error
 	case err := <-got:
 		return err
 	default:
-		t.Fatalf("%s waited %s", name, d)
-		return nil
 	}
+	go func() {
+		for {
+			select {
+			case <-ready:
+				return
+			default:
+				_ = machine.FS.Append(fifo, nil, 0o600)
+			}
+		}
+	}()
+	_ = machine.Clock.Await(t.Context(), ready, d)
+	t.Fatalf("%s waited %s on the FIFO", name, d)
+	return nil
 }
 
 // value: each read of the project at root, as the calls that read it.
@@ -134,7 +148,7 @@ func TestAFIFOInTheDeclarationIsRefusedAndNoReadWaitsOnIt(t *testing.T) {
 			}
 			mkfifo(t, at)
 			for name, read := range reads(t, d, root) {
-				if err := within(t, name, 10*time.Second, read); !refusedOrBare(err, calls.NotAFile, project.ErrNotAFile, rel) {
+				if err := within(t, name, at, 10*time.Second, read); !refusedOrBare(err, calls.NotAFile, project.ErrNotAFile, rel) {
 					t.Errorf("%s = %v; want %s refused as not a file", name, err, rel)
 				}
 			}
