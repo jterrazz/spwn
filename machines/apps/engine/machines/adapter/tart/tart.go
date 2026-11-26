@@ -56,6 +56,8 @@ func (h *hypervisor) bin() string {
 
 func (h *hypervisor) Name() string { return name }
 
+func (h *hypervisor) Package() string { return name }
+
 func (h *hypervisor) Installed() bool {
 	_, ok := h.run.LookPath(name)
 	return ok

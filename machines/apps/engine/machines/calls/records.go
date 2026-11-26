@@ -81,35 +81,50 @@ func (s *Machinist) HoldOf(ctx context.Context, name string) (model.Hold, bool) 
 func (s *Machinist) Records() ([]model.VMRecord, error) { return s.records() }
 
 func (s *Machinist) vms(ctx context.Context, mac string, live map[string]EngineVM) ([]model.VM, error) {
+	out, _, err := s.listed(ctx, mac, live)
+	return out, err
+}
+
+// value: this Mac's VMs, and whether its hypervisor's listing failed while
+// VMs are recorded.
+func (s *Machinist) listed(ctx context.Context, mac string, live map[string]EngineVM) ([]model.VM, bool, error) {
 	// invariant: the daemon's view wins, but a VM it runs no run of keeps
 	// the suspended its hypervisor tells; without it, no engine or a listing
 	// that fails means nothing is running: every workspace reads stopped.
 	stored, err := s.stored()
 	if err != nil || len(stored) == 0 {
-		return nil, err
+		return nil, false, err
 	}
-	out := s.vmsOf(mac, stored, s.disks(ctx), live)
+	disks, lerr := s.listing(ctx)
+	out := s.vmsOf(mac, stored, disks, live)
 	for i, vm := range out {
 		if vm.Lifetime == model.AlwaysOn && s.o.Uptime != nil {
 			out[i].Uptime, _ = s.o.Uptime.Get(ctx, vm.Name)
 		}
 	}
-	return out, nil
+	return out, lerr != nil, nil
 }
 
 // value: the disks this Mac's hypervisor holds, by VM; none when it does
 // not say.
 func (s *Machinist) disks(ctx context.Context) map[string]contract.Disk {
+	out, _ := s.listing(ctx)
+	return out
+}
+
+func (s *Machinist) listing(ctx context.Context) (map[string]contract.Disk, error) {
 	out := map[string]contract.Disk{}
 	if s.engine == nil {
-		return out
+		return out, nil
 	}
-	if disks, err := s.engine.Disks(ctx); err == nil {
-		for _, d := range disks {
-			out[d.VM] = d
-		}
+	disks, err := s.engine.Disks(ctx)
+	if err != nil {
+		return out, err
 	}
-	return out
+	for _, d := range disks {
+		out[d.VM] = d
+	}
+	return out, nil
 }
 
 // value: the VMs these records are, as the disks and the engine's view

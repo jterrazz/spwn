@@ -312,7 +312,7 @@ func (s *Builder) Delete(ctx context.Context, image, version string) ([]images.R
 		return nil, err
 	}
 	if _, err := s.e.Version(ctx); err != nil {
-		return nil, &images.NoEngineError{Hypervisor: s.e.Name(), Cause: err}
+		return nil, &images.NoEngineError{Hypervisor: s.e.Name(), Package: s.e.Package(), Cause: err}
 	}
 	all := []images.Record{{Name: image, Version: version}}
 	if !s.old(ctx, image, version) {

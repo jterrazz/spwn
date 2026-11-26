@@ -26,7 +26,7 @@ func (s *Machinist) engineState(ctx context.Context, name string) contract.DiskS
 func (s *Machinist) hypervisorState(ctx context.Context, name string) (contract.DiskState, error) {
 	disks, err := s.engine.Disks(ctx)
 	if err != nil {
-		return diskMissing, &model.NoEngineError{Hypervisor: s.engine.Name(), Cause: err}
+		return diskMissing, &model.NoEngineError{Hypervisor: s.engine.Name(), Package: s.engine.Package(), Cause: err}
 	}
 	for _, d := range disks {
 		if d.VM == name {
@@ -50,6 +50,7 @@ func (s *Machinist) PowerOff(ctx context.Context, name string) error {
 	return s.powerOff(ctx, name)
 }
 
-func (s *Machinist) EngineRunning(ctx context.Context, name string) bool {
-	return s.engineState(ctx, name) == contract.DiskRunning
+func (s *Machinist) EngineRunning(ctx context.Context, name string) (bool, error) {
+	state, err := s.hypervisorState(ctx, name)
+	return state == contract.DiskRunning, err
 }

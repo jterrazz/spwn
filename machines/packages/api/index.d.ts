@@ -2341,6 +2341,8 @@ export type MachinesMacView = {
     OtherRelease?: boolean;
     Reachable: boolean;
     Sentence?: string;
+    SilentHypervisor?: string;
+    SilentPackage?: string;
     Standing?: 'asleep' | 'not-seen' | 'engine-stopped' | 'engine-not-installed' | 'online';
     StationVersion: string;
     ThisMac: boolean;

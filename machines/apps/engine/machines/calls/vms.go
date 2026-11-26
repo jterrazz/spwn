@@ -92,6 +92,9 @@ func (s *Machinist) Start(ctx context.Context, name string) error {
 	if err := s.vmUserRefused(); err != nil {
 		return err
 	}
+	if _, err := s.hypervisorState(ctx, name); err != nil {
+		return err
+	}
 	img, _ := s.imageOf(ctx, rec.Image)
 	retry := rec.Birth != nil && rec.Birth.Failed
 	journal.Mark(ctx, s.h.Now(), "boot")
@@ -265,6 +268,9 @@ func (s *Machinist) Delete(ctx context.Context, name string) (model.DeleteReport
 	if err := s.EngineUp(ctx); err != nil {
 		return model.DeleteReport{}, err
 	}
+	if _, err := s.hypervisorState(ctx, name); err != nil {
+		return model.DeleteReport{}, err
+	}
 	if err := s.engineAPI.Do(ctx, engine.VMDelete, name); err != nil {
 		return model.DeleteReport{}, err
 	}
@@ -275,13 +281,22 @@ func (s *Machinist) Remove(ctx context.Context, name string) (model.DeleteReport
 	// invariant: Remove is the whole delete, run by the engine: the run stops,
 	// the disk, record, files and block go, and the VM's leases and their serve
 	// entries are released.
+	// invariant: a hypervisor that does not answer refuses the delete with
+	// nothing erased: its silence never reads as a disk already gone.
 	report := model.DeleteReport{Name: name}
-	if s.engineState(ctx, name) == contract.DiskRunning {
-		if err := s.engine.Shutdown(ctx, name, hardStopWait); err != nil {
+	state, err := s.hypervisorState(ctx, name)
+	if err != nil {
+		return report, err
+	}
+	if state == contract.DiskRunning {
+		if stopErr := s.engine.Shutdown(ctx, name, hardStopWait); stopErr != nil {
+			return report, stopErr
+		}
+		if state, err = s.hypervisorState(ctx, name); err != nil {
 			return report, err
 		}
 	}
-	missing := s.engineState(ctx, name) == diskMissing
+	missing := state == diskMissing
 	if !missing {
 		if err := s.engine.Delete(ctx, name); err != nil {
 			return report, err

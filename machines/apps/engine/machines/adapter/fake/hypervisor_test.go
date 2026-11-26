@@ -69,3 +69,15 @@ func TestABootTheWorldScriptsToFailWritesItsConsoleLines(t *testing.T) {
 		t.Errorf("console of web: %q, %v; want the lines the refused boot wrote, %q", lines, err, bootRefused())
 	}
 }
+
+func TestAHypervisorTheWorldNamesAnotherThanItsOwnHasNoPackageToInstall(t *testing.T) {
+	w := &world.World{}
+	h := HypervisorOf(w, "mac-mini", "own", nil)
+	if got := h.Package(); got != "own" {
+		t.Errorf("a Mac of the world's default hypervisor installs %q, want its own", got)
+	}
+	w.Mac("mac-mini").Hypervisor = "vz"
+	if got := h.Package(); got != "" {
+		t.Errorf("a Mac whose world names vz installs %q, want nothing", got)
+	}
+}

@@ -83,10 +83,16 @@ func (e *NoImageError) Error() string { return "image " + e.Image + " is not bui
 
 type NoEngineError struct {
 	Hypervisor string
+	Package    string
 	Cause      error
 }
 
-func (e *NoEngineError) Error() string { return e.Hypervisor + " is not installed or does not answer" }
+func (e *NoEngineError) Error() string {
+	if e.Package == "" {
+		return e.Hypervisor + " does not answer"
+	}
+	return e.Hypervisor + " is not installed or does not answer"
+}
 
 func (e *NoEngineError) Unwrap() error { return e.Cause }
 

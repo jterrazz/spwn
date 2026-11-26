@@ -71,7 +71,7 @@ func Worded(err error) error {
 	case errors.As(err, &noRecipe):
 		return coded(fail.Refused, NoRecipe, noRecipe.Image)
 	case errors.As(err, &noEngine):
-		return coded(fail.Refused, NoHypervisor, noEngine.Hypervisor)
+		return &fail.Error{Type: fail.Refused, Code: NoHypervisor, Subject: noEngine.Hypervisor, Cause: err, Detail: map[string]string{"package": noEngine.Package}}
 	case errors.As(err, &old):
 		return &fail.Error{Type: fail.Refused, Code: OldRecord, Subject: old.Image, Cause: err, Detail: map[string]string{"version": old.Version, "file": old.File}}
 	case errors.As(err, &inUse):

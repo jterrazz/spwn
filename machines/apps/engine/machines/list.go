@@ -170,6 +170,13 @@ func Findings(f AllMachines) []finding.Finding {
 			add(mac, severityOf(s.Tone()), label, label+" has its engine stopped", "station engine start"+on)
 		case MacOnline:
 		}
+		if h.SilentHypervisor != "" {
+			fix := ""
+			if h.SilentPackage != "" {
+				fix = "station apps install " + h.SilentPackage + on
+			}
+			add(mac, finding.Broken, label, (&NoEngineError{Hypervisor: h.SilentHypervisor, Package: h.SilentPackage}).Error(), fix)
+		}
 		if h.Reachable && h.Engine.Running() && h.Engine.LocalNetwork == LocalNetworkNotApproved {
 			out = append(out, finding.Finding{Machine: mac, Section: section.Overview, Severity: finding.NeedsALook, Subject: label, Text: NotApproved(h.Name, h.Engine.Bundled), Fix: finding.Fix{Path: LocalNetworkFix(h.Name, h.Engine.Bundled)}})
 		}

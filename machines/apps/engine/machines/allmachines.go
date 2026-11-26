@@ -290,7 +290,13 @@ type MacView struct {
 	LAN    string
 	Node   Node
 	Engine EngineView
-	VMs    []VM
+	// value: the hypervisor of this Mac whose listing failed while VMs are
+	// recorded, by name: it does not say how its VMs stand; empty while it
+	// answers.
+	SilentHypervisor string `json:",omitempty"`
+	// value: the catalog app that installs it, empty when nothing does.
+	SilentPackage string `json:",omitempty"`
+	VMs           []VM
 	// value: SPEC B5.12: what it is, as it read itself at its last answer,
 	// and whether it has a lid (a laptop) or not (a desktop).
 	Hardware machine.Hardware

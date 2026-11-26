@@ -79,6 +79,13 @@ func carried(e *fail.Error, generic, advice string) (message, hint string) {
 	return generic, advice
 }
 
+func noEngine(said error, pkg string) (message, hint string) {
+	if pkg == "" {
+		return said.Error(), ""
+	}
+	return said.Error(), "station apps install " + pkg
+}
+
 func programLabel(e *fail.Error) string { return accounts.Program(e.Subject).Label() }
 
 // value: the programs Machines signs in for, by their wire names, in the
@@ -492,7 +499,7 @@ func Codes() map[fail.Code]Wording {
 			return said, "station machines create --network nat"
 		},
 		machinescalls.NoHypervisor: func(e *fail.Error) (string, string) {
-			return (&machines.NoEngineError{Hypervisor: e.Subject}).Error(), "station apps install " + e.Subject
+			return noEngine(&machines.NoEngineError{Hypervisor: e.Subject, Package: e.Detail["package"]}, e.Detail["package"])
 		},
 		imagescalls.NoLinuxBinary: func(*fail.Error) (string, string) {
 			return (&images.NoLinuxBinaryError{}).Error(), linuxBinaryHint
@@ -514,7 +521,7 @@ func Codes() map[fail.Code]Wording {
 			return said.Error(), "station images lists the versions you can delete"
 		},
 		imagescalls.NoHypervisor: func(e *fail.Error) (string, string) {
-			return (&images.NoEngineError{Hypervisor: e.Subject}).Error(), "station apps install " + e.Subject
+			return noEngine(&images.NoEngineError{Hypervisor: e.Subject, Package: e.Detail["package"]}, e.Detail["package"])
 		},
 		machinescalls.TooLittle: func(*fail.Error) (string, string) {
 			return (&machines.TooLittleMemoryError{}).Error(), "ask for " + strconv.Itoa(machines.MinMemoryBytes>>30) + " GB or more: --memory " + strconv.Itoa(machines.MinMemoryBytes>>30) + "G"

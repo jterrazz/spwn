@@ -23,6 +23,7 @@ import (
 type fakeMachines struct {
 	mu      sync.Mutex
 	stuck   map[string]bool
+	silent  error
 	records []model.VMRecord
 	saved   []model.VMRecord
 	saveErr error
@@ -57,7 +58,9 @@ func (f *fakeMachines) PowerOff(_ context.Context, vm string) error {
 	return nil
 }
 
-func (f *fakeMachines) EngineRunning(_ context.Context, name string) bool { return f.stuck[name] }
+func (f *fakeMachines) EngineRunning(_ context.Context, name string) (bool, error) {
+	return f.stuck[name], f.silent
+}
 
 func (f *fakeMachines) MarkUptime(context.Context, model.UptimeMark) error { return nil }
 
@@ -210,6 +213,32 @@ func TestAtStartALiveRunIsAdoptedNeverRunAgain(t *testing.T) {
 	h.d.adopt(cancelled(t))
 	if got := h.state("api"); got != engine.StateRunning || h.runs() != 0 {
 		t.Errorf("adopted api: %s with %d runs, want running and none", got, h.runs())
+	}
+}
+
+func TestAtStartAHypervisorThatDoesNotAnswerKeepsEachVMAsKnownAndBootsNone(t *testing.T) {
+	h := newHarness(t,
+		model.VMRecord{Name: "api", Lifetime: model.Persistent, Want: model.WantRunning},
+		model.VMRecord{Name: "web", Lifetime: model.Persistent, Want: model.WantRunning},
+	)
+	h.m.silent = errors.New("the hypervisor does not answer")
+	h.d.Remember(engine.Memory{"api": {State: engine.StateRunning}})
+	h.d.adopt(cancelled(t))
+	if api, web := h.state("api"), h.state("web"); api != engine.StateRunning || web != engine.StateStopped || h.runs() != 0 {
+		t.Errorf("adopted with a silent hypervisor: api %s, web %s, %d runs; want api running as remembered, web as it was, none run", api, web, h.runs())
+	}
+}
+
+func TestAStopOfAVMWithNoRunRefusesWhileItsHypervisorDoesNotAnswer(t *testing.T) {
+	h := newHarness(t, model.VMRecord{Name: "api", Lifetime: model.Persistent, Want: model.WantRunning})
+	h.m.silent = errors.New("the hypervisor does not answer")
+	v, _ := h.d.find("api")
+	v.state = engine.StateRunning
+	if err := h.d.endRun(t.Context(), v); !errors.Is(err, h.m.silent) {
+		t.Errorf("a stop with a silent hypervisor answered %v; want its silence", err)
+	}
+	if got := h.state("api"); got != engine.StateRunning {
+		t.Errorf("after the refused stop api is %s; want running as known", got)
 	}
 }
 
@@ -378,6 +407,19 @@ func TestStopAllAnswersFailedForALastingVMTheEngineStillRuns(t *testing.T) {
 	}
 	if len(got) != 2 || got[0] != want[0] || got[1] != want[1] {
 		t.Errorf("stop_all answered %+v, want %+v", got, want)
+	}
+}
+
+func TestStopAllNeverAnswersStoppedForAVMItsHypervisorCannotSay(t *testing.T) {
+	h := newHarness(t, model.VMRecord{Name: "api", Lifetime: model.Persistent, Want: model.WantRunning})
+	v, _ := h.d.find("api")
+	if err := h.d.start(cancelled(t), v); err != nil {
+		t.Fatal(err)
+	}
+	h.m.silent = errors.New("the hypervisor does not answer")
+	got := h.d.stopAll(t.Context())
+	if len(got) != 1 || got[0].Result != engine.ResultFailed || got[0].Detail != h.m.silent.Error() {
+		t.Errorf("stop_all with a silent hypervisor answered %+v; want api failed with its silence", got)
 	}
 }
 

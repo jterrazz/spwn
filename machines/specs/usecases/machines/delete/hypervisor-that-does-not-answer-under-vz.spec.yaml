@@ -1,0 +1,20 @@
+description: 'over vz, a delete is refused while its hypervisor does not answer, and the VM is kept'
+env:
+    - two-macs-vz
+    - engine
+runs:
+    - command: 'world fault Hypervisor.Disks'
+      exit: 0
+    - command: 'machines delete linux-1 --confirm=linux-1'
+      exit: 2
+      stderr: |
+          Error: vz does not answer
+          Hint: run station --help
+    - command: 'machines --this-mac'
+      exit: 0
+      stdout: |
+          ●	macbook-pro	Mac	macbook-pro	Engine running
+          ○	api	Workspace	macbook-pro	Stopped · persistent	4 CPU	8 GB
+          ●	linux-1	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB
+          # Needs you
+          ✗	This Mac	vz does not answer

@@ -69,7 +69,7 @@ if (process.env.STATION_SPEC_BUILT !== '1' && binaryIsStale()) {
 // that world, `world.json` in its own directory, read and written by every run.
 // invariant: AR-02: with STATION_SPEC_HYPERVISOR set (`make test` sets it to vz for
 // its second pass over the machines and engine/keep suites), every world's Macs run
-// the fake of that hypervisor instead of tart's; `two-macs-vz` is two-macs over vz.
+// the fake of that hypervisor instead of tart's; `two-macs-tart` and `two-macs-vz` are two-macs over that hypervisor in both passes.
 const hypervisor = process.env.STATION_SPEC_HYPERVISOR ?? '';
 // value: the temp root @jterrazz/test points TMPDIR, TMP and TEMP at, its run's own.
 const INHERITED = new Set(['TEMP', 'TMP', 'TMPDIR']);
@@ -93,6 +93,7 @@ const worlds = {
             .map((name) => [name.replace(/\.json$/u, ''), world(name, hypervisor)]),
     ),
     'no-block': world('two-macs.json', hypervisor, false),
+    'two-macs-tart': world('two-macs.json', 'tart'),
     'two-macs-vz': world('two-macs.json', 'vz'),
 };
 

@@ -25,7 +25,7 @@ func (s *Machinist) AllMachinesAsItFills(ctx context.Context, thisMacOnly bool, 
 	nodes := s.nodeMap(ctx)
 	name := s.thisMac(cfg)
 	info, live := s.engineView(ctx)
-	vms, err := s.vms(ctx, name, live)
+	vms, silent, err := s.listed(ctx, name, live)
 	if err != nil {
 		return model.AllMachines{}, err
 	}
@@ -47,6 +47,10 @@ func (s *Machinist) AllMachinesAsItFills(ctx context.Context, thisMacOnly bool, 
 	}
 	thisMac := model.MacView{
 		Name: name, User: user, StationVersion: s.o.Version, ThisMac: true, Reachable: true, Node: nodes[name], Engine: info, VMs: vms,
+	}
+	if silent && s.o.ThisMachine == catalog.Mac {
+		thisMac.SilentHypervisor = s.engine.Name()
+		thisMac.SilentPackage = s.engine.Package()
 	}
 	if s.o.ThisMachine == catalog.Mac && s.o.LAN != nil {
 		thisMac.LAN = s.o.LAN(ctx)
