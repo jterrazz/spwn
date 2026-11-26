@@ -258,6 +258,10 @@ func TestTheLinuxImageKeepsOneKernelAndWhatItsImagePhaseInstalled(t *testing.T) 
 	if strings.Index(body, "apt-get purge") > strings.Index(body, "apt-get clean") {
 		t.Error("the linux cleanup purges after apt-get clean, once the package lists are gone")
 	}
+	rebuild := `[ -z "${kernel:-}" ] || update-initramfs -u -k "$kernel"`
+	if !strings.Contains(body, rebuild) || strings.Index(body, rebuild) < strings.Index(body, "apt-get purge") {
+		t.Error("the linux cleanup does not build the kept kernel's initramfs again once the firmware is purged")
+	}
 	file, err := fs.ReadFile(catalog.BuiltinFiles(), "machines/base-ubuntu.machine.yaml")
 	if err != nil {
 		t.Fatal(err)
