@@ -101,6 +101,47 @@ describe('mirror', () => {
         expect(engine.requests('engine.state')).toHaveLength(2);
     });
 
+    test("a refused stream draws the engine's words and is asked again past three ticks", async () => {
+        // Given - a window asking the fleet of an engine that refuses one of the views it names
+        using _ = clock.run('2026-11-21T09:00:00Z');
+        const engine = fakeEngine(HELLO);
+        const mirror = new StateMirror(new Client(engine.transport), {
+            grace: 500,
+            lost: 45_000,
+            retry: 1000,
+        });
+        mirror.subscriberOf('machines.list')(() => undefined);
+        await clock.advance(1);
+        const refusal = {
+            code: 'engine.state-unknown-key',
+            field: 'keys',
+            message: 'no slice or view is named engine.guides',
+            subject: 'engine.guides',
+            type: 'refused',
+        };
+
+        // When - the engine refuses the stream, then answers it once asked again
+        engine.answer('engine.state', { error: refusal });
+        const refused = mirror.reading('machines.list');
+        await clock.advance(44_999);
+        const meanwhile = engine.requests('engine.state').length;
+        await clock.advance(1);
+        engine.answer('engine.state', OPENED, {
+            out: {
+                event: 'snapshot',
+                rev: 7,
+                slices: { 'machines.list': { hash: 'a', state: 'fresh', value: FLEET } },
+            },
+        });
+
+        // Then - the refusal is the view's failure in its words, the stream asked once more after 45 s, and drawn
+        expect(refused.kind === 'failed' && refused.error.message).toBe(refusal.message);
+        expect(meanwhile).toBe(1);
+        expect(engine.requests('engine.state')).toHaveLength(2);
+        const shown = mirror.reading('machines.list');
+        expect(shown.kind === 'read' && shown.out).toStrictEqual(FLEET);
+    });
+
     test("the fleet and a machine's Overview are views; any other input, or a target on a Mac, is a call", () => {
         // Given - the reads the window makes of the two calls
 
