@@ -8,6 +8,8 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"slices"
+	"strings"
 	"testing"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
@@ -368,25 +370,44 @@ func holdsWhatThePlanSaid(t *testing.T, root string, changes []project.Change) {
 	}
 }
 
-func TestAnApplyStoppedByAFolderInTheWayRecordsWhatItWrote(t *testing.T) {
+// value: the first change past the first whose folder holds no change
+// before it, nor the record: a folder made read-only there stops an apply
+// after what came before it is written.
+func stopAt(t *testing.T, changes []project.Change) (k int, folder string) {
+	t.Helper()
+	record := project.StateFolder + "/" + project.RecordName
+	for k = 1; k < len(changes); k++ {
+		folder = path.Dir(changes[k].Path)
+		beneath := func(p string) bool { return strings.HasPrefix(p, folder+"/") }
+		if folder != "." && !beneath(record) && !slices.ContainsFunc(changes[:k], func(c project.Change) bool { return beneath(c.Path) }) {
+			return k, folder
+		}
+	}
+	t.Fatalf("no change of %+v sits in a folder apply reaches after another", changes)
+	return 0, ""
+}
+
+func TestAnApplyStoppedByAFolderItCannotWriteInRecordsWhatItWrote(t *testing.T) {
+	if machine.Env.Euid() == 0 {
+		t.Skip("root writes in a folder without its write bit")
+	}
 	t.Setenv("SPWN_HOME", t.TempDir())
-	d := calls.Deps{Projects: manifest.New(local.New(nil, nil, nil, nil).FS)}
+	d := calls.Deps{Projects: manifest.New(machine.FS)}
 	made, err := calls.Create.Run(t.Context(), d, calls.CreateIn{Folder: t.TempDir(), From: "severance"}, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 	plan, err := calls.Plan.Run(t.Context(), d, calls.PlanIn{Folder: made.Root}, nil)
-	if err != nil || len(plan.Changes) < 4 {
-		t.Fatalf("Plan = %+v, %v; want four files to add at least", plan.Changes, err)
+	if err != nil || !plan.Valid {
+		t.Fatalf("Plan = %+v, %v; want a valid plan", plan, err)
 	}
-	blocked := plan.Changes[3].Path
-	inTheWay := filepath.Join(made.Root, filepath.FromSlash(blocked))
-	if err = os.MkdirAll(inTheWay, 0o750); err != nil {
+	k, folder := stopAt(t, plan.Changes)
+	blocked := plan.Changes[k].Path
+	stopped := filepath.Join(made.Root, filepath.FromSlash(folder))
+	if err = machine.FS.MkdirAll(stopped, 0o755); err != nil {
 		t.Fatal(err)
 	}
-	if err = os.WriteFile(filepath.Join(inTheWay, "mine.txt"), []byte("mine\n"), 0o600); err != nil {
-		t.Fatal(err)
-	}
+	readOnly(t, stopped)
 	_, err = calls.Apply.Run(t.Context(), d, calls.ApplyIn{Folder: made.Root, Confirm: confirm.Yes}, nil)
 	if !refusedAbout(err, calls.NotWritten, blocked) {
 		t.Fatalf("Apply = %v; want NotWritten naming %s", err, blocked)
@@ -399,24 +420,24 @@ func TestAnApplyStoppedByAFolderInTheWayRecordsWhatItWrote(t *testing.T) {
 	if err = json.Unmarshal(data, &record); err != nil {
 		t.Fatal(err)
 	}
-	if len(record) != 3 {
-		t.Errorf("record = %v; want the 3 files written before %s", record, blocked)
+	if len(record) != k {
+		t.Errorf("record = %v; want the %d files written before %s", record, k, blocked)
 	}
-	for _, c := range plan.Changes[:3] {
+	for _, c := range plan.Changes[:k] {
 		if record[c.Path] != project.Digest(c.File) {
 			t.Errorf("record of %s = %q; want the digest of what was written", c.Path, record[c.Path])
 		}
 	}
-	holdsWhatThePlanSaid(t, made.Root, plan.Changes[:3])
-	if mine, _ := os.ReadFile(filepath.Join(inTheWay, "mine.txt")); string(mine) != "mine\n" {
-		t.Errorf("the folder in the way holds %q; want it untouched", mine)
+	holdsWhatThePlanSaid(t, made.Root, plan.Changes[:k])
+	if _, err = machine.FS.Stat(filepath.Join(made.Root, filepath.FromSlash(blocked))); !errors.Is(err, fs.ErrNotExist) {
+		t.Errorf("%s: %v; want it not written", blocked, err)
 	}
-	if err = local.New(nil, nil, nil, nil).FS.RemoveAll(inTheWay); err != nil {
+	if err = machine.FS.Chmod(stopped, 0o755); err != nil {
 		t.Fatal(err)
 	}
 	again, err := calls.Apply.Run(t.Context(), d, calls.ApplyIn{Folder: made.Root}, nil)
-	if err != nil || len(again.Changes) != len(plan.Changes)-3 {
-		t.Fatalf("the next Apply = %+v, %v; want the %d changes left, none asked", again.Changes, err, len(plan.Changes)-3)
+	if err != nil || len(again.Changes) != len(plan.Changes)-k {
+		t.Fatalf("the next Apply = %+v, %v; want the %d changes left, none asked", again.Changes, err, len(plan.Changes)-k)
 	}
 	holdsWhatThePlanSaid(t, made.Root, plan.Changes)
 }

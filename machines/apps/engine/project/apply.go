@@ -86,6 +86,9 @@ var (
 	// value: a name of the declaration that is neither a file nor a folder,
 	// a FIFO or a device say, which a read could wait on forever.
 	ErrNotAFile = errors.New("is neither a file nor a folder")
+	// value: a name on a rendered file's way that holds a file, where apply
+	// makes a folder: never removed, as it is the owner's.
+	ErrNotAFolder = errors.New("is a file where apply makes a folder")
 )
 
 func Declaration() []string {

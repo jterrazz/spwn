@@ -44,6 +44,9 @@ var (
 	ErrOwner = errors.New("is another user's")
 	// value: a file larger than MaxRead, which a Folder never reads.
 	ErrTooLarge = errors.New("is larger than 1 MiB")
+	// value: a name on the way to a folder that holds anything but a folder
+	// or a link, a file say.
+	ErrNotFolder = errors.New("is not a folder")
 )
 
 const MaxRead = 1 << 20
@@ -138,13 +141,11 @@ func (b Beneath) Folders(base, rel string, perm fs.FileMode, o Owner) error {
 		case e.Mode&fs.ModeSymlink != 0:
 			return &fs.PathError{Op: "mkdir", Path: path.Join(base, at), Err: ErrLink}
 		case !e.Mode.IsDir():
-			return &fs.PathError{Op: "mkdir", Path: path.Join(base, at), Err: errNotFolder}
+			return &fs.PathError{Op: "mkdir", Path: path.Join(base, at), Err: ErrNotFolder}
 		}
 	}
 	return nil
 }
-
-var errNotFolder = errors.New("is not a folder")
 
 var errNotMade = errors.New("is not the folder just made")
 
@@ -567,15 +568,21 @@ func namesOf(rel string) ([]string, error) {
 	return out, nil
 }
 
-// value: name opened in dir with O_NOFOLLOW; a link answers ErrLink.
+// value: name opened in dir with O_NOFOLLOW; a link answers ErrLink, and
+// anything else where a folder is opened answers ErrNotFolder.
 func openat(dir int, name string, flags int, at string) (int, error) {
 	fd, err := unix.Openat(dir, name, flags|unix.O_NOFOLLOW|unix.O_NONBLOCK|unix.O_CLOEXEC, 0)
 	if err == nil {
 		return fd, nil
 	}
 	var st unix.Stat_t
-	if (errors.Is(err, unix.ELOOP) || errors.Is(err, unix.ENOTDIR)) && unix.Fstatat(dir, name, &st, unix.AT_SYMLINK_NOFOLLOW) == nil && entryOf(&st).Mode&fs.ModeSymlink != 0 {
-		err = ErrLink
+	if (errors.Is(err, unix.ELOOP) || errors.Is(err, unix.ENOTDIR)) && unix.Fstatat(dir, name, &st, unix.AT_SYMLINK_NOFOLLOW) == nil {
+		switch m := entryOf(&st).Mode; {
+		case m&fs.ModeSymlink != 0:
+			err = ErrLink
+		case !m.IsDir():
+			err = ErrNotFolder
+		}
 	}
 	return -1, &fs.PathError{Op: "open", Path: at, Err: err}
 }

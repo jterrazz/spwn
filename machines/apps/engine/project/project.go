@@ -83,6 +83,9 @@ type State struct {
 	// value: the paths from the root that hold neither a file, a folder
 	// nor a link: a FIFO, a device.
 	Irregular []string `json:",omitempty"`
+	// value: the folders from the root without their write bit, in which
+	// no name is made, replaced or removed.
+	ReadOnly []string `json:",omitempty"`
 	// invariant: what apply last wrote, as Digest gives it.
 	Record Record `json:",omitempty"`
 }

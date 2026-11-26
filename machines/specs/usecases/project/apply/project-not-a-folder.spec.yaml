@@ -1,0 +1,20 @@
+description: 'station project apply refuses a file where a run folder goes, naming it, and writes nothing'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'project create site'
+      exit: 0
+      stdout: |
+          ●	site	created	{{workdir}}/site
+    - command: '--version >/dev/null; "$STATION" world project "$HOME/site" edit .spwn/agents/neo "a file"'
+      exit: 0
+    - command: '--version >/dev/null; /bin/mkdir -p site && cd site && "$STATION" project apply --yes'
+      exit: 2
+      stderr: |
+          Error: .spwn/agents/neo is a file where apply makes a folder
+          Hint: move it away, then station project apply
+    - command: '--version >/dev/null; /usr/bin/jq -c ".macs[\"macbook-pro\"].stores.projects[] | [(.Disk // {} | keys), (.Record // {} | length)]" world.json'
+      exit: 0
+      stdout: |
+          [[".spwn/agents/neo"],0]

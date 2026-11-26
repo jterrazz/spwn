@@ -1,0 +1,34 @@
+description: 'station project apply that cannot write its record says so, and the next apply records it'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'project create site'
+      exit: 0
+      stdout: |
+          ●	site	created	{{workdir}}/site
+    - command: '--version >/dev/null; "$STATION" world project "$HOME/site" readonly .spwn'
+      exit: 0
+    - command: '--version >/dev/null; /bin/mkdir -p site && cd site && "$STATION" project apply --yes'
+      exit: 2
+      stdout: |
+          	{{workdir}}/site/spwn.yaml	1 change to apply
+          # To apply
+          ●	.spwn/agents/neo/CLAUDE.md	add
+      stderr: |
+          Error: .spwn/applied.json, the record of what apply wrote, could not be written; every change is made, and the next apply records it
+          Hint: make room for it, then station project apply
+    - command: '--version >/dev/null; /usr/bin/jq -c ".macs[\"macbook-pro\"].stores.projects[] | [(.Disk // {} | keys), (.Record // {} | length)]" world.json'
+      exit: 0
+      stdout: |
+          [[".spwn/agents/neo/CLAUDE.md"],0]
+    - command: '--version >/dev/null; "$STATION" world project "$HOME/site" readonly .spwn off'
+      exit: 0
+    - command: '--version >/dev/null; /bin/mkdir -p site && cd site && "$STATION" project apply'
+      exit: 0
+      stdout: |
+          ●	{{workdir}}/site/spwn.yaml	Nothing to apply.
+    - command: '--version >/dev/null; /usr/bin/jq -c ".macs[\"macbook-pro\"].stores.projects[] | [(.Disk // {} | keys), (.Record // {} | length)]" world.json'
+      exit: 0
+      stdout: |
+          [[".spwn/agents/neo/CLAUDE.md"],1]

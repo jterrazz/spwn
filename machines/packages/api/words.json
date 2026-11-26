@@ -1058,6 +1058,11 @@
       "Detail": "project",
       "Tone": "plain"
     },
+    "project.not-a-folder": {
+      "Word": "not a folder",
+      "Detail": "project",
+      "Tone": "plain"
+    },
     "project.not-found": {
       "Word": "not found",
       "Detail": "project",

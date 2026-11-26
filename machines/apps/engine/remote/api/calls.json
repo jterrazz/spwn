@@ -1163,6 +1163,7 @@
         "project.invalid",
         "project.link-in-the-way",
         "project.not-a-file",
+        "project.not-a-folder",
         "project.not-found",
         "project.not-written"
       ],
@@ -1203,6 +1204,7 @@
         "project.invalid",
         "project.link-in-the-way",
         "project.not-a-file",
+        "project.not-a-folder",
         "project.not-found"
       ],
       "in": "PlanIn",

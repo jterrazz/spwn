@@ -55,16 +55,19 @@ func unwritten(root, rel string, err error) error {
 		}
 		err = at.Err
 	}
-	if errors.Is(err, local.ErrLink) || errors.Is(err, local.ErrHardLink) {
+	switch {
+	case errors.Is(err, local.ErrLink) || errors.Is(err, local.ErrHardLink):
 		err = project.ErrLink
+	case errors.Is(err, local.ErrNotFolder):
+		err = project.ErrNotAFolder
 	}
 	return &project.Unwritten{Path: rel, Err: err}
 }
 
-// value: a read's err, named as unwritten names it when it is a link; any
-// other failure to read as it is.
+// value: a read's err, named as unwritten names it when it is a link or a
+// file on a folder's way; any other failure to read as it is.
 func linked(root, rel string, err error) error {
-	if errors.Is(err, local.ErrLink) || errors.Is(err, local.ErrHardLink) {
+	if errors.Is(err, local.ErrLink) || errors.Is(err, local.ErrHardLink) || errors.Is(err, local.ErrNotFolder) {
 		return unwritten(root, rel, err)
 	}
 	return err
@@ -269,6 +272,7 @@ func (p Projects) Plan(_ context.Context, root string) (project.Plan, error) {
 			issues = append(issues, issueOf(i, project.SourceManifest))
 		}
 		issues = append(issues, rendered(root)...)
+		issues = append(issues, p.inTheWay(root, shown(found).Agents)...)
 		return project.PlanOf(found.Root, found.ManifestPath, issues), nil
 	})
 }
@@ -336,21 +340,56 @@ func (p Projects) Render(_ context.Context, root, agent string) ([]project.File,
 		if err := p.declared(root); err != nil {
 			return nil, err
 		}
-		src, err := source.Load(root)
+		return renders(root, agent)
+	})
+}
+
+// value: the files agent renders, read under the act lock its caller
+// holds.
+func renders(root, agent string) ([]project.File, error) {
+	src, err := source.Load(root)
+	if err != nil {
+		return nil, err
+	}
+	for _, g := range groupings(src) {
+		input, err := source.ToCompileInput(src, g)
 		if err != nil {
 			return nil, err
 		}
-		for _, g := range groupings(src) {
-			input, err := source.ToCompileInput(src, g)
+		if slices.ContainsFunc(input.Agents, func(a transpile.AgentInput) bool { return a.Name == agent }) {
+			return render(harnessOf(src, agent), input, agent)
+		}
+	}
+	return nil, nil
+}
+
+// value: an issue for each rendered file whose name holds neither a file
+// nor a link, a folder or a FIFO say: apply writes a file there, and never
+// takes such a thing away. A name it cannot reach is the changes' read to
+// refuse, and an agent that does not render is rendered's to say.
+func (p Projects) inTheWay(root string, agents []string) []project.Issue {
+	var out []project.Issue
+	for _, agent := range agents {
+		files, err := renders(root, agent)
+		if err != nil {
+			continue
+		}
+		for _, f := range files {
+			rel := project.RunFolder(agent) + "/" + f.Path
+			dir, name := path.Split(rel)
+			folder, err := p.open(root, strings.TrimSuffix(dir, "/"))
 			if err != nil {
-				return nil, err
+				continue
 			}
-			if slices.ContainsFunc(input.Agents, func(a transpile.AgentInput) bool { return a.Name == agent }) {
-				return render(harnessOf(src, agent), input, agent)
+			e, err := folder.Lstat(name)
+			folder.Close()
+			if err == nil && !e.Mode.IsRegular() && e.Mode&fs.ModeSymlink == 0 {
+				out = append(out, project.Issue{Level: project.Error, Path: rel, Message: "is not a file, and apply writes a file there",
+					Hint: "move it away, then station project plan", Source: project.SourceCompile})
 			}
 		}
-		return nil, nil
-	})
+	}
+	return out
 }
 
 const recordPath = project.StateFolder + "/" + project.RecordName
@@ -490,9 +529,9 @@ func (p Projects) change(root string, c project.Change) error {
 }
 
 // invariant: name made what c says, through the folder's descriptor: a
-// file over a file is replaced at once, a link is never followed, and
-// anything else there is taken away first, a file only while it holds
-// what was just read.
+// file there is replaced at once, or taken away only while it holds what
+// was just read; a link there is replaced or taken away, never followed;
+// anything else there, a folder or a FIFO, is refused, never touched.
 func made(f *local.Folder, name string, c project.Change) error {
 	e, err := f.Lstat(name)
 	if err != nil && !errors.Is(err, fs.ErrNotExist) {

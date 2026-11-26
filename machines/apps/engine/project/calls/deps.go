@@ -37,6 +37,9 @@ const (
 	// value: a name of the declaration that is neither a file nor a folder,
 	// a FIFO say: refused before any of the declaration is read.
 	NotAFile fail.Code = "project.not-a-file"
+	// value: a file on the way to a rendered file, where apply makes a
+	// folder: refused before anything is written, never removed.
+	NotAFolder fail.Code = "project.not-a-folder"
 	// value: a change apply could not make, a folder in a rendered file's
 	// way say: it stops there, recording what it wrote before.
 	NotWritten fail.Code = "project.not-written"
@@ -53,6 +56,8 @@ func coded(err error, subject string) error {
 		return fail.New(fail.Refused, LinkInTheWay, at.Path, nil)
 	case errors.As(err, &at) && errors.Is(at.Err, project.ErrNotAFile):
 		return fail.New(fail.Refused, NotAFile, at.Path, nil)
+	case errors.As(err, &at) && errors.Is(at.Err, project.ErrNotAFolder):
+		return fail.New(fail.Refused, NotAFolder, at.Path, nil)
 	case errors.As(err, &at) && unrecorded(err):
 		return fail.New(fail.Refused, NotWritten, at.Path, map[string]string{"record": "not-written"})
 	case errors.As(err, &at):

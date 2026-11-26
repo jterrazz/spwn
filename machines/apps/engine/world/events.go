@@ -74,7 +74,7 @@ func events() []event {
 		{"agent", []string{"<mac>", "served|held", "[<pid>]", "[<executable>]", "[<label>]"}, agentSocket},
 		{"admin", []string{"on|off"}, admin},
 		{"release", []string{"<tag>", "[no-asset]"}, releaseTag},
-		{"project", []string{"<root>", "[error|warning|info|drift|render|edit|link|fifo]", "[<agent>|<path>]", "[<path>|<message>|<content>|<target>]", "[<content>|hint:]", "[<hint>]"}, declareProject},
+		{"project", []string{"<root>", "[error|warning|info|drift|render|edit|link|fifo|readonly]", "[<agent>|<path>]", "[<path>|<message>|<content>|<target>|off]", "[<content>|hint:]", "[<hint>]"}, declareProject},
 	}
 }
 
@@ -701,7 +701,7 @@ func declareProject(w *World, args []string) error {
 		kept.Project = project.Project{Name: filepath.Base(root), Root: root, Manifest: filepath.Join(root, project.ManifestName)}
 	}
 	if len(args) > 1 {
-		if len(args) < 3 || len(args) < 4 && args[1] != "edit" && args[1] != "fifo" {
+		if len(args) < 3 || len(args) < 4 && args[1] != "edit" && args[1] != "fifo" && args[1] != "readonly" {
 			return fmt.Errorf("project %s takes a level, a path and a message", root)
 		}
 		said, hint := args[3:], []string(nil)
@@ -718,13 +718,18 @@ func declareProject(w *World, args []string) error {
 			linkRunFolder(&kept, args[2], args[3])
 		case args[1] == "fifo":
 			kept.Irregular = append(kept.Irregular, args[2])
+		case args[1] == "readonly":
+			kept.ReadOnly = slices.DeleteFunc(kept.ReadOnly, func(at string) bool { return at == args[2] })
+			if len(args) < 4 || args[3] != "off" {
+				kept.ReadOnly = append(kept.ReadOnly, args[2])
+			}
 		case args[1] == "drift":
 			issue.Level, issue.Source = project.Error, project.SourceLockfile
 			kept.Drift = append(kept.Drift, issue)
 		case slices.Contains(project.Level("").Enum(), args[1]):
 			kept.Issues = append(kept.Issues, issue)
 		default:
-			return fmt.Errorf("project takes error, warning, info, drift, render, edit, link or fifo, not %q", args[1])
+			return fmt.Errorf("project takes error, warning, info, drift, render, edit, link, fifo or readonly, not %q", args[1])
 		}
 	}
 	s.Projects[root] = kept
@@ -765,7 +770,9 @@ func editRunFolder(kept *project.State, path string, content []string) {
 // invariant: link <path> <target> is the owner, or a repository cloned,
 // putting a link at that path from the project's root: a name of the
 // declaration, a folder of a run folder's path or the record, which a
-// project refuses to follow. fifo <path> puts a FIFO there.
+// project refuses to follow. fifo <path> puts a FIFO there. readonly
+// <folder> takes the folder's write bit away, so no name in it is made,
+// replaced or removed; readonly <folder> off gives it back.
 func linkRunFolder(kept *project.State, path, target string) {
 	if kept.Disk == nil {
 		kept.Disk = map[string]project.File{}

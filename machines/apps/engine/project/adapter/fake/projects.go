@@ -138,7 +138,17 @@ func (p *Projects) Plan(_ context.Context, root string) (project.Plan, error) {
 	if err != nil {
 		return project.Plan{}, err
 	}
-	return project.PlanOf(root, s.Project.Manifest, s.Issues), nil
+	issues := slices.Clone(s.Issues)
+	for _, agent := range slices.Sorted(maps.Keys(s.Rendered)) {
+		for _, f := range s.Rendered[agent] {
+			rel := project.RunFolder(agent) + "/" + f.Path
+			if filled(s, rel) || slices.Contains(s.Irregular, rel) {
+				issues = append(issues, project.Issue{Level: project.Error, Path: rel, Message: "is not a file, and apply writes a file there",
+					Hint: "move it away, then station project plan", Source: project.SourceCompile})
+			}
+		}
+	}
+	return project.PlanOf(root, s.Project.Manifest, issues), nil
 }
 
 func (p *Projects) Drift(_ context.Context, root string) (project.Drift, error) {
@@ -163,12 +173,15 @@ func (p *Projects) Render(_ context.Context, root, agent string) ([]project.File
 
 const recordPath = project.StateFolder + "/" + project.RecordName
 
-// value: the link the disk holds on the way to rel, on a folder of its
-// path, as the real disk refuses it; nil when none is.
+// value: the link or the file the disk holds on the way to rel, on a
+// folder of its path, as the real disk refuses it; nil when none is.
 func linkOn(s project.State, rel string) error {
 	for at := path.Dir(rel); at != "."; at = path.Dir(at) {
-		if f, ok := s.Disk[at]; ok && f.Link {
+		switch f, ok := s.Disk[at]; {
+		case ok && f.Link:
 			return &project.Unwritten{Path: at, Err: project.ErrLink}
+		case ok:
+			return &project.Unwritten{Path: at, Err: project.ErrNotAFolder}
 		}
 	}
 	return nil
@@ -225,22 +238,40 @@ func (p *Projects) Write(_ context.Context, root string, changes []project.Chang
 		s.Disk = map[string]project.File{}
 	}
 	defer func() { p.kept()[root] = s }()
+	unrecorded := &project.Unwritten{Path: recordPath, Err: errReadOnly}
 	for i, c := range changes {
+		var refused error
+		switch {
+		case slices.Contains(s.ReadOnly, path.Dir(c.Path)):
+			refused = errReadOnly
+		case filled(s, c.Path):
+			refused = errFolderInTheWay
+		}
+		if refused != nil {
+			failed := &project.Unwritten{Path: c.Path, Err: refused}
+			if slices.Contains(s.ReadOnly, project.StateFolder) {
+				return errors.Join(failed, unrecorded)
+			}
+			s.Record = project.Kept(s.Record, record, changes, i)
+			return failed
+		}
 		if c.Kind == project.Remove {
 			delete(s.Disk, c.Path)
 			continue
 		}
-		if filled(s, c.Path) {
-			s.Record = project.Kept(s.Record, record, changes, i)
-			return &project.Unwritten{Path: c.Path, Err: errFolderInTheWay}
-		}
 		s.Disk[c.Path] = c.File
+	}
+	if slices.Contains(s.ReadOnly, project.StateFolder) {
+		return unrecorded
 	}
 	s.Record = maps.Clone(record)
 	return nil
 }
 
-var errFolderInTheWay = errors.New("is a folder that holds files")
+var (
+	errFolderInTheWay = errors.New("is a folder that holds files")
+	errReadOnly       = errors.New("is in a folder without its write bit")
+)
 
 // value: rel names a folder that holds a file, as a file the world wrote
 // under it says.

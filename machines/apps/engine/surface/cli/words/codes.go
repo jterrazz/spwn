@@ -606,6 +606,9 @@ func Codes() map[fail.Code]Wording {
 		projectcalls.NotAFile: func(e *fail.Error) (string, string) {
 			return e.Subject + " is neither a file nor a folder: a project's declaration holds only those", "move it away, then station project plan"
 		},
+		projectcalls.NotAFolder: func(e *fail.Error) (string, string) {
+			return e.Subject + " is a file where apply makes a folder", "move it away, then station project apply"
+		},
 		projectcalls.NotWritten: func(e *fail.Error) (string, string) {
 			switch {
 			case e.Detail["record"] == "":
