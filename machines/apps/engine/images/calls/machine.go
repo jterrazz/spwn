@@ -14,6 +14,8 @@ type Machine interface {
 	ReadFile(path string) ([]byte, error)
 	// value: an executable written at path, its folder made.
 	Keep(path string, data []byte) error
+	// value: a file the owner reads written at path, its folder made.
+	Note(path string, data []byte) error
 	// value: the status and body a GET of url answers.
 	Get(ctx context.Context, url string) (status int, body []byte, err error)
 	// value: a new key pair for the image at path and path.pub, its folder

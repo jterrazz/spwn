@@ -26,6 +26,9 @@ type BuilderOptions struct {
 	Unread error
 	// value: the Mac this service holds the images of.
 	Mac string
+	// value: this Mac's folder of station's logs, where a failed build
+	// copies the logs of its build VM, and the home a path is shown under.
+	Logs, Home string
 }
 
 type Builder struct {

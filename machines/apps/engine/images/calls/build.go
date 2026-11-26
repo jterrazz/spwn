@@ -3,8 +3,11 @@ package calls
 import (
 	"context"
 	"crypto/sha256"
+	"encoding/base64"
 	"encoding/hex"
+	"errors"
 	"fmt"
+	"path"
 	"slices"
 	"strconv"
 	"strings"
@@ -212,6 +215,7 @@ func (s *Builder) buildOne(ctx context.Context, w wanted, binary string, progres
 	at(images.BuildSettings, "baking "+t.Name+"'s image phase")
 	lock, err := s.bakeRun(ctx, b, img, t, Login{User: s.o.User, Key: key})
 	if err != nil {
+		s.keepLogs(ctx, b, img.Name, Login{User: s.o.User, Key: key}, err)
 		return failed("the image phase", err)
 	}
 	at(images.BuildSeal, "removing the base's admin user")
@@ -346,10 +350,111 @@ func (s *Builder) bakeRun(ctx context.Context, b BuildVM, img catalog.Image, t i
 		return "", err
 	}
 	if out.Code != 0 {
+		if failed := failedLines(out); failed != nil {
+			return "", failed
+		}
 		return "", outputError(out)
 	}
 	_, lock, _ := strings.Cut(out.Stdout, lockMark+"\n")
 	return lock, nil
+}
+
+// value: the line after which a failed bake prints each line its apply
+// marked failed, its cells without the mark.
+const failedMark = "--- station failed"
+
+// invariant: an image phase that failed is told by its apply's own lines,
+// the ones the bake hands back after failedMark: each by its name, with the
+// words after its cells, and the summary the apply ended on; an apply that
+// marked none is told by its output's tail.
+func failedLines(out Ran) *images.PackagesFailedError {
+	said := ""
+	for line := range strings.Lines(out.Stderr) {
+		if rest, ok := strings.CutPrefix(strings.TrimSpace(line), "Error: "); ok {
+			said = rest
+		}
+	}
+	_, rows, _ := strings.Cut(out.Stdout, failedMark+"\n")
+	var failed []images.FailedPackage
+	for line := range strings.Lines(rows) {
+		cells := strings.Split(strings.TrimRight(line, "\n"), "\t")
+		if cells[0] == "" {
+			continue
+		}
+		reason := strings.TrimSpace(strings.Join(cells[min(len(cells), 3):], " "))
+		failed = slices.DeleteFunc(failed, func(p images.FailedPackage) bool { return p.Name == cells[0] })
+		failed = append(failed, images.FailedPackage{Name: cells[0], Reason: reason})
+	}
+	if len(failed) == 0 {
+		return nil
+	}
+	if said == "" {
+		said = strconv.Itoa(len(failed)) + " failed"
+	}
+	return &images.PackagesFailedError{Said: said, Failed: failed}
+}
+
+// value: the share of each failed line's log a failed build copies from its
+// VM, its tail, and how long the copy may take.
+const (
+	logTail = 64 << 10
+	logWait = 30 * time.Second
+)
+
+// invariant: before a build VM whose image phase failed is deleted, the
+// logs of the lines it marked failed, the first FailedNamed of them, each
+// cut to its last logTail bytes, are copied from the guest to this Mac's
+// logs folder as station-build-<image>.<line>.log; a copy is best-effort,
+// so a guest that no longer answers leaves the reason in the error and
+// never another error in its place.
+func (s *Builder) keepLogs(ctx context.Context, b BuildVM, image string, as Login, err error) {
+	var failed *images.PackagesFailedError
+	if !errors.As(err, &failed) || s.o.Logs == "" {
+		return
+	}
+	var names []string
+	for _, p := range failed.Failed[:min(len(failed.Failed), images.FailedNamed)] {
+		if catalog.CheckPackage(p.Name) == nil {
+			names = append(names, quote(p.Name))
+		}
+	}
+	if len(names) == 0 {
+		return
+	}
+	script := "cd \"$HOME/.local/state/station/logs\" 2>/dev/null || exit 0\nfor p in " + strings.Join(names, " ") + "; do\n" +
+		"    if [ -f \"$p.log\" ]; then printf '%s %s\\n' \"$p\" \"$(tail -c " + strconv.Itoa(logTail) + " \"$p.log\" | base64 -w0)\"; fi\ndone\n"
+	ctx, cancel := context.WithTimeout(context.WithoutCancel(ctx), logWait)
+	defer cancel()
+	out, ran := b.Run(ctx, as, "bash -s", script)
+	switch {
+	case ran != nil:
+		failed.Unkept = ran.Error()
+		return
+	case out.Code != 0:
+		failed.Unkept = outputError(out).Error()
+		return
+	}
+	for line := range strings.Lines(out.Stdout) {
+		name, body, _ := strings.Cut(strings.TrimSpace(line), " ")
+		data, bad := base64.StdEncoding.DecodeString(body)
+		i := slices.IndexFunc(failed.Failed, func(p images.FailedPackage) bool { return p.Name == name })
+		if bad != nil || i < 0 || catalog.CheckPackage(name) != nil {
+			continue
+		}
+		file := path.Join(s.o.Logs, buildPrefix+image+"."+name+".log")
+		if wrote := s.m.Note(file, data); wrote != nil {
+			failed.Unkept = wrote.Error()
+			continue
+		}
+		failed.Failed[i].Log = s.shown(file)
+	}
+}
+
+func (s *Builder) shown(file string) string {
+	if home := s.o.Home; home != "" && strings.HasPrefix(file, home+"/") {
+		return "~" + strings.TrimPrefix(file, home)
+	}
+	return file
 }
 
 func cleanupRun(ctx context.Context, b BuildVM, script string, as Login) error {
