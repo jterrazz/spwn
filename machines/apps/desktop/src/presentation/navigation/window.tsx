@@ -1,5 +1,5 @@
 import type { MachinesMacView, OverviewNeed, OverviewReadOutput } from '@jterrazz/station-api';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState, useSyncExternalStore } from 'react';
 import type { ComponentType } from 'react';
 
 import { findMachine, macsOf } from '../../domain/machines/machines';
@@ -16,6 +16,8 @@ import { onTabKey } from './keys';
 import { Lost, useLost } from './lost';
 import { NoEngine, useHeld } from './no-engine';
 import type { Held } from './no-engine';
+import { Opened } from './opened';
+import type { Opening } from './opened';
 import { Rail } from './rail';
 import { TAB_PANEL } from './route';
 import type { PlainPage, Route } from './route';
@@ -44,9 +46,7 @@ export type PageProps = {
     addMac?: (() => void) | undefined;
 };
 
-// value: where New machine was opened from: a Mac's page names that Mac, a machine file's page that file.
-export type Opening = { on?: string | undefined; from?: string | undefined };
-
+export type { Opening } from './opened';
 export type Pages = {
     Head: ComponentType<PageProps>;
     Body: ComponentType<PageProps>;
@@ -74,13 +74,6 @@ export function Window({ initial, pages, Gallery, onRoute }: WindowProps) {
         </RouterProvider>
     );
 }
-
-type Sheet =
-    | { kind: 'add-mac' }
-    | { kind: 'add-password' }
-    | { kind: 'find' }
-    | { kind: 'new-machine'; opening: Opening }
-    | { kind: 'none' };
 
 export function whereOf(route: Route): string {
     if (route.page === 'machine') {
@@ -131,9 +124,7 @@ export function useStation() {
 }
 
 type SheetsProps = {
-    sheet: Sheet;
-    onClose: () => void;
-    onAddMac: () => void;
+    opened: Opened;
     go: Go;
     pages: Pages;
     macs: readonly MachinesMacView[];
@@ -141,8 +132,10 @@ type SheetsProps = {
     withGallery: boolean;
 };
 
-function Sheets({ sheet, onClose, onAddMac, go, pages, macs, needs, withGallery }: SheetsProps) {
+function Sheets({ opened, go, pages, macs, needs, withGallery }: SheetsProps) {
+    const sheet = useSyncExternalStore(opened.subscribe, opened.shown);
     const { NewMachine, AddMac, AddPassword } = pages;
+    const { addMac: onAddMac, close: onClose } = opened;
     switch (sheet.kind) {
         case 'find': {
             return (
@@ -175,39 +168,11 @@ function Sheets({ sheet, onClose, onAddMac, go, pages, macs, needs, withGallery 
 
 function useSheets() {
     const [sidebar, setSidebar] = useState(true);
-    const [sheet, setSheet] = useState<Sheet>({ kind: 'none' });
-    const find = useCallback(() => {
-        setSheet({ kind: 'find' });
-    }, []);
-    const close = useCallback(() => {
-        setSheet({ kind: 'none' });
-    }, []);
-    const newMachine = useCallback((opening: Opening = {}) => {
-        setSheet({ kind: 'new-machine', opening });
-    }, []);
-    const newBlank = useCallback(() => {
-        setSheet({ kind: 'new-machine', opening: {} });
-    }, []);
-    const addMac = useCallback(() => {
-        setSheet({ kind: 'add-mac' });
-    }, []);
-    const addPassword = useCallback(() => {
-        setSheet({ kind: 'add-password' });
-    }, []);
+    const opened = useMemo(() => new Opened(), []);
     const toggleSidebar = useCallback(() => {
         setSidebar((open) => !open);
     }, []);
-    return {
-        addMac,
-        addPassword,
-        close,
-        find,
-        newBlank,
-        newMachine,
-        sheet,
-        sidebar,
-        toggleSidebar,
-    };
+    return { opened, sidebar, toggleSidebar };
 }
 
 type FrameProps = { Gallery?: ComponentType | undefined; pages: Pages };
@@ -231,16 +196,17 @@ function Frame({ Gallery, pages }: FrameProps) {
     const held = useHeld(drawn);
     const quiet = held !== undefined;
     const sheets = useSheets();
-    const { addMac, newMachine } = sheets;
+    const { opened } = sheets;
+    const { addMac, newMachine } = opened;
     const withGallery = Gallery !== undefined;
-    const onSpace = useSpaceKeys(router, macs, sheets.find, { on: !quiet, withGallery });
+    const onSpace = useSpaceKeys(router, macs, opened.find, { on: !quiet, withGallery });
     const { lost, dismiss } = useLost(router, macs, listed);
     const found = route.page === 'machine' ? findMachine(macs, route.machine) : undefined;
     useSettledRoute(router, found);
     const area = { addMac, found, Gallery, go, home, newMachine, pages, route };
     const rail = { engine, go, needs, onSpace, quiet, route };
-    const onFind = quiet ? NOWHERE : sheets.find;
-    const aside = { ...side, go, onFind, onNewMachine: sheets.newBlank, quiet, route };
+    const onFind = quiet ? NOWHERE : opened.find;
+    const aside = { ...side, go, onFind, onNewMachine: opened.newBlank, quiet, route };
     const spaced = quiet || !isGlobal(route);
     const shown = spaced && sheets.sidebar;
     return (
@@ -253,8 +219,8 @@ function Frame({ Gallery, pages }: FrameProps) {
                         found={found}
                         ItemName={pages.ItemName}
                         macs={macs}
-                        onAddPassword={sheets.addPassword}
-                        onNewMachine={sheets.newBlank}
+                        onAddPassword={opened.addPassword}
+                        onNewMachine={opened.newBlank}
                         onToggleSidebar={spaced ? sheets.toggleSidebar : undefined}
                         quiet={quiet}
                         router={router}
@@ -270,10 +236,8 @@ function Frame({ Gallery, pages }: FrameProps) {
                     go={go}
                     macs={macs}
                     needs={needs}
-                    onAddMac={addMac}
-                    onClose={sheets.close}
+                    opened={opened}
                     pages={pages}
-                    sheet={sheets.sheet}
                     withGallery={withGallery}
                 />
             )}

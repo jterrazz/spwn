@@ -72,11 +72,6 @@ function Busiest({ report }: { report: ActivityReport }) {
 }
 
 export function BusiestNow({ found }: { found: Found }) {
-    const { readers, shown } = useActivity(found, '1h');
-    return (
-        <>
-            {readers}
-            {shown?.kind === 'read' ? <Busiest report={shown.out} /> : null}
-        </>
-    );
+    const shown = useActivity(found, '1h');
+    return shown?.kind === 'read' ? <Busiest report={shown.out} /> : null;
 }

@@ -2,12 +2,11 @@ import type {
     ActivityReadInput,
     ActivityReport,
     ActivitySample,
-    EngineWatchInput,
     MachinesMacView,
     Target,
 } from '@jterrazz/station-api';
-import { useCallback, useEffect, useState } from 'react';
-import type { ReactElement, ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import type { ReactNode } from 'react';
 
 import { spanOf } from '../../../domain/activity/measures';
 import type { Span } from '../../../domain/activity/measures';
@@ -16,6 +15,7 @@ import { targetOf } from '../../../domain/machines/machines';
 import type { Found } from '../../../domain/machines/machines';
 import { keyOf } from '../../../domain/request-key';
 import { useWatch } from '../../dependencies/dependencies';
+import type { Reading } from '../../dependencies/dependencies';
 
 export type Heard =
     | { kind: 'failed'; error: EngineError }
@@ -25,54 +25,43 @@ function placeheld(heard: Heard): Heard {
     return heard.kind === 'read' ? { ...heard, placeholder: true } : heard;
 }
 
-// invariant: what was last heard of a machine stays shown while another span of it is read, marked a placeholder
-// invariant: until that span answers; a reader of another machine starts from nothing.
-export function useHeard(input: ActivityReadInput) {
-    const key = keyOf({ call: 'activity.read', in: input });
-    const of = input.of ?? '';
-    const [last, setLast] = useState<undefined | { key: string; of: string; heard: Heard }>(
-        undefined,
-    );
-    const heard = useCallback(
-        (next: Heard) => {
-            setLast({ heard: next, key, of });
-        },
-        [key, of],
-    );
-    if (last === undefined || last.of !== of) {
-        return { heard, shown: undefined };
+function heardOf(reading: Reading<ActivityReport>): Heard | undefined {
+    if (reading.kind === 'failed') {
+        return { error: reading.error, kind: 'failed' };
     }
-    return { heard, shown: last.key === key ? last.heard : placeheld(last.heard) };
+    if (reading.kind === 'read') {
+        return reading.placeholder === true
+            ? { kind: 'read', out: reading.out, placeholder: true }
+            : { kind: 'read', out: reading.out };
+    }
+    return undefined;
 }
 
-export function Reader({
-    input,
-    target,
-    heard,
-}: {
-    input: ActivityReadInput;
-    target: Target | undefined;
-    heard: (heard: Heard) => void;
-}) {
+type Last = { key: string; of: string; reading: Reading<ActivityReport> };
+
+function shownOf(last: Last | undefined, key: string, of: string): Heard | undefined {
+    const one = last === undefined || last.of !== of ? undefined : heardOf(last.reading);
+    return one !== undefined && last?.key !== key ? placeheld(one) : one;
+}
+
+// invariant: what was last heard of a machine stays shown while another span of it is read, marked a placeholder
+// invariant: until that span answers; a reader of another machine starts from nothing. What is shown is derived from
+// invariant: the one reading in the render that reads it, so an answer is drawn in the commit it arrives in.
+function useHeard(
+    input: ActivityReadInput | undefined,
+    target: Target | undefined,
+): Heard | undefined {
     const reading = useWatch('activity.read', input, target, { placeholder: true });
-    useEffect(() => {
-        if (reading.kind === 'failed') {
-            heard(reading);
-        } else if (reading.kind === 'read') {
-            heard(
-                reading.placeholder === true
-                    ? { kind: 'read', out: reading.out, placeholder: true }
-                    : { kind: 'read', out: reading.out },
-            );
-        }
-    }, [reading, heard]);
-    return null;
-}
-
-export function Held({ name, thisMac }: { name: string; thisMac: boolean }) {
-    const machines: EngineWatchInput = { machines: thisMac ? [] : [name] };
-    useWatch('engine.watch', machines);
-    return null;
+    const key = input === undefined ? '' : keyOf({ call: 'activity.read', in: input });
+    const of = input?.of ?? '';
+    const [last, setLast] = useState<Last>();
+    if (
+        reading.kind !== 'reading' &&
+        (last?.reading !== reading || last.key !== key || last.of !== of)
+    ) {
+        setLast({ key, of, reading });
+    }
+    return useMemo(() => shownOf(last, key, of), [last, key, of]);
 }
 
 export function useHistory(found: Found): readonly ActivitySample[] | undefined {
@@ -93,41 +82,28 @@ function inputOf(mac: string, vm: string | undefined, span: Span): ActivityReadI
     return { graph, machine: { Name: vm, On: mac }, of: vm };
 }
 
-export function useActivity(
-    found: Found,
-    span: Span,
-): { readers: ReactElement; shown: Heard | undefined } {
+// value: what is shown of `found`'s activity over `span`: the engine keeps it watched while it is read, and a VM the
+// value: engine keeps no history of is read from inside it.
+export function useActivity(found: Found, span: Span): Heard | undefined {
     const name = found.vm?.Name ?? found.mac.Name;
     const mac = found.mac.Name;
     const vm = found.vm?.Name;
-    const onMac = targetOf({ mac: found.mac });
-    const inVm = targetOf(found);
-    const kept = inputOf(mac, vm, span);
-    const own = inputOf(mac, undefined, span);
-    const first = useHeard(kept);
-    const second = useHeard(own);
-    const unkept =
-        vm !== undefined && first.shown?.kind === 'read' && first.shown.out.source === '';
-    const readers = (
-        <>
-            <Held name={name} thisMac={found.mac.ThisMac && vm === undefined} />
-            <Reader heard={first.heard} input={kept} target={onMac} />
-            {unkept ? <Reader heard={second.heard} input={own} target={inVm} /> : null}
-        </>
-    );
-    return { readers, shown: unkept ? second.shown : first.shown };
+    useWatch('engine.watch', { machines: found.mac.ThisMac && vm === undefined ? [] : [name] });
+    const first = useHeard(inputOf(mac, vm, span), targetOf({ mac: found.mac }));
+    const unkept = vm !== undefined && first?.kind === 'read' && first.out.source === '';
+    const second = useHeard(unkept ? inputOf(mac, undefined, span) : undefined, targetOf(found));
+    return unkept ? second : first;
 }
 
 type HeardOn = (mac: string, heard: Heard | undefined) => void;
 
 function MacReader({ mac, span, heard }: { mac: MachinesMacView; span: Span; heard: HeardOn }) {
-    const { readers, shown } = useActivity({ mac }, span);
+    const shown = useActivity({ mac }, span);
     useEffect(() => {
         heard(mac.Name, shown);
     }, [heard, mac.Name, shown]);
-    return readers;
+    return null;
 }
-
 function withHeard(
     kept: ReadonlyMap<string, Heard>,
     mac: string,
