@@ -1,15 +1,15 @@
 .window {
+    position: relative;
     height: 100%;
     display: grid;
     grid-template-rows: var(--chrome-row) minmax(0, 1fr);
-    grid-template-columns: 224px minmax(0, 1fr);
+    grid-template-columns: auto minmax(0, 1fr);
     background: var(--ground-window);
     overflow: hidden;
 }
-.collapsed {
-    grid-template-columns: minmax(0, 1fr);
-}
 .main {
+    grid-row: 2;
+    grid-column: 2;
     background: var(--ground);
     display: flex;
     flex-direction: column;

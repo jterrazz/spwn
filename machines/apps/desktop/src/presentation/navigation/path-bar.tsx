@@ -8,6 +8,8 @@ import { Icon } from '../ui/icon';
 import { Button, IconButton, Sign } from '../ui/index';
 import type { Shown } from '../words/shown';
 import { actionOf } from './bar-action';
+import { ColumnToggle } from './column';
+import type { ColumnState } from './column-state';
 import { EngineMark } from './engine-foot';
 import { PathNav } from './path';
 import type { PlainPage } from './route';
@@ -28,7 +30,7 @@ export type PathBarProps = {
     standing: Shown | undefined;
     onSpace: (space: Space) => void;
     onFind: () => void;
-    onToggleSidebar: (() => void) | undefined;
+    column: ColumnState | undefined;
     onAddPassword: () => void;
     onNewMachine: () => void;
     ItemName: ComponentType<{ page: PlainPage; item: string }>;
@@ -121,11 +123,11 @@ function End({ router, quiet, macs, needs, engine, onFind, ...props }: PathBarPr
     );
 }
 
-// invariant: the bar is the window's one row of navigation: the sign, the sidebar's toggle, Back and Forward, the
+// invariant: the bar is the window's one row of navigation: the sign, the column's pin, Back and Forward, the
 // invariant: path, then the engine's mark, the stale mark, the page's action, Inbox, Find and Settings. It is a deep
 // invariant: drag region, which leaves every button in it clickable; its popovers draw in a portal outside it.
 export function PathBar(props: PathBarProps) {
-    const { router, quiet, found, macs, standing, onSpace, onToggleSidebar, ItemName } = props;
+    const { router, quiet, found, macs, standing, onSpace, column, ItemName } = props;
     const { route, go, back, forward, canGoBack, canGoForward } = router;
     const segments = segmentsOf({ found, route, standing }, quiet);
     return (
@@ -142,13 +144,7 @@ export function PathBar(props: PathBarProps) {
             >
                 <Sign />
             </button>
-            {onToggleSidebar === undefined ? null : (
-                <IconButton
-                    icon="sidebar"
-                    label="Show or hide the sidebar"
-                    onClick={onToggleSidebar}
-                />
-            )}
+            {column === undefined ? null : <ColumnToggle column={column} />}
             <IconButton
                 disabled={quiet || !canGoBack}
                 icon="back"

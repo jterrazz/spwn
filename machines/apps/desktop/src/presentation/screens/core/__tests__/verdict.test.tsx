@@ -22,12 +22,13 @@ import { stagedReplay } from '../../../../infrastructure/outbound/engine-replay/
 import type { Stage } from '../../../../infrastructure/outbound/engine-replay/replay';
 import { NO_OPENER } from '../../../../infrastructure/outbound/opener-tauri/tauri-opener';
 import { EngineProvider } from '../../../dependencies/dependencies';
+import { PINNED } from '../../../navigation/__tests__/pinned';
 import { Window } from '../../../navigation/window';
 import { PAGES } from '../../registry';
 
 const recordingFor = await recordingsOf('two-macs');
 
-const sidebar = navigation('Sidebar');
+const column = navigation('Column');
 const PANEL = region('The engine on this Mac');
 const HOME = content('2 things need you.');
 
@@ -55,7 +56,7 @@ function verdictOver(fit: 'app-older' | 'engine-older'): { stage: Stage; tree: R
                 presence: documentPresence(),
             }}
         >
-            <Window initial={{ page: 'home' }} pages={PAGES} />
+            <Window initial={{ page: 'home' }} memory={PINNED} pages={PAGES} />
         </EngineProvider>
     );
     return { stage, tree };
@@ -69,9 +70,9 @@ describe('verdict', () => {
             // When - the window opens on it
             await visitor.see(within(PANEL, heading('Update station here')));
 
-            // Then - the install line beside Update, and the verdict on the sidebar's Engine line
+            // Then - the install line beside Update, and the verdict on the column's Engine line
             await visitor.see(within(PANEL, content(INSTALL_LINE)));
-            await visitor.see(within(sidebar, content('Engine older than this app')));
+            await visitor.see(within(column, content('Engine older than this app')));
         });
         expect(judgedOnce(stage)).toStrictEqual([1, 0]);
         expect(result.errors.text).toBe('');
@@ -85,8 +86,8 @@ describe('verdict', () => {
             // When - the window opens on it
             await visitor.see(within(PANEL, heading('Update Spwn')));
 
-            // Then - the verdict on the sidebar's Engine line
-            await visitor.see(within(sidebar, content('This app older than the engine')));
+            // Then - the verdict on the column's Engine line
+            await visitor.see(within(column, content('This app older than the engine')));
         });
         expect(judgedOnce(stage)).toStrictEqual([1, 0]);
         expect(result.errors.text).toBe('');
@@ -106,7 +107,7 @@ describe('verdict', () => {
 
             // Then - Home is drawn, and the foot no longer says the verdict
             await visitor.see(HOME);
-            await visitor.gone(within(sidebar, content('Engine older than this app')));
+            await visitor.gone(within(column, content('Engine older than this app')));
             mains.push(document.querySelector('main'));
         });
         expect(mains[0]).toBeInstanceOf(HTMLElement);

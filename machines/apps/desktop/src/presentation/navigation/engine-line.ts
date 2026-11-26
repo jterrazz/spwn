@@ -9,7 +9,7 @@ import type { Shown } from '../words/shown';
 
 export type EngineLine = { dot: Shown; said: string; version: string; opens: boolean };
 
-// value: the engine's one line, read where the window names its engine: the sidebar's foot, the bar's mark and Settings.
+// value: the engine's one line, read where the window names its engine: the column's foot, the bar's mark and Settings.
 export function useEngineLine(engine: Reading<EngineReadOutput>): EngineLine {
     const reach = useReach();
     if (reach.kind === 'unanswered') {

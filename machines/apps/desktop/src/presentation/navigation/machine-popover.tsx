@@ -20,7 +20,7 @@ export function matches(label: string, query: string): boolean {
     return label.toLowerCase().includes(query.trim().toLowerCase());
 }
 
-// value: the machine list, as the sidebar draws it: each Mac, then its VMs under it; for one Mac, its VMs alone.
+// value: the machine list, as the column draws it: each Mac, then its VMs under it; for one Mac, its VMs alone.
 export function machineRows({ macs, current, mac }: Fleet): readonly PopoverRow[] {
     const listed = machineNamesOf(macs);
     const shown = mac === undefined ? macs : macs.filter((one) => one.Name === mac);

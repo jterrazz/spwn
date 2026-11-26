@@ -26,20 +26,21 @@ import {
 import type { Recording } from '../../../../infrastructure/outbound/engine-replay/replay';
 import { NO_OPENER } from '../../../../infrastructure/outbound/opener-tauri/tauri-opener';
 import { EngineProvider } from '../../../dependencies/dependencies';
+import { PINNED } from '../../../navigation/__tests__/pinned';
 import type { Route } from '../../../navigation/route';
 import { Window } from '../../../navigation/window';
 import { PAGES } from '../../registry';
 
 const recordingFor = await recordingsOf('creating', 'engine-stopped', 'two-macs');
 
-const sidebar = navigation('Sidebar');
+const column = navigation('Column');
 
 function machineOver(world: string, machine: string) {
     const initial: Route = { machine, page: 'machine', tab: 'Overview' };
     const dependencies = composeReplay({ recording: recordingFor(world) });
     return (
         <EngineProvider dependencies={dependencies}>
-            <Window initial={initial} pages={PAGES} />
+            <Window initial={initial} memory={PINNED} pages={PAGES} />
         </EngineProvider>
     );
 }
@@ -53,7 +54,7 @@ function linuxOneOver(transport: Transport) {
     const initial: Route = { machine: 'linux-1', page: 'machine', tab: 'Overview' };
     return (
         <EngineProvider dependencies={dependencies}>
-            <Window initial={initial} pages={PAGES} />
+            <Window initial={initial} memory={PINNED} pages={PAGES} />
         </EngineProvider>
     );
 }
@@ -82,7 +83,7 @@ function headerBoxes(): Boxes {
 }
 
 describe('gestures', () => {
-    test('stop asks first, then stops the machine, and the header and sidebar read it again', async () => {
+    test('stop asks first, then stops the machine, and the header and column read it again', async () => {
         // Given - linux-1's page over two-macs, linux-1 running
         const result = await component.render(
             machineOver('two-macs', 'linux-1'),
@@ -103,7 +104,7 @@ describe('gestures', () => {
                 // Then - the engine's machines.list, read again, says it is stopped
                 await visitor.gone(dialog('Stop linux-1?'));
                 await visitor.see(heading('linux-1 stopped'));
-                await visitor.see(within(sidebar, button('linux-1 stopped')));
+                await visitor.see(within(column, button('linux-1 stopped')));
                 await visitor.see(content('done'));
             },
         );
@@ -207,7 +208,7 @@ describe('gestures', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test('delete asks for the name typed, then the machine leaves the sidebar', async () => {
+    test('delete asks for the name typed, then the machine leaves the column', async () => {
         // Given - api's page over two-macs
         const result = await component.render(machineOver('two-macs', 'api'), async (visitor) => {
             await visitor.see(heading('api stopped'));
@@ -225,8 +226,8 @@ describe('gestures', () => {
             await visitor.see(within(asked, free));
             await visitor.click(within(asked, button('Delete')));
 
-            // Then - Home, and api is no machine of the sidebar any more
-            const gone = within(sidebar, button('api stopped'));
+            // Then - Home, and api is no machine of the column any more
+            const gone = within(column, button('api stopped'));
             await visitor.see(content('2 things need you.'));
             await visitor.gone(gone);
         });

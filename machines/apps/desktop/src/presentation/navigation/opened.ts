@@ -11,7 +11,7 @@ export type Sheet =
 const NONE: Sheet = { kind: 'none' };
 
 // invariant: the sheet the window shows, held apart from the frame: opening or closing one tells only who reads it,
-// invariant: so the page, the path bar and the sidebar beneath it are not drawn again. Every opener is one function
+// invariant: so the page, the path bar and the column beneath it are not drawn again. Every opener is one function
 // invariant: for the window's life.
 export class Opened {
     private sheet: Sheet = NONE;

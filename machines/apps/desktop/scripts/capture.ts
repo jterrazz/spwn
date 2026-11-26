@@ -1,7 +1,7 @@
 // outside: a Linux VM only (headless Chromium); a Mac never opens a browser for this.
 // value: usage: node scripts/capture.ts [<out-dir> [<world>...]]: .artifacts/captures and every recorded world by
 // value: default. It builds the proof pages, serves them, and saves <world>/<page>.png for each page of the
-// value: sidebar and <world>/<machine>-<tab>.png for each tab of each machine the world lists, the full height of
+// value: column and <world>/<machine>-<tab>.png for each tab of each machine the world lists, the full height of
 // value: the page, and gallery.png, the design components, with gallery/<Component>.png, one reference image per
 // value: component the gallery enters, each opened by its start route (`?page=`, `?machine=&tab=`); the shots of
 // value: OPENED add a world's dialogs and clicked views, <world>/<name>.png, by the steps each declares.

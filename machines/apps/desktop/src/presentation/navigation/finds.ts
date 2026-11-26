@@ -189,8 +189,8 @@ function machineOf(result: Result): string {
 }
 
 // invariant: a machine's tabs keep the tab bar's order, the order everything() lists them in, so only their
-// invariant: machines are sorted, and toSorted is stable. The machines keep the sidebar's order, each Mac then its
-// invariant: VMs, as machines.list sends them, and the places, Machine files and the shelves keep the sidebar's.
+// invariant: machines are sorted, and toSorted is stable. The machines keep the column's order, each Mac then its
+// invariant: VMs, as machines.list sends them, and the places, Machine files and the shelves keep the path's.
 function inOrder(kind: Kind): (a: Result, b: Result) => number {
     if (AS_LISTED.has(kind)) {
         return () => 0;

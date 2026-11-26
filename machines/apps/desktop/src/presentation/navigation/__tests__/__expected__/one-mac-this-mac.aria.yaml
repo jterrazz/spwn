@@ -1,6 +1,6 @@
 - banner:
   - button "Home"
-  - button "Show or hide the sidebar"
+  - button "Pin the column" [pressed]
   - button "Back" [disabled]
   - button "Forward" [disabled]
   - navigation "Path":
@@ -16,23 +16,22 @@
   - button "Inbox"
   - button "Find"
   - button "Settings"
-- navigation "Sidebar":
-  - group "Every Mac":
-    - button "Storage"
-    - button "Engine"
+- navigation "Column":
   - group "Machines":
-    - heading "Machines" [level=2]
+    - text: Machines
     - button "macbook-pro online":
       - text: macbook-pro
       - img "online"
   - group "Library":
-    - heading "Library" [level=2]
+    - text: Library
     - button "Apps 1"
     - button "Skills 0"
     - button "Machine settings 0"
     - button "Machine files"
+    - button "Storage"
     - button "Passwords"
-  - button "Engine running · dev"
+  - region "Engine state":
+    - button "Engine running · dev"
 - main:
   - heading "macbook-pro online" [level=2]
   - paragraph: This Mac · Engine running. Sleeps normally.

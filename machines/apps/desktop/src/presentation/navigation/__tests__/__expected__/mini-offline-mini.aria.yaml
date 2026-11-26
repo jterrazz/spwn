@@ -1,6 +1,6 @@
 - banner:
   - button "Home"
-  - button "Show or hide the sidebar"
+  - button "Pin the column" [pressed]
   - button "Back"
   - button "Forward" [disabled]
   - navigation "Path":
@@ -16,12 +16,10 @@
   - button "Inbox"
   - button "Find"
   - button "Settings"
-- navigation "Sidebar":
-  - group "Every Mac":
-    - button "Storage"
-    - button "Engine"
+- navigation "Column":
   - group "Machines":
-    - heading "Machines" [level=2]
+    - text: Machines
+    - button "macbook-pro's machines" [expanded]
     - button "macbook-pro online":
       - text: macbook-pro
       - img "online"
@@ -31,6 +29,7 @@
     - button "linux-1 running":
       - text: linux-1
       - img "running"
+    - button "mac-mini's machines" [expanded]
     - button "mac-mini not seen":
       - text: mac-mini
       - img "not seen"
@@ -38,13 +37,15 @@
       - text: infra
       - img "not seen"
   - group "Library":
-    - heading "Library" [level=2]
+    - text: Library
     - button "Apps 9"
     - button "Skills 0"
     - button "Machine settings 0"
     - button "Machine files"
+    - button "Storage"
     - button "Passwords"
-  - button "Engine running · dev"
+  - region "Engine state":
+    - button "Engine running · dev"
 - main:
   - heading "mac-mini not seen" [level=2]
   - paragraph: Not seen for 6 h. Asleep or off the network.

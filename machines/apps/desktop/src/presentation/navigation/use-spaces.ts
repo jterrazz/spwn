@@ -2,6 +2,7 @@ import type { MachinesMacView } from '@jterrazz/station-api';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { useShortcuts } from './keys';
+import type { Acts } from './keys';
 import type { Route } from './route';
 import type { Router } from './router';
 import { inSpace, landingOf } from './spaces';
@@ -14,7 +15,7 @@ export type KeysOn = { on: boolean; withGallery: boolean };
 export function useSpaceKeys(
     router: Router,
     macs: readonly MachinesMacView[],
-    onFind: () => void,
+    { onFind, onColumn }: Pick<Acts, 'onColumn' | 'onFind'>,
     { on, withGallery }: KeysOn,
 ): (space: Space) => void {
     const { route, go } = router;
@@ -33,7 +34,7 @@ export function useSpaceKeys(
         },
         [go, firstMac],
     );
-    const acts = useMemo(() => ({ onFind, onSpace }), [onFind, onSpace]);
+    const acts = useMemo(() => ({ onColumn, onFind, onSpace }), [onColumn, onFind, onSpace]);
     useShortcuts(router, acts, withGallery, on);
     return onSpace;
 }

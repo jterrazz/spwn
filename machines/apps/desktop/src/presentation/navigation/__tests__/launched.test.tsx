@@ -9,6 +9,7 @@ import { EngineProvider } from '../../dependencies/dependencies';
 import { PAGES } from '../../screens/registry';
 import { Launched } from '../launched';
 import { Window } from '../window';
+import { PINNED } from './pinned';
 
 const recordingFor = await recordingsOf('two-macs');
 
@@ -17,12 +18,12 @@ const NONE: Recording = { exchanges: [], station: '', world: 'none' };
 function launchedOver(recording: Recording, link?: Link) {
     const drawn: string[] = [];
     const onDrawn = () => {
-        drawn.push(document.querySelector('nav[aria-label="Sidebar"]')?.textContent ?? '');
+        drawn.push(document.querySelector('nav[aria-label="Column"]')?.textContent ?? '');
     };
     const dependencies = composeReplay({ link, recording });
     const tree = (
         <EngineProvider dependencies={dependencies}>
-            <Window initial={{ page: 'home' }} pages={PAGES} />
+            <Window initial={{ page: 'home' }} memory={PINNED} pages={PAGES} />
             <Launched onDrawn={onDrawn} />
         </EngineProvider>
     );
@@ -37,12 +38,12 @@ describe('Launched', () => {
         // When - the engine has answered
         await component.render(tree, async (visitor) => {
             await visitor.see(
-                within(navigation('Sidebar'), content('macbook-pro', { exact: false })),
+                within(navigation('Column'), content('macbook-pro', { exact: false })),
             );
             await waitUntil(() => drawn.length > 0, { why: 'the frame drawn' });
         });
 
-        // Then - the commit it is told of already holds the machines in the sidebar
+        // Then - the commit it is told of already holds the machines in the column
         expect(drawn[0]).toContain('macbook-pro');
     });
 
@@ -74,7 +75,7 @@ describe('Launched', () => {
 
         // When - the frame says the engine is connecting
         await component.render(tree, async (visitor) => {
-            await visitor.see(within(navigation('Sidebar'), content('Engine connecting')));
+            await visitor.see(within(navigation('Column'), content('Engine connecting')));
         });
 
         // Then - nothing is told

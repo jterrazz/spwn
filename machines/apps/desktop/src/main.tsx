@@ -78,6 +78,7 @@ if (root) {
                     <Window
                         Gallery={Gallery}
                         initial={initialRoute()}
+                        memory={memory}
                         onRoute={onRoute}
                         pages={PAGES}
                     />

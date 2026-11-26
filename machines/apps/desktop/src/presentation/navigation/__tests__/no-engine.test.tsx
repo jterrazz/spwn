@@ -21,10 +21,11 @@ import { NO_OPENER } from '../../../infrastructure/outbound/opener-tauri/tauri-o
 import { EngineProvider } from '../../dependencies/dependencies';
 import { PAGES } from '../../screens/registry';
 import { Window } from '../window';
+import { PINNED } from './pinned';
 
 const recordingFor = await recordingsOf('two-macs');
 
-const sidebar = navigation('Sidebar');
+const column = navigation('Column');
 const SOCKET = 'replay of two-macs';
 const ABSENT: Link = {
     kind: 'absent',
@@ -38,7 +39,7 @@ const OPEN: Link = {
     refused: undefined,
     socket: SOCKET,
 };
-const SAID = within(sidebar, content(`No engine answers at ${SOCKET}`));
+const SAID = within(column, content(`No engine answers at ${SOCKET}`));
 const VERDICT = content('2 things need you.');
 const FIND = dialog('Find');
 
@@ -50,7 +51,7 @@ function windowOver(stage: Stage) {
     };
     return (
         <EngineProvider dependencies={dependencies}>
-            <Window initial={{ page: 'home' }} pages={PAGES} />
+            <Window initial={{ page: 'home' }} memory={PINNED} pages={PAGES} />
         </EngineProvider>
     );
 }

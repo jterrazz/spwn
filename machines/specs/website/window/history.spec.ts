@@ -10,18 +10,18 @@ import {
 } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
-import { website } from '../website.specification.js';
+import { PINNED, website } from '../website.specification.js';
 
 const HOME = '/?world=two-macs&page=home';
-const sidebar = navigation('Sidebar');
+const column = navigation('Column');
 const back = button('Back');
 const forward = button('Forward');
-const thisMac = within(sidebar, button('macbook-pro online'));
+const thisMac = within(column, button('macbook-pro online'));
 
 describe('history', () => {
     test('A4 back returns through the tab and the page I came from, then is disabled', async () => {
         // Given - the window on Home over two-macs, nothing behind it
-        const result = await website.visit(HOME, async (visitor) => {
+        const result = await website.storage(PINNED).visit(HOME, async (visitor) => {
             await visitor.see(disabled(back));
 
             // When - This Mac is opened, its Ports tab chosen, then back is taken twice
@@ -42,7 +42,7 @@ describe('history', () => {
 
     test('A4 forward retraces what back undid, and is disabled at the last place', async () => {
         // Given - the window on Home over two-macs, nothing behind it nor ahead
-        const result = await website.visit(HOME, async (visitor) => {
+        const result = await website.storage(PINNED).visit(HOME, async (visitor) => {
             await visitor.see(disabled(back));
             await visitor.see(disabled(forward));
 
@@ -65,7 +65,7 @@ describe('history', () => {
 
     test('A4 ⌘[ and ⌘] walk the history as the two buttons of the bar do', async () => {
         // Given - the window on Home over two-macs
-        const result = await website.visit(HOME, async (visitor) => {
+        const result = await website.storage(PINNED).visit(HOME, async (visitor) => {
             // When - This Mac is opened, then ⌘[ and ⌘] pressed
             await visitor.click(thisMac);
             await visitor.see(heading('macbook-pro online'));

@@ -37,9 +37,7 @@ export function useFrameLine({ engine, quiet }: EngineSaid): EngineLine {
 
 type Go = { go: (to: Route) => void };
 
-// value: the engine's line at the sidebar's foot: its state's dot and its words, opening the Engine page.
-export function EngineFoot({ engine, quiet, go }: EngineSaid & Go) {
-    const line = useFrameLine({ engine, quiet });
+function FootLine({ line, go }: Go & { line: EngineLine }) {
     if (!line.opens) {
         return (
             <div className={styles.foot}>
@@ -64,6 +62,17 @@ export function EngineFoot({ engine, quiet, go }: EngineSaid & Go) {
     );
 }
 
+// value: the engine's line at the column's foot: its state's dot and its words, opening the Engine page, in a region
+// value: of its own so a line of Needs you that says the same is told from it.
+export function EngineFoot({ engine, quiet, go }: EngineSaid & Go) {
+    const line = useFrameLine({ engine, quiet });
+    return (
+        <section aria-label="Engine state" className={styles.footing}>
+            <FootLine go={go} line={line} />
+        </section>
+    );
+}
+
 // invariant: the bar marks the engine only when it is not fine: absent, connecting, refused, incompatible or in a
 // invariant: state of its own that is not ok; a read still under way marks nothing.
 function marked({ engine, quiet }: EngineSaid, line: EngineLine): boolean {
@@ -73,8 +82,8 @@ function marked({ engine, quiet }: EngineSaid, line: EngineLine): boolean {
     return engine.kind === 'read' && line.dot.tone !== 'ok';
 }
 
-// value: the engine's mark at the bar's right, so its absence is said with the sidebar hidden; it names itself as
-// value: the sidebar's foot does, and opens the Engine page when there is one to open.
+// value: the engine's mark at the bar's right, so its absence is said with the column hidden; it names itself as
+// value: the column's foot does, and opens the Engine page when there is one to open.
 export function EngineMark({ engine, quiet, go }: EngineSaid & Go) {
     const line = useFrameLine({ engine, quiet });
     if (!marked({ engine, quiet }, line)) {

@@ -15,17 +15,25 @@ import { composeReplay } from '../../../composition/compose';
 import { recordingsOf } from '../../../infrastructure/outbound/engine-replay/recordings';
 import { EngineProvider } from '../../dependencies/dependencies';
 import { PAGES } from '../../screens/registry';
+import { wordOfSent } from '../../words/engine-words';
+import { NO_STATE_WORD } from '../../words/words';
 import { machineRoute } from '../route';
+import type { PlainPage } from '../route';
 import { PLACES } from '../segments';
 import { TITLES } from '../titles';
 import { Window } from '../window';
+import { PINNED } from './pinned';
 
 const LISTS = import.meta.glob<unknown>('../../../fixtures/worlds/*/machines.list.json', {
     eager: true,
     import: 'default',
 });
 
-type Fleet = { world: string; macs: readonly { name: string; vms: readonly string[] }[] };
+type Fleet = {
+    world: string;
+    macs: readonly { name: string; vms: readonly string[] }[];
+    rows: readonly { name: string; row: string }[];
+};
 
 function fieldOf(value: unknown, key: string): unknown {
     if (typeof value !== 'object' || value === null) {
@@ -44,16 +52,31 @@ function nameOf(value: unknown): string {
     return typeof name === 'string' ? name : '';
 }
 
+// value: a machine's row as the column names it: its name, then its standing's word.
+function rowOf(
+    machine: unknown,
+    of: 'MachinesMacStanding' | 'MachinesVMStanding',
+): { name: string; row: string } {
+    const standing = fieldOf(machine, 'Standing');
+    const word = typeof standing === 'string' ? wordOfSent(of, standing) : NO_STATE_WORD;
+    return { name: nameOf(machine), row: `${nameOf(machine)} ${word}` };
+}
+
 function fleetOf(path: string, recorded: unknown): Fleet {
     const [first] = listOf(fieldOf(recorded, 'exchanges'));
     const out = listOf(fieldOf(first, 'answers'))
         .map((answer) => fieldOf(answer, 'out'))
         .findLast((found) => found !== undefined);
-    const macs = listOf(fieldOf(fieldOf(out, 'All'), 'Macs')).map((mac) => ({
+    const listed = listOf(fieldOf(fieldOf(out, 'All'), 'Macs'));
+    const macs = listed.map((mac) => ({
         name: nameOf(mac),
         vms: listOf(fieldOf(mac, 'VMs')).map(nameOf),
     }));
-    return { macs, world: path.split('/').at(-2) ?? '' };
+    const rows = listed.flatMap((mac) => [
+        rowOf(mac, 'MachinesMacStanding'),
+        ...listOf(fieldOf(mac, 'VMs')).map((vm) => rowOf(vm, 'MachinesVMStanding')),
+    ]);
+    return { macs, rows, world: path.split('/').at(-2) ?? '' };
 }
 
 const FLEETS = Object.entries(LISTS)
@@ -62,9 +85,19 @@ const FLEETS = Object.entries(LISTS)
 const recordingFor = await recordingsOf(...FLEETS.map((fleet) => fleet.world));
 
 const path = navigation('Path');
-const sidebar = navigation('Sidebar');
+const column = navigation('Column');
 
 const bar = banner();
+
+// value: the Library's pages, in the column's order.
+const LIBRARY: readonly PlainPage[] = [
+    'catalog-apps',
+    'catalog-skills',
+    'catalog-settings',
+    'machine-files',
+    'storage',
+    'passwords',
+];
 
 // value: a level's popover opened by its segment, filtered down to one name, chosen by Enter; a machine's segment
 // value: carries its state's words after its name, a place's its name alone.
@@ -86,17 +119,17 @@ async function choose(
 describe('PathNav', () => {
     test.each(FLEETS)(
         'every page of $world is reached through the path bar',
-        async ({ world, macs }) => {
+        async ({ world, macs, rows }) => {
             // Given - the window on Home over the world
             const result = await component.render(
                 <EngineProvider dependencies={composeReplay({ recording: recordingFor(world) })}>
-                    <Window initial={{ page: 'home' }} pages={PAGES} />
+                    <Window initial={{ page: 'home' }} memory={PINNED} pages={PAGES} />
                 </EngineProvider>,
                 async (visitor) => {
                     await visitor.see(within(path, content(TITLES.home)));
 
-                    // When - Storage is opened from the sidebar, then every place from the place segment's popover
-                    await visitor.click(within(sidebar, button(TITLES.storage, { exact: false })));
+                    // When - Storage is opened from the column, then every place from the place segment's popover
+                    await visitor.click(within(column, button(TITLES.storage, { exact: false })));
                     await visitor.see(within(path, button(TITLES.storage)));
                     let at: string = TITLES.storage;
                     for (const place of PLACES) {
@@ -109,11 +142,9 @@ describe('PathNav', () => {
                         at = TITLES[place];
                     }
 
-                    // When - the first Mac is opened from the sidebar, then every machine from its Mac's segment
+                    // When - the first Mac is opened from the column, then every machine from its Mac's segment
                     const [first] = macs;
-                    await visitor.click(
-                        within(sidebar, button(first?.name ?? '', { exact: false })),
-                    );
+                    await visitor.click(within(column, button(rows[0]?.row ?? '')));
                     let on = first?.name ?? '';
                     for (const mac of macs) {
                         for (const machine of [mac.name, ...mac.vms]) {
@@ -139,6 +170,35 @@ describe('PathNav', () => {
 
             // Then - the walk ended on Home, the window's first page
             expect(result.html.text).toContain(TITLES.home);
+        },
+        120_000,
+    );
+
+    test.each(FLEETS)(
+        'every machine and every Library page of $world is reached through the column',
+        async ({ world, rows }) => {
+            // Given - the window on Home over the world, its column pinned
+            const result = await component.render(
+                <EngineProvider dependencies={composeReplay({ recording: recordingFor(world) })}>
+                    <Window initial={{ page: 'home' }} memory={PINNED} pages={PAGES} />
+                </EngineProvider>,
+                async (visitor) => {
+                    await visitor.see(within(path, content(TITLES.home)));
+
+                    // When - each machine, then each Library page, is pressed in the column
+                    for (const { name, row } of rows) {
+                        await visitor.click(within(column, button(row)));
+                        await visitor.see(within(path, button(name, { exact: false })));
+                    }
+                    for (const page of LIBRARY) {
+                        await visitor.click(within(column, button(TITLES[page], { exact: false })));
+                        await visitor.see(within(path, button(TITLES[page])));
+                    }
+                },
+            );
+
+            // Then - the walk ended on the Library's last page, the column still beside it
+            expect(result.html.text).toContain(TITLES.passwords);
         },
         120_000,
     );

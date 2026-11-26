@@ -237,6 +237,9 @@
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
 }
+.footing {
+    flex: none;
+}
 .foot {
     all: unset;
     box-sizing: border-box;

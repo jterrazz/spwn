@@ -26,7 +26,7 @@ export const FIT_MACHINES_WORDS: Readonly<Record<Unfit, string>> = {
     'engine-older': 'Update station to see them',
 };
 
-// value: the sidebar foot's line, the verdict itself opening a line.
+// value: the column foot's line, the verdict itself opening a line.
 export function fitFootWord(fit: Unfit): string {
     const words = FIT_WORDS[fit];
     return `${words.charAt(0).toUpperCase()}${words.slice(1)}`;

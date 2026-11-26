@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # outside: Xvfb, openbox and xdotool exist in the Linux VM alone; a Mac never opens this window.
 # value: usage: capture-tauri.sh [<out-dir> [<world>]]: .artifacts/captures/tauri and stories by default. It opens
-# value: the window on the world (tauri-session.sh) and captures Home, then the first machine of the sidebar.
+# value: the window on the world (tauri-session.sh) and captures Home, then the first machine of the column, pinned at the window's 1440 px.
 set -euo pipefail
 # shellcheck source=bench-env.sh
 source "$(dirname "$0")/bench-env.sh"

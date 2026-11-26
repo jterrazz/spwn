@@ -1,6 +1,6 @@
 - banner:
   - button "Home"
-  - button "Show or hide the sidebar"
+  - button "Pin the column" [pressed]
   - button "Back" [disabled]
   - button "Forward" [disabled]
   - navigation "Path":
@@ -14,12 +14,13 @@
   - button "Inbox 1"
   - button "Find"
   - button "Settings"
-- navigation "Sidebar":
-  - group "Every Mac":
-    - button "Storage"
-    - button "Engine"
+- navigation "Column":
+  - group "Needs you 1":
+    - text: Needs you 1
+    - button "com.example.brain.x-snapshot is failing, last exit 2"
   - group "Machines":
-    - heading "Machines" [level=2]
+    - text: Machines
+    - button "macbook-pro's machines" [expanded]
     - button "macbook-pro online":
       - text: macbook-pro
       - img "online"
@@ -29,6 +30,7 @@
     - button "linux-1 running":
       - text: linux-1
       - img "running"
+    - button "mac-mini's machines" [expanded]
     - button "mac-mini online":
       - text: mac-mini
       - img "online"
@@ -36,13 +38,15 @@
       - text: infra
       - img "healthy"
   - group "Library":
-    - heading "Library" [level=2]
+    - text: Library
     - button "Apps 9"
     - button "Skills 0"
     - button "Machine settings 3"
     - button "Machine files"
+    - button "Storage"
     - button "Passwords"
-  - button "Engine running · v0.21.0"
+  - region "Engine state":
+    - button "Engine running · v0.21.0"
 - main:
   - region "macbook-pro":
     - heading "macbook-pro" [level=2]

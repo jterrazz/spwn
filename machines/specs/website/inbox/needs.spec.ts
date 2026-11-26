@@ -12,91 +12,102 @@ import {
 } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
-import { website } from '../website.specification.js';
+import { PINNED, website } from '../website.specification.js';
 
-const sidebar = navigation('Sidebar');
+const column = navigation('Column');
 const bar = banner();
 const needs = region('Needs you');
 const canWait = region('Upkeep');
 
 describe('needs', () => {
-    test('N1 a line settled by its verb leaves, and the sidebar counts one less', async () => {
+    test('N1 a line settled by its verb leaves, and the column counts one less', async () => {
         // Given - the window on Home over engine-stopped, whose one line that needs me is the stopped engine
         const start = button('Start the engine', { exact: false });
-        const result = await website.visit('/?world=engine-stopped&page=home', async (visitor) => {
-            await visitor.see(within(bar, button('Inbox 1')));
-            await visitor.see(heading('Needs you 1'));
-            await visitor.see(heading('The engine is stopped.'));
+        const result = await website
+            .storage(PINNED)
+            .visit('/?world=engine-stopped&page=home', async (visitor) => {
+                await visitor.see(within(bar, button('Inbox 1')));
+                await visitor.see(heading('Needs you 1'));
+                await visitor.see(heading('The engine is stopped.'));
 
-            // When - its verb, Start the engine, is pressed
-            await visitor.click(within(needs, start));
+                // When - its verb, Start the engine, is pressed
+                await visitor.click(within(needs, start));
 
-            // Then - the line has left, and the sidebar no longer counts it
-            await visitor.gone(within(needs, start));
-            await visitor.see(within(bar, button('Inbox')));
-        });
+                // Then - the line has left, and the column no longer counts it
+                await visitor.gone(within(needs, start));
+                await visitor.see(within(bar, button('Inbox')));
+            });
         expect(result.errors.text).toBe('');
     });
 
     test('N2 the lines that press and those that can wait are told apart in two panels, by the engine', async () => {
         // Given - the Inbox over two-macs, one line that needs me beside seven that can wait
-        const result = await website.visit('/?world=two-macs&page=inbox', async (visitor) => {
-            // When - I open Needs you
-            // Then - two panels, each with the lines the engine's upkeep puts in it
-            await visitor.see(
-                within(needs, content('com.example.brain.x-snapshot is failing, last exit 2')),
-            );
-            await visitor.see(within(canWait, content('1 mise update waiting')));
-            await visitor.gone(
-                within(canWait, content('com.example.brain.x-snapshot is failing, last exit 2')),
-            );
+        const result = await website
+            .storage(PINNED)
+            .visit('/?world=two-macs&page=inbox', async (visitor) => {
+                // When - I open Needs you
+                // Then - two panels, each with the lines the engine's upkeep puts in it
+                await visitor.see(
+                    within(needs, content('com.example.brain.x-snapshot is failing, last exit 2')),
+                );
+                await visitor.see(within(canWait, content('1 mise update waiting')));
+                await visitor.gone(
+                    within(
+                        canWait,
+                        content('com.example.brain.x-snapshot is failing, last exit 2'),
+                    ),
+                );
 
-            // Then - each line's pill is its Mark's word: Needs you for the failing task, Upkeep for the update
-            await visitor.see(
-                within(
-                    needs,
-                    button('Needs you com.example.brain.x-snapshot is failing', { exact: false }),
-                ),
-            );
-            await visitor.see(
-                within(canWait, button('Upkeep 1 mise update waiting', { exact: false })),
-            );
-        });
+                // Then - each line's pill is its Mark's word: Needs you for the failing task, Upkeep for the update
+                await visitor.see(
+                    within(
+                        needs,
+                        button('Needs you com.example.brain.x-snapshot is failing', {
+                            exact: false,
+                        }),
+                    ),
+                );
+                await visitor.see(
+                    within(canWait, button('Upkeep 1 mise update waiting', { exact: false })),
+                );
+            });
         expect(result.errors.text).toBe('');
     });
 
     test("N3 a port reached outside Tailscale opens its Mac's Ports, where declaring it public settles its line", async () => {
         // Given - the Inbox over stories, where ControlCenter listens on macbook-pro's port 5000, reached outside Tailscale and declared by no one
         const line = button('Exposed port 5000 is reachable outside Tailscale macbook-pro · Ports');
-        const result = await website.visit('/?world=stories&page=inbox', async (visitor) => {
-            await visitor.see(within(needs, line));
-            await visitor.gone(within(needs, content('Review')));
+        const result = await website
+            .storage(PINNED)
+            .visit('/?world=stories&page=inbox', async (visitor) => {
+                await visitor.see(within(needs, line));
+                await visitor.gone(within(needs, content('Review')));
 
-            // When - its line is pressed
-            await visitor.click(within(needs, line));
+                // When - its line is pressed
+                await visitor.click(within(needs, line));
 
-            // Then - the Mac's Ports tab opens on the line, above the port it names and its declaration
-            const declare = within(
-                region('What listens on this Mac'),
-                button('Declare :5000 public'),
-            );
-            await visitor.see(within(region('Needs you, on its ports'), line));
-            await visitor.see(declare);
+                // Then - the Mac's Ports tab opens on the line, above the port it names and its declaration
+                const declare = within(
+                    region('What listens on this Mac'),
+                    button('Declare :5000 public'),
+                );
+                await visitor.see(within(region('Needs you, on its ports'), line));
+                await visitor.see(declare);
 
-            // When - it is declared public
-            await visitor.click(declare);
+                // When - it is declared public
+                await visitor.click(declare);
 
-            // Then - the line has left
-            await visitor.gone(line);
-        });
+                // Then - the line has left
+                await visitor.gone(line);
+            });
         expect(result.errors.text).toBe('');
     });
 
     test('N4 a program held by a grant says which password holds it, gives no end, and opens that password', async () => {
         // Given - linux-1's Sign-ins over two-macs, npm held by a grant of npm publish
-        const result = await website.visit(
-            '/?world=two-macs&machine=linux-1&tab=Sign-ins',
-            async (visitor) => {
+        const result = await website
+            .storage(PINNED)
+            .visit('/?world=two-macs&machine=linux-1&tab=Sign-ins', async (visitor) => {
                 const rows = region('Sign-ins');
 
                 // When - the row is read
@@ -106,8 +117,7 @@ describe('needs', () => {
                 );
                 await visitor.click(within(rows, button('Open the password npm publish')));
                 await visitor.see(heading('npm publish'));
-            },
-        );
+            });
         expect(result.errors.text).toBe('');
         expect(result.content.text).not.toContain('until');
     });
@@ -117,27 +127,32 @@ describe('needs', () => {
     test('N6 a server whose SSH fails is restarted from its line, its name typed', async () => {
         // Given - the Inbox over standings, where restart-1 fails SSH answers and its line names machines.restart
         const line = button('Restart restart-1');
-        const result = await website.visit('/?world=standings&page=inbox', async (visitor) => {
-            await visitor.see(within(canWait, content('restart-1 fails SSH answers')));
+        const result = await website
+            .storage(PINNED)
+            .visit('/?world=standings&page=inbox', async (visitor) => {
+                await visitor.see(within(canWait, content('restart-1 fails SSH answers')));
 
-            // When - its Restart is pressed, and confirmed with the name typed
-            await visitor.click(within(canWait, line));
-            const confirm = dialog('Restart restart-1?');
-            await visitor.fill(within(confirm, field('Type restart-1 to confirm')), 'restart-1');
-            await visitor.click(within(confirm, button('Restart')));
+                // When - its Restart is pressed, and confirmed with the name typed
+                await visitor.click(within(canWait, line));
+                const confirm = dialog('Restart restart-1?');
+                await visitor.fill(
+                    within(confirm, field('Type restart-1 to confirm')),
+                    'restart-1',
+                );
+                await visitor.click(within(confirm, button('Restart')));
 
-            // Then - the dialog has closed, and the line offered no command to copy
-            await visitor.gone(confirm);
-            await visitor.gone(content('Copy the command'));
-        });
+                // Then - the dialog has closed, and the line offered no command to copy
+                await visitor.gone(confirm);
+                await visitor.gone(content('Copy the command'));
+            });
         expect(result.errors.text).toBe('');
     });
 
     test('N7 a program signed out offers Sign in, and its sheet shows the engine code and the site to open', async () => {
         // Given - linux-1's Sign-ins over two-macs, gh signed out
-        const result = await website.visit(
-            '/?world=two-macs&machine=linux-1&tab=Sign-ins&pace=600',
-            async (visitor) => {
+        const result = await website
+            .storage(PINNED)
+            .visit('/?world=two-macs&machine=linux-1&tab=Sign-ins&pace=600', async (visitor) => {
                 // When - Sign in of gh is pressed
                 await visitor.click(within(region('Sign-ins'), button('Sign in gh')));
 
@@ -146,96 +161,103 @@ describe('needs', () => {
                 await visitor.see(within(sheet, content('WDJB-MJHT')));
                 await visitor.see(within(sheet, button('Copy code')));
                 await visitor.see(within(sheet, button('Open github.com')));
-            },
-        );
+            });
         expect(result.errors.text).toBe('');
     });
 
     test('N8 an empty Needs you says no need is listed, and draws no table', async () => {
         // Given - the Inbox over one-mac, where no line waits
-        const result = await website.visit('/?world=one-mac&page=inbox', async (visitor) => {
-            // When - Needs you is read
-            await visitor.see(needs);
+        const result = await website
+            .storage(PINNED)
+            .visit('/?world=one-mac&page=inbox', async (visitor) => {
+                // When - Needs you is read
+                await visitor.see(needs);
 
-            // Then - it says so in a line, with no button to press
-            await visitor.see(within(needs, content('No need is listed.')));
-            await visitor.gone(within(needs, button('Update mise')));
-        });
+                // Then - it says so in a line, with no button to press
+                await visitor.see(within(needs, content('No need is listed.')));
+                await visitor.gone(within(needs, button('Update mise')));
+            });
         expect(result.errors.text).toBe('');
     });
 
     test('N9 a line settled by its verb leaves the top, and its line appears in the History below, with its verb and by me', async () => {
         // Given - the Inbox over two-macs, where mise waits for an update and the History holds no day but last night
         const today = within(region('History'), region('Today'));
-        const result = await website.visit('/?world=two-macs&page=inbox', async (visitor) => {
-            await visitor.see(within(canWait, content('1 mise update waiting')));
+        const result = await website
+            .storage(PINNED)
+            .visit('/?world=two-macs&page=inbox', async (visitor) => {
+                await visitor.see(within(canWait, content('1 mise update waiting')));
 
-            // When - its verb, Update, is pressed
-            await visitor.click(within(canWait, button('Update mise')));
+                // When - its verb, Update, is pressed
+                await visitor.click(within(canWait, button('Update mise')));
 
-            // Then - the line has left, and the History's Today holds the engine's line of the update, by me
-            await visitor.gone(within(canWait, content('1 mise update waiting')));
-            await visitor.see(within(today, button('10:00 node updated by you')));
-        });
+                // Then - the line has left, and the History's Today holds the engine's line of the update, by me
+                await visitor.gone(within(canWait, content('1 mise update waiting')));
+                await visitor.see(within(today, button('10:00 node updated by you')));
+            });
         expect(result.errors.text).toBe('');
     });
 
     test("N10 a Mac chosen above the list keeps only that Mac's needs, and All brings them back", async () => {
         // Given - the Inbox over two-macs, where every need is on the first Mac
-        const result = await website.visit('/?world=two-macs&page=inbox', async (visitor) => {
-            await visitor.see(
-                within(needs, content('com.example.brain.x-snapshot is failing, last exit 2')),
-            );
+        const result = await website
+            .storage(PINNED)
+            .visit('/?world=two-macs&page=inbox', async (visitor) => {
+                await visitor.see(
+                    within(needs, content('com.example.brain.x-snapshot is failing, last exit 2')),
+                );
 
-            // When - the Mac mini is chosen
-            await visitor.click(within(main(), button('mac-mini')));
+                // When - the Mac mini is chosen
+                await visitor.click(within(main(), button('mac-mini')));
 
-            // Then - none of the needs concerns it
-            await visitor.see(
-                content('None of the needs listed concerns mac-mini or its machines.'),
-            );
-            await visitor.gone(
-                within(needs, content('com.example.brain.x-snapshot is failing, last exit 2')),
-            );
+                // Then - none of the needs concerns it
+                await visitor.see(
+                    content('None of the needs listed concerns mac-mini or its machines.'),
+                );
+                await visitor.gone(
+                    within(needs, content('com.example.brain.x-snapshot is failing, last exit 2')),
+                );
 
-            // When - all machines are chosen again
-            await visitor.click(within(main(), button('All machines')));
+                // When - all machines are chosen again
+                await visitor.click(within(main(), button('All machines')));
 
-            // Then - the needs are back
-            await visitor.see(
-                within(needs, content('com.example.brain.x-snapshot is failing, last exit 2')),
-            );
-        });
+                // Then - the needs are back
+                await visitor.see(
+                    within(needs, content('com.example.brain.x-snapshot is failing, last exit 2')),
+                );
+            });
         expect(result.errors.text).toBe('');
     });
 
     test("N10 a Mac chosen above the list keeps only that Mac's history, and All brings it back", async () => {
         // Given - the Inbox over two-macs, whose night failed mise on the first Mac and kept nothing on the mini
         const history = region('History');
-        const result = await website.visit('/?world=two-macs&page=inbox', async (visitor) => {
-            await visitor.see(within(history, button('Retry mise')));
+        const result = await website
+            .storage(PINNED)
+            .visit('/?world=two-macs&page=inbox', async (visitor) => {
+                await visitor.see(within(history, button('Retry mise')));
 
-            // When - the Mac mini is chosen
-            await visitor.click(within(main(), button('mac-mini')));
+                // When - the Mac mini is chosen
+                await visitor.click(within(main(), button('mac-mini')));
 
-            // Then - the History reads the engine's sentence for that Mac, and mise has left
-            await visitor.see(within(history, content('Nothing was done in the last 7 days.')));
-            await visitor.gone(within(history, button('Retry mise')));
+                // Then - the History reads the engine's sentence for that Mac, and mise has left
+                await visitor.see(within(history, content('Nothing was done in the last 7 days.')));
+                await visitor.gone(within(history, button('Retry mise')));
 
-            // When - all machines are chosen again
-            await visitor.click(within(main(), button('All machines')));
+                // When - all machines are chosen again
+                await visitor.click(within(main(), button('All machines')));
 
-            // Then - the night is back
-            await visitor.see(within(history, button('Retry mise')));
-        });
+                // Then - the night is back
+                await visitor.see(within(history, button('Retry mise')));
+            });
         expect(result.errors.text).toBe('');
     });
 
     test("N12 a broken sign-in's line opens the sheet of the Sign-ins tab, for its program on its machine", async () => {
         // Given - the Inbox over two-macs, where This Mac's npm sign-in is broken
-        const result = await website.visit(
-            '/?world=two-macs&page=inbox&pace=600',
-            async (visitor) => {
+        const result = await website
+            .storage(PINNED)
+            .visit('/?world=two-macs&page=inbox&pace=600', async (visitor) => {
                 await visitor.see(within(needs, button('Fix npm')));
 
                 // When - Fix is pressed on its line
@@ -243,34 +265,36 @@ describe('needs', () => {
 
                 // Then - the engine's step for npm on This Mac is on a sheet
                 await visitor.see(dialog('Sign in to npm on macbook-pro'));
-            },
-        );
+            });
         expect(result.errors.text).toBe('');
     });
 
-    test('N11 the bar holds Home and Inbox, the sidebar Storage and Engine, the machines and the Library with Machine files and Passwords', async () => {
+    test('N11 the bar holds Home and Inbox, the column what needs me, the machines, the Library with Storage, Machine files and Passwords, and the Engine line', async () => {
         // Given - the window over two-macs
-        const result = await website.visit('/?world=two-macs&page=home', async (visitor) => {
-            // When - I read the sidebar
-            await visitor.see(sidebar);
+        const result = await website
+            .storage(PINNED)
+            .visit('/?world=two-macs&page=home', async (visitor) => {
+                // When - I read the column
+                await visitor.see(column);
 
-            // Then - the fleet's places are there, Inbox with its count of the lines that need me, the Library with its counts
-            await visitor.see(within(bar, button('Home')));
-            await visitor.see(within(bar, button('Inbox 2')));
-            await visitor.see(within(sidebar, button('Passwords')));
-            await visitor.gone(within(bar, button('Storage')));
-            await visitor.see(within(sidebar, button('Storage')));
-            await visitor.see(within(sidebar, button('Engine')));
-            await visitor.see(within(sidebar, button('macbook-pro online')));
-            await visitor.see(within(sidebar, button('api stopped')));
-            await visitor.see(within(sidebar, button('linux-1 running')));
-            await visitor.see(within(sidebar, button('mac-mini online')));
-            await visitor.see(within(sidebar, button('infra healthy')));
-            await visitor.see(within(sidebar, button('Apps 10')));
-            await visitor.see(within(sidebar, button('Skills 0')));
-            await visitor.see(within(sidebar, button('Machine settings 3')));
-            await visitor.see(within(sidebar, button('Machine files')));
-        });
+                // Then - the fleet's places are there, Inbox with its count of the lines that need me, the Library with its counts
+                await visitor.see(within(bar, button('Home')));
+                await visitor.see(within(bar, button('Inbox 2')));
+                await visitor.see(within(column, button('Passwords')));
+                await visitor.gone(within(bar, button('Storage')));
+                await visitor.see(within(column, button('Storage')));
+                await visitor.see(within(column, button('npm sign-in fails', { exact: false })));
+                await visitor.see(within(column, button('Engine', { exact: false })));
+                await visitor.see(within(column, button('macbook-pro online')));
+                await visitor.see(within(column, button('api stopped')));
+                await visitor.see(within(column, button('linux-1 running')));
+                await visitor.see(within(column, button('mac-mini online')));
+                await visitor.see(within(column, button('infra healthy')));
+                await visitor.see(within(column, button('Apps 10')));
+                await visitor.see(within(column, button('Skills 0')));
+                await visitor.see(within(column, button('Machine settings 3')));
+                await visitor.see(within(column, button('Machine files')));
+            });
         expect(result.errors.text).toBe('');
     });
 });

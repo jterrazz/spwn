@@ -1,6 +1,6 @@
 - banner:
   - button "Home"
-  - button "Show or hide the sidebar"
+  - button "Pin the column" [pressed]
   - button "Back" [disabled]
   - button "Forward" [disabled]
   - navigation "Path":
@@ -10,22 +10,21 @@
   - button "Inbox" [disabled]
   - button "Find" [disabled]
   - button "Settings" [disabled]
-- navigation "Sidebar":
-  - group "Every Mac":
-    - button "Storage" [disabled]
-    - button "Engine" [disabled]
+- navigation "Column":
   - group "Machines":
-    - heading "Machines" [level=2]
+    - text: Machines
     - paragraph: None yet
   - group "Library":
-    - heading "Library" [level=2]
+    - text: Library
     - button "Apps" [disabled]
     - button "Skills" [disabled]
     - button "Machine settings" [disabled]
     - button "Machine files" [disabled]
+    - button "Storage" [disabled]
     - button "Passwords" [disabled]
-  - img "waiting"
-  - text: No engine on this Mac
+  - region "Engine state":
+    - img "waiting"
+    - text: No engine on this Mac
 - main:
   - region "Spwn on this Mac":
     - heading "Waiting for Spwn on this Mac." [level=1]

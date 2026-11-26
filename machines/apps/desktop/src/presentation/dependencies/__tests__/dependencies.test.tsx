@@ -11,6 +11,7 @@ import { recordingsOf } from '../../../infrastructure/outbound/engine-replay/rec
 import { stagedReplay } from '../../../infrastructure/outbound/engine-replay/replay';
 import type { Recording } from '../../../infrastructure/outbound/engine-replay/replay';
 import { NO_OPENER } from '../../../infrastructure/outbound/opener-tauri/tauri-opener';
+import { PINNED } from '../../navigation/__tests__/pinned';
 import { Window } from '../../navigation/window';
 import { PAGES } from '../../screens/registry';
 import { EngineProvider, useRead } from '../dependencies';
@@ -121,11 +122,11 @@ describe('dependencies', () => {
         // When - both are rendered and have read the engine
         await component.render(
             <EngineProvider dependencies={dependencies}>
-                <EngineState label="sidebar" />
+                <EngineState label="column" />
                 <EngineState label="page" />
             </EngineProvider>,
             async (visitor) => {
-                await visitor.see(content('sidebar: running'));
+                await visitor.see(content('column: running'));
                 await visitor.see(content('page: running'));
             },
         );
@@ -137,7 +138,7 @@ describe('dependencies', () => {
         expect(asked).toHaveLength(1);
     });
 
-    test("the sidebar's engine line follows an engine that restarts as another version", async () => {
+    test("the column's engine line follows an engine that restarts as another version", async () => {
         // Given - the window over two-macs, its engine read as dev
         const recording = recordingFor('two-macs');
         const stage = opened(recording);
@@ -150,7 +151,7 @@ describe('dependencies', () => {
         // When - the engine restarts with another pid and answers as v9
         const result = await component.render(
             <EngineProvider dependencies={dependencies}>
-                <Window initial={{ page: 'home' }} pages={PAGES} />
+                <Window initial={{ page: 'home' }} memory={PINNED} pages={PAGES} />
             </EngineProvider>,
             async (visitor) => {
                 await visitor.see(content('Engine running · dev'));
