@@ -7,12 +7,13 @@ runs:
       exit: 0
     - command: '--version >/dev/null; /bin/cat > held.sh'
       stdin: |
-          { printf '%s\n' '{"v":2,"id":"1","call":"machines.create-workspace","in":{"Request":{"Name":"linux-4","Image":"base-ubuntu","Size":{"MemoryBytes":4294967296}}}}'; /bin/sleep 8; } 2>/dev/null | "$STATION" guest serve --stdio > created 2>/dev/null &
+          { printf '%s\n' '{"v":2,"id":"1","call":"machines.create-workspace","in":{"Request":{"Name":"linux-4","Image":"base-ubuntu","Size":{"MemoryBytes":4294967296}}}}'; until [ -e released ]; do /bin/sleep 0.05; done; } 2>/dev/null | "$STATION" guest serve --stdio > created 2>/dev/null &
           door=$!
           i=0
-          until /usr/bin/grep -q '"step":"booting"' created || [ $i -ge 50 ]; do /bin/sleep 0.1; i=$((i+1)); done
+          until /usr/bin/jq -e '[.script[]? | select(.call == "Hypervisor.Boot" and .hold and .vm == null)] | length == 0' world.json >/dev/null 2>&1 || [ $i -ge 1200 ]; do /bin/sleep 0.05; i=$((i+1)); done
           printf '%s\n' '{"v":2,"id":"1","call":"engine.guides","in":{}}' | "$STATION" guest serve --stdio | /usr/bin/jq -c 'select(.out or .error) | .out.guides[]? // .error'
           kill -INT $door
+          : > released
           wait
           /usr/bin/jq -c 'select(.progress) | [.progress.act, .progress.step, .progress.task, .progress.done]' created
       exit: 0
