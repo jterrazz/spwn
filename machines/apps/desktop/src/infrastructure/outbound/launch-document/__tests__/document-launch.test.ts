@@ -1,13 +1,31 @@
 import { readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { describe, expect, test } from 'vitest';
 
 import { documentLaunch, FACES } from '../document-launch';
 
 const DOCUMENT = new URL('../../../../presentation/ui/document.css', import.meta.url);
 
-function importOf(face: string): string {
-    const [weight = '', ...family] = face.replace(' 1em', '').replaceAll('"', '').split(' ');
-    return `@fontsource/${family.join('-').toLowerCase()}/${weight}.css`;
+interface Face {
+    family: string;
+    from: number;
+    to: number;
+}
+
+function faceOf(import_: string): Face {
+    const css = readFileSync(createRequire(import.meta.url).resolve(import_), 'utf8');
+    const family = /font-family:\s*['"](?<name>[^'"]+)['"]/u.exec(css)?.groups?.name ?? '';
+    const [from = '', to = from] = (
+        /font-weight:\s*(?<range>[\d ]+);/u.exec(css)?.groups?.range ?? ''
+    )
+        .trim()
+        .split(' ');
+    return { family, from: Number(from), to: Number(to) };
+}
+
+function loadedOf(face: string): { family: string; weight: number } {
+    const [weight = '', ...family] = face.replace(' 1em', '').split(' ');
+    return { family: family.join(' ').replaceAll('"', ''), weight: Number(weight) };
 }
 
 function byName(one: string, other: string): number {
@@ -18,15 +36,26 @@ describe('document launch', () => {
     test('the faces loaded are exactly the ones the document imports', () => {
         // Given - the document's stylesheet
         const css = readFileSync(DOCUMENT, 'utf8');
-        const imported = [...css.matchAll(/@import '(?<path>@fontsource\/[^']+)'/gu)].map(
-            (found) => found.groups?.path ?? '',
+        const imported = [
+            ...css.matchAll(/@import '(?<path>@fontsource(?:-variable)?\/[^']+)'/gu),
+        ].map((found) => faceOf(found.groups?.path ?? ''));
+
+        // When - each face loaded is read as a family and a weight
+        const loaded = FACES.map((face) => loadedOf(face));
+
+        // Then - the same families, none missing and none extra, each loaded at a weight its import declares
+        expect(loaded.map((face) => face.family).toSorted(byName)).toStrictEqual(
+            imported.map((face) => face.family).toSorted(byName),
         );
-
-        // When - each face loaded is named by its import
-        const loaded = FACES.map((face) => importOf(face));
-
-        // Then - the same faces, none missing and none extra
-        expect(loaded.toSorted(byName)).toStrictEqual(imported.toSorted(byName));
+        expect(
+            loaded.filter((face) =>
+                imported.some(
+                    (one) =>
+                        one.family === face.family &&
+                        (face.weight < one.from || face.weight > one.to),
+                ),
+            ),
+        ).toStrictEqual([]);
     });
 
     test("the faces' load settles and the show is the one handed in", async () => {

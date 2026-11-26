@@ -16,7 +16,7 @@
 .code {
     font-family: var(--font-mono);
     font-size: var(--text-metric);
-    font-weight: var(--weight-strong);
+    font-weight: var(--weight-regular);
     letter-spacing: 0.25em;
     color: var(--t1);
 }

@@ -157,7 +157,7 @@ export default defineConfig({
                     'run by node in the Linux VM to photograph the proof pages; nothing imports it',
             },
             ignoreDependencies: {
-                '@fontsource/geist':
+                '@fontsource-variable/geist':
                     'src/presentation/ui/document.css loads the font by a CSS @import, which knip does not read',
                 '@fontsource/geist-mono':
                     'src/presentation/ui/document.css loads the font by a CSS @import, which knip does not read',

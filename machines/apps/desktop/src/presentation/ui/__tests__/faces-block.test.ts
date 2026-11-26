@@ -17,7 +17,8 @@ describe('faces block', () => {
             (found) => found.groups?.display,
         );
 
-        // Then - Geist and Geist Mono's faces, every one `block`
+        // Then - Geist Variable and Geist Mono's faces, every one `block`
+        expect(code).toMatch(/font-family:\s*["']Geist Variable["']/u);
         expect(code).toMatch(/font-family:\s*["']Geist Mono["']/u);
         expect(displays.length).toBeGreaterThan(0);
         expect(new Set(displays)).toStrictEqual(new Set(['block']));
