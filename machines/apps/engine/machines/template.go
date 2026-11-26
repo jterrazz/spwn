@@ -65,15 +65,17 @@ type FirstStartApp struct {
 }
 
 // value: why a create's apply left a package when the run said no words
-// of it: the apply's bound ended before it was carried out; and why that
+// of it: the apply's bound ended before it started, or it was still
+// installing when the bound's cap ended it; and why that
 // apply answered for no package when it ended without an answer: its
 // bound passed, or the create was stopped, or what it stands on (the
 // mounts, the Machinefile's copy) failed, so it never ran.
 const (
-	NotFinished  = "the apply ran out of time"
-	OutOfTime    = "it ran out of time"
-	ApplyStopped = "the create was stopped before it ended"
-	NeverRan     = "it did not run, since the " + StepBoot + " failed"
+	NotFinished     = "the apply ran out of time"
+	StillInstalling = "still installing when the time ran out"
+	OutOfTime       = "it ran out of time"
+	ApplyStopped    = "the create was stopped before it ended"
+	NeverRan        = "it did not run, since the " + StepBoot + " failed"
 )
 
 type FirstStartGrant struct {

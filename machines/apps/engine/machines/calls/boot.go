@@ -26,9 +26,12 @@ const (
 )
 
 // value: how long past its bound a create waits for its apply's answer:
-// the package running at the bound is read again (machinefile's
-// rereadBudget), the lock written, then the answer crosses back.
-const applyGrace = time.Minute
+// the package running at the bound may go on for catalog.InFlightCap,
+// then, within the minute beyond, the run lock is taken and the plan read
+// before the guest's clock starts, a package ended at the cap is read
+// again (machinefile's rereadBudget), the lock is written, and the answer
+// crosses back.
+const applyGrace = catalog.InFlightCap + time.Minute
 
 // value: the folder of the VM user's station files, under its home, and
 // the station binary the image carries.
@@ -174,9 +177,10 @@ func (s *Machinist) applyBoot(ctx context.Context, name string, t model.Template
 // through its Mac's engine, as machinefile.apply does there off a
 // terminal, each package that would ask the owner something left for the
 // owner's own run, since a create has no terminal to ask on. The guest
-// carries the packages out within the packages' share of a phase's bound
-// and answers with what it did once it ends, the Mac waiting a grace
-// beyond it: each package installed or set is Applied; each it did not is
+// starts packages within the packages' share of a phase's bound, the one
+// running then ending within catalog.InFlightCap, and answers with what it
+// did once it ends, the Mac waiting a grace beyond both: each package
+// installed or set is Applied; each it did not is
 // Unfinished with why; an apply that answered for no package says why in
 // Unapplied, never in Failed: the workspace is made all the same. A
 // package the image already holds is kept, and is neither.
@@ -218,7 +222,9 @@ func (s *Machinist) applyAll(ctx context.Context, vm, file string, b *model.Firs
 // in the run's own words.
 func unfinishedWhy(d machinefile.Done) string {
 	switch {
-	case d.Reason == machinefile.Interrupted, d.Reason == machinefile.NotRun && d.Detail == "":
+	case d.Reason == machinefile.Interrupted:
+		return model.StillInstalling
+	case d.Reason == machinefile.NotRun && d.Detail == "":
 		return model.NotFinished
 	case d.Detail != "":
 		return firstLine(d.Detail)

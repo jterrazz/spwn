@@ -56,9 +56,9 @@ type ApplyIn struct {
 	// carried out, where without it the run refuses and changes nothing: a
 	// create's apply, which has no terminal to ask on.
 	LeaveAsking bool
-	// value: the longest the packages are carried out for: the package
-	// still running past it ends there, those after it are not run, and the
-	// run answers with what it did; zero, no bound but the phase's own.
+	// value: how long packages may start for: none starts past it, the one
+	// running then may end within catalog.InFlightCap more, and the run
+	// answers with what it did; zero or less, no bound but the phase's own.
 	Within time.Duration
 }
 
@@ -118,7 +118,7 @@ var Apply = call.Call[Deps, ApplyIn, machinefile.Applied]{
 			}
 			out.Bound = plan.Name
 		}
-		r := run{d: d, p: p, in: in, name: plan.Name, ended: map[string]catalog.State{}, there: map[string]bool{}, left: left}
+		r := run{d: d, p: p, in: in, name: plan.Name, ended: map[string]catalog.State{}, there: map[string]bool{}, left: left, inFlight: catalog.InFlightCap}
 		out.Done = r.carry(ctx, plan.Lines)
 		journal.Mark(ctx, d.Now(), "blocks")
 		if err := ctx.Err(); err != nil {
@@ -265,6 +265,9 @@ type run struct {
 	// value: the packages' bound (ApplyIn.Within) ended before each was
 	// carried out.
 	cut bool
+	// value: how long past that bound the package running at it may go on
+	// (catalog.InFlightCap).
+	inFlight time.Duration
 }
 
 func asking(asked []machinefile.Asked) map[string]bool {
@@ -282,9 +285,12 @@ func asking(asked []machinefile.Asked) map[string]bool {
 // of its bound (catalog.ItemsBound), so the owner's lines after them keep
 // theirs: a package still running at the end of the share ends there, and
 // those after it are not run. A bound the caller gives (ApplyIn.Within)
-// ends them the same way, read on this machine's clock between packages
-// too, and the run is cut: it answers with what it did, as an apply, and
-// is not recorded as one run to its end.
+// is read on this machine's clock before each package, and none starts
+// past it; a package manager is never stopped mid-transaction for it, so
+// the package running then, or waiting on its manager's lock, may end
+// within r.inFlight more, past which it ends there. Either way the run is
+// cut: it answers with what it did, as an apply, and is not recorded as
+// one run to its end.
 func (r *run) carry(ctx context.Context, lines []machinefile.Line) []machinefile.Done {
 	if r.in.Phase == catalog.PhaseImage || r.in.Phase == catalog.PhaseBoot {
 		var cancel context.CancelFunc
@@ -295,7 +301,7 @@ func (r *run) carry(ctx context.Context, lines []machinefile.Line) []machinefile
 	var until time.Time
 	if r.in.Within > 0 {
 		var cancel context.CancelFunc
-		ctx, cancel = context.WithTimeout(ctx, r.in.Within)
+		ctx, cancel = context.WithTimeout(ctx, r.in.Within+r.inFlight)
 		defer cancel()
 		until = r.d.Now().Add(r.in.Within)
 	}

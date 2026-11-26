@@ -36,8 +36,12 @@ func done(pkg string, action machinefile.Action, state catalog.State, reason mac
 
 func TestACreatesApplyBoundsTheGuestsWorkAndWaitsAGraceBeyondIt(t *testing.T) {
 	// invariant: the guest is given the packages' share of a phase's bound,
-	// and the Mac waits that and its grace, never more, so a guest that
-	// never answers still lets the create end.
+	// and the Mac waits that, the cap of the package running at it and a
+	// minute more, never less, so the guest answers first, and never more,
+	// so a guest that never answers still lets the create end.
+	if applyGrace < catalog.InFlightCap+time.Minute {
+		t.Fatalf("the Mac's grace %v gives up before the guest's cap %v and its minute", applyGrace, catalog.InFlightCap)
+	}
 	var got handed
 	ref, cancel := context.WithTimeout(context.Background(), catalog.PackagesBound+applyGrace)
 	defer cancel()
@@ -67,7 +71,7 @@ func TestACreatesApplyCountsWhatItDidAndNamesWhatItLeft(t *testing.T) {
 	wantLeft := []model.FirstStartApp{
 		{App: "ripgrep", Reason: "the install failed"},
 		{App: "github-login", Reason: machinefile.AsksInTerminal},
-		{App: "node", Reason: model.NotFinished},
+		{App: "node", Reason: model.StillInstalling},
 		{App: "tree", Reason: model.NotFinished},
 	}
 	if !slices.Equal(b.Applied, wantApplied) || !slices.Equal(b.Unfinished, wantLeft) || b.Failed != "" || b.Unapplied != "" {
