@@ -62,8 +62,11 @@
         - heading "What Machines refuses" [level=3]
         - text: guard · 2 blocks · folded for ProduitE3 Architecture
         - button "Open"
-        - button "no-running-agent"
-        - button "no-ungranted-port"
+        - list:
+          - listitem:
+            - 'button "to know about a running agent: starting, watching, answering and merging agents is not its job no-running-agent"'
+          - listitem:
+            - 'button "to share a port nobody granted: a port outside a machine''s rights is flagged, never shared no-ungranted-port"'
       - region "Table machines":
         - text: Table Refusal · by machines
         - button "Boundaries"

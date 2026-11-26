@@ -445,7 +445,41 @@
     font-size: var(--text-row);
     line-height: 1.45;
 }
-.chips,
+.folds {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid var(--line);
+}
+.folds > li + li {
+    border-top: 1px solid var(--line);
+}
+.fold {
+    display: flex;
+    align-items: center;
+    gap: var(--space-8);
+    width: 100%;
+    padding: var(--space-8) 0;
+    border: 0;
+    background: none;
+    color: var(--t2);
+    font: inherit;
+    font-size: var(--text-body);
+    text-align: left;
+    cursor: pointer;
+}
+.fold:hover .foldLine {
+    color: var(--t1);
+}
+.foldLine {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
 .refs {
     display: flex;
     flex-wrap: wrap;

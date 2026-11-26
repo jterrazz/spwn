@@ -44,10 +44,15 @@
         - heading "What a person uses today" [level=3]
         - text: define · 4 blocks · folded by its author
         - button "Open"
-        - button "by-hand"
-        - button "one-big-agent"
-        - button "managed-platform"
-        - button "unrelated-tools"
+        - list:
+          - listitem:
+            - 'button "you are the bottleneck: what gets built is bounded by your hours by-hand"'
+          - listitem:
+            - button "the only safety is its instructions; one context holds everything, and you stop knowing what it did one-big-agent"
+          - listitem:
+            - button "your context, machines and credentials live in their place, worked in their method managed-platform"
+          - listitem:
+            - button "each keeps its own copy of your context, and you are the integration between them unrelated-tools"
       - figure "Figure two-costs":
         - text: Figure quad
         - button "What a person uses today"

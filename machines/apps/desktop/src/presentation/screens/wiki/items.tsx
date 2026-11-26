@@ -9,7 +9,7 @@ import { useState } from 'react';
 import { SEPARATOR } from '../../../domain/separator';
 import { countOf } from '../../words/engine-words';
 import { WIKI_FOLDED_WORDS, WIKI_WORDS } from '../../words/wiki';
-import { Card, FloorMark, Lines, TileBlock } from './block';
+import { Card, FloorMark, Folds, Lines, TileBlock } from './block';
 import { DotIcon } from './dot-icon';
 import { attentionOf, Findings, placeOf } from './fields';
 import type { Reader } from './fields';
@@ -267,21 +267,13 @@ function Group({
             >
                 <GroupHead group={group} reader={reader} toggle={toggle} />
                 {group.Lead === '' ? null : <p className={styles.groupLead}>{group.Lead}</p>}
-                <div className={styles.chips}>
-                    {blocks.map((block) => (
-                        <button
-                            className={styles.chip}
-                            key={block.Address}
-                            onClick={() => {
-                                setOpen(true);
-                            }}
-                            type="button"
-                        >
-                            <DotIcon grids={reader.grids} name={block.Icon} size="small" />
-                            {block.Word}
-                        </button>
-                    ))}
-                </div>
+                <Folds
+                    blocks={blocks}
+                    onOpen={() => {
+                        setOpen(true);
+                    }}
+                    reader={reader}
+                />
                 <Findings findings={blocks.flatMap((block) => block.Finding ?? [])} />
             </section>
         );

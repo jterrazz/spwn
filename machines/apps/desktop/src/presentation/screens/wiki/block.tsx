@@ -131,6 +131,33 @@ export function Lines({ blocks, reader }: { blocks: readonly WikiServedBlock[]; 
     );
 }
 
+// value: a folded group's blocks, each by what it says in one line; any of them opens the group.
+export function Folds({
+    blocks,
+    onOpen,
+    reader,
+}: {
+    blocks: readonly WikiServedBlock[];
+    onOpen: () => void;
+    reader: Reader;
+}) {
+    return (
+        <ul className={styles.folds}>
+            {blocks.map((block) => (
+                <li key={block.Address}>
+                    <button className={styles.fold} onClick={onOpen} type="button">
+                        <DotIcon grids={reader.grids} name={block.Icon} size="small" />
+                        <span className={styles.foldLine}>
+                            {block.Line === '' ? block.Title : block.Line}
+                        </span>
+                        <span className={styles.lineWord}>{block.Word}</span>
+                    </button>
+                </li>
+            ))}
+        </ul>
+    );
+}
+
 export function Card({ block, reader }: { block: WikiServedBlock; reader: Reader }) {
     return <Whole block={block} look="card" reader={reader} />;
 }
