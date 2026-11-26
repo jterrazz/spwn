@@ -384,7 +384,7 @@ The window names itself Spwn, on the owner's word of 2026-11-18, with a capital 
 
 - `src-tauri/tauri.conf.json` gives the product name `Spwn`, so a bundle is `Spwn.app`, the window's title `Spwn` and the identifier `com.jterrazz.spwn`; `index.html`'s title is `Spwn` too.
 - The binary is the crate's name, `spwn-window` (`src-tauri/Cargo.toml`, pinned by `mainBinaryName` in `tauri.conf.json` so the product name never renames it), never `spwn`, which is the CLI's name on a PATH.
-- Its icon is the Spwn mark, `src-tauri/icons/` ([its page](src-tauri/icons/README.md)); the window draws that same drawing as its sign, at the bar's left and at the head of the core's panel (`Sign`, `src/presentation/ui/sign.tsx`).
+- Its icon is the Spwn mark, `src-tauri/icons/` ([its page](src-tauri/icons/README.md)); the window draws that same drawing as its sign, at the bar's left and nowhere else in the window (`Sign`, `src/presentation/ui/sign.tsx`).
 - What the window reads of the engine keeps its words: the socket (`…/station/engine.sock`), `STATION_ENGINE_SOCKET` and `@jterrazz/station-api`. The window's own `STATION_WINDOW_OPENED`, `STATION_WINDOW_CORE`, the npm member `station-desktop` and the route's storage key `station.window.route` keep theirs too: no person reads them.
 
 ## Its bundle
