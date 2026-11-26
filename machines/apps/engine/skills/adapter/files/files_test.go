@@ -18,6 +18,29 @@ func open(t *testing.T) contract.Files {
 	return files.New(local.New(nil, nil, nil, nil).FS)
 }
 
+func TestANameThatClimbsOutOfTheSkillsNamesNoSkill(t *testing.T) {
+	root := t.TempDir()
+	skillsOf := open(t)
+	if _, err := skillsOf.Create(t.Context(), root, "focus"); err != nil {
+		t.Fatal(err)
+	}
+	beside := filepath.Join(root, "spwn", "x"+skills.Suffix)
+	if err := os.WriteFile(beside, []byte("---\nname: x\n---\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	for _, name := range []string{"../x", "..", ".", "", "a/b"} {
+		if _, err := skillsOf.Show(t.Context(), root, name); !errors.Is(err, skills.ErrNotFound) {
+			t.Errorf("Show(%q) = %v; want ErrNotFound", name, err)
+		}
+		if err := skillsOf.Delete(t.Context(), root, name); !errors.Is(err, skills.ErrNotFound) {
+			t.Errorf("Delete(%q) = %v; want ErrNotFound", name, err)
+		}
+	}
+	if _, err := os.ReadFile(beside); err != nil {
+		t.Errorf("the file beside the skills was removed: %v", err)
+	}
+}
+
 func TestALinkOnTheWayToTheSkillsIsNeverFollowed(t *testing.T) {
 	root, away := t.TempDir(), t.TempDir()
 	victim := filepath.Join(away, "kept.md")
