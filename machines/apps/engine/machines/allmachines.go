@@ -175,6 +175,22 @@ type VM struct {
 	GuestError string `json:",omitempty"`
 }
 
+func (vm *VM) UnmarshalJSON(data []byte) error {
+	// invariant: a VM answered with no state at all reads as unknown too,
+	// as one answered off the enum does: a binary of this release always
+	// writes the key.
+	if string(data) == "null" {
+		return nil
+	}
+	type answered VM
+	v := answered{State: UnknownState}
+	if err := json.Unmarshal(data, &v); err != nil {
+		return err
+	}
+	*vm = VM(v)
+	return nil
+}
+
 type KeptDrift struct {
 	// value: how a running workspace stands with its Machinefile, as its
 	// Mac's engine last read it: when, how many differences every chapter

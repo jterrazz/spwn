@@ -26,6 +26,18 @@ func TestAStateOffTheEnumDecodesAsUnknown(t *testing.T) {
 	}
 }
 
+func TestAVMAnsweredWithNoStateDecodesAsUnknown(t *testing.T) {
+	for _, answered := range []string{`{"Name":"linux-1"}`, `{"Name":"linux-1","State":null}`} {
+		var vm VM
+		if err := json.Unmarshal([]byte(answered), &vm); err != nil {
+			t.Fatalf("%s is refused: %v", answered, err)
+		}
+		if vm.Name != "linux-1" || vm.State != UnknownState {
+			t.Errorf("%s decodes as %+v, want linux-1 in the state unknown", answered, vm)
+		}
+	}
+}
+
 func TestAStateThatIsNoStringIsRefused(t *testing.T) {
 	var vm VM
 	if err := json.Unmarshal([]byte(`{"State":7}`), &vm); err == nil {
