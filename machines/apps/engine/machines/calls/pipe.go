@@ -51,7 +51,11 @@ func (s *Machinist) Pipe(ctx context.Context, name string, pipe func(ctx context
 	if err != nil {
 		return err
 	}
-	if s.engineState(ctx, name) != contract.DiskRunning {
+	state, err := s.hypervisorState(ctx, name)
+	if err != nil {
+		return err
+	}
+	if state != contract.DiskRunning {
 		return &model.StoppedError{Name: name, Lifetime: rec.Lifetime}
 	}
 	addr, err := s.engine.Address(ctx, name, pipeIPWait)
