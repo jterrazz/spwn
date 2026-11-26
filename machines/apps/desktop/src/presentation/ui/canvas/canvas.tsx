@@ -1,11 +1,11 @@
-import { useMemo, useRef } from 'react';
+import { memo, useMemo, useRef } from 'react';
 
 import type { Measured } from '../measure';
 import { CanvasNodeView } from './canvas-node';
 import type { CanvasWords, NodeWords } from './canvas-node';
 import { GEOMETRY } from './geometry';
 import { handlersOf, useWheel } from './gestures';
-import type { Actions } from './gestures';
+import type { Actions, WheelPast } from './gestures';
 import { nodeOf, pathTo } from './graph';
 import type { CanvasGraph, Face, Rect } from './graph';
 import { useMotion } from './motion';
@@ -28,6 +28,7 @@ export type CanvasProps = {
     onPath: (path: readonly string[]) => void;
     onLeaf: (id: null | string) => void;
     onRaise?: (id: string) => void;
+    onWheelPast?: WheelPast;
 };
 
 const NO_BANDS: ReadonlyMap<number, string> = new Map();
@@ -137,8 +138,9 @@ function saidOf(words: ReadonlyMap<string, NodeWords>, opened: string | undefine
 
 // value: a canvas of nodes over a dot grid, each drawn by its face (region, open, card, pill, dot) at the place the
 // value: pure layout gives it, under one camera. It is controlled: the open path and the leaf live with the caller,
-// value: handed back through `onPath` and `onLeaf`, and Space or a second click on the leaf calls `onRaise`.
-export function Canvas(props: CanvasProps) {
+// value: handed back through `onPath` and `onLeaf`, and Space, Read or a second click on the leaf calls `onRaise`;
+// value: a wheel down past the camera's bottom is handed to `onWheelPast`.
+function CanvasOf(props: CanvasProps) {
     const {
         bands = NO_BANDS,
         bottom = 0,
@@ -146,6 +148,7 @@ export function Canvas(props: CanvasProps) {
         label,
         leaf,
         measureText,
+        onWheelPast,
         path,
         shared,
         words,
@@ -160,7 +163,7 @@ export function Canvas(props: CanvasProps) {
     const { frame } = staged;
     useFlip({ graph, motion, path, rig, staged });
     useRove(root, frame, leaf ?? path.at(-1) ?? null);
-    useWheel(root, rig, frame);
+    useWheel(root, rig, frame, onWheelPast);
     const actions = actionsOf({ ...props, faceOf: (id) => frame.layout.rects.get(id)?.face });
     const handlers = handlersOf({ actions, frame, motion, rig });
 
@@ -197,3 +200,6 @@ export function Canvas(props: CanvasProps) {
         </div>
     );
 }
+
+// invariant: memoised, so what holds it (the sheet over it) renders without rendering the canvas.
+export const Canvas = memo(CanvasOf);

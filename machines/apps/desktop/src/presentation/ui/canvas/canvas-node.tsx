@@ -9,7 +9,8 @@ import styles from './canvas.module.css';
 // value: what a node says on each face, handed by the caller, so the canvas assumes no wiki: `name` is the word a
 // value: pill, a head and the accessible name carry; a card adds `kicker` over its `title` (the name by default),
 // value: a `line` and a `foot` under its marks; a head adds `count`, and with `lead` the head is a page's, large,
-// value: its title over that line. `icon` is drawn before the name where the face has room.
+// value: its title over that line. `icon` is drawn before the name where the face has room. A node given `read`
+// value: can be read: open, it draws the Read button, named so, which hands it to the reader.
 export type NodeWords = {
     name: string;
     title?: string;
@@ -19,10 +20,12 @@ export type NodeWords = {
     count?: string;
     lead?: string;
     icon?: ReactNode;
+    read?: string;
 };
 
-// value: the words every node shares: what the close hint says, and the accessible name of a count of needs.
-export type CanvasWords = { close: string; needs: (count: number) => string };
+// value: the words every node shares: what the close hint and the Read button say, and the accessible name of a
+// value: count of needs.
+export type CanvasWords = { close: string; read: string; needs: (count: number) => string };
 
 type NodeProps = {
     node: Node;
@@ -176,6 +179,28 @@ function kindOf(face: Face, drawn: Drawn): string {
     return KINDS[face];
 }
 
+// value: an open node's Read button, for a node its words name as one to read; the canvas's click hands it on.
+function readOf({ node, shared, words }: Drawn): ReactNode {
+    if (words.read === undefined) {
+        return null;
+    }
+    return (
+        <button aria-label={words.read} className={styles.read} data-read={node.id} type="button">
+            <Icon name="book" />
+            {shared.read}
+        </button>
+    );
+}
+
+function useElement(id: string, onElement: NodeProps['onElement']) {
+    return useCallback(
+        (one: HTMLDivElement | null) => {
+            onElement(id, one);
+        },
+        [id, onElement],
+    );
+}
+
 // invariant: a node renders when its face or its leaf mark changes, never when it only moves: its place is written
 // invariant: by the canvas into its custom properties (flip.ts `seat`), so opening a node renders only the nodes
 // invariant: whose face changed, the born and the leaf.
@@ -195,12 +220,7 @@ function CanvasNodeOf({
         setSeen(face);
         setGhost(motion ? seen : null);
     }
-    const element = useCallback(
-        (one: HTMLDivElement | null) => {
-            onElement(node.id, one);
-        },
-        [node.id, onElement],
-    );
+    const element = useElement(node.id, onElement);
     const drawn = { leafDepth, node, shared, words };
     const kind = kindOf(face, drawn);
     const hasKids = node.kids.length > 0 && node.depth < leafDepth;
@@ -228,6 +248,7 @@ function CanvasNodeOf({
                 >
                     {body(drawn, face)}
                 </button>
+                {face === 'open' ? readOf(drawn) : null}
             </div>
             {ghost === null ? null : (
                 <div aria-hidden="true" className={styles.ghost} data-part="ghost" inert>

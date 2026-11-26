@@ -114,6 +114,9 @@ const PATHS = {
     close: <path d="M4 4l8 8M12 4l-8 8" />,
     chevron: <path d="M6 3.5L10.5 8 6 12.5" />,
     up: <path d="M4 10l4-4 4 4" />,
+    book: (
+        <path d="M3 3.5h4a1.5 1.5 0 0 1 1 .5 1.5 1.5 0 0 1 1-.5h4v9H9a1 1 0 0 0-1 1 1 1 0 0 0-1-1H3z" />
+    ),
     choose: <path d="M5.5 6.5L8 4l2.5 2.5M5.5 9.5L8 12l2.5-2.5" />,
     lock: (
         <>

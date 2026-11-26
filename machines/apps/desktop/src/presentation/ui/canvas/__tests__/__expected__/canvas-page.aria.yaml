@@ -11,6 +11,7 @@
     - text: Boundaries
     - img "3 wait for you"
     - text: What Spwn is not, and what each of its parts refuses to be, for anyone weighing a feature that sits near an edge.
+  - button "Read Boundaries": Read
   - button "The stack, 1 waits for you": The stack
   - button "ADR-002"
   - button "Top": Opening Top one-stack 1 block

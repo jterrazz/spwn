@@ -26,12 +26,23 @@ function nodeAt(target: EventTarget): string | undefined {
         : undefined;
 }
 
-// value: the prototype's click: a node's button opens it, a region's ground opens the region, an open node's ground
-// value: does nothing, and the desk goes up.
+function readAt(target: EventTarget | null): string | undefined {
+    return target instanceof Element
+        ? target.closest<HTMLElement>('button[data-read]')?.dataset.read
+        : undefined;
+}
+
+// value: the prototype's click: an open node's Read hands it to the reader, a node's button opens it, a region's
+// value: ground opens the region, an open node's ground does nothing, and the desk goes up.
 function clicked(event: MouseEvent<HTMLElement>, rig: CanvasRig, actions: Actions): void {
     if (rig.swallows()) {
         event.preventDefault();
         event.stopPropagation();
+        return;
+    }
+    const read = readAt(event.target);
+    if (read !== undefined) {
+        actions.raise(read);
         return;
     }
     const id = nodeAt(event.target);
@@ -73,8 +84,16 @@ function keyed(event: KeyboardEvent<HTMLElement>, { actions, frame, motion, rig 
     }
 }
 
+export type WheelPast = (delta: number, at: number) => void;
+
 // invariant: the wheel pans as a drag does, through the rig, and is listened to as not passive so it can hold the page.
-export function useWheel(root: RefObject<HTMLElement | null>, rig: CanvasRig, frame: Frame): void {
+// invariant: A wheel down that leaves the camera at its clamp's bottom is handed on, its delta and its time.
+export function useWheel(
+    root: RefObject<HTMLElement | null>,
+    rig: CanvasRig,
+    frame: Frame,
+    past: undefined | WheelPast,
+): void {
     useEffect(() => {
         const element = root.current;
         if (element === null) {
@@ -82,13 +101,16 @@ export function useWheel(root: RefObject<HTMLElement | null>, rig: CanvasRig, fr
         }
         const wheel = (event: WheelEvent) => {
             event.preventDefault();
-            rig.pan(frame, { x: -event.deltaX, y: -event.deltaY });
+            const atBottom = rig.pan(frame, { x: -event.deltaX, y: -event.deltaY });
+            if (atBottom && event.deltaY > 0) {
+                past?.(event.deltaY, event.timeStamp);
+            }
         };
         element.addEventListener('wheel', wheel, { passive: false });
         return () => {
             element.removeEventListener('wheel', wheel);
         };
-    }, [frame, rig, root]);
+    }, [frame, past, rig, root]);
 }
 
 export function handlersOf(keys: Keyed) {

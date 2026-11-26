@@ -22,6 +22,7 @@ export function CanvasSample({ start, startLeaf, ...canvas }: CanvasSampleProps)
 
 export const CANVAS_WORDS: CanvasWords = {
     close: 'close',
+    read: 'Read',
     needs: (count) => `${String(count)} wait${count > 1 ? '' : 's'} for you`,
 };
 

@@ -31,6 +31,7 @@ const NAMES: readonly IconName[] = [
     'close',
     'chevron',
     'up',
+    'book',
     'choose',
     'lock',
     'pin',

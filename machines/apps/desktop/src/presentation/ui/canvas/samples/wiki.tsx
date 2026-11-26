@@ -61,6 +61,9 @@ function wordsOf(node: CanvasNode): NodeWords {
     if (node.depth === 2 && said.lead !== '') {
         words.lead = said.lead;
     }
+    if (node.depth === 2 || node.depth === 3) {
+        words.read = `Read ${said.title === '' ? node.label : said.title}`;
+    }
     const rows = ICONS[said.seat];
     if (rows !== undefined) {
         words.icon = <Pixels rows={rows} />;

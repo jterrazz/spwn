@@ -211,6 +211,32 @@ describe('Canvas', () => {
         expect(stops).toBe(1);
     });
 
+    test('the Read button of an open page and of an open section hands it to the reader, and opens nothing', async () => {
+        // Given - the wiki with a section open
+        const onRaise = vi.fn<(id: string) => void>();
+        const onPath = vi.fn<(path: readonly string[]) => void>();
+        await component.render(
+            <Host
+                onPath={onPath}
+                onRaise={onRaise}
+                sample="wiki"
+                start={['S:product', 'P:product/boundaries', 'C:product/boundaries:1']}
+            />,
+            async (visitor) => {
+                // When - the section's Read, then the page's
+                await visitor.click(button('Read What Spwn is not'));
+                await visitor.click(button('Read Boundaries'));
+            },
+        );
+
+        // Then - each raised its own node, and the path never moved
+        expect(onRaise.mock.calls).toStrictEqual([
+            ['C:product/boundaries:1'],
+            ['P:product/boundaries'],
+        ]);
+        expect(onPath.mock.calls).toStrictEqual([]);
+    });
+
     test('a second click on the leaf and Space on it hand it to the reader', async () => {
         // Given - the wiki with a section open
         const onRaise = vi.fn<(id: string) => void>();
@@ -260,12 +286,12 @@ describe('Canvas', () => {
         // Then - each costs its pinned count
         expect(taken).toStrictEqual([
             {
-                by: { Canvas: 2, CanvasNodeOf: 2, Host: 1, Icon: 1, Marks: 1, You: 3 },
+                by: { CanvasNodeOf: 2, CanvasOf: 2, Host: 1, Icon: 1, Marks: 1, You: 3 },
                 commits: 2,
                 renders: 10,
             },
             {
-                by: { Canvas: 1, CanvasNodeOf: 7, Host: 1, Marks: 10, You: 5 },
+                by: { CanvasNodeOf: 7, CanvasOf: 1, Host: 1, Marks: 10, You: 5 },
                 commits: 1,
                 renders: 24,
             },
