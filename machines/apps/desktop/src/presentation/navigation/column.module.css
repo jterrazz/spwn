@@ -29,9 +29,8 @@
     display: flex;
     border: 1px solid var(--edge);
     border-radius: var(--radius-row);
-    background: var(--glass);
-    -webkit-backdrop-filter: var(--blur);
-    backdrop-filter: var(--blur);
+    /* value: opaque --s2, not glass: blurring a 256 x 830 px column over a scrolling page cost 4.6 to 5.5 ms a frame at 1440 x 900, and 2 to 3.5 ms even at a 2 px radius, past the 2 ms the column may spend */
+    background: var(--s2);
     box-shadow: var(--lift-2);
     animation: slide 160ms ease-out;
 }
