@@ -177,11 +177,6 @@ export type ActivityChart = {
     peak_at?: string;
 };
 
-export type ActivityEnvelope = {
-    max: number;
-    mean: number;
-};
-
 export type ActivityMeasures = {
     disk_read: ActivityBucket[] | null;
     disk_write: ActivityBucket[] | null;
@@ -229,20 +224,6 @@ export type ActivityReport = {
     window: number;
 };
 
-export type ActivityRollup = {
-    at: string;
-    cpu: ActivityEnvelope;
-    disk_read: ActivityEnvelope;
-    disk_write: ActivityEnvelope;
-    memory: ActivityEnvelope;
-    net_in: ActivityEnvelope;
-    net_out: ActivityEnvelope;
-    points: number;
-    pressure?: 'critical' | 'normal' | 'warn';
-    span: number;
-    swap: ActivityEnvelope;
-};
-
 export type ActivitySample = {
     at: string;
     battery?: ActivityBattery;
@@ -265,13 +246,13 @@ export type ActivitySample = {
 };
 
 export type ActivitySeries = {
-    last?: ActivitySample;
+    recent?: ActivitySample[];
     ticks?: number;
     tiers: ActivityTierRollups[] | null;
 };
 
 export type ActivityTierRollups = {
-    buckets: ActivityRollup[] | null;
+    buckets: number[][] | null;
     every: number;
 };
 

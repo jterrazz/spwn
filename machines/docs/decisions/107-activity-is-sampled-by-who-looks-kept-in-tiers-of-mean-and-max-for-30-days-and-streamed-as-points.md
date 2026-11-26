@@ -57,7 +57,7 @@ Sub-second sampling; tweened or rolling figures; motion at idle that no sample c
 ## Consequences
 
 - The numbers the owner may tune after the prototype (the default window, the cadences, the tiers' steps and horizons) are each one named constant.
-- A machine's history costs about 0.5 MB of the engine's memory, 5 MB for ten machines; the files write about 1 KB per machine per 15 min.
+- A machine's history costs about 0.65 MB of the engine's memory, 6.5 MB for ten machines: a bucket is 88 B, its memory and swap whole bytes, its shares and rates float32, which an answer rounds to what it measures; the files write about 1 KB per machine per 15 min.
 - `activity.read`'s report keeps its whole series only until the stream lands; meanwhile it is served from the tiers and carries each measure's mean and max over the window asked.
 - The findings that must last (memory pressure held, swap growing, a server's CPU busy) are judged on the tiers' buckets.
 - The cost of sampling at 1 s on a Mac is estimated, not measured; a measure on the acceptance Mac sets its budget.

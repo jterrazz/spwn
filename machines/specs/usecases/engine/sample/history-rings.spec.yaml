@@ -3,12 +3,12 @@ env:
     - two-macs
     - engine
 runs:
-    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].engine.menubar = "open"'' world.json > w.json && /bin/mv w.json world.json; /usr/bin/jq -r ''.now'' world.json > started; "$STATION" world advance 30m; "$STATION" world advance 2s; /usr/bin/jq -r --arg started "$(/bin/cat started)" ''(.now | fromdate) as $now | ($started | fromdate) as $from | .macs["macbook-pro"].engine.activity["macbook-pro"].series.tiers | (.[0].buckets | map(.at | fromdate)) as $s | (.[2].buckets | map(.at | fromdate)) as $m | "the seconds: some: \($s | length > 0), none older than 10 min: \($now - $s[0] <= 600)", "the minutes: from the start: \($m[0] - $from < 60), to now: \($now - $m[-1] < 60)"'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].engine.menubar = "open"'' world.json > w.json && /bin/mv w.json world.json; /usr/bin/jq -r ''.now'' world.json > started; "$STATION" world advance 30m; "$STATION" world advance 2s; /usr/bin/jq -r --arg started "$(/bin/cat started)" ''(.now | fromdate) as $now | ($started | fromdate) as $from | .macs["macbook-pro"].engine.activity["macbook-pro"].series.tiers | (.[0].buckets | map(.[0] / 1000 | floor)) as $s | (.[2].buckets | map(.[0] / 1000 | floor)) as $m | "the seconds: some: \($s | length > 0), none older than 10 min: \($now - $s[0] <= 600)", "the minutes: from the start: \($m[0] - $from < 60), to now: \($now - $m[-1] < 60)"'' world.json'
       exit: 0
       stdout: |
           the seconds: some: true, none older than 10 min: true
           the minutes: from the start: true, to now: true
-    - command: '--version >/dev/null; /usr/bin/jq -r ''.now'' world.json > crashed; "$STATION" world engine-crash macbook-pro; "$STATION" world advance 1m; /usr/bin/jq -r --arg crashed "$(/bin/cat crashed)" ''.macs["macbook-pro"].engine | "buckets from before the restart: \([.activity["macbook-pro"].series.tiers[].buckets[] | select(.at < $crashed)] | length)"'' world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -r ''.now'' world.json > crashed; "$STATION" world engine-crash macbook-pro; "$STATION" world advance 1m; /usr/bin/jq -r --arg crashed "$(/bin/cat crashed)" ''.macs["macbook-pro"].engine | "buckets from before the restart: \([.activity["macbook-pro"].series.tiers[].buckets[] | select(.[0] / 1000 < ($crashed | fromdate))] | length)"'' world.json'
       exit: 0
       stdout: |
           buckets from before the restart: 0

@@ -25,6 +25,15 @@ func DiskFreeTold(name string, last Sample) string {
 	return name + ": " + strconv.Itoa(int(float64(last.DiskFree)/float64(last.DiskTotal)*100)) + " % of its disk is free"
 }
 
+func pressureHeld(prev, x *bucket) bool {
+	critical := pressureRank(PressureCritical)
+	return prev.floor() == critical && x.floor() == critical
+}
+
+func swapGrowing(prev, x *bucket) bool { return x.swap.mean(x.n()) > prev.swap.mean(prev.n()) }
+
+func busy(_, x *bucket) bool { return x.span > 0 && x.cpu.mean >= BusyCPU }
+
 func Findings(m machine.Ref, kind machine.Kind, s *Series, busiest []Process) []finding.Finding {
 	// invariant: SPEC §6.5, read from the series alone: what holds now is
 	// judged on the last sample, what must last on the tier's buckets that
@@ -56,11 +65,10 @@ func Findings(m machine.Ref, kind machine.Kind, s *Series, busiest []Process) []
 			add(finding.NeedsALook, SubjectDisk, text, fix)
 		}
 	}
-	critical := pressureRank(PressureCritical)
-	if _, held := s.held(T0, func(prev, x *bucket) bool { return prev.floor == critical && x.floor == critical }); held >= PressureFor {
+	if _, held := s.held(T0, pressureHeld); held >= PressureFor {
 		add(finding.Broken, "memory", "Memory pressure critical", activityFix(on))
 	}
-	if _, held := s.held(T2, func(prev, x *bucket) bool { return x.swap.mean > prev.swap.mean }); held >= SwapFor {
+	if _, held := s.held(T2, swapGrowing); held >= SwapFor {
 		add(finding.NeedsALook, "swap", "Swap growing", activityFix(on))
 	}
 	switch {
@@ -73,7 +81,6 @@ func Findings(m machine.Ref, kind machine.Kind, s *Series, busiest []Process) []
 		add(finding.NeedsALook, "battery", "Battery low: "+strconv.Itoa(b.Percent)+" %", finding.Fix{})
 		out[len(out)-1].Detail = "Plug in " + m.Name
 	}
-	busy := func(_, x *bucket) bool { return x.span > 0 && x.cpu.mean >= BusyCPU }
 	if run, held := s.held(T2, busy); kind == machine.Server && held >= BusyFor {
 		var sum, span float64
 		for _, b := range run {

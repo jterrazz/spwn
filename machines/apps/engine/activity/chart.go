@@ -91,8 +91,18 @@ type Measures struct {
 }
 
 type measure struct {
-	of    func(b *bucket) envelope
+	// value: a measure's mean and busiest in a bucket, and whether it is a
+	// rate, weighted by the time it spans, or a gauge, by its samples.
+	of    func(b *bucket) (mean, top float64)
 	rated bool
+}
+
+func rated(of func(b *bucket) envelope) measure {
+	return measure{of: func(b *bucket) (float64, float64) { e := of(b); return float64(e.mean), float64(e.max) }, rated: true}
+}
+
+func gauged(of func(b *bucket) gauge) measure {
+	return measure{of: func(b *bucket) (float64, float64) { g := of(b); return float64(g.mean(b.n())), float64(g.max) }}
 }
 
 func (s *Series) fold(window time.Duration, now time.Time, m measure) (time.Duration, []Bucket) {
@@ -118,22 +128,22 @@ func (s *Series) fold(window time.Duration, now time.Time, m measure) (time.Dura
 		if from < start || from >= end {
 			continue
 		}
-		w := float64(b.n)
+		w := float64(b.n())
 		if m.rated {
 			w = float64(b.span)
 		}
 		if w == 0 {
 			continue
 		}
-		e := m.of(&b)
+		mean, top := m.of(&b)
 		o := &out[(from-start)/step]
-		if o.Points == 0 || float64(e.max) > o.Max {
-			o.Max, o.MaxAt = float64(e.max), time.UnixMilli(b.at).UTC()
+		if o.Points == 0 || top > o.Max {
+			o.Max, o.MaxAt = top, time.UnixMilli(b.at).UTC()
 		}
 		k := &weights[(from-start)/step]
-		o.Mean = (o.Mean**k + float64(e.mean)*w) / (*k + w)
+		o.Mean = (o.Mean**k + mean*w) / (*k + w)
 		*k += w
-		o.Points += int(b.n)
+		o.Points += b.n()
 	}
 	return every, out
 }
@@ -141,28 +151,24 @@ func (s *Series) fold(window time.Duration, now time.Time, m measure) (time.Dura
 func (s *Series) Chart(window time.Duration, now time.Time) Chart {
 	// value: SPEC B5.3: the window's CPU from its tier (TierOf), each bar
 	// the mean and the busiest share measured in it, and its peak.
-	every, buckets := s.fold(window, now, measure{of: func(b *bucket) envelope { return b.cpu }, rated: true})
+	every, buckets := s.fold(window, now, rated(func(b *bucket) envelope { return b.cpu }))
 	w := Chart{Every: every, Buckets: buckets}
 	peaked(&w)
 	return w
 }
 
 func (s *Series) Measures(window time.Duration, now time.Time) Measures {
-	gauge := func(of func(b *bucket) envelope) []Bucket {
-		_, out := s.fold(window, now, measure{of: of})
-		return out
-	}
-	rate := func(of func(b *bucket) envelope) []Bucket {
-		_, out := s.fold(window, now, measure{of: of, rated: true})
+	bars := func(m measure) []Bucket {
+		_, out := s.fold(window, now, m)
 		return out
 	}
 	return Measures{
 		Every:     BucketOf(window),
-		Memory:    gauge(func(b *bucket) envelope { return b.mem }),
-		Swap:      gauge(func(b *bucket) envelope { return b.swap }),
-		DiskRead:  rate(func(b *bucket) envelope { return b.diskRead }),
-		DiskWrite: rate(func(b *bucket) envelope { return b.diskWrite }),
-		NetIn:     rate(func(b *bucket) envelope { return b.netIn }),
-		NetOut:    rate(func(b *bucket) envelope { return b.netOut }),
+		Memory:    bars(gauged(func(b *bucket) gauge { return b.mem })),
+		Swap:      bars(gauged(func(b *bucket) gauge { return b.swap })),
+		DiskRead:  bars(rated(func(b *bucket) envelope { return b.diskRead })),
+		DiskWrite: bars(rated(func(b *bucket) envelope { return b.diskWrite })),
+		NetIn:     bars(rated(func(b *bucket) envelope { return b.netIn })),
+		NetOut:    bars(rated(func(b *bucket) envelope { return b.netOut })),
 	}
 }

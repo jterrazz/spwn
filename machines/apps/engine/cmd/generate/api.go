@@ -69,11 +69,22 @@ type (
 		Install json.RawMessage `json:",omitempty"`
 	}
 	seriesJSON struct {
-		Last  *activity.Sample       `json:"last,omitempty"`
-		Ticks float64                `json:"ticks,omitempty"`
-		Tiers []activity.TierRollups `json:"tiers"`
+		Recent []activity.Sample      `json:"recent,omitempty"`
+		Ticks  float32                `json:"ticks,omitempty"`
+		Tiers  []activity.TierRollups `json:"tiers"`
 	}
 )
+
+// invariant: the types that write themselves with MarshalJSON only to round
+// their numbers (activity's rounded.go), and a Rollup its row: their form
+// is their own fields, or their own array, as Go declares them.
+func ownFields() map[reflect.Type]bool {
+	return map[reflect.Type]bool{
+		reflect.TypeFor[activity.Rates](): true, reflect.TypeFor[activity.Chart](): true, reflect.TypeFor[activity.Measures](): true,
+		reflect.TypeFor[activity.Process](): true, reflect.TypeFor[activity.Usage](): true, reflect.TypeFor[activity.VMUsage](): true,
+		reflect.TypeFor[activity.Sample](): true, reflect.TypeFor[activity.Rollup](): true,
+	}
+}
 
 func mirrors() map[reflect.Type]reflect.Type {
 	return map[reflect.Type]reflect.Type{

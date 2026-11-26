@@ -1,6 +1,7 @@
 package activity
 
 import (
+	"iter"
 	"math"
 	"time"
 )
@@ -38,14 +39,12 @@ var Tiers = [...]Tier{
 	T3: {15 * time.Minute, 30 * 24 * time.Hour},
 }
 
-type envelope struct{ mean, max float32 }
+// value: the newest samples a series keeps whole, outside its tiers, so
+// the means of the last RateWindow are the counters' own (Recent): the
+// RateWindow and twice WatchedEvery of a sample a second.
+const recentKept = 16
 
-func (e *envelope) gauge(x float64, n uint16) {
-	if n == 1 || float32(x) > e.max {
-		e.max = float32(x)
-	}
-	e.mean = float32(float64(e.mean) + (x-float64(e.mean))/float64(n))
-}
+type envelope struct{ mean, max float32 }
 
 func (e *envelope) rate(x, span, dt float64) {
 	if span == 0 || float32(x) > e.max {
@@ -54,16 +53,56 @@ func (e *envelope) rate(x, span, dt float64) {
 	e.mean = float32((float64(e.mean)*span + x*dt) / (span + dt))
 }
 
+type gauge struct {
+	// invariant: bytes, exact: the sum and the most of the readings a
+	// bucket counts, so its mean is their sum over its samples.
+	sum, max int64
+}
+
+func (g *gauge) add(x int64, n int) {
+	if n == 1 || x > g.max {
+		g.max = x
+	}
+	g.sum += x
+}
+
+func (g gauge) mean(n int) int64 {
+	if n == 0 {
+		return 0
+	}
+	return int64(math.Round(float64(g.sum) / float64(n)))
+}
+
+const (
+	// value: a bucket's meta, low bits first: 20 bits left for the time of
+	// its CPU's busiest sample, then the samples it counts and the least
+	// pressure they said.
+	countShift = 20
+	countBits  = 10
+	floorShift = countShift + countBits
+	// value: the samples a bucket counts at most: 15 min at a sample a
+	// second is 900, and ADR-107 refuses sub-second sampling.
+	maxCount = 1<<countBits - 1
+)
+
 type bucket struct {
 	// invariant: at is the unix millisecond of the bucket's newest sample,
 	// 0 for a slot nothing was measured in; span the seconds its rates
-	// measure, n the samples it counts; floor the least pressure they said.
-	at    int64
-	span  float32
-	n     uint16
-	floor uint8
+	// measure; meta the samples it counts and the least pressure they said.
+	at   int64
+	span float32
+	meta uint32
 
-	cpu, mem, swap, diskRead, diskWrite, netIn, netOut envelope
+	mem, swap                               gauge
+	cpu, diskRead, diskWrite, netIn, netOut envelope
+}
+
+func (b *bucket) n() int { return int(b.meta >> countShift & maxCount) }
+
+func (b *bucket) floor() uint8 { return uint8(b.meta >> floorShift) } //nolint:gosec // value: the top 2 bits.
+
+func (b *bucket) count(n int, floor uint8) {
+	b.meta = b.meta&(1<<countShift-1) | uint32(n)<<countShift | uint32(floor)<<floorShift //nolint:gosec // value: n is at most maxCount.
 }
 
 type ring struct {
@@ -74,20 +113,24 @@ type ring struct {
 func (r *ring) of(at int64) *bucket { return &r.slots[(at/r.every)%int64(len(r.slots))] }
 
 func (r *ring) add(at int64, x *Sample, rated *Rates, dt float64) {
+	// invariant: a bucket that counts maxCount samples keeps none more.
 	b := r.of(at)
 	if b.at == 0 || b.at/r.every != at/r.every {
 		*b = bucket{}
 	}
+	n := b.n()
+	if n == maxCount {
+		return
+	}
+	n++
 	b.at = at
-	if b.n < math.MaxUint16 {
-		b.n++
+	floor := b.floor()
+	if rank := pressureRank(x.Pressure); n == 1 || rank < floor {
+		floor = rank
 	}
-	rank := pressureRank(x.Pressure)
-	if b.n == 1 || rank < b.floor {
-		b.floor = rank
-	}
-	b.mem.gauge(float64(x.MemUsed), b.n)
-	b.swap.gauge(float64(x.SwapUsed), b.n)
+	b.count(n, floor)
+	b.mem.add(x.MemUsed, n)
+	b.swap.add(x.SwapUsed, n)
 	if rated == nil {
 		return
 	}
@@ -100,17 +143,21 @@ func (r *ring) add(at int64, x *Sample, rated *Rates, dt float64) {
 	b.span = float32(span + dt)
 }
 
-func (r *ring) newest(at int64) []bucket {
+func (r *ring) back(at int64) iter.Seq[*bucket] {
 	// value: the buckets of this ring from the slot of at back to its
-	// oldest, newest first, those of a slot that is not theirs dropped.
-	out := make([]bucket, 0, len(r.slots))
-	slot := at / r.every
-	for i := range int64(len(r.slots)) {
-		if b := r.of((slot - i) * r.every); b.at != 0 && b.at/r.every == slot-i {
-			out = append(out, *b)
+	// oldest, newest first, in place, those of a slot that is not theirs
+	// skipped.
+	return func(yield func(*bucket) bool) {
+		if len(r.slots) == 0 {
+			return
+		}
+		slot := at / r.every
+		for i := range int64(len(r.slots)) {
+			if b := r.of((slot - i) * r.every); b.at != 0 && b.at/r.every == slot-i && !yield(b) {
+				return
+			}
 		}
 	}
-	return out
 }
 
 func pressureRank(p Pressure) uint8 {
@@ -132,12 +179,13 @@ func pressureOf(rank uint8) Pressure {
 type Series struct {
 	// invariant: the engine's memory only (ADR-107): every sample rolls into
 	// each tier's ring of fixed slots, indexed by time, so a tier keeps at
-	// most its Kept and a slot no sample reached is a gap. last is the
-	// newest sample, ticks the CPU ticks a second its last interval counted.
-	last  Sample
-	has   bool
-	ticks float64
-	rings [len(Tiers)]ring
+	// most its Kept and a slot no sample reached is a gap. recent holds the
+	// newest recentKept samples whole, count the samples added; ticks the
+	// CPU ticks a second the newest interval counted.
+	recent [recentKept]Sample
+	count  int
+	ticks  float32
+	rings  [len(Tiers)]ring
 }
 
 func countedAgain(a, b *Sample) bool {
@@ -147,12 +195,19 @@ func countedAgain(a, b *Sample) bool {
 		b.NetIn < a.NetIn || b.NetOut < a.NetOut || (!a.Boot.IsZero() && !b.Boot.IsZero() && !a.Boot.Equal(b.Boot))
 }
 
+func (s *Series) newest() *Sample { return &s.recent[(s.count-1)%recentKept] }
+
+func (s *Series) push(x Sample) {
+	s.recent[s.count%recentKept] = x
+	s.count++
+}
+
 func (s *Series) Add(x Sample) {
 	// invariant: a sample no later than the newest is not kept; a rate is
 	// measured between a sample and the one before it, unless a Pause or a
 	// machine that counted again lies between them: the sample then counts
 	// its gauges only.
-	if s.has && !x.At.After(s.last.At) {
+	if s.count > 0 && !x.At.After(s.newest().At) {
 		return
 	}
 	if s.rings[T0].slots == nil {
@@ -162,12 +217,13 @@ func (s *Series) Add(x Sample) {
 	}
 	var rated *Rates
 	var dt float64
-	if s.has {
-		if gap := x.At.Sub(s.last.At); gap <= Pause && !countedAgain(&s.last, &x) {
-			r := Between(s.last, x)
+	if s.count > 0 {
+		last := s.newest()
+		if gap := x.At.Sub(last.At); gap <= Pause && !countedAgain(last, &x) {
+			r := Between(*last, x)
 			rated, dt = &r, gap.Seconds()
-			if x.CPUTotal > s.last.CPUTotal {
-				s.ticks = float64(x.CPUTotal-s.last.CPUTotal) / dt
+			if x.CPUTotal > last.CPUTotal {
+				s.ticks = float32(float64(x.CPUTotal-last.CPUTotal) / dt)
 			}
 		}
 	}
@@ -175,10 +231,15 @@ func (s *Series) Add(x Sample) {
 	for i := range s.rings {
 		s.rings[i].add(at, &x, rated, dt)
 	}
-	s.last, s.has = x, true
+	s.push(x)
 }
 
-func (s *Series) Last() (Sample, bool) { return s.last, s.has }
+func (s *Series) Last() (Sample, bool) {
+	if s.count == 0 {
+		return Sample{}, false
+	}
+	return *s.newest(), true
+}
 
 func (s *Series) Clone() Series {
 	// value: a series of its own: what is added to it leaves s as it was.
@@ -200,16 +261,18 @@ func SeriesOf(points []Sample) Series {
 
 func (s *Series) within(tier int, from, now time.Time) []bucket {
 	// value: the tier's buckets from `from` to now, oldest first.
-	if !s.has {
+	if s.count == 0 {
 		return nil
 	}
-	r := &s.rings[tier]
-	all := r.newest(now.UnixMilli())
-	out := make([]bucket, 0, len(all))
-	for i := len(all) - 1; i >= 0; i-- {
-		if all[i].at >= from.UnixMilli() {
-			out = append(out, all[i])
+	var out []bucket
+	for b := range s.rings[tier].back(now.UnixMilli()) {
+		if b.at < from.UnixMilli() {
+			break
 		}
+		out = append(out, *b)
+	}
+	for i, j := 0, len(out)-1; i < j; i, j = i+1, j-1 {
+		out[i], out[j] = out[j], out[i]
 	}
 	return out
 }
@@ -244,8 +307,8 @@ func (s *Series) History(now time.Time) []Sample {
 func (s *Series) read(now time.Time) time.Time {
 	// value: the time a read ends at: now, or the newest sample's when the
 	// engine's clock is ahead of the reader's, so that sample is drawn.
-	if s.has && s.last.At.After(now) {
-		return s.last.At
+	if s.count > 0 && s.newest().At.After(now) {
+		return s.newest().At
 	}
 	return now
 }
@@ -263,19 +326,20 @@ func (s *Series) points(tier int, from, now time.Time) []Sample {
 	if len(buckets) == 0 {
 		return nil
 	}
+	last := s.newest()
 	out := make([]Sample, len(buckets))
-	c := s.last
+	c := *last
 	cut := 0
 	for i := len(buckets) - 1; i >= 0; i-- {
 		b := &buckets[i]
 		out[i] = Sample{
-			At: time.UnixMilli(b.at).UTC(), CPUBusy: c.CPUBusy, CPUTotal: c.CPUTotal, CPUs: s.last.CPUs,
-			MemUsed: int64(b.mem.mean), MemTotal: s.last.MemTotal, Pressure: pressureOf(b.floor), SwapUsed: int64(b.swap.mean),
+			At: time.UnixMilli(b.at).UTC(), CPUBusy: c.CPUBusy, CPUTotal: c.CPUTotal, CPUs: last.CPUs,
+			MemUsed: b.mem.mean(b.n()), MemTotal: last.MemTotal, Pressure: pressureOf(b.floor()), SwapUsed: b.swap.mean(b.n()),
 			DiskRead: c.DiskRead, DiskWritten: c.DiskWritten, NetIn: c.NetIn, NetOut: c.NetOut,
-			Thermal: ThermalUnknown, Boot: s.last.Boot,
+			Thermal: ThermalUnknown, Boot: last.Boot,
 		}
 		span := float64(b.span)
-		total := uint64(math.Round(span * s.ticks))
+		total := uint64(math.Round(span * float64(s.ticks)))
 		busy := uint64(math.Round(float64(b.cpu.mean) / 100 * float64(total)))
 		back := []struct {
 			v *uint64
@@ -306,52 +370,55 @@ func (s *Series) held(tier int, holds func(prev, x *bucket) bool) (run []bucket,
 	// value: how long, back from the newest bucket of the tier, every
 	// bucket held against the one before it, and the buckets that held,
 	// newest first; a Pause between two buckets ends the run.
-	if !s.has {
+	if s.count == 0 {
 		return nil, 0
 	}
-	all := s.rings[tier].newest(s.last.At.UnixMilli())
-	if len(all) < 2 {
-		return nil, 0
-	}
-	since := all[0].at
-	for i := 0; i+1 < len(all); i++ {
-		x, prev := &all[i], &all[i+1]
-		if x.at-prev.at > Pause.Milliseconds() || !holds(prev, x) {
+	var x *bucket
+	var first, since int64
+	for b := range s.rings[tier].back(s.newest().At.UnixMilli()) {
+		if x == nil {
+			x, first, since = b, b.at, b.at
+			continue
+		}
+		if x.at-b.at > Pause.Milliseconds() || !holds(b, x) {
 			break
 		}
-		run, since = all[:i+1], prev.at
+		run, since, x = append(run, *x), b.at, b
 	}
-	return run, time.Duration(all[0].at-since) * time.Millisecond
+	return run, time.Duration(first-since) * time.Millisecond
 }
 
 func Recent(s *Series, now time.Time) (Rates, time.Duration) {
-	// invariant: SPEC §6.2: the mean of the last RateWindow, from the T0
-	// buckets of an engine a surface watches: the newest sample no older
-	// than WatchedEvery and a second of jitter, the buckets after
-	// RateWindow before it spanning RateWindow within WatchedEvery under
-	// and twice over. Samples a minute apart, or a newest gone stale, span
-	// no such window: no rate, and the reader samples twice itself.
-	last, ok := s.Last()
-	if !ok || now.Sub(last.At) > WatchedEvery+time.Second {
+	// invariant: SPEC §6.2: the mean of the last RateWindow, between the
+	// newest sample of an engine a surface watches, no older than
+	// WatchedEvery and a second of jitter, and the kept sample nearest
+	// RateWindow before it, within WatchedEvery under and twice over (a
+	// sample a cadence skipped), both read whole. Samples a minute apart, or
+	// a newest gone stale, span no such window: no rate, and the reader
+	// samples twice itself.
+	if s.count == 0 {
 		return Rates{}, 0
 	}
-	var r Rates
-	var span float64
-	for _, b := range s.within(T0, last.At.Add(-RateWindow+time.Millisecond), last.At) {
-		if b.span == 0 {
+	newest := s.newest()
+	if now.Sub(newest.At) > WatchedEvery+time.Second {
+		return Rates{}, 0
+	}
+	var base *Sample
+	for i := 1; i < min(s.count, recentKept); i++ {
+		x := &s.recent[(s.count-1-i)%recentKept]
+		gap := newest.At.Sub(x.At)
+		if gap < RateWindow-WatchedEvery {
 			continue
 		}
-		w := float64(b.span)
-		r.CPU += float64(b.cpu.mean) * w
-		r.DiskRead += float64(b.diskRead.mean) * w
-		r.DiskWrite += float64(b.diskWrite.mean) * w
-		r.NetIn += float64(b.netIn.mean) * w
-		r.NetOut += float64(b.netOut.mean) * w
-		span += w
+		if gap >= RateWindow+2*WatchedEvery {
+			break
+		}
+		if base == nil || (gap-RateWindow).Abs() < (newest.At.Sub(base.At)-RateWindow).Abs() {
+			base = x
+		}
 	}
-	window := time.Duration(span * float64(time.Second))
-	if window < RateWindow-WatchedEvery || window >= RateWindow+2*WatchedEvery {
+	if base == nil {
 		return Rates{}, 0
 	}
-	return Rates{CPU: r.CPU / span, DiskRead: r.DiskRead / span, DiskWrite: r.DiskWrite / span, NetIn: r.NetIn / span, NetOut: r.NetOut / span}, window
+	return Between(*base, *newest), newest.At.Sub(base.At)
 }

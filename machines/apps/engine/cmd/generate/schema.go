@@ -188,7 +188,7 @@ func (r *reflector) wireOf(t reflect.Type) map[string]any {
 	if t.Kind() == reflect.Pointer {
 		return r.wireOf(t.Elem())
 	}
-	if marshals(t, jsonMarshaler) {
+	if marshals(t, jsonMarshaler) && !ownFields()[t] {
 		panic("the wire schema has no rule for " + t.String() + ", which writes itself with MarshalJSON: name its form in wireRules.custom or give it a WireSchema")
 	}
 	if marshals(t, textMarshaler) {

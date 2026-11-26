@@ -88,8 +88,8 @@ func TestEachTiersMeanIsTheCountersMean(t *testing.T) {
 	if len(buckets) != 3 || !near(float64(b.cpu.mean), want.CPU) || !near(float64(b.diskRead.mean), want.DiskRead) || b.span != 58 {
 		t.Errorf("the first minute is %+v over %d buckets; want its counter mean %.4f %% CPU, %v B/s read over the 58 s its 29 intervals span", b, len(buckets), want.CPU, want.DiskRead)
 	}
-	if mid := buckets[1]; mid.n != 30 || mid.span != 60 {
-		t.Errorf("a whole minute holds %d samples over %v s; want 30 over 60 s", mid.n, mid.span)
+	if mid := buckets[1]; mid.n() != 30 || mid.span != 60 {
+		t.Errorf("a whole minute holds %d samples over %v s; want 30 over 60 s", mid.n(), mid.span)
 	}
 }
 
@@ -155,8 +155,8 @@ func TestATiersRingWrapsAndKeepsOnlyItsHorizon(t *testing.T) {
 		t.Fatalf("T0 holds %d buckets from %v; want the last 600 s, one a second", len(got), time.UnixMilli(got[0].at).UTC())
 	}
 	for _, b := range got {
-		if b.n != 1 {
-			t.Fatalf("a slot of T0 reused holds %d samples; want only the newest second's one", b.n)
+		if b.n() != 1 {
+			t.Fatalf("a slot of T0 reused holds %d samples; want only the newest second's one", b.n())
 		}
 	}
 	for i, r := range sp.s.rings {
@@ -178,22 +178,24 @@ func TestTheTiersReadBackAsTheyWereWritten(t *testing.T) {
 	if err := json.Unmarshal(data, &again); err != nil {
 		t.Fatal(err)
 	}
-	if again.last != sp.s.last || again.ticks != sp.s.ticks {
-		t.Errorf("the newest sample reads back as %+v at %v ticks/s; want %+v at %v", again.last, again.ticks, sp.s.last, sp.s.ticks)
+	gotLast, _ := again.Last()
+	wantLast, _ := sp.s.Last()
+	if gotLast != wantLast || again.count != recentKept || again.ticks != sp.s.ticks {
+		t.Errorf("the newest samples read back as %d, the last %+v at %v ticks/s; want the last %d whole, %+v at %v", again.count, gotLast, again.ticks, recentKept, wantLast, sp.s.ticks)
 	}
 	for i := range Tiers {
 		if want, got := sp.s.within(i, from, sp.at), again.within(i, from, sp.at); len(got) != len(want) || got[len(got)-1] != want[len(want)-1] || got[0] != want[0] {
 			t.Errorf("tier %v reads back %d buckets; want the %d written, alike", Tiers[i].Every, len(got), len(want))
 		}
 	}
-	if err := json.Unmarshal([]byte(`{"last": {"at": "2026-11-25T12:00:00Z"}, "tiers": [{"every": 2000000000, "buckets": []}]}`), &again); err == nil {
+	if err := json.Unmarshal([]byte(`{"recent": [{"at": "2026-11-25T12:00:00Z"}], "tiers": [{"every": 2000000000, "buckets": []}]}`), &again); err == nil {
 		t.Error("a tier of 2 s read back; want it refused, no tier has that step")
 	}
 }
 
-func TestAMachinesTiersHoldAboutHalfAMegabyte(t *testing.T) {
-	if size := reflect.TypeFor[bucket]().Size(); size != 72 {
-		t.Errorf("a bucket is %d bytes; want 72", size)
+func TestAMachinesTiersHoldUnder700KB(t *testing.T) {
+	if size := reflect.TypeFor[bucket]().Size(); size != 88 {
+		t.Errorf("a bucket is %d bytes; want 88: its memory and swap whole bytes", size)
 	}
 	var before, after runtime.MemStats
 	runtime.GC()
@@ -203,8 +205,8 @@ func TestAMachinesTiersHoldAboutHalfAMegabyte(t *testing.T) {
 	runtime.ReadMemStats(&after)
 	bytes := after.TotalAlloc - before.TotalAlloc
 	t.Logf("a machine's tiers: %d bytes", bytes)
-	if bytes > 600_000 || bytes < 500_000 {
-		t.Errorf("a machine's tiers hold %d bytes; want about 520 KB, never over 600 KB", bytes)
+	if bytes > 700_000 || bytes < 600_000 {
+		t.Errorf("a machine's tiers hold %d bytes; want about 650 KB, never over 700 KB", bytes)
 	}
 	runtime.KeepAlive(&s)
 }
