@@ -53,7 +53,11 @@ func outline(s wiki.Served) string {
 		line(1, "finding", string(f.Level), f.Rule, f.Says)
 	}
 	for _, f := range s.Attention {
-		line(1, "attention", string(f.Level), f.Rule, "at="+f.At, strconv.Quote(f.Word))
+		found := ""
+		if f.Found != "" {
+			found = " found=" + string(f.Found)
+		}
+		line(1, "attention", string(f.Level), f.Rule, "at="+f.At+found, strconv.Quote(f.Word))
 	}
 	var items func(depth int, its []wiki.ServedItem)
 	items = func(depth int, its []wiki.ServedItem) {
@@ -191,6 +195,34 @@ func TestEveryPageIsServedToItsGoldenAtEachBudget(t *testing.T) {
 	}
 	if got.String() != string(want) {
 		t.Errorf("%s differs (go test ./apps/engine/wiki/ -update rewrites it):\n%s", path, got.String())
+	}
+}
+
+func TestAFindingOnABlockThisReadingTimeDoesNotDrawSaysWhichOneDoes(t *testing.T) {
+	c, err := wiki.Read(corpusFiles(t))
+	if err != nil {
+		t.Fatal(err)
+	}
+	found := map[wiki.Budget]int{}
+	for _, budget := range wiki.Budgets() {
+		s, serveErr := c.Serve("product/boundaries", budget)
+		if serveErr != nil {
+			t.Fatal(serveErr)
+		}
+		for _, f := range s.Attention {
+			if f.Found != "" {
+				found[budget]++
+				if f.Found == budget || f.At == "" {
+					t.Errorf("@%s: %s found = %q at %q; want a later reading time and a block", budget, f.Rule, f.Found, f.At)
+				}
+			}
+		}
+	}
+	if found[wiki.Budget2min] != 0 || found[wiki.Budget10min] != 0 {
+		t.Errorf("findings pointing elsewhere = %v; the longer reading times draw every block", found)
+	}
+	if found[wiki.Budget30s] == 0 {
+		t.Errorf("findings pointing elsewhere = %v; want some at 30s", found)
 	}
 }
 

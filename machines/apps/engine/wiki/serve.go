@@ -209,6 +209,10 @@ type ServedFinding struct {
 	// page's own head; and the word of what it is about.
 	At   string
 	Word string
+	// value: when this reading time does not draw the block the finding is
+	// about, nor a folded group that holds it, the first reading time that
+	// does; empty when the finding is found where At says.
+	Found Budget
 }
 
 var (

@@ -373,7 +373,7 @@ page product/boundaries @30s floor=1 Produit seats=blueprint,[product],engineeri
   finding needs-you S6 "product/boundaries" rests on this page's reading: you have not ruled
   attention needs-you S6 at= "Boundaries"
   attention needs-you S6 at=product/boundaries#no-computer "no-computer"
-  attention needs-you S6 at=product/boundaries#os-holds-no-facts "os-holds-no-facts"
+  attention needs-you S6 at=product/boundaries#os-holds-no-facts found=2min "os-holds-no-facts"
     block product/boundaries#one-stack decision icon=decision tier=lead shown=tile "Spwn is one stack of six apps on one ladder."
       field adr "studio-os:home/spwn/wiki/product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder.md" 
       field decides "Spwn is one stack of six apps on one ladder." 

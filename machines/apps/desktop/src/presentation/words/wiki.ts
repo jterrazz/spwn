@@ -33,6 +33,7 @@ export function decisionTone(accepted: boolean): Tone {
 export const WIKI_ATTENTION_WORDS = {
     others: 'more findings below',
     page: 'this page',
+    shownAt: 'shown at',
     title: 'Needs you',
 } as const;
 

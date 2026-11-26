@@ -24,7 +24,15 @@ import styles from './wiki.module.css';
 const LISTED = 5;
 
 // value: each finding of the page, in the engine's order, as a way to where it sits.
-function Attention({ page, findings }: { page: string; findings: readonly WikiServedFinding[] }) {
+function Attention({
+    page,
+    findings,
+    onBudget,
+}: {
+    page: string;
+    findings: readonly WikiServedFinding[];
+    onBudget: (budget: string) => void;
+}) {
     if (findings.length === 0) {
         return null;
     }
@@ -38,6 +46,10 @@ function Attention({ page, findings }: { page: string; findings: readonly WikiSe
                         className={styles.attentionRow}
                         data-tone={WIKI_LEVEL_TONES[finding.Level]}
                         onClick={() => {
+                            if (finding.Found !== '') {
+                                onBudget(finding.Found);
+                                return;
+                            }
                             document
                                 .querySelector(`#${placeOf(finding.At === '' ? page : finding.At)}`)
                                 ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -53,7 +65,9 @@ function Attention({ page, findings }: { page: string; findings: readonly WikiSe
                             {finding.Word === '' ? WIKI_ATTENTION_WORDS.page : finding.Word}
                         </span>
                         <span className={styles.attentionLevel}>
-                            {WIKI_LEVEL_WORDS[finding.Level]}
+                            {finding.Found === ''
+                                ? WIKI_LEVEL_WORDS[finding.Level]
+                                : `${WIKI_ATTENTION_WORDS.shownAt} ${finding.Found}`}
                         </span>
                     </button>
                 </li>
@@ -89,7 +103,11 @@ function Side({ served, onBudget }: { served: WikiServed; onBudget: (budget: str
                     <b>{needs}</b> {WIKI_LEVEL_WORDS['needs-you']}
                 </span>
             )}
-            <Attention findings={served.Attention ?? []} page={served.Page.ID} />
+            <Attention
+                findings={served.Attention ?? []}
+                onBudget={onBudget}
+                page={served.Page.ID}
+            />
             {folded === 0 ? null : (
                 <span className={styles.sideFoot}>
                     {countOf('block', folded)} {WIKI_WORDS.folded}

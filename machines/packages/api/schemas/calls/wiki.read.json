@@ -603,6 +603,9 @@
         "At": {
           "type": "string"
         },
+        "Found": {
+          "type": "string"
+        },
         "Hard": {
           "type": "boolean"
         },
@@ -630,6 +633,7 @@
       },
       "required": [
         "At",
+        "Found",
         "Hard",
         "Level",
         "Line",

@@ -116,6 +116,22 @@ describe('Wiki', () => {
         await expect(result.tree).toMatch(file('./__expected__/boundaries-group-open.aria.yaml'));
     });
 
+    test('a finding on a block this reading time leaves out opens the reading time that draws it', async () => {
+        // Given - Boundaries at thirty seconds, which leaves the OS's refusal out
+        const result = await component.render(wikiOver('product/boundaries'), async (visitor) => {
+            await visitor.see(heading('Boundaries'));
+            await visitor.click(button('30s'));
+            await visitor.see(button('needs you os-holds-no-facts shown at 2min'));
+
+            // When - its row in the side panel is pressed
+            await visitor.click(button('needs you os-holds-no-facts shown at 2min'));
+            await visitor.see(button(QUIET_LINE));
+        });
+
+        // Then - the page is the one served at two minutes
+        await expect(result.tree).toMatch(file('./__expected__/boundaries.aria.yaml'));
+    });
+
     test('a quiet line opened draws its fields under it', async () => {
         // Given - Boundaries at its own budget, the OS's refusal served as a quiet line
         const result = await component.render(wikiOver('product/boundaries'), async (visitor) => {

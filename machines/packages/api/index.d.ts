@@ -3404,6 +3404,7 @@ export type WikiServedFigure = {
 
 export type WikiServedFinding = {
     At: string;
+    Found: string;
     Hard: boolean;
     Level: '' | 'ambient' | 'needs-you' | 'remark';
     Line: number;
