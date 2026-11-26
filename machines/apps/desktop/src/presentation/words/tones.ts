@@ -24,7 +24,7 @@ export const OWN_STATE_TONES: Tones<OwnState> = {
     'not-wired': 'plain',
     reading: 'new',
     stale: 'plain',
-    unknown: 'warn',
+    unknown: 'plain',
     untyped: 'bad',
     'window-error': 'plain',
     'window-out': 'new',
@@ -78,7 +78,7 @@ export const DISK_KIND_STEPS: Readonly<Record<Exclude<DiskAmount['Kind'], 'free'
 
 export const PORT_ANSWER_TONES: Tones<PortsPort['Answer']> = {
     '': 'plain',
-    starting: 'warn',
+    starting: 'new',
     unreachable: 'warn',
 };
 
