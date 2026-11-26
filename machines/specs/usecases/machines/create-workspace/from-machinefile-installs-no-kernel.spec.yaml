@@ -1,4 +1,4 @@
-description: 'a create from an image without linux-kernel installs no kernel and names it as drift'
+description: 'a create from an image built without linux-kernel installs no kernel and names it as drift'
 fixture: ../../__fixtures__/build/
 env: two-macs
 runs:
@@ -12,13 +12,17 @@ runs:
       exit: 0
     - command: 'images build studio-linux --binary $HOME/station-linux >/dev/null'
       exit: 0
-    - command: '--version >/dev/null; /usr/bin/jq ''(.macs["macbook-pro"].stores.images[] | select(.name == "studio-linux") | .lock) = "lock: station.lock/v1\nmachinefile: studio-linux\napps:\n  - { name: mise, method: script, version: 2026.11.1 }\n  - { name: git, method: apt }\n"'' world.json > w.json && /bin/mv w.json world.json'
+    - command: '--version >/dev/null; /usr/bin/jq ''(.macs["macbook-pro"].stores.images[] | select(.name == "studio-linux") | .lock) = "lock: station.lock/v1\nmachinefile: studio-linux\napps:\n  - { name: mise, method: script, version: 2026.11.1 }\n  - { name: git, method: apt }\n" | .macs["web"] = .macs["linux-1"]'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
-    - command: 'machines create --memory 4G web --from studio-linux --json | /usr/bin/jq -c ''{applied: [.boot.applied[].name], unfinished: .boot.unfinished, drift: .boot.drift}'''
-      exit: 0
-      stdout: |
-          {"applied":["ohmyzsh","docker","git-shortcuts","hushlogin","build-essential","playwright-deps"],"unfinished":[],"drift":["linux-kernel is not baked into the image"]}
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["web"].apps.apt.installed // {} | keys | map(select(startswith("linux-")))'' world.json'
       exit: 0
       stdout: |
-          ["linux-image-virtual-hwe-24.04"]
+          []
+    - command: 'machines create --memory 4G web --from studio-linux --json | /usr/bin/jq -c ''{applied: [.boot.applied[].name], unfinished: .boot.unfinished, drift: .boot.drift}'''
+      exit: 0
+      stdout: |
+          {"applied":["mise","ohmyzsh","docker","git-shortcuts","hushlogin","apt","git","build-essential","playwright-deps"],"unfinished":[],"drift":["linux-kernel is not baked into the image"]}
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["web"].apps.apt.installed // {} | [has("git"), (keys | map(select(startswith("linux-"))))]'' world.json'
+      exit: 0
+      stdout: |
+          [true,[]]

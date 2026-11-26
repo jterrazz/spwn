@@ -122,8 +122,8 @@ func TestAnApplyThatLeavesWhatAsksCarriesOutTheRest(t *testing.T) {
 	if got[1].Reason != machinefile.WaitsForYou || got[1].Detail != machinefile.AsksInTerminal {
 		t.Fatalf("github-login ended %q %q; want left, %q", got[1].Reason, got[1].Detail, machinefile.AsksInTerminal)
 	}
-	if got[2].Reason != machinefile.NotRun {
-		t.Fatalf("gh-tool ended %q; want not run, since what it requires was left", got[2].Reason)
+	if got[2].Reason != machinefile.NotRun || got[2].Detail != "requires github-login, which waits for you" {
+		t.Fatalf("gh-tool ended %q %q; want not run, since what it requires was left for you", got[2].Reason, got[2].Detail)
 	}
 	if len(c.until) != 2 {
 		t.Fatalf("installed %d packages; want 2", len(c.until))

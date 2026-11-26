@@ -352,9 +352,9 @@ func (r *run) carry(ctx context.Context, lines []machinefile.Line) []machinefile
 }
 
 func (r *run) line(ctx context.Context, l machinefile.Line) machinefile.Done {
-	// invariant: a line whose step waits on one that failed is not run,
-	// naming it, and what waits on it is not run either; every other
-	// branch goes on.
+	// invariant: a line whose step waits on one that failed, or that was
+	// left for the owner, is not run, naming it and which, and what waits
+	// on it is not run either; every other branch goes on.
 	done := machinefile.Done{Line: l, State: l.Seen.State, Version: l.Seen.Version, Detail: l.Seen.Detail}
 	if !l.Acts() {
 		return done
@@ -364,7 +364,11 @@ func (r *run) line(ctx context.Context, l machinefile.Line) machinefile.Done {
 		return done
 	}
 	for _, w := range l.Step.Waits {
-		if r.ended[w] == catalog.StateBroken {
+		switch {
+		case r.left[w]:
+			done.Reason, done.Detail = machinefile.NotRun, "requires "+w+", which waits for you"
+			return done
+		case r.ended[w] == catalog.StateBroken:
 			done.Reason, done.Detail = machinefile.NotRun, "requires "+w+", which did not install"
 			return done
 		}
