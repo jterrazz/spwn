@@ -6,6 +6,7 @@ W=$1; L=$2; VM=$VM_LINUX; RS=$VM_DIR/; R='$HOME'/$VM_DIR
 case $L in "" | *[!A-Za-z0-9._-]*) echo "bad label: $L"; exit 2 ;; esac
 rm -f "${RUN:?}/$L-dt.end"; trap 'echo "END $(date +%T)" > $RUN/$L-dt.end' EXIT
 B=${3:-$(git -C "$W" rev-parse --abbrev-ref HEAD)} || exit 2
+sha=$(git -C "$W" rev-parse --short=9 "$B")
 git -C "$W" bundle create $RUN/$L.bundle "$B" --tags >/dev/null 2>&1 || exit 90
 ssh -n -o ConnectTimeout=10 $VM "mkdir -p $R" || exit 91
 scp -q $RUN/$L.bundle $VM:$RS$L.bundle && scp -q $GATE_DIR/desktop-proof-remote.sh $VM:$RS$L-dt-remote.sh || exit 91; rm -f $RUN/$L.bundle
@@ -18,6 +19,5 @@ done
 ssh -n $VM "cat $R/$L-dt.out" | tee $RUN/$L-dt.out
 ssh -n $VM "cd $R && rm -f ${L}-dt.out ${L}-dt.end ${L}-dt-remote.sh"
 red=; for s in NPMCI TSC VITEST PROOF WEBSITE TSCHECK ARCH MAKELINT DT-DONE; do case $s in DT-DONE) k=$s ;; *) k=$s=0 ;; esac; grep -qx "$k" $RUN/$L-dt.out || red=${red:+$red,}$s; done
-sha=$(git -C "$W" rev-parse --short=9 "$B")
 [ -n "$red" ] || { echo "VERDICT $L $sha GREEN steps=-"; exit 0; }
 echo "VERDICT $L $sha RED steps=$red"; exit 1
