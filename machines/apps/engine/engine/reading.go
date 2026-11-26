@@ -3,7 +3,6 @@ package engine
 import (
 	"time"
 
-	"github.com/jterrazz/studio-station/apps/engine/devices"
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
 )
 
@@ -23,7 +22,7 @@ type Reading struct {
 	Agent   model.Agent
 	// value: how the running engine says its Mac's device book stands
 	// (Hello's BookState).
-	BookState devices.Standing
+	BookState BookState
 }
 
 func (r Reading) Skewed() bool {

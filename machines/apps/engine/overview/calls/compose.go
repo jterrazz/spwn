@@ -274,18 +274,18 @@ func engineOf(head overview.Head, r *engine.Reading) (overview.Engine, []finding
 	case machines.EngineRunning:
 	}
 	switch r.BookState {
-	case devices.Changed:
+	case engine.BookChanged:
 		// invariant: a device book its engine did not write is never
 		// silent: it is a need, red, until each device is added again.
 		return overview.EngineRunning, []finding.Finding{{Machine: mac, Section: section.Overview, Severity: finding.Broken, Urgency: finding.Red, Subject: overview.DevicesSubject,
 			Text: devices.ChangedOutside, Fix: finding.Fix{Command: "station devices"}}}
-	case devices.Unchecked:
+	case engine.BookUnchecked:
 		// invariant: a book its engine could not check yet is a need too,
 		// for it reaches no VM, in words that blame no one: the keychain
 		// to unlock.
 		return overview.EngineRunning, []finding.Finding{{Machine: mac, Section: section.Overview, Severity: finding.NeedsALook, Urgency: finding.Red, Subject: overview.DevicesSubject,
 			Text: devices.NotChecked, Fix: finding.Fix{Command: "station devices"}}}
-	case devices.Kept:
+	case engine.BookKept:
 	}
 	return overview.EngineRunning, nil
 }

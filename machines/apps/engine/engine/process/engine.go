@@ -18,7 +18,6 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/activity"
 	awakecalls "github.com/jterrazz/studio-station/apps/engine/awake/calls"
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
-	"github.com/jterrazz/studio-station/apps/engine/devices"
 	"github.com/jterrazz/studio-station/apps/engine/core/journal"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
@@ -90,7 +89,7 @@ type Options struct {
 	BookKeys func() []string
 	// value: the device book's head this engine holds and how the book on
 	// disk stands with it (engine.Hello's Book); nil holds none.
-	Book func() (head string, standing devices.Standing)
+	Book func() (head string, standing engine.BookState)
 	// value: opens this Mac's ssh key agent, each refusal before its socket
 	// opens, and returns what serves it until ctx ends; nil opens none.
 	Agent func(ctx context.Context) (func(context.Context) error, error)

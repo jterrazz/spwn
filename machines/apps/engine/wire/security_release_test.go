@@ -3,6 +3,8 @@
 package wire
 
 import (
+	"context"
+	"strings"
 	"testing"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
@@ -10,16 +12,31 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/platform/local/localtest"
 )
 
-func TestTheReleaseBuildRunsTheSystemsSecurityWhateverTheSystemRootSays(t *testing.T) {
-	run := localtest.NewRunner(t)
-	run.On("/usr/bin/security", "find-generic-password", "-s", "station-devices", "-a", "head", "-w").Reply(local.Output{ExitCode: 44})
-	run.On("/usr/bin/security", "find-generic-password", "-s", "station", "-a", "github", "-w").Reply(local.Output{ExitCode: 44})
+// value: a runner that answers every program as a keychain with no such
+// item, and keeps the path of each program it was asked to run.
+type keptRun struct {
+	*localtest.Runner
+	ran []string
+}
+
+func (r *keptRun) Output(_ context.Context, c local.Cmd) (local.Output, error) {
+	r.ran = append(r.ran, c.Name)
+	return local.Output{ExitCode: 44}, nil
+}
+
+func TestTheReleaseBuildRunsTheSystemsKeychainToolWhateverTheSystemRootSays(t *testing.T) {
+	run := &keptRun{Runner: localtest.NewRunner(t)}
 	vars := map[string]string{"STATION_SYSTEM_ROOT": "/sandbox"}
 	if _, err := deviceAnchor(local.System{Run: run}, vars).Read(t.Context()); err != nil {
 		t.Fatal(err)
 	}
 	_, _ = machine{kind: catalog.Mac, sys: local.System{Run: run}, vars: vars}.vault().Get(t.Context(), "github")
-	if len(run.Calls) != 2 {
-		t.Fatalf("calls %+v; want the anchor and the vault each to run /usr/bin/security", run.Calls)
+	if len(run.ran) != 2 {
+		t.Fatalf("ran %q; want the anchor and the vault each to run their tool once", run.ran)
+	}
+	for _, name := range run.ran {
+		if strings.HasPrefix(name, "/sandbox") {
+			t.Fatalf("ran %q; want no program under the system root in a release build", run.ran)
+		}
 	}
 }

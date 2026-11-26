@@ -194,6 +194,16 @@ func TestTheEngineRunsWithItsBookSole(t *testing.T) {
 	}
 }
 
+func TestABooksStandingCrossesTheWireInItsOwnWords(t *testing.T) {
+	for standing, said := range map[devices.Standing]engine.BookState{
+		devices.Kept: engine.BookKept, devices.Changed: engine.BookChanged, devices.Unchecked: engine.BookUnchecked,
+	} {
+		if engine.BookState(standing) != said {
+			t.Fatalf("the standing %q crosses as %q, want %q", standing, engine.BookState(standing), said)
+		}
+	}
+}
+
 func TestTheHeadAProcessTakesIsTheOneTheRunningEngineHolds(t *testing.T) {
 	if got, ok, err := peerOf(t, nil).Held(t.Context()); err != nil || ok || got != (devices.Head{}) {
 		t.Fatalf("no engine answering: %+v, %v, %v; want nothing held and no error", got, ok, err)
@@ -205,7 +215,7 @@ func TestTheHeadAProcessTakesIsTheOneTheRunningEngineHolds(t *testing.T) {
 		}
 	}
 	var unreadable *devicescontract.AnchorUnreadableError
-	if _, ok, err := peerSaying(t, engine.Hello{Book: head.String(), BookState: devices.Unchecked}).Held(t.Context()); ok || !errors.As(err, &unreadable) {
+	if _, ok, err := peerSaying(t, engine.Hello{Book: head.String(), BookState: engine.BookUnchecked}).Held(t.Context()); ok || !errors.As(err, &unreadable) {
 		t.Fatalf("an engine still waiting for the keychain: %v, %v; want the keychain unreadable here too", ok, err)
 	}
 }

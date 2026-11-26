@@ -39,7 +39,6 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 
-	"github.com/jterrazz/studio-station/apps/engine/devices"
 	devicescontract "github.com/jterrazz/studio-station/apps/engine/devices/contract"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
 	enginelog "github.com/jterrazz/studio-station/apps/engine/engine/adapter/log"
@@ -116,7 +115,7 @@ func (m machine) engine(env kit.Env) *process.Engine {
 	jobs := append([]process.Tick{sample.Run}, m.macJobs(calls)...)
 	state := m.readers(calls, report, func() awake.View { return d.AwakeView() })
 	var deviceKey func() string
-	var book func() (string, devices.Standing)
+	var book func() (string, engine.BookState)
 	if m.profile.Kind == coremachine.Computer {
 		deviceKey, book = m.deviceKeyLine, m.heldBook
 	}

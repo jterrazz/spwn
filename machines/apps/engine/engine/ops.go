@@ -5,7 +5,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jterrazz/studio-station/apps/engine/devices"
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
 )
 
@@ -33,7 +32,21 @@ type Hello struct {
 	// empty when it is that one; changed outside Spwn, or not checked yet
 	// for a login keychain unreadable since the engine started, either way
 	// trusted for nothing.
-	BookState devices.Standing `json:"book_state,omitempty"`
+	BookState BookState `json:"book_state,omitempty"`
+}
+
+// value: the words the engine says its book's standing in, the devices
+// family's Standing as it crosses the wire.
+type BookState string
+
+const (
+	BookKept      BookState = ""
+	BookChanged   BookState = "changed"
+	BookUnchecked BookState = "unchecked"
+)
+
+func (BookState) Enum() []string {
+	return []string{string(BookKept), string(BookChanged), string(BookUnchecked)}
 }
 
 type VMView struct {

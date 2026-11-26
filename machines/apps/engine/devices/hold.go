@@ -3,7 +3,6 @@ package devices
 import (
 	"crypto/sha256"
 	"encoding/hex"
-	"strings"
 )
 
 type Standing string
@@ -50,7 +49,7 @@ func Sum(data []byte) string {
 }
 
 func unheld(generation int) Head {
-	return Head{Generation: max(generation, 1), Digest: strings.Repeat("0", sha256.Size*2)}
+	return Head{Generation: max(generation, 1), Digest: hex.EncodeToString(make([]byte, sha256.Size))}
 }
 
 func Keep(h Head) Hold { return Hold{Head: h} }

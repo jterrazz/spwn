@@ -13,6 +13,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/devices"
 	devicescalls "github.com/jterrazz/studio-station/apps/engine/devices/calls"
 	devicescontract "github.com/jterrazz/studio-station/apps/engine/devices/contract"
+	"github.com/jterrazz/studio-station/apps/engine/engine"
 	enginecalls "github.com/jterrazz/studio-station/apps/engine/engine/calls"
 	"github.com/jterrazz/studio-station/apps/engine/platform/darwin"
 	"github.com/jterrazz/studio-station/apps/engine/remote"
@@ -65,7 +66,7 @@ func (p enginePeer) Held(ctx context.Context) (devices.Head, bool, error) {
 		return devices.Head{}, false, nil
 	case err != nil:
 		return devices.Head{}, false, &devicescontract.AnchorUnreadableError{Cause: err.Error()}
-	case h.BookState == devices.Unchecked:
+	case h.BookState == engine.BookUnchecked:
 		return devices.Head{}, false, &devicescontract.AnchorUnreadableError{Cause: "this Mac's engine has not read it since it started"}
 	case h.Book == "":
 		return devices.Head{}, false, nil
@@ -81,12 +82,12 @@ func (p enginePeer) Held(ctx context.Context) (devices.Head, bool, error) {
 
 // value: what the engine's hello says of the book: the head it holds and
 // how the book on disk stands with it.
-func (m machine) heldBook() (string, devices.Standing) {
+func (m machine) heldBook() (string, engine.BookState) {
 	head, standing, ok := m.stores.devices.Held(context.Background())
 	if !ok {
-		return "", devices.Kept
+		return "", engine.BookKept
 	}
-	return head.String(), standing
+	return head.String(), engine.BookState(standing)
 }
 
 func (m machine) bookChanged() {
