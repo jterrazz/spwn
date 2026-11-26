@@ -42,15 +42,22 @@ type Store struct {
 	known bool
 	// value: this Mac's running engine, whose head a process that is not
 	// that engine takes in place of the anchor's; nil asks the anchor alone.
-	peer contract.Peer
+	peer Peer
 	// value: this process is the engine, the book's only writer: once it
 	// holds a head it asks neither the anchor nor a peer again.
 	sole bool
 }
 
+type Peer interface {
+	// invariant: the head this Mac's running engine holds of its book; ok
+	// false when no engine answers or it holds none yet; an engine that
+	// answers anything else is an error, never ok.
+	Held(ctx context.Context) (devices.Head, bool, error)
+}
+
 var _ contract.Store = (*Store)(nil)
 
-func New(files Files, at string, anchor contract.Anchor, peer contract.Peer) *Store {
+func New(files Files, at string, anchor contract.Anchor, peer Peer) *Store {
 	return &Store{files: files, at: at, anchor: anchor, peer: peer}
 }
 

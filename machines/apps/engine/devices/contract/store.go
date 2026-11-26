@@ -31,13 +31,6 @@ type Store interface {
 	Held(ctx context.Context) (head devices.Head, changed, ok bool)
 }
 
-type Peer interface {
-	// invariant: the head this Mac's running engine holds of its book; ok
-	// false when no engine answers or it holds none yet; an engine that
-	// answers anything else is an error, never ok.
-	Held(ctx context.Context) (devices.Head, bool, error)
-}
-
 type Anchor interface {
 	// invariant: the head this Mac last wrote of its book, kept where a
 	// writer of the state folder cannot roll it back; none kept reads as

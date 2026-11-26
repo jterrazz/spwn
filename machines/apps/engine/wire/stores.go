@@ -68,7 +68,7 @@ type stores struct {
 	asking sync.Mutex
 }
 
-func newStores(files local.FS, p setup.Paths, anchor devicescontract.Anchor, peer devicescontract.Peer) *stores {
+func newStores(files local.FS, p setup.Paths, anchor devicescontract.Anchor, peer devicesjsonfile.Peer) *stores {
 	return &stores{
 		prefs:        corejsonfile.NewPreferences(files, p.Prefs, preferenceGroups()),
 		machines:     machinesjsonfile.New(lockable{files}, filepath.Join(p.State, "vms")),
