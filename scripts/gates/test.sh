@@ -13,7 +13,8 @@ d=$(GATE_RUN_DIR=$T/run GATE_VM_RAM=/r bash -c '. ./env.sh; echo "$VM_RAM"'); [ 
 grep -nE 'git clone' ./*.sh | grep -v '^./test.sh' | grep -vE 'git clone -q -b \S+ \S+ ("\$WT"|\$C|\$W/)' && bad "a clone lands outside the RAM folder"
 grep -noE '(^|[ ;])(WT|C)=[^ ;]+' ./*.sh | grep -v '^./test.sh' | grep -vE '=\$(W|VM_RAM)/' && bad "a clone folder is not under the RAM folder"
 bare_ssh() {
-  local f n l s re='(^|[^A-Za-z0-9_.-])(ssh|scp|sftp|rsync)($|[^A-Za-z0-9_-])' comment='^[[:space:]]*#'
+  local f n l s c re='(^|[^A-Za-z0-9_.-])(ssh|scp|sftp|rsync)($|[^A-Za-z0-9_-])' comment='^[[:space:]]*#'
+  local exempt='^(.*[^[:space:]])[[:space:]]+# gate-ssh: exempt \([^()#]+\)$' hash='(^|[[:space:]])#'
   for f in "$@"; do
     n=0
     while IFS= read -r l || [ -n "$l" ]; do
@@ -21,23 +22,35 @@ bare_ssh() {
       [[ $l =~ $comment ]] && continue
       s=${l//'"$GATE_SSH" ssh'/}; s=${s//'"$GATE_SSH" scp'/}; s=${s//'"$GATE_SSH" rsh'/}; s=${s//'rsync -e "$GATE_SSH rsh"'/}
       [[ $s =~ $re ]] || continue
-      [[ $l == *'# gate-ssh: exempt'* && $l == *'-F /dev/null'* && $l == *'IdentityAgent=none'* ]] && continue
+      if [[ $l =~ $exempt ]]; then
+        c=${BASH_REMATCH[1]}
+        [[ ! $c =~ $hash && $c == *'-F /dev/null'* && $c == *'IdentityAgent=none'* ]] && continue
+      fi
       echo "$f:$n: $l"
     done < "$f"
+    echo "read $f $n"
   done
 }
 F=$(mktemp -d) || exit 2
 bare_lines=('ssh vm true' '  scp x vm:y' 'a && ssh -n vm true' 'x=$(ssh vm true)' 'S="ssh -n"' 'rsync -a a vm:b' 'if ssh vm true; then'
   'command ssh vm true' 'env ssh vm true' 'exec ssh vm true' 'nohup ssh vm true' 'timeout 5 ssh vm true' 'echo vm | xargs ssh' '/usr/bin/ssh vm true'
   'while ssh vm true; do :; done' 'x=`ssh vm true`' 's=ssh; $s vm true' 'rsync -e "$GATE_SSH rsh" a vm:b; ssh vm true' '"$GATE_SSH" ssh vm true; scp a vm:b'
-  'sftp vm' 'rsync -a -e ssh a vm:b' 'echo "(hold or ssh)"' 'ssh vm true  # gate-ssh: exempt (no guard)' 'ssh -F /dev/null vm true  # gate-ssh: exempt (half a guard)')
+  'sftp vm' 'rsync -a -e ssh a vm:b' 'echo "(hold or ssh)"' 'ssh vm true  # gate-ssh: exempt (no guard)' 'ssh -F /dev/null vm true  # gate-ssh: exempt (half a guard)'
+  'ssh -F /dev/null vm true # -o IdentityAgent=none # gate-ssh: exempt (the options in a comment)' 'ssh vm true  # gate-ssh: exempt (x) -F /dev/null -o IdentityAgent=none'
+  'ssh -F /dev/null -o IdentityAgent=none vm true; x=" # gate-ssh: exempt (in a string)"; ssh vm true')
 printf '%s\n' "${bare_lines[@]}" > "$F/bare.sh"
 printf '%s\n' '"$GATE_SSH" ssh vm true' '# ssh vm true' 'ssh -F /dev/null -o IdentityAgent=none vm true  # gate-ssh: exempt (why)' 'rsync -e "$GATE_SSH rsh" a vm:b' 'SSHP=("$GATE_SSH" ssh -n)' 'ssh-keygen -l -f k' 'cat ~/.ssh/known_hosts' > "$F/clean.sh"
 tree=(); for f in ./*.sh ../*.sh ../../machines/apps/*/scripts/*.sh; do case $f in ./gate-ssh.sh | ./test.sh) ;; *) tree+=("$f") ;; esac; done
 [ ${#tree[@]} -ge 20 ] || bad "the bare-ssh lint reads only ${#tree[@]} scripts"
-lint=$(bare_ssh "$F/bare.sh" "$F/clean.sh" "${tree[@]}")
-n=$(grep -cF "$F/bare.sh:" <<< "$lint"); [ "$n" = ${#bare_lines[@]} ] || bad "the bare-ssh lint did not run on the tree or misses a form: $n of ${#bare_lines[@]} fixture lines flagged"
-rest=$(grep -vF "$F/bare.sh:" <<< "$lint"); [ -z "$rest" ] || bad "bare ssh to a VM (a script reaches a VM only through \"\$GATE_SSH\"): $rest"
+cp ./cc.sh "$F/cc-sentinel.sh"; printf '%s\n' 'ssh "$VM" true' >> "$F/cc-sentinel.sh"; last=$(wc -l < "$F/cc-sentinel.sh")
+lint=$(bare_ssh "$F/bare.sh" "$F/clean.sh" "$F/cc-sentinel.sh" "${tree[@]}")
+n=$(grep -cF "$F/bare.sh:" <<< "$lint"); [ "$n" = ${#bare_lines[@]} ] || bad "the bare-ssh lint misses a form: $n of ${#bare_lines[@]} fixture lines flagged"
+[ "$(grep -F "$F/cc-sentinel.sh:" <<< "$lint" | cut -d: -f2)" = "$((last))" ] || bad "the bare-ssh lint does not flag exactly the sentinel line of a real script: $(grep -F "$F/cc-sentinel.sh:" <<< "$lint")"
+[ "$(grep -cE '^read \.\.?/' <<< "$lint")" = ${#tree[@]} ] || bad "the bare-ssh lint read $(grep -cE '^read \.\.?/' <<< "$lint") of the ${#tree[@]} scripts of the tree"
+for k in ./cc.sh ./cold-gate.sh ./desktop-proof.sh ./regen.sh ./env.sh ./darwin-build.sh ../install.sh ../../machines/apps/desktop/scripts/look.sh; do
+  grep -qE "^read ${k//./\\.} [1-9][0-9]*$" <<< "$lint" || bad "the bare-ssh lint did not read $k"
+done
+rest=$(grep -vF "$F/" <<< "$lint" | grep -v '^read '); [ -z "$rest" ] || bad "bare ssh to a VM (a script reaches a VM only through \"\$GATE_SSH\"): $rest"
 rm -rf "$F"
 export GATE_RUN_DIR=$T/slot GATE_SLOT_POLL=1 GATE_SLOT_MAX_LOAD=100000
 unset GATE_SLOT_VM
