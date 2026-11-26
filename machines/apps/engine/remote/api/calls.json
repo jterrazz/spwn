@@ -1476,7 +1476,6 @@
       "schema": "station.wiki.read/v1",
       "where": "in-process",
       "errors": [
-        "wiki.bad-budget",
         "wiki.none",
         "wiki.unknown-page",
         "wiki.unreadable"

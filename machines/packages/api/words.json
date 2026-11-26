@@ -1303,11 +1303,6 @@
       "Word": "Machine stopped",
       "Tone": "plain"
     },
-    "wiki.bad-budget": {
-      "Word": "bad budget",
-      "Detail": "wiki",
-      "Tone": "plain"
-    },
     "wiki.none": {
       "Word": "none",
       "Detail": "wiki",
@@ -2325,6 +2320,12 @@
       "Other": "restarts",
       "Tone": "plain"
     },
+    "row": {
+      "Word": "Rows",
+      "One": "row",
+      "Other": "rows",
+      "Tone": "plain"
+    },
     "setting": {
       "Word": "Settings",
       "One": "setting",
@@ -2371,6 +2372,24 @@
     },
     "reading": {
       "Word": "reading",
+      "Tone": "plain"
+    }
+  },
+  "WikiDetail": {
+    "card": {
+      "Word": "card",
+      "Tone": "plain"
+    },
+    "full": {
+      "Word": "full",
+      "Tone": "plain"
+    },
+    "line": {
+      "Word": "line",
+      "Tone": "plain"
+    },
+    "word": {
+      "Word": "word",
       "Tone": "plain"
     }
   }

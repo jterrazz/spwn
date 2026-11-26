@@ -22,6 +22,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/page"
 	"github.com/jterrazz/studio-station/apps/engine/settings"
 	"github.com/jterrazz/studio-station/apps/engine/surface/cli/words"
+	"github.com/jterrazz/studio-station/apps/engine/wiki"
 )
 
 const (
@@ -437,7 +438,9 @@ func wordedEnums() []worded {
 			string(page.NounWikiPage):      {Word: "Pages", One: "page", Other: "pages", Tone: verdict.Plain},
 			string(page.NounRemark):        {Word: "Remarks", One: "remark", Other: "remarks", Tone: verdict.Plain},
 			string(page.NounHardFinding):   {Word: "Hard findings", One: "hard finding", Other: "hard findings", Tone: verdict.Plain},
+			string(page.NounRow):           {Word: "Rows", One: "row", Other: "rows", Tone: verdict.Plain},
 		}},
+		{wiki.Detail(""), wordsOf(wiki.Detail("").Enum(), func(v string) string { return v })},
 		{catalog.OS(""), map[string]word{
 			string(catalog.OSMacOS):  plain("macOS"),
 			string(catalog.OSUbuntu): plain("Ubuntu"),

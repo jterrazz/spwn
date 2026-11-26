@@ -22,8 +22,9 @@ const (
 	NounWikiPage      Noun = "wiki-page"
 	NounRemark        Noun = "remark"
 	NounHardFinding   Noun = "hard-finding"
+	NounRow           Noun = "row"
 )
 
 func (Noun) Enum() []string {
-	return []string{string(NounMachine), string(NounSkill), string(NounListener), string(NounQuietListener), string(NounRestart), string(NounLine), string(NounPackage), string(NounApp), string(NounSetting), string(NounPassword), string(NounGrant), string(NounBlock), string(NounQuietBlock), string(NounWikiPage), string(NounRemark), string(NounHardFinding)}
+	return []string{string(NounMachine), string(NounSkill), string(NounListener), string(NounQuietListener), string(NounRestart), string(NounLine), string(NounPackage), string(NounApp), string(NounSetting), string(NounPassword), string(NounGrant), string(NounBlock), string(NounQuietBlock), string(NounWikiPage), string(NounRemark), string(NounHardFinding), string(NounRow)}
 }

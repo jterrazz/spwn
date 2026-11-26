@@ -48,7 +48,7 @@ type fixture struct {
 	name, id, source string
 }
 
-func read(t *testing.T, path string) string {
+func read(t testing.TB, path string) string {
 	t.Helper()
 	body, err := os.ReadFile(path)
 	if err != nil {

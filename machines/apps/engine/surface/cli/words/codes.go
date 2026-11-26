@@ -743,9 +743,6 @@ func Codes() map[fail.Code]Wording {
 		wikicalls.Unreadable: func(e *fail.Error) (string, string) {
 			return "the wiki cannot be read: " + e.Subject, "repair wiki.yaml at the wiki's root"
 		},
-		wikicalls.BadBudget: func(e *fail.Error) (string, string) {
-			return "\"" + e.Subject + "\" is no budget: 30s, 2min or 10min", "read the page at 30s, 2min or 10min"
-		},
 		diskcalls.RecordUnreadable: func(e *fail.Error) (string, string) {
 			return e.Subject + " cannot be read: nothing is freed until it can", "repair " + e.Subject + " by hand, or remove it: rm " + e.Subject
 		},

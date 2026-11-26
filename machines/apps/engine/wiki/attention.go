@@ -30,15 +30,12 @@ func ranked(findings []ServedFinding) []ServedFinding {
 // holds it when the group is served folded.
 func attention(page []ServedFinding, sections []ServedSection) []ServedFinding {
 	out := slices.Clone(page)
-	var walk func(items []ServedItem, folded string, grouped bool)
-	walk = func(items []ServedItem, folded string, grouped bool) {
+	var walk func(items []ServedItem, folded string)
+	walk = func(items []ServedItem, folded string) {
 		for _, it := range items {
 			if b := it.Block; b != nil {
 				for _, f := range b.Finding {
 					f.At = cmp.Or(folded, f.At)
-					if folded == "" && b.Shown == ShownNone {
-						f.Found = shownFrom(b.Tier, grouped)
-					}
 					out = append(out, f)
 				}
 			}
@@ -47,25 +44,14 @@ func attention(page []ServedFinding, sections []ServedSection) []ServedFinding {
 				if g.Folded != FoldNone && at == "" {
 					at = g.Address
 				}
-				walk(g.Items, at, true)
+				walk(g.Items, at)
 			}
 		}
 	}
 	for _, sec := range sections {
-		walk(sec.Items, "", false)
+		walk(sec.Items, "")
 	}
 	return ranked(out)
-}
-
-// invariant: the first reading time, shortest first, at which a block of this
-// tier is drawn rather than left out.
-func shownFrom(t Tier, grouped bool) Budget {
-	for _, b := range Budgets() {
-		if shown(t, b, grouped) != ShownNone {
-			return b
-		}
-	}
-	return ""
 }
 
 func needsYou(findings []ServedFinding) int {

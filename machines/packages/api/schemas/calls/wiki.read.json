@@ -60,6 +60,16 @@
     "wiki.PageHead": {
       "additionalProperties": false,
       "properties": {
+        "Decision": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/wiki.ServedDecision"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "Floor": {
           "type": "integer"
         },
@@ -75,24 +85,33 @@
         "Line": {
           "type": "string"
         },
+        "Number": {
+          "type": "string"
+        },
         "Seat": {
           "type": "string"
         },
         "Soft": {
           "type": "integer"
         },
+        "Title": {
+          "type": "string"
+        },
         "Word": {
           "type": "string"
         }
       },
       "required": [
+        "Decision",
         "Floor",
         "Hard",
         "ID",
         "Icon",
         "Line",
+        "Number",
         "Seat",
         "Soft",
+        "Title",
         "Word"
       ],
       "type": "object"
@@ -164,38 +183,6 @@
       ],
       "type": "object"
     },
-    "wiki.SeatHead": {
-      "additionalProperties": false,
-      "properties": {
-        "Active": {
-          "type": "boolean"
-        },
-        "Home": {
-          "type": "string"
-        },
-        "ID": {
-          "type": "string"
-        },
-        "Icon": {
-          "type": "string"
-        },
-        "Name": {
-          "type": "string"
-        },
-        "Plan": {
-          "type": "boolean"
-        }
-      },
-      "required": [
-        "Active",
-        "Home",
-        "ID",
-        "Icon",
-        "Name",
-        "Plan"
-      ],
-      "type": "object"
-    },
     "wiki.Served": {
       "additionalProperties": false,
       "properties": {
@@ -208,17 +195,8 @@
             "null"
           ]
         },
-        "Budget": {
-          "type": "string"
-        },
-        "Budgets": {
-          "items": {
-            "type": "string"
-          },
-          "type": [
-            "array",
-            "null"
-          ]
+        "Blocks": {
+          "type": "integer"
         },
         "Findings": {
           "items": {
@@ -231,15 +209,6 @@
         },
         "Floor": {
           "$ref": "#/$defs/wiki.FloorHead"
-        },
-        "Floors": {
-          "items": {
-            "$ref": "#/$defs/wiki.ServedFloor"
-          },
-          "type": [
-            "array",
-            "null"
-          ]
         },
         "Icons": {
           "additionalProperties": {
@@ -256,20 +225,14 @@
             "null"
           ]
         },
+        "Lede": {
+          "$ref": "#/$defs/wiki.ServedLede"
+        },
         "NeedsYou": {
           "type": "integer"
         },
         "Page": {
           "$ref": "#/$defs/wiki.PageHead"
-        },
-        "Pages": {
-          "items": {
-            "$ref": "#/$defs/wiki.PageHead"
-          },
-          "type": [
-            "array",
-            "null"
-          ]
         },
         "Paragraph": {
           "items": {
@@ -280,9 +243,9 @@
             "null"
           ]
         },
-        "Seats": {
+        "Reading": {
           "items": {
-            "$ref": "#/$defs/wiki.SeatHead"
+            "$ref": "#/$defs/wiki.ServedReading"
           },
           "type": [
             "array",
@@ -298,28 +261,22 @@
             "null"
           ]
         },
-        "Unshown": {
-          "type": "integer"
-        },
         "Verdict": {
           "$ref": "#/$defs/wiki.Verdict"
         }
       },
       "required": [
         "Attention",
-        "Budget",
-        "Budgets",
+        "Blocks",
         "Findings",
         "Floor",
-        "Floors",
         "Icons",
+        "Lede",
         "NeedsYou",
         "Page",
-        "Pages",
         "Paragraph",
-        "Seats",
+        "Reading",
         "Sections",
-        "Unshown",
         "Verdict"
       ],
       "type": "object"
@@ -399,17 +356,6 @@
         "Score": {
           "type": "integer"
         },
-        "Shown": {
-          "enum": [
-            "",
-            "card",
-            "counted",
-            "line",
-            "none",
-            "tile"
-          ],
-          "type": "string"
-        },
         "Sub": {
           "anyOf": [
             {
@@ -463,7 +409,6 @@
         "NeedsYou",
         "OwnFloor",
         "Score",
-        "Shown",
         "Sub",
         "Table",
         "Tier",
@@ -603,7 +548,13 @@
         "At": {
           "type": "string"
         },
-        "Found": {
+        "From": {
+          "enum": [
+            "word",
+            "line",
+            "card",
+            "full"
+          ],
           "type": "string"
         },
         "Hard": {
@@ -633,41 +584,13 @@
       },
       "required": [
         "At",
-        "Found",
+        "From",
         "Hard",
         "Level",
         "Line",
         "Rule",
         "Says",
         "Word"
-      ],
-      "type": "object"
-    },
-    "wiki.ServedFloor": {
-      "additionalProperties": false,
-      "properties": {
-        "Blocks": {
-          "type": "integer"
-        },
-        "Current": {
-          "type": "boolean"
-        },
-        "Index": {
-          "type": "integer"
-        },
-        "Name": {
-          "type": "string"
-        },
-        "Question": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "Blocks",
-        "Current",
-        "Index",
-        "Name",
-        "Question"
       ],
       "type": "object"
     },
@@ -684,7 +607,6 @@
           "enum": [
             "",
             "author",
-            "budget",
             "seat"
           ],
           "type": "string"
@@ -705,6 +627,18 @@
           ]
         },
         "Lead": {
+          "type": "string"
+        },
+        "MirroredBy": {
+          "type": "string"
+        },
+        "MirroredFrom": {
+          "enum": [
+            "word",
+            "line",
+            "card",
+            "full"
+          ],
           "type": "string"
         },
         "NeedsYou": {
@@ -741,6 +675,8 @@
         "Intent",
         "Items",
         "Lead",
+        "MirroredBy",
+        "MirroredFrom",
         "NeedsYou",
         "OwnFloor",
         "ReadBy",
@@ -771,9 +707,34 @@
             }
           ]
         },
+        "Max": {
+          "enum": [
+            "word",
+            "line",
+            "card",
+            "full"
+          ],
+          "type": "string"
+        },
         "Prose": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/wiki.ServedProse"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "Ranks": {
           "items": {
-            "$ref": "#/$defs/wiki.Paragraph"
+            "enum": [
+              "word",
+              "line",
+              "card",
+              "full"
+            ],
+            "type": "string"
           },
           "type": [
             "array",
@@ -784,7 +745,107 @@
       "required": [
         "Block",
         "Group",
-        "Prose"
+        "Max",
+        "Prose",
+        "Ranks"
+      ],
+      "type": "object"
+    },
+    "wiki.ServedLede": {
+      "additionalProperties": false,
+      "properties": {
+        "First": {
+          "items": {
+            "$ref": "#/$defs/wiki.Run"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "More": {
+          "type": "boolean"
+        },
+        "Ranks": {
+          "items": {
+            "enum": [
+              "word",
+              "line",
+              "card",
+              "full"
+            ],
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "First",
+        "More",
+        "Ranks"
+      ],
+      "type": "object"
+    },
+    "wiki.ServedProse": {
+      "additionalProperties": false,
+      "properties": {
+        "First": {
+          "items": {
+            "$ref": "#/$defs/wiki.Run"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "ID": {
+          "type": "string"
+        },
+        "More": {
+          "type": "boolean"
+        },
+        "Paragraphs": {
+          "items": {
+            "$ref": "#/$defs/wiki.Paragraph"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "First",
+        "ID",
+        "More",
+        "Paragraphs"
+      ],
+      "type": "object"
+    },
+    "wiki.ServedReading": {
+      "additionalProperties": false,
+      "properties": {
+        "Label": {
+          "type": "string"
+        },
+        "Same": {
+          "type": "boolean"
+        },
+        "Seconds": {
+          "type": "integer"
+        },
+        "Words": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "Label",
+        "Same",
+        "Seconds",
+        "Words"
       ],
       "type": "object"
     },
@@ -847,6 +908,9 @@
         "Heading": {
           "type": "string"
         },
+        "Icon": {
+          "type": "string"
+        },
         "Items": {
           "items": {
             "$ref": "#/$defs/wiki.ServedItem"
@@ -856,6 +920,9 @@
             "null"
           ]
         },
+        "Label": {
+          "type": "string"
+        },
         "Rests": {
           "type": "boolean"
         }
@@ -863,7 +930,9 @@
       "required": [
         "Anchor",
         "Heading",
+        "Icon",
         "Items",
+        "Label",
         "Rests"
       ],
       "type": "object"
@@ -880,8 +949,14 @@
             "null"
           ]
         },
+        "Count": {
+          "type": "integer"
+        },
         "In": {
           "$ref": "#/$defs/wiki.ServedRef"
+        },
+        "Mirrors": {
+          "type": "string"
         },
         "Of": {
           "type": "string"
@@ -904,7 +979,9 @@
       },
       "required": [
         "Columns",
+        "Count",
         "In",
+        "Mirrors",
         "Of",
         "Rows",
         "Title",
@@ -931,9 +1008,6 @@
     "wiki.calls.ReadIn": {
       "additionalProperties": false,
       "properties": {
-        "Budget": {
-          "type": "string"
-        },
         "Page": {
           "type": "string"
         }

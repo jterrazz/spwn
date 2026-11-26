@@ -14,7 +14,7 @@ import (
 
 const checkGolden = "check-corpus.txt"
 
-func corpusSources(t *testing.T) map[string]string {
+func corpusSources(t testing.TB) map[string]string {
 	t.Helper()
 	out := map[string]string{}
 	for _, id := range corpusPages() {

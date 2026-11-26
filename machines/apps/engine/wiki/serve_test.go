@@ -23,53 +23,55 @@ func corpusFiles(t *testing.T) map[string][]byte {
 	return out
 }
 
+func details(ds []wiki.Detail) string {
+	out := make([]string, 0, len(ds))
+	for _, d := range ds {
+		out = append(out, string(d))
+	}
+	return strings.Join(out, ",")
+}
+
 func outline(s wiki.Served) string {
 	var b strings.Builder
 	line := func(depth int, parts ...string) {
 		b.WriteString(strings.Repeat("  ", depth) + strings.Join(parts, " ") + "\n")
 	}
-	seats := make([]string, 0, len(s.Seats))
-	for _, seat := range s.Seats {
-		mark := seat.ID
-		if seat.Active {
-			mark = "[" + mark + "]"
-		}
-		seats = append(seats, mark)
+	line(0, "page", s.Page.ID, "floor="+strconv.Itoa(s.Floor.Index), s.Floor.Name, "blocks="+strconv.Itoa(s.Blocks), "needs-you="+strconv.Itoa(s.NeedsYou))
+	if s.Page.Number != "" {
+		line(1, "record", s.Page.Number, strconv.Quote(s.Page.Title))
 	}
-	line(0, "page", s.Page.ID, "@"+string(s.Budget), "floor="+strconv.Itoa(s.Floor.Index), s.Floor.Name, "seats="+strings.Join(seats, ","), "needs-you="+strconv.Itoa(s.NeedsYou), "unshown="+strconv.Itoa(s.Unshown))
-	ladder := make([]string, 0, len(s.Floors))
-	for _, f := range s.Floors {
-		mark := strconv.Itoa(f.Index) + ":" + strconv.Itoa(f.Blocks)
-		if f.Current {
-			mark = "[" + mark + "]"
-		}
-		ladder = append(ladder, mark)
+	if d := s.Page.Decision; d != nil {
+		line(1, "decision", "page="+d.Page, d.Number, "status="+strconv.Quote(d.Status), "date="+d.Date, strconv.Quote(d.Decides))
 	}
-	line(1, "floors", strings.Join(ladder, " "))
+	for i, r := range s.Reading {
+		line(1, "reading", string(wiki.Details()[i]), "words="+strconv.Itoa(r.Words), "seconds="+strconv.Itoa(r.Seconds), strconv.Quote(r.Label), "same="+strconv.FormatBool(r.Same))
+	}
 	for _, p := range s.Paragraph {
 		line(1, "paragraph", runs(p))
 	}
+	line(1, "lede", "ranks="+details(s.Lede.Ranks), "first="+runs(wiki.Paragraph{Runs: s.Lede.First}), "more="+strconv.FormatBool(s.Lede.More))
 	for _, f := range s.Findings {
-		line(1, "finding", string(f.Level), f.Rule, f.Says)
+		line(1, "finding", string(f.Level), f.Rule, "from="+string(f.From), f.Says)
 	}
 	for _, f := range s.Attention {
-		found := ""
-		if f.Found != "" {
-			found = " found=" + string(f.Found)
-		}
-		line(1, "attention", string(f.Level), f.Rule, "at="+f.At+found, strconv.Quote(f.Word))
+		line(1, "attention", string(f.Level), f.Rule, "at="+f.At, "from="+string(f.From), strconv.Quote(f.Word))
 	}
 	var items func(depth int, its []wiki.ServedItem)
 	items = func(depth int, its []wiki.ServedItem) {
 		for _, it := range its {
+			faces := "ranks=" + details(it.Ranks) + " max=" + string(it.Max)
 			switch {
 			case it.Prose != nil:
-				for _, p := range it.Prose {
-					line(depth, string(p.Form), runs(p))
+				line(depth, "prose", it.Prose.ID, faces, "first="+runs(wiki.Paragraph{Runs: it.Prose.First}), "more="+strconv.FormatBool(it.Prose.More))
+				for _, p := range it.Prose.Paragraphs {
+					line(depth+1, string(p.Form), runs(p))
 				}
 			case it.Group != nil:
 				g := it.Group
-				head := []string{"group", g.ID, string(g.Intent), "blocks=" + strconv.Itoa(g.Blocks), "folded=" + string(g.Folded)}
+				head := []string{"group", g.ID, faces, string(g.Intent), "blocks=" + strconv.Itoa(g.Blocks), "folded=" + string(g.Folded)}
+				if g.MirroredBy != "" {
+					head = append(head, "mirrored-by="+g.MirroredBy, "from="+string(g.MirroredFrom))
+				}
 				if g.OwnFloor != nil {
 					head = append(head, "own-floor="+strconv.Itoa(g.OwnFloor.Index))
 				}
@@ -80,7 +82,7 @@ func outline(s wiki.Served) string {
 				items(depth+1, g.Items)
 			case it.Block != nil:
 				k := it.Block
-				head := []string{"block", k.Address, k.Kind, "icon=" + k.Icon, "tier=" + string(k.Tier), "shown=" + string(k.Shown)}
+				head := []string{"block", k.Address, faces, k.Kind, "icon=" + k.Icon, "tier=" + string(k.Tier)}
 				if k.OwnFloor != nil {
 					head = append(head, "own-floor="+strconv.Itoa(k.OwnFloor.Index))
 				}
@@ -92,7 +94,7 @@ func outline(s wiki.Served) string {
 					line(depth+1, "field", f.Name, strconv.Quote(f.Text), refs(f.Refs))
 				}
 				if k.Table != nil {
-					line(depth+1, "table", k.Table.Of, "in="+k.Table.In.Address, "where="+strconv.Quote(k.Table.Where), "columns="+strings.Join(k.Table.Columns, ","))
+					line(depth+1, "table", k.Table.Of, "in="+k.Table.In.Address, "where="+strconv.Quote(k.Table.Where), "columns="+strings.Join(k.Table.Columns, ","), "count="+strconv.Itoa(k.Table.Count), "mirrors="+k.Table.Mirrors)
 					for _, r := range k.Table.Rows {
 						cells := make([]string, 0, len(r.Cells))
 						for _, c := range r.Cells {
@@ -114,15 +116,13 @@ func outline(s wiki.Served) string {
 					line(depth+1, "decision", "page="+d.Page, d.Number, strconv.Quote(d.Title), "status="+strconv.Quote(d.Status), "accepted="+strconv.FormatBool(d.Accepted), "date="+d.Date, "amended-by="+strings.Join(d.AmendedBy, ","), "amends="+strings.Join(d.Amends, ","), "resolves="+strconv.FormatBool(d.Resolves), strconv.Quote(d.Decides))
 				}
 				for _, f := range k.Finding {
-					line(depth+1, "finding", string(f.Level), f.Rule, f.Says)
+					line(depth+1, "finding", string(f.Level), f.Rule, "from="+string(f.From), f.Says)
 				}
 			}
 		}
 	}
 	for _, sec := range s.Sections {
-		if sec.Heading != "" {
-			line(1, "section", sec.Anchor, strconv.Quote(sec.Heading), "rests="+strconv.FormatBool(sec.Rests))
-		}
+		line(1, "section", sec.Anchor, strconv.Quote(sec.Label), "icon="+sec.Icon, "rests="+strconv.FormatBool(sec.Rests))
 		items(2, sec.Items)
 	}
 	return b.String()
@@ -167,20 +167,28 @@ func refs(rs []wiki.ServedRef) string {
 	return " refs=" + strings.Join(out, ",")
 }
 
-func TestEveryPageIsServedToItsGoldenAtEachBudget(t *testing.T) {
+func servedCorpus(t *testing.T) map[string]wiki.Served {
+	t.Helper()
 	c, err := wiki.Read(corpusFiles(t))
 	if err != nil {
 		t.Fatal(err)
 	}
+	out := map[string]wiki.Served{}
+	for _, id := range corpusPages() {
+		s, err := c.Serve(id)
+		if err != nil {
+			t.Fatalf("%s: %v", id, err)
+		}
+		out[id] = s
+	}
+	return out
+}
+
+func TestEveryPageIsServedToItsGoldenAtItsFourLevels(t *testing.T) {
+	served := servedCorpus(t)
 	var got strings.Builder
 	for _, id := range corpusPages() {
-		for _, budget := range wiki.Budgets() {
-			s, served := c.Serve(id, budget)
-			if served != nil {
-				t.Fatalf("%s: %v", id, served)
-			}
-			got.WriteString(outline(s) + "\n")
-		}
+		got.WriteString(outline(served[id]) + "\n")
 	}
 	path := filepath.Join(goldenDir, serveGolden)
 	if *update {
@@ -198,42 +206,34 @@ func TestEveryPageIsServedToItsGoldenAtEachBudget(t *testing.T) {
 	}
 }
 
-func TestAFindingOnABlockThisReadingTimeDoesNotDrawSaysWhichOneDoes(t *testing.T) {
-	c, err := wiki.Read(corpusFiles(t))
-	if err != nil {
-		t.Fatal(err)
-	}
-	found := map[wiki.Budget]int{}
-	for _, budget := range wiki.Budgets() {
-		s, serveErr := c.Serve("product/boundaries", budget)
-		if serveErr != nil {
-			t.Fatal(serveErr)
-		}
+func TestAFindingSaysTheFirstLevelThatShowsIt(t *testing.T) {
+	want := map[wiki.Level]wiki.Detail{wiki.LevelNeedsYou: wiki.DetailWord, wiki.LevelRemark: wiki.DetailLine, wiki.LevelAmbient: wiki.DetailCard}
+	seen := map[wiki.Detail]int{}
+	for id, s := range servedCorpus(t) {
 		for _, f := range s.Attention {
-			if f.Found != "" {
-				found[budget]++
-				if f.Found == budget || f.At == "" {
-					t.Errorf("@%s: %s found = %q at %q; want a later reading time and a block", budget, f.Rule, f.Found, f.At)
-				}
+			from := want[f.Level]
+			if f.Hard {
+				from = wiki.DetailWord
 			}
+			if f.From != from {
+				t.Errorf("%s: %s %s from %q; want %q", id, f.Level, f.Rule, f.From, from)
+			}
+			seen[f.From]++
 		}
 	}
-	if found[wiki.Budget2min] != 0 || found[wiki.Budget10min] != 0 {
-		t.Errorf("findings pointing elsewhere = %v; the longer reading times draw every block", found)
-	}
-	if found[wiki.Budget30s] == 0 {
-		t.Errorf("findings pointing elsewhere = %v; want some at 30s", found)
+	if seen[wiki.DetailWord] == 0 || seen[wiki.DetailCard] == 0 {
+		t.Errorf("findings by level = %v; want some at word and some at card", seen)
 	}
 }
 
-func TestACorpusIsOpenedAtItsFirstSeatsHomeAndItsOwnBudget(t *testing.T) {
+func TestACorpusIsOpenedAtItsFirstSeatsHome(t *testing.T) {
 	c, err := wiki.Read(corpusFiles(t))
 	if err != nil {
 		t.Fatal(err)
 	}
-	s, err := c.Serve(c.Home(), "")
-	if err != nil || s.Page.ID != "blueprint/philosophy" || s.Budget != wiki.Budget2min || len(s.Pages) != len(corpusPages()) {
-		t.Fatalf("Serve(home) = %s @%s, %d pages, %v", s.Page.ID, s.Budget, len(s.Pages), err)
+	s, err := c.Serve(c.Home())
+	if err != nil || s.Page.ID != "blueprint/philosophy" || len(s.Reading) != len(wiki.Details()) {
+		t.Fatalf("Serve(home) = %s, %d readings, %v", s.Page.ID, len(s.Reading), err)
 	}
 }
 
@@ -242,7 +242,7 @@ func TestAPageNoFileHoldsIsUnknown(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := c.Serve("product/nowhere", ""); !errors.Is(err, wiki.ErrUnknownPage) {
+	if _, err := c.Serve("product/nowhere"); !errors.Is(err, wiki.ErrUnknownPage) {
 		t.Fatalf("Serve = %v; want ErrUnknownPage", err)
 	}
 }
@@ -280,7 +280,7 @@ func TestAFigureWithNoPartsWrittenIsDrawnFromTheGroupItShowsByItsTitle(t *testin
 	if err != nil {
 		t.Fatal(err)
 	}
-	s, err := c.Serve("growth/positioning", wiki.Budget2min)
+	s, err := c.Serve("growth/positioning")
 	if err != nil {
 		t.Fatal(err)
 	}

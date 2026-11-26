@@ -3,7 +3,6 @@ package calls
 import (
 	"context"
 	"errors"
-	"slices"
 
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
@@ -16,7 +15,6 @@ const (
 	None        fail.Code = "wiki.none"
 	UnknownPage fail.Code = "wiki.unknown-page"
 	Unreadable  fail.Code = "wiki.unreadable"
-	BadBudget   fail.Code = "wiki.bad-budget"
 )
 
 type Deps struct {
@@ -40,17 +38,12 @@ type ReadIn struct {
 	// value: the page's id, its path under the corpus without .md; empty
 	// opens the first seat's home.
 	Page string
-	// value: 30s, 2min or 10min; empty reads at the corpus's own budget.
-	Budget wiki.Budget
 }
 
 var Read = call.Call[Deps, ReadIn, wiki.Served]{
 	Name: "wiki.read", Where: call.InProcess, Applies: Applies,
-	Errors: []fail.Code{None, UnknownPage, Unreadable, BadBudget},
+	Errors: []fail.Code{None, UnknownPage, Unreadable},
 	Run: func(ctx context.Context, d Deps, in ReadIn, _ call.Progress) (wiki.Served, error) {
-		if in.Budget != "" && !slices.Contains(wiki.Budgets(), in.Budget) {
-			return wiki.Served{}, fail.New(fail.Refused, BadBudget, string(in.Budget), nil)
-		}
 		files, err := d.Corpus.Files(ctx)
 		if errors.Is(err, contract.ErrNone) {
 			return wiki.Served{}, fail.New(fail.NotFound, None, "", nil)
@@ -66,7 +59,7 @@ var Read = call.Call[Deps, ReadIn, wiki.Served]{
 		if page == "" {
 			page = corpus.Home()
 		}
-		served, err := corpus.Serve(page, in.Budget)
+		served, err := corpus.Serve(page)
 		if errors.Is(err, wiki.ErrUnknownPage) {
 			return wiki.Served{}, fail.New(fail.NotFound, UnknownPage, page, nil)
 		}

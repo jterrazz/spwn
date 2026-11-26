@@ -48,6 +48,39 @@ func (s *server) decision(b *Block) *ServedDecision {
 	return d
 }
 
+// invariant: a record's page heads with its decision as its record says it,
+// and what it decides as the first decision block of the corpus, in page
+// order then reading order, whose adr names it says it.
+func (s *server) record(id string) *ServedDecision {
+	r := s.c.Records[id]
+	d := &ServedDecision{Page: id, Number: r.Number, Title: r.Title, Status: r.Status, Date: r.Date, Accepted: r.Status == "Accepted", AmendedBy: r.AmendedBy, Amends: r.Amends, Resolves: true}
+	var find func(items []Item) bool
+	find = func(items []Item) bool {
+		for _, it := range items {
+			switch it := it.(type) {
+			case *Block:
+				if named, ok := s.c.pageAt(textOf(it.Props, "adr")); ok && it.Kind == "decision" && named == id {
+					d.Decides = textOf(it.Props, "decides")
+					return true
+				}
+			case *Group:
+				if find(it.Items) {
+					return true
+				}
+			}
+		}
+		return false
+	}
+	for _, p := range s.c.Pages {
+		for _, sec := range p.Sections {
+			if find(sec.Items) {
+				return d
+			}
+		}
+	}
+	return d
+}
+
 var (
 	recordTitle = regexp.MustCompile(`^# (ADR-\d+): (.+)$`)
 	recordLine  = regexp.MustCompile(`^(?:\*\*)?(Status|Date|Amended by|Amends):?(?:\*\*)? (.+)$`)

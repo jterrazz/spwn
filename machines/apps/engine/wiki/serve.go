@@ -10,32 +10,38 @@ import (
 )
 
 type Served struct {
-	// value: a page of a corpus as a reader is served it: its blocks with
-	// their reading (tier, how the budget shows each, the findings that sit
-	// on it), its groups folded or open, its tables' rows found, and the bar
-	// and the tree it is read among. Every judgement in it is the engine's;
-	// the window draws it.
+	// value: a page of a corpus as a reader is served it, at its four levels
+	// of detail at once: each block, group and prose with the face it takes
+	// at each level and the most it opens, its blocks' reading (tier, the
+	// findings that sit on it), its groups and the tables that mirror them,
+	// its tables' rows found, and how long each level takes to read. Every judgement in it is
+	// the engine's; the window draws it.
 	Page      PageHead
 	Paragraph []Paragraph
+	Lede      ServedLede
 	Floor     FloorHead
-	// value: the ladder the page stands on: every floor of the corpus, the
-	// page's own marked, each with how many of the page's blocks sit on it.
-	Floors   []ServedFloor
-	Budget   Budget
-	Budgets  []Budget
-	Seats    []SeatHead
-	Pages    []PageHead
-	Sections []ServedSection
-	Findings []ServedFinding
-	// value: what the page's head counts of it as served: the findings that
-	// need the owner, on the page or its blocks, and the blocks this budget
-	// does not show, a folded group counting all of its own.
-	NeedsYou, Unshown int
+	Sections  []ServedSection
+	Findings  []ServedFinding
+	// value: what the page's head counts of it: the findings that need the
+	// owner, on the page or its blocks, and its blocks, a group's included.
+	NeedsYou, Blocks int
 	// value: every finding served on the page and its blocks, in the order
 	// a reader is asked to look at them, what needs the owner first.
 	Attention []ServedFinding
-	Icons     map[string][]string
-	Verdict   Verdict
+	// value: the reading time of each level, word first.
+	Reading []ServedReading
+	Icons   map[string][]string
+	Verdict Verdict
+}
+
+type ServedLede struct {
+	// value: what stands under the page's title at each level: its
+	// paragraph's first sentence at word, the paragraph clipped to its line
+	// at line and whole from card; on a decision record its decision, a line
+	// up to line and its full face from card.
+	Ranks []Detail
+	First []Run
+	More  bool
 }
 
 type PageHead struct {
@@ -47,32 +53,18 @@ type PageHead struct {
 	Icon  string
 	// value: the hard and the soft findings that sit on the page or its blocks.
 	Hard, Soft int
+	// value: on a decision record, its number and its title read from its
+	// head, and the decision as its record and the block that names it say
+	// it; empty on any other page.
+	Number   string
+	Title    string
+	Decision *ServedDecision
 }
 
 type FloorHead struct {
 	Index    int
 	Name     string
 	Question string
-}
-
-type ServedFloor struct {
-	Index    int
-	Name     string
-	Question string
-	Blocks   int
-	Current  bool
-}
-
-type SeatHead struct {
-	ID   string
-	Name string
-	Icon string
-	Home string
-	// value: the seat a reader holds the blueprint with, read as a seat
-	// without owning one.
-	Plan bool
-	// value: the seat of the page served.
-	Active bool
 }
 
 type Verdict struct{ Hard, Soft int }
@@ -83,14 +75,33 @@ type ServedSection struct {
 	// value: the page's own "Rests on" section, the one S6 reads: what the
 	// page stands on, served where it is written.
 	Rests bool
+	// value: how a reader names the section, its heading or the opening's
+	// word, and its icon: home for the opening, rests for Rests on, guard
+	// when a group of it guards, else define.
+	Label string
+	Icon  string
 	Items []ServedItem
 }
 
 type ServedItem struct {
-	// invariant: one of Prose, Group or Block is set.
-	Prose []Paragraph
+	// invariant: one of Prose, Group or Block is set. Ranks holds the face
+	// it takes at each level, word first, never less at a level than
+	// at the one before it nor more than Max, the most it opens.
+	Ranks []Detail
+	Max   Detail
+	Prose *ServedProse
 	Group *ServedGroup
 	Block *ServedBlock
+}
+
+type ServedProse struct {
+	// value: prose as paragraphs, list items, quotes and table lines, its
+	// id p<section>.<k>, the k-th prose of its section, and its first
+	// sentence, which its word and line faces show.
+	ID         string
+	Paragraphs []Paragraph
+	First      []Run
+	More       bool
 }
 
 type ServedGroup struct {
@@ -100,11 +111,15 @@ type ServedGroup struct {
 	NeedsYou bool
 	Title    string
 	Intent   Intent
-	// value: why it opens folded: its author wrote fold, the seat of the
-	// page reads no group of its intent, or the budget folds every group;
-	// empty when it opens.
+	// value: why it opens folded: its author wrote fold, or the seat of the
+	// page reads no group of its intent; empty when it opens.
 	Folded Fold
 	Blocks int
+	// value: the table of the page whose rows are its blocks, and the first
+	// level at which that table shows them as rows, from which the group
+	// shows its blocks' words alone.
+	MirroredBy   string
+	MirroredFrom Detail
 	// value: the floor its blocks sit on, served only when it is not its
 	// page's.
 	OwnFloor *FloorHead
@@ -120,14 +135,13 @@ const (
 	FoldNone   Fold = ""
 	FoldAuthor Fold = "author"
 	FoldSeat   Fold = "seat"
-	FoldBudget Fold = "budget"
 )
 
 type Shown string
 
 const (
-	// value: how the budget shows a block: a wide tile, a card, one line,
-	// counted beside its set, or not at all.
+	// value: how a budget of S11 shows a block: a wide tile, a card, one
+	// line, counted beside its set, or not at all; the levels are read off it.
 	ShownTile    Shown = "tile"
 	ShownCard    Shown = "card"
 	ShownLine    Shown = "line"
@@ -150,7 +164,6 @@ type ServedBlock struct {
 	Tier     Tier
 	Score    int
 	Why      []Cause
-	Shown    Shown
 	Fields   []ServedField
 	Table    *ServedTable
 	Sub      *PageHead
@@ -181,6 +194,10 @@ type ServedTable struct {
 	Where   string
 	Columns []string
 	Rows    []ServedRow
+	// value: how many rows it found, said with the noun row; and the group
+	// of the page whose blocks are its rows, drawn above it.
+	Count   int
+	Mirrors string
 }
 
 type ServedRow struct {
@@ -209,10 +226,9 @@ type ServedFinding struct {
 	// page's own head; and the word of what it is about.
 	At   string
 	Word string
-	// value: when this reading time does not draw the block the finding is
-	// about, nor a folded group that holds it, the first reading time that
-	// does; empty when the finding is found where At says.
-	Found Budget
+	// value: the first level that says it: word for one that needs the
+	// owner or a hard one, line for a remark, card for an ambient one.
+	From Detail
 }
 
 var (
@@ -270,30 +286,20 @@ func (c Corpus) Home() string {
 	return c.Schema.Seats[0].Home
 }
 
-func Budgets() []Budget { return []Budget{Budget30s, Budget2min, Budget10min} }
-
-func (c Corpus) Serve(id string, budget Budget) (Served, error) {
+func (c Corpus) Serve(id string) (Served, error) {
 	i := slices.IndexFunc(c.Pages, func(p Page) bool { return p.ID == id })
 	if i < 0 {
 		return Served{}, ErrUnknownPage
 	}
-	if budget == "" {
-		budget = c.Schema.Budget
-	}
-	s := server{c: c, budget: budget, readings: map[string]BlockReading{}, pages: map[string]*Page{}, blocks: map[string]*Block{}, groups: map[string]*Group{}}
+	s := server{c: c, readings: map[string]BlockReading{}, pages: map[string]*Page{}, blocks: map[string]*Block{}, groups: map[string]*Group{}}
 	s.index()
 	p := &c.Pages[i]
 	reading := s.reading(p.ID)
 	out := Served{
-		Page: s.head(p), Paragraph: Paragraphs(p.Faces.Paragraph), Budget: budget, Budgets: Budgets(),
-		Floor: s.floor(reading.Floor), Floors: s.ladder(reading), Icons: map[string][]string{},
+		Page: s.head(p), Paragraph: Paragraphs(p.Faces.Paragraph),
+		Floor: s.floor(reading.Floor), Icons: map[string][]string{},
 	}
-	for _, seat := range c.Schema.Seats {
-		out.Seats = append(out.Seats, SeatHead{ID: seat.ID, Name: seat.Name, Icon: seat.ID, Home: seat.Home, Plan: seat.Plan, Active: seat.ID == reading.Seat})
-	}
-	for j := range c.Pages {
-		out.Pages = append(out.Pages, s.head(&c.Pages[j]))
-	}
+	out.Lede = lede(out.Page, out.Paragraph)
 	for _, icon := range c.Schema.Icons {
 		out.Icons[icon.Name] = icon.Rows
 	}
@@ -303,52 +309,75 @@ func (c Corpus) Serve(id string, budget Budget) (Served, error) {
 		} else {
 			out.Verdict.Soft++
 		}
-		if f.Page == p.ID && f.Block == "" && s.signals(f) {
+		if f.Page == p.ID && f.Block == "" {
 			out.Findings = append(out.Findings, served(f, "", p.Faces.Word))
 		}
 	}
 	for si, sec := range p.Sections {
-		ss := ServedSection{}
+		ss := ServedSection{Label: openingLabel, Icon: "home"}
 		if sec.Heading != nil {
 			ss.Heading, ss.Anchor, ss.Rests = sec.Heading.Text, sec.Heading.Anchor, restsOn(sec.Heading.Text)
+			ss.Label, ss.Icon = ss.Heading, sectionIcon(ss.Rests, sec.Items)
 		}
 		if si == 0 && sec.Heading == nil {
 			sec.Items = s.afterParagraph(sec.Items, p.Faces.Paragraph)
 		}
+		k := 0
 		for _, it := range sec.Items {
-			if _, prose := it.(*Prose); prose && budget == Budget30s {
-				continue
+			item := s.item(p, reading, it, false)
+			if item.Prose != nil {
+				item.Prose.ID = "p" + strconv.Itoa(si) + "." + strconv.Itoa(k)
+				k++
 			}
-			ss.Items = append(ss.Items, s.item(p, reading, it, false))
+			ss.Items = append(ss.Items, item)
 		}
 		out.Sections = append(out.Sections, ss)
-		out.Unshown += tally(ss.Items)
 	}
+	mirror(out.Sections)
+	out.Blocks = blocksOf(out.Sections)
 	out.Findings = ranked(out.Findings)
 	out.Attention = attention(out.Findings, out.Sections)
 	out.NeedsYou = needsYou(out.Attention)
+	out.Reading = readingOf(out)
 	return out, nil
 }
 
-func tally(items []ServedItem) (unshown int) {
+// value: the word a section with no heading, the page's opening, is named by.
+const openingLabel = "Top"
+
+func sectionIcon(rests bool, items []Item) string {
+	if rests {
+		return "rests"
+	}
 	for _, it := range items {
-		if b := it.Block; b != nil && b.Shown == ShownNone {
-			unshown++
-		}
-		if g := it.Group; g != nil {
-			u := tally(g.Items)
-			if g.Folded != "" {
-				u = g.Blocks
-			}
-			unshown += u
+		if g, ok := it.(*Group); ok && g.Intent == IntentGuard {
+			return "guard"
 		}
 	}
-	return unshown
+	return "define"
+}
+
+func blocksOf(sections []ServedSection) int {
+	n := 0
+	var walk func(items []ServedItem)
+	walk = func(items []ServedItem) {
+		for _, it := range items {
+			if it.Block != nil {
+				n++
+			}
+			if it.Group != nil {
+				walk(it.Group.Items)
+			}
+		}
+	}
+	for _, sec := range sections {
+		walk(sec.Items)
+	}
+	return n
 }
 
 type server struct {
 	c        Corpus
-	budget   Budget
 	readings map[string]BlockReading
 	pages    map[string]*Page
 	blocks   map[string]*Block
@@ -401,24 +430,12 @@ func (s *server) floor(i int) FloorHead {
 	return FloorHead{Index: i}
 }
 
-func (s *server) ladder(r Reading) []ServedFloor {
-	out := make([]ServedFloor, 0, len(s.c.Schema.Floors))
-	for i := range s.c.Schema.Floors {
-		h := s.floor(i)
-		f := ServedFloor{Index: h.Index, Name: h.Name, Question: h.Question, Current: i == r.Floor}
-		for _, b := range r.Blocks {
-			if b.Weight != nil && b.Floor == i {
-				f.Blocks++
-			}
-		}
-		out = append(out, f)
-	}
-	return out
-}
-
 func (s *server) head(p *Page) PageHead {
 	r := s.reading(p.ID)
 	h := PageHead{ID: p.ID, Seat: r.Seat, Floor: r.Floor, Word: p.Faces.Word, Line: plainOf(p.Faces.Line), Icon: p.Faces.Icon}
+	if record, ok := s.c.Records[p.ID]; ok {
+		h.Number, h.Title, h.Decision = record.Number, record.Title, s.record(p.ID)
+	}
 	for _, f := range s.c.Report.Findings {
 		if f.Page != p.ID {
 			continue
@@ -458,25 +475,33 @@ func (s *server) afterParagraph(items []Item, paragraph string) []Item {
 func (s *server) item(p *Page, r Reading, it Item, grouped bool) ServedItem {
 	switch it := it.(type) {
 	case *Prose:
-		return ServedItem{Prose: Paragraphs(it.Markdown)}
+		paras := Paragraphs(it.Markdown)
+		first, more := firstSentenceOf(paras)
+		return ServedItem{Ranks: openRanks(), Max: DetailCard, Prose: &ServedProse{Paragraphs: paras, First: first, More: more}}
 	case *Group:
-		return ServedItem{Group: s.group(p, r, it)}
+		return ServedItem{Ranks: openRanks(), Max: DetailCard, Group: s.group(p, r, it)}
 	case *Block:
-		return ServedItem{Block: s.block(p, it, grouped)}
+		b := s.block(p, it)
+		most := DetailFull
+		if b.Figure != nil {
+			most = DetailCard
+		}
+		return ServedItem{Ranks: blockRanks(b.Tier, grouped, most), Max: most, Block: b}
 	}
 	return ServedItem{}
 }
 
-// invariant: SPEC-v1 §15: at 30 s only needs-you Signals show, at 2 min
-// remarks too, at 10 min ambient as well; a hard finding shows at every budget.
-func (s *server) signals(f Finding) bool {
+// invariant: SPEC-v1 §15, read at the levels: at word (30 s) only needs-you
+// Signals show, at line (2 min) remarks too, at card (10 min) ambient as
+// well; a hard finding shows at every level.
+func fromOf(f Finding) Detail {
 	switch {
 	case f.Hard || f.Level == LevelNeedsYou:
-		return true
+		return DetailWord
 	case f.Level == LevelRemark:
-		return s.budget != Budget30s
+		return DetailLine
 	}
-	return s.budget == Budget10min
+	return DetailCard
 }
 
 func restsOn(heading string) bool { return strings.EqualFold(heading, "rests on") }
@@ -487,8 +512,6 @@ func (s *server) group(p *Page, r Reading, g *Group) *ServedGroup {
 	switch {
 	case g.Fold:
 		out.Folded = FoldAuthor
-	case s.budget == Budget30s:
-		out.Folded = FoldBudget
 	case !slices.Contains(gr.ReadBy, r.Seat):
 		out.Folded = FoldSeat
 	}
@@ -511,7 +534,7 @@ func (s *server) group(p *Page, r Reading, g *Group) *ServedGroup {
 	return out
 }
 
-func (s *server) block(p *Page, b *Block, grouped bool) *ServedBlock {
+func (s *server) block(p *Page, b *Block) *ServedBlock {
 	r := s.readings[b.Address]
 	kind, _ := s.c.Schema.kind(b.Kind)
 	out := &ServedBlock{
@@ -525,9 +548,8 @@ func (s *server) block(p *Page, b *Block, grouped bool) *ServedBlock {
 		f := s.floor(r.Floor)
 		out.OwnFloor = &f
 	}
-	out.Shown = shown(out.Tier, s.budget, grouped)
 	for _, f := range s.c.Report.Findings {
-		if f.Page == p.ID && f.Block == b.ID && s.signals(f) {
+		if f.Page == p.ID && f.Block == b.ID {
 			out.Finding = append(out.Finding, served(f, b.Address, out.Word))
 		}
 	}
@@ -590,7 +612,7 @@ func pick(wide bool, a, b Shown) Shown {
 }
 
 func served(f Finding, at, word string) ServedFinding {
-	return ServedFinding{Rule: f.Rule, Hard: f.Hard, Level: f.Level, Line: f.Line, Says: f.Says, At: at, Word: word}
+	return ServedFinding{Rule: f.Rule, Hard: f.Hard, Level: f.Level, Line: f.Line, Says: f.Says, At: at, Word: word, From: fromOf(f)}
 }
 
 func (s *server) ref(address string) ServedRef {
@@ -657,6 +679,7 @@ func (s *server) table(v *TableView, rows []string) *ServedTable {
 		}
 		out.Rows = append(out.Rows, row)
 	}
+	out.Count = len(out.Rows)
 	return out
 }
 
