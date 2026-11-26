@@ -47,7 +47,8 @@
     font-weight: var(--weight-regular);
     color: var(--t2);
 }
-.before {
+.before,
+.after {
     flex: none;
 }
 .before .word {

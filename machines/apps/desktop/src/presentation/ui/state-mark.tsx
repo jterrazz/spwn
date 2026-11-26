@@ -21,8 +21,9 @@ export function isCalm(tone: Tone): boolean {
     return CALM.has(tone);
 }
 
-// value: where the word is said: `after` the mark or `before` it, unless the state is calm; `name` only as the
-// value: mark's name, where the place already says the state; `beside` by the sentence the caller draws next to it.
+// value: where the word is said: after the mark when unset, or `before` it, unless the state is calm; `after` the
+// value: mark whatever the tone, for an outcome that reports the owner's own gesture; `name` only as the mark's
+// value: name, where the place already says the state; `beside` by the sentence the caller draws next to it.
 export type StateMarkProps =
     | { tone: Tone; said: 'beside' }
     | { tone: Tone; word: string; said?: 'after' | 'before' | 'name' };
@@ -32,11 +33,11 @@ export function StateMark(props: StateMarkProps) {
     if (props.said === 'beside') {
         return <span aria-hidden="true" className={styles.mark} data-mark={mark} />;
     }
-    const { word, said = 'after' } = props;
+    const { word, said } = props;
     if (word.trim() === '') {
         throw new Error('A state mark carries its word: a colour alone is no state.');
     }
-    if (said === 'name' || isCalm(props.tone)) {
+    if (said === 'name' || (said !== 'after' && isCalm(props.tone))) {
         return (
             <span
                 aria-label={word}
@@ -48,7 +49,7 @@ export function StateMark(props: StateMarkProps) {
         );
     }
     return (
-        <span className={`${styles.state} ${said === 'before' ? styles.before : ''}`}>
+        <span className={`${styles.state} ${said === undefined ? '' : styles[said]}`}>
             <span aria-hidden="true" className={styles.mark} data-mark={mark} />
             <span className={styles.word} data-mark={mark}>
                 {word}

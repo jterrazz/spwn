@@ -78,6 +78,27 @@ describe('StateMark', () => {
         expect(down.html.text).toContain('aria-hidden="true"');
     });
 
+    test('an outcome says its word, calm as it is, and hides its mark from the reader', async () => {
+        // Given - a gesture the owner just made, done, in a row whose other words fill it
+        let width = 0;
+        const result = await component.render(
+            <span style={{ display: 'flex', width: '120px' }}>
+                <StateMark said="after" tone="ok" word="done" />
+                <span style={{ whiteSpace: 'nowrap' }}>Outside Tailscale, declare it public</span>
+            </span>,
+            async () => {
+                // When - its word is measured
+                width = document.querySelector('[data-mark="ok"]:not(:empty)')?.clientWidth ?? 0;
+            },
+        );
+
+        // Then - the word is the text, read once, never cut to nothing, and no image is left to read
+        expect(result.tree.text).toContain('done');
+        expect(result.tree.text).not.toContain('img');
+        expect(width).toBeGreaterThan(0);
+        expect(result.html.text).toContain('aria-hidden="true"');
+    });
+
     test('a mark beside a sentence is hidden, the sentence says the state', async () => {
         // Given - a mark drawn beside the sentence that says it
         const result = await component.render(

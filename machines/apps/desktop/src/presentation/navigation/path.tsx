@@ -6,7 +6,7 @@ import { machineNamesOf } from '../../domain/machines/machines';
 import type { Found } from '../../domain/machines/machines';
 import { focusablesIn, moveFocus, moveOfKey } from '../ui/focus';
 import { Icon } from '../ui/icon';
-import { identityOf, MachineIcon, StateDot, usePopover } from '../ui/index';
+import { identityOf, MachineIcon, StateMark, usePopover } from '../ui/index';
 import { machineKindOf } from '../words/provisional';
 import type { Shown } from '../words/shown';
 import { MachinePopover } from './machine-popover';
@@ -127,7 +127,7 @@ function Opener({ segment, opens, stop, last }: Stop & { segment: Segment; opens
                     {segment.label}
                 </span>
                 {segment.shown === undefined ? null : (
-                    <StateDot tone={segment.shown.tone} word={segment.shown.word} />
+                    <StateMark said="name" tone={segment.shown.tone} word={segment.shown.word} />
                 )}
                 <span aria-hidden="true" className={styles.chevron}>
                     <Icon name="choose" />

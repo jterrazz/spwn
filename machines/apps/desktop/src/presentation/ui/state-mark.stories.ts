@@ -21,6 +21,7 @@ export const STATE_MARK_STORIES: readonly Story<StateMarkProps>[] = [
         name: `${tone}, named only`,
         props: { said: 'name' as const, tone, word: WORDS[tone] },
     })),
+    { name: 'an outcome says its word', props: { said: 'after', tone: 'ok', word: 'done' } },
     { name: 'beside a sentence', props: { said: 'beside', tone: 'warn' } },
     { name: 'long text', props: { tone: 'warn', word: 'Needs a look before it can update' } },
 ];

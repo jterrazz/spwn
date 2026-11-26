@@ -8,7 +8,7 @@ import type { ButtonVariant } from '../../ui/button';
 import { Button, Row } from '../../ui/index';
 import { diskGestureOf } from '../../words/provisional';
 import { DISK_GESTURE_LABELS, DISK_GESTURE_VERBS } from '../../words/words';
-import { FreedFigure, heldOf, OutcomePill } from './outcomes';
+import { FreedFigure, heldOf, OutcomeMark } from './outcomes';
 
 import pageStyles from '../../ui/page.module.css';
 import styles from './disk.module.css';
@@ -38,7 +38,7 @@ function Settled({ gesture, frees }: { gesture: DiskGesture; frees: boolean }) {
             {outcomes.map((outcome) => (
                 <span className={pageStyles.outcome} key={outcome.Name}>
                     {frees ? <FreedFigure outcome={outcome} /> : null}
-                    <OutcomePill outcome={outcome} />
+                    <OutcomeMark outcome={outcome} />
                 </span>
             ))}
         </>
