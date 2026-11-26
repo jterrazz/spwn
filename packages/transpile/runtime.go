@@ -206,9 +206,7 @@ func lookupRuntime(name string) (Runtime, error) {
 
 // RegisteredRuntimes returns the sorted set of names currently
 // registered via Register. Used by the CLI to surface an accurate
-// "known runtimes" hint on typos, and by `station project plan` to warn when an
-// agent declares a runtime that the catalog knows about but no
-// compile adapter implements.
+// "known runtimes" hint on typos.
 func RegisteredRuntimes() []string {
 	out := make([]string, 0, len(runtimes))
 	for name := range runtimes {

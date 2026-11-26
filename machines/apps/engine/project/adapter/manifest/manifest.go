@@ -146,14 +146,14 @@ func (p Projects) Drift(_ context.Context, root string) (project.Drift, error) {
 
 // invariant: each agent is rendered for the catalog's default harness, each
 // grouping of the declaration apart, and nothing is written: an agent with
-// no prompt, or that renders no file, is an issue of the plan, and so is a
-// harness no renderer is registered for.
+// no prompt, or that renders no file, is an issue of the plan. A harness
+// the manifest's rule accepts is one whose renderer is linked.
 func rendered(root string) []project.Issue {
 	src, err := source.Load(root)
 	if err != nil {
 		return []project.Issue{{Level: project.Error, Path: root, Message: "the project's files do not read: " + err.Error(), Hint: "every file under spwn/ must be readable", Source: project.SourceCompile}}
 	}
-	out := harnessIssues(src)
+	var out []project.Issue
 	groupings := source.WorldNames(src)
 	if len(groupings) < 2 {
 		groupings = []string{""}
@@ -187,20 +187,6 @@ func rendered(root string) []project.Issue {
 					Hint: "spwn/agents/" + a.Name + "/ lacks its AGENTS.md or its agent.yaml", Source: project.SourceCompile})
 			}
 		}
-	}
-	return out
-}
-
-func harnessIssues(src *source.ProjectSource) []project.Issue {
-	registered := transpile.RegisteredRuntimes()
-	var out []project.Issue
-	for _, a := range src.Agents {
-		raw := a.Config.Runtime.Backend
-		if raw == "" || slices.Contains(registered, strings.TrimPrefix(raw, "spwn:")) {
-			continue
-		}
-		out = append(out, project.Issue{Level: project.Warning, Path: "spwn/agents/" + a.Name + "/agent.yaml#runtime.backend",
-			Message: "harness " + raw + " has no renderer", Hint: "one of " + strings.Join(registered, ", "), Source: project.SourceCompile})
 	}
 	return out
 }

@@ -1,6 +1,8 @@
 package manifest_test
 
 import (
+	"errors"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"slices"
@@ -8,6 +10,8 @@ import (
 	"testing"
 
 	spwnproject "spwn.sh/packages/project"
+	"spwn.sh/packages/runtimes"
+	"spwn.sh/packages/transpile"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/platform/local"
@@ -85,6 +89,13 @@ func TestAnUnsupportedBackendPlansInvalidNamingTheSupportedOnes(t *testing.T) {
 	}
 }
 
+func TestEveryHarnessTheManifestAcceptsHasARenderer(t *testing.T) {
+	names := slices.Sorted(slices.Values(runtimes.Names()))
+	if !slices.Equal(names, transpile.RegisteredRuntimes()) {
+		t.Fatalf("runtimes %v, renderers %v; a harness the plan accepts must render", names, transpile.RegisteredRuntimes())
+	}
+}
+
 func TestAReferenceTheLockfileDoesNotRecordIsDriftNotPlan(t *testing.T) {
 	p, m := made(t)
 	if err := os.WriteFile(filepath.Join(m.Root, "spwn.lock"), []byte("version: 1\n"), 0o600); err != nil {
@@ -97,6 +108,148 @@ func TestAReferenceTheLockfileDoesNotRecordIsDriftNotPlan(t *testing.T) {
 	plan, err := p.Plan(t.Context(), m.Root)
 	if err != nil || !plan.Valid {
 		t.Fatalf("Plan = %+v, %v; want valid: drift refuses nothing", plan, err)
+	}
+}
+
+func edited(t *testing.T, path string, edit func(string) string) {
+	t.Helper()
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(path, []byte(edit(string(data))), 0o600); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func without(prefix string) func(string) string {
+	return func(s string) string {
+		var kept []string
+		for _, line := range strings.Split(s, "\n") {
+			if !strings.HasPrefix(strings.TrimSpace(line), prefix) {
+				kept = append(kept, line)
+			}
+		}
+		return strings.Join(kept, "\n")
+	}
+}
+
+func appended(tail string) func(string) string {
+	return func(s string) string { return s + tail }
+}
+
+func depending(ref string) func(string) string { return appended("\n  - " + ref + "\n") }
+
+func agentFile(root string) string {
+	return filepath.Join(root, "spwn", "agents", project.Starter, "agent.yaml")
+}
+
+func skillFile(t *testing.T, root, name string) {
+	t.Helper()
+	body := "---\nname: " + name + "\ndescription: One-line description of what this skill does.\n---\n\n# " + name + "\n"
+	if err := os.WriteFile(filepath.Join(root, "spwn", "skills", name+".md"), []byte(body), 0o600); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestEachRuleOfTheDeclarationIsAnIssueOfThePlan(t *testing.T) {
+	manifestFile := func(root string) string { return filepath.Join(root, project.ManifestName) }
+	for _, c := range []struct {
+		rule          string
+		breaks        func(t *testing.T, root string)
+		level         project.Level
+		message, hint string
+	}{
+		{"an agent with no description", func(t *testing.T, root string) { edited(t, agentFile(root), without("description:")) },
+			project.Error, "is missing a description", ""},
+		{"an agent without its SOUL.md", func(t *testing.T, root string) {
+			if err := local.New(nil, nil, nil, nil).FS.Remove(filepath.Join(root, "spwn", "agents", project.Starter, "SOUL.md")); err != nil {
+				t.Fatal(err)
+			}
+		}, project.Error, "missing SOUL.md", ""},
+		{"one agent in two groupings", func(t *testing.T, root string) {
+			edited(t, manifestFile(root), appended("  backup:\n    agents: ["+project.Starter+"]\n    workspaces: [.]\n"))
+		}, project.Error, "already deployed", ""},
+		{"a grouping with no knowledge path", func(t *testing.T, root string) { edited(t, manifestFile(root), without("knowledge:")) },
+			project.Info, "has no knowledge path", "knowledge: ./knowledge"},
+		{"a grouping named for a subcommand", func(t *testing.T, root string) {
+			edited(t, manifestFile(root), func(s string) string { return strings.Replace(s, "\n  "+project.Starter+":\n", "\n  knowledge:\n", 1) })
+		}, project.Error, `world name "knowledge" collides`, ""},
+		{"a local skill with no file", func(t *testing.T, root string) { edited(t, agentFile(root), depending("skill/unknown-local")) },
+			project.Error, `dependency "skill/unknown-local" does not exist`, "spwn/skills/unknown-local.md"},
+		{"a bare reference", func(t *testing.T, root string) {
+			skillFile(t, root, "code-review")
+			edited(t, agentFile(root), depending("code-review"))
+		}, project.Error, `dependency "code-review" is invalid`, "skill/code-review"},
+		{"a reference in the retired @spwn/ form", func(t *testing.T, root string) { edited(t, agentFile(root), depending(`"@spwn/python"`)) },
+			project.Error, `dependency "@spwn/python" is invalid`, ""},
+		{"a retired tools block", func(t *testing.T, root string) { edited(t, agentFile(root), appended("\ntools:\n  - \"spwn:unix\"\n")) },
+			project.Error, `legacy top-level "tools" block`, "flat `dependencies:` list"},
+		{"a retired skills block", func(t *testing.T, root string) {
+			edited(t, agentFile(root), appended("\nskills:\n  - \"skill/focus\"\n"))
+		},
+			project.Error, `legacy top-level "skills" block`, "flat `dependencies:` list"},
+		{"a retired hooks block", func(t *testing.T, root string) {
+			edited(t, agentFile(root), appended("\nhooks:\n  - \"hook/session-banner\"\n"))
+		},
+			project.Error, `legacy top-level "hooks" block`, "flat `dependencies:` list"},
+	} {
+		t.Run(c.rule, func(t *testing.T) {
+			p, m := made(t)
+			c.breaks(t, m.Root)
+			plan, err := p.Plan(t.Context(), m.Root)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !slices.ContainsFunc(plan.Issues, func(i project.Issue) bool {
+				return i.Level == c.level && i.Source == project.SourceManifest && strings.Contains(i.Message, c.message) && strings.Contains(i.Hint, c.hint)
+			}) {
+				t.Fatalf("Plan issues = %+v; want a %s saying %q with a hint naming %q", plan.Issues, c.level, c.message, c.hint)
+			}
+			if c.level == project.Error && plan.Valid {
+				t.Errorf("Plan = %+v; an error must make it invalid", plan)
+			}
+		})
+	}
+}
+
+func TestAReferenceThatResolvesPlansValid(t *testing.T) {
+	for ref, file := range map[string]string{"skill/reading": "reading", "spwn:mempalace": ""} {
+		t.Run(ref, func(t *testing.T) {
+			p, m := made(t)
+			if file != "" {
+				skillFile(t, m.Root, file)
+			}
+			edited(t, agentFile(m.Root), depending(ref))
+			plan, err := p.Plan(t.Context(), m.Root)
+			if err != nil || !plan.Valid {
+				t.Fatalf("Plan = %+v, %v; want valid", plan, err)
+			}
+		})
+	}
+}
+
+func TestReadingAProjectWritesNoHome(t *testing.T) {
+	p, m := made(t)
+	home, spwnHome := t.TempDir(), filepath.Join(t.TempDir(), "spwn-home")
+	t.Setenv("HOME", home)
+	t.Setenv("SPWN_HOME", spwnHome)
+	if _, err := p.Find(t.Context(), t.TempDir()); !errors.Is(err, project.ErrNotFound) {
+		t.Fatalf("Find outside a project = %v; want ErrNotFound", err)
+	}
+	if _, err := p.Show(t.Context(), m.Root); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := p.Plan(t.Context(), m.Root); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := p.Drift(t.Context(), m.Root); err != nil {
+		t.Fatal(err)
+	}
+	for _, path := range []string{spwnHome, filepath.Join(home, ".spwn")} {
+		if _, err := local.New(nil, nil, nil, nil).FS.Stat(path); !errors.Is(err, fs.ErrNotExist) {
+			t.Errorf("%s after reads = %v; want it absent", path, err)
+		}
 	}
 }
 
