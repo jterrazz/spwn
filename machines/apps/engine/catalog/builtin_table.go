@@ -1622,7 +1622,7 @@ func builtinCatalog() (Catalog, error) {
 						Kinds: []MachineKind{
 							"mac"},
 						Install: ShellInstall{
-							Line: "xcode-select --install"}},
+							Line: "xcode-select -p >/dev/null 2>&1 || xcode-select --install"}},
 					{
 						Kinds: []MachineKind{
 							"linux"},
@@ -1633,7 +1633,7 @@ func builtinCatalog() (Catalog, error) {
 						Kinds: []MachineKind{
 							"macos"},
 						Install: ShellInstall{
-							Line: "xcode-select --install"}}},
+							Line: "xcode-select -p >/dev/null 2>&1 || xcode-select --install"}}},
 				Provides: []string{
 					"git"},
 				Version: VersionRead{
@@ -2204,7 +2204,7 @@ func builtinCatalog() (Catalog, error) {
 						Kinds: []MachineKind{
 							"mac"},
 						Install: ShellInstall{
-							Line: "d=\"$HOME/.local/share\"; case \"$XDG_DATA_HOME\" in /*) d=\"$XDG_DATA_HOME\" ;; esac; mkdir -p \"$d/station/tart\" \"$d/station/vms\" \"$HOME/.local/bin\" && curl -fsSL https://github.com/cirruslabs/tart/releases/latest/download/tart.tar.gz | tar -xz -C \"$d/station/tart\""}}},
+							Line: "set -euo pipefail\nd=\"$HOME/.local/share\"\ncase \"${XDG_DATA_HOME:-}\" in /*) d=\"$XDG_DATA_HOME\" ;; esac\nmkdir -p \"$d/station/vms\" \"$HOME/.local/bin\"\nnew=$(mktemp -d \"$d/station/tart.new.XXXXXX\")\ntrap 'rm -rf \"$new\"' EXIT\ncurl -fsSL https://github.com/cirruslabs/tart/releases/latest/download/tart.tar.gz | tar -xz -C \"$new\"\nfresh=$(\"$new/tart.app/Contents/MacOS/tart\" --version)\nnow=$(\"$d/station/tart/tart.app/Contents/MacOS/tart\" --version 2>/dev/null || true)\n[ \"$fresh\" != \"$now\" ] || exit 0\nold=\"$d/station/tart.old.$$\"\n[ ! -e \"$d/station/tart\" ] || mv \"$d/station/tart\" \"$old\"\nmv \"$new\" \"$d/station/tart\" || { [ ! -e \"$old\" ] || mv \"$old\" \"$d/station/tart\"; exit 1; }\nrm -rf \"$old\"\n"}}},
 				Provides: []string{
 					"tart"},
 				Version: VersionRead{
@@ -2868,7 +2868,7 @@ func builtinCatalog() (Catalog, error) {
 						Kinds: []MachineKind{
 							"linux"},
 						Install: ShellInstall{
-							Line:  "uv tool install browser-use",
+							Line:  "uv tool install --upgrade browser-use",
 							Check: "ANONYMIZED_TELEMETRY=false browser-use --version",
 							Undo:  "uv tool uninstall browser-use"}},
 					{
@@ -2914,7 +2914,7 @@ func builtinCatalog() (Catalog, error) {
 						Kinds: []MachineKind{
 							"linux"},
 						Install: ShellInstall{
-							Line:  "uv tool install 'markitdown[all]'",
+							Line:  "uv tool install --upgrade 'markitdown[all]'",
 							Check: "markitdown --version",
 							Undo:  "uv tool uninstall markitdown"}},
 					{
@@ -2939,7 +2939,7 @@ func builtinCatalog() (Catalog, error) {
 						Kinds: []MachineKind{
 							"linux"},
 						Install: ShellInstall{
-							Line:  "uv tool install mcp2cli",
+							Line:  "uv tool install --upgrade mcp2cli",
 							Check: "mcp2cli --version",
 							Undo:  "uv tool uninstall mcp2cli"}},
 					{
@@ -2964,7 +2964,7 @@ func builtinCatalog() (Catalog, error) {
 						Kinds: []MachineKind{
 							"linux"},
 						Install: ShellInstall{
-							Line:  "uv tool install mempalace",
+							Line:  "uv tool install --upgrade mempalace",
 							Check: "mempalace --version",
 							Undo:  "uv tool uninstall mempalace"}},
 					{
@@ -6285,7 +6285,7 @@ func builtinCatalog() (Catalog, error) {
 							Selector: Selector{
 								OS: "macos"},
 							Script: &ScriptMethod{
-								Run: "xcode-select --install"}},
+								Run: "xcode-select -p >/dev/null 2>&1 || xcode-select --install"}},
 						{
 							Selector: Selector{
 								Family: "debian"},
@@ -6845,7 +6845,7 @@ func builtinCatalog() (Catalog, error) {
 								Machine: Roles{
 									"computer"}},
 							Script: &ScriptMethod{
-								Run: "d=\"$HOME/.local/share\"; case \"$XDG_DATA_HOME\" in /*) d=\"$XDG_DATA_HOME\" ;; esac; mkdir -p \"$d/station/tart\" \"$d/station/vms\" \"$HOME/.local/bin\" && curl -fsSL https://github.com/cirruslabs/tart/releases/latest/download/tart.tar.gz | tar -xz -C \"$d/station/tart\""}}},
+								Run: "set -euo pipefail\nd=\"$HOME/.local/share\"\ncase \"${XDG_DATA_HOME:-}\" in /*) d=\"$XDG_DATA_HOME\" ;; esac\nmkdir -p \"$d/station/vms\" \"$HOME/.local/bin\"\nnew=$(mktemp -d \"$d/station/tart.new.XXXXXX\")\ntrap 'rm -rf \"$new\"' EXIT\ncurl -fsSL https://github.com/cirruslabs/tart/releases/latest/download/tart.tar.gz | tar -xz -C \"$new\"\nfresh=$(\"$new/tart.app/Contents/MacOS/tart\" --version)\nnow=$(\"$d/station/tart/tart.app/Contents/MacOS/tart\" --version 2>/dev/null || true)\n[ \"$fresh\" != \"$now\" ] || exit 0\nold=\"$d/station/tart.old.$$\"\n[ ! -e \"$d/station/tart\" ] || mv \"$d/station/tart\" \"$old\"\nmv \"$new\" \"$d/station/tart\" || { [ ! -e \"$old\" ] || mv \"$old\" \"$d/station/tart\"; exit 1; }\nrm -rf \"$old\"\n"}}},
 					Disk: &Disk{
 						Paths: []Stored{
 							{
@@ -7508,7 +7508,7 @@ func builtinCatalog() (Catalog, error) {
 								Family: "linux"},
 							Script: &ScriptMethod{
 								Check: "ANONYMIZED_TELEMETRY=false browser-use --version",
-								Run:   "uv tool install browser-use",
+								Run:   "uv tool install --upgrade browser-use",
 								Undo:  "uv tool uninstall browser-use"}}}},
 				Folder: "ai-tooling",
 				File:   "packages/ai-tooling/browser-use.yaml",
@@ -7555,7 +7555,7 @@ func builtinCatalog() (Catalog, error) {
 								Family: "linux"},
 							Script: &ScriptMethod{
 								Check: "markitdown --version",
-								Run:   "uv tool install 'markitdown[all]'",
+								Run:   "uv tool install --upgrade 'markitdown[all]'",
 								Undo:  "uv tool uninstall markitdown"}}}},
 				Folder: "ai-tooling",
 				File:   "packages/ai-tooling/markitdown.yaml",
@@ -7585,7 +7585,7 @@ func builtinCatalog() (Catalog, error) {
 								Family: "linux"},
 							Script: &ScriptMethod{
 								Check: "mcp2cli --version",
-								Run:   "uv tool install mcp2cli",
+								Run:   "uv tool install --upgrade mcp2cli",
 								Undo:  "uv tool uninstall mcp2cli"}}}},
 				Folder: "ai-tooling",
 				File:   "packages/ai-tooling/mcp2cli.yaml",
@@ -7615,7 +7615,7 @@ func builtinCatalog() (Catalog, error) {
 								Family: "linux"},
 							Script: &ScriptMethod{
 								Check: "mempalace --version",
-								Run:   "uv tool install mempalace",
+								Run:   "uv tool install --upgrade mempalace",
 								Undo:  "uv tool uninstall mempalace"}}}},
 				Folder: "ai-tooling",
 				File:   "packages/ai-tooling/mempalace.yaml",

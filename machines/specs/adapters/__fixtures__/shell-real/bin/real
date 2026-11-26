@@ -1,0 +1,7 @@
+#!/bin/sh
+# the system's own program of the name it is called by, so a shell line runs for real.
+name=${0##*/}
+for dir in /bin /usr/bin; do
+    [ ! -x "$dir/$name" ] || exec "$dir/$name" "$@"
+done
+exit 97

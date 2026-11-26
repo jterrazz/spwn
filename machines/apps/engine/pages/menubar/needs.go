@@ -28,6 +28,7 @@ const (
 	VerbSignIn  = "Sign in"
 	VerbShow    = "Show"
 	VerbUpdate  = "Update"
+	VerbInstall = "Install"
 	VerbCopyFix = "Copy fix"
 )
 
@@ -82,12 +83,16 @@ func (n Need) of(name string) bool {
 
 func needsOf(r NeedsReading, self string) (needs, upkeep []Need) {
 	// invariant: SPEC B5.7: what needs the owner, ranked by finding.Rank (a
-	// server down, a port exposed), and upkeep apart, ranked by
+	// hypervisor that does not answer, a server down, a port exposed), and
+	// upkeep apart, ranked by
 	// finding.RankUpkeep, never in the badge. Two reds are two needs. A
 	// server restarting is not one, even while it is still stopped.
 	w := needSaid{r: r, self: self}
 	if r.All != nil {
 		for _, h := range r.All.Macs {
+			if f, ok := model.SilentHypervisor(*r.All, h); ok {
+				needs = append(needs, w.silent(h, f))
+			}
 			for _, vm := range h.VMs {
 				switch {
 				case vm.Lifetime == model.AlwaysOn && vm.Restart != nil:
@@ -156,6 +161,23 @@ func (w needSaid) down(h model.MacView, vm model.VM) Need {
 		Find: []string{VerbRestart + " " + vm.Name}, Facts: facts, Nav: machinePage(vm.Name), Scope: []string{h.Name, vm.Name},
 		Verb: verb,
 	}
+}
+
+func (w needSaid) silent(h model.MacView, f finding.Finding) Need {
+	where := w.mac(h.Name)
+	key := "hypervisor:" + h.Name
+	f.Urgency = finding.Red
+	need := Need{
+		Finding: f, Key: key, Glyph: symbol("xmark.octagon.fill", page.SignalFailing), Hero: f.Text, Subject: where, What: f.Text,
+		Find: []string{VerbShow + " " + h.SilentHypervisor + " on " + where}, Facts: []page.Value{page.Text("on " + where)}, Nav: machinePage(h.Name), Scope: []string{h.Name},
+		Verb: page.Action{ID: key, Label: VerbShow, On: page.OnRow, Rows: []string{key}},
+	}
+	if h.SilentPackage != "" {
+		need.Find = []string{VerbInstall + " " + h.SilentPackage + " on " + where}
+		need.Verb = page.Action{ID: key, Label: VerbInstall, Busy: "Installing", On: page.OnRow, Rows: []string{key}, Mutates: true, Default: true,
+			Run: &page.Run{Call: CallInstall, In: map[string]string{"Names": `["` + h.SilentPackage + `"]`}, Target: macTarget(h.Name, w.self)}}
+	}
+	return need
 }
 
 func (w needSaid) exposed(mac string, p ports.Port) Need {

@@ -64,7 +64,7 @@ func (n Night) verdict() verdict.Verdict {
 		return verdict.Verdict{Tone: verdict.Bad, Sentence: counted(len(n.Failed), "update") + " failed.", Line: moved(len(n.Moved))}
 	}
 	v := verdict.Verdict{Tone: verdict.OK, Sentence: moved(len(n.Moved))}
-	if waits := len(n.Waiting) + len(n.Left); waits > 0 || n.Unpulled != "" {
+	if waits := len(n.Waiting) + len(n.Left) + len(n.Deferred); waits > 0 || n.Unpulled != "" {
 		v.Tone = verdict.Warn
 		v.Line = counted(waits, "app") + " waits for you."
 		if waits != 1 {

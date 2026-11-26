@@ -76,6 +76,7 @@ type Nights struct {
 	Machinefile string
 	Waiting     []machinefile.Waiting
 	Left        []string
+	Deferred    []machinefile.Deferred
 	Failed      []string
 	Unpulled    string
 	Error       string
@@ -88,7 +89,7 @@ func NightOf(n machinefile.Night, ran bool, now time.Time) Nights {
 	if !ran {
 		return Nights{}
 	}
-	out := Nights{Machinefile: n.Machinefile, Waiting: n.Waiting, Left: n.Left, Failed: n.Failed, Unpulled: n.Unpulled, Error: n.Error}
+	out := Nights{Machinefile: n.Machinefile, Waiting: n.Waiting, Left: n.Left, Deferred: n.Deferred, Failed: n.Failed, Unpulled: n.Unpulled, Error: n.Error}
 	nights := []machinefile.Night{n}
 	if n.Last != nil && !n.Complete() {
 		out.Waiting = n.Last.Waiting
@@ -126,6 +127,9 @@ func (n Nights) findings(m machine.Ref) []finding.Finding {
 	}
 	for _, app := range n.Left {
 		said(finding.NeedsALook, app, app+" waits for you: its update asks a password", asked)
+	}
+	for _, w := range n.Deferred {
+		said(finding.NeedsALook, w.App, w.Said(), finding.Fix{Command: "station apps update " + w.App, InTerminal: true})
 	}
 	for _, w := range n.Waiting {
 		file := w.File

@@ -154,7 +154,18 @@ func (d *Engine) adopt(ctx context.Context) {
 		case remembered && (known.State == engine.StateBroken || known.State == engine.StateStale || !known.RerunAt.IsZero() || known.Detail == model.PoweredOffInside):
 			v.state, v.detail, v.rerunAt = known.State, known.Detail, known.RerunAt
 			continue
-		case d.m.EngineRunning(ctx, r.Name):
+		}
+		// invariant: a hypervisor that does not answer leaves each VM as the
+		// engine last knew it, and boots none: its silence is not a VM down.
+		running, err := d.m.EngineRunning(ctx, r.Name)
+		switch {
+		case err != nil:
+			if remembered {
+				v.state, v.detail = known.State, known.Detail
+			}
+			d.logf(r.Name, "adopt: "+err.Error())
+			continue
+		case running:
 			v.state = engine.StateRunning
 			continue
 		}
@@ -320,9 +331,13 @@ func (d *Engine) ended(ctx context.Context, v *vmState) {
 		}
 		_ = d.start(ctx, v)
 	case model.ActDelete:
+		if _, err := d.m.Remove(ctx, name); err != nil {
+			d.logf(name, "delete: "+err.Error())
+			d.setState(v, engine.StateStopped, "")
+			return
+		}
 		d.releaseVM(ctx, name)
 		d.forgetGrants(ctx, name)
-		_, _ = d.m.Remove(ctx, name)
 		d.forget(name)
 	case model.ActStopped:
 		_ = d.m.Save(d.editRecord(v, func(rec *model.VMRecord) { rec.Want = model.WantStopped }))
@@ -485,10 +500,16 @@ func (d *Engine) endRun(ctx context.Context, v *vmState) error {
 		v.stopping = false
 		d.mu.Unlock()
 	}()
-	if run == nil && !d.m.EngineRunning(ctx, vm) {
-		d.disconnect(v)
-		d.setState(v, engine.StateStopped, "")
-		return nil
+	if run == nil {
+		running, err := d.m.EngineRunning(ctx, vm)
+		if err != nil {
+			return err
+		}
+		if !running {
+			d.disconnect(v)
+			d.setState(v, engine.StateStopped, "")
+			return nil
+		}
 	}
 	sent := false
 	if client != nil {

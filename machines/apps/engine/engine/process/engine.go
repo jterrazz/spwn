@@ -46,7 +46,9 @@ type Machines interface {
 	Save(model.VMRecord) error
 	Remove(ctx context.Context, name string) (model.DeleteReport, error)
 	PowerOff(ctx context.Context, name string) error
-	EngineRunning(ctx context.Context, name string) bool
+	// value: whether the hypervisor runs the VM; an error when it does not
+	// answer, which says nothing of whether the VM runs.
+	EngineRunning(ctx context.Context, name string) (bool, error)
 	ThisMacName() string
 	ThisMacLabel() string
 	// value: the engine-only machines.uptime-mark: what the keep job marks
@@ -666,8 +668,12 @@ func (d *Engine) stopAll(ctx context.Context) []engine.Stopped {
 			defer wg.Done()
 			s := engine.Stopped{Name: r.Name, Lifetime: string(r.Lifetime), Result: engine.ResultStopped}
 			err := d.halt(ctx, v, true)
-			if err == nil && d.m.EngineRunning(ctx, r.Name) {
-				err = errors.New("the engine still runs it")
+			if err == nil {
+				if still, herr := d.m.EngineRunning(ctx, r.Name); herr != nil {
+					err = herr
+				} else if still {
+					err = errors.New("the engine still runs it")
+				}
 			}
 			if err != nil {
 				s.Result, s.Detail = engine.ResultFailed, err.Error()

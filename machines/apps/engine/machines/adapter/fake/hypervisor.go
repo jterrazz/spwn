@@ -54,6 +54,13 @@ func (h *Hypervisor) Name() string {
 	return h.name
 }
 
+func (h *Hypervisor) Package() string {
+	if h.Name() == h.name {
+		return h.name
+	}
+	return ""
+}
+
 func (h *Hypervisor) Installed() bool {
 	// invariant: a Mac of no hypervisor has one once the catalogue's package
 	// for it is installed in the world, as the real one lands on the path.

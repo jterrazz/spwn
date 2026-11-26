@@ -1,0 +1,17 @@
+description: 'a hypervisor that does not answer is a need of This Mac''s Overview, its fix a call'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'world fault Hypervisor.Disks'
+      exit: 0
+    - command: 'overview --all | /usr/bin/grep "does not answer"'
+      exit: 0
+      stdout: |
+          ✗	tart is not installed or does not answer	station apps install tart
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out.Summary | [.Needs[] | select(.Text | test("does not answer")) | [.Machine, .Section, .Broken, .Call, .Args, .Command]]'' | /usr/bin/tail -1'
+      stdin: |
+          {"v":2,"id":"1","watch":"overview.read","in":{}}
+      exit: 0
+      stdout: |
+          [["macbook-pro","overview",true,"apps.install",{"Names":"tart"},"station apps install tart"]]

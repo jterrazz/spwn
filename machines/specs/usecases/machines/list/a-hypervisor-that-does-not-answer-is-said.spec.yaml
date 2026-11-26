@@ -1,0 +1,25 @@
+description: 'a hypervisor that does not answer is said by the list, a start and a pipe, never a VM stopped'
+env:
+    - two-macs-tart
+    - engine
+runs:
+    - command: 'world fault Hypervisor.Disks'
+      exit: 0
+    - command: 'machines --this-mac'
+      exit: 0
+      stdout: |
+          ●	macbook-pro	Mac	macbook-pro	Engine running
+          ○	api	Workspace	macbook-pro	Stopped · persistent	4 CPU	8 GB
+          ●	linux-1	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB
+          # Needs you
+          ✗	This Mac	tart is not installed or does not answer	station apps install tart
+    - command: 'machines start api'
+      exit: 2
+      stderr: |
+          Error: tart is not installed or does not answer
+          Hint: station apps install tart
+    - command: 'machines pipe linux-1'
+      exit: 2
+      stderr: |
+          Error: tart is not installed or does not answer
+          Hint: station apps install tart

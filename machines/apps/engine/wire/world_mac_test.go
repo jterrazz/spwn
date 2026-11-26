@@ -59,11 +59,11 @@ func (quietMachines) Save(model.VMRecord) error          { return nil }
 func (quietMachines) Remove(context.Context, string) (model.DeleteReport, error) {
 	return model.DeleteReport{}, nil
 }
-func (quietMachines) PowerOff(context.Context, string) error             { return nil }
-func (quietMachines) EngineRunning(context.Context, string) bool         { return false }
-func (quietMachines) ThisMacName() string                                { return "here" }
-func (quietMachines) ThisMacLabel() string                               { return "here" }
-func (quietMachines) MarkUptime(context.Context, model.UptimeMark) error { return nil }
+func (quietMachines) PowerOff(context.Context, string) error              { return nil }
+func (quietMachines) EngineRunning(context.Context, string) (bool, error) { return false, nil }
+func (quietMachines) ThisMacName() string                                 { return "here" }
+func (quietMachines) ThisMacLabel() string                                { return "here" }
+func (quietMachines) MarkUptime(context.Context, model.UptimeMark) error  { return nil }
 
 type quietTailnet struct{}
 

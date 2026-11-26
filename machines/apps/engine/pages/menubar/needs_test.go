@@ -194,6 +194,42 @@ func TestAFailingLoginItemIsShownFromTheFleetAndItsFixCopiedOnItsMac(t *testing.
 	}
 }
 
+func TestAHypervisorThatDoesNotAnswerIsANeedWhoseVerbInstallsItAtItsMac(t *testing.T) {
+	hv := catalog.HypervisorApp
+	r := needsFleet()
+	r.All.Macs[0].SilentHypervisor, r.All.Macs[0].SilentPackage = hv, hv
+	r.All.Macs[1].SilentHypervisor, r.All.Macs[1].SilentPackage = hv, hv
+	needs, _ := needsOf(r, needsPro)
+	var got []string
+	for _, n := range needs {
+		if strings.HasPrefix(n.Key, "hypervisor:") {
+			got = append(got, n.Hero+" | "+n.Subject+" | "+strings.Join(n.Find, " | ")+" | "+n.Verb.Label)
+			if run := n.Verb.Run; run == nil || run.Call != CallInstall || run.In["Names"] != `["`+hv+`"]` || (run.Target == nil) != (n.Finding.Machine.Name == needsPro) {
+				t.Errorf("%s's Install runs %+v, want apps.install of the hypervisor at its Mac", n.Subject, run)
+			}
+		}
+	}
+	slices.Sort(got)
+	want := []string{
+		hv + " is not installed or does not answer | This Mac | Install " + hv + " on This Mac | Install",
+		hv + " is not installed or does not answer | mac-mini | Install " + hv + " on mac-mini | Install",
+	}
+	if !slices.Equal(got, want) {
+		t.Fatalf("the hypervisors' needs say\n%q\nwant\n%q", got, want)
+	}
+	var mini []string
+	for _, s := range NeedsPage(r, needsMini, page.Context{Machine: needsPro, Kind: "computer"}).Sections {
+		for _, it := range s.Items {
+			if it.Row != nil && strings.HasPrefix(it.Row.Verb, "hypervisor:") {
+				mini = append(mini, it.Row.Verb)
+			}
+		}
+	}
+	if !slices.Equal(mini, []string{"hypervisor:" + needsMini}) {
+		t.Errorf("mac-mini's page lists %q, want its own hypervisor alone", mini)
+	}
+}
+
 func TestUpkeepIsNeverCountedAmongWhatNeedsYou(t *testing.T) {
 	p := NeedsPage(needsFleet(), "", page.Context{Machine: needsPro, Kind: "computer"})
 	for _, s := range p.Sections {
@@ -272,5 +308,23 @@ func TestADeviceBookChangedOutsideSpwnIsANeedSayingWhatIsTrustedAndTheGestureTha
 		if u.Hero == devices.ChangedOutside {
 			t.Errorf("the changed book is upkeep too; want it a need alone")
 		}
+	}
+}
+
+func TestAHypervisorThatNothingInstallsIsANeedThatOnlyShowsItsMac(t *testing.T) {
+	r := needsFleet()
+	r.All.Macs[0].SilentHypervisor = "vz"
+	needs, _ := needsOf(r, needsPro)
+	var got []string
+	for _, n := range needs {
+		if strings.HasPrefix(n.Key, "hypervisor:") {
+			got = append(got, n.Hero+" | "+strings.Join(n.Find, " | ")+" | "+n.Verb.Label)
+			if n.Verb.Run != nil || n.Verb.Mutates {
+				t.Errorf("%s's verb runs %+v, want a Show that changes nothing", n.Subject, n.Verb.Run)
+			}
+		}
+	}
+	if want := []string{"vz does not answer | Show vz on This Mac | Show"}; !slices.Equal(got, want) {
+		t.Fatalf("the hypervisor's need says %q, want %q", got, want)
 	}
 }

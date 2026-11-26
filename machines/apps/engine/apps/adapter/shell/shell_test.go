@@ -48,3 +48,13 @@ func TestAnUndoRunsAsItsLineDoesAndALineWithNoneIsRefusedBeforeAnyRuns(t *testin
 		t.Fatalf("ran %+v %v; want bash %v", ran, err, want)
 	}
 }
+
+func TestALineThatFailsSaysItsLastWord(t *testing.T) {
+	i := shell.New(local.Played(func(local.Cmd) (local.Output, error) {
+		return local.Output{ExitCode: 22, Stderr: "fetching\ncurl: (22) The requested URL returned error: 503\n"}, nil
+	}, "bash"))
+	err := i.Update(context.Background(), []catalog.Install{catalog.ShellInstall{Line: "curl -fsSL x | tar -x"}}, nil)
+	if want := "bash -c exited 22: curl: (22) The requested URL returned error: 503"; err == nil || err.Error() != want {
+		t.Fatalf("a failed line answered %v, want %q", err, want)
+	}
+}

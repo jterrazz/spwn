@@ -50,7 +50,7 @@ func (s *Builder) Update(ctx context.Context, names []string, progress func(imag
 		return nil, err
 	}
 	if _, err := s.e.Version(ctx); err != nil {
-		return nil, &images.NoEngineError{Hypervisor: s.e.Name(), Cause: err}
+		return nil, &images.NoEngineError{Hypervisor: s.e.Name(), Package: s.e.Package(), Cause: err}
 	}
 	if progress == nil {
 		progress = func(images.Step) {}

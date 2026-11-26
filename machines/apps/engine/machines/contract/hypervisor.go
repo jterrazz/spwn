@@ -12,6 +12,8 @@ import (
 
 type Hypervisor interface {
 	Name() string
+	// value: the catalog app that installs it, empty when nothing does.
+	Package() string
 	// invariant: Installed answers without running anything, so a Mac without
 	// the hypervisor is told so before any call to it.
 	Installed() bool

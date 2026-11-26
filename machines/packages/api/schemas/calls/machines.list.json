@@ -706,6 +706,12 @@
         "Sentence": {
           "type": "string"
         },
+        "SilentHypervisor": {
+          "type": "string"
+        },
+        "SilentPackage": {
+          "type": "string"
+        },
         "Standing": {
           "enum": [
             "asleep",

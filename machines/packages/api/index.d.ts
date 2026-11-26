@@ -1837,6 +1837,11 @@ export type MachinefileChapterDrift = {
     Verdict: CoreVerdictVerdict;
 };
 
+export type MachinefileDeferred = {
+    app: string;
+    running: number;
+};
+
 export type MachinefileDiffering = {
     Account: string;
     Asked: string;
@@ -1858,7 +1863,8 @@ export type MachinefileDone = {
     Log: string;
     Method: string;
     Newest: string;
-    Reason: '' | 'interrupted' | 'not-run' | 'pinned' | 'updates-itself' | 'waits-for-you';
+    Reason: '' | 'interrupted' | 'not-run' | 'pinned' | 'updates-itself' | 'waits-for-machines' | 'waits-for-you';
+    Running?: number;
     State: '' | 'absent' | 'broken' | 'degraded' | 'ok' | 'pending' | 'unknown';
     Updated: boolean;
     Version: string;
@@ -1987,6 +1993,7 @@ export type MachinefileMoved = {
 
 export type MachinefileNight = {
     at: string;
+    deferred?: MachinefileDeferred[];
     error?: string;
     failed?: string[];
     interrupted?: boolean;
@@ -2446,6 +2453,8 @@ export type MachinesMacView = {
     OtherRelease?: boolean;
     Reachable: boolean;
     Sentence?: string;
+    SilentHypervisor?: string;
+    SilentPackage?: string;
     Standing?: 'asleep' | 'not-seen' | 'engine-stopped' | 'engine-not-installed' | 'online';
     StationVersion: string;
     ThisMac: boolean;

@@ -517,6 +517,30 @@ func (s ScriptMethod) check(upgrade string) string {
 	case s.Run != "" && (len(s.Args) > 0 || len(s.Env) > 0 || upgrade != ""):
 		return "a run line takes no args, env or upgrade"
 	}
+	return overInstalled(s.Run)
+}
+
+var (
+	unpacks = regexp.MustCompile(`\b(tar\s+-?[a-zA-Z]*x|unzip\b|ditto\s+-x)`)
+	fetches = regexp.MustCompile(`\b(curl|wget)\b`)
+	removes = regexp.MustCompile(`\brm\s+-[a-zA-Z]*[rR]`)
+	traps   = regexp.MustCompile(`trap\s+'[^']*'`)
+)
+
+// invariant: a run line is its own update, so it never leaves less than
+// was there: what it unpacks lands in a folder it made (mktemp) before it
+// moves in, and it removes nothing before it fetched the replacement; a
+// trap that cleans its own folder at exit is not a removal.
+func overInstalled(line string) string {
+	line = traps.ReplaceAllString(line, "")
+	if at := unpacks.FindStringIndex(line); at != nil {
+		if made := strings.Index(line, "mktemp"); made < 0 || made > at[0] {
+			return "a run line unpacks into a folder it made (mktemp -d) and moves it in once it reads, never over what is installed"
+		}
+	}
+	if rm, fetch := removes.FindStringIndex(line), fetches.FindStringIndex(line); rm != nil && fetch != nil && rm[0] < fetch[0] {
+		return "a run line removes nothing before it fetched its replacement"
+	}
 	return ""
 }
 

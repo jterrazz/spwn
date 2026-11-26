@@ -14,6 +14,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/machinefile"
 	"github.com/jterrazz/studio-station/apps/engine/machinefile/contract"
+	"github.com/jterrazz/studio-station/apps/engine/machines"
 )
 
 type UpgradeIn struct {
@@ -104,6 +105,10 @@ func upgrade(ctx context.Context, d Deps, in UpgradeIn, p call.Progress) (machin
 		if l.Seen.Condition == machinefile.Absent {
 			r := &run{d: d, p: p, in: ApplyIn{Interactive: in.Interactive}, name: plan.Name}
 			out.Done = append(out.Done, r.reinstall(ctx, l))
+			continue
+		}
+		if n := runningOn(ctx, d, in, l); n > 0 {
+			out.Done = append(out.Done, machinefile.Done{Line: l, State: l.Seen.State, Method: l.Seen.Method, Version: l.Seen.Version, Reason: machinefile.WaitsForMachines, Running: n})
 			continue
 		}
 		out.Done = append(out.Done, update(ctx, d, l, p))
@@ -238,6 +243,32 @@ func finishedUpdate(ctx context.Context, d Deps, done machinefile.Done) machinef
 	}
 	done.State, done.Method, done.Version, done.Reason, done.Updated = catalog.StateOK, now.Method, now.Version, "", true
 	return done
+}
+
+// invariant: the night never updates the hypervisor under machines of this
+// Mac that run on it: a new release would drive the runs the old one
+// started, with nobody watching; the owner's own update stays his, at any
+// hour. Machines that cannot be read count as one running.
+func runningOn(ctx context.Context, d Deps, in UpgradeIn, l machinefile.Line) int {
+	if !in.Unattended || l.Step.Package != catalog.HypervisorApp || d.AllMachines == nil {
+		return 0
+	}
+	all, err := d.AllMachines(ctx)
+	if err != nil {
+		return 1
+	}
+	n := 0
+	for _, h := range all.Macs {
+		if !h.ThisMac {
+			continue
+		}
+		for _, vm := range h.VMs {
+			if vm.State == machines.Running {
+				n++
+			}
+		}
+	}
+	return n
 }
 
 func update(ctx context.Context, d Deps, l machinefile.Line, p call.Progress) machinefile.Done {

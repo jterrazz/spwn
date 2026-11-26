@@ -13,5 +13,5 @@ methods:
     - family: linux
       script:
           check: mcp2cli --version
-          run: uv tool install mcp2cli
+          run: uv tool install --upgrade mcp2cli
           undo: uv tool uninstall mcp2cli

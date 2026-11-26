@@ -300,8 +300,8 @@ func engineOf(head overview.Head, r *engine.Reading) (overview.Engine, []finding
 	return overview.EngineRunning, nil
 }
 
-// value: what a Mac's Overview reads of All machines: its VMs, their
-// findings; the other Macs are All machines' own.
+// value: what a Mac's Overview reads of All machines: its hypervisor's
+// silence, its VMs, their findings; the other Macs are All machines' own.
 func thisMacsVMs(f machines.AllMachines) ([]finding.Finding, []overview.VM) {
 	i := slices.IndexFunc(f.Macs, func(h machines.MacView) bool { return h.ThisMac })
 	if i < 0 {
@@ -309,6 +309,9 @@ func thisMacsVMs(f machines.AllMachines) ([]finding.Finding, []overview.VM) {
 	}
 	h := f.Macs[i]
 	var own []finding.Finding
+	if silent, ok := machines.SilentHypervisor(f, h); ok {
+		own = append(own, silent)
+	}
 	for _, fd := range machines.Findings(f) {
 		if fd.Machine.On == h.Name {
 			own = append(own, fd)

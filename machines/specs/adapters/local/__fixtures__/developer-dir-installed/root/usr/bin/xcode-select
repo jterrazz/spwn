@@ -1,0 +1,9 @@
+#!/bin/sh
+# a Mac whose developer directory is the command line developer package, which
+# refuses to install again, as macOS's does, exiting 1.
+echo "xcode-select $*" >> "$HOME/.calls"
+if [ "$1" = --install ]; then
+    echo 'xcode-select: note: Command line tools are already installed. Use "Software Update" in System Settings or the softwareupdate command line interface to install updates' >&2
+    exit 1
+fi
+echo /Library/Developer/CommandLineTools

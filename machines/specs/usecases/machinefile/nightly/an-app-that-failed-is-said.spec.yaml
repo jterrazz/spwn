@@ -23,6 +23,10 @@ runs:
       stdout: |
           ✗	homebrew failed its update last night	station machinefile upgrade --machinefile macbook-pro
           	Apps	● 9 ok · ◐ 1 update · ○ 103 not installed · 1 moved last night
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].stores.journal[] | select(.Outcome == "failed") | {Text, By, Detail}'' world.json'
+      exit: 0
+      stdout: |
+          {"Text":"homebrew","By":"the night","Detail":"the update failed: its output is in ~/.local/state/station/logs/homebrew.log"}
     - command: 'machinefile update'
       exit: 0
       stdout: |

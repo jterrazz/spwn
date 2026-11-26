@@ -190,7 +190,7 @@ func (s *Machinist) checkCreate(ctx context.Context, r model.CreateRequest) (mod
 		return r, claims{}, &model.BadNameError{Name: r.Name}
 	}
 	if _, err = s.engine.Version(ctx); err != nil {
-		return r, claims{}, &model.NoEngineError{Hypervisor: s.engine.Name(), Cause: err}
+		return r, claims{}, &model.NoEngineError{Hypervisor: s.engine.Name(), Package: s.engine.Package(), Cause: err}
 	}
 	held, err := s.claims(ctx)
 	if err != nil {

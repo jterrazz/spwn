@@ -105,7 +105,7 @@ func Worded(err error) error {
 	case errors.As(err, &net):
 		return refused(fail.Refused, BadNetwork, net.Value, map[string]string{"bridge": yes(net.Bridge)})
 	case errors.As(err, &hyper):
-		return refused(fail.Refused, NoHypervisor, hyper.Hypervisor, nil)
+		return refused(fail.Refused, NoHypervisor, hyper.Hypervisor, map[string]string{"package": hyper.Package})
 	case errors.As(err, &bad):
 		return refused(fail.Refused, BadName, bad.Name, nil)
 	case errors.As(err, &taken):

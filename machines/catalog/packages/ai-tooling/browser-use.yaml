@@ -13,5 +13,5 @@ methods:
     - family: linux
       script:
           check: ANONYMIZED_TELEMETRY=false browser-use --version
-          run: uv tool install browser-use
+          run: uv tool install --upgrade browser-use
           undo: uv tool uninstall browser-use

@@ -28,7 +28,7 @@ func ViewOf(name string, rec MacRecord, node Node, far MacView, answered bool) M
 	}
 	view := MacView{
 		Name: name, User: rec.User, StationVersion: far.StationVersion, Reachable: true, LAN: far.LAN, Node: far.Node, Engine: far.Engine,
-		Hardware: far.Hardware, Laptop: far.Laptop, Asleep: far.Asleep, Awake: far.Awake,
+		Hardware: far.Hardware, Laptop: far.Laptop, Asleep: far.Asleep, Awake: far.Awake, SilentHypervisor: far.SilentHypervisor, SilentPackage: far.SilentPackage,
 	}
 	for _, vm := range far.VMs {
 		vm.Mac = name
