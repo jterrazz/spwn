@@ -1,5 +1,6 @@
 import { Suspense } from 'react';
 
+import { GuideSheet } from '../features/guide/guide-sheet';
 import { routeOfNeed } from '../features/overview/needs';
 import { GestureConfirm } from '../kit/gestures';
 import type { PlainPage } from '../navigation/route';
@@ -68,9 +69,15 @@ function GalleryPage({ Gallery }: Pick<PageProps, 'Gallery'>) {
     );
 }
 
-function Head({ route, found, go, newMachine }: PageProps) {
+function Head({ route, found, go, guide, newMachine }: PageProps) {
     return route.page === 'machine' && found ? (
-        <MachineHeader found={found} go={go} onNewMachine={newMachine} tab={route.tab} />
+        <MachineHeader
+            found={found}
+            go={go}
+            onGuide={guide}
+            onNewMachine={newMachine}
+            tab={route.tab}
+        />
     ) : null;
 }
 
@@ -138,6 +145,7 @@ export const PAGES: Pages = {
     Body,
     Confirm: GestureConfirm,
     Core: CorePage,
+    Guide: GuideSheet,
     Head,
     ItemName,
     NewMachine,

@@ -44,18 +44,20 @@ type Acts struct {
 	// invariant: the file is the board: each write reads it, changes its
 	// own act and writes it back whole, then puts what it holds, so
 	// two engines of one Mac (a world's commands) never drop each other's.
-	mu     sync.Mutex
-	file   ActFile
-	owners ActOwners
-	now    func() time.Time
-	put    func(guide.Acts) error
+	mu      sync.Mutex
+	file    ActFile
+	owners  ActOwners
+	now     func() time.Time
+	put     func(guide.Acts) error
+	project func(guide.Act) (guide.Guide, bool)
 }
 
-func OpenActs(file ActFile, owners ActOwners, now func() time.Time, put func(guide.Acts) error) *Acts {
+func OpenActs(file ActFile, owners ActOwners, now func() time.Time, put func(guide.Acts) error, project func(guide.Act) (guide.Guide, bool)) *Acts {
 	// invariant: at the engine's start an act whose process no longer runs
 	// ends interrupted at the step it reached; the board puts what it
-	// holds only when it holds an act.
-	b := &Acts{file: file, owners: owners, now: now, put: put}
+	// holds only when it holds an act. project is an act's Guide as the
+	// engine serves it, false for a family no projection knows.
+	b := &Acts{file: file, owners: owners, now: now, put: put, project: project}
 	b.mu.Lock()
 	defer b.mu.Unlock()
 	k := b.read()
@@ -75,7 +77,10 @@ func OpenActs(file ActFile, owners ActOwners, now func() time.Time, put func(gui
 	return b
 }
 
-func (b *Acts) Phase(family string, ph guide.Phase) string {
+func (b *Acts) Phase(family string, ph guide.Phase) (string, *guide.Guide) {
+	// invariant: the phase that puts an act on the board answers its first
+	// Guide, projected from the act as put, so the progress frame that
+	// names the act carries what the board already holds.
 	id := guide.ID(family, ph.Subject)
 	b.mu.Lock()
 	defer b.mu.Unlock()
@@ -84,7 +89,8 @@ func (b *Acts) Phase(family string, ph guide.Phase) string {
 	if i >= 0 && k.Acts[i].Ended != "" {
 		k.Acts, i = slices.Delete(k.Acts, i, i+1), -1
 	}
-	if i < 0 {
+	put := i < 0
+	if put {
 		var owner *machines.Process
 		if self, err := b.owners.Self(); err == nil {
 			owner = &self
@@ -97,8 +103,15 @@ func (b *Acts) Phase(family string, ph guide.Phase) string {
 		e.Rail = slices.Clone(ph.Rail)
 	}
 	e.Step, e.Line, e.At = ph.Step, ph.Line, b.at()
+	act := e.Act
 	b.save(k)
-	return id
+	if !put {
+		return id, nil
+	}
+	if g, known := b.project(act); known {
+		return id, &g
+	}
+	return id, nil
 }
 
 func (b *Acts) End(id string, ended guide.Ended, failed *call.WireError) {

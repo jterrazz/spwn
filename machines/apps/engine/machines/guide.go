@@ -10,6 +10,9 @@ const (
 	// value: the act family of a create: a VM made, its image built first
 	// when it is missing, its id `machines.create:<name>`.
 	GuideCreate = "machines.create"
+
+	// value: how a create names itself in its Guide's heading.
+	guideCreateAct = "New machine"
 )
 
 func (s BirthStep) Label() string {
@@ -55,7 +58,7 @@ func CreateGuide(a guide.Act, vm *VM) guide.Guide {
 	if at >= 0 && at+1 < len(a.Rail) {
 		next = a.Rail[at+1].Label
 	}
-	g := guide.Guide{ID: a.ID, Act: a.Family, Subject: a.Subject, Steps: guide.Rail(a), Ended: a.Ended}
+	g := guide.Guide{ID: a.ID, Act: guideCreateAct, Subject: a.Subject, Steps: guide.Rail(a), Ended: a.Ended}
 	switch a.Ended {
 	case "":
 		g.Live = true
@@ -68,8 +71,9 @@ func CreateGuide(a guide.Act, vm *VM) guide.Guide {
 	case guide.EndedDone:
 		g.Line = a.Subject + " is ready"
 		g.View = guide.View{
-			Illustration: guide.PictureDone, Headline: guide.Headline{Now: a.Subject + " is ready", Next: ""},
-			Sentence: readyWords(a.Subject, vm), Move: guide.MoveEngine,
+			Illustration: guide.PictureDone, Headline: guide.Headline{Now: a.Subject + " is ready.", Next: "Open it in your terminal."},
+			Sentence: readyWords(a.Subject, vm), Move: guide.MoveOwner,
+			Action: &guide.Gesture{Label: "Open " + a.Subject, Nav: "machine:" + a.Subject},
 		}
 	default:
 		g.View = endedView(a, vm, at, label)
@@ -96,20 +100,20 @@ func endedView(a guide.Act, vm *VM, at int, label string) guide.View {
 		v.Kept = "Nothing was made."
 	case vm.Birth != nil && vm.Birth.Failed && vm.Birth.Gone:
 		v.Kept, v.Move = "Its disk is kept until you delete it.", guide.MoveOwner
-		v.Action = deleteGesture(vm.Name)
+		v.Action = deleteGesture(vm.Name, vm.Mac)
 	case vm.State == Running:
 		v.Kept, v.Move = vm.Name+" runs, but its set-up did not finish.", guide.MoveOwner
-		v.Action = deleteGesture(vm.Name)
+		v.Action = deleteGesture(vm.Name, vm.Mac)
 		if vm.Birth != nil && vm.Birth.Failed {
-			v.Action = &guide.Gesture{Label: "Try again", Call: "machines.start", Args: map[string]string{"VM": vm.Name}}
-			v.Quiet = deleteGesture(vm.Name)
+			v.Action = &guide.Gesture{Label: "Try again", Call: "machines.start", Args: map[string]string{"VM": vm.Name}, On: vm.Mac}
+			v.Quiet = deleteGesture(vm.Name, vm.Mac)
 		}
 	default:
 		v.Kept, v.Move = keptWords(vm), guide.MoveOwner
 		if gestures := GesturesOf(*vm); len(gestures) > 0 && (gestures[0] == GestureTryAgain || gestures[0] == GestureStart) {
-			v.Action = &guide.Gesture{Label: map[Gesture]string{GestureTryAgain: "Try again", GestureStart: "Start " + vm.Name}[gestures[0]], Call: "machines.start", Args: map[string]string{"VM": vm.Name}}
+			v.Action = &guide.Gesture{Label: map[Gesture]string{GestureTryAgain: "Try again", GestureStart: "Start " + vm.Name}[gestures[0]], Call: "machines.start", Args: map[string]string{"VM": vm.Name}, On: vm.Mac}
 		}
-		v.Quiet = deleteGesture(vm.Name)
+		v.Quiet = deleteGesture(vm.Name, vm.Mac)
 	}
 	if v.Sentence == "" && vm != nil && vm.Birth != nil {
 		v.Sentence = vm.Birth.Cause
@@ -124,8 +128,8 @@ func keptWords(vm *VM) string {
 	return vm.Name + " is kept, stopped."
 }
 
-func deleteGesture(name string) *guide.Gesture {
-	return &guide.Gesture{Label: "Delete " + name, Call: "machines.delete", Args: map[string]string{"VM": name}, Confirm: name}
+func deleteGesture(name, mac string) *guide.Gesture {
+	return &guide.Gesture{Label: "Delete " + name, Call: "machines.delete", Args: map[string]string{"VM": name}, On: mac, Confirm: name}
 }
 
 func readyWords(name string, vm *VM) string {

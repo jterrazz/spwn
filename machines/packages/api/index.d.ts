@@ -3348,6 +3348,7 @@ export type Progress = {
     detail?: string;
     done?: boolean;
     error?: CoreCallWireError;
+    guide?: CoreGuideGuide;
     step?: string;
     task: string;
 };

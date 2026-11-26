@@ -74,6 +74,7 @@ MEASURED = {"machines.stop"}
 NOISE = {"engine.start": "PID"}
 CLOCKED = {"settings.matrix": "Read", "awake.read": "Now"}
 MACHINES = {"watch": "machines.list", "in": {}}
+GUIDES = {"call": "engine.guides", "in": {}}
 STAMP = ROOT / ".artifacts" / "window-record.stamp"
 FORCE = "WINDOW_RECORD_FORCE"
 KEYS = pathlib.Path(os.environ["STATION_BENCH"]) / "record-keys" if os.environ.get("STATION_BENCH") else None
@@ -164,6 +165,7 @@ def asks(listed):
         *[{"watch": "vault.new", "in": {}} for _ in here],
         *[{"watch": "awake.read", "in": {}, **onMac(mac)} for mac in macs],
         *[{"call": "engine.log", "in": {}, **onMac(mac)} for mac in macs],
+        {"call": "engine.guides", "in": {}},
         {"call": "journal.read", "in": {}},
         {"call": "journal.read", "in": {"Night": True}},
         *[{"call": "journal.read", "in": {"Mac": mac}} for mac in macsOf(listed)],
@@ -217,6 +219,7 @@ def asked(seed, requests, fixture):
         return list(pool.map(lambda request: serve(seed, [request], fixture)[1][0], requests))
 
 
+CREATE_LINUX_2 = {"call": "machines.create-workspace", "in": {"Request": {"Name": "linux-2", "From": "base-ubuntu", "Lifetime": "ephemeral", "Purpose": "Lot shell", "Size": {"MemoryBytes": 4294967296}}}}
 STOP_LINUX_1 = {"call": "machines.stop", "in": {"VM": "linux-1"}}
 
 GESTURES = {
@@ -298,6 +301,13 @@ GESTURES = {
     ],
     "creating": [
         {"call": "machines.delete", "in": {"VM": "linux-5", "Confirm": "linux-5"}},
+    ],
+    "create-held": [
+        {**CREATE_LINUX_2, "during": [MACHINES, GUIDES, {"watch": "overview.read", "in": {}, **at("linux-2")}]},
+    ],
+    "create-failing": [
+        CREATE_LINUX_2,
+        {"call": "machines.start", "in": {"VM": "linux-2"}, "following": CREATE_LINUX_2},
     ],
     "machinefile-differs": [
         {"call": "machinefile.apply", "in": {"Confirm": "yes"}},
@@ -461,22 +471,37 @@ def gesture(world, seed, fixture, request, reads, before):
         door.ask([following])
         before = based(door, world, reads, before)
 
+    apart = {}
+
     def asked_while(count):
         if count != 1 or not during:
             return []
         door.reached()
-        return during
+        for read in during:
+            if callOf(read) == "engine.guides":
+                apart[keyOf(read)] = door.ask([read])[0]
+        return [read for read in during if callOf(read) != "engine.guides"]
 
     [answers, *heard] = door.ask([request], asked_while)
-    running = [{"request": read, "answers": kept(read, frames)} for read, frames in zip(during, heard)]
+    heard = iter(heard)
+    running = [{"request": read, "answers": kept(read, apart[keyOf(read)] if keyOf(read) in apart else next(heard))}
+               for read in during]
     [listed] = door.ask([MACHINES])
     born = [read for read in asked_in(world, listed) if keyOf(read) not in before]
-    changed = []
+    changed, late = [], []
     for read in [*reads, *born]:
         if callOf(read) in TIMED and not measured(request, read):
             continue
+        if callOf(read) == "engine.guides":
+            late.append(read)
+            continue
         [frames] = door.ask([read])
         frames, was = kept(read, frames), before.get(keyOf(read))
+        if was is None or compared(read, frames) != compared(read, was):
+            changed.append({"request": read, "answers": frames})
+    door.stop()
+    for read in late:
+        frames, was = kept(read, door.apart(read)), before.get(keyOf(read))
         if was is None or compared(read, frames) != compared(read, was):
             changed.append({"request": read, "answers": frames})
     door.close()

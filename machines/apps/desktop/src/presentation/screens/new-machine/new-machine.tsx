@@ -1,8 +1,10 @@
 import type {
     CallName,
+    CoreGuideGuide,
     MachinesCallsNewIn,
     MachinesCallsNewMachine,
     MachinesCreated,
+    Progress,
 } from '@jterrazz/station-api';
 import { useEffect, useRef, useState } from 'react';
 import type { ReactElement } from 'react';
@@ -38,7 +40,12 @@ import styles from './new-machine.module.css';
 
 const CREATE_REREADS: readonly CallName[] = ['overview.read'];
 
-export type NewMachineProps = { go: (to: Route) => void; onClose: () => void; opening: Opening };
+export type NewMachineProps = {
+    go: (to: Route) => void;
+    onClose: () => void;
+    onGuide: (act: string, served: CoreGuideGuide | undefined) => void;
+    opening: Opening;
+};
 
 type SheetProps = NewMachineProps & {
     answer: MachinesCallsNewMachine;
@@ -53,18 +60,24 @@ function placeOf(gesture: Gesture<unknown>, answer: MachinesCallsNewMachine): Re
         : 'foot';
 }
 
-// invariant: Launch hands the owner to the new machine's page once the engine has begun making it (its first
-// invariant: progress frame) or answered, whichever comes first, and only once: a refusal comes before either, so
-// invariant: it is drawn in the sheet.
-function useLaunch({ go, onClose }: Pick<NewMachineProps, 'go' | 'onClose'>) {
+// invariant: Launch opens the Guide of the act the engine gave in its first progress frame, drawn as that frame served
+// invariant: it until the engine's list holds it, or, when it gave none,
+// invariant: hands the owner to the new machine's page once it has answered; it does either once, as the engine has
+// invariant: begun or answered, and a refusal comes before either, so it is drawn in the sheet.
+function useLaunch({ go, onClose, onGuide }: Pick<NewMachineProps, 'go' | 'onClose' | 'onGuide'>) {
     const launched = useRef(false);
-    return (name: string) => {
-        if (launched.current || name === '') {
+    return (name: string, first: Progress | undefined) => {
+        const act = first?.act;
+        if (launched.current || (name === '' && act === undefined)) {
             return;
         }
         launched.current = true;
-        onClose();
-        go(machineRoute(name));
+        if (act === undefined) {
+            onClose();
+            go(machineRoute(name));
+        } else {
+            onGuide(act, first?.guide);
+        }
     };
 }
 
@@ -76,7 +89,7 @@ function useCreate(props: SheetProps) {
     const launch = useLaunch(props);
     const shared = {
         onDone: (out: MachinesCreated) => {
-            launch(out.VM.Name);
+            launch(out.VM.Name, undefined);
         },
         rereads: CREATE_REREADS,
         subject: name,
@@ -89,10 +102,10 @@ function useCreate(props: SheetProps) {
     });
     const server = useGesture('machines.create-server', { ...shared, input: serverInputOf(asked) });
     const gesture = draft.kind === 'server' ? server : workspace;
-    const begun = gesture.state.kind === 'running' && gesture.state.progress.length > 0;
+    const first = gesture.state.kind === 'running' ? gesture.state.progress.at(0) : undefined;
     useEffect(() => {
-        if (begun) {
-            launch(name);
+        if (first !== undefined) {
+            launch(name, first);
         }
     });
     const ready =

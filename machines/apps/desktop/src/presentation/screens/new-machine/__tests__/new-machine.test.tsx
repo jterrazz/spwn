@@ -54,7 +54,7 @@ describe('New machine', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test('a workspace on This Mac is launched there, and the sheet hands over to its page', async () => {
+    test('a workspace on This Mac is launched there, and the sheet hands over to the Guide of its act, whose action opens its page', async () => {
         // Given - the New machine sheet over two-macs, opened on the mini
         const result = await component.render(windowOver('two-macs'), async (visitor) => {
             await visitor.click(NEW_MACHINE);
@@ -67,14 +67,17 @@ describe('New machine', () => {
             await visitor.click(within(onThisMac, button('ephemeral')));
             await visitor.click(within(onThisMac, button('Launch')));
 
-            // Then - the sheet is gone and gate5's page is open
+            // Then - the sheet is gone and gate5's Guide reads it made, its action opening gate5's page
             await visitor.gone(onThisMac);
+            const guide = dialog('New machine gate5');
+            await visitor.see(within(guide, heading('gate5 is ready. Open it in your terminal.')));
+            await visitor.click(within(guide, button('Open gate5')));
             await visitor.see(heading('gate5 running'));
         });
         expect(result.errors.text).toBe('');
     });
 
-    test("from a Mac's page the create is sent to that Mac, and the sheet hands over to the machine it made there", async () => {
+    test("from a Mac's page the create is sent to that Mac, and the sheet hands over to the machine it made there, which no Guide follows", async () => {
         // Given - the mini's page over two-macs
         const result = await component.render(
             windowOver('two-macs', machineRoute('mac-mini')),

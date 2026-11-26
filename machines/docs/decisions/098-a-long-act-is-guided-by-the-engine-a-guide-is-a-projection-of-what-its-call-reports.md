@@ -25,4 +25,5 @@ A create takes minutes and crosses steps (an image's build, the clone, the boot,
 - Only a create asked of an engine's socket is guided: a create a command runs itself (`station machines create`), and a server's create, report no Phase that anyone keeps.
 - The call is `engine.guides`, not the plan's `guides.list`: a call of the engine's package is named by its family (rule `calls-gated`).
 - A family gains a Guide by naming it on its call and adding its projection to `feeds.Guided`; the rule fails one without the other.
+- A repair names the machine it runs at (`On`, as a finding's fix does), and a made create's Guide carries one action, the page of its machine (`Nav`), so the window wires gestures and draws nothing else of them; its heading is the engine's words, never the family's id. A create asked of another Mac is not guided, since only the engine whose socket the window asked runs the act's board.
 - Not yet decided here: re-running a create that failed before its first run (the plan's `guides.again`), which today offers no repair.

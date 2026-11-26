@@ -1,4 +1,9 @@
-import type { MachinesMacView, OverviewNeed, OverviewReadOutput } from '@jterrazz/station-api';
+import type {
+    CoreGuideGuide,
+    MachinesMacView,
+    OverviewNeed,
+    OverviewReadOutput,
+} from '@jterrazz/station-api';
 import { useMemo, useSyncExternalStore } from 'react';
 import type { ComponentType } from 'react';
 
@@ -46,6 +51,7 @@ export type PageProps = {
     Gallery?: ComponentType | undefined;
     newMachine?: ((opening?: Opening) => void) | undefined;
     addMac?: (() => void) | undefined;
+    guide?: ((act: string) => void) | undefined;
 };
 
 export type { Opening } from './opened';
@@ -53,8 +59,19 @@ export type Pages = {
     Head: ComponentType<PageProps>;
     Body: ComponentType<PageProps>;
     Confirm: ComponentType;
+    Guide: ComponentType<{
+        act: string;
+        go: Go;
+        onClose: () => void;
+        served: CoreGuideGuide | undefined;
+    }>;
     Core: ComponentType;
-    NewMachine: ComponentType<{ go: Go; onClose: () => void; opening: Opening }>;
+    NewMachine: ComponentType<{
+        go: Go;
+        onClose: () => void;
+        onGuide: (act: string, served: CoreGuideGuide | undefined) => void;
+        opening: Opening;
+    }>;
     AddMac: ComponentType<{ go: Go; onClose: () => void }>;
     AddPassword: ComponentType<{ onClose: () => void }>;
     ItemName: ComponentType<{ page: PlainPage; item: string }>;
@@ -139,8 +156,8 @@ type SheetsProps = {
 
 function Sheets({ opened, go, pages, macs, needs, withGallery }: SheetsProps) {
     const sheet = useSyncExternalStore(opened.subscribe, opened.shown);
-    const { NewMachine, AddMac, AddPassword } = pages;
-    const { addMac: onAddMac, close: onClose } = opened;
+    const { NewMachine, AddMac, AddPassword, Guide } = pages;
+    const { addMac: onAddMac, close: onClose, guide: onGuide } = opened;
     switch (sheet.kind) {
         case 'find': {
             return (
@@ -157,7 +174,12 @@ function Sheets({ opened, go, pages, macs, needs, withGallery }: SheetsProps) {
             );
         }
         case 'new-machine': {
-            return <NewMachine go={go} onClose={onClose} opening={sheet.opening} />;
+            return (
+                <NewMachine go={go} onClose={onClose} onGuide={onGuide} opening={sheet.opening} />
+            );
+        }
+        case 'guide': {
+            return <Guide act={sheet.act} go={go} onClose={onClose} served={sheet.served} />;
         }
         case 'add-mac': {
             return <AddMac go={go} onClose={onClose} />;
@@ -220,7 +242,7 @@ function Frame({ Gallery, pages, memory }: FrameProps) {
     const sheets = useSheets();
     const column = useMemo(() => new ColumnState(memory, globalThis.innerWidth), [memory]);
     const { opened } = sheets;
-    const { addMac, newMachine } = opened;
+    const { addMac, guide, newMachine } = opened;
     const withGallery = Gallery !== undefined;
     const spaced = quiet || !isGlobal(route);
     const onSpace = useSpaceKeys(
@@ -232,7 +254,7 @@ function Frame({ Gallery, pages, memory }: FrameProps) {
     const lost = useLost(router, macs, listed);
     const found = route.page === 'machine' ? findMachine(macs, route.machine) : undefined;
     useSettledRoute(router, found);
-    const area = { addMac, found, Gallery, go, home, newMachine, pages, route };
+    const area = { addMac, found, Gallery, go, guide, home, newMachine, pages, route };
     const aside = { ...side, engine, go, needs, quiet, route, routeOfNeed: pages.routeOfNeed };
     return (
         <Screen>

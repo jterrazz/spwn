@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
+	"github.com/jterrazz/studio-station/apps/engine/core/guide"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/remote/contract"
 )
@@ -43,6 +44,10 @@ type Progress struct {
 	// and the step of its rail it reached; absent for a call no Guide follows.
 	Act  string `json:"act,omitempty"`
 	Step string `json:"step,omitempty"`
+	// value: the act's Guide as the engine served it when it put the act
+	// on its board, on the one frame that first names the act, so a client
+	// draws it before its copy of engine.guides holds it.
+	Guide *guide.Guide `json:"guide,omitempty"`
 }
 
 type Frame struct {

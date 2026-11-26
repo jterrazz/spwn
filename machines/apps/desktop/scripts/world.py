@@ -224,6 +224,22 @@ def failed_at_boot(name, vm):
     return edit
 
 
+def boot_held(mac, vm):
+    """The boot of `vm` on `mac` held for the world's life, in place of two-macs' hold of linux-2 on mac-mini: a create of it
+    stays at its boot and every read meanwhile sees it there."""
+    def edit(content):
+        content["script"] = [{"call": "Hypervisor.Boot", "hold": True, "mac": mac, "vm": vm}]
+    return edit
+
+
+def boot_refused_once():
+    """The next boot of a VM the hypervisor refuses, in place of two-macs' hold of linux-2's boot: a create of it fails at
+    its boot and is kept on the record, as `world fault Hypervisor.Boot 1` leaves it."""
+    def edit(content):
+        content["script"] = [{"call": "Hypervisor.Boot", "times": 1}]
+    return edit
+
+
 def installed_for(mac, machinefile, package, method):
     """A package the ledger says station installed for `machinefile`: when the file lists it no longer, it is an extra
     Apply leaves (specs/usecases/machinefile/drift/an-extra-stays-at-a-bare-apply.spec.yaml)."""
@@ -475,6 +491,8 @@ WORLDS = {
                                                  unreadable("macbook-pro", "api")]),
     "share-local": ("two-macs", None, {}, [kept_local("macbook-pro", "linux-1", 5173)]),
     "create-failed": ("two-macs", None, {}, [failed_at_boot("macbook-pro", "linux-2")]),
+    "create-held": ("two-macs", None, {}, [boot_held("macbook-pro", "linux-2")]),
+    "create-failing": ("two-macs", None, {}, [boot_refused_once()]),
     "range-full": ("range-full", None, {}, [listens("macbook-pro", "linux-1", 9000, "node")]),
     "kept-four-hours": ("two-macs", None, {}, [kept_awake("macbook-pro", session={
         "lid": False, "battery": False, "started_at": "2026-11-04T10:00:00Z", "until": "2026-11-04T14:00:00Z",

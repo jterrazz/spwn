@@ -1,4 +1,14 @@
-import { banner, button, component, content, navigation, within } from '@jterrazz/test';
+import {
+    banner,
+    button,
+    component,
+    content,
+    dialog,
+    field,
+    navigation,
+    region,
+    within,
+} from '@jterrazz/test';
 import { Profiler } from 'react';
 import { describe, expect, test } from 'vitest';
 
@@ -6,7 +16,7 @@ import { settled } from '../../../composition/__tests__/page-over';
 import { composeReplay } from '../../../composition/compose';
 import { Client } from '../../../infrastructure/outbound/engine-link/client';
 import { recordingsOf } from '../../../infrastructure/outbound/engine-replay/recordings';
-import { opened } from '../../dependencies/__tests__/over-a-replay';
+import { CHANGES, opened } from '../../dependencies/__tests__/over-a-replay';
 import { pushed } from '../../dependencies/__tests__/pushed';
 import { EngineProvider } from '../../dependencies/dependencies';
 import { HIDDEN, PINNED } from '../../navigation/__tests__/pinned';
@@ -17,7 +27,7 @@ import { PAGES } from '../registry';
 import { overBudget, tallied } from './tally';
 import type { Budget, Tally } from './tally';
 
-const recordingFor = await recordingsOf('calm', 'stories');
+const recordingFor = await recordingsOf('calm', 'create-held', 'stories');
 
 // hazard: press wraps a key longer than one letter in braces, so a chord is user-event's hold and release
 // hazard: with its outer braces left to press.
@@ -31,6 +41,7 @@ const HOME: Route = { page: 'home' };
 const BUDGETS = {
     activityTab: { commits: 4, renders: 326 },
     find: { commits: 1, renders: 25 },
+    guideOpens: { commits: 4, renders: 293 },
     homeCalm: { commits: 8, renders: 535 },
     homeStories: { commits: 8, renders: 795 },
     newMachine: { commits: 2, renders: 39 },
@@ -172,6 +183,41 @@ describe('registry', () => {
 
         // Then - it cost no more than its budget
         expect(overBudget(cost, BUDGETS.activityTab)).toStrictEqual({});
+    });
+
+    test('launching a machine hands New machine to its Guide in one commit, within its budget', async () => {
+        // Given - the New machine sheet filled for linux-2 over create-held, every moment of the window's sheets seen
+        const over = talliedOver('create-held', HOME);
+        const sheet = dialog('New machine on macbook-pro');
+        const bare: string[] = [];
+        const watcher = new MutationObserver(() => {
+            if (document.querySelector('[role="dialog"]') === null) {
+                bare.push(document.body.textContent);
+            }
+        });
+        let cost: Tally | undefined;
+        await component.render(over.ui, async (visitor) => {
+            await settled(over.stage);
+            await visitor.click(within(banner(), button('New machine')));
+            await visitor.click(within(region('On'), button('macbook-pro')));
+            await visitor.fill(within(sheet, field('What is it for?')), 'Lot shell');
+            await visitor.fill(within(sheet, field('Name')), 'linux-2');
+            await visitor.click(within(sheet, button('ephemeral')));
+            await settled(over.stage);
+            over.tally.taken();
+            watcher.observe(document.body, CHANGES);
+
+            // When - Launch is pressed and the engine begins the act
+            await visitor.click(within(sheet, button('Launch')));
+            await visitor.see(dialog('New machine linux-2'));
+            await settled(over.stage);
+            cost = over.tally.taken();
+            watcher.disconnect();
+        });
+
+        // Then - no moment drew the window without a sheet, and it cost no more than its budget
+        expect(bare).toStrictEqual([]);
+        expect(overBudget(cost, BUDGETS.guideOpens)).toStrictEqual({});
     });
 
     test('a revision of engine.state equal to the one drawn commits nothing and renders nothing', async () => {

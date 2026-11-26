@@ -79,6 +79,30 @@ class Door:
             self.lines.put(line)
         self.lines.put("")
 
+    def apart(self, request):
+        """A read of the acts the engine guides, asked of a second `station guest serve --stdio` over this door's own HOME,
+        as the stories ask it: an engine reads the board a live act left in acts.json as it starts, so the act this
+        door's engine runs, or ran, is the one it names, at the step it reached. Its answer is returned as `ask`
+        returns one."""
+        process = subprocess.Popen(
+            [str(binary), "guest", "serve", "--stdio"], cwd=self.home, env=self.env,
+            stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True,
+        )
+        process.stdin.write(json.dumps({"v": 2, "id": "0", "hello": {"version": "dev", "calls": None}}) + "\n")
+        process.stdin.write(json.dumps({"v": 2, "id": "1", **request}) + "\n")
+        process.stdin.flush()
+        frames = []
+        for line in process.stdout:
+            frame = json.loads(line)
+            if frame["id"] != "1":
+                continue
+            frames.append({key: value for key, value in frame.items() if key != "id"})
+            if "out" in frame or "error" in frame:
+                break
+        process.stdin.close()
+        process.wait(timeout=60)
+        return frames
+
     def send(self, frames):
         self.process.stdin.write("".join(json.dumps(frame) + "\n" for frame in frames))
         self.process.stdin.flush()
@@ -92,6 +116,8 @@ class Door:
         engine's done; any other is waited for to its end, as a watch that settles (disk.read) or an Overview whose
         slowest part has not answered may be silent longer than QUIET. A request still open after WHOLE silences in a
         row stops the run, so no part-read answer is ever written."""
+        if len(requests) == 1 and callOf(requests[0]) == "engine.guides":
+            return [self.apart(requests[0])]
         ids, watches, unended = [], set(), set()
         first = len(requests)
         unheld = False
@@ -164,6 +190,11 @@ class Door:
         reads have answered; with nothing held it changes nothing."""
         subprocess.run([str(binary), "world", "unhold"], cwd=self.home, env=self.env, stdout=subprocess.DEVNULL,
                        check=True)
+
+    def stop(self):
+        """Ends this door's engine and waits for it, its world written back, its HOME still here to be read."""
+        self.process.stdin.close()
+        self.process.wait(timeout=60)
 
     def close(self):
         self.process.stdin.close()
