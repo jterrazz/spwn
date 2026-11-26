@@ -32,9 +32,9 @@ describe('fold', () => {
         // Given - the 1100 px minimum, the column hidden, and a last segment of 160 px
         const least = fixedWidth() + 140 + FOLD_WIDTH + 160;
 
-        // Then - the bar holds them, the three spaces kept as words and the Find field at its 120 px
+        // Then - the bar holds them, the three spaces kept as words and Find as its 28 px glass
         expect(BAR_FIXED.spaces).toBe(150);
-        expect(BAR_FIXED.find).toBe(120);
+        expect(BAR_FIXED.find).toBe(28);
         expect(least).toBeLessThanOrEqual(1100);
     });
 });

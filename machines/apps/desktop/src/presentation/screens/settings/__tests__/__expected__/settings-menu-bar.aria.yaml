@@ -3,7 +3,6 @@
     - button "Machine"
     - button "Agent soon": Agent
     - button "OS soon": OS
-  - button "Home"
   - button "Back" [disabled]
   - button "Forward" [disabled]
   - navigation "Path":

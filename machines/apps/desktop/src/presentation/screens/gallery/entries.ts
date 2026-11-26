@@ -72,8 +72,6 @@ import { ROW_SKELETON_STORIES } from '../../ui/row-skeleton.stories';
 import { ROW_HEAD_STORIES, ROW_STORIES } from '../../ui/row.stories';
 import { SearchField } from '../../ui/search-field';
 import { SEARCH_FIELD_STORIES } from '../../ui/search-field.stories';
-import { Sign } from '../../ui/sign';
-import { SIGN_STORIES } from '../../ui/sign.stories';
 import { StateMark } from '../../ui/state-mark';
 import { STATE_MARK_STORIES } from '../../ui/state-mark.stories';
 import { Switch } from '../../ui/switch';
@@ -97,7 +95,6 @@ export const ENTRIES: readonly Entry[] = [
     entry('MachineIcon', 'Marks', { Component: MachineIcon, stories: MACHINE_ICON_STORIES }),
     entry('MachineChip', 'Marks', { Component: MachineChip, stories: MACHINE_CHIP_STORIES }),
     entry('StateMark', 'Marks', { Component: StateMark, stories: STATE_MARK_STORIES }),
-    entry('Sign', 'Marks', { Component: Sign, stories: SIGN_STORIES }),
     entry('TypeTag', 'Marks', { Component: TypeTag, stories: TYPE_TAG_STORIES }),
     entry('Value', 'Marks', { Component: Value, frame: 'meter', stories: VALUE_STORIES }),
     entry('DotStrip', 'Marks', { Component: DotStrip, stories: DOT_STRIP_STORIES }),

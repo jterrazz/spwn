@@ -1,4 +1,4 @@
-import { button, component, content, heading } from '@jterrazz/test';
+import { button, component, content, heading, option } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { composeReplay } from '../../../composition/compose';
@@ -38,8 +38,9 @@ describe('Boundary', () => {
                 await visitor.see(content('needs is not iterable'));
                 await visitor.see(button('Reload'));
 
-                // When - Home is opened from the bar that survived
-                await visitor.click(button('Home'));
+                // When - Home is opened from the card of the bar that survived
+                await visitor.click(button('Inbox'));
+                await visitor.click(option('Home ⌘0'));
 
                 // Then - Home is drawn again
                 await visitor.see(content('Home is drawn'));

@@ -7,6 +7,7 @@ import {
     disabled,
     focused,
     navigation,
+    option,
     waitUntil,
     within,
 } from '@jterrazz/test';
@@ -32,6 +33,7 @@ const LINUX_1 = within(path, button('linux-1', { exact: false }));
 // hazard: with its outer braces left to press.
 const COMMAND_2 = 'Meta>}2{/Meta';
 const COMMAND_1 = 'Meta>}1{/Meta';
+const COMMAND_0 = 'Meta>}0{/Meta';
 
 function selected(): string | undefined {
     return document.querySelector('[role="tab"][aria-selected="true"]')?.textContent;
@@ -70,7 +72,7 @@ describe('spaces', () => {
             await visitor.see(LINUX_1);
             const machine = pressedWords();
 
-            // When - Settings, then Back, then the bar's Home
+            // When - Settings, then Back, then ⌘0
             await visitor.click(within(bar, button('Settings')));
             await visitor.see(within(path, content('Settings')));
             await underlined([]);
@@ -79,7 +81,7 @@ describe('spaces', () => {
             await visitor.see(LINUX_1);
             await underlined(['Machine']);
             const back = pressedWords();
-            await visitor.click(within(bar, button('Home')));
+            await visitor.press(COMMAND_0);
             await visitor.see(within(path, content('Home')));
             read = [machine, settings, back, pressedWords()];
         });
@@ -164,13 +166,14 @@ describe('spaces', () => {
         await component.render(windowOn(machineRoute('linux-1', 'Ports')), async (visitor) => {
             await visitor.see(LINUX_1);
 
-            // When - Home, then ⌘1; Home again, then the Machine word
-            await visitor.click(within(bar, button('Home')));
+            // When - Home by ⌘0, then ⌘1; Home again by the card's first row, then the Machine word
+            await visitor.press(COMMAND_0);
             await visitor.see(within(path, content('Home')));
             await visitor.press(COMMAND_1);
             await visitor.see(LINUX_1);
             const byKey = selected();
-            await visitor.click(within(bar, button('Home')));
+            await visitor.click(within(path, button('Fleet')));
+            await visitor.click(option('Home ⌘0'));
             await visitor.see(within(path, content('Home')));
             await visitor.click(within(spaces, button('Machine')));
             await visitor.see(LINUX_1);

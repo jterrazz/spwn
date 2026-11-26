@@ -1,9 +1,7 @@
-import { banner, button, content, dialog, within } from '@jterrazz/test';
+import { button, content, dialog, within } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { website } from '../website.specification.js';
-
-const bar = banner();
 
 describe('awake', () => {
     test('M2 Awake keeps the Mac awake for 4 h, and Home says until when', async () => {
@@ -20,7 +18,7 @@ describe('awake', () => {
 
                 // Then - the sheet closes, and Home's Awake tile says On, until when
                 await visitor.gone(sheet);
-                await visitor.click(within(bar, button('Home')));
+                await visitor.press('Meta+0');
                 await visitor.see(content('on'));
                 await visitor.see(content('until', { exact: false }));
             },
@@ -40,7 +38,7 @@ describe('awake', () => {
 
                 // Then - the sheet closes, and Home's Awake tile no longer says On
                 await visitor.gone(sheet);
-                await visitor.click(within(bar, button('Home')));
+                await visitor.press('Meta+0');
                 await visitor.see(content('off'));
                 await visitor.gone(content('on'));
             },

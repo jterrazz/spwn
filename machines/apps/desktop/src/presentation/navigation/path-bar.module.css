@@ -12,18 +12,6 @@
 :global(html[data-chrome='overlay']) .bar {
     padding-left: 84px;
 }
-.sign {
-    all: unset;
-    box-sizing: border-box;
-    display: grid;
-    place-items: center;
-    width: 32px;
-    height: 32px;
-    flex: none;
-    border-radius: var(--radius-control);
-    cursor: pointer;
-}
-.sign:focus-visible,
 .segment:focus-visible,
 .inbox:focus-visible,
 .find:focus-visible,
@@ -206,6 +194,23 @@
 .find:disabled {
     cursor: default;
     color: var(--t4);
+}
+/* value: under 1280 px of window the full bar crowds, so Find keeps its glass alone, 28 px and bare like the gear beside it, and ⌘K still opens it */
+@media (width < 1280px) {
+    .find {
+        width: 28px;
+        padding: 0;
+        justify-content: center;
+        background: none;
+    }
+    .find:hover:not(:disabled) {
+        background: var(--s2);
+        color: var(--t1);
+    }
+    .find > span,
+    .find kbd {
+        display: none;
+    }
 }
 .stale {
     flex: none;
