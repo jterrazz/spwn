@@ -1,18 +1,8 @@
 // Package automation implements the `spwn automation` command group.
 //
-// Subcommands:
-//
-//	ls      list every automation declared in spwn.yaml plus its
-//	          last-fired status (cron) or watcher path (fs).
-//	logs    tail the project's <root>/.spwn/runs.jsonl receipt log,
-//	          either as a one-shot dump or with --follow.
-//	status  engine state snapshot: how many automations are
-//	          registered per world, last fire times, freshness.
-//	daemon  run the engine for the current project and block until
-//	          interrupted.
-//
-// All four are read-only against the project filesystem except
-// `daemon`, which writes receipts + state.
+// Its one subcommand is daemon: run the engine for the current project
+// and block until interrupted, writing receipts and state. Reading the
+// automations and their runs is `station automations`.
 package automation
 
 import (
@@ -30,13 +20,11 @@ to one of your project's agents. The command "spwn automation daemon" fires them
 events arrive and writes a receipt for every dispatch.
 
 Declare automations under spwn.yaml#worlds.<name>.automations. See
-docs/guides/automations.md for the full schema.`,
+docs/guides/automations.md for the full schema. "station automations" lists
+them and the runs written for them.`,
 }
 
 func init() {
-	Cmd.AddCommand(lsCmd)
-	Cmd.AddCommand(logsCmd)
-	Cmd.AddCommand(statusCmd)
 	Cmd.AddCommand(daemonCmd)
 
 	Cmd.SetHelpFunc(automationHelp)
@@ -51,11 +39,6 @@ func automationHelp(cmd *cobra.Command, args []string) {
 	ui.RenderGroupedHelp(w,
 		ui.Strong("⬡ automation")+" "+ui.Faint("- trigger-driven agent wakeups"),
 		[]ui.HelpGroup{
-			{Title: "Inspect", Commands: []ui.HelpEntry{
-				{Name: "ls", Desc: "List every declared automation"},
-				{Name: "status", Desc: "Engine state and last-fired snapshot"},
-				{Name: "logs", Desc: "Tail .spwn/runs.jsonl receipts"},
-			}},
 			{Title: "Run", Commands: []ui.HelpEntry{
 				{Name: "daemon", Desc: "Run the engine until interrupted"},
 			}},

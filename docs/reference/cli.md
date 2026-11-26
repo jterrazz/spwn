@@ -77,7 +77,8 @@ Decided in ADR-021 and ADR-022. A row whose left column is `station` is built, u
 | `spwn skill *`                               | `spwn skills`                                                                                                                              |
 | `spwn team *` (hidden)                       | `station teams` reads; a team is a file, `~/.spwn/teams/<team>.yaml`, and an agent joins it by `station agents edit <agent> --team <team>` |
 | `spwn organization` (hidden)                 | gone                                                                                                                                       |
-| `spwn automation *`                          | `spwn automations`; the engine runs them, so `automation daemon` goes                                                                      |
+| `spwn automation ls\|status\|logs`           | `station automations` and `station automations log` read them, with no follow                                                              |
+| `spwn automation daemon`                     | gone when the engine runs automations, which it does only while Spwn is open; until then it stays                                          |
 | `spwn gate`, `spwn auth`, `spwn cookie-sync` | `spwn accounts`, the one credential noun with one vault                                                                                    |
 | `spwn web`                                   | gone: Spwn.app is the one GUI                                                                                                              |
 | `spwn upgrade`                               | `spwn update`                                                                                                                              |
@@ -122,9 +123,6 @@ spwn world inspect <id>       # inspect a running world
 spwn world enter   <id>       # interactive shell inside the world
 
 # ── Automations ──────────────────────────────────────────────────
-spwn automation ls            # list declared automations + last-fired
-spwn automation status        # per-automation rollup (fires/ok/fail)
-spwn automation logs [-f] [-n N]   # tail .spwn/runs.jsonl receipts
 spwn automation daemon        # run the engine until interrupted
 
 # ── System ───────────────────────────────────────────────────────

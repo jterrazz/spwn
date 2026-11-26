@@ -285,13 +285,11 @@ events arrive and writes a receipt for every dispatch.
 
 ```text
 Declare automations under spwn.yaml#worlds.<name>.automations. See
-docs/guides/automations.md for the full schema.
+docs/guides/automations.md for the full schema. "station automations" lists
+them and the runs written for them.
 ```
 
 - [spwn automation daemon](#spwn-automation-daemon): Run the engine for the current project until interrupted.
-- [spwn automation logs](#spwn-automation-logs): Tail .spwn/runs.jsonl receipts.
-- [spwn automation ls](#spwn-automation-ls): List every automation declared in spwn.yaml.
-- [spwn automation status](#spwn-automation-status): Engine state and last-fired snapshot.
 
 ## spwn automation daemon
 
@@ -320,35 +318,6 @@ resumes at the next scheduled time.
 
 ```text
 spwn automation daemon
-```
-
-## spwn automation logs
-
-Tail .spwn/runs.jsonl receipts.
-
-```text
-spwn automation logs [flags]
-```
-
-```text
-  -f, --follow      stream new receipts as they arrive
-  -n, --limit int   show at most N most-recent receipts before --follow takes over (default 50)
-```
-
-## spwn automation ls
-
-List every automation declared in spwn.yaml.
-
-```text
-spwn automation ls
-```
-
-## spwn automation status
-
-Engine state and last-fired snapshot.
-
-```text
-spwn automation status
 ```
 
 ## spwn build
