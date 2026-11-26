@@ -60,12 +60,14 @@ type Disk struct {
 	State DiskState
 }
 
-// value: how a VM boots: its network, and the folders of its Mac it
-// shares live, each under its tag (machines.MountTag).
+// value: how a VM boots: its network, the folders of its Mac it shares
+// live, each under its tag (machines.MountTag), and how its disk takes
+// its guest's flushes; the zero Sync is SyncFull.
 
 type BootOptions struct {
 	Network machines.Network
 	Mounts  []machines.Mount
+	Sync    machines.DiskSync
 }
 
 type Run interface {

@@ -488,7 +488,7 @@ func (r liveRun) Ended() <-chan model.RunEnd { return r.ended }
 // value: a hypervisor whose one VM, api, runs from before the engine.
 type liveHypervisor struct{ run liveRun }
 
-func (h liveHypervisor) Boot(context.Context, string, model.Network, []model.Mount) (process.Run, error) {
+func (h liveHypervisor) Boot(context.Context, string, model.Network, []model.Mount, model.DiskSync) (process.Run, error) {
 	return h.run, nil
 }
 func (h liveHypervisor) Adopt(context.Context, string) (process.Run, bool) { return h.run, true }

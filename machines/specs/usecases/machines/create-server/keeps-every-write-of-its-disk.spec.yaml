@@ -1,0 +1,11 @@
+description: 'a server boots with its disk fully synced: a power cut loses no acknowledged write'
+env: two-macs
+runs:
+    - command: 'machines create infra-2 --server --on mac-mini --json | /usr/bin/jq -r .lifetime'
+      exit: 0
+      stdout: |
+          always-on
+    - command: '--version >/dev/null; /usr/bin/jq -r ''.macs["mac-mini"].vms["infra-2"].booted.sync'' world.json'
+      exit: 0
+      stdout: |
+          full

@@ -16,4 +16,4 @@ runs:
       files:
           .calls:
               contains:
-                  - 'tart run --no-graphics --no-audio --serial-path {{workdir}}/.local/state/station/consoles/linux-1 linux-1'
+                  - 'tart run --no-graphics --no-audio --serial-path {{workdir}}/.local/state/station/consoles/linux-1 --root-disk-opts=sync=none linux-1'

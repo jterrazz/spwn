@@ -35,6 +35,28 @@ func (l Lifetime) Word() string {
 	return string(l)
 }
 
+// value: how a VM's disk takes the flushes its guest asks for: SyncFull
+// writes each to its Mac's SSD before the guest hears it is done, SyncNone
+// answers at once and leaves the write to the Mac's own cache.
+
+type DiskSync string
+
+const (
+	SyncFull DiskSync = "full"
+	SyncNone DiskSync = "none"
+)
+
+func (l Lifetime) Sync() DiskSync {
+	// invariant: ADR-104: durability follows what is lost. An ephemeral
+	// workspace is deleted when its work ends, so it never waits on a flush;
+	// a persistent workspace and a server hold the owner's data, so a power
+	// cut never loses a write the guest was told is done.
+	if l == Ephemeral {
+		return SyncNone
+	}
+	return SyncFull
+}
+
 type Size struct {
 	CPUs         int
 	Memory, Disk int64

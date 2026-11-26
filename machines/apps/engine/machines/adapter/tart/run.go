@@ -75,6 +75,12 @@ func (h *hypervisor) Boot(ctx context.Context, vm string, o contract.BootOptions
 	}
 	_ = h.fs.Remove(h.files.exit(vm))
 	argv := []string{h.bin(), "run", "--no-graphics", "--no-audio", "--serial-path", console}
+	// invariant: tart's root disk is VZDiskImageSynchronizationMode .full
+	// unless --root-disk-opts names another (tart 2.42 VM.swift:54,
+	// Run.swift:267), so SyncFull passes nothing.
+	if o.Sync == machines.SyncNone {
+		argv = append(argv, "--root-disk-opts=sync=none")
+	}
 	if o.Network.Bridged {
 		if iface := h.defaultInterface(ctx); iface != "" {
 			argv = append(argv, "--net-bridged="+iface)

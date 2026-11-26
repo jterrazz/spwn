@@ -521,6 +521,9 @@ type Container struct {
 type Boot struct {
 	Bridged bool     `json:"bridged"`
 	Folders []string `json:"folders"`
+	// value: how its disk took its guest's flushes, as the boot asked
+	// (machines.DiskSync): `full` or `none`.
+	Sync machines.DiskSync `json:"sync"`
 }
 
 type Kept struct {

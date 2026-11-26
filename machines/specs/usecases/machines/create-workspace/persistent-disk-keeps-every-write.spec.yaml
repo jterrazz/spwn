@@ -1,0 +1,11 @@
+description: 'a persistent workspace boots with its disk fully synced: a power cut loses no acknowledged write'
+env: two-macs
+runs:
+    - command: 'machines create --memory 4G api-2 --persistent | /usr/bin/tail -1'
+      exit: 0
+      stdout: |
+          ●	api-2	Created	Persistent · 4 CPU · 4 GB · 20 GB
+    - command: '--version >/dev/null; /usr/bin/jq -r ''.macs["macbook-pro"].vms["api-2"].booted.sync'' world.json'
+      exit: 0
+      stdout: |
+          full

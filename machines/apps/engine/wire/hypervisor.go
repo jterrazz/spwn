@@ -29,8 +29,8 @@ func (m machine) hypervisorHome() string { return filepath.Join(m.paths.Data, "v
 
 type engineHypervisor struct{ contract.Hypervisor }
 
-func (h engineHypervisor) Boot(ctx context.Context, vm string, n model.Network, mounts []model.Mount) (process.Run, error) {
-	return h.Hypervisor.Boot(ctx, vm, contract.BootOptions{Network: n, Mounts: mounts})
+func (h engineHypervisor) Boot(ctx context.Context, vm string, n model.Network, mounts []model.Mount, sync model.DiskSync) (process.Run, error) {
+	return h.Hypervisor.Boot(ctx, vm, contract.BootOptions{Network: n, Mounts: mounts, Sync: sync})
 }
 
 func (h engineHypervisor) Adopt(ctx context.Context, vm string) (process.Run, bool) {
@@ -39,8 +39,11 @@ func (h engineHypervisor) Adopt(ctx context.Context, vm string) (process.Run, bo
 
 type buildHypervisor struct{ contract.Hypervisor }
 
+// invariant: ADR-104: a build VM is thrown away on any failure and made
+// again from its Machinefile, so it never waits on a flush; its seal is a
+// clean poweroff the build waits for before it records the image.
 func (h buildHypervisor) BootBuild(ctx context.Context, vm string) error {
-	_, err := h.Boot(ctx, vm, contract.BootOptions{})
+	_, err := h.Boot(ctx, vm, contract.BootOptions{Sync: model.SyncNone})
 	return err
 }
 

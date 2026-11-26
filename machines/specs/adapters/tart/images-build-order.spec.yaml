@@ -43,7 +43,7 @@ runs:
           .local/state/station/consoles/station-build-base-ubuntu: absent
           .local/state/station/images/askpass: absent
           .runs:
-              contains: 'tart run --no-graphics --no-audio --serial-path {{workdir}}/.local/state/station/consoles/station-build-base-ubuntu station-build-base-ubuntu'
+              contains: 'tart run --no-graphics --no-audio --serial-path {{workdir}}/.local/state/station/consoles/station-build-base-ubuntu --root-disk-opts=sync=none station-build-base-ubuntu'
     - command: '--version > /dev/null; /usr/bin/awk ''/^tart pull/{p=NR} /^tart clone/{c=NR} /^vm-sshd exec \/bin\/cat/{s=NR} /^vm-sshd exec sudo env/{a=NR} /^vm-sshd exec env MACHINEFILE/{b=NR} /^vm-sshd exec sudo bash -s$/{d=NR} /^tart stop/{t=NR} /^tart rename/{r=NR} END{print (p<c && c<s && s<a && a<b && b<d && d<t && t<r) ? "ordered" : "disordered"}'' .calls'
       exit: 0
       stdout: |

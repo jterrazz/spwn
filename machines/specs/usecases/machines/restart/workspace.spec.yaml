@@ -15,7 +15,7 @@ runs:
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].vms["linux-1"] | {pid, booted}'' world.json'
       exit: 0
       stdout: |
-          {"pid":2002,"booted":{"bridged":false,"folders":[]}}
+          {"pid":2002,"booted":{"bridged":false,"folders":[],"sync":"none"}}
     - command: 'machines --this-mac'
       exit: 0
       stdout: |

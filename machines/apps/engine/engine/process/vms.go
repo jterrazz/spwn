@@ -216,7 +216,8 @@ func (d *Engine) start(ctx context.Context, v *vmState) error {
 	}
 	d.refreshSelf(ctx)
 	d.renderEnv(ctx, v)
-	run, err := d.hv.Boot(ctx, name, model.Network{Bridged: d.record(v).Network == model.Bridged}, mounts)
+	rec := d.record(v)
+	run, err := d.hv.Boot(ctx, name, model.Network{Bridged: rec.Network == model.Bridged}, mounts, rec.Lifetime.Sync())
 	if err != nil {
 		return err
 	}

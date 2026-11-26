@@ -1,6 +1,7 @@
 package fake
 
 import (
+	"cmp"
 	"context"
 	"errors"
 	"maps"
@@ -256,7 +257,7 @@ func (h *Hypervisor) Boot(ctx context.Context, vm string, opts contract.BootOpti
 		return nil, ErrScripted
 	}
 	v.PID, v.Ended, v.UpAt = h.nextPID(), nil, h.w.Now
-	v.Booted = &world.Boot{Bridged: opts.Network.Bridged, Folders: folders(opts.Mounts)}
+	v.Booted = &world.Boot{Bridged: opts.Network.Bridged, Folders: folders(opts.Mounts), Sync: cmp.Or(opts.Sync, machines.SyncFull)}
 	return &run{h: h, vm: vm, pid: v.PID}, nil
 }
 

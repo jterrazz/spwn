@@ -264,6 +264,28 @@ func TestABridgedVMBootsOnTheMacsDefaultInterface(t *testing.T) {
 	<-r.Ended()
 }
 
+func TestAVMThatWaitsOnNoFlushBootsWithItsRootDiskUnsynced(t *testing.T) {
+	m := newMachine(t)
+	m.boot("dev", "--root-disk-opts=sync=none")
+	r, err := m.hypervisor().Boot(t.Context(), "dev", contract.BootOptions{Sync: machines.SyncNone})
+	if err != nil {
+		t.Fatal(err)
+	}
+	m.end(r, machines.GuestPoweroff)
+	<-r.Ended()
+}
+
+func TestAVMThatKeepsEveryWriteBootsOnTheHypervisorsFullSync(t *testing.T) {
+	m := newMachine(t)
+	m.boot("dev")
+	r, err := m.hypervisor().Boot(t.Context(), "dev", contract.BootOptions{Sync: machines.SyncFull})
+	if err != nil {
+		t.Fatal(err)
+	}
+	m.end(r, machines.GuestPoweroff)
+	<-r.Ended()
+}
+
 func TestAVMBootsSharingEachMountUnderItsOwnTag(t *testing.T) {
 	m := newMachine(t)
 	m.boot("dev", "--dir=/Users/me/src:tag=station-1", "--dir=/Users/me/refs:ro,tag=station-2")

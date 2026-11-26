@@ -1,0 +1,11 @@
+description: 'an ephemeral workspace boots with its disk unsynced: it never waits on a flush'
+env: two-macs
+runs:
+    - command: 'machines create --memory 4G box | /usr/bin/tail -1'
+      exit: 0
+      stdout: |
+          ●	box	Created	Ephemeral · 4 CPU · 4 GB · 20 GB
+    - command: '--version >/dev/null; /usr/bin/jq -r ''.macs["macbook-pro"].vms.box.booted.sync'' world.json'
+      exit: 0
+      stdout: |
+          none
