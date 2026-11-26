@@ -1,7 +1,7 @@
 #!/bin/bash
 set -u
 cd "$(dirname "$0")" || exit 2
-fail=0; bad() { echo "FAIL $*"; fail=1; }
+fail=0; TAG=; bad() { echo "FAIL${TAG:+ [$TAG]} $*"; fail=1; }
 for f in *.sh; do bash -n "$f" || bad "syntax $f"; done
 python3 -I -c 'import ast, sys; ast.parse(open(sys.argv[1]).read())' cc-verdict.py || bad "syntax cc-verdict.py"
 grep -nE '/private/tmp|/tmp/claude' ./*.sh ./*.py | grep -v '^./test.sh' && bad "a script names a scratchpad"
@@ -150,7 +150,8 @@ route vm-loose "KEY=$H/k/vm_key"; chmod 666 "$R/vm-loose.env"
 ln -s "$R/vm-a.env" "$R/vm-sym.env"
 mkdir -p "$T/routes-open"; cp "$R/vm-a.env" "$T/routes-open/"; chmod 777 "$T/routes-open"
 ln -s "$R" "$T/routes-link"
-gate_ssh() { env -i PATH="$PATH" HOME="$H" GATE_ROUTES_DIR="$R" GATE_SSH_DRYRUN=1 bash ./gate-ssh.sh "$@"; }
+GSH=bash
+gate_ssh() { env -i PATH="$PATH" HOME="$H" GATE_ROUTES_DIR="$R" GATE_SSH_DRYRUN=1 "$GSH" ./gate-ssh.sh "$@"; }
 refused() {
   local want=$1 err rc; shift
   err=$("$@" 2>&1 > /dev/null); rc=$?
@@ -163,11 +164,13 @@ child=(/usr/bin/env -i PATH=/usr/bin:/bin:/usr/sbin:/sbin "HOME=$H")
 ssh_w() { argv ${child[@]+"${child[@]}"} /usr/bin/ssh -a; echo "$common"; }
 scp_w() { argv ${child[@]+"${child[@]}"} /usr/bin/scp; echo "$common"; }
 sshg() { local a i; mapfile -t a; for i in "${!a[@]}"; do [ "${a[$i]}" = /usr/bin/ssh ] && break; done; /usr/bin/ssh -G "${a[@]:$((i + 1))}" 2>&1; }
+dry_suite() {
+: > "$H/k/gone_key"
 want=$(ssh_w; argv -o "IdentityFile=$H/k/vm_key" -o "UserKnownHostsFile=$H/kh" -n -o ConnectTimeout=10 -- vm-a true)
 got=$(gate_ssh ssh -n -o ConnectTimeout=10 vm-a true); [ "$got" = "$want" ] || bad "direct ssh argv: $got"
 want=$(ssh_w; argv -o "IdentityFile=$H/k/vm_key" -o "UserKnownHostsFile=$H/kh" -- vm-a true)
 got=$(gate_ssh rsh vm-a true); [ "$got" = "$want" ] || bad "direct rsh argv: $got"
-got=$(env -i PATH="$PATH" HOME=/nonexistent GATE_ROUTES_DIR="$R" GATE_SSH_DRYRUN=1 bash ./gate-ssh.sh rsh vm-a true); [ "$(grep -v '^HOME=' <<< "$got")" = "$(grep -v '^HOME=' <<< "$want")" ] || bad "a direct route needs \$HOME: $got"
+got=$(env -i PATH="$PATH" HOME=/nonexistent GATE_ROUTES_DIR="$R" GATE_SSH_DRYRUN=1 "$GSH" ./gate-ssh.sh rsh vm-a true); [ "$(grep -v '^HOME=' <<< "$got")" = "$(grep -v '^HOME=' <<< "$want")" ] || bad "a direct route needs \$HOME: $got"
 want=$(scp_w; argv -o "IdentityFile=$H/k/vm_key" -o "UserKnownHostsFile=$H/kh" -q -- a.txt vm-a:dir/)
 got=$(gate_ssh scp -q a.txt vm-a:dir/); [ "$got" = "$want" ] || bad "direct scp argv: $got"
 proxied=(-o "IdentityFile=$H/k/vm_key" -o "UserKnownHostsFile=$H/kh" -o HostName=vm-p.internal -o User=gate -o Port=2222 -o "ProxyCommand='$H/bin/station' machines pipe vm-p")
@@ -198,26 +201,31 @@ want=$(ssh_w; argv -o "IdentityFile=$H/k/hop_key" -o "UserKnownHostsFile=$H/kh" 
 case $(tail -n 1 <<< "$got") in "ssh -o BatchMode=yes -- vm-b 'eval "*) ;; *) bad "hop ssh second hop: $(tail -n 1 <<< "$got")" ;; esac
 want=$(ssh_w; argv -o "IdentityFile=$H/k/hop_key" -o "UserKnownHostsFile=$H/kh" -- ops@hop-host)
 got=$(gate_ssh ssh vm-bk true); [ "$(sed '$d' <<< "$got")" = "$want" ] || bad "hop ssh argv with its known hosts: $got"
-mkdir -p "$T/sbx/dir x"; printf x > "$T/it's a.txt"; printf x > "$T/up.txt"
+rm -rf "$T/sbx"; mkdir -p "$T/sbx/dir x"; printf x > "$T/it's a.txt"; printf x > "$T/up.txt"
 got=$(gate_ssh scp "$T/it's a.txt" "vm-b:dir x/"); [ "$(grep -c '^/usr/bin/ssh$' <<< "$got")" = 1 ] || bad "hop scp upload is not one ssh: $got"
 remote=$(b64_of <<< "$got"); (cd "$T/sbx" && printf y | sh -c "$remote"); [ "$(cat "$T/sbx/dir x/it's a.txt" 2> /dev/null)" = y ] || bad "hop scp upload names another file: $remote"
 remote=$(gate_ssh scp "$T/up.txt" 'vm-b:$(touch pwned)' | b64_of); (cd "$T/sbx" && printf y | sh -c "$remote"); [ ! -e "$T/sbx/pwned" ] && [ -f "$T/sbx/\$(touch pwned)" ] || bad "hop scp upload runs its destination: $remote"
 gate_ssh scp 'vm-b:a b;touch pwned' "$T/down.txt"; [ "$(b64_of < "$T/down.txt")" = "/bin/cat -- 'a b;touch pwned'" ] || bad "hop scp download runs its source or a cat from PATH: $(tail -n 1 "$T/down.txt")"
 case $(gate_ssh scp "$T/up.txt" vm-b:x | b64_of) in *'/bin/cat > "$d"') ;; *) bad "hop scp upload runs a cat from PATH" ;; esac
+nl_name="q'"$'\n'"touch pwned-nl"; printf x > "$T/$nl_name"; rm -f "$T/sbx/pwned-nl"
+remote=$(gate_ssh scp "$T/$nl_name" "vm-b:dir x/" | b64_of); (cd "$T/sbx" && printf y | sh -c "$remote" 2> /dev/null)
+[ ! -e "$T/sbx/pwned-nl" ] && [ "$(cat "$T/sbx/dir x/$nl_name" 2> /dev/null)" = y ] || bad "hop scp upload of a name with a quote and a newline runs a line of it or names another file: $remote"
+printf z > "$T/sbx/$nl_name"; gate_ssh scp "vm-b:$nl_name" "$T/down-nl.txt"; remote=$(b64_of < "$T/down-nl.txt")
+[ "$(cd "$T/sbx" && sh -c "$remote" 2> /dev/null)" = z ] && [ ! -e "$T/sbx/pwned-nl" ] || bad "hop scp download of a name with a quote and a newline reads another file or runs a line of it: $remote"
 E=$T/evil; mkdir -p "$E"; for c in base64 tr ls id dirname basename cut readlink find head rm; do printf '#!/bin/sh\necho evil\n' > "$E/$c"; chmod 755 "$E/$c"; done
-printf x > "$T/dl.out"; env -i PATH="$E:$PATH" HOME="$H" GATE_ROUTES_DIR="$R" timeout 30 bash ./gate-ssh.sh scp vm-dl:x "$T/dl.out" > /dev/null 2>&1; rc=$?
+printf x > "$T/dl.out"; env -i PATH="$E:$PATH" HOME="$H" GATE_ROUTES_DIR="$R" timeout 30 "$GSH" ./gate-ssh.sh scp vm-dl:x "$T/dl.out" > /dev/null 2>&1; rc=$?
 [ $rc = 255 ] && [ ! -e "$T/dl.out" ] || bad "a failed hop download is not removed by the system rm (exit $rc)"
 mkdir -p "$T/cdp/gates"; printf '#!/bin/sh\necho cdpath > %s\n' "$T/cdp.hit" > "$T/cdp/gates/gate-ssh.sh"; chmod 755 "$T/cdp/gates/gate-ssh.sh"
-got=$(cd .. && env -i PATH="$PATH" HOME="$H" GATE_ROUTES_DIR="$R" GATE_SSH_DRYRUN=1 CDPATH="$T/cdp" bash gates/gate-ssh.sh scp "$T/up.txt" vm-b:x 2>&1)
+got=$(cd .. && env -i PATH="$PATH" HOME="$H" GATE_ROUTES_DIR="$R" GATE_SSH_DRYRUN=1 CDPATH="$T/cdp" "$GSH" gates/gate-ssh.sh scp "$T/up.txt" vm-b:x 2>&1)
 [ "$(grep -c '^/usr/bin/ssh$' <<< "$got")" = 1 ] && [ ! -e "$T/cdp.hit" ] || bad "CDPATH moves gate-ssh's own path: $got"
 cfg=$(gate_ssh ssh vm-a true | sshg); grep -qx 'escapechar none' <<< "$cfg" || bad "ssh -G: an escape character is live: $(grep '^escapechar' <<< "$cfg")"
 refused "scp names a URI" gate_ssh scp "$T/up.txt" 'scp://someone@evil.example:2200/x'
 refused "scp names a URI" gate_ssh scp 'scp://vm-a/x' "$T/dl.out"
-got=$(env -i PATH="$E:$PATH" HOME="$H" GATE_ROUTES_DIR="$R" GATE_SSH_DRYRUN=1 bash ./gate-ssh.sh ssh vm-b 'echo hi' 2>&1); [ "$(b64_of <<< "$got")" = 'echo hi' ] || bad "gate-ssh takes a tool from PATH: $got"
+got=$(env -i PATH="$E:$PATH" HOME="$H" GATE_ROUTES_DIR="$R" GATE_SSH_DRYRUN=1 "$GSH" ./gate-ssh.sh ssh vm-b 'echo hi' 2>&1); [ "$(b64_of <<< "$got")" = 'echo hi' ] || bad "gate-ssh takes a tool from PATH: $got"
 refused "no route for vm-nope" gate_ssh ssh vm-nope true
 for h in vm-def vm-dslash vm-dot vm-other vm-hopdef vm-hopdot; do refused "where the owner's own identities live" gate_ssh ssh $h true; done
 if [ -d "$pw/.ssh" ]; then
-  refused "$pw/.ssh/gate-ssh-absent-key lies under" env -i PATH="$PATH" HOME=/nonexistent GATE_ROUTES_DIR="$R" GATE_SSH_DRYRUN=1 bash ./gate-ssh.sh ssh vm-pw true
+  refused "$pw/.ssh/gate-ssh-absent-key lies under" env -i PATH="$PATH" HOME=/nonexistent GATE_ROUTES_DIR="$R" GATE_SSH_DRYRUN=1 "$GSH" ./gate-ssh.sh ssh vm-pw true
 else
   echo "skip: the passwd home has no ~/.ssh here (the passwd-home test)"
 fi
@@ -264,15 +272,15 @@ for h in vm-st-env vm-st-ssh vm-st-link vm-st-other; do refused "the two names t
 for h in vm-st-ww vm-st-wd; do refused "or is writable by someone else" gate_ssh ssh $h true; done
 [ "$(gate_ssh ssh vm-st-app true | grep '^ProxyCommand=')" = "ProxyCommand='$H/Apps/Spwn.app/Contents/MacOS/Spwn Engine' machines pipe vm-st-app" ] || bad "Spwn.app's engine is not the proxy, quoted: $(gate_ssh ssh vm-st-app true 2>&1 | grep -i proxy)"
 [ "$(gate_ssh ssh vm-st-app true | sshg | grep '^proxycommand ')" = "proxycommand '$H/Apps/Spwn.app/Contents/MacOS/Spwn Engine' machines pipe vm-st-app" ] || bad "ssh -G: Spwn.app's engine is not one word"
-refused "the two names the installer ships" env -i PATH="$PATH" HOME="$H" GATE_ROUTES_DIR="$R" SSH_AUTH_SOCK=/run/presence.sock SSH_ASKPASS=/usr/bin/true bash ./gate-ssh.sh ssh vm-st-env true
+refused "the two names the installer ships" env -i PATH="$PATH" HOME="$H" GATE_ROUTES_DIR="$R" SSH_AUTH_SOCK=/run/presence.sock SSH_ASKPASS=/usr/bin/true "$GSH" ./gate-ssh.sh ssh vm-st-env true
 rm -f "$T/proxy.env"
-env -i PATH="$PATH" HOME="$H" GATE_ROUTES_DIR="$R" SSH_AUTH_SOCK=/run/presence.sock SSH_ASKPASS=/usr/bin/true SSH_ASKPASS_REQUIRE=force DISPLAY=:0 timeout 20 bash ./gate-ssh.sh ssh -o ConnectTimeout=5 vm-p true > /dev/null 2>&1
+env -i PATH="$PATH" HOME="$H" GATE_ROUTES_DIR="$R" SSH_AUTH_SOCK=/run/presence.sock SSH_ASKPASS=/usr/bin/true SSH_ASKPASS_REQUIRE=force DISPLAY=:0 timeout 20 "$GSH" ./gate-ssh.sh ssh -o ConnectTimeout=5 vm-p true > /dev/null 2>&1
 [ -f "$T/proxy.env" ] || bad "the proxy never ran, so its environment is unproven"
 grep -E '^(SSH_AUTH_SOCK|SSH_ASKPASS|SSH_ASKPASS_REQUIRE|DISPLAY|GATE_ROUTES_DIR)=' "$T/proxy.env" && bad "the proxy inherits the caller's agent, askpass or display"
 grep -qx 'PATH=/usr/bin:/bin:/usr/sbin:/sbin' "$T/proxy.env" && grep -qx "HOME=$H" "$T/proxy.env" || bad "the proxy's PATH or HOME is not the fixed one: $(grep -E '^(PATH|HOME)=' "$T/proxy.env")"
 for c in ssh scp; do
   w=(); [ $c = scp ] && w=(a.txt vm-a:b) || w=(vm-a true)
-  [ "$(env -i PATH="$PATH" HOME="$H" GATE_ROUTES_DIR="$R" SSH_AUTH_SOCK=/x GATE_SSH_DRYRUN=1 bash ./gate-ssh.sh $c "${w[@]}" | head -n 2)" = "$(printf '/usr/bin/env\n-i\n')" ] || bad "$c is not launched with a scrubbed environment"
+  [ "$(env -i PATH="$PATH" HOME="$H" GATE_ROUTES_DIR="$R" SSH_AUTH_SOCK=/x GATE_SSH_DRYRUN=1 "$GSH" ./gate-ssh.sh $c "${w[@]}" | head -n 2)" = "$(printf '/usr/bin/env\n-i\n')" ] || bad "$c is not launched with a scrubbed environment"
 done
 refused "STATION is read only with PROXY" gate_ssh ssh vm-station-alone true
 refused "HOSTNAME is not a plain host name" gate_ssh ssh vm-badhost true
@@ -281,10 +289,10 @@ for h in vm-port0 vm-portbig vm-portx; do refused "PORT is not a port number" ga
 for h in vm-badhop vm-badhop-semi vm-badhop-two; do refused "HOP is not user@host" gate_ssh ssh $h true; done
 refused "is not yours alone" gate_ssh ssh vm-loose true
 refused "is a symbolic link: write the file itself" gate_ssh ssh vm-sym true
-refused "route folder $T/routes-open is not yours alone" env -i PATH="$PATH" HOME="$H" GATE_ROUTES_DIR="$T/routes-open" GATE_SSH_DRYRUN=1 bash ./gate-ssh.sh ssh vm-a true
-refused "route folder /usr is not yours alone" env -i PATH="$PATH" HOME="$H" GATE_ROUTES_DIR=/usr GATE_SSH_DRYRUN=1 bash ./gate-ssh.sh ssh vm-a true
-refused "is a symbolic link: name the folder itself" env -i PATH="$PATH" HOME="$H" GATE_ROUTES_DIR="$T/routes-link" GATE_SSH_DRYRUN=1 bash ./gate-ssh.sh ssh vm-a true
-refused "no route for vm-a" env -i PATH="$PATH" HOME="$H" GATE_SSH_DRYRUN=1 bash ./gate-ssh.sh ssh vm-a true
+refused "route folder $T/routes-open is not yours alone" env -i PATH="$PATH" HOME="$H" GATE_ROUTES_DIR="$T/routes-open" GATE_SSH_DRYRUN=1 "$GSH" ./gate-ssh.sh ssh vm-a true
+refused "route folder /usr is not yours alone" env -i PATH="$PATH" HOME="$H" GATE_ROUTES_DIR=/usr GATE_SSH_DRYRUN=1 "$GSH" ./gate-ssh.sh ssh vm-a true
+refused "is a symbolic link: name the folder itself" env -i PATH="$PATH" HOME="$H" GATE_ROUTES_DIR="$T/routes-link" GATE_SSH_DRYRUN=1 "$GSH" ./gate-ssh.sh ssh vm-a true
+refused "no route for vm-a" env -i PATH="$PATH" HOME="$H" GATE_SSH_DRYRUN=1 "$GSH" ./gate-ssh.sh ssh vm-a true
 refused "is not a plain host name" gate_ssh ssh a/b true
 refused "is not a plain host name" gate_ssh ssh user@vm-a true
 refused "no route for vm-nope" gate_ssh scp x vm-nope:y
@@ -293,6 +301,16 @@ refused "scp between two remote paths" gate_ssh scp vm-a:x vm-a:y
 for c in "ssh -i /x vm-a true" "ssh -F /dev/null vm-a true" "ssh -J h vm-a true" "ssh -A vm-a true" "ssh -o IdentityAgent=x vm-a true" "ssh -o ProxyCommand=x vm-a true" "ssh" "scp -r a vm-a:b" "scp -P 1 a vm-a:b" "scp a vm-a:b -o ProxyCommand=x" "scp a b" "bogus"; do
   gate_ssh $c > /dev/null 2>&1; [ $? = 2 ] || bad "an unrouted option is accepted: $c"
 done
+}
+dry_suite
+B32=${GATE_BASH32:-$(command -v bash-3.2 || true)}
+if [ -n "$B32" ]; then
+  [ "$("$B32" -c 'echo "${BASH_VERSINFO[0]}.${BASH_VERSINFO[1]}"')" = 3.2 ] || bad "GATE_BASH32 $B32 is not bash 3.2"
+  GSH=$B32; TAG=bash-3.2; dry_suite; GSH=bash; TAG=
+  echo "gate-ssh.sh dry runs and quoting proved under $("$B32" -c 'echo "$BASH_VERSION"')"
+else
+  echo "SKIP: no bash 3.2 here (set GATE_BASH32 or put bash-3.2 on PATH): gate-ssh.sh is NOT proved under the Mac's /bin/bash"
+fi
 if command -v sshd > /dev/null && command -v ssh-keygen > /dev/null && command -v python3 > /dev/null; then
   S=$T/sd; O=$T/owner; mkdir -p "$S" "$O/.ssh"; chmod 700 "$S" "$O" "$O/.ssh"
   ssh-keygen -q -t ed25519 -N '' -f "$S/host"; ssh-keygen -q -t ed25519 -N '' -f "$S/client"; ssh-keygen -q -t ed25519 -N '' -C synthetic-owner -f "$O/.ssh/id_ed25519"
@@ -316,7 +334,7 @@ if command -v sshd > /dev/null && command -v ssh-keygen > /dev/null && command -
     out=$(live_ssh sd-decoy echo owner-identity 2>&1); rc=$?
     [ $rc = 92 ] && [[ $out != *owner-identity* ]] || bad "a KEY ssh expands reached the server with the owner's identity (exit $rc): $out"
     cp "$S/client" "$S/gone"; chmod 600 "$S/gone"; route sd-gone "KEY=$S/gone" "${live[@]}"
-    mapfile -t a < <(env -i PATH="$PATH" HOME="$O" GATE_ROUTES_DIR="$R" GATE_SSH_DRYRUN=1 bash ./gate-ssh.sh ssh sd-gone echo reached)
+    mapfile -t a < <(env -i PATH="$PATH" HOME="$O" GATE_ROUTES_DIR="$R" GATE_SSH_DRYRUN=1 "$GSH" ./gate-ssh.sh ssh sd-gone echo reached)
     rm -f "$S/gone"
     out=$(env -i PATH="$PATH" HOME="$O" timeout 20 "${a[@]}" 2>&1); rc=$?
     [ $rc = 255 ] && [[ $out != *reached* ]] || bad "a key gone at launch still authenticates (exit $rc): $out"

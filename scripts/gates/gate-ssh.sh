@@ -25,7 +25,7 @@ resolve() {
   d=$(cd -P "$(command -p dirname "$p")" 2> /dev/null && pwd -P) || return 1
   printf '%s\n' "$d/$(command -p basename "$p")"
 }
-quote() { printf "'%s'" "${1//\'/\'\\\'\'}"; }
+quote() { local q="'" r="'\\''"; printf "'%s'" "${1//$q/$r}"; }
 private() {
   local perm uid
   read -r perm _ uid _ <<< "$(command -p ls -ldn "$1" 2> /dev/null)"
@@ -231,14 +231,14 @@ scp_mode() {
     rd=${dst#"$host":}; [ -n "$rd" ] || rd=.
     for s in "${srcs[@]}"; do
       [ -f "$s" ] || { echo "gate-ssh: $s: no such file" >&2; exit 1; }
-      "$SELF" ssh "$host" "d=$(quote "$rd"); if [ -d \"\$d\" ]; then d=\"\$d\"/$(quote "$(command -p basename "$s")"); fi; /bin/cat > \"\$d\"" < "$s" || exit $?
+      "$BASH" "$SELF" ssh "$host" "d=$(quote "$rd"); if [ -d \"\$d\" ]; then d=\"\$d\"/$(quote "$(command -p basename "$s")"); fi; /bin/cat > \"\$d\"" < "$s" || exit $?
     done
     exit 0
   fi
   [ ${#srcs[@]} -eq 1 ] || { echo "gate-ssh: a two-hop route copies one remote source at a time" >&2; exit 2; }
   rs=${srcs[0]#"$host":}; out=$dst
   [ -d "$out" ] && out="$out/$(command -p basename "$rs")"
-  "$SELF" ssh -n "$host" "/bin/cat -- $(quote "$rs")" > "$out" || { rc=$?; command -p rm -f "$out"; exit $rc; }
+  "$BASH" "$SELF" ssh -n "$host" "/bin/cat -- $(quote "$rs")" > "$out" || { rc=$?; command -p rm -f "$out"; exit $rc; }
 }
 
 mode=${1:-}; shift || usage
