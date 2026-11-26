@@ -23,6 +23,12 @@
           "keep": 60
         },
         {
+          "key": "color",
+          "label": "color",
+          "kind": "text",
+          "keep": 40
+        },
+        {
           "key": "agents",
           "label": "agents",
           "kind": "text",

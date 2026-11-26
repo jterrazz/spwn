@@ -91,7 +91,7 @@ func read(all []declared, rows []automation.Receipt) []automations.Automation {
 				a.Failed++
 			}
 			if r.Fired.After(a.LastFired) {
-				a.LastFired = r.Fired
+				a.LastFired, a.LastOK = r.Fired, r.OK
 			}
 		}
 		out = append(out, a)
@@ -145,5 +145,5 @@ func (a Automations) Log(ctx context.Context, root, ref string, last int) ([]aut
 }
 
 func run(r automation.Receipt) automations.Run {
-	return automations.Run{Group: r.World, Name: r.Automation, Scheduled: r.Scheduled, At: r.Fired, OK: r.OK, Error: r.Error, Output: r.Output}
+	return automations.Run{Group: r.World, Name: r.Automation, Trigger: r.Trigger, Cause: r.Reason, Scheduled: r.Scheduled, At: r.Fired, DurationMS: r.DurationMS, OK: r.OK, Error: r.Error, Output: r.Output, Missed: r.Missed, Paths: len(r.EventPaths)}
 }

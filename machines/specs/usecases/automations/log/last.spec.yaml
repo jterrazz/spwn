@@ -1,4 +1,4 @@
-description: 'station automations log --last keeps only the newest runs'
+description: 'station automations log --last keeps the newest runs, 0 keeps every run'
 env:
     - two-macs
     - engine
@@ -9,5 +9,12 @@ runs:
       exit: 0
       stdout: |
           # Runs
-          ●	2026-05-02 06:00:00	morning	ok
-          ●	2026-05-03 06:00:00	morning	ok
+          ●	2026-05-02 06:00:00	morning		0s	ok
+          ●	2026-05-03 06:00:00	morning		0s	ok
+    - command: '--version >/dev/null; cd site && "$STATION" automations log --last 0'
+      exit: 0
+      stdout: |
+          # Runs
+          ●	2026-05-01 06:00:00	morning		0s	ok
+          ●	2026-05-02 06:00:00	morning		0s	ok
+          ●	2026-05-03 06:00:00	morning		0s	ok

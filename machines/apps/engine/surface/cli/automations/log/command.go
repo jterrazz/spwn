@@ -31,7 +31,7 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 		Example: "  station automations log\n  station automations log morning --last 5\n  station automations log --json",
 		Args:    cobra.MaximumNArgs(1),
 		Declare: func(f *pflag.FlagSet, in *Input) {
-			f.IntVar(&in.Last, "last", 0, "how many of the newest runs to show (default 50)")
+			f.IntVar(&in.Last, "last", automationscalls.DefaultLast, "how many of the newest runs to show, 0 for every run")
 		},
 		Bind: func(in *Input, args []string) error {
 			if len(args) == 1 {

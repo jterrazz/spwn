@@ -1,4 +1,4 @@
 Runs
-                         automation  outcome
-  ● 2026-05-01 06:00:00  morning     ok                        brief written
-  ✗ 2026-05-02 06:00:00  morning     failed: no running world
+                         automation  fired by                took  outcome
+  ● 2026-05-01 06:00:00  morning     cron catchup, 2 missed  1.5s  ok       brief written
+  ✗ 2026-05-02 06:00:00  morning     cron on-time            40ms  failed: no running world

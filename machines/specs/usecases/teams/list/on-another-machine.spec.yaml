@@ -13,7 +13,7 @@ runs:
       stdout: |
           	On linux-1:
           # Teams
-          ●	web	Web Team	neo
+          ●	web	Web Team	none	neo
     - command: '--version >/dev/null; /usr/bin/jq -c "[.macs[\"macbook-pro\"].stores.teams // [] | length]" world.json'
       exit: 0
       stdout: |

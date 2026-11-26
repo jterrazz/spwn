@@ -45,11 +45,7 @@ func open(t *testing.T, declared []contracttest.Declared, ran []automations.Run)
 	}
 	writer := automation.NewFileReceiptWriter(filepath.Join(project, ".spwn", "runs.jsonl"))
 	for _, r := range ran {
-		trigger := "cron"
-		if r.Scheduled.IsZero() {
-			trigger = "fs"
-		}
-		err := writer.Write(automation.Receipt{World: "brain", Automation: r.Name, Trigger: trigger, Scheduled: r.Scheduled, Fired: r.At, Finished: r.At, OK: r.OK, Error: r.Error, Output: r.Output, Reason: "on-time"})
+		err := writer.Write(automation.Receipt{World: "brain", Automation: r.Name, Trigger: r.Trigger, Scheduled: r.Scheduled, Fired: r.At, Finished: r.At, DurationMS: r.DurationMS, OK: r.OK, Error: r.Error, Output: r.Output, Reason: r.Cause, Missed: r.Missed, EventPaths: make([]string, r.Paths)})
 		if err != nil {
 			t.Fatal(err)
 		}

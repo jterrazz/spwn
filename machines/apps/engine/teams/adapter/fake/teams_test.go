@@ -16,7 +16,7 @@ func TestTeams(t *testing.T) {
 		teams := make([]map[string]string, 0, len(declared))
 		minds := make([]map[string]string, 0, len(memberOf))
 		for _, d := range declared {
-			teams = append(teams, map[string]string{"Slug": d.Slug, "Name": d.Name, "Description": d.Description})
+			teams = append(teams, map[string]string{"Slug": d.Slug, "Name": d.Name, "Description": d.Description, "Color": d.Color})
 		}
 		for name, team := range memberOf {
 			minds = append(minds, map[string]string{"Name": name, "Team": team})

@@ -22,7 +22,7 @@ func read(t project.Team) (teams.Team, error) {
 		return teams.Team{}, err
 	}
 	slices.Sort(members)
-	return teams.Team{Slug: t.Slug, Name: t.Name, Description: t.Description, Members: members}, nil
+	return teams.Team{Slug: t.Slug, Name: t.Name, Description: t.Description, Color: t.Color, Members: members}, nil
 }
 
 func (Teams) List(_ context.Context, root string) ([]teams.Team, error) {

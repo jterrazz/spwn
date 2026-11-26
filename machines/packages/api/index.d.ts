@@ -485,6 +485,7 @@ export type AutomationsAutomation = {
     Fires: number;
     Group: string;
     LastFired: string;
+    LastOK: boolean;
     Name: string;
     Shared: boolean;
     Trigger: AutomationsTrigger;
@@ -507,12 +508,17 @@ export type AutomationsCallsShowIn = {
 
 export type AutomationsRun = {
     At: string;
+    Cause: string;
+    DurationMS: number;
     Error: string;
     Group: string;
+    Missed: number;
     Name: string;
     OK: boolean;
     Output: string;
+    Paths: number;
     Scheduled: string;
+    Trigger: string;
 };
 
 export type AutomationsTrigger = {
@@ -3411,6 +3417,7 @@ export type TeamsCallsShowIn = {
 };
 
 export type TeamsTeam = {
+    Color: string;
     Description: string;
     Members: string[] | null;
     Name: string;

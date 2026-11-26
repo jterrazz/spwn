@@ -13,4 +13,4 @@ runs:
     - command: '--version >/dev/null; cd site && "$STATION" automations b/same'
       exit: 0
       stdout: |
-          ●	b/same	trinity	cron 0 7 * * *	2026-05-02 07:00:00	2, 1 failed
+          ●	b/same	trinity	cron 0 7 * * *	2026-05-02 07:00:00	2, 1 failed	its last run failed

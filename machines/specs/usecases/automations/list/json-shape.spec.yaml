@@ -29,6 +29,7 @@ runs:
                   "spec": "./inbox"
                 },
                 "last_fired": null,
+                "last_ok": null,
                 "fires": 0,
                 "failed": 0
               },
@@ -41,6 +42,7 @@ runs:
                   "spec": "0 6 * * *"
                 },
                 "last_fired": "2026-05-02T06:00:00Z",
+                "last_ok": false,
                 "fires": 2,
                 "failed": 1
               }

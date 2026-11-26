@@ -19,6 +19,9 @@
           "format": "date-time",
           "type": "string"
         },
+        "LastOK": {
+          "type": "boolean"
+        },
         "Name": {
           "type": "string"
         },
@@ -35,6 +38,7 @@
         "Fires",
         "Group",
         "LastFired",
+        "LastOK",
         "Name",
         "Shared",
         "Trigger"

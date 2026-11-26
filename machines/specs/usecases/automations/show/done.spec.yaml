@@ -8,7 +8,7 @@ runs:
     - command: '--version >/dev/null; cd site && "$STATION" automations morning'
       exit: 0
       stdout: |
-          ●	morning	neo	cron 0 6 * * *	2026-05-02 06:00:00	2, 1 failed
+          ●	morning	neo	cron 0 6 * * *	2026-05-02 06:00:00	2, 1 failed	its last run failed
     - command: '--version >/dev/null; cd site && "$STATION" automations inbox'
       exit: 0
       stdout: |

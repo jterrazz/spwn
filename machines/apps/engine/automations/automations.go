@@ -29,20 +29,34 @@ type Automation struct {
 	// value: when the newest run of this automation started; zero when
 	// none ran.
 	LastFired time.Time
-	Fires     int
-	Failed    int
+	// value: whether that newest run passed; false when none ran.
+	LastOK bool
+	Fires  int
+	Failed int
 	// value: set by Mark, true when another group declares the same name.
 	Shared bool
 }
 
 type Run struct {
-	Group     string
-	Name      string
+	Group string
+	Name  string
+	// value: the receipt's trigger, Cron or FS.
+	Trigger string
+	// value: why the run fired, as its receipt says: on-time, catchup,
+	// create:<file>.
+	Cause string
+	// value: the cron slot the run covers; zero for a file trigger.
 	Scheduled time.Time
 	At        time.Time
-	OK        bool
-	Error     string
-	Output    string
+	// value: how long the run took, in milliseconds.
+	DurationMS int64
+	OK         bool
+	Error      string
+	Output     string
+	// value: the catch-up slots collapsed into this run; zero when none.
+	Missed int
+	// value: the paths a burst of file events coalesced into this run.
+	Paths int
 }
 
 var ErrNotFound = errors.New("no automation of that name")

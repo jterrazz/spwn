@@ -34,6 +34,7 @@ runs:
                   "spec": "0 6 * * *"
                 },
                 "last_fired": null,
+                "last_ok": null,
                 "fires": 0,
                 "failed": 0,
                 "reason": "refused"

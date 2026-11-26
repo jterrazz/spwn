@@ -23,6 +23,12 @@
           "keep": 60
         },
         {
+          "key": "color",
+          "label": "color",
+          "kind": "text",
+          "keep": 40
+        },
+        {
           "key": "agents",
           "label": "agents",
           "kind": "text",
@@ -41,6 +47,9 @@
               },
               {
                 "kind": "pending"
+              },
+              {
+                "kind": "pending"
               }
             ],
             "detail": {
@@ -54,6 +63,9 @@
             "mark": "pending",
             "label": "web",
             "cells": [
+              {
+                "kind": "pending"
+              },
               {
                 "kind": "pending"
               },

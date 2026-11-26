@@ -10,12 +10,12 @@ runs:
     - command: 'teams web'
       exit: 0
       stdout: |
-          ●	web	Web Team	neo	Ships the site.
+          ●	web	Web Team	none	neo	Ships the site.
           # Members
           ●	neo
     - command: 'teams core'
       exit: 0
       stdout: |
-          ●	core	Core	none
+          ●	core	Core	none	none
           # Members
           	none

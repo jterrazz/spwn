@@ -3,6 +3,7 @@ package files_test
 import (
 	"os"
 	"path/filepath"
+	"strconv"
 	"testing"
 
 	"github.com/jterrazz/studio-station/apps/engine/teams/adapter/files"
@@ -31,6 +32,9 @@ func open(inProject bool) contracttest.Opener {
 		}
 		for _, d := range declared {
 			body := "name: " + d.Name + "\n"
+			if d.Color != "" {
+				body += "color: " + strconv.Quote(d.Color) + "\n"
+			}
 			if d.Description != "" {
 				body += "description: " + d.Description + "\n"
 			}

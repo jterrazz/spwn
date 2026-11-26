@@ -8,7 +8,7 @@ runs:
       stdout: |
           	On linux-1:
           # Runs
-          ●	2026-05-01 06:00:00	morning	ok
+          ●	2026-05-01 06:00:00	morning		0s	ok
     - command: 'automations log'
       exit: 0
       stdout: |

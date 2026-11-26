@@ -10,7 +10,7 @@ import (
 func teamList() []teams.Team {
 	return []teams.Team{
 		{Slug: "core", Name: "Core", Description: "Keeps the platform standing."},
-		{Slug: "web", Name: "Web Team", Description: "Ships the site.", Members: []string{"neo", "trinity"}},
+		{Slug: "web", Name: "Web Team", Description: "Ships the site.", Color: "purple", Members: []string{"neo", "trinity"}},
 	}
 }
 

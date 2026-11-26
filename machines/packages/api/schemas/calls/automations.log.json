@@ -7,11 +7,20 @@
           "format": "date-time",
           "type": "string"
         },
+        "Cause": {
+          "type": "string"
+        },
+        "DurationMS": {
+          "type": "integer"
+        },
         "Error": {
           "type": "string"
         },
         "Group": {
           "type": "string"
+        },
+        "Missed": {
+          "type": "integer"
         },
         "Name": {
           "type": "string"
@@ -22,19 +31,30 @@
         "Output": {
           "type": "string"
         },
+        "Paths": {
+          "type": "integer"
+        },
         "Scheduled": {
           "format": "date-time",
+          "type": "string"
+        },
+        "Trigger": {
           "type": "string"
         }
       },
       "required": [
         "At",
+        "Cause",
+        "DurationMS",
         "Error",
         "Group",
+        "Missed",
         "Name",
         "OK",
         "Output",
-        "Scheduled"
+        "Paths",
+        "Scheduled",
+        "Trigger"
       ],
       "type": "object"
     },

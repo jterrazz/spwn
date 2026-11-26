@@ -26,12 +26,14 @@ runs:
                 "slug": "core",
                 "name": "Core",
                 "description": "",
+                "color": "",
                 "members": []
               },
               {
                 "slug": "web",
                 "name": "Web Team",
                 "description": "Ships the site.",
+                "color": "",
                 "members": [
                   "neo"
                 ]

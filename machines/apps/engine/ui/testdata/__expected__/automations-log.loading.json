@@ -23,6 +23,18 @@
           "keep": 70
         },
         {
+          "key": "fired",
+          "label": "fired by",
+          "kind": "text",
+          "keep": 50
+        },
+        {
+          "key": "took",
+          "label": "took",
+          "kind": "text",
+          "keep": 40
+        },
+        {
           "key": "outcome",
           "label": "outcome",
           "kind": "text",
@@ -41,6 +53,12 @@
               },
               {
                 "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
               }
             ],
             "detail": {
@@ -54,6 +72,12 @@
             "mark": "pending",
             "label": "2026-05-02 06:00:00",
             "cells": [
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              },
               {
                 "kind": "pending"
               },

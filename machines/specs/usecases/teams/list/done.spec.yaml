@@ -1,7 +1,7 @@
 description: 'station teams lists the teams declared, each with the agents of this folder that name it'
 env: two-macs
 runs:
-    - command: '--version >/dev/null; /usr/bin/jq ".macs[\"macbook-pro\"].stores.teams = [{\"Slug\":\"web\",\"Name\":\"Web Team\",\"Description\":\"Ships the site.\"},{\"Slug\":\"core\",\"Name\":\"Core\"}]" world.json > seeded.json && /bin/mv seeded.json world.json'
+    - command: '--version >/dev/null; /usr/bin/jq ".macs[\"macbook-pro\"].stores.teams = [{\"Slug\":\"web\",\"Name\":\"Web Team\",\"Description\":\"Ships the site.\",\"Color\":\"#8B5CF6\"},{\"Slug\":\"core\",\"Name\":\"Core\"}]" world.json > seeded.json && /bin/mv seeded.json world.json'
       exit: 0
     - command: 'agents create neo --team web'
       exit: 0
@@ -19,5 +19,5 @@ runs:
       exit: 0
       stdout: |
           # Teams
-          ●	core	Core	none
-          ●	web	Web Team	neo, trinity	Ships the site.
+          ●	core	Core	none	none
+          ●	web	Web Team	#8B5CF6	neo, trinity	Ships the site.

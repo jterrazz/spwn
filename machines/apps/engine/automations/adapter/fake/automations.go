@@ -27,7 +27,7 @@ func Of(w *world.World, machine string) *Automations {
 func (a *Automations) store() *world.Stores { return a.w.Mac(a.machine).Store() }
 
 func (a *Automations) read(declared automations.Automation, project string) automations.Automation {
-	declared.LastFired, declared.Fires, declared.Failed = time.Time{}, 0, 0
+	declared.LastFired, declared.LastOK, declared.Fires, declared.Failed = time.Time{}, false, 0, 0
 	for _, run := range a.store().AutomationRuns[project] {
 		if run.Group != declared.Group || run.Name != declared.Name {
 			continue
@@ -37,7 +37,7 @@ func (a *Automations) read(declared automations.Automation, project string) auto
 			declared.Failed++
 		}
 		if run.At.After(declared.LastFired) {
-			declared.LastFired = run.At
+			declared.LastFired, declared.LastOK = run.At, run.OK
 		}
 	}
 	return declared

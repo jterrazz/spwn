@@ -11,6 +11,7 @@ func columns() []page.Column {
 	return []page.Column{
 		{Key: "slug", Kind: page.KindText, Keep: 100},
 		{Key: "name", Label: "name", Kind: page.KindText, Keep: 60},
+		{Key: "color", Label: "color", Kind: page.KindText, Keep: 40},
 		{Key: "agents", Label: "agents", Kind: page.KindText, Keep: 50},
 	}
 }
@@ -24,7 +25,7 @@ func members(t teams.Team) string {
 
 func row(t teams.Team) page.Row {
 	return page.Row{ID: t.Slug, Label: t.Slug, Mark: page.OK, Detail: page.Text(t.Description),
-		Cells: []page.Value{page.Text(t.Name), page.Text(members(t))}}
+		Cells: []page.Value{page.Text(t.Name), page.Text(colorOf(t)), page.Text(members(t))}}
 }
 
 func List(all []teams.Team, thisMac page.Context) page.Page {
@@ -60,6 +61,7 @@ type TeamJSON struct {
 	Slug        string   `json:"slug"`
 	Name        string   `json:"name"`
 	Description string   `json:"description"`
+	Color       string   `json:"color"`
 	Members     []string `json:"members"`
 }
 
@@ -78,7 +80,7 @@ func teamJSON(t teams.Team) TeamJSON {
 	if members == nil {
 		members = []string{}
 	}
-	return TeamJSON{Slug: t.Slug, Name: t.Name, Description: t.Description, Members: members}
+	return TeamJSON{Slug: t.Slug, Name: t.Name, Description: t.Description, Color: t.Color, Members: members}
 }
 
 func ListContract(schema string, all []teams.Team) ListJSON {
@@ -91,4 +93,11 @@ func ListContract(schema string, all []teams.Team) ListJSON {
 
 func ShowContract(schema string, t teams.Team) ShowJSON {
 	return ShowJSON{Schema: schema, TeamJSON: teamJSON(t)}
+}
+
+func colorOf(t teams.Team) string {
+	if t.Color == "" {
+		return "none"
+	}
+	return t.Color
 }

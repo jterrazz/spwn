@@ -85,6 +85,8 @@ Decided in ADR-021 and ADR-022. A row whose left column is `station` is built, u
 
 `spwn project plan` does not check a `spwn:<name>` reference against the built-in catalog: the engine links no copy of it (`packages/dependency/builtin` carries the embedded catalog, and no package the engine links imports it), so such a reference passes the plan unverified, and the check that `spwn check` made, `unknown-builtin-tool`, is lost. `spwn install` still refuses an unknown name until it goes, and the rule that refuses every `spwn:` reference replaces it.
 
+`station automations` keeps what `spwn automation ls`, `status` and `logs` showed, and drops four things on purpose: `logs --follow` and its `-n` (no command follows a file, rule 8, so `--last` bounds the runs), the age of the last run (`3h ago`, which the page replaces by the instant), the daemon-lock rollup of `status` (the engine runs the automations later, and only while Spwn is open), and the 120-character cut of an error (the page shows its first line whole, the `--json` document all of it).
+
 ### Agents' commands today
 
 ```bash

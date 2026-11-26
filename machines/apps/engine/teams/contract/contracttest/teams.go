@@ -11,7 +11,7 @@ import (
 )
 
 type Declared struct {
-	Slug, Name, Description string
+	Slug, Name, Description, Color string
 }
 
 type Opener func(t *testing.T, declared []Declared, memberOf map[string]string) (contract.Teams, string)
@@ -21,7 +21,7 @@ func Teams(t *testing.T, open Opener) {
 	// project's root, the teams declared, and the agents made in the
 	// project, each named with the team its agent.yaml gives it.
 	ctx := context.Background()
-	web := Declared{Slug: "web", Name: "Web Team", Description: "Ships the site"}
+	web := Declared{Slug: "web", Name: "Web Team", Description: "Ships the site", Color: "purple"}
 	core := Declared{Slug: "core", Name: "Core"}
 	memberOf := map[string]string{"neo": "web", "trinity": "web", "smith": "core", "oracle": "gone", "solo": ""}
 
@@ -38,7 +38,7 @@ func Teams(t *testing.T, open Opener) {
 		got, err := m.List(ctx, project)
 		want := []teams.Team{
 			{Slug: "core", Name: "Core", Members: []string{"smith"}},
-			{Slug: "web", Name: "Web Team", Description: "Ships the site", Members: []string{"neo", "trinity"}},
+			{Slug: "web", Name: "Web Team", Description: "Ships the site", Color: "purple", Members: []string{"neo", "trinity"}},
 		}
 		if err != nil || len(got) != len(want) {
 			t.Fatalf("List = %+v, %v; want %+v", got, err, want)
@@ -61,7 +61,7 @@ func Teams(t *testing.T, open Opener) {
 	t.Run("one team is read by its slug", func(t *testing.T) {
 		m, project := open(t, []Declared{web, core}, memberOf)
 		got, err := m.Team(ctx, project, "web")
-		want := teams.Team{Slug: "web", Name: "Web Team", Description: "Ships the site", Members: []string{"neo", "trinity"}}
+		want := teams.Team{Slug: "web", Name: "Web Team", Description: "Ships the site", Color: "purple", Members: []string{"neo", "trinity"}}
 		if err != nil || !same(got, want) {
 			t.Fatalf("Team = %+v, %v; want %+v", got, err, want)
 		}
@@ -78,5 +78,5 @@ func Teams(t *testing.T, open Opener) {
 }
 
 func same(a, b teams.Team) bool {
-	return a.Slug == b.Slug && a.Name == b.Name && a.Description == b.Description && slices.Equal(a.Members, b.Members)
+	return a.Slug == b.Slug && a.Name == b.Name && a.Description == b.Description && a.Color == b.Color && slices.Equal(a.Members, b.Members)
 }

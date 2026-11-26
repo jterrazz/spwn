@@ -3,20 +3,20 @@ env:
     - two-macs
     - engine
 runs:
-    - command: '--version >/dev/null; /bin/mkdir site && /usr/bin/touch site/spwn.yaml && P="$PWD/site" /usr/bin/jq ".macs[\"macbook-pro\"].stores.automations = {(env.P): [{\"Name\":\"inbox\",\"Agent\":\"trinity\",\"Trigger\":{\"Kind\":\"fs\",\"Spec\":\"./inbox\"}},{\"Name\":\"morning\",\"Agent\":\"neo\",\"Trigger\":{\"Kind\":\"cron\",\"Spec\":\"0 6 * * *\"}}]} | .macs[\"macbook-pro\"].stores.automation_runs = {(env.P): [{\"Name\":\"morning\",\"Scheduled\":\"2026-05-01T06:00:00Z\",\"At\":\"2026-05-01T06:00:00Z\",\"OK\":true,\"Output\":\"brief written\"},{\"Name\":\"inbox\",\"At\":\"2026-05-01T11:23:14Z\",\"OK\":true},{\"Name\":\"morning\",\"Scheduled\":\"2026-05-02T06:00:00Z\",\"At\":\"2026-05-02T06:00:00Z\",\"OK\":false,\"Error\":\"no running world\"}]}" world.json > seeded.json && /bin/mv seeded.json world.json'
+    - command: '--version >/dev/null; /bin/mkdir site && /usr/bin/touch site/spwn.yaml && P="$PWD/site" /usr/bin/jq ".macs[\"macbook-pro\"].stores.automations = {(env.P): [{\"Name\":\"inbox\",\"Agent\":\"trinity\",\"Trigger\":{\"Kind\":\"fs\",\"Spec\":\"./inbox\"}},{\"Name\":\"morning\",\"Agent\":\"neo\",\"Trigger\":{\"Kind\":\"cron\",\"Spec\":\"0 6 * * *\"}}]} | .macs[\"macbook-pro\"].stores.automation_runs = {(env.P): [{\"Name\":\"morning\",\"Trigger\":\"cron\",\"Cause\":\"catchup\",\"Scheduled\":\"2026-05-01T06:00:00Z\",\"At\":\"2026-05-01T06:00:00Z\",\"DurationMS\":1500,\"OK\":true,\"Output\":\"brief written\",\"Missed\":2},{\"Name\":\"inbox\",\"Trigger\":\"fs\",\"Cause\":\"create:a.md\",\"At\":\"2026-05-01T11:23:14Z\",\"DurationMS\":40,\"OK\":true,\"Paths\":3},{\"Name\":\"morning\",\"Trigger\":\"cron\",\"Cause\":\"on-time\",\"Scheduled\":\"2026-05-02T06:00:00Z\",\"At\":\"2026-05-02T06:00:00Z\",\"DurationMS\":8,\"OK\":false,\"Error\":\"no running world\"}]}" world.json > seeded.json && /bin/mv seeded.json world.json'
       exit: 0
     - command: '--version >/dev/null; cd site && "$STATION" automations log'
       exit: 0
       stdout: |
           # Runs
-          ●	2026-05-01 06:00:00	morning	ok	brief written
-          ●	2026-05-01 11:23:14	inbox	ok
-          ✗	2026-05-02 06:00:00	morning	failed: no running world
+          ●	2026-05-01 06:00:00	morning	cron catchup, 2 missed	1.5s	ok	brief written
+          ●	2026-05-01 11:23:14	inbox	fs create:a.md, 3 paths	40ms	ok
+          ✗	2026-05-02 06:00:00	morning	cron on-time	8ms	failed: no running world
     - command: '--version >/dev/null; cd site && "$STATION" automations log inbox'
       exit: 0
       stdout: |
           # Runs
-          ●	2026-05-01 11:23:14	inbox	ok
+          ●	2026-05-01 11:23:14	inbox	fs create:a.md, 3 paths	40ms	ok
     - command: '--version >/dev/null; cd site && "$STATION" automations log --json'
       exit: 0
       stdout: |
@@ -35,30 +35,45 @@ runs:
               {
                 "group": "",
                 "automation": "morning",
+                "trigger": "cron",
+                "cause": "catchup",
                 "scheduled": "2026-05-01T06:00:00Z",
                 "at": "2026-05-01T06:00:00Z",
+                "duration_ms": 1500,
                 "ok": true,
                 "error": "",
-                "output": "brief written"
+                "output": "brief written",
+                "missed": 2,
+                "paths": 0
               },
               {
                 "group": "",
                 "automation": "inbox",
+                "trigger": "fs",
+                "cause": "create:a.md",
                 "scheduled": null,
                 "at": "2026-05-01T11:23:14Z",
+                "duration_ms": 40,
                 "ok": true,
                 "error": "",
-                "output": ""
+                "output": "",
+                "missed": 0,
+                "paths": 3
               },
               {
                 "group": "",
                 "automation": "morning",
+                "trigger": "cron",
+                "cause": "on-time",
                 "scheduled": "2026-05-02T06:00:00Z",
                 "at": "2026-05-02T06:00:00Z",
+                "duration_ms": 8,
                 "ok": false,
                 "error": "no running world",
                 "reason": "failing",
-                "output": ""
+                "output": "",
+                "missed": 0,
+                "paths": 0
               }
             ]
           }

@@ -23,6 +23,18 @@
           "keep": 70
         },
         {
+          "key": "fired",
+          "label": "fired by",
+          "kind": "text",
+          "keep": 50
+        },
+        {
+          "key": "took",
+          "label": "took",
+          "kind": "text",
+          "keep": 40
+        },
+        {
           "key": "outcome",
           "label": "outcome",
           "kind": "text",
@@ -39,6 +51,14 @@
               {
                 "kind": "text",
                 "text": "morning"
+              },
+              {
+                "kind": "text",
+                "text": "cron catchup, 2 missed"
+              },
+              {
+                "kind": "text",
+                "text": "1.5s"
               },
               {
                 "kind": "text",
@@ -60,6 +80,14 @@
               {
                 "kind": "text",
                 "text": "morning"
+              },
+              {
+                "kind": "text",
+                "text": "cron on-time"
+              },
+              {
+                "kind": "text",
+                "text": "40ms"
               },
               {
                 "kind": "text",

@@ -12,7 +12,7 @@ runs:
       exit: 0
       stdout: |
           	On linux-1:
-          ●	web	Web Team	neo
+          ●	web	Web Team	none	neo
           # Members
           ●	neo
     - command: 'teams web'

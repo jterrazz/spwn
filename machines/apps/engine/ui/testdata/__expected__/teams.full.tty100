@@ -1,4 +1,4 @@
 Teams
-          name      agents
-  ● core  Core      none          Keeps the platform standing.
-  ● web   Web Team  neo, trinity  Ships the site.
+          name      color   agents
+  ● core  Core      none    none          Keeps the platform standing.
+  ● web   Web Team  purple  neo, trinity  Ships the site.

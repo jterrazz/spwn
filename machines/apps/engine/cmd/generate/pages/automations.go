@@ -21,8 +21,8 @@ func automationList() []automations.Automation {
 // value: the runs written for the project: one that passed, one that failed.
 func automationRuns() []automations.Run {
 	return []automations.Run{
-		{Name: "morning", Scheduled: time.Date(2026, time.May, 1, 6, 0, 0, 0, time.UTC), At: time.Date(2026, time.May, 1, 6, 0, 0, 0, time.UTC), OK: true, Output: "brief written"},
-		{Name: "morning", Scheduled: time.Date(2026, time.May, 2, 6, 0, 0, 0, time.UTC), At: time.Date(2026, time.May, 2, 6, 0, 0, 0, time.UTC), Error: "no running world"},
+		{Name: "morning", Trigger: automations.Cron, Cause: "catchup", Scheduled: time.Date(2026, time.May, 1, 6, 0, 0, 0, time.UTC), At: time.Date(2026, time.May, 1, 6, 0, 0, 0, time.UTC), DurationMS: 1500, OK: true, Output: "brief written", Missed: 2},
+		{Name: "morning", Trigger: automations.Cron, Cause: "on-time", Scheduled: time.Date(2026, time.May, 2, 6, 0, 0, 0, time.UTC), At: time.Date(2026, time.May, 2, 6, 0, 0, 0, time.UTC), DurationMS: 40, Error: "no running world"},
 	}
 }
 

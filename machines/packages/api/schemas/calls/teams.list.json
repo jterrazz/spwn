@@ -3,6 +3,9 @@
     "teams.Team": {
       "additionalProperties": false,
       "properties": {
+        "Color": {
+          "type": "string"
+        },
         "Description": {
           "type": "string"
         },
@@ -23,6 +26,7 @@
         }
       },
       "required": [
+        "Color",
         "Description",
         "Members",
         "Name",
