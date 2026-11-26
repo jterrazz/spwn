@@ -4,23 +4,102 @@ import Observation
 import StationKit
 import SwiftUI
 
-@main
-struct StationMenuBarApp: App {
-    @NSApplicationDelegateAdaptor(StationDelegate.self) private var station
+// value: why the app is asked to end, numbered as the C entry points carry it.
+public enum QuitReason: Int32, Sendable {
+    case user = 0
+    case logout = 1
+    case restart = 2
+    case shutdown = 3
+}
 
-    // value: an App has a scene; the panel is the status item's, not one.
-    var body: some Scene { Settings { EmptyView() } }
+// value: what the panel asks of the app whose process draws it.
+public struct MenuBarShell: Sendable {
+    public let openWindow: @MainActor @Sendable (String?) -> Void
+    public let quit: @MainActor @Sendable (QuitReason) -> Void
+
+    public init(openWindow: @escaping @MainActor @Sendable (String?) -> Void, quit: @escaping @MainActor @Sendable (QuitReason) -> Void) {
+        self.openWindow = openWindow
+        self.quit = quit
+    }
+}
+
+// invariant: one panel per process, started once on the main thread; the
+// item's visibility is the owner's, kept in the app's own defaults, shown
+// unless he hid it.
+@MainActor
+public enum SpwnMenuBar {
+    static var panel: MenuBarPanel?
+    nonisolated static let shownKey = "showInMenuBar"
+
+    public static func start(_ shell: MenuBarShell) {
+        guard panel == nil else { return }
+        let started = MenuBarPanel(shell: shell)
+        panel = started
+        started.start()
+        started.show(shown)
+    }
+
+    public nonisolated static var shown: Bool {
+        UserDefaults.standard.object(forKey: shownKey) as? Bool ?? true
+    }
+
+    public static func show(_ on: Bool) {
+        UserDefaults.standard.set(on, forKey: shownKey)
+        panel?.show(on)
+    }
+}
+
+public typealias SpwnOpenWindow = @convention(c) (UnsafeMutableRawPointer?, UnsafePointer<CChar>?) -> Void
+public typealias SpwnQuit = @convention(c) (UnsafeMutableRawPointer?, Int32) -> Void
+
+struct ShellContext: @unchecked Sendable {
+    let raw: UnsafeMutableRawPointer?
+}
+
+func onMain(_ work: @escaping @MainActor @Sendable () -> Void) {
+    if Thread.isMainThread {
+        MainActor.assumeIsolated(work)
+    } else {
+        DispatchQueue.main.async { MainActor.assumeIsolated(work) }
+    }
+}
+
+@_cdecl("spwn_menu_bar_start")
+public func spwn_menu_bar_start(_ ctx: UnsafeMutableRawPointer?, _ openWindow: SpwnOpenWindow, _ quit: SpwnQuit) {
+    let context = ShellContext(raw: ctx)
+    let shell = MenuBarShell(
+        openWindow: { machine in
+            guard let machine else { return openWindow(context.raw, nil) }
+            machine.withCString { openWindow(context.raw, $0) }
+        },
+        quit: { reason in quit(context.raw, reason.rawValue) })
+    onMain { SpwnMenuBar.start(shell) }
+}
+
+@_cdecl("spwn_menu_bar_set_shown")
+public func spwn_menu_bar_set_shown(_ shown: Bool) {
+    onMain { SpwnMenuBar.show(shown) }
+}
+
+@_cdecl("spwn_menu_bar_shown")
+public func spwn_menu_bar_shown() -> Bool {
+    SpwnMenuBar.shown
 }
 
 @MainActor
-final class StationDelegate: NSObject, NSApplicationDelegate {
+final class MenuBarPanel {
+    let shell: MenuBarShell
     let model = Model()
     let trial = Trial()
     private var status: StatusPanel?
     private var labelling: AnyCancellable?
     private var drawing = StatusDrawing()
 
-    func applicationDidFinishLaunching(_: Notification) {
+    init(shell: MenuBarShell) {
+        self.shell = shell
+    }
+
+    func start() {
         let trial = self.trial
         let report = Trial.frames ? { line in trial.log(line) } : nil as ((String) -> Void)?
         if Trial.on {
@@ -34,7 +113,8 @@ final class StationDelegate: NSObject, NSApplicationDelegate {
             return
         }
         let model = self.model
-        status = StatusPanel(content: { AnyView(ModelPanel(model: model)) }, opened: { model.opened() }, closed: { model.closed() }, report: report,
+        let shell = self.shell
+        status = StatusPanel(content: { AnyView(ModelPanel(model: model, shell: shell)) }, opened: { model.opened() }, closed: { model.closed() }, report: report,
                              generation: report == nil ? nil : { model.state.generation })
         label()
         model.start()
@@ -42,6 +122,11 @@ final class StationDelegate: NSObject, NSApplicationDelegate {
             let bench = Bench(panel: status, model: model, log: report)
             Task { await bench.run() }
         }
+    }
+
+    func show(_ on: Bool) {
+        if !on { status?.hide() }
+        status?.item.isVisible = on
     }
 
     // invariant: the status item is drawn again only when its icon or its
@@ -59,6 +144,7 @@ final class StationDelegate: NSObject, NSApplicationDelegate {
 
 struct ModelPanel: View {
     let model: Model
+    let shell: MenuBarShell
 
     var body: some View {
         StorePanel(store: model.store, handlers: handlers)
@@ -68,6 +154,7 @@ struct ModelPanel: View {
     }
 
     var handlers: PopoverHandlers {
+        let shell = self.shell
         var h = model.navigation.wire(PopoverHandlers(
             run: { action, answers in model.run(action, answers: answers) },
             confirm: { action in model.state.confirming = action?.id },
@@ -75,7 +162,7 @@ struct ModelPanel: View {
             open: { url in model.open(url) },
             toggleQR: { url in model.state.qr = model.state.qr == url ? nil : url },
             toggleMenu: { model.state.menu.toggle() },
-            quit: { NSApplication.shared.terminate(nil) },
+            quit: { shell.quit(.user) },
             openMachine: { name in model.openMachine(name) },
             copy: { text in
                 NSPasteboard.general.clearContents()

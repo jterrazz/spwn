@@ -152,8 +152,10 @@ final class KitBoundaryTests: XCTestCase {
         XCTAssertGreaterThan(files.count, 2)
         XCTAssertEqual(Self.scanCatalog(files), [])
         let package = try String(contentsOf: Tree.root.appendingPathComponent("apps/menubar/Package.swift"), encoding: .utf8)
-        let app = try XCTUnwrap(package.split(separator: "\n").first { $0.contains("name: \"StationMenuBar\"") })
-        XCTAssertFalse(app.contains("StationCatalog"), "Station.app links the Catalog")
+        for target in [".target(name: \"SpwnMenuBar\"", ".executableTarget(name: \"StationMenuBar\""] {
+            let app = try XCTUnwrap(package.split(separator: "\n").first { $0.contains(target) })
+            XCTAssertFalse(app.contains("StationCatalog"), "the menu bar links the Catalog: \(target)")
+        }
         let bundle = try String(contentsOf: Tree.root.appendingPathComponent("apps/menubar/scripts/build.sh"), encoding: .utf8)
         XCTAssertFalse(bundle.contains("StationCatalog"), "the bundle carries the Catalog")
     }

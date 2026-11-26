@@ -114,7 +114,7 @@ final class StoryLoadTests: XCTestCase {
     }
 
     func testStationAppNeverLinksTheLoader() throws {
-        let files = FileManager.default.enumerator(at: Tree.app, includingPropertiesForKeys: nil)!.compactMap { $0 as? URL }
+        let files = [Tree.app, Tree.devShell].flatMap { FileManager.default.enumerator(at: $0, includingPropertiesForKeys: nil)!.compactMap { $0 as? URL } }
             .filter { $0.pathExtension == "swift" }
         XCTAssertGreaterThan(files.count, 0)
         for file in files {

@@ -43,7 +43,7 @@ final class CallsTests: XCTestCase {
     // invariant: rule menubar-no-exec (MB-09): a program is started in the
     // file that opens the terminal and nowhere else, in the kit or the app.
     func testNoCLIExec() {
-        XCTAssertEqual(Self.execs(swiftFiles(Tree.sources) + swiftFiles(Tree.app)), [])
+        XCTAssertEqual(Self.execs(swiftFiles(Tree.sources) + swiftFiles(Tree.app) + swiftFiles(Tree.devShell)), [])
         XCTAssertEqual(Self.execs([("engine/Actions.swift", "let p = Process()"), ("engine/Terminal.swift", "let p = Process()")]), ["engine/Actions.swift"])
     }
 }
