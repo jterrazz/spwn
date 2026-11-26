@@ -45,9 +45,6 @@ func TestAllTools_VersionNotEmpty(t *testing.T) {
 
 func TestAllTools_VerifyNotEmpty(t *testing.T) {
 	for _, tool := range builtin.BuiltinTools() {
-		if isTemplateTool(tool.Name()) {
-			continue // template entries (e.g. spwn:matrix) are scaffolds, not installable deps
-		}
 		t.Run(tool.Name(), func(t *testing.T) {
 			if len(tool.Verify()) == 0 {
 				t.Errorf("%s must have at least one verify command", tool.Name())
@@ -58,9 +55,6 @@ func TestAllTools_VerifyNotEmpty(t *testing.T) {
 
 func TestAllTools_InstallSpecNonEmpty(t *testing.T) {
 	for _, tool := range builtin.BuiltinTools() {
-		if isTemplateTool(tool.Name()) {
-			continue
-		}
 		t.Run(tool.Name(), func(t *testing.T) {
 			spec := tool.Install()
 			hasContent := len(spec.Packages.Apt) > 0 || len(spec.Commands) > 0 || len(spec.Files) > 0
@@ -69,21 +63,6 @@ func TestAllTools_InstallSpecNonEmpty(t *testing.T) {
 			}
 		})
 	}
-}
-
-// isTemplateTool returns true when the spwn:<slug> is a gallery
-// template (has a `worlds:` section) rather than a pure dependency.
-// Uses the exported Get API (returns ErrNotFound on non-gallery
-// entries), so no internal state is reached.
-func isTemplateTool(toolName string) bool {
-	slug := strings.TrimPrefix(toolName, "spwn:")
-	if _, err := builtin.GalleryEntryBySlug(slug); err == nil {
-		return true
-	}
-	if _, err := builtin.GalleryEntryBySlug(strings.ReplaceAll(slug, "-", "_")); err == nil {
-		return true
-	}
-	return false
 }
 
 func TestAllTools_NoDuplicateNames(t *testing.T) {
@@ -137,11 +116,6 @@ func TestAllTools_NoDependOnSelf(t *testing.T) {
 
 func TestAllTools_SkillsHaveSkillMD(t *testing.T) {
 	for _, tool := range builtin.BuiltinTools() {
-		if isTemplateTool(tool.Name()) {
-			// Template entries ship project-shared skills (no SKILL.md
-			// contract: those live in per-agent agent.yaml refs).
-			continue
-		}
 		s := tool.Skills()
 		if s == nil {
 			continue

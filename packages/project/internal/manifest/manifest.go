@@ -13,8 +13,10 @@ package manifest
 
 import (
 	"fmt"
-	"os"
+	"path/filepath"
 	"time"
+
+	"spwn.sh/packages/platform"
 
 	"gopkg.in/yaml.v3"
 )
@@ -236,7 +238,15 @@ func (d Duration) AsDuration() time.Duration {
 // LoadPath reads and parses spwn.yaml from an explicit file path.
 // Applies defaults but does NOT run validation rules.
 func LoadPath(path string) (*Manifest, error) {
-	data, err := os.ReadFile(path)
+	t := platform.Within(filepath.Dir(path))
+	defer t.Close()
+	return Read(t, path)
+}
+
+// Read reads and parses spwn.yaml at path through the project's tree t.
+// Applies defaults but does NOT run validation rules.
+func Read(t *platform.Tree, path string) (*Manifest, error) {
+	data, err := t.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("read %s: %w", path, err)
 	}

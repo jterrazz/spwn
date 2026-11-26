@@ -86,13 +86,13 @@ func RunInstall(cmd *cobra.Command, raw, agentFilter string) error {
 	switch parsed.Kind {
 	case refs.KindLocalSkill, refs.KindLocalTool, refs.KindLocalHook, refs.KindLocalCommand:
 		if agentFilter == "" {
-			return fmt.Errorf("%q is a local ref: pass --agent <name> to attach it to one agent, or author a new one with `spwn skill new %s` / `spwn/tools/%s/` / `spwn/hooks/%s.yaml` / `spwn/commands/%s.md`",
+			return fmt.Errorf("%q is a local ref: pass --agent <name> to attach it to one agent, or author a new one with `station skills create %s` / `spwn/tools/%s/` / `spwn/hooks/%s.yaml` / `spwn/commands/%s.md`",
 				ref, parsed.Name, parsed.Name, parsed.Name, parsed.Name)
 		}
 		if res := refs.ResolveSkill(p.Root, parsed, nil, false); res == refs.ResolveNotFound {
 			switch parsed.Kind {
 			case refs.KindLocalSkill:
-				return fmt.Errorf("skill/%s not found at spwn/skills/%s.md; create it first with `spwn skill new %s`",
+				return fmt.Errorf("skill/%s not found at spwn/skills/%s.md; create it first with `station skills create %s`",
 					parsed.Name, parsed.Name, parsed.Name)
 			case refs.KindLocalTool:
 				return fmt.Errorf("tool/%s not found at spwn/tools/%s/; scaffold a tool.yaml there first",

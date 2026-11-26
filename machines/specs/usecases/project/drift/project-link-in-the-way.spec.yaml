@@ -1,0 +1,16 @@
+description: 'station project drift refuses a linked lockfile, naming it, and reads nothing through it'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'project create site'
+      exit: 0
+      stdout: |
+          ●	site	created	{{workdir}}/site
+    - command: '--version >/dev/null; "$STATION" world project "$HOME/site" link spwn.lock /tmp/elsewhere.lock'
+      exit: 0
+    - command: '--version >/dev/null; /bin/mkdir -p site && cd site && "$STATION" project drift'
+      exit: 2
+      stderr: |
+          Error: spwn.lock is a link: a project's declaration is never read through one
+          Hint: put the file it points to there instead, then station project plan

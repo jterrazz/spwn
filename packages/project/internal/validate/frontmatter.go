@@ -4,8 +4,9 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
-	"os"
 	"strings"
+
+	"spwn.sh/packages/platform"
 
 	"gopkg.in/yaml.v3"
 )
@@ -41,14 +42,12 @@ type Frontmatter struct {
 // frontmatter block if present. Returns Found=false (no error) when
 // the file does not start with `---`. Returns an error for I/O
 // failures or malformed YAML inside a present block.
-func ParseMarkdownFrontmatter(path string) (*Frontmatter, error) {
-	f, err := os.Open(path)
+func ParseMarkdownFrontmatter(t *platform.Tree, path string) (*Frontmatter, error) {
+	data, err := t.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
-	defer f.Close()
-
-	return parseFrontmatterReader(bufio.NewReader(f))
+	return ParseMarkdownFrontmatterBytes(data)
 }
 
 // ParseMarkdownFrontmatterBytes is the in-memory variant.

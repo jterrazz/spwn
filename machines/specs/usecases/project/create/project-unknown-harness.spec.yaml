@@ -1,0 +1,8 @@
+description: 'station project create with a harness the catalog does not know is refused, exit 2'
+env: two-macs
+runs:
+    - command: 'project create site --harness emacs'
+      exit: 2
+      stderr: |
+          Error: no harness named "emacs"
+          Hint: one of claude-code, codex

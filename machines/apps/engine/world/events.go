@@ -2,6 +2,7 @@ package world
 
 import (
 	"fmt"
+	"path/filepath"
 	"slices"
 	"strconv"
 	"strings"
@@ -11,6 +12,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/images"
 	"github.com/jterrazz/studio-station/apps/engine/ports"
+	"github.com/jterrazz/studio-station/apps/engine/project"
 	"github.com/jterrazz/studio-station/apps/engine/settings"
 
 	"github.com/jterrazz/studio-station/apps/engine/machines"
@@ -72,6 +74,7 @@ func events() []event {
 		{"agent", []string{"<mac>", "served|held", "[<pid>]", "[<executable>]", "[<label>]"}, agentSocket},
 		{"admin", []string{"on|off"}, admin},
 		{"release", []string{"<tag>", "[no-asset]"}, releaseTag},
+		{"project", []string{"<root>", "[error|warning|info|drift|render|edit|link|fifo|readonly]", "[<agent>|<path>]", "[<path>|<message>|<content>|<target>|off]", "[<content>|hint:]", "[<hint>]"}, declareProject},
 	}
 }
 
@@ -678,4 +681,103 @@ func releaseTag(w *World, args []string) error {
 	}
 	w.Releases = append(w.Releases, r)
 	return nil
+}
+
+// invariant: a project of This Mac at an absolute root, declared once and
+// then given, one event each, an issue its plan finds or a row of its drift.
+func declareProject(w *World, args []string) error {
+	m, err := w.known(w.ThisMac)
+	if err != nil {
+		return err
+	}
+	root := args[0]
+	if !filepath.IsAbs(root) {
+		return fmt.Errorf("project takes an absolute root, not %q", root)
+	}
+	s := m.Store()
+	if s.Projects == nil {
+		s.Projects = map[string]project.State{}
+	}
+	kept, ok := s.Projects[root]
+	if !ok {
+		kept.Project = project.Project{Name: filepath.Base(root), Root: root, Manifest: filepath.Join(root, project.ManifestName)}
+	}
+	if len(args) > 1 {
+		if len(args) < 3 || len(args) < 4 && args[1] != "edit" && args[1] != "fifo" && args[1] != "readonly" {
+			return fmt.Errorf("project %s takes a level, a path and a message", root)
+		}
+		said, hint := args[3:], []string(nil)
+		if i := slices.Index(said, "hint:"); i >= 0 {
+			said, hint = said[:i], said[i+1:]
+		}
+		issue := project.Issue{Level: project.Level(args[1]), Path: args[2], Message: strings.Join(said, " "), Hint: strings.Join(hint, " "), Source: project.SourceManifest}
+		switch {
+		case args[1] == "render":
+			declareRender(&kept, args[2], args[3], args[4:])
+		case args[1] == "edit":
+			editRunFolder(&kept, args[2], args[3:])
+		case args[1] == "link":
+			linkRunFolder(&kept, args[2], args[3])
+		case args[1] == "fifo":
+			kept.Irregular = append(kept.Irregular, args[2])
+		case args[1] == "readonly":
+			kept.ReadOnly = slices.DeleteFunc(kept.ReadOnly, func(at string) bool { return at == args[2] })
+			if len(args) < 4 || args[3] != "off" {
+				kept.ReadOnly = append(kept.ReadOnly, args[2])
+			}
+		case args[1] == "drift":
+			issue.Level, issue.Source = project.Error, project.SourceLockfile
+			kept.Drift = append(kept.Drift, issue)
+		case slices.Contains(project.Level("").Enum(), args[1]):
+			kept.Issues = append(kept.Issues, issue)
+		default:
+			return fmt.Errorf("project takes error, warning, info, drift, render, edit, link, fifo or readonly, not %q", args[1])
+		}
+	}
+	s.Projects[root] = kept
+	return nil
+}
+
+// invariant: render <agent> <path> <content> is what the agent's harness
+// renders at that path of its run folder; with no content, it renders
+// nothing there any more.
+func declareRender(kept *project.State, agent, path string, content []string) {
+	if kept.Rendered == nil {
+		kept.Rendered = map[string][]project.File{}
+	}
+	files := slices.DeleteFunc(kept.Rendered[agent], func(f project.File) bool { return f.Path == path })
+	if len(content) > 0 {
+		files = append(files, project.File{Path: path, Data: []byte(strings.Join(content, " ") + "\n"), Mode: 0o644})
+	}
+	kept.Rendered[agent] = files
+	if !slices.Contains(kept.Project.Agents, agent) {
+		kept.Project.Agents = append(kept.Project.Agents, agent)
+		slices.Sort(kept.Project.Agents)
+	}
+}
+
+// invariant: edit <path> <content> is the owner writing that file by hand,
+// a path from the project's root; with no content, deleting it.
+func editRunFolder(kept *project.State, path string, content []string) {
+	if kept.Disk == nil {
+		kept.Disk = map[string]project.File{}
+	}
+	if len(content) == 0 {
+		delete(kept.Disk, path)
+		return
+	}
+	kept.Disk[path] = project.File{Path: path, Data: []byte(strings.Join(content, " ") + "\n"), Mode: 0o644}
+}
+
+// invariant: link <path> <target> is the owner, or a repository cloned,
+// putting a link at that path from the project's root: a name of the
+// declaration, a folder of a run folder's path or the record, which a
+// project refuses to follow. fifo <path> puts a FIFO there. readonly
+// <folder> takes the folder's write bit away, so no name in it is made,
+// replaced or removed; readonly <folder> off gives it back.
+func linkRunFolder(kept *project.State, path, target string) {
+	if kept.Disk == nil {
+		kept.Disk = map[string]project.File{}
+	}
+	kept.Disk[path] = project.File{Path: path, Data: []byte(target), Link: true}
 }

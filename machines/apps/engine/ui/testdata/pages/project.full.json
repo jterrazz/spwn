@@ -1,0 +1,77 @@
+{
+  "schema": "station.page/v1",
+  "id": "project",
+  "command": "project",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "site",
+      "title": "site",
+      "role": "banner",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "cell0",
+          "kind": "text",
+          "keep": 40
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "site",
+            "mark": "ok",
+            "label": "site",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "~/Developer/site/spwn.yaml"
+              }
+            ]
+          }
+        }
+      ],
+      "uncounted": true
+    },
+    {
+      "id": "agents",
+      "title": "Agents",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "neo",
+            "mark": "ok",
+            "label": "neo"
+          }
+        },
+        {
+          "row": {
+            "id": "trinity",
+            "mark": "ok",
+            "label": "trinity"
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 2
+        }
+      ]
+    }
+  ]
+}

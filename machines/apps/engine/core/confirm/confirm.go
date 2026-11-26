@@ -38,6 +38,8 @@ const (
 	Delete        Action = "delete"
 	// value: an agent's Mind is deleted, every layer of it.
 	DeleteAgent Action = "delete-agent"
+	// value: a skill file is deleted.
+	DeleteSkill Action = "delete-skill"
 	Erase       Action = "erase"
 	// value: build the image a create needs first, when this Mac has none.
 	BuildImage Action = "build-image"
@@ -112,7 +114,7 @@ const (
 
 func Actions() []Action {
 	return []Action{Install, Share, Start, Restart, Edit, Remove, StopSharing, SignOut, RemovePassword, RemoveGrant, Undeclare, OffHere,
-		Overwrite, Forget, ForgetDevice, DeleteImage, RestartMac, RestartServer, StopEngine, Stop, Delete, DeleteAgent, Erase, BuildImage, Cleanup, FreeUnused, Relocate}
+		Overwrite, Forget, ForgetDevice, DeleteImage, RestartMac, RestartServer, StopEngine, Stop, Delete, DeleteAgent, DeleteSkill, Erase, BuildImage, Cleanup, FreeUnused, Relocate}
 }
 
 func ConsequenceOf(a Action, k machine.Kind, facts ...Fact) Consequence {
@@ -145,7 +147,7 @@ func ConsequenceOf(a Action, k machine.Kind, facts ...Fact) Consequence {
 		return Destroys
 	case Remove, SignOut, RemovePassword, RemoveGrant, Overwrite, Forget, DeleteImage, RestartMac, StopEngine, Cleanup, FreeUnused:
 		return StopsOthers
-	case Erase, DeleteAgent, ForgetDevice:
+	case Erase, DeleteAgent, DeleteSkill, ForgetDevice:
 	}
 	return Destroys
 }
@@ -261,6 +263,8 @@ func (a Action) Consequence() string {
 		return "%s and everything on its disk are deleted for good."
 	case DeleteAgent:
 		return "%s's Mind, every layer of it, is deleted for good."
+	case DeleteSkill:
+		return "%s is deleted for good."
 	case Erase:
 		return "The data of %s is deleted for good."
 	case BuildImage:

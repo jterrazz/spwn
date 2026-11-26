@@ -1,0 +1,33 @@
+description: 'station project plan names a folder where a file renders as an error, and apply then writes nothing'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'project create site'
+      exit: 0
+      stdout: |
+          ●	site	created	{{workdir}}/site
+    - command: '--version >/dev/null; "$STATION" world project "$HOME/site" edit .spwn/agents/neo/CLAUDE.md/mine.txt "mine"'
+      exit: 0
+    - command: '--version >/dev/null; /bin/mkdir -p site && cd site && "$STATION" project plan'
+      exit: 2
+      stdout: |
+          ✗	{{workdir}}/site/spwn.yaml	1 error, 0 warnings
+          # Issues
+          ✗	.spwn/agents/neo/CLAUDE.md	is not a file, and apply writes a file there · move it away, then station project plan
+      stderr: |
+          Error: the project at {{workdir}}/site has 1 error
+          Hint: fix each one above, then station project plan
+    - command: '--version >/dev/null; /bin/mkdir -p site && cd site && "$STATION" project apply --yes'
+      exit: 2
+      stdout: |
+          ✗	{{workdir}}/site/spwn.yaml	1 error, 0 warnings
+          # Issues
+          ✗	.spwn/agents/neo/CLAUDE.md	is not a file, and apply writes a file there · move it away, then station project plan
+      stderr: |
+          Error: the project at {{workdir}}/site has 1 error
+          Hint: fix each one above, then station project plan
+    - command: '--version >/dev/null; /usr/bin/jq -c ".macs[\"macbook-pro\"].stores.projects[] | [(.Disk // {} | keys), (.Record // {} | length)]" world.json'
+      exit: 0
+      stdout: |
+          [[".spwn/agents/neo/CLAUDE.md/mine.txt"],0]

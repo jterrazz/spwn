@@ -24,7 +24,7 @@ func consequences() map[confirm.Action]confirm.Consequence {
 		confirm.RemoveGrant: confirm.StopsOthers, confirm.Overwrite: confirm.StopsOthers, confirm.Forget: confirm.StopsOthers,
 		confirm.DeleteImage: confirm.StopsOthers, confirm.RestartMac: confirm.StopsOthers, confirm.StopEngine: confirm.StopsOthers,
 		confirm.Cleanup: confirm.StopsOthers, confirm.FreeUnused: confirm.StopsOthers,
-		confirm.Delete: confirm.Destroys, confirm.DeleteAgent: confirm.Destroys, confirm.Erase: confirm.Destroys, confirm.ForgetDevice: confirm.Destroys,
+		confirm.Delete: confirm.Destroys, confirm.DeleteAgent: confirm.Destroys, confirm.DeleteSkill: confirm.Destroys, confirm.Erase: confirm.Destroys, confirm.ForgetDevice: confirm.Destroys,
 	}
 }
 

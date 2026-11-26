@@ -1,0 +1,50 @@
+description: 'station project plan --json carries the verdict, the summary and each issue'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" world project "$HOME/site" error spwn/agents/neo/agent.yaml "agent.yaml does not parse"'
+      exit: 0
+    - command: '--version >/dev/null; /bin/mkdir site && cd site && "$STATION" project plan --json'
+      exit: 2
+      stdout: |
+          {
+            "schema": "station.project.plan/v1",
+            "generated_at": "{{iso8601}}",
+            "machine": {
+              "name": "macbook-pro",
+              "label": "This Mac",
+              "kind": "computer",
+              "on": null,
+              "this_mac": true
+            },
+            "findings": [],
+            "valid": false,
+            "manifest": "{{workdir}}/site/spwn.yaml",
+            "summary": {
+              "errors": 1,
+              "warnings": 0,
+              "info": 0
+            },
+            "issues": [
+              {
+                "level": "error",
+                "path": "spwn/agents/neo/agent.yaml",
+                "message": "agent.yaml does not parse",
+                "source": "manifest"
+              }
+            ],
+            "changes": []
+          }
+          {
+            "schema": "station.error/v1",
+            "type": "refused",
+            "code": "project.invalid",
+            "subject": "{{workdir}}/site",
+            "message": "the project at {{workdir}}/site has 1 error",
+            "hint": "fix each one above, then station project plan",
+            "fix": null
+          }
+      stderr: |
+          Error: the project at {{workdir}}/site has 1 error
+          Hint: fix each one above, then station project plan

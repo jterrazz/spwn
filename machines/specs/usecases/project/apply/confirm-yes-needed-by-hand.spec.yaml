@@ -1,0 +1,35 @@
+description: 'an apply over a file edited by hand names it changed by hand and writes nothing without --yes'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'project create site'
+      exit: 0
+      stdout: |
+          ●	site	created	{{workdir}}/site
+    - command: '--version >/dev/null; /bin/mkdir -p site && cd site && "$STATION" project apply'
+      exit: 0
+      stdout: |
+          	{{workdir}}/site/spwn.yaml	1 change to apply
+          # To apply
+          ●	.spwn/agents/neo/CLAUDE.md	add
+          ●	{{workdir}}/site/spwn.yaml	applied, 1 change
+    - command: '--version >/dev/null; "$STATION" world project "$HOME/site" edit .spwn/agents/neo/CLAUDE.md "mine"'
+      exit: 0
+    - command: '--version >/dev/null; /bin/mkdir -p site && cd site && "$STATION" project apply </dev/null'
+      exit: 2
+      stdout: |
+          	{{workdir}}/site/spwn.yaml	1 change to apply
+          # To apply
+          ◐	.spwn/agents/neo/CLAUDE.md	overwrite: changed by hand, yours is lost
+      stderr: |
+          Error: refusing without --yes: overwrites .spwn/agents/neo/CLAUDE.md, changed by hand
+          Hint: re-run with --yes
+    - command: '--version >/dev/null; /bin/mkdir -p site && cd site && "$STATION" project plan'
+      exit: 0
+      stdout: |
+          ●	{{workdir}}/site/spwn.yaml	valid
+          # Issues
+          	none
+          # To apply
+          ◐	.spwn/agents/neo/CLAUDE.md	overwrite: changed by hand, yours is lost

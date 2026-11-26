@@ -8,9 +8,19 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/ui/token"
 )
 
-func HintText(h page.Hint) string { return token.Arrow + " " + h.Command }
+func HintText(h page.Hint) string {
+	if h.Command == "" {
+		return h.Text
+	}
+	return token.Arrow + " " + h.Command
+}
 
 func Hint(st token.Styles, h page.Hint) string {
+	// value: a command after the arrow; a hint with no command is words,
+	// drawn muted with no arrow, as nothing there is to run.
+	if h.Command == "" {
+		return st.Muted.Render(h.Text)
+	}
 	return st.Muted.Render(token.Arrow+" ") + st.Text.Render(h.Command)
 }
 

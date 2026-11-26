@@ -80,12 +80,16 @@ import (
 	portsfake "github.com/jterrazz/studio-station/apps/engine/ports/adapter/fake"
 	"github.com/jterrazz/studio-station/apps/engine/ports/adapter/funnel"
 	portscontract "github.com/jterrazz/studio-station/apps/engine/ports/contract"
+	projectfake "github.com/jterrazz/studio-station/apps/engine/project/adapter/fake"
+	projectcontract "github.com/jterrazz/studio-station/apps/engine/project/contract"
 	remotefake "github.com/jterrazz/studio-station/apps/engine/remote/adapter/fake"
 	"github.com/jterrazz/studio-station/apps/engine/remote/adapter/unix"
 	remotecontract "github.com/jterrazz/studio-station/apps/engine/remote/contract"
 	"github.com/jterrazz/studio-station/apps/engine/remote/serve"
 	settingsfake "github.com/jterrazz/studio-station/apps/engine/settings/adapter/fake"
 	settingscontract "github.com/jterrazz/studio-station/apps/engine/settings/contract"
+	skillsfake "github.com/jterrazz/studio-station/apps/engine/skills/adapter/fake"
+	skillscontract "github.com/jterrazz/studio-station/apps/engine/skills/contract"
 	"github.com/jterrazz/studio-station/apps/engine/surface/cli/kit"
 	teamsfake "github.com/jterrazz/studio-station/apps/engine/teams/adapter/fake"
 	teamscontract "github.com/jterrazz/studio-station/apps/engine/teams/contract"
@@ -476,8 +480,10 @@ func (m *worldMac) waker() contract.Waker       { return machinesfake.WakerOf(m.
 func (m *worldMac) processes(kernel contract.Processes) contract.Processes {
 	return machinesfake.ProcessesOf(m.run.w, m.name, kernel)
 }
-func (m *worldMac) minds() agentscontract.Minds { return agentsfake.Of(m.run.w, m.name) }
-func (m *worldMac) teams() teamscontract.Teams  { return teamsfake.Of(m.run.w, m.name) }
+func (m *worldMac) minds() agentscontract.Minds        { return agentsfake.Of(m.run.w, m.name) }
+func (m *worldMac) skillFiles() skillscontract.Files   { return skillsfake.Of(m.run.w, m.name) }
+func (m *worldMac) projects() projectcontract.Projects { return projectfake.Of(m.run.w, m.name) }
+func (m *worldMac) teams() teamscontract.Teams         { return teamsfake.Of(m.run.w, m.name) }
 func (m *worldMac) automations() automationscontract.Automations {
 	return automationsfake.Of(m.run.w, m.name)
 }

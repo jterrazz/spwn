@@ -1,0 +1,8 @@
+description: 'station skills delete of a name no skill has is refused before any question'
+env: two-macs
+runs:
+    - command: 'skills delete paper-reading --confirm=paper-reading'
+      exit: 2
+      stderr: |
+          Error: no skill named "paper-reading"
+          Hint: station skills

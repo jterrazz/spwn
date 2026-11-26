@@ -21,6 +21,7 @@
 package project
 
 import (
+	"spwn.sh/packages/platform"
 	"spwn.sh/packages/project/internal/discovery"
 	intmanifest "spwn.sh/packages/project/internal/manifest"
 	"spwn.sh/packages/project/internal/scaffold"
@@ -151,6 +152,13 @@ func Init(dir string, opts InitOpts) error {
 	})
 }
 
+// Scaffold returns the files Init writes for a project named name, by
+// slash path from its root, without writing any: the caller writes them
+// where and how it decides. Its .gitignore is not among them.
+func Scaffold(name, backend string) (map[string][]byte, error) {
+	return scaffold.Files(name, backend)
+}
+
 // AddWorldOpts configures AddWorld.
 type AddWorldOpts = scaffold.AddWorldOpts
 
@@ -168,12 +176,12 @@ func RemoveWorld(manifestPath, name string) error {
 	return scaffold.RemoveWorld(manifestPath, name)
 }
 
-// AppendGitignore adds a `.spwn/` entry to <root>/.gitignore, creating
-// the file when missing and idempotent when already present. Used by
-// Init and by the catalog example installer so `spwn init spwn:<slug>`
-// drops a consistent gitignore too.
-func AppendGitignore(root string) error {
-	return scaffold.AppendGitignore(root)
+// Gitignore returns the bytes of a project's .gitignore that held
+// existing, with the `.spwn/` entry Init writes added when it is not
+// there yet. The engine's project create writes it beside Scaffold's
+// files, or an example's.
+func Gitignore(existing []byte) []byte {
+	return scaffold.Gitignore(existing)
 }
 
 // ErrWorldNotFound is returned by RemoveWorld when the named world
@@ -245,10 +253,11 @@ type ValidateOpts struct {
 	HookEventsByRuntime map[string][]string
 }
 
-// Validate runs every validation rule against the project and returns
-// the collected issues. It never returns an error - all problems
-// surface as Issues with a Level. Callers decide what to do with
-// warnings vs errors.
+// Validate runs every rule of the declaration against the project and
+// returns the collected issues. It never returns an error - all
+// problems surface as Issues with a Level. Callers decide what to do
+// with warnings vs errors. Whether the lockfile records what the
+// project declares is Drift's.
 func Validate(p *Project, opts ...ValidateOpts) []Issue {
 	if p == nil {
 		return nil
@@ -257,8 +266,27 @@ func Validate(p *Project, opts ...ValidateOpts) []Issue {
 	if len(opts) > 0 {
 		o = opts[0]
 	}
+	t := platform.Within(p.Root)
+	defer t.Close()
+	return validate.Run(inputOf(t, p, o))
+}
+
+// Drift returns how what was installed for the project differs from
+// what it declares: each reference the lockfile does not record, or a
+// lockfile that does not read.
+func Drift(p *Project) []Issue {
+	if p == nil {
+		return nil
+	}
+	t := platform.Within(p.Root)
+	defer t.Close()
+	return validate.Lockfile(inputOf(t, p, ValidateOpts{}))
+}
+
+func inputOf(t *platform.Tree, p *Project, o ValidateOpts) validate.Input {
 	in := validate.Input{
 		Root:                p.Root,
+		Tree:                t,
 		Manifest:            p.Manifest,
 		BuiltinTools:        o.BuiltinTools,
 		SupportedRuntimes:   o.SupportedRuntimes,
@@ -274,7 +302,7 @@ func Validate(p *Project, opts ...ValidateOpts) []Issue {
 			Name: a.Name, Path: a.Path, Exists: a.Exists,
 		})
 	}
-	return validate.Run(in)
+	return in
 }
 
 // HasErrors returns true if any issue is LevelError.
@@ -288,11 +316,13 @@ func HasErrors(issues []Issue) bool {
 }
 
 func loadAt(manifestPath, root string) (*Project, error) {
-	m, err := intmanifest.LoadPath(manifestPath)
+	t := platform.Within(root)
+	defer t.Close()
+	m, err := intmanifest.Read(t, manifestPath)
 	if err != nil {
 		return nil, err
 	}
-	agents, orphans := resolveRefs(root, m)
+	agents, orphans := resolveRefs(t, root, m)
 	return &Project{
 		Root:         root,
 		ManifestPath: manifestPath,

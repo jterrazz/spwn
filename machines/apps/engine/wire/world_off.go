@@ -32,8 +32,10 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/ports"
 	"github.com/jterrazz/studio-station/apps/engine/ports/adapter/funnel"
 	portscontract "github.com/jterrazz/studio-station/apps/engine/ports/contract"
+	projectcontract "github.com/jterrazz/studio-station/apps/engine/project/contract"
 	remotecontract "github.com/jterrazz/studio-station/apps/engine/remote/contract"
 	settingscontract "github.com/jterrazz/studio-station/apps/engine/settings/contract"
+	skillscontract "github.com/jterrazz/studio-station/apps/engine/skills/contract"
 	teamscontract "github.com/jterrazz/studio-station/apps/engine/teams/contract"
 )
 
@@ -73,6 +75,8 @@ func (*worldMac) unlocker() contract.Unlocker                                   
 func (*worldMac) waker() contract.Waker                                             { return nil }
 func (*worldMac) processes(kernel contract.Processes) contract.Processes            { return kernel }
 func (*worldMac) minds() agentscontract.Minds                                       { return nil }
+func (*worldMac) skillFiles() skillscontract.Files                                  { return nil }
+func (*worldMac) projects() projectcontract.Projects                                { return nil }
 func (*worldMac) teams() teamscontract.Teams                                        { return nil }
 func (*worldMac) automations() automationscontract.Automations                      { return nil }
 func (*worldMac) jobs() backgroundcontract.Jobs                                     { return nil }

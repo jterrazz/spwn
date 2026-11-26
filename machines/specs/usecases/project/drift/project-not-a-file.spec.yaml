@@ -1,0 +1,16 @@
+description: 'station project drift refuses a FIFO at the lockfile, naming it, and waits on nothing'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'project create site'
+      exit: 0
+      stdout: |
+          ●	site	created	{{workdir}}/site
+    - command: '--version >/dev/null; "$STATION" world project "$HOME/site" fifo spwn.lock'
+      exit: 0
+    - command: '--version >/dev/null; /bin/mkdir -p site && cd site &&"$STATION" project drift'
+      exit: 2
+      stderr: |
+          Error: spwn.lock is neither a file nor a folder: a project's declaration holds only those
+          Hint: move it away, then station project plan

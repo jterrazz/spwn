@@ -1,0 +1,173 @@
+package files
+
+import (
+	"context"
+	"errors"
+	"io/fs"
+	"path/filepath"
+	"slices"
+	"strings"
+
+	"spwn.sh/packages/platform"
+
+	"github.com/jterrazz/studio-station/apps/engine/platform/local"
+	"github.com/jterrazz/studio-station/apps/engine/skills"
+	"github.com/jterrazz/studio-station/apps/engine/skills/contract"
+)
+
+type disk interface {
+	MkdirAll(path string, perm fs.FileMode) error
+}
+
+type Files struct {
+	// value: the disk the folder that holds the user's own skills is made
+	// on, trusted as the caller's.
+	fs disk
+	// value: the skills' folder and each file in it, reached from the
+	// project's root one name at a time, never through a link.
+	under local.Beneath
+}
+
+var _ contract.Files = Files{}
+
+func New(fsys disk) Files { return Files{fs: fsys} }
+
+// invariant: Agents' packages resolve every path from one process-global
+// project root, which platform.WithProjectRoot holds for one act, so the
+// folder is read inside it. A project's folder is reached from its root,
+// the user's own from the folder that holds it, each the caller's to
+// trust.
+func in[T any](project string, act func(base, rel, dir string) (T, error)) (T, error) {
+	return platform.WithProjectRoot(project, func() (T, error) {
+		dir := platform.SkillsDir()
+		if project != "" {
+			if rel, err := filepath.Rel(project, dir); err == nil && filepath.IsLocal(rel) {
+				return act(project, filepath.ToSlash(rel), dir)
+			}
+		}
+		return act(filepath.Dir(dir), filepath.Base(dir), dir)
+	})
+}
+
+func fileOf(name string) (string, error) {
+	if name == "" || filepath.Base(name) != name || name == "." || name == ".." {
+		return "", skills.ErrNotFound
+	}
+	return name + skills.Suffix, nil
+}
+
+func (f Files) List(_ context.Context, project string) ([]skills.Skill, error) {
+	return in(project, func(base, rel, dir string) ([]skills.Skill, error) {
+		folder, err := f.under.Open(base, rel)
+		if errors.Is(err, fs.ErrNotExist) {
+			return []skills.Skill{}, nil
+		}
+		if err != nil {
+			return nil, err
+		}
+		defer folder.Close()
+		names, err := folder.Names()
+		if err != nil {
+			return nil, err
+		}
+		out := []skills.Skill{}
+		for _, file := range names {
+			name, ok := strings.CutSuffix(file, skills.Suffix)
+			if !ok {
+				continue
+			}
+			if e, err := folder.Lstat(file); err != nil || !e.Mode.IsRegular() {
+				continue
+			}
+			body, _, err := folder.ReadFile(file)
+			if err != nil {
+				return nil, err
+			}
+			out = append(out, skills.Skill{Name: name, Path: filepath.Join(dir, file), Description: skills.Describe(string(body))})
+		}
+		slices.SortFunc(out, func(a, b skills.Skill) int { return strings.Compare(a.Name, b.Name) })
+		return out, nil
+	})
+}
+
+func (f Files) Show(_ context.Context, project, name string) (skills.Skill, error) {
+	return in(project, func(base, rel, dir string) (skills.Skill, error) {
+		file, err := fileOf(name)
+		if err != nil {
+			return skills.Skill{}, err
+		}
+		folder, err := f.under.Open(base, rel)
+		if errors.Is(err, fs.ErrNotExist) {
+			return skills.Skill{}, skills.ErrNotFound
+		}
+		if err != nil {
+			return skills.Skill{}, err
+		}
+		defer folder.Close()
+		body, _, err := folder.ReadFile(file)
+		if errors.Is(err, fs.ErrNotExist) {
+			return skills.Skill{}, skills.ErrNotFound
+		}
+		if err != nil {
+			return skills.Skill{}, err
+		}
+		return skills.Skill{Name: name, Path: filepath.Join(dir, file), Description: skills.Describe(string(body)), Body: string(body)}, nil
+	})
+}
+
+func (f Files) Create(_ context.Context, project, name string) (skills.Skill, error) {
+	return in(project, func(base, rel, dir string) (skills.Skill, error) {
+		file, unnamed := fileOf(name)
+		if unnamed != nil {
+			return skills.Skill{}, skills.ErrBadName
+		}
+		if project == "" {
+			if err := f.fs.MkdirAll(base, 0o755); err != nil {
+				return skills.Skill{}, err
+			}
+		}
+		if err := f.under.Folders(base, rel, 0o755, local.Self()); err != nil {
+			return skills.Skill{}, err
+		}
+		folder, err := f.under.Open(base, rel)
+		if err != nil {
+			return skills.Skill{}, err
+		}
+		defer folder.Close()
+		if _, err = folder.Lstat(file); err == nil {
+			return skills.Skill{}, skills.ErrExists
+		}
+		made := skills.Blank(name, filepath.Join(dir, file))
+		err = folder.Replace(file, local.Seen{}, []byte(made.Body), 0o644, local.Self())
+		if errors.Is(err, local.ErrChanged) {
+			return skills.Skill{}, skills.ErrExists
+		}
+		return made, err
+	})
+}
+
+func (f Files) Delete(_ context.Context, project, name string) error {
+	_, err := in(project, func(base, rel, _ string) (struct{}, error) {
+		file, err := fileOf(name)
+		if err != nil {
+			return struct{}{}, err
+		}
+		folder, err := f.under.Open(base, rel)
+		if errors.Is(err, fs.ErrNotExist) {
+			return struct{}{}, skills.ErrNotFound
+		}
+		if err != nil {
+			return struct{}{}, err
+		}
+		defer folder.Close()
+		body, _, err := folder.ReadFile(file)
+		if errors.Is(err, fs.ErrNotExist) {
+			return struct{}{}, skills.ErrNotFound
+		}
+		if err != nil {
+			return struct{}{}, err
+		}
+		return struct{}{}, folder.Remove(file, local.Seen{Data: body, There: true})
+	})
+	return err
+}

@@ -103,6 +103,11 @@
       }
     }
   },
+  "project.apply": {
+    "confirm": "overwrite",
+    "consequence": "Your value of %s is replaced by the one the file asks.",
+    "form": "yes-no"
+  },
   "settings.apply": {
     "confirm": "overwrite",
     "consequence": "Your value of %s is replaced by the one the file asks.",
@@ -112,6 +117,11 @@
     "confirm": "off-here",
     "consequence": "Machines stops applying %s on this machine; its value now stays.",
     "form": "none"
+  },
+  "skills.delete": {
+    "confirm": "delete-skill",
+    "consequence": "%s is deleted for good.",
+    "form": "type-name"
   },
   "vault.remove": {
     "confirm": "remove-password",

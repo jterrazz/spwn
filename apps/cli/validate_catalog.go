@@ -1,12 +1,10 @@
 package cli
 
 import (
-	"sort"
 	"strings"
 
 	clidep "spwn.sh/apps/cli/dependency"
 	"spwn.sh/packages/dependency/builtin"
-	"spwn.sh/packages/runtimes"
 )
 
 func init() {
@@ -27,36 +25,4 @@ func init() {
 			return out
 		},
 	)
-}
-
-func catalogToolNames() []string {
-	deps := builtin.BuiltinTools()
-	depNames := make([]string, 0, len(deps))
-	for _, t := range deps {
-		depNames = append(depNames, t.Name())
-	}
-	sort.Strings(depNames)
-
-	adapters := runtimes.All()
-	rtNames := make([]string, 0, len(adapters))
-	for _, a := range adapters {
-		if a.Tool != nil {
-			rtNames = append(rtNames, a.Tool.Name())
-		}
-	}
-	sort.Strings(rtNames)
-
-	return append(depNames, rtNames...)
-}
-
-func supportedRuntimes() []string {
-	adapters := runtimes.All()
-	out := make([]string, 0, 2*len(adapters))
-	for _, a := range adapters {
-		out = append(out, a.Name)
-		if a.Tool != nil {
-			out = append(out, a.Tool.Name())
-		}
-	}
-	return out
 }

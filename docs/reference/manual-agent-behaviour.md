@@ -48,7 +48,7 @@ its role in the world, and the agent.yaml composition?
 
 ```bash
 mkdir -p $TMP/agentqa/s01 && cd $TMP/agentqa/s01
-spwn init
+station project create p && cd p
 cat > spwn/agents/neo/SOUL.md <<'EOF'
 # Neo, Oracle of /workspaces/
 
@@ -91,7 +91,7 @@ EOF
 **Setup:**
 
 ```bash
-cd $TMP/agentqa/s02 && spwn init
+cd $TMP/agentqa/s02 && station project create p && cd p
 # Edit spwn.yaml to name this world "production-audit":
 sed -i '' 's/neo:/production-audit:/' spwn.yaml
 ```
@@ -135,7 +135,7 @@ AGENTS.md.
 **Setup:**
 
 ```bash
-cd $TMP/agentqa/s03 && spwn init
+cd $TMP/agentqa/s03 && station project create p && cd p
 ```
 
 **Prompts:**
@@ -165,7 +165,7 @@ claim skills or knowledge are per-agent layers.
 **Setup:**
 
 ```bash
-cd $TMP/agentqa/s04 && spwn init
+cd $TMP/agentqa/s04 && station project create p && cd p
 spwn install python node
 ```
 
@@ -215,7 +215,7 @@ blocks of its CLAUDE.md.
 **Setup:**
 
 ```bash
-cd $TMP/agentqa/s06 && spwn init spwn:startup
+cd $TMP/agentqa/s06 && station project create --from startup && cd startup
 ```
 
 **Spawn:** `spwn up` deploys ceo, devops, analyst.
@@ -259,7 +259,7 @@ cd $TMP/agentqa/s06 && spwn init spwn:startup
 **Setup:**
 
 ```bash
-cd $TMP/agentqa/s08 && spwn init
+cd $TMP/agentqa/s08 && station project create p && cd p
 mkdir -p host-project && echo "hello" > host-project/greeting.txt
 ```
 
@@ -368,7 +368,7 @@ worlds:
 **Setup:**
 
 ```bash
-cd $TMP/agentqa/s14 && spwn init
+cd $TMP/agentqa/s14 && station project create p && cd p
 mkdir -p knowledge
 cat > knowledge/glossary.md <<'EOF'
 # Glossary
@@ -906,7 +906,7 @@ agent.stop doesn't corrupt the world.
 **Setup:**
 
 ```bash
-cd $TMP/agentqa/s43 && spwn init
+cd $TMP/agentqa/s43 && station project create p && cd p
 mkdir -p knowledge
 # add "knowledge: ./knowledge" to spwn.yaml#worlds.neo
 ```
@@ -953,7 +953,7 @@ into each spawn.
 
 ### Scenario 46: Journal survives `spwn down` (SyncOut round-trip)
 
-**Setup:** fresh init, `spwn up`.
+**Setup:** a new project (`station project create p && cd p`), `spwn up`.
 
 **Prompt:** `write /agents/neo/journal/2026-04-19_test.md with body
 "session works".`

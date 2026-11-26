@@ -18,6 +18,8 @@ runs:
           awake
           activity
           agents
+          skills
+          project
           teams
           automations
           init

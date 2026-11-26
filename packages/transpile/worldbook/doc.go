@@ -21,7 +21,7 @@
 // This keeps the content authored once and shared across every
 // runtime that ships a renderer.
 //
-// When a future "spwn build --bare" mode lands (user content only,
+// When a future "bare" render mode lands (user content only,
 // no spwn opinions), it will skip this package's output while still
 // running through the runtime's layout step.
 package worldbook

@@ -1,0 +1,91 @@
+{
+  "$defs": {
+    "project.Drift": {
+      "additionalProperties": false,
+      "properties": {
+        "Manifest": {
+          "type": "string"
+        },
+        "Root": {
+          "type": "string"
+        },
+        "Rows": {
+          "items": {
+            "$ref": "#/$defs/project.Issue"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "Manifest",
+        "Root",
+        "Rows"
+      ],
+      "type": "object"
+    },
+    "project.Issue": {
+      "additionalProperties": false,
+      "properties": {
+        "Hint": {
+          "type": "string"
+        },
+        "Level": {
+          "enum": [
+            "",
+            "error",
+            "warning",
+            "info"
+          ],
+          "type": "string"
+        },
+        "Message": {
+          "type": "string"
+        },
+        "Path": {
+          "type": "string"
+        },
+        "Source": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Hint",
+        "Level",
+        "Message",
+        "Path",
+        "Source"
+      ],
+      "type": "object"
+    },
+    "project.calls.DriftIn": {
+      "additionalProperties": false,
+      "properties": {
+        "Folder": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/spwn/blob/main/machines/packages/api/schemas/calls/project.drift.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call project.drift of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/project.calls.DriftIn"
+    },
+    "out": {
+      "$ref": "#/$defs/project.Drift"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "project.drift",
+  "type": "object"
+}

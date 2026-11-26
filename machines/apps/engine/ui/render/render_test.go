@@ -2,6 +2,7 @@ package render
 
 import (
 	"bytes"
+	"cmp"
 	"errors"
 	"flag"
 	"image/color"
@@ -196,10 +197,10 @@ func TestEveryHintIsWholeInEveryMedium(t *testing.T) {
 			for _, it := range items {
 				switch {
 				case it.Row != nil && it.Row.Hint != nil:
-					hints[it.Row.Hint.Command] = true
+					hints[cmp.Or(it.Row.Hint.Command, it.Row.Hint.Text)] = true
 				case it.Group != nil:
 					if it.Group.Head.Hint != nil {
-						hints[it.Group.Head.Hint.Command] = true
+						hints[cmp.Or(it.Group.Head.Hint.Command, it.Group.Head.Hint.Text)] = true
 					}
 					walk(it.Group.Items)
 				}
@@ -248,6 +249,25 @@ func TestEveryHintIsWholeInEveryMedium(t *testing.T) {
 				}
 			}
 		}
+	}
+}
+
+func TestARowHintOfWordsIsPrintedWithNoArrow(t *testing.T) {
+	r := page.Row{ID: "0", Label: "spwn.yaml", Mark: page.Unjudged, Detail: page.Text("world neo has no knowledge path"), Hint: &page.Hint{Text: "add knowledge: ./knowledge"}}
+	p := page.Seal(page.Page{ID: "project-plan", Command: "project plan", Sections: []page.Section{{ID: "issues", Title: "Issues", Items: []page.Item{{Row: &r}}}}})
+	piped, err := pipe.Render(p)
+	if err != nil || !strings.Contains(string(piped), "world neo has no knowledge path"+token.Sep+"add knowledge: ./knowledge") {
+		t.Errorf("pipe = %q, %v; want the words after the detail", piped, err)
+	}
+	for _, width := range []int{80, 100} {
+		text := ansi.Strip(string(tty.Render(p, tty.Options{Width: width, Dark: true})))
+		if !strings.Contains(text, "add knowledge: ./knowledge") || strings.Contains(text, token.Arrow+" add knowledge") {
+			t.Errorf("tty%d = %q; want the words with no arrow", width, text)
+		}
+	}
+	body := string(pagejson.Render(p))
+	if !regexp.MustCompile(`"hint":\s*\{\s*"text":\s*"add knowledge: ./knowledge"\s*\}`).MatchString(body) {
+		t.Errorf("json = %s; want the words as the hint's text and no command", body)
 	}
 }
 

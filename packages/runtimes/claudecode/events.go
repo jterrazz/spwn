@@ -3,7 +3,7 @@ package claudecode
 // SupportedEvents enumerates the runtime hook events Claude Code
 // understands today. Hooks declared with any other event name are
 // silently dropped by the runtime at firing time, so spwn surfaces
-// the mismatch as a `spwn check` warning instead of letting the user
+// the mismatch as a `station project plan` warning instead of letting the user
 // believe their hook is wired.
 //
 // The list mirrors the public Claude Code hook reference. Keep it

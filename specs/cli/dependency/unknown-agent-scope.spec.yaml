@@ -1,19 +1,6 @@
 description: --agent naming an agent that does not exist lists the real ones
+fixture: ../__fixtures__/severance/
 runs:
-    - command: init severance
-      exit: 0
-      stdout: |4
-            spwn.yaml          # created
-            Worlds added:      mdr
-            Agents added:      dylan, helly, irving, mark
-
-            Next:
-              spwn up                        # spawn the world
-      stderr: |4+
-          
-            ✓ Installed example spwn:severance
-
-
     - command: install qmd --agent ghost
       exit: 1
       stderr: |4+

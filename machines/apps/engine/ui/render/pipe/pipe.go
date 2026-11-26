@@ -1,6 +1,7 @@
 package pipe
 
 import (
+	"cmp"
 	"errors"
 	"strings"
 
@@ -102,7 +103,7 @@ func row(b *strings.Builder, r page.Row, cells []bool) {
 		last = append(last, s)
 	}
 	if r.Hint != nil {
-		last = append(last, r.Hint.Command)
+		last = append(last, cmp.Or(r.Hint.Command, r.Hint.Text))
 	}
 	fields = append(fields, strings.Join(last, token.Sep))
 	line(b, fields)

@@ -1,0 +1,11 @@
+description: 'station skills create makes a markdown file from the template'
+env: two-macs
+runs:
+    - command: 'skills create paper-reading'
+      exit: 0
+      stdout: |
+          ●	paper-reading	created	~/.spwn/skills/paper-reading.md
+    - command: '--version >/dev/null; /usr/bin/jq -c ".macs[\"macbook-pro\"].stores.skills[\"\"][0] | [.Name, .Path, .Description]" world.json'
+      exit: 0
+      stdout: |
+          ["paper-reading","~/.spwn/skills/paper-reading.md","One-line description of what this skill does."]

@@ -1,0 +1,89 @@
+{
+  "$defs": {
+    "project.Applied": {
+      "additionalProperties": false,
+      "properties": {
+        "Changes": {
+          "items": {
+            "$ref": "#/$defs/project.Change"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Manifest": {
+          "type": "string"
+        },
+        "Root": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Changes",
+        "Manifest",
+        "Root"
+      ],
+      "type": "object"
+    },
+    "project.Change": {
+      "additionalProperties": false,
+      "properties": {
+        "Agent": {
+          "type": "string"
+        },
+        "ByHand": {
+          "type": "boolean"
+        },
+        "Kind": {
+          "enum": [
+            "",
+            "add",
+            "overwrite",
+            "remove"
+          ],
+          "type": "string"
+        },
+        "Path": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Agent",
+        "Kind",
+        "Path"
+      ],
+      "type": "object"
+    },
+    "project.calls.ApplyIn": {
+      "additionalProperties": false,
+      "properties": {
+        "Confirm": {
+          "type": "string"
+        },
+        "Folder": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/spwn/blob/main/machines/packages/api/schemas/calls/project.apply.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call project.apply of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/project.calls.ApplyIn"
+    },
+    "out": {
+      "$ref": "#/$defs/project.Applied"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "project.apply",
+  "type": "object"
+}

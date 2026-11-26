@@ -15,7 +15,7 @@
 // spwn.lock text format (plus a legacy-YAML fallback for migration).
 //
 // The package has zero spwn dependencies (only stdlib), so every
-// upstream layer can import it. The built-in catalog and the gallery
-// live in the subpackage builtin, which embeds the generated copy of
+// upstream layer can import it. The built-in tool catalog
+// lives in the subpackage builtin, which embeds the generated copy of
 // /catalog and is linked by no engine package.
 package dependency

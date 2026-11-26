@@ -1,0 +1,25 @@
+description: 'station project apply of a project whose plan has an error prints the plan and writes nothing'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" world project "$HOME/site" error spwn/agents/neo/agent.yaml "agent.yaml does not parse"'
+      exit: 0
+    - command: '--version >/dev/null; /bin/mkdir -p site && cd site && "$STATION" project apply'
+      exit: 2
+      stdout: |
+          ✗	{{workdir}}/site/spwn.yaml	1 error, 0 warnings
+          # Issues
+          ✗	spwn/agents/neo/agent.yaml	agent.yaml does not parse
+      stderr: |
+          Error: the project at {{workdir}}/site has 1 error
+          Hint: fix each one above, then station project plan
+    - command: '--version >/dev/null; /bin/mkdir -p site && cd site && "$STATION" project plan'
+      exit: 2
+      stdout: |
+          ✗	{{workdir}}/site/spwn.yaml	1 error, 0 warnings
+          # Issues
+          ✗	spwn/agents/neo/agent.yaml	agent.yaml does not parse
+      stderr: |
+          Error: the project at {{workdir}}/site has 1 error
+          Hint: fix each one above, then station project plan

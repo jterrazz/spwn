@@ -20,7 +20,7 @@ var Renderer = &renderer{}
 func (r *renderer) Name() string { return "claude-code" }
 
 // SupportedHookEvents returns every hook event Claude Code recognises.
-// `spwn check` cross-references each declared hook against this list
+// `station project plan` cross-references each declared hook against this list
 // to surface typos and Codex-only events that would silently no-op
 // in a Claude session. See events.go for the canonical set.
 func (r *renderer) SupportedHookEvents() []string {

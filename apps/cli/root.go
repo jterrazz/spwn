@@ -13,7 +13,6 @@ import (
 	"spwn.sh/apps/cli/automation"
 	"spwn.sh/apps/cli/gate"
 	"spwn.sh/apps/cli/logs"
-	"spwn.sh/apps/cli/skill"
 	"spwn.sh/apps/cli/ui"
 	"spwn.sh/apps/cli/world"
 	"spwn.sh/packages/upgrade"
@@ -53,7 +52,6 @@ func init() {
 
 	rootCmd.AddCommand(installCmd())
 	rootCmd.AddCommand(uninstallCmd())
-	rootCmd.AddCommand(skill.Cmd)
 
 	rootCmd.AddCommand(automation.Cmd)
 
@@ -130,7 +128,7 @@ func customHelp(cmd *cobra.Command, args []string) {
 	fmt.Fprintln(w)
 
 	fmt.Fprintf(w, "%s\n", ui.Strong("Quick Start:"))
-	printHelpCmd(w, "spwn init", "Scaffold a new project")
+	printHelpCmd(w, "station project create site", "Make a new project")
 	printHelpCmd(w, "station agents create neo", "Create an agent")
 	printHelpCmd(w, "spwn up", "Bring up every world in spwn.yaml")
 	printHelpCmd(w, "spwn agent neo", "Start the world that contains neo")
@@ -144,7 +142,6 @@ func customHelp(cmd *cobra.Command, args []string) {
 	fmt.Fprintf(w, "%s\n", ui.Strong("Building blocks:"))
 	printHelpCmd(w, "install <ref>", "Install a dependency "+ui.Faint("(spwn:unix, github.com/...)"))
 	printHelpCmd(w, "uninstall <ref>", "Remove a dependency")
-	printHelpCmd(w, "skill", "Author skill files "+ui.Faint("(new, edit, show, rm, ls)"))
 	fmt.Fprintln(w)
 
 	fmt.Fprintf(w, "%s\n", ui.Strong("Worlds:"))
@@ -157,7 +154,6 @@ func customHelp(cmd *cobra.Command, args []string) {
 	fmt.Fprintln(w)
 
 	fmt.Fprintf(w, "%s\n", ui.Strong("System:"))
-	printHelpCmd(w, "init", "Create default configs")
 	printHelpCmd(w, "auth", "Manage credentials")
 	printHelpCmd(w, "upgrade", "Update the CLI")
 	fmt.Fprintln(w)

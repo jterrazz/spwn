@@ -1,0 +1,11 @@
+name: helly
+description: Helly, the newest refiner. Sharp, skeptical, surfaces the assumption everyone else skipped.
+role: worker
+
+runtime:
+  backend: "spwn:claude-code"
+
+# Project-wide deps (unix, git) are inherited from spwn.yaml.
+# Local blocks are referenced via the path-style skill/, tool/, hook/ forms.
+dependencies:
+  - "skill/refine"

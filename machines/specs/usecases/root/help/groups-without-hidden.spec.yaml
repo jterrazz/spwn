@@ -29,6 +29,8 @@ runs:
       exit: 0
       stdout: |
           agents
+          skills
+          project
           teams
           automations
     - command: 'help | /usr/bin/sed -n "/^  SPWN/,/^  FLAGS/p" | /usr/bin/grep -oE "^    [a-z]+ " | /usr/bin/tr -d " "'

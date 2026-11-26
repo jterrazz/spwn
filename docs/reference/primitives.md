@@ -159,7 +159,7 @@ matcher: Bash # optional: scope pattern (defaults to *)
 command: echo "[audit] $CLAUDE_TOOL_INPUT" # required: shell fragment
 ```
 
-Event support differs by runtime: `PreToolUse`, `PostToolUse`, `UserPromptSubmit`, `SessionStart`, `Stop` work on both Claude Code and codex; `Notification`, `SubagentStop`, `PreCompact`, `SessionEnd` are Claude-only. `spwn check` warns when a hook targets an event the selecting agent's runtime doesn't fire, and flags hook files no agent subscribes to. The runtime event registries live in [`../packages/runtimes/<runtime>/events.go`](../../packages/runtimes). YAML source (vs the JSON both runtimes store) buys comments and multi-line commands; the translation from YAML to JSON is the point of `spwn build`.
+Event support differs by runtime: `PreToolUse`, `PostToolUse`, `UserPromptSubmit`, `SessionStart`, `Stop` work on both Claude Code and codex; `Notification`, `SubagentStop`, `PreCompact`, `SessionEnd` are Claude-only. `station project plan` warns when a hook targets an event the selecting agent's runtime doesn't fire, and flags hook files no agent subscribes to. The runtime event registries live in [`../packages/runtimes/<runtime>/events.go`](../../packages/runtimes). YAML source (vs the JSON both runtimes store) buys comments and multi-line commands; the translation from YAML to JSON is the point of `station project apply`.
 
 ## Commands: `spwn/commands/<name>.md`
 
@@ -181,7 +181,7 @@ The body is written verbatim to `.claude/commands/<name>.md` or `.codex/commands
 ## Invariants
 
 - **Input, not output.** The manifests declare what reality should be; what the agent reads at startup (physics, faculties, roster) is what it is after the build ([Physics](../concepts/physics.md)). Operators author YAML, agents read rendered markdown.
-- **Declarative all the way down.** No manifest triggers behaviour by being edited; reality changes only through `spwn build` and `spwn up`.
+- **Declarative all the way down.** No manifest triggers behaviour by being edited; reality changes only through `station project apply` and `spwn up`.
 - **Composition, not restriction.** Security comes from what the world image lacks, never from a rule in YAML.
 - **Blocks are files.** Every skill, tool, hook, and command is one file or directory on disk, diffable and reviewable like code.
 - **Declared, then proven.** A tool's `verify:` probes run at the end of the image build, so a world that is missing what it promised fails the build instead of failing an agent.

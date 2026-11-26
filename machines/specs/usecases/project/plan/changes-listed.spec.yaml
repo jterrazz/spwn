@@ -1,0 +1,32 @@
+description: 'station project plan of a valid project lists what apply would write'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'project create site'
+      exit: 0
+      stdout: |
+          ●	site	created	{{workdir}}/site
+    - command: '--version >/dev/null; /bin/mkdir -p site && cd site && "$STATION" project plan'
+      exit: 0
+      stdout: |
+          ●	{{workdir}}/site/spwn.yaml	valid
+          # Issues
+          	none
+          # To apply
+          ●	.spwn/agents/neo/CLAUDE.md	add
+    - command: '--version >/dev/null; /bin/mkdir -p site && cd site && "$STATION" project apply'
+      exit: 0
+      stdout: |
+          	{{workdir}}/site/spwn.yaml	1 change to apply
+          # To apply
+          ●	.spwn/agents/neo/CLAUDE.md	add
+          ●	{{workdir}}/site/spwn.yaml	applied, 1 change
+    - command: '--version >/dev/null; /bin/mkdir -p site && cd site && "$STATION" project plan'
+      exit: 0
+      stdout: |
+          ●	{{workdir}}/site/spwn.yaml	valid
+          # Issues
+          	none
+          # To apply
+          	none

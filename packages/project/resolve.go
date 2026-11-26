@@ -1,14 +1,18 @@
 package project
 
 import (
-	"os"
 	"path/filepath"
 	"sort"
 
+	"spwn.sh/packages/platform"
 	intmanifest "spwn.sh/packages/project/internal/manifest"
+	"spwn.sh/packages/project/internal/validate"
 )
 
-func resolveRefs(root string, m *intmanifest.Manifest) (deployable, orphans []AgentRef) {
+// invariant: a declared name that is not one folder name (a separator,
+// "..", a NUL) names no folder: it is never joined to a path, and
+// Validate says why.
+func resolveRefs(t *platform.Tree, root string, m *intmanifest.Manifest) (deployable, orphans []AgentRef) {
 	declared := map[string]struct{}{}
 	for _, w := range m.Worlds {
 		for _, name := range w.Agents {
@@ -22,16 +26,20 @@ func resolveRefs(root string, m *intmanifest.Manifest) (deployable, orphans []Ag
 	}
 	sort.Strings(names)
 	for _, name := range names {
+		if !validate.IsOneName(name) {
+			deployable = append(deployable, AgentRef{Name: name})
+			continue
+		}
 		path := filepath.Join(root, "spwn", "agents", name)
 		deployable = append(deployable, AgentRef{
 			Name:   name,
 			Path:   path,
-			Exists: dirExists(path),
+			Exists: t.IsDir(path),
 		})
 	}
 
 	agentsDir := filepath.Join(root, "spwn", "agents")
-	entries, err := os.ReadDir(agentsDir)
+	entries, err := t.ReadDir(agentsDir)
 	if err == nil {
 		for _, e := range entries {
 			if !e.IsDir() {
@@ -51,12 +59,4 @@ func resolveRefs(root string, m *intmanifest.Manifest) (deployable, orphans []Ag
 	}
 	sort.Slice(orphans, func(i, j int) bool { return orphans[i].Name < orphans[j].Name })
 	return deployable, orphans
-}
-
-func dirExists(p string) bool {
-	info, err := os.Stat(p)
-	if err != nil {
-		return false
-	}
-	return info.IsDir()
 }

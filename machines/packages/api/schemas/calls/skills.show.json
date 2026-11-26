@@ -1,0 +1,58 @@
+{
+  "$defs": {
+    "skills.Skill": {
+      "additionalProperties": false,
+      "properties": {
+        "Body": {
+          "type": "string"
+        },
+        "Description": {
+          "type": "string"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "Path": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Body",
+        "Description",
+        "Name",
+        "Path"
+      ],
+      "type": "object"
+    },
+    "skills.calls.ShowIn": {
+      "additionalProperties": false,
+      "properties": {
+        "Skill": {
+          "type": "string"
+        },
+        "project": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/spwn/blob/main/machines/packages/api/schemas/calls/skills.show.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call skills.show of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/skills.calls.ShowIn"
+    },
+    "out": {
+      "$ref": "#/$defs/skills.Skill"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "skills.show",
+  "type": "object"
+}

@@ -1,0 +1,20 @@
+description: 'station project apply refuses a FIFO in the declaration, naming it, and writes nothing'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'project create site'
+      exit: 0
+      stdout: |
+          ●	site	created	{{workdir}}/site
+    - command: '--version >/dev/null; "$STATION" world project "$HOME/site" fifo spwn.yaml'
+      exit: 0
+    - command: '--version >/dev/null; /bin/mkdir -p site && cd site &&"$STATION" project apply --yes'
+      exit: 2
+      stderr: |
+          Error: spwn.yaml is neither a file nor a folder: a project's declaration holds only those
+          Hint: move it away, then station project plan
+    - command: '--version >/dev/null; /usr/bin/jq -c ".macs[\"macbook-pro\"].stores.projects[] | [(.Disk // {} | keys), (.Record // {} | length)]" world.json'
+      exit: 0
+      stdout: |
+          [[],0]

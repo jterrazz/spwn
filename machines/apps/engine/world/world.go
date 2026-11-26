@@ -22,7 +22,9 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/machinefile"
 	"github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/ports"
+	"github.com/jterrazz/studio-station/apps/engine/project"
 	"github.com/jterrazz/studio-station/apps/engine/settings"
+	"github.com/jterrazz/studio-station/apps/engine/skills"
 	"github.com/jterrazz/studio-station/apps/engine/teams"
 )
 
@@ -377,6 +379,11 @@ type Stores struct {
 	Agents map[string][]agents.Mind `json:"agents,omitempty"`
 	// value: the agents' archives written on this machine, by path.
 	AgentArchives map[string]agents.Mind `json:"agent_archives,omitempty"`
+	// value: the skill files kept on this machine, by the project root they
+	// belong to ("" for the user's own), each list by name.
+	Skills map[string][]skills.Skill `json:"skills,omitempty"`
+	// value: the projects kept on this machine, by their root.
+	Projects map[string]project.State `json:"projects,omitempty"`
 	// value: the teams declared for this machine's user, by slug; their
 	// members are read from Agents, never kept here.
 	Teams []teams.Team `json:"teams,omitempty"`

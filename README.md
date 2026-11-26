@@ -72,11 +72,11 @@ Every command: [Machines' command reference](machines/docs/reference/commands.md
 
 ```sh
 spwn auth            # check your agent runtime sign-in
-spwn init            # a project and its first agent, neo
+station project create site # a new folder ./site, a project and its first agent, neo
 spwn agent neo       # talk to neo, in a sandboxed world
-spwn build           # one portable artifact
+station project apply # render each agent into .spwn/agents/
 spwn up              # bring a world up; down tears it down
-spwn check           # bad refs, missing files, lockfile drift
+station project plan # bad refs, missing files; `station project drift` for the lockfile
 ```
 
 Every command, and where each goes in the one grammar: [the CLI](docs/reference/cli.md) · [Agents' command reference](docs/reference/commands.md) · runs on Claude Code or Codex · needs Docker · first steps in [Getting started](docs/start/getting-started.md).

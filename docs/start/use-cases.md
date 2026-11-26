@@ -5,7 +5,8 @@ Four sessions that show what Spwn is for, each a few commands from an empty dire
 ## Compose a scientist from blocks
 
 ```bash
-spwn init
+station project create lab && cd lab
+station agents create curie
 spwn install python --agent curie
 spwn install qmd --agent curie
 spwn install skill/paper-reading --agent curie
@@ -18,8 +19,7 @@ spwn agent talk curie "reproduce the results in notebooks/exp-042.qmd and flag a
 ## Ship an agent with your repo
 
 ```bash
-cd acme-api
-spwn init
+station project create acme-api && cd acme-api
 spwn install node --agent neo
 spwn install git --agent neo
 
@@ -48,8 +48,8 @@ station agents delete neo-migration --confirm=neo-migration
 ## Read untrusted code inside a container
 
 ```bash
-git clone https://github.com/someone/sus-repo /tmp/sus && cd /tmp/sus
-spwn init
+station project create sus && cd sus
+git clone https://github.com/someone/sus-repo code
 spwn up                    # a Docker container on the bridge network, 256 processes at most
 spwn agent talk neo "run every test and benchmark, tell me what the code actually does"
 ```

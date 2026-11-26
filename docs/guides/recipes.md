@@ -14,7 +14,8 @@ An autonomous lab partner: Python for code, QMD for local search over
 your notebooks, and a skill that teaches the agent how to read papers.
 
 ```bash
-spwn init
+station project create lab && cd lab
+station agents create curie
 spwn install python --agent curie
 spwn install qmd --agent curie
 spwn install skill/paper-reading --agent curie
@@ -33,8 +34,10 @@ What happened:
   staged to `/world/skills/paper-reading/SKILL.md` inside the image;
   at spawn time Claude Code picks it up through its native
   `.claude/skills/` discovery path (symlinked from the agent's home).
-- `spwn up` materialises every world in `spwn.yaml`: by default,
-  `spwn init` gave you one single-agent world named `curie`.
+- `station project create lab` made the folder `./lab` with its
+  `spwn.yaml` and the starter agent `neo`; `station agents create curie`
+  added `curie` beside it.
+- `spwn up` materialises every world in `spwn.yaml`.
 - `spwn agent talk` opens a session inside the running container with
   the workspace mounted.
 
@@ -51,8 +54,7 @@ Your teammates clone the repo, run `spwn up`, and get the same agent
 byte-for-byte: no setup docs, no onboarding slides.
 
 ```bash
-cd acme-api
-spwn init
+station project create acme-api && cd acme-api
 spwn install node --agent neo
 spwn install git --agent neo
 
@@ -118,8 +120,8 @@ Clone a repo you don't trust and ask an agent what it does, inside a
 Docker container rather than in your shell.
 
 ```bash
-git clone https://github.com/someone/sus-repo /tmp/sus && cd /tmp/sus
-spwn init
+station project create sus && cd sus
+git clone https://github.com/someone/sus-repo code
 spwn up                    # a Docker container on the bridge network, 256 processes at most
 spwn agent talk neo "run every test and benchmark, tell me what the code actually does"
 ```

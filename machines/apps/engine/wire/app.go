@@ -189,6 +189,8 @@ func Build(args, env []string, stdin, stdout, stderr *os.File) (p *Program, exit
 		awakeCommand(kenv, thisMac),
 		activityCommand(kenv, thisMac),
 		agentsCommand(kenv, thisMac),
+		skillsCommand(kenv, thisMac),
+		projectCommand(kenv, thisMac),
 		teamsCommand(kenv, thisMac),
 		automationsCommand(kenv, thisMac),
 	)

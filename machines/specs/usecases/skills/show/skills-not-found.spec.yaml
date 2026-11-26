@@ -1,0 +1,8 @@
+description: 'station skills <skill> of a name no skill has is refused, exit 2'
+env: two-macs
+runs:
+    - command: 'skills paper-reading'
+      exit: 2
+      stderr: |
+          Error: no skill named "paper-reading"
+          Hint: station skills

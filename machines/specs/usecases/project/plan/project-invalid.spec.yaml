@@ -1,0 +1,19 @@
+description: 'station project plan of a project with an error prints every issue, the errors first, then exits 2'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" world project "$HOME/site" warning spwn.yaml "agent neo is declared twice"'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" world project "$HOME/site" error spwn/agents/neo/agent.yaml "agent.yaml does not parse"'
+      exit: 0
+    - command: '--version >/dev/null; /bin/mkdir site && cd site && "$STATION" project plan'
+      exit: 2
+      stdout: |
+          ✗	{{workdir}}/site/spwn.yaml	1 error, 1 warning
+          # Issues
+          ✗	spwn/agents/neo/agent.yaml	agent.yaml does not parse
+          ◐	spwn.yaml	agent neo is declared twice
+      stderr: |
+          Error: the project at {{workdir}}/site has 1 error
+          Hint: fix each one above, then station project plan

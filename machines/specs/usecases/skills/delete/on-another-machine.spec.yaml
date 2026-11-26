@@ -1,0 +1,13 @@
+description: 'station skills delete --on a VM deletes the file kept on that VM'
+env: two-macs
+runs:
+    - command: 'skills create paper-reading --on linux-1'
+      exit: 0
+      stdout: |
+          	On linux-1:
+          ●	paper-reading	created	~/.spwn/skills/paper-reading.md
+    - command: 'skills delete paper-reading --confirm=paper-reading --on linux-1'
+      exit: 0
+      stdout: |
+          	On linux-1:
+          ●	paper-reading	deleted

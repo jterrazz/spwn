@@ -1,0 +1,14 @@
+name: neo
+description: A blank-slate agent; replace this one-liner with what neo is for.
+
+runtime:
+  backend: "spwn:claude-code"
+
+dependencies:
+  - "spwn:unix"
+  - "spwn:git"
+  - "spwn:python"
+  - "skill/focus"
+  - "tool/greet"
+  - "hook/session-banner"
+  - "command/refactor"

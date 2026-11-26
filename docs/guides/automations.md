@@ -23,9 +23,9 @@ container. Before you write your first automation, scaffold the
 project end-to-end:
 
 ```bash
-spwn init                    # creates spwn.yaml + spwn/agents/
+station project create site && cd site # creates ./site: spwn.yaml + spwn/agents/
 station agents create editor     # creates spwn/agents/editor/
-spwn check                   # confirm the tree is valid
+station project plan         # confirm the tree is valid
 spwn up                      # bring up the world (architect spawns containers)
 ```
 
@@ -50,12 +50,12 @@ worlds:
                 prompt: "Review yesterday's journal and write a brief."
 ```
 
-Verify with `spwn check` (parses the new block) and `station automations`
+Verify with `station project plan` (parses the new block) and `station automations`
 (shows the entry plus its placeholder `last fired`):
 
 ```text
-$ spwn check
-✓ Project is valid
+$ station project plan
+●	/path/to/my-project/spwn.yaml	valid
 $ station automations
 # Automations
 ●  morning-brief  editor  cron 0 6 * * *  never  none
@@ -112,7 +112,7 @@ Reusing a slash-command file means the same prompt can be invoked
 three ways: by the agent via `/morning-brief`, manually via
 `spwn agent talk`, or automatically via the cron.
 
-**Trigger:** exactly one of `cron:` or `fs:`. `spwn check` rejects
+**Trigger:** exactly one of `cron:` or `fs:`. `station project plan` rejects
 both-set / neither-set.
 
 **Agent:** must be one of the world's declared agents; the engine
@@ -277,7 +277,7 @@ Per-`<world>/<name>` cursor of the last successful fire's
 runs 2h late advances the cursor to the slot it covered, preventing
 the next catch-up from re-detecting it).
 
-Both files are gitignored by `spwn init`'s default `.gitignore`.
+Both files are gitignored by the `.gitignore` `station project create` writes.
 
 ---
 
@@ -400,7 +400,7 @@ failed receipt and the next fire retries.
 ### `command file not found at spwn/commands/<name>.md`
 
 Either the file is missing on disk, or the ref is misspelled in
-`spwn.yaml`. `spwn check` catches both before runtime.
+`spwn.yaml`. `station project plan` catches both before runtime.
 
 ### `debounce 50ms is below the 100ms minimum`
 
@@ -416,7 +416,7 @@ every day". When in doubt, paste your expression into
 
 ### My fs trigger doesn't fire
 
-- Confirm the path exists: `spwn check` blocks on missing paths
+- Confirm the path exists: `station project plan` blocks on missing paths
   with an explicit error.
 - Check the events filter. Default is `[create]`: files modified
   in place but never created don't fire.
@@ -424,7 +424,7 @@ every day". When in doubt, paste your expression into
   parent directory and use `patterns:` to filter.
 - **Pattern syntax is `filepath.Match`, not shell glob.** Brace
   expansion (`*.{md,txt}`) and doublestar (`**/*.md`) are NOT
-  supported and `spwn check` rejects them. Use multiple patterns
+  supported and `station project plan` rejects them. Use multiple patterns
   for the brace case (`["*.md", "*.txt"]`) and combine
   `recursive: true` + a basename pattern for the doublestar case
   (`recursive: true, patterns: ["*.md"]`).

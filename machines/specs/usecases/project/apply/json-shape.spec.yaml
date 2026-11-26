@@ -1,0 +1,34 @@
+description: 'station project apply --json carries each change written'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'project create site'
+      exit: 0
+      stdout: |
+          ●	site	created	{{workdir}}/site
+    - command: '--version >/dev/null; /bin/mkdir -p site && cd site && "$STATION" project apply --json'
+      exit: 0
+      stdout: |
+          {
+            "schema": "station.project.apply/v1",
+            "generated_at": "{{iso8601}}",
+            "machine": {
+              "name": "macbook-pro",
+              "label": "This Mac",
+              "kind": "computer",
+              "on": null,
+              "this_mac": true
+            },
+            "findings": [],
+            "root": "{{workdir}}/site",
+            "manifest": "{{workdir}}/site/spwn.yaml",
+            "changes": [
+              {
+                "agent": "neo",
+                "path": ".spwn/agents/neo/CLAUDE.md",
+                "kind": "add",
+                "byHand": false
+              }
+            ]
+          }

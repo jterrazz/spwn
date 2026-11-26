@@ -1,0 +1,33 @@
+description: 'station project apply stopped by a read-only folder names the file and recovers next time'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'project create site'
+      exit: 0
+      stdout: |
+          ●	site	created	{{workdir}}/site
+    - command: '--version >/dev/null; "$STATION" world project "$HOME/site" readonly .spwn/agents/neo'
+      exit: 0
+    - command: '--version >/dev/null; /bin/mkdir -p site && cd site && "$STATION" project apply --yes'
+      exit: 2
+      stdout: |
+          	{{workdir}}/site/spwn.yaml	1 change to apply
+          # To apply
+          ●	.spwn/agents/neo/CLAUDE.md	add
+      stderr: |
+          Error: .spwn/agents/neo/CLAUDE.md could not be written; what apply wrote before it is recorded
+          Hint: make room for it, then station project apply
+    - command: '--version >/dev/null; /usr/bin/jq -c ".macs[\"macbook-pro\"].stores.projects[] | [(.Disk // {} | keys), (.Record // {} | length)]" world.json'
+      exit: 0
+      stdout: |
+          [[],0]
+    - command: '--version >/dev/null; "$STATION" world project "$HOME/site" readonly .spwn/agents/neo off'
+      exit: 0
+    - command: '--version >/dev/null; /bin/mkdir -p site && cd site && "$STATION" project apply'
+      exit: 0
+      stdout: |
+          	{{workdir}}/site/spwn.yaml	1 change to apply
+          # To apply
+          ●	.spwn/agents/neo/CLAUDE.md	add
+          ●	{{workdir}}/site/spwn.yaml	applied, 1 change

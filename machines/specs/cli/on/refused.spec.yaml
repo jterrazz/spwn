@@ -18,6 +18,50 @@ runs:
           Hint: run it on x itself: ssh x
       files:
           .calls: absent
+    - command: 'project plan --on x'
+      exit: 2
+      stderr: |
+          Error: --on does not apply to "project plan"
+          Hint: run it on x itself: ssh x
+      files:
+          .calls: absent
+    - command: 'project apply --on x'
+      exit: 2
+      stderr: |
+          Error: --on does not apply to "project apply"
+          Hint: run it on x itself: ssh x
+      files:
+          .calls: absent
+    - command: 'project --on x'
+      exit: 2
+      stderr: |
+          Error: --on does not apply to "project"
+          Hint: run it on x itself: ssh x
+      files:
+          .calls: absent
+    - command: 'project create site --on x'
+      exit: 2
+      stderr: |
+          Error: --on does not apply to "project create"
+          Hint: run it on x itself: ssh x
+      files:
+          .calls: absent
+          site: absent
+    - command: 'project create --from matrix --on x'
+      exit: 2
+      stderr: |
+          Error: --on does not apply to "project create"
+          Hint: run it on x itself: ssh x
+      files:
+          .calls: absent
+          matrix: absent
+    - command: 'project drift --on x'
+      exit: 2
+      stderr: |
+          Error: --on does not apply to "project drift"
+          Hint: run it on x itself: ssh x
+      files:
+          .calls: absent
     - command: 'guest --on x'
       exit: 2
       stderr: |

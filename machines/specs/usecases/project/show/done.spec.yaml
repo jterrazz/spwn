@@ -1,0 +1,15 @@
+description: 'station project shows the project of this folder: its file and its agents'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'project create site'
+      exit: 0
+      stdout: |
+          ●	site	created	{{workdir}}/site
+    - command: '--version >/dev/null; /bin/mkdir site && cd site && "$STATION" project'
+      exit: 0
+      stdout: |
+          ●	site	{{workdir}}/site/spwn.yaml
+          # Agents
+          ●	neo

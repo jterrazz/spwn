@@ -1213,6 +1213,76 @@
       "out": "UndeclareOut"
     },
     {
+      "name": "project.apply",
+      "schema": "station.project.apply/v1",
+      "where": "in-process",
+      "confirm": "overwrite",
+      "consequence": "Your value of %s is replaced by the one the file asks.",
+      "errors": [
+        "confirm.yes-needed",
+        "project.invalid",
+        "project.link-in-the-way",
+        "project.not-a-file",
+        "project.not-a-folder",
+        "project.not-found",
+        "project.not-written"
+      ],
+      "in": "ApplyIn",
+      "out": "Applied"
+    },
+    {
+      "name": "project.create",
+      "schema": "station.project.create/v1",
+      "where": "in-process",
+      "errors": [
+        "project.bad-name",
+        "project.example-declares-harness",
+        "project.exists",
+        "project.unknown-example",
+        "project.unknown-harness"
+      ],
+      "in": "CreateIn",
+      "out": "Project"
+    },
+    {
+      "name": "project.drift",
+      "schema": "station.project.drift/v1",
+      "where": "in-process",
+      "errors": [
+        "project.link-in-the-way",
+        "project.not-a-file",
+        "project.not-found"
+      ],
+      "in": "DriftIn",
+      "out": "Drift"
+    },
+    {
+      "name": "project.plan",
+      "schema": "station.project.plan/v1",
+      "where": "in-process",
+      "errors": [
+        "project.invalid",
+        "project.link-in-the-way",
+        "project.not-a-file",
+        "project.not-a-folder",
+        "project.not-found"
+      ],
+      "in": "PlanIn",
+      "out": "Plan"
+    },
+    {
+      "name": "project.show",
+      "schema": "station.project.show/v1",
+      "where": "in-process",
+      "errors": [
+        "project.link-in-the-way",
+        "project.not-a-file",
+        "project.not-found"
+      ],
+      "in": "ShowIn",
+      "out": "Project"
+    },
+    {
       "name": "settings.apply",
       "schema": "station.settings.apply/v1",
       "section": "settings",
@@ -1296,6 +1366,47 @@
       "where": "at-target",
       "in": "InitIn",
       "out": "Report"
+    },
+    {
+      "name": "skills.create",
+      "schema": "station.skills.create/v1",
+      "where": "at-target",
+      "errors": [
+        "skills.bad-name",
+        "skills.exists"
+      ],
+      "in": "CreateIn",
+      "out": "Skill"
+    },
+    {
+      "name": "skills.delete",
+      "schema": "station.skills.delete/v1",
+      "where": "at-target",
+      "confirm": "delete-skill",
+      "consequence": "%s is deleted for good.",
+      "errors": [
+        "confirm.mismatch",
+        "confirm.needed",
+        "skills.not-found"
+      ],
+      "in": "DeleteIn",
+      "out": "Skill"
+    },
+    {
+      "name": "skills.list",
+      "schema": "station.skills.list/v1",
+      "where": "at-target",
+      "in": "ListIn"
+    },
+    {
+      "name": "skills.show",
+      "schema": "station.skills.show/v1",
+      "where": "at-target",
+      "errors": [
+        "skills.not-found"
+      ],
+      "in": "ShowIn",
+      "out": "Skill"
     },
     {
       "name": "teams.list",

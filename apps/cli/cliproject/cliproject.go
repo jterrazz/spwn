@@ -28,14 +28,14 @@ func Find() (*project.Project, error) {
 
 // Require is Find with a friendly error when no project exists.
 // Commands that can't operate in legacy mode use this so the user
-// sees a consistent "run `spwn init`" hint.
+// sees a consistent "run `station project create`" hint.
 func Require() (*project.Project, error) {
 	p, err := Find()
 	if err != nil {
 		return nil, err
 	}
 	if p == nil {
-		return nil, fmt.Errorf("no spwn.yaml found: run `spwn init` first")
+		return nil, fmt.Errorf("no spwn.yaml found: run `station project create <name>` first")
 	}
 	return p, nil
 }

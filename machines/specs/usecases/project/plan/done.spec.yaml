@@ -1,0 +1,17 @@
+description: 'station project plan of a project with no issue says it is valid'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'project create site'
+      exit: 0
+      stdout: |
+          ●	site	created	{{workdir}}/site
+    - command: '--version >/dev/null; /bin/mkdir site && cd site && "$STATION" project plan'
+      exit: 0
+      stdout: |
+          ●	{{workdir}}/site/spwn.yaml	valid
+          # Issues
+          	none
+          # To apply
+          ●	.spwn/agents/neo/CLAUDE.md	add

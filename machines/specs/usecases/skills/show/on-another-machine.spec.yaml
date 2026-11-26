@@ -1,0 +1,40 @@
+description: 'station skills <skill> --on a VM reads the file kept on that VM'
+env: two-macs
+runs:
+    - command: 'skills create paper-reading --on linux-1'
+      exit: 0
+      stdout: |
+          	On linux-1:
+          ●	paper-reading	created	~/.spwn/skills/paper-reading.md
+    - command: 'skills paper-reading --on linux-1'
+      exit: 0
+      stdout: |
+          	On linux-1:
+          ●	paper-reading	~/.spwn/skills/paper-reading.md	One-line description of what this skill does.
+          # Text
+          	---
+          	name: paper-reading
+          	description: One-line description of what this skill does.
+          	---
+
+          	# paper-reading
+
+          	> One-line description of what this skill does.
+
+          	## When to use
+
+          	Describe the trigger. When should the agent invoke this skill?
+
+          	## Prerequisites
+
+          	List what it needs: programs, environment, or prior knowledge.
+
+          	## Steps
+
+          	1. First step
+          	2. Second step
+          	3. Third step
+
+          	## Rollback
+
+          	How to undo if things go wrong.

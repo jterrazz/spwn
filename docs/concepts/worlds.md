@@ -1,10 +1,10 @@
 # Worlds
 
-A world is a Docker container started from the project image, and everything an agent keeps has to cross its boundary through a declared mount. This chapter is how a world runs, the port that runs it, and what moves in and out of it. The YAML that declares any of it is [Primitives](../reference/primitives.md).
+A world is a Docker container started from the world image, and everything an agent keeps has to cross its boundary through a declared mount. This chapter is how a world runs, the port that runs it, and what moves in and out of it. The YAML that declares any of it is [Primitives](../reference/primitives.md).
 
 ## How a world runs
 
-- **One image per project.** `spwn build` compiles the declared reality (agents, tools, skills, rendered context) into a project-specific image. Worlds are containers started from that image; nothing is installed at world-start time.
+- **One image per tool set.** `spwn up` builds the world image from the tools the agents declare, tagged by their hash ([ADR-020](../decisions/020-a-world-image-is-tagged-by-its-tool-sets-hash.md)), and renders the declared reality (agents, skills, rendered context) into the container it starts; nothing is installed at world-start time.
 - **Container labels are the world state.** The running backend is queried directly; there is no shadow registry to drift.
 - **Lifecycle**: create, start, run agents, then stop or destroy. Destroying a world removes the container; everything worth keeping lives in a mount or in the agent's Mind.
 - **Session continuity survives the container.** An agent's session state persists with its Mind on the host, so re-entering a world (or being respawned after a crash) resumes the conversation instead of starting from zero.

@@ -36,7 +36,7 @@ documented caveat · ⚪ not run.
 **Hypothesis:** one wins, the other fails cleanly; no zombie
 containers; state.json not corrupted.
 **Probe:** launch two `spwn up` in background, wait both, count
-containers + check `spwn world list` state, re-run `spwn check --json`.
+containers + check `spwn world list` state, re-run `station project plan --json`.
 **Failure:** 2 containers for 1 world, or state.json parse error.
 
 ### A2. `spwn down` mid-spawn
@@ -63,13 +63,13 @@ serialises them), or one errors cleanly.
 
 **Hypothesis:** isolated; each has its own container with unique
 world-id.
-**Probe:** /tmp/p1 + /tmp/p2 both `spwn init && spwn up`.
+**Probe:** in /tmp, `station project create p1` and `station project create p2`, then `spwn up` in each.
 
-### A6. `spwn build` while `spwn up` runs
+### A6. `station project apply` while `spwn up` runs
 
 **Hypothesis:** both read the project tree independently; neither
 corrupts the other.
-**Probe:** `spwn up &; spwn build --tree-only`.
+**Probe:** `spwn up &; station project apply`.
 
 ### A7. Agent `docker cp`'d while container is being destroyed
 

@@ -32,9 +32,6 @@ func loadYAMLTools() ([]tool.Tool, error) {
 		if !e.IsDir() {
 			continue
 		}
-		if schema, err := loadEntrySchema(e.Name()); err == nil && hasWorlds(schema) {
-			continue
-		}
 		toolsDir := path.Join(contentRoot, e.Name(), "tools")
 		subs, err := fs.ReadDir(catalogFS, toolsDir)
 		if err != nil {

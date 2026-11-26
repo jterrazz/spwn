@@ -35,7 +35,7 @@ describe('talk', () => {
     test('a second talk to a codex world resumes the codex thread, with AGENTS.md and the native skill in sight', async () => {
         // Given - a codex project brought up, then talked to twice
         await using result = await simulated
-            .fixture(directory('../../__fixtures__/codex-pilot/'))
+            .fixture(directory('./__fixtures__/codex-pilot/'))
             .exec([
                 'up',
                 'agent talk neo "Do you see your native skills?"',

@@ -1,0 +1,120 @@
+package project_test
+
+import (
+	"errors"
+	"maps"
+	"testing"
+
+	"github.com/jterrazz/studio-station/apps/engine/project"
+)
+
+func file(path, data string) project.File {
+	return project.File{Path: path, Data: []byte(data), Mode: 0o644}
+}
+
+func TestChangesOf(t *testing.T) {
+	a, b := file("CLAUDE.md", "a"), file("CLAUDE.md", "b")
+	p := project.RunFolder("neo") + "/CLAUDE.md"
+	one := map[string][]project.File{"neo": {a}}
+	for _, c := range []struct {
+		name         string
+		rendered     map[string][]project.File
+		record, disk project.Record
+		want         []project.Change
+	}{
+		{"a file the disk lacks is added", one, nil, nil, []project.Change{{Agent: "neo", Path: p, Kind: project.Add}}},
+		{"a file the disk holds as rendered is no change", one, nil, project.Record{p: project.Digest(a)}, nil},
+		{"a file apply left, rendered anew, is overwritten", map[string][]project.File{"neo": {b}}, project.Record{p: project.Digest(a)}, project.Record{p: project.Digest(a)},
+			[]project.Change{{Agent: "neo", Path: p, Kind: project.Overwrite}}},
+		{"a file edited since apply is overwritten by hand", one, project.Record{p: project.Digest(a)}, project.Record{p: project.Digest(b)},
+			[]project.Change{{Agent: "neo", Path: p, Kind: project.Overwrite, ByHand: true}}},
+		{"a file apply never wrote, in the way, is overwritten by hand", one, nil, project.Record{p: project.Digest(b)},
+			[]project.Change{{Agent: "neo", Path: p, Kind: project.Overwrite, ByHand: true}}},
+		{"a file written and no longer rendered is removed", map[string][]project.File{}, project.Record{p: project.Digest(a)}, project.Record{p: project.Digest(a)},
+			[]project.Change{{Agent: "neo", Path: p, Kind: project.Remove}}},
+		{"a file written, edited, and no longer rendered is removed by hand", map[string][]project.File{}, project.Record{p: project.Digest(a)}, project.Record{p: project.Digest(b)},
+			[]project.Change{{Agent: "neo", Path: p, Kind: project.Remove, ByHand: true}}},
+		{"a file written and already gone is no change", map[string][]project.File{}, project.Record{p: project.Digest(a)}, nil, nil},
+	} {
+		t.Run(c.name, func(t *testing.T) {
+			got, next, err := project.ChangesOf(c.rendered, c.record, c.disk)
+			if err != nil || len(got) != len(c.want) {
+				t.Fatalf("ChangesOf = %+v, %v; want %+v", got, err, c.want)
+			}
+			for i := range got {
+				if got[i].Agent != c.want[i].Agent || got[i].Path != c.want[i].Path || got[i].Kind != c.want[i].Kind || got[i].ByHand != c.want[i].ByHand {
+					t.Errorf("change %d = %+v; want %+v", i, got[i], c.want[i])
+				}
+			}
+			if len(next) != len(c.rendered["neo"]) {
+				t.Errorf("record = %v; want one digest per rendered file", next)
+			}
+		})
+	}
+}
+
+func TestARenderedPathNeverLeavesItsRunFolder(t *testing.T) {
+	for _, bad := range []string{"../spwn.yaml", "/etc/passwd", "", ".", "..", "a/../../b", "a//b"} {
+		if _, _, err := project.ChangesOf(map[string][]project.File{"neo": {file(bad, "x")}}, nil, nil); !errors.Is(err, project.ErrOutside) {
+			t.Errorf("ChangesOf(%q) = %v; want ErrOutside", bad, err)
+		}
+	}
+}
+
+func TestARecordedPathOutsideARunFolderIsNeverReadNorRemoved(t *testing.T) {
+	a := file("CLAUDE.md", "a")
+	tampered := project.Record{}
+	for _, p := range []string{"../victim.txt", "/abs", "spwn.yaml", ".spwn/keep.txt", ".spwn/agents/neo/../../../spwn.yaml", ".spwn/agents/neo", ".spwn/agents//x",
+		".spwn/agents/x\x00/f", ".spwn/agents/neo/a\x00b", ".spwn/agents/neo/line\nbreak", ".spwn/agents/neo/bell\x07", ".spwn/agents/neo/del\x7f"} {
+		tampered[p] = project.Digest(a)
+		if project.InRunFolder(p) {
+			t.Errorf("InRunFolder(%q) = true; want false", p)
+		}
+	}
+	if paths := project.Paths(nil, tampered); len(paths) != 0 {
+		t.Errorf("Paths = %v; want none of the record's paths read", paths)
+	}
+	changes, next, err := project.ChangesOf(map[string][]project.File{}, tampered, tampered)
+	if err != nil || len(changes) != 0 || len(next) != 0 {
+		t.Errorf("ChangesOf = %+v, %v, %v; want nothing removed and the paths dropped", changes, next, err)
+	}
+	if !project.InRunFolder(project.RunFolder("neo") + "/CLAUDE.md") {
+		t.Error("a file of a run folder is not in it")
+	}
+}
+
+func TestAnApplyStoppedKeepsWhatItWroteBeforeForEveryChangeNotMade(t *testing.T) {
+	old, now := project.Digest(file("CLAUDE.md", "old")), project.Digest(file("CLAUDE.md", "now"))
+	was := project.Record{".spwn/agents/neo/a.md": old, ".spwn/agents/neo/b.md": old, ".spwn/agents/neo/c.md": old}
+	next := project.Record{".spwn/agents/neo/a.md": now, ".spwn/agents/neo/b.md": now, ".spwn/agents/neo/new.md": now}
+	changes := []project.Change{
+		{Path: ".spwn/agents/neo/a.md", Kind: project.Overwrite},
+		{Path: ".spwn/agents/neo/b.md", Kind: project.Overwrite},
+		{Path: ".spwn/agents/neo/c.md", Kind: project.Remove},
+		{Path: ".spwn/agents/neo/new.md", Kind: project.Add},
+	}
+	kept := project.Kept(was, next, changes, 1)
+	want := project.Record{".spwn/agents/neo/a.md": now, ".spwn/agents/neo/b.md": old, ".spwn/agents/neo/c.md": old}
+	if !maps.Equal(kept, want) {
+		t.Errorf("Kept = %v; want %v: the one written, and each file not reached as apply wrote it before, so c.md is still removed next time", kept, want)
+	}
+}
+
+func TestADigestTellsTheModeAndALinkApart(t *testing.T) {
+	plain := file("x", "target")
+	exec := project.File{Path: "x", Data: []byte("target"), Mode: 0o755}
+	link := project.File{Path: "x", Data: []byte("target"), Link: true}
+	if project.Digest(plain) == project.Digest(exec) || project.Digest(plain) == project.Digest(link) {
+		t.Error("a digest must differ by mode and by link")
+	}
+}
+
+func TestGoesNamesEachLoss(t *testing.T) {
+	said := project.Goes([]project.Change{
+		{Path: ".spwn/agents/neo/CLAUDE.md", Kind: project.Overwrite, ByHand: true},
+		{Path: ".spwn/agents/neo/old.md", Kind: project.Remove},
+	})
+	if said != "overwrites .spwn/agents/neo/CLAUDE.md, changed by hand; removes .spwn/agents/neo/old.md" {
+		t.Errorf("Goes = %q", said)
+	}
+}

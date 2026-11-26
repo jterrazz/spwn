@@ -1,3 +1,0 @@
-# neo
-
-@SOUL.md

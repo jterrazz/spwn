@@ -1,0 +1,497 @@
+package wire_test
+
+import (
+	"bytes"
+	"encoding/json"
+	"errors"
+	"io/fs"
+	"os"
+	"path"
+	"path/filepath"
+	"slices"
+	"strings"
+	"testing"
+
+	"github.com/jterrazz/studio-station/apps/engine/catalog"
+	"github.com/jterrazz/studio-station/apps/engine/core/confirm"
+	"github.com/jterrazz/studio-station/apps/engine/core/fail"
+	"github.com/jterrazz/studio-station/apps/engine/platform/local"
+	"github.com/jterrazz/studio-station/apps/engine/project"
+	"github.com/jterrazz/studio-station/apps/engine/project/adapter/manifest"
+	"github.com/jterrazz/studio-station/apps/engine/project/calls"
+	skillfiles "github.com/jterrazz/studio-station/apps/engine/skills/adapter/files"
+)
+
+func applying(t *testing.T) (d calls.Deps, folder, root string) {
+	t.Helper()
+	t.Setenv("SPWN_HOME", t.TempDir())
+	d = calls.Deps{Projects: manifest.New()}
+	folder = t.TempDir()
+	made, err := d.Projects.Create(t.Context(), folder, "site", catalog.Harnesses()[0], "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	return d, folder, made.Root
+}
+
+func refusedWith(err error, code fail.Code) bool {
+	var refused *fail.Error
+	return errors.As(err, &refused) && refused.Code == code
+}
+
+func TestWhatAPlanListsIsWhatAnApplyWrites(t *testing.T) {
+	d, folder, root := applying(t)
+	plan, err := calls.Plan.Run(t.Context(), d, calls.PlanIn{Folder: root}, nil)
+	if err != nil || len(plan.Changes) == 0 {
+		t.Fatalf("Plan = %+v, %v; want the starter's files to add", plan.Changes, err)
+	}
+	applied, err := calls.Apply.Run(t.Context(), d, calls.ApplyIn{Folder: root}, nil)
+	if err != nil || len(applied.Changes) != len(plan.Changes) {
+		t.Fatalf("Apply = %+v, %v; want what the plan listed", applied.Changes, err)
+	}
+	for i, c := range plan.Changes {
+		if c.Kind != project.Add || applied.Changes[i].Path != c.Path {
+			t.Fatalf("change %d: plan %+v, apply %+v", i, c, applied.Changes[i])
+		}
+		on, read := os.ReadFile(filepath.Join(root, filepath.FromSlash(c.Path)))
+		if read != nil || !bytes.Equal(on, c.File.Data) {
+			t.Errorf("%s holds %q, %v; the plan said %q", c.Path, on, read, c.File.Data)
+		}
+	}
+	entries, err := os.ReadDir(folder)
+	if err != nil || len(entries) != 1 || entries[0].Name() != "site" {
+		t.Errorf("the folder around the project holds %v, %v; want the project alone", entries, err)
+	}
+	again, err := calls.Apply.Run(t.Context(), d, calls.ApplyIn{Folder: root}, nil)
+	if err != nil || len(again.Changes) != 0 {
+		t.Errorf("a second Apply = %+v, %v; want nothing to apply", again.Changes, err)
+	}
+}
+
+func TestAFileEditedByHandIsNeverOverwrittenUnasked(t *testing.T) {
+	d, _, root := applying(t)
+	applied, err := calls.Apply.Run(t.Context(), d, calls.ApplyIn{Folder: root}, nil)
+	if err != nil || len(applied.Changes) == 0 {
+		t.Fatalf("Apply = %+v, %v", applied, err)
+	}
+	edited := filepath.Join(root, filepath.FromSlash(applied.Changes[0].Path))
+	if err = os.WriteFile(edited, []byte("mine\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	mine := filepath.Join(root, project.StateFolder, "agents", project.Starter, "notes.md")
+	if err = os.WriteFile(mine, []byte("kept\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	refused, err := calls.Apply.Run(t.Context(), d, calls.ApplyIn{Folder: root}, nil)
+	if !refusedWith(err, confirm.YesNeeded) || len(refused.Changes) != 1 || !refused.Changes[0].ByHand {
+		t.Fatalf("Apply over a hand edit = %+v, %v; want it asked first", refused.Changes, err)
+	}
+	if on, _ := os.ReadFile(edited); string(on) != "mine\n" {
+		t.Errorf("the refused apply wrote %q", on)
+	}
+	if _, err := calls.Apply.Run(t.Context(), d, calls.ApplyIn{Folder: root, Confirm: confirm.Yes}, nil); err != nil {
+		t.Fatal(err)
+	}
+	if on, _ := os.ReadFile(edited); string(on) == "mine\n" {
+		t.Error("an apply answered yes kept the hand edit")
+	}
+	if on, _ := os.ReadFile(mine); string(on) != "kept\n" {
+		t.Errorf("a file apply never wrote reads %q; want it untouched", on)
+	}
+}
+
+func TestALinkIsWrittenAsALinkAndReadAsOne(t *testing.T) {
+	d, _, root := applying(t)
+	link := project.File{Path: "SOUL.md", Data: []byte("../../../spwn/agents/neo/SOUL.md"), Link: true}
+	exec := project.File{Path: "bin/run", Data: []byte("#!/bin/sh\n"), Mode: 0o755}
+	rendered := map[string][]project.File{project.Starter: {link, exec}}
+	changes, next, err := project.ChangesOf(rendered, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = d.Projects.Write(t.Context(), root, changes, next); err != nil {
+		t.Fatal(err)
+	}
+	_, disk, err := d.Projects.Applied(t.Context(), root, project.Paths(rendered, nil))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, f := range []project.File{link, exec} {
+		p := project.RunFolder(project.Starter) + "/" + f.Path
+		if disk[p] != project.Digest(f) {
+			t.Errorf("%s reads %s; want %s", p, disk[p], project.Digest(f))
+		}
+	}
+}
+
+func TestAPlanWithAnErrorAppliesNothing(t *testing.T) {
+	d, _, root := applying(t)
+	if err := os.WriteFile(filepath.Join(root, "spwn", "agents", project.Starter, "agent.yaml"), []byte("name: [\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := calls.Apply.Run(t.Context(), d, calls.ApplyIn{Folder: root, Confirm: confirm.Yes}, nil); !refusedWith(err, calls.Invalid) {
+		t.Fatalf("Apply = %v; want project.invalid", err)
+	}
+	if _, err := os.ReadDir(filepath.Join(root, project.StateFolder, "agents")); !errors.Is(err, fs.ErrNotExist) {
+		t.Errorf("an invalid plan wrote its run folders: %v", err)
+	}
+}
+
+func refusedAbout(err error, code fail.Code, subject string) bool {
+	var refused *fail.Error
+	return errors.As(err, &refused) && refused.Code == code && refused.Subject == subject
+}
+
+func TestALinkWhereApplyReachesIsRefusedAndNothingIsWrittenThroughIt(t *testing.T) {
+	for _, c := range []struct {
+		name, link string
+		// value: whether the link names a folder; else a file, the record.
+		folder, applied bool
+	}{
+		{"the run folder of an agent", ".spwn/agents/" + project.Starter, true, false},
+		{"the state folder", project.StateFolder, true, false},
+		{"the record", project.StateFolder + "/" + project.RecordName, false, true},
+	} {
+		t.Run(c.name, func(t *testing.T) {
+			d, _, root := applying(t)
+			if c.applied {
+				if _, err := calls.Apply.Run(t.Context(), d, calls.ApplyIn{Folder: root}, nil); err != nil {
+					t.Fatal(err)
+				}
+			}
+			away := t.TempDir()
+			target := away
+			if !c.folder {
+				target = filepath.Join(away, "victim.json")
+				if err := os.WriteFile(target, []byte("{}\n"), 0o600); err != nil {
+					t.Fatal(err)
+				}
+			}
+			at, disk := filepath.Join(root, filepath.FromSlash(c.link)), local.New(nil, nil, nil, nil).FS
+			if err := os.MkdirAll(filepath.Dir(at), 0o750); err != nil {
+				t.Fatal(err)
+			}
+			if err := disk.RemoveAll(at); err != nil {
+				t.Fatal(err)
+			}
+			if err := disk.Symlink(target, at); err != nil {
+				t.Fatal(err)
+			}
+			if _, err := calls.Plan.Run(t.Context(), d, calls.PlanIn{Folder: root}, nil); !refusedAbout(err, calls.LinkInTheWay, c.link) {
+				t.Errorf("Plan = %v; want project.link-in-the-way about %s", err, c.link)
+			}
+			if _, err := calls.Apply.Run(t.Context(), d, calls.ApplyIn{Folder: root, Confirm: confirm.Yes}, nil); !refusedAbout(err, calls.LinkInTheWay, c.link) {
+				t.Errorf("Apply --yes = %v; want project.link-in-the-way about %s", err, c.link)
+			}
+			entries, err := os.ReadDir(away)
+			if c.folder && (err != nil || len(entries) != 0) {
+				t.Errorf("the folder linked to holds %v, %v; want it empty", entries, err)
+			}
+			if data, _ := os.ReadFile(target); !c.folder && string(data) != "{}\n" {
+				t.Errorf("the file linked to holds %q; want it untouched", data)
+			}
+		})
+	}
+}
+
+func TestWriteNeverTouchesAPathOutsideARunFolder(t *testing.T) {
+	d, folder, root := applying(t)
+	victim := filepath.Join(folder, "victim.txt")
+	if err := os.WriteFile(victim, []byte("v\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	manifestBefore, err := os.ReadFile(filepath.Join(root, project.ManifestName))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, p := range []string{"../victim.txt", project.ManifestName, ".spwn/keep.txt"} {
+		for _, kind := range []project.Kind{project.Add, project.Overwrite, project.Remove} {
+			change := project.Change{Path: p, Kind: kind, File: project.File{Path: p, Data: []byte("x\n"), Mode: 0o644}}
+			if err := d.Projects.Write(t.Context(), root, []project.Change{change}, project.Record{}); !errors.Is(err, project.ErrOutside) {
+				t.Errorf("Write %s %s = %v; want ErrOutside", kind, p, err)
+			}
+		}
+	}
+	if data, _ := os.ReadFile(victim); string(data) != "v\n" {
+		t.Errorf("the file beside the project holds %q; want it untouched", data)
+	}
+	if data, _ := os.ReadFile(filepath.Join(root, project.ManifestName)); !bytes.Equal(data, manifestBefore) {
+		t.Errorf("spwn.yaml holds %q; want it untouched", data)
+	}
+	if _, err := os.ReadFile(filepath.Join(root, ".spwn", "keep.txt")); !errors.Is(err, fs.ErrNotExist) {
+		t.Errorf(".spwn/keep.txt = %v; want it never written", err)
+	}
+}
+
+func TestATamperedRecordIsNeitherReadNorObeyed(t *testing.T) {
+	d, folder, root := applying(t)
+	if _, err := calls.Apply.Run(t.Context(), d, calls.ApplyIn{Folder: root}, nil); err != nil {
+		t.Fatal(err)
+	}
+	away := filepath.Join(t.TempDir(), "abs.txt")
+	kept := map[string]string{filepath.Join(folder, "victim.txt"): "v\n", away: "a\n", filepath.Join(root, ".spwn", "keep.txt"): "k\n"}
+	for p, data := range kept {
+		if err := os.WriteFile(p, []byte(data), 0o600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	kept[filepath.Join(root, project.ManifestName)] = ""
+	record := filepath.Join(root, ".spwn", project.RecordName)
+	data, err := os.ReadFile(record)
+	if err != nil {
+		t.Fatal(err)
+	}
+	written := project.Record{}
+	if err = json.Unmarshal(data, &written); err != nil {
+		t.Fatal(err)
+	}
+	for _, p := range []string{"../victim.txt", away, project.ManifestName, ".spwn/keep.txt"} {
+		written[p] = "sha256:00"
+	}
+	if data, err = json.Marshal(written); err != nil {
+		t.Fatal(err)
+	}
+	if err = os.WriteFile(record, data, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	plan, err := calls.Plan.Run(t.Context(), d, calls.PlanIn{Folder: root}, nil)
+	if err != nil || len(plan.Changes) != 0 {
+		t.Fatalf("Plan = %+v, %v; want nothing to apply", plan.Changes, err)
+	}
+	if _, err = calls.Apply.Run(t.Context(), d, calls.ApplyIn{Folder: root, Confirm: confirm.Yes}, nil); err != nil {
+		t.Fatal(err)
+	}
+	for p, want := range kept {
+		got, err := os.ReadFile(p)
+		if err != nil || want != "" && string(got) != want {
+			t.Errorf("%s = %q, %v; want it untouched", p, got, err)
+		}
+	}
+}
+
+func TestASkillMadeAsItsTemplatePlansValidAndListingSkillsWritesNoHome(t *testing.T) {
+	d, _, root := applying(t)
+	skillsOf := skillfiles.New(local.New(nil, nil, nil, nil).FS)
+	if _, err := skillsOf.Create(t.Context(), root, "reading"); err != nil {
+		t.Fatal(err)
+	}
+	agent := filepath.Join(root, "spwn", "agents", project.Starter, "agent.yaml")
+	data, err := os.ReadFile(agent)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = os.WriteFile(agent, append(data, []byte("  - \"skill/reading\"\n")...), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	plan, err := calls.Plan.Run(t.Context(), d, calls.PlanIn{Folder: root}, nil)
+	if err != nil || !plan.Valid {
+		t.Fatalf("Plan = %+v, %v; want a skill made from its template valid", plan.Issues, err)
+	}
+	home, spwnHome := t.TempDir(), filepath.Join(t.TempDir(), "spwn-home")
+	t.Setenv("HOME", home)
+	t.Setenv("SPWN_HOME", spwnHome)
+	if listed, err := skillsOf.List(t.Context(), root); err != nil || len(listed) == 0 {
+		t.Fatalf("List = %+v, %v; want the project's skills", listed, err)
+	}
+	if _, err := skillsOf.List(t.Context(), ""); err != nil && !errors.Is(err, fs.ErrNotExist) {
+		t.Fatal(err)
+	}
+	for _, at := range []string{spwnHome, filepath.Join(home, ".spwn")} {
+		if _, err := (local.Beneath{}).Lstat(filepath.Dir(at), filepath.Base(at)); !errors.Is(err, fs.ErrNotExist) {
+			t.Errorf("%s after listing = %v; want it absent", at, err)
+		}
+	}
+}
+
+func TestANameThatHoldsADanglingLinkExists(t *testing.T) {
+	t.Setenv("SPWN_HOME", t.TempDir())
+	d := calls.Deps{Projects: manifest.New()}
+	folder := t.TempDir()
+	if err := local.New(nil, nil, nil, nil).FS.Symlink(filepath.Join(folder, "nowhere"), filepath.Join(folder, "site")); err != nil {
+		t.Fatal(err)
+	}
+	for _, from := range []string{"", catalog.Examples()[0]} {
+		if _, err := calls.Create.Run(t.Context(), d, calls.CreateIn{Folder: folder, Name: "site", From: from}, nil); !refusedWith(err, calls.Exists) {
+			t.Errorf("Create (from %q) over a dangling link = %v; want project.exists", from, err)
+		}
+	}
+	if _, err := (local.Beneath{}).Lstat(folder, "nowhere"); !errors.Is(err, fs.ErrNotExist) {
+		t.Errorf("the link's target was made: %v", err)
+	}
+}
+
+func TestANameThatHoldsALinkToAFolderExistsAndNothingIsWrittenThere(t *testing.T) {
+	t.Setenv("SPWN_HOME", t.TempDir())
+	d := calls.Deps{Projects: manifest.New()}
+	folder, elsewhere := t.TempDir(), t.TempDir()
+	if err := machine.FS.Symlink(elsewhere, filepath.Join(folder, "site")); err != nil {
+		t.Fatal(err)
+	}
+	for _, from := range []string{"", catalog.Examples()[0]} {
+		if _, err := calls.Create.Run(t.Context(), d, calls.CreateIn{Folder: folder, Name: "site", From: from}, nil); !refusedWith(err, calls.Exists) {
+			t.Errorf("Create (from %q) over a link to a folder = %v; want project.exists", from, err)
+		}
+	}
+	there, err := local.Beneath{}.Open(filepath.Dir(elsewhere), filepath.Base(elsewhere))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer there.Close()
+	if names, err := there.Names(); err != nil || len(names) != 0 {
+		t.Errorf("the link's folder holds %v, %v; want nothing written through the link", names, err)
+	}
+}
+
+func holdsEveryFileOf(t *testing.T, files fs.FS, dir, root string) {
+	t.Helper()
+	want, err := fs.ReadDir(files, dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, err := os.ReadDir(filepath.Join(root, filepath.FromSlash(dir)))
+	if err != nil {
+		t.Fatalf("the project lacks %s of the example: %v", dir, err)
+	}
+	held := map[string]bool{}
+	for _, e := range got {
+		held[e.Name()] = true
+	}
+	for _, e := range want {
+		if !held[e.Name()] {
+			t.Errorf("the project lacks %s/%s of the example", dir, e.Name())
+		} else if e.IsDir() {
+			holdsEveryFileOf(t, files, path.Join(dir, e.Name()), root)
+		}
+	}
+}
+
+func holdsWhatThePlanSaid(t *testing.T, root string, changes []project.Change) {
+	t.Helper()
+	for _, c := range changes {
+		if c.Kind == project.Remove {
+			continue
+		}
+		dir, name := path.Split(c.Path)
+		f, err := local.Beneath{}.Open(root, path.Clean(dir))
+		if err != nil {
+			t.Errorf("%s: %v", c.Path, err)
+			continue
+		}
+		var on []byte
+		if c.File.Link {
+			var target string
+			target, err = f.Readlink(name)
+			on = []byte(target)
+		} else {
+			on, _, err = f.ReadFile(name)
+		}
+		f.Close()
+		if err != nil || !bytes.Equal(on, c.File.Data) {
+			t.Errorf("%s holds %q, %v; the plan said %q", c.Path, on, err, c.File.Data)
+		}
+	}
+}
+
+// value: the first change past the first whose folder holds no change
+// before it, nor the record: a folder made read-only there stops an apply
+// after what came before it is written.
+func stopAt(t *testing.T, changes []project.Change) (k int, folder string) {
+	t.Helper()
+	record := project.StateFolder + "/" + project.RecordName
+	for k = 1; k < len(changes); k++ {
+		folder = path.Dir(changes[k].Path)
+		beneath := func(p string) bool { return strings.HasPrefix(p, folder+"/") }
+		if folder != "." && !beneath(record) && !slices.ContainsFunc(changes[:k], func(c project.Change) bool { return beneath(c.Path) }) {
+			return k, folder
+		}
+	}
+	t.Fatalf("no change of %+v sits in a folder apply reaches after another", changes)
+	return 0, ""
+}
+
+func TestAnApplyStoppedByAFolderItCannotWriteInRecordsWhatItWrote(t *testing.T) {
+	if machine.Env.Euid() == 0 {
+		t.Skip("root writes in a folder without its write bit")
+	}
+	t.Setenv("SPWN_HOME", t.TempDir())
+	d := calls.Deps{Projects: manifest.New()}
+	made, err := calls.Create.Run(t.Context(), d, calls.CreateIn{Folder: t.TempDir(), From: "severance"}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	plan, err := calls.Plan.Run(t.Context(), d, calls.PlanIn{Folder: made.Root}, nil)
+	if err != nil || !plan.Valid {
+		t.Fatalf("Plan = %+v, %v; want a valid plan", plan, err)
+	}
+	k, folder := stopAt(t, plan.Changes)
+	blocked := plan.Changes[k].Path
+	stopped := filepath.Join(made.Root, filepath.FromSlash(folder))
+	if err = machine.FS.MkdirAll(stopped, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	readOnly(t, stopped)
+	_, err = calls.Apply.Run(t.Context(), d, calls.ApplyIn{Folder: made.Root, Confirm: confirm.Yes}, nil)
+	if !refusedAbout(err, calls.NotWritten, blocked) {
+		t.Fatalf("Apply = %v; want NotWritten naming %s", err, blocked)
+	}
+	data, err := os.ReadFile(filepath.Join(made.Root, project.StateFolder, project.RecordName))
+	if err != nil {
+		t.Fatal(err)
+	}
+	record := project.Record{}
+	if err = json.Unmarshal(data, &record); err != nil {
+		t.Fatal(err)
+	}
+	if len(record) != k {
+		t.Errorf("record = %v; want the %d files written before %s", record, k, blocked)
+	}
+	for _, c := range plan.Changes[:k] {
+		if record[c.Path] != project.Digest(c.File) {
+			t.Errorf("record of %s = %q; want the digest of what was written", c.Path, record[c.Path])
+		}
+	}
+	holdsWhatThePlanSaid(t, made.Root, plan.Changes[:k])
+	if _, err = machine.FS.Stat(filepath.Join(made.Root, filepath.FromSlash(blocked))); !errors.Is(err, fs.ErrNotExist) {
+		t.Errorf("%s: %v; want it not written", blocked, err)
+	}
+	if err = machine.FS.Chmod(stopped, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	again, err := calls.Apply.Run(t.Context(), d, calls.ApplyIn{Folder: made.Root}, nil)
+	if err != nil || len(again.Changes) != len(plan.Changes)-k {
+		t.Fatalf("the next Apply = %+v, %v; want the %d changes left, none asked", again.Changes, err, len(plan.Changes)-k)
+	}
+	holdsWhatThePlanSaid(t, made.Root, plan.Changes)
+}
+
+func TestEachExampleOfTheCatalogPlansValidAndApplies(t *testing.T) {
+	for _, example := range catalog.Examples() {
+		t.Run(example, func(t *testing.T) {
+			t.Setenv("SPWN_HOME", t.TempDir())
+			d := calls.Deps{Projects: manifest.New()}
+			made, err := calls.Create.Run(t.Context(), d, calls.CreateIn{Folder: t.TempDir(), From: example}, nil)
+			if err != nil || made.Name != example || len(made.Agents) == 0 {
+				t.Fatalf("Create = %+v, %v; want the example's project named for it, with its agents", made, err)
+			}
+			files, _ := catalog.Example(example)
+			holdsEveryFileOf(t, files, ".", made.Root)
+			plan, err := calls.Plan.Run(t.Context(), d, calls.PlanIn{Folder: made.Root}, nil)
+			if err != nil || !plan.Valid || len(plan.Changes) == 0 {
+				t.Fatalf("Plan = %+v, %v; want valid, with files to apply", plan, err)
+			}
+			applied, err := calls.Apply.Run(t.Context(), d, calls.ApplyIn{Folder: made.Root}, nil)
+			if err != nil || len(applied.Changes) != len(plan.Changes) {
+				t.Fatalf("Apply = %+v, %v; want what the plan listed", applied.Changes, err)
+			}
+			holdsWhatThePlanSaid(t, made.Root, plan.Changes)
+			for _, agent := range made.Agents {
+				if entries, err := os.ReadDir(filepath.Join(made.Root, project.StateFolder, "agents", agent)); err != nil || len(entries) == 0 {
+					t.Errorf("run folder of %s holds %v, %v; want its rendered files", agent, entries, err)
+				}
+			}
+			if again, err := calls.Apply.Run(t.Context(), d, calls.ApplyIn{Folder: made.Root}, nil); err != nil || len(again.Changes) != 0 {
+				t.Errorf("a second Apply = %+v, %v; want nothing to apply", again.Changes, err)
+			}
+		})
+	}
+}

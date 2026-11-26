@@ -1,10 +1,9 @@
-// Package runtimeres resolves the runtime name for a `spwn up` or
-// `spwn build` invocation, layering auth-state awareness on top of
-// the pure source.ResolveRuntime resolver.
+// Package runtimeres resolves the runtime name for a `spwn up`
+// invocation, layering auth-state awareness on top of the pure
+// source.ResolveRuntime resolver.
 //
-// It is a small leaf package so it can be imported by both the top-
-// Level cli package (for `spwn build`) and the cli/world subpackage
-// (for `spwn up`) without creating an import cycle through the main
+// It is a small leaf package so the cli/world subpackage (for
+// `spwn up`) can import it without an import cycle through the main
 // cli package.
 package runtimeres
 

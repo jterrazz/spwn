@@ -8,7 +8,7 @@ What the automated suites prove, and where, is [Test architecture](../reference/
 
 | Suite                                                     | Scenarios | Driver                      | Probes                                                                                                                             |
 | --------------------------------------------------------- | --------- | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| [CLI scenarios](../reference/manual-cli-scenarios.md)     | 50        | `scripts/manual-harness.sh` | Realistic command sequences a user runs in a day: init, build, up, talk, down. Uses `mock-claude`; mostly automatable.             |
+| [CLI scenarios](../reference/manual-cli-scenarios.md)     | 50        | `scripts/manual-harness.sh` | Realistic command sequences a user runs in a day: init, up, talk, down. Uses `mock-claude`; mostly automatable.                    |
 | [Agent behaviour](../reference/manual-agent-behaviour.md) | 50        | Human + live Claude         | Whether the host-side setup (CLAUDE.md, playbooks, skills, hooks, tools, knowledge, roster, messaging) actually reaches the agent. |
 | [Edge cases](../reference/manual-edge-cases.md)           | 67        | Mixed (bash + human)        | Concurrency, partial failure, state-machine holes, filesystem edges, tool-install failure modes.                                   |
 

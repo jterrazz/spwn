@@ -27,7 +27,10 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/machines"
 	machinescalls "github.com/jterrazz/studio-station/apps/engine/machines/calls"
 	"github.com/jterrazz/studio-station/apps/engine/ports"
+	"github.com/jterrazz/studio-station/apps/engine/project"
+	projectcalls "github.com/jterrazz/studio-station/apps/engine/project/calls"
 	settingscalls "github.com/jterrazz/studio-station/apps/engine/settings/calls"
+	skillscalls "github.com/jterrazz/studio-station/apps/engine/skills/calls"
 	teamscalls "github.com/jterrazz/studio-station/apps/engine/teams/calls"
 )
 
@@ -52,7 +55,7 @@ func typedGesture(action string) (doing, done string, ok bool) {
 	switch confirm.Action(action) {
 	case confirm.Stop:
 		return "stopping", "stopped", true
-	case confirm.Delete, confirm.DeleteAgent:
+	case confirm.Delete, confirm.DeleteAgent, confirm.DeleteSkill:
 		return "deleting", "deleted", true
 	case confirm.RestartServer:
 		return "restarting", "restarted", true
@@ -580,6 +583,62 @@ func Codes() map[fail.Code]Wording {
 		},
 		agentscalls.BadArchive: func(e *fail.Error) (string, string) {
 			return e.Subject + " is not an agent's archive", "station agents export <agent> --to <folder> writes one"
+		},
+		skillscalls.NotFound: func(e *fail.Error) (string, string) {
+			return "no skill named \"" + e.Subject + "\"", "station skills"
+		},
+		skillscalls.Exists: func(e *fail.Error) (string, string) {
+			return "a skill named \"" + e.Subject + "\" exists", "pick another name"
+		},
+		skillscalls.BadName: func(e *fail.Error) (string, string) {
+			return "\"" + e.Subject + "\" is not a name a skill takes", "lowercase letters, digits and dashes, a letter first, and no verb of skills"
+		},
+		projectcalls.NotFound: func(e *fail.Error) (string, string) {
+			return "no project in " + e.Subject + " or above it: no spwn.yaml", "station project create <name>"
+		},
+		projectcalls.Exists: func(e *fail.Error) (string, string) {
+			return e.Subject + " exists: a project is made as a new folder", "pick another name"
+		},
+		projectcalls.BadName: func(e *fail.Error) (string, string) {
+			return "\"" + e.Subject + "\" is not a name a project takes", "lowercase letters, digits and dashes, a letter or a digit first"
+		},
+		projectcalls.UnknownHarness: func(e *fail.Error) (string, string) {
+			return "no harness named \"" + e.Subject + "\"", "one of " + e.Detail["known"]
+		},
+		projectcalls.UnknownExample: func(e *fail.Error) (string, string) {
+			return "no example named \"" + e.Subject + "\"", "one of " + e.Detail["known"]
+		},
+		projectcalls.ExampleDeclaresHarness: func(e *fail.Error) (string, string) {
+			return "the example \"" + e.Subject + "\" declares its own harness", "drop --harness, or make a blank project with it"
+		},
+		projectcalls.Invalid: func(e *fail.Error) (string, string) {
+			n := e.Detail["errors"]
+			noun := " errors"
+			if n == "1" {
+				noun = " error"
+			}
+			return "the project at " + e.Subject + " has " + n + noun, "fix each one above, then station project plan"
+		},
+		projectcalls.LinkInTheWay: func(e *fail.Error) (string, string) {
+			if project.Declared(e.Subject) {
+				return e.Subject + " is a link: a project's declaration is never read through one", "put the file it points to there instead, then station project plan"
+			}
+			return e.Subject + " is a link: apply never follows one", "remove the link, then station project apply"
+		},
+		projectcalls.NotAFile: func(e *fail.Error) (string, string) {
+			return e.Subject + " is neither a file nor a folder: a project's declaration holds only those", "move it away, then station project plan"
+		},
+		projectcalls.NotAFolder: func(e *fail.Error) (string, string) {
+			return e.Subject + " is a file where apply makes a folder", "move it away, then station project apply"
+		},
+		projectcalls.NotWritten: func(e *fail.Error) (string, string) {
+			switch {
+			case e.Detail["record"] == "":
+				return e.Subject + " could not be written; what apply wrote before it is recorded", "make room for it, then station project apply"
+			case e.Subject == project.StateFolder+"/"+project.RecordName:
+				return e.Subject + ", the record of what apply wrote, could not be written; every change is made, and the next apply records it", "make room for it, then station project apply"
+			}
+			return e.Subject + " could not be written, nor " + project.StateFolder + "/" + project.RecordName + ", the record of what apply wrote before it", "make room for both, then station project apply"
 		},
 		teamscalls.NotFound: func(e *fail.Error) (string, string) {
 			return "no team named \"" + e.Subject + "\"", "station teams"

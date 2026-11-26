@@ -3,7 +3,11 @@ package resolve
 import (
 	"os"
 	"path/filepath"
+	"syscall"
 	"testing"
+	"time"
+
+	"spwn.sh/packages/platform"
 )
 
 func TestWalk_simpleImport(t *testing.T) {
@@ -13,7 +17,7 @@ func TestWalk_simpleImport(t *testing.T) {
 	mustWrite(t, soul, "# soul\n")
 	mustWrite(t, claude, "# header\n\nread @SOUL.md for the agent's soul\n")
 
-	r, err := Walk(root, claude)
+	r, err := walk(t, root, claude)
 	if err != nil {
 		t.Fatalf("Walk: %v", err)
 	}
@@ -33,7 +37,7 @@ func TestWalk_missingImportIsReported(t *testing.T) {
 	claude := filepath.Join(root, "CLAUDE.md")
 	mustWrite(t, claude, "see @core/does-not-exist.md for details\n")
 
-	r, err := Walk(root, claude)
+	r, err := walk(t, root, claude)
 	if err != nil {
 		t.Fatalf("Walk: %v", err)
 	}
@@ -52,7 +56,7 @@ func TestWalk_detectsCycle(t *testing.T) {
 	mustWrite(t, a, "see @b.md\n")
 	mustWrite(t, b, "see @a.md\n")
 
-	r, err := Walk(root, a)
+	r, err := walk(t, root, a)
 	if err != nil {
 		t.Fatalf("Walk: %v", err)
 	}
@@ -66,7 +70,7 @@ func TestWalk_ignoresEmailAddresses(t *testing.T) {
 	claude := filepath.Join(root, "CLAUDE.md")
 	mustWrite(t, claude, "ping me at user@example.com - not an import\n")
 
-	r, err := Walk(root, claude)
+	r, err := walk(t, root, claude)
 	if err != nil {
 		t.Fatalf("Walk: %v", err)
 	}
@@ -84,13 +88,71 @@ func TestWalk_requiresMdExtension(t *testing.T) {
 	claude := filepath.Join(root, "CLAUDE.md")
 	mustWrite(t, claude, "tag @someone and mention @other things\n")
 
-	r, err := Walk(root, claude)
+	r, err := walk(t, root, claude)
 	if err != nil {
 		t.Fatalf("Walk: %v", err)
 	}
 	if len(r.Missing) != 0 {
 		t.Errorf("bare @foo should be ignored, got: %+v", r.Missing)
 	}
+}
+
+// TestWalk_anImportThatLeavesTheProjectIsNeverRead: an @-import that
+// climbs out of the project, or names an absolute path elsewhere, is
+// Outside, and the file there is never read: neither its @-tokens nor
+// its existence reach the result.
+func TestWalk_anImportThatLeavesTheProjectIsNeverRead(t *testing.T) {
+	base := t.TempDir()
+	project := filepath.Join(base, "project")
+	agent := filepath.Join(project, "spwn", "agents", "neo")
+	entry := filepath.Join(agent, "AGENTS.md")
+	outside := filepath.Join(base, "outside", "notes.md")
+	mustWrite(t, outside, "@secret-token.md\n")
+	mustWrite(t, entry, "read @../../../../outside/notes.md and @"+outside+"\n")
+
+	tree := platform.Within(project)
+	defer tree.Close()
+	r, err := Walk(tree, agent, entry)
+	if err != nil {
+		t.Fatalf("Walk: %v", err)
+	}
+	if len(r.Outside) != 2 {
+		t.Fatalf("Outside = %+v, want the two imports", r.Outside)
+	}
+	if len(r.Visited) != 1 || len(r.Missing) != 0 {
+		t.Errorf("Visited = %v, Missing = %+v: nothing outside may be read", r.Visited, r.Missing)
+	}
+}
+
+// TestWalk_aFIFOAtAnImportIsNeverWaitedOn: a FIFO an import names is
+// not a file: Walk returns at once and lists it missing.
+func TestWalk_aFIFOAtAnImportIsNeverWaitedOn(t *testing.T) {
+	root := t.TempDir()
+	claude := filepath.Join(root, "CLAUDE.md")
+	mustWrite(t, claude, "read @pipe.md\n")
+	if err := syscall.Mkfifo(filepath.Join(root, "pipe.md"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	done := make(chan *Result, 1)
+	go func() {
+		r, _ := walk(t, root, claude)
+		done <- r
+	}()
+	select {
+	case r := <-done:
+		if r == nil || len(r.Missing) != 1 {
+			t.Errorf("Missing = %+v, want the FIFO", r)
+		}
+	case <-time.After(10 * time.Second):
+		t.Fatal("Walk waited on a FIFO")
+	}
+}
+
+func walk(t *testing.T, root, start string) (*Result, error) {
+	t.Helper()
+	tree := platform.Within(root)
+	defer tree.Close()
+	return Walk(tree, root, start)
 }
 
 func mustWrite(t *testing.T, path, body string) {

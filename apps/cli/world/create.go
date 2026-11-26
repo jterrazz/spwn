@@ -35,7 +35,7 @@ spwn/agents/<name>/. Use "station agents create" first if they don't.`,
 
 		p, err := cliproject.Require()
 		if err != nil {
-			return s.FailHint("No project", err, "Run \"spwn init\" first")
+			return s.FailHint("No project", err, "Run \"station project create <name>\" first")
 		}
 
 		if err := project.AddWorld(p.ManifestPath, name, project.AddWorldOpts{
@@ -75,7 +75,7 @@ preserved. Other worlds may still reference them.`,
 
 		p, err := cliproject.Require()
 		if err != nil {
-			return s.FailHint("No project", err, "Run \"spwn init\" first")
+			return s.FailHint("No project", err, "Run \"station project create <name>\" first")
 		}
 
 		if err := project.RemoveWorld(p.ManifestPath, name); err != nil {

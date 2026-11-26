@@ -20,7 +20,7 @@ Three suites stay outside it, because each costs minutes and a Docker daemon of 
 ```bash
 make test-go-e2e        # the Go world suite, //go:build e2e
 make test-compile-e2e   # the Go image-build suite
-make test-smoke         # real image builds: spwn init, up, a tool probe (~10 minutes cold)
+make test-smoke         # real image builds: the scaffold brought up, a tool probe (~10 minutes cold)
 make test-pkg PKG=agent # one Go module, verbose
 ```
 

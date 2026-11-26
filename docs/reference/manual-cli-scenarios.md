@@ -1,7 +1,7 @@
 # Manual pass: CLI scenarios
 
 Full path-based QA: each scenario is a **succession of real commands** a user
-would run in a day, from init to teardown. Every scenario asserts at least one
+would run in a day, from a new project to teardown. Every scenario asserts at least one
 outcome (exit code, file existence, substring in output).
 
 Fifty scenarios, ninety-eight assertions. How a pass is run is [Run a manual pass](../guides/run-a-manual-pass.md).
@@ -20,7 +20,7 @@ bash scripts/manual-harness.sh 31 40      # the Docker ones
 
 - All user-level state lives under `$SPWN_HOME` (default `/tmp/qa-50/spwn_home`).
   The developer's real `~/.spwn` is never touched.
-- Each scenario gets its own `$TMP_ROOT/sNN/` dir and `cd`s into it so project
+- Each scenario gets its own `$TMP_ROOT/sNN/` dir and `cd`s into it, then into the project it creates there (`./p`, or the example's name), so project
   state doesn't leak across scenarios.
 - Every scenario starts by `docker rm -f` on any leftover `world-*` containers
   from a prior run.
@@ -35,55 +35,54 @@ bash scripts/manual-harness.sh 31 40      # the Docker ones
 
 ### Group A: First-run lifecycle (1 to 10)
 
-#### 1. Fresh user journey: init, check, JSON validation
+#### 1. Fresh user journey: create, plan, JSON validation
 
 ```bash
 cd $TMP/s01
-spwn init                                    # → scaffold created
-spwn check                                   # → exit 0, "Project is valid"
-spwn check --json                            # → {"valid": true, "summary": {...}}
+station project create p && cd p             # → scaffold created in ./p
+station project plan                                   # → exit 0, "Project is valid"
+station project plan --json                            # → {"valid": true, "summary": {...}}
 ```
 
-**Asserts:** `init` exit 0 · `check` exit 0 · `check --json` contains `"valid": true`.
+**Asserts:** `create` exit 0 · `plan` exit 0 · `plan --json` contains `"valid": true`.
 
-#### 2. `spwn init` refuses to clobber
+#### 2. `station project create` never creates over a folder
 
 ```bash
 cd $TMP/s02
-echo "version: 1" > spwn.yaml                # dirty dir
-spwn init                                    # → exit != 0
-spwn init --force                            # → exit 0 (overwrites)
-spwn check                                   # → exit 0
+station project create p                     # → exit 0
+station project create p                     # → exit != 0 (the folder exists)
+cd p && station project plan                 # → exit 0
 ```
 
-**Asserts:** first `init` nonzero · `init --force` zero · `check` zero.
+**Asserts:** first `create` zero · second `create` nonzero · `plan` zero.
 
-#### 3. `spwn init spwn:matrix`
+#### 3. `station project create --from matrix`
 
 ```bash
 cd $TMP/s03
-spwn init spwn:matrix                        # catalog scaffold
+station project create --from matrix && cd matrix  # the catalog's example
 ls spwn/agents/neo                           # → neo is present
-spwn check                                   # → exit 0
+station project plan                                   # → exit 0
 ```
 
-**Asserts:** init zero · `spwn/agents/neo/` exists · check zero.
+**Asserts:** create zero · `spwn/agents/neo/` exists · plan zero.
 
-#### 4. `spwn init spwn:startup`, multi-agent
+#### 4. `station project create --from startup`, multi-agent
 
 ```bash
 cd $TMP/s04
-spwn init spwn:startup
-spwn check
+station project create --from startup && cd startup
+station project plan
 station agents --json                         # → includes ceo, devops, analyst
 ```
 
-**Asserts:** init zero · check zero · `ceo`/`devops`/`analyst` each in JSON.
+**Asserts:** create zero · plan zero · `ceo`/`devops`/`analyst` each in JSON.
 
-#### 5. Bogus init ref
+#### 5. An example the catalog does not hold
 
 ```bash
-spwn init spwn:does-not-exist-xyz-987        # → exit != 0
+station project create --from does-not-exist-xyz-987  # → exit != 0
 ```
 
 **Asserts:** nonzero exit.
@@ -105,7 +104,7 @@ spwn up                                      # → rc ∈ {0,1}, never a panic
 
 ```bash
 cd $TMP/s07
-spwn init spwn:matrix
+station project create --from matrix && cd matrix
 spwn up                                      # → exit 0
 spwn up                                      # → exit 0 or 1, never a panic
 spwn down
@@ -121,17 +120,17 @@ in a prebuilt `SPWN_BASE_IMAGE`. Matrix has only `spwn:*` deps.
 
 ```bash
 cd $TMP/s08
-spwn init
+station project create p && cd p
 spwn down                                    # → rc ≤ 1, never a panic
 ```
 
 **Asserts:** rc ≤ 1.
 
-#### 9. Malformed `spwn.yaml`: `spwn check` errors precisely
+#### 9. Malformed `spwn.yaml`: `station project plan` errors precisely
 
 ```bash
 printf "invalid: [yaml broken" > spwn.yaml
-spwn check                                   # → exit != 0
+station project plan                                   # → exit != 0
 ```
 
 **Asserts:** nonzero exit.
@@ -139,9 +138,9 @@ spwn check                                   # → exit != 0
 #### 10. Invalid dep ref in agent.yaml: check catches it
 
 ```bash
-spwn init
+station project create p && cd p
 # flip "spwn:unix" to "spwn:does-not-exist-zz" in spwn/agents/neo/agent.yaml
-spwn check                                   # → exit != 0
+station project plan                                   # → exit != 0
 ```
 
 **Asserts:** nonzero exit.
@@ -153,7 +152,7 @@ spwn check                                   # → exit != 0
 #### 11. `station agents create` scaffolds the home tree
 
 ```bash
-spwn init && station agents create bob
+station project create p && cd p && station agents create bob
 ls spwn/agents/bob                           # → agent.yaml, SOUL.md, AGENTS.md, playbooks/, journal/
 ```
 
@@ -162,14 +161,14 @@ ls spwn/agents/bob                           # → agent.yaml, SOUL.md, AGENTS.m
 #### 12. Duplicate `station agents create` refuses
 
 ```bash
-spwn init && station agents create bob
+station project create p && cd p && station agents create bob
 station agents create bob                           # → exit != 0
 ```
 
 #### 13. `station agents` in plain + JSON
 
 ```bash
-spwn init && station agents create bob
+station project create p && cd p && station agents create bob
 station agents
 station agents --json                         # → valid JSON, contains bob + neo
 ```
@@ -177,7 +176,7 @@ station agents --json                         # → valid JSON, contains bob + n
 #### 14. `station agents <name>` happy + missing
 
 ```bash
-spwn init
+station project create p && cd p
 station agents neo                       # → exit 0
 station agents does-not-exist            # → exit != 0
 ```
@@ -185,7 +184,7 @@ station agents does-not-exist            # → exit != 0
 #### 15. `station agents delete` happy + missing
 
 ```bash
-spwn init && station agents create bob
+station project create p && cd p && station agents create bob
 station agents delete bob --confirm=bob                            # → exit 0
 station agents delete bob --confirm=bob                            # → exit != 0
 ```
@@ -193,7 +192,7 @@ station agents delete bob --confirm=bob                            # → exit !=
 #### 16. `station agents export` produces a gzip archive
 
 ```bash
-spwn init && station agents create bob
+station project create p && cd p && station agents create bob
 station agents export bob --to .                        # → bob*.tar.gz on disk
 file bob*.tar.gz                             # → "gzip compressed data"
 ```
@@ -201,7 +200,7 @@ file bob*.tar.gz                             # → "gzip compressed data"
 #### 17. `station agents import` round-trip
 
 ```bash
-spwn init && station agents create bob && station agents export bob --to .
+station project create p && cd p && station agents create bob && station agents export bob --to .
 station agents delete bob --confirm=bob
 station agents import bob*.tar.gz                # → exit 0
 station agents --json                         # → contains bob
@@ -210,7 +209,7 @@ station agents --json                         # → contains bob
 #### 18. `station agents fork` clones identity + memory
 
 ```bash
-spwn init && station agents create bob
+station project create p && cd p && station agents create bob
 station agents fork bob --as bob-v2                   # → exit 0
 station agents --json                         # → contains bob and bob-v2
 ```
@@ -218,18 +217,18 @@ station agents --json                         # → contains bob and bob-v2
 #### 19. `station agents <name>`
 
 ```bash
-spwn init && station agents create bob
+station project create p && cd p && station agents create bob
 station agents bob                       # → just bob, exit 0
 station agents does-not-exist            # → exit != 0
 ```
 
-#### 20. `spwn skill new / ls / rm`
+#### 20. `station skills create / list / delete`
 
 ```bash
-spwn init
-spwn skill new daily-standup                 # → writes spwn/skills/daily-standup.md
-spwn skill ls                                # → exit 0
-spwn skill rm daily-standup                  # → exit 0; file gone
+station project create p && cd p
+station skills create daily-standup          # → writes spwn/skills/daily-standup.md
+station skills                               # → exit 0
+station skills delete daily-standup --confirm=daily-standup  # → exit 0; file gone
 ```
 
 ---
@@ -239,7 +238,7 @@ spwn skill rm daily-standup                  # → exit 0; file gone
 #### 21. `spwn install python`, global install
 
 ```bash
-spwn init && spwn install python
+station project create p && cd p && spwn install python
 grep python spwn/agents/neo/agent.yaml       # → present
 grep python spwn.lock                        # → present
 ```
@@ -247,7 +246,7 @@ grep python spwn.lock                        # → present
 #### 22. `spwn install node --agent bob`, scoped install
 
 ```bash
-spwn init && station agents create bob
+station project create p && cd p && station agents create bob
 spwn install node --agent bob
 # → bob's agent.yaml has spwn:node; neo's does NOT
 ```
@@ -255,7 +254,7 @@ spwn install node --agent bob
 #### 23. `spwn uninstall python`
 
 ```bash
-spwn init && spwn install python
+station project create p && cd p && spwn install python
 spwn uninstall python                        # → exit 0; python gone
 ```
 
@@ -270,10 +269,10 @@ grep does-not-exist-xyz spwn.lock            # → not present
 
 Before the fix: silently succeeded, added a broken ref. Now: fails fast with
 `skill:<name> not found at spwn/skills/<name>.md; create it first with
-\`spwn skill new <name>\``.
+\`station skills create <name>\``.
 
 ```bash
-spwn init
+station project create p && cd p
 spwn install skill:does-not-exist --agent neo
 # → exit != 0 (was 0 pre-fix)
 ```
@@ -281,7 +280,7 @@ spwn install skill:does-not-exist --agent neo
 #### 26. Bare name auto-promotes to `spwn:<name>`
 
 ```bash
-spwn init && spwn install node               # → becomes spwn:node
+station project create p && cd p && spwn install node               # → becomes spwn:node
 grep "spwn:node\|node" spwn/agents/neo/agent.yaml   # → present
 ```
 
@@ -294,14 +293,14 @@ spwn install github:jterrazz/does-not-exist  # → rc ≤ 1 (clean error OR plan
 #### 28. Local refs refused without `--agent`
 
 ```bash
-spwn init && echo "# test" > spwn/skills/myskill.md
+station project create p && cd p && echo "# test" > spwn/skills/myskill.md
 spwn install skill:myskill                   # → exit != 0 (no --agent)
 ```
 
 #### 29. Lockfile deterministic ordering
 
 ```bash
-spwn init && spwn install python && spwn install node
+station project create p && cd p && spwn install python && spwn install node
 diff <(grep '^spwn:' spwn.lock) <(grep '^spwn:' spwn.lock | sort)
 # → zero diff
 ```
@@ -309,11 +308,11 @@ diff <(grep '^spwn:' spwn.lock) <(grep '^spwn:' spwn.lock | sort)
 #### 30. Repeated `spwn install` keeps project valid
 
 ```bash
-spwn init
+station project create p && cd p
 spwn install python
 spwn install node
 spwn install git
-spwn check                                   # → exit 0
+station project plan                                   # → exit 0
 ```
 
 ---
@@ -327,7 +326,7 @@ a real production image.
 #### 31. matrix scaffold spawns; `spwn world list` shows running
 
 ```bash
-spwn init spwn:matrix && spwn up
+station project create --from matrix && cd matrix && spwn up
 spwn world list                              # → table contains "running"
 spwn down
 ```
@@ -339,7 +338,7 @@ Pre-fix: `Agent home: ~/.spwn/agents/neo → /agents/neo`. Post-fix: the project
 the inspect output.
 
 ```bash
-spwn init spwn:matrix && spwn up
+station project create --from matrix && cd matrix && spwn up
 spwn world inspect $(docker ps --format '{{.Names}}' --filter name=world-)
 # → output includes ".../spwn/agents/<name>" path
 ```
@@ -347,7 +346,7 @@ spwn world inspect $(docker ps --format '{{.Names}}' --filter name=world-)
 #### 33. `spwn world list --json` is valid JSON
 
 ```bash
-spwn init spwn:matrix && spwn up
+station project create --from matrix && cd matrix && spwn up
 spwn world list --json                       # → parseable JSON, has "worlds" key
 spwn down
 ```
@@ -355,14 +354,14 @@ spwn down
 #### 34. `spwn down <id>` destroys a single world
 
 ```bash
-spwn init spwn:matrix && spwn up
+station project create --from matrix && cd matrix && spwn up
 spwn down world-matrix-<runtime-suffix>      # → exit 0
 ```
 
 #### 35. `spwn world list` shows nothing after `spwn down`
 
 ```bash
-spwn init spwn:matrix && spwn up && spwn down
+station project create --from matrix && cd matrix && spwn up && spwn down
 spwn world list --json 2>&1                # → no "running"
 ```
 
@@ -371,7 +370,7 @@ spwn world list --json 2>&1                # → no "running"
 Two forms:
 
 ```bash
-spwn init spwn:matrix && spwn up
+station project create --from matrix && cd matrix && spwn up
 spwn logs --world matrix                     # → exit 0 (config name)
 spwn world logs world-matrix-<suffix>        # → exit 0 (runtime id)
 spwn down
@@ -380,7 +379,7 @@ spwn down
 #### 37. `spwn world inspect` happy + not-found
 
 ```bash
-spwn init spwn:matrix && spwn up
+station project create --from matrix && cd matrix && spwn up
 spwn world inspect <real-id>                 # → exit 0
 spwn world inspect world-does-not-exist-12345  # → exit != 0
 ```
@@ -388,7 +387,7 @@ spwn world inspect world-does-not-exist-12345  # → exit != 0
 #### 38. Knowledge mount propagates into `/world/knowledge/`
 
 ```bash
-spwn init spwn:matrix
+station project create --from matrix && cd matrix
 mkdir knowledge && echo "test fact" > knowledge/fact.md
 # add "knowledge: ./knowledge" to the matrix entry in spwn.yaml
 spwn up
@@ -399,7 +398,7 @@ spwn down
 #### 39. Workspaces mount at `/workspaces/<name>/`
 
 ```bash
-spwn init spwn:matrix
+station project create --from matrix && cd matrix
 spwn up -w .                                 # mount cwd as a workspace
 docker exec <id> ls /workspaces/             # → non-empty
 ```
@@ -407,7 +406,7 @@ docker exec <id> ls /workspaces/             # → non-empty
 #### 40. After `spwn down`, matrix containers are gone
 
 ```bash
-spwn init spwn:matrix && spwn up
+station project create --from matrix && cd matrix && spwn up
 # docker ps filter name=world-matrix → one container
 spwn down
 # docker ps filter name=world-matrix → empty
@@ -421,51 +420,50 @@ spwn down
 
 ```bash
 printf "version: 1\nname: bad\nworlds:\n  mat: [ broken\n" > spwn.yaml
-spwn check                                   # → exit != 0, mentions "yaml" or "line"
+station project plan                                   # → exit != 0, mentions "yaml" or "line"
 ```
 
 #### 42. Unicode agent name is handled cleanly
 
 ```bash
-spwn init && station agents create 日本              # rc ≤ 1 (reject or slugify, no crash)
+station project create p && cd p && station agents create 日本              # rc ≤ 1 (reject or slugify, no crash)
 ```
 
 #### 43. Very long agent name (>63 chars, slug boundary)
 
 ```bash
-spwn init && station agents create $(printf 'x%.0s' {1..80})   # rc ≤ 1
+station project create p && cd p && station agents create $(printf 'x%.0s' {1..80})   # rc ≤ 1
 ```
 
 #### 44. Empty `dependencies: []` is valid
 
 ```bash
-spwn init
+station project create p && cd p
 # rewrite spwn/agents/neo/agent.yaml with dependencies: []
-spwn check                                   # → exit 0
+station project plan                                   # → exit 0
 ```
 
 #### 45. Corrupted `spwn.lock` recovers via install
 
 ```bash
-spwn init
+station project create p && cd p
 printf "garbage content\n" > spwn.lock
-spwn check                                   # → rc ≤ 1 (either flags or tolerates)
+station project plan                                   # → rc ≤ 1 (either flags or tolerates)
 spwn install python                          # → exit 0 (regenerates lock)
 ```
 
 #### 46. Project discovery walks upward
 
 ```bash
-spwn init && mkdir -p a/b/c && cd a/b/c
-spwn check                                   # → finds spwn.yaml two dirs up, exit 0
+station project create p && cd p && mkdir -p a/b/c && cd a/b/c
+station project plan                                   # → finds spwn.yaml two dirs up, exit 0
 ```
 
 #### 47. Sibling projects are isolated
 
 ```bash
-mkdir p1 p2
-(cd p1 && spwn init && station agents create alice)
-(cd p2 && spwn init && station agents create bob)
+station project create p1 && (cd p1 && station agents create alice)
+station project create p2 && (cd p2 && station agents create bob)
 cd p1 && station agents --json               # → alice present, bob absent
 ```
 
@@ -482,11 +480,11 @@ spwn --help                                  # → contains "Quick Start" + "Ent
 spwn help                                    # → same (alias)
 ```
 
-#### 50. Full three-verb sanity: init, up, exec-inside, down
+#### 50. Full three-verb sanity: create, up, exec-inside, down
 
 ```bash
-spwn init spwn:matrix                        # → exit 0
-spwn check                                   # → exit 0
+station project create --from matrix && cd matrix                        # → exit 0
+station project plan                                   # → exit 0
 spwn up                                      # → exit 0
 docker exec <id> ls /agents/neo/CLAUDE.md    # → exit 0 (file exists inside)
 spwn down                                    # → exit 0

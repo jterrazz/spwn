@@ -202,7 +202,7 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 	}
 	if err != nil {
 		return s.FailHint("Config failed", fmt.Errorf("cannot load %q: %w", configName, err),
-			"Run \"spwn init\" to create default configs")
+			"Run \"station project create <name>\" to make a project")
 	}
 
 	if err := world.ValidateManifest(m); err != nil {

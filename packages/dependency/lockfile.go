@@ -22,6 +22,8 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+
+	"spwn.sh/packages/platform"
 )
 
 // LockFileName is the canonical lockfile basename at the project root.
@@ -55,6 +57,27 @@ func EmptyLockfile() *Lockfile {
 	}
 }
 
+// Encode returns the bytes of spwn.lock for l: its header, then one
+// line per dependency, sorted by reference.
+func (l *Lockfile) Encode() []byte {
+	var b strings.Builder
+	b.WriteString("# spwn.lock: DO NOT EDIT\n")
+	keys := make([]string, 0, len(l.Deps))
+	for k := range l.Deps {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	for _, k := range keys {
+		e := l.Deps[k]
+		version := e.Version
+		if version == "" {
+			version = "latest"
+		}
+		fmt.Fprintf(&b, "%s %s %s\n", k, version, e.Source)
+	}
+	return []byte(b.String())
+}
+
 // Path returns the canonical lockfile location for a project root.
 func LockfilePath(projectRoot string) string {
 	return filepath.Join(projectRoot, LockFileName)
@@ -62,7 +85,9 @@ func LockfilePath(projectRoot string) string {
 
 // Exists reports whether a lockfile is present at the given project root.
 func LockfileExists(projectRoot string) bool {
-	_, err := os.Stat(LockfilePath(projectRoot))
+	t := platform.Within(projectRoot)
+	defer t.Close()
+	_, err := t.Stat(LockfilePath(projectRoot))
 	return err == nil
 }
 
@@ -70,7 +95,14 @@ func LockfileExists(projectRoot string) bool {
 // does not exist so callers can distinguish "never installed" from
 // "corrupted".
 func LoadLockfile(projectRoot string) (*Lockfile, error) {
-	data, err := os.ReadFile(LockfilePath(projectRoot))
+	t := platform.Within(projectRoot)
+	defer t.Close()
+	return ReadLockfile(t)
+}
+
+// ReadLockfile is LoadLockfile through the project's tree t.
+func ReadLockfile(t *platform.Tree) (*Lockfile, error) {
+	data, err := t.ReadFile(LockfilePath(t.Dir()))
 	if err != nil {
 		if os.IsNotExist(err) {
 			return nil, nil
@@ -118,22 +150,7 @@ func SaveLockfile(projectRoot string, l *Lockfile) error {
 	if l == nil {
 		return fmt.Errorf("nil lockfile")
 	}
-	var b strings.Builder
-	b.WriteString("# spwn.lock: DO NOT EDIT\n")
-	keys := make([]string, 0, len(l.Deps))
-	for k := range l.Deps {
-		keys = append(keys, k)
-	}
-	sort.Strings(keys)
-	for _, k := range keys {
-		e := l.Deps[k]
-		version := e.Version
-		if version == "" {
-			version = "latest"
-		}
-		fmt.Fprintf(&b, "%s %s %s\n", k, version, e.Source)
-	}
-	if err := os.WriteFile(LockfilePath(projectRoot), []byte(b.String()), 0o644); err != nil {
+	if err := os.WriteFile(LockfilePath(projectRoot), l.Encode(), 0o644); err != nil {
 		return fmt.Errorf("write %s: %w", LockFileName, err)
 	}
 	return nil
