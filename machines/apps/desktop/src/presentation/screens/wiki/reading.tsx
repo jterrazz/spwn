@@ -1,15 +1,71 @@
-import type { WikiServed, WikiServedFloor, WikiServedSection } from '@jterrazz/station-api';
+import type {
+    WikiServed,
+    WikiServedFinding,
+    WikiServedFloor,
+    WikiServedSection,
+} from '@jterrazz/station-api';
 
 import { Picks, StateDot } from '../../ui/index';
 import { countOf } from '../../words/engine-words';
-import { WIKI_LEVEL_TONES, WIKI_LEVEL_WORDS, WIKI_WORDS } from '../../words/wiki';
+import {
+    WIKI_ATTENTION_WORDS,
+    WIKI_LEVEL_TONES,
+    WIKI_LEVEL_WORDS,
+    WIKI_WORDS,
+} from '../../words/wiki';
 import { DotIcon } from './dot-icon';
-import { Findings } from './fields';
+import { Findings, placeOf } from './fields';
 import type { Reader } from './fields';
 import { Bento, isLight, runsOf } from './items';
 import { Prose } from './prose';
 
 import styles from './wiki.module.css';
+
+const LISTED = 5;
+
+// value: each finding of the page, in the engine's order, as a way to where it sits.
+function Attention({ page, findings }: { page: string; findings: readonly WikiServedFinding[] }) {
+    if (findings.length === 0) {
+        return null;
+    }
+    const listed = findings.slice(0, LISTED);
+    const rest = findings.length - listed.length;
+    return (
+        <ul aria-label={WIKI_ATTENTION_WORDS.title} className={styles.attention}>
+            {listed.map((finding) => (
+                <li key={`${finding.At}-${finding.Rule}-${String(finding.Line)}`}>
+                    <button
+                        className={styles.attentionRow}
+                        data-tone={WIKI_LEVEL_TONES[finding.Level]}
+                        onClick={() => {
+                            document
+                                .querySelector(`#${placeOf(finding.At === '' ? page : finding.At)}`)
+                                ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }}
+                        title={finding.Says}
+                        type="button"
+                    >
+                        <StateDot
+                            tone={WIKI_LEVEL_TONES[finding.Level]}
+                            word={WIKI_LEVEL_WORDS[finding.Level]}
+                        />
+                        <span className={styles.attentionWord}>
+                            {finding.Word === '' ? WIKI_ATTENTION_WORDS.page : finding.Word}
+                        </span>
+                        <span className={styles.attentionLevel}>
+                            {WIKI_LEVEL_WORDS[finding.Level]}
+                        </span>
+                    </button>
+                </li>
+            ))}
+            {rest === 0 ? null : (
+                <li className={styles.sideFoot}>
+                    +{rest} {WIKI_ATTENTION_WORDS.others}
+                </li>
+            )}
+        </ul>
+    );
+}
 
 function Side({ served, onBudget }: { served: WikiServed; onBudget: (budget: string) => void }) {
     const budgets = (served.Budgets ?? []).map((budget) => ({ id: budget, title: budget }));
@@ -33,6 +89,7 @@ function Side({ served, onBudget }: { served: WikiServed; onBudget: (budget: str
                     <b>{needs}</b> {WIKI_LEVEL_WORDS['needs-you']}
                 </span>
             )}
+            <Attention findings={served.Attention ?? []} page={served.Page.ID} />
             {folded === 0 ? null : (
                 <span className={styles.sideFoot}>
                     {countOf('block', folded)} {WIKI_WORDS.folded}
@@ -127,7 +184,7 @@ function Ladder({ floors }: { floors: readonly WikiServedFloor[] }) {
 function Head({ served, onBudget }: { served: WikiServed; onBudget: (budget: string) => void }) {
     const { Floor, Page } = served;
     return (
-        <header className={styles.pageHead}>
+        <header className={styles.pageHead} id={placeOf(Page.ID)}>
             <div className={styles.headMain}>
                 <Ladder floors={served.Floors ?? []} />
                 <div className={styles.pageMeta}>

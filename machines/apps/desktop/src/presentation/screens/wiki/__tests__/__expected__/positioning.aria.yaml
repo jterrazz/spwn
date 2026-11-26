@@ -26,7 +26,13 @@
         - button "2min" [pressed]
         - button "10min"
       - img "needs you"
-      - text: 1 needs you 4 blocks folded at this reading time
+      - text: 1 needs you
+      - list "Needs you":
+        - listitem:
+          - button "needs you Positioning needs you":
+            - img "needs you"
+            - text: Positioning needs you
+      - text: 4 blocks folded at this reading time
     - region "The category it refuses":
       - heading "The category it refuses" [level=2]
       - paragraph: "Spwn is not sold as an agent framework, an AI platform or a tool that makes more output. Each of those is judged by how much it produces, and production is what became cheap (what changed). Spwn is judged by whether you still understand and own what was produced: the one enemy is losing your thread."

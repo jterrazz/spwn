@@ -185,6 +185,7 @@ page product/stack @30s floor=1 Produit seats=blueprint,[product],engineering,gr
   floors 0:0 [1:6] 2:0 3:0 4:0
   paragraph "Spwn's three spaces and what lives in each, for anyone deciding what a part of the app is for or where it goes: per space, what you let go of, what you keep, and whether it runs today. The structure is the owner's, decided on 2026-11-22 ([his words](../blueprint/owner-words.md#the-three-spaces-of-the-app)); the record is [ADR-003](./decisions/003-the-three-spaces-are-the-structure-of-the-app.md). It replaces the six-rung ladder of [ADR-002](./decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder.md)."
   finding needs-you S6 "product/stack" rests on this page's reading: you have not ruled
+  attention needs-you S6 at= "The stack"
   section the-three-spaces "The three spaces" rests=false
     group parts define blocks=6 folded=budget lead=""
       block product/stack#machines part icon=part tier=quiet shown=none "the file that describes it"
@@ -232,6 +233,7 @@ page product/stack @2min floor=1 Produit seats=blueprint,[product],engineering,g
   floors 0:0 [1:6] 2:0 3:0 4:0
   paragraph "Spwn's three spaces and what lives in each, for anyone deciding what a part of the app is for or where it goes: per space, what you let go of, what you keep, and whether it runs today. The structure is the owner's, decided on 2026-11-22 ([his words](../blueprint/owner-words.md#the-three-spaces-of-the-app)); the record is [ADR-003](./decisions/003-the-three-spaces-are-the-structure-of-the-app.md). It replaces the six-rung ladder of [ADR-002](./decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder.md)."
   finding needs-you S6 "product/stack" rests on this page's reading: you have not ruled
+  attention needs-you S6 at= "The stack"
   section the-three-spaces "The three spaces" rests=false
     plain "The layers of the Spwn app are three great concepts, and in the future three distinct spaces in its GUI. The owner drew each as the running of a company:"
     head "Space" | "The company it is the parallel of" | "State"
@@ -288,6 +290,7 @@ page product/stack @10min floor=1 Produit seats=blueprint,[product],engineering,
   floors 0:0 [1:6] 2:0 3:0 4:0
   paragraph "Spwn's three spaces and what lives in each, for anyone deciding what a part of the app is for or where it goes: per space, what you let go of, what you keep, and whether it runs today. The structure is the owner's, decided on 2026-11-22 ([his words](../blueprint/owner-words.md#the-three-spaces-of-the-app)); the record is [ADR-003](./decisions/003-the-three-spaces-are-the-structure-of-the-app.md). It replaces the six-rung ladder of [ADR-002](./decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder.md)."
   finding needs-you S6 "product/stack" rests on this page's reading: you have not ruled
+  attention needs-you S6 at= "The stack"
   section the-three-spaces "The three spaces" rests=false
     plain "The layers of the Spwn app are three great concepts, and in the future three distinct spaces in its GUI. The owner drew each as the running of a company:"
     head "Space" | "The company it is the parallel of" | "State"
@@ -344,6 +347,9 @@ page product/boundaries @30s floor=1 Produit seats=blueprint,[product],engineeri
   floors 0:0 [1:11] 2:0 3:2 4:0
   paragraph "What Spwn is not, and what each of its parts refuses to be, for anyone weighing a feature that sits near an edge. The owner confirmed the five boundaries of Spwn on 2026-11-21 ([his answer](../blueprint/owner-words.md#why-spwn-exists)); the record is [ADR-002](#one-stack), accepted."
   finding needs-you S6 "product/boundaries" rests on this page's reading: you have not ruled
+  attention needs-you S6 at= "Boundaries"
+  attention needs-you S6 at=product/boundaries#no-computer "no-computer"
+  attention needs-you S6 at=product/boundaries#os-holds-no-facts "os-holds-no-facts"
     block product/boundaries#one-stack decision icon=decision tier=lead shown=tile "Spwn is one stack of six apps on one ladder."
       field adr "studio-os:home/spwn/wiki/product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder.md" 
       field decides "Spwn is one stack of six apps on one ladder." 
@@ -386,7 +392,7 @@ page product/boundaries @30s floor=1 Produit seats=blueprint,[product],engineeri
       field by ""  refs=product/stack#agents
       field refuses "to hold security in an agent's instructions: what is forbidden does not exist in the world" 
       field because "studio-os:home/spwn/wiki/engineering/decisions/001-security-as-physics.md" 
-    block product/boundaries#no-computer refusal icon=refusal tier=lead shown=tile "to prepare the computer an agent runs on: that is Machines' space"
+    block product/boundaries#no-computer refusal icon=refusal tier=lead shown=tile needs-you "to prepare the computer an agent runs on: that is Machines' space"
       field by ""  refs=product/stack#agents
       field refuses "to prepare the computer an agent runs on: that is Machines' space" 
       field because ""  refs=product/stack
@@ -395,7 +401,7 @@ page product/boundaries @30s floor=1 Produit seats=blueprint,[product],engineeri
       field by ""  refs=product/stack#wiki
       field refuses "to decide what is true: you write the facts, agents read them" 
       field because ""  refs=blueprint/philosophy#taste
-    block product/boundaries#os-holds-no-facts refusal icon=refusal tier=normal shown=none "to be a second place where facts live, or to hide the detail with no way down to it"
+    block product/boundaries#os-holds-no-facts refusal icon=refusal tier=normal shown=none needs-you "to be a second place where facts live, or to hide the detail with no way down to it"
       field by ""  refs=product/stack#os
       field refuses "to be a second place where facts live, or to hide the detail with no way down to it" 
       field because ""  refs=blueprint/philosophy#delegating
@@ -406,6 +412,9 @@ page product/boundaries @2min floor=1 Produit seats=blueprint,[product],engineer
   floors 0:0 [1:11] 2:0 3:2 4:0
   paragraph "What Spwn is not, and what each of its parts refuses to be, for anyone weighing a feature that sits near an edge. The owner confirmed the five boundaries of Spwn on 2026-11-21 ([his answer](../blueprint/owner-words.md#why-spwn-exists)); the record is [ADR-002](#one-stack), accepted."
   finding needs-you S6 "product/boundaries" rests on this page's reading: you have not ruled
+  attention needs-you S6 at= "Boundaries"
+  attention needs-you S6 at=product/boundaries#no-computer "no-computer"
+  attention needs-you S6 at=product/boundaries#os-holds-no-facts "os-holds-no-facts"
     block product/boundaries#one-stack decision icon=decision tier=lead shown=card "Spwn is one stack of six apps on one ladder."
       field adr "studio-os:home/spwn/wiki/product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder.md" 
       field decides "Spwn is one stack of six apps on one ladder." 
@@ -449,7 +458,7 @@ page product/boundaries @2min floor=1 Produit seats=blueprint,[product],engineer
       field by ""  refs=product/stack#agents
       field refuses "to hold security in an agent's instructions: what is forbidden does not exist in the world" 
       field because "studio-os:home/spwn/wiki/engineering/decisions/001-security-as-physics.md" 
-    block product/boundaries#no-computer refusal icon=refusal tier=lead shown=card "to prepare the computer an agent runs on: that is Machines' space"
+    block product/boundaries#no-computer refusal icon=refusal tier=lead shown=card needs-you "to prepare the computer an agent runs on: that is Machines' space"
       field by ""  refs=product/stack#agents
       field refuses "to prepare the computer an agent runs on: that is Machines' space" 
       field because ""  refs=product/stack
@@ -458,7 +467,7 @@ page product/boundaries @2min floor=1 Produit seats=blueprint,[product],engineer
       field by ""  refs=product/stack#wiki
       field refuses "to decide what is true: you write the facts, agents read them" 
       field because ""  refs=blueprint/philosophy#taste
-    block product/boundaries#os-holds-no-facts refusal icon=refusal tier=normal shown=line "to be a second place where facts live, or to hide the detail with no way down to it"
+    block product/boundaries#os-holds-no-facts refusal icon=refusal tier=normal shown=line needs-you "to be a second place where facts live, or to hide the detail with no way down to it"
       field by ""  refs=product/stack#os
       field refuses "to be a second place where facts live, or to hide the detail with no way down to it" 
       field because ""  refs=blueprint/philosophy#delegating
@@ -471,6 +480,9 @@ page product/boundaries @10min floor=1 Produit seats=blueprint,[product],enginee
   floors 0:0 [1:11] 2:0 3:2 4:0
   paragraph "What Spwn is not, and what each of its parts refuses to be, for anyone weighing a feature that sits near an edge. The owner confirmed the five boundaries of Spwn on 2026-11-21 ([his answer](../blueprint/owner-words.md#why-spwn-exists)); the record is [ADR-002](#one-stack), accepted."
   finding needs-you S6 "product/boundaries" rests on this page's reading: you have not ruled
+  attention needs-you S6 at= "Boundaries"
+  attention needs-you S6 at=product/boundaries#no-computer "no-computer"
+  attention needs-you S6 at=product/boundaries#os-holds-no-facts "os-holds-no-facts"
     block product/boundaries#one-stack decision icon=decision tier=lead shown=tile "Spwn is one stack of six apps on one ladder."
       field adr "studio-os:home/spwn/wiki/product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder.md" 
       field decides "Spwn is one stack of six apps on one ladder." 
@@ -514,7 +526,7 @@ page product/boundaries @10min floor=1 Produit seats=blueprint,[product],enginee
       field by ""  refs=product/stack#agents
       field refuses "to hold security in an agent's instructions: what is forbidden does not exist in the world" 
       field because "studio-os:home/spwn/wiki/engineering/decisions/001-security-as-physics.md" 
-    block product/boundaries#no-computer refusal icon=refusal tier=lead shown=tile "to prepare the computer an agent runs on: that is Machines' space"
+    block product/boundaries#no-computer refusal icon=refusal tier=lead shown=tile needs-you "to prepare the computer an agent runs on: that is Machines' space"
       field by ""  refs=product/stack#agents
       field refuses "to prepare the computer an agent runs on: that is Machines' space" 
       field because ""  refs=product/stack
@@ -523,7 +535,7 @@ page product/boundaries @10min floor=1 Produit seats=blueprint,[product],enginee
       field by ""  refs=product/stack#wiki
       field refuses "to decide what is true: you write the facts, agents read them" 
       field because ""  refs=blueprint/philosophy#taste
-    block product/boundaries#os-holds-no-facts refusal icon=refusal tier=normal shown=card "to be a second place where facts live, or to hide the detail with no way down to it"
+    block product/boundaries#os-holds-no-facts refusal icon=refusal tier=normal shown=card needs-you "to be a second place where facts live, or to hide the detail with no way down to it"
       field by ""  refs=product/stack#os
       field refuses "to be a second place where facts live, or to hide the detail with no way down to it" 
       field because ""  refs=blueprint/philosophy#delegating
@@ -536,6 +548,7 @@ page growth/positioning @30s floor=1 Produit seats=blueprint,product,engineering
   floors 0:0 [1:5] 2:0 3:0 4:0
   paragraph "Where Spwn stands against what a person uses today instead, for anyone writing a comparison, a pitch or an answer to \"how is it different\": the category it refuses, the four alternatives and what each costs. What Spwn is, in one sentence, is [the vision](../blueprint/vision.md#the-definition)'s and is not restated here."
   finding needs-you S6 "growth/positioning" rests on this page's reading: you have not ruled
+  attention needs-you S6 at= "Positioning"
   section the-category-it-refuses "The category it refuses" rests=false
     block growth/positioning#lead-with-the-thread rule icon=soft tier=quiet shown=none "A comparison never leads with speed, model quality or the number of integrations."
       field says "A comparison never leads with speed, model quality or the number of integrations." 
@@ -573,6 +586,7 @@ page growth/positioning @2min floor=1 Produit seats=blueprint,product,engineerin
   floors 0:0 [1:5] 2:0 3:0 4:0
   paragraph "Where Spwn stands against what a person uses today instead, for anyone writing a comparison, a pitch or an answer to \"how is it different\": the category it refuses, the four alternatives and what each costs. What Spwn is, in one sentence, is [the vision](../blueprint/vision.md#the-definition)'s and is not restated here."
   finding needs-you S6 "growth/positioning" rests on this page's reading: you have not ruled
+  attention needs-you S6 at= "Positioning"
   section the-category-it-refuses "The category it refuses" rests=false
     plain "Spwn is not sold as an agent framework, an AI platform or a tool that makes more output. Each of those is judged by how much it produces, and production is what became cheap ([what changed](../blueprint/vision.md#what-changed)). Spwn is judged by whether you still understand and own what was produced: the one enemy is [losing your thread](../blueprint/vision.md#the-enemy-losing-your-thread)."
     block growth/positioning#lead-with-the-thread rule icon=soft tier=quiet shown=counted "A comparison never leads with speed, model quality or the number of integrations."
@@ -614,6 +628,7 @@ page growth/positioning @10min floor=1 Produit seats=blueprint,product,engineeri
   floors 0:0 [1:5] 2:0 3:0 4:0
   paragraph "Where Spwn stands against what a person uses today instead, for anyone writing a comparison, a pitch or an answer to \"how is it different\": the category it refuses, the four alternatives and what each costs. What Spwn is, in one sentence, is [the vision](../blueprint/vision.md#the-definition)'s and is not restated here."
   finding needs-you S6 "growth/positioning" rests on this page's reading: you have not ruled
+  attention needs-you S6 at= "Positioning"
   section the-category-it-refuses "The category it refuses" rests=false
     plain "Spwn is not sold as an agent framework, an AI platform or a tool that makes more output. Each of those is judged by how much it produces, and production is what became cheap ([what changed](../blueprint/vision.md#what-changed)). Spwn is judged by whether you still understand and own what was produced: the one enemy is [losing your thread](../blueprint/vision.md#the-enemy-losing-your-thread)."
     block growth/positioning#lead-with-the-thread rule icon=soft tier=quiet shown=line "A comparison never leads with speed, model quality or the number of integrations."
@@ -728,6 +743,7 @@ page product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder @10min fl
   floors 0:0 [1:0] 2:0 3:0 4:0
   paragraph "**Status:** Accepted **Date:** 2026-11-21 **Amended by:** [ADR-003](./003-the-three-spaces-are-the-structure-of-the-app.md) (the ladder) **Amends:** [growth ADR-007](../../growth/decisions/007-spwn-is-the-ai-stack-that-abstracts-everything-but-you.md)"
   finding ambient S8 page "product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder" is prose only
+  attention ambient S8 at= "ADR-002: Spwn is one stack of six apps on one ladder"
     plain "An agent leaves the status `Proposed`; only the owner writes `Accepted`."
   section decision "Decision" rests=false
     plain "Six apps, in this order on one ladder: Machines, Agents, Wiki, Specs, Design, OS."
@@ -748,6 +764,7 @@ page machines/decisions/035-a-port-is-a-right-with-an-audience @10min floor=3 Ar
   floors 0:0 1:0 2:0 [3:0] 4:0
   paragraph "**Status:** Accepted **Date:** 2026-11-11"
   finding ambient S8 page "machines/decisions/035-a-port-is-a-right-with-an-audience" is prose only
+  attention ambient S8 at= "ADR-035: A port is a right with an audience"
     plain "Amends [ADR-018](018-two-port-classes.md). Amended by [ADR-086](086-a-vm-reserves-a-packages-port-only-when-its-machinefile-installs-it.md)."
   section decision "Decision" rests=false
     plain "A machine's ports are rights, never an inventory."

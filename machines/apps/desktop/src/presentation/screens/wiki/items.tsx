@@ -11,7 +11,7 @@ import { countOf } from '../../words/engine-words';
 import { WIKI_FOLDED_WORDS, WIKI_WORDS } from '../../words/wiki';
 import { Card, FloorMark, Lines, TileBlock } from './block';
 import { DotIcon } from './dot-icon';
-import { Findings } from './fields';
+import { attentionOf, Findings, placeOf } from './fields';
 import type { Reader } from './fields';
 import { Prose } from './prose';
 
@@ -260,7 +260,11 @@ function Group({
     if (!open) {
         const blocks = blocksOf(group.Items ?? []);
         return (
-            <section aria-label={group.Title} className={`${span ?? ''} ${styles.foldedGroup}`}>
+            <section
+                aria-label={group.Title}
+                className={`${span ?? ''} ${styles.foldedGroup ?? ''} ${attentionOf(group.NeedsYou)}`}
+                id={placeOf(group.Address)}
+            >
                 <GroupHead group={group} reader={reader} toggle={toggle} />
                 {group.Lead === '' ? null : <p className={styles.groupLead}>{group.Lead}</p>}
                 <div className={styles.chips}>
@@ -283,7 +287,11 @@ function Group({
         );
     }
     return (
-        <section aria-label={group.Title} className={`${styles.whole} ${styles.group}`}>
+        <section
+            aria-label={group.Title}
+            className={`${styles.whole ?? ''} ${styles.group ?? ''}`}
+            id={placeOf(group.Address)}
+        >
             <GroupHead group={group} reader={reader} toggle={toggle} />
             <Bento items={group.Items ?? []} reader={reader} />
         </section>

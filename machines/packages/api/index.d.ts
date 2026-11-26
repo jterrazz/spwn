@@ -3334,6 +3334,7 @@ export type WikiSeatHead = {
 };
 
 export type WikiServed = {
+    Attention: WikiServedFinding[] | null;
     Budget: string;
     Budgets: string[] | null;
     Findings: WikiServedFinding[] | null;
@@ -3361,6 +3362,7 @@ export type WikiServedBlock = {
     Icon: string;
     Kind: string;
     Line: string;
+    NeedsYou: boolean;
     OwnFloor: WikiFloorHead | null;
     Score: number;
     Shown: '' | 'card' | 'counted' | 'line' | 'none' | 'tile';
@@ -3401,11 +3403,13 @@ export type WikiServedFigure = {
 };
 
 export type WikiServedFinding = {
+    At: string;
     Hard: boolean;
     Level: '' | 'ambient' | 'needs-you' | 'remark';
     Line: number;
     Rule: string;
     Says: string;
+    Word: string;
 };
 
 export type WikiServedFloor = {
@@ -3417,12 +3421,14 @@ export type WikiServedFloor = {
 };
 
 export type WikiServedGroup = {
+    Address: string;
     Blocks: number;
     Folded: '' | 'author' | 'budget' | 'seat';
     ID: string;
     Intent: string;
     Items: WikiServedItem[] | null;
     Lead: string;
+    NeedsYou: boolean;
     OwnFloor: WikiFloorHead | null;
     ReadBy: string[] | null;
     Title: string;

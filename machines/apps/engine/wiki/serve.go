@@ -31,8 +31,11 @@ type Served struct {
 	// need the owner, on the page or its blocks, and the blocks this budget
 	// does not show, a folded group counting all of its own.
 	NeedsYou, Unshown int
-	Icons             map[string][]string
-	Verdict           Verdict
+	// value: every finding served on the page and its blocks, in the order
+	// a reader is asked to look at them, what needs the owner first.
+	Attention []ServedFinding
+	Icons     map[string][]string
+	Verdict   Verdict
 }
 
 type PageHead struct {
@@ -91,9 +94,12 @@ type ServedItem struct {
 }
 
 type ServedGroup struct {
-	ID     string
-	Title  string
-	Intent Intent
+	ID      string
+	Address string
+	// value: a block it holds raises what needs the owner.
+	NeedsYou bool
+	Title    string
+	Intent   Intent
 	// value: why it opens folded: its author wrote fold, the seat of the
 	// page reads no group of its intent, or the budget folds every group;
 	// empty when it opens.
@@ -151,6 +157,8 @@ type ServedBlock struct {
 	Figure   *ServedFigure
 	Decision *ServedDecision
 	Finding  []ServedFinding
+	// value: one of its findings needs the owner.
+	NeedsYou bool
 }
 
 type ServedField struct {
@@ -196,6 +204,11 @@ type ServedFinding struct {
 	Level Level
 	Line  int
 	Says  string
+	// value: where the reader finds what it is about: the address of its
+	// block, or of the group served folded that holds it, empty for the
+	// page's own head; and the word of what it is about.
+	At   string
+	Word string
 }
 
 var (
@@ -287,7 +300,7 @@ func (c Corpus) Serve(id string, budget Budget) (Served, error) {
 			out.Verdict.Soft++
 		}
 		if f.Page == p.ID && f.Block == "" && s.signals(f) {
-			out.Findings = append(out.Findings, served(f))
+			out.Findings = append(out.Findings, served(f, "", p.Faces.Word))
 		}
 	}
 	for si, sec := range p.Sections {
@@ -305,42 +318,28 @@ func (c Corpus) Serve(id string, budget Budget) (Served, error) {
 			ss.Items = append(ss.Items, s.item(p, reading, it, false))
 		}
 		out.Sections = append(out.Sections, ss)
-		needs, unshown := tally(ss.Items)
-		out.NeedsYou += needs
-		out.Unshown += unshown
+		out.Unshown += tally(ss.Items)
 	}
-	out.NeedsYou += needsYou(out.Findings)
+	out.Findings = ranked(out.Findings)
+	out.Attention = attention(out.Findings, out.Sections)
+	out.NeedsYou = needsYou(out.Attention)
 	return out, nil
 }
 
-func tally(items []ServedItem) (needs, unshown int) {
+func tally(items []ServedItem) (unshown int) {
 	for _, it := range items {
-		if b := it.Block; b != nil {
-			needs += needsYou(b.Finding)
-			if b.Shown == ShownNone {
-				unshown++
-			}
+		if b := it.Block; b != nil && b.Shown == ShownNone {
+			unshown++
 		}
 		if g := it.Group; g != nil {
-			n, u := tally(g.Items)
+			u := tally(g.Items)
 			if g.Folded != "" {
 				u = g.Blocks
 			}
-			needs += n
 			unshown += u
 		}
 	}
-	return needs, unshown
-}
-
-func needsYou(findings []ServedFinding) int {
-	n := 0
-	for _, f := range findings {
-		if f.Level == LevelNeedsYou {
-			n++
-		}
-	}
-	return n
+	return unshown
 }
 
 type server struct {
@@ -480,7 +479,7 @@ func restsOn(heading string) bool { return strings.EqualFold(heading, "rests on"
 
 func (s *server) group(p *Page, r Reading, g *Group) *ServedGroup {
 	gr := s.readings[p.ID+"#"+g.ID]
-	out := &ServedGroup{ID: g.ID, Title: g.Title, Intent: g.Intent, ReadBy: gr.ReadBy}
+	out := &ServedGroup{ID: g.ID, Address: p.ID + "#" + g.ID, Title: g.Title, Intent: g.Intent, ReadBy: gr.ReadBy}
 	switch {
 	case g.Fold:
 		out.Folded = FoldAuthor
@@ -496,6 +495,9 @@ func (s *server) group(p *Page, r Reading, g *Group) *ServedGroup {
 		}
 		if si.Block != nil && si.Block.OwnFloor != nil {
 			out.OwnFloor = si.Block.OwnFloor
+		}
+		if si.Block != nil && si.Block.NeedsYou {
+			out.NeedsYou = true
 		}
 		out.Items = append(out.Items, si)
 	}
@@ -522,9 +524,11 @@ func (s *server) block(p *Page, b *Block, grouped bool) *ServedBlock {
 	out.Shown = shown(out.Tier, s.budget, grouped)
 	for _, f := range s.c.Report.Findings {
 		if f.Page == p.ID && f.Block == b.ID && s.signals(f) {
-			out.Finding = append(out.Finding, served(f))
+			out.Finding = append(out.Finding, served(f, b.Address, out.Word))
 		}
 	}
+	out.Finding = ranked(out.Finding)
+	out.NeedsYou = needsYou(out.Finding) > 0
 	if b.Kind == "decision" {
 		out.Decision = s.decision(b)
 	}
@@ -581,8 +585,8 @@ func pick(wide bool, a, b Shown) Shown {
 	return b
 }
 
-func served(f Finding) ServedFinding {
-	return ServedFinding{Rule: f.Rule, Hard: f.Hard, Level: f.Level, Line: f.Line, Says: f.Says}
+func served(f Finding, at, word string) ServedFinding {
+	return ServedFinding{Rule: f.Rule, Hard: f.Hard, Level: f.Level, Line: f.Line, Says: f.Says, At: at, Word: word}
 }
 
 func (s *server) ref(address string) ServedRef {

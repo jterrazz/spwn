@@ -8,6 +8,16 @@ import styles from './wiki.module.css';
 
 export type Reader = { grids: Grids; open: (page: string) => void; seat: string };
 
+// value: the element a served address is drawn as, so a finding can lead the reader to it.
+export function placeOf(address: string): string {
+    return `wiki-${address.replaceAll(/[^\w-]/gu, '-')}`;
+}
+
+// value: the mark of a block or a group the engine says needs the owner.
+export function attentionOf(needsYou: boolean): string {
+    return needsYou ? (styles.needsYou ?? '') : '';
+}
+
 // value: the page a ref opens: its address up to the block it names.
 function pageOf(address: string): string {
     const [page = address] = address.split('#');
@@ -86,7 +96,11 @@ export function Findings({ findings }: { findings: null | readonly WikiServedFin
     return (
         <ul aria-label="Findings" className={styles.findings}>
             {listed.map((finding) => (
-                <li className={styles.finding} key={`${finding.Rule}-${String(finding.Line)}`}>
+                <li
+                    className={styles.finding}
+                    data-tone={WIKI_LEVEL_TONES[finding.Level]}
+                    key={`${finding.Rule}-${String(finding.Line)}`}
+                >
                     <StateDot
                         tone={WIKI_LEVEL_TONES[finding.Level]}
                         word={WIKI_LEVEL_WORDS[finding.Level]}

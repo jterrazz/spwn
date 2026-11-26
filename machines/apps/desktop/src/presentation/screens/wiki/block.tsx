@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { WIKI_WORDS } from '../../words/wiki';
 import { DecisionLook } from './decision';
 import { DotIcon } from './dot-icon';
-import { Fields, Findings } from './fields';
+import { attentionOf, Fields, Findings, placeOf } from './fields';
 import type { Reader } from './fields';
 import { FigureLook, TableLook } from './looks';
 
@@ -71,7 +71,11 @@ function Whole({
         return <DecisionLook block={block} decision={block.Decision} reader={reader} />;
     }
     return (
-        <article aria-label={`${block.Title} ${block.Word}`} className={styles[look]}>
+        <article
+            aria-label={`${block.Title} ${block.Word}`}
+            className={`${styles[look] ?? ''} ${attentionOf(block.NeedsYou)}`}
+            id={placeOf(block.Address)}
+        >
             <Head block={block} reader={reader} />
             <p className={look === 'tile' ? styles.tileLine : styles.cardLine}>{block.Line}</p>
             <Fields fields={block.Fields} line={block.Line} reader={reader} />
@@ -83,7 +87,10 @@ function Whole({
 function Line({ block, reader }: { block: WikiServedBlock; reader: Reader }) {
     const [open, setOpen] = useState(false);
     return (
-        <li className={styles.lineItem}>
+        <li
+            className={`${styles.lineItem ?? ''} ${attentionOf(block.NeedsYou)}`}
+            id={placeOf(block.Address)}
+        >
             <button
                 aria-expanded={open}
                 className={styles.line}

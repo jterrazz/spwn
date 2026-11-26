@@ -199,6 +199,15 @@
     "wiki.Served": {
       "additionalProperties": false,
       "properties": {
+        "Attention": {
+          "items": {
+            "$ref": "#/$defs/wiki.ServedFinding"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
         "Budget": {
           "type": "string"
         },
@@ -297,6 +306,7 @@
         }
       },
       "required": [
+        "Attention",
         "Budget",
         "Budgets",
         "Findings",
@@ -373,6 +383,9 @@
         "Line": {
           "type": "string"
         },
+        "NeedsYou": {
+          "type": "boolean"
+        },
         "OwnFloor": {
           "anyOf": [
             {
@@ -447,6 +460,7 @@
         "Icon",
         "Kind",
         "Line",
+        "NeedsYou",
         "OwnFloor",
         "Score",
         "Shown",
@@ -586,6 +600,9 @@
     "wiki.ServedFinding": {
       "additionalProperties": false,
       "properties": {
+        "At": {
+          "type": "string"
+        },
         "Hard": {
           "type": "boolean"
         },
@@ -606,14 +623,19 @@
         },
         "Says": {
           "type": "string"
+        },
+        "Word": {
+          "type": "string"
         }
       },
       "required": [
+        "At",
         "Hard",
         "Level",
         "Line",
         "Rule",
-        "Says"
+        "Says",
+        "Word"
       ],
       "type": "object"
     },
@@ -648,6 +670,9 @@
     "wiki.ServedGroup": {
       "additionalProperties": false,
       "properties": {
+        "Address": {
+          "type": "string"
+        },
         "Blocks": {
           "type": "integer"
         },
@@ -678,6 +703,9 @@
         "Lead": {
           "type": "string"
         },
+        "NeedsYou": {
+          "type": "boolean"
+        },
         "OwnFloor": {
           "anyOf": [
             {
@@ -702,12 +730,14 @@
         }
       },
       "required": [
+        "Address",
         "Blocks",
         "Folded",
         "ID",
         "Intent",
         "Items",
         "Lead",
+        "NeedsYou",
         "OwnFloor",
         "ReadBy",
         "Title"

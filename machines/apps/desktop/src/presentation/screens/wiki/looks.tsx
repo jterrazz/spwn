@@ -3,7 +3,7 @@ import type { WikiServedBlock, WikiServedFigure, WikiServedTable } from '@jterra
 import { SEPARATOR } from '../../../domain/separator';
 import { WIKI_WORDS } from '../../words/wiki';
 import { DotIcon } from './dot-icon';
-import { FieldValue, Ref } from './fields';
+import { attentionOf, FieldValue, placeOf, Ref } from './fields';
 import type { Reader } from './fields';
 
 import styles from './wiki.module.css';
@@ -23,7 +23,11 @@ export function TableLook({
 }) {
     const columns = table.Columns ?? [];
     return (
-        <section aria-label={`${WIKI_WORDS.table} ${block.Word}`} className={styles.look}>
+        <section
+            aria-label={`${WIKI_WORDS.table} ${block.Word}`}
+            className={`${styles.look ?? ''} ${attentionOf(block.NeedsYou)}`}
+            id={placeOf(block.Address)}
+        >
             <header className={styles.blockHead}>
                 <DotIcon grids={reader.grids} name={block.Icon} size="small" />
                 <span className={styles.kind}>{WIKI_WORDS.table}</span>
@@ -132,7 +136,11 @@ export function FigureLook({
     reader: Reader;
 }) {
     return (
-        <figure aria-label={`${block.Title} ${block.Word}`} className={styles.figure}>
+        <figure
+            aria-label={`${block.Title} ${block.Word}`}
+            className={`${styles.figure ?? ''} ${attentionOf(block.NeedsYou)}`}
+            id={placeOf(block.Address)}
+        >
             <header className={styles.blockHead}>
                 <DotIcon grids={reader.grids} name={block.Icon} size="small" />
                 <span className={styles.kind}>{block.Title}</span>

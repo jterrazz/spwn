@@ -1,9 +1,9 @@
 import type { WikiServedBlock, WikiServedDecision } from '@jterrazz/station-api';
 
 import { StateDot } from '../../ui/index';
-import { WIKI_DECISION_WORDS } from '../../words/wiki';
+import { decisionTone, WIKI_DECISION_WORDS } from '../../words/wiki';
 import { DotIcon } from './dot-icon';
-import { Findings } from './fields';
+import { attentionOf, Findings, placeOf } from './fields';
 import type { Reader } from './fields';
 
 import styles from './wiki.module.css';
@@ -36,7 +36,11 @@ export function DecisionLook({
 }) {
     const amended = decision.AmendedBy ?? [];
     return (
-        <article aria-label={`${block.Title} ${block.Word}`} className={styles.decision}>
+        <article
+            aria-label={`${block.Title} ${block.Word}`}
+            className={`${styles.decision} ${attentionOf(block.NeedsYou)}`}
+            id={placeOf(block.Address)}
+        >
             <header className={styles.blockHead}>
                 <DotIcon grids={reader.grids} name={block.Icon} size="small" />
                 <span className={styles.kind}>{block.Title}</span>
@@ -48,7 +52,7 @@ export function DecisionLook({
                 </span>
                 {decision.Status === '' ? null : (
                     <span className={styles.decisionStatus}>
-                        <StateDot tone={decision.Accepted ? 'ok' : 'warn'} word={decision.Status} />
+                        <StateDot tone={decisionTone(decision.Accepted)} word={decision.Status} />
                         {decision.Status}
                     </span>
                 )}

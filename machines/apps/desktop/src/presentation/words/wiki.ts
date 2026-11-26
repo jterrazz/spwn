@@ -25,6 +25,17 @@ export const WIKI_LEVEL_WORDS: Readonly<Record<WikiServedFinding['Level'], strin
     remark: 'remark',
 };
 
+// value: a decision in force reads settled; any other status the record writes waits on a word.
+export function decisionTone(accepted: boolean): Tone {
+    return accepted ? 'ok' : 'warn';
+}
+
+export const WIKI_ATTENTION_WORDS = {
+    others: 'more findings below',
+    page: 'this page',
+    title: 'Needs you',
+} as const;
+
 export const WIKI_DECISION_WORDS = {
     amendedBy: 'amended by',
     decides: 'decides',

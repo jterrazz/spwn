@@ -52,6 +52,9 @@ func outline(s wiki.Served) string {
 	for _, f := range s.Findings {
 		line(1, "finding", string(f.Level), f.Rule, f.Says)
 	}
+	for _, f := range s.Attention {
+		line(1, "attention", string(f.Level), f.Rule, "at="+f.At, strconv.Quote(f.Word))
+	}
 	var items func(depth int, its []wiki.ServedItem)
 	items = func(depth int, its []wiki.ServedItem) {
 		for _, it := range its {
@@ -66,6 +69,9 @@ func outline(s wiki.Served) string {
 				if g.OwnFloor != nil {
 					head = append(head, "own-floor="+strconv.Itoa(g.OwnFloor.Index))
 				}
+				if g.NeedsYou {
+					head = append(head, "needs-you")
+				}
 				line(depth, append(head, "lead="+strconv.Quote(g.Lead))...)
 				items(depth+1, g.Items)
 			case it.Block != nil:
@@ -73,6 +79,9 @@ func outline(s wiki.Served) string {
 				head := []string{"block", k.Address, k.Kind, "icon=" + k.Icon, "tier=" + string(k.Tier), "shown=" + string(k.Shown)}
 				if k.OwnFloor != nil {
 					head = append(head, "own-floor="+strconv.Itoa(k.OwnFloor.Index))
+				}
+				if k.NeedsYou {
+					head = append(head, "needs-you")
 				}
 				line(depth, append(head, strconv.Quote(k.Line))...)
 				for _, f := range k.Fields {

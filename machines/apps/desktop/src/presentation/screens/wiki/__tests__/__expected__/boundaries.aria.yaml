@@ -26,7 +26,21 @@
         - button "2min" [pressed]
         - button "10min"
       - img "needs you"
-      - text: 3 needs you 2 blocks folded at this reading time
+      - text: 3 needs you
+      - list "Needs you":
+        - listitem:
+          - button "needs you Boundaries needs you":
+            - img "needs you"
+            - text: Boundaries needs you
+        - listitem:
+          - button "needs you no-computer needs you":
+            - img "needs you"
+            - text: no-computer needs you
+        - listitem:
+          - button "needs you os-holds-no-facts needs you":
+            - img "needs you"
+            - text: os-holds-no-facts needs you
+      - text: 2 blocks folded at this reading time
     - region "Boundaries":
       - article "Decision one-stack":
         - text: Decision one-stack ADR-002
