@@ -23,6 +23,7 @@ export { Field } from './field';
 export { FormField } from './form-field';
 export { IconButton } from './icon-button';
 export { IDENTITIES, type Identity, identityOf } from './identity';
+export { Illustration, type IllustrationName, ILLUSTRATIONS } from './illustrations/illustration';
 export { MachineChip } from './machine-chip';
 export { MachineIcon } from './machine-icon';
 export { MacSection } from './mac-section';

@@ -26,6 +26,9 @@
     --bad: #ff6d63;
     --bad-hover: #ff8a82;
     --new: #4cc2f5;
+    --accent: #ff9f0a;
+    --on-accent: #1b1003;
+    --on-bad: #2a0c0a;
     --tone-fill: 8%;
     --tone-line: 24%;
 
@@ -34,6 +37,18 @@
     --scrim: rgb(8 9 12 / 62%);
     --shadow-pop: 0 30px 80px rgb(0 0 0 / 50%);
     --shadow-primary: 0 6px 16px rgb(0 0 0 / 32%);
+
+    --art-ink: #e3e4e8;
+    --art-dim: #8a8c93;
+    --art-top: #2e2f34;
+    --art-left: #25262a;
+    --art-right: #1e1f23;
+    --art-shadow: #0a0b0d;
+    --art-lit-top: #35312b;
+    --art-lit-left: #2c2925;
+    --art-lit-right: #252320;
+    --art-well: #1a1b1f;
+    --art-stroke: 1.4px;
 
     --id-blue: #4a98fb;
     --id-purple: #b877f2;

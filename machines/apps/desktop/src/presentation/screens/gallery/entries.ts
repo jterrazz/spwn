@@ -35,6 +35,8 @@ import { Icon } from '../../ui/icon';
 import { IconButton } from '../../ui/icon-button';
 import { ICON_BUTTON_STORIES } from '../../ui/icon-button.stories';
 import { ICON_STORIES } from '../../ui/icon.stories';
+import { Illustration } from '../../ui/illustrations/illustration';
+import { ILLUSTRATION_STORIES } from '../../ui/illustrations/illustration.stories';
 import { MacSection } from '../../ui/mac-section';
 import { MAC_SECTION_STORIES } from '../../ui/mac-section.stories';
 import { MachineChip } from '../../ui/machine-chip';
@@ -104,6 +106,11 @@ export const ENTRIES: readonly Entry[] = [
     entry('Missing', 'Marks', { Component: Missing, frame: 'block', stories: MISSING_STORIES }),
     entry('MissingMark', 'Marks', { Component: MissingMark, stories: MISSING_MARK_STORIES }),
     entry('Bone', 'Marks', { Component: Bone, frame: 'meter', stories: BONE_STORIES }),
+    entry('Illustration', 'Marks', {
+        Component: Illustration,
+        frame: 'meter',
+        stories: ILLUSTRATION_STORIES,
+    }),
     entry('Bar', 'Measures', { Component: Bar, frame: 'meter', stories: BAR_STORIES }),
     entry('ShareBar', 'Measures', {
         Component: ShareBar,

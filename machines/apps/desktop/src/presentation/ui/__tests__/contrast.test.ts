@@ -79,6 +79,23 @@ describe('contrast', () => {
         expect(below(MARK_BAR, decoration)).toStrictEqual([]);
     });
 
+    test('the accent and the drawings ink hold the bar of a mark on each ground, and a mark on the accent reads', () => {
+        // Given - the accent and the drawings' line on each ground, the dark mark on the accent
+        const marks = [
+            ...overGrounds('accent', (ground) => ratio(colourOf('accent'), colourOf(ground))),
+            ...overGrounds('art-ink', (ground) => ratio(colourOf('art-ink'), colourOf(ground))),
+            ...overGrounds('art-dim', (ground) => ratio(colourOf('art-dim'), colourOf(ground))),
+        ];
+        const onAccent: Measure = [
+            '--on-accent on --accent',
+            ratio(colourOf('on-accent'), colourOf('accent')),
+        ];
+
+        // Then - each holds the bar of a mark, and the mark on the accent the bar of text
+        expect(below(MARK_BAR, marks)).toStrictEqual([]);
+        expect(below(TEXT_BAR, [onAccent])).toStrictEqual([]);
+    });
+
     test('the pill is drawn at 8 % of its tone, and its line at 24 %', () => {
         // Given - the two shares tokens.css names
         const shares = [tokenOf('tone-fill'), tokenOf('tone-line')];
