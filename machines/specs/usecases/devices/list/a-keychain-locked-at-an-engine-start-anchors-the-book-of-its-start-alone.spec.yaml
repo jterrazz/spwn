@@ -1,4 +1,4 @@
-description: 'a keychain locked at an engine start leaves a planted book unchecked, then anchors the start book alone'
+description: 'a keychain locked at an engine start anchors the start book alone, a planted one unchecked'
 env:
     - two-macs
     - engine
