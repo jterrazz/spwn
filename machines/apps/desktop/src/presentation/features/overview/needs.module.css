@@ -1,11 +1,7 @@
-.command {
-    display: flex;
-    align-items: center;
-    gap: var(--space-10);
-    min-width: 0;
-    max-width: 320px;
-}
-
-.verb {
+.path {
     color: var(--t3);
+    font-size: var(--text-label);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }

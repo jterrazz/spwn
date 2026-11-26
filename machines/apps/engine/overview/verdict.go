@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/jterrazz/studio-station/apps/engine/activity"
 	"github.com/jterrazz/studio-station/apps/engine/core/finding"
 	"github.com/jterrazz/studio-station/apps/engine/core/section"
 	"github.com/jterrazz/studio-station/apps/engine/core/verdict"
@@ -29,13 +30,16 @@ const (
 	VerbTryAgain    Verb = "try-again"
 	VerbUpdate      Verb = "update"
 	VerbRemove      Verb = "remove"
+	VerbDelete      Verb = "delete"
+	VerbUpgrade     Verb = "upgrade"
+	VerbWake        Verb = "wake"
 	VerbMove        Verb = "move"
 	VerbStartEngine Verb = "start-engine"
 	VerbFix         Verb = "fix"
 )
 
 func (Verb) Enum() []string {
-	return []string{string(VerbReview), string(VerbRestart), string(VerbStart), string(VerbTryAgain), string(VerbUpdate), string(VerbRemove),
+	return []string{string(VerbReview), string(VerbRestart), string(VerbStart), string(VerbTryAgain), string(VerbUpdate), string(VerbRemove), string(VerbDelete), string(VerbUpgrade), string(VerbWake),
 		string(VerbMove), string(VerbStartEngine), string(VerbFix)}
 }
 
@@ -86,8 +90,8 @@ func UpkeepOf(f finding.Finding) Upkeep {
 }
 
 func VerbOf(f finding.Finding) Verb {
-	// invariant: a need's verb is its call's, and a port's line with no call
-	// is reviewed on its machine's Ports.
+	// invariant: a need's verb is its call's, and a port's or an Activity reading's
+	// line with no call is reviewed on its machine's tab.
 	switch f.Fix.Call {
 	case "engine.start":
 		return VerbStartEngine
@@ -97,6 +101,12 @@ func VerbOf(f finding.Finding) Verb {
 		return VerbRemove
 	case "disk.move":
 		return VerbMove
+	case "machines.delete":
+		return VerbDelete
+	case "machinefile.upgrade":
+		return VerbUpgrade
+	case "machines.wake":
+		return VerbWake
 	case "machines.restart":
 		return VerbRestart
 	case "machines.start":
@@ -105,7 +115,7 @@ func VerbOf(f finding.Finding) Verb {
 		}
 		return VerbStart
 	}
-	if f.Section == section.Ports {
+	if f.Section == section.Ports || (f.Section == section.Activity && f.Subject != activity.SubjectDisk) {
 		return VerbReview
 	}
 	return VerbFix

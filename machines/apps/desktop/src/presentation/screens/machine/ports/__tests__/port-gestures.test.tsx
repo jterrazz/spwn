@@ -26,7 +26,7 @@ describe('port gestures', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test('a share the engine cannot make shows its words and its hint', async () => {
+    test('a share the engine cannot make shows its words, and withholds a hint that is a command', async () => {
         // Given - linux-1's Ports over range-full, linux-1 sharing the most ports a VM may and listening on 9000
         const result = await component.render(
             portsOver('range-full', 'linux-1'),
@@ -41,12 +41,11 @@ describe('port gestures', () => {
                 // When - Share of port 9000 is clicked
                 await visitor.click(button('Share :9000'));
 
-                // Then - the engine's failure as it came, its words then its hint, and Dismiss clears it
+                // Then - the engine's words, the hint that is a command never drawn, and Dismiss clears it
                 await visitor.see(said);
-                await visitor.see(hint);
+                await visitor.gone(hint);
                 await visitor.click(button('Dismiss'));
                 await visitor.gone(said);
-                await visitor.gone(hint);
             },
         );
         expect(result.errors.text).toBe('');

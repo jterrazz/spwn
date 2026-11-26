@@ -17,11 +17,13 @@ import type { Found } from '../../../domain/machines/machines';
 import { useGesture } from '../../dependencies/use-gesture';
 import { GestureButton, GestureRow } from '../../kit/gestures';
 import { LoginSheet } from '../../kit/login-sheet';
+import { carriesCommand } from '../../ui/command';
 import { CopyButton } from '../../ui/copy-button';
-import { Button, Row, Value } from '../../ui/index';
+import { Button, Row } from '../../ui/index';
 import type { RowProps } from '../../ui/row';
 import { wordOf } from '../../words/engine-words';
 import {
+    deleteInputOf,
     loginProgramOf,
     machineKindOf,
     moveInputOf,
@@ -30,10 +32,11 @@ import {
     startInputOf,
     startVmInputOf,
     updateInputOf,
+    upgradeInputOf,
+    wakeInputOf,
 } from '../../words/provisional';
 import type { NeedCall } from '../../words/provisional';
 import { needState } from '../../words/shown';
-import { gestureOf } from './needs';
 
 import styles from './needs.module.css';
 
@@ -41,6 +44,8 @@ const UPDATE_REREADS: readonly CallName[] = ['overview.read', 'apps.list'];
 const REMOVE_REREADS: readonly CallName[] = ['overview.read', 'background.list'];
 const MOVE_REREADS: readonly CallName[] = ['overview.read', 'disk.read'];
 const START_REREADS: readonly CallName[] = ['engine.read', 'overview.read'];
+
+const UPGRADE_REREADS: readonly CallName[] = ['overview.read', 'machinefile.drift'];
 
 const LIFECYCLE_REREADS: readonly CallName[] = ['overview.read'];
 
@@ -166,6 +171,28 @@ function Call(props: Props) {
     if (move) {
         return <Fix {...props} call="disk.move" input={move} rereads={MOVE_REREADS} />;
     }
+    const erase = deleteInputOf(need);
+    if (erase) {
+        return (
+            <Fix
+                {...props}
+                call="machines.delete"
+                input={erase}
+                rereads={LIFECYCLE_REREADS}
+                subject={erase.VM}
+            />
+        );
+    }
+    const upgrade = upgradeInputOf(need);
+    if (upgrade) {
+        return (
+            <Fix {...props} call="machinefile.upgrade" input={upgrade} rereads={UPGRADE_REREADS} />
+        );
+    }
+    const wake = wakeInputOf(need);
+    if (wake) {
+        return <Fix {...props} call="machines.wake" input={wake} rereads={LIFECYCLE_REREADS} />;
+    }
     const start = startInputOf(need);
     if (start) {
         return <Fix {...props} call="engine.start" input={start} rereads={START_REREADS} />;
@@ -212,24 +239,28 @@ function Login(props: Props & { found: Found; program: AccountsProgram }) {
     );
 }
 
-function Command({ text }: { text: string }) {
-    return (
-        <span className={styles.command}>
-            <Value>{text}</Value>
-            <CopyButton name={`Copy ${text}`} text={text} />
-        </span>
-    );
-}
-
 function Said(props: Props) {
-    const gesture = gestureOf(props.need);
-    const said =
-        gesture !== undefined && 'text' in gesture ? (
-            <Command text={gesture.text} />
-        ) : (
-            <span className={styles.verb}>{verbOf(props.need)}</span>
+    const { Command, Path } = props.need;
+    if (Command !== '') {
+        return (
+            <Row
+                {...rowOf(
+                    props,
+                    <CopyButton label="Copy the command" name="Copy the command" text={Command} />,
+                )}
+            />
         );
-    return <Row {...rowOf(props, said)} />;
+    }
+    return (
+        <Row
+            {...rowOf(props, null)}
+            below={
+                Path === '' || carriesCommand(Path) ? null : (
+                    <span className={styles.path}>{Path}</span>
+                )
+            }
+        />
+    );
 }
 
 export function NeedLine(props: Props) {

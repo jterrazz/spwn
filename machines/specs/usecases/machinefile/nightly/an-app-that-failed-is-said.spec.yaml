@@ -21,7 +21,7 @@ runs:
     - command: 'overview | /usr/bin/grep "last night"'
       exit: 0
       stdout: |
-          ✗	homebrew failed its update last night	station machinefile update
+          ✗	homebrew failed its update last night	station machinefile upgrade --machinefile macbook-pro
           	Apps	● 9 ok · ◐ 1 update · ○ 103 not installed · 1 moved last night
     - command: 'machinefile update'
       exit: 0

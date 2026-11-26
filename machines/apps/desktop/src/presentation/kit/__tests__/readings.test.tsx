@@ -12,14 +12,15 @@ const REFUSED = new EngineError({
 });
 
 describe('readings', () => {
-    test('its fix command is copied by its Copy gesture', async () => {
+    test('its fix command is never drawn, and its Copy the command button copies it', async () => {
         // Given - a refusal whose fix is a command, and a clipboard that takes it
         const written = vi.spyOn(navigator.clipboard, 'writeText').mockResolvedValue();
         await component.render(<Unanswered error={REFUSED} size="tab" />, async (visitor) => {
-            await visitor.see(content('station engine start'));
+            await visitor.see(content('the engine of this Mac is stopped', { exact: false }));
+            await visitor.gone(content('station engine start'));
 
-            // When - its Copy is clicked
-            await visitor.click(button('Copy station engine start'));
+            // When - its Copy the command is clicked
+            await visitor.click(button('Copy the command'));
 
             // Then - the button says it copied
             await visitor.see(button('Copied'));
@@ -29,29 +30,23 @@ describe('readings', () => {
         expect(written).toHaveBeenCalledWith('station engine start');
     });
 
-    test('a fix line withheld on screen offers no Copy of its command', async () => {
-        // Given - a refusal whose command is plain but whose fix line names a path shaped like a secret
-        const withheld = new EngineError({
-            fix: {
-                Args: null,
-                Call: '',
-                Command: 'station engine start',
-                Confirm: '',
-                On: '',
-                Path: `x9${'k7'.repeat(20)}`,
-            },
-            hint: 'the engine of this Mac is stopped',
-            message: 'no engine answers',
-            type: 'engine-stopped',
+    test('a hint that is a command is withheld, and the words around it stay', async () => {
+        // Given - a refusal whose hint is a command line
+        const refused = new EngineError({
+            hint: 'station machines start api',
+            message: 'api is stopped',
+            type: 'refused',
         });
+
+        // When - it is drawn
         const result = await component.render(
-            <Unanswered error={withheld} size="tab" />,
+            <Unanswered error={refused} size="tab" />,
             async (visitor) => {
-                await visitor.see(content('Withheld'));
+                await visitor.see(content('api is stopped.'));
             },
         );
 
-        // Then - the line reads Withheld and nothing offers to copy it
-        expect(result.tree.text).not.toContain('Copy');
+        // Then - the command is nowhere on the page
+        expect(result.tree.text).not.toContain('station');
     });
 });

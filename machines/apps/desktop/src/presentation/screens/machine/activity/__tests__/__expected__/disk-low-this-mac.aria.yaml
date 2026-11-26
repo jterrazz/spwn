@@ -13,7 +13,7 @@
   - paragraph:
     - 'img "Disk almost full: 4 % free"'
     - text: disk
-  - text: station disk
+  - button "Copy the command"
   - group "Window":
     - button "6 min" [pressed]
     - button "1 h"

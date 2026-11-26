@@ -55,6 +55,49 @@ const TRY_AGAIN = {
     Verb: 'try-again',
 };
 
+const DELETE = {
+    ...TRY_AGAIN,
+    Args: { VM: 'api' },
+    Call: 'machines.delete',
+    Command: 'station machines delete api',
+    Confirm: 'api',
+    Text: 'api was not created: it failed at SSH',
+    Verb: 'delete',
+};
+
+const UPGRADE = {
+    ...TRY_AGAIN,
+    Machine: 'macbook-pro',
+    Subject: 'macbook-pro',
+    Mark: 'needs-you',
+    Args: { Machinefile: 'macbook-pro' },
+    Call: 'machinefile.upgrade',
+    Command: 'station machinefile update',
+    Noun: 'Apps',
+    Section: 'apps',
+    Text: "the night's upgrade of macbook-pro failed: it stopped",
+    Verb: 'upgrade',
+};
+
+const PATH_ONLY = {
+    Args: null,
+    Broken: false,
+    Call: '',
+    Command: '',
+    Confirm: '',
+    Machine: 'macbook-pro',
+    Mark: 'needs-you',
+    Noun: 'Settings',
+    On: 'macbook-pro',
+    Path: 'System Settings > Network > Firewall',
+    Section: 'settings',
+    Severity: 'needs-a-look',
+    Subject: 'firewall',
+    Text: 'Firewall: off',
+    Upkeep: 'needs-you',
+    Verb: 'fix',
+};
+
 function recordOf(value: unknown): Record<string, unknown> | undefined {
     return typeof value === 'object' && value !== null
         ? Object.fromEntries(Object.entries(value))
@@ -239,6 +282,53 @@ describe('NeedLine', () => {
                 const sheet = dialog('Sign in to npm on macbook-pro');
                 await visitor.see(sheet);
                 await visitor.gone(sheet);
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
+
+    test('a need whose fix is a path alone draws the path under its sentence and no verb', async () => {
+        // Given - the Inbox over two-macs, its one need a firewall that is off, fixed by a path alone
+        const recording = withNeeds(recordingFor('two-macs'), [PATH_ONLY]);
+        const result = await component.render(
+            pageOver(recording, { page: 'inbox' }),
+            async (visitor) => {
+                // Then - the path is read as a quiet line, and nothing stands for a verb
+                await visitor.see(within(needs, content('System Settings > Network > Firewall')));
+                await visitor.gone(within(needs, content('Fix')));
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
+
+    test('a VM that is gone is deleted from its need, through the dialog that asks its name typed, and no command is offered', async () => {
+        // Given - the Inbox over two-macs, its one need a VM whose create failed and left nothing to start
+        const recording = withNeeds(recordingFor('two-macs'), [DELETE]);
+        const result = await component.render(
+            pageOver(recording, { page: 'inbox' }),
+            async (visitor) => {
+                await visitor.see(within(needs, button('Delete api')));
+
+                // When - its Delete is clicked
+                await visitor.click(within(needs, button('Delete api')));
+
+                // Then - the dialog of its page asks the name typed, and the need never offered to copy a command
+                await visitor.see(within(dialog('Delete api?'), field('Type api to confirm')));
+                await visitor.gone(content('Copy the command'));
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
+
+    test("a night's failed upgrade is run again from its need, and no command is offered", async () => {
+        // Given - the Inbox over two-macs, its one need the night's upgrade that failed
+        const recording = withNeeds(recordingFor('two-macs'), [UPGRADE]);
+        const result = await component.render(
+            pageOver(recording, { page: 'inbox' }),
+            async (visitor) => {
+                // Then - its button wears Upgrade, and nothing offers the command
+                await visitor.see(within(needs, button('Upgrade macbook-pro')));
+                await visitor.gone(content('Copy the command'));
             },
         );
         expect(result.errors.text).toBe('');

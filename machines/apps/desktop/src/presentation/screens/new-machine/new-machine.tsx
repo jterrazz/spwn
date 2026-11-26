@@ -140,7 +140,7 @@ function Purpose({ draft, change, refusal }: PurposeProps) {
                 onChange={(purpose) => {
                     change({ purpose });
                 }}
-                placeholder="Lot L6 · machine file views"
+                placeholder="What is it for?"
                 value={draft.purpose}
             />
             {refusal}

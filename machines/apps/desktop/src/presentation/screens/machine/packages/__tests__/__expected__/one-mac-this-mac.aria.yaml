@@ -12,11 +12,11 @@
   - heading "Follows no machine file." [level=1]
   - paragraph:
     - img "not given yet"
-    - text: "give this machine one: station init --machinefile <name>"
+    - text: What the engine answered is below
   - region "Upgrades":
     - heading "Upgrades" [level=2]
     - button "Upgrade now"
     - paragraph: What the engine answered is below
   - region "Apps":
     - heading "Apps by file, a later one wins" [level=2]
-    - text: "not found no Machinefile named macbook-pro. give this machine one: station init --machinefile <name>"
+    - text: not found no Machinefile named macbook-pro.

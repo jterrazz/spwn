@@ -1,4 +1,14 @@
-import { button, content, dialog, heading, main, navigation, region, within } from '@jterrazz/test';
+import {
+    button,
+    content,
+    dialog,
+    field,
+    heading,
+    main,
+    navigation,
+    region,
+    within,
+} from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { website } from '../website.specification.js';
@@ -59,7 +69,7 @@ describe('needs', () => {
         const line = button('Exposed port 5000 is reachable outside Tailscale macbook-pro · Ports');
         const result = await website.visit('/?world=stories&page=inbox', async (visitor) => {
             await visitor.see(within(needs, line));
-            await visitor.see(within(needs, content('Review')));
+            await visitor.gone(within(needs, content('Review')));
 
             // When - its line is pressed
             await visitor.click(within(needs, line));
@@ -102,6 +112,25 @@ describe('needs', () => {
     });
 
     test.todo("N5 waits for each line's version rule on machinefile.drift");
+
+    test('N6 a server whose SSH fails is restarted from its line, its name typed', async () => {
+        // Given - the Inbox over standings, where restart-1 fails SSH answers and its line names machines.restart
+        const line = button('Restart restart-1');
+        const result = await website.visit('/?world=standings&page=inbox', async (visitor) => {
+            await visitor.see(within(canWait, content('restart-1 fails SSH answers')));
+
+            // When - its Restart is pressed, and confirmed with the name typed
+            await visitor.click(within(canWait, line));
+            const confirm = dialog('Restart restart-1?');
+            await visitor.fill(within(confirm, field('Type restart-1 to confirm')), 'restart-1');
+            await visitor.click(within(confirm, button('Restart')));
+
+            // Then - the dialog has closed, and the line offered no command to copy
+            await visitor.gone(confirm);
+            await visitor.gone(content('Copy the command'));
+        });
+        expect(result.errors.text).toBe('');
+    });
 
     test('N7 a program signed out offers Sign in, and its sheet shows the engine code and the site to open', async () => {
         // Given - linux-1's Sign-ins over two-macs, gh signed out

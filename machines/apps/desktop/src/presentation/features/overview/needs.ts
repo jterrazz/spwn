@@ -42,11 +42,3 @@ export function needsOn(
     const names = new Set([mac.Name, ...(mac.VMs ?? []).map((vm) => vm.Name)]);
     return needs.filter((need) => names.has(need.Machine));
 }
-
-export function gestureOf(need: OverviewNeed): undefined | { call: string } | { text: string } {
-    if (need.Call !== '') {
-        return { call: need.Call };
-    }
-    const text = need.Command === '' ? need.Path : need.Command;
-    return text === '' ? undefined : { text };
-}

@@ -1,7 +1,7 @@
 import type { OverviewNeed } from '@jterrazz/station-api';
 import { describe, expect, test } from 'vitest';
 
-import { gestureOf, needsOn, tabOf } from '../needs';
+import { needsOn, tabOf } from '../needs';
 import type { Held } from '../needs';
 
 function need(Machine: string, change: Partial<OverviewNeed> = {}): OverviewNeed {
@@ -77,25 +77,5 @@ describe('needs', () => {
 
         // Then - Ports, Storage, then Overview
         expect(tabs).toStrictEqual(['Ports', 'Storage', 'Overview']);
-    });
-
-    test('a call is the gesture, then a command, then a path', () => {
-        // Given - a need with a call, one with a command, one with a path, one with none
-
-        // When - their gestures are read
-        const gestures = [
-            gestureOf(need('book', { Call: 'apps.update', Command: 'brew upgrade' })),
-            gestureOf(need('book', { Command: 'npm login' })),
-            gestureOf(need('book', { Path: 'System Settings > Network' })),
-            gestureOf(need('book')),
-        ];
-
-        // Then - each says what the engine gave, in that order of preference
-        expect(gestures).toStrictEqual([
-            { call: 'apps.update' },
-            { text: 'npm login' },
-            { text: 'System Settings > Network' },
-            undefined,
-        ]);
     });
 });

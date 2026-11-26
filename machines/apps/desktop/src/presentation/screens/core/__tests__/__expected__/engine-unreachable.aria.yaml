@@ -51,10 +51,9 @@
       - img "Spwn v0.22.0 is out."
       - text: This Mac runs v0.21.0.
     - region "Update":
-      - heading "Update the public installer installs station and Spwn" [level=2]
+      - heading "Update the public installer installs Spwn" [level=2]
       - button "What changed"
       - button "Update"
-      - text: curl -fsSL https://spwn.sh/install.sh | bash
     - region "Engine":
       - heading "Engine" [level=2]
       - text: "Engine v0.21.0 running Latest release Checked 4 Nov, 02:00 · GitHub: dial tcp: connection refused (4 Nov, 09:50)"

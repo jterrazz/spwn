@@ -1,6 +1,6 @@
 - main:
   - heading "No machine follows a file." [level=1]
-  - text: "not found no Machinefile named macbook-pro. give this machine one: station init --machinefile <name>"
+  - text: not found no Machinefile named macbook-pro.
   - paragraph: Shipped with Machines
   - group "Shipped with Machines":
     - button "base-debian" [pressed]
@@ -8,11 +8,10 @@
     - button "base-ubuntu"
   - region "base-debian.machine.yaml":
     - heading "base-debian.machine.yaml" [level=2]
-    - text: built-in/machinefiles/base-debian.machine.yaml
     - group "How the file is shown":
       - button "Fields" [pressed]
       - button "YAML"
-    - paragraph: A Debian 13 machine with station's plumbing and nothing else
+    - paragraph: A Debian 13 machine with Spwn's plumbing and nothing else
     - term: Makes
     - definition: a workspace
     - term: System

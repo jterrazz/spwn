@@ -44,12 +44,6 @@
     font-weight: var(--weight-medium);
     overflow-wrap: anywhere;
 }
-.path {
-    font-family: var(--font-mono);
-    font-size: var(--text-label);
-    color: var(--t3);
-    overflow-wrap: anywhere;
-}
 .tabs {
     display: flex;
     flex-wrap: wrap;

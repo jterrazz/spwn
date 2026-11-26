@@ -21,6 +21,7 @@ import { GestureButton, GestureOutcome } from '../../../kit/gestures';
 import { NoVerdict } from '../../../kit/readings';
 import { SkeletonHead } from '../../../kit/skeleton';
 import { useRouter } from '../../../navigation/router';
+import { unlessCommand } from '../../../ui/command';
 import { Panel, Row, Screen, Verdict } from '../../../ui/index';
 import { Page } from '../../../ui/page';
 import { chapterNoun, fileJoinOf, ownState, verdictShown } from '../../../words/shown';
@@ -81,9 +82,10 @@ function followsNoFile(error: EngineError): boolean {
 }
 
 function NoFile({ hint }: { hint: string }) {
+    const said = unlessCommand(hint);
     return (
         <Verdict
-            line={hint === '' ? 'What the engine answered is below' : hint}
+            line={said === '' ? 'What the engine answered is below' : said}
             size="tab"
             title="Follows no machine file."
             {...ownState('not-given')}

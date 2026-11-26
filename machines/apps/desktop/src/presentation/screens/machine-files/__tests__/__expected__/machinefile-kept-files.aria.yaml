@@ -13,7 +13,6 @@
     - button "base-ubuntu"
   - region "macbook-pro.machine.yaml":
     - heading "macbook-pro.machine.yaml" [level=2]
-    - text: ~/.config/station/machinefiles/macbook-pro.machine.yaml
     - group "How the file is shown":
       - button "Fields" [pressed]
       - button "YAML"

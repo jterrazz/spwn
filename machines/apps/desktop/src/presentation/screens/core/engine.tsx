@@ -1,6 +1,5 @@
 import type { MachinesMacView, MachinesRelease } from '@jterrazz/station-api';
 
-import { INSTALL_LINE } from '../../../domain/core';
 import { SEPARATOR } from '../../../domain/separator';
 import { dayAndClock } from '../../../domain/when';
 import { useHello, useOffers, useReach, useRead, useUpdate } from '../../dependencies/dependencies';
@@ -16,7 +15,6 @@ import { shownOrWithheld } from '../../ui/secret';
 import { engineShown, macState } from '../../words/shown';
 import type { Shown } from '../../words/shown';
 import { RELEASE_WORDS } from '../../words/words';
-import { Fine, Mono } from './core-parts';
 import { UpdatePanel } from './update';
 
 import styles from './core.module.css';
@@ -57,11 +55,7 @@ function Offer({ release }: { release: MachinesRelease }) {
                     />
                 )
             }
-            note={
-                <>
-                    the public installer installs <Mono>station</Mono> and Spwn
-                </>
-            }
+            note="the public installer installs Spwn"
             title={RELEASE_WORDS.update}
         >
             <div className={styles.acts}>
@@ -73,10 +67,6 @@ function Offer({ release }: { release: MachinesRelease }) {
                 >
                     {RELEASE_WORDS.update}
                 </Button>
-                <span className={styles.grow} />
-                <Fine>
-                    <Mono>{INSTALL_LINE}</Mono>
-                </Fine>
             </div>
         </Panel>
     );

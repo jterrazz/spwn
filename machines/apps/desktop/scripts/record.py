@@ -293,6 +293,9 @@ GESTURES = {
         {"call": "machines.create-workspace", "in": {"Request": {"Name": "gate5", "From": "base-ubuntu", "Lifetime": "ephemeral"}, "Confirm": "yes"}},
         {"call": "machines.add", "in": {"Name": "mac-mini"}},
     ],
+    "standings": [
+        {"call": "machines.restart", "in": {"Name": "restart-1", "Confirm": "restart-1"}},
+    ],
     "creating": [
         {"call": "machines.delete", "in": {"VM": "linux-5", "Confirm": "linux-5"}},
     ],

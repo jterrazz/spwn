@@ -2,15 +2,20 @@ import type {
     AccountsProgram,
     AppsUpdateInput,
     BackgroundRemoveInput,
+    CoreFindingFix,
     DiskMoveInput,
     DiskRow,
     EngineStartInput,
     MachinefileExtraLine,
     MachinefileLine,
+    MachinefileUpgradeInput,
+    MachinesDeleteInput,
     MachinesFit,
+    MachinesForgetInput,
     MachinesRestartInput,
     MachinesStartInput,
     MachinesVM,
+    MachinesWakeInput,
     OverviewNeed,
     PortsPort,
     PortsSharedPort,
@@ -93,6 +98,29 @@ export function startVmInputOf(need: OverviewNeed): MachinesStartInput | undefin
     return need.Call !== 'machines.start' || name === '' ? undefined : { VM: name };
 }
 
+export function deleteInputOf(need: OverviewNeed): MachinesDeleteInput | undefined {
+    const name = need.Args?.VM ?? '';
+    return need.Call !== 'machines.delete' || name === '' ? undefined : { VM: name };
+}
+
+export function upgradeInputOf(need: OverviewNeed): MachinefileUpgradeInput | undefined {
+    return need.Call === 'machinefile.upgrade'
+        ? { Machinefile: need.Args?.Machinefile ?? '' }
+        : undefined;
+}
+
+export function wakeInputOf(need: OverviewNeed): MachinesWakeInput | undefined {
+    const name = need.Args?.Name ?? '';
+    return need.Call !== 'machines.wake' || name === '' ? undefined : { Name: name };
+}
+
+export function forgetInputOf(
+    fix: Pick<CoreFindingFix, 'Args' | 'Call'>,
+): MachinesForgetInput | undefined {
+    const name = fix.Args?.Name ?? '';
+    return fix.Call !== 'machines.forget' || name === '' ? undefined : { Name: name };
+}
+
 export function startInputOf(need: OverviewNeed): EngineStartInput | undefined {
     return need.Call === 'engine.start' ? {} : undefined;
 }
@@ -102,8 +130,11 @@ export type NeedCall =
     | 'background.remove'
     | 'disk.move'
     | 'engine.start'
+    | 'machinefile.upgrade'
+    | 'machines.delete'
     | 'machines.restart'
-    | 'machines.start';
+    | 'machines.start'
+    | 'machines.wake';
 
 // outside: a listening port carries no field saying it is shared (apps/engine/ports/exposure.go, Port).
 export function isPortShared(port: PortsPort, shares: readonly PortsSharedPort[]): boolean {

@@ -54,9 +54,3 @@
     padding: 0;
     flex: 1;
 }
-.fix {
-    display: inline-flex;
-    align-items: baseline;
-    gap: var(--space-4);
-    min-width: 0;
-}
