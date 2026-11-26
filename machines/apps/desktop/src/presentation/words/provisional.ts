@@ -3,6 +3,7 @@ import type {
     AppsUpdateInput,
     BackgroundRemoveInput,
     CoreFindingFix,
+    CoreGuideGesture,
     DiskMoveInput,
     DiskRow,
     EngineStartInput,
@@ -180,4 +181,23 @@ export function shareOpensFromHere(share: PortsSharedPort, onThisMac: boolean): 
         return share.urls.public;
     }
     return onThisMac ? share.urls.local : '';
+}
+
+export type Repair =
+    | { call: 'machines.delete'; input: MachinesDeleteInput }
+    | { call: 'machines.start'; input: MachinesStartInput };
+
+// outside: a Guide's gesture names its call and its args as strings (apps/engine/core/guide, Gesture); the window runs
+// outside: the calls a create's repairs name, each with the input its own page sends.
+export function repairOf(gesture: CoreGuideGesture): Repair | undefined {
+    const vm = gesture.args?.VM ?? '';
+    if (vm === '') {
+        return undefined;
+    }
+    if (gesture.call === 'machines.start') {
+        return { call: gesture.call, input: { VM: vm } };
+    }
+    return gesture.call === 'machines.delete'
+        ? { call: gesture.call, input: { VM: vm } }
+        : undefined;
 }

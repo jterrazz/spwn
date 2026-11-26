@@ -5,6 +5,7 @@ export type Sheet =
     | { kind: 'add-mac' }
     | { kind: 'add-password' }
     | { kind: 'find' }
+    | { kind: 'guide'; act: string }
     | { kind: 'new-machine'; opening: Opening }
     | { kind: 'none' };
 
@@ -12,7 +13,8 @@ const NONE: Sheet = { kind: 'none' };
 
 // invariant: the sheet the window shows, held apart from the frame: opening or closing one tells only who reads it,
 // invariant: so the page, the path bar and the sidebar beneath it are not drawn again. Every opener is one function
-// invariant: for the window's life.
+// invariant: for the window's life. A Guide is a sheet of the act the engine named, so New machine hands over to it
+// invariant: in one change.
 export class Opened {
     private sheet: Sheet = NONE;
     private readonly listeners = new Set<() => void>();
@@ -40,6 +42,10 @@ export class Opened {
 
     readonly find = (): void => {
         this.open({ kind: 'find' });
+    };
+
+    readonly guide = (act: string): void => {
+        this.open({ act, kind: 'guide' });
     };
 
     readonly newBlank = (): void => {

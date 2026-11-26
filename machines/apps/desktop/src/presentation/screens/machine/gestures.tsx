@@ -38,7 +38,7 @@ function useLifecycle({ mac, vm }: VmProps) {
     };
 }
 
-export function LifecycleGestures({ mac, vm, terminal }: VmProps & { terminal?: ReactNode }) {
+export function LifecycleGestures({ mac, vm, beside }: VmProps & { beside?: ReactNode }) {
     const gestures = useLifecycle({ mac, vm });
     const [last, setLast] = useState<Lifecycle>(
         () => LIFECYCLES.find((which) => gestures[which].state.kind !== 'idle') ?? 'stop',
@@ -67,7 +67,7 @@ export function LifecycleGestures({ mac, vm, terminal }: VmProps & { terminal?: 
             <div className={styles.actions}>
                 {done ? <GestureOutcome gesture={shown} /> : null}
                 {(vm.Gestures ?? []).map(button)}
-                {terminal}
+                {beside}
             </div>
             {done ? null : <GestureOutcome gesture={shown} />}
         </div>

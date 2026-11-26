@@ -13,6 +13,7 @@ export const VIEW_KEYS = [
     'accounts.list:*',
     'awake.read',
     'awake.read:*',
+    'engine.guides',
 ] as const;
 
 const PER_MACHINE = ['overview.read:', 'ports.list:', 'accounts.list:', 'awake.read:'] as const;
@@ -75,6 +76,8 @@ const NAMED: Readonly<Record<string, Named>> = {
         return isPlain(fields) ? ownOrOf('accounts.list', mac) : undefined;
     },
     'awake.read': (fields, mac) => (isPlain(fields) ? ownOrOf('awake.read', mac) : undefined),
+    'engine.guides': (fields, mac) =>
+        isPlain(fields) && mac === undefined ? 'engine.guides' : undefined,
     'machines.list': (fields, mac) =>
         isPlain(fields) && mac === undefined ? 'machines.list' : undefined,
     'overview.read': (fields, mac) => {
@@ -88,7 +91,7 @@ const NAMED: Readonly<Record<string, Named>> = {
 
 // invariant: a read is a view when it asks This Mac's engine for an answer the engine keeps: the fleet, This Mac's
 // invariant: Overview with the other Macs or without, another machine's Overview, every Mac's ports or one machine's,
-// invariant: a machine's sign-ins and a Mac's Awake; any other input or target is still asked by its call.
+// invariant: a machine's sign-ins, a Mac's Awake and the acts the engine guides; any other input or target is still asked by its call.
 export function viewNamed(name: string, input: unknown, target: Aim): undefined | View {
     const fields = fieldsOf(input);
     const mac = aMac(target);

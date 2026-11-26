@@ -3,6 +3,7 @@ import type { MachinesMacView } from '@jterrazz/station-api';
 import { sentence } from '../../../domain/format';
 import type { Found } from '../../../domain/machines/machines';
 import { SEPARATOR } from '../../../domain/separator';
+import { ShowProgress } from '../../features/guide/show-progress';
 import { useIdentityOf } from '../../kit/identity';
 import { machineRoute, TAB_PANEL, tabsOf } from '../../navigation/route';
 import type { Route, Tab } from '../../navigation/route';
@@ -22,6 +23,7 @@ type Props = {
     tab: Tab;
     go: (to: Route) => void;
     onNewMachine?: ((opening: Opening) => void) | undefined;
+    onGuide?: ((act: string) => void) | undefined;
 };
 
 function MacLine({ mac }: { mac: MachinesMacView }) {
@@ -53,7 +55,11 @@ function VmLine({ found, go }: { found: Found; go: Props['go'] }) {
     );
 }
 
-function Actions({ found, onNewMachine }: Pick<Props, 'found' | 'onNewMachine'>) {
+function Actions({
+    found,
+    onNewMachine,
+    onGuide,
+}: Pick<Props, 'found' | 'onGuide' | 'onNewMachine'>) {
     const { mac, vm } = found;
     if (!vm) {
         return (
@@ -71,11 +77,21 @@ function Actions({ found, onNewMachine }: Pick<Props, 'found' | 'onNewMachine'>)
         );
     }
     return (
-        <LifecycleGestures key={vm.Name} mac={mac} terminal={<TerminalButton vm={vm} />} vm={vm} />
+        <LifecycleGestures
+            beside={
+                <>
+                    <ShowProgress machine={vm.Name} onShow={onGuide} />
+                    <TerminalButton vm={vm} />
+                </>
+            }
+            key={vm.Name}
+            mac={mac}
+            vm={vm}
+        />
     );
 }
 
-export function MachineHeader({ found, tab, go, onNewMachine }: Props) {
+export function MachineHeader({ found, tab, go, onGuide, onNewMachine }: Props) {
     const { mac, vm } = found;
     const name = vm?.Name ?? mac.Name;
     const identityOf = useIdentityOf();
@@ -97,7 +113,7 @@ export function MachineHeader({ found, tab, go, onNewMachine }: Props) {
                             {vm ? <VmLine found={found} go={go} /> : <MacLine mac={mac} />}
                         </div>
                     </div>
-                    <Actions found={found} onNewMachine={onNewMachine} />
+                    <Actions found={found} onGuide={onGuide} onNewMachine={onNewMachine} />
                 </div>
                 <Switch
                     controls={TAB_PANEL}
