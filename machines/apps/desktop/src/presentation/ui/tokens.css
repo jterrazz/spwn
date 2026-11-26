@@ -29,10 +29,6 @@
     --on-bad: #1c0806;
 
     --on-primary: #0b0b0d;
-    --ok-on-primary: #178a3a;
-    --warn-on-primary: #a86200;
-    --bad-on-primary: #cf2b20;
-    --new-on-primary: #0766cc;
     --primary: #f4f4f5;
     --primary-hover: #ffffff;
     --primary-press: #dcdde0;
@@ -41,6 +37,9 @@
     --lift-2: 0 12px 32px rgb(0 0 0 / 38%), 0 2px 6px rgb(0 0 0 / 30%);
     --lift-3: 0 30px 80px rgb(0 0 0 / 55%), 0 4px 12px rgb(0 0 0 / 30%);
     --lift-primary: 0 1px 0 rgb(255 255 255 / 30%) inset, 0 4px 12px rgb(0 0 0 / 30%);
+    /* value: what floats (a popover, Find) is glass: the board's tint at 84 %, not its 70 %, the least share at which --t1 and --t2 keep 4.5:1 and --t3 3:1 over the white primary button, the brightest thing glass floats over, plus one step against the alpha's 8-bit rounding */
+    --glass: rgb(36 37 43 / 84%);
+    --blur: blur(22px) saturate(160%);
 
     --art-ink: #e3e4e8;
     --art-dim: #8a8c93;
@@ -97,19 +96,13 @@
     --motion-wait: 2.4s ease-in-out infinite;
 
     --chrome-row: 52px;
-
-    --ground-window: var(--s0);
-    --ground: var(--s0);
-    --ground-sidebar: var(--s1);
 }
 
-html[data-material='vibrant'] {
-    --material-canvas: 86%;
-    --material-sidebar: 72%;
-
-    --ground-window: transparent;
-    --ground: color-mix(in srgb, var(--s0) var(--material-canvas), transparent);
-    --ground-sidebar: color-mix(in srgb, var(--s1) var(--material-sidebar), transparent);
+@media (prefers-reduced-transparency: reduce) {
+    :root {
+        --glass: var(--s2);
+        --blur: none;
+    }
 }
 
 [data-identity='blue'] {

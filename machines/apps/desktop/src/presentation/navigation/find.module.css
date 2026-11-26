@@ -1,5 +1,10 @@
 .pop {
     max-height: 100%;
+    background: var(--glass);
+    -webkit-backdrop-filter: var(--blur);
+    backdrop-filter: var(--blur);
+    border: 1px solid var(--edge);
+    box-shadow: var(--lift-2);
 }
 .input {
     all: unset;

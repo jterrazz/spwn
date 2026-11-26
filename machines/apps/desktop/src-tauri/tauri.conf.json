@@ -24,11 +24,7 @@
                 "hiddenTitle": true,
                 "trafficLightPosition": { "x": 18, "y": 28.5 },
                 "theme": "Dark",
-                "transparent": true,
-                "windowEffects": {
-                    "effects": ["underWindowBackground"],
-                    "state": "followsWindowActiveState"
-                }
+                "backgroundColor": "#131417"
             }
         ],
         "security": { "csp": "default-src 'self'; font-src 'self' data:; img-src 'self' data:" }

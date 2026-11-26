@@ -16,7 +16,7 @@ body,
 }
 
 body {
-    background: var(--ground-window);
+    background: var(--s0);
     color: var(--t1);
     font-family: var(--font-sans);
     font-size: var(--text-body);

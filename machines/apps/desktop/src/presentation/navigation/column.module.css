@@ -4,8 +4,7 @@
     width: 256px;
     min-height: 0;
     display: flex;
-    border-right: 1px solid var(--hair);
-    background: var(--ground-sidebar);
+    background: var(--s1);
 }
 .hidden {
     grid-row: 2;
@@ -30,7 +29,8 @@
     display: flex;
     border: 1px solid var(--edge);
     border-radius: var(--radius-row);
-    background: var(--s1);
+    /* value: opaque --s2, not glass: blurring a 256 x 830 px column over a scrolling page cost 4.1 to 5.5 ms a frame more than no peek at 1440 x 900, and 2 to 3.5 ms even at a 2 px radius, past the 2 ms the column may spend */
+    background: var(--s2);
     box-shadow: var(--lift-2);
     animation: slide 160ms ease-out;
 }
@@ -65,7 +65,6 @@
 .list > .group + .group {
     margin: 0 calc(-1 * var(--space-12));
     padding: var(--space-12) var(--space-12) 0;
-    border-top: 1px solid var(--hair);
 }
 .caption {
     display: flex;
@@ -146,25 +145,15 @@
     gap: var(--space-4);
     margin-left: 20px;
     padding-left: var(--space-8);
-    border-left: 1px solid var(--edge);
+    border-left: 1px solid var(--hair);
 }
 .column button > span:first-child {
     border-radius: 50%;
 }
-.column [aria-current='page'] > span:first-child {
-    background: var(--on-primary);
-    color: var(--primary);
-}
 .column [aria-current='page'],
 .column [aria-current='page']:hover {
-    --ok: var(--ok-on-primary);
-    --you: var(--warn-on-primary);
-    --bad: var(--bad-on-primary);
-    --busy: var(--new-on-primary);
-    --t3: var(--on-primary);
-
-    background: var(--primary);
-    color: var(--on-primary);
+    background: var(--s3);
+    color: var(--t1);
 }
 .pin {
     all: unset;
@@ -176,7 +165,7 @@
     height: 32px;
     padding: 0 var(--space-12);
     border-radius: var(--radius-control);
-    background: var(--s1);
+    background: transparent;
     color: var(--t1);
     font-size: var(--text-body);
     cursor: pointer;
