@@ -7,6 +7,8 @@ import (
 	"os"
 	"path/filepath"
 	"time"
+
+	"spwn.sh/packages/platform"
 )
 
 func receiptsPath(projectRoot string) string {
@@ -35,7 +37,9 @@ type receiptRow struct {
 
 func readReceipts(projectRoot string) ([]receiptRow, error) {
 	path := receiptsPath(projectRoot)
-	f, err := os.Open(path)
+	tree := platform.Within(projectRoot)
+	f, err := tree.OpenFile(path, os.O_RDONLY, 0)
+	tree.Close()
 	if err != nil {
 		if os.IsNotExist(err) {
 			return nil, nil

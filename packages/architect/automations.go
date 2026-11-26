@@ -272,8 +272,8 @@ func (a *Architect) NewAutomationEngine(cfg AutomationEngineConfig) (*automation
 	eng, err := automation.New(automation.Config{
 		Clock:      clock,
 		Dispatcher: NewAutomationDispatcher(a),
-		Receipts:   automation.NewFileReceiptWriter(receiptsPath),
-		State:      automation.NewFileStateStore(statePath),
+		Receipts:   automation.NewFileReceiptWriter(cfg.ProjectRoot, receiptsPath),
+		State:      automation.NewFileStateStore(cfg.ProjectRoot, statePath),
 		FS:         cfg.FS,
 		Commands:   NewCommandFileResolver(cfg.ProjectRoot),
 	})

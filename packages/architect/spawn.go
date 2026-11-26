@@ -395,8 +395,11 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	}
 
 	worldStateDir := worldStateDirFor(id)
-	if err := os.MkdirAll(worldStateDir, 0o755); err != nil {
-		return nil, fmt.Errorf("create world-state dir %s: %w", worldStateDir, err)
+	state := platform.StateTree()
+	mkErr := state.MkdirAll(worldStateDir, 0o755)
+	state.Close()
+	if mkErr != nil {
+		return nil, fmt.Errorf("create world-state dir %s: %w", worldStateDir, mkErr)
 	}
 
 	if knowledgeMounted {

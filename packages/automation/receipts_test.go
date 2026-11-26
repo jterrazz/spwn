@@ -67,7 +67,7 @@ func TestMemoryReceiptWriter_AppendsInOrder(t *testing.T) {
 func TestFileReceiptWriter_AppendsJSONLine(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "runs.jsonl")
-	w := NewFileReceiptWriter(path)
+	w := NewFileReceiptWriter(dir, path)
 	must(t, w.Write(sampleReceipt(t)))
 
 	data, err := os.ReadFile(path)
@@ -91,7 +91,7 @@ func TestFileReceiptWriter_AppendsJSONLine(t *testing.T) {
 func TestFileReceiptWriter_AppendsAcrossWrites(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "runs.jsonl")
-	w := NewFileReceiptWriter(path)
+	w := NewFileReceiptWriter(dir, path)
 	must(t, w.Write(sampleReceipt(t)))
 	r2 := sampleReceipt(t)
 	r2.Reason = "catchup"
@@ -127,7 +127,7 @@ func TestFileReceiptWriter_OmitsEmptyOptionals(t *testing.T) {
 	// dashboard's grep.
 	dir := t.TempDir()
 	path := filepath.Join(dir, "runs.jsonl")
-	w := NewFileReceiptWriter(path)
+	w := NewFileReceiptWriter(dir, path)
 	must(t, w.Write(sampleReceipt(t)))
 
 	data, err := os.ReadFile(path)
@@ -149,7 +149,7 @@ func TestFileReceiptWriter_OmitsEmptyOptionals(t *testing.T) {
 func TestFileReceiptWriter_CreatesParentDir(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "deep", "nested", "runs.jsonl")
-	w := NewFileReceiptWriter(path)
+	w := NewFileReceiptWriter(dir, path)
 	must(t, w.Write(sampleReceipt(t)))
 	if _, err := os.Stat(path); err != nil {
 		t.Fatalf("file should exist: %v", err)
@@ -162,7 +162,7 @@ func TestFileReceiptWriter_RotatesPastSizeThreshold(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "runs.jsonl")
 	// Tiny RotateSize so the test fires fast.
-	w := &FileReceiptWriter{Path: path, RotateSize: 200, RotateKeep: 3}
+	w := &FileReceiptWriter{Root: dir, Path: path, RotateSize: 200, RotateKeep: 3}
 	must(t, w.Write(sampleReceipt(t)))
 	must(t, w.Write(sampleReceipt(t))) // ~360B total, so the next Write triggers
 	must(t, w.Write(sampleReceipt(t)))
@@ -187,7 +187,7 @@ func TestFileReceiptWriter_ShiftsHistoricalFiles(t *testing.T) {
 	// expected ordering (most recent in .1).
 	dir := t.TempDir()
 	path := filepath.Join(dir, "runs.jsonl")
-	w := &FileReceiptWriter{Path: path, RotateSize: 100, RotateKeep: 3}
+	w := &FileReceiptWriter{Root: dir, Path: path, RotateSize: 100, RotateKeep: 3}
 
 	// Force four rotations.
 	for i := 0; i < 5; i++ {
@@ -210,7 +210,7 @@ func TestFileReceiptWriter_ShiftsHistoricalFiles(t *testing.T) {
 func TestFileReceiptWriter_RotationDisabledWhenSizeZero(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "runs.jsonl")
-	w := &FileReceiptWriter{Path: path, RotateSize: 0}
+	w := &FileReceiptWriter{Root: dir, Path: path, RotateSize: 0}
 	for i := 0; i < 10; i++ {
 		must(t, w.Write(sampleReceipt(t)))
 	}
@@ -224,7 +224,7 @@ func TestFileReceiptWriter_ConcurrentSafe(t *testing.T) {
 	// opens: no torn lines, every receipt persisted.
 	dir := t.TempDir()
 	path := filepath.Join(dir, "runs.jsonl")
-	w := NewFileReceiptWriter(path)
+	w := NewFileReceiptWriter(dir, path)
 
 	const N = 50
 	var wg sync.WaitGroup

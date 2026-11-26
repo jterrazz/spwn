@@ -522,6 +522,7 @@ func TestE2E_ReceiptLogRotates(t *testing.T) {
 	dir := t.TempDir()
 	receiptsPath := filepath.Join(dir, "runs.jsonl")
 	w := &automation.FileReceiptWriter{
+		Root:       dir,
 		Path:       receiptsPath,
 		RotateSize: 200,
 		RotateKeep: 3,

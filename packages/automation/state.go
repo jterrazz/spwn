@@ -2,11 +2,14 @@ package automation
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
-	"os"
+	"io/fs"
 	"path/filepath"
 	"sync"
 	"time"
+
+	"spwn.sh/packages/platform"
 )
 
 // StateStore persists the engine's last-fired cursor across restarts.
@@ -88,9 +91,13 @@ type stateFile struct {
 // project's cursors. The engine surfaces the write error; callers
 // see the surface and can intervene before more data is at risk.
 type FileStateStore struct {
+	// Root is the project's folder: the file is read, written and
+	// renamed through a root opened there, so a link the project carries
+	// on the way to Path is refused, never followed.
+	Root string
 	Path string
 
-	mu      sync.Mutex
+	mu     sync.Mutex
 	loaded  bool
 	tainted error
 	entries map[string]time.Time
@@ -99,8 +106,8 @@ type FileStateStore struct {
 // NewFileStateStore constructs a writer rooted at path. The file is
 // loaded lazily on first read: boot stays fast even for projects
 // with no prior state.
-func NewFileStateStore(path string) *FileStateStore {
-	return &FileStateStore{Path: path}
+func NewFileStateStore(root, path string) *FileStateStore {
+	return &FileStateStore{Root: root, Path: path}
 }
 
 // LastFired returns the persisted cursor. Reads the in-memory cache;
@@ -138,7 +145,14 @@ func (s *FileStateStore) ensureLoadedLocked() {
 		return
 	}
 	s.loaded = true
-	data, err := os.ReadFile(s.Path)
+	tree := platform.Within(s.Root)
+	data, err := tree.ReadFile(s.Path)
+	tree.Close()
+	if err != nil && !errors.Is(err, fs.ErrNotExist) {
+		s.entries = map[string]time.Time{}
+		s.tainted = err
+		return
+	}
 	if err != nil {
 		s.entries = map[string]time.Time{}
 		return
@@ -182,7 +196,12 @@ func (s *FileStateStore) IsTainted() error {
 }
 
 func (s *FileStateStore) writeLocked(entries map[string]time.Time) error {
-	if err := os.MkdirAll(filepath.Dir(s.Path), 0o755); err != nil {
+	if s.Root == "" {
+		return fmt.Errorf("state file %s: no project root to write it under", s.Path)
+	}
+	tree := platform.Within(s.Root)
+	defer tree.Close()
+	if err := tree.MkdirAll(filepath.Dir(s.Path), 0o755); err != nil {
 		return fmt.Errorf("state dir: %w", err)
 	}
 	envelope := stateFile{
@@ -194,10 +213,10 @@ func (s *FileStateStore) writeLocked(entries map[string]time.Time) error {
 		return fmt.Errorf("encode state: %w", err)
 	}
 	tmp := s.Path + ".tmp"
-	if err := os.WriteFile(tmp, data, 0o644); err != nil {
+	if err := tree.WriteFile(tmp, data, 0o644); err != nil {
 		return fmt.Errorf("write state tmp: %w", err)
 	}
-	if err := os.Rename(tmp, s.Path); err != nil {
+	if err := tree.Rename(tmp, s.Path); err != nil {
 		return fmt.Errorf("rename state: %w", err)
 	}
 	return nil

@@ -3,7 +3,6 @@ package architect
 import (
 	"context"
 	"fmt"
-	"os"
 	"path/filepath"
 
 	"spwn.sh/packages/agent"
@@ -31,8 +30,10 @@ func agentHomesForSpawn(opts SpawnOpts) map[string]string {
 func initAgentDeploymentDirs(rec models.AgentRecord, worldID string) error {
 	agentDir := agent.AgentDir(rec.Name)
 	deploymentDir := filepath.Join(agentDir, "worlds", worldID)
+	state := platform.StateTree()
+	defer state.Close()
 	for _, sub := range []string{"inbox", "outbox", "notes"} {
-		if err := os.MkdirAll(filepath.Join(deploymentDir, sub), 0o755); err != nil {
+		if err := state.MkdirAll(filepath.Join(deploymentDir, sub), 0o755); err != nil {
 			return fmt.Errorf("mkdir %s: %w", sub, err)
 		}
 	}

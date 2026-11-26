@@ -19,6 +19,10 @@ var ErrOutside = errors.New("leaves the project")
 // neither a file nor a folder: a FIFO, a device or a socket.
 var ErrNotAFile = errors.New("is neither a file nor a folder")
 
+// ErrLink is the error of a name a Tree refuses because it, or a folder
+// on its way, is a link whose target leaves the folder the Tree reads.
+var ErrLink = errors.New("is a link out of its folder, refused: copy what it names into the folder")
+
 // Tree is a project's folder, read through a root it cannot leave: a path
 // that climbs out by "..", an absolute path elsewhere and a link whose
 // target is outside are refused before anything outside is opened, and a
@@ -146,7 +150,7 @@ func (t *Tree) open(p string, folder bool) (*os.File, error) {
 	}
 	f, err := t.root.OpenFile(rel, os.O_RDONLY|syscall.O_NONBLOCK, 0)
 	if err != nil {
-		return nil, err
+		return nil, t.linkOut(p, rel, err)
 	}
 	info, err := f.Stat()
 	if err != nil {
@@ -197,7 +201,7 @@ func (t *Tree) Sub(p string) *Tree {
 	dir := filepath.Join(t.dir, rel)
 	root, err := t.root.OpenRoot(rel)
 	if err != nil {
-		return &Tree{dir: dir, real: dir, err: err}
+		return &Tree{dir: dir, real: dir, err: t.linkOut(p, rel, err)}
 	}
 	return &Tree{dir: dir, real: dir, root: root}
 }
@@ -259,31 +263,88 @@ func (t *Tree) ReadFile(p string) ([]byte, error) {
 	return io.ReadAll(f)
 }
 
-// WriteFile is os.WriteFile of the file p inside the Tree: a link whose
-// target is outside is refused, never written through, and a FIFO is
-// refused, never waited on.
-func (t *Tree) WriteFile(p string, data []byte, perm fs.FileMode) error {
+// OpenFile is os.OpenFile of the file p inside the Tree, never blocking
+// on a FIFO: a link whose target is outside is refused, never opened
+// through, a dangling one included, and what opens is refused unless it
+// is a regular file.
+func (t *Tree) OpenFile(p string, flag int, perm fs.FileMode) (*os.File, error) {
 	rel, err := t.Rel(p)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	f, err := t.root.OpenFile(rel, os.O_WRONLY|os.O_CREATE|syscall.O_NONBLOCK, perm)
+	f, err := t.root.OpenFile(rel, flag|syscall.O_NONBLOCK, perm)
+	if err != nil {
+		return nil, t.linkOut(p, rel, err)
+	}
+	info, err := f.Stat()
+	if err != nil {
+		f.Close()
+		return nil, err
+	}
+	if !info.Mode().IsRegular() {
+		f.Close()
+		return nil, &fs.PathError{Op: "open", Path: p, Err: ErrNotAFile}
+	}
+	return f, nil
+}
+
+// WriteFile is os.WriteFile of the file p inside the Tree, opened by
+// OpenFile.
+func (t *Tree) WriteFile(p string, data []byte, perm fs.FileMode) error {
+	f, err := t.OpenFile(p, os.O_WRONLY|os.O_CREATE, perm)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
-	info, err := f.Stat()
-	if err != nil {
-		return err
-	}
-	if !info.Mode().IsRegular() {
-		return &fs.PathError{Op: "open", Path: p, Err: ErrNotAFile}
-	}
 	if err := f.Truncate(0); err != nil {
 		return err
 	}
 	_, err = f.Write(data)
 	return err
+}
+
+// AppendFile appends data to the file p inside the Tree, creating it,
+// opened by OpenFile.
+func (t *Tree) AppendFile(p string, data []byte, perm fs.FileMode) error {
+	f, err := t.OpenFile(p, os.O_WRONLY|os.O_CREATE|os.O_APPEND, perm)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	_, err = f.Write(data)
+	return err
+}
+
+// Rename is os.Rename of from to to, both inside the Tree: a link is
+// renamed as itself, never followed.
+func (t *Tree) Rename(from, to string) error {
+	relFrom, err := t.Rel(from)
+	if err != nil {
+		return err
+	}
+	relTo, err := t.Rel(to)
+	if err != nil {
+		return err
+	}
+	return t.root.Rename(relFrom, relTo)
+}
+
+// Remove is os.Remove of p inside the Tree: a link is removed as itself.
+func (t *Tree) Remove(p string) error {
+	rel, err := t.Rel(p)
+	if err != nil {
+		return err
+	}
+	return t.root.Remove(rel)
+}
+
+// Lstat is os.Lstat of p inside the Tree: a link is described as itself.
+func (t *Tree) Lstat(p string) (fs.FileInfo, error) {
+	rel, err := t.Rel(p)
+	if err != nil {
+		return nil, err
+	}
+	return t.root.Lstat(rel)
 }
 
 // MkdirAll is os.MkdirAll of the folder p inside the Tree.
@@ -292,7 +353,33 @@ func (t *Tree) MkdirAll(p string, perm fs.FileMode) error {
 	if err != nil {
 		return err
 	}
-	return t.root.MkdirAll(rel, perm)
+	if err := t.root.MkdirAll(rel, perm); err != nil {
+		return t.linkOut(p, rel, err)
+	}
+	return nil
+}
+
+// linkOut is the error of an open the root refused: ErrLink naming, by
+// its name under the Tree, the first component of rel that is a link, when one is and the refusal is
+// neither a missing name nor a permission, else err itself. It reads the
+// links alone, never their targets, so it says the same whatever is
+// outside.
+func (t *Tree) linkOut(p, rel string, err error) error {
+	if errors.Is(err, fs.ErrNotExist) || errors.Is(err, fs.ErrPermission) {
+		return err
+	}
+	parts := strings.Split(filepath.Clean(rel), string(filepath.Separator))
+	for i := range parts {
+		prefix := filepath.Join(parts[:i+1]...)
+		info, lerr := t.root.Lstat(prefix)
+		if lerr != nil {
+			return err
+		}
+		if info.Mode()&fs.ModeSymlink != 0 {
+			return &fs.PathError{Op: "open", Path: prefix, Err: ErrLink}
+		}
+	}
+	return err
 }
 
 // ReadDir is os.ReadDir of the folder p inside the Tree, sorted by name.

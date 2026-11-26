@@ -12,6 +12,7 @@ import (
 	"spwn.sh/apps/cli/cliproject"
 	"spwn.sh/packages/architect"
 	"spwn.sh/packages/automation"
+	"spwn.sh/packages/platform"
 	"spwn.sh/packages/project"
 )
 
@@ -44,9 +45,17 @@ resumes at the next scheduled time.`,
 		}
 
 		lockPath := filepath.Join(p.Root, ".spwn", "automations", "daemon.lock")
-		if err := os.MkdirAll(filepath.Dir(lockPath), 0o755); err != nil {
+		tree := platform.Within(p.Root)
+		if err := tree.MkdirAll(filepath.Dir(lockPath), 0o755); err != nil {
+			tree.Close()
 			return fmt.Errorf("create lockfile directory: %w", err)
 		}
+		lockCheck, err := tree.OpenFile(lockPath, os.O_RDWR|os.O_CREATE, 0o644)
+		tree.Close()
+		if err != nil {
+			return fmt.Errorf("open lock file %s: %w", lockPath, err)
+		}
+		lockCheck.Close()
 		lockFile, err := acquireDaemonLock(lockPath)
 		if err != nil {
 			return err
