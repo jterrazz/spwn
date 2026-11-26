@@ -212,6 +212,23 @@
 .linked {
     display: flex;
     gap: var(--space-12);
+    position: relative;
+    isolation: isolate;
+}
+.linked:has(> .opener)::before {
+    content: '';
+    position: absolute;
+    inset: 0 calc(-1 * var(--space-8));
+    z-index: -1;
+    border-radius: var(--radius-control);
+    pointer-events: none;
+    transition: background var(--motion-hover) var(--ease);
+}
+.linked:has(> .opener):hover::before {
+    background: var(--s2);
+}
+.linked:has(> .opener:active)::before {
+    background: var(--s3-press);
 }
 .inner {
     flex: 1;
@@ -230,18 +247,11 @@
     margin-left: calc(-1 * var(--space-8));
     padding: var(--space-4) var(--space-8);
     border-radius: var(--radius-control);
-    transition: background var(--motion-hover) var(--ease);
 }
 .linked > .opener {
     align-self: stretch;
     margin-block: calc(-1 * var(--row-pad));
     padding-block: var(--row-pad);
-}
-.opener:hover {
-    background: var(--s2);
-}
-.opener:active {
-    background: var(--s3-press);
 }
 .link {
     flex: none;
