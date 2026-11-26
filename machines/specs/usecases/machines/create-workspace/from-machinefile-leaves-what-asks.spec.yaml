@@ -1,0 +1,30 @@
+description: 'a package that would ask is left for a terminal, and the create installs every other one'
+fixture: ../../__fixtures__/build/
+env: two-macs
+runs:
+    - command: 'world edit macbook-pro machinefiles/studio-linux.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: studio-linux
+          machine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }
+          extends: [base-ubuntu]
+          vm: { resources: { memory: 4G } }
+          apps: [jq, ripgrep]
+          settings: { github-login: {} }
+      exit: 0
+    - command: 'images build studio-linux --binary $HOME/station-linux >/dev/null'
+      exit: 0
+    - command: 'machines create --memory 4G web --from studio-linux'
+      exit: 0
+      stdout: |
+          ●	Running
+          ●	Has an address	192.168.64.5
+          ●	SSH answers
+          ●	Boot phase	studio-linux	4 apps installed · 2 settings set
+          ◐	github-login	not set: asks a question: finish it in a terminal
+          ◐	1 package to finish	station machinefile apply --on web
+          ●	web	Created	Ephemeral · 4 CPU · 4 GB · 20 GB
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["web"].apps.apt.installed // {} | [has("jq"), has("ripgrep")]'' world.json'
+      exit: 0
+      stdout: |
+          [true,true]

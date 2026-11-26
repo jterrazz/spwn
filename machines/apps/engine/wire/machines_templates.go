@@ -5,6 +5,7 @@ import (
 	"errors"
 	"path"
 	"strings"
+	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/accounts"
 	accountscalls "github.com/jterrazz/studio-station/apps/engine/accounts/calls"
@@ -188,13 +189,15 @@ func (m machine) signedIn(ctx context.Context, vm string) (map[string]bool, erro
 
 // value: a workspace's create applies its Machinefile in it as
 // machinefile.apply runs there, a call the VM is the target of, reached
-// through this Mac's engine.
-func (m machine) applyAt(ctx context.Context, vm, file string) (machinefile.Applied, error) {
+// through this Mac's engine: what would ask the owner is left, and the
+// guest ends its packages at the bound given and answers with what it
+// did.
+func (m machine) applyAt(ctx context.Context, vm, file string, within time.Duration) (machinefile.Applied, error) {
 	r := m.far.router
 	if r == nil {
 		return machinefile.Applied{}, errors.New("this Mac's engine does not answer")
 	}
-	return call.Invoke(ctx, r, coremachine.Ref{Name: vm}, machinefilecalls.Apply, machinefilecalls.ApplyIn{Machinefile: file}, nil)
+	return call.Invoke(ctx, r, coremachine.Ref{Name: vm}, machinefilecalls.Apply, machinefilecalls.ApplyIn{Machinefile: file, LeaveAsking: true, Within: within}, nil)
 }
 
 // value: the kind of machine a VM is: its image's, and Linux for an image

@@ -70,8 +70,10 @@ type Options struct {
 	// reads it there.
 	SignedIn func(ctx context.Context, vm string) (map[string]bool, error)
 	// value: applies a Machinefile inside a VM of this Mac, as
-	// machinefile.apply does there, off a terminal; nil applies none.
-	Apply func(ctx context.Context, vm, machinefile string) (machinefile.Applied, error)
+	// machinefile.apply does there off a terminal, what would ask the owner
+	// left, its packages carried out within the bound given; nil applies
+	// none.
+	Apply func(ctx context.Context, vm, machinefile string, within time.Duration) (machinefile.Applied, error)
 	// value: the processes of this Mac, which say whether a create still
 	// runs; nil says none does.
 	Processes contract.Processes

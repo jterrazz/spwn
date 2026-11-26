@@ -51,6 +51,15 @@ type ApplyIn struct {
 	Phase       catalog.Phase
 	Interactive bool
 	Confirm     string
+	// value: off a terminal, each package whose run would ask the owner
+	// something is left, waiting for the owner's own run, and the rest is
+	// carried out, where without it the run refuses and changes nothing: a
+	// create's apply, which has no terminal to ask on.
+	LeaveAsking bool
+	// value: the longest the packages are carried out for: the package
+	// still running past it ends there, those after it are not run, and the
+	// run answers with what it did; zero, no bound but the phase's own.
+	Within time.Duration
 }
 
 var Apply = call.Call[Deps, ApplyIn, machinefile.Applied]{
@@ -85,8 +94,12 @@ var Apply = call.Call[Deps, ApplyIn, machinefile.Applied]{
 			return machinefile.Applied{}, err
 		}
 		out := machinefile.Applied{Plan: plan}
+		var left map[string]bool
 		if asked := plan.Interactive(in.Remove); !in.Interactive && len(asked) > 0 {
-			return out, refusedOffTerminal(asked, "apply")
+			if !in.LeaveAsking || in.Remove {
+				return out, refusedOffTerminal(asked, "apply")
+			}
+			left = asking(asked)
 		}
 		var extra []string
 		for _, e := range plan.Extra {
@@ -105,7 +118,7 @@ var Apply = call.Call[Deps, ApplyIn, machinefile.Applied]{
 			}
 			out.Bound = plan.Name
 		}
-		r := run{d: d, p: p, in: in, name: plan.Name, ended: map[string]catalog.State{}, there: map[string]bool{}}
+		r := run{d: d, p: p, in: in, name: plan.Name, ended: map[string]catalog.State{}, there: map[string]bool{}, left: left}
 		out.Done = r.carry(ctx, plan.Lines)
 		journal.Mark(ctx, d.Now(), "blocks")
 		if err := ctx.Err(); err != nil {
@@ -125,7 +138,7 @@ var Apply = call.Call[Deps, ApplyIn, machinefile.Applied]{
 		if err := relock(ctx, d, plan, out.Done); err != nil {
 			return out, err
 		}
-		if ctx.Err() == nil {
+		if ctx.Err() == nil && !r.cut {
 			if err := d.Ledger.PutApply(ctx, plan.Name, d.Now().UTC()); err != nil {
 				return out, err
 			}
@@ -246,22 +259,53 @@ type run struct {
 	// value: the apps that read there once their line ended, whose blocks
 	// may be written.
 	there map[string]bool
+	// value: the packages left for the owner's own run, since theirs would
+	// ask something off a terminal (ApplyIn.LeaveAsking).
+	left map[string]bool
+	// value: the packages' bound (ApplyIn.Within) ended before each was
+	// carried out.
+	cut bool
+}
+
+func asking(asked []machinefile.Asked) map[string]bool {
+	out := map[string]bool{}
+	for _, a := range asked {
+		for _, pkg := range a.Packages {
+			out[pkg] = true
+		}
+	}
+	return out
 }
 
 // invariant: the packages are carried out one at a time in the plan's
 // order; a phase run inside a VM (image, boot) gives them their own share
 // of its bound (catalog.ItemsBound), so the owner's lines after them keep
 // theirs: a package still running at the end of the share ends there, and
-// those after it are not run.
+// those after it are not run. A bound the caller gives (ApplyIn.Within)
+// ends them the same way, read on this machine's clock between packages
+// too, and the run is cut: it answers with what it did, as an apply, and
+// is not recorded as one run to its end.
 func (r *run) carry(ctx context.Context, lines []machinefile.Line) []machinefile.Done {
 	if r.in.Phase == catalog.PhaseImage || r.in.Phase == catalog.PhaseBoot {
 		var cancel context.CancelFunc
 		ctx, cancel = context.WithTimeout(ctx, catalog.PackagesBound)
 		defer cancel()
 	}
+	outer := ctx
+	var until time.Time
+	if r.in.Within > 0 {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, r.in.Within)
+		defer cancel()
+		until = r.d.Now().Add(r.in.Within)
+	}
+	defer func() { r.cut = r.cut || (ctx.Err() != nil && outer.Err() == nil) }()
 	out := make([]machinefile.Done, 0, len(lines))
 	for i, l := range lines {
-		if ctx.Err() != nil {
+		if !until.IsZero() && l.Acts() && !r.d.Now().Before(until) {
+			r.cut = true
+		}
+		if ctx.Err() != nil || r.cut {
 			for _, rest := range lines[i:] {
 				out = append(out, machinefile.Done{Line: rest, State: catalog.StateAbsent, Reason: machinefile.NotRun})
 			}
@@ -273,7 +317,7 @@ func (r *run) carry(ctx context.Context, lines []machinefile.Line) []machinefile
 		done := r.line(ctx, l)
 		r.ended[l.Step.Package] = done.State
 		r.there[l.Step.Package] = l.Step.Kind == catalog.KindApp && done.Reason == "" && (done.State == catalog.StateOK || (l.Action == machinefile.Adopt && done.State == catalog.StateDegraded))
-		if done.Reason == machinefile.NotRun {
+		if done.Reason == machinefile.NotRun || done.Reason == machinefile.WaitsForYou {
 			r.ended[l.Step.Package] = catalog.StateBroken
 		}
 		out = append(out, done)
@@ -287,6 +331,10 @@ func (r *run) line(ctx context.Context, l machinefile.Line) machinefile.Done {
 	// branch goes on.
 	done := machinefile.Done{Line: l, State: l.Seen.State, Version: l.Seen.Version, Detail: l.Seen.Detail}
 	if !l.Acts() {
+		return done
+	}
+	if r.left[l.Step.Package] {
+		done.Reason, done.Detail = machinefile.WaitsForYou, machinefile.AsksInTerminal
 		return done
 	}
 	for _, w := range l.Step.Waits {

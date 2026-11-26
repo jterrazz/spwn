@@ -526,6 +526,12 @@ const (
 	AnotherWay      = "present another way since Machines installed it: kept, and yours"
 )
 
+const (
+	// value: the words of a package an unattended apply left since its
+	// run would ask the owner something (WaitsForYou).
+	AsksInTerminal = "asks a question: finish it in a terminal"
+)
+
 func (s ExtraLine) Holding() string {
 	// value: the words of a manager kept for what it holds, the same in the
 	// plan and in the run.
@@ -615,8 +621,9 @@ const (
 	Pinned Reason = "pinned"
 	// value: an upgrade leaves an app that updates itself to its updater.
 	SelfUpdating Reason = "updates-itself"
-	// value: an unattended upgrade (the engine's, at night) leaves an app
-	// whose update asks the owner something for the owner's own run.
+	// value: an unattended run (the engine's upgrade at night, a create's
+	// apply) leaves a package whose run asks the owner something for the
+	// owner's own run.
 	WaitsForYou Reason = "waits-for-you"
 	// value: an unattended upgrade leaves the hypervisor while machines of
 	// this Mac run on it, for the owner's own update.

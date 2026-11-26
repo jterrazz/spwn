@@ -34,11 +34,11 @@ type TemplateFile struct {
 	Body []byte
 }
 
-// value: what a workspace's first start did of its Machinefile: the boot
-// phase's apply (Failed, its first line, when it did not run at all), the
-// packages the apply of the whole file installed or set (Applied) and those
-// it left unfinished, why that apply answered for none (Unapplied, its
-// first line, when it could not run at all), each program
+// value: what a workspace's first start did of its Machinefile: its boot
+// phase (Failed, the first line of why its mounts, the Machinefile's copy
+// or the boot phase's apply did not end well), the packages the apply of
+// the whole file installed or set (Applied) and those it left unfinished,
+// why that apply answered for none (Unapplied), each program
 // granted, each sign-in left to the owner, and the image's drift from the
 // Machinefile now, one line a package (hard case 17).
 
@@ -64,12 +64,16 @@ type FirstStartApp struct {
 	Log     string `json:",omitempty"`
 }
 
-// value: why a package of a create's apply is unfinished when the run
-// said no words of it: it asks the owner something, which a create has no
-// terminal for, or the apply's bound ended before it was carried out.
+// value: why a create's apply left a package when the run said no words
+// of it: the apply's bound ended before it was carried out; and why that
+// apply answered for no package when it ended without an answer: its
+// bound passed, or the create was stopped, or what it stands on (the
+// mounts, the Machinefile's copy) failed, so it never ran.
 const (
-	AsksYou     = "it asks you something, on a terminal"
-	NotFinished = "the apply's time ran out before it"
+	NotFinished  = "the apply ran out of time"
+	OutOfTime    = "it ran out of time"
+	ApplyStopped = "the create was stopped before it ended"
+	NeverRan     = "it did not run, since the " + StepBoot + " failed"
 )
 
 type FirstStartGrant struct {

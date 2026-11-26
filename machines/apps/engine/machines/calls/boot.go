@@ -14,7 +14,6 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 	"github.com/jterrazz/studio-station/apps/engine/core/journal"
 	"github.com/jterrazz/studio-station/apps/engine/machinefile"
-	machinefilecalls "github.com/jterrazz/studio-station/apps/engine/machinefile/calls"
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
 )
 
@@ -25,6 +24,11 @@ const (
 	bootWait  = catalog.PhaseBound
 	applyWait = catalog.PackagesBound
 )
+
+// value: how long past its bound a create waits for its apply's answer:
+// the package running at the bound is read again (machinefile's
+// rereadBudget), the lock written, then the answer crosses back.
+const applyGrace = time.Minute
 
 // value: the folder of the VM user's station files, under its home, and
 // the station binary the image carries.
@@ -43,7 +47,8 @@ const (
 // each it signs in to that the workspace is not signed in to is left to
 // the owner with its command, since a sign-in is done at the program's
 // site; then the whole Machinefile is applied there, what its image holds
-// kept (ADR-103); last, the image's drift from the Machinefile is read
+// kept (ADR-103), an apply the failed mounts or copy kept from running
+// said as not run; last, the image's drift from the Machinefile is read
 // (hard case 17).
 // Nothing that fails here fails the create: the workspace is made, and
 // its page says what is left to do.
@@ -70,8 +75,11 @@ func (s *Machinist) bootPhase(ctx context.Context, name, version string, t model
 		b.Grants = append(b.Grants, g)
 	}
 	b.SignIns = s.signInsLeft(ctx, name, t.SignIns)
-	if written {
+	switch {
+	case written:
 		s.applyAll(ctx, name, t.Name, b)
+	case s.o.Apply != nil:
+		b.Unapplied = model.NeverRan
 	}
 	if s.o.Templates != nil {
 		b.Drift, _ = s.o.Templates.Drift(ctx, t.Name, version)
@@ -164,27 +172,31 @@ func (s *Machinist) applyBoot(ctx context.Context, name string, t model.Template
 
 // invariant: a create applies its whole Machinefile inside the workspace
 // through its Mac's engine, as machinefile.apply does there off a
-// terminal, within the packages' share of a phase's bound: each package
-// it installed or set is Applied; each it did not is Unfinished with why,
-// one the apply would ask the owner about included, since a create has
-// no terminal to ask on; an apply that answered for no package says why
-// in Unapplied, never in Failed: the workspace is made all the same. A package the image already holds is kept, and is neither.
+// terminal, each package that would ask the owner something left for the
+// owner's own run, since a create has no terminal to ask on. The guest
+// carries the packages out within the packages' share of a phase's bound
+// and answers with what it did once it ends, the Mac waiting a grace
+// beyond it: each package installed or set is Applied; each it did not is
+// Unfinished with why; an apply that answered for no package says why in
+// Unapplied, never in Failed: the workspace is made all the same. A
+// package the image already holds is kept, and is neither.
 func (s *Machinist) applyAll(ctx context.Context, vm, file string, b *model.FirstStart) {
 	if s.o.Apply == nil {
 		return
 	}
 	journal.Mark(ctx, s.h.Now(), "apply")
-	ctx, cancel := context.WithTimeout(ctx, applyWait)
+	asked := ctx
+	ctx, cancel := context.WithTimeout(ctx, applyWait+applyGrace)
 	defer cancel()
-	applied, err := s.o.Apply(ctx, vm, file)
-	var refused *fail.Error
+	applied, err := s.o.Apply(ctx, vm, file, applyWait)
 	switch {
-	case errors.As(err, &refused) && refused.Code == machinefilecalls.NeedsTerminal:
-		for pkg := range strings.SplitSeq(refused.Subject, ", ") {
-			b.Unfinished = append(b.Unfinished, model.FirstStartApp{App: pkg, Reason: model.AsksYou})
-		}
+	case err != nil && asked.Err() != nil:
+		b.Unapplied = model.ApplyStopped
 		return
-	case err != nil && len(applied.Done) == 0:
+	case errors.Is(err, context.DeadlineExceeded):
+		b.Unapplied = model.OutOfTime
+		return
+	case err != nil:
 		b.Unapplied = firstLine(err.Error())
 		return
 	}

@@ -1782,9 +1782,11 @@ export type MachinefileBlockDone = {
 export type MachinefileCallsApplyIn = {
     Confirm?: string;
     Interactive?: boolean;
+    LeaveAsking?: boolean;
     Machinefile?: string;
     Phase?: 'image' | 'boot' | 'apply';
     Remove?: boolean;
+    Within?: number;
 };
 
 export type MachinefileCallsDriftIn = {
