@@ -90,6 +90,16 @@ func (b *Book) Readmit(d Device, own, mac string, key *ecdsa.PublicKey) error {
 	return nil
 }
 
+func (c Checked) Holder(key string) (Device, bool) {
+	// invariant: only a trusted entry holds a key: a broken entry, and every
+	// entry of a stale book, holds none, whatever key it names.
+	i := slices.IndexFunc(c.Trusted, func(d Device) bool { return sameKey(d.Key, key) })
+	if i < 0 {
+		return Device{}, false
+	}
+	return c.Trusted[i], true
+}
+
 func (c Checked) Opening(ch Channel) []string {
 	var keys []string
 	for _, d := range c.Trusted {

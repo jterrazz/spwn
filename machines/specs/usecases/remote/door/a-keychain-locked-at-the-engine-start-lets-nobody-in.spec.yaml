@@ -1,0 +1,15 @@
+description: 'a keychain locked at the engine''s start lets nobody in at the door, the book''s own device included'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" devices add mac-mini $("$STATION" devices --on mac-mini --json | /usr/bin/jq -r .key) --channels pipe >/dev/null'
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].stores.devices_anchor_unreadable = true'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'world engine-crash macbook-pro'
+      exit: 0
+    - command: 'world knock macbook-pro mac-mini'
+      exit: 0
+      stdout: |
+          door: refused SHA256:BoS4yciLAuSqrxlufZLEPNDAgryOX/2NniX6/wFZYoY: the device book is not checked yet: nobody is let in until the login keychain answers

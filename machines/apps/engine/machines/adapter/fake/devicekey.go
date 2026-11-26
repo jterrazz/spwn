@@ -72,7 +72,17 @@ func DeviceKeyFor(mac string) *DeviceKey {
 	// invariant: a world Mac's device key is the same in every process of a
 	// story, made from its name alone, so what one run seals the next one
 	// checks.
-	scalar := sha256.Sum256([]byte("world device key\n" + mac))
+	return keyFrom("world device key\n" + mac)
+}
+
+func DoorKeyFor(mac string) *DeviceKey {
+	// value: a world Mac's door host key, its own and never its device key,
+	// the same in every process of a story.
+	return keyFrom("world door key\n" + mac)
+}
+
+func keyFrom(seed string) *DeviceKey {
+	scalar := sha256.Sum256([]byte(seed))
 	key, err := ecdsa.ParseRawPrivateKey(elliptic.P256(), scalar[:])
 	if err != nil {
 		return &DeviceKey{}

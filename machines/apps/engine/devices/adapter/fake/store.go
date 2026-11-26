@@ -205,7 +205,7 @@ func (s *Store) Held(context.Context) (devices.Head, devices.Standing, bool) {
 	s.w.Lock()
 	defer s.w.Unlock()
 	m := s.w.Mac(s.mac)
-	if !m.EngineRuns() || m.Engine.Book == nil {
+	if !s.sole || !m.EngineRuns() || m.Engine.Book == nil {
 		return devices.Head{}, devices.Kept, false
 	}
 	_, _ = held(m)

@@ -20,6 +20,8 @@ type farMac struct {
 	fresh func()
 	// value: where it keeps a gesture it runs on itself.
 	kept call.Keeper
+	// value: the machine whose book judges a knock at its door.
+	gate machine
 }
 
 // invariant: a far Mac is built over its own slice of the world, with no
@@ -29,5 +31,5 @@ func (m machine) farMac(env kit.Env, w *worldMac) farMac {
 	fenv := kit.Env{Out: env.Out, On: &kit.On{ThisMachine: there.thisMac()}, Self: there.profile.Ref}
 	r := there.router(fenv)
 	fenv.Calls = r
-	return farMac{registry: there.registry(fenv), profile: there.profile, start: func() *process.Engine { return there.startedEngine(fenv) }, relay: served{r: r}, fresh: func() { there.pool.Forget("") }, kept: there.kept()}
+	return farMac{registry: there.registry(fenv), profile: there.profile, start: func() *process.Engine { return there.startedEngine(fenv) }, relay: served{r: r}, fresh: func() { there.pool.Forget("") }, kept: there.kept(), gate: there}
 }

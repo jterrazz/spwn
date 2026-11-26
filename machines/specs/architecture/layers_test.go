@@ -42,7 +42,10 @@ const (
 // invariant: the import table of docs/concepts/architecture.md, owned HERE. A
 // package matches the row with the most specific pattern: an exact path beats
 // `x/*`, a longer prefix beats a shorter. `std` is the standard library minus
-// forbiddenStd; a forbidden member is re-allowed only by its name in a row.
+// forbiddenStd; a forbidden member is re-allowed only by its name in a row. A
+// library outside the module is allowed by its exact import path, or by
+// `x/*` for the packages under x: a row that names x/crypto/ssh may not
+// import ssh/agent through it.
 func importTable() map[string][]string {
 	// value: what a surface reaches the use cases by: the kernel's calls,
 	// confirmations and machines, each family's model and calls.
@@ -51,7 +54,7 @@ func importTable() map[string][]string {
 	for _, f := range families() {
 		calls = append(calls, f, f+"/calls")
 	}
-	organism := []string{"ui/molecule", "ui/atom", "ui/token", "page", lip, bubble, huh, std}
+	organism := []string{"ui/molecule", "ui/atom", "ui/token", "page", lip, bubble + "/*", huh, std}
 	template := append(slices.Clone(organism), "ui/organism")
 	return map[string][]string{
 		"cmd/station":                {"wire", "os"},
@@ -63,6 +66,7 @@ func importTable() map[string][]string {
 		"surface/cli/*":              append([]string{"surface/cli/kit", "core/fail", "engine", "page", "pages/*", "catalog", cobra, pflag, std}, calls...),
 		"engine":                     {"platform/local", "catalog", "setup", "core/call/lanes", "ports", "ports/contract", "background", "background/contract", "accounts", "accounts/contract", "settings", "settings/contract", "machines", "machines/contract", "images", "setup", "setup/contract", "core/store", "core/adapter/fake", "machines/adapter/fake", std, "activity", "ports/calls", "awake", "awake/contract", "awake/calls", "net/netip"},
 		"machines/adapter/ssh":       {"machines/contract", "machines/contract/contracttest", sshPkg, sshPkg + "/knownhosts", sshPkg + "/agent", "platform/local", "platform/local/localtest", "net/netip", std},
+		"remote/adapter/door":        {"platform/local", sshPkg, std},
 		"machines/adapter/tart":      {"platform/local", "machines", "machines/contract", "machines/contract/contracttest", "images/contract", "core/call", "net/netip", std},
 		"platform/local":             {"os", "os/exec", "os/user", "net", "net/http", "syscall", "unsafe", "golang.org/x/sys/unix", std},
 		"platform/local/localtest":   {"platform/local", "testing", "testing/fstest", "net", std},
@@ -126,7 +130,8 @@ func symbolRules() []symbolRule {
 		{symbols: []string{"os.*", "os/exec.*", "syscall.*", "os/user.*"}, owners: []string{"platform/local", "platform/darwin"}},
 		{symbols: []string{"net.*"}, owners: []string{"platform/local", "platform/local/localtest"}, tests: true},
 		{symbols: []string{"net/http.*"}, owners: []string{"platform/local"}},
-		{symbols: []string{sshPkg + ".*", sshPkg + "/knownhosts.*", sshPkg + "/agent.*"}, owners: []string{"machines/adapter/ssh"}},
+		{symbols: []string{sshPkg + ".*"}, owners: []string{"machines/adapter/ssh", "remote/adapter/door"}},
+		{symbols: []string{sshPkg + "/knownhosts.*", sshPkg + "/agent.*"}, owners: []string{"machines/adapter/ssh"}},
 		{symbols: []string{"fmt.Print", "fmt.Println", "fmt.Printf", "log.*", "print", "println"}},
 		{symbols: []string{"fmt.Fprint", "fmt.Fprintln", "fmt.Fprintf", "io.WriteString", "io.Copy", "io.CopyN"}, owners: []string{"output", "ui/render/*", "platform/local", "cmd/generate"}},
 		{symbols: cobraWriters(), owners: []string{"surface/cli/kit", "wire"}},
@@ -343,7 +348,7 @@ func allowedImport(row, pkg, ip string, test bool) bool {
 		return slices.Contains(allowed, std) && !forbiddenStd(ip) && !readsFiles(row, ip)
 	}
 	for _, a := range allowed {
-		if ip == a || strings.HasPrefix(ip, a+"/") {
+		if base, ok := strings.CutSuffix(a, "/*"); (ok && strings.HasPrefix(ip, base+"/")) || ip == a {
 			return true
 		}
 	}
@@ -765,6 +770,8 @@ func rules() []rule {
 		{"RowsPresentation", ruleRows, "apps/engine/ui/mutantleak/leak.go", "package mutantleak\n\nimport _ \"os/exec\"\n", "apps/engine/ui/mutantleak"},
 		{"Imports", ruleImports, "apps/engine/catalog/mutant_imports.go", "package catalog\n\nimport _ \"os/exec\"\n", "apps/engine/catalog/mutant_imports.go"},
 		{"ImportsCore", ruleImports, "apps/engine/core/machine/mutant_imports.go", "package machine\n\nimport _ \"os\"\n", "apps/engine/core/machine/mutant_imports.go"},
+		{"ImportsDoorCrypto", ruleImports, "apps/engine/remote/adapter/door/mutant_crypto.go", "package door\n\nimport _ \"golang.org/x/crypto/curve25519\"\n", "apps/engine/remote/adapter/door/mutant_crypto.go"},
+		{"ImportsDoorAgent", ruleImports, "apps/engine/remote/adapter/door/mutant_agent.go", "package door\n\nimport _ \"" + sshPkg + "/agent\"\n", "apps/engine/remote/adapter/door/mutant_agent.go"},
 		{"ImportsCoreFiles", ruleImports, "apps/engine/core/section/mutant_imports.go", "package section\n\nimport _ \"path/filepath\"\n", "apps/engine/core/section/mutant_imports.go"},
 		{"Symbols", ruleSymbols, "apps/engine/pages/apps/mutant_symbols.go", "package apps\n\nimport \"time\"\n\nfunc mutantNow() time.Time { return time.Now() }\n", "apps/engine/pages/apps/mutant_symbols.go"},
 		{"Systemtest", ruleSystemtest, "apps/engine/ui/token/mutant_systemtest.go", "package token\n\nimport _ \"" + module + "/platform/local/localtest\"\n", "apps/engine/ui/token/mutant_systemtest.go"},
@@ -898,8 +905,10 @@ func TestPowerSafe(t *testing.T)  { judge(t, "PowerSafe") }
 func TestPowerFiles(t *testing.T) { judge(t, "PowerFiles") }
 func TestStreams(t *testing.T)    { judge(t, "Streams") }
 
-func TestImportsCore(t *testing.T)      { judge(t, "ImportsCore") }
-func TestImportsCoreFiles(t *testing.T) { judge(t, "ImportsCoreFiles") }
+func TestImportsCore(t *testing.T)       { judge(t, "ImportsCore") }
+func TestImportsCoreFiles(t *testing.T)  { judge(t, "ImportsCoreFiles") }
+func TestImportsDoorCrypto(t *testing.T) { judge(t, "ImportsDoorCrypto") }
+func TestImportsDoorAgent(t *testing.T)  { judge(t, "ImportsDoorAgent") }
 
 func TestKit(t *testing.T)           { judge(t, "Kit") }
 func TestLevels(t *testing.T)        { judge(t, "Levels") }

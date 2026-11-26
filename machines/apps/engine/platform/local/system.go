@@ -142,6 +142,20 @@ func (r Reply) Said(name string) string { return r.Header[http.CanonicalHeaderKe
 
 type Conn interface{ io.ReadWriteCloser }
 
+type NetConn interface {
+	// value: a connection with its addresses and deadlines, the one a
+	// protocol library speaks over: net.Conn's methods, named here so a
+	// package outside platform closes one without reaching net.
+	Read(b []byte) (n int, err error)
+	Write(b []byte) (n int, err error)
+	Close() error
+	LocalAddr() net.Addr
+	RemoteAddr() net.Addr
+	SetDeadline(t time.Time) error
+	SetReadDeadline(t time.Time) error
+	SetWriteDeadline(t time.Time) error
+}
+
 type Listener interface {
 	Accept() (Conn, error)
 	Close() error

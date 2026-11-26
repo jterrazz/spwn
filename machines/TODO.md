@@ -377,7 +377,17 @@ removed from the iPhone app.
 The book landed: `station devices`, `add` with presence and here-only, `forget` from afar, the seal, and a
 VM trusting its Mac's device key and the book's `pipe` entries alone. What it decides stops at the VMs: a
 Mac itself is still reached through its own sshd and `~/.ssh/authorized_keys`, and the key agent still
-relays every key it does not hold. The door ([ADR-090](docs/decisions/090-a-machine-is-reached-through-its-engines-door-never-through-openssh.md)) owes the rest:
+relays every key it does not hold. The door's gate is written (`remote/adapter/door`, judged by
+`wire/door.go`): it lets in only a key of the book this Mac's engine holds, and nobody while the book is
+changed, not checked yet, unreadable or a newer Spwn's; it serves no channel and no engine opens it yet,
+so a world's `knock` event alone reaches it. The door ([ADR-090](docs/decisions/090-a-machine-is-reached-through-its-engines-door-never-through-openssh.md)) owes the rest:
+
+- **The door's pre-auth limits**: connections per peer and in all, a handshake deadline, a pause after
+  failed authentications, and its lines in `logs/engine.log`, before any engine opens it.
+- **The door's address and its cost**, before any engine opens it too: it listens on this Mac's tailnet
+  address alone and checks each peer against the tailnet before the version line; the book's verdict is
+  kept per book head, so a key offered costs no seal check; and a test drives many connections while
+  devices are added and forgotten.
 
 - **The channels as the door's allowlist**: a device opens `spwn-api` or `herdr` only when its entry says so.
 - **Forget closes a live session**: `devices.forget` ends that device's open door sessions, as it already

@@ -1,0 +1,17 @@
+description: 'a book written back from before a forget lets nobody in at the door, the device it lists included'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" devices add mac-mini $("$STATION" devices --on mac-mini --json | /usr/bin/jq -r .key) --channels pipe >/dev/null'
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].stores | {devices, devices_generation, devices_anchor}'' world.json > before.json'
+      exit: 0
+    - command: 'devices forget mac-mini --confirm=mac-mini >/dev/null'
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq --slurpfile b before.json ''.macs["macbook-pro"].stores += $b[0]'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'world knock macbook-pro mac-mini'
+      exit: 0
+      stdout: |
+          door: refused SHA256:BoS4yciLAuSqrxlufZLEPNDAgryOX/2NniX6/wFZYoY: the device book changed outside Spwn: nobody is let in until a device is added again
