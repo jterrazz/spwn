@@ -43,6 +43,9 @@
     --lift-2: 0 12px 32px rgb(0 0 0 / 38%), 0 2px 6px rgb(0 0 0 / 30%);
     --lift-3: 0 30px 80px rgb(0 0 0 / 55%), 0 4px 12px rgb(0 0 0 / 30%);
     --lift-primary: 0 1px 0 rgb(255 255 255 / 30%) inset, 0 4px 12px rgb(0 0 0 / 30%);
+    /* value: what floats (a popover, the peeked column, Find) is glass: the board's tint at 84 %, not its 70 %, the least share at which --t1 and --t2 keep 4.5:1 and --t3 3:1 over the white primary button, the brightest thing glass floats over, plus one step against the alpha's 8-bit rounding */
+    --glass: rgb(36 37 43 / 84%);
+    --blur: blur(22px) saturate(160%);
 
     --art-ink: #e3e4e8;
     --art-dim: #8a8c93;
@@ -114,6 +117,13 @@ html[data-material='vibrant'] {
     --ground-window: transparent;
     --ground: color-mix(in srgb, var(--s0) var(--material-canvas), transparent);
     --ground-sidebar: color-mix(in srgb, var(--s1) var(--material-sidebar), transparent);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+    :root {
+        --glass: var(--s2);
+        --blur: none;
+    }
 }
 
 [data-identity='blue'] {

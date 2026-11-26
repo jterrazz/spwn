@@ -1,8 +1,9 @@
 import { readdirSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, relative } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import { mixed, ratio, rgbOf } from '../contrast';
+import type { Rgb } from '../contrast';
 
 const TOKENS = readFileSync(join(import.meta.dirname, '..', 'tokens.css'), 'utf8');
 
@@ -10,17 +11,38 @@ const PRESENTATION = join(import.meta.dirname, '..', '..');
 
 const SCALES = ['text', 'radius', 'space', 'motion'] as const;
 
-function stylesUnder(dir: string): string[] {
+function sheetsUnder(dir: string): string[] {
     return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
         const path = join(dir, entry.name);
         if (entry.isDirectory()) {
-            return stylesUnder(path);
+            return sheetsUnder(path);
         }
-        return path.endsWith('.css') ? [readFileSync(path, 'utf8')] : [];
+        return path.endsWith('.css') ? [path] : [];
     });
 }
 
-const STYLES = stylesUnder(PRESENTATION).join('\n');
+const SHEETS = sheetsUnder(PRESENTATION);
+
+const STYLES = SHEETS.map((path) => readFileSync(path, 'utf8')).join('\n');
+
+type Rule = { file: string; selector: string; body: string };
+
+const RULES: readonly Rule[] = SHEETS.flatMap((path) =>
+    [...readFileSync(path, 'utf8').matchAll(/(?<selector>[^{}]+)\{(?<body>[^{}]*)\}/gu)].map(
+        (found) => ({
+            body: found.groups?.body ?? '',
+            file: relative(PRESENTATION, path),
+            selector: (found.groups?.selector ?? '').trim(),
+        }),
+    ),
+);
+
+const GLASS = RULES.filter((rule) => rule.body.includes('var(--glass)'));
+
+function declares(body: string, property: string, value: string): boolean {
+    const escaped = value.replaceAll(/[()]/gu, String.raw`\$&`);
+    return new RegExp(String.raw`(?:^|[;\s])${property}:\s*${escaped}`, 'u').test(body);
+}
 
 function scaleNames(source: string, around: 'declared' | 'drawn'): Set<string> {
     const name = `--(?:${SCALES.join('|')})-[a-z0-9-]+`;
@@ -28,7 +50,7 @@ function scaleNames(source: string, around: 'declared' | 'drawn'): Set<string> {
     return new Set([...source.matchAll(new RegExp(pattern, 'gu'))].map((each) => each[1] ?? ''));
 }
 
-const DARK = TOKENS.slice(0, TOKENS.indexOf("html[data-material='vibrant']"));
+const DARK = TOKENS.slice(0, TOKENS.indexOf('@media (prefers-reduced-transparency: reduce)'));
 
 function tokenOf(name: string): string {
     const found = new RegExp(`--${name}:\\s*(?<value>[^;]+);`, 'u').exec(DARK);
@@ -74,6 +96,25 @@ function overGrounds(
 
 function onGrounds(name: string, grounds: readonly string[] = GROUNDS): Measure[] {
     return overGrounds(name, (ground) => ratio(colourOf(name), colourOf(ground)), grounds);
+}
+
+function glassOver(ground: string): Rgb {
+    const found = /^rgb\((?<red>\d+) (?<green>\d+) (?<blue>\d+) \/ (?<share>\d+)%\)$/u.exec(
+        tokenOf('glass'),
+    );
+    if (found?.groups === undefined) {
+        throw new Error(`--glass is not an rgb() with a share: ${tokenOf('glass')}`);
+    }
+    const { blue, green, red, share } = found.groups;
+    const tint = { blue: Number(blue), green: Number(green), red: Number(red) };
+    return mixed(colourOf(ground), tint, Number(share) / 100);
+}
+
+function onGlass(text: string, grounds: readonly string[]): Measure[] {
+    return grounds.map((ground) => [
+        `--${text} on --glass over --${ground}`,
+        ratio(colourOf(text), glassOver(ground)),
+    ]);
 }
 
 describe('contrast', () => {
@@ -122,6 +163,25 @@ describe('contrast', () => {
 
         // Then - each holds the bar of text
         expect(below(TEXT_BAR, labels)).toStrictEqual([]);
+    });
+
+    test('text on glass reads at 4.5:1 over each of the four surface steps', () => {
+        // Given - each text level on the glass composited over s0 to s3, the blur left out since it only averages
+        const measures = TEXTS.flatMap((text) => onGlass(text, GROUNDS));
+
+        // Then - none is below the bar of text
+        expect(below(TEXT_BAR, measures)).toStrictEqual([]);
+    });
+
+    test('over the white primary button, the brightest thing glass floats over, a name and its meta keep 4.5:1 and the third level 3:1', () => {
+        // Given - the text levels on the glass composited over the primary at rest and at hover, pure white
+        const grounds = ['primary', 'primary-hover'];
+        const read = [...onGlass('t1', grounds), ...onGlass('t2', grounds)];
+        const third = onGlass('t3', grounds);
+
+        // Then - none falls under its bar
+        expect(below(TEXT_BAR, read)).toStrictEqual([]);
+        expect(below(MARK_BAR, third)).toStrictEqual([]);
     });
 
     test('a control one step above its surface differs from it by 1.06:1 at least, the path bar to its Find box included', () => {
@@ -186,5 +246,55 @@ describe('contrast', () => {
         // Then - none is drawn undeclared, and none stands unused, so a renamed step leaves nothing behind
         expect([...drawn].filter((name) => !declared.has(name))).toStrictEqual([]);
         expect([...declared].filter((name) => !drawn.has(name))).toStrictEqual([]);
+    });
+
+    test('what floats wears glass, and nothing else does: no page, tile or sheet', () => {
+        // Given - every rule of the style sheets that draws the glass
+        const worn = GLASS.map((rule) => `${rule.file} ${rule.selector}`).toSorted();
+
+        // Then - they are the floating surfaces, and only they
+        expect(worn).toStrictEqual([]);
+    });
+
+    test('a glass rule draws the blur, its WebKit twin, an edge and the floating lift', () => {
+        // Given - every rule that draws the glass, and the parts of the material each must draw
+        const parts: readonly (readonly [string, (body: string) => boolean])[] = [
+            ['backdrop-filter', (body) => declares(body, 'backdrop-filter', 'var(--blur)')],
+            [
+                '-webkit-backdrop-filter',
+                (body) => declares(body, '-webkit-backdrop-filter', 'var(--blur)'),
+            ],
+            ['edge', (body) => body.includes('var(--edge)')],
+            ['lift', (body) => declares(body, 'box-shadow', 'var(--lift-2)')],
+        ];
+        const missing = GLASS.flatMap((rule) =>
+            parts
+                .filter(([, drawn]) => !drawn(rule.body))
+                .map(([part]) => `${rule.file} ${rule.selector}: ${part}`),
+        );
+
+        // Then - none lacks a part of the material
+        expect(missing).toStrictEqual([]);
+    });
+
+    test('a backdrop filter is drawn by glass alone', () => {
+        // Given - every rule that blurs what lies under it
+        const blurring = RULES.filter((rule) => rule.body.includes('backdrop-filter:'));
+
+        // Then - each is a glass rule
+        expect(blurring.filter((rule) => !GLASS.includes(rule))).toStrictEqual([]);
+    });
+
+    test('asked for less transparency, glass becomes the opaque s2 step and blurs nothing', () => {
+        // Given - the tokens tokens.css sets when the system asks for reduced transparency
+        const reduced = TOKENS.slice(
+            TOKENS.indexOf('@media (prefers-reduced-transparency: reduce)'),
+        ).split('}')[0];
+
+        // Then - the glass is s2 and the blur is none, and nothing else changes there
+        expect(reduced?.match(/--[a-z0-9-]+:[^;]+;/gu)).toStrictEqual([
+            '--glass: var(--s2);',
+            '--blur: none;',
+        ]);
     });
 });
