@@ -205,7 +205,7 @@ type TilesProps = {
 export function ActivityTiles({ found, up, of, fourth, disk }: TilesProps) {
     const name = found.vm?.Name ?? found.mac.Name;
     const labels = labelsOf(of);
-    const { readers, shown } = useActivity(found, '1h');
+    const shown = useActivity(found, '1h');
     const unknown = unknownOf(shown);
     const report = shown?.kind === 'read' ? shown.out : undefined;
     const memoryTile = (
@@ -217,24 +217,21 @@ export function ActivityTiles({ found, up, of, fourth, disk }: TilesProps) {
         />
     );
     return (
-        <>
-            {readers}
-            <Tiles>
-                {unknown !== undefined || report === undefined ? (
-                    <>
-                        <Unknown label={labels.cpu} state={unknown ?? 'reading'} />
-                        {memoryTile}
-                        <Unknown label={labels.disk} state={unknown ?? 'reading'} />
-                    </>
-                ) : (
-                    <>
-                        <CpuTile label={labels.cpu} name={name} report={report} />
-                        {memoryTile}
-                        <DiskHeld disk={disk} label={labels.disk} report={report} />
-                    </>
-                )}
-                {fourth ?? <UptimeTile label={labels.up} report={report} up={up} />}
-            </Tiles>
-        </>
+        <Tiles>
+            {unknown !== undefined || report === undefined ? (
+                <>
+                    <Unknown label={labels.cpu} state={unknown ?? 'reading'} />
+                    {memoryTile}
+                    <Unknown label={labels.disk} state={unknown ?? 'reading'} />
+                </>
+            ) : (
+                <>
+                    <CpuTile label={labels.cpu} name={name} report={report} />
+                    {memoryTile}
+                    <DiskHeld disk={disk} label={labels.disk} report={report} />
+                </>
+            )}
+            {fourth ?? <UptimeTile label={labels.up} report={report} up={up} />}
+        </Tiles>
     );
 }

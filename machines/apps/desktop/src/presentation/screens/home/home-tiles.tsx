@@ -92,26 +92,23 @@ function AwakeTile() {
 }
 
 export function HomeTiles({ mac }: { mac: MachinesMacView }) {
-    const { readers, shown } = useActivity({ mac }, '1h');
+    const shown = useActivity({ mac }, '1h');
     const unknown = unknownOf(shown);
     const report = shown?.kind === 'read' ? shown.out : undefined;
     return (
-        <>
-            {readers}
-            <Tiles>
-                <MemoryFreeTile />
-                {unknown !== undefined || report === undefined ? (
-                    <Unknown label={LABELS.cpu} state={unknown ?? 'reading'} />
-                ) : (
-                    <CpuTile label={LABELS.cpu} name={mac.Name} report={report} />
-                )}
-                <AwakeTile />
-                {unknown !== undefined || report === undefined ? (
-                    <Unknown label={LABELS.disk} state={unknown ?? 'reading'} />
-                ) : (
-                    <DiskFreeTile mac={mac} report={report} />
-                )}
-            </Tiles>
-        </>
+        <Tiles>
+            <MemoryFreeTile />
+            {unknown !== undefined || report === undefined ? (
+                <Unknown label={LABELS.cpu} state={unknown ?? 'reading'} />
+            ) : (
+                <CpuTile label={LABELS.cpu} name={mac.Name} report={report} />
+            )}
+            <AwakeTile />
+            {unknown !== undefined || report === undefined ? (
+                <Unknown label={LABELS.disk} state={unknown ?? 'reading'} />
+            ) : (
+                <DiskFreeTile mac={mac} report={report} />
+            )}
+        </Tiles>
     );
 }

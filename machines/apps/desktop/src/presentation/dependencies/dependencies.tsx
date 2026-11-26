@@ -189,11 +189,11 @@ function isOutOf<N extends CallName>(
 const IDLE = () => () => undefined;
 
 // invariant: a view the engine keeps is read from its mirrored stream, never asked by its call, unless the engine
-// invariant: could not read it: the call then answers what the window draws, its refusal. Any other read is the store's.
-function useAsked(asked: Asked): Reading<unknown> {
+// invariant: could not read it: the call then answers what the window draws, its refusal. Any other read is the store's;
+// invariant: nothing asked is read from no one and stays reading.
+function useAsked(asked: Asked | undefined): Reading<unknown> {
     const { store, mirror, batch } = useEngine();
-    const view = viewOf(asked);
-    const key = askedKey(asked);
+    const view = asked === undefined ? undefined : viewOf(asked);
     const subscribe = view === undefined ? IDLE : batch.of(mirror.subscriberOf(view));
     const mirrored = useSyncExternalStore(subscribe, () =>
         view === undefined ? READING : mirror.reading(view),
@@ -201,9 +201,10 @@ function useAsked(asked: Asked): Reading<unknown> {
     const refused = useSyncExternalStore(subscribe, () =>
         view === undefined ? undefined : mirror.refusedOf(view),
     );
-    const called = view === undefined || refused !== undefined;
-    const stored = useSyncExternalStore(called ? batch.of(store.subscriberOf(asked)) : IDLE, () =>
-        called ? store.reading(key) : READING,
+    const called =
+        asked !== undefined && (view === undefined || refused !== undefined) ? asked : undefined;
+    const stored = useSyncExternalStore(called ? batch.of(store.subscriberOf(called)) : IDLE, () =>
+        called ? store.reading(askedKey(called)) : READING,
     );
     return called ? stored : mirrored;
 }
@@ -230,13 +231,16 @@ export function useStale(): readonly Stale[] {
     return useSyncExternalStore(batch.of(stale.subscribe), stale.shown);
 }
 
+// value: what `name` answers for `input`; with no input, nothing is asked and the reading stays reading.
 export function useWatch<N extends WatchName>(
     name: N,
-    input: In<N>,
+    input: In<N> | undefined,
     target?: Target,
     asking: Asking = {},
 ): Reading<Out<N>> {
-    const reading = useAsked({ input, kind: 'watch', name, target });
+    const reading = useAsked(
+        input === undefined ? undefined : { input, kind: 'watch', name, target },
+    );
     useStaleMark(reading);
     return usePlaceholder(isOutOf(name, reading) ? reading : READING, asking);
 }

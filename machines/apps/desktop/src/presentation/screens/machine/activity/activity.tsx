@@ -54,7 +54,7 @@ function Measured({
 export function ActivityTab({ found, go }: { found: Found; go: Go }) {
     const name = found.vm?.Name ?? found.mac.Name;
     const [span, setSpan] = useState<Span>('6m');
-    const { readers, shown } = useActivity(found, span);
+    const shown = useActivity(found, span);
     const switcher = (
         <div className={styles.bar}>
             <Switch
@@ -92,7 +92,6 @@ export function ActivityTab({ found, go }: { found: Found; go: Go }) {
     }
     return (
         <Page>
-            {readers}
             {now}
             <Log found={found} />
         </Page>
