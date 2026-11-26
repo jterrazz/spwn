@@ -383,7 +383,8 @@ relays every key it does not hold. The door ([ADR-090](docs/decisions/090-a-mach
 What a process running code as the owner still opens, and what is left of the fix, each its own lot ([ADR-092](docs/decisions/092-a-machines-device-book-says-who-may-reach-it.md), "What the seal is worth").
 
 - **The anchor across an engine restart.** While the engine runs it believes only the books it wrote
-  (`devices add` and `forget` routed to it, `jsonfile.Store.Sole`), so a book and a head moved forward
+  (`devices add` and `forget` routed to it, `jsonfile.Store.Sole`, its start read final even when it
+  fails), so a book and a head moved forward
   by a process that runs `security` raise "The device book changed outside Spwn" and reach nothing. A
   new engine has only the keychain, so the same book written while no engine ran is trusted. It closes
   when the item is written through the Security framework by the signed engine, with an access list
