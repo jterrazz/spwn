@@ -2204,7 +2204,7 @@ func builtinCatalog() (Catalog, error) {
 						Kinds: []MachineKind{
 							"mac"},
 						Install: ShellInstall{
-							Line: "d=\"$HOME/.local/share\"; case \"$XDG_DATA_HOME\" in /*) d=\"$XDG_DATA_HOME\" ;; esac; mkdir -p \"$d/station/tart\" \"$d/station/vms\" \"$HOME/.local/bin\" && curl -fsSL https://github.com/cirruslabs/tart/releases/latest/download/tart.tar.gz | tar -xz -C \"$d/station/tart\""}}},
+							Line: "set -euo pipefail\nd=\"$HOME/.local/share\"\ncase \"${XDG_DATA_HOME:-}\" in /*) d=\"$XDG_DATA_HOME\" ;; esac\nmkdir -p \"$d/station/vms\" \"$HOME/.local/bin\"\nnew=$(mktemp -d \"$d/station/tart.new.XXXXXX\")\ntrap 'rm -rf \"$new\"' EXIT\ncurl -fsSL https://github.com/cirruslabs/tart/releases/latest/download/tart.tar.gz | tar -xz -C \"$new\"\nfresh=$(\"$new/tart.app/Contents/MacOS/tart\" --version)\nnow=$(\"$d/station/tart/tart.app/Contents/MacOS/tart\" --version 2>/dev/null || true)\n[ \"$fresh\" != \"$now\" ] || exit 0\nold=\"$d/station/tart.old.$$\"\n[ ! -e \"$d/station/tart\" ] || mv \"$d/station/tart\" \"$old\"\nmv \"$new\" \"$d/station/tart\" || { [ ! -e \"$old\" ] || mv \"$old\" \"$d/station/tart\"; exit 1; }\nrm -rf \"$old\"\n"}}},
 				Provides: []string{
 					"tart"},
 				Version: VersionRead{
@@ -6845,7 +6845,7 @@ func builtinCatalog() (Catalog, error) {
 								Machine: Roles{
 									"computer"}},
 							Script: &ScriptMethod{
-								Run: "d=\"$HOME/.local/share\"; case \"$XDG_DATA_HOME\" in /*) d=\"$XDG_DATA_HOME\" ;; esac; mkdir -p \"$d/station/tart\" \"$d/station/vms\" \"$HOME/.local/bin\" && curl -fsSL https://github.com/cirruslabs/tart/releases/latest/download/tart.tar.gz | tar -xz -C \"$d/station/tart\""}}},
+								Run: "set -euo pipefail\nd=\"$HOME/.local/share\"\ncase \"${XDG_DATA_HOME:-}\" in /*) d=\"$XDG_DATA_HOME\" ;; esac\nmkdir -p \"$d/station/vms\" \"$HOME/.local/bin\"\nnew=$(mktemp -d \"$d/station/tart.new.XXXXXX\")\ntrap 'rm -rf \"$new\"' EXIT\ncurl -fsSL https://github.com/cirruslabs/tart/releases/latest/download/tart.tar.gz | tar -xz -C \"$new\"\nfresh=$(\"$new/tart.app/Contents/MacOS/tart\" --version)\nnow=$(\"$d/station/tart/tart.app/Contents/MacOS/tart\" --version 2>/dev/null || true)\n[ \"$fresh\" != \"$now\" ] || exit 0\nold=\"$d/station/tart.old.$$\"\n[ ! -e \"$d/station/tart\" ] || mv \"$d/station/tart\" \"$old\"\nmv \"$new\" \"$d/station/tart\" || { [ ! -e \"$old\" ] || mv \"$old\" \"$d/station/tart\"; exit 1; }\nrm -rf \"$old\"\n"}}},
 					Disk: &Disk{
 						Paths: []Stored{
 							{

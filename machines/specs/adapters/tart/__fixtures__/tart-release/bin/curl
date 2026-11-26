@@ -1,0 +1,17 @@
+#!/bin/sh
+# curl as tart's release meets it: the archive of a tart.app whose binary answers the version
+# .release holds (2.42.0 without one); with .release-down, the release does not answer.
+if [ -e "$HOME/.release-down" ]; then
+    echo 'curl: (22) The requested URL returned error: 503' >&2
+    exit 22
+fi
+version=2.42.0
+[ ! -e "$HOME/.release" ] || version=$(/bin/cat "$HOME/.release")
+dir=$(/usr/bin/mktemp -d)
+/bin/mkdir -p "$dir/tart.app/Contents/MacOS"
+printf '#!/bin/sh\necho %s\n' "$version" > "$dir/tart.app/Contents/MacOS/tart"
+/bin/chmod 755 "$dir/tart.app/Contents/MacOS/tart"
+/usr/bin/tar -cz -C "$dir" tart.app
+status=$?
+/bin/rm -rf "$dir"
+exit $status

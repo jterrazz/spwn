@@ -1,0 +1,23 @@
+description: 'an update of tart to its own version keeps its copy, and one to a newer version swaps it whole'
+fixture:
+    - ./__fixtures__/shell-real/
+    - ./__fixtures__/tart-release/
+env: engine
+runs:
+    - command: 'apps install tart'
+      exit: 0
+      stdout: |
+          ●	tart	2.42.0	shell
+          ●	tart-launcher			~/.local/bin/tart
+    - command: '--version >/dev/null; /bin/ls -i .local/share/station/tart/tart.app/Contents/MacOS/tart > .before; "$STATION" apps update tart; /bin/ls -i .local/share/station/tart/tart.app/Contents/MacOS/tart | /usr/bin/cmp - .before && echo untouched'
+      exit: 0
+      stdout: |
+          ●	tart	2.42.0	shell
+          untouched
+    - command: '--version >/dev/null; echo 2.43.0 > .release; "$STATION" apps update tart; .local/bin/tart --version; /bin/ls .local/share/station'
+      exit: 0
+      stdout: |
+          ●	tart	2.43.0	shell
+          2.43.0
+          tart
+          vms

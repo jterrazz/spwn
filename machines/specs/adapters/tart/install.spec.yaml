@@ -9,6 +9,20 @@ runs:
     - command: '--version >/dev/null; /bin/cat .calls'
       exit: 0
       stdout: |
-          bash [-c] [d="$HOME/.local/share"; case "$XDG_DATA_HOME" in /*) d="$XDG_DATA_HOME" ;; esac; mkdir -p "$d/station/tart" "$d/station/vms" "$HOME/.local/bin" && curl -fsSL https://github.com/cirruslabs/tart/releases/latest/download/tart.tar.gz | tar -xz -C "$d/station/tart"]
+          bash [-c] [set -euo pipefail
+          d="$HOME/.local/share"
+          case "${XDG_DATA_HOME:-}" in /*) d="$XDG_DATA_HOME" ;; esac
+          mkdir -p "$d/station/vms" "$HOME/.local/bin"
+          new=$(mktemp -d "$d/station/tart.new.XXXXXX")
+          trap 'rm -rf "$new"' EXIT
+          curl -fsSL https://github.com/cirruslabs/tart/releases/latest/download/tart.tar.gz | tar -xz -C "$new"
+          fresh=$("$new/tart.app/Contents/MacOS/tart" --version)
+          now=$("$d/station/tart/tart.app/Contents/MacOS/tart" --version 2>/dev/null || true)
+          [ "$fresh" != "$now" ] || exit 0
+          old="$d/station/tart.old.$$"
+          [ ! -e "$d/station/tart" ] || mv "$d/station/tart" "$old"
+          mv "$new" "$d/station/tart" || { [ ! -e "$old" ] || mv "$old" "$d/station/tart"; exit 1; }
+          rm -rf "$old"
+          ]
       files:
           .local/bin/tart: exists

@@ -135,6 +135,8 @@ func TestAPackageIsJudgedAlone(t *testing.T) {
 		strings.Replace(gh, "brew: gh", "script: {check: gh}", 1):                                                      "or says the owner's way in its hint",
 		strings.Replace(gh, "brew: gh", "script: {hint: download it, undo: rm gh}", 1):                                 "has a hint, no check, undo or upgrade",
 		strings.Replace(gh, "brew: gh", "upgrade: gh up\n      script: {run: a}", 1):                                   "a run line takes no args, env or upgrade",
+		strings.Replace(gh, "brew: gh", `script: {run: 'curl -fsSL x | tar -xz -C "$HOME/gh"'}`, 1):                    "a run line unpacks into a folder it made (mktemp -d)",
+		strings.Replace(gh, "brew: gh", `script: {run: 'rm -rf "$HOME/gh" && curl -fsSL -o "$HOME/gh" x'}`, 1):         "a run line removes nothing before it fetched its replacement",
 		strings.Replace(gh, "provides: [gh]", "provides: [gh]\nphase: later", 1):                                       `phase "later" is none of`,
 		strings.Replace(gh, "provides: [gh]", "provides: [gh]\nafter-apply: [restart-gh]", 1):                          `"restart-gh" is none of`,
 		strings.Replace(gh, "provides: [gh]", "provides: [gh]\naccepts: [play-store]", 1):                              `source "play-store" is none of`,

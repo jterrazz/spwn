@@ -3,6 +3,7 @@ package shell
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/jterrazz/studio-station/apps/engine/apps"
 	"github.com/jterrazz/studio-station/apps/engine/apps/contract"
@@ -33,7 +34,12 @@ func (s *Shell) Outdated(context.Context, []string) (map[string]apps.Currency, e
 func (s *Shell) line(ctx context.Context, line string, logs contract.Logs) error {
 	c := local.Command("bash", "-c", line)
 	c.Logs = logs
-	return local.Attach(ctx, s.run, c)
+	err := local.Attach(ctx, s.run, c)
+	var exit *local.ExitError
+	if errors.As(err, &exit) && exit.LastStderr != "" {
+		return fmt.Errorf("%w: %s", err, exit.LastStderr)
+	}
+	return err
 }
 
 func (s *Shell) Install(ctx context.Context, installs []catalog.Install, logs contract.Logs) error {

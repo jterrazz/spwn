@@ -34,7 +34,8 @@ func keptApply(in ApplyIn, out machinefile.Applied, _ error) []journal.Line {
 }
 
 // invariant: an upgrade keeps one line per app it moved, held or failed
-// to move, a failed one with the update that tries it again; one that
+// to move, a failed one with the words its update failed with and the
+// update that tries it again; one that
 // moved nothing keeps one line that says so.
 func keptUpgrade(in UpgradeIn, out machinefile.Upgraded, err error) []journal.Line {
 	n := machinefile.NightOf(out, err, in.Machinefile, time.Time{})
@@ -46,8 +47,12 @@ func keptUpgrade(in UpgradeIn, out machinefile.Upgraded, err error) []journal.Li
 	for _, w := range n.Waiting {
 		lines = append(lines, journal.Line{Text: w.App, Subject: app(w.App), Outcome: journal.Held, Detail: w.Words()})
 	}
+	why := map[string]string{}
+	for _, d := range out.Done {
+		why[d.Line.Step.Package] = d.Detail
+	}
 	for _, name := range n.Failed {
-		lines = append(lines, journal.Line{Text: name, Subject: app(name), Outcome: journal.Failed, Retry: &finding.Fix{Call: "apps.update", Args: map[string]string{"Names": name}}})
+		lines = append(lines, journal.Line{Text: name, Detail: why[name], Subject: app(name), Outcome: journal.Failed, Retry: &finding.Fix{Call: "apps.update", Args: map[string]string{"Names": name}}})
 	}
 	if len(lines) == 0 {
 		lines = append(lines, journal.Line{Text: n.Machinefile + " upgraded", Detail: "nothing moved"})

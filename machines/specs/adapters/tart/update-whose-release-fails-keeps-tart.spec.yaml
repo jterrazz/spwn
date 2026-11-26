@@ -1,0 +1,30 @@
+description: 'an update of tart whose release does not answer leaves tart answering, its log saying why'
+fixture:
+    - ./__fixtures__/shell-real/
+    - ./__fixtures__/tart-release/
+env: engine
+runs:
+    - command: 'apps install tart'
+      exit: 0
+      stdout: |
+          ●	tart	2.42.0	shell
+          ●	tart-launcher			~/.local/bin/tart
+    - command: '--version >/dev/null; : > .release-down; echo 2.43.0 > .release; "$STATION" apps update tart'
+      exit: 1
+      stdout: |
+          ✗	tart		shell	~/.local/state/station/logs/tart.log
+      stderr: |
+          Error: 1 of 1 apps failed
+          Hint: re-run it: station apps update tart
+    - command: '--version >/dev/null; .local/bin/tart --version; /bin/ls .local/share/station; /bin/cat .local/state/station/logs/tart.log'
+      exit: 0
+      stdout: |
+          2.42.0
+          tart
+          vms
+          curl: (22) The requested URL returned error: 503
+
+          gzip: stdin: unexpected end of file
+          /bin/tar: Child returned status 1
+          /bin/tar: Error is not recoverable: exiting now
+          {{iso8601}} update tart: bash -c exited 2: /bin/tar: Error is not recoverable: exiting now
