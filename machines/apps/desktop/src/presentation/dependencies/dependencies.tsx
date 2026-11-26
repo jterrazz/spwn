@@ -27,6 +27,7 @@ import { UpdateFlow } from '../../application/use-cases/update-flow';
 import type { UpdateState } from '../../application/use-cases/update-flow';
 import { NO_WINDOW_UPDATE, WindowUpdateFlow } from '../../application/use-cases/window-update-flow';
 import type { WindowUpdateState } from '../../application/use-cases/window-update-flow';
+import { Batch } from './batch';
 import { StaleMarks } from './stale-marks';
 import type { Stale } from './stale-marks';
 import { usePlaceholder } from './use-placeholder';
@@ -49,6 +50,7 @@ export type Dependencies = {
 };
 
 type Engine = {
+    batch: Batch;
     client: EnginePort;
     store: ReadStore;
     mirror: StateMirror;
@@ -88,6 +90,7 @@ export function EngineProvider({
     const engine = useMemo(() => {
         const mirrored = new StateMirror(client, mirror);
         return {
+            batch: new Batch(),
             client,
             core: new CoreFlow(core, coreLookEvery),
             gestures: new GestureStore(),
@@ -140,8 +143,8 @@ export function useReread(): (names: readonly CallName[]) => void {
 }
 
 function useLink(): Judged | undefined {
-    const { store } = useEngine();
-    return useSyncExternalStore(store.subscribeLink, store.link);
+    const { store, batch } = useEngine();
+    return useSyncExternalStore(batch.of(store.subscribeLink), store.link);
 }
 
 export function useReach(): Reach {
@@ -188,10 +191,10 @@ const IDLE = () => () => undefined;
 // invariant: a view the engine keeps is read from its mirrored stream, never asked by its call, unless the engine
 // invariant: could not read it: the call then answers what the window draws, its refusal. Any other read is the store's.
 function useAsked(asked: Asked): Reading<unknown> {
-    const { store, mirror } = useEngine();
+    const { store, mirror, batch } = useEngine();
     const view = viewOf(asked);
     const key = askedKey(asked);
-    const subscribe = view === undefined ? IDLE : mirror.subscriberOf(view);
+    const subscribe = view === undefined ? IDLE : batch.of(mirror.subscriberOf(view));
     const mirrored = useSyncExternalStore(subscribe, () =>
         view === undefined ? READING : mirror.reading(view),
     );
@@ -199,7 +202,7 @@ function useAsked(asked: Asked): Reading<unknown> {
         view === undefined ? undefined : mirror.refusedOf(view),
     );
     const called = view === undefined || refused !== undefined;
-    const stored = useSyncExternalStore(called ? store.subscriberOf(asked) : IDLE, () =>
+    const stored = useSyncExternalStore(called ? batch.of(store.subscriberOf(asked)) : IDLE, () =>
         called ? store.reading(key) : READING,
     );
     return called ? stored : mirrored;
@@ -223,8 +226,8 @@ function useStaleMark(reading: Reading<unknown>): void {
 }
 
 export function useStale(): readonly Stale[] {
-    const { stale } = useEngine();
-    return useSyncExternalStore(stale.subscribe, stale.shown);
+    const { stale, batch } = useEngine();
+    return useSyncExternalStore(batch.of(stale.subscribe), stale.shown);
 }
 
 export function useWatch<N extends WatchName>(

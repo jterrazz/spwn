@@ -27,12 +27,12 @@ const HOME: Route = { page: 'home' };
 // value: each the count measured when it was last lowered: a change that costs more fails here, one that costs less
 // value: lowers it.
 const BUDGETS = {
-    activityTab: { commits: 7, renders: 486 },
+    activityTab: { commits: 4, renders: 320 },
     find: { commits: 1, renders: 273 },
-    homeCalm: { commits: 22, renders: 1703 },
-    homeStories: { commits: 24, renders: 2634 },
-    newMachine: { commits: 4, renders: 343 },
-    storage: { commits: 18, renders: 766 },
+    homeCalm: { commits: 9, renders: 617 },
+    homeStories: { commits: 9, renders: 873 },
+    newMachine: { commits: 2, renders: 287 },
+    storage: { commits: 2, renders: 412 },
     unchangedRevision: { commits: 0, renders: 0 },
 } as const satisfies Record<string, Budget>;
 
