@@ -278,6 +278,34 @@ describe('contrast', () => {
         expect(below(1.06, steps)).toStrictEqual([]);
     });
 
+    test('the row the keyboard is on stands 1.3:1 off the glass it floats on, and apart from the current row', () => {
+        // Given - the active row's step on the glass over s0 to s3, the current row's step under it, and the rules
+        const popover = readFileSync(join(import.meta.dirname, '..', 'popover.module.css'), 'utf8');
+        const find = readFileSync(
+            join(import.meta.dirname, '..', '..', 'navigation', 'find.module.css'),
+            'utf8',
+        );
+        const active = colourOf('s3-press');
+        const offGlass = GROUNDS.map((ground): Measure => [
+            `--s3-press on --glass over --${ground}`,
+            ratio(active, glassOver(ground)),
+        ]);
+        const offCurrent: Measure = ['--s3-press on --s3', ratio(active, colourOf('s3'))];
+        const backgrounds = [
+            /\.row\[data-active\] \{[^}]*?\bbackground: (?<fill>[^;]+);/u.exec(popover),
+            /\.row\[aria-selected='true'\] \{[^}]*?\bbackground: (?<fill>[^;]+);/u.exec(popover),
+            /\.result\[aria-selected='true'\] \{[^}]*?\bbackground: (?<fill>[^;]+);/u.exec(find),
+        ].map((found) => found?.groups?.fill);
+
+        // Then - the active row clears 1.3:1 on every ground, a step above the current row, and the rules draw them
+        expect(below(1.3, offGlass)).toStrictEqual([]);
+        expect(below(1.2, [offCurrent])).toStrictEqual([]);
+        expect(backgrounds).toStrictEqual(['var(--s3-press)', 'var(--s3)', 'var(--s3-press)']);
+        expect(popover.indexOf('.row[data-active]')).toBeGreaterThan(
+            popover.indexOf(".row[aria-selected='true']"),
+        );
+    });
+
     test('the drawings ink holds the bar of a mark on each of the four surface steps', () => {
         // Given - the drawings' line on s0 to s3
         const marks = [...onGrounds('art-ink'), ...onGrounds('art-dim')];

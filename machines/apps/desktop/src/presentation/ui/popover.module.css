@@ -115,12 +115,12 @@
     color: var(--t2);
     min-width: 0;
 }
-.row[data-active] {
-    background: var(--s2);
-    color: var(--t1);
-}
 .row[aria-selected='true'] {
     background: var(--s3);
+    color: var(--t1);
+}
+.row[data-active] {
+    background: var(--s3-press);
     color: var(--t1);
 }
 .row[aria-disabled='true'] {

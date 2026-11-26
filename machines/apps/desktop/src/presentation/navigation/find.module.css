@@ -38,7 +38,7 @@
     color: var(--t2);
 }
 .result[aria-selected='true'] {
-    background: var(--s2);
+    background: var(--s3-press);
     color: var(--t1);
 }
 .label {
