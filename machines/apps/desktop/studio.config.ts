@@ -134,6 +134,11 @@ export default defineConfig({
                     rules: { 'jterrazz/no-test-code-in-production': 'off' },
                 },
                 {
+                    files: ['scripts/canvas-dump.ts'],
+                    reason: "the canvas's fixtures are dumped by running the approved prototype's own functions in headless Chromium through Playwright",
+                    rules: { 'jterrazz/no-test-code-in-production': 'off' },
+                },
+                {
                     files: ['src/presentation/words/words.ts'],
                     reason: "the law's one table of the words the engine owes, one literal map per code, so it grows with the wire and shrinks as each enum joins packages/api's words.json; a name of its own (`*.data.ts`) would move every import of it",
                     rules: { 'max-lines': 'off' },
@@ -155,6 +160,8 @@ export default defineConfig({
             entry: {
                 'scripts/capture.ts':
                     'run by node in the Linux VM to photograph the proof pages; nothing imports it',
+                'scripts/canvas-dump.ts':
+                    "run by node in the Linux VM to write the canvas's fixtures from the prototype; nothing imports it",
             },
             ignoreDependencies: {
                 '@fontsource-variable/geist':

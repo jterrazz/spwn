@@ -4,6 +4,7 @@ import type { CanvasGraph, CanvasNode, Rect } from '../graph';
 import type { Guide, Viewport } from '../layout';
 import type { Options } from '../place';
 import graphFixture from './prototype-graph.json';
+import keysFixture from './prototype-keys.json';
 import statesFixture from './prototype-states.json';
 
 export type ProtoRect = Rect & { face: string };
@@ -44,6 +45,18 @@ export const WIDE: ProtoState[] = statesFixture.wide;
 export const NARROW: ProtoState[] = statesFixture.narrow;
 
 export const STATES: ProtoState[] = [...WIDE, ...NARROW];
+
+// value: one walk of the prototype's keys: for each node drawn under `sel`, where each arrow (left, right, up,
+// value: down) moved the focus, null where it stayed, and where `ensureVisible` took the camera from three starts.
+export type ProtoKeys = {
+    sel: string[];
+    leaf: null | string;
+    viewport: Viewport;
+    moves: Record<string, (null | string)[]>;
+    visible: { id: string; from: Camera; out: Camera }[];
+};
+
+export const KEYS: ProtoKeys[] = [...keysFixture.wide, ...keysFixture.narrow];
 
 export const PRODUIT = 'S:product';
 

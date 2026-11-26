@@ -47,12 +47,15 @@ export type Geometry = {
         topOpen: number;
         topRoot: number;
         clamp: number;
+        visible: number;
     };
+    neighbour: { clipWidth: number; clipHeight: number; ahead: number; across: number };
 };
 
-// value: the prototype's numbers (`SZ`, `MINOPEN`, `place`, `layout`, `camTarget`, `camClamp` of wiki-proto/spwn-wiki-proto-r1.html), the layout by meaning the owner chose
+// value: the prototype's numbers (`SZ`, `MINOPEN`, `place`, `layout`, `camTarget`, `camClamp`, `ensureVisible` and
+// value: the arrow keys' score of wiki-proto/spwn-wiki-proto-r1.html), the layout by meaning the owner chose
 export const GEOMETRY: Geometry = {
-    camera: { clamp: 120, fitHeight: 56, fitWidth: 48, topOpen: 70, topRoot: 36 },
+    camera: { clamp: 120, fitHeight: 56, fitWidth: 48, topOpen: 70, topRoot: 36, visible: 24 },
     cards: { 2: [248, 118], 3: [236, 116] },
     dot: {
         chipCap: 10,
@@ -79,6 +82,7 @@ export const GEOMETRY: Geometry = {
     },
     leafDepth: 4,
     minOpen: { 1: 300, 2: 560, 3: 420 },
+    neighbour: { across: 2.2, ahead: 4, clipHeight: 46, clipWidth: 240 },
     otherCard: [222, 108],
     otherMinOpen: 300,
     pad: 16,

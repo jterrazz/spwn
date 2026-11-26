@@ -45,6 +45,33 @@ export function cameraTarget(frame: Frame, sel: readonly string[]): Camera {
         : { x, y };
 }
 
+type Span = { start: number; size: number; room: number };
+
+function pulledIn(at: number, { room, size, start }: Span, margin: number): number {
+    const shown = Math.min(size, room - 2 * margin);
+    if (start + at < margin) {
+        return margin - start;
+    }
+    if (start + shown + at > room - margin) {
+        return room - margin - start - shown;
+    }
+    return at;
+}
+
+// value: the camera moved the least that shows `id` whole, a margin from each edge; a node larger than the canvas
+// value: is shown from its top-left corner. The camera is handed back as it was when nothing moves.
+export function cameraShowing(frame: Frame, at: Camera, id: string): Camera {
+    const rect = frame.layout.rects.get(id);
+    if (rect === undefined) {
+        return at;
+    }
+    const margin = frame.geometry.camera.visible;
+    const { height, width } = frame.viewport;
+    const x = pulledIn(at.x, { room: width, size: rect.w, start: rect.x }, margin);
+    const y = pulledIn(at.y, { room: height, size: rect.h, start: rect.y }, margin);
+    return x === at.x && y === at.y ? at : { x, y };
+}
+
 export function cameraClamp(frame: Frame, from: Camera, to: Camera): Clamped {
     const { box } = frame.layout;
     const margin = frame.geometry.camera.clamp;
