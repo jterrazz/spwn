@@ -28,7 +28,12 @@ var builtin = catalogfiles.Files
 
 const BuiltinOrigin = "built-in"
 
-func Builtin() (Catalog, error) { return Load(builtin, "packages") }
+func Builtin() (Catalog, error) {
+	// value: the built-in catalog, compiled from the embedded files by `make
+	// generate` (builtin_table.go), so a run decodes none of them; Load is
+	// the strict read the table is compiled from and held to.
+	return builtinCatalog()
+}
 
 func BuiltinFiles() fs.FS {
 	// value: the embedded files: packages/ holds the catalog's, machines/ the
@@ -78,7 +83,11 @@ func Load(fsys fs.FS, root string) (Catalog, error) {
 	if err != nil {
 		return Catalog{}, err
 	}
-	return Assemble(pkgs)
+	images, err := sizedImages(builtin)
+	if err != nil {
+		return Catalog{}, err
+	}
+	return assemble(pkgs, images)
 }
 
 func Packages(fsys fs.FS, root, origin string) ([]Placed, error) {
@@ -142,13 +151,17 @@ func Over(sources ...[]Placed) []Placed {
 }
 
 func Assemble(pkgs []Placed) (Catalog, error) {
-	// value: the catalog of the packages given, judged whole.
-	pkgs = slices.Clone(pkgs)
-	slices.SortFunc(pkgs, byCategory)
-	images, err := sizedImages(builtin)
+	// value: the catalog of the packages given, judged whole, with the
+	// built-in images.
+	b, err := Builtin()
 	if err != nil {
 		return Catalog{}, err
 	}
+	return assemble(pkgs, b.Images)
+}
+
+func assemble(pkgs []Placed, images []Image) (Catalog, error) {
+	pkgs = byCategory(pkgs)
 	c := Catalog{Images: images, Packages: pkgs}
 	files := map[string]string{}
 	for _, p := range pkgs {
@@ -177,32 +190,51 @@ func Assemble(pkgs []Placed) (Catalog, error) {
 
 // invariant: the apps and managers stand before the settings, each by
 // category, in the order of the categories' tables, then by name; a folder
-// that is no category sorts last, refused by the load.
-func byCategory(a, b Placed) int {
-	if (a.Package.Kind == KindSetting) != (b.Package.Kind == KindSetting) {
-		if a.Package.Kind == KindSetting {
+// that is no category sorts last, refused by the load. Each package's rank
+// is read once, never per comparison.
+func byCategory(pkgs []Placed) []Placed {
+	apps, settings := make([]string, 0, len(Categories)), make([]string, 0, len(SettingCategories))
+	for _, c := range Categories {
+		apps = append(apps, c.Folder())
+	}
+	for _, c := range SettingCategories {
+		settings = append(settings, c.Folder())
+	}
+	order := make([]ranked, len(pkgs))
+	for i, p := range pkgs {
+		folders := apps
+		setting := p.Package.Kind == KindSetting
+		if setting {
+			folders = settings
+		}
+		rank := slices.Index(folders, p.Folder)
+		if rank < 0 {
+			rank = len(folders)
+		}
+		order[i] = ranked{p: p, setting: setting, rank: rank}
+	}
+	slices.SortFunc(order, byRank)
+	out := make([]Placed, len(order))
+	for i, r := range order {
+		out[i] = r.p
+	}
+	return out
+}
+
+type ranked struct {
+	p       Placed
+	setting bool
+	rank    int
+}
+
+func byRank(a, b ranked) int {
+	if a.setting != b.setting {
+		if a.setting {
 			return 1
 		}
 		return -1
 	}
-	return cmp.Or(cmp.Compare(a.rank(), b.rank()), cmp.Compare(a.Package.Name, b.Package.Name))
-}
-
-func (p Placed) rank() int {
-	folders := make([]string, 0, len(Categories))
-	if p.Package.Kind == KindSetting {
-		for _, c := range SettingCategories {
-			folders = append(folders, c.Folder())
-		}
-	} else {
-		for _, c := range Categories {
-			folders = append(folders, c.Folder())
-		}
-	}
-	if i := slices.Index(folders, p.Folder); i >= 0 {
-		return i
-	}
-	return len(folders)
+	return cmp.Or(cmp.Compare(a.rank, b.rank), cmp.Compare(a.p.Package.Name, b.p.Package.Name))
 }
 
 // invariant: the packages judged together, each refusal naming the file that

@@ -144,6 +144,7 @@ func CatalogOf(trees []Tree) (catalog.Catalog, error) {
 	// invariant: the trees strongest first; a same-name package of a stronger
 	// source replaces a weaker one whole, as a same-name Machinefile does.
 	sources := make([][]catalog.Placed, 0, len(trees))
+	var reader catalog.Reader
 	for _, t := range trees {
 		var pkgs []catalog.Placed
 		for _, f := range t.Files {
@@ -158,7 +159,7 @@ func CatalogOf(trees []Tree) (catalog.Catalog, error) {
 			if !ok || strings.Contains(name, "/") || !strings.HasSuffix(name, ".yaml") {
 				return catalog.Catalog{}, refusedFile(catalogDir, &catalog.FileError{File: t.display(f), Problem: "is no package file: a package is catalog/<category>/<name>.yaml"})
 			}
-			p, err := catalog.Read(t.display(f), folder, string(t.Kind), f.Body)
+			p, err := reader.Read(t.display(f), folder, string(t.Kind), f.Body)
 			if err != nil {
 				return catalog.Catalog{}, refusedFile(catalogDir, err)
 			}

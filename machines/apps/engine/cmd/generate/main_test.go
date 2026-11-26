@@ -55,6 +55,13 @@ func TestTheMachinefileSchemaHasNotDriftedFromItsTypes(t *testing.T) {
 	}
 }
 
+func TestTheCompiledCatalogHasNotDriftedFromItsFiles(t *testing.T) {
+	current, err := os.ReadFile(filepath.Join(root(t), tablePath))
+	if err != nil || !bytes.Equal(current, builtinTable()) {
+		t.Fatalf("%s is out of sync with the catalog's package files: run make generate and commit the result", tablePath)
+	}
+}
+
 func TestThePageFixturesHaveNotDriftedFromThePageFunctions(t *testing.T) {
 	want := pageFixtures()
 	dir := filepath.Join(root(t), pagesDir)

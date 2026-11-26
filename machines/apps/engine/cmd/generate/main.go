@@ -34,6 +34,7 @@ func main() {
 	world := flag.String("world", pages.PlayWorldPath, "the stories' machines as an engine world, the play rig's, rewritten whole")
 	schema := flag.String("schema", schemaPath, "the JSON Schema of a package file of the catalog, rewritten whole")
 	machinefiles := flag.String("machinefile-schema", machinefileSchemaPath, "the JSON Schema of a Machinefile, rewritten whole")
+	table := flag.String("table", tablePath, "the built-in catalog compiled to Go, rewritten whole")
 	flag.Parse()
 	current, err := os.ReadFile(*path)
 	if err != nil {
@@ -79,6 +80,9 @@ func main() {
 		panic(err)
 	}
 	if err := os.WriteFile(*machinefiles, machinefileSchema(), 0o600); err != nil {
+		panic(err)
+	}
+	if err := os.WriteFile(*table, builtinTable(), 0o600); err != nil {
 		panic(err)
 	}
 	if err := writeAPI("."); err != nil {

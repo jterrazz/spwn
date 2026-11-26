@@ -48,6 +48,7 @@ type Program struct {
 }
 
 func Run(args, env []string, stdin, stdout, stderr *os.File) int {
+	collectFor(args, varsOf(env))
 	p, code := Build(args, env, stdin, stdout, stderr)
 	if p == nil {
 		return code
@@ -105,12 +106,7 @@ func Build(args, env []string, stdin, stdout, stderr *os.File) (p *Program, exit
 		// every other write of it goes to stderr, no child reads its stdin.
 		stdout, childIn = stderr, strings.NewReader("")
 	}
-	vars := map[string]string{}
-	for _, kv := range env {
-		if k, v, ok := strings.Cut(kv, "="); ok {
-			vars[k] = v
-		}
-	}
+	vars := varsOf(env)
 	inTTY, outTTY, errTTY := token.IsTerminal(stdin), token.IsTerminal(stdout), token.IsTerminal(stderr)
 	session, opened := openWorld(vars, slices.Contains(args, "--page"))
 	dark := true
