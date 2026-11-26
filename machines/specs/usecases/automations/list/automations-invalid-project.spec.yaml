@@ -1,0 +1,12 @@
+description: 'station automations of a manifest that does not read is refused, exit 2'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; /bin/mkdir site && /usr/bin/touch site/spwn.yaml && P="$PWD/site" /usr/bin/jq ".macs[\"macbook-pro\"].stores.automation_manifest_errors = {(env.P): \"worlds: cannot read a list\"} | .macs[\"macbook-pro\"].stores.automation_runs = {(env.P): [{\"Name\":\"morning\",\"At\":\"2026-05-01T06:00:00Z\",\"OK\":true}]}" world.json > seeded.json && /bin/mv seeded.json world.json'
+      exit: 0
+    - command: '--version >/dev/null; cd site && "$STATION" automations'
+      exit: 2
+      stderr: |
+          Error: the manifest of this project does not read: worlds: cannot read a list
+          Hint: open {{workdir}}/site/spwn.yaml

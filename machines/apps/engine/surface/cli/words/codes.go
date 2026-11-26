@@ -570,6 +570,9 @@ func Codes() map[fail.Code]Wording {
 		automationscalls.NotUnique: func(e *fail.Error) (string, string) {
 			return "\"" + e.Subject + "\" is declared by more than one group: " + e.Detail["groups"], "station " + e.Detail["verb"] + " " + e.Detail["first"] + "/" + e.Subject
 		},
+		automationscalls.InvalidProject: func(e *fail.Error) (string, string) {
+			return "the manifest of this project does not read: " + e.Detail["error"], "open " + e.Subject
+		},
 		backgroundcalls.Unknown: func(e *fail.Error) (string, string) {
 			return "no background task \"" + e.Subject + "\"", "station background"
 		},

@@ -219,6 +219,7 @@
             "apps.not-installed",
             "apps.unknown",
             "apps.unpinnable",
+            "automations.invalid-project",
             "automations.not-found",
             "automations.not-unique",
             "awake.no-battery",

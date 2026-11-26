@@ -43,7 +43,10 @@ func (a *Automations) read(declared automations.Automation, project string) auto
 	return declared
 }
 
-func (a *Automations) all(project string) []automations.Automation {
+func (a *Automations) all(project string) ([]automations.Automation, error) {
+	if reason, bad := a.store().AutomationManifestErrors[project]; bad {
+		return nil, &automations.InvalidProjectError{Path: project + "/spwn.yaml", Reason: reason}
+	}
 	declared := a.store().Automations[project]
 	out := make([]automations.Automation, 0, len(declared))
 	for _, d := range declared {
@@ -55,19 +58,23 @@ func (a *Automations) all(project string) []automations.Automation {
 		}
 		return strings.Compare(x.Group, y.Group)
 	})
-	return automations.Mark(out)
+	return automations.Mark(out), nil
 }
 
 func (a *Automations) List(_ context.Context, project string) ([]automations.Automation, error) {
 	a.w.Lock()
 	defer a.w.Unlock()
-	return a.all(project), nil
+	return a.all(project)
 }
 
 func (a *Automations) Automation(_ context.Context, project, ref string) (automations.Automation, error) {
 	a.w.Lock()
 	defer a.w.Unlock()
-	return automations.Select(a.all(project), ref)
+	all, err := a.all(project)
+	if err != nil {
+		return automations.Automation{}, err
+	}
+	return automations.Select(all, ref)
 }
 
 func (a *Automations) Log(_ context.Context, project, ref string, last int) ([]automations.Run, error) {
@@ -75,7 +82,11 @@ func (a *Automations) Log(_ context.Context, project, ref string, last int) ([]a
 	defer a.w.Unlock()
 	var chosen automations.Automation
 	if ref != "" {
-		found, err := automations.Select(a.all(project), ref)
+		all, err := a.all(project)
+		if err != nil {
+			return nil, err
+		}
+		found, err := automations.Select(all, ref)
 		if err != nil {
 			return nil, err
 		}

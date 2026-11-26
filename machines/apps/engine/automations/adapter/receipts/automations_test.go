@@ -119,3 +119,25 @@ func TestANameTwoGroupsDeclareIsNotUniqueUntilQualified(t *testing.T) {
 		t.Fatalf("Automation(c/same) = %v; want ErrNotFound", err)
 	}
 }
+
+func TestAManifestThatDoesNotReadIsOneInvalidProjectError(t *testing.T) {
+	t.Setenv("SPWN_HOME", t.TempDir())
+	root := t.TempDir()
+	if err := os.WriteFile(filepath.Join(root, "spwn.yaml"), []byte("version: 1\nworlds: [not, a, map]\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	var bad *automations.InvalidProjectError
+	if _, err := (receipts.Automations{}).List(t.Context(), root); !errors.As(err, &bad) || bad.Reason == "" || bad.Path != filepath.Join(root, "spwn.yaml") {
+		t.Fatalf("List = %v; want an InvalidProjectError naming the manifest and its error", err)
+	}
+	if _, err := (receipts.Automations{}).Automation(t.Context(), root, "morning"); !errors.As(err, &bad) {
+		t.Fatalf("Automation = %v; want an InvalidProjectError", err)
+	}
+	if _, err := (receipts.Automations{}).Log(t.Context(), root, "morning", 0); !errors.As(err, &bad) {
+		t.Fatalf("Log(morning) = %v; want an InvalidProjectError", err)
+	}
+	runs, err := receipts.Automations{}.Log(t.Context(), root, "", 0)
+	if err != nil || len(runs) != 0 {
+		t.Fatalf("Log() = %+v, %v; want the runs of the file with no manifest read", runs, err)
+	}
+}

@@ -66,3 +66,23 @@ func TestANameTwoGroupsDeclareIsNotUniqueUntilQualified(t *testing.T) {
 		t.Fatalf("Log(b/same) = %+v, %v; want the two runs of b", runs, err)
 	}
 }
+
+func TestAManifestThatDoesNotReadIsOneInvalidProjectError(t *testing.T) {
+	project := t.TempDir()
+	w := worldWith(t, map[string]any{
+		"automation_manifest_errors": map[string]any{project: "worlds: cannot read a list"},
+		"automation_runs":            map[string]any{project: []automations.Run{{Name: "morning", OK: true}}},
+	})
+	fakeAutomations := fake.Of(w, "this-mac")
+	var bad *automations.InvalidProjectError
+	if _, err := fakeAutomations.List(t.Context(), project); !errors.As(err, &bad) || bad.Reason != "worlds: cannot read a list" {
+		t.Fatalf("List = %v; want an InvalidProjectError with the manifest's error", err)
+	}
+	if _, err := fakeAutomations.Log(t.Context(), project, "morning", 0); !errors.As(err, &bad) {
+		t.Fatalf("Log(morning) = %v; want an InvalidProjectError", err)
+	}
+	runs, err := fakeAutomations.Log(t.Context(), project, "", 0)
+	if err != nil || len(runs) != 1 {
+		t.Fatalf("Log() = %+v, %v; want the runs, the manifest unread", runs, err)
+	}
+}

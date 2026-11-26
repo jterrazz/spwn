@@ -380,6 +380,9 @@ type Stores struct {
 	Automations map[string][]automations.Automation `json:"automations,omitempty"`
 	// value: the runs written for a project, by its root, oldest first.
 	AutomationRuns map[string][]automations.Run `json:"automation_runs,omitempty"`
+	// value: a project root whose manifest does not read, by the error its
+	// manifest gives; such a project declares nothing the Automations can list.
+	AutomationManifestErrors map[string]string `json:"automation_manifest_errors,omitempty"`
 }
 
 func (m *Mac) Store() *Stores {

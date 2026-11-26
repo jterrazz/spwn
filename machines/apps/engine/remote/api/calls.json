@@ -281,6 +281,9 @@
       "name": "automations.list",
       "schema": "station.automations.list/v1",
       "where": "at-target",
+      "errors": [
+        "automations.invalid-project"
+      ],
       "in": "ListIn"
     },
     {
@@ -288,6 +291,7 @@
       "schema": "station.automations.log/v1",
       "where": "at-target",
       "errors": [
+        "automations.invalid-project",
         "automations.not-found",
         "automations.not-unique"
       ],
@@ -298,6 +302,7 @@
       "schema": "station.automations.show/v1",
       "where": "at-target",
       "errors": [
+        "automations.invalid-project",
         "automations.not-found",
         "automations.not-unique"
       ],

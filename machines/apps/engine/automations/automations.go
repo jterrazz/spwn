@@ -132,3 +132,14 @@ func (r Run) Qualified() string {
 	}
 	return r.Group + "/" + r.Name
 }
+
+type InvalidProjectError struct {
+	// value: the manifest that does not read, as the project names it.
+	Path string
+	// value: the manifest's own error.
+	Reason string
+}
+
+func (e *InvalidProjectError) Error() string {
+	return "the manifest " + e.Path + " does not read: " + e.Reason
+}

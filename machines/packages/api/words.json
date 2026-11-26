@@ -398,6 +398,11 @@
       "Detail": "apps",
       "Tone": "plain"
     },
+    "automations.invalid-project": {
+      "Word": "invalid project",
+      "Detail": "automations",
+      "Tone": "plain"
+    },
     "automations.not-found": {
       "Word": "not found",
       "Detail": "automations",

@@ -43,7 +43,11 @@ func declaredIn(root string) ([]declared, error) {
 		return nil, nil
 	}
 	if err != nil {
-		return nil, err
+		var unreadable *fs.PathError
+		if errors.As(err, &unreadable) {
+			return nil, err
+		}
+		return nil, &automations.InvalidProjectError{Path: filepath.Join(root, manifestFile), Reason: err.Error()}
 	}
 	var out []declared
 	for group, w := range p.Manifest.Worlds {
