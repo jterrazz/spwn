@@ -102,6 +102,7 @@ type checker struct {
 	floors    map[string]int
 	needsYou  map[string]bool
 	rows      map[*Block][]string
+	kids      map[string][]string
 	findings  []Finding
 }
 
@@ -167,6 +168,7 @@ func newChecker(schema Schema, pages []Page) *checker {
 		}
 	}
 	slices.Sort(k.addresses)
+	k.kids = k.childrenOf()
 	return k
 }
 
@@ -300,41 +302,101 @@ func forProse(p *Page, each func(*Prose)) {
 	}
 }
 
-// invariant: `needs` has no cycle (H10); each cycle is said once, from its
-// first page in id order.
+// invariant: `needs` has no cycle (H10). The pages that need each other
+// are found in one pass, Tarjan's strongly connected components, so the
+// check is linear in the pages and their needs; each such set is said once,
+// from its first page in id order, by the shortest cycle back to it.
 func (k *checker) cycles() {
 	needs := map[string][]string{}
 	for _, p := range k.pages {
 		if fl, ok := k.front(p, "needs"); ok {
-			needs[p.ID] = frontList(fl.Value)
-		}
-	}
-	said := map[string]bool{}
-	for _, p := range k.pages {
-		var walk func(path []string) bool
-		walk = func(path []string) bool {
-			for _, next := range needs[path[len(path)-1]] {
-				if next == path[0] {
-					cycle := append(slices.Clone(path), next)
-					key := strings.Join(slices.Sorted(slices.Values(path)), " ")
-					if !said[key] {
-						said[key] = true
-						fl, _ := k.front(p, "needs")
-						k.add("H10", p.ID, "", At{Line: fl.Line, Col: 1}, "needs: "+strings.Join(cycle, " -> "))
-					}
-					return true
-				}
-				if slices.Contains(path, next) {
-					continue
-				}
-				if walk(append(slices.Clone(path), next)) {
-					return true
+			for _, n := range frontList(fl.Value) {
+				if _, page := k.byID[n]; page {
+					needs[p.ID] = append(needs[p.ID], n)
 				}
 			}
-			return false
 		}
-		walk([]string{p.ID})
 	}
+	for _, set := range components(k.pages, needs) {
+		first := slices.Min(set)
+		if len(set) == 1 && !slices.Contains(needs[first], first) {
+			continue
+		}
+		fl, _ := k.front(k.byID[first], "needs")
+		k.add("H10", first, "", At{Line: fl.Line, Col: 1}, "needs: "+strings.Join(shortestCycle(first, set, needs), " -> "))
+	}
+}
+
+// value: the strongly connected components of the needs graph, each its
+// pages, found from the pages in id order.
+func components(pages []*Page, needs map[string][]string) [][]string {
+	index, low, on := map[string]int{}, map[string]int{}, map[string]bool{}
+	var stack []string
+	var out [][]string
+	var visit func(v string)
+	visit = func(v string) {
+		index[v], low[v] = len(index), len(index)
+		stack = append(stack, v)
+		on[v] = true
+		for _, w := range needs[v] {
+			if _, seen := index[w]; !seen {
+				visit(w)
+				low[v] = min(low[v], low[w])
+			} else if on[w] {
+				low[v] = min(low[v], index[w])
+			}
+		}
+		if low[v] != index[v] {
+			return
+		}
+		var set []string
+		for {
+			w := stack[len(stack)-1]
+			stack = stack[:len(stack)-1]
+			on[w] = false
+			set = append(set, w)
+			if w == v {
+				break
+			}
+		}
+		out = append(out, set)
+	}
+	for _, p := range pages {
+		if _, seen := index[p.ID]; !seen {
+			visit(p.ID)
+		}
+	}
+	return out
+}
+
+// value: the fewest needs from first back to itself inside its component,
+// each step taken in the order its page lists them.
+func shortestCycle(first string, set []string, needs map[string][]string) []string {
+	in := map[string]bool{}
+	for _, v := range set {
+		in[v] = true
+	}
+	from := map[string]string{first: ""}
+	queue := []string{first}
+	for len(queue) > 0 {
+		v := queue[0]
+		queue = queue[1:]
+		for _, w := range needs[v] {
+			if w == first {
+				cycle := []string{first}
+				for at := v; at != first; at = from[at] {
+					cycle = append(cycle, at)
+				}
+				slices.Reverse(cycle[1:])
+				return append(cycle, first)
+			}
+			if _, seen := from[w]; !seen && in[w] {
+				from[w] = v
+				queue = append(queue, w)
+			}
+		}
+	}
+	return []string{first, first}
 }
 
 func (k *checker) page(p *Page) {
@@ -725,6 +787,34 @@ func (k *checker) subPage(p *Page, b *Block, placed map[string]bool) {
 	placed[child] = true
 }
 
+// value: each page's children by childOf, found once for the corpus: a page
+// is the child of each page its id lies under and of each it needs.
+func (k *checker) childrenOf() map[string][]string {
+	kids := map[string][]string{}
+	for _, c := range k.pages {
+		parents := map[string]bool{}
+		for i := range len(c.ID) {
+			if c.ID[i] != '/' {
+				continue
+			}
+			if _, ok := k.byID[c.ID[:i]]; ok {
+				parents[c.ID[:i]] = true
+			}
+		}
+		if fl, ok := k.front(c, "needs"); ok {
+			for _, n := range frontList(fl.Value) {
+				if _, ok := k.byID[n]; ok && n != c.ID {
+					parents[n] = true
+				}
+			}
+		}
+		for p := range parents {
+			kids[p] = append(kids[p], c.ID)
+		}
+	}
+	return kids
+}
+
 func (k *checker) childOf(c, p *Page) bool {
 	if strings.HasPrefix(c.ID, p.ID+"/") {
 		return true
@@ -736,12 +826,7 @@ func (k *checker) childOf(c, p *Page) bool {
 // invariant: a page of more than seven blocks with children places one of
 // them (S18).
 func (k *checker) children(p *Page, placed map[string]bool) {
-	var kids []string
-	for _, c := range k.pages {
-		if c != p && k.childOf(c, p) {
-			kids = append(kids, c.ID)
-		}
-	}
+	kids := k.kids[p.ID]
 	if len(kids) == 0 || len(k.blocks[p.ID]) <= pageBlocks {
 		return
 	}
