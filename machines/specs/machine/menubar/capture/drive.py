@@ -85,7 +85,7 @@ class Rig:
         # key, and every call came back empty (runs cap5, cap6, fix1).
         argv = ["ssh", "-n", "-F", "/dev/null", "-o", "IdentitiesOnly=yes", "-o", "IdentityAgent=none",
                 "-o", "StrictHostKeyChecking=no", "-o", "UserKnownHostsFile=/dev/null", "-o", "LogLevel=ERROR",
-                "-o", "BatchMode=yes", "-i", self.key, f"admin@{self.ip}", cmd]
+                "-o", "BatchMode=yes", "-o", f"IdentityFile={self.key}", f"admin@{self.ip}", cmd]
         r = subprocess.run(argv, capture_output=True, text=True, timeout=300)
         if r.returncode == 255:
             raise RuntimeError(f"ssh admin@{self.ip}: {r.stderr.strip()}")

@@ -84,13 +84,13 @@ bounded=(/usr/bin/perl -e 'alarm shift; exec @ARGV or die "exec $ARGV[0]: $!\n"'
 vm_ssh() {
   local vm=$1
   shift
-  on_mac "${bounded[@]}" 600 /usr/bin/ssh "${ssh_opts[@]}" -i "$key" -o ProxyCommand="$mac/.local/bin/station machines pipe $vm" "$vm_user@$vm" "$@"
+  on_mac "${bounded[@]}" 600 /usr/bin/ssh "${ssh_opts[@]}" -o "IdentityFile=$key" -o ProxyCommand="$mac/.local/bin/station machines pipe $vm" "$vm_user@$vm" "$@"
 }
 in_vm() { vm_ssh "$1" "$2" < /dev/null; }
 # value: in_vm_for <seconds> <vm> <command>: in_vm with a bound of its own.
 in_vm_for() {
   local secs=$1 vm=$2
-  on_mac "${bounded[@]}" "$secs" /usr/bin/ssh "${ssh_opts[@]}" -i "$key" -o ProxyCommand="$mac/.local/bin/station machines pipe $vm" "$vm_user@$vm" "$3" < /dev/null
+  on_mac "${bounded[@]}" "$secs" /usr/bin/ssh "${ssh_opts[@]}" -o "IdentityFile=$key" -o ProxyCommand="$mac/.local/bin/station machines pipe $vm" "$vm_user@$vm" "$3" < /dev/null
 }
 
 # invariant: a GITHUB_TOKEN the runner holds reaches the station of a workspace, so its

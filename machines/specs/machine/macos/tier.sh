@@ -67,8 +67,8 @@ if ! tart list --quiet --source local | grep -qx "$base"; then
   made+=("$bake")
   tart clone ghcr.io/cirruslabs/macos-tahoe-base:latest "$bake" >> "$log" 2>&1 || fail "pull the macOS base"
   ip=$(boot "$bake") || fail "boot $bake"
-  ssh "${ssh_opts[@]}" -i "$ssh_key" "admin@$ip" 'bash -s' < "$suite/macos/prebake.sh" >> "$log" 2>&1 || fail "prebake"
-  ssh "${ssh_opts[@]}" -i "$ssh_key" "admin@$ip" 'rm -f ~/.ssh/authorized_keys' || true
+  ssh "${ssh_opts[@]}" -o "IdentityFile=$ssh_key" "admin@$ip" 'bash -s' < "$suite/macos/prebake.sh" >> "$log" 2>&1 || fail "prebake"
+  ssh "${ssh_opts[@]}" -o "IdentityFile=$ssh_key" "admin@$ip" 'rm -f ~/.ssh/authorized_keys' || true
   tart stop "$bake" >> "$log" 2>&1
   tart rename "$bake" "$base" >> "$log" 2>&1 || fail "keep $base"
   made=()
@@ -84,11 +84,11 @@ say "-- $vm at $ip"
 # invariant: inside, the guest plays a Mac: STATION_MACHINE_KIND=mac on every call
 # but those that play a macOS workspace's guest: the Activity read, and the npm and
 # uv apps the catalogue places only there.
-in_vm() { ssh -n "${ssh_opts[@]}" -i "$ssh_key" "$user@$ip" "export STATION_MACHINE_KIND=mac; $1"; }
+in_vm() { ssh -n "${ssh_opts[@]}" -o "IdentityFile=$ssh_key" "$user@$ip" "export STATION_MACHINE_KIND=mac; $1"; }
 say "kern.hv_vmm_present: $(in_vm 'sysctl -n kern.hv_vmm_present' 2>&1)"
 
 in_vm 'rm -rf /tmp/station-e2e && mkdir -p /tmp/station-e2e/hello /tmp/station-e2e/npm' || fail "scratch folder"
-scp "${ssh_opts[@]}" -i "$ssh_key" -q "$repo/.artifacts/go/station" "$user@$ip:/tmp/station-e2e/station" || fail "copy the binary"
+scp "${ssh_opts[@]}" -o "IdentityFile=$ssh_key" -q "$repo/.artifacts/go/station" "$user@$ip:/tmp/station-e2e/station" || fail "copy the binary"
 
 listing() { in_vm 'cd ~ && find . -mindepth 1 -maxdepth 4 2>/dev/null | sed "s|^\./||" | LC_ALL=C sort'; }
 station="\$HOME/.local/bin/station"
@@ -190,7 +190,7 @@ while read -r app method kind; do
   [ -z "$kind" ] || pin="STATION_MACHINE_KIND=$kind"
   if [ "$method" = mas ]; then
     in_vm "$brew_path $station apps install mas </dev/null" >> "$log" 2>&1 || miss "apps install mas exited $?"
-    reply=$(perl -e 'alarm 120; exec @ARGV' ssh -n "${ssh_opts[@]}" -i "$ssh_key" "$user@$ip" "export STATION_MACHINE_KIND=mac; $brew_path $mise_path $station apps install $app </dev/null" 2>&1)
+    reply=$(perl -e 'alarm 120; exec @ARGV' ssh -n "${ssh_opts[@]}" -o "IdentityFile=$ssh_key" "$user@$ip" "export STATION_MACHINE_KIND=mac; $brew_path $mise_path $station apps install $app </dev/null" 2>&1)
     code=$?
     [ $code -ne 142 ] || { in_vm 'sudo -n pkill -f "mas install"; pkill -f "station apps install"' || true; reply="no answer in 120 s"; }
     say "   mas $app: exit $code: $(tr '\n' ' ' <<< "$reply" | cut -c1-200)"
@@ -244,7 +244,7 @@ while read -r name state; do
 done < "$work/settings-set.txt"
 # value: the system answers first: its `softwareupdate -l` rewrites the list station
 # reads, which Apple's catalogue changes between two calls minutes apart.
-real=$(ssh "${ssh_opts[@]}" -i "$ssh_key" "$user@$ip" 'bash -s' < "$suite/macos/checked-truth.sh")
+real=$(ssh "${ssh_opts[@]}" -o "IdentityFile=$ssh_key" "$user@$ip" 'bash -s' < "$suite/macos/checked-truth.sh")
 in_vm "$brew_path $station settings --json" > "$work/settings-checked.json" || fail "settings --json"
 checked=$(jq -r '[.settings[] | select(.group == "checked")] | length' "$work/settings-checked.json")
 [ "$(wc -l <<< "$real" | tr -d ' ')" -eq "$checked" ] || miss "station lists $checked checked settings, checked-truth.sh answers $(wc -l <<< "$real" | tr -d ' ')"
@@ -257,7 +257,7 @@ case_pass
 
 
 case_begin activity-in-macos-vm AC-36
-act=$(ssh -n "${ssh_opts[@]}" -i "$ssh_key" "$user@$ip" "STATION_MACHINE_KIND=workspace $station activity --json")
+act=$(ssh -n "${ssh_opts[@]}" -o "IdentityFile=$ssh_key" "$user@$ip" "STATION_MACHINE_KIND=workspace $station activity --json")
 ncpu=$(in_vm 'sysctl -n hw.ncpu')
 mem=$(in_vm 'sysctl -n hw.memsize')
 [ "$(jq -r '.cpu.cpus' <<< "$act")" = "$ncpu" ] || fail "cpus $(jq -r '.cpu.cpus' <<< "$act") vs hw.ncpu $ncpu"
@@ -354,7 +354,7 @@ ip=$(boot "$bare") || fail "boot $bare"
 bare_path='PATH=/usr/bin:/bin:/usr/sbin:/sbin'
 in_vm 'sudo -n rm -rf /opt/homebrew /usr/local/Homebrew' || fail "make the base bare"
 in_vm 'rm -rf /tmp/station-e2e && mkdir -p /tmp/station-e2e' || fail "scratch folder"
-scp "${ssh_opts[@]}" -i "$ssh_key" -q "$repo/.artifacts/go/station" "$user@$ip:/tmp/station-e2e/station" || fail "copy the binary"
+scp "${ssh_opts[@]}" -o "IdentityFile=$ssh_key" -q "$repo/.artifacts/go/station" "$user@$ip:/tmp/station-e2e/station" || fail "copy the binary"
 in_vm 'test ! -e /opt/homebrew/bin/brew' || fail "the base still holds Homebrew"
 in_vm "$place" >> "$log" 2>&1 || miss "placing the binary exited $?"
 in_vm "$bare_path $station apps install homebrew jq </dev/null" >> "$log" 2>&1 || miss "apps install homebrew jq exited $?: the manager installed in this run was not found in it"
@@ -378,8 +378,8 @@ tart set "$applied" --memory 8192 >> "$log" 2>&1 || fail "size $applied"
 ip=$(boot "$applied") || fail "boot $applied"
 in_vm 'sudo -n rm -rf /opt/homebrew /usr/local/Homebrew' || fail "make the base bare"
 in_vm 'rm -rf /tmp/station-e2e && mkdir -p /tmp/station-e2e' || fail "scratch folder"
-scp "${ssh_opts[@]}" -i "$ssh_key" -q "$repo/.artifacts/go/station" "$user@$ip:/tmp/station-e2e/station" || fail "copy the binary"
-scp "${ssh_opts[@]}" -i "$ssh_key" -q "$suite/macos/e2e-apply.machine.yaml" "$user@$ip:/tmp/station-e2e/e2e-apply.machine.yaml" || fail "copy the Machinefile"
+scp "${ssh_opts[@]}" -o "IdentityFile=$ssh_key" -q "$repo/.artifacts/go/station" "$user@$ip:/tmp/station-e2e/station" || fail "copy the binary"
+scp "${ssh_opts[@]}" -o "IdentityFile=$ssh_key" -q "$suite/macos/e2e-apply.machine.yaml" "$user@$ip:/tmp/station-e2e/e2e-apply.machine.yaml" || fail "copy the Machinefile"
 fp="$work/home-apply"
 mkdir -p "$fp"
 steps=()
@@ -447,14 +447,14 @@ case_pass
 # the same way, so the key is what saves the first.
 case_begin engine-restart-under-launchd ADR-060
 in_vm 'mkdir -p /tmp/station-e2e' || fail "scratch folder"
-scp "${ssh_opts[@]}" -i "$ssh_key" -q "$repo/.artifacts/go/station" "$user@$ip:/tmp/station-e2e/station" || fail "copy the binary"
+scp "${ssh_opts[@]}" -o "IdentityFile=$ssh_key" -q "$repo/.artifacts/go/station" "$user@$ip:/tmp/station-e2e/station" || fail "copy the binary"
 # value: the swap build is the binary under test stamped v0.0.0-swap, built here where Go is,
 # or copied to .artifacts/go/ by `make e2e-binaries` where it is not.
 if command -v go > /dev/null; then
   (cd "$repo" && CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -ldflags "-X github.com/jterrazz/studio-station/apps/engine/wire.version=v0.0.0-swap" -o .artifacts/go/station-swap ./apps/engine/cmd/station) >> "$log" 2>&1 || fail "build the swap binary"
 fi
-scp "${ssh_opts[@]}" -i "$ssh_key" -q "$repo/.artifacts/go/station-swap" "$user@$ip:/tmp/station-e2e/station-swap" || fail "copy the swap binary"
-scp "${ssh_opts[@]}" -i "$ssh_key" -q "$suite/macos/stand-in-run.sh" "$user@$ip:/tmp/station-e2e/stand-in-run.sh" || fail "copy the stand-in"
+scp "${ssh_opts[@]}" -o "IdentityFile=$ssh_key" -q "$repo/.artifacts/go/station-swap" "$user@$ip:/tmp/station-e2e/station-swap" || fail "copy the swap binary"
+scp "${ssh_opts[@]}" -o "IdentityFile=$ssh_key" -q "$suite/macos/stand-in-run.sh" "$user@$ip:/tmp/station-e2e/stand-in-run.sh" || fail "copy the stand-in"
 in_vm 'sudo -n launchctl asuser "$(id -u)" launchctl setenv STATION_MACHINE_KIND mac' || fail "pin the kind in the user's launchd"
 in_vm "$place" || fail "place the binary"
 agent='gui/$(id -u)/com.jterrazz.station.engine'
@@ -564,11 +564,11 @@ if ! printf '%s  %s\n' "$standalone_digest" "$standalone_zip" | shasum -a 256 -c
   printf '%s  %s\n' "$standalone_digest" "$standalone_zip" | shasum -a 256 -c - > /dev/null 2>&1 || fail "Station.app $standalone_version: $standalone_zip is not the pinned digest"
 fi
 in_vm 'rm -rf /tmp/station-e2e && mkdir -p /tmp/station-e2e' || fail "scratch folder"
-scp "${ssh_opts[@]}" -i "$ssh_key" -q "$repo/.artifacts/go/station" "$user@$ip:/tmp/station-e2e/station" || fail "copy the binary"
-tar -C "$repo/.artifacts/window" -cf - Spwn.app | ssh "${ssh_opts[@]}" -i "$ssh_key" "$user@$ip" 'tar -C /tmp/station-e2e -xf -' || fail "copy Spwn.app"
-tar -C "$repo/.artifacts/window/next" -cf - Spwn.app | ssh "${ssh_opts[@]}" -i "$ssh_key" "$user@$ip" 'mkdir -p /tmp/station-e2e/next && tar -C /tmp/station-e2e/next -xf - && mv /tmp/station-e2e/next/Spwn.app /tmp/station-e2e/Spwn-next.app' || fail "copy the next Spwn.app"
-ssh "${ssh_opts[@]}" -i "$ssh_key" "$user@$ip" 'cat > /tmp/station-e2e/Station.app.zip && ditto -x -k /tmp/station-e2e/Station.app.zip /tmp/station-e2e/' < "$standalone_zip" || fail "copy Station.app $standalone_version"
-moved=$(ssh "${ssh_opts[@]}" -i "$ssh_key" "$user@$ip" 'bash -s' < "$suite/macos/bundle-move.sh")
+scp "${ssh_opts[@]}" -o "IdentityFile=$ssh_key" -q "$repo/.artifacts/go/station" "$user@$ip:/tmp/station-e2e/station" || fail "copy the binary"
+tar -C "$repo/.artifacts/window" -cf - Spwn.app | ssh "${ssh_opts[@]}" -o "IdentityFile=$ssh_key" "$user@$ip" 'tar -C /tmp/station-e2e -xf -' || fail "copy Spwn.app"
+tar -C "$repo/.artifacts/window/next" -cf - Spwn.app | ssh "${ssh_opts[@]}" -o "IdentityFile=$ssh_key" "$user@$ip" 'mkdir -p /tmp/station-e2e/next && tar -C /tmp/station-e2e/next -xf - && mv /tmp/station-e2e/next/Spwn.app /tmp/station-e2e/Spwn-next.app' || fail "copy the next Spwn.app"
+ssh "${ssh_opts[@]}" -o "IdentityFile=$ssh_key" "$user@$ip" 'cat > /tmp/station-e2e/Station.app.zip && ditto -x -k /tmp/station-e2e/Station.app.zip /tmp/station-e2e/' < "$standalone_zip" || fail "copy Station.app $standalone_version"
+moved=$(ssh "${ssh_opts[@]}" -o "IdentityFile=$ssh_key" "$user@$ip" 'bash -s' < "$suite/macos/bundle-move.sh")
 code=$?
 say "$(grep -v '^miss ' <<< "$moved")"
 [ $code -eq 0 ] || fail "the move's setup: $(grep '^setup ' <<< "$moved")"

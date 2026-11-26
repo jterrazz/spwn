@@ -142,14 +142,14 @@ until SSH_ASKPASS="$askpass" SSH_ASKPASS_REQUIRE=force DISPLAY=none \
   sleep 2
 done
 say "-- $vm at $ip, booted in $((SECONDS - t)) s"
-in_vm() { ssh -n "${ssh_opts[@]}" -i "$ssh_key" "$user@$ip" "$1"; }
+in_vm() { ssh -n "${ssh_opts[@]}" -o "IdentityFile=$ssh_key" "$user@$ip" "$1"; }
 say "display: $(in_vm 'system_profiler SPDisplaysDataType | grep -E "Chipset|Resolution|UI Looks|Retina|Display Type"' 2>&1 | tr -s ' ' | tr '\n' ';')"
 say "xcode: $(in_vm 'xcodebuild -version | head -1; sw_vers -productVersion' 2>&1 | tr '\n' ' ')"
 
 # invariant: the branch goes in by git, the committed tree and nothing of the
 # Mac's folders; the VM's repo takes it on a branch it does not hold checked out.
 in_vm 'rm -rf ~/station && git init -q -b scratch ~/station' || fail "git init in the VM"
-GIT_SSH_COMMAND="ssh ${ssh_opts[*]} -i $ssh_key" \
+GIT_SSH_COMMAND="ssh ${ssh_opts[*]} -o IdentityFile=$ssh_key" \
   git -C "$repo" push -q "$user@$ip:station" "HEAD:refs/heads/run" >> "$log" 2>&1 || fail "git push into the VM"
 in_vm 'cd ~/station && git checkout -q run' || fail "checkout in the VM"
 say "-- pushed $(git -C "$repo" rev-parse --short HEAD)"
@@ -220,7 +220,7 @@ if ! pinned; then
   curl -fsSL -o "$oxipng_tar" "https://github.com/oxipng/oxipng/releases/download/v$oxipng_version/oxipng-$oxipng_version-aarch64-apple-darwin.tar.gz" >> "$log" 2>&1 || fail "download oxipng $oxipng_version"
   pinned || fail "oxipng $oxipng_version: $oxipng_tar is not the pinned digest"
 fi
-ssh "${ssh_opts[@]}" -i "$ssh_key" "$user@$ip" 'mkdir -p ~/oxipng && tar -xzf - --strip-components=1 -C ~/oxipng' < "$oxipng_tar" || fail "copy oxipng into the VM"
+ssh "${ssh_opts[@]}" -o "IdentityFile=$ssh_key" "$user@$ip" 'mkdir -p ~/oxipng && tar -xzf - --strip-components=1 -C ~/oxipng' < "$oxipng_tar" || fail "copy oxipng into the VM"
 say "oxipng: $(in_vm '~/oxipng/oxipng --version' 2>&1)"
 
 t=$SECONDS
@@ -231,10 +231,10 @@ env_line='STATION_REQUIRE_MENUBAR=1 STATION_OXIPNG=$HOME/oxipng/oxipng'
 expected="$work/expected.txt"
 if [ -n "$expect" ]; then
   grep -v '^[[:space:]]*#' "$expect" | sed 's/^[[:space:]]*//; s/[[:space:]]*$//' | grep . | sort -u > "$expected"
-  ssh "${ssh_opts[@]}" -i "$ssh_key" "$user@$ip" 'cat > /tmp/station-expect-goldens.txt' < "$expected" || fail "copy the golden list into the VM"
+  ssh "${ssh_opts[@]}" -o "IdentityFile=$ssh_key" "$user@$ip" 'cat > /tmp/station-expect-goldens.txt' < "$expected" || fail "copy the golden list into the VM"
   env_line="$env_line STATION_EXPECT_GOLDENS=/tmp/station-expect-goldens.txt"
 fi
-ssh -n "${ssh_opts[@]}" -i "$ssh_key" "$user@$ip" "zsh -lc 'cd $vm_root && $env_line make menubar-check'" >> "$log" 2>&1
+ssh -n "${ssh_opts[@]}" -o "IdentityFile=$ssh_key" "$user@$ip" "zsh -lc 'cd $vm_root && $env_line make menubar-check'" >> "$log" 2>&1
 code=$?
 say "-- make menubar-check exit $code in $((SECONDS - t)) s"
 
