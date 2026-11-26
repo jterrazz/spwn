@@ -227,10 +227,13 @@ func TestAnEngineWhoseKeychainWasLockedAtItsStartAnchorsTheBookOfItsStartAlone(t
 	if _, _, err := engine.Read(t.Context()); !errors.Is(err, locked) {
 		t.Fatalf("Read = %v; want the keychain's refusal while it stays locked", err)
 	}
-	if _, standing, ok := engine.Held(t.Context()); standing != devices.Unchecked || !ok {
-		t.Fatalf("held %q, %v; want the book not checked yet", standing, ok)
+	if _, standing, ok := engine.Held(t.Context()); standing != devices.Kept || !ok {
+		t.Fatalf("held %q, %v; want an empty book, unchecked, to be no need", standing, ok)
 	}
 	plant(t, at, k, withLaptop, headLaptop)
+	if _, standing, ok := engine.Held(t.Context()); standing != devices.Unchecked || !ok {
+		t.Fatalf("held %q, %v; want the planted book not checked yet", standing, ok)
+	}
 	k.locked = nil
 	trustsNothing(t, engine, devices.Changed)
 	if err := files().WriteFile(at, []byte("{}"), 0o600); err != nil {

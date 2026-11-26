@@ -1,0 +1,21 @@
+package devices_test
+
+import (
+	"testing"
+
+	"github.com/jterrazz/studio-station/apps/engine/devices"
+)
+
+func TestABookAwaitingItsCheckIsANeedOnlyWhenItHoldsADevice(t *testing.T) {
+	awaiting := devices.Await(1, devices.Sum(nil))
+	if got := awaiting.Standing(devices.Book{}, false); got != devices.Kept {
+		t.Fatalf("an empty book awaiting its check stands %q, want no need", got)
+	}
+	laptop := devices.Book{Generation: 1, Devices: []devices.Device{{Name: "laptop", Key: "ssh-ed25519 LAPTOP"}}}
+	if got := awaiting.Standing(laptop, false); got != devices.Unchecked {
+		t.Fatalf("a book of one device awaiting its check stands %q, want unchecked", got)
+	}
+	if got := awaiting.Settle(`{"devices":[]}`, devices.Head{}); got.State != devices.Unheld {
+		t.Fatalf("a book written while awaiting settles to %+v, want it held for nothing", got)
+	}
+}

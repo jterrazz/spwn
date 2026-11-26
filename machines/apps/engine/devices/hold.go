@@ -77,6 +77,11 @@ func (h Hold) Settle(now string, anchored Head) Hold {
 func (h Hold) Standing(b Book, unreadable bool) Standing {
 	switch h.State {
 	case Awaiting:
+		// invariant: a book with no device waiting for its check is no
+		// need: it lets no one in, checked or not.
+		if len(b.Devices) == 0 {
+			return Kept
+		}
 		return Unchecked
 	case Unheld:
 		return Changed

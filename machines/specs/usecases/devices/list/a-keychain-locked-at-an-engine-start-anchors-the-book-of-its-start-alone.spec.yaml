@@ -1,4 +1,4 @@
-description: 'a keychain locked at an engine start leaves the book unchecked, then anchors the start book alone'
+description: 'a keychain locked at an engine start leaves a planted book unchecked, then anchors the start book alone'
 env:
     - two-macs
     - engine
@@ -18,8 +18,16 @@ runs:
           {"v":2,"id":"1","watch":"overview.read","in":{}}
       exit: 0
       stdout: |
+          []
+    - command: '--version >/dev/null; /usr/bin/jq --slurpfile b before.json ''.macs["macbook-pro"].stores += $b[0]'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out.Summary | [.Needs[] | select(.Subject == "devices") | [.Text, .Upkeep, .Detail]]'' | /usr/bin/tail -1'
+      stdin: |
+          {"v":2,"id":"1","watch":"overview.read","in":{}}
+      exit: 0
+      stdout: |
           [["The device book is not checked yet","needs-you",""]]
-    - command: '--version >/dev/null; /usr/bin/jq --slurpfile b before.json ''.macs["macbook-pro"].stores += $b[0] | .macs["macbook-pro"].stores.devices_anchor_unreadable = false'' world.json > w.json && /bin/mv w.json world.json'
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].stores.devices_anchor_unreadable = false'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
     - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out | {stale, devices: [.devices[] | .name], broken: [.broken[] | .name]}'''
       stdin: |
