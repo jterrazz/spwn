@@ -596,7 +596,9 @@ func Codes() map[fail.Code]Wording {
 			}
 			return "the project at " + e.Subject + " has " + n + noun, "fix each one above, then station project plan"
 		},
-		backgroundcalls.Unknown: func(e *fail.Error) (string, string) {
+		projectcalls.LinkInTheWay: func(e *fail.Error) (string, string) {
+			return e.Subject + " is a link: apply never follows one", "remove the link, then station project apply"
+		}, backgroundcalls.Unknown: func(e *fail.Error) (string, string) {
 			return "no background task \"" + e.Subject + "\"", "station background"
 		},
 		backgroundcalls.RootScope: func(e *fail.Error) (string, string) {

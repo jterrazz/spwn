@@ -9,6 +9,7 @@ import (
 	"io/fs"
 	"os"
 	"path"
+	"slices"
 	"strings"
 	"time"
 
@@ -114,6 +115,36 @@ func (Beneath) Mkdir(base, rel string, perm fs.FileMode, o Owner) (err error) {
 	}
 	return nil
 }
+
+func (b Beneath) Folders(base, rel string, perm fs.FileMode, o Owner) error {
+	// value: each folder of rel, from base down, made with perm and given o
+	// when it is not there yet, one there already kept as it is; a link or
+	// anything but a folder on the way is refused, never followed.
+	at := ""
+	for n := range strings.SplitSeq(rel, "/") {
+		at = path.Join(at, n)
+		e, err := b.Lstat(base, at)
+		if errors.Is(err, fs.ErrNotExist) {
+			err = b.Mkdir(base, at, perm, o)
+			if errors.Is(err, fs.ErrExist) {
+				e, err = b.Lstat(base, at)
+			} else if err == nil {
+				continue
+			}
+		}
+		switch {
+		case err != nil:
+			return err
+		case e.Mode&fs.ModeSymlink != 0:
+			return &fs.PathError{Op: "mkdir", Path: path.Join(base, at), Err: ErrLink}
+		case !e.Mode.IsDir():
+			return &fs.PathError{Op: "mkdir", Path: path.Join(base, at), Err: errNotFolder}
+		}
+	}
+	return nil
+}
+
+var errNotFolder = errors.New("is not a folder")
 
 var errNotMade = errors.New("is not the folder just made")
 
@@ -245,6 +276,84 @@ func (f *Folder) ReadFile(name string) ([]byte, Entry, error) {
 		return nil, Entry{}, &fs.PathError{Op: "read", Path: at, Err: ErrTooLarge}
 	}
 	return data, e, err
+}
+
+func (f *Folder) Names() ([]string, error) {
+	// value: every name the folder holds, read through its descriptor, in
+	// order.
+	dup, err := unix.Dup(f.fd)
+	if err != nil {
+		return nil, &fs.PathError{Op: "readdir", Path: f.at, Err: err}
+	}
+	folder := os.NewFile(uintptr(dup), f.at)
+	defer func() { _ = folder.Close() }()
+	if _, err = unix.Seek(dup, 0, io.SeekStart); err != nil {
+		return nil, &fs.PathError{Op: "readdir", Path: f.at, Err: err}
+	}
+	names, err := folder.Readdirnames(-1)
+	if err != nil {
+		return nil, &fs.PathError{Op: "readdir", Path: f.at, Err: err}
+	}
+	slices.Sort(names)
+	return names, nil
+}
+
+var errNotLink = errors.New("is not a link")
+
+func (f *Folder) Readlink(name string) (string, error) {
+	// value: the target of the link name holds, never followed; anything but
+	// a link is refused.
+	at := path.Join(f.at, name)
+	buf := make([]byte, 4096)
+	n, err := unix.Readlinkat(f.fd, name, buf)
+	if errors.Is(err, unix.EINVAL) {
+		err = errNotLink
+	}
+	if err != nil {
+		return "", &fs.PathError{Op: "readlink", Path: at, Err: err}
+	}
+	return string(buf[:n]), nil
+}
+
+func (f *Folder) Link(name, target string) error {
+	// invariant: name made a link to target at once: the link is made beside
+	// it under a name of its own, then renamed over name, and the folder
+	// synced. A name that holds anything but nothing or a link is refused,
+	// never replaced.
+	at := path.Join(f.at, name)
+	e, err := f.Lstat(name)
+	switch {
+	case err == nil && e.Mode&fs.ModeSymlink == 0:
+		return &fs.PathError{Op: "link", Path: at, Err: errNotLink}
+	case err != nil && !errors.Is(err, fs.ErrNotExist):
+		return err
+	}
+	tmp := "." + name + "." + rand.Text() + ".station"
+	if err := unix.Symlinkat(target, f.fd, tmp); err != nil {
+		return &fs.PathError{Op: "link", Path: at, Err: err}
+	}
+	if err := unix.Renameat(f.fd, tmp, f.fd, name); err != nil {
+		_ = unix.Unlinkat(f.fd, tmp, 0)
+		return &fs.PathError{Op: "link", Path: at, Err: err}
+	}
+	return unix.Fsync(f.fd)
+}
+
+func (f *Folder) RemoveLink(name string) error {
+	// value: the link name holds taken away, never followed; anything but a
+	// link is refused, never removed.
+	at := path.Join(f.at, name)
+	e, err := f.Lstat(name)
+	switch {
+	case err != nil:
+		return err
+	case e.Mode&fs.ModeSymlink == 0:
+		return &fs.PathError{Op: "remove", Path: at, Err: errNotLink}
+	}
+	if err := unix.Unlinkat(f.fd, name, 0); err != nil {
+		return &fs.PathError{Op: "remove", Path: at, Err: err}
+	}
+	return nil
 }
 
 var errNotFile = errors.New("is not a file")

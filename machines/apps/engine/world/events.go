@@ -74,7 +74,7 @@ func events() []event {
 		{"agent", []string{"<mac>", "served|held", "[<pid>]", "[<executable>]", "[<label>]"}, agentSocket},
 		{"admin", []string{"on|off"}, admin},
 		{"release", []string{"<tag>", "[no-asset]"}, releaseTag},
-		{"project", []string{"<root>", "[error|warning|info|drift|render|edit]", "[<agent>|<path>]", "[<path>|<message>|<content>]", "[<content>]"}, declareProject},
+		{"project", []string{"<root>", "[error|warning|info|drift|render|edit|link]", "[<agent>|<path>]", "[<path>|<message>|<content>|<target>]", "[<content>]"}, declareProject},
 	}
 }
 
@@ -710,13 +710,15 @@ func declareProject(w *World, args []string) error {
 			declareRender(&kept, args[2], args[3], args[4:])
 		case args[1] == "edit":
 			editRunFolder(&kept, args[2], args[3:])
+		case args[1] == "link":
+			linkRunFolder(&kept, args[2], args[3])
 		case args[1] == "drift":
 			issue.Level, issue.Source = project.Error, project.SourceLockfile
 			kept.Drift = append(kept.Drift, issue)
 		case slices.Contains(project.Level("").Enum(), args[1]):
 			kept.Issues = append(kept.Issues, issue)
 		default:
-			return fmt.Errorf("project takes error, warning, info, drift, render or edit, not %q", args[1])
+			return fmt.Errorf("project takes error, warning, info, drift, render, edit or link, not %q", args[1])
 		}
 	}
 	s.Projects[root] = kept
@@ -752,4 +754,14 @@ func editRunFolder(kept *project.State, path string, content []string) {
 		return
 	}
 	kept.Disk[path] = project.File{Path: path, Data: []byte(strings.Join(content, " ") + "\n"), Mode: 0o644}
+}
+
+// invariant: link <path> <target> is the owner, or a repository cloned,
+// putting a link at that path from the project's root: a folder of a run
+// folder's path or the record, which apply refuses to follow.
+func linkRunFolder(kept *project.State, path, target string) {
+	if kept.Disk == nil {
+		kept.Disk = map[string]project.File{}
+	}
+	kept.Disk[path] = project.File{Path: path, Data: []byte(target), Link: true}
 }

@@ -1,0 +1,16 @@
+description: 'station project plan refuses a linked record, naming the link, and reads nothing'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'project create site'
+      exit: 0
+      stdout: |
+          ●	site	created	{{workdir}}/site
+    - command: '--version >/dev/null; "$STATION" world project "$HOME/site" link .spwn/applied.json /tmp/victim.json'
+      exit: 0
+    - command: '--version >/dev/null; /bin/mkdir -p site && cd site && "$STATION" project plan'
+      exit: 2
+      stderr: |
+          Error: .spwn/applied.json is a link: apply never follows one
+          Hint: remove the link, then station project apply

@@ -1,0 +1,20 @@
+description: 'station project apply refuses a linked run folder, naming the link, and writes nothing'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'project create site'
+      exit: 0
+      stdout: |
+          ●	site	created	{{workdir}}/site
+    - command: '--version >/dev/null; "$STATION" world project "$HOME/site" link .spwn/agents/neo /tmp/elsewhere'
+      exit: 0
+    - command: '--version >/dev/null; /bin/mkdir -p site && cd site && "$STATION" project apply --yes'
+      exit: 2
+      stderr: |
+          Error: .spwn/agents/neo is a link: apply never follows one
+          Hint: remove the link, then station project apply
+    - command: '--version >/dev/null; /usr/bin/jq -c ".macs[\"macbook-pro\"].stores.projects[] | [.Disk | keys, (.Record // {} | length)]" world.json'
+      exit: 0
+      stdout: |
+          [[".spwn/agents/neo"],0]

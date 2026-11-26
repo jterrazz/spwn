@@ -66,7 +66,23 @@ const (
 	RecordName = "applied.json"
 )
 
-var ErrOutside = errors.New("a rendered path leaves its run folder")
+var (
+	ErrOutside = errors.New("a rendered path leaves its run folder")
+	// value: a link, or a file with another name, where apply reaches: on a
+	// folder of a run folder's path, on the record, or at a file it reads.
+	ErrLink = errors.New("is a link, which apply never follows")
+)
+
+type Unwritten struct {
+	// value: the path from the project's root an apply cannot reach, read
+	// or write, and why.
+	Path string
+	Err  error
+}
+
+func (u *Unwritten) Error() string { return u.Path + " " + u.Err.Error() }
+
+func (u *Unwritten) Unwrap() error { return u.Err }
 
 func RunFolder(agent string) string { return StateFolder + "/agents/" + agent }
 

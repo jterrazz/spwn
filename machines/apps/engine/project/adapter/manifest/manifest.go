@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
+	"path"
 	"path/filepath"
 	"regexp"
 	"slices"
@@ -22,29 +23,52 @@ import (
 	"spwn.sh/packages/transpile/source"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
+	"github.com/jterrazz/studio-station/apps/engine/platform/local"
 	"github.com/jterrazz/studio-station/apps/engine/project"
 	"github.com/jterrazz/studio-station/apps/engine/project/contract"
 )
 
 type disk interface {
-	Stat(path string) (fs.FileInfo, error)
 	MkdirAll(path string, perm fs.FileMode) error
-	ReadFile(path string) ([]byte, error)
-	Readlink(path string) (string, error)
 	WriteFile(path string, data []byte, perm fs.FileMode) error
-	Symlink(target, path string) error
-	Chmod(path string, perm fs.FileMode) error
-	Remove(path string) error
 }
 
 type Projects struct {
 	// value: the disk of the machine a new project's folder is made on.
 	fs disk
+	// value: every run folder and the record, reached from the project's
+	// root one name at a time, never through a link.
+	under local.Beneath
 }
 
 var _ contract.Projects = Projects{}
 
 func New(fsys disk) Projects { return Projects{fs: fsys} }
+
+// value: err as the project names it: the path from root it is about, a
+// link or a file of two names there said as project.ErrLink.
+func unwritten(root, rel string, err error) error {
+	var at *fs.PathError
+	if errors.As(err, &at) {
+		if inside, relErr := filepath.Rel(root, at.Path); relErr == nil && !strings.HasPrefix(inside, "..") {
+			rel = filepath.ToSlash(inside)
+		}
+		err = at.Err
+	}
+	if errors.Is(err, local.ErrLink) || errors.Is(err, local.ErrHardLink) {
+		err = project.ErrLink
+	}
+	return &project.Unwritten{Path: rel, Err: err}
+}
+
+// value: a read's err, named as unwritten names it when it is a link; any
+// other failure to read as it is.
+func linked(root, rel string, err error) error {
+	if errors.Is(err, local.ErrLink) || errors.Is(err, local.ErrHardLink) {
+		return unwritten(root, rel, err)
+	}
+	return err
+}
 
 // invariant: Agents' packages resolve paths from one process-global
 // project root, which platform.WithProjectRoot holds for one act.
@@ -108,25 +132,25 @@ func (p Projects) copyFolder(files fs.FS, dir, root, name string) error {
 		return err
 	}
 	for _, e := range entries {
-		path := e.Name()
+		at := e.Name()
 		if dir != "." {
-			path = dir + "/" + path
+			at = dir + "/" + at
 		}
-		target := filepath.Join(root, filepath.FromSlash(path))
+		target := filepath.Join(root, filepath.FromSlash(at))
 		if e.IsDir() {
 			if err := p.fs.MkdirAll(target, 0o755); err != nil {
 				return err
 			}
-			if err := p.copyFolder(files, path, root, name); err != nil {
+			if err := p.copyFolder(files, at, root, name); err != nil {
 				return err
 			}
 			continue
 		}
-		data, err := fs.ReadFile(files, path)
+		data, err := fs.ReadFile(files, at)
 		if err != nil {
 			return err
 		}
-		if path == project.ManifestName {
+		if at == project.ManifestName {
 			data = manifestName.ReplaceAll(data, []byte("name: "+name))
 		}
 		if err := p.fs.WriteFile(target, data, 0o644); err != nil {
@@ -139,8 +163,11 @@ func (p Projects) copyFolder(files fs.FS, dir, root, name string) error {
 func (p Projects) Create(_ context.Context, folder, name, harness, example string) (project.Project, error) {
 	root := filepath.Join(folder, name)
 	return in(root, func() (project.Project, error) {
-		if _, err := p.fs.Stat(root); err == nil {
+		switch _, err := p.under.Lstat(folder, name); {
+		case err == nil:
 			return project.Project{}, project.ErrExists
+		case !errors.Is(err, fs.ErrNotExist):
+			return project.Project{}, err
 		}
 		if err := p.fs.MkdirAll(root, 0o755); err != nil {
 			return project.Project{}, err
@@ -270,17 +297,45 @@ func (p Projects) Render(_ context.Context, root, agent string) ([]project.File,
 	})
 }
 
+const recordPath = project.StateFolder + "/" + project.RecordName
+
+// value: the folder dir of root, a slash path from it, opened one name at
+// a time; "" is root itself, the caller's to trust.
+func (p Projects) open(root, dir string) (*local.Folder, error) {
+	if dir == "" {
+		return p.under.Open(filepath.Dir(root), filepath.Base(root))
+	}
+	return p.under.Open(root, dir)
+}
+
+// value: the record apply keeps, and its bytes as read, for a write that
+// replaces it only while it still holds them.
+func (p Projects) record(root string) (project.Record, local.Seen, error) {
+	record := project.Record{}
+	f, err := p.open(root, project.StateFolder)
+	if errors.Is(err, fs.ErrNotExist) {
+		return record, local.Seen{}, nil
+	}
+	if err != nil {
+		return nil, local.Seen{}, linked(root, project.StateFolder, err)
+	}
+	defer f.Close()
+	data, _, err := f.ReadFile(project.RecordName)
+	if errors.Is(err, fs.ErrNotExist) {
+		return record, local.Seen{}, nil
+	}
+	if err != nil {
+		return nil, local.Seen{}, linked(root, recordPath, err)
+	}
+	if err := json.Unmarshal(data, &record); err != nil {
+		return nil, local.Seen{}, fmt.Errorf("%s does not read: %w", recordPath, err)
+	}
+	return record, local.Seen{Data: data, There: true}, nil
+}
+
 func (p Projects) Applied(_ context.Context, root string, paths []string) (record, disk project.Record, err error) {
-	record = project.Record{}
-	data, err := p.fs.ReadFile(filepath.Join(root, project.StateFolder, project.RecordName))
-	switch {
-	case errors.Is(err, fs.ErrNotExist):
-	case err != nil:
+	if record, _, err = p.record(root); err != nil {
 		return nil, nil, err
-	default:
-		if err := json.Unmarshal(data, &record); err != nil {
-			return nil, nil, fmt.Errorf("%s/%s does not read: %w", project.StateFolder, project.RecordName, err)
-		}
 	}
 	disk = project.Record{}
 	for _, rel := range paths {
@@ -295,25 +350,43 @@ func (p Projects) Applied(_ context.Context, root string, paths []string) (recor
 	return record, disk, nil
 }
 
-// value: what the disk holds at rel under root, as a File; a link is read
-// as its target, never followed.
+// value: what the disk holds at rel under root, as a File; a link at its
+// own name is read as its target, never followed, and one on a folder of
+// its path is refused (project.ErrLink).
 func (p Projects) held(root, rel string) (project.File, bool, error) {
-	full := filepath.Join(root, filepath.FromSlash(rel))
-	if target, err := p.fs.Readlink(full); err == nil {
-		return project.File{Path: rel, Data: []byte(target), Link: true}, true, nil
-	}
-	info, err := p.fs.Stat(full)
-	if errors.Is(err, fs.ErrNotExist) {
+	dir, name := path.Split(rel)
+	f, err := p.open(root, strings.TrimSuffix(dir, "/"))
+	switch {
+	case errors.Is(err, fs.ErrNotExist):
 		return project.File{}, false, nil
+	case err != nil:
+		return project.File{}, false, linked(root, rel, err)
 	}
+	defer f.Close()
+	e, err := f.Lstat(name)
+	switch {
+	case errors.Is(err, fs.ErrNotExist):
+		return project.File{}, false, nil
+	case err != nil:
+		return project.File{}, false, linked(root, rel, err)
+	case e.Mode&fs.ModeSymlink != 0:
+		target, readErr := f.Readlink(name)
+		if readErr != nil {
+			return project.File{}, false, linked(root, rel, readErr)
+		}
+		return project.File{Path: rel, Data: []byte(target), Link: true}, true, nil
+	case !e.Mode.IsRegular():
+		return project.File{Path: rel, Data: []byte(e.Mode.Type().String())}, true, nil
+	}
+	data, e, err := f.ReadFile(name)
 	if err != nil {
-		return project.File{}, false, err
+		return project.File{}, false, linked(root, rel, err)
 	}
-	if !info.Mode().IsRegular() {
-		return project.File{Path: rel, Data: []byte(info.Mode().Type().String())}, true, nil
-	}
-	data, err := p.fs.ReadFile(full)
-	return project.File{Path: rel, Data: data, Mode: uint32(info.Mode().Perm())}, err == nil, err
+	return project.File{Path: rel, Data: data, Mode: uint32(e.Mode.Perm())}, true, nil
+}
+
+func (p Projects) folders(root, dir string) error {
+	return p.under.Folders(root, dir, 0o755, local.Self())
 }
 
 func (p Projects) Write(_ context.Context, root string, changes []project.Change, record project.Record) error {
@@ -321,44 +394,96 @@ func (p Projects) Write(_ context.Context, root string, changes []project.Change
 		if !fs.ValidPath(c.Path) || !strings.HasPrefix(c.Path, project.StateFolder+"/") {
 			return fmt.Errorf("%w: %s", project.ErrOutside, c.Path)
 		}
-		full := filepath.Join(root, filepath.FromSlash(c.Path))
-		if c.Kind == project.Remove {
-			if err := p.fs.Remove(full); err != nil && !errors.Is(err, fs.ErrNotExist) {
-				return err
-			}
-			continue
+		if err := p.change(root, c); err != nil {
+			return unwritten(root, c.Path, err)
 		}
-		if err := p.fs.MkdirAll(filepath.Dir(full), 0o755); err != nil {
-			return err
-		}
-		if c.Kind == project.Overwrite {
-			if err := p.fs.Remove(full); err != nil && !errors.Is(err, fs.ErrNotExist) {
-				return err
-			}
-		}
-		if c.File.Link {
-			if err := p.fs.Symlink(string(c.File.Data), full); err != nil {
-				return err
-			}
-			continue
-		}
-		perm := fs.FileMode(c.File.Mode).Perm()
-		if err := p.fs.WriteFile(full, c.File.Data, perm); err != nil {
-			return err
-		}
-		if err := p.fs.Chmod(full, perm); err != nil {
+	}
+	return p.keep(root, record)
+}
+
+func (p Projects) change(root string, c project.Change) error {
+	dir, name := path.Split(c.Path)
+	dir = strings.TrimSuffix(dir, "/")
+	if c.Kind != project.Remove {
+		if err := p.folders(root, dir); err != nil {
 			return err
 		}
 	}
+	f, err := p.open(root, dir)
+	if c.Kind == project.Remove && errors.Is(err, fs.ErrNotExist) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	return made(f, name, c)
+}
+
+// invariant: name made what c says, through the folder's descriptor: a
+// file over a file is replaced at once, a link is never followed, and
+// anything else there is taken away first, a file only while it holds
+// what was just read.
+func made(f *local.Folder, name string, c project.Change) error {
+	e, err := f.Lstat(name)
+	if err != nil && !errors.Is(err, fs.ErrNotExist) {
+		return err
+	}
+	held, link := err == nil, err == nil && e.Mode&fs.ModeSymlink != 0
+	seen := local.Seen{}
+	switch {
+	case link && (!c.File.Link || c.Kind == project.Remove):
+		if err := f.RemoveLink(name); err != nil {
+			return err
+		}
+	case held && !link:
+		data, _, err := f.ReadFile(name)
+		if err != nil {
+			return err
+		}
+		seen = local.Seen{Data: data, There: true}
+		if c.Kind == project.Remove || c.File.Link {
+			if err := f.Remove(name, seen); err != nil {
+				return err
+			}
+		}
+	}
+	switch {
+	case c.Kind == project.Remove:
+		return nil
+	case c.File.Link:
+		return f.Link(name, string(c.File.Data))
+	}
+	perm := fs.FileMode(c.File.Mode).Perm()
+	if err := f.Replace(name, seen, c.File.Data, perm, local.Self()); err != nil {
+		return err
+	}
+	return f.ChmodFile(name, local.Self().UID, func(fs.FileMode) fs.FileMode { return perm })
+}
+
+// value: record kept as what apply wrote, replacing the one read only
+// while it still holds what was read.
+func (p Projects) keep(root string, record project.Record) error {
 	data, err := json.MarshalIndent(record, "", "  ")
 	if err != nil {
 		return err
 	}
-	state := filepath.Join(root, project.StateFolder)
-	if err := p.fs.MkdirAll(state, 0o755); err != nil {
+	_, seen, err := p.record(root)
+	if err != nil {
 		return err
 	}
-	return p.fs.WriteFile(filepath.Join(state, project.RecordName), append(data, '\n'), 0o644)
+	if err = p.folders(root, project.StateFolder); err != nil {
+		return unwritten(root, recordPath, err)
+	}
+	f, err := p.open(root, project.StateFolder)
+	if err != nil {
+		return unwritten(root, recordPath, err)
+	}
+	defer f.Close()
+	if err := f.Replace(project.RecordName, seen, append(data, '\n'), 0o644, local.Self()); err != nil {
+		return unwritten(root, recordPath, err)
+	}
+	return nil
 }
 
 // invariant: each agent is rendered by the Render hook of the harness it

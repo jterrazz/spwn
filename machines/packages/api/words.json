@@ -1048,6 +1048,11 @@
       "Detail": "project",
       "Tone": "plain"
     },
+    "project.link-in-the-way": {
+      "Word": "link in the way",
+      "Detail": "project",
+      "Tone": "plain"
+    },
     "project.not-found": {
       "Word": "not found",
       "Detail": "project",

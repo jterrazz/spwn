@@ -242,3 +242,73 @@ func TestChmodFileChangesOnlyAFileTheOwnerHolds(t *testing.T) {
 		t.Fatalf("mode after chmod = %o; want 644", info.Mode().Perm())
 	}
 }
+
+func TestFoldersAreMadeDownToTheLastAndNeverThroughALink(t *testing.T) {
+	base, away := t.TempDir(), t.TempDir()
+	if err := (Beneath{}).Folders(base, "a/b/c", 0o755, Self()); err != nil {
+		t.Fatal(err)
+	}
+	if err := (Beneath{}).Folders(base, "a/b/c", 0o755, Self()); err != nil {
+		t.Fatalf("Folders over folders there = %v; want them kept", err)
+	}
+	if info, err := os.Stat(filepath.Join(base, "a", "b", "c")); err != nil || !info.IsDir() || info.Mode().Perm() != 0o755 {
+		t.Fatalf("a/b/c = %v, %v; want a folder, 755", info, err)
+	}
+	if err := os.Symlink(away, filepath.Join(base, "a", "l")); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(base, "a", "f"), nil, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	for _, rel := range []string{"a/l", "a/l/d", "a/f", "a/f/d"} {
+		if err := (Beneath{}).Folders(base, rel, 0o755, Self()); err == nil {
+			t.Errorf("Folders(%s) made it; want a refusal", rel)
+		}
+	}
+	if err := (Beneath{}).Folders(base, "a/l/d", 0o755, Self()); !errors.Is(err, ErrLink) {
+		t.Errorf("Folders through a link = %v; want ErrLink", err)
+	}
+	if entries, _ := os.ReadDir(away); len(entries) != 0 {
+		t.Errorf("a folder was made through the link: %v", entries)
+	}
+}
+
+func TestALinkIsMadeReadAndRemovedAsALink(t *testing.T) {
+	base, away := t.TempDir(), t.TempDir()
+	target := filepath.Join(away, "f")
+	if err := os.WriteFile(target, []byte("x"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(base, "file"), []byte("y"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	f := opened(t, filepath.Dir(base), filepath.Base(base))
+	if err := f.Link("l", target); err != nil {
+		t.Fatal(err)
+	}
+	if err := f.Link("l", "elsewhere"); err != nil {
+		t.Fatalf("Link over a link = %v; want it replaced", err)
+	}
+	if got, err := f.Readlink("l"); err != nil || got != "elsewhere" {
+		t.Fatalf("Readlink = %q, %v; want elsewhere", got, err)
+	}
+	if err := f.Link("file", target); err == nil {
+		t.Error("Link over a file replaced it; want a refusal")
+	}
+	if _, err := f.Readlink("file"); err == nil {
+		t.Error("Readlink of a file read it; want a refusal")
+	}
+	if err := f.RemoveLink("file"); err == nil {
+		t.Error("RemoveLink of a file removed it; want a refusal")
+	}
+	if err := f.RemoveLink("l"); err != nil {
+		t.Fatal(err)
+	}
+	names, err := f.Names()
+	if err != nil || len(names) != 1 || names[0] != "file" {
+		t.Fatalf("Names = %v, %v; want the file alone", names, err)
+	}
+	if data, err := os.ReadFile(target); err != nil || string(data) != "x" {
+		t.Errorf("the link's target = %q, %v; want it untouched", data, err)
+	}
+}

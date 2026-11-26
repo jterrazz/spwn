@@ -29,14 +29,21 @@ const (
 	// value: a plan that finds an error: the leaf refuses once the plan is
 	// printed, so the owner reads every issue.
 	Invalid fail.Code = "project.invalid"
+	// value: a link where an apply reaches, on a folder of a run folder's
+	// path or on its record: refused before anything is written, never
+	// followed.
+	LinkInTheWay fail.Code = "project.link-in-the-way"
 )
 
 func coded(err error, subject string) error {
 	// invariant: a refusal of the Projects travels as its code, worded by
 	// the binary that prints it.
+	var at *project.Unwritten
 	switch {
 	case err == nil:
 		return nil
+	case errors.As(err, &at) && errors.Is(at.Err, project.ErrLink):
+		return fail.New(fail.Refused, LinkInTheWay, at.Path, nil)
 	case errors.Is(err, project.ErrNotFound):
 		return fail.New(fail.NotFound, NotFound, subject, nil)
 	case errors.Is(err, project.ErrExists):

@@ -44,7 +44,7 @@ var Apply = call.Call[Deps, ApplyIn, project.Applied]{
 	// value: the project's declared state made true in its run folders:
 	// what its plan lists, and nothing else.
 	Name: "project.apply", Where: call.InProcess, Applies: machine.Anywhere, Confirm: confirm.Overwrite,
-	Errors: []fail.Code{NotFound, Invalid, confirm.YesNeeded},
+	Errors: []fail.Code{NotFound, Invalid, LinkInTheWay, confirm.YesNeeded},
 	Run: func(ctx context.Context, d Deps, in ApplyIn, _ call.Progress) (project.Applied, error) {
 		// invariant: a plan with an error writes nothing; an apply that
 		// only adds asks nothing; one that overwrites or removes a file
@@ -64,7 +64,7 @@ var Apply = call.Call[Deps, ApplyIn, project.Applied]{
 		}
 		changes, record, next, err := pending(ctx, d, root)
 		if err != nil {
-			return out, err
+			return out, coded(err, root)
 		}
 		out.Changes = changes
 		if asked := project.Asked(changes); len(asked) > 0 {
@@ -75,6 +75,6 @@ var Apply = call.Call[Deps, ApplyIn, project.Applied]{
 		if len(changes) == 0 && maps.Equal(record, next) {
 			return out, nil
 		}
-		return out, d.Projects.Write(ctx, root, changes, next)
+		return out, coded(d.Projects.Write(ctx, root, changes, next), root)
 	},
 }

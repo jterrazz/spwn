@@ -396,6 +396,7 @@
             "project.example-declares-harness",
             "project.exists",
             "project.invalid",
+            "project.link-in-the-way",
             "project.not-found",
             "project.unknown-example",
             "project.unknown-harness",

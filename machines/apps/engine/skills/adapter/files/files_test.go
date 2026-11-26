@@ -1,6 +1,7 @@
 package files_test
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"testing"
@@ -15,6 +16,38 @@ import (
 func open(t *testing.T) contract.Files {
 	t.Setenv("SPWN_HOME", t.TempDir())
 	return files.New(local.New(nil, nil, nil, nil).FS)
+}
+
+func TestALinkOnTheWayToTheSkillsIsNeverFollowed(t *testing.T) {
+	root, away := t.TempDir(), t.TempDir()
+	victim := filepath.Join(away, "kept.md")
+	if err := os.WriteFile(victim, []byte("---\nname: kept\n---\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	disk := local.New(nil, nil, nil, nil).FS
+	if err := disk.MkdirAll(filepath.Join(root, "spwn"), 0o750); err != nil {
+		t.Fatal(err)
+	}
+	if err := disk.Symlink(away, filepath.Join(root, "spwn", "skills")); err != nil {
+		t.Fatal(err)
+	}
+	skillsOf := open(t)
+	if _, err := skillsOf.Create(t.Context(), root, "focus"); !errors.Is(err, local.ErrLink) {
+		t.Errorf("Create through a link = %v; want ErrLink", err)
+	}
+	if _, err := skillsOf.Show(t.Context(), root, "kept"); !errors.Is(err, local.ErrLink) {
+		t.Errorf("Show through a link = %v; want ErrLink", err)
+	}
+	if err := skillsOf.Delete(t.Context(), root, "kept"); !errors.Is(err, local.ErrLink) {
+		t.Errorf("Delete through a link = %v; want ErrLink", err)
+	}
+	if _, err := skillsOf.List(t.Context(), root); !errors.Is(err, local.ErrLink) {
+		t.Errorf("List through a link = %v; want ErrLink", err)
+	}
+	entries, err := os.ReadDir(away)
+	if err != nil || len(entries) != 1 {
+		t.Errorf("the folder linked to holds %v, %v; want kept.md alone", entries, err)
+	}
 }
 
 func TestFiles(t *testing.T) {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"io/fs"
 	"maps"
+	"path"
 	"path/filepath"
 	"slices"
 
@@ -130,6 +131,27 @@ func (p *Projects) Render(_ context.Context, root, agent string) ([]project.File
 	return slices.Clone(s.Rendered[agent]), nil
 }
 
+const recordPath = project.StateFolder + "/" + project.RecordName
+
+// value: the link the disk holds on the way to rel, on a folder of its
+// path, as the real disk refuses it; nil when none is.
+func linkOn(s project.State, rel string) error {
+	for at := path.Dir(rel); at != "."; at = path.Dir(at) {
+		if f, ok := s.Disk[at]; ok && f.Link {
+			return &project.Unwritten{Path: at, Err: project.ErrLink}
+		}
+	}
+	return nil
+}
+
+// value: the link on the way to the record or at it; nil when none is.
+func recordLinked(s project.State) error {
+	if f, ok := s.Disk[recordPath]; ok && f.Link {
+		return &project.Unwritten{Path: recordPath, Err: project.ErrLink}
+	}
+	return linkOn(s, recordPath)
+}
+
 func (p *Projects) Applied(_ context.Context, root string, paths []string) (record, disk project.Record, err error) {
 	p.w.Lock()
 	defer p.w.Unlock()
@@ -137,10 +159,16 @@ func (p *Projects) Applied(_ context.Context, root string, paths []string) (reco
 	if err != nil {
 		return nil, nil, err
 	}
+	if err := recordLinked(s); err != nil {
+		return nil, nil, err
+	}
 	disk = project.Record{}
-	for _, path := range paths {
-		if f, ok := s.Disk[path]; ok {
-			disk[path] = project.Digest(f)
+	for _, rel := range paths {
+		if err := linkOn(s, rel); err != nil {
+			return nil, nil, err
+		}
+		if f, ok := s.Disk[rel]; ok {
+			disk[rel] = project.Digest(f)
 		}
 	}
 	return maps.Clone(s.Record), disk, nil
@@ -152,6 +180,14 @@ func (p *Projects) Write(_ context.Context, root string, changes []project.Chang
 	s, err := p.state(root)
 	if err != nil {
 		return err
+	}
+	if err := recordLinked(s); err != nil {
+		return err
+	}
+	for _, c := range changes {
+		if err := linkOn(s, c.Path); err != nil {
+			return err
+		}
 	}
 	if s.Disk == nil {
 		s.Disk = map[string]project.File{}

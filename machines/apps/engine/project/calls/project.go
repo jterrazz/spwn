@@ -91,7 +91,7 @@ var Plan = call.Call[Deps, PlanIn, project.Plan]{
 	// first; it changes nothing, and a plan with an error is refused by the
 	// surface that prints it.
 	Name: "project.plan", Where: call.InProcess, Applies: machine.Anywhere,
-	Errors: []fail.Code{NotFound, Invalid},
+	Errors: []fail.Code{NotFound, Invalid, LinkInTheWay},
 	Run: func(ctx context.Context, d Deps, in PlanIn, _ call.Progress) (project.Plan, error) {
 		root, err := d.Projects.Find(ctx, in.Folder)
 		if err != nil {

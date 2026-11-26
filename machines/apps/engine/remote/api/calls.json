@@ -1161,6 +1161,7 @@
       "errors": [
         "confirm.yes-needed",
         "project.invalid",
+        "project.link-in-the-way",
         "project.not-found"
       ],
       "in": "ApplyIn",
@@ -1196,6 +1197,7 @@
       "where": "in-process",
       "errors": [
         "project.invalid",
+        "project.link-in-the-way",
         "project.not-found"
       ],
       "in": "PlanIn",
