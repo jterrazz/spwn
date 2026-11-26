@@ -10,6 +10,9 @@ const (
 	// value: the act family of a create: a VM made, its image built first
 	// when it is missing, its id `machines.create:<name>`.
 	GuideCreate = "machines.create"
+
+	// value: how a create names itself in its Guide's heading.
+	guideCreateAct = "New machine"
 )
 
 func (s BirthStep) Label() string {
@@ -55,7 +58,7 @@ func CreateGuide(a guide.Act, vm *VM) guide.Guide {
 	if at >= 0 && at+1 < len(a.Rail) {
 		next = a.Rail[at+1].Label
 	}
-	g := guide.Guide{ID: a.ID, Act: a.Family, Subject: a.Subject, Steps: guide.Rail(a), Ended: a.Ended}
+	g := guide.Guide{ID: a.ID, Act: guideCreateAct, Subject: a.Subject, Steps: guide.Rail(a), Ended: a.Ended}
 	switch a.Ended {
 	case "":
 		g.Live = true
@@ -70,6 +73,7 @@ func CreateGuide(a guide.Act, vm *VM) guide.Guide {
 		g.View = guide.View{
 			Illustration: guide.PictureDone, Headline: guide.Headline{Now: a.Subject + " is ready", Next: ""},
 			Sentence: readyWords(a.Subject, vm), Move: guide.MoveEngine,
+			Action: &guide.Gesture{Label: "Open " + a.Subject, Nav: "machine:" + a.Subject},
 		}
 	default:
 		g.View = endedView(a, vm, at, label)

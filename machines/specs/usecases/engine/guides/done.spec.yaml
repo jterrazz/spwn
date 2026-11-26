@@ -28,4 +28,4 @@ runs:
           {"v":2,"id":"1","call":"engine.guides","in":{}}
       exit: 0
       stdout: |
-          {"id":"machines.create:linux-4","act":"machines.create","subject":"linux-4","steps":[{"id":"cloning","label":"Disk","status":"done"},{"id":"booting","label":"Boot","status":"done"},{"id":"address","label":"Network","status":"done"},{"id":"ssh","label":"SSH","status":"done"}],"view":{"illustration":"done","headline":{"now":"linux-4 is ready","next":""},"sentence":"linux-4 runs on macbook-pro.","move":"engine"},"ended":"done","line":"linux-4 is ready","live":false}
+          {"id":"machines.create:linux-4","act":"New machine","subject":"linux-4","steps":[{"id":"cloning","label":"Disk","status":"done"},{"id":"booting","label":"Boot","status":"done"},{"id":"address","label":"Network","status":"done"},{"id":"ssh","label":"SSH","status":"done"}],"view":{"illustration":"done","headline":{"now":"linux-4 is ready","next":""},"sentence":"linux-4 runs on macbook-pro.","move":"engine","action":{"label":"Open linux-4","nav":"machine:linux-4"}},"ended":"done","line":"linux-4 is ready","live":false}
