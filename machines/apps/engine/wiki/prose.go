@@ -98,12 +98,13 @@ func numbered(line string) int {
 
 func plainOf(line string) string {
 	// invariant: a line Face is served as the words a reader reads, its
-	// marks dropped: a link keeps its words, code its text.
+	// marks dropped: a link keeps its words, code its text; a line of no
+	// words is served empty, so its block's line face shows its word.
 	var b strings.Builder
 	for _, r := range runs(line) {
 		b.WriteString(r.Text)
 	}
-	return b.String()
+	return strings.TrimSpace(b.String())
 }
 
 func runs(text string) []Run {

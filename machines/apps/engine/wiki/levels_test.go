@@ -254,11 +254,44 @@ func TestAProsesFirstSentenceEndsWhereItsTextEndsOne(t *testing.T) {
 	}
 }
 
+// invariant: a block whose line Face renders no words has no line, and its
+// line face shows its word, so the level that opens it to a line reads no
+// fewer words than the level before.
+func TestABlockWhoseLineSaysNothingShowsItsWordAndNoLevelReadsLess(t *testing.T) {
+	for _, c := range []struct{ name, source string }{
+		{"blank, the input FuzzServe found", "000000000\n\n<Term id=\"00000\" means=\" \"/>"},
+		{"blank under a heading", "# Home\n\nThe page.\n\n## A\n\n<Term id=\"seat\" means=\"   \" />\n"},
+		{"code of a space", "# Home\n\nThe page.\n\n## A\n\n<Term id=\"seat\" means=\"` `\" />\n"},
+	} {
+		t.Run(c.name, func(t *testing.T) {
+			corpus, err := wiki.Read(map[string][]byte{"wiki.yaml": []byte(tinySchema), "blueprint/home.md": []byte(c.source)})
+			if err != nil {
+				t.Fatal(err)
+			}
+			s, err := corpus.Serve("blueprint/home")
+			if err != nil {
+				t.Fatal(err)
+			}
+			for _, it := range everyItem(s) {
+				if it.Block != nil && it.Block.Line != "" {
+					t.Errorf("%s: line %q", it.Block.ID, it.Block.Line)
+				}
+			}
+			for i := 1; i < len(s.Reading); i++ {
+				if s.Reading[i].Words < s.Reading[i-1].Words {
+					t.Errorf("@%d: %+v after %+v", i, s.Reading[i], s.Reading[i-1])
+				}
+			}
+		})
+	}
+}
+
 func FuzzServe(f *testing.F) {
 	for _, source := range corpusSources(f) {
 		f.Add(source)
 	}
 	f.Add("# Home\n\nOne. Two: three e.g. four.\n\n## A\n\n<Term id=\"a\" means=\"b\" />\n")
+	f.Add("000000000\n\n<Term id=\"00000\" means=\" \"/>")
 	f.Fuzz(func(t *testing.T, source string) {
 		corpus, err := wiki.Read(map[string][]byte{"wiki.yaml": []byte(tinySchema), "blueprint/home.md": []byte(source)})
 		if err != nil {
