@@ -1,0 +1,32 @@
+description: 'an add over a book not trusted says the book starts again, and the next add does not'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'devices add laptop ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGmY0fN5lE8XqXhcG0OB1oCw0SYqC0f6M1bM1jR5e9wz --channels pipe'
+      exit: 0
+      stdout: |
+          ●	laptop may reach macbook-pro's VMs	SHA256:cT5hNh5Eo/0cBgMbx4JlmcPYDZoZXd37eJaUqyKQd2M, by pipe
+    - command: 'devices add desk ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBERERERERERERERERERERERERERERERERERERERERER --channels pipe >/dev/null'
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].stores.devices_generation = 9'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'devices add laptop ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGmY0fN5lE8XqXhcG0OB1oCw0SYqC0f6M1bM1jR5e9wz --channels pipe'
+      exit: 0
+      stdout: |
+          ●	laptop may reach macbook-pro's VMs	SHA256:cT5hNh5Eo/0cBgMbx4JlmcPYDZoZXd37eJaUqyKQd2M, by pipe
+          ◐	The device book starts again with laptop: add your other devices too
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out | {name, starts_again} else .error | {code} end'''
+      stdin: |
+          {"v":2,"id":"1","call":"devices.add","in":{"Name":"desk","Key":"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBERERERERERERERERERERERERERERERERERERERERER","Channels":["pipe"]}}
+      exit: 0
+      stdout: |
+          {"name":"desk","starts_again":null}
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].stores.devices_unreadable = true'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then .out | {name, starts_again} else .error | {code} end'''
+      stdin: |
+          {"v":2,"id":"1","call":"devices.add","in":{"Name":"desk","Key":"ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBERERERERERERERERERERERERERERERERERERERERER","Channels":["pipe"]}}
+      exit: 0
+      stdout: |
+          {"name":"desk","starts_again":true}

@@ -1,6 +1,6 @@
 {
   "$defs": {
-    "devices.Row": {
+    "devices.Added": {
       "additionalProperties": false,
       "properties": {
         "added": {
@@ -24,6 +24,9 @@
         },
         "name": {
           "type": "string"
+        },
+        "starts_again": {
+          "type": "boolean"
         }
       },
       "required": [
@@ -62,7 +65,7 @@
       "$ref": "#/$defs/devices.calls.AddIn"
     },
     "out": {
-      "$ref": "#/$defs/devices.Row"
+      "$ref": "#/$defs/devices.Added"
     }
   },
   "required": [

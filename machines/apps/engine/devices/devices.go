@@ -63,6 +63,14 @@ type Row struct {
 	Added       time.Time `json:"added"`
 }
 
+type Added struct {
+	Row
+	// value: the add started a new book, the one on disk trusted for
+	// nothing: whatever it held reaches nothing, and each other device is
+	// added again.
+	StartsAgain bool `json:"starts_again,omitempty"`
+}
+
 func RowOf(d Device) Row {
 	return Row{Name: d.Name, Key: d.Key, Fingerprint: Fingerprint(d.Key), Channels: d.Channels, Added: d.Added}
 }

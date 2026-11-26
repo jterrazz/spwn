@@ -41,11 +41,11 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 			return nil
 		},
 		Run: func(ctx context.Context, in *Input, io kit.IO) error {
-			row, err := call.Invoke(ctx, env.Calls, env.Target(), devicescalls.Add, devicescalls.AddIn{Name: in.Name, Key: in.Key, Channels: in.Channels}, nil)
+			added, err := call.Invoke(ctx, env.Calls, env.Target(), devicescalls.Add, devicescalls.AddIn{Name: in.Name, Key: in.Key, Channels: in.Channels}, nil)
 			if err != nil {
 				return err
 			}
-			return io.Page(pagedevices.Added(row, env.Target().Name, d.ThisMachine), row)
+			return io.Page(pagedevices.Added(added, env.Target().Name, d.ThisMachine), added)
 		},
 	}, env)
 }

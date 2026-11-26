@@ -84,9 +84,15 @@ func Page(l devices.Listing, thisMac page.Context) page.Page {
 	return page.Seal(page.Page{ID: command, Command: command, Context: thisMac, Sections: sections, Hints: hints})
 }
 
-func Added(r devices.Row, mac string, thisMac page.Context) page.Page {
-	row := page.Row{ID: r.Name, Label: r.Name + " may reach " + mac + "'s VMs", Mark: page.OK, Detail: page.Text(r.Fingerprint + ", by " + channelsOf(r))}
-	return pages.Outcome("devices add", thisMac, nil, []page.Row{row}, "device")
+func Added(a devices.Added, mac string, thisMac page.Context) page.Page {
+	// invariant: an add that started a new book says so, since the book
+	// before it reaches nothing any more: the other devices it held are
+	// added again, each from the device itself.
+	rows := []page.Row{{ID: a.Name, Label: a.Name + " may reach " + mac + "'s VMs", Mark: page.OK, Detail: page.Text(a.Fingerprint + ", by " + channelsOf(a.Row))}}
+	if a.StartsAgain {
+		rows = append(rows, page.Row{ID: "book", Label: "The device book starts again with " + a.Name + ": add your other devices too", Mark: page.Attention, Reason: page.Partial})
+	}
+	return pages.Outcome("devices add", thisMac, nil, rows, "device")
 }
 
 func Forgotten(name, mac string, thisMac page.Context) page.Page {

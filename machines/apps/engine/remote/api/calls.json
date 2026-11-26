@@ -229,7 +229,7 @@
         "devices.presence-refused"
       ],
       "in": "AddIn",
-      "out": "Row",
+      "out": "Added",
       "journal": true
     },
     {

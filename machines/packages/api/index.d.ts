@@ -958,6 +958,15 @@ export type CoreVerdictVerdict = {
     Tone: 'ok' | 'warn' | 'bad' | 'plain' | 'new';
 };
 
+export type DevicesAdded = {
+    added: string;
+    channels: string[] | null;
+    fingerprint: string;
+    key?: string;
+    name: string;
+    starts_again?: boolean;
+};
+
 export type DevicesCallsAddIn = {
     Channels?: string[];
     Key?: string;
@@ -3352,7 +3361,7 @@ export type BackgroundListOutput = BackgroundTask[] | null;
 export type BackgroundRemoveInput = BackgroundCallsRemoveIn;
 export type BackgroundRemoveOutput = BackgroundTask;
 export type DevicesAddInput = DevicesCallsAddIn;
-export type DevicesAddOutput = DevicesRow;
+export type DevicesAddOutput = DevicesAdded;
 export type DevicesForgetInput = DevicesCallsForgetIn;
 export type DevicesForgetOutput = DevicesCallsForgotten;
 export type DevicesListInput = Record<string, never>;
