@@ -307,9 +307,6 @@ func toolSkillEntries(tools []tool.Tool) []transpile.SkillEntry {
 	return out
 }
 
-// refusedToolSkills is one warning per file of a tool's skills that its
-// root refused because it is a link out of the tool's folder: the skill
-// is left out of the world, and said so.
 func refusedToolSkills(tools []tool.Tool) []string {
 	var out []string
 	for _, t := range tools {
