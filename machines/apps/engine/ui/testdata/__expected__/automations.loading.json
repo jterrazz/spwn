@@ -68,6 +68,30 @@
         },
         {
           "row": {
+            "id": "log",
+            "mark": "pending",
+            "label": "log",
+            "cells": [
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
             "id": "morning",
             "mark": "pending",
             "label": "morning",
@@ -94,7 +118,7 @@
       "counts": [
         {
           "mark": "pending",
-          "n": 2
+          "n": 3
         }
       ]
     }

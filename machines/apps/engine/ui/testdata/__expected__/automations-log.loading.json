@@ -1,0 +1,78 @@
+{
+  "schema": "station.page/v1",
+  "id": "automations-log",
+  "command": "automations log",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "loading",
+  "sections": [
+    {
+      "id": "runs",
+      "title": "Runs",
+      "columns": [
+        {
+          "key": "at",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "automation",
+          "label": "automation",
+          "kind": "text",
+          "keep": 70
+        },
+        {
+          "key": "outcome",
+          "label": "outcome",
+          "kind": "text",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "0",
+            "mark": "pending",
+            "label": "2026-05-01 06:00:00",
+            "cells": [
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "1",
+            "mark": "pending",
+            "label": "2026-05-02 06:00:00",
+            "cells": [
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "pending",
+          "n": 2
+        }
+      ]
+    }
+  ]
+}

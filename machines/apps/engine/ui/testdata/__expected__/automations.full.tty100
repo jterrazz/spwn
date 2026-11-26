@@ -1,4 +1,5 @@
 Automations
              agent    trigger         last fired           runs
   ● inbox    trinity  fs ./inbox      never                none
+  ◐ log      neo      cron 0 9 * * 1  never                none  its name is a command's: station…
   ● morning  neo      cron 0 6 * * *  2026-05-02 06:00:00  2, 1 failed

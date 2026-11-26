@@ -61,7 +61,7 @@ func row(a automations.Automation) page.Row {
 	r := page.Row{ID: label(a), Label: label(a), Mark: page.OK,
 		Cells: []page.Value{page.Text(a.Agent), page.Text(trigger(a.Trigger)), page.Text(lastFired(a)), page.Text(runs(a))}}
 	if automations.Reserved(a.Name) {
-		r.Mark = page.Attention
+		r.Mark, r.Reason = page.Attention, reasonOfAutomation(a)
 		r.Detail = page.Text(reservedSentence(a))
 	}
 	return r
@@ -98,16 +98,16 @@ func Log(all []automations.Run, thisMac page.Context) page.Page {
 		{Key: "outcome", Label: "outcome", Kind: page.KindText, Keep: 60},
 	}}
 	for i, run := range all {
-		mark, outcome := page.OK, "ok"
+		mark, outcome, reason := page.OK, "ok", reasonOfRun(run)
 		if !run.OK {
 			mark, outcome = page.Broken, "failed: "+oneLine(run.Error)
 		}
-		r := page.Row{ID: strconv.Itoa(i), Label: run.At.UTC().Format(time.DateTime), Mark: mark,
+		r := page.Row{ID: strconv.Itoa(i), Label: run.At.UTC().Format(time.DateTime), Mark: mark, Reason: reason,
 			Cells: []page.Value{page.Text(run.Qualified()), page.Text(outcome)}, Detail: page.Text(oneLine(run.Output))}
 		s.Items = append(s.Items, page.Item{Row: &r})
 	}
 	if len(all) == 0 {
-		s.Items = []page.Item{{Empty: &page.Empty{Text: "No run yet: each run of an automation is written to .spwn/runs.jsonl of the project."}}}
+		s.Items = []page.Item{{Empty: &page.Empty{Text: "No run yet: runs are written to .spwn/runs.jsonl of the project."}}}
 	}
 	return page.Seal(page.Page{ID: "automations-log", Command: "automations log", Context: thisMac, Sections: []page.Section{s}})
 }
@@ -130,16 +130,18 @@ type AutomationJSON struct {
 	LastFired *time.Time  `json:"last_fired"`
 	Fires     int         `json:"fires"`
 	Failed    int         `json:"failed"`
+	Reason    page.Reason `json:"reason,omitempty"`
 }
 
 type RunJSON struct {
-	Group      string     `json:"group"`
-	Automation string     `json:"automation"`
-	Scheduled  *time.Time `json:"scheduled"`
-	At         time.Time  `json:"at"`
-	OK         bool       `json:"ok"`
-	Error      string     `json:"error"`
-	Output     string     `json:"output"`
+	Group      string      `json:"group"`
+	Automation string      `json:"automation"`
+	Scheduled  *time.Time  `json:"scheduled"`
+	At         time.Time   `json:"at"`
+	OK         bool        `json:"ok"`
+	Error      string      `json:"error"`
+	Reason     page.Reason `json:"reason,omitempty"`
+	Output     string      `json:"output"`
 }
 
 type ListJSON struct {
@@ -167,7 +169,7 @@ func instant(t time.Time) *time.Time {
 
 func automationJSON(a automations.Automation) AutomationJSON {
 	return AutomationJSON{Group: a.Group, Name: a.Name, Agent: a.Agent, Trigger: TriggerJSON{Kind: a.Trigger.Kind, Spec: a.Trigger.Spec},
-		LastFired: instant(a.LastFired), Fires: a.Fires, Failed: a.Failed}
+		LastFired: instant(a.LastFired), Fires: a.Fires, Failed: a.Failed, Reason: reasonOfAutomation(a)}
 }
 
 func ListContract(schema string, all []automations.Automation) ListJSON {
@@ -185,7 +187,21 @@ func ShowContract(schema string, a automations.Automation) ShowJSON {
 func LogContract(schema string, all []automations.Run) LogJSON {
 	out := LogJSON{Schema: schema, Runs: make([]RunJSON, 0, len(all))}
 	for _, r := range all {
-		out.Runs = append(out.Runs, RunJSON{Group: r.Group, Automation: r.Name, Scheduled: instant(r.Scheduled), At: r.At.UTC(), OK: r.OK, Error: r.Error, Output: r.Output})
+		out.Runs = append(out.Runs, RunJSON{Group: r.Group, Automation: r.Name, Scheduled: instant(r.Scheduled), At: r.At.UTC(), OK: r.OK, Error: r.Error, Output: r.Output, Reason: reasonOfRun(r)})
 	}
 	return out
+}
+
+func reasonOfAutomation(a automations.Automation) page.Reason {
+	if automations.Reserved(a.Name) {
+		return page.Refused
+	}
+	return ""
+}
+
+func reasonOfRun(r automations.Run) page.Reason {
+	if !r.OK {
+		return page.Failing
+	}
+	return ""
 }

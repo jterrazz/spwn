@@ -69,6 +69,36 @@
         },
         {
           "row": {
+            "id": "log",
+            "mark": "attention",
+            "label": "log",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "neo"
+              },
+              {
+                "kind": "text",
+                "text": "cron 0 9 * * 1"
+              },
+              {
+                "kind": "text",
+                "text": "never"
+              },
+              {
+                "kind": "text",
+                "text": "none"
+              }
+            ],
+            "detail": {
+              "kind": "text",
+              "text": "its name is a command's: station automations log log reads its runs, and no detail can be asked for it"
+            },
+            "reason": "refused"
+          }
+        },
+        {
+          "row": {
             "id": "morning",
             "mark": "ok",
             "label": "morning",
@@ -97,6 +127,10 @@
         {
           "mark": "ok",
           "n": 2
+        },
+        {
+          "mark": "attention",
+          "n": 1
         }
       ]
     }

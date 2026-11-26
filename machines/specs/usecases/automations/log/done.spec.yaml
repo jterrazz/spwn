@@ -57,6 +57,7 @@ runs:
                 "at": "2026-05-02T06:00:00Z",
                 "ok": false,
                 "error": "no running world",
+                "reason": "failing",
                 "output": ""
               }
             ]

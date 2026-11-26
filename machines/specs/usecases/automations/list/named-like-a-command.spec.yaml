@@ -10,3 +10,33 @@ runs:
       stdout: |
           # Automations
           ◐	log	neo	cron 0 6 * * *	never	none	its name is a command's: station automations log log reads its runs, and no detail can be asked for it
+    - command: '--version >/dev/null; cd site && "$STATION" automations --json'
+      exit: 0
+      stdout: |
+          {
+            "schema": "station.automations.list/v1",
+            "generated_at": "{{iso8601}}",
+            "machine": {
+              "name": "macbook-pro",
+              "label": "This Mac",
+              "kind": "computer",
+              "on": null,
+              "this_mac": true
+            },
+            "findings": [],
+            "automations": [
+              {
+                "group": "",
+                "name": "log",
+                "agent": "neo",
+                "trigger": {
+                  "kind": "cron",
+                  "spec": "0 6 * * *"
+                },
+                "last_fired": null,
+                "fires": 0,
+                "failed": 0,
+                "reason": "refused"
+              }
+            ]
+          }

@@ -1,0 +1,41 @@
+{
+  "schema": "station.page/v1",
+  "id": "automations-log",
+  "command": "automations log",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "runs",
+      "title": "Runs",
+      "columns": [
+        {
+          "key": "at",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "automation",
+          "label": "automation",
+          "kind": "text",
+          "keep": 70
+        },
+        {
+          "key": "outcome",
+          "label": "outcome",
+          "kind": "text",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "empty": {
+            "text": "No run yet: runs are written to .spwn/runs.jsonl of the project."
+          }
+        }
+      ]
+    }
+  ]
+}
