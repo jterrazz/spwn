@@ -1,6 +1,6 @@
 import type { SettingsMatrix, SettingsRow } from '@jterrazz/station-api';
 
-import { Facts, Panel, Row, StatePill, Value } from '../../ui/index';
+import { Facts, Panel, Row, StateMark, Value } from '../../ui/index';
 import { countOf, wordOf } from '../../words/engine-words';
 import { kindChipWord, reversibleState } from '../../words/shown';
 import { needsOf } from './item-model';
@@ -39,7 +39,7 @@ function HowApplied({ row, go, routeOf }: ItemProps & { row: SettingsRow }) {
     };
     return (
         <Panel
-            action={undone ? <StatePill tone={undone.tone} word={undone.word} /> : undefined}
+            action={undone ? <StateMark tone={undone.tone} word={undone.word} /> : undefined}
             padded
             title="How it is applied"
         >

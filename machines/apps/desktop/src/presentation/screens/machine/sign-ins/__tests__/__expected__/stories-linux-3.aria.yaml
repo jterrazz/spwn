@@ -1,5 +1,7 @@
 - main:
-  - heading "linux-3 running" [level=2]
+  - heading "linux-3 running" [level=2]:
+    - text: linux-3
+    - img "running"
   - paragraph:
     - text: workspace · ephemeral · on
     - button "mac-mini"

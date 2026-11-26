@@ -5,7 +5,7 @@ import { SEPARATOR } from '../../../domain/separator';
 import { useGesture } from '../../dependencies/use-gesture';
 import { GestureButton, GestureRow } from '../../kit/gestures';
 import { Icon } from '../../ui/icon';
-import { StatePill } from '../../ui/index';
+import { StateMark } from '../../ui/index';
 import { newestState } from '../../words/shown';
 
 import styles from '../../features/disk/disk.module.css';
@@ -41,7 +41,7 @@ export function ImageLine({ image, mac, sentence }: ImageLineProps) {
             title={name}
             trail={
                 <span className={styles.trail}>
-                    {newest === null ? null : <StatePill {...newest} />}
+                    {newest === null ? null : <StateMark {...newest} />}
                     {image.Deletable ? (
                         <GestureButton
                             destroys

@@ -1,7 +1,7 @@
 import type { Unfit } from '../../../domain/fit';
 import { useReach, useUpdate, useWindowUpdate } from '../../dependencies/dependencies';
 import { WindowRelease } from '../../features/window-release/window-release';
-import { Button, StatePill } from '../../ui/index';
+import { Button, StateMark } from '../../ui/index';
 import {
     FIT_APP_UPDATE_WORD,
     FIT_LEAD_WORDS,
@@ -47,7 +47,7 @@ function Verdict({ fit, executable }: { fit: Unfit; executable: string | undefin
     return (
         <section aria-label={FIT_PANEL_WORD} className={styles.panel}>
             <span className={styles.pill}>
-                <StatePill {...fitState(fit)} />
+                <StateMark {...fitState(fit)} />
             </span>
             <Head title={FIT_REMEDY_WORDS[fit]}>{FIT_LEAD_WORDS[fit]}</Head>
             {fit === 'engine-older' ? <EngineOlder executable={executable} /> : <AppOlder />}

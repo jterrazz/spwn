@@ -9,7 +9,7 @@ import { GestureButton, GestureRow, HeldOutcomes } from '../../../kit/gestures';
 import { Unanswered, VerdictHead } from '../../../kit/readings';
 import { Skeleton, SkeletonPanel } from '../../../kit/skeleton';
 import type { Route } from '../../../navigation/route';
-import { Panel, Row, StatePill, Value, VerdictSkeleton } from '../../../ui/index';
+import { Panel, Row, StateMark, Value, VerdictSkeleton } from '../../../ui/index';
 import { Page } from '../../../ui/page';
 import { isDeclarable, isPortShared } from '../../../words/provisional';
 import { portReach, shareToWord } from '../../../words/shown';
@@ -30,7 +30,7 @@ function Answer({ port }: { port: PortsPort }) {
         return null;
     }
     return (
-        <StatePill tone={PORT_ANSWER_TONES[port.Answer]} word={PORT_ANSWER_WORDS[port.Answer]} />
+        <StateMark tone={PORT_ANSWER_TONES[port.Answer]} word={PORT_ANSWER_WORDS[port.Answer]} />
     );
 }
 
@@ -83,7 +83,7 @@ function DeclarableRow({ port, mac, target }: MacPortProps) {
             trail={
                 <span className={styles.trail}>
                     <Answer port={port} />
-                    <StatePill {...portReach(port)} />
+                    <StateMark {...portReach(port)} />
                     <GestureButton
                         gesture={declare}
                         label={`Declare it ${audience}`}
@@ -106,7 +106,7 @@ export function MacPortRow({ port, mac, target }: MacPortProps) {
             trail={
                 <span className={styles.trail}>
                     <Answer port={port} />
-                    <StatePill {...portReach(port)} />
+                    <StateMark {...portReach(port)} />
                 </span>
             }
         />

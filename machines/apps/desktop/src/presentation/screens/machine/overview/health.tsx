@@ -5,7 +5,7 @@ import { clock, duration, seconds } from '../../../../domain/format';
 import { SEPARATOR } from '../../../../domain/separator';
 import { between, shortDay } from '../../../../domain/when';
 import type { Route } from '../../../navigation/route';
-import { Chart, MissingMark, Panel, StatePill, Tile, Value } from '../../../ui/index';
+import { Chart, MissingMark, Panel, StateMark, Tile, Value } from '../../../ui/index';
 import type { Measured } from '../../../ui/index';
 import {
     dayOpensHistory,
@@ -52,7 +52,7 @@ export function Health({ vm }: { vm: MachinesVM }) {
         <Panel note={age === undefined ? '' : `checked ${age}`} padded title="Health">
             {vm.Health === undefined ? null : (
                 <div className={styles.healthHead}>
-                    <StatePill {...verdictShown(vm.Health)} />
+                    <StateMark {...verdictShown(vm.Health)} />
                     {vm.Health.Line === undefined || vm.Health.Line === '' ? null : (
                         <span className={styles.healthLine}>{vm.Health.Line}</span>
                     )}
@@ -60,7 +60,7 @@ export function Health({ vm }: { vm: MachinesVM }) {
             )}
             <div className={styles.steps}>
                 <Step label="Its state">
-                    <StatePill {...vmState(vm)} />
+                    <StateMark {...vmState(vm)} />
                 </Step>
                 <Step label="Its address">
                     {vm.IP === '' ? (
@@ -70,10 +70,10 @@ export function Health({ vm }: { vm: MachinesVM }) {
                     )}
                 </Step>
                 <Step label="SSH">
-                    <StatePill {...vmSsh(vm)} />
+                    <StateMark {...vmSsh(vm)} />
                 </Step>
                 <Step label="Its check">
-                    <StatePill {...vmCheck(vm)} />
+                    <StateMark {...vmCheck(vm)} />
                 </Step>
             </div>
         </Panel>

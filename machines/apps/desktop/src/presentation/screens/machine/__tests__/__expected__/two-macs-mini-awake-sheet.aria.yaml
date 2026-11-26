@@ -1,5 +1,7 @@
 - main:
-  - heading "mac-mini online" [level=2]
+  - heading "mac-mini online" [level=2]:
+    - text: mac-mini
+    - img "online"
   - paragraph: Engine running. Never sleeps.
   - button "Keep mac-mini awake": Awake…
   - dialog "Keep mac-mini awake":

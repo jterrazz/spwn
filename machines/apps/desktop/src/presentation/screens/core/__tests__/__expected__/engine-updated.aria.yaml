@@ -50,7 +50,7 @@
     - heading "macbook-pro" [level=2]
     - heading "This Mac runs the latest release." [level=1]
     - region "Update":
-      - text: updated
+      - img "updated"
       - heading "Updated." [level=1]
       - paragraph: The installer is done and the engine restarted. The head of this page is what it says now.
       - log "The installer's output": "Detecting the newest release... Version: v0.22.0 Downloading spwn_darwin_arm64.tar.gz... Downloading station-darwin-arm64... ✓ spwn v0.22.0 in /Users/you/.local/bin, also as spwn-agents ✓ station v0.22.0 in /Users/you/.local/bin, also as spwn-machines"

@@ -10,8 +10,8 @@ import type { Route } from '../../navigation/route';
 import type { Opening } from '../../navigation/window';
 import { Caption, Missing, Switch } from '../../ui/index';
 import { Page } from '../../ui/page';
-import { isCalm } from '../../ui/state-pill';
 import { wordOf } from '../../words/engine-words';
+import { UNFLAGGED_FILE_TONES } from '../../words/tones';
 import { Chapters } from './chapters';
 import { FileHead } from './file-head';
 import type { Identities, Shown } from './file-head';
@@ -42,7 +42,7 @@ function Tabs({
                         label={wordOf('MachinefileShelf', shelf).Word}
                         onChange={choose}
                         options={shelved.map((candidate) => ({
-                            flagged: isCalm(candidate.Verdict.Tone)
+                            flagged: UNFLAGGED_FILE_TONES.has(candidate.Verdict.Tone)
                                 ? undefined
                                 : candidate.Verdict.Sentence,
                             id: candidate.Name,

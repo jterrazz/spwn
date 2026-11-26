@@ -2,7 +2,7 @@ import type { MachinefileDiffering, MachinefileDrift } from '@jterrazz/station-a
 import { useState } from 'react';
 
 import { differencesOf, planFilesOf } from '../../../features/machinefile/model';
-import { AppIcon, Button, Panel, StatePill, Switch, Value } from '../../../ui/index';
+import { AppIcon, Button, Panel, StateMark, Switch, Value } from '../../../ui/index';
 import type { Identity } from '../../../ui/index';
 import type { PlanLine } from '../../../words/provisional';
 import { engineShown } from '../../../words/shown';
@@ -41,7 +41,7 @@ function DiffRow({
                 )}
             </div>
             <div className={styles.state}>
-                <StatePill {...engineShown('MachinefileCondition', Seen.Condition)} />
+                <StateMark {...engineShown('MachinefileCondition', Seen.Condition)} />
                 {Seen.Version === '' ? (
                     <span className={styles.muted}>{Seen.Detail}</span>
                 ) : (
@@ -52,7 +52,9 @@ function DiffRow({
                 {toFile ? (
                     <span className={styles.muted}>not given</span>
                 ) : (
-                    <StatePill dotted={false} {...engineShown('MachinefileAction', line.Action)} />
+                    <span className={styles.action}>
+                        {engineShown('MachinefileAction', line.Action).word}
+                    </span>
                 )}
             </div>
         </div>
@@ -68,7 +70,7 @@ function BlockRow({ differing }: { differing: MachinefileDiffering }) {
                 <Value look="raised">{differing.Block}</Value>
             </div>
             <div className={styles.state}>
-                <StatePill {...engineShown('MachinefileCondition', differing.Condition)} />
+                <StateMark {...engineShown('MachinefileCondition', differing.Condition)} />
             </div>
             <div className={styles.will} />
         </div>

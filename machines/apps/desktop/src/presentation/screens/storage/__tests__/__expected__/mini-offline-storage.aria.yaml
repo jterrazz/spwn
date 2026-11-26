@@ -20,7 +20,8 @@
       - paragraph: Data and settings are never freed here. Erasing an app's data is asked for by name.
     - region "Images":
       - heading "Images a machine built in advance; a new machine starts as a copy of it" [level=2]
-      - text: base-ubuntu 1 built 20 Oct · 12 GB · 2 machines made from it newest
+      - text: base-ubuntu 1 built 20 Oct · 12 GB · 2 machines made from it
+      - img "newest"
     - region "Machines":
       - heading "Machines what is inside a VM is on its own Storage tab" [level=2]
       - text: macbook-pro the Mac itself · No cache to free. What is left is yours or the system's. 0 B

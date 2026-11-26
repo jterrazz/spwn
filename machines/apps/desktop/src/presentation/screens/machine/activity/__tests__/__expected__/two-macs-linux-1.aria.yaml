@@ -1,5 +1,7 @@
 - main:
-  - heading "linux-1 running" [level=2]
+  - heading "linux-1 running" [level=2]:
+    - text: linux-1
+    - img "running"
   - paragraph:
     - text: workspace · ephemeral · on
     - button "macbook-pro"

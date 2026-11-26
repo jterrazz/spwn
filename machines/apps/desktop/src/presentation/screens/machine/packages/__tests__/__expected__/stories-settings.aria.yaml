@@ -1,5 +1,7 @@
 - main:
-  - heading "macbook-pro online" [level=2]
+  - heading "macbook-pro online" [level=2]:
+    - text: macbook-pro
+    - img "online"
   - paragraph: This Mac · Engine running. Awake until 18:00, lid closed.
   - button "Keep macbook-pro awake": Awake…
   - button "New machine on macbook-pro": New machine

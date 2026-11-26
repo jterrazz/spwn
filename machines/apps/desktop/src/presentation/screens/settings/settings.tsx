@@ -3,7 +3,7 @@ import { MenuBar } from '../../features/menu-bar/menu-bar';
 import { WindowRelease } from '../../features/window-release/window-release';
 import { useEngineLine } from '../../navigation/engine-line';
 import type { Route } from '../../navigation/route';
-import { Button, Panel, Row, StateDot } from '../../ui/index';
+import { Button, Panel, Row, StateMark } from '../../ui/index';
 
 import page from '../../ui/page.module.css';
 
@@ -21,7 +21,7 @@ function EnginePanel({ go }: { go: Go }) {
     return (
         <Panel title={SETTINGS_WORDS.engine}>
             <Row
-                lead={<StateDot {...line.dot} />}
+                lead={<StateMark said="name" {...line.dot} />}
                 leadSize="dot"
                 title={line.said}
                 trail={

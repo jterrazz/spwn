@@ -27,7 +27,7 @@
     - text: Engine not started
 - main:
   - region "Spwn on this Mac":
-    - text: installed
+    - img "installed"
     - heading "Spwn is installed. Start the engine next." [level=1]
     - paragraph: The engine runs your machines. The installer does not start it, so nothing runs yet.
     - paragraph: On this Mac

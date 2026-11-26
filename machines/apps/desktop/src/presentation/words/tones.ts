@@ -55,6 +55,9 @@ export const AWAKE_ON_TONE = 'ok' satisfies Tone;
 
 export const REVERSIBLE_TONE: Tone = 'ok';
 
+// value: a file's verdict that raises no flag on its tab: every machine matches it, or none follows it to compare.
+export const UNFLAGGED_FILE_TONES: ReadonlySet<Tone> = new Set(['ok', 'plain']);
+
 // outside: a colour of identity is design/'s type, which engine/ never imports: these are the colours the Disk
 // outside: bar's kinds take, and design/'s type checks each where a page hands it over.
 export type ShareColour =

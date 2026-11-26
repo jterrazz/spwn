@@ -1,5 +1,7 @@
 - main:
-  - heading "infra healthy" [level=2]
+  - heading "infra healthy" [level=2]:
+    - text: infra
+    - img "healthy"
   - paragraph:
     - text: server · always on · on
     - button "mac-mini"
@@ -18,7 +20,11 @@
   - text: of 80 GB Check 41ms passes · 3 s ago
   - region "Health":
     - heading "Health checked 3 s ago" [level=2]
-    - text: Healthy. Its state healthy Its address 192.168.64.5 SSH answers Its check passes
+    - img "Healthy."
+    - text: Its state
+    - img "healthy"
+    - text: Its address 192.168.64.5 SSH answers Its check
+    - img "passes"
   - region "Check latency":
     - heading "Check latency" [level=2]
     - text: 41 ms now

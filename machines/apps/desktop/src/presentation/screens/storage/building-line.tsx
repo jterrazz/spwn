@@ -2,7 +2,7 @@ import type { ImagesBuilding, ImagesReport } from '@jterrazz/station-api';
 
 import { sentence } from '../../../domain/format';
 import { Icon } from '../../ui/icon';
-import { Row, StateDot, StatePill } from '../../ui/index';
+import { Row, StateMark } from '../../ui/index';
 import { wordOf } from '../../words/engine-words';
 import { engineShown, newestState } from '../../words/shown';
 
@@ -16,7 +16,7 @@ function Walk({ building }: { building: ImagesBuilding }) {
         <span className={styles.walk}>
             {walk.map((step) => (
                 <span className={styles.step} key={step.Step}>
-                    <StateDot {...engineShown('ImagesBuildState', step.State)} />
+                    <StateMark said="name" {...engineShown('ImagesBuildState', step.State)} />
                     {step.Word}
                 </span>
             ))}
@@ -40,7 +40,7 @@ export function BuildingLine({ building, image }: BuildingLineProps) {
             trail={
                 newest === null ? undefined : (
                     <span className={styles.trail}>
-                        <StatePill {...newest} />
+                        <StateMark {...newest} />
                     </span>
                 )
             }

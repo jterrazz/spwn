@@ -4,10 +4,6 @@ import styles from './state-pill.module.css';
 
 const CALM: ReadonlySet<Tone> = new Set(['ok', 'plain']);
 
-export function isCalm(tone: Tone): boolean {
-    return CALM.has(tone);
-}
-
 export function StatePill({
     tone,
     word,
