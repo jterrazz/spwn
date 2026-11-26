@@ -9,27 +9,19 @@
       - option "agent-7f Running":
         - text: agent-7f
         - img "Running"
-      - option "api Stopped":
-        - text: api
-        - img "Stopped"
+      - option "api Stopped"
       - option "linux-1 Running" [selected]:
         - text: linux-1
         - img "Running"
-      - option "linux-2 Creating":
-        - text: linux-2
-        - img "Creating"
+      - option "linux-2 Creating"
       - option "mac-mini Up":
         - text: mac-mini
         - img "Up"
-      - option "infra Down":
-        - text: infra
-        - img "Down"
+      - option "infra Down"
       - option "linux-3 Running":
         - text: linux-3
         - img "Running"
       - option "review-bot Running":
         - text: review-bot
         - img "Running"
-      - option "macbook-air Asleep":
-        - text: macbook-air
-        - img "Asleep"
+      - option "macbook-air Asleep"

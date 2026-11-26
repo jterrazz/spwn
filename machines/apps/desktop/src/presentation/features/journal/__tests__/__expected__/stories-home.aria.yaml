@@ -18,23 +18,30 @@
   - region "Machines":
     - heading "Machines 7" [level=2]
     - group "Macs":
-      - button "macbook-pro · 4 machines · all running": macbook-pro 4 machines all running
+      - button "macbook-pro · 4 machines · all running":
+        - text: macbook-pro 4 machines
+        - img "all running"
       - button "mac-mini · 3 machines · 1 machine down": mac-mini 3 machines 1 machine down
       - button "macbook-air · asleep": macbook-air asleep
       - text: 1 machine down This Mac
     - button "macbook-pro"
+    - img "all running"
     - text: 22 %
     - img "Memory of macbook-pro"
     - text: 20 free
     - button "agent-7f"
-    - text: Write the changelog of v4 running 1 %
+    - text: Write the changelog of v4
+    - img "running"
+    - text: 1 %
     - img "Memory of agent-7f"
     - text: 5.3 / 8
     - button "api"
     - text: The API's staging copy stopped
     - img "Memory of api"
     - button "linux-1"
-    - text: Lot L2.5, settings from a machine file running 9 %
+    - text: Lot L2.5, settings from a machine file
+    - img "running"
+    - text: 9 %
     - img "Memory of linux-1"
     - text: 5.3 / 8
     - button "linux-2"
@@ -50,14 +57,19 @@
     - img "Memory of infra"
     - text: 16 / 24
     - button "linux-3"
-    - text: Refresh the auth token running 17 %
+    - text: Refresh the auth token
+    - img "running"
+    - text: 17 %
     - img "Memory of linux-3"
     - text: 5.3 / 8
     - button "review-bot"
-    - text: Review every pull request of studio-station running 0.9 %
+    - text: Review every pull request of studio-station
+    - img "running"
+    - text: 0.9 %
     - img "Memory of review-bot"
     - text: 2.7 / 4
     - button "macbook-air"
+    - text: asleep
     - img "Memory of macbook-air"
     - text: 20 free
   - region "Last night":

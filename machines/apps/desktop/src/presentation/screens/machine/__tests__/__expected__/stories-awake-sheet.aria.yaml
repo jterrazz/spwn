@@ -43,9 +43,13 @@
     - text: 4 macOS 8 agent-7f, 5 used 8 linux-1, 5 used 8 linux-2 20 free
   - region "Its machines":
     - heading "Its machines" [level=2]
-    - button "agent-7f Write the changelog of v4 · by studio-os-43 running · up 2 h"
+    - button "agent-7f Write the changelog of v4 · by studio-os-43 running · up 2 h":
+      - text: agent-7f Write the changelog of v4 · by studio-os-43
+      - img "running · up 2 h"
     - button "api The API's staging copy · by you stopped"
-    - button "linux-1 Lot L2.5, settings from a machine file · by studio-os-fe running · up 2 h"
+    - button "linux-1 Lot L2.5, settings from a machine file · by studio-os-fe running · up 2 h":
+      - text: linux-1 Lot L2.5, settings from a machine file · by studio-os-fe
+      - img "running · up 2 h"
     - 'button "linux-2 Lot L3, the Machines page · by studio-os-fe Creating: image 1 of 5"'
   - region "Packages":
     - heading "Packages" [level=2]

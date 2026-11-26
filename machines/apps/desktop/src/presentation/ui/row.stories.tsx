@@ -27,21 +27,21 @@ export const ROW_STORIES: readonly Story<RowProps>[] = [
         },
     },
     {
-        name: 'columns: kind, value, a quiet state',
+        name: 'columns: kind, value, a calm state',
         props: {
             kind: 'manager',
-            sentence: 'A calm state is a quiet word',
+            sentence: 'A calm state is its mark alone',
             state: { tone: 'ok', word: 'Present' },
             title: 'mise',
             value: <Value>2025.11.3</Value>,
         },
     },
     {
-        name: 'a calm state as a pill',
+        name: 'a state at rest says its word',
         props: {
             sentence: 'what is installed, and its settings',
             size: 'slim',
-            state: { calm: 'pill', tone: 'ok', word: 'Matches' },
+            state: { tone: 'plain', word: 'Stopped' },
             title: 'Packages',
         },
     },

@@ -104,27 +104,10 @@
     text-overflow: ellipsis;
 }
 .state {
-    font-size: var(--text-meta);
     line-height: 17px;
     display: flex;
     align-items: center;
-    gap: 8px;
-    white-space: nowrap;
-}
-.ok {
-    color: var(--t2);
-}
-.plain {
-    color: var(--t3);
-}
-.warn {
-    color: var(--you);
-}
-.bad {
-    color: var(--bad);
-}
-.new {
-    color: var(--busy);
+    min-width: 0;
 }
 .figure {
     font-family: var(--font-mono);

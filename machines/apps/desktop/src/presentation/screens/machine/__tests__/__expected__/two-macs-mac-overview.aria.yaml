@@ -34,7 +34,11 @@
   - region "Its machines":
     - heading "Its machines" [level=2]
     - button "api by you stopped"
-    - button "linux-1 by you running"
+    - button "linux-1 by you running":
+      - text: linux-1 by you
+      - img "running"
   - region "Packages":
     - heading "Packages" [level=2]
-    - button "Follows macbook-pro its apps, settings and the values you set are read in Machine files Matches macbook-pro."
+    - button "Follows macbook-pro its apps, settings and the values you set are read in Machine files Matches macbook-pro.":
+      - text: Follows macbook-pro its apps, settings and the values you set are read in Machine files
+      - img "Matches macbook-pro."

@@ -40,7 +40,9 @@
   - region "Its machines":
     - heading "Its machines" [level=2]
     - button "api by you stopped"
-    - button "linux-1 by you running"
+    - button "linux-1 by you running":
+      - text: linux-1 by you
+      - img "running"
   - region "Packages":
     - heading "Packages" [level=2]
     - text: not found no Machinefile named macbook-pro.

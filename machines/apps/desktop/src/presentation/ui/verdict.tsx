@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 
 import type { Tone } from '../../domain/tone';
 import { Bone } from './bone';
-import { StateDot } from './state-dot';
+import { StateMark } from './state-mark';
 
 import styles from './verdict.module.css';
 
@@ -21,7 +21,7 @@ export function Verdict({ title, line, tone, word, size, action }: VerdictProps)
             <h1 className={styles.title}>{title}</h1>
             {line === '' || line === undefined || line === null ? null : (
                 <p className={styles.line}>
-                    <StateDot tone={tone} word={word} />
+                    <StateMark said="name" tone={tone} word={word} />
                     <span>{line}</span>
                 </p>
             )}

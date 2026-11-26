@@ -5,7 +5,7 @@ import type { Tone } from '../../domain/tone';
 import { moved, moveOfKey } from './focus';
 import { Icon } from './icon';
 import { useMovedPointer } from './moved-pointer';
-import { StateDot } from './state-dot';
+import { StateMark } from './state-mark';
 
 import styles from './popover.module.css';
 
@@ -90,12 +90,9 @@ function Option({ row, id, active, onPick, onHover }: OptionProps) {
                     </span>
                 )}
             </span>
-            {row.state && row.state.tone !== 'ok' ? (
-                <span aria-hidden="true" className={styles.word}>
-                    {row.state.word}
-                </span>
+            {row.state ? (
+                <StateMark said="before" tone={row.state.tone} word={row.state.word} />
             ) : null}
-            {row.state ? <StateDot tone={row.state.tone} word={row.state.word} /> : null}
         </div>
     );
 }

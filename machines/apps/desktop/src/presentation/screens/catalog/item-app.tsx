@@ -2,7 +2,7 @@ import type { AppsReport, SettingsRow } from '@jterrazz/station-api';
 
 import { sentence } from '../../../domain/format';
 import { useRead } from '../../dependencies/dependencies';
-import { AppIcon, Button, Facts, MissingMark, Panel, Row, StatePill, Value } from '../../ui/index';
+import { AppIcon, Button, Facts, MissingMark, Panel, Row, StateMark, Value } from '../../ui/index';
 import { countOf, detailOf, wordOf } from '../../words/engine-words';
 import type { PlanLine } from '../../words/provisional';
 import { appUpdate, kindChipWord, settingState } from '../../words/shown';
@@ -71,11 +71,7 @@ function Version({ report, line }: { report: AppsReport; line: PlanLine | undefi
     const rule = line?.Step.Rule ?? '';
     const here =
         report.Version === '' ? (
-            <StatePill
-                quiet
-                tone={APP_STATE_TONES[report.State]}
-                word={APP_STATE_WORDS[report.State]}
-            />
+            <StateMark tone={APP_STATE_TONES[report.State]} word={APP_STATE_WORDS[report.State]} />
         ) : (
             <Value look="raised">{report.Version}</Value>
         );
@@ -89,7 +85,7 @@ function Version({ report, line }: { report: AppsReport; line: PlanLine | undefi
                     {
                         label: 'Newest',
                         value: update ? (
-                            <StatePill
+                            <StateMark
                                 tone={update.tone}
                                 word={waiting === '' ? update.word : waiting}
                             />
@@ -128,11 +124,7 @@ function ComesWith({
                             }}
                             sentence={row?.Package.Description}
                             size="slim"
-                            state={
-                                row === undefined
-                                    ? null
-                                    : { ...settingState(row.State), calm: 'pill' }
-                            }
+                            state={row === undefined ? null : settingState(row.State)}
                             tag={kindChipWord('setting')}
                             tagLook="type"
                             title={name}

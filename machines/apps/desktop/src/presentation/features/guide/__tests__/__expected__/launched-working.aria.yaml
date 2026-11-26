@@ -27,10 +27,16 @@
   - region "Machines":
     - heading "Machines 4" [level=2]
     - group "Macs":
-      - button "macbook-pro · 3 machines · all running": macbook-pro 3 machines all running
-      - button "mac-mini · 1 machine · all running": mac-mini 1 machine all running
-      - text: all running This Mac
+      - button "macbook-pro · 3 machines · all running":
+        - text: macbook-pro 3 machines
+        - img "all running"
+      - button "mac-mini · 1 machine · all running":
+        - text: mac-mini 1 machine
+        - img "all running"
+      - img "all running"
+      - text: This Mac
     - button "macbook-pro"
+    - img "all running"
     - text: 34 %
     - img "Memory of macbook-pro"
     - text: 0 free
@@ -38,7 +44,7 @@
     - text: stopped
     - img "Memory of api"
     - button "linux-1"
-    - text: running
+    - img "running"
     - img "Memory of linux-1"
     - text: of 8
     - button "linux-2"
@@ -46,11 +52,12 @@
     - img "Memory of linux-2"
     - text: of 4
     - button "mac-mini"
+    - img "all running"
     - text: 21 %
     - img "Memory of mac-mini"
     - text: 36 free
     - button "infra"
-    - text: healthy
+    - img "healthy"
     - img "Memory of infra"
     - text: of 24
     - button "Add a Mac"

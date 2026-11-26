@@ -15,4 +15,6 @@
   - heading "Signed in to 1 of 5 programs." [level=1]
   - region "Sign-ins":
     - heading "Sign-ins 5" [level=2]
-    - text: gh you@example.com · from the password GitHub token signed in Sign in from mac-mini npm signed out Sign in from mac-mini claude signed out Sign in from mac-mini wrangler signed out Sign in from mac-mini codex signed out Sign in from mac-mini
+    - text: gh you@example.com · from the password GitHub token
+    - img "signed in"
+    - text: Sign in from mac-mini npm signed out Sign in from mac-mini claude signed out Sign in from mac-mini wrangler signed out Sign in from mac-mini codex signed out Sign in from mac-mini

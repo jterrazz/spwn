@@ -31,9 +31,7 @@
     - button "macbook-pro online":
       - text: macbook-pro
       - img "online"
-    - button "api stopped":
-      - text: api
-      - img "stopped"
+    - button "api stopped"
     - button "linux-1 running":
       - text: linux-1
       - img "running"

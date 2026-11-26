@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import type { Tone } from '../../domain/tone';
 import { Icon } from './icon';
 import type { IconName } from './icon';
-import { StateDot } from './state-dot';
+import { StateMark } from './state-mark';
 
 import styles from './nav-item.module.css';
 
@@ -45,12 +45,7 @@ export function NavItem({
                     {count.value}
                 </span>
             ) : null}
-            {state && state.tone !== 'ok' ? (
-                <span aria-hidden="true" className={styles.word}>
-                    {state.word}
-                </span>
-            ) : null}
-            {state ? <StateDot tone={state.tone} word={state.word} /> : null}
+            {state ? <StateMark said="before" tone={state.tone} word={state.word} /> : null}
         </button>
     );
 }

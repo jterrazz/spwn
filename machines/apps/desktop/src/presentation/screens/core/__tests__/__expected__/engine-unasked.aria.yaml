@@ -23,12 +23,8 @@
   - group "Machines":
     - text: Machines
     - button "macbook-pro's machines" [expanded]
-    - button "macbook-pro engine stopped":
-      - text: macbook-pro
-      - img "engine stopped"
-    - button "api stopped":
-      - text: api
-      - img "stopped"
+    - button "macbook-pro engine stopped"
+    - button "api stopped"
     - button "linux-1 running":
       - text: linux-1
       - img "running"
@@ -61,4 +57,5 @@
     - heading "mac-mini" [level=2]
     - region "Engine":
       - heading "Engine" [level=2]
-      - text: Engine dev running
+      - text: Engine dev
+      - img "running"

@@ -21,22 +21,15 @@
     border-radius: var(--radius-control);
     padding: var(--space-4) 9px;
 }
-.toned {
-    --tone: var(--t2);
-    color: var(--tone);
-    background: color-mix(in srgb, var(--tone) var(--tone-fill), transparent);
+.value[data-tone='warn'] {
+    color: var(--you);
 }
-.toned[data-tone='warn'] {
-    --tone: var(--you);
+.value[data-tone='bad'] {
+    color: var(--bad);
 }
-.toned[data-tone='bad'] {
-    --tone: var(--bad);
-}
-.toned[data-tone='ok'] {
-    --tone: var(--ok);
-}
-.toned[data-tone='new'] {
-    --tone: var(--busy);
+.mark {
+    display: inline-flex;
+    margin-right: var(--space-8);
 }
 .square {
     width: 7px;

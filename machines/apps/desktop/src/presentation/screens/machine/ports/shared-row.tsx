@@ -4,7 +4,7 @@ import type { Gesture } from '../../../dependencies/use-gesture';
 import { GestureButton, GestureRow } from '../../../kit/gestures';
 import { Openable, shareAddressOf } from '../../../kit/openable';
 import { Switch, Value } from '../../../ui/index';
-import { isCalm } from '../../../ui/state-pill';
+import { isCalm } from '../../../ui/state-mark';
 import { shareToWord } from '../../../words/shown';
 import { SHARE_STATE_TONES } from '../../../words/tones';
 import { SHARE_REACH_GESTURE_WORDS, SHARE_STATE_WORDS } from '../../../words/words';
@@ -109,7 +109,6 @@ export function SharedRow({ share, target, onThisMac, compact = false }: SharedR
         lead: <Value look="raised">{`:${share.guest_port}`}</Value>,
         leadSize: 'value',
         state: {
-            calm: 'unsaid',
             tone: SHARE_STATE_TONES[share.state],
             word: SHARE_STATE_WORDS[share.state],
         },

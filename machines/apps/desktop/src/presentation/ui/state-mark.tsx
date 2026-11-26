@@ -17,6 +17,10 @@ const MARKS: Readonly<Record<Tone, Mark>> = {
 // invariant: the one list of calm tones: a calm state draws no word, its mark carries the word as its name.
 const CALM: ReadonlySet<Tone> = new Set(['ok']);
 
+export function isCalm(tone: Tone): boolean {
+    return CALM.has(tone);
+}
+
 // value: where the word is said: `after` the mark or `before` it, unless the state is calm; `name` only as the
 // value: mark's name, where the place already says the state; `beside` by the sentence the caller draws next to it.
 export type StateMarkProps =
@@ -32,7 +36,7 @@ export function StateMark(props: StateMarkProps) {
     if (word.trim() === '') {
         throw new Error('A state mark carries its word: a colour alone is no state.');
     }
-    if (said === 'name' || CALM.has(props.tone)) {
+    if (said === 'name' || isCalm(props.tone)) {
         return (
             <span
                 aria-label={word}

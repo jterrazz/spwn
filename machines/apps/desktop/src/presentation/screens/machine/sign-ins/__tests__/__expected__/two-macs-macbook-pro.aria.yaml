@@ -12,12 +12,15 @@
   - heading "Signed in to 3 of 5 programs." [level=1]
   - region "Sign-ins":
     - heading "Sign-ins 5" [level=2]
-    - text: gh you · repo · signed in by itself signed in
+    - text: gh you · repo · signed in by itself
+    - img "signed in"
     - button "Sign out gh": Sign out
     - text: npm you · signed in by itself · The token is refused by registry.npmjs.org needs signing in again
     - button "Sign in again npm": Sign in again
-    - text: claude you@example.com · Max plan · signed in by itself signed in
+    - text: claude you@example.com · Max plan · signed in by itself
+    - img "signed in"
     - button "Sign out claude": Sign out
-    - text: wrangler you@example.com · signed in by itself signed in
+    - text: wrangler you@example.com · signed in by itself
+    - img "signed in"
     - button "Sign out wrangler": Sign out
     - text: codex signed out Sign it in with its own login in a terminal

@@ -23,19 +23,13 @@
     - button "macbook-pro online":
       - text: macbook-pro
       - img "online"
-    - button "api stopped":
-      - text: api
-      - img "stopped"
+    - button "api stopped"
     - button "linux-1 running":
       - text: linux-1
       - img "running"
     - button "mac-mini's machines" [expanded]
-    - button "mac-mini not seen":
-      - text: mac-mini
-      - img "not seen"
-    - button "infra not seen":
-      - text: infra
-      - img "not seen"
+    - button "mac-mini not seen"
+    - button "infra not seen"
   - group "Library":
     - text: Library
     - button "Apps 9"

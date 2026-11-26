@@ -28,7 +28,11 @@ type Board = {
 
 function cellsOf(opener: Element): string[] {
     const line = opener.parentElement?.parentElement;
-    return [...(line?.children ?? [])].map((cell) => cell.textContent);
+    return [...(line?.children ?? [])].map(
+        (cell) =>
+            cell.textContent ||
+            (cell.querySelector('[role="img"][data-mark]')?.getAttribute('aria-label') ?? ''),
+    );
 }
 
 function board(): Board {

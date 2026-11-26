@@ -1,7 +1,7 @@
 import type { MouseEvent, ReactNode } from 'react';
 
 import type { Tone } from '../../domain/tone';
-import { isCalm, StatePill } from './state-pill';
+import { StateMark } from './state-mark';
 import { TypeTag } from './type-tag';
 import { Value } from './value';
 
@@ -9,10 +9,7 @@ import styles from './row.module.css';
 
 export type RowTemplate = 'catalog' | 'flow' | 'meters' | 'passwords';
 
-// value: `calm: 'unsaid'` draws no word for a calm state, where the panel's title already says it ("Shared");
-// value: `calm: 'pill'` draws it as a pill of its own tone, where the mockup lists calm and deviating rows alike.
-type Calm = 'pill' | 'unsaid' | 'word';
-type RowState = { tone: Tone; word: string; calm?: Calm };
+type RowState = { tone: Tone; word: string };
 
 // value: a column given `null` is kept empty in this row, so a list whose rows differ still aligns; a column
 // value: left `undefined` is not a column of this list at all. A value given as a string is plain text with
@@ -108,22 +105,13 @@ function classesOf(columns: Columns, size: 'regular' | 'slim', open: boolean): s
     ].join(' ');
 }
 
-function StateShown({ state }: { state: RowState }) {
-    const calm = isCalm(state.tone);
-    if (calm && state.calm === 'unsaid') {
-        return null;
-    }
-    const pill = calm && state.calm === 'pill';
-    return <StatePill quiet={!pill} tone={state.tone} word={state.word} />;
-}
-
 function StateCell({ state, at }: { state: null | RowState | undefined; at: 'end' | 'start' }) {
     if (state === undefined) {
         return null;
     }
     return (
         <div className={`${styles.state} ${at === 'end' ? styles.atEnd : ''}`}>
-            {state === null ? null : <StateShown state={state} />}
+            {state === null ? null : <StateMark tone={state.tone} word={state.word} />}
         </div>
     );
 }
