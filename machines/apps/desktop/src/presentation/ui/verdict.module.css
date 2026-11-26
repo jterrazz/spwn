@@ -1,5 +1,5 @@
 .verdict {
-    padding: var(--space-16) var(--space-4);
+    padding: var(--space-16) 0;
 }
 .title {
     margin: 0;
