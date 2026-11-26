@@ -3,9 +3,16 @@
 package wire
 
 import (
+	"bufio"
 	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
 	"io"
+	"net"
 	"net/netip"
+	"strconv"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -16,7 +23,9 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/engine"
 	"github.com/jterrazz/studio-station/apps/engine/engine/process"
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
+	"github.com/jterrazz/studio-station/apps/engine/platform/local"
 	"github.com/jterrazz/studio-station/apps/engine/ports"
+	"github.com/jterrazz/studio-station/apps/engine/remote/api"
 	"github.com/jterrazz/studio-station/apps/engine/world"
 )
 
@@ -341,6 +350,64 @@ func TestWorldMacFirstCallersServeAFarMacOnce(t *testing.T) {
 	wg.Wait()
 	if n := built.Load(); n != 1 {
 		t.Fatalf("a far Mac was built %d times by concurrent first callers, want 1", n)
+	}
+}
+
+func askAsGuest(conn net.Conn, claimed string, asks int) ([]string, error) {
+	lines := bufio.NewScanner(conn)
+	var said []string
+	for i := range asks {
+		in, _ := json.Marshal(engine.ReserveIn{VM: claimed, GuestPort: 3000})
+		frame, _ := json.Marshal(api.Frame{V: api.Version, ID: strconv.Itoa(i), Call: engine.CallReserve, In: in})
+		if _, err := conn.Write(append(frame, '\n')); err != nil {
+			return said, err
+		}
+		if !lines.Scan() {
+			return said, fmt.Errorf("ask %d was never answered: %w", i, lines.Err())
+		}
+		var got api.Frame
+		if err := json.Unmarshal(lines.Bytes(), &got); err != nil || got.Error == nil {
+			return said, fmt.Errorf("ask %d was answered %s, want its refusal", i, lines.Bytes())
+		}
+		said = append(said, got.Error.Message)
+	}
+	return said, nil
+}
+
+func TestWorldMacGuestSocketsAnswerEachConnectionAsItsOwnGuest(t *testing.T) {
+	guests := []string{"linux-1", "linux-22", "workspace-333", "w"}
+	const asks = 3
+	closed := func(context.Context, string) (*catalog.PortRights, string, error) {
+		return nil, "", errors.New("closed")
+	}
+	for range 200 {
+		d := process.New(quietMac{}, nil, nil, quietMachines{}, quietTailnet{}, process.Stores{Ports: quietPolicy{}, Reservations: quietReservations{}}, process.Options{ThisMachine: catalog.Mac, State: "/state", Rights: closed})
+		serve := machine{sys: local.System{Clock: quietMac{}}}.engineServer(d, nil, nil)
+		barrier := make(chan struct{})
+		said := make([][]string, len(guests))
+		errs := make([]error, len(guests))
+		var wg sync.WaitGroup
+		for i, guest := range guests {
+			wg.Go(func() {
+				near, far := net.Pipe()
+				defer func() { _ = near.Close() }()
+				<-barrier
+				go serve(context.Background(), far, guest)
+				said[i], errs[i] = askAsGuest(near, guests[(i+1)%len(guests)], asks)
+			})
+		}
+		close(barrier)
+		wg.Wait()
+		for i, guest := range guests {
+			if errs[i] != nil {
+				t.Fatalf("the guest socket of %s: %v", guest, errs[i])
+			}
+			for _, message := range said[i] {
+				if !strings.Contains(message, "rights of "+guest+" (") {
+					t.Fatalf("a call on the guest socket of %s was judged as another VM's: %q", guest, message)
+				}
+			}
+		}
 	}
 }
 
