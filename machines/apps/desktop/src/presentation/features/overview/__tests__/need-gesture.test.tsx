@@ -3,8 +3,17 @@ import { describe, expect, test } from 'vitest';
 
 import { pageOver } from '../../../../composition/__tests__/page-over';
 import { recordingsOf } from '../../../../infrastructure/outbound/engine-replay/recordings';
-import type { Recording } from '../../../../infrastructure/outbound/engine-replay/replay';
 import { NO_OPENER } from '../../../../infrastructure/outbound/opener-tauri/tauri-opener';
+import {
+    DELETE,
+    FIX_LINE,
+    PANE,
+    PATH_ONLY,
+    RESTART,
+    TRY_AGAIN,
+    UPGRADE,
+    withNeeds,
+} from './need-gesture.fixtures';
 
 const recordingFor = await recordingsOf('engine-stopped', 'machinefile-differs', 'two-macs');
 
@@ -16,113 +25,6 @@ const needs = region('Needs you');
 const waiting = region('Upkeep');
 
 const doneHere = region('Done here');
-
-const RESTART = {
-    Args: { Name: 'infra' },
-    Broken: true,
-    Call: 'machines.restart',
-    Command: '',
-    Confirm: '',
-    Machine: 'infra',
-    Mark: 'down',
-    Noun: 'Overview',
-    On: 'mac-mini',
-    Path: '',
-    Section: 'overview',
-    Severity: 'broken',
-    Subject: 'infra',
-    Text: 'infra check fails',
-    Upkeep: 'needs-you',
-    Verb: 'restart',
-};
-
-const TRY_AGAIN = {
-    Args: { VM: 'api' },
-    Broken: true,
-    Call: 'machines.start',
-    Command: 'station machines start api',
-    Confirm: '',
-    Machine: 'api',
-    Mark: 'down',
-    Noun: 'Overview',
-    On: 'macbook-pro',
-    Path: '',
-    Section: 'overview',
-    Severity: 'broken',
-    Subject: 'api',
-    Text: 'api was not created: it failed at boot',
-    Upkeep: 'needs-you',
-    Verb: 'try-again',
-};
-
-const DELETE = {
-    ...TRY_AGAIN,
-    Args: { VM: 'api' },
-    Call: 'machines.delete',
-    Command: 'station machines delete api',
-    Confirm: 'api',
-    Text: 'api was not created: it failed at SSH',
-    Verb: 'delete',
-};
-
-const UPGRADE = {
-    ...TRY_AGAIN,
-    Machine: 'macbook-pro',
-    Subject: 'macbook-pro',
-    Mark: 'needs-you',
-    Args: { Machinefile: 'macbook-pro' },
-    Call: 'machinefile.upgrade',
-    Command: 'station machinefile update',
-    Noun: 'Apps',
-    Section: 'apps',
-    Text: "the night's upgrade of macbook-pro failed: it stopped",
-    Verb: 'upgrade',
-};
-
-const PATH_ONLY = {
-    Args: null,
-    Broken: false,
-    Call: '',
-    Command: '',
-    Confirm: '',
-    Machine: 'macbook-pro',
-    Mark: 'needs-you',
-    Noun: 'Settings',
-    On: 'macbook-pro',
-    Path: 'System Settings > Network > Firewall',
-    Section: 'settings',
-    Severity: 'needs-a-look',
-    Subject: 'firewall',
-    Text: 'Firewall: off',
-    Upkeep: 'needs-you',
-    Verb: 'fix',
-};
-
-function recordOf(value: unknown): Record<string, unknown> | undefined {
-    return typeof value === 'object' && value !== null
-        ? Object.fromEntries(Object.entries(value))
-        : undefined;
-}
-
-function needed(answer: unknown, list: readonly object[]): unknown {
-    const reply = recordOf(answer);
-    const out = recordOf(reply?.out);
-    const summary = recordOf(out?.Summary);
-    return reply && out && summary?.Pending === false
-        ? { ...reply, out: { ...out, Summary: { ...summary, Needs: list } } }
-        : answer;
-}
-
-function withNeeds(recording: Recording, list: readonly object[]): Recording {
-    return {
-        ...recording,
-        exchanges: recording.exchanges.map((exchange) =>
-            exchange.request.watch === 'overview.read' && exchange.request.target === undefined
-                ? { ...exchange, answers: exchange.answers.map((one) => needed(one, list)) }
-                : exchange,
-        ),
-    };
-}
 
 function brightNames(): string[] {
     return [...document.querySelectorAll('button')]
@@ -297,6 +199,50 @@ describe('NeedLine', () => {
                 // Then - the path is read as a quiet line, and nothing stands for a verb
                 await visitor.see(within(needs, content('System Settings > Network > Firewall')));
                 await visitor.gone(within(needs, content('Fix')));
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
+
+    test('a need whose fix is a pane of This Mac draws the button that opens it, and no command', async () => {
+        // Given - the Inbox over two-macs, its one need This Mac's firewall, with the pane the engine sent
+        const recording = withNeeds(recordingFor('two-macs'), [PANE]);
+        const result = await component.render(
+            pageOver(recording, { page: 'inbox' }),
+            async (visitor) => {
+                // Then - Open Firewall settings stands for the verb, and nothing copies a command
+                await visitor.see(within(needs, button('Open Firewall settings')));
+                await visitor.gone(within(needs, button('Copy the command')));
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
+
+    test('a pane of another Mac is never drawn as a button here', async () => {
+        // Given - the Inbox over two-macs, a firewall need of mac-mini that sends its pane
+        const recording = withNeeds(recordingFor('two-macs'), [
+            { ...PANE, Machine: 'mac-mini', On: 'mac-mini' },
+        ]);
+        const result = await component.render(
+            pageOver(recording, { page: 'inbox' }),
+            async (visitor) => {
+                // Then - the need is listed with no button to open a pane on this Mac
+                await visitor.see(within(needs, content('Firewall: off')));
+                await visitor.gone(within(needs, button('Open Firewall settings')));
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
+
+    test('a line the owner runs is a button that fills it into Terminal, never shown', async () => {
+        // Given - the Inbox over two-macs, its one need a root task whose removal the owner runs
+        const recording = withNeeds(recordingFor('two-macs'), [FIX_LINE]);
+        const result = await component.render(
+            pageOver(recording, { page: 'inbox' }),
+            async (visitor) => {
+                // Then - Run in Terminal stands for the verb, the line itself is not on the page
+                await visitor.see(within(needs, button('Run in Terminal')));
+                await visitor.gone(within(needs, content('sudo launchctl', { exact: false })));
             },
         );
         expect(result.errors.text).toBe('');

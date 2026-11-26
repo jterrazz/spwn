@@ -214,6 +214,9 @@
         "Detail": {
           "type": "string"
         },
+        "InTerminal": {
+          "type": "boolean"
+        },
         "Machine": {
           "type": "string"
         },
@@ -230,7 +233,13 @@
         "Noun": {
           "type": "string"
         },
+        "Object": {
+          "type": "string"
+        },
         "On": {
+          "type": "string"
+        },
+        "Pane": {
           "type": "string"
         },
         "Path": {
@@ -285,6 +294,8 @@
             "wake",
             "move",
             "start-engine",
+            "open-settings",
+            "in-terminal",
             "fix"
           ],
           "type": "string"
@@ -297,10 +308,13 @@
         "Command",
         "Confirm",
         "Detail",
+        "InTerminal",
         "Machine",
         "Mark",
         "Noun",
+        "Object",
         "On",
+        "Pane",
         "Path",
         "Section",
         "Severity",

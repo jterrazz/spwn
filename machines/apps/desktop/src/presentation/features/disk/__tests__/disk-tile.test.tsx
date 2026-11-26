@@ -7,7 +7,7 @@ import { recordingsOf } from '../../../../infrastructure/outbound/engine-replay/
 const recordingFor = await recordingsOf('mini-workspace');
 
 const REFUSAL = 'infra is a server: Machines does not manage its disk';
-const HINT = 'manage it with your own tooling: ssh infra';
+const HINT = 'run station overview for what infra has';
 
 function infraOverview(recording = recordingFor('mini-workspace')) {
     return pageOver(recording, { machine: 'infra', page: 'machine', tab: 'Overview' });

@@ -278,13 +278,13 @@ func engineOf(head overview.Head, r *engine.Reading) (overview.Engine, []finding
 		// invariant: a device book its engine did not write is never
 		// silent: it is a need, red, until each device is added again.
 		return overview.EngineRunning, []finding.Finding{{Machine: mac, Section: section.Overview, Severity: finding.Broken, Urgency: finding.Red, Subject: overview.DevicesSubject,
-			Text: devices.ChangedOutside, Fix: finding.Fix{Command: "station devices"}}}
+			Text: devices.ChangedOutside, Fix: finding.Fix{Command: "station devices", InTerminal: true}}}
 	case engine.BookUnchecked:
 		// invariant: a book its engine could not check yet is a need too,
 		// for it reaches no VM, in words that blame no one: the keychain
 		// to unlock.
 		return overview.EngineRunning, []finding.Finding{{Machine: mac, Section: section.Overview, Severity: finding.NeedsALook, Urgency: finding.Red, Subject: overview.DevicesSubject,
-			Text: devices.NotChecked, Fix: finding.Fix{Command: "station devices"}}}
+			Text: devices.NotChecked, Fix: finding.Fix{Command: "station devices", InTerminal: true}}}
 	case engine.BookUnreadable, engine.BookNewer:
 		// invariant: a book's file its engine cannot read, or a newer
 		// Spwn's book, is a need too, red, in its own words: adding again
@@ -294,7 +294,7 @@ func engineOf(head overview.Head, r *engine.Reading) (overview.Engine, []finding
 			text = devices.ByNewer
 		}
 		return overview.EngineRunning, []finding.Finding{{Machine: mac, Section: section.Overview, Severity: finding.Broken, Urgency: finding.Red, Subject: overview.DevicesSubject,
-			Text: text, Fix: finding.Fix{Command: "station devices"}}}
+			Text: text, Fix: finding.Fix{Command: "station devices", InTerminal: true}}}
 	case engine.BookKept:
 	}
 	return overview.EngineRunning, nil

@@ -19,15 +19,16 @@
     - button "Update mise": Update
     - button "Upkeep 1 brew update waiting macbook-pro · Apps"
     - button "Update brew": Update
-    - 'button "Upkeep Firewall: off macbook-pro · Settings System Settings > Network > Firewall"'
+    - 'button "Upkeep Firewall: off macbook-pro · Settings"'
+    - button "Open Firewall settings"
     - button "Upkeep ~/.tart is misplaced macbook-pro · Disk"
     - button "Move ~/.tart": Move
     - button "Upkeep com.bjango.istatmenus.installer is left over macbook-pro · Background"
-    - button "Copy the command"
+    - button "Run in Terminal"
     - button "Upkeep com.docker.socket is left over macbook-pro · Background"
-    - button "Copy the command"
+    - button "Run in Terminal"
     - button "Upkeep com.docker.vmnetd is left over macbook-pro · Background"
-    - button "Copy the command"
+    - button "Run in Terminal"
   - region "History":
     - heading "History what happened, newest first" [level=2]
     - region "Last night":

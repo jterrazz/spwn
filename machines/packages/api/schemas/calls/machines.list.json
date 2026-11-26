@@ -261,7 +261,13 @@
         "Confirm": {
           "type": "string"
         },
+        "InTerminal": {
+          "type": "boolean"
+        },
         "On": {
+          "type": "string"
+        },
+        "Pane": {
           "type": "string"
         },
         "Path": {

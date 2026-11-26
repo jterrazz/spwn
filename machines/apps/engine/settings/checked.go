@@ -94,7 +94,7 @@ func JudgeChecked(it catalog.CheckedSetting, lives bool, facts map[catalog.Fact]
 	}
 	row.Checked, row.Value, row.Expected = AsExpected, v.value, v.expected
 	if !v.ok {
-		row.Checked, row.Fix = NeedsFix, finding.Fix{Path: it.Fix}
+		row.Checked, row.Fix = NeedsFix, finding.Fix{Path: it.Fix, Pane: it.Pane}
 	}
 	return row
 }

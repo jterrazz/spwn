@@ -5,6 +5,8 @@ import { isRecord } from '../../../domain/request-key';
 import type { Ipc } from '../engine-tauri/tauri';
 
 const COMMANDS = {
+    'fix-line': { argument: 'command', command: 'open_fix_in_terminal' },
+    settings: { argument: 'url', command: 'open_settings' },
     terminal: { argument: 'command', command: 'open_in_terminal' },
     url: { argument: 'url', command: 'open_url' },
 } as const satisfies Record<Opens, { argument: string; command: string }>;
