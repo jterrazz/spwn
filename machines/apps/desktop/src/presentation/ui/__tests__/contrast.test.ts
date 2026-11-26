@@ -103,16 +103,24 @@ function onGrounds(name: string, grounds: readonly string[] = GROUNDS): Measure[
     return overGrounds(name, (ground) => ratio(colourOf(name), colourOf(ground)), grounds);
 }
 
-function glassOver(ground: string): Rgb {
-    const found = /^rgb\((?<red>\d+) (?<green>\d+) (?<blue>\d+) \/ (?<share>\d+)%\)$/u.exec(
-        tokenOf('glass'),
+function numberOf(name: string): number {
+    return Number(tokenOf(name));
+}
+
+function translucent(name: string, over: Rgb): Rgb {
+    const found = /^rgb\((?<red>\d+) (?<green>\d+) (?<blue>\d+) \/ (?<share>[\d.]+)%\)$/u.exec(
+        tokenOf(name),
     );
     if (found?.groups === undefined) {
-        throw new Error(`--glass is not an rgb() with a share: ${tokenOf('glass')}`);
+        throw new Error(`--${name} is not an rgb() with a share: ${tokenOf(name)}`);
     }
     const { blue, green, red, share } = found.groups;
     const tint = { blue: Number(blue), green: Number(green), red: Number(red) };
-    return mixed(colourOf(ground), tint, Number(share) / 100);
+    return mixed(over, tint, Number(share) / 100);
+}
+
+function glassOver(ground: string): Rgb {
+    return translucent('glass', colourOf(ground));
 }
 
 function onGlass(text: string, grounds: readonly string[]): Measure[] {
@@ -284,6 +292,46 @@ describe('contrast', () => {
 
         // Then - each holds the bar of a mark
         expect(below(MARK_BAR, marks)).toStrictEqual([]);
+    });
+
+    test('on the canvas ground and on a region, the three text levels read at 4.5:1 and the decorative level at 3:1', () => {
+        // Given - each text level on the desk and on the region composited over it, and the level that labels a floor's guide
+        const region = translucent('region', colourOf('desk'));
+        const read: Measure[] = TEXTS.flatMap((text) => [
+            ...onGrounds(text, ['desk']),
+            [`--${text} on --region over --desk`, ratio(colourOf(text), region)],
+        ]);
+
+        // Then - each holds its bar
+        expect(below(TEXT_BAR, read)).toStrictEqual([]);
+        expect(below(MARK_BAR, onGrounds('t4', ['desk']))).toStrictEqual([]);
+    });
+
+    test('a pill left behind on the canvas keeps its word at 3:1 while it recedes over the desk', () => {
+        // Given - the word on each pill surface, both faded by --dim-recede over the desk
+        const share = numberOf('dim-recede');
+        const faded = (colour: Rgb) => mixed(colourOf('desk'), colour, share);
+        const measures: Measure[] = ['s2', 's3'].flatMap((ground) =>
+            ['t1', 't2'].map((text): Measure => [
+                `--${text} on --${ground} at ${share}`,
+                ratio(faded(colourOf(text)), faded(colourOf(ground))),
+            ]),
+        );
+
+        // Then - none is below the bar of a mark
+        expect(below(MARK_BAR, measures)).toStrictEqual([]);
+    });
+
+    test('the unread part of a page keeps its text at 3:1 while --dim-unread fades it over the page', () => {
+        // Given - the two readable levels faded by --dim-unread over s0
+        const share = numberOf('dim-unread');
+        const measures: Measure[] = ['t1', 't2'].map((text) => [
+            `--${text} on --s0 at ${share}`,
+            ratio(mixed(colourOf('s0'), colourOf(text), share), colourOf('s0')),
+        ]);
+
+        // Then - none is below the bar of a mark
+        expect(below(MARK_BAR, measures)).toStrictEqual([]);
     });
 
     test('every scale token a rule draws is declared in tokens.css, and every one declared is drawn', () => {

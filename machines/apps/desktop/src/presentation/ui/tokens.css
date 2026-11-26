@@ -10,6 +10,8 @@
     --s3-hover: #36373e;
     --s3-press: #3d3e45;
 
+    --desk: #0d0e10;
+
     --hair: rgb(255 255 255 / 6%);
     --edge: rgb(255 255 255 / 9%);
 
@@ -38,6 +40,7 @@
     --lift-3: 0 30px 80px rgb(0 0 0 / 55%), 0 4px 12px rgb(0 0 0 / 30%);
     --lift-primary: 0 1px 0 rgb(255 255 255 / 30%) inset, 0 4px 12px rgb(0 0 0 / 30%);
     /* value: what floats (a popover, Find) is glass: the board's tint at 84 %, not its 70 %, the least share at which --t1 and --t2 keep 4.5:1 and --t3 3:1 over the white primary button, the brightest thing glass floats over, plus one step against the alpha's 8-bit rounding */
+    --lift-sheet: 0 -1px 0 rgb(255 255 255 / 8%), 0 -24px 60px rgb(0 0 0 / 45%);
     --glass: rgb(36 37 43 / 84%);
     --blur: blur(22px) saturate(160%);
 
@@ -89,7 +92,15 @@
     --space-16: 16px;
     --space-24: 24px;
 
+    --region: rgb(255 255 255 / 2.2%);
+    --grid-dot: rgb(255 255 255 / 10%);
+    --grid-pitch: 22px;
+    --dim-unread: 0.6;
+    --dim-recede: 0.55;
+
     --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+    --spring: cubic-bezier(0.2, 1.2, 0.3, 1);
+    --ease-sheet: cubic-bezier(0.22, 1.1, 0.36, 1);
     --motion-hover: 120ms;
     --motion-pop: 200ms;
     --motion-press: scale(0.97);
