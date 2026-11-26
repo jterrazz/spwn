@@ -207,3 +207,35 @@ func TestAVersionedFormulaIsLookedForInItsKeg(t *testing.T) {
 		}
 	}
 }
+
+func recipe(t *testing.T, name string) string {
+	t.Helper()
+	body, err := catalog.Recipes.ReadFile("images/" + name)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return string(body)
+}
+
+func TestTheLinuxImageBootsWithoutWhatAVMNeverUses(t *testing.T) {
+	body := recipe(t, "linux.sh")
+	for _, step := range []string{
+		"touch /etc/cloud/cloud-init.disabled",
+		"systemctl mask systemd-networkd-wait-online.service",
+		"systemctl mask ModemManager.service multipathd.service multipathd.socket udisks2.service fwupd.service fwupd-refresh.timer motd-news.timer",
+		"systemctl enable station-hostkeys.service station-intent.service station-growroot.service",
+		"ExecStart=-/usr/bin/growpart /dev/vda 1",
+		"ExecStart=-/usr/sbin/resize2fs /dev/vda1",
+	} {
+		if !strings.Contains(body, step) {
+			t.Errorf("the linux recipe lacks %q", step)
+		}
+	}
+	// invariant: unattended-upgrades and the apt timers that run it are a VM's
+	// only security updates: the night upgrades a Mac's Machinefile apps.
+	for _, kept := range []string{"unattended-upgrades", "apt-daily"} {
+		if strings.Contains(body, kept) {
+			t.Errorf("the linux recipe touches %s, a VM's only source of security updates", kept)
+		}
+	}
+}

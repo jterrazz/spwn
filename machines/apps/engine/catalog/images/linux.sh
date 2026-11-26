@@ -27,7 +27,7 @@ chmod 0600 "/home/$VM_USER/.ssh/authorized_keys"
 install -d -m 0700 -o "$VM_USER" -g "$VM_USER" "/home/$VM_USER/.config" "/home/$VM_USER/.config/station" "/home/$VM_USER/.config/station/machinefiles"
 
 apt-get update
-# outside: zsh is the user's login shell, growpart (cloud-guest-utils) grows the disk at first boot, and node's linux builds link libatomic, which the base lacks.
+# outside: zsh is the user's login shell, growpart (cloud-guest-utils) grows the disk at each boot, and node's linux builds link libatomic, which the base lacks.
 apt-get install -y zsh curl ca-certificates cloud-guest-utils libatomic1
 # outside: the docker group exists before the docker package installs, so the user is in it from the image's first session.
 groupadd -f docker
@@ -72,7 +72,28 @@ ExecStart=/bin/sh -c 'printf "\\nstation-intent=poweroff\\n" >/dev/hvc0'
 WantedBy=poweroff.target halt.target
 UNIT
 
-systemctl enable station-hostkeys.service station-intent.service
+cat > /etc/systemd/system/station-growroot.service <<'UNIT'
+[Unit]
+Description=Grow the root partition and its filesystem to the disk the VM was given
+After=local-fs.target
+
+[Service]
+Type=oneshot
+ExecStart=-/usr/bin/growpart /dev/vda 1
+ExecStart=-/usr/sbin/resize2fs /dev/vda1
+
+[Install]
+WantedBy=multi-user.target
+UNIT
+
+systemctl enable station-hostkeys.service station-intent.service station-growroot.service
+
+# outside: a VM is a clone of a disk baked behind its Mac's NAT, never a cloud instance; cloud-init would only render again, at every boot, the network it wrote at the build's (every `en*` link by DHCP, whatever its MAC), which a clone keeps without it.
+[ ! -d /etc/cloud ] || touch /etc/cloud/cloud-init.disabled
+# outside: the engine waits on sshd, which answers once the address exists; waiting for every link online held docker and the boot's end, never ssh.
+systemctl mask systemd-networkd-wait-online.service
+# outside: each serves what a VM has not: ModemManager a modem, multipathd a SAN's paths, udisks2 a desktop's disk mounts, fwupd a device's firmware, motd-news Canonical's news for a login banner.
+systemctl mask ModemManager.service multipathd.service multipathd.socket udisks2.service fwupd.service fwupd-refresh.timer motd-news.timer
 
 # outside: a guest kernel line reaches the host's console file only when hvc0 is the kernel's console.
 install -d /etc/default/grub.d
