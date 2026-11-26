@@ -33,12 +33,12 @@ Two invariants follow from rule 5 and rule 8. Commands speak the domain's words,
 
 The help has four groups: the three spaces of [ADR-019](../decisions/019-the-product-is-three-spaces-machine-agent-and-os.md), then Spwn itself.
 
-| Group       | Holds                                                                                                                      |
-| ----------- | -------------------------------------------------------------------------------------------------------------------------- |
-| **Machine** | `machines`, `images`, `engine`, `apps`, `settings`, `disk`, `ports`, `accounts`, `background`, `awake`, `activity`         |
-| **Agent**   | `agents`, `teams`, `skills`, `automations`, `project`                                                                      |
-| **OS**      | no command yet, so the help draws nothing for it                                                                           |
-| **Spwn**    | `init`, `use`, `update`, `doctor`, `uninstall`, `help`, `--version`, and the `machinefile`, `journal` and `overview` reads |
+| Group       | Holds                                                                                                                           |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| **Machine** | `machines`, `images`, `engine`, `approvals`, `apps`, `settings`, `disk`, `ports`, `accounts`, `background`, `awake`, `activity` |
+| **Agent**   | `agents`, `teams`, `skills`, `automations`, `project`                                                                           |
+| **OS**      | no command yet, so the help draws nothing for it                                                                                |
+| **Spwn**    | `init`, `use`, `update`, `doctor`, `uninstall`, `help`, `--version`, and the `machinefile`, `journal` and `overview` reads      |
 
 Where an agent runs, and how its project and its Mind follow it, is decided: an agent runs on a machine (`spwn agents start neo --on linux-1`), its project and Mind live on that machine, and the noun `world` is gone ([ADR-021](../decisions/021-one-program-spwn-one-command-for-everything.md), decisions 4 and 5). What an agent is given on that machine is [ADR-022](../decisions/022-an-agent-is-given-apps-its-machine-is-the-wall.md)'s.
 

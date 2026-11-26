@@ -1,0 +1,11 @@
+description: 'inside a server, the approvals are refused: only a Mac asks macOS for any'
+env:
+    - in-server
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .error then .error | {code, field} else .out end'''
+      stdin: |
+          {"v":2,"id":"1","call":"approvals.list","in":{}}
+      exit: 0
+      stdout: |
+          {"code":"section.not-for-this-machine","field":null}

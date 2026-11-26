@@ -12,7 +12,7 @@ import (
 )
 
 func cgoFiles() []string {
-	return []string{"apps/engine/platform/darwin/power_darwin.go", "apps/engine/platform/darwin/kernel_darwin.go", "apps/engine/platform/darwin/presence_darwin.go"}
+	return []string{"apps/engine/platform/darwin/power_darwin.go", "apps/engine/platform/darwin/kernel_darwin.go", "apps/engine/platform/darwin/presence_darwin.go", "apps/engine/platform/darwin/agents_darwin.go"}
 }
 
 func cgoTags() map[string]string {

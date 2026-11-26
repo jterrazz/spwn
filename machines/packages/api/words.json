@@ -156,6 +156,30 @@
       "Tone": "plain"
     }
   },
+  "ApprovalsID": {
+    "local-network": {
+      "Word": "Local Network",
+      "Tone": "plain"
+    }
+  },
+  "ApprovalsState": {
+    "approved": {
+      "Word": "approved",
+      "Tone": "ok"
+    },
+    "checking": {
+      "Word": "checking",
+      "Tone": "plain"
+    },
+    "refused": {
+      "Word": "refused",
+      "Tone": "warn"
+    },
+    "unknown": {
+      "Word": "unknown",
+      "Tone": "plain"
+    }
+  },
   "CatalogAfterApply": {
     "logout": {
       "Word": "a log out",

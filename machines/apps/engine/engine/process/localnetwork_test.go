@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/jterrazz/studio-station/apps/engine/approvals"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/machines/contract"
@@ -23,7 +24,7 @@ func (addressed) Address(context.Context, string, time.Duration) (netip.Addr, er
 type dialing struct {
 	err   error
 	guest Guest
-	grant model.LocalNetwork
+	grant approvals.State
 }
 
 func (g *dialing) Dial(context.Context, string, netip.AddrPort) (Guest, error) {
@@ -45,10 +46,10 @@ var errNoRoute = &contract.NoRouteError{Err: errors.New("dial tcp 192.168.64.3:2
 func blockedHarness(t *testing.T) (harness, *dialing, *vmState) {
 	t.Helper()
 	h := newHarness(t, model.VMRecord{Name: "api", Lifetime: model.Persistent, Want: model.WantRunning})
-	g := &dialing{err: errNoRoute, grant: model.LocalNetworkNotApproved}
+	g := &dialing{err: errNoRoute, grant: approvals.Refused}
 	h.d.hv, h.d.guests = addressed{h.hv}, g
-	h.d.o.LocalNetwork = func(context.Context) model.LocalNetwork { return g.grant }
-	h.clock.At = h.clock.At.Add(localNetworkSettling)
+	h.d.o.LocalNetwork = func(context.Context) approvals.State { return g.grant }
+	h.clock.At = h.clock.At.Add(approvals.LocalNetworkSettling)
 	h.hv.outlived("api")
 	v, _ := h.d.find("api")
 	v.run, _ = h.hv.Adopt(t.Context(), "api")
@@ -79,7 +80,7 @@ func TestADialItsMacRefusesForLocalNetworkBlocksTheVMUntilOneConnects(t *testing
 }
 
 func TestADialWithNoRouteWhileTheGrantReadsApprovedIsNoBlockAndSaysOnlyWhatItMet(t *testing.T) {
-	for name, grant := range map[string]model.LocalNetwork{"approved": model.LocalNetworkApproved, "unreadable": ""} {
+	for name, grant := range map[string]approvals.State{"approved": approvals.Approved, "unreadable": approvals.Unknown} {
 		t.Run(name, func(t *testing.T) {
 			h, g, v := blockedHarness(t)
 			g.grant = grant

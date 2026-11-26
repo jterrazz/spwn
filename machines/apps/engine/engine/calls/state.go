@@ -92,6 +92,19 @@ func WithoutState(ctx context.Context) context.Context {
 	return context.WithValue(ctx, stateKey{}, nil)
 }
 
+func Viewed(ctx context.Context, p *Projections, name string) (value any, served bool) {
+	// value: the view of that name as the store of the engine that serves
+	// ctx projects it now; served is false where ctx carries no engine's
+	// store, so the caller asks the engine it reaches.
+	src, ok := ctx.Value(stateKey{}).(State)
+	if !ok || src == nil || p == nil {
+		return nil, false
+	}
+	src.Ready(ctx)
+	views := p.of.Project(src.Store().Now(), func(asked string) bool { return asked == name })
+	return views[name].Value, true
+}
+
 var StateWatch = call.Watch[Deps, engine.StateIn, engine.StateFrame]{
 	Name: "engine.state", Where: call.InEngine, Applies: Applies,
 	Errors: []fail.Code{StateNoKey, StateUnknownKey},

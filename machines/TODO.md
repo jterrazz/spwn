@@ -511,3 +511,6 @@ orchestrator under the owner's delegation). Nothing proves that
 `autorestartatconnect` restarts a Mac after a power cut. Starts it: a real
 power cut on a Mac whose `autorestart` is 0, the owner's physical test. If
 that Mac stays off, the setting must require `autorestart 1`.
+
+## A refused Local Network is read again every 30 s, forever
+While a Mac stays refused, `approvals.Due` (`apps/engine/approvals/localnetwork.go`) reads it again every 30 s: macOS refuses the datagram with EHOSTUNREACH before it leaves, so each read is an on-host syscall, 2,880 a day for as long as the refusal stands (the verifier's read of the family, 2026-11-26). Nothing is sent to the network and the owner's click is seen within 30 s, which is why it stays. Starts it: a later lot that decides a backoff (a longer interval after a refusal has stood for a while, or none once the Guide has told the owner) and its story.

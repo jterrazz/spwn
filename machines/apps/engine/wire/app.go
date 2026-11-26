@@ -178,6 +178,7 @@ func Build(args, env []string, stdin, stdout, stderr *os.File) (p *Program, exit
 		devicesCommand(kenv, thisMac),
 		imagesCommand(kenv, thisMac),
 		engineCommand(kenv, thisMac),
+		approvalsCommand(kenv, thisMac),
 		appsCommand(kenv, thisMac),
 		settingsCommand(kenv, thisMac),
 		diskCommand(kenv, thisMac),

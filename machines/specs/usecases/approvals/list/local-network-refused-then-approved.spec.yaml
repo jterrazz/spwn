@@ -1,0 +1,27 @@
+description: 'a refusal is read again every 30 s, so an approval reads approved without a restart'
+env:
+    - engine-stopped
+    - engine
+runs:
+    - command: 'world local-network macbook-pro not-approved'
+      exit: 0
+    - command: 'engine start >/dev/null'
+      exit: 0
+    - command: 'world advance 90s'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | .out // .error'''
+      stdin: |
+          {"v":2,"id":"1","call":"approvals.list","in":{}}
+      exit: 0
+      stdout: |
+          {"mac":"macbook-pro","rows":[{"id":"local-network","state":"refused","holder":"station","required":true,"sentence":"Spwn reaches the VMs it runs on this Mac and your Macs nearby.","fix":{"call":null,"command":null,"path":"approve station on macbook-pro's screen, or in System Settings > Privacy & Security > Local Network","pane":"x-apple.systempreferences:com.apple.settings.PrivacySecurity.extension"}}]}
+    - command: 'world local-network macbook-pro approved'
+      exit: 0
+    - command: 'world advance 30s'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | .out // .error'''
+      stdin: |
+          {"v":2,"id":"1","call":"approvals.list","in":{}}
+      exit: 0
+      stdout: |
+          {"mac":"macbook-pro","rows":[{"id":"local-network","state":"approved","holder":"station","required":true,"sentence":"Spwn reaches the VMs it runs on this Mac and your Macs nearby.","fix":{"call":null,"command":null,"path":null}}]}

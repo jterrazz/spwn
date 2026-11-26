@@ -6,6 +6,7 @@ import (
 	"go/parser"
 	"go/token"
 	"go/types"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -55,7 +56,7 @@ func importTable() map[string][]string {
 	return map[string][]string{
 		"cmd/station":                {"wire", "os"},
 		"cmd/generate":               append([]string{"catalog", "disk", "core/verdict", "core/fail", "core/finding", "core/guide", "core/journal", "core/section", "surface/cli/words", "cmd/generate/pages", "page", "ui/render/json", "os", "flag", std}, calls...),
-		"cmd/generate/pages":         {"page", "pages", "pages/*", "engine", "agents", "skills", "project", "teams", "automations", "machines", "ports", "images", "setup", "overview", "activity", "apps", "settings", "disk", "accounts", "background", "awake", "devices", "machinefile", "core/journal", "core/machine", "catalog", "ui/token", std},
+		"cmd/generate/pages":         {"page", "pages", "pages/*", "engine", "agents", "skills", "project", "teams", "automations", "machines", "ports", "images", "setup", "overview", "activity", "apps", "settings", "disk", "accounts", "background", "awake", "devices", "approvals", "machinefile", "core/journal", "core/machine", "catalog", "ui/token", std},
 		"wire":                       {"*", fang, cobra, "os", "os/signal", "syscall", "runtime/debug", "net/netip", std},
 		"surface/cli":                {"surface/cli/kit", cobra, std},
 		"surface/cli/kit":            append([]string{"output", "page", "core/fail", "core/secret", "surface/cli/words", "core/store", "engine", "catalog", "testing", cobra, pflag, std}, calls...),
@@ -68,7 +69,7 @@ func importTable() map[string][]string {
 		"catalog":                    {catalogModule, yamlPkg, std},
 		"page":                       {"core/secret", std},
 		"pages":                      {"page", "catalog", std},
-		"pages/*":                    {"page", "pages", "pages/*", "agents", "skills", "project", "teams", "automations", "core/call/lanes", "core/finding", "core/journal", "core/machine", "core/section", "engine", "machines", "ports", "images", "setup", "overview", "activity", "apps", "settings", "disk", "accounts", "background", "awake", "devices", "machinefile", "catalog", std},
+		"pages/*":                    {"page", "pages", "pages/*", "agents", "skills", "project", "teams", "automations", "core/call/lanes", "core/finding", "core/journal", "core/machine", "core/section", "engine", "machines", "ports", "images", "setup", "overview", "activity", "apps", "settings", "disk", "accounts", "background", "awake", "devices", "approvals", "machinefile", "catalog", std},
 		"ui/token":                   {lip, term, std},
 		"ui/atom":                    {"core/size", "ui/token", "page", lip, bubble + "/spinner", std},
 		"ui/molecule":                {"ui/atom", "ui/token", "page", lip, std},
@@ -184,6 +185,42 @@ type world struct {
 	// value: the source files cgo rewrote before compiling (repo-relative):
 	// their syntax reaches the rules only as cgo's output.
 	cgo []string
+	// value: the text of every Go file under apps/engine/ that is not a
+	// test, repo-relative, whatever its build tags or the host's GOOS, with
+	// the overlay applied.
+	raw map[string]string
+}
+
+func readRaw(t *testing.T, root string, overlay map[string]string) map[string]string {
+	t.Helper()
+	raw := map[string]string{}
+	fsys := os.DirFS(root)
+	err := fs.WalkDir(fsys, "apps/engine", func(rel string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() && (d.Name() == "testdata" || d.Name() == "node_modules") {
+			return fs.SkipDir
+		}
+		if d.IsDir() || !strings.HasSuffix(rel, ".go") || strings.HasSuffix(rel, "_test.go") {
+			return nil
+		}
+		data, err := fs.ReadFile(fsys, rel)
+		if err != nil {
+			return err
+		}
+		raw[rel] = string(data)
+		return nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for rel, src := range overlay {
+		if strings.HasPrefix(rel, "apps/engine/") && strings.HasSuffix(rel, ".go") && !strings.HasSuffix(rel, "_test.go") {
+			raw[rel] = src
+		}
+	}
+	return raw
 }
 
 func repoRoot(t *testing.T) string {
@@ -211,7 +248,7 @@ func load(t *testing.T, overlay map[string]string) *world {
 	if err != nil {
 		t.Fatal(err)
 	}
-	w := &world{root: root, packages: map[string]bool{}}
+	w := &world{root: root, packages: map[string]bool{}, raw: readRaw(t, root, overlay)}
 	seen := map[string]bool{}
 	for _, p := range pkgs {
 		if strings.HasSuffix(p.ID, ".test") {
@@ -794,6 +831,12 @@ func rules() []rule {
 		{"FixArgsAreInputsConfirm", ruleFixArgsAreInputs, "apps/engine/overview/mutant_confirm.go", "package overview\n\nimport \"" + module + "/core/finding\"\n\nvar mutantDelete = finding.Fix{Call: \"machines.delete\", Args: map[string]string{\"VM\": \"linux-1\"}}\n", "apps/engine/overview/mutant_confirm.go"},
 		{"FixIsAGesture", ruleFixIsAGesture, "apps/engine/overview/mutant_gesture.go", "package overview\n\nimport \"" + module + "/core/finding\"\n\nvar mutantSaid = finding.Fix{Command: \"sudo rm /x\"}\n", "apps/engine/overview/mutant_gesture.go"},
 		{"OneBackgroundJob", ruleOneBackgroundJob, "apps/engine/wire/mutant_job.go", "package wire\n\nimport \"" + module + "/background/contract\"\n\nvar mutantAgentJob = contract.JobSpec{Label: \"com.jterrazz.station.agent\", Program: []string{\"station\", \"machines\", \"agent\"}}\n", "apps/engine/wire/mutant_job.go"},
+		{"ApprovalsOwned", ruleApprovalsOwned, "apps/engine/engine/process/mutant_mdns.go", "package process\n\nconst mutantGroup = \"224.0.0.251:5353\"\n", "apps/engine/engine/process/mutant_mdns.go"},
+		{"ApprovalsOwnedCgo", ruleApprovalsOwned, "apps/engine/engine/process/mutant_consent_darwin.go", "//go:build darwin && cgo\n\npackage process\n\n/*\nstatic int mutantStatus(void) { return SMAppServiceStatusEnabled; }\n*/\nimport \"C\"\n", "apps/engine/engine/process/mutant_consent_darwin.go"},
+		{"ApprovalsOwnedSplit", ruleApprovalsOwned, "apps/engine/engine/process/mutant_mdns_split.go", "package process\n\nconst mutantSplit = \"224.0.0.\" + \"251\"\n", "apps/engine/engine/process/mutant_mdns_split.go"},
+		{"ApprovalsOwnedIPv4", ruleApprovalsOwned, "apps/engine/engine/process/mutant_mdns_ipv4.go", "package process\n\nimport \"net\"\n\nvar mutantIPv4 = net.IPv4(224, 0, 0, 251)\n", "apps/engine/engine/process/mutant_mdns_ipv4.go"},
+		{"ApprovalsOwnedIPv6", ruleApprovalsOwned, "apps/engine/engine/process/mutant_mdns_ipv6.go", "package process\n\nconst mutantIPv6 = \"[ff02::fb]:5353\"\n", "apps/engine/engine/process/mutant_mdns_ipv6.go"},
+		{"ApprovalsOwnedIdent", ruleApprovalsOwned, "apps/engine/engine/process/mutant_send.go", "package process\n\ntype mutantSockets interface{ SendUDP(address string) error }\n", "apps/engine/engine/process/mutant_send.go"},
 		{"Registries", ruleRegistries, "apps/engine/pages/apps/mutant_registries.go", "package apps\n\nvar mutantRegistry = map[string]int{}\n\nfunc init() { mutantRegistry[\"x\"] = 1 }\n", "apps/engine/pages/apps/mutant_registries.go"},
 	}
 }

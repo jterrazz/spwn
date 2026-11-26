@@ -7,7 +7,7 @@ export type Kind = (typeof KINDS)[number];
 export type Measure = (typeof MEASURES)[number];
 
 // value: the most the production build may weigh, in bytes (and font files), the next 500 B above what it weighs: js
-// value: 651,056 raw and 172,181 brotli, css 92,532 raw and 17,656 brotli (Geist Mono's symbols face inlined in it),
+// value: 651,291 raw and 172,199 brotli, css 92,532 raw and 17,656 brotli (Geist Mono's symbols face inlined in it),
 // value: fonts 62,784 raw and 62,798 brotli in 4 files (variable Geist and Geist Mono 400, each Latin and
 // value: Latin-extended).
 // value: A change that grows one past its line raises the line here, in its own diff, where a reviewer reads it.

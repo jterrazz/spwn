@@ -1,0 +1,25 @@
+description: 'station approvals reads the engine''s approvals as a page and a document, here and on another Mac'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'world local-network macbook-pro not-approved'
+      exit: 0
+    - command: 'approvals'
+      exit: 0
+      stdout: |
+          # macbook-pro
+          ◐	Local Network	refused	Spwn reaches the VMs it runs on this Mac and your Macs nearby.
+          	approve station on macbook-pro's screen, or in System Settings > Privacy & Security > Local Network
+    - command: 'approvals --json | /usr/bin/jq -c ''{schema, mac, rows: [.rows[] | {id, state, holder, required, pane: .fix.pane}]}'''
+      exit: 0
+      stdout: |
+          {"schema":"station.approvals.list/v1","mac":"macbook-pro","rows":[{"id":"local-network","state":"refused","holder":"station","required":true,"pane":"x-apple.systempreferences:com.apple.settings.PrivacySecurity.extension"}]}
+    - command: 'world local-network mac-mini approved'
+      exit: 0
+    - command: 'approvals --on mac-mini'
+      exit: 0
+      stdout: |
+          	On mac-mini:
+          # mac-mini
+          ●	Local Network	approved	Spwn reaches the VMs it runs on this Mac and your Macs nearby.

@@ -5,15 +5,16 @@ import (
 	"testing"
 	"time"
 
+	"github.com/jterrazz/studio-station/apps/engine/approvals"
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
 )
 
 type approval struct {
-	answer model.LocalNetwork
+	answer approvals.State
 	reads  int
 }
 
-func (a *approval) read(context.Context) model.LocalNetwork {
+func (a *approval) read(context.Context) approvals.State {
 	a.reads++
 	return a.answer
 }
@@ -26,7 +27,7 @@ func (h harness) after(t *testing.T, d time.Duration, tick int) {
 
 func TestARefusalInTheEnginesFirst90sReadsCheckingAndIsReadAgainEvery2s(t *testing.T) {
 	h := newHarness(t)
-	a := &approval{answer: model.LocalNetworkNotApproved}
+	a := &approval{answer: approvals.Refused}
 	h.d.o.LocalNetwork = a.read
 	if err := h.d.Begin(t.Context(), nil); err != nil {
 		t.Fatal(err)
@@ -38,7 +39,7 @@ func TestARefusalInTheEnginesFirst90sReadsCheckingAndIsReadAgainEvery2s(t *testi
 	if a.reads != 1 {
 		t.Errorf("1 s after its start: %d reads, want none again", a.reads)
 	}
-	a.answer = model.LocalNetworkApproved
+	a.answer = approvals.Approved
 	h.after(t, time.Second, 2)
 	if got := h.d.Hello().LocalNetwork; a.reads != 2 || got != model.LocalNetworkApproved {
 		t.Fatalf("2 s after its start: %d reads, hello %q, want 2 reads and approved", a.reads, got)
@@ -51,7 +52,7 @@ func TestARefusalInTheEnginesFirst90sReadsCheckingAndIsReadAgainEvery2s(t *testi
 
 func TestARefusalPast90sReadsNotApprovedThenEvery30s(t *testing.T) {
 	h := newHarness(t)
-	a := &approval{answer: model.LocalNetworkNotApproved}
+	a := &approval{answer: approvals.Refused}
 	h.d.o.LocalNetwork = a.read
 	if err := h.d.Begin(t.Context(), nil); err != nil {
 		t.Fatal(err)
@@ -73,7 +74,7 @@ func TestARefusalPast90sReadsNotApprovedThenEvery30s(t *testing.T) {
 	if a.reads != 46 {
 		t.Errorf("29 s after its verdict: %d reads, want none again", a.reads)
 	}
-	a.answer = model.LocalNetworkApproved
+	a.answer = approvals.Approved
 	h.after(t, time.Second, 47)
 	if got := h.d.Hello().LocalNetwork; a.reads != 47 || got != model.LocalNetworkApproved {
 		t.Fatalf("30 s after its verdict: %d reads, hello %q", a.reads, got)
@@ -82,7 +83,7 @@ func TestARefusalPast90sReadsNotApprovedThenEvery30s(t *testing.T) {
 
 func TestAnEngineBegunPast90sAfterItsStartReadsARefusalAsNotApproved(t *testing.T) {
 	h := newHarness(t)
-	h.d.o.LocalNetwork = (&approval{answer: model.LocalNetworkNotApproved}).read
+	h.d.o.LocalNetwork = (&approval{answer: approvals.Refused}).read
 	h.d.o.StartedAt = h.clock.At.Add(-2 * time.Minute)
 	if err := h.d.Begin(t.Context(), nil); err != nil {
 		t.Fatal(err)
@@ -94,12 +95,55 @@ func TestAnEngineBegunPast90sAfterItsStartReadsARefusalAsNotApproved(t *testing.
 
 func TestALocalNetworkReadPastItsSecondCannotTell(t *testing.T) {
 	h := newHarness(t)
-	h.d.o.LocalNetwork = func(ctx context.Context) model.LocalNetwork {
+	h.d.o.LocalNetwork = func(ctx context.Context) approvals.State {
 		<-ctx.Done()
-		return model.LocalNetworkNotApproved
+		return approvals.Refused
 	}
 	h.d.readLocalNetwork(t.Context())
 	if got := h.d.Hello().LocalNetwork; got != "" {
 		t.Errorf("a read that did not end: hello %q, want none", got)
+	}
+	listed := approvals.ListingOf("mac", h.d.Hello().LocalNetwork, false)
+	if len(listed.Rows) != 1 || listed.Rows[0].State != approvals.Unknown || listed.Rows[0].Fix.Path != nil {
+		t.Errorf("approvals.list after a read that did not end: %+v, want one unknown row owing no fix", listed.Rows)
+	}
+}
+
+func TestApprovalsListFollowsTheRefusalToTheOwnersApproval(t *testing.T) {
+	h := newHarness(t)
+	a := &approval{answer: approvals.Refused}
+	h.d.o.LocalNetwork = a.read
+	h.d.o.StartedAt = h.clock.At.Add(-2 * time.Minute)
+	if err := h.d.Begin(t.Context(), nil); err != nil {
+		t.Fatal(err)
+	}
+	listed := func() approvals.Row { return approvals.ListingOf("mac", h.d.Hello().LocalNetwork, false).Rows[0] }
+	if got := listed(); got.State != approvals.Refused || got.Fix.Path == nil || got.Fix.Pane == nil {
+		t.Fatalf("refused past 90 s: %+v, want a refused row owing its fix", got)
+	}
+	a.answer = approvals.Approved
+	h.after(t, 30*time.Second, 1)
+	if got := listed(); got.State != approvals.Approved || got.Fix.Path != nil {
+		t.Errorf("30 s after the owner approved: %+v, want an approved row owing no fix", got)
+	}
+}
+
+func TestApprovalsListReadsCheckingThenApprovedInsideTheSettling(t *testing.T) {
+	h := newHarness(t)
+	a := &approval{answer: approvals.Refused}
+	h.d.o.LocalNetwork = a.read
+	if err := h.d.Begin(t.Context(), nil); err != nil {
+		t.Fatal(err)
+	}
+	listed := func() approvals.State {
+		return approvals.ListingOf("mac", h.d.Hello().LocalNetwork, false).Rows[0].State
+	}
+	if got := listed(); got != approvals.Checking {
+		t.Fatalf("a refusal at the start: %s, want checking", got)
+	}
+	a.answer = approvals.Approved
+	h.after(t, 2*time.Second, 1)
+	if got := listed(); got != approvals.Approved {
+		t.Errorf("2 s later, approved: %s, want approved", got)
 	}
 }

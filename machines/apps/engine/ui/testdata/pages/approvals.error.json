@@ -1,0 +1,13 @@
+{
+  "schema": "station.page/v1",
+  "id": "approvals",
+  "command": "approvals",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "failed",
+  "error": {
+    "message": "the engine is not running",
+    "hint": "station engine start"
+  }
+}

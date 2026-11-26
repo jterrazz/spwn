@@ -1,0 +1,13 @@
+description: 'the approvals of another Mac are its own engine''s, asked through that Mac'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'world local-network mac-mini approved'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | .out // .error'''
+      stdin: |
+          {"v":2,"id":"1","call":"approvals.list","target":{"name":"mac-mini"},"in":{}}
+      exit: 0
+      stdout: |
+          {"mac":"mac-mini","rows":[{"id":"local-network","state":"approved","holder":"station","required":true,"sentence":"Spwn reaches the VMs it runs on this Mac and your Macs nearby.","fix":{"call":null,"command":null,"path":null}}]}

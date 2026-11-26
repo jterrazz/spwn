@@ -88,6 +88,14 @@ station engine restart # restart the engine's job, whatever it runs: the VMs tha
 
 `--json` is `station.engine.read/v1`: `{schema, engine: {state, version, up_s, vms, stopped_at, stopped_by}}`, `state` `running`, `stopped` or `not-installed`. An engine running another version than station names both and `station engine start`. `--remove` ends the engine's life on this Mac once it has stopped: without Spwn.app it deletes both agents' plists and boots them out, with it it unregisters both bundled agents from SMAppService, and `station engine` then reads `not-installed`; it removes nothing else ([Getting started](../start/getting-started.md#5-remove-what-it-put-down) lists the rest), and an engine kept running for a server keeps its jobs. A Mac only; `--on <mac>` runs it on another Mac. A start the job manager refuses ends in `the engine did not start: <its last word>` (exit 1). See [Machines](machines.md#the-engine).
 
+### `station approvals`
+
+```sh
+station approvals [--json] # what macOS lets Spwn do on this Mac, one row per approval, as its engine read it
+```
+
+A Mac only, read from its engine, so it needs the engine running (`station engine start`), and with `--on` another Mac's. Each row is an approval (Local Network first), its state (`approved`, `refused`, `checking` while a refusal is not yet macOS's verdict, `unknown` where the engine cannot tell) and what it lets Spwn do; a refused one ends with where to approve it. None stops Spwn from running. `--json` is `station.approvals.list/v1`: `{schema, mac, rows}`, each row `{id, state, holder, required, sentence, fix}`, its `fix` as every document says it (`call`, `command` and `path`, null when unset, and `pane` while one is owed) ([API](api.md)).
+
 ### `station apps`
 
 ```sh

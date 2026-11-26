@@ -1,0 +1,15 @@
+description: 'on a Mac that has approved Local Network, its row reads approved and owes no fix'
+env:
+    - engine-stopped
+    - engine
+runs:
+    - command: 'world local-network macbook-pro approved'
+      exit: 0
+    - command: 'engine start >/dev/null'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | .out // .error'''
+      stdin: |
+          {"v":2,"id":"1","call":"approvals.list","in":{}}
+      exit: 0
+      stdout: |
+          {"mac":"macbook-pro","rows":[{"id":"local-network","state":"approved","holder":"station","required":true,"sentence":"Spwn reaches the VMs it runs on this Mac and your Macs nearby.","fix":{"call":null,"command":null,"path":null}}]}

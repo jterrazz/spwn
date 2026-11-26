@@ -1,0 +1,11 @@
+description: 'with the engine stopped, the approvals are not read: the call says the engine is down'
+env:
+    - engine-stopped
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | .out // .error'''
+      stdin: |
+          {"v":2,"id":"1","call":"approvals.list","in":{}}
+      exit: 0
+      stdout: |
+          {"message":"the engine is not running","hint":"station engine start","exit":1}

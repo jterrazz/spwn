@@ -364,6 +364,28 @@ export type AgentsSlept = {
 
 export type Answer = HelloFrame | ProgressFrame | OutFrame | ErrorFrame | DoneFrame;
 
+export type ApprovalsFix = {
+    args?: Record<string, string>;
+    call: string | null;
+    command: string | null;
+    pane?: string;
+    path: string | null;
+};
+
+export type ApprovalsListing = {
+    mac: string;
+    rows: ApprovalsRow[] | null;
+};
+
+export type ApprovalsRow = {
+    fix: ApprovalsFix;
+    holder: string;
+    id: 'local-network';
+    required: boolean;
+    sentence: string;
+    state: 'approved' | 'refused' | 'checking' | 'unknown';
+};
+
 export type AppsCallsInstallIn = {
     Interactive?: boolean;
     Method?: string;
@@ -3727,6 +3749,8 @@ export type AgentsShowInput = AgentsCallsShowIn;
 export type AgentsShowOutput = AgentsMind;
 export type AgentsSleepInput = AgentsCallsSleepIn;
 export type AgentsSleepOutput = AgentsSlept;
+export type ApprovalsListInput = Record<string, never>;
+export type ApprovalsListOutput = ApprovalsListing;
 export type AppsInstallInput = AppsCallsInstallIn;
 export type AppsInstallOutput = AppsOutcome[] | null;
 export type AppsListInput = AppsCallsListIn;
@@ -3986,6 +4010,7 @@ export interface Calls {
     'agents.list': { in: AgentsListInput; out: AgentsListOutput; watch: false };
     'agents.show': { in: AgentsShowInput; out: AgentsShowOutput; watch: false };
     'agents.sleep': { in: AgentsSleepInput; out: AgentsSleepOutput; watch: false };
+    'approvals.list': { in: ApprovalsListInput; out: ApprovalsListOutput; watch: false };
     'apps.install': { in: AppsInstallInput; out: AppsInstallOutput; watch: false };
     'apps.list': { in: AppsListInput; out: AppsListOutput; watch: true };
     'apps.matrix': { in: AppsMatrixInput; out: AppsMatrixOutput; watch: false };
@@ -4128,6 +4153,10 @@ export type AccountsStepKind = 'device-code' | 'link' | 'paste';
 
 export type AccountsTargetFit = 'fits' | 'no';
 
+export type ApprovalsID = 'local-network';
+
+export type ApprovalsState = 'approved' | 'refused' | 'checking' | 'unknown';
+
 export type CatalogAfterApply = 'restart-dock' | 'restart-finder' | 'restart-menu-bar' | 'logout' | 'reboot';
 
 export type CatalogAppKind = 'app' | 'manager' | 'skill';
@@ -4259,6 +4288,8 @@ export type StationWords = {
     AccountsProgramState: Record<AccountsProgramState, StationWord>;
     AccountsStepKind: Record<AccountsStepKind, StationWord>;
     AccountsTargetFit: Record<AccountsTargetFit, StationWord>;
+    ApprovalsID: Record<ApprovalsID, StationWord>;
+    ApprovalsState: Record<ApprovalsState, StationWord>;
     CatalogAfterApply: Record<CatalogAfterApply, StationWord>;
     CatalogAppKind: Record<CatalogAppKind, StationWord>;
     CatalogArch: Record<CatalogArch, StationWord>;

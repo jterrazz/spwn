@@ -1,0 +1,125 @@
+{
+  "$defs": {
+    "approvals.Fix": {
+      "additionalProperties": false,
+      "properties": {
+        "args": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object"
+        },
+        "call": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "command": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "pane": {
+          "type": "string"
+        },
+        "path": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "call",
+        "command",
+        "path"
+      ],
+      "type": "object"
+    },
+    "approvals.Listing": {
+      "additionalProperties": false,
+      "properties": {
+        "mac": {
+          "type": "string"
+        },
+        "rows": {
+          "items": {
+            "$ref": "#/$defs/approvals.Row"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "mac",
+        "rows"
+      ],
+      "type": "object"
+    },
+    "approvals.Row": {
+      "additionalProperties": false,
+      "properties": {
+        "fix": {
+          "$ref": "#/$defs/approvals.Fix"
+        },
+        "holder": {
+          "type": "string"
+        },
+        "id": {
+          "enum": [
+            "local-network"
+          ],
+          "type": "string"
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "sentence": {
+          "type": "string"
+        },
+        "state": {
+          "enum": [
+            "approved",
+            "refused",
+            "checking",
+            "unknown"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "fix",
+        "holder",
+        "id",
+        "required",
+        "sentence",
+        "state"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/spwn/blob/main/machines/packages/api/schemas/calls/approvals.list.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call approvals.list of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "additionalProperties": false,
+      "properties": {},
+      "type": "object"
+    },
+    "out": {
+      "$ref": "#/$defs/approvals.Listing"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "approvals.list",
+  "type": "object"
+}

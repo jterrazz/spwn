@@ -4,8 +4,9 @@ package wire
 
 import (
 	"context"
-	model "github.com/jterrazz/studio-station/apps/engine/machines"
 	"time"
+
+	"github.com/jterrazz/studio-station/apps/engine/approvals"
 
 	"github.com/spf13/cobra"
 
@@ -67,7 +68,7 @@ func (*worldMac) guests() contract.GuestDialer                           { retur
 func (*worldMac) deviceKey() contract.DeviceKey                          { return nil }
 
 func specDeviceKey(map[string]string) contract.DeviceKey                            { return nil }
-func (*worldMac) localNetwork() func(context.Context) model.LocalNetwork            { return nil }
+func (*worldMac) localNetwork() func(context.Context) approvals.State               { return nil }
 func (*worldMac) agent() func(context.Context) (func(context.Context) error, error) { return nil }
 func (*worldMac) imageSource(string) imagescontract.ImageSource                     { return nil }
 func (*worldMac) sshConfig() contract.SSHConfig                                     { return nil }

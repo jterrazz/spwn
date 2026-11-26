@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/accounts"
+	"github.com/jterrazz/studio-station/apps/engine/approvals"
 	"github.com/jterrazz/studio-station/apps/engine/awake"
 	"github.com/jterrazz/studio-station/apps/engine/engine/store"
 	"github.com/jterrazz/studio-station/apps/engine/machines"
@@ -31,6 +32,8 @@ const (
 	viewAccountsOf        = ViewAccounts + ":"
 	ViewAwake             = "awake.read"
 	viewAwakeOf           = ViewAwake + ":"
+	// value: This Mac's approvals, as its engine read them (ADR-105).
+	ViewApprovals = "approvals.list"
 )
 
 type MachinesView struct {
@@ -47,7 +50,7 @@ type OverviewView struct {
 
 func (o Pages) Known(name string) bool {
 	switch name {
-	case ViewMachines, ViewOverview, ViewOverviewElsewhere, ViewPorts, ViewAccounts, ViewAwake, ViewGuides:
+	case ViewMachines, ViewOverview, ViewOverviewElsewhere, ViewPorts, ViewAccounts, ViewAwake, ViewGuides, ViewApprovals:
 		return true
 	}
 	for _, kind := range []string{viewOverviewOf, viewPortsOf, viewAccountsOf, viewAwakeOf} {
@@ -95,6 +98,10 @@ func (o Pages) Project(s *store.Snapshot, asked func(name string) bool) map[stri
 	}
 	if asked(ViewGuides) {
 		out[ViewGuides] = v.guides(all)
+	}
+	if asked(ViewApprovals) {
+		h, _, _ := value[machines.MacView](v.s, store.Of(store.FamilyMac, v.this))
+		out[ViewApprovals] = viewOf(own, approvals.ListingOf(v.this, h.Engine.LocalNetwork, h.Engine.Bundled))
 	}
 	v.portsViews(all, asked, out)
 	v.ownViews(asked, out)

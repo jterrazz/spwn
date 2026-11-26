@@ -541,6 +541,16 @@ in_vm "kill $kept_child $control_child" > /dev/null 2>&1 || true
 in_vm 'launchctl bootout gui/$(id -u)/com.jterrazz.station.engine; rm -f ~/Library/LaunchAgents/com.jterrazz.station.engine.plist; sudo -n launchctl asuser "$(id -u)" launchctl unsetenv STATION_MACHINE_KIND' > /dev/null 2>&1 || true
 case_pass
 
+# value: the sentence macOS shows in Spwn's Local Network prompt is the bundle's own
+# NSLocalNetworkUsageDescription, merged by Tauri from apps/desktop/src-tauri/Info.plist
+# into the Spwn.app `make window` built.
+case_begin bundle-words-its-local-network-prompt ADR-073
+[ -d "$repo/.artifacts/window/Spwn.app" ] || fail "no $repo/.artifacts/window/Spwn.app: run make window on a Mac with Xcode first"
+asked=$(plutil -extract NSLocalNetworkUsageDescription raw -o - "$repo/.artifacts/window/Spwn.app/Contents/Info.plist" 2>&1)
+[ "$asked" = "Spwn reaches the VMs it runs on this Mac and your Macs nearby." ] || miss "the bundle's NSLocalNetworkUsageDescription reads '$asked'"
+say "   Local Network prompt: $asked"
+case_pass
+
 # value: the move of a Mac from the bare jobs to Spwn.app's, made by the window's own start
 # (ADR-073): mode B placed with a standalone menu bar running, then Spwn.app opened, after
 # which the engine's job runs the bundle's binary, the bare jobs and their plists are gone,
