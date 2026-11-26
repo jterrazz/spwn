@@ -51,8 +51,10 @@ func (t *wrappedLocalTool) Dependencies() []string {
 // "local:<name>". Missing manifest is a crisp authoring error: an
 // empty local dependency would render to nothing and the user would
 // spend an afternoon debugging a no-op. Every read goes through a root
-// opened at the project's folder, and a `files:` source that leaves the
-// tool's folder is refused before anything is read.
+// opened at the tool's folder through the project's root: a `files:`
+// source that leaves the tool's folder is refused by its name before
+// anything is read, and a link there to elsewhere, in the project or
+// outside it, is refused by the root.
 func LoadTool(projectRoot, name string) (tool.Tool, error) {
 	pkgDir := path.Join("spwn", localToolDir, name)
 	project := platform.FS(projectRoot)
@@ -65,7 +67,7 @@ func LoadTool(projectRoot, name string) (tool.Tool, error) {
 	}
 
 	parsed, err := manifest.Parse(
-		manifest.FSResolver{FS: project, Root: pkgDir},
+		manifest.FSResolver{FS: platform.FSUnder(projectRoot, pkgDir), Root: "."},
 		manifest.ParseOptions{
 			DefaultName:    name,
 			DefaultVersion: "0.0.0-local",

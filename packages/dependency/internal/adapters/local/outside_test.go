@@ -2,6 +2,7 @@ package local
 
 import (
 	"errors"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -170,6 +171,56 @@ func TestAToolFolderThatIsALinkOutIsNeverRead(t *testing.T) {
 	}
 	if said[0] != said[1] {
 		t.Errorf("the error tells whether the outside folder is there:\n there: %s\n not:   %s", said[0], said[1])
+	}
+}
+
+func TestAFilesSourceThatLinksToAnotherProjectFileIsNeverRead(t *testing.T) {
+	var said [2]string
+	for i, there := range []bool{true, false} {
+		root, dir := toolBeside(t, "  /etc/evil: files/x")
+		tooldir := filepath.Join(root, "spwn", "tools", "evil")
+		if there {
+			if err := os.WriteFile(filepath.Join(root, ".env"), []byte(outsideSecret+"\n"), 0o644); err != nil {
+				t.Fatal(err)
+			}
+		}
+		if err := os.Symlink(filepath.Join("..", "..", "..", "..", ".env"), filepath.Join(tooldir, "files", "x")); err != nil {
+			t.Fatal(err)
+		}
+		tl, err := loadWithin(t, root)
+		if err == nil {
+			t.Fatalf("LoadTool = %v; want an error, the image would carry %q", tl, tl.Install().Files["/etc/evil"])
+		}
+		if strings.Contains(err.Error(), outsideSecret) {
+			t.Errorf("the error carries the project's .env: %v", err)
+		}
+		said[i] = strings.ReplaceAll(err.Error(), dir, "DIR")
+	}
+	if said[0] != said[1] {
+		t.Errorf("the error tells whether the project's .env is there:\n there: %s\n not:   %s", said[0], said[1])
+	}
+}
+
+func TestAToolSkillThatLinksOutOfTheToolsFolderIsNeverRead(t *testing.T) {
+	root, _ := toolBeside(t, "  /usr/local/bin/run: files/run.sh")
+	tooldir := filepath.Join(root, "spwn", "tools", "evil")
+	if err := os.WriteFile(filepath.Join(root, ".env"), []byte(outsideSecret+"\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(filepath.Join(tooldir, "skills"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink(filepath.Join("..", "..", "..", "..", ".env"), filepath.Join(tooldir, "skills", "SKILL.md")); err != nil {
+		t.Fatal(err)
+	}
+	tl, err := loadWithin(t, root)
+	if err != nil {
+		t.Fatalf("LoadTool: %v", err)
+	}
+	if skills := tl.Skills(); skills != nil {
+		if body, err := fs.ReadFile(skills, "SKILL.md"); err == nil {
+			t.Errorf("the tool's skills read %q through a link out of the tool's folder", body)
+		}
 	}
 }
 

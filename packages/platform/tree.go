@@ -167,9 +167,40 @@ func (t *Tree) open(p string, folder bool) (*os.File, error) {
 // FS is the folder dir as an fs.FS whose every call reads through a Tree
 // opened at dir for that call and closed after it, so the FS holds no
 // root open between calls and refuses what the Tree refuses.
-func FS(dir string) fs.FS { return treeFS(dir) }
+func FS(dir string) fs.FS { return treeFS{dir: dir} }
 
-type treeFS string
+// FSUnder is the folder sub of dir as an fs.FS: each call opens a Tree at
+// dir and, through it, a root at sub, so a link that leaves sub is refused
+// even when its target is elsewhere under dir, and a sub that is a link
+// out of dir is refused by dir's root.
+func FSUnder(dir, sub string) fs.FS { return treeFS{dir: dir, sub: sub} }
+
+type treeFS struct{ dir, sub string }
+
+func (d treeFS) tree() *Tree {
+	t := Within(d.dir)
+	if d.sub == "" {
+		return t
+	}
+	defer t.Close()
+	return t.Sub(d.sub)
+}
+
+// Sub is the folder p of the Tree as a Tree of its own, opened through
+// the Tree's root: p cannot leave the Tree, and a read of the Sub cannot
+// leave p.
+func (t *Tree) Sub(p string) *Tree {
+	rel, err := t.Rel(p)
+	if err != nil {
+		return &Tree{dir: p, real: p, err: err}
+	}
+	dir := filepath.Join(t.dir, rel)
+	root, err := t.root.OpenRoot(rel)
+	if err != nil {
+		return &Tree{dir: dir, real: dir, err: err}
+	}
+	return &Tree{dir: dir, real: dir, root: root}
+}
 
 func (d treeFS) name(op, name string) (string, error) {
 	if !fs.ValidPath(name) {
@@ -183,7 +214,7 @@ func (d treeFS) Open(name string) (fs.File, error) {
 	if err != nil {
 		return nil, err
 	}
-	t := Within(string(d))
+	t := d.tree()
 	defer t.Close()
 	return t.open(p, true)
 }
@@ -193,7 +224,7 @@ func (d treeFS) ReadFile(name string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	t := Within(string(d))
+	t := d.tree()
 	defer t.Close()
 	return t.ReadFile(p)
 }
@@ -203,7 +234,7 @@ func (d treeFS) ReadDir(name string) ([]fs.DirEntry, error) {
 	if err != nil {
 		return nil, err
 	}
-	t := Within(string(d))
+	t := d.tree()
 	defer t.Close()
 	return t.ReadDir(p)
 }
@@ -213,7 +244,7 @@ func (d treeFS) Stat(name string) (fs.FileInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	t := Within(string(d))
+	t := d.tree()
 	defer t.Close()
 	return t.Stat(p)
 }
