@@ -20,6 +20,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/machinefile"
 	"github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/ports"
+	"github.com/jterrazz/studio-station/apps/engine/project"
 	"github.com/jterrazz/studio-station/apps/engine/settings"
 	"github.com/jterrazz/studio-station/apps/engine/skills"
 )
@@ -374,6 +375,8 @@ type Stores struct {
 	// value: the skill files kept on this machine, by the project root they
 	// belong to ("" for the user's own), each list by name.
 	Skills map[string][]skills.Skill `json:"skills,omitempty"`
+	// value: the projects kept on this machine, by their root.
+	Projects map[string]project.State `json:"projects,omitempty"`
 }
 
 func (m *Mac) Store() *Stores {

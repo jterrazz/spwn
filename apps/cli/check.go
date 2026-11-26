@@ -70,6 +70,7 @@ severity. Exits non-zero when errors are found (or warnings, with
 			SupportedRuntimes:   supportedRuntimes(),
 			HookEventsByRuntime: transpile.HookEventsByRuntime(),
 		})
+		issues = append(issues, project.Drift(p)...)
 		out := cmd.OutOrStdout()
 
 		var compileIssues []compileIssue

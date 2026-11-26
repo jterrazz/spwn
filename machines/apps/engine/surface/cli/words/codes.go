@@ -26,6 +26,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/machines"
 	machinescalls "github.com/jterrazz/studio-station/apps/engine/machines/calls"
 	"github.com/jterrazz/studio-station/apps/engine/ports"
+	projectcalls "github.com/jterrazz/studio-station/apps/engine/project/calls"
 	settingscalls "github.com/jterrazz/studio-station/apps/engine/settings/calls"
 	skillscalls "github.com/jterrazz/studio-station/apps/engine/skills/calls"
 )
@@ -568,6 +569,26 @@ func Codes() map[fail.Code]Wording {
 		},
 		skillscalls.BadName: func(e *fail.Error) (string, string) {
 			return "\"" + e.Subject + "\" is not a name a skill takes", "lowercase letters, digits and dashes, a letter first, and no verb of skills"
+		},
+		projectcalls.NotFound: func(e *fail.Error) (string, string) {
+			return "no project in " + e.Subject + " or above it: no spwn.yaml", "station project create <name>"
+		},
+		projectcalls.Exists: func(e *fail.Error) (string, string) {
+			return e.Subject + " exists: a project is made as a new folder", "pick another name"
+		},
+		projectcalls.BadName: func(e *fail.Error) (string, string) {
+			return "\"" + e.Subject + "\" is not a name a project takes", "lowercase letters, digits and dashes, a letter or a digit first"
+		},
+		projectcalls.UnknownHarness: func(e *fail.Error) (string, string) {
+			return "no harness named \"" + e.Subject + "\"", "one of " + e.Detail["known"]
+		},
+		projectcalls.Invalid: func(e *fail.Error) (string, string) {
+			n := e.Detail["errors"]
+			noun := " errors"
+			if n == "1" {
+				noun = " error"
+			}
+			return "the project at " + e.Subject + " has " + n + noun, "fix each one above, then station project plan"
 		},
 		backgroundcalls.Unknown: func(e *fail.Error) (string, string) {
 			return "no background task \"" + e.Subject + "\"", "station background"

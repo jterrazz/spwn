@@ -29,6 +29,7 @@ runs:
       stdout: |
           agents
           skills
+          project
     - command: 'help | /usr/bin/sed -n "/^  SPWN/,/^  FLAGS/p" | /usr/bin/grep -oE "^    [a-z]+ " | /usr/bin/tr -d " "'
       exit: 0
       stdout: |

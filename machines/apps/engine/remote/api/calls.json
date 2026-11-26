@@ -1153,6 +1153,49 @@
       "out": "UndeclareOut"
     },
     {
+      "name": "project.create",
+      "schema": "station.project.create/v1",
+      "where": "in-process",
+      "errors": [
+        "project.bad-name",
+        "project.exists",
+        "project.unknown-harness"
+      ],
+      "in": "CreateIn",
+      "out": "Project"
+    },
+    {
+      "name": "project.drift",
+      "schema": "station.project.drift/v1",
+      "where": "in-process",
+      "errors": [
+        "project.not-found"
+      ],
+      "in": "DriftIn",
+      "out": "Drift"
+    },
+    {
+      "name": "project.plan",
+      "schema": "station.project.plan/v1",
+      "where": "in-process",
+      "errors": [
+        "project.invalid",
+        "project.not-found"
+      ],
+      "in": "PlanIn",
+      "out": "Plan"
+    },
+    {
+      "name": "project.show",
+      "schema": "station.project.show/v1",
+      "where": "in-process",
+      "errors": [
+        "project.not-found"
+      ],
+      "in": "ShowIn",
+      "out": "Project"
+    },
+    {
       "name": "settings.apply",
       "schema": "station.settings.apply/v1",
       "section": "settings",

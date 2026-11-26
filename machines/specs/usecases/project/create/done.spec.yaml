@@ -1,0 +1,11 @@
+description: 'station project create makes a new folder with its spwn.yaml and a starter agent'
+env: two-macs
+runs:
+    - command: 'project create site'
+      exit: 0
+      stdout: |
+          ●	site	created	{{workdir}}/site
+    - command: '--version >/dev/null; /usr/bin/jq -c ".macs[\"macbook-pro\"].stores.projects[] | .Project" world.json'
+      exit: 0
+      stdout: |
+          {"Name":"site","Root":"{{workdir}}/site","Manifest":"{{workdir}}/site/spwn.yaml","Agents":["neo"]}

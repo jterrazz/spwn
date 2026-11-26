@@ -6,7 +6,7 @@ Every command of `station`, grouped as `station help` groups them: the four grou
 | ---------- | ------------------------------------------------------------------------------------------------------------------ |
 | Rules      | What holds for every command                                                                                       |
 | Machine    | `machines`, `images`, `engine`, `apps`, `settings`, `disk`, `ports`, `accounts`, `background`, `awake`, `activity` |
-| Agent      | `agents`, `skills`                                                                                                 |
+| Agent      | `agents`, `skills`, `project`                                                                                      |
 | Spwn       | `overview`, `init`, `--version`, `use`, `journal`, `machinefile`, `help`                                           |
 | Plumbing   | The hidden commands the machine runs for itself                                                                    |
 | Exit codes | What 0, 1, 2 and 130 mean                                                                                          |
@@ -204,6 +204,19 @@ station skills delete <skill> [--confirm=<skill>] # its file, for good
 ```
 
 A skill is a bare markdown file, `spwn/skills/<name>.md` in the project, or `~/.spwn/skills/<name>.md` outside one; its description is the `description:` line of its frontmatter. A name is lowercase letters, digits and dashes, a letter first, and no verb of `skills`; a name taken is refused, exit 2. A skill's text is changed by opening its file: no command edits it. `delete` asks the skill's name typed on a terminal and needs `--confirm=<skill>` off one. `--on` reads the project as `station agents` does. `--json` is `station.skills.list/v1`, or `station.skills.show/v1` for one skill.
+
+### `station project`
+
+```sh
+station project [--json] # the project of this folder: its spwn.yaml and its agents
+station project create <name> [--harness <harness>] # a new folder, ./<name>, with its spwn.yaml and the starter agent neo
+station project plan [--json] # what the project's rules find in its files, the errors first
+station project drift [--json] # each reference spwn.lock does not record
+```
+
+A project is the files of a folder: the one whose `spwn.yaml` sits in this folder or the nearest above it, and a folder in none is refused, exit 2, with `station project create <name>` to make one. `create` makes `./<name>` and refuses a folder that exists, a name that is not lowercase letters, digits and dashes, a letter or a digit first, and a harness the catalog does not hold, exit 2; nothing is written outside the new folder. Its harness, `claude-code` unless `--harness` names another, is written in the starter agent's `agent.yaml`.
+
+`plan` reads and writes nothing: the declaration's rules, then a render of each agent for `claude-code` that is kept in memory. A plan with an error prints every issue, then exits 2; warnings alone exit 0. A `spwn:<name>` reference is not checked against a catalog. `drift` lists what was installed apart from what the project declares, and a row refuses nothing. Every command reads this folder in this process, so `--on` is refused. `--json` is `station.project.show/v1`, `station.project.plan/v1` and `station.project.drift/v1`.
 
 ## Spwn
 

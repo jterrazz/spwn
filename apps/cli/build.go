@@ -134,6 +134,7 @@ Examples:
 				SupportedRuntimes:   supportedRuntimes(),
 				HookEventsByRuntime: transpile.HookEventsByRuntime(),
 			})
+			issues = append(issues, project.Drift(p)...)
 			if project.HasErrors(issues) {
 				return fmt.Errorf("project has validation errors - run `spwn check` to see them")
 			}

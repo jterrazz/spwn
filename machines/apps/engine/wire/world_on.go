@@ -75,6 +75,8 @@ import (
 	portsfake "github.com/jterrazz/studio-station/apps/engine/ports/adapter/fake"
 	"github.com/jterrazz/studio-station/apps/engine/ports/adapter/funnel"
 	portscontract "github.com/jterrazz/studio-station/apps/engine/ports/contract"
+	projectfake "github.com/jterrazz/studio-station/apps/engine/project/adapter/fake"
+	projectcontract "github.com/jterrazz/studio-station/apps/engine/project/contract"
 	remotefake "github.com/jterrazz/studio-station/apps/engine/remote/adapter/fake"
 	"github.com/jterrazz/studio-station/apps/engine/remote/adapter/unix"
 	remotecontract "github.com/jterrazz/studio-station/apps/engine/remote/contract"
@@ -433,11 +435,12 @@ func (m *worldMac) waker() contract.Waker       { return machinesfake.WakerOf(m.
 func (m *worldMac) processes(kernel contract.Processes) contract.Processes {
 	return machinesfake.ProcessesOf(m.run.w, m.name, kernel)
 }
-func (m *worldMac) minds() agentscontract.Minds      { return agentsfake.Of(m.run.w, m.name) }
-func (m *worldMac) skillFiles() skillscontract.Files { return skillsfake.Of(m.run.w, m.name) }
-func (m *worldMac) jobs() backgroundcontract.Jobs    { return backgroundfake.New(m.run.w, m.name) }
-func (m *worldMac) meter() activitycontract.Meter    { return activityfake.MeterOf(m.run.w, m.name) }
-func (m *worldMac) disk() diskcontract.DiskUsage     { return m.files() }
+func (m *worldMac) minds() agentscontract.Minds        { return agentsfake.Of(m.run.w, m.name) }
+func (m *worldMac) skillFiles() skillscontract.Files   { return skillsfake.Of(m.run.w, m.name) }
+func (m *worldMac) projects() projectcontract.Projects { return projectfake.Of(m.run.w, m.name) }
+func (m *worldMac) jobs() backgroundcontract.Jobs      { return backgroundfake.New(m.run.w, m.name) }
+func (m *worldMac) meter() activitycontract.Meter      { return activityfake.MeterOf(m.run.w, m.name) }
+func (m *worldMac) disk() diskcontract.DiskUsage       { return m.files() }
 
 func (m *worldMac) files() *diskfake.Usage        { return diskfake.UsageOf(m.run.w, m.name).At(m.home) }
 func (m *worldMac) tailnet() sharingNode          { return portsfake.TailnetOf(m.run.w, m.name) }

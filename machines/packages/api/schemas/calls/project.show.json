@@ -1,0 +1,61 @@
+{
+  "$defs": {
+    "project.Project": {
+      "additionalProperties": false,
+      "properties": {
+        "Agents": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Manifest": {
+          "type": "string"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "Root": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Agents",
+        "Manifest",
+        "Name",
+        "Root"
+      ],
+      "type": "object"
+    },
+    "project.calls.ShowIn": {
+      "additionalProperties": false,
+      "properties": {
+        "Folder": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/spwn/blob/main/machines/packages/api/schemas/calls/project.show.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call project.show of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/project.calls.ShowIn"
+    },
+    "out": {
+      "$ref": "#/$defs/project.Project"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "project.show",
+  "type": "object"
+}

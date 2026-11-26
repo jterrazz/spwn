@@ -2,6 +2,7 @@ package world
 
 import (
 	"fmt"
+	"path/filepath"
 	"slices"
 	"strconv"
 	"strings"
@@ -11,6 +12,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/images"
 	"github.com/jterrazz/studio-station/apps/engine/ports"
+	"github.com/jterrazz/studio-station/apps/engine/project"
 	"github.com/jterrazz/studio-station/apps/engine/settings"
 
 	"github.com/jterrazz/studio-station/apps/engine/machines"
@@ -72,6 +74,7 @@ func events() []event {
 		{"agent", []string{"<mac>", "served|held", "[<pid>]", "[<executable>]", "[<label>]"}, agentSocket},
 		{"admin", []string{"on|off"}, admin},
 		{"release", []string{"<tag>", "[no-asset]"}, releaseTag},
+		{"project", []string{"<root>", "[error|warning|info|drift]", "[<path>]", "[<message>]"}, declareProject},
 	}
 }
 
@@ -675,5 +678,43 @@ func releaseTag(w *World, args []string) error {
 		return fmt.Errorf("world release %s takes [no-asset], not %q", args[0], args[1])
 	}
 	w.Releases = append(w.Releases, r)
+	return nil
+}
+
+// invariant: a project of This Mac at an absolute root, declared once and
+// then given, one event each, an issue its plan finds or a row of its drift.
+func declareProject(w *World, args []string) error {
+	m, err := w.known(w.ThisMac)
+	if err != nil {
+		return err
+	}
+	root := args[0]
+	if !filepath.IsAbs(root) {
+		return fmt.Errorf("project takes an absolute root, not %q", root)
+	}
+	s := m.Store()
+	if s.Projects == nil {
+		s.Projects = map[string]project.State{}
+	}
+	kept, ok := s.Projects[root]
+	if !ok {
+		kept.Project = project.Project{Name: filepath.Base(root), Root: root, Manifest: filepath.Join(root, project.ManifestName)}
+	}
+	if len(args) > 1 {
+		if len(args) < 4 {
+			return fmt.Errorf("project %s takes a level, a path and a message", root)
+		}
+		issue := project.Issue{Level: project.Level(args[1]), Path: args[2], Message: args[3], Source: project.SourceManifest}
+		switch {
+		case args[1] == "drift":
+			issue.Level, issue.Source = project.Error, project.SourceLockfile
+			kept.Drift = append(kept.Drift, issue)
+		case slices.Contains(project.Level("").Enum(), args[1]):
+			kept.Issues = append(kept.Issues, issue)
+		default:
+			return fmt.Errorf("project takes error, warning, info or drift, not %q", args[1])
+		}
+	}
+	s.Projects[root] = kept
 	return nil
 }

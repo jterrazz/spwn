@@ -1,0 +1,8 @@
+description: 'station project create of a name the manifest refuses is refused, exit 2'
+env: two-macs
+runs:
+    - command: 'project create My_Site'
+      exit: 2
+      stderr: |
+          Error: "My_Site" is not a name a project takes
+          Hint: lowercase letters, digits and dashes, a letter or a digit first

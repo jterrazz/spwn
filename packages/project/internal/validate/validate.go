@@ -101,7 +101,8 @@ type Input struct {
 	HookEventsByRuntime map[string][]string
 }
 
-// Run executes every rule against the input and returns all issues.
+// Run executes every rule of the declaration against the input and
+// returns all issues; the lockfile's rule is Lockfile's.
 func Run(in Input) []Issue {
 	var out []Issue
 	rules := []func(Input) []Issue{
@@ -121,7 +122,6 @@ func Run(in Input) []Issue {
 		rulePackVersionConflict,
 		ruleRuntimeBackendConflict,
 		rulePacksExist,
-		ruleLockfileConsistent,
 		ruleRuntimeSupported,
 		ruleMarkdownImports,
 		ruleSkillFrontmatter,
@@ -1301,4 +1301,12 @@ func editDistance(a, b string) int {
 		prev, curr = curr, prev
 	}
 	return prev[lb]
+}
+
+// Lockfile runs the one rule that compares the project with what was
+// installed for it: every reference it declares is recorded in the
+// lockfile. Run leaves it out, so a declaration is judged apart from
+// its drift.
+func Lockfile(in Input) []Issue {
+	return ruleLockfileConsistent(in)
 }

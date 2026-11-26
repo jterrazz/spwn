@@ -55,7 +55,7 @@ func importTable() map[string][]string {
 	return map[string][]string{
 		"cmd/station":                {"wire", "os"},
 		"cmd/generate":               append([]string{"catalog", "disk", "core/verdict", "core/fail", "core/finding", "core/journal", "core/section", "surface/cli/words", "cmd/generate/pages", "page", "ui/render/json", "os", "flag", std}, calls...),
-		"cmd/generate/pages":         {"page", "pages", "pages/*", "engine", "agents", "skills", "machines", "ports", "images", "setup", "overview", "activity", "apps", "settings", "disk", "accounts", "background", "awake", "machinefile", "core/journal", "core/machine", "catalog", "ui/token", std},
+		"cmd/generate/pages":         {"page", "pages", "pages/*", "engine", "agents", "skills", "project", "machines", "ports", "images", "setup", "overview", "activity", "apps", "settings", "disk", "accounts", "background", "awake", "machinefile", "core/journal", "core/machine", "catalog", "ui/token", std},
 		"wire":                       {"*", fang, cobra, "os", "os/signal", "syscall", "runtime/debug", "net/netip", std},
 		"surface/cli":                {"surface/cli/kit", cobra, std},
 		"surface/cli/kit":            append([]string{"output", "page", "core/fail", "core/secret", "surface/cli/words", "core/store", "engine", "catalog", "testing", cobra, pflag, std}, calls...),
@@ -68,7 +68,7 @@ func importTable() map[string][]string {
 		"catalog":                    {catalogModule, yamlPkg, std},
 		"page":                       {"core/secret", std},
 		"pages":                      {"page", "catalog", std},
-		"pages/*":                    {"page", "pages", "pages/*", "agents", "skills", "core/call/lanes", "core/finding", "core/journal", "core/machine", "core/section", "engine", "machines", "ports", "images", "setup", "overview", "activity", "apps", "settings", "disk", "accounts", "background", "awake", "machinefile", "catalog", std},
+		"pages/*":                    {"page", "pages", "pages/*", "agents", "skills", "project", "core/call/lanes", "core/finding", "core/journal", "core/machine", "core/section", "engine", "machines", "ports", "images", "setup", "overview", "activity", "apps", "settings", "disk", "accounts", "background", "awake", "machinefile", "catalog", std},
 		"ui/token":                   {lip, term, std},
 		"ui/atom":                    {"core/size", "ui/token", "page", lip, bubble + "/spinner", std},
 		"ui/molecule":                {"ui/atom", "ui/token", "page", lip, std},

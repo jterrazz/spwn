@@ -1028,6 +1028,31 @@
       "Detail": "port",
       "Tone": "plain"
     },
+    "project.bad-name": {
+      "Word": "bad name",
+      "Detail": "project",
+      "Tone": "plain"
+    },
+    "project.exists": {
+      "Word": "exists",
+      "Detail": "project",
+      "Tone": "plain"
+    },
+    "project.invalid": {
+      "Word": "invalid",
+      "Detail": "project",
+      "Tone": "plain"
+    },
+    "project.not-found": {
+      "Word": "not found",
+      "Detail": "project",
+      "Tone": "plain"
+    },
+    "project.unknown-harness": {
+      "Word": "unknown harness",
+      "Detail": "project",
+      "Tone": "plain"
+    },
     "range_full": {
       "Word": "No free port",
       "Tone": "plain"

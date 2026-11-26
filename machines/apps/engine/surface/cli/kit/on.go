@@ -71,6 +71,11 @@ func refusesOn(path string) bool {
 	case "shell", "completion", "help", "guest", "use":
 		return true
 	}
+	if fields[0] == "project" {
+		// invariant: a project is the files of this folder, read in this
+		// process.
+		return true
+	}
 	if len(fields) == 1 && fields[0] == "machinefile" {
 		// invariant: the Machinefiles listed are the ones this Mac reads.
 		return true

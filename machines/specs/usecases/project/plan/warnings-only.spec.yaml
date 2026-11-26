@@ -1,0 +1,13 @@
+description: 'station project plan of a project with warnings only lists them and exits 0'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" world project "$HOME/site" warning spwn.yaml "agent neo is declared twice"'
+      exit: 0
+    - command: '--version >/dev/null; /bin/mkdir site && cd site && "$STATION" project plan'
+      exit: 0
+      stdout: |
+          ◐	{{workdir}}/site/spwn.yaml	valid, 0 errors, 1 warning
+          # Issues
+          ◐	spwn.yaml	agent neo is declared twice

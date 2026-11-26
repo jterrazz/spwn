@@ -1,0 +1,8 @@
+description: 'station project plan in a folder no spwn.yaml is in or above is refused, exit 2'
+env: two-macs
+runs:
+    - command: 'project plan'
+      exit: 2
+      stderr: |
+          Error: no project in {{workdir}} or above it: no spwn.yaml
+          Hint: station project create <name>

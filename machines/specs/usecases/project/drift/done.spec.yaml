@@ -1,0 +1,15 @@
+description: 'station project drift of a project as declared says nothing drifted'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'project create site'
+      exit: 0
+      stdout: |
+          ●	site	created	{{workdir}}/site
+    - command: '--version >/dev/null; /bin/mkdir site && cd site && "$STATION" project drift'
+      exit: 0
+      stdout: |
+          ●	{{workdir}}/site/spwn.yaml	as declared
+          # Drift
+          	none

@@ -18,6 +18,7 @@ runs:
           activity
           agents
           skills
+          project
           init
           use
           journal

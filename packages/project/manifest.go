@@ -245,10 +245,11 @@ type ValidateOpts struct {
 	HookEventsByRuntime map[string][]string
 }
 
-// Validate runs every validation rule against the project and returns
-// the collected issues. It never returns an error - all problems
-// surface as Issues with a Level. Callers decide what to do with
-// warnings vs errors.
+// Validate runs every rule of the declaration against the project and
+// returns the collected issues. It never returns an error - all
+// problems surface as Issues with a Level. Callers decide what to do
+// with warnings vs errors. Whether the lockfile records what the
+// project declares is Drift's.
 func Validate(p *Project, opts ...ValidateOpts) []Issue {
 	if p == nil {
 		return nil
@@ -257,6 +258,20 @@ func Validate(p *Project, opts ...ValidateOpts) []Issue {
 	if len(opts) > 0 {
 		o = opts[0]
 	}
+	return validate.Run(inputOf(p, o))
+}
+
+// Drift returns how what was installed for the project differs from
+// what it declares: each reference the lockfile does not record, or a
+// lockfile that does not read.
+func Drift(p *Project) []Issue {
+	if p == nil {
+		return nil
+	}
+	return validate.Lockfile(inputOf(p, ValidateOpts{}))
+}
+
+func inputOf(p *Project, o ValidateOpts) validate.Input {
 	in := validate.Input{
 		Root:                p.Root,
 		Manifest:            p.Manifest,
@@ -274,7 +289,7 @@ func Validate(p *Project, opts ...ValidateOpts) []Issue {
 			Name: a.Name, Path: a.Path, Exists: a.Exists,
 		})
 	}
-	return validate.Run(in)
+	return in
 }
 
 // HasErrors returns true if any issue is LevelError.

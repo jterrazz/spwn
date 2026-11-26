@@ -18,6 +18,13 @@ runs:
           Hint: run it on x itself: ssh x
       files:
           .calls: absent
+    - command: 'project plan --on x'
+      exit: 2
+      stderr: |
+          Error: --on does not apply to "project plan"
+          Hint: run it on x itself: ssh x
+      files:
+          .calls: absent
     - command: 'guest --on x'
       exit: 2
       stderr: |
