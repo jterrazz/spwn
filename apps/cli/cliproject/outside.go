@@ -15,6 +15,7 @@ import (
 	"golang.org/x/term"
 	"gopkg.in/yaml.v3"
 
+	"spwn.sh/apps/cli/ui"
 	"spwn.sh/packages/platform"
 )
 
@@ -210,13 +211,21 @@ type Allowed struct {
 	typed []Reach
 }
 
-// Keep writes the reaches a typed yes allowed into the user's grants
-// file; reaches allowed by --yes, or already kept, write nothing.
-func (a Allowed) Keep() error {
-	if len(a.typed) == 0 {
+// Keep writes the reaches a typed yes allowed that are among of into the
+// user's grants file: a run asked once for several worlds keeps each
+// world's own reaches once that world has started. Reaches allowed by
+// --yes, or already kept, write nothing.
+func (a Allowed) Keep(of []Reach) error {
+	var kept []Reach
+	for _, r := range a.typed {
+		if slices.Contains(of, r) {
+			kept = append(kept, r)
+		}
+	}
+	if len(kept) == 0 {
 		return nil
 	}
-	return rememberGrants(a.root, a.typed)
+	return rememberGrants(a.root, kept)
 }
 
 // Consent allows the reaches of the project at root: one already kept for
@@ -238,7 +247,7 @@ func Consent(root string, reaches []Reach, yes, terminal bool, in io.Reader, out
 		return Allowed{}, nil
 	case yes:
 		for _, r := range asked {
-			fmt.Fprintf(out, "  allowed for this run: %q (%s)\n", r.Path, r.Grants)
+			fmt.Fprintf(out, "  allowed for this run: %q (%s)\n", r.Path, ui.Clean(r.Grants))
 		}
 		return Allowed{}, nil
 	case !terminal:
@@ -246,10 +255,10 @@ func Consent(root string, reaches []Reach, yes, terminal bool, in io.Reader, out
 	}
 	fmt.Fprintf(out, "\n  spwn.yaml names host paths outside the project %q:\n", projectKey(root))
 	for _, r := range asked {
-		fmt.Fprintf(out, "    %q\n      %s\n", r.Path, r.Grants)
+		fmt.Fprintf(out, "    %q\n      %s\n", r.Path, ui.Clean(r.Grants))
 	}
 	fmt.Fprintf(out, "  The world's agents run what this project gives them, with this access.\n")
-	fmt.Fprintf(out, "  Allow them for this project folder? A yes is kept in %s. [y/N] ", GrantsPath())
+	fmt.Fprintf(out, "  Allow them for this project folder? A yes is kept in %s. [y/N] ", ui.Clean(GrantsPath()))
 	line, _ := bufio.NewReader(in).ReadString('\n')
 	if a := strings.ToLower(strings.TrimSpace(line)); a != "y" && a != "yes" {
 		return Allowed{}, errors.New("the host paths outside the project were not allowed: nothing was mounted")

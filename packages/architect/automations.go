@@ -64,10 +64,10 @@ func (d *AutomationDispatcher) Dispatch(ctx context.Context, req automation.Disp
 	}
 
 	if err := authentication.SyncCredentials(); err != nil {
-		fmt.Fprintf(os.Stderr, "spwn: automation: sync credentials before %s/%s: %v\n", req.World, req.Agent, err)
+		fmt.Fprintf(os.Stderr, "spwn: automation: sync credentials before %q/%q: %q\n", req.World, req.Agent, err)
 	}
 	if err := rt.SyncHostCredentials(platform.CredentialsDir()); err != nil {
-		fmt.Fprintf(os.Stderr, "spwn: automation: sync runtime credentials before %s/%s: %v\n", req.World, req.Agent, err)
+		fmt.Fprintf(os.Stderr, "spwn: automation: sync runtime credentials before %q/%q: %q\n", req.World, req.Agent, err)
 	}
 
 	cmd := rt.BuildCommand(runtimes.SpawnConfig{

@@ -142,7 +142,7 @@ func TestYesAllowsForThisRunOnlyAndSaysSo(t *testing.T) {
 	if want := "  allowed for this run: " + strconv.Quote(outside) + ` (read-write mount at /workspaces/home in world "neo")` + "\n"; out.String() != want {
 		t.Errorf("--yes prints %q, want %q", out.String(), want)
 	}
-	if err := allowed.Keep(); err != nil {
+	if err := allowed.Keep([]Reach{rw}); err != nil {
 		t.Fatal(err)
 	}
 	noGrantsFile(t)
@@ -164,7 +164,7 @@ func TestATypedYesIsKeptOnlyOnceTheRunSucceeded(t *testing.T) {
 	if _, err := Consent(a, []Reach{rw}, false, false, strings.NewReader(""), &bytes.Buffer{}); !errors.As(err, &refused) {
 		t.Fatalf("a yes whose run never succeeded was kept: %v", err)
 	}
-	if err := allowed.Keep(); err != nil {
+	if err := allowed.Keep([]Reach{rw}); err != nil {
 		t.Fatal(err)
 	}
 	for run := 1; run <= 2; run++ {
@@ -182,15 +182,15 @@ func TestAKeptYesServesItsProjectPathAndAccessOnly(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := allowed.Keep(); err != nil {
+	if err := allowed.Keep([]Reach{ro}); err != nil {
 		t.Fatal(err)
 	}
 	for name, c := range map[string]struct {
 		root  string
 		reach Reach
 	}{
-		"another project":            {b, ro},
-		"another path":               {a, Reach{Path: filepath.Dir(outside), Access: "read-only", Grants: "read-only mount"}},
+		"another project":             {b, ro},
+		"another path":                {a, Reach{Path: filepath.Dir(outside), Access: "read-only", Grants: "read-only mount"}},
 		"read-write on the same path": {a, Reach{Path: outside, Access: "read-write", Grants: "read-write mount"}},
 		"a watch on the same path":    {a, Reach{Path: outside, Access: "names and times recorded", Grants: "watched"}},
 	} {

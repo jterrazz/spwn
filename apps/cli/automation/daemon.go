@@ -12,6 +12,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"spwn.sh/apps/cli/cliproject"
+	"spwn.sh/apps/cli/ui"
 	"spwn.sh/packages/architect"
 	"spwn.sh/packages/automation"
 	"spwn.sh/packages/platform"
@@ -104,16 +105,16 @@ resumes at the next scheduled time.`,
 		ctx, cancel := signal.NotifyContext(cmd.Context(), os.Interrupt, syscall.SIGTERM)
 		defer cancel()
 
-		fmt.Fprintf(cmd.OutOrStdout(), "automation daemon for project %s\n", p.Manifest.Name)
+		fmt.Fprintf(cmd.OutOrStdout(), "automation daemon for project %s\n", ui.Clean(p.Manifest.Name))
 		fmt.Fprintf(cmd.OutOrStdout(), "registered automations: %d\n", countAutomations(p))
-		fmt.Fprintln(cmd.OutOrStdout(), "receipts: "+receiptsPath(p.Root))
+		fmt.Fprintln(cmd.OutOrStdout(), "receipts: "+ui.Clean(receiptsPath(p.Root)))
 		fmt.Fprintln(cmd.OutOrStdout(), "ctrl-c to stop")
 
 		if err := eng.Start(ctx); err != nil {
 			return fmt.Errorf("start engine: %w", err)
 		}
-		if err := allowed.Keep(); err != nil {
-			fmt.Fprintf(cmd.ErrOrStderr(), "the yes was not kept in %s: %v\n", cliproject.GrantsPath(), err)
+		if err := allowed.Keep(reaches); err != nil {
+			fmt.Fprintf(cmd.ErrOrStderr(), "the yes was not kept in %s: %s\n", ui.Clean(cliproject.GrantsPath()), ui.CleanError(err))
 		}
 
 		<-ctx.Done()

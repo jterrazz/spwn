@@ -13,6 +13,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"spwn.sh/apps/cli/cliproject"
+	"spwn.sh/apps/cli/ui"
 	"spwn.sh/packages/platform"
 )
 
@@ -41,7 +42,7 @@ var logsCmd = &cobra.Command{
 
 		out := cmd.OutOrStdout()
 		for _, r := range rows {
-			fmt.Fprintln(out, formatReceiptLine(r))
+			fmt.Fprintln(out, ui.Clean(formatReceiptLine(r)))
 		}
 
 		if !logsFollow {
@@ -154,7 +155,7 @@ func tailReceipts(f *os.File, out io.Writer, ctx context.Context) error {
 				pending = pending[idx+1:]
 				row, ok := parseReceiptLine(line)
 				if ok {
-					fmt.Fprintln(out, formatReceiptLine(row))
+					fmt.Fprintln(out, ui.Clean(formatReceiptLine(row)))
 				}
 			}
 		}

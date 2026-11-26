@@ -146,16 +146,16 @@ func RunInstall(cmd *cobra.Command, raw, agentFilter string) error {
 	out := cmd.OutOrStdout()
 	fmt.Fprintf(out, "  %s  %s\n", ui.Green("\u2713"), ui.Strong("installed "+ref))
 	fmt.Fprintf(out, "     %d agent%s updated, %s pinned\n",
-		mutated, plural(mutated), dependency.LockFileName)
+		mutated, ui.Clean(plural(mutated)), ui.Clean(dependency.LockFileName))
 
 	if parsed.Kind == refs.KindSpwnBuiltin {
 		gateToolsRoot, err := platform.GateToolsDir()
 		if err == nil {
 			gateSlugs, gerr := builtin.CopyGateTools(parsed.Name, gateToolsRoot)
 			if gerr != nil {
-				fmt.Fprintf(out, "  %s  warning: gate-tool sync: %v\n", ui.Strong("!"), gerr)
+				fmt.Fprintf(out, "  %s  warning: gate-tool sync: %s\n", ui.Strong("!"), ui.CleanError(gerr))
 			} else if len(gateSlugs) > 0 {
-				fmt.Fprintf(out, "  %s  gate tool(s) installed: %s\n", ui.Green("\u2713"), strings.Join(gateSlugs, ", "))
+				fmt.Fprintf(out, "  %s  gate tool(s) installed: %s\n", ui.Green("\u2713"), ui.Clean(strings.Join(gateSlugs, ", ")))
 				fmt.Fprintf(out, "     restart the gate to load: %s\n", ui.Strong("spwn gate restart"))
 			}
 		}
@@ -214,7 +214,7 @@ func RunUninstall(cmd *cobra.Command, raw, agentFilter string) error {
 
 	out := cmd.OutOrStdout()
 	fmt.Fprintf(out, "  %s  %s\n", ui.Green("\u2713"), ui.Strong("uninstalled "+ref))
-	fmt.Fprintf(out, "     %d agent%s updated\n", mutated, plural(mutated))
+	fmt.Fprintf(out, "     %d agent%s updated\n", mutated, ui.Clean(plural(mutated)))
 	return nil
 }
 

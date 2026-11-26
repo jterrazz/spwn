@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"spwn.sh/apps/cli/cliproject"
+	"spwn.sh/apps/cli/ui"
 	"spwn.sh/packages/project"
 )
 
@@ -37,7 +38,7 @@ var lsCmd = &cobra.Command{
 			if t, ok := lastFired[e.World+"/"+e.Name]; ok {
 				lf = humanTimeAgo(t)
 			}
-			fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\n", e.World, e.Name, formatTrigger(e.Auto), e.Auto.Agent, lf)
+			fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\n", ui.Clean(e.World), ui.Clean(e.Name), ui.Clean(formatTrigger(e.Auto)), ui.Clean(e.Auto.Agent), ui.Clean(lf))
 		}
 		return w.Flush()
 	},

@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"spwn.sh/apps/cli/cliproject"
+	"spwn.sh/apps/cli/ui"
 )
 
 var statusCmd = &cobra.Command{
@@ -43,7 +44,7 @@ var statusCmd = &cobra.Command{
 				}
 			}
 			fmt.Fprintf(w, "%s\t%d\t%d\t%d\t%s\t%s\n",
-				key, s.fires, s.okCount, s.failCount, last, result)
+				ui.Clean(key), s.fires, s.okCount, s.failCount, ui.Clean(last), ui.Clean(result))
 		}
 		return w.Flush()
 	},

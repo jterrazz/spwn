@@ -92,7 +92,7 @@ var lsCmd = &cobra.Command{
 			if len(members) > 0 {
 				line += "   " + strings.Join(members, ", ")
 			}
-			fmt.Println(line)
+			fmt.Println(ui.Clean(line))
 		}
 		return nil
 	},
@@ -124,12 +124,12 @@ var editCmd = &cobra.Command{
 		}
 
 		if !changed {
-			fmt.Printf("  %s (%s)\n", t.Name, t.Slug)
+			fmt.Printf("  %s (%s)\n", ui.Clean(t.Name), ui.Clean(t.Slug))
 			if t.Color != "" {
-				fmt.Printf("     color: %s\n", t.Color)
+				fmt.Printf("     color: %s\n", ui.Clean(t.Color))
 			}
 			if t.Description != "" {
-				fmt.Printf("     %s\n", t.Description)
+				fmt.Printf("     %s\n", ui.Clean(t.Description))
 			}
 			return nil
 		}
@@ -220,7 +220,7 @@ var membersCmd = &cobra.Command{
 			return nil
 		}
 		for _, name := range members {
-			fmt.Println("  " + name)
+			fmt.Println("  " + ui.Clean(name))
 		}
 		return nil
 	},

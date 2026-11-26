@@ -13,6 +13,7 @@ import (
 	"spwn.sh/packages/architect"
 	"spwn.sh/packages/authentication"
 	"spwn.sh/packages/platform"
+	"spwn.sh/packages/project"
 	"spwn.sh/packages/runtimes"
 	"spwn.sh/packages/world"
 )
@@ -110,25 +111,92 @@ a one-off world from ~/.spwn/worlds/<config>.yaml.`,
 	RunE: composeUpRunE,
 }
 
+type plannedWorld struct {
+	name    string
+	pw      *projectWorld
+	running *world.World
+	drifted *world.World
+	reaches []cliproject.Reach
+}
+
+var (
+	startWorld   = spawnRunE
+	askTerminal  = cliproject.StdinIsTerminal
+	runningWorld = findRunningWorldByConfig
+)
+
 func composeUpRunE(cmd *cobra.Command, args []string) error {
-	if len(args) > 0 {
-		return spawnRunE(cmd, args)
-	}
 	p, err := loadProject()
 	if err != nil || p == nil || len(p.Manifest.Worlds) == 0 {
-		return spawnRunE(cmd, args)
+		return startWorld(cmd, args, nil)
 	}
-	names := sortedWorldNames(p)
-	if len(names) == 1 {
-		return spawnRunE(cmd, []string{names[0]})
+	names := args
+	if len(names) == 0 {
+		names = sortedWorldNames(p)
 	}
-	for _, name := range names {
-		resetSpawnFlags(cmd)
-		if err := spawnRunE(cmd, []string{name}); err != nil {
+	many := len(names) > 1
+	plans, err := planWorlds(cmd, p, names, many)
+	if err != nil {
+		return err
+	}
+	var reaches []cliproject.Reach
+	for _, pl := range plans {
+		reaches = append(reaches, pl.reaches...)
+	}
+	allowed, err := cliproject.Consent(p.Root, reaches, spawnYes, askTerminal(), cmd.InOrStdin(), cmd.ErrOrStderr())
+	if err != nil {
+		return ui.New().FailHint("Outside the project", err,
+			"Run `spwn up` in a terminal to be asked once (a yes is kept), or `spwn up --yes` to allow these paths for this run only")
+	}
+	for _, pl := range plans {
+		if many {
+			resetSpawnFlags(cmd)
+		}
+		if err := startWorld(cmd, []string{pl.name}, &pl); err != nil {
 			return err
+		}
+		if err := allowed.Keep(pl.reaches); err != nil {
+			ui.New().Warn("Grants", fmt.Sprintf("the yes was not kept in %s: %v", cliproject.GrantsPath(), err))
 		}
 	}
 	return nil
+}
+
+// invariant: planWorlds prints nothing unless it refuses and reads nothing outside the project, so the run's one ask, after it, precedes every byte a world prints.
+func planWorlds(cmd *cobra.Command, p *project.Project, names []string, many bool) ([]plannedWorld, error) {
+	ctx := context.Background()
+	backend := spawnBackend
+	if many {
+		backend = ""
+	}
+	plans := make([]plannedWorld, 0, len(names))
+	for _, name := range names {
+		if err := platform.CheckName("world", name); err != nil {
+			return nil, ui.New().FailHint("Project", err, "Name a world by one name of spwn.yaml's worlds:")
+		}
+		pw, err := resolveProjectWorld(p, name, backend)
+		if err != nil {
+			return nil, ui.New().FailHint("Project", err, "Check spwn.yaml or pick an existing world name")
+		}
+		pl := plannedWorld{name: name, pw: pw}
+		if existing := runningWorld(ctx, name); existing != nil {
+			if pw.Runtime != "" && existing.Runtime != "" && existing.Runtime != pw.Runtime {
+				pl.drifted = existing
+			} else {
+				pl.running = existing
+			}
+		}
+		if pl.running == nil {
+			for _, r := range pw.Outside {
+				if strings.Contains(r.Grants, " mount at /workspaces/") && cmd.Flags().Changed("workspace") {
+					continue
+				}
+				pl.reaches = append(pl.reaches, r)
+			}
+		}
+		plans = append(plans, pl)
+	}
+	return plans, nil
 }
 
 func resetSpawnFlags(cmd *cobra.Command) {
@@ -139,7 +207,7 @@ func resetSpawnFlags(cmd *cobra.Command) {
 	spawnBackend = ""
 }
 
-func spawnRunE(cmd *cobra.Command, args []string) error {
+func spawnRunE(cmd *cobra.Command, args []string, pl *plannedWorld) error {
 	ctx := context.Background()
 	s := ui.New()
 
@@ -148,29 +216,32 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 		positionalName = args[0]
 	}
 
-	if positionalName != "" {
+	var running, drifted *world.World
+	switch {
+	case pl != nil:
+		running, drifted = pl.running, pl.drifted
+	case positionalName != "":
 		if err := platform.CheckName("world", positionalName); err != nil {
 			return s.FailHint("Project", err, "Name a world by one name of spwn.yaml's worlds:")
 		}
-		if existing := findRunningWorldByConfig(ctx, positionalName); existing != nil {
-			wanted := resolveWantedRuntime(positionalName, spawnBackend)
-			if wanted != "" && existing.Runtime != "" && existing.Runtime != wanted {
-				s.Blank()
-				s.Warn("Runtime drift",
-					fmt.Sprintf("world %q was spawned with %q and now wants %q, rebuilding",
-						positionalName, existing.Runtime, wanted))
-				s.Blank()
-				if arc, derr := architect.NewFromEnv(); derr == nil {
-					_, _ = arc.Destroy(ctx, existing.ID)
-				}
-			} else {
-				s.Blank()
-				s.Success(fmt.Sprintf("world %q is already running (%s)", positionalName, existing.ID))
-				s.Blank()
-				s.Info("Enter:", fmt.Sprintf("spwn world enter %s", existing.ID))
-				s.Blank()
-				return nil
-			}
+		running = runningWorld(ctx, positionalName)
+	}
+	if running != nil {
+		s.Blank()
+		s.Success(fmt.Sprintf("world %q is already running (%s)", positionalName, running.ID))
+		s.Blank()
+		s.Info("Enter:", fmt.Sprintf("spwn world enter %s", running.ID))
+		s.Blank()
+		return nil
+	}
+	if drifted != nil {
+		s.Blank()
+		s.Warn("Runtime drift",
+			fmt.Sprintf("world %q was spawned with %q and now wants %q, rebuilding",
+				positionalName, drifted.Runtime, pl.pw.Runtime))
+		s.Blank()
+		if arc, derr := architect.NewFromEnv(); derr == nil {
+			_, _ = arc.Destroy(ctx, drifted.ID)
 		}
 	}
 
@@ -184,25 +255,10 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 		defer unlock()
 	}
 
-	pw, projectErr := applyProjectDefaults(cmd, positionalName, spawnBackend)
-	if projectErr != nil {
-		return s.FailHint("Project", projectErr, "Check spwn.yaml or pick an existing world name")
-	}
-	var allowed cliproject.Allowed
-	if pw != nil {
-		var reaches []cliproject.Reach
-		for _, r := range pw.Outside {
-			if strings.Contains(r.Grants, " mount at /workspaces/") && cmd.Flags().Changed("workspace") {
-				continue
-			}
-			reaches = append(reaches, r)
-		}
-		var err error
-		allowed, err = cliproject.Consent(pw.Project.Root, reaches, spawnYes, cliproject.StdinIsTerminal(), cmd.InOrStdin(), cmd.ErrOrStderr())
-		if err != nil {
-			return s.FailHint("Outside the project", err,
-				"Run `spwn up` in a terminal to be asked once (a yes is kept), or `spwn up --yes` to allow these paths for this run only")
-		}
+	var pw *projectWorld
+	if pl != nil {
+		pw = pl.pw
+		applyWorldDefaults(cmd, pw)
 	}
 
 	configName := "default"
@@ -341,7 +397,7 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 			case "tools_resolved":
 				enterImage()
 				if detail != "" {
-					s.TreeLine("tools: "+ui.Faint(detail), "")
+					s.TreeLine("tools:", detail)
 				}
 			case "image_resolving", "image_building":
 			case "image_built":
@@ -370,9 +426,6 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		buildProgress.CompleteCurrent()
 		return s.SubFailHint("Spawn failed", err, spawnHint(err, agentName, agents))
-	}
-	if err := allowed.Keep(); err != nil {
-		s.Warn("Grants", fmt.Sprintf("the yes was not kept in %s: %v", cliproject.GrantsPath(), err))
 	}
 
 	u := result.World
@@ -423,18 +476,6 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 	s.Blank()
 
 	return nil
-}
-
-func resolveWantedRuntime(worldName, backendOverride string) string {
-	p, err := loadProject()
-	if err != nil || p == nil {
-		return ""
-	}
-	pw, err := resolveProjectWorld(p, worldName, backendOverride)
-	if err != nil || pw == nil {
-		return ""
-	}
-	return pw.Runtime
 }
 
 func runtimeAuthProvider(runtimeName string) string {
@@ -533,24 +574,11 @@ func spawnHint(err error, agentName string, agents []architect.AgentSpec) string
 	}
 }
 
-func applyProjectDefaults(cmd *cobra.Command, requestedName, backendOverride string) (*projectWorld, error) {
-	p, err := loadProject()
-	if err != nil || p == nil {
-		return nil, nil
-	}
-	pw, err := resolveProjectWorld(p, requestedName, backendOverride)
-	if err != nil {
-		if requestedName != "" {
-			return nil, err
-		}
-		return nil, nil
-	}
-
+func applyWorldDefaults(cmd *cobra.Command, pw *projectWorld) {
 	if !cmd.Flags().Changed("config") && !cmd.Flags().Changed("world") && spawnConfig == "" {
 		spawnConfig = pw.Name
 	}
 	if !cmd.Flags().Changed("agent") && len(spawnAgents) == 0 {
 		spawnAgents = append(spawnAgents, pw.Agents...)
 	}
-	return pw, nil
 }
