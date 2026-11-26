@@ -10,7 +10,7 @@ import { useState } from 'react';
 import type { ReactNode } from 'react';
 
 import type { In, ReadName } from '../../../application/ports/engine.port';
-import type { ConfirmKind } from '../../../application/use-cases/confirms';
+import type { ConfirmForm, ConfirmKind } from '../../../application/use-cases/confirms';
 import { sentence } from '../../../domain/format';
 import { findMachine, targetOf } from '../../../domain/machines/machines';
 import type { Found } from '../../../domain/machines/machines';
@@ -77,12 +77,14 @@ type FixProps<N extends NeedCall & ReadName> = Props & {
     rereads: readonly CallName[];
     subject?: string | undefined;
     kind?: ConfirmKind | undefined;
+    asks?: '' | ConfirmForm | undefined;
 };
 
 function Fix<N extends NeedCall & ReadName>(props: FixProps<N>) {
     const { need, macs, call, input, rereads, primary } = props;
     const subject = props.subject ?? need.Subject;
     const fix = useGesture(call, {
+        asks: props.asks,
         input,
         kind: props.kind,
         rereads,
@@ -116,6 +118,7 @@ function Lifecycle(props: Props) {
         return (
             <Fix
                 {...props}
+                asks={found.vm.Asks?.Restart}
                 call="machines.restart"
                 input={restart}
                 kind={machineKindOf(found.vm)}
