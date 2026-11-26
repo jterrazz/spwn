@@ -194,6 +194,34 @@ func TestATreesFSRefusesWhatTheTreeRefuses(t *testing.T) {
 	}
 }
 
+func TestATreeWhoseRootOrAMiddleNameIsNoFolderNeverWaits(t *testing.T) {
+	tree, dir := treeBeside(t)
+	file := filepath.Join(tree.Dir(), "spwn.yaml")
+	pipe := filepath.Join(tree.Dir(), "pipe.md")
+	for name, read := range map[string]func() error{
+		"a FIFO root":          func() error { r := Within(pipe); defer r.Close(); _, err := r.ReadFile("x"); return err },
+		"a file root":          func() error { r := Within(file); defer r.Close(); _, err := r.ReadFile("x"); return err },
+		"a FS at a FIFO":       func() error { _, err := fs.ReadFile(FS(pipe), "x"); return err },
+		"a FIFO in the middle": func() error { _, err := tree.ReadFile("pipe.md/x"); return err },
+		"a file in the middle": func() error { _, err := tree.ReadFile("spwn.yaml/x"); return err },
+		"a FIFO in the middle by its absolute path": func() error { _, err := tree.Stat(filepath.Join(dir, "project", "pipe.md", "x")); return err },
+	} {
+		got := make(chan error, 1)
+		go func() { got <- read() }()
+		select {
+		case err := <-got:
+			if !errors.Is(err, syscall.ENOTDIR) {
+				t.Errorf("%s: %v; want ENOTDIR", name, err)
+			}
+		case <-time.After(10 * time.Second):
+			if w, err := os.OpenFile(pipe, os.O_WRONLY, 0); err == nil {
+				_ = w.Close()
+			}
+			t.Fatalf("%s waited on a FIFO", name)
+		}
+	}
+}
+
 func TestATreeOfAFolderThatIsNotThereReadsNothing(t *testing.T) {
 	tree := Within(filepath.Join(t.TempDir(), "not-there"))
 	defer tree.Close()

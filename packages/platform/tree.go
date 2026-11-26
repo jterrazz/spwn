@@ -45,6 +45,9 @@ func Within(dir string) *Tree {
 	if err != nil {
 		resolved = abs
 	}
+	if info, err := os.Stat(abs); err == nil && !info.IsDir() {
+		return &Tree{dir: abs, real: resolved, err: &fs.PathError{Op: "open", Path: abs, Err: syscall.ENOTDIR}}
+	}
 	root, err := os.OpenRoot(abs)
 	if err != nil {
 		return &Tree{dir: abs, real: resolved, err: err}
