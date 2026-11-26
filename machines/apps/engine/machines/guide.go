@@ -72,7 +72,7 @@ func CreateGuide(a guide.Act, vm *VM) guide.Guide {
 		g.Line = a.Subject + " is ready"
 		g.View = guide.View{
 			Illustration: guide.PictureDone, Headline: guide.Headline{Now: a.Subject + " is ready", Next: ""},
-			Sentence: readyWords(a.Subject, vm), Move: guide.MoveEngine,
+			Sentence: readyWords(a.Subject, vm), Move: guide.MoveOwner,
 			Action: &guide.Gesture{Label: "Open " + a.Subject, Nav: "machine:" + a.Subject},
 		}
 	default:
