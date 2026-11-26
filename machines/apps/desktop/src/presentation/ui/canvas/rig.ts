@@ -15,10 +15,13 @@ export type Toward = { direction: Direction; animate: boolean };
 
 type Drag = { x: number; y: number; from: Camera; pointer: number; moved: boolean };
 
+// invariant: a node is left out when made inert inside the canvas (a ghost, a node leaving); an inert page around the
+// invariant: canvas (a raised sheet over it) leaves every node in, so its tab stop stands when the page lowers.
 function buttonsIn(root: HTMLElement): HTMLButtonElement[] {
-    return [...root.querySelectorAll<HTMLButtonElement>('button[data-n]')].filter(
-        (one) => one.closest('[inert]') === null,
-    );
+    return [...root.querySelectorAll<HTMLButtonElement>('button[data-n]')].filter((one) => {
+        const held = one.closest('[inert]');
+        return held === null || !root.contains(held);
+    });
 }
 
 // value: one tab stop in the canvas, on `want` when it is drawn, else on the first node; the focus follows it when
@@ -107,14 +110,16 @@ export class CanvasRig {
         this.moveTo(this.world, target, animate);
     }
 
-    pan(frame: Frame, by: Camera): void {
+    // value: the camera moved by `by`, held in its clamp; whether it now rests at the clamp's bottom is handed back.
+    pan(frame: Frame, by: Camera): boolean {
         if (this.world === null) {
-            return;
+            return false;
         }
         const from = this.stop(this.world);
         const to = cameraClamp(frame, this.anchor, { x: from.x + by.x, y: from.y + by.y });
         this.at = { x: to.x, y: to.y };
         place(this.world, this.at);
+        return to.atBottom;
     }
 
     readonly down = (event: PointerEvent<HTMLElement>): void => {

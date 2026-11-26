@@ -1,0 +1,7 @@
+/* value: the space the specs draw the OS space in: the prototype's window at 1100 wide, less its 48 px bar. */
+.desk {
+    position: relative;
+    width: 1100px;
+    height: 852px;
+    overflow: hidden;
+}

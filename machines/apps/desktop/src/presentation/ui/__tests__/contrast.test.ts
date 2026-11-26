@@ -4,6 +4,7 @@ import { describe, expect, test } from 'vitest';
 
 import { mixed, ratio, rgbOf } from '../contrast';
 import type { Rgb } from '../contrast';
+import { ORANGE_SHEETS } from './contrast.fixtures';
 
 const TOKENS = readFileSync(join(import.meta.dirname, '..', 'tokens.css'), 'utf8');
 
@@ -193,35 +194,8 @@ describe('contrast', () => {
         // Given - every style sheet that draws --you
         const orange = sheetsDrawing('you');
 
-        // Then - the closed list: a new sheet that draws the owner's colour is a deliberate edit of this one
-        expect(orange).toStrictEqual([
-            'features/disk/disk.module.css',
-            'kit/login-sheet.module.css',
-            'navigation/column.module.css',
-            'navigation/path-bar.module.css',
-            'navigation/space-switch.module.css',
-            'screens/catalog/item.module.css',
-            'screens/machine-files/machine-files.module.css',
-            'screens/machine/overview/overview.module.css',
-            'screens/machine/packages/packages.module.css',
-            'screens/machine/storage/machine-storage.module.css',
-            'screens/passwords/passwords.module.css',
-            'ui/bar.module.css',
-            'ui/canvas/canvas.module.css',
-            'ui/chart.module.css',
-            'ui/document.css',
-            'ui/dot-strip.module.css',
-            'ui/fleet-board.module.css',
-            'ui/form-field.module.css',
-            'ui/guide.module.css',
-            'ui/illustrations/illustration.module.css',
-            'ui/nav-item.module.css',
-            'ui/search-field.module.css',
-            'ui/state-mark.module.css',
-            'ui/switch.module.css',
-            'ui/tile.module.css',
-            'ui/value.module.css',
-        ]);
+        // Then - the closed list: a new sheet that draws the owner's colour is a deliberate edit of it
+        expect(orange).toStrictEqual(ORANGE_SHEETS);
     });
 
     test('blue is drawn by the style sheets of a busy mark, a progress line or a running step, and no other', () => {

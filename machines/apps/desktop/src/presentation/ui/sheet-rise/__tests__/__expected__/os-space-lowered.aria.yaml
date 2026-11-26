@@ -1,0 +1,66 @@
+- group "The wiki":
+  - text: E0 · Intention E1 · Produit E3 · Architecture
+  - button "Vision"
+  - button "Produit, 4 wait for you" [expanded]:
+    - text: Produit 3 pages
+    - img "4 wait for you"
+    - text: close
+  - button "Technique"
+  - button "Croissance, 1 waits for you"
+  - button "Boundaries, 3 wait for you" [expanded]:
+    - text: Boundaries
+    - img "3 wait for you"
+    - text: What Spwn is not, and what each of its parts refuses to be, for anyone weighing a feature that sits near an edge.
+  - button "Read Boundaries": Read
+  - button "The stack, 1 waits for you"
+  - button "ADR-002"
+  - button "Top"
+  - button "What Spwn is not"
+  - button "What each app refuses, 2 wait for you" [expanded]:
+    - text: What each app refuses 8 blocks
+    - img "2 wait for you"
+    - text: close
+  - button "Read What each app refuses": Read
+  - button "Rests on"
+  - button "What Machines refuses": Group · guard What Machines refuses no-running-agent · no-ungranted-port 2 blocks
+  - button "machines": Table machines
+  - button "no-model": "Refusal no-model to run a model: no inference happens inside Spwn, an agent's harness calls its provider"
+  - button "no-security-in-instructions": "Refusal no-security-in-instructions to hold security in an agent's instructions: what is forbidden does not exist in the world"
+  - button "no-computer, 1 waits for you":
+    - text: Refusal
+    - img "1 waits for you"
+    - text: "no-computer to prepare the computer an agent runs on: that is Machines' space"
+  - button "wiki-decides-nothing": "Refusal wiki-decides-nothing to decide what is true: you write the facts, agents read them"
+  - button "os-holds-no-facts, 1 waits for you":
+    - text: Refusal
+    - img "1 waits for you"
+    - text: os-holds-no-facts to be a second place where facts live, or to hide the detail with no way down to it
+  - button "The rows of…": Paragraph The rows of the… The rows of the four apps being made are derived from the convictions; none of those apps has a design yet, so each row is a constraint on the design to come, not a description of it.
+  - paragraph: What each app refuses, 8 blocks
+- region "Boundaries":
+  - button "Raise or lower the page"
+  - button "Open Boundaries": Produit E1 Produit 4 sections at What each app refuses 3 wait for you Boundaries What Spwn is not, and what each of its parts refuses to be, for anyone weighing a feature that sits near an edge. scroll ↓ or Open
+  - article:
+    - paragraph: Produit · E1 Produit
+    - heading "Boundaries" [level=1]
+    - paragraph: What Spwn is not, and what each of its parts refuses to be, for anyone weighing a feature that sits near an edge.
+    - heading "Top" [level=2]
+    - paragraph: one-stack Spwn is one stack of six apps on one ladder.
+    - heading "What Spwn is not" [level=2]
+    - paragraph: not-a-replacement a replacement for the person
+    - paragraph: not-vibe-coding a vibe-coding tool
+    - paragraph: not-a-cloud-service a cloud service
+    - paragraph: not-one-vendor tied to one vendor
+    - paragraph: not-a-method a method of work imposed
+    - paragraph: "Each line is… Each line is the edge of the one enemy, losing your thread:"
+    - heading "What each app refuses" [level=2]
+    - paragraph: What Machines refuses no-running-agent · no-ungranted-port
+    - paragraph: machines
+    - paragraph: "no-model to run a model: no inference happens inside Spwn, an agent's harness calls its provider"
+    - paragraph: "no-security-in-instructions to hold security in an agent's instructions: what is forbidden does not exist in the world"
+    - paragraph: "no-computer to prepare the computer an agent runs on: that is Machines' space"
+    - paragraph: "wiki-decides-nothing to decide what is true: you write the facts, agents read them"
+    - paragraph: os-holds-no-facts to be a second place where facts live, or to hide the detail with no way down to it
+    - paragraph: The rows of… The rows of the four apps being made are derived from the convictions; none of those apps has a design yet, so each row is a constraint on the design to come, not a description of it.
+    - heading "Rests on" [level=2]
+    - paragraph: "Two rows are… Two rows are this page's reading rather than the owner's word or a record:"

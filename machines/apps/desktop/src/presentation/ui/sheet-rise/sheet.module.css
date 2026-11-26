@@ -1,0 +1,130 @@
+/* value: the prototype's space, sheet, grabber, strip, scroller and collapsed bar (wiki-proto/spwn-wiki-proto-r1.html
+   `.space`, `.sheet`, `.grabber`, `.strip`, `.sscroll`, `.cbar`, `.reading .cv`): the bar and the raised sheet's
+   top 52 px down, the canvas fading in 300 ms and lifting in 420 ms, the bar in 260 / 360 ms, the strip in 220 ms. */
+.space {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: var(--desk);
+}
+
+.behind {
+    position: absolute;
+    inset: 0;
+    transition:
+        opacity 300ms var(--ease),
+        transform 420ms var(--ease);
+}
+.space[data-raised] .behind {
+    opacity: 0;
+    transform: translateY(-14px) scale(0.985);
+    pointer-events: none;
+}
+
+.bar {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    z-index: 4;
+    height: 52px;
+    opacity: 0;
+    transform: translateY(-8px);
+    pointer-events: none;
+    transition:
+        opacity 260ms var(--ease),
+        transform 360ms var(--ease);
+}
+.space[data-raised] .bar {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+}
+
+/* invariant: at rest the stylesheet places the sheet, lowered by its height less the strip's (--peek, the strip's
+   own height); the rig only animates between the two and writes a place while a hand drags it. */
+.sheet {
+    --peek: 112px;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 52px;
+    bottom: 0;
+    z-index: 5;
+    border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
+    background: var(--s0);
+    transform: translateY(calc(100% - var(--peek)));
+}
+.sheet:has([data-peek='title']) {
+    --peek: 78px;
+}
+.space[data-raised] .sheet {
+    transform: none;
+}
+.sheet[data-moving] {
+    will-change: transform;
+}
+/* invariant: the sheet's lift is drawn once on a pseudo-element of its own, never by the layer that moves. */
+.sheet::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow: var(--lift-sheet);
+    pointer-events: none;
+}
+
+.grab {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    z-index: 3;
+    width: 120px;
+    height: 22px;
+    margin-left: -60px;
+    display: grid;
+    place-items: center;
+    cursor: grab;
+    touch-action: none;
+}
+.grab::before {
+    content: '';
+    width: 38px;
+    height: 5px;
+    border-radius: 3px;
+    background: rgb(255 255 255 / 16%);
+    transition: background 160ms var(--ease);
+}
+.grab:hover::before {
+    background: rgb(255 255 255 / 32%);
+}
+
+.strip {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    z-index: 2;
+    border-radius: inherit;
+    background: var(--s0);
+    touch-action: none;
+    transition: opacity 220ms var(--ease);
+}
+.space[data-raised] .strip {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.scroll {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    overscroll-behavior: contain;
+    overflow-anchor: none;
+    border-radius: inherit;
+    outline: none;
+}
+.space[data-raised] .scroll {
+    overflow-y: auto;
+}
