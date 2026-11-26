@@ -2,6 +2,7 @@ package wire_test
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"io/fs"
 	"os"
@@ -187,6 +188,81 @@ func TestALinkWhereApplyReachesIsRefusedAndNothingIsWrittenThroughIt(t *testing.
 				t.Errorf("the file linked to holds %q; want it untouched", data)
 			}
 		})
+	}
+}
+
+func TestWriteNeverTouchesAPathOutsideARunFolder(t *testing.T) {
+	d, folder, root := applying(t)
+	victim := filepath.Join(folder, "victim.txt")
+	if err := os.WriteFile(victim, []byte("v\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	manifestBefore, err := os.ReadFile(filepath.Join(root, project.ManifestName))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, p := range []string{"../victim.txt", project.ManifestName, ".spwn/keep.txt"} {
+		for _, kind := range []project.Kind{project.Add, project.Overwrite, project.Remove} {
+			change := project.Change{Path: p, Kind: kind, File: project.File{Path: p, Data: []byte("x\n"), Mode: 0o644}}
+			if err := d.Projects.Write(t.Context(), root, []project.Change{change}, project.Record{}); !errors.Is(err, project.ErrOutside) {
+				t.Errorf("Write %s %s = %v; want ErrOutside", kind, p, err)
+			}
+		}
+	}
+	if data, _ := os.ReadFile(victim); string(data) != "v\n" {
+		t.Errorf("the file beside the project holds %q; want it untouched", data)
+	}
+	if data, _ := os.ReadFile(filepath.Join(root, project.ManifestName)); !bytes.Equal(data, manifestBefore) {
+		t.Errorf("spwn.yaml holds %q; want it untouched", data)
+	}
+	if _, err := os.ReadFile(filepath.Join(root, ".spwn", "keep.txt")); !errors.Is(err, fs.ErrNotExist) {
+		t.Errorf(".spwn/keep.txt = %v; want it never written", err)
+	}
+}
+
+func TestATamperedRecordIsNeitherReadNorObeyed(t *testing.T) {
+	d, folder, root := applying(t)
+	if _, err := calls.Apply.Run(t.Context(), d, calls.ApplyIn{Folder: root}, nil); err != nil {
+		t.Fatal(err)
+	}
+	away := filepath.Join(t.TempDir(), "abs.txt")
+	kept := map[string]string{filepath.Join(folder, "victim.txt"): "v\n", away: "a\n", filepath.Join(root, ".spwn", "keep.txt"): "k\n"}
+	for p, data := range kept {
+		if err := os.WriteFile(p, []byte(data), 0o600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	kept[filepath.Join(root, project.ManifestName)] = ""
+	record := filepath.Join(root, ".spwn", project.RecordName)
+	data, err := os.ReadFile(record)
+	if err != nil {
+		t.Fatal(err)
+	}
+	written := project.Record{}
+	if err = json.Unmarshal(data, &written); err != nil {
+		t.Fatal(err)
+	}
+	for _, p := range []string{"../victim.txt", away, project.ManifestName, ".spwn/keep.txt"} {
+		written[p] = "sha256:00"
+	}
+	if data, err = json.Marshal(written); err != nil {
+		t.Fatal(err)
+	}
+	if err = os.WriteFile(record, data, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	plan, err := calls.Plan.Run(t.Context(), d, calls.PlanIn{Folder: root}, nil)
+	if err != nil || len(plan.Changes) != 0 {
+		t.Fatalf("Plan = %+v, %v; want nothing to apply", plan.Changes, err)
+	}
+	if _, err = calls.Apply.Run(t.Context(), d, calls.ApplyIn{Folder: root, Confirm: confirm.Yes}, nil); err != nil {
+		t.Fatal(err)
+	}
+	for p, want := range kept {
+		got, err := os.ReadFile(p)
+		if err != nil || want != "" && string(got) != want {
+			t.Errorf("%s = %q, %v; want it untouched", p, got, err)
+		}
 	}
 }
 

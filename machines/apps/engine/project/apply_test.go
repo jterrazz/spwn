@@ -60,6 +60,27 @@ func TestARenderedPathNeverLeavesItsRunFolder(t *testing.T) {
 	}
 }
 
+func TestARecordedPathOutsideARunFolderIsNeverReadNorRemoved(t *testing.T) {
+	a := file("CLAUDE.md", "a")
+	tampered := project.Record{}
+	for _, p := range []string{"../victim.txt", "/abs", "spwn.yaml", ".spwn/keep.txt", ".spwn/agents/neo/../../../spwn.yaml", ".spwn/agents/neo", ".spwn/agents//x"} {
+		tampered[p] = project.Digest(a)
+		if project.InRunFolder(p) {
+			t.Errorf("InRunFolder(%q) = true; want false", p)
+		}
+	}
+	if paths := project.Paths(nil, tampered); len(paths) != 0 {
+		t.Errorf("Paths = %v; want none of the record's paths read", paths)
+	}
+	changes, next, err := project.ChangesOf(map[string][]project.File{}, tampered, tampered)
+	if err != nil || len(changes) != 0 || len(next) != 0 {
+		t.Errorf("ChangesOf = %+v, %v, %v; want nothing removed and the paths dropped", changes, next, err)
+	}
+	if !project.InRunFolder(project.RunFolder("neo") + "/CLAUDE.md") {
+		t.Error("a file of a run folder is not in it")
+	}
+}
+
 func TestADigestTellsTheModeAndALinkApart(t *testing.T) {
 	plain := file("x", "target")
 	exec := project.File{Path: "x", Data: []byte("target"), Mode: 0o755}

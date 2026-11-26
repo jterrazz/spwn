@@ -27,6 +27,15 @@ func local(p string) bool {
 	return p != "" && p != "." && path.Clean(p) == p && !strings.HasPrefix(p, "/") && p != ".." && !strings.HasPrefix(p, "../")
 }
 
+func InRunFolder(p string) bool {
+	// invariant: a path from the project's root that names a file under one
+	// agent's run folder, local and clean; the only path apply reads,
+	// writes or removes, whatever its record says.
+	rest, ok := strings.CutPrefix(p, StateFolder+"/agents/")
+	agent, file, _ := strings.Cut(rest, "/")
+	return ok && local(p) && agent != "" && local(file)
+}
+
 type Kind string
 
 const (
@@ -99,7 +108,8 @@ func Digest(f File) string {
 
 func Paths(rendered map[string][]File, record Record) []string {
 	// value: every path a plan of changes reads on disk: each one rendered,
-	// and each one apply wrote before.
+	// and each one apply wrote before that is in a run folder; the record is
+	// read as untrusted, so any other path it holds is never read.
 	var out []string
 	for agent, files := range rendered {
 		for _, f := range files {
@@ -107,7 +117,9 @@ func Paths(rendered map[string][]File, record Record) []string {
 		}
 	}
 	for p := range record {
-		out = append(out, p)
+		if InRunFolder(p) {
+			out = append(out, p)
+		}
 	}
 	slices.Sort(out)
 	return slices.Compact(out)
@@ -120,7 +132,8 @@ func ChangesOf(rendered map[string][]File, record, disk Record) ([]Change, Recor
 	// that differs is an overwrite, by hand when apply did not leave it
 	// so. A file apply wrote that is no longer rendered is removed, by hand
 	// when edited since, and dropped unsaid when already gone. A file apply
-	// never wrote and that is not rendered is never read nor touched.
+	// never wrote and that is not rendered is never read nor touched, and
+	// so is a path of the record that is not in a run folder.
 	var out []Change
 	next := Record{}
 	for agent, files := range rendered {
@@ -141,7 +154,7 @@ func ChangesOf(rendered map[string][]File, record, disk Record) ([]Change, Recor
 		}
 	}
 	for p, was := range record {
-		if _, kept := next[p]; kept {
+		if _, kept := next[p]; kept || !InRunFolder(p) {
 			continue
 		}
 		have, on := disk[p]

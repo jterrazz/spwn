@@ -391,7 +391,7 @@ func (p Projects) folders(root, dir string) error {
 
 func (p Projects) Write(_ context.Context, root string, changes []project.Change, record project.Record) error {
 	for _, c := range changes {
-		if !fs.ValidPath(c.Path) || !strings.HasPrefix(c.Path, project.StateFolder+"/") {
+		if !project.InRunFolder(c.Path) {
 			return fmt.Errorf("%w: %s", project.ErrOutside, c.Path)
 		}
 		if err := p.change(root, c); err != nil {
