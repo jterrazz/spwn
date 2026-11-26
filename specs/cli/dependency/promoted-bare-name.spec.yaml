@@ -1,0 +1,10 @@
+description: a bare name matching the catalog installs the scheme form
+fixture: ../__fixtures__/docker-pilot/
+runs:
+    - command: install python
+      exit: 0
+      stdout: |4
+            ✓  installed spwn:python
+               1 agent updated, spwn.lock pinned
+      files:
+          spwn/agents/neo/agent.yaml: { contains: 'spwn:python' }

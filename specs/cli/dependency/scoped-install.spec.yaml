@@ -1,0 +1,77 @@
+description: --agent narrows an install to a single agent
+runs:
+    - command: init severance
+      exit: 0
+      stdout: |4
+            spwn.yaml          # created
+            Worlds added:      mdr
+            Agents added:      dylan, helly, irving, mark
+
+            Next:
+              spwn up                        # spawn the world
+      stderr: |4+
+          
+            ✓ Installed example spwn:severance
+
+
+    - command: install qmd --agent mark
+      exit: 0
+      stdout: |4
+            ✓  installed spwn:qmd
+               1 agent updated, spwn.lock pinned
+      files:
+          spwn/agents/mark/agent.yaml:
+              equals: |
+                  name: mark
+                  description: Mark, the team lead, reads the handbook first, delegates second, finishes the batch.
+                  role: chief
+                  runtime:
+                      backend: spwn:claude-code
+                  dependencies:
+                      - skill/refine
+                      - spwn:qmd
+          spwn/agents/helly/agent.yaml:
+              equals: |
+                  name: helly
+                  description: Helly, the newest refiner. Sharp, skeptical, surfaces the assumption everyone else skipped.
+                  role: worker
+
+                  runtime:
+                    backend: "spwn:claude-code"
+
+                  # Project-wide deps (unix, git) are inherited from spwn.yaml.
+                  # Local blocks are referenced via the path-style skill/, tool/, hook/ forms.
+                  dependencies:
+                    - "skill/refine"
+          spwn/agents/irving/agent.yaml:
+              equals: |
+                  name: irving
+                  description: Irving, the senior refiner by the book, cites the handbook, upholds procedure, escalates anything outside it.
+                  role: worker
+
+                  runtime:
+                    backend: "spwn:claude-code"
+
+                  # Project-wide deps (unix, git) are inherited from spwn.yaml.
+                  # Local blocks are referenced via the path-style skill/, tool/, hook/ forms.
+                  dependencies:
+                    - "skill/refine"
+          spwn/agents/dylan/agent.yaml:
+              equals: |
+                  name: dylan
+                  description: Dylan, the fastest refiner on the floor. Results-hungry, metrics-first, always knows his batch count.
+                  role: worker
+
+                  runtime:
+                    backend: "spwn:claude-code"
+
+                  # Project-wide deps (unix, git) are inherited from spwn.yaml.
+                  # Local blocks are referenced via the path-style skill/, tool/, hook/ forms.
+                  dependencies:
+                    - "skill/refine"
+          spwn.lock:
+              equals: |
+                  # spwn.lock: DO NOT EDIT
+                  spwn:git latest builtin
+                  spwn:qmd latest builtin
+                  spwn:unix latest builtin

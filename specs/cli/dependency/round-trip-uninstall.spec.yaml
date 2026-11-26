@@ -1,0 +1,26 @@
+description: uninstall removes the ref from agent.yaml and the lockfile
+fixture: ../__fixtures__/docker-pilot/
+runs:
+    - command: install spwn:python
+      exit: 0
+      stdout: |4
+            ✓  installed spwn:python
+               1 agent updated, spwn.lock pinned
+    - command: uninstall spwn:python
+      exit: 0
+      stdout: |4
+            ✓  uninstalled spwn:python
+               1 agent updated
+      files:
+          spwn/agents/neo/agent.yaml:
+              equals: |
+                  name: neo
+                  description: Fixture agent for the docker-pilot e2e; a minimal unix+git agent used by the Docker pilot harness.
+                  runtime:
+                      backend: spwn:claude-code
+                  dependencies:
+                      - spwn:unix
+                      - spwn:git
+          spwn.lock:
+              equals: |
+                  # spwn.lock: DO NOT EDIT

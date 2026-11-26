@@ -1,0 +1,36 @@
+description: a scoped uninstall keeps the lockfile pin while other agents carry the ref
+runs:
+    - command: init severance
+      exit: 0
+      stdout: |4
+            spwn.yaml          # created
+            Worlds added:      mdr
+            Agents added:      dylan, helly, irving, mark
+
+            Next:
+              spwn up                        # spawn the world
+      stderr: |4+
+          
+            ✓ Installed example spwn:severance
+
+
+    - command: install qmd
+      exit: 0
+      stdout: |4
+            ✓  installed spwn:qmd
+               4 agents updated, spwn.lock pinned
+    - command: uninstall qmd --agent mark
+      exit: 0
+      stdout: |4
+            ✓  uninstalled spwn:qmd
+               1 agent updated
+      files:
+          spwn/agents/mark/agent.yaml:
+              equals: |
+                  name: mark
+                  description: Mark, the team lead, reads the handbook first, delegates second, finishes the batch.
+                  role: chief
+                  runtime:
+                      backend: spwn:claude-code
+                  dependencies:
+                      - skill/refine
