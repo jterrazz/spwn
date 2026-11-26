@@ -20,6 +20,7 @@ import (
 
 	"gopkg.in/yaml.v3"
 
+	"spwn.sh/packages/platform"
 	"spwn.sh/packages/project"
 )
 
@@ -212,8 +213,11 @@ func Load(projectRoot string) (*ProjectSource, error) {
 		return nil, fmt.Errorf("resolve project root: %w", err)
 	}
 
+	t := platform.Within(abs)
+	defer t.Close()
+
 	manifestPath := filepath.Join(abs, "spwn.yaml")
-	if _, err := os.Stat(manifestPath); err != nil {
+	if _, err := t.Stat(manifestPath); err != nil {
 		if os.IsNotExist(err) {
 			return nil, fmt.Errorf("no spwn.yaml found at %s", manifestPath)
 		}
@@ -230,31 +234,31 @@ func Load(projectRoot string) (*ProjectSource, error) {
 		RootDir:  abs,
 	}
 
-	agents, err := loadAgents(abs, p)
+	agents, err := loadAgents(t, abs, p)
 	if err != nil {
 		return nil, err
 	}
 	src.Agents = agents
 
-	skills, err := loadSkills(abs)
+	skills, err := loadSkills(t, abs)
 	if err != nil {
 		return nil, err
 	}
 	src.Skills = skills
 
-	hooks, err := loadHooks(abs)
+	hooks, err := loadHooks(t, abs)
 	if err != nil {
 		return nil, err
 	}
 	src.Hooks = hooks
 
-	commands, err := loadCommands(abs)
+	commands, err := loadCommands(t, abs)
 	if err != nil {
 		return nil, err
 	}
 	src.Commands = commands
 
-	profiles, err := loadProfiles(abs)
+	profiles, err := loadProfiles(t, abs)
 	if err != nil {
 		return nil, err
 	}
@@ -263,7 +267,7 @@ func Load(projectRoot string) (*ProjectSource, error) {
 	return src, nil
 }
 
-func loadAgents(root string, p *project.Project) ([]AgentSource, error) {
+func loadAgents(t *platform.Tree, root string, p *project.Project) ([]AgentSource, error) {
 	seen := map[string]string{}
 	for _, a := range p.Agents {
 		if !a.Exists {
@@ -289,7 +293,7 @@ func loadAgents(root string, p *project.Project) ([]AgentSource, error) {
 	out := make([]AgentSource, 0, len(names))
 	for _, name := range names {
 		dir := seen[name]
-		src, err := loadAgent(name, dir)
+		src, err := loadAgent(t, name, dir)
 		if err != nil {
 			return nil, err
 		}
@@ -297,7 +301,7 @@ func loadAgents(root string, p *project.Project) ([]AgentSource, error) {
 	}
 
 	agentsDir := filepath.Join(root, "spwn", "agents")
-	entries, err := os.ReadDir(agentsDir)
+	entries, err := t.ReadDir(agentsDir)
 	if err != nil && !os.IsNotExist(err) {
 		return nil, fmt.Errorf("read %s: %w", agentsDir, err)
 	}
@@ -308,7 +312,7 @@ func loadAgents(root string, p *project.Project) ([]AgentSource, error) {
 		if _, ok := seen[e.Name()]; ok {
 			continue
 		}
-		src, err := loadAgent(e.Name(), filepath.Join(agentsDir, e.Name()))
+		src, err := loadAgent(t, e.Name(), filepath.Join(agentsDir, e.Name()))
 		if err != nil {
 			return nil, err
 		}
@@ -318,25 +322,25 @@ func loadAgents(root string, p *project.Project) ([]AgentSource, error) {
 	return out, nil
 }
 
-func loadAgent(name, dir string) (AgentSource, error) {
+func loadAgent(t *platform.Tree, name, dir string) (AgentSource, error) {
 	src := AgentSource{Name: name}
 
 	agentMDPath := filepath.Join(dir, "AGENTS.md")
-	if b, err := os.ReadFile(agentMDPath); err == nil {
+	if b, err := t.ReadFile(agentMDPath); err == nil {
 		src.AgentMD = b
 	} else if !os.IsNotExist(err) {
 		return src, fmt.Errorf("read %s: %w", agentMDPath, err)
 	}
 
 	soulPath := filepath.Join(dir, "SOUL.md")
-	if b, err := os.ReadFile(soulPath); err == nil {
+	if b, err := t.ReadFile(soulPath); err == nil {
 		src.Soul = b
 	} else if !os.IsNotExist(err) {
 		return src, fmt.Errorf("read %s: %w", soulPath, err)
 	}
 
 	configPath := filepath.Join(dir, "agent.yaml")
-	if b, err := os.ReadFile(configPath); err == nil {
+	if b, err := t.ReadFile(configPath); err == nil {
 		var cfg AgentConfig
 		if err := yaml.Unmarshal(b, &cfg); err != nil {
 			return src, fmt.Errorf("parse %s: %w", configPath, err)
@@ -346,7 +350,7 @@ func loadAgent(name, dir string) (AgentSource, error) {
 		return src, fmt.Errorf("read %s: %w", configPath, err)
 	}
 
-	layers, err := loadLayers(dir)
+	layers, err := loadLayers(t, dir)
 	if err != nil {
 		return src, err
 	}
@@ -355,27 +359,27 @@ func loadAgent(name, dir string) (AgentSource, error) {
 	return src, nil
 }
 
-func loadLayers(agentDir string) (LayerFiles, error) {
+func loadLayers(t *platform.Tree, agentDir string) (LayerFiles, error) {
 	var lf LayerFiles
 	var err error
-	if lf.Playbooks, err = readTree(filepath.Join(agentDir, "playbooks")); err != nil {
+	if lf.Playbooks, err = readTree(t, filepath.Join(agentDir, "playbooks")); err != nil {
 		return lf, err
 	}
-	if lf.Journal, err = readTree(filepath.Join(agentDir, "journal")); err != nil {
+	if lf.Journal, err = readTree(t, filepath.Join(agentDir, "journal")); err != nil {
 		return lf, err
 	}
 	return lf, nil
 }
 
-func readTree(dir string) (map[string][]byte, error) {
-	if _, err := os.Stat(dir); err != nil {
+func readTree(t *platform.Tree, dir string) (map[string][]byte, error) {
+	if _, err := t.Stat(dir); err != nil {
 		if os.IsNotExist(err) {
 			return nil, nil
 		}
 		return nil, fmt.Errorf("stat %s: %w", dir, err)
 	}
 	out := map[string][]byte{}
-	err := filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
+	err := t.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
@@ -391,7 +395,7 @@ func readTree(dir string) (map[string][]byte, error) {
 			return err
 		}
 		rel = filepath.ToSlash(rel)
-		b, err := os.ReadFile(path)
+		b, err := t.ReadFile(path)
 		if err != nil {
 			return fmt.Errorf("read %s: %w", path, err)
 		}
@@ -404,9 +408,9 @@ func readTree(dir string) (map[string][]byte, error) {
 	return out, nil
 }
 
-func loadSkills(root string) ([]SkillSource, error) {
+func loadSkills(t *platform.Tree, root string) ([]SkillSource, error) {
 	dir := filepath.Join(root, "spwn", "skills")
-	entries, err := os.ReadDir(dir)
+	entries, err := t.ReadDir(dir)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return nil, nil
@@ -420,7 +424,7 @@ func loadSkills(root string) ([]SkillSource, error) {
 			continue
 		}
 		if e.IsDir() {
-			skill, ok, err := loadSkillDir(filepath.Join(dir, name), name)
+			skill, ok, err := loadSkillDir(t, filepath.Join(dir, name), name)
 			if err != nil {
 				return nil, err
 			}
@@ -433,7 +437,7 @@ func loadSkills(root string) ([]SkillSource, error) {
 			continue
 		}
 		path := filepath.Join(dir, name)
-		body, err := os.ReadFile(path)
+		body, err := t.ReadFile(path)
 		if err != nil {
 			return nil, fmt.Errorf("read %s: %w", path, err)
 		}
@@ -447,13 +451,13 @@ func loadSkills(root string) ([]SkillSource, error) {
 	return out, nil
 }
 
-func loadSkillDir(root, name string) (SkillSource, bool, error) {
+func loadSkillDir(t *platform.Tree, root, name string) (SkillSource, bool, error) {
 	files := map[string][]byte{}
-	err := filepath.Walk(root, func(p string, info os.FileInfo, err error) error {
+	err := t.WalkDir(root, func(p string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
-		if info.IsDir() {
+		if d.IsDir() {
 			return nil
 		}
 		rel, relErr := filepath.Rel(root, p)
@@ -461,7 +465,7 @@ func loadSkillDir(root, name string) (SkillSource, bool, error) {
 			return relErr
 		}
 		rel = filepath.ToSlash(rel)
-		body, readErr := os.ReadFile(p)
+		body, readErr := t.ReadFile(p)
 		if readErr != nil {
 			return fmt.Errorf("read %s: %w", p, readErr)
 		}
@@ -487,8 +491,8 @@ func ensureSkillFrontmatter(body []byte, name string) []byte {
 	return append([]byte(header), body...)
 }
 
-func loadHooks(root string) ([]HookSource, error) {
-	if legacy := filepath.Join(root, "spwn", "hooks.yaml"); fileExists(legacy) {
+func loadHooks(t *platform.Tree, root string) ([]HookSource, error) {
+	if legacy := filepath.Join(root, "spwn", "hooks.yaml"); fileExists(t, legacy) {
 		return nil, fmt.Errorf(
 			"%s: legacy hooks.yaml is no longer supported; "+
 				"migrate each entry to its own file at spwn/hooks/<name>.yaml "+
@@ -498,7 +502,7 @@ func loadHooks(root string) ([]HookSource, error) {
 	}
 
 	dir := filepath.Join(root, "spwn", "hooks")
-	entries, err := os.ReadDir(dir)
+	entries, err := t.ReadDir(dir)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return nil, nil
@@ -513,7 +517,7 @@ func loadHooks(root string) ([]HookSource, error) {
 		}
 		name := strings.TrimSuffix(e.Name(), ".yaml")
 		path := filepath.Join(dir, e.Name())
-		data, rerr := os.ReadFile(path)
+		data, rerr := t.ReadFile(path)
 		if rerr != nil {
 			return nil, fmt.Errorf("read %s: %w", path, rerr)
 		}
@@ -542,14 +546,14 @@ func loadHooks(root string) ([]HookSource, error) {
 	return out, nil
 }
 
-func fileExists(path string) bool {
-	info, err := os.Stat(path)
+func fileExists(t *platform.Tree, path string) bool {
+	info, err := t.Stat(path)
 	return err == nil && !info.IsDir()
 }
 
-func loadCommands(root string) ([]CommandSource, error) {
+func loadCommands(t *platform.Tree, root string) ([]CommandSource, error) {
 	dir := filepath.Join(root, "spwn", "commands")
-	entries, err := os.ReadDir(dir)
+	entries, err := t.ReadDir(dir)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return nil, nil
@@ -566,7 +570,7 @@ func loadCommands(root string) ([]CommandSource, error) {
 			continue
 		}
 		path := filepath.Join(dir, name)
-		body, rerr := os.ReadFile(path)
+		body, rerr := t.ReadFile(path)
 		if rerr != nil {
 			return nil, fmt.Errorf("read %s: %w", path, rerr)
 		}
@@ -579,16 +583,16 @@ func loadCommands(root string) ([]CommandSource, error) {
 	return out, nil
 }
 
-func loadProfiles(root string) ([]ProfileSource, error) {
+func loadProfiles(t *platform.Tree, root string) ([]ProfileSource, error) {
 	dir := filepath.Join(root, "spwn", "profiles")
-	if _, err := os.Stat(dir); err != nil {
+	if _, err := t.Stat(dir); err != nil {
 		if os.IsNotExist(err) {
 			return nil, nil
 		}
 		return nil, fmt.Errorf("stat %s: %w", dir, err)
 	}
 	var out []ProfileSource
-	err := filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
+	err := t.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
@@ -608,7 +612,7 @@ func loadProfiles(root string) ([]ProfileSource, error) {
 		}
 		rel = filepath.ToSlash(rel)
 		id := strings.TrimSuffix(rel, ".md")
-		b, err := os.ReadFile(path)
+		b, err := t.ReadFile(path)
 		if err != nil {
 			return fmt.Errorf("read %s: %w", path, err)
 		}

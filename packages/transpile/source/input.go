@@ -2,11 +2,11 @@ package source
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 	"sort"
 	"strings"
 
+	"spwn.sh/packages/platform"
 	"spwn.sh/packages/transpile"
 )
 
@@ -124,9 +124,9 @@ func ToCompileInput(src *ProjectSource, worldName string) (transpile.Input, erro
 		if !filepath.IsAbs(resolved) {
 			resolved = filepath.Join(src.RootDir, kp)
 		}
-		if info, err := os.Stat(resolved); err == nil && info.IsDir() {
-			knowledgeMounted = true
-		}
+		t := platform.Within(src.RootDir)
+		knowledgeMounted = t.IsDir(resolved)
+		t.Close()
 	}
 
 	skills := make([]transpile.SkillEntry, 0, len(src.Skills))

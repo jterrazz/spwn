@@ -21,6 +21,7 @@
 package project
 
 import (
+	"spwn.sh/packages/platform"
 	"spwn.sh/packages/project/internal/discovery"
 	intmanifest "spwn.sh/packages/project/internal/manifest"
 	"spwn.sh/packages/project/internal/scaffold"
@@ -265,7 +266,9 @@ func Validate(p *Project, opts ...ValidateOpts) []Issue {
 	if len(opts) > 0 {
 		o = opts[0]
 	}
-	return validate.Run(inputOf(p, o))
+	t := platform.Within(p.Root)
+	defer t.Close()
+	return validate.Run(inputOf(t, p, o))
 }
 
 // Drift returns how what was installed for the project differs from
@@ -275,12 +278,15 @@ func Drift(p *Project) []Issue {
 	if p == nil {
 		return nil
 	}
-	return validate.Lockfile(inputOf(p, ValidateOpts{}))
+	t := platform.Within(p.Root)
+	defer t.Close()
+	return validate.Lockfile(inputOf(t, p, ValidateOpts{}))
 }
 
-func inputOf(p *Project, o ValidateOpts) validate.Input {
+func inputOf(t *platform.Tree, p *Project, o ValidateOpts) validate.Input {
 	in := validate.Input{
 		Root:                p.Root,
+		Tree:                t,
 		Manifest:            p.Manifest,
 		BuiltinTools:        o.BuiltinTools,
 		SupportedRuntimes:   o.SupportedRuntimes,
@@ -310,11 +316,13 @@ func HasErrors(issues []Issue) bool {
 }
 
 func loadAt(manifestPath, root string) (*Project, error) {
-	m, err := intmanifest.LoadPath(manifestPath)
+	t := platform.Within(root)
+	defer t.Close()
+	m, err := intmanifest.Read(t, manifestPath)
 	if err != nil {
 		return nil, err
 	}
-	agents, orphans := resolveRefs(root, m)
+	agents, orphans := resolveRefs(t, root, m)
 	return &Project{
 		Root:         root,
 		ManifestPath: manifestPath,

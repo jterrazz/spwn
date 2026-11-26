@@ -11,10 +11,12 @@ package resolve
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strings"
+
+	"spwn.sh/packages/platform"
 )
 
 var importRe = regexp.MustCompile(`(^|[^\w/])@([\w.\-/]+\.md)\b`)
@@ -33,6 +35,10 @@ type Result struct {
 	// Missing lists broken @-imports encountered. Each entry is a
 	// Reference where the target file could not be opened.
 	Missing []Reference
+
+	// Outside lists the @-imports whose every candidate leaves the
+	// project: none of them is opened, nor its existence asked.
+	Outside []Reference
 
 	// Cycles lists self-referential or circular import chains found
 	// during the walk. An empty slice means the import graph is a
@@ -66,12 +72,15 @@ type Reference struct {
 // the agent root (e.g. `@SOUL.md`). References without a
 // leading `/` are treated as relative to the containing file's
 // directory first, then as relative to root.
-func Walk(root, startFile string) (*Result, error) {
+//
+// Every file is read through the project's tree t: a candidate that
+// leaves it is never opened, and only a file is read.
+func Walk(t *platform.Tree, root, startFile string) (*Result, error) {
 	absStart, err := filepath.Abs(startFile)
 	if err != nil {
 		return nil, fmt.Errorf("resolve %s: %w", startFile, err)
 	}
-	if _, err := os.Stat(absStart); err != nil {
+	if _, err := t.Stat(absStart); err != nil {
 		return nil, fmt.Errorf("stat %s: %w", absStart, err)
 	}
 	absRoot, err := filepath.Abs(root)
@@ -102,7 +111,7 @@ func Walk(root, startFile string) (*Result, error) {
 			return
 		}
 
-		data, err := os.ReadFile(path)
+		data, err := t.ReadFile(path)
 		if err != nil {
 			return
 		}
@@ -113,10 +122,14 @@ func Walk(root, startFile string) (*Result, error) {
 		visited[path] = true
 
 		for _, ref := range extractImports(path, string(data)) {
-			candidates := resolveCandidates(absRoot, path, ref.Target)
+			candidates := slices.DeleteFunc(resolveCandidates(absRoot, path, ref.Target), func(c string) bool { return !t.Holds(c) })
+			if len(candidates) == 0 {
+				r.Outside = append(r.Outside, ref)
+				continue
+			}
 			resolved := ""
 			for _, c := range candidates {
-				if _, err := os.Stat(c); err == nil {
+				if t.IsFile(c) {
 					resolved = c
 					break
 				}

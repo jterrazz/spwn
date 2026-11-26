@@ -94,6 +94,10 @@ L1 starts once the owner has read ADR-073: mode A gives one Local Network row, i
 - **M8, automatic login only from a Machinefile**: a Mac setting that turns automatic login on for a headless Mac, never on by default, declared in the owner's own Machinefile (the Mac mini as an always-on Mac, below). Proof: a story for default off and for applied, drift and undo.
 - **M9, `spwn uninstall`** (below) removes the link, the engine's registration and the app, leaving no BTM row after the Trash. The owner's `sudo sfltool resetbtm` and the (-) on old Local Network rows stay his, once per Mac.
 
+## The project's reads not yet through its root (2026-11-26)
+
+ADR-099 decision 6 reads the declaration through `platform.Tree`. Left as plain reads: the package cache's (`packages/dependency/internal/manifest/loader.go`'s `DirResolver` and `SkillsFS`, `internal/adapters/local/hydrate.go`), which reads what an install wrote, not the project; the `~/.spwn` organization and team files (`packages/project/organization.go`, `team.go`); the upward search for `spwn.yaml` (`internal/discovery/`). The record's FIFO and size refusals at `.spwn/applied.json` (`local.ErrTooLarge` for the size) reach the surface as raw errors, with no code of their own. Proof owed: a real-disk test per read once each goes through a root, and a coded refusal for the record.
+
 ## `station uninstall` undoes its own writes
 
 Today removal is a recipe by hand ([Getting started](docs/start/getting-started.md#5-remove-what-it-put-down)), and `station uninstall` is an unknown command (QA, 2026-11-21). The command undoes what station wrote, by its ledger (`ledger.json`) and the Footprint's rows, never by a path list of its own: the engine's two jobs booted out, the plists, Station.app, the `# >>> station >>>` blocks, the keys `init` set in the owner's files, the folders, then its own binary last, and `--keep-data` for the VMs.

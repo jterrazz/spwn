@@ -17,6 +17,7 @@ import (
 
 	"spwn.sh/packages/dependency"
 	"spwn.sh/packages/dependency/refs"
+	"spwn.sh/packages/platform"
 	intmanifest "spwn.sh/packages/project/internal/manifest"
 	"spwn.sh/packages/project/internal/resolve"
 
@@ -75,6 +76,10 @@ type Input struct {
 	Root     string
 	Manifest *intmanifest.Manifest
 
+	// Tree is Root, read through a root no path of the declaration can
+	// leave; every rule reads the project through it. Nil: Run opens it.
+	Tree *platform.Tree
+
 	// AgentRefs are the deployable agents (referenced by some world).
 	AgentRefs []AgentRef
 
@@ -104,6 +109,10 @@ type Input struct {
 // Run executes every rule of the declaration against the input and
 // returns all issues; the lockfile's rule is Lockfile's.
 func Run(in Input) []Issue {
+	if in.Tree == nil {
+		in.Tree = platform.Within(in.Root)
+		defer in.Tree.Close()
+	}
 	var out []Issue
 	rules := []func(Input) []Issue{
 		ruleManifestVersion,
@@ -111,6 +120,7 @@ func Run(in Input) []Issue {
 		ruleWorldsMap,
 		ruleWorldNames,
 		ruleReservedWorldNames,
+		ruleAgentNames,
 		ruleAgentDirsExist,
 		ruleAgentStructure,
 		ruleAgentYAMLParses,
@@ -156,6 +166,33 @@ const MaxAgentNameLen = 63
 // names at creation time, before anything is written to disk.
 func IsValidAgentName(name string) bool {
 	return name != "" && len(name) <= MaxAgentNameLen && slugRe.MatchString(name)
+}
+
+// IsOneName reports whether name is one folder name: not empty, not "."
+// or "..", and holding no separator and no NUL. A declared agent that is
+// not one is never joined to a path.
+func IsOneName(name string) bool {
+	return name != "" && name != "." && name != ".." && !strings.ContainsAny(name, "/\\\x00")
+}
+
+func ruleAgentNames(in Input) []Issue {
+	if in.Manifest == nil {
+		return nil
+	}
+	var out []Issue
+	for _, world := range sortedKeys(in.Manifest.Worlds) {
+		for i, name := range in.Manifest.Worlds[world].Agents {
+			if IsOneName(name) {
+				continue
+			}
+			out = append(out, Issue{
+				Level: LevelError, Path: fmt.Sprintf("spwn.yaml#worlds.%s.agents[%d]", world, i),
+				Message: fmt.Sprintf("agent %q leaves the project: an agent is one folder of spwn/agents/", name),
+				Hint:    "name the agent by its folder, e.g. `agents: [neo]`",
+			})
+		}
+	}
+	return out
 }
 
 // ErrInvalidWorkspaceName is the error WorkspaceName wraps.
@@ -320,7 +357,7 @@ func ruleReservedWorldNames(in Input) []Issue {
 func ruleAgentDirsExist(in Input) []Issue {
 	var out []Issue
 	for _, a := range in.AgentRefs {
-		if a.Exists {
+		if a.Exists || !IsOneName(a.Name) {
 			continue
 		}
 		out = append(out, Issue{
@@ -351,7 +388,7 @@ func ruleAgentStructure(in Input) []Issue {
 		}
 		for _, r := range required {
 			full := filepath.Join(a.Path, r.rel)
-			info, err := os.Stat(full)
+			info, err := in.tree().Stat(full)
 			if err != nil {
 				out = append(out, Issue{
 					Level: r.level, Path: relPath(in.Root, full),
@@ -436,8 +473,8 @@ func (a *agentYAML) UnmarshalYAML(node *yaml.Node) error {
 	return nil
 }
 
-func loadAgentYAML(dir string) (*agentYAML, error) {
-	data, err := os.ReadFile(filepath.Join(dir, "agent.yaml"))
+func loadAgentYAML(t *platform.Tree, dir string) (*agentYAML, error) {
+	data, err := t.ReadFile(filepath.Join(dir, "agent.yaml"))
 	if err != nil {
 		return nil, err
 	}
@@ -455,7 +492,7 @@ func ruleAgentYAMLParses(in Input) []Issue {
 			continue
 		}
 		yamlPath := filepath.Join(a.Path, "agent.yaml")
-		data, err := os.ReadFile(yamlPath)
+		data, err := in.tree().ReadFile(yamlPath)
 		if err != nil {
 			if os.IsNotExist(err) {
 				continue
@@ -492,7 +529,7 @@ func ruleAgentYAMLLegacyKeys(in Input) []Issue {
 			continue
 		}
 		yamlPath := filepath.Join(a.Path, "agent.yaml")
-		data, err := os.ReadFile(yamlPath)
+		data, err := in.tree().ReadFile(yamlPath)
 		if err != nil {
 			continue
 		}
@@ -521,7 +558,7 @@ func ruleAgentDescription(in Input) []Issue {
 		if !a.Exists {
 			continue
 		}
-		parsed, err := loadAgentYAML(a.Path)
+		parsed, err := loadAgentYAML(in.tree(), a.Path)
 		if err != nil {
 			continue
 		}
@@ -636,7 +673,7 @@ func rulePackVersionConflict(in Input) []Issue {
 			if a == nil || !a.Exists {
 				continue
 			}
-			parsed, err := loadAgentYAML(a.Path)
+			parsed, err := loadAgentYAML(in.tree(), a.Path)
 			if err != nil {
 				continue
 			}
@@ -684,7 +721,7 @@ func ruleRuntimeBackendConflict(in Input) []Issue {
 			if a == nil || !a.Exists {
 				continue
 			}
-			parsed, err := loadAgentYAML(a.Path)
+			parsed, err := loadAgentYAML(in.tree(), a.Path)
 			if err != nil || parsed.Runtime.Backend == "" {
 				continue
 			}
@@ -740,7 +777,7 @@ func rulePacksExist(in Input) []Issue {
 			return []Issue{{
 				Level: LevelError, Path: location,
 				Message: fmt.Sprintf("dependency %q is invalid", raw),
-				Hint:    invalidRefHint(in.Root, raw),
+				Hint:    invalidRefHint(in.tree(), in.Root, raw),
 			}}
 		}
 
@@ -785,7 +822,7 @@ func rulePacksExist(in Input) []Issue {
 		if !a.Exists {
 			continue
 		}
-		parsed, err := loadAgentYAML(a.Path)
+		parsed, err := loadAgentYAML(in.tree(), a.Path)
 		if err != nil {
 			continue
 		}
@@ -801,7 +838,7 @@ func ruleLockfileConsistent(in Input) []Issue {
 	if in.Manifest == nil {
 		return nil
 	}
-	lock, err := dependency.LoadLockfile(in.Root)
+	lock, err := dependency.ReadLockfile(in.tree())
 	if err != nil {
 		return []Issue{{
 			Level: LevelError, Path: dependency.LockFileName,
@@ -830,7 +867,7 @@ func ruleLockfileConsistent(in Input) []Issue {
 		if !a.Exists {
 			continue
 		}
-		parsed, err := loadAgentYAML(a.Path)
+		parsed, err := loadAgentYAML(in.tree(), a.Path)
 		if err != nil {
 			continue
 		}
@@ -879,7 +916,7 @@ func ruleRuntimeSupported(in Input) []Issue {
 		if !a.Exists {
 			continue
 		}
-		parsed, err := loadAgentYAML(a.Path)
+		parsed, err := loadAgentYAML(in.tree(), a.Path)
 		if err != nil || parsed.Runtime.Backend == "" {
 			continue
 		}
@@ -902,9 +939,17 @@ func ruleMarkdownImports(in Input) []Issue {
 			continue
 		}
 		entryPath := filepath.Join(a.Path, "AGENTS.md")
-		result, err := resolve.Walk(a.Path, entryPath)
+		result, err := resolve.Walk(in.tree(), a.Path, entryPath)
 		if err != nil {
 			continue
+		}
+		for _, ref := range result.Outside {
+			out = append(out, Issue{
+				Level:   LevelError,
+				Path:    fmt.Sprintf("%s @%s", relPath(in.Root, ref.Source), ref.Target),
+				Message: "@-import " + ref.Target + " leaves the project",
+				Hint:    "import a file of the project, or remove the reference",
+			})
 		}
 		for _, ref := range result.Missing {
 			out = append(out, Issue{
@@ -930,9 +975,9 @@ func ruleMarkdownImports(in Input) []Issue {
 
 func ruleSkillFrontmatter(in Input) []Issue {
 	var out []Issue
-	for _, path := range collectSkillFiles(in.Root) {
+	for _, path := range collectSkillFiles(in.tree(), in.Root) {
 		rel := relPath(in.Root, path)
-		fm, err := ParseMarkdownFrontmatter(path)
+		fm, err := ParseMarkdownFrontmatter(in.tree(), path)
 		if err != nil {
 			out = append(out, Issue{
 				Level: LevelError, Path: rel,
@@ -967,10 +1012,10 @@ func ruleSkillFrontmatter(in Input) []Issue {
 	return out
 }
 
-func collectSkillFiles(root string) []string {
+func collectSkillFiles(t *platform.Tree, root string) []string {
 	var out []string
-	for _, rel := range skillSearchRoots(root) {
-		_ = filepath.WalkDir(rel, func(path string, d os.DirEntry, err error) error {
+	for _, rel := range skillSearchRoots(t, root) {
+		_ = t.WalkDir(rel, func(path string, d os.DirEntry, err error) error {
 			if err != nil || d.IsDir() {
 				return nil
 			}
@@ -984,12 +1029,12 @@ func collectSkillFiles(root string) []string {
 	return out
 }
 
-func skillSearchRoots(root string) []string {
+func skillSearchRoots(t *platform.Tree, root string) []string {
 	var roots []string
 
 	roots = append(roots, filepath.Join(root, "spwn", "skills"))
 
-	if entries, err := os.ReadDir(filepath.Join(root, "spwn", "tools")); err == nil {
+	if entries, err := t.ReadDir(filepath.Join(root, "spwn", "tools")); err == nil {
 		for _, e := range entries {
 			if e.IsDir() {
 				roots = append(roots, filepath.Join(root, "spwn", "tools", e.Name(), "skills"))
@@ -1033,8 +1078,16 @@ func ruleKnowledgePath(in Input) []Issue {
 		if !filepath.IsAbs(resolved) {
 			resolved = filepath.Join(in.Root, path)
 		}
-		info, err := os.Stat(resolved)
-		if err != nil || !info.IsDir() {
+		if !in.tree().Holds(resolved) {
+			out = append(out, Issue{
+				Level:   LevelError,
+				Path:    "spwn.yaml#worlds." + name + ".knowledge",
+				Message: fmt.Sprintf("knowledge path %q leaves the project", path),
+				Hint:    "keep the world's knowledge in a folder of the project, e.g. `knowledge: ./knowledge`",
+			})
+			continue
+		}
+		if !in.tree().IsDir(resolved) {
 			out = append(out, Issue{
 				Level:   LevelWarning,
 				Path:    "spwn.yaml#worlds." + name + ".knowledge",
@@ -1051,7 +1104,7 @@ func ruleHookEventsSupported(in Input) []Issue {
 		return nil
 	}
 	hooksDir := filepath.Join(in.Root, "spwn", "hooks")
-	entries, err := os.ReadDir(hooksDir)
+	entries, err := in.tree().ReadDir(hooksDir)
 	if err != nil {
 		return nil
 	}
@@ -1064,7 +1117,7 @@ func ruleHookEventsSupported(in Input) []Issue {
 		if !a.Exists {
 			continue
 		}
-		y, ferr := loadAgentYAML(a.Path)
+		y, ferr := loadAgentYAML(in.tree(), a.Path)
 		if ferr != nil || y == nil {
 			continue
 		}
@@ -1098,7 +1151,7 @@ func ruleHookEventsSupported(in Input) []Issue {
 		}
 		hookName := strings.TrimSuffix(e.Name(), ".yaml")
 		path := filepath.Join(hooksDir, e.Name())
-		data, rerr := os.ReadFile(path)
+		data, rerr := in.tree().ReadFile(path)
 		if rerr != nil {
 			continue
 		}
@@ -1204,7 +1257,7 @@ func relPath(root, path string) string {
 	return rel
 }
 
-func invalidRefHint(root, raw string) string {
+func invalidRefHint(t *platform.Tree, root, raw string) string {
 	name := strings.TrimSpace(raw)
 	name = strings.TrimPrefix(name, "@")
 	for _, retired := range []string{"local:", "skill:", "tool:", "hook:"} {
@@ -1214,18 +1267,18 @@ func invalidRefHint(root, raw string) string {
 		}
 	}
 
-	if name != "" && !strings.ContainsAny(name, ":/") {
+	if IsOneName(name) && !strings.Contains(name, ":") {
 		var matches []string
-		if st, err := os.Stat(filepath.Join(root, "spwn", "skills", name+".md")); err == nil && !st.IsDir() {
+		if t.IsFile(filepath.Join(root, "spwn", "skills", name+".md")) {
 			matches = append(matches, "skill/"+name)
 		}
-		if st, err := os.Stat(filepath.Join(root, "spwn", "tools", name)); err == nil && st.IsDir() {
+		if t.IsDir(filepath.Join(root, "spwn", "tools", name)) {
 			matches = append(matches, "tool/"+name)
 		}
-		if st, err := os.Stat(filepath.Join(root, "spwn", "hooks", name+".yaml")); err == nil && !st.IsDir() {
+		if t.IsFile(filepath.Join(root, "spwn", "hooks", name+".yaml")) {
 			matches = append(matches, "hook/"+name)
 		}
-		if st, err := os.Stat(filepath.Join(root, "spwn", "commands", name+".md")); err == nil && !st.IsDir() {
+		if t.IsFile(filepath.Join(root, "spwn", "commands", name+".md")) {
 			matches = append(matches, "command/"+name)
 		}
 		if len(matches) == 1 {
@@ -1308,5 +1361,16 @@ func editDistance(a, b string) int {
 // lockfile. Run leaves it out, so a declaration is judged apart from
 // its drift.
 func Lockfile(in Input) []Issue {
+	if in.Tree == nil {
+		in.Tree = platform.Within(in.Root)
+		defer in.Tree.Close()
+	}
 	return ruleLockfileConsistent(in)
+}
+
+func (in Input) tree() *platform.Tree {
+	if in.Tree != nil {
+		return in.Tree
+	}
+	return platform.Within(in.Root)
 }

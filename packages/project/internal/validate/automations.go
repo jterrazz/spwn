@@ -2,7 +2,6 @@ package validate
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -10,6 +9,7 @@ import (
 
 	"github.com/robfig/cron/v3"
 
+	"spwn.sh/packages/platform"
 	intmanifest "spwn.sh/packages/project/internal/manifest"
 )
 
@@ -86,7 +86,7 @@ func ruleAutomations(in Input) []Issue {
 			}
 
 			if hasFS {
-				out = append(out, validateFS(in.Root, pathPrefix+".on.fs", a.On.FS)...)
+				out = append(out, validateFS(in.tree(), in.Root, pathPrefix+".on.fs", a.On.FS)...)
 			}
 
 			hasPrompt := strings.TrimSpace(a.Prompt) != ""
@@ -109,7 +109,7 @@ func ruleAutomations(in Input) []Issue {
 			}
 
 			if hasCommand {
-				out = append(out, validateAutomationCommandRef(in.Root, pathPrefix+".command", a.Command)...)
+				out = append(out, validateAutomationCommandRef(in.tree(), in.Root, pathPrefix+".command", a.Command)...)
 			}
 
 			switch a.Catchup {
@@ -143,7 +143,7 @@ func ruleAutomations(in Input) []Issue {
 	return out
 }
 
-func validateFS(root, pathPrefix string, fs *intmanifest.FSTrigger) []Issue {
+func validateFS(t *platform.Tree, root, pathPrefix string, fs *intmanifest.FSTrigger) []Issue {
 	var out []Issue
 
 	if strings.TrimSpace(fs.Path) == "" {
@@ -170,8 +170,17 @@ func validateFS(root, pathPrefix string, fs *intmanifest.FSTrigger) []Issue {
 	if !filepath.IsAbs(resolved) {
 		resolved = filepath.Join(root, resolved)
 	}
-	if !pathHasGlob {
-		if info, err := os.Stat(resolved); err != nil {
+	outside := !t.Holds(resolved)
+	if outside && !pathHasGlob {
+		out = append(out, Issue{
+			Level:   LevelInfo,
+			Path:    pathPrefix + ".path",
+			Message: fmt.Sprintf("watch path %q is outside the project: not checked", strings.TrimSpace(fs.Path)),
+			Hint:    "the watcher reads it when the world runs; a path of the project is checked here",
+		})
+	}
+	if !pathHasGlob && !outside {
+		if info, err := t.Stat(resolved); err != nil {
 			out = append(out, Issue{
 				Level:   LevelError,
 				Path:    pathPrefix + ".path",
@@ -265,7 +274,7 @@ func validateFS(root, pathPrefix string, fs *intmanifest.FSTrigger) []Issue {
 	return out
 }
 
-func validateAutomationCommandRef(root, pathPrefix, ref string) []Issue {
+func validateAutomationCommandRef(t *platform.Tree, root, pathPrefix, ref string) []Issue {
 	var out []Issue
 	const prefix = "command/"
 	if !strings.HasPrefix(ref, prefix) {
@@ -288,7 +297,7 @@ func validateAutomationCommandRef(root, pathPrefix, ref string) []Issue {
 		return out
 	}
 	target := filepath.Join(root, "spwn", "commands", name+".md")
-	if _, err := os.Stat(target); err != nil {
+	if _, err := t.Stat(target); err != nil {
 		out = append(out, Issue{
 			Level:   LevelError,
 			Path:    pathPrefix,

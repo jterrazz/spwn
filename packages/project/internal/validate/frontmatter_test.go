@@ -5,6 +5,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"spwn.sh/packages/platform"
 )
 
 // TestParseMarkdownFrontmatter_happyPath: canonical "---\n...\n---"
@@ -109,7 +111,9 @@ func TestParseMarkdownFrontmatter_fromFile(t *testing.T) {
 	if err := os.WriteFile(path, []byte("---\nname: f\ndescription: g\n---\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	fm, err := ParseMarkdownFrontmatter(path)
+	tree := platform.Within(dir)
+	defer tree.Close()
+	fm, err := ParseMarkdownFrontmatter(tree, path)
 	if err != nil {
 		t.Fatalf("parse: %v", err)
 	}
