@@ -9,7 +9,7 @@ Every Spwn dependency, whether shipped in the built-in catalog or authored under
 ## Key types
 
 - `Schema`: on-disk shape of `tool.yaml` (name, version, dependencies, install spec, files, verify).
-- `Parse(Resolver, ParseOptions)`, returning `*Parsed`: the single entry point. `FSResolver` reads an `fs.FS`: the embedded catalog, or a project tool's folder through a root opened at it inside the project's root (`platform.FSUnder`); a `files:` source that leaves the tool's folder is refused by its name (`ErrLeavesTheTool`) before anything is read, and a link there to elsewhere, in the project or outside it, by the root.
+- `Parse(Resolver, ParseOptions)`, returning `*Parsed`: the single entry point. `FSResolver` reads an `fs.FS`: the embedded catalog, or a project tool's folder through a root opened at it inside the project's root (`platform.FSUnder`); a `files:` source that leaves the tool's folder is refused by its name (`ErrLeavesTheTool`) before anything is read, and a link inside the tool's folder to elsewhere, in the project or outside it, by the root (`platform.ErrLink`); `LoadTool` refuses a tool's folder, `spwn/` or `spwn/tools/` that is itself a link.
 - `Ref`, `ParseRef(string)` returning a `Ref`: classify a ref as `KindSpwnBuiltin`, `KindRegistry`, `KindLocalSkill`, `KindLocalTool`, `KindLocalHook`, or `KindInvalid` (bare names, unknown schemes).
 - `SplitVersion`, `Canonical`: strip and normalise `@version` suffixes.
 - `ResolveTool` / `ResolveSkill`: check whether a ref resolves to a real on-disk target.
