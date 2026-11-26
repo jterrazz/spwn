@@ -5,6 +5,8 @@
 
 Written 2026-11-06 from the owner's round 13 decision M1 and the code that carries it.
 
+Superseded in part by [ADR-107](107-activity-is-sampled-by-who-looks-kept-in-tiers-of-mean-and-max-for-30-days-and-streamed-as-points.md): how often the engine samples a machine, and the history's shape and horizon, four tiers of mean and max kept 30 days in place of 24 h of points in memory.
+
 ## Context
 
 v2 printed a few counters in `station status` and read each of them on its own. The owner asked for monitoring of every machine, Macs and VMs: CPU, memory, swap, disk read and write, network in and out with their totals, load, thermal and battery on a Mac, free space, uptime, the busiest processes, with history and graphs in the TUI and the menu bar and plain values in the CLI.
