@@ -10,6 +10,16 @@ export { ConfirmDialog } from './confirm-dialog';
 export { CodeBlock } from './code-block';
 export { aDialogIsOpen, Dialog, Modal } from './dialog';
 export { DotStrip } from './dot-strip';
+export {
+    Guide,
+    type GuideAction,
+    type GuideProgress,
+    type GuidePrompt,
+    type GuideProps,
+    type GuideStep,
+    type GuideStepStatus,
+    type GuideView,
+} from './guide';
 export { Facts } from './facts';
 export {
     FleetBoard,

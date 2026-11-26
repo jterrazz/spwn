@@ -31,6 +31,8 @@ import { FleetBoard } from '../../ui/fleet-board';
 import { FLEET_BOARD_STORIES } from '../../ui/fleet-board.stories';
 import { FormField } from '../../ui/form-field';
 import { FORM_FIELD_STORIES } from '../../ui/form-field.stories';
+import { Guide } from '../../ui/guide';
+import { GUIDE_STORIES } from '../../ui/guide.stories';
 import { Icon } from '../../ui/icon';
 import { IconButton } from '../../ui/icon-button';
 import { ICON_BUTTON_STORIES } from '../../ui/icon-button.stories';
@@ -213,6 +215,7 @@ export const ENTRIES: readonly Entry[] = [
         frame: 'dialog',
         stories: CONFIRM_DIALOG_STORIES,
     }),
+    entry('Guide', 'Dialogs', { Component: Guide, frame: 'sheet', stories: GUIDE_STORIES }),
     entry('Popover', 'Dialogs', {
         Component: PopoverSample,
         frame: 'block',

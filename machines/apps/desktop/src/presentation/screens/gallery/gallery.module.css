@@ -94,6 +94,18 @@
     border-radius: var(--radius-panel);
     background: var(--canvas);
 }
+.sheet .sample {
+    width: 100%;
+}
+.sheet .drawn {
+    display: block;
+    position: relative;
+    height: 540px;
+    overflow: hidden;
+    transform: translateZ(0);
+    border-radius: var(--radius-panel);
+    background: var(--canvas);
+}
 .story {
     font-size: var(--text-label);
     color: var(--t3);
