@@ -122,7 +122,7 @@ type plannedWorld struct {
 
 var (
 	startWorld   = spawnRunE
-	askTerminal  = cliproject.StdinIsTerminal
+	askTerminal  = cliproject.AskTerminal
 	runningWorld = findRunningWorldByConfig
 )
 

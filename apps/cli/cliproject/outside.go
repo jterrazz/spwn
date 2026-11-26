@@ -12,7 +12,6 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"golang.org/x/term"
 	"gopkg.in/yaml.v3"
 
 	"spwn.sh/apps/cli/ui"
@@ -201,8 +200,6 @@ func rememberGrants(root string, reaches []Reach) error {
 	return os.WriteFile(GrantsPath(), data, 0o600)
 }
 
-// StdinIsTerminal reports whether the answer can be asked of a person.
-func StdinIsTerminal() bool { return term.IsTerminal(int(os.Stdin.Fd())) }
 
 // Allowed is what Consent let through: the reaches a typed yes allowed,
 // kept only once the run they were asked for has succeeded.
@@ -231,8 +228,9 @@ func (a Allowed) Keep(of []Reach) error {
 // Consent allows the reaches of the project at root: one already kept for
 // this project folder, path and access passes silently; with yes the rest
 // are allowed for this run only and each is printed to out, never kept;
-// on a terminal the rest are shown once and asked, and a typed yes is
-// returned to be kept once the run succeeds. Off a terminal and without
+// on a terminal the rest are shown once and asked, what was typed before
+// the ask discarded when in is a terminal, and a typed yes is returned to
+// be kept once the run succeeds. Off a terminal and without
 // yes it refuses with a NotGrantedError; a no refuses too.
 func Consent(root string, reaches []Reach, yes, terminal bool, in io.Reader, out io.Writer) (Allowed, error) {
 	grants := readGrants()
@@ -252,6 +250,11 @@ func Consent(root string, reaches []Reach, yes, terminal bool, in io.Reader, out
 		return Allowed{}, nil
 	case !terminal:
 		return Allowed{}, &NotGrantedError{Root: projectKey(root), Reaches: asked}
+	}
+	if f, ok := in.(*os.File); ok {
+		if err := flushInput(int(f.Fd())); err != nil {
+			return Allowed{}, fmt.Errorf("the host paths outside the project were not allowed: what was typed before the ask could not be discarded: %w", err)
+		}
 	}
 	fmt.Fprintf(out, "\n  spwn.yaml names host paths outside the project %q:\n", projectKey(root))
 	for _, r := range asked {

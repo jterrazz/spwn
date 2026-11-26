@@ -37,9 +37,9 @@ func watchingProject(t *testing.T, path string) (root, outside string) {
 
 func runDaemon(t *testing.T, terminal bool, answer string) (string, error) {
 	t.Helper()
-	was := stdinIsTerminal
-	stdinIsTerminal = func() bool { return terminal }
-	t.Cleanup(func() { stdinIsTerminal = was })
+	was := askTerminal
+	askTerminal = func() bool { return terminal }
+	t.Cleanup(func() { askTerminal = was })
 	var errOut bytes.Buffer
 	daemonCmd.SetIn(strings.NewReader(answer))
 	daemonCmd.SetErr(&errOut)

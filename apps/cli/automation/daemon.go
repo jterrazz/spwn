@@ -21,7 +21,7 @@ import (
 
 var daemonYes bool
 
-var stdinIsTerminal = cliproject.StdinIsTerminal
+var askTerminal = cliproject.AskTerminal
 
 func init() {
 	daemonCmd.Flags().BoolVar(&daemonYes, "yes", false, "Allow, for this run only, the watch folders outside the project that spwn.yaml names, printing each; never kept")
@@ -77,7 +77,7 @@ resumes at the next scheduled time.`,
 		if err != nil {
 			return err
 		}
-		allowed, err := cliproject.Consent(p.Root, reaches, daemonYes, stdinIsTerminal(), cmd.InOrStdin(), cmd.ErrOrStderr())
+		allowed, err := cliproject.Consent(p.Root, reaches, daemonYes, askTerminal(), cmd.InOrStdin(), cmd.ErrOrStderr())
 		if err != nil {
 			return fmt.Errorf("%w\n%s", err, daemonRefusalHint)
 		}
