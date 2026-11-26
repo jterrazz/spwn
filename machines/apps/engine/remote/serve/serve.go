@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"slices"
 	"sync"
 
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
@@ -124,7 +125,9 @@ func answer(ctx context.Context, f api.Frame, out *writer, calls Calls, word cal
 		var run call.Progress = p
 		g := &guided{progress: p}
 		if gc, ok := calls.(GuidedCalls); ok {
-			if g.family, g.acts = gc.Guide(f.Target.Ref(), f.Call); g.family != "" && g.acts != nil {
+			meta, acts := gc.Guide(f.Target.Ref(), f.Call)
+			g.family, g.acts, g.repairs = meta.Guide, acts, repairOf(meta, f.In)
+			if g.family != "" && g.acts != nil {
 				run = g
 			}
 		}
@@ -210,25 +213,41 @@ func (p progress) Done(task string, err error) {
 type Acts interface {
 	// value: the engine's act board: a guided call's phase kept under its
 	// act, its id answered, and its first Guide when the phase put it; its
-	// end, with the failure it ended on, nil when it was made.
+	// end, with the failure it ended on, nil when it was made; and the
+	// refusal of a repair its Guide offered once it ended.
 	Phase(family string, ph guide.Phase) (string, *guide.Guide)
 	End(id string, ended guide.Ended, failed *call.WireError)
+	Refused(id string, refusal *call.WireError)
 }
 
 type GuidedCalls interface {
 	// value: a stream's calls that are the window's door onto an engine:
-	// the act family a call is guided as at its target and the board it is
-	// kept on, none for a call no Guide follows or that runs at another
-	// machine.
-	Guide(target machine.Ref, name string) (string, Acts)
+	// the call as this machine's registry declares it (its Guide and its
+	// Repairs) and the board its acts are kept on; a zero Meta and no
+	// board for a call that runs at another machine.
+	Guide(target machine.Ref, name string) (call.Meta, Acts)
+}
+
+func repairOf(m call.Meta, in json.RawMessage) string {
+	if m.Repairs == nil {
+		return ""
+	}
+	family, subject := m.Repairs(in)
+	if family == "" || subject == "" {
+		return ""
+	}
+	return guide.ID(family, subject)
 }
 
 type guided struct {
 	progress
 	family string
 	acts   Acts
-	act    string
-	step   string
+	// value: the act this call is the repair of, empty for a call that
+	// repairs none.
+	repairs string
+	act     string
+	step    string
 	// value: the step each task was told at, which its end belongs to.
 	told map[string]string
 	// value: the act's first Guide, until the frame that first names the
@@ -266,8 +285,13 @@ func (g *guided) Done(task string, err error) {
 
 func (g *guided) end(err error) {
 	// invariant: a call cut by its context did not fail: it ends interrupted
-	// at its step, as an engine that stopped under it does.
+	// at its step, as an engine that stopped under it does. A repair the
+	// engine refused is told to the act it repairs.
 	switch {
+	case g.act == "" && g.repairs != "" && g.acts != nil && err != nil:
+		if w := call.ToWire(err, g.word); refusal(err, w) {
+			g.acts.Refused(g.repairs, w)
+		}
 	case g.act == "":
 	case err == nil:
 		g.acts.End(g.act, guide.EndedDone, nil)
@@ -276,4 +300,13 @@ func (g *guided) end(err error) {
 	default:
 		g.acts.End(g.act, guide.EndedFailed, call.ToWire(err, g.word))
 	}
+}
+
+func refusal(err error, w *call.WireError) bool {
+	// invariant: a question the call asks first, the owner's no, and a call
+	// cut by its context are no refusal of the repair.
+	if errors.Is(err, context.Canceled) || w == nil {
+		return false
+	}
+	return !slices.Contains([]fail.Type{fail.NeedsConfirmation, fail.Declined, fail.Interrupted}, w.Type)
 }

@@ -65,14 +65,29 @@ class Door:
         self.home, env = sandbox(seed, fixture)
         self.env = env
         shutil.copytree(turned(seed, fixture), self.home, symlinks=True, dirs_exist_ok=True)
+        self.next = 0
+        self.station = self.open()
+
+    def open(self):
+        """Starts this door's engine over its HOME and answers the version its hello names."""
         self.process = subprocess.Popen(
-            [str(binary), "guest", "serve", "--stdio"], cwd=self.home, env=env,
+            [str(binary), "guest", "serve", "--stdio"], cwd=self.home, env=self.env,
             stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True,
         )
         self.lines = queue.Queue()
         threading.Thread(target=self.pump, daemon=True).start()
-        self.next = 0
-        self.station = self.ask([{"hello": {"version": "dev", "calls": None}}])[0][0]["hello"]["version"]
+        return self.ask([{"hello": {"version": "dev", "calls": None}}])[0][0]["hello"]["version"]
+
+    def prefer(self, preferences):
+        """Ends this door's engine, sets `preferences` in This Mac's preferences of the world it wrote back, and opens
+        the door again over the same HOME, its acts and records kept: a world the owner changed between two
+        gestures, as a preference set by hand."""
+        self.stop()
+        world = self.home / "world.json"
+        content = json.loads(world.read_text())
+        content["macs"][content["this_mac"]].setdefault("preferences", {}).update(preferences)
+        world.write_text(json.dumps(content, indent=2) + "\n")
+        self.open()
 
     def pump(self):
         for line in self.process.stdout:

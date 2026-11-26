@@ -70,6 +70,10 @@ type Call[D, In, Out any] struct {
 	// reported as phases (core/guide) and kept on the engine's act board;
 	// empty for a call no Guide follows.
 	Guide string
+	// value: the act a Guide offers this call as the repair of, its family
+	// and its subject as the input names it; nil for a call that repairs
+	// no act.
+	Repairs func(in In) (family, subject string)
 }
 
 type Asker interface {
@@ -124,6 +128,9 @@ type Meta struct {
 	// its wire form; nil for a call that keeps no line.
 	Journal func(in, out any, err error) []journal.Line
 	Guide   string
+	// value: the call's Repairs over its In, its Go value or its wire form;
+	// nil for a call that repairs no act.
+	Repairs func(in any) (family, subject string)
 }
 
 type Handler interface {
@@ -200,7 +207,21 @@ func Bind[D, In, Out any](c Call[D, In, Out], d D) Handler {
 		Name: c.Name, Section: c.Section, Where: c.Where, Applies: c.Applies, Needs: c.Needs, Confirm: c.Confirm, ConfirmBy: c.ConfirmBy, Errors: c.Errors,
 		In: reflect.TypeFor[In]().Name(), Out: reflect.TypeFor[Out]().Name(), InType: reflect.TypeFor[In](), OutType: reflect.TypeFor[Out](),
 		Document: c.Document, Abilities: c.Abilities, Journal: lifted(c.Journal), Guide: c.Guide,
+		Repairs: repairing(c.Repairs),
 	}, runFn: c.Run, deps: d}
+}
+
+func repairing[In any](r func(In) (string, string)) func(in any) (string, string) {
+	if r == nil {
+		return nil
+	}
+	return func(in any) (string, string) {
+		i, err := valueOf[In]("", in)
+		if err != nil {
+			return "", ""
+		}
+		return r(i)
+	}
 }
 
 func lifted[In, Out any](j func(In, Out, error) []journal.Line) func(in, out any, err error) []journal.Line {

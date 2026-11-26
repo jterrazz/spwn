@@ -22,6 +22,7 @@ type StartOut struct {
 
 var Start = call.Call[Deps, VMIn, StartOut]{
 	Name: "machines.start", Where: call.InEngine, Applies: machine.Anywhere, Needs: machines.VMNeeds(), Journal: keptStart,
+	Repairs: func(in VMIn) (string, string) { return machines.GuideCreate, in.VM },
 	Run: func(ctx context.Context, d Deps, in VMIn, _ call.Progress) (StartOut, error) {
 		if err := d.Machines.CheckStart(in.VM); err != nil {
 			return StartOut{}, err
@@ -83,7 +84,8 @@ type DeleteIn struct {
 
 var Delete = call.Call[Deps, DeleteIn, machines.DeleteReport]{
 	Name: "machines.delete", Where: call.InEngine, Applies: machine.Anywhere, Confirm: confirm.Delete, Journal: keptDelete,
-	Errors: []fail.Code{confirm.Needed, confirm.Mismatch, BeingCreated},
+	Errors:  []fail.Code{confirm.Needed, confirm.Mismatch, BeingCreated},
+	Repairs: func(in DeleteIn) (string, string) { return machines.GuideCreate, in.VM },
 	Run: func(ctx context.Context, d Deps, in DeleteIn, _ call.Progress) (machines.DeleteReport, error) {
 		if err := d.Machines.CheckDelete(in.VM); err != nil {
 			return machines.DeleteReport{}, Worded(err)
