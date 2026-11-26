@@ -1162,6 +1162,7 @@
         "confirm.yes-needed",
         "project.invalid",
         "project.link-in-the-way",
+        "project.not-a-file",
         "project.not-found",
         "project.not-written"
       ],
@@ -1187,6 +1188,8 @@
       "schema": "station.project.drift/v1",
       "where": "in-process",
       "errors": [
+        "project.link-in-the-way",
+        "project.not-a-file",
         "project.not-found"
       ],
       "in": "DriftIn",
@@ -1199,6 +1202,7 @@
       "errors": [
         "project.invalid",
         "project.link-in-the-way",
+        "project.not-a-file",
         "project.not-found"
       ],
       "in": "PlanIn",
@@ -1209,6 +1213,8 @@
       "schema": "station.project.show/v1",
       "where": "in-process",
       "errors": [
+        "project.link-in-the-way",
+        "project.not-a-file",
         "project.not-found"
       ],
       "in": "ShowIn",

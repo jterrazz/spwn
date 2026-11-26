@@ -352,6 +352,7 @@
             "project.exists",
             "project.invalid",
             "project.link-in-the-way",
+            "project.not-a-file",
             "project.not-found",
             "project.not-written",
             "project.unknown-example",
