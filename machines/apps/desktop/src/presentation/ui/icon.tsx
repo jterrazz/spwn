@@ -120,6 +120,7 @@ const PATHS = {
             <path d="M5.5 7V5a2.5 2.5 0 015 0v2" />
         </>
     ),
+    pin: <path d="M5.5 2.5h5M6.5 2.5v3.8L4.2 9.5h7.6L9.5 6.3V2.5M8 9.5v4" />,
 } satisfies Record<string, ReactElement>;
 
 export type IconName = keyof typeof PATHS;

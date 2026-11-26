@@ -57,7 +57,10 @@
     color: var(--t3);
 }
 .filter:focus-within {
-    box-shadow: inset 0 0 0 1.5px var(--new);
+    box-shadow: inset 0 0 0 1px var(--line-2);
+}
+.input:focus-visible {
+    outline: none;
 }
 .filter svg {
     width: 14px;
@@ -110,13 +113,23 @@
     color: var(--t2);
     min-width: 0;
 }
-.row[aria-selected='true'] {
-    background: var(--wash);
-    color: var(--t1);
-}
 .row[data-active] {
     background: var(--panel);
     color: var(--t1);
+}
+.row[aria-selected='true'] {
+    --ok: var(--ok-on-primary);
+    --warn: var(--warn-on-primary);
+    --bad: var(--bad-on-primary);
+    --new: var(--new-on-primary);
+    --t3: var(--on-primary);
+
+    background: var(--primary);
+    color: var(--on-primary);
+}
+.row[aria-selected='true'] > span:first-child {
+    background: var(--on-primary);
+    color: var(--primary);
 }
 .row[aria-disabled='true'] {
     cursor: default;

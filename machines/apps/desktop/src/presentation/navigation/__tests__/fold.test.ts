@@ -29,7 +29,7 @@ describe('fold', () => {
     });
 
     test('at the window minimum, the parts that never fold leave room for the space, the `…` and a last segment', () => {
-        // Given - the 1100 px minimum, the sidebar hidden under the bar, and a last segment of 160 px
+        // Given - the 1100 px minimum, the column hidden, and a last segment of 160 px
         const least = fixedWidth() + 140 + FOLD_WIDTH + 160;
 
         // Then - the bar holds them, the Find field kept at its 120 px

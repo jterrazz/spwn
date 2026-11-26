@@ -19,6 +19,7 @@ import { EngineProvider } from '../../dependencies/dependencies';
 import { PAGES } from '../../screens/registry';
 import type { Route } from '../route';
 import { Window } from '../window';
+import { PINNED } from './pinned';
 import { commandsDrawnOver, WORLDS } from './walk';
 
 const recordingFor = await recordingsOf(
@@ -29,7 +30,7 @@ const recordingFor = await recordingsOf(
     'two-macs',
 );
 
-const sidebar = navigation('Sidebar');
+const column = navigation('Column');
 const back = button('Back');
 const forward = button('Forward');
 const HOME: Route = { page: 'home' };
@@ -38,7 +39,7 @@ function windowOver(world: string, initial: Route) {
     const dependencies = composeReplay({ recording: recordingFor(world) });
     return (
         <EngineProvider dependencies={dependencies}>
-            <Window initial={initial} pages={PAGES} />
+            <Window initial={initial} memory={PINNED} pages={PAGES} />
         </EngineProvider>
     );
 }
@@ -58,8 +59,8 @@ describe('Window', () => {
     test("a stopped machine's Overview is quiet: its file's chapters and its delete", async () => {
         // Given - the window on Home over two-macs
         const result = await component.render(windowOver('two-macs', HOME), async (visitor) => {
-            // When - api, which is stopped, is chosen in the sidebar
-            await visitor.click(within(sidebar, button('api stopped')));
+            // When - api, which is stopped, is chosen in the column
+            await visitor.click(within(column, button('api stopped')));
 
             // Then - its header is the engine's, and its Overview asks nothing a stopped machine refuses
             await visitor.see(heading('api stopped'));
@@ -91,7 +92,7 @@ describe('Window', () => {
         // Given - the window on Home over mini-offline
         const result = await component.render(windowOver('mini-offline', HOME), async (visitor) => {
             // When - the Mac that does not answer is opened
-            await visitor.click(within(sidebar, button('mac-mini not seen')));
+            await visitor.click(within(column, button('mac-mini not seen')));
             await visitor.see(heading('mac-mini not seen'));
         });
 
@@ -106,10 +107,10 @@ describe('Window', () => {
         // When - the mini is opened
         const result = await component.render(
             <EngineProvider dependencies={dependencies}>
-                <Window initial={HOME} pages={PAGES} />
+                <Window initial={HOME} memory={PINNED} pages={PAGES} />
             </EngineProvider>,
             async (visitor) => {
-                await visitor.click(within(sidebar, button('mac-mini not seen')));
+                await visitor.click(within(column, button('mac-mini not seen')));
 
                 // Then - its Overview stands on the verdict machines.list gives it, not on the refusal
                 await visitor.see(heading('mac-mini has not been seen for 6 h.'));
@@ -137,7 +138,7 @@ describe('Window', () => {
         });
         const result = await component.render(
             <EngineProvider dependencies={dependencies}>
-                <Window initial={{ page: 'home' }} pages={PAGES} />
+                <Window initial={{ page: 'home' }} memory={PINNED} pages={PAGES} />
             </EngineProvider>,
             async (visitor) => {
                 // When - the window has heard from its transport, and found no core on the disk
@@ -145,7 +146,7 @@ describe('Window', () => {
             },
         );
 
-        // Then - the sidebar is quiet, and Home is the one panel that offers the install
+        // Then - the column is quiet, and Home is the one panel that offers the install
         await expect(result.tree).toMatch(file('./__expected__/no-engine-home.aria.yaml'));
     });
 
@@ -157,11 +158,11 @@ describe('Window', () => {
         });
         const result = await component.render(
             <EngineProvider dependencies={dependencies}>
-                <Window initial={HOME} pages={PAGES} />
+                <Window initial={HOME} memory={PINNED} pages={PAGES} />
             </EngineProvider>,
             async (visitor) => {
                 // When - the window has heard from its transport
-                await visitor.see(within(sidebar, content('Engine connecting')));
+                await visitor.see(within(column, content('Engine connecting')));
             },
         );
 
@@ -197,10 +198,10 @@ describe('Window', () => {
         // When - the window has read it
         const result = await component.render(
             <EngineProvider dependencies={dependencies}>
-                <Window initial={HOME} pages={PAGES} />
+                <Window initial={HOME} memory={PINNED} pages={PAGES} />
             </EngineProvider>,
             async (visitor) => {
-                await visitor.see(within(sidebar, content('the engine is stopping')));
+                await visitor.see(within(column, content('the engine is stopping')));
             },
         );
 
@@ -211,7 +212,7 @@ describe('Window', () => {
     test("the mouse's back and forward buttons walk the history", async () => {
         // Given - the window on Home over two-macs, This Mac opened
         const result = await component.render(windowOver('two-macs', HOME), async (visitor) => {
-            await visitor.click(within(sidebar, button('macbook-pro online')));
+            await visitor.click(within(column, button('macbook-pro online')));
             await visitor.see(heading('macbook-pro online'));
 
             // When - the mouse's back button is released, then its forward button

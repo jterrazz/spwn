@@ -27,3 +27,7 @@
     height: 16px;
     stroke-width: 1.5;
 }
+.button[aria-pressed='true'] {
+    background: var(--raise);
+    color: var(--t1);
+}

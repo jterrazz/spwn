@@ -30,7 +30,7 @@ export type Located = {
 
 export type Path = { route: Route; found: Located | undefined; standing: Shown | undefined };
 
-// value: the Machine space's pages a place segment lists, in the sidebar's order.
+// value: the Machine space's pages a place segment lists: the two that show every Mac at once, then the Library.
 export const PLACES: readonly PlainPage[] = [
     'storage',
     'engine',

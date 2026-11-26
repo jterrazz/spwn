@@ -7,7 +7,7 @@ import type { Shown } from '../words/shown';
 import { RELEASE_WORDS, WINDOW_RELEASE_WORDS, windowAvailableWord } from '../words/words';
 import type { Route } from './route';
 
-import styles from './sidebar.module.css';
+import styles from './column.module.css';
 
 type Go = (to: Route) => void;
 

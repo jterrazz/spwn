@@ -11,12 +11,13 @@ import { recordingsOf } from '../../../../infrastructure/outbound/engine-replay/
 import { stagedReplay } from '../../../../infrastructure/outbound/engine-replay/replay';
 import { NO_OPENER } from '../../../../infrastructure/outbound/opener-tauri/tauri-opener';
 import { EngineProvider } from '../../../dependencies/dependencies';
+import { PINNED } from '../../../navigation/__tests__/pinned';
 import { Window } from '../../../navigation/window';
 import { PAGES } from '../../registry';
 
 const recordingFor = await recordingsOf('two-macs');
 
-const sidebar = navigation('Sidebar');
+const column = navigation('Column');
 const INSTALLED = heading('Spwn is installed. Start the engine next.');
 
 function noEngineWith(script: CoreScriptName) {
@@ -46,7 +47,7 @@ function noEngineWith(script: CoreScriptName) {
                 presence: documentPresence(),
             }}
         >
-            <Window initial={{ page: 'home' }} pages={PAGES} />
+            <Window initial={{ page: 'home' }} memory={PINNED} pages={PAGES} />
         </EngineProvider>
     );
 }
@@ -59,7 +60,7 @@ describe('CorePage', () => {
             await visitor.see(heading('Spwn is not installed on this Mac.'));
         });
 
-        // Then - one panel on Home, and a sidebar whose items wait for an engine
+        // Then - one panel on Home, and a column whose items wait for an engine
         await expect(result.tree).toMatch(file('./__expected__/missing.aria.yaml'));
     });
 
@@ -162,9 +163,9 @@ describe('CorePage', () => {
             // When - the engine is started
             await visitor.click(button('Start the engine'));
 
-            // Then - Home is the engine's, and the sidebar lists its machines
+            // Then - Home is the engine's, and the column lists its machines
             await visitor.see(content('2 things need you.'));
-            await visitor.see(within(sidebar, button('api stopped')));
+            await visitor.see(within(column, button('api stopped')));
         });
         expect(result.errors.text).toBe('');
     });

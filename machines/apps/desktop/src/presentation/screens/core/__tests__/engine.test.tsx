@@ -22,6 +22,7 @@ import { stagedReplay } from '../../../../infrastructure/outbound/engine-replay/
 import type { Recording } from '../../../../infrastructure/outbound/engine-replay/replay';
 import { NO_OPENER } from '../../../../infrastructure/outbound/opener-tauri/tauri-opener';
 import { EngineProvider } from '../../../dependencies/dependencies';
+import { PINNED } from '../../../navigation/__tests__/pinned';
 import { Window } from '../../../navigation/window';
 import { PAGES } from '../../registry';
 
@@ -33,7 +34,7 @@ const recordingFor = await recordingsOf(
     'stories',
 );
 
-const sidebar = navigation('Sidebar');
+const column = navigation('Column');
 const BEHIND = heading('Spwn v0.22.0 is out.');
 const ROW = button('v0.22.0 available Update');
 
@@ -59,13 +60,13 @@ function engineOver(recording: Recording, { script, link }: Over = {}) {
                 presence: documentPresence(),
             }}
         >
-            <Window initial={{ page: 'engine' }} pages={PAGES} />
+            <Window initial={{ page: 'engine' }} memory={PINNED} pages={PAGES} />
         </EngineProvider>
     );
 }
 
 describe('EnginePage', () => {
-    test('a Mac behind the latest release is offered the update, and its sidebar foot says so', async () => {
+    test('a Mac behind the latest release is offered the update, and its column foot says so', async () => {
         // Given - an engine whose reading is behind
         const result = await component.render(
             engineOver(recordingFor('release-behind')),
@@ -74,7 +75,7 @@ describe('EnginePage', () => {
                 await visitor.see(BEHIND);
 
                 // Then - the foot's row names the release as sent
-                await visitor.see(within(sidebar, ROW));
+                await visitor.see(within(column, ROW));
             },
         );
         await expect(result.tree).toMatch(file('./__expected__/engine-behind.aria.yaml'));
@@ -162,7 +163,7 @@ describe('EnginePage', () => {
                 await visitor.see(BEHIND);
 
                 // When - Update is pressed
-                await visitor.click(within(navigation('Sidebar'), ROW));
+                await visitor.click(within(navigation('Column'), ROW));
                 await visitor.click(button('Update'));
 
                 // Then - the update ends, and the engine's new head replaces the offer

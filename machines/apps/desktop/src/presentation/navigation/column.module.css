@@ -1,0 +1,233 @@
+.pinned {
+    grid-row: 2;
+    grid-column: 1;
+    width: 256px;
+    min-height: 0;
+    display: flex;
+    border-right: 1px solid var(--line);
+    background: var(--ground-sidebar);
+}
+.hidden {
+    grid-row: 2;
+    grid-column: 1;
+    width: 0;
+}
+.edge {
+    position: absolute;
+    z-index: 3;
+    top: var(--chrome-row);
+    bottom: 0;
+    left: 0;
+    width: 8px;
+}
+.peek {
+    position: absolute;
+    z-index: 3;
+    top: calc(var(--chrome-row) + var(--space-8));
+    bottom: var(--space-8);
+    left: var(--space-8);
+    width: 256px;
+    display: flex;
+    border: 1px solid var(--line-2);
+    border-radius: var(--radius-card);
+    background: var(--side);
+    box-shadow: var(--shadow-pop);
+    animation: slide 160ms ease-out;
+}
+@keyframes slide {
+    from {
+        opacity: 0;
+        transform: translateX(-12px);
+    }
+}
+.column {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-14);
+    padding: var(--space-14) var(--space-10) var(--space-10);
+    overflow-y: auto;
+}
+.list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-10);
+    flex: 1 1 0;
+    min-height: 160px;
+    overflow-y: auto;
+}
+.group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+.list > .group + .group {
+    margin: 0 calc(-1 * var(--space-10));
+    padding: var(--space-10) var(--space-10) 0;
+    border-top: 1px solid var(--line);
+}
+.caption {
+    display: flex;
+    justify-content: space-between;
+    margin: 0;
+    padding: 0 var(--space-8) var(--space-6);
+    font-size: var(--text-label);
+    font-weight: var(--weight-medium);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--t3);
+}
+.owed {
+    font-weight: var(--weight-medium);
+    color: var(--warn);
+}
+.none {
+    margin: 0;
+    padding: 0 var(--space-8);
+    font-size: var(--text-label);
+    color: var(--t4);
+}
+.need {
+    display: grid;
+    place-items: center;
+    width: 20px;
+    height: 20px;
+    flex: none;
+    border-radius: 50%;
+    background: var(--panel);
+}
+.mac {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+.macRow {
+    display: flex;
+    align-items: center;
+}
+.macRow > button:last-child {
+    flex: 1;
+}
+.fold {
+    all: unset;
+    box-sizing: border-box;
+    display: grid;
+    place-items: center;
+    width: 14px;
+    height: 30px;
+    flex: none;
+    color: var(--t4);
+    cursor: pointer;
+}
+.fold:is(button):hover {
+    color: var(--t1);
+}
+.fold:disabled {
+    cursor: default;
+}
+.fold:focus-visible {
+    outline: 2px solid var(--new);
+    outline-offset: -2px;
+    border-radius: var(--radius-tick);
+}
+.fold > svg {
+    width: 10px;
+    height: 10px;
+    stroke-width: 1.8;
+    transition: transform var(--motion-hover);
+}
+.fold[aria-expanded='true'] > svg {
+    transform: rotate(90deg);
+}
+.vms {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin-left: 20px;
+    padding-left: var(--space-8);
+    border-left: 1px solid var(--line-2);
+}
+.column button > span:first-child {
+    border-radius: 50%;
+}
+.column [aria-current='page'] > span:first-child {
+    background: var(--on-primary);
+    color: var(--primary);
+}
+.column [aria-current='page'],
+.column [aria-current='page']:hover {
+    --ok: var(--ok-on-primary);
+    --warn: var(--warn-on-primary);
+    --bad: var(--bad-on-primary);
+    --new: var(--new-on-primary);
+    --t3: var(--on-primary);
+
+    background: var(--primary);
+    color: var(--on-primary);
+}
+.pin {
+    all: unset;
+    box-sizing: border-box;
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: var(--space-8);
+    height: 32px;
+    padding: 0 var(--space-10);
+    border-radius: var(--radius-control);
+    background: var(--panel);
+    color: var(--t1);
+    font-size: var(--text-body);
+    cursor: pointer;
+}
+.pin:hover {
+    background: var(--raise);
+}
+.pin:focus-visible {
+    outline: 2px solid var(--new);
+    outline-offset: 1px;
+}
+.pin > svg {
+    width: 14px;
+    height: 14px;
+    stroke-width: 1.5;
+}
+.pinLabel {
+    flex: 1;
+}
+.pin > kbd {
+    font: inherit;
+    font-size: var(--text-label);
+    color: var(--t3);
+}
+.release {
+    flex: none;
+    display: flex;
+    gap: var(--space-8);
+    align-items: center;
+    margin: var(--space-8) 0 0;
+    padding: var(--space-6) var(--space-8);
+    border: 1px solid color-mix(in srgb, var(--new) 45%, transparent);
+    border-radius: var(--radius-control);
+    background: color-mix(in srgb, var(--new) 10%, transparent);
+    color: var(--t1);
+    font: inherit;
+    font-size: var(--text-label);
+    text-align: left;
+    cursor: pointer;
+}
+.release:focus-visible {
+    outline: 2px solid var(--new);
+    outline-offset: 1px;
+}
+.releaseText {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.releaseGo {
+    color: var(--new);
+}

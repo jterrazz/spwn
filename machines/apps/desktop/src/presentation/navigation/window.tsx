@@ -1,5 +1,5 @@
 import type { MachinesMacView, OverviewNeed, OverviewReadOutput } from '@jterrazz/station-api';
-import { useCallback, useMemo, useState, useSyncExternalStore } from 'react';
+import { useMemo, useSyncExternalStore } from 'react';
 import type { ComponentType } from 'react';
 
 import { findMachine, macsOf } from '../../domain/machines/machines';
@@ -10,6 +10,8 @@ import { Screen } from '../ui/index';
 import { rollUpState } from '../words/shown';
 import { Boundary } from './boundary';
 import { useCarried } from './carried';
+import { ColumnSlot } from './column';
+import { ColumnState } from './column-state';
 import { Find } from './find';
 import { onTabKey } from './keys';
 import { Lost, useLost } from './lost';
@@ -20,9 +22,9 @@ import type { Opening } from './opened';
 import { PathBar } from './path-bar';
 import { TAB_PANEL } from './route';
 import type { PlainPage, Route } from './route';
+import type { Memory } from './route-memory';
 import { RouterProvider, useRouter } from './router';
 import { useSettledRoute } from './settled';
-import { Sidebar } from './sidebar';
 import { isGlobal } from './spaces';
 import { TITLES } from './titles';
 import { useSpaceKeys } from './use-spaces';
@@ -65,12 +67,13 @@ export type WindowProps = {
     pages: Pages;
     Gallery?: ComponentType | undefined;
     onRoute?: ((route: Route) => void) | undefined;
+    memory?: Memory | undefined;
 };
 
-export function Window({ initial, pages, Gallery, onRoute }: WindowProps) {
+export function Window({ initial, pages, Gallery, onRoute, memory }: WindowProps) {
     return (
         <RouterProvider initial={initial} onRoute={onRoute}>
-            <Frame Gallery={Gallery} pages={pages} />
+            <Frame Gallery={Gallery} memory={memory} pages={pages} />
         </RouterProvider>
     );
 }
@@ -169,15 +172,15 @@ function Sheets({ opened, go, pages, macs, needs, withGallery }: SheetsProps) {
 }
 
 function useSheets() {
-    const [sidebar, setSidebar] = useState(true);
     const opened = useMemo(() => new Opened(), []);
-    const toggleSidebar = useCallback(() => {
-        setSidebar((open) => !open);
-    }, []);
-    return { opened, sidebar, toggleSidebar };
+    return { opened };
 }
 
-type FrameProps = { Gallery?: ComponentType | undefined; pages: Pages };
+type FrameProps = {
+    Gallery?: ComponentType | undefined;
+    pages: Pages;
+    memory: Memory | undefined;
+};
 
 // invariant: a space opens where this window last was in it; only Machine opens today, Agent and OS wait.
 const NOWHERE = () => undefined;
@@ -189,30 +192,53 @@ function Content({ area, held }: { area: AreaProps; held: Held | undefined }) {
     return <NoEngine Core={held === 'verdict' ? area.pages.Verdict : area.pages.Core} />;
 }
 
+type MainProps = {
+    area: AreaProps;
+    held: Held | undefined;
+    lost: ReturnType<typeof useLost>;
+};
+
+function Main({ area, held, lost: { lost, dismiss } }: MainProps) {
+    return (
+        <main className={styles.main}>
+            {lost === undefined || held !== undefined ? null : (
+                <Lost machine={lost} onDismiss={dismiss} />
+            )}
+            <Content area={area} held={held} />
+        </main>
+    );
+}
+
 // invariant: one tree whatever the link says, so an absence, a verdict and a relink remount no page and close no
 // invariant: sheet; the core's panel or the verdict's stands in the page's place.
-function Frame({ Gallery, pages }: FrameProps) {
+function Frame({ Gallery, pages, memory }: FrameProps) {
     const router = useRouter();
     const { route, go } = router;
     const { drawn, engine, home, listed, macs, needs, side, standing } = useStation();
     const held = useHeld(drawn);
     const quiet = held !== undefined;
     const sheets = useSheets();
+    const column = useMemo(() => new ColumnState(memory, globalThis.innerWidth), [memory]);
     const { opened } = sheets;
     const { addMac, newMachine } = opened;
     const withGallery = Gallery !== undefined;
-    const onSpace = useSpaceKeys(router, macs, opened.find, { on: !quiet, withGallery });
-    const { lost, dismiss } = useLost(router, macs, listed);
+    const spaced = quiet || !isGlobal(route);
+    const onSpace = useSpaceKeys(
+        router,
+        macs,
+        { onColumn: spaced ? column.toggle : NOWHERE, onFind: opened.find },
+        { on: !quiet, withGallery },
+    );
+    const lost = useLost(router, macs, listed);
     const found = route.page === 'machine' ? findMachine(macs, route.machine) : undefined;
     useSettledRoute(router, found);
     const area = { addMac, found, Gallery, go, home, newMachine, pages, route };
-    const aside = { ...side, engine, go, quiet, route };
-    const spaced = quiet || !isGlobal(route);
-    const shown = spaced && sheets.sidebar;
+    const aside = { ...side, engine, go, needs, quiet, route, routeOfNeed: pages.routeOfNeed };
     return (
         <Screen>
-            <div className={`${styles.window} ${shown ? '' : styles.collapsed}`}>
+            <div className={styles.window}>
                 <PathBar
+                    column={spaced ? column : undefined}
                     engine={engine}
                     found={found}
                     ItemName={pages.ItemName}
@@ -222,18 +248,12 @@ function Frame({ Gallery, pages }: FrameProps) {
                     onFind={quiet ? NOWHERE : opened.find}
                     onNewMachine={opened.newBlank}
                     onSpace={onSpace}
-                    onToggleSidebar={spaced ? sheets.toggleSidebar : undefined}
                     quiet={quiet}
                     router={router}
                     standing={standing}
                 />
-                {shown ? <Sidebar {...aside} /> : null}
-                <main className={styles.main}>
-                    {lost === undefined || quiet ? null : (
-                        <Lost machine={lost} onDismiss={dismiss} />
-                    )}
-                    <Content area={area} held={held} />
-                </main>
+                {spaced ? <ColumnSlot {...aside} column={column} /> : null}
+                <Main area={area} held={held} lost={lost} />
             </div>
             {quiet ? null : (
                 <Sheets

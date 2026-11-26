@@ -80,7 +80,7 @@ function shown(groups: readonly Group[]) {
 }
 
 describe('finds', () => {
-    test("an empty query lists what the sidebar holds, in the sidebar's order, machines as listed", () => {
+    test('an empty query lists the places, the machines as listed, Machine files and the shelves', () => {
         // Given - two Macs, two VMs, a need and three packages held
         const groups = matching(everything(HELD), '');
 
@@ -109,7 +109,7 @@ describe('finds', () => {
         // Given - a query for the catalog
         const groups = matching(everything(HELD), 'catalog');
 
-        // Then - Apps, Skills and Settings, in the sidebar's order
+        // Then - Apps, Skills and Settings, in the column's order
         expect(shown(groups)).toStrictEqual([['Catalog', ['Apps', 'Skills', 'Settings']]]);
         expect(groups[0]?.results.map((result) => result.to)).toStrictEqual([
             { route: { page: 'catalog-apps' } },

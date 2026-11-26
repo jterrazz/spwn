@@ -119,8 +119,8 @@ export default defineConfig({
                     rules: { 'jsx-a11y/no-noninteractive-tabindex': 'off' },
                 },
                 {
-                    files: ['src/presentation/navigation/sidebar.tsx'],
-                    reason: 'the sidebar is a navigation landmark whose buttons move by arrows: the landmark listens for the arrows its buttons bubble up',
+                    files: ['src/presentation/navigation/column.tsx'],
+                    reason: 'the column is a navigation landmark whose buttons move by arrows: the landmark listens for the arrows its buttons bubble up',
                     rules: { 'jsx-a11y/no-noninteractive-element-interactions': 'off' },
                 },
                 {

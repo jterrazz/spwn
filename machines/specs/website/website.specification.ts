@@ -12,3 +12,6 @@ export const { cleanup, website } = await specification.website({
 });
 
 afterAll(cleanup);
+
+// value: the storage of a window whose column was pinned; a visit is 1280 px wide, where an unpinned column hides.
+export const PINNED = { local: { 'station.window.column': 'pinned' } };

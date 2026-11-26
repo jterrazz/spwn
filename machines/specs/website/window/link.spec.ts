@@ -1,17 +1,17 @@
 import { banner, button, content, dialog, heading, navigation, within } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
-import { website } from '../website.specification.js';
+import { PINNED, website } from '../website.specification.js';
 
-const sidebar = navigation('Sidebar');
-const SAID = within(sidebar, content('No engine answers at replay of two-macs'));
+const column = navigation('Column');
+const SAID = within(column, content('No engine answers at replay of two-macs'));
 
 describe('link', () => {
     test('E7 an engine absent for a moment leaves the page drawn and its sheet open', async () => {
         // Given - Home over two-macs, whose link is declared absent after a second, for three
-        const result = await website.visit(
-            '/?world=two-macs&page=home&link=blip',
-            async (visitor) => {
+        const result = await website
+            .storage(PINNED)
+            .visit('/?world=two-macs&page=home&link=blip', async (visitor) => {
                 await visitor.see(heading('2 things need you.'));
                 await visitor.click(within(banner(), button('Find')));
 
@@ -23,8 +23,7 @@ describe('link', () => {
                 await visitor.see(dialog('Find'));
                 await visitor.see(heading('2 things need you.'));
                 await visitor.gone(heading('Spwn is not installed on this Mac.'));
-            },
-        );
+            });
         expect(result.errors.text).toBe('');
     });
 });

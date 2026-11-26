@@ -18,7 +18,7 @@ export function opensNow(space: Space): boolean {
     return space === 'machine';
 }
 
-// value: where a page sits: the window's own places beside the space's sidebar, Settings alone in the content, every
+// value: where a page sits: the window's own places beside the space's column, Settings alone in the content, every
 // value: other page the Machine space's, Storage, Engine and Passwords among them.
 const REACH: Readonly<Record<PlainPage, 'global' | 'space' | 'window'>> = {
     'catalog-apps': 'space',

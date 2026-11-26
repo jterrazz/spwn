@@ -6,6 +6,7 @@ export type Keystroke = { key: string; metaKey: boolean; ctrlKey: boolean; shift
 
 export type Shortcut =
     | 'back'
+    | 'column'
     | 'find'
     | 'forward'
     | 'gallery'
@@ -43,11 +44,11 @@ export function shortcutOf(stroke: Keystroke, withGallery: boolean): Shortcut | 
         return undefined;
     }
     const key = stroke.key.toLowerCase();
-    if (withGallery && stroke.shiftKey && key === 'g') {
-        return 'gallery';
-    }
     if (stroke.shiftKey) {
-        return undefined;
+        return withGallery && key === 'g' ? 'gallery' : undefined;
+    }
+    if (stroke.metaKey && stroke.ctrlKey && key === 's') {
+        return 'column';
     }
     if (Object.hasOwn(COMMANDS, key)) {
         return COMMANDS[key];
