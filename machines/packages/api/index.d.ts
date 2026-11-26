@@ -1156,6 +1156,8 @@ export type EngineFit = {
 export type EngineHello = {
     abilities?: string[];
     agent?: MachinesAgent;
+    book?: string;
+    book_changed?: boolean;
     calls?: string[];
     executable?: string;
     local_network?: string;
@@ -1224,6 +1226,7 @@ export type EnginePagesIn = {
 export type EngineReading = {
     Agent: MachinesAgent;
     AwakeUntil: string | null;
+    BookChanged: boolean;
     State: 'running' | 'stopped' | 'not-installed';
     Station: string;
     Stopped: EngineStopMark;

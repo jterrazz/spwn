@@ -10,6 +10,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/finding"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/core/section"
+	"github.com/jterrazz/studio-station/apps/engine/devices"
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/overview"
 	"github.com/jterrazz/studio-station/apps/engine/page"
@@ -107,6 +108,11 @@ func needsOf(r NeedsReading, self string) (needs, upkeep []Need) {
 	}
 	for _, s := range r.Overviews {
 		upkeep = append(upkeep, w.upkeep(s)...)
+		for _, n := range s.Needs {
+			if n.Section == section.Overview && n.Subject == overview.DevicesSubject {
+				needs = append(needs, w.outside(s.Head.Name))
+			}
+		}
 	}
 	of := func(n Need) finding.Finding { return n.Finding }
 	return finding.RankBy(needs, of), finding.RankUpkeep(upkeep, of)
@@ -169,6 +175,20 @@ func (w needSaid) exposed(mac string, p ports.Port) Need {
 		Key:     key, Glyph: symbol("exclamationmark.shield", page.SignalFailing), Hero: "Port " + strconv.Itoa(p.Port) + " is exposed", Subject: "Port " + strconv.Itoa(p.Port), What: catalog.ReachableOutside, Said: said,
 		Find: []string{"Port " + strconv.Itoa(p.Port) + " is exposed"}, Facts: facts, Nav: page.ID(string(PortsID) + ":" + mac), Scope: scope,
 		Verb: page.Action{ID: key, Label: VerbReview, On: page.OnRow, Rows: []string{key}, Default: true},
+	}
+}
+
+// invariant: a device book the engine did not write is a need, red: what
+// happened, that nothing of it is trusted, and the gesture that repairs,
+// each device added again with the owner present.
+func (w needSaid) outside(mac string) Need {
+	key := "devices:" + mac
+	return Need{
+		Finding: finding.Finding{Machine: machine.Ref{Name: mac}, Section: section.Overview, Severity: finding.Broken, Urgency: finding.Red, Subject: overview.DevicesSubject, Text: devices.ChangedOutside},
+		Key:     key, Glyph: symbol("exclamationmark.shield", page.SignalFailing), Hero: devices.ChangedOutside, Subject: w.mac(mac), What: "device book changed outside Spwn",
+		Find: []string{devices.ChangedOutside + " on " + w.mac(mac)}, Facts: []page.Value{page.Text("trusts nothing of it"), page.Text("on " + w.mac(mac))},
+		Detail: []string{devices.ChangedWhy, devices.ChangedRepair}, Nav: machinePage(mac), Scope: []string{mac},
+		Verb: page.Action{ID: key, Label: VerbShow, On: page.OnRow, Rows: []string{key}, Default: true, Run: &page.Run{Terminal: true, Argv: onMac([]string{"devices"}, mac, w.self)}},
 	}
 }
 

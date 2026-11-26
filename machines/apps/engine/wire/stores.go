@@ -68,7 +68,7 @@ type stores struct {
 	asking sync.Mutex
 }
 
-func newStores(files local.FS, p setup.Paths, anchor devicescontract.Anchor) *stores {
+func newStores(files local.FS, p setup.Paths, anchor devicescontract.Anchor, peer devicescontract.Peer) *stores {
 	return &stores{
 		prefs:        corejsonfile.NewPreferences(files, p.Prefs, preferenceGroups()),
 		machines:     machinesjsonfile.New(lockable{files}, filepath.Join(p.State, "vms")),
@@ -82,7 +82,7 @@ func newStores(files local.FS, p setup.Paths, anchor devicescontract.Anchor) *st
 		ledger:       machinefilejsonfile.NewLedger(lockable{files}, filepath.Join(p.State, "ledger.json")),
 		release:      enginejsonfile.NewReleaseCache(files, filepath.Join(p.Cache, "release.json")),
 		journal:      journaljsonfile.New(lockable{files}, filepath.Join(p.State, "journal.jsonl")),
-		devices:      devicesjsonfile.New(lockable{files}, filepath.Join(p.State, "devices.json"), anchor),
+		devices:      devicesjsonfile.New(lockable{files}, filepath.Join(p.State, "devices.json"), anchor, peer),
 	}
 }
 

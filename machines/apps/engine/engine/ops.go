@@ -23,6 +23,14 @@ type Hello struct {
 	// station, as the engine last read it; empty where it cannot tell.
 	LocalNetwork model.LocalNetwork `json:"local_network,omitempty"`
 	Agent        model.Agent        `json:"agent,omitzero"`
+	// value: the head of the device book this engine holds,
+	// "<generation> <digest>", the one it read first or wrote last, "0 "
+	// for a book never written; empty before it read the book, and on a
+	// machine with none.
+	Book string `json:"book,omitempty"`
+	// value: the book on disk is not the one this engine holds: it changed
+	// outside Spwn, and the engine trusts nothing of it.
+	BookChanged bool `json:"book_changed,omitempty"`
 }
 
 type VMView struct {

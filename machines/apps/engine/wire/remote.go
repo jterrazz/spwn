@@ -65,6 +65,9 @@ func (m machine) router(env kit.Env) *remote.Router {
 		Stopped: m.stopped,
 		Kept:    m.kept(),
 	})
+	if m.profile.Kind == coremachine.Computer {
+		r.WithEngine(m.bookWriter(), devicesWrites()...)
+	}
 	m.far.router = r
 	return r
 }

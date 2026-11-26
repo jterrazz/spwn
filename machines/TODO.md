@@ -380,21 +380,21 @@ relays every key it does not hold. The door ([ADR-090](docs/decisions/090-a-mach
 - **The relay goes** (`Agent.relay`, `keyring.upstream`, `wire.sessionAgent`) once no Mac-to-Mac OpenSSH remains.
 
 ## The device book's security lots (review of 2026-11-26)
-Three holes a process running code as the owner opens, each its own lot ([ADR-092](docs/decisions/092-a-machines-device-book-says-who-may-reach-it.md), "What the seal is worth").
+What a process running code as the owner still opens, and what is left of the fix, each its own lot ([ADR-092](docs/decisions/092-a-machines-device-book-says-who-may-reach-it.md), "What the seal is worth").
 
-- **The anchor moved forward.** `jsonfile.Store.read` believes any anchor generation at or above the one it
-  holds, so a process that runs `security` writes a book mixing entries this Mac once sealed (a forgotten
-  device's included) at a higher generation, with its head, and the running engine sends that key to every
-  VM. "Believe only the engine's own writes" does not hold as such: `devices add` and `forget` are
-  `in-engine` calls that the CLI runs in its own process (the Router's engine row is set by no
-  production caller, and `router_test.go` pins an `in-engine` call for this machine to this process), so
-  the CLI writes the book while the engine runs. Either they go through `engine.sock` (the
-  `engineAPI` client exists) and the engine trusts only its own writes, or each entry's seal binds the
-  generation of its add and a running engine believes a newer book only when every entry is one it held
-  or was sealed past its generation. Either way the owner is told "the device book changed outside Spwn".
-  Across an engine restart a book of old entries is still trusted until the item is written through the
-  Security framework by the signed engine, with an access list that leaves `/usr/bin/security` out,
-  which needs the engine to be a child of the signed app (the one-app lots).
+- **The anchor across an engine restart.** While the engine runs it believes only the books it wrote
+  (`devices add` and `forget` routed to it, `jsonfile.Store.Sole`), so a book and a head moved forward
+  by a process that runs `security` raise "The device book changed outside Spwn" and reach nothing. A
+  new engine has only the keychain, so the same book written while no engine ran is trusted. It closes
+  when the item is written through the Security framework by the signed engine, with an access list
+  that leaves `/usr/bin/security` out, which needs the engine to be a child of the signed app (the
+  one-app lots). Binding each seal to the generation of its add does not close it: the forged book
+  holds the forgotten entry at its old generation, which a newer book holds lawfully too, so the seal
+  would have to cover the forgets, which sign nothing.
+- **The other `in-engine` calls still run in the asking process** (machines' lifecycle, the vault,
+  `ports.share`, the grants, Awake): only the devices family is routed through `remote.Router.WithEngine`.
+  Each has its own engine-down meaning (`machines start` starts the engine), so each moves as its own
+  lot, its stopped-engine story first.
 - **A device key blob of any access.** `machines/adapter/macos/devicekey.go` loads whatever
   `device-key.enclave` holds and `enclave.swift` opens it without reading its access control, so a key the
   attacker made with none becomes this Mac's own at the next engine start. The fix: refuse at load a blob

@@ -35,15 +35,39 @@ type Store struct {
 	// value: the highest head this process read from the anchor or wrote
 	// to it. While the file's generation is that head's, the anchor is not
 	// read again, so a walk costs no read of it; an anchor read lower than
-	// it is never believed.
+	// it is never believed. The engine (sole) never reads it again at all:
+	// a book or an anchor it did not write, at any generation, is not the
+	// anchored one.
 	held  devices.Head
 	known bool
+	// value: this Mac's running engine, whose head a process that is not
+	// that engine takes in place of the anchor's; nil asks the anchor alone.
+	peer contract.Peer
+	// value: this process is the engine, the book's only writer: once it
+	// holds a head it asks neither the anchor nor a peer again.
+	sole bool
 }
 
 var _ contract.Store = (*Store)(nil)
 
-func New(files Files, at string, anchor contract.Anchor) *Store {
-	return &Store{files: files, at: at, anchor: anchor}
+func New(files Files, at string, anchor contract.Anchor, peer contract.Peer) *Store {
+	return &Store{files: files, at: at, anchor: anchor, peer: peer}
+}
+
+func (s *Store) Sole() {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.sole = true
+}
+
+func (s *Store) Held(context.Context) (devices.Head, bool, bool) {
+	book, err := s.book()
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if !s.known {
+		return devices.Head{}, false, false
+	}
+	return s.held, err != nil || !book.Anchored(s.held), true
 }
 
 type file struct {
@@ -87,8 +111,17 @@ func (s *Store) book() (devices.Book, error) {
 func (s *Store) anchored(ctx context.Context, generation int) (devices.Head, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	if s.known && s.held.Generation == generation {
+	if s.known && (s.sole || s.held.Generation == generation) {
 		return s.held, nil
+	}
+	if !s.sole && s.peer != nil {
+		held, ok, err := s.peer.Held(ctx)
+		if err != nil {
+			return devices.Head{}, err
+		}
+		if ok {
+			return held, nil
+		}
 	}
 	return s.read(ctx)
 }

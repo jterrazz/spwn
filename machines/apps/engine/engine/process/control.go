@@ -91,7 +91,7 @@ func (c *Control) Read(ctx context.Context) (engine.Reading, error) {
 		}
 		return r, nil
 	}
-	r.State, r.Version, r.Agent = model.EngineRunning, hello.Version, hello.Agent
+	r.State, r.Version, r.Agent, r.BookChanged = model.EngineRunning, hello.Version, hello.Agent, hello.BookChanged
 	if !hello.StartedAt.IsZero() {
 		r.Up = c.h.Now().Sub(hello.StartedAt)
 	}

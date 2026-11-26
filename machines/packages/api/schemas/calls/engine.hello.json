@@ -12,6 +12,12 @@
         "agent": {
           "$ref": "#/$defs/machines.Agent"
         },
+        "book": {
+          "type": "string"
+        },
+        "book_changed": {
+          "type": "boolean"
+        },
         "calls": {
           "items": {
             "type": "string"

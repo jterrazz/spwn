@@ -87,6 +87,9 @@ type Options struct {
 	// whose seals hold: the only keys a VM trusts beside the device key;
 	// nil trusts none.
 	BookKeys func() []string
+	// value: the device book's head this engine holds and whether the
+	// book on disk is another (engine.Hello's Book); nil holds none.
+	Book func() (head string, changed bool)
 	// value: opens this Mac's ssh key agent, each refusal before its socket
 	// opens, and returns what serves it until ctx ends; nil opens none.
 	Agent func(ctx context.Context) (func(context.Context) error, error)

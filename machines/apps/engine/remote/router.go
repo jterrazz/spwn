@@ -46,9 +46,11 @@ type Router struct {
 	registry *call.Registry
 	thisMac  machine.Profile
 	reach    Reach
-	// value: this Mac's engine, where a call of this machine that needs its
-	// state runs; nil runs every call of this machine in this process.
-	engine call.Router
+	// value: this Mac's engine, where the in-engine calls of this machine
+	// it names run, whether a surface of this process or a frame it serves
+	// asks them; nil runs every call of this machine in this process.
+	engine  call.Router
+	engined map[string]bool
 
 	mu   sync.Mutex
 	open map[string]*link
@@ -70,9 +72,13 @@ func NewRouter(registry *call.Registry, thisMac machine.Profile, reach Reach) *R
 	return &Router{registry: registry, thisMac: thisMac, reach: reach, open: map[string]*link{}}
 }
 
-func (r *Router) WithEngine(engine call.Router) *Router {
-	// value: the router with this Mac's engine as its third row.
-	r.engine = engine
+func (r *Router) WithEngine(engine call.Router, calls ...string) *Router {
+	// value: the router with this Mac's engine as its third row, for the
+	// in-engine calls named.
+	r.engine, r.engined = engine, map[string]bool{}
+	for _, name := range calls {
+		r.engined[name] = true
+	}
 	return r
 }
 
@@ -222,7 +228,7 @@ func (r *Router) author(ctx context.Context, name string) error {
 }
 
 func (r *Router) inEngine(name string) bool {
-	if r.engine == nil {
+	if r.engine == nil || !r.engined[name] {
 		return false
 	}
 	h, ok := r.registry.Lookup(name)
@@ -396,6 +402,11 @@ func (r *Router) Serve(ctx context.Context, target machine.Ref, name string, in 
 		return nil, err
 	}
 	vm, ok := r.vm(target)
+	if !ok && r.inEngine(name) {
+		var out json.RawMessage
+		err := r.engine.Invoke(ctx, machine.Ref{}, name, in, &out, p)
+		return out, err
+	}
 	if !ok {
 		v, err := serve.Local(r.registry, r.thisMac, r.reach.Version).Invoke(ctx, target, name, in, p)
 		r.keep(ctx, r.thisMac.Ref, name, in, v, err)

@@ -2,6 +2,7 @@ package remote_test
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"io"
 	"testing"
@@ -155,7 +156,7 @@ func engineOf(t *testing.T, ran *int) call.Router {
 
 func TestACallThatNeedsTheEngineRunsInThisMacsEngineAndTheOthersHere(t *testing.T) {
 	here, there := 0, 0
-	r := remote.NewRouter(updates(&here), laptop, remote.Reach{}).WithEngine(engineOf(t, &there))
+	r := remote.NewRouter(updates(&here), laptop, remote.Reach{}).WithEngine(engineOf(t, &there), "apps.update-in-engine")
 	for _, where := range []call.Where{call.AtTarget, call.InEngine, call.InProcess} {
 		var out updated
 		if err := r.Invoke(t.Context(), laptop.Ref, "apps.update-"+string(where), installIn{App: "jq"}, &out, nil); err != nil || out.App != "jq" {
@@ -164,5 +165,53 @@ func TestACallThatNeedsTheEngineRunsInThisMacsEngineAndTheOthersHere(t *testing.
 	}
 	if here != 2 || there != 1 {
 		t.Errorf("ran %d here and %d in the engine, want the in-engine call there and the two others here", here, there)
+	}
+}
+
+func TestAnInEngineCallTheEngineIsNotNamedForRunsHere(t *testing.T) {
+	here, there := 0, 0
+	r := remote.NewRouter(updates(&here), laptop, remote.Reach{}).WithEngine(engineOf(t, &there))
+	var out updated
+	if err := r.Invoke(t.Context(), laptop.Ref, "apps.update-in-engine", installIn{App: "jq"}, &out, nil); err != nil || here != 1 || there != 0 {
+		t.Errorf("ran %d here and %d in the engine (%v), want it here: the engine runs only the calls it is named for", here, there, err)
+	}
+}
+
+// value: an in-engine call that answers whether its frame came marked far.
+func marked(ran *int) *call.Registry {
+	registry, _ := call.NewRegistry([]call.Handler{call.Bind(call.Call[struct{}, installIn, updated]{
+		Name: "apps.update-in-engine", Section: section.Apps, Where: call.InEngine, Applies: onMacOS,
+		Run: func(ctx context.Context, _ struct{}, _ installIn, _ call.Progress) (updated, error) {
+			*ran++
+			if call.Far(ctx) {
+				return updated{App: "far"}, nil
+			}
+			return updated{App: "here"}, nil
+		},
+	}, struct{}{})})
+	return registry
+}
+
+func TestAFrameServedHereForACallOfTheEngineRunsInTheEngineItsFarMarkKept(t *testing.T) {
+	for _, far := range []bool{false, true} {
+		here, there := 0, 0
+		s := serve.Server{Calls: marked(&there).Lookup, ThisMachine: laptop}
+		engine := remote.Endpoint(api.NewClient(func(context.Context) (io.ReadWriteCloser, error) {
+			inR, inW := io.Pipe()
+			outR, outW := io.Pipe()
+			go s.Conn(t.Context(), pipe{Reader: inR, Writer: outW, closers: []io.Closer{inR, outW}})
+			return pipe{Reader: outR, Writer: inW, closers: []io.Closer{outR, inW}}, nil
+		}))
+		r := remote.NewRouter(marked(&here), laptop, remote.Reach{}).WithEngine(engine, "apps.update-in-engine")
+		ctx := t.Context()
+		want := "here"
+		if far {
+			ctx, want = call.WithFar(ctx), "far"
+		}
+		got, err := r.Serve(ctx, machine.Ref{}, "apps.update-in-engine", []byte(`{"App":"jq"}`), nil)
+		var out updated
+		if raw, ok := got.(json.RawMessage); !ok || err != nil || json.Unmarshal(raw, &out) != nil || out.App != want || here != 0 || there != 1 {
+			t.Errorf("a served frame, far %v: %v %v, ran %d here and %d in the engine; want it run in the engine once, seen %s", far, got, err, here, there, want)
+		}
 	}
 }

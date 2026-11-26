@@ -13,6 +13,9 @@
             "null"
           ]
         },
+        "BookChanged": {
+          "type": "boolean"
+        },
         "State": {
           "enum": [
             "running",
@@ -40,6 +43,7 @@
       "required": [
         "Agent",
         "AwakeUntil",
+        "BookChanged",
         "State",
         "Station",
         "Stopped",

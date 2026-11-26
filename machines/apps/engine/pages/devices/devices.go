@@ -40,9 +40,10 @@ func again(r devices.Row) string {
 
 func Page(l devices.Listing, thisMac page.Context) page.Page {
 	// invariant: this Mac's own key first, the line another device adds;
+	// then, when the whole book is not the one this Mac last wrote, that it
+	// changed outside Spwn, what is trusted and the gesture that repairs;
 	// then the devices it trusts; then the broken entries, each with the
-	// command that adds it again, under a title that says when the whole
-	// book is not the one this Mac last wrote.
+	// command that adds it again.
 	sections := []page.Section{}
 	if l.Key != "" {
 		own := page.Fact{Key: "key", Value: page.Text(devices.Fingerprint(l.Key))}
@@ -57,11 +58,17 @@ func Page(l devices.Listing, thisMac page.Context) page.Page {
 		trusted.Items = []page.Item{{Empty: &page.Empty{Text: "No other device added",
 			Hint: &page.Hint{Command: "station devices add <name> <its key>"}}}}
 	}
+	if l.Stale {
+		sections = append(sections, page.Section{ID: "changed", Title: devices.ChangedOutside, Items: []page.Item{
+			{Fact: &page.Fact{Key: "what", Value: page.Text(devices.ChangedWhy)}},
+			{Fact: &page.Fact{Key: "repair", Value: page.Text(devices.ChangedRepair)}},
+		}})
+	}
 	sections = append(sections, trusted)
 	if len(l.Broken) > 0 {
 		title := "Seal broken: reaches nothing"
 		if l.Stale {
-			title = "Not the book this Mac last wrote: reaches nothing until added again"
+			title = "Of that book: reaches nothing until added again"
 		}
 		broken := page.Section{ID: "broken", Title: title, Columns: columns()}
 		for _, r := range l.Broken {

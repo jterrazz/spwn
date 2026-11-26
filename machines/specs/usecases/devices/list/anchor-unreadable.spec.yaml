@@ -1,4 +1,4 @@
-description: 'a keychain that cannot be read trusts no entry: the read and a forget are refused, nothing written'
+description: 'a keychain unreadable at an engine start trusts no entry: read and forget refused'
 env:
     - two-macs
     - engine
@@ -7,16 +7,18 @@ runs:
       exit: 0
     - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].stores.devices_anchor_unreadable = true'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
+    - command: 'world engine-crash macbook-pro'
+      exit: 0
     - command: 'devices'
       exit: 1
       stderr: |
           Error: the device book's head is not readable in the login keychain: security: SecKeychainSearchCopyNext: User interaction is not allowed.
-          Hint: run station devices --help
+          Hint: unlock this Mac's login keychain, then run it again
     - command: 'devices forget laptop --confirm=laptop'
       exit: 1
       stderr: |
           Error: the device book's head is not readable in the login keychain: security: SecKeychainSearchCopyNext: User interaction is not allowed.
-          Hint: run station devices forget --help
+          Hint: unlock this Mac's login keychain, then run it again
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].stores | {devices: [.devices[] | .name], devices_generation}'' world.json'
       exit: 0
       stdout: |

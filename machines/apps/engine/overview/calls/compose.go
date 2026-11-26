@@ -17,6 +17,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/core/section"
 	"github.com/jterrazz/studio-station/apps/engine/core/store"
+	"github.com/jterrazz/studio-station/apps/engine/devices"
 	diskcalls "github.com/jterrazz/studio-station/apps/engine/disk/calls"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
 	enginecalls "github.com/jterrazz/studio-station/apps/engine/engine/calls"
@@ -271,6 +272,12 @@ func engineOf(head overview.Head, r *engine.Reading) (overview.Engine, []finding
 		return overview.EngineStopped, []finding.Finding{{Machine: mac, Section: section.Overview, Severity: finding.NeedsALook, Urgency: finding.Red, Subject: "engine",
 			Text: "Engine not installed", Fix: finding.Fix{Call: "engine.start"}}}
 	case machines.EngineRunning:
+	}
+	if r.BookChanged {
+		// invariant: a device book its engine did not write is never
+		// silent: it is a need, red, until each device is added again.
+		return overview.EngineRunning, []finding.Finding{{Machine: mac, Section: section.Overview, Severity: finding.Broken, Urgency: finding.Red, Subject: overview.DevicesSubject,
+			Text: devices.ChangedOutside, Fix: finding.Fix{Command: "station devices"}}}
 	}
 	return overview.EngineRunning, nil
 }

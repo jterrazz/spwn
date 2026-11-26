@@ -407,6 +407,9 @@ type Engine struct {
 	Memory engine.Memory `json:"memory,omitempty"`
 	// value: what the engine holds of Awake between two commands.
 	Awake *engine.AwakeKept `json:"awake,omitempty"`
+	// value: the head of its Mac's device book the engine holds in its
+	// memory between two commands; its successor after a restart holds none.
+	Book *devices.Head `json:"book,omitempty"`
 	// value: what the exposure job knows between two commands.
 	Exposure *engine.ExposureKept `json:"exposure,omitempty"`
 	// value: the activity the engine holds in its memory between two

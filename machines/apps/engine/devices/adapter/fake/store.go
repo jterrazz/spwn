@@ -72,30 +72,69 @@ func clone(in []devices.Device) []devices.Device {
 	return out
 }
 
+// invariant: while its Mac's engine runs, the head it holds is the one
+// every reader of the world takes, the anchor never read again: the head
+// it read first, then the one it wrote last; with no engine running, the
+// anchor's.
+func held(m *world.Mac) (devices.Head, error) {
+	st := m.Store()
+	if !m.EngineRuns() {
+		return anchored(st)
+	}
+	if m.Engine.Book != nil {
+		return *m.Engine.Book, nil
+	}
+	h, err := anchored(st)
+	if err == nil {
+		m.Engine.Book = &h
+	}
+	return h, err
+}
+
 func (s *Store) Read(context.Context) (devices.Book, devices.Head, error) {
 	s.w.Lock()
 	defer s.w.Unlock()
-	st := s.w.Mac(s.mac).Store()
-	h, err := anchored(st)
+	m := s.w.Mac(s.mac)
+	h, err := held(m)
 	if err != nil {
 		return devices.Book{}, devices.Head{}, err
 	}
+	st := m.Store()
 	return devices.Book{Generation: st.DevicesGeneration, Devices: clone(st.Devices)}, h, nil
 }
 
 func (s *Store) Change(_ context.Context, edit func(*devices.Book) error) error {
 	s.w.Lock()
 	defer s.w.Unlock()
-	st := s.w.Mac(s.mac).Store()
-	h, err := anchored(st)
+	m := s.w.Mac(s.mac)
+	h, err := held(m)
 	if err != nil {
 		return err
 	}
+	st := m.Store()
 	next, err := devices.Next(devices.Book{Generation: st.DevicesGeneration, Devices: clone(st.Devices)}, h, edit)
 	if err != nil {
 		return err
 	}
-	st.DevicesAnchor = next.Head().String()
+	head := next.Head()
+	st.DevicesAnchor = head.String()
 	st.Devices, st.DevicesGeneration = clone(next.Devices), next.Generation
+	if m.EngineRuns() {
+		m.Engine.Book = &head
+	}
 	return nil
+}
+
+func (s *Store) Sole() {}
+
+func (s *Store) Held(context.Context) (devices.Head, bool, bool) {
+	s.w.Lock()
+	defer s.w.Unlock()
+	m := s.w.Mac(s.mac)
+	if !m.EngineRuns() || m.Engine.Book == nil {
+		return devices.Head{}, false, false
+	}
+	st := m.Store()
+	book := devices.Book{Generation: st.DevicesGeneration, Devices: st.Devices}
+	return *m.Engine.Book, !book.Anchored(*m.Engine.Book), true
 }

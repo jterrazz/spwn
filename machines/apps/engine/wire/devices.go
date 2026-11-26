@@ -2,15 +2,20 @@ package wire
 
 import (
 	"context"
+	"errors"
 	"sync"
 
 	"github.com/spf13/cobra"
 
 	"github.com/jterrazz/studio-station/apps/engine/accounts/adapter/keychain"
+	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	coremachine "github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/devices"
 	devicescalls "github.com/jterrazz/studio-station/apps/engine/devices/calls"
+	devicescontract "github.com/jterrazz/studio-station/apps/engine/devices/contract"
+	enginecalls "github.com/jterrazz/studio-station/apps/engine/engine/calls"
 	"github.com/jterrazz/studio-station/apps/engine/platform/darwin"
+	"github.com/jterrazz/studio-station/apps/engine/remote"
 	devicescmd "github.com/jterrazz/studio-station/apps/engine/surface/cli/devices"
 	devicesadd "github.com/jterrazz/studio-station/apps/engine/surface/cli/devices/add"
 	devicesforget "github.com/jterrazz/studio-station/apps/engine/surface/cli/devices/forget"
@@ -22,6 +27,62 @@ func (m machine) devicesDeps() devicescalls.Deps {
 		Store: m.stores.devices, Sealer: devicescalls.Sealer{Key: m.deviceKey(), Mac: m.profile.Ref.Name},
 		Presence: m.devicePresence, Now: m.sys.Clock.Now, Changed: m.bookChanged,
 	}
+}
+
+// value: the calls that write the device book, which only this Mac's
+// engine runs, whichever surface or frame asks them.
+func devicesWrites() []string { return []string{devicescalls.Add.Name, devicescalls.Forget.Name} }
+
+// invariant: the engine is the device book's only writer: a write asked
+// in any other process of this Mac rides engine.sock, and with the engine
+// not running it is refused as the engine's own calls are, never run here.
+func (m machine) bookWriter() call.Router { return bookWriter{remote.Endpoint(m.engineAPI().c)} }
+
+type bookWriter struct{ engine call.Router }
+
+func (b bookWriter) Invoke(ctx context.Context, target coremachine.Ref, name string, in, out any, p call.Progress) error {
+	return downAs(b.engine.Invoke(ctx, target, name, in, out, p), &enginecalls.DownError{})
+}
+
+func (b bookWriter) Watch(ctx context.Context, target coremachine.Ref, name string, in any, p call.Progress) (<-chan call.Update[any], error) {
+	updates, err := b.engine.Watch(ctx, target, name, in, p)
+	return updates, downAs(err, &enginecalls.DownError{})
+}
+
+// invariant: a process of this Mac that is not its engine judges the book
+// by the head the running engine holds, never by the keychain, which any
+// process running `security` can move; with no engine running, by the
+// keychain, as the engine does at its start.
+type enginePeer struct{ api engineAPI }
+
+func (p enginePeer) Held(ctx context.Context) (devices.Head, bool, error) {
+	h, err := p.api.Hello(ctx)
+	var down *enginecalls.DownError
+	switch {
+	case errors.As(err, &down):
+		return devices.Head{}, false, nil
+	case err != nil:
+		return devices.Head{}, false, &devicescontract.AnchorUnreadableError{Cause: err.Error()}
+	case h.Book == "":
+		return devices.Head{}, false, nil
+	case h.Book == (devices.Head{}).String():
+		return devices.Head{}, true, nil
+	}
+	held, err := devices.ParseHead(h.Book)
+	if err != nil {
+		return devices.Head{}, false, &devicescontract.AnchorUnreadableError{Cause: err.Error()}
+	}
+	return held, true, nil
+}
+
+// value: what the engine's hello says of the book: the head it holds and
+// whether the book on disk is another.
+func (m machine) heldBook() (string, bool) {
+	head, changed, ok := m.stores.devices.Held(context.Background())
+	if !ok {
+		return "", false
+	}
+	return head.String(), changed
 }
 
 func (m machine) bookChanged() {

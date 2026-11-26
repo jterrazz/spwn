@@ -139,13 +139,13 @@ Not a contract, on purpose: the activity history and the engine's run registry l
 
 Every surface reaches a call through `core/call.Router` (`Invoke`, `Watch`); `call.Invoke[D, In, Out]` keeps the call's dependencies out of the surface's sight. `remote.Router`, which `wire` builds from the Registry and the two `EndpointDialer`s, resolves a call by its `Where` and its target:
 
-| Target                         | `Where`              | Runs                                                                                                  |
-| ------------------------------ | -------------------- | ----------------------------------------------------------------------------------------------------- |
-| none                           | `in-process`         | in this process; the call itself may fan out to many machines through `remote/each`                   |
-| this machine                   | `at-target`          | in this process                                                                                       |
-| a VM of this Mac               | `at-target`          | this Mac's engine, over its socket, which relays the frame to the VM's guest over its one connection  |
-| this Mac, or a VM of this Mac  | `in-engine`          | this Mac's engine, over its unix socket                                                               |
-| another Mac, or one of its VMs | any but `in-process` | that Mac's engine, dialed by `ssh <mac> station engine attach`, which resolves the frame the same way |
+| Target                         | `Where`              | Runs                                                                                                                                                                                            |
+| ------------------------------ | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| none                           | `in-process`         | in this process; the call itself may fan out to many machines through `remote/each`                                                                                                             |
+| this machine                   | `at-target`          | in this process                                                                                                                                                                                 |
+| a VM of this Mac               | `at-target`          | this Mac's engine, over its socket, which relays the frame to the VM's guest over its one connection                                                                                            |
+| this Mac, or a VM of this Mac  | `in-engine`          | in this process; the calls `wire` names to `WithEngine` (`devices.add`, `devices.forget`), in this Mac's engine over its unix socket, from a surface and from a frame this process serves alike |
+| another Mac, or one of its VMs | any but `in-process` | that Mac's engine, dialed by `ssh <mac> station engine attach`, which resolves the frame the same way                                                                                           |
 
 A target always wins over `Where`: an `in-process` call asked with one runs on that machine like any other, so a call that reads another machine from here takes that machine in its input, as `machinefile.drift {Machine}` does to read a VM's ports and accounts on its Mac.
 

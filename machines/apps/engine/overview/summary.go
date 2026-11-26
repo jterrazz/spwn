@@ -65,6 +65,12 @@ const (
 
 const RefusedSubject = "catalog"
 
+const (
+	// value: the subject of the Needs-you line a device book changed
+	// outside Spwn is.
+	DevicesSubject = "devices"
+)
+
 type Need struct {
 	// value: one Needs-you line, a section's finding as the pages draw it.
 	Machine string

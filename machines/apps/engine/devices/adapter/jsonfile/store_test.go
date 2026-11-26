@@ -2,6 +2,7 @@ package jsonfile_test
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"io/fs"
 	"os"
@@ -72,7 +73,69 @@ func (k *keychain) set(h devices.Head) {
 }
 
 func openOn(at string, torn bool, k *keychain) *jsonfile.Store {
-	return jsonfile.New(holding{FS: local.New(nil, nil, nil, nil).FS, torn: torn}, at, k)
+	return jsonfile.New(holding{FS: local.New(nil, nil, nil, nil).FS, torn: torn}, at, k, nil)
+}
+
+// value: this Mac's running engine as another process asks it: the head
+// its store holds.
+type engineOf struct{ s *jsonfile.Store }
+
+func (e engineOf) Held(ctx context.Context) (devices.Head, bool, error) {
+	h, _, ok := e.s.Held(ctx)
+	return h, ok, nil
+}
+
+func TestABookAndAnAnchorMovedForwardWhileTheEngineRunsAreNotTheAnchoredOnes(t *testing.T) {
+	at := filepath.Join(t.TempDir(), "station", "devices.json")
+	k := &keychain{}
+	engine := openOn(at, false, k)
+	engine.Sole()
+	if err := engine.Change(t.Context(), add("laptop")); err != nil {
+		t.Fatal(err)
+	}
+	book, _, err := engine.Read(t.Context())
+	if err != nil {
+		t.Fatal(err)
+	}
+	laptop := book.Devices[0]
+	if err = engine.Change(t.Context(), add("desk")); err != nil {
+		t.Fatal(err)
+	}
+	if err = engine.Change(t.Context(), func(b *devices.Book) error { b.Forget("laptop"); return nil }); err != nil {
+		t.Fatal(err)
+	}
+	held, _, _ := engine.Held(t.Context())
+	forged := devices.Book{Generation: held.Generation + 5, Devices: []devices.Device{laptop, {Name: "desk", Key: "ssh-ed25519 AAAAdesk", Channels: devices.AllChannels()}}}
+	data, err := json.Marshal(struct {
+		V int `json:"v"`
+		devices.Book
+	}{V: jsonfile.Version, Book: forged})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = files().WriteFile(at, data, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	k.set(forged.Head())
+	cli := jsonfile.New(holding{FS: files()}, at, k, engineOf{engine})
+	for name, s := range map[string]*jsonfile.Store{"the engine": engine, "another process": cli} {
+		book, head, readErr := s.Read(t.Context())
+		if readErr != nil || book.Generation != forged.Generation || book.Anchored(head) || head != held {
+			t.Errorf("%s read %+v, %+v, %v; want the book at %d not anchored, the engine's head %+v kept", name, book, head, readErr, forged.Generation, held)
+		}
+		if got := devices.Check(book, head, "mini", nil); !got.Stale || len(got.Trusted) != 0 {
+			t.Errorf("%s checked %+v; want nothing of the book trusted", name, got)
+		}
+	}
+	if _, changed, ok := engine.Held(t.Context()); !changed || !ok {
+		t.Errorf("the engine's hold says changed %v, ok %v; want the book said changed outside Spwn", changed, ok)
+	}
+	if err = engine.Change(t.Context(), add("tablet")); err != nil {
+		t.Fatal(err)
+	}
+	if book, head, err := engine.Read(t.Context()); err != nil || !book.Anchored(head) || len(book.Devices) != 1 || book.Devices[0].Name != "tablet" || head.Generation != held.Generation+1 {
+		t.Errorf("Read = %+v, %+v, %v; want a new book of tablet alone, one past the engine's own", book, head, err)
+	}
 }
 
 func open(at string, torn bool) *jsonfile.Store { return openOn(at, torn, &keychain{}) }

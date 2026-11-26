@@ -107,6 +107,30 @@ func TestARefusalComesBackAsTheErrorItWasRaisedAs(t *testing.T) {
 	}
 }
 
+// value: an adapter's error that carries its own words and repair.
+type worded struct{}
+
+func (worded) Error() string { return "the keychain is locked" }
+func (worded) Unwrap() error {
+	return &fail.Said{Message: "the keychain is locked", Hint: "unlock it, then run it again"}
+}
+
+func TestAnErrorThatSaysItsRepairKeepsItOverTheSocket(t *testing.T) {
+	read := call.Bind(call.Call[struct{}, struct{}, struct{}]{
+		Name: "devices.forget", Where: call.InEngine, Applies: machine.Anywhere,
+		Run: func(context.Context, struct{}, struct{}, call.Progress) (struct{}, error) {
+			return struct{}{}, worded{}
+		},
+	}, struct{}{})
+	s := serve.Server{Calls: func(name string) (call.Handler, bool) { return read, name == "devices.forget" }, ThisMachine: laptop, Hint: "station machines"}
+	err := dialed(t.Context(), s).Call(t.Context(), "devices.forget", machine.Ref{}, struct{}{}, nil, nil)
+	var e *fail.Error
+	var said *fail.Said
+	if !errors.As(err, &e) || e.Hint == s.Hint || !errors.As(err, &said) || said.Message != "the keychain is locked" || said.Hint != "unlock it, then run it again" {
+		t.Fatalf("a worded error over the socket: %#v, want its own words and repair, never the server's default hint", err)
+	}
+}
+
 func TestALineThatIsNoFrameIsRefusedAndTheConnectionAnswersTheNext(t *testing.T) {
 	inR, inW := io.Pipe()
 	outR, outW := io.Pipe()

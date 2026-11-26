@@ -3,6 +3,8 @@ package contract
 import (
 	"context"
 
+	"github.com/jterrazz/studio-station/apps/engine/core/fail"
+
 	"github.com/jterrazz/studio-station/apps/engine/devices"
 )
 
@@ -18,6 +20,22 @@ type Store interface {
 	// leaves a book that is not the anchored one, trusted nowhere. A change
 	// whose edit answers an error writes nothing and answers it.
 	Change(ctx context.Context, edit func(*devices.Book) error) error
+	// invariant: from now on this process is the book's only writer, this
+	// Mac's engine: once it holds a head it reads the anchor never again,
+	// so a book or an anchor it did not write, at any generation, is not
+	// the anchored one, and the next change starts from an empty book.
+	Sole()
+	// value: the head this process holds, the one it read first or wrote
+	// last; changed when the book on disk is not that one; ok false before
+	// it read one.
+	Held(ctx context.Context) (head devices.Head, changed, ok bool)
+}
+
+type Peer interface {
+	// invariant: the head this Mac's running engine holds of its book; ok
+	// false when no engine answers or it holds none yet; an engine that
+	// answers anything else is an error, never ok.
+	Held(ctx context.Context) (devices.Head, bool, error)
 }
 
 type Anchor interface {
@@ -35,4 +53,10 @@ type AnchorUnreadableError struct {
 
 func (e *AnchorUnreadableError) Error() string {
 	return "the device book's head is not readable in the login keychain: " + e.Cause
+}
+
+func (e *AnchorUnreadableError) Unwrap() error {
+	// value: its repair, the same whichever process meets it, the engine's
+	// included.
+	return &fail.Said{Message: e.Error(), Hint: "unlock this Mac's login keychain, then run it again"}
 }
