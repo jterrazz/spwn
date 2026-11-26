@@ -53,8 +53,13 @@ type projectWorld struct {
 	Workspaces []world.Workspace
 	// Outside is each host path of Workspaces and Knowledge that leaves
 	// the project, which spwn up mounts only once it is granted.
-	Outside  []cliproject.Reach
-	Manifest world.Manifest
+	Outside []cliproject.Reach
+	// DeclaredKnowledge and DeclaredWorkspaces are the host paths as
+	// spwn.yaml writes them with what each resolved to, resolved again
+	// just before the container is made.
+	DeclaredKnowledge  []cliproject.Declared
+	DeclaredWorkspaces []cliproject.Declared
+	Manifest           world.Manifest
 	// Knowledge is the absolute host path to bind into
 	// /world/knowledge/, resolved from the manifest's
 	// worlds.<name>.knowledge key relative to the project root.
@@ -159,12 +164,14 @@ func resolveProjectWorld(p *project.Project, name, backendOverride string) (*pro
 
 	var outside []cliproject.Reach
 	var knowledge string
+	var declaredKnowledge, declaredWorkspaces []cliproject.Declared
 	if kp := strings.TrimSpace(w.Knowledge); kp != "" {
 		if err := cliproject.CheckHostPath("knowledge path", kp); err != nil {
 			return nil, fmt.Errorf("world %q: %w", name, err)
 		}
 		resolved, leaves := cliproject.Resolve(p.Root, kp)
 		knowledge = resolved
+		declaredKnowledge = append(declaredKnowledge, cliproject.Declared{Text: kp, Resolved: resolved})
 		if leaves {
 			outside = append(outside, cliproject.Reach{Path: resolved, Access: "read-write", Grants: fmt.Sprintf("read-write mount at /world/knowledge in world %q", name)})
 		}
@@ -209,6 +216,7 @@ func resolveProjectWorld(p *project.Project, name, backendOverride string) (*pro
 			outside = append(outside, cliproject.Reach{Path: resolved, Access: access, Grants: fmt.Sprintf("%s mount at /workspaces/%s in world %q", access, ws.Name, name)})
 		}
 		entries = append(entries, world.Workspace{Name: ws.Name, Path: resolved, ReadOnly: ws.ReadOnly})
+		declaredWorkspaces = append(declaredWorkspaces, cliproject.Declared{Text: ws.Path, Resolved: resolved})
 	}
 
 	var runtimeName string
@@ -229,5 +237,8 @@ func resolveProjectWorld(p *project.Project, name, backendOverride string) (*pro
 		Manifest:   m,
 		Knowledge:  knowledge,
 		Runtime:    runtimeName,
+
+		DeclaredKnowledge:  declaredKnowledge,
+		DeclaredWorkspaces: declaredWorkspaces,
 	}, nil
 }

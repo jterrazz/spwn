@@ -3,6 +3,7 @@ package world
 import (
 	"context"
 	"fmt"
+	"slices"
 	"strings"
 	"time"
 
@@ -199,6 +200,15 @@ func planWorlds(cmd *cobra.Command, p *project.Project, names []string, many boo
 	return plans, nil
 }
 
+func (pw *projectWorld) recheck(withWorkspaces bool) func() error {
+	declared := slices.Clone(pw.DeclaredKnowledge)
+	if withWorkspaces {
+		declared = append(declared, pw.DeclaredWorkspaces...)
+	}
+	root := pw.Project.Root
+	return func() error { return cliproject.Recheck(root, declared) }
+}
+
 func resetSpawnFlags(cmd *cobra.Command) {
 	spawnConfig = ""
 	spawnName = ""
@@ -307,8 +317,13 @@ func spawnRunE(cmd *cobra.Command, args []string, pl *plannedWorld) error {
 		return s.FailHint("Invalid workspace", wsErr,
 			`Expected: "path", "name=path", or "name=path:ro"`)
 	}
-	if pw != nil && !cmd.Flags().Changed("workspace") && len(spawnWorkspaces) == 0 {
-		workspaces = pw.Workspaces
+	var recheck func() error
+	if pw != nil {
+		ownWorkspaces := !cmd.Flags().Changed("workspace") && len(spawnWorkspaces) == 0
+		if ownWorkspaces {
+			workspaces = pw.Workspaces
+		}
+		recheck = pw.recheck(ownWorkspaces)
 	}
 
 	s.Blank()
@@ -389,6 +404,7 @@ func spawnRunE(cmd *cobra.Command, args []string, pl *plannedWorld) error {
 		ForceRebuild: spawnForceRebuild,
 		Knowledge:    knowledge,
 		RuntimeName:  runtimeName,
+		Recheck:      recheck,
 		LogWriter:    buildProgress,
 		OnProgress: func(event, detail string) {
 			switch event {

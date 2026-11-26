@@ -98,3 +98,33 @@ func TestADaemonWatchPathIsCheckedBeforeTheAsk(t *testing.T) {
 		}
 	}
 }
+
+func TestAWatchPathSwappedToALinkOutIsRefusedWhenTheWatchStarts(t *testing.T) {
+	root, outside := watchingProject(t, "inbox")
+	inbox := filepath.Join(root, "inbox")
+	if err := os.Mkdir(inbox, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	p, err := cliproject.Require()
+	if err != nil {
+		t.Fatal(err)
+	}
+	reaches, declared, err := watchReaches(p)
+	if err != nil || len(reaches) != 0 {
+		t.Fatalf("watchReaches = %v, %v", reaches, err)
+	}
+	want := []cliproject.Declared{{Text: "inbox", Resolved: inbox}}
+	if len(declared) != 1 || declared[0] != want[0] {
+		t.Fatalf("declared %+v, want %+v", declared, want)
+	}
+	if err := os.Remove(inbox); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink(outside, inbox); err != nil {
+		t.Fatal(err)
+	}
+	var changed *cliproject.ChangedError
+	if err := cliproject.Recheck(p.Root, declared); !errors.As(err, &changed) {
+		t.Fatalf("Recheck = %v, want a ChangedError", err)
+	}
+}

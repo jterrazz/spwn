@@ -73,6 +73,19 @@ type SpawnOpts struct {
 	// never mentions /world/knowledge/). The CLI resolves any
 	// project-relative path to absolute before calling Spawn.
 	Knowledge string
+	// Recheck, when set, is called just before the container is made and
+	// again once it is started: an error refuses the world, the started
+	// container removed. The CLI resolves the project's declared host
+	// paths again there, since a world of the same project may rewrite
+	// the project's links while this one starts.
+	Recheck func() error
+}
+
+func (opts *SpawnOpts) recheck() error {
+	if opts.Recheck == nil {
+		return nil
+	}
+	return opts.Recheck()
 }
 
 func (opts *SpawnOpts) runtimeName() string {
@@ -433,6 +446,10 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		GroupAdd:    groupAdd,
 	}
 
+	if err := opts.recheck(); err != nil {
+		releaseImage()
+		return nil, err
+	}
 	containerID, err := a.backend.Create(ctx, containerCfg)
 	releaseImage()
 	if err != nil {
@@ -442,6 +459,10 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	if err := a.backend.Start(ctx, containerID); err != nil {
 		a.rollback(ctx, containerID)
 		return nil, fmt.Errorf("start container: %w", err)
+	}
+	if err := opts.recheck(); err != nil {
+		a.rollback(ctx, containerID)
+		return nil, err
 	}
 	opts.progress("container_created", id)
 

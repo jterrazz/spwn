@@ -73,7 +73,7 @@ resumes at the next scheduled time.`,
 		}
 		defer releaseDaemonLock(lockFile)
 
-		reaches, err := watchReaches(p)
+		reaches, declared, err := watchReaches(p)
 		if err != nil {
 			return err
 		}
@@ -110,8 +110,15 @@ resumes at the next scheduled time.`,
 		fmt.Fprintln(cmd.OutOrStdout(), "receipts: "+ui.Clean(receiptsPath(p.Root)))
 		fmt.Fprintln(cmd.OutOrStdout(), "ctrl-c to stop")
 
+		if err := cliproject.Recheck(p.Root, declared); err != nil {
+			return err
+		}
 		if err := eng.Start(ctx); err != nil {
 			return fmt.Errorf("start engine: %w", err)
+		}
+		if err := cliproject.Recheck(p.Root, declared); err != nil {
+			eng.Stop()
+			return err
 		}
 		if err := allowed.Keep(reaches); err != nil {
 			fmt.Fprintf(cmd.ErrOrStderr(), "the yes was not kept in %s: %s\n", ui.Clean(cliproject.GrantsPath()), ui.CleanError(err))
@@ -127,8 +134,9 @@ resumes at the next scheduled time.`,
 
 const daemonRefusalHint = "Run `spwn automation daemon` in a terminal to be asked once (a yes is kept), or `spwn automation daemon --yes` to allow these paths for this run only"
 
-func watchReaches(p *project.Project) ([]cliproject.Reach, error) {
+func watchReaches(p *project.Project) ([]cliproject.Reach, []cliproject.Declared, error) {
 	var reaches []cliproject.Reach
+	var declared []cliproject.Declared
 	for _, wname := range slices.Sorted(maps.Keys(p.Manifest.Worlds)) {
 		w := p.Manifest.Worlds[wname]
 		for _, aname := range slices.Sorted(maps.Keys(w.Automations)) {
@@ -138,13 +146,14 @@ func watchReaches(p *project.Project) ([]cliproject.Reach, error) {
 			}
 			for what, text := range map[string]string{"world name": wname, "automation name": aname} {
 				if err := cliproject.CheckText(what, text); err != nil {
-					return nil, err
+					return nil, nil, err
 				}
 			}
 			if err := cliproject.CheckHostPath("watch path", a.On.FS.Path); err != nil {
-				return nil, fmt.Errorf("automation %q of world %q: %w", aname, wname, err)
+				return nil, nil, fmt.Errorf("automation %q of world %q: %w", aname, wname, err)
 			}
 			resolved, leaves := cliproject.Resolve(p.Root, a.On.FS.Path)
+			declared = append(declared, cliproject.Declared{Text: a.On.FS.Path, Resolved: resolved})
 			a.On.FS.Path = resolved
 			if leaves {
 				reaches = append(reaches, cliproject.Reach{Path: resolved, Access: "names and times recorded",
@@ -152,7 +161,7 @@ func watchReaches(p *project.Project) ([]cliproject.Reach, error) {
 			}
 		}
 	}
-	return reaches, nil
+	return reaches, declared, nil
 }
 
 func countAutomations(p *project.Project) int {

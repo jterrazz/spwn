@@ -161,3 +161,53 @@ func TestAWorldNameThatClimbsIsRefused(t *testing.T) {
 		t.Fatal(`world ".." was resolved`)
 	}
 }
+
+func TestEveryBindSourceOfAWorldIsResolvedAgainBeforeItsContainer(t *testing.T) {
+	p, root, outside := projectWith(t, "version: 1\nname: site\nworlds:\n  neo:\n    agents: []\n    workspaces: [\"sub\"]\n    knowledge: kn\n")
+	for _, d := range []string{"sub", "kn"} {
+		if err := os.Mkdir(filepath.Join(root, d), 0o755); err != nil {
+			t.Fatal(err)
+		}
+	}
+	pw, err := resolveProjectWorld(p, "neo", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	wantKn := []cliproject.Declared{{Text: "kn", Resolved: filepath.Join(root, "kn")}}
+	wantWs := []cliproject.Declared{{Text: "sub", Resolved: filepath.Join(root, "sub")}}
+	if !slices.Equal(pw.DeclaredKnowledge, wantKn) || !slices.Equal(pw.DeclaredWorkspaces, wantWs) {
+		t.Fatalf("declared %+v %+v, want %+v %+v", pw.DeclaredKnowledge, pw.DeclaredWorkspaces, wantKn, wantWs)
+	}
+	if err := pw.recheck(true)(); err != nil {
+		t.Fatalf("an unchanged world was refused: %v", err)
+	}
+
+	for _, swapped := range []string{"sub", "kn"} {
+		t.Run(swapped, func(t *testing.T) {
+			at := filepath.Join(root, swapped)
+			if err := os.Rename(at, at+".was"); err != nil {
+				t.Fatal(err)
+			}
+			if err := os.Symlink(outside, at); err != nil {
+				t.Fatal(err)
+			}
+			t.Cleanup(func() {
+				if err := os.Remove(at); err != nil {
+					t.Fatal(err)
+				}
+				if err := os.Rename(at+".was", at); err != nil {
+					t.Fatal(err)
+				}
+			})
+			var changed *cliproject.ChangedError
+			if err := pw.recheck(true)(); !errors.As(err, &changed) || changed.Text != swapped || changed.Now != outside {
+				t.Fatalf("recheck = %v, want a ChangedError naming %q", err, swapped)
+			}
+			if swapped == "sub" {
+				if err := pw.recheck(false)(); err != nil {
+					t.Fatalf("with -w the project's workspaces are not bound, yet were rechecked: %v", err)
+				}
+			}
+		})
+	}
+}
