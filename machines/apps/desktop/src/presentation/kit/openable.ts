@@ -1,4 +1,9 @@
-import type { MachinesRelease, MachinesSSHTarget, PortsSharedPort } from '@jterrazz/station-api';
+import type {
+    MachinesRelease,
+    MachinesSSHTarget,
+    OverviewNeed,
+    PortsSharedPort,
+} from '@jterrazz/station-api';
 
 import type { Opening, Opens } from '../../application/ports/opener.port';
 import { shareOpensFromHere } from '../words/provisional';
@@ -16,6 +21,16 @@ export class Openable implements Opening {
 
     static ofSsh(target: MachinesSSHTarget): Openable | undefined {
         return target.Command === '' ? undefined : new Openable('terminal', target.Command);
+    }
+
+    static ofPane(need: Pick<OverviewNeed, 'Pane'>): Openable | undefined {
+        return need.Pane === '' ? undefined : new Openable('settings', need.Pane);
+    }
+
+    static ofFixLine(need: Pick<OverviewNeed, 'Command' | 'InTerminal'>): Openable | undefined {
+        return need.InTerminal && need.Command !== ''
+            ? new Openable('fix-line', need.Command)
+            : undefined;
     }
 
     static ofRelease(release: MachinesRelease): Openable | undefined {

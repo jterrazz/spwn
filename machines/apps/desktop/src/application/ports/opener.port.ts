@@ -1,6 +1,6 @@
 import type { EngineError } from '../../domain/engine-error';
 
-export type Opens = 'terminal' | 'url';
+export type Opens = 'fix-line' | 'settings' | 'terminal' | 'url';
 
 export type Opening = { readonly opens: Opens; readonly value: string };
 

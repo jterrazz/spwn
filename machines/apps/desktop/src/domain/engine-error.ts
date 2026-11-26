@@ -7,6 +7,7 @@ export type Fate = 'answered' | 'lost' | 'unsent';
 // value: the refusals the window makes of its own, its shell's (`src-tauri/src/opener.rs`) and its opener's outside
 // value: Tauri: drawn like the engine's, never on the engine's wire, so never one of its codes.
 export const WINDOW_FAIL_CODES = [
+    'opener.not-a-settings-pane',
     'opener.not-a-web-address',
     'opener.not-one-line',
     'opener.not-opened',

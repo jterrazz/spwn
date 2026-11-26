@@ -12,12 +12,27 @@ use serde::Serialize;
 pub const NOT_A_WEB_ADDRESS: &str = "opener.not-a-web-address";
 pub const NOT_ONE_LINE: &str = "opener.not-one-line";
 pub const NOT_OPENED: &str = "opener.not-opened";
+pub const NOT_A_SETTINGS_PANE: &str = "opener.not-a-settings-pane";
 
 // value: the longest address and command line the window opens; an engine's are a few dozen characters.
 pub const URL_LIMIT: usize = 2048;
 pub const COMMAND_LIMIT: usize = 1024;
 
+// value: the System Settings panes the window opens, whole as the engine sends them: the engine's `catalog.Panes`,
+// value: which a test of the architecture holds equal to this list. Nothing else reaches `open` as a pane.
+pub const PANES: &[&str] = &[
+    "x-apple.systempreferences:com.apple.settings.PrivacySecurity.extension?FileVault",
+    "x-apple.systempreferences:com.apple.Network-Settings.extension?Firewall",
+    "x-apple.systempreferences:com.apple.settings.PrivacySecurity.extension?Security",
+    "x-apple.systempreferences:com.apple.settings.PrivacySecurity.extension",
+    "x-apple.systempreferences:com.apple.Software-Update-Settings.extension",
+    "x-apple.systempreferences:com.apple.Lock-Screen-Settings.extension",
+    "x-apple.systempreferences:com.apple.Sharing-Settings.extension",
+    "x-apple.systempreferences:com.apple.Time-Machine-Settings.extension",
+];
+
 const FOLDER: &str = "spwn-window-open";
+const LINE_END: &str = "SPWN_LINE";
 const SUFFIX: &str = ".command";
 
 #[derive(Debug, PartialEq, Serialize)]
@@ -82,9 +97,31 @@ pub fn one_line(command: &str) -> Result<&str, Refusal> {
     Ok(command)
 }
 
+// invariant: a pane opens only when it is, whole and byte for byte, one of PANES: a URL the engine did not name, a
+// invariant: well-formed pane of another id included, never reaches `open`.
+pub fn settings_pane(url: &str) -> Result<&str, Refusal> {
+    if PANES.contains(&url) {
+        Ok(url)
+    } else {
+        Err(refused(
+            NOT_A_SETTINGS_PANE,
+            "the window opens no System Settings pane it was not told of",
+        ))
+    }
+}
+
 // value: the script a terminal runs: it removes itself, then runs the engine's line as it came.
 pub fn script_of(command: &str) -> String {
     format!("#!/bin/sh\nrm -f -- \"$0\"\n{command}\n")
+}
+
+// invariant: the script of a line that is the owner's to run: it prints what Spwn filled in, then waits for Return
+// invariant: before it runs the line, so closing the window runs nothing; the line is printed by a quoted here-document,
+// invariant: never quoted into a command.
+pub fn waiting_script_of(command: &str) -> String {
+    format!(
+        "#!/bin/sh\nrm -f -- \"$0\"\ncat <<'{LINE_END}'\nSpwn filled in this line for you. Nothing runs until you press Return:\n\n  {command}\n\n{LINE_END}\nprintf 'Press Return to run it, or close this window. '\nread -r _answer || exit 0\n{command}\n"
+    )
 }
 
 pub fn folder() -> PathBuf {
@@ -108,7 +145,7 @@ fn own_folder(dir: &Path) -> io::Result<()> {
     fs::set_permissions(dir, fs::Permissions::from_mode(0o700))
 }
 
-pub fn write_script(dir: &Path, command: &str) -> io::Result<PathBuf> {
+pub fn write_script(dir: &Path, script: &str) -> io::Result<PathBuf> {
     static NEXT: AtomicU32 = AtomicU32::new(0);
     own_folder(dir)?;
     let nanos = SystemTime::now()
@@ -121,7 +158,7 @@ pub fn write_script(dir: &Path, command: &str) -> io::Result<PathBuf> {
         .create_new(true)
         .mode(0o700)
         .open(&path)?;
-    file.write_all(script_of(command).as_bytes())?;
+    file.write_all(script.as_bytes())?;
     Ok(path)
 }
 
@@ -201,20 +238,34 @@ pub fn open_url_now(url: &str) -> Result<(), Refusal> {
     faked("url", url).unwrap_or_else(|| launch_url(url))
 }
 
-pub fn open_in_terminal_now(command: &str) -> Result<(), Refusal> {
-    let command = one_line(command)?;
-    let script = write_script(&folder(), command).map_err(|error| {
+pub fn open_settings_now(url: &str) -> Result<(), Refusal> {
+    let url = settings_pane(url)?;
+    faked("settings", url).unwrap_or_else(|| launch_url(url))
+}
+
+fn run_in_terminal(what: &str, command: &str, script: &str) -> Result<(), Refusal> {
+    let script = write_script(&folder(), script).map_err(|error| {
         refused(
             NOT_OPENED,
             format!("the script could not be written: {error}"),
         )
     })?;
     let shown = script.display().to_string();
-    faked("terminal", &format!("{shown}\t{command}")).unwrap_or_else(|| {
+    faked(what, &format!("{shown}\t{command}")).unwrap_or_else(|| {
         launch_script(&script).inspect_err(|_| {
             let _ = fs::remove_file(&script);
         })
     })
+}
+
+pub fn open_in_terminal_now(command: &str) -> Result<(), Refusal> {
+    let command = one_line(command)?;
+    run_in_terminal("terminal", command, &script_of(command))
+}
+
+pub fn open_fix_in_terminal_now(command: &str) -> Result<(), Refusal> {
+    let command = one_line(command)?;
+    run_in_terminal("fix-line", command, &waiting_script_of(command))
 }
 
 #[tauri::command(async)]
@@ -225,6 +276,16 @@ pub fn open_url(url: String) -> Result<(), Refusal> {
 #[tauri::command(async)]
 pub fn open_in_terminal(command: String) -> Result<(), Refusal> {
     open_in_terminal_now(&command)
+}
+
+#[tauri::command(async)]
+pub fn open_settings(url: String) -> Result<(), Refusal> {
+    open_settings_now(&url)
+}
+
+#[tauri::command(async)]
+pub fn open_fix_in_terminal(command: String) -> Result<(), Refusal> {
+    open_fix_in_terminal_now(&command)
 }
 
 #[cfg(test)]

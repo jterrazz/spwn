@@ -17,6 +17,8 @@ import type { Found } from '../../../domain/machines/machines';
 import { useGesture } from '../../dependencies/use-gesture';
 import { GestureButton, GestureRow } from '../../kit/gestures';
 import { LoginSheet } from '../../kit/login-sheet';
+import { Openable } from '../../kit/openable';
+import { OpenButton } from '../../kit/opens';
 import { carriesCommand } from '../../ui/command';
 import { CopyButton } from '../../ui/copy-button';
 import { Button, Row } from '../../ui/index';
@@ -239,8 +241,31 @@ function Login(props: Props & { found: Found; program: AccountsProgram }) {
     );
 }
 
+function Opened(props: Props & { label: string; openable: Openable }) {
+    const { label, openable, primary } = props;
+    const variant = primary ? 'primary' : 'plain';
+    return (
+        <Row
+            {...rowOf(
+                props,
+                <OpenButton held="" label={label} openable={openable} variant={variant} />,
+            )}
+        />
+    );
+}
+
 function Said(props: Props) {
-    const { Command, Path } = props.need;
+    const { need } = props;
+    const { Command, Path } = need;
+    const onThisMac = findMachine(props.macs, need.Machine)?.mac.ThisMac === true;
+    const pane = onThisMac ? Openable.ofPane(need) : undefined;
+    if (pane) {
+        return <Opened {...props} label={`${verbOf(need)} ${need.Object}`} openable={pane} />;
+    }
+    const line = Openable.ofFixLine(need);
+    if (line) {
+        return <Opened {...props} label={verbOf(need)} openable={line} />;
+    }
     if (Command !== '') {
         return (
             <Row

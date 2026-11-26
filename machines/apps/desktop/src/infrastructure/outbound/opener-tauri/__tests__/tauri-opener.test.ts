@@ -69,6 +69,60 @@ describe('tauri opener', () => {
         expect(shareAddressOf(SHARE)).toBe('https://mac.tail1234.ts.net:40001');
     });
 
+    test("a pane is handed the engine's URL to the shell's settings command", async () => {
+        // Given - a need that names its pane, and the shell's invoke
+        const { invoked, ipc } = fakeInvoke();
+        const pane = Openable.ofPane({
+            Pane: 'x-apple.systempreferences:com.apple.Network-Settings.extension?Firewall',
+        });
+
+        // When - it is opened
+        const opened = pane ? await tauriOpener(ipc)(pane) : undefined;
+
+        // Then - one command, the pane as sent
+        expect(opened).toStrictEqual({ kind: 'opened' });
+        expect(invoked).toStrictEqual([
+            {
+                args: {
+                    url: 'x-apple.systempreferences:com.apple.Network-Settings.extension?Firewall',
+                },
+                command: 'open_settings',
+            },
+        ]);
+    });
+
+    test('a line the owner runs goes to the waiting terminal command, never the running one', async () => {
+        // Given - a need whose command is the owner's to run
+        const { invoked, ipc } = fakeInvoke();
+        const line = Openable.ofFixLine({
+            Command: 'sudo launchctl bootout system/x',
+            InTerminal: true,
+        });
+
+        // When - it is opened
+        if (line) {
+            await tauriOpener(ipc)(line);
+        }
+
+        // Then - open_fix_in_terminal alone
+        expect(invoked).toStrictEqual([
+            {
+                args: { command: 'sudo launchctl bootout system/x' },
+                command: 'open_fix_in_terminal',
+            },
+        ]);
+    });
+
+    test('a need with no pane, or a command nobody asked the owner to run, opens nothing', () => {
+        // Given - a need with no pane, a command the owner is not asked to run, and a flag with no command
+        const none = Openable.ofPane({ Pane: '' });
+        const notAsked = Openable.ofFixLine({ Command: 'station disk', InTerminal: false });
+        const empty = Openable.ofFixLine({ Command: '', InTerminal: true });
+
+        // Then - none of them opens anything
+        expect([none, notAsked, empty]).toStrictEqual([undefined, undefined, undefined]);
+    });
+
     test("the shell's refusal comes back as a refusal the page draws", async () => {
         // Given - a shell that refuses the address
         const { ipc } = fakeInvoke(

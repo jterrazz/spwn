@@ -10,7 +10,13 @@ import { Unanswered } from './readings';
 
 import styles from '../ui/page.module.css';
 
+export const WAITS_FOR_RETURN =
+    'Opens Terminal with the line filled in; nothing runs until you press Return';
 export const WITHHELD_OPENS = 'Not opened: what it would open looks like a secret';
+
+function titleOf(openable: Openable): string {
+    return openable.opens === 'fix-line' ? WAITS_FOR_RETURN : openable.value;
+}
 
 export type OpenButtonProps = {
     label: string;
@@ -47,7 +53,7 @@ export function OpenButton({ label, openable, held, variant = 'plain' }: OpenBut
                 onClick={() => {
                     void open();
                 }}
-                title={openable.value}
+                title={titleOf(openable)}
                 variant={variant}
             >
                 {label}

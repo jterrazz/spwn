@@ -47,6 +47,8 @@ fn main() {
             engine::engine_close,
             opener::open_url,
             opener::open_in_terminal,
+            opener::open_settings,
+            opener::open_fix_in_terminal,
             local_core::core_present,
             local_core::core_install,
             local_core::core_start,

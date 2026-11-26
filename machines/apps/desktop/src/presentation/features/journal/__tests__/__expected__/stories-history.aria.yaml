@@ -18,7 +18,8 @@
     - button "Upkeep 2 brew updates waiting macbook-pro · Apps"
     - button "Update brew": Update
     - 'button "Upkeep node 25.1.0 available: change ''24'' to ''25'' macbook-pro · Apps"'
-    - 'button "Upkeep Firewall: off macbook-pro · Settings System Settings > Network > Firewall"'
+    - 'button "Upkeep Firewall: off macbook-pro · Settings"'
+    - button "Open Firewall settings"
   - region "History":
     - heading "History what happened, newest first" [level=2]
     - region "Today":
