@@ -54,7 +54,7 @@ public struct GaugeTile: View {
     func bar(_ bar: Value) -> some View {
         let m = Token.Metric.GaugeParts.self
         let share = Self.share(bar)
-        let ink = share > m.full ? tokens.color.red : share > m.hot ? tokens.color.orange : tokens.color.accent
+        let ink = share > m.full ? tokens.color.red : share > m.hot ? tokens.color.t1 : tokens.color.accent
         return Capsule().fill(tokens.color.track)
             .frame(height: m.bar)
             .overlay(alignment: .leading) {

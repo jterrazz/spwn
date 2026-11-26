@@ -115,7 +115,7 @@ struct MachineActivity: View {
                 }
                 .lineLimit(1)
                 if let sentence = chart?.anomaly?.sentence, !sentence.isEmpty {
-                    Text(sentence).recorded(sentence, Token.Role.chartNote).foregroundStyle(tokens.color.orangeText).lineLimit(1)
+                    Text(sentence).recorded(sentence, Token.Role.chartNote).foregroundStyle(tokens.color.t1).lineLimit(1)
                 }
                 if let chart {
                     ActivityCharts(chart, scrub: scrubbed ? scrub : nil, onScrub: scrubbed ? onScrub : { _ in })

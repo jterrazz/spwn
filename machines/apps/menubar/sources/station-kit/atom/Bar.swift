@@ -36,7 +36,7 @@ public struct Bar: View {
     func ink(_ calm: Color) -> Color {
         switch Self.level(used) {
         case .calm: calm
-        case .warn: tokens.color.orange
+        case .warn: tokens.color.t1
         case .critical: tokens.color.red
         }
     }

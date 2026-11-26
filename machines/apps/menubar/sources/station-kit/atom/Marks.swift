@@ -96,7 +96,7 @@ public struct MacRing: View {
                 .stroke(tokens.color.track, style: StrokeStyle(lineWidth: m.macRingStroke, dash: asleep ? m.asleepDash : []))
             if !asleep {
                 Arc(share: share).inset(by: inset)
-                    .stroke(share > Token.Hot.cpu ? tokens.color.orange : tokens.color.accent, style: StrokeStyle(lineWidth: m.macRingStroke, lineCap: .round))
+                    .stroke(share > Token.Hot.cpu ? tokens.color.t1 : tokens.color.accent, style: StrokeStyle(lineWidth: m.macRingStroke, lineCap: .round))
                     .animation(tokens.motion(Token.Motion.progress), value: share)
             }
             Image(systemName: symbol).font(.system(size: m.macGlyph, weight: .medium)).foregroundStyle(tokens.color.t2)

@@ -175,6 +175,14 @@ final class KitBoundaryTests: XCTestCase {
         XCTAssertEqual(Self.scan(files), [])
     }
 
+    // invariant: a view reads `tokens.color.*`; no view outside token/ names a
+    // system colour or the system accent.
+    func testNoViewNamesASystemColour() {
+        let raw = #"Color\.(green|orange|red|blue|yellow|accentColor)\b|NSColor\.system"#
+        let found = Self.swiftFiles(Tree.sources).filter { !$0.path.hasPrefix("token/") && $0.text.range(of: raw, options: .regularExpression) != nil }.map(\.path)
+        XCTAssertEqual(found, [])
+    }
+
     func testTheScanCatchesWhatItForbids() {
         let caught = Self.scan([
             ("atom/Dot.swift", "import SwiftUI\nstruct D: View { var body: some View { ProgressView().foregroundStyle(Color(red: 1, green: 0, blue: 0)) } }"),
