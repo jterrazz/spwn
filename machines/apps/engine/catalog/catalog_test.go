@@ -1,6 +1,7 @@
 package catalog_test
 
 import (
+	"io/fs"
 	"path"
 	"slices"
 	"strings"
@@ -236,5 +237,33 @@ func TestTheLinuxImageBootsWithoutWhatAVMNeverUses(t *testing.T) {
 		if strings.Contains(body, kept) {
 			t.Errorf("the linux recipe touches %s, a VM's only source of security updates", kept)
 		}
+	}
+}
+
+func TestTheLinuxImageKeepsOneKernelAndWhatItsImagePhaseInstalled(t *testing.T) {
+	body := recipe(t, "linux-cleanup.sh")
+	for _, step := range []string{
+		`if ls "$added" 2>/dev/null | grep -q '^linux-image-'; then`,
+		"linux-libc-dev | linux-base | *\"$kernel\"*) ;;",
+		`*) [ -e "$added/$p" ] || purge+=("$p") ;;`,
+		`apt-get purge -y "${purge[@]}"`,
+	} {
+		if !strings.Contains(body, step) {
+			t.Errorf("the linux cleanup lacks %q", step)
+		}
+	}
+	if strings.Index(body, "apt-get purge") > strings.Index(body, "apt-get clean") {
+		t.Error("the linux cleanup purges after apt-get clean, once the package lists are gone")
+	}
+	file, err := fs.ReadFile(catalog.BuiltinFiles(), "machines/base-ubuntu.machine.yaml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	m, err := catalog.DecodeMachinefile("base-ubuntu.machine.yaml", file)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if m.VM == nil || m.VM.Image == nil || !slices.Contains(m.VM.Image.Bake, "linux-kernel") {
+		t.Error("base-ubuntu bakes no linux-kernel: its image would keep both of the upstream's kernels")
 	}
 }
