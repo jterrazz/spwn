@@ -1,0 +1,98 @@
+{
+  "$defs": {
+    "automations.Automation": {
+      "additionalProperties": false,
+      "properties": {
+        "Agent": {
+          "type": "string"
+        },
+        "Failed": {
+          "type": "integer"
+        },
+        "Fires": {
+          "type": "integer"
+        },
+        "Group": {
+          "type": "string"
+        },
+        "LastFired": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "LastOK": {
+          "type": "boolean"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "Shared": {
+          "type": "boolean"
+        },
+        "Trigger": {
+          "$ref": "#/$defs/automations.Trigger"
+        }
+      },
+      "required": [
+        "Agent",
+        "Failed",
+        "Fires",
+        "Group",
+        "LastFired",
+        "LastOK",
+        "Name",
+        "Shared",
+        "Trigger"
+      ],
+      "type": "object"
+    },
+    "automations.Trigger": {
+      "additionalProperties": false,
+      "properties": {
+        "Kind": {
+          "type": "string"
+        },
+        "Spec": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Kind",
+        "Spec"
+      ],
+      "type": "object"
+    },
+    "automations.calls.ListIn": {
+      "additionalProperties": false,
+      "properties": {
+        "project": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/spwn/blob/main/machines/packages/api/schemas/calls/automations.list.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call automations.list of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/automations.calls.ListIn"
+    },
+    "out": {
+      "items": {
+        "$ref": "#/$defs/automations.Automation"
+      },
+      "type": [
+        "array",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "automations.list",
+  "type": "object"
+}

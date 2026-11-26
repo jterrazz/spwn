@@ -50,15 +50,15 @@ worlds:
                 prompt: "Review yesterday's journal and write a brief."
 ```
 
-Verify with `spwn check` (parses the new block) and `spwn automation ls`
-(shows the entry plus its placeholder `LAST FIRED`):
+Verify with `spwn check` (parses the new block) and `station automations`
+(shows the entry plus its placeholder `last fired`):
 
 ```text
 $ spwn check
 ✓ Project is valid
-$ spwn automation ls
-WORLD  NAME           TRIGGER         AGENT   LAST FIRED
-brain  morning-brief  cron 0 6 * * *  editor  —
+$ station automations
+# Automations
+●  morning-brief  editor  cron 0 6 * * *  never  none
 ```
 
 Then run the engine:
@@ -284,16 +284,15 @@ Both files are gitignored by `spwn init`'s default `.gitignore`.
 ## CLI
 
 ```text
-spwn automation ls           # list every automation + last-fired
-spwn automation status       # per-automation rollup (fires/ok/fail)
-spwn automation logs [-n N]  # last N receipts
-spwn automation logs -f      # tail receipts as they arrive
-spwn automation daemon       # run the engine; ctrl-c to stop
+station automations                 # list every automation, when it last ran, how often
+station automations <automation>    # one automation
+station automations log [<automation>] [--last N]   # the newest runs, oldest first
+spwn automation daemon              # run the engine; ctrl-c to stop
 ```
 
-`ls` / `status` / `logs` are read-only against `.spwn/`. They work
-whether or not the daemon is running; `logs -f` will wait for the
-file to appear if there's nothing yet.
+`station automations` and `station automations log` only read the
+manifest and `.spwn/runs.jsonl`. They work whether or not the daemon is
+running, and they have no follow: run `log` again to see new receipts.
 
 ---
 
@@ -451,11 +450,11 @@ workarounds:
 - Have the agent inspect `.Event.Paths` and skip swap/temp files
   itself.
 
-### `spwn automation logs` is empty
+### `station automations log` is empty
 
 Either the daemon hasn't fired anything yet, or the daemon isn't
-running. `spwn automation status` shows whether any fires have been
-recorded.
+running. `station automations` shows, on each row, whether any fires
+have been recorded.
 
 ---
 

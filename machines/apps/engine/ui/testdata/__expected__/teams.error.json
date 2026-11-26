@@ -1,0 +1,13 @@
+{
+  "schema": "station.page/v1",
+  "id": "teams",
+  "command": "teams",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "failed",
+  "error": {
+    "message": "the teams of ~/.spwn cannot be read",
+    "hint": "station teams"
+  }
+}

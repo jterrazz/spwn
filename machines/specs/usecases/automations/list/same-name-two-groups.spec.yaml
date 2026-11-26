@@ -1,0 +1,13 @@
+description: 'station automations lists a name two groups declare as group/name, one row each'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; /bin/mkdir site && /usr/bin/touch site/spwn.yaml && P="$PWD/site" /usr/bin/jq ".macs[\"macbook-pro\"].stores.automations = {(env.P): [{\"Group\":\"a\",\"Name\":\"same\",\"Agent\":\"neo\",\"Trigger\":{\"Kind\":\"cron\",\"Spec\":\"0 6 * * *\"}},{\"Group\":\"b\",\"Name\":\"same\",\"Agent\":\"trinity\",\"Trigger\":{\"Kind\":\"cron\",\"Spec\":\"0 7 * * *\"}}]} | .macs[\"macbook-pro\"].stores.automation_runs = {(env.P): [{\"Group\":\"a\",\"Name\":\"same\",\"At\":\"2026-05-01T06:00:00Z\",\"OK\":true},{\"Group\":\"b\",\"Name\":\"same\",\"At\":\"2026-05-01T07:00:00Z\",\"OK\":true},{\"Group\":\"b\",\"Name\":\"same\",\"At\":\"2026-05-02T07:00:00Z\",\"OK\":false,\"Error\":\"no running world\"}]}" world.json > seeded.json && /bin/mv seeded.json world.json'
+      exit: 0
+    - command: '--version >/dev/null; cd site && "$STATION" automations'
+      exit: 0
+      stdout: |
+          # Automations
+          ●	a/same	neo	cron 0 6 * * *	2026-05-01 06:00:00	1
+          ●	b/same	trinity	cron 0 7 * * *	2026-05-02 07:00:00	2, 1 failed

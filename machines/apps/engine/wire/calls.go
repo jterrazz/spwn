@@ -18,6 +18,7 @@ import (
 	activitycontract "github.com/jterrazz/studio-station/apps/engine/activity/contract"
 	agentscalls "github.com/jterrazz/studio-station/apps/engine/agents/calls"
 	appscalls "github.com/jterrazz/studio-station/apps/engine/apps/calls"
+	automationscalls "github.com/jterrazz/studio-station/apps/engine/automations/calls"
 	awakecalls "github.com/jterrazz/studio-station/apps/engine/awake/calls"
 	backgroundcalls "github.com/jterrazz/studio-station/apps/engine/background/calls"
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
@@ -37,6 +38,7 @@ import (
 	settingscontract "github.com/jterrazz/studio-station/apps/engine/settings/contract"
 	setupcalls "github.com/jterrazz/studio-station/apps/engine/setup/calls"
 	"github.com/jterrazz/studio-station/apps/engine/surface/cli/kit"
+	teamscalls "github.com/jterrazz/studio-station/apps/engine/teams/calls"
 	vaultcalls "github.com/jterrazz/studio-station/apps/engine/vault/calls"
 )
 
@@ -61,6 +63,8 @@ func (m machine) registry(env kit.Env) *call.Registry {
 		activitycalls.All(m.activityDeps(sections.Meter)),
 		overviewcalls.All(sections),
 		agentscalls.All(agentscalls.Deps{Minds: m.minds(), Kind: kind, Home: m.sys.Env.Home()}),
+		teamscalls.All(teamscalls.Deps{Teams: m.teams(), Home: m.sys.Env.Home()}),
+		automationscalls.All(automationscalls.Deps{Automations: m.automations(), Home: m.sys.Env.Home()}),
 		accountscalls.All(accountscalls.Deps{SignIns: m.signIns(), Kind: kind}),
 		vaultcalls.All(vaultcalls.Deps{Passwords: m.passwords(), SignIns: m.signIns(), Mac: m.where.Machine, Separator: token.Sep, Kind: kind}),
 		grantscalls.All(grantscalls.Deps{Grants: m.grants(), Kind: kind}),

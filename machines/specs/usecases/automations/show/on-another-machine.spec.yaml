@@ -1,0 +1,15 @@
+description: 'station automations <automation> --on a VM reads the automation that VM declares'
+env: two-macs
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ".macs[\"linux-1\"].stores.automations = {\"\": [{\"Name\":\"morning\",\"Agent\":\"neo\",\"Trigger\":{\"Kind\":\"cron\",\"Spec\":\"0 6 * * *\"}}]}" world.json > seeded.json && /bin/mv seeded.json world.json'
+      exit: 0
+    - command: 'automations morning --on linux-1'
+      exit: 0
+      stdout: |
+          	On linux-1:
+          ●	morning	neo	cron 0 6 * * *	never	none
+    - command: 'automations morning'
+      exit: 2
+      stderr: |
+          Error: no automation named "morning"
+          Hint: station automations

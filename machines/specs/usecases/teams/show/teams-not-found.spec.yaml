@@ -1,0 +1,8 @@
+description: 'station teams <team> of a slug no team has is refused, exit 2'
+env: two-macs
+runs:
+    - command: 'teams web'
+      exit: 2
+      stderr: |
+          Error: no team named "web"
+          Hint: station teams

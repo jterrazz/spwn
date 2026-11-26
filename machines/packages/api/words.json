@@ -403,6 +403,21 @@
       "Detail": "apps",
       "Tone": "plain"
     },
+    "automations.invalid-project": {
+      "Word": "invalid project",
+      "Detail": "automations",
+      "Tone": "plain"
+    },
+    "automations.not-found": {
+      "Word": "not found",
+      "Detail": "automations",
+      "Tone": "plain"
+    },
+    "automations.not-unique": {
+      "Word": "not unique",
+      "Detail": "automations",
+      "Tone": "plain"
+    },
     "awake.no-battery": {
       "Word": "no battery",
       "Detail": "awake",
@@ -1100,6 +1115,11 @@
     "setting.unknown": {
       "Word": "unknown",
       "Detail": "setting",
+      "Tone": "plain"
+    },
+    "teams.not-found": {
+      "Word": "not found",
+      "Detail": "teams",
       "Tone": "plain"
     },
     "unknown_op": {

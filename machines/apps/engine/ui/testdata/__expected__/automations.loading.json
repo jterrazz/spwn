@@ -1,0 +1,126 @@
+{
+  "schema": "station.page/v1",
+  "id": "automations",
+  "command": "automations",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "loading",
+  "sections": [
+    {
+      "id": "automations",
+      "title": "Automations",
+      "columns": [
+        {
+          "key": "name",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "agent",
+          "label": "agent",
+          "kind": "text",
+          "keep": 70
+        },
+        {
+          "key": "trigger",
+          "label": "trigger",
+          "kind": "text",
+          "keep": 60
+        },
+        {
+          "key": "last-fired",
+          "label": "last fired",
+          "kind": "text",
+          "keep": 40
+        },
+        {
+          "key": "runs",
+          "label": "runs",
+          "kind": "text",
+          "keep": 30
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "inbox",
+            "mark": "pending",
+            "label": "inbox",
+            "cells": [
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "log",
+            "mark": "pending",
+            "label": "log",
+            "cells": [
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "morning",
+            "mark": "pending",
+            "label": "morning",
+            "cells": [
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "pending",
+          "n": 3
+        }
+      ]
+    }
+  ]
+}

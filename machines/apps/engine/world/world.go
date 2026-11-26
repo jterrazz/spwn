@@ -10,6 +10,7 @@ import (
 
 	"github.com/jterrazz/studio-station/apps/engine/activity"
 	"github.com/jterrazz/studio-station/apps/engine/agents"
+	"github.com/jterrazz/studio-station/apps/engine/automations"
 	"github.com/jterrazz/studio-station/apps/engine/awake"
 	"github.com/jterrazz/studio-station/apps/engine/background"
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
@@ -21,6 +22,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/ports"
 	"github.com/jterrazz/studio-station/apps/engine/settings"
+	"github.com/jterrazz/studio-station/apps/engine/teams"
 )
 
 type World struct {
@@ -370,6 +372,19 @@ type Stores struct {
 	Agents map[string][]agents.Mind `json:"agents,omitempty"`
 	// value: the agents' archives written on this machine, by path.
 	AgentArchives map[string]agents.Mind `json:"agent_archives,omitempty"`
+	// value: the teams declared for this machine's user, by slug; their
+	// members are read from Agents, never kept here.
+	Teams []teams.Team `json:"teams,omitempty"`
+	// value: the automations a project declares, by the project root they
+	// belong to; what their runs say is read from AutomationRuns.
+	Automations map[string][]automations.Automation `json:"automations,omitempty"`
+	// value: the runs written for a project, by its root, oldest first.
+	AutomationRuns map[string][]automations.Run `json:"automation_runs,omitempty"`
+	// value: a project root whose manifest does not read, by the error its
+	// manifest gives; such a project declares nothing the Automations can list.
+	AutomationManifestErrors map[string]string `json:"automation_manifest_errors,omitempty"`
+	// value: how many lines of a project's receipts file are no receipt, by its root.
+	AutomationUnreadable map[string]int `json:"automation_unreadable,omitempty"`
 }
 
 func (m *Mac) Store() *Stores {

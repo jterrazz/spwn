@@ -258,3 +258,89 @@ func TestFileReceiptWriter_ConcurrentSafe(t *testing.T) {
 		t.Errorf("decoded %d lines, want %d (some torn?)", count, N)
 	}
 }
+
+const sampleReceiptLog = `{"world":"brain","automation":"morning","trigger":"cron","fired":"2026-05-01T06:00:00Z","finished":"2026-05-01T06:04:23Z","duration_ms":263000,"ok":true,"reason":"on-time","scheduled":"2026-05-01T06:00:00Z"}
+{"world":"brain","automation":"inbox","trigger":"fs","fired":"2026-05-01T11:23:14Z","finished":"2026-05-01T11:23:18Z","duration_ms":4000,"ok":true,"reason":"create:foo.md"}
+{"world":"brain","automation":"morning","trigger":"cron","fired":"2026-05-02T06:00:00Z","finished":"2026-05-02T06:00:01.5Z","duration_ms":1500,"ok":false,"reason":"on-time","error":"world brain: no running world"}
+`
+
+func writeLog(t *testing.T, body string) string {
+	t.Helper()
+	path := filepath.Join(t.TempDir(), "runs.jsonl")
+	must(t, os.WriteFile(path, []byte(body), 0o600))
+	return path
+}
+
+func TestReadReceipts_ParsesAllRows(t *testing.T) {
+	rows, _, err := ReadReceipts(writeLog(t, sampleReceiptLog))
+	if err != nil {
+		t.Fatalf("read: %v", err)
+	}
+	if len(rows) != 3 {
+		t.Fatalf("len = %d, want 3", len(rows))
+	}
+	if rows[0].Automation != "morning" || !rows[0].OK {
+		t.Errorf("row 0 = %+v", rows[0])
+	}
+	if rows[2].OK || rows[2].Error == "" {
+		t.Errorf("row 2 should be a failure with error set")
+	}
+}
+
+func TestReadReceipts_MissingFileIsNone(t *testing.T) {
+	rows, _, err := ReadReceipts(filepath.Join(t.TempDir(), "absent.jsonl"))
+	if err != nil || len(rows) != 0 {
+		t.Fatalf("rows = %d, err = %v; want none", len(rows), err)
+	}
+}
+
+func TestReadReceipts_OversizedLineSkippedNotPropagated(t *testing.T) {
+	huge := strings.Repeat("e", 5*1024*1024)
+	mixed := `{"world":"brain","automation":"x","trigger":"cron","fired":"2026-05-01T06:00:00Z","finished":"2026-05-01T06:00:00Z","duration_ms":0,"ok":true,"reason":"on-time"}
+{"world":"brain","automation":"y","trigger":"cron","fired":"2026-05-01T07:00:00Z","finished":"2026-05-01T07:00:00Z","duration_ms":0,"ok":false,"reason":"on-time","error":"` + huge + `"}
+{"world":"brain","automation":"z","trigger":"cron","fired":"2026-05-01T08:00:00Z","finished":"2026-05-01T08:00:00Z","duration_ms":0,"ok":true,"reason":"on-time"}
+`
+	rows, _, err := ReadReceipts(writeLog(t, mixed))
+	if err != nil {
+		t.Fatalf("oversized line should not error the read, got: %v", err)
+	}
+	if len(rows) != 2 || rows[0].Automation != "x" || rows[1].Automation != "z" {
+		t.Errorf("rows = %+v; want x and z", rows)
+	}
+}
+
+func TestReadReceipts_SkipsBadLines(t *testing.T) {
+	mixed := `{"world":"brain","automation":"x","trigger":"cron","fired":"2026-05-01T06:00:00Z","finished":"2026-05-01T06:00:00Z","duration_ms":0,"ok":true,"reason":"on-time"}
+not-json
+{"world":"brain","automation":"y","trigger":"cron","fired":"2026-05-01T07:00:00Z","finished":"2026-05-01T07:00:00Z","duration_ms":0,"ok":true,"reason":"on-time"}
+`
+	rows, _, err := ReadReceipts(writeLog(t, mixed))
+	if err != nil || len(rows) != 2 {
+		t.Errorf("rows = %d, err = %v; want 2 (the bad line skipped)", len(rows), err)
+	}
+}
+
+func TestReadReceipts_AFinalLineWithNoNewlineIsRead(t *testing.T) {
+	body := strings.TrimSuffix(sampleReceiptLog, "\n")
+	rows, unreadable, err := ReadReceipts(writeLog(t, body))
+	if err != nil || unreadable != 0 || len(rows) != 3 || rows[2].Automation != "morning" || rows[2].OK {
+		t.Fatalf("rows = %+v, unreadable = %d, err = %v; want the 3 rows, the last read", rows, unreadable, err)
+	}
+}
+
+func TestReadReceipts_ATornLastLineIsSkippedAndCounted(t *testing.T) {
+	torn := sampleReceiptLog + `{"world":"brain","automation":"inbox","trigger":"fs","fired":"2026-05-03`
+	rows, unreadable, err := ReadReceipts(writeLog(t, torn))
+	if err != nil || unreadable != 1 || len(rows) != 3 {
+		t.Fatalf("rows = %d, unreadable = %d, err = %v; want 3 rows and 1 unreadable line", len(rows), unreadable, err)
+	}
+}
+
+func TestReadReceipts_EveryLineItCannotReadIsCounted(t *testing.T) {
+	huge := strings.Repeat("e", 5*1024*1024)
+	body := "not-json\n\n" + huge + "\n" + sampleReceiptLog
+	rows, unreadable, err := ReadReceipts(writeLog(t, body))
+	if err != nil || unreadable != 2 || len(rows) != 3 {
+		t.Fatalf("rows = %d, unreadable = %d, err = %v; want 3 rows, 2 unreadable (a blank line is none)", len(rows), unreadable, err)
+	}
+}

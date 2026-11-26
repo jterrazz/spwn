@@ -78,7 +78,7 @@ resumes at the next scheduled time.`,
 
 		fmt.Fprintf(cmd.OutOrStdout(), "automation daemon for project %s\n", p.Manifest.Name)
 		fmt.Fprintf(cmd.OutOrStdout(), "registered automations: %d\n", countAutomations(p))
-		fmt.Fprintln(cmd.OutOrStdout(), "receipts: "+receiptsPath(p.Root))
+		fmt.Fprintln(cmd.OutOrStdout(), "receipts: "+filepath.Join(p.Root, ".spwn", "runs.jsonl"))
 		fmt.Fprintln(cmd.OutOrStdout(), "ctrl-c to stop")
 
 		if err := eng.Start(ctx); err != nil {

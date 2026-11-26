@@ -1,0 +1,121 @@
+{
+  "$defs": {
+    "automations.Run": {
+      "additionalProperties": false,
+      "properties": {
+        "At": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "Cause": {
+          "type": "string"
+        },
+        "DurationMS": {
+          "type": "integer"
+        },
+        "Error": {
+          "type": "string"
+        },
+        "Group": {
+          "type": "string"
+        },
+        "Missed": {
+          "type": "integer"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "OK": {
+          "type": "boolean"
+        },
+        "Output": {
+          "type": "string"
+        },
+        "Paths": {
+          "type": "integer"
+        },
+        "Scheduled": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "Trigger": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "At",
+        "Cause",
+        "DurationMS",
+        "Error",
+        "Group",
+        "Missed",
+        "Name",
+        "OK",
+        "Output",
+        "Paths",
+        "Scheduled",
+        "Trigger"
+      ],
+      "type": "object"
+    },
+    "automations.Runs": {
+      "additionalProperties": false,
+      "properties": {
+        "Runs": {
+          "items": {
+            "$ref": "#/$defs/automations.Run"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Total": {
+          "type": "integer"
+        },
+        "Unreadable": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "Runs",
+        "Total",
+        "Unreadable"
+      ],
+      "type": "object"
+    },
+    "automations.calls.LogIn": {
+      "additionalProperties": false,
+      "properties": {
+        "automation": {
+          "type": "string"
+        },
+        "last": {
+          "type": "integer"
+        },
+        "project": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/spwn/blob/main/machines/packages/api/schemas/calls/automations.log.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call automations.log of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/automations.calls.LogIn"
+    },
+    "out": {
+      "$ref": "#/$defs/automations.Runs"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "automations.log",
+  "type": "object"
+}

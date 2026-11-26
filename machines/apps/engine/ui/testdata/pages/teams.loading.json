@@ -1,0 +1,90 @@
+{
+  "schema": "station.page/v1",
+  "id": "teams",
+  "command": "teams",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "loading",
+  "sections": [
+    {
+      "id": "teams",
+      "title": "Teams",
+      "columns": [
+        {
+          "key": "slug",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "name",
+          "label": "name",
+          "kind": "text",
+          "keep": 60
+        },
+        {
+          "key": "color",
+          "label": "color",
+          "kind": "text",
+          "keep": 40
+        },
+        {
+          "key": "agents",
+          "label": "agents",
+          "kind": "text",
+          "keep": 50
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "core",
+            "mark": "pending",
+            "label": "core",
+            "cells": [
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "web",
+            "mark": "pending",
+            "label": "web",
+            "cells": [
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              },
+              {
+                "kind": "pending"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            }
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "pending",
+          "n": 2
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+description: 'station automations lists the automations the project declares, with what their runs say'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; /bin/mkdir site && /usr/bin/touch site/spwn.yaml && P="$PWD/site" /usr/bin/jq ".macs[\"macbook-pro\"].stores.automations = {(env.P): [{\"Name\":\"inbox\",\"Agent\":\"trinity\",\"Trigger\":{\"Kind\":\"fs\",\"Spec\":\"./inbox\"}},{\"Name\":\"morning\",\"Agent\":\"neo\",\"Trigger\":{\"Kind\":\"cron\",\"Spec\":\"0 6 * * *\"}}]} | .macs[\"macbook-pro\"].stores.automation_runs = {(env.P): [{\"Name\":\"morning\",\"Scheduled\":\"2026-05-01T06:00:00Z\",\"At\":\"2026-05-01T06:00:00Z\",\"OK\":true,\"Output\":\"brief written\"},{\"Name\":\"morning\",\"Scheduled\":\"2026-05-02T06:00:00Z\",\"At\":\"2026-05-02T06:00:00Z\",\"OK\":false,\"Error\":\"no running world\"}]}" world.json > seeded.json && /bin/mv seeded.json world.json'
+      exit: 0
+    - command: '--version >/dev/null; cd site && "$STATION" automations'
+      exit: 0
+      stdout: |
+          # Automations
+          ●	inbox	trinity	fs ./inbox	never	none
+          ●	morning	neo	cron 0 6 * * *	2026-05-02 06:00:00	2, 1 failed

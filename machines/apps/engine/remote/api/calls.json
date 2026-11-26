@@ -279,6 +279,39 @@
       "journal": true
     },
     {
+      "name": "automations.list",
+      "schema": "station.automations.list/v1",
+      "where": "at-target",
+      "errors": [
+        "automations.invalid-project"
+      ],
+      "in": "ListIn"
+    },
+    {
+      "name": "automations.log",
+      "schema": "station.automations.log/v1",
+      "where": "at-target",
+      "errors": [
+        "automations.invalid-project",
+        "automations.not-found",
+        "automations.not-unique"
+      ],
+      "in": "LogIn",
+      "out": "Runs"
+    },
+    {
+      "name": "automations.show",
+      "schema": "station.automations.show/v1",
+      "where": "at-target",
+      "errors": [
+        "automations.invalid-project",
+        "automations.not-found",
+        "automations.not-unique"
+      ],
+      "in": "ShowIn",
+      "out": "Automation"
+    },
+    {
       "name": "awake.keep",
       "schema": "station.awake.keep/v1",
       "where": "in-engine",
@@ -1250,6 +1283,22 @@
       ],
       "in": "InitIn",
       "out": "Report"
+    },
+    {
+      "name": "teams.list",
+      "schema": "station.teams.list/v1",
+      "where": "at-target",
+      "in": "ListIn"
+    },
+    {
+      "name": "teams.show",
+      "schema": "station.teams.show/v1",
+      "where": "at-target",
+      "errors": [
+        "teams.not-found"
+      ],
+      "in": "ShowIn",
+      "out": "Team"
     },
     {
       "name": "vault.add",

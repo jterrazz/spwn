@@ -9,6 +9,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/accounts"
 	agentscalls "github.com/jterrazz/studio-station/apps/engine/agents/calls"
 	appscalls "github.com/jterrazz/studio-station/apps/engine/apps/calls"
+	automationscalls "github.com/jterrazz/studio-station/apps/engine/automations/calls"
 	awakecalls "github.com/jterrazz/studio-station/apps/engine/awake/calls"
 	backgroundcalls "github.com/jterrazz/studio-station/apps/engine/background/calls"
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
@@ -27,6 +28,7 @@ import (
 	machinescalls "github.com/jterrazz/studio-station/apps/engine/machines/calls"
 	"github.com/jterrazz/studio-station/apps/engine/ports"
 	settingscalls "github.com/jterrazz/studio-station/apps/engine/settings/calls"
+	teamscalls "github.com/jterrazz/studio-station/apps/engine/teams/calls"
 )
 
 type Wording func(e *fail.Error) (message, hint string)
@@ -571,6 +573,18 @@ func Codes() map[fail.Code]Wording {
 		},
 		agentscalls.BadArchive: func(e *fail.Error) (string, string) {
 			return e.Subject + " is not an agent's archive", "station agents export <agent> --to <folder> writes one"
+		},
+		teamscalls.NotFound: func(e *fail.Error) (string, string) {
+			return "no team named \"" + e.Subject + "\"", "station teams"
+		},
+		automationscalls.NotFound: func(e *fail.Error) (string, string) {
+			return "no automation named \"" + e.Subject + "\"", "station automations"
+		},
+		automationscalls.NotUnique: func(e *fail.Error) (string, string) {
+			return "\"" + e.Subject + "\" is declared by more than one group: " + e.Detail["groups"], "station " + e.Detail["verb"] + " " + e.Detail["first"] + "/" + e.Subject
+		},
+		automationscalls.InvalidProject: func(e *fail.Error) (string, string) {
+			return "the manifest of this project does not read: " + e.Detail["error"], "open " + e.Subject
 		},
 		backgroundcalls.Unknown: func(e *fail.Error) (string, string) {
 			return "no background task \"" + e.Subject + "\"", "station background"

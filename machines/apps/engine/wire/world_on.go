@@ -45,6 +45,8 @@ import (
 	agentscontract "github.com/jterrazz/studio-station/apps/engine/agents/contract"
 	appsfake "github.com/jterrazz/studio-station/apps/engine/apps/adapter/fake"
 	appscontract "github.com/jterrazz/studio-station/apps/engine/apps/contract"
+	automationsfake "github.com/jterrazz/studio-station/apps/engine/automations/adapter/fake"
+	automationscontract "github.com/jterrazz/studio-station/apps/engine/automations/contract"
 	awakefake "github.com/jterrazz/studio-station/apps/engine/awake/adapter/fake"
 	awakecontract "github.com/jterrazz/studio-station/apps/engine/awake/contract"
 	backgroundfake "github.com/jterrazz/studio-station/apps/engine/background/adapter/fake"
@@ -82,6 +84,8 @@ import (
 	settingsfake "github.com/jterrazz/studio-station/apps/engine/settings/adapter/fake"
 	settingscontract "github.com/jterrazz/studio-station/apps/engine/settings/contract"
 	"github.com/jterrazz/studio-station/apps/engine/surface/cli/kit"
+	teamsfake "github.com/jterrazz/studio-station/apps/engine/teams/adapter/fake"
+	teamscontract "github.com/jterrazz/studio-station/apps/engine/teams/contract"
 	"github.com/jterrazz/studio-station/apps/engine/world"
 )
 
@@ -434,7 +438,11 @@ func (m *worldMac) waker() contract.Waker       { return machinesfake.WakerOf(m.
 func (m *worldMac) processes(kernel contract.Processes) contract.Processes {
 	return machinesfake.ProcessesOf(m.run.w, m.name, kernel)
 }
-func (m *worldMac) minds() agentscontract.Minds   { return agentsfake.Of(m.run.w, m.name) }
+func (m *worldMac) minds() agentscontract.Minds { return agentsfake.Of(m.run.w, m.name) }
+func (m *worldMac) teams() teamscontract.Teams  { return teamsfake.Of(m.run.w, m.name) }
+func (m *worldMac) automations() automationscontract.Automations {
+	return automationsfake.Of(m.run.w, m.name)
+}
 func (m *worldMac) jobs() backgroundcontract.Jobs { return backgroundfake.New(m.run.w, m.name) }
 func (m *worldMac) meter() activitycontract.Meter { return activityfake.MeterOf(m.run.w, m.name) }
 func (m *worldMac) disk() diskcontract.DiskUsage  { return m.files() }

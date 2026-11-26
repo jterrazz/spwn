@@ -1,0 +1,4 @@
+# Automations
+●	inbox	trinity	fs ./inbox	never	none
+◐	log	neo	cron 0 9 * * 1	never	none	its name is a command's: station automations log log reads its runs, and no detail can be asked for it
+●	morning	neo	cron 0 6 * * *	2026-05-02 06:00:00	2, 1 failed

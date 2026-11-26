@@ -99,6 +99,16 @@ func TestWithProjectRoot_TwoGoroutinesNeverSeeEachOthersRoot(t *testing.T) {
 	}
 }
 
+func TestWithProjectRoot_RestoresTheRootItFound(t *testing.T) {
+	outer := filepath.Join(t.TempDir(), "outer")
+	SetProjectRoot(outer)
+	t.Cleanup(func() { SetProjectRoot("") })
+	_, _ = WithProjectRoot("/p", func() (int, error) { return 0, nil })
+	if got := ProjectRoot(); got != outer {
+		t.Errorf("root after the act = %q, want %q", got, outer)
+	}
+}
+
 func TestWithProjectRoot_ReturnsTheActsError(t *testing.T) {
 	want := errors.New("boom")
 	_, err := WithProjectRoot("/p", func() (int, error) { return 0, want })

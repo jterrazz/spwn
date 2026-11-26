@@ -1,0 +1,126 @@
+{
+  "schema": "station.page/v1",
+  "id": "automations-log",
+  "command": "automations log",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "runs",
+      "title": "Runs",
+      "columns": [
+        {
+          "key": "at",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "automation",
+          "label": "automation",
+          "kind": "text",
+          "keep": 70
+        },
+        {
+          "key": "fired",
+          "label": "fired by",
+          "kind": "text",
+          "keep": 50
+        },
+        {
+          "key": "took",
+          "label": "took",
+          "kind": "text",
+          "keep": 40
+        },
+        {
+          "key": "outcome",
+          "label": "outcome",
+          "kind": "text",
+          "keep": 60
+        }
+      ],
+      "items": [
+        {
+          "row": {
+            "id": "0",
+            "mark": "ok",
+            "label": "2026-05-01 06:00:00",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "morning"
+              },
+              {
+                "kind": "text",
+                "text": "cron catchup, 2 missed"
+              },
+              {
+                "kind": "text",
+                "text": "1.5s"
+              },
+              {
+                "kind": "text",
+                "text": "ok"
+              }
+            ],
+            "detail": {
+              "kind": "text",
+              "text": "brief written"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "1",
+            "mark": "broken",
+            "label": "2026-05-02 06:00:00",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "morning"
+              },
+              {
+                "kind": "text",
+                "text": "cron on-time"
+              },
+              {
+                "kind": "text",
+                "text": "40ms"
+              },
+              {
+                "kind": "text",
+                "text": "failed: no running world"
+              }
+            ],
+            "detail": {
+              "kind": "none"
+            },
+            "reason": "failing"
+          }
+        },
+        {
+          "note": {
+            "text": "2 of 3: --last 0 shows all"
+          }
+        },
+        {
+          "note": {
+            "text": "1 line of .spwn/runs.jsonl could not be read"
+          }
+        }
+      ],
+      "counts": [
+        {
+          "mark": "ok",
+          "n": 1
+        },
+        {
+          "mark": "broken",
+          "n": 1
+        }
+      ]
+    }
+  ]
+}

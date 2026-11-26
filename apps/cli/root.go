@@ -13,9 +13,7 @@ import (
 	"spwn.sh/apps/cli/automation"
 	"spwn.sh/apps/cli/gate"
 	"spwn.sh/apps/cli/logs"
-	"spwn.sh/apps/cli/organization"
 	"spwn.sh/apps/cli/skill"
-	"spwn.sh/apps/cli/team"
 	"spwn.sh/apps/cli/ui"
 	"spwn.sh/apps/cli/world"
 	"spwn.sh/packages/upgrade"
@@ -56,9 +54,6 @@ func init() {
 	rootCmd.AddCommand(installCmd())
 	rootCmd.AddCommand(uninstallCmd())
 	rootCmd.AddCommand(skill.Cmd)
-
-	rootCmd.AddCommand(team.Cmd)
-	rootCmd.AddCommand(organization.Cmd)
 
 	rootCmd.AddCommand(automation.Cmd)
 

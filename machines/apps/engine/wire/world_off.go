@@ -13,6 +13,7 @@ import (
 	activitycontract "github.com/jterrazz/studio-station/apps/engine/activity/contract"
 	agentscontract "github.com/jterrazz/studio-station/apps/engine/agents/contract"
 	appscontract "github.com/jterrazz/studio-station/apps/engine/apps/contract"
+	automationscontract "github.com/jterrazz/studio-station/apps/engine/automations/contract"
 	awakecontract "github.com/jterrazz/studio-station/apps/engine/awake/contract"
 	backgroundcontract "github.com/jterrazz/studio-station/apps/engine/background/contract"
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
@@ -31,6 +32,7 @@ import (
 	portscontract "github.com/jterrazz/studio-station/apps/engine/ports/contract"
 	remotecontract "github.com/jterrazz/studio-station/apps/engine/remote/contract"
 	settingscontract "github.com/jterrazz/studio-station/apps/engine/settings/contract"
+	teamscontract "github.com/jterrazz/studio-station/apps/engine/teams/contract"
 )
 
 // invariant: the release build knows no world: openWorld answers none, so
@@ -69,6 +71,8 @@ func (*worldMac) unlocker() contract.Unlocker                                   
 func (*worldMac) waker() contract.Waker                                             { return nil }
 func (*worldMac) processes(kernel contract.Processes) contract.Processes            { return kernel }
 func (*worldMac) minds() agentscontract.Minds                                       { return nil }
+func (*worldMac) teams() teamscontract.Teams                                        { return nil }
+func (*worldMac) automations() automationscontract.Automations                      { return nil }
 func (*worldMac) jobs() backgroundcontract.Jobs                                     { return nil }
 func (*worldMac) releases() enginecontract.Releases                                 { return nil }
 func (*worldMac) inspector() settingscontract.Inspector                             { return nil }

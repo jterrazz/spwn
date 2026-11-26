@@ -17,6 +17,8 @@ runs:
           awake
           activity
           agents
+          teams
+          automations
           init
           use
           journal

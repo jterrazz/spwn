@@ -1,0 +1,8 @@
+description: 'station automations log with no run written says where a run is written'
+env: two-macs
+runs:
+    - command: 'automations log'
+      exit: 0
+      stdout: |
+          # Runs
+          	none
