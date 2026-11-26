@@ -144,10 +144,9 @@ export function flip(scene: Scene, drawn: readonly Drawn[]): void {
     }
 }
 
-// value: the camera written as the world's custom properties, which its module's CSS turns into its transform.
+// invariant: the world's own transform, never an inherited custom property that restyles every node on a pan.
 export function place(world: HTMLElement, at: Camera): void {
-    world.style.setProperty('--cx', `${String(at.x)}px`);
-    world.style.setProperty('--cy', `${String(at.y)}px`);
+    world.style.transform = translate(at);
 }
 
 // value: the camera carried to `to` from where it shows now, over the prototype's camera curve.

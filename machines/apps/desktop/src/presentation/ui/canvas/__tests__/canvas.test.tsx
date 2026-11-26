@@ -196,9 +196,9 @@ describe('Canvas', () => {
         // Then - each costs its pinned count
         expect(taken).toStrictEqual([
             {
-                by: { Canvas: 2, CanvasNodeOf: 2, Host: 1, Marks: 1, You: 3 },
+                by: { Canvas: 2, CanvasNodeOf: 2, Host: 1, Icon: 1, Marks: 1, You: 3 },
                 commits: 2,
-                renders: 9,
+                renders: 10,
             },
             {
                 by: { Canvas: 1, CanvasNodeOf: 7, Host: 1, Marks: 10, You: 5 },

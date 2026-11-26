@@ -1,6 +1,7 @@
 import { memo, useCallback, useState } from 'react';
 import type { ReactNode } from 'react';
 
+import { Icon } from '../icon';
 import type { Face, CanvasNode as Node } from './graph';
 
 import styles from './canvas.module.css';
@@ -85,7 +86,12 @@ function head(drawn: Drawn, open: boolean): ReactNode {
             <span className={styles.label}>{words.name}</span>
             {words.count === undefined ? null : <span className={styles.count}>{words.count}</span>}
             <You count={node.needs} shared={shared} />
-            {open ? <span className={styles.close}>{shared.close}</span> : null}
+            {open ? (
+                <span className={styles.close}>
+                    <Icon name="up" />
+                    {shared.close}
+                </span>
+            ) : null}
         </>
     );
 }

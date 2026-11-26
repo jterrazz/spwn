@@ -17,7 +17,7 @@
         "S:blueprint": {
             "count": "1 page",
             "foot": "",
-            "kicker": "",
+            "kicker": "Paragraph",
             "lead": "",
             "line": "",
             "seat": "blueprint",
@@ -26,7 +26,7 @@
         "P:blueprint/philosophy": {
             "count": "",
             "foot": "8 sections",
-            "kicker": "",
+            "kicker": "E0 Intention",
             "lead": "The seven convictions Spwn is built on, written as principles a newcomer can apply to a design choice; the vision holds the case they serve, and this page holds the rules.",
             "line": "The seven convictions Spwn is built on, written as principles a newcomer can apply to a design choice; the vision holds the case they serve, and this page holds the rules.",
             "seat": "blueprint",
@@ -260,7 +260,7 @@
         "S:product": {
             "count": "3 pages",
             "foot": "",
-            "kicker": "",
+            "kicker": "Paragraph",
             "lead": "",
             "line": "",
             "seat": "product",
@@ -269,7 +269,7 @@
         "P:product/boundaries": {
             "count": "",
             "foot": "4 sections",
-            "kicker": "",
+            "kicker": "E1 Produit",
             "lead": "What Spwn is not, and what each of its parts refuses to be, for anyone weighing a feature that sits near an edge.",
             "line": "What Spwn is not, and what each of its parts refuses to be, for anyone weighing a feature that sits near an edge.",
             "seat": "product",
@@ -458,7 +458,7 @@
         "P:product/stack": {
             "count": "",
             "foot": "3 sections",
-            "kicker": "",
+            "kicker": "E1 Produit",
             "lead": "Spwn's three spaces and what lives in each, for anyone deciding what a part of the app is for or where it goes: per space, what you let go of, what you keep, and whether it runs today.",
             "line": "Spwn's three spaces and what lives in each, for anyone deciding what a part of the app is for or where it goes: per space, what you let go of, what you keep, and whether it runs today.",
             "seat": "product",
@@ -548,7 +548,7 @@
         "P:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder": {
             "count": "",
             "foot": "2 sections",
-            "kicker": "",
+            "kicker": "E1 Produit",
             "lead": "Status: Accepted Date: 2026-11-21 Amended by: ADR-003 (the ladder) Amends: growth ADR-007",
             "line": "Spwn is one stack of six apps on one ladder.",
             "seat": "product",
@@ -593,7 +593,7 @@
         "S:engineering": {
             "count": "2 pages",
             "foot": "",
-            "kicker": "",
+            "kicker": "Paragraph",
             "lead": "",
             "line": "",
             "seat": "engineering",
@@ -602,7 +602,7 @@
         "P:machines/reference/ports": {
             "count": "",
             "foot": "1 section",
-            "kicker": "",
+            "kicker": "E3 Architecture",
             "lead": "station ports lists every TCP port that listens on a Mac or a VM, each in the class of who reaches it.",
             "line": "station ports lists every TCP port that listens on a Mac or a VM, each in the class of who reaches it.",
             "seat": "engineering",
@@ -665,7 +665,7 @@
         "P:machines/decisions/035-a-port-is-a-right-with-an-audience": {
             "count": "",
             "foot": "2 sections",
-            "kicker": "",
+            "kicker": "E3 Architecture",
             "lead": "Status: Accepted Date: 2026-11-11",
             "line": "A port is a right with an audience.",
             "seat": "engineering",
@@ -710,7 +710,7 @@
         "S:growth": {
             "count": "1 page",
             "foot": "",
-            "kicker": "",
+            "kicker": "Paragraph",
             "lead": "",
             "line": "",
             "seat": "growth",
@@ -719,7 +719,7 @@
         "P:growth/positioning": {
             "count": "",
             "foot": "3 sections",
-            "kicker": "",
+            "kicker": "E1 Produit",
             "lead": "Where Spwn stands against what a person uses today instead, for anyone writing a comparison, a pitch or an answer to \"how is it different\": the category it refuses, the four alternatives and what each costs.",
             "line": "Where Spwn stands against what a person uses today instead, for anyone writing a comparison, a pitch or an answer to \"how is it different\": the category it refuses, the four alternatives and what each costs.",
             "seat": "growth",

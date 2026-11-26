@@ -57,7 +57,7 @@ const WORDS = `(() => {
         return [n.id, {
             count: text(head, '.cnt'),
             foot: (card.querySelector('.cdots')?.lastChild?.textContent ?? '').trim(),
-            kicker: text(card, '.ctop > span:not(.you)'),
+            kicker: text(card, '.ctop > span:not(.you, .dico)'),
             lead: text(head, '.pl'),
             line: text(card, '.cl'),
             seat: n.kind === 'seat' || n.kind === 'page' ? n.seat : '',

@@ -3,6 +3,8 @@
     inset: 0;
     overflow: hidden;
     background: var(--desk);
+    font-size: var(--text-body);
+    line-height: 20px;
     cursor: default;
     touch-action: none;
     outline: none;
@@ -22,7 +24,6 @@
     position: absolute;
     left: 0;
     top: 0;
-    transform: translate(var(--cx, 0), var(--cy, 0));
     transform-origin: 0 0;
     will-change: transform;
 }
@@ -73,7 +74,6 @@
     height: var(--h);
     transform: translate(var(--x), var(--y));
     transform-origin: 0 0;
-    will-change: transform;
     transition: opacity 320ms var(--ease);
 }
 .node[inert] {
@@ -188,11 +188,19 @@
     color: var(--t3);
 }
 .close {
+    display: flex;
+    align-items: center;
+    gap: 5px;
     margin-left: auto;
     font-size: 11.5px;
     color: var(--t4);
     opacity: 0;
     transition: opacity 160ms var(--ease);
+}
+.close svg {
+    width: 12px;
+    height: 12px;
+    stroke-width: 1.5;
 }
 .hit:hover .close,
 .hit:focus-visible .close {
@@ -205,6 +213,7 @@
     align-items: flex-start;
     gap: 4px;
     padding: 16px 18px 0;
+    border-radius: 14px 14px 8px 8px;
     white-space: normal;
 }
 .title {
@@ -230,9 +239,9 @@
 
 .mark {
     flex: none;
-    width: 6px;
-    height: 6px;
-    border-radius: 1.5px;
+    width: 7px;
+    height: 7px;
+    border-radius: var(--radius-mark);
     background: var(--you);
     transform: rotate(45deg);
 }
@@ -309,7 +318,7 @@
 .hit[data-kind='dot'][data-you]::before {
     width: 7px;
     height: 7px;
-    border-radius: 1.5px;
+    border-radius: var(--radius-mark);
     background: var(--you);
     transform: rotate(45deg);
 }
@@ -427,18 +436,18 @@
     display: inline-grid;
     flex: none;
     grid-template-columns: repeat(var(--columns), 2px);
-    color: var(--t3);
-}
-.node[data-depth='1'] .pixels {
+    gap: 1.5px;
     color: var(--t2);
 }
 .pixels i {
     width: 2px;
     height: 2px;
+    border-radius: 0.5px;
     background: currentColor;
+    opacity: 0.95;
 }
 .pixels i.off {
-    background: none;
+    opacity: 0;
 }
 
 .said {
