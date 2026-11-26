@@ -16,3 +16,7 @@ while :; do
 done
 ssh -n $VM "cat $R/$L-dt.out" | tee $RUN/$L-dt.out
 ssh -n $VM "cd $R && rm -f ${L}-dt.out ${L}-dt.end ${L}-dt-remote.sh"
+red=; for s in NPMCI TSC VITEST PROOF WEBSITE TSCHECK ARCH MAKELINT DT-DONE; do case $s in DT-DONE) k=$s ;; *) k=$s=0 ;; esac; grep -qx "$k" $RUN/$L-dt.out || red=${red:+$red,}$s; done
+sha=$(git -C "$W" rev-parse --short=9 "$B")
+[ -n "$red" ] || { echo "VERDICT $L $sha GREEN steps=-"; exit 0; }
+echo "VERDICT $L $sha RED steps=$red"; exit 1

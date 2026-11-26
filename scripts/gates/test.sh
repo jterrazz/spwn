@@ -26,5 +26,38 @@ wait
 [ "$(tr '\n' ' ' < "$T/order")" = "landing normal low " ] || bad "slot order: $(tr '\n' ' ' < "$T/order")"
 GATE_SLOT_PRIORITY=urgent bash ./gate-slot.sh true > /dev/null 2>&1; [ $? = 2 ] || bad "an unknown priority is accepted"
 [ -z "$(ls "$T/slot/gate-slots/wanted" 2>/dev/null)" ] || bad "a waiter left its mark"
+sb() { local d=$T/$1; rm -rf "$d"; mkdir -p "$d/bin" "$d/home" "$d/run" "$d/r/scripts"; cp -R . "$d/r/scripts/gates"
+  [ -n "${NOFOLDER:-}" ] || mkdir -p "$d/home/spwn-gates"
+  cat > "$d/bin/ssh" <<'EOF'
+#!/bin/bash
+while [ $# -gt 0 ]; do case $1 in -o | -i) shift 2 ;; -*) shift ;; *) break ;; esac; done
+shift
+[ -e "$HOME/down" ] && exit 255
+echo "$*" >> "$HOME/ssh.calls"
+exec bash -c "$*"
+EOF
+  cat > "$d/bin/scp" <<'EOF'
+#!/bin/bash
+a=(); while [ $# -gt 0 ]; do case $1 in -o | -i) shift 2 ;; -*) shift ;; *) a+=("$1"); shift ;; esac; done
+[ -e "$HOME/down" ] && exit 255
+m() { case $1 in *:*) case ${1#*:} in /*) echo "${1#*:}" ;; *) echo "$HOME/${1#*:}" ;; esac ;; *) echo "$1" ;; esac; }
+dst=${a[${#a[@]}-1]}; unset 'a[${#a[@]}-1]'
+for s in "${a[@]}"; do cp "$(m "$s")" "$(m "$dst")" || exit 1; done
+EOF
+  printf '#!/bin/bash\nexec /bin/sleep 0.2\n' > "$d/bin/sleep"; chmod +x "$d/bin/ssh" "$d/bin/scp" "$d/bin/sleep"
+  git init -q -b b "$d/w"; local g=(-c user.name=t -c user.email=t@t); git -C "$d/w" "${g[@]}" commit -q --allow-empty -m c0; git -C "$d/w" "${g[@]}" commit -q --allow-empty -m c1
+}
+in_sb() { local d=$T/$1; shift; ( cd "$d/r/scripts/gates" && HOME=$d/home PATH=$d/bin:$PATH GATE_RUN_DIR=$d/run GATE_VM_LINUX=stubvm GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null "$@" ); }
+dp_case() { local n=$1 want_rc=$2 want=$3; shift 3
+  sb "$n"; printf '%s\n' "$@" > "$T/$n/home/dp-stages"
+  printf '#!/bin/bash\ncat "$HOME/dp-stages"\n' > "$T/$n/r/scripts/gates/desktop-proof-remote.sh"
+  out=$(in_sb "$n" bash desktop-proof.sh "$T/$n/w" lab b 2>&1); rc=$?
+  [ $rc = "$want_rc" ] || bad "desktop-proof $n: exit $rc, wanted $want_rc"
+  case $out in *"VERDICT lab $(git -C "$T/$n/w" rev-parse --short=9 b) $want"*) ;; *) bad "desktop-proof $n: no 'VERDICT lab <sha> $want' in: $(echo "$out" | tail -2)" ;; esac
+}
+dp_case dp-green 0 "GREEN steps=-" NPMCI=0 TSC=0 VITEST=0 PROOF=0 WEBSITE=0 TSCHECK=0 ARCH=0 MAKELINT=0 DT-DONE
+dp_case dp-red 1 "RED steps=WEBSITE" NPMCI=0 TSC=0 VITEST=0 PROOF=0 WEBSITE=1 TSCHECK=0 ARCH=0 MAKELINT=0 DT-DONE
+dp_case dp-two 1 "RED steps=TSC,MAKELINT" NPMCI=0 TSC=2 VITEST=0 PROOF=0 WEBSITE=0 TSCHECK=0 ARCH=0 MAKELINT=1 DT-DONE
+dp_case dp-cut 1 "RED steps=WEBSITE,TSCHECK,ARCH,MAKELINT,DT-DONE" NPMCI=0 TSC=0 VITEST=0 PROOF=0
 [ $fail = 0 ] && echo "gate scripts: ok"
 exit $fail
