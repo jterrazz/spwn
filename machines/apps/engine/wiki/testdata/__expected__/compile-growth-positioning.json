@@ -254,16 +254,16 @@
             "shows": "growth/positioning#alternatives",
             "parts": [
               {
-                "name": "by hand",
-                "at": "y"
+                "Name": "by hand",
+                "At": "y"
               },
               {
-                "name": "one big agent",
-                "at": "x"
+                "Name": "one big agent",
+                "At": "x"
               },
               {
-                "name": "spwn",
-                "at": "xy"
+                "Name": "spwn",
+                "At": "xy"
               }
             ],
             "caption": "Each costs either scale or authorship."

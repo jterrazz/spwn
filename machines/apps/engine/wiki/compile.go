@@ -43,6 +43,9 @@ func Compile(id, source string, schema Schema) Page {
 	// invariant: a pure function of its arguments: it reads no file, runs
 	// nothing, and the same source gives the same Page. A page with a finding
 	// still compiles as far as it reads; its findings say what was refused.
+	if len(source) > MaxPageBytes {
+		return tooLong(id, int64(len(source)), schema)
+	}
 	source = strings.ReplaceAll(source, "\r\n", "\n")
 	c := &compiler{
 		page:    &Page{ID: id, Sections: []Section{{Items: []Item{}}}},
@@ -54,10 +57,7 @@ func Compile(id, source string, schema Schema) Page {
 	}
 	c.section = &c.page.Sections[0]
 	c.run()
-	c.page.Findings = c.findings
-	if c.page.Findings == nil {
-		c.page.Findings = []Finding{}
-	}
+	c.page.Findings = capped(c.findings, nil)
 	c.faces()
 	return *c.page
 }
@@ -323,7 +323,7 @@ func (c *compiler) openGroup(t tag, span Span) {
 	}
 	kind, _ := c.schema.kind("group")
 	c.attributes(kind, t)
-	g := &Group{T: "group", ID: idOf(t.props), Title: textOf(t.props, "title"), Intent: Intent(textOf(t.props, "intent")), Props: t.props, Items: []Item{}, At: t.at, Tag: span, Span: span}
+	g := &Group{T: "group", ID: idOf(t.props), Title: textOf(t.props, "title"), Intent: intentOf(textOf(t.props, "intent")), Props: t.props, Items: []Item{}, At: t.at, Tag: span, Span: span}
 	if v, ok := t.props.Get("fold"); ok && v.Kind == ValueBool {
 		g.Fold = v.Bool
 	}
@@ -484,34 +484,54 @@ func viewOf(kind string, props Props) View {
 
 // value: the name within two edits of tag, the first in order on a tie;
 // empty when none is that close.
+// invariant: a name whose length is as far from the tag's as the best
+// distance yet is never compared, and a comparison stops once every
+// alignment is that far, so a corpus of thousands of addresses suggests
+// in time linear in them.
 func nearest(tag string, names []string) string {
 	best, score := "", 3
+	low := strings.ToLower(tag)
+	var rows [2][]int
 	for _, n := range names {
-		if d := distance(strings.ToLower(tag), strings.ToLower(n)); d < score {
+		name := strings.ToLower(n)
+		if abs(len(name)-len(low)) >= score {
+			continue
+		}
+		if d := distance(low, name, score, &rows); d < score {
 			best, score = n, d
 		}
 	}
 	return best
 }
 
-func distance(a, b string) int {
-	prev := make([]int, len(b)+1)
-	for j := range prev {
-		prev[j] = j
+func abs(n int) int { return max(n, -n) }
+
+// value: the edit distance of a and b, or limit when it is limit or more.
+func distance(a, b string, limit int, rows *[2][]int) int {
+	prev, cur := rows[0][:0], rows[1][:0]
+	for j := range len(b) + 1 {
+		prev = append(prev, j)
+		cur = append(cur, 0)
 	}
 	for i := 1; i <= len(a); i++ {
-		cur := make([]int, len(b)+1)
 		cur[0] = i
+		least := i
 		for j := 1; j <= len(b); j++ {
 			cost := 1
 			if a[i-1] == b[j-1] {
 				cost = 0
 			}
 			cur[j] = min(prev[j]+1, cur[j-1]+1, prev[j-1]+cost)
+			least = min(least, cur[j])
 		}
-		prev = cur
+		if least >= limit {
+			rows[0], rows[1] = prev, cur
+			return limit
+		}
+		prev, cur = cur, prev
 	}
-	return prev[len(b)]
+	rows[0], rows[1] = prev, cur
+	return min(prev[len(b)], limit)
 }
 
 // invariant: a page's word Face is its `# title`, its paragraph Face the

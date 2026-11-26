@@ -489,6 +489,7 @@
             "vault.unknown",
             "vm_stopped",
             "wiki.none",
+            "wiki.too-large",
             "wiki.unknown-page",
             "wiki.unreadable"
           ],

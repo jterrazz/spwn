@@ -2,6 +2,7 @@ package platform
 
 import (
 	"errors"
+	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -73,6 +74,10 @@ func TestATreeNeverFollowsALinkOutOfIt(t *testing.T) {
 	if data, err := tree.ReadFile(at); err == nil {
 		t.Errorf("ReadFile through a link out of the tree = %q; want it refused", data)
 	}
+	if f, err := tree.Open(at); err == nil {
+		_ = f.Close()
+		t.Errorf("Open through a link out of the tree succeeded; want it refused")
+	}
 	if tree.IsFile(at) {
 		t.Errorf("IsFile through a link out of the tree = true; want it refused")
 	}
@@ -84,6 +89,7 @@ func TestATreeNeverWaitsOnAFIFO(t *testing.T) {
 	for name, read := range map[string]func() error{
 		"ReadFile": func() error { _, err := tree.ReadFile(at); return err },
 		"ReadDir":  func() error { _, err := tree.ReadDir(at); return err },
+		"Open":     func() error { _, err := tree.Open(at); return err },
 	} {
 		got := make(chan error, 1)
 		go func() { got <- read() }()
@@ -115,6 +121,23 @@ func TestATreeWalksAsWalkDirDoes(t *testing.T) {
 	want := []string{"spwn", filepath.Join("spwn", "agents"), filepath.Join("spwn", "agents", "neo")}
 	if err != nil || len(got) != len(want) || got[0] != want[0] || got[1] != want[1] || got[2] != want[2] {
 		t.Errorf("WalkDir = %v, %v; want %v", got, err, want)
+	}
+}
+
+func TestATreeOpensAFileSizedByTheFileItReads(t *testing.T) {
+	tree, _ := treeBeside(t)
+	f, err := tree.Open("spwn.yaml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+	info, err := f.Stat()
+	if err != nil {
+		t.Fatal(err)
+	}
+	body, err := io.ReadAll(f)
+	if err != nil || string(body) != "version: 1\n" || info.Size() != int64(len(body)) {
+		t.Errorf("Open read %q of %d bytes, %v; want the file and its size", body, info.Size(), err)
 	}
 }
 

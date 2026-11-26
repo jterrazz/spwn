@@ -1483,6 +1483,7 @@
       "where": "in-process",
       "errors": [
         "wiki.none",
+        "wiki.too-large",
         "wiki.unknown-page",
         "wiki.unreadable"
       ],
@@ -1495,6 +1496,7 @@
       "where": "in-process",
       "errors": [
         "wiki.none",
+        "wiki.too-large",
         "wiki.unknown-page",
         "wiki.unreadable"
       ],

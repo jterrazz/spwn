@@ -1,12 +1,13 @@
-home "Wiki" "Every page of this Mac's wiki, by the seat that reads it." pages=7 seats=4 needs=5 on=3 hard=0 soft=10
+home "Wiki" "Every page of this Mac's wiki, by the seat that reads it." pages=8 seats=4 needs=5 on=3 hard=1 soft=10
 floor 0 "Intention" ["E0" "Intention"] "Why does this exist?"
 floor 1 "Produit" ["E1" "Produit"] "What do we build, and for whom?"
 floor 2 "Domaines" ["E2" "Domaines"] "What things does it handle, in which words?"
 floor 3 "Architecture" ["E3" "Architecture"] "Where is the code, and what may it touch?"
 floor 4 "Code" ["E4" "Code"] "Which lines carry it?"
 icons blueprint,engineering,growth,product
-seat S:blueprint "Vision" needs=0 marks=. icon=blueprint ref=blueprint band=0 home=P:blueprint/philosophy count=1
+seat S:blueprint "Vision" needs=0 marks=.. icon=blueprint ref=blueprint band=0 home=P:blueprint/philosophy count=2
   page P:blueprint/philosophy "Philosophy" needs=0 marks=........ icon=blueprint ref=blueprint/philosophy count=8 kicker=["E0 Intention"] line=["The seven convictions Spwn is built on, written as principles a newcomer can apply to a design choice; the vision holds the case they serve, and this page holds the rules."]
+  page P:blueprint/unfinished "Unfinished" needs=0 marks=. icon=blueprint ref=blueprint/unfinished count=1 kicker=["E0 Intention"] line=["A page still being written, served with the hard finding it holds: its table reads a page that does not exist yet."]
 seat S:product "Produit" needs=4 marks=yy. icon=product ref=product band=1 home=P:product/boundaries count=3
   page P:product/boundaries "Boundaries" needs=3 marks=..y. icon=product ref=product/boundaries count=4 kicker=["E1 Produit"] line=["What Spwn is not, and what each of its parts refuses to be, for anyone weighing a feature that sits near an edge."]
   page P:product/stack "The stack" needs=1 marks=... icon=product ref=product/stack count=3 kicker=["E1 Produit"] line=["Spwn's three spaces and what lives in each, for anyone deciding what a part of the app is for or where it goes: per space, what you let go of, what you keep, and whether it runs today."]
@@ -116,4 +117,9 @@ open P:machines/decisions/035-a-port-is-a-right-with-an-audience
       prose B:machines/decisions/035-a-port-is-a-right-with-an-audience:p0.0 "Amends ADR-018. Amended"+cut needs=0 marks= icon=para ref=p0.0 title=["Amends ADR-018. Amended by"]+cut kicker=["Paragraph"] line=["Amends ADR-018."]
     section C:machines/decisions/035-a-port-is-a-right-with-an-audience:1 "Decision" needs=0 marks=. icon=define ref=decision count=1 kicker=["Section"] line=["A machine's ports are rights, never an inventory."]
       prose B:machines/decisions/035-a-port-is-a-right-with-an-audience:p1.0 "A machine's ports"+cut needs=0 marks= icon=para ref=p1.0 title=["A machine's ports are"]+cut kicker=["Paragraph"] line=["A machine's ports are rights, never an inventory."]
+
+open P:blueprint/unfinished
+  page P:blueprint/unfinished "Unfinished" needs=0 marks=. icon=blueprint ref=blueprint/unfinished count=1 kicker=["E0 Intention"] line=["A page still being written, served with the hard finding it holds: its table reads a page that does not exist yet."]
+    section C:blueprint/unfinished:0 "Top" needs=0 marks=. icon=home ref= count=1 kicker=["Opening"] line=["all"]
+      block B:blueprint/unfinished:all "all" needs=0 marks= icon=table ref=all kicker=["Table"]
 

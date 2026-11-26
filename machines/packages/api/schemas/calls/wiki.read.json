@@ -3,37 +3,37 @@
     "wiki.Cause": {
       "additionalProperties": false,
       "properties": {
-        "cause": {
+        "Name": {
           "type": "string"
         },
-        "points": {
+        "Points": {
           "type": "integer"
         }
       },
       "required": [
-        "cause",
-        "points"
+        "Name",
+        "Points"
       ],
       "type": "object"
     },
     "wiki.FigurePart": {
       "additionalProperties": false,
       "properties": {
-        "at": {
+        "At": {
           "type": "string"
         },
-        "n": {
+        "N": {
           "type": "integer"
         },
-        "name": {
+        "Name": {
           "type": "string"
         },
-        "to": {
+        "To": {
           "type": "string"
         }
       },
       "required": [
-        "name"
+        "Name"
       ],
       "type": "object"
     },
@@ -377,6 +377,12 @@
           ]
         },
         "Tier": {
+          "enum": [
+            "",
+            "lead",
+            "normal",
+            "quiet"
+          ],
           "type": "string"
         },
         "Title": {
@@ -615,6 +621,14 @@
           "type": "string"
         },
         "Intent": {
+          "enum": [
+            "decide",
+            "define",
+            "guard",
+            "locate",
+            "prove",
+            "tell"
+          ],
           "type": "string"
         },
         "Items": {

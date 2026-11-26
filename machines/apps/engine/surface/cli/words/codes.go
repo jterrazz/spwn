@@ -741,7 +741,13 @@ func Codes() map[fail.Code]Wording {
 			return "no page of the wiki is \"" + e.Subject + "\"", "a page's id is its path under the wiki, without .md"
 		},
 		wikicalls.Unreadable: func(e *fail.Error) (string, string) {
+			if path := e.Detail["path"]; path != "" {
+				return "the wiki cannot be read: " + path + " is a link out of its folder, or cannot be opened", "make " + path + " a file inside the wiki's folder, or remove it"
+			}
 			return "the wiki cannot be read: " + e.Subject, "repair wiki.yaml at the wiki's root"
+		},
+		wikicalls.TooLarge: func(e *fail.Error) (string, string) {
+			return "the wiki holds more than " + e.Detail["pages"] + " pages or " + e.Detail["mib"] + " MiB, so it is not read", "split it into smaller wikis, or move what is not a page out of its folder"
 		},
 		diskcalls.RecordUnreadable: func(e *fail.Error) (string, string) {
 			return e.Subject + " cannot be read: nothing is freed until it can", "repair " + e.Subject + " by hand, or remove it: rm " + e.Subject

@@ -49,7 +49,7 @@ The engine's `Check` (`apps/engine/wiki/check.go`) judges the compiled pages of 
 
 | Rules                     | Judge                                                                                                       |
 | ------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| H1, H22, H38 to H41       | the compile: a kind that exists, a tag that reads, a braced value, a group's bounds, each attribute         |
+| H1, H22, H38 to H41, H44  | the compile: a kind that exists, a tag that reads, a braced value, a group's bounds, each attribute, size   |
 | H2, H3, H4, H5, H6        | each field's type, enum and presence, a ref's `to`; ids; refs; an anchor's repository; a rule's proof       |
 | H8, H9, H10, H12, H14     | a term defined once and a retired one written nowhere; floors; `needs`; an authored Face; a component       |
 | H15 to H17, H35           | `weight`, one written lead per set, `intent`, `fold`                                                        |
@@ -90,9 +90,11 @@ The blocks of one group are weighed together, and outside a group those of one s
 
 At the corpus budget a page shows at most seven lines (S11): at `10min` a quiet block is a line, at `2min` a normal one, at `30s` none, a group its page's seat does not read is one line and hides its blocks, and at `30s` every group is one line.
 
+The three budgets are the engine's own measure: no call takes one and no answer carries one, and a page is served at its four levels instead, each block's ranks derived from what the three budgets show of it (below).
+
 ## What is served
 
-`wiki.read`, a call of this process applied on a Mac, answers one page of the corpus that Mac declares, read whole and checked at each ask: `Page`, its id, the first seat's home when empty. A Mac declares no wiki until a Machinefile can name one, so outside a world it answers `wiki.none`; a world seeds a Mac's corpus as its `wiki`, a repository's files at its head.
+`wiki.read`, a call of this process applied on a Mac, answers one page of the corpus that Mac declares, read whole and checked whenever it changed since the last ask (the limits below): `Page`, its id, the first seat's home when empty. A Mac declares no wiki until a Machinefile can name one, so outside a world it answers `wiki.none`; a world seeds a Mac's corpus as its `wiki`, a repository's files at its head.
 
 One answer serves the page at its four levels of detail, `word`, `line`, `card` and `full`: a level changes how much a block, a group or prose shows and never hides one. Each of them carries `Ranks`, the face it shows at each of the four in that order, and `Max`, the most it opens. The ranks never fall from one level to the next nor pass `Max`, which `levels_test.go` holds over the corpus and `FuzzServe` over any page.
 
@@ -116,11 +118,11 @@ The answer carries every judgement the window draws, and the window decides none
 
 A label is always round: `Seconds` is the exact value, and the label rounds it to the nearest 5 s under a minute (5 s at least, and 57.5 s or more is `1 min`), to the nearest 15 s from a minute to five minutes, and to the nearest minute past them. The labels never fall from one level to the next, and two levels that show different things may share one.
 
-Its refusals are `wiki.none`, `wiki.unknown-page` and `wiki.unreadable` (`wiki.yaml` absent or refused, its finding said), each told in `specs/usecases/wiki/read/`.
+Its refusals are `wiki.none`, `wiki.unknown-page`, `wiki.unreadable` (`wiki.yaml` absent or refused, its finding said; or a file of the folder its read refuses, a link out of it or a FIFO, named by its path inside the wiki only) and `wiki.too-large`, each told in `specs/usecases/wiki/read/`.
 
 ### The map
 
-`wiki.map`, beside it, answers the graph the window's canvas navigates the corpus by, in one answer, so the window derives none of it. It reads the same compiled corpus as `wiki.read`.
+`wiki.map`, beside it, answers the graph the window's canvas navigates the corpus by, in one answer, so the window derives none of it. It reads the same compiled corpus as `wiki.read`, through the same cache: an unchanged corpus is compiled once for both calls.
 
 - **Its nodes** are the seats, `S:<seat>`, in the schema's order and listed as `Roots`; each seat's pages, `P:<page>`, lowest floor first, the records after the other pages of their floor, then by word; and under the page `Open` names, its sections, `C:<page>:<i>` with `i` the section's index in `wiki.read`'s `Sections` (a section with nothing in it is left out), and what each holds, its blocks, groups and paragraphs, `B:<page>:<id>`. A page not open is served with no kids. `Ref` is the id `wiki.read` serves a node by: the seat's, the page's, the section's anchor (empty for the opening) or the block's, the group's or the prose's, `p<section>.<n>`.
 - **Each node** carries its `Depth` (1 for a seat to 4 for a block, a group or a paragraph), `Parent` (null for a seat) and `Kids` in reading order; `Needs`, the needs-you findings under it, its kids' and its own (a page owns those on its head, a block its own, a group its blocks'); `Marks`, one per kid, true where that kid holds one (a group marks its blocks), eleven at most, `More` counting the rest; `Band`, the canvas row of its seat, the lowest floor of the seat's pages; and its words: `Label`, then `TitleParts`, `KickerParts` and `LineParts` when they say more than the label, its `Icon` (the one `wiki.read` serves the block with, so the canvas and the sheet draw the same) and `Count`, what it holds, said with its kind's noun (pages, sections, a section's blocks, a group's blocks). A seat names its `Home`, the node of the page it opens at.
@@ -130,6 +132,19 @@ Its refusals are `wiki.none`, `wiki.unknown-page` and `wiki.unreadable` (`wiki.y
 Its size is the words it carries. Over the seven pages of `apps/engine/wiki/testdata/corpus/` (measured 2026-11-26 on `development-linux-mini`), the map with none open is 4,993 bytes for 11 nodes, and with a page open 6,839 to 13,425 bytes for 15 to 36; a node averages 264 bytes for a seat, 423 to 454 for a page, 347 to 518 for a section, 187 to 331 for a block, 323 to 356 for a group and 328 to 444 for a paragraph. Over 500 pages, the map with none open is 240,937 bytes for 504 nodes, built in 79 ms once the corpus is read, and the largest with a page open 249,673.
 
 A map open at no page of its own is refused `wiki.unknown-page`; its other refusals are `wiki.read`'s, each told in `specs/usecases/wiki/map/`.
+
+### The limits
+
+The read both calls share is bounded, each limit a constant of `apps/engine/wiki/limits.go`:
+
+- a page file past 1 MiB is sized and never read: it is served with no content and its one hard finding, H44, naming its size; a file that grows after it was sized is read only to one byte past the limit, and is served the same way;
+- a corpus past 2,000 pages or 64 MiB of files read is refused whole, `wiki.too-large`; the folder's walk stops at the limit;
+- a page shows at most 100 findings of one rule, then one more of that rule that counts the rest;
+- an abandoned ask stops the read between two pages, compiled or checked.
+
+The corpus last read is kept in memory by its signature (each file's path, size and modification time; in the fake world, its bytes' hash), so an unchanged corpus is served without a file read; any change reads and compiles it anew. One corpus is kept, the last read, so the memory it holds is bounded by the limits above, and asks made at once each serve a corpus read whole.
+
+The signature has one known limit: a page rewritten at its size whose modification time does not move is served as it was until the next change. That happens when a program restores the time, or when two writes fall in one tick of the file system's clock, a few milliseconds on Linux. The fake world has no times, so its signature hashes every byte and has no such limit.
 
 ## Beyond the spec
 

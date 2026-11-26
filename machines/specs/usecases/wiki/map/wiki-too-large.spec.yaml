@@ -1,0 +1,13 @@
+description: 'wiki.map of a wiki past 2,000 pages is refused whole, with no page compiled'
+env:
+    - one-mac
+    - engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].wiki = {"head":"c1","commits":{"c1":({"wiki.yaml":"wiki: spwn.wiki/v1\n"} + ([range(2001)] | map({("blueprint/p\(.).md"): "# P\n"}) | add))}}'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.error.code'''
+      stdin: |
+          {"v":2,"id":"1","call":"wiki.map","target":{},"in":{}}
+      exit: 0
+      stdout: |
+          "wiki.too-large"

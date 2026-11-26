@@ -7,7 +7,6 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 	"github.com/jterrazz/studio-station/apps/engine/wiki"
-	"github.com/jterrazz/studio-station/apps/engine/wiki/contract"
 )
 
 type MapIn struct {
@@ -18,7 +17,7 @@ type MapIn struct {
 
 var Map = call.Call[Deps, MapIn, wiki.Map]{
 	Name: "wiki.map", Where: call.InProcess, Applies: Applies,
-	Errors: []fail.Code{None, UnknownPage, Unreadable},
+	Errors: []fail.Code{None, UnknownPage, Unreadable, TooLarge},
 	Run: func(ctx context.Context, d Deps, in MapIn, _ call.Progress) (wiki.Map, error) {
 		corpus, err := compiled(ctx, d)
 		if err != nil {
@@ -30,21 +29,4 @@ var Map = call.Call[Deps, MapIn, wiki.Map]{
 		}
 		return out, err
 	},
-}
-
-// invariant: the one way a call of the family reaches the compiled corpus,
-// its refusals coded as wiki.read codes them.
-func compiled(ctx context.Context, d Deps) (wiki.Corpus, error) {
-	files, err := d.Corpus.Files(ctx)
-	if errors.Is(err, contract.ErrNone) {
-		return wiki.Corpus{}, fail.New(fail.NotFound, None, "", nil)
-	}
-	if err != nil {
-		return wiki.Corpus{}, err
-	}
-	corpus, err := wiki.Read(files)
-	if err != nil {
-		return wiki.Corpus{}, fail.New(fail.Failed, Unreadable, err.Error(), nil)
-	}
-	return corpus, nil
 }

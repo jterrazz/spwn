@@ -186,13 +186,15 @@ func TestTheMapIsTheGraphThePrototypeBuilt(t *testing.T) {
 		t.Fatal(err)
 	}
 	glyphs := glyphsOf(t, proto)
-	c := corpusOf(t, corpusFiles(t))
+	files := corpusFiles(t)
+	delete(files, unfinished+".md")
+	c := corpusOf(t, files)
 	root := mapOf(t, c, "")
 	engine := map[string]prototypeNode{}
 	for _, n := range root.Nodes {
 		engine[n.ID] = engineView(n)
 	}
-	for _, id := range corpusPages() {
+	for _, id := range slices.DeleteFunc(corpusPages(), func(id string) bool { return id == unfinished }) {
 		for _, n := range mapOf(t, c, id).Nodes {
 			if n.Depth > 1 && n.ID != "P:"+id {
 				v := engineView(n)

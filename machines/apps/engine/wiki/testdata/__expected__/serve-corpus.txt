@@ -1,4 +1,4 @@
-page blueprint/philosophy floor=0 Intention blocks=9 needs-you=0
+page blueprint/philosophy floor=0 Intention blocks=9 needs-you=0 verdict=1h10s
   reading word words=106 seconds=28 "≈ 30 s" same=false
   reading line words=179 seconds=47 "≈ 45 s" same=false
   reading card words=437 seconds=114 "≈ 2 min" same=false
@@ -83,7 +83,7 @@ page blueprint/philosophy floor=0 Intention blocks=9 needs-you=0
     prose p7.0 ranks=word,line,card,card max=card first="**Example.**" more=true
       item "**Example.** A correction given once becomes a rule the next agent reads."
 
-page product/stack floor=1 Produit blocks=7 needs-you=1
+page product/stack floor=1 Produit blocks=7 needs-you=1 verdict=1h10s
   reading word words=114 seconds=30 "≈ 30 s" same=false
   reading line words=157 seconds=41 "≈ 40 s" same=false
   reading card words=419 seconds=109 "≈ 1 min 45 s" same=false
@@ -149,7 +149,7 @@ page product/stack floor=1 Produit blocks=7 needs-you=1
     prose p3.0 ranks=word,line,card,card max=card first="One claim here is this page's reading, not the owner's word:" more=true
       plain "One claim here is this page's reading, not the owner's word: that a space leans only on the spaces before it (\"How the spaces stack\"). The placement of Wiki, Specs and Design in the OS space is his; the \"you let go of\" and \"you keep\" columns come from the brief he confirmed on 2026-11-21."
 
-page product/boundaries floor=1 Produit blocks=14 needs-you=3
+page product/boundaries floor=1 Produit blocks=14 needs-you=3 verdict=1h10s
   reading word words=147 seconds=38 "≈ 40 s" same=false
   reading line words=260 seconds=68 "≈ 1 min 15 s" same=false
   reading card words=382 seconds=100 "≈ 1 min 45 s" same=false
@@ -225,7 +225,7 @@ page product/boundaries floor=1 Produit blocks=14 needs-you=3
     prose p3.0 ranks=word,line,card,card max=card first="Two rows are this page's reading rather than the owner's word or a record:" more=true
       plain "Two rows are this page's reading rather than the owner's word or a record: Agents refusing to prepare a computer, and the OS refusing to hold facts of its own. Both follow from the spaces; the owner has not ruled on either."
 
-page growth/positioning floor=1 Produit blocks=7 needs-you=1
+page growth/positioning floor=1 Produit blocks=7 needs-you=1 verdict=1h10s
   reading word words=84 seconds=22 "≈ 20 s" same=false
   reading line words=143 seconds=37 "≈ 35 s" same=false
   reading card words=342 seconds=89 "≈ 1 min 30 s" same=false
@@ -276,7 +276,7 @@ page growth/positioning floor=1 Produit blocks=7 needs-you=1
     prose p3.0 ranks=word,line,card,card max=card first="What is not settled:" more=true
       plain "What is not settled: whether \"the category it refuses\" is said in public, and how, is a positioning call the owner has not made; it is on [open questions](./open-questions.md#positioning-audience-and-pricing). The four alternatives and their costs are this page's argument; the brief the owner confirmed on 2026-11-21 did not list them, so he has not ruled on them."
 
-page machines/reference/ports floor=3 Architecture blocks=4 needs-you=0
+page machines/reference/ports floor=3 Architecture blocks=4 needs-you=0 verdict=1h10s
   reading word words=77 seconds=20 "≈ 20 s" same=false
   reading line words=172 seconds=45 "≈ 45 s" same=false
   reading card words=194 seconds=51 "≈ 50 s" same=false
@@ -304,7 +304,7 @@ page machines/reference/ports floor=3 Architecture blocks=4 needs-you=0
     prose p1.1 ranks=word,line,card,card max=card first="A row of a port names its label from the catalog's packages' `ports` (5173 `Vite`, 3000 `Node or Next`, 8081 `Expo`, 5432 `Postgres`) as a hint of what probably serves it, never a decision." more=false
       plain "A row of a port names its label from the catalog's packages' `ports` (5173 `Vite`, 3000 `Node or Next`, 8081 `Expo`, 5432 `Postgres`) as a hint of what probably serves it, never a decision."
 
-page product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder floor=1 Produit blocks=0 needs-you=0
+page product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder floor=1 Produit blocks=0 needs-you=0 verdict=1h10s
   record ADR-002 "Spwn is one stack of six apps on one ladder"
   decision page=product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder ADR-002 status="Accepted" date=2026-11-21 "Spwn is one stack of six apps on one ladder."
   reading word words=44 seconds=11 "≈ 10 s" same=false
@@ -322,7 +322,7 @@ page product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder floor=1 P
     prose p1.0 ranks=word,line,card,card max=card first="Six apps, in this order on one ladder:" more=true
       plain "Six apps, in this order on one ladder: Machines, Agents, Wiki, Specs, Design, OS."
 
-page machines/decisions/035-a-port-is-a-right-with-an-audience floor=3 Architecture blocks=0 needs-you=0
+page machines/decisions/035-a-port-is-a-right-with-an-audience floor=3 Architecture blocks=0 needs-you=0 verdict=1h10s
   record ADR-035 "A port is a right with an audience"
   decision page=machines/decisions/035-a-port-is-a-right-with-an-audience ADR-035 status="Accepted" date=2026-11-11 "A port is a right with an audience."
   reading word words=31 seconds=8 "≈ 10 s" same=false
@@ -339,4 +339,17 @@ page machines/decisions/035-a-port-is-a-right-with-an-audience floor=3 Architect
   section decision "Decision" icon=define rests=false
     prose p1.0 ranks=word,line,card,card max=card first="A machine's ports are rights, never an inventory." more=false
       plain "A machine's ports are rights, never an inventory."
+
+page blueprint/unfinished floor=0 Intention blocks=1 needs-you=0 verdict=1h10s
+  reading word words=14 seconds=4 "≈ 5 s" same=false
+  reading line words=29 seconds=8 "≈ 10 s" same=false
+  reading card words=30 seconds=8 "≈ 10 s" same=false
+  reading full words=30 seconds=8 "≈ 10 s" same=true
+  paragraph "A page still being written, served with the hard finding it holds: its table reads a page that does not exist yet."
+  lede ranks=word,line,card,card first="A page still being written, served with the hard finding it holds:" more=true
+  attention  H4 at=blueprint/unfinished#all from=word "all"
+  section  "Top" icon=home rests=false
+    block blueprint/unfinished#all ranks=word,card,full,full max=full table icon=table tier= ""
+      table conviction in=blueprint/nowhere where="" columns=says count=0 mirrors=
+      finding  H4 from=word "blueprint/nowhere" is no page
 

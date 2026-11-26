@@ -195,3 +195,7 @@ func (t *Tree) walk(p string, d fs.DirEntry, fn fs.WalkDirFunc) error {
 	}
 	return nil
 }
+
+// Open opens the file p inside the Tree for reading, as ReadFile refuses
+// what it refuses, so a caller sizes and reads one opened file.
+func (t *Tree) Open(p string) (fs.File, error) { return t.open(p, false) }

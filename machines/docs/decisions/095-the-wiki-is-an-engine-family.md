@@ -17,6 +17,8 @@ The wiki is an engine family, `apps/engine/wiki/`, like `machinefile/`: a model,
 
 The check is a pure function over the compiled pages and the schema. What it needs of git, of the file system past the pages it is given, or of the network is a later call over a contract, never the core.
 
+The read is bounded so a hostile or overgrown corpus cannot hold the engine: every path of the compile and the check is linear in the corpus (the needs cycles are found as strongly connected components), a page past 1 MiB is not compiled (H44), a corpus past 2,000 pages or 64 MiB is refused whole (`wiki.too-large`), a page shows 100 findings of a rule and counts the rest, and an abandoned ask stops between pages. The limits are constants of `apps/engine/wiki/limits.go`; the corpus last read is kept in memory by its stat signature.
+
 ## Consequences
 
 - A page is judged with no runtime of its own: the same records serve the CLI, the window and an agent.

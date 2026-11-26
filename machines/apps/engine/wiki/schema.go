@@ -31,6 +31,8 @@ func corpusTypes() []string {
 	return []string{"sentence", "text", "enum", "ref", "anchor", "date", "bool", "int"}
 }
 
+// value: the reading times a corpus is weighed at; none is on the wire,
+// where a page is served at its four levels.
 func budgets() []Budget { return []Budget{Budget30s, Budget2min, Budget10min} }
 
 type SchemaError struct {
@@ -123,10 +125,11 @@ func ReadSchema(file string, body []byte) (Schema, error) {
 			paths = append(paths, p)
 		}
 		for _, r := range seat.Reads {
-			if !slices.Contains(intents(), Intent(r)) {
+			in, ok := named(intents(), r)
+			if !ok {
 				return Schema{}, refuse(seat.Line, "seat %q reads %q, which is no intent: tell, define, decide, locate, guard or prove", seat.ID, r)
 			}
-			out.Reads = append(out.Reads, Intent(r))
+			out.Reads = append(out.Reads, in)
 		}
 		s.Seats = append(s.Seats, out)
 	}
@@ -149,10 +152,11 @@ func ReadSchema(file string, body []byte) (Schema, error) {
 		}
 		s.Mounts = append(s.Mounts, Mount{At: m.At, Repo: m.Repo, Path: m.Path})
 	}
-	s.Budget = Budget(w.Budget)
-	if !slices.Contains(budgets(), s.Budget) {
+	budget, ok := named(budgets(), w.Budget)
+	if !ok {
 		return Schema{}, refuse(w.Lines["budget"], "budget %q does not exist: 30s, 2min or 10min", w.Budget)
 	}
+	s.Budget = budget
 	if n := len(contentKinds()) + len(w.Kinds); n > maxContentKinds {
 		return Schema{}, refuse(w.Lines["kinds"], "%d kinds of the corpus and %d of the engine make %d content kinds, %d at most", len(w.Kinds), len(contentKinds()), n, maxContentKinds)
 	}

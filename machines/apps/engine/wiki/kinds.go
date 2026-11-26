@@ -108,6 +108,32 @@ func intents() []Intent {
 	return []Intent{IntentTell, IntentDefine, IntentDecide, IntentLocate, IntentGuard, IntentProve}
 }
 
+// invariant: an author's text becomes an enum's value only by naming one of
+// its constants, never by conversion, so each enum stays closed on the wire.
+func named[T ~string](values []T, s string) (T, bool) {
+	for _, v := range values {
+		if string(v) == s {
+			return v, true
+		}
+	}
+	var none T
+	return none, false
+}
+
+func isNamed[T ~string](values []T, s string) bool {
+	_, ok := named(values, s)
+	return ok
+}
+
+// value: a group's intent as served: the one it names, else tell, the
+// intent of prose, as an intent that does not exist is refused (H17).
+func intentOf(s string) Intent {
+	if in, ok := named(intents(), s); ok {
+		return in
+	}
+	return IntentTell
+}
+
 type FaceTemplates struct {
 	// value: a template, `{field}` standing for a field's text and `{id}`
 	// for the block's id.

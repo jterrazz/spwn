@@ -244,10 +244,10 @@ func (m *mapper) close(at int, kids []int, own int) {
 		n.Needs += kid.Needs
 		marks = append(marks, kid.Needs > 0)
 	}
-	n.Marks, n.More = capped(marks)
+	n.Marks, n.More = cappedMarks(marks)
 }
 
-func capped(marks []bool) (shown []bool, more int) {
+func cappedMarks(marks []bool) (shown []bool, more int) {
 	if len(marks) <= MaxMarks {
 		return marks, 0
 	}
@@ -297,7 +297,7 @@ func (m *mapper) page(p *Page, parent string, band int, open bool) int {
 	} else {
 		pn := &m.out.Nodes[at]
 		pn.Kids, pn.Needs, pn.Count = []string{}, m.own[p.ID]+needs, len(marks)
-		pn.Marks, pn.More = capped(marks)
+		pn.Marks, pn.More = cappedMarks(marks)
 	}
 	if m.out.Nodes[at].Needs > 0 {
 		m.out.Home.Needs += m.out.Nodes[at].Needs
@@ -392,7 +392,7 @@ func (m *mapper) group(p *Page, g *Group) MapNode {
 		}
 	}
 	n.Needs, n.Count = m.needsOf(p.ID, g.Items), len(marks)
-	n.Marks, n.More = capped(marks)
+	n.Marks, n.More = cappedMarks(marks)
 	n.LineParts = partsOf(words...)
 	if lead, ok := m.server.blocks[m.server.readings[p.ID+"#"+g.ID].Lead]; ok {
 		if line := partsOf(strings.TrimSpace(lead.Faces.Line)); line != nil {

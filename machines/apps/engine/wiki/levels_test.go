@@ -235,7 +235,7 @@ func TestAProsesFirstSentenceEndsWhereItsTextEndsOne(t *testing.T) {
 	} {
 		t.Run(c.name, func(t *testing.T) {
 			files := map[string][]byte{"wiki.yaml": []byte(tinySchema), "blueprint/home.md": []byte("# Home\n\nThe page.\n\n## Part\n\n" + c.prose + "\n")}
-			corpus, err := wiki.Read(files)
+			corpus, err := readAll(files)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -264,7 +264,7 @@ func TestABlockWhoseLineSaysNothingShowsItsWordAndNoLevelReadsLess(t *testing.T)
 		{"code of a space", "# Home\n\nThe page.\n\n## A\n\n<Term id=\"seat\" means=\"` `\" />\n"},
 	} {
 		t.Run(c.name, func(t *testing.T) {
-			corpus, err := wiki.Read(map[string][]byte{"wiki.yaml": []byte(tinySchema), "blueprint/home.md": []byte(c.source)})
+			corpus, err := readAll(map[string][]byte{"wiki.yaml": []byte(tinySchema), "blueprint/home.md": []byte(c.source)})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -293,7 +293,7 @@ func FuzzServe(f *testing.F) {
 	f.Add("# Home\n\nOne. Two: three e.g. four.\n\n## A\n\n<Term id=\"a\" means=\"b\" />\n")
 	f.Add("000000000\n\n<Term id=\"00000\" means=\" \"/>")
 	f.Fuzz(func(t *testing.T, source string) {
-		corpus, err := wiki.Read(map[string][]byte{"wiki.yaml": []byte(tinySchema), "blueprint/home.md": []byte(source)})
+		corpus, err := readAll(map[string][]byte{"wiki.yaml": []byte(tinySchema), "blueprint/home.md": []byte(source)})
 		if err != nil {
 			return
 		}

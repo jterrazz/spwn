@@ -77,6 +77,7 @@ func TestTheFacesServedAreThoseThePrototypeDerived(t *testing.T) {
 		t.Fatal(err)
 	}
 	served := servedCorpus(t)
+	delete(served, unfinished)
 	if len(proto) != len(served) {
 		t.Fatalf("the prototype embeds %d pages, the corpus serves %d", len(proto), len(served))
 	}

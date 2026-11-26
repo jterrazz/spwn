@@ -1,4 +1,5 @@
 findings
+  blueprint/unfinished:6:37 H4 hard "blueprint/nowhere" is no page
   growth/positioning:60:1 S6 needs-you "growth/positioning" rests on this page's reading: you have not ruled
   machines/decisions/035-a-port-is-a-right-with-an-audience:1:1 S8 ambient page "machines/decisions/035-a-port-is-a-right-with-an-audience" is prose only
   product/boundaries:70:1 S6 needs-you "no-computer" rests on this page's reading: you have not ruled
@@ -20,6 +21,8 @@ readings
     blueprint/philosophy#proven conviction floor=0 score=1 tier=quiet why=kind:1
     blueprint/philosophy#taste-is-a-system conviction floor=0 score=1 tier=quiet why=kind:1
     blueprint/philosophy#learns conviction floor=0 score=1 tier=quiet why=kind:1
+  blueprint/unfinished seat=blueprint floor=0
+    blueprint/unfinished#all table floor=0 rows=
   growth/positioning seat=growth floor=1
     growth/positioning#lead-with-the-thread rule floor=1 score=1 tier=quiet why=guard-soft:1
     growth/positioning#alternatives group floor=1 readBy=blueprint,product,engineering,growth

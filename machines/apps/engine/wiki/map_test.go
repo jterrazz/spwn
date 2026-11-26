@@ -17,7 +17,7 @@ const mapGolden = "map-corpus.txt"
 
 func corpusOf(t testing.TB, files map[string][]byte) wiki.Corpus {
 	t.Helper()
-	c, err := wiki.Read(files)
+	c, err := readAll(files)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -354,7 +354,7 @@ func FuzzMap(f *testing.F) {
 	f.Add("# Home\n\nOne. Two.\n\n## A\n\n<Term id=\"a\" means=\"b\" />\n\n## A\n\nprose\n")
 	f.Add("<Term/>")
 	f.Fuzz(func(t *testing.T, source string) {
-		corpus, err := wiki.Read(map[string][]byte{"wiki.yaml": []byte(tinySchema), "blueprint/home.md": []byte(source), "blueprint/other.md": []byte("# Other\n\nIt rests.\n")})
+		corpus, err := readAll(map[string][]byte{"wiki.yaml": []byte(tinySchema), "blueprint/home.md": []byte(source), "blueprint/other.md": []byte("# Other\n\nIt rests.\n")})
 		if err != nil {
 			return
 		}
