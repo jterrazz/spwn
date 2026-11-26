@@ -32,4 +32,5 @@ runs:
             -n, --name string             Display name for the world
             -w, --workspace stringArray   Host directory to mount. Repeatable. Forms: "path", "name=path", "name=path:ro". Omit for ephemeral.
             -u, --world string            Explicit path to a YAML config file
+                --yes                     Allow, for this project, the host paths outside it that spwn.yaml mounts, without asking
 
