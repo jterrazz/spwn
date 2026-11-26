@@ -1,6 +1,7 @@
 package world_test
 
 import (
+	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -59,11 +60,10 @@ func TestAnEnginesPastIsADayAtAMinuteAndSixMinutesAtTwoSeconds(t *testing.T) {
 	if len(day) < 1430 || len(live) != 180 {
 		t.Fatalf("the past holds %d minutes of the day and %d points of the last 6 min, want about 1440 and 180", len(day), len(live))
 	}
-	for name, points := range map[string][]activity.Sample{"day": day, "live": live} {
-		for i := 1; i < len(points); i++ {
-			a, b := points[i-1], points[i]
-			if b.CPUBusy < a.CPUBusy || b.CPUTotal <= a.CPUTotal || b.NetIn < a.NetIn || b.NetOut < a.NetOut {
-				t.Fatalf("the %s's counters go back at %v: %+v then %+v", name, b.At, a, b)
+	for name, points := range map[string][]activity.Point{"day": day, "live": live} {
+		for _, p := range points[1:] {
+			if r := p.Rated; r == nil || r.CPU.Mean <= 0 || r.CPU.Mean > 100 || r.NetIn.Mean <= 0 || r.NetOut.Mean <= 0 {
+				t.Fatalf("the %s's point at %v rates %+v; want every point after the first measured", name, p.At, r)
 			}
 		}
 	}
@@ -92,12 +92,12 @@ func TestAPastNeverStartsBeforeTheMachineCounted(t *testing.T) {
 	if len(day) >= 120 {
 		t.Errorf("the VM's past holds %d minutes; its counters hold less than its two hours since boot", len(day))
 	}
-	for i := 1; i < len(day); i++ {
-		if day[i].CPUTotal <= day[i-1].CPUTotal {
-			t.Fatalf("the VM's counters wrap at %v: %d then %d", day[i].At, day[i-1].CPUTotal, day[i].CPUTotal)
+	for _, p := range day[1:] {
+		if p.Rated == nil {
+			t.Fatalf("the VM's point at %v measured no rate: its counters wrap", p.At)
 		}
 	}
-	if newest := day[len(day)-1]; newest.CPUTotal != 3_000_000 {
+	if newest, _ := k.Series.Last(); newest.CPUTotal != 3_000_000 {
 		t.Errorf("the VM's past ends at %d ticks, want its meter's 3000000", newest.CPUTotal)
 	}
 }
@@ -120,7 +120,7 @@ func TestAPastIsSpentAndNeverReplacesWhatTheEngineKeeps(t *testing.T) {
 		t.Error("the world writes its past back after it was unfolded")
 	}
 	again, written := seeded(t, string(data)).Macs["mbp"].Engine.Activity["vm1"], e.Activity["vm1"]
-	if got, want := again.Series.History(pastNow), written.Series.History(pastNow); len(got) != len(want) || got[0] != want[0] || got[len(got)-1] != want[len(want)-1] {
+	if got, want := again.Series.History(pastNow), written.Series.History(pastNow); !reflect.DeepEqual(got, want) {
 		t.Error("the past unfolded reads back other than it was written")
 	}
 }

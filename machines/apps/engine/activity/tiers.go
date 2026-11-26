@@ -116,12 +116,74 @@ func (b *bucket) peaked(offset int64) {
 
 func (b *bucket) peakAt(every int64) int64 { return b.at - b.at%every + b.peak() }
 
+type gauges struct {
+	// invariant: what a T2 bucket's newest sample read and no other tier
+	// keeps: its free disk bytes, its load in hundredths, its battery a word
+	// (0 none; else 1<<15, on battery 1<<9, charging 1<<8, the percent).
+	free    int64
+	load    [3]uint32
+	battery uint16
+}
+
+const (
+	batteryHeld     = 1 << 15
+	batteryOn       = 1 << 9
+	batteryCharging = 1 << 8
+)
+
+func gaugesOf(x *Sample) gauges {
+	g := gauges{free: x.DiskFree}
+	for i, l := range x.Load {
+		g.load[i] = uint32(min(max(math.Round(l*100), 0), math.MaxUint32))
+	}
+	if b := x.Battery; b != nil {
+		g.battery = batteryHeld | uint16(min(max(b.Percent, 0), 255)) //nolint:gosec // value: clamped to a byte.
+		if b.OnBattery {
+			g.battery |= batteryOn
+		}
+		if b.Charging {
+			g.battery |= batteryCharging
+		}
+	}
+	return g
+}
+
+func (g gauges) loads() [3]float64 {
+	return [3]float64{float64(g.load[0]) / 100, float64(g.load[1]) / 100, float64(g.load[2]) / 100}
+}
+
+func (g gauges) charge() *Battery {
+	if g.battery&batteryHeld == 0 {
+		return nil
+	}
+	return &Battery{Percent: int(g.battery & 0xff), OnBattery: g.battery&batteryOn != 0, Charging: g.battery&batteryCharging != 0}
+}
+
 type ring struct {
 	every int64
 	slots []bucket
+	// invariant: T2's alone, one per slot, nil on every other tier.
+	gauges []gauges
 }
 
-func (r *ring) of(at int64) *bucket { return &r.slots[(at/r.every)%int64(len(r.slots))] }
+func ringOf(tier, slots int) ring {
+	r := ring{every: Tiers[tier].Every.Milliseconds(), slots: make([]bucket, slots)}
+	if tier == T2 {
+		r.gauges = make([]gauges, slots)
+	}
+	return r
+}
+
+func (r *ring) index(at int64) int64 { return (at / r.every) % int64(len(r.slots)) }
+
+func (r *ring) of(at int64) *bucket { return &r.slots[r.index(at)] }
+
+func (r *ring) gaugesAt(at int64) gauges {
+	if r.gauges == nil {
+		return gauges{}
+	}
+	return r.gauges[r.index(at)]
+}
 
 func (r *ring) add(at int64, x *Sample, rated *Rates, dt float64) {
 	// invariant: a bucket that counts maxCount samples keeps none more.
@@ -135,6 +197,9 @@ func (r *ring) add(at int64, x *Sample, rated *Rates, dt float64) {
 	}
 	n++
 	b.at = at
+	if r.gauges != nil {
+		r.gauges[r.index(at)] = gaugesOf(x)
+	}
 	floor := b.floor()
 	if rank := pressureRank(x.Pressure); n == 1 || rank < floor {
 		floor = rank
@@ -192,13 +257,12 @@ func pressureOf(rank uint8) Pressure {
 
 type Series struct {
 	// invariant: the engine's memory only (ADR-107): every sample rolls into
-	// each tier's ring of fixed slots, indexed by time, so a tier keeps at
-	// most its Kept and a slot no sample reached is a gap. recent holds the
-	// newest recentKept samples whole, count the samples added; ticks the
-	// CPU ticks a second the newest interval counted.
+	// each tier's ring of fixed slots, indexed by the sample's own time, so a
+	// tier keeps at most its Kept and a slot no sample reached is a gap.
+	// recent holds the newest recentKept samples whole, count the samples
+	// added.
 	recent [recentKept]Sample
 	count  int
-	ticks  float32
 	rings  [len(Tiers)]ring
 }
 
@@ -226,7 +290,7 @@ func (s *Series) Add(x Sample) {
 	}
 	if s.rings[T0].slots == nil {
 		for i, t := range Tiers {
-			s.rings[i] = ring{every: t.Every.Milliseconds(), slots: make([]bucket, int(t.Kept/t.Every))}
+			s.rings[i] = ringOf(i, int(t.Kept/t.Every))
 		}
 	}
 	var rated *Rates
@@ -236,9 +300,6 @@ func (s *Series) Add(x Sample) {
 		if gap := x.At.Sub(last.At); gap <= Pause && !countedAgain(last, &x) {
 			r := Between(*last, x)
 			rated, dt = &r, gap.Seconds()
-			if x.CPUTotal > last.CPUTotal {
-				s.ticks = float32(float64(x.CPUTotal-last.CPUTotal) / dt)
-			}
 		}
 	}
 	at := x.At.UnixMilli()
@@ -260,6 +321,9 @@ func (s *Series) Clone() Series {
 	out := *s
 	for i := range out.rings {
 		out.rings[i].slots = append([]bucket(nil), s.rings[i].slots...)
+		if s.rings[i].gauges != nil {
+			out.rings[i].gauges = append([]gauges(nil), s.rings[i].gauges...)
+		}
 	}
 	return out
 }
@@ -305,14 +369,14 @@ func TierOf(window time.Duration) int {
 	return pick
 }
 
-func (s *Series) Graph(window time.Duration, now time.Time) []Sample {
+func (s *Series) Graph(window time.Duration, now time.Time) []Point {
 	// invariant: SPEC §6.4: the points a graph of the last window draws,
 	// oldest first: one a bucket of the window's tier (TierOf).
 	now = s.read(now)
 	return s.points(TierOf(window), now.Add(-window), now)
 }
 
-func (s *Series) History(now time.Time) []Sample {
+func (s *Series) History(now time.Time) []Point {
 	// value: the last 24 h a script reads, one point a minute of T2.
 	now = s.read(now)
 	return s.points(T2, now.Add(-24*time.Hour), now)
@@ -327,57 +391,21 @@ func (s *Series) read(now time.Time) time.Time {
 	return now
 }
 
-func (s *Series) points(tier int, from, now time.Time) []Sample {
-	// invariant: one point a bucket, at its newest sample: its memory and
-	// swap the bucket's means, its pressure the least it said; its
-	// counters the newest sample's, less what each newer bucket's means
-	// counted over the time they span, so two points apart rate what the
-	// buckets measured. A point whose counter would go below zero is before
-	// the machine counted: it and those older are dropped. A point carries
-	// no load, thermal, battery nor free space: those are the newest
-	// sample's alone.
+func (s *Series) points(tier int, from, now time.Time) []Point {
+	// invariant: one point a bucket, built from that bucket alone, so a
+	// pause or a counter that went back is a gap at its own bucket and the
+	// points before it stay.
 	buckets := s.within(tier, from, now)
 	if len(buckets) == 0 {
 		return nil
 	}
 	last := s.newest()
-	out := make([]Sample, len(buckets))
-	c := *last
-	cut := 0
-	for i := len(buckets) - 1; i >= 0; i-- {
-		b := &buckets[i]
-		out[i] = Sample{
-			At: time.UnixMilli(b.at).UTC(), CPUBusy: c.CPUBusy, CPUTotal: c.CPUTotal, CPUs: last.CPUs,
-			MemUsed: b.mem.mean(b.n()), MemTotal: last.MemTotal, Pressure: pressureOf(b.floor()), SwapUsed: b.swap.mean(b.n()),
-			DiskRead: c.DiskRead, DiskWritten: c.DiskWritten, NetIn: c.NetIn, NetOut: c.NetOut,
-			Thermal: ThermalUnknown, Boot: last.Boot,
-		}
-		span := float64(b.span)
-		total := uint64(math.Round(span * float64(s.ticks)))
-		busy := uint64(math.Round(float64(b.cpu.mean) / 100 * float64(total)))
-		back := []struct {
-			v *uint64
-			d uint64
-		}{
-			{&c.CPUTotal, total}, {&c.CPUBusy, busy},
-			{&c.DiskRead, uint64(math.Round(float64(b.diskRead.mean) * span))}, {&c.DiskWritten, uint64(math.Round(float64(b.diskWrite.mean) * span))},
-			{&c.NetIn, uint64(math.Round(float64(b.netIn.mean) * span))}, {&c.NetOut, uint64(math.Round(float64(b.netOut.mean) * span))},
-		}
-		under := false
-		for _, k := range back {
-			if k.d > *k.v {
-				under = true
-			}
-		}
-		if under {
-			cut = i
-			break
-		}
-		for _, k := range back {
-			*k.v -= k.d
-		}
+	r := &s.rings[tier]
+	out := make([]Point, len(buckets))
+	for i := range buckets {
+		out[i] = buckets[i].point(r.every, r.gaugesAt(buckets[i].at), r.gauges != nil, last)
 	}
-	return out[cut:]
+	return out
 }
 
 func (s *Series) held(tier int, holds func(prev, x *bucket) bool) (run []bucket, held time.Duration) {

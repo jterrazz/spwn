@@ -37,33 +37,6 @@ func BucketOf(window time.Duration) time.Duration {
 	return 30 * time.Minute
 }
 
-func Fold(points []Sample, window time.Duration, now time.Time) Chart {
-	// invariant: each share is measured between two points and falls in the
-	// bucket of the later one; a share outside the window is not counted.
-	every := BucketOf(window)
-	n := max(int(window/every), 1)
-	start := now.Add(-time.Duration(n) * every)
-	w := Chart{Every: every, Buckets: make([]Bucket, n)}
-	for i := range w.Buckets {
-		w.Buckets[i].At = start.Add(time.Duration(i) * every)
-	}
-	for i := 1; i < len(points); i++ {
-		at := points[i].At
-		if at.Before(start) || !at.Before(start.Add(time.Duration(n)*every)) {
-			continue
-		}
-		b := &w.Buckets[int(at.Sub(start)/every)]
-		cpu := Between(points[i-1], points[i]).CPU
-		b.Mean = (b.Mean*float64(b.Points) + cpu) / float64(b.Points+1)
-		b.Points++
-		if b.Points == 1 || cpu > b.Max {
-			b.Max, b.MaxAt = cpu, at
-		}
-	}
-	peaked(&w)
-	return w
-}
-
 func peaked(w *Chart) {
 	w.Peak = -1
 	for i, b := range w.Buckets {
@@ -90,35 +63,38 @@ type Measures struct {
 	NetOut    []Bucket      `json:"net_out"`
 }
 
-type measure struct {
-	// value: a measure's mean and busiest in a bucket, and whether it is a
-	// rate, weighted by the time it spans, or a gauge, by its samples; and
-	// whether its tier keeps the time of its busiest sample (the CPU's).
-	of     func(b *bucket) (mean, top float64)
-	rated  bool
-	peaked bool
+type measure func(p *Point) (r Range, at time.Time, weight float64)
+
+func rated(of func(r *Rated) Range) measure {
+	// value: a rate, weighted by the time it spans; a point that rated
+	// nothing weighs nothing.
+	return func(p *Point) (Range, time.Time, float64) {
+		if p.Rated == nil {
+			return Range{}, time.Time{}, 0
+		}
+		return of(p.Rated), p.At, p.Rated.Span
+	}
 }
 
-func rated(of func(b *bucket) envelope) measure {
-	return measure{of: func(b *bucket) (float64, float64) { e := of(b); return float64(e.mean), float64(e.max) }, rated: true}
+func gauged(of func(p *Point) Range) measure {
+	// value: a gauge, weighted by the samples it counts.
+	return func(p *Point) (Range, time.Time, float64) { return of(p), p.At, float64(p.Samples) }
 }
 
-func timed(m measure) measure {
-	m.peaked = true
-	return m
+func cpu(p *Point) (Range, time.Time, float64) {
+	if p.Rated == nil {
+		return Range{}, time.Time{}, 0
+	}
+	return p.Rated.CPU, p.Rated.CPUMaxAt, p.Rated.Span
 }
 
-func gauged(of func(b *bucket) gauge) measure {
-	return measure{of: func(b *bucket) (float64, float64) { g := of(b); return float64(g.mean(b.n())), float64(g.max) }}
-}
-
-func (s *Series) fold(window time.Duration, now time.Time, m measure) (time.Duration, []Bucket) {
-	// invariant: the bars are aligned on their span and end on the first
-	// boundary at or after now, so a now on a boundary ends a whole bar as
-	// Fold's do; a tier bucket falls in the bar its slot starts in, a rate
-	// weighted by the time it spans, a gauge by its samples, and the
-	// busiest is the busiest the tier kept, at its own sample's time for the
-	// CPU, at the bucket's newest sample for the others.
+func fold(points []Point, window time.Duration, now time.Time, m measure) []Bucket {
+	// invariant: the one fold of a window, the engine's and the menu bar's:
+	// the bars are aligned on their span and end on the first boundary at
+	// or after now, so a now on a boundary ends a whole bar; a point falls
+	// in the bar its newest sample is in, a bar's mean is its points' means
+	// weighted as m weighs them, its busiest the busiest its points kept, at
+	// its own sample's time for the CPU, at the point's for the others.
 	every := BucketOf(window)
 	n := max(int(window/every), 1)
 	step := every.Milliseconds()
@@ -129,58 +105,57 @@ func (s *Series) fold(window time.Duration, now time.Time, m measure) (time.Dura
 	for i := range out {
 		out[i].At = time.UnixMilli(start + int64(i)*step).UTC()
 	}
-	tier := TierOf(window)
-	tierStep := Tiers[tier].Every.Milliseconds()
-	for _, b := range s.within(tier, time.UnixMilli(start), now) {
-		from := b.at - b.at%tierStep
-		if from < start || from >= end {
+	for i := range points {
+		p := &points[i]
+		at := p.At.UnixMilli()
+		if at < start || at >= end {
 			continue
 		}
-		w := float64(b.n())
-		if m.rated {
-			w = float64(b.span)
-		}
+		r, top, w := m(p)
 		if w == 0 {
 			continue
 		}
-		mean, top := m.of(&b)
-		o := &out[(from-start)/step]
-		if o.Points == 0 || top > o.Max {
-			at := b.at
-			if m.peaked {
-				at = b.peakAt(tierStep)
-			}
-			o.Max, o.MaxAt = top, time.UnixMilli(at).UTC()
+		k := (at - start) / step
+		o := &out[k]
+		if o.Points == 0 || r.Max > o.Max {
+			o.Max, o.MaxAt = r.Max, top
 		}
-		k := &weights[(from-start)/step]
-		o.Mean = (o.Mean**k + mean*w) / (*k + w)
-		*k += w
-		o.Points += b.n()
+		o.Mean = (o.Mean*weights[k] + r.Mean*w) / (weights[k] + w)
+		weights[k] += w
+		o.Points += p.Samples
 	}
-	return every, out
+	return out
 }
 
-func (s *Series) Chart(window time.Duration, now time.Time) Chart {
-	// value: SPEC B5.3: the window's CPU from its tier (TierOf), each bar
-	// the mean and the busiest share measured in it, and its peak.
-	every, buckets := s.fold(window, now, timed(rated(func(b *bucket) envelope { return b.cpu })))
-	w := Chart{Every: every, Buckets: buckets}
+func ChartOf(points []Point, window time.Duration, now time.Time) Chart {
+	// value: SPEC B5.3: the window's CPU, each bar the mean and the busiest
+	// share measured in it, and its peak.
+	w := Chart{Every: BucketOf(window), Buckets: fold(points, window, now, cpu)}
 	peaked(&w)
 	return w
 }
 
-func (s *Series) Measures(window time.Duration, now time.Time) Measures {
-	bars := func(m measure) []Bucket {
-		_, out := s.fold(window, now, m)
-		return out
-	}
+func MeasuresOf(points []Point, window time.Duration, now time.Time) Measures {
 	return Measures{
 		Every:     BucketOf(window),
-		Memory:    bars(gauged(func(b *bucket) gauge { return b.mem })),
-		Swap:      bars(gauged(func(b *bucket) gauge { return b.swap })),
-		DiskRead:  bars(rated(func(b *bucket) envelope { return b.diskRead })),
-		DiskWrite: bars(rated(func(b *bucket) envelope { return b.diskWrite })),
-		NetIn:     bars(rated(func(b *bucket) envelope { return b.netIn })),
-		NetOut:    bars(rated(func(b *bucket) envelope { return b.netOut })),
+		Memory:    fold(points, window, now, gauged(func(p *Point) Range { return p.Memory })),
+		Swap:      fold(points, window, now, gauged(func(p *Point) Range { return p.Swap })),
+		DiskRead:  fold(points, window, now, rated(func(r *Rated) Range { return r.DiskRead })),
+		DiskWrite: fold(points, window, now, rated(func(r *Rated) Range { return r.DiskWrite })),
+		NetIn:     fold(points, window, now, rated(func(r *Rated) Range { return r.NetIn })),
+		NetOut:    fold(points, window, now, rated(func(r *Rated) Range { return r.NetOut })),
 	}
+}
+
+func (s *Series) charted(window time.Duration, now time.Time) []Point {
+	// value: the points of the window's tier (TierOf) its bars can hold.
+	return s.points(TierOf(window), now.Add(-window-BucketOf(window)), now)
+}
+
+func (s *Series) Chart(window time.Duration, now time.Time) Chart {
+	return ChartOf(s.charted(window, now), window, now)
+}
+
+func (s *Series) Measures(window time.Duration, now time.Time) Measures {
+	return MeasuresOf(s.charted(window, now), window, now)
 }

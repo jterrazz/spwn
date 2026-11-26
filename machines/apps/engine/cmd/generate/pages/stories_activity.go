@@ -35,9 +35,14 @@ func profiles() map[string]activity.Profile {
 func sceneHistory() map[string]activity.Report {
 	out := map[string]activity.Report{}
 	for name, p := range profiles() {
-		out[name] = activity.Report{Source: activity.FromEngine, History: p.Points(storyNow, 24*time.Hour, activity.IdleEvery), Graph: p.Points(storyNow, 6*time.Minute, activity.WatchedEvery)}
+		day, live := activity.SeriesOf(p.Points(storyNow, 24*time.Hour, activity.IdleEvery)), activity.SeriesOf(livePoints(p))
+		out[name] = activity.Report{Source: activity.FromEngine, History: day.History(storyNow), Graph: live.Graph(activity.LiveWindow, storyNow)}
 	}
 	return out
+}
+
+func livePoints(p activity.Profile) []activity.Sample {
+	return p.Points(storyNow, activity.LiveWindow, activity.WatchedEvery)
 }
 
 // value: the story's busiest processes, and each machine's live readings
@@ -50,8 +55,12 @@ func busyProcesses(f *Scene) {
 		"infra":   {{PID: 801, Name: "k3s-server", Value: 9}, {PID: 802, Name: "traefik", Value: 4}, {PID: 803, Name: "station", Value: 1}},
 	}
 	share := map[string]float64{"linux-1": 12, "agent-7f": 1, "linux-3": 22, "infra": 9, "review-bot": 1}
+	profile := profiles()
 	for name, readings := range f.Samples {
-		kept := f.History[name].Graph
+		var kept []activity.Sample
+		if p, ok := profile[name]; ok {
+			kept = livePoints(p)
+		}
 		for i := range readings {
 			r := &readings[i]
 			if k := len(kept) - len(readings) + i; k >= 0 {

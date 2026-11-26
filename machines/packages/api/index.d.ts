@@ -177,6 +177,12 @@ export type ActivityChart = {
     peak_at?: string;
 };
 
+export type ActivityGauges = {
+    battery?: ActivityBattery;
+    disk_free: number;
+    load: number[];
+};
+
 export type ActivityMeasures = {
     disk_read: ActivityBucket[] | null;
     disk_write: ActivityBucket[] | null;
@@ -187,11 +193,40 @@ export type ActivityMeasures = {
     swap: ActivityBucket[] | null;
 };
 
+export type ActivityPoint = {
+    at: string;
+    battery?: ActivityBattery;
+    cpus: number;
+    disk_free?: number;
+    load?: number[];
+    mem_total: number;
+    memory: ActivityRange;
+    pressure?: 'critical' | 'normal' | 'warn';
+    rated?: ActivityRated;
+    samples: number;
+    swap: ActivityRange;
+};
+
 export type ActivityProcess = {
     name: string;
     pid: number;
     value: number;
     vm?: string;
+};
+
+export type ActivityRange = {
+    max: number;
+    mean: number;
+};
+
+export type ActivityRated = {
+    cpu: ActivityRange;
+    cpu_max_at: string;
+    disk_read: ActivityRange;
+    disk_write: ActivityRange;
+    net_in: ActivityRange;
+    net_out: ActivityRange;
+    span: number;
 };
 
 export type ActivityRates = {
@@ -212,8 +247,8 @@ export type ActivityReading = {
 export type ActivityReport = {
     chart?: ActivityChart;
     findings: CoreFindingFinding[] | null;
-    graph?: ActivitySample[];
-    history?: ActivitySample[];
+    graph?: ActivityPoint[];
+    history?: ActivityPoint[];
     last: ActivityReading;
     measures?: ActivityMeasures;
     rates: ActivityRates;
@@ -247,13 +282,13 @@ export type ActivitySample = {
 
 export type ActivitySeries = {
     recent?: ActivitySample[];
-    ticks?: number;
     tiers: ActivityTierRollups[] | null;
 };
 
 export type ActivityTierRollups = {
     buckets: number[][] | null;
     every: number;
+    gauges?: ActivityGauges[];
     slots?: number;
 };
 

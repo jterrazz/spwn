@@ -180,8 +180,8 @@ func TestTheTiersReadBackAsTheyWereWritten(t *testing.T) {
 	}
 	gotLast, _ := again.Last()
 	wantLast, _ := sp.s.Last()
-	if gotLast != wantLast || again.count != recentKept || again.ticks != sp.s.ticks {
-		t.Errorf("the newest samples read back as %d, the last %+v at %v ticks/s; want the last %d whole, %+v at %v", again.count, gotLast, again.ticks, recentKept, wantLast, sp.s.ticks)
+	if gotLast != wantLast || again.count != recentKept {
+		t.Errorf("the newest samples read back as %d, the last %+v; want the last %d whole, %+v", again.count, gotLast, recentKept, wantLast)
 	}
 	for i := range Tiers {
 		if want, got := sp.s.within(i, from, sp.at), again.within(i, from, sp.at); len(got) != len(want) || got[len(got)-1] != want[len(want)-1] || got[0] != want[0] {
@@ -193,9 +193,12 @@ func TestTheTiersReadBackAsTheyWereWritten(t *testing.T) {
 	}
 }
 
-func TestAMachinesTiersHoldUnder700KB(t *testing.T) {
+func TestAMachinesTiersHoldUnder750KB(t *testing.T) {
 	if size := reflect.TypeFor[bucket]().Size(); size != 88 {
 		t.Errorf("a bucket is %d bytes; want 88: its memory and swap whole bytes", size)
+	}
+	if size := reflect.TypeFor[gauges]().Size(); size != 24 {
+		t.Errorf("a T2 slot's gauges are %d bytes; want 24: its free bytes, its load in hundredths, its battery a word", size)
 	}
 	var before, after runtime.MemStats
 	runtime.GC()
@@ -205,8 +208,8 @@ func TestAMachinesTiersHoldUnder700KB(t *testing.T) {
 	runtime.ReadMemStats(&after)
 	bytes := after.TotalAlloc - before.TotalAlloc
 	t.Logf("a machine's tiers: %d bytes", bytes)
-	if bytes > 700_000 || bytes < 600_000 {
-		t.Errorf("a machine's tiers hold %d bytes; want about 650 KB, never over 700 KB", bytes)
+	if bytes > 750_000 || bytes < 700_000 {
+		t.Errorf("a machine's tiers hold %d bytes; want about 740 KB, never over 750 KB", bytes)
 	}
 	runtime.KeepAlive(&s)
 }

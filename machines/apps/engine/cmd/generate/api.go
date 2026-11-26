@@ -70,7 +70,6 @@ type (
 	}
 	seriesJSON struct {
 		Recent []activity.Sample      `json:"recent,omitempty"`
-		Ticks  float32                `json:"ticks,omitempty"`
 		Tiers  []activity.TierRollups `json:"tiers"`
 	}
 )
@@ -83,6 +82,7 @@ func ownFields() map[reflect.Type]bool {
 		reflect.TypeFor[activity.Rates](): true, reflect.TypeFor[activity.Chart](): true, reflect.TypeFor[activity.Measures](): true,
 		reflect.TypeFor[activity.Process](): true, reflect.TypeFor[activity.Usage](): true, reflect.TypeFor[activity.VMUsage](): true,
 		reflect.TypeFor[activity.Sample](): true, reflect.TypeFor[activity.Rollup](): true,
+		reflect.TypeFor[activity.Point](): true, reflect.TypeFor[activity.Rated](): true,
 	}
 }
 

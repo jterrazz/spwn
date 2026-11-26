@@ -29,7 +29,8 @@ func kept(steady float64, at func(time.Time) (float64, bool)) *activity.Report {
 		}
 		return out
 	}
-	return &activity.Report{History: series(24*time.Hour, activity.IdleEvery), Graph: series(6*time.Minute, activity.WatchedEvery)}
+	day, live := activity.SeriesOf(series(24*time.Hour, activity.IdleEvery)), activity.SeriesOf(series(6*time.Minute, activity.WatchedEvery))
+	return &activity.Report{History: day.History(macNow), Graph: live.Graph(activity.LiveWindow, macNow)}
 }
 
 func chartsOf(t *testing.T, s *page.Section) (cpu, net page.Chart) {

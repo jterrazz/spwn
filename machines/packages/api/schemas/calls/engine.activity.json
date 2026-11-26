@@ -54,6 +54,30 @@
       ],
       "type": "object"
     },
+    "activity.Gauges": {
+      "additionalProperties": false,
+      "properties": {
+        "battery": {
+          "$ref": "#/$defs/activity.Battery"
+        },
+        "disk_free": {
+          "type": "integer"
+        },
+        "load": {
+          "items": {
+            "type": "number"
+          },
+          "maxItems": 3,
+          "minItems": 3,
+          "type": "array"
+        }
+      },
+      "required": [
+        "disk_free",
+        "load"
+      ],
+      "type": "object"
+    },
     "activity.Process": {
       "additionalProperties": false,
       "properties": {
@@ -199,9 +223,6 @@
           },
           "type": "array"
         },
-        "ticks": {
-          "type": "number"
-        },
         "tiers": {
           "items": {
             "$ref": "#/$defs/activity.TierRollups"
@@ -236,6 +257,12 @@
         },
         "every": {
           "type": "integer"
+        },
+        "gauges": {
+          "items": {
+            "$ref": "#/$defs/activity.Gauges"
+          },
+          "type": "array"
         },
         "slots": {
           "type": "integer"

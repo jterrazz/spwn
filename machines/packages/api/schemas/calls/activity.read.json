@@ -185,6 +185,64 @@
       ],
       "type": "object"
     },
+    "activity.Point": {
+      "additionalProperties": false,
+      "properties": {
+        "at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "battery": {
+          "$ref": "#/$defs/activity.Battery"
+        },
+        "cpus": {
+          "type": "integer"
+        },
+        "disk_free": {
+          "type": "integer"
+        },
+        "load": {
+          "items": {
+            "type": "number"
+          },
+          "maxItems": 3,
+          "minItems": 3,
+          "type": "array"
+        },
+        "mem_total": {
+          "type": "integer"
+        },
+        "memory": {
+          "$ref": "#/$defs/activity.Range"
+        },
+        "pressure": {
+          "enum": [
+            "critical",
+            "normal",
+            "warn"
+          ],
+          "type": "string"
+        },
+        "rated": {
+          "$ref": "#/$defs/activity.Rated"
+        },
+        "samples": {
+          "type": "integer"
+        },
+        "swap": {
+          "$ref": "#/$defs/activity.Range"
+        }
+      },
+      "required": [
+        "at",
+        "cpus",
+        "mem_total",
+        "memory",
+        "samples",
+        "swap"
+      ],
+      "type": "object"
+    },
     "activity.Process": {
       "additionalProperties": false,
       "properties": {
@@ -205,6 +263,59 @@
         "name",
         "pid",
         "value"
+      ],
+      "type": "object"
+    },
+    "activity.Range": {
+      "additionalProperties": false,
+      "properties": {
+        "max": {
+          "type": "number"
+        },
+        "mean": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "max",
+        "mean"
+      ],
+      "type": "object"
+    },
+    "activity.Rated": {
+      "additionalProperties": false,
+      "properties": {
+        "cpu": {
+          "$ref": "#/$defs/activity.Range"
+        },
+        "cpu_max_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "disk_read": {
+          "$ref": "#/$defs/activity.Range"
+        },
+        "disk_write": {
+          "$ref": "#/$defs/activity.Range"
+        },
+        "net_in": {
+          "$ref": "#/$defs/activity.Range"
+        },
+        "net_out": {
+          "$ref": "#/$defs/activity.Range"
+        },
+        "span": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "cpu",
+        "cpu_max_at",
+        "disk_read",
+        "disk_write",
+        "net_in",
+        "net_out",
+        "span"
       ],
       "type": "object"
     },
@@ -278,13 +389,13 @@
         },
         "graph": {
           "items": {
-            "$ref": "#/$defs/activity.Sample"
+            "$ref": "#/$defs/activity.Point"
           },
           "type": "array"
         },
         "history": {
           "items": {
-            "$ref": "#/$defs/activity.Sample"
+            "$ref": "#/$defs/activity.Point"
           },
           "type": "array"
         },

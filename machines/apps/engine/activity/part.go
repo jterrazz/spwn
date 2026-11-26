@@ -18,7 +18,7 @@ func (s *Series) Part(w Want, now time.Time) Series {
 	// samples, the buckets of each tier a graph, the 24 h and the findings
 	// read, and room for the samples a reader adds up to a Pause past now;
 	// each ring only as long as that, so nothing else is copied.
-	out := Series{recent: s.recent, count: s.count, ticks: s.ticks}
+	out := Series{recent: s.recent, count: s.count}
 	if s.count == 0 {
 		return out
 	}
@@ -41,12 +41,15 @@ func (s *Series) Part(w Want, now time.Time) Series {
 	for i := range s.rings {
 		r := &s.rings[i]
 		n := min(int64(len(r.slots)), (end-from[i])/r.every+2)
-		part := ring{every: r.every, slots: make([]bucket, n)}
+		part := ringOf(i, int(n))
 		for b := range r.back(newest) {
 			if b.at < from[i] {
 				break
 			}
 			*part.of(b.at) = *b
+			if part.gauges != nil {
+				part.gauges[part.index(b.at)] = r.gaugesAt(b.at)
+			}
 		}
 		out.rings[i] = part
 	}

@@ -49,12 +49,12 @@ type Report struct {
 	Window time.Duration `json:"window"`
 	// value: the Meter did not answer in Budget: no value is known.
 	Silent bool `json:"silent,omitempty"`
-	// value: the last 24 h a minute apart, when the read asked for the
-	// history (Series.History).
-	History []Sample `json:"history,omitempty"`
-	// value: the points of the window a screen's graphs draw, when the read
-	// asked for one.
-	Graph []Sample `json:"graph,omitempty"`
+	// value: the last 24 h, a point a minute of T2, when the read asked for
+	// the history (Series.History).
+	History []Point `json:"history,omitempty"`
+	// value: the points of the window a screen's graphs draw, one a bucket
+	// of its tier (TierOf), when the read asked for one.
+	Graph []Point `json:"graph,omitempty"`
 	// value: the window's CPU as its chart draws it (SPEC B5.3), when the
 	// read asked for a window.
 	Chart *Chart `json:"chart,omitempty"`

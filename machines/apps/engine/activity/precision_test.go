@@ -15,8 +15,8 @@ func TestAMemoryReadingIsKeptToTheByte(t *testing.T) {
 	}
 	now := from.Add(29 * time.Minute)
 	for _, x := range s.History(now) {
-		if x.MemUsed != 1_181_116_006 || x.SwapUsed != 123_456_789 {
-			t.Fatalf("a minute of the history reads %d B of memory and %d of swap; want 1181116006 and 123456789, as measured", x.MemUsed, x.SwapUsed)
+		if x.Memory.Mean != 1_181_116_006 || x.Swap.Mean != 123_456_789 {
+			t.Fatalf("a minute of the history reads %v B of memory and %v of swap; want 1181116006 and 123456789, as measured", x.Memory.Mean, x.Swap.Mean)
 		}
 	}
 	m := s.Measures(time.Hour, now)

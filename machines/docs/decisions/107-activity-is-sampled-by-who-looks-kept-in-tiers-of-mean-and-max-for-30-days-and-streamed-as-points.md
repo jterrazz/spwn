@@ -34,7 +34,9 @@ The owner asked to rework the timing, the refresh rate and the time window of Ac
 | T3   | 15 min | 30 d   |
 
 - Each bucket keeps, for every measure (CPU share, memory used, swap used, disk read and write, network in and out), the **mean and the max** of what was measured in it, the samples it counts and the time its rates span. A rate is measured between two samples, from the kernel's counters, so its mean is exact at any step; a gauge is the mean of its readings. The max of every tier is the max of the samples, so a 1 s spike survives to the 30 days.
-- Every sample rolls into all four tiers at once, by the engine's clock; each tier is a fixed ring of slots indexed by time, so its size is bounded and a slot nothing was measured in is a gap, never a zero.
+- Every sample rolls into all four tiers at once, in the slot of its own time: the clock of the machine that measured it, so a VM's slots follow its guest's clock. Each tier is a fixed ring of slots indexed by that time, so its size is bounded and a slot nothing was measured in is a gap, never a zero.
+- A point a reader draws is one bucket, built from that bucket alone: its rates' means over the time they span, its gauges, its samples. A pause in the sampling, or a counter that went back (a reboot), is a gap at the bucket of the first sample after it, and the points before it stay.
+- The 1 min tier alone also keeps its newest sample's load, free disk space and battery, for the 24 h series a script reads; no other tier's reader needs them.
 - T2 and T3 survive restarts and updates, in fixed-record ring files written once per 15 min and at a clean stop: 30 days is the journal's horizon, so every event it keeps has its curves.
 - Min is not kept: for load the floor is rarely the question.
 
@@ -54,10 +56,22 @@ The owner asked to rework the timing, the refresh rate and the time window of Ac
 
 Sub-second sampling; tweened or rolling figures; motion at idle that no sample caused; an unbounded history; a React render per sample; a curve coloured by its value; a series re-sent per update.
 
+## What the first lot ships
+
+The decision lands in lots. The first ships the four tiers and nothing else of it:
+
+- The history is the four tiers, each bucket the mean and max of every measure, the 1 min tier with its gauges; every number an answer writes is rounded to what it measures; `activity.read` asks its engine, through `engine.activity`, for one machine and only the part of its tiers it reads.
+- The cadence is unchanged: 2 s while a surface watches the machine, 60 s otherwise.
+- Nothing is persisted: an engine restart starts the history again from nothing.
+- No stream: `activity.read` stays one-shot, its series served from the tiers.
+- What a reader sees change against the two rings of whole samples kept before: a bar ends on the first boundary of its span at or after now, not at now; its mean is weighted by the time each sample spans; its `points` counts samples, not intervals; its busiest is the busiest its tier kept, a 1 s spike included; the 24 h graph is 97 points of 15 min, not 1440 of 1 min; a point is a bucket's rates, gauges and samples, no counter since boot; and the menu bar folds its charts with the window's fold, so both draw the same bars, but for a bar that holds a gap, whose samples the window's count includes and the menu bar's leaves out.
+
+The cadence that follows who looks, the ring files and `activity.stream` are later lots.
+
 ## Consequences
 
 - The numbers the owner may tune after the prototype (the default window, the cadences, the tiers' steps and horizons) are each one named constant.
-- A machine's history costs about 0.65 MB of the engine's memory, 6.5 MB for ten machines: a bucket is 88 B, its memory and swap whole bytes, its shares and rates float32, which an answer rounds to what it measures; the files write about 1 KB per machine per 15 min.
+- A machine's history costs about 0.74 MB of the engine's memory (737,280 B measured), 7.4 MB for ten machines: a bucket is 88 B, its memory and swap whole bytes, its shares and rates float32, which an answer rounds to what it measures, and each slot of the 1 min tier 24 B more of gauges; the files write about 1 KB per machine per 15 min.
 - `activity.read`'s report keeps its whole series only until the stream lands; meanwhile it is served from the tiers and carries each measure's mean and max over the window asked. It asks the engine for one machine and only the buckets its window, its 24 h and its findings read, about 19 KB for a day of a full 30 days, whatever the fleet.
 - The findings that must last (memory pressure held, swap growing, a server's CPU busy) are judged on the tiers' buckets.
 - The cost of sampling at 1 s on a Mac is estimated, not measured; a measure on the acceptance Mac sets its budget.
