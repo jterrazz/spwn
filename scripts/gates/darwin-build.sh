@@ -25,10 +25,10 @@ tart run --no-graphics $vm > $W/tart.log 2>&1 & tp=$!
 ip=$(tart ip $vm --wait 180) || die ip
 key=$W/id; ssh-keygen -q -t ed25519 -N '' -f $key
 printf '#!/bin/sh\necho admin\n' > $W/ap; chmod 700 $W/ap
-n=0; until SSH_ASKPASS=$W/ap SSH_ASKPASS_REQUIRE=force DISPLAY=none ssh "${opts[@]/BatchMode=yes/BatchMode=no}" -o PubkeyAuthentication=no admin@$ip "mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys" < $key.pub 2>/dev/null; do n=$((n+1)); [ $n -lt 60 ] || die ssh; sleep 2; done
-vmx() { ssh -n "${opts[@]}" -i $key admin@$ip "$1" >> $log 2>&1; }
+n=0; until SSH_ASKPASS=$W/ap SSH_ASKPASS_REQUIRE=force DISPLAY=none ssh "${opts[@]/BatchMode=yes/BatchMode=no}" -o PubkeyAuthentication=no admin@$ip "mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys" < $key.pub 2>/dev/null; do n=$((n+1)); [ $n -lt 60 ] || die ssh; sleep 2; done  # gate-ssh: exempt (throwaway key, local tart VM)
+vmx() { ssh -n "${opts[@]}" -i $key admin@$ip "$1" >> $log 2>&1; }  # gate-ssh: exempt (throwaway key, local tart VM)
 vmx 'rm -rf ~/station && git init -q -b scratch ~/station' || die init
-GIT_SSH_COMMAND="ssh ${opts[*]} -i $key" git -C "$wt" push -q admin@$ip:station "$sha:refs/heads/run" >> $log 2>&1 || die push
+GIT_SSH_COMMAND="ssh ${opts[*]} -i $key" git -C "$wt" push -q admin@$ip:station "$sha:refs/heads/run" >> $log 2>&1 || die push  # gate-ssh: exempt (throwaway key, local tart VM)
 vmx 'cd ~/station && git checkout -q run' || die checkout
 vmx "set -e; cd ~; curl -fsSLo go.tgz https://go.dev/dl/go$gover.darwin-arm64.tar.gz; echo '$gosum  go.tgz' | shasum -a 256 -c -; mkdir -p gotool && tar -xzf go.tgz -C gotool; ~/gotool/go/bin/go version" || die "go $gover install or checksum"
 env='export PATH=$HOME/gotool/go/bin:$PATH MACOSX_DEPLOYMENT_TARGET=14.0 CGO_ENABLED=1 GOOS=darwin GOARCH=arm64; sdk=$(xcrun --sdk macosx --show-sdk-path); export CC="clang -arch arm64 -isysroot $sdk -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET"; cd ~/station/'"$sub"
@@ -38,5 +38,5 @@ vmx "set -e; $env; go build -ldflags '-X github.com/jterrazz/studio-station/apps
 vmx "set -e; $env; command -v cargo >/dev/null || [ -x \$HOME/.cargo/bin/cargo ] || curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal >/dev/null 2>&1; . \$HOME/.cargo/env; cd apps/desktop/src-tauri; cargo test --bin spwn-window" || die "cargo test of the window (apps/desktop/src-tauri)"
 vmx "set -e; $env; ../scripts/sign-macos-test.sh" || die "scripts/sign-macos-test.sh"
 if [ -n "${DARWIN_STEPS:-}" ]; then vmx "set -e; $env; $DARWIN_STEPS" || die "DARWIN_STEPS"; fi
-if [ -n "${DARWIN_OUT:-}" ]; then scp "${opts[@]}" -i $key admin@$ip:station-bin "$DARWIN_OUT" >> $log 2>&1 || die scp; fi
+if [ -n "${DARWIN_OUT:-}" ]; then scp "${opts[@]}" -i $key admin@$ip:station-bin "$DARWIN_OUT" >> $log 2>&1 || die scp; fi  # gate-ssh: exempt (throwaway key, local tart VM)
 echo "PASS darwin-build $sha ($ver)" | tee -a $log

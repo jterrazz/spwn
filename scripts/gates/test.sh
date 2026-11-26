@@ -12,6 +12,18 @@ d=$(env -u GATE_VM_RAM GATE_RUN_DIR=$T/run GATE_VM_DIR=g bash -c '. ./env.sh; ec
 d=$(GATE_RUN_DIR=$T/run GATE_VM_RAM=/r bash -c '. ./env.sh; echo "$VM_RAM"'); [ "$d" = /r ] || bad "GATE_VM_RAM is ignored: $d"
 grep -nE 'git clone' ./*.sh | grep -v '^./test.sh' | grep -vE 'git clone -q -b \S+ \S+ ("\$WT"|\$C|\$W/)' && bad "a clone lands outside the RAM folder"
 grep -noE '(^|[ ;])(WT|C)=[^ ;]+' ./*.sh | grep -v '^./test.sh' | grep -vE '=\$(W|VM_RAM)/' && bad "a clone folder is not under the RAM folder"
+bare_ssh() {
+  local p1='(^|[;&|({!]|\$\(|(then|do|until|if|else)[[:space:]])[[:space:]]*(ssh|scp|rsync)[[:space:]]' p2=$'=\\(?["\']?(ssh|scp)[[:space:]"\']'
+  grep -nE -e "$p1" -e "$p2" "$@" | grep -vE '^[^:]*:[0-9]+:[[:space:]]*#' | grep -v 'gate-ssh: exempt' | grep -vE 'rsync .*-e "\$GATE_SSH rsh"'
+}
+bare=(); for f in ./*.sh; do case $f in ./gate-ssh.sh | ./test.sh | ./*-remote.sh) ;; *) bare+=("$f") ;; esac; done
+bare_ssh "${bare[@]}" && bad "bare ssh to a VM: a script reaches a VM only through \$GATE_SSH"
+F=$(mktemp -d) || exit 2
+printf '%s\n' 'ssh vm true' '  scp x vm:y' 'a && ssh -n vm true' 'x=$(ssh vm true)' 'S="ssh -n"' 'rsync -a a vm:b' 'if ssh vm true; then' > "$F/bare.sh"
+printf '%s\n' '"$GATE_SSH" ssh vm true' '# ssh vm true' 'ssh vm true  # gate-ssh: exempt (why)' 'rsync -e "$GATE_SSH rsh" a vm:b' 'echo "(hold or ssh)"' 'SSHP=("$GATE_SSH" ssh -n)' > "$F/clean.sh"
+[ "$(bare_ssh "$F/bare.sh" | wc -l | tr -d ' ')" = 7 ] || bad "the bare-ssh lint misses a form: $(bare_ssh "$F/bare.sh" | wc -l)"
+[ -z "$(bare_ssh "$F/clean.sh")" ] || bad "the bare-ssh lint flags a routed line: $(bare_ssh "$F/clean.sh")"
+rm -rf "$F"
 export GATE_RUN_DIR=$T/slot GATE_SLOT_POLL=1 GATE_SLOT_MAX_LOAD=100000
 unset GATE_SLOT_VM
 : > "$T/order"

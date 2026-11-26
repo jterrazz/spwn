@@ -40,9 +40,9 @@ echo COLD-DONE
 exit \$rc
 R
 mkdir -p "$RUN/vm-hold"; trap 'rm -f "$RUN/vm-hold/$VM" "$RUN/vm-hold/all"' EXIT
-ssh -n $VM "mkdir -p $R" || exit 91
+"$GATE_SSH" ssh -n $VM "mkdir -p $R" || exit 91
 run="\$HOME/.local/bin/heavy-run-excl 5400 bash $R/$L-cold-remote.sh"
-scp -q "$RUN/$L-cold.bundle" "$RUN/$L-cold-remote.sh" $VM:$RS || exit 91
+"$GATE_SSH" scp -q "$RUN/$L-cold.bundle" "$RUN/$L-cold-remote.sh" $VM:$RS || exit 91
 rm -f "$RUN/$L-cold.bundle"
-GATE_SLOT_VM=$VM "$GATE_DIR/gate-slot.sh" "$GATE_DIR/hold-then.sh" "$VM" ssh -n $VM "$run; rc=\$?; rm -f $R/$L-cold-remote.sh; exit \$rc" > "$RUN/station-$L-cold.log" 2>&1
-rc=$?; echo "slot-exit=$rc" >> "$RUN/station-$L-cold.log"; scp -q $VM:$RS$L-check.log "$RUN/station-$L-check-full.log" 2>/dev/null; ssh -n $VM "rm -f $R/$L-check.log"; rm -f "$RUN/$L-cold-remote.sh"; exit $rc
+GATE_SLOT_VM=$VM "$GATE_DIR/gate-slot.sh" "$GATE_DIR/hold-then.sh" "$VM" "$GATE_SSH" ssh -n $VM "$run; rc=\$?; rm -f $R/$L-cold-remote.sh; exit \$rc" > "$RUN/station-$L-cold.log" 2>&1
+rc=$?; echo "slot-exit=$rc" >> "$RUN/station-$L-cold.log"; "$GATE_SSH" scp -q $VM:$RS$L-check.log "$RUN/station-$L-check-full.log" 2>/dev/null; "$GATE_SSH" ssh -n $VM "rm -f $R/$L-check.log"; rm -f "$RUN/$L-cold-remote.sh"; exit $rc

@@ -10,7 +10,7 @@ trap 'rm -f "$D/wanted/$$"' EXIT
 load() {
   if [ -r /proc/loadavg ]; then l=$(awk '{print int($1)}' /proc/loadavg); else l=$(sysctl -n vm.loadavg | awk '{print int($2)}'); fi
   if [ -n "${GATE_SLOT_VM:-}" ]; then
-    v=$(ssh -n -o ConnectTimeout=10 "$GATE_SLOT_VM" cat /proc/loadavg 2>/dev/null | awk '{print int($1)}')
+    v=$("$GATE_SSH" ssh -n -o ConnectTimeout=10 "$GATE_SLOT_VM" cat /proc/loadavg 2>/dev/null | awk '{print int($1)}')
     [ "${v:-0}" -gt "$l" ] && l=$v
   fi
   echo "$l"

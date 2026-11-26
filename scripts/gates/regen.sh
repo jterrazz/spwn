@@ -9,10 +9,10 @@ one)
   rm -f "${RUN:?}/$L-regen.end"; trap 'echo END > "$RUN/$L-regen.end"' EXIT
   git -C "$W" branch -f $B $SHA >/dev/null || exit 89
   git -C "$W" bundle create $RUN/$L-regen.bundle "$B" --tags >/dev/null 2>&1 || exit 90
-  ssh -n $VM "mkdir -p $R" && scp -q $RUN/$L-regen.bundle $VM:$RS && scp -q $GATE_DIR/regen-remote.sh $VM:$RS$L-regen-remote.sh || exit 91; rm -f $RUN/$L-regen.bundle
-  ssh -n $VM "CC_HOME=$R CC_WORK=$VM_RAM bash $R/$L-regen-remote.sh $L $B $ARIA"
-  rm -rf "${RUN:?}/${L:?}-regen-out"; mkdir -p $RUN/$L-regen-out; scp -q $VM:${RS}$L-regen-r.tar $RUN/$L-regen-out/r.tar; scp -q $VM:${RS}$L-regen-changes.txt $RUN/$L-regen-out/changes.txt; tar -C $RUN/$L-regen-out -xf $RUN/$L-regen-out/r.tar
-  ssh -n $VM "rm -rf $VM_RAM/${L}-regen-node; cd $R && rm -rf ${L}-regen.bundle ${L}-regen-r.tar ${L}-regen-remote.sh"
+  "$GATE_SSH" ssh -n $VM "mkdir -p $R" && "$GATE_SSH" scp -q $RUN/$L-regen.bundle $VM:$RS && "$GATE_SSH" scp -q $GATE_DIR/regen-remote.sh $VM:$RS$L-regen-remote.sh || exit 91; rm -f $RUN/$L-regen.bundle
+  "$GATE_SSH" ssh -n $VM "CC_HOME=$R CC_WORK=$VM_RAM bash $R/$L-regen-remote.sh $L $B $ARIA"
+  rm -rf "${RUN:?}/${L:?}-regen-out"; mkdir -p $RUN/$L-regen-out; "$GATE_SSH" scp -q $VM:${RS}$L-regen-r.tar $RUN/$L-regen-out/r.tar; "$GATE_SSH" scp -q $VM:${RS}$L-regen-changes.txt $RUN/$L-regen-out/changes.txt; tar -C $RUN/$L-regen-out -xf $RUN/$L-regen-out/r.tar
+  "$GATE_SSH" ssh -n $VM "rm -rf $VM_RAM/${L}-regen-node; cd $R && rm -rf ${L}-regen.bundle ${L}-regen-r.tar ${L}-regen-remote.sh"
   git -C "$W" branch -D $B >/dev/null ;;
 all)
   [ $# -eq 6 ] || usage; W=$2; MAP=$3; P=$4; ok "$P"; [ -f "$MAP" ] || { echo "no map file $MAP"; exit 2; }
