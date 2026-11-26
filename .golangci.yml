@@ -151,8 +151,9 @@ linters:
                   - forbidigo
               path: ^packages/architect/spawn\.go$
               source: os\.Stat\(abs\)
-            # outside: a world's knowledge is stat'd as spwn.yaml's knowledge: path gives it, before its bind; plan
-            # refuses one outside the project, `spwn up` takes it as resolved (apps/cli/world/project.go).
+            # outside: NOT YET ROOTED, a world's knowledge is stat'd and bound as spwn.yaml's knowledge: path gives
+            # it; plan refuses one outside the project, `spwn up` takes it as resolved, absolute included
+            # (apps/cli/world/project.go); machines/TODO.md records it.
             - linters:
                   - forbidigo
               path: ^packages/architect/spawn\.go$
