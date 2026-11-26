@@ -1,21 +1,27 @@
 // outside: a Linux VM only (headless Chromium); a Mac never opens a browser for this.
-// value: usage: node scripts/canvas-dump.ts <spwn-wiki-proto-r1.html> <out-dir>: the prototype-*.json fixtures of
-// value: src/presentation/ui/canvas/__tests__/, written by running the prototype's own functions. The prototype the owner
-// value: approved lives outside this repository, at home/spwn/work/uncommitted/os-design/wiki-proto/ of the studio-os
-// value: estate; its last line exports its state as window.__proto, and the dump injects the rest of what it reads
-// value: before that line. The JSON is written minified: `make fix` formats it.
-import { readFileSync, writeFileSync } from 'node:fs';
+// value: usage: node scripts/canvas-dump.ts <spwn-wiki-proto-r1.html>: the canvas's fixtures, written in place by
+// value: running the prototype's own functions: the wiki sample (src/presentation/ui/canvas/samples/) and the
+// value: prototype's states and walks (its __tests__/). The prototype the owner approved lives outside this
+// value: repository, at home/spwn/work/uncommitted/os-design/wiki-proto/ of the studio-os estate; its last line exports
+// value: its state as window.__proto, and the dump injects the rest of what it reads before that line. The JSON is
+// value: written minified: `make fix` formats it.
+import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { chromium } from 'playwright';
 
-const [protoArgument, outArgument] = process.argv.slice(2);
-if (protoArgument === undefined || outArgument === undefined) {
-    throw new Error('usage: node scripts/canvas-dump.ts <spwn-wiki-proto-r1.html> <out-dir>');
+const [protoArgument] = process.argv.slice(2);
+if (protoArgument === undefined) {
+    throw new Error('usage: node scripts/canvas-dump.ts <spwn-wiki-proto-r1.html>');
 }
-const out = resolve(outArgument);
+const canvas = resolve(import.meta.dirname, '../src/presentation/ui/canvas');
+const samples = join(canvas, 'samples');
+const tests = join(canvas, '__tests__');
+const out = mkdtempSync(join(tmpdir(), 'canvas-dump-'));
 const MARK = 'window.__proto={S,H,';
 const MORE = [
     'globalThis.dumpMore={M,labelOf,tw,PILLF,kidMarks,camTarget,camClamp,pagesOf,layout,stripH,ensureVisible,',
+    'needN,nodeHTML,',
     'proto:()=>window.__proto,getSP:()=>SP,getDECO:()=>DECO,getBOX:()=>BOX,setCam0:(x,y)=>{cam0={x,y};},',
     'getCam:()=>cam,putCam:(x,y)=>{cam={x,y};}};',
 ].join('');
@@ -33,10 +39,33 @@ const GRAPH = `(() => {
     const nodes = Object.values(more.proto().NODES).map((n) => ({
         band: n.kind === 'seat' ? Math.min(...more.pagesOf(n.seat).map((p) => p.floor)) : 0,
         depth: n.k, id: n.id, kids: n.kids, kind: n.kind, label: more.labelOf(n.id),
-        marks: more.kidMarks(n.id), parent: n.par,
+        marks: more.kidMarks(n.id), needs: more.needN(n.id), parent: n.par,
     }));
     const widths = Object.fromEntries(nodes.map((n) => [n.label, more.tw(n.label, more.PILLF)]));
     return { nodes, roots: more.M.seats.map((s) => 'S:' + s.id), widths };
+})()`;
+
+// value: the words the prototype draws on each node, read from its own nodeHTML: a card's top line, title, line and
+// value: foot, a head's count, a lead head's title and line, and each floor guide's label; the gallery draws them.
+const WORDS = `(() => {
+    const more = globalThis.dumpMore;
+    const drawn = (id, face) => { const box = document.createElement('div'); box.innerHTML = more.nodeHTML(id, face); return box; };
+    const text = (box, selector) => box.querySelector(selector)?.textContent.trim() ?? '';
+    const nodes = Object.fromEntries(Object.values(more.proto().NODES).map((n) => {
+        const card = drawn(n.id, 'card');
+        const head = drawn(n.id, n.k === 1 ? 'region' : 'open');
+        return [n.id, {
+            count: text(head, '.cnt'),
+            foot: (card.querySelector('.cdots')?.lastChild?.textContent ?? '').trim(),
+            kicker: text(card, '.ctop > span:not(.you)'),
+            lead: text(head, '.pl'),
+            line: text(card, '.cl'),
+            seat: n.kind === 'seat' || n.kind === 'page' ? n.seat : '',
+            title: n.k === 1 ? '' : text(card, 'b'),
+        }];
+    }));
+    const bands = Object.fromEntries(Object.keys(more.M.floors).map((f) => [f, 'E' + f + ' · ' + more.M.floors[f].name]));
+    return { bands, icons: more.M.icons, nodes };
 })()`;
 
 // value: four pulls per state, from two starts, for camClamp.
@@ -174,12 +203,14 @@ const walksWide = await each(WALKS.map((path) => walkOf(path)));
 await atWidth(1100);
 const narrow = await each(upTo(2).map((id) => stateOf(id)));
 const walksNarrow = await each(WALKS.slice(0, 3).map((path) => walkOf(path)));
+const words: unknown = await page.evaluate(WORDS);
 await browser.close();
 
-writeFileSync(join(out, 'prototype-graph.json'), JSON.stringify(graph));
-writeFileSync(join(out, 'prototype-states.json'), JSON.stringify({ narrow, wide }));
+writeFileSync(join(samples, 'wiki-graph.json'), JSON.stringify(graph));
+writeFileSync(join(samples, 'wiki-words.json'), JSON.stringify(words));
+writeFileSync(join(tests, 'prototype-states.json'), JSON.stringify({ narrow, wide }));
 writeFileSync(
-    join(out, 'prototype-keys.json'),
+    join(tests, 'prototype-keys.json'),
     JSON.stringify({ narrow: walksNarrow, wide: walksWide }),
 );
 process.stdout.write(

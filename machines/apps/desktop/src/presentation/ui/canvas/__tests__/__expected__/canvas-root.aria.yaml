@@ -1,0 +1,24 @@
+- group "The wiki":
+  - text: E0 · Intention E1 · Produit E3 · Architecture
+  - button "Vision": Vision 1 page
+  - button "Produit, 4 wait for you":
+    - text: Produit 3 pages
+    - img "4 wait for you"
+  - button "Technique": Technique 2 pages
+  - button "Croissance, 1 waits for you":
+    - text: Croissance 1 page
+    - img "1 waits for you"
+  - button "Philosophy": Philosophy The seven convictions Spwn is built on, written as principles a newcomer can apply to a design choice; the vision holds the case they serve, and this page holds the rules. 8 sections
+  - button "Boundaries, 3 wait for you":
+    - img "3 wait for you"
+    - text: 3 Boundaries What Spwn is not, and what each of its parts refuses to be, for anyone weighing a feature that sits near an edge. 4 sections
+  - button "The stack, 1 waits for you":
+    - img "1 waits for you"
+    - text: "1 The stack Spwn's three spaces and what lives in each, for anyone deciding what a part of the app is for or where it goes: per space, what you let go of, what you keep, and whether it runs today. 3 sections"
+  - button "ADR-002": ADR-002 · Spwn is one stack of six apps on one ladder Spwn is one stack of six apps on one ladder. 2 sections
+  - button "Ports": Ports station ports lists every TCP port that listens on a Mac or a VM, each in the class of who reaches it. 1 section
+  - button "ADR-035": ADR-035 · A port is a right with an audience A port is a right with an audience. 2 sections
+  - button "Positioning, 1 waits for you":
+    - img "1 waits for you"
+    - text: "1 Positioning Where Spwn stands against what a person uses today instead, for anyone writing a comparison, a pitch or an answer to \"how is it different\": the category it refuses, the four alternatives and what each costs. 3 sections"
+  - paragraph

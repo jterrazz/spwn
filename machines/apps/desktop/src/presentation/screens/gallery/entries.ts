@@ -7,6 +7,7 @@ import { Bone } from '../../ui/bone';
 import { BONE_STORIES } from '../../ui/bone.stories';
 import { Button } from '../../ui/button';
 import { BUTTON_STORIES } from '../../ui/button.stories';
+import { CANVAS_STORIES, CanvasSample } from '../../ui/canvas/canvas.stories';
 import { Caption } from '../../ui/caption';
 import { CAPTION_STORIES } from '../../ui/caption.stories';
 import { Chart } from '../../ui/chart';
@@ -179,6 +180,11 @@ export const ENTRIES: readonly Entry[] = [
         stories: ROW_HEAD_STORIES,
     }),
     entry('Facts', 'Containers', { Component: Facts, frame: 'block', stories: FACTS_STORIES }),
+    entry('Canvas', 'Containers', {
+        Component: CanvasSample,
+        frame: 'canvas',
+        stories: CANVAS_STORIES,
+    }),
     entry('FleetBoard', 'Containers', {
         Component: FleetBoard,
         frame: 'block',

@@ -15,8 +15,9 @@ export const LAYERS = [
 export type Layer = (typeof LAYERS)[number];
 
 // value: how an entry's samples are laid out: side by side, one per line, in the window's column's width,
-// value: in a meter's width, each in a frame that holds a dialog's veil inside it, or in one tall enough for a sheet.
-export type Frame = 'block' | 'dialog' | 'inline' | 'meter' | 'nav' | 'sheet';
+// value: in a meter's width, each in a frame that holds a dialog's veil inside it, in one tall enough for a sheet, or
+// value: in a desk the height of the window's space over its strip.
+export type Frame = 'block' | 'canvas' | 'dialog' | 'inline' | 'meter' | 'nav' | 'sheet';
 
 export type Sample = { name: string; drawn: ReactNode };
 

@@ -106,6 +106,17 @@
     border-radius: var(--radius-tile);
     background: var(--s0);
 }
+.canvas .sample {
+    width: 100%;
+}
+.canvas .drawn {
+    display: block;
+    position: relative;
+    height: 740px;
+    overflow: hidden;
+    transform: translateZ(0);
+    border-radius: var(--radius-tile);
+}
 .story {
     font-size: var(--text-meta);
     color: var(--t3);

@@ -1,0 +1,26 @@
+- group "The wiki":
+  - text: E0 · Intention E1 · Produit E3 · Architecture
+  - button "Vision"
+  - button "Produit, 4 wait for you" [expanded]:
+    - text: Produit 3 pages
+    - img "4 wait for you"
+    - text: close
+  - button "Technique"
+  - button "Croissance, 1 waits for you"
+  - button "Boundaries, 3 wait for you" [expanded]:
+    - text: Boundaries
+    - img "3 wait for you"
+    - text: What Spwn is not, and what each of its parts refuses to be, for anyone weighing a feature that sits near an edge.
+  - button "The stack, 1 waits for you"
+  - button "ADR-002"
+  - button "Top"
+  - button "What Spwn is not" [expanded]: What Spwn is not 6 blocks close
+  - button "What each app refuses, 2 wait for you": What each app refuses
+  - button "Rests on"
+  - button "not-a-replacement": Refusal not-a-replacement a replacement for the person
+  - button "not-vibe-coding": Refusal not-vibe-coding a vibe-coding tool
+  - button "not-a-cloud-service": Refusal not-a-cloud-service a cloud service
+  - button "not-one-vendor": Refusal not-one-vendor tied to one vendor
+  - button "not-a-method": Refusal not-a-method a method of work imposed
+  - button "Each line is…": "Paragraph Each line is the… Each line is the edge of the one enemy, losing your thread:"
+  - paragraph: What Spwn is not, 6 blocks

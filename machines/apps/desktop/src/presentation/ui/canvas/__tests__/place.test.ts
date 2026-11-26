@@ -14,6 +14,7 @@ function node(depth: number, extra: Partial<CanvasNode> = {}): CanvasNode {
         kind: 'any',
         label: 'label',
         marks: [],
+        needs: 0,
         parent: null,
         ...extra,
     };

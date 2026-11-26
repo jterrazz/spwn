@@ -88,8 +88,12 @@ export default defineConfig({
         oxlint: {
             overrides: [
                 {
-                    files: ['src/presentation/ui/chart.tsx', 'src/presentation/ui/row.tsx'],
-                    reason: 'a mark of a chart and a column of a row are their position: the list is never reordered and holds no other identity',
+                    files: [
+                        'src/presentation/ui/canvas/canvas-node.tsx',
+                        'src/presentation/ui/chart.tsx',
+                        'src/presentation/ui/row.tsx',
+                    ],
+                    reason: "a mark of a chart, a column of a row and a canvas node's mark of a kid are their position: the list is never reordered and holds no other identity",
                     rules: { 'react/no-array-index-key': 'off' },
                 },
                 {

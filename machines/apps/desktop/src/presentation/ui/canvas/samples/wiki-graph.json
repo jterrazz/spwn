@@ -8,6 +8,7 @@
             "kind": "seat",
             "label": "Vision",
             "marks": [false],
+            "needs": 0,
             "parent": null
         },
         {
@@ -27,6 +28,7 @@
             "kind": "page",
             "label": "Philosophy",
             "marks": [false, false, false, false, false, false, false, false],
+            "needs": 0,
             "parent": "S:blueprint"
         },
         {
@@ -37,6 +39,7 @@
             "kind": "block",
             "label": "all",
             "marks": [],
+            "needs": 0,
             "parent": "C:blueprint/philosophy:0"
         },
         {
@@ -47,6 +50,7 @@
             "kind": "block",
             "label": "who-carries",
             "marks": [],
+            "needs": 0,
             "parent": "C:blueprint/philosophy:0"
         },
         {
@@ -57,6 +61,7 @@
             "kind": "prose",
             "label": "Each conviction is…",
             "marks": [],
+            "needs": 0,
             "parent": "C:blueprint/philosophy:0"
         },
         {
@@ -71,6 +76,7 @@
             "kind": "sec",
             "label": "Top",
             "marks": [false, false, false],
+            "needs": 0,
             "parent": "P:blueprint/philosophy"
         },
         {
@@ -81,6 +87,7 @@
             "kind": "block",
             "label": "taste",
             "marks": [],
+            "needs": 0,
             "parent": "C:blueprint/philosophy:1"
         },
         {
@@ -91,6 +98,7 @@
             "kind": "prose",
             "label": "Argument. What an…",
             "marks": [],
+            "needs": 0,
             "parent": "C:blueprint/philosophy:1"
         },
         {
@@ -101,6 +109,7 @@
             "kind": "sec",
             "label": "1. You bring the taste. The stack brings the hands",
             "marks": [false, false],
+            "needs": 0,
             "parent": "P:blueprint/philosophy"
         },
         {
@@ -111,6 +120,7 @@
             "kind": "block",
             "label": "delegating",
             "marks": [],
+            "needs": 0,
             "parent": "C:blueprint/philosophy:2"
         },
         {
@@ -121,6 +131,7 @@
             "kind": "prose",
             "label": "Example. At the…",
             "marks": [],
+            "needs": 0,
             "parent": "C:blueprint/philosophy:2"
         },
         {
@@ -131,6 +142,7 @@
             "kind": "sec",
             "label": "2. Delegating is a craft, not a prompt",
             "marks": [false, false],
+            "needs": 0,
             "parent": "P:blueprint/philosophy"
         },
         {
@@ -141,6 +153,7 @@
             "kind": "block",
             "label": "rules-in-the-world",
             "marks": [],
+            "needs": 0,
             "parent": "C:blueprint/philosophy:3"
         },
         {
@@ -151,6 +164,7 @@
             "kind": "prose",
             "label": "Example. An agent…",
             "marks": [],
+            "needs": 0,
             "parent": "C:blueprint/philosophy:3"
         },
         {
@@ -161,6 +175,7 @@
             "kind": "sec",
             "label": "3. Rules live in the world, not in the agent",
             "marks": [false, false],
+            "needs": 0,
             "parent": "P:blueprint/philosophy"
         },
         {
@@ -171,6 +186,7 @@
             "kind": "block",
             "label": "declared",
             "marks": [],
+            "needs": 0,
             "parent": "C:blueprint/philosophy:4"
         },
         {
@@ -181,6 +197,7 @@
             "kind": "prose",
             "label": "Example. qa.machine.yaml gives…",
             "marks": [],
+            "needs": 0,
             "parent": "C:blueprint/philosophy:4"
         },
         {
@@ -191,6 +208,7 @@
             "kind": "sec",
             "label": "4. Declared, never improvised",
             "marks": [false, false],
+            "needs": 0,
             "parent": "P:blueprint/philosophy"
         },
         {
@@ -201,6 +219,7 @@
             "kind": "block",
             "label": "proven",
             "marks": [],
+            "needs": 0,
             "parent": "C:blueprint/philosophy:5"
         },
         {
@@ -211,6 +230,7 @@
             "kind": "prose",
             "label": "Example. A request…",
             "marks": [],
+            "needs": 0,
             "parent": "C:blueprint/philosophy:5"
         },
         {
@@ -221,6 +241,7 @@
             "kind": "sec",
             "label": "5. Done means proven",
             "marks": [false, false],
+            "needs": 0,
             "parent": "P:blueprint/philosophy"
         },
         {
@@ -231,6 +252,7 @@
             "kind": "block",
             "label": "taste-is-a-system",
             "marks": [],
+            "needs": 0,
             "parent": "C:blueprint/philosophy:6"
         },
         {
@@ -241,6 +263,7 @@
             "kind": "prose",
             "label": "Example. The site's…",
             "marks": [],
+            "needs": 0,
             "parent": "C:blueprint/philosophy:6"
         },
         {
@@ -251,6 +274,7 @@
             "kind": "sec",
             "label": "6. Taste is a system",
             "marks": [false, false],
+            "needs": 0,
             "parent": "P:blueprint/philosophy"
         },
         {
@@ -261,6 +285,7 @@
             "kind": "block",
             "label": "learns",
             "marks": [],
+            "needs": 0,
             "parent": "C:blueprint/philosophy:7"
         },
         {
@@ -271,6 +296,7 @@
             "kind": "prose",
             "label": "Example. A correction…",
             "marks": [],
+            "needs": 0,
             "parent": "C:blueprint/philosophy:7"
         },
         {
@@ -281,6 +307,7 @@
             "kind": "sec",
             "label": "7. The stack learns. You don't repeat yourself",
             "marks": [false, false],
+            "needs": 0,
             "parent": "P:blueprint/philosophy"
         },
         {
@@ -295,6 +322,7 @@
             "kind": "seat",
             "label": "Produit",
             "marks": [true, true, false],
+            "needs": 4,
             "parent": null
         },
         {
@@ -310,6 +338,7 @@
             "kind": "page",
             "label": "Boundaries",
             "marks": [false, false, true, false],
+            "needs": 3,
             "parent": "S:product"
         },
         {
@@ -320,6 +349,7 @@
             "kind": "block",
             "label": "one-stack",
             "marks": [],
+            "needs": 0,
             "parent": "C:product/boundaries:0"
         },
         {
@@ -330,6 +360,7 @@
             "kind": "sec",
             "label": "Top",
             "marks": [false],
+            "needs": 0,
             "parent": "P:product/boundaries"
         },
         {
@@ -340,6 +371,7 @@
             "kind": "block",
             "label": "not-a-replacement",
             "marks": [],
+            "needs": 0,
             "parent": "C:product/boundaries:1"
         },
         {
@@ -350,6 +382,7 @@
             "kind": "block",
             "label": "not-vibe-coding",
             "marks": [],
+            "needs": 0,
             "parent": "C:product/boundaries:1"
         },
         {
@@ -360,6 +393,7 @@
             "kind": "block",
             "label": "not-a-cloud-service",
             "marks": [],
+            "needs": 0,
             "parent": "C:product/boundaries:1"
         },
         {
@@ -370,6 +404,7 @@
             "kind": "block",
             "label": "not-one-vendor",
             "marks": [],
+            "needs": 0,
             "parent": "C:product/boundaries:1"
         },
         {
@@ -380,6 +415,7 @@
             "kind": "block",
             "label": "not-a-method",
             "marks": [],
+            "needs": 0,
             "parent": "C:product/boundaries:1"
         },
         {
@@ -390,6 +426,7 @@
             "kind": "prose",
             "label": "Each line is…",
             "marks": [],
+            "needs": 0,
             "parent": "C:product/boundaries:1"
         },
         {
@@ -407,6 +444,7 @@
             "kind": "sec",
             "label": "What Spwn is not",
             "marks": [false, false, false, false, false, false],
+            "needs": 0,
             "parent": "P:product/boundaries"
         },
         {
@@ -417,6 +455,7 @@
             "kind": "group",
             "label": "What Machines refuses",
             "marks": [false, false],
+            "needs": 0,
             "parent": "C:product/boundaries:2"
         },
         {
@@ -427,6 +466,7 @@
             "kind": "block",
             "label": "machines",
             "marks": [],
+            "needs": 0,
             "parent": "C:product/boundaries:2"
         },
         {
@@ -437,6 +477,7 @@
             "kind": "block",
             "label": "no-model",
             "marks": [],
+            "needs": 0,
             "parent": "C:product/boundaries:2"
         },
         {
@@ -447,6 +488,7 @@
             "kind": "block",
             "label": "no-security-in-instructions",
             "marks": [],
+            "needs": 0,
             "parent": "C:product/boundaries:2"
         },
         {
@@ -457,6 +499,7 @@
             "kind": "block",
             "label": "no-computer",
             "marks": [],
+            "needs": 1,
             "parent": "C:product/boundaries:2"
         },
         {
@@ -467,6 +510,7 @@
             "kind": "block",
             "label": "wiki-decides-nothing",
             "marks": [],
+            "needs": 0,
             "parent": "C:product/boundaries:2"
         },
         {
@@ -477,6 +521,7 @@
             "kind": "block",
             "label": "os-holds-no-facts",
             "marks": [],
+            "needs": 1,
             "parent": "C:product/boundaries:2"
         },
         {
@@ -487,6 +532,7 @@
             "kind": "prose",
             "label": "The rows of…",
             "marks": [],
+            "needs": 0,
             "parent": "C:product/boundaries:2"
         },
         {
@@ -506,6 +552,7 @@
             "kind": "sec",
             "label": "What each app refuses",
             "marks": [false, false, false, false, true, false, true, false],
+            "needs": 2,
             "parent": "P:product/boundaries"
         },
         {
@@ -516,6 +563,7 @@
             "kind": "prose",
             "label": "Two rows are…",
             "marks": [],
+            "needs": 0,
             "parent": "C:product/boundaries:3"
         },
         {
@@ -526,6 +574,7 @@
             "kind": "sec",
             "label": "Rests on",
             "marks": [false],
+            "needs": 0,
             "parent": "P:product/boundaries"
         },
         {
@@ -536,6 +585,7 @@
             "kind": "page",
             "label": "The stack",
             "marks": [false, false, false],
+            "needs": 1,
             "parent": "S:product"
         },
         {
@@ -546,6 +596,7 @@
             "kind": "prose",
             "label": "The layers of…",
             "marks": [],
+            "needs": 0,
             "parent": "C:product/stack:1"
         },
         {
@@ -556,6 +607,7 @@
             "kind": "group",
             "label": "The parts and what you keep",
             "marks": [false, false, false, false, false, false],
+            "needs": 0,
             "parent": "C:product/stack:1"
         },
         {
@@ -566,6 +618,7 @@
             "kind": "block",
             "label": "all",
             "marks": [],
+            "needs": 0,
             "parent": "C:product/stack:1"
         },
         {
@@ -576,6 +629,7 @@
             "kind": "prose",
             "label": "The column \"you…",
             "marks": [],
+            "needs": 0,
             "parent": "C:product/stack:1"
         },
         {
@@ -591,6 +645,7 @@
             "kind": "sec",
             "label": "The three spaces",
             "marks": [false, false, false, false],
+            "needs": 0,
             "parent": "P:product/stack"
         },
         {
@@ -601,6 +656,7 @@
             "kind": "prose",
             "label": "A space leans…",
             "marks": [],
+            "needs": 0,
             "parent": "C:product/stack:2"
         },
         {
@@ -611,6 +667,7 @@
             "kind": "sec",
             "label": "How the spaces stack",
             "marks": [false],
+            "needs": 0,
             "parent": "P:product/stack"
         },
         {
@@ -621,6 +678,7 @@
             "kind": "prose",
             "label": "One claim here…",
             "marks": [],
+            "needs": 0,
             "parent": "C:product/stack:3"
         },
         {
@@ -631,6 +689,7 @@
             "kind": "sec",
             "label": "Rests on",
             "marks": [false],
+            "needs": 0,
             "parent": "P:product/stack"
         },
         {
@@ -644,6 +703,7 @@
             "kind": "page",
             "label": "ADR-002",
             "marks": [false, false],
+            "needs": 0,
             "parent": "S:product"
         },
         {
@@ -654,6 +714,7 @@
             "kind": "prose",
             "label": "An agent leaves…",
             "marks": [],
+            "needs": 0,
             "parent": "C:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder:0"
         },
         {
@@ -664,6 +725,7 @@
             "kind": "sec",
             "label": "Top",
             "marks": [false],
+            "needs": 0,
             "parent": "P:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder"
         },
         {
@@ -674,6 +736,7 @@
             "kind": "prose",
             "label": "Six apps, in…",
             "marks": [],
+            "needs": 0,
             "parent": "C:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder:1"
         },
         {
@@ -684,6 +747,7 @@
             "kind": "sec",
             "label": "Decision",
             "marks": [false],
+            "needs": 0,
             "parent": "P:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder"
         },
         {
@@ -697,6 +761,7 @@
             "kind": "seat",
             "label": "Technique",
             "marks": [false, false],
+            "needs": 0,
             "parent": null
         },
         {
@@ -707,6 +772,7 @@
             "kind": "page",
             "label": "Ports",
             "marks": [false],
+            "needs": 0,
             "parent": "S:engineering"
         },
         {
@@ -717,6 +783,7 @@
             "kind": "prose",
             "label": "A VM's rights…",
             "marks": [],
+            "needs": 0,
             "parent": "C:machines/reference/ports:1"
         },
         {
@@ -727,6 +794,7 @@
             "kind": "block",
             "label": "right",
             "marks": [],
+            "needs": 0,
             "parent": "C:machines/reference/ports:1"
         },
         {
@@ -737,6 +805,7 @@
             "kind": "block",
             "label": "audience",
             "marks": [],
+            "needs": 0,
             "parent": "C:machines/reference/ports:1"
         },
         {
@@ -747,6 +816,7 @@
             "kind": "group",
             "label": "What is flagged",
             "marks": [false, false],
+            "needs": 0,
             "parent": "C:machines/reference/ports:1"
         },
         {
@@ -757,6 +827,7 @@
             "kind": "prose",
             "label": "A row of…",
             "marks": [],
+            "needs": 0,
             "parent": "C:machines/reference/ports:1"
         },
         {
@@ -773,6 +844,7 @@
             "kind": "sec",
             "label": "Rights and audiences",
             "marks": [false, false, false, false, false],
+            "needs": 0,
             "parent": "P:machines/reference/ports"
         },
         {
@@ -786,6 +858,7 @@
             "kind": "page",
             "label": "ADR-035",
             "marks": [false, false],
+            "needs": 0,
             "parent": "S:engineering"
         },
         {
@@ -796,6 +869,7 @@
             "kind": "prose",
             "label": "Amends ADR-018. Amended…",
             "marks": [],
+            "needs": 0,
             "parent": "C:machines/decisions/035-a-port-is-a-right-with-an-audience:0"
         },
         {
@@ -806,6 +880,7 @@
             "kind": "sec",
             "label": "Top",
             "marks": [false],
+            "needs": 0,
             "parent": "P:machines/decisions/035-a-port-is-a-right-with-an-audience"
         },
         {
@@ -816,6 +891,7 @@
             "kind": "prose",
             "label": "A machine's ports…",
             "marks": [],
+            "needs": 0,
             "parent": "C:machines/decisions/035-a-port-is-a-right-with-an-audience:1"
         },
         {
@@ -826,6 +902,7 @@
             "kind": "sec",
             "label": "Decision",
             "marks": [false],
+            "needs": 0,
             "parent": "P:machines/decisions/035-a-port-is-a-right-with-an-audience"
         },
         {
@@ -836,6 +913,7 @@
             "kind": "seat",
             "label": "Croissance",
             "marks": [true],
+            "needs": 1,
             "parent": null
         },
         {
@@ -846,6 +924,7 @@
             "kind": "page",
             "label": "Positioning",
             "marks": [false, false, false],
+            "needs": 1,
             "parent": "S:growth"
         },
         {
@@ -856,6 +935,7 @@
             "kind": "prose",
             "label": "Spwn is not…",
             "marks": [],
+            "needs": 0,
             "parent": "C:growth/positioning:1"
         },
         {
@@ -866,6 +946,7 @@
             "kind": "block",
             "label": "lead-with-the-thread",
             "marks": [],
+            "needs": 0,
             "parent": "C:growth/positioning:1"
         },
         {
@@ -876,6 +957,7 @@
             "kind": "prose",
             "label": "It leads with…",
             "marks": [],
+            "needs": 0,
             "parent": "C:growth/positioning:1"
         },
         {
@@ -890,6 +972,7 @@
             "kind": "sec",
             "label": "The category it refuses",
             "marks": [false, false, false],
+            "needs": 0,
             "parent": "P:growth/positioning"
         },
         {
@@ -900,6 +983,7 @@
             "kind": "group",
             "label": "What a person uses today",
             "marks": [false, false, false, false],
+            "needs": 0,
             "parent": "C:growth/positioning:2"
         },
         {
@@ -910,6 +994,7 @@
             "kind": "block",
             "label": "two-costs",
             "marks": [],
+            "needs": 0,
             "parent": "C:growth/positioning:2"
         },
         {
@@ -920,6 +1005,7 @@
             "kind": "block",
             "label": "all",
             "marks": [],
+            "needs": 0,
             "parent": "C:growth/positioning:2"
         },
         {
@@ -930,6 +1016,7 @@
             "kind": "prose",
             "label": "Each costs either…",
             "marks": [],
+            "needs": 0,
             "parent": "C:growth/positioning:2"
         },
         {
@@ -945,6 +1032,7 @@
             "kind": "sec",
             "label": "The alternatives",
             "marks": [false, false, false, false],
+            "needs": 0,
             "parent": "P:growth/positioning"
         },
         {
@@ -955,6 +1043,7 @@
             "kind": "prose",
             "label": "What is not…",
             "marks": [],
+            "needs": 0,
             "parent": "C:growth/positioning:3"
         },
         {
@@ -965,6 +1054,7 @@
             "kind": "sec",
             "label": "Rests on",
             "marks": [false],
+            "needs": 0,
             "parent": "P:growth/positioning"
         }
     ],

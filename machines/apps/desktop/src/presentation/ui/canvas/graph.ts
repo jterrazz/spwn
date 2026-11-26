@@ -8,6 +8,7 @@ export type CanvasNode = {
     kids: readonly string[];
     label: string;
     marks: readonly boolean[];
+    needs: number;
     band: number;
 };
 

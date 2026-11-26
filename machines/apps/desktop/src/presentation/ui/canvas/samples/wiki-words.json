@@ -1,0 +1,828 @@
+{
+    "bands": {
+        "0": "E0 · Intention",
+        "1": "E1 · Produit",
+        "2": "E2 · Domaines",
+        "3": "E3 · Architecture",
+        "4": "E4 · Code"
+    },
+    "icons": {
+        "blueprint": ["#####", "#...#", "#.#.#", "#...#", "#####"],
+        "conviction": ["..#..", ".###.", "#####", ".###.", "..#.."],
+        "engineering": ["##.##", "#...#", "##.##"],
+        "growth": ["....#", "...##", "..###", ".####"],
+        "product": ["#.#.#", ".#.#.", "#.#.#"]
+    },
+    "nodes": {
+        "S:blueprint": {
+            "count": "1 page",
+            "foot": "",
+            "kicker": "",
+            "lead": "",
+            "line": "",
+            "seat": "blueprint",
+            "title": ""
+        },
+        "P:blueprint/philosophy": {
+            "count": "",
+            "foot": "8 sections",
+            "kicker": "",
+            "lead": "The seven convictions Spwn is built on, written as principles a newcomer can apply to a design choice; the vision holds the case they serve, and this page holds the rules.",
+            "line": "The seven convictions Spwn is built on, written as principles a newcomer can apply to a design choice; the vision holds the case they serve, and this page holds the rules.",
+            "seat": "blueprint",
+            "title": "Philosophy"
+        },
+        "B:blueprint/philosophy:all": {
+            "count": "0 block",
+            "foot": "",
+            "kicker": "Table",
+            "lead": "",
+            "line": "",
+            "seat": "",
+            "title": "all"
+        },
+        "B:blueprint/philosophy:who-carries": {
+            "count": "0 block",
+            "foot": "",
+            "kicker": "Figure",
+            "lead": "",
+            "line": "Who carries them: how many of the seven each part of the stack carries.",
+            "seat": "",
+            "title": "who-carries"
+        },
+        "B:blueprint/philosophy:p0.0": {
+            "count": "0 block",
+            "foot": "",
+            "kicker": "Paragraph",
+            "lead": "",
+            "line": "Each conviction is written in the same six parts:",
+            "seat": "",
+            "title": "Each conviction is written…"
+        },
+        "C:blueprint/philosophy:0": {
+            "count": "3 blocks",
+            "foot": "3 blocks",
+            "kicker": "Opening",
+            "lead": "",
+            "line": "all · who-carries",
+            "seat": "",
+            "title": "Top"
+        },
+        "B:blueprint/philosophy:taste": {
+            "count": "0 block",
+            "foot": "",
+            "kicker": "Conviction",
+            "lead": "",
+            "line": "You bring the taste. The stack brings the hands.",
+            "seat": "",
+            "title": "taste"
+        },
+        "B:blueprint/philosophy:p1.0": {
+            "count": "0 block",
+            "foot": "",
+            "kicker": "Paragraph",
+            "lead": "",
+            "line": "Argument.",
+            "seat": "",
+            "title": "Argument. What an agent…"
+        },
+        "C:blueprint/philosophy:1": {
+            "count": "2 blocks",
+            "foot": "2 blocks",
+            "kicker": "Section",
+            "lead": "",
+            "line": "taste",
+            "seat": "",
+            "title": "1. You bring the taste. The stack brings the hands"
+        },
+        "B:blueprint/philosophy:delegating": {
+            "count": "0 block",
+            "foot": "",
+            "kicker": "Conviction",
+            "lead": "",
+            "line": "Delegating is a craft, not a prompt.",
+            "seat": "",
+            "title": "delegating"
+        },
+        "B:blueprint/philosophy:p2.0": {
+            "count": "0 block",
+            "foot": "",
+            "kicker": "Paragraph",
+            "lead": "",
+            "line": "Example.",
+            "seat": "",
+            "title": "Example. At the end…"
+        },
+        "C:blueprint/philosophy:2": {
+            "count": "2 blocks",
+            "foot": "2 blocks",
+            "kicker": "Section",
+            "lead": "",
+            "line": "delegating",
+            "seat": "",
+            "title": "2. Delegating is a craft, not a prompt"
+        },
+        "B:blueprint/philosophy:rules-in-the-world": {
+            "count": "0 block",
+            "foot": "",
+            "kicker": "Conviction",
+            "lead": "",
+            "line": "Rules live in the world, not in the agent.",
+            "seat": "",
+            "title": "rules-in-the-world"
+        },
+        "B:blueprint/philosophy:p3.0": {
+            "count": "0 block",
+            "foot": "",
+            "kicker": "Paragraph",
+            "lead": "",
+            "line": "Example.",
+            "seat": "",
+            "title": "Example. An agent cannot…"
+        },
+        "C:blueprint/philosophy:3": {
+            "count": "2 blocks",
+            "foot": "2 blocks",
+            "kicker": "Section",
+            "lead": "",
+            "line": "rules-in-the-world",
+            "seat": "",
+            "title": "3. Rules live in the world, not in the agent"
+        },
+        "B:blueprint/philosophy:declared": {
+            "count": "0 block",
+            "foot": "",
+            "kicker": "Conviction",
+            "lead": "",
+            "line": "Declared, never improvised.",
+            "seat": "",
+            "title": "declared"
+        },
+        "B:blueprint/philosophy:p4.0": {
+            "count": "0 block",
+            "foot": "",
+            "kicker": "Paragraph",
+            "lead": "",
+            "line": "Example.",
+            "seat": "",
+            "title": "Example. qa.machine.yaml gives qa-1,…"
+        },
+        "C:blueprint/philosophy:4": {
+            "count": "2 blocks",
+            "foot": "2 blocks",
+            "kicker": "Section",
+            "lead": "",
+            "line": "declared",
+            "seat": "",
+            "title": "4. Declared, never improvised"
+        },
+        "B:blueprint/philosophy:proven": {
+            "count": "0 block",
+            "foot": "",
+            "kicker": "Conviction",
+            "lead": "",
+            "line": "Done means proven.",
+            "seat": "",
+            "title": "proven"
+        },
+        "B:blueprint/philosophy:p5.0": {
+            "count": "0 block",
+            "foot": "",
+            "kicker": "Paragraph",
+            "lead": "",
+            "line": "Example.",
+            "seat": "",
+            "title": "Example. A request comes…"
+        },
+        "C:blueprint/philosophy:5": {
+            "count": "2 blocks",
+            "foot": "2 blocks",
+            "kicker": "Section",
+            "lead": "",
+            "line": "proven",
+            "seat": "",
+            "title": "5. Done means proven"
+        },
+        "B:blueprint/philosophy:taste-is-a-system": {
+            "count": "0 block",
+            "foot": "",
+            "kicker": "Conviction",
+            "lead": "",
+            "line": "Taste is a system.",
+            "seat": "",
+            "title": "taste-is-a-system"
+        },
+        "B:blueprint/philosophy:p6.0": {
+            "count": "0 block",
+            "foot": "",
+            "kicker": "Paragraph",
+            "lead": "",
+            "line": "Example.",
+            "seat": "",
+            "title": "Example. The site's canvas…"
+        },
+        "C:blueprint/philosophy:6": {
+            "count": "2 blocks",
+            "foot": "2 blocks",
+            "kicker": "Section",
+            "lead": "",
+            "line": "taste-is-a-system",
+            "seat": "",
+            "title": "6. Taste is a system"
+        },
+        "B:blueprint/philosophy:learns": {
+            "count": "0 block",
+            "foot": "",
+            "kicker": "Conviction",
+            "lead": "",
+            "line": "The stack learns. You don't repeat yourself.",
+            "seat": "",
+            "title": "learns"
+        },
+        "B:blueprint/philosophy:p7.0": {
+            "count": "0 block",
+            "foot": "",
+            "kicker": "Paragraph",
+            "lead": "",
+            "line": "Example.",
+            "seat": "",
+            "title": "Example. A correction given…"
+        },
+        "C:blueprint/philosophy:7": {
+            "count": "2 blocks",
+            "foot": "2 blocks",
+            "kicker": "Section",
+            "lead": "",
+            "line": "learns",
+            "seat": "",
+            "title": "7. The stack learns. You don't repeat yourself"
+        },
+        "S:product": {
+            "count": "3 pages",
+            "foot": "",
+            "kicker": "",
+            "lead": "",
+            "line": "",
+            "seat": "product",
+            "title": ""
+        },
+        "P:product/boundaries": {
+            "count": "",
+            "foot": "4 sections",
+            "kicker": "",
+            "lead": "What Spwn is not, and what each of its parts refuses to be, for anyone weighing a feature that sits near an edge.",
+            "line": "What Spwn is not, and what each of its parts refuses to be, for anyone weighing a feature that sits near an edge.",
+            "seat": "product",
+            "title": "Boundaries"
+        },
+        "B:product/boundaries:one-stack": {
+            "count": "0 block",
+            "foot": "",
+            "kicker": "Decision",
+            "lead": "",
+            "line": "Spwn is one stack of six apps on one ladder.",
+            "seat": "",
+            "title": "one-stack"
+        },
+        "C:product/boundaries:0": {
+            "count": "1 block",
+            "foot": "1 block",
+            "kicker": "Opening",
+            "lead": "",
+            "line": "one-stack",
+            "seat": "",
+            "title": "Top"
+        },
+        "B:product/boundaries:not-a-replacement": {
+            "count": "0 block",
+            "foot": "",
+            "kicker": "Refusal",
+            "lead": "",
+            "line": "a replacement for the person",
+            "seat": "",
+            "title": "not-a-replacement"
+        },
+        "B:product/boundaries:not-vibe-coding": {
+            "count": "0 block",
+            "foot": "",
+            "kicker": "Refusal",
+            "lead": "",
+            "line": "a vibe-coding tool",
+            "seat": "",
+            "title": "not-vibe-coding"
+        },
+        "B:product/boundaries:not-a-cloud-service": {
+            "count": "0 block",
+            "foot": "",
+            "kicker": "Refusal",
+            "lead": "",
+            "line": "a cloud service",
+            "seat": "",
+            "title": "not-a-cloud-service"
+        },
+        "B:product/boundaries:not-one-vendor": {
+            "count": "0 block",
+            "foot": "",
+            "kicker": "Refusal",
+            "lead": "",
+            "line": "tied to one vendor",
+            "seat": "",
+            "title": "not-one-vendor"
+        },
+        "B:product/boundaries:not-a-method": {
+            "count": "0 block",
+            "foot": "",
+            "kicker": "Refusal",
+            "lead": "",
+            "line": "a method of work imposed",
+            "seat": "",
+            "title": "not-a-method"
+        },
+        "B:product/boundaries:p1.0": {
+            "count": "0 block",
+            "foot": "",
+            "kicker": "Paragraph",
+            "lead": "",
+            "line": "Each line is the edge of the one enemy, losing your thread:",
+            "seat": "",
+            "title": "Each line is the…"
+        },
+        "C:product/boundaries:1": {
+            "count": "6 blocks",
+            "foot": "6 blocks",
+            "kicker": "Section",
+            "lead": "",
+            "line": "not-a-replacement · not-vibe-coding · not-a-cloud-service · not-one-vendor · not-a-method",
+            "seat": "",
+            "title": "What Spwn is not"
+        },
+        "B:product/boundaries:machines-refuses": {
+            "count": "0 block",
+            "foot": "2 blocks",
+            "kicker": "Group · guard",
+            "lead": "",
+            "line": "no-running-agent · no-ungranted-port",
+            "seat": "",
+            "title": "What Machines refuses"
+        },
+        "B:product/boundaries:machines": {
+            "count": "0 block",
+            "foot": "",
+            "kicker": "Table",
+            "lead": "",
+            "line": "",
+            "seat": "",
+            "title": "machines"
+        },
+        "B:product/boundaries:no-model": {
+            "count": "0 block",
+            "foot": "",
+            "kicker": "Refusal",
+            "lead": "",
+            "line": "to run a model: no inference happens inside Spwn, an agent's harness calls its provider",
+            "seat": "",
+            "title": "no-model"
+        },
+        "B:product/boundaries:no-security-in-instructions": {
+            "count": "0 block",
+            "foot": "",
+            "kicker": "Refusal",
+            "lead": "",
+            "line": "to hold security in an agent's instructions: what is forbidden does not exist in the world",
+            "seat": "",
+            "title": "no-security-in-instructions"
+        },
+        "B:product/boundaries:no-computer": {
+            "count": "0 block",
+            "foot": "",
+            "kicker": "Refusal",
+            "lead": "",
+            "line": "to prepare the computer an agent runs on: that is Machines' space",
+            "seat": "",
+            "title": "no-computer"
+        },
+        "B:product/boundaries:wiki-decides-nothing": {
+            "count": "0 block",
+            "foot": "",
+            "kicker": "Refusal",
+            "lead": "",
+            "line": "to decide what is true: you write the facts, agents read them",
+            "seat": "",
+            "title": "wiki-decides-nothing"
+        },
+        "B:product/boundaries:os-holds-no-facts": {
+            "count": "0 block",
+            "foot": "",
+            "kicker": "Refusal",
+            "lead": "",
+            "line": "to be a second place where facts live, or to hide the detail with no way down to it",
+            "seat": "",
+            "title": "os-holds-no-facts"
+        },
+        "B:product/boundaries:p2.0": {
+            "count": "0 block",
+            "foot": "",
+            "kicker": "Paragraph",
+            "lead": "",
+            "line": "The rows of the four apps being made are derived from the convictions; none of those apps has a design yet, so each row is a constraint on the design to come, not a description of it.",
+            "seat": "",
+            "title": "The rows of the…"
+        },
+        "C:product/boundaries:2": {
+            "count": "8 blocks",
+            "foot": "8 blocks",
+            "kicker": "Section",
+            "lead": "",
+            "line": "What Machines refuses · machines · no-model · no-security-in-instructions · no-computer · wiki-decides-nothing · os-holds-no-facts",
+            "seat": "",
+            "title": "What each app refuses"
+        },
+        "B:product/boundaries:p3.0": {
+            "count": "0 block",
+            "foot": "",
+            "kicker": "Paragraph",
+            "lead": "",
+            "line": "Two rows are this page's reading rather than the owner's word or a record:",
+            "seat": "",
+            "title": "Two rows are this…"
+        },
+        "C:product/boundaries:3": {
+            "count": "1 block",
+            "foot": "1 block",
+            "kicker": "Section",
+            "lead": "",
+            "line": "Two rows are this page's reading rather than the owner's word or a record:",
+            "seat": "",
+            "title": "Rests on"
+        },
+        "P:product/stack": {
+            "count": "",
+            "foot": "3 sections",
+            "kicker": "",
+            "lead": "Spwn's three spaces and what lives in each, for anyone deciding what a part of the app is for or where it goes: per space, what you let go of, what you keep, and whether it runs today.",
+            "line": "Spwn's three spaces and what lives in each, for anyone deciding what a part of the app is for or where it goes: per space, what you let go of, what you keep, and whether it runs today.",
+            "seat": "product",
+            "title": "The stack"
+        },
+        "B:product/stack:p1.0": {
+            "count": "0 block",
+            "foot": "",
+            "kicker": "Paragraph",
+            "lead": "",
+            "line": "The layers of the Spwn app are three great concepts, and in the future three distinct spaces in its GUI.",
+            "seat": "",
+            "title": "The layers of the…"
+        },
+        "B:product/stack:parts": {
+            "count": "0 block",
+            "foot": "6 blocks",
+            "kicker": "Group · define",
+            "lead": "",
+            "line": "machines · agents · wiki · specs · design · os",
+            "seat": "",
+            "title": "The parts and what you keep"
+        },
+        "B:product/stack:all": {
+            "count": "0 block",
+            "foot": "",
+            "kicker": "Table",
+            "lead": "",
+            "line": "",
+            "seat": "",
+            "title": "all"
+        },
+        "B:product/stack:p1.1": {
+            "count": "0 block",
+            "foot": "",
+            "kicker": "Paragraph",
+            "lead": "",
+            "line": "The column \"you keep\" is the part no space may take away; the boundaries say what each part refuses for that reason.",
+            "seat": "",
+            "title": "The column \"you keep\"…"
+        },
+        "C:product/stack:1": {
+            "count": "4 blocks",
+            "foot": "4 blocks",
+            "kicker": "Section",
+            "lead": "",
+            "line": "The parts and what you keep · all",
+            "seat": "",
+            "title": "The three spaces"
+        },
+        "B:product/stack:p2.0": {
+            "count": "0 block",
+            "foot": "",
+            "kicker": "Paragraph",
+            "lead": "",
+            "line": "A space leans on the ones before it and never needs the ones after.",
+            "seat": "",
+            "title": "A space leans on…"
+        },
+        "C:product/stack:2": {
+            "count": "1 block",
+            "foot": "1 block",
+            "kicker": "Section",
+            "lead": "",
+            "line": "A space leans on the ones before it and never needs the ones after.",
+            "seat": "",
+            "title": "How the spaces stack"
+        },
+        "B:product/stack:p3.0": {
+            "count": "0 block",
+            "foot": "",
+            "kicker": "Paragraph",
+            "lead": "",
+            "line": "One claim here is this page's reading, not the owner's word:",
+            "seat": "",
+            "title": "One claim here is…"
+        },
+        "C:product/stack:3": {
+            "count": "1 block",
+            "foot": "1 block",
+            "kicker": "Section",
+            "lead": "",
+            "line": "One claim here is this page's reading, not the owner's word:",
+            "seat": "",
+            "title": "Rests on"
+        },
+        "P:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder": {
+            "count": "",
+            "foot": "2 sections",
+            "kicker": "",
+            "lead": "Status: Accepted Date: 2026-11-21 Amended by: ADR-003 (the ladder) Amends: growth ADR-007",
+            "line": "Spwn is one stack of six apps on one ladder.",
+            "seat": "product",
+            "title": "ADR-002 · Spwn is one stack of six apps on one ladder"
+        },
+        "B:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder:p0.0": {
+            "count": "0 block",
+            "foot": "",
+            "kicker": "Paragraph",
+            "lead": "",
+            "line": "An agent leaves the status Proposed; only the owner writes Accepted.",
+            "seat": "",
+            "title": "An agent leaves the…"
+        },
+        "C:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder:0": {
+            "count": "1 block",
+            "foot": "1 block",
+            "kicker": "Opening",
+            "lead": "",
+            "line": "An agent leaves the status Proposed; only the owner writes Accepted.",
+            "seat": "",
+            "title": "Top"
+        },
+        "B:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder:p1.0": {
+            "count": "0 block",
+            "foot": "",
+            "kicker": "Paragraph",
+            "lead": "",
+            "line": "Six apps, in this order on one ladder:",
+            "seat": "",
+            "title": "Six apps, in this…"
+        },
+        "C:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder:1": {
+            "count": "1 block",
+            "foot": "1 block",
+            "kicker": "Section",
+            "lead": "",
+            "line": "Six apps, in this order on one ladder:",
+            "seat": "",
+            "title": "Decision"
+        },
+        "S:engineering": {
+            "count": "2 pages",
+            "foot": "",
+            "kicker": "",
+            "lead": "",
+            "line": "",
+            "seat": "engineering",
+            "title": ""
+        },
+        "P:machines/reference/ports": {
+            "count": "",
+            "foot": "1 section",
+            "kicker": "",
+            "lead": "station ports lists every TCP port that listens on a Mac or a VM, each in the class of who reaches it.",
+            "line": "station ports lists every TCP port that listens on a Mac or a VM, each in the class of who reaches it.",
+            "seat": "engineering",
+            "title": "Ports"
+        },
+        "B:machines/reference/ports:p1.0": {
+            "count": "0 block",
+            "foot": "",
+            "kicker": "Paragraph",
+            "lead": "",
+            "line": "A VM's rights are the ports of its Machinefile (Machinefiles):",
+            "seat": "",
+            "title": "A VM's rights are…"
+        },
+        "B:machines/reference/ports:right": {
+            "count": "0 block",
+            "foot": "",
+            "kicker": "Term",
+            "lead": "",
+            "line": "what a machine may open and to whom, its Machinefile's ports: open, to (its audience), except, audiences",
+            "seat": "",
+            "title": "right"
+        },
+        "B:machines/reference/ports:audience": {
+            "count": "0 block",
+            "foot": "",
+            "kicker": "Term",
+            "lead": "",
+            "line": "who a right, or the owner's ports share --to, shares a port with: local, private or public",
+            "seat": "",
+            "title": "audience"
+        },
+        "B:machines/reference/ports:what-is-flagged": {
+            "count": "0 block",
+            "foot": "2 blocks",
+            "kicker": "Group · guard",
+            "lead": "",
+            "line": "A port that listens outside the rights is flagged, never shared.",
+            "seat": "",
+            "title": "What is flagged"
+        },
+        "B:machines/reference/ports:p1.1": {
+            "count": "0 block",
+            "foot": "",
+            "kicker": "Paragraph",
+            "lead": "",
+            "line": "A row of a port names its label from the catalog's packages' ports (5173 Vite, 3000 Node or Next, 8081 Expo, 5432 Postgres) as a hint of what probably serves it, never a decision.",
+            "seat": "",
+            "title": "A row of a…"
+        },
+        "C:machines/reference/ports:1": {
+            "count": "5 blocks",
+            "foot": "5 blocks",
+            "kicker": "Section",
+            "lead": "",
+            "line": "right · audience · What is flagged",
+            "seat": "",
+            "title": "Rights and audiences"
+        },
+        "P:machines/decisions/035-a-port-is-a-right-with-an-audience": {
+            "count": "",
+            "foot": "2 sections",
+            "kicker": "",
+            "lead": "Status: Accepted Date: 2026-11-11",
+            "line": "A port is a right with an audience.",
+            "seat": "engineering",
+            "title": "ADR-035 · A port is a right with an audience"
+        },
+        "B:machines/decisions/035-a-port-is-a-right-with-an-audience:p0.0": {
+            "count": "0 block",
+            "foot": "",
+            "kicker": "Paragraph",
+            "lead": "",
+            "line": "Amends ADR-018.",
+            "seat": "",
+            "title": "Amends ADR-018. Amended by…"
+        },
+        "C:machines/decisions/035-a-port-is-a-right-with-an-audience:0": {
+            "count": "1 block",
+            "foot": "1 block",
+            "kicker": "Opening",
+            "lead": "",
+            "line": "Amends ADR-018.",
+            "seat": "",
+            "title": "Top"
+        },
+        "B:machines/decisions/035-a-port-is-a-right-with-an-audience:p1.0": {
+            "count": "0 block",
+            "foot": "",
+            "kicker": "Paragraph",
+            "lead": "",
+            "line": "A machine's ports are rights, never an inventory.",
+            "seat": "",
+            "title": "A machine's ports are…"
+        },
+        "C:machines/decisions/035-a-port-is-a-right-with-an-audience:1": {
+            "count": "1 block",
+            "foot": "1 block",
+            "kicker": "Section",
+            "lead": "",
+            "line": "A machine's ports are rights, never an inventory.",
+            "seat": "",
+            "title": "Decision"
+        },
+        "S:growth": {
+            "count": "1 page",
+            "foot": "",
+            "kicker": "",
+            "lead": "",
+            "line": "",
+            "seat": "growth",
+            "title": ""
+        },
+        "P:growth/positioning": {
+            "count": "",
+            "foot": "3 sections",
+            "kicker": "",
+            "lead": "Where Spwn stands against what a person uses today instead, for anyone writing a comparison, a pitch or an answer to \"how is it different\": the category it refuses, the four alternatives and what each costs.",
+            "line": "Where Spwn stands against what a person uses today instead, for anyone writing a comparison, a pitch or an answer to \"how is it different\": the category it refuses, the four alternatives and what each costs.",
+            "seat": "growth",
+            "title": "Positioning"
+        },
+        "B:growth/positioning:p1.0": {
+            "count": "0 block",
+            "foot": "",
+            "kicker": "Paragraph",
+            "lead": "",
+            "line": "Spwn is not sold as an agent framework, an AI platform or a tool that makes more output.",
+            "seat": "",
+            "title": "Spwn is not sold…"
+        },
+        "B:growth/positioning:lead-with-the-thread": {
+            "count": "0 block",
+            "foot": "",
+            "kicker": "Rule",
+            "lead": "",
+            "line": "A comparison never leads with speed, model quality or the number of integrations.",
+            "seat": "",
+            "title": "lead-with-the-thread"
+        },
+        "B:growth/positioning:p1.1": {
+            "count": "0 block",
+            "foot": "",
+            "kicker": "Paragraph",
+            "lead": "",
+            "line": "It leads with what the alternative does to your thread.",
+            "seat": "",
+            "title": "It leads with what…"
+        },
+        "C:growth/positioning:1": {
+            "count": "3 blocks",
+            "foot": "3 blocks",
+            "kicker": "Section",
+            "lead": "",
+            "line": "lead-with-the-thread",
+            "seat": "",
+            "title": "The category it refuses"
+        },
+        "B:growth/positioning:alternatives": {
+            "count": "0 block",
+            "foot": "4 blocks",
+            "kicker": "Group · define",
+            "lead": "",
+            "line": "by-hand · one-big-agent · managed-platform · unrelated-tools",
+            "seat": "",
+            "title": "What a person uses today"
+        },
+        "B:growth/positioning:two-costs": {
+            "count": "0 block",
+            "foot": "",
+            "kicker": "Figure",
+            "lead": "",
+            "line": "Each costs either scale or authorship.",
+            "seat": "",
+            "title": "two-costs"
+        },
+        "B:growth/positioning:all": {
+            "count": "0 block",
+            "foot": "",
+            "kicker": "Table",
+            "lead": "",
+            "line": "",
+            "seat": "",
+            "title": "all"
+        },
+        "B:growth/positioning:p2.0": {
+            "count": "0 block",
+            "foot": "",
+            "kicker": "Paragraph",
+            "lead": "",
+            "line": "Each costs either scale or authorship.",
+            "seat": "",
+            "title": "Each costs either scale…"
+        },
+        "C:growth/positioning:2": {
+            "count": "4 blocks",
+            "foot": "4 blocks",
+            "kicker": "Section",
+            "lead": "",
+            "line": "What a person uses today · two-costs · all",
+            "seat": "",
+            "title": "The alternatives"
+        },
+        "B:growth/positioning:p3.0": {
+            "count": "0 block",
+            "foot": "",
+            "kicker": "Paragraph",
+            "lead": "",
+            "line": "What is not settled:",
+            "seat": "",
+            "title": "What is not settled:…"
+        },
+        "C:growth/positioning:3": {
+            "count": "1 block",
+            "foot": "1 block",
+            "kicker": "Section",
+            "lead": "",
+            "line": "What is not settled:",
+            "seat": "",
+            "title": "Rests on"
+        }
+    }
+}

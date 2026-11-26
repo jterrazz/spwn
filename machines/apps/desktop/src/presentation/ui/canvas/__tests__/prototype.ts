@@ -3,7 +3,7 @@ import { GEOMETRY } from '../geometry';
 import type { CanvasGraph, CanvasNode, Rect } from '../graph';
 import type { Guide, Viewport } from '../layout';
 import type { Options } from '../place';
-import graphFixture from './prototype-graph.json';
+import graphFixture from '../samples/wiki-graph.json';
 import keysFixture from './prototype-keys.json';
 import statesFixture from './prototype-states.json';
 

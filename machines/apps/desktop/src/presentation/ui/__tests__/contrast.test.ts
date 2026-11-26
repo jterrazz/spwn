@@ -207,6 +207,7 @@ describe('contrast', () => {
             'screens/machine/storage/machine-storage.module.css',
             'screens/passwords/passwords.module.css',
             'ui/bar.module.css',
+            'ui/canvas/canvas.module.css',
             'ui/chart.module.css',
             'ui/document.css',
             'ui/dot-strip.module.css',
