@@ -111,12 +111,14 @@ Its refusals are `wiki.none`, `wiki.unknown-page`, `wiki.unreadable` (`wiki.yaml
 
 The read is bounded, each limit a constant of `apps/engine/wiki/limits.go`:
 
-- a page file past 1 MiB is sized and never read: it is served with no content and its one hard finding, H44, naming its size;
+- a page file past 1 MiB is sized and never read: it is served with no content and its one hard finding, H44, naming its size; a file that grows after it was sized is read only to one byte past the limit, and is served the same way;
 - a corpus past 2,000 pages or 64 MiB of files read is refused whole, `wiki.too-large`; the folder's walk stops at the limit;
 - a page shows at most 100 findings of one rule, then one more of that rule that counts the rest;
 - an abandoned ask stops the read between two pages, compiled or checked.
 
-The corpus last read is kept in memory by its signature (each file's path, size and modification time; in the fake world, its bytes' hash), so an unchanged corpus is served without a file read; any change reads and compiles it anew.
+The corpus last read is kept in memory by its signature (each file's path, size and modification time; in the fake world, its bytes' hash), so an unchanged corpus is served without a file read; any change reads and compiles it anew. One corpus is kept, the last read, so the memory it holds is bounded by the limits above, and asks made at once each serve a corpus read whole.
+
+The signature has one known limit: a page rewritten at its size whose modification time does not move is served as it was until the next change. That happens when a program restores the time, or when two writes fall in one tick of the file system's clock, a few milliseconds on Linux. The fake world has no times, so its signature hashes every byte and has no such limit.
 
 ## Beyond the spec
 

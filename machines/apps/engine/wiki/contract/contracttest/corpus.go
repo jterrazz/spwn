@@ -47,6 +47,34 @@ func Corpus(t *testing.T, declared func(t *testing.T) Subject, none func(t *test
 		}
 	})
 
+	t.Run("a signature holds while nothing changes, moves when a page is added or resized, and a hidden file never moves it", func(t *testing.T) {
+		s := declared(t)
+		s.Put("wiki.yaml", "wiki: spwn.wiki/v1\n")
+		s.Put("blueprint/philosophy.md", "# Philosophy\n")
+		signature := func() string {
+			t.Helper()
+			sig, err := s.Corpus.Signature(ctx)
+			if err != nil {
+				t.Fatalf("Signature: %v", err)
+			}
+			return sig
+		}
+		first := signature()
+		if again := signature(); again != first {
+			t.Fatalf("two signatures of one corpus differ: %q, %q", first, again)
+		}
+		s.Put(".notes.md", "# Hidden, never a page\n")
+		if hidden := signature(); hidden != first {
+			t.Fatalf("a hidden file moved the signature")
+		}
+		s.Put("blueprint/philosophy.md", "# Philosophy, longer\n")
+		resized := signature()
+		s.Put("blueprint/vision.md", "# Vision\n")
+		if added := signature(); resized == first || added == resized {
+			t.Fatalf("signatures %q, %q, %q; want each change seen", first, resized, added)
+		}
+	})
+
 	t.Run("a page past its limit is sized and never read", func(t *testing.T) {
 		s := declared(t)
 		s.Put("wiki.yaml", "wiki: spwn.wiki/v1\n")
