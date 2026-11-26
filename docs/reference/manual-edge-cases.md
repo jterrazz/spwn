@@ -65,11 +65,11 @@ serialises them), or one errors cleanly.
 world-id.
 **Probe:** /tmp/p1 + /tmp/p2 both `spwn init && spwn up`.
 
-### A6. `spwn build` while `spwn up` runs
+### A6. `station project apply` while `spwn up` runs
 
 **Hypothesis:** both read the project tree independently; neither
 corrupts the other.
-**Probe:** `spwn up &; spwn build --tree-only`.
+**Probe:** `spwn up &; station project apply`.
 
 ### A7. Agent `docker cp`'d while container is being destroyed
 

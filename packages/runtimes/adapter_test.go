@@ -123,7 +123,7 @@ func TestNames(t *testing.T) {
 // TestRegisterDefaults iterates every adapter with a Tool and
 // registers it into the provided tool.Registry. This is the
 // integration between the Adapter umbrella and the dep-resolver
-// Registry. Failing here breaks `spwn build` and `spwn up`.
+// Registry. Failing here breaks `spwn up`.
 func TestRegisterDefaults(t *testing.T) {
 	reg := &fakeToolRegistry{seen: map[string]bool{}}
 	if err := runtimes.RegisterDefaults(reg); err != nil {

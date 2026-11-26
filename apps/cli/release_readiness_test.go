@@ -641,18 +641,6 @@ func TestReleaseReadiness(t *testing.T) {
 		}
 	})
 
-	t.Run("49_build_tree_only_passes", func(t *testing.T) {
-		// J49: `build --tree-only` on a fresh init renders to disk.
-		t.Parallel()
-		env, _ := freshEnv(t)
-		wd := t.TempDir()
-		mustInit(t, env, wd, "acme")
-		stdout, stderr, code := runCLI(t, env, wd, "build", "--tree-only")
-		if code != 0 {
-			t.Fatalf("build --tree-only failed: code=%d\nstdout=%s\nstderr=%s", code, stdout, stderr)
-		}
-	})
-
 	// ── K. Regression tests for bugs surfaced this session ───────────
 
 	t.Run("51_catalog_install_ships_knowledge_dir", func(t *testing.T) {

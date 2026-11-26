@@ -23,7 +23,7 @@ import (
 //     the CLI uses).
 //  3. Runs `project.Validate` (the rule engine behind `station project plan`).
 //  4. Loads the project source and calls `transpile.Compile` (the
-//     pure half of `spwn build --tree-only`, no Docker).
+//     pure half of `station project apply`, no Docker).
 //
 // If any of those steps fails, the catalog entry is broken at
 // compile time and would fail for any user who ran `spwn init
@@ -83,8 +83,8 @@ func TestCatalog_EveryGalleryEntryBuilds(t *testing.T) {
 				t.Fatalf("validate surfaced %d error(s):\n  %s", len(errorIssues), strings.Join(errorIssues, "\n  "))
 			}
 
-			// Step 4: compile to tree (what `spwn build --tree-only`
-			// does, minus the WriteTo).
+			// Step 4: compile to tree (what `station project apply`
+			// renders, minus the write).
 			src, err := source.Load(p.Root)
 			if err != nil {
 				t.Fatalf("source.Load: %v", err)

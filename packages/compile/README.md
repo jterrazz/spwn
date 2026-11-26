@@ -7,7 +7,7 @@ The compile layer: Docker-touching image assembly.
 Two entry points live here because they share the Dockerfile generator and the container backend:
 
 1. **`compile.New(registry, backend)` then `Builder.Build(req)`**: the base world image of one dependency set. Resolves the set into a Dockerfile, runs `docker build`, probes the result to verify every tool works. The image is tagged `<repository>:<content hash>` (`spwn/world:<hash>` at spawn time), so two dependency sets never share a tag. One build of a tag runs at a time on the machine, through a flock in the temp folder whose wait is bounded; the result holds the tag in use until its `Release`, and a build that writes a new tag removes the other tags of its repository that nothing holds and no container uses. A forced rebuild builds with no cache and never untags first. Called by `packages/architect` at spawn time.
-2. **`compile.BuildFromBase(ctx, cli, req)`**: project-specific derived images. Takes a base image plus a transpiled `Tree` (from `packages/transpile`) and produces `FROM <base> / COPY tree/ /world/` as a pushable artifact. Called by `spwn build`.
+2. **`compile.BuildFromBase(ctx, cli, req)`**: project-specific derived images. Takes a base image plus a transpiled `Tree` (from `packages/transpile`) and produces `FROM <base> / COPY tree/ /world/` as a pushable artifact. Called by nothing since `spwn build` was deleted.
 
 ```text
 packages/transpile    →   Tree (in-memory path → bytes)
@@ -35,5 +35,5 @@ Dependency resolution (the `Registry`, transitive expansion, topological sort) a
 
 ## Related
 
-- **Imported by**: `apps/cli` (`spwn build`), `packages/architect`
+- **Imported by**: `packages/architect`
 - **Imports**: `packages/dependency` + `packages/dependency/resolver` (dep-resolution + aggregation helpers), `packages/container/backend` (Docker adapter), `packages/platform`

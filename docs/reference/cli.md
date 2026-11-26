@@ -57,7 +57,7 @@ The grammar above is decided, and built only in part. Today the install puts two
 | `station` | The Machine space: `machines`, `apps`, `settings`, `disk`, `ports`, `accounts`, `images`, `engine` and the rest of [Machines' commands](../../machines/docs/reference/commands.md), and `agents`, `skills`, `project` | The grammar, apart from the name |
 | `spwn`    | Every other Agent command, as the map below lists them                                                                                                                                                                | The old grammar, below           |
 
-`station help` draws the four groups: Machine and Spwn hold its commands, Agent holds `station agents`, an agent's Mind (its list and detail, `create`, `edit`, `delete`, `fork`, `export`, `import`, `dream`, `sleep`), `station skills`, its skill files (the list and a skill's text, `create`, `delete`), and `station project`, the project of this folder (its file and agents, `create`, `plan`, `drift`), and OS holds no command yet, so the help does not draw it. The order decided is: the file half first (`agents`, `teams`, `skills`, `automations`, `project`), then the run half (`agents start`, `stop`, `talk`, `log`), then the old `spwn` is deleted and `station` takes the name `spwn`. Until the last step, `spwn` means Agents' program and the names `spwn-agents` and `spwn-machines`, with the shell aliases `agents` and `machines`, are the installer's old names: [ADR-021](../decisions/021-one-program-spwn-one-command-for-everything.md) voids them, and they never ship again once it is built.
+`station help` draws the four groups: Machine and Spwn hold its commands, Agent holds `station agents`, an agent's Mind (its list and detail, `create`, `edit`, `delete`, `fork`, `export`, `import`, `dream`, `sleep`), `station skills`, its skill files (the list and a skill's text, `create`, `delete`), and `station project`, the project of this folder (its file and agents, `create`, `plan`, `apply`, `drift`), and OS holds no command yet, so the help does not draw it. The order decided is: the file half first (`agents`, `teams`, `skills`, `automations`, `project`), then the run half (`agents start`, `stop`, `talk`, `log`), then the old `spwn` is deleted and `station` takes the name `spwn`. Until the last step, `spwn` means Agents' program and the names `spwn-agents` and `spwn-machines`, with the shell aliases `agents` and `machines`, are the installer's old names: [ADR-021](../decisions/021-one-program-spwn-one-command-for-everything.md) voids them, and they never ship again once it is built.
 
 ### Where today's Agent commands go
 
@@ -66,8 +66,8 @@ Decided in ADR-021 and ADR-022. A row whose left column is `station` is built, u
 | Today                                             | The grammar's form                                                                                       |
 | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
 | `spwn init`, `station project create`             | `spwn project create`                                                                                    |
-| `station project plan\|drift`                     | `spwn project plan` and `spwn project drift`                                                             |
-| `spwn build`                                      | gone: the world image leaves, and `project apply` renders the project                                    |
+| `station project plan\|apply\|drift`              | `spwn project plan`, `spwn project apply` and `spwn project drift`                                       |
+| `spwn build` (deleted)                            | gone: `spwn project apply` renders each agent into its run folder; the world image leaves `build`        |
 | `spwn up`, `spwn down`, `spwn world *`            | `spwn agents start`, `spwn agents stop`, on a machine (`--on`); the noun `world` goes                    |
 | `spwn agent neo`, `spwn agent talk neo`           | `spwn agents talk neo`                                                                                   |
 | `station agents create\|fork\|dream\|sleep`       | `spwn agents create\|fork\|dream\|sleep`                                                                 |
@@ -82,14 +82,15 @@ Decided in ADR-021 and ADR-022. A row whose left column is `station` is built, u
 
 `spwn project plan` does not check a `spwn:<name>` reference against the built-in catalog: the engine links no copy of it (`packages/dependency/builtin` carries the embedded catalog, and no package the engine links imports it), so such a reference passes the plan unverified, and the `unknown-builtin-tool` and `invalid-dependency` checks of the deleted `spwn check` are lost. `spwn install` still refuses an unknown name until it goes, and the rule that refuses every `spwn:` reference replaces it.
 
+`station project apply` renders each agent into its run folder, `.spwn/agents/<agent>/`, and makes the whole declaration true, so what the deleted `spwn build` offered is lost on purpose: `--output` and `--force` (the folder is fixed; apply removes only what it wrote and asks before it overwrites a file edited by hand), `--agent` (no filter), `--runtime` (an agent declares its harness, and a sign-in never picks one), `--world` (each agent renders in the first grouping that holds it), `--dry-run` (`station project plan` lists what apply would write), and the image: `--tag`, `--base`, `--no-cache` and `SPWN_BASE_IMAGE` have no heir in the engine. `spwn up` builds its world image through the architect until `spwn up` is deleted, and an agent on a machine runs in its run folder, with no image.
+
 ### Agents' commands today
 
 ```bash
 # ── Project workflow ─────────────────────────────────────────────
 spwn init                     # scaffold spwn.yaml + ./spwn/ + .spwn/
 station project plan          # validate the tree
-spwn build --tree-only        # render the project tree to ./dist (preview/debug)
-spwn build --base <image>     # transpile + compile into a project-specific Docker image (or set SPWN_BASE_IMAGE)
+station project apply         # render each agent into .spwn/agents/<agent>/ (what plan lists)
 spwn up [name]                # bring up every world in spwn.yaml (or one by name)
 spwn agent neo                # spawn the world that contains neo and open a session
 spwn down [name]              # stop every world (or one)

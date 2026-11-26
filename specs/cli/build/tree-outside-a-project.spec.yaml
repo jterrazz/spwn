@@ -1,8 +1,0 @@
-description: build --tree-only outside a Spwn project nudges the user at spwn init
-runs:
-    - command: build --tree-only
-      exit: 1
-      stderr: |4+
-          
-            Error: no spwn.yaml found: run `spwn init` first
-

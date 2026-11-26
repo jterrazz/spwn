@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"sort"
 	"strings"
 
 	clidep "spwn.sh/apps/cli/dependency"
@@ -27,26 +26,6 @@ func init() {
 			return out
 		},
 	)
-}
-
-func catalogToolNames() []string {
-	deps := builtin.BuiltinTools()
-	depNames := make([]string, 0, len(deps))
-	for _, t := range deps {
-		depNames = append(depNames, t.Name())
-	}
-	sort.Strings(depNames)
-
-	adapters := runtimes.All()
-	rtNames := make([]string, 0, len(adapters))
-	for _, a := range adapters {
-		if a.Tool != nil {
-			rtNames = append(rtNames, a.Tool.Name())
-		}
-	}
-	sort.Strings(rtNames)
-
-	return append(depNames, rtNames...)
 }
 
 func supportedRuntimes() []string {

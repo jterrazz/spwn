@@ -1,9 +1,0 @@
-description: --dry-run without --tree-only names the flag it needs
-fixture: ../__fixtures__/docker-pilot/
-runs:
-    - command: build --dry-run
-      exit: 1
-      stderr: |4+
-          
-            Error: --dry-run requires --tree-only
-

@@ -42,7 +42,7 @@ my-project/
 Spwn turns your repo into a **portable agent artifact**, consumed by the Spwn CLI today, and by web UIs, apps, and embedded SDKs on the roadmap. One bundle format, many future surfaces.
 
 ```text
-   repo  ──▶  spwn build  ──▶  artifact  ──▶  anywhere
+   repo  ──▶  project apply, spwn up  ──▶  artifact  ──▶  anywhere
 ```
 
 Four ideas to hold in your head before you dive in:
@@ -131,7 +131,7 @@ Think of Spwn the way you think of `tsc` or `babel`. You write in one clean, pro
    YOUR REPO             BUILD                ARTIFACT
   ───────────          ─────────             ──────────────────────────
    spwn.yaml                                ┌──▶  Docker image
-   spwn/agents/         spwn build          │     (push, pull, run anywhere)
+   spwn/agents/         apply, up           │     (push, pull, run anywhere)
    spwn/skills/    ──▶  transpile     ──▶  ─┤
    spwn/tools/          + compile           │
    spwn/hooks/                              └──▶  runtime-native tree

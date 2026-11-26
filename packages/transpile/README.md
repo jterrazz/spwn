@@ -23,7 +23,7 @@ hooks/*   ─►│ package)  │             │          │
 Powers two delivery shapes, sharing the transpile phase verbatim:
 
 1. **Spawn-time injection** (`spwn up`): the tree is docker-cp'd into a running base container. Every spawn re-transpiles; no rebuild needed for source edits.
-2. **Build-time compile** (`spwn build`): the same tree is `COPY`'d into a derived image at `docker build` time. Produces a self-contained artifact you can push and run without the source tree.
+2. **Project apply** (`station project apply`): each agent's files of the same tree are written into its run folder, `.spwn/agents/<agent>/`.
 
 ## Key types
 
@@ -36,5 +36,5 @@ Powers two delivery shapes, sharing the transpile phase verbatim:
 
 ## Related
 
-- **Imported by**: `apps/cli` (`spwn build`, `station project plan`), `packages/architect` (spawn pipeline), `packages/runtimes/*` (renderers)
+- **Imported by**: `machines/apps/engine/project` (`station project plan`, `station project apply`), `packages/architect` (spawn pipeline), `packages/runtimes/*` (renderers)
 - **Imports**: `packages/project`, `packages/agent`, `packages/dependency`

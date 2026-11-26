@@ -185,7 +185,7 @@ var reservedAgentSubcommands = map[string]struct{}{
 	"deploy": {}, "compose": {}, "list": {}, "init": {},
 
 	"architect": {}, "world": {}, "agent": {}, "up": {},
-	"down": {}, "build": {}, "install": {}, "uninstall": {},
+	"down": {}, "install": {}, "uninstall": {},
 	"auth": {}, "status": {}, "web": {}, "upgrade": {}, "team": {},
 	"organization": {}, "snap": {}, "help": {}, "version": {},
 }
