@@ -1,4 +1,4 @@
-page blueprint/philosophy @30s floor=0 Intention seats=[blueprint],product,engineering,growth needs-you=0 unshown=9
+page blueprint/philosophy @30s floor=0 Intention seats=[blueprint],product,engineering,growth needs-you=0 unshown=9 verdict=1h10s
   floors [0:7] 1:0 2:0 3:0 4:0
   paragraph "The seven convictions Spwn is built on, written as principles a newcomer can apply to a design choice; [the vision](./vision.md) holds the case they serve, and this page holds the rules. The owner confirmed the seven on 2026-11-21 ([his answer](./owner-words.md#why-spwn-exists))."
     block blueprint/philosophy#all table icon=table tier= shown=none ""
@@ -61,7 +61,7 @@ page blueprint/philosophy @30s floor=0 Intention seats=[blueprint],product,engin
       field carried_in ""  refs=product/stack#agents,product/stack#wiki
       field broken_by "A memory that lives only in a session's context, or a lesson written where no agent will read it." 
 
-page blueprint/philosophy @2min floor=0 Intention seats=[blueprint],product,engineering,growth needs-you=0 unshown=0
+page blueprint/philosophy @2min floor=0 Intention seats=[blueprint],product,engineering,growth needs-you=0 unshown=0 verdict=1h10s
   floors [0:7] 1:0 2:0 3:0 4:0
   paragraph "The seven convictions Spwn is built on, written as principles a newcomer can apply to a design choice; [the vision](./vision.md) holds the case they serve, and this page holds the rules. The owner confirmed the seven on 2026-11-21 ([his answer](./owner-words.md#why-spwn-exists))."
     block blueprint/philosophy#all table icon=table tier= shown=tile ""
@@ -133,7 +133,7 @@ page blueprint/philosophy @2min floor=0 Intention seats=[blueprint],product,engi
       field broken_by "A memory that lives only in a session's context, or a lesson written where no agent will read it." 
     item "**Example.** A correction given once becomes a rule the next agent reads."
 
-page blueprint/philosophy @10min floor=0 Intention seats=[blueprint],product,engineering,growth needs-you=0 unshown=0
+page blueprint/philosophy @10min floor=0 Intention seats=[blueprint],product,engineering,growth needs-you=0 unshown=0 verdict=1h10s
   floors [0:7] 1:0 2:0 3:0 4:0
   paragraph "The seven convictions Spwn is built on, written as principles a newcomer can apply to a design choice; [the vision](./vision.md) holds the case they serve, and this page holds the rules. The owner confirmed the seven on 2026-11-21 ([his answer](./owner-words.md#why-spwn-exists))."
     block blueprint/philosophy#all table icon=table tier= shown=tile ""
@@ -205,7 +205,7 @@ page blueprint/philosophy @10min floor=0 Intention seats=[blueprint],product,eng
       field broken_by "A memory that lives only in a session's context, or a lesson written where no agent will read it." 
     item "**Example.** A correction given once becomes a rule the next agent reads."
 
-page product/stack @30s floor=1 Produit seats=blueprint,[product],engineering,growth needs-you=1 unshown=7
+page product/stack @30s floor=1 Produit seats=blueprint,[product],engineering,growth needs-you=1 unshown=7 verdict=1h10s
   floors 0:0 [1:6] 2:0 3:0 4:0
   paragraph "Spwn's three spaces and what lives in each, for anyone deciding what a part of the app is for or where it goes: per space, what you let go of, what you keep, and whether it runs today. The structure is the owner's, decided on 2026-11-22 ([his words](../blueprint/owner-words.md#the-three-spaces-of-the-app)); the record is [ADR-003](./decisions/003-the-three-spaces-are-the-structure-of-the-app.md). It replaces the six-rung ladder of [ADR-002](./decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder.md)."
   finding needs-you S6 "product/stack" rests on this page's reading: you have not ruled
@@ -253,7 +253,7 @@ page product/stack @30s floor=1 Produit seats=blueprint,[product],engineering,gr
   section how-the-spaces-stack "How the spaces stack" rests=false
   section rests-on "Rests on" rests=true
 
-page product/stack @2min floor=1 Produit seats=blueprint,[product],engineering,growth needs-you=1 unshown=0
+page product/stack @2min floor=1 Produit seats=blueprint,[product],engineering,growth needs-you=1 unshown=0 verdict=1h10s
   floors 0:0 [1:6] 2:0 3:0 4:0
   paragraph "Spwn's three spaces and what lives in each, for anyone deciding what a part of the app is for or where it goes: per space, what you let go of, what you keep, and whether it runs today. The structure is the owner's, decided on 2026-11-22 ([his words](../blueprint/owner-words.md#the-three-spaces-of-the-app)); the record is [ADR-003](./decisions/003-the-three-spaces-are-the-structure-of-the-app.md). It replaces the six-rung ladder of [ADR-002](./decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder.md)."
   finding needs-you S6 "product/stack" rests on this page's reading: you have not ruled
@@ -310,7 +310,7 @@ page product/stack @2min floor=1 Produit seats=blueprint,[product],engineering,g
   section rests-on "Rests on" rests=true
     plain "One claim here is this page's reading, not the owner's word: that a space leans only on the spaces before it (\"How the spaces stack\"). The placement of Wiki, Specs and Design in the OS space is his; the \"you let go of\" and \"you keep\" columns come from the brief he confirmed on 2026-11-21."
 
-page product/stack @10min floor=1 Produit seats=blueprint,[product],engineering,growth needs-you=1 unshown=0
+page product/stack @10min floor=1 Produit seats=blueprint,[product],engineering,growth needs-you=1 unshown=0 verdict=1h10s
   floors 0:0 [1:6] 2:0 3:0 4:0
   paragraph "Spwn's three spaces and what lives in each, for anyone deciding what a part of the app is for or where it goes: per space, what you let go of, what you keep, and whether it runs today. The structure is the owner's, decided on 2026-11-22 ([his words](../blueprint/owner-words.md#the-three-spaces-of-the-app)); the record is [ADR-003](./decisions/003-the-three-spaces-are-the-structure-of-the-app.md). It replaces the six-rung ladder of [ADR-002](./decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder.md)."
   finding needs-you S6 "product/stack" rests on this page's reading: you have not ruled
@@ -367,7 +367,7 @@ page product/stack @10min floor=1 Produit seats=blueprint,[product],engineering,
   section rests-on "Rests on" rests=true
     plain "One claim here is this page's reading, not the owner's word: that a space leans only on the spaces before it (\"How the spaces stack\"). The placement of Wiki, Specs and Design in the OS space is his; the \"you let go of\" and \"you keep\" columns come from the brief he confirmed on 2026-11-21."
 
-page product/boundaries @30s floor=1 Produit seats=blueprint,[product],engineering,growth needs-you=3 unshown=12
+page product/boundaries @30s floor=1 Produit seats=blueprint,[product],engineering,growth needs-you=3 unshown=12 verdict=1h10s
   floors 0:0 [1:11] 2:0 3:2 4:0
   paragraph "What Spwn is not, and what each of its parts refuses to be, for anyone weighing a feature that sits near an edge. The owner confirmed the five boundaries of Spwn on 2026-11-21 ([his answer](../blueprint/owner-words.md#why-spwn-exists)); the record is [ADR-002](#one-stack), accepted."
   finding needs-you S6 "product/boundaries" rests on this page's reading: you have not ruled
@@ -432,7 +432,7 @@ page product/boundaries @30s floor=1 Produit seats=blueprint,[product],engineeri
       finding needs-you S6 "os-holds-no-facts" rests on this page's reading: you have not ruled
   section rests-on "Rests on" rests=true
 
-page product/boundaries @2min floor=1 Produit seats=blueprint,[product],engineering,growth needs-you=3 unshown=2
+page product/boundaries @2min floor=1 Produit seats=blueprint,[product],engineering,growth needs-you=3 unshown=2 verdict=1h10s
   floors 0:0 [1:11] 2:0 3:2 4:0
   paragraph "What Spwn is not, and what each of its parts refuses to be, for anyone weighing a feature that sits near an edge. The owner confirmed the five boundaries of Spwn on 2026-11-21 ([his answer](../blueprint/owner-words.md#why-spwn-exists)); the record is [ADR-002](#one-stack), accepted."
   finding needs-you S6 "product/boundaries" rests on this page's reading: you have not ruled
@@ -500,7 +500,7 @@ page product/boundaries @2min floor=1 Produit seats=blueprint,[product],engineer
   section rests-on "Rests on" rests=true
     plain "Two rows are this page's reading rather than the owner's word or a record: Agents refusing to prepare a computer, and the OS refusing to hold facts of its own. Both follow from the spaces; the owner has not ruled on either."
 
-page product/boundaries @10min floor=1 Produit seats=blueprint,[product],engineering,growth needs-you=3 unshown=2
+page product/boundaries @10min floor=1 Produit seats=blueprint,[product],engineering,growth needs-you=3 unshown=2 verdict=1h10s
   floors 0:0 [1:11] 2:0 3:2 4:0
   paragraph "What Spwn is not, and what each of its parts refuses to be, for anyone weighing a feature that sits near an edge. The owner confirmed the five boundaries of Spwn on 2026-11-21 ([his answer](../blueprint/owner-words.md#why-spwn-exists)); the record is [ADR-002](#one-stack), accepted."
   finding needs-you S6 "product/boundaries" rests on this page's reading: you have not ruled
@@ -568,7 +568,7 @@ page product/boundaries @10min floor=1 Produit seats=blueprint,[product],enginee
   section rests-on "Rests on" rests=true
     plain "Two rows are this page's reading rather than the owner's word or a record: Agents refusing to prepare a computer, and the OS refusing to hold facts of its own. Both follow from the spaces; the owner has not ruled on either."
 
-page growth/positioning @30s floor=1 Produit seats=blueprint,product,engineering,[growth] needs-you=1 unshown=7
+page growth/positioning @30s floor=1 Produit seats=blueprint,product,engineering,[growth] needs-you=1 unshown=7 verdict=1h10s
   floors 0:0 [1:5] 2:0 3:0 4:0
   paragraph "Where Spwn stands against what a person uses today instead, for anyone writing a comparison, a pitch or an answer to \"how is it different\": the category it refuses, the four alternatives and what each costs. What Spwn is, in one sentence, is [the vision](../blueprint/vision.md#the-definition)'s and is not restated here."
   finding needs-you S6 "growth/positioning" rests on this page's reading: you have not ruled
@@ -606,7 +606,7 @@ page growth/positioning @30s floor=1 Produit seats=blueprint,product,engineering
         row growth/positioning#unrelated-tools gives="each tool is good at its part" costs="each keeps its own copy of your context, and you are the integration between them"
   section rests-on "Rests on" rests=true
 
-page growth/positioning @2min floor=1 Produit seats=blueprint,product,engineering,[growth] needs-you=1 unshown=4
+page growth/positioning @2min floor=1 Produit seats=blueprint,product,engineering,[growth] needs-you=1 unshown=4 verdict=1h10s
   floors 0:0 [1:5] 2:0 3:0 4:0
   paragraph "Where Spwn stands against what a person uses today instead, for anyone writing a comparison, a pitch or an answer to \"how is it different\": the category it refuses, the four alternatives and what each costs. What Spwn is, in one sentence, is [the vision](../blueprint/vision.md#the-definition)'s and is not restated here."
   finding needs-you S6 "growth/positioning" rests on this page's reading: you have not ruled
@@ -648,7 +648,7 @@ page growth/positioning @2min floor=1 Produit seats=blueprint,product,engineerin
   section rests-on "Rests on" rests=true
     plain "What is not settled: whether \"the category it refuses\" is said in public, and how, is a positioning call the owner has not made; it is on [open questions](./open-questions.md#positioning-audience-and-pricing). The four alternatives and their costs are this page's argument; the brief the owner confirmed on 2026-11-21 did not list them, so he has not ruled on them."
 
-page growth/positioning @10min floor=1 Produit seats=blueprint,product,engineering,[growth] needs-you=1 unshown=4
+page growth/positioning @10min floor=1 Produit seats=blueprint,product,engineering,[growth] needs-you=1 unshown=4 verdict=1h10s
   floors 0:0 [1:5] 2:0 3:0 4:0
   paragraph "Where Spwn stands against what a person uses today instead, for anyone writing a comparison, a pitch or an answer to \"how is it different\": the category it refuses, the four alternatives and what each costs. What Spwn is, in one sentence, is [the vision](../blueprint/vision.md#the-definition)'s and is not restated here."
   finding needs-you S6 "growth/positioning" rests on this page's reading: you have not ruled
@@ -690,7 +690,7 @@ page growth/positioning @10min floor=1 Produit seats=blueprint,product,engineeri
   section rests-on "Rests on" rests=true
     plain "What is not settled: whether \"the category it refuses\" is said in public, and how, is a positioning call the owner has not made; it is on [open questions](./open-questions.md#positioning-audience-and-pricing). The four alternatives and their costs are this page's argument; the brief the owner confirmed on 2026-11-21 did not list them, so he has not ruled on them."
 
-page machines/reference/ports @30s floor=3 Architecture seats=blueprint,product,[engineering],growth needs-you=0 unshown=4
+page machines/reference/ports @30s floor=3 Architecture seats=blueprint,product,[engineering],growth needs-you=0 unshown=4 verdict=1h10s
   floors 0:0 1:0 2:0 [3:4] 4:0
   paragraph "`station ports` lists every TCP port that listens on a Mac or a VM, each in the class of who reaches it. Which ports a VM may open, and to whom, are its [rights](#right): a port that starts listening inside them is shared with their audience within seconds, one outside them is flagged and never shared."
   section rights-and-audiences "Rights and audiences" rests=false
@@ -709,7 +709,7 @@ page machines/reference/ports @30s floor=3 Architecture seats=blueprint,product,
         field decides "A port is a right with an audience." 
         decision page=machines/decisions/035-a-port-is-a-right-with-an-audience ADR-035 "A port is a right with an audience" status="Accepted" accepted=true date=2026-11-11 amended-by=ADR-086 amends=ADR-018 resolves=true "A port is a right with an audience."
 
-page machines/reference/ports @2min floor=3 Architecture seats=blueprint,product,[engineering],growth needs-you=0 unshown=0
+page machines/reference/ports @2min floor=3 Architecture seats=blueprint,product,[engineering],growth needs-you=0 unshown=0 verdict=1h10s
   floors 0:0 1:0 2:0 [3:4] 4:0
   paragraph "`station ports` lists every TCP port that listens on a Mac or a VM, each in the class of who reaches it. Which ports a VM may open, and to whom, are its [rights](#right): a port that starts listening inside them is shared with their audience within seconds, one outside them is flagged and never shared."
   section rights-and-audiences "Rights and audiences" rests=false
@@ -730,7 +730,7 @@ page machines/reference/ports @2min floor=3 Architecture seats=blueprint,product
         decision page=machines/decisions/035-a-port-is-a-right-with-an-audience ADR-035 "A port is a right with an audience" status="Accepted" accepted=true date=2026-11-11 amended-by=ADR-086 amends=ADR-018 resolves=true "A port is a right with an audience."
     plain "A row of a port names its label from the catalog's packages' `ports` (5173 `Vite`, 3000 `Node or Next`, 8081 `Expo`, 5432 `Postgres`) as a hint of what probably serves it, never a decision."
 
-page machines/reference/ports @10min floor=3 Architecture seats=blueprint,product,[engineering],growth needs-you=0 unshown=0
+page machines/reference/ports @10min floor=3 Architecture seats=blueprint,product,[engineering],growth needs-you=0 unshown=0 verdict=1h10s
   floors 0:0 1:0 2:0 [3:4] 4:0
   paragraph "`station ports` lists every TCP port that listens on a Mac or a VM, each in the class of who reaches it. Which ports a VM may open, and to whom, are its [rights](#right): a port that starts listening inside them is shared with their audience within seconds, one outside them is flagged and never shared."
   section rights-and-audiences "Rights and audiences" rests=false
@@ -751,19 +751,19 @@ page machines/reference/ports @10min floor=3 Architecture seats=blueprint,produc
         decision page=machines/decisions/035-a-port-is-a-right-with-an-audience ADR-035 "A port is a right with an audience" status="Accepted" accepted=true date=2026-11-11 amended-by=ADR-086 amends=ADR-018 resolves=true "A port is a right with an audience."
     plain "A row of a port names its label from the catalog's packages' `ports` (5173 `Vite`, 3000 `Node or Next`, 8081 `Expo`, 5432 `Postgres`) as a hint of what probably serves it, never a decision."
 
-page product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder @30s floor=1 Produit seats=blueprint,[product],engineering,growth needs-you=0 unshown=0
+page product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder @30s floor=1 Produit seats=blueprint,[product],engineering,growth needs-you=0 unshown=0 verdict=1h10s
   floors 0:0 [1:0] 2:0 3:0 4:0
   paragraph "**Status:** Accepted **Date:** 2026-11-21 **Amended by:** [ADR-003](./003-the-three-spaces-are-the-structure-of-the-app.md) (the ladder) **Amends:** [growth ADR-007](../../growth/decisions/007-spwn-is-the-ai-stack-that-abstracts-everything-but-you.md)"
   section decision "Decision" rests=false
 
-page product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder @2min floor=1 Produit seats=blueprint,[product],engineering,growth needs-you=0 unshown=0
+page product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder @2min floor=1 Produit seats=blueprint,[product],engineering,growth needs-you=0 unshown=0 verdict=1h10s
   floors 0:0 [1:0] 2:0 3:0 4:0
   paragraph "**Status:** Accepted **Date:** 2026-11-21 **Amended by:** [ADR-003](./003-the-three-spaces-are-the-structure-of-the-app.md) (the ladder) **Amends:** [growth ADR-007](../../growth/decisions/007-spwn-is-the-ai-stack-that-abstracts-everything-but-you.md)"
     plain "An agent leaves the status `Proposed`; only the owner writes `Accepted`."
   section decision "Decision" rests=false
     plain "Six apps, in this order on one ladder: Machines, Agents, Wiki, Specs, Design, OS."
 
-page product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder @10min floor=1 Produit seats=blueprint,[product],engineering,growth needs-you=0 unshown=0
+page product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder @10min floor=1 Produit seats=blueprint,[product],engineering,growth needs-you=0 unshown=0 verdict=1h10s
   floors 0:0 [1:0] 2:0 3:0 4:0
   paragraph "**Status:** Accepted **Date:** 2026-11-21 **Amended by:** [ADR-003](./003-the-three-spaces-are-the-structure-of-the-app.md) (the ladder) **Amends:** [growth ADR-007](../../growth/decisions/007-spwn-is-the-ai-stack-that-abstracts-everything-but-you.md)"
   finding ambient S8 page "product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder" is prose only
@@ -772,19 +772,19 @@ page product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder @10min fl
   section decision "Decision" rests=false
     plain "Six apps, in this order on one ladder: Machines, Agents, Wiki, Specs, Design, OS."
 
-page machines/decisions/035-a-port-is-a-right-with-an-audience @30s floor=3 Architecture seats=blueprint,product,[engineering],growth needs-you=0 unshown=0
+page machines/decisions/035-a-port-is-a-right-with-an-audience @30s floor=3 Architecture seats=blueprint,product,[engineering],growth needs-you=0 unshown=0 verdict=1h10s
   floors 0:0 1:0 2:0 [3:0] 4:0
   paragraph "**Status:** Accepted **Date:** 2026-11-11"
   section decision "Decision" rests=false
 
-page machines/decisions/035-a-port-is-a-right-with-an-audience @2min floor=3 Architecture seats=blueprint,product,[engineering],growth needs-you=0 unshown=0
+page machines/decisions/035-a-port-is-a-right-with-an-audience @2min floor=3 Architecture seats=blueprint,product,[engineering],growth needs-you=0 unshown=0 verdict=1h10s
   floors 0:0 1:0 2:0 [3:0] 4:0
   paragraph "**Status:** Accepted **Date:** 2026-11-11"
     plain "Amends [ADR-018](018-two-port-classes.md). Amended by [ADR-086](086-a-vm-reserves-a-packages-port-only-when-its-machinefile-installs-it.md)."
   section decision "Decision" rests=false
     plain "A machine's ports are rights, never an inventory."
 
-page machines/decisions/035-a-port-is-a-right-with-an-audience @10min floor=3 Architecture seats=blueprint,product,[engineering],growth needs-you=0 unshown=0
+page machines/decisions/035-a-port-is-a-right-with-an-audience @10min floor=3 Architecture seats=blueprint,product,[engineering],growth needs-you=0 unshown=0 verdict=1h10s
   floors 0:0 1:0 2:0 [3:0] 4:0
   paragraph "**Status:** Accepted **Date:** 2026-11-11"
   finding ambient S8 page "machines/decisions/035-a-port-is-a-right-with-an-audience" is prose only
@@ -792,4 +792,28 @@ page machines/decisions/035-a-port-is-a-right-with-an-audience @10min floor=3 Ar
     plain "Amends [ADR-018](018-two-port-classes.md). Amended by [ADR-086](086-a-vm-reserves-a-packages-port-only-when-its-machinefile-installs-it.md)."
   section decision "Decision" rests=false
     plain "A machine's ports are rights, never an inventory."
+
+page blueprint/unfinished @30s floor=0 Intention seats=[blueprint],product,engineering,growth needs-you=0 unshown=1 verdict=1h10s
+  floors [0:0] 1:0 2:0 3:0 4:0
+  paragraph "A page still being written, served with the hard finding it holds: its table reads a page that does not exist yet."
+  attention  H4 at=blueprint/unfinished#all found=2min "all"
+    block blueprint/unfinished#all table icon=table tier= shown=none ""
+      table conviction in=blueprint/nowhere where="" columns=says
+      finding  H4 "blueprint/nowhere" is no page
+
+page blueprint/unfinished @2min floor=0 Intention seats=[blueprint],product,engineering,growth needs-you=0 unshown=0 verdict=1h10s
+  floors [0:0] 1:0 2:0 3:0 4:0
+  paragraph "A page still being written, served with the hard finding it holds: its table reads a page that does not exist yet."
+  attention  H4 at=blueprint/unfinished#all "all"
+    block blueprint/unfinished#all table icon=table tier= shown=tile ""
+      table conviction in=blueprint/nowhere where="" columns=says
+      finding  H4 "blueprint/nowhere" is no page
+
+page blueprint/unfinished @10min floor=0 Intention seats=[blueprint],product,engineering,growth needs-you=0 unshown=0 verdict=1h10s
+  floors [0:0] 1:0 2:0 3:0 4:0
+  paragraph "A page still being written, served with the hard finding it holds: its table reads a page that does not exist yet."
+  attention  H4 at=blueprint/unfinished#all "all"
+    block blueprint/unfinished#all table icon=table tier= shown=tile ""
+      table conviction in=blueprint/nowhere where="" columns=says
+      finding  H4 "blueprint/nowhere" is no page
 

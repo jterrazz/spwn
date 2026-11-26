@@ -45,7 +45,7 @@ func outline(s wiki.Served) string {
 		}
 		seats = append(seats, mark)
 	}
-	line(0, "page", s.Page.ID, "@"+string(s.Budget), "floor="+strconv.Itoa(s.Floor.Index), s.Floor.Name, "seats="+strings.Join(seats, ","), "needs-you="+strconv.Itoa(s.NeedsYou), "unshown="+strconv.Itoa(s.Unshown))
+	line(0, "page", s.Page.ID, "@"+string(s.Budget), "floor="+strconv.Itoa(s.Floor.Index), s.Floor.Name, "seats="+strings.Join(seats, ","), "needs-you="+strconv.Itoa(s.NeedsYou), "unshown="+strconv.Itoa(s.Unshown), "verdict="+strconv.Itoa(s.Verdict.Hard)+"h"+strconv.Itoa(s.Verdict.Soft)+"s")
 	ladder := make([]string, 0, len(s.Floors))
 	for _, f := range s.Floors {
 		mark := strconv.Itoa(f.Index) + ":" + strconv.Itoa(f.Blocks)

@@ -126,11 +126,22 @@ func TestTheCorpusChecksToItsGolden(t *testing.T) {
 	}
 }
 
-func TestTheCorpusHasNoHardFinding(t *testing.T) {
+// value: the one page of the fixture corpus written with a hard finding,
+// so the served golden proves such a page is still served.
+const unfinished = "blueprint/unfinished"
+
+func TestTheCorpusHasNoHardFindingButOnItsUnfinishedPage(t *testing.T) {
+	held := 0
 	for _, f := range checked(spwnKinds(), corpusSources(t)).Findings {
-		if f.Hard {
+		switch {
+		case f.Hard && f.Page == unfinished:
+			held++
+		case f.Hard:
 			t.Errorf("%s", line(f))
 		}
+	}
+	if held != 1 {
+		t.Errorf("%s holds %d hard findings; want its one H4", unfinished, held)
 	}
 }
 

@@ -1,0 +1,66 @@
+{
+  "id": "blueprint/unfinished",
+  "faces": {
+    "word": "Unfinished",
+    "line": "A page still being written, served with the hard finding it holds: its table reads a page that does not exist yet.",
+    "paragraph": "A page still being written, served with the hard finding it holds: its table reads a page that does not exist yet.",
+    "icon": ""
+  },
+  "title": {
+    "from": 1,
+    "to": 1
+  },
+  "sections": [
+    {
+      "heading": null,
+      "items": [
+        {
+          "t": "prose",
+          "markdown": "A page still being written, served with the hard finding it holds: its table reads a page that\ndoes not exist yet.",
+          "span": {
+            "from": 3,
+            "to": 4
+          }
+        },
+        {
+          "t": "block",
+          "id": "all",
+          "kind": "table",
+          "address": "blueprint/unfinished#all",
+          "props": {
+            "id": "all",
+            "of": "conviction",
+            "in": {
+              "ref": "blueprint/nowhere"
+            },
+            "columns": [
+              "says"
+            ]
+          },
+          "faces": {
+            "word": "all",
+            "line": "",
+            "icon": "table"
+          },
+          "view": {
+            "of": "conviction",
+            "in": "blueprint/nowhere",
+            "where": null,
+            "columns": [
+              "says"
+            ]
+          },
+          "at": {
+            "line": 6,
+            "col": 1
+          },
+          "span": {
+            "from": 6,
+            "to": 6
+          }
+        }
+      ]
+    }
+  ],
+  "findings": []
+}
