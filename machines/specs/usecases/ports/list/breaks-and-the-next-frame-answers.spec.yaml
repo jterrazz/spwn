@@ -1,0 +1,15 @@
+description: 'a call that panics answers broke on its stream and the next frame of that stream answers'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'world panic Listeners.Read 1 times'
+      exit: 0
+    - command: 'guest serve --stdio | /usr/bin/jq -s -c ''map(select(.out or .error)) | sort_by(.id) | .[] | if .out then {id, out: (.out | type)} else {id, error: (.error | {code, subject, message, hint})} end'''
+      stdin: |
+          {"v":2,"id":"1","call":"ports.list","in":{}}
+          {"v":2,"id":"2","call":"machines.list","in":{}}
+      exit: 0
+      stdout: |
+          {"id":"1","error":{"code":"broke","subject":"ports.list","message":"station broke on ports.list; it kept running","hint":"run it again"}}
+          {"id":"2","out":"object"}

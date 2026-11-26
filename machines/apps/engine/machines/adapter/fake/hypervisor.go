@@ -27,6 +27,8 @@ var (
 	ErrScripted  = errors.New("the hypervisor refused to boot it, as the world scripted it")
 	ErrNoAddress = errors.New("the VM got no address, as the world scripted it")
 	ErrNoListing = errors.New("the hypervisor could not list its disks, as the world scripted it")
+	// value: a resize the world scripts to fail, its disk kept as cloned.
+	ErrResizeScripted = errors.New("the hypervisor refused to resize it, as the world scripted it")
 )
 
 type Hypervisor struct {
@@ -176,6 +178,9 @@ func (h *Hypervisor) Resize(_ context.Context, vm string, s machines.Size) error
 	v, ok := h.disk(vm)
 	if !ok {
 		return ErrNoDisk
+	}
+	if h.w.Fails("Hypervisor.Resize") {
+		return ErrResizeScripted
 	}
 	v.Size = s
 	return nil

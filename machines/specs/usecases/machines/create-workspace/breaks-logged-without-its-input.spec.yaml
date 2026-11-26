@@ -1,0 +1,20 @@
+description: 'a break logs its call, the panic''s type and its stack, never the call''s input'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'world panic Hypervisor.Resize 1 times'
+      exit: 0
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.error.code // empty'''
+      stdin: |
+          {"v":2,"id":"1","call":"machines.create-workspace","in":{"Request":{"Image":"base-ubuntu","Name":"web","Size":{"MemoryBytes":4294967296},"Purpose":"build the api for the acme-9f2c7e launch"}}}
+      exit: 0
+      stdout: |
+          "broke"
+    - command: 'guest serve --stdio | /usr/bin/jq -r ''.out.Lines // [] | map(select(contains("broke in") or startswith("goroutine ") or contains("acme-9f2c7e") or contains("web"))) | .[] | if startswith("goroutine ") then "a stack follows" else sub("^[^ ]+ "; "") end'''
+      stdin: |
+          {"v":2,"id":"1","call":"engine.log","in":{}}
+      exit: 0
+      stdout: |
+          engine: broke in stream.call on machines.create-workspace: goes.Script: world panic Hypervisor.Resize
+          a stack follows

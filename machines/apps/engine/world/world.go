@@ -14,6 +14,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/awake"
 	"github.com/jterrazz/studio-station/apps/engine/background"
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
+	"github.com/jterrazz/studio-station/apps/engine/core/goes"
 	"github.com/jterrazz/studio-station/apps/engine/core/journal"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/devices"
@@ -125,6 +126,9 @@ type Fault struct {
 	// the next call, whichever VM it is of.
 	Mac string `json:"mac,omitempty"`
 	VM  string `json:"vm,omitempty"`
+	// value: the call panics instead of failing, with a goes.Script, so the
+	// boundary that serves it breaks as on a bug.
+	Panic bool `json:"panic,omitempty"`
 }
 
 type Mac struct {
@@ -685,7 +689,9 @@ func (m *Mac) GiveTurn() { m.turn = false }
 
 func (w *World) Fails(call string) bool {
 	// invariant: a scripted fault fails its call and is spent; one with no
-	// count fails every call.
+	// count fails every call. A scripted panic panics there instead, spent
+	// as a fault is, as the fake's own code would on a bug: its deferred
+	// unlocks run as the panic unwinds.
 	for i, f := range w.Script {
 		if f.Call != call || f.Hold {
 			continue
@@ -696,6 +702,9 @@ func (w *World) Fails(call string) bool {
 			w.Script = append(w.Script[:i], w.Script[i+1:]...)
 		default:
 			w.Script[i].Times--
+		}
+		if f.Panic {
+			panic(goes.Script("world panic " + call))
 		}
 		return true
 	}
