@@ -16,6 +16,8 @@ env:
     SIGNING_SECRETS_PATH: /spwn
     # value: the version stamped into every station binary, the one inside Spwn.app included: the tag, or dry-run-<sha> on a dry run
     STATION_VERSION: ${{ github.ref_type == 'tag' && github.ref_name || format('dry-run-{0}', github.sha) }}
+    # value: the link flags that leave a release binary's symbol table and DWARF out (38.4 to 27.1 MB, gzip 17.6 to 9.2 MB); a panic's trace and `go version -m` read the pclntab and the build info, which stay, and dev and test builds keep their symbols; `scripts/gates/darwin-build.sh` reads this line so the gate links the release's way
+    RELEASE_STRIP: -s -w
 
 # invariant: one run per ref at a time, never cancelled half way through a release
 concurrency:
@@ -58,7 +60,7 @@ jobs:
                   cache-dependency-path: machines/go.work.sum
             - name: Build the binaries
               env:
-                  LDFLAGS: -X github.com/jterrazz/studio-station/apps/engine/wire.version=${{ env.STATION_VERSION }}
+                  LDFLAGS: ${{ env.RELEASE_STRIP }} -X github.com/jterrazz/studio-station/apps/engine/wire.version=${{ env.STATION_VERSION }}
               run: |
                   set -euo pipefail
                   dist="$RUNNER_TEMP/station"
@@ -101,7 +103,7 @@ jobs:
               env:
                   # value: the oldest macOS the binaries run on, Sonoma
                   MACOSX_DEPLOYMENT_TARGET: '14.0'
-                  LDFLAGS: -X github.com/jterrazz/studio-station/apps/engine/wire.version=${{ env.STATION_VERSION }}
+                  LDFLAGS: ${{ env.RELEASE_STRIP }} -X github.com/jterrazz/studio-station/apps/engine/wire.version=${{ env.STATION_VERSION }}
               run: |
                   set -euo pipefail
                   dist="$RUNNER_TEMP/station"
