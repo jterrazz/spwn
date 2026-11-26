@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"slices"
+	"strconv"
 	"strings"
 	"time"
 
@@ -204,7 +205,7 @@ func (s *Builder) buildOne(ctx context.Context, w wanted, binary string, progres
 		return failed("copying the station binary", err)
 	}
 	at(images.BuildPackages, "running the "+img.Name+" recipe")
-	env := "VM_USER=" + quote(s.o.User) + " IMAGE_KEY=" + quote(strings.TrimSpace(pub))
+	env := "VM_USER=" + quote(s.o.User) + " IMAGE_KEY=" + quote(strings.TrimSpace(pub)) + " APT_LOCK_WAIT=" + strconv.Itoa(int(catalog.AptLockWait/time.Second))
 	if err = recipeRun(ctx, b, string(recipe), env); err != nil {
 		return failed("the recipe", err)
 	}

@@ -63,6 +63,8 @@ The recipe is the base plumbing of a system, shell files embedded under `apps/en
 
 The plumbing is bounded at 30 minutes, and the image phase at 35: 15 for its packages, then 20 for its `run.image` lines ([Phases](machinefiles.md#phases)). A VM's first boot sets its own name and machine id and grows the disk. No tailscale is in the image: a VM is reached through its Mac ([Machines](machines.md#ssh)).
 
+A build is raced by no package operation of its own base. The upstream's daily apt timers are overdue at every boot of a clone, and the unattended upgrade they start holds dpkg's lock for minutes, so before its first `apt-get` the plumbing stops them for the build's boot, waiting for a run they already started rather than killing it, and makes every apt run of the image wait up to 5 min for another's lock (`DPkg::Lock::Timeout` in `/etc/apt/apt.conf.d/60-station-lock-wait`, which the upstream sets for `apt` alone, so `apt-get`, and an install script that runs it, docker's, waited for nothing). The timers stay enabled: a VM made from the image runs its daily security updates.
+
 ## The binary inside
 
 The image carries `station-linux-arm64`. A release build downloads the asset of its own version into `~/.cache/station/` and checks it against the release's `checksums.txt`. A build whose version is no release's tag (a development build, a build of a branch, signed or not) has none to download: the refusal says this station is not a released version and names where a customer gets it, the `station-linux-arm64` asset of a release at `https://github.com/jterrazz/spwn/releases`, and `--binary` takes that file. From a checkout, `make build-linux` makes it:
