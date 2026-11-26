@@ -28,10 +28,10 @@ const HOME: Route = { page: 'home' };
 // value: lowers it.
 const BUDGETS = {
     activityTab: { commits: 4, renders: 318 },
-    find: { commits: 1, renders: 265 },
+    find: { commits: 1, renders: 25 },
     homeCalm: { commits: 8, renders: 570 },
     homeStories: { commits: 8, renders: 815 },
-    newMachine: { commits: 2, renders: 279 },
+    newMachine: { commits: 2, renders: 39 },
     storage: { commits: 2, renders: 412 },
     unchangedRevision: { commits: 0, renders: 0 },
 } as const satisfies Record<string, Budget>;
