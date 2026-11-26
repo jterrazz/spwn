@@ -48,8 +48,9 @@ func encodings(s string) [][]byte {
 	return forms
 }
 
-// Tripped is the value an armed tripwire panics with; it is fatal: no helper
-// of core/goes recovers it, so a leak always ends the run that made it.
+// invariant: the value an armed tripwire panics with is fatal: no helper of
+// core/goes recovers it, so a leak always ends the run that made it.
+
 type Tripped string
 
 func (Tripped) FatalBreak() {}

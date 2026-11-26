@@ -58,8 +58,9 @@ func Seal(p Page) Page {
 	return p
 }
 
-// Unsealed is the value a strict Seal panics with; it is fatal: no helper of
+// invariant: the value a strict Seal panics with is fatal: no helper of
 // core/goes recovers it, so a page the seal refuses always ends the run.
+
 type Unsealed struct{ Err error }
 
 func (Unsealed) FatalBreak() {}

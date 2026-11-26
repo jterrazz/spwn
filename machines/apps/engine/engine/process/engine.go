@@ -556,8 +556,9 @@ func (d *Engine) step(ctx context.Context, tick int) {
 	}
 }
 
-// Log writes a line the engine says of itself, a break of core/goes,
-// stamped as every line of its log is.
+// value: a line the engine says of itself, a break of core/goes, stamped
+// and written as every line of its log is.
+
 func (d *Engine) Log(line string) { d.logf("engine", line) }
 
 func (d *Engine) logf(subject, message string) {
