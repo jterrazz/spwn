@@ -10,6 +10,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/apps"
@@ -55,10 +56,26 @@ type Apt struct {
 	// value: the run has a terminal, where sudo may ask its password; off
 	// one, sudo never asks and fails where it would.
 	terminal bool
+	clock    local.Clock
+	// value: when this adapter last refreshed the package lists, and the
+	// sources they were read from then; one refresh serves every install
+	// until the sources change or the bound passes.
+	mu        sync.Mutex
+	refreshed time.Time
+	sources   string
 }
 
-func New(run local.Runner, files local.FS, store string, terminal bool) *Apt {
-	return &Apt{run: run, files: files, store: store, terminal: terminal}
+// value: how long the lists one refresh read stay current for the installs
+// that follow in the same run.
+const listsFresh = 10 * time.Minute
+
+const (
+	sourcesFile = "/etc/apt/sources.list"
+	sourcesDir  = "/etc/apt/sources.list.d"
+)
+
+func New(run local.Runner, files local.FS, store string, terminal bool, clock local.Clock) *Apt {
+	return &Apt{run: run, files: files, store: store, terminal: terminal, clock: clock}
 }
 
 func (a *Apt) Method() catalog.Method { return catalog.MethodApt }
@@ -457,7 +474,38 @@ func drop(held []string, key string) []string {
 }
 
 func (a *Apt) refresh(ctx context.Context, logs contract.Logs) error {
-	return a.root(ctx, logs, slices.Concat(quiet(), []string{"update"})...)
+	// invariant: an install sees lists read from the sources it runs with:
+	// one refresh serves the run until a source list changes (a step added
+	// a repository) or listsFresh has passed; a refresh that failed is
+	// not remembered.
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	sources := a.sourceList()
+	if !a.refreshed.IsZero() && sources == a.sources && a.clock.Now().Sub(a.refreshed) < listsFresh {
+		return nil
+	}
+	if err := a.root(ctx, logs, slices.Concat(quiet(), []string{"update"})...); err != nil {
+		return err
+	}
+	a.refreshed, a.sources = a.clock.Now(), sources
+	return nil
+}
+
+func (a *Apt) sourceList() string {
+	var b strings.Builder
+	note := func(p string, info fs.FileInfo) {
+		b.WriteString(p + " " + strconv.FormatInt(info.Size(), 10) + " " + strconv.FormatInt(info.ModTime().UnixNano(), 10) + "\n")
+	}
+	if info, err := a.files.Stat(sourcesFile); err == nil {
+		note(sourcesFile, info)
+	}
+	entries, _ := a.files.ReadDir(sourcesDir)
+	for _, e := range entries {
+		if info, err := e.Info(); err == nil && !e.IsDir() {
+			note(path.Join(sourcesDir, e.Name()), info)
+		}
+	}
+	return b.String()
 }
 
 func (a *Apt) root(ctx context.Context, logs contract.Logs, argv ...string) error {

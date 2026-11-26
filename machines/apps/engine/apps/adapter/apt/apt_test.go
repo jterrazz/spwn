@@ -9,6 +9,7 @@ import (
 	"slices"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/apps"
 	"github.com/jterrazz/studio-station/apps/engine/apps/adapter/apt"
@@ -120,11 +121,11 @@ func serving(verb func(context.Context, contract.For, []catalog.Install, contrac
 }
 
 func aptOf(run local.Runner, terminal bool) *apt.Apt {
-	return apt.New(run, localtest.NewFS(), aptStore, terminal)
+	return apt.New(run, localtest.NewFS(), aptStore, terminal, &localtest.Clock{At: time.Unix(1e9, 0)})
 }
 
 func playedOn(d *dpkg, files local.FS) *apt.Apt {
-	return apt.New(local.Played(d.play, "apt-get", "dpkg-query", "apt-cache", "sudo"), files, aptStore, false)
+	return apt.New(local.Played(d.play, "apt-get", "dpkg-query", "apt-cache", "sudo"), files, aptStore, false, &localtest.Clock{At: time.Unix(1e9, 0)})
 }
 
 func rooted(d *dpkg) bool {
@@ -646,3 +647,73 @@ func TestAFailedRunThatWasNotInterruptedLetsGoOfEveryRecord(t *testing.T) {
 }
 
 func (d *dpkg) has(p string) bool { _, ok := d.held[p]; return ok }
+
+func updates(d *dpkg) int {
+	n := 0
+	for _, c := range d.calls {
+		if strings.HasPrefix(c, "sudo") && strings.HasSuffix(c, " update") {
+			n++
+		}
+	}
+	return n
+}
+
+func TestAnApplyOfSeveralAptAppsRefreshesTheListsOnce(t *testing.T) {
+	// invariant: the lists are refreshed once for every install of a run;
+	// a repository a step added meanwhile earns one more, and so does a
+	// run that lasts past the bound.
+	ctx := context.Background()
+	install := func(a *apt.Apt, app string) {
+		t.Helper()
+		if err := a.InstallFor(ctx, apply(app), []catalog.Install{catalog.AptInstall{Packages: []string{app}}}, nil); err != nil {
+			t.Fatal(err)
+		}
+	}
+	build := func() (*dpkg, *apt.Apt, *localtest.FS, *localtest.Clock) {
+		d := &dpkg{held: map[string]string{}}
+		files := localtest.NewFS()
+		clock := &localtest.Clock{At: time.Unix(1e9, 0)}
+		return d, apt.New(local.Played(d.play, "apt-get", "dpkg-query", "apt-cache", "sudo"), files, aptStore, false, clock), files, clock
+	}
+
+	d, a, _, _ := build()
+	for _, app := range []string{"ripgrep", "jq", "tree", "fd-find", "bat"} {
+		install(a, app)
+	}
+	if n := updates(d); n != 1 {
+		t.Errorf("5 apt apps ran %d updates; want 1", n)
+	}
+
+	d, a, files, _ := build()
+	install(a, "ripgrep")
+	install(a, "jq")
+	if err := files.WriteFile("/etc/apt/sources.list.d/docker.list", []byte("deb https://download.docker.com/linux/ubuntu noble stable\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	install(a, "tree")
+	install(a, "bat")
+	if n := updates(d); n != 2 {
+		t.Errorf("a repository added mid-run ran %d updates; want 2", n)
+	}
+
+	d, a, _, clock := build()
+	install(a, "ripgrep")
+	clock.At = clock.At.Add(11 * time.Minute)
+	install(a, "jq")
+	if n := updates(d); n != 2 {
+		t.Errorf("an install past the bound ran %d updates; want 2", n)
+	}
+}
+
+func TestAFailedRefreshIsNotRemembered(t *testing.T) {
+	d := &dpkg{held: map[string]string{}, fails: true}
+	a := played(d)
+	foo := []catalog.Install{catalog.AptInstall{Packages: []string{"foo"}}}
+	ctx := context.Background()
+
+	_ = a.InstallFor(ctx, apply("x"), foo, nil)
+	_ = a.InstallFor(ctx, apply("y"), foo, nil)
+	if n := updates(d); n != 2 {
+		t.Errorf("two installs after a failed refresh ran %d updates; want 2", n)
+	}
+}

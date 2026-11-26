@@ -135,7 +135,7 @@ func installers(m machine, terminal bool) (contract.Installers, contract.Bundler
 	for _, i := range []contract.Installer{
 		bundle.Formulae(), bundle.Casks(),
 		mas.New(run), npm.New(run, bundle, runtimes.Where, relocatedValue(m, catalog.FileNpmrc, "cache")), uv.New(run, bundle),
-		bun.New(run), runtimes, apt.New(run, m.sys.FS, filepath.Join(m.paths.Data, "apt"), terminal),
+		bun.New(run), runtimes, apt.New(run, m.sys.FS, filepath.Join(m.paths.Data, "apt"), terminal, m.sys.Clock),
 		skills.New(skills.Options{
 			Run: run, FS: m.sys.FS, Net: m.sys.Net, Home: m.sys.Env.Home(),
 			APIURL: m.or("STATION_GITHUB_API_URL", "https://api.github.com"),
