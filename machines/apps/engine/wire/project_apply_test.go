@@ -405,6 +405,7 @@ func TestEachExampleOfTheCatalogPlansValidAndApplies(t *testing.T) {
 			if err != nil || len(applied.Changes) != len(plan.Changes) {
 				t.Fatalf("Apply = %+v, %v; want what the plan listed", applied.Changes, err)
 			}
+			holdsWhatThePlanSaid(t, made.Root, plan.Changes)
 			for _, agent := range made.Agents {
 				if entries, err := os.ReadDir(filepath.Join(made.Root, project.StateFolder, "agents", agent)); err != nil || len(entries) == 0 {
 					t.Errorf("run folder of %s holds %v, %v; want its rendered files", agent, entries, err)
