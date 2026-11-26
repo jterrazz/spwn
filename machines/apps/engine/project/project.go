@@ -56,6 +56,9 @@ type Plan struct {
 	Summary Summary
 	// value: the errors first, then the warnings, then the advice.
 	Issues []Issue
+	// value: what apply would write and remove, by path; none when the
+	// plan has an error, as nothing is rendered then.
+	Changes []Change
 }
 
 type Drift struct {
@@ -72,6 +75,12 @@ type State struct {
 	Project Project
 	Issues  []Issue `json:",omitempty"`
 	Drift   []Issue `json:",omitempty"`
+	// value: what each agent's harness renders, by agent.
+	Rendered map[string][]File `json:",omitempty"`
+	// value: what the run folders hold, by path from the root.
+	Disk map[string]File `json:",omitempty"`
+	// invariant: what apply last wrote, as Digest gives it.
+	Record Record `json:",omitempty"`
 }
 
 var (

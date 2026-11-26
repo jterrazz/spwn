@@ -1,0 +1,38 @@
+description: 'off a terminal, an apply that overwrites a file names it and needs --yes, then writes it anew'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'project create site'
+      exit: 0
+      stdout: |
+          ●	site	created	{{workdir}}/site
+    - command: '--version >/dev/null; /bin/mkdir -p site && cd site && "$STATION" project apply'
+      exit: 0
+      stdout: |
+          	{{workdir}}/site/spwn.yaml	1 change to apply
+          # To apply
+          ●	.spwn/agents/neo/CLAUDE.md	add
+          ●	{{workdir}}/site/spwn.yaml	applied, 1 change
+    - command: '--version >/dev/null; "$STATION" world project "$HOME/site" render neo CLAUDE.md "# neo, anew"'
+      exit: 0
+    - command: '--version >/dev/null; /bin/mkdir -p site && cd site && "$STATION" project apply </dev/null'
+      exit: 2
+      stdout: |
+          	{{workdir}}/site/spwn.yaml	1 change to apply
+          # To apply
+          ◐	.spwn/agents/neo/CLAUDE.md	overwrite
+      stderr: |
+          Error: refusing without --yes: overwrites .spwn/agents/neo/CLAUDE.md
+          Hint: re-run with --yes
+    - command: '--version >/dev/null; /bin/mkdir -p site && cd site && "$STATION" project apply --yes'
+      exit: 0
+      stdout: |
+          	{{workdir}}/site/spwn.yaml	1 change to apply
+          # To apply
+          ◐	.spwn/agents/neo/CLAUDE.md	overwrite
+          ●	{{workdir}}/site/spwn.yaml	applied, 1 change
+    - command: '--version >/dev/null; /bin/mkdir -p site && cd site && "$STATION" project apply'
+      exit: 0
+      stdout: |
+          ●	{{workdir}}/site/spwn.yaml	Nothing to apply.

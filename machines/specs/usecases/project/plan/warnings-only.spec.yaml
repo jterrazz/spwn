@@ -11,3 +11,5 @@ runs:
           ◐	{{workdir}}/site/spwn.yaml	valid, 0 errors, 1 warning
           # Issues
           ◐	spwn.yaml	agent neo is declared twice
+          # To apply
+          	none

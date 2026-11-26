@@ -3190,6 +3190,17 @@ export type ProgressFrame = {
     v: 2;
 };
 
+export type ProjectApplied = {
+    Changes: ProjectChange[] | null;
+    Manifest: string;
+    Root: string;
+};
+
+export type ProjectCallsApplyIn = {
+    Confirm?: string;
+    Folder?: string;
+};
+
 export type ProjectCallsCreateIn = {
     Folder?: string;
     Harness?: string;
@@ -3208,6 +3219,13 @@ export type ProjectCallsShowIn = {
     Folder?: string;
 };
 
+export type ProjectChange = {
+    Agent: string;
+    ByHand?: boolean;
+    Kind: '' | 'add' | 'overwrite' | 'remove';
+    Path: string;
+};
+
 export type ProjectDrift = {
     Manifest: string;
     Root: string;
@@ -3223,6 +3241,7 @@ export type ProjectIssue = {
 };
 
 export type ProjectPlan = {
+    Changes: ProjectChange[] | null;
     Issues: ProjectIssue[] | null;
     Manifest: string;
     Root: string;
@@ -3685,6 +3704,8 @@ export type PortsStopSharingInput = PortsCallsStopSharingIn;
 export type PortsStopSharingOutput = PortsCallsStopSharingOut;
 export type PortsUndeclareInput = PortsCallsUndeclareIn;
 export type PortsUndeclareOutput = PortsCallsUndeclareOut;
+export type ProjectApplyInput = ProjectCallsApplyIn;
+export type ProjectApplyOutput = ProjectApplied;
 export type ProjectCreateInput = ProjectCallsCreateIn;
 export type ProjectCreateOutput = ProjectProject;
 export type ProjectDriftInput = ProjectCallsDriftIn;
@@ -3834,6 +3855,7 @@ export interface Calls {
     'ports.share': { in: PortsShareInput; out: PortsShareOutput; watch: false };
     'ports.stop-sharing': { in: PortsStopSharingInput; out: PortsStopSharingOutput; watch: false; confirm: 'stop-sharing'; consequence: '%s is no longer shared, and its reserved port is released.' };
     'ports.undeclare': { in: PortsUndeclareInput; out: PortsUndeclareOutput; watch: false; confirm: 'undeclare'; consequence: '%s is no longer declared, so a listener on it is flagged again.' };
+    'project.apply': { in: ProjectApplyInput; out: ProjectApplyOutput; watch: false; confirm: 'overwrite'; consequence: 'Your value of %s is replaced by the one the file asks.' };
     'project.create': { in: ProjectCreateInput; out: ProjectCreateOutput; watch: false };
     'project.drift': { in: ProjectDriftInput; out: ProjectDriftOutput; watch: false };
     'project.plan': { in: ProjectPlanInput; out: ProjectPlanOutput; watch: false };

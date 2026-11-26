@@ -13,3 +13,5 @@ runs:
           ●	{{workdir}}/site/spwn.yaml	valid
           # Issues
           	none
+          # To apply
+          ●	.spwn/agents/neo/CLAUDE.md	add

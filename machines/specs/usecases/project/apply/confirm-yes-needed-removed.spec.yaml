@@ -1,0 +1,37 @@
+description: 'an apply that removes a file it wrote names it and needs --yes; with it, the file is gone'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'project create site'
+      exit: 0
+      stdout: |
+          ●	site	created	{{workdir}}/site
+    - command: '--version >/dev/null; "$STATION" world project "$HOME/site" render neo notes.md "kept notes"'
+      exit: 0
+    - command: '--version >/dev/null; /bin/mkdir -p site && cd site && "$STATION" project apply'
+      exit: 0
+      stdout: |
+          	{{workdir}}/site/spwn.yaml	2 changes to apply
+          # To apply
+          ●	.spwn/agents/neo/CLAUDE.md	add
+          ●	.spwn/agents/neo/notes.md	add
+          ●	{{workdir}}/site/spwn.yaml	applied, 2 changes
+    - command: '--version >/dev/null; "$STATION" world project "$HOME/site" render neo notes.md'
+      exit: 0
+    - command: '--version >/dev/null; /bin/mkdir -p site && cd site && "$STATION" project apply </dev/null'
+      exit: 2
+      stdout: |
+          	{{workdir}}/site/spwn.yaml	1 change to apply
+          # To apply
+          ◐	.spwn/agents/neo/notes.md	remove
+      stderr: |
+          Error: refusing without --yes: removes .spwn/agents/neo/notes.md
+          Hint: re-run with --yes
+    - command: '--version >/dev/null; /bin/mkdir -p site && cd site && "$STATION" project apply --yes'
+      exit: 0
+      stdout: |
+          	{{workdir}}/site/spwn.yaml	1 change to apply
+          # To apply
+          ◐	.spwn/agents/neo/notes.md	remove
+          ●	{{workdir}}/site/spwn.yaml	applied, 1 change

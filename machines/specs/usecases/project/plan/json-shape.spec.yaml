@@ -33,7 +33,8 @@ runs:
                 "message": "agent.yaml does not parse",
                 "source": "manifest"
               }
-            ]
+            ],
+            "changes": []
           }
           {
             "schema": "station.error/v1",

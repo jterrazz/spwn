@@ -14,7 +14,7 @@ type Deps struct {
 }
 
 func All(d Deps) []call.Handler {
-	return []call.Handler{call.Bind(Show, d), call.Bind(Create, d), call.Bind(Plan, d), call.Bind(Drift, d)}
+	return []call.Handler{call.Bind(Show, d), call.Bind(Create, d), call.Bind(Plan, d), call.Bind(Drift, d), call.Bind(Apply, d)}
 }
 
 const (

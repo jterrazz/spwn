@@ -3,6 +3,7 @@ package contracttest
 import (
 	"context"
 	"errors"
+	"maps"
 	"path/filepath"
 	"slices"
 	"testing"
@@ -69,6 +70,66 @@ func Projects(t *testing.T, open func(t *testing.T) (contract.Projects, string))
 		drift, err := p.Drift(ctx, made.Root)
 		if err != nil || len(drift.Rows) != 0 || drift.Root != made.Root {
 			t.Fatalf("Drift = %+v, %v; want no row", drift, err)
+		}
+	})
+
+	t.Run("a new project's starter renders in memory, and nothing is on disk until written", func(t *testing.T) {
+		p, folder := open(t)
+		made, err := p.Create(ctx, folder, "site", first)
+		if err != nil {
+			t.Fatal(err)
+		}
+		files, err := p.Render(ctx, made.Root, project.Starter)
+		if err != nil || len(files) == 0 {
+			t.Fatalf("Render = %d files, %v; want the starter's", len(files), err)
+		}
+		rendered := map[string][]project.File{project.Starter: files}
+		record, disk, err := p.Applied(ctx, made.Root, project.Paths(rendered, nil))
+		if err != nil || len(record) != 0 || len(disk) != 0 {
+			t.Fatalf("Applied = %v, %v, %v; want nothing applied", record, disk, err)
+		}
+		changes, next, err := project.ChangesOf(rendered, record, disk)
+		if err != nil || len(changes) != len(files) || len(project.Asked(changes)) != 0 {
+			t.Fatalf("ChangesOf = %+v, %v; want one add per file", changes, err)
+		}
+		if err = p.Write(ctx, made.Root, changes, next); err != nil {
+			t.Fatal(err)
+		}
+		record, disk, err = p.Applied(ctx, made.Root, project.Paths(rendered, nil))
+		if err != nil || !maps.Equal(record, next) || !maps.Equal(disk, next) {
+			t.Fatalf("Applied after Write = %v, %v, %v; want the record and the disk as rendered", record, disk, err)
+		}
+		again, _, err := project.ChangesOf(rendered, record, disk)
+		if err != nil || len(again) != 0 {
+			t.Fatalf("ChangesOf after Write = %+v, %v; want none", again, err)
+		}
+	})
+
+	t.Run("a file written and then no longer rendered is removed, and the record forgets it", func(t *testing.T) {
+		p, folder := open(t)
+		made, err := p.Create(ctx, folder, "site", first)
+		if err != nil {
+			t.Fatal(err)
+		}
+		files, err := p.Render(ctx, made.Root, project.Starter)
+		if err != nil {
+			t.Fatal(err)
+		}
+		rendered := map[string][]project.File{project.Starter: files}
+		changes, next, _ := project.ChangesOf(rendered, nil, nil)
+		if err = p.Write(ctx, made.Root, changes, next); err != nil {
+			t.Fatal(err)
+		}
+		gone, kept, err := project.ChangesOf(map[string][]project.File{}, next, next)
+		if err != nil || len(gone) != len(files) || gone[0].Kind != project.Remove || gone[0].ByHand {
+			t.Fatalf("ChangesOf = %+v, %v; want each file removed", gone, err)
+		}
+		if err = p.Write(ctx, made.Root, gone, kept); err != nil {
+			t.Fatal(err)
+		}
+		record, disk, err := p.Applied(ctx, made.Root, project.Paths(rendered, next))
+		if err != nil || len(record) != 0 || len(disk) != 0 {
+			t.Fatalf("Applied after the removal = %v, %v, %v; want nothing", record, disk, err)
 		}
 	})
 }

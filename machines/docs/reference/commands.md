@@ -212,11 +212,14 @@ station project [--json] # the project of this folder: its spwn.yaml and its age
 station project create <name> [--harness <harness>] # a new folder, ./<name>, with its spwn.yaml and the starter agent neo
 station project plan [--json] # what the project's rules find in its files, the errors first
 station project drift [--json] # each reference spwn.lock does not record
+station project apply [--yes] [--json] # render each agent into its run folder, .spwn/agents/<agent>/
 ```
 
 A project is the files of a folder: the one whose `spwn.yaml` sits in this folder or the nearest above it, and a folder in none is refused, exit 2, with `station project create <name>` to make one. `create` makes `./<name>` and refuses a folder that exists, a name that is not lowercase letters, digits and dashes, a letter or a digit first, and a harness the catalog does not hold, exit 2; nothing is written outside the new folder. Its harness, `claude-code` unless `--harness` names another, is written in the starter agent's `agent.yaml`.
 
-`plan` reads and writes nothing: the declaration's rules, then a render of each agent for `claude-code` that is kept in memory. A plan with an error prints every issue, then exits 2; warnings alone exit 0. A `spwn:<name>` reference is not checked against a catalog. `drift` lists what was installed apart from what the project declares, and a row refuses nothing. Every command reads this folder in this process, so `--on` is refused. `--json` is `station.project.show/v1`, `station.project.plan/v1` and `station.project.drift/v1`.
+`plan` reads and writes nothing: the declaration's rules, then a render of each agent for the harness it declares (its own `runtime.backend`, else the project's, else `claude-code`) that is kept in memory, and, when it has no error, what `apply` would add, overwrite and remove under `To apply`. A plan with an error prints every issue, then exits 2; warnings alone exit 0. A `spwn:<name>` reference is not checked against a catalog. `drift` lists what was installed apart from what the project declares, and a row refuses nothing. Every command reads this folder in this process, so `--on` is refused. `--json` is `station.project.show/v1`, `station.project.plan/v1`, `station.project.drift/v1` and `station.project.apply/v1`.
+
+`apply` makes the plan's `To apply` true, and nothing else: it lists it first, then writes each agent's rendered files into its run folder, `.spwn/agents/<agent>/`, the project's gitignored state, and keeps what it wrote in `.spwn/applied.json`. A plan with an error is printed and refused, exit 2, and nothing is written. An apply that only adds asks nothing; one that overwrites or removes a file names each, a file edited by hand since as `changed by hand`, and asks once, yes or no; off a terminal, and always with `--json`, it refuses without `--yes`, exit 2. It removes only a file it wrote, and never reads a file of a run folder it did not write. A second apply writes nothing and says `Nothing to apply.` It builds no image and starts no agent.
 
 ## Spwn
 

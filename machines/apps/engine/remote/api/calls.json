@@ -1153,6 +1153,20 @@
       "out": "UndeclareOut"
     },
     {
+      "name": "project.apply",
+      "schema": "station.project.apply/v1",
+      "where": "in-process",
+      "confirm": "overwrite",
+      "consequence": "Your value of %s is replaced by the one the file asks.",
+      "errors": [
+        "confirm.yes-needed",
+        "project.invalid",
+        "project.not-found"
+      ],
+      "in": "ApplyIn",
+      "out": "Applied"
+    },
+    {
       "name": "project.create",
       "schema": "station.project.create/v1",
       "where": "in-process",

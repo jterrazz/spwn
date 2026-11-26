@@ -1,5 +1,34 @@
 {
   "$defs": {
+    "project.Change": {
+      "additionalProperties": false,
+      "properties": {
+        "Agent": {
+          "type": "string"
+        },
+        "ByHand": {
+          "type": "boolean"
+        },
+        "Kind": {
+          "enum": [
+            "",
+            "add",
+            "overwrite",
+            "remove"
+          ],
+          "type": "string"
+        },
+        "Path": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Agent",
+        "Kind",
+        "Path"
+      ],
+      "type": "object"
+    },
     "project.Issue": {
       "additionalProperties": false,
       "properties": {
@@ -37,6 +66,15 @@
     "project.Plan": {
       "additionalProperties": false,
       "properties": {
+        "Changes": {
+          "items": {
+            "$ref": "#/$defs/project.Change"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
         "Issues": {
           "items": {
             "$ref": "#/$defs/project.Issue"
@@ -60,6 +98,7 @@
         }
       },
       "required": [
+        "Changes",
         "Issues",
         "Manifest",
         "Root",

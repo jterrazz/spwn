@@ -81,6 +81,10 @@ var Plan = call.Call[Deps, PlanIn, project.Plan]{
 			return project.Plan{}, coded(err, in.Folder)
 		}
 		p, err := d.Projects.Plan(ctx, root)
+		if err != nil || !p.Valid {
+			return p, coded(err, root)
+		}
+		p.Changes, _, _, err = pending(ctx, d, root)
 		return p, coded(err, root)
 	},
 }

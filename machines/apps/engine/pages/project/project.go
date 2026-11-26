@@ -77,12 +77,72 @@ func verdict(p project.Plan) (mark page.Mark, said string) {
 }
 
 func Plan(p project.Plan, thisMac page.Context) page.Page {
-	// invariant: the verdict first, then each issue, the errors first.
+	// invariant: the verdict first, then each issue, the errors first, then
+	// what apply would change when the plan has no error.
 	mark, said := verdict(p)
-	return page.Seal(page.Page{ID: "project-plan", Command: "project plan", Context: thisMac, Sections: []page.Section{
+	sections := []page.Section{
 		banner("plan", p.Manifest, mark, said),
 		issues("issues", "Issues", "Nothing to fix: the project reads as it is declared.", p.Issues),
+	}
+	if p.Valid {
+		sections = append(sections, changes(p.Changes))
+	}
+	return page.Seal(page.Page{ID: "project-plan", Command: "project plan", Context: thisMac, Sections: sections})
+}
+
+// value: what a change does to its file, as a row says it.
+func doing(c project.Change) (mark page.Mark, said string) {
+	said = map[project.Kind]string{project.Add: "add", project.Overwrite: "overwrite", project.Remove: "remove"}[c.Kind]
+	mark = page.OK
+	if c.Kind != project.Add {
+		mark = page.Attention
+	}
+	if c.ByHand {
+		said += ": changed by hand, yours is lost"
+	}
+	return mark, said
+}
+
+func changes(all []project.Change) page.Section {
+	s := page.Section{ID: "changes", Title: "To apply", Columns: []page.Column{{Key: "path", Kind: page.KindText, Keep: 100}}}
+	for _, c := range all {
+		mark, said := doing(c)
+		r := page.Row{ID: c.Path, Label: c.Path, Mark: mark, Detail: page.Text(said)}
+		s.Items = append(s.Items, page.Item{Row: &r})
+	}
+	if len(all) == 0 {
+		s.Items = []page.Item{{Empty: &page.Empty{Text: "Nothing to apply."}}}
+	}
+	return s
+}
+
+func count(n int) string {
+	if n == 1 {
+		return "1 change"
+	}
+	return strconv.Itoa(n) + " changes"
+}
+
+func Pending(p project.Plan, thisMac page.Context) page.Page {
+	// value: what an apply is about to change, listed before it does.
+	return page.Seal(page.Page{ID: "project-apply-pending", Command: "project apply", Context: thisMac, Sections: []page.Section{
+		banner("pending", p.Manifest, page.Unjudged, count(len(p.Changes))+" to apply"),
+		changes(p.Changes),
 	}})
+}
+
+func Applied(a project.Applied, thisMac page.Context) page.Page {
+	// invariant: an apply says what it changed, or that nothing was to.
+	said := "Nothing to apply."
+	if len(a.Changes) > 0 {
+		said = "applied, " + count(len(a.Changes))
+	}
+	return page.Seal(page.Page{ID: "project-apply", Command: "project apply", Context: thisMac,
+		Sections: []page.Section{banner("project-apply", a.Manifest, page.OK, said)}})
+}
+
+func ApplyConfirm(a project.Applied) page.Confirm {
+	return page.Confirm{Question: "Apply " + a.Root + "? It " + project.Goes(project.Asked(a.Changes)), Yes: "apply"}
 }
 
 func Drift(d project.Drift, thisMac page.Context) page.Page {
@@ -134,12 +194,39 @@ type SummaryJSON struct {
 	Info     int `json:"info"`
 }
 
+type ChangeJSON struct {
+	Agent  string `json:"agent"`
+	Path   string `json:"path"`
+	Kind   string `json:"kind"`
+	ByHand bool   `json:"byHand"`
+}
+
 type PlanJSON struct {
-	Schema   string      `json:"schema"`
-	Valid    bool        `json:"valid"`
-	Manifest string      `json:"manifest"`
-	Summary  SummaryJSON `json:"summary"`
-	Issues   []IssueJSON `json:"issues"`
+	Schema   string       `json:"schema"`
+	Valid    bool         `json:"valid"`
+	Manifest string       `json:"manifest"`
+	Summary  SummaryJSON  `json:"summary"`
+	Issues   []IssueJSON  `json:"issues"`
+	Changes  []ChangeJSON `json:"changes"`
+}
+
+type AppliedJSON struct {
+	Schema   string       `json:"schema"`
+	Root     string       `json:"root"`
+	Manifest string       `json:"manifest"`
+	Changes  []ChangeJSON `json:"changes"`
+}
+
+func changesJSON(all []project.Change) []ChangeJSON {
+	out := make([]ChangeJSON, 0, len(all))
+	for _, c := range all {
+		out = append(out, ChangeJSON{Agent: c.Agent, Path: c.Path, Kind: string(c.Kind), ByHand: c.ByHand})
+	}
+	return out
+}
+
+func AppliedContract(schema string, a project.Applied) AppliedJSON {
+	return AppliedJSON{Schema: schema, Root: a.Root, Manifest: a.Manifest, Changes: changesJSON(a.Changes)}
 }
 
 type DriftJSON struct {
@@ -158,7 +245,7 @@ func issuesJSON(all []project.Issue) []IssueJSON {
 
 func PlanContract(schema string, p project.Plan) PlanJSON {
 	return PlanJSON{Schema: schema, Valid: p.Valid, Manifest: p.Manifest,
-		Summary: SummaryJSON{Errors: p.Summary.Errors, Warnings: p.Summary.Warnings, Info: p.Summary.Info}, Issues: issuesJSON(p.Issues)}
+		Summary: SummaryJSON{Errors: p.Summary.Errors, Warnings: p.Summary.Warnings, Info: p.Summary.Info}, Issues: issuesJSON(p.Issues), Changes: changesJSON(p.Changes)}
 }
 
 func DriftContract(schema string, d project.Drift) DriftJSON {

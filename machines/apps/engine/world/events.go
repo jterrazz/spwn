@@ -74,7 +74,7 @@ func events() []event {
 		{"agent", []string{"<mac>", "served|held", "[<pid>]", "[<executable>]", "[<label>]"}, agentSocket},
 		{"admin", []string{"on|off"}, admin},
 		{"release", []string{"<tag>", "[no-asset]"}, releaseTag},
-		{"project", []string{"<root>", "[error|warning|info|drift]", "[<path>]", "[<message>]"}, declareProject},
+		{"project", []string{"<root>", "[error|warning|info|drift|render|edit]", "[<agent>|<path>]", "[<path>|<message>|<content>]", "[<content>]"}, declareProject},
 	}
 }
 
@@ -701,20 +701,55 @@ func declareProject(w *World, args []string) error {
 		kept.Project = project.Project{Name: filepath.Base(root), Root: root, Manifest: filepath.Join(root, project.ManifestName)}
 	}
 	if len(args) > 1 {
-		if len(args) < 4 {
+		if len(args) < 4 && args[1] != "edit" {
 			return fmt.Errorf("project %s takes a level, a path and a message", root)
 		}
-		issue := project.Issue{Level: project.Level(args[1]), Path: args[2], Message: args[3], Source: project.SourceManifest}
+		issue := project.Issue{Level: project.Level(args[1]), Path: args[2], Message: strings.Join(args[3:], " "), Source: project.SourceManifest}
 		switch {
+		case args[1] == "render":
+			declareRender(&kept, args[2], args[3], args[4:])
+		case args[1] == "edit":
+			editRunFolder(&kept, args[2], args[3:])
 		case args[1] == "drift":
 			issue.Level, issue.Source = project.Error, project.SourceLockfile
 			kept.Drift = append(kept.Drift, issue)
 		case slices.Contains(project.Level("").Enum(), args[1]):
 			kept.Issues = append(kept.Issues, issue)
 		default:
-			return fmt.Errorf("project takes error, warning, info or drift, not %q", args[1])
+			return fmt.Errorf("project takes error, warning, info, drift, render or edit, not %q", args[1])
 		}
 	}
 	s.Projects[root] = kept
 	return nil
+}
+
+// invariant: render <agent> <path> <content> is what the agent's harness
+// renders at that path of its run folder; with no content, it renders
+// nothing there any more.
+func declareRender(kept *project.State, agent, path string, content []string) {
+	if kept.Rendered == nil {
+		kept.Rendered = map[string][]project.File{}
+	}
+	files := slices.DeleteFunc(kept.Rendered[agent], func(f project.File) bool { return f.Path == path })
+	if len(content) > 0 {
+		files = append(files, project.File{Path: path, Data: []byte(strings.Join(content, " ") + "\n"), Mode: 0o644})
+	}
+	kept.Rendered[agent] = files
+	if !slices.Contains(kept.Project.Agents, agent) {
+		kept.Project.Agents = append(kept.Project.Agents, agent)
+		slices.Sort(kept.Project.Agents)
+	}
+}
+
+// invariant: edit <path> <content> is the owner writing that file by hand,
+// a path from the project's root; with no content, deleting it.
+func editRunFolder(kept *project.State, path string, content []string) {
+	if kept.Disk == nil {
+		kept.Disk = map[string]project.File{}
+	}
+	if len(content) == 0 {
+		delete(kept.Disk, path)
+		return
+	}
+	kept.Disk[path] = project.File{Path: path, Data: []byte(strings.Join(content, " ") + "\n"), Mode: 0o644}
 }

@@ -118,6 +118,11 @@
     "consequence": "%s is no longer declared, so a listener on it is flagged again.",
     "form": "yes-no"
   },
+  "project.apply": {
+    "confirm": "overwrite",
+    "consequence": "Your value of %s is replaced by the one the file asks.",
+    "form": "yes-no"
+  },
   "settings.apply": {
     "confirm": "overwrite",
     "consequence": "Your value of %s is replaced by the one the file asks.",

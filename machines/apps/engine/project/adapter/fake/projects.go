@@ -2,7 +2,9 @@ package fake
 
 import (
 	"context"
+	"maps"
 	"path/filepath"
+	"slices"
 
 	"github.com/jterrazz/studio-station/apps/engine/project"
 	"github.com/jterrazz/studio-station/apps/engine/project/contract"
@@ -16,6 +18,12 @@ type Projects struct {
 }
 
 var _ contract.Projects = (*Projects)(nil)
+
+func Starter() project.File {
+	// value: what a new project's starter agent renders in the fake world:
+	// the prompt a harness reads.
+	return project.File{Path: "CLAUDE.md", Data: []byte("# " + project.Starter + "\n"), Mode: 0o644}
+}
 
 func New() *Projects { return Of(&world.World{}, "this-mac") }
 
@@ -65,7 +73,7 @@ func (p *Projects) Create(_ context.Context, folder, name, _ string) (project.Pr
 	if s.Projects == nil {
 		s.Projects = map[string]project.State{}
 	}
-	s.Projects[root] = project.State{Project: made}
+	s.Projects[root] = project.State{Project: made, Rendered: map[string][]project.File{project.Starter: {Starter()}}}
 	return made, nil
 }
 
@@ -87,4 +95,52 @@ func (p *Projects) Drift(_ context.Context, root string) (project.Drift, error) 
 		return project.Drift{}, err
 	}
 	return project.Drift{Root: root, Manifest: s.Project.Manifest, Rows: append([]project.Issue{}, s.Drift...)}, nil
+}
+
+func (p *Projects) Render(_ context.Context, root, agent string) ([]project.File, error) {
+	p.w.Lock()
+	defer p.w.Unlock()
+	s, err := p.state(root)
+	if err != nil {
+		return nil, err
+	}
+	return slices.Clone(s.Rendered[agent]), nil
+}
+
+func (p *Projects) Applied(_ context.Context, root string, paths []string) (record, disk project.Record, err error) {
+	p.w.Lock()
+	defer p.w.Unlock()
+	s, err := p.state(root)
+	if err != nil {
+		return nil, nil, err
+	}
+	disk = project.Record{}
+	for _, path := range paths {
+		if f, ok := s.Disk[path]; ok {
+			disk[path] = project.Digest(f)
+		}
+	}
+	return maps.Clone(s.Record), disk, nil
+}
+
+func (p *Projects) Write(_ context.Context, root string, changes []project.Change, record project.Record) error {
+	p.w.Lock()
+	defer p.w.Unlock()
+	s, err := p.state(root)
+	if err != nil {
+		return err
+	}
+	if s.Disk == nil {
+		s.Disk = map[string]project.File{}
+	}
+	for _, c := range changes {
+		if c.Kind == project.Remove {
+			delete(s.Disk, c.Path)
+			continue
+		}
+		s.Disk[c.Path] = c.File
+	}
+	s.Record = maps.Clone(record)
+	p.kept()[root] = s
+	return nil
 }

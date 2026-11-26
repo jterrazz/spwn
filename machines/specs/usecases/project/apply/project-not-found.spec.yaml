@@ -1,0 +1,10 @@
+description: 'station project apply in a folder of no project refuses and names project create'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; /bin/mkdir -p empty && cd empty && "$STATION" project apply'
+      exit: 2
+      stderr: |
+          Error: no project in {{workdir}}/empty or above it: no spwn.yaml
+          Hint: station project create <name>
