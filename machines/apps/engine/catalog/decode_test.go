@@ -63,9 +63,14 @@ func TestAnUnknownKeyIsNamedSinceANewerStationMayHaveWrittenIt(t *testing.T) {
 			t.Errorf("decoded with %v, want the unknown key %q", err, want)
 		}
 	}
-	_, err := catalog.DecodeMachinefile("machinefiles/web.machine.yaml", []byte("machinefile: station.machinefile/v1\nname: web\nports: { audiences: { 5432: local }, scope: private }\n"))
-	if file := (*catalog.FileError)(nil); !errors.As(err, &file) || file.Unknown != "scope" {
-		t.Errorf("decoded with %v, want the unknown key scope", err)
+	for body, want := range map[string]string{
+		"ports: { audiences: { 5432: local }, scope: private }\n": "scope",
+		"my key: x\n": "my key",
+	} {
+		_, err := catalog.DecodeMachinefile("machinefiles/web.machine.yaml", []byte("machinefile: station.machinefile/v1\nname: web\n"+body))
+		if file := (*catalog.FileError)(nil); !errors.As(err, &file) || file.Unknown != want || !strings.Contains(err.Error(), "field "+want+" not found") {
+			t.Errorf("decoded with %v, want the unknown key %q", err, want)
+		}
 	}
 }
 
