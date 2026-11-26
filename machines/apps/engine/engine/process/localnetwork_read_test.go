@@ -103,4 +103,47 @@ func TestALocalNetworkReadPastItsSecondCannotTell(t *testing.T) {
 	if got := h.d.Hello().LocalNetwork; got != "" {
 		t.Errorf("a read that did not end: hello %q, want none", got)
 	}
+	listed := approvals.ListingOf("mac", h.d.Hello().LocalNetwork, false)
+	if len(listed.Rows) != 1 || listed.Rows[0].State != approvals.Unknown || listed.Rows[0].Fix.Path != nil {
+		t.Errorf("approvals.list after a read that did not end: %+v, want one unknown row owing no fix", listed.Rows)
+	}
+}
+
+func TestApprovalsListFollowsTheRefusalToTheOwnersApproval(t *testing.T) {
+	h := newHarness(t)
+	a := &approval{answer: approvals.Refused}
+	h.d.o.LocalNetwork = a.read
+	h.d.o.StartedAt = h.clock.At.Add(-2 * time.Minute)
+	if err := h.d.Begin(t.Context(), nil); err != nil {
+		t.Fatal(err)
+	}
+	listed := func() approvals.Row { return approvals.ListingOf("mac", h.d.Hello().LocalNetwork, false).Rows[0] }
+	if got := listed(); got.State != approvals.Refused || got.Fix.Path == nil || got.Fix.Pane == nil {
+		t.Fatalf("refused past 90 s: %+v, want a refused row owing its fix", got)
+	}
+	a.answer = approvals.Approved
+	h.after(t, 30*time.Second, 1)
+	if got := listed(); got.State != approvals.Approved || got.Fix.Path != nil {
+		t.Errorf("30 s after the owner approved: %+v, want an approved row owing no fix", got)
+	}
+}
+
+func TestApprovalsListReadsCheckingThenApprovedInsideTheSettling(t *testing.T) {
+	h := newHarness(t)
+	a := &approval{answer: approvals.Refused}
+	h.d.o.LocalNetwork = a.read
+	if err := h.d.Begin(t.Context(), nil); err != nil {
+		t.Fatal(err)
+	}
+	listed := func() approvals.State {
+		return approvals.ListingOf("mac", h.d.Hello().LocalNetwork, false).Rows[0].State
+	}
+	if got := listed(); got != approvals.Checking {
+		t.Fatalf("a refusal at the start: %s, want checking", got)
+	}
+	a.answer = approvals.Approved
+	h.after(t, 2*time.Second, 1)
+	if got := listed(); got != approvals.Approved {
+		t.Errorf("2 s later, approved: %s, want approved", got)
+	}
 }

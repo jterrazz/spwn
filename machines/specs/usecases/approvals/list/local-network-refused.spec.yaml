@@ -14,4 +14,4 @@ runs:
           {"v":2,"id":"1","call":"approvals.list","in":{}}
       exit: 0
       stdout: |
-          {"mac":"macbook-pro","rows":[{"id":"local-network","state":"refused","holder":"station","required":true,"sentence":"Spwn reaches the VMs it runs and your Macs nearby.","fix":{"Call":"","Args":null,"On":"","Confirm":"","Command":"","Path":"approve station on macbook-pro's screen, or in System Settings > Privacy & Security > Local Network","Pane":"x-apple.systempreferences:com.apple.settings.PrivacySecurity.extension"}}]}
+          {"mac":"macbook-pro","rows":[{"id":"local-network","state":"refused","holder":"station","required":true,"sentence":"Spwn reaches the VMs it runs on this Mac and your Macs nearby.","fix":{"call":null,"command":null,"path":"approve station on macbook-pro's screen, or in System Settings > Privacy & Security > Local Network","pane":"x-apple.systempreferences:com.apple.settings.PrivacySecurity.extension"}}]}

@@ -23,10 +23,17 @@ func (id ID) Word() string {
 	return string(id)
 }
 
+// value: the owner's sentence for Local Network: the row's own, and the
+// bundle's NSLocalNetworkUsageDescription macOS shows in its prompt, which
+// the architecture suite holds equal byte for byte.
+const (
+	LocalNetworkSentence = "Spwn reaches the VMs it runs on this Mac and your Macs nearby."
+)
+
 func (id ID) Sentence() string {
-	// value: what the approval lets Spwn do, in the engine's words.
+	// value: what the approval lets Spwn do, in the owner's words.
 	if id == LocalNetwork {
-		return "Spwn reaches the VMs it runs and your Macs nearby."
+		return LocalNetworkSentence
 	}
 	return ""
 }
@@ -45,16 +52,24 @@ func (id ID) States() []State {
 	return nil
 }
 
+type Fix struct {
+	// invariant: the fix as every document carries it (finding.FixJSON, its
+	// three ways null when unset), and the System Settings pane that holds
+	// it, said only while one is owed.
+	finding.FixJSON
+	Pane *string `json:"pane,omitempty"`
+}
+
 type Row struct {
 	// value: one approval of a Mac: its state, the process macOS charges
 	// with it, whether Spwn needs it, what it enables, and the gesture that
-	// moves it, empty while none is owed.
-	ID       ID          `json:"id"`
-	State    State       `json:"state"`
-	Holder   string      `json:"holder"`
-	Required bool        `json:"required"`
-	Sentence string      `json:"sentence"`
-	Fix      finding.Fix `json:"fix"`
+	// moves it, its three ways null while none is owed.
+	ID       ID     `json:"id"`
+	State    State  `json:"state"`
+	Holder   string `json:"holder"`
+	Required bool   `json:"required"`
+	Sentence string `json:"sentence"`
+	Fix      Fix    `json:"fix"`
 }
 
 type Listing struct {
@@ -75,7 +90,9 @@ func localNetworkRow(mac string, s State, bundled bool) Row {
 	// the others owe none until approvals.ask exists.
 	row := Row{ID: LocalNetwork, State: s, Holder: machines.LocalNetworkApp(bundled), Required: LocalNetwork.Required(), Sentence: LocalNetwork.Sentence()}
 	if s == Refused {
-		row.Fix = finding.Fix{Path: machines.LocalNetworkFix(mac, bundled), Pane: catalog.PaneLocalNetwork}
+		fix := finding.Fix{Path: machines.LocalNetworkFix(mac, bundled)}.JSON()
+		pane := catalog.PaneLocalNetwork
+		row.Fix = Fix{FixJSON: fix, Pane: &pane}
 	}
 	return row
 }

@@ -364,13 +364,21 @@ export type AgentsSlept = {
 
 export type Answer = HelloFrame | ProgressFrame | OutFrame | ErrorFrame | DoneFrame;
 
+export type ApprovalsFix = {
+    args?: Record<string, string>;
+    call: string | null;
+    command: string | null;
+    pane?: string;
+    path: string | null;
+};
+
 export type ApprovalsListing = {
     mac: string;
     rows: ApprovalsRow[] | null;
 };
 
 export type ApprovalsRow = {
-    fix: CoreFindingFix;
+    fix: ApprovalsFix;
     holder: string;
     id: 'local-network';
     required: boolean;

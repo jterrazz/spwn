@@ -94,7 +94,7 @@ station engine restart # restart the engine's job, whatever it runs: the VMs tha
 station approvals [--json] # what macOS lets Spwn do on this Mac, one row per approval, as its engine read it
 ```
 
-A Mac only, read from its engine, so it needs the engine running (`station engine start`), and with `--on` another Mac's. Each row is an approval (Local Network first), its state (`approved`, `refused`, `checking` while a refusal is not yet macOS's verdict, `unknown` where the engine cannot tell) and what it lets Spwn do; a refused one ends with where to approve it. None stops Spwn from running. `--json` is `station.approvals.list/v1`: `{schema, mac, rows}`, each row `{id, state, holder, required, sentence, fix}` ([API](api.md)).
+A Mac only, read from its engine, so it needs the engine running (`station engine start`), and with `--on` another Mac's. Each row is an approval (Local Network first), its state (`approved`, `refused`, `checking` while a refusal is not yet macOS's verdict, `unknown` where the engine cannot tell) and what it lets Spwn do; a refused one ends with where to approve it. None stops Spwn from running. `--json` is `station.approvals.list/v1`: `{schema, mac, rows}`, each row `{id, state, holder, required, sentence, fix}`, its `fix` as every document says it (`call`, `command` and `path`, null when unset, and `pane` while one is owed) ([API](api.md)).
 
 ### `station apps`
 

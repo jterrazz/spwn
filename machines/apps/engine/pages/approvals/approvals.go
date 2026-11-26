@@ -36,10 +36,10 @@ func Page(l approvals.Listing, thisMac page.Context) page.Page {
 		mark, reason := markOf(r.State)
 		row := page.Row{ID: string(r.ID), Label: r.ID.Word(), Mark: mark, Reason: reason,
 			Cells: []page.Value{page.Text(r.State.Word()), page.Text(r.Sentence)}}
-		if r.Fix.Path != "" {
-			row.Detail = page.Text(r.Fix.Path)
-		}
 		section.Items = append(section.Items, page.Item{Row: &row})
+		if r.Fix.Path != nil {
+			section.Items = append(section.Items, page.Item{Note: &page.Note{Text: *r.Fix.Path}})
+		}
 	}
 	return page.Seal(page.Page{ID: command, Command: command, Context: thisMac, Sections: []page.Section{section}})
 }

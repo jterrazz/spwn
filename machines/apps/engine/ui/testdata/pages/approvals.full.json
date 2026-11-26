@@ -43,14 +43,15 @@
               },
               {
                 "kind": "text",
-                "text": "Spwn reaches the VMs it runs and your Macs nearby."
+                "text": "Spwn reaches the VMs it runs on this Mac and your Macs nearby."
               }
             ],
-            "detail": {
-              "kind": "text",
-              "text": "approve Spwn on mac-mini's screen, or in System Settings > Privacy & Security > Local Network"
-            },
             "reason": "refused"
+          }
+        },
+        {
+          "note": {
+            "text": "approve Spwn on mac-mini's screen, or in System Settings > Privacy & Security > Local Network"
           }
         }
       ],

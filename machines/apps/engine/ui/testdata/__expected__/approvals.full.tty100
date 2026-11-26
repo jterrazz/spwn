@@ -1,3 +1,4 @@
 mac-mini
                    state    lets
-  ◐ Local Network  refused  Spwn reaches the VMs it runs and your Macs nearby.  approve Spwn on ma…
+  ◐ Local Network  refused  Spwn reaches the VMs it runs on this Mac and your Macs nearby.
+  approve Spwn on mac-mini's screen, or in System Settings > Privacy & Security > Local Network

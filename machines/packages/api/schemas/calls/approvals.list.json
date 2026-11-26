@@ -1,5 +1,43 @@
 {
   "$defs": {
+    "approvals.Fix": {
+      "additionalProperties": false,
+      "properties": {
+        "args": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object"
+        },
+        "call": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "command": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "pane": {
+          "type": "string"
+        },
+        "path": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "call",
+        "command",
+        "path"
+      ],
+      "type": "object"
+    },
     "approvals.Listing": {
       "additionalProperties": false,
       "properties": {
@@ -26,7 +64,7 @@
       "additionalProperties": false,
       "properties": {
         "fix": {
-          "$ref": "#/$defs/core.finding.Fix"
+          "$ref": "#/$defs/approvals.Fix"
         },
         "holder": {
           "type": "string"
@@ -60,50 +98,6 @@
         "required",
         "sentence",
         "state"
-      ],
-      "type": "object"
-    },
-    "core.finding.Fix": {
-      "additionalProperties": false,
-      "properties": {
-        "Args": {
-          "additionalProperties": {
-            "type": "string"
-          },
-          "type": [
-            "object",
-            "null"
-          ]
-        },
-        "Call": {
-          "type": "string"
-        },
-        "Command": {
-          "type": "string"
-        },
-        "Confirm": {
-          "type": "string"
-        },
-        "InTerminal": {
-          "type": "boolean"
-        },
-        "On": {
-          "type": "string"
-        },
-        "Pane": {
-          "type": "string"
-        },
-        "Path": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "Args",
-        "Call",
-        "Command",
-        "Confirm",
-        "On",
-        "Path"
       ],
       "type": "object"
     }
