@@ -14,7 +14,9 @@
     max-height: var(--popover-height, none);
     display: flex;
     flex-direction: column;
-    background: var(--s1);
+    background: var(--glass);
+    -webkit-backdrop-filter: var(--blur);
+    backdrop-filter: var(--blur);
     border: 1px solid var(--edge);
     border-radius: var(--radius-row);
     box-shadow: var(--lift-2);
@@ -118,18 +120,8 @@
     color: var(--t1);
 }
 .row[aria-selected='true'] {
-    --ok: var(--ok-on-primary);
-    --you: var(--warn-on-primary);
-    --bad: var(--bad-on-primary);
-    --busy: var(--new-on-primary);
-    --t3: var(--on-primary);
-
-    background: var(--primary);
-    color: var(--on-primary);
-}
-.row[aria-selected='true'] > span:first-child {
-    background: var(--on-primary);
-    color: var(--primary);
+    background: var(--s3);
+    color: var(--t1);
 }
 .row[aria-disabled='true'] {
     cursor: default;

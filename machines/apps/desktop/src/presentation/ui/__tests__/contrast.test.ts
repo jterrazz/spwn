@@ -253,7 +253,7 @@ describe('contrast', () => {
         const worn = GLASS.map((rule) => `${rule.file} ${rule.selector}`).toSorted();
 
         // Then - they are the floating surfaces, and only they
-        expect(worn).toStrictEqual([]);
+        expect(worn).toStrictEqual(['ui/popover.module.css .popover']);
     });
 
     test('a glass rule draws the blur, its WebKit twin, an edge and the floating lift', () => {
