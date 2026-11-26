@@ -267,3 +267,13 @@ func TestTheLinuxImageKeepsOneKernelAndWhatItsImagePhaseInstalled(t *testing.T) 
 		t.Error("base-ubuntu bakes no linux-kernel: its image would keep both of the upstream's kernels")
 	}
 }
+
+func TestTheLinuxImageInitramfsCarriesOnlyItsRootsModules(t *testing.T) {
+	if !strings.Contains(recipe(t, "linux.sh"), "echo 'MODULES=dep' > /etc/initramfs-tools/conf.d/60-station-modules.conf") {
+		t.Error("the linux recipe builds no initramfs of MODULES=dep")
+	}
+	cleanup := recipe(t, "linux-cleanup.sh")
+	if !strings.Contains(cleanup, "update-initramfs -u -k all") || strings.Index(cleanup, "update-initramfs") < strings.Index(cleanup, "apt-get purge") {
+		t.Error("the linux cleanup does not build the initramfs again once the other kernels are gone")
+	}
+}

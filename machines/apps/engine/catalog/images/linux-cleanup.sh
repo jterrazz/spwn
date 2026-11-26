@@ -38,6 +38,7 @@ if [ ${#purge[@]} -gt 0 ]; then
     apt-get autoremove --purge -y
 fi
 dpkg-query -W snapd >/dev/null 2>&1 || rm -rf /var/lib/snapd /var/cache/snapd /snap
+! command -v update-initramfs >/dev/null || update-initramfs -u -k all
 apt-get clean
 rm -rf /var/lib/apt/lists/*
 sync
