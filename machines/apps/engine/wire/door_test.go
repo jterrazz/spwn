@@ -142,14 +142,24 @@ func TestTheDoorDecidesEveryStandingAndOpensOnKeptAlone(t *testing.T) {
 			t.Errorf("the door has not decided the standing %q", s)
 			continue
 		}
-		if err := bookTrusted(s); (err == nil) != opens {
+		if err := bookTrusted(s, true); (err == nil) != opens {
 			t.Errorf("standing %q: %v, want open %v", s, err, opens)
+		}
+		if err := bookTrusted(s, false); !errors.Is(err, errBookNotHeld) {
+			t.Errorf("standing %q of a book not held: %v, want it not held", s, err)
 		}
 	}
 	if len(declared) != len(decided) {
 		t.Errorf("the devices package declares %v, the door decides %d", declared, len(decided))
 	}
-	if err := bookTrusted(devices.Standing("bogus")); err == nil {
+	if err := bookTrusted(devices.Standing("bogus"), true); err == nil {
 		t.Error("a standing the devices package never declared opens the door")
+	}
+}
+
+func TestTheZeroStandingOfABookNotHeldOpensNoDoor(t *testing.T) {
+	var zero devices.Standing
+	if err := bookTrusted(zero, false); !errors.Is(err, errBookNotHeld) {
+		t.Fatalf("the zero standing of a book not held: %v, want it not held", err)
 	}
 }

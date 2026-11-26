@@ -14,7 +14,13 @@ var (
 	errNotInBook   = errors.New("not in the device book")
 )
 
-func bookTrusted(standing devices.Standing) error {
+// invariant: Kept is the zero Standing, and a store that holds no book
+// answers it beside ok false: the book is trusted only when it is held, so
+// no caller's order of checks opens the door on a zero value.
+func bookTrusted(standing devices.Standing, held bool) error {
+	if !held {
+		return errBookNotHeld
+	}
 	switch standing {
 	case devices.Kept:
 		return nil
@@ -40,11 +46,8 @@ func (m machine) admits(ctx context.Context, key string) (string, error) {
 	if m.profile.Kind != coremachine.Computer {
 		return "", errDoorNotHere
 	}
-	_, standing, ok := m.stores.devices.Held(ctx)
-	if !ok {
-		return "", errBookNotHeld
-	}
-	if err := bookTrusted(standing); err != nil {
+	_, standing, held := m.stores.devices.Held(ctx)
+	if err := bookTrusted(standing, held); err != nil {
 		return "", err
 	}
 	book, anchored, err := m.stores.devices.Read(ctx)
