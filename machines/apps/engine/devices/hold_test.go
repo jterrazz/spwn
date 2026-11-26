@@ -7,7 +7,7 @@ import (
 )
 
 func TestABookAwaitingItsCheckIsANeedOnlyWhenItHoldsADevice(t *testing.T) {
-	awaiting := devices.Await(1, devices.Sum(nil))
+	awaiting := devices.Await(devices.Book{Generation: 1}, devices.Sum(nil))
 	if got := awaiting.Standing(devices.Book{}, false); got != devices.Kept {
 		t.Fatalf("an empty book awaiting its check stands %q, want no need", got)
 	}
@@ -17,5 +17,11 @@ func TestABookAwaitingItsCheckIsANeedOnlyWhenItHoldsADevice(t *testing.T) {
 	}
 	if got := awaiting.Settle(`{"devices":[]}`, devices.Head{}); got.State != devices.Unheld {
 		t.Fatalf("a book written while awaiting settles to %+v, want it held for nothing", got)
+	}
+	if got := awaiting.Settle(devices.Sum(nil), laptop.Head()); got.State != devices.Unheld {
+		t.Fatalf("a head that is not the start book's settles to %+v, want it held for nothing", got)
+	}
+	if got := awaiting.Settle(devices.Sum(nil), devices.Book{Generation: 1}.Head()); got.State != devices.Holding {
+		t.Fatalf("the start book's own head settles to %+v, want it held", got)
 	}
 }

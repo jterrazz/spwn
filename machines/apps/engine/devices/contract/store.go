@@ -28,7 +28,9 @@ type Store interface {
 	// A start read that fails holds a head no book has (devices.Hold): a
 	// book or a head Spwn never writes trusts nothing until the engine
 	// writes; an anchor that cannot be read is read again only until it
-	// first answers, and anchors then the book of the start alone.
+	// first answers, and that answer is held only when it is the head of
+	// the book of the start, still on disk byte for byte: any other head
+	// trusts nothing until the engine writes.
 	Sole(ctx context.Context)
 	// value: the head this process holds and how the book on disk stands
 	// with it; ok false in a process that is not the engine.

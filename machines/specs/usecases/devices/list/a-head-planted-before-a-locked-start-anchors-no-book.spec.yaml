@@ -1,0 +1,43 @@
+description: 'a head planted before a locked engine start anchors no book, not even its own'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'devices add laptop ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGmY0fN5lE8XqXhcG0OB1oCw0SYqC0f6M1bM1jR5e9wz --channels pipe >/dev/null'
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].stores | {devices, devices_generation, devices_anchor}'' world.json > before.json'
+      exit: 0
+    - command: 'devices forget laptop --confirm=laptop >/dev/null'
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq --slurpfile b before.json ''.macs["macbook-pro"].stores.devices_anchor = $b[0].devices_anchor | .macs["macbook-pro"].stores.devices_anchor_unreadable = true'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'world engine-crash macbook-pro'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out.Summary | [.Needs[] | select(.Subject == "devices") | [.Text, .Upkeep, .Detail]]'' | /usr/bin/tail -1'
+      stdin: |
+          {"v":2,"id":"1","watch":"overview.read","in":{}}
+      exit: 0
+      stdout: |
+          []
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].stores.devices_anchor_unreadable = false'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out | {stale, devices: [.devices[] | .name], broken: [.broken[] | .name]}'''
+      stdin: |
+          {"v":2,"id":"1","call":"devices.list","in":{}}
+      exit: 0
+      stdout: |
+          {"stale":true,"devices":[],"broken":[]}
+    - command: '--version >/dev/null; /usr/bin/jq --slurpfile b before.json ''.macs["macbook-pro"].stores += ($b[0] | {devices, devices_generation})'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out | {stale, devices: [.devices[] | .name], broken: [.broken[] | .name]}'''
+      stdin: |
+          {"v":2,"id":"1","call":"devices.list","in":{}}
+      exit: 0
+      stdout: |
+          {"stale":true,"devices":[],"broken":["laptop"]}
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out.Summary | [.Needs[] | select(.Subject == "devices") | [.Text, .Upkeep, .Detail]]'' | /usr/bin/tail -1'
+      stdin: |
+          {"v":2,"id":"1","watch":"overview.read","in":{}}
+      exit: 0
+      stdout: |
+          [["The device book changed outside Spwn","needs-you",""]]

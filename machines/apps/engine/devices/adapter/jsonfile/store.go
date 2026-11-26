@@ -77,7 +77,7 @@ func (s *Store) Sole(ctx context.Context) {
 	case contract.Malformed(err):
 		s.hold = devices.Refuse(book.Generation)
 	default:
-		s.hold = devices.Await(book.Generation, sum)
+		s.hold = devices.Await(book, sum)
 	}
 }
 

@@ -257,6 +257,25 @@ func TestAnEngineWhoseKeychainWasLockedAtItsStartAnchorsTheBookOfItsStartAlone(t
 	}
 }
 
+func TestAnEngineWhoseKeychainWasLockedAtItsStartHoldsNoHeadButTheStartBooks(t *testing.T) {
+	at := filepath.Join(t.TempDir(), "station", "devices.json")
+	k := &keychain{}
+	withLaptop, headLaptop := forgottenLaptop(t, at, k)
+	k.set(headLaptop)
+	k.locked = errors.New("the keychain is locked")
+	engine := openOn(at, false, k)
+	engine.Sole(t.Context())
+	k.locked = nil
+	trustsNothing(t, engine, devices.Changed)
+	if err := files().WriteFile(at, withLaptop, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	trustsNothing(t, engine, devices.Changed)
+	if held, _, _ := engine.Held(t.Context()); held == headLaptop {
+		t.Fatalf("held %+v; want no head the keychain was given while the engine awaited", held)
+	}
+}
+
 type lyingPeer struct{ head devices.Head }
 
 func (p lyingPeer) Held(context.Context) (devices.Head, bool, error) { return p.head, true, nil }

@@ -33,11 +33,12 @@ type Hold struct {
 	// invariant: what this Mac's engine trusts its book by, from its start
 	// read on: the head it holds, a head no book has while it awaits or
 	// refuses; while it awaits, Start is the SHA-256 of the book's bytes
-	// at the engine's start, the only book a first readable anchor may
-	// then anchor.
+	// at the engine's start and Begun that book's head: a first readable
+	// anchor anchors that book alone, and only when it is that head.
 	Head  Head      `json:"head"`
 	State HoldState `json:"state,omitempty"`
 	Start string    `json:"start,omitempty"`
+	Begun Head      `json:"begun,omitzero"`
 }
 
 func Sum(data []byte) string {
@@ -56,19 +57,20 @@ func Keep(h Head) Hold { return Hold{Head: h} }
 
 func Refuse(generation int) Hold { return Hold{Head: unheld(generation), State: Unheld} }
 
-func Await(generation int, start string) Hold {
-	return Hold{Head: unheld(generation), State: Awaiting, Start: start}
+func Await(start Book, sum string) Hold {
+	return Hold{Head: unheld(start.Generation), State: Awaiting, Start: sum, Begun: start.Head()}
 }
 
 func (h Hold) Settle(now string, anchored Head) Hold {
 	// invariant: an engine that could not read the anchor at its start
-	// takes the first head it reads only with the book it found at its
-	// start, byte for byte: a book written since, whatever head the
-	// keychain then holds, is trusted nowhere until the engine writes one.
+	// holds the first head it reads only when that head anchors the book
+	// it found at its start and the file is still that book, byte for
+	// byte; any other head, and any book written since, is trusted
+	// nowhere until the engine writes one.
 	if h.State != Awaiting {
 		return h
 	}
-	if now != h.Start {
+	if now != h.Start || anchored != h.Begun {
 		return Refuse(h.Head.Generation)
 	}
 	return Keep(anchored)

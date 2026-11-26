@@ -162,7 +162,7 @@ func (s *Store) Sole(context.Context) {
 	case malformed(st, err):
 		hold = devices.Refuse(st.DevicesGeneration)
 	default:
-		hold = devices.Await(st.DevicesGeneration, sumOf(st))
+		hold = devices.Await(bookOf(st), sumOf(st))
 	}
 	m.Engine.Book = &hold
 }
