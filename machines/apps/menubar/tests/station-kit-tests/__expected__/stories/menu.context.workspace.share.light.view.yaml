@@ -13,7 +13,7 @@ added:
       - menuitem "Share" [kit=MenuPreview.item] [at=5,132] [size=195.5x24] [icon=square.and.arrow.up] [submenu] [state=lit]
       - menuitem "Grant a password…" [kit=MenuPreview.item] [at=5,156] [size=195.5x24] [icon=key]
       - separator [kit=MenuPreview.line] [at=5,180] [size=195.5x11]
-      - menuitem "Stop…" [kit=MenuPreview.item] [at=5,191] [size=195.5x24] [icon=stop]
+      - menuitem "Stop" [kit=MenuPreview.item] [at=5,191] [size=195.5x24] [icon=stop]
       - separator [kit=MenuPreview.line] [at=5,215] [size=195.5x11]
       - menuitem "Delete…" [kit=MenuPreview.item] [at=5,226] [size=195.5x24] [icon=trash] [state=danger]
     - menu [kit=MenuPreview] [at=118,358] [size=200x58]:

@@ -1,7 +1,7 @@
 description: 'a delete drops the stops of sharing the owner chose for the VM'
 env: two-macs
 runs:
-    - command: 'ports stop-sharing linux-1 7000 --yes'
+    - command: 'ports stop-sharing linux-1 7000'
       exit: 0
       stdout: |
           ●	linux-1:7000	not shared

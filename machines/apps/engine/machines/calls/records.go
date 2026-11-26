@@ -62,20 +62,18 @@ func (s *Machinist) kindOfImage(image string) catalog.MachineKind {
 	return catalog.Linux
 }
 
-func (s *Machinist) HoldOf(ctx context.Context, name string) (model.Hold, bool) {
-	// value: what keeps a VM of this Mac as machines.list would say it now;
-	// false for no VM of that name.
+func (s *Machinist) VMSeen(ctx context.Context, name string) (model.VM, bool) {
 	stored, err := s.stored()
 	if err != nil {
-		return model.Hold{}, false
+		return model.VM{}, false
 	}
 	_, live := s.engineView(ctx)
 	for _, vm := range s.vmsOf(s.ThisMacName(), stored, s.disks(ctx), live) {
 		if vm.Name == name {
-			return model.HoldOf(vm), true
+			return vm, true
 		}
 	}
-	return model.Hold{}, false
+	return model.VM{}, false
 }
 
 func (s *Machinist) Records() ([]model.VMRecord, error) { return s.records() }

@@ -9,11 +9,10 @@ runs:
       stdin: |
           see Remove lazygit?
           send n
-          see Hint:
+          see Nothing changed.
           screen
       exit: 1
       stdout: |
           ┃ Remove lazygit?
           ┃
-          Error: lazygit kept: you said no
-          Hint: --yes skips the question
+          Nothing changed.

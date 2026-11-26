@@ -42,7 +42,7 @@ var Apply = call.Call[Deps, ApplyIn, []settings.Change]{
 			}
 		}
 		if len(changed) > 0 {
-			if refused := confirm.Require(confirm.For(confirm.Overwrite, d.Kind), strings.Join(changed, ", "), in.Confirm); refused != nil {
+			if refused := confirm.Require(confirm.Of(confirm.Overwrite, d.Kind), strings.Join(changed, ", "), in.Confirm); refused != nil {
 				return nil, refused
 			}
 		}

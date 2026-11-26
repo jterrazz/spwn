@@ -1,10 +1,10 @@
-description: 'piped without --yes, init says what it would move, then is refused before any step'
+description: 'piped without --yes, init asks nothing: it says what it moves, then moves it'
 env: fresh
 runs:
     - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].disk.files = {"~/.bun/install/global/node_modules/skills/cli.mjs": 180000000, "~/.bun/bin/bun": 52000000, "~/.bun/install/cache/skills@1.0.0/package.json": 64000, "~/.bun/_bun": 8000, "~/go/bin/golangci-lint": 59000000, "~/go/pkg/mod/cache/download/x": 2300000, "~/go/pkg/sumdb/sum.golang.org/latest": 4000, "~/.npm/_cacache/index-v5/x": 800000}'' world.json > next.json && /bin/mv next.json world.json'
       exit: 0
     - command: 'init --name macbook-pro'
-      exit: 2
+      exit: 0
       stdout: |
           # To move
           ○	~/.bun/install/global	to ~/.local/share/bun/install/global	180 MB
@@ -15,12 +15,12 @@ runs:
           ○	~/go/pkg/mod	to ~/.cache/go/mod	2.3 MB
           ○	~/go/pkg/sumdb	to ~/.local/share/go/pkg/sumdb	4.0 KB
           ○	~/.npm	to ~/.cache/npm	800 KB
-      stderr: |
-          Error: refusing to move the apps' files without --yes
-          Hint: re-run with --yes
-      files:
-          .zshrc: absent
+          ●	name	macbook-pro
+          ●	zshrc
+          ●	relocate	bunfig, go env, mise settings, npmrc, moved ~/.bun, ~/go, ~/.npm
+          # Machinefile
+          	none bound by init: init --machinefile binds one
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].disk.files | keys'' world.json'
       exit: 0
       stdout: |
-          ["~/.bun/_bun","~/.bun/bin/bun","~/.bun/install/cache/skills@1.0.0/package.json","~/.bun/install/global/node_modules/skills/cli.mjs","~/.npm/_cacache/index-v5/x","~/go/bin/golangci-lint","~/go/pkg/mod/cache/download/x","~/go/pkg/sumdb/sum.golang.org/latest"]
+          ["~/.cache/bun/install/skills@1.0.0/package.json","~/.cache/go/mod/cache/download/x","~/.cache/npm/_cacache/index-v5/x","~/.local/share/bun/bin/bun","~/.local/share/bun/install/global/node_modules/skills/cli.mjs","~/.local/share/go/bin/golangci-lint","~/.local/share/go/pkg/sumdb/sum.golang.org/latest"]

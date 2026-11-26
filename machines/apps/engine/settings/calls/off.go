@@ -3,6 +3,7 @@ package calls
 import (
 	"context"
 	"errors"
+	"slices"
 	"strings"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
@@ -10,6 +11,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/confirm"
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 	"github.com/jterrazz/studio-station/apps/engine/core/section"
+	"github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/settings"
 	"github.com/jterrazz/studio-station/apps/engine/settings/contract"
 )
@@ -48,7 +50,7 @@ var Off = call.Call[Deps, OffIn, []settings.Change]{
 			}
 			pkgs = append(pkgs, it)
 		}
-		if err := confirm.Require(confirm.For(confirm.OffHere, d.Kind), strings.Join(in.Names, ", "), in.Confirm); err != nil {
+		if err := confirm.Require(confirm.Of(confirm.OffHere, d.Kind, offFacts(ctx, d, in.Names)...), strings.Join(in.Names, ", "), in.Confirm); err != nil {
 			return nil, err
 		}
 		off := offThisMac(d)
@@ -111,6 +113,25 @@ var Off = call.Call[Deps, OffIn, []settings.Change]{
 		}
 		return changes, setOff(d, off)
 	},
+}
+
+// value: the fact off is graded by: Never sleeps off on a Mac that hosts a
+// server lets that server pause; a Mac whose machines do not read is taken
+// to host one.
+func offFacts(ctx context.Context, d Deps, names []string) []confirm.Fact {
+	if d.All == nil || !slices.Contains(names, catalog.ProcNeverSleeps.Name()) {
+		return nil
+	}
+	all, err := d.All.Machines(ctx)
+	if err != nil {
+		return []confirm.Fact{confirm.HostsServer}
+	}
+	for _, h := range all.Macs {
+		if h.ThisMac && slices.ContainsFunc(h.VMs, func(vm machines.VM) bool { return vm.Lifetime == machines.AlwaysOn }) {
+			return []confirm.Fact{confirm.HostsServer}
+		}
+	}
+	return nil
 }
 
 func keeper(d Deps, it catalog.Setting) (contract.Keeper, bool) {

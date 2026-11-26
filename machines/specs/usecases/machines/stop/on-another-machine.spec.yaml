@@ -2,11 +2,6 @@ description: 'a workspace of another Mac stops through that Mac, and stays stopp
 env: mini-workspace
 runs:
     - command: 'machines stop ci-1 --on mac-mini'
-      exit: 2
-      stderr: |
-          Error: refusing to stop without --yes
-          Hint: re-run with --yes
-    - command: 'machines stop ci-1 --yes --on mac-mini'
       exit: 0
       stdout: |
           	On mac-mini:

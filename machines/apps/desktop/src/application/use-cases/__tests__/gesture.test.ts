@@ -64,6 +64,28 @@ describe('gesture', () => {
         expect(running).toStrictEqual({ answer: 'yes', kind: 'running', progress: [] });
     });
 
+    test("a yes to the engine's own question answers with the names it asked about", () => {
+        // Given - a gesture the engine asked yes or no about two names
+        const asked = refusal({
+            code: 'confirm.yes-needed',
+            detail: { level: 'yes-no', name: 'base-ubuntu@2026.10.20, old-vm' },
+            message: 'refusing without --yes: base-ubuntu@2026.10.20, old-vm',
+            type: 'needs-confirmation',
+        });
+        const ask = askOf(asked);
+
+        // When - the owner says yes
+        const running =
+            ask && step(walk([{ ask, kind: 'start' }]), { answer: '', kind: 'confirm' });
+
+        // Then - it runs answered by those names, which the engine refuses once they change
+        expect(running).toStrictEqual({
+            answer: 'base-ubuntu@2026.10.20, old-vm',
+            kind: 'running',
+            progress: [],
+        });
+    });
+
     test('a cancel at the confirm sends nothing and returns to idle', () => {
         // Given - a gesture asking
         const asking = walk([{ ask: ASK_YES, kind: 'start' }]);

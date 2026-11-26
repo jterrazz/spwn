@@ -19,9 +19,9 @@ func TestAVMsHoldSaysWhoKeepsItAndWhetherItIsSafeToDelete(t *testing.T) {
 		want machines.Hold
 	}{
 		"a server": {machines.VM{Lifetime: machines.AlwaysOn, State: machines.Running, Creator: "studio-os-fe"},
-			machines.Hold{State: machines.HoldAlwaysOn, Sentence: "Always on. Stopping it needs its name typed."}},
+			machines.Hold{State: machines.HoldAlwaysOn, Sentence: "Always on. Stopping it asks yes or no."}},
 		"a server being created": {machines.VM{Lifetime: machines.AlwaysOn, State: machines.Creating, Creator: "studio-os-fe"},
-			machines.Hold{State: machines.HoldAlwaysOn, Sentence: "Always on. Stopping it needs its name typed."}},
+			machines.Hold{State: machines.HoldAlwaysOn, Sentence: "Always on. Stopping it asks yes or no."}},
 		"its Mac not seen": {machines.VM{Lifetime: machines.AlwaysOn, State: machines.UnknownState},
 			machines.Hold{State: machines.HoldNotSeen, Sentence: "Not seen: its Mac does not answer, so nothing says what holds it."}},
 		"being created by a session": {machines.VM{Lifetime: machines.Persistent, State: machines.Creating, Creator: "studio-os-fe"},

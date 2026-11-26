@@ -6,7 +6,6 @@ import (
 	"strconv"
 
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
-	"github.com/jterrazz/studio-station/apps/engine/core/confirm"
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 	coremachine "github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/platform/local"
@@ -97,7 +96,7 @@ func (p settingsPublic) Declare(ctx context.Context, d catalog.Declares, by stri
 }
 
 func (p settingsPublic) Undeclare(ctx context.Context, d catalog.Declares) error {
-	in := portscalls.UndeclareIn{Port: strconv.Itoa(d.Port), Confirm: confirm.Yes}
+	in := portscalls.UndeclareIn{Port: strconv.Itoa(d.Port)}
 	_, err := call.Invoke(ctx, p.calls, coremachine.Ref{}, portscalls.Undeclare, in, nil)
 	if f, ok := errors.AsType[*fail.Error](err); ok && f.Code == ports.CodeNotDeclared {
 		return nil

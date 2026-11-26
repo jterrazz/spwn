@@ -58,7 +58,7 @@ var remove = call.Call[deps, removeIn, struct{}]{
 	Name: "apps.remove", Section: section.Apps, Where: call.AtTarget, Applies: appsSection, Confirm: confirm.Remove,
 	Errors: []fail.Code{confirm.YesNeeded},
 	Run: func(_ context.Context, d deps, in removeIn, _ call.Progress) (struct{}, error) {
-		if err := confirm.Require(confirm.For(confirm.Remove, machine.Computer), in.App, in.Confirm); err != nil {
+		if err := confirm.Require(confirm.Of(confirm.Remove, machine.Computer), in.App, in.Confirm); err != nil {
 			return struct{}{}, err
 		}
 		delete(d.installed, in.App)

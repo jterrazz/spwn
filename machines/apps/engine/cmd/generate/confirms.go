@@ -27,7 +27,7 @@ type callConfirmation struct {
 }
 
 func confirmationOf(a confirm.Action, k machine.Kind) confirmation {
-	return confirmation{Confirm: string(a), Consequence: a.Consequence(), Form: string(confirm.For(a, k))}
+	return confirmation{Confirm: string(a), Consequence: a.Consequence(), Form: string(confirm.Of(a, k))}
 }
 
 // value: confirms.json, each confirmed call's action, consequence and form

@@ -3,7 +3,7 @@ fixture:
     - ./__fixtures__/tart-store/
     - ./__fixtures__/vms-taken/
 runs:
-    - command: 'init --name m --yes </dev/null'
+    - command: 'init --name m </dev/null'
       exit: 1
       stdout: |
           # To move

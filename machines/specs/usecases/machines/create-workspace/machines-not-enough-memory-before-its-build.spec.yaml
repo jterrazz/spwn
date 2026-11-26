@@ -8,7 +8,7 @@ runs:
           machine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }
           extends: [base-ubuntu]
       exit: 0
-    - command: 'machines create web --from studio-linux --memory 60G --yes'
+    - command: 'machines create web --from studio-linux --memory 60G'
       exit: 2
       stderr: |
           Error: not enough memory on macbook-pro: 60 GB asked, 4 GB left for VMs

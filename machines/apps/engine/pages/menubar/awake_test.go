@@ -19,7 +19,7 @@ func TestAwakeOffersTheSwitchesThisMacHas(t *testing.T) {
 	now := time.Date(2026, 11, 3, 10, 30, 0, 0, time.UTC)
 	offered := func(caps machine.Capabilities) []string {
 		r := awake.Report{Now: now, Engine: awake.EngineRunning, Mac: "this", Reading: awake.Reading{Source: "ac"}, Caps: caps}
-		p := Awake(pageawake.AllMachines{Now: now, Zone: time.UTC, Reports: []awake.Report{r}, This: "this"}, page.Context{Machine: "this"})
+		p := Awake(pageawake.AllMachines{Now: now, Zone: time.UTC, Reports: []awake.Report{r}, This: "this"}, page.Context{Machine: "this"}, nil)
 		ids := make([]string, 0, len(p.Actions))
 		for _, a := range p.Actions {
 			ids = append(ids, a.ID)
@@ -66,7 +66,7 @@ func TestKeepAwakeForPicksTheTermInForce(t *testing.T) {
 	now := time.Date(2026, 11, 3, 10, 30, 0, 0, time.UTC)
 	picked := func(s *awake.Session) []string {
 		r := awake.Report{Now: now, Engine: awake.EngineRunning, Mac: "this", Reading: awake.Reading{Source: "ac"}, Caps: machine.Capabilities{Engine: true}, Session: s}
-		p := Awake(pageawake.AllMachines{Now: now, Zone: time.UTC, Reports: []awake.Report{r}, This: "this"}, page.Context{Machine: "this"})
+		p := Awake(pageawake.AllMachines{Now: now, Zone: time.UTC, Reports: []awake.Report{r}, This: "this"}, page.Context{Machine: "this"}, nil)
 		var ids []string
 		for _, a := range p.Actions {
 			if a.Picked {
@@ -98,7 +98,7 @@ func TestAwakeSendsTheEndItHoldsUntil(t *testing.T) {
 	r := awake.Report{Now: now, Engine: awake.EngineRunning, Mac: "this", Reading: awake.Reading{Source: "ac"},
 		Caps:    machine.Capabilities{Engine: true, Lid: true, Battery: true},
 		Session: &awake.Session{StartedAt: now.Add(-time.Hour), Until: until, For: 4 * time.Hour}}
-	p := Awake(pageawake.AllMachines{Now: now, Zone: time.UTC, Reports: []awake.Report{r}, This: "this"}, page.Context{Machine: "this"})
+	p := Awake(pageawake.AllMachines{Now: now, Zone: time.UTC, Reports: []awake.Report{r}, This: "this"}, page.Context{Machine: "this"}, nil)
 	for _, a := range p.Actions {
 		switch a.ID {
 		case ActionUntil:
@@ -119,7 +119,37 @@ func awakeOf(t *testing.T, reports []awake.Report, silent ...pageawake.Silent) p
 	page.Strict(true)
 	defer page.Strict(false)
 	now := time.Date(2026, 11, 7, 10, 30, 0, 0, time.UTC)
-	return Awake(pageawake.AllMachines{Now: now, Zone: time.UTC, Reports: reports, This: "this", Silent: silent}, page.Context{Machine: "this"})
+	return Awake(pageawake.AllMachines{Now: now, Zone: time.UTC, Reports: reports, This: "this", Silent: silent}, page.Context{Machine: "this"}, nil)
+}
+
+// invariant: ADR-097: Change… on a Mac that never sleeps asks what the
+// engine grades: nothing when it hosts no server, a yes or no naming the
+// server it hosts, answered yes once the owner says yes.
+func TestLetSleepAsksWhatTheEngineGrades(t *testing.T) {
+	now := time.Date(2026, 11, 7, 10, 30, 0, 0, time.UTC)
+	bySleepFacts := func(_ string, _ machine.Kind, facts ...string) string {
+		if slices.Contains(facts, FactHostsServer) {
+			return LevelYesNo
+		}
+		return LevelNone
+	}
+	letSleep := func(servers []string) page.Action {
+		r := awake.Report{Now: now, Engine: awake.EngineRunning, Mac: "mini", Caps: machine.Capabilities{Engine: true}, NeverSleeps: true, Servers: servers}
+		p := Awake(pageawake.AllMachines{Now: now, Zone: time.UTC, Reports: []awake.Report{r}, This: "this"}, page.Context{Machine: "this"}, bySleepFacts)
+		for _, a := range p.Actions {
+			if a.ID == ActionChange+"mini" {
+				return a
+			}
+		}
+		t.Fatal("a Mac that never sleeps offers no Change")
+		return page.Action{}
+	}
+	if a := letSleep(nil); a.Confirm != nil || a.Run.In["Confirm"] != "" {
+		t.Fatalf("with no server, let sleep asks %+v and sends %v", a.Confirm, a.Run.In)
+	}
+	if a := letSleep([]string{"infra"}); a.Confirm == nil || !strings.Contains(a.Confirm.Lines[0].Text, "infra") || a.Run.In["Confirm"] != "yes" {
+		t.Fatalf("with infra, let sleep asks %+v and sends %v", a.Confirm, a.Run.In)
+	}
 }
 
 func notes(s *page.Section) []string {

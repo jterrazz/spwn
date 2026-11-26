@@ -13,7 +13,7 @@ func TestAServerWhoseCheckFailsNeedsYouAndOneNotAnsweringYetDoesNot(t *testing.T
 	ref := machine.Ref{Name: "api", On: "mini"}
 	server := VM{Name: "api", Lifetime: AlwaysOn, State: Running, CheckStatus: CheckStatus{State: CheckFailing, Since: time.Date(2026, 11, 14, 10, 1, 0, 0, time.Local)}}
 	f, ok := vmFinding(ref, server, "", false)
-	if !ok || f.Severity != finding.Broken || f.Fix.Call != "machines.restart" || f.Fix.Args["Name"] != "api" || f.Fix.On != "mini" || f.Fix.Confirm != "api" || f.Text != "api check failing since 10:01" || f.Detail != "mini. Since 10:01." {
+	if !ok || f.Severity != finding.Broken || f.Fix.Call != "machines.restart" || f.Fix.Args["Name"] != "api" || f.Fix.On != "mini" || f.Fix.Confirm != "" || f.Text != "api check failing since 10:01" || f.Detail != "mini. Since 10:01." {
 		t.Fatalf("a server whose check fails: %+v, %v", f, ok)
 	}
 	server.CheckStatus = CheckStatus{State: CheckWaiting}
@@ -47,7 +47,7 @@ func TestAServerInALoopIsOfferedItsRestartAndABrokenOneStopsOrRestarts(t *testin
 	recent := []time.Time{now, now, now, now, now}
 	server := VM{Name: "api", Lifetime: AlwaysOn, State: Broken, Restarts: Restarts{Looping: true, Recent: recent}}
 	f, ok := vmFinding(ref, server, "", false)
-	if !ok || f.Severity != finding.Broken || f.Fix.Call != "machines.restart" || f.Fix.Args["Name"] != "api" || f.Fix.On != "mini" || f.Fix.Confirm != "api" || f.Text != "api is in a loop: ↺ 5 in 10 min" {
+	if !ok || f.Severity != finding.Broken || f.Fix.Call != "machines.restart" || f.Fix.Args["Name"] != "api" || f.Fix.On != "mini" || f.Fix.Confirm != "" || f.Text != "api is in a loop: ↺ 5 in 10 min" {
 		t.Fatalf("a server in a loop: %+v, %v", f, ok)
 	}
 	if got := GesturesOf(server); !slices.Equal(got, []Gesture{GestureStop, GestureRestart}) {
@@ -55,7 +55,7 @@ func TestAServerInALoopIsOfferedItsRestartAndABrokenOneStopsOrRestarts(t *testin
 	}
 	broken := VM{Name: "api", Lifetime: AlwaysOn, State: Broken, Detail: BrokenDetail()}
 	f, ok = vmFinding(ref, broken, "", false)
-	if !ok || f.Severity != finding.Broken || f.Fix.Call != "machines.restart" || f.Fix.Command != "" || f.Fix.Args["Name"] != "api" || f.Fix.On != "mini" || f.Fix.Confirm != "api" || f.Text != "api is broken: rebooting in a loop" {
+	if !ok || f.Severity != finding.Broken || f.Fix.Call != "machines.restart" || f.Fix.Command != "" || f.Fix.Args["Name"] != "api" || f.Fix.On != "mini" || f.Fix.Confirm != "" || f.Text != "api is broken: rebooting in a loop" {
 		t.Errorf("a broken server: %+v, %v", f, ok)
 	}
 	broken.Lifetime = Persistent
@@ -91,7 +91,7 @@ func TestEveryVMFindingButTheTwoPathOnesNamesTheCallThatFixesIt(t *testing.T) {
 		"powered off inside": {VM{Name: "vm-1", Lifetime: AlwaysOn, State: Stopped, Detail: PoweredOffInside}, "machines.start", "VM", ""},
 		"ended unexpectedly": {VM{Name: "vm-1", Lifetime: Persistent, State: Stale}, "machines.start", "VM", ""},
 		"broken workspace":   {VM{Name: "vm-1", Lifetime: Persistent, State: Broken, Detail: BrokenDetail()}, "machines.delete", "VM", "vm-1"},
-		"guest absent":       {VM{Name: "vm-1", Lifetime: Persistent, State: Running, Guest: "absent"}, "machines.restart", "Name", "vm-1"},
+		"guest absent":       {VM{Name: "vm-1", Lifetime: Persistent, State: Running, Guest: "absent"}, "machines.restart", "Name", ""},
 	} {
 		f, ok := vmFinding(ref, c.vm, " --on mini", false)
 		if !ok || f.Fix.Call != c.call || f.Fix.On != "mini" || f.Fix.Confirm != c.confirm || f.Fix.Command == "" {

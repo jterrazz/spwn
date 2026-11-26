@@ -94,7 +94,7 @@ var Delete = call.Call[Deps, DeleteIn, []images.Record]{
 		if in.Version != "" {
 			name += "@" + in.Version
 		}
-		if err := confirm.Require(confirm.For(confirm.DeleteImage, d.Kind), name, in.Confirm); err != nil {
+		if err := confirm.Require(confirm.Of(confirm.DeleteImage, d.Kind), name, in.Confirm); err != nil {
 			return nil, err
 		}
 		return d.Images.Delete(ctx, in.Image, in.Version)

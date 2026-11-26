@@ -13,7 +13,7 @@ runs:
       exit: 0
     - command: '--version >/dev/null; printf ''export EDITOR=vim\n\nalias gs=git\n'' > .zshrc'
       exit: 0
-    - command: 'init --yes > /dev/null; printf ''alias ll="ls -l"\n'' >> .zshrc; /bin/cat .zshrc'
+    - command: 'init > /dev/null; printf ''alias ll="ls -l"\n'' >> .zshrc; /bin/cat .zshrc'
       exit: 0
       stdout: |
           export EDITOR=vim

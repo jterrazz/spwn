@@ -305,7 +305,7 @@ func (o Pages) Ports(s *store.Snapshot, subject string) page.Page {
 	listed := v.ports(all)
 	if listed == nil {
 		return o.unreadOr(s, store.Of(store.FamilyPorts, v.this), pagemenubar.PortsID, func() page.Page {
-			return pagemenubar.Ports(ports.Listing{}, pagemenubar.PortsOf{Machine: subject, Now: v.now, Machines: all}, o.ThisMachine)
+			return pagemenubar.Ports(ports.Listing{}, pagemenubar.PortsOf{Machine: subject, Now: v.now, Machines: all, Asks: levels}, o.ThisMachine)
 		})
 	}
 	l := ports.Listing{AllMachines: *listed}
@@ -313,7 +313,7 @@ func (o Pages) Ports(s *store.Snapshot, subject string) page.Page {
 		l.AllMachines = ports.Of(l.AllMachines, subject)
 	}
 	l.Verdict = ports.VerdictOf(l.AllMachines)
-	return pagemenubar.Ports(l, pagemenubar.PortsOf{Machine: subject, Now: v.now, Machines: all}, o.ThisMachine)
+	return pagemenubar.Ports(l, pagemenubar.PortsOf{Machine: subject, Now: v.now, Machines: all, Asks: levels}, o.ThisMachine)
 }
 
 // value: the page a slice that could not be read draws, its why said, or
@@ -372,7 +372,7 @@ func (o Pages) Awake(s *store.Snapshot, _ string) page.Page {
 	this := v.awake(v.this)
 	if this == nil {
 		return o.unreadOr(s, store.Of(store.FamilyAwake, v.this), pagemenubar.AwakeID, func() page.Page {
-			return pagemenubar.Awake(pageawake.AllMachines{Now: v.now, Zone: o.zone(), This: v.this}, o.ThisMachine)
+			return pagemenubar.Awake(pageawake.AllMachines{Now: v.now, Zone: o.zone(), This: v.this}, o.ThisMachine, levels)
 		})
 	}
 	f := pageawake.AllMachines{Now: v.now, Zone: o.zone(), This: v.this, Reports: []awake.Report{*this}}
@@ -387,7 +387,7 @@ func (o Pages) Awake(s *store.Snapshot, _ string) page.Page {
 		}
 		f.Silent = append(f.Silent, silentAwake(h, records[h.Name], v.this))
 	}
-	return pagemenubar.Awake(f, o.ThisMachine)
+	return pagemenubar.Awake(f, o.ThisMachine, levels)
 }
 
 // value: a Mac that does not answer, as it last did: asleep or not, when,

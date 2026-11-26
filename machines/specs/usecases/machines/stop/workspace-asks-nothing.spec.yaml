@@ -1,4 +1,4 @@
-description: 'on a terminal, stop asks yes or no; yes stops the workspace and keeps it'
+description: 'on a terminal, a workspace stops with no question, and the outcome says how to start it again'
 fixture:
     - ../../../__fixtures__/terminal/
 env:
@@ -7,15 +7,13 @@ env:
 runs:
     - command: '--version >/dev/null; terminal --size 100x20 /usr/bin/env -u NO_COLOR COLUMNS=100 "$STATION" machines stop linux-1'
       stdin: |
-          within 10 see Stop linux-1?
-          send y
           within 20 exit 0
           screen
       exit: 0
       stdout: |
-          ┃ Stop linux-1? It is kept, stopped, until you start it
-          ┃
           ✓ linux-1 · stopped, kept
+
+          → station machines start linux-1
     - command: 'machines | /usr/bin/grep linux-1'
       exit: 0
       stdout: |

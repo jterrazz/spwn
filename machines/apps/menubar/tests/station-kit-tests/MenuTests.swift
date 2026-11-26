@@ -60,14 +60,14 @@ final class MenuTests: XCTestCase {
         XCTAssertEqual(read["menu.station"], ["New VM… ⌘N", "Add a Mac…", "Open station in Terminal ⌘T", "-", "Quit Spwn Menu ⌘Q"])
         XCTAssertEqual(read["menu.context.workspace"], ["linux-1 on This Mac", "Open ↩", "Open in Terminal ⌘↩", "Open Vite", "-",
                                                         "Copy [SSH command, Link to Vite, Link to Port 3000]", "Share [Show QR…, A port…]", "Grant a password…", "-",
-                                                        "Stop…", "-", "Delete… (red)"])
+                                                        "Stop", "-", "Delete… (red)"])
         XCTAssertEqual(read["menu.new-vm.on"], ["This Mac · 28 GB free", "✓ mac-mini · 8 GB free", "macbook-air · asleep (off)"])
         XCTAssertEqual(read["menu.new-vm.create"], ["Create ↩", "Create and Open in Terminal ⌥↩"])
         let workspaces = ["✓ linux-1 · on This Mac", "agent-7f · on This Mac", "linux-3 · on mac-mini", "review-bot · on mac-mini"]
         XCTAssertEqual(read["menu.grant.to"], ["✓ linux-1", "agent-7f"])
         XCTAssertEqual(read["menu.share-port.of"], workspaces)
         XCTAssertEqual(read["menu.context.stopped"], ["api on This Mac", "Open ↩", "-", "Start", "-", "Delete… (red)"])
-        XCTAssertEqual(read["menu.context.server.down"]?.contains("Restart… (red)"), true)
+        XCTAssertEqual(read["menu.context.server.down"]?.contains("Restart"), true)
         XCTAssertEqual(read["menu.context.mac"], ["mac-mini", "Open ↩", "New VM on mac-mini… ⌘N", "Open in Terminal ⌘T"])
         XCTAssertEqual(read["menu.context.mac.asleep"], ["macbook-air", "Open ↩", "Wake macbook-air"])
         XCTAssertEqual(read["menu.context.grant"], ["GitHub granted to linux-1", "Remove… (red)"])
@@ -75,7 +75,7 @@ final class MenuTests: XCTestCase {
         XCTAssertEqual(read["menu.page.mac"], ["mac-mini", "Open in Terminal ⌘T", "-", "Restart…", "Stop everything… (red)", "-", "Forget… (red)"])
         XCTAssertEqual(read["menu.page.this-mac"], ["This Mac", "Open in Terminal ⌘T", "-", "Stop everything… (red)"])
         XCTAssertEqual(read["menu.page.mac.asleep"], ["macbook-air", "Wake macbook-air", "-", "Forget… (red)"])
-        XCTAssertEqual(read["menu.page.server"], ["infra on mac-mini", "Restart… (red)", "Stop… (red)", "-", "Delete… (red)"])
+        XCTAssertEqual(read["menu.page.server"], ["infra on mac-mini", "Restart…", "Stop… (red)", "-", "Delete… (red)"])
         XCTAssertEqual(read["menu.page.ports"], ["Share a port…", "Declare a port public…"])
     }
 
@@ -89,11 +89,13 @@ final class MenuTests: XCTestCase {
     }
 
     // invariant: picking an entry does what it says: a link opens or is
-    // copied, Open goes to the row's page, a verb that asks first opens
-    // its question, the app's own Quit quits.
+    // copied, Open goes to the row's page, a verb that asks nothing runs
+    // at once, one that asks first opens its question, the app's own Quit
+    // quits.
     func testPickingAnEntryDoesWhatItSays() throws {
         var did: [String] = []
-        var h = PopoverHandlers(confirm: { did.append("asks " + ($0?.id ?? "")) }, open: { did.append("opens " + $0.absoluteString) },
+        var h = PopoverHandlers(run: { a, _ in did.append("runs " + (a.id ?? "")) },
+                                confirm: { did.append("asks " + ($0?.id ?? "")) }, open: { did.append("opens " + $0.absoluteString) },
                                 quit: { did.append("quits") },
                                 copy: { did.append("copies " + $0) })
         h.push = { did.append("goes to " + $0) }
@@ -101,14 +103,14 @@ final class MenuTests: XCTestCase {
         let page = try XCTUnwrap(try Stories.load(root: Tree.stories).first { $0.id == "menu.context.workspace" }?.state.shown)
         let model = MenuModel.context(try XCTUnwrap(page.sections?.flatMap { $0.items ?? [] }.compactMap(\.row).first { $0.id == "linux-1" }), actions: page.actions ?? [])
         let entries = model.items + model.items.flatMap(\.submenu)
-        for title in ["Open", "Open Vite", "SSH command", "Stop…"] {
+        for title in ["Open", "Open Vite", "SSH command", "Stop", "Delete…"] {
             pick(try XCTUnwrap(entries.first { $0.title == title }, title), nav: "menubar.machine:linux-1")
         }
         let home = try XCTUnwrap(try Stories.load(root: Tree.stories).first { $0.id == "menu.station" }?.state.shown)
         for item in MenuModel.station(home).items where item.id == MenuModel.quit {
             pick(item, nav: nil)
         }
-        XCTAssertEqual(did, ["goes to menubar.machine:linux-1", "opens https://macbook-pro.tail77a797.ts.net:40001", "copies ssh linux-1", "asks stop@linux-1", "quits"])
+        XCTAssertEqual(did, ["goes to menubar.machine:linux-1", "opens https://macbook-pro.tail77a797.ts.net:40001", "copies ssh linux-1", "runs stop@linux-1", "asks delete@linux-1", "quits"])
     }
 
     // value: a native menu as the owner reads it: its header, each entry's

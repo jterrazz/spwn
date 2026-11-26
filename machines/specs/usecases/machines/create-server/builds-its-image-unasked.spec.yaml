@@ -1,0 +1,13 @@
+description: 'no image on This Mac: a server''s create asks nothing, even piped, and says it builds the image first'
+env: one-mac
+runs:
+    - command: 'machines create infra --server'
+      exit: 2
+      stderr: |
+          base-ubuntu is built first, which takes several minutes
+          Error: this station is not a released version: there is no release binary to put in the image
+          Hint: download station-linux-arm64 from https://github.com/jterrazz/spwn/releases, then station images build base-ubuntu --binary <that file>
+    - command: 'machines --json | /usr/bin/jq -c ''[.macs[].vms[].name]'''
+      exit: 0
+      stdout: |
+          []

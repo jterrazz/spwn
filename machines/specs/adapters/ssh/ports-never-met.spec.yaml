@@ -26,7 +26,7 @@ runs:
       stderr: |
           Error: no Mac has connected to this VM yet
           Hint: on the VM's Mac: station engine start
-    - command: '--version >/dev/null; STATION_MACHINE_KIND=linux "$STATION" ports stop-sharing 3000 --yes'
+    - command: '--version >/dev/null; STATION_MACHINE_KIND=linux "$STATION" ports stop-sharing 3000'
       exit: 1
       stderr: |
           Error: no Mac has connected to this VM yet

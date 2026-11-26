@@ -11,7 +11,7 @@ runs:
           machine: { kind: computer, system: { os: macos } }
           apps: [jq, postgres]
       exit: 0
-    - command: 'init --yes > /dev/null'
+    - command: 'init > /dev/null'
       exit: 0
     - command: '--version >/dev/null; printf ''alias ll="ls -l"\n'' >> .zshrc'
       exit: 0

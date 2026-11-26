@@ -10,7 +10,6 @@ import {
     everyOutcomeBroken,
     freeCaches,
     freed,
-    freeHeld,
     freeIt,
     freesAsked,
     freeStation,
@@ -80,7 +79,7 @@ describe('unused', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test("its gesture sends exactly the engine's names, none of Kept, asks the engine's subject typed, and reads again", async () => {
+    test("its gesture sends exactly the engine's names, none of Kept, asks yes or no naming them, and reads again", async () => {
         // Given - Storage over leftovers, ~/.tart kept beside the two rows to free, its requests kept
         const stage = staged(recordingFor('leftovers'));
         const consequence = content(
@@ -95,11 +94,11 @@ describe('unused', () => {
                 images: readsAsked(stage, 'images.list'),
             };
 
-            // When - Free 12 GB is pressed, the subject the engine asks typed, and confirmed
+            // When - Free 12 GB is pressed, and the engine's question, which types nothing, answered yes
             await visitor.click(within(disk, freeStation));
             const asked = dialog('Free 12 GB on macbook-pro?');
             await visitor.see(within(asked, consequence));
-            await visitor.fill(within(asked, field(`Type ${SUBJECT} to confirm`)), SUBJECT);
+            await visitor.gone(within(asked, field(`Type ${SUBJECT} to confirm`)));
             await visitor.click(within(asked, freeIt));
 
             // Then - what was freed is held, and the rows leave
@@ -117,42 +116,16 @@ describe('unused', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test('a name typed otherwise is refused, nothing is sent with it, and nothing is read again', async () => {
-        // Given - Storage over leftovers, the engine's question open
-        const stage = staged(recordingFor('leftovers'));
-        let before = 0;
-        const result = await component.render(storageOn(stage), async (visitor) => {
-            await visitor.click(within(disk, freeStation));
-            const asked = dialog('Free 12 GB on macbook-pro?');
-            const typed = within(asked, field(`Type ${SUBJECT} to confirm`));
-            await visitor.see(typed);
-            before = readsAsked(stage, 'disk.read');
-
-            // When - a name the engine did not ask is typed
-            await visitor.fill(typed, 'old-vm');
-
-            // Then - Free is held, and the rows stay
-            await visitor.see(within(asked, freeHeld));
-            await visitor.see(within(freed, content('old-vm')));
-        });
-        expect(freesAsked(stage)).toStrictEqual([{ Names: NAMES }]);
-        expect(readsAsked(stage, 'disk.read')).toBe(before);
-        expect(result.errors.text).toBe('');
-    });
-
     test('an outcome the engine says broken is held with its reason, the others as freed', async () => {
         // Given - Storage over old-home-running, the old folder and the unused image to free while tart runs
-        const subject = 'base-ubuntu@2026.10.20, ~/.tart';
         const result = await component.render(
             storageOver(recordingFor('old-home-running')),
             async (visitor) => {
                 await visitor.see(within(freed, content('Old folder')));
 
-                // When - Free 7 GB is confirmed with the engine's subject typed
+                // When - Free 7 GB is answered yes
                 await visitor.click(within(disk, button('Free 7 GB')));
-                const asked = dialog('Free 7 GB on macbook-pro?');
-                await visitor.fill(within(asked, field(`Type ${subject} to confirm`)), subject);
-                await visitor.click(within(asked, freeIt));
+                await visitor.click(within(dialog('Free 7 GB on macbook-pro?'), freeIt));
 
                 // Then - ~/.tart is held as failed with the engine's reason, the image as freed
                 await visitor.see(within(done, content('tart is running')));
@@ -224,14 +197,11 @@ describe('unused', () => {
 
     test('every outcome broken is held as failed with its reason, and no done sits beside the button', async () => {
         // Given - Storage over old-home-running, every outcome of its free broken and the rows still listed
-        const subject = 'base-ubuntu@2026.10.20, ~/.tart';
         const page = storageOver(everyOutcomeBroken(recordingFor('old-home-running')));
         const result = await component.render(page, async (visitor) => {
-            // When - Free 7 GB is confirmed with the engine's subject typed
+            // When - Free 7 GB is answered yes
             await visitor.click(within(disk, button('Free 7 GB')));
-            const asked = dialog('Free 7 GB on macbook-pro?');
-            await visitor.fill(within(asked, field(`Type ${subject} to confirm`)), subject);
-            await visitor.click(within(asked, freeIt));
+            await visitor.click(within(dialog('Free 7 GB on macbook-pro?'), freeIt));
 
             // Then - each reason is held, the rows stay listed, and the Disk panel says nothing is done
             await visitor.see(within(done, content('the image is in use')));
@@ -250,14 +220,18 @@ describe('unused', () => {
         const result = await component.render(storageOn(stage), async (visitor) => {
             await visitor.click(within(disk, button('Free 3 GB')));
             const asked = dialog('Free 3 GB on macbook-pro?');
-            await visitor.see(within(asked, field(`Type ${own} to confirm`)));
+            await visitor.see(
+                within(asked, content(`Deleted for good: ${own}.`, { exact: false })),
+            );
 
             // When - the question is cancelled, then the Free of the mini's own section pressed
             await visitor.click(within(asked, button('Cancel')));
             const miniDisk = within(MINI, region('Disk'));
             await visitor.click(within(miniDisk, button('Free 2 GB')));
             const miniAsked = dialog('Free 2 GB on mac-mini?');
-            await visitor.see(within(miniAsked, field(`Type ${other} to confirm`)));
+            await visitor.see(
+                within(miniAsked, content(`Deleted for good: ${other}.`, { exact: false })),
+            );
         });
 
         // Then - each Mac was sent its own names alone
@@ -275,16 +249,19 @@ describe('unused', () => {
         const result = await component.render(storageOn(stage), async (visitor) => {
             await visitor.click(within(disk, freeStation));
             const asked = dialog('Free 12 GB on macbook-pro?');
-            await visitor.fill(within(asked, field(`Type ${SUBJECT} to confirm`)), SUBJECT);
+            await visitor.see(
+                within(asked, content(`Deleted for good: ${SUBJECT}.`, { exact: false })),
+            );
 
-            // When - the names change, and the old subject is confirmed
+            // When - the names change, and the old question answered yes
             stage.restart(HELLO_AGAIN, narrowedTo(recordingFor('leftovers'), first, SUBJECT));
             await visitor.see(within(disk, button('Free 3 GB')));
             await visitor.click(within(asked, freeIt));
 
-            // Then - the engine says mismatch, the question asks again for the new subject, nothing is done
-            await visitor.see(within(asked, field(`Type ${first} to confirm`)));
-            await visitor.see(within(asked, freeHeld));
+            // Then - the yes named the old names, so the engine asks again for the new ones, nothing is done
+            await visitor.see(
+                within(asked, content(`Deleted for good: ${first}.`, { exact: false })),
+            );
             await visitor.gone(done);
         });
         expect(freesAsked(stage)).toStrictEqual([

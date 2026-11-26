@@ -60,13 +60,12 @@ describe('New machine', () => {
             await visitor.click(NEW_MACHINE);
             await visitor.see(onMini);
 
-            // When - This Mac is picked, gate5 named ephemeral, then launched and confirmed
+            // When - This Mac is picked, gate5 named ephemeral, then launched, which asks nothing
             await visitor.click(within(region('On'), thisMac));
             await visitor.see(onThisMac);
             await visitor.fill(within(onThisMac, field('Name')), 'gate5');
             await visitor.click(within(onThisMac, button('ephemeral')));
             await visitor.click(within(onThisMac, button('Launch')));
-            await visitor.click(within(dialog('Launch gate5?'), button('Launch')));
 
             // Then - the sheet is gone and gate5's page is open
             await visitor.gone(onThisMac);
@@ -85,7 +84,6 @@ describe('New machine', () => {
                 await visitor.fill(within(onMini, field('Name')), 'gate5');
                 await visitor.click(within(onMini, button('8 GB · workspace')));
                 await visitor.click(within(onMini, button('Launch')));
-                await visitor.click(within(dialog('Launch gate5?'), button('Launch')));
 
                 // Then - the mini's engine made it, the sheet is gone and gate5's page is open
                 await visitor.gone(onMini);
@@ -103,7 +101,6 @@ describe('New machine', () => {
             // When - infra is launched on the mini
             await visitor.fill(within(onMini, field('Name')), 'infra');
             await visitor.click(within(onMini, button('Launch')));
-            await visitor.click(within(dialog('Launch infra?'), button('Launch')));
 
             // Then - the sheet stays, with the engine's refusal under the name, off the On row
             const said = content('"infra" is taken (on mac-mini)', { exact: false });
@@ -121,7 +118,6 @@ describe('New machine', () => {
             // When - base-ubuntu is launched on the mini
             await visitor.fill(within(onMini, field('Name')), 'base-ubuntu');
             await visitor.click(within(onMini, button('Launch')));
-            await visitor.click(within(dialog('Launch base-ubuntu?'), button('Launch')));
 
             // Then - the engine's sentence stands under the name
             const said = content("base-ubuntu names a Machinefile of base-ubuntu's chain", {
@@ -140,7 +136,6 @@ describe('New machine', () => {
             // When - Bad_Name is launched on the mini
             await visitor.fill(within(onMini, field('Name')), 'Bad_Name');
             await visitor.click(within(onMini, button('Launch')));
-            await visitor.click(within(dialog('Launch Bad_Name?'), button('Launch')));
 
             // Then - the engine's sentence stands under the name
             const said = content('"Bad_Name" is not a valid name', { exact: false });
@@ -157,7 +152,6 @@ describe('New machine', () => {
             // When - a purpose of 121 characters is launched
             await visitor.fill(within(onMini, field('What is it for?')), 'x'.repeat(121));
             await visitor.click(within(onMini, button('Launch')));
-            await visitor.click(within(dialog('Launch linux-2?'), button('Launch')));
 
             // Then - the engine's words stand under the purpose
             const said = content('a purpose is one line of at most 120 characters', {
@@ -180,7 +174,6 @@ describe('New machine', () => {
             await visitor.gone(within(onThisMac, button('persistent')));
             await visitor.fill(within(onThisMac, field('Name')), 'web');
             await visitor.click(within(onThisMac, button('Launch')));
-            await visitor.click(within(dialog('Launch web?'), button('Launch')));
 
             // Then - the sheet hands over to web's page
             await visitor.gone(onThisMac);
@@ -213,7 +206,6 @@ describe('New machine', () => {
             // When - a purpose of 121 characters is launched
             await visitor.fill(within(onMini, field('What is it for?')), purpose);
             await visitor.click(within(onMini, button('Launch')));
-            await visitor.click(within(dialog('Launch linux-2?'), button('Launch')));
 
             // Then - the engine's sentence stands under the purpose
             const said = content('a purpose is one line of at most 120 characters', {

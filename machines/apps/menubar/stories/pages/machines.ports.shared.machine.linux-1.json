@@ -1968,27 +1968,23 @@
     {
       "label": "Stop",
       "on": "page",
-      "confirm": {
-        "question": "Stop linux-1 on This Mac?",
-        "lines": [
-          {
-            "kind": "text",
-            "text": "Its disk is kept. 3 shared ports stop answering until it starts again."
-          }
-        ],
-        "yes": "Stop linux-1",
-        "no": "Cancel",
-        "icon": "app"
-      },
       "priority": 1,
       "mutates": true,
       "id": "stop",
       "run": {
         "call": "machines.stop",
         "in": {
-          "Confirm": "yes",
           "VM": "linux-1"
         }
+      },
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "linux-1 is stopping"
+          }
+        ]
       }
     },
     {
@@ -2003,6 +1999,7 @@
           }
         ],
         "danger": true,
+        "type": "linux-1",
         "yes": "Delete linux-1",
         "no": "Cancel",
         "icon": "app"
@@ -2013,7 +2010,6 @@
       "run": {
         "call": "machines.delete",
         "in": {
-          "Confirm": "\"linux-1\"",
           "VM": "linux-1"
         }
       }
@@ -2256,26 +2252,12 @@
       "rows": [
         "linux-1:5173"
       ],
-      "confirm": {
-        "question": "Stop sharing linux-1:5173?",
-        "lines": [
-          {
-            "kind": "text",
-            "text": "The link stops answering on your tailnet. What answers on it keeps running inside the VM."
-          }
-        ],
-        "danger": true,
-        "yes": "Stop sharing",
-        "no": "Cancel",
-        "icon": "app"
-      },
       "priority": 3,
       "mutates": true,
       "id": "stop-sharing:linux-1:5173",
       "run": {
         "call": "ports.stop-sharing",
         "in": {
-          "Confirm": "yes",
           "Mac": "\"macbook-pro\"",
           "Port": "\"5173\"",
           "VM": "\"linux-1\""
@@ -2328,26 +2310,12 @@
       "rows": [
         "linux-1:3000"
       ],
-      "confirm": {
-        "question": "Stop sharing linux-1:3000?",
-        "lines": [
-          {
-            "kind": "text",
-            "text": "The link stops answering on your tailnet. What answers on it keeps running inside the VM."
-          }
-        ],
-        "danger": true,
-        "yes": "Stop sharing",
-        "no": "Cancel",
-        "icon": "app"
-      },
       "priority": 3,
       "mutates": true,
       "id": "stop-sharing:linux-1:3000",
       "run": {
         "call": "ports.stop-sharing",
         "in": {
-          "Confirm": "yes",
           "Mac": "\"macbook-pro\"",
           "Port": "\"3000\"",
           "VM": "\"linux-1\""
@@ -2400,26 +2368,12 @@
       "rows": [
         "linux-1:4321"
       ],
-      "confirm": {
-        "question": "Stop sharing linux-1:4321?",
-        "lines": [
-          {
-            "kind": "text",
-            "text": "The link stops answering on your tailnet. What answers on it keeps running inside the VM."
-          }
-        ],
-        "danger": true,
-        "yes": "Stop sharing",
-        "no": "Cancel",
-        "icon": "app"
-      },
       "priority": 3,
       "mutates": true,
       "id": "stop-sharing:linux-1:4321",
       "run": {
         "call": "ports.stop-sharing",
         "in": {
-          "Confirm": "yes",
           "Mac": "\"macbook-pro\"",
           "Port": "\"4321\"",
           "VM": "\"linux-1\""
@@ -2687,29 +2641,25 @@
     {
       "label": "Stop",
       "on": "menu",
-      "confirm": {
-        "question": "Stop linux-1 on This Mac?",
-        "lines": [
-          {
-            "kind": "text",
-            "text": "Its disk is kept. 3 shared ports stop answering until it starts again."
-          }
-        ],
-        "yes": "Stop linux-1",
-        "no": "Cancel",
-        "icon": "app"
-      },
       "priority": 1,
       "mutates": true,
       "id": "stop@menu",
       "run": {
         "call": "machines.stop",
         "in": {
-          "Confirm": "yes",
           "VM": "linux-1"
         }
       },
-      "icon": "stop"
+      "icon": "stop",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "linux-1 is stopping"
+          }
+        ]
+      }
     },
     {
       "label": "Delete",
@@ -2723,6 +2673,7 @@
           }
         ],
         "danger": true,
+        "type": "linux-1",
         "yes": "Delete linux-1",
         "no": "Cancel",
         "icon": "app"
@@ -2733,7 +2684,6 @@
       "run": {
         "call": "machines.delete",
         "in": {
-          "Confirm": "\"linux-1\"",
           "VM": "linux-1"
         }
       },

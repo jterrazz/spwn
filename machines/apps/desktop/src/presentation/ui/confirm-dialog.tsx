@@ -16,6 +16,7 @@ export type ConfirmDialogProps = {
     said?: string | undefined;
     held?: string | undefined;
     destroys?: boolean;
+    instead?: undefined | { label: string; run: () => void };
     onCancel: () => void;
     onConfirm: (typed: string) => void;
 };
@@ -32,6 +33,24 @@ function Held({ held }: { held: string | undefined }) {
     );
 }
 
+type Instead = ConfirmDialogProps['instead'];
+
+function InsteadButton({ instead, onCancel }: { instead: Instead; onCancel: () => void }) {
+    if (instead === undefined) {
+        return null;
+    }
+    return (
+        <Button
+            onClick={() => {
+                onCancel();
+                instead.run();
+            }}
+        >
+            {instead.label}
+        </Button>
+    );
+}
+
 export function ConfirmDialog({
     title,
     verb,
@@ -39,6 +58,7 @@ export function ConfirmDialog({
     said,
     held,
     destroys = false,
+    instead,
     onCancel,
     onConfirm,
 }: ConfirmDialogProps) {
@@ -53,6 +73,7 @@ export function ConfirmDialog({
                 actions={
                     <>
                         <Button onClick={onCancel}>Cancel</Button>
+                        <InsteadButton instead={instead} onCancel={onCancel} />
                         <Button
                             disabled={!ready}
                             onClick={confirm}

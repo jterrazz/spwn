@@ -80,9 +80,9 @@ func hourOfActivity() pageactivity.View {
 func menubarOwnPages() []Fixture {
 	thisMac := menubarHere()
 	return []Fixture{
-		{Name: "menubar.ports.mini", Page: pagemenubar.Ports(miniPorts(), pagemenubar.PortsOf{Machine: "mac-mini"}, thisMac)},
-		{Name: "menubar.ports.linux-1", Page: pagemenubar.Ports(linuxPorts(), pagemenubar.PortsOf{Machine: "linux-1"}, thisMac)},
-		{Name: "menubar.awake.two-macs", Page: pagemenubar.Awake(twoMacsAwake(), thisMac)},
+		{Name: "menubar.ports.mini", Page: pagemenubar.Ports(miniPorts(), pagemenubar.PortsOf{Machine: "mac-mini", Asks: Levels}, thisMac)},
+		{Name: "menubar.ports.linux-1", Page: pagemenubar.Ports(linuxPorts(), pagemenubar.PortsOf{Machine: "linux-1", Asks: Levels}, thisMac)},
+		{Name: "menubar.awake.two-macs", Page: pagemenubar.Awake(twoMacsAwake(), thisMac, Levels)},
 		{Name: "menubar.activity.mac", Page: pagemenubar.Activity(hourOfActivity(), thisMac)},
 	}
 }

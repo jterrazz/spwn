@@ -1,4 +1,4 @@
-description: 'a server stopped with its name typed wants to stay stopped: its Mac''s reboot does not start it'
+description: 'a server stopped by its name stays stopped: its Mac''s reboot does not start it'
 fixture:
     - ../../../__fixtures__/terminal/
 env:

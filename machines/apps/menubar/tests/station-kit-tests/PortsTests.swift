@@ -9,8 +9,8 @@ final class PortsTests: XCTestCase {
 
     // invariant: PO-33: a web share's row opens its link in a click; its QR
     // beside unfolds under it the QR of that link, Copy link, which copies
-    // it, Open, which opens it, and Stop sharing, a y/n whose yes is the
-    // ports.stop-sharing call of that port. Its menu holds the same verbs,
+    // it, Open, which opens it, and Stop sharing, which asks nothing and
+    // runs the ports.stop-sharing call of that port. Its menu holds the same verbs,
     // and a raw share's holds Copy and Stop sharing.
     func testAWebShareOpensItsLinkAndShowsItsQR() async throws {
         let page = try Tree.page("menubar.ports.linux-1")
@@ -27,9 +27,9 @@ final class PortsTests: XCTestCase {
         XCTAssertEqual(PortRow.menu(row, in: actions).map { $0?.label }, ["Open Vite", "Copy link to Vite", "Show QR for Vite", nil, "Stop sharing"])
         XCTAssertEqual(PortRow.menu(rows[1], in: actions).map { $0?.label }, ["Copy link to Port 7000", nil, "Stop sharing"])
         let stop = try XCTUnwrap(PortRow.menu(row, in: actions).last ?? nil)
-        XCTAssertEqual(stop.confirm?.question, "Stop sharing linux-1:5173?")
+        XCTAssertNil(stop.confirm)
         XCTAssertEqual(stop.run?.call, "ports.stop-sharing")
-        XCTAssertEqual(Client.input([:], fixed: stop.run?.in) as NSDictionary, ["VM": "linux-1", "Port": "5173", "Mac": "macbook-pro", "Confirm": "yes"] as NSDictionary)
+        XCTAssertEqual(Client.input([:], fixed: stop.run?.in) as NSDictionary, ["VM": "linux-1", "Port": "5173", "Mac": "macbook-pro"] as NSDictionary)
         var copied: [String] = []
         var opened: [URL] = []
         var asked: [String?] = []
@@ -48,7 +48,7 @@ final class PortsTests: XCTestCase {
 
     // invariant: SPEC A4: a running workspace's Overview has its Ports
     // card, its shares then its first listener with Share, and its menu
-    // offers Share a port… (its sheet), Stop… and Delete…, each its own
+    // offers Share a port… (its sheet), Stop and Delete…, each its own
     // call.
     func testAWorkspaceKeepsItsPortsAndItsVerbs() throws {
         let page = try Tree.page("menubar.vm.linux-1")
@@ -57,7 +57,7 @@ final class PortsTests: XCTestCase {
         XCTAssertEqual(PortsSection.label(card), "Ports")
         XCTAssertEqual(card.rows.map(\.label), ["Vite", "Port 7000"])
         XCTAssertEqual(PortRow.menu(card.rows[0], in: page.actions ?? []).last??.run?.call, "ports.stop-sharing")
-        let items = MenuModel.page(page).items.filter { ["Share a port…", "Stop…", "Delete…"].contains($0.title) }
+        let items = MenuModel.page(page).items.filter { ["Share a port…", "Stop", "Delete…"].contains($0.title) }
         XCTAssertEqual(items.map { $0.action?.run?.call ?? $0.action?.sheet }, ["share-port", "machines.stop", "machines.delete"])
     }
 

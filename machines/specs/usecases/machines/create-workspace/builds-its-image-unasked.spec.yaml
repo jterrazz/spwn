@@ -1,18 +1,10 @@
-description: 'no image on This Mac: create asks to build it, refused off a terminal, --yes starts the build'
+description: 'no image on This Mac: create asks nothing, even piped, and says it builds the image first'
 env: one-mac
 runs:
     - command: 'machines create'
       exit: 2
       stderr: |
-          Error: image base-ubuntu is not built on macbook-pro
-          Hint: station images build base-ubuntu
-    - command: 'machines --json | /usr/bin/jq -c ''[.macs[].vms[].name]'''
-      exit: 0
-      stdout: |
-          []
-    - command: 'machines create --yes'
-      exit: 2
-      stderr: |
+          base-ubuntu is built first, which takes several minutes
           Error: this station is not a released version: there is no release binary to put in the image
           Hint: download station-linux-arm64 from https://github.com/jterrazz/spwn/releases, then station images build base-ubuntu --binary <that file>
     - command: 'machines --json | /usr/bin/jq -c ''[.macs[].vms[].name]'''

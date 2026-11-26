@@ -1,12 +1,11 @@
-description: 'off a terminal, stop sharing without --yes is refused, and the port is still shared'
+description: 'off a terminal, stop sharing asks nothing: the port stops being shared at once'
 env: two-macs
 runs:
     - command: 'ports stop-sharing linux-1 7000'
-      exit: 2
-      stderr: |
-          Error: refusing to stop sharing linux-1:7000 without --yes
-          Hint: re-run with --yes
+      exit: 0
+      stdout: |
+          ●	linux-1:7000	not shared
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"] | {reserved: [.stores.reservations[].guest_port], shared: [.tailnet.shares[].Reserved], remembered: .preferences.services.not_shared}'' world.json'
       exit: 0
       stdout: |
-          {"reserved":[5173,7000],"shared":[40001,40002],"remembered":null}
+          {"reserved":[5173],"shared":[40001],"remembered":null}

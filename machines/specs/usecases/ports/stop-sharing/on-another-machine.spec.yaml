@@ -5,7 +5,7 @@ runs:
       exit: 0
       stdout: |
           https://mac-mini.tail1234.ts.net:40000
-    - command: 'ports stop-sharing infra 8080 --on mac-mini --yes'
+    - command: 'ports stop-sharing infra 8080 --on mac-mini'
       exit: 0
       stdout: |
           	On mac-mini:

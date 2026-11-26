@@ -1,7 +1,7 @@
 description: 'init moves what go install put in ~/go/bin into its new home, by rename'
 fixture: ./__fixtures__/go-bin/
 runs:
-    - command: 'init --name m --yes </dev/null'
+    - command: 'init --name m </dev/null'
       exit: 0
       stdout: |
           # To move

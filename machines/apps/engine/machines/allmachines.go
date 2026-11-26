@@ -141,10 +141,12 @@ type VM struct {
 	Strip *UptimeStrip `json:",omitempty"`
 	// value: what keeps it, and so whether it is safe to delete; the
 	// sections its page has, by its kind; the gestures its header offers, by
-	// its state; all judged by machines.list, nil in any other answer.
+	// its state, and what each asks (AsksOf); all judged by machines.list,
+	// nil in any other answer.
 	Hold     *Hold     `json:",omitempty"`
 	Sections *Sections `json:",omitempty"`
 	Gestures []Gesture `json:",omitempty"`
+	Asks     *Asks     `json:",omitempty"`
 	// value: the memory its process holds on its Mac now, in bytes, as that
 	// Mac's kernel measures it; zero when it does not run or is not measured.
 	UsedBytes int64 `json:",omitempty"`

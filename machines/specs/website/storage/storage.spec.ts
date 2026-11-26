@@ -45,16 +45,20 @@ describe('storage', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test('D9 what nothing uses is freed by its names typed, and the verdict reads nothing to free', async () => {
+    test('D9 what nothing uses is freed by a yes that names it, and the verdict reads nothing to free', async () => {
         // Given - Storage over leftovers, an unused image and the disk of a deleted VM
         const subject = 'base-ubuntu@2026.10.20, old-vm';
         const result = await website.visit('/?world=leftovers&page=storage', async (visitor) => {
             await visitor.see(within(THIS_MAC, heading('12.0 GB can be freed.')));
 
-            // When - Free 12 GB is pressed, and the names the engine asks are typed
+            // When - Free 12 GB is pressed, the dialog names what goes and asks yes or no, and yes is pressed
             await visitor.click(within(thisDisk, button('Free 12 GB')));
             const asked = dialog('Free 12 GB on macbook-pro?');
-            await visitor.fill(within(asked, field(`Type ${subject} to confirm`)), subject);
+            const consequence = content(
+                `Deleted for good: ${subject}. No machine and no file of yours is touched.`,
+            );
+            await visitor.see(within(asked, consequence));
+            await visitor.gone(within(asked, field(`Type ${subject} to confirm`)));
             await visitor.click(within(asked, button('Free')));
 
             // Then - the verdict reads nothing to free, nothing is left to free, and what went is held
@@ -70,10 +74,14 @@ describe('storage', () => {
         // Given - Storage over leftovers, whose History holds no day
         const subject = 'base-ubuntu@2026.10.20, old-vm';
         const result = await website.visit('/?world=leftovers&page=storage', async (visitor) => {
-            // When - Free 12 GB is pressed and confirmed with the names, then the Inbox opened
+            // When - Free 12 GB is pressed and answered yes, then the Inbox opened
             await visitor.click(within(thisDisk, button('Free 12 GB')));
             const asked = dialog('Free 12 GB on macbook-pro?');
-            await visitor.fill(within(asked, field(`Type ${subject} to confirm`)), subject);
+            const consequence = content(
+                `Deleted for good: ${subject}. No machine and no file of yours is touched.`,
+            );
+            await visitor.see(within(asked, consequence));
+            await visitor.gone(within(asked, field(`Type ${subject} to confirm`)));
             await visitor.click(within(asked, button('Free')));
             await visitor.see(within(THIS_MAC, heading('Nothing to free.')));
             await visitor.click(within(banner(), button('Inbox', { exact: false })));

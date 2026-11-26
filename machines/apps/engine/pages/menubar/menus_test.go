@@ -58,11 +58,11 @@ func yesNo(string, coremachine.Kind, ...string) string { return LevelYesNo }
 
 // invariant: SPEC A5: a running workspace's row on its Mac's page opens
 // it, opens its terminal, then offers its own page's verbs grouped: Share,
-// Stop..., Delete... last, in red.
+// Stop, Delete... last, in red.
 func TestAWorkspaceRowsMenuOffersItsOwnPagesVerbs(t *testing.T) {
 	p := macPageOf(t, miniMac, nil)
 	got := rowMenu(t, p, "linux-3")
-	want := []string{"linux-3 on mac-mini", "Open", "Open in Terminal", "-", "Copy [SSH command]", "Share [A port...]", "-", "Stop...", "-", "Delete... (red)"}
+	want := []string{"linux-3 on mac-mini", "Open", "Open in Terminal", "-", "Copy [SSH command]", "Share [A port...]", "-", "Stop", "-", "Delete... (red)"}
 	if !slices.Equal(got, want) {
 		t.Fatalf("linux-3's menu %q", got)
 	}
@@ -133,16 +133,16 @@ func TestAMacRowsMenuOnHome(t *testing.T) {
 	}
 }
 
-// invariant: a server's row on Home asks Restart as its page does, down
-// or up, since machines.restart asks a server's name typed; the item is
-// red, as its typed question is.
+// invariant: a server's row on Home asks Restart as its page does: an up
+// server's yes or no, a down one's nothing, since its restart is the
+// repair (ADR-097).
 func TestAServerRowsMenuOnHomeRestartsAsItsPageDoes(t *testing.T) {
 	w := newHeroWorld()
 	w.r.Asks = graded
-	if got := rowMenu(t, homeOf(t, w), "infra"); !slices.Contains(got, "Restart... (red)") || !slices.Contains(got, "Delete... (red)") || got[0] != "infra on mac-mini" {
+	if got := rowMenu(t, homeOf(t, w), "infra"); !slices.Contains(got, "Restart...") || !slices.Contains(got, "Delete... (red)") || got[0] != "infra on mac-mini" {
 		t.Fatalf("infra's menu %q", got)
 	}
-	if got := rowMenu(t, homeOf(t, w.down()), "infra"); !slices.Contains(got, "Restart... (red)") {
+	if got := rowMenu(t, homeOf(t, w.down()), "infra"); !slices.Contains(got, "Restart") {
 		t.Fatalf("a down server's menu %q", got)
 	}
 }

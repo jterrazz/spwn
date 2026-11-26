@@ -2,9 +2,9 @@ import type { CallName, MachinesMacView, MachinesVM } from '@jterrazz/station-ap
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 
-import { targetOf } from '../../../domain/machines/machines';
+import { isRunning, targetOf } from '../../../domain/machines/machines';
 import { useGesture } from '../../dependencies/use-gesture';
-import { GestureButton, GestureOutcome, marked } from '../../kit/gestures';
+import { GestureButton, GestureOutcome, marked, useStart } from '../../kit/gestures';
 import type { Route } from '../../navigation/route';
 import { wordOf } from '../../words/engine-words';
 import { machineKindOf } from '../../words/provisional';
@@ -31,9 +31,13 @@ function useLifecycle({ mac, vm }: VmProps) {
         target,
     };
     return {
-        restart: useGesture('machines.restart', { ...spec, input: { Name: vm.Name } }),
+        restart: useGesture('machines.restart', {
+            ...spec,
+            asks: vm.Asks?.Restart,
+            input: { Name: vm.Name },
+        }),
         start: useGesture('machines.start', { ...spec, input: { VM: vm.Name } }),
-        stop: useGesture('machines.stop', { ...spec, input: { VM: vm.Name } }),
+        stop: useGesture('machines.stop', { ...spec, asks: vm.Asks?.Stop, input: { VM: vm.Name } }),
         'try-again': useGesture('machines.start', { ...spec, input: { VM: vm.Name } }),
     };
 }
@@ -74,23 +78,51 @@ export function LifecycleGestures({ mac, vm, terminal }: VmProps & { terminal?: 
     );
 }
 
+// value: what a delete takes with it, said in its question: "Delete linux-1 and its 40 GB disk?".
+export function deleteTitle(vm: MachinesVM): string {
+    return vm.SizeGB > 0
+        ? `Delete ${vm.Name} and its ${vm.SizeGB} GB disk?`
+        : `Delete ${vm.Name} and its disk?`;
+}
+
 export function DeleteGesture({ mac, vm, go }: VmProps & { go: (to: Route) => void }) {
+    const started = useStart();
+    const target = targetOf({ mac });
+    const stop = useGesture('machines.stop', {
+        asks: vm.Asks?.Stop,
+        input: { VM: vm.Name },
+        kind: machineKindOf(vm),
+        rereads: LIFECYCLE_REREADS,
+        subject: vm.Name,
+        target,
+    });
     const remove = useGesture('machines.delete', {
+        asks: vm.Asks?.Delete,
         input: { VM: vm.Name },
         onDone: () => {
             go({ page: 'home' });
         },
         rereads: LIFECYCLE_REREADS,
         subject: vm.Name,
-        target: targetOf({ mac }),
+        target,
     });
+    // invariant: a VM that runs offers the safe way out of its delete: stop it, its disk kept.
+    const instead = isRunning(vm)
+        ? {
+              label: 'Stop instead',
+              run: () => {
+                  started(stop, { destroys: false, title: `Stop ${vm.Name}?`, verb: 'Stop' });
+              },
+          }
+        : undefined;
     return (
         <div className={styles.destructive}>
             <GestureButton
                 gesture={remove}
                 held={holdAgainst(vm.Hold)}
+                instead={instead}
                 label={`Delete ${vm.Name}…`}
-                title={`Delete ${vm.Name}?`}
+                title={deleteTitle(vm)}
                 variant="danger"
                 verb="Delete"
             />

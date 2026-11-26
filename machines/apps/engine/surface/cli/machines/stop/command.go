@@ -28,23 +28,24 @@ type Input struct {
 }
 
 func Command(d Deps, env kit.Env) *cobra.Command {
-	// invariant: a workspace's stop asks yes or no (--yes), a server's its
-	// name typed (--confirm=<name>), which --yes never answers; the VM's own
-	// Mac decides which, so the question is put once its call has refused.
+	// invariant: a workspace's stop asks nothing, a server's asks yes or no
+	// (--yes, or --confirm=<name>), the VM's own Mac grading which
+	// (confirm.Of), so the question is put once its call has refused. The
+	// outcome says how to undo it.
 	return kit.Command(kit.Leaf[Input]{
 		Use:     "stop <vm>",
 		Short:   "Stop a VM; it is kept, with its disk, until started or deleted",
-		Example: "  station machines stop linux-1 --yes\n  station machines stop infra --confirm=infra",
+		Example: "  station machines stop linux-1\n  station machines stop infra --yes",
 		Args:    cobra.ExactArgs(1),
 		Declare: func(f *pflag.FlagSet, in *Input) {
-			f.StringVar(&in.Confirm, "confirm", "", "a server's name, typed, to stop it without the question")
+			f.StringVar(&in.Confirm, "confirm", "", "the VM's name, typed, to stop a server without the question")
 		},
 		Bind: func(in *Input, args []string) error {
 			in.Name = args[0]
 			return nil
 		},
 		Asks:     true,
-		Confirm:  func(in *Input) string { return "Stop " + in.Name + "? It is kept, stopped, until you start it" },
+		Confirm:  func(in *Input) string { return "Stop " + in.Name + "? What it serves stops until you start it again." },
 		Verb:     func(*Input) string { return "stop" },
 		Complete: func([]string, string) []string { return d.Names() },
 		Run: func(ctx context.Context, in *Input, io kit.IO) error {
@@ -59,10 +60,7 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 				first = io.YesAnswer()
 			}
 			out, err := stopIt(first)
-			switch {
-			case typedAsked(err) && in.Confirm == "" && !io.Yes && io.Interactive && io.Prompt != nil:
-				out, err = typed(in.Name, io, stopIt)
-			case yesAsked(err):
+			if yesAsked(err) {
 				err = io.Confirmed(func(answer string) error {
 					out, err = stopIt(answer)
 					return err
@@ -71,37 +69,21 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			switch {
-			case out.Already:
+			if out.Already {
 				return io.Page(pagemachines.Already("stop", in.Name, false, d.ThisMachine), nil)
-			case out.Kind == machine.Server:
-				start := "station machines start " + in.Name
-				if env.Far() {
-					start += " --on " + env.Target().Name
-				}
+			}
+			start := "station machines start " + in.Name
+			if env.Far() {
+				start += " --on " + env.Target().Name
+			}
+			if out.Kind == machine.Server {
 				return io.Page(pagemachines.ServerStopped(in.Name, start, d.ThisMachine), nil)
 			}
-			return io.Page(pagemachines.Change("stop", in.Name, "stopped, kept", d.ThisMachine), nil)
+			p := pagemachines.Change("stop", in.Name, "stopped, kept", d.ThisMachine)
+			p.Hints = []page.Hint{*page.Cmd(start)}
+			return io.Page(p, nil)
 		},
 	}, env)
-}
-
-func typed(name string, io kit.IO, stopIt func(string) (machinescalls.StopOut, error)) (machinescalls.StopOut, error) {
-	answers, err := io.Prompt.Form(pagemachines.StopServerForm(name))
-	if err != nil {
-		return machinescalls.StopOut{}, err
-	}
-	out, err := stopIt(answers["name"])
-	var wrong *fail.Error
-	if errors.As(err, &wrong) && wrong.Code == confirm.Mismatch {
-		return out, fail.New(fail.Declined, confirm.Mismatch, wrong.Subject, wrong.Detail)
-	}
-	return out, err
-}
-
-func typedAsked(err error) bool {
-	var e *fail.Error
-	return errors.As(err, &e) && e.Code == confirm.Needed
 }
 
 func yesAsked(err error) bool {

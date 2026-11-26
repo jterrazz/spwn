@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
-	"github.com/jterrazz/studio-station/apps/engine/core/confirm"
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/core/section"
@@ -20,8 +19,7 @@ type StopSharingIn struct {
 	VM   string
 	Port string
 	// value: the Mac the VM runs on, when the caller has read it; empty finds it.
-	Mac     string
-	Confirm string
+	Mac string
 }
 
 type StopSharingOut struct {
@@ -31,10 +29,10 @@ type StopSharingOut struct {
 }
 
 var StopSharing = call.Call[Deps, StopSharingIn, StopSharingOut]{
-	// invariant: a stop of sharing asks yes or no, then releases the reserved
-	// port on the VM's Mac, whose engine remembers the choice (Remember).
-	Name: "ports.stop-sharing", Section: section.Ports, Where: call.InEngine, Applies: machine.Anywhere, Confirm: confirm.StopSharing,
-	Errors: []fail.Code{confirm.YesNeeded},
+	// invariant: a stop of sharing asks nothing (ADR-097: a share gives it
+	// back), and releases the reserved port on the VM's Mac, whose engine
+	// remembers the choice (Remember).
+	Name: "ports.stop-sharing", Section: section.Ports, Where: call.InEngine, Applies: machine.Anywhere,
 	Run: func(ctx context.Context, d Deps, in StopSharingIn, _ call.Progress) (StopSharingOut, error) {
 		port, err := d.Ports.CheckPort(in.Port)
 		if err != nil {
@@ -53,10 +51,7 @@ var StopSharing = call.Call[Deps, StopSharingIn, StopSharingOut]{
 				return StopSharingOut{}, err
 			}
 		}
-		if err = confirm.Require(confirm.For(confirm.StopSharing, d.Kind), strings.TrimPrefix(vm+":"+in.Port, ":"), in.Confirm); err != nil {
-			return StopSharingOut{}, err
-		}
-		r, err := d.Ports.Release(ctx, t, mac, in.Confirm == confirm.Yes)
+		r, err := d.Ports.Release(ctx, t, mac)
 		return StopSharingOut{Reservation: r, Mac: mac}, err
 	},
 }

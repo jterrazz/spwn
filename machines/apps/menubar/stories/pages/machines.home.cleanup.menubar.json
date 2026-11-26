@@ -3944,8 +3944,6 @@
             "text": "infra is unreachable for about a minute while it boots. Its health checks run again after the boot."
           }
         ],
-        "danger": true,
-        "type": "infra",
         "yes": "Restart infra",
         "no": "Cancel",
         "icon": "app"
@@ -3956,14 +3954,14 @@
       "run": {
         "call": "machines.restart",
         "in": {
+          "Confirm": "yes",
           "Name": "infra"
         },
         "target": {
           "name": "mac-mini"
         }
       },
-      "icon": "arrow.clockwise",
-      "destructive": true
+      "icon": "arrow.clockwise"
     },
     {
       "label": "Stop",
@@ -3977,7 +3975,6 @@
           }
         ],
         "danger": true,
-        "type": "infra",
         "yes": "Stop infra",
         "no": "Cancel",
         "icon": "app"
@@ -3988,6 +3985,7 @@
       "run": {
         "call": "machines.stop",
         "in": {
+          "Confirm": "yes",
           "VM": "infra"
         },
         "target": {

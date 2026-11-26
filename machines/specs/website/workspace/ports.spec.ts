@@ -118,11 +118,9 @@ describe('ports', () => {
                 const shared = within(region('Shared'), region('Port 5173'));
                 await visitor.see(shared);
 
-                // When - Stop sharing is pressed on it and confirmed
+                // When - Stop sharing is pressed on it, which asks nothing
                 await visitor.click(within(shared, button('Stop sharing')));
-                await visitor.click(
-                    within(dialog('Stop sharing linux-1:5173?'), button('Stop sharing')),
-                );
+                await visitor.gone(dialog('Stop sharing linux-1:5173?'));
 
                 // Then - it has left Shared, and is listed as listening, offered to be shared again
                 await visitor.gone(shared);

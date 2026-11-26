@@ -29,9 +29,6 @@
     "ports.calls.UndeclareIn": {
       "additionalProperties": false,
       "properties": {
-        "Confirm": {
-          "type": "string"
-        },
         "Machine": {
           "type": "string"
         },

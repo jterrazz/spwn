@@ -66,19 +66,16 @@ describe('port gestures', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test('stop sharing asks first, then the share leaves the list', async () => {
+    test('stop sharing asks nothing, and the share leaves the list', async () => {
         // Given - linux-1's Ports over two-macs, port 5173 shared
         const result = await component.render(portsOver('two-macs', 'linux-1'), async (visitor) => {
             await visitor.see(within(region('Shared'), region('Port 5173')));
 
-            // When - Stop sharing is clicked, then confirmed
+            // When - Stop sharing is clicked
             await visitor.click(within(region('Port 5173'), button('Stop sharing')));
-            const asked = dialog('Stop sharing linux-1:5173?');
-            await visitor.see(asked);
-            await visitor.click(within(asked, button('Stop sharing')));
 
-            // Then - ports.list, read again, holds no share of port 5173
-            await visitor.gone(asked);
+            // Then - no dialog, and ports.list, read again, holds no share of port 5173
+            await visitor.gone(dialog());
             await visitor.gone(region('Port 5173'));
             await visitor.see(region('Port 7000'));
         });
@@ -131,23 +128,6 @@ describe('port gestures', () => {
             await visitor.see(within(shared, button('Local')));
             await visitor.see(within(shared, button('Private')));
             await visitor.see(within(shared, button('Public')));
-        });
-        expect(result.errors.text).toBe('');
-    });
-
-    test('a cancel at the confirm leaves the share as it was', async () => {
-        // Given - linux-1's Ports over two-macs
-        const result = await component.render(portsOver('two-macs', 'linux-1'), async (visitor) => {
-            await visitor.see(region('Port 5173'));
-
-            // When - Stop sharing is clicked, then cancelled
-            await visitor.click(within(region('Port 5173'), button('Stop sharing')));
-            const asked = dialog('Stop sharing linux-1:5173?');
-            await visitor.click(within(asked, button('Cancel')));
-
-            // Then - no dialog, and the port is still shared
-            await visitor.gone(asked);
-            await visitor.see(region('Port 5173'));
         });
         expect(result.errors.text).toBe('');
     });

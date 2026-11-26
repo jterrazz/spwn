@@ -2,7 +2,7 @@ description: 'init moves what bun put in ~/.bun so its relative bin links still 
 runs:
     - command: '--version >/dev/null; /bin/mkdir -p .bun/install/global/node_modules/skills .bun/install/cache/x .bun/bin && echo skills-cli > .bun/install/global/node_modules/skills/cli.mjs && echo x > .bun/install/cache/x/f && /bin/ln -s ../install/global/node_modules/skills/cli.mjs .bun/bin/skills'
       exit: 0
-    - command: 'init --name m --yes </dev/null'
+    - command: 'init --name m </dev/null'
       exit: 0
       stdout: |
           # To move

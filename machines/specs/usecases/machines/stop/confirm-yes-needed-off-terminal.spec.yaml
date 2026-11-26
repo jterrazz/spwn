@@ -1,14 +1,12 @@
-description: 'a stop off a terminal without --yes is refused before anything stops, and the workspace still runs'
+description: 'a server stop off a terminal without --yes is refused, and the server still runs'
 env: two-macs
 runs:
-    - command: 'machines stop linux-1'
+    - command: 'machines stop infra --on mac-mini'
       exit: 2
       stderr: |
           Error: refusing to stop without --yes
           Hint: re-run with --yes
-    - command: 'machines --this-mac'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].vms.infra | {running: (.pid > 0), want: .kept.want}'' world.json'
       exit: 0
       stdout: |
-          ●	macbook-pro	Mac	macbook-pro	Engine running
-          ○	api	Workspace	macbook-pro	Stopped · persistent	4 CPU	8 GB
-          ●	linux-1	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB
+          {"running":true,"want":"running"}

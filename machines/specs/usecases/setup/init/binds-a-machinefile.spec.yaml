@@ -9,7 +9,7 @@ runs:
           machine: { kind: computer, system: { os: macos } }
           apps: [jq, fd]
       exit: 0
-    - command: 'init --yes --name macbook-pro --machinefile downloads/laptop.machine.yaml'
+    - command: 'init --name macbook-pro --machinefile downloads/laptop.machine.yaml'
       exit: 0
       stdout: |
           # To move

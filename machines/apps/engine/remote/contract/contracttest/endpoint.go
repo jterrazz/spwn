@@ -49,7 +49,7 @@ func Far() *call.Registry {
 		call.Bind(call.Call[struct{}, ForgetIn, struct{}]{
 			Name: "apps.forget", Where: call.AtTarget, Applies: machine.Anywhere, Confirm: confirm.Forget,
 			Run: func(_ context.Context, _ struct{}, in ForgetIn, _ call.Progress) (struct{}, error) {
-				return struct{}{}, confirm.Require(confirm.For(confirm.Forget, machine.Computer), in.App, in.Confirm)
+				return struct{}{}, confirm.Require(confirm.Of(confirm.Forget, machine.Computer), in.App, in.Confirm)
 			},
 		}, struct{}{}),
 		call.BindWatch(call.Watch[struct{}, struct{}, Sample]{

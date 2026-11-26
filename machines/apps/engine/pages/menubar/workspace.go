@@ -28,8 +28,8 @@ func workspacePage(m Machine, h model.MacView, vm model.VM) page.Page {
 	p.Sections = []page.Section{{ID: SectionSummary, Title: vm.Name, Role: page.Summary, Caption: workspaceFacts(m, h, vm, label)}}
 	menu := page.Action{ID: ActionMenu, Label: "More options for " + vm.Name, Icon: "ellipsis", On: page.OnPage}
 	shared, grants := len(workspacePorts(m, vm).Shares), grantedOn(m, vm.Name)
-	stop := stopWorkspace(vm, label, shared).action(m.Asks, page.Action{ID: ActionStop, Label: "Stop", On: page.OnPage, Priority: 1, Mutates: true,
-		Run: &page.Run{Call: CallStopVM, In: map[string]string{"VM": vm.Name}, Target: target(h)}})
+	stop := page.Action{ID: ActionStop, Label: "Stop", On: page.OnPage, Priority: 1, Mutates: true,
+		Run: &page.Run{Call: CallStopVM, In: map[string]string{"VM": vm.Name}, Target: target(h)}, Hud: hud(vm.Name + " is stopping")}
 	running := vm.State == model.Running
 	if !running && vm.Standing != model.StandingDown {
 		stop = page.Action{ID: ActionStartVM, Label: "Start " + vm.Name, On: page.OnPage, Priority: 1, Mutates: true,

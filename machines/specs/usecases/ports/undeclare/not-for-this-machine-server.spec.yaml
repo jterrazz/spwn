@@ -1,7 +1,7 @@
 description: 'inside a server, undeclare is refused: its Mac keeps the declaration'
 env: in-server
 runs:
-    - command: 'ports undeclare 443 --yes'
+    - command: 'ports undeclare 443'
       exit: 2
       stderr: |
           Error: infra's ports are declared from its Mac

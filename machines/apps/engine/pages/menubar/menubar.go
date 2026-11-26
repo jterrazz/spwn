@@ -556,7 +556,7 @@ func awakeAction(r *awake.Report) page.Action {
 type Levels func(gesture string, kind machine.Kind, facts ...string) string
 
 // value: the levels a gesture on a machine of a kind asks at, as the
-// call's confirmation rule gives them (confirm.For, its caller's): a page
+// call's confirmation rule gives them (confirm.Of, its caller's): a page
 // only draws them.
 const (
 	LevelNone     = "none"

@@ -1,8 +1,8 @@
-description: 'with no image built on its Mac, a server''s create is refused off a terminal in that Mac''s name'
-env: one-mac
+description: 'a server of an image station only fetches, not on This Mac, is refused with how to fetch it'
+env: two-macs
 runs:
-    - command: 'machines create infra --server'
+    - command: 'machines create box --server --image base-macos --memory 4G'
       exit: 2
       stderr: |
-          Error: image base-ubuntu is not built on macbook-pro
-          Hint: station images build base-ubuntu
+          Error: image base-macos is not on macbook-pro
+          Hint: station images update base-macos

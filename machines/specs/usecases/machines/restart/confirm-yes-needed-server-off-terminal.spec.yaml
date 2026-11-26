@@ -1,11 +1,11 @@
-description: 'off a terminal, a server restart without its name typed is refused before any effect'
+description: 'off a terminal, an up server''s restart without --yes is refused before any effect'
 env: two-macs
 runs:
     - command: 'machines restart infra --on mac-mini'
       exit: 2
       stderr: |
-          Error: refusing without the name typed: infra
-          Hint: in a script: --confirm=infra
+          Error: refusing to restart without --yes
+          Hint: re-run with --yes
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].vms.infra | {pid, want: .kept.want}'' world.json'
       exit: 0
       stdout: |

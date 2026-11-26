@@ -146,6 +146,7 @@ The records of decisions this repository alone took go in [`decisions/`](decisio
 - [093 The window is a path bar over a cool dark](decisions/093-the-window-is-a-path-bar-over-a-cool-dark.md) (Proposed)
 - [094 Machines' Turborepo leaves Go to the Makefile](decisions/094-machines-turborepo-leaves-go-to-the-makefile.md) (Proposed)
 - [096 Spwn is one app: its menu bar, its notifications and its engine live while it runs](decisions/096-spwn-is-one-app-its-menu-bar-notifications-and-engine-live-while-it-runs.md) (Proposed)
+- [097 A confirmation follows its consequence](decisions/097-a-confirmation-follows-its-consequence.md) (Proposed)
 - [098 A long act is guided by the engine; a Guide is a projection of what its call reports](decisions/098-a-long-act-is-guided-by-the-engine-a-guide-is-a-projection-of-what-its-call-reports.md) (Proposed)
 
 A decision spanning several repositories is recorded by the corpus that spans them. What was left for later is `TODO.md` at the repository root.

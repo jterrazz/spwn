@@ -63,7 +63,7 @@ var GrantRemove = call.Call[Deps, GrantRemoveIn, accounts.Revoked]{
 		if err := d.Grants.Check(ctx, in.Entry, in.To); err != nil {
 			return accounts.Revoked{}, err
 		}
-		if err := confirm.Require(confirm.For(confirm.RemoveGrant, d.Kind), in.To, in.Confirm); err != nil {
+		if err := confirm.Require(confirm.Of(confirm.RemoveGrant, d.Kind), in.To, in.Confirm); err != nil {
 			return accounts.Revoked{}, err
 		}
 		return d.Grants.Remove(ctx, in.Entry, in.To)

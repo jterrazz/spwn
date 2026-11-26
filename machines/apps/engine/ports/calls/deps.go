@@ -47,7 +47,7 @@ type Ports interface {
 	Share(ctx context.Context, vm string, port int, to catalog.Audience) (ports.SharedPort, error)
 	// value: the other Mac that holds the reservation; empty when this one does.
 	CheckRelease(ctx context.Context, t ports.Target) (mac string, err error)
-	Release(ctx context.Context, t ports.Target, mac string, yes bool) (ports.Reservation, error)
+	Release(ctx context.Context, t ports.Target, mac string) (ports.Reservation, error)
 	// value: the machine's name (this Mac's when empty), and the other Mac
 	// that keeps its declarations; empty when this one does.
 	Keeper(ctx context.Context, machine string) (name, mac string, err error)

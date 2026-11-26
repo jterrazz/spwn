@@ -66,8 +66,9 @@ type Machines interface {
 	// value: the lifetime of a VM of this Mac, which says its kind; empty
 	// for no VM of it.
 	LifetimeOf(name string) machines.Lifetime
-	// value: what keeps a VM of this Mac, as machines.list says it now.
-	HoldOf(ctx context.Context, name string) (machines.Hold, bool)
+	// value: a VM of this Mac as machines.list says it now; false for no
+	// VM of that name.
+	VMSeen(ctx context.Context, name string) (machines.VM, bool)
 	// value: whether the VM of this Mac runs now.
 	Running(ctx context.Context, name string) (bool, error)
 	Stop(ctx context.Context, name string) error

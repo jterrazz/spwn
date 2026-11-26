@@ -8,4 +8,4 @@ runs:
           {"v":2,"id":"1","watch":"overview.read","in":{}}
       exit: 0
       stdout: |
-          ["machines.restart",{"Name":"loop-1"},"macbook-pro","loop-1","restart"]
+          ["machines.restart",{"Name":"loop-1"},"macbook-pro","","restart"]

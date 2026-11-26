@@ -61,7 +61,7 @@ describe('overview', () => {
             await visitor.click(button('Delete api…'));
 
             // Then - the dialog says what the delete ends, and nothing of its hold
-            const asked = dialog('Delete api?');
+            const asked = dialog('Delete api and its 50 GB disk?');
             const said = content('api and everything on its disk are deleted for good.');
             await visitor.see(within(asked, said));
             await visitor.gone(within(asked, content('Yours', { exact: false })));
@@ -78,7 +78,7 @@ describe('overview', () => {
                 await visitor.click(button('Delete linux-1…'));
 
                 // Then - the consequence, then the hold on a line of its own
-                const asked = dialog('Delete linux-1?');
+                const asked = dialog('Delete linux-1 and its 40 GB disk?');
                 const said = content('linux-1 and everything on its disk are deleted for good.');
                 const held = content(
                     'It is held by its lot, by studio-os-fe: work may be in progress.',

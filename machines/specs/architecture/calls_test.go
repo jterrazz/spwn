@@ -279,6 +279,36 @@ func ruleJSONNeverAsks(w *world) []finding {
 	return out
 }
 
+// invariant: rule delete-asks-by-consequence: a call that names the delete
+// confirmation grades it by machines.FactsOf, the facts every surface
+// grades a VM by (ADR-097), and by nothing of its own.
+func ruleDeleteAsksByConsequence(w *world) []finding {
+	var out []finding
+	for _, c := range callValues(w) {
+		sel, named := c.fields["Confirm"].(*ast.SelectorExpr)
+		if named && sel.Sel.Name == "Delete" && !calls(c.fields["Run"], c.f.info, module+"/machines", "FactsOf") {
+			out = append(out, finding{"delete-asks-by-consequence", c.f.at(c.lit.Pos()), c.name + " asks a delete by a rule of its own: machines.FactsOf is the one"})
+		}
+	}
+	return out
+}
+
+// value: the Run of fn calls the function name of the package pkg.
+func calls(fn ast.Node, info *types.Info, pkg, name string) bool {
+	found := false
+	ast.Inspect(fn, func(n ast.Node) bool {
+		if ce, ok := n.(*ast.CallExpr); ok {
+			if sel, ok := ce.Fun.(*ast.SelectorExpr); ok {
+				if obj := info.Uses[sel.Sel]; obj != nil && obj.Pkg() != nil && obj.Pkg().Path() == pkg && obj.Name() == name {
+					found = true
+				}
+			}
+		}
+		return !found
+	})
+	return found
+}
+
 // invariant: rule every-code-worded (ER-07): every fail.Code constant the
 // tree declares is worded in surface/cli/words, and raised: named by code
 // outside surface/cli/words, whose table and declarations are no raise.
@@ -354,6 +384,7 @@ func TestEveryCodeWorded(t *testing.T)       { judge(t, "EveryCodeWorded") }
 func TestEveryCodeWordedRaised(t *testing.T) { judge(t, "EveryCodeWordedRaised") }
 
 func TestNoSurfaceReadsTheTerminalAlone(t *testing.T) { judge(t, "JSONNeverAsks") }
+func TestDeleteAsksByConsequence(t *testing.T)        { judge(t, "DeleteAsksByConsequence") }
 
 // value: the reference profiles of the worlds: a laptop Mac, a desktop
 // Mac, a workspace, a server.

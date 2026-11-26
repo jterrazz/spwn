@@ -7,17 +7,24 @@ final class AlertTests: XCTestCase {
     func confirm(_ story: String) throws -> Confirm {
         let s = Stories[story]
         let page = try XCTUnwrap(s.state.shown)
-        return try XCTUnwrap(page.action(try XCTUnwrap(s.ui.alert))?.confirm)
+        return try XCTUnwrap(page.action(try XCTUnwrap(s.ui.alert))?.confirm, story)
     }
 
-    // invariant: SPEC A5: the level is the engine's, drawn as it comes: a
-    // typed alert names what to type, a yes or no one names nothing.
+    // value: the lines of a story's drawing that name what to type.
+    func names(_ story: Story) -> [String] {
+        ViewGolden.tree(ViewGolden.nodes(ViewGolden.record(AnyView(StoryView(story).stationAccessibility()), scheme: .dark, desk: true)))
+            .filter { $0.contains("[font=Role.alertName]") }
+    }
+
+    // invariant: SPEC A5, ADR-097: the level is the engine's, drawn as it
+    // comes: each alert opens a gesture its page asks, a typed alert draws
+    // the name its page gives, a yes or no one draws none.
     func testEachAlertAsksAtTheLevelTheEngineGraded() throws {
-        let typed = ["alert.restart-server", "alert.stop-server", "alert.stop-server.typed", "alert.delete-server", "alert.delete-vm.persistent", "alert.restart-mac"]
-        let asked = try Stories.load(root: Tree.stories).filter { $0.group == .alert }.map(\.id)
-        XCTAssertEqual(asked.count, 14)
-        for id in asked {
-            XCTAssertEqual(try confirm(id).type != nil, typed.contains(id), id)
+        let asked = try Stories.load(root: Tree.stories).filter { $0.group == .alert }
+        XCTAssertEqual(asked.count, 12)
+        for story in asked {
+            let confirm = try confirm(story.id)
+            XCTAssertEqual(names(story).map { $0.contains("text \"\(confirm.type ?? "")\"") }, confirm.type == nil ? [] : [true], story.id)
         }
     }
 
@@ -25,40 +32,42 @@ final class AlertTests: XCTestCase {
     // something defaults to Cancel, and a typed one stays off until its
     // name is typed whole.
     func testTheRedButtonIsNeverTheDefaultAndATypedOneWaitsForItsName() throws {
-        XCTAssertTrue(AlertCard.yesIsDefault(try confirm("alert.stop-vm")))
-        for id in ["alert.restart-server", "alert.stop-server", "alert.delete-vm.ephemeral", "alert.forget-mac"] {
+        XCTAssertTrue(AlertCard.yesIsDefault(try confirm("alert.restart-server")))
+        for id in ["alert.stop-server", "alert.restart-mac", "alert.delete-vm.ephemeral", "alert.forget-mac"] {
             XCTAssertFalse(AlertCard.yesIsDefault(try confirm(id)), id)
         }
-        let stop = try confirm("alert.stop-server")
-        XCTAssertFalse(AlertCard.allows(stop, typed: ""))
-        XCTAssertFalse(AlertCard.allows(stop, typed: "infr"))
-        XCTAssertTrue(AlertCard.allows(stop, typed: "infra"))
-        let typed = Stories["alert.stop-server.typed"]
-        XCTAssertTrue(AlertCard.allows(stop, typed: typed.state.answers["stop"]?[ActionRunner.typedKey] ?? ""))
+        let delete = try confirm("alert.delete-server")
+        XCTAssertFalse(AlertCard.allows(delete, typed: ""))
+        XCTAssertFalse(AlertCard.allows(delete, typed: "infr"))
+        XCTAssertTrue(AlertCard.allows(delete, typed: "infra"))
+        let typed = Stories["alert.delete-server.typed"]
+        XCTAssertTrue(AlertCard.allows(delete, typed: typed.state.answers["delete"]?[ActionRunner.typedKey] ?? ""))
     }
 
     // invariant: a question with no form is drawn on the panel's alert
     // layer, over the page, never in its flow.
     func testAQuestionIsDrawnOnTheAlertLayer() throws {
-        let story = Stories["alert.stop-vm"]
+        let story = Stories["alert.restart-server"]
         XCTAssertNotNil(AlertLayer.layers(story.state.shown, story.state, PopoverHandlers()).alert)
         var closed = story.state
         closed.confirming = nil
         XCTAssertNil(AlertLayer.layers(story.state.shown, closed, PopoverHandlers()).alert)
     }
 
-    // invariant: the answer the call takes: the name typed when the call
-    // checks it, the page's fixed yes when the alert asked typed of a call
-    // that asks yes or no (a Mac hosting a server restarts on yes).
+    // invariant: ADR-097: the answer the call takes is the owner's: the
+    // name he typed when the alert asks it, which neither the page nor the
+    // app fills, and the page's yes when it asks yes or no.
     func testTheCallTakesTheAnswerItsOwnLevelAsks() throws {
-        let server = try XCTUnwrap(Stories["alert.stop-server"].state.shown?.action("stop"))
-        XCTAssertEqual(ActionRunner.filled(server, answers: [ActionRunner.typedKey: "infra"])[ActionRunner.typedKey], "infra")
-        let restart = try XCTUnwrap(Stories["alert.restart-server"].state.shown?.action("restart"))
-        XCTAssertEqual(restart.confirm?.type, "infra")
-        XCTAssertEqual(ActionRunner.filled(restart, answers: [ActionRunner.typedKey: "infra"])[ActionRunner.typedKey], "infra")
-        let mac = try XCTUnwrap(Stories["alert.restart-mac"].state.shown?.action("restart-mac"))
-        XCTAssertEqual(mac.confirm?.type, "mac-mini")
-        XCTAssertNil(ActionRunner.filled(mac, answers: [ActionRunner.typedKey: "mac-mini"])[ActionRunner.typedKey])
-        XCTAssertEqual(mac.run?.in?[ActionRunner.typedKey], "yes")
+        let delete = try XCTUnwrap(Stories["alert.delete-server"].state.shown?.action("delete"))
+        XCTAssertEqual(delete.confirm?.type, "infra")
+        XCTAssertNil(delete.run?.in?[ActionRunner.typedKey])
+        XCTAssertNil(ActionRunner.filled(delete, answers: [:])[ActionRunner.typedKey])
+        XCTAssertEqual(ActionRunner.filled(delete, answers: [ActionRunner.typedKey: "infra"])[ActionRunner.typedKey], "infra")
+        for (story, id) in [("alert.stop-server", "stop"), ("alert.restart-server", "restart"), ("alert.restart-mac", "restart-mac")] {
+            let action = try XCTUnwrap(Stories[story].state.shown?.action(id), story)
+            XCTAssertNil(action.confirm?.type, story)
+            XCTAssertNil(ActionRunner.filled(action, answers: [ActionRunner.typedKey: "infra"])[ActionRunner.typedKey], story)
+            XCTAssertEqual(action.run?.in?[ActionRunner.typedKey], "yes", story)
+        }
     }
 }

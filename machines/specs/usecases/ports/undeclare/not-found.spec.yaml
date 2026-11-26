@@ -1,7 +1,7 @@
 description: 'undeclaring a port nothing declared is refused with where to look'
 env: two-macs
 runs:
-    - command: 'ports undeclare mac-mini 6000 --yes'
+    - command: 'ports undeclare mac-mini 6000'
       exit: 2
       stderr: |
           Error: 6000 on mac-mini is not declared public

@@ -42,15 +42,13 @@ public struct ActionRunner: Sendable {
     }
 
     // value: the key a typed confirmation's answer goes under: the name the
-    // owner typed, which the call checks against the machine's own. An
-    // answer the page fixed is the call's own (its yes under a question the
-    // alert asks typed): the name typed then only opened the alert's button.
+    // owner typed, which the call checks against the machine's own. A page
+    // fixes it only under a yes or no question, its yes (ADR-097).
     public static let typedKey = "Confirm"
 
     public static func filled(_ action: Action, answers: [String: String]) -> [String: String] {
         var out = action.form.map { Answers($0, answers).sent } ?? [:]
-        let fixed = action.run?.in?[typedKey] != nil
-        if action.confirm?.type != nil, !fixed, let typed = answers[typedKey] { out[typedKey] = typed }
+        if action.confirm?.type != nil, let typed = answers[typedKey] { out[typedKey] = typed }
         for (key, value) in answers where action.run?.in?[key] != nil && key != typedKey { out[key] = value }
         return out
     }

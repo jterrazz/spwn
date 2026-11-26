@@ -32,17 +32,17 @@ type Deps struct {
 type Input struct{ Name, Confirm string }
 
 func Command(d Deps, env kit.Env) *cobra.Command {
-	// invariant: a Mac's restart asks yes or no (--yes), a server's its name
-	// typed (--confirm=<name>), which --yes never answers, a workspace's
-	// nothing; the VM's own Mac decides which, so the question is put once
-	// its call has refused.
+	// invariant: a Mac's restart and an up server's ask yes or no (--yes, or
+	// --confirm=<name>), naming what pauses; a down server's and a
+	// workspace's ask nothing. The VM's own Mac grades which (confirm.Of),
+	// so the question is put once its call has refused.
 	return kit.Command(kit.Leaf[Input]{
 		Use:     "restart <machine>",
 		Short:   "Restart a Mac with a FileVault-aware reboot, or a VM with a poweroff and a start",
-		Example: "  station machines restart mac-mini --yes\n  station machines restart infra --confirm=infra",
+		Example: "  station machines restart mac-mini --yes\n  station machines restart infra --yes",
 		Args:    cobra.ExactArgs(1),
 		Declare: func(f *pflag.FlagSet, in *Input) {
-			f.StringVar(&in.Confirm, "confirm", "", "a server's name, typed, to restart it without the question")
+			f.StringVar(&in.Confirm, "confirm", "", "the machine's name, typed, to restart it without the question")
 		},
 		Bind: func(in *Input, args []string) error {
 			in.Name = args[0]
@@ -50,8 +50,11 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 		},
 		Asks: true,
 		Confirm: func(in *Input) string {
+			if !d.IsMac(in.Name) {
+				return "Restart " + in.Name + "? What it serves stops while it restarts."
+			}
 			if paused := d.Pausing(in.Name); len(paused) > 0 {
-				return "Restart " + in.Name + "? " + strings.Join(paused, ", ") + " pauses until it is back"
+				return "Restart " + in.Name + "? " + and(paused) + " " + pause(len(paused)) + " until it is back."
 			}
 			return "Restart " + in.Name + "?"
 		},
@@ -78,8 +81,11 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 				first = io.YesAnswer()
 			}
 			report, err := restartIt(first)
-			if typedAsked(err) && in.Confirm == "" && !io.Yes && io.Interactive && io.Prompt != nil {
-				report, err = typed(in.Name, io, restartIt)
+			if yesAsked(err) {
+				err = io.Confirmed(func(answer string) error {
+					report, err = restartIt(answer)
+					return err
+				})
 			}
 			if err != nil {
 				return err
@@ -89,20 +95,22 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 	}, env)
 }
 
-func typed(name string, io kit.IO, restartIt func(string) (machines.RestartReport, error)) (machines.RestartReport, error) {
-	answers, err := io.Prompt.Form(pagemachines.RestartServerForm(name))
-	if err != nil {
-		return machines.RestartReport{}, err
+// value: names said as a sentence: "a", "a and b", "a, b and c".
+func and(names []string) string {
+	if len(names) < 2 {
+		return strings.Join(names, "")
 	}
-	report, err := restartIt(answers["name"])
-	var wrong *fail.Error
-	if errors.As(err, &wrong) && wrong.Code == confirm.Mismatch {
-		return report, fail.New(fail.Declined, confirm.Mismatch, wrong.Subject, wrong.Detail)
-	}
-	return report, err
+	return strings.Join(names[:len(names)-1], ", ") + " and " + names[len(names)-1]
 }
 
-func typedAsked(err error) bool {
+func pause(n int) string {
+	if n == 1 {
+		return "pauses"
+	}
+	return "pause"
+}
+
+func yesAsked(err error) bool {
 	var e *fail.Error
-	return errors.As(err, &e) && e.Code == confirm.Needed
+	return errors.As(err, &e) && e.Code == confirm.YesNeeded
 }

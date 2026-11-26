@@ -193,7 +193,7 @@ final class StoryTests: XCTestCase {
 
     func testEveryPanelStoryStaysGlass() throws {
         var failures: [String] = []
-        for story in try stories() where panel(story) && story.group != .sheet && story.group != .alert && story.ui.sheet == nil
+        for story in try stories() where panel(story) && story.group != .sheet && story.group != .alert && story.ui.sheet == nil && story.ui.alert == nil
             && StoryMotion.of(story.id)?.motion.slides != true {
             for scheme in Self.schemes {
                 let share = GlassTests.opaque(view(story), scheme: scheme) ?? 1

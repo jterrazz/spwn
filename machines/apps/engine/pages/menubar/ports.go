@@ -33,6 +33,7 @@ type PortsOf struct {
 	// value: the machines as read, whose running workspaces a port may
 	// be shared from; nil, those whose listeners the page lists.
 	Machines *model.AllMachines
+	Asks     Levels
 }
 
 func Ports(l ports.Listing, of PortsOf, thisMac page.Context) page.Page {
@@ -42,7 +43,7 @@ func Ports(l ports.Listing, of PortsOf, thisMac page.Context) page.Page {
 	// is Full list in Terminal and Share a port…. Scoped to a machine it
 	// lists that machine's ports alone. The scope's word is the fact a
 	// narrow header drops first: the way back already names it.
-	sc := portsScope{Self: thisMac.Machine, Now: of.Now}
+	sc := portsScope{Self: thisMac.Machine, Now: of.Now, Asks: of.Asks}
 	where := "All machines"
 	if of.Machine != "" {
 		where = of.Machine
@@ -130,9 +131,9 @@ func declarePublic(l ports.Listing) page.Action {
 	return page.Action{ID: ActionDeclarePublic, Label: "Declare public", On: page.OnPage, Priority: 2, Mutates: true, Form: form, Run: &page.Run{Call: CallDeclare}}
 }
 
-func stopSharing(s ports.SharedPort, mac string) page.Action {
+func stopSharing(s ports.SharedPort, mac string, levels Levels) page.Action {
 	id := pageports.Row(s).ID
 	port := strconv.Itoa(s.GuestPort)
-	return stopShare(s.VM, port).action(yesOrNo, page.Action{ID: ActionStopSharing + id, Label: "Stop sharing", On: page.OnRow, Rows: []string{id}, Priority: 3, Mutates: true,
+	return stopShare(s.VM, port).action(levels, page.Action{ID: ActionStopSharing + id, Label: "Stop sharing", On: page.OnRow, Rows: []string{id}, Priority: 3, Mutates: true,
 		Run: &page.Run{Call: CallStopSharing, In: map[string]string{"VM": strconv.Quote(s.VM), "Port": strconv.Quote(port), "Mac": strconv.Quote(mac)}}})
 }

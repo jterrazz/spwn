@@ -3,7 +3,7 @@ import { useEffect, useRef, useSyncExternalStore } from 'react';
 
 import type { EnginePort, In, Out, ReadName } from '../../application/ports/engine.port';
 import { confirmingOf, consequenceOf } from '../../application/use-cases/confirms';
-import type { Confirming, ConfirmKind } from '../../application/use-cases/confirms';
+import type { ConfirmForm, Confirming, ConfirmKind } from '../../application/use-cases/confirms';
 import { IDLE, step } from '../../application/use-cases/gesture';
 import type { Ask, GestureEvent, GestureState } from '../../application/use-cases/gesture';
 import { EngineError } from '../../domain/engine-error';
@@ -15,6 +15,8 @@ export type GestureSpec<N extends ReadName> = {
     // invariant: undefined when the engine names what it asks about: the call is sent unanswered first, and the
     // invariant: question is the engine's confirm.needed, its subject the one typed and put in the consequence.
     subject: string | undefined;
+    // invariant: the form the engine graded for this target's gesture (a VM's Asks); undefined reads the call's table.
+    asks?: '' | ConfirmForm | undefined;
     typed?: string | undefined;
     rereads: readonly CallName[];
     target?: Target | undefined;
@@ -89,7 +91,7 @@ export function useGesture<N extends ReadName>(name: N, spec: GestureSpec<N>): G
     const reread = useReread();
     const gestures = useGestureStore();
     const key = keyOf({ call: name, in: spec.input, target: spec.target });
-    const confirming = confirmingOf(name, spec.kind);
+    const confirming = confirmingOf(name, spec.kind, spec.asks);
     const held = useSyncExternalStore(gestures.subscriberOf(key), () => gestures.state(key));
     const state = isStateOf(name, held) ? held : IDLE;
     const latest = useRef(spec);
@@ -126,7 +128,7 @@ export function useGesture<N extends ReadName>(name: N, spec: GestureSpec<N>): G
         start: () => {
             send({
                 ask: firstAsk(
-                    confirmingOf(name, latest.current.kind),
+                    confirmingOf(name, latest.current.kind, latest.current.asks),
                     latest.current.typed ?? latest.current.subject,
                 ),
                 kind: 'start',

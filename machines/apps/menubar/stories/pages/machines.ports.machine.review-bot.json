@@ -1674,30 +1674,26 @@
     {
       "label": "Stop",
       "on": "page",
-      "confirm": {
-        "question": "Stop review-bot on mac-mini?",
-        "lines": [
-          {
-            "kind": "text",
-            "text": "Its disk is kept."
-          }
-        ],
-        "yes": "Stop review-bot",
-        "no": "Cancel",
-        "icon": "app"
-      },
       "priority": 1,
       "mutates": true,
       "id": "stop",
       "run": {
         "call": "machines.stop",
         "in": {
-          "Confirm": "yes",
           "VM": "review-bot"
         },
         "target": {
           "name": "mac-mini"
         }
+      },
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "review-bot is stopping"
+          }
+        ]
       }
     },
     {
@@ -1889,32 +1885,28 @@
     {
       "label": "Stop",
       "on": "menu",
-      "confirm": {
-        "question": "Stop review-bot on mac-mini?",
-        "lines": [
-          {
-            "kind": "text",
-            "text": "Its disk is kept."
-          }
-        ],
-        "yes": "Stop review-bot",
-        "no": "Cancel",
-        "icon": "app"
-      },
       "priority": 1,
       "mutates": true,
       "id": "stop@menu",
       "run": {
         "call": "machines.stop",
         "in": {
-          "Confirm": "yes",
           "VM": "review-bot"
         },
         "target": {
           "name": "mac-mini"
         }
       },
-      "icon": "stop"
+      "icon": "stop",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "review-bot is stopping"
+          }
+        ]
+      }
     },
     {
       "label": "Delete",

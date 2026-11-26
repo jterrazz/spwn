@@ -8,7 +8,7 @@ import { SEPARATOR } from '../../domain/separator';
 import type { Tone } from '../../domain/tone';
 import { unlessCommand } from '../ui/command';
 import { CopyButton } from '../ui/copy-button';
-import { asSentence, capitalised, Missing, Panel, StatePill, Verdict } from '../ui/index';
+import { asSentence, Button, capitalised, Missing, Panel, StatePill, Verdict } from '../ui/index';
 import { shownOrWithheld } from '../ui/secret';
 import { failedState } from '../words/failed';
 import { ownState, verdictShown } from '../words/shown';
@@ -151,5 +151,25 @@ export function NotGiven({
         <Panel action={action} title={title}>
             <Missing>{what}</Missing>
         </Panel>
+    );
+}
+
+const UNKNOWN_SAID =
+    'No answer came before the connection ended: the engine may have done it. The page below shows what it now says.';
+
+export function Unknown({ error, onDismiss }: { error: EngineError; onDismiss: () => void }) {
+    return (
+        <span className={styles.outcome}>
+            <span className={styles.unanswered}>
+                <StatePill {...ownState('unknown')} />
+                <span className={styles.said}>
+                    {UNKNOWN_SAID}
+                    <span className={styles.hint}>{shownOrWithheld(error.message)}</span>
+                </span>
+            </span>
+            <Button onClick={onDismiss} variant="link">
+                Dismiss
+            </Button>
+        </span>
     );
 }

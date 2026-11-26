@@ -10,6 +10,7 @@ import {
 } from 'react';
 import type { ReactNode } from 'react';
 
+import type { Instead } from '../../application/use-cases/gesture-store';
 import type { EngineError } from '../../domain/engine-error';
 import { useGestureStore } from '../dependencies/dependencies';
 import { useGesture } from '../dependencies/use-gesture';
@@ -17,10 +18,9 @@ import type { Gesture } from '../dependencies/use-gesture';
 import type { ButtonVariant } from '../ui/button';
 import { Button, ConfirmDialog, Panel, ProgressLine, Row, StatePill } from '../ui/index';
 import type { RowProps } from '../ui/row';
-import { shownOrWithheld } from '../ui/secret';
 import { forgetInputOf } from '../words/provisional';
 import { ownState } from '../words/shown';
-import { Unanswered } from './readings';
+import { Unanswered, Unknown } from './readings';
 
 import styles from '../ui/page.module.css';
 
@@ -35,6 +35,7 @@ type GestureButtonProps = {
     name?: string;
     destroys?: boolean;
     yields?: boolean;
+    instead?: Instead | undefined;
 };
 
 export function marked(gesture: Gesture<unknown>, mark: () => void): Gesture<unknown> {
@@ -53,17 +54,19 @@ type Asking = {
     consequence?: string | undefined;
     held?: string | undefined;
     destroys: boolean;
+    instead?: Instead | undefined;
 };
 
 export function useStart(): (gesture: Gesture<unknown>, asking: Asking) => void {
     const gestures = useGestureStore();
-    return (gesture, { title, verb, consequence, held, destroys }) => {
+    return (gesture, { title, verb, consequence, held, destroys, instead }) => {
         gestures.askedBy({
             cancel: gesture.cancel,
             confirm: gesture.confirm,
             consequence: (ask) => consequence ?? gesture.consequence(ask),
             destroys,
             held,
+            instead,
             key: gesture.key,
             title,
             verb,
@@ -83,10 +86,11 @@ export function GestureButton({
     name,
     destroys = variant === 'danger',
     yields = false,
+    instead,
 }: GestureButtonProps) {
     const started = useStart();
     const start = () => {
-        started(gesture, { consequence, destroys, held, title, verb });
+        started(gesture, { consequence, destroys, held, instead, title, verb });
     };
     return (
         <Button
@@ -112,6 +116,7 @@ export function GestureConfirm() {
         <ConfirmDialog
             destroys={asked.destroys}
             held={asked.held ?? ask.refusal?.wire?.detail?.holder}
+            instead={asked.instead}
             key={asked.key}
             onCancel={asked.cancel}
             onConfirm={asked.confirm}
@@ -120,26 +125,6 @@ export function GestureConfirm() {
             typed={ask.form === 'name' ? ask.name : undefined}
             verb={asked.verb}
         />
-    );
-}
-
-const UNKNOWN_SAID =
-    'No answer came before the connection ended: the engine may have done it. The page below shows what it now says.';
-
-export function Unknown({ error, onDismiss }: { error: EngineError; onDismiss: () => void }) {
-    return (
-        <span className={styles.outcome}>
-            <span className={styles.unanswered}>
-                <StatePill {...ownState('unknown')} />
-                <span className={styles.said}>
-                    {UNKNOWN_SAID}
-                    <span className={styles.hint}>{shownOrWithheld(error.message)}</span>
-                </span>
-            </span>
-            <Button onClick={onDismiss} variant="link">
-                Dismiss
-            </Button>
-        </span>
     );
 }
 

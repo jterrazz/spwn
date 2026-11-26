@@ -27,7 +27,7 @@
   "disk.free-unused": {
     "confirm": "free-unused",
     "consequence": "Deleted for good: %s. No machine and no file of yours is touched.",
-    "form": "type-name"
+    "form": "yes-no"
   },
   "engine.stop": {
     "confirm": "stop-engine",
@@ -54,16 +54,6 @@
     "consequence": "Every stopped ephemeral workspace is deleted.",
     "form": "yes-no"
   },
-  "machines.create-server": {
-    "confirm": "build-image",
-    "consequence": "%s is built first, which takes several minutes.",
-    "form": "yes-no"
-  },
-  "machines.create-workspace": {
-    "confirm": "build-image",
-    "consequence": "%s is built first, which takes several minutes.",
-    "form": "yes-no"
-  },
   "machines.delete": {
     "confirm": "delete",
     "consequence": "%s and everything on its disk are deleted for good.",
@@ -82,7 +72,7 @@
       "server": {
         "confirm": "restart-server",
         "consequence": "It is a server: what it serves stops while it restarts.",
-        "form": "type-name"
+        "form": "yes-no"
       },
       "workspace": {
         "confirm": "restart",
@@ -99,24 +89,14 @@
   "machines.stop": {
     "confirm": "stop",
     "consequence": "%s stops: what it serves stops until you start it again.",
-    "form": "yes-no",
+    "form": "none",
     "kinds": {
       "server": {
         "confirm": "stop",
         "consequence": "%s stops: what it serves stops until you start it again.",
-        "form": "type-name"
+        "form": "yes-no"
       }
     }
-  },
-  "ports.stop-sharing": {
-    "confirm": "stop-sharing",
-    "consequence": "%s is no longer shared, and its reserved port is released.",
-    "form": "yes-no"
-  },
-  "ports.undeclare": {
-    "confirm": "undeclare",
-    "consequence": "%s is no longer declared, so a listener on it is flagged again.",
-    "form": "yes-no"
   },
   "settings.apply": {
     "confirm": "overwrite",
@@ -126,12 +106,7 @@
   "settings.off": {
     "confirm": "off-here",
     "consequence": "Machines stops applying %s on this machine; its value now stays.",
-    "form": "yes-no"
-  },
-  "setup.init": {
-    "confirm": "relocate",
-    "consequence": "Moved where each app now looks, one rename each: %s.",
-    "form": "yes-no"
+    "form": "none"
   },
   "vault.remove": {
     "confirm": "remove-password",

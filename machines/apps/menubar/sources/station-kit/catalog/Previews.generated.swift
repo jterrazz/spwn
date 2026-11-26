@@ -10,6 +10,8 @@ import SwiftUI
 
 #Preview("alert.delete-server") { StoryStage(Stories["alert.delete-server"]) }
 
+#Preview("alert.delete-server.typed") { StoryStage(Stories["alert.delete-server.typed"]) }
+
 #Preview("alert.delete-vm.ephemeral") { StoryStage(Stories["alert.delete-vm.ephemeral"]) }
 
 #Preview("alert.delete-vm.persistent") { StoryStage(Stories["alert.delete-vm.persistent"]) }
@@ -29,12 +31,6 @@ import SwiftUI
 #Preview("alert.stop-all") { StoryStage(Stories["alert.stop-all"]) }
 
 #Preview("alert.stop-server") { StoryStage(Stories["alert.stop-server"]) }
-
-#Preview("alert.stop-server.typed") { StoryStage(Stories["alert.stop-server.typed"]) }
-
-#Preview("alert.stop-share") { StoryStage(Stories["alert.stop-share"]) }
-
-#Preview("alert.stop-vm") { StoryStage(Stories["alert.stop-vm"]) }
 
 #Preview("awake.4h") { StoryStage(Stories["awake.4h"]) }
 

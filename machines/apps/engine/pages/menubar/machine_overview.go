@@ -384,7 +384,7 @@ func (o macOverview) awakeAction() (page.Action, bool) {
 		a.Label = "Keep " + o.label + " awake"
 		return a, true
 	}
-	a, ok := change(*r, o.label)
+	a, ok := change(*r, o.label, o.m.Asks)
 	a.Rows = []string{RowAwake}
 	a.Label = "Keep " + o.label + " awake"
 	return a, ok

@@ -1,5 +1,5 @@
 canvas: { scheme: dark, scale: 2, unit: pt, still: true, ground: FlatDesk, contrast: increased }
-base: ./alert.stop-server.typed.dark.view.yaml
+base: ./alert.delete-server.typed.dark.view.yaml
 tokens:
   color.plateSolid: rgba(16 16 20 / 1)
   color.hair: rgba(255 255 255 / 0.3)

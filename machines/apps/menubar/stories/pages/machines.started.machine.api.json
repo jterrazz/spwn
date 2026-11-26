@@ -619,27 +619,23 @@
     {
       "label": "Stop",
       "on": "page",
-      "confirm": {
-        "question": "Stop api on This Mac?",
-        "lines": [
-          {
-            "kind": "text",
-            "text": "Its disk is kept."
-          }
-        ],
-        "yes": "Stop api",
-        "no": "Cancel",
-        "icon": "app"
-      },
       "priority": 1,
       "mutates": true,
       "id": "stop",
       "run": {
         "call": "machines.stop",
         "in": {
-          "Confirm": "yes",
           "VM": "api"
         }
+      },
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "api is stopping"
+          }
+        ]
       }
     },
     {
@@ -989,29 +985,25 @@
     {
       "label": "Stop",
       "on": "menu",
-      "confirm": {
-        "question": "Stop api on This Mac?",
-        "lines": [
-          {
-            "kind": "text",
-            "text": "Its disk is kept."
-          }
-        ],
-        "yes": "Stop api",
-        "no": "Cancel",
-        "icon": "app"
-      },
       "priority": 1,
       "mutates": true,
       "id": "stop@menu",
       "run": {
         "call": "machines.stop",
         "in": {
-          "Confirm": "yes",
           "VM": "api"
         }
       },
-      "icon": "stop"
+      "icon": "stop",
+      "hud": {
+        "kind": "list",
+        "items": [
+          {
+            "kind": "text",
+            "text": "api is stopping"
+          }
+        ]
+      }
     },
     {
       "label": "Delete",

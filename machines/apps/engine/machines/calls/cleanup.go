@@ -62,7 +62,7 @@ var Cleanup = call.Call[Deps, CleanupIn, machines.Cleaned]{
 		if len(pick) == 0 {
 			return out, nil
 		}
-		if err := confirm.Require(confirm.For(confirm.Cleanup, d.Kind), strings.Join(pick, ", "), in.Confirm); err != nil {
+		if err := confirm.Require(confirm.Of(confirm.Cleanup, d.Kind), strings.Join(pick, ", "), in.Confirm); err != nil {
 			return out, err
 		}
 		for _, name := range pick {

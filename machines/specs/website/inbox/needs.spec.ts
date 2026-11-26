@@ -114,16 +114,16 @@ describe('needs', () => {
 
     test.todo("N5 waits for each line's version rule on machinefile.drift");
 
-    test('N6 a server whose SSH fails is restarted from its line, its name typed', async () => {
+    test('N6 a server whose SSH fails is restarted from its line by a yes that asks no name', async () => {
         // Given - the Inbox over standings, where restart-1 fails SSH answers and its line names machines.restart
         const line = button('Restart restart-1');
         const result = await website.visit('/?world=standings&page=inbox', async (visitor) => {
             await visitor.see(within(canWait, content('restart-1 fails SSH answers')));
 
-            // When - its Restart is pressed, and confirmed with the name typed
+            // When - its Restart is pressed, and confirmed by a yes, no name asked since restart-1 is a server that runs
             await visitor.click(within(canWait, line));
             const confirm = dialog('Restart restart-1?');
-            await visitor.fill(within(confirm, field('Type restart-1 to confirm')), 'restart-1');
+            await visitor.gone(within(confirm, field('Type restart-1 to confirm')));
             await visitor.click(within(confirm, button('Restart')));
 
             // Then - the dialog has closed, and the line offered no command to copy

@@ -33,6 +33,7 @@ func fleetPorts(t *testing.T, f ports.AllMachines, of PortsOf) page.Page {
 	t.Helper()
 	page.Strict(true)
 	defer page.Strict(false)
+	of.Asks = graded
 	return Ports(ports.Listing{AllMachines: f}, of, page.Context{Machine: proMac})
 }
 
@@ -315,8 +316,11 @@ func TestAShareMenuStopsIt(t *testing.T) {
 		}
 	}
 	stop := action(p, ActionStopSharing+"linux-1:7000")
-	if stop == nil || stop.Run == nil || stop.Run.Call != CallStopSharing || stop.Run.In["Port"] != `"7000"` || stop.Confirm == nil {
+	if stop == nil || stop.Run == nil || stop.Run.Call != CallStopSharing || stop.Run.In["Port"] != `"7000"` {
 		t.Fatalf("stop %+v", stop)
+	}
+	if _, answered := stop.Run.In["Confirm"]; stop.Confirm != nil || answered {
+		t.Fatalf("a stop sharing asks %+v and sends %v: its call asks nothing", stop.Confirm, stop.Run.In)
 	}
 }
 
@@ -354,7 +358,7 @@ func TestAWorkspaceOverviewHasItsPortsCard(t *testing.T) {
 		t.Fatalf("a share's card line names its audience: %+v", c)
 	}
 	menu := action(p, ActionMenu)
-	if menu == nil || !slices.Equal(menuWords(p, menu.Submenu), []string{"linux-1 on This Mac", "Copy ssh command", "Share a port...", "-", "Stop...", "-", "Delete... (red)"}) {
+	if menu == nil || !slices.Equal(menuWords(p, menu.Submenu), []string{"linux-1 on This Mac", "Copy ssh command", "Share a port...", "-", "Stop", "-", "Delete... (red)"}) {
 		t.Fatalf("menu %q", menuWords(p, menu.Submenu))
 	}
 	f.Macs[0].Shared, f.Macs[0].Ports = nil, nil
@@ -529,7 +533,7 @@ func TestAShareOpensItsLinkOnlyWhileItIsServed(t *testing.T) {
 func TestANotAllowedListenerIsOfferedAndTheLocalCountKeepsAllShares(t *testing.T) {
 	f := portFleet()
 	f.Macs[0].Shared = []ports.SharedPort{{VM: "linux-1", GuestPort: 8443, State: ports.PhaseNotAllowed, Detail: "listens, not allowed (open: 3000-3999)"}}
-	b := portsOf(f, portsScope{Self: proMac})
+	b := portsOf(f, portsScope{Self: proMac, Asks: graded})
 	if !slices.ContainsFunc(b.Listeners, func(it page.Item) bool { return it.Row.ID == "linux-1:8443" }) {
 		t.Fatalf("the sheet's listeners %q", ids(rowsFrom(b.Listeners)))
 	}
@@ -537,7 +541,7 @@ func TestANotAllowedListenerIsOfferedAndTheLocalCountKeepsAllShares(t *testing.T
 	for i := range catalog.PortRowsShown + 5 {
 		f.Macs[0].Shared = append(f.Macs[0].Shared, ports.SharedPort{VM: "linux-1", GuestPort: 3000 + i, Reserved: 40000 + i, State: ports.PhaseShared, To: "local"})
 	}
-	b = portsOf(f, portsScope{Self: proMac})
+	b = portsOf(f, portsScope{Self: proMac, Asks: graded})
 	for _, s := range b.Sections {
 		if s.ID == SectionLocal && (s.Caption[0].Text != strconv.Itoa(catalog.PortRowsShown+5) || !s.Uncounted) {
 			t.Fatalf("local caption %+v uncounted %v", s.Caption, s.Uncounted)

@@ -8,4 +8,4 @@ runs:
           {"v":2,"id":"1","watch":"machines.list","in":{}}
       exit: 0
       stdout: |
-          [["api",{"State":"yours","Sentence":"Yours. Stays until you delete it."}],["linux-1",{"State":"yours","Sentence":"Yours. Deleted when it powers off."}],["infra",{"State":"always-on","Sentence":"Always on. Stopping it needs its name typed."}]]
+          [["api",{"State":"yours","Sentence":"Yours. Stays until you delete it."}],["linux-1",{"State":"yours","Sentence":"Yours. Deleted when it powers off."}],["infra",{"State":"always-on","Sentence":"Always on. Stopping it asks yes or no."}]]

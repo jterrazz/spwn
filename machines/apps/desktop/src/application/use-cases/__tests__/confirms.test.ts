@@ -4,7 +4,7 @@ import { confirmingOf, consequenceOf } from '../confirms';
 
 describe('confirms', () => {
     test("a call's confirmation is the engine's, its kind of machine choosing among the forms it gives", () => {
-        // Given - machines.restart, which a server types, a workspace skips and a Mac answers yes to, and machines.stop
+        // Given - machines.restart, which a server and a Mac answer yes to and a workspace skips, and machines.stop
 
         // When - each is asked for its kind
         const forms = [
@@ -17,8 +17,8 @@ describe('confirms', () => {
             confirmingOf('machines.delete', 'workspace')?.form,
         ];
 
-        // Then - the name, nothing, a yes, a yes, the name, a yes, the name
-        expect(forms).toStrictEqual(['name', undefined, 'yes', 'yes', 'name', 'yes', 'name']);
+        // Then - a yes, nothing, a yes, a yes, a yes, nothing, the name
+        expect(forms).toStrictEqual(['yes', undefined, 'yes', 'yes', 'yes', undefined, 'name']);
     });
 
     test('a call that asks nothing has no confirmation', () => {

@@ -1,0 +1,15 @@
+description: '--yes answers an up server''s restart: a new run, still wanted running'
+env: two-macs
+runs:
+    - command: 'machines restart infra --on mac-mini --yes'
+      exit: 0
+      stdout: |
+          	On mac-mini:
+          ●	Running
+          ●	Has an address	192.168.64.5
+          ●	SSH answers
+          ●	infra	restarted
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"].vms.infra | {pid, want: .kept.want}'' world.json'
+      exit: 0
+      stdout: |
+          {"pid":1002,"want":"running"}

@@ -2098,6 +2098,12 @@ export type MachinesAllMachines = {
     Standing?: MachinesRollUp;
 };
 
+export type MachinesAsks = {
+    Delete: '' | 'none' | 'yes-no' | 'type-name';
+    Restart: '' | 'none' | 'yes-no' | 'type-name';
+    Stop: '' | 'none' | 'yes-no' | 'type-name';
+};
+
 export type MachinesBack = {
     Name: string;
     VMs: MachinesVM[] | null;
@@ -2130,13 +2136,11 @@ export type MachinesCallsCleanupIn = {
 };
 
 export type MachinesCallsCreateIn = {
-    Confirm?: string;
     Request?: MachinesCreateRequest;
 };
 
 export type MachinesCallsCreateServerIn = {
     Check?: string;
-    Confirm?: string;
     Creator?: string;
     Image?: string;
     Name?: string;
@@ -2550,6 +2554,7 @@ export type MachinesUptimeStrip = {
 };
 
 export type MachinesVM = {
+    Asks?: MachinesAsks;
     Birth: MachinesBirth | null;
     Blocked?: 'local-network' | 'vm-user';
     BootAt: string;
@@ -3111,7 +3116,6 @@ export type PortsCallsShareIn = {
 };
 
 export type PortsCallsStopSharingIn = {
-    Confirm?: string;
     Mac?: string;
     Port?: string;
     VM?: string;
@@ -3123,7 +3127,6 @@ export type PortsCallsStopSharingOut = {
 };
 
 export type PortsCallsUndeclareIn = {
-    Confirm?: string;
     Machine?: string;
     Port?: string;
 };
@@ -3451,7 +3454,6 @@ export type SettingsRowInput = {
 };
 
 export type SetupCallsInitIn = {
-    Confirm?: string;
     Interactive?: boolean;
     Name?: string;
     Plan?: boolean;
@@ -3868,8 +3870,8 @@ export interface Calls {
     'machinefile.upgrade': { in: MachinefileUpgradeInput; out: MachinefileUpgradeOutput; watch: false };
     'machines.add': { in: MachinesAddInput; out: MachinesAddOutput; watch: false };
     'machines.cleanup': { in: MachinesCleanupInput; out: MachinesCleanupOutput; watch: false; confirm: 'cleanup'; consequence: 'Every stopped ephemeral workspace is deleted.' };
-    'machines.create-server': { in: MachinesCreateServerInput; out: MachinesCreateServerOutput; watch: false; confirm: 'build-image'; consequence: '%s is built first, which takes several minutes.' };
-    'machines.create-workspace': { in: MachinesCreateWorkspaceInput; out: MachinesCreateWorkspaceOutput; watch: false; confirm: 'build-image'; consequence: '%s is built first, which takes several minutes.' };
+    'machines.create-server': { in: MachinesCreateServerInput; out: MachinesCreateServerOutput; watch: false };
+    'machines.create-workspace': { in: MachinesCreateWorkspaceInput; out: MachinesCreateWorkspaceOutput; watch: false };
     'machines.delete': { in: MachinesDeleteInput; out: MachinesDeleteOutput; watch: false; confirm: 'delete'; consequence: '%s and everything on its disk are deleted for good.' };
     'machines.edit': { in: MachinesEditInput; out: MachinesEditOutput; watch: false };
     'machines.forget': { in: MachinesForgetInput; out: MachinesForgetOutput; watch: false; confirm: 'forget'; consequence: '%s leaves your machines; nothing on it changes.' };
@@ -3890,8 +3892,8 @@ export interface Calls {
     'ports.list': { in: PortsListInput; out: PortsListOutput; watch: false };
     'ports.set-https': { in: PortsSetHttpsInput; out: PortsSetHttpsOutput; watch: false };
     'ports.share': { in: PortsShareInput; out: PortsShareOutput; watch: false };
-    'ports.stop-sharing': { in: PortsStopSharingInput; out: PortsStopSharingOutput; watch: false; confirm: 'stop-sharing'; consequence: '%s is no longer shared, and its reserved port is released.' };
-    'ports.undeclare': { in: PortsUndeclareInput; out: PortsUndeclareOutput; watch: false; confirm: 'undeclare'; consequence: '%s is no longer declared, so a listener on it is flagged again.' };
+    'ports.stop-sharing': { in: PortsStopSharingInput; out: PortsStopSharingOutput; watch: false };
+    'ports.undeclare': { in: PortsUndeclareInput; out: PortsUndeclareOutput; watch: false };
     'settings.apply': { in: SettingsApplyInput; out: SettingsApplyOutput; watch: false; confirm: 'overwrite'; consequence: 'Your value of %s is replaced by the one the file asks.' };
     'settings.diff': { in: SettingsDiffInput; out: SettingsDiffOutput; watch: false };
     'settings.list': { in: SettingsListInput; out: SettingsListOutput; watch: true };
@@ -3899,7 +3901,7 @@ export interface Calls {
     'settings.off': { in: SettingsOffInput; out: SettingsOffOutput; watch: false; confirm: 'off-here'; consequence: 'Machines stops applying %s on this machine; its value now stays.' };
     'settings.show': { in: SettingsShowInput; out: SettingsShowOutput; watch: false };
     'settings.zsh-block': { in: SettingsZshBlockInput; out: SettingsZshBlockOutput; watch: false };
-    'setup.init': { in: SetupInitInput; out: SetupInitOutput; watch: false; confirm: 'relocate'; consequence: 'Moved where each app now looks, one rename each: %s.' };
+    'setup.init': { in: SetupInitInput; out: SetupInitOutput; watch: false };
     'teams.list': { in: TeamsListInput; out: TeamsListOutput; watch: false };
     'teams.show': { in: TeamsShowInput; out: TeamsShowOutput; watch: false };
     'vault.add': { in: VaultAddInput; out: VaultAddOutput; watch: false };

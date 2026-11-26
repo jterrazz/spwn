@@ -1,9 +1,15 @@
 canvas: { scheme: dark, scale: 2, unit: pt, still: true, ground: FlatDesk }
 base: ./mac.this.overview.dark.view.yaml
+tokens:
+  Role.alertLabel: system 12 medium t2
+  Role.alertName: system 12 bold monospaced t1
 added:
 - in group [kit=Popover] › group [kit=MacPage] › group [kit=Panel]:
-  - dialog "Delete agent-7f?" [kit=AlertCard] [at=26,135.5] [size=270.5x167.5]:
-    - button "Cancel" [kit=PanelButton] [at=16,125] [size=107.5x28]:
+  - dialog "Delete agent-7f?" [kit=AlertCard] [at=26,108] [size=270.5x222]:
+    - text "Type" [at=16,121] [size=29x15] [font=Role.alertLabel]
+    - text "agent-7f" [at=89,121] [size=60x15] [font=Role.alertName]
+    - text "to confirm" [at=193.5,121] [size=60.5x15] [font=Role.alertLabel]
+    - button "Cancel" [kit=PanelButton] [at=16,179.5] [size=107.5x28]:
       - text "Cancel" [at=33,6.5] [size=41x15] [font=Role.button]
-    - button "Delete agent-7f" [kit=PanelButton] [at=131.5,125] [size=122.5x28]:
+    - button "Delete agent-7f" [kit=PanelButton] [at=131.5,179.5] [size=122.5x28]:
       - text "Delete agent-7f" [at=14,6.5] [size=94.5x15] [font=Role.button]

@@ -1,7 +1,7 @@
 description: 'init moves the old Tart store and app into station''s data folder by rename, never pulls'
 fixture: ./__fixtures__/tart-store/
 runs:
-    - command: 'init --name m --yes </dev/null'
+    - command: 'init --name m </dev/null'
       exit: 0
       stdout: |
           # To move

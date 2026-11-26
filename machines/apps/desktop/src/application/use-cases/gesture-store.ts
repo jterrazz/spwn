@@ -1,6 +1,8 @@
 import { IDLE } from './gesture';
 import type { Ask, GestureState } from './gesture';
 
+export type Instead = { label: string; run: () => void };
+
 export type Confirmation = {
     key: string;
     title: string;
@@ -8,6 +10,8 @@ export type Confirmation = {
     consequence: (ask: Ask) => string | undefined;
     destroys: boolean;
     held?: string | undefined;
+    // invariant: the safe way out a destroying question offers (Stop instead), run in place of the gesture.
+    instead?: Instead | undefined;
     confirm: (typed: string) => void;
     cancel: () => void;
 };

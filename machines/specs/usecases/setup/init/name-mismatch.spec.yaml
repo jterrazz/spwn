@@ -6,7 +6,7 @@ runs:
       stderr: |
           Error: this Mac is named "macbook-pro", not "other"
           Hint: run station init without --name
-    - command: 'init --name macbook-pro --yes | /usr/bin/grep name'
+    - command: 'init --name macbook-pro | /usr/bin/grep name'
       exit: 0
       stdout: |
           ●	name	macbook-pro

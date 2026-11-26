@@ -7,7 +7,7 @@ runs:
       exit: 0
       stdout: |
           ●	5000 on mac-mini	declared public (your LAN)
-    - command: 'ports undeclare mac-mini 5000 --yes'
+    - command: 'ports undeclare mac-mini 5000'
       exit: 0
       stdout: |
           ●	5000 on mac-mini	not declared

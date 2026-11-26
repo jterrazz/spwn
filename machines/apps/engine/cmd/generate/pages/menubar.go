@@ -69,7 +69,7 @@ func readingsAt(now time.Time, memory, disk, free int64) []activity.Reading {
 	return out
 }
 
-var Levels pagemenubar.Levels // value: the confirmation rule the machine pages draw, set by the generator that owns the calls (confirm.For).
+var Levels pagemenubar.Levels // value: the confirmation rule the machine pages draw, set by the generator that owns the calls (confirm.Of).
 
 func menubarHere() page.Context { return page.Context{Machine: thisMacName, Kind: "computer"} }
 

@@ -30,7 +30,7 @@ var Remove = call.Call[Deps, RemoveIn, []apps.Outcome]{
 		if err := installed(ctx, d, in.Names); err != nil {
 			return nil, err
 		}
-		if err := confirm.Require(confirm.For(confirm.Remove, d.Kind), strings.Join(in.Names, ", "), in.Confirm); err != nil {
+		if err := confirm.Require(confirm.Of(confirm.Remove, d.Kind), strings.Join(in.Names, ", "), in.Confirm); err != nil {
 			return nil, err
 		}
 		out, err := d.Apps.Uninstall(ctx, in.Names, in.Word)

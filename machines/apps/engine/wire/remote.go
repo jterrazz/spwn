@@ -18,7 +18,6 @@ import (
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
-	"github.com/jterrazz/studio-station/apps/engine/core/confirm"
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 	coremachine "github.com/jterrazz/studio-station/apps/engine/core/machine"
 
@@ -254,11 +253,8 @@ func (m machine) askPorts(ctx context.Context, macs []string) map[string]ports.M
 	return answers
 }
 
-func (m machine) releaseOn(ctx context.Context, mac string, t ports.Target, yes bool) (ports.Reservation, error) {
+func (m machine) releaseOn(ctx context.Context, mac string, t ports.Target) (ports.Reservation, error) {
 	in := portscalls.StopSharingIn{VM: t.VM, Port: strconv.Itoa(t.Port)}
-	if yes {
-		in.Confirm = confirm.Yes
-	}
 	out, err := call.Invoke(ctx, m.far.router, coremachine.Ref{Name: mac}, portscalls.StopSharing, in, nil)
 	return out.Reservation, err
 }

@@ -101,7 +101,7 @@ var Delete = call.Call[Deps, DeleteIn, agents.Agent]{
 		if err != nil {
 			return agents.Agent{}, coded(err, in.Agent)
 		}
-		if err := confirm.Require(confirm.For(confirm.DeleteAgent, d.Kind), in.Agent, in.Confirm); err != nil {
+		if err := confirm.Require(confirm.Of(confirm.DeleteAgent, d.Kind), in.Agent, in.Confirm); err != nil {
 			return m.Agent, err
 		}
 		return m.Agent, coded(d.Minds.Delete(ctx, d.root(in.Project), in.Agent), in.Agent)

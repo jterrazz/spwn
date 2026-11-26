@@ -2,7 +2,7 @@
     "group": "menu",
     "heightNote": "linux-1's page as built after the prototype: no prototype height holds, its golden is the reference",
     "id": "menu.page.workspace",
-    "note": "linux-1's … menu: Copy ssh command, Share a port…, Grant a password…; Stop…; Delete….",
+    "note": "linux-1's … menu: Copy ssh command, Share a port…, Grant a password…; Stop; Delete….",
     "pages": ["pages/machines.machine.linux-1.json"],
     "schema": "station.story/v1",
     "ui": {

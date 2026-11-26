@@ -38,7 +38,7 @@ func Translate(err error, path string) *fail.Error {
 		if worded.Message == "" && errors.As(worded.Cause, &said) {
 			worded.Message, worded.Hint = said.Message, said.Hint
 		}
-		if worded.Message != "" && worded.Hint == "" {
+		if worded.Message != "" && worded.Hint == "" && worded.Type != fail.Declined {
 			worded.Hint = hint
 		}
 		return worded

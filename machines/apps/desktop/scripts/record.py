@@ -217,7 +217,7 @@ def asked(seed, requests, fixture):
         return list(pool.map(lambda request: serve(seed, [request], fixture)[1][0], requests))
 
 
-STOP_LINUX_1 = {"call": "machines.stop", "in": {"VM": "linux-1", "Confirm": "yes"}}
+STOP_LINUX_1 = {"call": "machines.stop", "in": {"VM": "linux-1"}}
 
 GESTURES = {
     "two-macs": [
@@ -225,7 +225,7 @@ GESTURES = {
         {"call": "machines.start", "in": {"VM": "linux-1"}, "following": STOP_LINUX_1},
         {"call": "machines.start", "in": {"VM": "api"}},
         {"call": "machines.delete", "in": {"VM": "api", "Confirm": "api"}},
-        {"call": "machines.restart", "in": {"Name": "infra", "Confirm": "infra"}, **at("mac-mini")},
+        {"call": "machines.restart", "in": {"Name": "infra", "Confirm": "yes"}, **at("mac-mini")},
         {"call": "apps.update", "in": {"Managers": ["mise"]}},
         {"call": "awake.keep", "in": {"For": 14400000000000}},
         {"call": "disk.free", "in": {}},
@@ -235,7 +235,7 @@ GESTURES = {
         {"call": "disk.erase", "in": {"App": "ollama", "Confirm": "ollama"}},
         {"call": "disk.erase", "in": {"App": "orbstack", "Confirm": "orbstack"}},
         {"call": "images.delete", "in": {"Image": "base-ubuntu", "Version": "2026.10.20", "Confirm": "yes"}},
-        {"call": "ports.stop-sharing", "in": {"VM": "linux-1", "Port": "5173", "Confirm": "yes"}},
+        {"call": "ports.stop-sharing", "in": {"VM": "linux-1", "Port": "5173"}},
         {"call": "ports.share", "in": {"VM": "linux-1", "Port": "5173", "To": "local"}},
         {"call": "ports.share", "in": {"VM": "linux-1", "Port": "5173", "To": "public"}},
         {"watch": "accounts.login", "in": {"Program": "gh", "Machine": "linux-1"}},
@@ -243,15 +243,15 @@ GESTURES = {
         {"call": "accounts.open", "in": {"Machine": "linux-1", "Exchange": "ex-1"}},
         {"call": "accounts.logout", "in": {"Program": "claude", "Machine": "linux-1", "Confirm": "yes"}},
         {"call": "background.remove", "in": {"Label": "com.example.brain.x-snapshot", "Confirm": "yes"}},
-        {"call": "machines.create-workspace", "in": {"Request": {"Name": "gate5", "From": "base-ubuntu", "Lifetime": "ephemeral"}, "Confirm": "yes"}, **at("mac-mini")},
-        {"call": "machines.create-workspace", "in": {"Request": {"Name": "gate5", "From": "base-ubuntu", "Lifetime": "ephemeral", "Size": {"MemoryBytes": 4294967296}}, "Confirm": "yes"}},
-        {"call": "machines.create-workspace", "in": {"Request": {"Name": "infra", "From": "base-ubuntu", "Lifetime": "ephemeral"}, "Confirm": "yes"}, **at("mac-mini")},
-        {"call": "machines.create-workspace", "in": {"Request": {"Name": "base-ubuntu", "From": "base-ubuntu", "Lifetime": "ephemeral"}, "Confirm": "yes"}, **at("mac-mini")},
-        {"call": "machines.create-workspace", "in": {"Request": {"Name": "Bad_Name", "From": "base-ubuntu", "Lifetime": "ephemeral"}, "Confirm": "yes"}, **at("mac-mini")},
-        {"call": "machines.create-workspace", "in": {"Request": {"Name": "linux-2", "From": "base-ubuntu", "Lifetime": "ephemeral", "Purpose": "x" * 121}, "Confirm": "yes"}, **at("mac-mini")},
-        {"call": "machines.create-workspace", "in": {"Request": {"Name": "linux-2", "From": "base-ubuntu", "Lifetime": "ephemeral", "Purpose": "Lot shell"}, "Confirm": "yes"}, **at("mac-mini"),
+        {"call": "machines.create-workspace", "in": {"Request": {"Name": "gate5", "From": "base-ubuntu", "Lifetime": "ephemeral"}}, **at("mac-mini")},
+        {"call": "machines.create-workspace", "in": {"Request": {"Name": "gate5", "From": "base-ubuntu", "Lifetime": "ephemeral", "Size": {"MemoryBytes": 4294967296}}}},
+        {"call": "machines.create-workspace", "in": {"Request": {"Name": "infra", "From": "base-ubuntu", "Lifetime": "ephemeral"}}, **at("mac-mini")},
+        {"call": "machines.create-workspace", "in": {"Request": {"Name": "base-ubuntu", "From": "base-ubuntu", "Lifetime": "ephemeral"}}, **at("mac-mini")},
+        {"call": "machines.create-workspace", "in": {"Request": {"Name": "Bad_Name", "From": "base-ubuntu", "Lifetime": "ephemeral"}}, **at("mac-mini")},
+        {"call": "machines.create-workspace", "in": {"Request": {"Name": "linux-2", "From": "base-ubuntu", "Lifetime": "ephemeral", "Purpose": "x" * 121}}, **at("mac-mini")},
+        {"call": "machines.create-workspace", "in": {"Request": {"Name": "linux-2", "From": "base-ubuntu", "Lifetime": "ephemeral", "Purpose": "Lot shell"}}, **at("mac-mini"),
          "during": [MACHINES, {"watch": "overview.read", "in": {}, **at("linux-2")}]},
-        {"call": "machines.create-server", "in": {"Name": "web", "Image": "base-ubuntu", "Size": {"MemoryBytes": 4294967296}, "Confirm": "yes"}},
+        {"call": "machines.create-server", "in": {"Name": "web", "Image": "base-ubuntu", "Size": {"MemoryBytes": 4294967296}}},
         {"call": "machines.add", "in": {"Name": "mac-mini"}},
         {"call": "vault.remove", "in": {"ID": "pw-2", "Confirm": "yes"}},
         {"call": "grants.remove", "in": {"Entry": "pw-2", "To": "linux-1", "Confirm": "yes"}},
@@ -277,7 +277,7 @@ GESTURES = {
         {"call": "ports.share", "in": {"VM": "linux-1", "Port": "4321"}},
         {"call": "ports.share", "in": {"VM": "linux-3", "Port": "5432"}, **at("mac-mini")},
         {"call": "ports.declare", "in": {"Machine": "macbook-pro", "Port": "5000", "Via": "lan"}},
-        {"call": "machines.restart", "in": {"Name": "infra", "Confirm": "infra"}, **at("mac-mini")},
+        {"call": "machines.restart", "in": {"Name": "infra"}, **at("mac-mini")},
     ],
     "sign-ins": [
         {"watch": "accounts.login", "in": {"Program": "claude", "Machine": "linux-1"}},
@@ -290,11 +290,11 @@ GESTURES = {
         {"call": "engine.start", "in": {}},
     ],
     "one-mac": [
-        {"call": "machines.create-workspace", "in": {"Request": {"Name": "gate5", "From": "base-ubuntu", "Lifetime": "ephemeral"}, "Confirm": "yes"}},
+        {"call": "machines.create-workspace", "in": {"Request": {"Name": "gate5", "From": "base-ubuntu", "Lifetime": "ephemeral"}}},
         {"call": "machines.add", "in": {"Name": "mac-mini"}},
     ],
     "standings": [
-        {"call": "machines.restart", "in": {"Name": "restart-1", "Confirm": "restart-1"}},
+        {"call": "machines.restart", "in": {"Name": "restart-1", "Confirm": "yes"}},
     ],
     "creating": [
         {"call": "machines.delete", "in": {"VM": "linux-5", "Confirm": "linux-5"}},

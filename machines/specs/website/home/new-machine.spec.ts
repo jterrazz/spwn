@@ -24,10 +24,10 @@ describe('new machine', () => {
             await visitor.click(within(banner(), button('New machine')));
             const sheet = dialog('New machine on mac-mini');
 
-            // When - what it is for is said, and linux-2 is launched and confirmed
+            // When - what it is for is said, and linux-2 is launched, which asks nothing
             await visitor.fill(within(sheet, field('What is it for?')), 'Lot shell');
             await visitor.click(within(sheet, button('Launch')));
-            await visitor.click(within(dialog('Launch linux-2?'), button('Launch')));
+            await visitor.gone(dialog('Launch linux-2?'));
 
             // Then - the sheet hands over to linux-2's page, running, with what it is for
             await visitor.gone(sheet);
@@ -45,10 +45,10 @@ describe('new machine', () => {
                 await visitor.click(within(banner(), button('New machine')));
                 const sheet = dialog('New machine on mac-mini');
 
-                // When - linux-2 is launched for what it is for
+                // When - linux-2 is launched for what it is for, which asks nothing
                 await visitor.fill(within(sheet, field('What is it for?')), 'Lot shell');
                 await visitor.click(within(sheet, button('Launch')));
-                await visitor.click(within(dialog('Launch linux-2?'), button('Launch')));
+                await visitor.gone(dialog('Launch linux-2?'));
 
                 // Then - its page reads creating and its step
                 await visitor.see(heading('linux-2 creating'));
@@ -136,10 +136,10 @@ describe('new machine', () => {
             await visitor.click(within(banner(), button('New machine')));
             const sheet = dialog('New machine on mac-mini');
 
-            // When - base-ubuntu is named, launched and confirmed
+            // When - base-ubuntu is named and launched, which asks nothing
             await visitor.fill(within(sheet, field('Name')), 'base-ubuntu');
             await visitor.click(within(sheet, button('Launch')));
-            await visitor.click(within(dialog('Launch base-ubuntu?'), button('Launch')));
+            await visitor.gone(dialog('Launch base-ubuntu?'));
 
             // Then - the sheet stays, the engine's sentence under the name
             const said = content("base-ubuntu names a Machinefile of base-ubuntu's chain", {
@@ -157,10 +157,10 @@ describe('new machine', () => {
             await visitor.click(within(banner(), button('New machine')));
             const sheet = dialog('New machine on mac-mini');
 
-            // When - infra is named, launched and confirmed
+            // When - infra is named and launched, which asks nothing
             await visitor.fill(within(sheet, field('Name')), 'infra');
             await visitor.click(within(sheet, button('Launch')));
-            await visitor.click(within(dialog('Launch infra?'), button('Launch')));
+            await visitor.gone(dialog('Launch infra?'));
 
             // Then - the engine's sentence under the name
             const said = content('"infra" is taken (on mac-mini)', { exact: false });

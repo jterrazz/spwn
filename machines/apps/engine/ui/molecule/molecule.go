@@ -36,6 +36,16 @@ func Empty(st token.Styles, e page.Empty) string {
 	return line + atom.Spaces(token.Gap) + Hint(st, *e.Hint)
 }
 
+func DeclinedLines(st token.Styles, e page.Error) []string {
+	// value: an act the owner declined, said as a calm line and no error:
+	// "Nothing changed.", then its hint when it has one (ADR-097).
+	lines := []string{st.Text.Render(e.Message)}
+	if e.Hint != "" {
+		lines = append(lines, st.Muted.Render("Hint:")+" "+st.Text.Render(e.Hint))
+	}
+	return lines
+}
+
 func ErrorLines(st token.Styles, e page.Error) []string {
 	lines := []string{st.Error.Render("Error:") + " " + st.Text.Render(e.Message)}
 	if e.Hint != "" {

@@ -82,25 +82,17 @@ function headerBoxes(): Boxes {
 }
 
 describe('gestures', () => {
-    test('stop asks first, then stops the machine, and the header and sidebar read it again', async () => {
+    test('stop asks nothing: it stops the machine, and the header and sidebar read it again', async () => {
         // Given - linux-1's page over two-macs, linux-1 running
         const result = await component.render(
             machineOver('two-macs', 'linux-1'),
             async (visitor) => {
                 await visitor.see(heading('linux-1 running'));
 
-                // When - Stop is clicked, then confirmed in its dialog
+                // When - Stop is clicked
                 await visitor.click(button('Stop'));
-                await visitor.see(dialog('Stop linux-1?'));
-                await visitor.see(
-                    within(
-                        dialog('Stop linux-1?'),
-                        content('linux-1 stops: what it serves stops until you start it again.'),
-                    ),
-                );
-                await visitor.click(within(dialog('Stop linux-1?'), button('Stop')));
 
-                // Then - the engine's machines.list, read again, says it is stopped
+                // Then - no dialog was asked, and the engine's machines.list, read again, says it is stopped
                 await visitor.gone(dialog('Stop linux-1?'));
                 await visitor.see(heading('linux-1 stopped'));
                 await visitor.see(within(sidebar, button('linux-1 stopped')));
@@ -118,9 +110,8 @@ describe('gestures', () => {
             await visitor.see(heading('linux-1 running'));
             before = headerBoxes();
 
-            // When - Stop is confirmed and the engine says it is done
+            // When - Stop is clicked and the engine says it is done
             await visitor.click(button('Stop'));
-            await visitor.click(within(dialog('Stop linux-1?'), button('Stop')));
             await visitor.see(heading('linux-1 stopped'));
             await visitor.see(content('done'));
             after = headerBoxes();
@@ -137,7 +128,6 @@ describe('gestures', () => {
         const start = holdingCall(stagedReplay(recordingFor('two-macs')), 'machines.start');
         const result = await component.render(linuxOneOver(start.transport), async (visitor) => {
             await visitor.click(button('Stop'));
-            await visitor.click(within(dialog('Stop linux-1?'), button('Stop')));
             await visitor.see(content('done'));
 
             // When - Start follows, and the connection drops before its answer
@@ -158,10 +148,8 @@ describe('gestures', () => {
         const result = await component.render(linuxOneOver(stop.transport), async (visitor) => {
             await visitor.see(heading('linux-1 running'));
 
-            // When - Stop is confirmed, and the connection drops before its answer
+            // When - Stop is clicked, and the connection drops before its answer
             await visitor.click(button('Stop'));
-            await visitor.click(within(dialog('Stop linux-1?'), button('Stop')));
-            await visitor.gone(dialog('Stop linux-1?'));
             await waitUntil(() => stop.sent(), { why: 'machines.stop sent' });
             stop.drop();
 
@@ -175,19 +163,41 @@ describe('gestures', () => {
     });
 
     test('a cancel at the confirm leaves the machine as it was', async () => {
-        // Given - linux-1's page over two-macs
+        // Given - linux-1's page over two-macs, linux-1 an ephemeral workspace that runs
         const result = await component.render(
             machineOver('two-macs', 'linux-1'),
             async (visitor) => {
                 await visitor.see(heading('linux-1 running'));
 
-                // When - Stop is clicked, then cancelled
-                await visitor.click(button('Stop'));
-                await visitor.click(within(dialog('Stop linux-1?'), button('Cancel')));
+                // When - its Delete is clicked, then cancelled
+                await visitor.click(button('Delete linux-1…'));
+                const asked = dialog('Delete linux-1 and its', { exact: false });
+                await visitor.see(within(asked, field('Type linux-1 to confirm')));
+                await visitor.click(within(asked, button('Cancel')));
 
                 // Then - no dialog, and the machine still runs
-                await visitor.gone(dialog('Stop linux-1?'));
+                await visitor.gone(asked);
                 await visitor.see(heading('linux-1 running'));
+            },
+        );
+        expect(result.errors.text).toBe('');
+    });
+
+    test('the delete of a running machine offers to stop it instead, which stops it and deletes nothing', async () => {
+        // Given - linux-1's page over two-macs, linux-1 running
+        const result = await component.render(
+            machineOver('two-macs', 'linux-1'),
+            async (visitor) => {
+                await visitor.see(heading('linux-1 running'));
+
+                // When - its Delete is clicked, then Stop instead
+                await visitor.click(button('Delete linux-1…'));
+                const asked = dialog('Delete linux-1 and its', { exact: false });
+                await visitor.click(within(asked, button('Stop instead')));
+                // Then - the dialog is gone, and linux-1 is stopped, still a machine of the sidebar
+                await visitor.gone(asked);
+                await visitor.see(heading('linux-1 stopped'));
+                await visitor.see(within(sidebar, button('linux-1 stopped')));
             },
         );
         expect(result.errors.text).toBe('');
@@ -214,7 +224,7 @@ describe('gestures', () => {
 
             // When - Delete api is clicked, a wrong name typed, then the right one
             await visitor.click(button('Delete api…'));
-            const asked = dialog('Delete api?');
+            const asked = dialog('Delete api and its', { exact: false });
             const typed = within(asked, field('Type api to confirm'));
             const held = disabled(button('Delete'));
             const free = enabled(button('Delete'));
@@ -242,7 +252,7 @@ describe('gestures', () => {
 
                 // When - its delete is confirmed by its name
                 await visitor.click(button('Delete linux-5…'));
-                const asked = dialog('Delete linux-5?');
+                const asked = dialog('Delete linux-5 and its disk?');
                 await visitor.fill(within(asked, field('Type linux-5 to confirm')), 'linux-5');
                 await visitor.click(within(asked, button('Delete')));
 
@@ -279,17 +289,17 @@ describe('gestures', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test("a server's restart is asked first, sent to its Mac, and the engine's answer is shown", async () => {
+    test("an up server's restart asks yes or no, is sent to its Mac, and the engine's answer is shown", async () => {
         // Given - infra's page over two-macs, a server on mac-mini whose header says nothing of its uptime
         const result = await component.render(machineOver('two-macs', 'infra'), async (visitor) => {
             await visitor.see(heading('infra', { exact: false }));
             const restarted = content('Up 1 min.', { exact: false });
             await visitor.gone(restarted);
 
-            // When - Restart is clicked, then confirmed in its dialog by the server's name
+            // When - Restart is clicked, then answered yes in its dialog, which asks no name
             await visitor.click(button('Restart'));
             const confirm = dialog('Restart infra?');
-            await visitor.fill(within(confirm, field('Type infra to confirm')), 'infra');
+            await visitor.gone(within(confirm, field('Type infra to confirm')));
             await visitor.click(within(confirm, button('Restart')));
 
             // Then - mac-mini restarts it, and the header, read again, says Done and the uptime its Mac gives

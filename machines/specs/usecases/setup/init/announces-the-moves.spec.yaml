@@ -3,7 +3,7 @@ env: fresh
 runs:
     - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].disk.files = {"~/.bun/install/global/node_modules/skills/cli.mjs": 180000000, "~/.bun/bin/bun": 52000000, "~/.bun/install/cache/skills@1.0.0/package.json": 64000, "~/.bun/_bun": 8000, "~/go/bin/golangci-lint": 59000000, "~/go/pkg/mod/cache/download/x": 2300000, "~/go/pkg/sumdb/sum.golang.org/latest": 4000, "~/.npm/_cacache/index-v5/x": 800000}'' world.json > next.json && /bin/mv next.json world.json'
       exit: 0
-    - command: 'init --name macbook-pro --yes'
+    - command: 'init --name macbook-pro'
       exit: 0
       stdout: |
           # To move
