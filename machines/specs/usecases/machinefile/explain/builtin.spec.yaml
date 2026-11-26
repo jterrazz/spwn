@@ -15,7 +15,7 @@ runs:
           	vm.resources.disk	20G	built-in	base-ubuntu
           	vm.network	nat	built-in	base-ubuntu
           	vm.image.from	ghcr.io/cirruslabs/ubuntu:24.04	built-in	base-ubuntu
-          	vm.image.bake	mise, git, docker, build-essential, playwright-deps	built-in	base-ubuntu
+          	vm.image.bake	linux-kernel, mise, git, docker, build-essential, playwright-deps	built-in	base-ubuntu
           	apps.mise	listed	built-in	base-ubuntu
           	apps.mise.method	script	built-in	mise
           	apps.mise.because	its one method for ubuntu 24.04	built-in	mise
@@ -31,9 +31,12 @@ runs:
           	settings.hushlogin	listed	built-in	base-ubuntu
           	settings.hushlogin.method	file	built-in	hushlogin
           	settings.hushlogin.because	its one method for ubuntu 24.04	built-in	hushlogin
-          	apps.apt	the manager of git	built-in	git
+          	apps.apt	the manager of linux-kernel	built-in	linux-kernel
           	apps.apt.method	apt	built-in	apt
           	apps.apt.because	its one method for ubuntu 24.04	built-in	apt
+          	apps.linux-kernel	listed	built-in	base-ubuntu
+          	apps.linux-kernel.method	apt	built-in	linux-kernel
+          	apps.linux-kernel.because	its one method for ubuntu 24.04	built-in	linux-kernel
           	apps.git	listed	built-in	base-ubuntu
           	apps.git.method	apt	built-in	git
           	apps.git.because	its one method for ubuntu 24.04	built-in	git

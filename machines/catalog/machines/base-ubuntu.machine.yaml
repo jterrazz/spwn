@@ -11,9 +11,10 @@ vm:
     image:
         {
             from: 'ghcr.io/cirruslabs/ubuntu:24.04',
-            bake: [mise, git, docker, build-essential, playwright-deps],
+            bake: [linux-kernel, mise, git, docker, build-essential, playwright-deps],
         }
 apps:
+    - linux-kernel
     - mise
     - { name: git, optional: true }
     - ohmyzsh
