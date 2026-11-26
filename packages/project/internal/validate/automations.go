@@ -14,6 +14,8 @@ import (
 )
 
 func ruleAutomations(in Input) []Issue {
+	tree, done := in.tree()
+	defer done()
 	if in.Manifest == nil {
 		return nil
 	}
@@ -86,7 +88,7 @@ func ruleAutomations(in Input) []Issue {
 			}
 
 			if hasFS {
-				out = append(out, validateFS(in.tree(), in.Root, pathPrefix+".on.fs", a.On.FS)...)
+				out = append(out, validateFS(tree, in.Root, pathPrefix+".on.fs", a.On.FS)...)
 			}
 
 			hasPrompt := strings.TrimSpace(a.Prompt) != ""
@@ -109,7 +111,7 @@ func ruleAutomations(in Input) []Issue {
 			}
 
 			if hasCommand {
-				out = append(out, validateAutomationCommandRef(in.tree(), in.Root, pathPrefix+".command", a.Command)...)
+				out = append(out, validateAutomationCommandRef(tree, in.Root, pathPrefix+".command", a.Command)...)
 			}
 
 			switch a.Catchup {
