@@ -105,6 +105,70 @@ describe('Canvas', () => {
         expect(onPath.mock.calls).toStrictEqual([[['S:product']], [[]]]);
     });
 
+    test('under reduced motion, opening a node jumps: the canvas starts no animation and keeps the focus', async () => {
+        // Given - the wiki at its root, under reduced motion
+        const restore = reducedMotion(true);
+        let started = -1;
+        await component.render(<Host sample="wiki" />, async (visitor) => {
+            // When - a seat is opened by a click
+            await visitor.click(button(PRODUCT));
+            started = document
+                .getAnimations()
+                .filter(
+                    (one) => !(one instanceof CSSTransition || one instanceof CSSAnimation),
+                ).length;
+
+            // Then - the seat holds the focus
+            await visitor.see(focused(button(PRODUCT)));
+        });
+        restore();
+
+        // Then - nothing was animated by script
+        expect(started).toBe(0);
+    });
+
+    test('a click on the desk goes up one level', async () => {
+        // Given - the wiki with a page open
+        const onPath = vi.fn<(path: readonly string[]) => void>();
+        await component.render(
+            <Host onPath={onPath} sample="wiki" start={['S:product', 'P:product/boundaries']} />,
+            async (visitor) => {
+                await visitor.see(button(BOUNDARIES));
+
+                // When - the desk itself, outside every node, is clicked
+                document
+                    .querySelector('[role="group"]')
+                    ?.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 1 }));
+            },
+        );
+
+        // Then - the page closed to its seat
+        expect(onPath.mock.calls).toStrictEqual([[['S:product']]]);
+    });
+
+    test('the seats compressed to dots stay buttons, named, that the arrows reach', async () => {
+        // Given - the wiki with a page open, its other seats drawn as dots
+        const reached: string[] = [];
+        await component.render(
+            <Host sample="wiki" start={['S:product', 'P:product/boundaries']} />,
+            async (visitor) => {
+                await visitor.see(button('Vision'));
+                await visitor.see(button('Technique'));
+
+                // When - the canvas is entered by Tab and walked up to its top
+                await visitor.press('Tab');
+                for (const key of ['ArrowUp', 'ArrowUp', 'ArrowUp', 'ArrowUp']) {
+                    await visitor.press(key);
+                    const node = document.activeElement?.closest<HTMLElement>('[data-node]');
+                    reached.push(`${node?.dataset.face ?? ''}:${node?.dataset.node ?? ''}`);
+                }
+            },
+        );
+
+        // Then - the walk landed on the Vision seat's dot
+        expect(reached).toContain('dot:S:blueprint');
+    });
+
     test('a drag pans the camera without opening what it started on', async () => {
         // Given - the wiki at its root
         const onPath = vi.fn<(path: readonly string[]) => void>();
