@@ -116,7 +116,7 @@ func (s Server) call(ctx context.Context, w *writer, f api.Frame) api.Frame {
 	ctx = call.Recording(ctx)
 	plain := progress{id: f.ID, out: w, word: s.wording}
 	var p call.Progress = plain
-	g := &guided{progress: plain, family: h.Meta().Guide, acts: s.Acts}
+	g := &guided{progress: plain, family: h.Meta().Guide, acts: s.Acts, repairs: repairOf(h.Meta(), f.In)}
 	if g.family != "" && s.Acts != nil {
 		p = g
 	}

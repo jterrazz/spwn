@@ -309,6 +309,10 @@ GESTURES = {
         CREATE_LINUX_2,
         {"call": "machines.start", "in": {"VM": "linux-2"}, "following": CREATE_LINUX_2},
     ],
+    "create-refused": [
+        CREATE_LINUX_2,
+        {"call": "machines.start", "in": {"VM": "linux-2"}, "following": CREATE_LINUX_2, "preferred": {"vm_user": "root"}},
+    ],
     "machinefile-differs": [
         {"call": "machinefile.apply", "in": {"Confirm": "yes"}},
         {"call": "machinefile.apply", "in": {"Confirm": "yes"}, **at("api")},
@@ -461,14 +465,19 @@ def gesture(world, seed, fixture, request, reads, before):
     """The gesture in a fresh world, then every read in that same world, kept when its answer changed: a watch by
     its settled answer, the one a window shows once it has read again. A read the world did not ask before, of a
     machine the gesture made, is kept whatever it answers. A gesture `following` another is made once that one is,
-    in the same world, and judged against what the reads answer then. The reads it names `during` are asked once its
+    in the same world, and judged against what the reads answer then; one `preferred` is made once those preferences
+    of This Mac are set by hand, its door opened again over the same HOME, and judged against what the reads answer
+    then. The reads it names `during` are asked once its
     first frame is in and every hold the world declares for a VM is reached, while it still runs, and kept as it
     answers them, changed or not."""
     door = Door(seed, fixture)
-    following, during = request.get("following"), request.get("during", [])
-    request = {key: value for key, value in request.items() if key not in ("following", "during")}
+    following, during, preferred = request.get("following"), request.get("during", []), request.get("preferred")
+    request = {key: value for key, value in request.items() if key not in ("following", "during", "preferred")}
     if following:
         door.ask([following])
+    if preferred:
+        door.prefer(preferred)
+    if following or preferred:
         before = based(door, world, reads, before)
 
     apart = {}

@@ -130,6 +130,22 @@ func (b *Acts) End(id string, ended guide.Ended, failed *call.WireError) {
 	b.save(k)
 }
 
+func (b *Acts) Refused(id string, refusal *call.WireError) {
+	// invariant: a repair the engine refused ends its act failed again, on
+	// the refusal's code and words, from the moment it was refused; an act
+	// that still runs, or that left the board, takes no refusal.
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	k := b.read()
+	i := slices.IndexFunc(k.Acts, func(e actEntry) bool { return e.ID == id && e.Ended != "" })
+	if i < 0 || refusal == nil {
+		return
+	}
+	e := &k.Acts[i]
+	e.Ended, e.Code, e.Cause, e.At = guide.EndedFailed, string(refusal.Code), refusal.Message, b.at()
+	b.save(k)
+}
+
 func (b *Acts) at() time.Time { return b.now().UTC().Truncate(time.Second) }
 
 func (b *Acts) save(k actsKept) {

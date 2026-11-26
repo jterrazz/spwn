@@ -11,7 +11,8 @@ import { repairOf } from '../../words/provisional';
 import type { Repair } from '../../words/provisional';
 import { routeOfNav } from './guide-of';
 
-const REPAIR_REREADS: readonly CallName[] = ['overview.read'];
+// value: a refused repair is the act's state on the engine's board, so the Guide reads the list again.
+const REPAIR_REREADS: readonly CallName[] = ['overview.read', 'engine.guides'];
 
 type Ground = {
     macs: readonly MachinesMacView[];
@@ -27,7 +28,8 @@ type Run = Ground & {
 
 // invariant: a repair runs the call the engine named, at the machine it named, and asks the confirmation the call
 // invariant: requires through the window's own dialog, the name typed being the engine's `confirm`; once made, the Guide
-// invariant: is left for the page of the machine, or Home when the machine is gone.
+// invariant: is left for the page of the machine, or Home when the machine is gone; refused, it stays open on the act as
+// invariant: the engine then serves it.
 function Repairing({ gesture, macs, go, leave, repair, children }: Run) {
     const on = gesture.on ?? '';
     const found = findMachine(macs, on);

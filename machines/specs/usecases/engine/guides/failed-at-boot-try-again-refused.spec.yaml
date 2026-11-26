@@ -1,0 +1,27 @@
+description: 'a Try again the engine refuses ends the create failed at its boot on the refusal'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'world fault Hypervisor.Boot 1'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | .error.code // .out.VM.Name'''
+      stdin: |
+          {"v":2,"id":"1","call":"machines.create-workspace","in":{"Request":{"Name":"linux-4","Image":"base-ubuntu","Size":{"MemoryBytes":4294967296}}}}
+      exit: 0
+      stdout: |
+          null
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs[.this_mac].preferences.vm_user = "root"'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | .error // .out'''
+      stdin: |
+          {"v":2,"id":"1","call":"machines.start","in":{"VM":"linux-4"}}
+      exit: 0
+      stdout: |
+          {"message":"vm_user \"root\" in preferences.json is not a VM user: a lowercase short name (a-z first, then up to 31 of a-z, 0-9, _, . and -, never a dot last), never admin or root","hint":"set another vm_user in ~/.config/station/preferences.json","exit":1}
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | .out.guides[]? // .error'''
+      stdin: |
+          {"v":2,"id":"1","call":"engine.guides","in":{}}
+      exit: 0
+      stdout: |
+          {"id":"machines.create:linux-4","act":"New machine","subject":"linux-4","steps":[{"id":"cloning","label":"Disk","status":"done"},{"id":"booting","label":"Boot","status":"failed"},{"id":"address","label":"Network","status":"next"},{"id":"ssh","label":"SSH","status":"next"}],"view":{"illustration":"boot-failed","headline":{"now":"Boot failed","next":""},"sentence":"vm_user \"root\" in preferences.json is not a VM user: a lowercase short name (a-z first, then up to 31 of a-z, 0-9, _, . and -, never a dot last), never admin or root","move":"owner","kept":"linux-4 is kept, stopped.","action":{"label":"Try again","call":"machines.start","args":{"VM":"linux-4"},"on":"macbook-pro"},"quiet":{"label":"Delete linux-4","call":"machines.delete","args":{"VM":"linux-4"},"on":"macbook-pro","confirm":"linux-4"}},"ended":"failed","line":"Creating linux-4 failed at Boot","live":false}

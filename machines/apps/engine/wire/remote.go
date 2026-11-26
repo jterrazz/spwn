@@ -321,9 +321,9 @@ type door struct {
 	attached bool
 }
 
-func (s served) Guide(target coremachine.Ref, name string) (string, serve.Acts) {
+func (s served) Guide(target coremachine.Ref, name string) (call.Meta, serve.Acts) {
 	if s.door.acts == nil || s.r == nil || (s.door.far != nil && s.door.far(target)) {
-		return "", nil
+		return call.Meta{}, nil
 	}
 	return s.r.Guide(target, name), s.door.acts
 }

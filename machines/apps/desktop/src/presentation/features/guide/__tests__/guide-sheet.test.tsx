@@ -2,6 +2,7 @@ import {
     banner,
     button,
     component,
+    content,
     dialog,
     field,
     file,
@@ -19,7 +20,7 @@ import type { Route } from '../../../navigation/route';
 import { Window } from '../../../navigation/window';
 import { PAGES } from '../../../screens/registry';
 
-const recordingFor = await recordingsOf('create-held', 'create-failing');
+const recordingFor = await recordingsOf('create-held', 'create-failing', 'create-refused');
 
 type Visitor = Parameters<NonNullable<Parameters<typeof component.render>[1]>>[0];
 
@@ -142,6 +143,29 @@ describe('guide-sheet', () => {
             await visitor.see(heading('linux-2 running'));
         });
         expect(result.errors.text).toBe('');
+    });
+
+    test('a Try again the engine refuses leaves the Guide open on the refusal, the boot still failed and its repairs still offered', async () => {
+        // Given - the failed Guide of linux-2, in a world whose vm_user the engine refuses
+        const result = await component.render(windowOver('create-refused'), async (visitor) => {
+            await launched(visitor);
+            await visitor.see(within(guide, heading('Boot failed')));
+
+            // When - Try again is pressed and the engine refuses it
+            await visitor.click(within(guide, button('Try again')));
+
+            // Then - the Guide still shows the act, now on the engine's refusal
+            await visitor.see(
+                within(
+                    guide,
+                    content(
+                        'vm_user "root" in preferences.json is not a VM user: a lowercase short name (a-z first, then up to 31 of a-z, 0-9, _, . and -, never a dot last), never admin or root',
+                    ),
+                ),
+            );
+            await visitor.see(within(guide, button('Try again')));
+        });
+        await expect(result.tree).toMatch(file('./__expected__/repair-refused.aria.yaml'));
     });
 
     test('deleting a failed create asks the name the engine gave, in the window’s own dialog', async () => {

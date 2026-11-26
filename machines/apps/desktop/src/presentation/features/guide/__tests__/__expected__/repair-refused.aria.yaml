@@ -1,0 +1,74 @@
+- banner:
+  - button "Home"
+  - button "Pin the column"
+  - button "Back" [disabled]
+  - button "Forward" [disabled]
+  - navigation "Path":
+    - list:
+      - listitem: Home
+  - button "New machine"
+  - button "Inbox 2"
+  - button "Find"
+  - button "Settings"
+- main:
+  - heading "linux-2 was not created." [level=1]
+  - paragraph:
+    - img "linux-2 was not created."
+    - text: 1 more thing needs you. The rest is fine. 3 machines on macbook-pro
+  - text: Memory free 40GB
+  - img "Memory each machine holds, and what is free"
+  - text: of 80 CPU, this Mac 34% 10 CPUs Awake, this Mac off on power Disk free, this Mac 388GB
+  - 'meter "Disk free, this Mac: used of its total"'
+  - text: of 994 GB · machines hold 120 GB
+  - region "Needs you":
+    - heading "Needs you 2" [level=2]
+    - 'button "Not created linux-2 was not created: it failed at boot linux-2 · Overview"'
+    - button "Try again linux-2": Try again
+    - text: "error vm_user \"root\" in preferences.json is not a VM user: a lowercase short name (a-z first, then up to 31 of a-z, 0-9, _, . and -, never a dot last), never admin or root."
+    - button "Dismiss"
+    - button "Needs you com.example.brain.x-snapshot is failing, last exit 2 macbook-pro · Background"
+    - button "Remove com.example.brain.x-snapshot": Remove
+  - region "Machines":
+    - heading "Machines 4" [level=2]
+    - group "Macs":
+      - button "macbook-pro · 3 machines · 1 machine not created": macbook-pro 3 machines 1 machine not created
+      - button "mac-mini · 1 machine · all running": mac-mini 1 machine all running
+      - text: 1 machine not created This Mac
+    - button "macbook-pro"
+    - text: 1 machine not created 34 %
+    - img "Memory of macbook-pro"
+    - text: 4 free
+    - button "api"
+    - text: stopped
+    - img "Memory of api"
+    - button "linux-1"
+    - text: running
+    - img "Memory of linux-1"
+    - text: of 8
+    - button "linux-2"
+    - text: Lot shell not created
+    - img "Memory of linux-2"
+    - button "mac-mini"
+    - text: 21 %
+    - img "Memory of mac-mini"
+    - text: 36 free
+    - button "infra"
+    - text: healthy
+    - img "Memory of infra"
+    - text: of 24
+    - button "Add a Mac"
+- dialog "New machine linux-2":
+  - heading "New machine linux-2" [level=2]
+  - list "Steps":
+    - listitem: Disk , done
+    - listitem: Boot , failed
+    - listitem: Network
+    - listitem: SSH
+  - paragraph: Failed
+  - button "Hide"
+  - heading "Boot failed" [level=3]
+  - paragraph: "vm_user \"root\" in preferences.json is not a VM user: a lowercase short name (a-z first, then up to 31 of a-z, 0-9, _, . and -, never a dot last), never admin or root"
+  - paragraph: linux-2 is kept, stopped.
+  - button "Try again"
+  - button "Delete linux-2"
+  - status "Boot failed"

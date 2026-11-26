@@ -391,14 +391,15 @@ func (r *Router) Asks(name string, in json.RawMessage) []string {
 	return r.registry.Asks(name, in)
 }
 
-func (r *Router) Guide(target machine.Ref, name string) string {
-	// value: the act family a call run on this machine is guided as, by
-	// this binary's registry; none for a call at another machine.
+func (r *Router) Guide(target machine.Ref, name string) call.Meta {
+	// value: a call run on this machine as this binary's registry declares
+	// it, the act family it is guided as and the act it repairs; a zero
+	// Meta for a call at another machine.
 	h, ok := r.registry.Lookup(name)
 	if !ok || (!r.local(target) && target.Name != r.thisMac.Ref.Name) {
-		return ""
+		return call.Meta{}
 	}
-	return h.Meta().Guide
+	return h.Meta()
 }
 
 func (r *Router) Served() contract.Hello {

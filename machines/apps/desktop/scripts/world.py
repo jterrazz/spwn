@@ -493,6 +493,7 @@ WORLDS = {
     "create-failed": ("two-macs", None, {}, [failed_at_boot("macbook-pro", "linux-2")]),
     "create-held": ("two-macs", None, {}, [boot_held("macbook-pro", "linux-2")]),
     "create-failing": ("two-macs", None, {}, [boot_refused_once()]),
+    "create-refused": ("two-macs", None, {}, [boot_refused_once()]),
     "range-full": ("range-full", None, {}, [listens("macbook-pro", "linux-1", 9000, "node")]),
     "kept-four-hours": ("two-macs", None, {}, [kept_awake("macbook-pro", session={
         "lid": False, "battery": False, "started_at": "2026-11-04T10:00:00Z", "until": "2026-11-04T14:00:00Z",

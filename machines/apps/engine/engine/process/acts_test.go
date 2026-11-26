@@ -77,3 +77,25 @@ func TestAnActWhoseProcessNoLongerRunsReadsInterrupted(t *testing.T) {
 		t.Fatalf("the next engine reads the cut act interrupted at its step: %+v", seen)
 	}
 }
+
+func TestARefusedRepairEndsOnlyAnEndedActFailedOnItsWords(t *testing.T) {
+	now := time.Date(2026, 11, 26, 9, 0, 0, 0, time.UTC)
+	var seen guide.Acts
+	board := process.OpenActs(&memFile{}, owners{running: true}, func() time.Time { return now }, func(a guide.Acts) error {
+		seen = a
+		return nil
+	}, projected)
+	rail := []guide.Rung{{ID: "cloning", Label: "Disk"}, {ID: "booting", Label: "Boot"}}
+	id, _ := board.Phase(machines.GuideCreate, guide.Phase{Subject: "linux-2", Rail: rail, Step: "booting"})
+	refused := &call.WireError{Code: "machines.not-enough-memory", Message: "linux-2 needs 4 GB, and 2 GB are free"}
+	board.Refused(id, refused)
+	if got := seen.Acts[0]; got.Ended != "" || got.Cause != "" {
+		t.Fatalf("an act that still runs takes no refusal: %+v", got)
+	}
+	board.End(id, guide.EndedInterrupted, nil)
+	now = now.Add(time.Minute)
+	board.Refused(id, refused)
+	if got := seen.Acts[0]; got.Ended != guide.EndedFailed || got.Code != string(refused.Code) || got.Cause != refused.Message || !got.At.Equal(now) || got.Step != "booting" {
+		t.Fatalf("an ended act whose repair is refused ends failed at its step on the refusal, from then: %+v", got)
+	}
+}
