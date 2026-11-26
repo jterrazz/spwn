@@ -200,16 +200,18 @@ A long act is guided by the engine, never by a client: a call whose `Meta` names
 
 ## A panic breaks a call or a job
 
-`core/goes` is the helper every goroutine of the engine is to start through and every call it serves is to run under, so that a panic fails that call or that job and not the engine. No engine code goes through it yet: lots L2 to L3b wire it, and the architecture rule that holds it (no `go` statement and no `.Go(` call outside `core/goes`) arrives with L3b.
+`core/goes` is the helper every goroutine of the engine is to start through and every call it serves is to run under, so that a panic fails that call or that job and not the engine ([ADR-108](../decisions/108-a-panic-breaks-its-call-or-its-job-never-the-engine.md)). The calls go through it already: every boundary of `remote/serve` that serves a frame (the engine socket's call, stream and watch, and a stream's answer, call and watch) runs its handler under `TryOf`, and a break there answers that frame the error coded `broke` ("the engine broke on <call>; it kept running", its hint the engine log), then the connection answers its next frame. The engine's goroutines do not yet: lots L3a and L3b wire them, and the architecture rule that holds it (no `go` statement and no `.Go(` call outside `core/goes`) arrives with L3b.
+
+The engine's start sets what a break reports into (`wire/engine.go`): its log is the engine log, its redactor `secret.Kept`, its clock the platform's, and its restart exits the engine with code 70 for launchd to start it afresh. The spec build sets the same, its log This Mac's engine log of the world and no restart.
 
 | Helper                | Runs fn                   | On a panic                                                                                                                    |
 | --------------------- | ------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `Try(name, fn)`       | on the caller's goroutine | returns a `*goes.Break` instead of fn's error                                                                                 |
+| `Try(name, fn)`       | on the caller's goroutine | returns a `*goes.Break` instead of fn's error; `TryOf(name, of, fn)` also names what it ran, a call, as the break's `Of`      |
 | `Go(name, fn)`        | on a goroutine of its own | reports the break; the goroutine ends after fn's own defers ran                                                               |
 | `Keep(ctx, name, fn)` | on a goroutine of its own | reports, then runs fn again after 1 s, doubling to 5 min, and from 1 s again after a run of 10 min; fn returning ends the job |
 | `Vital(name, fn)`     | on a goroutine of its own | reports, then panics again: the process dies and launchd starts it afresh                                                     |
 
-A break is reported as its name, the panic value's type, its text through the redactor the engine sets, and the stack; never the value, nor the call's input or output. It is counted per name and handed to the `OnBreak` hook. Each name is a string literal unique across the engine.
+A break is reported as its name, the panic value's type, its text through the redactor the engine sets, and the stack; never the value, nor the call's input or output. It is counted per name and handed to the `OnBreak` hook. Each name is a string literal unique across the engine; the call a boundary served is data, its `Of`, so the count of `serve.call` holds every call's breaks together.
 
 Three panics are never recovered. A value that implements `goes.Fatal` (the spec build's secret tripwire, the strict page seal) is panicked again by every helper. In the spec build (`-tags world`) a value that is not `goes.Scripted` is too, so a story still dies on a real bug, and a test or a world fault breaks on purpose with a `goes.Script`. A report that itself panics (the log, the redactor, the hook) ends the process with a `Fatal` naming the break it lost. A `runtime.Goexit` is no panic: it ends its goroutine with no break.
 
