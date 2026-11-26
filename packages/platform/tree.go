@@ -228,6 +228,42 @@ func (t *Tree) ReadFile(p string) ([]byte, error) {
 	return io.ReadAll(f)
 }
 
+// WriteFile is os.WriteFile of the file p inside the Tree: a link whose
+// target is outside is refused, never written through, and a FIFO is
+// refused, never waited on.
+func (t *Tree) WriteFile(p string, data []byte, perm fs.FileMode) error {
+	rel, err := t.Rel(p)
+	if err != nil {
+		return err
+	}
+	f, err := t.root.OpenFile(rel, os.O_WRONLY|os.O_CREATE|syscall.O_NONBLOCK, perm)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	info, err := f.Stat()
+	if err != nil {
+		return err
+	}
+	if !info.Mode().IsRegular() {
+		return &fs.PathError{Op: "open", Path: p, Err: ErrNotAFile}
+	}
+	if err := f.Truncate(0); err != nil {
+		return err
+	}
+	_, err = f.Write(data)
+	return err
+}
+
+// MkdirAll is os.MkdirAll of the folder p inside the Tree.
+func (t *Tree) MkdirAll(p string, perm fs.FileMode) error {
+	rel, err := t.Rel(p)
+	if err != nil {
+		return err
+	}
+	return t.root.MkdirAll(rel, perm)
+}
+
 // ReadDir is os.ReadDir of the folder p inside the Tree, sorted by name.
 func (t *Tree) ReadDir(p string) ([]fs.DirEntry, error) {
 	f, err := t.open(p, true)

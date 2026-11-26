@@ -222,6 +222,46 @@ func TestATreeWhoseRootOrAMiddleNameIsNoFolderNeverWaits(t *testing.T) {
 	}
 }
 
+func TestATreeWritesOnlyAFileInsideIt(t *testing.T) {
+	tree, dir := treeBeside(t)
+	if err := os.Symlink(filepath.Join(dir, "outside.md"), filepath.Join(tree.Dir(), "away.md")); err != nil {
+		t.Fatal(err)
+	}
+	if err := tree.MkdirAll(filepath.Join("spwn", "new", "deep"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	for _, p := range []string{"spwn.yaml", filepath.Join("spwn", "new", "deep", "x.md")} {
+		if err := tree.WriteFile(p, []byte("v2\n"), 0o644); err != nil {
+			t.Fatal(err)
+		}
+		if data, err := os.ReadFile(filepath.Join(tree.Dir(), p)); err != nil || string(data) != "v2\n" {
+			t.Errorf("%s after WriteFile = %q, %v; want v2 alone", p, data, err)
+		}
+	}
+	if err := tree.WriteFile("away.md", []byte("v2\n"), 0o644); err == nil {
+		t.Error("WriteFile through a link out = nil; want it refused")
+	}
+	if err := tree.MkdirAll(filepath.Join("..", "made"), 0o755); !errors.Is(err, ErrOutside) {
+		t.Errorf("MkdirAll(../made) = %v; want ErrOutside", err)
+	}
+	if data, _ := os.ReadFile(filepath.Join(dir, "outside.md")); string(data) != "OUTSIDE\n" {
+		t.Errorf("the outside file = %q; want it untouched", data)
+	}
+	got := make(chan error, 1)
+	go func() { got <- tree.WriteFile("pipe.md", []byte("x"), 0o644) }()
+	select {
+	case err := <-got:
+		if err == nil {
+			t.Error("WriteFile of a FIFO = nil; want it refused")
+		}
+	case <-time.After(10 * time.Second):
+		if r, err := os.OpenFile(filepath.Join(tree.Dir(), "pipe.md"), os.O_RDONLY|syscall.O_NONBLOCK, 0); err == nil {
+			_ = r.Close()
+		}
+		t.Fatal("WriteFile waited on a FIFO")
+	}
+}
+
 func TestATreeOfAFolderThatIsNotThereReadsNothing(t *testing.T) {
 	tree := Within(filepath.Join(t.TempDir(), "not-there"))
 	defer tree.Close()

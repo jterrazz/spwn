@@ -147,10 +147,6 @@ linters:
             - linters:
                   - forbidigo
               path: ^packages/project/(organization|team)\.go$
-            # outside: the scaffold writes a new project and reads back only what it wrote there.
-            - linters:
-                  - forbidigo
-              path: ^packages/project/internal/scaffold/
             # outside: discovery searches upward from a folder for the spwn.yaml that makes a project, before there
             # is a project folder to root a read at.
             - linters:
