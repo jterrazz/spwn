@@ -10,6 +10,7 @@ import (
 	"errors"
 	"io"
 	"slices"
+	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -450,6 +451,30 @@ func TestAJudgeThatPanicsEndsThatConnectionAloneWithItsLine(t *testing.T) {
 	_ = d.Serve(context.Background(), server)
 	if err := <-knocked; err != nil {
 		t.Fatalf("the door let nobody in after a connection broke: %v", err)
+	}
+}
+
+func TestTheDeviceLetInIsTheBooksLastAnswer(t *testing.T) {
+	host, laptop := newKey(t), newKey(t)
+	var asked atomic.Int32
+	admit := func(context.Context, string) (string, error) {
+		return "answer-" + strconv.Itoa(int(asked.Add(1))), nil
+	}
+	s := &served{done: make(chan struct{})}
+	d, err := door.New(context.Background(), host, admit, s.said)
+	if err != nil {
+		t.Fatal(err)
+	}
+	server, client := localtest.Pipe(t)
+	go func() {
+		defer close(s.done)
+		_ = d.Serve(context.Background(), server)
+	}()
+	if err := door.Knock(context.Background(), client, laptop, &host.k.PublicKey); err != nil {
+		t.Fatal(err)
+	}
+	if v, last := s.only(t), "answer-"+strconv.Itoa(int(asked.Load())); v.Device != last || asked.Load() != 3 {
+		t.Fatalf("the connection is %+v after %d asks, want the last answer %s of three", v, asked.Load(), last)
 	}
 }
 
