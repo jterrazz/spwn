@@ -25,9 +25,9 @@ const SPACES_LIST = dialog('Spaces');
 function pressedSpaces(html: string): string[] {
     const at = html.indexOf('aria-label="Spaces"');
     const nav = html.slice(at, html.indexOf('</nav>', at));
-    return [...nav.matchAll(/<button[^>]*aria-pressed="true"[^>]*>(?<word>[^<]*)</gu)].map(
-        (pressed) => pressed.groups?.word ?? '',
-    );
+    return [
+        ...nav.matchAll(/<button[^>]*aria-pressed="true"[^>]*><span[^>]*>(?<word>[^<]*)</gu),
+    ].map((pressed) => pressed.groups?.word ?? '');
 }
 
 describe('path bar', () => {

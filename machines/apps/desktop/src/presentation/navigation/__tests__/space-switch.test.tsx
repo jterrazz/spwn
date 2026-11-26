@@ -1,5 +1,15 @@
 import '../../ui/document.css';
-import { button, component, focused, navigation, waitUntil, within } from '@jterrazz/test';
+import {
+    banner,
+    button,
+    component,
+    content,
+    dialog,
+    focused,
+    navigation,
+    waitUntil,
+    within,
+} from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { composeReplay } from '../../../composition/compose';
@@ -50,7 +60,52 @@ function lineBottomOf(word: HTMLElement): number {
     return word.getBoundingClientRect().bottom - px(line.bottom);
 }
 
+// value: where each word starts and how wide it is, in the window's px, Machine, Agent then OS.
+function edges(): string {
+    return [...one('nav[aria-label="Spaces"]').querySelectorAll('button')]
+        .map((word) => {
+            const { left, width } = word.getBoundingClientRect();
+            return `${String(Math.round(left * 100) / 100)}+${String(Math.round(width * 100) / 100)}`;
+        })
+        .join(' ');
+}
+
 describe('SpaceSwitch', () => {
+    test('a word keeps its width whatever is pressed: on a machine, with Agent listed, and on Settings', async () => {
+        // Given - linux-1 over two-macs, the window's tokens loaded
+        let read: string[] = [];
+        await component.viewport({ height: 900, width: 1440 }).render(
+            <EngineProvider dependencies={composeReplay({ recording: recordingFor('two-macs') })}>
+                <Window initial={machineRoute('linux-1')} memory={PINNED} pages={PAGES} />
+            </EngineProvider>,
+            async (visitor) => {
+                await visitor.see(within(path, button('linux-1', { exact: false })));
+                await document.fonts.ready;
+                const onMachine = edges();
+
+                // When - Agent's list opens, then Settings
+                await visitor.click(button('Agent soon'));
+                await visitor.see(dialog('Spaces'));
+                const listed = edges();
+                await visitor.press('Escape');
+                await visitor.gone(dialog('Spaces'));
+                await visitor.click(within(banner(), button('Settings')));
+                await visitor.see(within(path, content('Settings')));
+                await waitUntil(
+                    () =>
+                        document.querySelector('nav[aria-label="Spaces"] [aria-pressed="true"]') ===
+                        null,
+                    { why: 'no word pressed on Settings' },
+                );
+                read = [onMachine, listed, edges()];
+            },
+        );
+
+        // Then - the three words start and end where they did
+        expect(read[1]).toBe(read[0]);
+        expect(read[2]).toBe(read[0]);
+    });
+
     test('the spaces and a page tab read apart: the line, the weight, the corner, the air and the roles', async () => {
         // Given - linux-1's Ports over two-macs, 1440 px wide, the window's tokens loaded
         let measured: Record<string, boolean | number | string> = {};

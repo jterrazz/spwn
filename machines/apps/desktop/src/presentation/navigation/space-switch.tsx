@@ -73,7 +73,10 @@ function WordOf({ space, pressed, stop, listed, quiet, standing, onSpace, onClos
                 title={`${name} (⌘${digit})`}
                 type="button"
             >
-                {name}
+                <span className={styles.name}>{name}</span>
+                <span aria-hidden="true" className={styles.held}>
+                    {name}
+                </span>
             </button>
             {listed ? <FromWord anchor={anchor} /> : null}
             {listed ? (

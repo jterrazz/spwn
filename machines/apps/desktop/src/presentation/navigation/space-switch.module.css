@@ -9,14 +9,24 @@
     all: unset;
     box-sizing: border-box;
     position: relative;
-    display: flex;
+    display: grid;
     align-items: center;
+    justify-items: center;
     color: var(--t3);
     font-size: var(--text-body);
     font-weight: var(--weight-medium);
     white-space: nowrap;
     cursor: pointer;
     transition: color var(--motion-hover) var(--ease);
+}
+.name,
+.held {
+    grid-area: 1 / 1;
+}
+/* invariant: each word keeps the width of its own active weight, so pressing one never moves its neighbours. */
+.held {
+    visibility: hidden;
+    font-weight: var(--weight-strong);
 }
 .word:hover:not(:disabled) {
     color: var(--t2);

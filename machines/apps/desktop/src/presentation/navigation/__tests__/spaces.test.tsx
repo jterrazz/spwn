@@ -53,7 +53,7 @@ function words(): HTMLButtonElement[] {
 function pressedWords(): string[] {
     return words()
         .filter((word) => word.getAttribute('aria-pressed') === 'true')
-        .map((word) => word.textContent);
+        .map((word) => word.firstElementChild?.textContent ?? '');
 }
 
 async function underlined(expected: readonly string[]): Promise<void> {
