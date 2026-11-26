@@ -118,6 +118,50 @@ func TestATreeWalksAsWalkDirDoes(t *testing.T) {
 	}
 }
 
+func TestAFileNamedAsAFolderIsNotRead(t *testing.T) {
+	tree, _ := treeBeside(t)
+	for _, p := range []string{"spwn.yaml/", "spwn.yaml/.", filepath.Join(tree.Dir(), "spwn.yaml") + "/"} {
+		if data, err := tree.ReadFile(p); !errors.Is(err, syscall.ENOTDIR) {
+			t.Errorf("ReadFile(%q) = %q, %v; want ENOTDIR", p, data, err)
+		}
+		if _, err := tree.Stat(p); !errors.Is(err, syscall.ENOTDIR) {
+			t.Errorf("Stat(%q) = %v; want ENOTDIR", p, err)
+		}
+		if tree.IsFile(p) {
+			t.Errorf("IsFile(%q) = true; want false", p)
+		}
+	}
+	for _, p := range []string{"spwn/", "spwn/.", "spwn/agents/./"} {
+		if !tree.IsDir(p) {
+			t.Errorf("IsDir(%q) = false; want the folder", p)
+		}
+	}
+}
+
+func TestATreeWhoseRootIsALinkHoldsTheFolderItResolvesTo(t *testing.T) {
+	tree, dir := treeBeside(t)
+	link := filepath.Join(dir, "link")
+	if err := os.Symlink(tree.Dir(), link); err != nil {
+		t.Fatal(err)
+	}
+	byLink := Within(link)
+	defer byLink.Close()
+	resolved, err := filepath.EvalSymlinks(tree.Dir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, p := range []string{filepath.Join(resolved, "spwn.yaml"), filepath.Join(link, "spwn.yaml"), "spwn.yaml"} {
+		if data, err := byLink.ReadFile(p); err != nil || string(data) != "version: 1\n" {
+			t.Errorf("ReadFile(%q) through a root given as a link = %q, %v; want the project's file", p, data, err)
+		}
+	}
+	for _, p := range []string{filepath.Join(dir, "outside.md"), filepath.Join(resolved, "..", "outside.md")} {
+		if byLink.Holds(p) {
+			t.Errorf("Holds(%q) = true through a root given as a link; want it outside", p)
+		}
+	}
+}
+
 func TestATreesFSRefusesWhatTheTreeRefuses(t *testing.T) {
 	tree, dir := treeBeside(t)
 	if err := os.Symlink(filepath.Join(dir, "outside.md"), filepath.Join(tree.Dir(), "spwn", "away.md")); err != nil {

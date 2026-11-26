@@ -26,23 +26,30 @@ var ErrNotAFile = errors.New("is neither a file nor a folder")
 // absolute or relative to the folder, as the loaders build them.
 type Tree struct {
 	dir  string
+	real string
 	root *os.Root
 	err  error
 }
 
 // Within opens dir once, as the root every read of the Tree goes through;
-// dir itself may be a link. A dir that does not open gives a Tree each
-// read of which fails with that error, as a read of a missing folder would.
+// dir itself may be a link, and an absolute path is under the Tree by
+// dir or by the folder dir resolves to. A dir that does not open gives a
+// Tree each read of which fails with that error, as a read of a missing
+// folder would.
 func Within(dir string) *Tree {
 	abs, err := filepath.Abs(dir)
 	if err != nil {
-		return &Tree{dir: dir, err: err}
+		return &Tree{dir: dir, real: dir, err: err}
+	}
+	resolved, err := filepath.EvalSymlinks(abs)
+	if err != nil {
+		resolved = abs
 	}
 	root, err := os.OpenRoot(abs)
 	if err != nil {
-		return &Tree{dir: abs, err: err}
+		return &Tree{dir: abs, real: resolved, err: err}
 	}
-	return &Tree{dir: abs, root: root}
+	return &Tree{dir: abs, real: resolved, root: root}
 }
 
 // Close releases the Tree's root.
@@ -70,11 +77,25 @@ func (t *Tree) under(p string) (string, bool) {
 	if !filepath.IsAbs(p) {
 		p = filepath.Join(t.dir, p)
 	}
-	rel, err := filepath.Rel(t.dir, filepath.Clean(p))
+	if rel, ok := beneath(t.dir, p); ok {
+		return rel, true
+	}
+	if t.real != t.dir {
+		return beneath(t.real, p)
+	}
+	return "", false
+}
+
+func beneath(dir, p string) (string, bool) {
+	rel, err := filepath.Rel(dir, filepath.Clean(p))
 	if err != nil || rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
 		return "", false
 	}
 	return rel, true
+}
+
+func namesAFolder(p string) bool {
+	return strings.HasSuffix(p, string(filepath.Separator)) || p == "." || strings.HasSuffix(p, string(filepath.Separator)+".")
 }
 
 // Rel is p as a name under the Tree's folder, or ErrOutside when p leaves
@@ -96,7 +117,11 @@ func (t *Tree) Stat(p string) (fs.FileInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	return t.root.Stat(rel)
+	info, err := t.root.Stat(rel)
+	if err == nil && namesAFolder(p) && !info.IsDir() {
+		return nil, &fs.PathError{Op: "stat", Path: p, Err: syscall.ENOTDIR}
+	}
+	return info, err
 }
 
 // IsDir reports whether p is a folder inside the Tree.
@@ -128,6 +153,10 @@ func (t *Tree) open(p string, folder bool) (*os.File, error) {
 	if !info.Mode().IsRegular() && (!folder || !info.IsDir()) {
 		f.Close()
 		return nil, &fs.PathError{Op: "open", Path: p, Err: ErrNotAFile}
+	}
+	if namesAFolder(p) && !info.IsDir() {
+		f.Close()
+		return nil, &fs.PathError{Op: "open", Path: p, Err: syscall.ENOTDIR}
 	}
 	return f, nil
 }
