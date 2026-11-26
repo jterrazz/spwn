@@ -162,7 +162,7 @@ func Build(args, env []string, stdin, stdout, stderr *os.File) (p *Program, exit
 	}
 	if session != nil {
 		world.engineFrom(func() *process.Engine { return thisMac.startedEngine(kenv) })
-		world.doorFrom(thisMac.admits)
+		world.doorFrom(thisMac)
 		session.farFrom(func(w *worldMac) farMac { return thisMac.farMac(kenv, w) })
 	}
 	kenv.On.Refresh = func(ctx context.Context) error {

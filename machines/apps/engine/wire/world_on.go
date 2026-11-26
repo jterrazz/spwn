@@ -145,6 +145,10 @@ type worldMac struct {
 	start   func() *process.Engine
 	// value: what its engine lets in at its door, guarded by serving.
 	admit remotedoor.Admit
+	// value: what a process of this Mac that is not its engine lets in, over
+	// a book store that never took the engine's start read; guarded by
+	// serving.
+	outside remotedoor.Admit
 	// invariant: mu guards starting, engine, began, tick, leave and home: an
 	// engine's own goroutines (its surfaces, a guest session, another Mac's
 	// engine) ask for this Mac's engine while the command ends it, and a
@@ -567,26 +571,37 @@ func (m *worldMac) notifier() process.Notifier {
 
 func (m *worldMac) engineFrom(start func() *process.Engine) { m.start = start }
 
-func (m *worldMac) doorFrom(admit remotedoor.Admit) {
+func (m *worldMac) doorFrom(at machine) {
 	m.serving.Lock()
 	defer m.serving.Unlock()
-	m.admit = admit
+	m.doorLocked(at)
 }
 
-func (m *worldMac) doorAdmit() remotedoor.Admit {
+func (m *worldMac) doorLocked(at machine) {
+	m.admit = at.admits
+	m.outside = func(ctx context.Context, key string) (string, error) {
+		return at.admitsBy(ctx, devicesfake.StoreOf(m.run.w, m.name), key)
+	}
+}
+
+func (m *worldMac) doorAdmit(engine bool) remotedoor.Admit {
 	m.serving.Lock()
 	defer m.serving.Unlock()
-	return m.admit
+	if engine {
+		return m.admit
+	}
+	return m.outside
 }
 
 // invariant: a knock is the second Mac's device key at the first Mac's
 // door, through the door's own protocol over a pair of sockets of this
-// process: the door judges with what that Mac's running engine holds, and a
-// Mac whose engine does not run does not answer.
-func (r *worldRun) knock(ctx context.Context, mac, from string) (string, error) {
+// process: the door judges with what that Mac's running engine holds, or,
+// with `not-the-engine`, with what a process of that Mac that is not its
+// engine holds, and a Mac whose engine does not run does not answer.
+func (r *worldRun) knock(ctx context.Context, mac, from string, engine bool) (string, error) {
 	m := r.mac(mac)
 	_, up := m.up(ctx)
-	admit := m.doorAdmit()
+	admit := m.doorAdmit(engine)
 	if !up || admit == nil {
 		return "door: " + mac + " does not answer", nil
 	}
@@ -1177,7 +1192,7 @@ func (m *worldMac) serveLocked() *remotefake.Dialer {
 		m.served = remotefake.New()
 		m.served.Serve(m.name, remotefake.Mac{Registry: far.registry, Profile: far.profile, Version: cmp.Or(m.stationVersion(), Version()), Lacks: m.slice().Lacks, Word: func(err error) *fail.Error { return kit.Translate(err, "") }, Relay: far.relay, Kept: far.kept})
 		m.start = far.start
-		m.admit = far.admit
+		m.doorLocked(far.gate)
 	}
 	return m.served
 }
@@ -1232,7 +1247,7 @@ func (r *worldRun) command() *cobra.Command {
 				return err
 			}
 			if ev.Name == "knock" {
-				line, knockErr := r.knock(c.Context(), ev.Args[0], ev.Args[1])
+				line, knockErr := r.knock(c.Context(), ev.Args[0], ev.Args[1], len(ev.Args) < 3)
 				if knockErr != nil {
 					return knockErr
 				}

@@ -6,6 +6,7 @@ import (
 
 	coremachine "github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/devices"
+	devicescontract "github.com/jterrazz/studio-station/apps/engine/devices/contract"
 )
 
 var (
@@ -43,14 +44,18 @@ func bookTrusted(standing devices.Standing, held bool) error {
 // seal holds against the device key the engine holds, and whose key is the
 // key offered.
 func (m machine) admits(ctx context.Context, key string) (string, error) {
+	return m.admitsBy(ctx, m.stores.devices, key)
+}
+
+func (m machine) admitsBy(ctx context.Context, store devicescontract.Store, key string) (string, error) {
 	if m.profile.Kind != coremachine.Computer {
 		return "", errDoorNotHere
 	}
-	_, standing, held := m.stores.devices.Held(ctx)
+	_, standing, held := store.Held(ctx)
 	if err := bookTrusted(standing, held); err != nil {
 		return "", err
 	}
-	book, anchored, err := m.stores.devices.Read(ctx)
+	book, anchored, err := store.Read(ctx)
 	if err != nil {
 		return "", err
 	}

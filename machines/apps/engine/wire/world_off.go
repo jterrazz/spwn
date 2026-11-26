@@ -124,7 +124,7 @@ func (*worldMac) absent(string) bool                  { return false }
 func (*worldMac) stationVersion() string              { return "" }
 func (*worldMac) engineStarted() time.Time            { return time.Time{} }
 
-func (*worldMac) doorFrom(func(context.Context, string) (string, error)) {}
+func (*worldMac) doorFrom(machine) {}
 
 func (*worldMac) presence() devices.Answer { return devices.Absent }
 

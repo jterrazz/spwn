@@ -1,8 +1,6 @@
 package wire
 
 import (
-	"context"
-
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	coremachine "github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/engine/process"
@@ -22,8 +20,8 @@ type farMac struct {
 	fresh func()
 	// value: where it keeps a gesture it runs on itself.
 	kept call.Keeper
-	// value: what its engine lets in at its door.
-	admit func(ctx context.Context, key string) (string, error)
+	// value: the machine whose book judges a knock at its door.
+	gate machine
 }
 
 // invariant: a far Mac is built over its own slice of the world, with no
@@ -33,5 +31,5 @@ func (m machine) farMac(env kit.Env, w *worldMac) farMac {
 	fenv := kit.Env{Out: env.Out, On: &kit.On{ThisMachine: there.thisMac()}, Self: there.profile.Ref}
 	r := there.router(fenv)
 	fenv.Calls = r
-	return farMac{registry: there.registry(fenv), profile: there.profile, start: func() *process.Engine { return there.startedEngine(fenv) }, relay: served{r: r}, fresh: func() { there.pool.Forget("") }, kept: there.kept(), admit: there.admits}
+	return farMac{registry: there.registry(fenv), profile: there.profile, start: func() *process.Engine { return there.startedEngine(fenv) }, relay: served{r: r}, fresh: func() { there.pool.Forget("") }, kept: there.kept(), gate: there}
 }

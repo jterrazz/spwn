@@ -1,0 +1,15 @@
+description: 'a process that is not the engine lets nobody in at the door, a device of its book included'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" devices add mac-mini $("$STATION" devices --on mac-mini --json | /usr/bin/jq -r .key) --channels pipe >/dev/null'
+      exit: 0
+    - command: 'world knock macbook-pro mac-mini not-the-engine'
+      exit: 0
+      stdout: |
+          door: refused SHA256:BoS4yciLAuSqrxlufZLEPNDAgryOX/2NniX6/wFZYoY: this process does not hold the device book: only the engine lets a device in
+    - command: 'world knock macbook-pro mac-mini'
+      exit: 0
+      stdout: |
+          door: mac-mini let in, key SHA256:BoS4yciLAuSqrxlufZLEPNDAgryOX/2NniX6/wFZYoY
