@@ -8,6 +8,7 @@ import (
 
 	"spwn.sh/apps/cli/cliproject"
 	"spwn.sh/apps/cli/runtimeres"
+	"spwn.sh/packages/platform"
 	"spwn.sh/packages/project"
 	"spwn.sh/packages/transpile/source"
 	"spwn.sh/packages/world"
@@ -92,9 +93,17 @@ func resolveProjectWorld(p *project.Project, name, backendOverride string) (*pro
 	if name == "" {
 		name = sortedWorldNames(p)[0]
 	}
+	if err := platform.CheckName("world", name); err != nil {
+		return nil, err
+	}
 	w, ok := p.Manifest.Worlds[name]
 	if !ok {
 		return nil, fmt.Errorf("world %q is not defined in spwn.yaml", name)
+	}
+	for _, aname := range w.Agents {
+		if err := platform.CheckName("agent", aname); err != nil {
+			return nil, fmt.Errorf("world %q: %w", name, err)
+		}
 	}
 
 	pkgSet := map[string]struct{}{}

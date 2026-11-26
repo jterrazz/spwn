@@ -151,7 +151,7 @@ func splitPathStyle(s string) (typ, name string, ok bool) {
 	default:
 		return "", "", false
 	}
-	if name == "" || name == "." || name == ".." || strings.ContainsAny(name, "/:\\\x00") {
+	if platform.CheckName(typ, name) != nil {
 		return "", "", false
 	}
 	return typ, name, true

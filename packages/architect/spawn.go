@@ -93,6 +93,19 @@ func (opts *SpawnOpts) Validate() error {
 	if opts.ConfigName == "" {
 		return fmt.Errorf("SpawnOpts.ConfigName is required")
 	}
+	if err := platform.CheckName("world", opts.ConfigName); err != nil {
+		return err
+	}
+	if opts.AgentName != "" {
+		if err := platform.CheckName("agent", opts.AgentName); err != nil {
+			return err
+		}
+	}
+	for _, spec := range opts.Agents {
+		if err := platform.CheckName("agent", spec.Name); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 

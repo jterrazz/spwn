@@ -11,6 +11,7 @@ import (
 	"spwn.sh/apps/cli/ui"
 	"spwn.sh/packages/architect"
 	"spwn.sh/packages/authentication"
+	"spwn.sh/packages/platform"
 	"spwn.sh/packages/runtimes"
 	"spwn.sh/packages/world"
 )
@@ -145,6 +146,9 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 	}
 
 	if positionalName != "" {
+		if err := platform.CheckName("world", positionalName); err != nil {
+			return s.FailHint("Project", err, "Name a world by one name of spwn.yaml's worlds:")
+		}
 		if existing := findRunningWorldByConfig(ctx, positionalName); existing != nil {
 			wanted := resolveWantedRuntime(positionalName, spawnBackend)
 			if wanted != "" && existing.Runtime != "" && existing.Runtime != wanted {
