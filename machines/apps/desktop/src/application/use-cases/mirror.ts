@@ -24,7 +24,7 @@ const NOT_KEPT = 'not-kept';
 // invariant: ADR-071's mirror: one held engine.state stream of the views, opened while a view or the verdict is held
 // invariant: and the link is open, its readings kept across a lost link and a restart, so a page once drawn never
 // invariant: blanks; a stream silent past `lost`, or cut, is asked again from the revision held, and answers what
-// invariant: moved. Its `opened` judges the engine it reaches (ADR-070's one verdict, none named an older engine); a
+// invariant: moved; one the engine refused is drawn as each view's failure in its words, and asked again past `lost`. Its `opened` judges the engine it reaches (ADR-070's one verdict, none named an older engine); a
 // invariant: misfit closes it until another engine answers.
 export class StateMirror {
     private readonly client: EnginePort;
@@ -183,15 +183,18 @@ export class StateMirror {
                     return;
                 }
                 this.close();
-                if (error.wire === undefined) {
-                    this.again = setTimeout(() => {
+                const refused = error.wire !== undefined;
+                if (refused) {
+                    for (const view of this.listeners.keys()) {
+                        this.show(view, { error, kind: 'failed' });
+                    }
+                }
+                this.again = setTimeout(
+                    () => {
                         this.follow();
-                    }, this.timing.retry);
-                    return;
-                }
-                for (const view of this.listeners.keys()) {
-                    this.show(view, { error, kind: 'failed' });
-                }
+                    },
+                    refused ? this.timing.lost : this.timing.retry,
+                );
             },
             out: (frame) => {
                 if (current()) {

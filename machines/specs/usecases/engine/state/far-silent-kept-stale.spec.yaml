@@ -5,13 +5,13 @@ env:
 runs:
     - command: '--version >/dev/null; "$STATION" guest serve --stdio >/dev/null'
       stdin: |
-          {"v":2,"id":"1","watch":"engine.state","in":{"keys":["local"],"revision":1}}
+          {"v":2,"id":"1","watch":"engine.state","in":{"keys":["local"],"revision":2}}
       exit: 0
     - command: 'world offline mac-mini'
       exit: 0
     - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out.event == "snapshot") | .out.slices["mac:mac-mini"] | [.state, .why, (.value.VMs | map(.Name))]'''
       stdin: |
-          {"v":2,"id":"1","watch":"engine.state","in":{"keys":["mac:mac-mini"],"revision":1}}
+          {"v":2,"id":"1","watch":"engine.state","in":{"keys":["mac:mac-mini"],"revision":2}}
       exit: 0
       stdout: |
           ["stale","unreachable",["infra"]]

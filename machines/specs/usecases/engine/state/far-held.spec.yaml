@@ -5,7 +5,7 @@ env:
 runs:
     - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out.event == "snapshot") | .out.slices | to_entries | map(select(.key | endswith(":mac-mini") or endswith(":infra"))) | map([.key, .value.state, (.value.why // ""), (.value.value != null)])'''
       stdin: |
-          {"v":2,"id":"1","watch":"engine.state","in":{"keys":["mac:*","overview:*"],"revision":1}}
+          {"v":2,"id":"1","watch":"engine.state","in":{"keys":["mac:*","overview:*"],"revision":2}}
       exit: 0
       stdout: |
           [["mac:mac-mini","fresh","",true],["overview:infra","fresh","",true],["overview:mac-mini","fresh","",true]]

@@ -5,7 +5,7 @@ env:
 runs:
     - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .error then .error | {code, field} elif .out.event == "opened" then [.out.event, .out.stream, .out.state, .out.fit.verdict] else [.out.event, (.out.slices | to_entries | map([.key, .value.state, (.value.value != null)]))] end'''
       stdin: |
-          {"v":2,"id":"1","watch":"engine.state","in":{"keys":[],"revision":1}}
+          {"v":2,"id":"1","watch":"engine.state","in":{"keys":[],"revision":2}}
       exit: 0
       stdout: |
           {"code":"engine.state-no-key","field":"keys"}

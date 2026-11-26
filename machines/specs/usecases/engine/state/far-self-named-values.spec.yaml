@@ -5,7 +5,7 @@ env:
 runs:
     - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out.event == "snapshot") | .out.slices | [paths(strings | test("mac-001")) as $p | [($p | map(tostring) | join(".")), getpath($p)]]'''
       stdin: |
-          {"v":2,"id":"1","watch":"engine.state","in":{"keys":["mac:*","ports:*","overview:*","awake:*","activity:*","signins:*","machines.list","overview.read+elsewhere","ports.list+all-machines","awake.read:mac-mini"],"revision":1}}
+          {"v":2,"id":"1","watch":"engine.state","in":{"keys":["mac:*","ports:*","overview:*","awake:*","activity:*","signins:*","machines.list","overview.read+elsewhere","ports.list+all-machines","awake.read:mac-mini"],"revision":2}}
       exit: 0
       stdout: |
           [["overview:mac-mini.value.Summary.Readiness.3.Detail","station machines unlock mac-001 (from the same network)"],["overview:mac-mini.value.Summary.Verdict.Line","1 machine on mac-001"]]

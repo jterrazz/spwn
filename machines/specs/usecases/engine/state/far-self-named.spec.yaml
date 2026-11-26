@@ -5,7 +5,7 @@ env:
 runs:
     - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out.event == "snapshot") | .out.slices["machines.list"].value.All.Macs | map([.Name, .Reachable])'''
       stdin: |
-          {"v":2,"id":"1","watch":"engine.state","in":{"keys":["machines.list"],"revision":1}}
+          {"v":2,"id":"1","watch":"engine.state","in":{"keys":["machines.list"],"revision":2}}
       exit: 0
       stdout: |
           [["macbook-pro",true],["mac-mini",true]]

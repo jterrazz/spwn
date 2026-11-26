@@ -9,7 +9,7 @@ const RECORDING: Recording = { exchanges: [], station: 'dev', world: 'test' };
 
 const STATE = {
     id: '1',
-    in: { keys: ['local'], revision: 1 },
+    in: { keys: ['local'], revision: 2 },
     v: 2,
     watch: 'engine.state',
 } as const;
@@ -53,11 +53,11 @@ describe('fitted', () => {
 
         // Then - an opening alone, below the window's revision, ended; then the opening that fits and its snapshot, held
         expect(before.frames).toMatchObject([
-            { out: { event: 'opened', fit: { app: 1, engine: 0, verdict: 'engine-older' } } },
+            { out: { event: 'opened', fit: { app: 2, engine: 1, verdict: 'engine-older' } } },
         ]);
         expect(before.ends).toStrictEqual(['answered']);
         expect(after.frames).toMatchObject([
-            { out: { event: 'opened', fit: { app: 1, engine: 1, verdict: 'fits' } } },
+            { out: { event: 'opened', fit: { app: 2, engine: 2, verdict: 'fits' } } },
             { out: { event: 'snapshot' } },
         ]);
         expect(after.ends).toStrictEqual([]);

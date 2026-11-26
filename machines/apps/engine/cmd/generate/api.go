@@ -355,19 +355,35 @@ func eventSchema(w *wireRules) map[string]any {
 	}
 }
 
-// value: the generated files of packages/api, by their path from the root.
-func apiFiles(root string) map[string][]byte {
+// value: the wire's rules, its calls, the schema of every call by its
+// name, the frame's and the events'.
+type wireDocuments struct {
+	rules        *wireRules
+	calls        []wireCall
+	docs         map[string]map[string]any
+	frame, event map[string]any
+}
+
+func wireDocs(root string) wireDocuments {
 	w := newWireRules(root)
 	calls := wireCalls()
 	w.learnAnswers(calls)
-	out := map[string][]byte{}
 	docs := map[string]map[string]any{}
 	for _, c := range calls {
-		doc := callSchema(w, c)
-		docs[c.meta.Name] = doc
-		out[filepath.Join(apiCallsDir, c.meta.Name+".json")] = indented(doc)
+		docs[c.meta.Name] = callSchema(w, c)
 	}
-	frame, event := frameSchema(w), eventSchema(w)
+	return wireDocuments{rules: w, calls: calls, docs: docs, frame: frameSchema(w), event: eventSchema(w)}
+}
+
+// value: the generated files of packages/api, by their path from the root.
+func apiFiles(root string) map[string][]byte {
+	d := wireDocs(root)
+	w, calls, docs, frame, event := d.rules, d.calls, d.docs, d.frame, d.event
+	out := map[string][]byte{}
+	for _, c := range calls {
+		out[filepath.Join(apiCallsDir, c.meta.Name+".json")] = indented(docs[c.meta.Name])
+	}
+	out[revisionPath] = indented(revisionFile(root, pinsOf(root, d)))
 	out[framePath] = indented(frame)
 	out[eventPath] = indented(event)
 	out[typesPath] = typescript(calls, docs, frame, event)

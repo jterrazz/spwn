@@ -6,7 +6,7 @@ const (
 	// value: the stream engine.state speaks, and the revision of it this
 	// engine speaks, judged by FitOf against the client's.
 	StateStream   = "station.state/v1"
-	StateRevision = 1
+	StateRevision = 2
 )
 
 const (
