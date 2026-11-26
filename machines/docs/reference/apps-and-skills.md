@@ -49,7 +49,7 @@ One registry, `Installers` in `apps/engine/apps/contract/`, holds an installer p
 | `npm`, `uv`       | `brew bundle`                                                         | `npm uninstall -g`, `uv tool uninstall`             | `brew bundle --upgrade`                        | Mac, macos |
 | `bun`             | `bun install -g`                                                      | `bun remove -g`                                     | `bun update -g`                                | all        |
 | `mise`            | `mise use --global <runtime>@<version>`, a runtime alone              | `mise unuse --global --no-prune`                    | `mise upgrade`                                 | all        |
-| `apt`             | `apt-get update`, then `apt-get install`, as root                     | `apt-get remove`, never what it would widen to      | `apt-get install --only-upgrade`               | Linux      |
+| `apt`             | `apt-get update` once per run, then `apt-get install`, as root        | `apt-get remove`, never what it would widen to      | `apt-get install --only-upgrade`               | Linux      |
 | `github-release`  | Machines fetches the release's asset, checked, into `~/.local/bin`    | the commands it put there, while still its own      | the install again, at the latest               | all        |
 | `script`, `shell` | the vendor's installer, or the `run` line                             | its `undo` line; none, not reversible               | its `upgrade`, else the install again, by name | all        |
 | `app`             | a `script` with a `hint` alone: the refusal names how                 | not reversible                                      | none                                           | Mac, macos |

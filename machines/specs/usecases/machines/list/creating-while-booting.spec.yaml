@@ -19,6 +19,7 @@ runs:
       stdout: |
           ┃ On which Mac?
           ┃ macbook-pro  2 VMs
+          ✓ cloning station-image-base-ubuntu-2026.11.01 · <1s
     - command: '--version >/dev/null; /bin/cat seen'
       exit: 0
       stdout: |

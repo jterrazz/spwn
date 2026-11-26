@@ -703,7 +703,8 @@
         "image.old-record",
         "image.unknown"
       ],
-      "in": "BuildIn"
+      "in": "BuildIn",
+      "journal": true
     },
     {
       "name": "images.delete",

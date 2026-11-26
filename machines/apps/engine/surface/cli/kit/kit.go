@@ -436,8 +436,10 @@ func Updates[T any](updates <-chan call.Update[T], build func(T) page.Page) <-ch
 }
 
 type Spinner struct {
-	io   IO
-	stop func()
+	io    IO
+	stop  func()
+	task  string
+	ended func(label string)
 }
 
 func Steps(o IO) *Spinner { return &Spinner{io: o, stop: func() {}} }
@@ -465,9 +467,21 @@ func (s *Spinner) Step(task, detail string) {
 		return
 	}
 	s.stop = s.io.Wait(output.Said(line...))
+	s.task, s.ended = task, s.io.out.Began()
 }
 
-func (*Spinner) Done(string, error) {}
+func (s *Spinner) Done(task string, err error) {
+	// value: a step that ended well leaves its line on the terminal, its name
+	// and its duration, the spinner of the next step drawing under it; one
+	// that failed leaves none, the error says it.
+	if err != nil || s.ended == nil || task != s.task {
+		return
+	}
+	s.stop()
+	s.stop = func() {}
+	s.ended(secret.Kept(task))
+	s.task, s.ended = "", nil
+}
 
 func (s *Spinner) Stop() { s.stop() }
 

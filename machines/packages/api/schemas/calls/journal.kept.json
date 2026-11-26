@@ -69,6 +69,12 @@
           ],
           "type": "string"
         },
+        "Phases": {
+          "items": {
+            "$ref": "#/$defs/core.journal.Phase"
+          },
+          "type": "array"
+        },
         "Purpose": {
           "type": "string"
         },
@@ -118,6 +124,27 @@
         "Subject",
         "Text",
         "Upgrade"
+      ],
+      "type": "object"
+    },
+    "core.journal.Phase": {
+      "additionalProperties": false,
+      "properties": {
+        "At": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "Took": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "At",
+        "Name",
+        "Took"
       ],
       "type": "object"
     },

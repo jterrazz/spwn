@@ -110,6 +110,7 @@ func (s Server) call(ctx context.Context, w *writer, f api.Frame) api.Frame {
 	if err != nil {
 		return api.Frame{ID: f.ID, Error: s.fault(err)}
 	}
+	ctx = call.Recording(ctx)
 	plain := progress{id: f.ID, out: w, word: s.wording}
 	var p call.Progress = plain
 	g := &guided{progress: plain, family: h.Meta().Guide, acts: s.Acts}

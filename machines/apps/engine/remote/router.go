@@ -88,6 +88,7 @@ func (r *Router) Invoke(ctx context.Context, target machine.Ref, name string, in
 		return r.engine.Invoke(ctx, target, name, in, out, p)
 	}
 	if r.local(t) {
+		ctx = call.Recording(ctx)
 		v, ran := r.registry.Run(ctx, r.thisMac, name, in, p)
 		r.keep(ctx, r.thisMac.Ref, name, in, v, ran)
 		call.Set(out, v)
@@ -407,6 +408,7 @@ func (r *Router) Serve(ctx context.Context, target machine.Ref, name string, in 
 	}
 	vm, ok := r.vm(target)
 	if !ok {
+		ctx = call.Recording(ctx)
 		v, err := serve.Local(r.registry, r.thisMac, r.reach.Version).Invoke(ctx, target, name, in, p)
 		r.keep(ctx, r.thisMac.Ref, name, in, v, err)
 		return v, err

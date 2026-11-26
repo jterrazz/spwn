@@ -18,6 +18,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	"github.com/jterrazz/studio-station/apps/engine/core/guide"
+	"github.com/jterrazz/studio-station/apps/engine/core/journal"
 	"github.com/jterrazz/studio-station/apps/engine/core/secret"
 	"github.com/jterrazz/studio-station/apps/engine/core/store"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
@@ -403,6 +404,7 @@ func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, build Ima
 	// first run on the VM is kept, with what failed; the ports its env
 	// names are reserved by its Mac's engine at that run, and read back
 	// once it answers.
+	journal.Mark(ctx, s.h.Now(), "checks")
 	if err := s.CheckMac(); err != nil {
 		return model.Created{}, err
 	}
@@ -542,6 +544,7 @@ func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, build Ima
 	}
 	phase(string(model.BornCloning), "cloning "+disk)
 	say("cloning " + disk)
+	journal.Mark(ctx, s.h.Now(), "clone")
 	if err = born(model.BornCloning, ""); err != nil {
 		return fail("the record", err)
 	}
@@ -557,6 +560,7 @@ func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, build Ima
 	}
 	phase(string(model.BornBooting), model.StepRunning)
 	say(model.StepRunning)
+	journal.Mark(ctx, s.h.Now(), "boot")
 	if err = born(model.BornBooting, ""); err != nil {
 		return fail("the record", err)
 	}
@@ -565,6 +569,7 @@ func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, build Ima
 	}
 	phase(string(model.BornAddress), model.StepAddress)
 	say(model.StepAddress)
+	journal.Mark(ctx, s.h.Now(), "address")
 	if err = born(model.BornAddress, ""); err != nil {
 		return failed(&model.UnknownMachineError{Name: r.Name})
 	}
@@ -575,6 +580,7 @@ func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, build Ima
 	ip := addr.String()
 	phase(string(model.BornSSH), model.StepSSH)
 	say(model.StepSSH)
+	journal.Mark(ctx, s.h.Now(), "reachable")
 	if err = born(model.BornSSH, ""); err != nil {
 		return failed(&model.UnknownMachineError{Name: r.Name})
 	}
@@ -585,8 +591,10 @@ func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, build Ima
 	if t != nil {
 		phase(string(model.BornSSH), model.StepBoot)
 		say(model.StepBoot)
+		journal.Mark(ctx, s.h.Now(), "machinefile")
 		boot = s.bootPhase(ctx, r.Name, version, *t)
 	}
+	journal.Mark(ctx, s.h.Now(), "ready")
 	if allMachines, err := s.AllMachines(ctx, false); err == nil {
 		_ = s.SSHBlocks(ctx, allMachines)
 	}

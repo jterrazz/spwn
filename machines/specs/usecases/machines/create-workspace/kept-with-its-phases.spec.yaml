@@ -1,0 +1,15 @@
+description: 'a create is kept with the phases it went through, in order, with their duration'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'machines delete linux-1 --confirm=linux-1 >/dev/null'
+      exit: 0
+    - command: 'machines create >/dev/null'
+      exit: 0
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.out.Lines | map(select(.Call == "machines.create-workspace")) | .[] | {Text, Phases: (.Phases | map({Name, Took}))}'''
+      stdin: |
+          {"v":2,"id":"1","call":"journal.kept","in":{}}
+      exit: 0
+      stdout: |
+          {"Text":"linux-1 created","Phases":[{"Name":"checks","Took":0},{"Name":"clone","Took":2000000000},{"Name":"boot","Took":0},{"Name":"address","Took":0},{"Name":"reachable","Took":0},{"Name":"ready","Took":0}]}

@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
+	"github.com/jterrazz/studio-station/apps/engine/core/journal"
 	"github.com/jterrazz/studio-station/apps/engine/images"
 	"github.com/jterrazz/studio-station/apps/engine/machines/contract"
 )
@@ -156,6 +157,7 @@ func (s *Builder) buildOne(ctx context.Context, w wanted, binary string, progres
 	owner := s.owner()
 	defer s.clear(img.Name)
 	at := func(step images.BuildStep, label string) {
+		journal.Mark(ctx, s.m.Now(), step.Word())
 		s.mark(images.Making{Image: img.Name, Version: version, Step: step, Owner: owner})
 		progress(images.Step{Label: label, Step: step})
 	}

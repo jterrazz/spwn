@@ -1037,11 +1037,18 @@ export type CoreJournalLine = {
     Machine: string;
     Night?: string;
     Outcome: 'done' | 'failed' | 'held';
+    Phases?: CoreJournalPhase[];
     Purpose: string;
     Retry: CoreFindingFix | null;
     Subject: CoreJournalSubject | null;
     Text: string;
     Upgrade: CoreJournalUpgrade | null;
+};
+
+export type CoreJournalPhase = {
+    At: string;
+    Name: string;
+    Took: number;
 };
 
 export type CoreJournalReadLine = {
@@ -1050,6 +1057,7 @@ export type CoreJournalReadLine = {
     Detail: string;
     On: string[] | null;
     Outcome: 'done' | 'failed' | 'held';
+    Phases?: CoreJournalPhase[];
     Purpose: string;
     Retry: CoreJournalRetry | null;
     Subject: CoreJournalSubject | null;

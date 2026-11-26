@@ -5,6 +5,7 @@ import (
 	"io"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 	"github.com/jterrazz/studio-station/apps/engine/core/secret"
@@ -108,6 +109,27 @@ func (w *Writer) Ahead(parts ...string) {
 	}
 	c := Detect(w.stderr, w.env, false)
 	line := tty.AheadLine(tty.NoteLine(parts...), c.Mode == TTY, c.Dark)
+	secret.Tripwire([]byte(line))
+	w.settle()
+	_, _ = io.WriteString(w.colored(w.stderr, c), line)
+}
+
+func (w *Writer) Began() func(label string) {
+	// value: a step that began, whose returned func says it ended once on
+	// the terminal with its duration (`✓ Cloning · 4s`), so the phases of a
+	// long act stay readable after it; a pipe hears nothing of it.
+	// invariant: like a step said ahead, it is kept by NO_COLOR as its glyph
+	// and words without color.
+	took := tty.Stopwatch()
+	return func(label string) { w.completed(label, took()) }
+}
+
+func (w *Writer) completed(label string, took time.Duration) {
+	if !w.stderr.IsTerminal {
+		return
+	}
+	c := Detect(w.stderr, w.env, false)
+	line := tty.CompletedLine(label, took, c.Mode == TTY, c.Dark)
 	secret.Tripwire([]byte(line))
 	w.settle()
 	_, _ = io.WriteString(w.colored(w.stderr, c), line)

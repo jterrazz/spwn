@@ -131,6 +131,7 @@ func (e endpoint) Invoke(ctx context.Context, target machine.Ref, name string, i
 	if err != nil {
 		return nil, e.over(err)
 	}
+	ctx = call.Recording(ctx)
 	out, err := e.m.Registry.Run(ctx, e.m.Profile, name, v, p)
 	if h, ok := e.m.Registry.Lookup(name); ok {
 		e.m.Kept.Keep(ctx, e.m.Profile, e.m.Profile.Ref, h.Meta(), v, out, err)

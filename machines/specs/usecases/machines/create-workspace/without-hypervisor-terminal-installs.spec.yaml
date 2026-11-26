@@ -19,6 +19,10 @@ runs:
           ┃
           ●       tart    1.0.0   shell
           ●       tart-launcher                   ~/.local/bin/tart
+          ✓ cloning station-image-base-ubuntu-2026.11.01 · <1s
+          ✓ Running · <1s
+          ✓ Has an address · <1s
+          ✓ SSH answers · <1s
           ●       Running
           ●       Has an address  192.168.64.5
           ●       SSH answers

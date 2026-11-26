@@ -32,6 +32,26 @@ func AheadLine(label string, colored, dark bool) string {
 	return line
 }
 
+func Stopwatch() func() time.Duration {
+	start := time.Now()
+	return func() time.Duration { return time.Since(start) }
+}
+
+func CompletedLine(label string, took time.Duration, colored, dark bool) string {
+	// value: a step done, its `✓` and words Muted and its duration after the
+	// separator, `<1s` under a second; without color, the glyph and words
+	// alone.
+	span := "<1s"
+	if took >= time.Second {
+		span = atom.Duration(int64(took.Round(time.Second) / time.Second))
+	}
+	line := token.New(dark).Muted.Render(token.Tick+atom.Spaces(1)+label+token.Sep+span) + "\n"
+	if !colored {
+		return ansi.Strip(line)
+	}
+	return line
+}
+
 func FindingLine(m page.Mark, parts ...string) string {
 	return atom.Glyph(m) + atom.Spaces(1) + strings.Join(parts, token.Sep) + "\n"
 }

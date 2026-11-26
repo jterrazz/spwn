@@ -1,6 +1,7 @@
 package calls_test
 
 import (
+	"slices"
 	"testing"
 	"time"
 
@@ -41,5 +42,45 @@ func TestAGestureIsKeptOnItsMachineByItsAuthorOnThisMacsClock(t *testing.T) {
 				t.Errorf("kept %+v; want %+v", got, c.want)
 			}
 		})
+	}
+}
+
+func TestAnActKeepsTheStepsItMarkedWithTheirStartAndDuration(t *testing.T) {
+	// invariant: a line carries each step its act marked, in order, each
+	// starting where it was marked and lasting to the next mark, the last to
+	// the instant the line is kept; a step marked twice in a row is one.
+	start := time.Date(2026, 11, 26, 9, 0, 0, 0, time.UTC)
+	ctx := journal.Recording(t.Context())
+	journal.Mark(ctx, start, "clone")
+	journal.Mark(ctx, start.Add(2*time.Second), "boot")
+	journal.Mark(ctx, start.Add(3*time.Second), "boot")
+	journal.Mark(ctx, start.Add(8*time.Second), "address")
+	end := start.Add(9500 * time.Millisecond)
+	store := fake.New()
+
+	if err := calls.Keep(ctx, calls.Deps{Journal: store, Now: func() time.Time { return end }}, calls.Ran{Call: "machines.create-workspace", Machine: "mac"}, journal.Line{Text: "api created"}); err != nil {
+		t.Fatal(err)
+	}
+	lines, _ := store.Lines(t.Context(), time.Time{}, time.Time{})
+	want := []journal.Phase{
+		{Name: "clone", At: start, Took: 2 * time.Second},
+		{Name: "boot", At: start.Add(2 * time.Second), Took: 6 * time.Second},
+		{Name: "address", At: start.Add(8 * time.Second), Took: 1500 * time.Millisecond},
+	}
+	if len(lines) != 1 || !slices.Equal(lines[0].Phases, want) {
+		t.Errorf("kept %+v; want the phases %+v", lines, want)
+	}
+}
+
+func TestAnActThatMarkedNothingKeepsNoSteps(t *testing.T) {
+	store := fake.New()
+	now := time.Date(2026, 11, 26, 9, 0, 0, 0, time.UTC)
+
+	if err := calls.Keep(journal.Recording(t.Context()), calls.Deps{Journal: store, Now: func() time.Time { return now }}, calls.Ran{Call: "disk.free", Machine: "mac"}, journal.Line{Text: "caches freed"}); err != nil {
+		t.Fatal(err)
+	}
+	lines, _ := store.Lines(t.Context(), time.Time{}, time.Time{})
+	if len(lines) != 1 || lines[0].Phases != nil {
+		t.Errorf("kept %+v; want a line with no steps", lines)
 	}
 }
