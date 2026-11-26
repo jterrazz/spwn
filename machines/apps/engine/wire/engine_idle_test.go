@@ -7,6 +7,7 @@ import (
 	"path"
 	"runtime"
 	"slices"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -18,7 +19,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/surface/cli/kit"
 )
 
-// value: the most an idle Mac engine may spawn a program:
+// value: the most an idle Mac engine may spawn a program or open a file:
 // idlePerMinute for each minute it is up (no cadence of the engine is shorter
 // than 9 s), plus idleStartup in all for the first readings and the readings
 // of the quarter hour. A reader that asks every tick, as the sleep timer's
@@ -117,77 +118,81 @@ func (r *spawnCount) Alive(int) bool                      { return false }
 func (r *spawnCount) Signal(int, local.Sig) error         { return nil }
 func (r *spawnCount) Reap(string) int                     { return 0 }
 
-type lockedFS struct {
+type openCount struct {
 	*localtest.FS
-	mu sync.Mutex
+	mu    sync.Mutex
+	opens map[string]int
 }
 
-func (f *lockedFS) lock() func() {
+func (f *openCount) lock() func() {
 	f.mu.Lock()
 	return f.mu.Unlock
 }
 
-func (f *lockedFS) ReadFile(p string) ([]byte, error) {
+func (f *openCount) ReadFile(p string) ([]byte, error) {
 	defer f.lock()()
+	f.opens[strings.TrimPrefix(p, "/")]++
 	return f.FS.ReadFile(p)
 }
 
-func (f *lockedFS) Open(p string) (fs.File, error) {
+func (f *openCount) Open(p string) (fs.File, error) {
 	defer f.lock()()
+	f.opens[strings.TrimPrefix(p, "/")]++
 	return f.FS.Open(p)
 }
 
-func (f *lockedFS) WriteFile(p string, data []byte, perm fs.FileMode) error {
+func (f *openCount) WriteFile(p string, data []byte, perm fs.FileMode) error {
 	defer f.lock()()
 	return f.FS.WriteFile(p, data, perm)
 }
 
-func (f *lockedFS) Append(p string, data []byte, perm fs.FileMode) error {
+func (f *openCount) Append(p string, data []byte, perm fs.FileMode) error {
 	defer f.lock()()
 	return f.FS.Append(p, data, perm)
 }
 
-func (f *lockedFS) Replace(p string, data []byte, perm fs.FileMode) error {
+func (f *openCount) Replace(p string, data []byte, perm fs.FileMode) error {
 	defer f.lock()()
 	return f.FS.Replace(p, data, perm)
 }
 
-func (f *lockedFS) MkdirAll(p string, perm fs.FileMode) error {
+func (f *openCount) MkdirAll(p string, perm fs.FileMode) error {
 	defer f.lock()()
 	return f.FS.MkdirAll(p, perm)
 }
 
-func (f *lockedFS) Remove(p string) error {
+func (f *openCount) Remove(p string) error {
 	defer f.lock()()
 	return f.FS.Remove(p)
 }
 
-func (f *lockedFS) RemoveAll(p string) error {
+func (f *openCount) RemoveAll(p string) error {
 	defer f.lock()()
 	return f.FS.RemoveAll(p)
 }
 
-func (f *lockedFS) Rename(from, to string) error {
+func (f *openCount) Rename(from, to string) error {
 	defer f.lock()()
 	return f.FS.Rename(from, to)
 }
 
-func (f *lockedFS) Stat(p string) (fs.FileInfo, error) {
+func (f *openCount) Stat(p string) (fs.FileInfo, error) {
 	defer f.lock()()
 	return f.FS.Stat(p)
 }
 
-func (f *lockedFS) ReadDir(p string) ([]fs.DirEntry, error) {
+func (f *openCount) ReadDir(p string) ([]fs.DirEntry, error) {
 	defer f.lock()()
+	f.opens[strings.TrimPrefix(p, "/")]++
 	return f.FS.ReadDir(p)
 }
 
-func (f *lockedFS) Glob(p string) ([]string, error) {
+func (f *openCount) Glob(p string) ([]string, error) {
 	defer f.lock()()
 	return f.FS.Glob(p)
 }
 
-func (f *lockedFS) WalkDir(root string, fn fs.WalkDirFunc) error {
+func (f *openCount) WalkDir(root string, fn fs.WalkDirFunc) error {
 	defer f.lock()()
 	return f.FS.WalkDir(root, fn)
 }
@@ -205,14 +210,15 @@ func (noPower) Ticks(context.Context) <-chan struct{} { return nil }
 func (noPower) Sleeping() bool                        { return false }
 
 // invariant: an idle Mac engine, nine hundred ticks on a clock that moves a
-// second a tick, spawns each program no more often than the budget above says, whatever the wall time the test takes.
-func TestAnIdleMacEngineSpawnsEachProgramWithinItsBudget(t *testing.T) {
+// second a tick, spawns each program and opens each file no more often than the
+// tables above say, whatever the wall time the test takes.
+func TestAnIdleMacEngineSpawnsAndOpensWithinItsBudgets(t *testing.T) {
 	const ticks = 900
 	const prefs = "{\n  \"v\": 1,\n  \"name\": \"here\"\n}\n"
 	const record = "{\n  \"v\": 2,\n  \"name\": \"api\",\n  \"image\": \"studio-linux\",\n  \"lifetime\": \"permanent\"\n}\n"
 	clock := &idleClock{at: time.Date(2026, 11, 26, 10, 0, 0, 0, time.UTC)}
 	run := &spawnCount{spawned: map[string]int{}}
-	files := &lockedFS{FS: localtest.NewFS()}
+	files := &openCount{FS: localtest.NewFS(), opens: map[string]int{}}
 	_ = files.FS.WriteFile("/home/u/.config/station/preferences.json", []byte(prefs), 0o600)
 	_ = files.FS.WriteFile("/home/u/.local/state/station/vms/api.json", []byte(record), 0o600)
 	env := localtest.Env{HomeDir: "/home/u", Login: "u", UID: 501, OS: "darwin", Arch: "arm64", Exe: "/usr/local/bin/station", Mac: "here"}
@@ -234,6 +240,9 @@ func TestAnIdleMacEngineSpawnsEachProgramWithinItsBudget(t *testing.T) {
 	run.mu.Lock()
 	clear(run.spawned)
 	run.mu.Unlock()
+	files.mu.Lock()
+	clear(files.opens)
+	files.mu.Unlock()
 	for tick := 1; tick <= ticks; tick++ {
 		clock.advance(time.Second)
 		d.Step(ctx, tick)
@@ -249,6 +258,15 @@ func TestAnIdleMacEngineSpawnsEachProgramWithinItsBudget(t *testing.T) {
 		t.Logf("spawned %s %d times in %d minutes (budget %d)", name, run.spawned[name], minutes, budget)
 		if run.spawned[name] > budget {
 			t.Errorf("an idle engine spawned %s %d times in %d minutes; its budget is %d", name, run.spawned[name], minutes, budget)
+		}
+	}
+	files.mu.Lock()
+	defer files.mu.Unlock()
+	for _, name := range slices.Sorted(maps.Keys(files.opens)) {
+		budget := idlePerMinute*minutes + idleStartup
+		t.Logf("opened %s %d times in %d minutes (budget %d)", name, files.opens[name], minutes, budget)
+		if files.opens[name] > budget {
+			t.Errorf("an idle engine opened %s %d times in %d minutes; its budget is %d", name, files.opens[name], minutes, budget)
 		}
 	}
 }
