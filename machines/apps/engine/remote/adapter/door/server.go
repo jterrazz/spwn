@@ -10,6 +10,7 @@ import (
 	"math/big"
 	"slices"
 	"strings"
+	"sync/atomic"
 
 	"golang.org/x/crypto/ssh"
 
@@ -120,7 +121,7 @@ func (d *Door) judgeKey(ctx context.Context, key ssh.PublicKey) (*ssh.Permission
 	return d.judge(ctx, strings.TrimSpace(string(ssh.MarshalAuthorizedKey(key))), ssh.FingerprintSHA256(key))
 }
 
-func (d *Door) terms(ctx context.Context) *ssh.ServerConfig {
+func (d *Door) terms(ctx context.Context, broke *atomic.Pointer[string]) *ssh.ServerConfig {
 	t := &ssh.ServerConfig{
 		Config:                  algorithms(),
 		MaxAuthTries:            maxAuthTries,
@@ -136,7 +137,7 @@ func (d *Door) terms(ctx context.Context) *ssh.ServerConfig {
 	// invariant: the door's own key signs a connection's exchange under that
 	// connection's context, never under the one the door was made in, so a
 	// door outlives its constructor's context.
-	t.AddHostKey(keySigner{ctx: ctx, key: d.own, pub: d.pub})
+	t.AddHostKey(keySigner{ctx: ctx, key: d.own, pub: d.pub, broke: broke})
 	return t
 }
 
@@ -158,9 +159,13 @@ func refused(err error) Verdict {
 }
 
 func (d *Door) Serve(ctx context.Context, c local.NetConn) (err error) {
-	// invariant: a panic while the door judges or answers a connection ends
-	// that connection alone, with the door's line; the engine that serves
-	// its other connections never sees it.
+	// invariant: a panic in what Serve runs on its own goroutine (the three
+	// judgements and the channel loop) ends that connection alone, with the
+	// door's line. x/crypto signs the key exchange on a goroutine of its
+	// own, out of this recover's reach: there the door's key answers a panic
+	// as that signature's error (keySigner.Sign), which ends that handshake
+	// alone, with the same line. No other code of the door runs on a
+	// goroutine of x/crypto's.
 	defer func() {
 		if broke := recover(); broke != nil {
 			_ = c.Close()
@@ -174,8 +179,13 @@ func (d *Door) Serve(ctx context.Context, c local.NetConn) (err error) {
 func (d *Door) serve(ctx context.Context, c local.NetConn) error {
 	stop := context.AfterFunc(ctx, func() { _ = c.Close() })
 	defer stop()
-	conn, channels, requests, err := ssh.NewServerConn(c, d.terms(ctx))
+	var broke atomic.Pointer[string]
+	conn, channels, requests, err := ssh.NewServerConn(c, d.terms(ctx, &broke))
 	if err != nil {
+		if why := broke.Load(); why != nil {
+			d.said(Verdict{Refused: *why})
+			return errBroke
+		}
 		d.said(refused(err))
 		return err
 	}
@@ -258,11 +268,23 @@ type keySigner struct {
 	ctx context.Context
 	key Key
 	pub ssh.PublicKey
+	// value: where the connection this key signs for keeps the line of a
+	// panic of its Sign; nil when no connection reads it.
+	broke *atomic.Pointer[string]
 }
 
 func (s keySigner) PublicKey() ssh.PublicKey { return s.pub }
 
-func (s keySigner) Sign(_ io.Reader, message []byte) (*ssh.Signature, error) {
+func (s keySigner) Sign(_ io.Reader, message []byte) (sig *ssh.Signature, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			why := fmt.Sprint(errBroke.Error()+": ", r)
+			if s.broke != nil {
+				s.broke.Store(&why)
+			}
+			sig, err = nil, errors.New(why)
+		}
+	}()
 	der, err := s.key.Sign(s.ctx, message)
 	if err != nil {
 		return nil, err

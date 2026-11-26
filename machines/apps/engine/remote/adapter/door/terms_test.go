@@ -8,7 +8,7 @@ import (
 
 func TestTheDoorSpeaksOnlyItsPinnedAlgorithms(t *testing.T) {
 	d := &Door{admit: func(context.Context, string) (string, error) { return "", errNoKey }}
-	terms := d.terms(context.Background())
+	terms := d.terms(context.Background(), nil)
 	for _, c := range []struct {
 		what      string
 		got, want []string

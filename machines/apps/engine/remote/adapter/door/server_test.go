@@ -12,6 +12,7 @@ import (
 	"slices"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"testing"
 
 	"golang.org/x/crypto/ssh"
@@ -449,6 +450,46 @@ func TestAJudgeThatPanicsEndsThatConnectionAloneWithItsLine(t *testing.T) {
 	_ = d.Serve(context.Background(), server)
 	if err := <-knocked; err != nil {
 		t.Fatalf("the door let nobody in after a connection broke: %v", err)
+	}
+}
+
+type breaksOnce struct {
+	p256
+	signed *atomic.Int32
+}
+
+func (k breaksOnce) Sign(ctx context.Context, message []byte) ([]byte, error) {
+	if k.signed.Add(1) == 1 {
+		panic("the host key broke")
+	}
+	return k.p256.Sign(ctx, message)
+}
+
+func TestAHostKeyThatPanicsEndsThatHandshakeAloneWithItsLine(t *testing.T) {
+	host, laptop := newKey(t), newKey(t)
+	s := &served{done: make(chan struct{})}
+	d, err := door.New(context.Background(), breaksOnce{host, &atomic.Int32{}}, (&book{held: map[string]string{laptop.line(t): "laptop"}}).admit, s.said)
+	if err != nil {
+		t.Fatal(err)
+	}
+	server, client := localtest.Pipe(t)
+	knocked := make(chan error, 1)
+	go func() { knocked <- door.Knock(context.Background(), client, laptop, &host.k.PublicKey) }()
+	if err := d.Serve(context.Background(), server); err == nil {
+		t.Fatal("a connection whose host key panicked was served")
+	}
+	if err := <-knocked; err == nil {
+		t.Fatal("a connection whose host key panicked was let in")
+	}
+	close(s.done)
+	if v := s.only(t); v.Device != "" || v.Refused != "the door broke on this connection: the host key broke" {
+		t.Fatalf("verdict %+v", v)
+	}
+	server, client = localtest.Pipe(t)
+	go func() { knocked <- door.Knock(context.Background(), client, laptop, &host.k.PublicKey) }()
+	_ = d.Serve(context.Background(), server)
+	if err := <-knocked; err != nil {
+		t.Fatalf("the door let nobody in after a host key's panic: %v", err)
 	}
 }
 
