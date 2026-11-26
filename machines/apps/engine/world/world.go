@@ -161,13 +161,18 @@ type Mac struct {
 	EngineLog []string `json:"engine_log,omitempty"`
 	// value: the station version this Mac runs; empty, the spec binary's.
 	Station string `json:"station,omitempty"`
-	// value: the calls that older station does not serve, until an upgrade.
+	// value: the calls and abilities that older station does not serve,
+	// until an upgrade; a VM's, those of the station its image carries.
 	Lacks []string `json:"lacks,omitempty"`
 	// value: what station keeps in this Mac's preferences, by group.
 	Preferences map[string]json.RawMessage `json:"preferences,omitempty"`
 	// value: station's own files as text, by name, while no store has read
 	// them: a file edited by hand, a file station v2 left.
 	Files map[string]string `json:"files,omitempty"`
+	// value: the Machinefiles' files (Files under machinefiles/) as they
+	// were when this Mac last built an image from each Machinefile, by its
+	// name: what that build copied into its VM and baked.
+	Built map[string]map[string]string `json:"built,omitempty"`
 	// value: the commit each shared source's clone is at, by the source's
 	// url.
 	Clones map[string]string `json:"clones,omitempty"`
@@ -701,6 +706,16 @@ func (w *World) Fails(call string) bool {
 	}
 	return false
 }
+
+type baked struct{}
+
+func Baked(ctx context.Context) context.Context {
+	// value: a run of an image's bake, which ran when the image was built,
+	// before any fault or hold a story scripts since: none reaches it.
+	return context.WithValue(ctx, baked{}, true)
+}
+
+func IsBaked(ctx context.Context) bool { return ctx.Value(baked{}) != nil }
 
 func (w *World) Holds(call string) bool {
 	// invariant: a scripted hold is spent by the one call it holds.

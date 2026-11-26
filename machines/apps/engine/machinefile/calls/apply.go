@@ -51,6 +51,34 @@ type ApplyIn struct {
 	Phase       catalog.Phase
 	Interactive bool
 	Confirm     string
+	// value: off a terminal, each package whose run would ask the owner
+	// something is left, waiting for the owner's own run, and the rest is
+	// carried out, where without it the run refuses and changes nothing: a
+	// create's apply, which has no terminal to ask on.
+	LeaveAsking bool
+	// value: how long packages may start for: none starts past it, the one
+	// running then may end within catalog.InFlightCap more, and the run
+	// answers with what it did; zero or less, no bound but the phase's own.
+	Within time.Duration
+}
+
+const (
+	LeaveAskingAbility = "machinefile.apply.leave-asking"
+	WithinAbility      = "machinefile.apply.within"
+)
+
+func (in ApplyIn) Asks() []string {
+	// invariant: an older binary decodes LeaveAsking and Within as absent,
+	// so it would refuse the whole run off a terminal and carry it out with
+	// no bound: each is asked only of a binary that lists it.
+	var asks []string
+	if in.LeaveAsking {
+		asks = append(asks, LeaveAskingAbility)
+	}
+	if in.Within > 0 {
+		asks = append(asks, WithinAbility)
+	}
+	return asks
 }
 
 var Apply = call.Call[Deps, ApplyIn, machinefile.Applied]{
@@ -59,7 +87,8 @@ var Apply = call.Call[Deps, ApplyIn, machinefile.Applied]{
 	// settings.apply, one at a time in the plan's order; then the owner's
 	// lines of its phase.
 	Name: "machinefile.apply", Document: 2, Where: call.AtTarget, Applies: machine.Anywhere, Confirm: confirm.Remove, Journal: keptApply,
-	Errors: []fail.Code{NotFound, NeedsTerminal, NameTaken, BadPhase, confirm.YesNeeded, Busy},
+	Errors:    []fail.Code{NotFound, NeedsTerminal, NameTaken, BadPhase, confirm.YesNeeded, Busy},
+	Abilities: []string{LeaveAskingAbility, WithinAbility},
 	Run: func(ctx context.Context, d Deps, in ApplyIn, p call.Progress) (answer machinefile.Applied, err error) {
 		defer func() { answer = answer.Answered() }()
 		journal.Mark(ctx, d.Now(), "plan")
@@ -85,8 +114,12 @@ var Apply = call.Call[Deps, ApplyIn, machinefile.Applied]{
 			return machinefile.Applied{}, err
 		}
 		out := machinefile.Applied{Plan: plan}
+		var left map[string]bool
 		if asked := plan.Interactive(in.Remove); !in.Interactive && len(asked) > 0 {
-			return out, refusedOffTerminal(asked, "apply")
+			if !in.LeaveAsking || in.Remove {
+				return out, refusedOffTerminal(asked, "apply")
+			}
+			left = asking(asked)
 		}
 		var extra []string
 		for _, e := range plan.Extra {
@@ -105,7 +138,7 @@ var Apply = call.Call[Deps, ApplyIn, machinefile.Applied]{
 			}
 			out.Bound = plan.Name
 		}
-		r := run{d: d, p: p, in: in, name: plan.Name, ended: map[string]catalog.State{}, there: map[string]bool{}}
+		r := run{d: d, p: p, in: in, name: plan.Name, ended: map[string]catalog.State{}, there: map[string]bool{}, left: left, inFlight: catalog.InFlightCap}
 		out.Done = r.carry(ctx, plan.Lines)
 		journal.Mark(ctx, d.Now(), "blocks")
 		if err := ctx.Err(); err != nil {
@@ -125,7 +158,7 @@ var Apply = call.Call[Deps, ApplyIn, machinefile.Applied]{
 		if err := relock(ctx, d, plan, out.Done); err != nil {
 			return out, err
 		}
-		if ctx.Err() == nil {
+		if ctx.Err() == nil && !r.cut {
 			if err := d.Ledger.PutApply(ctx, plan.Name, d.Now().UTC()); err != nil {
 				return out, err
 			}
@@ -246,22 +279,59 @@ type run struct {
 	// value: the apps that read there once their line ended, whose blocks
 	// may be written.
 	there map[string]bool
+	// value: the packages left for the owner's own run, since theirs would
+	// ask something off a terminal (ApplyIn.LeaveAsking).
+	left map[string]bool
+	// value: the packages' bound (ApplyIn.Within) ended before each was
+	// carried out.
+	cut bool
+	// value: how long past that bound the package running at it may go on
+	// (catalog.InFlightCap).
+	inFlight time.Duration
+}
+
+func asking(asked []machinefile.Asked) map[string]bool {
+	out := map[string]bool{}
+	for _, a := range asked {
+		for _, pkg := range a.Packages {
+			out[pkg] = true
+		}
+	}
+	return out
 }
 
 // invariant: the packages are carried out one at a time in the plan's
 // order; a phase run inside a VM (image, boot) gives them their own share
 // of its bound (catalog.ItemsBound), so the owner's lines after them keep
 // theirs: a package still running at the end of the share ends there, and
-// those after it are not run.
+// those after it are not run. A bound the caller gives (ApplyIn.Within)
+// is read on this machine's clock before each package, and none starts
+// past it; a package manager is never stopped mid-transaction for it, so
+// the package running then, or waiting on its manager's lock, may end
+// within r.inFlight more, past which it ends there. Either way the run is
+// cut: it answers with what it did, as an apply, and is not recorded as
+// one run to its end.
 func (r *run) carry(ctx context.Context, lines []machinefile.Line) []machinefile.Done {
 	if r.in.Phase == catalog.PhaseImage || r.in.Phase == catalog.PhaseBoot {
 		var cancel context.CancelFunc
 		ctx, cancel = context.WithTimeout(ctx, catalog.PackagesBound)
 		defer cancel()
 	}
+	outer := ctx
+	var until time.Time
+	if r.in.Within > 0 {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, r.in.Within+r.inFlight)
+		defer cancel()
+		until = r.d.Now().Add(r.in.Within)
+	}
+	defer func() { r.cut = r.cut || (ctx.Err() != nil && outer.Err() == nil) }()
 	out := make([]machinefile.Done, 0, len(lines))
 	for i, l := range lines {
-		if ctx.Err() != nil {
+		if !until.IsZero() && l.Acts() && !r.d.Now().Before(until) {
+			r.cut = true
+		}
+		if ctx.Err() != nil || r.cut {
 			for _, rest := range lines[i:] {
 				out = append(out, machinefile.Done{Line: rest, State: catalog.StateAbsent, Reason: machinefile.NotRun})
 			}
@@ -273,7 +343,7 @@ func (r *run) carry(ctx context.Context, lines []machinefile.Line) []machinefile
 		done := r.line(ctx, l)
 		r.ended[l.Step.Package] = done.State
 		r.there[l.Step.Package] = l.Step.Kind == catalog.KindApp && done.Reason == "" && (done.State == catalog.StateOK || (l.Action == machinefile.Adopt && done.State == catalog.StateDegraded))
-		if done.Reason == machinefile.NotRun {
+		if done.Reason == machinefile.NotRun || done.Reason == machinefile.WaitsForYou {
 			r.ended[l.Step.Package] = catalog.StateBroken
 		}
 		out = append(out, done)
@@ -282,15 +352,23 @@ func (r *run) carry(ctx context.Context, lines []machinefile.Line) []machinefile
 }
 
 func (r *run) line(ctx context.Context, l machinefile.Line) machinefile.Done {
-	// invariant: a line whose step waits on one that failed is not run,
-	// naming it, and what waits on it is not run either; every other
-	// branch goes on.
+	// invariant: a line whose step waits on one that failed, or that was
+	// left for the owner, is not run, naming it and which, and what waits
+	// on it is not run either; every other branch goes on.
 	done := machinefile.Done{Line: l, State: l.Seen.State, Version: l.Seen.Version, Detail: l.Seen.Detail}
 	if !l.Acts() {
 		return done
 	}
+	if r.left[l.Step.Package] {
+		done.Reason, done.Detail = machinefile.WaitsForYou, machinefile.AsksInTerminal
+		return done
+	}
 	for _, w := range l.Step.Waits {
-		if r.ended[w] == catalog.StateBroken {
+		switch {
+		case r.left[w]:
+			done.Reason, done.Detail = machinefile.NotRun, "requires "+w+", which waits for you"
+			return done
+		case r.ended[w] == catalog.StateBroken:
 			done.Reason, done.Detail = machinefile.NotRun, "requires "+w+", which did not install"
 			return done
 		}

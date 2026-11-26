@@ -1,0 +1,40 @@
+description: 'an app that fails to install leaves the workspace made, named with the apply that finishes it'
+fixture: ../../__fixtures__/build/
+env: two-macs
+runs:
+    - command: 'world edit macbook-pro machinefiles/studio-linux.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: studio-linux
+          machine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }
+          extends: [base-ubuntu]
+          vm: { resources: { memory: 4G } }
+          apps: [jq, ripgrep]
+      exit: 0
+    - command: 'images build studio-linux --binary $HOME/station-linux >/dev/null'
+      exit: 0
+    - command: 'world fault Installer.Install 1 times'
+      exit: 0
+    - command: 'machines create --memory 4G web --from studio-linux'
+      exit: 0
+      stdout: |
+          ●	Running
+          ●	Has an address	192.168.64.5
+          ●	SSH answers
+          ●	Boot phase	studio-linux	2 apps installed · 2 settings set
+          ◐	ohmyzsh	not installed: the install failed: its output is in ~/.local/state/station/logs/ohmyzsh.log
+          ◐	1 app to finish	station machinefile apply --on web
+          ●	web	Created	Ephemeral · 4 CPU · 4 GB · 20 GB
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["web"].apps.apt.installed // {} | [has("jq"), has("ripgrep")]'' world.json'
+      exit: 0
+      stdout: |
+          [true,true]
+    - command: 'machines'
+      exit: 0
+      stdout: |
+          ●	macbook-pro	Mac	macbook-pro	Engine running
+          ○	api	Workspace	macbook-pro	Stopped · persistent	4 CPU	8 GB
+          ●	linux-1	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB
+          ●	web	Workspace	macbook-pro	Running · ephemeral	4 CPU	4 GB
+          ●	mac-mini	Mac	mac-mini	Engine running
+          ●	infra	Server	mac-mini	Running · always on	8 CPU	24 GB

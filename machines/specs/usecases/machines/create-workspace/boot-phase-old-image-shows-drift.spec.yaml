@@ -12,7 +12,7 @@ runs:
       exit: 0
     - command: 'images build studio-linux --binary $HOME/station-linux >/dev/null'
       exit: 0
-    - command: '--version >/dev/null; /usr/bin/jq ''(.macs["macbook-pro"].stores.images[] | select(.name == "studio-linux") | .lock) = "lock: station.lock/v1\nmachinefile: studio-linux\napps:\n  - { name: mise, method: script, version: 2026.11.1 }\n  - { name: git, method: apt }\n"'' world.json > w.json && /bin/mv w.json world.json'
+    - command: '--version >/dev/null; /usr/bin/jq ''(.macs["macbook-pro"].stores.images[] | select(.name == "studio-linux") | .lock) = "lock: station.lock/v1\nmachinefile: studio-linux\napps:\n  - { name: mise, method: script, version: 2026.11.1 }\n  - { name: git, method: apt }\n" | .macs["web"] = .macs["linux-1"]'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
     - command: 'world edit macbook-pro machinefiles/studio-linux.machine.yaml'
       stdin: |
@@ -28,14 +28,24 @@ runs:
           ●	Running
           ●	Has an address	192.168.64.5
           ●	SSH answers
-          ●	Boot phase	studio-linux
-          ◐	Drift	from its image	jq is not baked into the image
+          ●	Boot phase	studio-linux	8 apps installed · 2 settings set
+          ◐	Drift	its image is behind its Machinefile	jq is not baked into the image · linux-kernel is not baked into the image
           ●	web	Created	Ephemeral · 4 CPU · 4 GB · 20 GB
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["web"].apps.apt.installed // {} | keys | map(select(startswith("linux-")))'' world.json'
+      exit: 0
+      stdout: |
+          []
     - command: 'machines delete web --confirm=web'
       exit: 0
       stdout: |
           ●	web	deleted
-    - command: 'machines create --memory 4G web --from studio-linux --json | /usr/bin/jq -c ''{template, boot}'''
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["web"] = .macs["linux-1"]'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'machines create --memory 4G web --from studio-linux --json | /usr/bin/jq -c ''{template, applied: [.boot.applied[].name], unfinished: .boot.unfinished, drift: .boot.drift}'''
       exit: 0
       stdout: |
-          {"template":"studio-linux","boot":{"grants":[],"signins":[],"drift":["jq is not baked into the image"]}}
+          {"template":"studio-linux","applied":["mise","ohmyzsh","docker","apt","git","build-essential","playwright-deps","jq"],"unfinished":[],"drift":["jq is not baked into the image","linux-kernel is not baked into the image"]}
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["web"].apps.apt.installed // {} | [has("jq"), (keys | map(select(startswith("linux-"))))]'' world.json'
+      exit: 0
+      stdout: |
+          [true,[]]

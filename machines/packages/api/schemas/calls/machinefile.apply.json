@@ -1545,6 +1545,9 @@
         "Interactive": {
           "type": "boolean"
         },
+        "LeaveAsking": {
+          "type": "boolean"
+        },
         "Machinefile": {
           "type": "string"
         },
@@ -1558,6 +1561,9 @@
         },
         "Remove": {
           "type": "boolean"
+        },
+        "Within": {
+          "type": "integer"
         }
       },
       "type": "object"

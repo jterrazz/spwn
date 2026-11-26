@@ -279,3 +279,17 @@ func TestTheLinuxImageKeepsOneKernelAndWhatItsImagePhaseInstalled(t *testing.T) 
 		t.Error("base-ubuntu bakes no linux-kernel: its image would keep both of the upstream's kernels")
 	}
 }
+
+func TestTheKernelIsOnlyEverInstalledByTheImagePhase(t *testing.T) {
+	cat, err := catalog.Builtin()
+	if err != nil {
+		t.Fatal(err)
+	}
+	it, ok := cat.Package("linux-kernel")
+	if !ok {
+		t.Fatal("the catalog holds no linux-kernel")
+	}
+	if it.Package.Phase != catalog.PhaseImage {
+		t.Errorf("linux-kernel is of the %q phase: an apply would install a kernel into a running VM, never purging the one it boots", it.Package.Phase)
+	}
+}

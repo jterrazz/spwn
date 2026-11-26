@@ -384,6 +384,9 @@ func (h *Hypervisor) Delete(_ context.Context, vm string) error {
 		return ErrRunning
 	}
 	v.Disk, v.PID, v.Ended, v.Born = false, 0, nil, 0
+	// invariant: what ran inside a VM lived on its disk, so its slice goes
+	// with it: a VM made again under its name starts from its image.
+	delete(h.w.Macs, vm)
 	m := h.thisMac()
 	delete(m.Cloned, vm)
 	if v.Kept == nil {

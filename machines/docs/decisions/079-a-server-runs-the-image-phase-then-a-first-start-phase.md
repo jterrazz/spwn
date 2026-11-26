@@ -7,6 +7,8 @@ Accepted by the owner on 2026-11-23, on the owner's word, with the answers recor
 
 **Amends:** [ADR-044](044-an-image-is-baked-from-its-machinefile.md): its line "A server's Machinefile is refused: station sets nothing up in a server".
 
+**Amended by:** [ADR-103](103-a-create-applies-its-whole-machinefile.md): a create applies its whole Machinefile after its boot phase (decision 2.3).
+
 ## Context
 
 ADR-044 bakes an image from its Machinefile in an image phase, then runs a boot phase at a workspace's first start, and refuses a server's Machinefile. [ADR-078](078-a-server-is-set-up-from-its-machinefile-on-the-owners-verb.md) now has station set a server up from its Machinefile, so that refusal goes, and a server needs the same two phases.

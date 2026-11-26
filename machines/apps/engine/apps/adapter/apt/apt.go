@@ -108,7 +108,7 @@ func (a *Apt) Inventory(ctx context.Context) (map[string]string, error) {
 	if err := a.Ready(ctx); err != nil {
 		return nil, err
 	}
-	out, err := a.run.Output(ctx, read(query, "-W", "-f", `${Package}\t${Version}\t${db:Status-Abbrev}\n`))
+	out, err := a.run.Output(ctx, read(query, "-W", "-f", statusFormat))
 	if err != nil {
 		return nil, err
 	}
@@ -123,6 +123,31 @@ func (a *Apt) Inventory(ctx context.Context) (map[string]string, error) {
 		}
 	}
 	return held, nil
+}
+
+const statusFormat = `${Package}\t${Version}\t${db:Status-Abbrev}\n`
+
+// invariant: a change first ends what a run killed mid-transaction left
+// half done, which apt refuses to run past: a package dpkg holds unpacked,
+// half-configured or waiting on its triggers is configured first, with
+// `dpkg --configure -a`, as apt itself asks. A read that fails leaves it
+// to the change, which says apt's own words.
+func (a *Apt) settled(ctx context.Context, logs contract.Logs) error {
+	out, err := a.run.Output(ctx, read(query, "-W", "-f", statusFormat))
+	if err == nil && out.ExitCode == 0 && halfDone(out.Stdout) {
+		return a.sudo(ctx, logs, "dpkg --configure", "env", "DEBIAN_FRONTEND=noninteractive", "dpkg", "--force-confdef", "--force-confold", "--configure", "-a")
+	}
+	return nil
+}
+
+func halfDone(statuses string) bool {
+	for line := range strings.Lines(statuses) {
+		fields := strings.Split(strings.TrimRight(line, "\n"), "\t")
+		if len(fields) == 3 && len(fields[2]) > 1 && strings.ContainsRune("UFWt", rune(fields[2][1])) {
+			return true
+		}
+	}
+	return false
 }
 
 func (a *Apt) Outdated(ctx context.Context, keys []string) (map[string]apps.Currency, error) {
@@ -204,6 +229,10 @@ func (a *Apt) InstallFor(ctx context.Context, f contract.For, installs []catalog
 	if err != nil {
 		return err
 	}
+	err = a.settled(ctx, logs)
+	if err != nil {
+		return err
+	}
 	before, err := a.Inventory(ctx)
 	if err != nil {
 		return err
@@ -282,6 +311,9 @@ func (a *Apt) Update(ctx context.Context, installs []catalog.Install, logs contr
 		return err
 	}
 	if err := a.refresh(ctx, logs); err != nil {
+		return err
+	}
+	if err := a.settled(ctx, logs); err != nil {
 		return err
 	}
 	return a.root(ctx, logs, slices.Concat(quiet(), []string{"install", "--only-upgrade", "--"}, names)...)
@@ -379,6 +411,9 @@ func (a *Apt) take(ctx context.Context, logs contract.Logs, names []string) erro
 	}
 	if len(also) > 0 {
 		return &TakesMoreError{Asked: names, Also: also}
+	}
+	if err := a.settled(ctx, logs); err != nil {
+		return err
 	}
 	return a.root(ctx, logs, slices.Concat(quiet(), []string{"remove"}, keep(), []string{"--"}, names)...)
 }
@@ -538,12 +573,15 @@ func (a *Apt) root(ctx context.Context, logs contract.Logs, argv ...string) erro
 	// invariant: a run fails in apt's words, `apt-get install exited 100`,
 	// sudo's own last line kept (`a password is required` off a terminal);
 	// one that ends on a lock apt waited for in vain says the lock was held.
-	verb := command + " " + argv[len(quiet())]
+	return a.sudo(ctx, logs, command+" "+argv[len(quiet())], argv...)
+}
+
+func (a *Apt) sudo(ctx context.Context, logs contract.Logs, verb string, argv ...string) error {
 	if !a.terminal {
 		argv = append([]string{"-n"}, argv...)
 	}
 	c := local.Command(catalog.Sudo, argv...)
-	c.Logs = logs
+	c.Logs, c.Unattended = logs, !a.terminal
 	ran, err := a.run.Attach(ctx, c, local.ToStderr)
 	switch {
 	case err != nil:

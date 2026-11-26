@@ -119,6 +119,16 @@ const (
 	PhaseBound    = PackagesBound + RunBound
 )
 
+const (
+	// value: how long past the bound a caller gives an apply
+	// (machinefile.apply's Within) the package already running at it may
+	// go on: a package manager is never stopped mid-transaction before it,
+	// so a package waiting on its manager's lock or installing then ends
+	// whole; past it the install is ended, all it started told to stop,
+	// then killed.
+	InFlightCap = 3 * time.Minute
+)
+
 // value: a size in megabytes, gigabytes or terabytes: `512M`, `32G`, `1T`.
 
 type Size string

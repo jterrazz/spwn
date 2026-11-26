@@ -1,0 +1,42 @@
+description: 'a restart applies nothing: an app its Machinefile gained since stays missing'
+fixture: ../../__fixtures__/build/
+env: two-macs
+runs:
+    - command: 'world edit macbook-pro machinefiles/studio-linux.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: studio-linux
+          machine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }
+          extends: [base-ubuntu]
+          vm: { lifetime: persistent, resources: { memory: 4G } }
+          apps: [jq, ripgrep]
+      exit: 0
+    - command: 'images build studio-linux --binary $HOME/station-linux >/dev/null'
+      exit: 0
+    - command: 'machines create --memory 4G web --from studio-linux >/dev/null'
+      exit: 0
+    - command: 'world edit macbook-pro machinefiles/studio-linux.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: studio-linux
+          machine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }
+          extends: [base-ubuntu]
+          vm: { lifetime: persistent, resources: { memory: 4G } }
+          apps: [jq, ripgrep, fd]
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq -S ''.macs["web"] | {apps, files, stores}'' world.json > before.json; /usr/bin/jq -c ''.macs["web"].apps.apt.installed // {} | [has("jq"), has("fd-find")]'' world.json'
+      exit: 0
+      stdout: |
+          [true,false]
+    - command: 'machines restart web'
+      exit: 0
+      stdout: |
+          ●	Running
+          ●	Has an address	192.168.64.5
+          ●	SSH answers
+          ●	web	restarted
+    - command: '--version >/dev/null; /usr/bin/jq -S ''.macs["web"] | {apps, files, stores}'' world.json > after.json; /usr/bin/cmp before.json after.json && echo unchanged; /usr/bin/jq -c ''[.macs["macbook-pro"].vms["web"].guest.ran[]? | select(contains("machinefile apply"))]'' world.json'
+      exit: 0
+      stdout: |
+          unchanged
+          ["/usr/local/bin/station machinefile apply --machinefile 'studio-linux' --phase boot </dev/null"]

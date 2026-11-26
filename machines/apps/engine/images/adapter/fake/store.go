@@ -101,6 +101,22 @@ func (s *Store) Put(_ context.Context, r images.Record) error {
 	defer s.w.Unlock()
 	all := s.records()
 	*all = append(slices.DeleteFunc(*all, same(r.Name, r.Version)), r)
+	// invariant: a record of an image built from a Machinefile is put once
+	// its build baked it: the Machinefiles this Mac holds then are what that
+	// image carries, whatever is edited since.
+	if r.Machinefile != "" && !r.Fetched {
+		m := s.w.Mac(s.mac)
+		files := map[string]string{}
+		for at, body := range m.Files {
+			if strings.HasPrefix(at, "machinefiles/") {
+				files[at] = body
+			}
+		}
+		if m.Built == nil {
+			m.Built = map[string]map[string]string{}
+		}
+		m.Built[r.Machinefile] = files
+	}
 	return nil
 }
 

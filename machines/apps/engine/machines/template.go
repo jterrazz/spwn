@@ -34,17 +34,52 @@ type TemplateFile struct {
 	Body []byte
 }
 
-// value: what a workspace's first start did of its Machinefile: the boot
-// phase's apply (Failed, its first line, when it did not end well), each
-// program granted, each sign-in left to the owner, and the image's drift
-// from the Machinefile now, one line a package (hard case 17).
+// value: what a workspace's first start did of its Machinefile: its boot
+// phase (Failed, the first line of why its mounts, the Machinefile's copy
+// or the boot phase's apply did not end well), the packages the apply of
+// the whole file installed or set (Applied) and those it left unfinished,
+// why that apply answered for none (Unapplied), each program
+// granted, each sign-in left to the owner, and the image's drift from the
+// Machinefile now, one line a package (hard case 17).
 
 type FirstStart struct {
-	Template string
-	Failed   string
-	Grants   []FirstStartGrant
-	SignIns  []FirstStartSignIn
-	Drift    []string
+	Template   string
+	Failed     string
+	Applied    []FirstStartApp `json:",omitempty"`
+	Unfinished []FirstStartApp `json:",omitempty"`
+	Unapplied  string          `json:",omitempty"`
+	Grants     []FirstStartGrant
+	SignIns    []FirstStartSignIn
+	Drift      []string
+}
+
+// value: a package of the Machinefile its first start's apply carried out:
+// its name, whether it is a setting, and, when it was not installed or
+// set, why and the log its run kept.
+
+type FirstStartApp struct {
+	App     string
+	Setting bool   `json:",omitempty"`
+	Reason  string `json:",omitempty"`
+	Log     string `json:",omitempty"`
+}
+
+// value: why a create's apply left a package when the run said no words
+// of it: the apply's bound ended before it started, or it was still
+// installing when the bound's cap ended it; and why that
+// apply answered for no package when it ended without an answer: its
+// bound passed, or the create was stopped, or what it stands on (the
+// mounts, the Machinefile's copy) failed, so it never ran.
+const (
+	NotFinished     = "the apply ran out of time"
+	StillInstalling = "still installing when the time ran out"
+	OutOfTime       = "it ran out of time"
+	ApplyStopped    = "the create was stopped before it ended"
+	NeverRan        = "it did not run, since the " + StepBoot + " failed"
+)
+
+func ImageOlder(image string) string {
+	return "the machine's image is older than this station: rebuild it (station images build " + image + ")"
 }
 
 type FirstStartGrant struct {

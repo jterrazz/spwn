@@ -81,6 +81,39 @@ func TestAReadPastItsBoundEndsWithWhatItStartedThoughItHoldsThePipes(t *testing.
 	}
 }
 
+func TestAnUnattendedCommandEndsWithWhatItStartedAtTheEndOfItsContext(t *testing.T) {
+	// invariant: an unattended command whose grandchild holds its output
+	// open ends within its grace once its context ends, and the grandchild
+	// with it, as an apt-get behind sudo must.
+	dir := t.TempDir()
+	pidFile := filepath.Join(dir, "pid")
+	r := &runner{dirs: []string{"/bin"}, stdout: &bytes.Buffer{}, stderr: &bytes.Buffer{}}
+	ctx, cancel := context.WithTimeout(context.Background(), 200*time.Millisecond)
+	defer cancel()
+	start := time.Now()
+
+	_, err := r.Attach(ctx, Cmd{Name: "sh", Args: []string{"-c", "sleep 60 & echo $! > " + pidFile + "; sleep 60"}, Unattended: true}, ToStderr)
+
+	if took := time.Since(start); err == nil || took > stopGrace+3*time.Second {
+		t.Fatalf("an unattended command cut at 200 ms ran %s and ended as %v", took, err)
+	}
+	body, err := os.ReadFile(pidFile)
+	if err != nil {
+		t.Fatal(err)
+	}
+	left, err := strconv.Atoi(strings.TrimSpace(string(body)))
+	if err != nil {
+		t.Fatalf("the background sleep's pid did not read: %q", body)
+	}
+	deadline := time.Now().Add(stopGrace + 2*time.Second)
+	for syscall.Kill(left, 0) == nil {
+		if time.Now().After(deadline) {
+			t.Fatalf("the sleep the command started outlives it (pid %d)", left)
+		}
+		time.Sleep(50 * time.Millisecond)
+	}
+}
+
 func TestACommandThatAnswersInTimeMayThenTakeItsTime(t *testing.T) {
 	var said bytes.Buffer
 	r := &runner{dirs: []string{"/bin"}, stdout: &said, stderr: &said}

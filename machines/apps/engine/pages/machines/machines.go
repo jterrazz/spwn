@@ -334,10 +334,23 @@ type CreatedJSON struct {
 
 type CreatedBoot struct {
 	// value: why the boot phase's apply did not end well; empty when it did.
-	Failed  string          `json:"failed,omitempty"`
-	Grants  []CreatedGrant  `json:"grants"`
-	SignIns []CreatedSignIn `json:"signins"`
-	Drift   []string        `json:"drift"`
+	Failed string `json:"failed,omitempty"`
+	// value: each package the apply of its whole Machinefile installed or
+	// set, and each it left unfinished, with why.
+	Applied    []CreatedPackage `json:"applied"`
+	Unfinished []CreatedPackage `json:"unfinished"`
+	// value: why that apply answered for no package; absent when it did.
+	Unapplied string          `json:"unapplied,omitempty"`
+	Grants    []CreatedGrant  `json:"grants"`
+	SignIns   []CreatedSignIn `json:"signins"`
+	Drift     []string        `json:"drift"`
+}
+
+type CreatedPackage struct {
+	Name    string `json:"name"`
+	Setting bool   `json:"setting,omitempty"`
+	Reason  string `json:"reason,omitempty"`
+	Log     string `json:"log,omitempty"`
 }
 
 type CreatedGrant struct {
@@ -383,7 +396,7 @@ func CreatedContract(schema string, c model.Created) CreatedJSON {
 	}
 	if b := c.Boot; b != nil {
 		body.Template = b.Template
-		body.Boot = &CreatedBoot{Failed: b.Failed, Grants: []CreatedGrant{}, SignIns: []CreatedSignIn{}, Drift: append([]string{}, b.Drift...)}
+		body.Boot = &CreatedBoot{Failed: b.Failed, Applied: createdPackages(b.Applied), Unfinished: createdPackages(b.Unfinished), Unapplied: b.Unapplied, Grants: []CreatedGrant{}, SignIns: []CreatedSignIn{}, Drift: append([]string{}, b.Drift...)}
 		for _, g := range b.Grants {
 			body.Boot.Grants = append(body.Boot.Grants, CreatedGrant{Program: g.Program, Code: string(g.Code), Subject: g.Subject})
 		}
@@ -392,6 +405,14 @@ func CreatedContract(schema string, c model.Created) CreatedJSON {
 		}
 	}
 	return body
+}
+
+func createdPackages(of []model.FirstStartApp) []CreatedPackage {
+	out := make([]CreatedPackage, 0, len(of))
+	for _, a := range of {
+		out = append(out, CreatedPackage{Name: a.App, Setting: a.Setting, Reason: a.Reason, Log: a.Log})
+	}
+	return out
 }
 
 func Created(c model.Created, thisMac page.Context, refusal func(model.FirstStartGrant) string) page.Page {
@@ -414,7 +435,7 @@ func Created(c model.Created, thisMac page.Context, refusal func(model.FirstStar
 		row := page.Row{ID: "ports", Label: "ports", Mark: page.Attention, Reason: page.Degraded, Cells: []page.Value{page.Text(off)}}
 		rows = append(rows, row)
 	}
-	rows = append(rows, bootRows(c.Boot, refusal)...)
+	rows = append(rows, bootRows(vm.Name, c.Boot, refusal)...)
 	head := pages.Done(vm.Name, catalog.StateOK, "")
 	head.Cells = []page.Value{page.Text("Created"), page.List(page.Text(titled(string(vm.Lifetime))), page.Text(strconv.Itoa(r.CPUs)+" CPU"), Memory(r.MemoryBytes), DiskSize(r.DiskBytes))}
 	rows = append(rows, head)
@@ -433,11 +454,13 @@ func Created(c model.Created, thisMac page.Context, refusal func(model.FirstStar
 }
 
 // invariant: a first start's boot phase says what it did of its
-// Machinefile and what it left: a boot phase or a grant that failed is
-// attention, never a failed create, a refused grant in the words of its
-// refusal, and the image's drift names each item with the build that
-// carries it.
-func bootRows(b *model.FirstStart, refusal func(model.FirstStartGrant) string) []page.Row {
+// Machinefile and what it left: how many apps its apply installed and
+// settings it set, each package it left with why, then how many are left
+// and the apply that finishes them; a boot phase, a package or a grant
+// that failed is attention, never a failed create, a refused grant in the
+// words of its refusal, and the image's drift names each item with the
+// build that carries it.
+func bootRows(vm string, b *model.FirstStart, refusal func(model.FirstStartGrant) string) []page.Row {
 	if b == nil {
 		return nil
 	}
@@ -448,7 +471,24 @@ func bootRows(b *model.FirstStart, refusal func(model.FirstStartGrant) string) [
 	if b.Failed != "" {
 		rows = append(rows, attention("boot", model.StepBoot, b.Failed))
 	} else {
-		rows = append(rows, passed(model.StepBoot, b.Template))
+		row := passed(model.StepBoot, b.Template)
+		if said := appliedWords(b.Applied); len(said) > 0 {
+			row.Cells[1] = page.List(said...)
+		}
+		rows = append(rows, row)
+	}
+	for _, u := range b.Unfinished {
+		verb := "not installed: "
+		if u.Setting {
+			verb = "not set: "
+		}
+		rows = append(rows, attention("unfinished/"+u.App, u.App, verb+u.Reason))
+	}
+	switch finish := "station machinefile apply --on " + vm; {
+	case b.Unapplied != "":
+		rows = append(rows, attention("unapplied", b.Template, "not applied: "+b.Unapplied), attention("finish", "Apps to finish", finish))
+	case len(b.Unfinished) > 0:
+		rows = append(rows, attention("finish", packagesLeft(b.Unfinished)+" to finish", finish))
 	}
 	for _, g := range b.Grants {
 		if g.Code != "" {
@@ -463,7 +503,7 @@ func bootRows(b *model.FirstStart, refusal func(model.FirstStartGrant) string) [
 		rows = append(rows, attention("signin/"+s.Program, s.Program, "not signed in: "+s.Command))
 	}
 	if len(b.Drift) > 0 {
-		row := attention("drift", "Drift", "from its image")
+		row := attention("drift", "Drift", "its image is behind its Machinefile")
 		items := make([]page.Value, 0, len(b.Drift))
 		for _, d := range b.Drift {
 			items = append(items, page.Text(d))
@@ -472,6 +512,39 @@ func bootRows(b *model.FirstStart, refusal func(model.FirstStartGrant) string) [
 		rows = append(rows, row)
 	}
 	return rows
+}
+
+// value: what a create's apply carried out, counted: the apps installed,
+// then the settings set; none when it carried out nothing.
+func appliedWords(applied []model.FirstStartApp) []page.Value {
+	apps, settings := 0, 0
+	for _, a := range applied {
+		if a.Setting {
+			settings++
+		} else {
+			apps++
+		}
+	}
+	var out []page.Value
+	if apps > 0 {
+		out = append(out, page.Text(counted(apps, "app")+" installed"))
+	}
+	if settings > 0 {
+		out = append(out, page.Text(counted(settings, "setting")+" set"))
+	}
+	return out
+}
+
+// value: how many packages a create's apply left, named apps when every
+// one is an app.
+func packagesLeft(left []model.FirstStartApp) string {
+	noun := "app"
+	for _, a := range left {
+		if a.Setting {
+			noun = "package"
+		}
+	}
+	return counted(len(left), noun)
 }
 
 func passed(label, detail string) page.Row {

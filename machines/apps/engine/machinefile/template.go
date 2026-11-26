@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"path"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -11,7 +12,9 @@ import (
 )
 
 // value: a Machinefile a VM image is made from: its name (the image's),
-// the image its disk starts from, its system, the packages it bakes, what its
+// the image its disk starts from, its system, the packages it bakes (its
+// bake list, then each app it lists of the image phase that list leaves
+// out), what its
 // vm says of how a VM made from it runs (the folders it mounts included)
 // and the accounts it is shared
 // (each term as written), the files of its chain a build VM needs (every
@@ -70,6 +73,11 @@ func TemplateOf(lib Library, name string, lock []byte) (Template, error) {
 	t.SignIns, t.Grants = m.programs(signInKey), m.programs(grantKey)
 	for _, b := range m.bake {
 		t.Bake = append(t.Bake, b.name)
+	}
+	for _, a := range m.apps {
+		if it, ok := lib.Catalog.Package(a.name); ok && it.Package.Phase == catalog.PhaseImage && !slices.Contains(t.Bake, a.name) {
+			t.Bake = append(t.Bake, a.name)
+		}
 	}
 	h := sha256.New()
 	for _, f := range files {
