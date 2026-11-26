@@ -59,5 +59,39 @@ dp_case dp-green 0 "GREEN steps=-" NPMCI=0 TSC=0 VITEST=0 PROOF=0 WEBSITE=0 TSCH
 dp_case dp-red 1 "RED steps=WEBSITE" NPMCI=0 TSC=0 VITEST=0 PROOF=0 WEBSITE=1 TSCHECK=0 ARCH=0 MAKELINT=0 DT-DONE
 dp_case dp-two 1 "RED steps=TSC,MAKELINT" NPMCI=0 TSC=2 VITEST=0 PROOF=0 WEBSITE=0 TSCHECK=0 ARCH=0 MAKELINT=1 DT-DONE
 dp_case dp-cut 1 "RED steps=WEBSITE,TSCHECK,ARCH,MAKELINT,DT-DONE" NPMCI=0 TSC=0 VITEST=0 PROOF=0
+tools_sb() { local d=$T/$1 t; mkdir -p "$d/home/.local/bin"
+  for t in mise npm npx go pnpm flock; do printf '#!/bin/bash\nexit 0\n' > "$d/bin/$t"; done
+  printf '#!/bin/bash\nexit $(cat "$HOME/make-$1.rc" 2>/dev/null || echo 0)\n' > "$d/bin/make"
+  printf '#!/bin/bash\nshift\nexec "$@"\n' > "$d/home/.local/bin/heavy-run-excl"
+  chmod +x "$d/bin/"* "$d/home/.local/bin/heavy-run-excl"
+}
+cold_case() { local n=$1 want_rc=$2; shift 2
+  sb "$n"; tools_sb "$n"; for k in "$@"; do echo 1 > "$T/$n/home/make-$k.rc"; done
+  in_sb "$n" bash cold-gate.sh "$T/$n/w" b lab > /dev/null 2>&1; rc=$?
+  [ $rc = "$want_rc" ] || bad "cold-gate $n: exit $rc, wanted $want_rc: $(tail -3 "$T/$n/run/station-lab-cold.log" 2>/dev/null)"
+}
+cold_case cold-green 0
+cold_case cold-generate 1 generate
+cold_case cold-check 1 check
+cold_case cold-lint 1 lint
+tip_case() { local n=$1 want_rc=$2 want=$3 mb=$4; sb "$n"; local w=$T/$n/w g=(-c user.name=t -c user.email=t@t)
+  mkdir -p "$w/machines/specs/machine/menubar"; printf '#!/bin/bash\n[ "$2" = --update-goldens ] && exit %s\nexit 0\n' "$mb" > "$w/machines/specs/machine/menubar/run.sh"
+  printf '#!/bin/bash\nexit 0\n' > "$T/$n/r/scripts/gates/darwin-build.sh"; chmod +x "$w/machines/specs/machine/menubar/run.sh"
+  git -C "$w" add -A; git -C "$w" "${g[@]}" commit -q -m m; out=$(in_sb "$n" env GATE_SLOT_MAX_LOAD=100000 bash tip-mac.sh "$w" "$(git -C "$w" rev-parse --short=9 HEAD)" lab 2>&1); rc=$?
+  [ $rc = "$want_rc" ] || bad "tip-mac $n: exit $rc, wanted $want_rc"
+  case $out in *"VERDICT lab $(git -C "$w" rev-parse --short=9 HEAD) $want"*) ;; *) bad "tip-mac $n: no 'VERDICT lab <sha> $want' in: $(echo "$out" | tail -2)" ;; esac
+}
+tip_case tip-green 0 "GREEN steps=-" 0
+tip_case tip-red 1 "RED steps=MB-UPDATE1,MB-UPDATE2" 1
+regen_case() { local n=$1 want_rc=$2 mode=$3 rr=$4; sb "$n"; local w=$T/$n/w s; s=$(git -C "$w" rev-parse HEAD)
+  printf '#!/bin/bash\ncd "$CC_HOME" && tar -cf "$1-regen-r.tar" -T /dev/null && : > "$1-regen-changes.txt"\nexit %s\n' "$rr" > "$T/$n/r/scripts/gates/regen-remote.sh"
+  if [ $mode = one ]; then in_sb "$n" bash regen.sh one "$w" "$s" lab > /dev/null 2>&1; rc=$?
+  else echo "1 $s" > "$T/$n/map"; in_sb "$n" bash regen.sh all "$w" "$T/$n/map" lab "1" "" > /dev/null 2>&1; rc=$?; fi
+  [ $rc = "$want_rc" ] || bad "regen $mode $n: exit $rc, wanted $want_rc"
+}
+regen_case regen-one-green 0 one 0
+regen_case regen-one-red 3 one 3
+regen_case regen-all-green 0 all 0
+regen_case regen-all-red 1 all 3
 [ $fail = 0 ] && echo "gate scripts: ok"
 exit $fail

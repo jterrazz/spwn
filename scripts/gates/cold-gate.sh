@@ -26,9 +26,10 @@ echo "t-npm \$(date +%T)"
 npm ci >/tmp/$L-npm.log 2>&1 || { tail -20 /tmp/$L-npm.log; exit 97; }
 (cd "\$(ls -d apps/desktop apps/window 2>/dev/null | head -1)" 2>/dev/null && npx playwright install chromium-headless-shell >/tmp/$L-pw.log 2>&1) || { tail -5 /tmp/$L-pw.log; exit 96; }
 echo "t-generate \$(date +%T)"
-take_slot; go work sync; nl make generate >/tmp/$L-gen.log 2>&1; echo "generate=\$?"; exec 8>&-; git status --porcelain | head
+take_slot; go work sync; nl make generate >/tmp/$L-gen.log 2>&1; gen=\$?; echo "generate=\$gen"; exec 8>&-; git status --porcelain | head
 echo "t-check \$(date +%T) workers=${GATE_VITEST_WORKERS:-12}"
 VITEST_MAX_WORKERS=${GATE_VITEST_WORKERS:-12} nl make check >/tmp/$L-check.log 2>&1; rc=\$?; echo "check=\$rc"
+[ \$gen = 0 ] || { tail -15 /tmp/$L-gen.log; [ \$rc = 0 ] && rc=\$gen; }
 echo "t-check-done \$(date +%T)"
 echo "t-rootlint \$(date +%T)"
 (cd "\$(git rev-parse --show-toplevel)" && nl pnpm install --frozen-lockfile >/tmp/$L-rootinstall.log 2>&1 && nl make lint >/tmp/$L-rootlint.log 2>&1); rl=\$?; echo "rootlint=\$rl"
