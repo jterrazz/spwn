@@ -186,6 +186,17 @@ func (m machine) signedIn(ctx context.Context, vm string) (map[string]bool, erro
 	return out, nil
 }
 
+// value: a workspace's create applies its Machinefile in it as
+// machinefile.apply runs there, a call the VM is the target of, reached
+// through this Mac's engine.
+func (m machine) applyAt(ctx context.Context, vm, file string) (machinefile.Applied, error) {
+	r := m.far.router
+	if r == nil {
+		return machinefile.Applied{}, errors.New("this Mac's engine does not answer")
+	}
+	return call.Invoke(ctx, r, coremachine.Ref{Name: vm}, machinefilecalls.Apply, machinefilecalls.ApplyIn{Machinefile: file}, nil)
+}
+
 // value: the kind of machine a VM is: its image's, and Linux for an image
 // built from a Machinefile or one no longer known.
 func (m machine) vmKind(ctx context.Context, vm string) catalog.MachineKind {

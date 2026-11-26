@@ -24,7 +24,7 @@ runs:
           ●	Running
           ●	Has an address	192.168.64.5
           ●	SSH answers
-          ●	Boot phase	studio-linux
+          ●	Boot phase	studio-linux	1 app installed · 2 settings set
           ●	web	Created	Ephemeral · 4 CPU · 4 GB · 20 GB
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].vms["web"] | {folders: .booted.folders, ran: [.guest.ran[]? | select(startswith("/usr/local/bin/station guest serve") | not)]}'' world.json'
       exit: 0

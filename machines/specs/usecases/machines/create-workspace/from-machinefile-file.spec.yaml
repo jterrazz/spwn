@@ -25,7 +25,7 @@ runs:
           ●	Running
           ●	Has an address	192.168.64.5
           ●	SSH answers
-          ●	Boot phase	qa
+          ●	Boot phase	qa	2 apps installed · 2 settings set
           ●	web	Created	Persistent · 6 CPU · 3 GB · 30 GB
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"] | [{image: .vms["web"].kept.image, template: .vms["web"].kept.template}, .files["machinefiles/qa.machine.yaml"] == .files["downloads/qa.machine.yaml"]]'' world.json'
       exit: 0

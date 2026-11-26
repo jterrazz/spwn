@@ -10,6 +10,7 @@ import (
 	"crypto/elliptic"
 	"crypto/rand"
 	"crypto/x509"
+	"encoding/base64"
 	"encoding/json"
 	"encoding/pem"
 	"errors"
@@ -71,6 +72,7 @@ import (
 	imagescontract "github.com/jterrazz/studio-station/apps/engine/images/contract"
 	journalfake "github.com/jterrazz/studio-station/apps/engine/journal/adapter/fake"
 	machinefilefake "github.com/jterrazz/studio-station/apps/engine/machinefile/adapter/fake"
+	machinefilecalls "github.com/jterrazz/studio-station/apps/engine/machinefile/calls"
 	machinefilecontract "github.com/jterrazz/studio-station/apps/engine/machinefile/contract"
 	machinesfake "github.com/jterrazz/studio-station/apps/engine/machines/adapter/fake"
 	"github.com/jterrazz/studio-station/apps/engine/machines/contract"
@@ -1612,13 +1614,36 @@ func (g worldGuests) hostKey(t contract.GuestTarget) error {
 }
 
 func (g worldGuest) Exec(ctx context.Context, cmd contract.GuestCommand) (contract.GuestResult, error) {
+	// invariant: a guest is another process: what the Mac's context carries
+	// (the steps its act records) never reaches it, only its end does.
+	asked := ctx
+	ctx, stop := context.WithCancel(context.Background())
+	defer stop()
+	defer context.AfterFunc(asked, stop)()
 	g.r.w.Lock()
 	slice, ok := g.r.w.Macs[g.vm]
 	ok = ok && slice.Self != nil
+	bake := ""
 	if !ok {
-		slice, ok = madeSlice(g.r.w, g.vm)
+		slice, bake, ok = madeSlice(g.r.w, g.vm)
+	}
+	if bake != "" && g.r.far != nil {
+		g.r.w.Unlock()
+		if err := g.bakeSlice(ctx, bake); err != nil {
+			return contract.GuestResult{}, err
+		}
+		g.r.w.Lock()
 	}
 	ok = ok && (cmd.Line != unix.Guest || !g.r.w.Fails("Guest.Serve"))
+	if ok && cmd.Line == "bash -s" && cmd.Stdin != nil {
+		script, err := io.ReadAll(cmd.Stdin)
+		if err != nil {
+			g.r.w.Unlock()
+			return contract.GuestResult{}, err
+		}
+		copied(slice, script)
+		cmd.Stdin = bytes.NewReader(script)
+	}
 	g.r.w.Unlock()
 	if cmd.Line != unix.Guest || !ok || g.r.far == nil || cmd.Stdin == nil {
 		return g.Guest.Exec(ctx, cmd)
@@ -1637,28 +1662,81 @@ func (g worldGuest) Exec(ctx context.Context, cmd contract.GuestCommand) (contra
 	return contract.GuestResult{Stdout: out.String()}, err
 }
 
+// invariant: the guest of the world runs no shell, so each file a script
+// writes into the VM user's station folder (the Machinefile and lock a
+// create copies in), one line of it, lands in the VM's slice as that line
+// writes it in a real guest. The caller holds the world's lock.
+func copied(slice *world.Mac, script []byte) {
+	for line := range strings.Lines(string(script)) {
+		rest, ok := strings.CutPrefix(strings.TrimSpace(line), "printf %s ")
+		if !ok {
+			continue
+		}
+		encoded, at, ok := strings.Cut(rest, ` | base64 -d > "$HOME/.config/station/`)
+		if !ok {
+			continue
+		}
+		body, err := base64.StdEncoding.DecodeString(encoded)
+		if err != nil {
+			continue
+		}
+		if slice.Files == nil {
+			slice.Files = map[string]string{}
+		}
+		slice.Files[strings.TrimSuffix(at, `"`)] = string(body)
+	}
+}
+
 // value: the slice of a VM a create made in this world, made the first
 // time its guest is asked: a Linux workspace or server, sized as its disk
-// was, following the Machinefile it was made from; false for any other VM.
-// The caller holds the world's lock.
-func madeSlice(w *world.World, vm string) (*world.Mac, bool) {
+// was, its user's sudo asking no password as station's image makes it,
+// following the Machinefile it was made from, which its image was built
+// from: the files of the Machinefiles its Mac holds, as its build copied
+// them in, and the name of the one to bake (bakeSlice), empty for a VM
+// made from no Machinefile; false for any other VM. The caller holds the
+// world's lock.
+func madeSlice(w *world.World, vm string) (*world.Mac, string, bool) {
 	holder := w.Holder(vm)
 	if holder == "" {
-		return nil, false
+		return nil, "", false
 	}
 	v := w.Macs[holder].VMs[vm]
 	if !v.Made || v.Kept == nil || v.Guest == nil || v.Guest.Replaced {
-		return nil, false
+		return nil, "", false
 	}
 	slice := w.Mac(vm)
 	slice.Self = &world.Self{Kind: v.Kept.Lifetime.Kind(), System: coremachine.System{OS: coremachine.Linux}, Hardware: coremachine.Hardware{Memory: v.Size.Memory, CPUs: v.Size.CPUs}}
-	if v.Kept.Template != "" && slice.Preferences == nil {
+	slice.Passwordless = true
+	if v.Kept.Template == "" {
+		return slice, "", true
+	}
+	if slice.Preferences == nil {
 		named, err := json.Marshal(map[string]string{"name": v.Kept.Template})
 		if err == nil {
 			slice.Preferences = map[string]json.RawMessage{"machinefile": named}
 		}
 	}
-	return slice, true
+	for at, body := range w.Macs[holder].Files {
+		if strings.HasPrefix(at, "machinefiles/") {
+			if slice.Files == nil {
+				slice.Files = map[string]string{}
+			}
+			slice.Files[at] = body
+		}
+	}
+	return slice, v.Kept.Template, true
+}
+
+// invariant: a VM cloned from an image holds what the image's bake
+// installed and set, as it was when the image was built: the image phase
+// of its Machinefile is carried out in its slice once, as the build ran
+// it, before anything else asks its guest, beyond the reach of a fault
+// or a hold scripted since (world.Baked).
+func (g worldGuest) bakeSlice(ctx context.Context, file string) error {
+	far := g.r.mac(g.vm).inVM()
+	far.fresh()
+	_, err := far.registry.Run(world.Baked(context.WithoutCancel(ctx)), far.profile, machinefilecalls.Apply.Name, machinefilecalls.ApplyIn{Machinefile: file, Phase: catalog.PhaseImage}, nil)
+	return err
 }
 
 // value: a VM of the world as its guest's hello placed it: the Mac that

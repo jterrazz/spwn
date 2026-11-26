@@ -695,6 +695,16 @@ func (w *World) Fails(call string) bool {
 	return false
 }
 
+type baked struct{}
+
+func Baked(ctx context.Context) context.Context {
+	// value: a run of an image's bake, which ran when the image was built,
+	// before any fault or hold a story scripts since: none reaches it.
+	return context.WithValue(ctx, baked{}, true)
+}
+
+func IsBaked(ctx context.Context) bool { return ctx.Value(baked{}) != nil }
+
 func (w *World) Holds(call string) bool {
 	// invariant: a scripted hold is spent by the one call it holds.
 	for i, f := range w.Script {

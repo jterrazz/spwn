@@ -81,6 +81,7 @@ func (m machine) machines(_ bool) *machinescalls.Machinist {
 		Templates:       machineTemplates{m},
 		Grant:           m.grantProgram,
 		SignedIn:        m.signedIn,
+		Apply:           m.applyAt,
 		Processes:       m.processes(),
 		GuestBinary:     m.guestBinary,
 	})

@@ -1,0 +1,39 @@
+description: 'create --from installs the apps its image did not bake, and keeps what it baked'
+fixture: ../../__fixtures__/build/
+env: two-macs
+runs:
+    - command: 'world edit macbook-pro machinefiles/studio-linux.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: studio-linux
+          machine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }
+          extends: [base-ubuntu]
+          vm: { resources: { memory: 4G } }
+          apps: [jq, ripgrep]
+      exit: 0
+    - command: 'images build studio-linux --binary $HOME/station-linux >/dev/null'
+      exit: 0
+    - command: 'machines create --memory 4G web --from studio-linux'
+      exit: 0
+      stdout: |
+          ●	Running
+          ●	Has an address	192.168.64.5
+          ●	SSH answers
+          ●	Boot phase	studio-linux	3 apps installed · 2 settings set
+          ●	web	Created	Ephemeral · 4 CPU · 4 GB · 20 GB
+    - command: 'machinefile drift --on web'
+      exit: 0
+      stdout: |
+          	On web:
+          # Packages
+          ●	mise	script	present
+          ●	ohmyzsh	script	present
+          ●	docker	script	present
+          ●	git-shortcuts	git-aliases	present · ~/.gitconfig [alias]
+          ●	hushlogin	file	present · ~/.hushlogin
+          ●	apt	apt	present
+          ●	git	apt	present
+          ●	build-essential	apt	present
+          ●	playwright-deps	apt	present
+          ●	jq	apt	present
+          ●	ripgrep	apt	present

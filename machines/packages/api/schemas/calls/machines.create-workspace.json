@@ -242,6 +242,12 @@
     "machines.FirstStart": {
       "additionalProperties": false,
       "properties": {
+        "Applied": {
+          "items": {
+            "$ref": "#/$defs/machines.FirstStartApp"
+          },
+          "type": "array"
+        },
         "Drift": {
           "items": {
             "type": "string"
@@ -274,6 +280,15 @@
         },
         "Template": {
           "type": "string"
+        },
+        "Unapplied": {
+          "type": "string"
+        },
+        "Unfinished": {
+          "items": {
+            "$ref": "#/$defs/machines.FirstStartApp"
+          },
+          "type": "array"
         }
       },
       "required": [
@@ -282,6 +297,27 @@
         "Grants",
         "SignIns",
         "Template"
+      ],
+      "type": "object"
+    },
+    "machines.FirstStartApp": {
+      "additionalProperties": false,
+      "properties": {
+        "App": {
+          "type": "string"
+        },
+        "Log": {
+          "type": "string"
+        },
+        "Reason": {
+          "type": "string"
+        },
+        "Setting": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "App"
       ],
       "type": "object"
     },

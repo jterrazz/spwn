@@ -28,7 +28,7 @@ runs:
           ●	Running
           ●	Has an address	192.168.64.5
           ●	SSH answers
-          ●	Boot phase	studio-linux
+          ●	Boot phase	studio-linux	4 apps installed · 2 settings set
           ◐	Drift	from its image	jq is not baked into the image
           ●	web	Created	Ephemeral · 4 CPU · 4 GB · 20 GB
     - command: 'machines delete web --confirm=web'
@@ -38,4 +38,4 @@ runs:
     - command: 'machines create --memory 4G web --from studio-linux --json | /usr/bin/jq -c ''{template, boot}'''
       exit: 0
       stdout: |
-          {"template":"studio-linux","boot":{"grants":[],"signins":[],"drift":["jq is not baked into the image"]}}
+          {"template":"studio-linux","boot":{"applied":[],"unfinished":[],"grants":[],"signins":[],"drift":["jq is not baked into the image"]}}

@@ -12,11 +12,19 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/accounts"
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
+	"github.com/jterrazz/studio-station/apps/engine/core/journal"
+	"github.com/jterrazz/studio-station/apps/engine/machinefile"
+	machinefilecalls "github.com/jterrazz/studio-station/apps/engine/machinefile/calls"
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
 )
 
-// value: the longest a boot phase's apply runs inside a workspace.
-const bootWait = catalog.PhaseBound
+// value: the longest a boot phase's apply runs inside a workspace, and
+// the longest the create's apply of its whole Machinefile runs there: the
+// packages' share of a phase.
+const (
+	bootWait  = catalog.PhaseBound
+	applyWait = catalog.PackagesBound
+)
 
 // value: the folder of the VM user's station files, under its home, and
 // the station binary the image carries.
@@ -34,17 +42,23 @@ const (
 // each program the Machinefile grants is granted, as grants.add does, and
 // each it signs in to that the workspace is not signed in to is left to
 // the owner with its command, since a sign-in is done at the program's
-// site; last, the image's drift from the Machinefile is read (hard case 17).
+// site; then the whole Machinefile is applied there, what its image holds
+// kept (ADR-103); last, the image's drift from the Machinefile is read
+// (hard case 17).
 // Nothing that fails here fails the create: the workspace is made, and
 // its page says what is left to do.
 func (s *Machinist) bootPhase(ctx context.Context, name, version string, t model.Template) *model.FirstStart {
 	b := &model.FirstStart{Template: t.Name}
+	written := false
 	if err := s.mount(ctx, name, t.Mounts); err != nil {
 		b.Failed = firstLine(err.Error())
 	} else if err := s.putTemplate(ctx, name, t.Files); err != nil {
 		b.Failed = firstLine(err.Error())
-	} else if err := s.applyBoot(ctx, name, t); err != nil {
-		b.Failed = firstLine(err.Error())
+	} else {
+		written = true
+		if err := s.applyBoot(ctx, name, t); err != nil {
+			b.Failed = firstLine(err.Error())
+		}
 	}
 	for _, program := range t.Grants {
 		g := model.FirstStartGrant{Program: program}
@@ -56,6 +70,9 @@ func (s *Machinist) bootPhase(ctx context.Context, name, version string, t model
 		b.Grants = append(b.Grants, g)
 	}
 	b.SignIns = s.signInsLeft(ctx, name, t.SignIns)
+	if written {
+		s.applyAll(ctx, name, t.Name, b)
+	}
 	if s.o.Templates != nil {
 		b.Drift, _ = s.o.Templates.Drift(ctx, t.Name, version)
 	}
@@ -143,6 +160,58 @@ func (s *Machinist) applyBoot(ctx context.Context, name string, t model.Template
 		return errors.New("the boot phase exited " + strconv.Itoa(out.ExitCode) + ": " + firstLine(cmpOr(out.Stderr, out.Stdout)))
 	}
 	return nil
+}
+
+// invariant: a create applies its whole Machinefile inside the workspace
+// through its Mac's engine, as machinefile.apply does there off a
+// terminal, within the packages' share of a phase's bound: each package
+// it installed or set is Applied; each it did not is Unfinished with why,
+// one the apply would ask the owner about included, since a create has
+// no terminal to ask on; an apply that answered for no package says why
+// in Unapplied, never in Failed: the workspace is made all the same. A package the image already holds is kept, and is neither.
+func (s *Machinist) applyAll(ctx context.Context, vm, file string, b *model.FirstStart) {
+	if s.o.Apply == nil {
+		return
+	}
+	journal.Mark(ctx, s.h.Now(), "apply")
+	ctx, cancel := context.WithTimeout(ctx, applyWait)
+	defer cancel()
+	applied, err := s.o.Apply(ctx, vm, file)
+	var refused *fail.Error
+	switch {
+	case errors.As(err, &refused) && refused.Code == machinefilecalls.NeedsTerminal:
+		for pkg := range strings.SplitSeq(refused.Subject, ", ") {
+			b.Unfinished = append(b.Unfinished, model.FirstStartApp{App: pkg, Reason: model.AsksYou})
+		}
+		return
+	case err != nil && len(applied.Done) == 0:
+		b.Unapplied = firstLine(err.Error())
+		return
+	}
+	for _, d := range applied.Done {
+		if !d.Line.Acts() {
+			continue
+		}
+		app := model.FirstStartApp{App: d.Line.Step.Package, Setting: d.Line.Action == machinefile.Set}
+		if d.State == catalog.StateOK && d.Reason == "" {
+			b.Applied = append(b.Applied, app)
+			continue
+		}
+		app.Reason, app.Log = unfinishedWhy(d), d.Log
+		b.Unfinished = append(b.Unfinished, app)
+	}
+}
+
+// value: why a package of the create's apply was not installed or set,
+// in the run's own words.
+func unfinishedWhy(d machinefile.Done) string {
+	switch {
+	case d.Reason == machinefile.Interrupted, d.Reason == machinefile.NotRun && d.Detail == "":
+		return model.NotFinished
+	case d.Detail != "":
+		return firstLine(d.Detail)
+	}
+	return string(d.State)
 }
 
 // value: the line a workspace's boot phase runs as its user: station's

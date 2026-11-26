@@ -19,7 +19,7 @@ runs:
           ●	Running
           ●	Has an address	192.168.64.5
           ●	SSH answers
-          ●	Boot phase	studio-linux
+          ●	Boot phase	studio-linux	2 apps installed · 2 settings set
           ●	web	Created	Persistent · 6 CPU · 3 GB · 30 GB
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].vms["web"] | {image: .kept.image, template: .kept.template, lifetime: .kept.lifetime, size, ran: [.guest.ran[]? | select(startswith("/usr/local/bin/station guest serve") | not)]}'' world.json'
       exit: 0
