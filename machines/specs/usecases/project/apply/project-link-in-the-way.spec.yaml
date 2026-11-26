@@ -14,7 +14,7 @@ runs:
       stderr: |
           Error: .spwn/agents/neo is a link: apply never follows one
           Hint: remove the link, then station project apply
-    - command: '--version >/dev/null; /usr/bin/jq -c ".macs[\"macbook-pro\"].stores.projects[] | [.Disk | keys, (.Record // {} | length)]" world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ".macs[\"macbook-pro\"].stores.projects[] | [(.Disk // {} | keys), (.Record // {} | length)]" world.json'
       exit: 0
       stdout: |
           [[".spwn/agents/neo"],0]

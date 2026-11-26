@@ -14,7 +14,7 @@ runs:
       stderr: |
           Error: spwn.yaml is neither a file nor a folder: a project's declaration holds only those
           Hint: move it away, then station project plan
-    - command: '--version >/dev/null; /usr/bin/jq -c ".macs[\"macbook-pro\"].stores.projects[] | [.Disk // {} | keys, (.Record // {} | length)]" world.json'
+    - command: '--version >/dev/null; /usr/bin/jq -c ".macs[\"macbook-pro\"].stores.projects[] | [(.Disk // {} | keys), (.Record // {} | length)]" world.json'
       exit: 0
       stdout: |
           [[],0]
