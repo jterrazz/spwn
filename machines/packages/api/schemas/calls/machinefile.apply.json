@@ -897,9 +897,13 @@
             "not-run",
             "pinned",
             "updates-itself",
+            "waits-for-machines",
             "waits-for-you"
           ],
           "type": "string"
+        },
+        "Running": {
+          "type": "integer"
         },
         "State": {
           "enum": [

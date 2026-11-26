@@ -1,5 +1,21 @@
 {
   "$defs": {
+    "machinefile.Deferred": {
+      "additionalProperties": false,
+      "properties": {
+        "app": {
+          "type": "string"
+        },
+        "running": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "app",
+        "running"
+      ],
+      "type": "object"
+    },
     "machinefile.Moved": {
       "additionalProperties": false,
       "properties": {
@@ -30,6 +46,12 @@
         "at": {
           "format": "date-time",
           "type": "string"
+        },
+        "deferred": {
+          "items": {
+            "$ref": "#/$defs/machinefile.Deferred"
+          },
+          "type": "array"
         },
         "error": {
           "type": "string"

@@ -3,6 +3,7 @@ package machinefile
 import (
 	"cmp"
 	"slices"
+	"strconv"
 	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
@@ -16,7 +17,8 @@ const NightHour = 3
 
 // value: what the night's upgrade did: when it ended, the Machinefile it
 // ran, each app it moved, each version waiting past a range, the apps it
-// left for the owner's run (a step that asks a password), the apps whose
+// left for the owner's run (a step that asks a password, the hypervisor
+// under machines that run on it), the apps whose
 // update failed, whether it was interrupted, why the shared source was
 // not pulled, why the night did not run to its end (the Machinefile
 // does not resolve, another run held the machine, the lock not written),
@@ -24,16 +26,32 @@ const NightHour = 3
 // did: what that one moved and left waiting still holds.
 
 type Night struct {
-	At          time.Time `json:"at"`
-	Machinefile string    `json:"machinefile"`
-	Moved       []Moved   `json:"moved,omitempty"`
-	Waiting     []Waiting `json:"waiting,omitempty"`
-	Left        []string  `json:"left,omitempty"`
-	Failed      []string  `json:"failed,omitempty"`
-	Interrupted bool      `json:"interrupted,omitempty"`
-	Unpulled    string    `json:"unpulled,omitempty"`
-	Error       string    `json:"error,omitempty"`
-	Last        *Night    `json:"last,omitempty"`
+	At          time.Time  `json:"at"`
+	Machinefile string     `json:"machinefile"`
+	Moved       []Moved    `json:"moved,omitempty"`
+	Waiting     []Waiting  `json:"waiting,omitempty"`
+	Left        []string   `json:"left,omitempty"`
+	Deferred    []Deferred `json:"deferred,omitempty"`
+	Failed      []string   `json:"failed,omitempty"`
+	Interrupted bool       `json:"interrupted,omitempty"`
+	Unpulled    string     `json:"unpulled,omitempty"`
+	Error       string     `json:"error,omitempty"`
+	Last        *Night     `json:"last,omitempty"`
+}
+
+// value: an app the night left as it was because machines of this Mac ran
+// on it, and how many.
+
+type Deferred struct {
+	App     string `json:"app"`
+	Running int    `json:"running"`
+}
+
+func (d Deferred) Said() string {
+	if d.Running == 1 {
+		return d.App + " waits: 1 machine runs"
+	}
+	return d.App + " waits: " + strconv.Itoa(d.Running) + " machines run"
 }
 
 // value: one app a night moved: from the version it read to the one it
@@ -79,11 +97,13 @@ func (n Night) After(last Night, ran bool) Night {
 }
 
 func (n *Night) seen(u Upgraded) {
-	n.Left, n.Failed = nil, nil
+	n.Left, n.Deferred, n.Failed = nil, nil, nil
 	for _, d := range u.Done {
 		switch {
 		case d.Reason == WaitsForYou:
 			n.Left = append(n.Left, d.Line.Step.Package)
+		case d.Reason == WaitsForMachines:
+			n.Deferred = append(n.Deferred, Deferred{App: d.Line.Step.Package, Running: d.Running})
 		case d.Reason == Interrupted || d.Reason == NotRun:
 		case d.State == catalog.StateBroken:
 			n.Failed = append(n.Failed, d.Line.Step.Package)

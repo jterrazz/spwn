@@ -618,6 +618,9 @@ const (
 	// value: an unattended upgrade (the engine's, at night) leaves an app
 	// whose update asks the owner something for the owner's own run.
 	WaitsForYou Reason = "waits-for-you"
+	// value: an unattended upgrade leaves the hypervisor while machines of
+	// this Mac run on it, for the owner's own update.
+	WaitsForMachines Reason = "waits-for-machines"
 )
 
 // value: one line of a run: what it was, how it ended, the version and
@@ -637,6 +640,9 @@ type Done struct {
 	// value: the newest version the app's manager offers, read by an
 	// upgrade within its range ("" where unread).
 	Newest string
+	// value: the machines of this Mac that ran on the app when the night
+	// left it (WaitsForMachines).
+	Running int `json:",omitempty"`
 }
 
 func (s Step) Kept() bool {

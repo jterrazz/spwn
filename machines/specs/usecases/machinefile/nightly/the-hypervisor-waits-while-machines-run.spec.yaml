@@ -1,0 +1,42 @@
+description: 'the night leaves tart while a machine of this Mac runs, and updates it once none runs'
+env: two-macs
+runs:
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [tart]
+      exit: 0
+    - command: 'machinefile apply --machinefile macbook-pro'
+      exit: 0
+      stdout: |
+          # To install
+          ○	tart	shell
+          ●	tart	1.0.0	shell
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].apps.shell |= (.behind = (.installed | map_values("1.1.0")))'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'world advance 18h'
+      exit: 0
+    - command: 'overview | /usr/bin/grep tart'
+      exit: 0
+      stdout: |
+          ◐	tart waits: 1 machine runs	station apps update tart
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[[.macs["macbook-pro"].apps.shell.installed[]], (.macs["macbook-pro"].stores.night | del(.at))]'' world.json'
+      exit: 0
+      stdout: |
+          [["1.0.0"],{"machinefile":"macbook-pro","deferred":[{"app":"tart","running":1}]}]
+    - command: 'machines stop linux-1 --yes'
+      exit: 0
+      stdout: |
+          ●	linux-1	stopped, kept
+    - command: 'world advance 24h'
+      exit: 0
+    - command: 'overview | /usr/bin/grep -c "tart waits"'
+      exit: 1
+      stdout: |
+          0
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[[.macs["macbook-pro"].apps.shell.installed[]], (.macs["macbook-pro"].stores.night | del(.at))]'' world.json'
+      exit: 0
+      stdout: |
+          [["1.1.0"],{"machinefile":"macbook-pro","moved":[{"app":"tart","was":"1.0.0","now":"1.1.0","range":"latest"}]}]
