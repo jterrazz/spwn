@@ -9,9 +9,9 @@ linters:
         - forbidigo
     settings:
         forbidigo:
-            # invariant: a read of a project goes through a root opened at its folder (packages/platform's Tree and
-            # FS), never a plain call that a name, a "..", an absolute path or a link of the declaration could direct
-            # outside it; the packages it binds are the scope rule of the exclusions below.
+            # invariant: a read or a write of a project goes through a root opened at its folder (packages/platform's
+            # Tree and FS), never a plain call that a name, a "..", an absolute path or a link of the declaration
+            # could direct outside it; the packages it binds are the scope rule of the exclusions below.
             analyze-types: true
             forbid:
                 - pattern: ^os\.(Open|OpenFile|ReadFile|ReadDir|Stat|Lstat|DirFS|Readlink|OpenRoot|OpenInRoot)$
@@ -26,6 +26,9 @@ linters:
                 - pattern: ^syscall\.Open$
                   pkg: ^syscall$
                   msg: a project is read through platform.Within or platform.FS, never a raw open
+                - pattern: ^os\.(WriteFile|Create|MkdirAll|Mkdir|Rename|Remove|RemoveAll|Symlink|Chmod)$
+                  pkg: ^os$
+                  msg: a project is written through platform.Within or platform.StateTree, never a plain os write a link of it could direct outside
         depguard:
             # invariant: each rule denies a layer the imports of the layers above it.
             # L1 platform imports nothing; L2 activity, authentication, upgrade import L1;
@@ -133,31 +136,30 @@ linters:
             - linters:
                   - forbidigo
               path-except: ^packages/(architect/|automation/|project/|transpile/source/|dependency/(refs/|lockfile\.go|internal/manifest/|internal/adapters/local/))
-            # outside: an fs automation watches the host folder its declaration names, which may be outside the
-            # project by design: plan says so as an advice, and the watcher lists names and times there, reading no
-            # file's bytes.
+            # outside: an fs automation watches the host folder the daemon resolved against the project
+            # (apps/cli/automation/daemon.go), one outside it only once the user granted it
+            # (apps/cli/cliproject/outside.go); the watcher lists names and times there, reading no file's bytes.
             - linters:
                   - forbidigo
               path: ^packages/automation/(automation|fs_source)\.go$
-            # outside: NOT YET ROOTED, the run receipts (.spwn/runs.jsonl) and the schedule state
-            # (.spwn/automations/state.json) are read and written by their plain paths, so a link a cloned project
-            # carries there is followed; machines/TODO.md records it.
-            - linters:
-                  - forbidigo
-              path: ^packages/automation/(receipts|state)\.go$
-            # outside: a world's workspaces are host folders the declaration names to mount, each stat'd as given
-            # before its bind.
+            # outside: a world's workspaces are host folders spwn up resolved against the project
+            # (apps/cli/world/project.go), one outside it only once the user granted it, or given by -w; each is
+            # stat'd before its bind.
             - linters:
                   - forbidigo
               path: ^packages/architect/spawn\.go$
               source: os\.Stat\(abs\)
-            # outside: NOT YET ROOTED, a world's knowledge is stat'd and bound as spwn.yaml's knowledge: path gives
-            # it; plan refuses one outside the project, `spwn up` takes it as resolved, absolute included
-            # (apps/cli/world/project.go); machines/TODO.md records it.
+            # outside: a world's knowledge is the folder spwn up resolved against the project, one outside it only
+            # once the user granted it; it is stat'd before its bind.
             - linters:
                   - forbidigo
               path: ^packages/architect/spawn\.go$
               source: os\.Stat\(opts\.Knowledge\)
+            # outside: the gh cache is the user's own folder, made before each world mounts it.
+            - linters:
+                  - forbidigo
+              path: ^packages/architect/spawn\.go$
+              source: os\.MkdirAll\(ghCache
             # outside: a test builds the project it reads, and reads it back to judge what the code read.
             - linters:
                   - forbidigo

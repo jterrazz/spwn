@@ -150,7 +150,9 @@ func SaveLockfile(projectRoot string, l *Lockfile) error {
 	if l == nil {
 		return fmt.Errorf("nil lockfile")
 	}
-	if err := os.WriteFile(LockfilePath(projectRoot), l.Encode(), 0o644); err != nil {
+	t := platform.Within(projectRoot)
+	defer t.Close()
+	if err := t.WriteFile(LockfilePath(projectRoot), l.Encode(), 0o644); err != nil {
 		return fmt.Errorf("write %s: %w", LockFileName, err)
 	}
 	return nil
