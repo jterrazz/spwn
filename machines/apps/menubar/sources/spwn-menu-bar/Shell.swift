@@ -35,9 +35,13 @@ public enum SpwnMenuBar {
         guard panel == nil else { return }
         let started = MenuBarPanel(shell: shell)
         panel = started
+        quitting = QuitEvents(shell: shell)
+        quitting?.install()
         started.start()
         started.show(shown)
     }
+
+    static var quitting: QuitEvents?
 
     public nonisolated static var shown: Bool {
         UserDefaults.standard.object(forKey: shownKey) as? Bool ?? true
@@ -84,6 +88,43 @@ public func spwn_menu_bar_set_shown(_ shown: Bool) {
 @_cdecl("spwn_menu_bar_shown")
 public func spwn_menu_bar_shown() -> Bool {
     SpwnMenuBar.shown
+}
+
+// invariant: the Dock's Quit, an `osascript quit` and the session's end arrive as the quit Apple Event; once the
+// app has finished launching, this handler takes it from AppKit's own, so it reaches the app with its reason
+// instead of terminating the process behind the app's back.
+@MainActor
+final class QuitEvents: NSObject {
+    let shell: MenuBarShell
+
+    init(shell: MenuBarShell) {
+        self.shell = shell
+    }
+
+    func install() {
+        NSAppleEventManager.shared().setEventHandler(
+            self, andSelector: #selector(quit(_:withReply:)),
+            forEventClass: AEEventClass(kCoreEventClass), andEventID: AEEventID(kAEQuitApplication))
+    }
+
+    @objc func quit(_ event: NSAppleEventDescriptor, withReply _: NSAppleEventDescriptor) {
+        let code = event.attributeDescriptor(forKeyword: AEKeyword(kAEQuitReason))?.typeCodeValue ?? 0
+        shell.quit(Self.reason(code))
+    }
+
+    // value: the quit reasons loginwindow sends, by their four-character codes.
+    static func reason(_ code: OSType) -> QuitReason {
+        switch code {
+        case fourCC("logo"), fourCC("rlgo"): .logout
+        case fourCC("rrst"), fourCC("rest"): .restart
+        case fourCC("rsdn"), fourCC("shut"): .shutdown
+        default: .user
+        }
+    }
+
+    static func fourCC(_ text: String) -> OSType {
+        text.utf8.reduce(0) { $0 << 8 | OSType($1) }
+    }
 }
 
 @MainActor

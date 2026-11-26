@@ -71,7 +71,33 @@ fn install() -> String {
     .concat()
 }
 
+// value: where `apps/menubar/scripts/build.sh library` puts libSpwnMenuBar.dylib, relative to this crate
+const MENU_BAR_LIBRARY: &str = "../../../.artifacts/window/menubar";
+
+// invariant: the `menu-bar` feature links the panel's Swift library on macOS and finds it in the bundle's
+// invariant: Contents/Frameworks; without the feature, or off macOS, nothing of Swift is needed
+fn menu_bar() {
+    let wanted = env::var_os("CARGO_FEATURE_MENU_BAR").is_some();
+    let macos = env::var("CARGO_CFG_TARGET_OS").is_ok_and(|os| os == "macos");
+    if !(wanted && macos) {
+        return;
+    }
+    let dir = Path::new(&env::var("CARGO_MANIFEST_DIR").expect("cargo sets CARGO_MANIFEST_DIR"))
+        .join(MENU_BAR_LIBRARY);
+    let library = dir.join("libSpwnMenuBar.dylib");
+    assert!(
+        library.is_file(),
+        "the menu-bar feature links {}: build it with apps/menubar/scripts/build.sh library",
+        library.display()
+    );
+    println!("cargo:rerun-if-changed={}", library.display());
+    println!("cargo:rustc-link-search=native={}", dir.display());
+    println!("cargo:rustc-link-lib=dylib=SpwnMenuBar");
+    println!("cargo:rustc-link-arg-bins=-Wl,-rpath,@executable_path/../Frameworks");
+}
+
 fn main() {
+    menu_bar();
     println!("cargo:rerun-if-changed={BRIDGED}");
     println!("cargo:rerun-if-changed={INSTALL}");
     let names = bridged();

@@ -3,6 +3,9 @@ name = "spwn-window"
 version = "0.1.0"
 edition = "2021"
 
+[features]
+menu-bar = []
+
 [build-dependencies]
 tauri-build = { version = "2", features = [] }
 serde_json = "1"

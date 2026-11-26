@@ -409,6 +409,15 @@ The window opens hidden (`"visible": false`, `src-tauri/tauri.conf.json`) and sh
 - The shell holds its own cap, `HARD_CAP` (1.5 s from its setup): past it the shell shows the window whatever the page did, so a page that never ran, threw first or was refused its show still shows. On a Mac, a click on the Dock while no window is on screen shows the window, unminimized and focused (`RunEvent::Reopen`).
 - The Linux bench proves the rule by its specs and the shell by its tests; that the first frame a Mac shows holds the page is the owner's eye at the next release, since the vibrancy window is drawn on a Mac alone.
 
+## Closing the window keeps Spwn running
+
+On a Mac, Spwn ends only when it is asked to quit ([ADR-096](../../docs/decisions/096-spwn-is-one-app-its-menu-bar-notifications-and-engine-live-while-it-runs.md)): closing its window hides it, and the process lives on.
+
+- A close of the `main` window (its red light, ⌘W) is prevented and the window hidden, its page and state kept, so the next show draws it unchanged (`window::close_requested`, `src-tauri/src/window.rs`); an exit the run loop asks by itself (`RunEvent::ExitRequested` with no code) is prevented too, while one the app asks (`app.exit`, the updater's restart) passes.
+- The Dock icon follows the window, the activation policy Regular while it is shown and Accessory once it is hidden, except while Spwn draws no menu bar item of its own: then the icon stays, or a running Spwn would have no way back to its window (`window::dock`). A click on Spwn in the Finder or the Dock shows the window again (`RunEvent::Reopen`).
+- Quit takes one route, `quit::requested` (`src-tauri/src/quit.rs`): the app menu's own "Quit Spwn" on ⌘Q, in place of AppKit's `terminate:`, and, from a build that carries the menu bar, its panel's Quit and the quit Apple Event (the Dock's Quit, `osascript`, the session's end), which the panel's library takes from AppKit with its reason (user, logout, restart, shutdown). Each says its reason on standard error and exits.
+- The menu bar item is drawn in Spwn's own process when the crate is built with its `menu-bar` feature: `src-tauri/src/menu_bar.rs` starts `libSpwnMenuBar.dylib` (`apps/menubar/sources/spwn-menu-bar/`, built by `apps/menubar/scripts/build.sh library` into `.artifacts/window/menubar/`) from `setup`, through its C entry points, and the bundle finds it in `Contents/Frameworks`. Without the feature, as `cargo test` and the Linux bench build it, nothing of Swift is linked and Spwn draws no item.
+
 ## The rules a page meets first
 
 Each is a finding of `typescript check`; `check-quick.sh` shows the per-file ones in seconds.

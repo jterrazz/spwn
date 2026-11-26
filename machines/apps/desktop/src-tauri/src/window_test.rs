@@ -1,7 +1,7 @@
 use std::cell::{Cell, RefCell};
 use std::time::Duration;
 
-use super::{capped, Shown, HARD_CAP};
+use super::{capped, dock, Dock, Shown, HARD_CAP};
 
 #[test]
 fn the_window_is_claimed_once() {
@@ -38,4 +38,19 @@ fn the_hard_cap_shows_nothing_once_the_page_showed_it() {
 fn the_hard_cap_comes_after_the_pages_own() {
     assert!(HARD_CAP > Duration::from_millis(800));
     assert!(HARD_CAP <= Duration::from_secs(2));
+}
+
+#[test]
+fn the_dock_icon_follows_the_window_unless_the_menu_bar_item_is_hidden_too() {
+    // Given - the window shown or hidden, the menu bar item shown or hidden
+    let cases = [(true, true), (true, false), (false, true), (false, false)];
+
+    // When - each is decided
+    let docks: Vec<Dock> = cases
+        .iter()
+        .map(|(window, item)| dock(*window, *item))
+        .collect();
+
+    // Then - hidden only with the window closed and the item there to bring it back
+    assert_eq!(docks, [Dock::Shown, Dock::Shown, Dock::Hidden, Dock::Shown]);
 }

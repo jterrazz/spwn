@@ -15,6 +15,7 @@ let package = Package(
         .executableTarget(name: "StationMenuBar", dependencies: ["SpwnMenuBar"], path: "sources/station-menu-bar"),
         .executableTarget(name: "StationCatalog", dependencies: ["StationKit"], path: "sources/station-catalog"),
         .testTarget(name: "StationKitTests", dependencies: ["StationKit"], path: "tests/station-kit-tests", exclude: ["__expected__"]),
+        .testTarget(name: "SpwnMenuBarTests", dependencies: ["SpwnMenuBar"], path: "tests/spwn-menu-bar-tests"),
         .testTarget(name: "StationCatalogTests", dependencies: ["StationCatalog", "StationKit"], path: "tests/station-catalog-tests"),
     ],
     swiftLanguageModes: [.v5]

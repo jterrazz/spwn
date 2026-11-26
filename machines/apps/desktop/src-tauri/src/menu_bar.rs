@@ -103,7 +103,90 @@ mod service {
     }
 }
 
+// invariant: the menu bar item Spwn's own process draws, when it is built with the `menu-bar` feature; a build
+// invariant: without it draws none, and its item reads hidden
+pub trait Panel {
+    fn shown(&self) -> bool;
+}
+
+#[cfg(all(target_os = "macos", feature = "menu-bar"))]
+mod native {
+    use std::ffi::{c_char, c_void};
+    use std::sync::OnceLock;
+
+    use tauri::AppHandle;
+
+    use super::Panel;
+    use crate::quit::{self, Reason};
+    use crate::window;
+
+    static APP: OnceLock<AppHandle> = OnceLock::new();
+
+    // invariant: the C entry points of libSpwnMenuBar.dylib (apps/menubar/sources/spwn-menu-bar/Shell.swift), its
+    // invariant: one Rust-side owner
+    extern "C" {
+        fn spwn_menu_bar_start(
+            ctx: *mut c_void,
+            open_window: extern "C" fn(*mut c_void, *const c_char),
+            quit: extern "C" fn(*mut c_void, i32),
+        );
+        fn spwn_menu_bar_shown() -> bool;
+    }
+
+    extern "C" fn open_window(_ctx: *mut c_void, _machine: *const c_char) {
+        if let Some(app) = APP.get() {
+            window::reopened(app);
+        }
+    }
+
+    extern "C" fn quit(_ctx: *mut c_void, reason: i32) {
+        if let Some(app) = APP.get() {
+            quit::requested(app, Reason::of(reason));
+        }
+    }
+
+    pub struct Native;
+
+    impl Native {
+        pub fn start(app: AppHandle) {
+            if APP.set(app).is_ok() {
+                unsafe { spwn_menu_bar_start(std::ptr::null_mut(), open_window, quit) }
+            }
+        }
+    }
+
+    impl Panel for Native {
+        fn shown(&self) -> bool {
+            unsafe { spwn_menu_bar_shown() }
+        }
+    }
+}
+
+#[cfg(all(target_os = "macos", feature = "menu-bar"))]
+pub fn panel() -> Box<dyn Panel> {
+    Box::new(native::Native)
+}
+
+#[cfg(not(all(target_os = "macos", feature = "menu-bar")))]
+pub fn panel() -> Box<dyn Panel> {
+    Box::new(Absent)
+}
+
+#[cfg(all(target_os = "macos", feature = "menu-bar"))]
+pub fn start(app: &tauri::AppHandle) {
+    native::Native::start(app.clone());
+}
+
+#[cfg(not(all(target_os = "macos", feature = "menu-bar")))]
+pub fn start(_app: &tauri::AppHandle) {}
+
 struct Absent;
+
+impl Panel for Absent {
+    fn shown(&self) -> bool {
+        false
+    }
+}
 
 impl LoginItem for Absent {
     fn status(&self) -> Status {
