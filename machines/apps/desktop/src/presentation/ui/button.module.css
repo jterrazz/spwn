@@ -17,11 +17,11 @@
         background var(--motion-hover) var(--ease),
         transform var(--motion-hover) var(--ease);
 }
-.button:hover,
-.button:active {
-    background: var(--s3-press);
+.button:hover {
+    background: var(--s3-hover);
 }
 .button:active {
+    background: var(--s3-press);
     transform: var(--motion-press);
 }
 .primary {
@@ -30,9 +30,11 @@
     font-weight: var(--weight-medium);
     box-shadow: var(--lift-primary);
 }
-.primary:hover,
+.primary:hover {
+    background: var(--primary-hover);
+}
 .primary:active {
-    background: var(--primary);
+    background: var(--primary-press);
 }
 .link,
 .danger {
@@ -70,7 +72,7 @@
 }
 .destroy {
     background: var(--bad);
-    color: var(--t1);
+    color: var(--on-bad);
     font-weight: var(--weight-medium);
 }
 .destroy:hover,
@@ -100,7 +102,7 @@
 }
 .destroy:disabled {
     background: var(--bad);
-    color: var(--t1);
+    color: var(--on-bad);
     font-weight: var(--weight-medium);
     box-shadow: none;
     opacity: 0.35;

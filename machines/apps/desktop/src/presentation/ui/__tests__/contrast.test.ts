@@ -124,6 +124,17 @@ describe('contrast', () => {
         expect(below(TEXT_BAR, labels)).toStrictEqual([]);
     });
 
+    test('the destroy button draws its label in --on-bad, on its fill and while disabled', () => {
+        // Given - the destroy rules of the button's style sheet
+        const button = readFileSync(join(import.meta.dirname, '..', 'button.module.css'), 'utf8');
+        const colours = [
+            ...button.matchAll(/\.destroy(?::disabled)? \{[^}]*?\bcolor: (?<colour>[^;]+);/gu),
+        ].map((each) => each.groups?.colour);
+
+        // Then - both rules set the dark label the contrast table measures
+        expect(colours).toStrictEqual(['var(--on-bad)', 'var(--on-bad)']);
+    });
+
     test('a control one step above its surface differs from it by 1.06:1 at least, the path bar to its Find box included', () => {
         // Given - each surface step against the step a control on it takes
         const steps: Measure[] = [
