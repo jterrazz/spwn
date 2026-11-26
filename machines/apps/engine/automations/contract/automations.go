@@ -18,6 +18,7 @@ type Automations interface {
 	Automation(ctx context.Context, project, name string) (automations.Automation, error)
 	// invariant: the runs written for the project, oldest first, those of
 	// the one automation a ref names (refused as Automation refuses it), and
-	// only the newest last of them.
-	Log(ctx context.Context, project, name string, last int) ([]automations.Run, error)
+	// only the newest last of them, with how many the file holds and how many
+	// of its lines could not be read.
+	Log(ctx context.Context, project, name string, last int) (automations.Runs, error)
 }

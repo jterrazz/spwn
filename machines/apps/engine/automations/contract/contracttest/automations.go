@@ -83,7 +83,8 @@ func Automations(t *testing.T, open Opener) {
 
 	t.Run("a last of none is every run", func(t *testing.T) {
 		m, project := open(t, []Declared{morning, inbox}, ran)
-		got, err := m.Log(ctx, project, "", 0)
+		logged, err := m.Log(ctx, project, "", 0)
+		got := logged.Runs
 		if err != nil || len(got) != len(ran) {
 			t.Fatalf("Log(0) = %+v, %v; want all %d runs", got, err, len(ran))
 		}
@@ -100,7 +101,8 @@ func Automations(t *testing.T, open Opener) {
 
 	t.Run("the log is every run, oldest first", func(t *testing.T) {
 		m, project := open(t, []Declared{morning, inbox}, ran)
-		got, err := m.Log(ctx, project, "", 50)
+		logged, err := m.Log(ctx, project, "", 50)
+		got := logged.Runs
 		if err != nil || len(got) != len(ran) {
 			t.Fatalf("Log = %+v, %v; want %d runs", got, err, len(ran))
 		}
@@ -113,15 +115,17 @@ func Automations(t *testing.T, open Opener) {
 
 	t.Run("the log of one automation keeps its runs, and the newest last of them", func(t *testing.T) {
 		m, project := open(t, []Declared{morning, inbox}, ran)
-		got, err := m.Log(ctx, project, "morning", 2)
-		if err != nil || len(got) != 2 || !sameRun(got[0], ran[2]) || !sameRun(got[1], ran[3]) {
+		logged, err := m.Log(ctx, project, "morning", 2)
+		got := logged.Runs
+		if err != nil || len(got) != 2 || logged.Total != 3 || !sameRun(got[0], ran[2]) || !sameRun(got[1], ran[3]) {
 			t.Fatalf("Log = %+v, %v; want the runs of the 2nd and 3rd", got, err)
 		}
 	})
 
 	t.Run("an automation that never ran has an empty log", func(t *testing.T) {
 		m, project := open(t, []Declared{morning, inbox}, ran[:1])
-		got, err := m.Log(ctx, project, "inbox", 50)
+		logged, err := m.Log(ctx, project, "inbox", 50)
+		got := logged.Runs
 		if err != nil || len(got) != 0 {
 			t.Fatalf("Log = %+v, %v; want none", got, err)
 		}
@@ -146,7 +150,7 @@ func NoProject(t *testing.T, open NoProjectOpener) {
 	if _, err := m.Automation(ctx, project, "morning"); !errors.Is(err, automations.ErrNotFound) {
 		t.Fatalf("Automation = %v; want ErrNotFound", err)
 	}
-	if got, err := m.Log(ctx, project, "", 50); err != nil || len(got) != 0 {
+	if got, err := m.Log(ctx, project, "", 50); err != nil || len(got.Runs) != 0 {
 		t.Fatalf("Log = %+v, %v; want none", got, err)
 	}
 	if _, err := m.Log(ctx, project, "morning", 50); !errors.Is(err, automations.ErrNotFound) {

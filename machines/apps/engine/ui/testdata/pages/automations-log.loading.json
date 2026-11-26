@@ -89,6 +89,16 @@
               "kind": "none"
             }
           }
+        },
+        {
+          "note": {
+            "text": "2 of 3: --last 0 shows all"
+          }
+        },
+        {
+          "note": {
+            "text": "1 line of .spwn/runs.jsonl could not be read"
+          }
         }
       ],
       "counts": [

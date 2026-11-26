@@ -383,6 +383,8 @@ type Stores struct {
 	// value: a project root whose manifest does not read, by the error its
 	// manifest gives; such a project declares nothing the Automations can list.
 	AutomationManifestErrors map[string]string `json:"automation_manifest_errors,omitempty"`
+	// value: how many lines of a project's receipts file are no receipt, by its root.
+	AutomationUnreadable map[string]int `json:"automation_unreadable,omitempty"`
 }
 
 func (m *Mac) Store() *Stores {

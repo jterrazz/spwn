@@ -58,6 +58,32 @@
       ],
       "type": "object"
     },
+    "automations.Runs": {
+      "additionalProperties": false,
+      "properties": {
+        "Runs": {
+          "items": {
+            "$ref": "#/$defs/automations.Run"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Total": {
+          "type": "integer"
+        },
+        "Unreadable": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "Runs",
+        "Total",
+        "Unreadable"
+      ],
+      "type": "object"
+    },
     "automations.calls.LogIn": {
       "additionalProperties": false,
       "properties": {
@@ -83,13 +109,7 @@
       "$ref": "#/$defs/automations.calls.LogIn"
     },
     "out": {
-      "items": {
-        "$ref": "#/$defs/automations.Run"
-      },
-      "type": [
-        "array",
-        "null"
-      ]
+      "$ref": "#/$defs/automations.Runs"
     }
   },
   "required": [

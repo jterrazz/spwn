@@ -53,10 +53,10 @@ type LogIn struct {
 	Last int `json:"last,omitempty"`
 }
 
-var Log = call.Call[Deps, LogIn, []automations.Run]{
+var Log = call.Call[Deps, LogIn, automations.Runs]{
 	Name: "automations.log", Where: call.AtTarget, Applies: machine.Anywhere,
 	Errors: []fail.Code{NotFound, NotUnique, InvalidProject},
-	Run: func(ctx context.Context, d Deps, in LogIn, _ call.Progress) ([]automations.Run, error) {
+	Run: func(ctx context.Context, d Deps, in LogIn, _ call.Progress) (automations.Runs, error) {
 		runs, err := d.Automations.Log(ctx, d.root(in.Project), in.Automation, in.Last)
 		return runs, coded(err, in.Project, in.Automation, "automations log")
 	},

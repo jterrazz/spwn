@@ -300,13 +300,16 @@ func (w *MemoryReceiptWriter) Receipts() []Receipt {
 	return out
 }
 
-func ReadReceipts(path string) ([]Receipt, error) {
+func ReadReceipts(path string) (rows []Receipt, unreadable int, err error) {
+	// invariant: a missing file is none; a line that is not a receipt, or is
+	// over maxReceiptLineBytes, is skipped and counted in unreadable, and the
+	// rest is kept, a last line with no trailing newline included.
 	f, err := os.Open(path)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return nil, nil
+			return nil, 0, nil
 		}
-		return nil, err
+		return nil, 0, err
 	}
 	defer f.Close()
 	return decodeReceipts(f)
@@ -314,8 +317,9 @@ func ReadReceipts(path string) ([]Receipt, error) {
 
 const maxReceiptLineBytes = 4 * 1024 * 1024
 
-func decodeReceipts(r io.Reader) ([]Receipt, error) {
+func decodeReceipts(r io.Reader) ([]Receipt, int, error) {
 	var out []Receipt
+	skipped := 0
 	br := bufio.NewReader(r)
 	for {
 		line, err := br.ReadBytes('\n')
@@ -323,17 +327,20 @@ func decodeReceipts(r io.Reader) ([]Receipt, error) {
 		switch {
 		case len(trimmed) == 0:
 		case len(trimmed) > maxReceiptLineBytes:
+			skipped++
 		default:
 			var row Receipt
 			if jerr := json.Unmarshal(trimmed, &row); jerr == nil {
 				out = append(out, row)
+			} else {
+				skipped++
 			}
 		}
 		if err == io.EOF {
-			return out, nil
+			return out, skipped, nil
 		}
 		if err != nil {
-			return out, err
+			return out, skipped, err
 		}
 	}
 }

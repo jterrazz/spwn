@@ -521,6 +521,12 @@ export type AutomationsRun = {
     Trigger: string;
 };
 
+export type AutomationsRuns = {
+    Runs: AutomationsRun[] | null;
+    Total: number;
+    Unreadable: number;
+};
+
 export type AutomationsTrigger = {
     Kind: string;
     Spec: string;
@@ -3506,7 +3512,7 @@ export type AppsUpdateOutput = AppsOutcome[] | null;
 export type AutomationsListInput = AutomationsCallsListIn;
 export type AutomationsListOutput = AutomationsAutomation[] | null;
 export type AutomationsLogInput = AutomationsCallsLogIn;
-export type AutomationsLogOutput = AutomationsRun[] | null;
+export type AutomationsLogOutput = AutomationsRuns;
 export type AutomationsShowInput = AutomationsCallsShowIn;
 export type AutomationsShowOutput = AutomationsAutomation;
 export type AwakeKeepInput = AwakeRequest;

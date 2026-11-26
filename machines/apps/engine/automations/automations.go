@@ -143,3 +143,13 @@ type InvalidProjectError struct {
 func (e *InvalidProjectError) Error() string {
 	return "the manifest " + e.Path + " does not read: " + e.Reason
 }
+
+type Runs struct {
+	// value: the newest runs asked for, oldest first.
+	Runs []Run
+	// value: how many runs the file holds for the selection, of which Runs
+	// is the newest.
+	Total int
+	// value: the lines of the receipts file that are no receipt, skipped.
+	Unreadable int
+}

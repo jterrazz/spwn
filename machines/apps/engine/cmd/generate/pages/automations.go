@@ -33,9 +33,9 @@ func automationPages() []Fixture {
 		failure("automations", "automations", "the manifest of this project cannot be read", "station automations"),
 		pageautomations.List(automationList(), thisMacContext()),
 	), states("automations-log",
-		pending(pageautomations.Log(automationRuns(), thisMacContext())),
-		pageautomations.Log(nil, thisMacContext()),
+		pending(pageautomations.Log(automations.Runs{Runs: automationRuns(), Total: 3, Unreadable: 1}, thisMacContext())),
+		pageautomations.Log(automations.Runs{}, thisMacContext()),
 		failure("automations-log", "automations log", "the runs of this project cannot be read", "station automations log"),
-		pageautomations.Log(automationRuns(), thisMacContext()),
+		pageautomations.Log(automations.Runs{Runs: automationRuns(), Total: 3, Unreadable: 1}, thisMacContext()),
 	)...)
 }

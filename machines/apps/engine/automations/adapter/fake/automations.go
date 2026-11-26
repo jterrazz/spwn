@@ -77,18 +77,18 @@ func (a *Automations) Automation(_ context.Context, project, ref string) (automa
 	return automations.Select(all, ref)
 }
 
-func (a *Automations) Log(_ context.Context, project, ref string, last int) ([]automations.Run, error) {
+func (a *Automations) Log(_ context.Context, project, ref string, last int) (automations.Runs, error) {
 	a.w.Lock()
 	defer a.w.Unlock()
 	var chosen automations.Automation
 	if ref != "" {
 		all, err := a.all(project)
 		if err != nil {
-			return nil, err
+			return automations.Runs{}, err
 		}
 		found, err := automations.Select(all, ref)
 		if err != nil {
-			return nil, err
+			return automations.Runs{}, err
 		}
 		chosen = found
 	}
@@ -98,8 +98,9 @@ func (a *Automations) Log(_ context.Context, project, ref string, last int) ([]a
 			out = append(out, run)
 		}
 	}
+	total := len(out)
 	if last > 0 && len(out) > last {
 		out = out[len(out)-last:]
 	}
-	return out, nil
+	return automations.Runs{Runs: out, Total: total, Unreadable: a.store().AutomationUnreadable[project]}, nil
 }

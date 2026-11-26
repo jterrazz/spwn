@@ -31,6 +31,8 @@ runs:
               "this_mac": true
             },
             "findings": [],
+            "total": 3,
+            "unreadable": 0,
             "runs": [
               {
                 "group": "",

@@ -295,7 +295,8 @@
         "automations.not-found",
         "automations.not-unique"
       ],
-      "in": "LogIn"
+      "in": "LogIn",
+      "out": "Runs"
     },
     {
       "name": "automations.show",

@@ -74,9 +74,9 @@ func trigger(on project.Trigger) automations.Trigger {
 	return automations.Trigger{}
 }
 
-func receiptsOf(root string) ([]automation.Receipt, error) {
+func receiptsOf(root string) ([]automation.Receipt, int, error) {
 	if root == "" {
-		return nil, nil
+		return nil, 0, nil
 	}
 	return automation.ReadReceipts(filepath.Join(root, receiptsDir, receiptsFile))
 }
@@ -108,7 +108,7 @@ func (Automations) List(_ context.Context, root string) ([]automations.Automatio
 	if err != nil || len(all) == 0 {
 		return []automations.Automation{}, err
 	}
-	rows, err := receiptsOf(root)
+	rows, _, err := receiptsOf(root)
 	if err != nil {
 		return nil, err
 	}
@@ -123,18 +123,18 @@ func (a Automations) Automation(ctx context.Context, root, ref string) (automati
 	return automations.Select(all, ref)
 }
 
-func (a Automations) Log(ctx context.Context, root, ref string, last int) ([]automations.Run, error) {
+func (a Automations) Log(ctx context.Context, root, ref string, last int) (automations.Runs, error) {
 	var chosen automations.Automation
 	if ref != "" {
 		found, err := a.Automation(ctx, root, ref)
 		if err != nil {
-			return nil, err
+			return automations.Runs{}, err
 		}
 		chosen = found
 	}
-	rows, err := receiptsOf(root)
+	rows, unreadable, err := receiptsOf(root)
 	if err != nil {
-		return nil, err
+		return automations.Runs{}, err
 	}
 	var out []automations.Run
 	for _, r := range rows {
@@ -142,10 +142,11 @@ func (a Automations) Log(ctx context.Context, root, ref string, last int) ([]aut
 			out = append(out, run(r))
 		}
 	}
+	total := len(out)
 	if last > 0 && len(out) > last {
 		out = out[len(out)-last:]
 	}
-	return out, nil
+	return automations.Runs{Runs: out, Total: total, Unreadable: unreadable}, nil
 }
 
 func run(r automation.Receipt) automations.Run {

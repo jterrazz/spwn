@@ -118,10 +118,12 @@ func took(run automations.Run) string {
 	return (time.Duration(run.DurationMS) * time.Millisecond).String()
 }
 
-func Log(all []automations.Run, thisMac page.Context) page.Page {
+func Log(logged automations.Runs, thisMac page.Context) page.Page {
+	all := logged.Runs
 	// invariant: one row per run, oldest first, with what fired it and how
 	// long it took, a failed one marked broken with its error; none says
-	// where a run is written.
+	// where a run is written, and notes how many more the file holds and how
+	// many of its lines could not be read.
 	s := page.Section{ID: "runs", Title: "Runs", Columns: []page.Column{
 		{Key: "at", Kind: page.KindText, Keep: 100},
 		{Key: "automation", Label: "automation", Kind: page.KindText, Keep: 70},
@@ -140,6 +142,9 @@ func Log(all []automations.Run, thisMac page.Context) page.Page {
 	}
 	if len(all) == 0 {
 		s.Items = []page.Item{{Empty: &page.Empty{Text: "No run yet: runs are written to .spwn/runs.jsonl of the project."}}}
+	}
+	for _, text := range notes(logged) {
+		s.Items = append(s.Items, page.Item{Note: &page.Note{Text: text}})
 	}
 	return page.Seal(page.Page{ID: "automations-log", Command: "automations log", Context: thisMac, Sections: []page.Section{s}})
 }
@@ -193,8 +198,10 @@ type ShowJSON struct {
 }
 
 type LogJSON struct {
-	Schema string    `json:"schema"`
-	Runs   []RunJSON `json:"runs"`
+	Schema     string    `json:"schema"`
+	Total      int       `json:"total"`
+	Unreadable int       `json:"unreadable"`
+	Runs       []RunJSON `json:"runs"`
 }
 
 func instant(t time.Time) *time.Time {
@@ -222,8 +229,9 @@ func ShowContract(schema string, a automations.Automation) ShowJSON {
 	return ShowJSON{Schema: schema, AutomationJSON: automationJSON(a)}
 }
 
-func LogContract(schema string, all []automations.Run) LogJSON {
-	out := LogJSON{Schema: schema, Runs: make([]RunJSON, 0, len(all))}
+func LogContract(schema string, logged automations.Runs) LogJSON {
+	all := logged.Runs
+	out := LogJSON{Schema: schema, Total: logged.Total, Unreadable: logged.Unreadable, Runs: make([]RunJSON, 0, len(all))}
 	for _, r := range all {
 		out.Runs = append(out.Runs, RunJSON{Group: r.Group, Automation: r.Name, Trigger: r.Trigger, Cause: r.Cause, Scheduled: instant(r.Scheduled), At: r.At.UTC(), DurationMS: r.DurationMS, Missed: r.Missed, Paths: r.Paths, OK: r.OK, Error: r.Error, Output: r.Output, Reason: reasonOfRun(r)})
 	}
@@ -249,4 +257,19 @@ func lastOK(a automations.Automation) *bool {
 		return nil
 	}
 	return &a.LastOK
+}
+
+func notes(logged automations.Runs) []string {
+	var out []string
+	if logged.Total > len(logged.Runs) {
+		out = append(out, strconv.Itoa(len(logged.Runs))+" of "+strconv.Itoa(logged.Total)+": --last 0 shows all")
+	}
+	switch logged.Unreadable {
+	case 0:
+	case 1:
+		out = append(out, "1 line of .spwn/runs.jsonl could not be read")
+	default:
+		out = append(out, strconv.Itoa(logged.Unreadable)+" lines of .spwn/runs.jsonl could not be read")
+	}
+	return out
 }

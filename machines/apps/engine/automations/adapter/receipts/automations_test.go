@@ -111,7 +111,8 @@ func TestANameTwoGroupsDeclareIsNotUniqueUntilQualified(t *testing.T) {
 	if err != nil || b.Group != "b" || b.Trigger.Spec != "0 7 * * *" {
 		t.Fatalf("Automation(b/same) = %+v, %v; want group b", b, err)
 	}
-	runs, err := receipts.Automations{}.Log(t.Context(), root, "b/same", 0)
+	logged, err := receipts.Automations{}.Log(t.Context(), root, "b/same", 0)
+	runs := logged.Runs
 	if err != nil || len(runs) != 2 || runs[0].Group != "b" || runs[1].Group != "b" {
 		t.Fatalf("Log(b/same) = %+v, %v; want the two runs of b", runs, err)
 	}
@@ -136,8 +137,25 @@ func TestAManifestThatDoesNotReadIsOneInvalidProjectError(t *testing.T) {
 	if _, err := (receipts.Automations{}).Log(t.Context(), root, "morning", 0); !errors.As(err, &bad) {
 		t.Fatalf("Log(morning) = %v; want an InvalidProjectError", err)
 	}
-	runs, err := receipts.Automations{}.Log(t.Context(), root, "", 0)
+	logged, err := receipts.Automations{}.Log(t.Context(), root, "", 0)
+	runs := logged.Runs
 	if err != nil || len(runs) != 0 {
 		t.Fatalf("Log() = %+v, %v; want the runs of the file with no manifest read", runs, err)
+	}
+}
+
+func TestALogSaysHowManyRunsTheFileHoldsAndHowManyLinesItCouldNotRead(t *testing.T) {
+	root := twoGroups(t)
+	path := filepath.Join(root, ".spwn", "runs.jsonl")
+	body, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if werr := os.WriteFile(path, append(body, []byte("{\"world\":\"b\",\"automation\":\"sa")...), 0o600); werr != nil {
+		t.Fatal(werr)
+	}
+	logged, err := receipts.Automations{}.Log(t.Context(), root, "", 2)
+	if err != nil || len(logged.Runs) != 2 || logged.Total != 3 || logged.Unreadable != 1 {
+		t.Fatalf("Log = %+v, %v; want the newest 2 of 3 runs and 1 unreadable line", logged, err)
 	}
 }

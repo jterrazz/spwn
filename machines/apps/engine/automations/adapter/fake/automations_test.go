@@ -61,7 +61,8 @@ func TestANameTwoGroupsDeclareIsNotUniqueUntilQualified(t *testing.T) {
 	if _, logged := fakeAutomations.Log(t.Context(), project, "same", 0); !errors.As(logged, &many) {
 		t.Fatalf("Log(same) = %v; want not unique", logged)
 	}
-	runs, err := fakeAutomations.Log(t.Context(), project, "b/same", 0)
+	logged, err := fakeAutomations.Log(t.Context(), project, "b/same", 0)
+	runs := logged.Runs
 	if err != nil || len(runs) != 2 || runs[0].Group != "b" || runs[1].Group != "b" {
 		t.Fatalf("Log(b/same) = %+v, %v; want the two runs of b", runs, err)
 	}
@@ -81,7 +82,8 @@ func TestAManifestThatDoesNotReadIsOneInvalidProjectError(t *testing.T) {
 	if _, err := fakeAutomations.Log(t.Context(), project, "morning", 0); !errors.As(err, &bad) {
 		t.Fatalf("Log(morning) = %v; want an InvalidProjectError", err)
 	}
-	runs, err := fakeAutomations.Log(t.Context(), project, "", 0)
+	logged, err := fakeAutomations.Log(t.Context(), project, "", 0)
+	runs := logged.Runs
 	if err != nil || len(runs) != 1 {
 		t.Fatalf("Log() = %+v, %v; want the runs, the manifest unread", runs, err)
 	}

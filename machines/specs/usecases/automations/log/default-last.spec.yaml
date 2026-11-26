@@ -1,0 +1,25 @@
+description: 'station automations log shows the newest 50 runs and says how many more the file holds'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; /bin/mkdir site && /usr/bin/touch site/spwn.yaml && P="$PWD/site" /usr/bin/jq ".macs[\"macbook-pro\"].stores.automations = {(env.P): [{\"Name\":\"morning\",\"Agent\":\"neo\",\"Trigger\":{\"Kind\":\"cron\",\"Spec\":\"* * * * *\"}}]} | .macs[\"macbook-pro\"].stores.automation_runs = {(env.P): [range(0;73) as \$i | {Name:\"morning\",At:(1777615200+\$i*60|todate),OK:true}]} | .macs[\"macbook-pro\"].stores.automation_unreadable = {(env.P): 1}" world.json > seeded.json && /bin/mv seeded.json world.json'
+      exit: 0
+    - command: '--version >/dev/null; cd site && "$STATION" automations log | /usr/bin/wc -l'
+      exit: 0
+      stdout: |
+          53
+    - command: '--version >/dev/null; cd site && "$STATION" automations log | /usr/bin/tail -3'
+      exit: 0
+      stdout: |
+          ●	2026-05-01 07:12:00	morning		0s	ok
+          	50 of 73: --last 0 shows all
+          	1 line of .spwn/runs.jsonl could not be read
+    - command: '--version >/dev/null; cd site && "$STATION" automations log --last 0 | /usr/bin/wc -l'
+      exit: 0
+      stdout: |
+          75
+    - command: '--version >/dev/null; cd site && "$STATION" automations log --json | /usr/bin/jq -c "{total, unreadable, runs: (.runs | length)}"'
+      exit: 0
+      stdout: |
+          {"total":73,"unreadable":1,"runs":50}
