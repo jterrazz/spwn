@@ -439,6 +439,8 @@ becomes the bottleneck.
 
 ## Smaller follow-ups
 
+- An apt run that waits for a lock another package operation holds (up to 5 min, `catalog.AptLockWait`) says so only in the app's log, apt's own `Waiting for cache lock` lines; the step on the owner's screen stays on the app's name. Saying "waiting for another package operation in the machine" on the step needs the adapter to read apt's stderr as it comes, where `local.Runner.Attach` hands it only to the log and its last line; starts with the next change to how an installer reports progress.
+
 - `gh`'s `hosts.yml` row says the login is in the keychain's `gh:github.com`: check on a Mac whether `security` may list that entry (it was denied on one read), and add it to the Keychain rows if it can be read.
 - `codex`'s `~/.codex/auth.json` row names the file the login lives in: check on a Mac with a Codex login that this is the file's name (`ls ~/.codex`), and fix the path if it is not.
 - `claude-desktop`'s `vm_bundles` is level `data`: check whether the app downloads it again after a delete (delete it on a Mac and open the app); if it does, the level becomes `cache`.

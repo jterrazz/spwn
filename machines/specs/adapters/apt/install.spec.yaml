@@ -11,8 +11,8 @@ runs:
       files:
           .calls:
               contains:
-                  - 'sudo -n env DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold update'
-                  - 'sudo -n env DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold install -- jq'
+                  - 'sudo -n env DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold -o DPkg::Lock::Timeout=300 update'
+                  - 'sudo -n env DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold -o DPkg::Lock::Timeout=300 install -- jq'
     - command: 'apps --json | /usr/bin/jq -r ''.apps[] | select(.name == "jq") | "\(.state) \(.method) \(.installed)"'''
       exit: 0
       stdout: |

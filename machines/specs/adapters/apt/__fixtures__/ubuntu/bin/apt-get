@@ -1,8 +1,27 @@
 #!/bin/sh
 # apt-get: simulates a removal (what depends lists comes with it), refuses a change that is not root's,
 # noninteractive and keeping changed configuration, and writes dpkg.db; while the file hang is there, an
-# install that wrote dpkg.db writes apt-hung, then waits to be interrupted.
+# install that wrote dpkg.db writes apt-hung, then waits to be interrupted. While the file dpkg-lock is there,
+# another package operation holds dpkg's lock for the seconds it says: an install or a removal told to wait
+# (-o DPkg::Lock::Timeout=<s>) at least that long says it waits, as apt does, and runs once it is let go;
+# one told less, or nothing, fails in apt's words (the stub never sits out the wait it was told).
 printf 'apt-get %s\n' "$*" >> "$HOME/.calls"
+case "$*" in
+    *" install "* | *" remove "*)
+        if [ -f "$HOME/dpkg-lock" ] && [ "$1" != -s ]; then
+            held=$(/bin/cat "$HOME/dpkg-lock")
+            wait=$(printf '%s\n' "$@" | /usr/bin/sed -n 's/^DPkg::Lock::Timeout=//p')
+            if [ "${wait:-0}" -lt "$held" ]; then
+                echo "E: Could not get lock /var/lib/dpkg/lock-frontend. It is held by process 4242 (unattended-upgr)" >&2
+                echo "E: Unable to acquire the dpkg frontend lock (/var/lib/dpkg/lock-frontend), is another process using it?" >&2
+                exit 100
+            fi
+            echo "Waiting for cache lock: Could not get lock /var/lib/dpkg/lock-frontend. It is held by process 4242 (unattended-upgr)... ${held}s" >&2
+            /bin/sleep "$held"
+            /bin/rm -f "$HOME/dpkg-lock"
+        fi
+        ;;
+esac
 db="$HOME/dpkg.db"
 touch "$db"
 if [ "$1" = -s ]; then
