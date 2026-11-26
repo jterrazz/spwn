@@ -4,6 +4,7 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
+	"go/types"
 	"io/fs"
 	"path/filepath"
 	"strconv"
@@ -11,19 +12,29 @@ import (
 	"testing"
 )
 
-// value: what reaches the user's terminal by design unchanged, with why.
+// value: what reaches the user's terminal by design unchanged, with why: a
+// whole function as `file:function`, or one value it prints as
+// `file:function value`, the value written as the code writes it.
 var printedRaw = map[string]string{
-	"agent/talk.go:talkCmd#0":                             "the agent's own reply, streamed to its terminal (ADR-023, the limit)",
+	"agent/talk.go:talkCmd#0 text":                        "the agent's own reply, printed to its terminal (ADR-023, the limit)",
+	"agent/talk.go:talkCmd#0 string(output)":              "the agent's own reply when it is not the runtime's JSON, printed to its terminal (ADR-023, the limit)",
+	"agent/talk.go:talkCmd#0 line":                        "the agent's stream-json events, streamed to its terminal (ADR-023, the limit)",
 	"authentication/authentication.go:renderDashboardRow": "a row whose glyph every caller styles by a ui function and whose other cells it styles itself",
 }
 
 var printFuncs = map[string]bool{"Fprint": true, "Fprintf": true, "Fprintln": true, "Print": true, "Printf": true, "Println": true}
+
+var logFuncs = map[string]bool{"Print": true, "Printf": true, "Println": true, "Fatal": true, "Fatalf": true, "Fatalln": true, "Panic": true, "Panicf": true, "Panicln": true}
+
+func noRaw(ast.Expr) bool { return false }
 
 // TestNothingPrintsAProjectStringButThroughTheUIPackage holds that every
 // fmt print under apps/cli (outside apps/cli/ui) and every print of
 // packages/architect to the terminal gives a %s or %v only a literal, a
 // call into the ui package (which passes its text through ui.Clean), or a
 // variable assigned only those; any other value is printed by %q or %d.
+// Under apps/cli the same holds for a log print, the source of an io.Copy
+// or io.WriteString, and what is written to os.Stdout or os.Stderr.
 func TestNothingPrintsAProjectStringButThroughTheUIPackage(t *testing.T) {
 	var bad []string
 	used := map[string]bool{}
@@ -45,16 +56,25 @@ func TestNothingPrintsAProjectStringButThroughTheUIPackage(t *testing.T) {
 				return err
 			}
 			for name, body := range bodies(f) {
-				if _, raw := printedRaw[filepath.ToSlash(path)+":"+name]; raw {
-					used[filepath.ToSlash(path)+":"+name] = true
+				key := filepath.ToSlash(path) + ":" + name
+				if _, raw := printedRaw[key]; raw {
+					used[key] = true
 					continue
+				}
+				allow := func(a ast.Expr) bool {
+					k := key + " " + types.ExprString(a)
+					if _, raw := printedRaw[k]; raw {
+						used[k] = true
+						return true
+					}
+					return false
 				}
 				ast.Inspect(body, func(n ast.Node) bool {
 					call, ok := n.(*ast.CallExpr)
-					if !ok || !isPkgCall(call, "fmt", printFuncs) {
+					if !ok {
 						return true
 					}
-					if why := unsafePrint(call, body, terminalOnly); why != "" {
+					if why := unsafeCall(call, body, terminalOnly, allow); why != "" {
 						bad = append(bad, fset.Position(call.Pos()).String()+": "+why)
 					}
 					return true
@@ -115,7 +135,37 @@ func isPkgCall(call *ast.CallExpr, pkg string, names map[string]bool) bool {
 	return ok && id.Name == pkg && (names == nil || names[sel.Sel.Name])
 }
 
-func unsafePrint(call *ast.CallExpr, fn *ast.BlockStmt, terminalOnly bool) string {
+func unsafeCall(call *ast.CallExpr, fn *ast.BlockStmt, terminalOnly bool, allow func(ast.Expr) bool) string {
+	switch {
+	case isPkgCall(call, "fmt", printFuncs):
+		return unsafePrint(call, fn, terminalOnly, allow)
+	case terminalOnly:
+		return ""
+	case isPkgCall(call, "log", logFuncs):
+		return unsafeArgs("log."+call.Fun.(*ast.SelectorExpr).Sel.Name, call.Args, fn, allow)
+	case isPkgCall(call, "io", map[string]bool{"Copy": true, "CopyN": true, "CopyBuffer": true, "WriteString": true}):
+		if len(call.Args) > 1 && !safeText(call.Args[1], fn, 0) && !allow(call.Args[1]) {
+			return "the source of io." + call.Fun.(*ast.SelectorExpr).Sel.Name
+		}
+	case isStdWrite(call):
+		for i, a := range call.Args {
+			if !safeText(a, fn, 0) && !allow(a) {
+				return "argument " + strconv.Itoa(i+1) + " of a Write to os.Stdout or os.Stderr"
+			}
+		}
+	}
+	return ""
+}
+
+func isStdWrite(call *ast.CallExpr) bool {
+	sel, ok := call.Fun.(*ast.SelectorExpr)
+	if !ok || (sel.Sel.Name != "Write" && sel.Sel.Name != "WriteString") {
+		return false
+	}
+	return isPkgCall(&ast.CallExpr{Fun: sel.X}, "os", map[string]bool{"Stdout": true, "Stderr": true})
+}
+
+func unsafePrint(call *ast.CallExpr, fn *ast.BlockStmt, terminalOnly bool, allow func(ast.Expr) bool) string {
 	name := call.Fun.(*ast.SelectorExpr).Sel.Name
 	args := call.Args
 	if strings.HasPrefix(name, "F") {
@@ -130,13 +180,13 @@ func unsafePrint(call *ast.CallExpr, fn *ast.BlockStmt, terminalOnly bool) strin
 		}
 		args = args[1:]
 	}
-	return unsafeArgs(name, args, fn)
+	return unsafeArgs(name, args, fn, allow)
 }
 
-func unsafeArgs(name string, args []ast.Expr, fn *ast.BlockStmt) string {
+func unsafeArgs(name string, args []ast.Expr, fn *ast.BlockStmt, allow func(ast.Expr) bool) string {
 	if !strings.HasSuffix(name, "f") {
 		for i, a := range args {
-			if !safeText(a, fn, 0) {
+			if !safeText(a, fn, 0) && !allow(a) {
 				return "argument " + strconv.Itoa(i+1) + " of " + name
 			}
 		}
@@ -155,7 +205,7 @@ func unsafeArgs(name string, args []ast.Expr, fn *ast.BlockStmt) string {
 	}
 	verbs := formatVerbs(format)
 	for i, a := range args[1:] {
-		if i < len(verbs) && strings.ContainsRune("svc", verbs[i]) && !safeText(a, fn, 0) {
+		if i < len(verbs) && strings.ContainsRune("svc", verbs[i]) && !safeText(a, fn, 0) && !allow(a) {
 			return "the %" + string(verbs[i]) + " argument " + strconv.Itoa(i+1) + " of " + name
 		}
 	}
@@ -193,6 +243,13 @@ func safeText(e ast.Expr, fn *ast.BlockStmt, depth int) bool {
 	switch x := e.(type) {
 	case *ast.BasicLit:
 		return true
+	case *ast.CompositeLit:
+		for _, elt := range x.Elts {
+			if _, lit := elt.(*ast.BasicLit); !lit {
+				return false
+			}
+		}
+		return true
 	case *ast.ParenExpr:
 		return safeText(x.X, fn, depth)
 	case *ast.BinaryExpr:
@@ -205,7 +262,7 @@ func safeText(e ast.Expr, fn *ast.BlockStmt, depth int) bool {
 			return true
 		}
 		if isPkgCall(x, "fmt", map[string]bool{"Sprint": true, "Sprintf": true, "Sprintln": true}) {
-			return unsafeArgs(x.Fun.(*ast.SelectorExpr).Sel.Name, x.Args, fn) == ""
+			return unsafeArgs(x.Fun.(*ast.SelectorExpr).Sel.Name, x.Args, fn, noRaw) == ""
 		}
 		if id, ok := x.Fun.(*ast.Ident); ok {
 			return safeText(id, fn, depth+1)
