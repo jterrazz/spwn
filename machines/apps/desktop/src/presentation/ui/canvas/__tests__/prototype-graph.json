@@ -1,0 +1,1056 @@
+{
+    "nodes": [
+        {
+            "band": 0,
+            "depth": 1,
+            "id": "S:blueprint",
+            "kids": ["P:blueprint/philosophy"],
+            "kind": "seat",
+            "label": "Vision",
+            "marks": [false],
+            "parent": null
+        },
+        {
+            "band": 0,
+            "depth": 2,
+            "id": "P:blueprint/philosophy",
+            "kids": [
+                "C:blueprint/philosophy:0",
+                "C:blueprint/philosophy:1",
+                "C:blueprint/philosophy:2",
+                "C:blueprint/philosophy:3",
+                "C:blueprint/philosophy:4",
+                "C:blueprint/philosophy:5",
+                "C:blueprint/philosophy:6",
+                "C:blueprint/philosophy:7"
+            ],
+            "kind": "page",
+            "label": "Philosophy",
+            "marks": [false, false, false, false, false, false, false, false],
+            "parent": "S:blueprint"
+        },
+        {
+            "band": 0,
+            "depth": 4,
+            "id": "B:blueprint/philosophy:all",
+            "kids": [],
+            "kind": "block",
+            "label": "all",
+            "marks": [],
+            "parent": "C:blueprint/philosophy:0"
+        },
+        {
+            "band": 0,
+            "depth": 4,
+            "id": "B:blueprint/philosophy:who-carries",
+            "kids": [],
+            "kind": "block",
+            "label": "who-carries",
+            "marks": [],
+            "parent": "C:blueprint/philosophy:0"
+        },
+        {
+            "band": 0,
+            "depth": 4,
+            "id": "B:blueprint/philosophy:p0.0",
+            "kids": [],
+            "kind": "prose",
+            "label": "Each conviction is…",
+            "marks": [],
+            "parent": "C:blueprint/philosophy:0"
+        },
+        {
+            "band": 0,
+            "depth": 3,
+            "id": "C:blueprint/philosophy:0",
+            "kids": [
+                "B:blueprint/philosophy:all",
+                "B:blueprint/philosophy:who-carries",
+                "B:blueprint/philosophy:p0.0"
+            ],
+            "kind": "sec",
+            "label": "Top",
+            "marks": [false, false, false],
+            "parent": "P:blueprint/philosophy"
+        },
+        {
+            "band": 0,
+            "depth": 4,
+            "id": "B:blueprint/philosophy:taste",
+            "kids": [],
+            "kind": "block",
+            "label": "taste",
+            "marks": [],
+            "parent": "C:blueprint/philosophy:1"
+        },
+        {
+            "band": 0,
+            "depth": 4,
+            "id": "B:blueprint/philosophy:p1.0",
+            "kids": [],
+            "kind": "prose",
+            "label": "Argument. What an…",
+            "marks": [],
+            "parent": "C:blueprint/philosophy:1"
+        },
+        {
+            "band": 0,
+            "depth": 3,
+            "id": "C:blueprint/philosophy:1",
+            "kids": ["B:blueprint/philosophy:taste", "B:blueprint/philosophy:p1.0"],
+            "kind": "sec",
+            "label": "1. You bring the taste. The stack brings the hands",
+            "marks": [false, false],
+            "parent": "P:blueprint/philosophy"
+        },
+        {
+            "band": 0,
+            "depth": 4,
+            "id": "B:blueprint/philosophy:delegating",
+            "kids": [],
+            "kind": "block",
+            "label": "delegating",
+            "marks": [],
+            "parent": "C:blueprint/philosophy:2"
+        },
+        {
+            "band": 0,
+            "depth": 4,
+            "id": "B:blueprint/philosophy:p2.0",
+            "kids": [],
+            "kind": "prose",
+            "label": "Example. At the…",
+            "marks": [],
+            "parent": "C:blueprint/philosophy:2"
+        },
+        {
+            "band": 0,
+            "depth": 3,
+            "id": "C:blueprint/philosophy:2",
+            "kids": ["B:blueprint/philosophy:delegating", "B:blueprint/philosophy:p2.0"],
+            "kind": "sec",
+            "label": "2. Delegating is a craft, not a prompt",
+            "marks": [false, false],
+            "parent": "P:blueprint/philosophy"
+        },
+        {
+            "band": 0,
+            "depth": 4,
+            "id": "B:blueprint/philosophy:rules-in-the-world",
+            "kids": [],
+            "kind": "block",
+            "label": "rules-in-the-world",
+            "marks": [],
+            "parent": "C:blueprint/philosophy:3"
+        },
+        {
+            "band": 0,
+            "depth": 4,
+            "id": "B:blueprint/philosophy:p3.0",
+            "kids": [],
+            "kind": "prose",
+            "label": "Example. An agent…",
+            "marks": [],
+            "parent": "C:blueprint/philosophy:3"
+        },
+        {
+            "band": 0,
+            "depth": 3,
+            "id": "C:blueprint/philosophy:3",
+            "kids": ["B:blueprint/philosophy:rules-in-the-world", "B:blueprint/philosophy:p3.0"],
+            "kind": "sec",
+            "label": "3. Rules live in the world, not in the agent",
+            "marks": [false, false],
+            "parent": "P:blueprint/philosophy"
+        },
+        {
+            "band": 0,
+            "depth": 4,
+            "id": "B:blueprint/philosophy:declared",
+            "kids": [],
+            "kind": "block",
+            "label": "declared",
+            "marks": [],
+            "parent": "C:blueprint/philosophy:4"
+        },
+        {
+            "band": 0,
+            "depth": 4,
+            "id": "B:blueprint/philosophy:p4.0",
+            "kids": [],
+            "kind": "prose",
+            "label": "Example. qa.machine.yaml gives…",
+            "marks": [],
+            "parent": "C:blueprint/philosophy:4"
+        },
+        {
+            "band": 0,
+            "depth": 3,
+            "id": "C:blueprint/philosophy:4",
+            "kids": ["B:blueprint/philosophy:declared", "B:blueprint/philosophy:p4.0"],
+            "kind": "sec",
+            "label": "4. Declared, never improvised",
+            "marks": [false, false],
+            "parent": "P:blueprint/philosophy"
+        },
+        {
+            "band": 0,
+            "depth": 4,
+            "id": "B:blueprint/philosophy:proven",
+            "kids": [],
+            "kind": "block",
+            "label": "proven",
+            "marks": [],
+            "parent": "C:blueprint/philosophy:5"
+        },
+        {
+            "band": 0,
+            "depth": 4,
+            "id": "B:blueprint/philosophy:p5.0",
+            "kids": [],
+            "kind": "prose",
+            "label": "Example. A request…",
+            "marks": [],
+            "parent": "C:blueprint/philosophy:5"
+        },
+        {
+            "band": 0,
+            "depth": 3,
+            "id": "C:blueprint/philosophy:5",
+            "kids": ["B:blueprint/philosophy:proven", "B:blueprint/philosophy:p5.0"],
+            "kind": "sec",
+            "label": "5. Done means proven",
+            "marks": [false, false],
+            "parent": "P:blueprint/philosophy"
+        },
+        {
+            "band": 0,
+            "depth": 4,
+            "id": "B:blueprint/philosophy:taste-is-a-system",
+            "kids": [],
+            "kind": "block",
+            "label": "taste-is-a-system",
+            "marks": [],
+            "parent": "C:blueprint/philosophy:6"
+        },
+        {
+            "band": 0,
+            "depth": 4,
+            "id": "B:blueprint/philosophy:p6.0",
+            "kids": [],
+            "kind": "prose",
+            "label": "Example. The site's…",
+            "marks": [],
+            "parent": "C:blueprint/philosophy:6"
+        },
+        {
+            "band": 0,
+            "depth": 3,
+            "id": "C:blueprint/philosophy:6",
+            "kids": ["B:blueprint/philosophy:taste-is-a-system", "B:blueprint/philosophy:p6.0"],
+            "kind": "sec",
+            "label": "6. Taste is a system",
+            "marks": [false, false],
+            "parent": "P:blueprint/philosophy"
+        },
+        {
+            "band": 0,
+            "depth": 4,
+            "id": "B:blueprint/philosophy:learns",
+            "kids": [],
+            "kind": "block",
+            "label": "learns",
+            "marks": [],
+            "parent": "C:blueprint/philosophy:7"
+        },
+        {
+            "band": 0,
+            "depth": 4,
+            "id": "B:blueprint/philosophy:p7.0",
+            "kids": [],
+            "kind": "prose",
+            "label": "Example. A correction…",
+            "marks": [],
+            "parent": "C:blueprint/philosophy:7"
+        },
+        {
+            "band": 0,
+            "depth": 3,
+            "id": "C:blueprint/philosophy:7",
+            "kids": ["B:blueprint/philosophy:learns", "B:blueprint/philosophy:p7.0"],
+            "kind": "sec",
+            "label": "7. The stack learns. You don't repeat yourself",
+            "marks": [false, false],
+            "parent": "P:blueprint/philosophy"
+        },
+        {
+            "band": 1,
+            "depth": 1,
+            "id": "S:product",
+            "kids": [
+                "P:product/boundaries",
+                "P:product/stack",
+                "P:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder"
+            ],
+            "kind": "seat",
+            "label": "Produit",
+            "marks": [true, true, false],
+            "parent": null
+        },
+        {
+            "band": 0,
+            "depth": 2,
+            "id": "P:product/boundaries",
+            "kids": [
+                "C:product/boundaries:0",
+                "C:product/boundaries:1",
+                "C:product/boundaries:2",
+                "C:product/boundaries:3"
+            ],
+            "kind": "page",
+            "label": "Boundaries",
+            "marks": [false, false, true, false],
+            "parent": "S:product"
+        },
+        {
+            "band": 0,
+            "depth": 4,
+            "id": "B:product/boundaries:one-stack",
+            "kids": [],
+            "kind": "block",
+            "label": "one-stack",
+            "marks": [],
+            "parent": "C:product/boundaries:0"
+        },
+        {
+            "band": 0,
+            "depth": 3,
+            "id": "C:product/boundaries:0",
+            "kids": ["B:product/boundaries:one-stack"],
+            "kind": "sec",
+            "label": "Top",
+            "marks": [false],
+            "parent": "P:product/boundaries"
+        },
+        {
+            "band": 0,
+            "depth": 4,
+            "id": "B:product/boundaries:not-a-replacement",
+            "kids": [],
+            "kind": "block",
+            "label": "not-a-replacement",
+            "marks": [],
+            "parent": "C:product/boundaries:1"
+        },
+        {
+            "band": 0,
+            "depth": 4,
+            "id": "B:product/boundaries:not-vibe-coding",
+            "kids": [],
+            "kind": "block",
+            "label": "not-vibe-coding",
+            "marks": [],
+            "parent": "C:product/boundaries:1"
+        },
+        {
+            "band": 0,
+            "depth": 4,
+            "id": "B:product/boundaries:not-a-cloud-service",
+            "kids": [],
+            "kind": "block",
+            "label": "not-a-cloud-service",
+            "marks": [],
+            "parent": "C:product/boundaries:1"
+        },
+        {
+            "band": 0,
+            "depth": 4,
+            "id": "B:product/boundaries:not-one-vendor",
+            "kids": [],
+            "kind": "block",
+            "label": "not-one-vendor",
+            "marks": [],
+            "parent": "C:product/boundaries:1"
+        },
+        {
+            "band": 0,
+            "depth": 4,
+            "id": "B:product/boundaries:not-a-method",
+            "kids": [],
+            "kind": "block",
+            "label": "not-a-method",
+            "marks": [],
+            "parent": "C:product/boundaries:1"
+        },
+        {
+            "band": 0,
+            "depth": 4,
+            "id": "B:product/boundaries:p1.0",
+            "kids": [],
+            "kind": "prose",
+            "label": "Each line is…",
+            "marks": [],
+            "parent": "C:product/boundaries:1"
+        },
+        {
+            "band": 0,
+            "depth": 3,
+            "id": "C:product/boundaries:1",
+            "kids": [
+                "B:product/boundaries:not-a-replacement",
+                "B:product/boundaries:not-vibe-coding",
+                "B:product/boundaries:not-a-cloud-service",
+                "B:product/boundaries:not-one-vendor",
+                "B:product/boundaries:not-a-method",
+                "B:product/boundaries:p1.0"
+            ],
+            "kind": "sec",
+            "label": "What Spwn is not",
+            "marks": [false, false, false, false, false, false],
+            "parent": "P:product/boundaries"
+        },
+        {
+            "band": 0,
+            "depth": 4,
+            "id": "B:product/boundaries:machines-refuses",
+            "kids": [],
+            "kind": "group",
+            "label": "What Machines refuses",
+            "marks": [false, false],
+            "parent": "C:product/boundaries:2"
+        },
+        {
+            "band": 0,
+            "depth": 4,
+            "id": "B:product/boundaries:machines",
+            "kids": [],
+            "kind": "block",
+            "label": "machines",
+            "marks": [],
+            "parent": "C:product/boundaries:2"
+        },
+        {
+            "band": 0,
+            "depth": 4,
+            "id": "B:product/boundaries:no-model",
+            "kids": [],
+            "kind": "block",
+            "label": "no-model",
+            "marks": [],
+            "parent": "C:product/boundaries:2"
+        },
+        {
+            "band": 0,
+            "depth": 4,
+            "id": "B:product/boundaries:no-security-in-instructions",
+            "kids": [],
+            "kind": "block",
+            "label": "no-security-in-instructions",
+            "marks": [],
+            "parent": "C:product/boundaries:2"
+        },
+        {
+            "band": 0,
+            "depth": 4,
+            "id": "B:product/boundaries:no-computer",
+            "kids": [],
+            "kind": "block",
+            "label": "no-computer",
+            "marks": [],
+            "parent": "C:product/boundaries:2"
+        },
+        {
+            "band": 0,
+            "depth": 4,
+            "id": "B:product/boundaries:wiki-decides-nothing",
+            "kids": [],
+            "kind": "block",
+            "label": "wiki-decides-nothing",
+            "marks": [],
+            "parent": "C:product/boundaries:2"
+        },
+        {
+            "band": 0,
+            "depth": 4,
+            "id": "B:product/boundaries:os-holds-no-facts",
+            "kids": [],
+            "kind": "block",
+            "label": "os-holds-no-facts",
+            "marks": [],
+            "parent": "C:product/boundaries:2"
+        },
+        {
+            "band": 0,
+            "depth": 4,
+            "id": "B:product/boundaries:p2.0",
+            "kids": [],
+            "kind": "prose",
+            "label": "The rows of…",
+            "marks": [],
+            "parent": "C:product/boundaries:2"
+        },
+        {
+            "band": 0,
+            "depth": 3,
+            "id": "C:product/boundaries:2",
+            "kids": [
+                "B:product/boundaries:machines-refuses",
+                "B:product/boundaries:machines",
+                "B:product/boundaries:no-model",
+                "B:product/boundaries:no-security-in-instructions",
+                "B:product/boundaries:no-computer",
+                "B:product/boundaries:wiki-decides-nothing",
+                "B:product/boundaries:os-holds-no-facts",
+                "B:product/boundaries:p2.0"
+            ],
+            "kind": "sec",
+            "label": "What each app refuses",
+            "marks": [false, false, false, false, true, false, true, false],
+            "parent": "P:product/boundaries"
+        },
+        {
+            "band": 0,
+            "depth": 4,
+            "id": "B:product/boundaries:p3.0",
+            "kids": [],
+            "kind": "prose",
+            "label": "Two rows are…",
+            "marks": [],
+            "parent": "C:product/boundaries:3"
+        },
+        {
+            "band": 0,
+            "depth": 3,
+            "id": "C:product/boundaries:3",
+            "kids": ["B:product/boundaries:p3.0"],
+            "kind": "sec",
+            "label": "Rests on",
+            "marks": [false],
+            "parent": "P:product/boundaries"
+        },
+        {
+            "band": 0,
+            "depth": 2,
+            "id": "P:product/stack",
+            "kids": ["C:product/stack:1", "C:product/stack:2", "C:product/stack:3"],
+            "kind": "page",
+            "label": "The stack",
+            "marks": [false, false, false],
+            "parent": "S:product"
+        },
+        {
+            "band": 0,
+            "depth": 4,
+            "id": "B:product/stack:p1.0",
+            "kids": [],
+            "kind": "prose",
+            "label": "The layers of…",
+            "marks": [],
+            "parent": "C:product/stack:1"
+        },
+        {
+            "band": 0,
+            "depth": 4,
+            "id": "B:product/stack:parts",
+            "kids": [],
+            "kind": "group",
+            "label": "The parts and what you keep",
+            "marks": [false, false, false, false, false, false],
+            "parent": "C:product/stack:1"
+        },
+        {
+            "band": 0,
+            "depth": 4,
+            "id": "B:product/stack:all",
+            "kids": [],
+            "kind": "block",
+            "label": "all",
+            "marks": [],
+            "parent": "C:product/stack:1"
+        },
+        {
+            "band": 0,
+            "depth": 4,
+            "id": "B:product/stack:p1.1",
+            "kids": [],
+            "kind": "prose",
+            "label": "The column \"you…",
+            "marks": [],
+            "parent": "C:product/stack:1"
+        },
+        {
+            "band": 0,
+            "depth": 3,
+            "id": "C:product/stack:1",
+            "kids": [
+                "B:product/stack:p1.0",
+                "B:product/stack:parts",
+                "B:product/stack:all",
+                "B:product/stack:p1.1"
+            ],
+            "kind": "sec",
+            "label": "The three spaces",
+            "marks": [false, false, false, false],
+            "parent": "P:product/stack"
+        },
+        {
+            "band": 0,
+            "depth": 4,
+            "id": "B:product/stack:p2.0",
+            "kids": [],
+            "kind": "prose",
+            "label": "A space leans…",
+            "marks": [],
+            "parent": "C:product/stack:2"
+        },
+        {
+            "band": 0,
+            "depth": 3,
+            "id": "C:product/stack:2",
+            "kids": ["B:product/stack:p2.0"],
+            "kind": "sec",
+            "label": "How the spaces stack",
+            "marks": [false],
+            "parent": "P:product/stack"
+        },
+        {
+            "band": 0,
+            "depth": 4,
+            "id": "B:product/stack:p3.0",
+            "kids": [],
+            "kind": "prose",
+            "label": "One claim here…",
+            "marks": [],
+            "parent": "C:product/stack:3"
+        },
+        {
+            "band": 0,
+            "depth": 3,
+            "id": "C:product/stack:3",
+            "kids": ["B:product/stack:p3.0"],
+            "kind": "sec",
+            "label": "Rests on",
+            "marks": [false],
+            "parent": "P:product/stack"
+        },
+        {
+            "band": 0,
+            "depth": 2,
+            "id": "P:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder",
+            "kids": [
+                "C:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder:0",
+                "C:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder:1"
+            ],
+            "kind": "page",
+            "label": "ADR-002",
+            "marks": [false, false],
+            "parent": "S:product"
+        },
+        {
+            "band": 0,
+            "depth": 4,
+            "id": "B:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder:p0.0",
+            "kids": [],
+            "kind": "prose",
+            "label": "An agent leaves…",
+            "marks": [],
+            "parent": "C:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder:0"
+        },
+        {
+            "band": 0,
+            "depth": 3,
+            "id": "C:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder:0",
+            "kids": ["B:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder:p0.0"],
+            "kind": "sec",
+            "label": "Top",
+            "marks": [false],
+            "parent": "P:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder"
+        },
+        {
+            "band": 0,
+            "depth": 4,
+            "id": "B:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder:p1.0",
+            "kids": [],
+            "kind": "prose",
+            "label": "Six apps, in…",
+            "marks": [],
+            "parent": "C:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder:1"
+        },
+        {
+            "band": 0,
+            "depth": 3,
+            "id": "C:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder:1",
+            "kids": ["B:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder:p1.0"],
+            "kind": "sec",
+            "label": "Decision",
+            "marks": [false],
+            "parent": "P:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder"
+        },
+        {
+            "band": 3,
+            "depth": 1,
+            "id": "S:engineering",
+            "kids": [
+                "P:machines/reference/ports",
+                "P:machines/decisions/035-a-port-is-a-right-with-an-audience"
+            ],
+            "kind": "seat",
+            "label": "Technique",
+            "marks": [false, false],
+            "parent": null
+        },
+        {
+            "band": 0,
+            "depth": 2,
+            "id": "P:machines/reference/ports",
+            "kids": ["C:machines/reference/ports:1"],
+            "kind": "page",
+            "label": "Ports",
+            "marks": [false],
+            "parent": "S:engineering"
+        },
+        {
+            "band": 0,
+            "depth": 4,
+            "id": "B:machines/reference/ports:p1.0",
+            "kids": [],
+            "kind": "prose",
+            "label": "A VM's rights…",
+            "marks": [],
+            "parent": "C:machines/reference/ports:1"
+        },
+        {
+            "band": 0,
+            "depth": 4,
+            "id": "B:machines/reference/ports:right",
+            "kids": [],
+            "kind": "block",
+            "label": "right",
+            "marks": [],
+            "parent": "C:machines/reference/ports:1"
+        },
+        {
+            "band": 0,
+            "depth": 4,
+            "id": "B:machines/reference/ports:audience",
+            "kids": [],
+            "kind": "block",
+            "label": "audience",
+            "marks": [],
+            "parent": "C:machines/reference/ports:1"
+        },
+        {
+            "band": 0,
+            "depth": 4,
+            "id": "B:machines/reference/ports:what-is-flagged",
+            "kids": [],
+            "kind": "group",
+            "label": "What is flagged",
+            "marks": [false, false],
+            "parent": "C:machines/reference/ports:1"
+        },
+        {
+            "band": 0,
+            "depth": 4,
+            "id": "B:machines/reference/ports:p1.1",
+            "kids": [],
+            "kind": "prose",
+            "label": "A row of…",
+            "marks": [],
+            "parent": "C:machines/reference/ports:1"
+        },
+        {
+            "band": 0,
+            "depth": 3,
+            "id": "C:machines/reference/ports:1",
+            "kids": [
+                "B:machines/reference/ports:p1.0",
+                "B:machines/reference/ports:right",
+                "B:machines/reference/ports:audience",
+                "B:machines/reference/ports:what-is-flagged",
+                "B:machines/reference/ports:p1.1"
+            ],
+            "kind": "sec",
+            "label": "Rights and audiences",
+            "marks": [false, false, false, false, false],
+            "parent": "P:machines/reference/ports"
+        },
+        {
+            "band": 0,
+            "depth": 2,
+            "id": "P:machines/decisions/035-a-port-is-a-right-with-an-audience",
+            "kids": [
+                "C:machines/decisions/035-a-port-is-a-right-with-an-audience:0",
+                "C:machines/decisions/035-a-port-is-a-right-with-an-audience:1"
+            ],
+            "kind": "page",
+            "label": "ADR-035",
+            "marks": [false, false],
+            "parent": "S:engineering"
+        },
+        {
+            "band": 0,
+            "depth": 4,
+            "id": "B:machines/decisions/035-a-port-is-a-right-with-an-audience:p0.0",
+            "kids": [],
+            "kind": "prose",
+            "label": "Amends ADR-018. Amended…",
+            "marks": [],
+            "parent": "C:machines/decisions/035-a-port-is-a-right-with-an-audience:0"
+        },
+        {
+            "band": 0,
+            "depth": 3,
+            "id": "C:machines/decisions/035-a-port-is-a-right-with-an-audience:0",
+            "kids": ["B:machines/decisions/035-a-port-is-a-right-with-an-audience:p0.0"],
+            "kind": "sec",
+            "label": "Top",
+            "marks": [false],
+            "parent": "P:machines/decisions/035-a-port-is-a-right-with-an-audience"
+        },
+        {
+            "band": 0,
+            "depth": 4,
+            "id": "B:machines/decisions/035-a-port-is-a-right-with-an-audience:p1.0",
+            "kids": [],
+            "kind": "prose",
+            "label": "A machine's ports…",
+            "marks": [],
+            "parent": "C:machines/decisions/035-a-port-is-a-right-with-an-audience:1"
+        },
+        {
+            "band": 0,
+            "depth": 3,
+            "id": "C:machines/decisions/035-a-port-is-a-right-with-an-audience:1",
+            "kids": ["B:machines/decisions/035-a-port-is-a-right-with-an-audience:p1.0"],
+            "kind": "sec",
+            "label": "Decision",
+            "marks": [false],
+            "parent": "P:machines/decisions/035-a-port-is-a-right-with-an-audience"
+        },
+        {
+            "band": 1,
+            "depth": 1,
+            "id": "S:growth",
+            "kids": ["P:growth/positioning"],
+            "kind": "seat",
+            "label": "Croissance",
+            "marks": [true],
+            "parent": null
+        },
+        {
+            "band": 0,
+            "depth": 2,
+            "id": "P:growth/positioning",
+            "kids": ["C:growth/positioning:1", "C:growth/positioning:2", "C:growth/positioning:3"],
+            "kind": "page",
+            "label": "Positioning",
+            "marks": [false, false, false],
+            "parent": "S:growth"
+        },
+        {
+            "band": 0,
+            "depth": 4,
+            "id": "B:growth/positioning:p1.0",
+            "kids": [],
+            "kind": "prose",
+            "label": "Spwn is not…",
+            "marks": [],
+            "parent": "C:growth/positioning:1"
+        },
+        {
+            "band": 0,
+            "depth": 4,
+            "id": "B:growth/positioning:lead-with-the-thread",
+            "kids": [],
+            "kind": "block",
+            "label": "lead-with-the-thread",
+            "marks": [],
+            "parent": "C:growth/positioning:1"
+        },
+        {
+            "band": 0,
+            "depth": 4,
+            "id": "B:growth/positioning:p1.1",
+            "kids": [],
+            "kind": "prose",
+            "label": "It leads with…",
+            "marks": [],
+            "parent": "C:growth/positioning:1"
+        },
+        {
+            "band": 0,
+            "depth": 3,
+            "id": "C:growth/positioning:1",
+            "kids": [
+                "B:growth/positioning:p1.0",
+                "B:growth/positioning:lead-with-the-thread",
+                "B:growth/positioning:p1.1"
+            ],
+            "kind": "sec",
+            "label": "The category it refuses",
+            "marks": [false, false, false],
+            "parent": "P:growth/positioning"
+        },
+        {
+            "band": 0,
+            "depth": 4,
+            "id": "B:growth/positioning:alternatives",
+            "kids": [],
+            "kind": "group",
+            "label": "What a person uses today",
+            "marks": [false, false, false, false],
+            "parent": "C:growth/positioning:2"
+        },
+        {
+            "band": 0,
+            "depth": 4,
+            "id": "B:growth/positioning:two-costs",
+            "kids": [],
+            "kind": "block",
+            "label": "two-costs",
+            "marks": [],
+            "parent": "C:growth/positioning:2"
+        },
+        {
+            "band": 0,
+            "depth": 4,
+            "id": "B:growth/positioning:all",
+            "kids": [],
+            "kind": "block",
+            "label": "all",
+            "marks": [],
+            "parent": "C:growth/positioning:2"
+        },
+        {
+            "band": 0,
+            "depth": 4,
+            "id": "B:growth/positioning:p2.0",
+            "kids": [],
+            "kind": "prose",
+            "label": "Each costs either…",
+            "marks": [],
+            "parent": "C:growth/positioning:2"
+        },
+        {
+            "band": 0,
+            "depth": 3,
+            "id": "C:growth/positioning:2",
+            "kids": [
+                "B:growth/positioning:alternatives",
+                "B:growth/positioning:two-costs",
+                "B:growth/positioning:all",
+                "B:growth/positioning:p2.0"
+            ],
+            "kind": "sec",
+            "label": "The alternatives",
+            "marks": [false, false, false, false],
+            "parent": "P:growth/positioning"
+        },
+        {
+            "band": 0,
+            "depth": 4,
+            "id": "B:growth/positioning:p3.0",
+            "kids": [],
+            "kind": "prose",
+            "label": "What is not…",
+            "marks": [],
+            "parent": "C:growth/positioning:3"
+        },
+        {
+            "band": 0,
+            "depth": 3,
+            "id": "C:growth/positioning:3",
+            "kids": ["B:growth/positioning:p3.0"],
+            "kind": "sec",
+            "label": "Rests on",
+            "marks": [false],
+            "parent": "P:growth/positioning"
+        }
+    ],
+    "roots": ["S:blueprint", "S:product", "S:engineering", "S:growth"],
+    "widths": {
+        "Vision": 38,
+        "Philosophy": 70,
+        "all": 15,
+        "who-carries": 73,
+        "Each conviction is…": 118,
+        "Top": 22,
+        "taste": 31,
+        "Argument. What an…": 125,
+        "1. You bring the taste. The stack brings the hands": 297,
+        "delegating": 64,
+        "Example. At the…": 103,
+        "2. Delegating is a craft, not a prompt": 219,
+        "rules-in-the-world": 113,
+        "Example. An agent…": 122,
+        "3. Rules live in the world, not in the agent": 251,
+        "declared": 52,
+        "Example. qa.machine.yaml gives…": 204,
+        "4. Declared, never improvised": 177,
+        "proven": 42,
+        "Example. A request…": 125,
+        "5. Done means proven": 135,
+        "taste-is-a-system": 108,
+        "Example. The site's…": 123,
+        "6. Taste is a system": 117,
+        "learns": 38,
+        "Example. A correction…": 141,
+        "7. The stack learns. You don't repeat yourself": 268,
+        "Produit": 45,
+        "Boundaries": 70,
+        "one-stack": 62,
+        "not-a-replacement": 114,
+        "not-vibe-coding": 98,
+        "not-a-cloud-service": 121,
+        "not-one-vendor": 97,
+        "not-a-method": 86,
+        "Each line is…": 76,
+        "What Spwn is not": 108,
+        "What Machines refuses": 142,
+        "machines": 59,
+        "no-model": 60,
+        "no-security-in-instructions": 165,
+        "no-computer": 81,
+        "wiki-decides-nothing": 129,
+        "os-holds-no-facts": 112,
+        "The rows of…": 78,
+        "What each app refuses": 138,
+        "Two rows are…": 87,
+        "Rests on": 54,
+        "The stack": 59,
+        "The layers of…": 84,
+        "The parts and what you keep": 173,
+        "The column \"you…": 111,
+        "The three spaces": 102,
+        "A space leans…": 92,
+        "How the spaces stack": 134,
+        "One claim here…": 98,
+        "ADR-002": 58,
+        "An agent leaves…": 105,
+        "Six apps, in…": 77,
+        "Decision": 52,
+        "Technique": 62,
+        "Ports": 33,
+        "A VM's rights…": 89,
+        "right": 29,
+        "audience": 55,
+        "What is flagged": 95,
+        "A row of…": 58,
+        "Rights and audiences": 131,
+        "ADR-035": 57,
+        "Amends ADR-018. Amended…": 181,
+        "A machine's ports…": 116,
+        "Croissance": 67,
+        "Positioning": 70,
+        "Spwn is not…": 81,
+        "lead-with-the-thread": 127,
+        "It leads with…": 83,
+        "The category it refuses": 137,
+        "What a person uses today": 157,
+        "two-costs": 63,
+        "Each costs either…": 112,
+        "The alternatives": 95,
+        "What is not…": 77
+    }
+}

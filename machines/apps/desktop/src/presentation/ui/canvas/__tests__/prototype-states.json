@@ -1,0 +1,3539 @@
+{
+    "narrow": [
+        {
+            "id": null,
+            "box": { "x": 0, "y": 0, "w": 1240, "h": 644 },
+            "clamps": [
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": -260, "y": -24, "atBottom": true, "atTop": false },
+                    "to": { "x": -5000, "y": -5000 }
+                },
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 120, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": 5000, "y": 5000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": -260, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": -3000, "y": 3000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": 40, "y": -24, "atBottom": true, "atTop": false },
+                    "to": { "x": 40, "y": -30 }
+                }
+            ],
+            "guides": [
+                { "band": 0, "w": 1240, "x": 0, "y": -20 },
+                { "band": 1, "w": 1240, "x": 0, "y": 212 },
+                { "band": 3, "w": 1240, "x": 0, "y": 444 }
+            ],
+            "rects": {
+                "P:blueprint/philosophy": { "face": "card", "h": 118, "w": 248, "x": 148, "y": 46 },
+                "S:blueprint": { "face": "region", "h": 180, "w": 280, "x": 132, "y": 0 },
+                "P:product/boundaries": { "face": "card", "h": 118, "w": 248, "x": 148, "y": 278 },
+                "P:product/stack": { "face": "card", "h": 118, "w": 248, "x": 408, "y": 278 },
+                "P:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder": {
+                    "face": "card",
+                    "h": 118,
+                    "w": 248,
+                    "x": 668,
+                    "y": 278
+                },
+                "S:product": { "face": "region", "h": 180, "w": 800, "x": 132, "y": 232 },
+                "P:growth/positioning": { "face": "card", "h": 118, "w": 248, "x": 976, "y": 278 },
+                "S:growth": { "face": "region", "h": 180, "w": 280, "x": 960, "y": 232 },
+                "P:machines/reference/ports": {
+                    "face": "card",
+                    "h": 118,
+                    "w": 248,
+                    "x": 148,
+                    "y": 510
+                },
+                "P:machines/decisions/035-a-port-is-a-right-with-an-audience": {
+                    "face": "card",
+                    "h": 118,
+                    "w": 248,
+                    "x": 408,
+                    "y": 510
+                },
+                "S:engineering": { "face": "region", "h": 180, "w": 540, "x": 132, "y": 464 }
+            },
+            "sel": [],
+            "target": { "x": 48, "y": 48 },
+            "viewport": { "height": 740, "width": 1100 }
+        },
+        {
+            "id": "S:blueprint",
+            "box": { "x": 0, "y": 0, "w": 432, "h": 320 },
+            "clamps": [
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 0, "y": 0, "atBottom": true, "atTop": false },
+                    "to": { "x": -5000, "y": -5000 }
+                },
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 120, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": 5000, "y": 5000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": -200, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": -3000, "y": 3000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": 40, "y": 100, "atBottom": true, "atTop": false },
+                    "to": { "x": 40, "y": -30 }
+                }
+            ],
+            "guides": [
+                { "band": 0, "w": 432, "x": 0, "y": -20 },
+                { "band": 1, "w": 432, "x": 0, "y": 200 },
+                { "band": 3, "w": 432, "x": 0, "y": 270 }
+            ],
+            "rects": {
+                "P:blueprint/philosophy": { "face": "card", "h": 118, "w": 248, "x": 148, "y": 46 },
+                "S:blueprint": { "face": "open", "h": 180, "w": 300, "x": 132, "y": 0 },
+                "S:product": { "face": "pill", "h": 30, "w": 123, "x": 132, "y": 220 },
+                "S:growth": { "face": "pill", "h": 30, "w": 129, "x": 283, "y": 220 },
+                "S:engineering": { "face": "pill", "h": 30, "w": 132, "x": 132, "y": 290 }
+            },
+            "sel": ["S:blueprint"],
+            "target": { "x": 268, "y": 280 },
+            "viewport": { "height": 740, "width": 1100 }
+        },
+        {
+            "id": "P:blueprint/philosophy",
+            "box": { "x": 0, "y": 0, "w": 1112, "h": 664 },
+            "clamps": [
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": -132, "y": -44, "atBottom": true, "atTop": false },
+                    "to": { "x": -5000, "y": -5000 }
+                },
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 120, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": 5000, "y": 5000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": -200, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": -3000, "y": 3000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": 40, "y": -30, "atBottom": false, "atTop": false },
+                    "to": { "x": 40, "y": -30 }
+                }
+            ],
+            "guides": [
+                { "band": 0, "w": 1112, "x": 0, "y": -20 },
+                { "band": 1, "w": 1112, "x": 0, "y": 550 },
+                { "band": 3, "w": 1112, "x": 0, "y": 620 }
+            ],
+            "rects": {
+                "C:blueprint/philosophy:0": {
+                    "face": "card",
+                    "h": 116,
+                    "w": 236,
+                    "x": 164,
+                    "y": 126
+                },
+                "C:blueprint/philosophy:1": {
+                    "face": "card",
+                    "h": 116,
+                    "w": 236,
+                    "x": 412,
+                    "y": 126
+                },
+                "C:blueprint/philosophy:2": {
+                    "face": "card",
+                    "h": 116,
+                    "w": 236,
+                    "x": 660,
+                    "y": 126
+                },
+                "C:blueprint/philosophy:3": {
+                    "face": "card",
+                    "h": 116,
+                    "w": 236,
+                    "x": 164,
+                    "y": 254
+                },
+                "C:blueprint/philosophy:4": {
+                    "face": "card",
+                    "h": 116,
+                    "w": 236,
+                    "x": 412,
+                    "y": 254
+                },
+                "C:blueprint/philosophy:5": {
+                    "face": "card",
+                    "h": 116,
+                    "w": 236,
+                    "x": 660,
+                    "y": 254
+                },
+                "C:blueprint/philosophy:6": {
+                    "face": "card",
+                    "h": 116,
+                    "w": 236,
+                    "x": 164,
+                    "y": 382
+                },
+                "C:blueprint/philosophy:7": {
+                    "face": "card",
+                    "h": 116,
+                    "w": 236,
+                    "x": 412,
+                    "y": 382
+                },
+                "P:blueprint/philosophy": { "face": "open", "h": 468, "w": 764, "x": 148, "y": 46 },
+                "S:blueprint": { "face": "open", "h": 530, "w": 980, "x": 132, "y": 0 },
+                "S:product": { "face": "dot", "h": 24, "w": 60, "x": 132, "y": 570 },
+                "S:growth": { "face": "dot", "h": 24, "w": 44, "x": 220, "y": 570 },
+                "S:engineering": { "face": "dot", "h": 24, "w": 52, "x": 132, "y": 640 }
+            },
+            "sel": ["S:blueprint", "P:blueprint/philosophy"],
+            "target": { "x": -72, "y": 105 },
+            "viewport": { "height": 740, "width": 1100 }
+        },
+        {
+            "id": "S:product",
+            "box": { "x": 0, "y": 0, "w": 1089, "h": 320 },
+            "clamps": [
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": -109, "y": 0, "atBottom": true, "atTop": false },
+                    "to": { "x": -5000, "y": -5000 }
+                },
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 120, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": 5000, "y": 5000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": -200, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": -3000, "y": 3000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": 40, "y": 100, "atBottom": true, "atTop": false },
+                    "to": { "x": 40, "y": -30 }
+                }
+            ],
+            "guides": [
+                { "band": 0, "w": 1089, "x": 0, "y": -20 },
+                { "band": 1, "w": 1089, "x": 0, "y": 50 },
+                { "band": 3, "w": 1089, "x": 0, "y": 270 }
+            ],
+            "rects": {
+                "S:blueprint": { "face": "pill", "h": 30, "w": 100, "x": 132, "y": 0 },
+                "P:product/boundaries": { "face": "card", "h": 118, "w": 248, "x": 148, "y": 116 },
+                "P:product/stack": { "face": "card", "h": 118, "w": 248, "x": 408, "y": 116 },
+                "P:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder": {
+                    "face": "card",
+                    "h": 118,
+                    "w": 248,
+                    "x": 668,
+                    "y": 116
+                },
+                "S:product": { "face": "open", "h": 180, "w": 800, "x": 132, "y": 70 },
+                "S:growth": { "face": "pill", "h": 30, "w": 129, "x": 960, "y": 70 },
+                "S:engineering": { "face": "pill", "h": 30, "w": 132, "x": 132, "y": 290 }
+            },
+            "sel": ["S:product"],
+            "target": { "x": 18, "y": 210 },
+            "viewport": { "height": 740, "width": 1100 }
+        },
+        {
+            "id": "P:product/boundaries",
+            "box": { "x": 0, "y": 0, "w": 1184, "h": 580 },
+            "clamps": [
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": -204, "y": 0, "atBottom": true, "atTop": false },
+                    "to": { "x": -5000, "y": -5000 }
+                },
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 120, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": 5000, "y": 5000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": -204, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": -3000, "y": 3000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": 40, "y": 40, "atBottom": true, "atTop": false },
+                    "to": { "x": 40, "y": -30 }
+                }
+            ],
+            "guides": [
+                { "band": 0, "w": 1184, "x": 0, "y": -20 },
+                { "band": 1, "w": 1184, "x": 0, "y": 50 },
+                { "band": 3, "w": 1184, "x": 0, "y": 536 }
+            ],
+            "rects": {
+                "S:blueprint": { "face": "dot", "h": 24, "w": 44, "x": 132, "y": 0 },
+                "P:product/stack": { "face": "pill", "h": 30, "w": 137, "x": 148, "y": 116 },
+                "P:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 128,
+                    "x": 293,
+                    "y": 116
+                },
+                "C:product/boundaries:0": {
+                    "face": "card",
+                    "h": 116,
+                    "w": 236,
+                    "x": 164,
+                    "y": 240
+                },
+                "C:product/boundaries:1": {
+                    "face": "card",
+                    "h": 116,
+                    "w": 236,
+                    "x": 412,
+                    "y": 240
+                },
+                "C:product/boundaries:2": {
+                    "face": "card",
+                    "h": 116,
+                    "w": 236,
+                    "x": 660,
+                    "y": 240
+                },
+                "C:product/boundaries:3": {
+                    "face": "card",
+                    "h": 116,
+                    "w": 236,
+                    "x": 164,
+                    "y": 368
+                },
+                "P:product/boundaries": { "face": "open", "h": 340, "w": 764, "x": 148, "y": 160 },
+                "S:product": { "face": "open", "h": 446, "w": 980, "x": 132, "y": 70 },
+                "S:growth": { "face": "dot", "h": 24, "w": 44, "x": 1140, "y": 70 },
+                "S:engineering": { "face": "dot", "h": 24, "w": 52, "x": 132, "y": 556 }
+            },
+            "sel": ["S:product", "P:product/boundaries"],
+            "target": { "x": -72, "y": 77 },
+            "viewport": { "height": 740, "width": 1100 }
+        },
+        {
+            "id": "P:product/stack",
+            "box": { "x": 0, "y": 0, "w": 1184, "h": 452 },
+            "clamps": [
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": -204, "y": 0, "atBottom": true, "atTop": false },
+                    "to": { "x": -5000, "y": -5000 }
+                },
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 120, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": 5000, "y": 5000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": -204, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": -3000, "y": 3000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": 40, "y": 100, "atBottom": true, "atTop": false },
+                    "to": { "x": 40, "y": -30 }
+                }
+            ],
+            "guides": [
+                { "band": 0, "w": 1184, "x": 0, "y": -20 },
+                { "band": 1, "w": 1184, "x": 0, "y": 50 },
+                { "band": 3, "w": 1184, "x": 0, "y": 408 }
+            ],
+            "rects": {
+                "S:blueprint": { "face": "dot", "h": 24, "w": 44, "x": 132, "y": 0 },
+                "P:product/boundaries": { "face": "pill", "h": 30, "w": 156, "x": 148, "y": 116 },
+                "P:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 128,
+                    "x": 312,
+                    "y": 116
+                },
+                "C:product/stack:1": { "face": "card", "h": 116, "w": 236, "x": 164, "y": 240 },
+                "C:product/stack:2": { "face": "card", "h": 116, "w": 236, "x": 412, "y": 240 },
+                "C:product/stack:3": { "face": "card", "h": 116, "w": 236, "x": 660, "y": 240 },
+                "P:product/stack": { "face": "open", "h": 212, "w": 764, "x": 148, "y": 160 },
+                "S:product": { "face": "open", "h": 318, "w": 980, "x": 132, "y": 70 },
+                "S:growth": { "face": "dot", "h": 24, "w": 44, "x": 1140, "y": 70 },
+                "S:engineering": { "face": "dot", "h": 24, "w": 52, "x": 132, "y": 428 }
+            },
+            "sel": ["S:product", "P:product/stack"],
+            "target": { "x": -72, "y": 141 },
+            "viewport": { "height": 740, "width": 1100 }
+        },
+        {
+            "id": "P:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder",
+            "box": { "x": 0, "y": 0, "w": 1184, "h": 452 },
+            "clamps": [
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": -204, "y": 0, "atBottom": true, "atTop": false },
+                    "to": { "x": -5000, "y": -5000 }
+                },
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 120, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": 5000, "y": 5000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": -204, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": -3000, "y": 3000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": 40, "y": 100, "atBottom": true, "atTop": false },
+                    "to": { "x": 40, "y": -30 }
+                }
+            ],
+            "guides": [
+                { "band": 0, "w": 1184, "x": 0, "y": -20 },
+                { "band": 1, "w": 1184, "x": 0, "y": 50 },
+                { "band": 3, "w": 1184, "x": 0, "y": 408 }
+            ],
+            "rects": {
+                "S:blueprint": { "face": "dot", "h": 24, "w": 44, "x": 132, "y": 0 },
+                "P:product/boundaries": { "face": "pill", "h": 30, "w": 156, "x": 148, "y": 116 },
+                "P:product/stack": { "face": "pill", "h": 30, "w": 137, "x": 312, "y": 116 },
+                "C:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder:0": {
+                    "face": "card",
+                    "h": 116,
+                    "w": 236,
+                    "x": 164,
+                    "y": 240
+                },
+                "C:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder:1": {
+                    "face": "card",
+                    "h": 116,
+                    "w": 236,
+                    "x": 412,
+                    "y": 240
+                },
+                "P:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder": {
+                    "face": "open",
+                    "h": 212,
+                    "w": 560,
+                    "x": 148,
+                    "y": 160
+                },
+                "S:product": { "face": "open", "h": 318, "w": 980, "x": 132, "y": 70 },
+                "S:growth": { "face": "dot", "h": 24, "w": 44, "x": 1140, "y": 70 },
+                "S:engineering": { "face": "dot", "h": 24, "w": 52, "x": 132, "y": 428 }
+            },
+            "sel": [
+                "S:product",
+                "P:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder"
+            ],
+            "target": { "x": -72, "y": 141 },
+            "viewport": { "height": 740, "width": 1100 }
+        },
+        {
+            "id": "S:engineering",
+            "box": { "x": 0, "y": 0, "w": 672, "h": 320 },
+            "clamps": [
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 0, "y": 0, "atBottom": true, "atTop": false },
+                    "to": { "x": -5000, "y": -5000 }
+                },
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 120, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": 5000, "y": 5000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": -200, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": -3000, "y": 3000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": 40, "y": 100, "atBottom": true, "atTop": false },
+                    "to": { "x": 40, "y": -30 }
+                }
+            ],
+            "guides": [
+                { "band": 0, "w": 672, "x": 0, "y": -20 },
+                { "band": 1, "w": 672, "x": 0, "y": 50 },
+                { "band": 3, "w": 672, "x": 0, "y": 120 }
+            ],
+            "rects": {
+                "S:blueprint": { "face": "pill", "h": 30, "w": 100, "x": 132, "y": 0 },
+                "S:product": { "face": "pill", "h": 30, "w": 123, "x": 132, "y": 70 },
+                "S:growth": { "face": "pill", "h": 30, "w": 129, "x": 283, "y": 70 },
+                "P:machines/reference/ports": {
+                    "face": "card",
+                    "h": 118,
+                    "w": 248,
+                    "x": 148,
+                    "y": 186
+                },
+                "P:machines/decisions/035-a-port-is-a-right-with-an-audience": {
+                    "face": "card",
+                    "h": 118,
+                    "w": 248,
+                    "x": 408,
+                    "y": 186
+                },
+                "S:engineering": { "face": "open", "h": 180, "w": 540, "x": 132, "y": 140 }
+            },
+            "sel": ["S:engineering"],
+            "target": { "x": 148, "y": 140 },
+            "viewport": { "height": 740, "width": 1100 }
+        },
+        {
+            "id": "P:machines/reference/ports",
+            "box": { "x": 0, "y": 0, "w": 1112, "h": 458 },
+            "clamps": [
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": -132, "y": 0, "atBottom": true, "atTop": false },
+                    "to": { "x": -5000, "y": -5000 }
+                },
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 120, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": 5000, "y": 5000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": -200, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": -3000, "y": 3000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": 40, "y": 100, "atBottom": true, "atTop": false },
+                    "to": { "x": 40, "y": -30 }
+                }
+            ],
+            "guides": [
+                { "band": 0, "w": 1112, "x": 0, "y": -20 },
+                { "band": 1, "w": 1112, "x": 0, "y": 50 },
+                { "band": 3, "w": 1112, "x": 0, "y": 120 }
+            ],
+            "rects": {
+                "S:blueprint": { "face": "dot", "h": 24, "w": 44, "x": 132, "y": 0 },
+                "S:product": { "face": "dot", "h": 24, "w": 60, "x": 132, "y": 70 },
+                "S:growth": { "face": "dot", "h": 24, "w": 44, "x": 220, "y": 70 },
+                "P:machines/decisions/035-a-port-is-a-right-with-an-audience": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 127,
+                    "x": 148,
+                    "y": 186
+                },
+                "C:machines/reference/ports:1": {
+                    "face": "card",
+                    "h": 116,
+                    "w": 236,
+                    "x": 164,
+                    "y": 310
+                },
+                "P:machines/reference/ports": {
+                    "face": "open",
+                    "h": 212,
+                    "w": 560,
+                    "x": 148,
+                    "y": 230
+                },
+                "S:engineering": { "face": "open", "h": 318, "w": 980, "x": 132, "y": 140 }
+            },
+            "sel": ["S:engineering", "P:machines/reference/ports"],
+            "target": { "x": -72, "y": 71 },
+            "viewport": { "height": 740, "width": 1100 }
+        },
+        {
+            "id": "P:machines/decisions/035-a-port-is-a-right-with-an-audience",
+            "box": { "x": 0, "y": 0, "w": 1112, "h": 458 },
+            "clamps": [
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": -132, "y": 0, "atBottom": true, "atTop": false },
+                    "to": { "x": -5000, "y": -5000 }
+                },
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 120, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": 5000, "y": 5000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": -200, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": -3000, "y": 3000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": 40, "y": 100, "atBottom": true, "atTop": false },
+                    "to": { "x": 40, "y": -30 }
+                }
+            ],
+            "guides": [
+                { "band": 0, "w": 1112, "x": 0, "y": -20 },
+                { "band": 1, "w": 1112, "x": 0, "y": 50 },
+                { "band": 3, "w": 1112, "x": 0, "y": 120 }
+            ],
+            "rects": {
+                "S:blueprint": { "face": "dot", "h": 24, "w": 44, "x": 132, "y": 0 },
+                "S:product": { "face": "dot", "h": 24, "w": 60, "x": 132, "y": 70 },
+                "S:growth": { "face": "dot", "h": 24, "w": 44, "x": 220, "y": 70 },
+                "P:machines/reference/ports": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 95,
+                    "x": 148,
+                    "y": 186
+                },
+                "C:machines/decisions/035-a-port-is-a-right-with-an-audience:0": {
+                    "face": "card",
+                    "h": 116,
+                    "w": 236,
+                    "x": 164,
+                    "y": 310
+                },
+                "C:machines/decisions/035-a-port-is-a-right-with-an-audience:1": {
+                    "face": "card",
+                    "h": 116,
+                    "w": 236,
+                    "x": 412,
+                    "y": 310
+                },
+                "P:machines/decisions/035-a-port-is-a-right-with-an-audience": {
+                    "face": "open",
+                    "h": 212,
+                    "w": 560,
+                    "x": 148,
+                    "y": 230
+                },
+                "S:engineering": { "face": "open", "h": 318, "w": 980, "x": 132, "y": 140 }
+            },
+            "sel": ["S:engineering", "P:machines/decisions/035-a-port-is-a-right-with-an-audience"],
+            "target": { "x": -72, "y": 71 },
+            "viewport": { "height": 740, "width": 1100 }
+        },
+        {
+            "id": "S:growth",
+            "box": { "x": 0, "y": 0, "w": 583, "h": 320 },
+            "clamps": [
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 0, "y": 0, "atBottom": true, "atTop": false },
+                    "to": { "x": -5000, "y": -5000 }
+                },
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 120, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": 5000, "y": 5000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": -200, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": -3000, "y": 3000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": 40, "y": 100, "atBottom": true, "atTop": false },
+                    "to": { "x": 40, "y": -30 }
+                }
+            ],
+            "guides": [
+                { "band": 0, "w": 583, "x": 0, "y": -20 },
+                { "band": 1, "w": 583, "x": 0, "y": 50 },
+                { "band": 3, "w": 583, "x": 0, "y": 270 }
+            ],
+            "rects": {
+                "S:blueprint": { "face": "pill", "h": 30, "w": 100, "x": 132, "y": 0 },
+                "S:product": { "face": "pill", "h": 30, "w": 123, "x": 132, "y": 70 },
+                "P:growth/positioning": { "face": "card", "h": 118, "w": 248, "x": 299, "y": 116 },
+                "S:growth": { "face": "open", "h": 180, "w": 300, "x": 283, "y": 70 },
+                "S:engineering": { "face": "pill", "h": 30, "w": 132, "x": 132, "y": 290 }
+            },
+            "sel": ["S:growth"],
+            "target": { "x": 117, "y": 210 },
+            "viewport": { "height": 740, "width": 1100 }
+        },
+        {
+            "id": "P:growth/positioning",
+            "box": { "x": 0, "y": 0, "w": 1200, "h": 408 },
+            "clamps": [
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": -220, "y": 0, "atBottom": true, "atTop": false },
+                    "to": { "x": -5000, "y": -5000 }
+                },
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 120, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": 5000, "y": 5000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": -220, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": -3000, "y": 3000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": 40, "y": 100, "atBottom": true, "atTop": false },
+                    "to": { "x": 40, "y": -30 }
+                }
+            ],
+            "guides": [
+                { "band": 0, "w": 1200, "x": 0, "y": -20 },
+                { "band": 1, "w": 1200, "x": 0, "y": 50 },
+                { "band": 3, "w": 1200, "x": 0, "y": 364 }
+            ],
+            "rects": {
+                "S:blueprint": { "face": "dot", "h": 24, "w": 44, "x": 132, "y": 0 },
+                "S:product": { "face": "dot", "h": 24, "w": 60, "x": 132, "y": 70 },
+                "C:growth/positioning:1": {
+                    "face": "card",
+                    "h": 116,
+                    "w": 236,
+                    "x": 252,
+                    "y": 196
+                },
+                "C:growth/positioning:2": {
+                    "face": "card",
+                    "h": 116,
+                    "w": 236,
+                    "x": 500,
+                    "y": 196
+                },
+                "C:growth/positioning:3": {
+                    "face": "card",
+                    "h": 116,
+                    "w": 236,
+                    "x": 748,
+                    "y": 196
+                },
+                "P:growth/positioning": { "face": "open", "h": 212, "w": 764, "x": 236, "y": 116 },
+                "S:growth": { "face": "open", "h": 274, "w": 980, "x": 220, "y": 70 },
+                "S:engineering": { "face": "dot", "h": 24, "w": 52, "x": 132, "y": 384 }
+            },
+            "sel": ["S:growth", "P:growth/positioning"],
+            "target": { "x": -160, "y": 163 },
+            "viewport": { "height": 740, "width": 1100 }
+        }
+    ],
+    "wide": [
+        {
+            "id": null,
+            "box": { "x": 0, "y": 0, "w": 1240, "h": 644 },
+            "clamps": [
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 0, "y": -24, "atBottom": true, "atTop": false },
+                    "to": { "x": -5000, "y": -5000 }
+                },
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 120, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": 5000, "y": 5000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": -200, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": -3000, "y": 3000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": 40, "y": -24, "atBottom": true, "atTop": false },
+                    "to": { "x": 40, "y": -30 }
+                }
+            ],
+            "guides": [
+                { "band": 0, "w": 1240, "x": 0, "y": -20 },
+                { "band": 1, "w": 1240, "x": 0, "y": 212 },
+                { "band": 3, "w": 1240, "x": 0, "y": 444 }
+            ],
+            "rects": {
+                "P:blueprint/philosophy": { "face": "card", "h": 118, "w": 248, "x": 148, "y": 46 },
+                "S:blueprint": { "face": "region", "h": 180, "w": 280, "x": 132, "y": 0 },
+                "P:product/boundaries": { "face": "card", "h": 118, "w": 248, "x": 148, "y": 278 },
+                "P:product/stack": { "face": "card", "h": 118, "w": 248, "x": 408, "y": 278 },
+                "P:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder": {
+                    "face": "card",
+                    "h": 118,
+                    "w": 248,
+                    "x": 668,
+                    "y": 278
+                },
+                "S:product": { "face": "region", "h": 180, "w": 800, "x": 132, "y": 232 },
+                "P:growth/positioning": { "face": "card", "h": 118, "w": 248, "x": 976, "y": 278 },
+                "S:growth": { "face": "region", "h": 180, "w": 280, "x": 960, "y": 232 },
+                "P:machines/reference/ports": {
+                    "face": "card",
+                    "h": 118,
+                    "w": 248,
+                    "x": 148,
+                    "y": 510
+                },
+                "P:machines/decisions/035-a-port-is-a-right-with-an-audience": {
+                    "face": "card",
+                    "h": 118,
+                    "w": 248,
+                    "x": 408,
+                    "y": 510
+                },
+                "S:engineering": { "face": "region", "h": 180, "w": 540, "x": 132, "y": 464 }
+            },
+            "sel": [],
+            "target": { "x": 100, "y": 48 },
+            "viewport": { "height": 740, "width": 1440 }
+        },
+        {
+            "id": "S:blueprint",
+            "box": { "x": 0, "y": 0, "w": 432, "h": 320 },
+            "clamps": [
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 0, "y": 0, "atBottom": true, "atTop": false },
+                    "to": { "x": -5000, "y": -5000 }
+                },
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 120, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": 5000, "y": 5000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": -200, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": -3000, "y": 3000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": 40, "y": 100, "atBottom": true, "atTop": false },
+                    "to": { "x": 40, "y": -30 }
+                }
+            ],
+            "guides": [
+                { "band": 0, "w": 432, "x": 0, "y": -20 },
+                { "band": 1, "w": 432, "x": 0, "y": 200 },
+                { "band": 3, "w": 432, "x": 0, "y": 270 }
+            ],
+            "rects": {
+                "P:blueprint/philosophy": { "face": "card", "h": 118, "w": 248, "x": 148, "y": 46 },
+                "S:blueprint": { "face": "open", "h": 180, "w": 300, "x": 132, "y": 0 },
+                "S:product": { "face": "pill", "h": 30, "w": 123, "x": 132, "y": 220 },
+                "S:growth": { "face": "pill", "h": 30, "w": 129, "x": 283, "y": 220 },
+                "S:engineering": { "face": "pill", "h": 30, "w": 132, "x": 132, "y": 290 }
+            },
+            "sel": ["S:blueprint"],
+            "target": { "x": 438, "y": 280 },
+            "viewport": { "height": 740, "width": 1440 }
+        },
+        {
+            "id": "P:blueprint/philosophy",
+            "box": { "x": 0, "y": 0, "w": 1232, "h": 536 },
+            "clamps": [
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 0, "y": 0, "atBottom": true, "atTop": false },
+                    "to": { "x": -5000, "y": -5000 }
+                },
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 120, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": 5000, "y": 5000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": -200, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": -3000, "y": 3000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": 40, "y": 84, "atBottom": true, "atTop": false },
+                    "to": { "x": 40, "y": -30 }
+                }
+            ],
+            "guides": [
+                { "band": 0, "w": 1232, "x": 0, "y": -20 },
+                { "band": 1, "w": 1232, "x": 0, "y": 422 },
+                { "band": 3, "w": 1232, "x": 0, "y": 492 }
+            ],
+            "rects": {
+                "C:blueprint/philosophy:0": {
+                    "face": "card",
+                    "h": 116,
+                    "w": 236,
+                    "x": 164,
+                    "y": 126
+                },
+                "C:blueprint/philosophy:1": {
+                    "face": "card",
+                    "h": 116,
+                    "w": 236,
+                    "x": 412,
+                    "y": 126
+                },
+                "C:blueprint/philosophy:2": {
+                    "face": "card",
+                    "h": 116,
+                    "w": 236,
+                    "x": 660,
+                    "y": 126
+                },
+                "C:blueprint/philosophy:3": {
+                    "face": "card",
+                    "h": 116,
+                    "w": 236,
+                    "x": 908,
+                    "y": 126
+                },
+                "C:blueprint/philosophy:4": {
+                    "face": "card",
+                    "h": 116,
+                    "w": 236,
+                    "x": 164,
+                    "y": 254
+                },
+                "C:blueprint/philosophy:5": {
+                    "face": "card",
+                    "h": 116,
+                    "w": 236,
+                    "x": 412,
+                    "y": 254
+                },
+                "C:blueprint/philosophy:6": {
+                    "face": "card",
+                    "h": 116,
+                    "w": 236,
+                    "x": 660,
+                    "y": 254
+                },
+                "C:blueprint/philosophy:7": {
+                    "face": "card",
+                    "h": 116,
+                    "w": 236,
+                    "x": 908,
+                    "y": 254
+                },
+                "P:blueprint/philosophy": {
+                    "face": "open",
+                    "h": 340,
+                    "w": 1012,
+                    "x": 148,
+                    "y": 46
+                },
+                "S:blueprint": { "face": "open", "h": 402, "w": 1100, "x": 132, "y": 0 },
+                "S:product": { "face": "dot", "h": 24, "w": 60, "x": 132, "y": 442 },
+                "S:growth": { "face": "dot", "h": 24, "w": 44, "x": 220, "y": 442 },
+                "S:engineering": { "face": "dot", "h": 24, "w": 52, "x": 132, "y": 512 }
+            },
+            "sel": ["S:blueprint", "P:blueprint/philosophy"],
+            "target": { "x": 38, "y": 169 },
+            "viewport": { "height": 740, "width": 1440 }
+        },
+        {
+            "id": "C:blueprint/philosophy:0",
+            "box": { "x": 0, "y": 0, "w": 1232, "h": 544 },
+            "clamps": [
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 0, "y": 0, "atBottom": true, "atTop": false },
+                    "to": { "x": -5000, "y": -5000 }
+                },
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 120, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": 5000, "y": 5000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": -200, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": -3000, "y": 3000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": 40, "y": 76, "atBottom": true, "atTop": false },
+                    "to": { "x": 40, "y": -30 }
+                }
+            ],
+            "guides": [
+                { "band": 0, "w": 1232, "x": 0, "y": -20 },
+                { "band": 1, "w": 1232, "x": 0, "y": 430 },
+                { "band": 3, "w": 1232, "x": 0, "y": 500 }
+            ],
+            "rects": {
+                "C:blueprint/philosophy:1": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 260,
+                    "x": 164,
+                    "y": 126
+                },
+                "C:blueprint/philosophy:2": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 260,
+                    "x": 432,
+                    "y": 126
+                },
+                "C:blueprint/philosophy:3": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 260,
+                    "x": 700,
+                    "y": 126
+                },
+                "C:blueprint/philosophy:4": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 247,
+                    "x": 164,
+                    "y": 164
+                },
+                "C:blueprint/philosophy:5": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 205,
+                    "x": 419,
+                    "y": 164
+                },
+                "C:blueprint/philosophy:6": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 187,
+                    "x": 632,
+                    "y": 164
+                },
+                "C:blueprint/philosophy:7": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 260,
+                    "x": 827,
+                    "y": 164
+                },
+                "B:blueprint/philosophy:all": {
+                    "face": "card",
+                    "h": 108,
+                    "w": 222,
+                    "x": 180,
+                    "y": 254
+                },
+                "B:blueprint/philosophy:who-carries": {
+                    "face": "card",
+                    "h": 108,
+                    "w": 222,
+                    "x": 414,
+                    "y": 254
+                },
+                "B:blueprint/philosophy:p0.0": {
+                    "face": "card",
+                    "h": 108,
+                    "w": 222,
+                    "x": 648,
+                    "y": 254
+                },
+                "C:blueprint/philosophy:0": {
+                    "face": "open",
+                    "h": 170,
+                    "w": 722,
+                    "x": 164,
+                    "y": 208
+                },
+                "P:blueprint/philosophy": {
+                    "face": "open",
+                    "h": 348,
+                    "w": 1068,
+                    "x": 148,
+                    "y": 46
+                },
+                "S:blueprint": { "face": "open", "h": 410, "w": 1100, "x": 132, "y": 0 },
+                "S:product": { "face": "dot", "h": 24, "w": 60, "x": 132, "y": 450 },
+                "S:growth": { "face": "dot", "h": 24, "w": 44, "x": 220, "y": 450 },
+                "S:engineering": { "face": "dot", "h": 24, "w": 52, "x": 132, "y": 520 }
+            },
+            "sel": ["S:blueprint", "P:blueprint/philosophy", "C:blueprint/philosophy:0"],
+            "target": { "x": 38, "y": 150 },
+            "viewport": { "height": 740, "width": 1440 }
+        },
+        {
+            "id": "C:blueprint/philosophy:1",
+            "box": { "x": 0, "y": 0, "w": 1232, "h": 544 },
+            "clamps": [
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 0, "y": 0, "atBottom": true, "atTop": false },
+                    "to": { "x": -5000, "y": -5000 }
+                },
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 120, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": 5000, "y": 5000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": -200, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": -3000, "y": 3000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": 40, "y": 76, "atBottom": true, "atTop": false },
+                    "to": { "x": 40, "y": -30 }
+                }
+            ],
+            "guides": [
+                { "band": 0, "w": 1232, "x": 0, "y": -20 },
+                { "band": 1, "w": 1232, "x": 0, "y": 430 },
+                { "band": 3, "w": 1232, "x": 0, "y": 500 }
+            ],
+            "rects": {
+                "C:blueprint/philosophy:0": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 100,
+                    "x": 164,
+                    "y": 126
+                },
+                "C:blueprint/philosophy:2": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 260,
+                    "x": 272,
+                    "y": 126
+                },
+                "C:blueprint/philosophy:3": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 260,
+                    "x": 540,
+                    "y": 126
+                },
+                "C:blueprint/philosophy:4": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 247,
+                    "x": 808,
+                    "y": 126
+                },
+                "C:blueprint/philosophy:5": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 205,
+                    "x": 164,
+                    "y": 164
+                },
+                "C:blueprint/philosophy:6": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 187,
+                    "x": 377,
+                    "y": 164
+                },
+                "C:blueprint/philosophy:7": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 260,
+                    "x": 572,
+                    "y": 164
+                },
+                "B:blueprint/philosophy:taste": {
+                    "face": "card",
+                    "h": 108,
+                    "w": 222,
+                    "x": 180,
+                    "y": 254
+                },
+                "B:blueprint/philosophy:p1.0": {
+                    "face": "card",
+                    "h": 108,
+                    "w": 222,
+                    "x": 414,
+                    "y": 254
+                },
+                "C:blueprint/philosophy:1": {
+                    "face": "open",
+                    "h": 170,
+                    "w": 488,
+                    "x": 164,
+                    "y": 208
+                },
+                "P:blueprint/philosophy": {
+                    "face": "open",
+                    "h": 348,
+                    "w": 1068,
+                    "x": 148,
+                    "y": 46
+                },
+                "S:blueprint": { "face": "open", "h": 410, "w": 1100, "x": 132, "y": 0 },
+                "S:product": { "face": "dot", "h": 24, "w": 60, "x": 132, "y": 450 },
+                "S:growth": { "face": "dot", "h": 24, "w": 44, "x": 220, "y": 450 },
+                "S:engineering": { "face": "dot", "h": 24, "w": 52, "x": 132, "y": 520 }
+            },
+            "sel": ["S:blueprint", "P:blueprint/philosophy", "C:blueprint/philosophy:1"],
+            "target": { "x": 38, "y": 150 },
+            "viewport": { "height": 740, "width": 1440 }
+        },
+        {
+            "id": "C:blueprint/philosophy:2",
+            "box": { "x": 0, "y": 0, "w": 1232, "h": 544 },
+            "clamps": [
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 0, "y": 0, "atBottom": true, "atTop": false },
+                    "to": { "x": -5000, "y": -5000 }
+                },
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 120, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": 5000, "y": 5000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": -200, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": -3000, "y": 3000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": 40, "y": 76, "atBottom": true, "atTop": false },
+                    "to": { "x": 40, "y": -30 }
+                }
+            ],
+            "guides": [
+                { "band": 0, "w": 1232, "x": 0, "y": -20 },
+                { "band": 1, "w": 1232, "x": 0, "y": 430 },
+                { "band": 3, "w": 1232, "x": 0, "y": 500 }
+            ],
+            "rects": {
+                "C:blueprint/philosophy:0": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 100,
+                    "x": 164,
+                    "y": 126
+                },
+                "C:blueprint/philosophy:1": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 260,
+                    "x": 272,
+                    "y": 126
+                },
+                "C:blueprint/philosophy:3": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 260,
+                    "x": 540,
+                    "y": 126
+                },
+                "C:blueprint/philosophy:4": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 247,
+                    "x": 808,
+                    "y": 126
+                },
+                "C:blueprint/philosophy:5": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 205,
+                    "x": 164,
+                    "y": 164
+                },
+                "C:blueprint/philosophy:6": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 187,
+                    "x": 377,
+                    "y": 164
+                },
+                "C:blueprint/philosophy:7": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 260,
+                    "x": 572,
+                    "y": 164
+                },
+                "B:blueprint/philosophy:delegating": {
+                    "face": "card",
+                    "h": 108,
+                    "w": 222,
+                    "x": 180,
+                    "y": 254
+                },
+                "B:blueprint/philosophy:p2.0": {
+                    "face": "card",
+                    "h": 108,
+                    "w": 222,
+                    "x": 414,
+                    "y": 254
+                },
+                "C:blueprint/philosophy:2": {
+                    "face": "open",
+                    "h": 170,
+                    "w": 488,
+                    "x": 164,
+                    "y": 208
+                },
+                "P:blueprint/philosophy": {
+                    "face": "open",
+                    "h": 348,
+                    "w": 1068,
+                    "x": 148,
+                    "y": 46
+                },
+                "S:blueprint": { "face": "open", "h": 410, "w": 1100, "x": 132, "y": 0 },
+                "S:product": { "face": "dot", "h": 24, "w": 60, "x": 132, "y": 450 },
+                "S:growth": { "face": "dot", "h": 24, "w": 44, "x": 220, "y": 450 },
+                "S:engineering": { "face": "dot", "h": 24, "w": 52, "x": 132, "y": 520 }
+            },
+            "sel": ["S:blueprint", "P:blueprint/philosophy", "C:blueprint/philosophy:2"],
+            "target": { "x": 38, "y": 150 },
+            "viewport": { "height": 740, "width": 1440 }
+        },
+        {
+            "id": "C:blueprint/philosophy:3",
+            "box": { "x": 0, "y": 0, "w": 1232, "h": 544 },
+            "clamps": [
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 0, "y": 0, "atBottom": true, "atTop": false },
+                    "to": { "x": -5000, "y": -5000 }
+                },
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 120, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": 5000, "y": 5000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": -200, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": -3000, "y": 3000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": 40, "y": 76, "atBottom": true, "atTop": false },
+                    "to": { "x": 40, "y": -30 }
+                }
+            ],
+            "guides": [
+                { "band": 0, "w": 1232, "x": 0, "y": -20 },
+                { "band": 1, "w": 1232, "x": 0, "y": 430 },
+                { "band": 3, "w": 1232, "x": 0, "y": 500 }
+            ],
+            "rects": {
+                "C:blueprint/philosophy:0": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 100,
+                    "x": 164,
+                    "y": 126
+                },
+                "C:blueprint/philosophy:1": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 260,
+                    "x": 272,
+                    "y": 126
+                },
+                "C:blueprint/philosophy:2": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 260,
+                    "x": 540,
+                    "y": 126
+                },
+                "C:blueprint/philosophy:4": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 247,
+                    "x": 808,
+                    "y": 126
+                },
+                "C:blueprint/philosophy:5": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 205,
+                    "x": 164,
+                    "y": 164
+                },
+                "C:blueprint/philosophy:6": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 187,
+                    "x": 377,
+                    "y": 164
+                },
+                "C:blueprint/philosophy:7": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 260,
+                    "x": 572,
+                    "y": 164
+                },
+                "B:blueprint/philosophy:rules-in-the-world": {
+                    "face": "card",
+                    "h": 108,
+                    "w": 222,
+                    "x": 180,
+                    "y": 254
+                },
+                "B:blueprint/philosophy:p3.0": {
+                    "face": "card",
+                    "h": 108,
+                    "w": 222,
+                    "x": 414,
+                    "y": 254
+                },
+                "C:blueprint/philosophy:3": {
+                    "face": "open",
+                    "h": 170,
+                    "w": 488,
+                    "x": 164,
+                    "y": 208
+                },
+                "P:blueprint/philosophy": {
+                    "face": "open",
+                    "h": 348,
+                    "w": 1068,
+                    "x": 148,
+                    "y": 46
+                },
+                "S:blueprint": { "face": "open", "h": 410, "w": 1100, "x": 132, "y": 0 },
+                "S:product": { "face": "dot", "h": 24, "w": 60, "x": 132, "y": 450 },
+                "S:growth": { "face": "dot", "h": 24, "w": 44, "x": 220, "y": 450 },
+                "S:engineering": { "face": "dot", "h": 24, "w": 52, "x": 132, "y": 520 }
+            },
+            "sel": ["S:blueprint", "P:blueprint/philosophy", "C:blueprint/philosophy:3"],
+            "target": { "x": 38, "y": 150 },
+            "viewport": { "height": 740, "width": 1440 }
+        },
+        {
+            "id": "C:blueprint/philosophy:4",
+            "box": { "x": 0, "y": 0, "w": 1232, "h": 544 },
+            "clamps": [
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 0, "y": 0, "atBottom": true, "atTop": false },
+                    "to": { "x": -5000, "y": -5000 }
+                },
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 120, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": 5000, "y": 5000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": -200, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": -3000, "y": 3000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": 40, "y": 76, "atBottom": true, "atTop": false },
+                    "to": { "x": 40, "y": -30 }
+                }
+            ],
+            "guides": [
+                { "band": 0, "w": 1232, "x": 0, "y": -20 },
+                { "band": 1, "w": 1232, "x": 0, "y": 430 },
+                { "band": 3, "w": 1232, "x": 0, "y": 500 }
+            ],
+            "rects": {
+                "C:blueprint/philosophy:0": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 100,
+                    "x": 164,
+                    "y": 126
+                },
+                "C:blueprint/philosophy:1": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 260,
+                    "x": 272,
+                    "y": 126
+                },
+                "C:blueprint/philosophy:2": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 260,
+                    "x": 540,
+                    "y": 126
+                },
+                "C:blueprint/philosophy:3": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 260,
+                    "x": 808,
+                    "y": 126
+                },
+                "C:blueprint/philosophy:5": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 205,
+                    "x": 164,
+                    "y": 164
+                },
+                "C:blueprint/philosophy:6": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 187,
+                    "x": 377,
+                    "y": 164
+                },
+                "C:blueprint/philosophy:7": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 260,
+                    "x": 572,
+                    "y": 164
+                },
+                "B:blueprint/philosophy:declared": {
+                    "face": "card",
+                    "h": 108,
+                    "w": 222,
+                    "x": 180,
+                    "y": 254
+                },
+                "B:blueprint/philosophy:p4.0": {
+                    "face": "card",
+                    "h": 108,
+                    "w": 222,
+                    "x": 414,
+                    "y": 254
+                },
+                "C:blueprint/philosophy:4": {
+                    "face": "open",
+                    "h": 170,
+                    "w": 488,
+                    "x": 164,
+                    "y": 208
+                },
+                "P:blueprint/philosophy": {
+                    "face": "open",
+                    "h": 348,
+                    "w": 1068,
+                    "x": 148,
+                    "y": 46
+                },
+                "S:blueprint": { "face": "open", "h": 410, "w": 1100, "x": 132, "y": 0 },
+                "S:product": { "face": "dot", "h": 24, "w": 60, "x": 132, "y": 450 },
+                "S:growth": { "face": "dot", "h": 24, "w": 44, "x": 220, "y": 450 },
+                "S:engineering": { "face": "dot", "h": 24, "w": 52, "x": 132, "y": 520 }
+            },
+            "sel": ["S:blueprint", "P:blueprint/philosophy", "C:blueprint/philosophy:4"],
+            "target": { "x": 38, "y": 150 },
+            "viewport": { "height": 740, "width": 1440 }
+        },
+        {
+            "id": "C:blueprint/philosophy:5",
+            "box": { "x": 0, "y": 0, "w": 1232, "h": 544 },
+            "clamps": [
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 0, "y": 0, "atBottom": true, "atTop": false },
+                    "to": { "x": -5000, "y": -5000 }
+                },
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 120, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": 5000, "y": 5000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": -200, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": -3000, "y": 3000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": 40, "y": 76, "atBottom": true, "atTop": false },
+                    "to": { "x": 40, "y": -30 }
+                }
+            ],
+            "guides": [
+                { "band": 0, "w": 1232, "x": 0, "y": -20 },
+                { "band": 1, "w": 1232, "x": 0, "y": 430 },
+                { "band": 3, "w": 1232, "x": 0, "y": 500 }
+            ],
+            "rects": {
+                "C:blueprint/philosophy:0": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 100,
+                    "x": 164,
+                    "y": 126
+                },
+                "C:blueprint/philosophy:1": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 260,
+                    "x": 272,
+                    "y": 126
+                },
+                "C:blueprint/philosophy:2": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 260,
+                    "x": 540,
+                    "y": 126
+                },
+                "C:blueprint/philosophy:3": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 260,
+                    "x": 808,
+                    "y": 126
+                },
+                "C:blueprint/philosophy:4": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 247,
+                    "x": 164,
+                    "y": 164
+                },
+                "C:blueprint/philosophy:6": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 187,
+                    "x": 419,
+                    "y": 164
+                },
+                "C:blueprint/philosophy:7": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 260,
+                    "x": 614,
+                    "y": 164
+                },
+                "B:blueprint/philosophy:proven": {
+                    "face": "card",
+                    "h": 108,
+                    "w": 222,
+                    "x": 180,
+                    "y": 254
+                },
+                "B:blueprint/philosophy:p5.0": {
+                    "face": "card",
+                    "h": 108,
+                    "w": 222,
+                    "x": 414,
+                    "y": 254
+                },
+                "C:blueprint/philosophy:5": {
+                    "face": "open",
+                    "h": 170,
+                    "w": 488,
+                    "x": 164,
+                    "y": 208
+                },
+                "P:blueprint/philosophy": {
+                    "face": "open",
+                    "h": 348,
+                    "w": 1068,
+                    "x": 148,
+                    "y": 46
+                },
+                "S:blueprint": { "face": "open", "h": 410, "w": 1100, "x": 132, "y": 0 },
+                "S:product": { "face": "dot", "h": 24, "w": 60, "x": 132, "y": 450 },
+                "S:growth": { "face": "dot", "h": 24, "w": 44, "x": 220, "y": 450 },
+                "S:engineering": { "face": "dot", "h": 24, "w": 52, "x": 132, "y": 520 }
+            },
+            "sel": ["S:blueprint", "P:blueprint/philosophy", "C:blueprint/philosophy:5"],
+            "target": { "x": 38, "y": 150 },
+            "viewport": { "height": 740, "width": 1440 }
+        },
+        {
+            "id": "C:blueprint/philosophy:6",
+            "box": { "x": 0, "y": 0, "w": 1232, "h": 544 },
+            "clamps": [
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 0, "y": 0, "atBottom": true, "atTop": false },
+                    "to": { "x": -5000, "y": -5000 }
+                },
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 120, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": 5000, "y": 5000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": -200, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": -3000, "y": 3000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": 40, "y": 76, "atBottom": true, "atTop": false },
+                    "to": { "x": 40, "y": -30 }
+                }
+            ],
+            "guides": [
+                { "band": 0, "w": 1232, "x": 0, "y": -20 },
+                { "band": 1, "w": 1232, "x": 0, "y": 430 },
+                { "band": 3, "w": 1232, "x": 0, "y": 500 }
+            ],
+            "rects": {
+                "C:blueprint/philosophy:0": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 100,
+                    "x": 164,
+                    "y": 126
+                },
+                "C:blueprint/philosophy:1": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 260,
+                    "x": 272,
+                    "y": 126
+                },
+                "C:blueprint/philosophy:2": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 260,
+                    "x": 540,
+                    "y": 126
+                },
+                "C:blueprint/philosophy:3": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 260,
+                    "x": 808,
+                    "y": 126
+                },
+                "C:blueprint/philosophy:4": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 247,
+                    "x": 164,
+                    "y": 164
+                },
+                "C:blueprint/philosophy:5": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 205,
+                    "x": 419,
+                    "y": 164
+                },
+                "C:blueprint/philosophy:7": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 260,
+                    "x": 632,
+                    "y": 164
+                },
+                "B:blueprint/philosophy:taste-is-a-system": {
+                    "face": "card",
+                    "h": 108,
+                    "w": 222,
+                    "x": 180,
+                    "y": 254
+                },
+                "B:blueprint/philosophy:p6.0": {
+                    "face": "card",
+                    "h": 108,
+                    "w": 222,
+                    "x": 414,
+                    "y": 254
+                },
+                "C:blueprint/philosophy:6": {
+                    "face": "open",
+                    "h": 170,
+                    "w": 488,
+                    "x": 164,
+                    "y": 208
+                },
+                "P:blueprint/philosophy": {
+                    "face": "open",
+                    "h": 348,
+                    "w": 1068,
+                    "x": 148,
+                    "y": 46
+                },
+                "S:blueprint": { "face": "open", "h": 410, "w": 1100, "x": 132, "y": 0 },
+                "S:product": { "face": "dot", "h": 24, "w": 60, "x": 132, "y": 450 },
+                "S:growth": { "face": "dot", "h": 24, "w": 44, "x": 220, "y": 450 },
+                "S:engineering": { "face": "dot", "h": 24, "w": 52, "x": 132, "y": 520 }
+            },
+            "sel": ["S:blueprint", "P:blueprint/philosophy", "C:blueprint/philosophy:6"],
+            "target": { "x": 38, "y": 150 },
+            "viewport": { "height": 740, "width": 1440 }
+        },
+        {
+            "id": "C:blueprint/philosophy:7",
+            "box": { "x": 0, "y": 0, "w": 1232, "h": 544 },
+            "clamps": [
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 0, "y": 0, "atBottom": true, "atTop": false },
+                    "to": { "x": -5000, "y": -5000 }
+                },
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 120, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": 5000, "y": 5000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": -200, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": -3000, "y": 3000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": 40, "y": 76, "atBottom": true, "atTop": false },
+                    "to": { "x": 40, "y": -30 }
+                }
+            ],
+            "guides": [
+                { "band": 0, "w": 1232, "x": 0, "y": -20 },
+                { "band": 1, "w": 1232, "x": 0, "y": 430 },
+                { "band": 3, "w": 1232, "x": 0, "y": 500 }
+            ],
+            "rects": {
+                "C:blueprint/philosophy:0": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 100,
+                    "x": 164,
+                    "y": 126
+                },
+                "C:blueprint/philosophy:1": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 260,
+                    "x": 272,
+                    "y": 126
+                },
+                "C:blueprint/philosophy:2": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 260,
+                    "x": 540,
+                    "y": 126
+                },
+                "C:blueprint/philosophy:3": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 260,
+                    "x": 808,
+                    "y": 126
+                },
+                "C:blueprint/philosophy:4": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 247,
+                    "x": 164,
+                    "y": 164
+                },
+                "C:blueprint/philosophy:5": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 205,
+                    "x": 419,
+                    "y": 164
+                },
+                "C:blueprint/philosophy:6": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 187,
+                    "x": 632,
+                    "y": 164
+                },
+                "B:blueprint/philosophy:learns": {
+                    "face": "card",
+                    "h": 108,
+                    "w": 222,
+                    "x": 180,
+                    "y": 254
+                },
+                "B:blueprint/philosophy:p7.0": {
+                    "face": "card",
+                    "h": 108,
+                    "w": 222,
+                    "x": 414,
+                    "y": 254
+                },
+                "C:blueprint/philosophy:7": {
+                    "face": "open",
+                    "h": 170,
+                    "w": 488,
+                    "x": 164,
+                    "y": 208
+                },
+                "P:blueprint/philosophy": {
+                    "face": "open",
+                    "h": 348,
+                    "w": 1068,
+                    "x": 148,
+                    "y": 46
+                },
+                "S:blueprint": { "face": "open", "h": 410, "w": 1100, "x": 132, "y": 0 },
+                "S:product": { "face": "dot", "h": 24, "w": 60, "x": 132, "y": 450 },
+                "S:growth": { "face": "dot", "h": 24, "w": 44, "x": 220, "y": 450 },
+                "S:engineering": { "face": "dot", "h": 24, "w": 52, "x": 132, "y": 520 }
+            },
+            "sel": ["S:blueprint", "P:blueprint/philosophy", "C:blueprint/philosophy:7"],
+            "target": { "x": 38, "y": 150 },
+            "viewport": { "height": 740, "width": 1440 }
+        },
+        {
+            "id": "S:product",
+            "box": { "x": 0, "y": 0, "w": 1089, "h": 320 },
+            "clamps": [
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 0, "y": 0, "atBottom": true, "atTop": false },
+                    "to": { "x": -5000, "y": -5000 }
+                },
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 120, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": 5000, "y": 5000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": -200, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": -3000, "y": 3000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": 40, "y": 100, "atBottom": true, "atTop": false },
+                    "to": { "x": 40, "y": -30 }
+                }
+            ],
+            "guides": [
+                { "band": 0, "w": 1089, "x": 0, "y": -20 },
+                { "band": 1, "w": 1089, "x": 0, "y": 50 },
+                { "band": 3, "w": 1089, "x": 0, "y": 270 }
+            ],
+            "rects": {
+                "S:blueprint": { "face": "pill", "h": 30, "w": 100, "x": 132, "y": 0 },
+                "P:product/boundaries": { "face": "card", "h": 118, "w": 248, "x": 148, "y": 116 },
+                "P:product/stack": { "face": "card", "h": 118, "w": 248, "x": 408, "y": 116 },
+                "P:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder": {
+                    "face": "card",
+                    "h": 118,
+                    "w": 248,
+                    "x": 668,
+                    "y": 116
+                },
+                "S:product": { "face": "open", "h": 180, "w": 800, "x": 132, "y": 70 },
+                "S:growth": { "face": "pill", "h": 30, "w": 129, "x": 960, "y": 70 },
+                "S:engineering": { "face": "pill", "h": 30, "w": 132, "x": 132, "y": 290 }
+            },
+            "sel": ["S:product"],
+            "target": { "x": 188, "y": 210 },
+            "viewport": { "height": 740, "width": 1440 }
+        },
+        {
+            "id": "P:product/boundaries",
+            "box": { "x": 0, "y": 0, "w": 1304, "h": 452 },
+            "clamps": [
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 0, "y": 0, "atBottom": true, "atTop": false },
+                    "to": { "x": -5000, "y": -5000 }
+                },
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 120, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": 5000, "y": 5000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": -200, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": -3000, "y": 3000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": 40, "y": 100, "atBottom": true, "atTop": false },
+                    "to": { "x": 40, "y": -30 }
+                }
+            ],
+            "guides": [
+                { "band": 0, "w": 1304, "x": 0, "y": -20 },
+                { "band": 1, "w": 1304, "x": 0, "y": 50 },
+                { "band": 3, "w": 1304, "x": 0, "y": 408 }
+            ],
+            "rects": {
+                "S:blueprint": { "face": "dot", "h": 24, "w": 44, "x": 132, "y": 0 },
+                "P:product/stack": { "face": "pill", "h": 30, "w": 137, "x": 148, "y": 116 },
+                "P:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 128,
+                    "x": 293,
+                    "y": 116
+                },
+                "C:product/boundaries:0": {
+                    "face": "card",
+                    "h": 116,
+                    "w": 236,
+                    "x": 164,
+                    "y": 240
+                },
+                "C:product/boundaries:1": {
+                    "face": "card",
+                    "h": 116,
+                    "w": 236,
+                    "x": 412,
+                    "y": 240
+                },
+                "C:product/boundaries:2": {
+                    "face": "card",
+                    "h": 116,
+                    "w": 236,
+                    "x": 660,
+                    "y": 240
+                },
+                "C:product/boundaries:3": {
+                    "face": "card",
+                    "h": 116,
+                    "w": 236,
+                    "x": 908,
+                    "y": 240
+                },
+                "P:product/boundaries": { "face": "open", "h": 212, "w": 1012, "x": 148, "y": 160 },
+                "S:product": { "face": "open", "h": 318, "w": 1100, "x": 132, "y": 70 },
+                "S:growth": { "face": "dot", "h": 24, "w": 44, "x": 1260, "y": 70 },
+                "S:engineering": { "face": "dot", "h": 24, "w": 52, "x": 132, "y": 428 }
+            },
+            "sel": ["S:product", "P:product/boundaries"],
+            "target": { "x": 38, "y": 141 },
+            "viewport": { "height": 740, "width": 1440 }
+        },
+        {
+            "id": "C:product/boundaries:0",
+            "box": { "x": 0, "y": 0, "w": 1304, "h": 550 },
+            "clamps": [
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 0, "y": 0, "atBottom": true, "atTop": false },
+                    "to": { "x": -5000, "y": -5000 }
+                },
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 120, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": 5000, "y": 5000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": -200, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": -3000, "y": 3000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": 40, "y": 70, "atBottom": true, "atTop": false },
+                    "to": { "x": 40, "y": -30 }
+                }
+            ],
+            "guides": [
+                { "band": 0, "w": 1304, "x": 0, "y": -20 },
+                { "band": 1, "w": 1304, "x": 0, "y": 50 },
+                { "band": 3, "w": 1304, "x": 0, "y": 506 }
+            ],
+            "rects": {
+                "S:blueprint": { "face": "dot", "h": 24, "w": 44, "x": 132, "y": 0 },
+                "P:product/stack": { "face": "dot", "h": 20, "w": 20, "x": 148, "y": 121 },
+                "P:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder": {
+                    "face": "dot",
+                    "h": 20,
+                    "w": 20,
+                    "x": 174,
+                    "y": 121
+                },
+                "C:product/boundaries:1": { "face": "pill", "h": 30, "w": 210, "x": 164, "y": 240 },
+                "C:product/boundaries:2": { "face": "pill", "h": 30, "w": 256, "x": 382, "y": 240 },
+                "C:product/boundaries:3": { "face": "pill", "h": 30, "w": 116, "x": 646, "y": 240 },
+                "B:product/boundaries:one-stack": {
+                    "face": "card",
+                    "h": 108,
+                    "w": 222,
+                    "x": 180,
+                    "y": 330
+                },
+                "C:product/boundaries:0": {
+                    "face": "open",
+                    "h": 170,
+                    "w": 420,
+                    "x": 164,
+                    "y": 284
+                },
+                "P:product/boundaries": { "face": "open", "h": 310, "w": 1068, "x": 148, "y": 160 },
+                "S:product": { "face": "open", "h": 416, "w": 1100, "x": 132, "y": 70 },
+                "S:growth": { "face": "dot", "h": 24, "w": 44, "x": 1260, "y": 70 },
+                "S:engineering": { "face": "dot", "h": 24, "w": 52, "x": 132, "y": 526 }
+            },
+            "sel": ["S:product", "P:product/boundaries", "C:product/boundaries:0"],
+            "target": { "x": 38, "y": 55 },
+            "viewport": { "height": 740, "width": 1440 }
+        },
+        {
+            "id": "C:product/boundaries:1",
+            "box": { "x": 0, "y": 0, "w": 1304, "h": 670 },
+            "clamps": [
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 0, "y": -50, "atBottom": true, "atTop": false },
+                    "to": { "x": -5000, "y": -5000 }
+                },
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 120, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": 5000, "y": 5000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": -200, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": -3000, "y": 3000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": 40, "y": -30, "atBottom": false, "atTop": false },
+                    "to": { "x": 40, "y": -30 }
+                }
+            ],
+            "guides": [
+                { "band": 0, "w": 1304, "x": 0, "y": -20 },
+                { "band": 1, "w": 1304, "x": 0, "y": 50 },
+                { "band": 3, "w": 1304, "x": 0, "y": 626 }
+            ],
+            "rects": {
+                "S:blueprint": { "face": "dot", "h": 24, "w": 44, "x": 132, "y": 0 },
+                "P:product/stack": { "face": "dot", "h": 20, "w": 20, "x": 148, "y": 121 },
+                "P:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder": {
+                    "face": "dot",
+                    "h": 20,
+                    "w": 20,
+                    "x": 174,
+                    "y": 121
+                },
+                "C:product/boundaries:0": { "face": "pill", "h": 30, "w": 84, "x": 164, "y": 240 },
+                "C:product/boundaries:2": { "face": "pill", "h": 30, "w": 256, "x": 256, "y": 240 },
+                "C:product/boundaries:3": { "face": "pill", "h": 30, "w": 116, "x": 520, "y": 240 },
+                "B:product/boundaries:not-a-replacement": {
+                    "face": "card",
+                    "h": 108,
+                    "w": 222,
+                    "x": 180,
+                    "y": 330
+                },
+                "B:product/boundaries:not-vibe-coding": {
+                    "face": "card",
+                    "h": 108,
+                    "w": 222,
+                    "x": 414,
+                    "y": 330
+                },
+                "B:product/boundaries:not-a-cloud-service": {
+                    "face": "card",
+                    "h": 108,
+                    "w": 222,
+                    "x": 648,
+                    "y": 330
+                },
+                "B:product/boundaries:not-one-vendor": {
+                    "face": "card",
+                    "h": 108,
+                    "w": 222,
+                    "x": 882,
+                    "y": 330
+                },
+                "B:product/boundaries:not-a-method": {
+                    "face": "card",
+                    "h": 108,
+                    "w": 222,
+                    "x": 180,
+                    "y": 450
+                },
+                "B:product/boundaries:p1.0": {
+                    "face": "card",
+                    "h": 108,
+                    "w": 222,
+                    "x": 414,
+                    "y": 450
+                },
+                "C:product/boundaries:1": {
+                    "face": "open",
+                    "h": 290,
+                    "w": 956,
+                    "x": 164,
+                    "y": 284
+                },
+                "P:product/boundaries": { "face": "open", "h": 430, "w": 1068, "x": 148, "y": 160 },
+                "S:product": { "face": "open", "h": 536, "w": 1100, "x": 132, "y": 70 },
+                "S:growth": { "face": "dot", "h": 24, "w": 44, "x": 1260, "y": 70 },
+                "S:engineering": { "face": "dot", "h": 24, "w": 52, "x": 132, "y": 646 }
+            },
+            "sel": ["S:product", "P:product/boundaries", "C:product/boundaries:1"],
+            "target": { "x": 38, "y": -5 },
+            "viewport": { "height": 740, "width": 1440 }
+        },
+        {
+            "id": "C:product/boundaries:2",
+            "box": { "x": 0, "y": 0, "w": 1304, "h": 670 },
+            "clamps": [
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 0, "y": -50, "atBottom": true, "atTop": false },
+                    "to": { "x": -5000, "y": -5000 }
+                },
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 120, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": 5000, "y": 5000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": -200, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": -3000, "y": 3000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": 40, "y": -30, "atBottom": false, "atTop": false },
+                    "to": { "x": 40, "y": -30 }
+                }
+            ],
+            "guides": [
+                { "band": 0, "w": 1304, "x": 0, "y": -20 },
+                { "band": 1, "w": 1304, "x": 0, "y": 50 },
+                { "band": 3, "w": 1304, "x": 0, "y": 626 }
+            ],
+            "rects": {
+                "S:blueprint": { "face": "dot", "h": 24, "w": 44, "x": 132, "y": 0 },
+                "P:product/stack": { "face": "dot", "h": 20, "w": 20, "x": 148, "y": 121 },
+                "P:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder": {
+                    "face": "dot",
+                    "h": 20,
+                    "w": 20,
+                    "x": 174,
+                    "y": 121
+                },
+                "C:product/boundaries:0": { "face": "pill", "h": 30, "w": 84, "x": 164, "y": 240 },
+                "C:product/boundaries:1": { "face": "pill", "h": 30, "w": 210, "x": 256, "y": 240 },
+                "C:product/boundaries:3": { "face": "pill", "h": 30, "w": 116, "x": 474, "y": 240 },
+                "B:product/boundaries:machines-refuses": {
+                    "face": "card",
+                    "h": 108,
+                    "w": 222,
+                    "x": 180,
+                    "y": 330
+                },
+                "B:product/boundaries:machines": {
+                    "face": "card",
+                    "h": 108,
+                    "w": 222,
+                    "x": 414,
+                    "y": 330
+                },
+                "B:product/boundaries:no-model": {
+                    "face": "card",
+                    "h": 108,
+                    "w": 222,
+                    "x": 648,
+                    "y": 330
+                },
+                "B:product/boundaries:no-security-in-instructions": {
+                    "face": "card",
+                    "h": 108,
+                    "w": 222,
+                    "x": 882,
+                    "y": 330
+                },
+                "B:product/boundaries:no-computer": {
+                    "face": "card",
+                    "h": 108,
+                    "w": 222,
+                    "x": 180,
+                    "y": 450
+                },
+                "B:product/boundaries:wiki-decides-nothing": {
+                    "face": "card",
+                    "h": 108,
+                    "w": 222,
+                    "x": 414,
+                    "y": 450
+                },
+                "B:product/boundaries:os-holds-no-facts": {
+                    "face": "card",
+                    "h": 108,
+                    "w": 222,
+                    "x": 648,
+                    "y": 450
+                },
+                "B:product/boundaries:p2.0": {
+                    "face": "card",
+                    "h": 108,
+                    "w": 222,
+                    "x": 882,
+                    "y": 450
+                },
+                "C:product/boundaries:2": {
+                    "face": "open",
+                    "h": 290,
+                    "w": 956,
+                    "x": 164,
+                    "y": 284
+                },
+                "P:product/boundaries": { "face": "open", "h": 430, "w": 1068, "x": 148, "y": 160 },
+                "S:product": { "face": "open", "h": 536, "w": 1100, "x": 132, "y": 70 },
+                "S:growth": { "face": "dot", "h": 24, "w": 44, "x": 1260, "y": 70 },
+                "S:engineering": { "face": "dot", "h": 24, "w": 52, "x": 132, "y": 646 }
+            },
+            "sel": ["S:product", "P:product/boundaries", "C:product/boundaries:2"],
+            "target": { "x": 38, "y": -5 },
+            "viewport": { "height": 740, "width": 1440 }
+        },
+        {
+            "id": "C:product/boundaries:3",
+            "box": { "x": 0, "y": 0, "w": 1304, "h": 550 },
+            "clamps": [
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 0, "y": 0, "atBottom": true, "atTop": false },
+                    "to": { "x": -5000, "y": -5000 }
+                },
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 120, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": 5000, "y": 5000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": -200, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": -3000, "y": 3000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": 40, "y": 70, "atBottom": true, "atTop": false },
+                    "to": { "x": 40, "y": -30 }
+                }
+            ],
+            "guides": [
+                { "band": 0, "w": 1304, "x": 0, "y": -20 },
+                { "band": 1, "w": 1304, "x": 0, "y": 50 },
+                { "band": 3, "w": 1304, "x": 0, "y": 506 }
+            ],
+            "rects": {
+                "S:blueprint": { "face": "dot", "h": 24, "w": 44, "x": 132, "y": 0 },
+                "P:product/stack": { "face": "dot", "h": 20, "w": 20, "x": 148, "y": 121 },
+                "P:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder": {
+                    "face": "dot",
+                    "h": 20,
+                    "w": 20,
+                    "x": 174,
+                    "y": 121
+                },
+                "C:product/boundaries:0": { "face": "pill", "h": 30, "w": 84, "x": 164, "y": 240 },
+                "C:product/boundaries:1": { "face": "pill", "h": 30, "w": 210, "x": 256, "y": 240 },
+                "C:product/boundaries:2": { "face": "pill", "h": 30, "w": 256, "x": 474, "y": 240 },
+                "B:product/boundaries:p3.0": {
+                    "face": "card",
+                    "h": 108,
+                    "w": 222,
+                    "x": 180,
+                    "y": 330
+                },
+                "C:product/boundaries:3": {
+                    "face": "open",
+                    "h": 170,
+                    "w": 420,
+                    "x": 164,
+                    "y": 284
+                },
+                "P:product/boundaries": { "face": "open", "h": 310, "w": 1068, "x": 148, "y": 160 },
+                "S:product": { "face": "open", "h": 416, "w": 1100, "x": 132, "y": 70 },
+                "S:growth": { "face": "dot", "h": 24, "w": 44, "x": 1260, "y": 70 },
+                "S:engineering": { "face": "dot", "h": 24, "w": 52, "x": 132, "y": 526 }
+            },
+            "sel": ["S:product", "P:product/boundaries", "C:product/boundaries:3"],
+            "target": { "x": 38, "y": 55 },
+            "viewport": { "height": 740, "width": 1440 }
+        },
+        {
+            "id": "P:product/stack",
+            "box": { "x": 0, "y": 0, "w": 1304, "h": 452 },
+            "clamps": [
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 0, "y": 0, "atBottom": true, "atTop": false },
+                    "to": { "x": -5000, "y": -5000 }
+                },
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 120, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": 5000, "y": 5000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": -200, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": -3000, "y": 3000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": 40, "y": 100, "atBottom": true, "atTop": false },
+                    "to": { "x": 40, "y": -30 }
+                }
+            ],
+            "guides": [
+                { "band": 0, "w": 1304, "x": 0, "y": -20 },
+                { "band": 1, "w": 1304, "x": 0, "y": 50 },
+                { "band": 3, "w": 1304, "x": 0, "y": 408 }
+            ],
+            "rects": {
+                "S:blueprint": { "face": "dot", "h": 24, "w": 44, "x": 132, "y": 0 },
+                "P:product/boundaries": { "face": "pill", "h": 30, "w": 156, "x": 148, "y": 116 },
+                "P:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 128,
+                    "x": 312,
+                    "y": 116
+                },
+                "C:product/stack:1": { "face": "card", "h": 116, "w": 236, "x": 164, "y": 240 },
+                "C:product/stack:2": { "face": "card", "h": 116, "w": 236, "x": 412, "y": 240 },
+                "C:product/stack:3": { "face": "card", "h": 116, "w": 236, "x": 660, "y": 240 },
+                "P:product/stack": { "face": "open", "h": 212, "w": 764, "x": 148, "y": 160 },
+                "S:product": { "face": "open", "h": 318, "w": 1100, "x": 132, "y": 70 },
+                "S:growth": { "face": "dot", "h": 24, "w": 44, "x": 1260, "y": 70 },
+                "S:engineering": { "face": "dot", "h": 24, "w": 52, "x": 132, "y": 428 }
+            },
+            "sel": ["S:product", "P:product/stack"],
+            "target": { "x": 38, "y": 141 },
+            "viewport": { "height": 740, "width": 1440 }
+        },
+        {
+            "id": "C:product/stack:1",
+            "box": { "x": 0, "y": 0, "w": 1304, "h": 550 },
+            "clamps": [
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 0, "y": 0, "atBottom": true, "atTop": false },
+                    "to": { "x": -5000, "y": -5000 }
+                },
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 120, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": 5000, "y": 5000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": -200, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": -3000, "y": 3000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": 40, "y": 70, "atBottom": true, "atTop": false },
+                    "to": { "x": 40, "y": -30 }
+                }
+            ],
+            "guides": [
+                { "band": 0, "w": 1304, "x": 0, "y": -20 },
+                { "band": 1, "w": 1304, "x": 0, "y": 50 },
+                { "band": 3, "w": 1304, "x": 0, "y": 506 }
+            ],
+            "rects": {
+                "S:blueprint": { "face": "dot", "h": 24, "w": 44, "x": 132, "y": 0 },
+                "P:product/boundaries": { "face": "dot", "h": 20, "w": 20, "x": 148, "y": 121 },
+                "P:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder": {
+                    "face": "dot",
+                    "h": 20,
+                    "w": 20,
+                    "x": 174,
+                    "y": 121
+                },
+                "C:product/stack:2": { "face": "pill", "h": 30, "w": 196, "x": 164, "y": 240 },
+                "C:product/stack:3": { "face": "pill", "h": 30, "w": 116, "x": 368, "y": 240 },
+                "B:product/stack:p1.0": { "face": "card", "h": 108, "w": 222, "x": 180, "y": 330 },
+                "B:product/stack:parts": { "face": "card", "h": 108, "w": 222, "x": 414, "y": 330 },
+                "B:product/stack:all": { "face": "card", "h": 108, "w": 222, "x": 648, "y": 330 },
+                "B:product/stack:p1.1": { "face": "card", "h": 108, "w": 222, "x": 882, "y": 330 },
+                "C:product/stack:1": { "face": "open", "h": 170, "w": 956, "x": 164, "y": 284 },
+                "P:product/stack": { "face": "open", "h": 310, "w": 1068, "x": 148, "y": 160 },
+                "S:product": { "face": "open", "h": 416, "w": 1100, "x": 132, "y": 70 },
+                "S:growth": { "face": "dot", "h": 24, "w": 44, "x": 1260, "y": 70 },
+                "S:engineering": { "face": "dot", "h": 24, "w": 52, "x": 132, "y": 526 }
+            },
+            "sel": ["S:product", "P:product/stack", "C:product/stack:1"],
+            "target": { "x": 38, "y": 55 },
+            "viewport": { "height": 740, "width": 1440 }
+        },
+        {
+            "id": "C:product/stack:2",
+            "box": { "x": 0, "y": 0, "w": 1304, "h": 550 },
+            "clamps": [
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 0, "y": 0, "atBottom": true, "atTop": false },
+                    "to": { "x": -5000, "y": -5000 }
+                },
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 120, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": 5000, "y": 5000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": -200, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": -3000, "y": 3000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": 40, "y": 70, "atBottom": true, "atTop": false },
+                    "to": { "x": 40, "y": -30 }
+                }
+            ],
+            "guides": [
+                { "band": 0, "w": 1304, "x": 0, "y": -20 },
+                { "band": 1, "w": 1304, "x": 0, "y": 50 },
+                { "band": 3, "w": 1304, "x": 0, "y": 506 }
+            ],
+            "rects": {
+                "S:blueprint": { "face": "dot", "h": 24, "w": 44, "x": 132, "y": 0 },
+                "P:product/boundaries": { "face": "dot", "h": 20, "w": 20, "x": 148, "y": 121 },
+                "P:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder": {
+                    "face": "dot",
+                    "h": 20,
+                    "w": 20,
+                    "x": 174,
+                    "y": 121
+                },
+                "C:product/stack:1": { "face": "pill", "h": 30, "w": 188, "x": 164, "y": 240 },
+                "C:product/stack:3": { "face": "pill", "h": 30, "w": 116, "x": 360, "y": 240 },
+                "B:product/stack:p2.0": { "face": "card", "h": 108, "w": 222, "x": 180, "y": 330 },
+                "C:product/stack:2": { "face": "open", "h": 170, "w": 420, "x": 164, "y": 284 },
+                "P:product/stack": { "face": "open", "h": 310, "w": 1068, "x": 148, "y": 160 },
+                "S:product": { "face": "open", "h": 416, "w": 1100, "x": 132, "y": 70 },
+                "S:growth": { "face": "dot", "h": 24, "w": 44, "x": 1260, "y": 70 },
+                "S:engineering": { "face": "dot", "h": 24, "w": 52, "x": 132, "y": 526 }
+            },
+            "sel": ["S:product", "P:product/stack", "C:product/stack:2"],
+            "target": { "x": 38, "y": 55 },
+            "viewport": { "height": 740, "width": 1440 }
+        },
+        {
+            "id": "C:product/stack:3",
+            "box": { "x": 0, "y": 0, "w": 1304, "h": 550 },
+            "clamps": [
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 0, "y": 0, "atBottom": true, "atTop": false },
+                    "to": { "x": -5000, "y": -5000 }
+                },
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 120, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": 5000, "y": 5000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": -200, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": -3000, "y": 3000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": 40, "y": 70, "atBottom": true, "atTop": false },
+                    "to": { "x": 40, "y": -30 }
+                }
+            ],
+            "guides": [
+                { "band": 0, "w": 1304, "x": 0, "y": -20 },
+                { "band": 1, "w": 1304, "x": 0, "y": 50 },
+                { "band": 3, "w": 1304, "x": 0, "y": 506 }
+            ],
+            "rects": {
+                "S:blueprint": { "face": "dot", "h": 24, "w": 44, "x": 132, "y": 0 },
+                "P:product/boundaries": { "face": "dot", "h": 20, "w": 20, "x": 148, "y": 121 },
+                "P:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder": {
+                    "face": "dot",
+                    "h": 20,
+                    "w": 20,
+                    "x": 174,
+                    "y": 121
+                },
+                "C:product/stack:1": { "face": "pill", "h": 30, "w": 188, "x": 164, "y": 240 },
+                "C:product/stack:2": { "face": "pill", "h": 30, "w": 196, "x": 360, "y": 240 },
+                "B:product/stack:p3.0": { "face": "card", "h": 108, "w": 222, "x": 180, "y": 330 },
+                "C:product/stack:3": { "face": "open", "h": 170, "w": 420, "x": 164, "y": 284 },
+                "P:product/stack": { "face": "open", "h": 310, "w": 1068, "x": 148, "y": 160 },
+                "S:product": { "face": "open", "h": 416, "w": 1100, "x": 132, "y": 70 },
+                "S:growth": { "face": "dot", "h": 24, "w": 44, "x": 1260, "y": 70 },
+                "S:engineering": { "face": "dot", "h": 24, "w": 52, "x": 132, "y": 526 }
+            },
+            "sel": ["S:product", "P:product/stack", "C:product/stack:3"],
+            "target": { "x": 38, "y": 55 },
+            "viewport": { "height": 740, "width": 1440 }
+        },
+        {
+            "id": "P:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder",
+            "box": { "x": 0, "y": 0, "w": 1304, "h": 452 },
+            "clamps": [
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 0, "y": 0, "atBottom": true, "atTop": false },
+                    "to": { "x": -5000, "y": -5000 }
+                },
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 120, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": 5000, "y": 5000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": -200, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": -3000, "y": 3000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": 40, "y": 100, "atBottom": true, "atTop": false },
+                    "to": { "x": 40, "y": -30 }
+                }
+            ],
+            "guides": [
+                { "band": 0, "w": 1304, "x": 0, "y": -20 },
+                { "band": 1, "w": 1304, "x": 0, "y": 50 },
+                { "band": 3, "w": 1304, "x": 0, "y": 408 }
+            ],
+            "rects": {
+                "S:blueprint": { "face": "dot", "h": 24, "w": 44, "x": 132, "y": 0 },
+                "P:product/boundaries": { "face": "pill", "h": 30, "w": 156, "x": 148, "y": 116 },
+                "P:product/stack": { "face": "pill", "h": 30, "w": 137, "x": 312, "y": 116 },
+                "C:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder:0": {
+                    "face": "card",
+                    "h": 116,
+                    "w": 236,
+                    "x": 164,
+                    "y": 240
+                },
+                "C:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder:1": {
+                    "face": "card",
+                    "h": 116,
+                    "w": 236,
+                    "x": 412,
+                    "y": 240
+                },
+                "P:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder": {
+                    "face": "open",
+                    "h": 212,
+                    "w": 560,
+                    "x": 148,
+                    "y": 160
+                },
+                "S:product": { "face": "open", "h": 318, "w": 1100, "x": 132, "y": 70 },
+                "S:growth": { "face": "dot", "h": 24, "w": 44, "x": 1260, "y": 70 },
+                "S:engineering": { "face": "dot", "h": 24, "w": 52, "x": 132, "y": 428 }
+            },
+            "sel": [
+                "S:product",
+                "P:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder"
+            ],
+            "target": { "x": 38, "y": 141 },
+            "viewport": { "height": 740, "width": 1440 }
+        },
+        {
+            "id": "C:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder:0",
+            "box": { "x": 0, "y": 0, "w": 1304, "h": 550 },
+            "clamps": [
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 0, "y": 0, "atBottom": true, "atTop": false },
+                    "to": { "x": -5000, "y": -5000 }
+                },
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 120, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": 5000, "y": 5000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": -200, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": -3000, "y": 3000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": 40, "y": 70, "atBottom": true, "atTop": false },
+                    "to": { "x": 40, "y": -30 }
+                }
+            ],
+            "guides": [
+                { "band": 0, "w": 1304, "x": 0, "y": -20 },
+                { "band": 1, "w": 1304, "x": 0, "y": 50 },
+                { "band": 3, "w": 1304, "x": 0, "y": 506 }
+            ],
+            "rects": {
+                "S:blueprint": { "face": "dot", "h": 24, "w": 44, "x": 132, "y": 0 },
+                "P:product/boundaries": { "face": "dot", "h": 20, "w": 20, "x": 148, "y": 121 },
+                "P:product/stack": { "face": "dot", "h": 20, "w": 20, "x": 174, "y": 121 },
+                "C:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder:1": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 114,
+                    "x": 164,
+                    "y": 240
+                },
+                "B:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder:p0.0": {
+                    "face": "card",
+                    "h": 108,
+                    "w": 222,
+                    "x": 180,
+                    "y": 330
+                },
+                "C:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder:0": {
+                    "face": "open",
+                    "h": 170,
+                    "w": 420,
+                    "x": 164,
+                    "y": 284
+                },
+                "P:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder": {
+                    "face": "open",
+                    "h": 310,
+                    "w": 1068,
+                    "x": 148,
+                    "y": 160
+                },
+                "S:product": { "face": "open", "h": 416, "w": 1100, "x": 132, "y": 70 },
+                "S:growth": { "face": "dot", "h": 24, "w": 44, "x": 1260, "y": 70 },
+                "S:engineering": { "face": "dot", "h": 24, "w": 52, "x": 132, "y": 526 }
+            },
+            "sel": [
+                "S:product",
+                "P:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder",
+                "C:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder:0"
+            ],
+            "target": { "x": 38, "y": 55 },
+            "viewport": { "height": 740, "width": 1440 }
+        },
+        {
+            "id": "C:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder:1",
+            "box": { "x": 0, "y": 0, "w": 1304, "h": 550 },
+            "clamps": [
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 0, "y": 0, "atBottom": true, "atTop": false },
+                    "to": { "x": -5000, "y": -5000 }
+                },
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 120, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": 5000, "y": 5000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": -200, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": -3000, "y": 3000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": 40, "y": 70, "atBottom": true, "atTop": false },
+                    "to": { "x": 40, "y": -30 }
+                }
+            ],
+            "guides": [
+                { "band": 0, "w": 1304, "x": 0, "y": -20 },
+                { "band": 1, "w": 1304, "x": 0, "y": 50 },
+                { "band": 3, "w": 1304, "x": 0, "y": 506 }
+            ],
+            "rects": {
+                "S:blueprint": { "face": "dot", "h": 24, "w": 44, "x": 132, "y": 0 },
+                "P:product/boundaries": { "face": "dot", "h": 20, "w": 20, "x": 148, "y": 121 },
+                "P:product/stack": { "face": "dot", "h": 20, "w": 20, "x": 174, "y": 121 },
+                "C:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder:0": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 84,
+                    "x": 164,
+                    "y": 240
+                },
+                "B:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder:p1.0": {
+                    "face": "card",
+                    "h": 108,
+                    "w": 222,
+                    "x": 180,
+                    "y": 330
+                },
+                "C:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder:1": {
+                    "face": "open",
+                    "h": 170,
+                    "w": 420,
+                    "x": 164,
+                    "y": 284
+                },
+                "P:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder": {
+                    "face": "open",
+                    "h": 310,
+                    "w": 1068,
+                    "x": 148,
+                    "y": 160
+                },
+                "S:product": { "face": "open", "h": 416, "w": 1100, "x": 132, "y": 70 },
+                "S:growth": { "face": "dot", "h": 24, "w": 44, "x": 1260, "y": 70 },
+                "S:engineering": { "face": "dot", "h": 24, "w": 52, "x": 132, "y": 526 }
+            },
+            "sel": [
+                "S:product",
+                "P:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder",
+                "C:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder:1"
+            ],
+            "target": { "x": 38, "y": 55 },
+            "viewport": { "height": 740, "width": 1440 }
+        },
+        {
+            "id": "S:engineering",
+            "box": { "x": 0, "y": 0, "w": 672, "h": 320 },
+            "clamps": [
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 0, "y": 0, "atBottom": true, "atTop": false },
+                    "to": { "x": -5000, "y": -5000 }
+                },
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 120, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": 5000, "y": 5000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": -200, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": -3000, "y": 3000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": 40, "y": 100, "atBottom": true, "atTop": false },
+                    "to": { "x": 40, "y": -30 }
+                }
+            ],
+            "guides": [
+                { "band": 0, "w": 672, "x": 0, "y": -20 },
+                { "band": 1, "w": 672, "x": 0, "y": 50 },
+                { "band": 3, "w": 672, "x": 0, "y": 120 }
+            ],
+            "rects": {
+                "S:blueprint": { "face": "pill", "h": 30, "w": 100, "x": 132, "y": 0 },
+                "S:product": { "face": "pill", "h": 30, "w": 123, "x": 132, "y": 70 },
+                "S:growth": { "face": "pill", "h": 30, "w": 129, "x": 283, "y": 70 },
+                "P:machines/reference/ports": {
+                    "face": "card",
+                    "h": 118,
+                    "w": 248,
+                    "x": 148,
+                    "y": 186
+                },
+                "P:machines/decisions/035-a-port-is-a-right-with-an-audience": {
+                    "face": "card",
+                    "h": 118,
+                    "w": 248,
+                    "x": 408,
+                    "y": 186
+                },
+                "S:engineering": { "face": "open", "h": 180, "w": 540, "x": 132, "y": 140 }
+            },
+            "sel": ["S:engineering"],
+            "target": { "x": 318, "y": 140 },
+            "viewport": { "height": 740, "width": 1440 }
+        },
+        {
+            "id": "P:machines/reference/ports",
+            "box": { "x": 0, "y": 0, "w": 1232, "h": 458 },
+            "clamps": [
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 0, "y": 0, "atBottom": true, "atTop": false },
+                    "to": { "x": -5000, "y": -5000 }
+                },
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 120, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": 5000, "y": 5000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": -200, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": -3000, "y": 3000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": 40, "y": 100, "atBottom": true, "atTop": false },
+                    "to": { "x": 40, "y": -30 }
+                }
+            ],
+            "guides": [
+                { "band": 0, "w": 1232, "x": 0, "y": -20 },
+                { "band": 1, "w": 1232, "x": 0, "y": 50 },
+                { "band": 3, "w": 1232, "x": 0, "y": 120 }
+            ],
+            "rects": {
+                "S:blueprint": { "face": "dot", "h": 24, "w": 44, "x": 132, "y": 0 },
+                "S:product": { "face": "dot", "h": 24, "w": 60, "x": 132, "y": 70 },
+                "S:growth": { "face": "dot", "h": 24, "w": 44, "x": 220, "y": 70 },
+                "P:machines/decisions/035-a-port-is-a-right-with-an-audience": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 127,
+                    "x": 148,
+                    "y": 186
+                },
+                "C:machines/reference/ports:1": {
+                    "face": "card",
+                    "h": 116,
+                    "w": 236,
+                    "x": 164,
+                    "y": 310
+                },
+                "P:machines/reference/ports": {
+                    "face": "open",
+                    "h": 212,
+                    "w": 560,
+                    "x": 148,
+                    "y": 230
+                },
+                "S:engineering": { "face": "open", "h": 318, "w": 1100, "x": 132, "y": 140 }
+            },
+            "sel": ["S:engineering", "P:machines/reference/ports"],
+            "target": { "x": 38, "y": 71 },
+            "viewport": { "height": 740, "width": 1440 }
+        },
+        {
+            "id": "C:machines/reference/ports:1",
+            "box": { "x": 0, "y": 0, "w": 1232, "h": 632 },
+            "clamps": [
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 0, "y": -12, "atBottom": true, "atTop": false },
+                    "to": { "x": -5000, "y": -5000 }
+                },
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 120, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": 5000, "y": 5000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": -200, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": -3000, "y": 3000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": 40, "y": -12, "atBottom": true, "atTop": false },
+                    "to": { "x": 40, "y": -30 }
+                }
+            ],
+            "guides": [
+                { "band": 0, "w": 1232, "x": 0, "y": -20 },
+                { "band": 1, "w": 1232, "x": 0, "y": 50 },
+                { "band": 3, "w": 1232, "x": 0, "y": 120 }
+            ],
+            "rects": {
+                "S:blueprint": { "face": "dot", "h": 24, "w": 44, "x": 132, "y": 0 },
+                "S:product": { "face": "dot", "h": 24, "w": 60, "x": 132, "y": 70 },
+                "S:growth": { "face": "dot", "h": 24, "w": 44, "x": 220, "y": 70 },
+                "P:machines/decisions/035-a-port-is-a-right-with-an-audience": {
+                    "face": "dot",
+                    "h": 20,
+                    "w": 20,
+                    "x": 148,
+                    "y": 191
+                },
+                "B:machines/reference/ports:p1.0": {
+                    "face": "card",
+                    "h": 108,
+                    "w": 222,
+                    "x": 180,
+                    "y": 356
+                },
+                "B:machines/reference/ports:right": {
+                    "face": "card",
+                    "h": 108,
+                    "w": 222,
+                    "x": 414,
+                    "y": 356
+                },
+                "B:machines/reference/ports:audience": {
+                    "face": "card",
+                    "h": 108,
+                    "w": 222,
+                    "x": 648,
+                    "y": 356
+                },
+                "B:machines/reference/ports:what-is-flagged": {
+                    "face": "card",
+                    "h": 108,
+                    "w": 222,
+                    "x": 882,
+                    "y": 356
+                },
+                "B:machines/reference/ports:p1.1": {
+                    "face": "card",
+                    "h": 108,
+                    "w": 222,
+                    "x": 180,
+                    "y": 476
+                },
+                "C:machines/reference/ports:1": {
+                    "face": "open",
+                    "h": 290,
+                    "w": 956,
+                    "x": 164,
+                    "y": 310
+                },
+                "P:machines/reference/ports": {
+                    "face": "open",
+                    "h": 386,
+                    "w": 1068,
+                    "x": 148,
+                    "y": 230
+                },
+                "S:engineering": { "face": "open", "h": 492, "w": 1100, "x": 132, "y": 140 }
+            },
+            "sel": ["S:engineering", "P:machines/reference/ports", "C:machines/reference/ports:1"],
+            "target": { "x": 38, "y": -53 },
+            "viewport": { "height": 740, "width": 1440 }
+        },
+        {
+            "id": "P:machines/decisions/035-a-port-is-a-right-with-an-audience",
+            "box": { "x": 0, "y": 0, "w": 1232, "h": 458 },
+            "clamps": [
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 0, "y": 0, "atBottom": true, "atTop": false },
+                    "to": { "x": -5000, "y": -5000 }
+                },
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 120, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": 5000, "y": 5000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": -200, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": -3000, "y": 3000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": 40, "y": 100, "atBottom": true, "atTop": false },
+                    "to": { "x": 40, "y": -30 }
+                }
+            ],
+            "guides": [
+                { "band": 0, "w": 1232, "x": 0, "y": -20 },
+                { "band": 1, "w": 1232, "x": 0, "y": 50 },
+                { "band": 3, "w": 1232, "x": 0, "y": 120 }
+            ],
+            "rects": {
+                "S:blueprint": { "face": "dot", "h": 24, "w": 44, "x": 132, "y": 0 },
+                "S:product": { "face": "dot", "h": 24, "w": 60, "x": 132, "y": 70 },
+                "S:growth": { "face": "dot", "h": 24, "w": 44, "x": 220, "y": 70 },
+                "P:machines/reference/ports": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 95,
+                    "x": 148,
+                    "y": 186
+                },
+                "C:machines/decisions/035-a-port-is-a-right-with-an-audience:0": {
+                    "face": "card",
+                    "h": 116,
+                    "w": 236,
+                    "x": 164,
+                    "y": 310
+                },
+                "C:machines/decisions/035-a-port-is-a-right-with-an-audience:1": {
+                    "face": "card",
+                    "h": 116,
+                    "w": 236,
+                    "x": 412,
+                    "y": 310
+                },
+                "P:machines/decisions/035-a-port-is-a-right-with-an-audience": {
+                    "face": "open",
+                    "h": 212,
+                    "w": 560,
+                    "x": 148,
+                    "y": 230
+                },
+                "S:engineering": { "face": "open", "h": 318, "w": 1100, "x": 132, "y": 140 }
+            },
+            "sel": ["S:engineering", "P:machines/decisions/035-a-port-is-a-right-with-an-audience"],
+            "target": { "x": 38, "y": 71 },
+            "viewport": { "height": 740, "width": 1440 }
+        },
+        {
+            "id": "C:machines/decisions/035-a-port-is-a-right-with-an-audience:0",
+            "box": { "x": 0, "y": 0, "w": 1232, "h": 556 },
+            "clamps": [
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 0, "y": 0, "atBottom": true, "atTop": false },
+                    "to": { "x": -5000, "y": -5000 }
+                },
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 120, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": 5000, "y": 5000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": -200, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": -3000, "y": 3000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": 40, "y": 64, "atBottom": true, "atTop": false },
+                    "to": { "x": 40, "y": -30 }
+                }
+            ],
+            "guides": [
+                { "band": 0, "w": 1232, "x": 0, "y": -20 },
+                { "band": 1, "w": 1232, "x": 0, "y": 50 },
+                { "band": 3, "w": 1232, "x": 0, "y": 120 }
+            ],
+            "rects": {
+                "S:blueprint": { "face": "dot", "h": 24, "w": 44, "x": 132, "y": 0 },
+                "S:product": { "face": "dot", "h": 24, "w": 60, "x": 132, "y": 70 },
+                "S:growth": { "face": "dot", "h": 24, "w": 44, "x": 220, "y": 70 },
+                "P:machines/reference/ports": {
+                    "face": "dot",
+                    "h": 20,
+                    "w": 20,
+                    "x": 148,
+                    "y": 191
+                },
+                "C:machines/decisions/035-a-port-is-a-right-with-an-audience:1": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 114,
+                    "x": 164,
+                    "y": 310
+                },
+                "B:machines/decisions/035-a-port-is-a-right-with-an-audience:p0.0": {
+                    "face": "card",
+                    "h": 108,
+                    "w": 222,
+                    "x": 180,
+                    "y": 400
+                },
+                "C:machines/decisions/035-a-port-is-a-right-with-an-audience:0": {
+                    "face": "open",
+                    "h": 170,
+                    "w": 420,
+                    "x": 164,
+                    "y": 354
+                },
+                "P:machines/decisions/035-a-port-is-a-right-with-an-audience": {
+                    "face": "open",
+                    "h": 310,
+                    "w": 1068,
+                    "x": 148,
+                    "y": 230
+                },
+                "S:engineering": { "face": "open", "h": 416, "w": 1100, "x": 132, "y": 140 }
+            },
+            "sel": [
+                "S:engineering",
+                "P:machines/decisions/035-a-port-is-a-right-with-an-audience",
+                "C:machines/decisions/035-a-port-is-a-right-with-an-audience:0"
+            ],
+            "target": { "x": 38, "y": -15 },
+            "viewport": { "height": 740, "width": 1440 }
+        },
+        {
+            "id": "C:machines/decisions/035-a-port-is-a-right-with-an-audience:1",
+            "box": { "x": 0, "y": 0, "w": 1232, "h": 556 },
+            "clamps": [
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 0, "y": 0, "atBottom": true, "atTop": false },
+                    "to": { "x": -5000, "y": -5000 }
+                },
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 120, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": 5000, "y": 5000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": -200, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": -3000, "y": 3000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": 40, "y": 64, "atBottom": true, "atTop": false },
+                    "to": { "x": 40, "y": -30 }
+                }
+            ],
+            "guides": [
+                { "band": 0, "w": 1232, "x": 0, "y": -20 },
+                { "band": 1, "w": 1232, "x": 0, "y": 50 },
+                { "band": 3, "w": 1232, "x": 0, "y": 120 }
+            ],
+            "rects": {
+                "S:blueprint": { "face": "dot", "h": 24, "w": 44, "x": 132, "y": 0 },
+                "S:product": { "face": "dot", "h": 24, "w": 60, "x": 132, "y": 70 },
+                "S:growth": { "face": "dot", "h": 24, "w": 44, "x": 220, "y": 70 },
+                "P:machines/reference/ports": {
+                    "face": "dot",
+                    "h": 20,
+                    "w": 20,
+                    "x": 148,
+                    "y": 191
+                },
+                "C:machines/decisions/035-a-port-is-a-right-with-an-audience:0": {
+                    "face": "pill",
+                    "h": 30,
+                    "w": 84,
+                    "x": 164,
+                    "y": 310
+                },
+                "B:machines/decisions/035-a-port-is-a-right-with-an-audience:p1.0": {
+                    "face": "card",
+                    "h": 108,
+                    "w": 222,
+                    "x": 180,
+                    "y": 400
+                },
+                "C:machines/decisions/035-a-port-is-a-right-with-an-audience:1": {
+                    "face": "open",
+                    "h": 170,
+                    "w": 420,
+                    "x": 164,
+                    "y": 354
+                },
+                "P:machines/decisions/035-a-port-is-a-right-with-an-audience": {
+                    "face": "open",
+                    "h": 310,
+                    "w": 1068,
+                    "x": 148,
+                    "y": 230
+                },
+                "S:engineering": { "face": "open", "h": 416, "w": 1100, "x": 132, "y": 140 }
+            },
+            "sel": [
+                "S:engineering",
+                "P:machines/decisions/035-a-port-is-a-right-with-an-audience",
+                "C:machines/decisions/035-a-port-is-a-right-with-an-audience:1"
+            ],
+            "target": { "x": 38, "y": -15 },
+            "viewport": { "height": 740, "width": 1440 }
+        },
+        {
+            "id": "S:growth",
+            "box": { "x": 0, "y": 0, "w": 583, "h": 320 },
+            "clamps": [
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 0, "y": 0, "atBottom": true, "atTop": false },
+                    "to": { "x": -5000, "y": -5000 }
+                },
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 120, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": 5000, "y": 5000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": -200, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": -3000, "y": 3000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": 40, "y": 100, "atBottom": true, "atTop": false },
+                    "to": { "x": 40, "y": -30 }
+                }
+            ],
+            "guides": [
+                { "band": 0, "w": 583, "x": 0, "y": -20 },
+                { "band": 1, "w": 583, "x": 0, "y": 50 },
+                { "band": 3, "w": 583, "x": 0, "y": 270 }
+            ],
+            "rects": {
+                "S:blueprint": { "face": "pill", "h": 30, "w": 100, "x": 132, "y": 0 },
+                "S:product": { "face": "pill", "h": 30, "w": 123, "x": 132, "y": 70 },
+                "P:growth/positioning": { "face": "card", "h": 118, "w": 248, "x": 299, "y": 116 },
+                "S:growth": { "face": "open", "h": 180, "w": 300, "x": 283, "y": 70 },
+                "S:engineering": { "face": "pill", "h": 30, "w": 132, "x": 132, "y": 290 }
+            },
+            "sel": ["S:growth"],
+            "target": { "x": 287, "y": 210 },
+            "viewport": { "height": 740, "width": 1440 }
+        },
+        {
+            "id": "P:growth/positioning",
+            "box": { "x": 0, "y": 0, "w": 1320, "h": 408 },
+            "clamps": [
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 0, "y": 0, "atBottom": true, "atTop": false },
+                    "to": { "x": -5000, "y": -5000 }
+                },
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 120, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": 5000, "y": 5000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": -200, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": -3000, "y": 3000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": 40, "y": 100, "atBottom": true, "atTop": false },
+                    "to": { "x": 40, "y": -30 }
+                }
+            ],
+            "guides": [
+                { "band": 0, "w": 1320, "x": 0, "y": -20 },
+                { "band": 1, "w": 1320, "x": 0, "y": 50 },
+                { "band": 3, "w": 1320, "x": 0, "y": 364 }
+            ],
+            "rects": {
+                "S:blueprint": { "face": "dot", "h": 24, "w": 44, "x": 132, "y": 0 },
+                "S:product": { "face": "dot", "h": 24, "w": 60, "x": 132, "y": 70 },
+                "C:growth/positioning:1": {
+                    "face": "card",
+                    "h": 116,
+                    "w": 236,
+                    "x": 252,
+                    "y": 196
+                },
+                "C:growth/positioning:2": {
+                    "face": "card",
+                    "h": 116,
+                    "w": 236,
+                    "x": 500,
+                    "y": 196
+                },
+                "C:growth/positioning:3": {
+                    "face": "card",
+                    "h": 116,
+                    "w": 236,
+                    "x": 748,
+                    "y": 196
+                },
+                "P:growth/positioning": { "face": "open", "h": 212, "w": 764, "x": 236, "y": 116 },
+                "S:growth": { "face": "open", "h": 274, "w": 1100, "x": 220, "y": 70 },
+                "S:engineering": { "face": "dot", "h": 24, "w": 52, "x": 132, "y": 384 }
+            },
+            "sel": ["S:growth", "P:growth/positioning"],
+            "target": { "x": -50, "y": 163 },
+            "viewport": { "height": 740, "width": 1440 }
+        },
+        {
+            "id": "C:growth/positioning:1",
+            "box": { "x": 0, "y": 0, "w": 1320, "h": 506 },
+            "clamps": [
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 0, "y": 0, "atBottom": true, "atTop": false },
+                    "to": { "x": -5000, "y": -5000 }
+                },
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 120, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": 5000, "y": 5000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": -200, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": -3000, "y": 3000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": 40, "y": 100, "atBottom": true, "atTop": false },
+                    "to": { "x": 40, "y": -30 }
+                }
+            ],
+            "guides": [
+                { "band": 0, "w": 1320, "x": 0, "y": -20 },
+                { "band": 1, "w": 1320, "x": 0, "y": 50 },
+                { "band": 3, "w": 1320, "x": 0, "y": 462 }
+            ],
+            "rects": {
+                "S:blueprint": { "face": "dot", "h": 24, "w": 44, "x": 132, "y": 0 },
+                "S:product": { "face": "dot", "h": 24, "w": 60, "x": 132, "y": 70 },
+                "C:growth/positioning:2": { "face": "pill", "h": 30, "w": 181, "x": 252, "y": 196 },
+                "C:growth/positioning:3": { "face": "pill", "h": 30, "w": 116, "x": 441, "y": 196 },
+                "B:growth/positioning:p1.0": {
+                    "face": "card",
+                    "h": 108,
+                    "w": 222,
+                    "x": 268,
+                    "y": 286
+                },
+                "B:growth/positioning:lead-with-the-thread": {
+                    "face": "card",
+                    "h": 108,
+                    "w": 222,
+                    "x": 502,
+                    "y": 286
+                },
+                "B:growth/positioning:p1.1": {
+                    "face": "card",
+                    "h": 108,
+                    "w": 222,
+                    "x": 736,
+                    "y": 286
+                },
+                "C:growth/positioning:1": {
+                    "face": "open",
+                    "h": 170,
+                    "w": 722,
+                    "x": 252,
+                    "y": 240
+                },
+                "P:growth/positioning": { "face": "open", "h": 310, "w": 1068, "x": 236, "y": 116 },
+                "S:growth": { "face": "open", "h": 372, "w": 1100, "x": 220, "y": 70 },
+                "S:engineering": { "face": "dot", "h": 24, "w": 52, "x": 132, "y": 482 }
+            },
+            "sel": ["S:growth", "P:growth/positioning", "C:growth/positioning:1"],
+            "target": { "x": -50, "y": 99 },
+            "viewport": { "height": 740, "width": 1440 }
+        },
+        {
+            "id": "C:growth/positioning:2",
+            "box": { "x": 0, "y": 0, "w": 1320, "h": 506 },
+            "clamps": [
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 0, "y": 0, "atBottom": true, "atTop": false },
+                    "to": { "x": -5000, "y": -5000 }
+                },
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 120, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": 5000, "y": 5000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": -200, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": -3000, "y": 3000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": 40, "y": 100, "atBottom": true, "atTop": false },
+                    "to": { "x": 40, "y": -30 }
+                }
+            ],
+            "guides": [
+                { "band": 0, "w": 1320, "x": 0, "y": -20 },
+                { "band": 1, "w": 1320, "x": 0, "y": 50 },
+                { "band": 3, "w": 1320, "x": 0, "y": 462 }
+            ],
+            "rects": {
+                "S:blueprint": { "face": "dot", "h": 24, "w": 44, "x": 132, "y": 0 },
+                "S:product": { "face": "dot", "h": 24, "w": 60, "x": 132, "y": 70 },
+                "C:growth/positioning:1": { "face": "pill", "h": 30, "w": 215, "x": 252, "y": 196 },
+                "C:growth/positioning:3": { "face": "pill", "h": 30, "w": 116, "x": 475, "y": 196 },
+                "B:growth/positioning:alternatives": {
+                    "face": "card",
+                    "h": 108,
+                    "w": 222,
+                    "x": 268,
+                    "y": 286
+                },
+                "B:growth/positioning:two-costs": {
+                    "face": "card",
+                    "h": 108,
+                    "w": 222,
+                    "x": 502,
+                    "y": 286
+                },
+                "B:growth/positioning:all": {
+                    "face": "card",
+                    "h": 108,
+                    "w": 222,
+                    "x": 736,
+                    "y": 286
+                },
+                "B:growth/positioning:p2.0": {
+                    "face": "card",
+                    "h": 108,
+                    "w": 222,
+                    "x": 970,
+                    "y": 286
+                },
+                "C:growth/positioning:2": {
+                    "face": "open",
+                    "h": 170,
+                    "w": 956,
+                    "x": 252,
+                    "y": 240
+                },
+                "P:growth/positioning": { "face": "open", "h": 310, "w": 1068, "x": 236, "y": 116 },
+                "S:growth": { "face": "open", "h": 372, "w": 1100, "x": 220, "y": 70 },
+                "S:engineering": { "face": "dot", "h": 24, "w": 52, "x": 132, "y": 482 }
+            },
+            "sel": ["S:growth", "P:growth/positioning", "C:growth/positioning:2"],
+            "target": { "x": -50, "y": 99 },
+            "viewport": { "height": 740, "width": 1440 }
+        },
+        {
+            "id": "C:growth/positioning:3",
+            "box": { "x": 0, "y": 0, "w": 1320, "h": 506 },
+            "clamps": [
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 0, "y": 0, "atBottom": true, "atTop": false },
+                    "to": { "x": -5000, "y": -5000 }
+                },
+                {
+                    "from": { "x": 0, "y": 0 },
+                    "out": { "x": 120, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": 5000, "y": 5000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": -200, "y": 120, "atBottom": false, "atTop": true },
+                    "to": { "x": -3000, "y": 3000 }
+                },
+                {
+                    "from": { "x": -200, "y": 100 },
+                    "out": { "x": 40, "y": 100, "atBottom": true, "atTop": false },
+                    "to": { "x": 40, "y": -30 }
+                }
+            ],
+            "guides": [
+                { "band": 0, "w": 1320, "x": 0, "y": -20 },
+                { "band": 1, "w": 1320, "x": 0, "y": 50 },
+                { "band": 3, "w": 1320, "x": 0, "y": 462 }
+            ],
+            "rects": {
+                "S:blueprint": { "face": "dot", "h": 24, "w": 44, "x": 132, "y": 0 },
+                "S:product": { "face": "dot", "h": 24, "w": 60, "x": 132, "y": 70 },
+                "C:growth/positioning:1": { "face": "pill", "h": 30, "w": 215, "x": 252, "y": 196 },
+                "C:growth/positioning:2": { "face": "pill", "h": 30, "w": 181, "x": 475, "y": 196 },
+                "B:growth/positioning:p3.0": {
+                    "face": "card",
+                    "h": 108,
+                    "w": 222,
+                    "x": 268,
+                    "y": 286
+                },
+                "C:growth/positioning:3": {
+                    "face": "open",
+                    "h": 170,
+                    "w": 420,
+                    "x": 252,
+                    "y": 240
+                },
+                "P:growth/positioning": { "face": "open", "h": 310, "w": 1068, "x": 236, "y": 116 },
+                "S:growth": { "face": "open", "h": 372, "w": 1100, "x": 220, "y": 70 },
+                "S:engineering": { "face": "dot", "h": 24, "w": 52, "x": 132, "y": 482 }
+            },
+            "sel": ["S:growth", "P:growth/positioning", "C:growth/positioning:3"],
+            "target": { "x": -50, "y": 99 },
+            "viewport": { "height": 740, "width": 1440 }
+        }
+    ]
+}
