@@ -36,7 +36,15 @@ func TestAnotherMacWhoseEngineIsNotInstalledIsToldSoWithItsOn(t *testing.T) {
 		{Name: "mac-mini", Reachable: true, Engine: EngineView{State: EngineNotInstalled}},
 	}}
 	fs := Findings(f)
-	if len(fs) != 1 || fs[0].Text != "mac-mini has no engine installed" || fs[0].Fix.Command != "station engine start --on mac-mini" || fs[0].Severity != finding.NeedsALook {
+	if len(fs) != 1 || fs[0].Text != "mac-mini has no engine installed" || fs[0].Fix.Call+fs[0].Fix.Command+fs[0].Fix.Path != "" || fs[0].Severity != finding.NeedsALook {
+		t.Errorf("findings %+v", fs)
+	}
+}
+
+func TestThisMacsStoppedEngineIsStartedFromATerminal(t *testing.T) {
+	f := AllMachines{Macs: []MacView{{Name: "macbook-pro", ThisMac: true, Reachable: true, Engine: EngineView{State: EngineNotInstalled}}}}
+	fs := Findings(f)
+	if len(fs) != 1 || fs[0].Fix.Command != "station engine start" || !fs[0].Fix.InTerminal {
 		t.Errorf("findings %+v", fs)
 	}
 }

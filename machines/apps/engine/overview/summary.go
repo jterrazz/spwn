@@ -76,11 +76,19 @@ type Need struct {
 	Args    map[string]string
 	// value: the machine Call runs at, and the name its typed question
 	// takes; empty with no Call, and with no typed question.
-	On       string
-	Confirm  string
-	Command  string
-	Path     string
-	Severity finding.Severity
+	On      string
+	Confirm string
+	Command string
+	Path    string
+	// value: the System Settings pane that holds the fix, as the URL that
+	// opens it, and the words of what it opens ("Firewall settings"); both
+	// empty unless this Mac's own engine judged the need.
+	Pane   string
+	Object string
+	// value: Command is the owner's to run in a terminal, never run by the
+	// window before the owner presses Return.
+	InTerminal bool
+	Severity   finding.Severity
 	// value: whether it needs the owner now or can wait, and the word of
 	// its gesture.
 	Upkeep Upkeep
@@ -166,16 +174,20 @@ func Summarize(m Head, engine Engine, own []finding.Finding, reads []Read, vms [
 	}
 	for i := range all {
 		all[i].Urgency = urgencyOf(all[i])
+		if catalog.PaneObject(all[i].Fix.Pane) == "" {
+			// invariant: a pane that is not one of the catalog's closed list never leaves the engine, whoever built it.
+			all[i].Fix.Pane = ""
+		}
 	}
 	for _, f := range finding.Rank(all) {
-		verb, command, path := VerbOf(f), f.Fix.Command, f.Fix.Path
+		verb, command, path, pane, inTerminal := VerbOf(f), f.Fix.Command, f.Fix.Path, f.Fix.Pane, f.Fix.InTerminal
 		if verb == VerbReview {
 			// invariant: a need that is reviewed opens its tab and carries
 			// no command; where to change it stays on its row there.
-			command, path = "", ""
+			command, path, pane, inTerminal = "", "", "", false
 		}
 		s.Needs = append(s.Needs, Need{Machine: f.Machine.Name, Section: f.Section, Broken: f.Severity == finding.Broken, Severity: f.Severity,
-			Subject: f.Subject, Text: f.Text, Call: f.Fix.Call, Args: f.Fix.Args, On: onOf(f), Confirm: f.Fix.Confirm, Command: command, Path: path,
+			Subject: f.Subject, Text: f.Text, Call: f.Fix.Call, Args: f.Fix.Args, On: onOf(f), Confirm: f.Fix.Confirm, Command: command, Path: path, Pane: pane, Object: catalog.PaneObject(pane), InTerminal: inTerminal,
 			Upkeep: UpkeepOf(f), Verb: verb, Noun: NounOf(f.Section), Mark: MarkOf(f, vms), Detail: f.Detail})
 	}
 	s.Verdict, s.Machines = VerdictOf(s, elsewhere), MachinesOf(vms)

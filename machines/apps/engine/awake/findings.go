@@ -16,7 +16,7 @@ func Findings(r Report, m machine.Ref) []finding.Finding {
 	switch r.Mode() {
 	case StoppedByGuard:
 		f.Text = "Awake stopped: " + r.LastEnd.Detail
-		f.Fix = finding.Fix{Command: "station awake"}
+		f.Fix = finding.Fix{Command: "station awake", InTerminal: true}
 		return []finding.Finding{f}
 	case AwakeUntil:
 		if near := BatteryNear(r); near != "" {

@@ -108,7 +108,7 @@ func (n Nights) findings(m machine.Ref) []finding.Finding {
 	// fixed by its line of the Machinefile.
 	var out []finding.Finding
 	upgrade := finding.Fix{Call: "machinefile.upgrade", Args: map[string]string{"Machinefile": n.Machinefile}, Command: "station machinefile update"}
-	asked := finding.Fix{Command: "station machinefile update"}
+	asked := finding.Fix{Command: "station machinefile update", InTerminal: true}
 	said := func(severity finding.Severity, subject, text string, fix finding.Fix) {
 		out = append(out, finding.Finding{Machine: m, Section: section.Apps, Severity: severity, Subject: subject, Text: text, Fix: fix})
 	}
@@ -125,7 +125,7 @@ func (n Nights) findings(m machine.Ref) []finding.Finding {
 		said(finding.Broken, app, app+" failed its update last night", upgrade)
 	}
 	for _, app := range n.Left {
-		said(finding.NeedsALook, app, app+" waits for your station machinefile update: its update asks you", asked)
+		said(finding.NeedsALook, app, app+" waits for you: its update asks a password", asked)
 	}
 	for _, w := range n.Waiting {
 		file := w.File

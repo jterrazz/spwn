@@ -950,7 +950,9 @@ export type CoreFindingFix = {
     Call: string;
     Command: string;
     Confirm: string;
+    InTerminal?: boolean;
     On: string;
+    Pane?: string;
     Path: string;
 };
 
@@ -959,7 +961,9 @@ export type CoreFindingFixInput = {
     Call?: string;
     Command?: string;
     Confirm?: string;
+    InTerminal?: boolean;
     On?: string;
+    Pane?: string;
     Path?: string;
 };
 
@@ -2600,17 +2604,20 @@ export type OverviewNeed = {
     Command: string;
     Confirm: string;
     Detail: string;
+    InTerminal: boolean;
     Machine: string;
     Mark: 'exposed' | 'down' | 'not-created' | 'needs-you' | 'can-wait';
     Noun: string;
+    Object: string;
     On: string;
+    Pane: string;
     Path: string;
     Section: 'overview' | 'activity' | 'apps' | 'settings' | 'disk' | 'ports' | 'accounts' | 'background' | 'awake' | 'ssh' | 'images';
     Severity: 'broken' | 'needs-a-look';
     Subject: string;
     Text: string;
     Upkeep: 'needs-you' | 'can-wait';
-    Verb: 'review' | 'restart' | 'start' | 'try-again' | 'update' | 'remove' | 'delete' | 'upgrade' | 'wake' | 'move' | 'start-engine' | 'fix';
+    Verb: 'review' | 'restart' | 'start' | 'try-again' | 'update' | 'remove' | 'delete' | 'upgrade' | 'wake' | 'move' | 'start-engine' | 'open-settings' | 'in-terminal' | 'fix';
 };
 
 export type OverviewPart = {
@@ -3949,7 +3956,7 @@ export type OverviewMark = 'exposed' | 'down' | 'not-created' | 'needs-you' | 'c
 
 export type OverviewUpkeep = 'needs-you' | 'can-wait';
 
-export type OverviewVerb = 'review' | 'restart' | 'start' | 'try-again' | 'update' | 'remove' | 'delete' | 'upgrade' | 'wake' | 'move' | 'start-engine' | 'fix';
+export type OverviewVerb = 'review' | 'restart' | 'start' | 'try-again' | 'update' | 'remove' | 'delete' | 'upgrade' | 'wake' | 'move' | 'start-engine' | 'open-settings' | 'in-terminal' | 'fix';
 
 export type PageNoun = 'machine' | 'skill' | 'listener' | 'quiet-listener' | 'restart' | 'line' | 'package' | 'app' | 'setting' | 'password' | 'grant';
 

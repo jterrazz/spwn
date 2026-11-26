@@ -25,8 +25,6 @@ type CheckedSetting struct {
 	Turn string
 }
 
-const systemSettings = "x-apple.systempreferences:"
-
 const (
 	checkedBudget = 2 * time.Second
 	updatesBudget = 10 * time.Second
@@ -36,14 +34,14 @@ const (
 var macKind = []MachineKind{Mac}
 
 var CheckedSettings = []CheckedSetting{
-	{Name: "filevault", Label: "Disk encryption", Description: "FileVault encrypts the disk", Kinds: macKind, Facts: []Fact{FactFileVault}, Fix: "System Settings > Privacy & Security > FileVault", Pane: systemSettings + "com.apple.settings.PrivacySecurity.extension?FileVault", Budget: checkedBudget},
-	{Name: "firewall", Label: "Firewall", Description: "The macOS firewall refuses unasked connections", Kinds: macKind, Facts: []Fact{FactFirewall}, Fix: "System Settings > Network > Firewall", Pane: systemSettings + "com.apple.Network-Settings.extension?Firewall", Budget: checkedBudget,
+	{Name: "filevault", Label: "Disk encryption", Description: "FileVault encrypts the disk", Kinds: macKind, Facts: []Fact{FactFileVault}, Fix: "System Settings > Privacy & Security > FileVault", Pane: paneFileVault, Budget: checkedBudget},
+	{Name: "firewall", Label: "Firewall", Description: "The macOS firewall refuses unasked connections", Kinds: macKind, Facts: []Fact{FactFirewall}, Fix: "System Settings > Network > Firewall", Pane: paneFirewall, Budget: checkedBudget,
 		Command: AsRoot("/usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate on"), Turn: "Turn the firewall on"},
 	{Name: "sip", Label: "System Integrity Protection", Description: "SIP keeps the system files read-only", Kinds: macKind, Facts: []Fact{FactSIP}, Fix: "Recovery > Terminal > csrutil enable", Budget: checkedBudget},
-	{Name: "automatic-updates", Label: "Automatic security updates", Description: "macOS installs its security responses by itself", Kinds: macKind, Facts: []Fact{FactAutoUpdates}, Fix: "System Settings > General > Software Update > Automatic updates", Pane: systemSettings + "com.apple.Software-Update-Settings.extension", Budget: checkedBudget},
-	{Name: "screen-lock", Label: "Screen lock", Description: "The screen locks after 5 min idle (a desktop: 5 min after the display turns off)", Kinds: macKind, Facts: []Fact{FactScreenLock, FactDisplaySleep}, Fix: "System Settings > Lock Screen", Pane: systemSettings + "com.apple.Lock-Screen-Settings.extension", Budget: checkedBudget},
-	{Name: "gatekeeper", Label: "Gatekeeper", Description: "Gatekeeper opens only signed apps", Kinds: macKind, Facts: []Fact{FactGatekeeper}, Fix: "System Settings > Privacy & Security > Security", Pane: systemSettings + "com.apple.settings.PrivacySecurity.extension?Security", Budget: checkedBudget},
-	{Name: "remote-login", Label: "Remote login", Description: "Remote login is off on a laptop, on on an always-on Mac", Kinds: macKind, Facts: []Fact{FactRemoteLogin}, Fix: "System Settings > General > Sharing > Remote Login", Pane: systemSettings + "com.apple.Sharing-Settings.extension", Budget: checkedBudget},
-	{Name: "time-machine", Label: "Time Machine", Description: "Time Machine's last backup is within 7 days", Kinds: macKind, Facts: []Fact{FactTimeMachine}, Fix: "System Settings > General > Time Machine", Pane: systemSettings + "com.apple.Time-Machine-Settings.extension", Budget: checkedBudget},
-	{Name: "macos-updates", Label: "macOS updates", Description: "No macOS update is waiting", Kinds: macKind, Facts: []Fact{FactSystemUpdates}, Fix: "System Settings > General > Software Update", Pane: systemSettings + "com.apple.Software-Update-Settings.extension", Budget: updatesBudget},
+	{Name: "automatic-updates", Label: "Automatic security updates", Description: "macOS installs its security responses by itself", Kinds: macKind, Facts: []Fact{FactAutoUpdates}, Fix: "System Settings > General > Software Update > Automatic updates", Pane: paneSoftware, Budget: checkedBudget},
+	{Name: "screen-lock", Label: "Screen lock", Description: "The screen locks after 5 min idle (a desktop: 5 min after the display turns off)", Kinds: macKind, Facts: []Fact{FactScreenLock, FactDisplaySleep}, Fix: "System Settings > Lock Screen", Pane: paneLockScreen, Budget: checkedBudget},
+	{Name: "gatekeeper", Label: "Gatekeeper", Description: "Gatekeeper opens only signed apps", Kinds: macKind, Facts: []Fact{FactGatekeeper}, Fix: "System Settings > Privacy & Security > Security", Pane: paneSecurity, Budget: checkedBudget},
+	{Name: "remote-login", Label: "Remote login", Description: "Remote login is off on a laptop, on on an always-on Mac", Kinds: macKind, Facts: []Fact{FactRemoteLogin}, Fix: "System Settings > General > Sharing > Remote Login", Pane: paneSharing, Budget: checkedBudget},
+	{Name: "time-machine", Label: "Time Machine", Description: "Time Machine's last backup is within 7 days", Kinds: macKind, Facts: []Fact{FactTimeMachine}, Fix: "System Settings > General > Time Machine", Pane: paneTimeMachine, Budget: checkedBudget},
+	{Name: "macos-updates", Label: "macOS updates", Description: "No macOS update is waiting", Kinds: macKind, Facts: []Fact{FactSystemUpdates}, Fix: "System Settings > General > Software Update", Pane: paneSoftware, Budget: updatesBudget},
 }

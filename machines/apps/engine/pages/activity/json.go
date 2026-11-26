@@ -155,7 +155,7 @@ func findings(v View) []finding.JSON {
 	fs := seen(v)
 	out := make([]finding.JSON, 0, len(fs))
 	for _, f := range fs {
-		out = append(out, finding.JSON{Severity: f.Severity, Section: f.Section, Subject: f.Subject, Text: f.Text, Fix: finding.Fix{Command: f.Fix}.JSON()})
+		out = append(out, finding.JSON{Severity: f.Severity, Section: f.Section, Subject: f.Subject, Text: f.Text, Fix: finding.Fix{Command: f.Fix, InTerminal: true}.JSON()})
 	}
 	return out
 }

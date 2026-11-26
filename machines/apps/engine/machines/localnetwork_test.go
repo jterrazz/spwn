@@ -3,6 +3,7 @@ package machines
 import (
 	"testing"
 
+	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/finding"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 )
@@ -19,6 +20,25 @@ func TestARunningVMItsMacBlocksIsUnreachableNamingTheMacAndItsFix(t *testing.T) 
 		if !ok || f.Text != "linux-2 is unreachable: mac-mini has not approved station for Local Network" || f.Fix.Path != fixOnMini || f.Fix.Command != "" || f.Fix.Call != "" {
 			t.Errorf("%s blocked: %+v, %v", vm.Lifetime, f, ok)
 		}
+	}
+}
+
+func TestTheLocalNetworkPaneOpensOnlyForTheMacThisEngineRunsOn(t *testing.T) {
+	ref := machine.Ref{Name: "linux-2", On: "mac-mini"}
+	vm := VM{Name: "linux-2", Lifetime: Ephemeral, State: Running, Guest: "absent", Blocked: LocalNetworkBlock}
+	own, _ := vmFinding(ref, vm, "", false)
+	far, _ := vmFinding(ref, vm, " --on mac-mini", false)
+	if own.Fix.Pane != catalog.PaneLocalNetwork || far.Fix.Pane != "" {
+		t.Errorf("panes: this Mac %q, another %q", own.Fix.Pane, far.Fix.Pane)
+	}
+	mac := func(this bool) []finding.Finding {
+		return Findings(AllMachines{Macs: []MacView{{Name: "mac-mini", ThisMac: this, Reachable: true, Engine: EngineView{State: EngineRunning, LocalNetwork: LocalNetworkNotApproved}}}})
+	}
+	if got := mac(true); len(got) != 1 || got[0].Fix.Pane != catalog.PaneLocalNetwork {
+		t.Errorf("this Mac's own block: %+v", got)
+	}
+	if got := mac(false); len(got) != 1 || got[0].Fix.Pane != "" || got[0].Fix.Path == "" {
+		t.Errorf("another Mac's block: %+v", got)
 	}
 }
 

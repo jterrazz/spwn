@@ -36,7 +36,7 @@ func TestAnOwnJobThatIsNotThisSpwnsIsLeftOverAndRemovedByHand(t *testing.T) {
 		t.Fatalf("an own job of another Spwn is %+v", task)
 	}
 	found := background.Findings([]background.Task{task}, machine.Ref{})
-	if len(found) != 1 || found[0].Text != "com.jterrazz.spwn.agent runs /private/tmp/old/Spwn.app/Contents/MacOS/Spwn Engine, not this Spwn's" || found[0].Fix.Command != job.Removal {
+	if len(found) != 1 || found[0].Text != "com.jterrazz.spwn.agent runs /private/tmp/old/Spwn.app/Contents/MacOS/Spwn Engine, not this Spwn's" || found[0].Fix.Command != job.Removal || !found[0].Fix.InTerminal {
 		t.Errorf("its finding is %+v", found)
 	}
 }

@@ -12,4 +12,4 @@ runs:
       exit: 2
       stdout: |
           Error: infra is a server: Machines does not manage its accounts
-          Hint: manage it with your own tooling: ssh infra
+          Hint: run station overview for what infra has

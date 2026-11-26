@@ -63,13 +63,23 @@ func TestADiskAlmostFullNeedsALookUnderTenPercentAndIsBrokenUnderFive(t *testing
 	}{
 		{here, machine.Computer, 8e9, []line{{finding.NeedsALook, "disk", "station disk"}}},
 		{linux1, machine.Workspace, 4e9, []line{{finding.Broken, "disk", "station disk --on linux-1"}}},
-		{infra, machine.Server, 4e9, []line{{finding.Broken, "disk", "station machines edit infra --disk <size> --on mac-mini"}}},
+		{infra, machine.Server, 4e9, []line{{finding.Broken, "disk", ""}}},
 		{here, machine.Computer, 11e9, []line{}},
 	}
 	for _, c := range cases {
 		if got := lines(activity.Findings(c.m, c.kind, free(c.free), nil)); !slices.Equal(got, c.want) {
 			t.Errorf("%s with %d bytes free of 100 GB: Findings() = %v; want %v", c.m.Name, c.free, got, c.want)
 		}
+	}
+}
+
+func TestADiskAlmostFullOfAMacIsAFilledLineForTheTerminalAndAServersIsASentence(t *testing.T) {
+	full := series(2*time.Second, 1, func(_ int, s *activity.Sample) { s.DiskFree, s.DiskTotal = 4e9, 100e9 })
+	if got := activity.Findings(here, machine.Computer, full, nil); len(got) != 1 || !got[0].Fix.InTerminal || got[0].Fix.Command != "station disk" {
+		t.Errorf("a Mac's disk: %+v; want its command filled for the terminal", got)
+	}
+	if got := activity.Findings(infra, machine.Server, full, nil); len(got) != 1 || got[0].Fix.Call+got[0].Fix.Command+got[0].Fix.Path != "" {
+		t.Errorf("a server's disk: %+v; want a sentence with no fix", got)
 	}
 }
 
@@ -123,8 +133,11 @@ func TestABatteryAtTwentyPercentOnBatteryNeedsALook(t *testing.T) {
 	low := series(2*time.Second, 1, func(_ int, s *activity.Sample) { s.Battery = &activity.Battery{Percent: 20, OnBattery: true} })
 	charging := series(2*time.Second, 1, func(_ int, s *activity.Sample) { s.Battery = &activity.Battery{Percent: 12, Charging: true} })
 
-	if got := lines(activity.Findings(here, machine.Computer, low, nil)); !slices.Equal(got, []line{{finding.NeedsALook, "battery", "plug in"}}) {
+	if got := lines(activity.Findings(here, machine.Computer, low, nil)); !slices.Equal(got, []line{{finding.NeedsALook, "battery", ""}}) {
 		t.Errorf("20 %% on battery: Findings() = %v; want battery low", got)
+	}
+	if got := activity.Findings(here, machine.Computer, low, nil); got[0].Detail != "Plug in "+here.Name {
+		t.Errorf("battery detail %q; want the sentence that says to plug in", got[0].Detail)
 	}
 	if got := activity.Findings(here, machine.Computer, charging, nil); len(got) != 0 {
 		t.Errorf("12 %% charging: Findings() = %v; want none", got)

@@ -2042,8 +2042,16 @@
       "Word": "Fix",
       "Tone": "plain"
     },
+    "in-terminal": {
+      "Word": "Run in Terminal",
+      "Tone": "plain"
+    },
     "move": {
       "Word": "Move",
+      "Tone": "plain"
+    },
+    "open-settings": {
+      "Word": "Open",
       "Tone": "plain"
     },
     "remove": {

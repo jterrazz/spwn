@@ -144,8 +144,8 @@ func Findings(f AllMachines) []finding.Finding {
 		}
 	}
 	var out []finding.Finding
-	add := func(m machine.Ref, sev finding.Severity, subject, text, fix string) {
-		out = append(out, finding.Finding{Machine: m, Section: section.Overview, Severity: sev, Subject: subject, Text: text, Fix: finding.Fix{Command: fix}})
+	add := func(m machine.Ref, sev finding.Severity, subject, text string, fix finding.Fix) {
+		out = append(out, finding.Finding{Machine: m, Section: section.Overview, Severity: sev, Subject: subject, Text: text, Fix: fix})
 	}
 	for _, h := range f.Macs {
 		label, mac := Label(f, h), machine.Ref{Name: h.Name}
@@ -158,23 +158,23 @@ func Findings(f AllMachines) []finding.Finding {
 			switch {
 			case !macsServer(h) && s == MacAsleep:
 			case h.LAN != "" && macsServer(h):
-				add(mac, severityOf(s.Tone()), label, label+" does not answer", "station machines unlock "+label)
+				add(mac, severityOf(s.Tone()), label, label+" does not answer", finding.Fix{Command: "station machines unlock " + label, InTerminal: true})
 			case s == MacAsleep && h.Hardware.Ether != "":
 				out = append(out, finding.Finding{Machine: mac, Section: section.Overview, Severity: severityOf(s.Tone()), Subject: label, Text: label + " does not answer", Fix: finding.Fix{Call: "machines.wake", Args: map[string]string{"Name": h.Name}, On: own}})
 			default:
-				add(mac, severityOf(s.Tone()), label, label+" does not answer", "")
+				add(mac, severityOf(s.Tone()), label, label+" does not answer", finding.Fix{})
 			}
 		case MacEngineNotInstalled:
-			add(mac, severityOf(s.Tone()), label, label+" has no engine installed", "station engine start"+on)
+			add(mac, severityOf(s.Tone()), label, label+" has no engine installed", engineStartFix(on))
 		case MacEngineStopped:
-			add(mac, severityOf(s.Tone()), label, label+" has its engine stopped", "station engine start"+on)
+			add(mac, severityOf(s.Tone()), label, label+" has its engine stopped", engineStartFix(on))
 		case MacOnline:
 		}
 		if h.Reachable && h.Engine.Running() && h.Engine.LocalNetwork == LocalNetworkNotApproved {
-			out = append(out, finding.Finding{Machine: mac, Section: section.Overview, Severity: finding.NeedsALook, Subject: label, Text: NotApproved(h.Name, h.Engine.Bundled), Fix: finding.Fix{Path: LocalNetworkFix(h.Name, h.Engine.Bundled)}})
+			out = append(out, finding.Finding{Machine: mac, Section: section.Overview, Severity: finding.NeedsALook, Subject: label, Text: NotApproved(h.Name, h.Engine.Bundled), Fix: localNetworkFix(h.Name, h.Engine.Bundled, h.ThisMac)})
 		}
 		if h.Reachable && h.Engine.Running() && h.Engine.Agent.Unserved() {
-			out = append(out, finding.Finding{Machine: mac, Section: section.Overview, Severity: finding.NeedsALook, Subject: label, Text: h.Engine.Agent.Said(h.Name), Fix: finding.Fix{Command: h.Engine.Agent.Fix()}})
+			out = append(out, finding.Finding{Machine: mac, Section: section.Overview, Severity: finding.NeedsALook, Subject: label, Text: h.Engine.Agent.Said(h.Name), Fix: finding.Fix{Command: h.Engine.Agent.Fix(), InTerminal: true}})
 		}
 		if fix, ok := Behind(h, thisMac); ok && h.Reachable {
 			out = append(out, finding.Finding{Machine: mac, Section: section.Overview, Severity: finding.NeedsALook, Subject: label, Text: label + " runs " + h.StationVersion, Fix: finding.Fix{Path: fix}})
@@ -189,6 +189,26 @@ func Findings(f AllMachines) []finding.Finding {
 		out = append(out, finding.Finding{Machine: machine.Ref{Name: r.Name}, Section: section.Overview, Severity: finding.NeedsALook, Subject: r.Name, Text: r.Name + " is left out: " + r.Why, Fix: finding.Fix{Path: MacRecordFix}})
 	}
 	return finding.Rank(out)
+}
+
+// invariant: the Local Network block is lifted on the Mac itself: its pane
+// opens only for the Mac this engine runs on, and another Mac's fix is the
+// sentence that says to approve it on that Mac's screen.
+func localNetworkFix(mac string, bundled, own bool) finding.Fix {
+	fix := finding.Fix{Path: LocalNetworkFix(mac, bundled)}
+	if own {
+		fix.Pane = catalog.PaneLocalNetwork
+	}
+	return fix
+}
+
+// invariant: another Mac's engine is started from that Mac, which no call
+// reaches yet (it is said, not offered); this Mac's, from a terminal.
+func engineStartFix(on string) finding.Fix {
+	if on != "" {
+		return finding.Fix{}
+	}
+	return finding.Fix{Command: "station engine start", InTerminal: true}
 }
 
 // invariant: a Mac that hosts a server and stops answering may wait at its
@@ -229,7 +249,7 @@ func vmFinding(ref machine.Ref, vm VM, on string, bundled bool) (finding.Finding
 	server := vm.Lifetime == AlwaysOn
 	switch {
 	case vm.State == Running && vm.Blocked == LocalNetworkBlock:
-		f.Text, f.Fix = vm.Name+" is unreachable: "+NotApproved(ref.On, bundled), finding.Fix{Path: LocalNetworkFix(ref.On, bundled)}
+		f.Text, f.Fix = vm.Name+" is unreachable: "+NotApproved(ref.On, bundled), localNetworkFix(ref.On, bundled, on == "")
 	case vm.State == Running && vm.Blocked == VMUserBlock:
 		f.Text, f.Fix = vm.Name+" is unreachable: "+VMUserRefused(ref.On), finding.Fix{Path: VMUserFix}
 	case s == StandingNotCreated && vm.Birth.Gone:

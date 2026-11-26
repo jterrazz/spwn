@@ -93,7 +93,7 @@ func TestFindingsHoldACheckedSettingNotAsExpected(t *testing.T) {
 	it := checked(t, "firewall")
 	row := settings.JudgeChecked(it, true, map[catalog.Fact]settings.Fact{catalog.FactFirewall: on("off")}, settings.Expectation{}, false)
 	got := settings.Findings([]settings.Row{row}, machine.Ref{Name: "macbook-pro"})
-	if len(got) != 1 || got[0].Subject != "firewall" || got[0].Text != "Firewall: off" || got[0].Fix.Path != "System Settings > Network > Firewall" {
+	if len(got) != 1 || got[0].Subject != "firewall" || got[0].Text != "Firewall: off" || got[0].Fix.Path != "System Settings > Network > Firewall" || got[0].Fix.Pane != "x-apple.systempreferences:com.apple.Network-Settings.extension?Firewall" {
 		t.Fatalf("findings = %+v, want Firewall off fixed in System Settings", got)
 	}
 	row.Checked = settings.CheckedOffThisMac

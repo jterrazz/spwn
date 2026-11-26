@@ -34,8 +34,8 @@ func Findings(m machine.Ref, kind machine.Kind, s *Series, busiest []Process) []
 		return nil
 	}
 	var out []finding.Finding
-	add := func(sev finding.Severity, subject, text, fix string) {
-		out = append(out, finding.Finding{Machine: m, Section: section.Activity, Severity: sev, Subject: subject, Text: text, Fix: finding.Fix{Command: fix}})
+	add := func(sev finding.Severity, subject, text string, fix finding.Fix) {
+		out = append(out, finding.Finding{Machine: m, Section: section.Activity, Severity: sev, Subject: subject, Text: text, Fix: fix})
 	}
 	on := ""
 	if m.On != "" {
@@ -43,12 +43,9 @@ func Findings(m machine.Ref, kind machine.Kind, s *Series, busiest []Process) []
 	}
 	if last.DiskTotal > 0 {
 		free := float64(last.DiskFree) / float64(last.DiskTotal)
-		fix := "station disk" + on
+		fix := finding.Fix{Command: "station disk" + on, InTerminal: true}
 		if kind == machine.Server {
-			fix = "station machines edit " + m.Name + " --disk <size>"
-			if m.On != "" {
-				fix += " --on " + m.On
-			}
+			fix = finding.Fix{}
 		}
 		text := "Disk almost full: " + strconv.Itoa(int(free*100)) + " % free"
 		switch {
@@ -60,20 +57,21 @@ func Findings(m machine.Ref, kind machine.Kind, s *Series, busiest []Process) []
 	}
 	points := merged(s)
 	if heldFor(points, func(prev, x Sample) bool { return prev.Pressure == PressureCritical && x.Pressure == PressureCritical }) >= PressureFor {
-		add(finding.Broken, "memory", "Memory pressure critical", "station activity"+on)
+		add(finding.Broken, "memory", "Memory pressure critical", activityFix(on))
 	}
 	coarse := s.Coarse()
 	if heldFor(coarse, func(prev, x Sample) bool { return x.SwapUsed > prev.SwapUsed }) >= SwapFor {
-		add(finding.NeedsALook, "swap", "Swap growing", "station activity"+on)
+		add(finding.NeedsALook, "swap", "Swap growing", activityFix(on))
 	}
 	switch {
 	case last.Thermal >= ThermalCritical:
-		add(finding.Broken, "thermal", "Running hot: Critical", "")
+		add(finding.Broken, "thermal", "Running hot: Critical", finding.Fix{})
 	case last.Thermal == ThermalSerious:
-		add(finding.NeedsALook, "thermal", "Running hot: Serious", "")
+		add(finding.NeedsALook, "thermal", "Running hot: Serious", finding.Fix{})
 	}
 	if b := last.Battery; b != nil && b.OnBattery && b.Percent <= LowBattery {
-		add(finding.NeedsALook, "battery", "Battery low: "+strconv.Itoa(b.Percent)+" %", "plug in")
+		add(finding.NeedsALook, "battery", "Battery low: "+strconv.Itoa(b.Percent)+" %", finding.Fix{})
+		out[len(out)-1].Detail = "Plug in " + m.Name
 	}
 	busy := func(prev, x Sample) bool { return Between(prev, x).CPU >= BusyCPU }
 	if held := heldFor(coarse, busy); kind == machine.Server && held >= BusyFor {
@@ -86,7 +84,7 @@ func Findings(m machine.Ref, kind machine.Kind, s *Series, busiest []Process) []
 			}
 		}
 		mean := Between(first, newest).CPU
-		add(finding.NeedsALook, "cpu", m.Name+" busy: "+strconv.Itoa(int(mean+0.5))+" % for "+strconv.Itoa(int(held.Minutes()))+" min", "station activity"+on)
+		add(finding.NeedsALook, "cpu", m.Name+" busy: "+strconv.Itoa(int(mean+0.5))+" % for "+strconv.Itoa(int(held.Minutes()))+" min", activityFix(on))
 		if len(busiest) > 0 {
 			top := busiest[0]
 			holds := top.Name + " holds " + strconv.Itoa(int(top.Value+0.5)) + " % of "
@@ -131,4 +129,8 @@ func Persisting(now, kept []finding.Finding) []finding.Finding {
 		}
 	}
 	return now
+}
+
+func activityFix(on string) finding.Fix {
+	return finding.Fix{Command: "station activity" + on, InTerminal: true}
 }

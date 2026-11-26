@@ -218,3 +218,51 @@ func sortedFields(in callInput) []string {
 
 func TestFixArgsAreInputs(t *testing.T)        { judge(t, "FixArgsAreInputs") }
 func TestFixArgsAreInputsConfirm(t *testing.T) { judge(t, "FixArgsAreInputsConfirm") }
+
+// invariant: rule fix-is-a-gesture: a fix is exactly one gesture the window
+// can draw: a call, a pane, or a command the owner runs in a terminal
+// (InTerminal); a Path alone is a sentence. A Fix literal that sets a
+// Command with no Call says InTerminal, one that says InTerminal has a
+// Command, and one that sets a Pane sets no Call, Command or InTerminal.
+func ruleFixIsAGesture(w *world) []finding {
+	var out []finding
+	for _, f := range w.files {
+		if f.test {
+			continue
+		}
+		ast.Inspect(f.syntax, func(n ast.Node) bool {
+			lit, ok := n.(*ast.CompositeLit)
+			if !ok || !isFix(f.info.TypeOf(lit)) {
+				return true
+			}
+			out = append(out, judgeGesture(f, lit)...)
+			return true
+		})
+	}
+	return out
+}
+
+func judgeGesture(f *file, lit *ast.CompositeLit) []finding {
+	set := map[string]bool{}
+	for _, e := range lit.Elts {
+		if kv, ok := e.(*ast.KeyValueExpr); ok {
+			if id, ok := kv.Key.(*ast.Ident); ok {
+				set[id.Name] = true
+			}
+		}
+	}
+	bad := func(what string) []finding {
+		return []finding{{"fix-is-a-gesture", f.at(lit.Pos()), what}}
+	}
+	switch {
+	case set["Command"] && !set["Call"] && !set["InTerminal"]:
+		return bad("a fix that is a command and no call says InTerminal: the owner runs it in a terminal")
+	case set["InTerminal"] && !set["Command"]:
+		return bad("a fix that says InTerminal carries the Command it fills in")
+	case set["Pane"] && (set["Call"] || set["Command"] || set["InTerminal"]):
+		return bad("a fix that opens a pane is that one gesture alone")
+	}
+	return nil
+}
+
+func TestFixIsAGesture(t *testing.T) { judge(t, "FixIsAGesture") }

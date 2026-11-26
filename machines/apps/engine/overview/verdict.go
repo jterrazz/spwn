@@ -24,23 +24,25 @@ func (Upkeep) Enum() []string { return []string{string(NeedsYou), string(CanWait
 type Verb string
 
 const (
-	VerbReview      Verb = "review"
-	VerbRestart     Verb = "restart"
-	VerbStart       Verb = "start"
-	VerbTryAgain    Verb = "try-again"
-	VerbUpdate      Verb = "update"
-	VerbRemove      Verb = "remove"
-	VerbDelete      Verb = "delete"
-	VerbUpgrade     Verb = "upgrade"
-	VerbWake        Verb = "wake"
-	VerbMove        Verb = "move"
-	VerbStartEngine Verb = "start-engine"
-	VerbFix         Verb = "fix"
+	VerbReview       Verb = "review"
+	VerbRestart      Verb = "restart"
+	VerbStart        Verb = "start"
+	VerbTryAgain     Verb = "try-again"
+	VerbUpdate       Verb = "update"
+	VerbRemove       Verb = "remove"
+	VerbDelete       Verb = "delete"
+	VerbUpgrade      Verb = "upgrade"
+	VerbWake         Verb = "wake"
+	VerbMove         Verb = "move"
+	VerbStartEngine  Verb = "start-engine"
+	VerbOpenSettings Verb = "open-settings"
+	VerbInTerminal   Verb = "in-terminal"
+	VerbFix          Verb = "fix"
 )
 
 func (Verb) Enum() []string {
 	return []string{string(VerbReview), string(VerbRestart), string(VerbStart), string(VerbTryAgain), string(VerbUpdate), string(VerbRemove), string(VerbDelete), string(VerbUpgrade), string(VerbWake),
-		string(VerbMove), string(VerbStartEngine), string(VerbFix)}
+		string(VerbMove), string(VerbStartEngine), string(VerbOpenSettings), string(VerbInTerminal), string(VerbFix)}
 }
 
 type Mark string
@@ -117,6 +119,12 @@ func VerbOf(f finding.Finding) Verb {
 	}
 	if f.Section == section.Ports || (f.Section == section.Activity && f.Subject != activity.SubjectDisk) {
 		return VerbReview
+	}
+	switch {
+	case f.Fix.Pane != "":
+		return VerbOpenSettings
+	case f.Fix.InTerminal:
+		return VerbInTerminal
 	}
 	return VerbFix
 }

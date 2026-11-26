@@ -8,4 +8,4 @@ runs:
           {"v":2,"id":"1","watch":"overview.read","in":{}}
       exit: 0
       stdout: |
-          [{"Tone":"bad","Sentence":"1 thing needs you.","Line":"The rest is fine. 2 machines on macbook-pro"},[["com.example.brain.x-snapshot","needs-you","remove"],["mise","can-wait","update"],["brew","can-wait","update"],["firewall","can-wait","fix"],["~/.tart","can-wait","move"],["com.bjango.istatmenus.installer","can-wait","fix"],["com.docker.socket","can-wait","fix"],["com.docker.vmnetd","can-wait","fix"]]]
+          [{"Tone":"bad","Sentence":"1 thing needs you.","Line":"The rest is fine. 2 machines on macbook-pro"},[["com.example.brain.x-snapshot","needs-you","remove"],["mise","can-wait","update"],["brew","can-wait","update"],["firewall","can-wait","open-settings"],["~/.tart","can-wait","move"],["com.bjango.istatmenus.installer","can-wait","in-terminal"],["com.docker.socket","can-wait","in-terminal"],["com.docker.vmnetd","can-wait","in-terminal"]]]

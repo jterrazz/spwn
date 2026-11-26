@@ -43,6 +43,10 @@ type Fix struct {
 	Confirm string
 	Command string
 	Path    string
+	// value: the System Settings pane that holds the fix, as the URL that opens it; set only when the machine the fix is on is the Mac whose engine judged it.
+	Pane string `json:",omitempty"`
+	// invariant: Command is the owner's to run from a terminal (it asks for admin, or asks a question at a terminal), never Spwn's: a client fills it into Terminal and runs nothing until the owner presses Return.
+	InTerminal bool `json:",omitempty"`
 }
 
 type Finding struct {
