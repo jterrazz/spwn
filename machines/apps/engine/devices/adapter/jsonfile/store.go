@@ -33,9 +33,9 @@ type Store struct {
 	anchor contract.Anchor
 	mu     sync.Mutex
 	// value: the highest head this process read from the anchor or wrote
-	// to it. While the file's generation is that head's, the anchor is not
-	// read again, so a walk costs no read of it; an anchor read lower than
-	// it is never believed.
+	// to it. While the file's book is that head's, generation and digest,
+	// the anchor is not read again, so a walk costs no read of it; an
+	// anchor read lower than it is never believed.
 	held  devices.Head
 	known bool
 	// value: this Mac's running engine, whose head a process that is not
@@ -105,7 +105,7 @@ func (s *Store) Read(ctx context.Context) (devices.Book, devices.Head, error) {
 		}
 		return devices.Book{}, devices.Head{}, err
 	}
-	anchored, err := s.anchored(ctx, book.Generation, sum)
+	anchored, err := s.anchored(ctx, book.Head(), sum)
 	if err != nil {
 		return devices.Book{}, devices.Head{}, err
 	}
@@ -150,13 +150,13 @@ func (s *Store) settled(ctx context.Context, sum string) (devices.Head, error) {
 	return s.hold.Head, nil
 }
 
-func (s *Store) anchored(ctx context.Context, generation int, sum string) (devices.Head, error) {
+func (s *Store) anchored(ctx context.Context, head devices.Head, sum string) (devices.Head, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if s.sole {
 		return s.settled(ctx, sum)
 	}
-	if s.known && s.held.Generation == generation {
+	if s.known && s.held == head {
 		return s.held, nil
 	}
 	if s.peer != nil {
