@@ -2,7 +2,7 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { mixed, ratio, rgbOf } from '../contrast';
+import { ratio, rgbOf } from '../contrast';
 
 const TOKENS = readFileSync(join(import.meta.dirname, '..', 'tokens.css'), 'utf8');
 
@@ -51,8 +51,6 @@ const QUIET_GROUNDS = ['s0', 's1', 's2'] as const;
 const TEXTS = ['t1', 't2', 't3'] as const;
 
 const MARKS = ['ok', 'bad', 'you', 'busy', 't3'] as const;
-
-const TONES = ['ok', 'you', 'bad', 'busy'] as const;
 
 const TEXT_BAR = 4.5;
 
@@ -153,29 +151,6 @@ describe('contrast', () => {
 
         // Then - none is below the bar of a mark
         expect(below(MARK_BAR, measures)).toStrictEqual([]);
-    });
-
-    test('a tone reads at 4.5:1 on its own pill over s0 to s2, the steps a pill sits on', () => {
-        // Given - each tone as text on its fill, the tone at its share over s0 to s2
-        const share = Number.parseFloat(tokenOf('tone-fill')) / 100;
-        const measures = TONES.flatMap((tone) =>
-            overGrounds(
-                `${tone} on its pill over`,
-                (ground) => ratio(colourOf(tone), mixed(colourOf(ground), colourOf(tone), share)),
-                QUIET_GROUNDS,
-            ),
-        );
-
-        // Then - none is below the bar of text
-        expect(below(TEXT_BAR, measures)).toStrictEqual([]);
-    });
-
-    test('the pill is drawn at 8 % of its tone, and its line at 24 %', () => {
-        // Given - the two shares tokens.css names
-        const shares = [tokenOf('tone-fill'), tokenOf('tone-line')];
-
-        // Then - they are the record's
-        expect(shares).toStrictEqual(['8%', '24%']);
     });
 
     test('every scale token a rule draws is declared in tokens.css, and every one declared is drawn', () => {

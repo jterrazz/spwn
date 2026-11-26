@@ -74,14 +74,8 @@ import { SearchField } from '../../ui/search-field';
 import { SEARCH_FIELD_STORIES } from '../../ui/search-field.stories';
 import { Sign } from '../../ui/sign';
 import { SIGN_STORIES } from '../../ui/sign.stories';
-import { StateDot } from '../../ui/state-dot';
-import { STATE_DOT_STORIES } from '../../ui/state-dot.stories';
 import { StateMark } from '../../ui/state-mark';
 import { STATE_MARK_STORIES } from '../../ui/state-mark.stories';
-import { StatePill } from '../../ui/state-pill';
-import { STATE_PILL_STORIES } from '../../ui/state-pill.stories';
-import { StateSign } from '../../ui/state-sign';
-import { STATE_SIGN_STORIES } from '../../ui/state-sign.stories';
 import { Switch } from '../../ui/switch';
 import { SWITCH_STORIES } from '../../ui/switch.stories';
 import { Tile } from '../../ui/tile';
@@ -103,10 +97,7 @@ export const ENTRIES: readonly Entry[] = [
     entry('MachineIcon', 'Marks', { Component: MachineIcon, stories: MACHINE_ICON_STORIES }),
     entry('MachineChip', 'Marks', { Component: MachineChip, stories: MACHINE_CHIP_STORIES }),
     entry('StateMark', 'Marks', { Component: StateMark, stories: STATE_MARK_STORIES }),
-    entry('StateDot', 'Marks', { Component: StateDot, stories: STATE_DOT_STORIES }),
     entry('Sign', 'Marks', { Component: Sign, stories: SIGN_STORIES }),
-    entry('StatePill', 'Marks', { Component: StatePill, stories: STATE_PILL_STORIES }),
-    entry('StateSign', 'Marks', { Component: StateSign, stories: STATE_SIGN_STORIES }),
     entry('TypeTag', 'Marks', { Component: TypeTag, stories: TYPE_TAG_STORIES }),
     entry('Value', 'Marks', { Component: Value, frame: 'meter', stories: VALUE_STORIES }),
     entry('DotStrip', 'Marks', { Component: DotStrip, stories: DOT_STRIP_STORIES }),

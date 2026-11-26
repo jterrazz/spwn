@@ -11,7 +11,7 @@ type Rule = { name: string; shape: RegExp };
 const RULES: readonly Rule[] = [
     {
         name: 'a tone or a word written into a state component',
-        shape: /<(?:StatePill|StateDot|Verdict)\b[^<>]*?\b(?:tone|word)=(?:"|\{\s*['"`])/gu,
+        shape: /<(?:StateMark|Verdict)\b[^<>]*?\b(?:tone|word)=(?:"|\{\s*['"`])/gu,
     },
     { name: 'a tone written into a state', shape: /\btone:\s*['"`]/gu },
     {
@@ -153,7 +153,7 @@ describe('words', () => {
     test('each pattern finds the mapping it names, and none a lawful line', () => {
         // Given - one forbidden line per rule, and the lawful lines nearest to each
         const forbidden = [
-            '<StatePill tone="warn" word={WORDS[port.Answer]} />',
+            '<StateMark tone="warn" word={WORDS[port.Answer]} />',
             '<Verdict line={line} size="tab" title="t" word="Not given" />',
             "state={{ tone: 'ok', word: 'settled' }}",
             "return need.Section === 'ports';",
@@ -162,7 +162,7 @@ describe('words', () => {
             '<Lines memory={vm} reading="Reading its console…" />',
         ];
         const lawful = [
-            '<StatePill tone={TONES[port.Answer]} word={WORDS[port.Answer]} />',
+            '<StateMark tone={TONES[port.Answer]} word={WORDS[port.Answer]} />',
             '<Verdict line={line} size="tab" title="t" {...ownState(\'not-given\')} />',
             '<Chart label={label} marks={marks} size="activity" tone="new" values={values} />',
             "if (port.Answer === '') {",
