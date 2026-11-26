@@ -7,6 +7,7 @@ wt=${1:-}; label=${2:-}
 [ ! -e $RUN/vm-hold/all ] || { echo "FAIL darwin-build: $RUN/vm-hold/all present"; exit 1; }
 sub=$(git -C "$wt" rev-parse --show-prefix); sha=$(git -C "$wt" rev-parse HEAD); sha9=${sha:0:9}
 ver=${DARWIN_VERSION:-v3.1.0-local-$sha9}
+strip=$(sed -n 's/^ *RELEASE_STRIP: //p' "$(git -C "$wt" rev-parse --show-toplevel)/.github/workflows/publish.yaml"); [ -n "$strip" ] || { echo "FAIL darwin-build: no RELEASE_STRIP in .github/workflows/publish.yaml"; exit 1; }
 gover=$(awk '$1=="go"{print $2; exit}' "$wt/go.work")
 case "$gover" in 1.27.3) gosum=dd3908cf20959d798c1e06ebe5b72213f0505ce01373b40ce3110975a6cd99c2 ;; *) echo "FAIL darwin-build: no pinned checksum for go $gover (add it from go.dev/dl/?mode=json)"; exit 1 ;; esac
 log=$RUN/inst-darwin-$label.log; : > $log
@@ -34,7 +35,7 @@ vmx "set -e; cd ~; curl -fsSLo go.tgz https://go.dev/dl/go$gover.darwin-arm64.ta
 env='export PATH=$HOME/gotool/go/bin:$PATH MACOSX_DEPLOYMENT_TARGET=14.0 CGO_ENABLED=1 GOOS=darwin GOARCH=arm64; sdk=$(xcrun --sdk macosx --show-sdk-path); export CC="clang -arch arm64 -isysroot $sdk -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET"; cd ~/station/'"$sub"
 vmx "set -e; $env; if grep -q '^enclave:' Makefile; then make enclave; fi" || die "make enclave"
 vmx "set -e; $env; for d in \$(go list -m -f '{{.Dir}}'); do echo module \$d; (cd \$d && go build ./... && go vet ./...) || exit 1; done" || die "go build ./... or go vet (per workspace module)"
-vmx "set -e; $env; go build -ldflags '-X github.com/jterrazz/studio-station/apps/engine/wire.version=$ver' -o ~/station-bin ./apps/engine/cmd/station; go version -m ~/station-bin | grep -q CGO_ENABLED=1; lipo -archs ~/station-bin; vtool -show-build ~/station-bin | grep minos; ~/station-bin --version; otool -L ~/station-bin; file ~/station-bin; shasum -a 256 ~/station-bin" || die "release build"
+vmx "set -e; $env; go build -ldflags '$strip -X github.com/jterrazz/studio-station/apps/engine/wire.version=$ver' -o ~/station-bin ./apps/engine/cmd/station; go version -m ~/station-bin | grep -q CGO_ENABLED=1; lipo -archs ~/station-bin; vtool -show-build ~/station-bin | grep minos; ~/station-bin --version; otool -L ~/station-bin; file ~/station-bin; shasum -a 256 ~/station-bin" || die "release build"
 vmx "set -e; $env; command -v cargo >/dev/null || [ -x \$HOME/.cargo/bin/cargo ] || curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal >/dev/null 2>&1; . \$HOME/.cargo/env; cd apps/desktop/src-tauri; cargo test --bin spwn-window" || die "cargo test of the window (apps/desktop/src-tauri)"
 vmx "set -e; $env; ../scripts/sign-macos-test.sh" || die "scripts/sign-macos-test.sh"
 if [ -n "${DARWIN_STEPS:-}" ]; then vmx "set -e; $env; $DARWIN_STEPS" || die "DARWIN_STEPS"; fi

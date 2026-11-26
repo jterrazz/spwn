@@ -10,7 +10,7 @@ Machines ships two artefacts, the `station` binary and the window's `Spwn.app`, 
 
 ## What a release carries
 
-Each binary is released as an asset named `station-<os>-<arch>`, for `linux` and `darwin` on `arm64` and `amd64`, all listed in the release's one `checksums.txt`; the install script asks for its binary's name and refuses a binary the checksums do not vouch for. A release that renames those assets breaks every machine's install path.
+Each binary is released as an asset named `station-<os>-<arch>`, for `linux` and `darwin` on `arm64` and `amd64`, all listed in the release's one `checksums.txt`; the install script asks for its binary's name and refuses a binary the checksums do not vouch for. A release that renames those assets breaks every machine's install path. A release binary is linked with `-s -w` (`RELEASE_STRIP`, the one line of `.github/workflows/publish.yaml` that says so, which the darwin gate reads too): no symbol table and no DWARF, a third smaller and half the download, while a panic's trace and `go version -m` stay readable; a binary built from a checkout (`make build`, the tests') keeps its symbols.
 
 The window rides the same release: `Spwn_darwin_arm64.zip` (its first install), then `Spwn.app.tar.gz`, its `.sig` and `latest.json` (its update), listed in the same `checksums.txt`. A release that renames these, or a window whose `plugins.updater` endpoint moves, strands every installed window.
 

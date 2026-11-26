@@ -7,4 +7,5 @@ type Files interface {
 	WriteFile(path string, data []byte, perm fs.FileMode) error
 	MkdirAll(path string, perm fs.FileMode) error
 	Remove(path string) error
+	Stat(path string) (fs.FileInfo, error)
 }

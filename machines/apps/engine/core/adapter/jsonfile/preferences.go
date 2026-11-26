@@ -5,8 +5,10 @@ import (
 	"encoding/json"
 	"errors"
 	"io/fs"
+	"maps"
 	"path"
 	"slices"
+	"sync"
 
 	"github.com/jterrazz/studio-station/apps/engine/core/contract"
 	"github.com/jterrazz/studio-station/apps/engine/core/store"
@@ -21,6 +23,13 @@ type Preferences struct {
 	files  Files
 	dir    string
 	groups []string
+
+	mu     sync.Mutex
+	held   bool
+	gen    uint64
+	stamp  store.Stamp
+	absent bool
+	doc    map[string]json.RawMessage
 }
 
 var (
@@ -55,6 +64,7 @@ func (p *Preferences) Write(group string, v any) error {
 	if err != nil {
 		return err
 	}
+	doc = maps.Clone(doc)
 	raw, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -68,6 +78,37 @@ func (p *Preferences) Write(group string, v any) error {
 }
 
 func (p *Preferences) load() (map[string]json.RawMessage, error) {
+	// invariant: the file is read again only when it changed: a write of this
+	// process (store.Written moved) or a stat that differs from the one the
+	// document was read under. A file that is not there is held as absent the
+	// same way, so an idle engine asking each second opens nothing.
+	gen := store.Written()
+	info, statErr := p.files.Stat(p.File())
+	absent := errors.Is(statErr, fs.ErrNotExist)
+	var stamp store.Stamp
+	if statErr == nil {
+		stamp = store.StampOf(info)
+	}
+	p.mu.Lock()
+	if p.held && p.gen == gen && p.absent == absent && p.stamp == stamp && (statErr == nil || absent) {
+		doc := p.doc
+		p.mu.Unlock()
+		return doc, nil
+	}
+	p.mu.Unlock()
+	doc, err := p.read()
+	if err != nil {
+		return nil, err
+	}
+	if statErr == nil || absent {
+		p.mu.Lock()
+		p.held, p.gen, p.stamp, p.absent, p.doc = true, gen, stamp, absent, doc
+		p.mu.Unlock()
+	}
+	return doc, nil
+}
+
+func (p *Preferences) read() (map[string]json.RawMessage, error) {
 	doc := map[string]json.RawMessage{}
 	data, err := p.files.ReadFile(p.File())
 	if errors.Is(err, fs.ErrNotExist) {
@@ -119,7 +160,9 @@ func (p *Preferences) save(doc map[string]json.RawMessage) error {
 	if err := p.files.MkdirAll(p.dir, 0o700); err != nil {
 		return &store.UnwritableError{Path: p.File(), Cause: err}
 	}
-	if err := p.files.WriteFile(p.File(), out.Bytes(), 0o600); err != nil {
+	err := p.files.WriteFile(p.File(), out.Bytes(), 0o600)
+	store.Wrote()
+	if err != nil {
 		return &store.UnwritableError{Path: p.File(), Cause: err}
 	}
 	return nil

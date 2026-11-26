@@ -5,9 +5,12 @@ import (
 	"encoding/json"
 	"errors"
 	"io/fs"
+	"maps"
 	"path"
+	"slices"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/core/store"
@@ -23,6 +26,7 @@ type Files interface {
 	MkdirAll(path string, perm fs.FileMode) error
 	ReadDir(path string) ([]fs.DirEntry, error)
 	Remove(path string) error
+	Stat(path string) (fs.FileInfo, error)
 }
 
 type Store struct {
@@ -31,6 +35,20 @@ type Store struct {
 	// invariant: one turn of this process at a time holds the records,
 	// waited for as long as ctx lasts.
 	turn chan struct{}
+
+	mu     sync.Mutex
+	listed [2]*listing
+}
+
+// invariant: a listing is what the folder held when it was read, with what
+// stat said of the folder and of each record before it was read; it answers
+// again, as a copy, while no store of this process wrote since and every stat
+// is the same, so an engine that lists the records each second opens none.
+type listing struct {
+	gen   uint64
+	dir   store.Stamp
+	files map[string]store.Stamp
+	out   []machines.Record
 }
 
 var (
@@ -175,7 +193,9 @@ func (s *Store) put(r machines.Record) error {
 	if err != nil {
 		return err
 	}
-	return s.files.WriteFile(s.recordFile(r.Name), append(data, '\n'), 0o600)
+	err = s.files.WriteFile(s.recordFile(r.Name), append(data, '\n'), 0o600)
+	store.Wrote()
+	return err
 }
 
 func (s *Store) List(context.Context) ([]machines.Record, error) { return s.list(false) }
@@ -183,19 +203,84 @@ func (s *Store) List(context.Context) ([]machines.Record, error) { return s.list
 func (s *Store) ListReadable(context.Context) ([]machines.Record, error) { return s.list(true) }
 
 func (s *Store) list(skipDamaged bool) ([]machines.Record, error) {
+	which := 0
+	if skipDamaged {
+		which = 1
+	}
+	gen := store.Written()
+	var dir store.Stamp
+	info, statErr := s.files.Stat(s.dir)
+	if statErr == nil {
+		dir = store.StampOf(info)
+	}
+	s.mu.Lock()
+	kept := s.listed[which]
+	s.mu.Unlock()
+	if statErr == nil && kept != nil && kept.gen == gen && kept.dir == dir && s.unchanged(kept.files) {
+		return copyRecords(kept.out), nil
+	}
+	out, stamps, err := s.readAll(skipDamaged)
+	if err != nil || statErr != nil || stamps == nil {
+		return out, err
+	}
+	s.mu.Lock()
+	s.listed[which] = &listing{gen: gen, dir: dir, files: stamps, out: copyRecords(out)}
+	s.mu.Unlock()
+	return out, nil
+}
+
+func (s *Store) unchanged(files map[string]store.Stamp) bool {
+	for at, was := range files {
+		info, err := s.files.Stat(at)
+		if err != nil || store.StampOf(info) != was {
+			return false
+		}
+	}
+	return true
+}
+
+func copyRecords(in []machines.Record) []machines.Record {
+	if in == nil {
+		return nil
+	}
+	out := make([]machines.Record, len(in))
+	for i, r := range in {
+		r.Env = maps.Clone(r.Env)
+		r.Mounts = slices.Clone(r.Mounts)
+		if r.Birth != nil {
+			b := *r.Birth
+			b.LastLines = slices.Clone(b.LastLines)
+			r.Birth = &b
+		}
+		if r.Owner != nil {
+			o := *r.Owner
+			r.Owner = &o
+		}
+		out[i] = r
+	}
+	return out
+}
+
+func (s *Store) readAll(skipDamaged bool) ([]machines.Record, map[string]store.Stamp, error) {
 	entries, err := s.files.ReadDir(s.dir)
 	if errors.Is(err, fs.ErrNotExist) {
-		return nil, nil
+		return nil, nil, nil
 	}
 	if err != nil {
-		return nil, &store.UnreadableError{Path: s.dir, Cause: err}
+		return nil, nil, &store.UnreadableError{Path: s.dir, Cause: err}
 	}
 	var out []machines.Record
+	stamps, stamped := map[string]store.Stamp{}, true
 	for _, e := range entries {
 		if e.IsDir() || !strings.HasSuffix(e.Name(), ".json") {
 			continue
 		}
 		at := path.Join(s.dir, e.Name())
+		if info, err := s.files.Stat(at); err == nil {
+			stamps[at] = store.StampOf(info)
+		} else {
+			stamped = false
+		}
 		f, err := s.read(at)
 		var unreadable *store.UnreadableError
 		if skipDamaged && errors.As(err, &unreadable) && store.OnlyNewer(err) == nil {
@@ -205,16 +290,21 @@ func (s *Store) list(skipDamaged bool) ([]machines.Record, error) {
 			if !errors.As(err, &unreadable) {
 				err = &store.UnreadableError{Path: at, Cause: err}
 			}
-			return nil, err
+			return nil, nil, err
 		}
 		out = append(out, f.record())
 	}
 	sort.Slice(out, func(i, j int) bool { return out[i].Name < out[j].Name })
-	return out, nil
+	if !stamped {
+		stamps = nil
+	}
+	return out, stamps, nil
 }
 
 func (s *Store) Delete(_ context.Context, name string) error {
-	if err := s.files.Remove(s.recordFile(name)); err != nil && !errors.Is(err, fs.ErrNotExist) {
+	err := s.files.Remove(s.recordFile(name))
+	store.Wrote()
+	if err != nil && !errors.Is(err, fs.ErrNotExist) {
 		return err
 	}
 	return nil

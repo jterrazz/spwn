@@ -44,12 +44,12 @@ func (m machine) awakeWaker() *awakecalls.Waker {
 			return awake.Slept{Ended: s.Ended, After: time.Duration(s.After) * time.Second}, awakeDown(err)
 		},
 		Installed: m.engineInstalled,
-	}, awakecalls.WakerOptions{Power: m.powerPort, ThisMachine: m.kind, ThisMacName: m.where.Machine, Zone: time.Local, MacNeverSleeps: m.macNeverSleeps})
+	}, awakecalls.WakerOptions{Power: m.powerPort, ThisMachine: m.kind, ThisMacName: m.where.Machine, Zone: time.Local, MacNeverSleeps: m.sleep.Fresh})
 }
 
 // value: this Mac's own sleep timer reads off, within the settings' read
 // budget; false on a Linux machine or a Mac that cannot say.
-func (m machine) macNeverSleeps(ctx context.Context) bool {
+func (m machine) readMacNeverSleeps(ctx context.Context) bool {
 	if m.kind != catalog.Mac {
 		return false
 	}

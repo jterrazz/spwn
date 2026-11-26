@@ -3,8 +3,10 @@ package jsonfile_test
 import (
 	"context"
 	"errors"
+	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -15,6 +17,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/machines/contract"
 	"github.com/jterrazz/studio-station/apps/engine/machines/contract/contracttest"
 	"github.com/jterrazz/studio-station/apps/engine/platform/local"
+	"github.com/jterrazz/studio-station/apps/engine/platform/local/localtest"
 )
 
 func disk() jsonfile.Files { return local.New(nil, nil, nil, nil).FS }
@@ -181,5 +184,89 @@ func TestAClaimHoldsTheRecordsAgainstAnotherProcessAndItsWaitEndsWithItsContext(
 	}
 	if _, err := first.Get(ctx, "web"); err == nil {
 		t.Error("the claim that gave up wrote its record")
+	}
+}
+
+type openedRecords struct {
+	jsonfile.Files
+	reads, listings int
+}
+
+func (o *openedRecords) ReadFile(p string) ([]byte, error) {
+	o.reads++
+	return o.Files.ReadFile(p)
+}
+
+func (o *openedRecords) ReadDir(p string) ([]fs.DirEntry, error) {
+	o.listings++
+	return o.Files.ReadDir(p)
+}
+
+func TestTheRecordsAreListedAgainOnlyWhenOneChanged(t *testing.T) {
+	ctx := context.Background()
+	dir := filepath.Join(t.TempDir(), "vms")
+	files := &openedRecords{Files: disk()}
+	s := jsonfile.New(files, dir)
+	for _, name := range []string{"api", "web"} {
+		if err := s.Put(ctx, machines.Record{Name: name, Image: "linux", CPUs: 2, Env: map[string]string{"A": "1"}}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	names := func() string {
+		got, err := s.List(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+		out := make([]string, 0, len(got))
+		for _, r := range got {
+			out = append(out, r.Name)
+		}
+		return strings.Join(out, ",")
+	}
+
+	if names() != "api,web" {
+		t.Fatalf("listed %q", names())
+	}
+	reads, listings := files.reads, files.listings
+	for range 5 {
+		names()
+	}
+	if files.reads != reads || files.listings != listings {
+		t.Errorf("5 lists of unchanged records opened %d files and %d folders; want none", files.reads-reads, files.listings-listings)
+	}
+
+	got, _ := s.List(ctx)
+	got[0].Env["A"] = "changed"
+	if again, _ := s.List(ctx); again[0].Env["A"] != "1" {
+		t.Errorf("a caller changing a listed record changed the next listing: %v", again[0].Env)
+	}
+
+	other := jsonfile.New(disk(), dir)
+	_ = other.Put(ctx, machines.Record{Name: "db", Image: "linux"})
+	if names() != "api,db,web" {
+		t.Errorf("after another store added a record, listed %q; want api,db,web", names())
+	}
+	_ = os.WriteFile(filepath.Join(dir, "web.json"), []byte(`{"v":2,"name":"web","image":"linux","cpus":8}`), 0o600)
+	if got, _ := s.List(ctx); got[2].CPUs != 8 {
+		t.Errorf("after a record was rewritten by hand, web has %d CPUs; want 8", got[2].CPUs)
+	}
+	_ = other.Delete(ctx, "db")
+	if names() != "api,web" {
+		t.Errorf("after a record was deleted, listed %q; want api,web", names())
+	}
+}
+
+func TestARecordWrittenByAnotherStoreOfTheProcessIsListedWhateverTheDisksStamp(t *testing.T) {
+	ctx := context.Background()
+	files := localtest.NewFS()
+	mine, theirs := jsonfile.New(files, "/vms"), jsonfile.New(files, "/vms")
+	for _, cpus := range []int{2, 4, 8} {
+		if err := theirs.Put(ctx, machines.Record{Name: "api", Image: "linux", CPUs: cpus}); err != nil {
+			t.Fatal(err)
+		}
+		got, err := mine.List(ctx)
+		if err != nil || len(got) != 1 || got[0].CPUs != cpus {
+			t.Fatalf("after another store wrote %d CPUs, listed %+v (%v)", cpus, got, err)
+		}
 	}
 }
