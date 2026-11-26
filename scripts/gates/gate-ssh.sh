@@ -40,7 +40,8 @@ sound() {
 secret() {
   local perm uid
   read -r perm _ uid _ <<< "$(command -p ls -ldn "$1" 2> /dev/null)"
-  [ "$uid" = "$ME" ] && [ "${perm:4:6}" = ------ ]
+  [ "$uid" = "$ME" ] || return 1
+  case ${perm:0:10} in -rw------- | -r--------) ;; *) return 1 ;; esac
 }
 
 ssh_folders() {
@@ -85,7 +86,7 @@ check_key() {
   local name=$1 r
   route_file "$name" "$2" "a gate route takes a dedicated key kept outside ~/.ssh, so this route is refused until one exists, and creating and authorising that key is the owner's gesture (this script never creates, copies or moves a key)"
   r=$RESOLVED
-  secret "$r" || refuse "route file $f: $name $r must be owned by you and readable by you alone (mode 600 or 400)"
+  secret "$r" || refuse "route file $f: $name $r must be owned by you and readable by you alone (mode 600 or 400 exactly)"
   [ -r "$r" ] || refuse "route file $f: $name $r is not a readable file"
   ROUTE+=(-o "IdentityFile=$r")
 }

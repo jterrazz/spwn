@@ -92,7 +92,7 @@ route vm-key-alias "KEY=$H/sshalias/gate-ssh-absent-key"
 route vm-kh-root "KEY=$H/k/vm_key" KNOWN_HOSTS=/etc/passwd
 ln -s "$H/kh" "$H/kh-link"; route vm-kh-link "KEY=$H/k/vm_key" "KNOWN_HOSTS=$H/kh-link"
 mkdir -p "$H/khd"; : > "$H/khd/kh"; chmod 777 "$H/khd"; route vm-kh-dir "KEY=$H/k/vm_key" "KNOWN_HOSTS=$H/khd/kh"
-for m in 644 640 400; do : > "$H/k/key$m"; chmod $m "$H/k/key$m"; route vm-key$m "KEY=$H/k/key$m"; done
+for m in 644 640 400 700 200 4600; do : > "$H/k/key$m"; chmod $m "$H/k/key$m"; route vm-key$m "KEY=$H/k/key$m"; done
 route vm-hopkey644 HOP=ops@hop-host "HOP_KEY=$H/k/key644"
 mkdir -p "$H/kd"; : > "$H/kd/key"; chmod 777 "$H/kd"; route vm-keydir "KEY=$H/kd/key"
 route vm-keyroot KEY=/etc/ssh/ssh_host_ed25519_key
@@ -255,7 +255,7 @@ refused "KNOWN_HOSTS $H/kh-ww is not yours alone" gate_ssh ssh vm-kh-ww true
 refused "KNOWN_HOSTS /etc/passwd is not yours alone" gate_ssh ssh vm-kh-root true
 refused "KNOWN_HOSTS $H/kh-link is a symbolic link" gate_ssh ssh vm-kh-link true
 refused "the folder of KNOWN_HOSTS" gate_ssh ssh vm-kh-dir true
-for h in vm-key644 vm-key640 vm-hopkey644; do refused "must be owned by you and readable by you alone" gate_ssh ssh $h true; done
+for h in vm-key644 vm-key640 vm-hopkey644 vm-key700 vm-key200 vm-key4600; do refused "must be owned by you and readable by you alone" gate_ssh ssh $h true; done
 refused "the folder of KEY" gate_ssh ssh vm-keydir true
 [ "$(gate_ssh ssh vm-key400 true | grep '^IdentityFile=')" = "IdentityFile=$H/k/key400" ] || bad "a key of mode 400 is refused"
 if [ -f /etc/ssh/ssh_host_ed25519_key ]; then
