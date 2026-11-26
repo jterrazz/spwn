@@ -95,7 +95,7 @@
     height: 20px;
     flex: none;
     border-radius: 50%;
-    background: var(--s1);
+    background: var(--s2);
 }
 .mac {
     display: flex;

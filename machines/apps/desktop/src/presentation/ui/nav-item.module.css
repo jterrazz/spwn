@@ -13,7 +13,7 @@
     transition: background var(--motion-hover);
 }
 .item:hover {
-    background: var(--s1);
+    background: var(--s2);
     color: var(--t1);
 }
 .item[aria-current='page'] {

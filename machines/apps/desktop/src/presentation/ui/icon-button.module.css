@@ -11,7 +11,7 @@
     transition: background var(--motion-hover);
 }
 .button:hover {
-    background: var(--s1);
+    background: var(--s2);
     color: var(--t1);
 }
 .button:active {

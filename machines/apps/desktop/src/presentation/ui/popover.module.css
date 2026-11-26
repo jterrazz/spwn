@@ -114,7 +114,7 @@
     min-width: 0;
 }
 .row[data-active] {
-    background: var(--s1);
+    background: var(--s2);
     color: var(--t1);
 }
 .row[aria-selected='true'] {

@@ -195,7 +195,7 @@
     height: 28px;
     padding: 0 var(--space-8);
     border-radius: var(--radius-control);
-    background: var(--s1);
+    background: var(--s2);
     color: var(--t3);
     font-size: var(--text-body);
     cursor: pointer;
@@ -216,7 +216,7 @@
     color: var(--t4);
 }
 .find:hover:not(:disabled) {
-    background: var(--s2);
+    background: var(--s3);
 }
 .find:disabled {
     cursor: default;

@@ -102,6 +102,18 @@ describe('contrast', () => {
         expect(below(TEXT_BAR, labels)).toStrictEqual([]);
     });
 
+    test('a control one step above its surface differs from it by 1.06:1 at least, the path bar to its Find box included', () => {
+        // Given - each surface step against the step a control on it takes
+        const steps: Measure[] = [
+            ['--s1 on --s0', ratio(colourOf('s1'), colourOf('s0'))],
+            ['--s2 on --s1 (the bar and its Find)', ratio(colourOf('s2'), colourOf('s1'))],
+            ['--s3 on --s2', ratio(colourOf('s3'), colourOf('s2'))],
+        ];
+
+        // Then - none is closer than the plan's lowest step
+        expect(below(1.06, steps)).toStrictEqual([]);
+    });
+
     test('the drawings ink holds the bar of a mark on each of the four surface steps', () => {
         // Given - the drawings' line on s0 to s3
         const marks = [...onGrounds('art-ink'), ...onGrounds('art-dim')];

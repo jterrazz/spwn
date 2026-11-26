@@ -11,7 +11,7 @@
     flex-direction: column;
     gap: 18px;
     padding: 22px 18px;
-    background: color-mix(in srgb, var(--s1), var(--s1));
+    background: var(--s0);
     border-right: 1px solid var(--hair);
     min-width: 0;
 }
