@@ -124,9 +124,10 @@ type Rollup [rollupLen]float64
 // rates span, the least pressure they said (0 none, 1 normal, 2 warn, 3
 // critical); the CPU's mean and busiest share; the memory's and the swap's
 // sum and busiest, in bytes; then the mean and the busiest of the disk
-// read and write and the network in and out, in bytes a second. A share
+// read and write and the network in and out, in bytes a second; last the
+// milliseconds from its slot's start to its CPU's busiest sample. A share
 // or a rate is the float32 the tier holds, written in its shortest form.
-const rollupLen = 18
+const rollupLen = 19
 
 type TierRollups struct {
 	Every time.Duration `json:"every"`
@@ -149,6 +150,7 @@ func (b *bucket) row() Rollup {
 		float64(b.mem.sum), float64(b.mem.max), float64(b.swap.sum), float64(b.swap.max),
 		float64(b.diskRead.mean), float64(b.diskRead.max), float64(b.diskWrite.mean), float64(b.diskWrite.max),
 		float64(b.netIn.mean), float64(b.netIn.max), float64(b.netOut.mean), float64(b.netOut.max),
+		float64(b.peak()),
 	}
 }
 
@@ -160,6 +162,7 @@ func (r Rollup) bucket() bucket {
 		diskRead: envelope{f(10), f(11)}, diskWrite: envelope{f(12), f(13)}, netIn: envelope{f(14), f(15)}, netOut: envelope{f(16), f(17)},
 	}
 	b.count(min(int(r[1]), maxCount), uint8(min(max(r[3], 0), 3)))
+	b.peaked(int64(r[18]))
 	return b
 }
 

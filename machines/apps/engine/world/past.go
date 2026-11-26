@@ -126,12 +126,13 @@ func (w *World) past(p activity.Profile, meter Meter, disk *Disk, started time.T
 	// invariant: the day unwatched, a sample a minute, up to the first of
 	// its last 6 min watched, one every 2 s, as the engine would have
 	// sampled them: the minutes end on that first sample, so the counters
-	// run on through it.
+	// run on through it, and read the profile's curve as it is at now, so
+	// a peak the profile puts 25 min ago is 25 min ago.
 	watched := aligned(p.Points(now, span(now, activity.WatchedEvery, 180), activity.WatchedEvery), answer)
 	points := watched
 	if len(watched) > 0 {
 		junction := watched[0]
-		points = append(aligned(p.Points(junction.At, span(junction.At, activity.IdleEvery, 1440), activity.IdleEvery), junction), watched[1:]...)
+		points = append(aligned(p.PointsTo(junction.At, now, span(junction.At, activity.IdleEvery, 1440), activity.IdleEvery), junction), watched[1:]...)
 	}
 	last := activity.Reading{Sample: answer, Top: activity.Busiest{CPU: activity.Ranked(meter.Top.CPU), Memory: activity.Ranked(meter.Top.Memory)}}
 	pids := make([]int, 0, len(runs))

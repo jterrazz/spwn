@@ -92,13 +92,20 @@ type Measures struct {
 
 type measure struct {
 	// value: a measure's mean and busiest in a bucket, and whether it is a
-	// rate, weighted by the time it spans, or a gauge, by its samples.
-	of    func(b *bucket) (mean, top float64)
-	rated bool
+	// rate, weighted by the time it spans, or a gauge, by its samples; and
+	// whether its tier keeps the time of its busiest sample (the CPU's).
+	of     func(b *bucket) (mean, top float64)
+	rated  bool
+	peaked bool
 }
 
 func rated(of func(b *bucket) envelope) measure {
 	return measure{of: func(b *bucket) (float64, float64) { e := of(b); return float64(e.mean), float64(e.max) }, rated: true}
+}
+
+func timed(m measure) measure {
+	m.peaked = true
+	return m
 }
 
 func gauged(of func(b *bucket) gauge) measure {
@@ -110,7 +117,8 @@ func (s *Series) fold(window time.Duration, now time.Time, m measure) (time.Dura
 	// boundary at or after now, so a now on a boundary ends a whole bar as
 	// Fold's do; a tier bucket falls in the bar its slot starts in, a rate
 	// weighted by the time it spans, a gauge by its samples, and the
-	// busiest is the busiest the tier kept, at that bucket's newest sample.
+	// busiest is the busiest the tier kept, at its own sample's time for the
+	// CPU, at the bucket's newest sample for the others.
 	every := BucketOf(window)
 	n := max(int(window/every), 1)
 	step := every.Milliseconds()
@@ -138,7 +146,11 @@ func (s *Series) fold(window time.Duration, now time.Time, m measure) (time.Dura
 		mean, top := m.of(&b)
 		o := &out[(from-start)/step]
 		if o.Points == 0 || top > o.Max {
-			o.Max, o.MaxAt = top, time.UnixMilli(b.at).UTC()
+			at := b.at
+			if m.peaked {
+				at = b.peakAt(tierStep)
+			}
+			o.Max, o.MaxAt = top, time.UnixMilli(at).UTC()
 		}
 		k := &weights[(from-start)/step]
 		o.Mean = (o.Mean**k + mean*w) / (*k + w)
@@ -151,7 +163,7 @@ func (s *Series) fold(window time.Duration, now time.Time, m measure) (time.Dura
 func (s *Series) Chart(window time.Duration, now time.Time) Chart {
 	// value: SPEC B5.3: the window's CPU from its tier (TierOf), each bar
 	// the mean and the busiest share measured in it, and its peak.
-	every, buckets := s.fold(window, now, rated(func(b *bucket) envelope { return b.cpu }))
+	every, buckets := s.fold(window, now, timed(rated(func(b *bucket) envelope { return b.cpu })))
 	w := Chart{Every: every, Buckets: buckets}
 	peaked(&w)
 	return w

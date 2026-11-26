@@ -225,8 +225,8 @@
             "items": {
               "type": "number"
             },
-            "maxItems": 18,
-            "minItems": 18,
+            "maxItems": 19,
+            "minItems": 19,
             "type": "array"
           },
           "type": [

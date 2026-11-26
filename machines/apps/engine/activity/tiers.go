@@ -78,6 +78,7 @@ const (
 	// its CPU's busiest sample, then the samples it counts and the least
 	// pressure they said.
 	countShift = 20
+	peakMask   = 1<<countShift - 1
 	countBits  = 10
 	floorShift = countShift + countBits
 	// value: the samples a bucket counts at most: 15 min at a sample a
@@ -102,8 +103,18 @@ func (b *bucket) n() int { return int(b.meta >> countShift & maxCount) }
 func (b *bucket) floor() uint8 { return uint8(b.meta >> floorShift) } //nolint:gosec // value: the top 2 bits.
 
 func (b *bucket) count(n int, floor uint8) {
-	b.meta = b.meta&(1<<countShift-1) | uint32(n)<<countShift | uint32(floor)<<floorShift //nolint:gosec // value: n is at most maxCount.
+	b.meta = b.meta&peakMask | uint32(n)<<countShift | uint32(floor)<<floorShift //nolint:gosec // value: n is at most maxCount.
 }
+
+func (b *bucket) peak() int64 { return int64(b.meta & peakMask) }
+
+func (b *bucket) peaked(offset int64) {
+	// invariant: the milliseconds from the bucket's slot start to its CPU's
+	// busiest sample: a 15 min slot is 900,000, under the 20 bits.
+	b.meta = b.meta&^peakMask | uint32(min(max(offset, 0), peakMask)) //nolint:gosec // value: clamped to the mask.
+}
+
+func (b *bucket) peakAt(every int64) int64 { return b.at - b.at%every + b.peak() }
 
 type ring struct {
 	every int64
@@ -135,6 +146,9 @@ func (r *ring) add(at int64, x *Sample, rated *Rates, dt float64) {
 		return
 	}
 	span := float64(b.span)
+	if span == 0 || float32(rated.CPU) > b.cpu.max {
+		b.peaked(at % r.every)
+	}
 	b.cpu.rate(rated.CPU, span, dt)
 	b.diskRead.rate(rated.DiskRead, span, dt)
 	b.diskWrite.rate(rated.DiskWrite, span, dt)
