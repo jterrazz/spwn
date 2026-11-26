@@ -8,6 +8,7 @@ import (
 
 	"spwn.sh/packages/agent"
 	"spwn.sh/packages/container/backend"
+	"spwn.sh/packages/platform"
 	"spwn.sh/packages/runtimes"
 	"spwn.sh/packages/transpile"
 	"spwn.sh/packages/world/models"
@@ -59,7 +60,7 @@ func writeRuntimeDefaultConfig(ctx context.Context, be backend.Backend, containe
 	return nil
 }
 
-func rosterCompileAgents(recs []models.AgentRecord, hookPool []transpile.HookEntry, commandPool []transpile.CommandEntry) []transpile.AgentInput {
+func rosterCompileAgents(minds *platform.Tree, recs []models.AgentRecord, hookPool []transpile.HookEntry, commandPool []transpile.CommandEntry) []transpile.AgentInput {
 	out := make([]transpile.AgentInput, 0, len(recs))
 	for _, r := range recs {
 		home := agent.AgentDir(r.Name)
@@ -67,9 +68,9 @@ func rosterCompileAgents(recs []models.AgentRecord, hookPool []transpile.HookEnt
 		out = append(out, transpile.AgentInput{
 			Name:      r.Name,
 			Role:      r.Role,
-			Soul:      readAgentFile(home, "SOUL.md"),
-			AgentMD:   readAgentFile(home, "AGENTS.md"),
-			Playbooks: loadAgentPlaybookIndex(r.Name),
+			Soul:      readAgentFile(minds, home, "SOUL.md"),
+			AgentMD:   readAgentFile(minds, home, "AGENTS.md"),
+			Playbooks: loadAgentPlaybookIndex(minds, home),
 			Model:     model,
 			Provider:  provider,
 			Hooks:     agentHookSelection(r.Name, hookPool),
@@ -87,17 +88,17 @@ func loadAgentRuntimePrefs(name string) (model, provider string) {
 	return m.Runtime.Model, m.Runtime.Provider
 }
 
-func readAgentFile(home, name string) []byte {
-	b, err := os.ReadFile(filepath.Join(home, name))
+func readAgentFile(minds *platform.Tree, home, name string) []byte {
+	b, err := minds.ReadFile(filepath.Join(home, name))
 	if err != nil {
 		return nil
 	}
 	return b
 }
 
-func loadAgentPlaybookIndex(agentName string) []transpile.PlaybookEntry {
-	playbooksDir := filepath.Join(agent.AgentDir(agentName), "playbooks")
-	entries, err := os.ReadDir(playbooksDir)
+func loadAgentPlaybookIndex(minds *platform.Tree, home string) []transpile.PlaybookEntry {
+	playbooksDir := filepath.Join(home, "playbooks")
+	entries, err := minds.ReadDir(playbooksDir)
 	if err != nil {
 		return nil
 	}
@@ -106,7 +107,7 @@ func loadAgentPlaybookIndex(agentName string) []transpile.PlaybookEntry {
 		if e.IsDir() {
 			continue
 		}
-		body, err := os.ReadFile(filepath.Join(playbooksDir, e.Name()))
+		body, err := minds.ReadFile(filepath.Join(playbooksDir, e.Name()))
 		if err != nil {
 			continue
 		}

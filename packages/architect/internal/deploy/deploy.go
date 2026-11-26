@@ -9,6 +9,7 @@
 package deploy
 
 import (
+	"cmp"
 	"context"
 	"fmt"
 	"os"
@@ -75,9 +76,11 @@ func MaterialiseTree(ctx context.Context, be backend.Backend, containerID string
 // A single chown here wouldn't catch those later writes.
 func SyncIn(ctx context.Context, be backend.Backend, containerID string, agentHomes map[string]string) error {
 	hostRoot := platform.AgentsDir()
+	minds := platform.Within(cmp.Or(platform.ProjectRoot(), platform.UserDir()))
+	defer minds.Close()
 	for agentName, containerHome := range agentHomes {
 		hostDir := filepath.Join(hostRoot, agentName)
-		if info, err := os.Stat(hostDir); err != nil || !info.IsDir() {
+		if info, err := minds.Stat(hostDir); err != nil || !info.IsDir() {
 			continue
 		}
 		if err := be.CopyDirTo(ctx, containerID, containerHome, hostDir); err != nil {

@@ -211,7 +211,9 @@ func (r *CommandFileResolver) Resolve(ref string) (string, error) {
 		return "", fmt.Errorf("command name %q must be a kebab-case slug (^[a-z][a-z0-9-]*$)", name)
 	}
 	path := filepath.Join(r.ProjectRoot, "spwn", "commands", name+".md")
-	data, err := os.ReadFile(path)
+	project := platform.Within(r.ProjectRoot)
+	defer project.Close()
+	data, err := project.ReadFile(path)
 	if err != nil {
 		return "", fmt.Errorf("read %s: %w", path, err)
 	}

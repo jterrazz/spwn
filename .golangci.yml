@@ -121,11 +121,24 @@ linters:
             - linters:
                   - errcheck
               path: _test\.go
-            # invariant: forbidigo binds the packages that read a project: its loader, the transpiler's source, and
-            # the dependency packages that read spwn.lock, spwn/tools/ and a tool's files.
+            # invariant: forbidigo binds the packages that read a project: its loader, the transpiler's source, the
+            # dependency packages that read spwn.lock, spwn/tools/ and a tool's files, and the architect, which reads
+            # spwn/skills/, spwn/hooks/, spwn/commands/ and the agents' Minds into a world.
             - linters:
                   - forbidigo
-              path-except: ^packages/(project/|transpile/source/|dependency/(refs/|lockfile\.go|internal/manifest/|internal/adapters/local/))
+              path-except: ^packages/(architect/|project/|transpile/source/|dependency/(refs/|lockfile\.go|internal/manifest/|internal/adapters/local/))
+            # outside: a world's workspaces are host folders the declaration names to mount, each stat'd as given
+            # before its bind.
+            - linters:
+                  - forbidigo
+              path: ^packages/architect/spawn\.go$
+              source: os\.Stat\(abs\)
+            # outside: a world's knowledge is stat'd as spwn.yaml's knowledge: path gives it, before its bind; plan
+            # refuses one outside the project, `spwn up` takes it as resolved (apps/cli/world/project.go).
+            - linters:
+                  - forbidigo
+              path: ^packages/architect/spawn\.go$
+              source: os\.Stat\(opts\.Knowledge\)
             # outside: a test builds the project it reads, and reads it back to judge what the code read.
             - linters:
                   - forbidigo

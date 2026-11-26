@@ -1,6 +1,7 @@
 package architect
 
 import (
+	"cmp"
 	"context"
 	"fmt"
 	"io"
@@ -454,14 +455,21 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	}
 	opts.progress("tools_probed", fmt.Sprintf("%d verified", len(verifiedTools)))
 
-	runtimeSkills := collectRuntimeSkills(platform.ProjectRoot(), resolvedTools)
-	hookPool := loadRuntimeHooks(platform.ProjectRoot())
-	commandPool := loadRuntimeCommands(platform.ProjectRoot())
+	var project *platform.Tree
+	if root := platform.ProjectRoot(); root != "" {
+		project = platform.Within(root)
+		defer project.Close()
+	}
+	minds := platform.Within(cmp.Or(platform.ProjectRoot(), platform.UserDir()))
+	defer minds.Close()
+	runtimeSkills := collectRuntimeSkills(project, resolvedTools)
+	hookPool := loadRuntimeHooks(project)
+	commandPool := loadRuntimeCommands(project)
 	compileInput := transpile.Input{
 		Deps:                  opts.Manifest.Deps,
 		VerifiedTools:         facultiesForRuntime(verifiedTools, opts.Manifest.Deps),
 		WorldID:               id,
-		Agents:                rosterCompileAgents(rosterAgents, hookPool, commandPool),
+		Agents:                rosterCompileAgents(minds, rosterAgents, hookPool, commandPool),
 		WorldKnowledgeMounted: knowledgeMounted,
 		Skills:                runtimeSkills,
 		Hooks:                 hookPool,

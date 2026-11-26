@@ -3,7 +3,6 @@ package architect
 import (
 	"fmt"
 	"io/fs"
-	"os"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -12,15 +11,16 @@ import (
 
 	"spwn.sh/packages/agent"
 	"spwn.sh/packages/dependency/tool"
+	"spwn.sh/packages/platform"
 	"spwn.sh/packages/transpile"
 )
 
-func loadRuntimeHooks(projectRoot string) []transpile.HookEntry {
-	if projectRoot == "" {
+func loadRuntimeHooks(project *platform.Tree) []transpile.HookEntry {
+	if project == nil {
 		return nil
 	}
-	dir := filepath.Join(projectRoot, "spwn", "hooks")
-	entries, err := os.ReadDir(dir)
+	dir := filepath.Join("spwn", "hooks")
+	entries, err := project.ReadDir(dir)
 	if err != nil {
 		return nil
 	}
@@ -30,7 +30,7 @@ func loadRuntimeHooks(projectRoot string) []transpile.HookEntry {
 			continue
 		}
 		name := strings.TrimSuffix(e.Name(), ".yaml")
-		data, rerr := os.ReadFile(filepath.Join(dir, e.Name()))
+		data, rerr := project.ReadFile(filepath.Join(dir, e.Name()))
 		if rerr != nil {
 			continue
 		}
@@ -94,12 +94,12 @@ func agentHookSelection(agentName string, pool []transpile.HookEntry) []transpil
 	return out
 }
 
-func loadRuntimeCommands(projectRoot string) []transpile.CommandEntry {
-	if projectRoot == "" {
+func loadRuntimeCommands(project *platform.Tree) []transpile.CommandEntry {
+	if project == nil {
 		return nil
 	}
-	dir := filepath.Join(projectRoot, "spwn", "commands")
-	entries, err := os.ReadDir(dir)
+	dir := filepath.Join("spwn", "commands")
+	entries, err := project.ReadDir(dir)
 	if err != nil {
 		return nil
 	}
@@ -112,7 +112,7 @@ func loadRuntimeCommands(projectRoot string) []transpile.CommandEntry {
 		if strings.HasPrefix(name, ".") || !strings.HasSuffix(name, ".md") {
 			continue
 		}
-		body, rerr := os.ReadFile(filepath.Join(dir, name))
+		body, rerr := project.ReadFile(filepath.Join(dir, name))
 		if rerr != nil {
 			continue
 		}
@@ -163,9 +163,9 @@ func agentCommandSelection(agentName string, pool []transpile.CommandEntry) []tr
 	return out
 }
 
-func collectRuntimeSkills(projectRoot string, tools []tool.Tool) []transpile.SkillEntry {
+func collectRuntimeSkills(project *platform.Tree, tools []tool.Tool) []transpile.SkillEntry {
 	out := make([]transpile.SkillEntry, 0)
-	out = append(out, loadUserSkills(projectRoot)...)
+	out = append(out, loadUserSkills(project)...)
 	out = append(out, toolSkillEntries(tools)...)
 	sort.Slice(out, func(i, j int) bool { return out[i].Name < out[j].Name })
 	return out
@@ -202,12 +202,12 @@ func facultiesForRuntime(verifiedTools, deps []string) []string {
 	return out
 }
 
-func loadUserSkills(projectRoot string) []transpile.SkillEntry {
-	if projectRoot == "" {
+func loadUserSkills(project *platform.Tree) []transpile.SkillEntry {
+	if project == nil {
 		return nil
 	}
-	base := filepath.Join(projectRoot, "spwn", "skills")
-	entries, err := os.ReadDir(base)
+	base := filepath.Join("spwn", "skills")
+	entries, err := project.ReadDir(base)
 	if err != nil {
 		return nil
 	}
@@ -218,7 +218,7 @@ func loadUserSkills(projectRoot string) []transpile.SkillEntry {
 			continue
 		}
 		if e.IsDir() {
-			if skill, ok := loadUserSkillDir(filepath.Join(base, name), name); ok {
+			if skill, ok := loadUserSkillDir(project, filepath.Join(base, name), name); ok {
 				out = append(out, skill)
 			}
 			continue
@@ -226,7 +226,7 @@ func loadUserSkills(projectRoot string) []transpile.SkillEntry {
 		if !strings.HasSuffix(name, ".md") {
 			continue
 		}
-		body, readErr := os.ReadFile(filepath.Join(base, name))
+		body, readErr := project.ReadFile(filepath.Join(base, name))
 		if readErr != nil {
 			continue
 		}
@@ -239,17 +239,17 @@ func loadUserSkills(projectRoot string) []transpile.SkillEntry {
 	return out
 }
 
-func loadUserSkillDir(dir, name string) (transpile.SkillEntry, bool) {
+func loadUserSkillDir(project *platform.Tree, dir, name string) (transpile.SkillEntry, bool) {
 	files := map[string][]byte{}
-	err := filepath.Walk(dir, func(p string, info os.FileInfo, walkErr error) error {
-		if walkErr != nil || info.IsDir() {
+	err := project.WalkDir(dir, func(p string, d fs.DirEntry, walkErr error) error {
+		if walkErr != nil || d.IsDir() {
 			return walkErr
 		}
 		rel, relErr := filepath.Rel(dir, p)
 		if relErr != nil {
 			return relErr
 		}
-		body, readErr := os.ReadFile(p)
+		body, readErr := project.ReadFile(p)
 		if readErr != nil {
 			return readErr
 		}
