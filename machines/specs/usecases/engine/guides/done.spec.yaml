@@ -1,0 +1,31 @@
+description: 'a create at the engine''s door tags each progress with its step, then reads done on every step'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | .out // .error'''
+      stdin: |
+          {"v":2,"id":"1","call":"engine.guides","in":{}}
+      exit: 0
+      stdout: |
+          {"guides":[]}
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.progress or .out or .error) | if .progress then [.progress.act, .progress.step, .progress.task] elif .out then .out.VM.Name else .error.code end'''
+      stdin: |
+          {"v":2,"id":"1","call":"machines.create-workspace","in":{"Request":{"Name":"linux-4","Image":"base-ubuntu","Size":{"MemoryBytes":4294967296}}}}
+      exit: 0
+      stdout: |
+          ["machines.create:linux-4","cloning","cloning station-image-base-ubuntu-2026.11.01"]
+          ["machines.create:linux-4","cloning","cloning station-image-base-ubuntu-2026.11.01"]
+          ["machines.create:linux-4","booting","Running"]
+          ["machines.create:linux-4","booting","Running"]
+          ["machines.create:linux-4","address","Has an address"]
+          ["machines.create:linux-4","address","Has an address"]
+          ["machines.create:linux-4","ssh","SSH answers"]
+          ["machines.create:linux-4","ssh","SSH answers"]
+          "linux-4"
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | .out.guides[]? // .error'''
+      stdin: |
+          {"v":2,"id":"1","call":"engine.guides","in":{}}
+      exit: 0
+      stdout: |
+          {"id":"machines.create:linux-4","act":"machines.create","subject":"linux-4","steps":[{"id":"cloning","label":"Disk","status":"done"},{"id":"booting","label":"Boot","status":"done"},{"id":"address","label":"Network","status":"done"},{"id":"ssh","label":"SSH","status":"done"}],"view":{"illustration":"done","headline":{"now":"linux-4 is ready","next":""},"sentence":"linux-4 runs on macbook-pro.","move":"engine"},"ended":"done","line":"linux-4 is ready","live":false}

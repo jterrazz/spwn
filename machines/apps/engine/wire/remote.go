@@ -314,6 +314,16 @@ type served struct {
 type door struct {
 	far func(coremachine.Ref) bool
 	up  func() bool
+	// value: the act board a guided call run at this door is kept on, as
+	// the engine socket keeps it; nil off a world's Mac.
+	acts serve.Acts
+}
+
+func (s served) Guide(target coremachine.Ref, name string) (string, serve.Acts) {
+	if s.door.acts == nil || s.r == nil || (s.door.far != nil && s.door.far(target)) {
+		return "", nil
+	}
+	return s.r.Guide(target, name), s.door.acts
 }
 
 // invariant: a far frame is answered by the engine's socket, so with This
@@ -378,7 +388,7 @@ func (m machine) socketDoor() door {
 		}
 		ref, _ := m.locate(t.Name)
 		return ref.On != m.profile.Ref.Name
-	}, up: m.world.runs}
+	}, up: m.world.runs, acts: m.doorBoard()}
 }
 
 func engineCommand(env kit.Env, m machine) *cobra.Command {

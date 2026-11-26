@@ -7,6 +7,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
+	"github.com/jterrazz/studio-station/apps/engine/images"
 	"github.com/jterrazz/studio-station/apps/engine/machines"
 )
 
@@ -31,11 +32,12 @@ type Holdings interface {
 	Held(ctx context.Context, vm string) (ports []int, accounts []string, err error)
 }
 
-type ImageBuild func(ctx context.Context, step func(label string)) error
+type ImageBuild func(ctx context.Context, step func(images.Step)) error
 
 type ImageBuilds interface {
-	// value: builds image on this Mac, each step's label to step as it starts.
-	Build(ctx context.Context, image string, step func(label string)) error
+	// value: builds image on this Mac, each step, its build step and its
+	// label, to step as it starts.
+	Build(ctx context.Context, image string, step func(images.Step)) error
 }
 
 type Machines interface {

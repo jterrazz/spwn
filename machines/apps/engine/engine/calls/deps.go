@@ -8,6 +8,7 @@ import (
 
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
+	"github.com/jterrazz/studio-station/apps/engine/core/guide"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
 	"github.com/jterrazz/studio-station/apps/engine/engine/contract"
@@ -34,6 +35,9 @@ type Deps struct {
 	// value: engine.state asked of this Mac's engine, for a door that is
 	// not the engine itself.
 	Forward func(ctx context.Context, in engine.StateIn) (<-chan json.RawMessage, error)
+	// value: engine.guides asked of this Mac's engine, for a door that is
+	// not the engine itself.
+	Guided func(ctx context.Context) (guide.Guides, error)
 	// value: the views engine.state projects of the store beside its
 	// slices; nil projects none.
 	Views *Projections
@@ -73,5 +77,5 @@ var Applies machine.Applies = func(p machine.Profile) machine.Verdict {
 }
 
 func All(d Deps) []call.Handler {
-	return []call.Handler{call.Bind(Read, d), call.Bind(Start, d), call.Bind(Restart, d), call.Bind(Stop, d), call.Bind(ReadRelease, d), call.Bind(RefreshRelease, d), call.Bind(ReadLog, d), call.BindWatch(StateWatch, d)}
+	return []call.Handler{call.Bind(Read, d), call.Bind(Start, d), call.Bind(Restart, d), call.Bind(Stop, d), call.Bind(ReadRelease, d), call.Bind(RefreshRelease, d), call.Bind(ReadLog, d), call.BindWatch(StateWatch, d), call.Bind(Guides, d)}
 }

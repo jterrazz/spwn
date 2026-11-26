@@ -49,6 +49,8 @@ type (
 		Detail string          `json:"detail,omitempty"`
 		Done   bool            `json:"done,omitempty"`
 		Error  *call.WireError `json:"error,omitempty"`
+		Act    string          `json:"act,omitempty"`
+		Step   string          `json:"step,omitempty"`
 	}
 )
 

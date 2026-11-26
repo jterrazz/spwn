@@ -1,0 +1,265 @@
+{
+  "$defs": {
+    "core.guide.Gesture": {
+      "additionalProperties": false,
+      "properties": {
+        "args": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object"
+        },
+        "call": {
+          "type": "string"
+        },
+        "confirm": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "nav": {
+          "type": "string"
+        },
+        "on": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "label"
+      ],
+      "type": "object"
+    },
+    "core.guide.Guide": {
+      "additionalProperties": false,
+      "properties": {
+        "act": {
+          "type": "string"
+        },
+        "ended": {
+          "enum": [
+            "done",
+            "failed",
+            "interrupted"
+          ],
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "line": {
+          "type": "string"
+        },
+        "live": {
+          "type": "boolean"
+        },
+        "steps": {
+          "items": {
+            "$ref": "#/$defs/core.guide.Step"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "subject": {
+          "type": "string"
+        },
+        "view": {
+          "$ref": "#/$defs/core.guide.View"
+        }
+      },
+      "required": [
+        "act",
+        "id",
+        "line",
+        "live",
+        "steps",
+        "subject",
+        "view"
+      ],
+      "type": "object"
+    },
+    "core.guide.Guides": {
+      "additionalProperties": false,
+      "properties": {
+        "guides": {
+          "items": {
+            "$ref": "#/$defs/core.guide.Guide"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "guides"
+      ],
+      "type": "object"
+    },
+    "core.guide.Headline": {
+      "additionalProperties": false,
+      "properties": {
+        "next": {
+          "type": "string"
+        },
+        "now": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "next",
+        "now"
+      ],
+      "type": "object"
+    },
+    "core.guide.Progress": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "live"
+          ],
+          "type": "string"
+        },
+        "line": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "line"
+      ],
+      "type": "object"
+    },
+    "core.guide.Prompt": {
+      "additionalProperties": false,
+      "properties": {
+        "lead": {
+          "type": "string"
+        },
+        "quote": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "lead",
+        "quote"
+      ],
+      "type": "object"
+    },
+    "core.guide.Step": {
+      "additionalProperties": false,
+      "properties": {
+        "detail": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "done",
+            "now",
+            "waiting",
+            "failed",
+            "next"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "status"
+      ],
+      "type": "object"
+    },
+    "core.guide.View": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "$ref": "#/$defs/core.guide.Gesture"
+        },
+        "headline": {
+          "$ref": "#/$defs/core.guide.Headline"
+        },
+        "illustration": {
+          "enum": [
+            "install-engine",
+            "fetch-image",
+            "build-1",
+            "build-2",
+            "build-3",
+            "build-4",
+            "build-failed",
+            "boot",
+            "boot-failed",
+            "apply-file",
+            "system-settings",
+            "touch-id",
+            "mac-search",
+            "mac-link",
+            "mac-joined",
+            "device-key",
+            "done"
+          ],
+          "type": "string"
+        },
+        "kept": {
+          "type": "string"
+        },
+        "move": {
+          "enum": [
+            "engine",
+            "owner"
+          ],
+          "type": "string"
+        },
+        "progress": {
+          "$ref": "#/$defs/core.guide.Progress"
+        },
+        "prompt": {
+          "$ref": "#/$defs/core.guide.Prompt"
+        },
+        "quiet": {
+          "$ref": "#/$defs/core.guide.Gesture"
+        },
+        "sentence": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "headline",
+        "illustration",
+        "move",
+        "sentence"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/spwn/blob/main/machines/packages/api/schemas/calls/engine.guides.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call engine.guides of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "additionalProperties": false,
+      "properties": {},
+      "type": "object"
+    },
+    "out": {
+      "$ref": "#/$defs/core.guide.Guides"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "engine.guides",
+  "type": "object"
+}

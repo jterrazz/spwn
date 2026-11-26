@@ -1,0 +1,11 @@
+description: 'the Guides of another Mac are its own engine''s, asked through that Mac'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | .out // .error'''
+      stdin: |
+          {"v":2,"id":"1","call":"engine.guides","target":{"name":"mac-mini"},"in":{}}
+      exit: 0
+      stdout: |
+          {"guides":[]}

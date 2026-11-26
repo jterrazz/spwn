@@ -1,0 +1,32 @@
+description: 'a create held at boot reads Boot now, live; cut there, it reads interrupted at Boot'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'world hold Hypervisor.Boot'
+      exit: 0
+    - command: '--version >/dev/null; /bin/cat > held.sh'
+      stdin: |
+          { printf '%s\n' '{"v":2,"id":"1","call":"machines.create-workspace","in":{"Request":{"Name":"linux-4","Image":"base-ubuntu","Size":{"MemoryBytes":4294967296}}}}'; /bin/sleep 8; } 2>/dev/null | "$STATION" guest serve --stdio > created 2>/dev/null &
+          door=$!
+          i=0
+          until /usr/bin/grep -q '"step":"booting"' created || [ $i -ge 50 ]; do /bin/sleep 0.1; i=$((i+1)); done
+          printf '%s\n' '{"v":2,"id":"1","call":"engine.guides","in":{}}' | "$STATION" guest serve --stdio | /usr/bin/jq -c 'select(.out or .error) | .out.guides[]? // .error'
+          kill -INT $door
+          wait
+          /usr/bin/jq -c 'select(.progress) | [.progress.act, .progress.step, .progress.task, .progress.done]' created
+      exit: 0
+    - command: '--version >/dev/null; . ./held.sh'
+      exit: 0
+      stdout: |
+          {"id":"machines.create:linux-4","act":"machines.create","subject":"linux-4","steps":[{"id":"cloning","label":"Disk","status":"done"},{"id":"booting","label":"Boot","status":"now"},{"id":"address","label":"Network","status":"next"},{"id":"ssh","label":"SSH","status":"next"}],"view":{"illustration":"boot","headline":{"now":"Boot now","next":"Network next"},"sentence":"Spwn is creating linux-4. It goes on if you hide this.","move":"engine","progress":{"kind":"live","line":"Running"}},"line":"Creating linux-4: Boot","live":true}
+          ["machines.create:linux-4","cloning","cloning station-image-base-ubuntu-2026.11.01",null]
+          ["machines.create:linux-4","cloning","cloning station-image-base-ubuntu-2026.11.01",true]
+          ["machines.create:linux-4","booting","Running",null]
+          ["machines.create:linux-4","booting","Running",true]
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | .out.guides[]? // .error'''
+      stdin: |
+          {"v":2,"id":"1","call":"engine.guides","in":{}}
+      exit: 0
+      stdout: |
+          {"id":"machines.create:linux-4","act":"machines.create","subject":"linux-4","steps":[{"id":"cloning","label":"Disk","status":"done"},{"id":"booting","label":"Boot","status":"failed","detail":"Interrupted"},{"id":"address","label":"Network","status":"next"},{"id":"ssh","label":"SSH","status":"next"}],"view":{"illustration":"boot-failed","headline":{"now":"Boot was interrupted","next":""},"sentence":"The engine stopped while it created linux-4.","move":"owner","kept":"linux-4 is kept, stopped.","action":{"label":"Start linux-4","call":"machines.start","args":{"VM":"linux-4"}},"quiet":{"label":"Delete linux-4","call":"machines.delete","args":{"VM":"linux-4"},"confirm":"linux-4"}},"ended":"interrupted","line":"Creating linux-4 was interrupted at Boot","live":false}

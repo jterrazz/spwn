@@ -1194,6 +1194,128 @@
       "Tone": "warn"
     }
   },
+  "CoreGuideEnded": {
+    "done": {
+      "Word": "Done",
+      "Tone": "plain"
+    },
+    "failed": {
+      "Word": "Failed",
+      "Tone": "plain"
+    },
+    "interrupted": {
+      "Word": "Interrupted",
+      "Tone": "plain"
+    }
+  },
+  "CoreGuideMove": {
+    "engine": {
+      "Word": "Spwn works",
+      "Tone": "plain"
+    },
+    "owner": {
+      "Word": "Your move",
+      "Tone": "plain"
+    }
+  },
+  "CoreGuidePicture": {
+    "apply-file": {
+      "Word": "A Machinefile being applied",
+      "Tone": "plain"
+    },
+    "boot": {
+      "Word": "A machine starting",
+      "Tone": "plain"
+    },
+    "boot-failed": {
+      "Word": "A machine that did not start",
+      "Tone": "plain"
+    },
+    "build-1": {
+      "Word": "An image being built",
+      "Tone": "plain"
+    },
+    "build-2": {
+      "Word": "An image being built",
+      "Tone": "plain"
+    },
+    "build-3": {
+      "Word": "An image being built",
+      "Tone": "plain"
+    },
+    "build-4": {
+      "Word": "An image being built",
+      "Tone": "plain"
+    },
+    "build-failed": {
+      "Word": "An image whose build failed",
+      "Tone": "plain"
+    },
+    "device-key": {
+      "Word": "This Mac's key",
+      "Tone": "plain"
+    },
+    "done": {
+      "Word": "Done",
+      "Tone": "plain"
+    },
+    "fetch-image": {
+      "Word": "An image being fetched",
+      "Tone": "plain"
+    },
+    "install-engine": {
+      "Word": "The engine being installed",
+      "Tone": "plain"
+    },
+    "mac-joined": {
+      "Word": "A Mac that joined",
+      "Tone": "plain"
+    },
+    "mac-link": {
+      "Word": "A Mac being linked",
+      "Tone": "plain"
+    },
+    "mac-search": {
+      "Word": "A Mac being looked for",
+      "Tone": "plain"
+    },
+    "system-settings": {
+      "Word": "System Settings",
+      "Tone": "plain"
+    },
+    "touch-id": {
+      "Word": "Touch ID",
+      "Tone": "plain"
+    }
+  },
+  "CoreGuideProgressKind": {
+    "live": {
+      "Word": "Live",
+      "Tone": "plain"
+    }
+  },
+  "CoreGuideStatus": {
+    "done": {
+      "Word": "Done",
+      "Tone": "plain"
+    },
+    "failed": {
+      "Word": "Failed",
+      "Tone": "plain"
+    },
+    "next": {
+      "Word": "Next",
+      "Tone": "plain"
+    },
+    "now": {
+      "Word": "Now",
+      "Tone": "plain"
+    },
+    "waiting": {
+      "Word": "Waiting for you",
+      "Tone": "plain"
+    }
+  },
   "CoreJournalKind": {
     "app": {
       "Word": "app",

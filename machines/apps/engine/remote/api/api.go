@@ -39,6 +39,10 @@ type Progress struct {
 	Detail string          `json:"detail,omitempty"`
 	Done   bool            `json:"done,omitempty"`
 	Error  *call.WireError `json:"error,omitempty"`
+	// value: the act a guided call's progress belongs to, `<family>:<subject>`,
+	// and the step of its rail it reached; absent for a call no Guide follows.
+	Act  string `json:"act,omitempty"`
+	Step string `json:"step,omitempty"`
 }
 
 type Frame struct {

@@ -10,6 +10,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 	"github.com/jterrazz/studio-station/apps/engine/core/finding"
+	"github.com/jterrazz/studio-station/apps/engine/core/guide"
 	"github.com/jterrazz/studio-station/apps/engine/core/journal"
 	"github.com/jterrazz/studio-station/apps/engine/core/section"
 	"github.com/jterrazz/studio-station/apps/engine/core/verdict"
@@ -48,6 +49,15 @@ type wordTable map[string]map[string]word
 type worded struct {
 	of    enumerated
 	words map[string]word
+}
+
+// value: each value of an enum worded by its own Word, plain.
+func wordsOf(values []string, wording func(v string) string) map[string]word {
+	out := map[string]word{}
+	for _, v := range values {
+		out[v] = plain(wording(v))
+	}
+	return out
 }
 
 func standingWords() map[string]word {
@@ -141,6 +151,11 @@ func wordedEnums() []worded {
 			string(machines.BornAddress):  {Word: machines.BornAddress.Word(), Detail: machines.BornAddress.Noun(), Tone: verdict.New},
 			string(machines.BornSSH):      {Word: machines.BornSSH.Word(), Detail: machines.BornSSH.Noun(), Tone: verdict.New},
 		}},
+		{guide.Status(""), wordsOf(guide.Status("").Enum(), func(v string) string { return guide.Status(v).Word() })},
+		{guide.Move(""), wordsOf(guide.Move("").Enum(), func(v string) string { return guide.Move(v).Word() })},
+		{guide.Picture(""), wordsOf(guide.Picture("").Enum(), func(v string) string { return guide.Picture(v).Word() })},
+		{guide.ProgressKind(""), wordsOf(guide.ProgressKind("").Enum(), func(v string) string { return guide.ProgressKind(v).Word() })},
+		{guide.Ended(""), wordsOf(guide.Ended("").Enum(), func(v string) string { return guide.Ended(v).Word() })},
 		{images.BuildStep(""), map[string]word{
 			string(images.BuildBaseSystem): plain(images.BuildBaseSystem.Word()),
 			string(images.BuildPackages):   plain(images.BuildPackages.Word()),

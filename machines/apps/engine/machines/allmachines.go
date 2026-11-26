@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
+	"github.com/jterrazz/studio-station/apps/engine/core/guide"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/core/verdict"
 )
@@ -387,7 +388,12 @@ type Created struct {
 	Boot *FirstStart
 }
 
-type Step struct{ Label string }
+type Step struct {
+	Label string
+	// value: the step a guided create reached, for the engine's act board;
+	// a step that carries one says nothing else.
+	Phase *guide.Phase
+}
 
 // value: SPEC §7.2's health steps, in order, a workspace's three.
 const (

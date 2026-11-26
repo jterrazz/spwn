@@ -4,11 +4,13 @@ import (
 	"bufio"
 	"context"
 	"encoding/json"
+	"errors"
 	"io"
 	"sync"
 
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
+	"github.com/jterrazz/studio-station/apps/engine/core/guide"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/core/secret"
 	"github.com/jterrazz/studio-station/apps/engine/remote/api"
@@ -116,7 +118,15 @@ func answer(ctx context.Context, f api.Frame, out *writer, calls Calls, word cal
 		h := calls.Hello()
 		reply(api.Frame{Hello: &h})
 	case f.Call != "":
-		v, err := calls.Invoke(ctx, f.Target.Ref(), f.Call, f.In, p)
+		var run call.Progress = p
+		g := &guided{progress: p}
+		if gc, ok := calls.(GuidedCalls); ok {
+			if g.family, g.acts = gc.Guide(f.Target.Ref(), f.Call); g.family != "" && g.acts != nil {
+				run = g
+			}
+		}
+		v, err := calls.Invoke(ctx, f.Target.Ref(), f.Call, f.In, run)
+		g.end(err)
 		if err != nil {
 			reply(api.Frame{Error: call.ToWire(err, word)})
 			return
@@ -192,4 +202,65 @@ func (p progress) Step(task, detail string) {
 
 func (p progress) Done(task string, err error) {
 	p.out.write(api.Frame{V: api.Version, ID: p.id, Progress: &api.Progress{Task: task, Done: true, Error: call.ToWire(err, p.word)}})
+}
+
+type Acts interface {
+	// value: the engine's act board: a guided call's phase kept under its
+	// act, its id answered; its end, with the failure it ended on, nil
+	// when it was made.
+	Phase(family string, ph guide.Phase) string
+	End(id string, ended guide.Ended, failed *call.WireError)
+}
+
+// value: a stream's calls that are the window's door onto an engine: the
+// act family a call is guided as at its target and the board it is kept
+// on, none for a call no Guide follows or that runs at another machine.
+type GuidedCalls interface {
+	Guide(target machine.Ref, name string) (string, Acts)
+}
+
+type guided struct {
+	progress
+	family string
+	acts   Acts
+	act    string
+	step   string
+	// value: the step each task was told at, which its end belongs to.
+	told map[string]string
+}
+
+func (g *guided) Phase(ph guide.Phase) {
+	g.act, g.step = g.acts.Phase(g.family, ph), ph.Step
+}
+
+func (g *guided) Step(task, detail string) {
+	if g.told == nil {
+		g.told = map[string]string{}
+	}
+	g.told[task] = g.step
+	g.out.write(api.Frame{V: api.Version, ID: g.id, Progress: &api.Progress{Task: task, Detail: secret.Kept(detail), Act: g.act, Step: g.step}})
+}
+
+func (g *guided) Done(task string, err error) {
+	// invariant: a task's end belongs to the step that told it, though the
+	// next step may already be reached.
+	step, told := g.told[task]
+	if !told {
+		step = g.step
+	}
+	g.out.write(api.Frame{V: api.Version, ID: g.id, Progress: &api.Progress{Task: task, Done: true, Error: call.ToWire(err, g.word), Act: g.act, Step: step}})
+}
+
+func (g *guided) end(err error) {
+	// invariant: a call cut by its context did not fail: it ends interrupted
+	// at its step, as an engine that stopped under it does.
+	switch {
+	case g.act == "":
+	case err == nil:
+		g.acts.End(g.act, guide.EndedDone, nil)
+	case errors.Is(err, context.Canceled):
+		g.acts.End(g.act, guide.EndedInterrupted, nil)
+	default:
+		g.acts.End(g.act, guide.EndedFailed, call.ToWire(err, g.word))
+	}
 }

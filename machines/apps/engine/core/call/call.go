@@ -66,6 +66,10 @@ type Call[D, In, Out any] struct {
 	// value: the lines a gesture that ran keeps in its Mac's journal, err
 	// nil or the failure it ended on; nil for a call that keeps none.
 	Journal func(in In, out Out, err error) []journal.Line
+	// value: the act family the engine guides this call as, its steps
+	// reported as phases (core/guide) and kept on the engine's act board;
+	// empty for a call no Guide follows.
+	Guide string
 }
 
 type Asker interface {
@@ -119,6 +123,7 @@ type Meta struct {
 	// value: the call's Journal over its In and Out, each its Go value or
 	// its wire form; nil for a call that keeps no line.
 	Journal func(in, out any, err error) []journal.Line
+	Guide   string
 }
 
 type Handler interface {
@@ -194,7 +199,7 @@ func Bind[D, In, Out any](c Call[D, In, Out], d D) Handler {
 	return bound[D, In, Out]{meta: Meta{
 		Name: c.Name, Section: c.Section, Where: c.Where, Applies: c.Applies, Needs: c.Needs, Confirm: c.Confirm, ConfirmBy: c.ConfirmBy, Errors: c.Errors,
 		In: reflect.TypeFor[In]().Name(), Out: reflect.TypeFor[Out]().Name(), InType: reflect.TypeFor[In](), OutType: reflect.TypeFor[Out](),
-		Document: c.Document, Abilities: c.Abilities, Journal: lifted(c.Journal),
+		Document: c.Document, Abilities: c.Abilities, Journal: lifted(c.Journal), Guide: c.Guide,
 	}, runFn: c.Run, deps: d}
 }
 

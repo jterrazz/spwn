@@ -155,7 +155,7 @@ func (m machine) engine(env kit.Env) *process.Engine {
 		owed.forget = m.world.forgetGrants
 	}
 	m.far.engine = d
-	d.ServeWith(m.engineServer(d, registry, calls))
+	d.ServeWith(m.engineServer(d, registry, calls, m.board(state)))
 	return d
 }
 

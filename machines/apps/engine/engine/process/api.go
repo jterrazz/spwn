@@ -117,6 +117,9 @@ type Serving struct {
 	Far call.Router
 	// value: where a gesture the engine runs for this Mac is kept.
 	Kept call.Keeper
+	// value: the act board the phases of a guided call are kept on; nil
+	// keeps none.
+	Acts serve.Acts
 	// value: the VM whose guest socket this server is: its guest's calls
 	// (engine.ports, engine.reserve, engine.release)
 	// are answered as the engine answers that guest; empty serves this
@@ -171,7 +174,7 @@ func Server(d *Engine, h Serving) serve.Server {
 			}
 			return d.Watch(ctx, in.Machines, send)
 		}},
-		ThisMachine: h.ThisMachine, Word: h.Word, Hint: "station machines", Sleep: h.Sleep, Far: h.Far, Kept: h.Kept,
+		ThisMachine: h.ThisMachine, Word: h.Word, Hint: "station machines", Sleep: h.Sleep, Far: h.Far, Kept: h.Kept, Acts: h.Acts,
 	}
 }
 

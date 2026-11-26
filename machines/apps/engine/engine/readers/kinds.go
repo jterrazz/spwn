@@ -4,6 +4,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/accounts"
 	"github.com/jterrazz/studio-station/apps/engine/activity"
 	"github.com/jterrazz/studio-station/apps/engine/awake"
+	"github.com/jterrazz/studio-station/apps/engine/core/guide"
 	"github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/overview"
 	"github.com/jterrazz/studio-station/apps/engine/ports"
@@ -18,4 +19,5 @@ type (
 	awakeReport    = awake.Report
 	activityReport = activity.Report
 	signinsRead    = accounts.ProgramsRead
+	actsKept       = guide.Acts
 )

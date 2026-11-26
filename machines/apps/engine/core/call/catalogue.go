@@ -31,6 +31,8 @@ type Entry struct {
 	// value: served by the engine itself beside the registry, so never named
 	// in a hello's calls.
 	Own bool `json:"own,omitempty"`
+	// value: the act family the engine guides the call as.
+	Guide string `json:"guide,omitempty"`
 }
 
 type Catalogue struct {
@@ -59,7 +61,7 @@ func (r *Registry) Catalogue(own ...Meta) ([]byte, error) {
 	metas = append(metas, own...)
 	slices.SortFunc(metas, func(a, b Meta) int { return strings.Compare(a.Name, b.Name) })
 	for _, m := range metas {
-		e := Entry{Name: m.Name, Schema: schema(m.Name, m.Document), Section: string(m.Section), Where: string(m.Where), Confirm: string(m.Confirm), Consequence: m.Confirm.Consequence(), In: m.In, Out: m.Out, Watch: m.Watch, Journal: m.Journal != nil, Own: slices.ContainsFunc(own, func(o Meta) bool { return o.Name == m.Name })}
+		e := Entry{Name: m.Name, Schema: schema(m.Name, m.Document), Section: string(m.Section), Where: string(m.Where), Confirm: string(m.Confirm), Consequence: m.Confirm.Consequence(), In: m.In, Out: m.Out, Watch: m.Watch, Journal: m.Journal != nil, Guide: m.Guide, Own: slices.ContainsFunc(own, func(o Meta) bool { return o.Name == m.Name })}
 		for k, a := range m.ConfirmBy {
 			if e.ConfirmBy == nil {
 				e.ConfirmBy = map[string]string{}

@@ -14,6 +14,7 @@ import (
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	coremachine "github.com/jterrazz/studio-station/apps/engine/core/machine"
+	"github.com/jterrazz/studio-station/apps/engine/images"
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
 	machinesfake "github.com/jterrazz/studio-station/apps/engine/machines/adapter/fake"
 	machinesjsonfile "github.com/jterrazz/studio-station/apps/engine/machines/adapter/jsonfile"
@@ -145,7 +146,7 @@ func TestCreateChildProcess(t *testing.T) {
 	built := false
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
-	_, err := m.Create(ctx, model.CreateRequest{Image: "base-ubuntu", Name: me, Size: model.Resources{MemoryBytes: 8 << 30}}, func(ctx context.Context, _ func(string)) error {
+	_, err := m.Create(ctx, model.CreateRequest{Image: "base-ubuntu", Name: me, Size: model.Resources{MemoryBytes: 8 << 30}}, func(ctx context.Context, _ func(images.Step)) error {
 		built = true
 		_ = sys.FS.WriteFile(filepath.Join(meet, "built."+me), nil, 0o600)
 		for ctx.Err() == nil {

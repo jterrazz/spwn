@@ -179,6 +179,9 @@
     "Progress": {
       "additionalProperties": false,
       "properties": {
+        "act": {
+          "type": "string"
+        },
         "detail": {
           "type": "string"
         },
@@ -187,6 +190,9 @@
         },
         "error": {
           "$ref": "#/$defs/core.call.WireError"
+        },
+        "step": {
+          "type": "string"
         },
         "task": {
           "type": "string"
