@@ -361,6 +361,9 @@ func TestAnEngineThatTrustsNothingWritesPastTheGenerationOfTheBookItFound(t *tes
 	engine := openOn(at, false, k)
 	engine.Sole(t.Context())
 	k.locked = nil
+	if err := files().WriteFile(at, []byte("garbage"), 0o600); err != nil {
+		t.Fatal(err)
+	}
 	if err := engine.Change(t.Context(), add("tablet")); err != nil {
 		t.Fatal(err)
 	}
