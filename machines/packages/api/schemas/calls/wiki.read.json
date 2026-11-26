@@ -238,6 +238,9 @@
             "null"
           ]
         },
+        "NeedsYou": {
+          "type": "integer"
+        },
         "Page": {
           "$ref": "#/$defs/wiki.PageHead"
         },
@@ -277,6 +280,9 @@
             "null"
           ]
         },
+        "Unshown": {
+          "type": "integer"
+        },
         "Verdict": {
           "$ref": "#/$defs/wiki.Verdict"
         }
@@ -287,11 +293,13 @@
         "Findings",
         "Floor",
         "Icons",
+        "NeedsYou",
         "Page",
         "Pages",
         "Paragraph",
         "Seats",
         "Sections",
+        "Unshown",
         "Verdict"
       ],
       "type": "object"

@@ -1,9 +1,4 @@
-import type {
-    WikiServed,
-    WikiServedFinding,
-    WikiServedItem,
-    WikiServedSection,
-} from '@jterrazz/station-api';
+import type { WikiServed, WikiServedSection } from '@jterrazz/station-api';
 
 import { SEPARATOR } from '../../../domain/separator';
 import { Picks, StateDot } from '../../ui/index';
@@ -17,40 +12,9 @@ import { Prose } from './prose';
 
 import styles from './wiki.module.css';
 
-type Tally = { needs: number; folded: number };
-
-function needsIn(findings: null | readonly WikiServedFinding[]): number {
-    return (findings ?? []).filter((finding) => finding.Level === 'needs-you').length;
-}
-
-function tallyOf(items: readonly WikiServedItem[], into: Tally): void {
-    for (const { Block, Group } of items) {
-        if (Block !== null) {
-            into.needs += needsIn(Block.Finding);
-            into.folded += Block.Shown === 'none' ? 1 : 0;
-        }
-        if (Group !== null) {
-            const inner: Tally = { folded: 0, needs: 0 };
-            tallyOf(Group.Items ?? [], inner);
-            into.needs += inner.needs;
-            into.folded += Group.Folded === '' ? inner.folded : Group.Blocks;
-        }
-    }
-}
-
-// value: what the head counts of the page as served: the findings that need the owner, and the blocks this reading
-// value: time does not show.
-function tally(served: WikiServed): Tally {
-    const into: Tally = { folded: 0, needs: needsIn(served.Findings) };
-    for (const section of served.Sections ?? []) {
-        tallyOf(section.Items ?? [], into);
-    }
-    return into;
-}
-
 function Side({ served, onBudget }: { served: WikiServed; onBudget: (budget: string) => void }) {
     const budgets = (served.Budgets ?? []).map((budget) => ({ id: budget, title: budget }));
-    const { needs, folded } = tally(served);
+    const { NeedsYou: needs, Unshown: folded } = served;
     return (
         <aside aria-label={WIKI_WORDS.page} className={styles.side}>
             <span className={styles.sideLabel}>{WIKI_WORDS.budget}</span>

@@ -3339,11 +3339,13 @@ export type WikiServed = {
     Findings: WikiServedFinding[] | null;
     Floor: WikiFloorHead;
     Icons: Record<string, string[] | null> | null;
+    NeedsYou: number;
     Page: WikiPageHead;
     Pages: WikiPageHead[] | null;
     Paragraph: WikiParagraph[] | null;
     Seats: WikiSeatHead[] | null;
     Sections: WikiServedSection[] | null;
+    Unshown: number;
     Verdict: WikiVerdict;
 };
 

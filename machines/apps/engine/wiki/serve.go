@@ -24,8 +24,12 @@ type Served struct {
 	Pages     []PageHead
 	Sections  []ServedSection
 	Findings  []ServedFinding
-	Icons     map[string][]string
-	Verdict   Verdict
+	// value: what the page's head counts of it as served: the findings that
+	// need the owner, on the page or its blocks, and the blocks this budget
+	// does not show, a folded group counting all of its own.
+	NeedsYou, Unshown int
+	Icons             map[string][]string
+	Verdict           Verdict
 }
 
 type PageHead struct {
@@ -275,8 +279,42 @@ func (c Corpus) Serve(id string, budget Budget) (Served, error) {
 			ss.Items = append(ss.Items, s.item(p, reading, it, false))
 		}
 		out.Sections = append(out.Sections, ss)
+		needs, unshown := tally(ss.Items)
+		out.NeedsYou += needs
+		out.Unshown += unshown
 	}
+	out.NeedsYou += needsYou(out.Findings)
 	return out, nil
+}
+
+func tally(items []ServedItem) (needs, unshown int) {
+	for _, it := range items {
+		if b := it.Block; b != nil {
+			needs += needsYou(b.Finding)
+			if b.Shown == ShownNone {
+				unshown++
+			}
+		}
+		if g := it.Group; g != nil {
+			n, u := tally(g.Items)
+			if g.Folded != "" {
+				u = g.Blocks
+			}
+			needs += n
+			unshown += u
+		}
+	}
+	return needs, unshown
+}
+
+func needsYou(findings []ServedFinding) int {
+	n := 0
+	for _, f := range findings {
+		if f.Level == LevelNeedsYou {
+			n++
+		}
+	}
+	return n
 }
 
 type server struct {

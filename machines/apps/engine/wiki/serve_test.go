@@ -36,7 +36,7 @@ func outline(s wiki.Served) string {
 		}
 		seats = append(seats, mark)
 	}
-	line(0, "page", s.Page.ID, "@"+string(s.Budget), "floor="+strconv.Itoa(s.Floor.Index), s.Floor.Name, "seats="+strings.Join(seats, ","))
+	line(0, "page", s.Page.ID, "@"+string(s.Budget), "floor="+strconv.Itoa(s.Floor.Index), s.Floor.Name, "seats="+strings.Join(seats, ","), "needs-you="+strconv.Itoa(s.NeedsYou), "unshown="+strconv.Itoa(s.Unshown))
 	for _, p := range s.Paragraph {
 		line(1, "paragraph", runs(p))
 	}
