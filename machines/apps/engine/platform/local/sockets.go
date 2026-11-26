@@ -127,6 +127,33 @@ func (sockets) DialTCP(ctx context.Context, address string, timeout time.Duratio
 	return d.DialContext(ctx, "tcp", address)
 }
 
+func Pair() (one, other NetConn, err error) {
+	// value: the two ends of one connection of this process to itself, a
+	// pair of unix sockets that no path names, so no other process reaches
+	// it, and buffered, so both ends may write first.
+	fds, err := syscall.Socketpair(syscall.AF_UNIX, syscall.SOCK_STREAM, 0)
+	if err != nil {
+		return nil, nil, err
+	}
+	a, errA := fileConn(fds[0])
+	b, errB := fileConn(fds[1])
+	if err = errors.Join(errA, errB); err != nil {
+		for _, c := range []net.Conn{a, b} {
+			if c != nil {
+				_ = c.Close()
+			}
+		}
+		return nil, nil, err
+	}
+	return a, b, nil
+}
+
+func fileConn(fd int) (net.Conn, error) {
+	f := os.NewFile(uintptr(fd), "pair")
+	defer func() { _ = f.Close() }()
+	return net.FileConn(f)
+}
+
 func (sockets) DialUnix(ctx context.Context, path string, timeout time.Duration) (Conn, error) {
 	d := net.Dialer{Timeout: timeout}
 	var conn net.Conn
