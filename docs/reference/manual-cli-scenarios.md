@@ -40,8 +40,8 @@ bash scripts/manual-harness.sh 31 40      # the Docker ones
 ```bash
 cd $TMP/s01
 spwn init                                    # → scaffold created
-spwn check                                   # → exit 0, "Project is valid"
-spwn check --json                            # → {"valid": true, "summary": {...}}
+station project plan                                   # → exit 0, "Project is valid"
+station project plan --json                            # → {"valid": true, "summary": {...}}
 ```
 
 **Asserts:** `init` exit 0 · `check` exit 0 · `check --json` contains `"valid": true`.
@@ -53,7 +53,7 @@ cd $TMP/s02
 echo "version: 1" > spwn.yaml                # dirty dir
 spwn init                                    # → exit != 0
 spwn init --force                            # → exit 0 (overwrites)
-spwn check                                   # → exit 0
+station project plan                                   # → exit 0
 ```
 
 **Asserts:** first `init` nonzero · `init --force` zero · `check` zero.
@@ -64,7 +64,7 @@ spwn check                                   # → exit 0
 cd $TMP/s03
 spwn init spwn:matrix                        # catalog scaffold
 ls spwn/agents/neo                           # → neo is present
-spwn check                                   # → exit 0
+station project plan                                   # → exit 0
 ```
 
 **Asserts:** init zero · `spwn/agents/neo/` exists · check zero.
@@ -74,7 +74,7 @@ spwn check                                   # → exit 0
 ```bash
 cd $TMP/s04
 spwn init spwn:startup
-spwn check
+station project plan
 station agents --json                         # → includes ceo, devops, analyst
 ```
 
@@ -127,11 +127,11 @@ spwn down                                    # → rc ≤ 1, never a panic
 
 **Asserts:** rc ≤ 1.
 
-#### 9. Malformed `spwn.yaml`: `spwn check` errors precisely
+#### 9. Malformed `spwn.yaml`: `station project plan` errors precisely
 
 ```bash
 printf "invalid: [yaml broken" > spwn.yaml
-spwn check                                   # → exit != 0
+station project plan                                   # → exit != 0
 ```
 
 **Asserts:** nonzero exit.
@@ -141,7 +141,7 @@ spwn check                                   # → exit != 0
 ```bash
 spwn init
 # flip "spwn:unix" to "spwn:does-not-exist-zz" in spwn/agents/neo/agent.yaml
-spwn check                                   # → exit != 0
+station project plan                                   # → exit != 0
 ```
 
 **Asserts:** nonzero exit.
@@ -313,7 +313,7 @@ spwn init
 spwn install python
 spwn install node
 spwn install git
-spwn check                                   # → exit 0
+station project plan                                   # → exit 0
 ```
 
 ---
@@ -421,7 +421,7 @@ spwn down
 
 ```bash
 printf "version: 1\nname: bad\nworlds:\n  mat: [ broken\n" > spwn.yaml
-spwn check                                   # → exit != 0, mentions "yaml" or "line"
+station project plan                                   # → exit != 0, mentions "yaml" or "line"
 ```
 
 #### 42. Unicode agent name is handled cleanly
@@ -441,7 +441,7 @@ spwn init && station agents create $(printf 'x%.0s' {1..80})   # rc ≤ 1
 ```bash
 spwn init
 # rewrite spwn/agents/neo/agent.yaml with dependencies: []
-spwn check                                   # → exit 0
+station project plan                                   # → exit 0
 ```
 
 #### 45. Corrupted `spwn.lock` recovers via install
@@ -449,7 +449,7 @@ spwn check                                   # → exit 0
 ```bash
 spwn init
 printf "garbage content\n" > spwn.lock
-spwn check                                   # → rc ≤ 1 (either flags or tolerates)
+station project plan                                   # → rc ≤ 1 (either flags or tolerates)
 spwn install python                          # → exit 0 (regenerates lock)
 ```
 
@@ -457,7 +457,7 @@ spwn install python                          # → exit 0 (regenerates lock)
 
 ```bash
 spwn init && mkdir -p a/b/c && cd a/b/c
-spwn check                                   # → finds spwn.yaml two dirs up, exit 0
+station project plan                                   # → finds spwn.yaml two dirs up, exit 0
 ```
 
 #### 47. Sibling projects are isolated
@@ -486,7 +486,7 @@ spwn help                                    # → same (alias)
 
 ```bash
 spwn init spwn:matrix                        # → exit 0
-spwn check                                   # → exit 0
+station project plan                                   # → exit 0
 spwn up                                      # → exit 0
 docker exec <id> ls /agents/neo/CLAUDE.md    # → exit 0 (file exists inside)
 spwn down                                    # → exit 0

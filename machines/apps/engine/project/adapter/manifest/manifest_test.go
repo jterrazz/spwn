@@ -66,6 +66,25 @@ func TestAnEmptyPromptIsAnIssueOfTheRender(t *testing.T) {
 	}
 }
 
+func TestAnUnsupportedBackendPlansInvalidNamingTheSupportedOnes(t *testing.T) {
+	p, m := made(t)
+	agent := "name: " + project.Starter + "\nruntime:\n  backend: \"spwn:fictional-runtime\"\n"
+	if err := os.WriteFile(filepath.Join(m.Root, "spwn", "agents", project.Starter, "agent.yaml"), []byte(agent), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	plan, err := p.Plan(t.Context(), m.Root)
+	if err != nil || plan.Valid {
+		t.Fatalf("Plan = %+v, %v; want invalid", plan, err)
+	}
+	i := slices.IndexFunc(plan.Issues, func(i project.Issue) bool { return strings.Contains(i.Message, "spwn:fictional-runtime") })
+	if i < 0 {
+		t.Fatalf("Plan = %+v; want an issue naming spwn:fictional-runtime", plan)
+	}
+	if got := plan.Issues[i]; got.Level != project.Error || !strings.Contains(got.Hint, "claude-code") {
+		t.Fatalf("issue = %+v; want an error listing the supported backends", got)
+	}
+}
+
 func TestAReferenceTheLockfileDoesNotRecordIsDriftNotPlan(t *testing.T) {
 	p, m := made(t)
 	if err := os.WriteFile(filepath.Join(m.Root, "spwn.lock"), []byte("version: 1\n"), 0o600); err != nil {

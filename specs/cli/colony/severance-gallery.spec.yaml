@@ -1,4 +1,4 @@
-description: init severance installs a check-passing four-agent project
+description: init severance installs a four-agent project
 runs:
     - command: init severance
       exit: 0
@@ -13,13 +13,6 @@ runs:
           
             ✓ Installed example spwn:severance
 
-
-    - command: check
-      exit: 0
-      stdout: |4+
-          
-            ✓  Project is valid
-               {{workdir}}/spwn.yaml
 
       files:
           spwn/agents/mark/agent.yaml: exists

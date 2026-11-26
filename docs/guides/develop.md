@@ -90,7 +90,7 @@ Then add a blank import to `packages/runtimes/defaults/defaults.go`, which is wh
 
 Three things land in the same commit as the change that makes them true:
 
-1. **The guard.** A discovery grows a test, a `spwn check` rule, or a runtime error in the same change: the suite is the specification ([Test](test.md)).
+1. **The guard.** A discovery grows a test, a `station project plan` rule, or a runtime error in the same change: the suite is the specification ([Test](test.md)).
 2. **The regenerated projection.** [Commands](../reference/commands.md) is projected from Cobra by `make docs` and never hand-edited (a Go test refuses a stale page); the embedded catalog is projected by `make generate`, which `build`, `lint` and `test` already run.
 3. **The chapter the behaviour falsified.** A page of this corpus that a change makes untrue is repaired by that change, not by a follow-up.
 

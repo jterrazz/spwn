@@ -1,9 +1,9 @@
 description: build stops at project validation before it touches Docker
-fixture: ../__fixtures__/check-invalid-tool/
+fixture: ./__fixtures__/check-invalid-tool/
 runs:
     - command: build
       exit: 1
       stderr: |4+
           
-            Error: project has validation errors - run `spwn check` to see them
+            Error: project has validation errors - run `station project plan` to see them
 

@@ -66,7 +66,7 @@ Decided in ADR-021 and ADR-022. A row whose left column is `station` is built, u
 | Today                                             | The grammar's form                                                                                       |
 | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
 | `spwn init`, `station project create`             | `spwn project create`                                                                                    |
-| `spwn check`, `station project plan\|drift`       | `spwn project plan` and `spwn project drift`                                                             |
+| `station project plan\|drift`                     | `spwn project plan` and `spwn project drift`                                                             |
 | `spwn build`                                      | gone: the world image leaves, and `project apply` renders the project                                    |
 | `spwn up`, `spwn down`, `spwn world *`            | `spwn agents start`, `spwn agents stop`, on a machine (`--on`); the noun `world` goes                    |
 | `spwn agent neo`, `spwn agent talk neo`           | `spwn agents talk neo`                                                                                   |
@@ -80,14 +80,14 @@ Decided in ADR-021 and ADR-022. A row whose left column is `station` is built, u
 | `spwn web`                                        | gone: Spwn.app is the one GUI                                                                            |
 | `spwn upgrade`                                    | `spwn update`                                                                                            |
 
-`spwn project plan` does not check a `spwn:<name>` reference against the built-in catalog: the engine links no copy of it (`packages/dependency/builtin` carries the embedded catalog, and no package the engine links imports it), so such a reference passes the plan unverified, and the check that `spwn check` made, `unknown-builtin-tool`, is lost. `spwn install` still refuses an unknown name until it goes, and the rule that refuses every `spwn:` reference replaces it.
+`spwn project plan` does not check a `spwn:<name>` reference against the built-in catalog: the engine links no copy of it (`packages/dependency/builtin` carries the embedded catalog, and no package the engine links imports it), so such a reference passes the plan unverified, and the `unknown-builtin-tool` check of the deleted `spwn check` is lost. `spwn install` still refuses an unknown name until it goes, and the rule that refuses every `spwn:` reference replaces it.
 
 ### Agents' commands today
 
 ```bash
 # ── Project workflow ─────────────────────────────────────────────
 spwn init                     # scaffold spwn.yaml + ./spwn/ + .spwn/
-spwn check                    # validate the tree
+station project plan          # validate the tree
 spwn build --tree-only        # render the project tree to ./dist (preview/debug)
 spwn build --base <image>     # transpile + compile into a project-specific Docker image (or set SPWN_BASE_IMAGE)
 spwn up [name]                # bring up every world in spwn.yaml (or one by name)

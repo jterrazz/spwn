@@ -77,7 +77,7 @@ runs:
                     - "spwn:python"
                     # Local blocks scaffolded by `spwn init`, one of each form so you
                     # can see how they're authored and used. Keep, edit, or delete them;
-                    # `spwn check` is happy either way.
+                    # `station project plan` is happy either way.
                     - "skill/focus"           # ./spwn/skills/focus.md
                     - "tool/greet"            # ./spwn/tools/greet/
                     - "hook/session-banner"   # ./spwn/hooks/session-banner.yaml

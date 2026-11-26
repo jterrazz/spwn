@@ -8,7 +8,7 @@ package codex
 // notifications, or session-end yet.
 //
 // Authors targeting Codex who write a Claude-only event will get a
-// `spwn check` warning rather than silent drift. Update this list
+// `station project plan` warning rather than silent drift. Update this list
 // when codex releases new events.
 var SupportedEvents = []string{
 	"PostToolUse",

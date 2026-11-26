@@ -11,7 +11,6 @@ export const { cli, cleanup } = await specification.cli(SPWN_BIN, {
         'auth',
         'automation',
         'build',
-        'check',
         'create',
         'daemon',
         'default',

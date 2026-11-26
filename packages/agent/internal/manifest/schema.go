@@ -23,7 +23,7 @@ type Manifest struct {
 
 	// Description is a mandatory one-line pitch of what this agent is
 	// for, the equivalent of the `description:` field in the skill
-	// frontmatter convention. `spwn check` flags an empty description
+	// frontmatter convention. `station project plan` flags an empty description
 	// as LevelError so every agent in a project has a human-readable
 	// purpose line that the inspector and external tooling
 	// can render without opening AGENTS.md.

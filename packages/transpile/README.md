@@ -36,5 +36,5 @@ Powers two delivery shapes, sharing the transpile phase verbatim:
 
 ## Related
 
-- **Imported by**: `apps/cli` (`spwn build`, `spwn check --deep`), `packages/architect` (spawn pipeline), `packages/runtimes/*` (renderers)
+- **Imported by**: `apps/cli` (`spwn build`, `station project plan`), `packages/architect` (spawn pipeline), `packages/runtimes/*` (renderers)
 - **Imports**: `packages/project`, `packages/agent`, `packages/dependency`

@@ -21,13 +21,13 @@ import (
 //     does).
 //  2. Loads the installed project via `project.Find` (same walker
 //     the CLI uses).
-//  3. Runs `project.Validate` (the rule engine behind `spwn check`).
+//  3. Runs `project.Validate` (the rule engine behind `station project plan`).
 //  4. Loads the project source and calls `transpile.Compile` (the
 //     pure half of `spwn build --tree-only`, no Docker).
 //
 // If any of those steps fails, the catalog entry is broken at
 // compile time and would fail for any user who ran `spwn init
-// <slug> && spwn check`.
+// <slug> && station project plan`.
 func TestCatalog_EveryGalleryEntryBuilds(t *testing.T) {
 	slugs := builtin.GallerySlugs()
 	if len(slugs) == 0 {
@@ -68,7 +68,7 @@ func TestCatalog_EveryGalleryEntryBuilds(t *testing.T) {
 				t.Fatal("project.Find returned nil, expected a project after Install")
 			}
 
-			// Step 3: validate (what `spwn check` runs).
+			// Step 3: validate (what `station project plan` runs).
 			issues := project.Validate(p, project.ValidateOpts{
 				BuiltinTools:      builtins,
 				SupportedRuntimes: supportedRuntimes,

@@ -13,7 +13,7 @@ import (
 // Test_requireAgentPrompts pins the QA-surfaced behaviour: compile
 // refuses to render an empty / missing AGENTS.md rather than
 // templating an empty CLAUDE.md. Before the fix, `spwn compile`
-// succeeded silently while `spwn check --deep` flagged it: a loud
+// succeeded silently while `station project plan` flagged it: a loud
 // inconsistency between the two commands.
 func Test_requireAgentPrompts(t *testing.T) {
 	cases := []struct {
@@ -78,63 +78,6 @@ func Test_requireAgentPrompts(t *testing.T) {
 				t.Fatalf("error %q does not contain %q", err.Error(), tc.wantErr)
 			}
 		})
-	}
-}
-
-// Test_crossCheckRuntimeAdapters locks the `spwn check` warning that
-// fires when an agent declares a catalog-known but compile-unimplemented
-// runtime (e.g. `spwn:codex`). Without this warning, `check` says
-// "valid" and `compile` fails with "unknown runtime", a silent gap
-// between the two commands.
-func Test_crossCheckRuntimeAdapters(t *testing.T) {
-	// Safety-net warning for agents that declare a runtime whose
-	// compile adapter isn't registered. Historically used
-	// `spwn:codex` as the example; codex became a first-class
-	// renderer, so the test uses a deliberately-fictional slug.
-	root := t.TempDir()
-	if err := os.WriteFile(filepath.Join(root, "spwn.yaml"),
-		[]byte(`version: 1
-name: qa
-worlds:
-  home:
-    agents: [neo]
-    workspaces: ["."]
-`), 0o644); err != nil {
-		t.Fatalf("write manifest: %v", err)
-	}
-	agentDir := filepath.Join(root, "spwn", "agents", "neo")
-	if err := os.MkdirAll(filepath.Join(agentDir, "core"), 0o755); err != nil {
-		t.Fatalf("mkdir: %v", err)
-	}
-	if err := os.WriteFile(filepath.Join(agentDir, "AGENTS.md"), []byte("# neo"), 0o644); err != nil {
-		t.Fatalf("write agent md: %v", err)
-	}
-	if err := os.WriteFile(filepath.Join(agentDir, "agent.yaml"), []byte(`name: neo
-runtime:
-  backend: "spwn:fictional-runtime"
-packages: ["spwn:unix"]
-`), 0o644); err != nil {
-		t.Fatalf("write agent yaml: %v", err)
-	}
-	if err := os.WriteFile(filepath.Join(agentDir, "core", "profile.md"), []byte("profile"), 0o644); err != nil {
-		t.Fatalf("write profile: %v", err)
-	}
-
-	issues := crossCheckRuntimeAdapters(root)
-	if len(issues) != 1 {
-		t.Fatalf("want 1 issue, got %d: %v", len(issues), issues)
-	}
-	if issues[0].Level != "warning" {
-		t.Fatalf("want warning, got %q", issues[0].Level)
-	}
-	if !strings.Contains(issues[0].Message, "spwn:fictional-runtime") {
-		t.Fatalf("message does not mention spwn:fictional-runtime: %q", issues[0].Message)
-	}
-	if !strings.Contains(issues[0].Hint, "claude-code") {
-		t.Fatalf("hint should list claude-code: %q", issues[0].Hint)
-	}
-	if !strings.Contains(issues[0].Hint, "codex") {
-		t.Fatalf("hint should now list codex too: %q", issues[0].Hint)
 	}
 }
 

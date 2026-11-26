@@ -72,8 +72,8 @@ scenario() {
 s1() {
     scenario 1 "fresh init + check"
     run "s1.init"   expect_zero "$SPWN" init
-    run "s1.check"  expect_zero "$SPWN" check
-    local json; json=$("$SPWN" check --json 2>&1)
+    run "s1.check"  expect_zero "$STATION" project plan
+    local json; json=$("$STATION" project plan --json 2>&1)
     checkstr "s1.checkjson-valid" '"valid": true' "$json"
 }
 
@@ -82,7 +82,7 @@ s2() {
     echo "version: 1" > spwn.yaml
     run "s2.init-no-force" expect_nonzero "$SPWN" init
     run "s2.init-force"    expect_zero    "$SPWN" init --force
-    run "s2.check"         expect_zero    "$SPWN" check
+    run "s2.check"         expect_zero    "$STATION" project plan
 }
 
 s3() {
@@ -93,13 +93,13 @@ s3() {
     else
         FAIL=$((FAIL+1)); RESULTS+=("FAIL  s3.neo-present")
     fi
-    run "s3.check" expect_zero "$SPWN" check
+    run "s3.check" expect_zero "$STATION" project plan
 }
 
 s4() {
     scenario 4 "init spwn:startup (3 agents)"
     run "s4.init-startup" expect_zero "$SPWN" init spwn:startup
-    run "s4.check"        expect_zero "$SPWN" check
+    run "s4.check"        expect_zero "$STATION" project plan
     local out; out=$("$STATION" agents --json 2>&1)
     checkstr "s4.ceo"     "ceo"     "$out"
     checkstr "s4.devops"  "devops"  "$out"
@@ -152,7 +152,7 @@ s8() {
 s9() {
     scenario 9 "corrupted spwn.yaml → check errors cleanly"
     printf "%s\n" "invalid: [yaml broken" > spwn.yaml
-    run "s9.check-corrupt" expect_nonzero "$SPWN" check
+    run "s9.check-corrupt" expect_nonzero "$STATION" project plan
 }
 
 s10() {
@@ -165,7 +165,7 @@ with open('$f') as fh: t = fh.read()
 t = t.replace('spwn:unix', 'spwn:does-not-exist-zz')
 with open('$f', 'w') as fh: fh.write(t)
 "
-    run "s10.check-bad-ref" expect_nonzero "$SPWN" check
+    run "s10.check-bad-ref" expect_nonzero "$STATION" project plan
 }
 
 s11() {
@@ -369,7 +369,7 @@ s30() {
     "$SPWN" install python > /dev/null 2>&1
     "$SPWN" install node > /dev/null 2>&1
     "$SPWN" install git > /dev/null 2>&1
-    run "s30.check" expect_zero "$SPWN" check
+    run "s30.check" expect_zero "$STATION" project plan
 }
 
 
@@ -530,7 +530,7 @@ s40() {
 s41() {
     scenario 41 "malformed yaml → check gives line-number error"
     printf "version: 1\nname: bad\nworlds:\n  mat: [ broken\n" > spwn.yaml
-    local out; out=$("$SPWN" check 2>&1)
+    local out; out=$("$STATION" project plan 2>&1)
     local rc=$?
     if [ $rc -ne 0 ]; then
         PASS=$((PASS+1)); RESULTS+=("PASS  s41.exit-nonzero")
@@ -579,14 +579,14 @@ runtime:
   backend: "spwn:claude-code"
 dependencies: []
 YAML
-    run "s44.check" expect_zero "$SPWN" check
+    run "s44.check" expect_zero "$STATION" project plan
 }
 
 s45() {
     scenario 45 "corrupted spwn.lock"
     "$SPWN" init > /dev/null 2>&1
     printf "garbage content\n" > spwn.lock
-    "$SPWN" check > /dev/null 2>&1
+    "$STATION" project plan > /dev/null 2>&1
     local rc=$?
     if [ $rc -le 1 ]; then
         PASS=$((PASS+1)); RESULTS+=("PASS  s45.check-clean")
@@ -601,7 +601,7 @@ s46() {
     "$SPWN" init > /dev/null 2>&1
     mkdir -p a/b/c
     cd a/b/c || return
-    run "s46.check-from-subdir" expect_zero "$SPWN" check
+    run "s46.check-from-subdir" expect_zero "$STATION" project plan
 }
 
 s47() {
@@ -636,7 +636,7 @@ s49() {
 s50() {
     scenario 50 "sanity: the 3 core verbs work end-to-end"
     "$SPWN" init spwn:matrix > /dev/null 2>&1
-    run "s50.check" expect_zero "$SPWN" check
+    run "s50.check" expect_zero "$STATION" project plan
     run "s50.up"    expect_zero "$SPWN" up
     local id; id=$(docker ps --format '{{.Names}}' --filter 'name=world-matrix' | head -1)
     if [ -n "$id" ]; then

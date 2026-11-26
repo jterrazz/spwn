@@ -22,7 +22,7 @@ func (r *renderer) Name() string { return "codex" }
 // SupportedHookEvents returns every hook event Codex recognises today.
 // Codex's set is narrower than Claude Code's: events outside this
 // list (Notification, SubagentStop, PreCompact, SessionEnd) ship into
-// `.codex/hooks.json` but never fire. `spwn check` warns when an
+// `.codex/hooks.json` but never fire. `station project plan` warns when an
 // agent backed by codex declares one of those. See events.go for the
 // canonical set.
 func (r *renderer) SupportedHookEvents() []string {

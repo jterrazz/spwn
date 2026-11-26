@@ -1,9 +1,0 @@
-description: a local ref without --agent is refused
-fixture: ../__fixtures__/docker-pilot/
-runs:
-    - command: install skill/paper-reading
-      exit: 1
-      stderr: |4+
-          
-            Error: "skill/paper-reading" is a local ref: pass --agent <name> to attach it to one agent, or author a new one with `station skills create paper-reading` / `spwn/tools/paper-reading/` / `spwn/hooks/paper-reading.yaml` / `spwn/commands/paper-reading.md`
-

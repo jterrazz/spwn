@@ -12,7 +12,7 @@ A Spwn project is a directory tree with a top-level `spwn.yaml`, one or more age
 - `Manifest`: parsed `spwn.yaml` (version, name, deps, worlds map).
 - `Find(cwd)`, returning `*Project`: walk up from cwd looking for `spwn.yaml`. Returns `nil` when no project is present so callers can fall back to global mode.
 - `Init(path, opts)`: scaffold a fresh project (manifest + starter agent + lockfile).
-- `Validate(Input)`, returning `[]Issue`: runs every rule (refs-exist, lockfile-consistent, version-conflict, runtime-supported, markdown-imports). Returns structured issues; CLI `spwn check` renders them.
+- `Validate(Input)`, returning `[]Issue`: runs every rule (refs-exist, lockfile-consistent, version-conflict, runtime-supported, markdown-imports). Returns structured issues; `station project plan` renders them.
 - `Team`, `Organization`, `Role` + CRUD (`CreateTeam`, `ListTeams`, `CreateOrganization`, `ValidateOrganization`, `SetAgentTeam` and the rest): teams group agents, organizations define role hierarchies. Stored as YAML under `~/.spwn/teams/` and `~/.spwn/organizations/` because they span multiple projects but are authored here.
 
 ## Related

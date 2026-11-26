@@ -2,7 +2,7 @@
 //
 // Rules are pure functions: they take an Input and return zero or more
 // Issues. Run calls every rule and returns the collected issues so a
-// single `spwn check` invocation produces the full picture of what's
+// single `station project plan` invocation produces the full picture of what's
 // wrong, not just the first failure.
 package validate
 

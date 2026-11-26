@@ -109,7 +109,7 @@ func Init(dir string, opts Opts) error {
 // the world name passed as a separate argument.
 type AddWorldOpts struct {
 	// Agents is the list of agent names this world deploys. Empty is
-	// allowed at scaffold time but `spwn check` will flag it.
+	// allowed at scaffold time but `station project plan` will flag it.
 	Agents []string
 	// Workspaces is the list of workspace mount specs. Empty defaults
 	// to ["."] so the project root is mounted at /workspace.

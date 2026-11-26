@@ -36,7 +36,7 @@ documented caveat · ⚪ not run.
 **Hypothesis:** one wins, the other fails cleanly; no zombie
 containers; state.json not corrupted.
 **Probe:** launch two `spwn up` in background, wait both, count
-containers + check `spwn world list` state, re-run `spwn check --json`.
+containers + check `spwn world list` state, re-run `station project plan --json`.
 **Failure:** 2 containers for 1 world, or state.json parse error.
 
 ### A2. `spwn down` mid-spawn

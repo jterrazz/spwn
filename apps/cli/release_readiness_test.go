@@ -113,20 +113,6 @@ func mustInit(t *testing.T, env []string, wd, name string) {
 	}
 }
 
-// writeSkill authors a bare-markdown skill with the frontmatter the
-// project check reads, as `station skills create` leaves it.
-func writeSkill(t *testing.T, wd, name string) {
-	t.Helper()
-	dir := filepath.Join(wd, "spwn", "skills")
-	if err := os.MkdirAll(dir, 0o755); err != nil {
-		t.Fatal(err)
-	}
-	body := "---\nname: " + name + "\ndescription: One-line description of what this skill does.\n---\n\n# " + name + "\n"
-	if err := os.WriteFile(filepath.Join(dir, name+".md"), []byte(body), 0o644); err != nil {
-		t.Fatal(err)
-	}
-}
-
 // readFile is a thin wrapper around os.ReadFile that fails the test on
 // error so call sites stay uncluttered.
 func readFile(t *testing.T, path string) string {
@@ -270,18 +256,6 @@ func TestReleaseReadiness(t *testing.T) {
 		}
 	})
 
-	t.Run("08_init_passes_check", func(t *testing.T) {
-		// A08: fresh init is validation-clean (`spwn check` exits 0).
-		t.Parallel()
-		env, _ := freshEnv(t)
-		wd := t.TempDir()
-		mustInit(t, env, wd, "acme")
-		stdout, stderr, code := runCLI(t, env, wd, "check")
-		if code != 0 {
-			t.Fatalf("check failed: code=%d\nstdout=%s\nstderr=%s", code, stdout, stderr)
-		}
-	})
-
 	// --------------------------------------------------------------------
 	// B: ref syntax + lockfile
 	// --------------------------------------------------------------------
@@ -318,10 +292,9 @@ func TestReleaseReadiness(t *testing.T) {
 		}
 	})
 
-	t.Run("11_check_reports_registry_unsupported", func(t *testing.T) {
+	t.Run("11_install_reports_registry_unsupported", func(t *testing.T) {
 		// B11: github: refs surface as "not yet supported" at install
-		// Time: they never reach agent.yaml, so check has nothing
-		// To complain about.
+		// time: they never reach agent.yaml.
 		t.Parallel()
 		env, _ := freshEnv(t)
 		wd := t.TempDir()
@@ -333,60 +306,6 @@ func TestReleaseReadiness(t *testing.T) {
 		combined := stdout + stderr
 		if !strings.Contains(combined, "not yet supported") {
 			t.Fatalf("expected registry-unsupported message, got:\n%s", combined)
-		}
-	})
-
-	t.Run("12_check_reports_unknown_local", func(t *testing.T) {
-		// B12: well-formed local refs with no matching file surface as "does not exist".
-		t.Parallel()
-		env, _ := freshEnv(t)
-		wd := t.TempDir()
-		mustInit(t, env, wd, "acme")
-		// Append a well-formed ref that resolves to nothing on disk.
-		yamlPath := filepath.Join(wd, "spwn/agents/neo/agent.yaml")
-		y := readFile(t, yamlPath)
-		if err := os.WriteFile(yamlPath, []byte(y+"\n  - skill/unknown-local\n"), 0o644); err != nil {
-			t.Fatal(err)
-		}
-		stdout, stderr, code := runCLI(t, env, wd, "check")
-		if code == 0 {
-			t.Fatalf("check should fail for missing skill ref")
-		}
-		combined := stdout + stderr
-		if !strings.Contains(combined, "unknown-local") || !strings.Contains(combined, "does not exist") {
-			t.Fatalf("expected unknown-local not-found message, got:\n%s", combined)
-		}
-	})
-
-	t.Run("12b_check_rejects_bare_ref", func(t *testing.T) {
-		// B12b: a bare ref (no scheme) is rejected up-front with a
-		// hint pointing the author at skill/, tool/, hook/. This is
-		// the exact failure mode the new explicit-form grammar prevents.
-		t.Parallel()
-		env, _ := freshEnv(t)
-		wd := t.TempDir()
-		mustInit(t, env, wd, "acme")
-		// Scaffold a real skill file on disk so the hint can suggest
-		// the right scheme rather than falling back to the generic form.
-		writeSkill(t, wd, "code-review")
-		yamlPath := filepath.Join(wd, "spwn/agents/neo/agent.yaml")
-		y := readFile(t, yamlPath)
-		if err := os.WriteFile(yamlPath, []byte(y+"\n  - code-review\n"), 0o644); err != nil {
-			t.Fatal(err)
-		}
-		stdout, stderr, code := runCLI(t, env, wd, "check")
-		if code == 0 {
-			t.Fatalf("check should reject bare ref")
-		}
-		combined := stdout + stderr
-		if !strings.Contains(combined, "code-review") {
-			t.Fatalf("expected error to mention code-review, got:\n%s", combined)
-		}
-		if !strings.Contains(combined, "invalid") {
-			t.Fatalf("expected bare ref to be flagged invalid, got:\n%s", combined)
-		}
-		if !strings.Contains(combined, "skill/code-review") {
-			t.Fatalf("expected hint pointing at skill/code-review, got:\n%s", combined)
 		}
 	})
 
@@ -402,23 +321,6 @@ func TestReleaseReadiness(t *testing.T) {
 		lock := readFile(t, filepath.Join(wd, "spwn.lock"))
 		if strings.Contains(lock, "@spwn/") {
 			t.Fatalf("lockfile contains legacy @spwn/ ref:\n%s", lock)
-		}
-	})
-
-	t.Run("14_check_rejects_legacy_at_in_agent_yaml", func(t *testing.T) {
-		// B14: `@spwn/name` written by hand into agent.yaml fails check.
-		t.Parallel()
-		env, _ := freshEnv(t)
-		wd := t.TempDir()
-		mustInit(t, env, wd, "acme")
-		yamlPath := filepath.Join(wd, "spwn/agents/neo/agent.yaml")
-		y := readFile(t, yamlPath)
-		if err := os.WriteFile(yamlPath, []byte(y+"\n  - \"@spwn/python\"\n"), 0o644); err != nil {
-			t.Fatal(err)
-		}
-		_, _, code := runCLI(t, env, wd, "check")
-		if code == 0 {
-			t.Fatalf("check should reject legacy @spwn/python ref")
 		}
 	})
 
@@ -567,29 +469,6 @@ func TestReleaseReadiness(t *testing.T) {
 	})
 
 	// --------------------------------------------------------------------
-	// F: skill / tool / hook verbs
-	// --------------------------------------------------------------------
-
-	t.Run("33_skill_path_ref_passes_check", func(t *testing.T) {
-		// F33: a skill/<name> ref resolves to spwn/skills/<name>.md and
-		// `check` stays clean.
-		t.Parallel()
-		env, _ := freshEnv(t)
-		wd := t.TempDir()
-		mustInit(t, env, wd, "acme")
-		writeSkill(t, wd, "reading")
-		yamlPath := filepath.Join(wd, "spwn/agents/neo/agent.yaml")
-		y := readFile(t, yamlPath)
-		if err := os.WriteFile(yamlPath, []byte(y+"\n  - skill/reading\n"), 0o644); err != nil {
-			t.Fatal(err)
-		}
-		stdout, stderr, code := runCLI(t, env, wd, "check")
-		if code != 0 {
-			t.Fatalf("check should pass with skill/ ref, got exit %d:\nstdout=%s\nstderr=%s", code, stdout, stderr)
-		}
-	})
-
-	// --------------------------------------------------------------------
 	// G: help text consistency
 	// --------------------------------------------------------------------
 
@@ -646,20 +525,6 @@ func TestReleaseReadiness(t *testing.T) {
 					t.Fatalf("%v help contains stale %q:\n%s", args, bad, combined)
 				}
 			}
-		}
-	})
-
-	t.Run("38_check_help_runs", func(t *testing.T) {
-		// G38: `check --help` renders and exits cleanly.
-		t.Parallel()
-		env, _ := freshEnv(t)
-		wd := t.TempDir()
-		stdout, stderr, code := runCLI(t, env, wd, "check", "--help")
-		if code != 0 {
-			t.Fatalf("check --help exit %d: stderr=%s", code, stderr)
-		}
-		if !strings.Contains(stdout, "check") {
-			t.Fatalf("check --help output suspiciously empty:\n%s", stdout)
 		}
 	})
 
@@ -759,124 +624,6 @@ func TestReleaseReadiness(t *testing.T) {
 	})
 
 	// --------------------------------------------------------------------
-	// I: check rules
-	// --------------------------------------------------------------------
-
-	t.Run("44_check_flags_missing_description", func(t *testing.T) {
-		// I44: an agent.yaml with no `description:` fails check.
-		t.Parallel()
-		env, _ := freshEnv(t)
-		wd := t.TempDir()
-		mustInit(t, env, wd, "acme")
-		yamlPath := filepath.Join(wd, "spwn/agents/neo/agent.yaml")
-		y := readFile(t, yamlPath)
-		// Drop the existing description line(s).
-		var out []string
-		for _, line := range strings.Split(y, "\n") {
-			if strings.HasPrefix(strings.TrimSpace(line), "description:") {
-				continue
-			}
-			out = append(out, line)
-		}
-		if err := os.WriteFile(yamlPath, []byte(strings.Join(out, "\n")), 0o644); err != nil {
-			t.Fatal(err)
-		}
-		stdout, stderr, code := runCLI(t, env, wd, "check")
-		if code == 0 {
-			t.Fatalf("check should fail on missing description")
-		}
-		if !strings.Contains(stdout+stderr, "description") {
-			t.Fatalf("check output should mention description")
-		}
-	})
-
-	t.Run("45_check_flags_missing_soul", func(t *testing.T) {
-		// I45: deleting SOUL.md surfaces a loud error.
-		t.Parallel()
-		env, _ := freshEnv(t)
-		wd := t.TempDir()
-		mustInit(t, env, wd, "acme")
-		if err := os.Remove(filepath.Join(wd, "spwn/agents/neo/SOUL.md")); err != nil {
-			t.Fatal(err)
-		}
-		stdout, stderr, code := runCLI(t, env, wd, "check")
-		if code == 0 {
-			t.Fatalf("check should fail when SOUL.md is missing")
-		}
-		if !strings.Contains(stdout+stderr, "SOUL.md") {
-			t.Fatalf("check output should mention SOUL.md")
-		}
-	})
-
-	t.Run("46_one_agent_one_world", func(t *testing.T) {
-		// I46: the same agent name in two worlds triggers the conflict rule.
-		t.Parallel()
-		env, _ := freshEnv(t)
-		wd := t.TempDir()
-		mustInit(t, env, wd, "acme")
-		yamlPath := filepath.Join(wd, "spwn.yaml")
-		y := readFile(t, yamlPath)
-		if err := os.WriteFile(yamlPath, []byte(y+"  backup:\n    agents: [neo]\n    workspaces: [.]\n"), 0o644); err != nil {
-			t.Fatal(err)
-		}
-		stdout, stderr, code := runCLI(t, env, wd, "check")
-		if code == 0 {
-			t.Fatalf("check should flag cross-world agent")
-		}
-		if !strings.Contains(stdout+stderr, "already deployed") {
-			t.Fatalf("check output missing one-agent-one-world message")
-		}
-	})
-
-	t.Run("47b_check_hints_on_missing_knowledge_key", func(t *testing.T) {
-		// I47b: a world with no `knowledge:` key emits a LevelInfo hint
-		// explaining that agents won't be told a knowledge base exists.
-		t.Parallel()
-		env, _ := freshEnv(t)
-		wd := t.TempDir()
-		mustInit(t, env, wd, "acme")
-		// Strip the `knowledge: ./knowledge` line init emitted.
-		yamlPath := filepath.Join(wd, "spwn.yaml")
-		data := readFile(t, yamlPath)
-		var filtered []string
-		for _, line := range strings.Split(data, "\n") {
-			if strings.Contains(line, "knowledge:") {
-				continue
-			}
-			filtered = append(filtered, line)
-		}
-		if err := os.WriteFile(yamlPath, []byte(strings.Join(filtered, "\n")), 0o644); err != nil {
-			t.Fatal(err)
-		}
-		stdout, stderr, code := runCLI(t, env, wd, "check")
-		if code != 0 && code != 1 {
-			// LevelInfo should not block. If it did, we'd see code > 1.
-			t.Fatalf("unexpected check exit code %d\nstdout=%s\nstderr=%s", code, stdout, stderr)
-		}
-		combined := stdout + stderr
-		if !strings.Contains(combined, "no knowledge path") {
-			t.Fatalf("check output should hint about missing knowledge path, got:\n%s", combined)
-		}
-	})
-
-	t.Run("47_reserved_world_name", func(t *testing.T) {
-		// I47: `knowledge` cannot be used as a world name.
-		t.Parallel()
-		env, _ := freshEnv(t)
-		wd := t.TempDir()
-		// Hand-craft the project rather than init+mutate so the world
-		// name takes effect unambiguously.
-		mustWriteProject(t, wd, "acme", "knowledge", "neo")
-		stdout, stderr, code := runCLI(t, env, wd, "check")
-		if code == 0 {
-			t.Fatalf("check should reject world named 'knowledge'")
-		}
-		if !strings.Contains(stdout+stderr, "knowledge") {
-			t.Fatalf("check output should mention the reserved name")
-		}
-	})
-
-	// --------------------------------------------------------------------
 	// J: misc release-readiness
 	// --------------------------------------------------------------------
 
@@ -933,39 +680,6 @@ func TestReleaseReadiness(t *testing.T) {
 		}
 	})
 
-	t.Run("52_catalog_install_severance_passes_check", func(t *testing.T) {
-		// The severance MDR team catalog entry must install + pass
-		// check cleanly (shape of agents/*/SOUL.md, dependencies with
-		// scheme refs, knowledge: ./knowledge world key, etc).
-		t.Parallel()
-		env, _ := freshEnv(t)
-		wd := t.TempDir()
-		if _, stderr, code := runCLI(t, env, wd, "init", "spwn:severance"); code != 0 {
-			t.Fatalf("init: %s", stderr)
-		}
-		_, stderr, code := runCLI(t, env, wd, "check")
-		if code != 0 {
-			t.Fatalf("check failed on severance project (code=%d):\n%s", code, stderr)
-		}
-	})
-
-	t.Run("53_catalog_install_research_lab_passes_check", func(t *testing.T) {
-		// Parallel coverage for research-lab, the other bundled
-		// example that uses the knowledge/ ship. If either catalog
-		// entry drifts out of sync with the current manifest schema
-		// this fires.
-		t.Parallel()
-		env, _ := freshEnv(t)
-		wd := t.TempDir()
-		if _, stderr, code := runCLI(t, env, wd, "init", "spwn:research-lab"); code != 0 {
-			t.Fatalf("init: %s", stderr)
-		}
-		_, stderr, code := runCLI(t, env, wd, "check")
-		if code != 0 {
-			t.Fatalf("check failed on research-lab project (code=%d):\n%s", code, stderr)
-		}
-	})
-
 	t.Run("55_migration_backup_tolerates_broken_symlink", func(t *testing.T) {
 		// Regression for a794d543: the pre-migration backup walked a
 		// credential-routing symlink (e.g. ~/.spwn/agents/<name>/.codex/
@@ -998,51 +712,4 @@ func TestReleaseReadiness(t *testing.T) {
 			t.Fatalf("pre-migration backup followed broken symlink:\n%s", stderr)
 		}
 	})
-}
-
-// mustWriteProject writes a minimal but valid spwn project skeleton so
-// I47 can point check at a world name ("knowledge") that init would
-// never produce naturally.
-func mustWriteProject(t *testing.T, root, projectName, worldName, agentName string) {
-	t.Helper()
-	manifest := fmt.Sprintf(`version: 1
-name: %s
-
-worlds:
-  %s:
-    agents: [%s]
-    workspaces: ["."]
-`, projectName, worldName, agentName)
-	if err := os.WriteFile(filepath.Join(root, "spwn.yaml"), []byte(manifest), 0o644); err != nil {
-		t.Fatal(err)
-	}
-	agentDir := filepath.Join(root, "spwn/agents", agentName)
-	if err := os.MkdirAll(agentDir, 0o755); err != nil {
-		t.Fatal(err)
-	}
-	for _, layer := range []string{"playbooks", "journal"} {
-		if err := os.MkdirAll(filepath.Join(agentDir, layer), 0o755); err != nil {
-			t.Fatal(err)
-		}
-	}
-	agentYAML := fmt.Sprintf(`name: %s
-description: Test agent for release readiness.
-
-runtime:
-  backend: "spwn:claude-code"
-
-dependencies: []
-`, agentName)
-	if err := os.WriteFile(filepath.Join(agentDir, "agent.yaml"), []byte(agentYAML), 0o644); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.WriteFile(filepath.Join(agentDir, "AGENTS.md"), []byte("# "+agentName+"\n"), 0o644); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.WriteFile(filepath.Join(agentDir, "SOUL.md"), []byte("# Profile\n"), 0o644); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.WriteFile(filepath.Join(root, "spwn.lock"), []byte("# spwn.lock: DO NOT EDIT\n"), 0o644); err != nil {
-		t.Fatal(err)
-	}
 }

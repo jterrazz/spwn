@@ -86,8 +86,8 @@ generated file tree to --output (default: ./dist). No Docker
 required, useful for previewing renderer output or authoring a
 new runtime backend.
 
-Use 'spwn up' to spawn a world from the current project. Use 'spwn
-check --deep' to run the transpile dry-run as part of validation.
+Use 'spwn up' to spawn a world from the current project. Use 'station
+project plan' to run the transpile dry-run as part of validation.
 
 Examples:
   spwn build                                  # transpile + image, tag spwn-<project>:latest
@@ -136,7 +136,7 @@ Examples:
 			})
 			issues = append(issues, project.Drift(p)...)
 			if project.HasErrors(issues) {
-				return fmt.Errorf("project has validation errors - run `spwn check` to see them")
+				return fmt.Errorf("project has validation errors - run `station project plan` to see them")
 			}
 		}
 

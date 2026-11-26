@@ -2,7 +2,7 @@
 // rule that guards it: parsing spwn.yaml, walking up from any
 // subdirectory to locate the nearest manifest (Find), scaffolding
 // a fresh project (Init), and running the validation rule engine
-// (Validate) that backs `spwn check`.
+// (Validate) that backs `station project plan`.
 //
 // Also lives here: project-scoped entities that span multiple
 // agents: Teams and Organizations (role hierarchies). These were

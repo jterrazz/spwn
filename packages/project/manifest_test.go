@@ -72,7 +72,7 @@ func TestInit_createsManifestAndLayout(t *testing.T) {
 	}
 
 	// Lockfile should be seeded with the three default spwn:* refs
-	// so `spwn check` passes on a brand-new project (no drift between
+	// so `station project plan` passes on a brand-new project (no drift between
 	// the scaffolded agent.yaml and the initial lockfile).
 	lock, err := os.ReadFile(filepath.Join(dir, "spwn.lock"))
 	if err != nil {

@@ -206,7 +206,7 @@ func lookupRuntime(name string) (Runtime, error) {
 
 // RegisteredRuntimes returns the sorted set of names currently
 // registered via Register. Used by the CLI to surface an accurate
-// "known runtimes" hint on typos, and by `spwn check` to warn when an
+// "known runtimes" hint on typos, and by `station project plan` to warn when an
 // agent declares a runtime that the catalog knows about but no
 // compile adapter implements.
 func RegisteredRuntimes() []string {
@@ -220,7 +220,7 @@ func RegisteredRuntimes() []string {
 
 // HookEventsByRuntime returns each registered runtime's supported
 // hook events, keyed by runtime name. The CLI hands this map to
-// validate.Input so `spwn check` can warn when a hook targets an
+// validate.Input so `station project plan` can warn when a hook targets an
 // event the agent's runtime would silently drop. Each value slice
 // is the runtime adapter's own SupportedHookEvents() output (already
 // sorted by the adapter).

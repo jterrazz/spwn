@@ -17,7 +17,6 @@ rules (network, filesystem, tools), and each agent keeps its Mind
 - [spwn auth](#spwn-auth): Manage credentials: dashboard, login, use, logout, disable.
 - [spwn automation](#spwn-automation): Trigger-driven agent wakeups (cron + filesystem).
 - [spwn build](#spwn-build): Transpile the project and compile it into a Docker image.
-- [spwn check](#spwn-check): Validate the project tree against spwn.yaml.
 - [spwn down](#spwn-down): Destroy a world.
 - [spwn gate](#spwn-gate): Manage the host-side credential broker (start/stop/status/logs/restart).
 - [spwn init](#spwn-init): Scaffold a Spwn project in the current directory.
@@ -375,8 +374,8 @@ new runtime backend.
 ```
 
 ```text
-Use 'spwn up' to spawn a world from the current project. Use 'spwn
-check --deep' to run the transpile dry-run as part of validation.
+Use 'spwn up' to spawn a world from the current project. Use 'station
+project plan' to run the transpile dry-run as part of validation.
 ```
 
 ```text
@@ -410,27 +409,6 @@ spwn build [flags]
       --tag string       Image tag (default: spwn-<project>:latest)
       --tree-only        Stop after the compile step; write the Tree to --output instead of building a Docker image
       --world string     World from spwn.yaml to build (required for multi-world projects)
-```
-
-## spwn check
-
-Validate the project tree against spwn.yaml.
-
-```text
-Walks up from the current directory looking for spwn.yaml, then runs
-every validation rule against the project. Reports issues grouped by
-severity. Exits non-zero when errors are found (or warnings, with
---strict).
-```
-
-```text
-spwn check [flags]
-```
-
-```text
-      --deep     Also run a compile dry-run and report renderer errors
-      --json     Emit results as structured JSON on stdout
-      --strict   Exit non-zero on warnings, not just errors
 ```
 
 ## spwn down
