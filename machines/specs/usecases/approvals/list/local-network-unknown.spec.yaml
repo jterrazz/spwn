@@ -1,0 +1,13 @@
+description: 'where the engine''s read of Local Network cannot tell, its row reads unknown and owes no fix'
+env:
+    - engine-stopped
+    - engine
+runs:
+    - command: 'engine start >/dev/null'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | .out // .error'''
+      stdin: |
+          {"v":2,"id":"1","call":"approvals.list","in":{}}
+      exit: 0
+      stdout: |
+          {"mac":"macbook-pro","rows":[{"id":"local-network","state":"unknown","holder":"station","required":true,"sentence":"Spwn reaches the VMs it runs and your Macs nearby.","fix":{"Call":"","Args":null,"On":"","Confirm":"","Command":"","Path":""}}]}

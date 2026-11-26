@@ -17,6 +17,7 @@ import (
 	activitycalls "github.com/jterrazz/studio-station/apps/engine/activity/calls"
 	activitycontract "github.com/jterrazz/studio-station/apps/engine/activity/contract"
 	agentscalls "github.com/jterrazz/studio-station/apps/engine/agents/calls"
+	approvalscalls "github.com/jterrazz/studio-station/apps/engine/approvals/calls"
 	appscalls "github.com/jterrazz/studio-station/apps/engine/apps/calls"
 	automationscalls "github.com/jterrazz/studio-station/apps/engine/automations/calls"
 	awakecalls "github.com/jterrazz/studio-station/apps/engine/awake/calls"
@@ -79,6 +80,7 @@ func (m machine) registry(env kit.Env) *call.Registry {
 		backgroundcalls.All(m.backgroundDeps()),
 		diskcalls.All(diskcalls.Deps{Disk: m.diskOf(env), Kind: kind, Name: m.profile.Ref.Name}),
 		enginecalls.All(m.engineDeps()),
+		approvalscalls.All(m.approvalsDeps()),
 		imagescalls.All(imagescalls.Deps{Images: imageBuilder{m.images()}, Kind: kind}),
 		journalcalls.All(m.journalDeps()),
 		machinefilecalls.All(m.machinefileDeps(thisMac)),

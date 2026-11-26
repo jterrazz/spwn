@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/jterrazz/studio-station/apps/engine/accounts"
+	"github.com/jterrazz/studio-station/apps/engine/approvals"
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 	"github.com/jterrazz/studio-station/apps/engine/core/finding"
@@ -156,6 +157,13 @@ func wordedEnums() []worded {
 		{guide.Picture(""), wordsOf(guide.Picture("").Enum(), func(v string) string { return guide.Picture(v).Word() })},
 		{guide.ProgressKind(""), wordsOf(guide.ProgressKind("").Enum(), func(v string) string { return guide.ProgressKind(v).Word() })},
 		{guide.Ended(""), wordsOf(guide.Ended("").Enum(), func(v string) string { return guide.Ended(v).Word() })},
+		{approvals.ID(""), wordsOf(approvals.ID("").Enum(), func(v string) string { return approvals.ID(v).Word() })},
+		{approvals.State(""), map[string]word{
+			string(approvals.Approved): toned(verdict.OK, approvals.Approved.Word()),
+			string(approvals.Refused):  toned(verdict.Warn, approvals.Refused.Word()),
+			string(approvals.Checking): plain(approvals.Checking.Word()),
+			string(approvals.Unknown):  plain(approvals.Unknown.Word()),
+		}},
 		{images.BuildStep(""), map[string]word{
 			string(images.BuildBaseSystem): plain(images.BuildBaseSystem.Word()),
 			string(images.BuildPackages):   plain(images.BuildPackages.Word()),

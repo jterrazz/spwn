@@ -201,6 +201,12 @@
       "out": "Slept"
     },
     {
+      "name": "approvals.list",
+      "schema": "station.approvals.list/v1",
+      "where": "in-engine",
+      "out": "Listing"
+    },
+    {
       "name": "apps.install",
       "schema": "station.apps.install/v1",
       "section": "apps",

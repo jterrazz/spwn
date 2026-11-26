@@ -31,8 +31,8 @@ apps/engine/
              a Machinefile against the catalog into the steps of a plan, explain, and plan, apply
              and drift, which read and act through apps' and settings' calls, never their adapters;
              the ledger of what apply installed
-  approvals/ macOS's consents to Spwn (Local Network first): one probe per approval (the contract
-             LocalNetwork) and the age of a refusal
+  approvals/ macOS's consents to Spwn (Local Network first): the closed table, one probe per approval
+             (the contract LocalNetwork), the age of a refusal, and approvals.list, a view of the engine
 
   agents/    an agent and the Mind it keeps on its machine, by project (the contract Minds), the
              family of the Agent space; its real adapter wraps Agents' spwn.sh/packages/agent
