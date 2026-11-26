@@ -133,5 +133,31 @@ NOFOLDER=1 dp_case dp-nofolder 0 "GREEN steps=-" NPMCI=0 TSC=0 VITEST=0 PROOF=0 
 NOFOLDER=1 cheap_case 0 0 heavy ""
 NOFOLDER=1 cold_case cold-nofolder 0
 NOFOLDER=1 regen_case regen-nofolder 0 one 0
+loop_case() { local n=$1 mode=$2 want_rc=$3 want=$4; cc_sb "$n"; echo "$mode" > "$T/$n/home/loop.mode"
+  cat > "$T/$n/r/scripts/gates/cc-loop.sh" <<'EOF'
+#!/bin/bash
+L=$1
+case $(cat "$HOME/loop.mode") in
+  down) : > "$HOME/down"; exit 0 ;;
+  nosummary) echo "VERDICT $L 1 abc GREEN - took=1s tier=heavy" ;;
+  short) echo "VERDICT $L 1 abc GREEN - took=1s tier=heavy"; echo "SUMMARY $L: 2 commits, 1 GREEN, 0 FLAKE, 0 RED" ;;
+  red) echo "VERDICT $L 1 abc RED steps=LINT took=1s tier=heavy"; echo "SUMMARY $L: 1 commits, 0 GREEN, 0 FLAKE, 1 RED" ;;
+  flake) echo "VERDICT $L 1 abc FLAKE(x) rerun=green took=1s tier=heavy"; echo "SUMMARY $L: 1 commits, 0 GREEN, 1 FLAKE, 0 RED" ;;
+esac
+echo END > "$CC_HOME/$L-cc.end"
+EOF
+  out=$(cc_run "$n" env -u CHEAP); rc=$?
+  [ $rc = "$want_rc" ] || bad "cc.sh loop $mode: exit $rc, wanted $want_rc"
+  case $out in *"$want"*) ;; *) bad "cc.sh loop $mode: no '$want' in: $(echo "$out" | tail -2)" ;; esac
+}
+loop_case loop-red red 1 "SUMMARY lab: 1 commits, 0 GREEN, 0 FLAKE, 1 RED"
+loop_case loop-flake flake 0 "1 FLAKE"
+loop_case loop-nosummary nosummary 94 "INCOMPLETE lab"
+loop_case loop-short short 94 "INCOMPLETE lab"
+loop_case loop-down down 93 "ATTACH=1 bash"
+cc_sb attach; mkdir -p "$T/attach/home/spwn-gates"
+printf '%s\n' "VERDICT lab 1 abc GREEN - took=1s tier=heavy" "SUMMARY lab: 1 commits, 1 GREEN, 0 FLAKE, 0 RED" > "$T/attach/home/spwn-gates/lab-cc.log"; echo END > "$T/attach/home/spwn-gates/lab-cc.end"
+out=$(in_sb attach timeout 120 env ATTACH=1 bash cc.sh "$T/attach/w" "$(git -C "$T/attach/w" rev-parse b~1)" lab 2>&1); rc=$?
+[ $rc = 0 ] || bad "cc.sh ATTACH=1 on a finished loop: exit $rc"
 [ $fail = 0 ] && echo "gate scripts: ok"
 exit $fail
