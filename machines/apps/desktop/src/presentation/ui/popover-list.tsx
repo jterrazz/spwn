@@ -15,12 +15,20 @@ export type PopoverRow = {
     lead?: ReactNode;
     state?: undefined | { tone: Tone; word: string };
     description?: string | undefined;
+    hint?: string | undefined;
     current?: boolean;
     indent?: boolean;
     disabled?: boolean;
 };
 
-export type PopoverSection = { label: string; rows: readonly PopoverRow[] };
+// value: one group of rows under its caption; `meta` is said at the caption's end, `empty` in its place when a
+// value: filter leaves it with no row, drawn only when the groups stand side by side.
+export type PopoverSection = {
+    label: string;
+    rows: readonly PopoverRow[];
+    meta?: string | undefined;
+    empty?: string | undefined;
+};
 
 export type PopoverFilter = {
     label: string;
@@ -34,6 +42,7 @@ export type PopoverListProps = {
     sections: readonly PopoverSection[];
     empty: string;
     filter?: PopoverFilter | undefined;
+    columns?: boolean;
     onChoose: (id: string) => void;
     close: () => void;
 };
@@ -43,13 +52,13 @@ function firstOf(rows: readonly PopoverRow[]): string | undefined {
         ?.id;
 }
 
-function startsOf(sections: readonly PopoverSection[]) {
+function startsOf(sections: readonly PopoverSection[], columns: boolean) {
     return sections
         .map((section, at) => ({
             section,
             start: sections.slice(0, at).reduce((sum, one) => sum + one.rows.length, 0),
         }))
-        .filter(({ section }) => section.rows.length > 0);
+        .filter(({ section }) => columns || section.rows.length > 0);
 }
 
 // invariant: Home and End move the caret while the filter holds the keyboard, as a text field's keys do; they
@@ -90,6 +99,7 @@ function Option({ row, id, active, onPick, onHover }: OptionProps) {
                     </span>
                 )}
             </span>
+            {row.hint === undefined ? null : <span className={styles.hint}>{row.hint}</span>}
             {row.state ? (
                 <StateMark said="before" tone={row.state.tone} word={row.state.word} />
             ) : null}
@@ -133,9 +143,15 @@ function Filter({
     );
 }
 
-// value: the row the keyboard is on, kept by its id so a filter that keeps it keeps it, else the first row shown.
-function useActiveRow(rows: readonly PopoverRow[], id: string) {
+// value: the row the keyboard is on, kept by its id so a filter that keeps it keeps it, else the first row shown;
+// value: a `typed` that changes, the columns' filter, starts it again on the first row it shows.
+function useActiveRow(rows: readonly PopoverRow[], id: string, typed: string | undefined) {
     const [chosen, setChosen] = useState(() => firstOf(rows));
+    const [was, setWas] = useState(typed);
+    if (was !== typed) {
+        setWas(typed);
+        setChosen(rows.find((row) => row.disabled !== true)?.id);
+    }
     const found = rows.findIndex((row) => row.id === chosen);
     const at = found !== -1 || rows.length === 0 ? found : 0;
     const active = at >= 0 ? `${id}-${String(at)}` : undefined;
@@ -153,18 +169,21 @@ function useActiveRow(rows: readonly PopoverRow[], id: string) {
 
 type SectionsProps = {
     sections: readonly PopoverSection[];
+    columns: boolean;
     id: string;
     at: number;
     onPick: (row: PopoverRow) => void;
     onHover: (event: MouseEvent, index: number) => void;
 };
 
-function Sections({ sections, id, at, onPick, onHover }: SectionsProps) {
-    return startsOf(sections).map(({ section, start }) => (
-        <div aria-label={section.label} key={section.label} role="group">
+function Sections({ sections, columns, id, at, onPick, onHover }: SectionsProps) {
+    return startsOf(sections, columns).map(({ section, start }) => (
+        <div aria-label={section.label} className={styles.group} key={section.label} role="group">
             <p aria-hidden="true" className={styles.section}>
                 {section.label}
+                {section.meta === undefined ? null : <span>{section.meta}</span>}
             </p>
+            {section.rows.length === 0 ? <p className={styles.none}>{section.empty}</p> : null}
             {section.rows.map((row, offset) => (
                 <Option
                     active={start + offset === at}
@@ -183,10 +202,17 @@ function Sections({ sections, id, at, onPick, onHover }: SectionsProps) {
     ));
 }
 
-export function PopoverList({ label, sections, empty, filter, onChoose, close }: PopoverListProps) {
+// invariant: with `columns` the sections stand side by side, each saying its own `empty` when a filter leaves it
+// invariant: no row, and the arrows still walk one list, the first section top to bottom, then the next.
+export function PopoverList(props: PopoverListProps) {
+    const { label, sections, empty, filter, columns = false, onChoose, close } = props;
     const id = useId();
     const rows = sections.flatMap((section) => section.rows);
-    const { active, at, choose, list } = useActiveRow(rows, id);
+    const { active, at, choose, list } = useActiveRow(
+        rows,
+        id,
+        columns ? filter?.value : undefined,
+    );
     const hover = useMovedPointer(choose);
     const pick = (row: PopoverRow | undefined) => {
         if (row !== undefined && row.disabled !== true) {
@@ -212,7 +238,7 @@ export function PopoverList({ label, sections, empty, filter, onChoose, close }:
             <div
                 aria-activedescendant={filter ? undefined : active}
                 aria-label={label}
-                className={styles.list}
+                className={`${styles.list} ${columns ? styles.columns : ''}`}
                 id={id}
                 onKeyDown={onKeyDown}
                 onMouseDown={(event) => {
@@ -222,8 +248,18 @@ export function PopoverList({ label, sections, empty, filter, onChoose, close }:
                 role="listbox"
                 tabIndex={filter ? -1 : 0}
             >
-                <Sections at={at} id={id} onHover={hover} onPick={pick} sections={sections} />
-                {rows.length === 0 ? <p className={styles.none}>{empty}</p> : null}
+                {rows.length === 0 ? (
+                    <p className={styles.none}>{empty}</p>
+                ) : (
+                    <Sections
+                        at={at}
+                        columns={columns}
+                        id={id}
+                        onHover={hover}
+                        onPick={pick}
+                        sections={sections}
+                    />
+                )}
             </div>
         </>
     );

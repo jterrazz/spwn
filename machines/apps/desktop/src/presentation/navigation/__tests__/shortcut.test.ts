@@ -17,6 +17,8 @@ describe('shortcut', () => {
         { expected: undefined, stroke: { ...bare, key: '4', metaKey: true } },
         { expected: 'find', stroke: { ...bare, key: 'K', metaKey: true } },
         { expected: 'find', stroke: { ...bare, ctrlKey: true, key: 'k' } },
+        { expected: 'card', stroke: { ...bare, key: 'l', metaKey: true } },
+        { expected: 'card', stroke: { ...bare, ctrlKey: true, key: 'L' } },
         { expected: 'forward', stroke: { ...bare, key: ']', metaKey: true } },
         { expected: 'Overview', stroke: { ...bare, ctrlKey: true, key: '1' } },
         { expected: 'Storage', stroke: { ...bare, ctrlKey: true, key: '6' } },

@@ -1,0 +1,37 @@
+- button "Fleet" [expanded]
+- dialog "Fleet":
+  - combobox "Go to a section or a machine" [expanded]
+  - listbox "Fleet":
+    - group "Sections":
+      - option "Home ⌘0"
+      - option "Fleet" [selected]
+      - option "Apps 10"
+      - option "Skills"
+      - option "Machine settings 3"
+      - option "Machine files"
+      - option "Storage"
+      - option "Passwords"
+      - option "Engine Behind"
+    - group "Fleet":
+      - option "macbook-pro Up":
+        - text: macbook-pro
+        - img "Up"
+      - option "agent-7f Running":
+        - text: agent-7f
+        - img "Running"
+      - option "api Stopped"
+      - option "linux-1 Running" [selected]:
+        - text: linux-1
+        - img "Running"
+      - option "linux-2 Creating"
+      - option "mac-mini Up":
+        - text: mac-mini
+        - img "Up"
+      - option "infra Down"
+      - option "linux-3 Running":
+        - text: linux-3
+        - img "Running"
+      - option "review-bot Running":
+        - text: review-bot
+        - img "Running"
+      - option "macbook-air Asleep"

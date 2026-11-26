@@ -1,10 +1,15 @@
 - banner:
+  - navigation "Spaces":
+    - button "Machine"
+    - button "Agent soon": Agent
+    - button "OS soon": OS
   - button "Home"
   - button "Back" [disabled]
   - button "Forward" [disabled]
   - navigation "Path":
     - list:
-      - listitem: Settings
+      - listitem:
+        - button "Settings"
   - button "Inbox 2"
   - button "Find"
   - button "Settings"

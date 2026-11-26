@@ -134,20 +134,22 @@ describe('global pages', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test('A17 the path of a catalog item reads Machine, its shelf, then the item, and the shelf lists the places', async () => {
+    test('A17 the path of a catalog item reads its shelf, then the item, and the section opens the card', async () => {
         // Given - the window on the app node of the Apps shelf over stories
         const result = await website
             .storage(PINNED)
             .visit('/?world=stories&page=catalog-apps&item=node', async (visitor) => {
                 // When - the path is read, then its shelf pressed
-                await visitor.see(within(path, button('Machine', { exact: false })));
+                await visitor.gone(within(path, button('Machine', { exact: false })));
+                await visitor.see(within(path, button('Apps')));
                 await visitor.see(within(path, content('node')));
                 await visitor.gone(within(path, button('node')));
                 await visitor.click(within(path, button('Apps')));
 
-                // Then - the space's places, and Apps opens the shelf again
-                await visitor.see(within(dialog('Places'), option('Skills', { exact: false })));
-                await visitor.click(within(dialog('Places'), option('Apps', { exact: false })));
+                // Then - the card, its sections beside the fleet, and Apps opens the shelf again
+                await visitor.see(within(dialog('Apps'), option('Skills', { exact: false })));
+                await visitor.see(within(dialog('Apps'), option('mac-mini', { exact: false })));
+                await visitor.click(within(dialog('Apps'), option('Apps', { exact: false })));
                 await visitor.see(region('Apps'));
                 await visitor.gone(within(path, content('node')));
             });

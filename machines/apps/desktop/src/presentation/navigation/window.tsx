@@ -204,7 +204,6 @@ type FrameProps = {
     memory: Memory | undefined;
 };
 
-// invariant: a space opens where this window last was in it; only Machine opens today, Agent and OS wait.
 const NOWHERE = () => undefined;
 
 function Content({ area, held }: { area: AreaProps; held: Held | undefined }) {
@@ -239,13 +238,12 @@ function Frame({ Gallery, pages, memory }: FrameProps) {
     const { drawn, engine, home, listed, macs, needs, side, standing } = useStation();
     const held = useHeld(drawn);
     const quiet = held !== undefined;
-    const sheets = useSheets();
+    const { opened } = useSheets();
     const column = useMemo(() => new ColumnState(memory, globalThis.innerWidth), [memory]);
-    const { opened } = sheets;
     const { addMac, guide, newMachine } = opened;
     const withGallery = Gallery !== undefined;
     const spaced = quiet || !isGlobal(route);
-    const onSpace = useSpaceKeys(
+    const { card, onSpace, soon } = useSpaceKeys(
         router,
         macs,
         { onColumn: spaced ? column.toggle : NOWHERE, onFind: opened.find },
@@ -260,6 +258,8 @@ function Frame({ Gallery, pages, memory }: FrameProps) {
         <Screen>
             <div className={styles.window}>
                 <PathBar
+                    card={card}
+                    carried={side.carried}
                     column={spaced ? column : undefined}
                     engine={engine}
                     found={found}
@@ -272,6 +272,7 @@ function Frame({ Gallery, pages, memory }: FrameProps) {
                     onSpace={onSpace}
                     quiet={quiet}
                     router={router}
+                    soon={soon}
                     standing={standing}
                 />
                 {spaced ? <ColumnSlot {...aside} column={column} /> : null}

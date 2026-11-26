@@ -6,6 +6,7 @@ export type Keystroke = { key: string; metaKey: boolean; ctrlKey: boolean; shift
 
 export type Shortcut =
     | 'back'
+    | 'card'
     | 'column'
     | 'find'
     | 'forward'
@@ -19,7 +20,7 @@ export type Shortcut =
     | Tab;
 
 const COMMANDS: Readonly<
-    Record<string, 'back' | 'find' | 'forward' | 'home' | 'inbox' | 'settings'>
+    Record<string, 'back' | 'card' | 'find' | 'forward' | 'home' | 'inbox' | 'settings'>
 > = {
     ',': 'settings',
     '0': 'home',
@@ -27,6 +28,7 @@ const COMMANDS: Readonly<
     ']': 'forward',
     i: 'inbox',
     k: 'find',
+    l: 'card',
 };
 
 // value: ⌘ with a digit is a space, one per member of SPACES, in their order.

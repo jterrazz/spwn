@@ -4,7 +4,7 @@ import { BAR_FIXED, fixedWidth, FOLD_WIDTH, foldOf } from '../fold';
 
 describe('fold', () => {
     test('a path that fits folds nothing', () => {
-        // Given - Machine, a Mac and a VM in a wide bar
+        // Given - Fleet, a Mac and a VM in a wide bar
         const folded = foldOf([130, 140, 110], 600);
 
         // Then - every segment shows
@@ -28,11 +28,12 @@ describe('fold', () => {
         expect(folded).toStrictEqual([]);
     });
 
-    test('at the window minimum, the parts that never fold leave room for the space, the `…` and a last segment', () => {
+    test('at the window minimum, the parts that never fold leave room for the section, the `…` and a last segment', () => {
         // Given - the 1100 px minimum, the column hidden, and a last segment of 160 px
         const least = fixedWidth() + 140 + FOLD_WIDTH + 160;
 
-        // Then - the bar holds them, the Find field kept at its 120 px
+        // Then - the bar holds them, the three spaces kept as words and the Find field at its 120 px
+        expect(BAR_FIXED.spaces).toBe(150);
         expect(BAR_FIXED.find).toBe(120);
         expect(least).toBeLessThanOrEqual(1100);
     });

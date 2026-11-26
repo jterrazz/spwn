@@ -34,6 +34,7 @@ export type PopoverProps = {
     onClose: () => void;
     filter?: PopoverFilter | undefined;
     align?: Align;
+    columns?: boolean;
     id?: string | undefined;
 };
 
@@ -181,6 +182,7 @@ export function Popover(props: PopoverProps) {
         onClose,
         filter,
         align = 'start',
+        columns = false,
         id,
     } = props;
     const host = useContext(PopoverHost);
@@ -196,7 +198,7 @@ export function Popover(props: PopoverProps) {
         <div className={styles.layer} ref={layer}>
             <div
                 aria-label={label}
-                className={styles.popover}
+                className={`${styles.popover} ${columns ? styles.card : ''}`}
                 data-side={place?.side}
                 id={id}
                 onBlur={onBlur}
@@ -208,6 +210,7 @@ export function Popover(props: PopoverProps) {
             >
                 <PopoverList
                     close={close}
+                    columns={columns}
                     empty={empty}
                     filter={filter}
                     label={label}

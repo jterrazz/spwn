@@ -3,10 +3,8 @@ import { describe, expect, test } from 'vitest';
 import { macState } from '../../words/shown';
 import { machineRoute } from '../route';
 import type { Route } from '../route';
-import { segmentsOf } from '../segments';
+import { fleetRoute, SECTIONS, segmentsOf } from '../segments';
 import type { Located } from '../segments';
-
-const DOWN = { tone: 'bad' as const, word: '1 down' };
 
 const LINUX_1: Located = {
     mac: { Name: 'macbook-pro', Standing: 'online' },
@@ -14,7 +12,7 @@ const LINUX_1: Located = {
 };
 
 function pathOf(route: Route, found?: Located, quiet = false) {
-    return segmentsOf({ found, route, standing: DOWN }, quiet).map((segment) => ({
+    return segmentsOf({ found, route }, quiet).map((segment) => ({
         label: segment.label,
         siblings: segment.siblings,
         to: segment.to,
@@ -22,69 +20,96 @@ function pathOf(route: Route, found?: Located, quiet = false) {
 }
 
 describe('segments', () => {
-    test("a VM's path is the space, its Mac, then itself, each opening its siblings", () => {
+    test("a VM's path is Fleet, its Mac, then itself, each opening its siblings", () => {
         // Given - linux-1 on macbook-pro
         const path = pathOf(machineRoute('linux-1'), LINUX_1);
 
-        // Then - Machine lists the spaces, the Mac the fleet, the VM its Mac's VMs
+        // Then - Fleet opens the card, the Mac the fleet, the VM its Mac's VMs
         expect(path).toStrictEqual([
-            { label: 'Machine', siblings: 'spaces', to: undefined },
+            { label: 'Fleet', siblings: 'card', to: undefined },
             { label: 'macbook-pro', siblings: 'fleet', to: machineRoute('macbook-pro') },
             { label: 'linux-1', siblings: 'vms', to: machineRoute('linux-1') },
         ]);
     });
 
-    test("the space's segment carries the engine's roll-up, and a Mac its own standing", () => {
+    test('the Fleet segment carries no mark, and a Mac its own standing', () => {
         // Given - macbook-pro opened
-        const [space, mac] = segmentsOf(
-            { found: { mac: LINUX_1.mac }, route: machineRoute('macbook-pro'), standing: DOWN },
+        const [fleet, mac] = segmentsOf(
+            { found: { mac: LINUX_1.mac }, route: machineRoute('macbook-pro') },
             false,
         );
 
-        // Then - the roll-up as given, the Mac's word as the engine says it
-        expect(space?.shown).toStrictEqual(DOWN);
+        // Then - no roll-up on Fleet, the Mac's word as the engine says it
+        expect(fleet?.shown).toBeUndefined();
         expect(mac?.shown).toStrictEqual(macState({ Standing: 'online' }));
     });
 
-    test('a page of the space is the space then the page, an item its shelf then its name', () => {
+    test('a page of the space starts at its section, an item at its shelf then its name', () => {
         // Given - Storage, then an app on its shelf
         const storage = pathOf({ page: 'storage' });
         const item = pathOf({ item: 'gh', page: 'catalog-apps' });
 
-        // Then - the place lists its siblings, the item is words
+        // Then - the section opens the card, the item is words
         expect(storage).toStrictEqual([
-            { label: 'Machine', siblings: 'spaces', to: undefined },
-            { label: 'Storage', siblings: 'places', to: { page: 'storage' } },
+            { label: 'Storage', siblings: 'card', to: { page: 'storage' } },
         ]);
-        expect(item.map((segment) => segment.label)).toStrictEqual(['Machine', 'Apps', 'gh']);
-        expect(item[2]?.siblings).toBeUndefined();
+        expect(item.map((segment) => segment.label)).toStrictEqual(['Apps', 'gh']);
+        expect(item[1]?.siblings).toBeUndefined();
     });
 
-    test("home, Inbox and Settings are the window's own, named alone", () => {
+    test("home, Inbox and Settings are the window's own, named alone, and open the card too", () => {
         // Given - each of the window's own pages
         const named = (['home', 'inbox', 'settings'] as const).map((page) => pathOf({ page }));
 
-        // Then - one segment, its page's name, opening nothing
+        // Then - one segment, its page's name, opening the card
         expect(named).toStrictEqual([
-            [{ label: 'Home', siblings: undefined, to: undefined }],
-            [{ label: 'Inbox', siblings: undefined, to: undefined }],
-            [{ label: 'Settings', siblings: undefined, to: undefined }],
+            [{ label: 'Home', siblings: 'card', to: undefined }],
+            [{ label: 'Inbox', siblings: 'card', to: undefined }],
+            [{ label: 'Settings', siblings: 'card', to: undefined }],
         ]);
     });
 
-    test('passwords is a page of the Machine space', () => {
-        // Given - the vault's list
-        const path = pathOf({ page: 'passwords' });
-
-        // Then - under the space
-        expect(path.map((segment) => segment.label)).toStrictEqual(['Machine', 'Passwords']);
-    });
-
-    test('the frame with no engine is Home alone, whatever the route', () => {
+    test('the frame with no engine is Home alone, as words, whatever the route', () => {
         // Given - a route to linux-1 while no engine answers
         const path = pathOf(machineRoute('linux-1'), LINUX_1, true);
 
-        // Then - Home, and no segment that would open the fleet
+        // Then - Home, and no segment that would open the card
         expect(path).toStrictEqual([{ label: 'Home', siblings: undefined, to: undefined }]);
+    });
+
+    test('the Machine space lists Home, the fleet, its shelves and places; a space not built lists none', () => {
+        // Given - the card's sections of each space
+        const sections = SECTIONS;
+
+        // Then - in their order
+        expect(sections).toStrictEqual({
+            agent: [],
+            machine: [
+                'home',
+                'fleet',
+                'catalog-apps',
+                'catalog-skills',
+                'catalog-settings',
+                'machine-files',
+                'storage',
+                'passwords',
+                'engine',
+            ],
+            os: [],
+        });
+    });
+
+    test("the card's Fleet goes to the last machine shown, else the first Mac, else nowhere", () => {
+        // Given - a window that showed linux-1's Ports, one that showed only Storage, one with no Mac
+        const shown = fleetRoute(machineRoute('linux-1', 'Ports'), 'macbook-pro');
+        const section = fleetRoute({ page: 'storage' }, 'macbook-pro');
+        const none = fleetRoute(undefined, undefined);
+
+        // Then - linux-1 where it was left, the first Mac, nothing
+        expect([shown, section, none]).toStrictEqual([
+            machineRoute('linux-1', 'Ports'),
+            machineRoute('macbook-pro'),
+            undefined,
+        ]);
     });
 });

@@ -6,15 +6,7 @@ import { Screen } from '../button';
 import { Popover, usePopover } from '../popover';
 import type { PopoverRow } from '../popover';
 import { POPOVER_STORIES, PopoverSample } from '../popover.stories';
-
-const MACHINES: readonly PopoverRow[] = [
-    { id: 'macbook-pro', label: 'macbook-pro' },
-    { id: 'api', indent: true, label: 'api', state: { tone: 'plain', word: 'Stopped' } },
-    { current: true, id: 'linux-1', indent: true, label: 'linux-1' },
-    { id: 'linux-2', indent: true, label: 'linux-2', state: { tone: 'new', word: 'Creating' } },
-    { id: 'mac-mini', label: 'mac-mini' },
-    { id: 'linux-3', indent: true, label: 'linux-3' },
-];
+import { MACHINES } from './popover.fixtures';
 
 const SPACES: readonly PopoverRow[] = [
     { current: true, id: 'machine', label: 'Machine' },
@@ -99,6 +91,7 @@ const GOLDENS = [
     './__expected__/popover-long-list.aria.yaml',
     './__expected__/popover-spaces.aria.yaml',
     './__expected__/popover-window-edge.aria.yaml',
+    './__expected__/popover-card.aria.yaml',
 ] as const;
 
 const DRAWN = GOLDENS.map((golden, at) => {

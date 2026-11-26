@@ -8,6 +8,8 @@ import { Icon } from '../ui/icon';
 import { Button, IconButton, Sign } from '../ui/index';
 import type { Shown } from '../words/shown';
 import { actionOf } from './bar-action';
+import type { Card } from './card';
+import type { Carried } from './carried';
 import { ColumnToggle } from './column';
 import type { ColumnState } from './column-state';
 import { EngineMark } from './engine-foot';
@@ -15,6 +17,8 @@ import { PathNav } from './path';
 import type { PlainPage } from './route';
 import type { Router } from './router';
 import { segmentsOf } from './segments';
+import type { Soon } from './soon';
+import { SpaceSwitch } from './space-switch';
 import type { Space } from './spaces';
 import { StaleMark } from './stale-mark';
 
@@ -29,6 +33,9 @@ export type PathBarProps = {
     engine: Reading<EngineReadOutput>;
     standing: Shown | undefined;
     onSpace: (space: Space) => void;
+    soon: Soon;
+    card: Card;
+    carried: Carried;
     onFind: () => void;
     column: ColumnState | undefined;
     onAddPassword: () => void;
@@ -124,15 +131,24 @@ function End({ router, quiet, macs, needs, engine, onFind, ...props }: PathBarPr
     );
 }
 
-// invariant: the bar is the window's one row of navigation: the sign, the column's pin, Back and Forward, the
-// invariant: path, then the engine's mark, the stale mark, the page's action, Inbox, Find and Settings. It is a deep
-// invariant: drag region, which leaves every button in it clickable; its popovers draw in a portal outside it.
+// invariant: the bar is the window's one row of navigation: the spaces and their rule, the sign, the column's pin,
+// invariant: Back and Forward, the path, then the engine's mark, the stale mark, the page's action, Inbox, Find and
+// invariant: Settings. It is a deep drag region, which leaves every button in it clickable; its popovers draw in a
+// invariant: portal outside it.
 export function PathBar(props: PathBarProps) {
-    const { router, quiet, found, macs, standing, onSpace, column, ItemName } = props;
+    const { router, quiet, found, macs, standing, onSpace, soon, column, ItemName } = props;
+    const { card, carried, engine } = props;
     const { route, go, back, forward, canGoBack, canGoForward } = router;
-    const segments = segmentsOf({ found, route, standing }, quiet);
+    const segments = segmentsOf({ found, route }, quiet);
     return (
         <header className={styles.bar} data-tauri-drag-region="deep">
+            <SpaceSwitch
+                onSpace={onSpace}
+                quiet={quiet}
+                route={route}
+                soon={soon}
+                standing={standing}
+            />
             <button
                 aria-keyshortcuts="Meta+0"
                 aria-label="Home"
@@ -161,14 +177,15 @@ export function PathBar(props: PathBarProps) {
                 shortcut="⌘]"
             />
             <PathNav
+                card={card}
+                carried={carried}
+                engine={engine}
                 found={found}
                 go={go}
                 ItemName={ItemName}
                 macs={macs}
-                onSpace={onSpace}
                 route={route}
                 segments={segments}
-                standing={standing}
             />
             <End {...props} />
         </header>

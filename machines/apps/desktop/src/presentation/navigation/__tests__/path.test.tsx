@@ -19,7 +19,7 @@ import { wordOfSent } from '../../words/engine-words';
 import { NO_STATE_WORD } from '../../words/words';
 import { machineRoute } from '../route';
 import type { PlainPage } from '../route';
-import { PLACES } from '../segments';
+import { SECTIONS } from '../segments';
 import { TITLES } from '../titles';
 import { Window } from '../window';
 import { PINNED } from './pinned';
@@ -128,18 +128,20 @@ describe('PathNav', () => {
                 async (visitor) => {
                     await visitor.see(within(path, content(TITLES.home)));
 
-                    // When - Storage is opened from the column, then every place from the place segment's popover
+                    // When - Storage is opened from the column, then every other section from the card
                     await visitor.click(within(column, button(TITLES.storage, { exact: false })));
                     await visitor.see(within(path, button(TITLES.storage)));
                     let at: string = TITLES.storage;
-                    for (const place of PLACES) {
-                        await choose(visitor, {
-                            exact: true,
-                            filter: 'Filter places',
-                            name: TITLES[place],
-                            segment: at,
-                        });
-                        at = TITLES[place];
+                    for (const section of SECTIONS.machine) {
+                        if (section !== 'fleet' && section !== 'storage') {
+                            await choose(visitor, {
+                                exact: true,
+                                filter: 'Go to a section or a machine',
+                                name: TITLES[section],
+                                segment: at,
+                            });
+                            at = TITLES[section];
+                        }
                     }
 
                     // When - the first Mac is opened from the column, then every machine from its Mac's segment
@@ -203,9 +205,9 @@ describe('PathNav', () => {
         120_000,
     );
 
-    test('a path too long for a 560 px bar folds its middle, and the fold reaches what it hides', async () => {
-        // Given - the window on linux-1, a VM of macbook-pro, over two-macs, 560 px wide
-        const result = await component.viewport({ height: 800, width: 560 }).render(
+    test('a path too long for a 640 px window folds its middle, and the fold reaches what it hides', async () => {
+        // Given - the window on linux-1, a VM of macbook-pro, over two-macs, 640 px wide
+        const result = await component.viewport({ height: 800, width: 640 }).render(
             <EngineProvider dependencies={composeReplay({ recording: recordingFor('two-macs') })}>
                 <Window initial={machineRoute('linux-1')} pages={PAGES} />
             </EngineProvider>,
@@ -213,8 +215,8 @@ describe('PathNav', () => {
                 // When - the path is read
                 await visitor.see(within(path, button('Folded levels')));
 
-                // Then - the space and the VM keep their names, the Mac is behind the fold, and the fold opens it
-                await visitor.see(within(path, button('Machine', { exact: false })));
+                // Then - Fleet and the VM keep their names, the Mac is behind the fold, and the fold opens it
+                await visitor.see(within(path, button('Fleet')));
                 await visitor.see(within(path, button('linux-1', { exact: false })));
                 await visitor.gone(within(path, button('macbook-pro', { exact: false })));
                 await visitor.click(within(path, button('Folded levels')));

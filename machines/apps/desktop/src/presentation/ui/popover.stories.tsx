@@ -107,6 +107,25 @@ function spaceOf(id: 'agent' | 'machine' | 'os', label: string, line: string): P
     };
 }
 
+const SECTIONS: readonly PopoverRow[] = [
+    { hint: '⌘0', id: 'home', label: 'Home', lead: <Icon name="home" /> },
+    { current: true, id: 'fleet', label: 'Fleet', lead: <Icon name="server" /> },
+    { hint: '10', id: 'apps', label: 'Apps', lead: <Icon name="apps" /> },
+    { id: 'skills', label: 'Skills', lead: <Icon name="skills" /> },
+    { hint: '3', id: 'settings', label: 'Machine settings', lead: <Icon name="settings" /> },
+    { id: 'files', label: 'Machine files', lead: <Icon name="file" /> },
+    { id: 'storage', label: 'Storage', lead: <Icon name="disc" /> },
+    { id: 'passwords', label: 'Passwords', lead: <Icon name="key" /> },
+    {
+        id: 'engine',
+        label: 'Engine',
+        lead: <Icon name="engine" />,
+        state: { tone: 'warn', word: 'Behind' },
+    },
+];
+
+const CARD_FILTER = 'Go to a section or a machine';
+
 export const POPOVER_STORIES: readonly Story<PopoverSampleProps>[] = [
     {
         name: 'the machines and their states',
@@ -205,6 +224,33 @@ export const POPOVER_STORIES: readonly Story<PopoverSampleProps>[] = [
                                 state: { tone: 'bad', word: 'Exposed' },
                             },
                         ],
+                    },
+                ],
+            },
+        },
+    },
+    {
+        name: 'the card: the sections beside the fleet, one filter',
+        props: {
+            opener: 'Fleet',
+            popover: {
+                columns: true,
+                empty: 'Nothing matches',
+                filter: {
+                    label: CARD_FILTER,
+                    onChange: nothing,
+                    placeholder: CARD_FILTER,
+                    value: '',
+                },
+                label: 'Fleet',
+                onChoose: nothing,
+                sections: [
+                    { empty: 'No section matches', label: 'Sections', rows: SECTIONS },
+                    {
+                        empty: 'No machine matches',
+                        label: 'Fleet',
+                        meta: `${String(MACHINES.length)} machines`,
+                        rows: MACHINES,
                     },
                 ],
             },

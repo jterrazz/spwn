@@ -191,6 +191,7 @@ describe('contrast', () => {
             'kit/login-sheet.module.css',
             'navigation/column.module.css',
             'navigation/path-bar.module.css',
+            'navigation/space-switch.module.css',
             'screens/catalog/item.module.css',
             'screens/machine-files/machine-files.module.css',
             'screens/machine/overview/overview.module.css',
@@ -244,6 +245,14 @@ describe('contrast', () => {
 
         // Then - none is below the bar of text
         expect(below(TEXT_BAR, measures)).toStrictEqual([]);
+    });
+
+    test("each mark of a state holds the bar of a mark on glass over the four surface steps, as a popover's rows draw it", () => {
+        // Given - the five marks of a state on the glass composited over s0 to s3
+        const measures = MARKS.flatMap((mark) => onGlass(mark, GROUNDS));
+
+        // Then - none is below the bar of a mark
+        expect(below(MARK_BAR, measures)).toStrictEqual([]);
     });
 
     test('over the white primary button, the brightest thing glass floats over, a name and its meta keep 4.5:1 and the third level 3:1', () => {
