@@ -40,7 +40,13 @@ export function entry<P extends object>(
         samples: stories.map((story) => ({
             drawn: (
                 <Screen>
-                    <Component {...story.props} />
+                    {story.density === undefined ? (
+                        <Component {...story.props} />
+                    ) : (
+                        <div data-density={story.density}>
+                            <Component {...story.props} />
+                        </div>
+                    )}
                 </Screen>
             ),
             name: story.name,

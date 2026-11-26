@@ -55,7 +55,6 @@ function Busiest({ report }: { report: ActivityReport }) {
             {rows.map((row) => (
                 <div className={styles.process} key={row.key}>
                     <Row
-                        size="slim"
                         title={row.name}
                         value={
                             <BusyShare

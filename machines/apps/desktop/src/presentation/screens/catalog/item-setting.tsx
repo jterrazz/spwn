@@ -63,7 +63,6 @@ function Changes({ row }: { row: SettingsRow }) {
                         key={stored.Path}
                         kind={wordOf('CatalogLevel', stored.Level).Word}
                         sentence={<Marked>{stored.Note}</Marked>}
-                        size="slim"
                         title={stored.Path}
                         titleLook="mono"
                     />
@@ -77,7 +76,6 @@ function Changes({ row }: { row: SettingsRow }) {
                                 set to <Value>{value.Value}</Value>
                             </>
                         }
-                        size="slim"
                         title={value.Key}
                         titleLook="mono"
                     />

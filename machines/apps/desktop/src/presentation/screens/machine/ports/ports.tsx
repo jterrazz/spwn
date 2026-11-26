@@ -171,7 +171,6 @@ function VmPorts({ of, vm, target }: VmPortsProps) {
                     {of.notShared.map((row) => (
                         <Row
                             key={`not-shared/${row.vm}`}
-                            size="slim"
                             title={row.detail}
                             value={String(row.count)}
                         />

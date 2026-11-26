@@ -41,7 +41,6 @@ function Steps({ lines, title, note = String(lines.length) }: StepsProps) {
                             </span>
                         }
                         leadSize="dot"
-                        size="slim"
                         {...(line.Step.Version === '' ? {} : { tag: line.Step.Version })}
                         title={line.Step.Package}
                         trail={
@@ -64,23 +63,14 @@ function Afterwards({ plan }: { plan: MachinefilePlan }) {
             {skipped.length === 0 ? null : (
                 <Panel title="Skipped">
                     {skipped.map((skip) => (
-                        <Row
-                            key={skip.Package}
-                            sentence={skip.Why}
-                            size="slim"
-                            title={skip.Package}
-                        />
+                        <Row key={skip.Package} sentence={skip.Why} title={skip.Package} />
                     ))}
                 </Panel>
             )}
             {restarts.length === 0 ? null : (
                 <Panel title="Once applied, it needs">
                     {restarts.map((restart) => (
-                        <Row
-                            key={restart}
-                            size="slim"
-                            title={wordOf('CatalogAfterApply', restart).Word}
-                        />
+                        <Row key={restart} title={wordOf('CatalogAfterApply', restart).Word} />
                     ))}
                 </Panel>
             )}

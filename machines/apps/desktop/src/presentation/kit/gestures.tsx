@@ -208,7 +208,6 @@ export function HeldOutcomes({ children }: { children: ReactNode }) {
                         <Row
                             key={one.title}
                             sentence={one.sentence ?? ''}
-                            size="slim"
                             title={one.title}
                             trail={one.shown}
                         />

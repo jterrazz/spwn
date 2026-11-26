@@ -40,7 +40,15 @@ export const ROW_STORIES: readonly Story<RowProps>[] = [
         name: 'a state at rest says its word',
         props: {
             sentence: 'what is installed, and its settings',
-            size: 'slim',
+            state: { tone: 'plain', word: 'Stopped' },
+            title: 'Packages',
+        },
+    },
+    {
+        density: 'compact',
+        name: 'a state at rest, compact',
+        props: {
+            sentence: 'what is installed, and its settings',
             state: { tone: 'plain', word: 'Stopped' },
             title: 'Packages',
         },
@@ -70,12 +78,12 @@ export const ROW_STORIES: readonly Story<RowProps>[] = [
         },
     },
     {
-        name: 'catalog template, slim',
+        density: 'compact',
+        name: 'catalog template, compact',
         props: {
             cells: ['One tool that installs every runtime'],
             kind: 'manager',
             lead: <AppIcon name="mise" />,
-            size: 'slim',
             state: { tone: 'ok', word: 'Installed' },
             template: 'catalog',
             title: 'mise',
@@ -126,11 +134,11 @@ export const ROW_STORIES: readonly Story<RowProps>[] = [
         },
     },
     {
-        name: 'a time lead, a strong title, slim',
+        density: 'compact',
+        name: 'a time lead, a strong title, compact',
         props: {
             lead: <Value>03:12</Value>,
             leadSize: 'clock',
-            size: 'slim',
             tag: '24.11.0 → 24.11.1',
             title: 'node',
             titleLook: 'strong',

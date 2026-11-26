@@ -58,7 +58,6 @@ export function FileChapters({
                         go(machineRoute(vm, tab));
                     }}
                     sentence={about}
-                    size="slim"
                     state={stateOf(drift, chapter)}
                     title={tab}
                 />

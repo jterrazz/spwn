@@ -7,7 +7,6 @@ export type RowSkeletonProps = {
     lead?: 'icon' | 'machine' | 'value';
     sentence?: boolean;
     trail?: NonNullable<RowProps['trailSize']>;
-    size?: 'regular' | 'slim';
     template?: RowProps['template'];
 };
 
@@ -16,17 +15,10 @@ const TRAILS = { fit: styles.hasTrail, pill: styles.trailPill, wide: styles.trai
 
 // value: a row before its answer, drawn in the row's own box and columns: a title line and, where its rows carry
 // value: one, a sentence line under it, so it stands as tall as the rows that replace it, its columns where theirs are.
-export function RowSkeleton({
-    lead,
-    sentence = true,
-    trail,
-    size = 'regular',
-    template = 'flow',
-}: RowSkeletonProps) {
+export function RowSkeleton({ lead, sentence = true, trail, template = 'flow' }: RowSkeletonProps) {
     const classes = [
         styles.row,
         styles.grid,
-        size === 'slim' ? styles.slim : undefined,
         template === 'flow' ? undefined : styles[template],
         lead === undefined ? undefined : LEADS[lead],
         trail === undefined ? undefined : TRAILS[trail],

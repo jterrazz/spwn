@@ -3,8 +3,8 @@
     grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1fr);
     gap: var(--space-16);
     align-items: center;
-    min-height: 46px;
-    padding: var(--space-8) 0;
+    min-height: var(--row-height);
+    padding: var(--row-pad) 0;
     border-top: 1px solid var(--hair);
 }
 .head {
