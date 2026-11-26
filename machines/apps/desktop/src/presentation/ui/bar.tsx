@@ -31,10 +31,13 @@ export function Bar({ percent, label, identity, tone = 'plain', width = 'fill' }
     );
 }
 
+export type Step = 's3' | 't2' | 't3' | 't4';
+
 export type SharePart = {
     key: string;
     size: number;
     identity?: Identity | undefined;
+    step?: Step | undefined;
     label?: string | undefined;
     rest?: boolean | undefined;
 };
@@ -43,6 +46,7 @@ export type ShareBarProps = {
     parts: readonly SharePart[];
     label: string;
     of?: number | undefined;
+    low?: boolean;
 };
 
 function shareOf(part: SharePart, of: number | undefined): Measured {
@@ -53,17 +57,18 @@ function shareOf(part: SharePart, of: number | undefined): Measured {
     return { '--share': `${(Number.isFinite(share) ? share : 0).toFixed(2)}%` };
 }
 
-export function ShareBar({ parts, label, of }: ShareBarProps) {
+export function ShareBar({ parts, label, of, low = false }: ShareBarProps) {
     return (
         <div
             aria-label={label}
-            className={`${styles.share} ${of === undefined ? '' : styles.whole}`}
+            className={`${styles.share} ${of === undefined ? '' : styles.whole} ${low ? styles.low : ''}`}
             role="img"
         >
             {parts.map((part) => (
                 <i
                     className={`${styles.part} ${part.rest === true ? styles.rest : ''}`}
                     data-identity={part.identity}
+                    data-step={part.step}
                     key={part.key}
                     style={shareOf(part, of)}
                     title={part.label}

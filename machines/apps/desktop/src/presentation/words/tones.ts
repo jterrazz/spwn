@@ -55,37 +55,25 @@ export const AWAKE_ON_TONE = 'ok' satisfies Tone;
 
 export const REVERSIBLE_TONE: Tone = 'ok';
 
-// outside: a colour of identity is design/'s type, which engine/ never imports: these are the colours the Disk
-// outside: bar's kinds take, and design/'s type checks each where a page hands it over.
-export type ShareColour =
-    | 'amber'
-    | 'blue'
-    | 'indigo'
-    | 'lilac'
-    | 'orange'
-    | 'pink'
-    | 'purple'
-    | 'sky'
-    | 'slate'
-    | 'system'
-    | 'teal';
+// outside: a grey of the neutral ramp is ui/'s type (ui/bar.tsx's Step), which words/ never imports: these are the
+// outside: four the Disk bar's kinds take, named by the token that draws them, and the bar checks each it is handed.
+export type DiskStep = 's3' | 't2' | 't3' | 't4';
 
-export const UNKNOWN_SHARE_COLOUR: ShareColour = 'system';
+export const UNKNOWN_DISK_STEP: DiskStep = 't3';
 
-// invariant: no two kinds share a colour; the Mac's four are cool (slate, blue, teal, sky), Machines' six take the
-// invariant: rest in an order that never sets two near hues side by side, and free is the neutral.
-export const DISK_KIND_COLOURS: Readonly<Record<DiskAmount['Kind'], ShareColour>> = {
-    apps: 'blue',
-    caches: 'sky',
-    free: 'system',
-    'image-cache': 'amber',
-    images: 'orange',
-    leftovers: 'pink',
-    logs: 'lilac',
-    'machine-disks': 'indigo',
-    'other-vms': 'purple',
-    system: 'slate',
-    'your-data': 'teal',
+// invariant: a kind is told apart by its place and its word, never by a hue: the ten kinds that hold bytes cycle
+// invariant: the ramp in this table's order, and free takes none, being the empty track.
+export const DISK_KIND_STEPS: Readonly<Record<Exclude<DiskAmount['Kind'], 'free'>, DiskStep>> = {
+    apps: 't2',
+    caches: 't3',
+    'image-cache': 't4',
+    images: 's3',
+    leftovers: 't2',
+    logs: 't3',
+    'machine-disks': 't4',
+    'other-vms': 's3',
+    system: 't2',
+    'your-data': 't3',
 };
 
 export const PORT_ANSWER_TONES: Tones<PortsPort['Answer']> = {

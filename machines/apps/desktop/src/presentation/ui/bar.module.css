@@ -46,18 +46,23 @@
 .whole {
     width: auto;
     height: 14px;
-    gap: var(--space-4);
+    gap: 1px;
     flex: initial;
     overflow: hidden;
+    border-radius: var(--radius-small);
 }
 .whole .part {
     flex: 0 1 var(--share);
     min-width: var(--space-8);
-    border-radius: var(--radius-small);
+    border-radius: 0;
     background: var(--c, var(--t3));
 }
 .whole .rest {
     flex-grow: 1;
     background: var(--s0);
     box-shadow: inset 0 0 0 1px var(--hair);
+}
+.low .rest {
+    background: var(--you);
+    box-shadow: none;
 }

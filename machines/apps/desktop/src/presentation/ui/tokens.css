@@ -64,8 +64,6 @@
     --id-sky: #84c7ff;
     --id-lilac: #d6a0f6;
     --id-slate: #9ea8b9;
-    --id-orange: #ff9460;
-    --id-amber: #e9c955;
 
     --font-sans: 'Geist Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
     --font-mono: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, monospace;
@@ -140,12 +138,18 @@ html[data-material='vibrant'] {
 [data-identity='slate'] {
     --c: var(--id-slate);
 }
-[data-identity='orange'] {
-    --c: var(--id-orange);
-}
-[data-identity='amber'] {
-    --c: var(--id-amber);
-}
 [data-identity='system'] {
     --c: var(--system);
+}
+[data-step='t2'] {
+    --c: var(--t2);
+}
+[data-step='t3'] {
+    --c: var(--t3);
+}
+[data-step='t4'] {
+    --c: var(--t4);
+}
+[data-step='s3'] {
+    --c: var(--s3);
 }

@@ -1,12 +1,18 @@
 import type { DiskAmount, DiskRow } from '@jterrazz/station-api';
 
 import { bytes } from '../../../domain/format';
-import type { Identity } from '../../ui/index';
 import { wordOfSent } from '../../words/engine-words';
 import { diskGestureOf } from '../../words/provisional';
-import { DISK_KIND_COLOURS, UNKNOWN_SHARE_COLOUR } from '../../words/tones';
-import type { ShareColour } from '../../words/tones';
+import { DISK_KIND_STEPS, UNKNOWN_DISK_STEP } from '../../words/tones';
+import type { DiskStep } from '../../words/tones';
 import { DISK_PENDING_WORD } from '../../words/words';
+
+// value: the engine's own line for a disk almost full (apps/engine/activity/findings.go): under a tenth free.
+const LOW_FREE_SHARE = 0.1;
+
+export function isLow({ Free, Total }: { Free: number; Total: number }): boolean {
+    return Total > 0 && Free >= 0 && Free / Total < LOW_FREE_SHARE;
+}
 
 export type Group = { group: DiskRow['Group']; rows: readonly DiskRow[] };
 
@@ -33,15 +39,17 @@ export function sizeOf(row: DiskRow): string {
 export type Part = {
     key: string;
     bytes: number;
-    identity: Identity;
+    step: DiskStep | undefined;
     label: string;
     rest: boolean;
 };
 
-function colourOf(table: Readonly<Record<string, ShareColour>>, code: string): ShareColour {
-    return Object.hasOwn(table, code)
-        ? (table[code] ?? UNKNOWN_SHARE_COLOUR)
-        : UNKNOWN_SHARE_COLOUR;
+function stepOf(code: string): DiskStep | undefined {
+    if (code === 'free') {
+        return undefined;
+    }
+    const steps: Readonly<Record<string, DiskStep>> = DISK_KIND_STEPS;
+    return Object.hasOwn(steps, code) ? (steps[code] ?? UNKNOWN_DISK_STEP) : UNKNOWN_DISK_STEP;
 }
 
 type Amount = Pick<DiskAmount, 'Bytes'> & { Kind: string };
@@ -49,10 +57,10 @@ type Amount = Pick<DiskAmount, 'Bytes'> & { Kind: string };
 export function kindPartsOf(kinds: readonly Amount[] | undefined): readonly Part[] {
     return (kinds ?? []).map(({ Kind, Bytes }) => ({
         bytes: Bytes,
-        identity: colourOf(DISK_KIND_COLOURS, Kind),
         key: Kind,
         label: wordOfSent('DiskKind', Kind),
         rest: Kind === 'free',
+        step: stepOf(Kind),
     }));
 }
 

@@ -1,20 +1,40 @@
 import type { DiskAmount, DiskRow } from '@jterrazz/station-api';
 import { describe, expect, test } from 'vitest';
 
-import { DISK_KIND_COLOURS } from '../../../words/tones';
-import { byApp, groupsOf, kindPartsOf, listedOf, sizeOf } from '../disk';
+import { DISK_KIND_STEPS } from '../../../words/tones';
+import { byApp, groupsOf, isLow, kindPartsOf, listedOf, sizeOf } from '../disk';
 
 function row(App: string, Group: DiskRow['Group'], change: Partial<DiskRow> = {}): DiskRow {
     return { App, Bytes: 1_000_000_000, Group, MoveTo: '', Paths: [], Pending: false, ...change };
 }
 
 describe('disk', () => {
-    test('every kind of the bar has a colour of its own', () => {
-        // Given - the colour each kind of the Disk card takes
-        const colours = Object.values(DISK_KIND_COLOURS);
+    test('a kind that holds bytes is drawn in a neutral step, never a hue, and free in none', () => {
+        // Given - the step each kind of the Disk card takes, and the kinds the engine can give
+        const steps = Object.values(DISK_KIND_STEPS);
+        const parts = kindPartsOf(
+            [...Object.keys(DISK_KIND_STEPS), 'free'].map((Kind) => ({ Bytes: 1, Kind })),
+        );
 
-        // Then - no two kinds share one, so the legend never reads two parts as one
-        expect(new Set(colours).size).toBe(colours.length);
+        // Then - each step is one of the four greys, and the one part left over, free, has none
+        expect(new Set(steps)).toStrictEqual(new Set(['t2', 't3', 't4', 's3']));
+        expect(
+            parts.filter((part) => part.step === undefined).map((part) => part.key),
+        ).toStrictEqual(['free']);
+    });
+
+    test('a disk is low under a tenth free, the engine line, and never merely for being used', () => {
+        // Given - a disk 4 % free, one exactly a tenth free, one 9 % free, one unread and one of no size
+        const verdicts = [
+            isLow({ Free: 4, Total: 100 }),
+            isLow({ Free: 10, Total: 100 }),
+            isLow({ Free: 9, Total: 100 }),
+            isLow({ Free: -1, Total: 100 }),
+            isLow({ Free: 0, Total: 0 }),
+        ];
+
+        // Then - only the two under a tenth are low
+        expect(verdicts).toStrictEqual([true, false, true, false, false]);
     });
 
     test('rows are grouped in the order the engine first gives each group', () => {
@@ -60,14 +80,14 @@ describe('disk', () => {
     });
 
     test('a kind or a holder the window does not know is worded by its code and drawn neutral', () => {
-        // Given - a kind the window has no colour for
+        // Given - a kind the window has no step for
         const unknown = [{ Bytes: 1, Kind: 'swap' }];
 
         // When - its part is made
         const [part] = kindPartsOf(unknown);
 
-        // Then - its code as its word and the neutral colour
-        expect([part?.label, part?.identity]).toStrictEqual(['swap', 'system']);
+        // Then - its code as its word and the middle grey
+        expect([part?.label, part?.step]).toStrictEqual(['swap', 't3']);
     });
 
     test('a part of no bytes is not listed, but free always is, in the engine order', () => {
