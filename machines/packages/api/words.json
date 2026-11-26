@@ -1092,6 +1092,11 @@
       "Detail": "setting",
       "Tone": "plain"
     },
+    "teams.not-found": {
+      "Word": "not found",
+      "Detail": "teams",
+      "Tone": "plain"
+    },
     "unknown_op": {
       "Word": "Unknown operation",
       "Tone": "plain"

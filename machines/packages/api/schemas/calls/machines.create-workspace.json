@@ -405,6 +405,7 @@
             "setting.needs-terminal",
             "setting.not-for-this-machine",
             "setting.unknown",
+            "teams.not-found",
             "unknown_op",
             "unknown_page",
             "unknown_vm",

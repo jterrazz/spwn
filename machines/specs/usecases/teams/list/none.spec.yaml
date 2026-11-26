@@ -1,0 +1,8 @@
+description: 'station teams with no team declared says where a team is declared'
+env: two-macs
+runs:
+    - command: 'teams'
+      exit: 0
+      stdout: |
+          # Teams
+          	none

@@ -27,6 +27,7 @@ import (
 	machinescalls "github.com/jterrazz/studio-station/apps/engine/machines/calls"
 	"github.com/jterrazz/studio-station/apps/engine/ports"
 	settingscalls "github.com/jterrazz/studio-station/apps/engine/settings/calls"
+	teamscalls "github.com/jterrazz/studio-station/apps/engine/teams/calls"
 )
 
 type Wording func(e *fail.Error) (message, hint string)
@@ -558,6 +559,9 @@ func Codes() map[fail.Code]Wording {
 		},
 		agentscalls.BadArchive: func(e *fail.Error) (string, string) {
 			return e.Subject + " is not an agent's archive", "station agents export <agent> --to <folder> writes one"
+		},
+		teamscalls.NotFound: func(e *fail.Error) (string, string) {
+			return "no team named \"" + e.Subject + "\"", "station teams"
 		},
 		backgroundcalls.Unknown: func(e *fail.Error) (string, string) {
 			return "no background task \"" + e.Subject + "\"", "station background"

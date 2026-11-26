@@ -1,0 +1,64 @@
+{
+  "$defs": {
+    "teams.Team": {
+      "additionalProperties": false,
+      "properties": {
+        "Description": {
+          "type": "string"
+        },
+        "Members": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Name": {
+          "type": "string"
+        },
+        "Slug": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Description",
+        "Members",
+        "Name",
+        "Slug"
+      ],
+      "type": "object"
+    },
+    "teams.calls.ShowIn": {
+      "additionalProperties": false,
+      "properties": {
+        "Team": {
+          "type": "string"
+        },
+        "project": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/spwn/blob/main/machines/packages/api/schemas/calls/teams.show.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call teams.show of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/teams.calls.ShowIn"
+    },
+    "out": {
+      "$ref": "#/$defs/teams.Team"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "teams.show",
+  "type": "object"
+}

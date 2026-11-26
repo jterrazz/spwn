@@ -1,0 +1,41 @@
+{
+  "schema": "station.page/v1",
+  "id": "teams",
+  "command": "teams",
+  "context": {
+    "kind": "computer"
+  },
+  "state": "ready",
+  "sections": [
+    {
+      "id": "teams",
+      "title": "Teams",
+      "columns": [
+        {
+          "key": "slug",
+          "kind": "text",
+          "keep": 100
+        },
+        {
+          "key": "name",
+          "label": "name",
+          "kind": "text",
+          "keep": 60
+        },
+        {
+          "key": "agents",
+          "label": "agents",
+          "kind": "text",
+          "keep": 50
+        }
+      ],
+      "items": [
+        {
+          "empty": {
+            "text": "No team declared: a team is a file, ~/.spwn/teams/<team>.yaml."
+          }
+        }
+      ]
+    }
+  ]
+}

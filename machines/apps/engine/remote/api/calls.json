@@ -1243,6 +1243,22 @@
       "out": "Report"
     },
     {
+      "name": "teams.list",
+      "schema": "station.teams.list/v1",
+      "where": "at-target",
+      "in": "ListIn"
+    },
+    {
+      "name": "teams.show",
+      "schema": "station.teams.show/v1",
+      "where": "at-target",
+      "errors": [
+        "teams.not-found"
+      ],
+      "in": "ShowIn",
+      "out": "Team"
+    },
+    {
       "name": "vault.add",
       "schema": "station.vault.add/v1",
       "section": "accounts",

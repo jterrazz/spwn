@@ -1,0 +1,20 @@
+description: 'station teams --on a VM reads the teams and agents kept on that VM; This Mac keeps none'
+env: two-macs
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ".macs[\"linux-1\"].stores.teams = [{\"Slug\":\"web\",\"Name\":\"Web Team\"}]" world.json > seeded.json && /bin/mv seeded.json world.json'
+      exit: 0
+    - command: 'agents create neo --team web --on linux-1'
+      exit: 0
+      stdout: |
+          	On linux-1:
+          ●	neo	created	~/.spwn/agents/neo
+    - command: 'teams --on linux-1'
+      exit: 0
+      stdout: |
+          	On linux-1:
+          # Teams
+          ●	web	Web Team	neo
+    - command: '--version >/dev/null; /usr/bin/jq -c "[.macs[\"macbook-pro\"].stores.teams // [] | length]" world.json'
+      exit: 0
+      stdout: |
+          [0]

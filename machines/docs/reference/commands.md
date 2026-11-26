@@ -6,7 +6,7 @@ Every command of `station`, grouped as `station help` groups them: the four grou
 | ---------- | ------------------------------------------------------------------------------------------------------------------ |
 | Rules      | What holds for every command                                                                                       |
 | Machine    | `machines`, `images`, `engine`, `apps`, `settings`, `disk`, `ports`, `accounts`, `background`, `awake`, `activity` |
-| Agent      | `agents`                                                                                                           |
+| Agent      | `agents`, `teams`                                                                                                  |
 | Spwn       | `overview`, `init`, `--version`, `use`, `journal`, `machinefile`, `help`                                           |
 | Plumbing   | The hidden commands the machine runs for itself                                                                    |
 | Exit codes | What 0, 1, 2 and 130 mean                                                                                          |
@@ -194,6 +194,14 @@ station agents sleep <agent> # stale playbooks archived, old sessions pruned, th
 ```
 
 A name is lowercase letters, digits and dashes, a letter first, and no verb of `agents`; a name taken, a harness the catalog does not hold, and an archive no export wrote are refused, exit 2. `delete` asks the agent's name typed on a terminal and needs `--confirm=<agent>` off one. With `--on` a VM of this Mac, each command acts on that VM's agents: the project of this folder is the guest folder a share of the VM's start puts it at, and a project no share reaches, or `--on` another Mac, is refused, exit 2, with the Machinefile's `vm.mounts` to add it to. `--json` is `station.agents.list/v1`, or `station.agents.show/v1` for one agent.
+
+### `station teams`
+
+```sh
+station teams [<team>] [--json] # the teams declared for you by slug, with the agents of this folder's project that name each; one team's detail
+```
+
+A team is a file, `~/.spwn/teams/<team>.yaml`, declared for every project of the user; an agent belongs to it by the `team` of its `agent.yaml`, which `station agents edit <agent> --team <team>` writes. No command writes a team. A slug no team file has is refused, exit 2. With `--on` a VM of this Mac, it reads that VM's teams and the agents of the project's guest folder, refused like `station agents` when no share reaches the project. `--json` is `station.teams.list/v1`, or `station.teams.show/v1` for one team.
 
 ## Spwn
 

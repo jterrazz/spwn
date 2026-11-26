@@ -1,0 +1,40 @@
+description: 'station teams --json prints each team with its name, description and members'
+env: two-macs
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ".macs[\"macbook-pro\"].stores.teams = [{\"Slug\":\"web\",\"Name\":\"Web Team\",\"Description\":\"Ships the site.\"},{\"Slug\":\"core\",\"Name\":\"Core\"}]" world.json > seeded.json && /bin/mv seeded.json world.json'
+      exit: 0
+    - command: 'agents create neo --team web'
+      exit: 0
+      stdout: |
+          ●	neo	created	~/.spwn/agents/neo
+    - command: 'teams --json'
+      exit: 0
+      stdout: |
+          {
+            "schema": "station.teams.list/v1",
+            "generated_at": "{{iso8601}}",
+            "machine": {
+              "name": "macbook-pro",
+              "label": "This Mac",
+              "kind": "computer",
+              "on": null,
+              "this_mac": true
+            },
+            "findings": [],
+            "teams": [
+              {
+                "slug": "core",
+                "name": "Core",
+                "description": "",
+                "members": []
+              },
+              {
+                "slug": "web",
+                "name": "Web Team",
+                "description": "Ships the site.",
+                "members": [
+                  "neo"
+                ]
+              }
+            ]
+          }
