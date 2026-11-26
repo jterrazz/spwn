@@ -34,12 +34,19 @@ func (b Book) Head() Head {
 
 func (h Head) String() string { return strconv.Itoa(h.Generation) + " " + h.Digest }
 
+const (
+	// value: the highest generation Spwn writes, past any count of adds
+	// and forgets, so the next one never overflows and a head above it is
+	// one Spwn never wrote.
+	MaxGeneration = 1 << 53
+)
+
 var errBadHead = errors.New("a device book's head is its generation then its digest")
 
 func ParseHead(s string) (Head, error) {
 	gen, digest, ok := strings.Cut(strings.TrimSpace(s), " ")
 	n, err := strconv.Atoi(gen)
-	if !ok || err != nil || n < 1 || len(digest) != sha256.Size*2 {
+	if !ok || err != nil || n < 1 || n > MaxGeneration || len(digest) != sha256.Size*2 {
 		return Head{}, errBadHead
 	}
 	if _, err := hex.DecodeString(digest); err != nil {
@@ -62,12 +69,12 @@ func Base(b Book, anchored Head) Book {
 
 func Next(b Book, anchored Head, edit func(*Book) error) (Book, error) {
 	// invariant: the book a change writes: its edit over Base, one
-	// generation past the anchored one.
+	// generation past the anchored one, and never past MaxGeneration.
 	next := Base(b, anchored)
 	if err := edit(&next); err != nil {
 		return Book{}, err
 	}
-	next.Generation = anchored.Generation + 1
+	next.Generation = min(anchored.Generation, MaxGeneration-1) + 1
 	if next.Devices == nil {
 		next.Devices = []Device{}
 	}

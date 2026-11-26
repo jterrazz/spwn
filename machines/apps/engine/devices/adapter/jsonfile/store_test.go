@@ -276,6 +276,26 @@ func TestAnEngineWhoseKeychainWasLockedAtItsStartHoldsNoHeadButTheStartBooks(t *
 	}
 }
 
+func TestABookAtTheLastGenerationLeavesTheNextWriteAHeadTheKeychainReadsBack(t *testing.T) {
+	at := filepath.Join(t.TempDir(), "station", "devices.json")
+	if err := files().MkdirAll(filepath.Dir(at), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	if err := files().WriteFile(at, []byte(`{"v": 1, "generation": 9223372036854775807, "devices": []}`), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	k := &keychain{locked: &contract.AnchorUnreadableError{Cause: "a head Spwn never writes", Malformed: true}}
+	engine := openOn(at, false, k)
+	engine.Sole(t.Context())
+	k.locked = nil
+	if err := engine.Change(t.Context(), add("tablet")); err != nil {
+		t.Fatal(err)
+	}
+	if got, err := devices.ParseHead(k.head.String()); err != nil || got.Generation != devices.MaxGeneration {
+		t.Fatalf("the keychain reads %q back as %+v, %v; want a head at the last generation", k.head.String(), got, err)
+	}
+}
+
 type lyingPeer struct{ head devices.Head }
 
 func (p lyingPeer) Held(context.Context) (devices.Head, bool, error) { return p.head, true, nil }
