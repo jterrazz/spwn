@@ -1,4 +1,4 @@
-import { button, component, content, file, heading, region, within } from '@jterrazz/test';
+import { button, component, content, file, focused, heading, region, within } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { pageOver } from '../../../../composition/__tests__/page-over';
@@ -26,6 +26,16 @@ const PAGES = [
     { item: 'growth/positioning', golden: 'positioning', title: 'Positioning' },
     { item: 'machines/reference/ports', golden: 'ports', title: 'Ports' },
 ] as const;
+
+const QUIET_LINE =
+    'to be a second place where facts live, or to hide the detail with no way down to it os-holds-no-facts';
+
+// value: more stops than the window and the page hold before the reading time.
+const TABS = 60;
+
+function onTenMinutes(): boolean {
+    return document.activeElement?.textContent === '10min';
+}
 
 describe('Wiki', () => {
     test('the wiki home lists every page under the seat that reads it', async () => {
@@ -69,6 +79,54 @@ describe('Wiki', () => {
 
         // Then - the page as the engine serves it for ten minutes
         await expect(result.tree).toMatch(file('./__expected__/ports-10min.aria.yaml'));
+    });
+
+    test('a reading time reached by the keyboard asks the page again as a click does', async () => {
+        // Given - the ports page at its own budget
+        const result = await component.render(
+            wikiOver('machines/reference/ports'),
+            async (visitor) => {
+                await visitor.see(heading('Ports'));
+
+                // When - the keyboard walks to ten minutes and presses it
+                for (let step = 0; step < TABS && !onTenMinutes(); step += 1) {
+                    await visitor.press('Tab');
+                }
+                await visitor.see(focused(button('10min')));
+                await visitor.press('Enter');
+                await visitor.see(content('A port is a right with an audience.'));
+            },
+        );
+
+        // Then - the very page the click is served
+        await expect(result.tree).toMatch(file('./__expected__/ports-10min.aria.yaml'));
+    });
+
+    test('a folded group opened draws its blocks whole', async () => {
+        // Given - Boundaries at its own budget, its Machines group folded for its seat
+        const result = await component.render(wikiOver('product/boundaries'), async (visitor) => {
+            await visitor.see(heading('Boundaries'));
+
+            // When - the group is opened
+            await visitor.click(within(region('What Machines refuses'), button('Open')));
+            await visitor.see(within(region('What Machines refuses'), button('Fold')));
+        });
+
+        // Then - the group holds its blocks as the engine served them, and folds back
+        await expect(result.tree).toMatch(file('./__expected__/boundaries-group-open.aria.yaml'));
+    });
+
+    test('a quiet line opened draws its fields under it', async () => {
+        // Given - Boundaries at its own budget, the OS's refusal served as a quiet line
+        const result = await component.render(wikiOver('product/boundaries'), async (visitor) => {
+            await visitor.see(heading('Boundaries'));
+
+            // When - the line is opened
+            await visitor.click(button(QUIET_LINE));
+        });
+
+        // Then - the line reads expanded, its fields under it
+        await expect(result.tree).toMatch(file('./__expected__/boundaries-line-open.aria.yaml'));
     });
 
     test('the window reads no tier, score or cause of a block: the engine decided how each shows', () => {

@@ -1,0 +1,109 @@
+- main:
+  - navigation "Seats":
+    - button "All"
+    - button "Vision"
+    - button "Produit" [pressed]
+    - button "Technique"
+    - button "Croissance"
+  - article "Boundaries":
+    - list "Floors":
+      - listitem "Why does this exist?": E0 Intention 0
+      - listitem "What do we build, and for whom?": E1 Produit 11
+      - listitem "What things does it handle, in which words?": E2 Domaines 0
+      - listitem "Where is the code, and what may it touch?": E3 Architecture 2
+      - listitem "Which lines carry it?": E4 Code 0
+    - text: What do we build, and for whom?
+    - heading "Boundaries" [level=1]
+    - paragraph: What Spwn is not, and what each of its parts refuses to be, for anyone weighing a feature that sits near an edge. The owner confirmed the five boundaries of Spwn on 2026-11-21 (his answer); the record is ADR-002, accepted.
+    - list "Findings":
+      - listitem:
+        - img "needs you"
+        - text: "needs you \"product/boundaries\" rests on this page's reading: you have not ruled"
+    - complementary "This page":
+      - text: Reading time
+      - group "Reading time":
+        - button "30s"
+        - button "2min" [pressed]
+        - button "10min"
+      - img "needs you"
+      - text: 3 needs you
+      - list "Needs you":
+        - listitem:
+          - button "needs you Boundaries needs you":
+            - img "needs you"
+            - text: Boundaries needs you
+        - listitem:
+          - button "needs you no-computer needs you":
+            - img "needs you"
+            - text: no-computer needs you
+        - listitem:
+          - button "needs you os-holds-no-facts needs you":
+            - img "needs you"
+            - text: os-holds-no-facts needs you
+      - text: 2 blocks folded at this reading time
+    - region "Boundaries":
+      - article "Decision one-stack":
+        - text: Decision one-stack ADR-002
+        - img "Accepted"
+        - text: Accepted 2026-11-21
+        - paragraph: amended by ADR-003
+        - term: record
+        - definition:
+          - button "Spwn is one stack of six apps on one ladder"
+        - term: decides
+        - definition: Spwn is one stack of six apps on one ladder.
+    - region "What Spwn is not":
+      - heading "What Spwn is not" [level=2]
+      - paragraph: 5 quiet blocks
+      - paragraph: "Each line is the edge of the one enemy, losing your thread: a stack that replaced you, produced for its own sake, kept your context in someone else's place, locked you to one vendor or worked in someone else's style would be a stack you are not the author of."
+    - region "What each app refuses":
+      - heading "What each app refuses" [level=2]
+      - region "What Machines refuses":
+        - heading "What Machines refuses" [level=3]
+        - text: guard · 2 blocks · folded for ProduitE3 Architecture
+        - button "Fold" [expanded]
+        - paragraph: 2 quiet blocks
+      - region "Table machines":
+        - text: Table Refusal · by machines
+        - button "Boundaries"
+        - table:
+          - rowgroup:
+            - row "Refusal refuses because":
+              - columnheader "Refusal"
+              - columnheader "refuses"
+              - columnheader "because"
+          - rowgroup:
+            - 'row "no-running-agent to know about a running agent: starting, watching, answering and merging agents is not its job spwn:machines/docs/decisions/052-station-keeps-no-agents.md"':
+              - rowheader "no-running-agent"
+              - 'cell "to know about a running agent: starting, watching, answering and merging agents is not its job"'
+              - cell "spwn:machines/docs/decisions/052-station-keeps-no-agents.md"
+            - 'row "no-ungranted-port to share a port nobody granted: a port outside a machine''s rights is flagged, never shared spwn:machines/docs/decisions/035-a-port-is-a-right-with-an-audience.md"':
+              - rowheader "no-ungranted-port"
+              - 'cell "to share a port nobody granted: a port outside a machine''s rights is flagged, never shared"'
+              - cell "spwn:machines/docs/decisions/035-a-port-is-a-right-with-an-audience.md"
+      - paragraph: 2 quiet blocks
+      - article "Refusal no-computer":
+        - text: Refusal no-computer
+        - paragraph: "to prepare the computer an agent runs on: that is Machines' space"
+        - term: by
+        - definition:
+          - button "agents"
+        - term: because
+        - definition:
+          - button "The stack"
+        - list "Findings":
+          - listitem:
+            - img "needs you"
+            - text: "needs you \"no-computer\" rests on this page's reading: you have not ruled"
+      - paragraph: 1 quiet block
+      - list:
+        - listitem:
+          - button "to be a second place where facts live, or to hide the detail with no way down to it os-holds-no-facts"
+          - list "Findings":
+            - listitem:
+              - img "needs you"
+              - text: "needs you \"os-holds-no-facts\" rests on this page's reading: you have not ruled"
+      - paragraph: The rows of the four apps being made are derived from the convictions; none of those apps has a design yet, so each row is a constraint on the design to come, not a description of it.
+    - region "Rests on":
+      - heading "Rests on" [level=2]
+      - paragraph: "Two rows are this page's reading rather than the owner's word or a record: Agents refusing to prepare a computer, and the OS refusing to hold facts of its own. Both follow from the spaces; the owner has not ruled on either."
