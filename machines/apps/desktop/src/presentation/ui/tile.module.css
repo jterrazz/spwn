@@ -1,5 +1,5 @@
 .tile {
-    background: var(--panel);
+    background: var(--s1);
     border-radius: var(--radius-panel);
     padding: var(--space-14) var(--space-16);
     display: flex;
@@ -56,11 +56,11 @@
     color: var(--ok);
 }
 .footState.warn {
-    color: var(--warn);
+    color: var(--you);
 }
 .footState.bad {
     color: var(--bad);
 }
 .footState.new {
-    color: var(--new);
+    color: var(--busy);
 }

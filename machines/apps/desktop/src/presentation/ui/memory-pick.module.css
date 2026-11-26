@@ -4,7 +4,7 @@
     gap: var(--space-10);
     padding: var(--space-12);
     border-radius: var(--radius-card);
-    background: var(--inset);
+    background: var(--s0);
 }
 .head {
     display: flex;
@@ -39,13 +39,13 @@
 .cell {
     aspect-ratio: 1;
     border-radius: var(--radius-cell);
-    background: var(--c, var(--raise));
+    background: var(--c, var(--s2));
 }
 .cell.held {
-    background: color-mix(in srgb, var(--c, var(--raise)) 42%, var(--inset));
+    background: color-mix(in srgb, var(--c, var(--s2)) 42%, var(--s0));
 }
 .cell.free {
-    background: var(--raise);
+    background: var(--s2);
 }
 .grid.take {
     touch-action: none;

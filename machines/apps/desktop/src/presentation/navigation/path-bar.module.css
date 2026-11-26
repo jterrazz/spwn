@@ -6,7 +6,7 @@
     align-items: center;
     gap: var(--space-6);
     padding: 0 var(--space-14) 0 var(--space-12);
-    border-bottom: 1px solid var(--line);
+    border-bottom: 1px solid var(--hair);
     background: var(--ground-sidebar);
 }
 :global(html[data-chrome='overlay']) .bar {
@@ -29,7 +29,7 @@
 .find:focus-visible,
 .mark:focus-visible,
 .foot:focus-visible {
-    outline: 2px solid var(--new);
+    outline: 2px solid var(--you);
     outline-offset: 1px;
 }
 .path {
@@ -85,11 +85,11 @@
 }
 .segment:hover,
 .segment[aria-expanded='true'] {
-    background: var(--wash);
+    background: var(--s2);
     color: var(--t1);
 }
 .segment:active {
-    background: var(--raise-2);
+    background: var(--s3-press);
 }
 .segment[aria-current='page'] {
     color: var(--t1);
@@ -166,7 +166,7 @@
 }
 .inbox:hover:not(:disabled),
 .mark:is(button):hover {
-    background: var(--wash);
+    background: var(--s2);
     color: var(--t1);
 }
 .inbox:disabled {
@@ -183,7 +183,7 @@
     color: var(--t3);
 }
 .urgent {
-    color: var(--warn);
+    color: var(--you);
 }
 .find {
     all: unset;
@@ -195,7 +195,7 @@
     height: 28px;
     padding: 0 var(--space-8);
     border-radius: var(--radius-control);
-    background: var(--panel);
+    background: var(--s1);
     color: var(--t3);
     font-size: var(--text-body);
     cursor: pointer;
@@ -216,7 +216,7 @@
     color: var(--t4);
 }
 .find:hover:not(:disabled) {
-    background: var(--raise);
+    background: var(--s2);
 }
 .find:disabled {
     cursor: default;
@@ -257,6 +257,6 @@
     cursor: pointer;
 }
 .foot:is(button):hover {
-    background: var(--wash);
+    background: var(--s2);
     color: var(--t1);
 }

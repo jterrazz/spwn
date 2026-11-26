@@ -1,7 +1,7 @@
 .rows {
     display: flex;
     flex-direction: column;
-    border: 1px solid var(--line);
+    border: 1px solid var(--hair);
     border-radius: var(--radius-well);
     overflow: hidden;
 }
@@ -13,7 +13,7 @@
     min-width: 0;
     padding: var(--space-10) var(--space-12);
     font-size: var(--text-body);
-    border-top: 1px solid var(--line);
+    border-top: 1px solid var(--hair);
     transition: background var(--motion-hover);
 }
 
@@ -23,11 +23,11 @@
 
 .open {
     cursor: pointer;
-    background: var(--raise);
+    background: var(--s2);
 }
 
 .open:hover {
-    background: var(--raise-2);
+    background: var(--s3);
 }
 
 .open .line {
@@ -48,8 +48,8 @@
 }
 
 .ring:checked {
-    border-color: var(--new);
-    background: radial-gradient(circle, var(--new) 0 38%, transparent 44%);
+    border-color: var(--t1);
+    background: radial-gradient(circle, var(--t1) 0 38%, transparent 44%);
 }
 
 .ring:disabled {

@@ -8,7 +8,7 @@
     padding: var(--space-14) var(--space-16);
     font-size: 15px;
     color: var(--t1);
-    border-bottom: 1px solid var(--line);
+    border-bottom: 1px solid var(--hair);
     flex: none;
 }
 .input::placeholder {
@@ -33,7 +33,7 @@
     color: var(--t2);
 }
 .result[aria-selected='true'] {
-    background: var(--raise);
+    background: var(--s2);
     color: var(--t1);
 }
 .label {

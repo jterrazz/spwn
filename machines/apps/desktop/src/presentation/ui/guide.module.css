@@ -4,15 +4,15 @@
     height: 440px;
     display: grid;
     grid-template-columns: 196px minmax(0, 1fr);
-    background: var(--panel);
+    background: var(--s1);
 }
 .rail {
     display: flex;
     flex-direction: column;
     gap: 18px;
     padding: 22px 18px;
-    background: color-mix(in srgb, var(--panel), var(--side));
-    border-right: 1px solid var(--line);
+    background: color-mix(in srgb, var(--s1), var(--s1));
+    border-right: 1px solid var(--hair);
     min-width: 0;
 }
 .act {
@@ -51,7 +51,7 @@
     top: 25px;
     bottom: -6px;
     width: 1px;
-    background: var(--line-2);
+    background: var(--edge);
 }
 .knob {
     width: 18px;
@@ -85,7 +85,7 @@
 }
 .step[data-status='done'] .knob {
     box-shadow: none;
-    background: var(--raise-2);
+    background: var(--s3);
 }
 .step[data-status='now'],
 .step[data-status='waiting'],
@@ -95,7 +95,7 @@
 }
 .step[data-status='now'] .knob,
 .step[data-status='waiting'] .knob {
-    box-shadow: inset 0 0 0 1.5px var(--accent);
+    box-shadow: inset 0 0 0 1.5px var(--you);
 }
 .step[data-status='now'] .knob::after,
 .step[data-status='waiting'] .knob::after {
@@ -103,12 +103,12 @@
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: var(--accent);
+    background: var(--you);
 }
 .step[data-status='waiting'] .knob {
     box-shadow:
-        inset 0 0 0 1.5px var(--accent),
-        0 0 0 4px color-mix(in srgb, var(--accent) 18%, transparent);
+        inset 0 0 0 1.5px var(--you),
+        0 0 0 4px color-mix(in srgb, var(--you) 18%, transparent);
 }
 .step[data-status='waiting'] .knob::after {
     width: 6px;
@@ -126,7 +126,7 @@
 }
 .fold .knob {
     box-shadow: none;
-    background: var(--raise-2);
+    background: var(--s3);
     font-family: var(--font-mono);
     font-size: 10px;
     color: var(--t2);
@@ -156,7 +156,7 @@
     height: 26px;
     padding: 0 var(--space-10);
     border-radius: var(--radius-pill);
-    background: var(--wash);
+    background: var(--s2);
     font-size: var(--text-label);
     color: var(--t3);
     cursor: pointer;
@@ -166,7 +166,7 @@
     color: var(--t1);
 }
 .hide:active {
-    background: var(--raise-2);
+    background: var(--s3-press);
     transform: var(--motion-press);
 }
 .hideMark {
@@ -211,7 +211,7 @@
 .track {
     height: 3px;
     border-radius: 3px;
-    background: var(--raise-2);
+    background: var(--s3);
     overflow: hidden;
 }
 .fill {
@@ -238,7 +238,7 @@
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: var(--accent);
+    background: var(--you);
     animation: pulse var(--motion-wait);
 }
 @keyframes pulse {
@@ -259,8 +259,8 @@
     gap: var(--space-10);
     padding: 9px var(--space-12);
     border-radius: var(--radius-well);
-    background: var(--inset);
-    box-shadow: inset 0 0 0 1px var(--line);
+    background: var(--s0);
+    box-shadow: inset 0 0 0 1px var(--hair);
     font-size: var(--text-label);
     line-height: 1.45;
     color: var(--t2);
@@ -275,7 +275,7 @@
     width: 22px;
     height: 22px;
     fill: none;
-    stroke: var(--accent);
+    stroke: var(--you);
     stroke-width: 1.5px;
     stroke-linecap: round;
     stroke-linejoin: round;
@@ -316,7 +316,7 @@
     color: var(--t1);
 }
 .quiet:active {
-    background: var(--raise-2);
+    background: var(--s3-press);
 }
 .said {
     position: absolute;

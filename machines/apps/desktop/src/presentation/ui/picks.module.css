@@ -21,31 +21,30 @@
     gap: 2px;
     padding: var(--space-10) var(--space-12);
     border-radius: var(--radius-card);
-    background: var(--inset);
+    background: var(--s0);
     box-shadow: inset 0 0 0 1px transparent;
 }
 .chips .pick {
     padding: 3px var(--space-10);
     border-radius: 999px;
-    background: var(--raise);
+    background: var(--s2);
     color: var(--t2);
     font-size: var(--text-label);
 }
 .pick:hover:not(:disabled) {
-    background: var(--raise);
+    background: var(--s2);
 }
 .chips .pick:hover:not(:disabled) {
-    background: var(--raise-2);
+    background: var(--s3-hover);
 }
 .pick:active:not(:disabled) {
-    background: var(--raise-2);
+    background: var(--s3-press);
 }
 .cards .pick[aria-pressed='true'] {
-    background: color-mix(in srgb, var(--new) 14%, var(--inset));
-    box-shadow: inset 0 0 0 1.5px var(--new);
+    background: var(--s3);
 }
 .chips .pick[aria-pressed='true'] {
-    background: color-mix(in srgb, var(--new) 24%, var(--raise));
+    background: var(--s3);
     color: var(--t1);
 }
 .pick:disabled {

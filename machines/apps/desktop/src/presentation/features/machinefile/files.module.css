@@ -4,13 +4,13 @@
 .planFile + .planFile {
     margin-top: var(--space-10);
     padding-top: var(--space-14);
-    border-top: 1px solid var(--line);
+    border-top: 1px solid var(--hair);
 }
 .line {
     display: grid;
     gap: var(--space-12);
     align-items: center;
-    border-top: 1px solid var(--line);
+    border-top: 1px solid var(--hair);
 }
 .machine {
     grid-template-columns: minmax(0, 1.1fr) 120px minmax(0, 1.6fr);
@@ -25,7 +25,7 @@
     appearance: none;
     background: none;
     border: 0;
-    border-top: 1px solid var(--line);
+    border-top: 1px solid var(--hair);
     font: inherit;
     color: inherit;
     text-align: left;
@@ -37,10 +37,10 @@
     transition: background var(--motion-hover);
 }
 .opens:hover {
-    background: var(--raise);
+    background: var(--s2);
 }
 .opens:active {
-    background: var(--raise-2);
+    background: var(--s3-press);
 }
 .name {
     display: flex;

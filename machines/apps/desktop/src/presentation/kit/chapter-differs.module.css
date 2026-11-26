@@ -5,7 +5,7 @@
     align-items: center;
     min-height: 46px;
     padding: var(--space-8) 0;
-    border-top: 1px solid var(--line);
+    border-top: 1px solid var(--hair);
 }
 .head {
     min-height: 26px;

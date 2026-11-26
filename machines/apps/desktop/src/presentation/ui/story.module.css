@@ -1,7 +1,7 @@
 .modal {
     margin: 0;
     padding: var(--space-24);
-    background: var(--panel);
+    background: var(--s1);
     border-radius: var(--radius-panel);
     color: var(--t2);
 }
@@ -14,7 +14,7 @@
     overflow: hidden;
     transform: translateZ(0);
     border-radius: var(--radius-panel);
-    background: var(--canvas);
+    background: var(--s0);
 }
 .popoverEnd {
     justify-content: flex-end;
@@ -31,5 +31,5 @@
     font-weight: var(--weight-medium);
 }
 .opener[aria-expanded='true'] {
-    background: var(--raise);
+    background: var(--s3);
 }

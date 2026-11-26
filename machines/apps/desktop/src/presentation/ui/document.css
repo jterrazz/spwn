@@ -1,8 +1,5 @@
-@import '@fontsource/geist/400.css';
-@import '@fontsource/geist/500.css';
-@import '@fontsource/geist/600.css';
+@import '@fontsource-variable/geist/wght.css';
 @import '@fontsource/geist-mono/400.css';
-@import '@fontsource/geist-mono/500.css';
 @import './tokens.css';
 
 *,
@@ -37,7 +34,7 @@ button {
 }
 
 html :focus-visible {
-    outline: 2px solid var(--new);
+    outline: 2px solid var(--you);
     outline-offset: 1px;
 }
 
@@ -55,7 +52,7 @@ main :is(button, label, dt, th, kbd, header, [role='tab'], [role='option']),
 }
 
 ::selection {
-    background: color-mix(in srgb, var(--new) 32%, transparent);
+    background: color-mix(in srgb, var(--you) 32%, transparent);
 }
 
 [hidden] {

@@ -8,14 +8,8 @@ import { describe, expect, test } from 'vitest';
 const DOCUMENT = fileURLToPath(new URL('../document.css', import.meta.url));
 const CONFIG = fileURLToPath(new URL('../../../../vite.config.ts', import.meta.url));
 const SOURCE = fileURLToPath(new URL('../../../', import.meta.url));
-const FONTSOURCE = [
-    '@fontsource/geist/400.css',
-    '@fontsource/geist/500.css',
-    '@fontsource/geist/600.css',
-    '@fontsource/geist-mono/400.css',
-    '@fontsource/geist-mono/500.css',
-];
-const SHIPPED = /-(?:latin|latin-ext|symbols2)-\d+-normal\.woff2/u;
+const FONTSOURCE = ['@fontsource-variable/geist/wght.css', '@fontsource/geist-mono/400.css'];
+const SHIPPED = /-(?:latin|latin-ext|symbols2)-(?:\d+|wght)-normal\.woff2/u;
 const SYSTEM_GLYPHS = new Set([
     0x21_92, 0x21_97, 0x21_e7, 0x23_18, 0x23_03, 0x23_04, 0x25_d0, 0x27_13,
 ]);
@@ -79,14 +73,14 @@ describe('faces shipped', () => {
         const { code } = await preprocessCSS(readFileSync(DOCUMENT, 'utf8'), DOCUMENT, config);
         const files = facesOf(code).map((face) => face.file);
 
-        // Then - ten Latin faces and two symbol faces, each a woff2, and no other file is named
-        expect(files).toHaveLength(12);
+        // Then - four Latin faces and one symbol face, each a woff2, and no other file is named
+        expect(files).toHaveLength(5);
         expect(files.filter((file) => !SHIPPED.test(file))).toStrictEqual([]);
         expect(code).not.toContain('.woff)');
     });
 
     test('no character the source draws is left to a system face by a subset the build drops', () => {
-        // Given - every face @fontsource declares for the five weights, split by what the build ships
+        // Given - every face @fontsource declares for the two imports, split by what the build ships
         const require = createRequire(import.meta.url);
         const faces = FONTSOURCE.flatMap((name) =>
             facesOf(readFileSync(require.resolve(name), 'utf8')),

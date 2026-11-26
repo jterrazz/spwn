@@ -12,7 +12,7 @@
     position: absolute;
     inset: 0.14lh 0;
     border-radius: var(--radius-cell);
-    background: var(--raise);
+    background: var(--s2);
     animation: wait var(--motion-wait);
 }
 .short {

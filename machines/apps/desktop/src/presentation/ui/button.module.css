@@ -5,7 +5,7 @@
     height: 28px;
     padding: 0 var(--space-12);
     border-radius: var(--radius-control);
-    background: var(--raise);
+    background: var(--s3);
     color: var(--t1);
     font-size: var(--text-body);
     display: inline-flex;
@@ -19,7 +19,7 @@
 }
 .button:hover,
 .button:active {
-    background: var(--raise-2);
+    background: var(--s3-press);
 }
 .button:active {
     transform: var(--motion-press);
@@ -28,7 +28,7 @@
     background: var(--primary);
     color: var(--on-primary);
     font-weight: var(--weight-medium);
-    box-shadow: var(--shadow-primary);
+    box-shadow: var(--lift-primary);
 }
 .primary:hover,
 .primary:active {
@@ -40,7 +40,10 @@
     padding: 0 var(--space-6);
 }
 .link {
-    color: var(--new);
+    color: var(--t1);
+    text-decoration: underline;
+    text-decoration-color: var(--t4);
+    text-underline-offset: 3px;
 }
 .danger {
     color: var(--bad);
@@ -81,11 +84,11 @@
 }
 .link:active,
 .danger:active {
-    background: var(--raise-2);
+    background: var(--s3-press);
 }
 .button:disabled {
     background: none;
-    box-shadow: inset 0 0 0 1px var(--line-2);
+    box-shadow: inset 0 0 0 1px var(--edge);
     color: var(--t4);
     font-weight: var(--weight-regular);
     cursor: default;
@@ -109,7 +112,7 @@
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    border: 1.5px solid var(--line-2);
+    border: 1.5px solid var(--edge);
     border-top-color: var(--t2);
     animation: turn 0.8s linear infinite;
 }

@@ -13,15 +13,15 @@
     transition: background var(--motion-hover);
 }
 .item:hover {
-    background: var(--panel);
+    background: var(--s1);
     color: var(--t1);
 }
 .item[aria-current='page'] {
-    background: var(--raise);
+    background: var(--s3);
     color: var(--t1);
 }
 .item:active {
-    background: var(--raise-2);
+    background: var(--s3-press);
     color: var(--t1);
 }
 .item:disabled {
@@ -56,7 +56,7 @@
 }
 .urgent {
     font-weight: var(--weight-medium);
-    color: var(--warn);
+    color: var(--you);
 }
 .word {
     flex: none;

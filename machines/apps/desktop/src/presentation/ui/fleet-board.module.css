@@ -7,8 +7,8 @@
 }
 .stage {
     border-radius: var(--radius-card);
-    background-color: var(--inset);
-    background-image: radial-gradient(circle, var(--dot) 1px, transparent 1.5px);
+    background-color: var(--s0);
+    background-image: radial-gradient(circle, var(--edge) 1px, transparent 1.5px);
     background-size: 16px 16px;
     background-position: 8px 8px;
     padding: 30px var(--space-16) var(--space-14);
@@ -27,7 +27,7 @@
     all: unset;
     width: 168px;
     box-sizing: border-box;
-    background: var(--raise);
+    background: var(--s2);
     border-radius: var(--radius-well);
     padding: var(--space-10) var(--space-12);
     display: flex;
@@ -41,21 +41,20 @@
         box-shadow var(--motion-hover);
 }
 .card:hover {
-    background: var(--raise-2);
+    background: var(--s3-hover);
 }
 .ringWarn {
-    box-shadow: inset 0 0 0 1.5px var(--warn);
+    box-shadow: inset 0 0 0 1.5px var(--you);
 }
 .ringBad {
     box-shadow: inset 0 0 0 1.5px var(--bad);
 }
 .quiet {
     background: transparent;
-    box-shadow: inset 0 0 0 1px var(--line-2);
+    box-shadow: inset 0 0 0 1px var(--edge);
 }
 .card[aria-pressed='true'] {
-    background: color-mix(in srgb, var(--new) 14%, var(--raise));
-    box-shadow: inset 0 0 0 1.5px var(--new);
+    background: var(--s3);
 }
 .cardName {
     font-size: var(--text-row);
@@ -93,13 +92,13 @@
     color: var(--t3);
 }
 .warn {
-    color: var(--warn);
+    color: var(--you);
 }
 .bad {
     color: var(--bad);
 }
 .new {
-    color: var(--new);
+    color: var(--busy);
 }
 .foot {
     display: flex;

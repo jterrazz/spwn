@@ -1,5 +1,5 @@
 .code {
-    background: var(--inset);
+    background: var(--s0);
     border-radius: var(--radius-well);
     padding: var(--space-12) var(--space-14);
     margin-bottom: var(--space-10);

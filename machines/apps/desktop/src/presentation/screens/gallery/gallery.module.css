@@ -35,7 +35,7 @@
     flex-direction: column;
     gap: var(--space-12);
     padding: var(--space-16);
-    background: var(--panel);
+    background: var(--s1);
     border-radius: var(--radius-panel);
 }
 .name {
@@ -92,7 +92,7 @@
     overflow: hidden;
     transform: translateZ(0);
     border-radius: var(--radius-panel);
-    background: var(--canvas);
+    background: var(--s0);
 }
 .sheet .sample {
     width: 100%;
@@ -104,7 +104,7 @@
     overflow: hidden;
     transform: translateZ(0);
     border-radius: var(--radius-panel);
-    background: var(--canvas);
+    background: var(--s0);
 }
 .story {
     font-size: var(--text-label);

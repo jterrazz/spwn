@@ -4,7 +4,7 @@
     gap: var(--space-12);
     min-height: 46px;
     padding: var(--space-8) 0;
-    border-top: 1px solid var(--line);
+    border-top: 1px solid var(--hair);
     min-width: 0;
 }
 .slim {
@@ -121,10 +121,10 @@
     transition: background var(--motion-hover);
 }
 .open:hover {
-    background: var(--raise);
+    background: var(--s2);
 }
 .open:active {
-    background: var(--raise-2);
+    background: var(--s3-press);
 }
 .lead {
     display: flex;
@@ -251,10 +251,10 @@
     padding-block: var(--space-4);
 }
 .opener:hover {
-    background: var(--raise);
+    background: var(--s2);
 }
 .opener:active {
-    background: var(--raise-2);
+    background: var(--s3-press);
 }
 .link {
     flex: none;

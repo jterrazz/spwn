@@ -38,7 +38,7 @@
     min-width: 0;
 }
 .rail {
-    background: var(--panel);
+    background: var(--s1);
     border-radius: var(--radius-panel);
     padding: var(--space-14) var(--space-16) var(--space-16);
     min-width: 0;
@@ -47,7 +47,7 @@
     display: flex;
     flex-direction: column;
     padding-bottom: var(--space-12);
-    border-bottom: 1px solid var(--line);
+    border-bottom: 1px solid var(--hair);
 }
 .install {
     display: grid;
@@ -79,14 +79,14 @@
     gap: var(--space-6);
     padding: var(--space-2) var(--space-8) var(--space-2) var(--space-2);
     border-radius: var(--radius-control);
-    background: var(--raise);
+    background: var(--s3);
     font-size: var(--text-label);
 }
 .chip:hover {
-    background: var(--raise-2);
+    background: var(--s3-hover);
 }
 .chip:focus-visible {
-    outline: 2px solid var(--new);
+    outline: 2px solid var(--you);
     outline-offset: 2px;
 }
 .rows {

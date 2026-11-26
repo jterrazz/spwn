@@ -2,7 +2,7 @@
     all: unset;
     box-sizing: border-box;
     cursor: pointer;
-    background: var(--panel);
+    background: var(--s1);
     border-radius: var(--radius-panel);
     padding: 20px;
     display: flex;
@@ -12,16 +12,16 @@
     transition: background var(--motion-hover);
 }
 .card:hover {
-    background: var(--raise);
+    background: var(--s3);
 }
 .card:active {
-    background: var(--raise-2);
+    background: var(--s3-press);
 }
 .icon {
     width: 34px;
     height: 34px;
     border-radius: var(--radius-well);
-    background: var(--raise-2);
+    background: var(--s3);
     display: grid;
     place-items: center;
     color: var(--t1);
