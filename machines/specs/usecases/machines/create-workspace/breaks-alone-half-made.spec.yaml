@@ -1,0 +1,36 @@
+description: 'a create that panics answers broke, its VM half made, and the next create makes its VM'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'world panic Hypervisor.Resize 1 times'
+      exit: 0
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then {id, out: .out.Name} else {id, error: (.error | {code, subject, message})} end'''
+      stdin: |
+          {"v":2,"id":"1","call":"machines.create-workspace","in":{"Request":{"Image":"base-ubuntu","Name":"web","Size":{"MemoryBytes":4294967296}}}}
+      exit: 0
+      stdout: |
+          {"id":"1","error":{"code":"broke","subject":"machines.create-workspace","message":"station broke on machines.create-workspace; it kept running"}}
+    - command: 'machines --this-mac'
+      exit: 0
+      stdout: |
+          ●	macbook-pro	Mac	macbook-pro	Engine running
+          ○	api	Workspace	macbook-pro	Stopped · persistent	4 CPU	8 GB
+          ●	linux-1	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB
+          ○	web	Workspace	macbook-pro	Stopped · ephemeral	4 CPU	4 GB	was left half made
+    - command: 'journal'
+      exit: 0
+      stdout: |
+          # Journal
+          	none
+    - command: 'machines delete web --confirm=web'
+      exit: 0
+      stdout: |
+          ●	web	deleted
+    - command: 'machines create docs --memory 4G'
+      exit: 0
+      stdout: |
+          ●	Running
+          ●	Has an address	192.168.64.5
+          ●	SSH answers
+          ●	docs	Created	Ephemeral · 4 CPU · 4 GB · 20 GB

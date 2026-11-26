@@ -399,6 +399,28 @@ func (s *Machinist) runs(p *model.Process) bool {
 }
 
 func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, build ImageBuild, progress func(model.Step)) (model.Created, error) {
+	// invariant: a create that returns, made, failed or interrupted, settles
+	// its birth as create says; one cut by a panic never returned, so its
+	// birth stays at the step it reached with no owner left, and its VM
+	// reads half made, never made: the owner deletes or starts it.
+	made := &made{}
+	defer s.settle(made)
+	created, err := s.create(ctx, r, build, progress, made)
+	made.ended = true
+	return created, err
+}
+
+func (s *Machinist) settle(m *made) {
+	switch {
+	case !m.record || m.undone || m.failed:
+	case m.ended:
+		_ = s.writeBirth(m.name, func(stored *model.Record) { stored.Birth, stored.Owner = nil, nil })
+	default:
+		_ = s.writeBirth(m.name, func(stored *model.Record) { stored.Owner = nil })
+	}
+}
+
+func (s *Machinist) create(ctx context.Context, r model.CreateRequest, build ImageBuild, progress func(model.Step), made *made) (model.Created, error) {
 	// invariant: a failure before the first run, the image's build
 	// included, rolls every made thing back, its record too, and from the
 	// first run on the VM is kept, with what failed; the ports its env
@@ -456,7 +478,6 @@ func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, build Ima
 	if r.Lifetime == model.Persistent || server {
 		want = model.WantRunning
 	}
-	made := &made{}
 	// invariant: a create the owner interrupts ends as an interruption,
 	// after the same rollback or keep as any failure at that step.
 	failed := func(err error) (model.Created, error) {
@@ -488,11 +509,6 @@ func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, build Ima
 		}
 		return failed(err)
 	}
-	defer func() {
-		if made.record && !made.undone && !made.failed {
-			_ = s.writeBirth(r.Name, func(stored *model.Record) { stored.Birth, stored.Owner = nil, nil })
-		}
-	}()
 	first := model.BornCloning
 	if build != nil {
 		first = model.BornBuilding
@@ -501,7 +517,7 @@ func (s *Machinist) Create(ctx context.Context, r model.CreateRequest, build Ima
 	if err = s.claim(ctx, asked, &r, img, others, &rec); err != nil {
 		return failed(err)
 	}
-	made.record = true
+	made.record, made.name = true, r.Name
 	rail := model.CreateRail(nil)
 	if build != nil {
 		rail = model.CreateRail(buildRail())
@@ -667,7 +683,12 @@ func (s *Machinist) sshFails(ctx context.Context, name, detail string) error {
 	return &model.UnhealthyError{Name: name, Step: model.StepSSH, Detail: detail}
 }
 
-type made struct{ vm, record, undone, failed bool }
+// value: what a create made, under the name its claim settled, and
+// whether it returned.
+type made struct {
+	name                              string
+	vm, record, undone, failed, ended bool
+}
 
 // value: the steps of an image's build, as a create that builds its image
 // first declares them on its rail.
