@@ -117,7 +117,7 @@ func firstSentenceOf(paras []Paragraph) (first []Run, more bool) {
 			if !strings.ContainsRune(".!?:", rune(r.Text[j])) || !spaceAfter(all, i, j) || abbreviation(all, i, j) {
 				continue
 			}
-			first = append(slices.Clone(all[:i]), Run{Text: r.Text[:j+1], Strong: r.Strong, Link: r.Link})
+			first = append(slices.Clone(all[:i]), Run{Text: r.Text[:j+1], Strong: r.Strong, Link: r.Link, Kind: r.Kind})
 			return trimRuns(first), len([]rune(strings.TrimSpace(runsText(first)))) < len([]rune(whole))-2
 		}
 	}

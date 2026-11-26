@@ -28,7 +28,7 @@ func rules() map[string]Level {
 		"S8": LevelAmbient, "S11": LevelAmbient, "S12": LevelRemark, "S13": LevelAmbient,
 		"S14": LevelAmbient, "S15": LevelRemark, "S16": LevelAmbient, "S17": LevelRemark,
 		"S18": LevelAmbient, "S21": LevelAmbient, "S22": LevelRemark, "S26": LevelRemark,
-		"S28": LevelRemark, "S29": LevelNeedsYou,
+		"S28": LevelRemark, "S29": LevelNeedsYou, "S30": LevelRemark,
 	}
 }
 

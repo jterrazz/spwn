@@ -168,6 +168,14 @@
         "Code": {
           "type": "boolean"
         },
+        "Kind": {
+          "enum": [
+            "anchor",
+            "external",
+            "page"
+          ],
+          "type": "string"
+        },
         "Link": {
           "type": "string"
         },

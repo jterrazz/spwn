@@ -280,6 +280,7 @@ func checkCases() []checkCase {
 		{name: "an intent no seat reads", from: "reads: [define, decide, locate, guard, prove]", to: "reads: [define, decide, locate, guard]", want: []string{`wiki.yaml:25:1 S22 remark intent "prove" is read by no seat`}},
 		{name: "a tag past twelve lines", pages: caseOf("<Conviction\nid=\"x\"\nsays=\"s.\"\nopposite=\"o.\"\ncarried_in={[\nref(\"product/stack#machines\"),\nref(\"product/stack#agents\"),\nref(\"product/stack#wiki\"),\nref(\"product/stack#specs\"),\nref(\"product/stack#design\"),\nref(\"product/stack#os\")\n]}\nbroken_by=\"b.\"\n/>"), want: []string{c + `3:1 S26 remark <Conviction "x"> runs 14 lines: put attributes two to a line`}},
 		{name: "a markdown table of a kind's fields", pages: caseOf(termX + "\n\n| Gives | Costs |\n| --- | --- |\n| a | b |"), want: []string{c + `5:1 S28 remark this table's columns are the fields of alternative: write blocks and a <Table>`}},
+		{name: "a prose link to a scheme the window does not follow", pages: caseOf(termX + "\n\nSee [the term](#x), [the stack](../product/stack.md) and [the site](https://spwn.sh/a).\nThen [run it](javascript:alert(1)\n"), want: []string{c + `6:1 S30 remark link to "javascript:alert(1" is no page, anchor or http or https address: served as its words`}},
 		{name: "a rule asking a waiver", pages: caseOf(`<Rule id="x" says="s." force="soft" guards={ref("blueprint/case")} read_at="spwn:a.md" waiver="the owner may waive it." />`), want: []string{c + `3:88 S29 needs-you rule "x" asks to be waived: the owner may waive it.`}},
 	}
 }

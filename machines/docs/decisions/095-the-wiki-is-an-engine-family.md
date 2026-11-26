@@ -19,6 +19,8 @@ The check is a pure function over the compiled pages and the schema. What it nee
 
 The read is bounded so a hostile or overgrown corpus cannot hold the engine: every path of the compile and the check is linear in the corpus (the needs cycles are found as strongly connected components), a page past 1 MiB is not compiled (H44), a corpus past 2,000 pages or 64 MiB is refused whole (`wiki.too-large`), a page shows 100 findings of a rule and counts the rest, and an abandoned ask stops between pages. The limits are constants of `apps/engine/wiki/limits.go`; the corpus last read is kept in memory by its stat signature.
 
+Two calls serve the compiled corpus, and both reach it through that one cached read, so neither compiles what the other has: `wiki.read` serves a page at its four levels (a word, a line, a card, the full page), each item saying the first level that shows it, and `wiki.map` serves the corpus as one graph, its seats, pages, sections and blocks, open at the page asked. The three reading budgets of `wiki.yaml` are the engine's own measure, from which it weighs what each level holds; no call takes one and no answer carries one. A link of a page is served with its kind (a page, an anchor, or an `http` or `https` address); a link to any other scheme is served as its words, and said by a remark.
+
 ## Consequences
 
 - A page is judged with no runtime of its own: the same records serve the CLI, the window and an agent.

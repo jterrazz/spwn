@@ -442,7 +442,10 @@ func (k *checker) page(p *Page) {
 			k.needsYou[p.ID] = true
 		}
 	}
-	forProse(p, func(pr *Prose) { k.markdownTables(p, pr) })
+	forProse(p, func(pr *Prose) {
+		k.markdownTables(p, pr)
+		k.proseLinks(p, pr)
+	})
 	ids := map[string]bool{}
 	unique := func(id string, where At) {
 		if id == "" {
@@ -535,6 +538,32 @@ func (k *checker) markdownTables(p *Page, pr *Prose) {
 			}
 		}
 	}
+}
+
+// value: the most of a refused link's target a finding quotes.
+const quotedTarget = 40
+
+// invariant: a prose link is judged as Paragraphs serves it, each refused
+// target found after the one before it, so a page of links is read once;
+// a target the joined lines no longer spell as written keeps the line of
+// the last one found.
+func (k *checker) proseLinks(p *Page, pr *Prose) {
+	from, line, lost := 0, pr.Span.From, false
+	paragraphs(pr.Markdown, func(target string) {
+		if !lost {
+			if i := strings.Index(pr.Markdown[from:], "]("+target); i >= 0 {
+				line += strings.Count(pr.Markdown[from:from+i], "\n")
+				from += i
+			} else {
+				lost = true
+			}
+		}
+		quoted := target
+		if len(quoted) > quotedTarget {
+			quoted = strings.ToValidUTF8(quoted[:quotedTarget], "") + "..."
+		}
+		k.add("S30", p.ID, "", At{Line: line, Col: 1}, fmt.Sprintf("link to %q is no page, anchor or http or https address: served as its words", quoted))
+	})
 }
 
 func (k *checker) group(p *Page, h heldGroup) {

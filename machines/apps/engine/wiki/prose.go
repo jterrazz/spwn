@@ -23,14 +23,52 @@ const (
 
 type Run struct {
 	// value: a run of a paragraph's text: plain, strong, code, or the words
-	// of a link and where it points.
+	// of a link, where it points as written, and its Kind.
 	Text   string
-	Strong bool   `json:",omitempty"`
-	Code   bool   `json:",omitempty"`
-	Link   string `json:",omitempty"`
+	Strong bool     `json:",omitempty"`
+	Code   bool     `json:",omitempty"`
+	Link   string   `json:",omitempty"`
+	Kind   LinkKind `json:",omitempty"`
 }
 
-func Paragraphs(markdown string) []Paragraph {
+type LinkKind string
+
+// value: what a prose link points at: a page of the corpus by its path from
+// the page, an anchor of the page, or an address of the web.
+const (
+	LinkPage     LinkKind = "page"
+	LinkExternal LinkKind = "external"
+	LinkAnchor   LinkKind = "anchor"
+)
+
+// invariant: a link is served only to where the window may follow it: an
+// anchor (#id), an http or https address, or a path with no scheme, which
+// is a page's. Any other scheme (javascript:, file:, mailto:), a path to a
+// host (//host) and a backslash are no link: the run is its words, plain,
+// and the check says so (S30).
+func linkKind(target string) (LinkKind, bool) {
+	t := strings.TrimSpace(target)
+	switch {
+	case t == "", strings.HasPrefix(t, "//"), strings.ContainsRune(t, '\\'):
+		return "", false
+	case strings.HasPrefix(t, "#"):
+		return LinkAnchor, true
+	}
+	if i := strings.IndexAny(t, ":/?#"); i >= 0 && t[i] == ':' {
+		switch strings.ToLower(t[:i]) {
+		case "http", "https":
+			return LinkExternal, true
+		}
+		return "", false
+	}
+	return LinkPage, true
+}
+
+func Paragraphs(markdown string) []Paragraph { return paragraphs(markdown, nil) }
+
+// invariant: refused, when set, is told each link target no Kind serves,
+// in reading order, so the check judges the very links a reader is served.
+func paragraphs(markdown string, refused func(target string)) []Paragraph {
 	// invariant: prose is read, never rendered as HTML: a paragraph is the
 	// lines up to a blank one, a list item opens on "- " or "1. " and takes
 	// the indented lines after it, and its inline marks are **strong**,
@@ -40,7 +78,7 @@ func Paragraphs(markdown string) []Paragraph {
 	var lines []string
 	flush := func() {
 		if len(lines) > 0 {
-			out = append(out, Paragraph{Form: form, Runs: runs(strings.Join(lines, " "))})
+			out = append(out, Paragraph{Form: form, Runs: runs(strings.Join(lines, " "), refused)})
 		}
 		lines = nil
 	}
@@ -59,7 +97,7 @@ func Paragraphs(markdown string) []Paragraph {
 			}
 			p := Paragraph{Form: FormRow}
 			for _, cell := range strings.Split(strings.Trim(line, "|"), "|") {
-				p.Cells = append(p.Cells, runs(strings.TrimSpace(cell)))
+				p.Cells = append(p.Cells, runs(strings.TrimSpace(cell), refused))
 			}
 			out = append(out, p)
 		case strings.HasPrefix(line, "- ") || strings.HasPrefix(line, "* "):
@@ -101,13 +139,13 @@ func plainOf(line string) string {
 	// marks dropped: a link keeps its words, code its text; a line of no
 	// words is served empty, so its block's line face shows its word.
 	var b strings.Builder
-	for _, r := range runs(line) {
+	for _, r := range runs(line, nil) {
 		b.WriteString(r.Text)
 	}
 	return strings.TrimSpace(b.String())
 }
 
-func runs(text string) []Run {
+func runs(text string, refused func(target string)) []Run {
 	var out []Run
 	var plain strings.Builder
 	emit := func(s Run) {
@@ -155,7 +193,17 @@ func runs(text string) []Run {
 			}
 		case rest[0] == '[':
 			if m, e := link(i); m > i && e < len(text) {
-				emit(Run{Text: text[i+1 : m], Link: text[m+2 : e]})
+				words, target := text[i+1:m], text[m+2:e]
+				kind, ok := linkKind(target)
+				switch {
+				case ok:
+					emit(Run{Text: words, Link: target, Kind: kind})
+				case refused != nil && strings.TrimSpace(target) != "":
+					refused(target)
+					plain.WriteString(words)
+				default:
+					plain.WriteString(words)
+				}
 				i = e + 1
 				continue
 			}
