@@ -9,7 +9,7 @@ version-read:
 methods:
     - os: macos
       script:
-          run: xcode-select --install
+          run: xcode-select -p >/dev/null 2>&1 || xcode-select --install
     - family: debian
       needs: [sudo]
       apt: { packages: [git] }

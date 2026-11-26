@@ -1,6 +1,6 @@
 description: 'an update of tart whose release does not answer leaves tart answering, its log saying why'
 fixture:
-    - ./__fixtures__/shell-real/
+    - ../__fixtures__/shell-real/
     - ./__fixtures__/tart-release/
 env: engine
 runs:

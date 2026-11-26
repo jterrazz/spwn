@@ -1622,7 +1622,7 @@ func builtinCatalog() (Catalog, error) {
 						Kinds: []MachineKind{
 							"mac"},
 						Install: ShellInstall{
-							Line: "xcode-select --install"}},
+							Line: "xcode-select -p >/dev/null 2>&1 || xcode-select --install"}},
 					{
 						Kinds: []MachineKind{
 							"linux"},
@@ -1633,7 +1633,7 @@ func builtinCatalog() (Catalog, error) {
 						Kinds: []MachineKind{
 							"macos"},
 						Install: ShellInstall{
-							Line: "xcode-select --install"}}},
+							Line: "xcode-select -p >/dev/null 2>&1 || xcode-select --install"}}},
 				Provides: []string{
 					"git"},
 				Version: VersionRead{
@@ -6285,7 +6285,7 @@ func builtinCatalog() (Catalog, error) {
 							Selector: Selector{
 								OS: "macos"},
 							Script: &ScriptMethod{
-								Run: "xcode-select --install"}},
+								Run: "xcode-select -p >/dev/null 2>&1 || xcode-select --install"}},
 						{
 							Selector: Selector{
 								Family: "debian"},

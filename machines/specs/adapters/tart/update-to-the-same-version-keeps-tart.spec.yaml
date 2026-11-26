@@ -1,6 +1,6 @@
 description: 'an update of tart to its own version keeps its copy, and one to a newer version swaps it whole'
 fixture:
-    - ./__fixtures__/shell-real/
+    - ../__fixtures__/shell-real/
     - ./__fixtures__/tart-release/
 env: engine
 runs:

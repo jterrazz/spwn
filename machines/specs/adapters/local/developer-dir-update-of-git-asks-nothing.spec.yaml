@@ -1,0 +1,12 @@
+description: 'an update of git on a Mac with its developer directory never asks xcode-select to install it'
+fixture:
+    - ./__fixtures__/developer-dir/
+    - ./__fixtures__/developer-dir-installed/
+    - ../__fixtures__/shell-real/
+env: engine
+runs:
+    - command: '--version >/dev/null; PATH="$PATH:$HOME/root/usr/bin" "$STATION" apps update git; /usr/bin/sort -u .calls'
+      exit: 0
+      stdout: |
+          ●	git	2.50.1	shell
+          xcode-select -p
