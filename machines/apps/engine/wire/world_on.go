@@ -57,6 +57,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/call/lanes"
 	corecontract "github.com/jterrazz/studio-station/apps/engine/core/contract"
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
+	"github.com/jterrazz/studio-station/apps/engine/core/goes"
 	coremachine "github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/devices"
 	devicesfake "github.com/jterrazz/studio-station/apps/engine/devices/adapter/fake"
@@ -205,7 +206,19 @@ func openWorld(vars map[string]string, look bool) (*worldRun, error) {
 	r := &worldRun{path: path, w: w, macs: map[string]*worldMac{}, held: held}
 	w.OnPause(r.pause)
 	w.OnUnhold(r.unheld)
+	goes.Set(goes.Options{Log: r.broke, Redact: secret.Kept, Clock: r.clock()})
 	return r, nil
+}
+
+// invariant: the world build's twin of the engine's start: a break its
+// engines recover is a line of This Mac's engine log, stamped by the
+// world's clock as the engine stamps its own, whichever Mac's engine broke,
+// since one process runs them all. No lock watch restarts a world's engine.
+func (r *worldRun) broke(line string) {
+	r.w.Lock()
+	defer r.w.Unlock()
+	m := r.w.Mac(r.w.ThisMac)
+	m.EngineLog = append(m.EngineLog, r.w.Now.UTC().Format(time.RFC3339)+" engine: "+line)
 }
 
 // value: the spec build's tripwire is armed: every frame, CLI write and

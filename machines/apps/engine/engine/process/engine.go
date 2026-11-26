@@ -556,6 +556,10 @@ func (d *Engine) step(ctx context.Context, tick int) {
 	}
 }
 
+// Log writes a line the engine says of itself, a break of core/goes,
+// stamped as every line of its log is.
+func (d *Engine) Log(line string) { d.logf("engine", line) }
+
 func (d *Engine) logf(subject, message string) {
 	if d.note != nil {
 		d.note(d.h.Now().UTC().Format(time.RFC3339) + " " + subject + ": " + message)

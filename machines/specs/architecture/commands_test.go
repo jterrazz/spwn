@@ -37,7 +37,7 @@ func commandTree(t *testing.T) *command.Command {
 		"HOME=" + dir, "PATH=" + filepath.Join(dir, "bin"), "TZ=UTC", "STATION_MACHINE_KIND=mac",
 		"STATION_SYSTEM_DIRS=", "STATION_SYSTEM_ROOT=" + filepath.Join(dir, "root"),
 	}
-	p, code := wire.Build(nil, env, null, out, out)
+	p, code := wire.Build(nil, env, null, out, out, func(code int) { t.Fatalf("station exited %d", code) })
 	if p == nil {
 		t.Fatalf("station built no tree: exit %d", code)
 	}

@@ -48,9 +48,9 @@ type Program struct {
 	vars     map[string]string
 }
 
-func Run(args, env []string, stdin, stdout, stderr *os.File) int {
+func Run(args, env []string, stdin, stdout, stderr *os.File, exit func(code int)) int {
 	collectFor(args, varsOf(env))
-	p, code := Build(args, env, stdin, stdout, stderr)
+	p, code := Build(args, env, stdin, stdout, stderr, exit)
 	if p == nil {
 		return code
 	}
@@ -95,7 +95,7 @@ func (p *Program) Close() error {
 	return closed
 }
 
-func Build(args, env []string, stdin, stdout, stderr *os.File) (p *Program, exit int) {
+func Build(args, env []string, stdin, stdout, stderr *os.File, ends func(code int)) (p *Program, exit int) {
 	// value: a run's tree built as Run builds it, never executed; nil and the
 	// exit code when this machine could not be read.
 	env = asBundledJob(args, env)
@@ -141,6 +141,7 @@ func Build(args, env []string, stdin, stdout, stderr *os.File) (p *Program, exit
 	unsearched := local.NewSearching(env, nil, nil, nil, local.Search{}, invoking)
 	cat, broken := layerCatalog(userSource(world, unsearched.FS, pathsOf(unsearched.Env.Home(), vars).Prefs), builtin)
 	thisMac := resolve(local.NewSearching(env, childIn, stdout, stderr, landing(cat, vars), invoking), darwin.NewDoor(env), vars, world, cat)
+	thisMac.exit = ends
 	kenv := kit.Env{
 		Out:         writer,
 		Prompt:      output.Terminal(stdin, stderr, vars["TERM"] == "dumb"),
@@ -347,6 +348,9 @@ type machine struct {
 	named func() string
 	// value: this process's one device key, made at its first ask.
 	key *heldKey
+	// value: how this process ends at once, main's own exit; nil for a Mac
+	// of the world this process builds beside its own.
+	exit func(code int)
 }
 
 func resolve(raw local.System, door darwin.Door, vars map[string]string, world *worldMac, cat catalog.Catalog) machine {

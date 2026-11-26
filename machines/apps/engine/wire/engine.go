@@ -38,6 +38,8 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
+	"github.com/jterrazz/studio-station/apps/engine/core/goes"
+	"github.com/jterrazz/studio-station/apps/engine/core/secret"
 
 	devicescontract "github.com/jterrazz/studio-station/apps/engine/devices/contract"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
@@ -314,19 +316,30 @@ func (m machine) engineStarted() time.Time {
 }
 
 func engineRunCommand(env kit.Env, m machine) *cobra.Command {
-	return enginerun.Command(enginerun.Deps{Engine: soleEngine{Engine: m.engine(env), book: m.stores.devices}}, env)
+	d := m.engine(env)
+	return enginerun.Command(enginerun.Deps{Engine: soleEngine{Engine: d, book: m.stores.devices, log: d.Log, clock: m.sys.Clock, exit: m.exit}}, env)
 }
+
+// value: the exit of an engine a lock left held after a break: EX_SOFTWARE,
+// so launchd starts it afresh and the log says why.
+const restartExit = 70
 
 // invariant: the process that runs the engine is the device book's only
 // writer from its start: it reads the book and its anchor once, before it
-// serves, and believes nothing but its own writes after.
+// serves, and believes nothing but its own writes after. A break it
+// recovers is said in its log, its text through the redactor, and a lock
+// a break left held exits it, restartExit, once core/goes logged why.
 type soleEngine struct {
 	enginerun.Engine
-	book devicescontract.Store
+	book  devicescontract.Store
+	log   func(line string)
+	clock local.Clock
+	exit  func(code int)
 }
 
 func (e soleEngine) Run(ctx context.Context, note func(string)) error {
 	e.book.Sole(ctx)
+	goes.Set(goes.Options{Log: e.log, Redact: secret.Kept, Clock: e.clock, Restart: func(string) { e.exit(restartExit) }})
 	return e.Engine.Run(ctx, note)
 }
 
