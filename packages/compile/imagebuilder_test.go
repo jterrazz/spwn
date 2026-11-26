@@ -14,7 +14,7 @@ import (
 
 	"spwn.sh/packages/compile/baseimages"
 	"spwn.sh/packages/container/backend"
-	"spwn.sh/packages/dependency"
+	"spwn.sh/packages/dependency/builtin"
 	"spwn.sh/packages/dependency/resolver"
 )
 
@@ -101,7 +101,7 @@ func newBuilder(t *testing.T, store *imageStore) *Builder {
 	t.Helper()
 	t.Setenv("TMPDIR", t.TempDir())
 	reg := resolver.NewRegistry()
-	if err := dependency.RegisterBuiltins(reg); err != nil {
+	if err := builtin.RegisterBuiltins(reg); err != nil {
 		t.Fatalf("register tools: %v", err)
 	}
 	return New(reg, store)

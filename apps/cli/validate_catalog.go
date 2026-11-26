@@ -5,14 +5,14 @@ import (
 	"strings"
 
 	clidep "spwn.sh/apps/cli/dependency"
-	"spwn.sh/packages/dependency"
+	"spwn.sh/packages/dependency/builtin"
 	"spwn.sh/packages/runtimes"
 )
 
 func init() {
 	clidep.SetCatalogLookup(
 		func(ref string) bool {
-			for _, t := range dependency.BuiltinTools() {
+			for _, t := range builtin.BuiltinTools() {
 				if t.Name() == ref {
 					return true
 				}
@@ -20,8 +20,8 @@ func init() {
 			return false
 		},
 		func() []string {
-			out := make([]string, 0, len(dependency.BuiltinTools()))
-			for _, t := range dependency.BuiltinTools() {
+			out := make([]string, 0, len(builtin.BuiltinTools()))
+			for _, t := range builtin.BuiltinTools() {
 				out = append(out, strings.TrimPrefix(t.Name(), "spwn:"))
 			}
 			return out
@@ -30,7 +30,7 @@ func init() {
 }
 
 func catalogToolNames() []string {
-	deps := dependency.BuiltinTools()
+	deps := builtin.BuiltinTools()
 	depNames := make([]string, 0, len(deps))
 	for _, t := range deps {
 		depNames = append(depNames, t.Name())

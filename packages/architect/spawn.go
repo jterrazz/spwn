@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"spwn.sh/packages/agent"
-	"spwn.sh/packages/dependency"
+	"spwn.sh/packages/dependency/builtin"
 	runtimes "spwn.sh/packages/runtimes"
 
 	"spwn.sh/packages/activity"
@@ -200,7 +200,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	}
 
 	reg := resolver.NewRegistry()
-	if err := dependency.RegisterBuiltins(reg); err != nil {
+	if err := builtin.RegisterBuiltins(reg); err != nil {
 		return nil, fmt.Errorf("register tools: %w", err)
 	}
 	if err := runtimes.RegisterDefaults(reg); err != nil {
@@ -224,7 +224,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	}
 
 	if projectRoot := platform.ProjectRoot(); projectRoot != "" {
-		hydrated, hErr := dependency.HydrateLocals(reg, projectRoot, toolList)
+		hydrated, hErr := builtin.HydrateLocals(reg, projectRoot, toolList)
 		if hErr != nil {
 			return nil, fmt.Errorf("load local tools: %w", hErr)
 		}

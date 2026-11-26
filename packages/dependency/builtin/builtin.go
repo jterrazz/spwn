@@ -1,4 +1,4 @@
-package dependency
+package builtin
 
 import (
 	"spwn.sh/packages/dependency/internal/adapters/local"

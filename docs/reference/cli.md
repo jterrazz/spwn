@@ -80,6 +80,8 @@ Decided in ADR-021 and ADR-022. A row whose left column is `station` is built, u
 | `spwn web`                                   | gone: Spwn.app is the one GUI                                                                            |
 | `spwn upgrade`                               | `spwn update`                                                                                            |
 
+`spwn project plan` does not check a `spwn:<name>` reference against the built-in catalog: the engine links no copy of it (`packages/dependency/builtin` carries the embedded catalog, and no package the engine links imports it), so such a reference passes the plan unverified, and the check that `spwn check` made, `unknown-builtin-tool`, is lost. `spwn install` still refuses an unknown name until it goes, and the rule that refuses every `spwn:` reference replaces it.
+
 ### Agents' commands today
 
 ```bash

@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"spwn.sh/packages/compile/internal/imagetest"
-	"spwn.sh/packages/dependency"
+	"spwn.sh/packages/dependency/builtin"
 	"spwn.sh/packages/dependency/resolver"
 	runtimes "spwn.sh/packages/runtimes"
 
@@ -16,7 +16,7 @@ import (
 func newRegistry(t *testing.T) *resolver.Registry {
 	t.Helper()
 	reg := resolver.NewRegistry()
-	if err := dependency.RegisterBuiltins(reg); err != nil {
+	if err := builtin.RegisterBuiltins(reg); err != nil {
 		t.Fatalf("register tools: %v", err)
 	}
 	if err := runtimes.RegisterDefaults(reg); err != nil {

@@ -10,7 +10,7 @@ import (
 
 	"spwn.sh/apps/cli/ui"
 
-	"spwn.sh/packages/dependency"
+	"spwn.sh/packages/dependency/builtin"
 	"spwn.sh/packages/dependency/refs"
 	"spwn.sh/packages/project"
 )
@@ -124,7 +124,7 @@ func resolveInitBackend(raw string) (string, error) {
 
 func parseExampleRef(ref string) (string, error) {
 	trimmed := strings.TrimSpace(ref)
-	resolved, err := refs.ResolveCLI(trimmed, dependency.GallerySlugs())
+	resolved, err := refs.ResolveCLI(trimmed, builtin.GallerySlugs())
 	if err != nil {
 		return "", err
 	}
@@ -160,7 +160,7 @@ func runInitExample(cmd *cobra.Command, ref string) error {
 		}
 	}
 
-	rep, err := dependency.Install(slug, cwd)
+	rep, err := builtin.Install(slug, cwd)
 	if err != nil {
 		return fmt.Errorf("install example %s: %w", ref, err)
 	}
