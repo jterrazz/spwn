@@ -42,18 +42,18 @@ const MAC_MINI: Route = { machine: 'mac-mini', page: 'machine', tab: 'Overview' 
 // value: each the count measured when it was last lowered: a change that costs more fails here, one that costs less
 // value: lowers it.
 const BUDGETS = {
-    activityTab: { commits: 4, renders: 327 },
+    activityTab: { commits: 4, renders: 326 },
     cardAndBack: { commits: 3, renders: 105 },
     cardTyped: { commits: 2, renders: 29 },
     find: { commits: 1, renders: 25 },
-    guideOpens: { commits: 4, renders: 298 },
-    homeCalm: { commits: 8, renders: 565 },
-    homeStories: { commits: 8, renders: 823 },
+    guideOpens: { commits: 4, renders: 297 },
+    homeCalm: { commits: 8, renders: 561 },
+    homeStories: { commits: 8, renders: 819 },
     newMachine: { commits: 2, renders: 39 },
     peek: { commits: 1, renders: 75 },
     pin: { commits: 1, renders: 74 },
     soonAndBack: { commits: 3, renders: 27 },
-    storage: { commits: 2, renders: 413 },
+    storage: { commits: 2, renders: 412 },
     unchangedRevision: { commits: 0, renders: 0 },
 } as const satisfies Record<string, Budget>;
 

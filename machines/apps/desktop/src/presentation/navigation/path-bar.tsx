@@ -5,7 +5,7 @@ import type { Found } from '../../domain/machines/machines';
 import { needsYou } from '../../domain/overview/upkeep';
 import type { Reading } from '../dependencies/dependencies';
 import { Icon } from '../ui/icon';
-import { Button, IconButton, Sign } from '../ui/index';
+import { Button, IconButton } from '../ui/index';
 import type { Shown } from '../words/shown';
 import { actionOf } from './bar-action';
 import type { Card } from './card';
@@ -131,8 +131,8 @@ function End({ router, quiet, macs, needs, engine, onFind, ...props }: PathBarPr
     );
 }
 
-// invariant: the bar is the window's one row of navigation: the spaces and their rule, the sign, the column's pin,
-// invariant: Back and Forward, the path, then the engine's mark, the stale mark, the page's action, Inbox, Find and
+// invariant: the bar is the window's one row of navigation: the spaces and their rule, the column's pin, Back and
+// invariant: Forward, the path, then the engine's mark, the stale mark, the page's action, Inbox, Find and
 // invariant: Settings. It is a deep drag region, which leaves every button in it clickable; its popovers draw in a
 // invariant: portal outside it.
 export function PathBar(props: PathBarProps) {
@@ -149,18 +149,6 @@ export function PathBar(props: PathBarProps) {
                 soon={soon}
                 standing={standing}
             />
-            <button
-                aria-keyshortcuts="Meta+0"
-                aria-label="Home"
-                className={styles.sign}
-                onClick={() => {
-                    go({ page: 'home' });
-                }}
-                title="Home (⌘0)"
-                type="button"
-            >
-                <Sign />
-            </button>
             {column === undefined ? null : <ColumnToggle column={column} />}
             <IconButton
                 disabled={quiet || !canGoBack}

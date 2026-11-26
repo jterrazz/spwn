@@ -2,18 +2,17 @@
 export const FOLD_WIDTH = 44;
 
 // value: the bar's parts that never fold, in px as `path-bar.module.css` draws them on a Mac: the lights' inset,
-// value: the three spaces and their rule, the sign, the column's pin, Back and Forward, the gaps between them, then
-// value: at its right the Inbox, Find and the Settings gear, with the bar's end padding.
+// value: the three spaces and their rule, the column's pin, Back and Forward, the gaps between them, then at its
+// value: right the Inbox, Find and the Settings gear, with the bar's end padding.
 export const BAR_FIXED = {
     arrows: 2 * 28,
     end: 14,
     find: 120,
-    gaps: 9 * 6,
+    gaps: 8 * 6,
     gear: 28,
     inbox: 44,
     lights: 84,
     separator: 13,
-    sign: 32,
     spaces: 150,
     toggle: 28,
 } as const;

@@ -160,12 +160,13 @@ describe('PathNav', () => {
                         }
                     }
 
-                    // Then - Inbox, Settings and Home are a press away in the bar
+                    // Then - Inbox and Settings are a press away in the bar, and Home is the card's first row
                     await visitor.click(within(bar, button('Inbox', { exact: false })));
                     await visitor.see(within(path, content(TITLES.inbox)));
                     await visitor.click(within(bar, button('Settings')));
                     await visitor.see(within(path, content(TITLES.settings)));
-                    await visitor.click(within(bar, button('Home')));
+                    await visitor.click(within(path, button(TITLES.settings)));
+                    await visitor.click(option('Home ⌘0'));
                     await visitor.see(within(path, content(TITLES.home)));
                 },
             );

@@ -12,18 +12,6 @@
 :global(html[data-chrome='overlay']) .bar {
     padding-left: 84px;
 }
-.sign {
-    all: unset;
-    box-sizing: border-box;
-    display: grid;
-    place-items: center;
-    width: 32px;
-    height: 32px;
-    flex: none;
-    border-radius: var(--radius-control);
-    cursor: pointer;
-}
-.sign:focus-visible,
 .segment:focus-visible,
 .inbox:focus-visible,
 .find:focus-visible,

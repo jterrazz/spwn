@@ -112,7 +112,7 @@ describe('workspace', () => {
                 await visitor.see(heading('linux-1 stopped'));
                 await visitor.see(content('It holds no memory. Start it to use it again.'));
                 await visitor.see(within(column, button('linux-1 stopped')));
-                await visitor.click(within(bar, button('Home')));
+                await visitor.press('Meta+0');
                 await visitor.see(within(region('Machines'), content('12 free')));
             });
         expect(result.errors.text).toBe('');

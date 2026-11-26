@@ -16,7 +16,6 @@ import { PINNED, website } from '../website.specification.js';
 
 const column = navigation('Column');
 const bar = banner();
-const path = navigation('Path');
 const needs = region('Needs you');
 const canWait = region('Upkeep');
 
@@ -276,7 +275,7 @@ describe('needs', () => {
                 await visitor.see(column);
 
                 // Then - the fleet's places are there, Inbox with its count of the lines that need me, the Library with its counts
-                await visitor.see(within(path, button('Home')));
+                await visitor.see(within(bar, button('Home')));
                 await visitor.see(within(bar, button('Inbox 2')));
                 await visitor.see(within(column, button('Passwords')));
                 await visitor.gone(within(bar, button('Storage')));

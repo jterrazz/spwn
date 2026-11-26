@@ -198,6 +198,33 @@ describe('path bar', () => {
         expect(result.errors.text).toBe('');
     });
 
+    test("A25 the bar holds no sign: ⌘0 opens Home, and so does the card's Home row, the one button named Home", async () => {
+        // Given - the proof build on linux-1's Ports over two-macs, its bar holding no button named Home
+        const result = await website
+            .storage(PINNED)
+            .visit('/?world=two-macs&machine=linux-1&tab=Ports', async (visitor) => {
+                await visitor.see(within(path, button('linux-1', { exact: false })));
+                await visitor.gone(within(bar, button('Home')));
+
+                // When - ⌘0
+                await visitor.press('Meta+0');
+
+                // Then - Home opens, its segment the bar's one Home
+                await visitor.see(within(path, button('Home')));
+                await visitor.see(within(bar, button('Home')));
+
+                // When - back to linux-1, then the card's Home row
+                await visitor.click(within(bar, button('Back')));
+                await visitor.see(within(path, button('linux-1', { exact: false })));
+                await visitor.click(within(path, button('Fleet')));
+                await visitor.click(within(dialog('Fleet'), option('Home ⌘0')));
+
+                // Then - Home again
+                await visitor.see(within(path, button('Home')));
+            });
+        expect(result.errors.text).toBe('');
+    });
+
     test.todo(
         'A19 waits for a viewport: a website visit takes none, and PathNav proves the fold at 640 px',
     );

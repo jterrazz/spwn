@@ -59,7 +59,6 @@ export { type RadioRow, RadioRows } from './radio-rows';
 export { Row, RowHead } from './row';
 export { RowSkeleton } from './row-skeleton';
 export { SearchField } from './search-field';
-export { Sign } from './sign';
 export { StateMark } from './state-mark';
 export { Switch } from './switch';
 export { Tile } from './tile';
