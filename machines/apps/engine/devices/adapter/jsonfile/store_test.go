@@ -277,6 +277,28 @@ func TestAnEngineWhoseKeychainWasLockedAtItsStartHoldsNoHeadButTheStartBooks(t *
 	}
 }
 
+func TestAnEngineThatFirstReadsItsKeychainOverAnotherBookTrustsNotEvenTheStartBookPutBack(t *testing.T) {
+	at := filepath.Join(t.TempDir(), "station", "devices.json")
+	k := &keychain{}
+	withLaptop, _ := forgottenLaptop(t, at, k)
+	start, err := files().ReadFile(at)
+	if err != nil {
+		t.Fatal(err)
+	}
+	k.locked = errors.New("the keychain is locked")
+	engine := openOn(at, false, k)
+	engine.Sole(t.Context())
+	if err = files().WriteFile(at, withLaptop, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	k.locked = nil
+	trustsNothing(t, engine, devices.Changed)
+	if err = files().WriteFile(at, start, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	trustsNothing(t, engine, devices.Changed)
+}
+
 func TestABookAtTheLastGenerationLeavesTheNextWriteAHeadTheKeychainReadsBack(t *testing.T) {
 	at := filepath.Join(t.TempDir(), "station", "devices.json")
 	if err := files().MkdirAll(filepath.Dir(at), 0o700); err != nil {
