@@ -150,5 +150,6 @@ The records of decisions this repository alone took go in [`decisions/`](decisio
 - [097 A confirmation follows its consequence](decisions/097-a-confirmation-follows-its-consequence.md) (Proposed)
 - [098 A long act is guided by the engine; a Guide is a projection of what its call reports](decisions/098-a-long-act-is-guided-by-the-engine-a-guide-is-a-projection-of-what-its-call-reports.md) (Proposed)
 - [101 A change an older peer cannot ignore raises the state revision](decisions/101-a-change-an-older-peer-cannot-ignore-raises-the-state-revision.md) (Proposed)
+- [102 The spaces are a switch of their own, and the path starts at the section](decisions/102-the-spaces-are-a-switch-of-their-own-and-the-path-starts-at-the-section.md) (Proposed)
 
 A decision spanning several repositories is recorded by the corpus that spans them. What was left for later is `TODO.md` at the repository root.

@@ -3,6 +3,8 @@
 **Status:** Proposed
 **Date:** 2026-11-25
 
+**Amended by:** [ADR-102](102-the-spaces-are-a-switch-of-their-own-and-the-path-starts-at-the-section.md) (Proposed): decisions 2 and 3 superseded, decision 1 amended: the spaces are a selector of their own at the bar's left, the path's first segment is the section, and the window holds no sign.
+
 The owner chose the navigation in round 4 of the window's redesign boards (2026-11-25); his answers, quoted below, are this record's authority. The record itself waits for his acceptance, and five smaller calls it carries are recommended and still his to answer.
 
 ## Context
