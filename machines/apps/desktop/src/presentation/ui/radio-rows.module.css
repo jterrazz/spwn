@@ -1,9 +1,6 @@
 .rows {
     display: flex;
     flex-direction: column;
-    border: 1px solid var(--hair);
-    border-radius: var(--radius-control);
-    overflow: hidden;
 }
 
 .row {
@@ -23,10 +20,13 @@
 
 .open {
     cursor: pointer;
-    background: var(--s2);
 }
 
 .open:hover {
+    background: var(--s2);
+}
+
+.open:has(.ring:checked) {
     background: var(--s3);
 }
 

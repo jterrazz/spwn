@@ -1,9 +1,6 @@
 .type {
     font-size: var(--text-meta);
     color: var(--t3);
-    border: 1px solid var(--edge);
-    border-radius: var(--radius-pill);
-    padding: 0 7px;
     line-height: 18px;
     white-space: nowrap;
     flex: none;
