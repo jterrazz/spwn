@@ -8,16 +8,18 @@
   - article "Wiki":
     - heading "Wiki" [level=1]
     - paragraph: Every page of this Mac’s wiki, by the seat that reads it.
-    - paragraph: 5 pages · 0 hard findings · 8 remarks
+    - paragraph: 7 pages · 0 hard findings · 10 remarks
     - region "Vision":
       - heading "Vision" [level=2]
       - button "Floor 0 Philosophy The seven convictions Spwn is built on, written as principles a newcomer can apply to a design choice; the vision holds the case they serve, and this page holds the rules."
     - region "Produit":
       - heading "Produit" [level=2]
       - button "Floor 1 Boundaries What Spwn is not, and what each of its parts refuses to be, for anyone weighing a feature that sits near an edge. 3 remarks"
+      - 'button "Floor 1 ADR-002: Spwn is one stack of six apps on one ladder Status: Accepted Date: 2026-11-21 Amended by: ADR-003 (the ladder) Amends: growth ADR-007 1 remark"'
       - 'button "Floor 1 The stack Spwn''s three spaces and what lives in each, for anyone deciding what a part of the app is for or where it goes: per space, what you let go of, what you keep, and whether it runs today. 1 remark"'
     - region "Technique":
       - heading "Technique" [level=2]
+      - 'button "Floor 3 ADR-035: A port is a right with an audience Status: Accepted Date: 2026-11-11 1 remark"'
       - button "Floor 3 Ports station ports lists every TCP port that listens on a Mac or a VM, each in the class of who reaches it."
     - region "Croissance":
       - heading "Croissance" [level=2]

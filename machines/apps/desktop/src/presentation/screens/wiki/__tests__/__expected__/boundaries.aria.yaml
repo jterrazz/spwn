@@ -8,7 +8,7 @@
   - article "Boundaries":
     - list "Floors":
       - listitem "Why does this exist?": E0 Intention 0
-      - listitem "What do we build, and for whom?": E1 Produit 10
+      - listitem "What do we build, and for whom?": E1 Produit 11
       - listitem "What things does it handle, in which words?": E2 Domaines 0
       - listitem "Where is the code, and what may it touch?": E3 Architecture 2
       - listitem "Which lines carry it?": E4 Code 0
@@ -27,6 +27,17 @@
         - button "10min"
       - img "needs you"
       - text: 3 needs you 2 blocks folded at this reading time
+    - region "Boundaries":
+      - article "Decision one-stack":
+        - text: Decision one-stack ADR-002
+        - img "Accepted"
+        - text: Accepted 2026-11-21
+        - paragraph: amended by ADR-003
+        - term: record
+        - definition:
+          - button "Spwn is one stack of six apps on one ladder"
+        - term: decides
+        - definition: Spwn is one stack of six apps on one ladder.
     - region "What Spwn is not":
       - heading "What Spwn is not" [level=2]
       - paragraph: 5 quiet blocks

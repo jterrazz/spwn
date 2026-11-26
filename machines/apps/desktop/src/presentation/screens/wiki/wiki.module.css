@@ -525,6 +525,69 @@
     color: var(--t1);
     max-width: 900px;
 }
+.decision {
+    margin: 0;
+    padding: 28px;
+    border-radius: var(--radius-panel);
+    background: var(--panel);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-12);
+    min-width: 0;
+    height: 100%;
+    box-sizing: border-box;
+}
+.decisionHead {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-8) var(--space-14);
+}
+.decisionNumber {
+    font-size: 40px;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    font-weight: var(--weight-strong);
+    color: var(--t1);
+}
+.decisionStatus {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-6);
+    font-size: var(--text-body);
+    color: var(--t2);
+}
+.decisionDate {
+    padding: var(--space-2) var(--space-8);
+    border-radius: var(--radius-pill);
+    background: var(--raise);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--t2);
+}
+.decisionAmended {
+    margin: 0;
+    font-size: var(--text-label);
+    color: var(--t3);
+}
+.decisionRecord {
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    color: var(--t1);
+    text-align: left;
+    text-decoration: underline dotted var(--t3);
+    text-underline-offset: 3px;
+    cursor: pointer;
+}
+.decisionDecides {
+    color: var(--t1);
+    font-size: var(--text-body);
+}
+.decisionUnread {
+    color: var(--t3);
+}
 .card {
     padding: var(--space-16);
     border-radius: var(--radius-panel);

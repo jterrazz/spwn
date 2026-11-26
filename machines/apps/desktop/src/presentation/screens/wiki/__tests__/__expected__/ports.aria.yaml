@@ -48,7 +48,7 @@
           - definition: spwn:machines/specs/usecases/engine/share/flags-outside-rights.spec.yaml
         - list:
           - listitem:
-            - button "A port is a right with an audience. port-is-a-right"
+            - button "A port is a right with an audience. port-is-a-right ADR-035 Accepted"
       - paragraph:
         - text: A row of a port names its label from the catalog's packages'
         - code: ports

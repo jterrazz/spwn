@@ -2,6 +2,7 @@ import type { WikiFloorHead, WikiPageHead, WikiServedBlock } from '@jterrazz/sta
 import { useState } from 'react';
 
 import { WIKI_WORDS } from '../../words/wiki';
+import { DecisionLook } from './decision';
 import { DotIcon } from './dot-icon';
 import { Fields, Findings } from './fields';
 import type { Reader } from './fields';
@@ -66,6 +67,9 @@ function Whole({
     if (block.Sub !== null) {
         return <SubPage reader={reader} sub={block.Sub} />;
     }
+    if (block.Decision !== null) {
+        return <DecisionLook block={block} decision={block.Decision} reader={reader} />;
+    }
     return (
         <article aria-label={`${block.Title} ${block.Word}`} className={styles[look]}>
             <Head block={block} reader={reader} />
@@ -93,6 +97,11 @@ function Line({ block, reader }: { block: WikiServedBlock; reader: Reader }) {
                     {block.Line === '' ? block.Title : block.Line}
                 </span>
                 <span className={styles.lineWord}>{block.Word}</span>
+                {block.Decision === null || !block.Decision.Resolves ? null : (
+                    <span className={styles.floorMark}>
+                        {block.Decision.Number} {block.Decision.Status}
+                    </span>
+                )}
                 <FloorMark floor={block.OwnFloor} />
             </button>
             {open ? (

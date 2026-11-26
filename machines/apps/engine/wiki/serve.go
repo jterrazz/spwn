@@ -149,6 +149,7 @@ type ServedBlock struct {
 	Table    *ServedTable
 	Sub      *PageHead
 	Figure   *ServedFigure
+	Decision *ServedDecision
 	Finding  []ServedFinding
 }
 
@@ -210,6 +211,9 @@ type Corpus struct {
 	Schema Schema
 	Pages  []Page
 	Report Report
+	// value: the decision records among the pages, by page id, each read
+	// from its file's head.
+	Records map[string]Record
 }
 
 func Read(files map[string][]byte) (Corpus, error) {
@@ -229,10 +233,15 @@ func Read(files map[string][]byte) (Corpus, error) {
 	}
 	slices.Sort(ids)
 	pages := make([]Page, 0, len(ids))
+	records := map[string]Record{}
 	for _, id := range ids {
-		pages = append(pages, Compile(id, string(files[id+".md"]), schema))
+		body := string(files[id+".md"])
+		pages = append(pages, Compile(id, body, schema))
+		if r, ok := readRecord(id, body); ok {
+			records[id] = r
+		}
 	}
-	return Corpus{Schema: schema, Pages: pages, Report: Check(schema, pages)}, nil
+	return Corpus{Schema: schema, Pages: pages, Report: Check(schema, pages), Records: records}, nil
 }
 
 func (c Corpus) Home() string {
@@ -515,6 +524,9 @@ func (s *server) block(p *Page, b *Block, grouped bool) *ServedBlock {
 		if f.Page == p.ID && f.Block == b.ID && s.signals(f) {
 			out.Finding = append(out.Finding, served(f))
 		}
+	}
+	if b.Kind == "decision" {
+		out.Decision = s.decision(b)
 	}
 	switch v := b.View.(type) {
 	case *TableView:

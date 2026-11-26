@@ -320,6 +320,16 @@
         "Address": {
           "type": "string"
         },
+        "Decision": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/wiki.ServedDecision"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "Fields": {
           "items": {
             "$ref": "#/$defs/wiki.ServedField"
@@ -428,6 +438,7 @@
       },
       "required": [
         "Address",
+        "Decision",
         "Fields",
         "Figure",
         "Finding",
@@ -445,6 +456,66 @@
         "Title",
         "Why",
         "Word"
+      ],
+      "type": "object"
+    },
+    "wiki.ServedDecision": {
+      "additionalProperties": false,
+      "properties": {
+        "Accepted": {
+          "type": "boolean"
+        },
+        "AmendedBy": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Amends": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Date": {
+          "type": "string"
+        },
+        "Decides": {
+          "type": "string"
+        },
+        "Number": {
+          "type": "string"
+        },
+        "Page": {
+          "type": "string"
+        },
+        "Resolves": {
+          "type": "boolean"
+        },
+        "Status": {
+          "type": "string"
+        },
+        "Title": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Accepted",
+        "AmendedBy",
+        "Amends",
+        "Date",
+        "Decides",
+        "Number",
+        "Page",
+        "Resolves",
+        "Status",
+        "Title"
       ],
       "type": "object"
     },

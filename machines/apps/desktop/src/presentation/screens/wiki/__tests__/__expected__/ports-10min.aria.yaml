@@ -51,10 +51,15 @@
           - term: proof
           - definition: spwn:machines/specs/usecases/engine/share/flags-outside-rights.spec.yaml
         - article "Decision port-is-a-right":
-          - text: Decision port-is-a-right
-          - paragraph: A port is a right with an audience.
-          - term: adr
-          - definition: spwn:machines/docs/decisions/035-a-port-is-a-right-with-an-audience.md
+          - text: Decision port-is-a-right ADR-035
+          - img "Accepted"
+          - text: Accepted 2026-11-11
+          - paragraph: amended by ADR-086
+          - term: record
+          - definition:
+            - button "A port is a right with an audience"
+          - term: decides
+          - definition: A port is a right with an audience.
       - paragraph:
         - text: A row of a port names its label from the catalog's packages'
         - code: ports

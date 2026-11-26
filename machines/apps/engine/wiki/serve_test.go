@@ -97,6 +97,9 @@ func outline(s wiki.Served) string {
 						line(depth+2, "part", strconv.Quote(p.Name), "at="+p.At)
 					}
 				}
+				if d := k.Decision; d != nil {
+					line(depth+1, "decision", "page="+d.Page, d.Number, strconv.Quote(d.Title), "status="+strconv.Quote(d.Status), "accepted="+strconv.FormatBool(d.Accepted), "date="+d.Date, "amended-by="+strings.Join(d.AmendedBy, ","), "amends="+strings.Join(d.Amends, ","), "resolves="+strconv.FormatBool(d.Resolves), strconv.Quote(d.Decides))
+				}
 				for _, f := range k.Finding {
 					line(depth+1, "finding", string(f.Level), f.Rule, f.Says)
 				}

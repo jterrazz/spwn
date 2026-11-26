@@ -25,6 +25,13 @@ export const WIKI_LEVEL_WORDS: Readonly<Record<WikiServedFinding['Level'], strin
     remark: 'remark',
 };
 
+export const WIKI_DECISION_WORDS = {
+    amendedBy: 'amended by',
+    decides: 'decides',
+    record: 'record',
+    unread: 'its record is not in this wiki',
+} as const;
+
 export const WIKI_WORDS = {
     all: 'All',
     budget: 'Reading time',

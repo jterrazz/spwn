@@ -1,0 +1,50 @@
+{
+  "id": "machines/decisions/035-a-port-is-a-right-with-an-audience",
+  "faces": {
+    "word": "ADR-035: A port is a right with an audience",
+    "line": "**Status:** Accepted **Date:** 2026-11-11",
+    "paragraph": "**Status:** Accepted **Date:** 2026-11-11",
+    "icon": ""
+  },
+  "title": {
+    "from": 1,
+    "to": 1
+  },
+  "sections": [
+    {
+      "heading": null,
+      "items": [
+        {
+          "t": "prose",
+          "markdown": "**Status:** Accepted\n**Date:** 2026-11-11\n\nAmends [ADR-018](018-two-port-classes.md).\nAmended by [ADR-086](086-a-vm-reserves-a-packages-port-only-when-its-machinefile-installs-it.md).",
+          "span": {
+            "from": 3,
+            "to": 7
+          }
+        }
+      ]
+    },
+    {
+      "heading": {
+        "level": 2,
+        "text": "Decision",
+        "anchor": "decision",
+        "at": {
+          "line": 9,
+          "col": 1
+        }
+      },
+      "items": [
+        {
+          "t": "prose",
+          "markdown": "A machine's ports are rights, never an inventory.",
+          "span": {
+            "from": 11,
+            "to": 11
+          }
+        }
+      ]
+    }
+  ],
+  "findings": []
+}

@@ -3352,6 +3352,7 @@ export type WikiServed = {
 
 export type WikiServedBlock = {
     Address: string;
+    Decision: WikiServedDecision | null;
     Fields: WikiServedField[] | null;
     Figure: WikiServedFigure | null;
     Finding: WikiServedFinding[] | null;
@@ -3369,6 +3370,19 @@ export type WikiServedBlock = {
     Title: string;
     Why: WikiCause[] | null;
     Word: string;
+};
+
+export type WikiServedDecision = {
+    Accepted: boolean;
+    AmendedBy: string[] | null;
+    Amends: string[] | null;
+    Date: string;
+    Decides: string;
+    Number: string;
+    Page: string;
+    Resolves: boolean;
+    Status: string;
+    Title: string;
 };
 
 export type WikiServedField = {

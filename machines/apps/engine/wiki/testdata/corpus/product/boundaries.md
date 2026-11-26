@@ -3,7 +3,9 @@
 What Spwn is not, and what each of its parts refuses to be, for anyone weighing a feature that
 sits near an edge. The owner confirmed the five boundaries of Spwn on 2026-11-21
 ([his answer](../blueprint/owner-words.md#why-spwn-exists)); the record is
-[ADR-002](./decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder.md), accepted.
+[ADR-002](#one-stack), accepted.
+
+<Decision id="one-stack" adr="studio-os:home/spwn/wiki/product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder.md" decides="Spwn is one stack of six apps on one ladder." />
 
 ## What Spwn is not
 

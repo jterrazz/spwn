@@ -1,8 +1,10 @@
 findings
   growth/positioning:60:1 S6 needs-you "growth/positioning" rests on this page's reading: you have not ruled
-  product/boundaries:68:1 S6 needs-you "no-computer" rests on this page's reading: you have not ruled
-  product/boundaries:78:1 S6 needs-you "os-holds-no-facts" rests on this page's reading: you have not ruled
-  product/boundaries:84:1 S6 needs-you "product/boundaries" rests on this page's reading: you have not ruled
+  machines/decisions/035-a-port-is-a-right-with-an-audience:1:1 S8 ambient page "machines/decisions/035-a-port-is-a-right-with-an-audience" is prose only
+  product/boundaries:70:1 S6 needs-you "no-computer" rests on this page's reading: you have not ruled
+  product/boundaries:80:1 S6 needs-you "os-holds-no-facts" rests on this page's reading: you have not ruled
+  product/boundaries:86:1 S6 needs-you "product/boundaries" rests on this page's reading: you have not ruled
+  product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder:1:1 S8 ambient page "product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder" is prose only
   product/stack:53:1 S6 needs-you "product/stack" rests on this page's reading: you have not ruled
   wiki.yaml:83:1 S21 ambient kind "alternative" has no icon: the dot stands in
   wiki.yaml:96:1 S21 ambient kind "part" has no icon: the dot stands in
@@ -26,6 +28,7 @@ readings
     growth/positioning#unrelated-tools alternative floor=1 score=0 tier=quiet why=
     growth/positioning#two-costs figure floor=1
     growth/positioning#all table floor=1 rows=growth/positioning#by-hand,growth/positioning#one-big-agent,growth/positioning#managed-platform,growth/positioning#unrelated-tools
+  machines/decisions/035-a-port-is-a-right-with-an-audience seat=engineering floor=3
   machines/reference/ports seat=engineering floor=3
     machines/reference/ports#right term floor=3 score=2 tier=normal why=prose-leans:2
     machines/reference/ports#audience term floor=3 score=0 tier=quiet why=
@@ -33,6 +36,7 @@ readings
     machines/reference/ports#flagged-never-shared rule floor=3 score=3 tier=lead why=guard-hard:2,anchored:1
     machines/reference/ports#port-is-a-right decision floor=3 score=2 tier=normal why=decision:1,anchored:1
   product/boundaries seat=product floor=1
+    product/boundaries#one-stack decision floor=1 score=4 tier=lead why=prose-leans:2,decision:1,anchored:1
     product/boundaries#not-a-replacement refusal floor=1 score=0 tier=quiet why=
     product/boundaries#not-vibe-coding refusal floor=1 score=0 tier=quiet why=
     product/boundaries#not-a-cloud-service refusal floor=1 score=0 tier=quiet why=
@@ -47,6 +51,7 @@ readings
     product/boundaries#no-computer refusal floor=1 score=3 tier=lead why=needs-you:3
     product/boundaries#wiki-decides-nothing refusal floor=1 score=0 tier=quiet why=
     product/boundaries#os-holds-no-facts refusal floor=1 score=3 tier=normal why=needs-you:3
+  product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder seat=product floor=1
   product/stack seat=product floor=1
     product/stack#parts group floor=1 readBy=blueprint,product,engineering,growth
     product/stack#machines part floor=1 score=0 tier=quiet why=
