@@ -2,14 +2,10 @@
 // generation, Docker backend adapter, image build pipeline,
 // post-build tool verification.
 //
-// Two entry points share the registry, backend, and generator:
-//
-//   - Builder.Build (constructed via compile.New): the shared base
-//     world image. Resolves a dependency set into a Dockerfile, runs
-//     docker build, probes the result. Cached on a version label.
-//   - BuildFromBase: project-specific derived images. Composes a
-//     transpiled Tree onto a base image via a single streamed tar
-//     build context.
+// One entry point owns the registry, backend, and generator:
+// Builder.Build (constructed via compile.New), the shared base world
+// image. It resolves a dependency set into a Dockerfile, runs docker
+// build, probes the result. Cached on a version label.
 //
 // Sub-packages:
 //
