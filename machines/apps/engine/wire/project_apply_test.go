@@ -17,6 +17,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/project"
 	"github.com/jterrazz/studio-station/apps/engine/project/adapter/manifest"
 	"github.com/jterrazz/studio-station/apps/engine/project/calls"
+	skillfiles "github.com/jterrazz/studio-station/apps/engine/skills/adapter/files"
 )
 
 func applying(t *testing.T) (d calls.Deps, folder, root string) {
@@ -262,6 +263,40 @@ func TestATamperedRecordIsNeitherReadNorObeyed(t *testing.T) {
 		got, err := os.ReadFile(p)
 		if err != nil || want != "" && string(got) != want {
 			t.Errorf("%s = %q, %v; want it untouched", p, got, err)
+		}
+	}
+}
+
+func TestASkillMadeAsItsTemplatePlansValidAndListingSkillsWritesNoHome(t *testing.T) {
+	d, _, root := applying(t)
+	skillsOf := skillfiles.New(local.New(nil, nil, nil, nil).FS)
+	if _, err := skillsOf.Create(t.Context(), root, "reading"); err != nil {
+		t.Fatal(err)
+	}
+	agent := filepath.Join(root, "spwn", "agents", project.Starter, "agent.yaml")
+	data, err := os.ReadFile(agent)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = os.WriteFile(agent, append(data, []byte("  - \"skill/reading\"\n")...), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	plan, err := calls.Plan.Run(t.Context(), d, calls.PlanIn{Folder: root}, nil)
+	if err != nil || !plan.Valid {
+		t.Fatalf("Plan = %+v, %v; want a skill made from its template valid", plan.Issues, err)
+	}
+	home, spwnHome := t.TempDir(), filepath.Join(t.TempDir(), "spwn-home")
+	t.Setenv("HOME", home)
+	t.Setenv("SPWN_HOME", spwnHome)
+	if listed, err := skillsOf.List(t.Context(), root); err != nil || len(listed) == 0 {
+		t.Fatalf("List = %+v, %v; want the project's skills", listed, err)
+	}
+	if _, err := skillsOf.List(t.Context(), ""); err != nil && !errors.Is(err, fs.ErrNotExist) {
+		t.Fatal(err)
+	}
+	for _, at := range []string{spwnHome, filepath.Join(home, ".spwn")} {
+		if _, err := (local.Beneath{}).Lstat(filepath.Dir(at), filepath.Base(at)); !errors.Is(err, fs.ErrNotExist) {
+			t.Errorf("%s after listing = %v; want it absent", at, err)
 		}
 	}
 }

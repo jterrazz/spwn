@@ -90,6 +90,81 @@ func TestInit_createsManifestAndLayout(t *testing.T) {
 // the scaffold materialises one concrete example for each local-ref
 // scheme (skill/, tool/, hook/) and the agent.yaml subscribes to all
 // three. Without this the "it just works on first init" promise slips.
+func TestInit_writesTheManifestAndTheStarterByteForByte(t *testing.T) {
+	dir := t.TempDir()
+	if err := Init(dir, InitOpts{Name: "site", Backend: "spwn:claude-code"}); err != nil {
+		t.Fatalf("Init: %v", err)
+	}
+	want := map[string]string{
+		"spwn.yaml": `# Spwn - project manifest
+# Docs: https://spwn.sh/docs/manifest
+#
+# This file declares the deployable worlds in this project. Each world
+# entry deploys one or more agents into a single sandboxed container.
+# Commit this file.
+
+version: 1
+name: site
+
+worlds:
+  neo:
+    agents: [neo]
+    workspaces: [.]
+    knowledge: ./spwn/knowledge
+`,
+		"spwn/agents/neo/agent.yaml": `# Agent composition: the source of truth for what this agent needs.
+#
+# dependencies: lists every external and local dep with an explicit form.
+# The prefix tells you the source; the leading path segment tells you
+# the kind of local block:
+#   spwn:<name>                  built-in catalog dep (e.g. spwn:python)
+#   github:<owner>/<repo>        third-party dep (planned, not yet resolved)
+#   skill/<name>                 local skill   (./spwn/skills/<name>.md)
+#   tool/<name>                  local tool    (./spwn/tools/<name>/)
+#   hook/<name>                  local hook    (./spwn/hooks/<name>.yaml)
+#   command/<name>               local command (./spwn/commands/<name>.md)
+# Bare names are invalid; always use one of the forms above.
+#
+# Hooks fire on runtime events (PreToolUse, SessionStart, ...) and are
+# selected per-agent via the dependency list, same shape as skills
+# and tools. An agent inherits only the hooks it lists here.
+#
+# Commands are slash-invoked prompt shortcuts (` + "`/refactor`, `/review`" + `)
+# the runtime exposes inside the agent's session. Same per-agent
+# selection: only the commands the agent subscribes to land in its
+# native commands directory.
+#
+# Optional ` + "`runtime.backend:`" + ` pins this agent to a specific backend
+# (spwn:claude-code, spwn:codex). Omit to let Spwn pick based on
+# project-wide config and the backend you're authenticated with.
+
+name: neo
+description: A blank-slate agent; replace this one-liner with what neo is for.
+
+runtime:
+  backend: "spwn:claude-code"
+
+dependencies:
+  - "spwn:unix"
+  - "spwn:git"
+  - "spwn:python"
+  # Local blocks scaffolded by ` + "`station project create`" + `, one of each form so you
+  # can see how they're authored and used. Keep, edit, or delete them;
+  # ` + "`station project plan`" + ` is happy either way.
+  - "skill/focus"           # ./spwn/skills/focus.md
+  - "tool/greet"            # ./spwn/tools/greet/
+  - "hook/session-banner"   # ./spwn/hooks/session-banner.yaml
+  - "command/refactor"      # ./spwn/commands/refactor.md (slash-invoked)
+`,
+	}
+	for rel, body := range want {
+		data, err := os.ReadFile(filepath.Join(dir, filepath.FromSlash(rel)))
+		if err != nil || string(data) != body {
+			t.Errorf("%s = %v\n%s\nwant\n%s", rel, err, data, body)
+		}
+	}
+}
+
 func TestInit_scaffoldsLocalRefExamples(t *testing.T) {
 	dir := t.TempDir()
 	if err := Init(dir, InitOpts{Name: "local-refs"}); err != nil {

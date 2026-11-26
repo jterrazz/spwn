@@ -48,6 +48,20 @@ func made(t *testing.T) (contract.Projects, project.Project) {
 	return p, m
 }
 
+func TestANewProjectHoldsTheMindLayoutAndNoMore(t *testing.T) {
+	_, m := made(t)
+	for _, rel := range []string{"spwn/agents/neo/playbooks", "spwn/agents/neo/journal", "spwn/knowledge"} {
+		if e, err := (local.Beneath{}).Lstat(m.Root, rel); err != nil || !e.Mode.IsDir() {
+			t.Errorf("%s = %v; want the folder", rel, err)
+		}
+	}
+	for _, rel := range []string{"spwn/agents/neo/identity", "spwn/agents/neo/skills", "spwn/agents/neo/knowledge", "knowledge", "spwn/worlds", "spwn/hooks.yaml"} {
+		if _, err := (local.Beneath{}).Lstat(m.Root, rel); !errors.Is(err, fs.ErrNotExist) {
+			t.Errorf("%s = %v; want it absent", rel, err)
+		}
+	}
+}
+
 func TestABrokenAgentPlansInvalid(t *testing.T) {
 	p, m := made(t)
 	if err := os.WriteFile(filepath.Join(m.Root, "spwn", "agents", project.Starter, "agent.yaml"), []byte("name: [\n"), 0o600); err != nil {
@@ -60,10 +74,22 @@ func TestABrokenAgentPlansInvalid(t *testing.T) {
 }
 
 func TestAMissingPromptIsAnIssueOfTheRender(t *testing.T) {
-	for name, content := range map[string]*string{"empty": new(string), "blank": ptr("   \n\t\n"), "no file": nil} {
-		t.Run(name, func(t *testing.T) {
+	for _, c := range []struct {
+		name, agent string
+		content     *string
+	}{
+		{"empty", project.Starter, new(string)},
+		{"blank", project.Starter, ptr("   \n\t\n")},
+		{"no file", project.Starter, nil},
+		{"the second of two agents", "trinity", nil},
+	} {
+		t.Run(c.name, func(t *testing.T) {
 			p, m := made(t)
-			prompt := filepath.Join(m.Root, "spwn", "agents", project.Starter, "AGENTS.md")
+			if c.agent != project.Starter {
+				secondAgent(t, m.Root, c.agent)
+			}
+			content := c.content
+			prompt := filepath.Join(m.Root, "spwn", "agents", c.agent, "AGENTS.md")
 			if content == nil {
 				if err := local.New(nil, nil, nil, nil).FS.Remove(prompt); err != nil {
 					t.Fatal(err)
@@ -72,13 +98,40 @@ func TestAMissingPromptIsAnIssueOfTheRender(t *testing.T) {
 				t.Fatal(err)
 			}
 			plan, err := p.Plan(t.Context(), m.Root)
+			missing := func(i project.Issue) bool { return strings.Contains(i.Message, "agent prompt is missing or empty") }
 			if err != nil || plan.Valid || !slices.ContainsFunc(plan.Issues, func(i project.Issue) bool {
-				return i.Source == project.SourceCompile && i.Level == project.Error && strings.Contains(i.Message, "agent prompt is missing or empty") && strings.Contains(i.Hint, "spwn/agents/"+project.Starter+"/AGENTS.md")
+				return i.Source == project.SourceCompile && i.Level == project.Error && missing(i) && strings.Contains(i.Hint, "spwn/agents/"+c.agent+"/AGENTS.md")
 			}) {
 				t.Fatalf("Plan = %+v, %v; want a render error naming the prompt to write", plan, err)
 			}
+			for _, i := range plan.Issues {
+				if missing(i) && !strings.Contains(i.Hint, "spwn/agents/"+c.agent+"/") {
+					t.Errorf("issue %+v names another agent than %s", i, c.agent)
+				}
+			}
 		})
 	}
+}
+
+func secondAgent(t *testing.T, root, name string) {
+	t.Helper()
+	from, to := filepath.Join(root, "spwn", "agents", project.Starter), filepath.Join(root, "spwn", "agents", name)
+	if err := os.MkdirAll(to, 0o750); err != nil {
+		t.Fatal(err)
+	}
+	for _, file := range []string{"agent.yaml", "SOUL.md", "AGENTS.md"} {
+		data, err := os.ReadFile(filepath.Join(from, file))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if file == "agent.yaml" {
+			data = []byte(strings.Replace(string(data), "\nname: "+project.Starter+"\n", "\nname: "+name+"\n", 1))
+		}
+		if err = os.WriteFile(filepath.Join(to, file), data, 0o600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	edited(t, filepath.Join(root, project.ManifestName), appended("  "+name+":\n    agents: ["+name+"]\n    workspaces: [.]\n    knowledge: ./spwn/knowledge\n"))
 }
 
 func ptr(s string) *string { return &s }
@@ -217,6 +270,12 @@ func TestEachRuleOfTheDeclarationIsAnIssueOfThePlan(t *testing.T) {
 		}, project.Error, `dependency "code-review" is invalid`, "skill/code-review"},
 		{"a reference in the retired @spwn/ form", func(t *testing.T, root string) { edited(t, agentFile(root), depending(`"@spwn/python"`)) },
 			project.Error, `dependency "@spwn/python" is invalid`, ""},
+		{"a reference in the retired local: form", func(t *testing.T, root string) {
+			skillFile(t, root, "foo")
+			edited(t, agentFile(root), depending(`"local:foo"`))
+		}, project.Error, `dependency "local:foo" is invalid`, "skill/foo"},
+		{"a reference to a scope of no registry", func(t *testing.T, root string) { edited(t, agentFile(root), depending(`"@acme/foo"`)) },
+			project.Error, `dependency "@acme/foo" is invalid`, ""},
 		{"a retired tools block", func(t *testing.T, root string) { edited(t, agentFile(root), appended("\ntools:\n  - \"spwn:unix\"\n")) },
 			project.Error, `legacy top-level "tools" block`, "flat `dependencies:` list"},
 		{"a retired skills block", func(t *testing.T, root string) {
