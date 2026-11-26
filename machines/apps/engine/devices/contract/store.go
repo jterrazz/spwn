@@ -12,7 +12,9 @@ import (
 type Store interface {
 	// invariant: the device book as the last write left it, seals as they
 	// were written, and the head this Mac anchored last; none written reads
-	// as a book with no entry and the zero Head.
+	// as a book with no entry and the zero Head. To this Mac's engine past
+	// its wait, a book that cannot be read reads as one with no entry under
+	// the head the engine holds; to any other reader it is an error.
 	Read(ctx context.Context) (devices.Book, devices.Head, error)
 	// invariant: a change reads the book and writes it back under one
 	// exclusive hold, so two changes at once never lose each other's; its

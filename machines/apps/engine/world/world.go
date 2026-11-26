@@ -373,6 +373,9 @@ type Stores struct {
 	// and the change that wrote it.
 	Devices           []devices.Device `json:"devices,omitempty"`
 	DevicesGeneration int              `json:"devices_generation,omitempty"`
+	// value: the book's file does not parse: a reader sees a file of that
+	// name and never a book, until a change writes it again.
+	DevicesUnreadable bool `json:"devices_unreadable,omitempty"`
 	// value: the book's head as this Mac's login keychain keeps it,
 	// "<generation> <digest>"; empty, none kept. Unreadable fails every
 	// read of it, as a locked keychain does.

@@ -100,6 +100,9 @@ type file struct {
 func (s *Store) Read(ctx context.Context) (devices.Book, devices.Head, error) {
 	book, sum, err := s.book()
 	if err != nil {
+		if head, ok := s.past(); ok {
+			return devices.Book{Devices: []devices.Device{}}, head, nil
+		}
 		return devices.Book{}, devices.Head{}, err
 	}
 	anchored, err := s.anchored(ctx, book.Generation, sum)
@@ -191,10 +194,7 @@ func (s *Store) Change(ctx context.Context, edit func(*devices.Book) error) erro
 	defer release()
 	kept, anchored, err := s.Read(ctx)
 	if err != nil {
-		if !s.unheld() {
-			return err
-		}
-		kept, anchored = devices.Book{Devices: []devices.Device{}}, s.heldHead()
+		return err
 	}
 	next, err := devices.Next(kept, anchored, edit)
 	if err != nil {
@@ -219,16 +219,11 @@ func (s *Store) Change(ctx context.Context, edit func(*devices.Book) error) erro
 	return nil
 }
 
-func (s *Store) unheld() bool {
-	// value: the engine holds no head it may trust: the next change starts
-	// from an empty book whatever the file holds, unreadable included.
+func (s *Store) past() (devices.Head, bool) {
+	// value: the engine past its wait reads a book it cannot read as an
+	// empty one under the head it holds: it trusts nothing of it, and the
+	// next change starts from an empty book and writes past the file.
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	return s.sole && s.hold.State == devices.Unheld
-}
-
-func (s *Store) heldHead() devices.Head {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	return s.hold.Head
+	return s.hold.Head, s.sole && s.hold.State != devices.Awaiting
 }
