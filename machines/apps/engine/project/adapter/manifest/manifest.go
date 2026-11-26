@@ -76,21 +76,74 @@ func in[T any](root string, act func() (T, error)) (T, error) {
 	return platform.WithProjectRoot(root, act)
 }
 
-func load(root string) (*spwnproject.Project, error) {
+// invariant: the declaration is walked, one name at a time and no link
+// followed, before any of it is read: the root module's loaders read by
+// path, so a link there would bring an outside file into what a harness
+// renders, and a FIFO would hold the read. root itself may be a link.
+func (p Projects) declared(root string) error {
+	for _, rel := range project.Declaration() {
+		if err := p.walk(root, rel, rel != "spwn"); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// value: nil when rel and every name under it is a file or a folder, a
+// file alone when file; else the first that is not, named from root.
+func (p Projects) walk(root, rel string, file bool) error {
+	e, err := p.under.Lstat(root, rel)
+	switch {
+	case errors.Is(err, fs.ErrNotExist):
+		return nil
+	case err != nil:
+		return unwritten(root, rel, err)
+	case e.Mode&fs.ModeSymlink != 0:
+		return &project.Unwritten{Path: rel, Err: project.ErrLink}
+	case e.Mode.IsRegular():
+		return nil
+	case file || !e.Mode.IsDir():
+		return &project.Unwritten{Path: rel, Err: project.ErrNotAFile}
+	}
+	f, err := p.under.Open(root, rel)
+	if err != nil {
+		return unwritten(root, rel, err)
+	}
+	names, err := f.Names()
+	f.Close()
+	if err != nil {
+		return unwritten(root, rel, err)
+	}
+	for _, name := range names {
+		if err := p.walk(root, rel+"/"+name, false); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (p Projects) load(root string) (*spwnproject.Project, error) {
+	if err := p.declared(root); err != nil {
+		return nil, err
+	}
 	return spwnproject.Load(filepath.Join(root, project.ManifestName))
 }
 
 func (p Projects) Find(_ context.Context, folder string) (string, error) {
-	return in("", func() (string, error) {
-		found, err := spwnproject.Find(folder)
-		if err != nil {
-			return "", err
+	// invariant: the root is the nearest folder from folder up whose
+	// spwn.yaml is there as anything but a folder; a link there is found,
+	// so that its project is refused rather than one further up.
+	for dir := filepath.Clean(folder); ; dir = filepath.Dir(dir) {
+		if e, err := p.under.Lstat(dir, project.ManifestName); err == nil && !e.Mode.IsDir() {
+			if err := p.declared(dir); err != nil {
+				return "", err
+			}
+			return dir, nil
 		}
-		if found == nil {
+		if filepath.Dir(dir) == dir {
 			return "", project.ErrNotFound
 		}
-		return found.Root, nil
-	})
+	}
 }
 
 func shown(found *spwnproject.Project) project.Project {
@@ -106,7 +159,7 @@ func shown(found *spwnproject.Project) project.Project {
 
 func (p Projects) Show(_ context.Context, root string) (project.Project, error) {
 	return in(root, func() (project.Project, error) {
-		found, err := load(root)
+		found, err := p.load(root)
 		if err != nil {
 			return project.Project{}, err
 		}
@@ -182,7 +235,7 @@ func (p Projects) Create(_ context.Context, folder, name, harness, example strin
 		} else if err := spwnproject.Init(root, spwnproject.InitOpts{Name: name, Backend: "spwn:" + harness}); err != nil {
 			return project.Project{}, err
 		}
-		found, err := load(root)
+		found, err := p.load(root)
 		if err != nil {
 			return project.Project{}, err
 		}
@@ -205,7 +258,7 @@ func issueOf(i spwnproject.Issue, src string) project.Issue {
 
 func (p Projects) Plan(_ context.Context, root string) (project.Plan, error) {
 	return in(root, func() (project.Plan, error) {
-		found, err := load(root)
+		found, err := p.load(root)
 		if err != nil {
 			return project.Plan{}, err
 		}
@@ -222,7 +275,7 @@ func (p Projects) Plan(_ context.Context, root string) (project.Plan, error) {
 
 func (p Projects) Drift(_ context.Context, root string) (project.Drift, error) {
 	return in(root, func() (project.Drift, error) {
-		found, err := load(root)
+		found, err := p.load(root)
 		if err != nil {
 			return project.Drift{}, err
 		}
@@ -280,6 +333,9 @@ func (p Projects) Render(_ context.Context, root, agent string) ([]project.File,
 	// invariant: an agent is rendered in the first grouping that holds it;
 	// one that no grouping holds renders nothing.
 	return in(root, func() ([]project.File, error) {
+		if err := p.declared(root); err != nil {
+			return nil, err
+		}
 		src, err := source.Load(root)
 		if err != nil {
 			return nil, err

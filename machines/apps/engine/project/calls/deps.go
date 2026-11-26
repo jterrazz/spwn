@@ -29,10 +29,13 @@ const (
 	// value: a plan that finds an error: the leaf refuses once the plan is
 	// printed, so the owner reads every issue.
 	Invalid fail.Code = "project.invalid"
-	// value: a link where an apply reaches, on a folder of a run folder's
-	// path or on its record: refused before anything is written, never
-	// followed.
+	// value: a link where a call reaches: in the declaration, on a folder
+	// of a run folder's path or on its record; refused before anything is
+	// read or written through it, never followed.
 	LinkInTheWay fail.Code = "project.link-in-the-way"
+	// value: a name of the declaration that is neither a file nor a folder,
+	// a FIFO say: refused before any of the declaration is read.
+	NotAFile fail.Code = "project.not-a-file"
 	// value: a change apply could not make, a folder in a rendered file's
 	// way say: it stops there, recording what it wrote before.
 	NotWritten fail.Code = "project.not-written"
@@ -47,6 +50,8 @@ func coded(err error, subject string) error {
 		return nil
 	case errors.As(err, &at) && errors.Is(at.Err, project.ErrLink):
 		return fail.New(fail.Refused, LinkInTheWay, at.Path, nil)
+	case errors.As(err, &at) && errors.Is(at.Err, project.ErrNotAFile):
+		return fail.New(fail.Refused, NotAFile, at.Path, nil)
 	case errors.As(err, &at):
 		return fail.New(fail.Refused, NotWritten, at.Path, nil)
 	case errors.Is(err, project.ErrNotFound):

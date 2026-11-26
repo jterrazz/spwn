@@ -26,6 +26,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/machines"
 	machinescalls "github.com/jterrazz/studio-station/apps/engine/machines/calls"
 	"github.com/jterrazz/studio-station/apps/engine/ports"
+	"github.com/jterrazz/studio-station/apps/engine/project"
 	projectcalls "github.com/jterrazz/studio-station/apps/engine/project/calls"
 	settingscalls "github.com/jterrazz/studio-station/apps/engine/settings/calls"
 	skillscalls "github.com/jterrazz/studio-station/apps/engine/skills/calls"
@@ -597,7 +598,13 @@ func Codes() map[fail.Code]Wording {
 			return "the project at " + e.Subject + " has " + n + noun, "fix each one above, then station project plan"
 		},
 		projectcalls.LinkInTheWay: func(e *fail.Error) (string, string) {
+			if project.Declared(e.Subject) {
+				return e.Subject + " is a link: a project's declaration is never read through one", "put the file it points to there instead, then station project plan"
+			}
 			return e.Subject + " is a link: apply never follows one", "remove the link, then station project apply"
+		},
+		projectcalls.NotAFile: func(e *fail.Error) (string, string) {
+			return e.Subject + " is neither a file nor a folder: a project's declaration holds only those", "move it away, then station project plan"
 		},
 		projectcalls.NotWritten: func(e *fail.Error) (string, string) {
 			return e.Subject + " could not be written; what apply wrote before it is recorded", "make room for it, then station project apply"

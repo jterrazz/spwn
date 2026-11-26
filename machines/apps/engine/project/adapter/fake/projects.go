@@ -46,11 +46,39 @@ func (p *Projects) state(root string) (project.State, error) {
 	return s, nil
 }
 
+// value: the project at root as a read of its declaration finds it,
+// refused as the real disk refuses it when a name of the declaration is a
+// link or neither a file nor a folder.
+func (p *Projects) read(root string) (project.State, error) {
+	s, err := p.state(root)
+	if err != nil {
+		return s, err
+	}
+	return s, declared(s)
+}
+
+func declared(s project.State) error {
+	for _, at := range slices.Sorted(maps.Keys(s.Disk)) {
+		if project.Declared(at) && s.Disk[at].Link {
+			return &project.Unwritten{Path: at, Err: project.ErrLink}
+		}
+	}
+	for _, at := range s.Irregular {
+		if project.Declared(at) {
+			return &project.Unwritten{Path: at, Err: project.ErrNotAFile}
+		}
+	}
+	return nil
+}
+
 func (p *Projects) Find(_ context.Context, folder string) (string, error) {
 	p.w.Lock()
 	defer p.w.Unlock()
 	for dir := filepath.Clean(folder); ; dir = filepath.Dir(dir) {
-		if _, ok := p.kept()[dir]; ok {
+		if s, ok := p.kept()[dir]; ok {
+			if err := declared(s); err != nil {
+				return "", err
+			}
 			return dir, nil
 		}
 		if filepath.Dir(dir) == dir {
@@ -62,7 +90,7 @@ func (p *Projects) Find(_ context.Context, folder string) (string, error) {
 func (p *Projects) Show(_ context.Context, root string) (project.Project, error) {
 	p.w.Lock()
 	defer p.w.Unlock()
-	s, err := p.state(root)
+	s, err := p.read(root)
 	return s.Project, err
 }
 
@@ -106,7 +134,7 @@ func (p *Projects) Create(_ context.Context, folder, name, _, example string) (p
 func (p *Projects) Plan(_ context.Context, root string) (project.Plan, error) {
 	p.w.Lock()
 	defer p.w.Unlock()
-	s, err := p.state(root)
+	s, err := p.read(root)
 	if err != nil {
 		return project.Plan{}, err
 	}
@@ -116,7 +144,7 @@ func (p *Projects) Plan(_ context.Context, root string) (project.Plan, error) {
 func (p *Projects) Drift(_ context.Context, root string) (project.Drift, error) {
 	p.w.Lock()
 	defer p.w.Unlock()
-	s, err := p.state(root)
+	s, err := p.read(root)
 	if err != nil {
 		return project.Drift{}, err
 	}
@@ -126,7 +154,7 @@ func (p *Projects) Drift(_ context.Context, root string) (project.Drift, error) 
 func (p *Projects) Render(_ context.Context, root, agent string) ([]project.File, error) {
 	p.w.Lock()
 	defer p.w.Unlock()
-	s, err := p.state(root)
+	s, err := p.read(root)
 	if err != nil {
 		return nil, err
 	}

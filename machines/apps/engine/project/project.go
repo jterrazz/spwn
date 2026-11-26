@@ -77,8 +77,12 @@ type State struct {
 	Drift   []Issue `json:",omitempty"`
 	// value: what each agent's harness renders, by agent.
 	Rendered map[string][]File `json:",omitempty"`
-	// value: what the run folders hold, by path from the root.
+	// value: what the run folders and the declaration hold, by path from
+	// the root, beyond what the declaration's own events say.
 	Disk map[string]File `json:",omitempty"`
+	// value: the paths from the root that hold neither a file, a folder
+	// nor a link: a FIFO, a device.
+	Irregular []string `json:",omitempty"`
 	// invariant: what apply last wrote, as Digest gives it.
 	Record Record `json:",omitempty"`
 }

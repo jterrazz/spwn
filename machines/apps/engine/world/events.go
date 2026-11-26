@@ -74,7 +74,7 @@ func events() []event {
 		{"agent", []string{"<mac>", "served|held", "[<pid>]", "[<executable>]", "[<label>]"}, agentSocket},
 		{"admin", []string{"on|off"}, admin},
 		{"release", []string{"<tag>", "[no-asset]"}, releaseTag},
-		{"project", []string{"<root>", "[error|warning|info|drift|render|edit|link]", "[<agent>|<path>]", "[<path>|<message>|<content>|<target>]", "[<content>|hint:]", "[<hint>]"}, declareProject},
+		{"project", []string{"<root>", "[error|warning|info|drift|render|edit|link|fifo]", "[<agent>|<path>]", "[<path>|<message>|<content>|<target>]", "[<content>|hint:]", "[<hint>]"}, declareProject},
 	}
 }
 
@@ -701,7 +701,7 @@ func declareProject(w *World, args []string) error {
 		kept.Project = project.Project{Name: filepath.Base(root), Root: root, Manifest: filepath.Join(root, project.ManifestName)}
 	}
 	if len(args) > 1 {
-		if len(args) < 4 && args[1] != "edit" {
+		if len(args) < 3 || len(args) < 4 && args[1] != "edit" && args[1] != "fifo" {
 			return fmt.Errorf("project %s takes a level, a path and a message", root)
 		}
 		said, hint := args[3:], []string(nil)
@@ -716,13 +716,15 @@ func declareProject(w *World, args []string) error {
 			editRunFolder(&kept, args[2], args[3:])
 		case args[1] == "link":
 			linkRunFolder(&kept, args[2], args[3])
+		case args[1] == "fifo":
+			kept.Irregular = append(kept.Irregular, args[2])
 		case args[1] == "drift":
 			issue.Level, issue.Source = project.Error, project.SourceLockfile
 			kept.Drift = append(kept.Drift, issue)
 		case slices.Contains(project.Level("").Enum(), args[1]):
 			kept.Issues = append(kept.Issues, issue)
 		default:
-			return fmt.Errorf("project takes error, warning, info, drift, render, edit or link, not %q", args[1])
+			return fmt.Errorf("project takes error, warning, info, drift, render, edit, link or fifo, not %q", args[1])
 		}
 	}
 	s.Projects[root] = kept
@@ -761,8 +763,9 @@ func editRunFolder(kept *project.State, path string, content []string) {
 }
 
 // invariant: link <path> <target> is the owner, or a repository cloned,
-// putting a link at that path from the project's root: a folder of a run
-// folder's path or the record, which apply refuses to follow.
+// putting a link at that path from the project's root: a name of the
+// declaration, a folder of a run folder's path or the record, which a
+// project refuses to follow. fifo <path> puts a FIFO there.
 func linkRunFolder(kept *project.State, path, target string) {
 	if kept.Disk == nil {
 		kept.Disk = map[string]project.File{}

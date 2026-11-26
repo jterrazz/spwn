@@ -2,6 +2,7 @@ package catalog_test
 
 import (
 	"io/fs"
+	"path"
 	"slices"
 	"testing"
 
@@ -48,6 +49,30 @@ func TestTheSeveranceExampleShipsItsKnowledge(t *testing.T) {
 		if _, err := fs.Stat(files, p); err != nil {
 			t.Errorf("missing %s: %v", p, err)
 		}
+	}
+}
+
+func filesAndFolders(t *testing.T, files fs.FS, dir string) {
+	t.Helper()
+	entries, err := fs.ReadDir(files, dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, e := range entries {
+		at := path.Join(dir, e.Name())
+		switch {
+		case e.IsDir():
+			filesAndFolders(t, files, at)
+		case !e.Type().IsRegular():
+			t.Errorf("%s is %v; an example holds files and folders only", at, e.Type())
+		}
+	}
+}
+
+func TestAnExampleHoldsNoLinkAsItIsEmbedded(t *testing.T) {
+	for _, name := range catalog.Examples() {
+		files, _ := catalog.Example(name)
+		filesAndFolders(t, files, ".")
 	}
 }
 

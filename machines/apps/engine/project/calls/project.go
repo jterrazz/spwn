@@ -24,7 +24,7 @@ type ShowIn struct {
 
 var Show = call.Call[Deps, ShowIn, project.Project]{
 	Name: "project.show", Where: call.InProcess, Applies: machine.Anywhere,
-	Errors: []fail.Code{NotFound},
+	Errors: []fail.Code{NotFound, LinkInTheWay, NotAFile},
 	Run: func(ctx context.Context, d Deps, in ShowIn, _ call.Progress) (project.Project, error) {
 		root, err := d.Projects.Find(ctx, in.Folder)
 		if err != nil {
@@ -91,7 +91,7 @@ var Plan = call.Call[Deps, PlanIn, project.Plan]{
 	// first; it changes nothing, and a plan with an error is refused by the
 	// surface that prints it.
 	Name: "project.plan", Where: call.InProcess, Applies: machine.Anywhere,
-	Errors: []fail.Code{NotFound, Invalid, LinkInTheWay},
+	Errors: []fail.Code{NotFound, Invalid, LinkInTheWay, NotAFile},
 	Run: func(ctx context.Context, d Deps, in PlanIn, _ call.Progress) (project.Plan, error) {
 		root, err := d.Projects.Find(ctx, in.Folder)
 		if err != nil {
@@ -114,7 +114,7 @@ var Drift = call.Call[Deps, DriftIn, project.Drift]{
 	// value: how what was installed for the project differs from what it
 	// declares; a row refuses nothing.
 	Name: "project.drift", Where: call.InProcess, Applies: machine.Anywhere,
-	Errors: []fail.Code{NotFound},
+	Errors: []fail.Code{NotFound, LinkInTheWay, NotAFile},
 	Run: func(ctx context.Context, d Deps, in DriftIn, _ call.Progress) (project.Drift, error) {
 		root, err := d.Projects.Find(ctx, in.Folder)
 		if err != nil {

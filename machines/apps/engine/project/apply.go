@@ -81,11 +81,30 @@ var (
 	// value: a link, or a file with another name, where apply reaches: on a
 	// folder of a run folder's path, on the record, or at a file it reads.
 	ErrLink = errors.New("is a link, which apply never follows")
+	// value: a name of the declaration that is neither a file nor a folder,
+	// a FIFO or a device say, which a read could wait on forever.
+	ErrNotAFile = errors.New("is neither a file nor a folder")
 )
 
+func Declaration() []string {
+	// value: the files and the folder a project is declared in, from its
+	// root; everything else at the root is the owner's.
+	return []string{ManifestName, "spwn.lock", "spwn"}
+}
+
+func Declared(p string) bool {
+	// value: p, a slash path from the root, is the declaration or under it.
+	for _, d := range Declaration() {
+		if p == d || strings.HasPrefix(p, d+"/") {
+			return true
+		}
+	}
+	return false
+}
+
 type Unwritten struct {
-	// value: the path from the project's root an apply cannot reach, read
-	// or write, and why.
+	// value: the path from the project's root a call cannot reach, read or
+	// write, and why.
 	Path string
 	Err  error
 }
