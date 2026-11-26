@@ -794,6 +794,7 @@ func rules() []rule {
 		{"FixArgsAreInputsConfirm", ruleFixArgsAreInputs, "apps/engine/overview/mutant_confirm.go", "package overview\n\nimport \"" + module + "/core/finding\"\n\nvar mutantDelete = finding.Fix{Call: \"machines.delete\", Args: map[string]string{\"VM\": \"linux-1\"}}\n", "apps/engine/overview/mutant_confirm.go"},
 		{"FixIsAGesture", ruleFixIsAGesture, "apps/engine/overview/mutant_gesture.go", "package overview\n\nimport \"" + module + "/core/finding\"\n\nvar mutantSaid = finding.Fix{Command: \"sudo rm /x\"}\n", "apps/engine/overview/mutant_gesture.go"},
 		{"OneBackgroundJob", ruleOneBackgroundJob, "apps/engine/wire/mutant_job.go", "package wire\n\nimport \"" + module + "/background/contract\"\n\nvar mutantAgentJob = contract.JobSpec{Label: \"com.jterrazz.station.agent\", Program: []string{\"station\", \"machines\", \"agent\"}}\n", "apps/engine/wire/mutant_job.go"},
+		{"ApprovalsOwned", ruleApprovalsOwned, "apps/engine/engine/process/mutant_mdns.go", "package process\n\nconst mutantGroup = \"224.0.0.251:5353\"\n", "apps/engine/engine/process/mutant_mdns.go"},
 		{"Registries", ruleRegistries, "apps/engine/pages/apps/mutant_registries.go", "package apps\n\nvar mutantRegistry = map[string]int{}\n\nfunc init() { mutantRegistry[\"x\"] = 1 }\n", "apps/engine/pages/apps/mutant_registries.go"},
 	}
 }
