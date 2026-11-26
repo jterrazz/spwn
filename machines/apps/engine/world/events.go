@@ -37,6 +37,7 @@ func events() []event {
 		{"offline", []string{"<mac>"}, offline(true)},
 		{"online", []string{"<mac>"}, offline(false)},
 		{"engine-crash", []string{"<mac>"}, engineCrash},
+		{"knock", []string{"<mac>", "<from-mac>"}, knock},
 		{"engine-log", []string{"<mac>", "<line>"}, writeEngineLog},
 		{"crash", []string{"<vm>"}, ended(machines.RunEnd{Reason: machines.Crashed, ExitCode: 1})},
 		{"poweroff-inside", []string{"<vm>"}, ended(machines.RunEnd{Reason: machines.GuestPoweroff})},
@@ -188,6 +189,18 @@ func offline(off bool) func(w *World, args []string) error {
 		m.Offline = off
 		return nil
 	}
+}
+
+func knock(w *World, args []string) error {
+	// invariant: a knock changes nothing of the world: the second Mac's
+	// device key knocks at the first's door, and what the door says is the
+	// door's own line, played beside the world by its run.
+	for _, mac := range args {
+		if _, err := w.known(mac); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // invariant: the engine's job manager starts a crashed engine again: the

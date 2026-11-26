@@ -1,0 +1,13 @@
+description: 'a device never added is refused at the door, this Mac''s and another Mac''s alike'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'world knock macbook-pro mac-mini'
+      exit: 0
+      stdout: |
+          door: refused SHA256:BoS4yciLAuSqrxlufZLEPNDAgryOX/2NniX6/wFZYoY: not in the device book
+    - command: 'world knock mac-mini macbook-pro'
+      exit: 0
+      stdout: |
+          door: refused SHA256:p6ujsfeY+BbEFHPXRJeDMYee6VC5+03g3B1aOP9LT4g: not in the device book
