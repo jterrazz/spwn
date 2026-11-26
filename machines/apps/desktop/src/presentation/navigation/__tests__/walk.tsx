@@ -71,8 +71,9 @@ function nameOf(route: Route): string {
     return route.page === 'machine' ? `${route.machine} ${route.tab}` : route.page;
 }
 
-// value: every line of every page and tab of one world that carries a command, the old name, a config path or a bare verb.
-export async function commandsDrawnOver(world: string): Promise<string[]> {
+type Read = (route: Route, text: string, primaries: number) => string[];
+
+async function walkOver(world: string, read: Read): Promise<string[]> {
     const recording = EVERY_WORLD.get(world);
     if (recording === undefined) {
         throw new Error(`${world} is not loaded`);
@@ -85,10 +86,28 @@ export async function commandsDrawnOver(world: string): Promise<string[]> {
                 <Window initial={route} pages={PAGES} />
             </EngineProvider>
         );
+        let primaries = 0;
         const result = await component.render(ui, async () => {
             await settled(stage);
+            primaries = [...document.querySelectorAll('button')].filter((one) =>
+                one.className.includes('primary'),
+            ).length;
         });
-        found.push(...findingsIn(result.tree.text).map((line) => `${nameOf(route)} | ${line}`));
+        found.push(...read(route, result.tree.text, primaries));
     }
     return [...new Set(found)];
+}
+
+// value: every line of every page and tab of one world that carries a command, the old name, a config path or a bare verb.
+export async function commandsDrawnOver(world: string): Promise<string[]> {
+    return await walkOver(world, (route, text) =>
+        findingsIn(text).map((line) => `${nameOf(route)} | ${line}`),
+    );
+}
+
+// value: every page and tab of one world that draws more than one white primary button once its exchanges have played.
+export async function primariesDrawnOver(world: string): Promise<string[]> {
+    return await walkOver(world, (route, _text, primaries) =>
+        primaries > 1 ? [`${nameOf(route)} | ${String(primaries)} primary buttons`] : [],
+    );
 }

@@ -10,17 +10,28 @@ const PRESENTATION = join(import.meta.dirname, '..', '..');
 
 const SCALES = ['text', 'radius', 'space', 'motion'] as const;
 
-function stylesUnder(dir: string): string[] {
-    return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+type Sheet = { path: string; source: string };
+
+function sheetsUnder(dir: string): Sheet[] {
+    return readdirSync(dir, { withFileTypes: true }).flatMap((entry): Sheet[] => {
         const path = join(dir, entry.name);
         if (entry.isDirectory()) {
-            return stylesUnder(path);
+            return sheetsUnder(path);
         }
-        return path.endsWith('.css') ? [readFileSync(path, 'utf8')] : [];
+        return path.endsWith('.css') ? [{ path, source: readFileSync(path, 'utf8') }] : [];
     });
 }
 
-const STYLES = stylesUnder(PRESENTATION).join('\n');
+const SHEETS = sheetsUnder(PRESENTATION);
+
+const STYLES = SHEETS.map(({ source }) => source).join('\n');
+
+function sheetsDrawing(token: string): string[] {
+    const drawn = new RegExp(String.raw`var\(--${token}[,)]`, 'u');
+    return SHEETS.filter(({ source }) => drawn.test(source))
+        .map(({ path }) => path.slice(PRESENTATION.length + 1))
+        .toSorted();
+}
 
 function scaleNames(source: string, around: 'declared' | 'drawn'): Set<string> {
     const name = `--(?:${SCALES.join('|')})-[a-z0-9-]+`;
@@ -122,6 +133,82 @@ describe('contrast', () => {
 
         // Then - each holds the bar of text
         expect(below(TEXT_BAR, labels)).toStrictEqual([]);
+    });
+
+    test('the destroy button draws its label in --on-bad, on its fill and while disabled', () => {
+        // Given - the destroy rules of the button's style sheet
+        const button = readFileSync(join(import.meta.dirname, '..', 'button.module.css'), 'utf8');
+        const colours = [
+            ...button.matchAll(/\.destroy(?::disabled)? \{[^}]*?\bcolor: (?<colour>[^;]+);/gu),
+        ].map((each) => each.groups?.colour);
+
+        // Then - both rules set the dark label the contrast table measures
+        expect(colours).toStrictEqual(['var(--on-bad)', 'var(--on-bad)']);
+    });
+
+    test('orange is drawn by the style sheets that carry a focus, a need, a warning or the disk running out, and no other', () => {
+        // Given - every style sheet that draws --you
+        const orange = sheetsDrawing('you');
+
+        // Then - the closed list: a new sheet that draws the owner's colour is a deliberate edit of this one
+        expect(orange).toStrictEqual([
+            'features/disk/disk.module.css',
+            'kit/login-sheet.module.css',
+            'navigation/column.module.css',
+            'navigation/path-bar.module.css',
+            'screens/catalog/item.module.css',
+            'screens/machine-files/machine-files.module.css',
+            'screens/machine/overview/overview.module.css',
+            'screens/machine/packages/packages.module.css',
+            'screens/machine/storage/machine-storage.module.css',
+            'screens/passwords/passwords.module.css',
+            'ui/bar.module.css',
+            'ui/chart.module.css',
+            'ui/document.css',
+            'ui/dot-strip.module.css',
+            'ui/fleet-board.module.css',
+            'ui/fleet-register.module.css',
+            'ui/form-field.module.css',
+            'ui/guide.module.css',
+            'ui/illustrations/illustration.module.css',
+            'ui/nav-item.module.css',
+            'ui/search-field.module.css',
+            'ui/state-dot.module.css',
+            'ui/state-pill.module.css',
+            'ui/state-sign.module.css',
+            'ui/switch.module.css',
+            'ui/tile.module.css',
+            'ui/value.module.css',
+        ]);
+    });
+
+    test('blue is drawn by the style sheets of a busy mark, a progress line or a running step, and no other', () => {
+        // Given - every style sheet that draws --busy
+        const blue = sheetsDrawing('busy');
+
+        // Then - the closed list: no focus, link, selection or identity is blue
+        expect(blue).toStrictEqual([
+            'screens/core/core.module.css',
+            'ui/bar.module.css',
+            'ui/chart.module.css',
+            'ui/dot-strip.module.css',
+            'ui/fleet-board.module.css',
+            'ui/fleet-register.module.css',
+            'ui/progress-line.module.css',
+            'ui/state-dot.module.css',
+            'ui/state-pill.module.css',
+            'ui/state-sign.module.css',
+            'ui/tile.module.css',
+            'ui/value.module.css',
+        ]);
+    });
+
+    test('the retired amber, blue and orange tokens are drawn by no style sheet', () => {
+        // Given - the old warn, new and accent tokens
+        const retired = ['warn', 'new', 'accent'].flatMap((token) => sheetsDrawing(token));
+
+        // Then - none remains
+        expect(retired).toStrictEqual([]);
     });
 
     test('a control one step above its surface differs from it by 1.06:1 at least, the path bar to its Find box included', () => {

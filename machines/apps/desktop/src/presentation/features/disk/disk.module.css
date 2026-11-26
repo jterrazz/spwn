@@ -106,7 +106,11 @@
     font-variant-numeric: tabular-nums;
 }
 .free .swatch {
-    background: var(--s3);
+    background: none;
+    box-shadow: inset 0 0 0 1.5px var(--t3);
+}
+.free.low .swatch {
+    box-shadow: inset 0 0 0 1.5px var(--you);
 }
 .swatch {
     display: inline-block;

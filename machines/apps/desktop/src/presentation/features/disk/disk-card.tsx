@@ -9,7 +9,7 @@ import type { ButtonVariant } from '../../ui/button';
 import { Button, Panel, ShareBar } from '../../ui/index';
 import type { SharePart } from '../../ui/index';
 import { DISK_PENDING_WORD, DISK_TITLE } from '../../words/words';
-import { kindPartsOf, listedOf } from './disk';
+import { isLow, kindPartsOf, listedOf } from './disk';
 import type { Part } from './disk';
 import { FreeAllButton, Freed, useFreeAll, useFreeImageCache } from './disk-gestures';
 import type { DiskGesture } from './disk-gestures';
@@ -34,10 +34,12 @@ function DiskBar({
     parts,
     total,
     label,
+    low,
 }: {
     parts: readonly Part[];
     total: number;
     label: string;
+    low: boolean;
 }) {
     const drawn = parts.filter((part) => part.bytes > 0);
     if (total <= 0 || drawn.length === 0) {
@@ -45,16 +47,16 @@ function DiskBar({
     }
     const said = parts.map((part) => `${part.label} ${bytes(part.bytes)}`).join(SEPARATOR);
     const held: SharePart[] = drawn.map((part) => ({
-        identity: part.rest ? undefined : part.identity,
         key: part.key,
         label: `${part.label}${SEPARATOR}${bytes(part.bytes)}`,
         rest: part.rest,
         size: part.bytes,
+        step: part.step,
     }));
-    return <ShareBar label={`${label}: ${said}`} of={total} parts={held} />;
+    return <ShareBar label={`${label}: ${said}`} low={low} of={total} parts={held} />;
 }
 
-function Legend({ parts }: { parts: readonly Part[] }) {
+function Legend({ parts, low }: { parts: readonly Part[]; low: boolean }) {
     if (parts.length === 0) {
         return null;
     }
@@ -62,8 +64,8 @@ function Legend({ parts }: { parts: readonly Part[] }) {
         <ul aria-label="The parts" className={styles.legend}>
             {parts.map((part) => (
                 <li
-                    className={part.rest ? styles.free : undefined}
-                    data-identity={part.rest ? undefined : part.identity}
+                    className={part.rest ? `${styles.free} ${low ? styles.low : ''}` : undefined}
+                    data-step={part.step}
                     key={part.key}
                 >
                     <i className={styles.swatch} />
@@ -146,8 +148,13 @@ function DiskPanel({ reading, name, sub, gestures, leads }: DiskPanelProps) {
                 </Button>
             </div>
             {sub === undefined ? null : <p className={styles.sub}>{sub}</p>}
-            <DiskBar label={`What holds the disk of ${name}`} parts={parts} total={reading.Total} />
-            <Legend parts={parts} />
+            <DiskBar
+                label={`What holds the disk of ${name}`}
+                low={isLow(reading)}
+                parts={parts}
+                total={reading.Total}
+            />
+            <Legend low={isLow(reading)} parts={parts} />
             {unused === undefined ? null : (
                 <UnusedFoot
                     canFree={unused}
