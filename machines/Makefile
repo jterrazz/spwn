@@ -190,8 +190,8 @@ deprovision: ## Remove the binary from ~/.local/bin; the user data stays
 	fi
 
 generate: ## Regenerate the catalog's projections, and on Linux the window's recordings
-	@go run ./apps/engine/cmd/generate
-	@printf "$(GREEN)●$(RESET) Regenerated skills/studio-toolbelt/SKILL.md, docs/reference/footprint.md, packages/api/schemas/station.package.v1.json, packages/api/schemas/station.machinefile.v1.json, apps/engine/remote/api/calls.json, packages/api, the page fixtures, the story worlds' pages and the recorded menubar stream and the window's bundled agents\n"
+	@go run -tags catalog_yaml ./apps/engine/cmd/generate
+	@printf "$(GREEN)●$(RESET) Regenerated apps/engine/catalog/builtin_table.go, skills/studio-toolbelt/SKILL.md, docs/reference/footprint.md, packages/api/schemas/station.package.v1.json, packages/api/schemas/station.machinefile.v1.json, apps/engine/remote/api/calls.json, packages/api, the page fixtures, the story worlds' pages and the recorded menubar stream and the window's bundled agents\n"
 	@if $(SDK_PROBE) >/dev/null 2>&1; then \
 		mkdir -p .artifacts/menubar; \
 		STATION_UPDATE_INDEX=1 swift test --package-path apps/menubar --scratch-path .artifacts/menubar/build --filter StoryCoverageTests > .artifacts/menubar/index.log 2>&1 \

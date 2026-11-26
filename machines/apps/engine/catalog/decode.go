@@ -82,6 +82,7 @@ func Decode(file string, body []byte) (Package, error) {
 // this station reads; then one document, no anchor, alias, merge key nor
 // YAML 1.1 scalar, and every key known.
 func strict(file string, body []byte, f format, v any) (*yaml.Node, error) {
+	decodes.Add(1)
 	var root yaml.Node
 	dec := yaml.NewDecoder(bytes.NewReader(body))
 	if err := dec.Decode(&root); err != nil {

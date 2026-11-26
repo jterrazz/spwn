@@ -190,10 +190,13 @@ func TestVocabularyLegacyEncodings(t *testing.T) {
 
 func splitText(s string) string { return strings.Join(splitWords(s), " ") }
 
+// invariant: a generated file says the words of what it is generated from,
+// which are judged there: the compiled catalog's are its package files',
+// read by catalogTexts.
 func sourceTexts(w *world) []corpusText {
 	var out []corpusText
 	for _, f := range w.files {
-		if f.test {
+		if f.test || ast.IsGenerated(f.syntax) {
 			continue
 		}
 		// invariant: a file cgo rewrote is read from the build cache, in the
