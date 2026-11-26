@@ -17,9 +17,12 @@ require (
 	go.yaml.in/yaml/v3 v3.0.5
 	golang.org/x/crypto v0.59.0
 	golang.org/x/sys v0.50.0
-	spwn.sh/packages/activity v0.0.0
 	spwn.sh/packages/agent v0.0.0
+	spwn.sh/packages/automation v0.0.0
 	spwn.sh/packages/platform v0.0.0
+	spwn.sh/packages/project v0.0.0
+	spwn.sh/packages/runtimes v0.0.0
+	spwn.sh/packages/transpile v0.0.0
 )
 
 require (
@@ -86,7 +89,7 @@ require (
 	github.com/fatih/color v1.19.0 // indirect
 	github.com/fatih/structtag v1.2.0 // indirect
 	github.com/firefart/nonamedreturns v1.0.8 // indirect
-	github.com/fsnotify/fsnotify v1.9.0 // indirect
+	github.com/fsnotify/fsnotify v1.10.1 // indirect
 	github.com/fzipp/gocyclo v0.6.0 // indirect
 	github.com/ghostiam/protogetter v1.0.1 // indirect
 	github.com/go-critic/go-critic v0.15.0 // indirect
@@ -182,6 +185,7 @@ require (
 	github.com/quasilyte/stdinfo v0.0.0-20220114132959-f7386bf02567 // indirect
 	github.com/raeperd/recvcheck v0.3.1 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
+	github.com/robfig/cron/v3 v3.0.1 // indirect
 	github.com/rogpeppe/go-internal v1.16.0 // indirect
 	github.com/ryancurrah/gomodguard v1.4.1 // indirect
 	github.com/ryancurrah/gomodguard/v2 v2.1.3 // indirect
@@ -238,6 +242,8 @@ require (
 	honnef.co/go/tools v0.8.2 // indirect
 	mvdan.cc/gofumpt v0.12.0 // indirect
 	mvdan.cc/unparam v0.0.0-20260823230713-2fa3d841b0c8 // indirect
+	spwn.sh/packages/activity v0.0.0 // indirect
+	spwn.sh/packages/dependency v0.0.0 // indirect
 )
 
 tool (
@@ -249,5 +255,10 @@ replace (
 	github.com/jterrazz/studio-station/catalog => ../../catalog
 	spwn.sh/packages/activity => ../../../packages/activity
 	spwn.sh/packages/agent => ../../../packages/agent
+	spwn.sh/packages/automation => ../../../packages/automation
+	spwn.sh/packages/dependency => ../../../packages/dependency
 	spwn.sh/packages/platform => ../../../packages/platform
+	spwn.sh/packages/project => ../../../packages/project
+	spwn.sh/packages/runtimes => ../../../packages/runtimes
+	spwn.sh/packages/transpile => ../../../packages/transpile
 )

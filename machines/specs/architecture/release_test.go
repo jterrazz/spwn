@@ -81,6 +81,26 @@ func TestTheBinaryLinksNoDockerClient(t *testing.T) {
 	}
 }
 
+// value: whether a package is the root's built-in catalog or the adapter that
+// embeds its generated copy.
+func rootCatalog(pkg string) bool {
+	return strings.HasPrefix(pkg, "spwn.sh/packages/dependency/builtin") || strings.HasPrefix(pkg, "spwn.sh/packages/dependency/internal/adapters/spwn")
+}
+
+// invariant: the binary every machine runs embeds no root catalog: that copy
+// of /catalog is made by a generator no Machines build runs, so a binary that
+// linked it would fail to build in a fresh checkout.
+func TestTheBinaryEmbedsNoRootCatalog(t *testing.T) {
+	for _, goos := range []string{"darwin", "linux"} {
+		if got := slices.DeleteFunc(linkedFor(t, "", goos), func(p string) bool { return !rootCatalog(p) }); len(got) > 0 {
+			t.Errorf("the %s binary links %v: the root's built-in catalog embeds a generated copy", goos, got)
+		}
+	}
+	if !rootCatalog("spwn.sh/packages/dependency/builtin") || !rootCatalog("spwn.sh/packages/dependency/internal/adapters/spwn") || rootCatalog("spwn.sh/packages/dependency") || rootCatalog("spwn.sh/packages/dependency/tool") {
+		t.Error("the catalog rule does not tell the root's built-in catalog from the lockfile's package")
+	}
+}
+
 // invariant: ARCHITECTURE 6.3: the spec build wires every family's fake
 // instead of its real adapters, so a fake no build links is a family whose
 // real tools a use case would run.
