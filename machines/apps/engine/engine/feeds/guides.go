@@ -8,19 +8,23 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/machines"
 )
 
-// value: every act the engines of the fleet guide, each as its Guide: This
-// Mac's board and the copy of every other Mac's, the call engine.guides answers.
-const ViewGuides = "engine.guides"
+const (
+	// value: every act the engines of the fleet guide, each as its Guide:
+	// This Mac's board and the copy of every other Mac's, the call
+	// engine.guides answers.
+	ViewGuides = "engine.guides"
+)
 
-// value: the act families a Guide is projected for; the calls that name one
-// and these are one list (rule guides).
-func GuidedFamilies() []string { return []string{machines.GuideCreate} }
+func GuidedFamilies() []string {
+	// value: the act families a Guide is projected for; the calls that name
+	// one and these are one list (rule guides).
+	return []string{machines.GuideCreate}
+}
 
-// value: the projection of an act family, by the family a call's Guide
-// names; false for a family no projection knows.
 func Guided(family string) (func(a guide.Act, vm *machines.VM) guide.Guide, bool) {
-	switch family {
-	case machines.GuideCreate:
+	// value: the projection of an act family, by the family a call's Guide
+	// names; false for a family no projection knows.
+	if family == machines.GuideCreate {
 		return machines.CreateGuide, true
 	}
 	return nil, false

@@ -8,8 +8,9 @@ import (
 )
 
 func statuses(a guide.Act) []guide.Status {
-	var out []guide.Status
-	for _, s := range guide.Rail(a) {
+	rail := guide.Rail(a)
+	out := make([]guide.Status, 0, len(rail))
+	for _, s := range rail {
 		out = append(out, s.Status)
 	}
 	return out

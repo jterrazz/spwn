@@ -6,9 +6,11 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/guide"
 )
 
-// value: the act family of a create: a VM made, its image built first when
-// it is missing, its id `machines.create:<name>`.
-const GuideCreate = "machines.create"
+const (
+	// value: the act family of a create: a VM made, its image built first
+	// when it is missing, its id `machines.create:<name>`.
+	GuideCreate = "machines.create"
+)
 
 func (s BirthStep) Label() string {
 	switch s {

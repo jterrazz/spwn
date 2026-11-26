@@ -11,13 +11,15 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/machines"
 )
 
-// value: how long an act that ended stays on the board, so a window that
-// was hidden still reads how it ended.
-const ActLinger = 10 * time.Minute
+const (
+	// value: how long an act that ended stays on the board, so a window
+	// that was hidden still reads how it ended.
+	ActLinger = 10 * time.Minute
+)
 
-// value: the board's one file, read and written whole; a file never
-// written reads as no bytes.
 type ActFile interface {
+	// value: the board's one file, read and written whole; a file never
+	// written reads as no bytes.
 	Read() ([]byte, error)
 	Write(data []byte) error
 }

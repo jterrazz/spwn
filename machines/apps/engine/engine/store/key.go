@@ -21,7 +21,7 @@ const (
 	FamilyRecords  Family = "records"
 	FamilyVault    Family = "vault"
 	FamilyNode     Family = "node"
-	// value: the acts the engine guides on a Mac (engine/acts), written by
+	// value: the acts the engine guides on a Mac (process.Acts), written by
 	// its board, never by a reader.
 	FamilyActs Family = "acts"
 )

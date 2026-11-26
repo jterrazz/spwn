@@ -132,9 +132,11 @@ func (p Picture) Word() string {
 
 type ProgressKind string
 
-// value: how far a step is: its last live line; a measure is added only
-// where the engine measures one.
-const Live ProgressKind = "live"
+const (
+	// value: how far a step is: its last live line; a measure is added only
+	// where the engine measures one.
+	Live ProgressKind = "live"
+)
 
 func (ProgressKind) Enum() []string { return []string{string(Live)} }
 

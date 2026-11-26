@@ -187,7 +187,8 @@ func (m machine) engineDeps() enginecalls.Deps {
 		},
 		Guided: func(ctx context.Context) (guide.Guides, error) {
 			var out guide.Guides
-			return out, m.engineAPI().do(ctx, enginecalls.Guides.Name, struct{}{}, &out)
+			err := m.engineAPI().do(ctx, enginecalls.Guides.Name, struct{}{}, &out)
+			return out, err
 		},
 	}
 	if m.world != nil {

@@ -388,7 +388,7 @@ func (r *Router) Guide(target machine.Ref, name string) string {
 	// value: the act family a call run on this machine is guided as, by
 	// this binary's registry; none for a call at another machine.
 	h, ok := r.registry.Lookup(name)
-	if !ok || !(r.local(target) || target.Name == r.thisMac.Ref.Name) {
+	if !ok || (!r.local(target) && target.Name != r.thisMac.Ref.Name) {
 		return ""
 	}
 	return h.Meta().Guide

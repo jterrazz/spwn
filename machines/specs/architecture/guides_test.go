@@ -66,8 +66,9 @@ func TestEveryGuidedCallHasItsProjection(t *testing.T) {
 
 // value: the quoted names of a TypeScript array or union, in order.
 func quoted(src string) []string {
-	var out []string
-	for _, m := range regexp.MustCompile(`'([a-z0-9-]+)'`).FindAllStringSubmatch(src, -1) {
+	found := regexp.MustCompile(`'([a-z0-9-]+)'`).FindAllStringSubmatch(src, -1)
+	out := make([]string, 0, len(found))
+	for _, m := range found {
 		out = append(out, m[1])
 	}
 	return out
@@ -146,14 +147,21 @@ func TestEveryStepOfACreateIsReachedInAStory(t *testing.T) {
 	// of a create's own rail stands reached (done, now, waiting or failed)
 	// in some story of engine.guides.
 	root := filepath.Join(repoRoot(t), "specs", "usecases", "engine", "guides")
+	stories, err := os.ReadDir(root)
+	if err != nil || len(stories) == 0 {
+		t.Fatalf("guides: no story of engine.guides under %s", root)
+	}
 	var told strings.Builder
-	_ = filepath.WalkDir(root, func(path string, d os.DirEntry, err error) error {
-		if err == nil && !d.IsDir() && strings.HasSuffix(path, ".spec.yaml") {
-			data, _ := os.ReadFile(path)
-			told.Write(data)
+	for _, story := range stories {
+		if !strings.HasSuffix(story.Name(), ".spec.yaml") {
+			continue
 		}
-		return nil
-	})
+		data, err := os.ReadFile(filepath.Join(root, story.Name()))
+		if err != nil {
+			t.Fatal(err)
+		}
+		told.Write(data)
+	}
 	for _, r := range machines.CreateRail(nil) {
 		reached := regexp.MustCompile(`"id":"` + regexp.QuoteMeta(r.ID) + `","label":"` + regexp.QuoteMeta(r.Label) + `","status":"(done|now|waiting|failed)"`)
 		if !reached.MatchString(told.String()) {

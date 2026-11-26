@@ -212,10 +212,11 @@ type Acts interface {
 	End(id string, ended guide.Ended, failed *call.WireError)
 }
 
-// value: a stream's calls that are the window's door onto an engine: the
-// act family a call is guided as at its target and the board it is kept
-// on, none for a call no Guide follows or that runs at another machine.
 type GuidedCalls interface {
+	// value: a stream's calls that are the window's door onto an engine:
+	// the act family a call is guided as at its target and the board it is
+	// kept on, none for a call no Guide follows or that runs at another
+	// machine.
 	Guide(target machine.Ref, name string) (string, Acts)
 }
 
