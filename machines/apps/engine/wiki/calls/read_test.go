@@ -84,6 +84,22 @@ func TestAnUnchangedCorpusIsServedFromMemoryAndAChangedOneIsReadAnew(t *testing.
 	wg.Wait()
 }
 
+func TestTheMapAndTheReadOfAnUnchangedCorpusCompileItOnce(t *testing.T) {
+	c := &counted{files: map[string]string{"wiki.yaml": yaml, "blueprint/a.md": "# A\n", "blueprint/b.md": "# B\n"}}
+	handlers := calls.All(calls.Deps{Corpus: c})
+	for range 2 {
+		if err := read(t, handlers[0], "blueprint/a"); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := handlers[1].Invoke(context.Background(), localMac(), []byte(`{"Open":"blueprint/b"}`), nil); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if c.reads != 1 {
+		t.Fatalf("two reads and two maps of one corpus read its files %d times; want once", c.reads)
+	}
+}
+
 func TestEachWayACorpusFailsToReadIsCoded(t *testing.T) {
 	for _, c := range []struct {
 		refusal error
@@ -93,13 +109,15 @@ func TestEachWayACorpusFailsToReadIsCoded(t *testing.T) {
 		{&wiki.TooLarge{Pages: 2001}, calls.TooLarge},
 		{&contract.Unreadable{Path: "blueprint/secret.md", Err: errors.New("openat blueprint/secret.md: path escapes from parent")}, calls.Unreadable},
 	} {
-		h := calls.All(calls.Deps{Corpus: &counted{refusal: c.refusal}})[0]
-		var e *fail.Error
-		if err := read(t, h, ""); !errors.As(err, &e) || e.Code != c.code {
-			t.Errorf("%v reads as %v; want %s", c.refusal, err, c.code)
-		}
-		if c.code == calls.Unreadable && (e.Subject != "blueprint/secret.md" || e.Detail["path"] != "blueprint/secret.md") {
-			t.Errorf("the refusal names %q; want the path inside the wiki", e.Subject)
+		for _, h := range calls.All(calls.Deps{Corpus: &counted{refusal: c.refusal}}) {
+			var e *fail.Error
+			if _, err := h.Invoke(context.Background(), localMac(), []byte(`{}`), nil); !errors.As(err, &e) || e.Code != c.code {
+				t.Errorf("%s: %v reads as %v; want %s", h.Meta().Name, c.refusal, err, c.code)
+				continue
+			}
+			if c.code == calls.Unreadable && (e.Subject != "blueprint/secret.md" || e.Detail["path"] != "blueprint/secret.md") {
+				t.Errorf("%s: the refusal names %q; want the path inside the wiki", h.Meta().Name, e.Subject)
+			}
 		}
 	}
 }
