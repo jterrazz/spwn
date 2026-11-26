@@ -1,4 +1,4 @@
-description: 'an accounts list with an old key, a bad program or a clash is refused at its line'
+description: 'an accounts list with an old key, a bad program, a clash or a grant-only signin is refused'
 env: two-macs
 runs:
     - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
@@ -38,7 +38,7 @@ runs:
     - command: 'machinefile explain'
       exit: 2
       stderr: |
-          Error: ~/.config/station/machinefiles/macbook-pro.machine.yaml:4: grants names "figma", none of gh, npm, claude, wrangler
+          Error: ~/.config/station/machinefiles/macbook-pro.machine.yaml:4: grants names "figma", none of gh, npm, claude, wrangler, codex
           Hint: fix that line: Machines never rewrites a Machinefile
     - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
       stdin: |
@@ -51,7 +51,7 @@ runs:
     - command: 'machinefile explain'
       exit: 2
       stderr: |
-          Error: ~/.config/station/machinefiles/macbook-pro.machine.yaml:4: signins names "", none of gh, npm, claude, wrangler
+          Error: ~/.config/station/machinefiles/macbook-pro.machine.yaml:4: signins names "", none of gh, npm, claude, wrangler, codex
           Hint: fix that line: Machines never rewrites a Machinefile
     - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
       stdin: |
@@ -79,4 +79,17 @@ runs:
       exit: 2
       stderr: |
           Error: ~/.config/station/machinefiles/macbook-pro.machine.yaml:4: gh is both signed in and granted: a machine signed in to a program is not granted it
+          Hint: fix that line: Machines never rewrites a Machinefile
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          accounts:
+              signins: [codex]
+      exit: 0
+    - command: 'machinefile explain'
+      exit: 2
+      stderr: |
+          Error: ~/.config/station/machinefiles/macbook-pro.machine.yaml:4: codex signs in only by a grant: list it under grants
           Hint: fix that line: Machines never rewrites a Machinefile

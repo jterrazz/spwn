@@ -1,0 +1,11 @@
+description: 'A program Machines signs in only by a grant is refused before anything runs'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.error) | .error | {code, field, subject, message, hint}'''
+      stdin: |
+          {"v":2,"id":"1","watch":"accounts.login","in":{"Program":"codex"}}
+      exit: 0
+      stdout: |
+          {"code":"login.by-grant","field":null,"subject":"codex","message":"Codex is signed in only by a password granted from its Mac","hint":"keep its key with station accounts add codex, then grant it with station accounts grant"}

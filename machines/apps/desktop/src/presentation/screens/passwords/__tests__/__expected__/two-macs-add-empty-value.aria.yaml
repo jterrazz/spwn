@@ -23,6 +23,7 @@
       - button "npm" [pressed]
       - button "Claude"
       - button "Cloudflare"
+      - button "Codex"
   - region "Kind":
     - text: Kind
     - group "Kind":

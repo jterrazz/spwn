@@ -100,25 +100,30 @@ func envFile(d catalog.Delivery) string {
 // invariant: a token reaches a VM on the guest's stdin, never in its
 // command line: into the program's own store by its own line, or into an
 // environment file of mode 0600 the zsh block sources.
-func injectLine(d catalog.Delivery) string {
-	if d.Env == "" {
+func injectLine(d catalog.Delivery, kind accounts.KeyKind) string {
+	if len(d.Env) == 0 {
 		return d.Inject
 	}
-	return `umask 077; mkdir -p "$HOME/` + catalog.GrantsDir + `"; IFS= read -r t; printf "export ` + d.Env + `='%s'\n" "$t" > ` + envFile(d) + `.station && mv ` + envFile(d) + `.station ` + envFile(d)
+	return `umask 077; mkdir -p "$HOME/` + catalog.GrantsDir + `"; IFS= read -r t; printf "export ` + d.EnvOf(string(kind)) + `='%s'\n" "$t" > ` + envFile(d) + `.station && mv ` + envFile(d) + `.station ` + envFile(d)
 }
 
 func removeLine(d catalog.Delivery) string {
-	if d.Env == "" {
+	if len(d.Env) == 0 {
 		return d.Remove
 	}
 	return `rm -f ` + envFile(d)
 }
 
-func deliverable(d catalog.Delivery, value []byte) bool {
+// invariant: an environment-file program takes a token only of a kind it
+// names a variable for, so no line exports an empty name.
+func deliverable(d catalog.Delivery, kind accounts.KeyKind, value []byte) bool {
 	if len(value) == 0 || strings.ContainsAny(string(value), "\n\r\x00") {
 		return false
 	}
-	return d.Env == "" || !strings.Contains(string(value), "'")
+	if len(d.Env) == 0 {
+		return true
+	}
+	return d.EnvOf(string(kind)) != "" && !strings.Contains(string(value), "'")
 }
 
 func (k *Kept) takeBack(ctx context.Context, program accounts.Program, vm string) error {
@@ -216,10 +221,10 @@ func (g *Grants) Add(ctx context.Context, in contract.GrantIn) (accounts.Granted
 		return accounts.Granted{}, accounts.Refusal(fail.Failed, accounts.GrantNoPresence, in.Entry)
 	}
 	value, err := g.k.keys.Get(ctx, keyOf(e.ID))
-	if err != nil || !deliverable(d, value) {
+	if err != nil || !deliverable(d, e.Kind, value) {
 		return accounts.Granted{}, accounts.Refusal(fail.Failed, accounts.GrantCannotDeliver, in.To)
 	}
-	code, err := g.k.d.Guest.GuestExec(ctx, in.To, injectLine(d), string(value)+"\n")
+	code, err := g.k.d.Guest.GuestExec(ctx, in.To, injectLine(d, e.Kind), string(value)+"\n")
 	if err != nil || code != 0 {
 		return accounts.Granted{}, accounts.Refusal(fail.Failed, accounts.GrantCannotDeliver, in.To)
 	}

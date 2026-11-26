@@ -49,6 +49,11 @@
       "Detail": "claude",
       "Tone": "plain"
     },
+    "codex": {
+      "Word": "Codex",
+      "Detail": "codex",
+      "Tone": "plain"
+    },
     "gh": {
       "Word": "GitHub",
       "Detail": "gh",
@@ -716,6 +721,11 @@
     },
     "login.busy": {
       "Word": "busy",
+      "Detail": "login",
+      "Tone": "plain"
+    },
+    "login.by-grant": {
+      "Word": "by grant",
       "Detail": "login",
       "Tone": "plain"
     },

@@ -15,11 +15,11 @@
 
 ## What is built
 
-This page is the target. Reading who is signed in (`accounts.list`), the redaction of what is read, the list's pages, the login relay, `accounts.logout`, the vault calls, grants to a machine, and the presence check are built. A sign-in's token is taken into the vault for `gh` alone. The Machinefile's `signins` and `grants` are built too: a workspace's first start grants each program of `grants` from this Mac's one password for it and leaves each program of `signins` it is not signed in to with its `station accounts login` command ([the Machinefile's keys](machinefiles.md#the-keys)). A share made before this is never taken back: none had reached a real VM ([ADR-049](../decisions/049-a-vm-signs-itself-in-the-vault-grants-the-rest.md)).The Passwords page is not built yet.
+This page is the target. Reading who is signed in (`accounts.list`), the redaction of what is read, the list's pages, the login relay, `accounts.logout`, the vault calls, grants to a machine, and the presence check are built. A sign-in's token is taken into the vault for `gh` alone, and `codex` is signed in by a grant alone. The Machinefile's `signins` and `grants` are built too: a workspace's first start grants each program of `grants` from this Mac's one password for it and leaves each program of `signins` it is not signed in to with its `station accounts login` command ([the Machinefile's keys](machinefiles.md#the-keys)). A share made before this is never taken back: none had reached a real VM ([ADR-049](../decisions/049-a-vm-signs-itself-in-the-vault-grants-the-rest.md)).The Passwords page is not built yet.
 
 ## Three concepts
 
-- **Sign-in**: a program's login on one machine, done by the program itself. The catalog owns how each program is read, logged in and logged out (`apps/engine/catalog/accounts.go`); a Machinefile names only which programs a machine signs in to.
+- **Sign-in**: a program's login on one machine, done by the program itself. The catalog owns how each program is read, logged in and logged out (`apps/engine/catalog/accounts.go`); a Machinefile names only which programs a machine signs in to. A program the catalog gives no login, `codex`, is signed in only by a grant: Machines reads it and signs it out, and its row offers no sign-in, saying to grant it a password on a workspace and to run its own login on a Mac.
 - **Vault entry**: one secret on the owner's Mac, with a label, the program it is for, what kind it is and who it signs in as.
 - **Grant**: an entry given to a machine, until it is removed.
 
@@ -50,7 +50,7 @@ Each entry `vault.list` answers says what its removal ends, so the confirmation 
 The Add a password sheet reads one watched call, `vault.new`, of This Mac's engine (a server or a workspace is refused as not for this machine). It answers the `Intro` ("It is kept in <mac>'s Keychain; you can then grant it to a machine."), the `Captures` and the typed way's `Programs`; the sheet words nothing itself. A password enters in one of two ways:
 
 - **From a sign-in** done on This Mac, whose token goes to the vault: the token the program's own command prints (`gh auth token`), read from its output and never shown. Only `gh` has such a command, so `Captures` holds one row per program this Mac is signed in to that has one. A row names the program, who it is, its scopes, the kind the token is kept as (`oauth-token` for `gh`), a sentence that says so ("Kept as an OAuth token, the kind gh holds") and the label proposed for it ("GitHub · you"). With no row, `CaptureLine` says to sign in first, and the way stays on the sheet. The kind is the engine's: `vault.add` from a sign-in derives it and ignores the one sent, and any other program is refused `vault.cannot-capture`.
-- **Typed**, as a value, of a kind the program takes. `Programs` lists every program in the catalog's order with the `Kinds` a typed password of it may be and the one offered first: `gh` a fine-grained token or a token, `npm` and `wrangler` a token or a fine-grained token, `claude` an OAuth token. A typed password sends its kind; a request schema never requires a key, so `vault.add` refuses a typed one without it as `call.bad-input`. The value travels as a write-only value, never in an argument list ([ADR-009](../decisions/009-one-bootstrap-verb-and-no-values-in-argv.md)); a native secure prompt asks for it where one can be drawn, and the window's password input is the last fallback, never reaching state, a log or a recording. Whether a native prompt can be drawn is open ([ADR](../decisions/049-a-vm-signs-itself-in-the-vault-grants-the-rest.md)).
+- **Typed**, as a value, of a kind the program takes. `Programs` lists every program in the catalog's order with the `Kinds` a typed password of it may be and the one offered first: `gh` a fine-grained token or a token, `npm` and `wrangler` a token or a fine-grained token, `claude` an OAuth token or an API key, `codex` an API key. A typed password sends its kind; a request schema never requires a key, so `vault.add` refuses a typed one without it as `call.bad-input`. The value travels as a write-only value, never in an argument list ([ADR-009](../decisions/009-one-bootstrap-verb-and-no-values-in-argv.md)); a native secure prompt asks for it where one can be drawn, and the window's password input is the last fallback, never reaching state, a log or a recording. Whether a native prompt can be drawn is open ([ADR](../decisions/049-a-vm-signs-itself-in-the-vault-grants-the-rest.md)).
 
 A blank label is refused `vault.empty-label`, and a typed password with no value `vault.empty-value`; both carry `Field`.
 
@@ -60,9 +60,11 @@ Each grant asks for Touch ID first, the engine's own `LAContext` with Machines' 
 
 A grant gives one entry to one machine. It has no end of its own: the owner decided on 2026-11-14 that no timing logic expires an account, so a grant stays until `grants.remove`, the removal of its password or the deletion of its VM. Granting again replaces it.
 
-- **It arrives** over stdin, never an argument: a login with the token for `gh`, a `~/.npmrc` line (mode 0600) for npm, an env file under `~/.config/station/grants/` that the shell block sources for Claude and wrangler.
+- **It arrives** over stdin, never an argument: a login with the token for `gh` and for `codex` (`codex login --with-api-key`, into its own `auth.json`), a `~/.npmrc` line (mode 0600) for npm, an env file under `~/.config/station/grants/` that the shell block sources for Claude and wrangler. The variable that file exports is the kind's: `CLAUDE_CODE_OAUTH_TOKEN` for a Claude OAuth token, `ANTHROPIC_API_KEY` for a Claude API key, `CLOUDFLARE_API_TOKEN` for wrangler.
 - **It leaves** at `grants.remove`, or when the VM's guest connects after a removal it could not receive, by the program's own Remove: a logout, or the deletion of the line or file that holds the secret. A program that reads an env file stops in new shells only, and the sentence of `grants.remove` says so.
 - **It is refused**, before anything is read, for a server, a VM of another Mac, a stopped VM, a VM already signed in, and a secret that cannot be delivered. The refusals of `vault.add` carry `Field` (`label` or `value`) so a form marks the input at fault; those of `grants.add` name none.
+
+Each delivery also names the variable that moves its program's own store, its sign-in among it: `GH_CONFIG_DIR`, `NPM_CONFIG_USERCONFIG` (a file), `CLAUDE_CONFIG_DIR`, `CODEX_HOME`, and for wrangler `XDG_CONFIG_HOME`, which moves every XDG program's folder with it. No call reads it yet: it is the mask an agent that is not given the program gets, an empty folder of its own ([ADR-022](../../../docs/decisions/022-an-agent-is-given-apps-its-machine-is-the-wall.md)), and `codex` refuses a `CODEX_HOME` that does not exist, so the folder is made first.
 
 Deleting a VM ends its grants with its disk. It is not a revocation: see below.
 
@@ -74,6 +76,8 @@ A grant's removal undoes it inside the VM; a token stays valid at its provider u
 | ------------------- | ---------------------------------------------------------------------- |
 | A VM's GitHub token | github.com, your account page for developer tokens and authorized apps |
 | The Claude token    | claude.ai, your account page for sessions and tokens                   |
+| A Claude API key    | the Claude Console, its API keys page                                  |
+| A Codex API key     | platform.openai.com, its API keys page                                 |
 
 ## Reading accounts
 
@@ -81,7 +85,7 @@ A grant's removal undoes it inside the VM; a token stays valid at its provider u
 
 ## Windows
 
-A sign-in that no longer works is a Needs-you finding whose fix is the call `accounts.login` with the program as `Program`, run at that machine; it prints as `station accounts login <program> --on <machine>`. The window's Accounts view has a Sign-ins tab per machine, the login sheet, the Passwords page and the grant picker. The menu bar's Accounts page, which lists what needs you first, offers Grant. Their screens are the window's and the menu bar's own; this page owns the words they show. In a terminal, `station accounts logout`, `add`, `grant` and `remove` run the same calls, a typed value asked in a hidden field ([Commands](commands.md#station-accounts)).
+A sign-in that no longer works is a Needs-you finding whose fix is the call `accounts.login` with the program as `Program`, run at that machine; it prints as `station accounts login <program> --on <machine>`. A program signed in only by a grant has no such fix, and `accounts.login` refuses it, `login.by-grant`. The window's Accounts view has a Sign-ins tab per machine, the login sheet, the Passwords page and the grant picker. The menu bar's Accounts page, which lists what needs you first, offers Grant. Their screens are the window's and the menu bar's own; this page owns the words they show. In a terminal, `station accounts logout`, `add`, `grant` and `remove` run the same calls, a typed value asked in a hidden field ([Commands](commands.md#station-accounts)).
 
 ## Related
 

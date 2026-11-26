@@ -81,6 +81,16 @@ func carried(e *fail.Error, generic, advice string) (message, hint string) {
 
 func programLabel(e *fail.Error) string { return accounts.Program(e.Subject).Label() }
 
+// value: the programs Machines signs in for, by their wire names, in the
+// catalog's order, the last after "and".
+func programNames() string {
+	names := make([]string, 0, len(accounts.Programs()))
+	for _, p := range accounts.Programs() {
+		names = append(names, string(p))
+	}
+	return strings.Join(names[:len(names)-1], ", ") + " and " + names[len(names)-1]
+}
+
 func Codes() map[fail.Code]Wording {
 	// invariant: the one table of every error code's words (rule
 	// every-code-worded): a code raised anywhere is worded here once.
@@ -318,7 +328,10 @@ func Codes() map[fail.Code]Wording {
 			return e.Subject + " " + e.Detail["version"] + ": " + e.Detail["method"] + " holds " + cmp.Or(e.Detail["holds"], "only its newest") + ", never " + e.Detail["version"], "ask " + e.Subject + " with no version, or by a method that holds it"
 		},
 		accounts.LoginUnknownProgram: func(e *fail.Error) (string, string) {
-			return "no program named \"" + e.Subject + "\"", "Machines signs in gh, npm, claude and wrangler"
+			return "no program named \"" + e.Subject + "\"", "Machines signs in " + programNames()
+		},
+		accounts.LoginByGrant: func(e *fail.Error) (string, string) {
+			return programLabel(e) + " is signed in only by a password granted from its Mac", "keep its key with station accounts add " + e.Subject + ", then grant it with station accounts grant"
 		},
 		accounts.LoginNotInstalled: func(e *fail.Error) (string, string) {
 			return programLabel(e) + " is not installed here", "install it first: station apps"

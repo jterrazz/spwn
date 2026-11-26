@@ -7,6 +7,8 @@ import (
 const (
 	lineServer  = "A server keeps its own sign-ins"
 	lineStopped = "Start the machine first"
+	lineByGrant = "Grant it a password from its Mac"
+	lineByHand  = "Sign it in with its own login in a terminal"
 )
 
 type TargetFit string

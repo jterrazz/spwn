@@ -12,4 +12,4 @@ runs:
       exit: 2
       stdout: |
           Error: no program named "zz"
-          Hint: Machines signs in gh, npm, claude and wrangler
+          Hint: Machines signs in gh, npm, claude, wrangler and codex

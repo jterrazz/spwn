@@ -270,7 +270,7 @@ describe('workspace', () => {
             async (visitor) => {
                 // When - its rows are read
                 const rows = region('Sign-ins');
-                await visitor.see(within(rows, heading('Sign-ins 4')));
+                await visitor.see(within(rows, heading('Sign-ins 5')));
 
                 // Then - no row offers Sign in, whichever the program
                 await visitor.gone(within(rows, button('Sign in gh')));

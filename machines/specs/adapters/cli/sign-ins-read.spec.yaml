@@ -12,6 +12,7 @@ runs:
           ["npm","signed-in","you",null,"sign-out"]
           ["claude","signed-in","you@example.com","Max plan","sign-out"]
           ["wrangler","signed-out",null,null,"sign-in"]
+          ["codex","signed-out",null,null,"none"]
           gh auth status --hostname github.com
           npm whoami
           claude auth status

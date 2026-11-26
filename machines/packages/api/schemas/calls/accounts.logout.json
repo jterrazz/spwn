@@ -40,7 +40,8 @@
             "gh",
             "npm",
             "claude",
-            "wrangler"
+            "wrangler",
+            "codex"
           ],
           "type": "string"
         },
@@ -85,7 +86,8 @@
             "gh",
             "npm",
             "claude",
-            "wrangler"
+            "wrangler",
+            "codex"
           ],
           "type": "string"
         }

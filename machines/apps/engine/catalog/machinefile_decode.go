@@ -433,6 +433,11 @@ func (a AccountsSpec) Problem() string {
 			}
 		}
 	}
+	for _, p := range LoginPrograms {
+		if len(p.Login) == 0 && slices.Contains(a.SignIns, ProgramName(p.Name)) {
+			return p.Name + " signs in only by a grant: list it under grants"
+		}
+	}
 	for _, n := range a.Grants {
 		if slices.Contains(a.SignIns, n) {
 			return string(n) + " is both signed in and granted: a machine signed in to a program is not granted it"

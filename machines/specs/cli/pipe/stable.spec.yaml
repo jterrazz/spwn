@@ -204,6 +204,7 @@ runs:
           ○	npm	signed out
           ○	claude	signed out
           ○	wrangler	signed out
+          ○	codex	signed out				Sign it in with its own login in a terminal
     - command: 'ports'
       exit: 0
       stdout: |
@@ -237,7 +238,7 @@ runs:
     - command: 'accounts --json | /usr/bin/jq -S -c ''del(.generated_at, .station.version?, .station.commit?) | (.. | objects | select(has("station_version")) | .station_version) |= "V"'''
       exit: 0
       stdout: |
-          {"accounts":[{"label":"GitHub","program":"gh","state":"signed-out"},{"label":"npm","program":"npm","state":"signed-out"},{"label":"Claude","program":"claude","state":"signed-out"},{"label":"Cloudflare","program":"wrangler","state":"signed-out"}],"findings":[],"machine":{"kind":"computer","label":"This Mac","name":"x","on":null,"this_mac":true},"schema":"station.accounts.list/v1"}
+          {"accounts":[{"label":"GitHub","program":"gh","state":"signed-out"},{"label":"npm","program":"npm","state":"signed-out"},{"label":"Claude","program":"claude","state":"signed-out"},{"label":"Cloudflare","program":"wrangler","state":"signed-out"},{"label":"Codex","line":"Sign it in with its own login in a terminal","program":"codex","state":"signed-out"}],"findings":[],"machine":{"kind":"computer","label":"This Mac","name":"x","on":null,"this_mac":true},"schema":"station.accounts.list/v1"}
     - command: 'ports --json | /usr/bin/jq -S -c ''del(.generated_at, .station.version?, .station.commit?) | (.. | objects | select(has("station_version")) | .station_version) |= "V"'''
       exit: 0
       stdout: |

@@ -8,4 +8,4 @@ runs:
           {"v":2,"id":"1","watch":"accounts.login","in":{"Program":"zz"}}
       exit: 0
       stdout: |
-          {"code":"login.unknown-program","field":null,"subject":"zz","message":"no program named \"zz\"","hint":"Machines signs in gh, npm, claude and wrangler"}
+          {"code":"login.unknown-program","field":null,"subject":"zz","message":"no program named \"zz\"","hint":"Machines signs in gh, npm, claude, wrangler and codex"}

@@ -31,9 +31,9 @@
       - text: :7000 server Private macbook-pro.tail1234.ts.net:40002
       - button "Stop sharing"
   - region "Sign-ins":
-    - heading "Sign-ins 4" [level=2]
+    - heading "Sign-ins 5" [level=2]
     - button "All sign-ins"
-    - text: gh signed out npm from the password npm publish signed in claude you@example.com · Max plan · signed in by itself signed in wrangler Refused at the provider needs signing in again
+    - text: gh signed out npm from the password npm publish signed in claude you@example.com · Max plan · signed in by itself signed in wrangler Refused at the provider needs signing in again codex Grant it a password from its Mac signed out
   - region "Why it exists":
     - heading "Why it exists" [level=2]
     - term: Purpose
