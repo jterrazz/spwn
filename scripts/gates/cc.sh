@@ -1,6 +1,8 @@
 #!/bin/bash
 . "$(dirname "$0")/env.sh"
 [ $# -ge 3 ] || { echo "usage: cc.sh <worktree> <base> <label> [vitest filters...]" >&2; exit 2; }
+# invariant: the scripts the loop runs on the VM test CHEAP for non-empty, so this launcher hands them 1 or nothing, never the raw word.
+case ${CHEAP:-} in 1 | true | yes) CHEAP=1; TIER=cheap ;; "" | 0 | false | no) CHEAP=; TIER=heavy ;; *) echo "bad CHEAP=$CHEAP: 1, true or yes runs the cheap tier; 0, false, no or empty runs the heavy tier" >&2; exit 2 ;; esac
 W=$1; BASE=$2; L=$3; shift 3; VM=$VM_LINUX
 case $L in "" | *[!A-Za-z0-9._-]*) echo "bad label: $L"; exit 2 ;; esac
 LOCK=$VM-$L; R='$HOME'/$VM_DIR; RS=$VM_DIR/
@@ -33,7 +35,7 @@ if [ -z "$ATTACH" ]; then
   rm -f $RUN/$L-cc.bundle $RUN/$L-cc.items
   if [ $# -eq 0 ]; then FILTERS="cli usecases adapters"; else FILTERS="$*"; fi
   until $SSHP $VM "rm -f $R/$L-cc.log $R/$L-cc.end; CC_HOME=$R CC_WORK=$VM_RAM CHEAP=$CHEAP ONLY=$ONLY UPD=$UPD PAR=$PAR setsid nohup bash $R/$L-cc-loop.sh $L $B $FILTERS > $R/$L-cc.log 2>&1 < /dev/null & echo launched" | grep -q launched; do fails=$((fails+1)); [ $fails -ge 15 ] && { echo "launch failed on $VM"; exit 91; }; sleep 20; done
-  launched=1; echo "launched $L on $VM $(date +%T): CHEAP=${CHEAP:-0} commits=$(echo ${PICK:-all}) log $R/$L-cc.log"
+  launched=1; echo "launched $L on $VM $(date +%T): tier=$TIER commits=$(echo ${PICK:-all}) log $R/$L-cc.log"
 fi
 launched=1; off=0; fails=0; polls=0
 while :; do

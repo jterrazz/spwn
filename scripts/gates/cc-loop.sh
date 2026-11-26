@@ -3,7 +3,7 @@
 export PATH=$HOME/.local/bin:$PATH
 L=$1; B=$2; shift 2
 R=${CC_HOME:?CC_HOME is the folder of the files}; W=${CC_WORK:?CC_WORK is the folder of the clones}; PAR=${PAR:-$([ -n "$CHEAP" ] && echo 4 || echo 1)}
-items=$R/$L-cc.items; pidf=$R/$L-cc.pid
+items=$R/$L-cc.items; pidf=$R/$L-cc.pid; tier=$([ -n "$CHEAP" ] && echo cheap || echo heavy)
 o=$(cat "$pidf" 2>/dev/null); if [ -n "$o" ] && kill -0 "$o" 2>/dev/null; then echo "refused: $L already runs loop pid $o"; exit 88; fi
 rm -f "$R/$L-cc.end"; echo $$ > "$pidf"
 trap 'kill $(jobs -p) 2>/dev/null; rm -rf "${W:?}/$L-node"; rm -f "$pidf"; echo "END $(date +%T)" > "$R/$L-cc.end"' EXIT
@@ -43,7 +43,7 @@ while [ $emitted -lt $total ]; do
   GREEN) g=$((g+1)) ;;
   *) rd=$((rd+1)) ;;
   esac
-  echo "VERDICT $L $n ${sha:0:9} $v took=$(cat "$f.secs" 2>/dev/null)s"
+  echo "VERDICT $L $n ${sha:0:9} $v took=$(cat "$f.secs" 2>/dev/null)s tier=$tier"
   rm -f "$f.out" "$f.rc" "$f.secs" "$f.blk" "${f}2.out" "${f}2.rc" "${f}2.blk"
   emitted=$((emitted+1))
 done

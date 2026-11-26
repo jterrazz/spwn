@@ -44,10 +44,18 @@ m() { case $1 in *:*) case ${1#*:} in /*) echo "${1#*:}" ;; *) echo "$HOME/${1#*
 dst=${a[${#a[@]}-1]}; unset 'a[${#a[@]}-1]'
 for s in "${a[@]}"; do cp "$(m "$s")" "$(m "$dst")" || exit 1; done
 EOF
-  printf '#!/bin/bash\nexec /bin/sleep 0.2\n' > "$d/bin/sleep"; chmod +x "$d/bin/ssh" "$d/bin/scp" "$d/bin/sleep"
+  printf '#!/bin/bash\nexec /bin/sleep 0.2\n' > "$d/bin/sleep"
+  cat > "$d/bin/df" <<'EOF'
+#!/bin/bash
+for p; do :; done
+case $p in "$HOME"/ram*) k=ram; s=ramfs ;; *) k=disk; s=vda1 ;; esac
+v=$(cat "$HOME/df.$k" 2>/dev/null || echo 10)
+case $* in *--output=pcent*) printf 'Use%%\n %s%%\n' "$v" ;; *--output=source,pcent*) printf 'Filesystem Use%%\n%s %s%%\n' "$s" "$v" ;; *) echo "$s 1G 1G 1G $v% $p" ;; esac
+EOF
+  chmod +x "$d/bin/ssh" "$d/bin/scp" "$d/bin/sleep" "$d/bin/df"
   git init -q -b b "$d/w"; local g=(-c user.name=t -c user.email=t@t); git -C "$d/w" "${g[@]}" commit -q --allow-empty -m c0; git -C "$d/w" "${g[@]}" commit -q --allow-empty -m c1
 }
-in_sb() { local d=$T/$1; shift; ( cd "$d/r/scripts/gates" && HOME=$d/home PATH=$d/bin:$PATH GATE_RUN_DIR=$d/run GATE_VM_LINUX=stubvm GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null "$@" ); }
+in_sb() { local d=$T/$1; shift; ( cd "$d/r/scripts/gates" && HOME=$d/home PATH=$d/bin:$PATH GATE_RUN_DIR=$d/run GATE_VM_LINUX=stubvm GATE_VM_RAM=$d/home/ram GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null "$@" ); }
 dp_case() { local n=$1 want_rc=$2 want=$3; shift 3
   sb "$n"; printf '%s\n' "$@" > "$T/$n/home/dp-stages"
   printf '#!/bin/bash\ncat "$HOME/dp-stages"\n' > "$T/$n/r/scripts/gates/desktop-proof-remote.sh"
@@ -93,5 +101,33 @@ regen_case regen-one-green 0 one 0
 regen_case regen-one-red 3 one 3
 regen_case regen-all-green 0 all 0
 regen_case regen-all-red 1 all 3
+cc_sb() { sb "$1"
+  cat > "$T/$1/r/scripts/gates/cc-remote.sh" <<'EOF'
+#!/bin/bash
+echo "CHEAP-SEEN[$CHEAP]" >> "$HOME/cheap.seen"
+echo "GOFMT[]"; echo VET-OK; echo SPECSVET-OK; echo LINT=$(cat "$HOME/lint.rc" 2>/dev/null || echo 0); echo "CC-DONE $3"
+EOF
+}
+cc_run() { local n=$1; shift; in_sb "$n" timeout 120 "$@" bash cc.sh "$T/$n/w" "$(git -C "$T/$n/w" rev-parse b~1)" lab 2>&1; }
+cheap_case() { local v=$1 want_rc=$2 tier=$3 seen=$4 n=cheap-$1; cc_sb "$n"
+  if [ "$v" = unset ]; then out=$(cc_run "$n" env -u CHEAP); else out=$(cc_run "$n" env CHEAP="$v"); fi; rc=$?
+  [ $rc = "$want_rc" ] || bad "cc.sh CHEAP=$v: exit $rc, wanted $want_rc"
+  case $tier in
+    refused) case $out in *"bad CHEAP=$v"*) ;; *) bad "cc.sh CHEAP=$v: no refusal sentence in: $out" ;; esac; [ ! -e "$T/$n/home/cheap.seen" ] || bad "cc.sh CHEAP=$v: refused but ran" ;;
+    *) case $out in *"launched lab on stubvm"*": tier=$tier commits"*) ;; *) bad "cc.sh CHEAP=$v: launch line has no tier=$tier: $out" ;; esac
+       case $out in *"VERDICT lab 1 "*" tier=$tier"*) ;; *) bad "cc.sh CHEAP=$v: VERDICT line has no tier=$tier" ;; esac
+       [ "$(cat "$T/$n/home/cheap.seen" 2>/dev/null)" = "CHEAP-SEEN[$seen]" ] || bad "cc.sh CHEAP=$v: the loop saw $(cat "$T/$n/home/cheap.seen" 2>/dev/null)" ;;
+  esac
+}
+cheap_case 1 0 cheap 1
+cheap_case true 0 cheap 1
+cheap_case yes 0 cheap 1
+cheap_case 0 0 heavy ""
+cheap_case false 0 heavy ""
+cheap_case no 0 heavy ""
+cheap_case "" 0 heavy ""
+cheap_case unset 0 heavy ""
+cheap_case maybe 2 refused ""
+cheap_case 2 2 refused ""
 [ $fail = 0 ] && echo "gate scripts: ok"
 exit $fail
