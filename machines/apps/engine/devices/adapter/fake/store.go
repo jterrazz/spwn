@@ -144,10 +144,10 @@ func (s *Store) Change(_ context.Context, edit func(*devices.Book) error) error 
 	return nil
 }
 
-// invariant: the start read of the world's engine, taken once in its
-// lifetime and kept in its memory between commands; the next start after
-// a restart takes it again.
 func (s *Store) Sole(context.Context) {
+	// invariant: the start read of the world's engine, taken once in its
+	// lifetime and kept in its memory between commands; the next start
+	// after a restart takes it again.
 	s.w.Lock()
 	defer s.w.Unlock()
 	m := s.w.Mac(s.mac)

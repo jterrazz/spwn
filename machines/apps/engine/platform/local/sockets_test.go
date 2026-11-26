@@ -13,7 +13,7 @@ import (
 
 func TestAUnixSocketIsMode0600InAFolderOfMode0700AndServesItsOwnUserAlone(t *testing.T) {
 	dir := filepath.Join(t.TempDir(), "station")
-	if err := os.MkdirAll(dir, 0o755); err != nil {
+	if err := os.MkdirAll(dir, 0o750); err != nil {
 		t.Fatal(err)
 	}
 	sock := filepath.Join(dir, "engine.sock")

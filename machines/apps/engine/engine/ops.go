@@ -35,8 +35,6 @@ type Hello struct {
 	BookState BookState `json:"book_state,omitempty"`
 }
 
-// value: the words the engine says its book's standing in, the devices
-// family's Standing as it crosses the wire.
 type BookState string
 
 const (

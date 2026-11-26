@@ -147,19 +147,19 @@ func (p planted) addThenForget(t *testing.T, s *devicesjsonfile.Store) {
 
 func TestAVMIsGivenNoKeyOfABookPlantedUnderTheEngine(t *testing.T) {
 	p := bookWithLaptop(t)
-	engine := p.store(lyingPeer{p.forged().Head()})
-	engine.Sole(t.Context())
+	held := p.store(lyingPeer{p.forged().Head()})
+	held.Sole(t.Context())
 	key := &heldKey{}
 	key.once.Do(func() { key.key = p.key })
-	m := machine{profile: coremachine.Profile{Kind: coremachine.Computer, Ref: coremachine.Ref{Name: "mini"}}, stores: &stores{devices: engine}, key: key}
-	if err := engine.Change(t.Context(), func(b *devices.Book) error { b.Devices = append(b.Devices, p.laptop); return nil }); err != nil {
+	m := machine{profile: coremachine.Profile{Kind: coremachine.Computer, Ref: coremachine.Ref{Name: "mini"}}, stores: &stores{devices: held}, key: key}
+	if err := held.Change(t.Context(), func(b *devices.Book) error { b.Devices = append(b.Devices, p.laptop); return nil }); err != nil {
 		t.Fatal(err)
 	}
 	keys := m.pipeKeys()
 	if got := keys(); len(got) != 1 || got[0] != p.laptop.Key {
 		t.Fatalf("the engine's own book gives %q; want laptop's key", got)
 	}
-	if err := engine.Change(t.Context(), func(b *devices.Book) error { b.Forget("laptop"); return nil }); err != nil {
+	if err := held.Change(t.Context(), func(b *devices.Book) error { b.Forget("laptop"); return nil }); err != nil {
 		t.Fatal(err)
 	}
 	p.plant(t)

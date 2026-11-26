@@ -95,7 +95,13 @@ func listenUnix(path string, uid int) (Listener, error) {
 	if err := os.MkdirAll(dir, 0o700); err != nil {
 		return nil, err
 	}
-	if err := os.Chmod(dir, 0o700); err != nil {
+	folder, err := os.Open(dir)
+	if err != nil {
+		return nil, err
+	}
+	err = folder.Chmod(0o700)
+	_ = folder.Close()
+	if err != nil {
 		return nil, err
 	}
 	var l net.Listener
