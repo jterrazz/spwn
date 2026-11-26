@@ -52,33 +52,35 @@ Another machine is reached through the `spwn` on it, never through an OpenSSH th
 
 The grammar above is decided, and built only in part. Today the install puts two programs on the path, and each command exists once, in one of them; as a command moves, it is deleted from the other.
 
-| Program   | Holds today                                                                                                                                                                                      | Grammar                          |
-| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------- |
-| `station` | The Machine space: `machines`, `apps`, `settings`, `disk`, `ports`, `accounts`, `images`, `engine` and the rest of [Machines' commands](../../machines/docs/reference/commands.md), and `agents` | The grammar, apart from the name |
-| `spwn`    | Every other Agent command, as the map below lists them                                                                                                                                           | The old grammar, below           |
+| Program   | Holds today                                                                                                                                                                                                  | Grammar                          |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------- |
+| `station` | The Machine space: `machines`, `apps`, `settings`, `disk`, `ports`, `accounts`, `images`, `engine` and the rest of [Machines' commands](../../machines/docs/reference/commands.md), and `agents` and `teams` | The grammar, apart from the name |
+| `spwn`    | Every other Agent command, as the map below lists them                                                                                                                                                       | The old grammar, below           |
 
-`station help` draws the four groups: Machine and Spwn hold its commands, Agent holds `station agents`, an agent's Mind (its list and detail, `create`, `edit`, `delete`, `fork`, `export`, `import`, `dream`, `sleep`), and OS holds no command yet, so the help does not draw it. The order decided is: the file half first (`agents`, `teams`, `skills`, `automations`, `project`), then the run half (`agents start`, `stop`, `talk`, `log`), then the old `spwn` is deleted and `station` takes the name `spwn`. Until the last step, `spwn` means Agents' program and the names `spwn-agents` and `spwn-machines`, with the shell aliases `agents` and `machines`, are the installer's old names: [ADR-021](../decisions/021-one-program-spwn-one-command-for-everything.md) voids them, and they never ship again once it is built.
+`station help` draws the four groups: Machine and Spwn hold its commands, Agent holds `station agents`, an agent's Mind (its list and detail, `create`, `edit`, `delete`, `fork`, `export`, `import`, `dream`, `sleep`), and `station teams`, the teams declared for you, read only, and OS holds no command yet, so the help does not draw it. The order decided is: the file half first (`agents`, `teams`, `skills`, `automations`, `project`), then the run half (`agents start`, `stop`, `talk`, `log`), then the old `spwn` is deleted and `station` takes the name `spwn`. Until the last step, `spwn` means Agents' program and the names `spwn-agents` and `spwn-machines`, with the shell aliases `agents` and `machines`, are the installer's old names: [ADR-021](../decisions/021-one-program-spwn-one-command-for-everything.md) voids them, and they never ship again once it is built.
 
 ### Where today's Agent commands go
 
 Decided in ADR-021 and ADR-022. A row whose left column is `station` is built, under that name until `station` takes the name `spwn`; every other row is not built until its command is a family of the engine.
 
-| Today                                        | The grammar's form                                                                                       |
-| -------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `spwn init`                                  | `spwn project create`                                                                                    |
-| `spwn check`                                 | `spwn project plan` and `spwn project drift`                                                             |
-| `spwn build`                                 | gone: the world image leaves, and `project apply` renders the project                                    |
-| `spwn up`, `spwn down`, `spwn world *`       | `spwn agents start`, `spwn agents stop`, on a machine (`--on`); the noun `world` goes                    |
-| `spwn agent neo`, `spwn agent talk neo`      | `spwn agents talk neo`                                                                                   |
-| `station agents create\|fork\|dream\|sleep`  | `spwn agents create\|fork\|dream\|sleep`                                                                 |
-| `station agents`, `station agents neo`       | `spwn agents`, `spwn agents neo`                                                                         |
-| `station agents delete neo --confirm=neo`    | `spwn agents delete neo --confirm=neo`                                                                   |
-| `spwn install`, `spwn uninstall`             | gone: `spwn agents edit --app <app>` and `spwn project edit --app <app>`; `install` means onto a machine |
-| `spwn skill *`                               | `spwn skills`                                                                                            |
-| `spwn automation *`                          | `spwn automations`; the engine runs them, so `automation daemon` goes                                    |
-| `spwn gate`, `spwn auth`, `spwn cookie-sync` | `spwn accounts`, the one credential noun with one vault                                                  |
-| `spwn web`                                   | gone: Spwn.app is the one GUI                                                                            |
-| `spwn upgrade`                               | `spwn update`                                                                                            |
+| Today                                        | The grammar's form                                                                                                                         |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `spwn init`                                  | `spwn project create`                                                                                                                      |
+| `spwn check`                                 | `spwn project plan` and `spwn project drift`                                                                                               |
+| `spwn build`                                 | gone: the world image leaves, and `project apply` renders the project                                                                      |
+| `spwn up`, `spwn down`, `spwn world *`       | `spwn agents start`, `spwn agents stop`, on a machine (`--on`); the noun `world` goes                                                      |
+| `spwn agent neo`, `spwn agent talk neo`      | `spwn agents talk neo`                                                                                                                     |
+| `station agents create\|fork\|dream\|sleep`  | `spwn agents create\|fork\|dream\|sleep`                                                                                                   |
+| `station agents`, `station agents neo`       | `spwn agents`, `spwn agents neo`                                                                                                           |
+| `station agents delete neo --confirm=neo`    | `spwn agents delete neo --confirm=neo`                                                                                                     |
+| `spwn install`, `spwn uninstall`             | gone: `spwn agents edit --app <app>` and `spwn project edit --app <app>`; `install` means onto a machine                                   |
+| `spwn skill *`                               | `spwn skills`                                                                                                                              |
+| `spwn team *` (hidden)                       | `station teams` reads; a team is a file, `~/.spwn/teams/<team>.yaml`, and an agent joins it by `station agents edit <agent> --team <team>` |
+| `spwn organization` (hidden)                 | gone                                                                                                                                       |
+| `spwn automation *`                          | `spwn automations`; the engine runs them, so `automation daemon` goes                                                                      |
+| `spwn gate`, `spwn auth`, `spwn cookie-sync` | `spwn accounts`, the one credential noun with one vault                                                                                    |
+| `spwn web`                                   | gone: Spwn.app is the one GUI                                                                                                              |
+| `spwn upgrade`                               | `spwn update`                                                                                                                              |
 
 `spwn project plan` does not check a `spwn:<name>` reference against the built-in catalog: the engine links no copy of it (`packages/dependency/builtin` carries the embedded catalog, and no package the engine links imports it), so such a reference passes the plan unverified, and the check that `spwn check` made, `unknown-builtin-tool`, is lost. `spwn install` still refuses an unknown name until it goes, and the rule that refuses every `spwn:` reference replaces it.
 
