@@ -2392,11 +2392,21 @@ export type MachinesEngineView = {
 };
 
 export type MachinesFirstStart = {
+    Applied?: MachinesFirstStartApp[];
     Drift: string[] | null;
     Failed: string;
     Grants: MachinesFirstStartGrant[] | null;
     SignIns: MachinesFirstStartSignIn[] | null;
     Template: string;
+    Unapplied?: string;
+    Unfinished?: MachinesFirstStartApp[];
+};
+
+export type MachinesFirstStartApp = {
+    App: string;
+    Log?: string;
+    Reason?: string;
+    Setting?: boolean;
 };
 
 export type MachinesFirstStartGrant = {

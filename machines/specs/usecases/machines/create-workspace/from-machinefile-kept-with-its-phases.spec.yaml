@@ -1,0 +1,25 @@
+description: 'a create from a Machinefile is kept with its apply as a phase of its own, after the boot phase'
+fixture: ../../__fixtures__/build/
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'world edit macbook-pro machinefiles/studio-linux.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: studio-linux
+          machine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }
+          extends: [base-ubuntu]
+          vm: { resources: { memory: 4G } }
+          apps: [jq, ripgrep]
+      exit: 0
+    - command: 'images build studio-linux --binary $HOME/station-linux >/dev/null'
+      exit: 0
+    - command: 'machines create --memory 4G web --from studio-linux >/dev/null'
+      exit: 0
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.out.Lines | map(select(.Call == "machines.create-workspace")) | .[] | {Text, Phases: (.Phases | map({Name, Took}))}'''
+      stdin: |
+          {"v":2,"id":"1","call":"journal.kept","in":{}}
+      exit: 0
+      stdout: |
+          {"Text":"web created","Phases":[{"Name":"checks","Took":0},{"Name":"clone","Took":2000000000},{"Name":"boot","Took":0},{"Name":"address","Took":0},{"Name":"reachable","Took":0},{"Name":"machinefile","Took":0},{"Name":"apply","Took":0},{"Name":"ready","Took":0}]}

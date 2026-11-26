@@ -194,11 +194,12 @@ func (f *Installer) runKeys(ctx context.Context, verb string, keys []string, app
 		return err
 	}
 	f.w.Lock()
-	if f.w.Fails("Installer." + verb) {
+	baked := world.IsBaked(ctx)
+	if !baked && f.w.Fails("Installer."+verb) {
 		f.w.Unlock()
 		return errScripted
 	}
-	held := f.w.Holds("Installer." + verb)
+	held := !baked && f.w.Holds("Installer."+verb)
 	for n, k := range keys {
 		if held && n > 0 {
 			break

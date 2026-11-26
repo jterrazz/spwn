@@ -7,6 +7,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/jterrazz/studio-station/apps/engine/machinefile"
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/machines/contract"
 	setupcontract "github.com/jterrazz/studio-station/apps/engine/setup/contract"
@@ -68,6 +69,9 @@ type Options struct {
 	// value: the programs a VM of this Mac is signed in to, as accounts.list
 	// reads it there.
 	SignedIn func(ctx context.Context, vm string) (map[string]bool, error)
+	// value: applies a Machinefile inside a VM of this Mac, as
+	// machinefile.apply does there, off a terminal; nil applies none.
+	Apply func(ctx context.Context, vm, machinefile string) (machinefile.Applied, error)
 	// value: the processes of this Mac, which say whether a create still
 	// runs; nil says none does.
 	Processes contract.Processes
