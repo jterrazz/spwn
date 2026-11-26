@@ -1,11 +1,14 @@
 package manifest
 
 import (
+	"errors"
 	"fmt"
-	"os"
+	"io/fs"
 	"path/filepath"
 
 	"gopkg.in/yaml.v3"
+
+	"spwn.sh/packages/platform"
 )
 
 // FileName is the on-disk name for the agent manifest.
@@ -16,14 +19,17 @@ func Path(agentDir string) string {
 	return filepath.Join(agentDir, FileName)
 }
 
-// Load reads agent.yaml from agentDir. A missing file returns a
-// zero-value Manifest with ok=false so callers can distinguish
+// Load reads agent.yaml from agentDir, through platform.DataFiles, so in
+// a project a link out of it is refused, never read. A missing file
+// returns a zero-value Manifest with ok=false so callers can distinguish
 // "declared but empty" from "never authored".
 func Load(agentDir string) (*Manifest, bool, error) {
 	path := Path(agentDir)
-	data, err := os.ReadFile(path)
+	files := platform.DataFiles()
+	defer files.Close()
+	data, err := files.ReadFile(path)
 	if err != nil {
-		if os.IsNotExist(err) {
+		if errors.Is(err, fs.ErrNotExist) {
 			return &Manifest{}, false, nil
 		}
 		return nil, false, fmt.Errorf("read %s: %w", path, err)
@@ -35,15 +41,18 @@ func Load(agentDir string) (*Manifest, bool, error) {
 	return &m, true, nil
 }
 
-// Save writes m to agentDir/agent.yaml. The caller is responsible
-// for ensuring agentDir exists.
+// Save writes m to agentDir/agent.yaml, through platform.DataFiles, so in
+// a project a link out of it is refused, never written through. The
+// caller is responsible for ensuring agentDir exists.
 func Save(agentDir string, m *Manifest) error {
 	data, err := yaml.Marshal(m)
 	if err != nil {
 		return fmt.Errorf("marshal manifest: %w", err)
 	}
 	path := Path(agentDir)
-	if err := os.WriteFile(path, data, 0o644); err != nil {
+	files := platform.DataFiles()
+	defer files.Close()
+	if err := files.WriteFile(path, data, 0o644); err != nil {
 		return fmt.Errorf("write %s: %w", path, err)
 	}
 	return nil

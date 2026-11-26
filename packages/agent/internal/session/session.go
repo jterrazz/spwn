@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+
+	"spwn.sh/packages/platform"
 )
 
 // Session tracks an agent's conversation state within a world.
@@ -48,7 +50,9 @@ func Load(mindPath, worldID string) (*Session, error) {
 // Save writes a session file to the Mind's journal directory.
 func Save(mindPath string, s *Session) error {
 	dir := filepath.Join(mindPath, "journal")
-	if err := os.MkdirAll(dir, 0755); err != nil {
+	files := platform.DataFiles()
+	defer files.Close()
+	if err := files.MkdirAll(dir, 0755); err != nil {
 		return fmt.Errorf("create journal dir: %w", err)
 	}
 
@@ -58,7 +62,7 @@ func Save(mindPath string, s *Session) error {
 	}
 
 	path := filePath(mindPath, s.WorldID)
-	return os.WriteFile(path, data, 0644)
+	return files.WriteFile(path, data, 0644)
 }
 
 // List returns all session files from the Mind's journal directory.

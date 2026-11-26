@@ -120,68 +120,6 @@ func DeleteTeam(slug string) error {
 	return os.Remove(path)
 }
 
-// TeamMembers returns the names of all agents whose agent.yaml
-// references the given team slug.
-func TeamMembers(teamSlug string) ([]string, error) {
-	agentsDir := platform.AgentsDir()
-	entries, err := os.ReadDir(agentsDir)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return nil, nil
-		}
-		return nil, err
-	}
-	var members []string
-	for _, e := range entries {
-		if !e.IsDir() {
-			continue
-		}
-		manifestPath := filepath.Join(agentsDir, e.Name(), "agent.yaml")
-		data, err := os.ReadFile(manifestPath)
-		if err != nil {
-			continue
-		}
-		var p struct {
-			Team string `yaml:"team"`
-		}
-		if yaml.Unmarshal(data, &p) == nil && p.Team == teamSlug {
-			members = append(members, e.Name())
-		}
-	}
-	return members, nil
-}
-
-// SetAgentTeam updates the agent's agent.yaml to reference the given
-// team slug. An empty slug clears the team assignment.
-func SetAgentTeam(agentName, teamSlug string) error {
-	agentDir := filepath.Join(platform.AgentsDir(), agentName)
-	if _, err := os.Stat(agentDir); os.IsNotExist(err) {
-		return fmt.Errorf("agent %q not found", agentName)
-	}
-	manifestPath := filepath.Join(agentDir, "agent.yaml")
-
-	var m map[string]any
-	data, err := os.ReadFile(manifestPath)
-	if err == nil {
-		_ = yaml.Unmarshal(data, &m)
-	}
-	if m == nil {
-		m = map[string]any{}
-	}
-
-	if teamSlug == "" {
-		delete(m, "team")
-	} else {
-		m["team"] = teamSlug
-	}
-
-	out, err := yaml.Marshal(m)
-	if err != nil {
-		return err
-	}
-	return os.WriteFile(manifestPath, out, 0644)
-}
-
 func writeTeam(path string, t Team) error {
 	data, err := yaml.Marshal(t)
 	if err != nil {

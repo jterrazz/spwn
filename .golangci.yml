@@ -132,10 +132,17 @@ linters:
               path: _test\.go
             # invariant: forbidigo binds the packages that read a project: its loader, the transpiler's source, the
             # dependency packages that read spwn.lock, spwn/tools/ and a tool's files, the architect, which reads
-            # spwn/skills/, spwn/hooks/, spwn/commands/ and the agents' Minds into a world, and the automation engine.
+            # spwn/skills/, spwn/hooks/, spwn/commands/ and the agents' Minds into a world, the automation engine, the agent
+            # package's agent.yaml, journal and session files, and the world-state store under .spwn/world-states.
             - linters:
                   - forbidigo
-              path-except: ^packages/(architect/|automation/|project/|transpile/source/|dependency/(refs/|lockfile\.go|internal/manifest/|internal/adapters/local/))
+              path-except: ^packages/(architect/|automation/|project/|transpile/source/|dependency/(refs/|lockfile\.go|internal/manifest/|internal/adapters/local/)|agent/(manifest\.go|internal/(manifest|journal|session)/)|world/runtimestate/)
+            # outside: not yet rooted: a Mind's journal and session files are read plainly (spwn agent logs, a resumed
+            # session); their writes go through platform.DataFiles.
+            - linters:
+                  - forbidigo
+              path: ^packages/agent/internal/(journal|session)/
+              source: os\.(ReadFile|ReadDir)\(
             # outside: an fs automation watches the host folder the daemon resolved against the project
             # (apps/cli/automation/daemon.go), one outside it only once the user granted it
             # (apps/cli/cliproject/outside.go); the watcher lists names and times there, reading no file's bytes.
@@ -164,7 +171,8 @@ linters:
             - linters:
                   - forbidigo
               path: _test\.go
-            # outside: the organization and team files live in ~/.spwn, the user's own, never in a project.
+            # outside: the organization and teams files live in ~/.spwn, the user's own, never in a project; an agent's
+            # agent.yaml is read and written by team_agents.go, in scope, through platform.DataFiles.
             - linters:
                   - forbidigo
               path: ^packages/project/(organization|team)\.go$

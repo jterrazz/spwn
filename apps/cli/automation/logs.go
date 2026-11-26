@@ -2,8 +2,10 @@ package automation
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"os"
 	"strings"
 	"time"
@@ -11,6 +13,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"spwn.sh/apps/cli/cliproject"
+	"spwn.sh/packages/platform"
 )
 
 var (
@@ -44,13 +47,12 @@ var logsCmd = &cobra.Command{
 		if !logsFollow {
 			return nil
 		}
-		path := receiptsPath(p.Root)
-		f, err := os.Open(path)
+		f, err := openReceipts(p.Root)
 		if err != nil {
-			if !os.IsNotExist(err) {
+			if !errors.Is(err, fs.ErrNotExist) {
 				return err
 			}
-			f, err = waitForFile(path, cmd.Context())
+			f, err = waitForFile(p.Root, cmd.Context())
 			if err != nil {
 				return err
 			}
@@ -100,7 +102,13 @@ func formatReceiptLine(r receiptRow) string {
 	return line
 }
 
-func waitForFile(path string, ctx context.Context) (*os.File, error) {
+func openReceipts(projectRoot string) (*os.File, error) {
+	tree := platform.Within(projectRoot)
+	defer tree.Close()
+	return tree.OpenFile(receiptsPath(projectRoot), os.O_RDONLY, 0)
+}
+
+func waitForFile(projectRoot string, ctx context.Context) (*os.File, error) {
 	t := time.NewTicker(250 * time.Millisecond)
 	defer t.Stop()
 	for {
@@ -108,11 +116,11 @@ func waitForFile(path string, ctx context.Context) (*os.File, error) {
 		case <-ctx.Done():
 			return nil, ctx.Err()
 		case <-t.C:
-			f, err := os.Open(path)
+			f, err := openReceipts(projectRoot)
 			if err == nil {
 				return f, nil
 			}
-			if !os.IsNotExist(err) {
+			if !errors.Is(err, fs.ErrNotExist) {
 				return nil, err
 			}
 		}
