@@ -225,7 +225,7 @@ export function PlanView(props: PlanProps) {
     const { target, name } = props;
     const plan = useRead('machinefile.plan', {}, target);
     return (
-        <Page>
+        <Page density="compact">
             <PlanBody name={name} plan={plan} />
             <PlanBar {...props} />
         </Page>

@@ -53,14 +53,14 @@ export function HomePage({ macs, overview, go, onNewMachine, onAddMac }: HomePro
     const reach = useReach();
     if (reach.kind === 'unanswered' && overview.kind !== 'read') {
         return (
-            <Page>
+            <Page density="comfortable">
                 <Absent reach={reach} />
             </Page>
         );
     }
     if (overview.kind === 'failed') {
         return (
-            <Page>
+            <Page density="comfortable">
                 <Unanswered error={overview.error} size="page" />
             </Page>
         );
@@ -68,7 +68,7 @@ export function HomePage({ macs, overview, go, onNewMachine, onAddMac }: HomePro
     const summary = overview.kind === 'read' ? overview.out.Summary : undefined;
     const thisMac = macs.find((mac) => mac.ThisMac);
     return (
-        <Page>
+        <Page density="comfortable">
             <Head summary={summary} />
             {thisMac ? <HomeTiles mac={thisMac} /> : null}
             <StartHere go={go} macs={macs} onNewMachine={onNewMachine} />

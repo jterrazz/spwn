@@ -178,20 +178,20 @@ export function EnginePage({ macs }: { macs: readonly MachinesMacView[] }) {
     const reach = useReach();
     if (reach.kind === 'unanswered' && macs.length === 0) {
         return (
-            <Page>
+            <Page density="comfortable">
                 <Absent reach={reach} />
             </Page>
         );
     }
     if (macs.length === 0) {
         return (
-            <Page>
+            <Page density="comfortable">
                 <SkeletonHead size="page" what="the Macs" />
             </Page>
         );
     }
     return (
-        <Page>
+        <Page density="comfortable">
             {macs.map((mac) => (
                 <MacSection key={mac.Name} name={mac.Name}>
                     {mac.ThisMac ? <ThisMac mac={mac} /> : <FarEngine mac={mac} />}

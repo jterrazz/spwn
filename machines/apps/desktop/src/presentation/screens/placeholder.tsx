@@ -4,7 +4,7 @@ import { ownState } from '../words/shown';
 
 export function PlaceholderPage({ title }: { title: string }) {
     return (
-        <Page>
+        <Page density="comfortable">
             <Verdict
                 line="It fills in when the window reads the engine's stream"
                 size="page"

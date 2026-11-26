@@ -204,7 +204,7 @@ function Upgrades({
 function Setup({ answers, target, name, asked, onPlan }: Asked & { onPlan: () => void }) {
     const drift = useRead('machinefile.drift', asked);
     return (
-        <Page>
+        <Page density="compact">
             <FileState drift={drift} name={name} />
             {drift.kind === 'read' ? <Differs drift={drift.out} onPlan={onPlan} /> : null}
             <Upgrades answers={answers} drift={drift} name={name} target={target} />

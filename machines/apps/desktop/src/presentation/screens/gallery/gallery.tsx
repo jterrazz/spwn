@@ -55,7 +55,7 @@ function EntryView({ entry }: { entry: Entry }) {
 export default function Gallery({ sample }: { sample: Dependencies }) {
     return (
         <SampleContext value={sample}>
-            <Page>
+            <Page density="comfortable">
                 <Verdict
                     line={`${String(ENTRIES.length)} components, each drawn in its variants and its data states`}
                     size="page"

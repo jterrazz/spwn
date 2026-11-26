@@ -155,7 +155,7 @@ function SettingsShelf({ open }: { open: Open }) {
     const size = useCatalogSize();
     if (settings.kind !== 'read') {
         return (
-            <Page>
+            <Page density="compact">
                 <Waiting reading={settings} what="Settings" />
             </Page>
         );
@@ -164,7 +164,7 @@ function SettingsShelf({ open }: { open: Open }) {
         matrix.kind === 'read' ? (matrix.out.Rows ?? []).map((row) => [row.Name, row]) : [],
     );
     return (
-        <Page>
+        <Page density="compact">
             <Listing
                 carried={
                     matrix.kind === 'read'
@@ -202,7 +202,7 @@ function AppsShelf({ shelf, open }: { shelf: 'apps' | 'skills'; open: Open }) {
     const { title } = SHELVES[shelf];
     if (apps.kind !== 'read') {
         return (
-            <Page>
+            <Page density="compact">
                 <Waiting reading={apps} what={title} />
             </Page>
         );
@@ -211,7 +211,7 @@ function AppsShelf({ shelf, open }: { shelf: 'apps' | 'skills'; open: Open }) {
         matrix.kind === 'read' ? (matrix.out.Rows ?? []).map((row) => [row.Name, row]) : [],
     );
     return (
-        <Page>
+        <Page density="compact">
             <Listing
                 carried={
                     matrix.kind === 'read'
