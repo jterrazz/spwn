@@ -13,9 +13,10 @@ Builds on [ADR-088](088-agents-live-in-the-one-binary-as-families-reached-by-cal
 
 1. **One Render hook.** The contract `Projects.Render(root, agent)` returns an agent's files, each a path, its bytes, its mode and whether it is a link; it writes nothing. Both `project plan` and `project apply` compute their changes from it through one pure function, `project.ChangesOf`, so what a plan lists is what an apply writes.
 2. **The harness is declared.** An agent renders for its own `runtime.backend`, else the project's, else the catalog's first harness; never one picked by a sign-in.
-3. **A record of what was written.** Apply keeps the digest of each file it wrote in `.spwn/applied.json`. A file it wrote and the declaration no longer renders is removed; a file it never wrote is never read nor touched.
+3. **A record of what was written.** Apply keeps the digest of each file it wrote in `.spwn/applied.json`. A file it wrote and the declaration no longer renders is removed; a file it never wrote and that is not rendered is never read nor touched. A file it never wrote at a path it renders is read, and named as changed by hand before it is overwritten, so the same question as decision 4 is asked. The record is a file of the repository, so a path it holds outside an agent's run folder is never read nor removed. An apply stopped by a change it could not make keeps the record of the changes it made, and the next one starts where it stopped.
 4. **A confirmation follows its consequence.** An apply that only adds asks nothing. One that overwrites or removes names each file, a file whose digest is not the record's as changed by hand, and asks once, yes or no; off a terminal and with `--json` it refuses without `--yes`. A plan with an error writes nothing. A second apply writes nothing.
 5. **No image.** Apply builds no image and starts no agent.
+6. **No link is followed.** Apply reaches every path from the project's folder one name at a time, never following a link: a link on a folder of a run folder's path, or on `.spwn/applied.json`, is refused by plan and apply, naming it, before anything is written. A link a harness renders is written as a link, and a link at a rendered file's name is replaced, never written through.
 
 ## Consequences
 
