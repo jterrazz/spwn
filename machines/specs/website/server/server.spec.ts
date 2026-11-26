@@ -27,17 +27,19 @@ describe('server', () => {
                 const health = region('Health');
                 await visitor.see(health);
 
-                // Then - its state, its address, SSH and its check each read their answer
-                await visitor.see(within(health, content('Healthy.', { exact: false })));
-                await visitor.see(within(health, content('healthy')));
+                // Then - its address and SSH each read their answer
                 await visitor.see(within(health, content('192.168.64.5')));
                 await visitor.see(within(health, content('answers')));
-                await visitor.see(within(health, content('passes')));
                 await visitor.see(
                     within(region('Check latency'), content('41 ms', { exact: false })),
                 );
             },
         );
+
+        // And - its verdict, its state and its check are calm, each a mark named by its word
+        expect(result.html.text).toContain('aria-label="Healthy."');
+        expect(result.html.text).toContain('aria-label="healthy"');
+        expect(result.html.text).toContain('aria-label="passes"');
         expect(result.errors.text).toBe('');
     });
 
