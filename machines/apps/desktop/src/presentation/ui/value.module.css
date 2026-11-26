@@ -5,21 +5,21 @@
     min-width: 0;
     max-width: 100%;
     font-family: var(--font-mono);
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
     color: var(--t2);
     white-space: pre;
 }
 .raised {
     background: var(--s2);
-    border-radius: var(--radius-icon);
-    padding: 1px var(--space-6);
+    border-radius: var(--radius-small);
+    padding: 1px var(--space-8);
 }
 .boxed {
     color: var(--t1);
     background: var(--s0);
     box-shadow: inset 0 0 0 1px var(--edge);
     border-radius: var(--radius-control);
-    padding: var(--space-2) 9px;
+    padding: var(--space-4) 9px;
 }
 .toned {
     --tone: var(--t2);
@@ -41,8 +41,8 @@
 .square {
     width: 7px;
     height: 7px;
-    margin-right: var(--space-6);
-    border-radius: var(--radius-tick);
+    margin-right: var(--space-8);
+    border-radius: var(--radius-mark);
     background: var(--c);
     flex: none;
 }

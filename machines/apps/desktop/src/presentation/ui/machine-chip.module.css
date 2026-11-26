@@ -2,14 +2,14 @@
     all: unset;
     cursor: pointer;
     display: inline-flex;
-    gap: var(--space-6);
+    gap: var(--space-8);
     align-items: center;
     padding: 3px 9px 3px var(--space-4);
     border-radius: var(--radius-control);
     background: var(--s3);
     color: var(--t1);
-    font-size: var(--text-label);
-    transition: background var(--motion-hover);
+    font-size: var(--text-meta);
+    transition: background var(--motion-hover) var(--ease);
 }
 .chip:hover {
     background: var(--s3-hover);

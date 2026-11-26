@@ -39,5 +39,5 @@
     padding: 20px var(--space-24) 48px;
     display: flex;
     flex-direction: column;
-    gap: var(--space-14);
+    gap: var(--space-16);
 }

@@ -4,18 +4,18 @@
     align-items: baseline;
     gap: var(--space-8);
     color: var(--t3);
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
     padding: var(--space-8) 0 var(--space-12);
     border-top: 1px dashed var(--edge);
 }
 .mark {
     flex: none;
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
     font-weight: var(--weight-regular);
     letter-spacing: 0;
-    padding: 0 var(--space-6);
+    padding: 0 var(--space-8);
     border: 1px dashed var(--edge);
-    border-radius: var(--radius-hair);
+    border-radius: var(--radius-mark);
     color: var(--t3);
     white-space: nowrap;
 }

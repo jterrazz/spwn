@@ -11,18 +11,18 @@
     min-height: 26px;
     border-top: 0;
     color: var(--t3);
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
 }
 .name {
     color: var(--t1);
-    font-size: var(--text-row);
+    font-size: var(--text-body);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 .hint {
     color: var(--t3);
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
 }
 .item {
     display: flex;

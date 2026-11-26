@@ -1,26 +1,26 @@
 .verdict {
-    padding: var(--space-14) var(--space-4);
+    padding: var(--space-16) var(--space-4);
 }
 .title {
     margin: 0;
     line-height: 1.15;
-    font-weight: var(--weight-strong);
+    font-weight: var(--weight-medium);
     letter-spacing: -0.02em;
     text-wrap: balance;
 }
 .page .title {
-    font-size: var(--text-page-verdict);
+    font-size: var(--text-headline);
 }
 .verdict.tab {
-    padding-top: var(--space-6);
+    padding-top: var(--space-8);
 }
 .tab .title {
-    font-size: var(--text-tab-verdict);
+    font-size: var(--text-headline);
 }
 .line {
     margin: var(--space-8) 0 0;
     color: var(--t3);
-    font-size: var(--text-row);
+    font-size: var(--text-body);
     display: flex;
     align-items: center;
     gap: var(--space-8);
@@ -33,5 +33,5 @@
     background: var(--s2);
 }
 .action {
-    margin-top: var(--space-14);
+    margin-top: var(--space-16);
 }

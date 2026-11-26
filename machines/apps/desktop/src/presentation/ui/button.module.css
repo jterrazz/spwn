@@ -10,12 +10,12 @@
     font-size: var(--text-body);
     display: inline-flex;
     align-items: center;
-    gap: var(--space-6);
+    gap: var(--space-8);
     white-space: nowrap;
     flex: none;
     transition:
-        background var(--motion-hover),
-        transform var(--motion-hover);
+        background var(--motion-hover) var(--ease),
+        transform var(--motion-hover) var(--ease);
 }
 .button:hover,
 .button:active {
@@ -37,7 +37,7 @@
 .link,
 .danger {
     background: none;
-    padding: 0 var(--space-6);
+    padding: 0 var(--space-8);
 }
 .link {
     color: var(--t1);
@@ -55,7 +55,7 @@
     padding: 0;
     background: none;
     color: var(--t3);
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
     text-decoration: underline;
     text-decoration-color: var(--t4);
     text-decoration-thickness: 1px;

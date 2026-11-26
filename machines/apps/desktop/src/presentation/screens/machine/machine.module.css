@@ -7,11 +7,11 @@
     margin: 0 auto;
     display: flex;
     flex-direction: column;
-    gap: var(--space-14);
+    gap: var(--space-16);
 }
 .top {
     display: flex;
-    gap: var(--space-14);
+    gap: var(--space-16);
     align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
@@ -24,7 +24,7 @@
 }
 .name {
     margin: 0;
-    font-size: var(--text-machine);
+    font-size: var(--text-title);
     font-weight: var(--weight-strong);
     letter-spacing: -0.01em;
     display: flex;
@@ -32,7 +32,7 @@
     gap: var(--space-8);
 }
 .sentence {
-    margin: var(--space-2) 0 0;
+    margin: var(--space-4) 0 0;
     color: var(--t3);
 }
 .link {
@@ -51,7 +51,7 @@
 .awakeState {
     display: flex;
     flex-direction: column;
-    gap: var(--space-2);
+    gap: var(--space-4);
 }
 .awakeSentence {
     margin: 0;
@@ -64,7 +64,7 @@
     margin: 0;
     padding-left: calc(14px + var(--space-8));
     color: var(--t3);
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
 }
 .awakeOutcomes {
     display: flex;
@@ -82,7 +82,7 @@
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    gap: var(--space-6);
+    gap: var(--space-8);
     max-width: 100%;
 }
 .destructive {

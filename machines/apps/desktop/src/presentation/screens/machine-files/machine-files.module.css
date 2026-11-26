@@ -1,6 +1,6 @@
 .file {
     background: var(--s1);
-    border-radius: var(--radius-panel);
+    border-radius: var(--radius-tile);
     padding: var(--space-16);
     display: flex;
     flex-direction: column;
@@ -35,12 +35,12 @@
     min-width: 0;
     display: flex;
     flex-direction: column;
-    gap: var(--space-2);
+    gap: var(--space-4);
 }
 .name {
     margin: 0;
     font-family: var(--font-mono);
-    font-size: var(--text-row);
+    font-size: var(--text-body);
     font-weight: var(--weight-regular);
     overflow-wrap: anywhere;
 }
@@ -52,7 +52,7 @@
 .shelf {
     display: flex;
     flex-direction: column;
-    gap: var(--space-6);
+    gap: var(--space-8);
     min-width: 0;
 }
 .lead {
@@ -65,19 +65,19 @@
 .none {
     margin: 0;
     color: var(--t3);
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
     padding: 9px 0;
 }
 .extends {
     display: inline-flex;
     flex-wrap: wrap;
-    gap: var(--space-6);
+    gap: var(--space-8);
 }
 .extended {
     all: unset;
     cursor: pointer;
     display: inline-flex;
-    border-radius: var(--radius-icon);
+    border-radius: var(--radius-small);
 }
 .extended:hover > span {
     background: var(--s3-hover);

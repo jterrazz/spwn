@@ -1,8 +1,8 @@
 .contents {
     display: flex;
     flex-direction: column;
-    gap: var(--space-6);
-    font-size: var(--text-label);
+    gap: var(--space-8);
+    font-size: var(--text-meta);
 }
 .line {
     margin: 0;
@@ -36,7 +36,7 @@
     gap: var(--space-12);
     padding: var(--space-16);
     background: var(--s1);
-    border-radius: var(--radius-panel);
+    border-radius: var(--radius-tile);
 }
 .name {
     margin: 0;
@@ -59,7 +59,7 @@
     margin: 0;
     display: flex;
     flex-direction: column;
-    gap: var(--space-6);
+    gap: var(--space-8);
     min-width: 0;
 }
 .drawn {
@@ -91,7 +91,7 @@
     height: 320px;
     overflow: hidden;
     transform: translateZ(0);
-    border-radius: var(--radius-panel);
+    border-radius: var(--radius-tile);
     background: var(--s0);
 }
 .sheet .sample {
@@ -103,10 +103,10 @@
     height: 540px;
     overflow: hidden;
     transform: translateZ(0);
-    border-radius: var(--radius-panel);
+    border-radius: var(--radius-tile);
     background: var(--s0);
 }
 .story {
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
     color: var(--t3);
 }

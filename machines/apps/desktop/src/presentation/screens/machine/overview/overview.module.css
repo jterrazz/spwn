@@ -1,13 +1,13 @@
 .columns {
     display: grid;
     grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
-    gap: var(--space-14);
+    gap: var(--space-16);
     align-items: start;
 }
 .column {
     display: flex;
     flex-direction: column;
-    gap: var(--space-14);
+    gap: var(--space-16);
     min-width: 0;
 }
 .kv {
@@ -33,18 +33,18 @@
 }
 .meta {
     color: var(--t3);
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
     text-align: right;
 }
 .healthHead {
     display: flex;
     align-items: center;
-    gap: var(--space-10);
+    gap: var(--space-12);
     margin-bottom: var(--space-8);
 }
 .healthLine {
     color: var(--t3);
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
 }
 .steps {
     display: grid;
@@ -53,17 +53,17 @@
 }
 .step {
     background: var(--s0);
-    border-radius: var(--radius-well);
-    padding: var(--space-10) var(--space-12);
+    border-radius: var(--radius-control);
+    padding: var(--space-12) var(--space-12);
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: var(--space-6);
+    gap: var(--space-8);
     min-width: 0;
 }
 .stepLabel {
     color: var(--t3);
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
 }
 .quiet {
     color: var(--t3);
@@ -104,13 +104,13 @@
     display: flex;
     justify-content: space-between;
     color: var(--t3);
-    font-size: var(--text-label);
-    margin-top: var(--space-6);
+    font-size: var(--text-meta);
+    margin-top: var(--space-8);
 }
 .fileTile {
     width: 20px;
     height: 20px;
-    border-radius: var(--radius-icon);
+    border-radius: var(--radius-small);
     display: grid;
     place-items: center;
     background: color-mix(in srgb, var(--t3) 22%, transparent);

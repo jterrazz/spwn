@@ -1,9 +1,9 @@
 .pick {
     display: flex;
     flex-direction: column;
-    gap: var(--space-10);
+    gap: var(--space-12);
     padding: var(--space-12);
-    border-radius: var(--radius-card);
+    border-radius: var(--radius-row);
     background: var(--s0);
 }
 .head {
@@ -14,7 +14,7 @@
     gap: var(--space-12);
 }
 .size {
-    font-size: var(--text-metric);
+    font-size: var(--text-headline);
     font-weight: var(--weight-strong);
     letter-spacing: -0.02em;
     line-height: 1;
@@ -29,7 +29,7 @@
 .line {
     margin-left: auto;
     color: var(--t3);
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
 }
 .grid {
     display: grid;
@@ -38,7 +38,7 @@
 }
 .cell {
     aspect-ratio: 1;
-    border-radius: var(--radius-cell);
+    border-radius: var(--radius-mark);
     background: var(--c, var(--s2));
 }
 .cell.held {

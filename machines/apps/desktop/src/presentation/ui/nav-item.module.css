@@ -10,10 +10,10 @@
     border-radius: var(--radius-control);
     color: var(--t2);
     min-width: 0;
-    transition: background var(--motion-hover);
+    transition: background var(--motion-hover) var(--ease);
 }
 .item:hover {
-    background: var(--s1);
+    background: var(--s2);
     color: var(--t1);
 }
 .item[aria-current='page'] {
@@ -50,7 +50,7 @@
     white-space: nowrap;
 }
 .count {
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
     flex: none;
     color: var(--t3);
 }
@@ -64,6 +64,6 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
     color: var(--t3);
 }

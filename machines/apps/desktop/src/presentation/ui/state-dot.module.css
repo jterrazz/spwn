@@ -8,12 +8,12 @@
 }
 .warn {
     background: var(--you);
-    border-radius: var(--radius-hair);
+    border-radius: var(--radius-mark);
     transform: rotate(45deg);
 }
 .bad {
     background: var(--bad);
-    border-radius: var(--radius-hair);
+    border-radius: var(--radius-mark);
 }
 .new {
     background: var(--busy);

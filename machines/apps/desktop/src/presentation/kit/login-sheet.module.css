@@ -10,12 +10,12 @@
     justify-content: space-between;
     padding: var(--space-16);
     background: var(--s0);
-    border-radius: var(--radius-well);
+    border-radius: var(--radius-control);
 }
 
 .code {
     font-family: var(--font-mono);
-    font-size: var(--text-metric);
+    font-size: var(--text-headline);
     font-weight: var(--weight-regular);
     letter-spacing: 0.25em;
     color: var(--t1);
@@ -48,7 +48,7 @@
 
 .input {
     width: 100%;
-    padding: var(--space-10) var(--space-12);
+    padding: var(--space-12) var(--space-12);
     font-family: var(--font-mono);
     font-size: var(--text-body);
     color: var(--t1);
@@ -63,7 +63,7 @@
 }
 
 .label {
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
     color: var(--t3);
 }
 

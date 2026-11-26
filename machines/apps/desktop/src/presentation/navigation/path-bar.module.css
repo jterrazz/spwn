@@ -4,8 +4,8 @@
     min-width: 0;
     display: flex;
     align-items: center;
-    gap: var(--space-6);
-    padding: 0 var(--space-14) 0 var(--space-12);
+    gap: var(--space-8);
+    padding: 0 var(--space-16) 0 var(--space-12);
     border-bottom: 1px solid var(--hair);
     background: var(--ground-sidebar);
 }
@@ -35,7 +35,7 @@
 .path {
     flex: 1 1 0;
     min-width: 0;
-    margin-left: var(--space-6);
+    margin-left: var(--space-8);
     overflow: hidden;
 }
 .levels {
@@ -54,7 +54,7 @@
 }
 .slash {
     flex: none;
-    padding: 0 var(--space-6);
+    padding: 0 var(--space-8);
     color: var(--t4);
 }
 .level:last-child {
@@ -68,14 +68,14 @@
     gap: var(--space-8);
     min-width: 0;
     height: 30px;
-    padding: 0 var(--space-8) 0 var(--space-6);
+    padding: 0 var(--space-8) 0 var(--space-8);
     border-radius: var(--radius-control);
     color: var(--t2);
     font-size: var(--text-body);
     cursor: pointer;
     transition:
-        background var(--motion-hover),
-        color var(--motion-hover);
+        background var(--motion-hover) var(--ease),
+        color var(--motion-hover) var(--ease);
 }
 .segment > svg {
     width: 16px;
@@ -119,7 +119,7 @@
     width: 20px;
     height: 20px;
     flex: none;
-    border-radius: var(--radius-icon);
+    border-radius: var(--radius-small);
     background: color-mix(in srgb, var(--t3) 22%, transparent);
     color: var(--t3);
 }
@@ -129,7 +129,7 @@
     stroke-width: 1.6;
 }
 .words {
-    padding: 0 var(--space-6);
+    padding: 0 var(--space-8);
     overflow: hidden;
     text-overflow: ellipsis;
     color: var(--t1);
@@ -139,7 +139,7 @@
 .end {
     display: flex;
     align-items: center;
-    gap: var(--space-6);
+    gap: var(--space-8);
     flex: none;
 }
 .inbox,
@@ -149,15 +149,15 @@
     position: relative;
     display: inline-flex;
     align-items: center;
-    gap: var(--space-6);
+    gap: var(--space-8);
     height: 28px;
-    padding: 0 var(--space-6);
+    padding: 0 var(--space-8);
     border-radius: var(--radius-control);
     color: var(--t3);
     cursor: pointer;
     transition:
-        background var(--motion-hover),
-        color var(--motion-hover);
+        background var(--motion-hover) var(--ease),
+        color var(--motion-hover) var(--ease);
 }
 .inbox > svg {
     width: 16px;
@@ -177,7 +177,7 @@
     cursor: help;
 }
 .count {
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
     font-weight: var(--weight-medium);
     font-variant-numeric: tabular-nums;
     color: var(--t3);
@@ -195,11 +195,11 @@
     height: 28px;
     padding: 0 var(--space-8);
     border-radius: var(--radius-control);
-    background: var(--s1);
+    background: var(--s2);
     color: var(--t3);
     font-size: var(--text-body);
     cursor: pointer;
-    transition: background var(--motion-hover);
+    transition: background var(--motion-hover) var(--ease);
 }
 .find > svg {
     width: 14px;
@@ -212,11 +212,11 @@
 }
 .find kbd {
     font-family: var(--font-mono);
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
     color: var(--t4);
 }
 .find:hover:not(:disabled) {
-    background: var(--s2);
+    background: var(--s3);
 }
 .find:disabled {
     cursor: default;
@@ -226,8 +226,8 @@
     flex: none;
     display: inline-flex;
     align-items: center;
-    gap: var(--space-6);
-    padding: var(--space-6);
+    gap: var(--space-8);
+    padding: var(--space-8);
     cursor: help;
 }
 .asOf {
@@ -248,10 +248,10 @@
     align-items: center;
     gap: var(--space-8);
     margin-top: var(--space-8);
-    padding: var(--space-6) var(--space-8);
+    padding: var(--space-8) var(--space-8);
     border-radius: var(--radius-control);
     color: var(--t3);
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
 }
 .foot:is(button) {
     cursor: pointer;

@@ -1,5 +1,5 @@
 .type {
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
     color: var(--t3);
     border: 1px solid var(--edge);
     border-radius: var(--radius-pill);

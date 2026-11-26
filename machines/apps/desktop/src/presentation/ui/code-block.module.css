@@ -1,14 +1,14 @@
 .code {
     background: var(--s0);
-    border-radius: var(--radius-well);
-    padding: var(--space-12) var(--space-14);
-    margin-bottom: var(--space-10);
+    border-radius: var(--radius-control);
+    padding: var(--space-12) var(--space-16);
+    margin-bottom: var(--space-12);
 }
 .lines {
     --row: 21px;
     height: var(--height);
     font-family: var(--font-mono);
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
     line-height: var(--row);
     color: var(--t2);
     overflow: auto;
@@ -24,7 +24,7 @@
 }
 .line {
     display: flex;
-    gap: var(--space-14);
+    gap: var(--space-16);
     height: var(--row);
     white-space: pre;
 }
@@ -53,8 +53,8 @@
     color: var(--t3);
 }
 .foot {
-    margin: var(--space-10) 0 0;
+    margin: var(--space-12) 0 0;
     font-family: var(--font-sans);
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
     color: var(--t3);
 }

@@ -1,7 +1,7 @@
 .facts {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: var(--space-14) var(--space-24);
+    gap: var(--space-16) var(--space-24);
     margin: 0;
 }
 .column {
@@ -11,7 +11,7 @@
 .line {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-14) 48px;
+    gap: var(--space-16) 48px;
 }
 .line .value {
     overflow-wrap: normal;
@@ -24,7 +24,7 @@
 }
 .label {
     color: var(--t3);
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
 }
 .value {
     margin: 0;

@@ -1,6 +1,6 @@
 .at {
     font-family: var(--font-mono);
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
     color: var(--t3);
     font-variant-numeric: tabular-nums;
 }
@@ -12,7 +12,7 @@
     min-width: 0;
 }
 .end {
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
     color: var(--t3);
     white-space: nowrap;
     overflow: hidden;
@@ -23,9 +23,9 @@
     display: flex;
     gap: var(--space-8);
     align-items: baseline;
-    padding: var(--space-14) 0 var(--space-6);
+    padding: var(--space-16) 0 var(--space-8);
     border-top: 1px solid var(--hair);
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
     font-weight: var(--weight-regular);
     color: var(--t2);
 }
@@ -33,7 +33,7 @@
     color: var(--t3);
 }
 .older {
-    padding-top: var(--space-14);
+    padding-top: var(--space-16);
     border-top: 1px solid var(--hair);
 }
 .dayHead + * {

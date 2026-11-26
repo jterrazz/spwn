@@ -16,7 +16,7 @@
     max-width: 600px;
     padding: var(--space-24);
     background: var(--s1);
-    border-radius: var(--radius-panel);
+    border-radius: var(--radius-tile);
 }
 
 .wide {
@@ -30,13 +30,13 @@
 .head {
     display: flex;
     flex-direction: column;
-    gap: var(--space-6);
+    gap: var(--space-8);
 }
 
 .title {
     margin: 0;
-    font-size: var(--text-tab-verdict);
-    font-weight: var(--weight-strong);
+    font-size: var(--text-headline);
+    font-weight: var(--weight-medium);
     line-height: 1.2;
     color: var(--t1);
     overflow-wrap: anywhere;
@@ -44,20 +44,20 @@
 
 .lead {
     margin: 0;
-    font-size: var(--text-row);
+    font-size: var(--text-body);
     line-height: 1.4;
     color: var(--t2);
 }
 
 .mono {
     font-family: var(--font-mono);
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
 }
 
 .monoLine {
     display: block;
     font-family: var(--font-mono);
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
     color: var(--t3);
 }
 
@@ -68,7 +68,7 @@
 
 .caption {
     margin: 0 0 var(--space-4);
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
     color: var(--t3);
 }
 
@@ -107,7 +107,7 @@
 
 .place {
     font-family: var(--font-mono);
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
     color: var(--t2);
     text-align: right;
 }
@@ -125,7 +125,7 @@
 
 .assure li {
     display: flex;
-    gap: var(--space-6);
+    gap: var(--space-8);
     align-items: center;
 }
 
@@ -141,9 +141,9 @@
     gap: var(--space-12);
     align-items: center;
     justify-content: space-between;
-    padding: var(--space-6) var(--space-8) var(--space-6) var(--space-14);
+    padding: var(--space-8) var(--space-8) var(--space-8) var(--space-16);
     background: var(--s0);
-    border-radius: var(--radius-well);
+    border-radius: var(--radius-control);
 }
 
 .code {
@@ -202,15 +202,15 @@
 
 .output {
     max-height: 210px;
-    padding: var(--space-12) var(--space-14);
+    padding: var(--space-12) var(--space-16);
     overflow: auto;
     font-family: var(--font-mono);
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
     line-height: 21px;
     white-space: pre-wrap;
     overflow-wrap: anywhere;
     background: var(--s0);
-    border-radius: var(--radius-well);
+    border-radius: var(--radius-control);
 }
 
 .line {
@@ -232,7 +232,7 @@
 }
 
 .fine {
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
     color: var(--t3);
 }
 

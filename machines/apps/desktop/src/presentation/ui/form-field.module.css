@@ -1,18 +1,18 @@
 .form {
     display: flex;
     flex-direction: column;
-    gap: var(--space-6);
+    gap: var(--space-8);
 }
 .label {
     color: var(--t3);
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
 }
 .input {
     all: unset;
     box-sizing: border-box;
     height: 34px;
-    padding: 0 var(--space-10);
-    border-radius: var(--radius-well);
+    padding: 0 var(--space-12);
+    border-radius: var(--radius-control);
     background: var(--s0);
     font-size: var(--text-body);
     color: var(--t1);
@@ -26,5 +26,5 @@
 }
 .hint {
     color: var(--t3);
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
 }

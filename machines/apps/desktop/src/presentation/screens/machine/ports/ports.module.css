@@ -15,10 +15,10 @@
     flex-wrap: wrap;
     align-items: center;
     gap: var(--space-8);
-    padding: var(--space-2) 0 var(--space-2) calc(56px + var(--space-12));
+    padding: var(--space-4) 0 var(--space-4) calc(56px + var(--space-12));
 }
 .links {
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
     color: var(--t3);
     white-space: pre-wrap;
 }

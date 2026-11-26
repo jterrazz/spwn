@@ -1,7 +1,7 @@
 .panel {
     background: var(--s1);
-    border-radius: var(--radius-panel);
-    padding: var(--space-14) var(--space-16) var(--space-6);
+    border-radius: var(--radius-tile);
+    padding: var(--space-16) var(--space-16) var(--space-8);
     display: flex;
     flex-direction: column;
     min-width: 0;
@@ -32,7 +32,7 @@
 .note {
     color: var(--t3);
     font-weight: var(--weight-regular);
-    font-size: var(--text-label);
+    font-size: var(--text-meta);
 }
 .empty {
     color: var(--t3);
