@@ -9,6 +9,7 @@ A wiki is a corpus of Markdown pages whose facts are tags, read by one file at i
 | Writing a page  | The rules the formatter and the grammar impose on a tag              |
 | What is judged  | The rules the engine judges a corpus by, and the ones left for later |
 | What is weighed | A block's weight, its tier, and what a page shows at the budget      |
+| What is served  | The call that answers a page with its reading, and where it is found |
 | Beyond the spec | Every reading of SPEC-v1 the engine made on its own                  |
 
 ## The file
@@ -89,6 +90,23 @@ The blocks of one group are weighed together, and outside a group those of one s
 
 At the corpus budget a page shows at most seven lines (S11): at `10min` a quiet block is a line, at `2min` a normal one, at `30s` none, a group its page's seat does not read is one line and hides its blocks, and at `30s` every group is one line.
 
+## What is served
+
+`wiki.read`, a call of this process applied on a Mac, answers one page of the corpus that Mac declares, read whole and checked at each ask: `Page`, its id, the first seat's home when empty, at `Budget`, `30s`, `2min` or `10min`, the corpus's own when empty. A Mac declares no wiki until a Machinefile can name one, so outside a world it answers `wiki.none`; a world seeds a Mac's corpus as its `wiki`, a repository's files at its head.
+
+The answer carries every judgement the window draws, and the window decides none:
+
+- the page's head, its paragraph Face, its floor, the seats bar (each seat, its home, the active one) and every page of the corpus with its counts of hard and soft findings;
+- the ladder the page stands on, `Floors`: every floor of the corpus in order, the page's own marked `Current`, each with how many of the page's weighed blocks sit on it; and on a block, or a group, whose floor is not its page's, that floor as `OwnFloor`;
+- each section's items in reading order, the page's own `## Rests on` marked `Rests`: prose as paragraphs, list items, quotes and table lines, each its runs (strong, code, a link and where it points), none at `30s`, where the budget folds the page; a group with its intent, the seats that read it and why it opens folded (`author`, `seat` or `budget`); a block with its kind, Faces (a line Face as the words it reads, its marks dropped, as a page's is), tier, score and causes, its fields in its kind's order with each ref resolved (to a page's title, a block's word or a group's title), and `Shown`;
+- `Shown`, the budget's table of S11 per block: at `10min` a lead is a `tile`, a normal block a `card`, a quiet one a `line`; at `2min` a lead is a `card`, a normal block a `line`, a quiet one `counted`; at `30s` a lead no group holds is a `tile` and no other block is shown, a group's one line carrying its lead. A table, a figure and a sub-page are a `tile` but at `30s`;
+- a decision as its record says it, `Decision`: the number, title, status, date and the records it amends or is amended by, read from the head of the page its `adr` names, and what the block says it `decides`; `Resolves` is false, and nothing of the record is served, when the `adr` names no record of the corpus;
+- a table's rows found and their cells by its columns, its `where` as the words it reads (`by Machines`), a sub-page's child's head, a figure's form, parts and caption, its parts drawn from what it shows when none is written (a `stack` that shows a table counts, for each page or block its rows name, how many rows name it, most first), and the findings that sit on each block and on the page at the budget's signals: needs-you and hard ones at `30s`, remarks too at `2min`, ambient ones as well at `10min`;
+- what asks for the reader's eye, in one order wherever it is listed (needs-you first, then hard, then remarks, then ambient): a block's findings in that order, `NeedsYou` on a block or group one of whose findings needs the owner, and the page's `Attention`, every finding served on the page and its blocks, each with the word of what it is about and `At`, the address of its block, or of the folded group that holds it, empty for the page's head, and `Found`, when this reading time draws neither that block nor its folded group, the first reading time that does, which the window opens;
+- the head's two counts, `NeedsYou`, the needs-you findings of `Attention`, and `Unshown`, the blocks this budget does not show, a folded group counting all of its own.
+
+Its refusals are `wiki.none`, `wiki.unknown-page`, `wiki.unreadable` (`wiki.yaml` absent or refused, its finding said) and `wiki.bad-budget`, each told in `specs/usecases/wiki/read/`.
+
 ## Beyond the spec
 
 Each reading the engine made where SPEC-v1 is silent:
@@ -106,5 +124,9 @@ Each reading the engine made where SPEC-v1 is silent:
 - A sub-page's child is a page under its folder, or one whose `needs` names it.
 - A markdown table asks for blocks (S28) when it has two columns or more, each a field of one content kind.
 - S13 and S18 count a page's weighed blocks.
+- At `30s` a lead outside any group is served as a tile: §15 says only that a group's one line carries its lead.
+- A figure with no `parts` is drawn from what its `shows` names, a group's blocks or the one block, each by its word and placed nowhere.
 - Weight causes are listed with their points, and a page's own `## Rests on` section or `rests_on` frontmatter raises S6 on the page.
 - A finding about `wiki.yaml` names that file and its line, column 1.
+- An anchor names a page of the corpus when a mount reads its file, or when its repository holds the corpus: a repository whose path climbs n folders (`studio-os: ../../..`) holds the corpus n folders down, so the anchor's path past its first n folders is the page.
+- A record is a page under a `decisions/` folder titled `ADR-n: title`; its status, date, and the records it amends or is amended by are read above its first section, as `**Key:** value` or as a sentence opening with the key (`Amended by [ADR-086](...)`). A status is `Accepted` only as written so.
