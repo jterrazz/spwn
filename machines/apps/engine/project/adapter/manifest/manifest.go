@@ -320,7 +320,7 @@ func rendered(root string) []project.Issue {
 	var out []project.Issue
 	prompts := map[string]bool{}
 	for _, a := range src.Agents {
-		prompts[a.Name] = len(a.AgentMD) > 0
+		prompts[a.Name] = strings.TrimSpace(string(a.AgentMD)) != ""
 	}
 	for _, g := range groupings(src) {
 		input, err := source.ToCompileInput(src, g)

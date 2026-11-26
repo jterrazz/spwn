@@ -59,14 +59,48 @@ func TestABrokenAgentPlansInvalid(t *testing.T) {
 	}
 }
 
-func TestAnEmptyPromptIsAnIssueOfTheRender(t *testing.T) {
-	p, m := made(t)
-	if err := os.WriteFile(filepath.Join(m.Root, "spwn", "agents", project.Starter, "AGENTS.md"), nil, 0o600); err != nil {
-		t.Fatal(err)
+func TestAMissingPromptIsAnIssueOfTheRender(t *testing.T) {
+	for name, content := range map[string]*string{"empty": new(string), "blank": ptr("   \n\t\n"), "no file": nil} {
+		t.Run(name, func(t *testing.T) {
+			p, m := made(t)
+			prompt := filepath.Join(m.Root, "spwn", "agents", project.Starter, "AGENTS.md")
+			if content == nil {
+				if err := local.New(nil, nil, nil, nil).FS.Remove(prompt); err != nil {
+					t.Fatal(err)
+				}
+			} else if err := os.WriteFile(prompt, []byte(*content), 0o600); err != nil {
+				t.Fatal(err)
+			}
+			plan, err := p.Plan(t.Context(), m.Root)
+			if err != nil || plan.Valid || !slices.ContainsFunc(plan.Issues, func(i project.Issue) bool {
+				return i.Source == project.SourceCompile && i.Level == project.Error && strings.Contains(i.Message, "agent prompt is missing or empty") && strings.Contains(i.Hint, "spwn/agents/"+project.Starter+"/AGENTS.md")
+			}) {
+				t.Fatalf("Plan = %+v, %v; want a render error naming the prompt to write", plan, err)
+			}
+		})
 	}
-	plan, err := p.Plan(t.Context(), m.Root)
-	if err != nil || !slices.ContainsFunc(plan.Issues, func(i project.Issue) bool { return i.Source == project.SourceCompile && i.Level == project.Error }) {
-		t.Fatalf("Plan = %+v, %v; want a render error", plan, err)
+}
+
+func ptr(s string) *string { return &s }
+
+func TestAnAgentIsRenderedByTheHarnessItDeclaresAndByNoOther(t *testing.T) {
+	owner := map[string]string{}
+	for _, harness := range catalog.Harnesses() {
+		p := open(t)
+		m, err := p.Create(t.Context(), t.TempDir(), "site", harness)
+		if err != nil {
+			t.Fatal(err)
+		}
+		files, err := p.Render(t.Context(), m.Root, project.Starter)
+		if err != nil || len(files) == 0 {
+			t.Fatalf("Render under %s = %d files, %v; want the harness's tree", harness, len(files), err)
+		}
+		for _, f := range files {
+			if other, taken := owner[f.Path]; taken {
+				t.Errorf("%s renders %s, which %s renders too; a harness's tree is its own", harness, f.Path, other)
+			}
+			owner[f.Path] = harness
+		}
 	}
 }
 
