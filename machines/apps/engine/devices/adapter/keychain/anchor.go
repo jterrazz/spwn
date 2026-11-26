@@ -14,8 +14,9 @@ const (
 	// value: the system's own, never one a PATH set by another process
 	// names; read under the system root a spec points into its sandbox.
 	command = "/usr/bin/security"
-	// value: the login keychain's item that holds the book's head, under a
-	// name apart from the vault's "station" items so the vault never lists it.
+	// value: the item that holds the book's head, found and written with no
+	// keychain named, as the vault's "station" items are, under a name apart
+	// from theirs so the vault never lists it.
 	itemName = "station-devices"
 	account  = "head"
 	// outside: `security` exits 44 when the item is not in the keychain.
