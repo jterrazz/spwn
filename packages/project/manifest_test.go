@@ -1,10 +1,13 @@
 package project
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"spwn.sh/packages/project/internal/discovery"
 )
 
 func TestInit_createsManifestAndLayout(t *testing.T) {
@@ -345,6 +348,28 @@ func TestFind_returnsNilWhenNoManifest(t *testing.T) {
 	}
 	if p != nil {
 		t.Fatalf("expected nil project in empty dir, got %+v", p)
+	}
+}
+
+func TestFind_refusesASpwnYAMLThatIsALink(t *testing.T) {
+	dir := t.TempDir()
+	away := filepath.Join(dir, "away")
+	if err := os.Mkdir(away, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := Init(away, InitOpts{Name: "away"}); err != nil {
+		t.Fatalf("Init: %v", err)
+	}
+	root := filepath.Join(dir, "site")
+	if err := os.MkdirAll(filepath.Join(root, "deep"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink(filepath.Join(away, "spwn.yaml"), filepath.Join(root, "spwn.yaml")); err != nil {
+		t.Fatal(err)
+	}
+	p, err := Find(filepath.Join(root, "deep"))
+	if !errors.Is(err, discovery.ErrLink) || !strings.Contains(err.Error(), filepath.Join(root, "spwn.yaml")) {
+		t.Fatalf("Find = %+v, %v; want the link refused, naming it", p, err)
 	}
 }
 
