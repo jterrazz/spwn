@@ -3708,6 +3708,19 @@ func builtinCatalog() (Catalog, error) {
 							Token: "betterdisplay"}}},
 				Bundle: "BetterDisplay"},
 			{
+				Name:        "linux-kernel",
+				Kind:        "app",
+				AppKind:     "app",
+				Description: "The one kernel a Linux VM boots, Ubuntu's hardware-enablement kernel without the firmware and headers of a physical machine",
+				Category:    "System Utilities",
+				Installs: []LivesOn{
+					{
+						Kinds: []MachineKind{
+							"linux"},
+						Install: AptInstall{
+							Packages: []string{
+								"linux-image-virtual-hwe-24.04"}}}}},
+			{
 				Name:        "mole",
 				Kind:        "app",
 				AppKind:     "app",
@@ -8483,6 +8496,25 @@ func builtinCatalog() (Catalog, error) {
 							Cask: "betterdisplay"}}},
 				Folder: "system-utilities",
 				File:   "packages/system-utilities/betterdisplay.yaml",
+				Origin: "built-in"},
+			{
+				Package: Package{
+					Package:     "station.package/v1",
+					Kind:        "app",
+					Name:        "linux-kernel",
+					Description: "The one kernel a Linux VM boots, Ubuntu's hardware-enablement kernel without the firmware and headers of a physical machine",
+					Methods: []MethodSpec{
+						{
+							Selector: Selector{
+								OS:      "ubuntu",
+								Version: "24.04"},
+							Needs: []Need{
+								"sudo"},
+							Apt: &AptMethod{
+								Packages: []string{
+									"linux-image-virtual-hwe-24.04"}}}}},
+				Folder: "system-utilities",
+				File:   "packages/system-utilities/linux-kernel.yaml",
 				Origin: "built-in"},
 			{
 				Package: Package{

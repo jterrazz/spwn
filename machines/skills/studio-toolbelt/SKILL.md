@@ -194,6 +194,7 @@ Modern replacements are on every machine; prefer them over the defaults:
 ### System Utilities
 
 - **betterdisplay**: Flexible HiDPI scaling and display management
+- **linux-kernel**: The one kernel a Linux VM boots, Ubuntu's hardware-enablement kernel without the firmware and headers of a physical machine
 - **mole**: Tidy, uninstall, analyze, and optimize macOS from the terminal
 - **pipifier**: Picture-in-Picture for Safari
 - **snippety**: Code snippet manager

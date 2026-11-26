@@ -52,7 +52,7 @@ runs:
               → station apps update gh
           Not installed  ○ 104 · cocoapods, homebrew, mas, pnpm, …
           OK             ● 7 · github-release, mise, go, ghostty, …
-          Not for this machine  13 apps live on other machines
+          Not for this machine  14 apps live on other machines
 
           → station apps update            the 2 updates
           → station apps install <app...>  install some

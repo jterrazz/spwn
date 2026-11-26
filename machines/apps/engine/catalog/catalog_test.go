@@ -1,6 +1,7 @@
 package catalog_test
 
 import (
+	"io/fs"
 	"path"
 	"slices"
 	"strings"
@@ -205,5 +206,71 @@ func TestAVersionedFormulaIsLookedForInItsKeg(t *testing.T) {
 				}
 			}
 		}
+	}
+}
+
+func recipe(t *testing.T, name string) string {
+	t.Helper()
+	body, err := catalog.Recipes.ReadFile("images/" + name)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return string(body)
+}
+
+func TestTheLinuxImageBootsWithoutWhatAVMNeverUses(t *testing.T) {
+	body := recipe(t, "linux.sh")
+	for _, step := range []string{
+		"touch /etc/cloud/cloud-init.disabled",
+		"systemctl mask systemd-networkd-wait-online.service",
+		"systemctl mask ModemManager.service multipathd.service multipathd.socket udisks2.service fwupd.service fwupd-refresh.timer motd-news.timer",
+		"systemctl enable station-hostkeys.service station-intent.service station-growroot.service",
+		"ExecStart=-/usr/bin/growpart /dev/vda 1",
+		"ExecStart=-/usr/sbin/resize2fs /dev/vda1",
+	} {
+		if !strings.Contains(body, step) {
+			t.Errorf("the linux recipe lacks %q", step)
+		}
+	}
+	// invariant: unattended-upgrades and the apt timers that run it are a VM's
+	// only security updates: the night upgrades a Mac's Machinefile apps.
+	for _, kept := range []string{"unattended-upgrades", "apt-daily"} {
+		if strings.Contains(body, kept) {
+			t.Errorf("the linux recipe touches %s, a VM's only source of security updates", kept)
+		}
+	}
+}
+
+func TestTheLinuxImageKeepsOneKernelAndWhatItsImagePhaseInstalled(t *testing.T) {
+	body := recipe(t, "linux-cleanup.sh")
+	for _, step := range []string{
+		`if ls "$added" 2>/dev/null | grep -q '^linux-image-'; then`,
+		"linux-libc-dev | linux-base | *\"$kernel\"*) ;;",
+		`*) [ -e "$added/$p" ] || purge+=("$p") ;;`,
+		`apt-get -s purge "${purge[@]}" | awk '$1 == "Purg" {print $2}'`,
+		`apt-get purge -y "${purge[@]}"`,
+		`grep -q "vmlinuz-$kernel" /boot/grub/grub.cfg`,
+	} {
+		if !strings.Contains(body, step) {
+			t.Errorf("the linux cleanup lacks %q", step)
+		}
+	}
+	if strings.Index(body, "apt-get purge") > strings.Index(body, "apt-get clean") {
+		t.Error("the linux cleanup purges after apt-get clean, once the package lists are gone")
+	}
+	rebuild := `[ -z "${kernel:-}" ] || update-initramfs -u -k "$kernel"`
+	if !strings.Contains(body, rebuild) || strings.Index(body, rebuild) < strings.Index(body, "apt-get purge") {
+		t.Error("the linux cleanup does not build the kept kernel's initramfs again once the firmware is purged")
+	}
+	file, err := fs.ReadFile(catalog.BuiltinFiles(), "machines/base-ubuntu.machine.yaml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	m, err := catalog.DecodeMachinefile("base-ubuntu.machine.yaml", file)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if m.VM == nil || m.VM.Image == nil || !slices.Contains(m.VM.Image.Bake, "linux-kernel") {
+		t.Error("base-ubuntu bakes no linux-kernel: its image would keep both of the upstream's kernels")
 	}
 }
