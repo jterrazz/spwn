@@ -125,6 +125,9 @@ type Serving struct {
 	// are answered as the engine answers that guest; empty serves this
 	// Mac's own.
 	Guest string
+	// value: where the engine's log is, as the owner reads it: the hint of
+	// a call that broke.
+	Log string
 }
 
 func Server(d *Engine, h Serving) serve.Server {
@@ -174,7 +177,7 @@ func Server(d *Engine, h Serving) serve.Server {
 			}
 			return d.Watch(ctx, in.Machines, send)
 		}},
-		ThisMachine: h.ThisMachine, Word: h.Word, Hint: "station machines", Sleep: h.Sleep, Far: h.Far, Kept: h.Kept, Acts: h.Acts,
+		ThisMachine: h.ThisMachine, Word: h.Word, Hint: "station machines", Sleep: h.Sleep, Far: h.Far, Kept: h.Kept, Acts: h.Acts, Log: h.Log,
 	}
 }
 
@@ -190,6 +193,6 @@ func guestServer(d *Engine, h Serving) serve.Server {
 			c, ok := byName[name]
 			return c, ok
 		},
-		ThisMachine: h.ThisMachine, Word: h.Word, Hint: "station ports", Sleep: h.Sleep, Far: h.Far,
+		ThisMachine: h.ThisMachine, Word: h.Word, Hint: "station ports", Sleep: h.Sleep, Far: h.Far, Log: h.Log,
 	}
 }

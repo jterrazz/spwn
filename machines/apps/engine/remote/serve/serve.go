@@ -2,6 +2,7 @@ package serve
 
 import (
 	"bufio"
+	"cmp"
 	"context"
 	"encoding/json"
 	"errors"
@@ -11,6 +12,7 @@ import (
 
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
+	"github.com/jterrazz/studio-station/apps/engine/core/goes"
 	"github.com/jterrazz/studio-station/apps/engine/core/guide"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/core/secret"
@@ -61,7 +63,10 @@ func Stream(ctx context.Context, r io.Reader, w io.Writer, calls Calls, word cal
 		rctx, done := answering.begin(ctx, f.ID)
 		running.Go(func() {
 			defer done()
-			answer(rctx, f, out, calls, word)
+			named := cmp.Or(f.Call+f.Watch, "hello")
+			if err := goes.TryOf("stream.answer", named, func() error { answer(rctx, f, out, calls, word); return nil }); err != nil {
+				out.write(api.Frame{ID: f.ID, Error: call.ToWire(broken(err, named, ""), word)})
+			}
 		})
 	}
 	return s.Err()
@@ -131,7 +136,12 @@ func answer(ctx context.Context, f api.Frame, out *writer, calls Calls, word cal
 				run = g
 			}
 		}
-		v, err := calls.Invoke(ctx, f.Target.Ref(), f.Call, f.In, run)
+		var v any
+		err := broken(goes.TryOf("stream.call", f.Call, func() error {
+			var err error
+			v, err = calls.Invoke(ctx, f.Target.Ref(), f.Call, f.In, run)
+			return err
+		}), f.Call, "")
 		g.end(err)
 		if err != nil {
 			reply(api.Frame{Error: call.ToWire(err, word)})
@@ -144,25 +154,33 @@ func answer(ctx context.Context, f api.Frame, out *writer, calls Calls, word cal
 		}
 		reply(api.Frame{Out: orNull(raw)})
 	case f.Watch != "":
-		updates, err := calls.Watch(ctx, f.Target.Ref(), f.Watch, f.In, p)
+		err := broken(goes.TryOf("stream.watch", f.Watch, func() error { return watched(ctx, f, calls, p, word, reply) }), f.Watch, "")
 		if err != nil {
 			reply(api.Frame{Error: call.ToWire(err, word)})
 			return
 		}
-		for u := range updates {
-			if u.Err != nil {
-				reply(api.Frame{Error: call.ToWire(u.Err, word)})
-				return
-			}
-			raw, err := call.Encode(u.Value, word)
-			if err != nil {
-				reply(api.Frame{Error: call.ToWire(err, word)})
-				return
-			}
-			reply(api.Frame{Out: orNull(raw)})
-		}
 		reply(api.Frame{Done: true})
 	}
+}
+
+// invariant: a watch's updates, each replied as it comes; the error that
+// ends it is answered by the caller, as the watch's last frame.
+func watched(ctx context.Context, f api.Frame, calls Calls, p call.Progress, word call.Wording, reply func(api.Frame)) error {
+	updates, err := calls.Watch(ctx, f.Target.Ref(), f.Watch, f.In, p)
+	if err != nil {
+		return err
+	}
+	for u := range updates {
+		if u.Err != nil {
+			return u.Err
+		}
+		raw, err := call.Encode(u.Value, word)
+		if err != nil {
+			return err
+		}
+		reply(api.Frame{Out: orNull(raw)})
+	}
+	return nil
 }
 
 func tooOld(version string) error {

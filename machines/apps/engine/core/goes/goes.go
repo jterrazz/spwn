@@ -25,17 +25,24 @@ type Break struct {
 	// invariant: a Break holds what a panic may say and never the panic's
 	// value: the boundary's name, the value's type, its text through the
 	// redactor (empty without one), and the stack of the goroutine that broke.
+	// Of is what a boundary that serves many ran when it broke, a call's
+	// name, data beside the literal Name; empty for any other boundary.
 	Name  string
+	Of    string
 	Type  string
 	Text  string
 	Stack []byte
 }
 
 func (b *Break) Error() string {
-	if b.Text == "" {
-		return "broke in " + b.Name + ": " + b.Type
+	at := b.Name
+	if b.Of != "" {
+		at += " on " + b.Of
 	}
-	return "broke in " + b.Name + ": " + b.Type + ": " + b.Text
+	if b.Text == "" {
+		return "broke in " + at + ": " + b.Type
+	}
+	return "broke in " + at + ": " + b.Type + ": " + b.Text
 }
 
 type Fatal interface {
@@ -125,6 +132,13 @@ func Try(name string, fn func() error) error {
 	return std.try(name, fn)
 }
 
+func TryOf(name, of string, fn func() error) error {
+	// invariant: Try at a boundary that serves many, named by data: the
+	// call it runs. name stays the literal that keys the counter; of rides
+	// in the Break and its log line.
+	return std.tryOf(name, of, fn)
+}
+
 func Go(name string, fn func()) {
 	// invariant: fn runs on a goroutine of its own; a panic is reported and
 	// ends that goroutine alone, after fn's own defers ran.
@@ -161,13 +175,15 @@ func (s *set) breaks(name string) int {
 	return s.counts[name]
 }
 
-func (s *set) try(name string, fn func() error) (err error) {
+func (s *set) try(name string, fn func() error) error { return s.tryOf(name, "", fn) }
+
+func (s *set) tryOf(name, of string, fn func() error) (err error) {
 	defer func() {
 		v := recover()
 		if v == nil {
 			return
 		}
-		b, pass := s.caught(name, v)
+		b, pass := s.caught(name, of, v)
 		if pass != nil {
 			panic(pass)
 		}
@@ -183,7 +199,7 @@ func (s *set) once(name string, fn func(), vital bool) (broke bool) {
 		if v == nil {
 			return
 		}
-		_, pass := s.caught(name, v)
+		_, pass := s.caught(name, "", v)
 		switch {
 		case pass != nil:
 			s.crash(pass)
@@ -234,7 +250,7 @@ func (s *set) kept(ctx context.Context, clock Clock, name string, fn func(contex
 // build an unscripted one, comes back as pass, unreported. Any other is
 // counted, logged and hooked as a Break; if that report panics, pass is a
 // Fatal naming it, so the process dies loudly rather than lose the break.
-func (s *set) caught(name string, v any) (b *Break, pass any) {
+func (s *set) caught(name, of string, v any) (b *Break, pass any) {
 	if marked[Fatal](v) || (strict && !marked[Scripted](v)) {
 		return nil, v
 	}
@@ -244,7 +260,7 @@ func (s *set) caught(name string, v any) (b *Break, pass any) {
 	}
 	s.counts[name]++
 	s.mu.Unlock()
-	b = &Break{Name: name, Type: fmt.Sprintf("%T", v), Stack: stack()}
+	b = &Break{Name: name, Of: of, Type: fmt.Sprintf("%T", v), Stack: stack()}
 	if lost := s.report(b, v); lost != nil {
 		return nil, lost
 	}

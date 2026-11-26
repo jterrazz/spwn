@@ -175,6 +175,25 @@ func TestTryTurnsAPanicIntoABreak(t *testing.T) {
 	}
 }
 
+func TestTryOfNamesWhatTheBoundaryRanBesideItsName(t *testing.T) {
+	r := &record{}
+	s := newSet(r, nil)
+	err := s.tryOf("serve.call", "machines.create-workspace", func() error { panic(Script("clone failed")) })
+	var b *Break
+	if !errors.As(err, &b) || b.Name != "serve.call" || b.Of != "machines.create-workspace" {
+		t.Fatalf("TryOf of a call that panicked = %#v, want a *Break of serve.call on the call", err)
+	}
+	if b.Error() != "broke in serve.call on machines.create-workspace: goes.Script: clone failed" {
+		t.Fatalf("Error() = %q", b.Error())
+	}
+	if got := r.snapshot(); len(got.lines) != 1 || !strings.HasPrefix(got.lines[0], b.Error()+"\n") {
+		t.Fatalf("log = %q, want the break's line, the call named, then its stack", got.lines)
+	}
+	if n := s.breaks("serve.call"); n != 1 {
+		t.Fatalf("breaks of the literal name = %d, want 1", n)
+	}
+}
+
 func TestTheRedactorWritesTheText(t *testing.T) {
 	r := &record{}
 	s := newSet(r, nil)

@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -13,6 +14,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	"github.com/jterrazz/studio-station/apps/engine/core/confirm"
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
+	"github.com/jterrazz/studio-station/apps/engine/core/goes"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/remote/api"
 	"github.com/jterrazz/studio-station/apps/engine/remote/serve"
@@ -492,5 +494,148 @@ func TestTheSocketMarksAFrameFarWhenItSaysSo(t *testing.T) {
 	}
 	if called, watched := run(`,"far":true`); !called || !watched {
 		t.Fatalf("a frame marked far ran here: call %v, watch %v", called, watched)
+	}
+}
+
+// value: a server whose machines.break panics, machines.answer answers, a
+// watch machines.feed panics after its first update, and page streams on.
+func breaking() serve.Server {
+	answer := call.Bind(call.Call[struct{}, struct{}, stopOut]{
+		Name: "machines.answer", Where: call.InEngine, Applies: machine.Anywhere,
+		Run: func(context.Context, struct{}, struct{}, call.Progress) (stopOut, error) {
+			return stopOut{Wanted: "answered"}, nil
+		},
+	}, struct{}{})
+	broken := call.Bind(call.Call[struct{}, struct{}, stopOut]{
+		Name: "machines.break", Where: call.InEngine, Applies: machine.Anywhere,
+		Run: func(context.Context, struct{}, struct{}, call.Progress) (stopOut, error) {
+			panic(goes.Script("index out of range"))
+		},
+	}, struct{}{})
+	return serve.Server{
+		ThisMachine: laptop, Log: "~/.local/state/station/logs/engine.log",
+		Calls: func(name string) (call.Handler, bool) {
+			switch name {
+			case "machines.answer":
+				return answer, true
+			case "machines.break":
+				return broken, true
+			}
+			return nil, false
+		},
+		Streams: map[string]serve.Feed{
+			"machines.feed": func(_ context.Context, _ json.RawMessage, send func(any) error) error {
+				_ = send(map[string]int{"page": 0})
+				panic(goes.Script("nil map"))
+			},
+			"page": func(ctx context.Context, _ json.RawMessage, send func(any) error) error {
+				for i := 0; ctx.Err() == nil; i++ {
+					if err := send(map[string]int{"page": i}); err != nil {
+						return err
+					}
+				}
+				return ctx.Err()
+			},
+		},
+	}
+}
+
+// value: one connection the server serves, held by the test: what it
+// writes, and the lines the server answers.
+func connected(t *testing.T, s serve.Server) (send func(line string), lines *bufio.Scanner) {
+	t.Helper()
+	inR, inW := io.Pipe()
+	outR, outW := io.Pipe()
+	go s.Conn(t.Context(), pipe{Reader: inR, Writer: outW, closers: []io.Closer{inR, outW}})
+	t.Cleanup(func() { _, _ = inW.Close(), outR.Close() })
+	return func(line string) {
+		if _, err := inW.Write([]byte(line + "\n")); err != nil {
+			t.Fatal(err)
+		}
+	}, bufio.NewScanner(outR)
+}
+
+func frameOn(t *testing.T, lines *bufio.Scanner) api.Frame {
+	t.Helper()
+	if !lines.Scan() {
+		t.Fatalf("the connection ended: %v", lines.Err())
+	}
+	var f api.Frame
+	if err := json.Unmarshal(lines.Bytes(), &f); err != nil {
+		t.Fatalf("%q: %v", lines.Text(), err)
+	}
+	return f
+}
+
+func TestACallThatBreaksFailsAloneAndTheConnectionAnswersTheNext(t *testing.T) {
+	send, lines := connected(t, breaking())
+	send(`{"v":2,"id":"1","call":"machines.break"}`)
+	broke := frameOn(t, lines)
+	if e := broke.Error; broke.ID != "1" || e == nil || e.Code != call.Broke || e.Type != fail.Failed || e.Subject != "machines.break" || e.Detail["log"] != "~/.local/state/station/logs/engine.log" {
+		t.Fatalf("the call that panicked answered %+v (error %+v), want it failed, coded broke, naming it and the log", broke, broke.Error)
+	}
+	send(`{"v":2,"id":"2","call":"machines.answer"}`)
+	answered := frameOn(t, lines)
+	if answered.ID != "2" || answered.Error != nil || string(answered.Out) != `{"Wanted":"answered"}` {
+		t.Fatalf("the next call on the same connection answered %+v, want its out", answered)
+	}
+}
+
+func TestAWatchThatBreaksEndsAloneAndAnotherWatchStreamsOn(t *testing.T) {
+	s := breaking()
+	pages, err := dialed(t.Context(), s).Watch(t.Context(), "page", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	send, lines := connected(t, s)
+	send(`{"v":2,"id":"1","watch":"machines.feed"}`)
+	if first := frameOn(t, lines); first.Error != nil || string(first.Out) != `{"page":0}` {
+		t.Fatalf("the watch's first frame = %+v, want its update", first)
+	}
+	if end := frameOn(t, lines); end.Error == nil || end.Error.Code != call.Broke || end.Error.Subject != "machines.feed" || end.Done {
+		t.Fatalf("the watch that panicked ended on %+v (error %+v), want its last frame coded broke", end, end.Error)
+	}
+	for range 3 {
+		if _, open := <-pages; !open {
+			t.Fatal("the page watch on another connection stopped once the other broke")
+		}
+	}
+}
+
+func TestAStreamAnswersBrokeForTheCallThatBrokeAndTheNextFrame(t *testing.T) {
+	registry, err := call.NewRegistry(slices.Collect(func(yield func(call.Handler) bool) {
+		s := breaking()
+		for _, name := range []string{"machines.break", "machines.answer"} {
+			h, _ := s.Calls(name)
+			if !yield(h) {
+				return
+			}
+		}
+	}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	in := `{"v":2,"id":"1","call":"machines.break"}` + "\n" + `{"v":2,"id":"2","call":"machines.answer"}` + "\n"
+	var out strings.Builder
+	if err := serve.Stream(t.Context(), strings.NewReader(in), &out, serve.Local(registry, laptop, "v0.21.0"), func(err error) *fail.Error {
+		var f *fail.Error
+		errors.As(err, &f)
+		return f
+	}); err != nil {
+		t.Fatal(err)
+	}
+	frames := map[string]api.Frame{}
+	for line := range strings.Lines(out.String()) {
+		var f api.Frame
+		if err := json.Unmarshal([]byte(line), &f); err != nil {
+			t.Fatalf("%q: %v", line, err)
+		}
+		frames[f.ID] = f
+	}
+	if e := frames["1"].Error; e == nil || e.Code != call.Broke || e.Subject != "machines.break" {
+		t.Fatalf("the frame that panicked answered %+v, want broke", frames["1"])
+	}
+	if f := frames["2"]; f.Error != nil || string(f.Out) != `{"Wanted":"answered"}` {
+		t.Fatalf("the next frame answered %+v, want its out", f)
 	}
 }

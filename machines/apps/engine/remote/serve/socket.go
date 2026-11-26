@@ -11,6 +11,7 @@ import (
 
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
+	"github.com/jterrazz/studio-station/apps/engine/core/goes"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/remote/api"
 )
@@ -46,6 +47,9 @@ type Server struct {
 	// value: where the phases of a guided call this server runs on this
 	// machine are kept; nil keeps none.
 	Acts Acts
+	// value: where this server's log is, as the owner reads it, named by
+	// the hint of a call that broke; empty names none.
+	Log string
 }
 
 func (s Server) Conn(ctx context.Context, conn io.ReadWriteCloser) {
@@ -120,7 +124,12 @@ func (s Server) call(ctx context.Context, w *writer, f api.Frame) api.Frame {
 	if g.family != "" && s.Acts != nil {
 		p = g
 	}
-	out, err := h.Invoke(ctx, s.ThisMachine, f.In, p)
+	var out json.RawMessage
+	err = broken(goes.TryOf("serve.call", f.Call, func() error {
+		var ran error
+		out, ran = h.Invoke(ctx, s.ThisMachine, f.In, p)
+		return ran
+	}), f.Call, s.Log)
 	g.end(err)
 	s.Kept.Keep(ctx, s.ThisMachine, s.ThisMachine.Ref, h.Meta(), f.In, out, err)
 	if err != nil {
@@ -155,9 +164,9 @@ func (s Server) watch(ctx context.Context, conn io.ReadWriteCloser, lines *bufio
 	if t := f.Target.Ref(); s.Far != nil && !s.thisMachine(t) {
 		err = s.far(ctx, t, w, f, send)
 	} else if stream, ok := s.Streams[f.Watch]; ok {
-		err = stream(ctx, f.In, send)
+		err = broken(goes.TryOf("serve.stream", f.Watch, func() error { return stream(ctx, f.In, send) }), f.Watch, s.Log)
 	} else {
-		err = s.updates(ctx, f, send)
+		err = broken(goes.TryOf("serve.watch", f.Watch, func() error { return s.updates(ctx, f, send) }), f.Watch, s.Log)
 	}
 	if err != nil {
 		_ = w.frame(api.Frame{ID: f.ID, Error: s.fault(err)})
@@ -225,6 +234,21 @@ func (s Server) guarded(ctx context.Context, conn io.Closer, write func(any) err
 		}()
 		return write(v)
 	}
+}
+
+// invariant: a call or a watch that broke fails alone, coded broke, naming
+// it and the log its trace went to; the server and its connection go on.
+// Any other answer is the call's own.
+func broken(err error, name, log string) error {
+	var b *goes.Break
+	if !errors.As(err, &b) {
+		return err
+	}
+	var detail map[string]string
+	if log != "" {
+		detail = map[string]string{"log": log}
+	}
+	return fail.New(fail.Failed, call.Broke, name, detail)
 }
 
 func (s Server) fault(err error) *call.WireError { return call.ToWire(err, s.wording) }

@@ -460,6 +460,10 @@
       "Detail": "background",
       "Tone": "plain"
     },
+    "broke": {
+      "Word": "Engine broke",
+      "Tone": "plain"
+    },
     "call.bad-frame": {
       "Word": "bad frame",
       "Detail": "call",
