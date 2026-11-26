@@ -163,11 +163,14 @@ func OrgPath() string {
 var actMu sync.Mutex
 
 // WithProjectRoot runs act with root as the process's project root, under a
-// lock every caller of it shares, and clears the root when act returns.
+// lock every caller of it shares, and restores the root it found when act
+// returns.
 func WithProjectRoot[T any](root string, act func() (T, error)) (T, error) {
+	// invariant: an act never calls WithProjectRoot, which is not re-entrant.
 	actMu.Lock()
 	defer actMu.Unlock()
+	previous := ProjectRoot()
 	SetProjectRoot(root)
-	defer SetProjectRoot("")
+	defer SetProjectRoot(previous)
 	return act()
 }
