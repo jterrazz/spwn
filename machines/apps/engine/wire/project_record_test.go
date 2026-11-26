@@ -104,3 +104,27 @@ func TestAChangeRefusedAloneSaysTheRecordKeptWhatWasWritten(t *testing.T) {
 		t.Errorf("refused = %q %v; want the record said written", refused.Subject, refused.Detail)
 	}
 }
+
+func TestARecordedPathWithAControlCharacterIsIgnoredAndBlocksNothing(t *testing.T) {
+	d, _, root := applying(t)
+	if _, err := calls.Apply.Run(t.Context(), d, calls.ApplyIn{Folder: root}, nil); err != nil {
+		t.Fatal(err)
+	}
+	record := filepath.Join(root, project.StateFolder, project.RecordName)
+	tampered := []byte(`{".spwn/agents/x\u0000/f": "sha256:00", ".spwn/agents/neo/a\u001bb": "sha256:00"}`)
+	if err := os.WriteFile(record, tampered, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	plan, err := calls.Plan.Run(t.Context(), d, calls.PlanIn{Folder: root}, nil)
+	if err != nil || !plan.Valid {
+		t.Fatalf("Plan = %+v, %v; want the tampered paths ignored", plan, err)
+	}
+	for _, c := range plan.Changes {
+		if !project.InRunFolder(c.Path) {
+			t.Errorf("the plan lists %q", c.Path)
+		}
+	}
+	if _, err := calls.Apply.Run(t.Context(), d, calls.ApplyIn{Folder: root, Confirm: confirm.Yes}, nil); err != nil {
+		t.Errorf("Apply = %v; want the tampered paths ignored", err)
+	}
+}

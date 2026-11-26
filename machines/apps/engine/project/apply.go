@@ -10,6 +10,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"unicode"
 )
 
 type File struct {
@@ -24,8 +25,9 @@ type File struct {
 
 func local(p string) bool {
 	// invariant: a slash path that names a file under its folder: never
-	// empty, absolute, dotted or climbing out.
-	return p != "" && p != "." && path.Clean(p) == p && !strings.HasPrefix(p, "/") && p != ".." && !strings.HasPrefix(p, "../")
+	// empty, absolute, dotted or climbing out, and holding no NUL nor any
+	// other control character.
+	return p != "" && p != "." && path.Clean(p) == p && !strings.HasPrefix(p, "/") && p != ".." && !strings.HasPrefix(p, "../") && !strings.ContainsFunc(p, unicode.IsControl)
 }
 
 func InRunFolder(p string) bool {

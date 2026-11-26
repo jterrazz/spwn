@@ -63,7 +63,8 @@ func TestARenderedPathNeverLeavesItsRunFolder(t *testing.T) {
 func TestARecordedPathOutsideARunFolderIsNeverReadNorRemoved(t *testing.T) {
 	a := file("CLAUDE.md", "a")
 	tampered := project.Record{}
-	for _, p := range []string{"../victim.txt", "/abs", "spwn.yaml", ".spwn/keep.txt", ".spwn/agents/neo/../../../spwn.yaml", ".spwn/agents/neo", ".spwn/agents//x"} {
+	for _, p := range []string{"../victim.txt", "/abs", "spwn.yaml", ".spwn/keep.txt", ".spwn/agents/neo/../../../spwn.yaml", ".spwn/agents/neo", ".spwn/agents//x",
+		".spwn/agents/x\x00/f", ".spwn/agents/neo/a\x00b", ".spwn/agents/neo/line\nbreak", ".spwn/agents/neo/bell\x07", ".spwn/agents/neo/del\x7f"} {
 		tampered[p] = project.Digest(a)
 		if project.InRunFolder(p) {
 			t.Errorf("InRunFolder(%q) = true; want false", p)
