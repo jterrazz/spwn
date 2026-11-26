@@ -16,7 +16,7 @@ bare_ssh() {
   local p1='(^|[;&|({!]|\$\(|(then|do|until|if|else)[[:space:]])[[:space:]]*(ssh|scp|rsync)[[:space:]]' p2=$'=\\(?["\']?(ssh|scp)[[:space:]"\']'
   grep -nE -e "$p1" -e "$p2" "$@" | grep -vE '^[^:]*:[0-9]+:[[:space:]]*#' | grep -v 'gate-ssh: exempt' | grep -vE 'rsync .*-e "\$GATE_SSH rsh"'
 }
-bare=(); for f in ./*.sh; do case $f in ./gate-ssh.sh | ./test.sh | ./*-remote.sh) ;; *) bare+=("$f") ;; esac; done
+bare=(); for f in ./*.sh ../../machines/apps/*/scripts/*.sh; do case $f in ./gate-ssh.sh | ./test.sh | ./*-remote.sh) ;; *) bare+=("$f") ;; esac; done
 bare_ssh "${bare[@]}" && bad "bare ssh to a VM: a script reaches a VM only through \$GATE_SSH"
 F=$(mktemp -d) || exit 2
 printf '%s\n' 'ssh vm true' '  scp x vm:y' 'a && ssh -n vm true' 'x=$(ssh vm true)' 'S="ssh -n"' 'rsync -a a vm:b' 'if ssh vm true; then' > "$F/bare.sh"

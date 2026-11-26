@@ -4,7 +4,7 @@
 # value: or folder run there (its goldens rewritten with --update), then every golden of src/ the run changed copied
 # value: back to the Mac, named one per line, to be looked at before a commit. `--new` runs in update mode too, but
 # value: copies back only the goldens the Mac does not have yet, so a new test's golden is born and no other moves.
-# value: STATION_VM names the host (design).
+# value: STATION_VM names the gate host and is required: its route is the route file gate-ssh.sh reads.
 # hazard: vitest's -u takes the next word as its own value, so the path is given before it.
 set -euo pipefail
 [ $# -ge 2 ] || {
@@ -27,17 +27,22 @@ case ${3:-} in
         exit 2
         ;;
 esac
-host=${STATION_VM:-design}
+host=${STATION_VM:-}
+[ -n "$host" ] || {
+    echo "look.sh: set STATION_VM to the gate host" >&2
+    exit 2
+}
 window=$(cd "$(dirname "$0")/.." && pwd)
 root=$(cd "$window/../.." && pwd)
+GATE_SSH=$root/../scripts/gates/gate-ssh.sh
 copy=window-$lot/repo
-ssh -o BatchMode=yes "$host" "mkdir -p $copy"
-rsync -a --delete --exclude .git --exclude node_modules --exclude target --exclude .artifacts "$root/" "$host:$copy/"
+"$GATE_SSH" ssh "$host" "mkdir -p $copy"
+rsync -e "$GATE_SSH rsh" -a --delete --exclude .git --exclude node_modules --exclude target --exclude .artifacts "$root/" "$host:$copy/"
 status=0
-ssh -o BatchMode=yes "$host" "set -o pipefail; cd $copy/apps/desktop && source scripts/bench-env.sh \
+"$GATE_SSH" ssh "$host" "set -o pipefail; cd $copy/apps/desktop && source scripts/bench-env.sh \
     && bash scripts/bench-setup.sh >/dev/null \
     && timeout 520 npx vitest --run --maxWorkers=${WINDOW_TEST_WORKERS:-2} '$path' $update 2>&1 | tail -40" || status=$?
 echo "goldens changed, to look at:"
-rsync -a ${only_new[@]+"${only_new[@]}"} --out-format 'apps/desktop/src/%n' --include '*/' --include '__expected__/**' --exclude '*' --prune-empty-dirs \
+rsync -e "$GATE_SSH rsh" -a ${only_new[@]+"${only_new[@]}"} --out-format 'apps/desktop/src/%n' --include '*/' --include '__expected__/**' --exclude '*' --prune-empty-dirs \
     "$host:$copy/apps/desktop/src/" "$window/src/"
 exit "$status"
