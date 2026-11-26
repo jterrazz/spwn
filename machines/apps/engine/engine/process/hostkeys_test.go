@@ -108,6 +108,37 @@ func TestABookChangeReachesEveryConnectedGuestAtOnce(t *testing.T) {
 	}
 }
 
+// value: a guest's stream whose next writes fail, as a pipe torn down.
+type tornStream struct {
+	heardStream
+	fails int
+}
+
+func (s *tornStream) Write(p []byte) (int, error) {
+	if s.fails > 0 {
+		s.fails--
+		return 0, errors.New("broken pipe")
+	}
+	return s.heardStream.Write(p)
+}
+
+func TestAHelloWhoseWriteFailedIsSentAgainAtTheNextWalk(t *testing.T) {
+	kept := []string{"ssh-ed25519 LAPTOP"}
+	d, v, _, _ := keyedEngine(t, nil, map[string]string{}, func() []string { return kept })
+	d.hello(v)
+	torn := &tornStream{fails: 1}
+	d.mu.Lock()
+	v.in = torn
+	d.mu.Unlock()
+	kept = nil
+	d.rehello(v)
+	d.rehello(v)
+	said := torn.heard()
+	if len(said) != 1 || strings.Contains(said[0], "LAPTOP") {
+		t.Fatalf("hellos %q, want the forget's hello written at the walk after the one that failed", said)
+	}
+}
+
 func TestADeviceKeyMadeAfterTheGuestConnectedReachesItOnTheNextWalk(t *testing.T) {
 	var made string
 	d, v, mac, heard := keyedEngine(t, func() string { return made }, map[string]string{}, nil)

@@ -793,38 +793,46 @@ func (d *Engine) blockedBy(ctx context.Context, v *vmState, gen int, err error) 
 	}
 }
 
-func (d *Engine) write(v *vmState, msg any) {
+func (d *Engine) write(v *vmState, msg any) bool {
 	data, err := json.Marshal(msg)
 	if err != nil {
-		return
+		return false
 	}
 	v.wmu.Lock()
 	defer v.wmu.Unlock()
 	d.mu.Lock()
 	in := v.in
 	d.mu.Unlock()
-	if in != nil {
-		_, _ = in.Write(append(data, '\n'))
+	if in == nil {
+		return false
 	}
+	_, err = in.Write(append(data, '\n'))
+	return err == nil
 }
 
 // value: alias of hello v1, the line a guest of any version reads: its
 // keys keep the words v2 wrote.
 func (d *Engine) hello(v *vmState) {
+	// invariant: the keys a guest was given are recorded once its hello is
+	// written to it, so a hello whose write failed is sent again at the
+	// next walk.
 	r := d.rightsOf(context.Background(), v.name)
 	keys := d.hostKeys()
 	d.mu.Lock()
-	v.keys = strings.Join(keys, "\n")
 	public := ports.ExposureOf(d.self.On, d.self.DNSName).PublicName
 	d.mu.Unlock()
 	env := d.record(v).Env
 	if env == nil {
 		env = map[string]string{}
 	}
-	d.write(v, map[string]any{
+	if d.write(v, map[string]any{
 		"v": 1, "type": "hello", "host": d.m.ThisMacName(), "vm": v.name, "public_host": public,
 		"keys": keys, "env": env, "ignored": []int{d.o.GuestPort}, "min_port": r.Floor(),
-	})
+	}) {
+		d.mu.Lock()
+		v.keys = strings.Join(keys, "\n")
+		d.mu.Unlock()
+	}
 }
 
 func (d *Engine) rehello(v *vmState) {
