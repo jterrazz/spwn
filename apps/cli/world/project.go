@@ -51,7 +51,10 @@ type projectWorld struct {
 	Name       string
 	Agents     []string
 	Workspaces []string
-	Manifest   world.Manifest
+	// Outside is each host path of Workspaces and Knowledge that leaves
+	// the project, which spwn up mounts only once it is granted.
+	Outside  []cliproject.Reach
+	Manifest world.Manifest
 	// Knowledge is the absolute host path to bind into
 	// /world/knowledge/, resolved from the manifest's
 	// worlds.<name>.knowledge key relative to the project root.
@@ -148,13 +151,38 @@ func resolveProjectWorld(p *project.Project, name, backendOverride string) (*pro
 
 	m := world.Manifest{Deps: pkgs, DepPolicies: policies}
 
+	var outside []cliproject.Reach
 	var knowledge string
 	if kp := strings.TrimSpace(w.Knowledge); kp != "" {
-		if filepath.IsAbs(kp) {
-			knowledge = kp
-		} else {
-			knowledge = filepath.Join(p.Root, kp)
+		resolved, leaves := cliproject.Resolve(p.Root, kp)
+		knowledge = resolved
+		if leaves {
+			outside = append(outside, cliproject.Reach{Path: resolved, Access: "read-write", Grants: fmt.Sprintf("read-write mount at /world/knowledge in world %q", name)})
 		}
+	}
+	workspaces, err := parseWorkspaceFlags(w.Workspaces)
+	if err != nil {
+		return nil, fmt.Errorf("world %q: %w", name, err)
+	}
+	entries := make([]string, 0, len(workspaces))
+	for i, ws := range workspaces {
+		wsName := ws.Name
+		if !strings.Contains(w.Workspaces[i], "=") {
+			lexical := ws.Path
+			if !filepath.IsAbs(lexical) {
+				lexical = filepath.Join(p.Root, lexical)
+			}
+			wsName = world.AutoWorkspaceName(lexical, i)
+		}
+		resolved, leaves := cliproject.Resolve(p.Root, ws.Path)
+		access, suffix := "read-write", ""
+		if ws.ReadOnly {
+			access, suffix = "read-only", ":ro"
+		}
+		if leaves {
+			outside = append(outside, cliproject.Reach{Path: resolved, Access: access, Grants: fmt.Sprintf("%s mount at /workspaces/%s in world %q", access, wsName, name)})
+		}
+		entries = append(entries, wsName+"="+resolved+suffix)
 	}
 
 	var runtimeName string
@@ -170,7 +198,8 @@ func resolveProjectWorld(p *project.Project, name, backendOverride string) (*pro
 		Project:    p,
 		Name:       name,
 		Agents:     append([]string(nil), w.Agents...),
-		Workspaces: append([]string(nil), w.Workspaces...),
+		Workspaces: entries,
+		Outside:    outside,
 		Manifest:   m,
 		Knowledge:  knowledge,
 		Runtime:    runtimeName,

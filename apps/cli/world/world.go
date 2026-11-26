@@ -8,6 +8,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"spwn.sh/apps/cli/cliproject"
 	"spwn.sh/apps/cli/ui"
 	"spwn.sh/packages/architect"
 	"spwn.sh/packages/authentication"
@@ -25,6 +26,7 @@ var (
 	spawnBackend      string
 	spawnInteractive  bool
 	spawnForceRebuild bool
+	spawnYes          bool
 )
 
 func init() {
@@ -50,6 +52,7 @@ func registerSpawnFlags(c *cobra.Command) {
 	c.Flags().StringVar(&spawnBackend, "backend", "", "Override the runtime backend for this spawn (e.g. claude-code, codex). Skips the auth-state auto-resolver.")
 	c.Flags().BoolVarP(&spawnInteractive, "interactive", "i", false, "Drop into the agent's session after spawn")
 	c.Flags().BoolVar(&spawnForceRebuild, "force-rebuild", false, "Ignore the image cache and rebuild the world image from scratch")
+	c.Flags().BoolVar(&spawnYes, "yes", false, "Allow, for this project, the host paths outside it that spwn.yaml mounts, without asking")
 }
 
 func worldHelp(cmd *cobra.Command, args []string) {
@@ -184,6 +187,19 @@ func spawnRunE(cmd *cobra.Command, args []string) error {
 	pw, projectErr := applyProjectDefaults(cmd, positionalName, spawnBackend)
 	if projectErr != nil {
 		return s.FailHint("Project", projectErr, "Check spwn.yaml or pick an existing world name")
+	}
+	if pw != nil {
+		var reaches []cliproject.Reach
+		for _, r := range pw.Outside {
+			if strings.Contains(r.Grants, " mount at /workspaces/") && cmd.Flags().Changed("workspace") {
+				continue
+			}
+			reaches = append(reaches, r)
+		}
+		if err := cliproject.Consent(pw.Project.Root, reaches, spawnYes, cliproject.StdinIsTerminal(), cmd.InOrStdin(), cmd.ErrOrStderr()); err != nil {
+			return s.FailHint("Outside the project", err,
+				"Run `spwn up` in a terminal to be asked once, or `spwn up --yes` to allow these paths for this project")
+		}
 	}
 
 	configName := "default"

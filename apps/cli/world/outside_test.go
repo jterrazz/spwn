@@ -3,6 +3,7 @@ package world
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"spwn.sh/packages/project"
@@ -56,6 +57,32 @@ func TestAWorldAgentThatClimbsIsRefusedTheSameWhetherItsTargetExists(t *testing.
 	const want = `world "neo": agent name "../../../outside/x" is not one name: a name is not empty, "." or "..", and holds no /, :, \ or NUL`
 	if gone.Error() != want {
 		t.Fatalf("refusal = %q, want %q", gone, want)
+	}
+}
+
+func TestAWorldsHostPathsThatLeaveTheProjectAreNamedResolved(t *testing.T) {
+	p, root, outside := projectWith(t, "version: 1\nname: site\nworlds:\n  neo:\n    agents: []\n    workspaces: [\".\", \"home=../outside:ro\", \"away\"]\n    knowledge: ../outside\n")
+	if err := os.Symlink(outside, filepath.Join(root, "away")); err != nil {
+		t.Fatal(err)
+	}
+	pw, err := resolveProjectWorld(p, "neo", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var got []string
+	for _, r := range pw.Outside {
+		got = append(got, r.Path+" | "+r.Access+" | "+r.Grants)
+	}
+	want := []string{
+		outside + ` | read-write | read-write mount at /world/knowledge in world "neo"`,
+		outside + ` | read-only | read-only mount at /workspaces/home in world "neo"`,
+		outside + ` | read-write | read-write mount at /workspaces/away in world "neo"`,
+	}
+	if strings.Join(got, "\n") != strings.Join(want, "\n") {
+		t.Fatalf("outside =\n%s\nwant\n%s", strings.Join(got, "\n"), strings.Join(want, "\n"))
+	}
+	if pw.Workspaces[0] != "site="+root || pw.Knowledge != outside {
+		t.Errorf("the mounts are not the resolved paths: %q %q", pw.Workspaces, pw.Knowledge)
 	}
 }
 

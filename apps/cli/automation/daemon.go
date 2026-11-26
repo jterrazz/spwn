@@ -16,6 +16,12 @@ import (
 	"spwn.sh/packages/project"
 )
 
+var daemonYes bool
+
+func init() {
+	daemonCmd.Flags().BoolVar(&daemonYes, "yes", false, "Allow, for this project, the watch folders outside it that spwn.yaml names, without asking")
+}
+
 var daemonCmd = &cobra.Command{
 	Use:   "daemon",
 	Short: "Run the engine for the current project until interrupted",
@@ -61,6 +67,24 @@ resumes at the next scheduled time.`,
 			return err
 		}
 		defer releaseDaemonLock(lockFile)
+
+		var reaches []cliproject.Reach
+		for wname, w := range p.Manifest.Worlds {
+			for aname, a := range w.Automations {
+				if a.On.FS == nil || a.On.FS.Path == "" {
+					continue
+				}
+				resolved, leaves := cliproject.Resolve(p.Root, a.On.FS.Path)
+				a.On.FS.Path = resolved
+				if leaves {
+					reaches = append(reaches, cliproject.Reach{Path: resolved, Access: "names and times listed",
+						Grants: fmt.Sprintf("watched by automation %q of world %q: the names and times of its files are listed", aname, wname)})
+				}
+			}
+		}
+		if err := cliproject.Consent(p.Root, reaches, daemonYes, cliproject.StdinIsTerminal(), cmd.InOrStdin(), cmd.ErrOrStderr()); err != nil {
+			return fmt.Errorf("%w\nRun `spwn automation daemon` in a terminal to be asked once, or `spwn automation daemon --yes` to allow these paths for this project", err)
+		}
 
 		arc, err := architect.NewFromEnv()
 		if err != nil {
