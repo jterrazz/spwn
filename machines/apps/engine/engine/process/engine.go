@@ -16,6 +16,7 @@ import (
 	awakecontract "github.com/jterrazz/studio-station/apps/engine/awake/contract"
 
 	"github.com/jterrazz/studio-station/apps/engine/activity"
+	"github.com/jterrazz/studio-station/apps/engine/approvals"
 	awakecalls "github.com/jterrazz/studio-station/apps/engine/awake/calls"
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/journal"
@@ -186,8 +187,9 @@ type Options struct {
 	// at every tick; nil keeps no store.
 	Reading Reading
 	// value: how this Mac stands with macOS's Local Network approval of
-	// the engine, read now; nil, or an empty answer, where it cannot tell.
-	LocalNetwork func(ctx context.Context) model.LocalNetwork
+	// the engine, read now by the approvals family's probe; nil where it
+	// cannot tell.
+	LocalNetwork func(ctx context.Context) approvals.State
 }
 
 type Reading interface {

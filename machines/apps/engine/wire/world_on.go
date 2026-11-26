@@ -43,6 +43,8 @@ import (
 	activitycontract "github.com/jterrazz/studio-station/apps/engine/activity/contract"
 	agentsfake "github.com/jterrazz/studio-station/apps/engine/agents/adapter/fake"
 	agentscontract "github.com/jterrazz/studio-station/apps/engine/agents/contract"
+	"github.com/jterrazz/studio-station/apps/engine/approvals"
+	approvalsfake "github.com/jterrazz/studio-station/apps/engine/approvals/adapter/fake"
 	appsfake "github.com/jterrazz/studio-station/apps/engine/apps/adapter/fake"
 	appscontract "github.com/jterrazz/studio-station/apps/engine/apps/contract"
 	automationsfake "github.com/jterrazz/studio-station/apps/engine/automations/adapter/fake"
@@ -383,8 +385,8 @@ func (m *worldMac) withAwake(kept map[string]activity.Kept) map[string]activity.
 }
 
 func (m *worldMac) power() awakecontract.Power { return awakefake.PowerOf(m.run.w, m.name) }
-func (m *worldMac) localNetwork() func(context.Context) model.LocalNetwork {
-	return func(context.Context) model.LocalNetwork { return m.slice().LocalNetwork }
+func (m *worldMac) localNetwork() func(context.Context) approvals.State {
+	return approvalsfake.LocalNetworkOf(m.run.w, m.name).Read
 }
 
 func (m *worldMac) agent() func(context.Context) (func(context.Context) error, error) {
