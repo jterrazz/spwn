@@ -2,6 +2,7 @@ import { component, content, waitUntil } from '@jterrazz/test';
 import { Profiler } from 'react';
 import { describe, expect, test } from 'vitest';
 
+import { settled } from '../../../composition/__tests__/page-over';
 import { keyOf } from '../../../domain/request-key';
 import { documentPresence } from '../../../infrastructure/outbound/document-presence/document-presence';
 import { Client } from '../../../infrastructure/outbound/engine-link/client';
@@ -204,7 +205,7 @@ describe('dependencies', () => {
     });
 
     test('reads asked again change nothing visible, and draw no refreshing mark', async () => {
-        // Given - the window on Home over two-macs, its answers counted as they come
+        // Given - the window on Home over two-macs drawn whole, its answers counted as they come
         const stage = opened(recordingFor('two-macs'), NOTICING);
         const count = counted(stage.transport);
         const { drawn, watcher } = watched();
@@ -222,6 +223,7 @@ describe('dependencies', () => {
             </EngineProvider>,
             async (visitor) => {
                 await visitor.see(content('2 things need you.'));
+                await settled(stage);
                 before = document.body.innerHTML;
                 watcher.observe(document.body, CHANGES);
 
@@ -272,7 +274,7 @@ describe('dependencies', () => {
     });
 
     test('home is drawn once per pushed revision that moves its views, and never for one equal to the one drawn', async () => {
-        // Given - the window on Home over two-macs, each React commit counted
+        // Given - the window on Home over two-macs drawn whole, each React commit counted
         const stage = opened(recordingFor('two-macs'));
         const engine = pushed(stage.transport);
         let commits = 0;
@@ -296,6 +298,7 @@ describe('dependencies', () => {
             </EngineProvider>,
             async (visitor) => {
                 await visitor.see(content('2 things need you.'));
+                await settled(stage);
                 const committed = commits;
 
                 // When - the engine pushes a revision equal to the one drawn, then one that moves both Overviews, then one that moves them back
@@ -314,7 +317,7 @@ describe('dependencies', () => {
     });
 
     test('a page once drawn is never blank again: an equal re-ask, a restart, a refusal and a revisit', async () => {
-        // Given - linux-1's Ports over two-macs, each React commit counted, a grace of nothing so a revisit is kept
+        // Given - linux-1's Ports over two-macs drawn whole, each React commit counted, a grace of nothing so a revisit is kept
         const stage = opened(recordingFor('two-macs'), NOTICING);
         const count = counted(stage.transport);
         const { drawn, watcher } = watched();
@@ -345,6 +348,7 @@ describe('dependencies', () => {
             </EngineProvider>,
             async (visitor) => {
                 await visitor.see(content(':5173'));
+                await settled(stage);
                 before = pageDrawn();
                 roots.push(document.querySelector('main'));
                 watcher.observe(document.body, CHANGES);

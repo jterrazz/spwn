@@ -1,6 +1,7 @@
 import { component, content, status, waitUntil } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
+import { settled } from '../../../composition/__tests__/page-over';
 import { documentPresence } from '../../../infrastructure/outbound/document-presence/document-presence';
 import { Client } from '../../../infrastructure/outbound/engine-link/client';
 import { recordingsOf } from '../../../infrastructure/outbound/engine-replay/recordings';
@@ -22,7 +23,7 @@ const HELLO = {
 
 describe('StaleMark', () => {
     test('a refresh refused keeps the page and marks the bar with the time of the answer still shown', async () => {
-        // Given - linux-1's Ports over two-macs, on a store whose clock says 10:42 then 10:43
+        // Given - linux-1's Ports over two-macs drawn whole, on a store whose clock says 10:42 then 10:43
         const stage = stagedReplay(recordingFor('two-macs'), {
             hello: HELLO,
             kind: 'open',
@@ -47,6 +48,7 @@ describe('StaleMark', () => {
             </EngineProvider>,
             async (visitor) => {
                 await visitor.see(content(':5173'));
+                await settled(stage);
 
                 // When - a minute on, the engine tells a notice and machines.ssh is refused as unreachable
                 now = new Date(2026, 10, 13, 10, 43);
