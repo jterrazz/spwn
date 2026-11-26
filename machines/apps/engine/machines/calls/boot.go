@@ -1,6 +1,7 @@
 package calls
 
 import (
+	"cmp"
 	"context"
 	"encoding/base64"
 	"errors"
@@ -11,6 +12,7 @@ import (
 
 	"github.com/jterrazz/studio-station/apps/engine/accounts"
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
+	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 	"github.com/jterrazz/studio-station/apps/engine/core/journal"
 	"github.com/jterrazz/studio-station/apps/engine/machinefile"
@@ -182,7 +184,10 @@ func (s *Machinist) applyBoot(ctx context.Context, name string, t model.Template
 // did once it ends, the Mac waiting a grace beyond both: each package
 // installed or set is Applied; each it did not is
 // Unfinished with why; an apply that answered for no package says why in
-// Unapplied, never in Failed: the workspace is made all the same. A
+// Unapplied, never in Failed: the workspace is made all the same. A guest
+// whose station, its image's, reads neither LeaveAsking nor Within is
+// refused before the call reaches it (machinefile.apply's abilities), and
+// Unapplied names its image's rebuild. A
 // package the image already holds is kept, and is neither.
 func (s *Machinist) applyAll(ctx context.Context, vm, file string, b *model.FirstStart) {
 	if s.o.Apply == nil {
@@ -193,12 +198,16 @@ func (s *Machinist) applyAll(ctx context.Context, vm, file string, b *model.Firs
 	ctx, cancel := context.WithTimeout(ctx, applyWait+applyGrace)
 	defer cancel()
 	applied, err := s.o.Apply(ctx, vm, file, applyWait)
+	var older *fail.Error
 	switch {
 	case err != nil && asked.Err() != nil:
 		b.Unapplied = model.ApplyStopped
 		return
 	case errors.Is(err, context.DeadlineExceeded):
 		b.Unapplied = model.OutOfTime
+		return
+	case errors.As(err, &older) && older.Code == call.FarTooOld && older.Subject == vm:
+		b.Unapplied = model.ImageOlder(cmp.Or(older.Detail["image"], file))
 		return
 	case err != nil:
 		b.Unapplied = firstLine(err.Error())

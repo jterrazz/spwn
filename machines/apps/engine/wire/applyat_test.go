@@ -59,13 +59,16 @@ func cutAtItsBound(ctx context.Context, _ struct{}, in machinefilecalls.ApplyIn,
 	}}, nil
 }
 
-func TestAGuestApplyCutAtItsBoundAnswersTheCreateWithWhatItDidOverTheWire(t *testing.T) {
-	apply := call.Call[struct{}, machinefilecalls.ApplyIn, machinefile.Applied]{Name: machinefilecalls.Apply.Name, Where: call.AtTarget, Applies: coremachine.Anywhere, Run: cutAtItsBound}
+// value: the create's router over a guest serving apply as given, its Mac
+// serving this binary's apply, whose run is never asked.
+func applyRouter(t *testing.T, apply call.Call[struct{}, machinefilecalls.ApplyIn, machinefile.Applied]) *remote.Router {
+	t.Helper()
 	guest, err := call.NewRegistry([]call.Handler{call.Bind(apply, struct{}{})})
 	if err != nil {
 		t.Fatal(err)
 	}
 	here := apply
+	here.Abilities = machinefilecalls.Apply.Abilities
 	here.Run = func(context.Context, struct{}, machinefilecalls.ApplyIn, call.Progress) (machinefile.Applied, error) {
 		t.Error("the create's apply ran on its Mac, never in its workspace")
 		return machinefile.Applied{}, nil
@@ -84,6 +87,12 @@ func TestAGuestApplyCutAtItsBoundAnswersTheCreateWithWhatItDidOverTheWire(t *tes
 		},
 	})
 	t.Cleanup(r.Close)
+	return r
+}
+
+func TestAGuestApplyCutAtItsBoundAnswersTheCreateWithWhatItDidOverTheWire(t *testing.T) {
+	apply := call.Call[struct{}, machinefilecalls.ApplyIn, machinefile.Applied]{Name: machinefilecalls.Apply.Name, Where: call.AtTarget, Applies: coremachine.Anywhere, Abilities: machinefilecalls.Apply.Abilities, Run: cutAtItsBound}
+	r := applyRouter(t, apply)
 	ctx, stop := context.WithTimeout(t.Context(), 10*time.Second)
 	defer stop()
 	got, err := machine{far: &late{router: r}}.applyAt(ctx, "web", "studio-linux", 50*time.Millisecond)
@@ -92,5 +101,27 @@ func TestAGuestApplyCutAtItsBoundAnswersTheCreateWithWhatItDidOverTheWire(t *tes
 	}
 	if len(got.Done) != 2 || got.Done[0].Line.Step.Package != "jq" || got.Done[0].State != catalog.StateOK || got.Done[1].Reason != machinefile.Interrupted {
 		t.Errorf("the create read %+v; want jq installed, then ripgrep interrupted at the bound", got.Done)
+	}
+}
+
+func TestAnOlderGuestIsRefusedTheCreatesApplyBeforeItRuns(t *testing.T) {
+	// invariant: a guest whose station lists neither of the apply's
+	// abilities decodes LeaveAsking and Within as absent, so the apply is
+	// refused as far too old before any call reaches it.
+	ran := false
+	older := call.Call[struct{}, machinefilecalls.ApplyIn, machinefile.Applied]{Name: machinefilecalls.Apply.Name, Where: call.AtTarget, Applies: coremachine.Anywhere, Run: func(context.Context, struct{}, machinefilecalls.ApplyIn, call.Progress) (machinefile.Applied, error) {
+		ran = true
+		return machinefile.Applied{}, nil
+	}}
+	r := applyRouter(t, older)
+	ctx, stop := context.WithTimeout(t.Context(), 10*time.Second)
+	defer stop()
+	_, err := machine{far: &late{router: r}}.applyAt(ctx, "web", "studio-linux", time.Minute)
+	var refused *fail.Error
+	if !errors.As(err, &refused) || refused.Code != call.FarTooOld || refused.Detail["call"] != machinefilecalls.LeaveAskingAbility {
+		t.Fatalf("an older guest answered the create %v; want it refused as far too old, lacking %s", err, machinefilecalls.LeaveAskingAbility)
+	}
+	if ran {
+		t.Fatal("the older guest ran the apply it reads without its inputs")
 	}
 }

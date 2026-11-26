@@ -161,7 +161,8 @@ type Mac struct {
 	EngineLog []string `json:"engine_log,omitempty"`
 	// value: the station version this Mac runs; empty, the spec binary's.
 	Station string `json:"station,omitempty"`
-	// value: the calls that older station does not serve, until an upgrade.
+	// value: the calls and abilities that older station does not serve,
+	// until an upgrade; a VM's, those of the station its image carries.
 	Lacks []string `json:"lacks,omitempty"`
 	// value: what station keeps in this Mac's preferences, by group.
 	Preferences map[string]json.RawMessage `json:"preferences,omitempty"`

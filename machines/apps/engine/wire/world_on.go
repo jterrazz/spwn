@@ -1672,10 +1672,25 @@ func (g worldGuest) Exec(ctx context.Context, cmd contract.GuestCommand) (contra
 		w = &out
 	}
 	g.r.w.Lock()
-	version := cmp.Or(slice.Station, Version())
+	version, lacks := cmp.Or(slice.Station, Version()), slices.Clone(slice.Lacks)
 	g.r.w.Unlock()
-	err := serve.Stream(ctx, cmd.Stdin, w, serve.Local(far.registry, far.profile, version), func(err error) *fail.Error { return kit.Translate(err, "") })
+	err := serve.Stream(ctx, cmd.Stdin, w, lacking{Calls: serve.Local(far.registry, far.profile, version), lacks: lacks}, func(err error) *fail.Error { return kit.Translate(err, "") })
 	return contract.GuestResult{Stdout: out.String()}, err
+}
+
+// invariant: a VM of the world whose slice lacks calls or abilities runs
+// the station of an image built before them: its guest's hello lists
+// neither, as that older binary's does.
+type lacking struct {
+	serve.Calls
+	lacks []string
+}
+
+func (l lacking) Hello() remotecontract.Hello {
+	h := l.Calls.Hello()
+	h.Calls = slices.DeleteFunc(h.Calls, func(c string) bool { return slices.Contains(l.lacks, c) })
+	h.Abilities = slices.DeleteFunc(h.Abilities, func(a string) bool { return slices.Contains(l.lacks, a) })
+	return h
 }
 
 // invariant: the guest of the world runs no shell, so each file a script

@@ -62,13 +62,33 @@ type ApplyIn struct {
 	Within time.Duration
 }
 
+const (
+	LeaveAskingAbility = "machinefile.apply.leave-asking"
+	WithinAbility      = "machinefile.apply.within"
+)
+
+func (in ApplyIn) Asks() []string {
+	// invariant: an older binary decodes LeaveAsking and Within as absent,
+	// so it would refuse the whole run off a terminal and carry it out with
+	// no bound: each is asked only of a binary that lists it.
+	var asks []string
+	if in.LeaveAsking {
+		asks = append(asks, LeaveAskingAbility)
+	}
+	if in.Within > 0 {
+		asks = append(asks, WithinAbility)
+	}
+	return asks
+}
+
 var Apply = call.Call[Deps, ApplyIn, machinefile.Applied]{
 	// value: the plan carried out: each package installed by apps.install,
 	// by the method and at the version its step chose, or set by
 	// settings.apply, one at a time in the plan's order; then the owner's
 	// lines of its phase.
 	Name: "machinefile.apply", Document: 2, Where: call.AtTarget, Applies: machine.Anywhere, Confirm: confirm.Remove, Journal: keptApply,
-	Errors: []fail.Code{NotFound, NeedsTerminal, NameTaken, BadPhase, confirm.YesNeeded, Busy},
+	Errors:    []fail.Code{NotFound, NeedsTerminal, NameTaken, BadPhase, confirm.YesNeeded, Busy},
+	Abilities: []string{LeaveAskingAbility, WithinAbility},
 	Run: func(ctx context.Context, d Deps, in ApplyIn, p call.Progress) (answer machinefile.Applied, err error) {
 		defer func() { answer = answer.Answered() }()
 		journal.Mark(ctx, d.Now(), "plan")

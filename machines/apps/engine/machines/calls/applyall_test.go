@@ -8,6 +8,8 @@ import (
 	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
+	"github.com/jterrazz/studio-station/apps/engine/core/call"
+	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 	"github.com/jterrazz/studio-station/apps/engine/machinefile"
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
 )
@@ -127,5 +129,23 @@ func TestACreateStoppedDuringItsApplySaysSo(t *testing.T) {
 	(&Machinist{h: keepingMac{kept: map[string]string{}}, o: Options{Apply: apply}}).applyAll(ctx, "web", "studio-linux", b)
 	if b.Unapplied != model.ApplyStopped {
 		t.Fatalf("got unapplied %q; want %q", b.Unapplied, model.ApplyStopped)
+	}
+}
+
+func TestACreateWhoseGuestIsOlderThanItsApplyNamesTheImagesRebuild(t *testing.T) {
+	// invariant: a guest refused as too old for the apply's inputs is the
+	// image's: its words name the rebuild, never the refusal's, and the
+	// workspace is made all the same; a far-too-old of the Mac is not.
+	older := model.ImageOlder("studio-linux")
+	if older != "the machine's image is older than this station: rebuild it (station images build studio-linux)" {
+		t.Fatalf("the words are %q", older)
+	}
+	for _, subject := range []string{"web", "macbook-pro"} {
+		refused := fail.New(fail.FarTooOld, call.FarTooOld, subject, map[string]string{"version": "dev", "call": "machinefile.apply.leave-asking"})
+		b := &model.FirstStart{}
+		applying(machinefile.Applied{}, refused, nil).applyAll(context.Background(), "web", "studio-linux", b)
+		if (b.Unapplied == older) != (subject == "web") || b.Unapplied == "" || b.Failed != "" || len(b.Unfinished) != 0 {
+			t.Fatalf("refused at %s: got unapplied %q, failed %q, unfinished %v; want the image's rebuild for the VM alone", subject, b.Unapplied, b.Failed, b.Unfinished)
+		}
 	}
 }

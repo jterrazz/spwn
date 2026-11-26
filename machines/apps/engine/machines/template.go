@@ -78,6 +78,10 @@ const (
 	NeverRan        = "it did not run, since the " + StepBoot + " failed"
 )
 
+func ImageOlder(image string) string {
+	return "the machine's image is older than this station: rebuild it (station images build " + image + ")"
+}
+
 type FirstStartGrant struct {
 	Program string
 	// value: why it was not granted, the refusal's code and its subject,
