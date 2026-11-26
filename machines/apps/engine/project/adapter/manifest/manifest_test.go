@@ -41,7 +41,7 @@ func TestANameIsTheManifestsRule(t *testing.T) {
 func made(t *testing.T) (contract.Projects, project.Project) {
 	t.Helper()
 	p := open(t)
-	m, err := p.Create(t.Context(), t.TempDir(), "site", catalog.Harnesses()[0])
+	m, err := p.Create(t.Context(), t.TempDir(), "site", catalog.Harnesses()[0], "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -87,7 +87,7 @@ func TestAnAgentIsRenderedByTheHarnessItDeclaresAndByNoOther(t *testing.T) {
 	owner := map[string]string{}
 	for _, harness := range catalog.Harnesses() {
 		p := open(t)
-		m, err := p.Create(t.Context(), t.TempDir(), "site", harness)
+		m, err := p.Create(t.Context(), t.TempDir(), "site", harness, "")
 		if err != nil {
 			t.Fatal(err)
 		}

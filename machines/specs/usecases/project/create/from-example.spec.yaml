@@ -1,0 +1,16 @@
+description: 'station project create --from makes a project of an example, named as asked or as it'
+env: two-macs
+runs:
+    - command: 'project create mdr --from severance'
+      exit: 0
+      stdout: |
+          ●	mdr	created	{{workdir}}/mdr
+    - command: 'project create --from matrix'
+      exit: 0
+      stdout: |
+          ●	matrix	created	{{workdir}}/matrix
+    - command: '--version >/dev/null; /usr/bin/jq -c "[.macs[\"macbook-pro\"].stores.projects[] | .Project] | sort_by(.Name)[]" world.json'
+      exit: 0
+      stdout: |
+          {"Name":"matrix","Root":"{{workdir}}/matrix","Manifest":"{{workdir}}/matrix/spwn.yaml","Agents":["neo"]}
+          {"Name":"mdr","Root":"{{workdir}}/mdr","Manifest":"{{workdir}}/mdr/spwn.yaml","Agents":["dylan","helly","irving","mark"]}

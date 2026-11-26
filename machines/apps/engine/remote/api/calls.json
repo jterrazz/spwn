@@ -1172,7 +1172,9 @@
       "where": "in-process",
       "errors": [
         "project.bad-name",
+        "project.example-declares-harness",
         "project.exists",
+        "project.unknown-example",
         "project.unknown-harness"
       ],
       "in": "CreateIn",

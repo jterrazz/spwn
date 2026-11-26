@@ -22,7 +22,7 @@ func applying(t *testing.T) (d calls.Deps, folder, root string) {
 	t.Setenv("SPWN_HOME", t.TempDir())
 	d = calls.Deps{Projects: manifest.New(local.New(nil, nil, nil, nil).FS)}
 	folder = t.TempDir()
-	made, err := d.Projects.Create(t.Context(), folder, "site", catalog.Harnesses()[0])
+	made, err := d.Projects.Create(t.Context(), folder, "site", catalog.Harnesses()[0], "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -129,5 +129,34 @@ func TestAPlanWithAnErrorAppliesNothing(t *testing.T) {
 	}
 	if _, err := os.ReadDir(filepath.Join(root, project.StateFolder, "agents")); !errors.Is(err, fs.ErrNotExist) {
 		t.Errorf("an invalid plan wrote its run folders: %v", err)
+	}
+}
+
+func TestEachExampleOfTheCatalogPlansValidAndApplies(t *testing.T) {
+	for _, example := range catalog.Examples() {
+		t.Run(example, func(t *testing.T) {
+			t.Setenv("SPWN_HOME", t.TempDir())
+			d := calls.Deps{Projects: manifest.New(local.New(nil, nil, nil, nil).FS)}
+			made, err := calls.Create.Run(t.Context(), d, calls.CreateIn{Folder: t.TempDir(), From: example}, nil)
+			if err != nil || made.Name != example || len(made.Agents) == 0 {
+				t.Fatalf("Create = %+v, %v; want the example's project named for it, with its agents", made, err)
+			}
+			plan, err := calls.Plan.Run(t.Context(), d, calls.PlanIn{Folder: made.Root}, nil)
+			if err != nil || !plan.Valid || len(plan.Changes) == 0 {
+				t.Fatalf("Plan = %+v, %v; want valid, with files to apply", plan, err)
+			}
+			applied, err := calls.Apply.Run(t.Context(), d, calls.ApplyIn{Folder: made.Root}, nil)
+			if err != nil || len(applied.Changes) != len(plan.Changes) {
+				t.Fatalf("Apply = %+v, %v; want what the plan listed", applied.Changes, err)
+			}
+			for _, agent := range made.Agents {
+				if entries, err := os.ReadDir(filepath.Join(made.Root, project.StateFolder, "agents", agent)); err != nil || len(entries) == 0 {
+					t.Errorf("run folder of %s holds %v, %v; want its rendered files", agent, entries, err)
+				}
+			}
+			if again, err := calls.Apply.Run(t.Context(), d, calls.ApplyIn{Folder: made.Root}, nil); err != nil || len(again.Changes) != 0 {
+				t.Errorf("a second Apply = %+v, %v; want nothing to apply", again.Changes, err)
+			}
+		})
 	}
 }

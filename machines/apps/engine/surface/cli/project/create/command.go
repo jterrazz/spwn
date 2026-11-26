@@ -21,20 +21,33 @@ type Deps struct {
 	Folder      func() string
 }
 
-type Input struct{ Name, Harness string }
+type Input struct{ Name, Harness, From string }
 
 func Command(d Deps, env kit.Env) *cobra.Command {
+	examples := catalog.Examples()
 	return kit.Command(kit.Leaf[Input]{
 		Use:     "create <name>",
-		Short:   "Make a project: a new folder of this one, with its spwn.yaml and a starter agent",
-		Example: "  station project create site\n  station project create site --harness " + catalog.Harnesses()[len(catalog.Harnesses())-1],
-		Args:    cobra.ExactArgs(1),
+		Short:   "Make a project: a new folder of this one, with its spwn.yaml and a starter agent, or the files of an example",
+		Example: "  station project create site\n  station project create site --harness " + catalog.Harnesses()[len(catalog.Harnesses())-1] + "\n  station project create --from " + examples[0] + "\n  station project create mine --from " + examples[len(examples)-1],
+		Args: func(c *cobra.Command, a []string) error {
+			if c.Flags().Changed("from") {
+				return cobra.MaximumNArgs(1)(c, a)
+			}
+			return cobra.ExactArgs(1)(c, a)
+		},
 		Declare: func(f *pflag.FlagSet, in *Input) {
 			f.StringVar(&in.Harness, "harness", "", "the harness its starter agent runs in, one of "+strings.Join(catalog.Harnesses(), ", ")+" (default "+catalog.Harnesses()[0]+")")
+			f.StringVar(&in.From, "from", "", "make the project from an example of the catalog, one of "+strings.Join(examples, ", ")+"; the name defaults to the example's")
 		},
-		Bind: func(in *Input, args []string) error { in.Name = args[0]; return nil },
+		Bind: func(in *Input, args []string) error {
+			if len(args) > 0 {
+				in.Name = args[0]
+			}
+			return nil
+		},
+		Near: catalog.Examples,
 		Run: func(ctx context.Context, in *Input, io kit.IO) error {
-			p, err := call.Invoke(ctx, env.Calls, machine.Ref{}, projectcalls.Create, projectcalls.CreateIn{Folder: d.Folder(), Name: in.Name, Harness: in.Harness}, nil)
+			p, err := call.Invoke(ctx, env.Calls, machine.Ref{}, projectcalls.Create, projectcalls.CreateIn{Folder: d.Folder(), Name: in.Name, Harness: in.Harness, From: in.From}, nil)
 			if err != nil {
 				return err
 			}

@@ -22,6 +22,10 @@ const (
 	Exists         fail.Code = "project.exists"
 	BadName        fail.Code = "project.bad-name"
 	UnknownHarness fail.Code = "project.unknown-harness"
+	UnknownExample fail.Code = "project.unknown-example"
+	// value: create --from with --harness: an example declares the harness
+	// of each of its agents, so none is chosen for it.
+	ExampleDeclaresHarness fail.Code = "project.example-declares-harness"
 	// value: a plan that finds an error: the leaf refuses once the plan is
 	// printed, so the owner reads every issue.
 	Invalid fail.Code = "project.invalid"

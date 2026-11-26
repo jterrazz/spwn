@@ -2,10 +2,12 @@ package fake
 
 import (
 	"context"
+	"io/fs"
 	"maps"
 	"path/filepath"
 	"slices"
 
+	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/project"
 	"github.com/jterrazz/studio-station/apps/engine/project/contract"
 	"github.com/jterrazz/studio-station/apps/engine/world"
@@ -61,19 +63,40 @@ func (p *Projects) Show(_ context.Context, root string) (project.Project, error)
 	return s.Project, err
 }
 
-func (p *Projects) Create(_ context.Context, folder, name, _ string) (project.Project, error) {
+func agentsOf(example string) []string {
+	// value: the agents an example holds, by name; the starter alone when
+	// none is named.
+	files, ok := catalog.Example(example)
+	if !ok {
+		return []string{project.Starter}
+	}
+	entries, _ := fs.ReadDir(files, "spwn/agents")
+	var names []string
+	for _, e := range entries {
+		if e.IsDir() {
+			names = append(names, e.Name())
+		}
+	}
+	return names
+}
+
+func (p *Projects) Create(_ context.Context, folder, name, _, example string) (project.Project, error) {
 	p.w.Lock()
 	defer p.w.Unlock()
 	root := filepath.Join(folder, name)
 	if _, err := p.state(root); err == nil {
 		return project.Project{}, project.ErrExists
 	}
-	made := project.Project{Name: name, Root: root, Manifest: filepath.Join(root, project.ManifestName), Agents: []string{project.Starter}}
+	made := project.Project{Name: name, Root: root, Manifest: filepath.Join(root, project.ManifestName), Agents: agentsOf(example)}
+	rendered := map[string][]project.File{}
+	for _, a := range made.Agents {
+		rendered[a] = []project.File{Starter()}
+	}
 	s := p.w.Mac(p.machine).Store()
 	if s.Projects == nil {
 		s.Projects = map[string]project.State{}
 	}
-	s.Projects[root] = project.State{Project: made, Rendered: map[string][]project.File{project.Starter: {Starter()}}}
+	s.Projects[root] = project.State{Project: made, Rendered: rendered}
 	return made, nil
 }
 

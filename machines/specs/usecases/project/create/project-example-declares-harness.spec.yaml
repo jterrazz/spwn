@@ -1,0 +1,8 @@
+description: 'station project create --from with --harness is refused, exit 2: an example declares its own'
+env: two-macs
+runs:
+    - command: 'project create --from matrix --harness codex'
+      exit: 2
+      stderr: |
+          Error: the example "matrix" declares its own harness
+          Hint: drop --harness, or make a blank project with it

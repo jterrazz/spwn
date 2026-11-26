@@ -1033,6 +1033,11 @@
       "Detail": "project",
       "Tone": "plain"
     },
+    "project.example-declares-harness": {
+      "Word": "example declares harness",
+      "Detail": "project",
+      "Tone": "plain"
+    },
     "project.exists": {
       "Word": "exists",
       "Detail": "project",
@@ -1045,6 +1050,11 @@
     },
     "project.not-found": {
       "Word": "not found",
+      "Detail": "project",
+      "Tone": "plain"
+    },
+    "project.unknown-example": {
+      "Word": "unknown example",
       "Detail": "project",
       "Tone": "plain"
     },

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/fs"
 	"path/filepath"
+	"regexp"
 	"slices"
 	"strings"
 
@@ -89,7 +90,53 @@ func (p Projects) Show(_ context.Context, root string) (project.Project, error) 
 	})
 }
 
-func (p Projects) Create(_ context.Context, folder, name, harness string) (project.Project, error) {
+var manifestName = regexp.MustCompile(`(?m)^name:.*$`)
+
+// invariant: an example's files are copied as they are, its manifest
+// renamed to the project's name; the folder is made before any file.
+func (p Projects) copyExample(root, name, example string) error {
+	files, ok := catalog.Example(example)
+	if !ok {
+		return fmt.Errorf("no example named %q", example)
+	}
+	return p.copyFolder(files, ".", root, name)
+}
+
+func (p Projects) copyFolder(files fs.FS, dir, root, name string) error {
+	entries, err := fs.ReadDir(files, dir)
+	if err != nil {
+		return err
+	}
+	for _, e := range entries {
+		path := e.Name()
+		if dir != "." {
+			path = dir + "/" + path
+		}
+		target := filepath.Join(root, filepath.FromSlash(path))
+		if e.IsDir() {
+			if err := p.fs.MkdirAll(target, 0o755); err != nil {
+				return err
+			}
+			if err := p.copyFolder(files, path, root, name); err != nil {
+				return err
+			}
+			continue
+		}
+		data, err := fs.ReadFile(files, path)
+		if err != nil {
+			return err
+		}
+		if path == project.ManifestName {
+			data = manifestName.ReplaceAll(data, []byte("name: "+name))
+		}
+		if err := p.fs.WriteFile(target, data, 0o644); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (p Projects) Create(_ context.Context, folder, name, harness, example string) (project.Project, error) {
 	root := filepath.Join(folder, name)
 	return in(root, func() (project.Project, error) {
 		if _, err := p.fs.Stat(root); err == nil {
@@ -98,7 +145,14 @@ func (p Projects) Create(_ context.Context, folder, name, harness string) (proje
 		if err := p.fs.MkdirAll(root, 0o755); err != nil {
 			return project.Project{}, err
 		}
-		if err := spwnproject.Init(root, spwnproject.InitOpts{Name: name, Backend: "spwn:" + harness}); err != nil {
+		if example != "" {
+			if err := p.copyExample(root, name, example); err != nil {
+				return project.Project{}, err
+			}
+			if err := spwnproject.AppendGitignore(root); err != nil {
+				return project.Project{}, err
+			}
+		} else if err := spwnproject.Init(root, spwnproject.InitOpts{Name: name, Backend: "spwn:" + harness}); err != nil {
 			return project.Project{}, err
 		}
 		found, err := load(root)

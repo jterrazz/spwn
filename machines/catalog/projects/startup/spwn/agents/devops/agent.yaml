@@ -1,0 +1,18 @@
+name: devops
+description: The devops. Owns deployments and container hygiene; reaches for the deployment + code-review skills.
+role: worker
+
+runtime:
+  backend: "spwn:claude-code"
+
+# Agent-specific deps, additions only.
+# Project-wide deps (unix, git, node) are inherited from spwn.yaml.
+# Only list what THIS agent needs beyond the shared set.
+#
+# Local blocks are referenced via the skill/, tool/, hook/ schemes and
+# live at the project root (spwn/skills/<name>.md, spwn/tools/<name>/,
+# spwn/hooks/<name>.yaml).
+dependencies:
+  - "spwn:docker-cli"
+  - "skill/deployment"
+  - "skill/code-review"

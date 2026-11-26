@@ -11,6 +11,8 @@ export default defineConfig({
         },
         oxfmt: {
             ignore: {
+                'catalog/projects/**':
+                    "the example projects `station project create --from` copies as they are into the owner's folder: their YAML comments and Markdown are what the owner reads, kept as authored",
                 'TODO.md': 'copied verbatim from the design',
                 'apps/menubar/stories/STORIES.md':
                     'copied verbatim from the design hand-off (v4), its captures left in the design folder',

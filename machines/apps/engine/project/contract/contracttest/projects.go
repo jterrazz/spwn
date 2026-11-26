@@ -3,6 +3,7 @@ package contracttest
 import (
 	"context"
 	"errors"
+	"io/fs"
 	"maps"
 	"path/filepath"
 	"slices"
@@ -29,7 +30,7 @@ func Projects(t *testing.T, open func(t *testing.T) (contract.Projects, string))
 
 	t.Run("a project made is a new folder with its starter agent, found from its root", func(t *testing.T) {
 		p, folder := open(t)
-		made, err := p.Create(ctx, folder, "site", last)
+		made, err := p.Create(ctx, folder, "site", last, "")
 		want := project.Project{Name: "site", Root: filepath.Join(folder, "site"), Manifest: filepath.Join(folder, "site", project.ManifestName), Agents: []string{project.Starter}}
 		if err != nil || made.Name != want.Name || made.Root != want.Root || made.Manifest != want.Manifest || !slices.Equal(made.Agents, want.Agents) {
 			t.Fatalf("Create = %+v, %v; want %+v", made, err, want)
@@ -49,17 +50,17 @@ func Projects(t *testing.T, open func(t *testing.T) (contract.Projects, string))
 
 	t.Run("a folder that exists is refused", func(t *testing.T) {
 		p, folder := open(t)
-		if _, err := p.Create(ctx, folder, "site", first); err != nil {
+		if _, err := p.Create(ctx, folder, "site", first, ""); err != nil {
 			t.Fatal(err)
 		}
-		if _, err := p.Create(ctx, folder, "site", first); !errors.Is(err, project.ErrExists) {
+		if _, err := p.Create(ctx, folder, "site", first, ""); !errors.Is(err, project.ErrExists) {
 			t.Errorf("Create twice = %v; want ErrExists", err)
 		}
 	})
 
 	t.Run("a new project plans valid and has not drifted", func(t *testing.T) {
 		p, folder := open(t)
-		made, err := p.Create(ctx, folder, "site", first)
+		made, err := p.Create(ctx, folder, "site", first, "")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -75,7 +76,7 @@ func Projects(t *testing.T, open func(t *testing.T) (contract.Projects, string))
 
 	t.Run("a new project's starter renders in memory, and nothing is on disk until written", func(t *testing.T) {
 		p, folder := open(t)
-		made, err := p.Create(ctx, folder, "site", first)
+		made, err := p.Create(ctx, folder, "site", first, "")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -105,9 +106,40 @@ func Projects(t *testing.T, open func(t *testing.T) (contract.Projects, string))
 		}
 	})
 
+	t.Run("a project made from each example holds its agents, plans valid and renders each", func(t *testing.T) {
+		for _, example := range catalog.Examples() {
+			p, folder := open(t)
+			files, _ := catalog.Example(example)
+			entries, err := fs.ReadDir(files, "spwn/agents")
+			if err != nil {
+				t.Fatal(err)
+			}
+			agents := make([]string, 0, len(entries))
+			for _, e := range entries {
+				agents = append(agents, e.Name())
+			}
+			made, err := p.Create(ctx, folder, "mine", "", example)
+			if err != nil || made.Name != "mine" || made.Root != filepath.Join(folder, "mine") || !slices.Equal(made.Agents, agents) {
+				t.Fatalf("%s: Create = %+v, %v; want the project mine with agents %v", example, made, err, agents)
+			}
+			plan, err := p.Plan(ctx, made.Root)
+			if err != nil || !plan.Valid {
+				t.Fatalf("%s: Plan = %+v, %v; want valid", example, plan, err)
+			}
+			for _, agent := range agents {
+				if rendered, err := p.Render(ctx, made.Root, agent); err != nil || len(rendered) == 0 {
+					t.Errorf("%s: Render(%s) = %v, %v; want files", example, agent, rendered, err)
+				}
+			}
+			if _, err := p.Create(ctx, folder, "mine", "", example); !errors.Is(err, project.ErrExists) {
+				t.Errorf("%s: Create over its own folder = %v; want ErrExists", example, err)
+			}
+		}
+	})
+
 	t.Run("a file written and then no longer rendered is removed, and the record forgets it", func(t *testing.T) {
 		p, folder := open(t)
-		made, err := p.Create(ctx, folder, "site", first)
+		made, err := p.Create(ctx, folder, "site", first, "")
 		if err != nil {
 			t.Fatal(err)
 		}

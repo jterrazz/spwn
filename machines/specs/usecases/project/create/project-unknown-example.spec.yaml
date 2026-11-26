@@ -1,0 +1,13 @@
+description: 'station project create --from an unknown example is refused, exit 2, naming the nearest'
+env: two-macs
+runs:
+    - command: 'project create --from matirx'
+      exit: 2
+      stderr: |
+          Error: no example named "matirx"
+          Hint: Did you mean matrix?
+    - command: 'project create --from nonesuch'
+      exit: 2
+      stderr: |
+          Error: no example named "nonesuch"
+          Hint: one of macrohard, matrix, paperclip-factory, research-lab, severance, startup

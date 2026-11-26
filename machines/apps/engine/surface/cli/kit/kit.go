@@ -21,6 +21,7 @@ import (
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/output"
 	"github.com/jterrazz/studio-station/apps/engine/page"
+	projectcalls "github.com/jterrazz/studio-station/apps/engine/project/calls"
 	"github.com/jterrazz/studio-station/apps/engine/surface/cli/words"
 )
 
@@ -178,6 +179,9 @@ type Leaf[I any] struct {
 	// call would do; else the gate's own words.
 	Refuse   func(in *I) error
 	Complete func(args []string, toComplete string) []string
+	// value: the names an example the leaf's call does not know is answered
+	// with when one is near; nil for a leaf that takes none.
+	Near func() []string
 	// value: the refusal of a word that names an entry of the family, the
 	// verb forgotten (SPEC §4.2); nil for any other word.
 	Entry func(word string) error
@@ -491,10 +495,19 @@ func meant[I any](worded *fail.Error, err error, c *cobra.Command, l Leaf[I], ar
 	// it knows, those its leaf completes, when one is near and the leaf
 	// completes names of that kind.
 	word, kind, unknown := unknownName(err)
-	if !unknown || l.Complete == nil || worded == nil || completes(noun(c)) != kind {
+	if !unknown || worded == nil {
 		return worded
 	}
-	near := Suggest(word, l.Complete(args, ""))
+	var known []string
+	switch {
+	case kind == "example" && l.Near != nil:
+		known = l.Near()
+	case l.Complete != nil && completes(noun(c)) == kind:
+		known = l.Complete(args, "")
+	default:
+		return worded
+	}
+	near := Suggest(word, known)
 	if len(near) == 0 {
 		return worded
 	}
@@ -528,6 +541,9 @@ func unknownName(err error) (word, kind string, found bool) {
 	var worded *fail.Error
 	if errors.As(err, &worded) && worded.Code == appscalls.Unknown {
 		return worded.Subject, "app", true
+	}
+	if errors.As(err, &worded) && worded.Code == projectcalls.UnknownExample {
+		return worded.Subject, "example", true
 	}
 	return "", "", false
 }

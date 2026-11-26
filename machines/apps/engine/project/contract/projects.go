@@ -18,9 +18,11 @@ type Projects interface {
 	Show(ctx context.Context, root string) (project.Project, error)
 	// invariant: a new folder, folder/name, made a project named name with
 	// its starter agent on harness; name is valid and harness one of the
-	// catalog's. A folder/name that exists is project.ErrExists, and
-	// nothing is written.
-	Create(ctx context.Context, folder, name, harness string) (project.Project, error)
+	// catalog's. When example names one of the catalog's, the folder holds
+	// that example's files instead, its manifest renamed name, and harness
+	// is empty: the example declares its own. A folder/name that exists is
+	// project.ErrExists, and nothing is written.
+	Create(ctx context.Context, folder, name, harness, example string) (project.Project, error)
 	// invariant: what the project's rules find in its declaration, as
 	// project.PlanOf orders it, with no Changes; it changes nothing.
 	Plan(ctx context.Context, root string) (project.Plan, error)

@@ -582,6 +582,12 @@ func Codes() map[fail.Code]Wording {
 		projectcalls.UnknownHarness: func(e *fail.Error) (string, string) {
 			return "no harness named \"" + e.Subject + "\"", "one of " + e.Detail["known"]
 		},
+		projectcalls.UnknownExample: func(e *fail.Error) (string, string) {
+			return "no example named \"" + e.Subject + "\"", "one of " + e.Detail["known"]
+		},
+		projectcalls.ExampleDeclaresHarness: func(e *fail.Error) (string, string) {
+			return "the example \"" + e.Subject + "\" declares its own harness", "drop --harness, or make a blank project with it"
+		},
 		projectcalls.Invalid: func(e *fail.Error) (string, string) {
 			n := e.Detail["errors"]
 			noun := " errors"

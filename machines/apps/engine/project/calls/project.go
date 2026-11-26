@@ -41,17 +41,34 @@ type CreateIn struct {
 	// value: the harness its starter agent runs in; empty, the catalog's
 	// default.
 	Harness string `json:",omitempty"`
+	// value: one of the catalog's examples, whose files the project is made
+	// of; empty, a blank project. The name then defaults to the example's.
+	From string `json:",omitempty"`
 }
 
 var Create = call.Call[Deps, CreateIn, project.Project]{
 	Name: "project.create", Where: call.InProcess, Applies: machine.Anywhere,
-	Errors: []fail.Code{BadName, UnknownHarness, Exists},
+	Errors: []fail.Code{BadName, UnknownHarness, UnknownExample, ExampleDeclaresHarness, Exists},
 	Run: func(ctx context.Context, d Deps, in CreateIn, _ call.Progress) (project.Project, error) {
 		// invariant: a project is made as a new folder, never over one that
 		// exists, and its harness is written in its file, never left to be
 		// chosen later.
-		if !project.ValidName(in.Name) {
-			return project.Project{}, fail.New(fail.Refused, BadName, in.Name, nil)
+		if in.From != "" && !slices.Contains(catalog.Examples(), in.From) {
+			return project.Project{}, fail.New(fail.Refused, UnknownExample, in.From, map[string]string{"known": strings.Join(catalog.Examples(), ", ")})
+		}
+		name := in.Name
+		if name == "" {
+			name = in.From
+		}
+		if !project.ValidName(name) {
+			return project.Project{}, fail.New(fail.Refused, BadName, name, nil)
+		}
+		if in.From != "" {
+			if in.Harness != "" {
+				return project.Project{}, fail.New(fail.Refused, ExampleDeclaresHarness, in.From, nil)
+			}
+			p, err := d.Projects.Create(ctx, in.Folder, name, "", in.From)
+			return p, coded(err, filepath.Join(in.Folder, name))
 		}
 		harness := in.Harness
 		if harness == "" {
@@ -60,8 +77,8 @@ var Create = call.Call[Deps, CreateIn, project.Project]{
 		if !slices.Contains(catalog.Harnesses(), harness) {
 			return project.Project{}, fail.New(fail.Refused, UnknownHarness, harness, map[string]string{"known": strings.Join(catalog.Harnesses(), ", ")})
 		}
-		p, err := d.Projects.Create(ctx, in.Folder, in.Name, harness)
-		return p, coded(err, filepath.Join(in.Folder, in.Name))
+		p, err := d.Projects.Create(ctx, in.Folder, name, harness, "")
+		return p, coded(err, filepath.Join(in.Folder, name))
 	},
 }
 
