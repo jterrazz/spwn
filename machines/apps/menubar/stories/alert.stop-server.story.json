@@ -1,7 +1,7 @@
 {
     "group": "alert",
     "id": "alert.stop-server",
-    "note": "Stop infra, typed: example.com goes offline; the red Stop infra stays off until infra is typed.",
+    "note": "Stop infra on mac-mini? Yes or no: example.com goes offline; Cancel is the default and Stop infra is red.",
     "pages": ["pages/machines.server.machine.infra.json"],
     "schema": "station.story/v1",
     "ui": {

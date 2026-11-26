@@ -22,7 +22,7 @@ Each story gives: what it shows; the data the page needs (what the engine must s
 - **Accounts** (3): `accounts.all`, `accounts.signing-in`, `accounts.signed-in`
 - **Awake** (3): `awake.all`, `awake.off`, `awake.4h`
 - **Sheets** (14): `sheet.new-vm`, `sheet.new-vm.options`, `sheet.new-vm.server`, `sheet.new-vm.first`, `sheet.grant`, `sheet.grant.vm`, `sheet.share-port`, `sheet.share-port.vm`, `sheet.share-port.empty`, `sheet.cleanup.mac`, `sheet.cleanup.all`, `sheet.hint.add-mac`, `sheet.hint.firewall`, `sheet.hint.declare-public`
-- **Confirmations (alerts)** (14): `alert.restart-server`, `alert.stop-server`, `alert.stop-server.typed`, `alert.delete-server`, `alert.stop-vm`, `alert.delete-vm.ephemeral`, `alert.delete-vm.persistent`, `alert.stop-all`, `alert.stop-all.server`, `alert.restart-mac`, `alert.forget-mac`, `alert.remove-grant`, `alert.stop-share`, `alert.let-sleep`
+- **Confirmations (alerts)** (12): `alert.restart-server`, `alert.stop-server`, `alert.delete-server`, `alert.delete-server.typed`, `alert.delete-vm.ephemeral`, `alert.delete-vm.persistent`, `alert.stop-all`, `alert.stop-all.server`, `alert.restart-mac`, `alert.forget-mac`, `alert.remove-grant`, `alert.let-sleep`
 - **Menus** (21): `menu.station`, `menu.context.workspace`, `menu.context.workspace.copy`, `menu.context.workspace.share`, `menu.context.stopped`, `menu.context.server`, `menu.context.server.down`, `menu.context.mac`, `menu.context.mac.asleep`, `menu.context.grant`, `menu.awake`, `menu.page.mac`, `menu.page.this-mac`, `menu.page.mac.asleep`, `menu.page.workspace`, `menu.page.server`, `menu.page.ports`, `menu.new-vm.on`, `menu.new-vm.create`, `menu.grant.to`, `menu.share-port.of`
 - **Popovers, tooltips, HUD** (5): `pop.qr`, `pop.qr.public`, `pop.info`, `pop.hud.copy`, `pop.hud.terminal`
 - **Find (Cmd-K)** (10): `find.empty`, `find.down`, `find.port`, `find.machine`, `find.action`, `find.awake`, `find.keyboard`, `find.more-open`, `find.nomatch`, `find.type-to-find`
@@ -662,7 +662,7 @@ Each story gives: what it shows; the data the page needs (what the engine must s
 ![server.stopped](stories/server.stopped.png)
 
 - **Capture**: [dark](stories/server.stopped.png)
-- **Shows**: infra stopped by its owner (after the typed confirmation).
+- **Shows**: infra stopped by its owner (after its yes).
 - **Data**: server stopped
 - **Interactions**: "mac-mini" → back; "More options for infra" → pageMenu(server:infra); "Overview" → seg(overview); "Activity" → seg(activity) [⌘I]; "Healthy · 4 of 4 checked after every boot · 41 s" → unfold(health:infra); "Restart…" → restartAsk(infra); "Show log" → terminal(journalctl -u k3s on infra); "CPU · 8 cores 17%" → seg(activity); "Memory 11.1 GB free" → seg(activity); "Network 0.0 MB/s" → seg(activity); "Open Traefik" → openUrl(https://example.com); "Copy link to Traefik" → copy(https://example.com); "Show QR for Traefik (443)" → qrpop(p3); "Copy Kubernetes API" → copy(http://infra.tail3e9a.ts.net:6443); "Copy link to Kubernetes API" → copy(http://infra.tail3e9a.ts.net:6443)
 - **Enters**: no animation (a state reached in place; live values tick every 1 to 2 s)
@@ -959,14 +959,16 @@ Keys: ↩ the primary button, ⌥↩ / ⌘↩ the split variants (New VM), Tab c
 
 Keys: Tab inside the alert only, ↩ the default (the red button is never the default while typed confirmation is empty), esc cancels.
 
+An alert asks what the engine grades its gesture ([ADR-097](../../../docs/decisions/097-a-confirmation-follows-its-consequence.md)): a gesture it asks nothing of (a workspace's stop, a down server's restart, stop sharing) runs at once, with no alert.
+
 ### `alert.restart-server`
 
 ![alert.restart-server](stories/alert.restart-server.png) ![alert.restart-server light](stories/alert.restart-server.light.png)
 
 - **Capture**: [dark](stories/alert.restart-server.png), [light](stories/alert.restart-server.light.png)
-- **Shows**: Restart infra on mac-mini? (its name typed, as `machines.restart` asks of a server, `--confirm=infra` in the CLI) "infra is unreachable for about a minute…", the name field, Cancel / Restart infra in red, disabled until infra is typed. The alert scales in from 1.08 at the panel centre over a scrim.
+- **Shows**: Restart infra on mac-mini? (yes or no, as `machines.restart` asks of an up server, `--yes` in the CLI; a down server's restart asks nothing) "infra is unreachable for about a minute…", Cancel / Restart infra, the default. The alert scales in from 1.08 at the panel centre over a scrim.
 - **Data**: server, host
-- **Interactions**: "the scrim (click outside the card)" → closeSheet; field "infra"; "Cancel" → closeSheet; "Restart infra" → sheetYes (disabled)
+- **Interactions**: "the scrim (click outside the card)" → closeSheet; "Cancel" → closeSheet; "Restart infra" → sheetYes
 - **Enters**: .scrim.on: CSS opacity 340 ms cubic-bezier(0.32, 0.72, 0, 1)
 - **Leaves**: .alert: opacity+transform 1 translate(-50%,-50%) → 0 translate(-50%,-50%) scale(.96) 200 ms snappy; .scrim: CSS opacity 340 ms cubic-bezier(0.32, 0.72, 0, 1) (esc)
 
@@ -975,21 +977,10 @@ Keys: Tab inside the alert only, ↩ the default (the red button is never the de
 ![alert.stop-server](stories/alert.stop-server.png)
 
 - **Capture**: [dark](stories/alert.stop-server.png)
-- **Shows**: Stop infra (typed): "example.com goes offline"; a field asks to type infra; the red button is disabled until it matches.
+- **Shows**: Stop infra on mac-mini? (yes or no: it stops what others reach) "example.com goes offline"; Cancel is the default, Stop infra is red.
 - **Data**: server, its public host
-- **Interactions**: "the scrim (click outside the card)" → closeSheet; field "infra"; "Cancel" → closeSheet; "Stop infra" → sheetYes (disabled)
+- **Interactions**: "the scrim (click outside the card)" → closeSheet; "Cancel" → closeSheet; "Stop infra" → sheetYes
 - **Enters**: .scrim.on: CSS opacity 340 ms cubic-bezier(0.32, 0.72, 0, 1)
-- **Leaves**: .alert: opacity+transform 1 translate(-50%,-50%) → 0 translate(-50%,-50%) scale(.96) 200 ms snappy; .scrim: CSS opacity 340 ms cubic-bezier(0.32, 0.72, 0, 1) (esc)
-
-### `alert.stop-server.typed`
-
-![alert.stop-server.typed](stories/alert.stop-server.typed.png)
-
-- **Capture**: [dark](stories/alert.stop-server.typed.png)
-- **Shows**: The name typed: Stop infra is enabled.
-- **Data**: as alert.stop-server
-- **Interactions**: "the scrim (click outside the card)" → closeSheet; field "infra"; "Cancel" → closeSheet; "Stop infra" → sheetYes
-- **Enters**: no animation (a state reached in place; live values tick every 1 to 2 s)
 - **Leaves**: .alert: opacity+transform 1 translate(-50%,-50%) → 0 translate(-50%,-50%) scale(.96) 200 ms snappy; .scrim: CSS opacity 340 ms cubic-bezier(0.32, 0.72, 0, 1) (esc)
 
 ### `alert.delete-server`
@@ -1003,15 +994,15 @@ Keys: Tab inside the alert only, ↩ the default (the red button is never the de
 - **Enters**: .scrim.on: CSS opacity 340 ms cubic-bezier(0.32, 0.72, 0, 1)
 - **Leaves**: .alert: opacity+transform 1 translate(-50%,-50%) → 0 translate(-50%,-50%) scale(.96) 200 ms snappy; .scrim: CSS opacity 340 ms cubic-bezier(0.32, 0.72, 0, 1) (esc)
 
-### `alert.stop-vm`
+### `alert.delete-server.typed`
 
-![alert.stop-vm](stories/alert.stop-vm.png)
+![alert.delete-server.typed](stories/alert.delete-server.typed.png)
 
-- **Capture**: [dark](stories/alert.stop-vm.png)
-- **Shows**: Stop linux-1 on This Mac? "Its disk is kept. 2 shared ports stop answering until it starts again."
-- **Data**: ports of the VM
-- **Interactions**: "the scrim (click outside the card)" → closeSheet; "Cancel" → closeSheet; "Stop linux-1" → sheetYes
-- **Enters**: .scrim.on: CSS opacity 340 ms cubic-bezier(0.32, 0.72, 0, 1)
+- **Capture**: [dark](stories/alert.delete-server.typed.png)
+- **Shows**: The name typed: Delete infra is enabled. Cancel stays the default.
+- **Data**: as alert.delete-server
+- **Interactions**: "the scrim (click outside the card)" → closeSheet; field "infra"; "Cancel" → closeSheet; "Delete infra" → sheetYes
+- **Enters**: no animation (a state reached in place; live values tick every 1 to 2 s)
 - **Leaves**: .alert: opacity+transform 1 translate(-50%,-50%) → 0 translate(-50%,-50%) scale(.96) 200 ms snappy; .scrim: CSS opacity 340 ms cubic-bezier(0.32, 0.72, 0, 1) (esc)
 
 ### `alert.delete-vm.ephemeral`
@@ -1019,9 +1010,9 @@ Keys: Tab inside the alert only, ↩ the default (the red button is never the de
 ![alert.delete-vm.ephemeral](stories/alert.delete-vm.ephemeral.png) ![alert.delete-vm.ephemeral light](stories/alert.delete-vm.ephemeral.light.png)
 
 - **Capture**: [dark](stories/alert.delete-vm.ephemeral.png), [light](stories/alert.delete-vm.ephemeral.light.png)
-- **Shows**: Delete agent-7f? (y/n for an ephemeral workspace) "This can't be undone. It goes with its disk (12 GB)."
+- **Shows**: Delete agent-7f? (typed: a running workspace; only a stopped ephemeral one nobody holds is deleted unasked) "This can't be undone. It goes with its disk (40 GB)."
 - **Data**: disk, ports and shares of the VM
-- **Interactions**: "the scrim (click outside the card)" → closeSheet; "Cancel" → closeSheet; "Delete agent-7f" → sheetYes
+- **Interactions**: "the scrim (click outside the card)" → closeSheet; field "agent-7f"; "Cancel" → closeSheet; "Delete agent-7f" → sheetYes (disabled)
 - **Enters**: .scrim.on: CSS opacity 340 ms cubic-bezier(0.32, 0.72, 0, 1)
 - **Leaves**: .alert: opacity+transform 1 translate(-50%,-50%) → 0 translate(-50%,-50%) scale(.96) 200 ms snappy; .scrim: CSS opacity 340 ms cubic-bezier(0.32, 0.72, 0, 1) (esc)
 
@@ -1063,9 +1054,9 @@ Keys: Tab inside the alert only, ↩ the default (the red button is never the de
 ![alert.restart-mac](stories/alert.restart-mac.png)
 
 - **Capture**: [dark](stories/alert.restart-mac.png)
-- **Shows**: Restart mac-mini? (typed, it hosts a server) "infra is down while mac-mini restarts, about 2 min."
+- **Shows**: Restart mac-mini? (yes or no, naming the server it stops) "It hosts a server. infra is down while mac-mini restarts, about 2 min."; Cancel is the default, Restart mac-mini is red.
 - **Data**: servers the Mac hosts
-- **Interactions**: "the scrim (click outside the card)" → closeSheet; field "mac-mini"; "Cancel" → closeSheet; "Restart mac-mini" → sheetYes (disabled)
+- **Interactions**: "the scrim (click outside the card)" → closeSheet; "Cancel" → closeSheet; "Restart mac-mini" → sheetYes
 - **Enters**: .scrim.on: CSS opacity 340 ms cubic-bezier(0.32, 0.72, 0, 1)
 - **Leaves**: .alert: opacity+transform 1 translate(-50%,-50%) → 0 translate(-50%,-50%) scale(.96) 200 ms snappy; .scrim: CSS opacity 340 ms cubic-bezier(0.32, 0.72, 0, 1) (esc)
 
@@ -1088,17 +1079,6 @@ Keys: Tab inside the alert only, ↩ the default (the red button is never the de
 - **Shows**: Remove GitHub? "The grant ends here; the token stays yours." Remove is red, as the grant row's Remove is.
 - **Data**: grant
 - **Interactions**: "the scrim (click outside the card)" → closeSheet; "Cancel" → closeSheet; "Remove" → sheetYes
-- **Enters**: .scrim.on: CSS opacity 340 ms cubic-bezier(0.32, 0.72, 0, 1)
-- **Leaves**: .alert: opacity+transform 1 translate(-50%,-50%) → 0 translate(-50%,-50%) scale(.96) 200 ms snappy; .scrim: CSS opacity 340 ms cubic-bezier(0.32, 0.72, 0, 1) (esc)
-
-### `alert.stop-share`
-
-![alert.stop-share](stories/alert.stop-share.png)
-
-- **Capture**: [dark](stories/alert.stop-share.png)
-- **Shows**: Stop sharing linux-1:5173? "The link stops answering on your tailnet. The service keeps running inside the VM."
-- **Data**: port
-- **Interactions**: "the scrim (click outside the card)" → closeSheet; "Cancel" → closeSheet; "Stop sharing" → sheetYes
 - **Enters**: .scrim.on: CSS opacity 340 ms cubic-bezier(0.32, 0.72, 0, 1)
 - **Leaves**: .alert: opacity+transform 1 translate(-50%,-50%) → 0 translate(-50%,-50%) scale(.96) 200 ms snappy; .scrim: CSS opacity 340 ms cubic-bezier(0.32, 0.72, 0, 1) (esc)
 
@@ -1133,7 +1113,7 @@ Keys: ↑ ↓ move, → opens a submenu, ↩ runs, esc closes.
 ![menu.context.workspace](stories/menu.context.workspace.png) ![menu.context.workspace light](stories/menu.context.workspace.light.png)
 
 - **Capture**: [dark](stories/menu.context.workspace.png), [light](stories/menu.context.workspace.light.png)
-- **Shows**: Right-click a workspace row: header "linux-1 on This Mac", Open ↩, Open in Terminal ⌘↩, Open Vite, Copy ›, Share ›, Restart, Stop…, Delete… (red).
+- **Shows**: Right-click a workspace row: header "linux-1 on This Mac", Open ↩, Open in Terminal ⌘↩, Open Vite, Copy ›, Share ›, Grant a password…, Stop (it asks nothing), Delete… (red).
 - **Data**: vm state, its first web port
 - **Interactions**: "New VM" → newvm(thismac) [New VM · on This Mac, the most free memory · ⌘N]; "More options for Spwn Menu" → gear; "Review" → push(vm:review-bot); "Ports, 5 shared" → push(ports:all) [5 shared · ⌘P]; "Accounts 1 signed out" → push(accounts:all) [Accounts · All machines · ⌘U]; "Awake, until 18:00" → push(awake:all) [Awake until 18:00 · ⌘E · right-click for a duration]; "Keep This Mac awake" → awakeToggle; "review-botmac-mini fixes the token refresh" → push(vm:review-bot); "Open review-bot in Terminal" → attach(review-bot) [Open in Terminal · ⌘↩]; "linux-1This Mac running tests · 41/58 pass 32%" → push(vm:linux-1); "Open linux-1 in Terminal" → attach(linux-1) [Open in Terminal · ⌘↩]; "linux-3mac-mini editing src/auth/refresh.ts 60%" → push(vm:linux-3); "Open linux-3 in Terminal" → attach(linux-3) [Open in Terminal · ⌘↩]; "agent-7f tests pass Clean up" → push(vm:agent-7f); "Clean up" → cleanup(thismac); "infra healthy · up 12 days · 2 ports" → push(vm:infra); "This Mac 1 working4 upkeep 23 GB free" → push(mac:thismac); "New VM on This Mac" → newvm(thismac) [New VM on This Mac · ⌘N]; "mac-mini 1 working1 waiting 19 GB free" → push(mac:mac-mini); "New VM on mac-mini" → newvm(mac-mini) [New VM on mac-mini · ⌘N]; "macbook-air asleep · seen 2 hr ago" → push(mac:macbook-air); "Find a machine, a port, an action… ⌘K" → find; menu item "Open ↩"; menu item "Open in Terminal ⌘↩"; menu item "Open Vite"; menu item "Copy"; menu item "Share"; … 3 more
 - **Enters**: .menu: opacity+transform 0 scale(.97) → 1 none 200 ms snappy; .qa: CSS opacity 120 ms
@@ -1177,7 +1157,7 @@ Keys: ↑ ↓ move, → opens a submenu, ↩ runs, esc closes.
 ![menu.context.server](stories/menu.context.server.png)
 
 - **Capture**: [dark](stories/menu.context.server.png)
-- **Shows**: A server row: Open, Open Traefik, Copy, Share, Restart (asks, red as its typed question is), Stop…, Delete….
+- **Shows**: A server row: Open, Open Traefik, Copy, Share, Restart… (asks yes or no), Stop…, Delete….
 - **Data**: server state, ports
 - **Interactions**: "New VM" → newvm(thismac) [New VM · on This Mac, the most free memory · ⌘N]; "More options for Spwn Menu" → gear; "Review" → push(vm:review-bot); "Ports, 5 shared" → push(ports:all) [5 shared · ⌘P]; "Accounts 1 signed out" → push(accounts:all) [Accounts · All machines · ⌘U]; "Awake, until 18:00" → push(awake:all) [Awake until 18:00 · ⌘E · right-click for a duration]; "Keep This Mac awake" → awakeToggle; "review-botmac-mini fixes the token refresh" → push(vm:review-bot); "Open review-bot in Terminal" → attach(review-bot) [Open in Terminal · ⌘↩]; "linux-1This Mac running tests · 41/58 pass 38%" → push(vm:linux-1); "Open linux-1 in Terminal" → attach(linux-1) [Open in Terminal · ⌘↩]; "linux-3mac-mini editing src/auth/refresh.ts 52%" → push(vm:linux-3); "Open linux-3 in Terminal" → attach(linux-3) [Open in Terminal · ⌘↩]; "agent-7f tests pass Clean up" → push(vm:agent-7f); "Clean up" → cleanup(thismac); "infra healthy · up 12 days · 2 ports" → push(vm:infra); "This Mac 1 working4 upkeep 23 GB free" → push(mac:thismac); "New VM on This Mac" → newvm(thismac) [New VM on This Mac · ⌘N]; "mac-mini 1 working1 waiting 19 GB free" → push(mac:mac-mini); "New VM on mac-mini" → newvm(mac-mini) [New VM on mac-mini · ⌘N]; "macbook-air asleep · seen 2 hr ago" → push(mac:macbook-air); "Find a machine, a port, an action… ⌘K" → find; menu item "Open ↩"; menu item "Open Traefik"; menu item "Copy"; menu item "Share"; menu item "Restart"; … 2 more
 - **Enters**: .menu: opacity+transform 0 scale(.97) → 1 none 200 ms snappy
@@ -1276,7 +1256,7 @@ Keys: ↑ ↓ move, → opens a submenu, ↩ runs, esc closes.
 ![menu.page.workspace](stories/menu.page.workspace.png)
 
 - **Capture**: [dark](stories/menu.page.workspace.png)
-- **Shows**: linux-1's More menu: Copy ssh command, Share a port…, Grant a password…, Stop…, Delete… (red).
+- **Shows**: linux-1's More menu: Copy ssh command, Share a port…, Grant a password…, Stop (it asks nothing), Delete… (red).
 - **Data**: vm
 - **Interactions**: "This Mac" → back; "More options for linux-1" → pageMenu(vm:linux-1); "Overview" → seg(overview); "Activity" → seg(activity) [⌘I]; "Ports" → seg(ports) [⌘P]; "Accounts" → seg(accounts) [⌘U]; "Full log" → terminal(claude log on linux-1); "CPU · 4 cores 34%" → seg(activity); "Memory 3.0 GB free" → seg(activity); "Network 0.8 MB/s" → seg(activity); "Open Vite" → openUrl(http://linux-1.tail3e9a.ts.net:5173); "Copy link to Vite" → copy(http://linux-1.tail3e9a.ts.net:5173); "Show QR for Vite (5173)" → qrpop(p1); "Open API dev server" → openUrl(http://linux-1.tail3e9a.ts.net:3000); "Copy link to API dev server" → copy(http://linux-1.tail3e9a.ts.net:3000); "Show QR for API dev server (3000)" → qrpop(p2); "Share Astro" → sharePort(linux-1:4321); "ssh linux-1" → copy(ssh linux-1); "Open in Terminal" → attach(linux-1) [⌘↩]; menu item "Copy ssh command"; menu item "Share a port…"; menu item "Grant a password…"; menu item "Stop…"; menu item "Delete…"
 - **Enters**: .menu: opacity+transform 0 scale(.97) → 1 none 200 ms snappy; .iconbtn: CSS background-color 120 ms; .iconbtn: CSS color 120 ms
@@ -1689,4 +1669,4 @@ Every story of this file is green: its story file, its pages, its dark and light
 
 ---
 
-145 ids: 144 stories (three of them designed after the prototype, without a capture) and `phone.explainer`; 199 captures of the prototype (33 light). This file is edited by hand: `tools/gen.mjs` would rewrite it from the prototype and undo every story designed since, so it regenerates only into a scratch copy, from which a re-captured prototype story is carried over by hand. Regenerate the captures: `node tools/run.mjs [regex]` then `node tools/gen.mjs` (driver, story definitions and generator in `tools/`; Playwright from /private/tmp/station-work/shot, metadata in /private/tmp/station-work/v4/meta.json).
+143 ids: 142 stories (four of them designed after the prototype, without a capture) and `phone.explainer`; 199 captures of the prototype (33 light). This file is edited by hand: `tools/gen.mjs` would rewrite it from the prototype and undo every story designed since, so it regenerates only into a scratch copy, from which a re-captured prototype story is carried over by hand. Regenerate the captures: `node tools/run.mjs [regex]` then `node tools/gen.mjs` (driver, story definitions and generator in `tools/`; Playwright from /private/tmp/station-work/shot, metadata in /private/tmp/station-work/v4/meta.json).

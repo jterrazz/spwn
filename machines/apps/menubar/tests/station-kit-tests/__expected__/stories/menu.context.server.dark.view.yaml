@@ -11,7 +11,7 @@ added:
       - separator [kit=MenuPreview.line] [at=5,97] [size=195.5x11]
       - menuitem "Copy" [kit=MenuPreview.item] [at=5,108] [size=195.5x24] [icon=doc.on.doc] [submenu]
       - separator [kit=MenuPreview.line] [at=5,132] [size=195.5x11]
-      - menuitem "Restart…" [kit=MenuPreview.item] [at=5,143] [size=195.5x24] [icon=arrow.clockwise] [state=danger]
+      - menuitem "Restart…" [kit=MenuPreview.item] [at=5,143] [size=195.5x24] [icon=arrow.clockwise]
       - menuitem "Stop…" [kit=MenuPreview.item] [at=5,167] [size=195.5x24] [icon=stop]
       - separator [kit=MenuPreview.line] [at=5,191] [size=195.5x11]
       - menuitem "Delete…" [kit=MenuPreview.item] [at=5,202] [size=195.5x24] [icon=trash] [state=danger]

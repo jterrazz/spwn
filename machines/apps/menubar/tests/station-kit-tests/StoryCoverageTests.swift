@@ -194,7 +194,7 @@ final class StoryCoverageTests: XCTestCase {
 
     func testEveryStoryIsGreen() throws {
         let coverage = try coverage()
-        XCTAssertEqual(coverage.ids.count, 145, "STORIES.md holds 144 stories and phone.explainer")
+        XCTAssertEqual(coverage.ids.count, 143, "STORIES.md holds 142 stories and phone.explainer")
         let (findings, tally) = coverage.audit()
         let gaps = Coverage.gaps.filter { !coverage.ids.contains($0) }
         print("stories: \(tally.green) green, \(tally.pending) unbuilt pending: \(coverage.unbuilt.joined(separator: ", ")); \(tally.orphans) orphans; \(gaps.count) gap ids pending: \(gaps.joined(separator: ", "))")

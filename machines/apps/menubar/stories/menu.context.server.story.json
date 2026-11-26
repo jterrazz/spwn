@@ -1,7 +1,7 @@
 {
     "group": "menu",
     "id": "menu.context.server",
-    "note": "Right-click infra on Home: Open, Open in Terminal, Open Traefik; Copy ›; Restart, Stop…; Delete….",
+    "note": "Right-click infra on Home: Open, Open in Terminal, Open Traefik; Copy ›; Restart…, Stop…; Delete….",
     "pages": ["pages/machines.home.menubar.json"],
     "samples": {
         "cpu:mac-mini": 55,

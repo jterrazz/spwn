@@ -35,9 +35,9 @@ final class KeyboardTests: XCTestCase {
     }
 
     func testAnAlertTrapsTheWalkInItsNameThenItsButtons() {
-        XCTAssertEqual(PanelRegion.of(Stories["alert.stop-vm"].state), .alert)
-        XCTAssertEqual(PanelOrder.walk(Stories["alert.stop-vm"].state), [.cancel, .confirm])
-        XCTAssertEqual(PanelOrder.walk(Stories["alert.stop-server.typed"].state), [.typed, .cancel, .confirm])
+        XCTAssertEqual(PanelRegion.of(Stories["alert.restart-server"].state), .alert)
+        XCTAssertEqual(PanelOrder.walk(Stories["alert.restart-server"].state), [.cancel, .confirm])
+        XCTAssertEqual(PanelOrder.walk(Stories["alert.delete-server.typed"].state), [.typed, .cancel, .confirm])
     }
 
     func testFindWalksItsResultsAndItsShowMoreLines() {
@@ -95,8 +95,8 @@ final class KeyboardTests: XCTestCase {
         let qr = Stories["pop.qr"].state
         let find = Stories["find.keyboard"].state
         let sheet = Stories["sheet.new-vm"].state
-        let alert = Stories["alert.stop-vm"].state
-        let typed = Stories["alert.stop-server.typed"].state
+        let alert = Stories["alert.restart-server"].state
+        let typed = Stories["alert.delete-server.typed"].state
         let workspace = Stories["workspace.overview"].state
         var overHome = home
         overHome.pushed = mac.shown

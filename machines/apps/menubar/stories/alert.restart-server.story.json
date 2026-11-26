@@ -1,7 +1,7 @@
 {
     "group": "alert",
     "id": "alert.restart-server",
-    "note": "Restart infra on mac-mini? A server's restart asks its name typed, as machines.restart does: infra is unreachable for about a minute while it boots.",
+    "note": "Restart infra on mac-mini? An up server's restart asks yes or no, as machines.restart does: infra is unreachable for about a minute while it boots.",
     "pages": ["pages/machines.server.machine.infra.json"],
     "schema": "station.story/v1",
     "ui": {
