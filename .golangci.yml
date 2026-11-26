@@ -14,12 +14,18 @@ linters:
             # outside it; the packages it binds are the scope rule of the exclusions below.
             analyze-types: true
             forbid:
-                - pattern: ^os\.(Open|OpenFile|ReadFile|ReadDir|Stat|Lstat|DirFS)$
+                - pattern: ^os\.(Open|OpenFile|ReadFile|ReadDir|Stat|Lstat|DirFS|Readlink|OpenRoot|OpenInRoot)$
                   pkg: ^os$
-                  msg: a project is read through platform.Within or platform.FS, never a plain os read
-                - pattern: ^filepath\.(Walk|WalkDir|Glob)$
+                  msg: a project is read through platform.Within or platform.FS, never a plain os read nor a root of its own
+                - pattern: ^ioutil\.(ReadFile|ReadDir)$
+                  pkg: ^io/ioutil$
+                  msg: a project is read through platform.Within or platform.FS, never a plain ioutil read
+                - pattern: ^filepath\.(Walk|WalkDir|Glob|EvalSymlinks)$
                   pkg: ^path/filepath$
-                  msg: a project is walked through platform.Tree's WalkDir, never a plain filepath walk
+                  msg: a project is walked through platform.Tree's WalkDir, never a plain filepath walk or link resolution
+                - pattern: ^syscall\.Open$
+                  pkg: ^syscall$
+                  msg: a project is read through platform.Within or platform.FS, never a raw open
         depguard:
             # invariant: each rule denies a layer the imports of the layers above it.
             # L1 platform imports nothing; L2 activity, authentication, upgrade import L1;
@@ -122,11 +128,23 @@ linters:
                   - errcheck
               path: _test\.go
             # invariant: forbidigo binds the packages that read a project: its loader, the transpiler's source, the
-            # dependency packages that read spwn.lock, spwn/tools/ and a tool's files, and the architect, which reads
-            # spwn/skills/, spwn/hooks/, spwn/commands/ and the agents' Minds into a world.
+            # dependency packages that read spwn.lock, spwn/tools/ and a tool's files, the architect, which reads
+            # spwn/skills/, spwn/hooks/, spwn/commands/ and the agents' Minds into a world, and the automation engine.
             - linters:
                   - forbidigo
-              path-except: ^packages/(architect/|project/|transpile/source/|dependency/(refs/|lockfile\.go|internal/manifest/|internal/adapters/local/))
+              path-except: ^packages/(architect/|automation/|project/|transpile/source/|dependency/(refs/|lockfile\.go|internal/manifest/|internal/adapters/local/))
+            # outside: an fs automation watches the host folder its declaration names, which may be outside the
+            # project by design: plan says so as an advice, and the watcher lists names and times there, reading no
+            # file's bytes.
+            - linters:
+                  - forbidigo
+              path: ^packages/automation/(automation|fs_source)\.go$
+            # outside: NOT YET ROOTED, the run receipts (.spwn/runs.jsonl) and the schedule state
+            # (.spwn/automations/state.json) are read and written by their plain paths, so a link a cloned project
+            # carries there is followed; machines/TODO.md records it.
+            - linters:
+                  - forbidigo
+              path: ^packages/automation/(receipts|state)\.go$
             # outside: a world's workspaces are host folders the declaration names to mount, each stat'd as given
             # before its bind.
             - linters:
