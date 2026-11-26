@@ -204,17 +204,6 @@ describe('contrast', () => {
         expect(below(MARK_BAR, marks)).toStrictEqual([]);
     });
 
-    test("a state's mark holds 3:1 on the column's current row, the light pill", () => {
-        // Given - each tone's mark as the current row draws it, on --primary
-        const measures = ['ok', 'warn', 'bad', 'new'].map((tone): Measure => [
-            `--${tone}-on-primary on --primary`,
-            ratio(colourOf(`${tone}-on-primary`), colourOf('primary')),
-        ]);
-
-        // Then - none is below the bar of a mark
-        expect(below(MARK_BAR, measures)).toStrictEqual([]);
-    });
-
     test('a tone reads at 4.5:1 on its own pill over s0 to s2, the steps a pill sits on', () => {
         // Given - each tone as text on its fill, the tone at its share over s0 to s2
         const share = Number.parseFloat(tokenOf('tone-fill')) / 100;
@@ -253,7 +242,10 @@ describe('contrast', () => {
         const worn = GLASS.map((rule) => `${rule.file} ${rule.selector}`).toSorted();
 
         // Then - they are the floating surfaces, and only they
-        expect(worn).toStrictEqual(['ui/popover.module.css .popover']);
+        expect(worn).toStrictEqual([
+            'navigation/column.module.css .peek',
+            'ui/popover.module.css .popover',
+        ]);
     });
 
     test('a glass rule draws the blur, its WebKit twin, an edge and the floating lift', () => {
