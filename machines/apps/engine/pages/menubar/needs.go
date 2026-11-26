@@ -110,7 +110,7 @@ func needsOf(r NeedsReading, self string) (needs, upkeep []Need) {
 		upkeep = append(upkeep, w.upkeep(s)...)
 		for _, n := range s.Needs {
 			if n.Section == section.Overview && n.Subject == overview.DevicesSubject {
-				needs = append(needs, w.outside(s.Head.Name))
+				needs = append(needs, w.outside(s.Head.Name, n.Text == devices.NotChecked))
 			}
 		}
 	}
@@ -180,14 +180,19 @@ func (w needSaid) exposed(mac string, p ports.Port) Need {
 
 // invariant: a device book the engine did not write is a need, red: what
 // happened, that nothing of it is trusted, and the gesture that repairs,
-// each device added again with the owner present.
-func (w needSaid) outside(mac string) Need {
+// each device added again with the owner present; one it could not check
+// yet says the keychain to unlock instead, and blames no one.
+func (w needSaid) outside(mac string, unchecked bool) Need {
 	key := "devices:" + mac
+	severity, hero, what, detail := finding.Broken, devices.ChangedOutside, "device book changed outside Spwn", []string{devices.ChangedWhy, devices.ChangedRepair}
+	if unchecked {
+		severity, hero, what, detail = finding.NeedsALook, devices.NotChecked, "device book not checked yet", []string{devices.NotCheckedWhy, devices.NotCheckedRepair}
+	}
 	return Need{
-		Finding: finding.Finding{Machine: machine.Ref{Name: mac}, Section: section.Overview, Severity: finding.Broken, Urgency: finding.Red, Subject: overview.DevicesSubject, Text: devices.ChangedOutside},
-		Key:     key, Glyph: symbol("exclamationmark.shield", page.SignalFailing), Hero: devices.ChangedOutside, Subject: w.mac(mac), What: "device book changed outside Spwn",
-		Find: []string{devices.ChangedOutside + " on " + w.mac(mac)}, Facts: []page.Value{page.Text("trusts nothing of it"), page.Text("on " + w.mac(mac))},
-		Detail: []string{devices.ChangedWhy, devices.ChangedRepair}, Nav: machinePage(mac), Scope: []string{mac},
+		Finding: finding.Finding{Machine: machine.Ref{Name: mac}, Section: section.Overview, Severity: severity, Urgency: finding.Red, Subject: overview.DevicesSubject, Text: hero},
+		Key:     key, Glyph: symbol("exclamationmark.shield", page.SignalFailing), Hero: hero, Subject: w.mac(mac), What: what,
+		Find: []string{hero + " on " + w.mac(mac)}, Facts: []page.Value{page.Text("trusts nothing of it"), page.Text("on " + w.mac(mac))},
+		Detail: detail, Nav: machinePage(mac), Scope: []string{mac},
 		Verb: page.Action{ID: key, Label: VerbShow, On: page.OnRow, Rows: []string{key}, Default: true, Run: &page.Run{Terminal: true, Argv: onMac([]string{"devices"}, mac, w.self)}},
 	}
 }

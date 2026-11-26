@@ -13,20 +13,20 @@ runs:
       exit: 0
     - command: '--version >/dev/null; /usr/bin/jq -cj --slurpfile l laptop.json ''{generation: 8, devices: ($l + .macs["macbook-pro"].stores.devices)}'' world.json > book.json && d=$(/usr/bin/sha256sum book.json | /usr/bin/cut -d " " -f 1) && /usr/bin/jq --slurpfile b book.json --arg a "8 $d" ''.macs["macbook-pro"].stores += {devices: $b[0].devices, devices_generation: 8, devices_anchor: $a}'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
-    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out | {stale, devices: [.devices[] | .name], broken: [.broken[] | .name]}'''
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out) | .out | {stale, devices: [.devices[] | .name], broken: [.broken[] | .name], keys: [.broken[] | .key]}'''
       stdin: |
           {"v":2,"id":"1","call":"devices.list","in":{}}
       exit: 0
       stdout: |
-          {"stale":true,"devices":[],"broken":["laptop","desk"]}
+          {"stale":true,"devices":[],"broken":["laptop","desk"],"keys":[null,null]}
     - command: 'devices'
       exit: 0
       stdout: |
           # macbook-pro
           key	SHA256:p6ujsfeY+BbEFHPXRJeDMYee6VC5+03g3B1aOP9LT4g
           # The device book changed outside Spwn
-          what	a book or a keychain head the engine did not write, or a write of it cut short; nothing of it is trusted, and no VM is given its keys
-          repair	add each device again with station devices add, you at this Mac
+          what	a book or a keychain head the engine did not write or could not parse, or a write of it cut short; nothing of it is trusted, and no VM is given its keys
+          repair	add each device again with station devices add, you at this Mac, taking its key from the device itself, never from this list
           # May reach macbook-pro
           	none
           # Of that book: reaches nothing until added again

@@ -89,7 +89,7 @@ func TestABookAndAnAnchorMovedForwardWhileTheEngineRunsAreNotTheAnchoredOnes(t *
 	at := filepath.Join(t.TempDir(), "station", "devices.json")
 	k := &keychain{}
 	engine := openOn(at, false, k)
-	engine.Sole()
+	engine.Sole(t.Context())
 	if err := engine.Change(t.Context(), add("laptop")); err != nil {
 		t.Fatal(err)
 	}
@@ -127,8 +127,8 @@ func TestABookAndAnAnchorMovedForwardWhileTheEngineRunsAreNotTheAnchoredOnes(t *
 			t.Errorf("%s checked %+v; want nothing of the book trusted", name, got)
 		}
 	}
-	if _, changed, ok := engine.Held(t.Context()); !changed || !ok {
-		t.Errorf("the engine's hold says changed %v, ok %v; want the book said changed outside Spwn", changed, ok)
+	if _, standing, ok := engine.Held(t.Context()); standing != devices.Changed || !ok {
+		t.Errorf("the engine's hold says %q, ok %v; want the book said changed outside Spwn", standing, ok)
 	}
 	if err = engine.Change(t.Context(), add("tablet")); err != nil {
 		t.Fatal(err)
@@ -136,6 +136,138 @@ func TestABookAndAnAnchorMovedForwardWhileTheEngineRunsAreNotTheAnchoredOnes(t *
 	if book, head, err := engine.Read(t.Context()); err != nil || !book.Anchored(head) || len(book.Devices) != 1 || book.Devices[0].Name != "tablet" || head.Generation != held.Generation+1 {
 		t.Errorf("Read = %+v, %+v, %v; want a new book of tablet alone, one past the engine's own", book, head, err)
 	}
+}
+
+// value: a book with laptop, then one with laptop forgotten, each anchored
+// in turn by k: the bytes and the head of the first, to plant back.
+func forgottenLaptop(t *testing.T, at string, k *keychain) ([]byte, devices.Head) {
+	t.Helper()
+	w := openOn(at, false, k)
+	if err := w.Change(t.Context(), add("laptop")); err != nil {
+		t.Fatal(err)
+	}
+	withLaptop, err := files().ReadFile(at)
+	if err != nil {
+		t.Fatal(err)
+	}
+	head := k.head
+	if err = w.Change(t.Context(), func(b *devices.Book) error { b.Forget("laptop"); return nil }); err != nil {
+		t.Fatal(err)
+	}
+	return withLaptop, head
+}
+
+func plant(t *testing.T, at string, k *keychain, data []byte, head devices.Head) {
+	t.Helper()
+	if err := files().WriteFile(at, data, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	k.set(head)
+}
+
+func trustsNothing(t *testing.T, s *jsonfile.Store, want devices.Standing) {
+	t.Helper()
+	book, head, err := s.Read(t.Context())
+	if err == nil && (book.Anchored(head) || len(devices.Check(book, head, "mini", nil).Trusted) != 0) {
+		t.Errorf("Read = %+v, %+v; want nothing of the book anchored", book, head)
+	}
+	if _, standing, ok := s.Held(t.Context()); standing != want || !ok {
+		t.Errorf("held %q, %v; want %q", standing, ok, want)
+	}
+}
+
+func TestAnEngineWhoseBookWasUnreadableAtItsStartTrustsNoBookPlantedAfterUntilItWrites(t *testing.T) {
+	at := filepath.Join(t.TempDir(), "station", "devices.json")
+	k := &keychain{}
+	withLaptop, headLaptop := forgottenLaptop(t, at, k)
+	if err := files().WriteFile(at, []byte("garbage"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	engine := openOn(at, false, k)
+	engine.Sole(t.Context())
+	trustsNothing(t, engine, devices.Changed)
+	plant(t, at, k, withLaptop, headLaptop)
+	trustsNothing(t, engine, devices.Changed)
+	if err := files().WriteFile(at, []byte("garbage"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := engine.Change(t.Context(), add("tablet")); err != nil {
+		t.Fatalf("a change over an unreadable book = %v; want it to start from an empty book", err)
+	}
+	book, head, err := engine.Read(t.Context())
+	if err != nil || !book.Anchored(head) || len(book.Devices) != 1 || book.Devices[0].Name != "tablet" || k.head != head {
+		t.Fatalf("Read = %+v, %+v, %v; want tablet alone, anchored in the keychain", book, head, err)
+	}
+	if _, standing, _ := engine.Held(t.Context()); standing != devices.Kept {
+		t.Fatalf("held %q after the engine's own write; want the book its own", standing)
+	}
+}
+
+func TestAnEngineWhoseKeychainHeadWasMalformedAtItsStartTrustsNothing(t *testing.T) {
+	at := filepath.Join(t.TempDir(), "station", "devices.json")
+	k := &keychain{}
+	withLaptop, headLaptop := forgottenLaptop(t, at, k)
+	k.locked = &contract.AnchorUnreadableError{Cause: "a head Spwn never writes", Malformed: true}
+	engine := openOn(at, false, k)
+	engine.Sole(t.Context())
+	k.locked = nil
+	trustsNothing(t, engine, devices.Changed)
+	plant(t, at, k, withLaptop, headLaptop)
+	trustsNothing(t, engine, devices.Changed)
+}
+
+func TestAnEngineWhoseKeychainWasLockedAtItsStartAnchorsTheBookOfItsStartAlone(t *testing.T) {
+	at := filepath.Join(t.TempDir(), "station", "devices.json")
+	k := &keychain{}
+	withLaptop, headLaptop := forgottenLaptop(t, at, k)
+	locked := errors.New("the keychain is locked")
+	k.locked = locked
+	engine := openOn(at, false, k)
+	engine.Sole(t.Context())
+	if _, _, err := engine.Read(t.Context()); !errors.Is(err, locked) {
+		t.Fatalf("Read = %v; want the keychain's refusal while it stays locked", err)
+	}
+	if _, standing, ok := engine.Held(t.Context()); standing != devices.Unchecked || !ok {
+		t.Fatalf("held %q, %v; want the book not checked yet", standing, ok)
+	}
+	plant(t, at, k, withLaptop, headLaptop)
+	k.locked = nil
+	trustsNothing(t, engine, devices.Changed)
+	if err := files().WriteFile(at, []byte("{}"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	trustsNothing(t, engine, devices.Changed)
+
+	at = filepath.Join(t.TempDir(), "station", "devices.json")
+	k = &keychain{}
+	forgottenLaptop(t, at, k)
+	k.locked = locked
+	engine = openOn(at, false, k)
+	engine.Sole(t.Context())
+	k.locked = nil
+	book, head, err := engine.Read(t.Context())
+	if err != nil || !book.Anchored(head) || book.Generation != 2 {
+		t.Fatalf("Read = %+v, %+v, %v; want the book of the start anchored by the keychain's first answer", book, head, err)
+	}
+	if _, standing, _ := engine.Held(t.Context()); standing != devices.Kept {
+		t.Fatalf("held %q; want the book of the start held", standing)
+	}
+}
+
+type lyingPeer struct{ head devices.Head }
+
+func (p lyingPeer) Held(context.Context) (devices.Head, bool, error) { return p.head, true, nil }
+
+func TestAnEngineAsksNoPeerForItsHead(t *testing.T) {
+	at := filepath.Join(t.TempDir(), "station", "devices.json")
+	k := &keychain{}
+	withLaptop, headLaptop := forgottenLaptop(t, at, k)
+	engine := jsonfile.New(holding{FS: files()}, at, k, lyingPeer{headLaptop})
+	engine.Sole(t.Context())
+	if err := files().WriteFile(at, withLaptop, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	trustsNothing(t, engine, devices.Changed)
 }
 
 func open(at string, torn bool) *jsonfile.Store { return openOn(at, torn, &keychain{}) }

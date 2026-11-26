@@ -35,17 +35,17 @@ type Store struct {
 	// value: the highest head this process read from the anchor or wrote
 	// to it. While the file's generation is that head's, the anchor is not
 	// read again, so a walk costs no read of it; an anchor read lower than
-	// it is never believed. The engine (sole) never reads it again at all:
-	// a book or an anchor it did not write, at any generation, is not the
-	// anchored one.
+	// it is never believed.
 	held  devices.Head
 	known bool
 	// value: this Mac's running engine, whose head a process that is not
 	// that engine takes in place of the anchor's; nil asks the anchor alone.
 	peer Peer
-	// value: this process is the engine, the book's only writer: once it
-	// holds a head it asks neither the anchor nor a peer again.
+	// value: this process is the engine, the book's only writer: from its
+	// start read on it trusts the book by hold alone, asking no peer, and
+	// the anchor only while the hold awaits its first readable answer.
 	sole bool
+	hold devices.Hold
 }
 
 type Peer interface {
@@ -61,20 +61,35 @@ func New(files Files, at string, anchor contract.Anchor, peer Peer) *Store {
 	return &Store{files: files, at: at, anchor: anchor, peer: peer}
 }
 
-func (s *Store) Sole() {
+func (s *Store) Sole(ctx context.Context) {
+	book, sum, err := s.book()
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.sole = true
+	if err != nil {
+		s.hold = devices.Refuse(0)
+		return
+	}
+	got, err := s.anchor.Read(ctx)
+	switch {
+	case err == nil:
+		s.hold = devices.Keep(got)
+	case contract.Malformed(err):
+		s.hold = devices.Refuse(book.Generation)
+	default:
+		s.hold = devices.Await(book.Generation, sum)
+	}
 }
 
-func (s *Store) Held(context.Context) (devices.Head, bool, bool) {
-	book, err := s.book()
+func (s *Store) Held(ctx context.Context) (devices.Head, devices.Standing, bool) {
+	book, sum, err := s.book()
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	if !s.known {
-		return devices.Head{}, false, false
+	if !s.sole {
+		return devices.Head{}, devices.Kept, false
 	}
-	return s.held, err != nil || !book.Anchored(s.held), true
+	_, _ = s.settled(ctx, sum)
+	return s.hold.Head, s.hold.Standing(book, err != nil), true
 }
 
 type file struct {
@@ -83,45 +98,65 @@ type file struct {
 }
 
 func (s *Store) Read(ctx context.Context) (devices.Book, devices.Head, error) {
-	book, err := s.book()
+	book, sum, err := s.book()
 	if err != nil {
 		return devices.Book{}, devices.Head{}, err
 	}
-	anchored, err := s.anchored(ctx, book.Generation)
+	anchored, err := s.anchored(ctx, book.Generation, sum)
 	if err != nil {
 		return devices.Book{}, devices.Head{}, err
 	}
 	return book, anchored, nil
 }
 
-func (s *Store) book() (devices.Book, error) {
+func (s *Store) book() (devices.Book, string, error) {
 	data, err := s.files.ReadFile(s.at)
 	if errors.Is(err, fs.ErrNotExist) {
-		return devices.Book{Devices: []devices.Device{}}, nil
+		return devices.Book{Devices: []devices.Device{}}, devices.Sum(nil), nil
 	}
 	if err != nil {
-		return devices.Book{}, &store.UnreadableError{Path: s.at, Cause: err}
+		return devices.Book{}, "", &store.UnreadableError{Path: s.at, Cause: err}
 	}
+	sum := devices.Sum(data)
 	var f file
 	if err := json.Unmarshal(data, &f); err != nil {
-		return devices.Book{}, &store.UnreadableError{Path: s.at, Cause: err, Line: store.LineOf(data, err)}
+		return devices.Book{}, sum, &store.UnreadableError{Path: s.at, Cause: err, Line: store.LineOf(data, err)}
 	}
 	if err := store.Current(f.V, Version); err != nil {
-		return devices.Book{}, &store.UnreadableError{Path: s.at, Cause: err}
+		return devices.Book{}, sum, &store.UnreadableError{Path: s.at, Cause: err}
 	}
 	if f.Devices == nil {
 		f.Devices = []devices.Device{}
 	}
-	return f.Book, nil
+	return f.Book, sum, nil
 }
 
-func (s *Store) anchored(ctx context.Context, generation int) (devices.Head, error) {
+func (s *Store) settled(ctx context.Context, sum string) (devices.Head, error) {
+	if s.hold.State != devices.Awaiting {
+		return s.hold.Head, nil
+	}
+	got, err := s.anchor.Read(ctx)
+	switch {
+	case err == nil:
+		s.hold = s.hold.Settle(sum, got)
+	case contract.Malformed(err):
+		s.hold = devices.Refuse(s.hold.Head.Generation)
+	default:
+		return devices.Head{}, err
+	}
+	return s.hold.Head, nil
+}
+
+func (s *Store) anchored(ctx context.Context, generation int, sum string) (devices.Head, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	if s.known && (s.sole || s.held.Generation == generation) {
+	if s.sole {
+		return s.settled(ctx, sum)
+	}
+	if s.known && s.held.Generation == generation {
 		return s.held, nil
 	}
-	if !s.sole && s.peer != nil {
+	if s.peer != nil {
 		held, ok, err := s.peer.Held(ctx)
 		if err != nil {
 			return devices.Head{}, err
@@ -156,7 +191,10 @@ func (s *Store) Change(ctx context.Context, edit func(*devices.Book) error) erro
 	defer release()
 	kept, anchored, err := s.Read(ctx)
 	if err != nil {
-		return err
+		if !s.unheld() {
+			return err
+		}
+		kept, anchored = devices.Book{Devices: []devices.Device{}}, s.heldHead()
 	}
 	next, err := devices.Next(kept, anchored, edit)
 	if err != nil {
@@ -171,9 +209,26 @@ func (s *Store) Change(ctx context.Context, edit func(*devices.Book) error) erro
 	}
 	s.mu.Lock()
 	s.held, s.known = next.Head(), true
+	if s.sole {
+		s.hold = devices.Keep(next.Head())
+	}
 	s.mu.Unlock()
 	if err := s.files.Replace(s.at, append(data, '\n'), 0o600); err != nil {
 		return &store.UnwritableError{Path: s.at, Cause: err}
 	}
 	return nil
+}
+
+func (s *Store) unheld() bool {
+	// value: the engine holds no head it may trust: the next change starts
+	// from an empty book whatever the file holds, unreadable included.
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.sole && s.hold.State == devices.Unheld
+}
+
+func (s *Store) heldHead() devices.Head {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.hold.Head
 }

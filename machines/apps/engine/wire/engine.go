@@ -39,6 +39,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 
+	"github.com/jterrazz/studio-station/apps/engine/devices"
 	devicescontract "github.com/jterrazz/studio-station/apps/engine/devices/contract"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
 	enginelog "github.com/jterrazz/studio-station/apps/engine/engine/adapter/log"
@@ -115,7 +116,7 @@ func (m machine) engine(env kit.Env) *process.Engine {
 	jobs := append([]process.Tick{sample.Run}, m.macJobs(calls)...)
 	state := m.readers(calls, report, func() awake.View { return d.AwakeView() })
 	var deviceKey func() string
-	var book func() (string, bool)
+	var book func() (string, devices.Standing)
 	if m.profile.Kind == coremachine.Computer {
 		deviceKey, book = m.deviceKeyLine, m.heldBook
 	}
@@ -321,14 +322,20 @@ func engineRunCommand(env kit.Env, m machine) *cobra.Command {
 // writer from its start: it reads the book and its anchor once, before it
 // serves, and believes nothing but its own writes after.
 type soleEngine struct {
-	*process.Engine
+	enginerun.Engine
 	book devicescontract.Store
 }
 
 func (e soleEngine) Run(ctx context.Context, note func(string)) error {
-	e.book.Sole()
-	_, _, _ = e.book.Read(ctx)
+	e.book.Sole(ctx)
 	return e.Engine.Run(ctx, note)
+}
+
+// invariant: a world's engine starts as the real one does: its start read
+// of the device book is taken before it serves.
+func (m machine) startedEngine(env kit.Env) *process.Engine {
+	m.stores.devices.Sole(context.Background())
+	return m.engine(env)
 }
 
 // invariant: the retry job takes out the removals a grant still owes a

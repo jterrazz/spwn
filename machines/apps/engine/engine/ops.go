@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/jterrazz/studio-station/apps/engine/devices"
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
 )
 
@@ -28,9 +29,11 @@ type Hello struct {
 	// for a book never written; empty before it read the book, and on a
 	// machine with none.
 	Book string `json:"book,omitempty"`
-	// value: the book on disk is not the one this engine holds: it changed
-	// outside Spwn, and the engine trusts nothing of it.
-	BookChanged bool `json:"book_changed,omitempty"`
+	// value: how the book on disk stands with the head this engine holds:
+	// empty when it is that one; changed outside Spwn, or not checked yet
+	// for a login keychain unreadable since the engine started, either way
+	// trusted for nothing.
+	BookState devices.Standing `json:"book_state,omitempty"`
 }
 
 type VMView struct {

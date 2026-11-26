@@ -33,7 +33,7 @@ func (d *Engine) Hello() engine.Hello {
 	d.mu.Unlock()
 	h := engine.Hello{Version: d.o.Version, Page: d.o.Page, PID: d.o.PID, StartedAt: d.started, Executable: d.o.Executable, Abilities: d.o.Abilities, LocalNetwork: ln, Agent: agent}
 	if d.o.Book != nil {
-		h.Book, h.BookChanged = d.o.Book()
+		h.Book, h.BookState = d.o.Book()
 	}
 	return h
 }

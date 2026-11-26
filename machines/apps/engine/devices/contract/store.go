@@ -2,6 +2,7 @@ package contract
 
 import (
 	"context"
+	"errors"
 
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 
@@ -21,14 +22,17 @@ type Store interface {
 	// whose edit answers an error writes nothing and answers it.
 	Change(ctx context.Context, edit func(*devices.Book) error) error
 	// invariant: from now on this process is the book's only writer, this
-	// Mac's engine: once it holds a head it reads the anchor never again,
-	// so a book or an anchor it did not write, at any generation, is not
-	// the anchored one, and the next change starts from an empty book.
-	Sole()
-	// value: the head this process holds, the one it read first or wrote
-	// last; changed when the book on disk is not that one; ok false before
-	// it read one.
-	Held(ctx context.Context) (head devices.Head, changed, ok bool)
+	// Mac's engine: it reads the book and the anchor now, and the read is
+	// final: a book or an anchor it did not write, at any generation, is
+	// not the anchored one, and the next change starts from an empty book.
+	// A start read that fails holds a head no book has (devices.Hold): a
+	// book or a head Spwn never writes trusts nothing until the engine
+	// writes; an anchor that cannot be read is read again only until it
+	// first answers, and anchors then the book of the start alone.
+	Sole(ctx context.Context)
+	// value: the head this process holds and how the book on disk stands
+	// with it; ok false in a process that is not the engine.
+	Held(ctx context.Context) (head devices.Head, standing devices.Standing, ok bool)
 }
 
 type Anchor interface {
@@ -40,8 +44,10 @@ type Anchor interface {
 }
 
 type AnchorUnreadableError struct {
-	// value: why the login keychain did not give the book's head.
-	Cause string
+	// value: why the login keychain did not give the book's head;
+	// Malformed when it gave one Spwn never writes.
+	Cause     string
+	Malformed bool
 }
 
 func (e *AnchorUnreadableError) Error() string {
@@ -52,4 +58,9 @@ func (e *AnchorUnreadableError) Unwrap() error {
 	// value: its repair, the same whichever process meets it, the engine's
 	// included.
 	return &fail.Said{Message: e.Error(), Hint: "unlock this Mac's login keychain, then run it again"}
+}
+
+func Malformed(err error) bool {
+	var u *AnchorUnreadableError
+	return errors.As(err, &u) && u.Malformed
 }

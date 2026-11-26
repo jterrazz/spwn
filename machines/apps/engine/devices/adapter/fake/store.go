@@ -72,23 +72,41 @@ func clone(in []devices.Device) []devices.Device {
 	return out
 }
 
-// invariant: while its Mac's engine runs, the head it holds is the one
-// every reader of the world takes, the anchor never read again: the head
-// it read first, then the one it wrote last; with no engine running, the
-// anchor's.
+func bookOf(st *world.Stores) devices.Book {
+	return devices.Book{Generation: st.DevicesGeneration, Devices: clone(st.Devices)}
+}
+
+// value: the world's book as bytes are to a file: its generation and every
+// entry, which its head covers.
+func sumOf(st *world.Stores) string { return bookOf(st).Head().String() }
+
+func malformed(st *world.Stores, err error) bool {
+	return err != nil && !st.DevicesAnchorUnreadable
+}
+
+// invariant: while its Mac's engine runs and has taken its start read, the
+// head it holds is the one every reader of the world takes: the anchor is
+// read again only while that hold awaits its first readable answer; with
+// no engine running, or before its start read, the anchor's.
 func held(m *world.Mac) (devices.Head, error) {
 	st := m.Store()
-	if !m.EngineRuns() {
+	if !m.EngineRuns() || m.Engine.Book == nil {
 		return anchored(st)
 	}
-	if m.Engine.Book != nil {
-		return *m.Engine.Book, nil
+	hold := *m.Engine.Book
+	if hold.State == devices.Awaiting {
+		got, err := anchored(st)
+		switch {
+		case err == nil:
+			hold = hold.Settle(sumOf(st), got)
+		case malformed(st, err):
+			hold = devices.Refuse(hold.Head.Generation)
+		default:
+			return devices.Head{}, err
+		}
+		m.Engine.Book = &hold
 	}
-	h, err := anchored(st)
-	if err == nil {
-		m.Engine.Book = &h
-	}
-	return h, err
+	return hold.Head, nil
 }
 
 func (s *Store) Read(context.Context) (devices.Book, devices.Head, error) {
@@ -120,21 +138,42 @@ func (s *Store) Change(_ context.Context, edit func(*devices.Book) error) error 
 	st.DevicesAnchor = head.String()
 	st.Devices, st.DevicesGeneration = clone(next.Devices), next.Generation
 	if m.EngineRuns() {
-		m.Engine.Book = &head
+		hold := devices.Keep(head)
+		m.Engine.Book = &hold
 	}
 	return nil
 }
 
-func (s *Store) Sole() {}
+// invariant: the start read of the world's engine, taken once in its
+// lifetime and kept in its memory between commands; the next start after
+// a restart takes it again.
+func (s *Store) Sole(context.Context) {
+	s.w.Lock()
+	defer s.w.Unlock()
+	m := s.w.Mac(s.mac)
+	if !m.EngineRuns() || m.Engine.Book != nil {
+		return
+	}
+	st := m.Store()
+	got, err := anchored(st)
+	hold := devices.Keep(got)
+	switch {
+	case err == nil:
+	case malformed(st, err):
+		hold = devices.Refuse(st.DevicesGeneration)
+	default:
+		hold = devices.Await(st.DevicesGeneration, sumOf(st))
+	}
+	m.Engine.Book = &hold
+}
 
-func (s *Store) Held(context.Context) (devices.Head, bool, bool) {
+func (s *Store) Held(context.Context) (devices.Head, devices.Standing, bool) {
 	s.w.Lock()
 	defer s.w.Unlock()
 	m := s.w.Mac(s.mac)
 	if !m.EngineRuns() || m.Engine.Book == nil {
-		return devices.Head{}, false, false
+		return devices.Head{}, devices.Kept, false
 	}
-	st := m.Store()
-	book := devices.Book{Generation: st.DevicesGeneration, Devices: st.Devices}
-	return *m.Engine.Book, !book.Anchored(*m.Engine.Book), true
+	_, _ = held(m)
+	return m.Engine.Book.Head, m.Engine.Book.Standing(bookOf(m.Store()), false), true
 }

@@ -3,6 +3,7 @@ package engine
 import (
 	"time"
 
+	"github.com/jterrazz/studio-station/apps/engine/devices"
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
 )
 
@@ -20,9 +21,9 @@ type Reading struct {
 	// value: set while the engine is stopped by the owner: when, and by what.
 	Stopped StopMark
 	Agent   model.Agent
-	// value: the running engine says its Mac's device book changed outside
-	// Spwn, and trusts nothing of it (Hello's BookChanged).
-	BookChanged bool
+	// value: how the running engine says its Mac's device book stands
+	// (Hello's BookState).
+	BookState devices.Standing
 }
 
 func (r Reading) Skewed() bool {

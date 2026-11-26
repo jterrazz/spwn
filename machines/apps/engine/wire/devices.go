@@ -51,8 +51,10 @@ func (b bookWriter) Watch(ctx context.Context, target coremachine.Ref, name stri
 
 // invariant: a process of this Mac that is not its engine judges the book
 // by the head the running engine holds, never by the keychain, which any
-// process running `security` can move; with no engine running, by the
-// keychain, as the engine does at its start.
+// process running `security` can move; with no engine running, or one
+// that holds no book (a Mac's engine always holds one from its start), by
+// the keychain, as the engine does at its start. An engine still waiting
+// for the keychain is the keychain unreadable, here too.
 type enginePeer struct{ api engineAPI }
 
 func (p enginePeer) Held(ctx context.Context) (devices.Head, bool, error) {
@@ -63,6 +65,8 @@ func (p enginePeer) Held(ctx context.Context) (devices.Head, bool, error) {
 		return devices.Head{}, false, nil
 	case err != nil:
 		return devices.Head{}, false, &devicescontract.AnchorUnreadableError{Cause: err.Error()}
+	case h.BookState == devices.Unchecked:
+		return devices.Head{}, false, &devicescontract.AnchorUnreadableError{Cause: "this Mac's engine has not read it since it started"}
 	case h.Book == "":
 		return devices.Head{}, false, nil
 	case h.Book == (devices.Head{}).String():
@@ -76,13 +80,13 @@ func (p enginePeer) Held(ctx context.Context) (devices.Head, bool, error) {
 }
 
 // value: what the engine's hello says of the book: the head it holds and
-// whether the book on disk is another.
-func (m machine) heldBook() (string, bool) {
-	head, changed, ok := m.stores.devices.Held(context.Background())
+// how the book on disk stands with it.
+func (m machine) heldBook() (string, devices.Standing) {
+	head, standing, ok := m.stores.devices.Held(context.Background())
 	if !ok {
-		return "", false
+		return "", devices.Kept
 	}
-	return head.String(), changed
+	return head.String(), standing
 }
 
 func (m machine) bookChanged() {

@@ -15,8 +15,13 @@
         "book": {
           "type": "string"
         },
-        "book_changed": {
-          "type": "boolean"
+        "book_state": {
+          "enum": [
+            "",
+            "changed",
+            "unchecked"
+          ],
+          "type": "string"
         },
         "calls": {
           "items": {

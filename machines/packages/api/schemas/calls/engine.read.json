@@ -13,8 +13,13 @@
             "null"
           ]
         },
-        "BookChanged": {
-          "type": "boolean"
+        "BookState": {
+          "enum": [
+            "",
+            "changed",
+            "unchecked"
+          ],
+          "type": "string"
         },
         "State": {
           "enum": [
@@ -43,7 +48,7 @@
       "required": [
         "Agent",
         "AwakeUntil",
-        "BookChanged",
+        "BookState",
         "State",
         "Station",
         "Stopped",

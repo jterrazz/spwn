@@ -985,7 +985,7 @@ export type DevicesRow = {
     added: string;
     channels: string[] | null;
     fingerprint: string;
-    key: string;
+    key?: string;
     name: string;
 };
 
@@ -1157,7 +1157,7 @@ export type EngineHello = {
     abilities?: string[];
     agent?: MachinesAgent;
     book?: string;
-    book_changed?: boolean;
+    book_state?: '' | 'changed' | 'unchecked';
     calls?: string[];
     executable?: string;
     local_network?: string;
@@ -1226,7 +1226,7 @@ export type EnginePagesIn = {
 export type EngineReading = {
     Agent: MachinesAgent;
     AwakeUntil: string | null;
-    BookChanged: boolean;
+    BookState: '' | 'changed' | 'unchecked';
     State: 'running' | 'stopped' | 'not-installed';
     Station: string;
     Stopped: EngineStopMark;

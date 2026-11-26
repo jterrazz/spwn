@@ -34,7 +34,8 @@ func rowOf(r devices.Row, mark page.Mark) page.Row {
 
 func again(r devices.Row) string {
 	// value: the command that adds a broken entry again, with the owner
-	// present at this Mac; its key is the entry's, in the read's document.
+	// present at this Mac; its key is taken from the device itself, never
+	// from the book.
 	return "station devices add " + r.Name + " <its key> --channels " + strings.ReplaceAll(channelsOf(r), " ", "")
 }
 

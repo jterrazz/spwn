@@ -225,6 +225,19 @@ func TestARefusedFileOfTheOwnerIsUpkeepNamingItsFileAndLine(t *testing.T) {
 	}
 }
 
+func TestADeviceBookNotCheckedYetIsANeedSayingTheKeychainToUnlock(t *testing.T) {
+	r := needsFleet()
+	r.Overviews[0].Needs = []overview.Need{{Machine: needsPro, Section: section.Overview, Severity: finding.NeedsALook, Subject: overview.DevicesSubject, Text: devices.NotChecked}}
+	needs, _ := needsOf(r, needsPro)
+	i := slices.IndexFunc(needs, func(n Need) bool { return n.Subject == "This Mac" && n.Hero == devices.NotChecked })
+	if i < 0 {
+		t.Fatalf("needs %d; want the book not checked yet among what needs you", len(needs))
+	}
+	if n := needs[i]; !slices.Equal(n.Detail, []string{devices.NotCheckedWhy, devices.NotCheckedRepair}) || n.Finding.Severity != finding.NeedsALook {
+		t.Errorf("the unchecked book says %q, %v; want the keychain to unlock, blaming no one", n.Detail, n.Finding.Severity)
+	}
+}
+
 func TestADeviceBookChangedOutsideSpwnIsANeedSayingWhatIsTrustedAndTheGestureThatRepairs(t *testing.T) {
 	r := needsFleet()
 	r.Overviews[0].Needs = []overview.Need{{Machine: needsPro, Section: section.Overview, Broken: true, Severity: finding.Broken, Subject: overview.DevicesSubject, Text: devices.ChangedOutside}}

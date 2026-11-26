@@ -30,7 +30,6 @@
         "added",
         "channels",
         "fingerprint",
-        "key",
         "name"
       ],
       "type": "object"

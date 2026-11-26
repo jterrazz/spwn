@@ -54,9 +54,10 @@ func (b *Book) Forget(name string) bool {
 
 type Row struct {
 	// value: an entry as a reader sees it: its key's fingerprint beside the
-	// key, and never its seal.
+	// key, and never its seal; a broken entry's key is not given, only its
+	// fingerprint.
 	Name        string    `json:"name"`
-	Key         string    `json:"key"`
+	Key         string    `json:"key,omitempty"`
 	Fingerprint string    `json:"fingerprint"`
 	Channels    []Channel `json:"channels"`
 	Added       time.Time `json:"added"`
@@ -64,6 +65,15 @@ type Row struct {
 
 func RowOf(d Device) Row {
 	return Row{Name: d.Name, Key: d.Key, Fingerprint: Fingerprint(d.Key), Channels: d.Channels, Added: d.Added}
+}
+
+func BrokenRowOf(d Device) Row {
+	// invariant: a broken entry's key is whatever wrote the book wrote, so
+	// it is never handed back as the key to add again: that key is taken
+	// from the device itself.
+	r := RowOf(d)
+	r.Key = ""
+	return r
 }
 
 type Listing struct {

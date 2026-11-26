@@ -54,7 +54,7 @@ func (a Anchor) Read(ctx context.Context) (devices.Head, error) {
 	}
 	h, err := devices.ParseHead(out.Stdout)
 	if err != nil {
-		return devices.Head{}, &contract.AnchorUnreadableError{Cause: err.Error()}
+		return devices.Head{}, &contract.AnchorUnreadableError{Cause: err.Error(), Malformed: true}
 	}
 	return h, nil
 }

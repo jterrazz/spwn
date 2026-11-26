@@ -165,7 +165,7 @@ func Build(args, env []string, stdin, stdout, stderr *os.File) (p *Program, exit
 		return appsinstall.Run(ctx, appsinstall.Deps{ThisMachine: thisMac.where, Now: thisMac.sys.Clock.Now}, kenv, []string{pkg}, o)
 	}
 	if session != nil {
-		world.engineFrom(func() *process.Engine { return thisMac.engine(kenv) })
+		world.engineFrom(func() *process.Engine { return thisMac.startedEngine(kenv) })
 		session.farFrom(func(w *worldMac) farMac { return thisMac.farMac(kenv, w) })
 	}
 	kenv.On.Refresh = func(ctx context.Context) error {

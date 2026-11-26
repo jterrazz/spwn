@@ -34,7 +34,7 @@ var List = call.Call[Deps, struct{}, devices.Listing]{
 			out.Devices = append(out.Devices, devices.RowOf(e))
 		}
 		for _, e := range checked.Broken {
-			out.Broken = append(out.Broken, devices.RowOf(e))
+			out.Broken = append(out.Broken, devices.BrokenRowOf(e))
 		}
 		return out, nil
 	},
