@@ -1,0 +1,11 @@
+description: 'wiki.map on a Mac that declares no wiki is refused: there is no page to read'
+env:
+    - one-mac
+    - engine
+runs:
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.error | {code, message}'''
+      stdin: |
+          {"v":2,"id":"1","call":"wiki.map","target":{},"in":{}}
+      exit: 0
+      stdout: |
+          {"code":"wiki.none","message":"this Mac declares no wiki, so there is no page to read"}

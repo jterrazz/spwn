@@ -1,0 +1,317 @@
+{
+  "id": "forms",
+  "faces": {
+    "word": "Forms",
+    "line": "Every form the compiler reads, once.",
+    "paragraph": "Not a corpus page: each form of the tag grammar, once, beside the ones the corpus pages use.",
+    "icon": ""
+  },
+  "kind": "guide",
+  "frontmatter": {
+    "span": {
+      "from": 1,
+      "to": 4
+    },
+    "lines": [
+      {
+        "key": "kind",
+        "value": "guide",
+        "line": 2
+      },
+      {
+        "key": "line",
+        "value": "Every form the compiler reads, once.",
+        "line": 3
+      }
+    ]
+  },
+  "title": {
+    "from": 6,
+    "to": 6
+  },
+  "sections": [
+    {
+      "heading": null,
+      "items": [
+        {
+          "t": "prose",
+          "markdown": "Not a corpus page: each form of the tag grammar, once, beside the ones the corpus pages use.",
+          "span": {
+            "from": 8,
+            "to": 8
+          }
+        },
+        {
+          "t": "block",
+          "id": "carried-today",
+          "kind": "table",
+          "address": "forms#carried-today",
+          "props": {
+            "id": "carried-today",
+            "of": "conviction",
+            "in": {
+              "ref": "blueprint/philosophy"
+            },
+            "where": {
+              "query": {
+                "field": "carried_in",
+                "op": "has",
+                "operand": {
+                  "state": "shipped"
+                }
+              }
+            },
+            "columns": [
+              "says",
+              "carried_in",
+              "@weight"
+            ],
+            "sort": "says"
+          },
+          "faces": {
+            "word": "carried-today",
+            "line": "",
+            "icon": "table"
+          },
+          "view": {
+            "of": "conviction",
+            "in": "blueprint/philosophy",
+            "where": {
+              "field": "carried_in",
+              "op": "has",
+              "operand": {
+                "state": "shipped"
+              }
+            },
+            "columns": [
+              "says",
+              "carried_in",
+              "@weight"
+            ],
+            "sort": "says"
+          },
+          "at": {
+            "line": 10,
+            "col": 1
+          },
+          "span": {
+            "from": 10,
+            "to": 11
+          }
+        },
+        {
+          "t": "block",
+          "id": "forms/child",
+          "kind": "page",
+          "address": "forms/child",
+          "props": {
+            "id": "forms/child",
+            "face": "open"
+          },
+          "faces": {
+            "word": "forms/child",
+            "line": "",
+            "icon": "page"
+          },
+          "view": {
+            "child": "forms/child",
+            "face": "open"
+          },
+          "at": {
+            "line": 12,
+            "col": 1
+          },
+          "span": {
+            "from": 12,
+            "to": 12
+          }
+        },
+        {
+          "t": "block",
+          "id": "forms/other",
+          "kind": "page",
+          "address": "forms/other",
+          "props": {
+            "id": "forms/other"
+          },
+          "faces": {
+            "word": "forms/other",
+            "line": "",
+            "icon": "page"
+          },
+          "view": {
+            "child": "forms/other",
+            "face": "line"
+          },
+          "at": {
+            "line": 13,
+            "col": 1
+          },
+          "span": {
+            "from": 13,
+            "to": 13
+          }
+        },
+        {
+          "t": "prose",
+          "markdown": "A line of prose, then a tag with no blank line between them, which stays prose:\n<Term id=\"not-a-tag\" means=\"prose\" />\n\nAn inline <Rule> inside a paragraph is prose too.",
+          "span": {
+            "from": 15,
+            "to": 18
+          }
+        }
+      ]
+    },
+    {
+      "heading": {
+        "level": 2,
+        "text": "Values",
+        "anchor": "values",
+        "at": {
+          "line": 20,
+          "col": 1
+        }
+      },
+      "items": [
+        {
+          "t": "block",
+          "id": "flow",
+          "kind": "figure",
+          "address": "forms#flow",
+          "props": {
+            "id": "flow",
+            "form": "flow",
+            "shows": {
+              "ref": "forms#values"
+            },
+            "caption": "One thing becomes another.",
+            "parts": [
+              {
+                "name": "draft",
+                "to": "checks"
+              },
+              {
+                "name": "page",
+                "n": 2,
+                "at": "xy"
+              }
+            ],
+            "weight": "lead"
+          },
+          "faces": {
+            "word": "flow",
+            "line": "One thing becomes another.",
+            "icon": "figure"
+          },
+          "view": {
+            "form": "flow",
+            "shows": "forms#values",
+            "parts": [
+              {
+                "name": "draft",
+                "to": "checks"
+              },
+              {
+                "name": "page",
+                "n": 2,
+                "at": "xy"
+              }
+            ],
+            "caption": "One thing becomes another."
+          },
+          "at": {
+            "line": 22,
+            "col": 1
+          },
+          "span": {
+            "from": 22,
+            "to": 29
+          }
+        },
+        {
+          "t": "block",
+          "id": "map",
+          "kind": "lens",
+          "address": "forms#map",
+          "props": {
+            "id": "map",
+            "of": "conviction"
+          },
+          "faces": {
+            "word": "map",
+            "line": "",
+            "icon": "lens"
+          },
+          "at": {
+            "line": 31,
+            "col": 1
+          },
+          "span": {
+            "from": 31,
+            "to": 31
+          }
+        },
+        {
+          "t": "group",
+          "id": "empty",
+          "title": "An empty group",
+          "intent": "prove",
+          "fold": false,
+          "props": {
+            "id": "empty",
+            "title": "An empty group",
+            "intent": "prove"
+          },
+          "items": [],
+          "at": {
+            "line": 33,
+            "col": 1
+          },
+          "tag": {
+            "from": 33,
+            "to": 33
+          },
+          "span": {
+            "from": 33,
+            "to": 33
+          }
+        },
+        {
+          "t": "prose",
+          "markdown": "#### A fourth-level heading is prose\n\n```markdown\n<Term id=\"in-a-fence\" means=\"a fence keeps a tag as text\" />\n```\n\n~~~~\n<Group id=\"fenced\" title=\"Fenced\" intent=\"tell\">\n~~~~",
+          "span": {
+            "from": 35,
+            "to": 43
+          }
+        },
+        {
+          "t": "block",
+          "id": "spaced",
+          "kind": "term",
+          "address": "forms#spaced",
+          "props": {
+            "id": "spaced",
+            "means": "a value set apart",
+            "not": "by spaces",
+            "retired": null,
+            "code": -1.5
+          },
+          "faces": {
+            "word": "spaced",
+            "line": "a value set apart",
+            "icon": "term"
+          },
+          "at": {
+            "line": 45,
+            "col": 1
+          },
+          "span": {
+            "from": 45,
+            "to": 45
+          }
+        }
+      ]
+    }
+  ],
+  "findings": []
+}

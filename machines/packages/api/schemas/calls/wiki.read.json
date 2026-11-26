@@ -1,0 +1,1036 @@
+{
+  "$defs": {
+    "wiki.Cause": {
+      "additionalProperties": false,
+      "properties": {
+        "cause": {
+          "type": "string"
+        },
+        "points": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "cause",
+        "points"
+      ],
+      "type": "object"
+    },
+    "wiki.FigurePart": {
+      "additionalProperties": false,
+      "properties": {
+        "at": {
+          "type": "string"
+        },
+        "n": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "to": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "type": "object"
+    },
+    "wiki.FloorHead": {
+      "additionalProperties": false,
+      "properties": {
+        "Index": {
+          "type": "integer"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "Question": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Index",
+        "Name",
+        "Question"
+      ],
+      "type": "object"
+    },
+    "wiki.PageHead": {
+      "additionalProperties": false,
+      "properties": {
+        "Decision": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/wiki.ServedDecision"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "Floor": {
+          "type": "integer"
+        },
+        "Hard": {
+          "type": "integer"
+        },
+        "ID": {
+          "type": "string"
+        },
+        "Icon": {
+          "type": "string"
+        },
+        "Line": {
+          "type": "string"
+        },
+        "Number": {
+          "type": "string"
+        },
+        "Seat": {
+          "type": "string"
+        },
+        "Soft": {
+          "type": "integer"
+        },
+        "Title": {
+          "type": "string"
+        },
+        "Word": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Decision",
+        "Floor",
+        "Hard",
+        "ID",
+        "Icon",
+        "Line",
+        "Number",
+        "Seat",
+        "Soft",
+        "Title",
+        "Word"
+      ],
+      "type": "object"
+    },
+    "wiki.Paragraph": {
+      "additionalProperties": false,
+      "properties": {
+        "Cells": {
+          "items": {
+            "items": {
+              "$ref": "#/$defs/wiki.Run"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Form": {
+          "enum": [
+            "",
+            "head",
+            "item",
+            "plain",
+            "quote",
+            "row"
+          ],
+          "type": "string"
+        },
+        "Runs": {
+          "items": {
+            "$ref": "#/$defs/wiki.Run"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "Cells",
+        "Form",
+        "Runs"
+      ],
+      "type": "object"
+    },
+    "wiki.Run": {
+      "additionalProperties": false,
+      "properties": {
+        "Code": {
+          "type": "boolean"
+        },
+        "Link": {
+          "type": "string"
+        },
+        "Strong": {
+          "type": "boolean"
+        },
+        "Text": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Text"
+      ],
+      "type": "object"
+    },
+    "wiki.Served": {
+      "additionalProperties": false,
+      "properties": {
+        "Attention": {
+          "items": {
+            "$ref": "#/$defs/wiki.ServedFinding"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Blocks": {
+          "type": "integer"
+        },
+        "Findings": {
+          "items": {
+            "$ref": "#/$defs/wiki.ServedFinding"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Floor": {
+          "$ref": "#/$defs/wiki.FloorHead"
+        },
+        "Icons": {
+          "additionalProperties": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "Lede": {
+          "$ref": "#/$defs/wiki.ServedLede"
+        },
+        "NeedsYou": {
+          "type": "integer"
+        },
+        "Page": {
+          "$ref": "#/$defs/wiki.PageHead"
+        },
+        "Paragraph": {
+          "items": {
+            "$ref": "#/$defs/wiki.Paragraph"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Reading": {
+          "items": {
+            "$ref": "#/$defs/wiki.ServedReading"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Sections": {
+          "items": {
+            "$ref": "#/$defs/wiki.ServedSection"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Verdict": {
+          "$ref": "#/$defs/wiki.Verdict"
+        }
+      },
+      "required": [
+        "Attention",
+        "Blocks",
+        "Findings",
+        "Floor",
+        "Icons",
+        "Lede",
+        "NeedsYou",
+        "Page",
+        "Paragraph",
+        "Reading",
+        "Sections",
+        "Verdict"
+      ],
+      "type": "object"
+    },
+    "wiki.ServedBlock": {
+      "additionalProperties": false,
+      "properties": {
+        "Address": {
+          "type": "string"
+        },
+        "Decision": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/wiki.ServedDecision"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "Fields": {
+          "items": {
+            "$ref": "#/$defs/wiki.ServedField"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Figure": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/wiki.ServedFigure"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "Finding": {
+          "items": {
+            "$ref": "#/$defs/wiki.ServedFinding"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Floor": {
+          "type": "integer"
+        },
+        "ID": {
+          "type": "string"
+        },
+        "Icon": {
+          "type": "string"
+        },
+        "Kind": {
+          "type": "string"
+        },
+        "Line": {
+          "type": "string"
+        },
+        "NeedsYou": {
+          "type": "boolean"
+        },
+        "OwnFloor": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/wiki.FloorHead"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "Score": {
+          "type": "integer"
+        },
+        "Sub": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/wiki.PageHead"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "Table": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/wiki.ServedTable"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "Tier": {
+          "type": "string"
+        },
+        "Title": {
+          "type": "string"
+        },
+        "Why": {
+          "items": {
+            "$ref": "#/$defs/wiki.Cause"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Word": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Address",
+        "Decision",
+        "Fields",
+        "Figure",
+        "Finding",
+        "Floor",
+        "ID",
+        "Icon",
+        "Kind",
+        "Line",
+        "NeedsYou",
+        "OwnFloor",
+        "Score",
+        "Sub",
+        "Table",
+        "Tier",
+        "Title",
+        "Why",
+        "Word"
+      ],
+      "type": "object"
+    },
+    "wiki.ServedDecision": {
+      "additionalProperties": false,
+      "properties": {
+        "Accepted": {
+          "type": "boolean"
+        },
+        "AmendedBy": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Amends": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Date": {
+          "type": "string"
+        },
+        "Decides": {
+          "type": "string"
+        },
+        "Number": {
+          "type": "string"
+        },
+        "Page": {
+          "type": "string"
+        },
+        "Resolves": {
+          "type": "boolean"
+        },
+        "Status": {
+          "type": "string"
+        },
+        "Title": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Accepted",
+        "AmendedBy",
+        "Amends",
+        "Date",
+        "Decides",
+        "Number",
+        "Page",
+        "Resolves",
+        "Status",
+        "Title"
+      ],
+      "type": "object"
+    },
+    "wiki.ServedField": {
+      "additionalProperties": false,
+      "properties": {
+        "Name": {
+          "type": "string"
+        },
+        "Refs": {
+          "items": {
+            "$ref": "#/$defs/wiki.ServedRef"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Text": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Name",
+        "Refs",
+        "Text"
+      ],
+      "type": "object"
+    },
+    "wiki.ServedFigure": {
+      "additionalProperties": false,
+      "properties": {
+        "Caption": {
+          "type": "string"
+        },
+        "Form": {
+          "type": "string"
+        },
+        "Parts": {
+          "items": {
+            "$ref": "#/$defs/wiki.FigurePart"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Shows": {
+          "$ref": "#/$defs/wiki.ServedRef"
+        },
+        "X": {
+          "type": "string"
+        },
+        "Y": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Caption",
+        "Form",
+        "Parts",
+        "Shows",
+        "X",
+        "Y"
+      ],
+      "type": "object"
+    },
+    "wiki.ServedFinding": {
+      "additionalProperties": false,
+      "properties": {
+        "At": {
+          "type": "string"
+        },
+        "From": {
+          "enum": [
+            "word",
+            "line",
+            "card",
+            "full"
+          ],
+          "type": "string"
+        },
+        "Hard": {
+          "type": "boolean"
+        },
+        "Level": {
+          "enum": [
+            "",
+            "ambient",
+            "needs-you",
+            "remark"
+          ],
+          "type": "string"
+        },
+        "Line": {
+          "type": "integer"
+        },
+        "Rule": {
+          "type": "string"
+        },
+        "Says": {
+          "type": "string"
+        },
+        "Word": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "At",
+        "From",
+        "Hard",
+        "Level",
+        "Line",
+        "Rule",
+        "Says",
+        "Word"
+      ],
+      "type": "object"
+    },
+    "wiki.ServedGroup": {
+      "additionalProperties": false,
+      "properties": {
+        "Address": {
+          "type": "string"
+        },
+        "Blocks": {
+          "type": "integer"
+        },
+        "Folded": {
+          "enum": [
+            "",
+            "author",
+            "seat"
+          ],
+          "type": "string"
+        },
+        "ID": {
+          "type": "string"
+        },
+        "Intent": {
+          "type": "string"
+        },
+        "Items": {
+          "items": {
+            "$ref": "#/$defs/wiki.ServedItem"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Lead": {
+          "type": "string"
+        },
+        "MirroredBy": {
+          "type": "string"
+        },
+        "MirroredFrom": {
+          "enum": [
+            "word",
+            "line",
+            "card",
+            "full"
+          ],
+          "type": "string"
+        },
+        "NeedsYou": {
+          "type": "boolean"
+        },
+        "OwnFloor": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/wiki.FloorHead"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ReadBy": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Title": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Address",
+        "Blocks",
+        "Folded",
+        "ID",
+        "Intent",
+        "Items",
+        "Lead",
+        "MirroredBy",
+        "MirroredFrom",
+        "NeedsYou",
+        "OwnFloor",
+        "ReadBy",
+        "Title"
+      ],
+      "type": "object"
+    },
+    "wiki.ServedItem": {
+      "additionalProperties": false,
+      "properties": {
+        "Block": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/wiki.ServedBlock"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "Group": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/wiki.ServedGroup"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "Max": {
+          "enum": [
+            "word",
+            "line",
+            "card",
+            "full"
+          ],
+          "type": "string"
+        },
+        "Prose": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/wiki.ServedProse"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "Ranks": {
+          "items": {
+            "enum": [
+              "word",
+              "line",
+              "card",
+              "full"
+            ],
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "Block",
+        "Group",
+        "Max",
+        "Prose",
+        "Ranks"
+      ],
+      "type": "object"
+    },
+    "wiki.ServedLede": {
+      "additionalProperties": false,
+      "properties": {
+        "First": {
+          "items": {
+            "$ref": "#/$defs/wiki.Run"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "More": {
+          "type": "boolean"
+        },
+        "Ranks": {
+          "items": {
+            "enum": [
+              "word",
+              "line",
+              "card",
+              "full"
+            ],
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "First",
+        "More",
+        "Ranks"
+      ],
+      "type": "object"
+    },
+    "wiki.ServedProse": {
+      "additionalProperties": false,
+      "properties": {
+        "First": {
+          "items": {
+            "$ref": "#/$defs/wiki.Run"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "ID": {
+          "type": "string"
+        },
+        "More": {
+          "type": "boolean"
+        },
+        "Paragraphs": {
+          "items": {
+            "$ref": "#/$defs/wiki.Paragraph"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "First",
+        "ID",
+        "More",
+        "Paragraphs"
+      ],
+      "type": "object"
+    },
+    "wiki.ServedReading": {
+      "additionalProperties": false,
+      "properties": {
+        "Label": {
+          "type": "string"
+        },
+        "Same": {
+          "type": "boolean"
+        },
+        "Seconds": {
+          "type": "integer"
+        },
+        "Words": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "Label",
+        "Same",
+        "Seconds",
+        "Words"
+      ],
+      "type": "object"
+    },
+    "wiki.ServedRef": {
+      "additionalProperties": false,
+      "properties": {
+        "Address": {
+          "type": "string"
+        },
+        "Resolves": {
+          "type": "boolean"
+        },
+        "Word": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Address",
+        "Resolves",
+        "Word"
+      ],
+      "type": "object"
+    },
+    "wiki.ServedRow": {
+      "additionalProperties": false,
+      "properties": {
+        "Address": {
+          "type": "string"
+        },
+        "Cells": {
+          "items": {
+            "$ref": "#/$defs/wiki.ServedField"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Icon": {
+          "type": "string"
+        },
+        "Word": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Address",
+        "Cells",
+        "Icon",
+        "Word"
+      ],
+      "type": "object"
+    },
+    "wiki.ServedSection": {
+      "additionalProperties": false,
+      "properties": {
+        "Anchor": {
+          "type": "string"
+        },
+        "Heading": {
+          "type": "string"
+        },
+        "Icon": {
+          "type": "string"
+        },
+        "Items": {
+          "items": {
+            "$ref": "#/$defs/wiki.ServedItem"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Label": {
+          "type": "string"
+        },
+        "Rests": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "Anchor",
+        "Heading",
+        "Icon",
+        "Items",
+        "Label",
+        "Rests"
+      ],
+      "type": "object"
+    },
+    "wiki.ServedTable": {
+      "additionalProperties": false,
+      "properties": {
+        "Columns": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Count": {
+          "type": "integer"
+        },
+        "In": {
+          "$ref": "#/$defs/wiki.ServedRef"
+        },
+        "Mirrors": {
+          "type": "string"
+        },
+        "Of": {
+          "type": "string"
+        },
+        "Rows": {
+          "items": {
+            "$ref": "#/$defs/wiki.ServedRow"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Title": {
+          "type": "string"
+        },
+        "Where": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Columns",
+        "Count",
+        "In",
+        "Mirrors",
+        "Of",
+        "Rows",
+        "Title",
+        "Where"
+      ],
+      "type": "object"
+    },
+    "wiki.Verdict": {
+      "additionalProperties": false,
+      "properties": {
+        "Hard": {
+          "type": "integer"
+        },
+        "Soft": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "Hard",
+        "Soft"
+      ],
+      "type": "object"
+    },
+    "wiki.calls.ReadIn": {
+      "additionalProperties": false,
+      "properties": {
+        "Page": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/spwn/blob/main/machines/packages/api/schemas/calls/wiki.read.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call wiki.read of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/wiki.calls.ReadIn"
+    },
+    "out": {
+      "$ref": "#/$defs/wiki.Served"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "wiki.read",
+  "type": "object"
+}

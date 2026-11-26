@@ -1,0 +1,478 @@
+{
+  "id": "blueprint/philosophy",
+  "faces": {
+    "word": "Philosophy",
+    "line": "The seven convictions Spwn is built on, written as principles a newcomer can apply to a design choice; [the vision](./vision.md) holds the case they serve, and this page holds the rules.",
+    "paragraph": "The seven convictions Spwn is built on, written as principles a newcomer can apply to a design choice; [the vision](./vision.md) holds the case they serve, and this page holds the rules. The owner confirmed the seven on 2026-11-21 ([his answer](./owner-words.md#why-spwn-exists)).",
+    "icon": ""
+  },
+  "title": {
+    "from": 1,
+    "to": 1
+  },
+  "sections": [
+    {
+      "heading": null,
+      "items": [
+        {
+          "t": "prose",
+          "markdown": "The seven convictions Spwn is built on, written as principles a newcomer can apply to a design\nchoice; [the vision](./vision.md) holds the case they serve, and this page holds the rules. The\nowner confirmed the seven on 2026-11-21 ([his answer](./owner-words.md#why-spwn-exists)).",
+          "span": {
+            "from": 3,
+            "to": 5
+          }
+        },
+        {
+          "t": "block",
+          "id": "all",
+          "kind": "table",
+          "address": "blueprint/philosophy#all",
+          "props": {
+            "id": "all",
+            "of": "conviction",
+            "in": {
+              "ref": "blueprint/philosophy"
+            },
+            "columns": [
+              "says",
+              "carried_in"
+            ]
+          },
+          "faces": {
+            "word": "all",
+            "line": "",
+            "icon": "table"
+          },
+          "view": {
+            "of": "conviction",
+            "in": "blueprint/philosophy",
+            "where": null,
+            "columns": [
+              "says",
+              "carried_in"
+            ]
+          },
+          "at": {
+            "line": 7,
+            "col": 1
+          },
+          "span": {
+            "from": 7,
+            "to": 7
+          }
+        },
+        {
+          "t": "block",
+          "id": "who-carries",
+          "kind": "figure",
+          "address": "blueprint/philosophy#who-carries",
+          "props": {
+            "id": "who-carries",
+            "form": "stack",
+            "shows": {
+              "ref": "blueprint/philosophy#all"
+            },
+            "caption": "Who carries them: how many of the seven each part of the stack carries."
+          },
+          "faces": {
+            "word": "who-carries",
+            "line": "Who carries them: how many of the seven each part of the stack carries.",
+            "icon": "figure"
+          },
+          "view": {
+            "form": "stack",
+            "shows": "blueprint/philosophy#all",
+            "parts": [],
+            "caption": "Who carries them: how many of the seven each part of the stack carries."
+          },
+          "at": {
+            "line": 9,
+            "col": 1
+          },
+          "span": {
+            "from": 9,
+            "to": 14
+          }
+        },
+        {
+          "t": "prose",
+          "markdown": "Each conviction is written in the same six parts: the statement, the sensible opposite (what a\nreasonable product does instead, which is why the conviction says something), the argument, where\nthe product carries it, one example, and the decision that would break it. A page that cites a\nconviction cites its number and links here.",
+          "span": {
+            "from": 16,
+            "to": 19
+          }
+        }
+      ]
+    },
+    {
+      "heading": {
+        "level": 2,
+        "text": "1. You bring the taste. The stack brings the hands",
+        "anchor": "1-you-bring-the-taste-the-stack-brings-the-hands",
+        "at": {
+          "line": 21,
+          "col": 1
+        }
+      },
+      "items": [
+        {
+          "t": "block",
+          "id": "taste",
+          "kind": "conviction",
+          "address": "blueprint/philosophy#taste",
+          "props": {
+            "id": "taste",
+            "says": "You bring the taste. The stack brings the hands.",
+            "opposite": "The tool decides the style and the context for you: a house prompt, a default voice, a template of how work should be done.",
+            "carried_in": [
+              {
+                "ref": "product/stack#wiki"
+              }
+            ],
+            "broken_by": "Shipping a built-in persona or style that overrides what you wrote, or letting one fact live in two places, so that an agent reads the stale copy."
+          },
+          "faces": {
+            "word": "taste",
+            "line": "You bring the taste. The stack brings the hands.",
+            "icon": "conviction"
+          },
+          "at": {
+            "line": 23,
+            "col": 1
+          },
+          "span": {
+            "from": 23,
+            "to": 29
+          }
+        },
+        {
+          "t": "prose",
+          "markdown": "- **Argument.** What an agent cannot supply is what makes the work yours: your taste, your vision,\n  your context from outside the screen. The owner's point is not to write down how he works but to\n  bring his taste and his context while working at the high level\n  ([the problem](./owner-words.md#the-problem), 2026-11-14).\n- **Example.** An agent opening a repository reads your vision and your decisions first, not a\n  generic instruction.",
+          "span": {
+            "from": 31,
+            "to": 36
+          }
+        }
+      ]
+    },
+    {
+      "heading": {
+        "level": 2,
+        "text": "2. Delegating is a craft, not a prompt",
+        "anchor": "2-delegating-is-a-craft-not-a-prompt",
+        "at": {
+          "line": 38,
+          "col": 1
+        }
+      },
+      "items": [
+        {
+          "t": "block",
+          "id": "delegating",
+          "kind": "conviction",
+          "address": "blueprint/philosophy#delegating",
+          "props": {
+            "id": "delegating",
+            "says": "Delegating is a craft, not a prompt.",
+            "opposite": "One strong agent, given every task in one long conversation.",
+            "carried_in": [
+              {
+                "ref": "product/stack#agents"
+              },
+              {
+                "ref": "product/stack#os"
+              }
+            ],
+            "broken_by": "A surface that asks you about everything, or one that hides the detail with no way to open it."
+          },
+          "faces": {
+            "word": "delegating",
+            "line": "Delegating is a craft, not a prompt.",
+            "icon": "conviction"
+          },
+          "at": {
+            "line": 40,
+            "col": 1
+          },
+          "span": {
+            "from": 40,
+            "to": 46
+          }
+        },
+        {
+          "t": "prose",
+          "markdown": "- **Example.** At the end of a day the chief shows what was done and asks you the two questions\n  only you can answer; everything else was settled by the owners of each domain.",
+          "span": {
+            "from": 48,
+            "to": 49
+          }
+        }
+      ]
+    },
+    {
+      "heading": {
+        "level": 2,
+        "text": "3. Rules live in the world, not in the agent",
+        "anchor": "3-rules-live-in-the-world-not-in-the-agent",
+        "at": {
+          "line": 51,
+          "col": 1
+        }
+      },
+      "items": [
+        {
+          "t": "block",
+          "id": "rules-in-the-world",
+          "kind": "conviction",
+          "address": "blueprint/philosophy#rules-in-the-world",
+          "props": {
+            "id": "rules-in-the-world",
+            "says": "Rules live in the world, not in the agent.",
+            "opposite": "Give the agent every access and ask it, in its instructions, to be careful.",
+            "carried_in": [
+              {
+                "ref": "product/stack#machines"
+              },
+              {
+                "ref": "product/stack#agents"
+              }
+            ],
+            "broken_by": "A guardrail in a prompt used as the security boundary, or a default that hands a VM the credentials of the Mac above it."
+          },
+          "faces": {
+            "word": "rules-in-the-world",
+            "line": "Rules live in the world, not in the agent.",
+            "icon": "conviction"
+          },
+          "at": {
+            "line": 53,
+            "col": 1
+          },
+          "span": {
+            "from": 53,
+            "to": 59
+          }
+        },
+        {
+          "t": "prose",
+          "markdown": "- **Example.** An agent cannot break your computer: it is not on it.",
+          "span": {
+            "from": 61,
+            "to": 61
+          }
+        }
+      ]
+    },
+    {
+      "heading": {
+        "level": 2,
+        "text": "4. Declared, never improvised",
+        "anchor": "4-declared-never-improvised",
+        "at": {
+          "line": 63,
+          "col": 1
+        }
+      },
+      "items": [
+        {
+          "t": "block",
+          "id": "declared",
+          "kind": "conviction",
+          "address": "blueprint/philosophy#declared",
+          "props": {
+            "id": "declared",
+            "says": "Declared, never improvised.",
+            "opposite": "Configure by hand, as you go, and forget what you did.",
+            "carried_in": [
+              {
+                "ref": "product/stack#machines"
+              },
+              {
+                "ref": "product/stack#agents"
+              }
+            ],
+            "broken_by": "A setting reachable only by a click with no file behind it, or a state the stack holds that no file explains."
+          },
+          "faces": {
+            "word": "declared",
+            "line": "Declared, never improvised.",
+            "icon": "conviction"
+          },
+          "at": {
+            "line": 65,
+            "col": 1
+          },
+          "span": {
+            "from": 65,
+            "to": 71
+          }
+        },
+        {
+          "t": "prose",
+          "markdown": "- **Example.** `qa.machine.yaml` gives `qa-1`, set up before its first command.",
+          "span": {
+            "from": 73,
+            "to": 73
+          }
+        }
+      ]
+    },
+    {
+      "heading": {
+        "level": 2,
+        "text": "5. Done means proven",
+        "anchor": "5-done-means-proven",
+        "at": {
+          "line": 75,
+          "col": 1
+        }
+      },
+      "items": [
+        {
+          "t": "block",
+          "id": "proven",
+          "kind": "conviction",
+          "address": "blueprint/philosophy#proven",
+          "props": {
+            "id": "proven",
+            "says": "Done means proven.",
+            "opposite": "“It seems to work”, said by whoever did the work.",
+            "carried_in": [
+              {
+                "ref": "product/stack#specs"
+              }
+            ],
+            "broken_by": "A status of done set by the agent that did the work, with no check behind it."
+          },
+          "faces": {
+            "word": "proven",
+            "line": "Done means proven.",
+            "icon": "conviction"
+          },
+          "at": {
+            "line": 77,
+            "col": 1
+          },
+          "span": {
+            "from": 77,
+            "to": 83
+          }
+        },
+        {
+          "t": "prose",
+          "markdown": "- **Example.** A request comes back with its proof, or it does not come back as done.",
+          "span": {
+            "from": 85,
+            "to": 85
+          }
+        }
+      ]
+    },
+    {
+      "heading": {
+        "level": 2,
+        "text": "6. Taste is a system",
+        "anchor": "6-taste-is-a-system",
+        "at": {
+          "line": 87,
+          "col": 1
+        }
+      },
+      "items": [
+        {
+          "t": "block",
+          "id": "taste-is-a-system",
+          "kind": "conviction",
+          "address": "blueprint/philosophy#taste-is-a-system",
+          "props": {
+            "id": "taste-is-a-system",
+            "says": "Taste is a system.",
+            "opposite": "Each screen designed on its own, to the taste of the day.",
+            "carried_in": [
+              {
+                "ref": "product/stack#design"
+              }
+            ],
+            "broken_by": "A component drawn by hand for one page when the kit has the piece."
+          },
+          "faces": {
+            "word": "taste-is-a-system",
+            "line": "Taste is a system.",
+            "icon": "conviction"
+          },
+          "at": {
+            "line": 89,
+            "col": 1
+          },
+          "span": {
+            "from": 89,
+            "to": 95
+          }
+        },
+        {
+          "t": "prose",
+          "markdown": "- **Example.** The site's canvas kit: one box, one arrow, one title, the same everywhere.",
+          "span": {
+            "from": 97,
+            "to": 97
+          }
+        }
+      ]
+    },
+    {
+      "heading": {
+        "level": 2,
+        "text": "7. The stack learns. You don't repeat yourself",
+        "anchor": "7-the-stack-learns-you-dont-repeat-yourself",
+        "at": {
+          "line": 99,
+          "col": 1
+        }
+      },
+      "items": [
+        {
+          "t": "block",
+          "id": "learns",
+          "kind": "conviction",
+          "address": "blueprint/philosophy#learns",
+          "props": {
+            "id": "learns",
+            "says": "The stack learns. You don't repeat yourself.",
+            "opposite": "Every session starts from nothing.",
+            "carried_in": [
+              {
+                "ref": "product/stack#agents"
+              },
+              {
+                "ref": "product/stack#wiki"
+              }
+            ],
+            "broken_by": "A memory that lives only in a session's context, or a lesson written where no agent will read it."
+          },
+          "faces": {
+            "word": "learns",
+            "line": "The stack learns. You don't repeat yourself.",
+            "icon": "conviction"
+          },
+          "at": {
+            "line": 101,
+            "col": 1
+          },
+          "span": {
+            "from": 101,
+            "to": 107
+          }
+        },
+        {
+          "t": "prose",
+          "markdown": "- **Example.** A correction given once becomes a rule the next agent reads.",
+          "span": {
+            "from": 109,
+            "to": 109
+          }
+        }
+      ]
+    }
+  ],
+  "findings": []
+}

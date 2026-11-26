@@ -171,6 +171,9 @@ type Mac struct {
 	// value: the commit each shared source's clone is at, by the source's
 	// url.
 	Clones map[string]string `json:"clones,omitempty"`
+	// value: the wiki this Mac declares, its files at each commit; nil when
+	// it declares none.
+	Wiki *Repository `json:"wiki,omitempty"`
 	// value: the images the hypervisor holds, by reference.
 	Images []string `json:"images,omitempty"`
 	// value: the VMs station's hypervisor adapter cloned here and has not

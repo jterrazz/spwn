@@ -1,0 +1,352 @@
+{
+  "id": "growth/positioning",
+  "faces": {
+    "word": "Positioning",
+    "line": "Where Spwn stands against what a person uses today instead, for anyone writing a comparison, a pitch or an answer to \"how is it different\": the category it refuses, the four alternatives and what each costs.",
+    "paragraph": "Where Spwn stands against what a person uses today instead, for anyone writing a comparison, a pitch or an answer to \"how is it different\": the category it refuses, the four alternatives and what each costs. What Spwn is, in one sentence, is [the vision](../blueprint/vision.md#the-definition)'s and is not restated here.",
+    "icon": ""
+  },
+  "title": {
+    "from": 1,
+    "to": 1
+  },
+  "sections": [
+    {
+      "heading": null,
+      "items": [
+        {
+          "t": "prose",
+          "markdown": "Where Spwn stands against what a person uses today instead, for anyone writing a comparison, a\npitch or an answer to \"how is it different\": the category it refuses, the four alternatives and\nwhat each costs. What Spwn is, in one sentence, is [the vision](../blueprint/vision.md#the-definition)'s\nand is not restated here.",
+          "span": {
+            "from": 3,
+            "to": 6
+          }
+        }
+      ]
+    },
+    {
+      "heading": {
+        "level": 2,
+        "text": "The category it refuses",
+        "anchor": "the-category-it-refuses",
+        "at": {
+          "line": 8,
+          "col": 1
+        }
+      },
+      "items": [
+        {
+          "t": "prose",
+          "markdown": "Spwn is not sold as an agent framework, an AI platform or a tool that makes more output. Each of\nthose is judged by how much it produces, and production is what became cheap\n([what changed](../blueprint/vision.md#what-changed)). Spwn is judged by whether you still\nunderstand and own what was produced: the one enemy is\n[losing your thread](../blueprint/vision.md#the-enemy-losing-your-thread).",
+          "span": {
+            "from": 10,
+            "to": 14
+          }
+        },
+        {
+          "t": "block",
+          "id": "lead-with-the-thread",
+          "kind": "rule",
+          "address": "growth/positioning#lead-with-the-thread",
+          "props": {
+            "id": "lead-with-the-thread",
+            "says": "A comparison never leads with speed, model quality or the number of integrations.",
+            "force": "soft",
+            "guards": {
+              "ref": "growth/positioning"
+            },
+            "read_at": "studio-os:home/spwn/wiki/growth/positioning.md"
+          },
+          "faces": {
+            "word": "lead-with-the-thread",
+            "line": "A comparison never leads with speed, model quality or the number of integrations.",
+            "icon": "soft"
+          },
+          "at": {
+            "line": 16,
+            "col": 1
+          },
+          "span": {
+            "from": 16,
+            "to": 22
+          }
+        },
+        {
+          "t": "prose",
+          "markdown": "It leads with what the alternative does to your thread.",
+          "span": {
+            "from": 24,
+            "to": 24
+          }
+        }
+      ]
+    },
+    {
+      "heading": {
+        "level": 2,
+        "text": "The alternatives",
+        "anchor": "the-alternatives",
+        "at": {
+          "line": 26,
+          "col": 1
+        }
+      },
+      "items": [
+        {
+          "t": "group",
+          "id": "alternatives",
+          "title": "What a person uses today",
+          "intent": "define",
+          "fold": true,
+          "props": {
+            "id": "alternatives",
+            "title": "What a person uses today",
+            "intent": "define",
+            "fold": true
+          },
+          "items": [
+            {
+              "t": "block",
+              "id": "by-hand",
+              "kind": "alternative",
+              "address": "growth/positioning#by-hand",
+              "props": {
+                "id": "by-hand",
+                "gives": "you know every line",
+                "costs": "you are the bottleneck: what gets built is bounded by your hours"
+              },
+              "faces": {
+                "word": "by-hand",
+                "line": "you are the bottleneck: what gets built is bounded by your hours",
+                "icon": "alternative"
+              },
+              "at": {
+                "line": 30,
+                "col": 1
+              },
+              "span": {
+                "from": 30,
+                "to": 30
+              }
+            },
+            {
+              "t": "block",
+              "id": "one-big-agent",
+              "kind": "alternative",
+              "address": "growth/positioning#one-big-agent",
+              "props": {
+                "id": "one-big-agent",
+                "gives": "speed, and one place to ask",
+                "costs": "the only safety is its instructions; one context holds everything, and you stop knowing what it did"
+              },
+              "faces": {
+                "word": "one-big-agent",
+                "line": "the only safety is its instructions; one context holds everything, and you stop knowing what it did",
+                "icon": "alternative"
+              },
+              "at": {
+                "line": 32,
+                "col": 1
+              },
+              "span": {
+                "from": 32,
+                "to": 36
+              }
+            },
+            {
+              "t": "block",
+              "id": "managed-platform",
+              "kind": "alternative",
+              "address": "growth/positioning#managed-platform",
+              "props": {
+                "id": "managed-platform",
+                "gives": "someone else runs the agents",
+                "costs": "your context, machines and credentials live in their place, worked in their method"
+              },
+              "faces": {
+                "word": "managed-platform",
+                "line": "your context, machines and credentials live in their place, worked in their method",
+                "icon": "alternative"
+              },
+              "at": {
+                "line": 38,
+                "col": 1
+              },
+              "span": {
+                "from": 38,
+                "to": 38
+              }
+            },
+            {
+              "t": "block",
+              "id": "unrelated-tools",
+              "kind": "alternative",
+              "address": "growth/positioning#unrelated-tools",
+              "props": {
+                "id": "unrelated-tools",
+                "gives": "each tool is good at its part",
+                "costs": "each keeps its own copy of your context, and you are the integration between them"
+              },
+              "faces": {
+                "word": "unrelated-tools",
+                "line": "each keeps its own copy of your context, and you are the integration between them",
+                "icon": "alternative"
+              },
+              "at": {
+                "line": 40,
+                "col": 1
+              },
+              "span": {
+                "from": 40,
+                "to": 40
+              }
+            }
+          ],
+          "at": {
+            "line": 28,
+            "col": 1
+          },
+          "tag": {
+            "from": 28,
+            "to": 28
+          },
+          "span": {
+            "from": 28,
+            "to": 42
+          }
+        },
+        {
+          "t": "block",
+          "id": "two-costs",
+          "kind": "figure",
+          "address": "growth/positioning#two-costs",
+          "props": {
+            "id": "two-costs",
+            "form": "quad",
+            "shows": {
+              "ref": "growth/positioning#alternatives"
+            },
+            "x": "scale",
+            "y": "authorship",
+            "parts": [
+              {
+                "name": "by hand",
+                "at": "y"
+              },
+              {
+                "name": "one big agent",
+                "at": "x"
+              },
+              {
+                "name": "spwn",
+                "at": "xy"
+              }
+            ],
+            "caption": "Each costs either scale or authorship."
+          },
+          "faces": {
+            "word": "two-costs",
+            "line": "Each costs either scale or authorship.",
+            "icon": "figure"
+          },
+          "view": {
+            "form": "quad",
+            "shows": "growth/positioning#alternatives",
+            "parts": [
+              {
+                "name": "by hand",
+                "at": "y"
+              },
+              {
+                "name": "one big agent",
+                "at": "x"
+              },
+              {
+                "name": "spwn",
+                "at": "xy"
+              }
+            ],
+            "caption": "Each costs either scale or authorship."
+          },
+          "at": {
+            "line": 44,
+            "col": 1
+          },
+          "span": {
+            "from": 44,
+            "to": 52
+          }
+        },
+        {
+          "t": "block",
+          "id": "all",
+          "kind": "table",
+          "address": "growth/positioning#all",
+          "props": {
+            "id": "all",
+            "of": "alternative",
+            "in": {
+              "ref": "growth/positioning#alternatives"
+            },
+            "columns": [
+              "gives",
+              "costs"
+            ]
+          },
+          "faces": {
+            "word": "all",
+            "line": "",
+            "icon": "table"
+          },
+          "view": {
+            "of": "alternative",
+            "in": "growth/positioning#alternatives",
+            "where": null,
+            "columns": [
+              "gives",
+              "costs"
+            ]
+          },
+          "at": {
+            "line": 54,
+            "col": 1
+          },
+          "span": {
+            "from": 54,
+            "to": 54
+          }
+        },
+        {
+          "t": "prose",
+          "markdown": "Each costs either scale or authorship. Spwn's answer is to keep both: the work goes to agents, the\ndecisions stay with you, on your machines, from one place for each fact\n([the stack](../product/stack.md)).",
+          "span": {
+            "from": 56,
+            "to": 58
+          }
+        }
+      ]
+    },
+    {
+      "heading": {
+        "level": 2,
+        "text": "Rests on",
+        "anchor": "rests-on",
+        "at": {
+          "line": 60,
+          "col": 1
+        }
+      },
+      "items": [
+        {
+          "t": "prose",
+          "markdown": "What is not settled: whether \"the category it refuses\" is said in public, and how, is a\npositioning call the owner has not made; it is on\n[open questions](./open-questions.md#positioning-audience-and-pricing). The four alternatives and\ntheir costs are this page's argument; the brief the owner confirmed on 2026-11-21 did not list\nthem, so he has not ruled on them.",
+          "span": {
+            "from": 62,
+            "to": 66
+          }
+        }
+      ]
+    }
+  ],
+  "findings": []
+}

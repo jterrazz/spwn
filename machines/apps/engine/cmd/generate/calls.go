@@ -26,6 +26,7 @@ import (
 	skillscalls "github.com/jterrazz/studio-station/apps/engine/skills/calls"
 	teamscalls "github.com/jterrazz/studio-station/apps/engine/teams/calls"
 	vaultcalls "github.com/jterrazz/studio-station/apps/engine/vault/calls"
+	wikicalls "github.com/jterrazz/studio-station/apps/engine/wiki/calls"
 )
 
 const callsPath = "apps/engine/remote/api/calls.json"
@@ -33,7 +34,7 @@ const callsPath = "apps/engine/remote/api/calls.json"
 // invariant: the registry with zero Deps: only its Meta is read, no call runs.
 func registry() *call.Registry {
 	r, err := call.NewRegistry(
-		agentscalls.All(agentscalls.Deps{}), skillscalls.All(skillscalls.Deps{}), projectcalls.All(projectcalls.Deps{}), teamscalls.All(teamscalls.Deps{}), automationscalls.All(automationscalls.Deps{}), accountscalls.All(accountscalls.Deps{}), activitycalls.All(activitycalls.Deps{}), appscalls.All(appscalls.Deps{}),
+		agentscalls.All(agentscalls.Deps{}), skillscalls.All(skillscalls.Deps{}), projectcalls.All(projectcalls.Deps{}), teamscalls.All(teamscalls.Deps{}), automationscalls.All(automationscalls.Deps{}), wikicalls.All(wikicalls.Deps{}), accountscalls.All(accountscalls.Deps{}), activitycalls.All(activitycalls.Deps{}), appscalls.All(appscalls.Deps{}),
 		awakecalls.All(awakecalls.Deps{}), backgroundcalls.All(backgroundcalls.Deps{}), diskcalls.All(diskcalls.Deps{}), enginecalls.All(enginecalls.Deps{}), approvalscalls.All(approvalscalls.Deps{}),
 		imagescalls.All(imagescalls.Deps{}), journalcalls.All(journalcalls.Deps{}), machinefilecalls.All(machinefilecalls.Deps{}), machinescalls.All(machinescalls.Deps{}), overviewcalls.All(overviewcalls.Sections{}),
 		portscalls.All(portscalls.Deps{}), settingscalls.All(settingscalls.Deps{}), setupcalls.All(setupcalls.Deps{}), vaultcalls.All(vaultcalls.Deps{}), grantscalls.All(grantscalls.Deps{}),

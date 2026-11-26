@@ -1,0 +1,272 @@
+{
+  "$defs": {
+    "wiki.Map": {
+      "additionalProperties": false,
+      "properties": {
+        "Floors": {
+          "items": {
+            "$ref": "#/$defs/wiki.MapFloor"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Home": {
+          "$ref": "#/$defs/wiki.MapHome"
+        },
+        "Icons": {
+          "additionalProperties": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "Nodes": {
+          "items": {
+            "$ref": "#/$defs/wiki.MapNode"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Open": {
+          "type": "string"
+        },
+        "Roots": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "Floors",
+        "Home",
+        "Icons",
+        "Nodes",
+        "Open",
+        "Roots"
+      ],
+      "type": "object"
+    },
+    "wiki.MapFloor": {
+      "additionalProperties": false,
+      "properties": {
+        "Index": {
+          "type": "integer"
+        },
+        "LabelParts": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Name": {
+          "type": "string"
+        },
+        "Question": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Index",
+        "LabelParts",
+        "Name",
+        "Question"
+      ],
+      "type": "object"
+    },
+    "wiki.MapHome": {
+      "additionalProperties": false,
+      "properties": {
+        "Hard": {
+          "type": "integer"
+        },
+        "Line": {
+          "type": "string"
+        },
+        "Needs": {
+          "type": "integer"
+        },
+        "NeedsPages": {
+          "type": "integer"
+        },
+        "Pages": {
+          "type": "integer"
+        },
+        "Seats": {
+          "type": "integer"
+        },
+        "Soft": {
+          "type": "integer"
+        },
+        "Word": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Hard",
+        "Line",
+        "Needs",
+        "NeedsPages",
+        "Pages",
+        "Seats",
+        "Soft",
+        "Word"
+      ],
+      "type": "object"
+    },
+    "wiki.MapNode": {
+      "additionalProperties": false,
+      "properties": {
+        "Band": {
+          "type": "integer"
+        },
+        "Count": {
+          "type": "integer"
+        },
+        "Depth": {
+          "type": "integer"
+        },
+        "Home": {
+          "type": "string"
+        },
+        "ID": {
+          "type": "string"
+        },
+        "Icon": {
+          "type": "string"
+        },
+        "KickerParts": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "Kids": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "Kind": {
+          "enum": [
+            "",
+            "seat",
+            "page",
+            "section",
+            "block",
+            "group",
+            "prose"
+          ],
+          "type": "string"
+        },
+        "Label": {
+          "type": "string"
+        },
+        "LabelCut": {
+          "type": "boolean"
+        },
+        "LineParts": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "Marks": {
+          "items": {
+            "type": "boolean"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "More": {
+          "type": "integer"
+        },
+        "Needs": {
+          "type": "integer"
+        },
+        "Parent": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "Ref": {
+          "type": "string"
+        },
+        "TitleCut": {
+          "type": "boolean"
+        },
+        "TitleParts": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "Band",
+        "Depth",
+        "ID",
+        "Icon",
+        "Kids",
+        "Kind",
+        "Label",
+        "Marks",
+        "Needs",
+        "Parent",
+        "Ref"
+      ],
+      "type": "object"
+    },
+    "wiki.calls.MapIn": {
+      "additionalProperties": false,
+      "properties": {
+        "Open": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/jterrazz/spwn/blob/main/machines/packages/api/schemas/calls/wiki.map.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "The call wiki.map of station.api/v2: the `in` its request frame carries, and the `out` of each answer. Written by make generate from the Go types the call reads and answers; the frames are frame.json.",
+  "properties": {
+    "in": {
+      "$ref": "#/$defs/wiki.calls.MapIn"
+    },
+    "out": {
+      "$ref": "#/$defs/wiki.Map"
+    }
+  },
+  "required": [
+    "in",
+    "out"
+  ],
+  "title": "wiki.map",
+  "type": "object"
+}

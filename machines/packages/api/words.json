@@ -1326,6 +1326,21 @@
     "vm_stopped": {
       "Word": "Machine stopped",
       "Tone": "plain"
+    },
+    "wiki.none": {
+      "Word": "none",
+      "Detail": "wiki",
+      "Tone": "plain"
+    },
+    "wiki.unknown-page": {
+      "Word": "unknown page",
+      "Detail": "wiki",
+      "Tone": "plain"
+    },
+    "wiki.unreadable": {
+      "Word": "unreadable",
+      "Detail": "wiki",
+      "Tone": "plain"
     }
   },
   "CoreFailField": {
@@ -2257,10 +2272,22 @@
       "Other": "apps",
       "Tone": "plain"
     },
+    "block": {
+      "Word": "Blocks",
+      "One": "block",
+      "Other": "blocks",
+      "Tone": "plain"
+    },
     "grant": {
       "Word": "Grants",
       "One": "grant",
       "Other": "grants",
+      "Tone": "plain"
+    },
+    "hard-finding": {
+      "Word": "Hard findings",
+      "One": "hard finding",
+      "Other": "hard findings",
       "Tone": "plain"
     },
     "line": {
@@ -2293,16 +2320,34 @@
       "Other": "passwords",
       "Tone": "plain"
     },
+    "quiet-block": {
+      "Word": "Quiet blocks",
+      "One": "quiet block",
+      "Other": "quiet blocks",
+      "Tone": "plain"
+    },
     "quiet-listener": {
       "Word": "Short-lived listeners",
       "One": "short-lived listener not listed",
       "Other": "short-lived listeners not listed",
       "Tone": "plain"
     },
+    "remark": {
+      "Word": "Remarks",
+      "One": "remark",
+      "Other": "remarks",
+      "Tone": "plain"
+    },
     "restart": {
       "Word": "Restarts",
       "One": "restart",
       "Other": "restarts",
+      "Tone": "plain"
+    },
+    "row": {
+      "Word": "Rows",
+      "One": "row",
+      "Other": "rows",
       "Tone": "plain"
     },
     "setting": {
@@ -2315,6 +2360,30 @@
       "Word": "Skills",
       "One": "skill",
       "Other": "skills",
+      "Tone": "plain"
+    },
+    "wiki-finding": {
+      "Word": "Findings",
+      "One": "finding",
+      "Other": "findings",
+      "Tone": "plain"
+    },
+    "wiki-page": {
+      "Word": "Pages",
+      "One": "page",
+      "Other": "pages",
+      "Tone": "plain"
+    },
+    "wiki-seat": {
+      "Word": "Seats",
+      "One": "seat",
+      "Other": "seats",
+      "Tone": "plain"
+    },
+    "wiki-section": {
+      "Word": "Sections",
+      "One": "section",
+      "Other": "sections",
       "Tone": "plain"
     }
   },
@@ -2345,6 +2414,24 @@
     },
     "reading": {
       "Word": "reading",
+      "Tone": "plain"
+    }
+  },
+  "WikiDetail": {
+    "card": {
+      "Word": "card",
+      "Tone": "plain"
+    },
+    "full": {
+      "Word": "full",
+      "Tone": "plain"
+    },
+    "line": {
+      "Word": "line",
+      "Tone": "plain"
+    },
+    "word": {
+      "Word": "word",
       "Tone": "plain"
     }
   }

@@ -32,6 +32,7 @@ import (
 	skillscalls "github.com/jterrazz/studio-station/apps/engine/skills/calls"
 	teamscalls "github.com/jterrazz/studio-station/apps/engine/teams/calls"
 	vaultcalls "github.com/jterrazz/studio-station/apps/engine/vault/calls"
+	wikicalls "github.com/jterrazz/studio-station/apps/engine/wiki/calls"
 )
 
 // value: every call of the binary, bound with zero Deps: its Meta only.
@@ -42,6 +43,7 @@ func allCalls(t *testing.T) *call.Registry {
 		diskcalls.All(diskcalls.Deps{}), imagescalls.All(imagescalls.Deps{}), journalcalls.All(journalcalls.Deps{}), machinefilecalls.All(machinefilecalls.Deps{}), machinescalls.All(machinescalls.Deps{}),
 		portscalls.All(portscalls.Deps{}), settingscalls.All(settingscalls.Deps{}), setupcalls.All(setupcalls.Deps{}), vaultcalls.All(vaultcalls.Deps{}), grantscalls.All(grantscalls.Deps{}),
 		agentscalls.All(agentscalls.Deps{}), skillscalls.All(skillscalls.Deps{}), projectcalls.All(projectcalls.Deps{}), teamscalls.All(teamscalls.Deps{}), automationscalls.All(automationscalls.Deps{}),
+		wikicalls.All(wikicalls.Deps{}),
 		activitycalls.All(activitycalls.Deps{}), enginecalls.All(enginecalls.Deps{}), approvalscalls.All(approvalscalls.Deps{}), overviewcalls.All(overviewcalls.Sections{}),
 		devicescalls.All(devicescalls.Deps{}),
 	)

@@ -1,0 +1,325 @@
+{
+  "id": "product/stack",
+  "faces": {
+    "word": "The stack",
+    "line": "Spwn's three spaces and what lives in each, for anyone deciding what a part of the app is for or where it goes: per space, what you let go of, what you keep, and whether it runs today.",
+    "paragraph": "Spwn's three spaces and what lives in each, for anyone deciding what a part of the app is for or where it goes: per space, what you let go of, what you keep, and whether it runs today. The structure is the owner's, decided on 2026-11-22 ([his words](../blueprint/owner-words.md#the-three-spaces-of-the-app)); the record is [ADR-003](./decisions/003-the-three-spaces-are-the-structure-of-the-app.md). It replaces the six-rung ladder of [ADR-002](./decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder.md).",
+    "icon": ""
+  },
+  "title": {
+    "from": 1,
+    "to": 1
+  },
+  "sections": [
+    {
+      "heading": null,
+      "items": [
+        {
+          "t": "prose",
+          "markdown": "Spwn's three spaces and what lives in each, for anyone deciding what a part of the app is for or\nwhere it goes: per space, what you let go of, what you keep, and whether it runs today. The\nstructure is the owner's, decided on 2026-11-22 ([his words](../blueprint/owner-words.md#the-three-spaces-of-the-app));\nthe record is\n[ADR-003](./decisions/003-the-three-spaces-are-the-structure-of-the-app.md). It replaces\nthe six-rung ladder of [ADR-002](./decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder.md).",
+          "span": {
+            "from": 3,
+            "to": 8
+          }
+        }
+      ]
+    },
+    {
+      "heading": {
+        "level": 2,
+        "text": "The three spaces",
+        "anchor": "the-three-spaces",
+        "at": {
+          "line": 10,
+          "col": 1
+        }
+      },
+      "items": [
+        {
+          "t": "prose",
+          "markdown": "The layers of the Spwn app are three great concepts, and in the future three distinct spaces in\nits GUI. The owner drew each as the running of a company:\n\n| Space   | The company it is the parallel of                                                                                                     | State      |\n| ------- | ------------------------------------------------------------------------------------------------------------------------------------- | ---------- |\n| Machine | The environment: the fleet of machines, the premises, the access, the security, the documents                                         | shipped    |\n| Agent   | The staff: their personalities, roles, focus and responsibilities                                                                     | shipped    |\n| OS      | The flows: which project, which vision, which product, which system runs inside; it steers the flows, the system and the abstractions | being made |\n\nEach space is one step of [the method](../blueprint/vision.md#the-method-climb-by-abstraction): a\npiece of work handed to the stack, a decision kept by you. What you let go of and keep, space by\nspace, in the parts that exist:",
+          "span": {
+            "from": 12,
+            "to": 23
+          }
+        },
+        {
+          "t": "group",
+          "id": "parts",
+          "title": "The parts and what you keep",
+          "intent": "define",
+          "fold": false,
+          "props": {
+            "id": "parts",
+            "title": "The parts and what you keep",
+            "intent": "define"
+          },
+          "items": [
+            {
+              "t": "block",
+              "id": "machines",
+              "kind": "part",
+              "address": "product/stack#machines",
+              "props": {
+                "id": "machines",
+                "space": "machine",
+                "lets_go": "preparing a computer",
+                "keeps": "the file that describes it",
+                "state": "shipped"
+              },
+              "faces": {
+                "word": "machines",
+                "line": "the file that describes it",
+                "icon": "part"
+              },
+              "at": {
+                "line": 27,
+                "col": 1
+              },
+              "span": {
+                "from": 27,
+                "to": 27
+              }
+            },
+            {
+              "t": "block",
+              "id": "agents",
+              "kind": "part",
+              "address": "product/stack#agents",
+              "props": {
+                "id": "agents",
+                "space": "agent",
+                "lets_go": "doing the work",
+                "keeps": "who does what, in which world",
+                "state": "shipped"
+              },
+              "faces": {
+                "word": "agents",
+                "line": "who does what, in which world",
+                "icon": "part"
+              },
+              "at": {
+                "line": 29,
+                "col": 1
+              },
+              "span": {
+                "from": 29,
+                "to": 29
+              }
+            },
+            {
+              "t": "block",
+              "id": "wiki",
+              "kind": "part",
+              "address": "product/stack#wiki",
+              "props": {
+                "id": "wiki",
+                "space": "os",
+                "lets_go": "repeating your context",
+                "keeps": "the facts and the decisions",
+                "state": "making"
+              },
+              "faces": {
+                "word": "wiki",
+                "line": "the facts and the decisions",
+                "icon": "part"
+              },
+              "at": {
+                "line": 31,
+                "col": 1
+              },
+              "span": {
+                "from": 31,
+                "to": 31
+              }
+            },
+            {
+              "t": "block",
+              "id": "specs",
+              "kind": "part",
+              "address": "product/stack#specs",
+              "props": {
+                "id": "specs",
+                "space": "os",
+                "lets_go": "checking by hand",
+                "keeps": "what done means",
+                "state": "making"
+              },
+              "faces": {
+                "word": "specs",
+                "line": "what done means",
+                "icon": "part"
+              },
+              "at": {
+                "line": 33,
+                "col": 1
+              },
+              "span": {
+                "from": 33,
+                "to": 33
+              }
+            },
+            {
+              "t": "block",
+              "id": "design",
+              "kind": "part",
+              "address": "product/stack#design",
+              "props": {
+                "id": "design",
+                "space": "os",
+                "lets_go": "drawing each screen",
+                "keeps": "your taste, as a system",
+                "state": "making"
+              },
+              "faces": {
+                "word": "design",
+                "line": "your taste, as a system",
+                "icon": "part"
+              },
+              "at": {
+                "line": 35,
+                "col": 1
+              },
+              "span": {
+                "from": 35,
+                "to": 35
+              }
+            },
+            {
+              "t": "block",
+              "id": "os",
+              "kind": "part",
+              "address": "product/stack#os",
+              "props": {
+                "id": "os",
+                "space": "os",
+                "lets_go": "holding it all together",
+                "keeps": "the intention, and the last word",
+                "state": "making"
+              },
+              "faces": {
+                "word": "os",
+                "line": "the intention, and the last word",
+                "icon": "part"
+              },
+              "at": {
+                "line": 37,
+                "col": 1
+              },
+              "span": {
+                "from": 37,
+                "to": 37
+              }
+            }
+          ],
+          "at": {
+            "line": 25,
+            "col": 1
+          },
+          "tag": {
+            "from": 25,
+            "to": 25
+          },
+          "span": {
+            "from": 25,
+            "to": 39
+          }
+        },
+        {
+          "t": "block",
+          "id": "all",
+          "kind": "table",
+          "address": "product/stack#all",
+          "props": {
+            "id": "all",
+            "of": "part",
+            "in": {
+              "ref": "product/stack"
+            },
+            "columns": [
+              "space",
+              "lets_go",
+              "keeps",
+              "state"
+            ]
+          },
+          "faces": {
+            "word": "all",
+            "line": "",
+            "icon": "table"
+          },
+          "view": {
+            "of": "part",
+            "in": "product/stack",
+            "where": null,
+            "columns": [
+              "space",
+              "lets_go",
+              "keeps",
+              "state"
+            ]
+          },
+          "at": {
+            "line": 41,
+            "col": 1
+          },
+          "span": {
+            "from": 41,
+            "to": 41
+          }
+        },
+        {
+          "t": "prose",
+          "markdown": "The column \"you keep\" is the part no space may take away; [the boundaries](./boundaries.md) say\nwhat each part refuses for that reason.",
+          "span": {
+            "from": 43,
+            "to": 44
+          }
+        }
+      ]
+    },
+    {
+      "heading": {
+        "level": 2,
+        "text": "How the spaces stack",
+        "anchor": "how-the-spaces-stack",
+        "at": {
+          "line": 46,
+          "col": 1
+        }
+      },
+      "items": [
+        {
+          "t": "prose",
+          "markdown": "A space leans on the ones before it and never needs the ones after. Agents runs in machines\nMachines can build; in the OS space, Wiki is what agents read, Specs proves the work against what\nyou and Wiki asked for, Design turns your taste into rules the work is held to, and the OS is the\none place you steer from.",
+          "span": {
+            "from": 48,
+            "to": 51
+          }
+        }
+      ]
+    },
+    {
+      "heading": {
+        "level": 2,
+        "text": "Rests on",
+        "anchor": "rests-on",
+        "at": {
+          "line": 53,
+          "col": 1
+        }
+      },
+      "items": [
+        {
+          "t": "prose",
+          "markdown": "One claim here is this page's reading, not the owner's word: that a space leans only on the\nspaces before it (\"How the spaces stack\"). The placement of Wiki, Specs and Design in the OS space\nis his; the \"you let go of\" and \"you keep\" columns come from the brief he confirmed on 2026-11-21.",
+          "span": {
+            "from": 55,
+            "to": 57
+          }
+        }
+      ]
+    }
+  ],
+  "findings": []
+}

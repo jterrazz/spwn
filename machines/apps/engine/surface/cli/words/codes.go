@@ -32,6 +32,7 @@ import (
 	settingscalls "github.com/jterrazz/studio-station/apps/engine/settings/calls"
 	skillscalls "github.com/jterrazz/studio-station/apps/engine/skills/calls"
 	teamscalls "github.com/jterrazz/studio-station/apps/engine/teams/calls"
+	wikicalls "github.com/jterrazz/studio-station/apps/engine/wiki/calls"
 )
 
 type Wording func(e *fail.Error) (message, hint string)
@@ -732,6 +733,15 @@ func Codes() map[fail.Code]Wording {
 		},
 		journalcalls.Unreadable: func(e *fail.Error) (string, string) {
 			return e.Subject + " cannot be read: what was done is not shown until it can", "repair " + e.Subject + " by hand, or remove it: rm " + e.Subject
+		},
+		wikicalls.None: func(*fail.Error) (string, string) {
+			return "this Mac declares no wiki, so there is no page to read", "a wiki is a folder whose root holds wiki.yaml"
+		},
+		wikicalls.UnknownPage: func(e *fail.Error) (string, string) {
+			return "no page of the wiki is \"" + e.Subject + "\"", "a page's id is its path under the wiki, without .md"
+		},
+		wikicalls.Unreadable: func(e *fail.Error) (string, string) {
+			return "the wiki cannot be read: " + e.Subject, "repair wiki.yaml at the wiki's root"
 		},
 		diskcalls.RecordUnreadable: func(e *fail.Error) (string, string) {
 			return e.Subject + " cannot be read: nothing is freed until it can", "repair " + e.Subject + " by hand, or remove it: rm " + e.Subject
