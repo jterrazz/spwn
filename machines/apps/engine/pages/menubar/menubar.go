@@ -475,6 +475,7 @@ const (
 	CallKeepAwake = "awake.keep"
 	CallAwakeOff  = "awake.off"
 	CallUpdate    = "apps.update"
+	CallInstall   = "apps.install"
 	CallAddMac    = "machines.add"
 	CallStopVM    = "machines.stop"
 	CallStartVM   = "machines.start"

@@ -170,12 +170,8 @@ func Findings(f AllMachines) []finding.Finding {
 			add(mac, severityOf(s.Tone()), label, label+" has its engine stopped", "station engine start"+on)
 		case MacOnline:
 		}
-		if h.SilentHypervisor != "" {
-			fix := ""
-			if h.SilentPackage != "" {
-				fix = "station apps install " + h.SilentPackage + on
-			}
-			add(mac, finding.Broken, label, (&NoEngineError{Hypervisor: h.SilentHypervisor, Package: h.SilentPackage}).Error(), fix)
+		if silent, ok := SilentHypervisor(f, h); ok {
+			out = append(out, silent)
 		}
 		if h.Reachable && h.Engine.Running() && h.Engine.LocalNetwork == LocalNetworkNotApproved {
 			out = append(out, finding.Finding{Machine: mac, Section: section.Overview, Severity: finding.NeedsALook, Subject: label, Text: NotApproved(h.Name, h.Engine.Bundled), Fix: finding.Fix{Path: LocalNetworkFix(h.Name, h.Engine.Bundled)}})
@@ -196,6 +192,25 @@ func Findings(f AllMachines) []finding.Finding {
 		out = append(out, finding.Finding{Machine: machine.Ref{Name: r.Name}, Section: section.Overview, Severity: finding.NeedsALook, Subject: r.Name, Text: r.Name + " is left out: " + r.Why, Fix: finding.Fix{Path: MacRecordFix}})
 	}
 	return finding.Rank(out)
+}
+
+func SilentHypervisor(f AllMachines, h MacView) (finding.Finding, bool) {
+	// value: the need of a Mac whose hypervisor does not answer: its
+	// install, the call a button runs at that Mac and the command a
+	// terminal types.
+	if h.SilentHypervisor == "" {
+		return finding.Finding{}, false
+	}
+	label, on := Label(f, h), ""
+	if !h.ThisMac {
+		on = " --on " + label
+	}
+	said := finding.Finding{Machine: machine.Ref{Name: h.Name}, Section: section.Overview, Severity: finding.Broken, Subject: label,
+		Text: (&NoEngineError{Hypervisor: h.SilentHypervisor, Package: h.SilentPackage}).Error()}
+	if h.SilentPackage != "" {
+		said.Fix = finding.Fix{Call: "apps.install", Args: map[string]string{"Names": h.SilentPackage}, Command: "station apps install " + h.SilentPackage + on}
+	}
+	return said, true
 }
 
 // invariant: a Mac that hosts a server and stops answering may wait at its
