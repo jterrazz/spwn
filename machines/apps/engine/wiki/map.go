@@ -38,12 +38,13 @@ type MapHome struct {
 }
 
 type MapFloor struct {
-	// value: a floor of the ladder and how the band of the canvas it names
-	// is labelled.
-	Index    int
-	Name     string
-	Question string
-	Label    string
+	// value: a floor of the ladder and the label of the band of the canvas
+	// it names: its letter and number, then its name, the parts the window
+	// joins with its separator.
+	Index      int
+	Name       string
+	Question   string
+	LabelParts []string
 }
 
 type NodeKind string
@@ -88,32 +89,36 @@ type MapNode struct {
 	// accessible name; its title, kicker and line on a card, each served only
 	// when it says something the label does not; its icon; and Count, what it
 	// holds, said with its kind's noun: pages, sections, items or blocks.
-	Label  string
-	Title  string `json:",omitempty"`
-	Kicker string `json:",omitempty"`
-	Line   string `json:",omitempty"`
-	Icon   string
-	Count  int `json:",omitempty"`
+	// A title, a kicker and a line are served as their parts in order, which
+	// the window joins with its separator; a label or a title cut to its
+	// first words is served as the words kept, with Cut true, and the window
+	// draws its ellipsis after them.
+	Label       string
+	LabelCut    bool     `json:",omitempty"`
+	TitleParts  []string `json:",omitempty"`
+	TitleCut    bool     `json:",omitempty"`
+	KickerParts []string `json:",omitempty"`
+	LineParts   []string `json:",omitempty"`
+	Icon        string
+	Count       int `json:",omitempty"`
 	// value: on a seat, the node of the page a reader opens it at.
 	Home string `json:",omitempty"`
 }
 
-// value: the most marks a node is served with, the most a face draws.
-const MaxMarks = 11
+const MaxMarks = 11 // value: the most marks a node is served with, the most a face draws.
 
 // value: the words the map's root and its cards are drawn with.
 const (
-	mapWord        = "Wiki"
-	mapLine        = "Every page of this Mac's wiki, by the seat that reads it."
-	sectionKicker  = "Section"
-	openingKicker  = "Opening"
-	proseKicker    = "Paragraph"
-	groupKicker    = "Group · "
-	proseIcon      = "para"
-	labelWords     = 3
-	titleWords     = 4
-	floorLetter    = "E"
-	floorSeparator = " · "
+	mapWord       = "Wiki"
+	mapLine       = "Every page of this Mac's wiki, by the seat that reads it."
+	sectionKicker = "Section"
+	openingKicker = "Opening"
+	proseKicker   = "Paragraph"
+	groupKicker   = "Group"
+	proseIcon     = "para"
+	labelWords    = 3
+	titleWords    = 4
+	floorLetter   = "E"
 )
 
 func (c Corpus) Map(open string) (Map, error) {
@@ -149,7 +154,7 @@ func (c Corpus) Map(open string) (Map, error) {
 	}
 	m.out.Home.Word, m.out.Home.Line = mapWord, mapLine
 	for i, f := range c.Schema.Floors {
-		m.out.Floors = append(m.out.Floors, MapFloor{Index: i, Name: f.Name, Question: f.Question, Label: floorLetter + strconv.Itoa(i) + floorSeparator + f.Name})
+		m.out.Floors = append(m.out.Floors, MapFloor{Index: i, Name: f.Name, Question: f.Question, LabelParts: partsOf(floorLetter+strconv.Itoa(i), f.Name)})
 	}
 	for _, seat := range c.Schema.Seats {
 		m.seat(seat, m.ordered(bySeat[seat.ID]), open)
@@ -215,7 +220,7 @@ func (m *mapper) seat(seat Seat, pages []*Page, open string) {
 	at := m.add(MapNode{ID: id, Depth: 1, Kind: NodeSeat, Ref: seat.ID, Band: band, Label: seat.Name, Icon: seat.ID, Count: len(pages)})
 	m.out.Roots = append(m.out.Roots, id)
 	m.out.Home.Seats++
-	var kids []int
+	kids := make([]int, 0, len(pages))
 	for _, p := range pages {
 		if seat.Home == p.ID {
 			m.out.Nodes[at].Home = "P:" + p.ID
@@ -231,7 +236,7 @@ func (m *mapper) seat(seat Seat, pages []*Page, open string) {
 func (m *mapper) close(at int, kids []int, own int) {
 	n := &m.out.Nodes[at]
 	n.Needs = own
-	marks := []bool{}
+	marks := make([]bool, 0, len(kids))
 	n.Kids = []string{}
 	for _, k := range kids {
 		kid := m.out.Nodes[k]
@@ -242,7 +247,7 @@ func (m *mapper) close(at int, kids []int, own int) {
 	n.Marks, n.More = capped(marks)
 }
 
-func capped(marks []bool) ([]bool, int) {
+func capped(marks []bool) (shown []bool, more int) {
 	if len(marks) <= MaxMarks {
 		return marks, 0
 	}
@@ -252,14 +257,14 @@ func capped(marks []bool) ([]bool, int) {
 func (m *mapper) page(p *Page, parent string, band int, open bool) int {
 	id := "P:" + p.ID
 	floor := m.read[p.ID].Floor
-	n := MapNode{ID: id, Depth: 2, Kind: NodePage, Parent: &parent, Ref: p.ID, Band: band, Label: p.Faces.Word, Line: plainOf(p.Faces.Line), Icon: m.read[p.ID].Seat}
+	n := MapNode{ID: id, Depth: 2, Kind: NodePage, Parent: &parent, Ref: p.ID, Band: band, Label: p.Faces.Word, LineParts: partsOf(plainOf(p.Faces.Line)), Icon: m.read[p.ID].Seat}
 	if f, ok := m.floorAt(floor); ok {
-		n.Kicker = floorLetter + strconv.Itoa(floor) + " " + f.Name
+		n.KickerParts = []string{floorLetter + strconv.Itoa(floor) + " " + f.Name}
 	}
 	if r, ok := m.c.Records[p.ID]; ok {
-		n.Label, n.Title = r.Number, r.Number+floorSeparator+r.Title
+		n.Label, n.TitleParts = r.Number, partsOf(r.Number, r.Title)
 		if d := m.server.record(p.ID); d.Decides != "" {
-			n.Line = d.Decides
+			n.LineParts = []string{d.Decides}
 		}
 	}
 	at := m.add(n)
@@ -323,15 +328,14 @@ func (m *mapper) needsOf(page string, items []Item) int {
 
 func (m *mapper) section(p *Page, si int, h *Heading, items []Item, parent string, band int) int {
 	id := "C:" + p.ID + ":" + strconv.Itoa(si)
-	n := MapNode{ID: id, Depth: 3, Kind: NodeSection, Parent: &parent, Band: band, Label: openingLabel, Kicker: openingKicker, Icon: "home"}
+	n := MapNode{ID: id, Depth: 3, Kind: NodeSection, Parent: &parent, Band: band, Label: openingLabel, KickerParts: []string{openingKicker}, Icon: "home"}
 	if h != nil {
 		rests := restsOn(h.Text)
-		n.Ref, n.Label, n.Kicker, n.Icon = h.Anchor, h.Text, sectionKicker, sectionIcon(rests, items)
+		n.Ref, n.Label, n.KickerParts, n.Icon = h.Anchor, h.Text, []string{sectionKicker}, sectionIcon(rests, items)
 	}
 	at := m.add(n)
 	var kids []int
-	var words []string
-	first := ""
+	var words, first []string
 	k := 0
 	for _, it := range items {
 		var item MapNode
@@ -345,8 +349,8 @@ func (m *mapper) section(p *Page, si int, h *Heading, items []Item, parent strin
 		case *Prose:
 			item = m.prose(it, "p"+strconv.Itoa(si)+"."+strconv.Itoa(k))
 			k++
-			if first == "" {
-				first = item.Line
+			if first == nil {
+				first = item.LineParts
 			}
 		default:
 			continue
@@ -360,9 +364,9 @@ func (m *mapper) section(p *Page, si int, h *Heading, items []Item, parent strin
 		item.ID, item.Depth, item.Parent, item.Band, item.Kids = "B:"+p.ID+":"+item.Ref, 4, &id, band, []string{}
 		kids = append(kids, m.add(item))
 	}
-	m.out.Nodes[at].Line, m.out.Nodes[at].Count = first, len(kids)
-	if len(words) > 0 {
-		m.out.Nodes[at].Line = strings.Join(words, floorSeparator)
+	m.out.Nodes[at].LineParts, m.out.Nodes[at].Count = first, len(kids)
+	if said := partsOf(words...); said != nil {
+		m.out.Nodes[at].LineParts = said
 	}
 	m.close(at, kids, 0)
 	return at
@@ -371,11 +375,11 @@ func (m *mapper) section(p *Page, si int, h *Heading, items []Item, parent strin
 func (m *mapper) block(p *Page, b *Block) MapNode {
 	kind, _ := m.c.Schema.kind(b.Kind)
 	needs := m.needs[p.ID+"#"+b.ID]
-	return MapNode{Kind: NodeBlock, Ref: b.ID, Needs: needs, Marks: []bool{}, Label: b.Faces.Word, Kicker: titleOf(kind, b.Kind), Line: plainOf(b.Faces.Line), Icon: cmp.Or(b.Faces.Icon, kind.Icon, b.Kind)}
+	return MapNode{Kind: NodeBlock, Ref: b.ID, Needs: needs, Marks: []bool{}, Label: b.Faces.Word, KickerParts: partsOf(titleOf(kind, b.Kind)), LineParts: partsOf(plainOf(b.Faces.Line)), Icon: cmp.Or(b.Faces.Icon, kind.Icon, b.Kind)}
 }
 
 func (m *mapper) group(p *Page, g *Group) MapNode {
-	n := MapNode{Kind: NodeGroup, Ref: g.ID, Label: g.Title, Kicker: groupKicker + string(g.Intent), Icon: "define"}
+	n := MapNode{Kind: NodeGroup, Ref: g.ID, Label: g.Title, KickerParts: partsOf(groupKicker, string(g.Intent)), Icon: "define"}
 	if g.Intent == IntentGuard {
 		n.Icon = "guard"
 	}
@@ -389,9 +393,11 @@ func (m *mapper) group(p *Page, g *Group) MapNode {
 	}
 	n.Needs, n.Count = m.needsOf(p.ID, g.Items), len(marks)
 	n.Marks, n.More = capped(marks)
-	n.Line = strings.Join(words, floorSeparator)
-	if lead, ok := m.server.blocks[m.server.readings[p.ID+"#"+g.ID].Lead]; ok && lead.Faces.Line != "" {
-		n.Line = lead.Faces.Line
+	n.LineParts = partsOf(words...)
+	if lead, ok := m.server.blocks[m.server.readings[p.ID+"#"+g.ID].Lead]; ok {
+		if line := partsOf(strings.TrimSpace(lead.Faces.Line)); line != nil {
+			n.LineParts = line
+		}
 	}
 	return n
 }
@@ -412,16 +418,31 @@ func (m *mapper) prose(pr *Prose, id string) MapNode {
 		texts = append(texts, strings.Join(cells, " "))
 	}
 	words := strings.Fields(strings.Join(texts, " "))
-	n := MapNode{Kind: NodeProse, Ref: id, Marks: []bool{}, Label: firstWords(words, labelWords), Kicker: proseKicker, Line: strings.TrimSpace(runsText(first)), Icon: proseIcon}
-	if title := firstWords(words, titleWords); title != n.Label {
-		n.Title = title
+	label, cut := firstWords(words, labelWords)
+	n := MapNode{Kind: NodeProse, Ref: id, Marks: []bool{}, Label: label, LabelCut: cut, KickerParts: []string{proseKicker}, LineParts: partsOf(strings.TrimSpace(runsText(first))), Icon: proseIcon}
+	if title, cut := firstWords(words, titleWords); title != n.Label {
+		n.TitleParts, n.TitleCut = []string{title}, cut
 	}
 	return n
 }
 
-func firstWords(words []string, n int) string {
+// invariant: a label or a title is cut to its first n words, and says it
+// was cut when the paragraph held more.
+func firstWords(words []string, n int) (string, bool) {
 	if len(words) <= n {
-		return strings.Join(words, " ")
+		return strings.Join(words, " "), false
 	}
-	return strings.Join(words[:n], " ") + "…"
+	return strings.Join(words[:n], " "), true
+}
+
+// invariant: a line of parts holds only parts that say something, and is
+// none when none does, so the window never joins an empty part.
+func partsOf(parts ...string) []string {
+	var out []string
+	for _, p := range parts {
+		if p != "" {
+			out = append(out, p)
+		}
+	}
+	return out
 }

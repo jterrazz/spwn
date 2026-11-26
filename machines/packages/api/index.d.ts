@@ -3730,7 +3730,7 @@ export type WikiMap = {
 
 export type WikiMapFloor = {
     Index: number;
-    Label: string;
+    LabelParts: string[] | null;
     Name: string;
     Question: string;
 };
@@ -3753,17 +3753,19 @@ export type WikiMapNode = {
     Home?: string;
     ID: string;
     Icon: string;
-    Kicker?: string;
+    KickerParts?: string[];
     Kids: string[] | null;
     Kind: '' | 'seat' | 'page' | 'section' | 'block' | 'group' | 'prose';
     Label: string;
-    Line?: string;
+    LabelCut?: boolean;
+    LineParts?: string[];
     Marks: boolean[] | null;
     More?: number;
     Needs: number;
     Parent: string | null;
     Ref: string;
-    Title?: string;
+    TitleCut?: boolean;
+    TitleParts?: string[];
 };
 
 export type WikiPageHead = {

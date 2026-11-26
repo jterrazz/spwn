@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"unicode/utf8"
 
 	"github.com/jterrazz/studio-station/apps/engine/wiki"
 )
@@ -62,8 +63,65 @@ type prototypeNode struct {
 // prototype's kind sec is the engine's section, a name no face draws.
 func mapDiffers() map[string]string {
 	return map[string]string{
-		"B:growth/positioning:lead-with-the-thread.icon": "a block's icon is the one wiki.read serves it with, its Face's, then its kind's, then its kind; the prototype drew one icon per kind, and this rule's Face is its force, soft",
+		"B:growth/positioning:lead-with-the-thread.icon": "a block's icon is the one wiki.read serves it with, its Face's, then its kind's, then its kind, so the canvas and the sheet draw the same icon for the same block; the prototype drew one icon per kind, and this rule's Face is its force, soft",
 	}
+}
+
+// value: how the prototype wrote a line of parts and a cut, read from the
+// fixture itself, since the glyphs are the kit's alone: a floor's label joins
+// its letter and its name with the separator, and a paragraph whose title
+// runs past its label had its label cut, the ellipsis after its words.
+type protoGlyphs struct{ sep, cut string }
+
+func glyphsOf(t *testing.T, g prototypeGraph) protoGlyphs {
+	t.Helper()
+	var out protoGlyphs
+	for _, f := range g.Floors {
+		letter := "E" + strconv.Itoa(f.Index)
+		if !strings.HasPrefix(f.Label, letter) || !strings.HasSuffix(f.Label, f.Name) || len(f.Label) <= len(letter)+len(f.Name) {
+			t.Fatalf("floor %+v: no separator between %q and %q", f, letter, f.Name)
+		}
+		sep := f.Label[len(letter) : len(f.Label)-len(f.Name)]
+		if out.sep != "" && sep != out.sep {
+			t.Fatalf("floor %d joins with %q; floor 0 with %q", f.Index, sep, out.sep)
+		}
+		out.sep = sep
+	}
+	for _, n := range g.Nodes {
+		if n.Kind != "prose" || n.Title == n.Label {
+			continue
+		}
+		_, size := utf8.DecodeLastRuneInString(n.Label)
+		cut, kept := n.Label[len(n.Label)-size:], n.Label[:len(n.Label)-size]
+		if !strings.HasPrefix(n.Title, kept+" ") || (out.cut != "" && cut != out.cut) {
+			t.Fatalf("%s: label %q is not its title %q cut", n.ID, n.Label, n.Title)
+		}
+		out.cut = cut
+	}
+	if out.sep == "" || out.cut == "" {
+		t.Fatalf("the fixture shows no separator (%q) or no cut (%q)", out.sep, out.cut)
+	}
+	return out
+}
+
+func (g protoGlyphs) split(s string) string {
+	if s == "" {
+		return partsField(nil, false)
+	}
+	kept, cut := strings.CutSuffix(s, g.cut)
+	return partsField(strings.Split(kept, g.sep), cut)
+}
+
+func (g protoGlyphs) view(n prototypeNode) prototypeNode {
+	n.Label, n.Title, n.Kicker, n.Line = g.split(n.Label), g.split(n.Title), g.split(n.Kicker), g.split(n.Line)
+	return n
+}
+
+func partsField(parts []string, cut bool) string {
+	if len(parts) == 0 {
+		return ""
+	}
+	return fmt.Sprintf("%q", parts) + map[bool]string{true: "+cut"}[cut]
 }
 
 func engineView(n wiki.MapNode) prototypeNode {
@@ -71,21 +129,21 @@ func engineView(n wiki.MapNode) prototypeNode {
 	if n.Kind == wiki.NodeSection {
 		kind = "sec"
 	}
-	out := prototypeNode{ID: n.ID, Depth: n.Depth, Kind: kind, Parent: n.Parent, Kids: n.Kids, Label: n.Label, Needs: n.Needs, Icon: n.Icon, Count: n.Count, Kicker: n.Kicker, Line: n.Line}
+	out := prototypeNode{ID: n.ID, Depth: n.Depth, Kind: kind, Parent: n.Parent, Kids: n.Kids, Label: partsField(partsOf(n.Label), n.LabelCut), Needs: n.Needs, Icon: n.Icon, Count: n.Count, Kicker: partsField(n.KickerParts, false), Line: partsField(n.LineParts, false)}
 	out.Marks = slices.Clone(n.Marks)
 	for range n.More {
 		out.Marks = append(out.Marks, false)
 	}
-	if n.Kind != wiki.NodeSeat {
-		out.Title = cmp.Or(n.Title, n.Label)
-	}
+	title := cmp.Or(partsField(n.TitleParts, n.TitleCut), out.Label)
 	switch n.Kind {
 	case wiki.NodeSeat:
 		out.Band, out.Home = n.Band, n.Home
+	case wiki.NodePage:
+		out.Title = title
 	case wiki.NodeSection:
-		out.Anchor = n.Ref
+		out.Anchor, out.Title = n.Ref, title
 	case wiki.NodeBlock, wiki.NodeGroup, wiki.NodeProse:
-		out.Ref = n.Ref
+		out.Ref, out.Title = n.Ref, title
 	}
 	return out
 }
@@ -127,6 +185,7 @@ func TestTheMapIsTheGraphThePrototypeBuilt(t *testing.T) {
 	if err := json.Unmarshal([]byte(read(t, filepath.Join("testdata", "prototype", "graph.json"))), &proto); err != nil {
 		t.Fatal(err)
 	}
+	glyphs := glyphsOf(t, proto)
 	c := corpusOf(t, corpusFiles(t))
 	root := mapOf(t, c, "")
 	engine := map[string]prototypeNode{}
@@ -155,7 +214,7 @@ func TestTheMapIsTheGraphThePrototypeBuilt(t *testing.T) {
 			t.Errorf("%s: the prototype drew it; the map serves none", p.ID)
 			continue
 		}
-		want, got := fieldsOf(protoView(p)), fieldsOf(e)
+		want, got := fieldsOf(glyphs.view(protoView(p))), fieldsOf(e)
 		for field, w := range want {
 			if got[field] == w {
 				continue
@@ -176,7 +235,7 @@ func TestTheMapIsTheGraphThePrototypeBuilt(t *testing.T) {
 		t.Errorf("home %s; the prototype's %+v", got, proto.Home)
 	}
 	for i, f := range proto.Floors {
-		if i >= len(root.Floors) || root.Floors[i].Label != f.Label || root.Floors[i].Name != f.Name || root.Floors[i].Index != f.Index {
+		if i >= len(root.Floors) || partsField(root.Floors[i].LabelParts, false) != glyphs.split(f.Label) || root.Floors[i].Name != f.Name || root.Floors[i].Index != f.Index {
 			t.Errorf("floor %d: %+v; the prototype's %+v", i, root.Floors, f)
 		}
 	}

@@ -68,8 +68,14 @@
         "Index": {
           "type": "integer"
         },
-        "Label": {
-          "type": "string"
+        "LabelParts": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
         },
         "Name": {
           "type": "string"
@@ -80,7 +86,7 @@
       },
       "required": [
         "Index",
-        "Label",
+        "LabelParts",
         "Name",
         "Question"
       ],
@@ -147,8 +153,11 @@
         "Icon": {
           "type": "string"
         },
-        "Kicker": {
-          "type": "string"
+        "KickerParts": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
         },
         "Kids": {
           "items": {
@@ -174,8 +183,14 @@
         "Label": {
           "type": "string"
         },
-        "Line": {
-          "type": "string"
+        "LabelCut": {
+          "type": "boolean"
+        },
+        "LineParts": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
         },
         "Marks": {
           "items": {
@@ -201,8 +216,14 @@
         "Ref": {
           "type": "string"
         },
-        "Title": {
-          "type": "string"
+        "TitleCut": {
+          "type": "boolean"
+        },
+        "TitleParts": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
         }
       },
       "required": [

@@ -1,119 +1,119 @@
 home "Wiki" "Every page of this Mac's wiki, by the seat that reads it." pages=7 seats=4 needs=5 on=3 hard=0 soft=10
-floor 0 "Intention" "E0 · Intention" "Why does this exist?"
-floor 1 "Produit" "E1 · Produit" "What do we build, and for whom?"
-floor 2 "Domaines" "E2 · Domaines" "What things does it handle, in which words?"
-floor 3 "Architecture" "E3 · Architecture" "Where is the code, and what may it touch?"
-floor 4 "Code" "E4 · Code" "Which lines carry it?"
+floor 0 "Intention" ["E0" "Intention"] "Why does this exist?"
+floor 1 "Produit" ["E1" "Produit"] "What do we build, and for whom?"
+floor 2 "Domaines" ["E2" "Domaines"] "What things does it handle, in which words?"
+floor 3 "Architecture" ["E3" "Architecture"] "Where is the code, and what may it touch?"
+floor 4 "Code" ["E4" "Code"] "Which lines carry it?"
 icons blueprint,engineering,growth,product
 seat S:blueprint "Vision" needs=0 marks=. icon=blueprint ref=blueprint band=0 home=P:blueprint/philosophy count=1
-  page P:blueprint/philosophy "Philosophy" needs=0 marks=........ icon=blueprint ref=blueprint/philosophy count=8 kicker="E0 Intention" line="The seven convictions Spwn is built on, written as principles a newcomer can apply to a design choice; the vision holds the case they serve, and this page holds the rules."
+  page P:blueprint/philosophy "Philosophy" needs=0 marks=........ icon=blueprint ref=blueprint/philosophy count=8 kicker=["E0 Intention"] line=["The seven convictions Spwn is built on, written as principles a newcomer can apply to a design choice; the vision holds the case they serve, and this page holds the rules."]
 seat S:product "Produit" needs=4 marks=yy. icon=product ref=product band=1 home=P:product/boundaries count=3
-  page P:product/boundaries "Boundaries" needs=3 marks=..y. icon=product ref=product/boundaries count=4 kicker="E1 Produit" line="What Spwn is not, and what each of its parts refuses to be, for anyone weighing a feature that sits near an edge."
-  page P:product/stack "The stack" needs=1 marks=... icon=product ref=product/stack count=3 kicker="E1 Produit" line="Spwn's three spaces and what lives in each, for anyone deciding what a part of the app is for or where it goes: per space, what you let go of, what you keep, and whether it runs today."
-  page P:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder "ADR-002" needs=0 marks=.. icon=product ref=product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder count=2 title="ADR-002 · Spwn is one stack of six apps on one ladder" kicker="E1 Produit" line="Spwn is one stack of six apps on one ladder."
+  page P:product/boundaries "Boundaries" needs=3 marks=..y. icon=product ref=product/boundaries count=4 kicker=["E1 Produit"] line=["What Spwn is not, and what each of its parts refuses to be, for anyone weighing a feature that sits near an edge."]
+  page P:product/stack "The stack" needs=1 marks=... icon=product ref=product/stack count=3 kicker=["E1 Produit"] line=["Spwn's three spaces and what lives in each, for anyone deciding what a part of the app is for or where it goes: per space, what you let go of, what you keep, and whether it runs today."]
+  page P:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder "ADR-002" needs=0 marks=.. icon=product ref=product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder count=2 title=["ADR-002" "Spwn is one stack of six apps on one ladder"] kicker=["E1 Produit"] line=["Spwn is one stack of six apps on one ladder."]
 seat S:engineering "Technique" needs=0 marks=.. icon=engineering ref=engineering band=3 home=P:machines/reference/ports count=2
-  page P:machines/reference/ports "Ports" needs=0 marks=. icon=engineering ref=machines/reference/ports count=1 kicker="E3 Architecture" line="station ports lists every TCP port that listens on a Mac or a VM, each in the class of who reaches it."
-  page P:machines/decisions/035-a-port-is-a-right-with-an-audience "ADR-035" needs=0 marks=.. icon=engineering ref=machines/decisions/035-a-port-is-a-right-with-an-audience count=2 title="ADR-035 · A port is a right with an audience" kicker="E3 Architecture" line="A port is a right with an audience."
+  page P:machines/reference/ports "Ports" needs=0 marks=. icon=engineering ref=machines/reference/ports count=1 kicker=["E3 Architecture"] line=["station ports lists every TCP port that listens on a Mac or a VM, each in the class of who reaches it."]
+  page P:machines/decisions/035-a-port-is-a-right-with-an-audience "ADR-035" needs=0 marks=.. icon=engineering ref=machines/decisions/035-a-port-is-a-right-with-an-audience count=2 title=["ADR-035" "A port is a right with an audience"] kicker=["E3 Architecture"] line=["A port is a right with an audience."]
 seat S:growth "Croissance" needs=1 marks=y icon=growth ref=growth band=1 home=P:growth/positioning count=1
-  page P:growth/positioning "Positioning" needs=1 marks=... icon=growth ref=growth/positioning count=3 kicker="E1 Produit" line="Where Spwn stands against what a person uses today instead, for anyone writing a comparison, a pitch or an answer to \"how is it different\": the category it refuses, the four alternatives and what each costs."
+  page P:growth/positioning "Positioning" needs=1 marks=... icon=growth ref=growth/positioning count=3 kicker=["E1 Produit"] line=["Where Spwn stands against what a person uses today instead, for anyone writing a comparison, a pitch or an answer to \"how is it different\": the category it refuses, the four alternatives and what each costs."]
 
 open P:blueprint/philosophy
-  page P:blueprint/philosophy "Philosophy" needs=0 marks=........ icon=blueprint ref=blueprint/philosophy count=8 kicker="E0 Intention" line="The seven convictions Spwn is built on, written as principles a newcomer can apply to a design choice; the vision holds the case they serve, and this page holds the rules."
-    section C:blueprint/philosophy:0 "Top" needs=0 marks=... icon=home ref= count=3 kicker="Opening" line="all · who-carries"
-      block B:blueprint/philosophy:all "all" needs=0 marks= icon=table ref=all kicker="Table"
-      block B:blueprint/philosophy:who-carries "who-carries" needs=0 marks= icon=figure ref=who-carries kicker="Figure" line="Who carries them: how many of the seven each part of the stack carries."
-      prose B:blueprint/philosophy:p0.0 "Each conviction is…" needs=0 marks= icon=para ref=p0.0 title="Each conviction is written…" kicker="Paragraph" line="Each conviction is written in the same six parts:"
-    section C:blueprint/philosophy:1 "1. You bring the taste. The stack brings the hands" needs=0 marks=.. icon=define ref=1-you-bring-the-taste-the-stack-brings-the-hands count=2 kicker="Section" line="taste"
-      block B:blueprint/philosophy:taste "taste" needs=0 marks= icon=conviction ref=taste kicker="Conviction" line="You bring the taste. The stack brings the hands."
-      prose B:blueprint/philosophy:p1.0 "Argument. What an…" needs=0 marks= icon=para ref=p1.0 title="Argument. What an agent…" kicker="Paragraph" line="Argument."
-    section C:blueprint/philosophy:2 "2. Delegating is a craft, not a prompt" needs=0 marks=.. icon=define ref=2-delegating-is-a-craft-not-a-prompt count=2 kicker="Section" line="delegating"
-      block B:blueprint/philosophy:delegating "delegating" needs=0 marks= icon=conviction ref=delegating kicker="Conviction" line="Delegating is a craft, not a prompt."
-      prose B:blueprint/philosophy:p2.0 "Example. At the…" needs=0 marks= icon=para ref=p2.0 title="Example. At the end…" kicker="Paragraph" line="Example."
-    section C:blueprint/philosophy:3 "3. Rules live in the world, not in the agent" needs=0 marks=.. icon=define ref=3-rules-live-in-the-world-not-in-the-agent count=2 kicker="Section" line="rules-in-the-world"
-      block B:blueprint/philosophy:rules-in-the-world "rules-in-the-world" needs=0 marks= icon=conviction ref=rules-in-the-world kicker="Conviction" line="Rules live in the world, not in the agent."
-      prose B:blueprint/philosophy:p3.0 "Example. An agent…" needs=0 marks= icon=para ref=p3.0 title="Example. An agent cannot…" kicker="Paragraph" line="Example."
-    section C:blueprint/philosophy:4 "4. Declared, never improvised" needs=0 marks=.. icon=define ref=4-declared-never-improvised count=2 kicker="Section" line="declared"
-      block B:blueprint/philosophy:declared "declared" needs=0 marks= icon=conviction ref=declared kicker="Conviction" line="Declared, never improvised."
-      prose B:blueprint/philosophy:p4.0 "Example. qa.machine.yaml gives…" needs=0 marks= icon=para ref=p4.0 title="Example. qa.machine.yaml gives qa-1,…" kicker="Paragraph" line="Example."
-    section C:blueprint/philosophy:5 "5. Done means proven" needs=0 marks=.. icon=define ref=5-done-means-proven count=2 kicker="Section" line="proven"
-      block B:blueprint/philosophy:proven "proven" needs=0 marks= icon=conviction ref=proven kicker="Conviction" line="Done means proven."
-      prose B:blueprint/philosophy:p5.0 "Example. A request…" needs=0 marks= icon=para ref=p5.0 title="Example. A request comes…" kicker="Paragraph" line="Example."
-    section C:blueprint/philosophy:6 "6. Taste is a system" needs=0 marks=.. icon=define ref=6-taste-is-a-system count=2 kicker="Section" line="taste-is-a-system"
-      block B:blueprint/philosophy:taste-is-a-system "taste-is-a-system" needs=0 marks= icon=conviction ref=taste-is-a-system kicker="Conviction" line="Taste is a system."
-      prose B:blueprint/philosophy:p6.0 "Example. The site's…" needs=0 marks= icon=para ref=p6.0 title="Example. The site's canvas…" kicker="Paragraph" line="Example."
-    section C:blueprint/philosophy:7 "7. The stack learns. You don't repeat yourself" needs=0 marks=.. icon=define ref=7-the-stack-learns-you-dont-repeat-yourself count=2 kicker="Section" line="learns"
-      block B:blueprint/philosophy:learns "learns" needs=0 marks= icon=conviction ref=learns kicker="Conviction" line="The stack learns. You don't repeat yourself."
-      prose B:blueprint/philosophy:p7.0 "Example. A correction…" needs=0 marks= icon=para ref=p7.0 title="Example. A correction given…" kicker="Paragraph" line="Example."
+  page P:blueprint/philosophy "Philosophy" needs=0 marks=........ icon=blueprint ref=blueprint/philosophy count=8 kicker=["E0 Intention"] line=["The seven convictions Spwn is built on, written as principles a newcomer can apply to a design choice; the vision holds the case they serve, and this page holds the rules."]
+    section C:blueprint/philosophy:0 "Top" needs=0 marks=... icon=home ref= count=3 kicker=["Opening"] line=["all" "who-carries"]
+      block B:blueprint/philosophy:all "all" needs=0 marks= icon=table ref=all kicker=["Table"]
+      block B:blueprint/philosophy:who-carries "who-carries" needs=0 marks= icon=figure ref=who-carries kicker=["Figure"] line=["Who carries them: how many of the seven each part of the stack carries."]
+      prose B:blueprint/philosophy:p0.0 "Each conviction is"+cut needs=0 marks= icon=para ref=p0.0 title=["Each conviction is written"]+cut kicker=["Paragraph"] line=["Each conviction is written in the same six parts:"]
+    section C:blueprint/philosophy:1 "1. You bring the taste. The stack brings the hands" needs=0 marks=.. icon=define ref=1-you-bring-the-taste-the-stack-brings-the-hands count=2 kicker=["Section"] line=["taste"]
+      block B:blueprint/philosophy:taste "taste" needs=0 marks= icon=conviction ref=taste kicker=["Conviction"] line=["You bring the taste. The stack brings the hands."]
+      prose B:blueprint/philosophy:p1.0 "Argument. What an"+cut needs=0 marks= icon=para ref=p1.0 title=["Argument. What an agent"]+cut kicker=["Paragraph"] line=["Argument."]
+    section C:blueprint/philosophy:2 "2. Delegating is a craft, not a prompt" needs=0 marks=.. icon=define ref=2-delegating-is-a-craft-not-a-prompt count=2 kicker=["Section"] line=["delegating"]
+      block B:blueprint/philosophy:delegating "delegating" needs=0 marks= icon=conviction ref=delegating kicker=["Conviction"] line=["Delegating is a craft, not a prompt."]
+      prose B:blueprint/philosophy:p2.0 "Example. At the"+cut needs=0 marks= icon=para ref=p2.0 title=["Example. At the end"]+cut kicker=["Paragraph"] line=["Example."]
+    section C:blueprint/philosophy:3 "3. Rules live in the world, not in the agent" needs=0 marks=.. icon=define ref=3-rules-live-in-the-world-not-in-the-agent count=2 kicker=["Section"] line=["rules-in-the-world"]
+      block B:blueprint/philosophy:rules-in-the-world "rules-in-the-world" needs=0 marks= icon=conviction ref=rules-in-the-world kicker=["Conviction"] line=["Rules live in the world, not in the agent."]
+      prose B:blueprint/philosophy:p3.0 "Example. An agent"+cut needs=0 marks= icon=para ref=p3.0 title=["Example. An agent cannot"]+cut kicker=["Paragraph"] line=["Example."]
+    section C:blueprint/philosophy:4 "4. Declared, never improvised" needs=0 marks=.. icon=define ref=4-declared-never-improvised count=2 kicker=["Section"] line=["declared"]
+      block B:blueprint/philosophy:declared "declared" needs=0 marks= icon=conviction ref=declared kicker=["Conviction"] line=["Declared, never improvised."]
+      prose B:blueprint/philosophy:p4.0 "Example. qa.machine.yaml gives"+cut needs=0 marks= icon=para ref=p4.0 title=["Example. qa.machine.yaml gives qa-1,"]+cut kicker=["Paragraph"] line=["Example."]
+    section C:blueprint/philosophy:5 "5. Done means proven" needs=0 marks=.. icon=define ref=5-done-means-proven count=2 kicker=["Section"] line=["proven"]
+      block B:blueprint/philosophy:proven "proven" needs=0 marks= icon=conviction ref=proven kicker=["Conviction"] line=["Done means proven."]
+      prose B:blueprint/philosophy:p5.0 "Example. A request"+cut needs=0 marks= icon=para ref=p5.0 title=["Example. A request comes"]+cut kicker=["Paragraph"] line=["Example."]
+    section C:blueprint/philosophy:6 "6. Taste is a system" needs=0 marks=.. icon=define ref=6-taste-is-a-system count=2 kicker=["Section"] line=["taste-is-a-system"]
+      block B:blueprint/philosophy:taste-is-a-system "taste-is-a-system" needs=0 marks= icon=conviction ref=taste-is-a-system kicker=["Conviction"] line=["Taste is a system."]
+      prose B:blueprint/philosophy:p6.0 "Example. The site's"+cut needs=0 marks= icon=para ref=p6.0 title=["Example. The site's canvas"]+cut kicker=["Paragraph"] line=["Example."]
+    section C:blueprint/philosophy:7 "7. The stack learns. You don't repeat yourself" needs=0 marks=.. icon=define ref=7-the-stack-learns-you-dont-repeat-yourself count=2 kicker=["Section"] line=["learns"]
+      block B:blueprint/philosophy:learns "learns" needs=0 marks= icon=conviction ref=learns kicker=["Conviction"] line=["The stack learns. You don't repeat yourself."]
+      prose B:blueprint/philosophy:p7.0 "Example. A correction"+cut needs=0 marks= icon=para ref=p7.0 title=["Example. A correction given"]+cut kicker=["Paragraph"] line=["Example."]
 
 open P:product/stack
-  page P:product/stack "The stack" needs=1 marks=... icon=product ref=product/stack count=3 kicker="E1 Produit" line="Spwn's three spaces and what lives in each, for anyone deciding what a part of the app is for or where it goes: per space, what you let go of, what you keep, and whether it runs today."
-    section C:product/stack:1 "The three spaces" needs=0 marks=.... icon=define ref=the-three-spaces count=4 kicker="Section" line="The parts and what you keep · all"
-      prose B:product/stack:p1.0 "The layers of…" needs=0 marks= icon=para ref=p1.0 title="The layers of the…" kicker="Paragraph" line="The layers of the Spwn app are three great concepts, and in the future three distinct spaces in its GUI."
-      group B:product/stack:parts "The parts and what you keep" needs=0 marks=...... icon=define ref=parts count=6 kicker="Group · define" line="machines · agents · wiki · specs · design · os"
-      block B:product/stack:all "all" needs=0 marks= icon=table ref=all kicker="Table"
-      prose B:product/stack:p1.1 "The column \"you…" needs=0 marks= icon=para ref=p1.1 title="The column \"you keep\"…" kicker="Paragraph" line="The column \"you keep\" is the part no space may take away; the boundaries say what each part refuses for that reason."
-    section C:product/stack:2 "How the spaces stack" needs=0 marks=. icon=define ref=how-the-spaces-stack count=1 kicker="Section" line="A space leans on the ones before it and never needs the ones after."
-      prose B:product/stack:p2.0 "A space leans…" needs=0 marks= icon=para ref=p2.0 title="A space leans on…" kicker="Paragraph" line="A space leans on the ones before it and never needs the ones after."
-    section C:product/stack:3 "Rests on" needs=0 marks=. icon=rests ref=rests-on count=1 kicker="Section" line="One claim here is this page's reading, not the owner's word:"
-      prose B:product/stack:p3.0 "One claim here…" needs=0 marks= icon=para ref=p3.0 title="One claim here is…" kicker="Paragraph" line="One claim here is this page's reading, not the owner's word:"
+  page P:product/stack "The stack" needs=1 marks=... icon=product ref=product/stack count=3 kicker=["E1 Produit"] line=["Spwn's three spaces and what lives in each, for anyone deciding what a part of the app is for or where it goes: per space, what you let go of, what you keep, and whether it runs today."]
+    section C:product/stack:1 "The three spaces" needs=0 marks=.... icon=define ref=the-three-spaces count=4 kicker=["Section"] line=["The parts and what you keep" "all"]
+      prose B:product/stack:p1.0 "The layers of"+cut needs=0 marks= icon=para ref=p1.0 title=["The layers of the"]+cut kicker=["Paragraph"] line=["The layers of the Spwn app are three great concepts, and in the future three distinct spaces in its GUI."]
+      group B:product/stack:parts "The parts and what you keep" needs=0 marks=...... icon=define ref=parts count=6 kicker=["Group" "define"] line=["machines" "agents" "wiki" "specs" "design" "os"]
+      block B:product/stack:all "all" needs=0 marks= icon=table ref=all kicker=["Table"]
+      prose B:product/stack:p1.1 "The column \"you"+cut needs=0 marks= icon=para ref=p1.1 title=["The column \"you keep\""]+cut kicker=["Paragraph"] line=["The column \"you keep\" is the part no space may take away; the boundaries say what each part refuses for that reason."]
+    section C:product/stack:2 "How the spaces stack" needs=0 marks=. icon=define ref=how-the-spaces-stack count=1 kicker=["Section"] line=["A space leans on the ones before it and never needs the ones after."]
+      prose B:product/stack:p2.0 "A space leans"+cut needs=0 marks= icon=para ref=p2.0 title=["A space leans on"]+cut kicker=["Paragraph"] line=["A space leans on the ones before it and never needs the ones after."]
+    section C:product/stack:3 "Rests on" needs=0 marks=. icon=rests ref=rests-on count=1 kicker=["Section"] line=["One claim here is this page's reading, not the owner's word:"]
+      prose B:product/stack:p3.0 "One claim here"+cut needs=0 marks= icon=para ref=p3.0 title=["One claim here is"]+cut kicker=["Paragraph"] line=["One claim here is this page's reading, not the owner's word:"]
 
 open P:product/boundaries
-  page P:product/boundaries "Boundaries" needs=3 marks=..y. icon=product ref=product/boundaries count=4 kicker="E1 Produit" line="What Spwn is not, and what each of its parts refuses to be, for anyone weighing a feature that sits near an edge."
-    section C:product/boundaries:0 "Top" needs=0 marks=. icon=home ref= count=1 kicker="Opening" line="one-stack"
-      block B:product/boundaries:one-stack "one-stack" needs=0 marks= icon=decision ref=one-stack kicker="Decision" line="Spwn is one stack of six apps on one ladder."
-    section C:product/boundaries:1 "What Spwn is not" needs=0 marks=...... icon=define ref=what-spwn-is-not count=6 kicker="Section" line="not-a-replacement · not-vibe-coding · not-a-cloud-service · not-one-vendor · not-a-method"
-      block B:product/boundaries:not-a-replacement "not-a-replacement" needs=0 marks= icon=refusal ref=not-a-replacement kicker="Refusal" line="a replacement for the person"
-      block B:product/boundaries:not-vibe-coding "not-vibe-coding" needs=0 marks= icon=refusal ref=not-vibe-coding kicker="Refusal" line="a vibe-coding tool"
-      block B:product/boundaries:not-a-cloud-service "not-a-cloud-service" needs=0 marks= icon=refusal ref=not-a-cloud-service kicker="Refusal" line="a cloud service"
-      block B:product/boundaries:not-one-vendor "not-one-vendor" needs=0 marks= icon=refusal ref=not-one-vendor kicker="Refusal" line="tied to one vendor"
-      block B:product/boundaries:not-a-method "not-a-method" needs=0 marks= icon=refusal ref=not-a-method kicker="Refusal" line="a method of work imposed"
-      prose B:product/boundaries:p1.0 "Each line is…" needs=0 marks= icon=para ref=p1.0 title="Each line is the…" kicker="Paragraph" line="Each line is the edge of the one enemy, losing your thread:"
-    section C:product/boundaries:2 "What each app refuses" needs=2 marks=....y.y. icon=guard ref=what-each-app-refuses count=8 kicker="Section" line="What Machines refuses · machines · no-model · no-security-in-instructions · no-computer · wiki-decides-nothing · os-holds-no-facts"
-      group B:product/boundaries:machines-refuses "What Machines refuses" needs=0 marks=.. icon=guard ref=machines-refuses count=2 kicker="Group · guard" line="no-running-agent · no-ungranted-port"
-      block B:product/boundaries:machines "machines" needs=0 marks= icon=table ref=machines kicker="Table"
-      block B:product/boundaries:no-model "no-model" needs=0 marks= icon=refusal ref=no-model kicker="Refusal" line="to run a model: no inference happens inside Spwn, an agent's harness calls its provider"
-      block B:product/boundaries:no-security-in-instructions "no-security-in-instructions" needs=0 marks= icon=refusal ref=no-security-in-instructions kicker="Refusal" line="to hold security in an agent's instructions: what is forbidden does not exist in the world"
-      block B:product/boundaries:no-computer "no-computer" needs=1 marks= icon=refusal ref=no-computer kicker="Refusal" line="to prepare the computer an agent runs on: that is Machines' space"
-      block B:product/boundaries:wiki-decides-nothing "wiki-decides-nothing" needs=0 marks= icon=refusal ref=wiki-decides-nothing kicker="Refusal" line="to decide what is true: you write the facts, agents read them"
-      block B:product/boundaries:os-holds-no-facts "os-holds-no-facts" needs=1 marks= icon=refusal ref=os-holds-no-facts kicker="Refusal" line="to be a second place where facts live, or to hide the detail with no way down to it"
-      prose B:product/boundaries:p2.0 "The rows of…" needs=0 marks= icon=para ref=p2.0 title="The rows of the…" kicker="Paragraph" line="The rows of the four apps being made are derived from the convictions; none of those apps has a design yet, so each row is a constraint on the design to come, not a description of it."
-    section C:product/boundaries:3 "Rests on" needs=0 marks=. icon=rests ref=rests-on count=1 kicker="Section" line="Two rows are this page's reading rather than the owner's word or a record:"
-      prose B:product/boundaries:p3.0 "Two rows are…" needs=0 marks= icon=para ref=p3.0 title="Two rows are this…" kicker="Paragraph" line="Two rows are this page's reading rather than the owner's word or a record:"
+  page P:product/boundaries "Boundaries" needs=3 marks=..y. icon=product ref=product/boundaries count=4 kicker=["E1 Produit"] line=["What Spwn is not, and what each of its parts refuses to be, for anyone weighing a feature that sits near an edge."]
+    section C:product/boundaries:0 "Top" needs=0 marks=. icon=home ref= count=1 kicker=["Opening"] line=["one-stack"]
+      block B:product/boundaries:one-stack "one-stack" needs=0 marks= icon=decision ref=one-stack kicker=["Decision"] line=["Spwn is one stack of six apps on one ladder."]
+    section C:product/boundaries:1 "What Spwn is not" needs=0 marks=...... icon=define ref=what-spwn-is-not count=6 kicker=["Section"] line=["not-a-replacement" "not-vibe-coding" "not-a-cloud-service" "not-one-vendor" "not-a-method"]
+      block B:product/boundaries:not-a-replacement "not-a-replacement" needs=0 marks= icon=refusal ref=not-a-replacement kicker=["Refusal"] line=["a replacement for the person"]
+      block B:product/boundaries:not-vibe-coding "not-vibe-coding" needs=0 marks= icon=refusal ref=not-vibe-coding kicker=["Refusal"] line=["a vibe-coding tool"]
+      block B:product/boundaries:not-a-cloud-service "not-a-cloud-service" needs=0 marks= icon=refusal ref=not-a-cloud-service kicker=["Refusal"] line=["a cloud service"]
+      block B:product/boundaries:not-one-vendor "not-one-vendor" needs=0 marks= icon=refusal ref=not-one-vendor kicker=["Refusal"] line=["tied to one vendor"]
+      block B:product/boundaries:not-a-method "not-a-method" needs=0 marks= icon=refusal ref=not-a-method kicker=["Refusal"] line=["a method of work imposed"]
+      prose B:product/boundaries:p1.0 "Each line is"+cut needs=0 marks= icon=para ref=p1.0 title=["Each line is the"]+cut kicker=["Paragraph"] line=["Each line is the edge of the one enemy, losing your thread:"]
+    section C:product/boundaries:2 "What each app refuses" needs=2 marks=....y.y. icon=guard ref=what-each-app-refuses count=8 kicker=["Section"] line=["What Machines refuses" "machines" "no-model" "no-security-in-instructions" "no-computer" "wiki-decides-nothing" "os-holds-no-facts"]
+      group B:product/boundaries:machines-refuses "What Machines refuses" needs=0 marks=.. icon=guard ref=machines-refuses count=2 kicker=["Group" "guard"] line=["no-running-agent" "no-ungranted-port"]
+      block B:product/boundaries:machines "machines" needs=0 marks= icon=table ref=machines kicker=["Table"]
+      block B:product/boundaries:no-model "no-model" needs=0 marks= icon=refusal ref=no-model kicker=["Refusal"] line=["to run a model: no inference happens inside Spwn, an agent's harness calls its provider"]
+      block B:product/boundaries:no-security-in-instructions "no-security-in-instructions" needs=0 marks= icon=refusal ref=no-security-in-instructions kicker=["Refusal"] line=["to hold security in an agent's instructions: what is forbidden does not exist in the world"]
+      block B:product/boundaries:no-computer "no-computer" needs=1 marks= icon=refusal ref=no-computer kicker=["Refusal"] line=["to prepare the computer an agent runs on: that is Machines' space"]
+      block B:product/boundaries:wiki-decides-nothing "wiki-decides-nothing" needs=0 marks= icon=refusal ref=wiki-decides-nothing kicker=["Refusal"] line=["to decide what is true: you write the facts, agents read them"]
+      block B:product/boundaries:os-holds-no-facts "os-holds-no-facts" needs=1 marks= icon=refusal ref=os-holds-no-facts kicker=["Refusal"] line=["to be a second place where facts live, or to hide the detail with no way down to it"]
+      prose B:product/boundaries:p2.0 "The rows of"+cut needs=0 marks= icon=para ref=p2.0 title=["The rows of the"]+cut kicker=["Paragraph"] line=["The rows of the four apps being made are derived from the convictions; none of those apps has a design yet, so each row is a constraint on the design to come, not a description of it."]
+    section C:product/boundaries:3 "Rests on" needs=0 marks=. icon=rests ref=rests-on count=1 kicker=["Section"] line=["Two rows are this page's reading rather than the owner's word or a record:"]
+      prose B:product/boundaries:p3.0 "Two rows are"+cut needs=0 marks= icon=para ref=p3.0 title=["Two rows are this"]+cut kicker=["Paragraph"] line=["Two rows are this page's reading rather than the owner's word or a record:"]
 
 open P:growth/positioning
-  page P:growth/positioning "Positioning" needs=1 marks=... icon=growth ref=growth/positioning count=3 kicker="E1 Produit" line="Where Spwn stands against what a person uses today instead, for anyone writing a comparison, a pitch or an answer to \"how is it different\": the category it refuses, the four alternatives and what each costs."
-    section C:growth/positioning:1 "The category it refuses" needs=0 marks=... icon=define ref=the-category-it-refuses count=3 kicker="Section" line="lead-with-the-thread"
-      prose B:growth/positioning:p1.0 "Spwn is not…" needs=0 marks= icon=para ref=p1.0 title="Spwn is not sold…" kicker="Paragraph" line="Spwn is not sold as an agent framework, an AI platform or a tool that makes more output."
-      block B:growth/positioning:lead-with-the-thread "lead-with-the-thread" needs=0 marks= icon=soft ref=lead-with-the-thread kicker="Rule" line="A comparison never leads with speed, model quality or the number of integrations."
-      prose B:growth/positioning:p1.1 "It leads with…" needs=0 marks= icon=para ref=p1.1 title="It leads with what…" kicker="Paragraph" line="It leads with what the alternative does to your thread."
-    section C:growth/positioning:2 "The alternatives" needs=0 marks=.... icon=define ref=the-alternatives count=4 kicker="Section" line="What a person uses today · two-costs · all"
-      group B:growth/positioning:alternatives "What a person uses today" needs=0 marks=.... icon=define ref=alternatives count=4 kicker="Group · define" line="by-hand · one-big-agent · managed-platform · unrelated-tools"
-      block B:growth/positioning:two-costs "two-costs" needs=0 marks= icon=figure ref=two-costs kicker="Figure" line="Each costs either scale or authorship."
-      block B:growth/positioning:all "all" needs=0 marks= icon=table ref=all kicker="Table"
-      prose B:growth/positioning:p2.0 "Each costs either…" needs=0 marks= icon=para ref=p2.0 title="Each costs either scale…" kicker="Paragraph" line="Each costs either scale or authorship."
-    section C:growth/positioning:3 "Rests on" needs=0 marks=. icon=rests ref=rests-on count=1 kicker="Section" line="What is not settled:"
-      prose B:growth/positioning:p3.0 "What is not…" needs=0 marks= icon=para ref=p3.0 title="What is not settled:…" kicker="Paragraph" line="What is not settled:"
+  page P:growth/positioning "Positioning" needs=1 marks=... icon=growth ref=growth/positioning count=3 kicker=["E1 Produit"] line=["Where Spwn stands against what a person uses today instead, for anyone writing a comparison, a pitch or an answer to \"how is it different\": the category it refuses, the four alternatives and what each costs."]
+    section C:growth/positioning:1 "The category it refuses" needs=0 marks=... icon=define ref=the-category-it-refuses count=3 kicker=["Section"] line=["lead-with-the-thread"]
+      prose B:growth/positioning:p1.0 "Spwn is not"+cut needs=0 marks= icon=para ref=p1.0 title=["Spwn is not sold"]+cut kicker=["Paragraph"] line=["Spwn is not sold as an agent framework, an AI platform or a tool that makes more output."]
+      block B:growth/positioning:lead-with-the-thread "lead-with-the-thread" needs=0 marks= icon=soft ref=lead-with-the-thread kicker=["Rule"] line=["A comparison never leads with speed, model quality or the number of integrations."]
+      prose B:growth/positioning:p1.1 "It leads with"+cut needs=0 marks= icon=para ref=p1.1 title=["It leads with what"]+cut kicker=["Paragraph"] line=["It leads with what the alternative does to your thread."]
+    section C:growth/positioning:2 "The alternatives" needs=0 marks=.... icon=define ref=the-alternatives count=4 kicker=["Section"] line=["What a person uses today" "two-costs" "all"]
+      group B:growth/positioning:alternatives "What a person uses today" needs=0 marks=.... icon=define ref=alternatives count=4 kicker=["Group" "define"] line=["by-hand" "one-big-agent" "managed-platform" "unrelated-tools"]
+      block B:growth/positioning:two-costs "two-costs" needs=0 marks= icon=figure ref=two-costs kicker=["Figure"] line=["Each costs either scale or authorship."]
+      block B:growth/positioning:all "all" needs=0 marks= icon=table ref=all kicker=["Table"]
+      prose B:growth/positioning:p2.0 "Each costs either"+cut needs=0 marks= icon=para ref=p2.0 title=["Each costs either scale"]+cut kicker=["Paragraph"] line=["Each costs either scale or authorship."]
+    section C:growth/positioning:3 "Rests on" needs=0 marks=. icon=rests ref=rests-on count=1 kicker=["Section"] line=["What is not settled:"]
+      prose B:growth/positioning:p3.0 "What is not"+cut needs=0 marks= icon=para ref=p3.0 title=["What is not settled:"]+cut kicker=["Paragraph"] line=["What is not settled:"]
 
 open P:machines/reference/ports
-  page P:machines/reference/ports "Ports" needs=0 marks=. icon=engineering ref=machines/reference/ports count=1 kicker="E3 Architecture" line="station ports lists every TCP port that listens on a Mac or a VM, each in the class of who reaches it."
-    section C:machines/reference/ports:1 "Rights and audiences" needs=0 marks=..... icon=guard ref=rights-and-audiences count=5 kicker="Section" line="right · audience · What is flagged"
-      prose B:machines/reference/ports:p1.0 "A VM's rights…" needs=0 marks= icon=para ref=p1.0 title="A VM's rights are…" kicker="Paragraph" line="A VM's rights are the ports of its Machinefile (Machinefiles):"
-      block B:machines/reference/ports:right "right" needs=0 marks= icon=term ref=right kicker="Term" line="what a machine may open and to whom, its Machinefile's ports: open, to (its audience), except, audiences"
-      block B:machines/reference/ports:audience "audience" needs=0 marks= icon=term ref=audience kicker="Term" line="who a right, or the owner's ports share --to, shares a port with: local, private or public"
-      group B:machines/reference/ports:what-is-flagged "What is flagged" needs=0 marks=.. icon=guard ref=what-is-flagged count=2 kicker="Group · guard" line="A port that listens outside the rights is flagged, never shared."
-      prose B:machines/reference/ports:p1.1 "A row of…" needs=0 marks= icon=para ref=p1.1 title="A row of a…" kicker="Paragraph" line="A row of a port names its label from the catalog's packages' ports (5173 Vite, 3000 Node or Next, 8081 Expo, 5432 Postgres) as a hint of what probably serves it, never a decision."
+  page P:machines/reference/ports "Ports" needs=0 marks=. icon=engineering ref=machines/reference/ports count=1 kicker=["E3 Architecture"] line=["station ports lists every TCP port that listens on a Mac or a VM, each in the class of who reaches it."]
+    section C:machines/reference/ports:1 "Rights and audiences" needs=0 marks=..... icon=guard ref=rights-and-audiences count=5 kicker=["Section"] line=["right" "audience" "What is flagged"]
+      prose B:machines/reference/ports:p1.0 "A VM's rights"+cut needs=0 marks= icon=para ref=p1.0 title=["A VM's rights are"]+cut kicker=["Paragraph"] line=["A VM's rights are the ports of its Machinefile (Machinefiles):"]
+      block B:machines/reference/ports:right "right" needs=0 marks= icon=term ref=right kicker=["Term"] line=["what a machine may open and to whom, its Machinefile's ports: open, to (its audience), except, audiences"]
+      block B:machines/reference/ports:audience "audience" needs=0 marks= icon=term ref=audience kicker=["Term"] line=["who a right, or the owner's ports share --to, shares a port with: local, private or public"]
+      group B:machines/reference/ports:what-is-flagged "What is flagged" needs=0 marks=.. icon=guard ref=what-is-flagged count=2 kicker=["Group" "guard"] line=["A port that listens outside the rights is flagged, never shared."]
+      prose B:machines/reference/ports:p1.1 "A row of"+cut needs=0 marks= icon=para ref=p1.1 title=["A row of a"]+cut kicker=["Paragraph"] line=["A row of a port names its label from the catalog's packages' ports (5173 Vite, 3000 Node or Next, 8081 Expo, 5432 Postgres) as a hint of what probably serves it, never a decision."]
 
 open P:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder
-  page P:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder "ADR-002" needs=0 marks=.. icon=product ref=product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder count=2 title="ADR-002 · Spwn is one stack of six apps on one ladder" kicker="E1 Produit" line="Spwn is one stack of six apps on one ladder."
-    section C:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder:0 "Top" needs=0 marks=. icon=home ref= count=1 kicker="Opening" line="An agent leaves the status Proposed; only the owner writes Accepted."
-      prose B:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder:p0.0 "An agent leaves…" needs=0 marks= icon=para ref=p0.0 title="An agent leaves the…" kicker="Paragraph" line="An agent leaves the status Proposed; only the owner writes Accepted."
-    section C:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder:1 "Decision" needs=0 marks=. icon=define ref=decision count=1 kicker="Section" line="Six apps, in this order on one ladder:"
-      prose B:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder:p1.0 "Six apps, in…" needs=0 marks= icon=para ref=p1.0 title="Six apps, in this…" kicker="Paragraph" line="Six apps, in this order on one ladder:"
+  page P:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder "ADR-002" needs=0 marks=.. icon=product ref=product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder count=2 title=["ADR-002" "Spwn is one stack of six apps on one ladder"] kicker=["E1 Produit"] line=["Spwn is one stack of six apps on one ladder."]
+    section C:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder:0 "Top" needs=0 marks=. icon=home ref= count=1 kicker=["Opening"] line=["An agent leaves the status Proposed; only the owner writes Accepted."]
+      prose B:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder:p0.0 "An agent leaves"+cut needs=0 marks= icon=para ref=p0.0 title=["An agent leaves the"]+cut kicker=["Paragraph"] line=["An agent leaves the status Proposed; only the owner writes Accepted."]
+    section C:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder:1 "Decision" needs=0 marks=. icon=define ref=decision count=1 kicker=["Section"] line=["Six apps, in this order on one ladder:"]
+      prose B:product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder:p1.0 "Six apps, in"+cut needs=0 marks= icon=para ref=p1.0 title=["Six apps, in this"]+cut kicker=["Paragraph"] line=["Six apps, in this order on one ladder:"]
 
 open P:machines/decisions/035-a-port-is-a-right-with-an-audience
-  page P:machines/decisions/035-a-port-is-a-right-with-an-audience "ADR-035" needs=0 marks=.. icon=engineering ref=machines/decisions/035-a-port-is-a-right-with-an-audience count=2 title="ADR-035 · A port is a right with an audience" kicker="E3 Architecture" line="A port is a right with an audience."
-    section C:machines/decisions/035-a-port-is-a-right-with-an-audience:0 "Top" needs=0 marks=. icon=home ref= count=1 kicker="Opening" line="Amends ADR-018."
-      prose B:machines/decisions/035-a-port-is-a-right-with-an-audience:p0.0 "Amends ADR-018. Amended…" needs=0 marks= icon=para ref=p0.0 title="Amends ADR-018. Amended by…" kicker="Paragraph" line="Amends ADR-018."
-    section C:machines/decisions/035-a-port-is-a-right-with-an-audience:1 "Decision" needs=0 marks=. icon=define ref=decision count=1 kicker="Section" line="A machine's ports are rights, never an inventory."
-      prose B:machines/decisions/035-a-port-is-a-right-with-an-audience:p1.0 "A machine's ports…" needs=0 marks= icon=para ref=p1.0 title="A machine's ports are…" kicker="Paragraph" line="A machine's ports are rights, never an inventory."
+  page P:machines/decisions/035-a-port-is-a-right-with-an-audience "ADR-035" needs=0 marks=.. icon=engineering ref=machines/decisions/035-a-port-is-a-right-with-an-audience count=2 title=["ADR-035" "A port is a right with an audience"] kicker=["E3 Architecture"] line=["A port is a right with an audience."]
+    section C:machines/decisions/035-a-port-is-a-right-with-an-audience:0 "Top" needs=0 marks=. icon=home ref= count=1 kicker=["Opening"] line=["Amends ADR-018."]
+      prose B:machines/decisions/035-a-port-is-a-right-with-an-audience:p0.0 "Amends ADR-018. Amended"+cut needs=0 marks= icon=para ref=p0.0 title=["Amends ADR-018. Amended by"]+cut kicker=["Paragraph"] line=["Amends ADR-018."]
+    section C:machines/decisions/035-a-port-is-a-right-with-an-audience:1 "Decision" needs=0 marks=. icon=define ref=decision count=1 kicker=["Section"] line=["A machine's ports are rights, never an inventory."]
+      prose B:machines/decisions/035-a-port-is-a-right-with-an-audience:p1.0 "A machine's ports"+cut needs=0 marks= icon=para ref=p1.0 title=["A machine's ports are"]+cut kicker=["Paragraph"] line=["A machine's ports are rights, never an inventory."]
 

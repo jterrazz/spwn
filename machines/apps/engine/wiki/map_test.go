@@ -53,19 +53,30 @@ func marksOf(n wiki.MapNode) string {
 }
 
 func nodeLine(n wiki.MapNode) string {
-	parts := []string{string(n.Kind), n.ID, strconv.Quote(n.Label), "needs=" + strconv.Itoa(n.Needs), "marks=" + marksOf(n), "icon=" + n.Icon, "ref=" + n.Ref}
+	parts := []string{string(n.Kind), n.ID, strconv.Quote(n.Label) + cutOf(n.LabelCut), "needs=" + strconv.Itoa(n.Needs), "marks=" + marksOf(n), "icon=" + n.Icon, "ref=" + n.Ref}
 	if n.Kind == wiki.NodeSeat {
 		parts = append(parts, "band="+strconv.Itoa(n.Band), "home="+n.Home)
 	}
 	if n.Count > 0 {
 		parts = append(parts, "count="+strconv.Itoa(n.Count))
 	}
-	for _, f := range [][2]string{{"title", n.Title}, {"kicker", n.Kicker}, {"line", n.Line}} {
-		if f[1] != "" {
-			parts = append(parts, f[0]+"="+strconv.Quote(f[1]))
+	for _, f := range []struct {
+		name  string
+		parts []string
+		cut   bool
+	}{{"title", n.TitleParts, n.TitleCut}, {"kicker", n.KickerParts, false}, {"line", n.LineParts, false}} {
+		if f.parts != nil {
+			parts = append(parts, f.name+"="+fmt.Sprintf("%q", f.parts)+cutOf(f.cut))
 		}
 	}
 	return strings.Repeat("  ", n.Depth-1) + strings.Join(parts, " ")
+}
+
+func cutOf(cut bool) string {
+	if cut {
+		return "+cut"
+	}
+	return ""
 }
 
 func mapOutline(m wiki.Map, from string) string {
@@ -84,9 +95,11 @@ func mapOutline(m wiki.Map, from string) string {
 		return b.String()
 	}
 	h := m.Home
-	b.WriteString(fmt.Sprintf("home %q %q pages=%d seats=%d needs=%d on=%d hard=%d soft=%d\n", h.Word, h.Line, h.Pages, h.Seats, h.Needs, h.NeedsPages, h.Hard, h.Soft))
+	head := fmt.Sprintf("home %q %q pages=%d seats=%d needs=%d on=%d hard=%d soft=%d\n", h.Word, h.Line, h.Pages, h.Seats, h.Needs, h.NeedsPages, h.Hard, h.Soft)
+	b.WriteString(head)
 	for _, f := range m.Floors {
-		b.WriteString(fmt.Sprintf("floor %d %q %q %q\n", f.Index, f.Name, f.Label, f.Question))
+		floor := fmt.Sprintf("floor %d %q %q %q\n", f.Index, f.Name, f.LabelParts, f.Question)
+		b.WriteString(floor)
 	}
 	names := make([]string, 0, len(m.Icons))
 	for name := range m.Icons {
@@ -246,7 +259,7 @@ func TestTheMapNamesEverySectionAndItemAsWikiReadServesIt(t *testing.T) {
 				if item.Ref != servedID(it) {
 					t.Errorf("%s: ref %q", bid, item.Ref)
 				}
-				if b := it.Block; b != nil && (item.Label != b.Word || item.Icon != b.Icon || item.Kicker != b.Title || item.Line != b.Line || item.Needs != needsOfFindings(b.Finding)) {
+				if b := it.Block; b != nil && (item.Label != b.Word || item.Icon != b.Icon || !slices.Equal(item.KickerParts, []string{b.Title}) || !slices.Equal(item.LineParts, partsOf(b.Line)) || item.Needs != needsOfFindings(b.Finding)) {
 					t.Errorf("%s: %+v; wiki.read %+v", bid, item, *b)
 				}
 				if g := it.Group; g != nil && item.Label != g.Title {
@@ -259,6 +272,43 @@ func TestTheMapNamesEverySectionAndItemAsWikiReadServesIt(t *testing.T) {
 		}
 		if page := nodes["P:"+id]; !slices.Equal(page.Kids, sections) {
 			t.Errorf("%s: kids %v; wiki.read %v", id, page.Kids, sections)
+		}
+	}
+}
+
+func partsOf(s string) []string {
+	if s == "" {
+		return nil
+	}
+	return []string{s}
+}
+
+// invariant: a part says something: the window joins what is served, so an
+// empty part would draw a separator between nothing.
+func partsSaySomething(n wiki.MapNode) bool {
+	for _, parts := range [][]string{n.TitleParts, n.KickerParts, n.LineParts} {
+		if parts != nil && (len(parts) == 0 || slices.Contains(parts, "")) {
+			return false
+		}
+	}
+	return (!n.LabelCut || n.Label != "") && (!n.TitleCut || n.TitleParts != nil)
+}
+
+func TestAParagraphIsLabelledByItsFirstWordsAndSaysWhenTheyAreCut(t *testing.T) {
+	for _, c := range []struct {
+		prose, label, title string
+		labelCut, titleCut  bool
+	}{
+		{prose: "Short one.", label: "Short one."},
+		{prose: "Exactly three words.", label: "Exactly three words."},
+		{prose: "Four words in all.", label: "Four words in", labelCut: true, title: "Four words in all."},
+		{prose: "Five words are here now.", label: "Five words are", labelCut: true, title: "Five words are here", titleCut: true},
+	} {
+		files := map[string][]byte{"wiki.yaml": []byte(tinySchema), "blueprint/home.md": []byte("# Home\n\nThe home.\n\n## A\n\n" + c.prose + "\n")}
+		m := mapOf(t, corpusOf(t, files), "blueprint/home")
+		n := nodesOf(m)["B:blueprint/home:p1.0"]
+		if n.Label != c.label || n.LabelCut != c.labelCut || !slices.Equal(n.TitleParts, partsOf(c.title)) || n.TitleCut != c.titleCut {
+			t.Errorf("%q: %q cut %v, title %q cut %v", c.prose, n.Label, n.LabelCut, n.TitleParts, n.TitleCut)
 		}
 	}
 }
@@ -302,6 +352,7 @@ func FuzzMap(f *testing.F) {
 		f.Add(source)
 	}
 	f.Add("# Home\n\nOne. Two.\n\n## A\n\n<Term id=\"a\" means=\"b\" />\n\n## A\n\nprose\n")
+	f.Add("<Term/>")
 	f.Fuzz(func(t *testing.T, source string) {
 		corpus, err := wiki.Read(map[string][]byte{"wiki.yaml": []byte(tinySchema), "blueprint/home.md": []byte(source), "blueprint/other.md": []byte("# Other\n\nIt rests.\n")})
 		if err != nil {
@@ -319,7 +370,7 @@ func FuzzMap(f *testing.F) {
 					t.Fatalf("open %q: %s twice", open, n.ID)
 				}
 				ids[n.ID] = true
-				if n.Kids == nil || n.Marks == nil || len(n.Marks) > wiki.MaxMarks {
+				if n.Kids == nil || n.Marks == nil || len(n.Marks) > wiki.MaxMarks || !partsSaySomething(n) {
 					t.Fatalf("open %q: %+v", open, n)
 				}
 			}
