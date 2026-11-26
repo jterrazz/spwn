@@ -1,6 +1,5 @@
-import type { WikiServed, WikiServedSection } from '@jterrazz/station-api';
+import type { WikiServed, WikiServedFloor, WikiServedSection } from '@jterrazz/station-api';
 
-import { SEPARATOR } from '../../../domain/separator';
 import { Picks, StateDot } from '../../ui/index';
 import { countOf } from '../../words/engine-words';
 import { WIKI_LEVEL_TONES, WIKI_LEVEL_WORDS, WIKI_WORDS } from '../../words/wiki';
@@ -103,17 +102,35 @@ function Section({
     );
 }
 
+function Ladder({ floors }: { floors: readonly WikiServedFloor[] }) {
+    return (
+        <ol aria-label={WIKI_WORDS.ladder} className={styles.ladder}>
+            {floors.map((floor) => (
+                <li
+                    aria-current={floor.Here ? 'step' : undefined}
+                    className={floor.Here ? styles.rungHere : styles.rung}
+                    key={floor.Index}
+                    title={floor.Question}
+                >
+                    <span className={styles.rungDot} />
+                    <span className={styles.rungName}>
+                        {WIKI_WORDS.floorShort}
+                        {floor.Index} {floor.Name}
+                    </span>
+                    <span className={styles.rungCount}>{floor.Blocks}</span>
+                </li>
+            ))}
+        </ol>
+    );
+}
+
 function Head({ served, onBudget }: { served: WikiServed; onBudget: (budget: string) => void }) {
     const { Floor, Page } = served;
     return (
         <header className={styles.pageHead}>
             <div className={styles.headMain}>
+                <Ladder floors={served.Floors ?? []} />
                 <div className={styles.pageMeta}>
-                    <span className={styles.floor}>
-                        {WIKI_WORDS.floor} {Floor.Index}
-                        {SEPARATOR}
-                        {Floor.Name}
-                    </span>
                     <span className={styles.question}>{Floor.Question}</span>
                 </div>
                 <h1 className={styles.pageTitle}>{Page.Word}</h1>

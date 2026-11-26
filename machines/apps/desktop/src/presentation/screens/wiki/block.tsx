@@ -1,6 +1,7 @@
-import type { WikiPageHead, WikiServedBlock } from '@jterrazz/station-api';
+import type { WikiFloorHead, WikiPageHead, WikiServedBlock } from '@jterrazz/station-api';
 import { useState } from 'react';
 
+import { WIKI_WORDS } from '../../words/wiki';
 import { DotIcon } from './dot-icon';
 import { Fields, Findings } from './fields';
 import type { Reader } from './fields';
@@ -14,7 +15,20 @@ function Head({ block, reader }: { block: WikiServedBlock; reader: Reader }) {
             <DotIcon grids={reader.grids} name={block.Icon} size="small" />
             <span className={styles.kind}>{block.Title}</span>
             <span className={styles.word}>{block.Word}</span>
+            <FloorMark floor={block.OwnFloor} />
         </header>
+    );
+}
+
+export function FloorMark({ floor }: { floor: null | WikiFloorHead }) {
+    if (floor === null) {
+        return null;
+    }
+    return (
+        <span className={styles.floorMark} title={floor.Question}>
+            {WIKI_WORDS.floorShort}
+            {floor.Index} {floor.Name}
+        </span>
     );
 }
 
@@ -79,6 +93,7 @@ function Line({ block, reader }: { block: WikiServedBlock; reader: Reader }) {
                     {block.Line === '' ? block.Title : block.Line}
                 </span>
                 <span className={styles.lineWord}>{block.Word}</span>
+                <FloorMark floor={block.OwnFloor} />
             </button>
             {open ? (
                 <div className={styles.lineOpen}>

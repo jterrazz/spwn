@@ -89,15 +89,73 @@
     gap: var(--space-6) var(--space-12);
     font-size: var(--text-label);
 }
-.floor {
-    color: var(--t1);
-    font-weight: var(--weight-medium);
-    padding: var(--space-2) var(--space-8);
-    border-radius: var(--radius-pill);
-    background: var(--raise);
-}
 .question {
     color: var(--t3);
+}
+.ladder {
+    list-style: none;
+    margin: 0 0 var(--space-12);
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    position: relative;
+    max-width: 560px;
+}
+.ladder::before {
+    content: '';
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    right: 4px;
+    border-top: 1px dotted var(--line-2);
+}
+.rung,
+.rungHere {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    font-size: 11px;
+    color: var(--t4);
+}
+.rungHere {
+    color: var(--t1);
+}
+.rungDot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    border: 1px solid var(--t4);
+    background: var(--ground);
+}
+.rungHere .rungDot {
+    border-color: var(--t1);
+    background: var(--t1);
+    box-shadow: 0 0 0 3px var(--raise-2);
+}
+.rungName {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: var(--weight-medium);
+}
+.rungCount {
+    font-family: var(--font-mono);
+    color: var(--t3);
+}
+.rung .rungCount {
+    color: var(--t4);
+}
+.groupMeta .floorMark {
+    margin-left: var(--space-8);
+}
+.floorMark {
+    padding: 0 var(--space-6);
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--line-2);
+    color: var(--t2);
+    font-size: 11px;
+    white-space: nowrap;
 }
 .pageTitle {
     margin: var(--space-4) 0 0;

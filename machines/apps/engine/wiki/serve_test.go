@@ -37,6 +37,15 @@ func outline(s wiki.Served) string {
 		seats = append(seats, mark)
 	}
 	line(0, "page", s.Page.ID, "@"+string(s.Budget), "floor="+strconv.Itoa(s.Floor.Index), s.Floor.Name, "seats="+strings.Join(seats, ","), "needs-you="+strconv.Itoa(s.NeedsYou), "unshown="+strconv.Itoa(s.Unshown))
+	ladder := make([]string, 0, len(s.Floors))
+	for _, f := range s.Floors {
+		mark := strconv.Itoa(f.Index) + ":" + strconv.Itoa(f.Blocks)
+		if f.Here {
+			mark = "[" + mark + "]"
+		}
+		ladder = append(ladder, mark)
+	}
+	line(1, "floors", strings.Join(ladder, " "))
 	for _, p := range s.Paragraph {
 		line(1, "paragraph", runs(p))
 	}
@@ -53,11 +62,19 @@ func outline(s wiki.Served) string {
 				}
 			case it.Group != nil:
 				g := it.Group
-				line(depth, "group", g.ID, string(g.Intent), "blocks="+strconv.Itoa(g.Blocks), "folded="+string(g.Folded), "lead="+strconv.Quote(g.Lead))
+				head := []string{"group", g.ID, string(g.Intent), "blocks=" + strconv.Itoa(g.Blocks), "folded=" + string(g.Folded)}
+				if g.OwnFloor != nil {
+					head = append(head, "own-floor="+strconv.Itoa(g.OwnFloor.Index))
+				}
+				line(depth, append(head, "lead="+strconv.Quote(g.Lead))...)
 				items(depth+1, g.Items)
 			case it.Block != nil:
 				k := it.Block
-				line(depth, "block", k.Address, k.Kind, "icon="+k.Icon, "tier="+string(k.Tier), "shown="+string(k.Shown), strconv.Quote(k.Line))
+				head := []string{"block", k.Address, k.Kind, "icon=" + k.Icon, "tier=" + string(k.Tier), "shown=" + string(k.Shown)}
+				if k.OwnFloor != nil {
+					head = append(head, "own-floor="+strconv.Itoa(k.OwnFloor.Index))
+				}
+				line(depth, append(head, strconv.Quote(k.Line))...)
 				for _, f := range k.Fields {
 					line(depth+1, "field", f.Name, strconv.Quote(f.Text), refs(f.Refs))
 				}

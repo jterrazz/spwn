@@ -199,7 +199,8 @@
                   "ref": "product/stack#machines"
                 },
                 "refuses": "to know about a running agent: starting, watching, answering and merging agents is not its job",
-                "because": "spwn:machines/docs/decisions/052-station-keeps-no-agents.md"
+                "because": "spwn:machines/docs/decisions/052-station-keeps-no-agents.md",
+                "floor": 3
               },
               "faces": {
                 "word": "no-running-agent",
@@ -212,7 +213,7 @@
               },
               "span": {
                 "from": 29,
-                "to": 34
+                "to": 35
               }
             },
             {
@@ -226,7 +227,8 @@
                   "ref": "product/stack#machines"
                 },
                 "refuses": "to share a port nobody granted: a port outside a machine's rights is flagged, never shared",
-                "because": "spwn:machines/docs/decisions/035-a-port-is-a-right-with-an-audience.md"
+                "because": "spwn:machines/docs/decisions/035-a-port-is-a-right-with-an-audience.md",
+                "floor": 3
               },
               "faces": {
                 "word": "no-ungranted-port",
@@ -234,12 +236,12 @@
                 "icon": "refusal"
               },
               "at": {
-                "line": 36,
+                "line": 37,
                 "col": 1
               },
               "span": {
-                "from": 36,
-                "to": 41
+                "from": 37,
+                "to": 43
               }
             }
           ],
@@ -253,7 +255,7 @@
           },
           "span": {
             "from": 27,
-            "to": 43
+            "to": 45
           }
         },
         {
@@ -302,12 +304,12 @@
             ]
           },
           "at": {
-            "line": 45,
+            "line": 47,
             "col": 1
           },
           "span": {
-            "from": 45,
-            "to": 45
+            "from": 47,
+            "to": 47
           }
         },
         {
@@ -329,12 +331,12 @@
             "icon": "refusal"
           },
           "at": {
-            "line": 47,
+            "line": 49,
             "col": 1
           },
           "span": {
-            "from": 47,
-            "to": 52
+            "from": 49,
+            "to": 54
           }
         },
         {
@@ -356,12 +358,12 @@
             "icon": "refusal"
           },
           "at": {
-            "line": 54,
+            "line": 56,
             "col": 1
           },
           "span": {
-            "from": 54,
-            "to": 59
+            "from": 56,
+            "to": 61
           }
         },
         {
@@ -386,12 +388,12 @@
             "icon": "refusal"
           },
           "at": {
-            "line": 61,
+            "line": 63,
             "col": 1
           },
           "span": {
-            "from": 61,
-            "to": 67
+            "from": 63,
+            "to": 69
           }
         },
         {
@@ -415,12 +417,12 @@
             "icon": "refusal"
           },
           "at": {
-            "line": 69,
+            "line": 71,
             "col": 1
           },
           "span": {
-            "from": 69,
-            "to": 69
+            "from": 71,
+            "to": 71
           }
         },
         {
@@ -445,20 +447,20 @@
             "icon": "refusal"
           },
           "at": {
-            "line": 71,
+            "line": 73,
             "col": 1
           },
           "span": {
-            "from": 71,
-            "to": 77
+            "from": 73,
+            "to": 79
           }
         },
         {
           "t": "prose",
           "markdown": "The rows of the four apps being made are derived from the convictions; none of those apps has a\ndesign yet, so each row is a constraint on the design to come, not a description of it.",
           "span": {
-            "from": 79,
-            "to": 80
+            "from": 81,
+            "to": 82
           }
         }
       ]
@@ -469,7 +471,7 @@
         "text": "Rests on",
         "anchor": "rests-on",
         "at": {
-          "line": 82,
+          "line": 84,
           "col": 1
         }
       },
@@ -478,8 +480,8 @@
           "t": "prose",
           "markdown": "Two rows are this page's reading rather than the owner's word or a record: Agents refusing to\nprepare a computer, and the OS refusing to hold facts of its own. Both follow from the spaces; the\nowner has not ruled on either.",
           "span": {
-            "from": 84,
-            "to": 86
+            "from": 86,
+            "to": 88
           }
         }
       ]

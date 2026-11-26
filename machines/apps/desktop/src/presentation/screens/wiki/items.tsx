@@ -9,7 +9,7 @@ import { useState } from 'react';
 import { SEPARATOR } from '../../../domain/separator';
 import { countOf } from '../../words/engine-words';
 import { WIKI_FOLDED_WORDS, WIKI_WORDS } from '../../words/wiki';
-import { Card, Lines, TileBlock } from './block';
+import { Card, FloorMark, Lines, TileBlock } from './block';
 import { DotIcon } from './dot-icon';
 import { Findings } from './fields';
 import type { Reader } from './fields';
@@ -219,7 +219,10 @@ function GroupHead({
             </span>
             <span className={styles.groupTitles}>
                 <h3 className={styles.groupTitle}>{group.Title}</h3>
-                <span className={styles.groupMeta}>{meta}</span>
+                <span className={styles.groupMeta}>
+                    {meta}
+                    <FloorMark floor={group.OwnFloor} />
+                </span>
             </span>
             {toggle === undefined ? null : (
                 <button

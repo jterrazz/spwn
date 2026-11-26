@@ -6,7 +6,13 @@
     - button "Technique"
     - button "Croissance"
   - article "Philosophy":
-    - text: Floor 0 · Intention Why does this exist?
+    - list "Floors":
+      - listitem "Why does this exist?": E0 Intention 7
+      - listitem "What do we build, and for whom?": E1 Produit 0
+      - listitem "What things does it handle, in which words?": E2 Domaines 0
+      - listitem "Where is the code, and what may it touch?": E3 Architecture 0
+      - listitem "Which lines carry it?": E4 Code 0
+    - text: Why does this exist?
     - heading "Philosophy" [level=1]
     - paragraph: The seven convictions Spwn is built on, written as principles a newcomer can apply to a design choice; the vision holds the case they serve, and this page holds the rules. The owner confirmed the seven on 2026-11-21 (his answer).
     - complementary "This page":

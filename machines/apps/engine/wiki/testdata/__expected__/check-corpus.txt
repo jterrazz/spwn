@@ -1,8 +1,8 @@
 findings
   growth/positioning:60:1 S6 needs-you "growth/positioning" rests on this page's reading: you have not ruled
-  product/boundaries:66:1 S6 needs-you "no-computer" rests on this page's reading: you have not ruled
-  product/boundaries:76:1 S6 needs-you "os-holds-no-facts" rests on this page's reading: you have not ruled
-  product/boundaries:82:1 S6 needs-you "product/boundaries" rests on this page's reading: you have not ruled
+  product/boundaries:68:1 S6 needs-you "no-computer" rests on this page's reading: you have not ruled
+  product/boundaries:78:1 S6 needs-you "os-holds-no-facts" rests on this page's reading: you have not ruled
+  product/boundaries:84:1 S6 needs-you "product/boundaries" rests on this page's reading: you have not ruled
   product/stack:53:1 S6 needs-you "product/stack" rests on this page's reading: you have not ruled
   wiki.yaml:83:1 S21 ambient kind "alternative" has no icon: the dot stands in
   wiki.yaml:96:1 S21 ambient kind "part" has no icon: the dot stands in
@@ -39,8 +39,8 @@ readings
     product/boundaries#not-one-vendor refusal floor=1 score=0 tier=quiet why=
     product/boundaries#not-a-method refusal floor=1 score=0 tier=quiet why=
     product/boundaries#machines-refuses group floor=1 readBy=engineering
-    product/boundaries#no-running-agent refusal floor=1 score=0 tier=quiet why=
-    product/boundaries#no-ungranted-port refusal floor=1 score=0 tier=quiet why=
+    product/boundaries#no-running-agent refusal floor=3 score=0 tier=quiet why=
+    product/boundaries#no-ungranted-port refusal floor=3 score=0 tier=quiet why=
     product/boundaries#machines table floor=1 rows=product/boundaries#no-running-agent,product/boundaries#no-ungranted-port
     product/boundaries#no-model refusal floor=1 score=0 tier=quiet why=
     product/boundaries#no-security-in-instructions refusal floor=1 score=0 tier=quiet why=

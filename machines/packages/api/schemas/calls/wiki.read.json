@@ -223,6 +223,15 @@
         "Floor": {
           "$ref": "#/$defs/wiki.FloorHead"
         },
+        "Floors": {
+          "items": {
+            "$ref": "#/$defs/wiki.ServedFloor"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
         "Icons": {
           "additionalProperties": {
             "items": {
@@ -292,6 +301,7 @@
         "Budgets",
         "Findings",
         "Floor",
+        "Floors",
         "Icons",
         "NeedsYou",
         "Page",
@@ -352,6 +362,16 @@
         },
         "Line": {
           "type": "string"
+        },
+        "OwnFloor": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/wiki.FloorHead"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "Score": {
           "type": "integer"
@@ -416,6 +436,7 @@
         "Icon",
         "Kind",
         "Line",
+        "OwnFloor",
         "Score",
         "Shown",
         "Sub",
@@ -525,6 +546,34 @@
       ],
       "type": "object"
     },
+    "wiki.ServedFloor": {
+      "additionalProperties": false,
+      "properties": {
+        "Blocks": {
+          "type": "integer"
+        },
+        "Here": {
+          "type": "boolean"
+        },
+        "Index": {
+          "type": "integer"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "Question": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Blocks",
+        "Here",
+        "Index",
+        "Name",
+        "Question"
+      ],
+      "type": "object"
+    },
     "wiki.ServedGroup": {
       "additionalProperties": false,
       "properties": {
@@ -558,6 +607,16 @@
         "Lead": {
           "type": "string"
         },
+        "OwnFloor": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/wiki.FloorHead"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "ReadBy": {
           "items": {
             "type": "string"
@@ -578,6 +637,7 @@
         "Intent",
         "Items",
         "Lead",
+        "OwnFloor",
         "ReadBy",
         "Title"
       ],

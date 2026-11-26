@@ -18,12 +18,15 @@ type Served struct {
 	Page      PageHead
 	Paragraph []Paragraph
 	Floor     FloorHead
-	Budget    Budget
-	Budgets   []Budget
-	Seats     []SeatHead
-	Pages     []PageHead
-	Sections  []ServedSection
-	Findings  []ServedFinding
+	// value: the ladder the page stands on: every floor of the corpus, the
+	// page's own marked, each with how many of the page's blocks sit on it.
+	Floors   []ServedFloor
+	Budget   Budget
+	Budgets  []Budget
+	Seats    []SeatHead
+	Pages    []PageHead
+	Sections []ServedSection
+	Findings []ServedFinding
 	// value: what the page's head counts of it as served: the findings that
 	// need the owner, on the page or its blocks, and the blocks this budget
 	// does not show, a folded group counting all of its own.
@@ -47,6 +50,14 @@ type FloorHead struct {
 	Index    int
 	Name     string
 	Question string
+}
+
+type ServedFloor struct {
+	Index    int
+	Name     string
+	Question string
+	Blocks   int
+	Here     bool
 }
 
 type SeatHead struct {
@@ -88,6 +99,9 @@ type ServedGroup struct {
 	// empty when it opens.
 	Folded Fold
 	Blocks int
+	// value: the floor its blocks sit on, served only when it is not its
+	// page's.
+	OwnFloor *FloorHead
 	// value: the line Face of its lead, its one line when folded.
 	Lead   string
 	ReadBy []string
@@ -124,15 +138,18 @@ type ServedBlock struct {
 	Word    string
 	Line    string
 	Floor   int
-	Tier    Tier
-	Score   int
-	Why     []Cause
-	Shown   Shown
-	Fields  []ServedField
-	Table   *ServedTable
-	Sub     *PageHead
-	Figure  *ServedFigure
-	Finding []ServedFinding
+	// value: the floor the block writes, served only when it is not its
+	// page's, so a block set deeper than its page says where it sits.
+	OwnFloor *FloorHead
+	Tier     Tier
+	Score    int
+	Why      []Cause
+	Shown    Shown
+	Fields   []ServedField
+	Table    *ServedTable
+	Sub      *PageHead
+	Figure   *ServedFigure
+	Finding  []ServedFinding
 }
 
 type ServedField struct {
@@ -243,7 +260,7 @@ func (c Corpus) Serve(id string, budget Budget) (Served, error) {
 	reading := s.reading(p.ID)
 	out := Served{
 		Page: s.head(p), Paragraph: Paragraphs(p.Faces.Paragraph), Budget: budget, Budgets: Budgets(),
-		Floor: s.floor(reading.Floor), Icons: map[string][]string{},
+		Floor: s.floor(reading.Floor), Floors: s.ladder(reading), Icons: map[string][]string{},
 	}
 	for _, seat := range c.Schema.Seats {
 		out.Seats = append(out.Seats, SeatHead{ID: seat.ID, Name: seat.Name, Icon: seat.ID, Home: seat.Home, Plan: seat.Plan, Active: seat.ID == reading.Seat})
@@ -372,6 +389,21 @@ func (s *server) floor(i int) FloorHead {
 	return FloorHead{Index: i}
 }
 
+func (s *server) ladder(r Reading) []ServedFloor {
+	out := make([]ServedFloor, 0, len(s.c.Schema.Floors))
+	for i := range s.c.Schema.Floors {
+		h := s.floor(i)
+		f := ServedFloor{Index: h.Index, Name: h.Name, Question: h.Question, Here: i == r.Floor}
+		for _, b := range r.Blocks {
+			if b.Weight != nil && b.Floor == i {
+				f.Blocks++
+			}
+		}
+		out = append(out, f)
+	}
+	return out
+}
+
 func (s *server) head(p *Page) PageHead {
 	r := s.reading(p.ID)
 	h := PageHead{ID: p.ID, Seat: r.Seat, Floor: r.Floor, Word: p.Faces.Word, Line: plainOf(p.Faces.Line), Icon: p.Faces.Icon}
@@ -453,6 +485,9 @@ func (s *server) group(p *Page, r Reading, g *Group) *ServedGroup {
 		if si.Block != nil && si.Block.Tier != "" {
 			out.Blocks++
 		}
+		if si.Block != nil && si.Block.OwnFloor != nil {
+			out.OwnFloor = si.Block.OwnFloor
+		}
 		out.Items = append(out.Items, si)
 	}
 	if b, ok := s.blocks[gr.Lead]; ok {
@@ -470,6 +505,10 @@ func (s *server) block(p *Page, b *Block, grouped bool) *ServedBlock {
 	}
 	if r.Weight != nil {
 		out.Tier, out.Score, out.Why = r.Weight.Tier, r.Weight.Score, r.Weight.Why
+	}
+	if page := s.reading(p.ID).Floor; r.Floor != page {
+		f := s.floor(r.Floor)
+		out.OwnFloor = &f
 	}
 	out.Shown = shown(out.Tier, s.budget, grouped)
 	for _, f := range s.c.Report.Findings {

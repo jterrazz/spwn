@@ -29,6 +29,8 @@ export const WIKI_WORDS = {
     all: 'All',
     budget: 'Reading time',
     floor: 'Floor',
+    floorShort: 'E',
+    ladder: 'Floors',
     folded: 'folded at this reading time',
     home: 'Wiki',
     homeLine: 'Every page of this Mac’s wiki, by the seat that reads it.',

@@ -35,7 +35,7 @@ describe('wiki', () => {
 
             // Then - the page, Produit chosen, at two minutes
             await visitor.see(heading('Boundaries'));
-            await visitor.see(content('Floor 1 · Produit'));
+            await visitor.see(content('E1 Produit'));
         });
         expect(result.errors.text).toBe('');
     });
@@ -70,7 +70,7 @@ describe('wiki', () => {
 
                 // Then - Ports, Technique chosen
                 await visitor.see(heading('Ports'));
-                await visitor.see(content('Floor 3 · Architecture'));
+                await visitor.see(content('E3 Architecture'));
             },
         );
         expect(result.errors.text).toBe('');

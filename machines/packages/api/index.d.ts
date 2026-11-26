@@ -3338,6 +3338,7 @@ export type WikiServed = {
     Budgets: string[] | null;
     Findings: WikiServedFinding[] | null;
     Floor: WikiFloorHead;
+    Floors: WikiServedFloor[] | null;
     Icons: Record<string, string[] | null> | null;
     NeedsYou: number;
     Page: WikiPageHead;
@@ -3359,6 +3360,7 @@ export type WikiServedBlock = {
     Icon: string;
     Kind: string;
     Line: string;
+    OwnFloor: WikiFloorHead | null;
     Score: number;
     Shown: '' | 'card' | 'counted' | 'line' | 'none' | 'tile';
     Sub: WikiPageHead | null;
@@ -3392,6 +3394,14 @@ export type WikiServedFinding = {
     Says: string;
 };
 
+export type WikiServedFloor = {
+    Blocks: number;
+    Here: boolean;
+    Index: number;
+    Name: string;
+    Question: string;
+};
+
 export type WikiServedGroup = {
     Blocks: number;
     Folded: '' | 'author' | 'budget' | 'seat';
@@ -3399,6 +3409,7 @@ export type WikiServedGroup = {
     Intent: string;
     Items: WikiServedItem[] | null;
     Lead: string;
+    OwnFloor: WikiFloorHead | null;
     ReadBy: string[] | null;
     Title: string;
 };

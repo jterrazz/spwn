@@ -31,6 +31,7 @@ id="no-running-agent"
 by={ref("product/stack#machines")}
 refuses="to know about a running agent: starting, watching, answering and merging agents is not its job"
 because="spwn:machines/docs/decisions/052-station-keeps-no-agents.md"
+floor={3}
 />
 
 <Refusal
@@ -38,6 +39,7 @@ id="no-ungranted-port"
 by={ref("product/stack#machines")}
 refuses="to share a port nobody granted: a port outside a machine's rights is flagged, never shared"
 because="spwn:machines/docs/decisions/035-a-port-is-a-right-with-an-audience.md"
+floor={3}
 />
 
 </Group>
