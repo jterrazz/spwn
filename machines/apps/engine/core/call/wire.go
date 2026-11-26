@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"reflect"
 	"strings"
+	"sync"
 
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 	"github.com/jterrazz/studio-station/apps/engine/core/finding"
@@ -200,7 +201,19 @@ func EncodedKeys(t reflect.Type) ([]EncodedKey, bool) {
 	return out, true
 }
 
-func holdsError(t reflect.Type) bool { return reaches(t, map[reflect.Type]bool{}) }
+// value: whether a type reaches an error, walked once per type a process
+// encodes, never per value.
+var holding sync.Map
+
+func holdsError(t reflect.Type) bool {
+	if was, ok := holding.Load(t); ok {
+		held, _ := was.(bool)
+		return held
+	}
+	held := reaches(t, map[reflect.Type]bool{})
+	holding.Store(t, held)
+	return held
+}
 
 func reaches(t reflect.Type, seen map[reflect.Type]bool) bool {
 	if t == errorType {
