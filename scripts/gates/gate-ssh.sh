@@ -6,7 +6,7 @@ ROUTES=${GATE_ROUTES_DIR:-$HOME/.config/spwn/gate-routes}
 refuse() { echo "gate-ssh: $*" >&2; exit 92; }
 usage() { echo "usage: gate-ssh.sh ssh|rsh [-n] [-q] [-T] [-o ConnectTimeout=N] <host> [command...]; gate-ssh.sh scp [-q] <source>... <destination>" >&2; exit 2; }
 # invariant: -F /dev/null keeps every ssh_config out, so the options below and the route file's are the whole configuration: no agent, no default identity, no proxy or jump the route did not name.
-COMMON=(-F /dev/null -o BatchMode=yes -o StrictHostKeyChecking=yes -o UpdateHostKeys=no -o GlobalKnownHostsFile=/dev/null -o IdentitiesOnly=yes -o IdentityAgent=none -o ForwardAgent=no -o ControlMaster=no -o ControlPath=none -o PermitLocalCommand=no)
+COMMON=(-F /dev/null -o BatchMode=yes -o StrictHostKeyChecking=yes -o UpdateHostKeys=no -o GlobalKnownHostsFile=/dev/null -o IdentitiesOnly=yes -o IdentityAgent=none -o ForwardAgent=no -o ControlMaster=no -o ControlPath=none -o PermitLocalCommand=no -o EscapeChar=none)
 SSH_GUARD=(-a "${COMMON[@]}")
 ME=$(command -p id -u)
 
@@ -211,6 +211,7 @@ scp_mode() {
   [ ${#paths[@]} -ge 2 ] || usage
   for a in "${paths[@]}"; do
     case $a in
+      *://*) refuse "scp names a URI, $a: name <host>:<path>, so the route says how the host is reached" ;;
       *:*) h=${a%%:*}; remotes=$((remotes + 1)); [ -z "$host" ] && host=$h; [ "$h" = "$host" ] || refuse "scp names two hosts: $host and $h" ;;
     esac
   done
@@ -225,14 +226,14 @@ scp_mode() {
     rd=${dst#"$host":}; [ -n "$rd" ] || rd=.
     for s in "${srcs[@]}"; do
       [ -f "$s" ] || { echo "gate-ssh: $s: no such file" >&2; exit 1; }
-      "$SELF" ssh "$host" "d=$(quote "$rd"); if [ -d \"\$d\" ]; then d=\"\$d\"/$(quote "$(command -p basename "$s")"); fi; cat > \"\$d\"" < "$s" || exit $?
+      "$SELF" ssh "$host" "d=$(quote "$rd"); if [ -d \"\$d\" ]; then d=\"\$d\"/$(quote "$(command -p basename "$s")"); fi; /bin/cat > \"\$d\"" < "$s" || exit $?
     done
     exit 0
   fi
   [ ${#srcs[@]} -eq 1 ] || { echo "gate-ssh: a two-hop route copies one remote source at a time" >&2; exit 2; }
   rs=${srcs[0]#"$host":}; out=$dst
   [ -d "$out" ] && out="$out/$(command -p basename "$rs")"
-  "$SELF" ssh -n "$host" "cat -- $(quote "$rs")" > "$out" || { rc=$?; rm -f "$out"; exit $rc; }
+  "$SELF" ssh -n "$host" "/bin/cat -- $(quote "$rs")" > "$out" || { rc=$?; command -p rm -f "$out"; exit $rc; }
 }
 
 mode=${1:-}; shift || usage
