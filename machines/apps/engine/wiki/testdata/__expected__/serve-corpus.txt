@@ -228,8 +228,8 @@ page product/boundaries floor=1 Produit blocks=14 needs-you=3
 page growth/positioning floor=1 Produit blocks=7 needs-you=1
   reading word words=84 seconds=22 "≈ 20 s" same=false
   reading line words=143 seconds=37 "≈ 35 s" same=false
-  reading card words=342 seconds=89 "≈ 1 min 29 s" same=false
-  reading full words=352 seconds=92 "≈ 1 min 32 s" same=false
+  reading card words=342 seconds=89 "≈ 1 min 30 s" same=false
+  reading full words=352 seconds=92 "≈ 1 min 30 s" same=false
   paragraph "Where Spwn stands against what a person uses today instead, for anyone writing a comparison, a pitch or an answer to \"how is it different\": the category it refuses, the four alternatives and what each costs. What Spwn is, in one sentence, is [the vision](../blueprint/vision.md#the-definition)'s and is not restated here."
   lede ranks=word,line,card,card first="Where Spwn stands against what a person uses today instead, for anyone writing a comparison, a pitch or an answer to \"how is it different\":" more=true
   finding needs-you S6 from=word "growth/positioning" rests on this page's reading: you have not ruled
@@ -279,8 +279,8 @@ page growth/positioning floor=1 Produit blocks=7 needs-you=1
 page machines/reference/ports floor=3 Architecture blocks=4 needs-you=0
   reading word words=77 seconds=20 "≈ 20 s" same=false
   reading line words=172 seconds=45 "≈ 45 s" same=false
-  reading card words=194 seconds=51 "≈ 51 s" same=false
-  reading full words=197 seconds=51 "≈ 52 s" same=false
+  reading card words=194 seconds=51 "≈ 50 s" same=false
+  reading full words=197 seconds=51 "≈ 50 s" same=false
   paragraph "`station ports` lists every TCP port that listens on a Mac or a VM, each in the class of who reaches it. Which ports a VM may open, and to whom, are its [rights](#right): a port that starts listening inside them is shared with their audience within seconds, one outside them is flagged and never shared."
   lede ranks=word,line,card,card first="`station ports` lists every TCP port that listens on a Mac or a VM, each in the class of who reaches it." more=true
   section  "Top" icon=home rests=false
@@ -307,8 +307,8 @@ page machines/reference/ports floor=3 Architecture blocks=4 needs-you=0
 page product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder floor=1 Produit blocks=0 needs-you=0
   record ADR-002 "Spwn is one stack of six apps on one ladder"
   decision page=product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder ADR-002 status="Accepted" date=2026-11-21 "Spwn is one stack of six apps on one ladder."
-  reading word words=44 seconds=11 "≈ 11 s" same=false
-  reading line words=44 seconds=11 "≈ 12 s" same=false
+  reading word words=44 seconds=11 "≈ 10 s" same=false
+  reading line words=44 seconds=11 "≈ 10 s" same=false
   reading card words=63 seconds=16 "≈ 15 s" same=false
   reading full words=63 seconds=16 "≈ 15 s" same=true
   paragraph "**Status:** Accepted **Date:** 2026-11-21 **Amended by:** [ADR-003](./003-the-three-spaces-are-the-structure-of-the-app.md) (the ladder) **Amends:** [growth ADR-007](../../growth/decisions/007-spwn-is-the-ai-stack-that-abstracts-everything-but-you.md)"
@@ -325,8 +325,8 @@ page product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder floor=1 P
 page machines/decisions/035-a-port-is-a-right-with-an-audience floor=3 Architecture blocks=0 needs-you=0
   record ADR-035 "A port is a right with an audience"
   decision page=machines/decisions/035-a-port-is-a-right-with-an-audience ADR-035 status="Accepted" date=2026-11-11 "A port is a right with an audience."
-  reading word words=31 seconds=8 "≈ 8 s" same=false
-  reading line words=31 seconds=8 "≈ 9 s" same=false
+  reading word words=31 seconds=8 "≈ 10 s" same=false
+  reading line words=31 seconds=8 "≈ 10 s" same=false
   reading card words=44 seconds=11 "≈ 10 s" same=false
   reading full words=44 seconds=11 "≈ 10 s" same=true
   paragraph "**Status:** Accepted **Date:** 2026-11-11"

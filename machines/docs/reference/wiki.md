@@ -114,7 +114,7 @@ The answer carries every judgement the window draws, and the window decides none
 - the head's counts, `Blocks` and `NeedsYou`, the needs-you findings of `Attention`;
 - `Reading`, one per level: the `Words` the level shows, the `Seconds` they take at 230 words a minute, its `Label`, and `Same` when the level shows exactly what the one before it shows.
 
-A label rounds its seconds to 5 s under a minute, to 15 s up to five minutes, and to the minute past them. Two levels that show different things never share a label: the finer rounding is taken for both until they differ, then the shorter is rounded down and the longer up, to the second. A `Same` level takes the label of the one before it.
+A label is always round: `Seconds` is the exact value, and the label rounds it to the nearest 5 s under a minute (5 s at least, and 57.5 s or more is `1 min`), to the nearest 15 s from a minute to five minutes, and to the nearest minute past them. The labels never fall from one level to the next, and two levels that show different things may share one.
 
 Its refusals are `wiki.none`, `wiki.unknown-page` and `wiki.unreadable` (`wiki.yaml` absent or refused, its finding said), each told in `specs/usecases/wiki/read/`.
 

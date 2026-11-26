@@ -201,74 +201,32 @@ func wordCount(texts ...string) int {
 	return n
 }
 
-// invariant: a reading time's label rounds its seconds to 5 s under a
-// minute, to 15 s up to five minutes and to the minute past them; a level
-// whose label would not pass the one before it, though it shows something
-// else, takes the finer rounding with that one until it does, down to the
-// second, and past the second it says one second more; a level that shows
-// what the one before it shows takes its label.
+// invariant: a reading time's label is round: its seconds to the nearest 5 s
+// under a minute (5 s at least, and a value of 57.5 s or more is 1 min), to
+// the nearest 15 s from a minute to five, and to the nearest minute past
+// five; the words only grow from one level to the next, so the labels never
+// fall, and two levels may say the same.
 func readings(words []int, same []bool) []ServedReading {
 	out := make([]ServedReading, len(words))
-	exact := make([]float64, len(words))
-	grain := make([]int, len(words))
 	for i, w := range words {
-		exact[i] = float64(w) * 60 / readingSpeed
-		out[i] = ServedReading{Words: w, Seconds: int(math.Round(exact[i])), Same: same[i]}
-		grain[i] = grainOf(exact[i])
-	}
-	for changed := true; changed; {
-		changed = false
-		for i := 1; i < len(words); i++ {
-			if same[i] || rounded(exact[i], grain[i]) > rounded(exact[i-1], grain[i-1]) {
-				continue
-			}
-			g := min(grain[i], grain[i-1])
-			if grain[i] == grain[i-1] {
-				g = finer(g)
-			}
-			if g != grain[i] || g != grain[i-1] {
-				grain[i], grain[i-1], changed = g, g, true
-			}
-		}
-	}
-	shown := make([]int, len(words))
-	for i := range words {
-		shown[i] = rounded(exact[i], grain[i])
-		switch {
-		case i > 0 && same[i]:
-			shown[i] = shown[i-1]
-		case i > 0:
-			shown[i] = max(shown[i], shown[i-1]+1)
-		}
-	}
-	for i := range out {
-		out[i].Label = labelOf(shown[i])
+		exact := float64(w) * 60 / readingSpeed
+		out[i] = ServedReading{Words: w, Seconds: int(math.Round(exact)), Label: labelOf(rounded(exact)), Same: same[i]}
 	}
 	return out
 }
 
-func grainOf(seconds float64) int {
+// value: the seconds a reading label shows for a value of seconds: under 60
+// the value to the nearest 5 s, 5 s at least; from 60 up to 300 to the
+// nearest 15 s; from 300 on to the nearest 60 s. 57.5 and up is 60.
+func rounded(seconds float64) int {
+	grain := 60.0
 	switch {
 	case seconds < 60:
-		return 5
+		grain = 5
 	case seconds < 300:
-		return 15
+		grain = 15
 	}
-	return 60
-}
-
-func finer(grain int) int {
-	switch grain {
-	case 60:
-		return 15
-	case 15:
-		return 5
-	}
-	return 1
-}
-
-func rounded(seconds float64, grain int) int {
-	return max(grain, int(math.Round(seconds/float64(grain)))*grain)
+	return max(5, int(math.Round(seconds/grain)*grain))
 }
 
 func labelOf(seconds int) string {

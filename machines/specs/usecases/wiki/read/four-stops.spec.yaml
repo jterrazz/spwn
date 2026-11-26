@@ -10,4 +10,4 @@ runs:
           {"v":2,"id":"1","call":"wiki.read","target":{},"in":{"Page":"blueprint/home"}}
       exit: 0
       stdout: |
-          {"reading":[[13,"≈ 3 s",false],[22,"≈ 6 s",false],[33,"≈ 9 s",false],[36,"≈ 10 s",false]],"lede":["word","line","card","card"],"items":[["p0.0",["word","line","card","card"],"card"],["blueprint/home#seat",["word","line","line","card"],"full"]],"first":["A seat is a reader:"]}
+          {"reading":[[13,"≈ 5 s",false],[22,"≈ 5 s",false],[33,"≈ 10 s",false],[36,"≈ 10 s",false]],"lede":["word","line","card","card"],"items":[["p0.0",["word","line","card","card"],"card"],["blueprint/home#seat",["word","line","line","card"],"full"]],"first":["A seat is a reader:"]}

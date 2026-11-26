@@ -104,37 +104,48 @@ func labelSeconds(t testing.TB, label string) int {
 	return total
 }
 
-func TestEveryLevelReadsLongerThanTheOneBeforeOrSaysItShowsTheSame(t *testing.T) {
+// value: whether a label is one of the round forms: a multiple of 5 s from 5 s
+// to 55 s, of 15 s from a minute up to five, of a minute past them.
+func roundLabel(t testing.TB, label string) bool {
+	t.Helper()
+	s := labelSeconds(t, label)
+	switch {
+	case s < 60:
+		return s >= 5 && s%5 == 0
+	case s < 300:
+		return s%15 == 0
+	}
+	return s%60 == 0
+}
+
+func TestEveryLevelReadsAsManyWordsAndARoundLabelNeverShorterOrSaysItShowsTheSame(t *testing.T) {
 	for id, s := range servedCorpus(t) {
 		if len(s.Reading) != len(wiki.Details()) || s.Reading[0].Same {
 			t.Fatalf("%s: readings %+v; want four, the first never the same", id, s.Reading)
 		}
+		if !roundLabel(t, s.Reading[0].Label) {
+			t.Errorf("%s: label %q is not round", id, s.Reading[0].Label)
+		}
 		for i := 1; i < len(s.Reading); i++ {
 			was, is := s.Reading[i-1], s.Reading[i]
-			if is.Same {
-				if is.Words != was.Words || is.Label != was.Label {
-					t.Errorf("%s @%s: the same as %s but %+v against %+v", id, wiki.Details()[i], wiki.Details()[i-1], is, was)
-				}
-				continue
+			if !roundLabel(t, is.Label) {
+				t.Errorf("%s @%s: label %q is not round", id, wiki.Details()[i], is.Label)
 			}
-			if is.Words < was.Words || labelSeconds(t, is.Label) <= labelSeconds(t, was.Label) {
-				t.Errorf("%s @%s: %d words %q after %d words %q; want as many words at least and a longer label", id, wiki.Details()[i], is.Words, is.Label, was.Words, was.Label)
+			if is.Same && (is.Words != was.Words || is.Label != was.Label) {
+				t.Errorf("%s @%s: the same as %s but %+v against %+v", id, wiki.Details()[i], wiki.Details()[i-1], is, was)
+			}
+			if is.Words < was.Words || labelSeconds(t, is.Label) < labelSeconds(t, was.Label) {
+				t.Errorf("%s @%s: %d words %q after %d words %q; want as many words at least and a label no shorter", id, wiki.Details()[i], is.Words, is.Label, was.Words, was.Label)
 			}
 		}
 	}
 }
 
-func TestBoundariesReadsAtFourTimesWhereThePrototypeShowedTwoAlike(t *testing.T) {
-	s := servedCorpus(t)["product/boundaries"]
-	labels := make([]string, 0, len(s.Reading))
-	for _, r := range s.Reading {
+func TestBoundariesShowsSomethingNewAtEveryLevel(t *testing.T) {
+	for _, r := range servedCorpus(t)["product/boundaries"].Reading {
 		if r.Same {
 			t.Errorf("reading %+v is the same; every level of Boundaries opens something", r)
 		}
-		labels = append(labels, r.Label)
-	}
-	if labels[2] == labels[3] || len(slices.Compact(slices.Clone(labels))) != len(labels) {
-		t.Fatalf("labels %v; want four apart, card's not full's", labels)
 	}
 }
 
@@ -267,7 +278,7 @@ func FuzzServe(f *testing.F) {
 		}
 		for i := 1; i < len(s.Reading); i++ {
 			was, is := s.Reading[i-1], s.Reading[i]
-			if (is.Same && is.Label != was.Label) || (!is.Same && (is.Words < was.Words || labelSeconds(t, is.Label) <= labelSeconds(t, was.Label))) {
+			if (is.Same && is.Label != was.Label) || is.Words < was.Words || labelSeconds(t, is.Label) < labelSeconds(t, was.Label) || !roundLabel(t, is.Label) {
 				t.Fatalf("@%d: %+v after %+v", i, is, was)
 			}
 		}
