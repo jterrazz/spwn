@@ -76,6 +76,8 @@ import { Sign } from '../../ui/sign';
 import { SIGN_STORIES } from '../../ui/sign.stories';
 import { StateDot } from '../../ui/state-dot';
 import { STATE_DOT_STORIES } from '../../ui/state-dot.stories';
+import { StateMark } from '../../ui/state-mark';
+import { STATE_MARK_STORIES } from '../../ui/state-mark.stories';
 import { StatePill } from '../../ui/state-pill';
 import { STATE_PILL_STORIES } from '../../ui/state-pill.stories';
 import { StateSign } from '../../ui/state-sign';
@@ -100,6 +102,7 @@ export const ENTRIES: readonly Entry[] = [
     entry('AppIcon', 'Marks', { Component: AppIcon, stories: APP_ICON_STORIES }),
     entry('MachineIcon', 'Marks', { Component: MachineIcon, stories: MACHINE_ICON_STORIES }),
     entry('MachineChip', 'Marks', { Component: MachineChip, stories: MACHINE_CHIP_STORIES }),
+    entry('StateMark', 'Marks', { Component: StateMark, stories: STATE_MARK_STORIES }),
     entry('StateDot', 'Marks', { Component: StateDot, stories: STATE_DOT_STORIES }),
     entry('Sign', 'Marks', { Component: Sign, stories: SIGN_STORIES }),
     entry('StatePill', 'Marks', { Component: StatePill, stories: STATE_PILL_STORIES }),

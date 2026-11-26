@@ -61,6 +61,7 @@ export { RowSkeleton } from './row-skeleton';
 export { SearchField } from './search-field';
 export { Sign } from './sign';
 export { StateDot } from './state-dot';
+export { StateMark } from './state-mark';
 export { StateSign } from './state-sign';
 export { StatePill } from './state-pill';
 export { Switch } from './switch';
