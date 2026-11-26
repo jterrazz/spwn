@@ -19,10 +19,10 @@ type Deps struct {
 	Name string
 	Kind machine.Kind
 	// value: the activity the engine of this Mac keeps of a machine, by
-	// name, and when that engine started: ok false when it keeps none of
-	// it, an error when it does not answer; nil on a machine whose engine
-	// is not its own (a VM's).
-	Kept  func(ctx context.Context, machine string) (kept activity.Kept, since time.Time, ok bool, err error)
+	// name, the part of it want reads, and when that engine started: ok
+	// false when it keeps none of it, an error when it does not answer; nil
+	// on a machine whose engine is not its own (a VM's).
+	Kept  func(ctx context.Context, machine string, want activity.Want) (kept activity.Kept, since time.Time, ok bool, err error)
 	Sleep func(ctx context.Context, d time.Duration) error
 	// value: the clock a kept history's freshness is judged by; set with
 	// Kept.

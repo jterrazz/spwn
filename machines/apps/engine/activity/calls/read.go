@@ -63,7 +63,7 @@ func (d Deps) read(ctx context.Context, in ReadIn) activity.Report {
 	var kept *activity.Kept
 	var since time.Time
 	if d.Kept != nil {
-		if k, at, ok, err := d.Kept(ctx, name); err == nil && ok {
+		if k, at, ok, err := d.Kept(ctx, name, activity.Want{Graph: in.Graph, History: in.History}); err == nil && ok {
 			if r, usable := fromHistory(k, at, in, d.Now()); usable {
 				r.Findings = findings(ref, kind, &k.Series, k.Last.Top)
 				return graphed(r, &k.Series, in, d.Now())

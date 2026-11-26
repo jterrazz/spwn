@@ -254,6 +254,7 @@ export type ActivitySeries = {
 export type ActivityTierRollups = {
     buckets: number[][] | null;
     every: number;
+    slots?: number;
 };
 
 export type ActivityUsage = {
@@ -1364,8 +1365,14 @@ export type DoneFrame = {
     v: 2;
 };
 
+export type EngineActivityIn = {
+    graph?: number;
+    history?: boolean;
+    machine?: string;
+};
+
 export type EngineActivityOut = {
-    machines: EngineKept[] | null;
+    kept?: EngineKept;
     since: string;
 };
 
@@ -1450,7 +1457,6 @@ export type EngineKeepSettingsIn = {
 
 export type EngineKept = {
     last: ActivityReading;
-    machine: string;
     series: ActivitySeries;
 };
 
@@ -3794,7 +3800,7 @@ export type DiskMoveInput = DiskCallsMoveIn;
 export type DiskMoveOutput = DiskOutcome;
 export type DiskReadInput = DiskCallsReadIn;
 export type DiskReadOutput = DiskReading;
-export type EngineActivityInput = Record<string, never>;
+export type EngineActivityInput = EngineActivityIn;
 export type EngineActivityOutput = EngineActivityOut;
 export type EngineAwakeInput = Record<string, never>;
 export type EngineAwakeOutput = AwakeView;

@@ -38,7 +38,7 @@ func Owns() []Own {
 		served(engine.CallAwakeView, none, reflect.TypeFor[awake.View]()),
 		served(engine.CallKeepAwake, reflect.TypeFor[engine.AwakeIn](), reflect.TypeFor[awake.Awoken]()),
 		served(engine.CallAwakeOff, none, reflect.TypeFor[engine.AwakeOff]()),
-		served(engine.CallActivity, none, reflect.TypeFor[engine.ActivityOut]()),
+		served(engine.CallActivity, reflect.TypeFor[engine.ActivityIn](), reflect.TypeFor[engine.ActivityOut]()),
 		served(engine.CallKeepSettings, reflect.TypeFor[engine.KeepSettingsIn](), ok),
 		served(engine.CallLastSettings, reflect.TypeFor[engine.VMIn](), reflect.TypeFor[engine.LastSettingsOut]()),
 		served(engine.CallRefresh, reflect.TypeFor[engine.PagesIn](), ok),

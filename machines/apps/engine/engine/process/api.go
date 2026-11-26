@@ -7,6 +7,7 @@ import (
 	"slices"
 	"time"
 
+	"github.com/jterrazz/studio-station/apps/engine/activity"
 	"github.com/jterrazz/studio-station/apps/engine/awake"
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
@@ -18,15 +19,14 @@ import (
 	enginecalls "github.com/jterrazz/studio-station/apps/engine/engine/calls"
 )
 
-func activityOf(d *Engine) engine.ActivityOut {
+func activityOf(d *Engine, in engine.ActivityIn) engine.ActivityOut {
 	h := d.History()
 	if h == nil {
-		return engine.ActivityOut{Machines: []engine.Kept{}}
+		return engine.ActivityOut{}
 	}
-	out := engine.ActivityOut{Since: h.Since(), Machines: []engine.Kept{}}
-	for _, name := range h.Machines() {
-		k, _ := h.Of(name)
-		out.Machines = append(out.Machines, engine.Kept{Machine: name, Last: k.Last, Series: k.Series})
+	out := engine.ActivityOut{Since: h.Since()}
+	if k, ok := h.Part(in.Machine, activity.Want{Graph: in.Graph, History: in.History}, d.h.Now()); ok {
+		out.Kept = &engine.Kept{Last: k.Last, Series: k.Series}
 	}
 	return out
 }
@@ -85,7 +85,9 @@ func calls(d *Engine, served []string) []call.Handler {
 		own(d, engine.CallAwakeView, func(_ context.Context, d *Engine, _ struct{}) (awake.View, error) { return d.AwakeView(), nil }),
 		own(d, engine.CallKeepAwake, func(_ context.Context, d *Engine, in engine.AwakeIn) (awake.Awoken, error) { return d.Awake(in) }),
 		own(d, engine.CallAwakeOff, func(_ context.Context, d *Engine, _ struct{}) (engine.AwakeOff, error) { return d.Sleep(), nil }),
-		own(d, engine.CallActivity, func(_ context.Context, d *Engine, _ struct{}) (engine.ActivityOut, error) { return activityOf(d), nil }),
+		own(d, engine.CallActivity, func(_ context.Context, d *Engine, in engine.ActivityIn) (engine.ActivityOut, error) {
+			return activityOf(d, in), nil
+		}),
 		own(d, engine.CallKeepSettings, func(_ context.Context, d *Engine, in engine.KeepSettingsIn) (struct{}, error) {
 			d.KeepSettings(in.VM, in.Read)
 			return struct{}{}, nil

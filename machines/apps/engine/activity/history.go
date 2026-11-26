@@ -131,6 +131,9 @@ const rollupLen = 19
 
 type TierRollups struct {
 	Every time.Duration `json:"every"`
+	// value: the slots of a part's ring (Series.Part), none for a whole
+	// tier's.
+	Slots int `json:"slots,omitempty"`
 	// value: the tier's buckets, oldest first, the slots nothing was
 	// measured in left out.
 	Buckets []Rollup `json:"buckets"`
@@ -194,6 +197,9 @@ func (s Series) MarshalJSON() ([]byte, error) {
 	}
 	for i, t := range Tiers {
 		tier := TierRollups{Every: t.Every, Buckets: []Rollup{}}
+		if n := len(s.rings[i].slots); n > 0 && n < int(t.Kept/t.Every) {
+			tier.Slots = n
+		}
 		if s.count > 0 {
 			for _, b := range s.within(i, time.UnixMilli(0), s.newest().At) {
 				tier.Buckets = append(tier.Buckets, b.row())
@@ -218,14 +224,26 @@ func (s *Series) UnmarshalJSON(data []byte) error {
 	for _, x := range in.Recent {
 		s.push(x)
 	}
+	var slots [len(Tiers)]int
 	for i, t := range Tiers {
-		s.rings[i] = ring{every: t.Every.Milliseconds(), slots: make([]bucket, int(t.Kept/t.Every))}
+		slots[i] = int(t.Kept / t.Every)
 	}
-	for _, tier := range in.Tiers {
+	of := make([]int, len(in.Tiers))
+	for j, tier := range in.Tiers {
 		i := slices.IndexFunc(Tiers[:], func(t Tier) bool { return t.Every == tier.Every })
 		if i < 0 {
 			return fmt.Errorf("activity: no tier of %v", tier.Every)
 		}
+		if tier.Slots > 0 {
+			slots[i] = min(tier.Slots, slots[i])
+		}
+		of[j] = i
+	}
+	for i, t := range Tiers {
+		s.rings[i] = ring{every: t.Every.Milliseconds(), slots: make([]bucket, slots[i])}
+	}
+	for j, tier := range in.Tiers {
+		i := of[j]
 		for _, r := range tier.Buckets {
 			if r[0] <= 0 || r[0] > math.MaxInt64 {
 				return fmt.Errorf("activity: a bucket of %v at %v", tier.Every, r[0])

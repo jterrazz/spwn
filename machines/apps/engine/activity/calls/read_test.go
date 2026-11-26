@@ -74,7 +74,7 @@ func TestTheDaysChartIsFoldedFromTheHistoryItsEngineKeeps(t *testing.T) {
 	}
 	d := Deps{
 		Meter: processes{}, Name: "mac-mini", Kind: machine.Computer, Now: func() time.Time { return now },
-		Kept: func(context.Context, string) (activity.Kept, time.Time, bool, error) {
+		Kept: func(context.Context, string, activity.Want) (activity.Kept, time.Time, bool, error) {
 			return activity.Kept{Series: activity.SeriesOf(points)}, now.Add(-3 * time.Hour), true, nil
 		},
 	}
