@@ -29,7 +29,7 @@ func kept(steady float64, at func(time.Time) (float64, bool)) *activity.Report {
 		}
 		return out
 	}
-	return &activity.Report{History: series(24*time.Hour, activity.CoarseEvery), Graph: series(6*time.Minute, activity.FineEvery)}
+	return &activity.Report{History: series(24*time.Hour, activity.IdleEvery), Graph: series(6*time.Minute, activity.WatchedEvery)}
 }
 
 func chartsOf(t *testing.T, s *page.Section) (cpu, net page.Chart) {

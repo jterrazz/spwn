@@ -54,6 +54,22 @@
       ],
       "type": "object"
     },
+    "activity.Envelope": {
+      "additionalProperties": false,
+      "properties": {
+        "max": {
+          "type": "number"
+        },
+        "mean": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "max",
+        "mean"
+      ],
+      "type": "object"
+    },
     "activity.Process": {
       "additionalProperties": false,
       "properties": {
@@ -99,6 +115,63 @@
       "required": [
         "sample",
         "top"
+      ],
+      "type": "object"
+    },
+    "activity.Rollup": {
+      "additionalProperties": false,
+      "properties": {
+        "at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "cpu": {
+          "$ref": "#/$defs/activity.Envelope"
+        },
+        "disk_read": {
+          "$ref": "#/$defs/activity.Envelope"
+        },
+        "disk_write": {
+          "$ref": "#/$defs/activity.Envelope"
+        },
+        "memory": {
+          "$ref": "#/$defs/activity.Envelope"
+        },
+        "net_in": {
+          "$ref": "#/$defs/activity.Envelope"
+        },
+        "net_out": {
+          "$ref": "#/$defs/activity.Envelope"
+        },
+        "points": {
+          "type": "integer"
+        },
+        "pressure": {
+          "enum": [
+            "critical",
+            "normal",
+            "warn"
+          ],
+          "type": "string"
+        },
+        "span": {
+          "type": "number"
+        },
+        "swap": {
+          "$ref": "#/$defs/activity.Envelope"
+        }
+      },
+      "required": [
+        "at",
+        "cpu",
+        "disk_read",
+        "disk_write",
+        "memory",
+        "net_in",
+        "net_out",
+        "points",
+        "span",
+        "swap"
       ],
       "type": "object"
     },
@@ -190,6 +263,52 @@
       ],
       "type": "object"
     },
+    "activity.Series": {
+      "additionalProperties": false,
+      "properties": {
+        "last": {
+          "$ref": "#/$defs/activity.Sample"
+        },
+        "ticks": {
+          "type": "number"
+        },
+        "tiers": {
+          "items": {
+            "$ref": "#/$defs/activity.TierRollups"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "tiers"
+      ],
+      "type": "object"
+    },
+    "activity.TierRollups": {
+      "additionalProperties": false,
+      "properties": {
+        "buckets": {
+          "items": {
+            "$ref": "#/$defs/activity.Rollup"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "every": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "buckets",
+        "every"
+      ],
+      "type": "object"
+    },
     "activity.Usage": {
       "additionalProperties": false,
       "properties": {
@@ -260,36 +379,20 @@
     "engine.Kept": {
       "additionalProperties": false,
       "properties": {
-        "coarse": {
-          "items": {
-            "$ref": "#/$defs/activity.Sample"
-          },
-          "type": [
-            "array",
-            "null"
-          ]
-        },
-        "fine": {
-          "items": {
-            "$ref": "#/$defs/activity.Sample"
-          },
-          "type": [
-            "array",
-            "null"
-          ]
-        },
         "last": {
           "$ref": "#/$defs/activity.Reading"
         },
         "machine": {
           "type": "string"
+        },
+        "series": {
+          "$ref": "#/$defs/activity.Series"
         }
       },
       "required": [
-        "coarse",
-        "fine",
         "last",
-        "machine"
+        "machine",
+        "series"
       ],
       "type": "object"
     }

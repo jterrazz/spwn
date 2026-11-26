@@ -27,8 +27,9 @@ func DiskFreeTold(name string, last Sample) string {
 
 func Findings(m machine.Ref, kind machine.Kind, s *Series, busiest []Process) []finding.Finding {
 	// invariant: SPEC §6.5, read from the series alone: what holds now is
-	// judged on the last sample, what must last on the points that span it;
-	// a busy CPU names the busiest process of the reading beside it.
+	// judged on the last sample, what must last on the tier's buckets that
+	// span it: memory pressure on T0's seconds, swap and a busy CPU on T2's
+	// minutes; a busy CPU names the busiest process of the reading beside it.
 	last, ok := s.Last()
 	if !ok {
 		return nil
@@ -55,12 +56,11 @@ func Findings(m machine.Ref, kind machine.Kind, s *Series, busiest []Process) []
 			add(finding.NeedsALook, SubjectDisk, text, fix)
 		}
 	}
-	points := merged(s)
-	if heldFor(points, func(prev, x Sample) bool { return prev.Pressure == PressureCritical && x.Pressure == PressureCritical }) >= PressureFor {
+	critical := pressureRank(PressureCritical)
+	if _, held := s.held(T0, func(prev, x *bucket) bool { return prev.floor == critical && x.floor == critical }); held >= PressureFor {
 		add(finding.Broken, "memory", "Memory pressure critical", activityFix(on))
 	}
-	coarse := s.Coarse()
-	if heldFor(coarse, func(prev, x Sample) bool { return x.SwapUsed > prev.SwapUsed }) >= SwapFor {
+	if _, held := s.held(T2, func(prev, x *bucket) bool { return x.swap.mean > prev.swap.mean }); held >= SwapFor {
 		add(finding.NeedsALook, "swap", "Swap growing", activityFix(on))
 	}
 	switch {
@@ -73,17 +73,15 @@ func Findings(m machine.Ref, kind machine.Kind, s *Series, busiest []Process) []
 		add(finding.NeedsALook, "battery", "Battery low: "+strconv.Itoa(b.Percent)+" %", finding.Fix{})
 		out[len(out)-1].Detail = "Plug in " + m.Name
 	}
-	busy := func(prev, x Sample) bool { return Between(prev, x).CPU >= BusyCPU }
-	if held := heldFor(coarse, busy); kind == machine.Server && held >= BusyFor {
-		newest := coarse[len(coarse)-1]
-		first := newest
-		for _, x := range coarse {
-			if !x.At.Before(newest.At.Add(-held)) {
-				first = x
-				break
-			}
+	busy := func(_, x *bucket) bool { return x.span > 0 && x.cpu.mean >= BusyCPU }
+	if run, held := s.held(T2, busy); kind == machine.Server && held >= BusyFor {
+		var sum, span float64
+		for _, b := range run {
+			sum += float64(b.cpu.mean) * float64(b.span)
+			span += float64(b.span)
 		}
-		mean := Between(first, newest).CPU
+		mean := sum / span
+		newest := last
 		add(finding.NeedsALook, "cpu", m.Name+" busy: "+strconv.Itoa(int(mean+0.5))+" % for "+strconv.Itoa(int(held.Minutes()))+" min", activityFix(on))
 		if len(busiest) > 0 {
 			top := busiest[0]
@@ -97,26 +95,6 @@ func Findings(m machine.Ref, kind machine.Kind, s *Series, busiest []Process) []
 		}
 	}
 	return out
-}
-
-func merged(s *Series) []Sample {
-	all := append(s.Coarse(), s.Fine()...)
-	slices.SortStableFunc(all, func(a, b Sample) int { return a.At.Compare(b.At) })
-	return slices.CompactFunc(all, func(a, b Sample) bool { return a.At.Equal(b.At) })
-}
-
-func heldFor(points []Sample, holds func(prev, x Sample) bool) time.Duration {
-	// value: how long, back from the newest point, every point held; a
-	// point is judged against the one before it.
-	if len(points) < 2 {
-		return 0
-	}
-	newest := points[len(points)-1]
-	since := newest.At
-	for i := len(points) - 1; i > 0 && holds(points[i-1], points[i]); i-- {
-		since = points[i-1].At
-	}
-	return newest.At.Sub(since)
 }
 
 func Persisting(now, kept []finding.Finding) []finding.Finding {

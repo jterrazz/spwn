@@ -113,6 +113,78 @@
       ],
       "type": "object"
     },
+    "activity.Measures": {
+      "additionalProperties": false,
+      "properties": {
+        "disk_read": {
+          "items": {
+            "$ref": "#/$defs/activity.Bucket"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "disk_write": {
+          "items": {
+            "$ref": "#/$defs/activity.Bucket"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "every": {
+          "type": "integer"
+        },
+        "memory": {
+          "items": {
+            "$ref": "#/$defs/activity.Bucket"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "net_in": {
+          "items": {
+            "$ref": "#/$defs/activity.Bucket"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "net_out": {
+          "items": {
+            "$ref": "#/$defs/activity.Bucket"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "swap": {
+          "items": {
+            "$ref": "#/$defs/activity.Bucket"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "disk_read",
+        "disk_write",
+        "every",
+        "memory",
+        "net_in",
+        "net_out",
+        "swap"
+      ],
+      "type": "object"
+    },
     "activity.Process": {
       "additionalProperties": false,
       "properties": {
@@ -218,6 +290,9 @@
         },
         "last": {
           "$ref": "#/$defs/activity.Reading"
+        },
+        "measures": {
+          "$ref": "#/$defs/activity.Measures"
         },
         "rates": {
           "$ref": "#/$defs/activity.Rates"

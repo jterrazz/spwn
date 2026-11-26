@@ -26,7 +26,7 @@ func activityOf(d *Engine) engine.ActivityOut {
 	out := engine.ActivityOut{Since: h.Since(), Machines: []engine.Kept{}}
 	for _, name := range h.Machines() {
 		k, _ := h.Of(name)
-		out.Machines = append(out.Machines, engine.Kept{Machine: name, Last: k.Last, Fine: k.Series.Fine(), Coarse: k.Series.Coarse()})
+		out.Machines = append(out.Machines, engine.Kept{Machine: name, Last: k.Last, Series: k.Series})
 	}
 	return out
 }

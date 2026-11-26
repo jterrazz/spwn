@@ -19,7 +19,7 @@ type ReadIn struct {
 	// findings' fixes say; empty is this machine.
 	Machine machine.Ref  `json:"machine,omitzero"`
 	Kind    machine.Kind `json:"kind,omitempty"`
-	// value: the 24 h series of the engine that keeps it, for scripts.
+	// value: the last 24 h the engine keeps, a minute apart, for scripts.
 	History bool `json:"history,omitempty"`
 	// value: the window a screen's graphs draw (6 min, 1 h, 24 h): the
 	// points of it the engine keeps.
@@ -86,7 +86,7 @@ func (d Deps) read(ctx context.Context, in ReadIn) activity.Report {
 	if kept != nil {
 		r.Since = since
 		if in.History {
-			r.History = kept.Series.Coarse()
+			r.History = kept.Series.History(d.Now())
 		}
 		r = graphed(r, &kept.Series, in, d.Now())
 	}
@@ -94,10 +94,12 @@ func (d Deps) read(ctx context.Context, in ReadIn) activity.Report {
 }
 
 func graphed(r activity.Report, s *activity.Series, in ReadIn, now time.Time) activity.Report {
+	// invariant: ADR-107: every measure of a window is read from the one
+	// tier TierOf picks for it, each bar its mean and its busiest.
 	if in.Graph > 0 {
 		r.Graph = s.Graph(in.Graph, now)
-		chart := activity.Fold(r.Graph, in.Graph, now)
-		r.Chart = &chart
+		chart, measures := s.Chart(in.Graph, now), s.Measures(in.Graph, now)
+		r.Chart, r.Measures = &chart, &measures
 	}
 	return r
 }
@@ -110,7 +112,7 @@ func fromHistory(k activity.Kept, since time.Time, in ReadIn, now time.Time) (ac
 	}
 	r.Rates, r.Window = activity.Recent(&k.Series, now)
 	if in.History {
-		r.History = k.Series.Coarse()
+		r.History = k.Series.History(now)
 	}
 	return r, r.Window > 0
 }
@@ -138,7 +140,7 @@ func (d Deps) direct(ctx context.Context, ref machine.Ref, kind machine.Kind, qu
 	}
 	var s activity.Series
 	if kept != nil {
-		s = activity.SeriesOf(kept.Series.Fine(), kept.Series.Coarse())
+		s = kept.Series.Clone()
 	}
 	for _, x := range points {
 		s.Add(x)

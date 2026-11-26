@@ -247,7 +247,7 @@ func body(v View) Body {
 }
 
 func history(points []activity.Sample) *HistoryJSON {
-	h := &HistoryJSON{Step: int(activity.CoarseEvery.Seconds()), Points: []PointJSON{}}
+	h := &HistoryJSON{Step: int(activity.Tiers[activity.T2].Every.Seconds()), Points: []PointJSON{}}
 	for i, x := range points {
 		p := PointJSON{At: x.At.UTC(), MemUsed: x.MemUsed, Swap: x.SwapUsed, Free: x.DiskFree}
 		if i > 0 {

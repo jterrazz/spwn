@@ -106,10 +106,10 @@ type ExecOut struct {
 }
 
 type Kept struct {
-	Machine string            `json:"machine"`
-	Last    activity.Reading  `json:"last"`
-	Fine    []activity.Sample `json:"fine"`
-	Coarse  []activity.Sample `json:"coarse"`
+	Machine string           `json:"machine"`
+	Last    activity.Reading `json:"last"`
+	// value: its tiers (ADR-107), each the buckets it holds.
+	Series activity.Series `json:"series"`
 }
 
 type ActivityOut struct {

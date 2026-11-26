@@ -2,6 +2,8 @@ package activity
 
 import (
 	"encoding/json"
+	"fmt"
+	"math"
 	"slices"
 	"sync"
 	"time"
@@ -51,7 +53,7 @@ func (h *History) Of(machine string) (Kept, bool) {
 	if !ok {
 		return Kept{}, false
 	}
-	return Kept{Last: k.Last, Series: k.Series.clone(), Told: slices.Clone(k.Told)}, true
+	return Kept{Last: k.Last, Series: k.Series.Clone(), Told: slices.Clone(k.Told)}, true
 }
 
 func (h *History) Raise(machine string, broken []string) []string {
@@ -98,34 +100,110 @@ func (h *History) Take(kept map[string]Kept) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 	for name, k := range kept {
-		h.kept[name] = &Kept{Last: k.Last, Series: k.Series.clone(), Told: slices.Clone(k.Told)}
+		h.kept[name] = &Kept{Last: k.Last, Series: k.Series.Clone(), Told: slices.Clone(k.Told)}
 	}
 }
 
-func (s *Series) clone() Series {
-	return Series{fine: ring{points: slices.Clone(s.fine.points), next: s.fine.next}, coarse: ring{points: slices.Clone(s.coarse.points), next: s.coarse.next}}
+func (h *History) Read(machine string, read func(k *Kept)) bool {
+	// value: what the engine keeps of a machine, read in place: no copy of
+	// its tiers, for a reader that keeps nothing of it.
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	k, ok := h.kept[machine]
+	if ok {
+		read(k)
+	}
+	return ok
+}
+
+type Envelope struct {
+	Mean float64 `json:"mean"`
+	Max  float64 `json:"max"`
+}
+
+type Rollup struct {
+	// value: one bucket of a tier as it is written: its newest sample's
+	// time, the samples it counts, the seconds its rates span, the least
+	// pressure they said, and each measure's mean and busiest.
+	At        time.Time `json:"at"`
+	Points    int       `json:"points"`
+	Span      float64   `json:"span"`
+	Pressure  Pressure  `json:"pressure,omitempty"`
+	CPU       Envelope  `json:"cpu"`
+	Memory    Envelope  `json:"memory"`
+	Swap      Envelope  `json:"swap"`
+	DiskRead  Envelope  `json:"disk_read"`
+	DiskWrite Envelope  `json:"disk_write"`
+	NetIn     Envelope  `json:"net_in"`
+	NetOut    Envelope  `json:"net_out"`
+}
+
+type TierRollups struct {
+	Every   time.Duration `json:"every"`
+	Buckets []Rollup      `json:"buckets"`
 }
 
 type seriesJSON struct {
-	Fine   []Sample `json:"fine"`
-	Coarse []Sample `json:"coarse"`
+	Last  *Sample       `json:"last,omitempty"`
+	Ticks float64       `json:"ticks,omitempty"`
+	Tiers []TierRollups `json:"tiers"`
 }
 
+func (e envelope) out() Envelope { return Envelope{Mean: float64(e.mean), Max: float64(e.max)} }
+
+func (e Envelope) in() envelope { return envelope{mean: float32(e.Mean), max: float32(e.Max)} }
+
 func (s Series) MarshalJSON() ([]byte, error) {
-	return json.Marshal(seriesJSON{Fine: s.Fine(), Coarse: s.Coarse()})
+	// invariant: each tier's buckets, oldest first, the slots nothing was
+	// measured in left out.
+	out := seriesJSON{Tiers: []TierRollups{}}
+	if s.has {
+		out.Last, out.Ticks = &s.last, s.ticks
+	}
+	for i, t := range Tiers {
+		tier := TierRollups{Every: t.Every, Buckets: []Rollup{}}
+		if s.has {
+			buckets := s.rings[i].newest(s.last.At.UnixMilli())
+			for j := len(buckets) - 1; j >= 0; j-- {
+				b := buckets[j]
+				tier.Buckets = append(tier.Buckets, Rollup{
+					At: time.UnixMilli(b.at).UTC(), Points: int(b.n), Span: float64(b.span), Pressure: pressureOf(b.floor),
+					CPU: b.cpu.out(), Memory: b.mem.out(), Swap: b.swap.out(), DiskRead: b.diskRead.out(), DiskWrite: b.diskWrite.out(), NetIn: b.netIn.out(), NetOut: b.netOut.out(),
+				})
+			}
+		}
+		out.Tiers = append(out.Tiers, tier)
+	}
+	return json.Marshal(out)
 }
 
 func (s *Series) UnmarshalJSON(data []byte) error {
+	// invariant: a tier whose step is not one of Tiers is refused: the
+	// buckets of another step would not fall in their slots.
 	var in seriesJSON
 	if err := json.Unmarshal(data, &in); err != nil {
 		return err
 	}
 	*s = Series{}
-	for _, x := range in.Fine {
-		s.fine.add(x, FinePoints)
+	if in.Last == nil {
+		return nil
 	}
-	for _, x := range in.Coarse {
-		s.coarse.add(x, CoarsePoints)
+	s.last, s.has, s.ticks = *in.Last, true, in.Ticks
+	for i, t := range Tiers {
+		s.rings[i] = ring{every: t.Every.Milliseconds(), slots: make([]bucket, int(t.Kept/t.Every))}
+	}
+	for _, tier := range in.Tiers {
+		i := slices.IndexFunc(Tiers[:], func(t Tier) bool { return t.Every == tier.Every })
+		if i < 0 {
+			return fmt.Errorf("activity: no tier of %v", tier.Every)
+		}
+		for _, r := range tier.Buckets {
+			at := r.At.UnixMilli()
+			*s.rings[i].of(at) = bucket{
+				at: at, span: float32(r.Span), n: uint16(min(r.Points, math.MaxUint16)), floor: pressureRank(r.Pressure), //nolint:gosec // value: capped to its range.
+				cpu: r.CPU.in(), mem: r.Memory.in(), swap: r.Swap.in(), diskRead: r.DiskRead.in(), diskWrite: r.DiskWrite.in(), netIn: r.NetIn.in(), netOut: r.NetOut.in(),
+			}
+		}
 	}
 	return nil
 }

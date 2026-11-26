@@ -114,17 +114,25 @@ func (w *World) past(p activity.Profile, meter Meter, disk *Disk, started time.T
 	if disk != nil {
 		answer.DiskTotal, answer.DiskFree = disk.Total, disk.Free
 	}
-	from := now.Add(-activity.CoarseEvery * (activity.CoarsePoints - 1))
+	from := now.Add(-24*time.Hour + activity.IdleEvery)
 	for _, t := range []time.Time{started, answer.Boot} {
 		if t.After(from) {
 			from = t
 		}
 	}
-	span := func(every time.Duration, points int) time.Duration {
-		return min(max(now.Sub(from), 0), every*time.Duration(points-1)).Truncate(every)
+	span := func(end time.Time, every time.Duration, points int) time.Duration {
+		return min(max(end.Sub(from), 0), every*time.Duration(points-1)).Truncate(every)
 	}
-	coarse := aligned(p.Points(now, span(activity.CoarseEvery, activity.CoarsePoints), activity.CoarseEvery), answer)
-	fine := aligned(p.Points(now, span(activity.FineEvery, activity.FinePoints), activity.FineEvery), answer)
+	// invariant: the day unwatched, a sample a minute, up to the first of
+	// its last 6 min watched, one every 2 s, as the engine would have
+	// sampled them: the minutes end on that first sample, so the counters
+	// run on through it.
+	watched := aligned(p.Points(now, span(now, activity.WatchedEvery, 180), activity.WatchedEvery), answer)
+	points := watched
+	if len(watched) > 0 {
+		junction := watched[0]
+		points = append(aligned(p.Points(junction.At, span(junction.At, activity.IdleEvery, 1440), activity.IdleEvery), junction), watched[1:]...)
+	}
 	last := activity.Reading{Sample: answer, Top: activity.Busiest{CPU: activity.Ranked(meter.Top.CPU), Memory: activity.Ranked(meter.Top.Memory)}}
 	pids := make([]int, 0, len(runs))
 	for pid := range runs {
@@ -143,7 +151,7 @@ func (w *World) past(p activity.Profile, meter Meter, disk *Disk, started time.T
 			}
 		}
 	}
-	return activity.Kept{Last: last, Series: activity.SeriesOf(fine, coarse)}
+	return activity.Kept{Last: last, Series: activity.SeriesOf(points)}
 }
 
 func aligned(points []activity.Sample, answer activity.Sample) []activity.Sample {

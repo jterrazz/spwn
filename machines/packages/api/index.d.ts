@@ -177,6 +177,21 @@ export type ActivityChart = {
     peak_at?: string;
 };
 
+export type ActivityEnvelope = {
+    max: number;
+    mean: number;
+};
+
+export type ActivityMeasures = {
+    disk_read: ActivityBucket[] | null;
+    disk_write: ActivityBucket[] | null;
+    every: number;
+    memory: ActivityBucket[] | null;
+    net_in: ActivityBucket[] | null;
+    net_out: ActivityBucket[] | null;
+    swap: ActivityBucket[] | null;
+};
+
 export type ActivityProcess = {
     name: string;
     pid: number;
@@ -205,12 +220,27 @@ export type ActivityReport = {
     graph?: ActivitySample[];
     history?: ActivitySample[];
     last: ActivityReading;
+    measures?: ActivityMeasures;
     rates: ActivityRates;
     silent?: boolean;
     since?: string;
     source: '' | 'direct' | 'engine' | 'mac-process';
     verdict: CoreVerdictVerdict;
     window: number;
+};
+
+export type ActivityRollup = {
+    at: string;
+    cpu: ActivityEnvelope;
+    disk_read: ActivityEnvelope;
+    disk_write: ActivityEnvelope;
+    memory: ActivityEnvelope;
+    net_in: ActivityEnvelope;
+    net_out: ActivityEnvelope;
+    points: number;
+    pressure?: 'critical' | 'normal' | 'warn';
+    span: number;
+    swap: ActivityEnvelope;
 };
 
 export type ActivitySample = {
@@ -232,6 +262,17 @@ export type ActivitySample = {
     pressure?: 'critical' | 'normal' | 'warn';
     swap_used: number;
     thermal: number;
+};
+
+export type ActivitySeries = {
+    last?: ActivitySample;
+    ticks?: number;
+    tiers: ActivityTierRollups[] | null;
+};
+
+export type ActivityTierRollups = {
+    buckets: ActivityRollup[] | null;
+    every: number;
 };
 
 export type ActivityUsage = {
@@ -1427,10 +1468,9 @@ export type EngineKeepSettingsIn = {
 };
 
 export type EngineKept = {
-    coarse: ActivitySample[] | null;
-    fine: ActivitySample[] | null;
     last: ActivityReading;
     machine: string;
+    series: ActivitySeries;
 };
 
 export type EngineLastSettingsOut = {

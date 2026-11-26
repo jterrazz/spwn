@@ -53,9 +53,9 @@ func Every(watched bool) time.Duration {
 	// invariant: SPEC §6.3: every 2 s while a surface watches, every 60 s
 	// otherwise.
 	if watched {
-		return activity.FineEvery
+		return activity.WatchedEvery
 	}
-	return activity.CoarseEvery
+	return activity.IdleEvery
 }
 
 func (s *Sample) due(h *activity.History, name string, now time.Time, every time.Duration) bool {
@@ -68,11 +68,11 @@ func (s *Sample) due(h *activity.History, name string, now time.Time, every time
 		s.last = map[string]time.Time{}
 	}
 	last := s.last[name]
-	if kept, ok := h.Of(name); ok {
-		if at, has := kept.Series.Last(); has && at.At.After(last) {
+	h.Read(name, func(k *activity.Kept) {
+		if at, has := k.Series.Last(); has && at.At.After(last) {
 			last = at.At
 		}
-	}
+	})
 	if !last.IsZero() && now.Sub(last) < every {
 		return false
 	}
@@ -86,7 +86,7 @@ func (s *Sample) due(h *activity.History, name string, now time.Time, every time
 func (s *Sample) retrySoon(name string, now time.Time, every time.Duration) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	s.last[name] = now.Add(activity.FineEvery - every)
+	s.last[name] = now.Add(activity.WatchedEvery - every)
 }
 
 func (s *Sample) Run(ctx context.Context) {
@@ -124,8 +124,9 @@ func (s *Sample) Run(ctx context.Context) {
 			continue
 		}
 		h.Add(m.Ref.Name, r)
-		kept, _ := h.Of(m.Ref.Name)
-		s.judge(h, m, activity.Findings(m.Ref, m.Kind, &kept.Series, r.Top.CPU), r.Sample)
+		var found []finding.Finding
+		h.Read(m.Ref.Name, func(k *activity.Kept) { found = activity.Findings(m.Ref, m.Kind, &k.Series, r.Top.CPU) })
+		s.judge(h, m, found, r.Sample)
 	}
 }
 

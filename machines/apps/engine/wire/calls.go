@@ -165,7 +165,7 @@ func keptOf(ctx context.Context, api engineAPI, name string) (activity.Kept, tim
 	}
 	for _, kept := range out.Machines {
 		if kept.Machine == name {
-			return activity.Kept{Last: kept.Last, Series: activity.SeriesOf(kept.Fine, kept.Coarse)}, out.Since, true, nil
+			return activity.Kept{Last: kept.Last, Series: kept.Series}, out.Since, true, nil
 		}
 	}
 	return activity.Kept{}, out.Since, false, nil

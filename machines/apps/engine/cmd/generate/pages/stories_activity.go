@@ -35,7 +35,7 @@ func profiles() map[string]activity.Profile {
 func sceneHistory() map[string]activity.Report {
 	out := map[string]activity.Report{}
 	for name, p := range profiles() {
-		out[name] = activity.Report{Source: activity.FromEngine, History: p.Points(storyNow, 24*time.Hour, activity.CoarseEvery), Graph: p.Points(storyNow, 6*time.Minute, activity.FineEvery)}
+		out[name] = activity.Report{Source: activity.FromEngine, History: p.Points(storyNow, 24*time.Hour, activity.IdleEvery), Graph: p.Points(storyNow, 6*time.Minute, activity.WatchedEvery)}
 	}
 	return out
 }

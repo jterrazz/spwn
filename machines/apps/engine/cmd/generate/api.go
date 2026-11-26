@@ -69,8 +69,9 @@ type (
 		Install json.RawMessage `json:",omitempty"`
 	}
 	seriesJSON struct {
-		Fine   []activity.Sample `json:"fine"`
-		Coarse []activity.Sample `json:"coarse"`
+		Last  *activity.Sample       `json:"last,omitempty"`
+		Ticks float64                `json:"ticks,omitempty"`
+		Tiers []activity.TierRollups `json:"tiers"`
 	}
 )
 

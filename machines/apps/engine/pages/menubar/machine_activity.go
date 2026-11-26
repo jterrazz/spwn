@@ -142,7 +142,7 @@ func (a activityOf) points(w activityWindow) []activity.Sample {
 	if r == nil {
 		return nil
 	}
-	if w.For <= activity.FineEvery*activity.FinePoints && len(r.Graph) > 1 {
+	if w.For <= activity.LiveWindow && len(r.Graph) > 1 {
 		return r.Graph
 	}
 	return r.History

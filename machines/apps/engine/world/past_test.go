@@ -22,6 +22,8 @@ const withPast = `{"now": "2026-11-07T10:30:00Z", "this_mac": "mbp", "macs": {
 		"vms": {"vm1": {"disk": true, "pid": 1001}, "api": {"disk": true}}},
 	"vm1": {"meter": {"sample": {"at": "2026-11-07T10:30:00Z", "cpu_busy": 1000000, "cpu_total": 3000000, "cpus": 4, "boot": "2026-11-07T08:30:00Z"}}}}}`
 
+var pastNow = time.Date(2026, 11, 7, 10, 30, 0, 0, time.UTC)
+
 func pastOf(t *testing.T, doc, machine string) activity.Kept {
 	t.Helper()
 	k, ok := seeded(t, doc).Macs["mbp"].Engine.Activity[machine]
@@ -38,36 +40,34 @@ func TestAnEnginesPastEndsOnTheSampleItsMeterAnswersNow(t *testing.T) {
 		t.Fatal("the engine keeps no activity of mbp: its past was not unfolded")
 	}
 	now := w.Macs["mbp"].Meter.Answers(w.Now)
-	for ring, points := range map[string][]activity.Sample{"coarse": k.Series.Coarse(), "fine": k.Series.Fine()} {
-		newest := points[len(points)-1]
-		if newest != now {
-			t.Errorf("the %s ring ends on %+v, want the meter's answer now %+v", ring, newest, now)
-		}
+	if newest, _ := k.Series.Last(); newest != now {
+		t.Errorf("the series ends on %+v, want the meter's answer now %+v", newest, now)
 	}
 	if k.Last.Sample != now {
 		t.Errorf("the last reading is %+v, want the meter's answer now", k.Last.Sample)
 	}
-	next := w.Macs["mbp"].Meter.Answers(w.Now.Add(activity.FineEvery))
-	if r := activity.Between(k.Series.Fine()[len(k.Series.Fine())-1], next); r.CPU <= 0 || r.CPU > 100 || r.NetIn <= 0 {
+	next := w.Macs["mbp"].Meter.Answers(w.Now.Add(activity.WatchedEvery))
+	newest, _ := k.Series.Last()
+	if r := activity.Between(newest, next); r.CPU <= 0 || r.CPU > 100 || r.NetIn <= 0 {
 		t.Errorf("the first live sample after the past reads %+v, want the meter's own rates", r)
 	}
 }
 
 func TestAnEnginesPastIsADayAtAMinuteAndSixMinutesAtTwoSeconds(t *testing.T) {
 	k := pastOf(t, withPast, "mbp")
-	coarse, fine := k.Series.Coarse(), k.Series.Fine()
-	if len(coarse) != activity.CoarsePoints || len(fine) != activity.FinePoints {
-		t.Fatalf("the past holds %d coarse and %d fine points, want %d and %d", len(coarse), len(fine), activity.CoarsePoints, activity.FinePoints)
+	day, live := k.Series.History(pastNow), k.Series.Graph(activity.LiveWindow, pastNow)
+	if len(day) < 1430 || len(live) != 180 {
+		t.Fatalf("the past holds %d minutes of the day and %d points of the last 6 min, want about 1440 and 180", len(day), len(live))
 	}
-	for ring, points := range map[string][]activity.Sample{"coarse": coarse, "fine": fine} {
+	for name, points := range map[string][]activity.Sample{"day": day, "live": live} {
 		for i := 1; i < len(points); i++ {
 			a, b := points[i-1], points[i]
 			if b.CPUBusy < a.CPUBusy || b.CPUTotal <= a.CPUTotal || b.NetIn < a.NetIn || b.NetOut < a.NetOut {
-				t.Fatalf("the %s ring's counters go back at %v: %+v then %+v", ring, b.At, a, b)
+				t.Fatalf("the %s's counters go back at %v: %+v then %+v", name, b.At, a, b)
 			}
 		}
 	}
-	if peak := activity.Fold(k.Series.Graph(24*time.Hour, coarse[len(coarse)-1].At), 24*time.Hour, coarse[len(coarse)-1].At); peak.Peak < 0 || peak.PeakAt.IsZero() {
+	if peak := k.Series.Chart(24*time.Hour, pastNow); peak.Peak < 0 || peak.PeakAt.IsZero() {
 		t.Errorf("a day of the past charts no peak: %+v", peak)
 	}
 }
@@ -84,26 +84,26 @@ func TestAMacsPastReadsTheVMsItRunsFromTheirProcesses(t *testing.T) {
 
 func TestAPastNeverStartsBeforeTheMachineCounted(t *testing.T) {
 	k := pastOf(t, withPast, "vm1")
-	coarse := k.Series.Coarse()
+	day := k.Series.History(pastNow)
 	boot := time.Date(2026, 11, 7, 8, 30, 0, 0, time.UTC)
-	if coarse[0].At.Before(boot) {
-		t.Errorf("the VM's past starts at %v, before it booted at %v", coarse[0].At, boot)
+	if day[0].At.Before(boot) {
+		t.Errorf("the VM's past starts at %v, before it booted at %v", day[0].At, boot)
 	}
-	if len(coarse) >= 120 {
-		t.Errorf("the VM's past holds %d minutes; its counters hold less than its two hours since boot", len(coarse))
+	if len(day) >= 120 {
+		t.Errorf("the VM's past holds %d minutes; its counters hold less than its two hours since boot", len(day))
 	}
-	for i := 1; i < len(coarse); i++ {
-		if coarse[i].CPUTotal <= coarse[i-1].CPUTotal {
-			t.Fatalf("the VM's counters wrap at %v: %d then %d", coarse[i].At, coarse[i-1].CPUTotal, coarse[i].CPUTotal)
+	for i := 1; i < len(day); i++ {
+		if day[i].CPUTotal <= day[i-1].CPUTotal {
+			t.Fatalf("the VM's counters wrap at %v: %d then %d", day[i].At, day[i-1].CPUTotal, day[i].CPUTotal)
 		}
 	}
-	if newest := coarse[len(coarse)-1]; newest.CPUTotal != 3_000_000 {
+	if newest := day[len(day)-1]; newest.CPUTotal != 3_000_000 {
 		t.Errorf("the VM's past ends at %d ticks, want its meter's 3000000", newest.CPUTotal)
 	}
 }
 
 func TestAPastIsSpentAndNeverReplacesWhatTheEngineKeeps(t *testing.T) {
-	doc := strings.Replace(withPast, `"started_at": "2026-11-04T10:30:00Z",`, `"started_at": "2026-11-04T10:30:00Z", "activity": {"mbp": {"last": {"sample": {"at": "2026-11-07T10:29:00Z", "cpu_total": 7}}, "series": {"fine": [], "coarse": []}}},`, 1)
+	doc := strings.Replace(withPast, `"started_at": "2026-11-04T10:30:00Z",`, `"started_at": "2026-11-04T10:30:00Z", "activity": {"mbp": {"last": {"sample": {"at": "2026-11-07T10:29:00Z", "cpu_total": 7}}, "series": {"tiers": []}}},`, 1)
 	w := seeded(t, doc)
 	e := w.Macs["mbp"].Engine
 	if got := e.Activity["mbp"].Last.Sample.CPUTotal; got != 7 {
@@ -120,7 +120,7 @@ func TestAPastIsSpentAndNeverReplacesWhatTheEngineKeeps(t *testing.T) {
 		t.Error("the world writes its past back after it was unfolded")
 	}
 	again, written := seeded(t, string(data)).Macs["mbp"].Engine.Activity["vm1"], e.Activity["vm1"]
-	if len(again.Series.Coarse()) != len(written.Series.Coarse()) {
+	if got, want := again.Series.History(pastNow), written.Series.History(pastNow); len(got) != len(want) || got[0] != want[0] || got[len(got)-1] != want[len(want)-1] {
 		t.Error("the past unfolded reads back other than it was written")
 	}
 }
@@ -128,13 +128,13 @@ func TestAPastIsSpentAndNeverReplacesWhatTheEngineKeeps(t *testing.T) {
 func TestAServersPastCarriesItsDiskAsItsSampleComposesIt(t *testing.T) {
 	doc := strings.Replace(withPast, `"vm1": {"meter": {`, `"vm1": {"self": {"kind": "server"}, "disk": {"total": 80000000000, "free": 44000000000}, "meter": {`, 1)
 	k := pastOf(t, doc, "vm1")
-	points := append(k.Series.Coarse(), k.Series.Fine()...)
-	if len(points) == 0 {
-		t.Fatal("the server's past holds no point")
+	newest, ok := k.Series.Last()
+	if !ok {
+		t.Fatal("the server's past holds no sample")
 	}
-	for _, s := range append(points, k.Last.Sample) {
+	for _, s := range []activity.Sample{newest, k.Last.Sample} {
 		if s.DiskTotal != 80_000_000_000 || s.DiskFree != 44_000_000_000 {
-			t.Fatalf("a kept point of the server at %v reads %d free of %d, want 44 GB free of 80 GB", s.At, s.DiskFree, s.DiskTotal)
+			t.Fatalf("the server's newest sample at %v reads %d free of %d, want 44 GB free of 80 GB", s.At, s.DiskFree, s.DiskTotal)
 		}
 	}
 }
