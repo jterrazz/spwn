@@ -7,15 +7,17 @@
     - button "Croissance"
   - article "Philosophy":
     - text: Floor 0 · Intention Why does this exist?
-    - group "Reading time":
-      - button "30s"
-      - button "2min" [pressed]
-      - button "10min"
     - heading "Philosophy" [level=1]
     - paragraph: The seven convictions Spwn is built on, written as principles a newcomer can apply to a design choice; the vision holds the case they serve, and this page holds the rules. The owner confirmed the seven on 2026-11-21 (his answer).
+    - complementary "This page":
+      - text: Reading time
+      - group "Reading time":
+        - button "30s"
+        - button "2min" [pressed]
+        - button "10min"
     - region "Philosophy":
       - region "Table all":
-        - text: Table conviction
+        - text: Table Conviction
         - button "Philosophy"
         - table:
           - rowgroup:

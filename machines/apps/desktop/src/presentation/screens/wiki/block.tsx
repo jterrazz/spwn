@@ -75,10 +75,10 @@ function Line({ block, reader }: { block: WikiServedBlock; reader: Reader }) {
                 type="button"
             >
                 <DotIcon grids={reader.grids} name={block.Icon} size="small" />
-                <span className={styles.lineWord}>{block.Word}</span>
                 <span className={styles.lineText}>
                     {block.Line === '' ? block.Title : block.Line}
                 </span>
+                <span className={styles.lineWord}>{block.Word}</span>
             </button>
             {open ? (
                 <div className={styles.lineOpen}>
@@ -100,14 +100,8 @@ export function Lines({ blocks, reader }: { blocks: readonly WikiServedBlock[]; 
     );
 }
 
-export function Cards({ blocks, reader }: { blocks: readonly WikiServedBlock[]; reader: Reader }) {
-    return (
-        <div className={styles.cards}>
-            {blocks.map((block) => (
-                <Whole block={block} key={block.Address} look="card" reader={reader} />
-            ))}
-        </div>
-    );
+export function Card({ block, reader }: { block: WikiServedBlock; reader: Reader }) {
+    return <Whole block={block} look="card" reader={reader} />;
 }
 
 export function TileBlock({ block, reader }: { block: WikiServedBlock; reader: Reader }) {

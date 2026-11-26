@@ -7,16 +7,20 @@
     - button "Croissance"
   - article "The stack":
     - text: Floor 1 · Produit What do we build, and for whom?
-    - group "Reading time":
-      - button "30s"
-      - button "2min" [pressed]
-      - button "10min"
     - heading "The stack" [level=1]
     - paragraph: "Spwn's three spaces and what lives in each, for anyone deciding what a part of the app is for or where it goes: per space, what you let go of, what you keep, and whether it runs today. The structure is the owner's, decided on 2026-11-22 (his words); the record is ADR-003. It replaces the six-rung ladder of ADR-002."
     - list "Findings":
       - listitem:
         - img "needs you"
         - text: "needs you \"product/stack\" rests on this page's reading: you have not ruled"
+    - complementary "This page":
+      - text: Reading time
+      - group "Reading time":
+        - button "30s"
+        - button "2min" [pressed]
+        - button "10min"
+      - img "needs you"
+      - text: 1 needs you
     - region "The three spaces":
       - heading "The three spaces" [level=2]
       - paragraph: "The layers of the Spwn app are three great concepts, and in the future three distinct spaces in its GUI. The owner drew each as the running of a company:"
@@ -45,7 +49,7 @@
         - text: define · 6 blocks
         - paragraph: 6 quiet blocks
       - region "Table all":
-        - text: Table part
+        - text: Table Part
         - button "The stack"
         - table:
           - rowgroup:

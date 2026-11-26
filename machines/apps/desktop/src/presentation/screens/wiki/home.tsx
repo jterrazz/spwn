@@ -10,7 +10,6 @@ import styles from './wiki.module.css';
 
 function counts(page: WikiPageHead): string {
     return [
-        `${WIKI_WORDS.floor} ${String(page.Floor)}`,
         page.Hard > 0 ? countOf('hard-finding', page.Hard) : '',
         page.Soft > 0 ? countOf('remark', page.Soft) : '',
     ]
@@ -27,7 +26,16 @@ function PageTile({ page, reader, icon }: { page: WikiPageHead; reader: Reader; 
             }}
             type="button"
         >
-            <DotIcon grids={reader.grids} name={page.Icon === '' ? icon : page.Icon} size="mid" />
+            <span className={styles.pageTileTop}>
+                <DotIcon
+                    grids={reader.grids}
+                    name={page.Icon === '' ? icon : page.Icon}
+                    size="mid"
+                />
+                <span className={styles.floorTag}>
+                    {WIKI_WORDS.floor} {page.Floor}
+                </span>
+            </span>
             <span className={styles.pageTileWord}>{page.Word}</span>
             <span className={styles.pageTileLine}>{page.Line}</span>
             <span className={styles.pageTileFoot}>{counts(page)}</span>
@@ -40,7 +48,7 @@ export function WikiHome({ served, reader }: { served: WikiServed; reader: Reade
     const seats = served.Seats ?? [];
     return (
         <article aria-label={WIKI_WORDS.home} className={styles.reading}>
-            <header className={styles.pageHead}>
+            <header className={styles.homeHead}>
                 <h1 className={styles.pageTitle}>{WIKI_WORDS.home}</h1>
                 <p className={styles.homeLine}>{WIKI_WORDS.homeLine}</p>
                 <p className={styles.homeCounts}>
@@ -51,27 +59,29 @@ export function WikiHome({ served, reader }: { served: WikiServed; reader: Reade
                     ].join(SEPARATOR)}
                 </p>
             </header>
-            {seats.map((seat) => {
-                const held = pages.filter((page) => page.Seat === seat.ID);
-                return held.length === 0 ? null : (
-                    <section aria-label={seat.Name} className={styles.section} key={seat.ID}>
-                        <h2 className={styles.seatTitle}>
-                            <DotIcon grids={reader.grids} name={seat.Icon} size="small" />
-                            {seat.Name}
-                        </h2>
-                        <div className={styles.pageTiles}>
-                            {held.map((page) => (
-                                <PageTile
-                                    icon={seat.Icon}
-                                    key={page.ID}
-                                    page={page}
-                                    reader={reader}
-                                />
-                            ))}
-                        </div>
-                    </section>
-                );
-            })}
+            <div className={styles.homeSeats}>
+                {seats.map((seat) => {
+                    const held = pages.filter((page) => page.Seat === seat.ID);
+                    return held.length === 0 ? null : (
+                        <section aria-label={seat.Name} className={styles.homeSeat} key={seat.ID}>
+                            <h2 className={styles.seatTitle}>
+                                <DotIcon grids={reader.grids} name={seat.Icon} size="small" />
+                                {seat.Name}
+                            </h2>
+                            <div className={styles.pageTiles}>
+                                {held.map((page) => (
+                                    <PageTile
+                                        icon={seat.Icon}
+                                        key={page.ID}
+                                        page={page}
+                                        reader={reader}
+                                    />
+                                ))}
+                            </div>
+                        </section>
+                    );
+                })}
+            </div>
         </article>
     );
 }

@@ -23,6 +23,7 @@ import { PasswordsPage } from './passwords/passwords';
 import { PlaceholderPage } from './placeholder';
 import { SettingsPage } from './settings/settings';
 import { StoragePage } from './storage/storage';
+import { WikiPageName } from './wiki/name';
 import { WikiPage } from './wiki/wiki';
 
 function Shelf({
@@ -56,6 +57,9 @@ function Files({
 }
 
 function ItemName({ page, item }: { page: PlainPage; item: string }) {
+    if (page === 'wiki') {
+        return <WikiPageName id={item} />;
+    }
     return page === 'passwords' ? <PasswordName id={item} /> : item;
 }
 

@@ -7,14 +7,16 @@
     - button "Croissance"
   - article "Ports":
     - text: Floor 3 · Architecture Where is the code, and what may it touch?
-    - group "Reading time":
-      - button "30s"
-      - button "2min" [pressed]
-      - button "10min"
     - heading "Ports" [level=1]
     - paragraph:
       - code: station ports
       - text: "lists every TCP port that listens on a Mac or a VM, each in the class of who reaches it. Which ports a VM may open, and to whom, are its rights: a port that starts listening inside them is shared with their audience within seconds, one outside them is flagged and never shared."
+    - complementary "This page":
+      - text: Reading time
+      - group "Reading time":
+        - button "30s"
+        - button "2min" [pressed]
+        - button "10min"
     - region "Rights and audiences":
       - heading "Rights and audiences" [level=2]
       - paragraph:
@@ -23,7 +25,7 @@
         - text: "of its Machinefile (Machinefiles): which ports it may open, and to whom."
       - list:
         - listitem:
-          - 'button "right what a machine may open and to whom, its Machinefile''s ports: open, to (its audience), except, audiences"'
+          - 'button "what a machine may open and to whom, its Machinefile''s ports: open, to (its audience), except, audiences right"'
       - paragraph: 1 quiet block
       - region "What is flagged":
         - heading "What is flagged" [level=3]
@@ -40,7 +42,7 @@
           - definition: spwn:machines/specs/usecases/engine/share/flags-outside-rights.spec.yaml
         - list:
           - listitem:
-            - button "port-is-a-right A port is a right with an audience."
+            - button "A port is a right with an audience. port-is-a-right"
       - paragraph:
         - text: A row of a port names its label from the catalog's packages'
         - code: ports

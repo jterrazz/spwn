@@ -7,16 +7,20 @@
     - button "Croissance" [pressed]
   - article "Positioning":
     - text: Floor 1 · Produit What do we build, and for whom?
-    - group "Reading time":
-      - button "30s"
-      - button "2min" [pressed]
-      - button "10min"
     - heading "Positioning" [level=1]
     - paragraph: "Where Spwn stands against what a person uses today instead, for anyone writing a comparison, a pitch or an answer to \"how is it different\": the category it refuses, the four alternatives and what each costs. What Spwn is, in one sentence, is the vision's and is not restated here."
     - list "Findings":
       - listitem:
         - img "needs you"
         - text: "needs you \"growth/positioning\" rests on this page's reading: you have not ruled"
+    - complementary "This page":
+      - text: Reading time
+      - group "Reading time":
+        - button "30s"
+        - button "2min" [pressed]
+        - button "10min"
+      - img "needs you"
+      - text: 1 needs you 4 blocks folded at this reading time
     - region "The category it refuses":
       - heading "The category it refuses" [level=2]
       - paragraph: "Spwn is not sold as an agent framework, an AI platform or a tool that makes more output. Each of those is judged by how much it produces, and production is what became cheap (what changed). Spwn is judged by whether you still understand and own what was produced: the one enemy is losing your thread."
@@ -35,9 +39,9 @@
       - figure "Figure two-costs":
         - text: Figure quad
         - button "What a person uses today"
-        - text: authorship by hand y one big agent x spwn xy scale Each costs either scale or authorship.
+        - text: authorship by hand one big agent spwn scale Each costs either scale or authorship.
       - region "Table all":
-        - text: Table alternative
+        - text: Table Alternative
         - button "What a person uses today"
         - table:
           - rowgroup:

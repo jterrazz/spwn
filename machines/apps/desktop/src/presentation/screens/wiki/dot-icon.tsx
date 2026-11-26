@@ -50,7 +50,7 @@ export function DotIcon({
 }) {
     const rows = grids[name] ?? BUILT_IN[name] ?? null;
     if (rows === null || rows.length === 0) {
-        return <span aria-hidden="true" className={`${styles.icon} ${styles[size]}`} />;
+        return null;
     }
     const width = Math.max(...rows.map((row) => row.length));
     return (

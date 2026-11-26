@@ -1,11 +1,16 @@
 import type { WikiServedBlock, WikiServedFigure, WikiServedTable } from '@jterrazz/station-api';
 
+import { SEPARATOR } from '../../../domain/separator';
 import { WIKI_WORDS } from '../../words/wiki';
 import { DotIcon } from './dot-icon';
 import { FieldValue, Ref } from './fields';
 import type { Reader } from './fields';
 
 import styles from './wiki.module.css';
+
+function columnWord(column: string): string {
+    return column.replaceAll('_', ' ');
+}
 
 export function TableLook({
     block,
@@ -22,68 +27,89 @@ export function TableLook({
             <header className={styles.blockHead}>
                 <DotIcon grids={reader.grids} name={block.Icon} size="small" />
                 <span className={styles.kind}>{WIKI_WORDS.table}</span>
-                <span className={styles.word}>{table.Of}</span>
-                {table.Where === '' ? null : (
-                    <span className={styles.where}>
-                        {WIKI_WORDS.where} {table.Where}
-                    </span>
-                )}
+                <span className={styles.tableOf}>
+                    {table.Title}
+                    {table.Where === '' ? null : `${SEPARATOR}${table.Where}`}
+                </span>
                 <span className={styles.headEnd}>
                     <Ref reader={reader} to={table.In} />
                 </span>
             </header>
-            <div className={styles.scroller}>
-                <table className={styles.table}>
-                    <thead>
-                        <tr>
-                            <th>{table.Title}</th>
-                            {columns.map((column) => (
-                                <th key={column}>{column.replaceAll('_', ' ')}</th>
+            <table className={styles.table}>
+                <thead>
+                    <tr>
+                        <th>{table.Title}</th>
+                        {columns.map((column) => (
+                            <th key={column}>{columnWord(column)}</th>
+                        ))}
+                    </tr>
+                </thead>
+                <tbody>
+                    {(table.Rows ?? []).map((row) => (
+                        <tr key={row.Address}>
+                            <th className={styles.rowHead} scope="row">
+                                <DotIcon grids={reader.grids} name={row.Icon} size="small" />
+                                {row.Word}
+                            </th>
+                            {(row.Cells ?? []).map((cell) => (
+                                <td data-column={columnWord(cell.Name)} key={cell.Name}>
+                                    <FieldValue field={cell} reader={reader} />
+                                </td>
                             ))}
                         </tr>
-                    </thead>
-                    <tbody>
-                        {(table.Rows ?? []).map((row) => (
-                            <tr key={row.Address}>
-                                <th className={styles.rowHead} scope="row">
-                                    <DotIcon grids={reader.grids} name={row.Icon} size="small" />
-                                    {row.Word}
-                                </th>
-                                {(row.Cells ?? []).map((cell) => (
-                                    <td key={cell.Name}>
-                                        <FieldValue field={cell} reader={reader} />
-                                    </td>
-                                ))}
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+                    ))}
+                </tbody>
+            </table>
         </section>
     );
 }
 
-function Parts({ figure }: { figure: WikiServedFigure }) {
+// value: where a quad draws a part by the engine's `at`: high on the y axis alone top left, on x alone bottom right,
+// value: on both top right in the accent, on neither bottom left.
+const CORNER: Readonly<Record<string, string | undefined>> = {
+    none: styles.atNone,
+    x: styles.atX,
+    xy: styles.atXY,
+    y: styles.atY,
+};
+
+function Quad({ figure }: { figure: WikiServedFigure }) {
     const parts = figure.Parts ?? [];
-    if (figure.Form === 'quad') {
-        return (
-            <div className={styles.quad}>
-                <span className={styles.axisY}>{figure.Y}</span>
-                <div className={styles.quadField}>
-                    {parts.map((part) => (
-                        <span className={styles.quadPart} key={part.name}>
-                            {part.name}
-                            {part.at === undefined ? null : <small> {part.at}</small>}
-                        </span>
-                    ))}
-                </div>
-                <span className={styles.axisX}>{figure.X}</span>
+    const placed = parts.filter((part) => CORNER[part.at ?? ''] !== undefined);
+    const unplaced = parts.filter((part) => CORNER[part.at ?? ''] === undefined);
+    return (
+        <div className={styles.quad}>
+            <span className={styles.axisY}>{figure.Y}</span>
+            <div className={styles.quadField}>
+                {placed.map((part) => (
+                    <span
+                        className={`${styles.quadPart} ${CORNER[part.at ?? ''] ?? ''}`}
+                        key={part.name}
+                    >
+                        <i aria-hidden="true" className={styles.quadDot} />
+                        {part.name}
+                    </span>
+                ))}
             </div>
-        );
+            <span className={styles.axisX}>{figure.X}</span>
+            {unplaced.length === 0 ? null : (
+                <p className={styles.unplaced}>
+                    {unplaced.map((part) => part.name).join(SEPARATOR)}
+                    {SEPARATOR}
+                    {WIKI_WORDS.unplaced}
+                </p>
+            )}
+        </div>
+    );
+}
+
+function Parts({ figure }: { figure: WikiServedFigure }) {
+    if (figure.Form === 'quad') {
+        return <Quad figure={figure} />;
     }
     return (
         <ol className={styles.figureParts}>
-            {parts.map((part) => (
+            {(figure.Parts ?? []).map((part) => (
                 <li key={part.name}>
                     <span className={styles.partName}>{part.name}</span>
                     {part.n === undefined ? null : <span className={styles.partN}>{part.n}</span>}
@@ -115,8 +141,10 @@ export function FigureLook({
                     <Ref reader={reader} to={figure.Shows} />
                 </span>
             </header>
-            <Parts figure={figure} />
-            <figcaption className={styles.caption}>{figure.Caption}</figcaption>
+            <div className={styles.figureBody}>
+                <Parts figure={figure} />
+                <figcaption className={styles.caption}>{figure.Caption}</figcaption>
+            </div>
         </figure>
     );
 }

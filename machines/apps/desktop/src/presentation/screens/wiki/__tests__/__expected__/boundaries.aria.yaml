@@ -7,16 +7,20 @@
     - button "Croissance"
   - article "Boundaries":
     - text: Floor 1 · Produit What do we build, and for whom?
-    - group "Reading time":
-      - button "30s"
-      - button "2min" [pressed]
-      - button "10min"
     - heading "Boundaries" [level=1]
     - paragraph: What Spwn is not, and what each of its parts refuses to be, for anyone weighing a feature that sits near an edge. The owner confirmed the five boundaries of Spwn on 2026-11-21 (his answer); the record is ADR-002, accepted.
     - list "Findings":
       - listitem:
         - img "needs you"
         - text: "needs you \"product/boundaries\" rests on this page's reading: you have not ruled"
+    - complementary "This page":
+      - text: Reading time
+      - group "Reading time":
+        - button "30s"
+        - button "2min" [pressed]
+        - button "10min"
+      - img "needs you"
+      - text: 3 needs you 2 blocks folded at this reading time
     - region "What Spwn is not":
       - heading "What Spwn is not" [level=2]
       - paragraph: 5 quiet blocks
@@ -30,7 +34,7 @@
         - button "no-running-agent"
         - button "no-ungranted-port"
       - region "Table machines":
-        - text: Table refusal where by machines
+        - text: Table Refusal · by machines
         - button "Boundaries"
         - table:
           - rowgroup:
@@ -64,7 +68,7 @@
       - paragraph: 1 quiet block
       - list:
         - listitem:
-          - button "os-holds-no-facts to be a second place where facts live, or to hide the detail with no way down to it"
+          - button "to be a second place where facts live, or to hide the detail with no way down to it os-holds-no-facts"
           - list "Findings":
             - listitem:
               - img "needs you"

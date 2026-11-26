@@ -7,14 +7,16 @@
     - button "Croissance"
   - article "Ports":
     - text: Floor 3 · Architecture Where is the code, and what may it touch?
-    - group "Reading time":
-      - button "30s"
-      - button "2min"
-      - button "10min" [pressed]
     - heading "Ports" [level=1]
     - paragraph:
       - code: station ports
       - text: "lists every TCP port that listens on a Mac or a VM, each in the class of who reaches it. Which ports a VM may open, and to whom, are its rights: a port that starts listening inside them is shared with their audience within seconds, one outside them is flagged and never shared."
+    - complementary "This page":
+      - text: Reading time
+      - group "Reading time":
+        - button "30s"
+        - button "2min"
+        - button "10min" [pressed]
     - region "Rights and audiences":
       - heading "Rights and audiences" [level=2]
       - paragraph:
@@ -28,7 +30,7 @@
         - definition: "what a machine may open and to whom, its Machinefile's `ports`: `open`, `to` (its audience), `except`, `audiences`"
       - list:
         - listitem:
-          - 'button "audience who a right, or the owner''s ports share --to, shares a port with: local, private or public"'
+          - 'button "who a right, or the owner''s ports share --to, shares a port with: local, private or public audience"'
       - region "What is flagged":
         - heading "What is flagged" [level=3]
         - text: guard · 2 blocks
