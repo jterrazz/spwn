@@ -479,6 +479,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	minds := platform.Within(cmp.Or(platform.ProjectRoot(), platform.UserDir()))
 	defer minds.Close()
 	runtimeSkills := collectRuntimeSkills(project, resolvedTools)
+	warnings = append(warnings, refusedToolSkills(resolvedTools)...)
 	hookPool := loadRuntimeHooks(project)
 	commandPool := loadRuntimeCommands(project)
 	compileInput := transpile.Input{

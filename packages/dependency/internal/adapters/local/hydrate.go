@@ -5,6 +5,7 @@ import (
 	"io/fs"
 	"path"
 	"path/filepath"
+	"strings"
 
 	"spwn.sh/packages/dependency/internal/manifest"
 	"spwn.sh/packages/dependency/refs"
@@ -51,12 +52,16 @@ func (t *wrappedLocalTool) Dependencies() []string {
 // "local:<name>". Missing manifest is a crisp authoring error: an
 // empty local dependency would render to nothing and the user would
 // spend an afternoon debugging a no-op. Every read goes through a root
-// opened at the tool's folder through the project's root: a `files:`
-// source that leaves the tool's folder is refused by its name before
-// anything is read, and a link there to elsewhere, in the project or
-// outside it, is refused by the root.
+// opened at the tool's folder through the project's root: the tool's
+// folder, spwn/ and spwn/tools/ are refused when one is a link, a
+// `files:` source that leaves the tool's folder is refused by its name
+// before anything is read, and a link inside the tool's folder to
+// elsewhere, in the project or outside it, is refused by the root.
 func LoadTool(projectRoot, name string) (tool.Tool, error) {
 	pkgDir := path.Join("spwn", localToolDir, name)
+	if err := noLinkOnTheWay(projectRoot, pkgDir); err != nil {
+		return nil, fmt.Errorf("local dependency %q: %w", name, err)
+	}
 	project := platform.FS(projectRoot)
 	info, err := fs.Stat(project, pkgDir)
 	if err != nil {
@@ -79,6 +84,23 @@ func LoadTool(projectRoot, name string) (tool.Tool, error) {
 	}
 
 	return &wrappedLocalTool{inner: manifest.ToolFromParsed(parsed), name: "local:" + name}, nil
+}
+
+func noLinkOnTheWay(projectRoot, pkgDir string) error {
+	tree := platform.Within(projectRoot)
+	defer tree.Close()
+	parts := strings.Split(pkgDir, "/")
+	for i := range parts {
+		folder := path.Join(parts[:i+1]...)
+		info, err := tree.Lstat(filepath.FromSlash(folder))
+		if err != nil {
+			return nil
+		}
+		if info.Mode()&fs.ModeSymlink != 0 {
+			return fmt.Errorf("%s is a link, refused: a tool's folder is a folder of spwn/tools/, never a link to one", folder)
+		}
+	}
+	return nil
 }
 
 // Hydrate walks a flat list of dependency refs, loads

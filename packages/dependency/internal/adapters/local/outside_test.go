@@ -174,6 +174,59 @@ func TestAToolFolderThatIsALinkOutIsNeverRead(t *testing.T) {
 	}
 }
 
+func TestAToolFolderThatIsALinkInsideTheProjectIsRefused(t *testing.T) {
+	for name, link := range map[string][2]string{
+		"the tool's folder": {filepath.Join("spwn", "tools", "evil"), filepath.Join("..", "..")},
+		"spwn/tools":        {filepath.Join("spwn", "tools"), "elsewhere"},
+	} {
+		t.Run(name, func(t *testing.T) {
+			dir := t.TempDir()
+			root := filepath.Join(dir, "site")
+			if err := os.MkdirAll(filepath.Join(root, "spwn", "elsewhere", "evil"), 0o755); err != nil {
+				t.Fatal(err)
+			}
+			for _, f := range []string{filepath.Join(root, "tool.yaml"), filepath.Join(root, "spwn", "elsewhere", "evil", "tool.yaml")} {
+				if err := os.WriteFile(f, []byte("name: evil\nfiles:\n  /etc/x: .env\n"), 0o644); err != nil {
+					t.Fatal(err)
+				}
+			}
+			if err := os.WriteFile(filepath.Join(root, ".env"), []byte(outsideSecret+"\n"), 0o644); err != nil {
+				t.Fatal(err)
+			}
+			if err := os.MkdirAll(filepath.Join(root, "spwn", "tools"), 0o755); err != nil {
+				t.Fatal(err)
+			}
+			at := filepath.Join(root, link[0])
+			if err := os.RemoveAll(at); err != nil {
+				t.Fatal(err)
+			}
+			if err := os.Symlink(link[1], at); err != nil {
+				t.Fatal(err)
+			}
+			tl, err := loadWithin(t, root)
+			if err == nil {
+				t.Fatalf("LoadTool = %s through a linked folder; the image would carry the project's .env", tl.Name())
+			}
+			want := `local dependency "evil": ` + filepath.ToSlash(link[0]) + ` is a link, refused: a tool's folder is a folder of spwn/tools/, never a link to one`
+			if err.Error() != want {
+				t.Errorf("refusal = %q, want %q", err, want)
+			}
+		})
+	}
+}
+
+func TestAFilesSourceThatLinksToAnotherProjectFileSaysItIsALink(t *testing.T) {
+	root, _ := toolBeside(t, "  /etc/evil: files/x")
+	if err := os.Symlink(filepath.Join("..", "..", "..", "..", ".env"), filepath.Join(root, "spwn", "tools", "evil", "files", "x")); err != nil {
+		t.Fatal(err)
+	}
+	_, err := loadWithin(t, root)
+	if err == nil || !strings.Contains(err.Error(), `local dependency "evil"`) || !strings.Contains(err.Error(), "files/x") || !strings.Contains(err.Error(), "is a link out of its folder") {
+		t.Fatalf("the refusal does not name the tool, the file and the link: %v", err)
+	}
+	t.Log(err)
+}
+
 func TestAFilesSourceThatLinksToAnotherProjectFileIsNeverRead(t *testing.T) {
 	var said [2]string
 	for i, there := range []bool{true, false} {

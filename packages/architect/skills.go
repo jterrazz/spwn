@@ -1,6 +1,7 @@
 package architect
 
 import (
+	"errors"
 	"fmt"
 	"io/fs"
 	"path/filepath"
@@ -302,6 +303,36 @@ func toolSkillEntries(tools []tool.Tool) []transpile.SkillEntry {
 			collectSidecar(sub, ".", files)
 			out = append(out, transpile.SkillEntry{Name: entry.Name(), Files: files})
 		}
+	}
+	return out
+}
+
+// refusedToolSkills is one warning per file of a tool's skills that its
+// root refused because it is a link out of the tool's folder: the skill
+// is left out of the world, and said so.
+func refusedToolSkills(tools []tool.Tool) []string {
+	var out []string
+	for _, t := range tools {
+		skillFS := t.Skills()
+		if skillFS == nil {
+			continue
+		}
+		refused := func(p string) {
+			out = append(out, fmt.Sprintf("tool %s: skill file %s is a link out of the tool's folder, refused: copy the file into the tool's folder", t.Name(), p))
+		}
+		_ = fs.WalkDir(skillFS, ".", func(p string, d fs.DirEntry, err error) error {
+			switch {
+			case err != nil:
+				if errors.Is(err, platform.ErrLink) {
+					refused(p)
+				}
+			case !d.IsDir():
+				if _, rerr := fs.ReadFile(skillFS, p); errors.Is(rerr, platform.ErrLink) {
+					refused(p)
+				}
+			}
+			return nil
+		})
 	}
 	return out
 }
