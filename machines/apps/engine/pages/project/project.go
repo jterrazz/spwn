@@ -49,7 +49,7 @@ func issues(id, title, none string, all []project.Issue) page.Section {
 	for i, issue := range all {
 		r := page.Row{ID: strconv.Itoa(i), Label: issue.Path, Mark: markOf(issue.Level), Detail: page.Text(issue.Message)}
 		if issue.Hint != "" {
-			r.Hint = &page.Hint{Command: issue.Hint}
+			r.Hint = &page.Hint{Text: issue.Hint}
 		}
 		s.Items = append(s.Items, page.Item{Row: &r})
 	}
