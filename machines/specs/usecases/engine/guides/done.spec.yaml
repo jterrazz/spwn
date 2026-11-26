@@ -1,4 +1,4 @@
-description: 'a create at the engine''s door tags each progress with its step, then reads done on every step'
+description: 'a create tags each progress with its step, the first with its Guide, then reads done'
 env:
     - two-macs
     - engine
@@ -9,19 +9,19 @@ runs:
       exit: 0
       stdout: |
           {"guides":[]}
-    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.progress or .out or .error) | if .progress then [.progress.act, .progress.step, .progress.task] elif .out then .out.VM.Name else .error.code end'''
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.progress or .out or .error) | if .progress then [.progress.act, .progress.step, .progress.task, .progress.guide.line] elif .out then .out.VM.Name else .error.code end'''
       stdin: |
           {"v":2,"id":"1","call":"machines.create-workspace","in":{"Request":{"Name":"linux-4","Image":"base-ubuntu","Size":{"MemoryBytes":4294967296}}}}
       exit: 0
       stdout: |
-          ["machines.create:linux-4","cloning","cloning station-image-base-ubuntu-2026.11.01"]
-          ["machines.create:linux-4","cloning","cloning station-image-base-ubuntu-2026.11.01"]
-          ["machines.create:linux-4","booting","Running"]
-          ["machines.create:linux-4","booting","Running"]
-          ["machines.create:linux-4","address","Has an address"]
-          ["machines.create:linux-4","address","Has an address"]
-          ["machines.create:linux-4","ssh","SSH answers"]
-          ["machines.create:linux-4","ssh","SSH answers"]
+          ["machines.create:linux-4","cloning","cloning station-image-base-ubuntu-2026.11.01","Creating linux-4: Disk"]
+          ["machines.create:linux-4","cloning","cloning station-image-base-ubuntu-2026.11.01",null]
+          ["machines.create:linux-4","booting","Running",null]
+          ["machines.create:linux-4","booting","Running",null]
+          ["machines.create:linux-4","address","Has an address",null]
+          ["machines.create:linux-4","address","Has an address",null]
+          ["machines.create:linux-4","ssh","SSH answers",null]
+          ["machines.create:linux-4","ssh","SSH answers",null]
           "linux-4"
     - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | .out.guides[]? // .error'''
       stdin: |

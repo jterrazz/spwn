@@ -14,6 +14,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/activity"
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
+	"github.com/jterrazz/studio-station/apps/engine/core/guide"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/engine"
 	enginecalls "github.com/jterrazz/studio-station/apps/engine/engine/calls"
@@ -51,6 +52,7 @@ type (
 		Error  *call.WireError `json:"error,omitempty"`
 		Act    string          `json:"act,omitempty"`
 		Step   string          `json:"step,omitempty"`
+		Guide  *guide.Guide    `json:"guide,omitempty"`
 	}
 )
 

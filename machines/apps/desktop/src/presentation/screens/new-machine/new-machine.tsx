@@ -1,8 +1,10 @@
 import type {
     CallName,
+    CoreGuideGuide,
     MachinesCallsNewIn,
     MachinesCallsNewMachine,
     MachinesCreated,
+    Progress,
 } from '@jterrazz/station-api';
 import { useEffect, useRef, useState } from 'react';
 import type { ReactElement } from 'react';
@@ -41,7 +43,7 @@ const CREATE_REREADS: readonly CallName[] = ['overview.read'];
 export type NewMachineProps = {
     go: (to: Route) => void;
     onClose: () => void;
-    onGuide: (act: string) => void;
+    onGuide: (act: string, served: CoreGuideGuide | undefined) => void;
     opening: Opening;
 };
 
@@ -58,12 +60,14 @@ function placeOf(gesture: Gesture<unknown>, answer: MachinesCallsNewMachine): Re
         : 'foot';
 }
 
-// invariant: Launch opens the Guide of the act the engine gave in its first progress frame, or, when it gave none,
+// invariant: Launch opens the Guide of the act the engine gave in its first progress frame, drawn as that frame served
+// invariant: it until the engine's list holds it, or, when it gave none,
 // invariant: hands the owner to the new machine's page once it has answered; it does either once, as the engine has
 // invariant: begun or answered, and a refusal comes before either, so it is drawn in the sheet.
 function useLaunch({ go, onClose, onGuide }: Pick<NewMachineProps, 'go' | 'onClose' | 'onGuide'>) {
     const launched = useRef(false);
-    return (name: string, act: string | undefined) => {
+    return (name: string, first: Progress | undefined) => {
+        const act = first?.act;
         if (launched.current || (name === '' && act === undefined)) {
             return;
         }
@@ -72,7 +76,7 @@ function useLaunch({ go, onClose, onGuide }: Pick<NewMachineProps, 'go' | 'onClo
             onClose();
             go(machineRoute(name));
         } else {
-            onGuide(act);
+            onGuide(act, first?.guide);
         }
     };
 }
@@ -101,7 +105,7 @@ function useCreate(props: SheetProps) {
     const first = gesture.state.kind === 'running' ? gesture.state.progress.at(0) : undefined;
     useEffect(() => {
         if (first !== undefined) {
-            launch(name, first.act);
+            launch(name, first);
         }
     });
     const ready =

@@ -1,4 +1,9 @@
-import type { MachinesMacView, OverviewNeed, OverviewReadOutput } from '@jterrazz/station-api';
+import type {
+    CoreGuideGuide,
+    MachinesMacView,
+    OverviewNeed,
+    OverviewReadOutput,
+} from '@jterrazz/station-api';
 import { useCallback, useMemo, useState, useSyncExternalStore } from 'react';
 import type { ComponentType } from 'react';
 
@@ -52,12 +57,17 @@ export type Pages = {
     Head: ComponentType<PageProps>;
     Body: ComponentType<PageProps>;
     Confirm: ComponentType;
-    Guide: ComponentType<{ act: string; go: Go; onClose: () => void }>;
+    Guide: ComponentType<{
+        act: string;
+        go: Go;
+        onClose: () => void;
+        served: CoreGuideGuide | undefined;
+    }>;
     Core: ComponentType;
     NewMachine: ComponentType<{
         go: Go;
         onClose: () => void;
-        onGuide: (act: string) => void;
+        onGuide: (act: string, served: CoreGuideGuide | undefined) => void;
         opening: Opening;
     }>;
     AddMac: ComponentType<{ go: Go; onClose: () => void }>;
@@ -166,7 +176,7 @@ function Sheets({ opened, go, pages, macs, needs, withGallery }: SheetsProps) {
             );
         }
         case 'guide': {
-            return <Guide act={sheet.act} go={go} onClose={onClose} />;
+            return <Guide act={sheet.act} go={go} onClose={onClose} served={sheet.served} />;
         }
         case 'add-mac': {
             return <AddMac go={go} onClose={onClose} />;

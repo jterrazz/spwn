@@ -206,9 +206,9 @@ func (p progress) Done(task string, err error) {
 
 type Acts interface {
 	// value: the engine's act board: a guided call's phase kept under its
-	// act, its id answered; its end, with the failure it ended on, nil
-	// when it was made.
-	Phase(family string, ph guide.Phase) string
+	// act, its id answered, and its first Guide when the phase put it; its
+	// end, with the failure it ended on, nil when it was made.
+	Phase(family string, ph guide.Phase) (string, *guide.Guide)
 	End(id string, ended guide.Ended, failed *call.WireError)
 }
 
@@ -228,10 +228,17 @@ type guided struct {
 	step   string
 	// value: the step each task was told at, which its end belongs to.
 	told map[string]string
+	// value: the act's first Guide, until the frame that first names the
+	// act carries it.
+	first *guide.Guide
 }
 
 func (g *guided) Phase(ph guide.Phase) {
-	g.act, g.step = g.acts.Phase(g.family, ph), ph.Step
+	act, first := g.acts.Phase(g.family, ph)
+	g.act, g.step = act, ph.Step
+	if first != nil {
+		g.first = first
+	}
 }
 
 func (g *guided) Step(task, detail string) {
@@ -239,7 +246,9 @@ func (g *guided) Step(task, detail string) {
 		g.told = map[string]string{}
 	}
 	g.told[task] = g.step
-	g.out.write(api.Frame{V: api.Version, ID: g.id, Progress: &api.Progress{Task: task, Detail: secret.Kept(detail), Act: g.act, Step: g.step}})
+	first := g.first
+	g.first = nil
+	g.out.write(api.Frame{V: api.Version, ID: g.id, Progress: &api.Progress{Task: task, Detail: secret.Kept(detail), Act: g.act, Step: g.step, Guide: first}})
 }
 
 func (g *guided) Done(task string, err error) {
