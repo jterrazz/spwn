@@ -60,7 +60,7 @@ type ServedFloor struct {
 	Name     string
 	Question string
 	Blocks   int
-	Here     bool
+	Current  bool
 }
 
 type SeatHead struct {
@@ -401,7 +401,7 @@ func (s *server) ladder(r Reading) []ServedFloor {
 	out := make([]ServedFloor, 0, len(s.c.Schema.Floors))
 	for i := range s.c.Schema.Floors {
 		h := s.floor(i)
-		f := ServedFloor{Index: h.Index, Name: h.Name, Question: h.Question, Here: i == r.Floor}
+		f := ServedFloor{Index: h.Index, Name: h.Name, Question: h.Question, Current: i == r.Floor}
 		for _, b := range r.Blocks {
 			if b.Weight != nil && b.Floor == i {
 				f.Blocks++

@@ -164,8 +164,8 @@ function Ladder({ floors }: { floors: readonly WikiServedFloor[] }) {
         <ol aria-label={WIKI_WORDS.ladder} className={styles.ladder}>
             {floors.map((floor) => (
                 <li
-                    aria-current={floor.Here ? 'step' : undefined}
-                    className={floor.Here ? styles.rungHere : styles.rung}
+                    aria-current={floor.Current ? 'step' : undefined}
+                    className={floor.Current ? styles.rungCurrent : styles.rung}
                     key={floor.Index}
                     title={floor.Question}
                 >

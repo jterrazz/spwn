@@ -110,7 +110,7 @@
     border-top: 1px dotted var(--line-2);
 }
 .rung,
-.rungHere {
+.rungCurrent {
     position: relative;
     display: flex;
     flex-direction: column;
@@ -118,7 +118,7 @@
     font-size: 11px;
     color: var(--t4);
 }
-.rungHere {
+.rungCurrent {
     color: var(--t1);
 }
 .rungDot {
@@ -128,7 +128,7 @@
     border: 1px solid var(--t4);
     background: var(--ground);
 }
-.rungHere .rungDot {
+.rungCurrent .rungDot {
     border-color: var(--t1);
     background: var(--t1);
     box-shadow: 0 0 0 3px var(--raise-2);

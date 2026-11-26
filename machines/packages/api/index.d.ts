@@ -3414,7 +3414,7 @@ export type WikiServedFinding = {
 
 export type WikiServedFloor = {
     Blocks: number;
-    Here: boolean;
+    Current: boolean;
     Index: number;
     Name: string;
     Question: string;

@@ -645,7 +645,7 @@
         "Blocks": {
           "type": "integer"
         },
-        "Here": {
+        "Current": {
           "type": "boolean"
         },
         "Index": {
@@ -660,7 +660,7 @@
       },
       "required": [
         "Blocks",
-        "Here",
+        "Current",
         "Index",
         "Name",
         "Question"

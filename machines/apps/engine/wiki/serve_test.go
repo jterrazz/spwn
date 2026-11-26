@@ -40,7 +40,7 @@ func outline(s wiki.Served) string {
 	ladder := make([]string, 0, len(s.Floors))
 	for _, f := range s.Floors {
 		mark := strconv.Itoa(f.Index) + ":" + strconv.Itoa(f.Blocks)
-		if f.Here {
+		if f.Current {
 			mark = "[" + mark + "]"
 		}
 		ladder = append(ladder, mark)
