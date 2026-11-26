@@ -3,7 +3,7 @@
 **Status:** Proposed
 **Date:** 2026-11-26
 
-Builds on [ADR-088](088-agents-live-in-the-one-binary-as-families-reached-by-calls.md): the project family is a family of the engine, reached by its calls. Root [ADR-021](../../../docs/decisions/021-one-program-spwn-one-command-for-everything.md) retires `spwn build`; this record says what replaces its render.
+Builds on [ADR-088](088-agents-live-in-the-one-binary-as-families-reached-by-calls.md): the project family is a family of the engine, reached by its calls. Root [ADR-021](../../../docs/decisions/021-one-program-spwn-one-command-for-everything.md) rule 5 gives a project's `spwn.yaml` its `plan`, `apply` and `drift`; it does not name `spwn build`, which the programme's lot A2b3 deletes. This record says what replaces its render.
 
 ## Context
 
