@@ -158,7 +158,7 @@ func Read(lines []Line, now time.Time, q Query) (groups []Group, next string) {
 }
 
 func readOf(l Line) ReadLine {
-	out := ReadLine{At: l.At, Text: l.Text, By: l.By, Purpose: l.Purpose, On: []string{l.Machine}, Outcome: l.Outcome, Upgrade: l.Upgrade, Detail: l.Detail}
+	out := ReadLine{At: l.At, Text: l.Text, By: l.By, Purpose: l.Purpose, On: []string{l.Machine}, Outcome: l.Outcome, Upgrade: l.Upgrade, Detail: l.Detail, Phases: l.Phases}
 	if l.Subject != nil {
 		s := *l.Subject
 		out.Subject = &s

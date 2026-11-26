@@ -29,7 +29,7 @@ type BuildIn struct {
 }
 
 var Build = call.Call[Deps, BuildIn, []images.Record]{
-	Name: "images.build", Where: call.InEngine, Applies: images.Applies, Needs: images.Needs(),
+	Name: "images.build", Where: call.InEngine, Applies: images.Applies, Needs: images.Needs(), Journal: keptBuild,
 	Errors: buildRefusals(),
 	Run: func(ctx context.Context, d Deps, in BuildIn, p call.Progress) ([]images.Record, error) {
 		steps := stepper(p)

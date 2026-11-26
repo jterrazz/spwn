@@ -22,13 +22,16 @@ func Keep(ctx context.Context, d Deps, ran Ran, lines ...journal.Line) error {
 	// named, on its own machine or the one the call ran on; a line that
 	// says no outcome is the run's, failed with its words when the run
 	// failed; a retry runs where the call ran unless it names its machine;
-	// a line of the night is its night's. Nothing to keep is no write.
+	// a line of the night is its night's; a line carries the steps its act
+	// marked. Nothing to keep is no write.
 	if len(lines) == 0 {
 		return nil
 	}
 	now, by := d.Now(), cmp.Or(ran.By, journal.ByYou)
+	phases := journal.Recorded(ctx, now)
 	for i := range lines {
 		l := &lines[i]
+		l.Phases = phases
 		l.At, l.Call, l.By, l.Machine = now, ran.Call, cmp.Or(l.By, by), cmp.Or(l.Machine, ran.Machine)
 		if by == journal.ByNight {
 			l.Night = now

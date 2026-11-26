@@ -76,3 +76,10 @@ func inside(ctx context.Context, m Meta) context.Context {
 	}
 	return context.WithValue(ctx, insideKey{}, m.Name)
 }
+
+func Recording(ctx context.Context) context.Context {
+	// invariant: a gesture runs, and is kept, on one context that records
+	// the steps it marks: each place that runs a call and keeps it opens the
+	// record first.
+	return journal.Recording(ctx)
+}

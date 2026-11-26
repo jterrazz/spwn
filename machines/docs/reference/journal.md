@@ -12,20 +12,21 @@ A VM keeps no journal: inside a server or a workspace both calls are refused as 
 
 ## What a line says
 
-| Field     | Holds                                                                                                          |
-| --------- | -------------------------------------------------------------------------------------------------------------- |
-| `At`      | the instant it was done, on the Mac's clock, RFC 3339                                                          |
-| `Machine` | the machine it concerns: the Mac or one of its VMs                                                             |
-| `Call`    | the call that made it; empty for an event the engine tells                                                     |
-| `Text`    | what was done, in the engine's words (`gate-2 deleted`, `node`)                                                |
-| `Detail`  | the sentence on it (`8 GB freed`, `download timed out`), its secrets withheld                                  |
-| `Subject` | what it links to: `Kind` (`app`, `machine`, `setting`, `skill`, `image`) and `Name`; absent when nothing links |
-| `By`      | `you`, a session's name, `the night` or `station`                                                              |
-| `Purpose` | a create's purpose, as it was asked                                                                            |
-| `Outcome` | `done`, `failed` or `held`                                                                                     |
-| `Upgrade` | `From` and `To`, for a line that moved an app                                                                  |
-| `Retry`   | the call that does it again (`Call`, `Args`, `On`), on a failed line that may be                               |
-| `Night`   | the instant of the night run it belongs to; absent for any other line                                          |
+| Field     | Holds                                                                                                                                   |
+| --------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `At`      | the instant it was done, on the Mac's clock, RFC 3339                                                                                   |
+| `Machine` | the machine it concerns: the Mac or one of its VMs                                                                                      |
+| `Call`    | the call that made it; empty for an event the engine tells                                                                              |
+| `Text`    | what was done, in the engine's words (`gate-2 deleted`, `node`)                                                                         |
+| `Detail`  | the sentence on it (`8 GB freed`, `download timed out`), its secrets withheld                                                           |
+| `Subject` | what it links to: `Kind` (`app`, `machine`, `setting`, `skill`, `image`) and `Name`; absent when nothing links                          |
+| `By`      | `you`, a session's name, `the night` or `station`                                                                                       |
+| `Purpose` | a create's purpose, as it was asked                                                                                                     |
+| `Outcome` | `done`, `failed` or `held`                                                                                                              |
+| `Upgrade` | `From` and `To`, for a line that moved an app                                                                                           |
+| `Retry`   | the call that does it again (`Call`, `Args`, `On`), on a failed line that may be                                                        |
+| `Night`   | the instant of the night run it belongs to; absent for any other line                                                                   |
+| `Phases`  | the steps the act went through, in order, each with its `Name`, its start `At` and its duration `Took`; absent when the act marked none |
 
 ## Reading it
 
@@ -69,7 +70,22 @@ The gestures that keep lines today:
 | `disk.free`, `disk.free-unused`                                          | `<row> freed` per row it freed, with its sentence; `<row> not freed` and its reason for a row that broke     |
 | `apps.update`                                                            | one per app it updated or failed to, a failed one with `apps.update` as its `Retry`                          |
 | `machinefile.apply`                                                      | `<file> applied`, what it installed and removed counted                                                      |
+| `images.build`                                                           | `<image> built`, `<image> not built` when it failed                                                          |
 | `machinefile.upgrade`                                                    | one per app it moved (`Upgrade`), left waiting (`held`) or failed to move; `<file> upgraded` when none moved |
+
+### The steps a line carries
+
+A gesture that takes time marks its steps as it runs, and its line keeps them (`Phases`): each begins where it was marked and lasts to the next, the last to the instant the line is kept, on the Mac's clock. A step named twice in a row is one.
+
+| Gesture                                | Steps, in the order they run                                                                                                               |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `machines.create-workspace`, `-server` | `checks`, an image build's own steps when it builds first, `clone`, `boot`, `address`, `reachable`, `machinefile` (with `--from`), `ready` |
+| `machines.start`                       | `checks`, `boot`, and `reachable` for a create's retry                                                                                     |
+| `machines.stop`                        | `checks`, `poweroff`                                                                                                                       |
+| `images.build`                         | `Base system`, `Packages`, `Settings`, `Seal`                                                                                              |
+| `machinefile.apply`                    | `plan`, one per package it carries out (named by it), `blocks`, `remove`, `run.<phase>`                                                    |
+
+A failed act keeps the steps it reached. `station journal --json` reads them with each line.
 
 ## Related
 

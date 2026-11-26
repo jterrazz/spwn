@@ -4,6 +4,7 @@ import (
 	"context"
 	"strings"
 
+	"github.com/jterrazz/studio-station/apps/engine/core/journal"
 	"github.com/jterrazz/studio-station/apps/engine/core/secret"
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/machines/contract"
@@ -80,6 +81,7 @@ func (s *Machinist) Start(ctx context.Context, name string) error {
 	// otherwise holds the new failure (its step, cause and console lines
 	// replacing the old), which the start answers as its error. No VM
 	// is run for a VM user its rule refuses (vmUserRefused).
+	journal.Mark(ctx, s.h.Now(), "checks")
 	rec, err := s.VM(name, engine.VMStart)
 	if err != nil {
 		return err
@@ -92,6 +94,7 @@ func (s *Machinist) Start(ctx context.Context, name string) error {
 	}
 	img, _ := s.imageOf(ctx, rec.Image)
 	retry := rec.Birth != nil && rec.Birth.Failed
+	journal.Mark(ctx, s.h.Now(), "boot")
 	if err := s.engineAPI.Do(ctx, engine.VMStart, name); err != nil {
 		if !retry {
 			return err
@@ -105,6 +108,7 @@ func (s *Machinist) Start(ctx context.Context, name string) error {
 	if !retry {
 		return nil
 	}
+	journal.Mark(ctx, s.h.Now(), "reachable")
 	if err := s.setUp(ctx, img, model.CreateRequest{Name: name, Lifetime: rec.Lifetime}); err != nil {
 		failed := &model.UnhealthyError{Name: name, Step: model.StepSSH, Detail: strings.TrimSpace(err.Error())}
 		if ctx.Err() == nil {
@@ -135,12 +139,14 @@ func (s *Machinist) vmUserRefused() error {
 func (s *Machinist) Stop(ctx context.Context, name string) error {
 	// invariant: a stop keeps the workspace, ephemeral or persistent (SP-5), and
 	// like every action it is refused while the engine is stopped.
+	journal.Mark(ctx, s.h.Now(), "checks")
 	if err := s.CheckStop(name); err != nil {
 		return err
 	}
 	if err := s.EngineUp(ctx); err != nil {
 		return err
 	}
+	journal.Mark(ctx, s.h.Now(), "poweroff")
 	return s.engineAPI.Do(ctx, engine.VMStop, name)
 }
 

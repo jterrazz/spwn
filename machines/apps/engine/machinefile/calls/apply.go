@@ -14,6 +14,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	"github.com/jterrazz/studio-station/apps/engine/core/confirm"
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
+	"github.com/jterrazz/studio-station/apps/engine/core/journal"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/core/secret"
 	"github.com/jterrazz/studio-station/apps/engine/machinefile"
@@ -61,6 +62,7 @@ var Apply = call.Call[Deps, ApplyIn, machinefile.Applied]{
 	Errors: []fail.Code{NotFound, NeedsTerminal, NameTaken, BadPhase, confirm.YesNeeded, Busy},
 	Run: func(ctx context.Context, d Deps, in ApplyIn, p call.Progress) (answer machinefile.Applied, err error) {
 		defer func() { answer = answer.Answered() }()
+		journal.Mark(ctx, d.Now(), "plan")
 		if bad := badPhase(in.Phase, in.Remove); bad != nil {
 			return machinefile.Applied{}, bad
 		}
@@ -105,12 +107,14 @@ var Apply = call.Call[Deps, ApplyIn, machinefile.Applied]{
 		}
 		r := run{d: d, p: p, in: in, name: plan.Name, ended: map[string]catalog.State{}, there: map[string]bool{}}
 		out.Done = r.carry(ctx, plan.Lines)
+		journal.Mark(ctx, d.Now(), "blocks")
 		if err := ctx.Err(); err != nil {
 			out.Interrupted = true
 			return out, errors.Join(err, relock(ctx, d, plan, out.Done))
 		}
 		out.Blocks = r.blocks(ctx, plan)
 		if in.Remove {
+			journal.Mark(ctx, d.Now(), "remove")
 			removed, blocks := r.remove(ctx, plan)
 			out.Removed, out.Blocks = removed, append(out.Blocks, blocks...)
 		}
@@ -139,6 +143,7 @@ var Apply = call.Call[Deps, ApplyIn, machinefile.Applied]{
 // (saidLines), and what was applied stays applied.
 func ran(ctx context.Context, d Deps, s machinefile.Script, p call.Progress) *machinefile.Ran {
 	task := "run." + string(s.Phase)
+	journal.Mark(ctx, d.Now(), task)
 	p.Step(task, secret.Kept(strings.Join(machinefile.ScriptLines(s.Lines), "\n")))
 	out := &machinefile.Ran{Script: s, State: catalog.StateOK}
 	if d.Shell == nil {
@@ -261,6 +266,9 @@ func (r *run) carry(ctx context.Context, lines []machinefile.Line) []machinefile
 				out = append(out, machinefile.Done{Line: rest, State: catalog.StateAbsent, Reason: machinefile.NotRun})
 			}
 			break
+		}
+		if l.Acts() {
+			journal.Mark(ctx, r.d.Now(), l.Step.Package)
 		}
 		done := r.line(ctx, l)
 		r.ended[l.Step.Package] = done.State

@@ -107,6 +107,7 @@ func (s Server) call(ctx context.Context, w *writer, f api.Frame) api.Frame {
 	if err != nil {
 		return api.Frame{ID: f.ID, Error: s.fault(err)}
 	}
+	ctx = call.Recording(ctx)
 	out, err := h.Invoke(ctx, s.ThisMachine, f.In, progress{id: f.ID, out: w, word: s.wording})
 	s.Kept.Keep(ctx, s.ThisMachine, s.ThisMachine.Ref, h.Meta(), f.In, out, err)
 	if err != nil {

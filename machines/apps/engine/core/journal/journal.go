@@ -76,6 +76,9 @@ type Line struct {
 	Upgrade *Upgrade
 	// value: the call that does it again, on a failed line that may be.
 	Retry *finding.Fix
+	// value: the steps the act ran, in order, each with its start and its
+	// duration; none for a line whose act marked none.
+	Phases []Phase `json:",omitempty"`
 	// value: the run of the night it belongs to; zero for any other line.
 	Night time.Time `json:",omitzero"`
 }
@@ -100,6 +103,9 @@ type ReadLine struct {
 	Upgrade *Upgrade
 	Detail  string
 	Retry   *Retry
+	// value: the steps the act ran, as its line kept them; absent when it
+	// marked none.
+	Phases []Phase `json:",omitempty"`
 }
 
 type Group struct {
