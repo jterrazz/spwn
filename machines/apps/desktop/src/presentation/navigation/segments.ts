@@ -4,11 +4,11 @@ import { macState, vmState } from '../words/shown';
 import type { Shown } from '../words/shown';
 import { machineRoute, OPENS_AN_ITEM } from './route';
 import type { PlainPage, Route } from './route';
-import { inSpace, SPACE_WORDS } from './spaces';
+import { inSpace } from './spaces';
 import { TITLES } from './titles';
 
-// value: what a segment's popover lists: the spaces, the space's places, the whole fleet, or one Mac's VMs.
-export type Siblings = 'fleet' | 'places' | 'spaces' | 'vms';
+// value: what a segment's popover lists: the space's places, the whole fleet, or one Mac's VMs.
+export type Siblings = 'fleet' | 'places' | 'vms';
 
 // value: one level of the path. `to` is where its name goes; a segment with no `siblings` is words, the page's own
 // value: name or an item the engine names, and opens nothing.
@@ -28,7 +28,7 @@ export type Located = {
     vm?: Pick<MachinesVM, 'Name' | 'Standing'> | undefined;
 };
 
-export type Path = { route: Route; found: Located | undefined; standing: Shown | undefined };
+export type Path = { route: Route; found: Located | undefined };
 
 // value: the Machine space's pages a place segment lists: the two that show every Mac at once, then the Library.
 export const PLACES: readonly PlainPage[] = [
@@ -41,9 +41,8 @@ export const PLACES: readonly PlainPage[] = [
     'passwords',
 ];
 
-function spaceOf(standing: Shown | undefined): Segment {
-    return { key: 'space', label: SPACE_WORDS.machine.name, shown: standing, siblings: 'spaces' };
-}
+// value: the section a machine's path starts at: the fleet, unmarked, whose popover lists the space's places.
+const FLEET: Segment = { key: 'fleet', label: 'Fleet', siblings: 'places' };
 
 function machineSegments(
     route: Extract<Route, { page: 'machine' }>,
@@ -82,15 +81,15 @@ function placeSegments(route: Exclude<Route, { page: 'machine' }>): Segment[] {
     return [place, { item: { item, page }, key: 'item', label: item }];
 }
 
-// invariant: a page of the Machine space opens on the space's segment; Home, Inbox, Settings and the gallery are
-// invariant: the window's own, named alone; the frame with no engine is Home alone, whatever the route.
-export function segmentsOf({ route, found, standing }: Path, quiet: boolean): Segment[] {
+// invariant: the path starts at the section, never at the space, which is the bar's own switch: a machine opens on
+// invariant: Fleet, a page of the Machine space on its place; Home, Inbox, Settings and the gallery are the window's
+// invariant: own, named alone; the frame with no engine is Home alone, whatever the route.
+export function segmentsOf({ route, found }: Path, quiet: boolean): Segment[] {
     if (quiet) {
         return [{ key: 'page', label: TITLES.home }];
     }
-    if (!inSpace(route)) {
-        return route.page === 'machine' ? [] : [{ key: 'page', label: TITLES[route.page] }];
+    if (route.page === 'machine') {
+        return [FLEET, ...machineSegments(route, found)];
     }
-    const below = route.page === 'machine' ? machineSegments(route, found) : placeSegments(route);
-    return [spaceOf(standing), ...below];
+    return inSpace(route) ? placeSegments(route) : [{ key: 'page', label: TITLES[route.page] }];
 }

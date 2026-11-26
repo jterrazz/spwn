@@ -50,8 +50,12 @@ function obey(shortcut: Shortcut, router: Router, { onColumn, onFind, onSpace }:
             onSpace('machine');
             return;
         }
-        case 'space-agent':
+        case 'space-agent': {
+            onSpace('agent');
+            return;
+        }
         case 'space-os': {
+            onSpace('os');
             return;
         }
         case 'gallery': {

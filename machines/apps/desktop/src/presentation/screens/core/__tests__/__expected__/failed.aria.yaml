@@ -1,4 +1,8 @@
 - banner:
+  - navigation "Spaces":
+    - button "Machine" [disabled] [pressed]
+    - button "Agent soon" [disabled]: Agent
+    - button "OS soon" [disabled]: OS
   - button "Home"
   - button "Pin the column" [pressed]
   - button "Back" [disabled]

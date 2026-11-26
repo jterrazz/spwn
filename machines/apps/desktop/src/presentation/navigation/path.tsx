@@ -8,7 +8,6 @@ import { focusablesIn, moveFocus, moveOfKey } from '../ui/focus';
 import { Icon } from '../ui/icon';
 import { identityOf, MachineIcon, StateMark, usePopover } from '../ui/index';
 import { machineKindOf } from '../words/provisional';
-import type { Shown } from '../words/shown';
 import { MachinePopover } from './machine-popover';
 import type { Opened } from './machine-popover';
 import { placeWays, WaysPopover } from './place-popover';
@@ -16,8 +15,6 @@ import type { Way } from './place-popover';
 import { machineRoute } from './route';
 import type { PlainPage, Route } from './route';
 import type { Segment } from './segments';
-import { SpacePopover } from './space-popover';
-import type { Space } from './spaces';
 import { keyOf, useFold } from './use-fold';
 
 import styles from './path-bar.module.css';
@@ -26,23 +23,14 @@ export type PathProps = {
     segments: readonly Segment[];
     found: Found | undefined;
     macs: readonly MachinesMacView[];
-    standing: Shown | undefined;
     route: Route;
     go: (to: Route) => void;
-    onSpace: (space: Space) => void;
     ItemName: ComponentType<{ page: PlainPage; item: string }>;
 };
 
 type Opens = Omit<PathProps, 'ItemName' | 'segments'>;
 
 function leadOf(segment: Segment, { found, macs }: Pick<Opens, 'found' | 'macs'>): ReactNode {
-    if (segment.key === 'space') {
-        return (
-            <span aria-hidden="true" className={styles.well}>
-                <Icon name="machine" />
-            </span>
-        );
-    }
     if (segment.key === 'vm' && found?.vm !== undefined) {
         return (
             <MachineIcon
@@ -67,15 +55,12 @@ function SiblingsOf({
     opened: Opened;
     opens: Opens;
 }) {
-    const { macs, route, go, onSpace, standing } = opens;
+    const { macs, route, go } = opens;
     const current = currentOf(route);
     const toMachine = (machine: string) => {
         go(machineRoute(machine));
     };
     switch (segment.siblings) {
-        case 'spaces': {
-            return <SpacePopover {...opened} onSpace={onSpace} standing={standing} />;
-        }
         case 'fleet': {
             return (
                 <MachinePopover {...opened} current={current} macs={macs} onChoose={toMachine} />

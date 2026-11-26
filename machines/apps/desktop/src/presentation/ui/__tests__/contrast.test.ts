@@ -191,6 +191,7 @@ describe('contrast', () => {
             'kit/login-sheet.module.css',
             'navigation/column.module.css',
             'navigation/path-bar.module.css',
+            'navigation/space-switch.module.css',
             'screens/catalog/item.module.css',
             'screens/machine-files/machine-files.module.css',
             'screens/machine/overview/overview.module.css',

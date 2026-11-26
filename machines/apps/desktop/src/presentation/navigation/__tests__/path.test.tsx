@@ -203,9 +203,9 @@ describe('PathNav', () => {
         120_000,
     );
 
-    test('a path too long for a 560 px bar folds its middle, and the fold reaches what it hides', async () => {
-        // Given - the window on linux-1, a VM of macbook-pro, over two-macs, 560 px wide
-        const result = await component.viewport({ height: 800, width: 560 }).render(
+    test('a path too long for a 640 px window folds its middle, and the fold reaches what it hides', async () => {
+        // Given - the window on linux-1, a VM of macbook-pro, over two-macs, 640 px wide
+        const result = await component.viewport({ height: 800, width: 640 }).render(
             <EngineProvider dependencies={composeReplay({ recording: recordingFor('two-macs') })}>
                 <Window initial={machineRoute('linux-1')} pages={PAGES} />
             </EngineProvider>,
@@ -213,8 +213,8 @@ describe('PathNav', () => {
                 // When - the path is read
                 await visitor.see(within(path, button('Folded levels')));
 
-                // Then - the space and the VM keep their names, the Mac is behind the fold, and the fold opens it
-                await visitor.see(within(path, button('Machine', { exact: false })));
+                // Then - Fleet and the VM keep their names, the Mac is behind the fold, and the fold opens it
+                await visitor.see(within(path, button('Fleet')));
                 await visitor.see(within(path, button('linux-1', { exact: false })));
                 await visitor.gone(within(path, button('macbook-pro', { exact: false })));
                 await visitor.click(within(path, button('Folded levels')));

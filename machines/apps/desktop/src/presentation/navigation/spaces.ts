@@ -42,6 +42,11 @@ export function isGlobal(route: Route): boolean {
     return route.page !== 'machine' && REACH[route.page] === 'global';
 }
 
+// invariant: read from the route, never stored, so Back and Forward move the underline; Settings is in no space.
+export function spaceOfRoute(route: Route): Space | undefined {
+    return isGlobal(route) ? undefined : 'machine';
+}
+
 // value: where the Machine space opens: the last of its pages this window showed, else the first Mac listed, else
 // value: Machine files.
 export function landingOf(last: Route | undefined, firstMac: string | undefined): Route {

@@ -1,4 +1,8 @@
 - banner:
+  - navigation "Spaces":
+    - button "Machine" [pressed]
+    - button "Agent soon": Agent
+    - button "OS soon": OS
   - button "Home"
   - button "Pin the column" [pressed]
   - button "Back"
@@ -6,9 +10,7 @@
   - navigation "Path":
     - list:
       - listitem:
-        - button "Machine 1 Mac not seen":
-          - text: Machine
-          - img "1 Mac not seen"
+        - button "Fleet"
       - listitem:
         - button "mac-mini not seen":
           - text: mac-mini

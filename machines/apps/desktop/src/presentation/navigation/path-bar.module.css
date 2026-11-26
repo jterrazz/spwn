@@ -113,21 +113,6 @@
     height: 14px;
     stroke-width: 1.5;
 }
-.well {
-    display: grid;
-    place-items: center;
-    width: 20px;
-    height: 20px;
-    flex: none;
-    border-radius: var(--radius-small);
-    background: color-mix(in srgb, var(--t3) 22%, transparent);
-    color: var(--t3);
-}
-.well svg {
-    width: 12px;
-    height: 12px;
-    stroke-width: 1.6;
-}
 .words {
     padding: 0 var(--space-8);
     overflow: hidden;

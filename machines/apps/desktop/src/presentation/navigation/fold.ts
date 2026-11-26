@@ -2,8 +2,8 @@
 export const FOLD_WIDTH = 44;
 
 // value: the bar's parts that never fold, in px as `path-bar.module.css` draws them on a Mac: the lights' inset,
-// value: the sign, the column's pin, Back and Forward, the gaps between them, then at its right the Inbox, Find
-// value: and the Settings gear, with the bar's end padding.
+// value: the three spaces and their rule, the sign, the column's pin, Back and Forward, the gaps between them, then
+// value: at its right the Inbox, Find and the Settings gear, with the bar's end padding.
 export const BAR_FIXED = {
     arrows: 2 * 28,
     end: 14,
@@ -12,7 +12,9 @@ export const BAR_FIXED = {
     gear: 28,
     inbox: 44,
     lights: 84,
+    separator: 13,
     sign: 32,
+    spaces: 150,
     toggle: 28,
 } as const;
 
@@ -20,7 +22,7 @@ export function fixedWidth(): number {
     return Object.values(BAR_FIXED).reduce((sum, width) => sum + width, 0);
 }
 
-// invariant: the first and the last segment never fold: the space says where I am, the last what I see. The ones
+// invariant: the first and the last segment never fold: the section says where I am, the last what I see. The ones
 // invariant: between fold from the first onward, so the path keeps its nearest levels while it fits.
 export function foldOf(widths: readonly number[], room: number): readonly number[] {
     const total = widths.reduce((sum, width) => sum + width, 0);

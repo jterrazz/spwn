@@ -32,6 +32,7 @@ const recordingFor = await recordingsOf('calm', 'create-held', 'stories');
 // hazard: press wraps a key longer than one letter in braces, so a chord is user-event's hold and release
 // hazard: with its outer braces left to press.
 const COMMAND_K = 'Control>}k{/Control';
+const COMMAND_2 = 'Meta>}2{/Meta';
 
 const HOME: Route = { page: 'home' };
 
@@ -39,15 +40,16 @@ const HOME: Route = { page: 'home' };
 // value: each the count measured when it was last lowered: a change that costs more fails here, one that costs less
 // value: lowers it.
 const BUDGETS = {
-    activityTab: { commits: 4, renders: 326 },
+    activityTab: { commits: 4, renders: 325 },
     find: { commits: 1, renders: 25 },
-    guideOpens: { commits: 4, renders: 294 },
-    homeCalm: { commits: 8, renders: 543 },
-    homeStories: { commits: 8, renders: 801 },
+    guideOpens: { commits: 4, renders: 295 },
+    homeCalm: { commits: 8, renders: 553 },
+    homeStories: { commits: 8, renders: 811 },
     newMachine: { commits: 2, renders: 39 },
     peek: { commits: 1, renders: 75 },
     pin: { commits: 1, renders: 74 },
-    storage: { commits: 2, renders: 417 },
+    soonAndBack: { commits: 3, renders: 27 },
+    storage: { commits: 2, renders: 412 },
     unchangedRevision: { commits: 0, renders: 0 },
 } as const satisfies Record<string, Budget>;
 
@@ -261,6 +263,27 @@ describe('registry', () => {
 
         // Then - it cost no more than its budget, and the page rendered not once
         expect(overBudget(cost, BUDGETS.peek)).toStrictEqual({});
+        expect(pageRendersOf(cost)).toStrictEqual(UNDRAWN);
+    });
+
+    test("switching to Agent and back draws the bar's spaces within their budget, and never the page", async () => {
+        // Given - mac-mini's Overview over stories, drawn whole
+        const over = talliedOver('stories', {
+            machine: 'mac-mini',
+            page: 'machine',
+            tab: 'Overview',
+        });
+
+        // When - ⌘2 opens Agent's Soon list, then Escape closes it
+        const cost = await costOf(over, async (visitor) => {
+            await visitor.press(COMMAND_2);
+            await visitor.see(dialog('Spaces'));
+            await visitor.press('Escape');
+            await visitor.gone(dialog('Spaces'));
+        });
+
+        // Then - it cost no more than its budget, and the page rendered not once
+        expect(overBudget(cost, BUDGETS.soonAndBack)).toStrictEqual({});
         expect(pageRendersOf(cost)).toStrictEqual(UNDRAWN);
     });
 });

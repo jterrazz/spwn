@@ -204,7 +204,6 @@ type FrameProps = {
     memory: Memory | undefined;
 };
 
-// invariant: a space opens where this window last was in it; only Machine opens today, Agent and OS wait.
 const NOWHERE = () => undefined;
 
 function Content({ area, held }: { area: AreaProps; held: Held | undefined }) {
@@ -245,7 +244,7 @@ function Frame({ Gallery, pages, memory }: FrameProps) {
     const { addMac, guide, newMachine } = opened;
     const withGallery = Gallery !== undefined;
     const spaced = quiet || !isGlobal(route);
-    const onSpace = useSpaceKeys(
+    const { onSpace, soon } = useSpaceKeys(
         router,
         macs,
         { onColumn: spaced ? column.toggle : NOWHERE, onFind: opened.find },
@@ -272,6 +271,7 @@ function Frame({ Gallery, pages, memory }: FrameProps) {
                     onSpace={onSpace}
                     quiet={quiet}
                     router={router}
+                    soon={soon}
                     standing={standing}
                 />
                 {spaced ? <ColumnSlot {...aside} column={column} /> : null}

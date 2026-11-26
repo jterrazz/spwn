@@ -1,4 +1,8 @@
 - banner:
+  - navigation "Spaces":
+    - button "Machine" [pressed]
+    - button "Agent soon": Agent
+    - button "OS soon": OS
   - button "Home"
   - button "Pin the column" [pressed]
   - button "Back"
@@ -6,9 +10,7 @@
   - navigation "Path":
     - list:
       - listitem:
-        - button "Machine all running":
-          - text: Machine
-          - img "all running"
+        - button "Fleet"
       - listitem:
         - button "macbook-pro online":
           - text: macbook-pro

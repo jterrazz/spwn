@@ -1,0 +1,50 @@
+.spaces {
+    align-self: stretch;
+    display: flex;
+    gap: 18px;
+    flex: none;
+    padding: 0 var(--space-4);
+}
+.word {
+    all: unset;
+    box-sizing: border-box;
+    position: relative;
+    display: flex;
+    align-items: center;
+    color: var(--t3);
+    font-size: var(--text-body);
+    font-weight: var(--weight-medium);
+    white-space: nowrap;
+    cursor: pointer;
+    transition: color var(--motion-hover) var(--ease);
+}
+.word:hover:not(:disabled) {
+    color: var(--t2);
+}
+.word:disabled {
+    cursor: default;
+}
+.word[aria-pressed='true'] {
+    color: var(--t1);
+    font-weight: var(--weight-strong);
+}
+.word[aria-pressed='true']::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    bottom: -1px;
+    left: 0;
+    height: 2px;
+    background: var(--t1);
+}
+.word:focus-visible {
+    outline: 2px solid var(--you);
+    outline-offset: -2px;
+    border-radius: var(--radius-small);
+}
+.rule {
+    width: 1px;
+    height: 18px;
+    flex: none;
+    background: var(--hair);
+}

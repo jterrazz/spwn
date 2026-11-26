@@ -5,36 +5,43 @@ import { useShortcuts } from './keys';
 import type { Acts } from './keys';
 import type { Route } from './route';
 import type { Router } from './router';
-import { inSpace, landingOf } from './spaces';
+import { Soon } from './soon';
+import { inSpace, landingOf, opensNow, spaceOfRoute } from './spaces';
 import type { Space } from './spaces';
 
 export type KeysOn = { on: boolean; withGallery: boolean };
 
-// invariant: a space opens where this window last was in it, so ⌘1 and the space popover's Machine return to the page left
-// invariant: for Home or Inbox.
+// invariant: a space opens where this window last was in it, kept per space for the window's life, so ⌘1 and the
+// invariant: Machine word return to the page left for Home or Inbox; a space not built opens its Soon list and moves
+// invariant: no route.
 export function useSpaceKeys(
     router: Router,
     macs: readonly MachinesMacView[],
     { onFind, onColumn }: Pick<Acts, 'onColumn' | 'onFind'>,
     { on, withGallery }: KeysOn,
-): (space: Space) => void {
+): { onSpace: (space: Space) => void; soon: Soon } {
     const { route, go } = router;
-    const last = useRef<Route | undefined>(undefined);
+    const soon = useMemo(() => new Soon(), []);
+    const last = useRef<Partial<Record<Space, Route>>>({});
     useEffect(() => {
-        if (inSpace(route)) {
-            last.current = route;
+        const space = spaceOfRoute(route);
+        if (space !== undefined && inSpace(route)) {
+            last.current = { ...last.current, [space]: route };
         }
     }, [route]);
     const firstMac = macs[0]?.Name;
     const onSpace = useCallback(
         (space: Space) => {
-            if (space === 'machine') {
-                go(landingOf(last.current, firstMac));
+            if (!opensNow(space)) {
+                soon.toggle(space);
+                return;
             }
+            soon.close();
+            go(landingOf(last.current[space], firstMac));
         },
-        [go, firstMac],
+        [go, firstMac, soon],
     );
     const acts = useMemo(() => ({ onColumn, onFind, onSpace }), [onColumn, onFind, onSpace]);
     useShortcuts(router, acts, withGallery, on);
-    return onSpace;
+    return { onSpace, soon };
 }

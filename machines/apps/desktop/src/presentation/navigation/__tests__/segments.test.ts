@@ -6,15 +6,13 @@ import type { Route } from '../route';
 import { segmentsOf } from '../segments';
 import type { Located } from '../segments';
 
-const DOWN = { tone: 'bad' as const, word: '1 down' };
-
 const LINUX_1: Located = {
     mac: { Name: 'macbook-pro', Standing: 'online' },
     vm: { Name: 'linux-1', Standing: 'running' },
 };
 
 function pathOf(route: Route, found?: Located, quiet = false) {
-    return segmentsOf({ found, route, standing: DOWN }, quiet).map((segment) => ({
+    return segmentsOf({ found, route }, quiet).map((segment) => ({
         label: segment.label,
         siblings: segment.siblings,
         to: segment.to,
@@ -22,42 +20,41 @@ function pathOf(route: Route, found?: Located, quiet = false) {
 }
 
 describe('segments', () => {
-    test("a VM's path is the space, its Mac, then itself, each opening its siblings", () => {
+    test("a VM's path is Fleet, its Mac, then itself, each opening its siblings", () => {
         // Given - linux-1 on macbook-pro
         const path = pathOf(machineRoute('linux-1'), LINUX_1);
 
-        // Then - Machine lists the spaces, the Mac the fleet, the VM its Mac's VMs
+        // Then - Fleet lists the places, the Mac the fleet, the VM its Mac's VMs
         expect(path).toStrictEqual([
-            { label: 'Machine', siblings: 'spaces', to: undefined },
+            { label: 'Fleet', siblings: 'places', to: undefined },
             { label: 'macbook-pro', siblings: 'fleet', to: machineRoute('macbook-pro') },
             { label: 'linux-1', siblings: 'vms', to: machineRoute('linux-1') },
         ]);
     });
 
-    test("the space's segment carries the engine's roll-up, and a Mac its own standing", () => {
+    test('the Fleet segment carries no mark, and a Mac its own standing', () => {
         // Given - macbook-pro opened
-        const [space, mac] = segmentsOf(
-            { found: { mac: LINUX_1.mac }, route: machineRoute('macbook-pro'), standing: DOWN },
+        const [fleet, mac] = segmentsOf(
+            { found: { mac: LINUX_1.mac }, route: machineRoute('macbook-pro') },
             false,
         );
 
-        // Then - the roll-up as given, the Mac's word as the engine says it
-        expect(space?.shown).toStrictEqual(DOWN);
+        // Then - no roll-up on Fleet, the Mac's word as the engine says it
+        expect(fleet?.shown).toBeUndefined();
         expect(mac?.shown).toStrictEqual(macState({ Standing: 'online' }));
     });
 
-    test('a page of the space is the space then the page, an item its shelf then its name', () => {
+    test('a page of the space starts at its place, an item at its shelf then its name', () => {
         // Given - Storage, then an app on its shelf
         const storage = pathOf({ page: 'storage' });
         const item = pathOf({ item: 'gh', page: 'catalog-apps' });
 
         // Then - the place lists its siblings, the item is words
         expect(storage).toStrictEqual([
-            { label: 'Machine', siblings: 'spaces', to: undefined },
             { label: 'Storage', siblings: 'places', to: { page: 'storage' } },
         ]);
-        expect(item.map((segment) => segment.label)).toStrictEqual(['Machine', 'Apps', 'gh']);
-        expect(item[2]?.siblings).toBeUndefined();
+        expect(item.map((segment) => segment.label)).toStrictEqual(['Apps', 'gh']);
+        expect(item[1]?.siblings).toBeUndefined();
     });
 
     test("home, Inbox and Settings are the window's own, named alone", () => {
@@ -72,12 +69,14 @@ describe('segments', () => {
         ]);
     });
 
-    test('passwords is a page of the Machine space', () => {
+    test('passwords is a place of the Machine space', () => {
         // Given - the vault's list
         const path = pathOf({ page: 'passwords' });
 
-        // Then - under the space
-        expect(path.map((segment) => segment.label)).toStrictEqual(['Machine', 'Passwords']);
+        // Then - its place alone, which lists the others
+        expect(path).toStrictEqual([
+            { label: 'Passwords', siblings: 'places', to: { page: 'passwords' } },
+        ]);
     });
 
     test('the frame with no engine is Home alone, whatever the route', () => {

@@ -135,9 +135,9 @@ describe('catalog', () => {
             .storage(PINNED)
             .visit('/?world=stories&page=catalog-skills', async (visitor) => {
                 // When - the path is read
-                // Then - it reads Machine, then Skills
+                // Then - it starts at Skills, the space named by the bar's own words
                 const path = navigation('Path');
-                await visitor.see(within(path, button('Machine', { exact: false })));
+                await visitor.gone(within(path, button('Machine', { exact: false })));
                 await visitor.see(within(path, button('Skills')));
             });
         expect(result.errors.text).toBe('');

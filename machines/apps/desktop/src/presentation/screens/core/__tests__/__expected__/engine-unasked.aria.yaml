@@ -1,14 +1,14 @@
 - banner:
+  - navigation "Spaces":
+    - button "Machine" [pressed]
+    - button "Agent soon": Agent
+    - button "OS soon": OS
   - button "Home"
   - button "Pin the column" [pressed]
   - button "Back" [disabled]
   - button "Forward" [disabled]
   - navigation "Path":
     - list:
-      - listitem:
-        - button "Machine 1 Mac with its engine stopped":
-          - text: Machine
-          - img "1 Mac with its engine stopped"
       - listitem:
         - button "Engine"
   - button "Engine stopped"
