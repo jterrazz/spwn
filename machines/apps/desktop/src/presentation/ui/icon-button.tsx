@@ -9,13 +9,22 @@ export type IconButtonProps = {
     shortcut?: string;
     onClick: () => void;
     disabled?: boolean;
+    pressed?: boolean | undefined;
 };
 
-export function IconButton({ icon, label, shortcut, onClick, disabled = false }: IconButtonProps) {
+export function IconButton({
+    icon,
+    label,
+    shortcut,
+    onClick,
+    disabled = false,
+    pressed,
+}: IconButtonProps) {
     return (
         <button
             aria-keyshortcuts={shortcut}
             aria-label={label}
+            aria-pressed={pressed}
             className={styles.button}
             disabled={disabled}
             onClick={onClick}

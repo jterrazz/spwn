@@ -96,6 +96,17 @@ describe('contrast', () => {
         expect(below(TEXT_BAR, [onAccent])).toStrictEqual([]);
     });
 
+    test("a state's mark holds 3:1 on the column's current row, the light pill", () => {
+        // Given - each tone's mark as the current row draws it, on --primary
+        const measures = TONES.map((tone): Measure => [
+            `--${tone}-on-primary on --primary`,
+            ratio(colourOf(`${tone}-on-primary`), colourOf('primary')),
+        ]);
+
+        // Then - none is below the bar of a mark
+        expect(below(MARK_BAR, measures)).toStrictEqual([]);
+    });
+
     test('the pill is drawn at 8 % of its tone, and its line at 24 %', () => {
         // Given - the two shares tokens.css names
         const shares = [tokenOf('tone-fill'), tokenOf('tone-line')];

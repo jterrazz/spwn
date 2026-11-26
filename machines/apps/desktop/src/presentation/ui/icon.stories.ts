@@ -32,6 +32,7 @@ const NAMES: readonly IconName[] = [
     'chevron',
     'choose',
     'lock',
+    'pin',
 ];
 
 export const ICON_STORIES: readonly Story<ComponentProps<typeof Icon>>[] = NAMES.map((name) => ({
