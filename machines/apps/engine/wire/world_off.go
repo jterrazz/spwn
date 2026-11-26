@@ -121,3 +121,8 @@ func (*worldMac) engineStarted() time.Time            { return time.Time{} }
 func (*worldMac) presence() devices.Answer { return devices.Absent }
 
 func specDeviceAnchor(map[string]string) devicescontract.Anchor { return nil }
+
+// invariant: the release build runs the system's own `security`, the one
+// that guards the vault and the device book's head, whatever
+// STATION_SYSTEM_ROOT says.
+func securityRoot(map[string]string) string { return "" }

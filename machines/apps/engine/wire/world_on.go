@@ -429,6 +429,10 @@ func specDeviceKey(vars map[string]string) contract.DeviceKey {
 	return machinesfake.DeviceKeyOf(key)
 }
 
+// value: the root the spec build reads `security` under, the sandbox's;
+// the release build has none.
+func securityRoot(vars map[string]string) string { return systemRootOf(vars) }
+
 // invariant: outside a world the spec build never reaches a keychain: the
 // device book's head is kept in the file STATION_DEVICE_ANCHOR_STUB names,
 // "<generation> <digest>"; without that variable the real keychain's
