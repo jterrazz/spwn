@@ -14,6 +14,46 @@ import (
 // value: the examples are the engine's, under its catalog; `spwn up` still builds their spwn: dependencies from this catalog
 const examplesDir = "../../machines/catalog/projects"
 
+func filesUnder(t *testing.T, root string) map[string][]byte {
+	t.Helper()
+	out := map[string][]byte{}
+	err := filepath.WalkDir(root, func(at string, e os.DirEntry, err error) error {
+		if err != nil || e.IsDir() {
+			return err
+		}
+		rel, err := filepath.Rel(root, at)
+		if err != nil {
+			return err
+		}
+		data, err := os.ReadFile(at)
+		out[filepath.ToSlash(rel)] = data
+		return err
+	})
+	if err != nil || len(out) == 0 {
+		t.Fatalf("read %s: %v, %d files", root, err, len(out))
+	}
+	return out
+}
+
+func TestTheSeveranceFixtureIsTheCatalogsExample(t *testing.T) {
+	fixture := filesUnder(t, "../../specs/cli/__fixtures__/severance")
+	example := filesUnder(t, filepath.Join(examplesDir, "severance"))
+	for rel, data := range example {
+		held, ok := fixture[rel]
+		switch {
+		case !ok:
+			t.Errorf("the fixture lacks %s", rel)
+		case string(held) != string(data):
+			t.Errorf("the fixture's %s differs from the example's", rel)
+		}
+	}
+	for rel := range fixture {
+		if _, ok := example[rel]; !ok {
+			t.Errorf("the fixture holds %s, which the example does not", rel)
+		}
+	}
+}
+
 func TestEveryExampleDependsOnlyOnToolsOfThisCatalog(t *testing.T) {
 	entries, err := os.ReadDir(examplesDir)
 	if err != nil || len(entries) == 0 {
