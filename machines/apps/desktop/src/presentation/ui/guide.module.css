@@ -12,7 +12,6 @@
     gap: 18px;
     padding: 22px 18px;
     background: var(--s0);
-    border-right: 1px solid var(--hair);
     min-width: 0;
 }
 .act {
@@ -260,7 +259,6 @@
     padding: 9px var(--space-12);
     border-radius: var(--radius-control);
     background: var(--s0);
-    box-shadow: inset 0 0 0 1px var(--hair);
     font-size: var(--text-meta);
     line-height: 1.45;
     color: var(--t2);

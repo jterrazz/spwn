@@ -12,9 +12,10 @@
     width: min(540px, 100%);
     max-height: 100%;
     background: var(--s1);
-    border: 1px solid var(--edge);
     border-radius: var(--radius-sheet);
-    box-shadow: var(--lift-3);
+    box-shadow:
+        var(--lift-3),
+        inset 0 0 0 1px var(--hair);
     overflow: hidden;
     display: flex;
     flex-direction: column;
