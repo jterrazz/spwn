@@ -1,7 +1,7 @@
 import type { CoreFlow, CoreState } from '../../../application/use-cases/core-flow';
 import { INSTALL_FOLDER, START_LINE } from '../../../domain/core';
 import { useCore, useUpdate } from '../../dependencies/dependencies';
-import { Button, Sign } from '../../ui/index';
+import { Button } from '../../ui/index';
 import { shownOrWithheld } from '../../ui/secret';
 import {
     Acts,
@@ -26,7 +26,6 @@ const OUTPUT = "The installer's output";
 function Offer({ flow }: { flow: CoreFlow }) {
     return (
         <>
-            <Sign size="large" />
             <Head title="Spwn is not installed on this Mac.">
                 This window shows the machines the Spwn engine runs. Install it here, then start the
                 engine.
@@ -65,7 +64,6 @@ function Installing({
 }) {
     return (
         <>
-            <Sign size="large" />
             <Head title="Installing Spwn.">
                 The installer runs the command below. Nothing lands in <Mono>{INSTALL_FOLDER}</Mono>{' '}
                 until every checksum matches.
