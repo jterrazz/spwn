@@ -607,8 +607,15 @@ func Codes() map[fail.Code]Wording {
 			return e.Subject + " is neither a file nor a folder: a project's declaration holds only those", "move it away, then station project plan"
 		},
 		projectcalls.NotWritten: func(e *fail.Error) (string, string) {
-			return e.Subject + " could not be written; what apply wrote before it is recorded", "make room for it, then station project apply"
-		}, backgroundcalls.Unknown: func(e *fail.Error) (string, string) {
+			switch {
+			case e.Detail["record"] == "":
+				return e.Subject + " could not be written; what apply wrote before it is recorded", "make room for it, then station project apply"
+			case e.Subject == project.StateFolder+"/"+project.RecordName:
+				return e.Subject + ", the record of what apply wrote, could not be written; every change is made, and the next apply records it", "make room for it, then station project apply"
+			}
+			return e.Subject + " could not be written, nor " + project.StateFolder + "/" + project.RecordName + ", the record of what apply wrote before it", "make room for both, then station project apply"
+		},
+		backgroundcalls.Unknown: func(e *fail.Error) (string, string) {
 			return "no background task \"" + e.Subject + "\"", "station background"
 		},
 		backgroundcalls.RootScope: func(e *fail.Error) (string, string) {

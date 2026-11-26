@@ -2,6 +2,7 @@ package calls
 
 import (
 	"errors"
+	"slices"
 
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
@@ -52,6 +53,8 @@ func coded(err error, subject string) error {
 		return fail.New(fail.Refused, LinkInTheWay, at.Path, nil)
 	case errors.As(err, &at) && errors.Is(at.Err, project.ErrNotAFile):
 		return fail.New(fail.Refused, NotAFile, at.Path, nil)
+	case errors.As(err, &at) && unrecorded(err):
+		return fail.New(fail.Refused, NotWritten, at.Path, map[string]string{"record": "not-written"})
 	case errors.As(err, &at):
 		return fail.New(fail.Refused, NotWritten, at.Path, nil)
 	case errors.Is(err, project.ErrNotFound):
@@ -60,4 +63,17 @@ func coded(err error, subject string) error {
 		return fail.New(fail.Refused, Exists, subject, nil)
 	}
 	return err
+}
+
+// value: err holds the record's own write refused, alone or joined to the
+// change refused before it.
+func unrecorded(err error) bool {
+	var at *project.Unwritten
+	if errors.As(err, &at) && at.Path == project.StateFolder+"/"+project.RecordName {
+		return true
+	}
+	if joined, ok := err.(interface{ Unwrap() []error }); ok {
+		return slices.ContainsFunc(joined.Unwrap(), unrecorded)
+	}
+	return false
 }
