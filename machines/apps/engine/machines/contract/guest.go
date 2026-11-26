@@ -6,6 +6,7 @@ import (
 	"io"
 	"io/fs"
 	"net/netip"
+	"strconv"
 )
 
 var (
@@ -38,6 +39,23 @@ type LockdownError struct {
 
 func (e *LockdownError) Error() string { return e.Cause }
 
+// value: the most of a command's output, its stdout and its stderr each,
+// an Exec keeps in its result; what streams to a writer it is given has
+// no bound.
+
+const GuestOutputMost = 8 << 20
+
+type OutputTooLargeError struct {
+	// value: the VM whose command printed past GuestOutputMost with no
+	// writer to take it: the command is ended, its result holding its
+	// output up to the most.
+	VM string
+}
+
+func (e *OutputTooLargeError) Error() string {
+	return e.VM + "'s command printed more than " + strconv.Itoa(GuestOutputMost>>20) + " MiB, the most a command's output is kept, so it was ended"
+}
+
 type GuestDialer interface {
 	Dial(ctx context.Context, t GuestTarget) (Guest, error)
 }
@@ -59,7 +77,8 @@ type GuestCommand struct {
 	Line string
 	// invariant: a secret reaches the guest by Stdin, never inside Line.
 	Stdin io.Reader
-	// value: where the command's output streams; nil keeps it in the result.
+	// value: where the command's output streams; nil keeps it in the
+	// result, up to GuestOutputMost.
 	Stdout, Stderr io.Writer
 }
 

@@ -364,6 +364,7 @@
             "grant.unknown-entry",
             "grant.unknown-machine",
             "guest_absent",
+            "guest_output_too_large",
             "guest_timeout",
             "ignored_port",
             "image.binary-not-found",

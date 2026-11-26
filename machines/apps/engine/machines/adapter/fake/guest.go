@@ -325,6 +325,10 @@ func (c *guest) Exec(ctx context.Context, cmd contract.GuestCommand) (contract.G
 	if poweroff {
 		c.poweroff()
 	}
+	if len(res.Stdout) > contract.GuestOutputMost || len(res.Stderr) > contract.GuestOutputMost {
+		res.Stdout, res.Stderr = res.Stdout[:min(len(res.Stdout), contract.GuestOutputMost)], res.Stderr[:min(len(res.Stderr), contract.GuestOutputMost)]
+		return res, &contract.OutputTooLargeError{VM: c.name}
+	}
 	return res, nil
 }
 

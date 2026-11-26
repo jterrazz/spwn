@@ -62,6 +62,8 @@ func engineTitle(code fail.Code) (string, bool) {
 		return "Guest not connected", true
 	case enginecalls.GuestTimeout:
 		return "Guest did not answer", true
+	case enginecalls.GuestOutputTooLarge:
+		return "Command output too large", true
 	case enginecalls.LocalNetwork:
 		return "Local Network not approved", true
 	case enginecalls.IgnoredPort:

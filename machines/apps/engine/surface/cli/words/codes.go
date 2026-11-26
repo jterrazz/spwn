@@ -191,6 +191,9 @@ func Codes() map[fail.Code]Wording {
 		enginecalls.GuestTimeout: func(e *fail.Error) (string, string) {
 			return carried(e, "the VM's guest did not answer in time", "station machines")
 		},
+		enginecalls.GuestOutputTooLarge: func(e *fail.Error) (string, string) {
+			return carried(e, "a command inside the VM printed past the most its output is kept, so it was ended", "station machines")
+		},
 		enginecalls.LocalNetwork: func(e *fail.Error) (string, string) {
 			return carried(e, "the Mac has not approved Machines for Local Network", "station machines")
 		},

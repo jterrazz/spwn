@@ -40,6 +40,7 @@ func New(files local.FS, sockets local.Sockets, goos string) contract.GuestDiale
 
 type client struct {
 	c    *ssh.Client
+	vm   string
 	done chan struct{}
 	once sync.Once
 }
@@ -197,7 +198,7 @@ func (d dialer) Dial(ctx context.Context, t contract.GuestTarget) (contract.Gues
 	if err != nil {
 		return nil, err
 	}
-	cl := &client{c: ssh.NewClient(c, chans, reqs), done: make(chan struct{})}
+	cl := &client{c: ssh.NewClient(c, chans, reqs), vm: t.VM, done: make(chan struct{})}
 	go cl.watch()
 	go cl.keepalive()
 	return cl, nil
@@ -236,13 +237,14 @@ func (c *client) Exec(ctx context.Context, cmd contract.GuestCommand) (contract.
 		return contract.GuestResult{}, err
 	}
 	defer func() { _ = session.Close() }()
-	var out, errs lockedBuffer
+	over := &overflow{passed: make(chan struct{})}
+	out, errs := &lockedBuffer{over: over}, &lockedBuffer{over: over}
 	session.Stdin, session.Stdout, session.Stderr = cmd.Stdin, cmd.Stdout, cmd.Stderr
 	if cmd.Stdout == nil {
-		session.Stdout = &out
+		session.Stdout = out
 	}
 	if cmd.Stderr == nil {
-		session.Stderr = &errs
+		session.Stderr = errs
 	}
 	if err := session.Start(cmd.Line); err != nil {
 		return contract.GuestResult{}, err
@@ -252,17 +254,27 @@ func (c *client) Exec(ctx context.Context, cmd contract.GuestCommand) (contract.
 		ended <- session.Wait()
 		close(drained)
 	}()
-	select {
-	case <-ctx.Done():
+	stop := func() contract.GuestResult {
 		_ = session.Signal(ssh.SIGTERM)
 		_ = session.Close()
 		select {
 		case <-drained:
 		case <-time.After(drainWait):
 		}
-		return contract.GuestResult{Stdout: out.String(), Stderr: errs.String()}, ctx.Err()
+		return contract.GuestResult{Stdout: out.String(), Stderr: errs.String()}
+	}
+	select {
+	case <-ctx.Done():
+		return stop(), ctx.Err()
+	case <-over.passed:
+		return stop(), &contract.OutputTooLargeError{VM: c.vm}
 	case err := <-ended:
 		res := contract.GuestResult{Stdout: out.String(), Stderr: errs.String()}
+		select {
+		case <-over.passed:
+			return res, &contract.OutputTooLargeError{VM: c.vm}
+		default:
+		}
 		var exit *ssh.ExitError
 		if errors.As(err, &exit) {
 			res.Code = exit.ExitStatus()
@@ -276,14 +288,33 @@ func (c *client) Exec(ctx context.Context, cmd contract.GuestCommand) (contract.
 // session is closed, so the output it wrote before is answered whole.
 const drainWait = 5 * time.Second
 
+var errOutputPastMost = errors.New("the command's output passed the most kept")
+
+// value: the end of a command whose output passed the most kept, said
+// once whichever of its buffers passed it first.
+type overflow struct {
+	passed chan struct{}
+	once   sync.Once
+}
+
+func (o *overflow) pass() { o.once.Do(func() { close(o.passed) }) }
+
+// invariant: a buffer holds GuestOutputMost bytes at most: the write that
+// would pass it keeps what fits, refuses the rest and says its overflow.
 type lockedBuffer struct {
-	mu sync.Mutex
-	b  bytes.Buffer
+	mu   sync.Mutex
+	b    bytes.Buffer
+	over *overflow
 }
 
 func (l *lockedBuffer) Write(p []byte) (int, error) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
+	if room := contract.GuestOutputMost - l.b.Len(); len(p) > room {
+		n, _ := l.b.Write(p[:room])
+		l.over.pass()
+		return n, errOutputPastMost
+	}
 	return l.b.Write(p)
 }
 

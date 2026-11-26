@@ -708,6 +708,10 @@
       "Word": "Guest not connected",
       "Tone": "plain"
     },
+    "guest_output_too_large": {
+      "Word": "Command output too large",
+      "Tone": "plain"
+    },
     "guest_timeout": {
       "Word": "Guest did not answer",
       "Tone": "plain"
