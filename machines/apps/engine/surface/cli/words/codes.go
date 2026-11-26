@@ -598,6 +598,9 @@ func Codes() map[fail.Code]Wording {
 		},
 		projectcalls.LinkInTheWay: func(e *fail.Error) (string, string) {
 			return e.Subject + " is a link: apply never follows one", "remove the link, then station project apply"
+		},
+		projectcalls.NotWritten: func(e *fail.Error) (string, string) {
+			return e.Subject + " could not be written; what apply wrote before it is recorded", "make room for it, then station project apply"
 		}, backgroundcalls.Unknown: func(e *fail.Error) (string, string) {
 			return "no background task \"" + e.Subject + "\"", "station background"
 		},

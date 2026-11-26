@@ -306,6 +306,86 @@ func holdsEveryFileOf(t *testing.T, files fs.FS, dir, root string) {
 	}
 }
 
+func holdsWhatThePlanSaid(t *testing.T, root string, changes []project.Change) {
+	t.Helper()
+	for _, c := range changes {
+		if c.Kind == project.Remove {
+			continue
+		}
+		dir, name := path.Split(c.Path)
+		f, err := local.Beneath{}.Open(root, path.Clean(dir))
+		if err != nil {
+			t.Errorf("%s: %v", c.Path, err)
+			continue
+		}
+		var on []byte
+		if c.File.Link {
+			var target string
+			target, err = f.Readlink(name)
+			on = []byte(target)
+		} else {
+			on, _, err = f.ReadFile(name)
+		}
+		f.Close()
+		if err != nil || !bytes.Equal(on, c.File.Data) {
+			t.Errorf("%s holds %q, %v; the plan said %q", c.Path, on, err, c.File.Data)
+		}
+	}
+}
+
+func TestAnApplyStoppedByAFolderInTheWayRecordsWhatItWrote(t *testing.T) {
+	t.Setenv("SPWN_HOME", t.TempDir())
+	d := calls.Deps{Projects: manifest.New(local.New(nil, nil, nil, nil).FS)}
+	made, err := calls.Create.Run(t.Context(), d, calls.CreateIn{Folder: t.TempDir(), From: "severance"}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	plan, err := calls.Plan.Run(t.Context(), d, calls.PlanIn{Folder: made.Root}, nil)
+	if err != nil || len(plan.Changes) < 4 {
+		t.Fatalf("Plan = %+v, %v; want four files to add at least", plan.Changes, err)
+	}
+	blocked := plan.Changes[3].Path
+	inTheWay := filepath.Join(made.Root, filepath.FromSlash(blocked))
+	if err = os.MkdirAll(inTheWay, 0o750); err != nil {
+		t.Fatal(err)
+	}
+	if err = os.WriteFile(filepath.Join(inTheWay, "mine.txt"), []byte("mine\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	_, err = calls.Apply.Run(t.Context(), d, calls.ApplyIn{Folder: made.Root, Confirm: confirm.Yes}, nil)
+	if !refusedAbout(err, calls.NotWritten, blocked) {
+		t.Fatalf("Apply = %v; want NotWritten naming %s", err, blocked)
+	}
+	data, err := os.ReadFile(filepath.Join(made.Root, project.StateFolder, project.RecordName))
+	if err != nil {
+		t.Fatal(err)
+	}
+	record := project.Record{}
+	if err = json.Unmarshal(data, &record); err != nil {
+		t.Fatal(err)
+	}
+	if len(record) != 3 {
+		t.Errorf("record = %v; want the 3 files written before %s", record, blocked)
+	}
+	for _, c := range plan.Changes[:3] {
+		if record[c.Path] != project.Digest(c.File) {
+			t.Errorf("record of %s = %q; want the digest of what was written", c.Path, record[c.Path])
+		}
+	}
+	holdsWhatThePlanSaid(t, made.Root, plan.Changes[:3])
+	if mine, _ := os.ReadFile(filepath.Join(inTheWay, "mine.txt")); string(mine) != "mine\n" {
+		t.Errorf("the folder in the way holds %q; want it untouched", mine)
+	}
+	if err = local.New(nil, nil, nil, nil).FS.RemoveAll(inTheWay); err != nil {
+		t.Fatal(err)
+	}
+	again, err := calls.Apply.Run(t.Context(), d, calls.ApplyIn{Folder: made.Root}, nil)
+	if err != nil || len(again.Changes) != len(plan.Changes)-3 {
+		t.Fatalf("the next Apply = %+v, %v; want the %d changes left, none asked", again.Changes, err, len(plan.Changes)-3)
+	}
+	holdsWhatThePlanSaid(t, made.Root, plan.Changes)
+}
+
 func TestEachExampleOfTheCatalogPlansValidAndApplies(t *testing.T) {
 	for _, example := range catalog.Examples() {
 		t.Run(example, func(t *testing.T) {

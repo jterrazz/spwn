@@ -2,11 +2,13 @@ package fake
 
 import (
 	"context"
+	"errors"
 	"io/fs"
 	"maps"
 	"path"
 	"path/filepath"
 	"slices"
+	"strings"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/project"
@@ -169,6 +171,8 @@ func (p *Projects) Applied(_ context.Context, root string, paths []string) (reco
 		}
 		if f, ok := s.Disk[rel]; ok {
 			disk[rel] = project.Digest(f)
+		} else if filled(s, rel) {
+			disk[rel] = project.Digest(project.File{Path: rel, Data: []byte(fs.ModeDir.String())})
 		}
 	}
 	return maps.Clone(s.Record), disk, nil
@@ -192,14 +196,31 @@ func (p *Projects) Write(_ context.Context, root string, changes []project.Chang
 	if s.Disk == nil {
 		s.Disk = map[string]project.File{}
 	}
-	for _, c := range changes {
+	defer func() { p.kept()[root] = s }()
+	for i, c := range changes {
 		if c.Kind == project.Remove {
 			delete(s.Disk, c.Path)
 			continue
 		}
+		if filled(s, c.Path) {
+			s.Record = project.Kept(s.Record, record, changes, i)
+			return &project.Unwritten{Path: c.Path, Err: errFolderInTheWay}
+		}
 		s.Disk[c.Path] = c.File
 	}
 	s.Record = maps.Clone(record)
-	p.kept()[root] = s
 	return nil
+}
+
+var errFolderInTheWay = errors.New("is a folder that holds files")
+
+// value: rel names a folder that holds a file, as a file the world wrote
+// under it says.
+func filled(s project.State, rel string) bool {
+	for at := range s.Disk {
+		if strings.HasPrefix(at, rel+"/") {
+			return true
+		}
+	}
+	return false
 }

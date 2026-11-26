@@ -33,6 +33,9 @@ const (
 	// path or on its record: refused before anything is written, never
 	// followed.
 	LinkInTheWay fail.Code = "project.link-in-the-way"
+	// value: a change apply could not make, a folder in a rendered file's
+	// way say: it stops there, recording what it wrote before.
+	NotWritten fail.Code = "project.not-written"
 )
 
 func coded(err error, subject string) error {
@@ -44,6 +47,8 @@ func coded(err error, subject string) error {
 		return nil
 	case errors.As(err, &at) && errors.Is(at.Err, project.ErrLink):
 		return fail.New(fail.Refused, LinkInTheWay, at.Path, nil)
+	case errors.As(err, &at):
+		return fail.New(fail.Refused, NotWritten, at.Path, nil)
 	case errors.Is(err, project.ErrNotFound):
 		return fail.New(fail.NotFound, NotFound, subject, nil)
 	case errors.Is(err, project.ErrExists):

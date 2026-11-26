@@ -1058,6 +1058,11 @@
       "Detail": "project",
       "Tone": "plain"
     },
+    "project.not-written": {
+      "Word": "not written",
+      "Detail": "project",
+      "Tone": "plain"
+    },
     "project.unknown-example": {
       "Word": "unknown example",
       "Detail": "project",

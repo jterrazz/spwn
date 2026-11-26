@@ -1162,7 +1162,8 @@
         "confirm.yes-needed",
         "project.invalid",
         "project.link-in-the-way",
-        "project.not-found"
+        "project.not-found",
+        "project.not-written"
       ],
       "in": "ApplyIn",
       "out": "Applied"

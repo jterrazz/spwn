@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"maps"
 	"path"
 	"slices"
 	"strconv"
@@ -181,6 +182,22 @@ func Asked(changes []Change) []Change {
 		if c.Kind != Add {
 			out = append(out, c)
 		}
+	}
+	return out
+}
+
+func Kept(was, next Record, changes []Change, done int) Record {
+	// value: the record an apply keeps when it stops after its first done
+	// changes: what it wrote, each file the disk already held as rendered,
+	// and, for a change it did not make, the file it wrote before as it
+	// was then.
+	out := maps.Clone(next)
+	for _, c := range changes[done:] {
+		if d, ok := was[c.Path]; ok {
+			out[c.Path] = d
+			continue
+		}
+		delete(out, c.Path)
 	}
 	return out
 }

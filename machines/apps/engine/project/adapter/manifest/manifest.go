@@ -390,12 +390,25 @@ func (p Projects) folders(root, dir string) error {
 }
 
 func (p Projects) Write(_ context.Context, root string, changes []project.Change, record project.Record) error {
+	// invariant: a change apply could not make stops it there, and the
+	// record it keeps is that of the changes it made, so the next apply
+	// owns them and starts again where this one stopped.
 	for _, c := range changes {
 		if !project.InRunFolder(c.Path) {
 			return fmt.Errorf("%w: %s", project.ErrOutside, c.Path)
 		}
+	}
+	was, _, err := p.record(root)
+	if err != nil {
+		return err
+	}
+	for i, c := range changes {
 		if err := p.change(root, c); err != nil {
-			return unwritten(root, c.Path, err)
+			failed := unwritten(root, c.Path, err)
+			if kept := p.keep(root, project.Kept(was, record, changes, i)); kept != nil {
+				return errors.Join(failed, kept)
+			}
+			return failed
 		}
 	}
 	return p.keep(root, record)
