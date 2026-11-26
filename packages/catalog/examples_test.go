@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"spwn.sh/packages/dependency"
+	"spwn.sh/packages/dependency/builtin"
 )
 
 // Structural embed-walking tests live inside the spwn adapter
@@ -17,7 +17,7 @@ import (
 // should be the first example users see since it's the multi-agent
 // showcase.
 func TestList_StartupIsFirst(t *testing.T) {
-	got, err := dependency.Gallery()
+	got, err := builtin.Gallery()
 	if err != nil {
 		t.Fatalf("List: %v", err)
 	}
@@ -30,7 +30,7 @@ func TestList_StartupIsFirst(t *testing.T) {
 }
 
 func TestList_AllShippedExamplesParse(t *testing.T) {
-	got, err := dependency.Gallery()
+	got, err := builtin.Gallery()
 	if err != nil {
 		t.Fatalf("List: %v", err)
 	}
@@ -66,7 +66,7 @@ func TestList_AllShippedExamplesParse(t *testing.T) {
 }
 
 func TestGet_UnknownSlug(t *testing.T) {
-	if _, err := dependency.GalleryEntryBySlug("nope"); err != dependency.ErrNotFound {
+	if _, err := builtin.GalleryEntryBySlug("nope"); err != builtin.ErrNotFound {
 		t.Errorf("expected ErrNotFound, got %v", err)
 	}
 }
@@ -74,7 +74,7 @@ func TestGet_UnknownSlug(t *testing.T) {
 func TestGet_PureDependencyIsNotGalleryEligible(t *testing.T) {
 	// spwn:unix has no worlds: section so Get must treat it as
 	// not-gallery-eligible.
-	if _, err := dependency.GalleryEntryBySlug("unix"); err != dependency.ErrNotFound {
+	if _, err := builtin.GalleryEntryBySlug("unix"); err != builtin.ErrNotFound {
 		t.Errorf("Get(\"unix\") should fail: deps without worlds are not gallery-eligible (got err=%v)", err)
 	}
 }
@@ -82,7 +82,7 @@ func TestGet_PureDependencyIsNotGalleryEligible(t *testing.T) {
 func TestInstall_CopiesAgentsAndWorldsIdempotently(t *testing.T) {
 	base := t.TempDir()
 
-	rep, err := dependency.Install("matrix", base)
+	rep, err := builtin.Install("matrix", base)
 	if err != nil {
 		t.Fatalf("Install: %v", err)
 	}
@@ -107,7 +107,7 @@ func TestInstall_CopiesAgentsAndWorldsIdempotently(t *testing.T) {
 	}
 
 	// Re-install: no new additions, every world + agent skipped.
-	rep2, err := dependency.Install("matrix", base)
+	rep2, err := builtin.Install("matrix", base)
 	if err != nil {
 		t.Fatalf("second Install: %v", err)
 	}
@@ -124,7 +124,7 @@ func TestInstall_CopiesAgentsAndWorldsIdempotently(t *testing.T) {
 
 func TestInstall_PreservesLocalEdits(t *testing.T) {
 	base := t.TempDir()
-	_, err := dependency.Install("paperclip-factory", base)
+	_, err := builtin.Install("paperclip-factory", base)
 	if err != nil {
 		t.Fatalf("Install: %v", err)
 	}
@@ -135,7 +135,7 @@ func TestInstall_PreservesLocalEdits(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	_, err = dependency.Install("paperclip-factory", base)
+	_, err = builtin.Install("paperclip-factory", base)
 	if err != nil {
 		t.Fatalf("re-Install: %v", err)
 	}
@@ -149,7 +149,7 @@ func TestInstall_PreservesLocalEdits(t *testing.T) {
 }
 
 func TestInstall_UnknownSlug(t *testing.T) {
-	if _, err := dependency.Install("nope", t.TempDir()); err != dependency.ErrNotFound {
+	if _, err := builtin.Install("nope", t.TempDir()); err != builtin.ErrNotFound {
 		t.Errorf("expected ErrNotFound, got %v", err)
 	}
 }

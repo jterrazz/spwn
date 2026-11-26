@@ -28,6 +28,7 @@ import (
 	"spwn.sh/apps/cli/ui"
 	"spwn.sh/packages/agent"
 	"spwn.sh/packages/dependency"
+	"spwn.sh/packages/dependency/builtin"
 	"spwn.sh/packages/dependency/refs"
 	"spwn.sh/packages/platform"
 	"spwn.sh/packages/project"
@@ -150,7 +151,7 @@ func RunInstall(cmd *cobra.Command, raw, agentFilter string) error {
 	if parsed.Kind == refs.KindSpwnBuiltin {
 		gateToolsRoot, err := platform.GateToolsDir()
 		if err == nil {
-			gateSlugs, gerr := dependency.CopyGateTools(parsed.Name, gateToolsRoot)
+			gateSlugs, gerr := builtin.CopyGateTools(parsed.Name, gateToolsRoot)
 			if gerr != nil {
 				fmt.Fprintf(out, "  %s  warning: gate-tool sync: %v\n", ui.Strong("!"), gerr)
 			} else if len(gateSlugs) > 0 {

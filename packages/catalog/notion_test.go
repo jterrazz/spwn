@@ -6,13 +6,13 @@ import (
 	"strings"
 	"testing"
 
-	"spwn.sh/packages/dependency"
+	"spwn.sh/packages/dependency/builtin"
 	"spwn.sh/packages/dependency/tool"
 )
 
 // findTool returns the registered tool with the given name, or nil.
 func findTool(name string) tool.Tool {
-	for _, t := range dependency.BuiltinTools() {
+	for _, t := range builtin.BuiltinTools() {
 		if t.Name() == name {
 			return t
 		}

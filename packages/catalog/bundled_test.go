@@ -1,7 +1,7 @@
 package catalog_test
 
 import (
-	"spwn.sh/packages/dependency"
+	"spwn.sh/packages/dependency/builtin"
 	"bytes"
 	"os"
 	"path/filepath"
@@ -81,7 +81,7 @@ func TestCatalogBundles(t *testing.T) {
 			// resolve the requested refs. This exercises the same
 			// code path `packages/architect` runs at spawn time.
 			reg := resolver.NewRegistry()
-			for _, tool := range dependency.BuiltinTools() {
+			for _, tool := range builtin.BuiltinTools() {
 				if err := reg.Register(tool); err != nil {
 					t.Fatalf("register %s: %v", tool.Name(), err)
 				}

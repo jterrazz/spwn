@@ -73,6 +73,18 @@ linters:
                         - pkg: spwn.sh/packages/project
                         - pkg: spwn.sh/packages/compile
                         - pkg: spwn.sh/packages/world
+                engine-linked:
+                    files:
+                        - '**/packages/project/**'
+                        - '**/packages/transpile/**'
+                        - '**/packages/automation/**'
+                        - '**/packages/runtimes/**'
+                        - '**/packages/agent/**'
+                        - '**/packages/activity/**'
+                        - '**/packages/platform/**'
+                    deny:
+                        - pkg: spwn.sh/packages/dependency/builtin
+                          desc: the engine links these packages, and the built-in catalog embeds a generated copy it must not carry
                 project-layer:
                     files:
                         - '**/packages/project/**'
@@ -96,12 +108,10 @@ linters:
               path: _test\.go
         paths:
             - third_party$
-            - builtin$
             - examples$
 formatters:
     exclusions:
         generated: lax
         paths:
             - third_party$
-            - builtin$
             - examples$

@@ -8,9 +8,9 @@ package tool
 // any registry without importing resolver.
 //
 // Callers that want to "wire every builtin into my registry" pass
-// their registry to dependency.RegisterBuiltins, which iterates
+// their registry to builtin.RegisterBuiltins, which iterates
 // Tools() and calls Register for each. The same interface powers
-// dependency.HydrateLocals during a spawn.
+// builtin.HydrateLocals during a spawn.
 type Registry interface {
 	Register(Tool) error
 }
