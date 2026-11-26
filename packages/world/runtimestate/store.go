@@ -78,8 +78,16 @@ type Store struct {
 	dir     string
 	backend backend.Backend
 	tree    func() *platform.Tree
+	written func() *platform.Tree
 
 	mu sync.Mutex
+}
+
+func stateTreeAsFound() *platform.Tree {
+	if root := platform.ProjectRoot(); root != "" {
+		return platform.Within(root)
+	}
+	return platform.Within(platform.UserDir())
 }
 
 func treeAbove(dir string) func() *platform.Tree {
@@ -96,14 +104,14 @@ func NewStore() (*Store, error) {
 	if err != nil {
 		return nil, fmt.Errorf("docker backend: %w", err)
 	}
-	return &Store{dir: filepath.Join(platform.LocalStateDir(), "world-states"), backend: docker, tree: platform.StateTree}, nil
+	return &Store{dir: filepath.Join(platform.LocalStateDir(), "world-states"), backend: docker, tree: stateTreeAsFound, written: platform.StateTree}, nil
 }
 
 // NewStoreWith creates a Store from an explicit backend + root dir,
 // read and written through a root at dir's parent. Used by tests and by
 // callers that already hold a backend.
 func NewStoreWith(b backend.Backend, dir string) (*Store, error) {
-	return &Store{dir: dir, backend: b, tree: treeAbove(dir)}, nil
+	return &Store{dir: dir, backend: b, tree: treeAbove(dir), written: treeAbove(dir)}, nil
 }
 
 // NewStoreAt returns a Store rooted at dir with no backend, read and
@@ -111,7 +119,7 @@ func NewStoreWith(b backend.Backend, dir string) (*Store, error) {
 // exercise mutable-state methods. Calls to List and Get error with "no
 // backend configured".
 func NewStoreAt(dir string) (*Store, error) {
-	return &Store{dir: dir, tree: treeAbove(dir)}, nil
+	return &Store{dir: dir, tree: treeAbove(dir), written: treeAbove(dir)}, nil
 }
 
 func testRunFilter() string { return os.Getenv(labels.TestRunEnv) }
@@ -429,7 +437,7 @@ func (s *Store) loadLocked(worldID string) (File, error) {
 }
 
 func (s *Store) saveLocked(worldID string, f File) error {
-	tree := s.tree()
+	tree := s.written()
 	defer tree.Close()
 	if err := tree.MkdirAll(filepath.Join(s.dir, worldID), 0o755); err != nil {
 		return err

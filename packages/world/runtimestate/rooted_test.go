@@ -27,7 +27,7 @@ func projectStore(t *testing.T) (s *Store, states, outside string) {
 	platform.SetProjectRoot(root)
 	t.Cleanup(func() { platform.SetProjectRoot(was) })
 	states = filepath.Join(root, ".spwn", "world-states")
-	return &Store{dir: states, tree: platform.StateTree}, states, outside
+	return &Store{dir: states, tree: stateTreeAsFound, written: platform.StateTree}, states, outside
 }
 
 func outsideStateUntouched(t *testing.T, outside string) {
