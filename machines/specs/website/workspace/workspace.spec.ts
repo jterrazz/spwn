@@ -74,8 +74,8 @@ describe('workspace', () => {
                 // When - Delete is pressed
                 await visitor.click(button('Delete linux-1…'));
 
-                // Then - the dialog says what the delete ends, then who holds it on a line of its own, and asks for the name, its Delete off
-                const confirm = dialog('Delete linux-1?');
+                // Then - the title names the disk it takes, the dialog says what the delete ends, then who holds it on a line of its own, and asks for the name, its Delete off
+                const confirm = dialog('Delete linux-1 and its 40 GB disk?');
                 await visitor.see(
                     within(
                         confirm,
@@ -104,12 +104,13 @@ describe('workspace', () => {
             await visitor.click(within(sidebar, button('linux-1 running')));
             await visitor.see(heading('linux-1 running'));
 
-            // When - Stop is pressed and confirmed
+            // When - Stop is pressed, which asks nothing
             await visitor.click(button('Stop'));
-            await visitor.click(within(dialog('Stop linux-1?'), button('Stop')));
+            await visitor.gone(dialog('Stop linux-1?'));
 
-            // Then - it reads stopped, and Home counts its memory free
+            // Then - it reads stopped and says how to start it again, and Home counts its memory free
             await visitor.see(heading('linux-1 stopped'));
+            await visitor.see(content('It holds no memory. Start it to use it again.'));
             await visitor.see(within(sidebar, button('linux-1 stopped')));
             await visitor.click(within(rail, button('Home')));
             await visitor.see(within(region('Machines'), content('12 free')));
@@ -139,12 +140,13 @@ describe('workspace', () => {
             async (visitor) => {
                 await visitor.see(heading('linux-1 running'));
 
-                // When - Stop is pressed and confirmed
+                // When - Stop is pressed, which asks nothing
                 await visitor.click(button('Stop'));
-                await visitor.click(within(dialog('Stop linux-1?'), button('Stop')));
+                await visitor.gone(dialog('Stop linux-1?'));
 
-                // Then - it reads stopped, and its Activity says nothing is measured
+                // Then - it reads stopped and says how to start it again, and its Activity says nothing is measured
                 await visitor.see(heading('linux-1 stopped'));
+                await visitor.see(button('Start'));
                 await visitor.see(content('Nothing to look at.'));
 
                 // When - Start is pressed

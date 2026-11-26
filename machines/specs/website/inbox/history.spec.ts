@@ -86,10 +86,10 @@ describe('history', () => {
         const result = await website.visit(
             '/?world=two-macs&machine=infra&tab=Overview',
             async (visitor) => {
-                // When - infra is restarted, its name typed, and the Inbox opened
+                // When - infra, a server that runs, is restarted by a yes that asks no name, and the Inbox opened
                 await visitor.click(button('Restart'));
                 const confirm = dialog('Restart infra?');
-                await visitor.fill(within(confirm, field('Type infra to confirm')), 'infra');
+                await visitor.gone(within(confirm, field('Type infra to confirm')));
                 await visitor.click(within(confirm, button('Restart')));
                 await visitor.gone(confirm);
                 await visitor.click(within(navigation('Rail'), button('Inbox', { exact: false })));

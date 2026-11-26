@@ -5,6 +5,7 @@ import {
     disabled,
     enabled,
     field,
+    heading,
     main,
     navigation,
     region,
@@ -84,11 +85,9 @@ describe('server', () => {
                 await visitor.see(within(needs, line));
                 await visitor.see(content('down · up 12 d'));
 
-                // When - its Restart is pressed, and confirmed with the name typed
+                // When - its Restart is pressed, which asks nothing since the server is down
                 await visitor.click(within(needs, button('Restart infra', { exact: false })));
-                const confirm = dialog('Restart infra?');
-                await visitor.fill(within(confirm, field('Type infra to confirm')), 'infra');
-                await visitor.click(within(confirm, button('Restart')));
+                await visitor.gone(dialog('Restart infra?'));
 
                 // Then - the line has left Needs you for Done here, and infra no longer reads down among the mini's machines
                 await visitor.gone(within(needs, line));
@@ -107,11 +106,9 @@ describe('server', () => {
                 const needs = region('Needs you, on this Mac');
                 const line = content('infra check failing since 10:18', { exact: false });
 
-                // When - its Restart is pressed and confirmed, then the Inbox opened
+                // When - its Restart is pressed, which asks nothing, then the Inbox opened
                 await visitor.click(within(needs, button('Restart infra', { exact: false })));
-                const confirm = dialog('Restart infra?');
-                await visitor.fill(within(confirm, field('Type infra to confirm')), 'infra');
-                await visitor.click(within(confirm, button('Restart')));
+                await visitor.gone(dialog('Restart infra?'));
                 await visitor.gone(within(needs, line));
                 await visitor.click(within(navigation('Rail'), button('Inbox', { exact: false })));
 
@@ -124,16 +121,16 @@ describe('server', () => {
         expect(result.errors.text).toBe('');
     });
 
-    test('S4 Delete asks for the name typed, and stays off until it matches', async () => {
-        // Given - the window on infra's page over two-macs
+    test('S4 Delete names the disk it takes, asks for the name typed, and stays off until it matches', async () => {
+        // Given - the window on infra's page over two-macs, a server that runs on an 80 GB disk
         const result = await website.visit(
             '/?world=two-macs&machine=infra&tab=Overview',
             async (visitor) => {
                 // When - Delete is pressed
                 await visitor.click(button('Delete infra…'));
 
-                // Then - the dialog asks for the name, and its Delete is off
-                const confirm = dialog('Delete infra?');
+                // Then - the title names the disk, the dialog asks for the name, and its Delete is off
+                const confirm = dialog('Delete infra and its 80 GB disk?');
                 await visitor.see(confirm);
                 const remove = within(confirm, button('Delete'));
                 await visitor.see(disabled(remove));
@@ -145,28 +142,31 @@ describe('server', () => {
                 await visitor.see(enabled(remove));
             },
         );
+        expect(result.html.text).toMatch(/class="[^"]*destroy[^"]*"[^>]*>Delete</u);
         expect(result.errors.text).toBe('');
     });
 
-    test('S4 Restart asks for the name typed, and stays off until it matches', async () => {
-        // Given - the window on infra's page over two-macs
+    test('S4 Restart of a server that runs asks yes or no, no name, and Cancel leaves it', async () => {
+        // Given - the window on infra's page over two-macs, a server that runs
         const result = await website.visit(
             '/?world=two-macs&machine=infra&tab=Overview',
             async (visitor) => {
                 // When - Restart is pressed
                 await visitor.click(button('Restart'));
 
-                // Then - the dialog asks for the name, and its Restart is off
+                // Then - the dialog asks yes or no: its Restart is on, and no name is asked
                 const confirm = dialog('Restart infra?');
                 await visitor.see(confirm);
                 const restart = within(confirm, button('Restart'));
-                await visitor.see(disabled(restart));
-
-                // When - the name is typed
-                await visitor.fill(within(confirm, field('Type infra to confirm')), 'infra');
-
-                // Then - Restart is on
                 await visitor.see(enabled(restart));
+                await visitor.gone(within(confirm, field('Type infra to confirm')));
+
+                // When - Cancel is pressed
+                await visitor.click(within(confirm, button('Cancel')));
+
+                // Then - the dialog is gone and infra still runs
+                await visitor.gone(confirm);
+                await visitor.see(heading('infra', { exact: false }));
             },
         );
         expect(result.errors.text).toBe('');
@@ -194,7 +194,7 @@ describe('server', () => {
                 await visitor.click(button('Delete infra…'));
 
                 // Then - its dialog says what the delete ends, and nothing of a hold that does not argue against it
-                const remove = dialog('Delete infra?');
+                const remove = dialog('Delete infra and its 80 GB disk?');
                 await visitor.see(
                     within(
                         remove,
