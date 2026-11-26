@@ -3,7 +3,7 @@
   "faces": {
     "word": "Boundaries",
     "line": "What Spwn is not, and what each of its parts refuses to be, for anyone weighing a feature that sits near an edge.",
-    "paragraph": "What Spwn is not, and what each of its parts refuses to be, for anyone weighing a feature that sits near an edge. The owner confirmed the five boundaries of Spwn on 2026-11-21 ([his answer](../blueprint/owner-words.md#why-spwn-exists)); the record is [ADR-002](./decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder.md), accepted.",
+    "paragraph": "What Spwn is not, and what each of its parts refuses to be, for anyone weighing a feature that sits near an edge. The owner confirmed the five boundaries of Spwn on 2026-11-21 ([his answer](../blueprint/owner-words.md#why-spwn-exists)); the record is [ADR-002](#one-stack), accepted.",
     "icon": ""
   },
   "title": {
@@ -16,10 +16,34 @@
       "items": [
         {
           "t": "prose",
-          "markdown": "What Spwn is not, and what each of its parts refuses to be, for anyone weighing a feature that\nsits near an edge. The owner confirmed the five boundaries of Spwn on 2026-11-21\n([his answer](../blueprint/owner-words.md#why-spwn-exists)); the record is\n[ADR-002](./decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder.md), accepted.",
+          "markdown": "What Spwn is not, and what each of its parts refuses to be, for anyone weighing a feature that\nsits near an edge. The owner confirmed the five boundaries of Spwn on 2026-11-21\n([his answer](../blueprint/owner-words.md#why-spwn-exists)); the record is\n[ADR-002](#one-stack), accepted.",
           "span": {
             "from": 3,
             "to": 6
+          }
+        },
+        {
+          "t": "block",
+          "id": "one-stack",
+          "kind": "decision",
+          "address": "product/boundaries#one-stack",
+          "props": {
+            "id": "one-stack",
+            "adr": "studio-os:home/spwn/wiki/product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder.md",
+            "decides": "Spwn is one stack of six apps on one ladder."
+          },
+          "faces": {
+            "word": "one-stack",
+            "line": "Spwn is one stack of six apps on one ladder.",
+            "icon": "decision"
+          },
+          "at": {
+            "line": 8,
+            "col": 1
+          },
+          "span": {
+            "from": 8,
+            "to": 8
           }
         }
       ]
@@ -30,7 +54,7 @@
         "text": "What Spwn is not",
         "anchor": "what-spwn-is-not",
         "at": {
-          "line": 8,
+          "line": 10,
           "col": 1
         }
       },
@@ -51,12 +75,12 @@
             "icon": "refusal"
           },
           "at": {
-            "line": 10,
+            "line": 12,
             "col": 1
           },
           "span": {
-            "from": 10,
-            "to": 10
+            "from": 12,
+            "to": 12
           }
         },
         {
@@ -75,12 +99,12 @@
             "icon": "refusal"
           },
           "at": {
-            "line": 12,
+            "line": 14,
             "col": 1
           },
           "span": {
-            "from": 12,
-            "to": 12
+            "from": 14,
+            "to": 14
           }
         },
         {
@@ -99,12 +123,12 @@
             "icon": "refusal"
           },
           "at": {
-            "line": 14,
+            "line": 16,
             "col": 1
           },
           "span": {
-            "from": 14,
-            "to": 14
+            "from": 16,
+            "to": 16
           }
         },
         {
@@ -123,12 +147,12 @@
             "icon": "refusal"
           },
           "at": {
-            "line": 16,
+            "line": 18,
             "col": 1
           },
           "span": {
-            "from": 16,
-            "to": 16
+            "from": 18,
+            "to": 18
           }
         },
         {
@@ -147,20 +171,20 @@
             "icon": "refusal"
           },
           "at": {
-            "line": 18,
+            "line": 20,
             "col": 1
           },
           "span": {
-            "from": 18,
-            "to": 18
+            "from": 20,
+            "to": 20
           }
         },
         {
           "t": "prose",
           "markdown": "Each line is the edge of the one enemy,\n[losing your thread](../blueprint/vision.md#the-enemy-losing-your-thread): a stack that replaced you, produced for its own sake, kept your context in someone else's place,\nlocked you to one vendor or worked in someone else's style would be a stack you are not the\nauthor of.",
           "span": {
-            "from": 20,
-            "to": 23
+            "from": 22,
+            "to": 25
           }
         }
       ]
@@ -171,7 +195,7 @@
         "text": "What each app refuses",
         "anchor": "what-each-app-refuses",
         "at": {
-          "line": 25,
+          "line": 27,
           "col": 1
         }
       },
@@ -199,7 +223,8 @@
                   "ref": "product/stack#machines"
                 },
                 "refuses": "to know about a running agent: starting, watching, answering and merging agents is not its job",
-                "because": "spwn:machines/docs/decisions/052-station-keeps-no-agents.md"
+                "because": "spwn:machines/docs/decisions/052-station-keeps-no-agents.md",
+                "floor": 3
               },
               "faces": {
                 "word": "no-running-agent",
@@ -207,12 +232,12 @@
                 "icon": "refusal"
               },
               "at": {
-                "line": 29,
+                "line": 31,
                 "col": 1
               },
               "span": {
-                "from": 29,
-                "to": 34
+                "from": 31,
+                "to": 37
               }
             },
             {
@@ -226,7 +251,8 @@
                   "ref": "product/stack#machines"
                 },
                 "refuses": "to share a port nobody granted: a port outside a machine's rights is flagged, never shared",
-                "because": "spwn:machines/docs/decisions/035-a-port-is-a-right-with-an-audience.md"
+                "because": "spwn:machines/docs/decisions/035-a-port-is-a-right-with-an-audience.md",
+                "floor": 3
               },
               "faces": {
                 "word": "no-ungranted-port",
@@ -234,26 +260,26 @@
                 "icon": "refusal"
               },
               "at": {
-                "line": 36,
+                "line": 39,
                 "col": 1
               },
               "span": {
-                "from": 36,
-                "to": 41
+                "from": 39,
+                "to": 45
               }
             }
           ],
           "at": {
-            "line": 27,
+            "line": 29,
             "col": 1
           },
           "tag": {
-            "from": 27,
-            "to": 27
+            "from": 29,
+            "to": 29
           },
           "span": {
-            "from": 27,
-            "to": 43
+            "from": 29,
+            "to": 47
           }
         },
         {
@@ -302,12 +328,12 @@
             ]
           },
           "at": {
-            "line": 45,
+            "line": 49,
             "col": 1
           },
           "span": {
-            "from": 45,
-            "to": 45
+            "from": 49,
+            "to": 49
           }
         },
         {
@@ -329,12 +355,12 @@
             "icon": "refusal"
           },
           "at": {
-            "line": 47,
+            "line": 51,
             "col": 1
           },
           "span": {
-            "from": 47,
-            "to": 52
+            "from": 51,
+            "to": 56
           }
         },
         {
@@ -356,12 +382,12 @@
             "icon": "refusal"
           },
           "at": {
-            "line": 54,
+            "line": 58,
             "col": 1
           },
           "span": {
-            "from": 54,
-            "to": 59
+            "from": 58,
+            "to": 63
           }
         },
         {
@@ -386,12 +412,12 @@
             "icon": "refusal"
           },
           "at": {
-            "line": 61,
+            "line": 65,
             "col": 1
           },
           "span": {
-            "from": 61,
-            "to": 67
+            "from": 65,
+            "to": 71
           }
         },
         {
@@ -415,12 +441,12 @@
             "icon": "refusal"
           },
           "at": {
-            "line": 69,
+            "line": 73,
             "col": 1
           },
           "span": {
-            "from": 69,
-            "to": 69
+            "from": 73,
+            "to": 73
           }
         },
         {
@@ -445,20 +471,20 @@
             "icon": "refusal"
           },
           "at": {
-            "line": 71,
+            "line": 75,
             "col": 1
           },
           "span": {
-            "from": 71,
-            "to": 77
+            "from": 75,
+            "to": 81
           }
         },
         {
           "t": "prose",
           "markdown": "The rows of the four apps being made are derived from the convictions; none of those apps has a\ndesign yet, so each row is a constraint on the design to come, not a description of it.",
           "span": {
-            "from": 79,
-            "to": 80
+            "from": 83,
+            "to": 84
           }
         }
       ]
@@ -469,7 +495,7 @@
         "text": "Rests on",
         "anchor": "rests-on",
         "at": {
-          "line": 82,
+          "line": 86,
           "col": 1
         }
       },
@@ -478,8 +504,8 @@
           "t": "prose",
           "markdown": "Two rows are this page's reading rather than the owner's word or a record: Agents refusing to\nprepare a computer, and the OS refusing to hold facts of its own. Both follow from the spaces; the\nowner has not ruled on either.",
           "span": {
-            "from": 84,
-            "to": 86
+            "from": 88,
+            "to": 90
           }
         }
       ]

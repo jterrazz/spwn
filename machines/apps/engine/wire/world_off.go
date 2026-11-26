@@ -37,6 +37,7 @@ import (
 	settingscontract "github.com/jterrazz/studio-station/apps/engine/settings/contract"
 	skillscontract "github.com/jterrazz/studio-station/apps/engine/skills/contract"
 	teamscontract "github.com/jterrazz/studio-station/apps/engine/teams/contract"
+	wikicontract "github.com/jterrazz/studio-station/apps/engine/wiki/contract"
 )
 
 // invariant: the release build knows no world: openWorld answers none, so
@@ -80,6 +81,7 @@ func (*worldMac) projects() projectcontract.Projects                            
 func (*worldMac) teams() teamscontract.Teams                                        { return nil }
 func (*worldMac) automations() automationscontract.Automations                      { return nil }
 func (*worldMac) jobs() backgroundcontract.Jobs                                     { return nil }
+func (*worldMac) wiki() wikicontract.Corpus                                         { return nil }
 func (*worldMac) releases() enginecontract.Releases                                 { return nil }
 func (*worldMac) inspector() settingscontract.Inspector                             { return nil }
 func (*worldMac) procedureAppliers() []settingscontract.Applier                     { return nil }

@@ -43,6 +43,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/surface/cli/kit"
 	teamscalls "github.com/jterrazz/studio-station/apps/engine/teams/calls"
 	vaultcalls "github.com/jterrazz/studio-station/apps/engine/vault/calls"
+	wikicalls "github.com/jterrazz/studio-station/apps/engine/wiki/calls"
 )
 
 // invariant: the one registry of this process, every family's All with its
@@ -70,6 +71,7 @@ func (m machine) registry(env kit.Env) *call.Registry {
 		projectcalls.All(projectcalls.Deps{Projects: m.projects()}),
 		teamscalls.All(teamscalls.Deps{Teams: m.teams(), Home: m.sys.Env.Home()}),
 		automationscalls.All(automationscalls.Deps{Automations: m.automations(), Home: m.sys.Env.Home()}),
+		wikicalls.All(wikicalls.Deps{Corpus: m.wikiCorpus()}),
 		accountscalls.All(accountscalls.Deps{SignIns: m.signIns(), Kind: kind}),
 		vaultcalls.All(vaultcalls.Deps{Passwords: m.passwords(), SignIns: m.signIns(), Mac: m.where.Machine, Separator: token.Sep, Kind: kind}),
 		grantscalls.All(grantscalls.Deps{Grants: m.grants(), Kind: kind}),

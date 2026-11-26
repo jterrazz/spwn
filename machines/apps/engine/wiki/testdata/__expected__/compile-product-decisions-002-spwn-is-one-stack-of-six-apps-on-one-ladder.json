@@ -1,0 +1,50 @@
+{
+  "id": "product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder",
+  "faces": {
+    "word": "ADR-002: Spwn is one stack of six apps on one ladder",
+    "line": "**Status:** Accepted **Date:** 2026-11-21 **Amended by:** [ADR-003](./003-the-three-spaces-are-the-structure-of-the-app.md) (the ladder) **Amends:** [growth ADR-007](../../growth/decisions/007-spwn-is-the-ai-stack-that-abstracts-everything-but-you.md)",
+    "paragraph": "**Status:** Accepted **Date:** 2026-11-21 **Amended by:** [ADR-003](./003-the-three-spaces-are-the-structure-of-the-app.md) (the ladder) **Amends:** [growth ADR-007](../../growth/decisions/007-spwn-is-the-ai-stack-that-abstracts-everything-but-you.md)",
+    "icon": ""
+  },
+  "title": {
+    "from": 1,
+    "to": 1
+  },
+  "sections": [
+    {
+      "heading": null,
+      "items": [
+        {
+          "t": "prose",
+          "markdown": "**Status:** Accepted\n**Date:** 2026-11-21\n**Amended by:** [ADR-003](./003-the-three-spaces-are-the-structure-of-the-app.md) (the ladder)\n**Amends:** [growth ADR-007](../../growth/decisions/007-spwn-is-the-ai-stack-that-abstracts-everything-but-you.md)\n\nAn agent leaves the status `Proposed`; only the owner writes `Accepted`.",
+          "span": {
+            "from": 3,
+            "to": 8
+          }
+        }
+      ]
+    },
+    {
+      "heading": {
+        "level": 2,
+        "text": "Decision",
+        "anchor": "decision",
+        "at": {
+          "line": 10,
+          "col": 1
+        }
+      },
+      "items": [
+        {
+          "t": "prose",
+          "markdown": "Six apps, in this order on one ladder: Machines, Agents, Wiki, Specs, Design, OS.",
+          "span": {
+            "from": 12,
+            "to": 12
+          }
+        }
+      ]
+    }
+  ],
+  "findings": []
+}

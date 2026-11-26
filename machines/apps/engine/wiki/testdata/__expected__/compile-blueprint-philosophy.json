@@ -62,11 +62,44 @@
           }
         },
         {
+          "t": "block",
+          "id": "who-carries",
+          "kind": "figure",
+          "address": "blueprint/philosophy#who-carries",
+          "props": {
+            "id": "who-carries",
+            "form": "stack",
+            "shows": {
+              "ref": "blueprint/philosophy#all"
+            },
+            "caption": "Who carries them: how many of the seven each part of the stack carries."
+          },
+          "faces": {
+            "word": "who-carries",
+            "line": "Who carries them: how many of the seven each part of the stack carries.",
+            "icon": "figure"
+          },
+          "view": {
+            "form": "stack",
+            "shows": "blueprint/philosophy#all",
+            "parts": [],
+            "caption": "Who carries them: how many of the seven each part of the stack carries."
+          },
+          "at": {
+            "line": 9,
+            "col": 1
+          },
+          "span": {
+            "from": 9,
+            "to": 14
+          }
+        },
+        {
           "t": "prose",
           "markdown": "Each conviction is written in the same six parts: the statement, the sensible opposite (what a\nreasonable product does instead, which is why the conviction says something), the argument, where\nthe product carries it, one example, and the decision that would break it. A page that cites a\nconviction cites its number and links here.",
           "span": {
-            "from": 9,
-            "to": 12
+            "from": 16,
+            "to": 19
           }
         }
       ]
@@ -77,7 +110,7 @@
         "text": "1. You bring the taste. The stack brings the hands",
         "anchor": "1-you-bring-the-taste-the-stack-brings-the-hands",
         "at": {
-          "line": 14,
+          "line": 21,
           "col": 1
         }
       },
@@ -104,20 +137,20 @@
             "icon": "conviction"
           },
           "at": {
-            "line": 16,
+            "line": 23,
             "col": 1
           },
           "span": {
-            "from": 16,
-            "to": 22
+            "from": 23,
+            "to": 29
           }
         },
         {
           "t": "prose",
           "markdown": "- **Argument.** What an agent cannot supply is what makes the work yours: your taste, your vision,\n  your context from outside the screen. The owner's point is not to write down how he works but to\n  bring his taste and his context while working at the high level\n  ([the problem](./owner-words.md#the-problem), 2026-11-14).\n- **Example.** An agent opening a repository reads your vision and your decisions first, not a\n  generic instruction.",
           "span": {
-            "from": 24,
-            "to": 29
+            "from": 31,
+            "to": 36
           }
         }
       ]
@@ -128,7 +161,7 @@
         "text": "2. Delegating is a craft, not a prompt",
         "anchor": "2-delegating-is-a-craft-not-a-prompt",
         "at": {
-          "line": 31,
+          "line": 38,
           "col": 1
         }
       },
@@ -158,20 +191,20 @@
             "icon": "conviction"
           },
           "at": {
-            "line": 33,
+            "line": 40,
             "col": 1
           },
           "span": {
-            "from": 33,
-            "to": 39
+            "from": 40,
+            "to": 46
           }
         },
         {
           "t": "prose",
           "markdown": "- **Example.** At the end of a day the chief shows what was done and asks you the two questions\n  only you can answer; everything else was settled by the owners of each domain.",
           "span": {
-            "from": 41,
-            "to": 42
+            "from": 48,
+            "to": 49
           }
         }
       ]
@@ -182,7 +215,7 @@
         "text": "3. Rules live in the world, not in the agent",
         "anchor": "3-rules-live-in-the-world-not-in-the-agent",
         "at": {
-          "line": 44,
+          "line": 51,
           "col": 1
         }
       },
@@ -212,20 +245,20 @@
             "icon": "conviction"
           },
           "at": {
-            "line": 46,
+            "line": 53,
             "col": 1
           },
           "span": {
-            "from": 46,
-            "to": 52
+            "from": 53,
+            "to": 59
           }
         },
         {
           "t": "prose",
           "markdown": "- **Example.** An agent cannot break your computer: it is not on it.",
           "span": {
-            "from": 54,
-            "to": 54
+            "from": 61,
+            "to": 61
           }
         }
       ]
@@ -236,7 +269,7 @@
         "text": "4. Declared, never improvised",
         "anchor": "4-declared-never-improvised",
         "at": {
-          "line": 56,
+          "line": 63,
           "col": 1
         }
       },
@@ -266,20 +299,20 @@
             "icon": "conviction"
           },
           "at": {
-            "line": 58,
+            "line": 65,
             "col": 1
           },
           "span": {
-            "from": 58,
-            "to": 64
+            "from": 65,
+            "to": 71
           }
         },
         {
           "t": "prose",
           "markdown": "- **Example.** `qa.machine.yaml` gives `qa-1`, set up before its first command.",
           "span": {
-            "from": 66,
-            "to": 66
+            "from": 73,
+            "to": 73
           }
         }
       ]
@@ -290,7 +323,7 @@
         "text": "5. Done means proven",
         "anchor": "5-done-means-proven",
         "at": {
-          "line": 68,
+          "line": 75,
           "col": 1
         }
       },
@@ -317,20 +350,20 @@
             "icon": "conviction"
           },
           "at": {
-            "line": 70,
+            "line": 77,
             "col": 1
           },
           "span": {
-            "from": 70,
-            "to": 76
+            "from": 77,
+            "to": 83
           }
         },
         {
           "t": "prose",
           "markdown": "- **Example.** A request comes back with its proof, or it does not come back as done.",
           "span": {
-            "from": 78,
-            "to": 78
+            "from": 85,
+            "to": 85
           }
         }
       ]
@@ -341,7 +374,7 @@
         "text": "6. Taste is a system",
         "anchor": "6-taste-is-a-system",
         "at": {
-          "line": 80,
+          "line": 87,
           "col": 1
         }
       },
@@ -368,20 +401,20 @@
             "icon": "conviction"
           },
           "at": {
-            "line": 82,
+            "line": 89,
             "col": 1
           },
           "span": {
-            "from": 82,
-            "to": 88
+            "from": 89,
+            "to": 95
           }
         },
         {
           "t": "prose",
           "markdown": "- **Example.** The site's canvas kit: one box, one arrow, one title, the same everywhere.",
           "span": {
-            "from": 90,
-            "to": 90
+            "from": 97,
+            "to": 97
           }
         }
       ]
@@ -392,7 +425,7 @@
         "text": "7. The stack learns. You don't repeat yourself",
         "anchor": "7-the-stack-learns-you-dont-repeat-yourself",
         "at": {
-          "line": 92,
+          "line": 99,
           "col": 1
         }
       },
@@ -422,20 +455,20 @@
             "icon": "conviction"
           },
           "at": {
-            "line": 94,
+            "line": 101,
             "col": 1
           },
           "span": {
-            "from": 94,
-            "to": 100
+            "from": 101,
+            "to": 107
           }
         },
         {
           "t": "prose",
           "markdown": "- **Example.** A correction given once becomes a rule the next agent reads.",
           "span": {
-            "from": 102,
-            "to": 102
+            "from": 109,
+            "to": 109
           }
         }
       ]

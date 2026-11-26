@@ -24,7 +24,7 @@ const (
 // value: the fixture corpus's pages, by id: the five pages of the first
 // slice in tag form, the path of each under the corpus its id.
 func corpusPages() []string {
-	return []string{"blueprint/philosophy", "product/stack", "product/boundaries", "growth/positioning", "machines/reference/ports"}
+	return []string{"blueprint/philosophy", "product/stack", "product/boundaries", "growth/positioning", "machines/reference/ports", "product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder", "machines/decisions/035-a-port-is-a-right-with-an-audience"}
 }
 
 // value: the schema of the fixture corpus, read from its wiki.yaml.

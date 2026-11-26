@@ -93,6 +93,8 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/surface/cli/kit"
 	teamsfake "github.com/jterrazz/studio-station/apps/engine/teams/adapter/fake"
 	teamscontract "github.com/jterrazz/studio-station/apps/engine/teams/contract"
+	wikifake "github.com/jterrazz/studio-station/apps/engine/wiki/adapter/fake"
+	wikicontract "github.com/jterrazz/studio-station/apps/engine/wiki/contract"
 	"github.com/jterrazz/studio-station/apps/engine/world"
 )
 
@@ -488,6 +490,7 @@ func (m *worldMac) automations() automationscontract.Automations {
 	return automationsfake.Of(m.run.w, m.name)
 }
 func (m *worldMac) jobs() backgroundcontract.Jobs { return backgroundfake.New(m.run.w, m.name) }
+func (m *worldMac) wiki() wikicontract.Corpus     { return wikifake.Of(m.run.w, m.name) }
 func (m *worldMac) meter() activitycontract.Meter { return activityfake.MeterOf(m.run.w, m.name) }
 func (m *worldMac) disk() diskcontract.DiskUsage  { return m.files() }
 

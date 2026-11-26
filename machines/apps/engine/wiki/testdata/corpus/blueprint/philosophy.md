@@ -6,6 +6,13 @@ owner confirmed the seven on 2026-11-21 ([his answer](./owner-words.md#why-spwn-
 
 <Table id="all" of="conviction" in={ref("blueprint/philosophy")} columns={["says", "carried_in"]} />
 
+<Figure
+id="who-carries"
+form="stack"
+shows={ref("blueprint/philosophy#all")}
+caption="Who carries them: how many of the seven each part of the stack carries."
+/>
+
 Each conviction is written in the same six parts: the statement, the sensible opposite (what a
 reasonable product does instead, which is why the conviction says something), the argument, where
 the product carries it, one example, and the decision that would break it. A page that cites a

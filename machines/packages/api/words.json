@@ -1302,6 +1302,26 @@
     "vm_stopped": {
       "Word": "Machine stopped",
       "Tone": "plain"
+    },
+    "wiki.bad-budget": {
+      "Word": "bad budget",
+      "Detail": "wiki",
+      "Tone": "plain"
+    },
+    "wiki.none": {
+      "Word": "none",
+      "Detail": "wiki",
+      "Tone": "plain"
+    },
+    "wiki.unknown-page": {
+      "Word": "unknown page",
+      "Detail": "wiki",
+      "Tone": "plain"
+    },
+    "wiki.unreadable": {
+      "Word": "unreadable",
+      "Detail": "wiki",
+      "Tone": "plain"
     }
   },
   "CoreFailField": {
@@ -2233,10 +2253,22 @@
       "Other": "apps",
       "Tone": "plain"
     },
+    "block": {
+      "Word": "Blocks",
+      "One": "block",
+      "Other": "blocks",
+      "Tone": "plain"
+    },
     "grant": {
       "Word": "Grants",
       "One": "grant",
       "Other": "grants",
+      "Tone": "plain"
+    },
+    "hard-finding": {
+      "Word": "Hard findings",
+      "One": "hard finding",
+      "Other": "hard findings",
       "Tone": "plain"
     },
     "line": {
@@ -2269,10 +2301,22 @@
       "Other": "passwords",
       "Tone": "plain"
     },
+    "quiet-block": {
+      "Word": "Quiet blocks",
+      "One": "quiet block",
+      "Other": "quiet blocks",
+      "Tone": "plain"
+    },
     "quiet-listener": {
       "Word": "Short-lived listeners",
       "One": "short-lived listener not listed",
       "Other": "short-lived listeners not listed",
+      "Tone": "plain"
+    },
+    "remark": {
+      "Word": "Remarks",
+      "One": "remark",
+      "Other": "remarks",
       "Tone": "plain"
     },
     "restart": {
@@ -2291,6 +2335,12 @@
       "Word": "Skills",
       "One": "skill",
       "Other": "skills",
+      "Tone": "plain"
+    },
+    "wiki-page": {
+      "Word": "Pages",
+      "One": "page",
+      "Other": "pages",
       "Tone": "plain"
     }
   },

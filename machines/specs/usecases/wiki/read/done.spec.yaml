@@ -1,0 +1,13 @@
+description: 'wiki.read with no page opens the first seat''s home at the corpus''s budget, its blocks read'
+env:
+    - one-mac
+    - engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].wiki = {"head":"c1","commits":{"c1":{"wiki.yaml":"wiki: spwn.wiki/v1\nfloors:\n    - id: intention\n      name: Intention\n      question: Why\n    - id: product\n      name: Product\n      question: What\n    - id: domains\n      name: Domains\n      question: Which words\n    - id: architecture\n      name: Architecture\n      question: Where\n    - id: code\n      name: Code\n      question: Which lines\nseats:\n    - id: vision\n      name: Vision\n      path: [blueprint/]\n      reads: [tell, define]\n      home: blueprint/home\nbudget: 2min\n","blueprint/home.md":"# Home\n\nThe one page of the wiki.\n\n<Term id=\"seat\" means=\"who a page is written for\" />\n","blueprint/notes.png":"png"}}}'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.out | {page: .Page.ID, budget: .Budget, floor: .Floor.Name, seats: [.Seats[] | [.ID, .Active]], pages: [.Pages[].ID], blocks: [.Sections[].Items[] | select(.Block) | .Block | [.Address, .Tier, .Shown, .Line]]}'''
+      stdin: |
+          {"v":2,"id":"1","call":"wiki.read","target":{},"in":{}}
+      exit: 0
+      stdout: |
+          {"page":"blueprint/home","budget":"2min","floor":"Intention","seats":[["vision",true]],"pages":["blueprint/home"],"blocks":[["blueprint/home#seat","quiet","counted","who a page is written for"]]}

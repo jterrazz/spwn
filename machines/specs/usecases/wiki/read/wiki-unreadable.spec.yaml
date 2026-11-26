@@ -1,0 +1,13 @@
+description: 'wiki.read of a wiki whose wiki.yaml does not read is refused, saying where'
+env:
+    - one-mac
+    - engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].wiki = {"head":"c1","commits":{"c1":{"wiki.yaml":"wiki: spwn.wiki/v2\n"}}}'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.error | {code, subject}'''
+      stdin: |
+          {"v":2,"id":"1","call":"wiki.read","target":{},"in":{}}
+      exit: 0
+      stdout: |
+          {"code":"wiki.unreadable","subject":"wiki.yaml: H42 is spwn.wiki/v2, newer than this station reads (spwn.wiki/v1): update station"}
