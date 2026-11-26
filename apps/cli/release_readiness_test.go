@@ -113,6 +113,20 @@ func mustInit(t *testing.T, env []string, wd, name string) {
 	}
 }
 
+// writeSkill authors a bare-markdown skill with the frontmatter the
+// project check reads, as `station skills create` leaves it.
+func writeSkill(t *testing.T, wd, name string) {
+	t.Helper()
+	dir := filepath.Join(wd, "spwn", "skills")
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	body := "---\nname: " + name + "\ndescription: One-line description of what this skill does.\n---\n\n# " + name + "\n"
+	if err := os.WriteFile(filepath.Join(dir, name+".md"), []byte(body), 0o644); err != nil {
+		t.Fatal(err)
+	}
+}
+
 // readFile is a thin wrapper around os.ReadFile that fails the test on
 // error so call sites stay uncluttered.
 func readFile(t *testing.T, path string) string {
@@ -354,9 +368,7 @@ func TestReleaseReadiness(t *testing.T) {
 		mustInit(t, env, wd, "acme")
 		// Scaffold a real skill file on disk so the hint can suggest
 		// the right scheme rather than falling back to the generic form.
-		if _, _, code := runCLI(t, env, wd, "skill", "new", "code-review"); code != 0 {
-			t.Fatal("skill new failed")
-		}
+		writeSkill(t, wd, "code-review")
 		yamlPath := filepath.Join(wd, "spwn/agents/neo/agent.yaml")
 		y := readFile(t, yamlPath)
 		if err := os.WriteFile(yamlPath, []byte(y+"\n  - code-review\n"), 0o644); err != nil {
@@ -558,61 +570,6 @@ func TestReleaseReadiness(t *testing.T) {
 	// F: skill / tool / hook verbs
 	// --------------------------------------------------------------------
 
-	t.Run("30_skill_new_writes_frontmatter", func(t *testing.T) {
-		// F30: `skill new` authors a file with YAML frontmatter.
-		t.Parallel()
-		env, _ := freshEnv(t)
-		wd := t.TempDir()
-		mustInit(t, env, wd, "acme")
-		if _, stderr, code := runCLI(t, env, wd, "skill", "new", "reading"); code != 0 {
-			t.Fatalf("skill new failed: stderr=%s", stderr)
-		}
-		path := filepath.Join(wd, "spwn/skills/reading.md")
-		body := readFile(t, path)
-		if !strings.HasPrefix(body, "---\n") {
-			t.Fatalf("skill file missing leading frontmatter:\n%s", body)
-		}
-		if !strings.Contains(body, "name: reading") || !strings.Contains(body, "description:") {
-			t.Fatalf("frontmatter missing name/description:\n%s", body)
-		}
-	})
-
-	t.Run("31_skill_ls_includes_new_skill", func(t *testing.T) {
-		// F31: after authoring, `skill ls` lists the slug.
-		t.Parallel()
-		env, _ := freshEnv(t)
-		wd := t.TempDir()
-		mustInit(t, env, wd, "acme")
-		if _, _, code := runCLI(t, env, wd, "skill", "new", "reading"); code != 0 {
-			t.Fatalf("skill new failed")
-		}
-		stdout, stderr, code := runCLI(t, env, wd, "skill", "ls")
-		if code != 0 {
-			t.Fatalf("skill ls failed: stderr=%s", stderr)
-		}
-		combined := stdout + stderr
-		if !strings.Contains(combined, "reading") {
-			t.Fatalf("skill ls output missing `reading`:\n%s", combined)
-		}
-	})
-
-	t.Run("32_skill_rm_removes_file", func(t *testing.T) {
-		// F32: `skill rm` deletes the underlying markdown file.
-		t.Parallel()
-		env, _ := freshEnv(t)
-		wd := t.TempDir()
-		mustInit(t, env, wd, "acme")
-		if _, _, code := runCLI(t, env, wd, "skill", "new", "reading"); code != 0 {
-			t.Fatalf("skill new failed")
-		}
-		if _, _, code := runCLI(t, env, wd, "skill", "rm", "reading"); code != 0 {
-			t.Fatalf("skill rm failed")
-		}
-		if _, err := os.Stat(filepath.Join(wd, "spwn/skills/reading.md")); !os.IsNotExist(err) {
-			t.Fatalf("skill file should be gone, err=%v", err)
-		}
-	})
-
 	t.Run("33_skill_path_ref_passes_check", func(t *testing.T) {
 		// F33: a skill/<name> ref resolves to spwn/skills/<name>.md and
 		// `check` stays clean.
@@ -620,9 +577,7 @@ func TestReleaseReadiness(t *testing.T) {
 		env, _ := freshEnv(t)
 		wd := t.TempDir()
 		mustInit(t, env, wd, "acme")
-		if _, _, code := runCLI(t, env, wd, "skill", "new", "reading"); code != 0 {
-			t.Fatalf("skill new failed")
-		}
+		writeSkill(t, wd, "reading")
 		yamlPath := filepath.Join(wd, "spwn/agents/neo/agent.yaml")
 		y := readFile(t, yamlPath)
 		if err := os.WriteFile(yamlPath, []byte(y+"\n  - skill/reading\n"), 0o644); err != nil {
@@ -1008,41 +963,6 @@ func TestReleaseReadiness(t *testing.T) {
 		_, stderr, code := runCLI(t, env, wd, "check")
 		if code != 0 {
 			t.Fatalf("check failed on research-lab project (code=%d):\n%s", code, stderr)
-		}
-	})
-
-	t.Run("54_skill_new_output_passes_check", func(t *testing.T) {
-		// Regression for the `spwn skill new` paper-cut: the command
-		// used to scaffold a .md file without YAML frontmatter, which
-		// then immediately failed `spwn check`'s ruleSkillFrontmatter.
-		// After the fix, a skill authored via the CLI passes check
-		// end-to-end when referenced by agent.yaml via skill:<name>.
-		t.Parallel()
-		env, _ := freshEnv(t)
-		wd := t.TempDir()
-		if _, stderr, code := runCLI(t, env, wd, "init", "--name", "skill-check"); code != 0 {
-			t.Fatalf("init: %s", stderr)
-		}
-		if _, stderr, code := runCLI(t, env, wd, "skill", "new", "note-taking"); code != 0 {
-			t.Fatalf("skill new: %s", stderr)
-		}
-		// Attach via the new scheme grammar and re-run check: it must pass.
-		agentYAML := filepath.Join(wd, "spwn/agents/neo/agent.yaml")
-		body, err := os.ReadFile(agentYAML)
-		if err != nil {
-			t.Fatal(err)
-		}
-		if !strings.Contains(string(body), "dependencies:") {
-			t.Fatalf("expected agent.yaml to contain dependencies: block:\n%s", body)
-		}
-		patched := strings.Replace(string(body),
-			"dependencies:\n", "dependencies:\n  - \"skill/note-taking\"\n", 1)
-		if err := os.WriteFile(agentYAML, []byte(patched), 0o644); err != nil {
-			t.Fatal(err)
-		}
-		_, stderr, code := runCLI(t, env, wd, "check")
-		if code != 0 {
-			t.Fatalf("check after skill new + attach: code=%d\n%s", code, stderr)
 		}
 	})
 

@@ -223,13 +223,13 @@ station agents bob                       # → just bob, exit 0
 station agents does-not-exist            # → exit != 0
 ```
 
-#### 20. `spwn skill new / ls / rm`
+#### 20. `station skills create / list / delete`
 
 ```bash
 spwn init
-spwn skill new daily-standup                 # → writes spwn/skills/daily-standup.md
-spwn skill ls                                # → exit 0
-spwn skill rm daily-standup                  # → exit 0; file gone
+station skills create daily-standup          # → writes spwn/skills/daily-standup.md
+station skills                               # → exit 0
+station skills delete daily-standup --confirm=daily-standup  # → exit 0; file gone
 ```
 
 ---
@@ -270,7 +270,7 @@ grep does-not-exist-xyz spwn.lock            # → not present
 
 Before the fix: silently succeeded, added a broken ref. Now: fails fast with
 `skill:<name> not found at spwn/skills/<name>.md; create it first with
-\`spwn skill new <name>\``.
+\`station skills create <name>\``.
 
 ```bash
 spwn init

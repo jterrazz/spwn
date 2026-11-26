@@ -59,7 +59,7 @@ func IsExperimental(cmd *cobra.Command) bool {
 // execution; browsers of `spwn --help` and the docs site never see them.
 //
 // The marker differs from MarkExperimental, which is for stable-but-evolving
-// commands (skill edit) that are safe to
+// commands that are safe to
 // advertise with an "[experimental]" prefix.
 func HideExperimental(cmd *cobra.Command) {
 	if cmd == nil {

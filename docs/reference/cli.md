@@ -63,22 +63,22 @@ The grammar above is decided, and built only in part. Today the install puts two
 
 Decided in ADR-021 and ADR-022. A row whose left column is `station` is built, under that name until `station` takes the name `spwn`; every other row is not built until its command is a family of the engine.
 
-| Today                                        | The grammar's form                                                                                       |
-| -------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `spwn init`                                  | `spwn project create`                                                                                    |
-| `spwn check`                                 | `spwn project plan` and `spwn project drift`                                                             |
-| `spwn build`                                 | gone: the world image leaves, and `project apply` renders the project                                    |
-| `spwn up`, `spwn down`, `spwn world *`       | `spwn agents start`, `spwn agents stop`, on a machine (`--on`); the noun `world` goes                    |
-| `spwn agent neo`, `spwn agent talk neo`      | `spwn agents talk neo`                                                                                   |
-| `station agents create\|fork\|dream\|sleep`  | `spwn agents create\|fork\|dream\|sleep`                                                                 |
-| `station agents`, `station agents neo`       | `spwn agents`, `spwn agents neo`                                                                         |
-| `station agents delete neo --confirm=neo`    | `spwn agents delete neo --confirm=neo`                                                                   |
-| `spwn install`, `spwn uninstall`             | gone: `spwn agents edit --app <app>` and `spwn project edit --app <app>`; `install` means onto a machine |
-| `spwn skill *`                               | `spwn skills`                                                                                            |
-| `spwn automation *`                          | `spwn automations`; the engine runs them, so `automation daemon` goes                                    |
-| `spwn gate`, `spwn auth`, `spwn cookie-sync` | `spwn accounts`, the one credential noun with one vault                                                  |
-| `spwn web`                                   | gone: Spwn.app is the one GUI                                                                            |
-| `spwn upgrade`                               | `spwn update`                                                                                            |
+| Today                                             | The grammar's form                                                                                       |
+| ------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `spwn init`                                       | `spwn project create`                                                                                    |
+| `spwn check`                                      | `spwn project plan` and `spwn project drift`                                                             |
+| `spwn build`                                      | gone: the world image leaves, and `project apply` renders the project                                    |
+| `spwn up`, `spwn down`, `spwn world *`            | `spwn agents start`, `spwn agents stop`, on a machine (`--on`); the noun `world` goes                    |
+| `spwn agent neo`, `spwn agent talk neo`           | `spwn agents talk neo`                                                                                   |
+| `station agents create\|fork\|dream\|sleep`       | `spwn agents create\|fork\|dream\|sleep`                                                                 |
+| `station agents`, `station agents neo`            | `spwn agents`, `spwn agents neo`                                                                         |
+| `station agents delete neo --confirm=neo`         | `spwn agents delete neo --confirm=neo`                                                                   |
+| `spwn install`, `spwn uninstall`                  | gone: `spwn agents edit --app <app>` and `spwn project edit --app <app>`; `install` means onto a machine |
+| `station skills`, `station skills create\|delete` | `spwn skills`, `spwn skills create\|delete`; `skill edit` goes, a skill is its file                      |
+| `spwn automation *`                               | `spwn automations`; the engine runs them, so `automation daemon` goes                                    |
+| `spwn gate`, `spwn auth`, `spwn cookie-sync`      | `spwn accounts`, the one credential noun with one vault                                                  |
+| `spwn web`                                        | gone: Spwn.app is the one GUI                                                                            |
+| `spwn upgrade`                                    | `spwn update`                                                                                            |
 
 `spwn project plan` does not check a `spwn:<name>` reference against the built-in catalog: the engine links no copy of it (`packages/dependency/builtin` carries the embedded catalog, and no package the engine links imports it), so such a reference passes the plan unverified, and the check that `spwn check` made, `unknown-builtin-tool`, is lost. `spwn install` still refuses an unknown name until it goes, and the rule that refuses every `spwn:` reference replaces it.
 
@@ -112,7 +112,7 @@ spwn install tool/ffmpeg --agent neo           # local tool, only neo
 spwn install hook/pre-spawn --agent neo        # local hook, only neo
 spwn install command/refactor --agent neo      # local command, only neo
 spwn uninstall python --agent neo              # detach from one agent
-spwn skill new|edit|show|rm <name>             # bare-markdown skill authoring
+station skills create|delete <name>           # bare-markdown skill authoring
 
 # ── Worlds ───────────────────────────────────────────────────────
 spwn world list               # list running worlds

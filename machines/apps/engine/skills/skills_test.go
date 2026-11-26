@@ -36,6 +36,9 @@ func TestADescriptionIsReadFromTheFrontmatterAlone(t *testing.T) {
 
 func TestANewSkillIsItsTemplateAndReadsBackItsDescription(t *testing.T) {
 	s := skills.Blank("focus", "~/.spwn/skills/focus.md")
+	if !strings.HasPrefix(s.Body, "---\nname: focus\ndescription: ") {
+		t.Errorf("the template opens with %q; want the frontmatter the project check reads", s.Body)
+	}
 	if s.Name != "focus" || s.Description != "One-line description of what this skill does." || !strings.Contains(s.Body, "# focus") || !strings.Contains(s.Body, "## When to use") || !strings.Contains(s.Body, "## Steps") {
 		t.Errorf("Blank = %+v; want focus with its template", s)
 	}

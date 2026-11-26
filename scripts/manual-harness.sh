@@ -256,14 +256,14 @@ s19() {
 }
 
 s20() {
-    scenario 20 "skill new / ls / rm"
+    scenario 20 "skills create / list / delete"
     "$SPWN" init > /dev/null 2>&1
-    run "s20.skill-new" expect_zero "$SPWN" skill new daily-standup
+    run "s20.skill-new" expect_zero "$STATION" skills create daily-standup
     [ -f "spwn/skills/daily-standup.md" ] \
         && { PASS=$((PASS+1)); RESULTS+=("PASS  s20.file-exists"); } \
         || { FAIL=$((FAIL+1)); RESULTS+=("FAIL  s20.file-exists"); }
-    run "s20.skill-ls"  expect_zero "$SPWN" skill ls
-    run "s20.skill-rm"  expect_zero "$SPWN" skill rm daily-standup
+    run "s20.skill-ls"  expect_zero "$STATION" skills
+    run "s20.skill-rm"  expect_zero "$STATION" skills delete daily-standup --confirm=daily-standup
     [ ! -f "spwn/skills/daily-standup.md" ] \
         && { PASS=$((PASS+1)); RESULTS+=("PASS  s20.file-gone"); } \
         || { FAIL=$((FAIL+1)); RESULTS+=("FAIL  s20.file-gone"); }

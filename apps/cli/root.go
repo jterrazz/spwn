@@ -14,7 +14,6 @@ import (
 	"spwn.sh/apps/cli/gate"
 	"spwn.sh/apps/cli/logs"
 	"spwn.sh/apps/cli/organization"
-	"spwn.sh/apps/cli/skill"
 	"spwn.sh/apps/cli/team"
 	"spwn.sh/apps/cli/ui"
 	"spwn.sh/apps/cli/world"
@@ -55,7 +54,6 @@ func init() {
 
 	rootCmd.AddCommand(installCmd())
 	rootCmd.AddCommand(uninstallCmd())
-	rootCmd.AddCommand(skill.Cmd)
 
 	rootCmd.AddCommand(team.Cmd)
 	rootCmd.AddCommand(organization.Cmd)
@@ -149,7 +147,6 @@ func customHelp(cmd *cobra.Command, args []string) {
 	fmt.Fprintf(w, "%s\n", ui.Strong("Building blocks:"))
 	printHelpCmd(w, "install <ref>", "Install a dependency "+ui.Faint("(spwn:unix, github.com/...)"))
 	printHelpCmd(w, "uninstall <ref>", "Remove a dependency")
-	printHelpCmd(w, "skill", "Author skill files "+ui.Faint("(new, edit, show, rm, ls)"))
 	fmt.Fprintln(w)
 
 	fmt.Fprintf(w, "%s\n", ui.Strong("Worlds:"))

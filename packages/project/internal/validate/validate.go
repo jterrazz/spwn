@@ -749,7 +749,7 @@ func rulePacksExist(in Input) []Issue {
 			return []Issue{{
 				Level: LevelError, Path: location,
 				Message: fmt.Sprintf("dependency %q does not exist", raw),
-				Hint:    "author ./spwn/skills/" + ref.Name + ".md (e.g. `spwn skill new " + ref.Name + "`)",
+				Hint:    "author ./spwn/skills/" + ref.Name + ".md (e.g. `station skills create " + ref.Name + "`)",
 			}}
 		case refs.KindLocalTool:
 			return []Issue{{

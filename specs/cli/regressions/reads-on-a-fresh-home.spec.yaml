@@ -56,15 +56,6 @@ runs:
           spwn-home: absent
           empty-home/.spwn: absent
 
-    - command: skill ls
-      exit: 0
-      stderr: |
-          No skills authored yet.
-          Create one with 'spwn skill new <name>'.
-      files:
-          spwn-home: absent
-          empty-home/.spwn: absent
-
     - command: world list
       exit: 0
       stderr: |4+

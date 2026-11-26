@@ -40,7 +40,7 @@ func TestCLI_Help(t *testing.T) {
 
 	// Verify the stable top-level subcommands are listed in the grouped
 	// help.
-	for _, sub := range []string{"world", "agent", "skill", "install", "init"} {
+	for _, sub := range []string{"world", "agent", "install", "init"} {
 		assertContains(t, out, sub, "root help")
 	}
 }
