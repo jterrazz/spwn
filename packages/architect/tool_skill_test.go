@@ -1,13 +1,16 @@
 package architect
 
 import (
+	"context"
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"spwn.sh/packages/dependency/tool"
 	"spwn.sh/packages/platform"
+	"spwn.sh/packages/world/models"
 )
 
 type skillsOnly struct {
@@ -49,4 +52,33 @@ func TestAToolSkillRefusedAsALinkIsReportedNotDropped(t *testing.T) {
 			}
 		}
 	}
+}
+
+func TestSpawnSaysARefusedToolSkillInItsWarnings(t *testing.T) {
+	isolateSpawn(t)
+	root := filepath.Join(t.TempDir(), "site")
+	writeFiles(t, root, map[string]string{
+		".env":                               outsideSecret + "\n",
+		"spwn/tools/evil/tool.yaml":          "name: evil\n",
+		"spwn/tools/evil/skills/ok/SKILL.md": "# ok\n",
+	})
+	linkAll(t, root, map[string]string{
+		"spwn/tools/evil/skills/SKILL.md": filepath.Join("..", "..", "..", "..", ".env"),
+	})
+	platform.SetProjectRoot(root)
+	t.Cleanup(func() { platform.SetProjectRoot("") })
+
+	res, err := New(newMockBackend(), nil).Spawn(context.Background(), SpawnOpts{
+		ConfigName: "neo",
+		Manifest:   models.Manifest{Deps: []string{"tool/evil"}},
+	})
+	if err != nil {
+		t.Fatalf("Spawn = %v", err)
+	}
+	for _, w := range res.Warnings {
+		if strings.Contains(w, "tool local:evil: skill file SKILL.md is a link out of the tool's folder, refused") {
+			return
+		}
+	}
+	t.Fatalf("Spawn's warnings = %q, want the refused skill said", res.Warnings)
 }
