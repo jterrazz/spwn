@@ -12,4 +12,4 @@ runs:
           {"v":2,"id":"1","call":"journal.kept","in":{}}
       exit: 0
       stdout: |
-          {"Text":"linux-1 created","Phases":[{"Name":"checks","Took":0},{"Name":"clone","Took":0},{"Name":"boot","Took":0},{"Name":"address","Took":0},{"Name":"reachable","Took":0},{"Name":"ready","Took":0}]}
+          {"Text":"linux-1 created","Phases":[{"Name":"checks","Took":0},{"Name":"clone","Took":2000000000},{"Name":"boot","Took":0},{"Name":"address","Took":0},{"Name":"reachable","Took":0},{"Name":"ready","Took":0}]}

@@ -147,6 +147,7 @@ func (h *Hypervisor) Clone(ctx context.Context, from imagescontract.ImageLocatio
 	if v.Guest == nil {
 		v.Guest = &world.Guest{Fresh: true}
 	}
+	h.w.Now = h.w.Now.Add(cloneTook)
 	switch {
 	case fromDisk && source.Guest != nil && source.Guest.Login != nil:
 		login := *source.Guest.Login
@@ -254,6 +255,11 @@ func (h *Hypervisor) Boot(ctx context.Context, vm string, opts contract.BootOpti
 	v.Booted = &world.Boot{Bridged: opts.Network.Bridged, Folders: folders(opts.Mounts)}
 	return &run{h: h, vm: vm, pid: v.PID}, nil
 }
+
+// value: what a clone takes on the world's clock, so a create over the world
+// has a step of a duration; a boot takes none, since every uptime a story
+// reads begins there.
+const cloneTook = 2 * time.Second
 
 // value: the lines the console writes when the world scripts a boot to fail,
 // the same each time, so a create that fails there has last lines to keep.
