@@ -43,6 +43,7 @@ if [ ${#purge[@]} -gt 0 ]; then
 fi
 dpkg-query -W snapd >/dev/null 2>&1 || rm -rf /var/lib/snapd /var/cache/snapd /snap
 [ -z "${kernel:-}" ] || grep -q "vmlinuz-$kernel" /boot/grub/grub.cfg || { echo "grub boots no $kernel, the one kernel the image keeps" >&2; exit 1; }
+! command -v update-initramfs >/dev/null || update-initramfs -u -k all
 apt-get clean
 rm -rf /var/lib/apt/lists/*
 sync

@@ -104,3 +104,5 @@ update-grub
 grep -q 'console=hvc0' /boot/grub/grub.cfg || { echo "the kernel's console is not hvc0" >&2; exit 1; }
 # outside: the console is a host file tart reads back as input, so a getty on it answers its own prompts.
 systemctl mask --now serial-getty@hvc0.service
+# outside: every Mac gives a VM the same virtual devices, so an initramfs needs only the modules this one's root uses; the cleanup builds it again for the kernel the image keeps.
+[ ! -d /etc/initramfs-tools/conf.d ] || echo 'MODULES=dep' > /etc/initramfs-tools/conf.d/60-station-modules.conf
