@@ -195,6 +195,23 @@
     cursor: default;
     color: var(--t4);
 }
+/* value: under 1280 px of window the full bar crowds, so Find keeps its glass alone, 28 px and bare like the gear beside it, and ⌘K still opens it */
+@media (width < 1280px) {
+    .find {
+        width: 28px;
+        padding: 0;
+        justify-content: center;
+        background: none;
+    }
+    .find:hover:not(:disabled) {
+        background: var(--s2);
+        color: var(--t1);
+    }
+    .find > span,
+    .find kbd {
+        display: none;
+    }
+}
 .stale {
     flex: none;
     display: inline-flex;

@@ -206,9 +206,9 @@ describe('PathNav', () => {
         120_000,
     );
 
-    test('a path too long for a 640 px window folds its middle, and the fold reaches what it hides', async () => {
-        // Given - the window on linux-1, a VM of macbook-pro, over two-macs, 640 px wide
-        const result = await component.viewport({ height: 800, width: 640 }).render(
+    test('a path too long for a 540 px window folds its middle, and the fold reaches what it hides', async () => {
+        // Given - the window on linux-1, a VM of macbook-pro, over two-macs, 540 px wide, Find drawn as its glass
+        const result = await component.viewport({ height: 800, width: 540 }).render(
             <EngineProvider dependencies={composeReplay({ recording: recordingFor('two-macs') })}>
                 <Window initial={machineRoute('linux-1')} pages={PAGES} />
             </EngineProvider>,
