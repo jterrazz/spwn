@@ -139,13 +139,12 @@ function UpgradeRows({ upgrades }: { upgrades: MachinefileUpgrades }) {
     const { Last: last } = upgrades;
     return (
         <>
-            <Row size="slim" title={upgrades.Sentence} />
-            {upgrades.File === '' ? null : <Row kind="File" size="slim" title={upgrades.File} />}
+            <Row title={upgrades.Sentence} />
+            {upgrades.File === '' ? null : <Row kind="File" title={upgrades.File} />}
             {last === undefined ? null : (
                 <Row
                     kind="Last run"
                     sentence={last.Verdict.Line}
-                    size="slim"
                     {...(lastRunOf(last) === '' ? {} : { tag: lastRunOf(last) })}
                     title={last.Verdict.Sentence}
                 />
@@ -204,7 +203,7 @@ function Upgrades({
 function Setup({ answers, target, name, asked, onPlan }: Asked & { onPlan: () => void }) {
     const drift = useRead('machinefile.drift', asked);
     return (
-        <Page>
+        <Page density="compact">
             <FileState drift={drift} name={name} />
             {drift.kind === 'read' ? <Differs drift={drift.out} onPlan={onPlan} /> : null}
             <Upgrades answers={answers} drift={drift} name={name} target={target} />

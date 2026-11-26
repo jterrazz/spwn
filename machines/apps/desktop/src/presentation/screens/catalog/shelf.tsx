@@ -78,7 +78,6 @@ function AppRow({
             onOpen={() => {
                 open(App.Name);
             }}
-            size="slim"
             state={
                 update === null
                     ? { tone: APP_STATE_TONES[report.State], word: APP_STATE_WORDS[report.State] }
@@ -129,7 +128,6 @@ function SettingRow({
             onOpen={() => {
                 open(row.Name);
             }}
-            size="slim"
             template="catalog"
             title={row.Name}
             value={settingValue(row, held)}
@@ -155,7 +153,7 @@ function SettingsShelf({ open }: { open: Open }) {
     const size = useCatalogSize();
     if (settings.kind !== 'read') {
         return (
-            <Page>
+            <Page density="compact">
                 <Waiting reading={settings} what="Settings" />
             </Page>
         );
@@ -164,7 +162,7 @@ function SettingsShelf({ open }: { open: Open }) {
         matrix.kind === 'read' ? (matrix.out.Rows ?? []).map((row) => [row.Name, row]) : [],
     );
     return (
-        <Page>
+        <Page density="compact">
             <Listing
                 carried={
                     matrix.kind === 'read'
@@ -202,7 +200,7 @@ function AppsShelf({ shelf, open }: { shelf: 'apps' | 'skills'; open: Open }) {
     const { title } = SHELVES[shelf];
     if (apps.kind !== 'read') {
         return (
-            <Page>
+            <Page density="compact">
                 <Waiting reading={apps} what={title} />
             </Page>
         );
@@ -211,7 +209,7 @@ function AppsShelf({ shelf, open }: { shelf: 'apps' | 'skills'; open: Open }) {
         matrix.kind === 'read' ? (matrix.out.Rows ?? []).map((row) => [row.Name, row]) : [],
     );
     return (
-        <Page>
+        <Page density="compact">
             <Listing
                 carried={
                     matrix.kind === 'read'

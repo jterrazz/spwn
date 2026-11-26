@@ -96,6 +96,14 @@
     --motion-wait: 2.4s ease-in-out infinite;
 
     --chrome-row: 52px;
+
+    --row-height: 40px;
+    --row-pad: var(--space-8);
+}
+
+[data-density='compact'] {
+    --row-height: 32px;
+    --row-pad: var(--space-4);
 }
 
 @media (prefers-reduced-transparency: reduce) {

@@ -60,7 +60,6 @@ function Process({
                 <Row
                     lead={leads ? null : undefined}
                     leadSize="machine"
-                    size="slim"
                     title={name}
                     titleLook="mono"
                     value={measured}
@@ -78,7 +77,6 @@ function Process({
                 go(machineRoute(name, 'Activity'));
             }}
             sentence="a machine of this Mac"
-            size="slim"
             title={name}
             value={measured}
         />

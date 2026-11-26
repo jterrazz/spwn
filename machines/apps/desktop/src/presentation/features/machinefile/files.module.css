@@ -14,12 +14,12 @@
 }
 .machine {
     grid-template-columns: minmax(0, 1.1fr) 120px minmax(0, 1.6fr);
-    min-height: 36px;
+    min-height: var(--row-height);
 }
 .file {
     grid-template-columns: minmax(150px, 220px) minmax(0, 1fr) auto;
     gap: var(--space-16);
-    min-height: 40px;
+    min-height: var(--row-height);
 }
 .opens {
     appearance: none;

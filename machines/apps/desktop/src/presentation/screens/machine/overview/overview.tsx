@@ -94,7 +94,7 @@ function MacOverview({ found, go }: { found: Found; go: Go }) {
     const up = overview.kind === 'read' ? overview.out.Summary.Head.Up : 0;
     const foot = overview.kind === 'read' ? overview.out.Summary.Machines : undefined;
     return (
-        <Page>
+        <Page density="comfortable">
             <MacHead name={name} overview={overview} unseen={found.mac.Unseen} />
             <ActivityTiles
                 disk={<DiskTile label="Disk" shows="used" target={targetOf(found)} />}
@@ -122,7 +122,7 @@ type VmProps = { mac: MachinesMacView; vm: MachinesVM; go: Go };
 
 function StoppedOverview({ mac, vm, go }: VmProps) {
     return (
-        <Page>
+        <Page density="comfortable">
             <VmHead vm={vm} />
             <FailedCreate birth={vm.Birth} />
             <FileChapters drift={undefined} go={go} vm={vm.Name} />
@@ -137,7 +137,7 @@ function VmOverview({ mac, vm, go }: VmProps) {
     const up = overview.kind === 'read' ? overview.out.Summary.Head.Up : 0;
     const server = machineKindOf(vm) === 'server';
     return (
-        <Page>
+        <Page density="comfortable">
             <VmHead overview={overview} vm={vm} />
             <ActivityTiles
                 disk={<DiskTile label="Disk" shows="used" target={targetOf(found)} />}

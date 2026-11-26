@@ -44,21 +44,21 @@ export function InboxPage({ macs, overview, go }: InboxProps) {
     const [chosen, setChosen] = useState<null | string>(null);
     if (reach.kind === 'unanswered' && overview.kind !== 'read') {
         return (
-            <Page>
+            <Page density="comfortable">
                 <Absent reach={reach} />
             </Page>
         );
     }
     if (overview.kind === 'failed') {
         return (
-            <Page>
+            <Page density="comfortable">
                 <Unanswered error={overview.error} size="page" />
             </Page>
         );
     }
     if (overview.kind === 'reading') {
         return (
-            <Page>
+            <Page density="comfortable">
                 <SkeletonHead size="page" what="what needs you" />
             </Page>
         );
@@ -70,7 +70,7 @@ export function InboxPage({ macs, overview, go }: InboxProps) {
             ? 'No need is listed.'
             : `None of the needs listed concerns ${chosen} or its machines.`;
     return (
-        <Page>
+        <Page density="comfortable">
             <SummaryHead size="page" summary={Summary} verdict={Summary.Verdict} />
             <Switch
                 all="All machines"

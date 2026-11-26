@@ -109,20 +109,20 @@ export function ItemPage({
     const needed = shelf === 'settings' ? settings : apps;
     if (reach.kind === 'unanswered' && needed.kind !== 'read') {
         return (
-            <Page>
+            <Page density="comfortable">
                 <Absent reach={reach} />
             </Page>
         );
     }
     if (needed.kind !== 'read') {
         return (
-            <Page>
+            <Page density="comfortable">
                 <Waiting name={name} reading={needed} />
             </Page>
         );
     }
     return (
-        <Page>
+        <Page density="comfortable">
             <Item
                 go={go}
                 macs={macs}

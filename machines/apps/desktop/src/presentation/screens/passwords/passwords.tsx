@@ -54,7 +54,7 @@ function EntryRow({ entry, go }: { entry: AccountsVaultEntry; go: Go }) {
 function Vault({ read, go }: { read: AccountsVaultRead; go: Go }) {
     const entries = read.Entries ?? [];
     return (
-        <Page>
+        <Page density="compact">
             <Verdict
                 line={asSentence(sentence([read.Verdict.Sentence, read.Verdict.Line]))}
                 size="page"
@@ -80,14 +80,14 @@ export function PasswordsPage({ opened, go }: { opened: string | undefined; go: 
     const listed = useWatch('vault.list', {}, undefined);
     if (listed.kind === 'failed') {
         return (
-            <Page>
+            <Page density="compact">
                 <Unanswered error={listed.error} size="page" />
             </Page>
         );
     }
     if (listed.kind === 'reading') {
         return (
-            <Page>
+            <Page density="compact">
                 <Skeleton what="the passwords of this Mac">
                     <VerdictSkeleton size="page" />
                     <SkeletonPanel

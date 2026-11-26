@@ -32,7 +32,6 @@ export type RowProps = {
     valueSize?: 'long' | 'short';
     trail?: ReactNode;
     trailSize?: 'fit' | 'pill' | 'wide';
-    size?: 'regular' | 'slim';
     template?: RowTemplate;
     nested?: boolean;
     onOpen?: () => void;
@@ -96,13 +95,8 @@ function columnsOf(columns: Columns): string[] {
     ].filter((name) => name !== undefined);
 }
 
-function classesOf(columns: Columns, size: 'regular' | 'slim', open: boolean): string {
-    return [
-        styles.row,
-        size === 'slim' ? styles.slim : '',
-        ...columnsOf(columns),
-        open ? styles.open : '',
-    ].join(' ');
+function classesOf(columns: Columns, open: boolean): string {
+    return [styles.row, ...columnsOf(columns), open ? styles.open : ''].join(' ');
 }
 
 function StateCell({ state, at }: { state: null | RowState | undefined; at: 'end' | 'start' }) {
@@ -179,7 +173,7 @@ function RowBody({
     kind,
     value,
     trail,
-}: Omit<RowProps, 'link' | 'onOpen' | 'size' | 'trailSize'>) {
+}: Omit<RowProps, 'link' | 'onOpen' | 'trailSize'>) {
     return (
         <>
             {lead === undefined ? null : <div className={styles.lead}>{lead}</div>}
@@ -217,12 +211,12 @@ function RowBody({
     );
 }
 
-export function Row({ size = 'regular', onOpen, link, ...shown }: RowProps) {
+export function Row({ onOpen, link, ...shown }: RowProps) {
     const body = <RowBody {...shown} />;
     const linked = link === undefined ? null : <div className={styles.link}>{link}</div>;
     if (onOpen && linked) {
         return (
-            <div className={`${styles.row} ${size === 'slim' ? styles.slim : ''} ${styles.linked}`}>
+            <div className={`${styles.row} ${styles.linked}`}>
                 <button
                     className={`${styles.opener} ${columnsOf(shown).join(' ')}`}
                     onClick={onOpen}
@@ -236,20 +230,20 @@ export function Row({ size = 'regular', onOpen, link, ...shown }: RowProps) {
     }
     if (onOpen) {
         return (
-            <button className={classesOf(shown, size, true)} onClick={onOpen} type="button">
+            <button className={classesOf(shown, true)} onClick={onOpen} type="button">
                 {body}
             </button>
         );
     }
     if (linked) {
         return (
-            <div className={`${styles.row} ${size === 'slim' ? styles.slim : ''} ${styles.linked}`}>
+            <div className={`${styles.row} ${styles.linked}`}>
                 <div className={`${styles.inner} ${columnsOf(shown).join(' ')}`}>{body}</div>
                 {linked}
             </div>
         );
     }
-    return <div className={classesOf(shown, size, false)}>{body}</div>;
+    return <div className={classesOf(shown, false)}>{body}</div>;
 }
 
 export type RowColumn = { label: string; numeric?: boolean };

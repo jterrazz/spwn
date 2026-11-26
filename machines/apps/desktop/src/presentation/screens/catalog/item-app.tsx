@@ -123,7 +123,6 @@ function ComesWith({
                                 go(routeOf(name));
                             }}
                             sentence={row?.Package.Description}
-                            size="slim"
                             state={row === undefined ? null : settingState(row.State)}
                             tag={kindChipWord('setting')}
                             tagLook="type"
@@ -158,7 +157,6 @@ function OnDisk({ report, go }: Pick<ItemProps, 'go'> & { report: AppsReport }) 
                         key={stored.Path}
                         kind={wordOf('CatalogLevel', stored.Level).Word}
                         sentence={sentence([detailOf('CatalogLevel', stored.Level), stored.Note])}
-                        size="slim"
                         title={stored.Path}
                     />
                 ))}

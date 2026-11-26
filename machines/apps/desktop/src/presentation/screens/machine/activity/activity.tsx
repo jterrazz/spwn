@@ -91,7 +91,7 @@ export function ActivityTab({ found, go }: { found: Found; go: Go }) {
         );
     }
     return (
-        <Page>
+        <Page density="comfortable">
             {now}
             <Log found={found} />
         </Page>

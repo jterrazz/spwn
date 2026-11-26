@@ -18,7 +18,7 @@ export const PANEL_STORIES: readonly Story<PanelProps>[] = [
                         stateAt="start"
                         title="Port 5000 is reachable from your local network"
                     />
-                    <Row size="slim" title="node 24.11.0 → 24.11.1" />
+                    <Row title="node 24.11.0 → 24.11.1" />
                 </>
             ),
             note: '2',

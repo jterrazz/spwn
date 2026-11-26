@@ -196,20 +196,20 @@ export function StoragePage({ macs, go }: { macs: readonly MachinesMacView[]; go
     const reach = useReach();
     if (reach.kind === 'unanswered' && macs.length === 0) {
         return (
-            <Page>
+            <Page density="compact">
                 <Absent reach={reach} />
             </Page>
         );
     }
     if (macs.length === 0) {
         return (
-            <Page>
+            <Page density="compact">
                 <SkeletonHead size="page" what="the Macs" />
             </Page>
         );
     }
     return (
-        <Page>
+        <Page density="compact">
             {macs.map((mac) => (
                 <OneMac go={go} key={mac.Name} mac={mac} />
             ))}

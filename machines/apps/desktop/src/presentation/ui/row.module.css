@@ -2,14 +2,10 @@
     display: flex;
     align-items: center;
     gap: var(--space-12);
-    min-height: 46px;
-    padding: var(--space-8) 0;
+    min-height: var(--row-height, 40px);
+    padding: var(--row-pad) 0;
     border-top: 1px solid var(--hair);
     min-width: 0;
-}
-.slim {
-    min-height: 36px;
-    padding: var(--space-4) 0;
 }
 .grid {
     display: grid;
@@ -74,7 +70,6 @@
 .catalog {
     --column-name: minmax(140px, 184px);
     --column-cells: minmax(0, 1fr);
-    min-height: 40px;
 }
 .catalog.hasState {
     --column-state: 96px;
@@ -88,8 +83,6 @@
 .meters {
     --column-cells: 112px 150px;
     column-gap: var(--space-12);
-    min-height: 40px;
-    padding-block: var(--space-4);
 }
 .passwords {
     --column-lead: 24px;
@@ -155,9 +148,6 @@
     color: var(--t3);
     font-size: var(--text-meta);
 }
-.slim .title {
-    font-size: var(--text-body);
-}
 .title.strong {
     font-weight: var(--weight-medium);
 }
@@ -208,6 +198,7 @@
     gap: var(--space-12);
     align-items: center;
     justify-content: flex-end;
+    margin-block: calc(var(--space-4) / -2);
 }
 .head {
     border-top: 0;
@@ -221,6 +212,23 @@
 .linked {
     display: flex;
     gap: var(--space-12);
+    position: relative;
+    isolation: isolate;
+}
+.linked:has(> .opener)::before {
+    content: '';
+    position: absolute;
+    inset: 0 calc(-1 * var(--space-8));
+    z-index: -1;
+    border-radius: var(--radius-control);
+    pointer-events: none;
+    transition: background var(--motion-hover) var(--ease);
+}
+.linked:has(> .opener):hover::before {
+    background: var(--s2);
+}
+.linked:has(> .opener:active)::before {
+    background: var(--s3-press);
 }
 .inner {
     flex: 1;
@@ -239,22 +247,11 @@
     margin-left: calc(-1 * var(--space-8));
     padding: var(--space-4) var(--space-8);
     border-radius: var(--radius-control);
-    transition: background var(--motion-hover) var(--ease);
 }
 .linked > .opener {
     align-self: stretch;
-    margin-block: calc(-1 * var(--space-8));
-    padding-block: var(--space-8);
-}
-.linked.slim > .opener {
-    margin-block: calc(-1 * var(--space-4));
-    padding-block: var(--space-4);
-}
-.opener:hover {
-    background: var(--s2);
-}
-.opener:active {
-    background: var(--s3-press);
+    margin-block: calc(-1 * var(--row-pad));
+    padding-block: var(--row-pad);
 }
 .link {
     flex: none;

@@ -63,7 +63,6 @@ export function Own({ view }: { view: MachinefileFileView }) {
                         key={`added-${name}`}
                         kind="added"
                         sentence="an app added on this Mac only"
-                        size="slim"
                         title={name}
                     />
                 ))}
@@ -72,7 +71,6 @@ export function Own({ view }: { view: MachinefileFileView }) {
                         key={`removed-${name}`}
                         kind="removed"
                         sentence="an app the files declare, left out here"
-                        size="slim"
                         title={name}
                     />
                 ))}
@@ -80,7 +78,6 @@ export function Own({ view }: { view: MachinefileFileView }) {
                     <Row
                         key={`set-${one.Setting}-${one.Option}`}
                         sentence={`${one.Option} set here`}
-                        size="slim"
                         title={one.Setting}
                         value={<Value>{one.Value}</Value>}
                     />
@@ -90,7 +87,6 @@ export function Own({ view }: { view: MachinefileFileView }) {
                         key={`gone-${name}`}
                         kind="removed"
                         sentence="a setting the files declare, left out here"
-                        size="slim"
                         title={name}
                     />
                 ))}
@@ -124,7 +120,6 @@ export function Followers({ view, go }: { view: MachinefileFileView; go: (to: Ro
                                     : `on ${follower.Mac}`,
                                 appliedOf(follower.Applied),
                             ])}
-                            size="slim"
                             state={followerState(follower)}
                             title={follower.Machine}
                         />
@@ -161,7 +156,6 @@ export function Users({
                             choose(user.Name);
                         }}
                         sentence={user.Description}
-                        size="slim"
                         title={user.Name}
                         value={countOf('machine', (user.Followers ?? []).length)}
                     />

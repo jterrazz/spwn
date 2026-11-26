@@ -46,7 +46,7 @@ type ReadProps = {
 function Read({ reading, name, target, go }: ReadProps) {
     return (
         <Screen>
-            <Page>
+            <Page density="compact">
                 <DiskCard
                     leads
                     name={name}
@@ -72,14 +72,14 @@ export function StorageTab({ name, target, go }: StorageTabProps) {
     const disk = useWatch('disk.read', {}, target);
     if (disk.kind === 'failed') {
         return (
-            <Page>
+            <Page density="compact">
                 <Unanswered error={disk.error} size="tab" />
             </Page>
         );
     }
     if (disk.kind === 'reading') {
         return (
-            <Page>
+            <Page density="compact">
                 <Skeleton what={`the disk of ${name}`}>
                     <SkeletonPanel title={DISK_TITLE} trail="fit" />
                 </Skeleton>

@@ -80,7 +80,7 @@ export function EntryPage({ entry, go }: { entry: AccountsVaultEntry; go: Go }) 
         </Button>
     );
     return (
-        <Page>
+        <Page density="comfortable">
             <header className={styles.head}>
                 <span className={styles.mark}>
                     <AppIcon name={entry.Program} />

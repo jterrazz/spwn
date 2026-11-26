@@ -226,14 +226,14 @@ export function SignInsTab({ found, go }: { found: Found; go: Go }) {
     const [asked, setAsked] = useState<Asked | undefined>(undefined);
     if (listed.kind === 'failed') {
         return (
-            <Page>
+            <Page density="compact">
                 <Unanswered error={listed.error} size="tab" />
             </Page>
         );
     }
     if (listed.kind === 'reading') {
         return (
-            <Page>
+            <Page density="compact">
                 <Skeleton what={`the sign-ins of ${name}`}>
                     <VerdictSkeleton line={false} size="tab" />
                     <SkeletonPanel lead="icon" title={TITLE} trail="fit" />
@@ -244,7 +244,7 @@ export function SignInsTab({ found, go }: { found: Found; go: Go }) {
     const { Verdict: verdict, Programs } = listed.out;
     const programs = Programs ?? [];
     return (
-        <Page>
+        <Page density="compact">
             <Verdict
                 line=""
                 size="tab"

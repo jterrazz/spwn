@@ -49,7 +49,6 @@ function rowOf({ line, go }: LineProps, link?: ReactNode): RowProps {
     const row: RowProps = {
         lead: <span className={styles.at}>{clock(line.At) ?? ''}</span>,
         leadSize: 'clock',
-        size: 'slim',
         title: line.Text,
         titleLook: 'strong',
         value: <Tail line={line} />,

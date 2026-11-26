@@ -165,14 +165,14 @@ export function MachineFilesPage({
     const [chosen, setChosen] = useState<string | undefined>(undefined);
     if (reach.kind === 'unanswered' && (explain.kind !== 'read' || files.kind !== 'read')) {
         return (
-            <Page>
+            <Page density="compact">
                 <Absent reach={reach} />
             </Page>
         );
     }
     if (files.kind !== 'read') {
         return (
-            <Page>
+            <Page density="compact">
                 <Waiting reading={files} size="page" what="the machine files This Mac reads" />
             </Page>
         );
@@ -181,7 +181,7 @@ export function MachineFilesPage({
     const file = chosen ?? opened ?? openedBy(explain, all);
     const view = all.find((candidate) => candidate.Name === file);
     return (
-        <Page>
+        <Page density="compact">
             <VerdictHead size="page" verdict={files.out.Verdict} />
             <Following explain={explain} />
             {view === undefined ? (

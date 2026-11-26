@@ -171,7 +171,6 @@ function VmPorts({ of, vm, target }: VmPortsProps) {
                     {of.notShared.map((row) => (
                         <Row
                             key={`not-shared/${row.vm}`}
-                            size="slim"
                             title={row.detail}
                             value={String(row.count)}
                         />
@@ -205,7 +204,7 @@ export function PortsTab({ found, go }: { found: Found; go: Go }) {
     const listing = useRead('ports.list', { Of: name });
     if (listing.kind === 'failed') {
         return (
-            <Page>
+            <Page density="compact">
                 <Unanswered error={listing.error} size="tab" />
             </Page>
         );
@@ -213,7 +212,7 @@ export function PortsTab({ found, go }: { found: Found; go: Go }) {
     const vm = found.vm?.Name;
     if (listing.kind === 'reading') {
         return (
-            <Page>
+            <Page density="compact">
                 <Skeleton what={`the ports of ${name}`}>
                     <VerdictSkeleton size="tab" />
                     <Alarm found={found} go={go} name={name} />
@@ -228,7 +227,7 @@ export function PortsTab({ found, go }: { found: Found; go: Go }) {
     }
     const of = portsOf(listing.out, { mac: found.mac.Name, vm });
     return (
-        <Page>
+        <Page density="compact">
             <VerdictHead size="tab" verdict={listing.out.verdict} />
             <Alarm found={found} go={go} name={name} />
             <HeldOutcomes>
