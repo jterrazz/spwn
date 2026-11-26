@@ -1,5 +1,6 @@
 #!/bin/bash
 set -u
+unset CDPATH
 SELF=$(cd "$(command -p dirname "${BASH_SOURCE[0]}")" && pwd -P)/$(command -p basename "${BASH_SOURCE[0]}")
 ROUTES=${GATE_ROUTES_DIR:-$HOME/.config/spwn/gate-routes}
 refuse() { echo "gate-ssh: $*" >&2; exit 92; }
@@ -9,7 +10,21 @@ COMMON=(-F /dev/null -o BatchMode=yes -o StrictHostKeyChecking=yes -o Identities
 SSH_GUARD=(-a "${COMMON[@]}")
 ME=$(command -p id -u)
 
-expand() { case $1 in "~/"*) echo "$HOME/${1#\~/}" ;; *) echo "$1" ;; esac; }
+expand() { case $1 in "~/"*) printf '%s\n' "$HOME/${1#\~/}" ;; *) printf '%s\n' "$1" ;; esac; }
+plain_path() {
+  case $2 in /*) ;; *) refuse "route file $f: $1 $2 is not an absolute path" ;; esac
+  case $2 in *[!A-Za-z0-9._/-]*) refuse "route file $f: $1 holds a character outside A-Z a-z 0-9 . _ / -, which ssh would expand (% or \${) after this check" ;; esac
+}
+resolve() {
+  local p=$1 l n=0 d
+  while [ -L "$p" ]; do
+    n=$((n + 1)); [ $n -le 16 ] || return 1
+    l=$(command -p readlink "$p") || return 1
+    case $l in /*) p=$l ;; *) p=$(command -p dirname "$p")/$l ;; esac
+  done
+  d=$(cd -P "$(command -p dirname "$p")" 2> /dev/null && pwd -P) || return 1
+  printf '%s\n' "$d/$(command -p basename "$p")"
+}
 quote() { printf "'%s'" "${1//\'/\'\\\'\'}"; }
 private() {
   local perm uid
@@ -26,23 +41,30 @@ owner_home() {
 }
 
 check_key() {
-  local name=$1 k=$2 d r h hr s x
-  case $k in /*) ;; *) refuse "route file $f: $name $k is not an absolute path" ;; esac
+  local name=$1 k=$2 r h hr s x
+  plain_path "$name" "$k"
   [ ! -L "$k" ] || refuse "route file $f: $name $k is a symbolic link: name the key file itself"
-  d=$(cd "$(command -p dirname "$k")" 2> /dev/null && pwd -P) || d=$(command -p dirname "$k")
-  r=$d/$(command -p basename "$k")
-  for h in "$(owner_home)" "$HOME"; do
-    hr=$(cd "$h" 2> /dev/null && pwd -P) || hr=$h
-    s=$(cd "$hr/.ssh" 2> /dev/null && pwd -P) || s=$hr/.ssh
+  r=$(resolve "$k") || refuse "route file $f: $name $k is not a readable file"
+  plain_path "$name" "$r"
+  for h in "$(owner_home)" "${HOME:-}"; do
+    [ -n "$h" ] || continue
+    hr=$(cd -P "$h" 2> /dev/null && pwd -P) || hr=$h
+    s=$(cd -P "$hr/.ssh" 2> /dev/null && pwd -P) || s=$hr/.ssh
     case $r in "$hr"/.ssh/* | "$s"/*) refuse "route file $f: $name $r lies under $hr/.ssh, where the owner's own identities live: a gate route takes a dedicated key kept outside ~/.ssh, so this route is refused until one exists, and creating and authorising that key is the owner's gesture (this script never creates, copies or moves a key)" ;; esac
     if [ -d "$s" ]; then
-      for x in "$s"/*; do
-        [ -e "$x" ] || continue
-        ! [ "$r" -ef "$x" ] || refuse "route file $f: $name $r is the same file as $x, an identity of the owner: a dedicated key only"
-      done
+      x=$(command -p find -L "$s" -maxdepth 4 -samefile "$r" 2> /dev/null | command -p head -n 1)
+      [ -z "$x" ] || refuse "route file $f: $name $r is the same file as $x, an identity of the owner: a dedicated key only"
     fi
   done
   [ -f "$r" ] && [ -r "$r" ] || refuse "route file $f: $name $r is not a readable file"
+  ROUTE+=(-o "IdentityFile=$r")
+}
+
+check_known_hosts() {
+  [ -n "$KNOWN_HOSTS" ] || return 0
+  plain_path KNOWN_HOSTS "$KNOWN_HOSTS"
+  [ -f "$KNOWN_HOSTS" ] || refuse "route file $f: KNOWN_HOSTS $KNOWN_HOSTS is not a file"
+  ROUTE+=(-o "UserKnownHostsFile=$KNOWN_HOSTS")
 }
 
 load_route() {
@@ -76,21 +98,17 @@ load_route() {
     esac
   done < "$f"
   ROUTE=()
-  if [ -n "$KNOWN_HOSTS" ]; then
-    case $KNOWN_HOSTS in /*) ;; *) refuse "route file $f: KNOWN_HOSTS $KNOWN_HOSTS is not an absolute path" ;; esac
-    case $KNOWN_HOSTS in *[!A-Za-z0-9._/-]*) refuse "route file $f: KNOWN_HOSTS holds a character outside A-Z a-z 0-9 . _ / -" ;; esac
-    [ -f "$KNOWN_HOSTS" ] || refuse "route file $f: KNOWN_HOSTS $KNOWN_HOSTS is not a file"
-    ROUTE+=(-o "UserKnownHostsFile=$KNOWN_HOSTS")
-  fi
   if [ -n "$HOP" ]; then
     [ -z "$KEY$HOSTNAME_$USER_$PORT$PROXY$STATION" ] && [ -n "$HOP_KEY" ] || refuse "route file $f: a two-hop route sets HOP, HOP_KEY and KNOWN_HOSTS and nothing else"
     case $HOP in *@*@* | -* | *[!A-Za-z0-9._@-]*) refuse "route file $f: HOP is not user@host" ;; esac
     case $HOP in [A-Za-z0-9._]*@[A-Za-z0-9._]*) ;; *) refuse "route file $f: HOP is not user@host" ;; esac
     check_key HOP_KEY "$HOP_KEY"
+    check_known_hosts
     return
   fi
   [ -n "$KEY" ] && [ -z "$HOP_KEY" ] || refuse "route file $f: a direct route sets KEY, and HOP_KEY only with HOP"
   check_key KEY "$KEY"
+  check_known_hosts
   if [ -n "$HOSTNAME_" ]; then
     case $HOSTNAME_ in -* | *[!A-Za-z0-9._-]*) refuse "route file $f: HOSTNAME is not a plain host name" ;; esac
     ROUTE+=(-o "HostName=$HOSTNAME_")
@@ -131,12 +149,12 @@ ssh_mode() {
   [ -n "$host" ] || usage
   load_route "$host"
   if [ -z "$HOP" ]; then
-    launch /usr/bin/ssh "${SSH_GUARD[@]}" -i "$KEY" ${ROUTE[@]+"${ROUTE[@]}"} ${flags[@]+"${flags[@]}"} -- "$host" ${rest[@]+"${rest[@]}"}
+    launch /usr/bin/ssh "${SSH_GUARD[@]}" ${ROUTE[@]+"${ROUTE[@]}"} ${flags[@]+"${flags[@]}"} -- "$host" ${rest[@]+"${rest[@]}"}
   fi
   [ ${#rest[@]} -gt 0 ] || { echo "gate-ssh: a two-hop route has no interactive login" >&2; exit 2; }
   cmd="${rest[*]}"
   b=$(printf %s "$cmd" | command -p base64 | command -p tr -d '\n')
-  launch /usr/bin/ssh "${SSH_GUARD[@]}" -i "$HOP_KEY" ${ROUTE[@]+"${ROUTE[@]}"} ${flags[@]+"${flags[@]}"} -- "$HOP" \
+  launch /usr/bin/ssh "${SSH_GUARD[@]}" ${ROUTE[@]+"${ROUTE[@]}"} ${flags[@]+"${flags[@]}"} -- "$HOP" \
     "ssh -o BatchMode=yes -- $host 'eval \"\$(printf %s $b | base64 -d)\"'"
 }
 
@@ -160,7 +178,7 @@ scp_mode() {
   if [[ $dst == *:* ]]; then [ "$remotes" = 1 ] || refuse "scp between two remote paths is not routed"; fi
   load_route "$host"
   if [ -z "$HOP" ]; then
-    launch /usr/bin/scp "${COMMON[@]}" -i "$KEY" ${ROUTE[@]+"${ROUTE[@]}"} ${flags[@]+"${flags[@]}"} -- "${paths[@]}"
+    launch /usr/bin/scp "${COMMON[@]}" ${ROUTE[@]+"${ROUTE[@]}"} ${flags[@]+"${flags[@]}"} -- "${paths[@]}"
   fi
   if [[ $dst == "$host":* ]]; then
     rd=${dst#"$host":}; [ -n "$rd" ] || rd=.

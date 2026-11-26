@@ -5,7 +5,7 @@ fail=0; bad() { echo "FAIL $*"; fail=1; }
 for f in *.sh; do bash -n "$f" || bad "syntax $f"; done
 python3 -I -c 'import ast, sys; ast.parse(open(sys.argv[1]).read())' cc-verdict.py || bad "syntax cc-verdict.py"
 grep -nE '/private/tmp|/tmp/claude' ./*.sh ./*.py | grep -v '^./test.sh' && bad "a script names a scratchpad"
-T=$(mktemp -d) || exit 2; trap 'rm -rf "$T"' EXIT
+T=$(mktemp -d) || exit 2; trap 'rm -rf "$T"' EXIT; T=$(cd -P "$T" && pwd -P)
 d=$(env -u GATE_RUN_DIR bash -c '. ./env.sh; echo "$RUN"'); case $d in */.artifacts/gates) ;; *) bad "default run folder is $d" ;; esac
 d=$(GATE_RUN_DIR=$T/run bash -c '. ./env.sh; echo "$RUN"'); [ "$d" = "$T/run" ] || bad "GATE_RUN_DIR is ignored: $d"
 d=$(env -u GATE_VM_RAM GATE_RUN_DIR=$T/run GATE_VM_DIR=g bash -c '. ./env.sh; echo "$VM_RAM"'); [ "$d" = /gates/g ] || bad "default RAM folder is $d"
@@ -57,10 +57,15 @@ unset GATE_RUN_DIR GATE_SLOT_POLL GATE_SLOT_MAX_LOAD
 H=$T/home; R=$T/routes; mkdir -p "$H/.ssh" "$H/k" "$H/bin" "$R"; chmod 700 "$R"
 : > "$H/k/vm_key"; : > "$H/k/hop_key"; : > "$H/.ssh/id_ed25519"; : > "$H/.ssh/other_key"
 ln -s "$H/k/vm_key" "$H/k/link_key"; ln "$H/.ssh/other_key" "$H/k/hard_key"
+mkdir -p "$H/.ssh/sub/deep"; : > "$H/.ssh/sub/deep/id2"; : > "$H/.ssh/.hidden"; ln "$H/.ssh/sub/deep/id2" "$H/k/hard_sub"; ln "$H/.ssh/.hidden" "$H/k/hard_dot"
 printf '#!/bin/sh\n' > "$H/bin/station"; chmod 755 "$H/bin/station"; : > "$H/bin/plain"
 eval "pw=~$(id -un)"
 route() { local n=$1; shift; printf '%s\n' "$@" > "$R/$n.env"; chmod 600 "$R/$n.env"; }
 route vm-a "KEY=$H/k/vm_key"
+: > "$H/k/gone_key"; route vm-gone "KEY=$H/k/gone_key"
+route vm-pct "KEY=$H/k/%d/vm_key"
+mkdir -p "$H/k/A\${HOME}/.ssh"; : > "$H/k/A\${HOME}/.ssh/id_ed25519"; route vm-var "KEY=$H/k/A\${HOME}/.ssh/id_ed25519"
+route vm-hopvar HOP=ops@hop-host "HOP_KEY=$H/k/A\${HOME}/.ssh/id_ed25519"
 : > "$H/kh"
 route vm-p "KEY=$H/k/vm_key" HOSTNAME=vm-p.internal USER=gate PORT=2222 PROXY=station-pipe "STATION=$H/bin/station" "KNOWN_HOSTS=$H/kh"
 route vm-b HOP=ops@hop-host "HOP_KEY=$H/k/hop_key"
@@ -77,6 +82,8 @@ route vm-hopdot HOP=ops@hop-host "HOP_KEY=$H/k/../.ssh/other_key"
 route vm-pw "KEY=$pw/.ssh/gate-ssh-absent-key"
 route vm-link "KEY=$H/k/link_key"
 route vm-hard "KEY=$H/k/hard_key"
+route vm-hard-sub "KEY=$H/k/hard_sub"
+route vm-hard-dot "KEY=$H/k/hard_dot"
 route vm-rel KEY=k/vm_key
 route vm-mixed "KEY=$H/k/vm_key" HOP=ops@hop-host
 route vm-hopextra HOP=ops@hop-host "HOP_KEY=$H/k/hop_key" PORT=22
@@ -109,36 +116,44 @@ refused() {
 argv() { printf '%s\n' "$@"; }
 common=$(argv -F /dev/null -o BatchMode=yes -o StrictHostKeyChecking=yes -o IdentitiesOnly=yes -o IdentityAgent=none -o ForwardAgent=no -o ControlMaster=no -o ControlPath=none -o PermitLocalCommand=no)
 b64_of() { tail -n 1 | sed -n "s/.*printf %s \([A-Za-z0-9+\/=]*\) | base64 -d.*/\1/p" | base64 -d; }
-want=$(argv /usr/bin/ssh -a; echo "$common"; argv -i "$H/k/vm_key" -n -o ConnectTimeout=10 -- vm-a true)
+child=()
+ssh_w() { argv ${child[@]+"${child[@]}"} /usr/bin/ssh -a; echo "$common"; }
+scp_w() { argv ${child[@]+"${child[@]}"} /usr/bin/scp; echo "$common"; }
+sshg() { local a i; mapfile -t a; for i in "${!a[@]}"; do [ "${a[$i]}" = /usr/bin/ssh ] && break; done; /usr/bin/ssh -G "${a[@]:$((i + 1))}" 2>&1; }
+want=$(ssh_w; argv -o "IdentityFile=$H/k/vm_key" -n -o ConnectTimeout=10 -- vm-a true)
 got=$(gate_ssh ssh -n -o ConnectTimeout=10 vm-a true); [ "$got" = "$want" ] || bad "direct ssh argv: $got"
-want=$(argv /usr/bin/ssh -a; echo "$common"; argv -i "$H/k/vm_key" -- vm-a true)
+want=$(ssh_w; argv -o "IdentityFile=$H/k/vm_key" -- vm-a true)
 got=$(gate_ssh rsh vm-a true); [ "$got" = "$want" ] || bad "direct rsh argv: $got"
-got=$(env -i PATH="$PATH" HOME=/nonexistent GATE_ROUTES_DIR="$R" GATE_SSH_DRYRUN=1 bash ./gate-ssh.sh rsh vm-a true); [ "$got" = "$want" ] || bad "a direct route needs \$HOME: $got"
-want=$(argv /usr/bin/scp; echo "$common"; argv -i "$H/k/vm_key" -q -- a.txt vm-a:dir/)
+got=$(env -i PATH="$PATH" HOME=/nonexistent GATE_ROUTES_DIR="$R" GATE_SSH_DRYRUN=1 bash ./gate-ssh.sh rsh vm-a true); [ "$(grep -v '^HOME=' <<< "$got")" = "$(grep -v '^HOME=' <<< "$want")" ] || bad "a direct route needs \$HOME: $got"
+want=$(scp_w; argv -o "IdentityFile=$H/k/vm_key" -q -- a.txt vm-a:dir/)
 got=$(gate_ssh scp -q a.txt vm-a:dir/); [ "$got" = "$want" ] || bad "direct scp argv: $got"
-proxied=(-i "$H/k/vm_key" -o "UserKnownHostsFile=$H/kh" -o HostName=vm-p.internal -o User=gate -o Port=2222 -o "ProxyCommand=$H/bin/station machines pipe vm-p")
-want=$(argv /usr/bin/ssh -a; echo "$common"; argv "${proxied[@]}" -- vm-p true)
+proxied=(-o "IdentityFile=$H/k/vm_key" -o "UserKnownHostsFile=$H/kh" -o HostName=vm-p.internal -o User=gate -o Port=2222 -o "ProxyCommand=$H/bin/station machines pipe vm-p")
+want=$(ssh_w; argv "${proxied[@]}" -- vm-p true)
 got=$(gate_ssh ssh vm-p true); [ "$got" = "$want" ] || bad "proxied ssh argv: $got"
-want=$(argv /usr/bin/scp; echo "$common"; argv "${proxied[@]}" -- a.txt vm-p:dir/)
+want=$(scp_w; argv "${proxied[@]}" -- a.txt vm-p:dir/)
 got=$(gate_ssh scp a.txt vm-p:dir/); [ "$got" = "$want" ] || bad "proxied scp argv: $got"
 for o in "-J evil@jump" "-o ProxyCommand=evil" "-i /x" "-A" "-F /x" "-oIdentityAgent=/x"; do
   got=$(gate_ssh ssh vm-a $o true)
-  want=$(argv /usr/bin/ssh -a; echo "$common"; argv -i "$H/k/vm_key" -- vm-a $o true)
+  want=$(ssh_w; argv -o "IdentityFile=$H/k/vm_key" -- vm-a $o true)
   [ "$got" = "$want" ] || bad "an option after the host is not a remote word: $o -> $got"
-  mapfile -t a <<< "$got"
-  cfg=$(/usr/bin/ssh -G "${a[@]:1}" 2>&1)
+  cfg=$(sshg <<< "$got")
   [ "$(grep '^identityfile ' <<< "$cfg")" = "identityfile $H/k/vm_key" ] || bad "ssh -G: an identity beside the route's after '$o': $(grep '^identityfile ' <<< "$cfg")"
   grep -qx 'identityagent none' <<< "$cfg" && grep -qx 'forwardagent no' <<< "$cfg" || bad "ssh -G: an agent is reachable after '$o'"
   grep -qE '^(proxyjump|proxycommand) ' <<< "$cfg" && bad "ssh -G: a proxy after '$o': $(grep -E '^(proxyjump|proxycommand) ' <<< "$cfg")"
 done
-mapfile -t a < <(gate_ssh ssh vm-p true); cfg=$(/usr/bin/ssh -G "${a[@]:1}" 2>&1)
+cfg=$(gate_ssh ssh vm-p true | sshg)
 grep -qx "proxycommand $H/bin/station machines pipe vm-p" <<< "$cfg" && grep -qx 'hostname vm-p.internal' <<< "$cfg" && grep -qx 'user gate' <<< "$cfg" && grep -qx 'port 2222' <<< "$cfg" && grep -qx "userknownhostsfile $H/kh" <<< "$cfg" && grep -qx 'stricthostkeychecking true' <<< "$cfg" || bad "ssh -G: the proxied route is not what the route file says: $cfg"
+got=$(gate_ssh ssh vm-gone true); rm -f "$H/k/gone_key"; cfg=$(sshg <<< "$got")
+[ "$(grep '^identityfile ' <<< "$cfg")" = "identityfile $H/k/gone_key" ] || bad "ssh -G: a key gone at launch leaves ssh another identity: $(grep '^identityfile ' <<< "$cfg" | tr '\n' ' ')"
+refused "KEY holds a character outside" gate_ssh ssh vm-pct true
+refused "KEY holds a character outside" gate_ssh ssh vm-var true
+refused "HOP_KEY holds a character outside" gate_ssh ssh vm-hopvar true
 got=$(gate_ssh ssh -n vm-b 'echo "a b"; ls')
-want=$(argv /usr/bin/ssh -a; echo "$common"; argv -i "$H/k/hop_key" -n -- ops@hop-host)
+want=$(ssh_w; argv -o "IdentityFile=$H/k/hop_key" -n -- ops@hop-host)
 [ "$(sed '$d' <<< "$got")" = "$want" ] || bad "hop ssh argv: $got"
 [ "$(b64_of <<< "$got")" = 'echo "a b"; ls' ] || bad "hop ssh command does not round-trip: $(tail -n 1 <<< "$got")"
 case $(tail -n 1 <<< "$got") in "ssh -o BatchMode=yes -- vm-b 'eval "*) ;; *) bad "hop ssh second hop: $(tail -n 1 <<< "$got")" ;; esac
-want=$(argv /usr/bin/ssh -a; echo "$common"; argv -i "$H/k/hop_key" -o "UserKnownHostsFile=$H/kh" -- ops@hop-host)
+want=$(ssh_w; argv -o "IdentityFile=$H/k/hop_key" -o "UserKnownHostsFile=$H/kh" -- ops@hop-host)
 got=$(gate_ssh ssh vm-bk true); [ "$(sed '$d' <<< "$got")" = "$want" ] || bad "hop ssh argv with its known hosts: $got"
 mkdir -p "$T/sbx/dir x"; printf x > "$T/it's a.txt"; printf x > "$T/up.txt"
 got=$(gate_ssh scp "$T/it's a.txt" "vm-b:dir x/"); [ "$(grep -c '^/usr/bin/ssh$' <<< "$got")" = 1 ] || bad "hop scp upload is not one ssh: $got"
@@ -151,7 +166,7 @@ refused "no route for vm-nope" gate_ssh ssh vm-nope true
 for h in vm-def vm-dslash vm-dot vm-other vm-hopdef vm-hopdot; do refused "where the owner's own identities live" gate_ssh ssh $h true; done
 refused "$pw/.ssh/gate-ssh-absent-key lies under" env -i PATH="$PATH" HOME=/nonexistent GATE_ROUTES_DIR="$R" GATE_SSH_DRYRUN=1 bash ./gate-ssh.sh ssh vm-pw true
 refused "is a symbolic link: name the key file itself" gate_ssh ssh vm-link true
-refused "is the same file as" gate_ssh ssh vm-hard true
+for h in vm-hard vm-hard-sub vm-hard-dot; do refused "is the same file as" gate_ssh ssh $h true; done
 refused "is not an absolute path" gate_ssh ssh vm-rel true
 refused "a two-hop route sets HOP, HOP_KEY and KNOWN_HOSTS and nothing else" gate_ssh ssh vm-mixed true
 refused "a two-hop route sets HOP, HOP_KEY and KNOWN_HOSTS and nothing else" gate_ssh ssh vm-hopextra true
@@ -187,7 +202,9 @@ for c in "ssh -i /x vm-a true" "ssh -F /dev/null vm-a true" "ssh -J h vm-a true"
   gate_ssh $c > /dev/null 2>&1; [ $? = 2 ] || bad "an unrouted option is accepted: $c"
 done
 if command -v sshd > /dev/null && command -v ssh-keygen > /dev/null && command -v python3 > /dev/null; then
-  S=$T/sd; mkdir -p "$S"; ssh-keygen -q -t ed25519 -N '' -f "$S/host"; ssh-keygen -q -t ed25519 -N '' -f "$S/client"; cp "$S/client.pub" "$S/authorized_keys"
+  S=$T/sd; O=$T/owner; mkdir -p "$S" "$O/.ssh"; chmod 700 "$S" "$O" "$O/.ssh"
+  ssh-keygen -q -t ed25519 -N '' -f "$S/host"; ssh-keygen -q -t ed25519 -N '' -f "$S/client"; ssh-keygen -q -t ed25519 -N '' -C synthetic-owner -f "$O/.ssh/id_ed25519"
+  cat "$S/client.pub" "$O/.ssh/id_ed25519.pub" > "$S/authorized_keys"
   port=$(python3 -I -c 'import socket; s = socket.socket(); s.bind(("127.0.0.1", 0)); print(s.getsockname()[1])')
   printf 'Port %s\nListenAddress 127.0.0.1\nHostKey %s\nAuthorizedKeysFile %s\nPidFile %s\nUsePAM no\nStrictModes no\nPasswordAuthentication no\nLogLevel QUIET\n' "$port" "$S/host" "$S/authorized_keys" "$S/pid" > "$S/sshd_config"
   "$(command -v sshd)" -D -f "$S/sshd_config" > /dev/null 2>&1 & sp=$!
@@ -197,10 +214,26 @@ if command -v sshd > /dev/null && command -v ssh-keygen > /dev/null && command -
     base=(-F /dev/null -p "$port" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ConnectTimeout=5 -o BatchMode=yes -l "$(id -un)")
     timeout 8 ssh "${base[@]}" -o IdentityAgent="$S/silent.sock" 127.0.0.1 true > /dev/null 2>&1; [ $? = 124 ] || bad "BatchMode bounds a stuck agent: the guard is not the only protection"
     timeout 8 ssh "${base[@]}" -o IdentitiesOnly=yes -o IdentityAgent=none -i "$S/client" 127.0.0.1 true > /dev/null 2>&1; [ $? = 0 ] || bad "the guard options do not reach a server with the dedicated key alone"
+    printf '[127.0.0.1]:%s %s\n' "$port" "$(cut -d' ' -f1-2 "$S/host.pub")" > "$S/kh"
+    live=(HOSTNAME=127.0.0.1 "PORT=$port" "USER=$(id -un)" "KNOWN_HOSTS=$S/kh")
+    live_ssh() { env -i PATH="$PATH" HOME="$O" GATE_ROUTES_DIR="$R" timeout 20 bash ./gate-ssh.sh ssh "$@"; }
+    route sd-ok "KEY=$S/client" "${live[@]}"
+    [ "$(live_ssh sd-ok echo routed 2> /dev/null)" = routed ] || bad "the dedicated key does not reach a local sshd through gate-ssh"
+    P=$T/pp; mkdir -p "$P/A\${HOME}/.ssh"; : > "$P/A\${HOME}/.ssh/id_ed25519"; chmod 600 "$P/A\${HOME}/.ssh/id_ed25519"; ln -s / "$P/A"
+    route sd-decoy "KEY=$P/A\${HOME}/.ssh/id_ed25519" "${live[@]}"
+    out=$(live_ssh sd-decoy echo owner-identity 2>&1); rc=$?
+    [ $rc = 92 ] && [[ $out != *owner-identity* ]] || bad "a KEY ssh expands reached the server with the owner's identity (exit $rc): $out"
+    cp "$S/client" "$S/gone"; chmod 600 "$S/gone"; route sd-gone "KEY=$S/gone" "${live[@]}"
+    mapfile -t a < <(env -i PATH="$PATH" HOME="$O" GATE_ROUTES_DIR="$R" GATE_SSH_DRYRUN=1 bash ./gate-ssh.sh ssh sd-gone echo reached)
+    rm -f "$S/gone"
+    out=$(env -i PATH="$PATH" HOME="$O" timeout 20 "${a[@]}" 2>&1); rc=$?
+    [ $rc = 255 ] && [[ $out != *reached* ]] || bad "a key gone at launch still authenticates (exit $rc): $out"
   else
-    echo "skip: no sshd could listen here (the BatchMode test)"
+    echo "skip: no sshd could listen here (the live route tests)"
   fi
   kill "$sp" "$kp" 2> /dev/null; wait "$sp" "$kp" 2> /dev/null
+else
+  echo "skip: no sshd, ssh-keygen or python3 here (the live route tests)"
 fi
 [ $fail = 0 ] && echo "gate scripts: ok"
 exit $fail
