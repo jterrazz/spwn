@@ -125,9 +125,10 @@ fn carries_the_code(messages: &[Message]) -> bool {
 }
 
 fn error_of(message: &Message) -> Option<(String, String, String)> {
-    let Message::Frame(frame) = message else {
+    let Message::Frame(raw) = message else {
         return None;
     };
+    let frame: Value = serde_json::from_str(raw.get()).ok()?;
     let error = frame.get("error")?;
     let text = |key: &str| {
         error

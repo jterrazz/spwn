@@ -8,7 +8,9 @@ use std::sync::{mpsc, Arc, Condvar, Mutex, PoisonError};
 use std::thread;
 use std::time::Duration;
 
-use serde::Serialize;
+use serde::de::{DeserializeSeed, MapAccess, Visitor};
+use serde::{Deserialize, Deserializer, Serialize};
+use serde_json::value::{to_raw_value, RawValue};
 use serde_json::{json, Map, Value};
 
 include!(concat!(env!("OUT_DIR"), "/bridged.rs"));
@@ -37,11 +39,27 @@ impl Refusal {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Serialize)]
+// invariant: a frame travels as the engine's own line, never rebuilt: no tree of values is made of an answer, and the
+// invariant: channel writes the line's bytes where they stand.
+#[derive(Clone, Debug, Serialize)]
 #[serde(rename_all = "lowercase")]
 pub enum Message {
-    Frame(Value),
+    Frame(Box<RawValue>),
     End(String),
+}
+
+impl PartialEq for Message {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (Message::Frame(left), Message::Frame(right)) => left.get() == right.get(),
+            (Message::End(left), Message::End(right)) => left == right,
+            _ => false,
+        }
+    }
+}
+
+fn frame_of(value: &Value) -> Message {
+    to_raw_value(value).map_or_else(|error| Message::End(error.to_string()), Message::Frame)
 }
 
 pub trait Sink: Send + 'static {
@@ -139,13 +157,78 @@ pub fn refusal(request: &Value, limit: usize) -> Option<Refusal> {
     })
 }
 
-fn ends(watch: bool, answer: &Value) -> bool {
-    answer.get("error").is_some()
-        || if watch {
-            answer.get("done").is_some()
-        } else {
-            answer.get("out").is_some()
+enum Key {
+    Done,
+    Error,
+    Other,
+    Out,
+}
+
+impl<'de> Deserialize<'de> for Key {
+    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        struct Named;
+        impl Visitor<'_> for Named {
+            type Value = Key;
+
+            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                formatter.write_str("a key")
+            }
+
+            fn visit_str<E>(self, name: &str) -> Result<Key, E> {
+                Ok(match name {
+                    "done" => Key::Done,
+                    "error" => Key::Error,
+                    "out" => Key::Out,
+                    _ => Key::Other,
+                })
+            }
         }
+        deserializer.deserialize_str(Named)
+    }
+}
+
+struct Ending {
+    watch: bool,
+}
+
+impl<'de> Visitor<'de> for Ending {
+    type Value = bool;
+
+    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+        formatter.write_str("a frame")
+    }
+
+    fn visit_map<A: MapAccess<'de>>(self, mut fields: A) -> Result<bool, A::Error> {
+        let mut last = false;
+        while let Some(key) = fields.next_key::<Key>()? {
+            last |= match key {
+                Key::Error => true,
+                Key::Done => self.watch,
+                Key::Out => !self.watch,
+                Key::Other => false,
+            };
+            fields.next_value::<serde::de::IgnoredAny>()?;
+        }
+        Ok(last)
+    }
+}
+
+impl<'de> DeserializeSeed<'de> for Ending {
+    type Value = bool;
+
+    fn deserialize<D: Deserializer<'de>>(self, deserializer: D) -> Result<bool, D::Error> {
+        deserializer.deserialize_map(self)
+    }
+}
+
+// invariant: a frame ends its exchange as the engine says (`remote/api`'s client): an error, or for a watch a done,
+// invariant: for a call an out; read from the keys of the line, none of whose values is built.
+fn ends(watch: bool, frame: &RawValue) -> bool {
+    let text = frame.get();
+    text.starts_with('{')
+        && Ending { watch }
+            .deserialize(&mut serde_json::Deserializer::from_str(text))
+            .unwrap_or(false)
 }
 
 pub fn connect_within(path: &Path, within: Duration) -> io::Result<UnixStream> {
@@ -210,7 +293,7 @@ pub fn pump(reader: impl Read, id: &str, watch: bool, sink: &impl Sink, limit: u
             }
             Ok(Line::TooLong) => format!("a line from the engine is longer than {limit} bytes"),
             Ok(Line::Whole(line)) if line.iter().all(u8::is_ascii_whitespace) => continue,
-            Ok(Line::Whole(line)) => match serde_json::from_slice::<Value>(&line) {
+            Ok(Line::Whole(line)) => match serde_json::from_slice::<Box<RawValue>>(&line) {
                 Ok(answer) => {
                     let last = ends(watch, &answer);
                     if !sink.send(Message::Frame(answer)) {
@@ -224,7 +307,7 @@ pub fn pump(reader: impl Read, id: &str, watch: bool, sink: &impl Sink, limit: u
                 Err(error) => format!("a line from the engine is no JSON: {error}"),
             },
         };
-        sink.send(Message::Frame(wire_error(id, "failed", BAD_FRAME, refused)));
+        sink.send(frame_of(&wire_error(id, "failed", BAD_FRAME, refused)));
         return String::from(ANSWERED);
     }
 }
@@ -351,7 +434,7 @@ impl Exchanges {
                 .get("id")
                 .and_then(Value::as_str)
                 .ok_or(refused.message.clone())?;
-            sink.send(Message::Frame(wire_error(
+            sink.send(frame_of(&wire_error(
                 id,
                 "refused",
                 refused.code,
@@ -469,3 +552,7 @@ impl Exchanges {
 #[cfg(test)]
 #[path = "bridge_test.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "bridge_alloc_test.rs"]
+mod allocations;

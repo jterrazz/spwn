@@ -68,3 +68,12 @@ main :is(button, label, dt, th, kbd, header, [role='tab'], [role='option']),
         animation: none !important;
     }
 }
+
+/* invariant: a hidden window draws nothing, so its infinite pulses and turns are paused rather than waking the page
+   to restyle a frame nobody sees; `data-visibility` is the root's, set by `markVisibility`. */
+html[data-visibility='hidden'],
+html[data-visibility='hidden'] *,
+html[data-visibility='hidden'] *::before,
+html[data-visibility='hidden'] *::after {
+    animation-play-state: paused !important;
+}
