@@ -244,6 +244,7 @@ describe('contrast', () => {
         // Then - they are the floating surfaces, and only they
         expect(worn).toStrictEqual([
             'navigation/column.module.css .peek',
+            'navigation/find.module.css .pop',
             'ui/popover.module.css .popover',
         ]);
     });
