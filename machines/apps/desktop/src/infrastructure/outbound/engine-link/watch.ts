@@ -102,7 +102,7 @@ export class Watching {
     }
 
     private failed(error: EngineError): void {
-        if (error.wire) {
+        if (error.wire && !error.broke) {
             this.stop();
             this.stream.error(error);
         } else if (!this.closed) {

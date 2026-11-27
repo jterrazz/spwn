@@ -34,4 +34,9 @@ export class EngineError extends Error {
         this.wire = wire;
         this.fate = fate;
     }
+
+    // invariant: the one code a watch survives: it asks again as over a lost connection.
+    get broke(): boolean {
+        return this.wire?.code === 'broke';
+    }
 }

@@ -59,12 +59,12 @@ export function ask(client: EnginePort, entry: Entry, quiet: () => boolean): voi
             },
             error: (error) => {
                 if (current()) {
-                    const reconnects = error.wire === undefined;
+                    const reconnects = error.wire === undefined || error.broke;
                     entry.asking = reconnects;
-                    if (reconnects && entry.reading.kind === 'read') {
+                    if (error.wire === undefined && entry.reading.kind === 'read') {
                         holds = quiet();
                     } else {
-                        failed(entry, error);
+                        failed(entry, error, error.broke);
                     }
                 }
             },
