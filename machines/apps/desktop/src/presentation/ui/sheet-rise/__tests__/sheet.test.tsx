@@ -137,6 +137,27 @@ describe('sheet', () => {
         expect(raised).toBe(false);
     });
 
+    test("a click on the bar's ground lowers the raised page; a click on a dot in it reads and keeps it raised", async () => {
+        // Given - the page raised
+        const restore = reducedMotion(true);
+        const seen: boolean[] = [];
+        await component.render(<Space raised />, async (visitor) => {
+            await visitor.see(navigation(BAR));
+
+            // When - a sibling page's dot is clicked, then the bar's own ground
+            await visitor.click(button('The stack, 1 waits for you'));
+            await settled();
+            seen.push(isRaised());
+            document.querySelector<HTMLElement>(`nav[aria-label="${BAR}"]`)?.click();
+            await settled();
+            seen.push(isRaised());
+        });
+        restore();
+
+        // Then - the dot kept it raised, the ground lowered it
+        expect(seen).toStrictEqual([true, false]);
+    });
+
     test('with motion, the rise is one animation of the sheet; under reduced motion it jumps', async () => {
         // Given - the space lowered, first with motion, then without
         const counts: number[] = [];

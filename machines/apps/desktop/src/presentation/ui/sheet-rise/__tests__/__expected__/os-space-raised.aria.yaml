@@ -5,13 +5,13 @@
   - button "Technique"
   - button "Croissance, 1 waits for you"
   - button "Boundaries, 3 wait for you": Boundaries
-  - button "Boundaries, 3 wait for you"
+  - button "Boundaries, 3 wait for you, current"
   - button "The stack, 1 waits for you"
   - button "ADR-002"
   - button "What each app refuses, 2 wait for you": What each app refuses
   - button "Top"
   - button "What Spwn is not"
-  - button "What each app refuses, 2 wait for you"
+  - button "What each app refuses, 2 wait for you, current"
   - button "Rests on"
   - button "Canvas"
 - region "Boundaries":

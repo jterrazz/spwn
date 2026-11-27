@@ -11,7 +11,8 @@ import { Icon } from '../icon';
 import styles from './collapsed-bar.module.css';
 
 // value: what the bar says of its own: its landmark's name, the home button's name, the way back to the canvas, its
-// value: key as ARIA names it and as its keycap shows it, and a count of needs.
+// value: key as ARIA names it and as its keycap shows it, a count of needs, and the name of the dot drawn current
+// value: (its own tab stop, as the prototype's, so it is never named as the pill before it).
 export type CollapsedWords = {
     label: string;
     home: string;
@@ -19,6 +20,7 @@ export type CollapsedWords = {
     key: string;
     keycap: string;
     needs: (count: number) => string;
+    current: (name: string) => string;
 };
 
 export type CollapsedBarProps = {
@@ -51,12 +53,15 @@ function siblingsOf(
     if (at > 0 && kin.length < 2) {
         return [];
     }
-    return kin.map((one) => ({
-        id: one,
-        name: named(graph, one, (words.get(one) ?? NO_WORDS).name, shared),
-        on: one === id,
-        you: nodeOf(graph, one).needs > 0,
-    }));
+    return kin.map((one) => {
+        const name = named(graph, one, (words.get(one) ?? NO_WORDS).name, shared);
+        return {
+            id: one,
+            name: one === id ? shared.current(name) : name,
+            on: one === id,
+            you: nodeOf(graph, one).needs > 0,
+        };
+    });
 }
 
 // value: the navigation folded over a raised page: home, then each node of the read path as a pill with its siblings

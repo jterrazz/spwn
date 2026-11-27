@@ -133,7 +133,7 @@ function hidden(when: boolean) {
 // value: the page as a sheet over what is `behind` it (the canvas): lowered, only its strip peeks at the foot of the
 // value: space; raised, it covers the space under the collapsed `bar`, the canvas faded, lifted and inert behind it.
 // value: It is controlled: a click on the strip, a wheel down over it, a drag up and the grabber ask `onRaise`;
-// value: Escape, a pull at the page's top, a drag down and the grabber ask `onLower`.
+// value: Escape, a pull at the page's top, a drag down, the grabber and a click on the bar's ground ask `onLower`.
 export function Sheet(props: SheetProps) {
     const { raised } = props;
     const motion = useMotion();

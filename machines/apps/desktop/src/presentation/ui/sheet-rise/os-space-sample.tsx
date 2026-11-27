@@ -21,6 +21,7 @@ export const STRIP_WORDS: StripWords = {
 
 export const BAR_WORDS: CollapsedWords = {
     canvas: 'Canvas',
+    current: (name) => `${name}, current`,
     home: 'The canvas, at the root',
     key: 'Escape',
     keycap: 'esc',

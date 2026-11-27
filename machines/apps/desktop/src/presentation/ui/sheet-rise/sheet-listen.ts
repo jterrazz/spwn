@@ -89,6 +89,23 @@ function listenPull(scroll: HTMLElement, told: Told): () => void {
     };
 }
 
+const CONTROL = 'a, button, input, select, textarea, [role="button"]';
+
+// value: a click on the bar's own ground, off every control it holds, lowers the page as the prototype's `#cbar` does;
+// value: the keyboard's way to the same place is Escape and the bar's "Canvas".
+function listenBarGround(bar: HTMLElement, told: Told): () => void {
+    const ground = (event: MouseEvent) => {
+        const hit = event.target instanceof Element ? event.target.closest(CONTROL) : null;
+        if (told.current.raised && (hit === null || !bar.contains(hit))) {
+            told.current.onLower();
+        }
+    };
+    bar.addEventListener('click', ground);
+    return () => {
+        bar.removeEventListener('click', ground);
+    };
+}
+
 // invariant: Escape lowers a raised page before anything under it hears the key: pressed in the space or on nothing,
 // invariant: never while a dialog is open over it, and taken, so the canvas's own Escape goes up only once lowered.
 function listenEscape(root: HTMLElement, told: Told): () => void {
@@ -108,7 +125,7 @@ function listenEscape(root: HTMLElement, told: Told): () => void {
     };
 }
 
-// value: the sheet's native listeners, set once for its life: the wheels, the pull and Escape.
+// value: the sheet's native listeners, set once for its life: the wheels, the pull, Escape and the bar's ground.
 export function useListeners(parts: Parts, told: Told): void {
     useEffect(() => {
         const [root, bar, grab, scroll, strip] = [
@@ -125,6 +142,7 @@ export function useListeners(parts: Parts, told: Told): void {
             listenWheels(strip, grab, bar, told),
             listenPull(scroll, told),
             listenEscape(root, told),
+            listenBarGround(bar, told),
         ];
         return () => {
             for (const end of ends) {

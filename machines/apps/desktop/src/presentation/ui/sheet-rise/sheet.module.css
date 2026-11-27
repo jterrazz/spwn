@@ -32,6 +32,7 @@
     opacity: 0;
     transform: translateY(-8px);
     pointer-events: none;
+    cursor: pointer;
     transition:
         opacity 260ms var(--ease),
         transform 360ms var(--ease);
