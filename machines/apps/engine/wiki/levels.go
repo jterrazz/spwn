@@ -140,13 +140,27 @@ func abbreviation(all []Run, i, j int) bool {
 	if all[i].Text[j] != '.' {
 		return false
 	}
-	var before strings.Builder
-	for _, r := range all[:i] {
-		before.WriteString(r.Text)
+	// invariant: the word the stop ends is read back from the stop, run by
+	// run, to the space before it, so a text of many stops reads each word
+	// once rather than the whole text before each.
+	var parts []string
+	text := all[i].Text[:j+1]
+	for k := i; ; {
+		start := strings.LastIndexFunc(text, unicode.IsSpace)
+		if start >= 0 {
+			_, size := utf8.DecodeRuneInString(text[start:])
+			parts = append(parts, text[start+size:])
+			break
+		}
+		parts = append(parts, text)
+		if k == 0 {
+			break
+		}
+		k--
+		text = all[k].Text
 	}
-	before.WriteString(all[i].Text[:j+1])
-	fields := strings.Fields(before.String())
-	word := strings.TrimLeft(fields[len(fields)-1], "([\"'“‘")
+	slices.Reverse(parts)
+	word := strings.TrimLeft(strings.Join(parts, ""), "([\"'“‘")
 	switch strings.ToLower(word) {
 	case "e.g.", "i.e.", "cf.", "vs.":
 		return true

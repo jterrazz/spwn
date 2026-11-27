@@ -25,15 +25,17 @@ type fence struct {
 }
 
 type compiler struct {
-	page     *Page
-	schema   Schema
-	x        lineIndex
-	lines    []string
-	section  *Section
-	group    *Group
-	refused  int
-	prose    []string
-	proseAt  int
+	page    *Page
+	schema  Schema
+	x       lineIndex
+	lines   []string
+	section *Section
+	group   *Group
+	refused int
+	prose   []string
+	proseAt int
+	// value: whether a line of prose since the last flush holds a word.
+	worded   bool
 	anchors  map[string]int
 	intro    bool
 	findings []Finding
@@ -172,12 +174,13 @@ func (c *compiler) text(n int, line string) {
 		c.proseAt = n
 	}
 	c.prose = append(c.prose, line)
+	c.worded = c.worded || strings.TrimSpace(line) != ""
 }
 
 func (c *compiler) flush() {
 	lines := c.prose
 	from := c.proseAt
-	c.prose = nil
+	c.prose, c.worded = nil, false
 	for len(lines) > 0 && strings.TrimSpace(lines[0]) == "" {
 		lines = lines[1:]
 		from++
@@ -208,7 +211,7 @@ func (c *compiler) heading(n int, line string) bool {
 		return false
 	}
 	text := strings.TrimSpace(strings.TrimRight(strings.TrimSpace(line[level:]), "#"))
-	if level == 1 && c.page.Title == nil && c.intro && len(c.section.Items) == 0 && strings.TrimSpace(strings.Join(c.prose, "")) == "" {
+	if level == 1 && c.page.Title == nil && c.intro && len(c.section.Items) == 0 && !c.worded {
 		c.prose = nil
 		c.page.Title = &Span{From: n, To: n}
 		c.page.Faces.Word = text

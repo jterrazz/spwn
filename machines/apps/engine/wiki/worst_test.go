@@ -68,6 +68,39 @@ const (
 	budgetBrackets = 50 * time.Millisecond
 )
 
+// value: the second verify's, measured the same way on development-linux-mini
+// (2026-11-27, load 6): the headings 30.5 ms and the abbreviations 27.5 ms,
+// each past 20 s before its path was made linear.
+const (
+	budgetHeadings      = 250 * time.Millisecond
+	budgetAbbreviations = 250 * time.Millisecond
+)
+
+// value: the second verify's worst inputs (2026-11-27): a line of prose then
+// a megabyte of level-1 headings, each once joined the intro's prose again;
+// a megabyte of abbreviations, each once rebuilt the text before it.
+func headingsAfterProse() string { return "x\n" + strings.Repeat("# a\n", 1<<18-1) }
+
+func abbreviations() string { return "# A\n\n" + strings.Repeat("e.g. ", (1<<20)/5-2) + "\n" }
+
+func TestAMegabyteOfHeadingsAfterProseCompilesInLinearTime(t *testing.T) {
+	src, schema := headingsAfterProse(), spwnKinds()
+	within(t, budgetHeadings, "a 1 MiB of level-1 headings after prose", func() { wiki.Compile("blueprint/h", src, schema) })
+}
+
+func TestAMegabyteOfAbbreviationsIsServedInLinearTime(t *testing.T) {
+	files := map[string][]byte{"wiki.yaml": []byte(tinySchema), "blueprint/home.md": []byte(abbreviations())}
+	corpus, err := readAll(files)
+	if err != nil {
+		t.Fatal(err)
+	}
+	within(t, budgetAbbreviations, "a page of 1 MiB of abbreviations", func() {
+		if _, refused := corpus.Serve("blueprint/home"); refused != nil {
+			t.Error(refused)
+		}
+	})
+}
+
 func TestATagOfAMegabyteOfAttributesCompilesInLinearTime(t *testing.T) {
 	src, schema := longTag(), spwnKinds()
 	var p wiki.Page
