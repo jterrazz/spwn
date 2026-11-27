@@ -3,8 +3,10 @@ package wiki
 import (
 	"cmp"
 	"context"
+	"encoding/hex"
 	"errors"
 	"fmt"
+	"hash/fnv"
 	"path"
 	"slices"
 	"strconv"
@@ -289,11 +291,19 @@ func Read(ctx context.Context, files map[string]File) (Corpus, error) {
 	slices.Sort(ids)
 	pages := make([]Page, 0, len(ids))
 	records := map[string]Record{}
-	for _, id := range ids {
+	var collided []Finding
+	owner := pageOwners(ids)
+	for _, file := range ids {
 		if stopped := ctx.Err(); stopped != nil {
 			return Corpus{}, stopped
 		}
-		f := files[id+".md"]
+		id := file
+		if heard, _ := audible(file); owner[heard] != file {
+			id = file + "~" + pathMark(file)
+			served, _ := audible(id)
+			collided = append(collided, finding("H3", served, "", At{Line: 1, Col: 1}, fmt.Sprintf("the files %+q and %+q are both the page %q: the second is served as %q", owner[heard]+".md", file+".md", heard, served)))
+		}
+		f := files[file+".md"]
 		if f.Body == nil && f.Size > MaxPageBytes {
 			pages = append(pages, tooLong(id, f.Size, schema))
 			continue
@@ -310,10 +320,41 @@ func Read(ctx context.Context, files map[string]File) (Corpus, error) {
 		return Corpus{}, err
 	}
 	if inSchema > 0 {
-		report.Findings = append(report.Findings, silenced(schemaFile, inSchema))
+		collided = append(collided, silenced(schemaFile, inSchema))
+	}
+	if len(collided) > 0 {
+		report.Findings = append(report.Findings, collided...)
 		sortFindings(report.Findings)
 	}
 	return Corpus{Schema: schema, Pages: pages, Report: report, Records: records}, nil
+}
+
+// invariant: of the files whose ids are one once their silent characters
+// are removed, the page id is held by the file that held none, else by the
+// first in path order; every other is served under its id and its
+// pathMark, with H3 naming both files.
+func pageOwners(files []string) map[string]string {
+	owner := make(map[string]string, len(files))
+	for _, file := range files {
+		if heard, n := audible(file); n == 0 {
+			owner[heard] = file
+		}
+	}
+	for _, file := range files {
+		if heard, _ := audible(file); owner[heard] == "" {
+			owner[heard] = file
+		}
+	}
+	return owner
+}
+
+// value: the mark a page whose id another file already holds is served
+// with: eight hex digits of the FNV-1a hash of its file's path, the same on
+// every read.
+func pathMark(file string) string {
+	h := fnv.New32a()
+	_, _ = h.Write([]byte(file))
+	return hex.EncodeToString(h.Sum(nil))
 }
 
 func (c Corpus) Home() string {

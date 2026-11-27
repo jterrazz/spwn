@@ -1,0 +1,19 @@
+description: 'wiki.read serves two files of one page id, the second under its path mark, hard'
+env:
+    - one-mac
+    - engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].wiki = {"head":"c1","commits":{"c1":{"wiki.yaml":"wiki: spwn.wiki/v1\nfloors:\n    - id: intention\n      name: Intention\n      question: Why\n    - id: product\n      name: Product\n      question: What\n    - id: domains\n      name: Domains\n      question: Which words\n    - id: architecture\n      name: Architecture\n      question: Where\n    - id: code\n      name: Code\n      question: Which lines\nseats:\n    - id: vision\n      name: Vision\n      path: [blueprint/]\n      reads: [tell, define]\n      home: blueprint/home\nbudget: 2min\n","blueprint/home.md":"# Home\n\nThe home of the wiki.\n","blueprint/ab.md":"# The honest one\n\nIt is first.\n"}}} | .macs["macbook-pro"].wiki.commits.c1["blueprint/a" + ([7] | implode) + "b.md"] = "# The bell\n\nIt rings.\n"'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.out | {page: .Page.ID, word: .Page.Word, hard: .Page.Hard}'''
+      stdin: |
+          {"v":2,"id":"1","call":"wiki.read","target":{},"in":{"Page":"blueprint/ab"}}
+      exit: 0
+      stdout: |
+          {"page":"blueprint/ab","word":"The honest one","hard":0}
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.out | {page: .Page.ID, word: .Page.Word, hard: .Page.Hard}'''
+      stdin: |
+          {"v":2,"id":"1","call":"wiki.read","target":{},"in":{"Page":"blueprint/ab~74932b71"}}
+      exit: 0
+      stdout: |
+          {"page":"blueprint/ab~74932b71","word":"The bell","hard":1}
