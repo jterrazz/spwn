@@ -165,6 +165,9 @@ func vmRow(vm model.VM) page.Row {
 	if vm.Birth != nil && vm.Birth.Failed {
 		detail = page.Text(vm.Birth.Sentence)
 	}
+	if vm.Detail == model.HalfMade {
+		detail = page.Text(vm.Detail)
+	}
 	row.Cells = []page.Value{page.Text(string(vm.Lifetime.Kind())), page.Text(vm.Mac), page.Text(string(vm.Lifetime)), page.Text(string(vm.Lifetime)), page.Text(""), page.Text(string(vm.State)), orDash(vm.IP), record(resources, detail), resources, detail}
 	return row
 }

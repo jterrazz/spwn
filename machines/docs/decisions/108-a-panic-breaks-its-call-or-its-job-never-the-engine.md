@@ -43,7 +43,7 @@ One line in the engine log, `<RFC3339> engine: broke in <name> on <call>: <type 
 
 - **A call the engine serves:** `Error: the engine broke on machines.create-workspace; it kept running` / `Hint: its trace is in ~/.local/state/station/logs/engine.log`, its type `failed`, so exit 1. A process that serves a stream (`guest serve --stdio`, `engine attach`) words it `station broke on <call>; it kept running` / `run it again`.
 - **The window and the menu bar:** the gesture fails with those words; a feed that broke ends its watch, and the client reconnects it.
-- **A create cut by a panic** leaves its VM stopped and "was left half made", never created. _Owner's to overturn: a create never retries on its own; the owner deletes or starts it. The night's upgrade that broke is run again by the next night._
+- **A create cut by a panic** leaves its VM "was left half made", never created, stopped or still running when the panic came after its boot: the birth's mark wins over the run state. _Owner's to overturn: a create never retries on its own; the owner deletes it, or retries by hand. The night's upgrade that broke is run again by the next night._
 - **A break that repeats** is to raise, with L5, a Needs you finding, "The engine keeps breaking on <name>", its hint the log, once one signature broke 3 times in 10 min, and to back the feed off. Until L5, a page projection that breaks on every store revision is reconnected about every second and writes a full stack each time, into a log no rotation bounds. _Owner's to overturn: a finding, rather than a neutral line on the Engine page only._
 
 ### The rule

@@ -142,10 +142,11 @@ func Born(vm VM, b *Birth, runs bool) VM {
 	// that asked it, a command or the engine, and dies with it: a birth
 	// whose process no longer runs (killed, its Mac restarted) has no create
 	// left, nor has one whose step and position this station does not know;
-	// it reads stopped, half made, to start or delete, its memory given back.
-	// A create that runs reads creating however long a step takes, an engine
-	// restart included. A birth that failed stays on the VM as its disk and
-	// engine say it, until a start that answers or a delete takes it off.
+	// it reads half made whatever its run state, stopped unless it runs, to
+	// delete or start by hand, its memory given back. A create that runs
+	// reads creating however long a step takes, an engine restart included.
+	// A birth that failed stays on the VM as its disk and engine say it,
+	// until a start that answers or a delete takes it off.
 	switch {
 	case b == nil:
 	case b.Failed:
@@ -153,6 +154,7 @@ func Born(vm VM, b *Birth, runs bool) VM {
 	case b.Known() && runs:
 		vm.State, vm.Birth = Creating, b
 	case vm.State == Running:
+		vm.Detail = HalfMade
 	default:
 		vm.State, vm.Detail = Stopped, HalfMade
 	}

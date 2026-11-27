@@ -178,6 +178,9 @@ func listVMRow(mac string, vm model.VM) page.Row {
 	if vm.Birth != nil && vm.Birth.Failed {
 		detail = page.Text(vm.Birth.Sentence)
 	}
+	if vm.Detail == model.HalfMade {
+		detail = page.Text(vm.Detail)
+	}
 	switch {
 	case vm.Lifetime != model.AlwaysOn:
 	case vm.Restarts.Looping:
