@@ -47,6 +47,8 @@ func Compile(id, source string, schema Schema) Page {
 		return tooLong(id, int64(len(source)), schema)
 	}
 	source = strings.ReplaceAll(source, "\r\n", "\n")
+	id, inID := audible(id)
+	source, inSource := audible(source)
 	c := &compiler{
 		page:    &Page{ID: id, Sections: []Section{{Items: []Item{}}}},
 		schema:  schema,
@@ -58,6 +60,9 @@ func Compile(id, source string, schema Schema) Page {
 	c.section = &c.page.Sections[0]
 	c.run()
 	c.page.Findings = capped(c.findings, nil)
+	if n := inID + inSource; n > 0 {
+		c.page.Findings = append([]Finding{silenced(id, n)}, c.page.Findings...)
+	}
 	c.faces()
 	return *c.page
 }

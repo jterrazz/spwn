@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/fs"
 	"maps"
 	"os"
 	"os/exec"
@@ -29,6 +30,65 @@ var readVerbs = []string{"diff", "drift", "explain", "list", "log", "matrix", "p
 // value: a world of its own for the answers no seed world carries: two-macs
 // with a Machinefile on this Mac, whose plan has steps.
 const machinefileWorld = "two-macs+machinefile"
+
+// value: a world of its own for the wiki: one-mac whose Mac's wiki is the
+// wiki family's fixture corpus, read at each of its pages and mapped open
+// at each, since no seed world carries a wiki.
+const wikiWorld = "one-mac+wiki"
+
+// value: a call sent with its input, past the reads sent with an empty one.
+type request struct{ call, in string }
+
+// value: the seed of wikiWorld, written under dir, and a wiki.read and a
+// wiki.map of each of its pages.
+func wikiSeed(t *testing.T, root, dir string) (string, []request) {
+	t.Helper()
+	data, err := os.ReadFile(filepath.Join(root, "specs", "usecases", "worlds", "one-mac.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var world map[string]any
+	if err = json.Unmarshal(data, &world); err != nil {
+		t.Fatal(err)
+	}
+	corpus, err := os.OpenRoot(filepath.Join(root, "apps", "engine", "wiki", "testdata", "corpus"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = corpus.Close() })
+	files := map[string]string{}
+	var asks []request
+	err = fs.WalkDir(corpus.FS(), ".", func(p string, d fs.DirEntry, walked error) error {
+		if walked != nil || d.IsDir() {
+			return walked
+		}
+		body, read := fs.ReadFile(corpus.FS(), p)
+		files[p] = string(body)
+		if id, page := strings.CutSuffix(p, ".md"); page {
+			in, _ := json.Marshal(id)
+			asks = append(asks, request{"wiki.read", `{"Page":` + string(in) + `}`}, request{"wiki.map", `{"Open":` + string(in) + `}`})
+		}
+		return read
+	})
+	if err != nil || len(asks) == 0 {
+		t.Fatalf("the wiki fixture corpus reads no page: %v", err)
+	}
+	macs, _ := world["macs"].(map[string]any)
+	mac, _ := macs["macbook-pro"].(map[string]any)
+	if mac == nil {
+		t.Fatal("one-mac.json holds no macbook-pro")
+	}
+	mac["wiki"] = map[string]any{"head": "c1", "commits": map[string]any{"c1": files}}
+	out, err := json.Marshal(world)
+	if err != nil {
+		t.Fatal(err)
+	}
+	seed := filepath.Join(dir, wikiWorld+".json")
+	if err = os.WriteFile(seed, out, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	return seed, asks
+}
 
 type served struct {
 	world string
@@ -64,6 +124,13 @@ func TestTheWorldsAnswersMatchTheirSchemas(t *testing.T) {
 		t.Fatalf("no world under specs/usecases/worlds: %v", err)
 	}
 	worlds := map[string]string{machinefileWorld: filepath.Join(root, "specs", "usecases", "worlds", "two-macs.json")}
+	wiki, asks := wikiSeed(t, root, t.TempDir())
+	worlds[wikiWorld] = wiki
+	for _, ask := range asks {
+		if outs[ask.call] == nil {
+			outs[ask.call] = compiled(t, c, root, "packages/api/schemas/calls/"+ask.call+".json", "#/properties/out")
+		}
+	}
 	for _, seed := range seeds {
 		worlds[strings.TrimSuffix(filepath.Base(seed), ".json")] = seed
 	}
@@ -76,7 +143,14 @@ func TestTheWorldsAnswersMatchTheirSchemas(t *testing.T) {
 		for name, seed := range worlds {
 			t.Run(name, func(t *testing.T) {
 				t.Parallel()
-				lines := serve(t, bin, name, seed, reads)
+				requests := make([]request, 0, len(reads))
+				for _, read := range reads {
+					requests = append(requests, request{read, "{}"})
+				}
+				if name == wikiWorld {
+					requests = append(requests, asks...)
+				}
+				lines := serve(t, bin, name, seed, requests)
 				for _, line := range lines {
 					v, err := jsonschema.UnmarshalJSON(bytes.NewReader(line))
 					if err != nil {
@@ -89,10 +163,10 @@ func TestTheWorldsAnswersMatchTheirSchemas(t *testing.T) {
 					out, ok := f["out"]
 					id, _ := f["id"].(string)
 					var n int
-					if _, err := fmt.Sscan(id, &n); !ok || err != nil || n < 1 || n > len(reads) {
+					if _, err := fmt.Sscan(id, &n); !ok || err != nil || n < 1 || n > len(requests) {
 						continue
 					}
-					name := reads[n-1]
+					name := requests[n-1].call
 					if err := outs[name].Validate(out); err != nil {
 						t.Errorf("%s: its out is not its schema's\n%v", name, err)
 					}
@@ -167,8 +241,8 @@ func compiled(t *testing.T, c *jsonschema.Compiler, root, path, pointer string) 
 }
 
 // value: the answer lines of one session of `guest serve --stdio` over a
-// fresh copy of a world: a hello, then each read by its index, from 1.
-func serve(t *testing.T, bin, world, seed string, reads []string) [][]byte {
+// fresh copy of a world: a hello, then each request by its index, from 1.
+func serve(t *testing.T, bin, world, seed string, reads []request) [][]byte {
 	t.Helper()
 	dir := t.TempDir()
 	for _, sub := range []string{"bin", "root"} {
@@ -210,8 +284,8 @@ func serve(t *testing.T, bin, world, seed string, reads []string) [][]byte {
 	}
 	var frames bytes.Buffer
 	frames.WriteString(`{"v":2,"id":"0","hello":{"version":"dev","calls":null}}` + "\n")
-	for i, name := range reads {
-		fmt.Fprintf(&frames, `{"v":2,"id":"%d","call":%q,"in":{}}`+"\n", i+1, name)
+	for i, r := range reads {
+		fmt.Fprintf(&frames, `{"v":2,"id":"%d","call":%q,"in":%s}`+"\n", i+1, r.call, r.in)
 	}
 	if _, err := io.Copy(in, &frames); err != nil {
 		t.Fatal(err)

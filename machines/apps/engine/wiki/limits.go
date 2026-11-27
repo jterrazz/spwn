@@ -13,6 +13,14 @@ const (
 	// is read with; a larger corpus is refused whole.
 	MaxPages       = 2000
 	MaxCorpusBytes = 64 << 20
+	// value: the most rows a table keeps and serves, and the most parts a
+	// figure drawn from what it shows is served with; past it the rest is
+	// counted (S31), so a page of tables over a page of blocks stays linear.
+	MaxTableRows = 200
+	// value: the most bytes of JSON one answer of wiki.read or wiki.map is
+	// built to: past it, the items of a page, or the nodes of a map, are
+	// left out from the first that does not fit, and counted.
+	MaxAnswerBytes = 4 << 20
 )
 
 type File struct {

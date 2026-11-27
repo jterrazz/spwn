@@ -1,0 +1,13 @@
+description: wiki.read serves a group's own finding on the group, in attention and in what needs you
+env:
+    - one-mac
+    - engine
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].wiki = {"head":"c1","commits":{"c1":{"wiki.yaml":"wiki: spwn.wiki/v1\nfloors:\n    - id: intention\n      name: Intention\n      question: Why\n    - id: product\n      name: Product\n      question: What\n    - id: domains\n      name: Domains\n      question: Which words\n    - id: architecture\n      name: Architecture\n      question: Where\n    - id: code\n      name: Code\n      question: Which lines\nseats:\n    - id: vision\n      name: Vision\n      path: [blueprint/]\n      reads: [tell, define]\n      home: blueprint/home\nbudget: 2min\n","blueprint/home.md":"# Home\n\nThe one page of the wiki.\n\n<Group id=\"words\" title=\"The words\" intent=\"define\" rests_on=\"reading\">\n\n<Term id=\"seat\" means=\"who reads a page.\" />\n\n</Group>\n"}}}'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.out | {needs: .NeedsYou, group: [.Sections[].Items[].Group | select(.) | {id: .ID, needs: .NeedsYou, findings: [.Finding[] | .Rule]}], attention: [.Attention[] | {rule: .Rule, at: .At}]}'''
+      stdin: |
+          {"v":2,"id":"1","call":"wiki.read","target":{},"in":{"Page":"blueprint/home"}}
+      exit: 0
+      stdout: |
+          {"needs":1,"group":[{"id":"words","needs":true,"findings":["S6"]}],"attention":[{"rule":"S6","at":"blueprint/home#words"}]}

@@ -120,11 +120,17 @@ func itemWords(it ServedItem, level int, folded bool, faces *strings.Builder) in
 	return 0
 }
 
+// invariant: a block counts at a face the most words of that face and of
+// every face before it, so no wiki.yaml template, a line written longer
+// than its card, makes a level read faster than the level before it.
 func blockWords(b *ServedBlock, face, level Detail) int {
-	if face == DetailWord {
-		return wordCount(b.Word)
+	n := wordCount(b.Word)
+	for _, d := range Details()[1 : face.rank()+1] {
+		n = max(n, faceWords(b, d))
 	}
-	n := faceWords(b, face)
+	if face == DetailWord {
+		return n
+	}
 	for _, f := range b.Finding {
 		if level.rank() >= f.From.rank() {
 			n += wordCount(f.Says)

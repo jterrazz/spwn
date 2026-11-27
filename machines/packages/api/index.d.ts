@@ -3742,6 +3742,7 @@ export type WikiFloorHead = {
 };
 
 export type WikiMap = {
+    Cut: number;
     Floors: WikiMapFloor[] | null;
     Home: WikiMapHome;
     Icons: Record<string, string[] | null> | null;
@@ -3821,6 +3822,7 @@ export type WikiRun = {
 export type WikiServed = {
     Attention: WikiServedFinding[] | null;
     Blocks: number;
+    Cut: number;
     Findings: WikiServedFinding[] | null;
     Floor: WikiFloorHead;
     Icons: Record<string, string[] | null> | null;
@@ -3877,6 +3879,7 @@ export type WikiServedField = {
 export type WikiServedFigure = {
     Caption: string;
     Form: string;
+    More: number;
     Parts: WikiFigurePart[] | null;
     Shows: WikiServedRef;
     X: string;
@@ -3897,13 +3900,14 @@ export type WikiServedFinding = {
 export type WikiServedGroup = {
     Address: string;
     Blocks: number;
+    Finding: WikiServedFinding[] | null;
     Folded: '' | 'author' | 'seat';
     ID: string;
     Intent: 'decide' | 'define' | 'guard' | 'locate' | 'prove' | 'tell';
     Items: WikiServedItem[] | null;
     Lead: string;
     MirroredBy: string;
-    MirroredFrom: 'word' | 'line' | 'card' | 'full';
+    MirroredFrom?: 'word' | 'line' | 'card' | 'full';
     NeedsYou: boolean;
     OwnFloor: WikiFloorHead | null;
     ReadBy: string[] | null;
@@ -3965,6 +3969,7 @@ export type WikiServedTable = {
     Count: number;
     In: WikiServedRef;
     Mirrors: string;
+    More: number;
     Of: string;
     Rows: WikiServedRow[] | null;
     Title: string;

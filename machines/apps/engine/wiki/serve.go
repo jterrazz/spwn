@@ -34,6 +34,9 @@ type Served struct {
 	Reading []ServedReading
 	Icons   map[string][]string
 	Verdict Verdict
+	// value: the items left out past MaxAnswerBytes, from the first that
+	// does not fit to the page's end, a group with its blocks counted once.
+	Cut int
 }
 
 type ServedLede struct {
@@ -109,7 +112,7 @@ type ServedProse struct {
 type ServedGroup struct {
 	ID      string
 	Address string
-	// value: a block it holds raises what needs the owner.
+	// value: it, or a block it holds, raises what needs the owner.
 	NeedsYou bool
 	Title    string
 	Intent   Intent
@@ -121,7 +124,7 @@ type ServedGroup struct {
 	// level at which that table shows them as rows, from which the group
 	// shows its blocks' words alone.
 	MirroredBy   string
-	MirroredFrom Detail
+	MirroredFrom Detail `json:",omitempty"`
 	// value: the floor its blocks sit on, served only when it is not its
 	// page's.
 	OwnFloor *FloorHead
@@ -129,6 +132,8 @@ type ServedGroup struct {
 	Lead   string
 	ReadBy []string
 	Items  []ServedItem
+	// value: the findings that sit on the group itself.
+	Finding []ServedFinding
 }
 
 type Fold string
@@ -196,9 +201,11 @@ type ServedTable struct {
 	Where   string
 	Columns []string
 	Rows    []ServedRow
-	// value: how many rows it found, said with the noun row; and the group
-	// of the page whose blocks are its rows, drawn above it.
+	// value: how many rows it found, said with the noun row, and how many of
+	// them are not served past MaxTableRows; and the group of the page whose
+	// blocks are its rows, drawn above it.
 	Count   int
+	More    int
 	Mirrors string
 }
 
@@ -214,7 +221,9 @@ type ServedFigure struct {
 	Caption string
 	Shows   ServedRef
 	Parts   []FigurePart
-	X, Y    string
+	// value: the parts drawn from what it shows past MaxTableRows, counted.
+	More int
+	X, Y string
 }
 
 type ServedFinding struct {
@@ -262,7 +271,8 @@ func Read(ctx context.Context, files map[string]File) (Corpus, error) {
 	if f.Size > MaxPageBytes {
 		return Corpus{}, fmt.Errorf("%s is %d bytes, %d at most", schemaFile, f.Size, MaxPageBytes)
 	}
-	schema, err := ReadSchema(schemaFile, f.Body)
+	yaml, inSchema := audible(string(f.Body))
+	schema, err := ReadSchema(schemaFile, []byte(yaml))
 	if err != nil {
 		return Corpus{}, err
 	}
@@ -289,15 +299,20 @@ func Read(ctx context.Context, files map[string]File) (Corpus, error) {
 			pages = append(pages, tooLong(id, f.Size, schema))
 			continue
 		}
-		body := string(f.Body)
-		pages = append(pages, Compile(id, body, schema))
-		if r, ok := readRecord(id, body); ok {
-			records[id] = r
+		p := Compile(id, string(f.Body), schema)
+		pages = append(pages, p)
+		body, _ := audible(string(f.Body))
+		if r, ok := readRecord(p.ID, body); ok {
+			records[p.ID] = r
 		}
 	}
 	report, err := Check(ctx, schema, pages)
 	if err != nil {
 		return Corpus{}, err
+	}
+	if inSchema > 0 {
+		report.Findings = append(report.Findings, silenced(schemaFile, inSchema))
+		sortFindings(report.Findings)
 	}
 	return Corpus{Schema: schema, Pages: pages, Report: report, Records: records}, nil
 }
@@ -316,7 +331,7 @@ func (c Corpus) Serve(id string) (Served, error) {
 	if i < 0 {
 		return Served{}, ErrUnknownPage
 	}
-	s := server{c: c, readings: map[string]BlockReading{}, pages: map[string]*Page{}, blocks: map[string]*Block{}, groups: map[string]*Group{}}
+	s := server{c: c, readings: map[string]BlockReading{}, pages: map[string]*Page{}, blocks: map[string]*Block{}, groups: map[string]*Group{}, m: newMeter()}
 	s.index()
 	p := &c.Pages[i]
 	reading := s.reading(p.ID)
@@ -325,8 +340,13 @@ func (c Corpus) Serve(id string) (Served, error) {
 		Floor: s.floor(reading.Floor), Icons: map[string][]string{},
 	}
 	out.Lede = lede(out.Page, out.Paragraph)
+	s.m.head(&out.Page)
+	s.m.paragraphs(out.Paragraph)
+	s.m.runs(out.Lede.First)
 	for _, icon := range c.Schema.Icons {
 		out.Icons[icon.Name] = icon.Rows
+		s.m.str(icon.Name)
+		s.m.strs(icon.Rows)
 	}
 	for _, f := range c.Report.Findings {
 		if f.Hard {
@@ -349,7 +369,10 @@ func (c Corpus) Serve(id string) (Served, error) {
 		}
 		k := 0
 		for _, it := range sec.Items {
-			item := s.item(p, reading, it, false)
+			item, ok := s.metered(p, reading, it, false)
+			if !ok {
+				continue
+			}
 			if item.Prose != nil {
 				item.Prose.ID = "p" + strconv.Itoa(si) + "." + strconv.Itoa(k)
 				k++
@@ -358,6 +381,7 @@ func (c Corpus) Serve(id string) (Served, error) {
 		}
 		out.Sections = append(out.Sections, ss)
 	}
+	out.Cut = s.cut
 	mirror(out.Sections)
 	out.Blocks = blocksOf(out.Sections)
 	out.Findings = ranked(out.Findings)
@@ -407,6 +431,25 @@ type server struct {
 	pages    map[string]*Page
 	blocks   map[string]*Block
 	groups   map[string]*Group
+	// value: what wiki.read's answer may still take, and the items left out.
+	m   *meter
+	cut int
+}
+
+// invariant: an item is built only while the answer has room, and served
+// only when its bytes fit what is left.
+func (s *server) metered(p *Page, r Reading, it Item, grouped bool) (ServedItem, bool) {
+	if s.m.spent() {
+		s.cut++
+		return ServedItem{}, false
+	}
+	item := s.item(p, r, it, grouped)
+	s.m.item(item)
+	if s.m.spent() {
+		s.cut++
+		return ServedItem{}, false
+	}
+	return item, true
 }
 
 func (s *server) index() {
@@ -541,7 +584,10 @@ func (s *server) group(p *Page, r Reading, g *Group) *ServedGroup {
 		out.Folded = FoldSeat
 	}
 	for _, inner := range g.Items {
-		si := s.item(p, r, inner, true)
+		si, ok := s.metered(p, r, inner, true)
+		if !ok {
+			continue
+		}
 		if si.Block != nil && si.Block.Tier != "" {
 			out.Blocks++
 		}
@@ -556,6 +602,13 @@ func (s *server) group(p *Page, r Reading, g *Group) *ServedGroup {
 	if b, ok := s.blocks[gr.Lead]; ok {
 		out.Lead = b.Faces.Line
 	}
+	for _, f := range s.c.Report.Findings {
+		if g.ID != "" && f.Page == p.ID && f.Block == g.ID {
+			out.Finding = append(out.Finding, served(f, out.Address, cmp.Or(g.Title, g.ID)))
+		}
+	}
+	out.Finding = ranked(out.Finding)
+	out.NeedsYou = out.NeedsYou || needsYou(out.Finding) > 0
 	return out
 }
 
@@ -574,7 +627,7 @@ func (s *server) block(p *Page, b *Block) *ServedBlock {
 		out.OwnFloor = &f
 	}
 	for _, f := range s.c.Report.Findings {
-		if f.Page == p.ID && f.Block == b.ID {
+		if b.ID != "" && f.Page == p.ID && f.Block == b.ID {
 			out.Finding = append(out.Finding, served(f, b.Address, out.Word))
 		}
 	}
@@ -585,7 +638,7 @@ func (s *server) block(p *Page, b *Block) *ServedBlock {
 	}
 	switch v := b.View.(type) {
 	case *TableView:
-		out.Table = s.table(v, r.Rows)
+		out.Table = s.table(v, r.Rows, r.More)
 	case *SubPageView:
 		if child, ok := s.pages[v.Child]; ok {
 			h := s.head(child)
@@ -594,7 +647,8 @@ func (s *server) block(p *Page, b *Block) *ServedBlock {
 			out.Sub = &PageHead{ID: v.Child}
 		}
 	case *FigureView:
-		out.Figure = &ServedFigure{Form: v.Form, Caption: v.Caption, Shows: s.ref(v.Shows), Parts: s.parts(v), X: textOf(b.Props, "x"), Y: textOf(b.Props, "y")}
+		out.Figure = &ServedFigure{Form: v.Form, Caption: v.Caption, Shows: s.ref(v.Shows), X: textOf(b.Props, "x"), Y: textOf(b.Props, "y")}
+		out.Figure.Parts, out.Figure.More = s.parts(v)
 	default:
 		out.Fields = s.fields(kind, b.Props)
 	}
@@ -686,7 +740,7 @@ func (s *server) field(name string, v Value) ServedField {
 	return out
 }
 
-func (s *server) table(v *TableView, rows []string) *ServedTable {
+func (s *server) table(v *TableView, rows []string, more int) *ServedTable {
 	kind, _ := s.c.Schema.kind(v.Of)
 	out := &ServedTable{Of: v.Of, Title: titleOf(kind, v.Of), In: s.ref(v.In), Columns: v.Columns}
 	if v.Where != nil {
@@ -704,7 +758,7 @@ func (s *server) table(v *TableView, rows []string) *ServedTable {
 		}
 		out.Rows = append(out.Rows, row)
 	}
-	out.Count = len(out.Rows)
+	out.Count, out.More = len(out.Rows)+more, more
 	return out
 }
 
@@ -721,28 +775,40 @@ func (s *server) where(q *Query) string {
 
 // invariant: a figure states nothing its shows does not (SPEC-v1 §11), so a
 // figure with no parts written is drawn from what it shows: a group's
-// blocks, or the one block it names, each by its word.
-func (s *server) parts(v *FigureView) []FigurePart {
+// blocks, or the one block it names, each by its word; of those drawn, the
+// first MaxTableRows are served and the rest counted.
+func (s *server) parts(v *FigureView) (parts []FigurePart, more int) {
 	if len(v.Parts) > 0 {
-		return v.Parts
+		return v.Parts, 0
 	}
 	if counted := s.counted(v); counted != nil {
-		return counted
+		return cappedParts(counted)
 	}
 	if b, ok := s.blocks[v.Shows]; ok {
-		return []FigurePart{{Name: cmp.Or(b.Faces.Word, b.ID)}}
+		return []FigurePart{{Name: cmp.Or(b.Faces.Word, b.ID)}}, 0
 	}
 	g, ok := s.groups[v.Shows]
 	if !ok {
-		return nil
+		return nil, 0
 	}
-	var out []FigurePart
 	for _, inner := range g.Items {
-		if b, ok := inner.(*Block); ok {
-			out = append(out, FigurePart{Name: cmp.Or(b.Faces.Word, b.ID)})
+		b, ok := inner.(*Block)
+		switch {
+		case !ok:
+		case len(parts) < MaxTableRows:
+			parts = append(parts, FigurePart{Name: cmp.Or(b.Faces.Word, b.ID)})
+		default:
+			more++
 		}
 	}
-	return out
+	return parts, more
+}
+
+func cappedParts(parts []FigurePart) (kept []FigurePart, more int) {
+	if len(parts) <= MaxTableRows {
+		return parts, 0
+	}
+	return parts[:MaxTableRows], len(parts) - MaxTableRows
 }
 
 // invariant: a stack with no parts written that shows a table counts what

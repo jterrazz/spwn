@@ -1,6 +1,7 @@
 package wiki_test
 
 import (
+	"encoding/json"
 	"slices"
 	"strconv"
 	"strings"
@@ -286,20 +287,85 @@ func TestABlockWhoseLineSaysNothingShowsItsWordAndNoLevelReadsLess(t *testing.T)
 	}
 }
 
+// value: tinySchema with one kind of the corpus, its word and line faces the
+// templates given.
+func noteSchema(word, line string) string {
+	return tinySchema + "kinds:\n    note:\n        title:\n            en: Note\n            fr: Note\n        weighs: 1\n        fields:\n            says:\n                type: sentence\n                required: true\n            then:\n                type: sentence\n        faces:\n            word: " + strconv.Quote(word) + "\n            line: " + strconv.Quote(line) + "\n"
+}
+
+// value: a text of three characters the engine removes, an escape, a
+// right-to-left override and a line separator, around an emoji drawn with
+// a zero-width joiner, which it keeps; built at run time so no line of the
+// source holds one.
+var silentText = "an " + string(rune(0x1b)) + "x escape, a " + string(rune(0x202e)) + " bidi override and a " + string(rune(0x2028)) + " separator, its \U0001F468" + string(rune(0x200d)) + "\U0001F469 kept."
+
+// value: whether a served answer holds a character that draws nothing or
+// reorders text, read back from its JSON so every string of it is seen.
+func holdsSilent(t *testing.T, answer any) string {
+	t.Helper()
+	data, err := json.Marshal(answer)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var tree any
+	if err := json.Unmarshal(data, &tree); err != nil {
+		t.Fatal(err)
+	}
+	var walk func(v any) string
+	walk = func(v any) string {
+		switch v := v.(type) {
+		case string:
+			if strings.ContainsFunc(v, func(r rune) bool {
+				return (r < 0x20 && r != '\n' && r != '\t') || (r >= 0x7f && r <= 0x9f) || (r >= 0x202a && r <= 0x202e) || (r >= 0x2066 && r <= 0x2069) || r == 0x2028 || r == 0x2029
+			}) {
+				return v
+			}
+		case []any:
+			for _, e := range v {
+				if s := walk(e); s != "" {
+					return s
+				}
+			}
+		case map[string]any:
+			for k, e := range v {
+				if s := walk(k); s != "" {
+					return s
+				}
+				if s := walk(e); s != "" {
+					return s
+				}
+			}
+		}
+		return ""
+	}
+	return walk(tree)
+}
+
 func FuzzServe(f *testing.F) {
 	for _, source := range corpusSources(f) {
-		f.Add(source)
+		f.Add(source, "{id}", "{says}")
 	}
-	f.Add("# Home\n\nOne. Two: three e.g. four.\n\n## A\n\n<Term id=\"a\" means=\"b\" />\n")
-	f.Add("000000000\n\n<Term id=\"00000\" means=\" \"/>")
-	f.Fuzz(func(t *testing.T, source string) {
-		corpus, err := readAll(map[string][]byte{"wiki.yaml": []byte(tinySchema), "blueprint/home.md": []byte(source)})
+	f.Add("# Home\n\nOne. Two: three e.g. four.\n\n## A\n\n<Term id=\"a\" means=\"b\" />\n", "{id}", "{says}")
+	f.Add("000000000\n\n<Term id=\"00000\" means=\" \"/>", "", "")
+	f.Add("# Home\n\n<Note id=\"a\" says=\"one.\" then=\"two.\" />\n", "{says} {then} {says} {then} {says}", "{id}")
+	f.Add("# H"+silentText+"\n\nA [x](a"+silentText+"b).\n\n<Note id=\"a\" says=\""+silentText+"\" />\n", "{says}", "{says}")
+	f.Fuzz(func(t *testing.T, source, word, line string) {
+		corpus, err := readAll(map[string][]byte{"wiki.yaml": []byte(noteSchema(word, line)), "blueprint/home.md": []byte(source)})
 		if err != nil {
 			return
 		}
 		s, err := corpus.Serve("blueprint/home")
 		if err != nil {
 			return
+		}
+		if bad := holdsSilent(t, s); bad != "" {
+			t.Fatalf("wiki.read serves %q", bad)
+		}
+		m, err := corpus.Map("blueprint/home")
+		if err == nil {
+			if bad := holdsSilent(t, m); bad != "" {
+				t.Fatalf("wiki.map serves %q", bad)
+			}
 		}
 		if !risesToItsMost(s.Lede.Ranks, wiki.DetailFull) || len(s.Reading) != len(wiki.Details()) || s.Reading[0].Same {
 			t.Fatalf("lede %v, readings %+v", s.Lede.Ranks, s.Reading)

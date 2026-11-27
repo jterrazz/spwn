@@ -67,8 +67,10 @@ type BlockReading struct {
 	Kind    string  `json:"kind"`
 	Floor   int     `json:"floor"`
 	Weight  *Weight `json:"weight"`
-	// value: a table's rows, the addresses of the blocks it finds.
+	// value: a table's rows, the addresses of the first MaxTableRows blocks
+	// it finds, and how many more it finds.
 	Rows []string `json:"rows,omitempty"`
+	More int      `json:"more,omitempty"`
 	// value: a group's lead and the seats that read its intent.
 	Lead   string   `json:"lead,omitempty"`
 	ReadBy []string `json:"readBy,omitempty"`
@@ -102,7 +104,10 @@ type checker struct {
 	addresses []string
 	floors    map[string]int
 	needsYou  map[string]bool
-	rows      map[*Block][]string
+	rows      map[*Block]*rowSet
+	kinds     map[scopeKey]*rowSet
+	queries   map[queryKey]map[string]*rowSet
+	inGroup   map[*Group][]held
 	kids      map[string][]string
 	// value: the findings of each page's compile, then the check's own, and
 	// how many of the check's each page has of each rule.
@@ -147,7 +152,8 @@ func sortFindings(findings []Finding) {
 func newChecker(schema Schema, pages []Page) *checker {
 	k := &checker{
 		schema: schema, byID: map[string]*Page{}, blocks: map[string][]held{}, groups: map[string][]heldGroup{},
-		targets: map[string]target{}, floors: map[string]int{}, needsYou: map[string]bool{}, rows: map[*Block][]string{},
+		targets: map[string]target{}, floors: map[string]int{}, needsYou: map[string]bool{}, rows: map[*Block]*rowSet{},
+		kinds: map[scopeKey]*rowSet{}, queries: map[queryKey]map[string]*rowSet{}, inGroup: map[*Group][]held{},
 		said: map[ruleOn]int{},
 	}
 	for i := range pages {
@@ -189,6 +195,9 @@ func newChecker(schema Schema, pages []Page) *checker {
 
 func (k *checker) hold(p *Page, h held) {
 	k.blocks[p.ID] = append(k.blocks[p.ID], h)
+	if h.group != nil {
+		k.inGroup[h.group] = append(k.inGroup[h.group], h)
+	}
 	if h.block.Kind != "page" {
 		k.mark(h.block.Address, h.block.ID, target{page: p, block: h.block})
 	}
@@ -579,10 +588,7 @@ func (k *checker) group(p *Page, h heldGroup) {
 		k.add("H35", p.ID, g.ID, g.Props.at("fold", g.At), fmt.Sprintf("fold: %s is true or false", text(v)))
 	}
 	n, floors := 0, []int{}
-	for _, b := range k.blocks[p.ID] {
-		if b.group != g {
-			continue
-		}
+	for _, b := range k.inGroup[g] {
 		n++
 		if f := k.blockFloor(p, b.block); !slices.Contains(floors, f) {
 			floors = append(floors, f)

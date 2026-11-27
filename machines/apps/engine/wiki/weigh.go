@@ -59,21 +59,135 @@ func (k *checker) table(p *Page, b *Block) {
 		}
 	}
 	scope := textOf(b.Props, "in")
-	var found, rows []string
-	for _, h := range k.inScope(scope) {
-		if h.block.Kind != of {
-			continue
-		}
-		found = append(found, h.block.Address)
-		if q == nil && hasWhere || q != nil && !k.matches(q, h.block) {
-			continue
-		}
-		rows = append(rows, h.block.Address)
-	}
-	if _, resolves := k.targets[scope]; resolves && len(found) == 0 {
+	found := k.ofKind(scope, of)
+	if _, resolves := k.targets[scope]; resolves && found.n == 0 {
 		k.add("S16", p.ID, b.ID, b.At, fmt.Sprintf("no %s under %s: the table is empty, not wrong", of, scope))
 	}
+	rows := found
+	switch {
+	case q != nil:
+		rows = k.matching(scope, of, q)
+	case hasWhere:
+		rows = &rowSet{}
+	}
+	if more := rows.n - len(rows.rows); more > 0 {
+		k.add("S31", p.ID, b.ID, b.At, fmt.Sprintf("table %q shows its first %d rows, and %d more rows: narrow its in or its where", b.ID, MaxTableRows, more))
+	}
 	k.rows[b] = rows
+}
+
+// value: the rows a table finds: the first MaxTableRows addresses in
+// reading order, and how many it finds in all.
+type rowSet struct {
+	rows []string
+	n    int
+}
+
+func (s *rowSet) add(address string) {
+	if len(s.rows) < MaxTableRows {
+		s.rows = append(s.rows, address)
+	}
+	s.n++
+}
+
+type scopeKey struct{ scope, of string }
+
+type queryKey struct {
+	scopeKey
+	field string
+	op    Op
+}
+
+// invariant: the blocks of one kind in one scope are found once per corpus,
+// whatever number of tables read them, and every table reading them shares
+// one rowSet, so a page of tables over a page of blocks stays linear.
+func (k *checker) ofKind(scope, of string) *rowSet {
+	key := scopeKey{scope, of}
+	if s, ok := k.kinds[key]; ok {
+		return s
+	}
+	s := &rowSet{}
+	for _, h := range k.inScope(scope) {
+		if h.block.Kind == of {
+			s.add(h.block.Address)
+		}
+	}
+	k.kinds[key] = s
+	return s
+}
+
+// invariant: the blocks of one kind in one scope are indexed once per field
+// and operator by every operand that matches them, so each table with a
+// condition finds its rows by one lookup, in reading order.
+func (k *checker) matching(scope, of string, q *Query) *rowSet {
+	key := queryKey{scopeKey{scope, of}, q.Field, q.Op}
+	index, ok := k.queries[key]
+	if !ok {
+		index = map[string]*rowSet{}
+		for _, h := range k.inScope(scope) {
+			if h.block.Kind == of {
+				k.indexBlock(index, h.block, q)
+			}
+		}
+		k.queries[key] = index
+	}
+	if s, ok := index[operandKey(q.Operand)]; ok {
+		return s
+	}
+	return &rowSet{}
+}
+
+func (k *checker) indexBlock(index map[string]*rowSet, b *Block, q *Query) {
+	v, ok := b.Props.Get(q.Field)
+	if !ok {
+		return
+	}
+	values := []Value{v}
+	if q.Op == OpHas {
+		values = v.List
+	}
+	seen := map[string]bool{}
+	for _, e := range values {
+		for _, key := range k.valueKeys(e) {
+			if seen[key] {
+				continue
+			}
+			seen[key] = true
+			s, ok := index[key]
+			if !ok {
+				s = &rowSet{}
+				index[key] = s
+			}
+			s.add(b.Address)
+		}
+	}
+}
+
+// value: the operand keys a value matches, as equals compares them: a ref
+// by its address and by its target's state, any other value by its text.
+func (k *checker) valueKeys(v Value) []string {
+	if v.Kind != ValueRef {
+		return []string{"t:" + text(v)}
+	}
+	keys := []string{"r:" + v.Text}
+	if t, ok := k.targets[v.Text]; ok && t.block != nil {
+		kind, _ := k.schema.kind(t.block.Kind)
+		if kind.State != "" {
+			keys = append(keys, "s:"+textOf(t.block.Props, kind.State))
+		}
+	}
+	return keys
+}
+
+func operandKey(operand Value) string {
+	switch operand.Kind {
+	case ValueRef:
+		return "r:" + operand.Text
+	case ValueState:
+		return "s:" + operand.Text
+	default:
+		return "t:" + operand.Text
+	}
 }
 
 func (k *checker) inScope(address string) []held {
@@ -84,13 +198,7 @@ func (k *checker) inScope(address string) []held {
 	case t.block != nil:
 		return []held{{block: t.block}}
 	case t.group != nil:
-		var out []held
-		for _, h := range k.blocks[t.page.ID] {
-			if h.group == t.group {
-				out = append(out, h)
-			}
-		}
-		return out
+		return k.inGroup[t.group]
 	default:
 		return k.blocks[t.page.ID]
 	}
@@ -124,33 +232,6 @@ func (k *checker) condition(p *Page, b *Block, kind Kind, q *Query, at At) bool 
 		return false
 	}
 	return true
-}
-
-func (k *checker) matches(q *Query, b *Block) bool {
-	v, ok := b.Props.Get(q.Field)
-	if !ok {
-		return false
-	}
-	if q.Op == OpHas {
-		return slices.ContainsFunc(v.List, func(e Value) bool { return k.equals(q.Operand, e) })
-	}
-	return k.equals(q.Operand, v)
-}
-
-func (k *checker) equals(operand, v Value) bool {
-	switch operand.Kind {
-	case ValueRef:
-		return v.Kind == ValueRef && v.Text == operand.Text
-	case ValueState:
-		t, ok := k.targets[v.Text]
-		if v.Kind != ValueRef || !ok || t.block == nil {
-			return false
-		}
-		kind, _ := k.schema.kind(t.block.Kind)
-		return kind.State != "" && textOf(t.block.Props, kind.State) == operand.Text
-	default:
-		return v.Kind != ValueRef && text(v) == operand.Text
-	}
 }
 
 func (k *checker) schemaRules() {
@@ -456,7 +537,11 @@ func (k *checker) budget(p *Page, weights map[*Block]*Weight) {
 func (k *checker) reading(p *Page, weights map[*Block]*Weight, leads map[*Group]string) Reading {
 	r := Reading{Page: p.ID, Seat: k.schema.seatOf(p.ID), Floor: k.floors[p.ID], Blocks: []BlockReading{}}
 	entry := func(b *Block) BlockReading {
-		return BlockReading{Address: b.Address, Kind: b.Kind, Floor: k.blockFloor(p, b), Weight: weights[b], Rows: k.rows[b]}
+		r := BlockReading{Address: b.Address, Kind: b.Kind, Floor: k.blockFloor(p, b), Weight: weights[b]}
+		if rows, ok := k.rows[b]; ok {
+			r.Rows, r.More = rows.rows, rows.n-len(rows.rows)
+		}
+		return r
 	}
 	for _, sec := range p.Sections {
 		for _, it := range sec.Items {

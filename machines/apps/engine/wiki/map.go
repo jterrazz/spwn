@@ -21,6 +21,9 @@ type Map struct {
 	Nodes  []MapNode
 	// value: the dot icons the nodes are drawn with, by name, each its rows.
 	Icons map[string][]string
+	// value: the nodes left out past MaxAnswerBytes, from the first that
+	// does not fit, a node counted with none of what it would hold.
+	Cut int
 }
 
 type MapHome struct {
@@ -122,7 +125,7 @@ const (
 )
 
 func (c Corpus) Map(open string) (Map, error) {
-	m := mapper{c: c, server: server{c: c, readings: map[string]BlockReading{}, pages: map[string]*Page{}, blocks: map[string]*Block{}, groups: map[string]*Group{}}, read: map[string]Reading{}, own: map[string]int{}, needs: map[string]int{}, served: map[string]bool{}}
+	m := mapper{c: c, server: server{c: c, readings: map[string]BlockReading{}, pages: map[string]*Page{}, blocks: map[string]*Block{}, groups: map[string]*Group{}}, read: map[string]Reading{}, own: map[string]int{}, needs: map[string]int{}, served: map[string]bool{}, meter: newMeter()}
 	m.server.index()
 	for _, r := range c.Report.Readings {
 		m.read[r.Page] = r
@@ -177,6 +180,7 @@ type mapper struct {
 	own    map[string]int
 	needs  map[string]int
 	served map[string]bool
+	meter  *meter
 	out    Map
 }
 
@@ -203,7 +207,14 @@ func boolRank(b bool) int {
 	return 0
 }
 
+// invariant: a node is served only when its bytes fit what the answer has
+// left; one that does not is counted and its index is -1.
 func (m *mapper) add(n MapNode) int {
+	m.meter.node(n)
+	if m.meter.spent() {
+		m.out.Cut++
+		return -1
+	}
 	m.out.Nodes = append(m.out.Nodes, n)
 	return len(m.out.Nodes) - 1
 }
@@ -218,17 +229,24 @@ func (m *mapper) seat(seat Seat, pages []*Page, open string) {
 		band = m.read[pages[0].ID].Floor
 	}
 	at := m.add(MapNode{ID: id, Depth: 1, Kind: NodeSeat, Ref: seat.ID, Band: band, Label: seat.Name, Icon: seat.ID, Count: len(pages)})
+	if at < 0 {
+		return
+	}
 	m.out.Roots = append(m.out.Roots, id)
 	m.out.Home.Seats++
 	kids := make([]int, 0, len(pages))
 	for _, p := range pages {
+		kid := m.page(p, id, band, p.ID == open)
+		if kid < 0 {
+			continue
+		}
 		if seat.Home == p.ID {
 			m.out.Nodes[at].Home = "P:" + p.ID
 		}
-		kids = append(kids, m.page(p, id, band, p.ID == open))
+		kids = append(kids, kid)
 	}
-	if m.out.Nodes[at].Home == "" && len(pages) > 0 {
-		m.out.Nodes[at].Home = "P:" + pages[0].ID
+	if m.out.Nodes[at].Home == "" && len(kids) > 0 {
+		m.out.Nodes[at].Home = m.out.Nodes[kids[0]].ID
 	}
 	m.close(at, kids, 0)
 }
@@ -268,6 +286,9 @@ func (m *mapper) page(p *Page, parent string, band int, open bool) int {
 		}
 	}
 	at := m.add(n)
+	if at < 0 {
+		return at
+	}
 	if open {
 		m.out.Open = id
 	}
@@ -284,7 +305,9 @@ func (m *mapper) page(p *Page, parent string, band int, open bool) int {
 			continue
 		}
 		if open {
-			sections = append(sections, m.section(p, si, sec.Heading, items, id, band))
+			if sec := m.section(p, si, sec.Heading, items, id, band); sec >= 0 {
+				sections = append(sections, sec)
+			}
 			continue
 		}
 		count := m.needsOf(p.ID, items)
@@ -320,7 +343,7 @@ func (m *mapper) needsOf(page string, items []Item) int {
 		case *Block:
 			n += m.needs[page+"#"+it.ID]
 		case *Group:
-			n += m.needsOf(page, it.Items)
+			n += m.needs[page+"#"+it.ID] + m.needsOf(page, it.Items)
 		}
 	}
 	return n
@@ -334,6 +357,9 @@ func (m *mapper) section(p *Page, si int, h *Heading, items []Item, parent strin
 		n.Ref, n.Label, n.KickerParts, n.Icon = h.Anchor, h.Text, []string{sectionKicker}, sectionIcon(rests, items)
 	}
 	at := m.add(n)
+	if at < 0 {
+		return at
+	}
 	var kids []int
 	var words, first []string
 	k := 0
@@ -362,7 +388,9 @@ func (m *mapper) section(p *Page, si int, h *Heading, items []Item, parent strin
 		}
 		m.served["B:"+p.ID+":"+item.Ref] = true
 		item.ID, item.Depth, item.Parent, item.Band, item.Kids = "B:"+p.ID+":"+item.Ref, 4, &id, band, []string{}
-		kids = append(kids, m.add(item))
+		if kid := m.add(item); kid >= 0 {
+			kids = append(kids, kid)
+		}
 	}
 	m.out.Nodes[at].LineParts, m.out.Nodes[at].Count = first, len(kids)
 	if said := partsOf(words...); said != nil {
@@ -391,7 +419,7 @@ func (m *mapper) group(p *Page, g *Group) MapNode {
 			words = append(words, b.Faces.Word)
 		}
 	}
-	n.Needs, n.Count = m.needsOf(p.ID, g.Items), len(marks)
+	n.Needs, n.Count = m.needs[p.ID+"#"+g.ID]+m.needsOf(p.ID, g.Items), len(marks)
 	n.Marks, n.More = cappedMarks(marks)
 	n.LineParts = partsOf(words...)
 	if lead, ok := m.server.blocks[m.server.readings[p.ID+"#"+g.ID].Lead]; ok {

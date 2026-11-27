@@ -204,6 +204,15 @@ const (
 
 func caseOf(body string) map[string]string { return map[string]string{caseID: body} }
 
+// value: n terms, `t1` to `tn`, each after a blank line.
+func manyTerms(n int) string {
+	var b strings.Builder
+	for i := 1; i <= n; i++ {
+		b.WriteString("<Term id=\"t" + strconv.Itoa(i) + "\" means=\"m.\" />\n\n")
+	}
+	return b.String()
+}
+
 // value: a tag eight times, its `dN` id numbered 1 to 8, each after a blank line.
 func eight(tag string) string {
 	var b strings.Builder
@@ -282,6 +291,9 @@ func checkCases() []checkCase {
 		{name: "a markdown table of a kind's fields", pages: caseOf(termX + "\n\n| Gives | Costs |\n| --- | --- |\n| a | b |"), want: []string{c + `5:1 S28 remark this table's columns are the fields of alternative: write blocks and a <Table>`}},
 		{name: "a prose link to a scheme the window does not follow", pages: caseOf(termX + "\n\nSee [the term](#x), [the stack](../product/stack.md) and [the site](https://spwn.sh/a).\nThen [run it](javascript:alert(1)\n"), want: []string{c + `6:1 S30 remark link to "javascript:alert(1" is no page, anchor or http or https address: served as its words`}},
 		{name: "a rule asking a waiver", pages: caseOf(`<Rule id="x" says="s." force="soft" guards={ref("blueprint/case")} read_at="spwn:a.md" waiver="the owner may waive it." />`), want: []string{c + `3:88 S29 needs-you rule "x" asks to be waived: the owner may waive it.`}},
+		{name: "a table finding more rows than it keeps", pages: caseOf(`<Table id="t" of="term" in={ref("blueprint/case")} columns={["means"]} />` + "\n\n" + manyTerms(wiki.MaxTableRows+1)), want: []string{c + `1:1 S13 ambient page "blueprint/case": 201 blocks, none leads`, c + `3:1 S31 ambient table "t" shows its first 200 rows, and 1 more rows: narrow its in or its where`}},
+		{name: "a prose link with a space around it or a tab", pages: caseOf(termX + "\n\nSee [a]( product/stack.md) and [b](product/stack.md\t).\n"), want: []string{c + `5:1 S30 remark link to " product/stack.md" is no page, anchor or http or https address: served as its words`, c + `5:1 S30 remark link to "product/stack.md\t" is no page, anchor or http or https address: served as its words`}},
+		{name: "characters that draw nothing", pages: caseOf(termX + "\n\nA line with " + silentText + "\n"), want: []string{c + `1:1 S32 remark 3 characters that draw nothing or reorder text were removed`}},
 	}
 }
 

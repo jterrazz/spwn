@@ -44,12 +44,13 @@ const (
 // invariant: a link is served only to where the window may follow it: an
 // anchor (#id), an http or https address, or a path with no scheme, which
 // is a page's. Any other scheme (javascript:, file:, mailto:), a path to a
-// host (//host) and a backslash are no link: the run is its words, plain,
-// and the check says so (S30).
+// host (//host), a backslash, a control character or a tab, and a space
+// before or after the target are no link: the run is its words, plain, and
+// the check says so (S30).
 func linkKind(target string) (LinkKind, bool) {
-	t := strings.TrimSpace(target)
+	t := target
 	switch {
-	case t == "", strings.HasPrefix(t, "//"), strings.ContainsRune(t, '\\'):
+	case t == "", t != strings.TrimSpace(t), strings.HasPrefix(t, "//"), strings.ContainsRune(t, '\\'), strings.ContainsFunc(t, func(r rune) bool { return r < 0x20 || r == 0x7f }):
 		return "", false
 	case strings.HasPrefix(t, "#"):
 		return LinkAnchor, true

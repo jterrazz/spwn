@@ -206,6 +206,9 @@
         "Blocks": {
           "type": "integer"
         },
+        "Cut": {
+          "type": "integer"
+        },
         "Findings": {
           "items": {
             "$ref": "#/$defs/wiki.ServedFinding"
@@ -276,6 +279,7 @@
       "required": [
         "Attention",
         "Blocks",
+        "Cut",
         "Findings",
         "Floor",
         "Icons",
@@ -527,6 +531,9 @@
         "Form": {
           "type": "string"
         },
+        "More": {
+          "type": "integer"
+        },
         "Parts": {
           "items": {
             "$ref": "#/$defs/wiki.FigurePart"
@@ -549,6 +556,7 @@
       "required": [
         "Caption",
         "Form",
+        "More",
         "Parts",
         "Shows",
         "X",
@@ -616,6 +624,15 @@
         },
         "Blocks": {
           "type": "integer"
+        },
+        "Finding": {
+          "items": {
+            "$ref": "#/$defs/wiki.ServedFinding"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
         },
         "Folded": {
           "enum": [
@@ -692,13 +709,13 @@
       "required": [
         "Address",
         "Blocks",
+        "Finding",
         "Folded",
         "ID",
         "Intent",
         "Items",
         "Lead",
         "MirroredBy",
-        "MirroredFrom",
         "NeedsYou",
         "OwnFloor",
         "ReadBy",
@@ -980,6 +997,9 @@
         "Mirrors": {
           "type": "string"
         },
+        "More": {
+          "type": "integer"
+        },
         "Of": {
           "type": "string"
         },
@@ -1004,6 +1024,7 @@
         "Count",
         "In",
         "Mirrors",
+        "More",
         "Of",
         "Rows",
         "Title",

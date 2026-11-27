@@ -25,9 +25,9 @@ func ranked(findings []ServedFinding) []ServedFinding {
 	return findings
 }
 
-// value: every finding served on the page and on its blocks, groups folded
-// or not, each with where the reader finds it: the block, or the group that
-// holds it when the group is served folded.
+// value: every finding served on the page, its groups and its blocks,
+// groups folded or not, each with where the reader finds it: the block, or
+// the group that holds it when the group is served folded, or the group.
 func attention(page []ServedFinding, sections []ServedSection) []ServedFinding {
 	out := slices.Clone(page)
 	var walk func(items []ServedItem, folded string)
@@ -40,6 +40,7 @@ func attention(page []ServedFinding, sections []ServedSection) []ServedFinding {
 				}
 			}
 			if g := it.Group; g != nil {
+				out = append(out, g.Finding...)
 				at := folded
 				if g.Folded != FoldNone && at == "" {
 					at = g.Address
