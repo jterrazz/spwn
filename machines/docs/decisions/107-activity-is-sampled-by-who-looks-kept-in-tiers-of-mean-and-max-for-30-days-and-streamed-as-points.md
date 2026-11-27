@@ -62,6 +62,7 @@ The decision lands in lots. The first ships the four tiers and nothing else of i
 
 - The history is the four tiers, each bucket the mean and max of every measure, the 1 min tier with its gauges; every number an answer writes is rounded to what it measures; `activity.read` asks its engine, through `engine.activity`, for one machine and only the part of its tiers it reads.
 - The 10 s tier is made on the first read that needs it, and none of this lot does: until then it costs nothing and a sample skips it; once made it starts empty, so its history begins at that first read. The cadence and stream lot makes it eager if a reader needs its past.
+- Within `station.activity.read/v1`, the four rates of a `--history` point may be `null` at a gap, as its CPU already was, and its memory and swap are the minute's mean: a gap is not a zero. This changes the contract of v1 without a v2, said in [Activity](../reference/activity.md) with the advice to scripts.
 - The cadence is unchanged: 2 s while a surface watches the machine, 60 s otherwise.
 - Nothing is persisted: an engine restart starts the history again from nothing.
 - No stream: `activity.read` stays one-shot, its series served from the tiers.

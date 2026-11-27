@@ -183,7 +183,7 @@ A Mac only; a guard already past its threshold refuses the start (exit 1). Piped
 station activity [--all-machines] [--json [--history]]
 ```
 
-What a machine is doing now: CPU and load, memory and its pressure, swap, free space, disk and network rates and totals, thermal and battery on a Mac, uptime, and the busiest processes; `--all-machines` is one row per machine and gathers every machine's findings (refused with `--on`, exit 2). `--json` prints `station.activity.read/v1`; `--history` adds the engine's 24 h series and needs `--json` (exit 2 without). Where each value comes from, and the history, are [Activity](activity.md)'s.
+What a machine is doing now: CPU and load, memory and its pressure, swap, free space, disk and network rates and totals, thermal and battery on a Mac, uptime, and the busiest processes; `--all-machines` is one row per machine and gathers every machine's findings (refused with `--on`, exit 2). `--json` prints `station.activity.read/v1`; `--history` adds the engine's 24 h series and needs `--json` (exit 2 without); a minute of it that measured no rate (after a pause or a reboot) has its CPU and its four rates `null`, so a script skips a `null` before it sums (`// empty` in jq). Where each value comes from, and the history, are [Activity](activity.md)'s.
 
 ## Agent
 
