@@ -23,6 +23,9 @@
 .strip[data-peek='title'] {
     height: 78px;
 }
+.strip:focus-visible {
+    outline: none;
+}
 .strip:focus-visible .open {
     box-shadow:
         inset 0 0 0 1px rgb(255 255 255 / 6%),

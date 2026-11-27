@@ -83,6 +83,9 @@
     width: 120px;
     height: 22px;
     margin-left: -60px;
+    padding: 0;
+    border: 0;
+    background: none;
     display: grid;
     place-items: center;
     cursor: grab;
@@ -127,4 +130,8 @@
 }
 .space[data-raised] .scroll {
     overflow-y: auto;
+}
+/* invariant: the page takes the focus a rise hands it to scroll by the keys; it draws no ring, as the prototype's. */
+.scroll:focus-visible {
+    outline: none;
 }
