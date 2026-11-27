@@ -269,6 +269,20 @@ func (s *set) caught(name, of string, v any) (b *Break, pass any) {
 	return b, nil
 }
 
+// invariant: a break keeps the words of a panic value only when the value
+// is words: an error (a runtime error included) or a string. Any other
+// value, a struct or a map that may hold a secret or a peer's input, is
+// told by its type alone.
+func worded(v any) (string, bool) {
+	switch v := v.(type) {
+	case error:
+		return v.Error(), true
+	case string:
+		return v, true
+	}
+	return "", false
+}
+
 func (s *set) report(b *Break, v any) (lost any) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -276,8 +290,8 @@ func (s *set) report(b *Break, v any) (lost any) {
 		}
 	}()
 	o := s.opts.Load()
-	if o != nil && o.Redact != nil {
-		b.Text = o.Redact(fmt.Sprint(v))
+	if text, ok := worded(v); ok && o != nil && o.Redact != nil {
+		b.Text = o.Redact(text)
 	}
 	if o != nil && o.Log != nil {
 		o.Log(b.Error() + "\n" + string(b.Stack))
