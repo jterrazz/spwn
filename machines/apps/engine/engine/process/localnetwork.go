@@ -48,11 +48,12 @@ func (d *Engine) readLocalNetwork(ctx context.Context) {
 // owner's click is seen without a restart; once approved, or where it
 // cannot tell, it reads no more.
 func (d *Engine) rereadLocalNetwork(ctx context.Context) {
-	d.mu.Lock()
-	since := d.h.Now().Sub(d.localNetworkAt)
-	due := d.localNetwork == model.LocalNetworkChecking && since >= localNetworkRetry ||
-		d.localNetwork == model.LocalNetworkNotApproved && since >= localNetworkEvery
-	d.mu.Unlock()
+	due := false
+	d.locked(func() {
+		since := d.h.Now().Sub(d.localNetworkAt)
+		due = d.localNetwork == model.LocalNetworkChecking && since >= localNetworkRetry ||
+			d.localNetwork == model.LocalNetworkNotApproved && since >= localNetworkEvery
+	})
 	if due {
 		d.readLocalNetwork(ctx)
 	}

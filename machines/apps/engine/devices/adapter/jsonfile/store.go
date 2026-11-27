@@ -211,12 +211,14 @@ func (s *Store) Change(ctx context.Context, edit func(*devices.Book) error) erro
 	if err := s.anchor.Write(ctx, next.Head()); err != nil {
 		return err
 	}
-	s.mu.Lock()
-	s.held, s.known = next.Head(), true
-	if s.sole {
-		s.hold = devices.Keep(next.Head())
-	}
-	s.mu.Unlock()
+	func() {
+		s.mu.Lock()
+		defer s.mu.Unlock()
+		s.held, s.known = next.Head(), true
+		if s.sole {
+			s.hold = devices.Keep(next.Head())
+		}
+	}()
 	if err := s.files.Replace(s.at, append(data, '\n'), 0o600); err != nil {
 		return &store.UnwritableError{Path: s.at, Cause: err}
 	}

@@ -35,13 +35,15 @@ func (d *Engine) tell(ctx context.Context, vm string, t engine.Told) {
 // invariant: a server whose run ended unexpectedly boots again after its
 // wait (SPEC §7.4); the owner is told of each restart, and once of a loop.
 func (d *Engine) restartLater(ctx context.Context, v *vmState, up time.Duration, now time.Time) {
-	d.mu.Lock()
-	was := v.restarts.Looping
-	v.restarts = v.restarts.After(up, now)
-	r := v.restarts
-	v.rerunAt = now.Add(r.Wait)
-	v.state, v.detail = engine.StateStopped, restartingDetail
-	d.mu.Unlock()
+	var was bool
+	var r model.Restarts
+	d.locked(func() {
+		was = v.restarts.Looping
+		v.restarts = v.restarts.After(up, now)
+		r = v.restarts
+		v.rerunAt = now.Add(r.Wait)
+		v.state, v.detail = engine.StateStopped, restartingDetail
+	})
 	switch {
 	case r.Looping && !was:
 		d.tell(ctx, v.name, engine.Looping(v.name, r))
@@ -75,15 +77,15 @@ func (d *Engine) keep(ctx context.Context, v *vmState) {
 	go func() {
 		answer, err := d.o.Checks.Run(ctx, target)
 		passed := err == nil
-		d.mu.Lock()
 		var change model.CheckChange
-		v.check, change = model.Health(v.check, passed, now)
-		if passed {
-			v.check.Answer = answer.Status
-			v.latency = model.KeepLatency(v.latency, model.LatencyPoint{At: now, Took: answer.Took})
-		}
-		v.checking = false
-		d.mu.Unlock()
+		d.locked(func() {
+			v.check, change = model.Health(v.check, passed, now)
+			if passed {
+				v.check.Answer = answer.Status
+				v.latency = model.KeepLatency(v.latency, model.LatencyPoint{At: now, Took: answer.Took})
+			}
+			v.checking = false
+		})
 		switch change {
 		case model.CheckFails:
 			d.logf(v.name, "its check fails: "+model.ShownCheck(rec.Check))
@@ -101,21 +103,7 @@ func (d *Engine) keep(ctx context.Context, v *vmState) {
 // run ends unexpectedly or its check fails since it passed; a restart that
 // follows walks the four health steps from the first.
 func (d *Engine) wentDown(ctx context.Context, v *vmState, cause string, lines []string, restarts bool, now time.Time) {
-	d.mu.Lock()
-	if v.recordLocked().Lifetime != model.AlwaysOn {
-		d.mu.Unlock()
-		return
-	}
-	was := v.down
-	v.down = true
-	if !was {
-		v.cause, v.lastLines = cause, lines
-	}
-	if restarts {
-		v.walk = &model.RestartWalk{Step: 1, At: now}
-	}
-	d.mu.Unlock()
-	if !was {
+	if server, was := d.markDownLocked(v, cause, lines, restarts, now); server && !was {
 		d.markUptime(ctx, model.UptimeMark{Server: v.name, Change: model.WentDown, At: now, Cause: cause})
 	}
 }
@@ -125,13 +113,36 @@ func (d *Engine) wentDown(ctx context.Context, v *vmState, cause string, lines [
 // on its record, through a restart when it walked one. The first time this
 // engine sees it healthy it marks it too, which starts its record and closes
 // an incident an earlier engine left open.
-func (d *Engine) walk(ctx context.Context, v *vmState) {
+func (d *Engine) markDownLocked(v *vmState, cause string, lines []string, restarts bool, now time.Time) (server, was bool) {
 	d.mu.Lock()
+	defer d.mu.Unlock()
 	if v.recordLocked().Lifetime != model.AlwaysOn {
-		d.mu.Unlock()
-		return
+		return false, false
 	}
-	now := d.h.Now()
+	was = v.down
+	v.down = true
+	if !was {
+		v.cause, v.lastLines = cause, lines
+	}
+	if restarts {
+		v.walk = &model.RestartWalk{Step: 1, At: now}
+	}
+	return true, was
+}
+
+func (d *Engine) walk(ctx context.Context, v *vmState) {
+	if back, now, walked := d.walkLocked(v); back {
+		d.markUptime(ctx, model.UptimeMark{Server: v.name, Change: model.CameBack, At: now, Restarted: walked})
+	}
+}
+
+func (d *Engine) walkLocked(v *vmState) (back bool, now time.Time, walked bool) {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	if v.recordLocked().Lifetime != model.AlwaysOn {
+		return false, now, false
+	}
+	now = d.h.Now()
 	running := v.state == engine.StateRunning
 	_, hasCheck := model.ParseCheck(v.recordLocked().Check)
 	step := model.WalkStep(running, running && v.ip != "", running && (v.guest == engine.GuestConnected || v.ssh), !hasCheck || v.check.State == model.CheckPassing)
@@ -139,18 +150,15 @@ func (d *Engine) walk(ctx context.Context, v *vmState) {
 		if v.walk != nil && v.walk.Step != step {
 			v.walk = &model.RestartWalk{Step: step, At: now}
 		}
-		d.mu.Unlock()
-		return
+		return false, now, false
 	}
-	walked := v.walk != nil
+	walked = v.walk != nil
 	if !walked && !v.down && v.marked {
-		d.mu.Unlock()
-		return
+		return false, now, false
 	}
 	v.walk, v.down, v.marked = nil, false, true
 	v.cause, v.lastLines = "", nil
-	d.mu.Unlock()
-	d.markUptime(ctx, model.UptimeMark{Server: v.name, Change: model.CameBack, At: now, Restarted: walked})
+	return true, now, walked
 }
 
 func (d *Engine) markUptime(ctx context.Context, m model.UptimeMark) {

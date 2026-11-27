@@ -254,12 +254,14 @@ func (s *set) caught(name, of string, v any) (b *Break, pass any) {
 	if marked[Fatal](v) || (strict && !marked[Scripted](v)) {
 		return nil, v
 	}
-	s.mu.Lock()
-	if s.counts == nil {
-		s.counts = map[string]int{}
-	}
-	s.counts[name]++
-	s.mu.Unlock()
+	func() {
+		s.mu.Lock()
+		defer s.mu.Unlock()
+		if s.counts == nil {
+			s.counts = map[string]int{}
+		}
+		s.counts[name]++
+	}()
 	b = &Break{Name: name, Of: of, Type: fmt.Sprintf("%T", v), Stack: stack()}
 	if lost := s.report(b, v); lost != nil {
 		return nil, lost
@@ -306,9 +308,11 @@ func (s *set) afterBreak() {
 
 func (s *set) watchLocks(o *Options) {
 	for {
-		s.mu.Lock()
-		locks := slices.Clone(s.locks)
-		s.mu.Unlock()
+		locks := func() []watched {
+			s.mu.Lock()
+			defer s.mu.Unlock()
+			return slices.Clone(s.locks)
+		}()
 		for _, w := range locks {
 			if !free(o.Clock, w.lock) && s.restarted.CompareAndSwap(false, true) {
 				if o.Log != nil {

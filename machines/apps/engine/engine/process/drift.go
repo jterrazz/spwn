@@ -29,18 +29,18 @@ func (d *Engine) keepDrift(ctx context.Context) {
 	}
 	now := d.h.Now()
 	var due []string
-	d.mu.Lock()
-	for name, v := range d.vms {
-		if v.state != engine.StateRunning || v.client == nil || v.drifting || v.recordLocked().Lifetime == model.AlwaysOn {
-			continue
+	d.locked(func() {
+		for name, v := range d.vms {
+			if v.state != engine.StateRunning || v.client == nil || v.drifting || v.recordLocked().Lifetime == model.AlwaysOn {
+				continue
+			}
+			if kept := v.keptDriftLocked(); kept != nil && !v.driftDue && now.Sub(kept.At) < driftEvery {
+				continue
+			}
+			v.drifting, v.driftDue = true, false
+			due = append(due, name)
 		}
-		if kept := v.keptDriftLocked(); kept != nil && !v.driftDue && now.Sub(kept.At) < driftEvery {
-			continue
-		}
-		v.drifting, v.driftDue = true, false
-		due = append(due, name)
-	}
-	d.mu.Unlock()
+	})
 	sort.Strings(due)
 	beside := d.o.Beside
 	if beside == nil {

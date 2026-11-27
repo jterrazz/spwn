@@ -168,14 +168,14 @@ func (d *Engine) unlisten(vm string, port int) {
 }
 
 func (d *Engine) unlistenExcept(vm string, seen map[int]bool) {
-	d.mu.Lock()
 	var gone []int
-	for _, s := range d.svcsInOrder() {
-		if s.vm == vm && !seen[s.port] {
-			gone = append(gone, s.port)
+	d.locked(func() {
+		for _, s := range d.svcsInOrder() {
+			if s.vm == vm && !seen[s.port] {
+				gone = append(gone, s.port)
+			}
 		}
-	}
-	d.mu.Unlock()
+	})
 	for _, port := range gone {
 		d.unlisten(vm, port)
 	}
@@ -1041,14 +1041,31 @@ func (d *Engine) release(ctx context.Context, vm string, port int) (ports.Reserv
 // a reservation its VM's rights no longer allow justifies none, for they are
 // judged first. It never touches another entry, and waits for Serve to be
 // on; a tailnet it cannot read is read again at each tick until it is.
-func (d *Engine) reconcileServe(ctx context.Context) {
+func (d *Engine) sharedReadLocked(shared []ports.Share, err error) ([]ports.Reservation, bool) {
 	d.mu.Lock()
-	on := d.self.On
-	judged := map[string]bool{}
-	for _, l := range d.reservations {
-		judged[l.VM] = true
+	defer d.mu.Unlock()
+	if err != nil {
+		if !d.unreadSaid {
+			d.logf("tailnet", "its entries could not be read: "+err.Error()+": read again at each tick")
+		}
+		d.unreadSaid = true
+		return nil, false
 	}
-	d.mu.Unlock()
+	d.lastShared, d.everRead, d.unreadSaid = shared, true, false
+	d.retry = d.retry || !d.reconciled
+	d.reconciled = true
+	return append([]ports.Reservation(nil), d.reservations...), true
+}
+
+func (d *Engine) reconcileServe(ctx context.Context) {
+	on := false
+	judged := map[string]bool{}
+	d.locked(func() {
+		on = d.self.On
+		for _, l := range d.reservations {
+			judged[l.VM] = true
+		}
+	})
 	if !on {
 		return
 	}
@@ -1056,20 +1073,10 @@ func (d *Engine) reconcileServe(ctx context.Context) {
 		d.rightsOf(ctx, vm)
 	}
 	shared, err := d.tn.Shared(ctx)
-	d.mu.Lock()
-	if err != nil {
-		if !d.unreadSaid {
-			d.logf("tailnet", "its entries could not be read: "+err.Error()+": read again at each tick")
-		}
-		d.unreadSaid = true
-		d.mu.Unlock()
+	reservations, read := d.sharedReadLocked(shared, err)
+	if !read {
 		return
 	}
-	d.lastShared, d.everRead, d.unreadSaid = shared, true, false
-	d.retry = d.retry || !d.reconciled
-	d.reconciled = true
-	reservations := append([]ports.Reservation(nil), d.reservations...)
-	d.mu.Unlock()
 	p := d.policy()
 	justified := func(e ports.Share) bool {
 		return slices.ContainsFunc(reservations, func(l ports.Reservation) bool { return justifies(l, e, p.HTTPS) })
@@ -1113,9 +1120,7 @@ func (d *Engine) remove(ctx context.Context, e ports.Share) {
 		return
 	}
 	e.Reserved = ports.CarriedFrom(e)
-	d.mu.Lock()
-	d.oweLocked(e)
-	d.mu.Unlock()
+	d.locked(func() { d.oweLocked(e) })
 }
 
 // value: whether a tailnet entry is the share a reservation makes in this

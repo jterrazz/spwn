@@ -425,9 +425,7 @@ func (d *Engine) Begin(ctx context.Context, note func(line string)) error {
 		d.started = d.o.StartedAt.UTC().Truncate(time.Second)
 	}
 	d.keepRecord()
-	d.mu.Lock()
-	d.history = activity.NewHistory(d.started)
-	d.mu.Unlock()
+	d.locked(func() { d.history = activity.NewHistory(d.started) })
 	d.neverSleeps(d.started)
 	d.reservations, _ = d.st.Reservations.List(ctx)
 	// invariant: the reservations are judged in the mode of this start, at
@@ -592,9 +590,7 @@ func (d *Engine) refreshSelf(ctx context.Context) {
 		// reservation justifies go before any share is served, so none is
 		// served on a Funnel port the mode no longer gives it.
 		mode := d.policy().HTTPS
-		d.mu.Lock()
-		d.serveInModeLocked(ctx, mode)
-		d.mu.Unlock()
+		d.locked(func() { d.serveInModeLocked(ctx, mode) })
 		d.reconcileServe(ctx)
 		d.serveAll(ctx)
 	case !self.On && self.Backend != ports.Running:
@@ -744,9 +740,8 @@ func (d *Engine) hostKeys() []string {
 func (d *Engine) Rehello() {
 	// invariant: a change of the book reaches every connected guest at once,
 	// never at the next walk, so a forgotten device loses its VMs now.
-	d.mu.Lock()
-	vms := slices.Collect(maps.Values(d.vms))
-	d.mu.Unlock()
+	var vms []*vmState
+	d.locked(func() { vms = slices.Collect(maps.Values(d.vms)) })
 	for _, v := range vms {
 		d.rehello(v)
 	}

@@ -287,9 +287,7 @@ func (m *Keeper) Sleep() awake.Slept {
 func (m *Keeper) Stop() bool { return m.finish(awake.ReasonStop, "station engine stop") }
 
 func (m *Keeper) Quit() {
-	m.mu.Lock()
-	m.releaseNeverLocked()
-	m.mu.Unlock()
+	m.locked(m.releaseNeverLocked)
 	if !m.finish(awake.ReasonQuit, "the engine stopped") {
 		m.ClearClamshell()
 	}
@@ -327,23 +325,20 @@ func (m *Keeper) evaluateLocked(r awake.Reading) (reason, detail string) {
 	return reason, detail
 }
 
-func (m *Keeper) Observe(ctx context.Context, ev awake.Event) {
-	r, err := m.port.Read()
-	if err != nil {
-		return
-	}
+type observed struct {
+	policy, changed, lidHeld bool
+	told, reason, detail     string
+}
+
+func (m *Keeper) observeLocked(ev awake.Event, r awake.Reading) observed {
 	m.mu.Lock()
+	defer m.mu.Unlock()
 	if m.session == nil && m.never {
 		told, changed := m.policyLocked(m.clock.Now())
-		m.mu.Unlock()
-		m.after(told, changed)
-		return
+		return observed{policy: true, told: told, changed: changed}
 	}
-	reason, detail := m.evaluateLocked(r)
-	if reason != "" {
-		m.mu.Unlock()
-		m.finish(reason, detail)
-		return
+	if reason, detail := m.evaluateLocked(r); reason != "" {
+		return observed{reason: reason, detail: detail}
 	}
 	lidHeld := m.session != nil && m.session.Lid
 	if lidHeld && (ev.Kind == "source" || ev.Kind == "lid") {
@@ -353,8 +348,24 @@ func (m *Keeper) Observe(ctx context.Context, ev awake.Event) {
 			m.log("clamshell: " + err.Error())
 		}
 	}
-	m.mu.Unlock()
-	if lidHeld && ev.Kind == "lid" && r.Lid == "closed" {
+	return observed{lidHeld: lidHeld}
+}
+
+func (m *Keeper) Observe(ctx context.Context, ev awake.Event) {
+	r, err := m.port.Read()
+	if err != nil {
+		return
+	}
+	o := m.observeLocked(ev, r)
+	switch {
+	case o.policy:
+		m.after(o.told, o.changed)
+		return
+	case o.reason != "":
+		m.finish(o.reason, o.detail)
+		return
+	}
+	if o.lidHeld && ev.Kind == "lid" && r.Lid == "closed" {
 		m.sleepDisplay(ctx)
 	}
 	m.changed()
@@ -401,12 +412,14 @@ func (m *Keeper) Tick() {
 	if err != nil {
 		return
 	}
-	m.mu.Lock()
-	was := m.reading.Lid
-	reason, detail := m.evaluateLocked(r)
-	held := m.session != nil
-	closed := held && m.session.Lid && was != "closed" && r.Lid == "closed"
-	m.mu.Unlock()
+	var reason, detail string
+	var held, closed bool
+	m.locked(func() {
+		was := m.reading.Lid
+		reason, detail = m.evaluateLocked(r)
+		held = m.session != nil
+		closed = held && m.session.Lid && was != "closed" && r.Lid == "closed"
+	})
 	if reason != "" {
 		m.finish(reason, detail)
 		return
@@ -439,14 +452,24 @@ func (m *Keeper) Policy(never bool, since time.Time) {
 	// while the preference says so, except while the battery guard of a Mac
 	// that reports a battery trips; every other guard only tells the owner, once
 	// per trip.
-	m.mu.Lock()
-	m.never = never
-	if since.IsZero() {
-		since = m.clock.Now()
-	}
-	told, changed := m.policyLocked(since)
-	m.mu.Unlock()
+	var told string
+	var changed bool
+	m.locked(func() {
+		m.never = never
+		if since.IsZero() {
+			since = m.clock.Now()
+		}
+		told, changed = m.policyLocked(since)
+	})
 	m.after(told, changed)
+}
+
+// invariant: a stretch that runs code under m.mu holds it through locked,
+// whose unlock is deferred, so a panic a boundary recovers leaves it free.
+func (m *Keeper) locked(f func()) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	f()
 }
 
 func (m *Keeper) after(told string, changed bool) {
