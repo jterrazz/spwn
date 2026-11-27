@@ -6,7 +6,6 @@ import type { Held } from '../../../domain/activity/measures';
 import { bytes, duration, memory, percent } from '../../../domain/format';
 import type { Found } from '../../../domain/machines/machines';
 import { SEPARATOR } from '../../../domain/separator';
-import type { Tone } from '../../../domain/tone';
 import { agoOf, firstUnitOf, shortDay } from '../../../domain/when';
 import { useIdentityOf } from '../../kit/identity';
 import { NotGivenTile, split, Unknown } from '../../kit/tile-states';
@@ -69,13 +68,11 @@ function HeldTile({
     held,
     shown,
     identity,
-    tone = 'plain',
 }: {
     label: string;
     held: Held | undefined;
     shown: (value: number) => string;
     identity?: Identity | undefined;
-    tone?: Tone;
 }) {
     if (held === undefined) {
         return <NotGivenTile label={label} />;
@@ -95,7 +92,6 @@ function HeldTile({
                     identity={identity}
                     label={`${label} used of its total`}
                     percent={(held.used / held.total) * 100}
-                    tone={identity === undefined ? tone : 'plain'}
                     width="fixed"
                 />
             }
@@ -189,7 +185,6 @@ function MemoryTile({ label, report, unknown, vm }: MemoryTileProps) {
             identity={vm ? identityOf(vm.Name) : undefined}
             label={label}
             shown={memory}
-            tone="new"
         />
     );
 }

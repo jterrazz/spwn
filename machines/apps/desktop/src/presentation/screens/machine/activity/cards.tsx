@@ -52,7 +52,6 @@ function Drawn({ marks, label, span }: { marks: Marks; label: string; span: Span
                 label={`${label} over ${spanOf(span).label}`}
                 marks={marks.labels}
                 size="activity"
-                tone="new"
                 values={marks.values}
             />
             <div className={styles.axis}>

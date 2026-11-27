@@ -215,15 +215,14 @@ describe('contrast', () => {
         ]);
     });
 
-    test('blue is drawn by the style sheets of a busy mark, a progress line or a running step, and no other', () => {
+    test('blue is drawn by the style sheets of an act in progress, and no other', () => {
         // Given - every style sheet that draws --busy
         const blue = sheetsDrawing('busy');
 
-        // Then - the closed list: no focus, link, selection or identity is blue
+        // Then - the closed list of acts in progress: no chart, gauge, focus, link, selection or identity is blue
         expect(blue).toStrictEqual([
             'screens/core/core.module.css',
             'ui/bar.module.css',
-            'ui/chart.module.css',
             'ui/dot-strip.module.css',
             'ui/progress-line.module.css',
             'ui/state-mark.module.css',

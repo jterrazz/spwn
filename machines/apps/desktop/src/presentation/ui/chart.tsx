@@ -10,7 +10,7 @@ export type ChartProps = {
     label: string;
     marks?: readonly string[] | undefined;
     size?: Size;
-    tone?: Tone;
+    tone?: Exclude<Tone, 'new'>;
     accent?: 'every' | 'last';
 };
 
