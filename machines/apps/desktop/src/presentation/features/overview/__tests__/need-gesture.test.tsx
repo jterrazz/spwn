@@ -176,7 +176,9 @@ describe('NeedLine', () => {
                 const states = [...(section?.querySelectorAll('[data-mark]') ?? [])];
                 said.words = states.map((one) => one.textContent).filter((word) => word !== '');
                 said.marks = states.flatMap((one) =>
-                    one.getAttribute('role') === 'img' ? [one.getAttribute('aria-label') ?? ''] : [],
+                    one.getAttribute('role') === 'img'
+                        ? [one.getAttribute('aria-label') ?? '']
+                        : [],
                 );
             },
         );
