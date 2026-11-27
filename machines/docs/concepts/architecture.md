@@ -211,11 +211,11 @@ The engine's start sets what a break reports into (`wire/engine.go`): its log is
 | `Keep(ctx, name, fn)` | on a goroutine of its own | reports, then runs fn again after 1 s, doubling to 5 min, and from 1 s again after a run of 10 min; fn returning ends the job |
 | `Vital(name, fn)`     | on a goroutine of its own | reports, then panics again: the process dies and launchd starts it afresh                                                     |
 
-A break is reported as its name, the panic value's type, its text through the redactor the engine sets, and the stack; never the value, nor the call's input or output. It is counted per name and handed to the `OnBreak` hook. Each name is a string literal unique across the engine; the call a boundary served is data, its `Of`, so the count of `serve.call` holds every call's breaks together.
+A break is reported as its name, the panic value's type, its text through the redactor the engine sets when the value is an error or a string (any other value is told by its type alone), and the stack; never the value, nor the call's input or output. A stream process, `guest serve --stdio` or `engine attach`, appends its breaks to its own machine's engine log. It is counted per name and handed to the `OnBreak` hook. Each name is a string literal unique across the engine; the call a boundary served is data, its `Of`, so the count of `serve.call` holds every call's breaks together.
 
 Three panics are never recovered. A value that implements `goes.Fatal` (the spec build's secret tripwire, the strict page seal) is panicked again by every helper. In the spec build (`-tags world`) a value that is not `goes.Scripted` is too, so a story still dies on a real bug, and a test or a world fault breaks on purpose with a `goes.Script`. A report that itself panics (the log, the redactor, the hook) ends the process with a `Fatal` naming the break it lost. A `runtime.Goexit` is no panic: it ends its goroutine with no break.
 
-A lock a break may leave held is registered with `goes.WatchLock`. After each recovered break, each watched lock is tried for 2 s; one still held logs that it stayed held and calls the restart the engine sets, once.
+A lock a recovered break could leave held is released by `defer` wherever a call, an index or a channel operation runs under it, and so is the world's lock in every fake that calls `Fails` under it; an undeferred stretch reads or writes fields alone. `goes.WatchLock` is wired to no lock yet: L4 is to watch only a lock never held across I/O, and to restart only when the same acquisition is still held after 30 s ([ADR-108](../decisions/108-a-panic-breaks-its-call-or-its-job-never-the-engine.md), "A lock left held").
 
 ## The fake world
 

@@ -94,6 +94,18 @@ L1 starts once the owner has read ADR-073: mode A gives one Local Network row, i
 - **M8, automatic login only from a Machinefile**: a Mac setting that turns automatic login on for a headless Mac, never on by default, declared in the owner's own Machinefile (the Mac mini as an always-on Mac, below). Proof: a story for default off and for applied, drift and undo.
 - **M9, `spwn uninstall`** (below) removes the link, the engine's registration and the app, leaving no BTM row after the Trash. The owner's `sudo sfltool resetbtm` and the (-) on old Local Network rows stay his, once per Mac.
 
+## The engine and a panic: the lots after L2b (2026-11-27)
+
+ADR-108 lists the lots; L1, L2 and L2b are done. What a verification of L2 found (2026-11-27) and each lot owes:
+
+- **L3a, the fan-out helpers**: `core/call/lanes`, `remote/each`, `overview/calls/compose.go`, `settings/calls/list.go`, `apps/calls/inventory.go`: a job's panic is that job's `broke`, the other jobs answer. Their goroutines run outside any `Try` today, so a panic there still ends the engine.
+- **L3b, every other site** (114 goroutine sites with L3a's, `panic-go-sites-fn.txt` of the plan): the registry's watch producers (`core/call/call.go`), the socket's connection goroutine outside `TryOf` (`engine/process/engine.go`'s `go d.Serve`: its repair, the act board's end, the journal's keep, the far invoke), the guest's ssh client, the ssh agent's serve, the far readers, the page feeds, the port carry; then `specs/architecture/goroutines_test.go`.
+- **L4, the engine's own and the lock watch**: watch only a lock never held across I/O (`d.mu` is held across tailscale calls of up to 5 s: `engine/process/share.go`, `ports/adapter/tailscale/tailscale.go`), count acquisitions, restart only when the same one is held after 30 s, a false-restart test first (ADR-108, "A lock left held"); `Vital` on the run watch and the accept loop; the night's jobs end their state in a `defer`.
+- **L5, a break that repeats**: a page projection that breaks on every store revision reconnects about every 1 s (both clients reset their back-off at the first frame) and writes a full stack each time into a log with no rotation. A finding once one signature broke 3 times in 10 min, and a back-off of the feed.
+- **The CLI's own boundary**: a call the CLI runs in its own process still ends that command on a panic (ADR-108, Consequences).
+- **The engine log's rotation**: `engine.log` grows without bound (no rotation in the engine); with L5's loop it grows by a stack a second.
+- **The lock sweep's remainder**: L2b left undeferred the stretches that read or write fields alone, and the far readers', the store readers', `engine/live`'s and the lane pool's waits, whose goroutines L3a and L3b put under `core/goes`: each is released by `defer` as its goroutine gets a boundary.
+
 ## The project's reads not yet through its root (2026-11-26)
 
 ADR-099 decision 6 reads the declaration through `platform.Tree`. Left as plain reads: the package cache's (`packages/dependency/internal/manifest/loader.go`'s `DirResolver` and `SkillsFS`, `internal/adapters/local/hydrate.go`), which reads what an install wrote, not the project; the `~/.spwn` organization and team files (`packages/project/organization.go`, `team.go`); the upward search for `spwn.yaml` (`internal/discovery/`). The record's FIFO and size refusals at `.spwn/applied.json` (`local.ErrTooLarge` for the size) reach the surface as raw errors, with no code of their own. Proof owed: a real-disk test per read once each goes through a root, and a coded refusal for the record.
