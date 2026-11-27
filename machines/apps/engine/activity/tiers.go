@@ -266,11 +266,18 @@ type Series struct {
 	rings  [len(Tiers)]ring
 }
 
+const (
+	// value: two boot times this close are one boot: Linux says it as now
+	// less the uptime, to the second, so it flips between two seconds.
+	BootJitter = 2 * time.Second
+)
+
 func countedAgain(a, b *Sample) bool {
 	// value: the machine counted again from zero between a and b: a
-	// counter went back, or it booted again.
+	// counter went back, or it booted again, its boot more than BootJitter
+	// from the last.
 	return b.CPUTotal < a.CPUTotal || b.CPUBusy < a.CPUBusy || b.DiskRead < a.DiskRead || b.DiskWritten < a.DiskWritten ||
-		b.NetIn < a.NetIn || b.NetOut < a.NetOut || (!a.Boot.IsZero() && !b.Boot.IsZero() && !a.Boot.Equal(b.Boot))
+		b.NetIn < a.NetIn || b.NetOut < a.NetOut || (!a.Boot.IsZero() && !b.Boot.IsZero() && a.Boot.Sub(b.Boot).Abs() > BootJitter)
 }
 
 func (s *Series) newest() *Sample { return &s.recent[(s.count-1)%recentKept] }
@@ -284,8 +291,9 @@ func (s *Series) Add(x Sample) {
 	// invariant: a sample no later than the newest is not kept; a rate is
 	// measured between a sample and the one before it, unless a Pause or a
 	// machine that counted again lies between them: the sample then counts
-	// its gauges only.
-	if s.count > 0 && !x.At.After(s.newest().At) {
+	// its gauges only. A sample at or before 1970 is not kept: a slot is
+	// told empty by a time of 0, and a time before it has no slot.
+	if x.At.UnixMilli() <= 0 || (s.count > 0 && !x.At.After(s.newest().At)) {
 		return
 	}
 	if s.rings[T0].slots == nil {

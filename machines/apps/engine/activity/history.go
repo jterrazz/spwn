@@ -172,8 +172,11 @@ func (b *bucket) row() Rollup {
 }
 
 func (r Rollup) bucket() (bucket, error) {
-	if r[0] <= 0 || r[0] > math.MaxInt64 {
-		return bucket{}, fmt.Errorf("activity: a bucket at %v", r[0])
+	// invariant: a row read is refused unless its time is after 1970 and
+	// its count and its floor are in their range: a count out of range
+	// would wrap into the floor's bits of the meta word.
+	if r[0] <= 0 || r[0] > math.MaxInt64 || r[1] < 0 || r[1] > maxCount || r[3] < 0 || r[3] > 3 {
+		return bucket{}, fmt.Errorf("activity: a bucket at %v of %v samples, its floor %v", r[0], r[1], r[3])
 	}
 	f := func(i int) float32 { return float32(r[i]) }
 	b := bucket{
@@ -181,7 +184,7 @@ func (r Rollup) bucket() (bucket, error) {
 		cpu: envelope{f(4), f(5)}, mem: gauge{int64(r[6]), int64(r[7])}, swap: gauge{int64(r[8]), int64(r[9])},
 		diskRead: envelope{f(10), f(11)}, diskWrite: envelope{f(12), f(13)}, netIn: envelope{f(14), f(15)}, netOut: envelope{f(16), f(17)},
 	}
-	b.count(min(int(r[1]), maxCount), uint8(min(max(r[3], 0), 3)))
+	b.count(int(r[1]), uint8(r[3]))
 	b.peaked(int64(r[18]))
 	return b, nil
 }
