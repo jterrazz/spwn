@@ -37,18 +37,18 @@ func (k *checker) table(p *Page, b *Block) {
 	of := textOf(b.Props, "of")
 	kind, ok := k.schema.kind(of)
 	if !ok || kind.Structural {
-		k.add("H19", p.ID, b.ID, b.Props.at("of", b.At), fmt.Sprintf("%q is no kind: a table shows the blocks of one kind", of))
+		k.add("H19", p.ID, b.ID, b.Props.at("of", b.At), sayf("%q is no kind: a table shows the blocks of one kind", of))
 		return
 	}
 	cols, _ := b.Props.Get("columns")
 	for _, c := range cols.List {
 		name := text(c)
 		if _, field := kind.field(name); !field && !slices.Contains(derivedColumns(), name) {
-			k.add("H20", p.ID, b.ID, whereOf(c, b.Props.at("columns", b.At)), fmt.Sprintf("column %q is neither a field of %s (%s) nor derived (%s)", name, of, strings.Join(kind.fieldNames(), ", "), strings.Join(derivedColumns(), ", ")))
+			k.add("H20", p.ID, b.ID, whereOf(c, b.Props.at("columns", b.At)), sayf("column %q is neither a field of %s (%s) nor derived (%s)", name, of, fieldsOf(kind), commas(derivedColumns())))
 		}
 	}
 	if len(cols.List) > tableCols {
-		k.add("S17", p.ID, b.ID, b.At, fmt.Sprintf("table %q has %d columns", b.ID, len(cols.List)))
+		k.add("S17", p.ID, b.ID, b.At, sayf("table %q has %d columns", b.ID, len(cols.List)))
 	}
 	v, hasWhere := b.Props.Get("where")
 	var q *Query
@@ -61,7 +61,7 @@ func (k *checker) table(p *Page, b *Block) {
 	scope := textOf(b.Props, "in")
 	found := k.ofKind(scope, of)
 	if _, resolves := k.targets[scope]; resolves && found.n == 0 {
-		k.add("S16", p.ID, b.ID, b.At, fmt.Sprintf("no %s under %s: the table is empty, not wrong", of, scope))
+		k.add("S16", p.ID, b.ID, b.At, sayf("no %s under %s: the table is empty, not wrong", of, scope))
 	}
 	rows := found
 	switch {
@@ -71,7 +71,7 @@ func (k *checker) table(p *Page, b *Block) {
 		rows = &rowSet{}
 	}
 	if more := rows.n - len(rows.rows); more > 0 {
-		k.add("S31", p.ID, b.ID, b.At, fmt.Sprintf("table %q shows its first %d rows, and %d more rows: narrow its in or its where", b.ID, MaxTableRows, more))
+		k.add("S31", p.ID, b.ID, b.At, sayf("table %q shows its first %d rows, and %d more rows: narrow its in or its where", b.ID, MaxTableRows, more))
 	}
 	k.rows[b] = rows
 }
@@ -209,13 +209,13 @@ func (k *checker) condition(p *Page, b *Block, kind Kind, q *Query, at At) bool 
 	_, list := listOf(f.Type)
 	switch {
 	case !ok:
-		k.add("H36", p.ID, b.ID, at, fmt.Sprintf("where: %q is no field of %s (%s)", q.Field, kind.ID, strings.Join(kind.fieldNames(), ", ")))
+		k.add("H36", p.ID, b.ID, at, sayf("where: %q is no field of %s (%s)", q.Field, kind.ID, fieldsOf(kind)))
 		return false
 	case q.Op == OpHas && !list:
-		k.add("H36", p.ID, b.ID, at, fmt.Sprintf("where: %s is no list, has tests a list's members: write is", q.Field))
+		k.add("H36", p.ID, b.ID, at, sayf("where: %s is no list, has tests a list's members: write is", q.Field))
 		return false
 	case q.Op == OpIs && list:
-		k.add("H36", p.ID, b.ID, at, fmt.Sprintf("where: %s is a list, is compares one value: write has", q.Field))
+		k.add("H36", p.ID, b.ID, at, sayf("where: %s is a list, is compares one value: write has", q.Field))
 		return false
 	}
 	if q.Operand.Kind != ValueState {
@@ -225,10 +225,10 @@ func (k *checker) condition(p *Page, b *Block, kind Kind, q *Query, at At) bool 
 	state, hasState := to.field(to.State)
 	switch {
 	case f.To == "" || to.State == "" || !hasState:
-		k.add("H36", p.ID, b.ID, at, fmt.Sprintf("where: state(%q) reads the state of %s's target, and %s points to no kind with a state", q.Operand.Text, q.Field, q.Field))
+		k.add("H36", p.ID, b.ID, at, sayf("where: state(%q) reads the state of %s's target, and %s points to no kind with a state", q.Operand.Text, q.Field, q.Field))
 		return false
 	case !slices.Contains(state.Values, q.Operand.Text):
-		k.add("H36", p.ID, b.ID, at, fmt.Sprintf("%q is no state of %s: %s", q.Operand.Text, to.ID, orList(state.Values)))
+		k.add("H36", p.ID, b.ID, at, sayf("%q is no state of %s: %s", q.Operand.Text, to.ID, oneOf(state.Values)))
 		return false
 	}
 	return true
@@ -246,13 +246,13 @@ func (k *checker) schemaRules() {
 			if near := nearest(seat.Home, k.addresses); near != "" {
 				says += fmt.Sprintf(" (did you mean %s?)", near)
 			}
-			k.addSchema("H4", seat.Line, says)
+			k.addSchema("H4", seat.Line, sayf("%s", says))
 		}
 		if !owned[seat.ID] {
-			k.addSchema("H33", seat.Line, fmt.Sprintf("seat %q owns no page: a seat opens the day it has content", seat.ID))
+			k.addSchema("H33", seat.Line, sayf("seat %q owns no page: a seat opens the day it has content", seat.ID))
 		}
 		if !k.schema.iconExists(seat.ID) {
-			k.addSchema("S21", seat.Line, fmt.Sprintf("seat %q has no icon: the dot stands in", seat.ID))
+			k.addSchema("S21", seat.Line, sayf("seat %q has no icon: the dot stands in", seat.ID))
 		}
 		for _, i := range seat.Reads {
 			read[i] = true
@@ -260,7 +260,7 @@ func (k *checker) schemaRules() {
 	}
 	for _, i := range intents() {
 		if !read[i] && len(k.schema.Seats) > 0 {
-			k.addSchema("S22", k.schema.Seats[0].Line, fmt.Sprintf("intent %q is read by no seat", i))
+			k.addSchema("S22", k.schema.Seats[0].Line, sayf("intent %q is read by no seat", i))
 		}
 	}
 	ids := make([]string, 0, len(k.schema.Kinds))
@@ -272,9 +272,9 @@ func (k *checker) schemaRules() {
 		kind := k.schema.Kinds[id]
 		switch {
 		case kind.Icon == "":
-			k.addSchema("S21", kind.Line, fmt.Sprintf("kind %q has no icon: the dot stands in", id))
+			k.addSchema("S21", kind.Line, sayf("kind %q has no icon: the dot stands in", id))
 		case !k.schema.iconExists(kind.Icon):
-			k.addSchema("H29", kind.Line, fmt.Sprintf("icon %q is in no icons: of wiki.yaml and is not built in", kind.Icon))
+			k.addSchema("H29", kind.Line, sayf("icon %q is in no icons: of wiki.yaml and is not built in", kind.Icon))
 		}
 	}
 	k.grids()
@@ -290,15 +290,15 @@ func (k *checker) grids() {
 			width = max(width, len([]rune(row)))
 			if bad := strings.Trim(row, "#."); bad != "" {
 				first, _ := utf8.DecodeRuneInString(bad)
-				k.addSchema("H30", icon.Line, fmt.Sprintf("icon %q: row %d holds %q; only # and .", icon.Name, i+1, string(first)))
+				k.addSchema("H30", icon.Line, sayf("icon %q: row %d holds %q; only # and .", icon.Name, i+1, string(first)))
 			}
 		}
 		if width > gridSide || len(icon.Rows) > gridSide {
-			k.addSchema("H30", icon.Line, fmt.Sprintf("icon %q is %d by %d, %d by %d at most", icon.Name, width, len(icon.Rows), gridSide, gridSide))
+			k.addSchema("H30", icon.Line, sayf("icon %q is %d by %d, %d by %d at most", icon.Name, width, len(icon.Rows), gridSide, gridSide))
 		}
 		grid := strings.Join(icon.Rows, "\n")
 		if first, ok := seen[grid]; ok {
-			k.addSchema("H31", icon.Line, fmt.Sprintf("icons %q and %q are the same grid", first, icon.Name))
+			k.addSchema("H31", icon.Line, sayf("icons %q and %q are the same grid", first, icon.Name))
 			continue
 		}
 		seen[grid] = icon.Name
@@ -454,7 +454,7 @@ func (k *checker) tiers(p *Page, set *weighed, weights map[*Block]*Weight) *Bloc
 			if set.group != nil {
 				name = fmt.Sprintf("group %q", set.group.ID)
 			}
-			k.add("H16", p.ID, b.ID, b.Props.at("weight", b.At), fmt.Sprintf("%s already has a written lead, %q: one per group; write quiet, or nothing", name, lead.ID))
+			k.add("H16", p.ID, b.ID, b.Props.at("weight", b.At), sayf("%s already has a written lead, %q: one per group; write quiet, or nothing", name, lead.ID))
 			continue
 		}
 		lead = b
@@ -479,9 +479,9 @@ func (k *checker) tiers(p *Page, set *weighed, weights map[*Block]*Weight) *Bloc
 		}
 		switch {
 		case w.By == TierLead && top-w.Score >= 3:
-			k.add("S12", p.ID, b.ID, b.Props.at("weight", b.At), fmt.Sprintf("%q is written lead, its score is %d and its %s's top is %d", b.ID, w.Score, set.labelWord(), top))
+			k.add("S12", p.ID, b.ID, b.Props.at("weight", b.At), sayf("%q is written lead, its score is %d and its %s's top is %d", b.ID, w.Score, set.labelWord(), top))
 		case w.By == TierQuiet && w.Score >= 4:
-			k.add("S12", p.ID, b.ID, b.Props.at("weight", b.At), fmt.Sprintf("%q is written quiet, its score is %d", b.ID, w.Score))
+			k.add("S12", p.ID, b.ID, b.Props.at("weight", b.At), sayf("%q is written quiet, its score is %d", b.ID, w.Score))
 		}
 	}
 	return lead
@@ -527,10 +527,10 @@ func (k *checker) budget(p *Page, weights map[*Block]*Weight) {
 		}
 	}
 	if lines > pageLines {
-		k.add("S11", p.ID, "", pageAt(p), fmt.Sprintf("page %q does not fit %s: %d lines", p.ID, k.schema.Budget, lines))
+		k.add("S11", p.ID, "", pageAt(p), sayf("page %q does not fit %s: %d lines", p.ID, k.schema.Budget, lines))
 	}
 	if n := len(weights); n > pageBlocks && !led {
-		k.add("S13", p.ID, "", pageAt(p), fmt.Sprintf("page %q: %d blocks, none leads", p.ID, n))
+		k.add("S13", p.ID, "", pageAt(p), sayf("page %q: %d blocks, none leads", p.ID, n))
 	}
 }
 

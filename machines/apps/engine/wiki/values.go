@@ -18,76 +18,76 @@ var (
 	blockIDForm = regexp.MustCompile(`^[a-z0-9]+(-[a-z0-9]+)*$`)
 )
 
-// value: what is wrong with a value for a field's type, empty when it fits;
+// value: what is wrong with a value for a field's type, none when it fits;
 // a union fits when one of its members does, a list when each element does.
-func fit(t string, f Field, v Value) string {
+func fit(t string, f Field, v Value) message {
 	if inner, ok := listOf(t); ok {
 		if v.Kind != ValueList {
-			return fmt.Sprintf("%s is %s, it takes %s", f.Name, describe(v), t)
+			return sayf("%s is %s, it takes %s", f.Name, describe(v), t)
 		}
 		for _, e := range v.List {
-			if problem := fit(inner, f, e); problem != "" {
+			if problem := fit(inner, f, e); !problem.none() {
 				return problem
 			}
 		}
-		return ""
+		return message{}
 	}
-	why := ""
+	var why message
 	for _, base := range strings.Split(t, "|") {
 		ok, problem := fitBase(base, f, v)
 		if ok {
-			return ""
+			return message{}
 		}
-		if why == "" {
+		if why.none() {
 			why = problem
 		}
 	}
-	if why != "" {
+	if !why.none() {
 		return why
 	}
-	return fmt.Sprintf("%s is %s, it takes %s", f.Name, describe(v), t)
+	return sayf("%s is %s, it takes %s", f.Name, describe(v), t)
 }
 
 // value: whether a value fits one base type, and when it is of the base's
 // shape but out of its range, what is wrong with it.
-func fitBase(base string, f Field, v Value) (fits bool, problem string) {
+func fitBase(base string, f Field, v Value) (fits bool, problem message) {
 	str := v.Kind == ValueString
 	switch base {
 	case "sentence":
 		if !str {
-			return false, ""
+			return false, message{}
 		}
 		limit := f.Max
 		if limit == 0 {
 			limit = sentenceCap
 		}
 		if n := utf8.RuneCountInString(v.Text); n > limit {
-			return false, fmt.Sprintf("%s is %d characters, %d at most", f.Name, n, limit)
+			return false, sayf("%s is %d characters, %d at most", f.Name, n, limit)
 		}
-		return true, ""
+		return true, message{}
 	case "text", "glob":
-		return str, ""
+		return str, message{}
 	case "enum":
 		if str && slices.Contains(f.Values, v.Text) {
-			return true, ""
+			return true, message{}
 		}
-		return false, fmt.Sprintf("%s: %s does not exist, it is %s", f.Name, text(v), orList(f.Values))
+		return false, sayf("%s: %s does not exist, it is %s", f.Name, text(v), oneOf(f.Values))
 	case "ref":
-		return v.Kind == ValueRef, ""
+		return v.Kind == ValueRef, message{}
 	case "anchor":
-		return str && anchorForm.MatchString(v.Text), ""
+		return str && anchorForm.MatchString(v.Text), message{}
 	case "date":
-		return str && dateForm.MatchString(v.Text), ""
+		return str && dateForm.MatchString(v.Text), message{}
 	case "bool":
-		return v.Kind == ValueBool, ""
+		return v.Kind == ValueBool, message{}
 	case "int":
-		return v.Kind == ValueNumber && intForm.MatchString(v.Text), ""
+		return v.Kind == ValueNumber && intForm.MatchString(v.Text), message{}
 	case "object":
-		return v.Kind == ValueObject, ""
+		return v.Kind == ValueObject, message{}
 	case "query":
-		return v.Kind == ValueQuery, ""
+		return v.Kind == ValueQuery, message{}
 	default:
-		return false, ""
+		return false, message{}
 	}
 }
 

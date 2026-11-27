@@ -150,6 +150,12 @@ func atCapsPages() []atCapsPage {
 			}
 			return strings.Join(parts, "")
 		}},
+		{"B6 tables of refused columns naming every field", blocksFilling(func(i int) string {
+			return fmt.Sprintf("<Table id=\"t%d\" of=\"wide\" in={ref(%q)} columns={[\"zz\", \"zy\", \"zx\"]} />\n\n", i, worstID)
+		})},
+		{"B6 blocks of an enum value of none", blocksFilling(func(int) string {
+			return fmt.Sprintf("<Wide %s=\"x\" %s=\"zz\" />\n\n", shortField, field)
+		})},
 		{"B6 blocks whose addresses are near every seat's home", blocksFilling(func(i int) string {
 			return fmt.Sprintf("<Wide id=%q %s=\"x\" />\n\n", padded(fmt.Sprintf("h%d-", i), wiki.MaxPageIDBytes-len(worstID)-1), shortField)
 		})},
