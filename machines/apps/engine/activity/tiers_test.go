@@ -49,6 +49,7 @@ func TestABurstOf3MinAt100PercentInADaySurvivesAsTheMaxOfEveryTier(t *testing.T)
 	now := from.Add(24 * time.Hour)
 	burst := now.Add(-8 * time.Minute)
 	sp := samplerAt(from)
+	sp.s.need(T1)
 	sp.run(24*time.Hour, WatchedEvery, func(at time.Time) float64 {
 		if !at.Before(burst) && at.Before(burst.Add(3*time.Minute)) {
 			return 100
@@ -160,7 +161,11 @@ func TestATiersRingWrapsAndKeepsOnlyItsHorizon(t *testing.T) {
 		}
 	}
 	for i, r := range sp.s.rings {
-		if want := int(Tiers[i].Kept / Tiers[i].Every); len(r.slots) != want {
+		want := int(Tiers[i].Kept / Tiers[i].Every)
+		if i == lazyTier {
+			want = 0
+		}
+		if len(r.slots) != want {
 			t.Errorf("tier %v holds %d slots; want %d", Tiers[i].Every, len(r.slots), want)
 		}
 	}
@@ -169,6 +174,7 @@ func TestATiersRingWrapsAndKeepsOnlyItsHorizon(t *testing.T) {
 func TestTheTiersReadBackAsTheyWereWritten(t *testing.T) {
 	from := time.Date(2026, 11, 25, 12, 0, 0, 0, time.UTC)
 	sp := samplerAt(from)
+	sp.s.need(T1)
 	sp.run(3*time.Hour, 10*time.Second, func(at time.Time) float64 { return float64(at.Minute()) })
 	data, err := json.Marshal(sp.s)
 	if err != nil {
@@ -193,12 +199,60 @@ func TestTheTiersReadBackAsTheyWereWritten(t *testing.T) {
 	}
 }
 
-func TestAMachinesTiersHoldUnder750KB(t *testing.T) {
+func TestTheTenSecondTierIsMadeOnTheFirstReadThatNeedsItAndStartsEmpty(t *testing.T) {
+	from := time.Date(2026, 11, 25, 12, 0, 0, 0, time.UTC)
+	sp := samplerAt(from)
+	sp.run(10*time.Minute, time.Second, half)
+	if n := len(sp.s.rings[T1].slots); n != 0 {
+		t.Fatalf("the 10 s tier holds %d slots before any read; want none made", n)
+	}
+	data, err := json.Marshal(sp.s)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var again Series
+	if err := json.Unmarshal(data, &again); err != nil {
+		t.Fatal(err)
+	}
+	if n := len(again.rings[T1].slots); n != 0 {
+		t.Errorf("the 10 s tier read back holds %d slots; want none made, as written", n)
+	}
+	read := sp.at
+	if got := sp.s.points(T1, from, read); got != nil {
+		t.Errorf("the first read of the 10 s tier draws %d points; want none, its history begins at that read", len(got))
+	}
+	if n, want := len(sp.s.rings[T1].slots), int(Tiers[T1].Kept/Tiers[T1].Every); n != want {
+		t.Fatalf("the 10 s tier holds %d slots after its first read; want its %d", n, want)
+	}
+	sp.run(time.Minute, time.Second, half)
+	got := sp.s.within(T1, from, sp.at)
+	if len(got) != 7 || got[0].at <= read.UnixMilli() {
+		t.Errorf("a minute of samples after its first read the 10 s tier holds %d buckets; want the 7 slots they reach, none from before the read", len(got))
+	}
+}
+
+func TestALoadIsKeptInHundredthsAndALoadOver655IsHeldAtTheMost(t *testing.T) {
+	for _, c := range []struct{ in, want [3]float64 }{
+		{[3]float64{4.8, 3.25, 1}, [3]float64{4.8, 3.25, 1}},
+		{[3]float64{0.004, 0.005, 655.35}, [3]float64{0, 0.01, 655.35}},
+		{[3]float64{700, 1e9, -1}, [3]float64{655.35, 655.35, 0}},
+	} {
+		kept := gaugesOf(&Sample{Load: c.in})
+		if got := kept.loads(); got != c.want {
+			t.Errorf("a load of %v is kept as %v; want %v", c.in, got, c.want)
+		}
+		if again := kept.wire().kept(); again != kept {
+			t.Errorf("a load of %v reads back as %v; want %v, the row it was written as", c.in, again.loads(), kept.loads())
+		}
+	}
+}
+
+func TestAMachinesTiersHoldUnder625KB(t *testing.T) {
 	if size := reflect.TypeFor[bucket]().Size(); size != 88 {
 		t.Errorf("a bucket is %d bytes; want 88: its memory and swap whole bytes", size)
 	}
-	if size := reflect.TypeFor[gauges]().Size(); size != 24 {
-		t.Errorf("a T2 slot's gauges are %d bytes; want 24: its free bytes, its load in hundredths, its battery a word", size)
+	if size := reflect.TypeFor[gauges]().Size(); size != 16 {
+		t.Errorf("a T2 slot's gauges are %d bytes; want 16: its free bytes, its load in hundredths, its battery a word", size)
 	}
 	var before, after runtime.MemStats
 	runtime.GC()
@@ -208,8 +262,8 @@ func TestAMachinesTiersHoldUnder750KB(t *testing.T) {
 	runtime.ReadMemStats(&after)
 	bytes := after.TotalAlloc - before.TotalAlloc
 	t.Logf("a machine's tiers: %d bytes", bytes)
-	if bytes > 750_000 || bytes < 700_000 {
-		t.Errorf("a machine's tiers hold %d bytes; want about 740 KB, never over 750 KB", bytes)
+	if bytes > 625_000 || bytes < 600_000 {
+		t.Errorf("a machine's tiers hold %d bytes; want about 615 KB, the 10 s tier not made, never over 625 KB", bytes)
 	}
 	runtime.KeepAlive(&s)
 }

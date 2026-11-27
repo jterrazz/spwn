@@ -14,6 +14,7 @@ func TestATierThatWrapsStartsItsSlotAgainNeverAddsToTheBucketBefore(t *testing.T
 	for _, tier := range []int{T1, T2, T3} {
 		every, kept := Tiers[tier].Every, Tiers[tier].Kept
 		sp := samplerAt(from)
+		sp.s.need(tier)
 		sp.run(kept+3*every, every, half)
 		now := sp.at
 		buckets := sp.s.within(tier, from, now)

@@ -116,12 +116,18 @@ func (b *bucket) peaked(offset int64) {
 
 func (b *bucket) peakAt(every int64) int64 { return b.at - b.at%every + b.peak() }
 
+// value: the tier no reader of the first lot reads (ADR-107): its ring is
+// made on the first read that needs it, empty, and a sample added before
+// skips it.
+const lazyTier = T1
+
 type gauges struct {
 	// invariant: what a T2 bucket's newest sample read and no other tier
-	// keeps: its free disk bytes, its load in hundredths, its battery a word
-	// (0 none; else 1<<15, on battery 1<<9, charging 1<<8, the percent).
+	// keeps: its free disk bytes, its load in hundredths (0 to 655.35, a
+	// load above held at the most), its battery a word (0 none; else 1<<15,
+	// on battery 1<<9, charging 1<<8, the percent).
 	free    int64
-	load    [3]uint32
+	load    [3]uint16
 	battery uint16
 }
 
@@ -134,7 +140,7 @@ const (
 func gaugesOf(x *Sample) gauges {
 	g := gauges{free: x.DiskFree}
 	for i, l := range x.Load {
-		g.load[i] = uint32(min(max(math.Round(l*100), 0), math.MaxUint32))
+		g.load[i] = uint16(min(max(math.Round(l*100), 0), math.MaxUint16))
 	}
 	if b := x.Battery; b != nil {
 		g.battery = batteryHeld | uint16(min(max(b.Percent, 0), 255)) //nolint:gosec // value: clamped to a byte.
@@ -186,7 +192,11 @@ func (r *ring) gaugesAt(at int64) gauges {
 }
 
 func (r *ring) add(at int64, x *Sample, rated *Rates, dt float64) {
-	// invariant: a bucket that counts maxCount samples keeps none more.
+	// invariant: a bucket that counts maxCount samples keeps none more; a
+	// ring not made yet keeps nothing.
+	if len(r.slots) == 0 {
+		return
+	}
 	b := r.of(at)
 	if b.at == 0 || b.at/r.every != at/r.every {
 		*b = bucket{}
@@ -298,7 +308,9 @@ func (s *Series) Add(x Sample) {
 	}
 	if s.rings[T0].slots == nil {
 		for i, t := range Tiers {
-			s.rings[i] = ringOf(i, int(t.Kept/t.Every))
+			if i != lazyTier && s.rings[i].slots == nil {
+				s.rings[i] = ringOf(i, int(t.Kept/t.Every))
+			}
 		}
 	}
 	var rated *Rates
@@ -403,6 +415,7 @@ func (s *Series) points(tier int, from, now time.Time) []Point {
 	// invariant: one point a bucket, built from that bucket alone, so a
 	// pause or a counter that went back is a gap at its own bucket and the
 	// points before it stay.
+	s.need(tier)
 	buckets := s.within(tier, from, now)
 	if len(buckets) == 0 {
 		return nil
@@ -414,6 +427,14 @@ func (s *Series) points(tier int, from, now time.Time) []Point {
 		out[i] = buckets[i].point(r.every, r.gaugesAt(buckets[i].at), r.gauges != nil, last)
 	}
 	return out
+}
+
+func (s *Series) need(tier int) {
+	// invariant: the lazy tier is made on the first read that needs it,
+	// empty: its history begins at that read.
+	if r := &s.rings[tier]; tier == lazyTier && r.slots == nil {
+		*r = ringOf(tier, int(Tiers[tier].Kept/Tiers[tier].Every))
+	}
 }
 
 func (s *Series) held(tier int, holds func(prev, x *bucket) bool) (run []bucket, held time.Duration) {

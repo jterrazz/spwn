@@ -13,4 +13,8 @@ func TestASampleRollsIntoEveryTierWithoutAllocating(t *testing.T) {
 	if allocs := testing.AllocsPerRun(1000, func() { sp.step(time.Second, 20) }); allocs != 0 {
 		t.Errorf("a sample's insert allocates %v times; want none once the tiers are made", allocs)
 	}
+	sp.s.need(T1)
+	if allocs := testing.AllocsPerRun(1000, func() { sp.step(time.Second, 20) }); allocs != 0 {
+		t.Errorf("a sample's insert allocates %v times once the 10 s tier is made; want none", allocs)
+	}
 }

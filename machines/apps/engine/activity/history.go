@@ -253,6 +253,7 @@ func (s *Series) UnmarshalJSON(data []byte) error {
 		slots[i] = int(t.Kept / t.Every)
 	}
 	of := make([]int, len(in.Tiers))
+	var held [len(Tiers)]bool
 	for j, tier := range in.Tiers {
 		i := slices.IndexFunc(Tiers[:], func(t Tier) bool { return t.Every == tier.Every })
 		if i < 0 {
@@ -261,10 +262,12 @@ func (s *Series) UnmarshalJSON(data []byte) error {
 		if tier.Slots > 0 {
 			slots[i] = min(tier.Slots, slots[i])
 		}
-		of[j] = i
+		of[j], held[i] = i, held[i] || len(tier.Buckets) > 0
 	}
 	for i := range Tiers {
-		s.rings[i] = ringOf(i, slots[i])
+		if i != lazyTier || held[i] {
+			s.rings[i] = ringOf(i, slots[i])
+		}
 	}
 	for j, tier := range in.Tiers {
 		into := &s.rings[of[j]]

@@ -29,6 +29,7 @@ func (s *Series) Part(w Want, now time.Time) Series {
 	}
 	reach := func(tier int, at int64) { from[tier] = min(from[tier], at) }
 	if w.Graph > 0 {
+		s.need(TierOf(w.Graph))
 		reach(TierOf(w.Graph), now.UnixMilli()-(w.Graph+BucketOf(w.Graph)).Milliseconds())
 	}
 	if w.History {
@@ -40,6 +41,9 @@ func (s *Series) Part(w Want, now time.Time) Series {
 	end := max(now.UnixMilli(), newest) + Pause.Milliseconds()
 	for i := range s.rings {
 		r := &s.rings[i]
+		if len(r.slots) == 0 {
+			continue
+		}
 		n := min(int64(len(r.slots)), (end-from[i])/r.every+2)
 		part := ringOf(i, int(n))
 		for b := range r.back(newest) {
