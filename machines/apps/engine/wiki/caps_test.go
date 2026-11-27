@@ -128,10 +128,14 @@ func atCapsPages() []atCapsPage {
 	field := padded("f01", wiki.MaxNameBytes)
 	value := padded("v00", wiki.MaxNameBytes)
 	return []atCapsPage{
+		{"B3 faces of MaxTemplateBytes over a page of blocks naming a 48-byte field", blocksFilling(func(int) string {
+			return "<Wide " + shortField + "=\"" + strings.Repeat("w", 48) + "\" />\n\n"
+		})},
 		{"B4 groups each read by every seat", blocksFilling(func(i int) string {
 			return fmt.Sprintf("<Group id=\"g%d\" title=\"g\" intent=\"tell\">\n\n<Wide %s=\"x\" />\n\n</Group>\n\n", i, shortField)
 		})},
 		{"B5 blocks on a floor of their own", blocksFilling(func(int) string { return "<Wide " + shortField + "=\"x\" floor={4} />\n\n" })},
+		{"S16 2,000 blocks whose faces are MaxFaceBytes of invalid UTF-8", invalidFaces},
 		{"B6 blocks writing the kind's fields", blocksFilling(func(i int) string {
 			return fmt.Sprintf("<Wide id=\"b%d\" %s=\"x\" %s=%q />\n\n", i, shortField, field, value)
 		})},
@@ -291,6 +295,34 @@ func TestTheFixtureHitsNoCap(t *testing.T) {
 		if f.Rule == "H44" || f.Rule == "S31" {
 			t.Errorf("the fixture corpus says %s on %s: %q; want no cap reached", f.Rule, f.Page, f.Says)
 		}
+	}
+}
+
+func TestABlockOfATemplateAtItsCapHoldsFacesOfMaxFaceBytesAndAnIconOfAName(t *testing.T) {
+	c, err := readAll(filesAtCaps(t, "# W\n\nThe page.\n\n<Wide "+shortField+"=\""+strings.Repeat("w", 200)+"\" />\n\n<Wide "+shortField+"=\"x\" icon=\""+strings.Repeat("i", wiki.MaxFaceBytes)+"\" />\n"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	blocks := 0
+	for _, p := range c.Pages {
+		for _, s := range p.Sections {
+			for _, it := range s.Items {
+				b, ok := it.(*wiki.Block)
+				if !ok {
+					continue
+				}
+				blocks++
+				if len(b.Faces.Word) < wiki.MaxFaceBytes-200 && blocks == 1 {
+					t.Errorf("a template naming a 200-byte field 36 times renders %d bytes; want it cut near MaxFaceBytes", len(b.Faces.Word))
+				}
+				if len(b.Faces.Word) > wiki.MaxFaceBytes || len(b.Faces.Line) > wiki.MaxFaceBytes || len(b.Faces.Icon) > wiki.MaxNameBytes {
+					t.Errorf("a block's faces are %d, %d and %d bytes; want %d, %d and %d at most", len(b.Faces.Word), len(b.Faces.Line), len(b.Faces.Icon), wiki.MaxFaceBytes, wiki.MaxFaceBytes, wiki.MaxNameBytes)
+				}
+			}
+		}
+	}
+	if blocks != 2 {
+		t.Errorf("%d blocks compiled; want 2", blocks)
 	}
 }
 

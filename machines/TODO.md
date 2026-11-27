@@ -111,7 +111,7 @@ The engine reads no real folder today: `wire/wiki.go` gives the files adapter th
 - **K5, `linkers` quadratic in a page**: `weigh.go` `weigh` builds each block's linkers by appending, links² in a page.
 - **S13, the corpus-wide index rebuilt per call**: `serve.go` `index`, called by every `Serve` and every `Map` (`map.go` `Map`), so one call costs the corpus.
 - **S14, the single flight**: a compile superseded by a newer signature is not cancelled, and its cleanup is not deferred (`calls/read.go` `cache`, `compile`).
-- **S15, the map's work before its meter**: a node's words are built, and a section's line joined, before `map.go` `add` meters the node.
+- **S15, the map's work before its meter**: a node's words, its kicker and its line, are built before `map.go` `add` meters the node, a prose's paragraphs read whole for its first sentence (`map.go` `prose`).
 - **S7, the anchors unchecked**: an anchor's repository and path are read for their form only (`check.go` `anchors`), never against the mounts.
 - **S8, the map's keys after cleaning**: a block's node id joins its page's id and its own with `:`, so a page whose id holds a `:` beside a block whose invalid id holds one (`a` with `b:c`, `a:b` with `c`) make one node, the second left out with no finding of its own (`map.go` `section`).
 - A prose's first sentence is found at each read and each map rather than once per corpus (`levels.go` `firstSentenceOf`).

@@ -408,10 +408,17 @@ func (m *mapper) section(p *Page, si int, h *Heading, items []Item, parent strin
 			kids = append(kids, kid)
 		}
 	}
-	m.out.Nodes[at].LineParts, m.out.Nodes[at].Count = first, len(kids)
-	if said := partsOf(words...); said != nil {
-		m.out.Nodes[at].LineParts = said
+	line := first
+	if said := lineOf(words); said != nil {
+		line = said
 	}
+	// invariant: the section's node was metered before its line was known,
+	// so its line is metered here, and set only if it fits.
+	m.meter.strs(line)
+	if !m.meter.spent() {
+		m.out.Nodes[at].LineParts = line
+	}
+	m.out.Nodes[at].Count = len(kids)
 	m.close(at, kids, 0)
 	return at
 }
@@ -437,7 +444,7 @@ func (m *mapper) group(p *Page, g *Group) MapNode {
 	}
 	n.Needs, n.Count = m.needs[p.ID+"#"+g.ID]+m.needsOf(p.ID, g.Items), len(marks)
 	n.Marks, n.More = cappedMarks(marks)
-	n.LineParts = partsOf(words...)
+	n.LineParts = lineOf(words)
 	if lead, ok := m.server.blocks[m.server.readings[p.ID+"#"+g.ID].Lead]; ok {
 		if line := partsOf(strings.TrimSpace(lead.Faces.Line)); line != nil {
 			n.LineParts = line
@@ -481,6 +488,24 @@ func firstWords(words []string, n int) (string, bool) {
 
 // invariant: a line of parts holds only parts that say something, and is
 // none when none does, so the window never joins an empty part.
+// value: a section's or a group's line, the words of what it holds, the
+// first that fit MaxFaceBytes together, so a node's line weighs a face at
+// most however many blocks it holds.
+func lineOf(words []string) []string {
+	var out []string
+	n := 0
+	for _, w := range words {
+		if w == "" {
+			continue
+		}
+		if n += len(w); n > MaxFaceBytes {
+			break
+		}
+		out = append(out, w)
+	}
+	return out
+}
+
 func partsOf(parts ...string) []string {
 	var out []string
 	for _, p := range parts {

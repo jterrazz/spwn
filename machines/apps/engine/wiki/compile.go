@@ -444,12 +444,12 @@ func facesOf(kind Kind, b *Block) BlockFaces {
 	if word == "" {
 		word = "{id}"
 	}
-	f := BlockFaces{Word: render(word, b), Line: render(kind.Faces.Line, b)}
+	f := BlockFaces{Word: render(word, b, MaxFaceBytes), Line: render(kind.Faces.Line, b, MaxFaceBytes)}
 	switch {
 	case textOf(b.Props, "icon") != "":
-		f.Icon, _ = clip(textOf(b.Props, "icon"), MaxFaceBytes)
+		f.Icon, _ = clip(textOf(b.Props, "icon"), MaxNameBytes)
 	case kind.Faces.Icon != "":
-		f.Icon = render(kind.Faces.Icon, b)
+		f.Icon = render(kind.Faces.Icon, b, MaxNameBytes)
 	case kind.Icon != "":
 		f.Icon = kind.Icon
 	default:
@@ -460,36 +460,53 @@ func facesOf(kind Kind, b *Block) BlockFaces {
 
 // invariant: a Face template is filled from the block's own fields; a dotted
 // name (`{adr.number}`) reads outside the page and renders empty here. A face
-// is at most MaxFaceBytes, cut on a character's boundary, and its render
-// stops writing there, so a template of MaxTemplateBytes naming one long
-// field many times costs a block MaxFaceBytes, never their product.
-func render(template string, b *Block) string {
+// is at most its cap, MaxFaceBytes for a word or a line and MaxNameBytes for
+// an icon, cut on a character's boundary, and its render stops writing
+// there, so a template of MaxTemplateBytes naming one long field many times
+// costs a block its cap, never their product; it is measured first and
+// written into one buffer of its size, so a face holds no more bytes than
+// it says.
+func render(template string, b *Block, most int) string {
+	if !strings.Contains(template, "{") {
+		s, _ := clip(template, most)
+		return s
+	}
+	limit := most + utf8.UTFMax
+	size := 0
+	partsOfFace(template, b, func(s string) bool {
+		size += len(s)
+		return size < limit
+	})
 	var out strings.Builder
-	write := func(s string) bool {
-		if room := MaxFaceBytes + utf8.UTFMax - out.Len(); len(s) > room {
+	out.Grow(min(size, limit))
+	partsOfFace(template, b, func(s string) bool {
+		if room := limit - out.Len(); len(s) > room {
 			out.WriteString(s[:room])
 			return false
 		}
 		out.WriteString(s)
 		return true
-	}
-	done := func() string {
-		s, _ := clip(out.String(), MaxFaceBytes)
-		return s
-	}
+	})
+	s, _ := clip(out.String(), most)
+	return s
+}
+
+// value: the template's text and the values it names, in order, each given
+// to write until write says to stop.
+func partsOfFace(template string, b *Block, write func(string) bool) {
 	for {
 		open := strings.IndexByte(template, '{')
 		if open < 0 {
 			write(template)
-			return done()
+			return
 		}
 		end := strings.IndexByte(template[open:], '}')
 		if end < 0 {
 			write(template)
-			return done()
+			return
 		}
 		if !write(template[:open]) {
-			return done()
+			return
 		}
 		name := template[open+1 : open+end]
 		value := ""
@@ -499,7 +516,7 @@ func render(template string, b *Block) string {
 			value = textOf(b.Props, name)
 		}
 		if !write(value) {
-			return done()
+			return
 		}
 		template = template[open+end+1:]
 	}
