@@ -238,6 +238,24 @@ describe('contrast', () => {
         expect(retired).toStrictEqual([]);
     });
 
+    test('the focus ring stands off its element by one token, and a ring drawn inside is the only other offset', () => {
+        // Given - every outline offset a style sheet declares, and the token's own value
+        const offsets = SHEETS.flatMap(({ source }) =>
+            [...source.matchAll(/outline-offset:\s*(?<value>[^;]+);/gu)].map((found) =>
+                (found.groups?.value ?? '').trim(),
+            ),
+        );
+
+        // Then - each is the token or the inset of a ring a list would cut, and the token is 2 px
+        expect(
+            offsets.filter((value) => value !== 'var(--focus-offset)' && value !== '-2px'),
+        ).toStrictEqual([]);
+        expect(offsets.filter((value) => value === 'var(--focus-offset)').length).toBeGreaterThan(
+            0,
+        );
+        expect(tokenOf('focus-offset')).toBe('2px');
+    });
+
     test('text on glass reads at 4.5:1 over each of the four surface steps', () => {
         // Given - each text level on the glass composited over s0 to s3, the blur left out since it only averages
         const measures = TEXTS.flatMap((text) => onGlass(text, GROUNDS));

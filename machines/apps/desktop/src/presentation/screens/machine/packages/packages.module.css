@@ -73,7 +73,7 @@
 }
 .fileLink:focus-visible {
     outline: 2px solid var(--you);
-    outline-offset: 2px;
+    outline-offset: var(--focus-offset);
 }
 .text {
     margin: 0;
