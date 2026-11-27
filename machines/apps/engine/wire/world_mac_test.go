@@ -24,6 +24,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/engine/process"
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/platform/local"
+	"github.com/jterrazz/studio-station/apps/engine/platform/local/localtest"
 	"github.com/jterrazz/studio-station/apps/engine/ports"
 	"github.com/jterrazz/studio-station/apps/engine/remote/api"
 	"github.com/jterrazz/studio-station/apps/engine/world"
@@ -382,7 +383,7 @@ func TestWorldMacGuestSocketsAnswerEachConnectionAsItsOwnGuest(t *testing.T) {
 	}
 	for range 200 {
 		d := process.New(quietMac{}, nil, nil, quietMachines{}, quietTailnet{}, process.Stores{Ports: quietPolicy{}, Reservations: quietReservations{}}, process.Options{ThisMachine: catalog.Mac, State: "/state", Rights: closed})
-		serve := machine{sys: local.System{Clock: quietMac{}}}.engineServer(d, nil, nil, nil)
+		serve := machine{sys: local.System{Clock: quietMac{}, Env: localtest.Env{HomeDir: "/home", OS: "darwin"}}}.engineServer(d, nil, nil, nil)
 		barrier := make(chan struct{})
 		said := make([][]string, len(guests))
 		errs := make([]error, len(guests))
