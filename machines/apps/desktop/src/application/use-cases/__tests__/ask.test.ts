@@ -143,6 +143,32 @@ describe('ask', () => {
         );
     });
 
+    test('a watch the engine broke on never draws the pending out of its reopened stream over its kept answer', async () => {
+        // Given - machines.list, a view the engine keeps, asked for the first time and answered pending then running
+        using _ = clock.run('2026-11-13T10:00:00Z');
+        const { engine, store } = await unsettled();
+        engine.answer('engine.state', ...KEEPS_MACHINES);
+        engine.answer('machines.list', PENDING, RUNNING);
+
+        // When - its handler breaks, the client opens it again, and the new stream answers pending first
+        engine.answer('machines.list', {
+            error: { code: 'broke', message: 'the engine broke', type: 'internal' },
+        });
+        await clock.advance(1000);
+        engine.answer('machines.list', PENDING);
+        const meanwhile = store.reading(KEY);
+        engine.answer('machines.list', STOPPED, DONE);
+
+        // Then - the running answer stayed shown with the break as its mark until the new stream's last out replaced it
+        expect(engine.asked('machines.list')).toBe(2);
+        expect(
+            meanwhile.kind === 'read' ? [meanwhile.out, meanwhile.stale?.wire?.code] : [],
+        ).toStrictEqual([RUNNING.out, 'broke']);
+        expect(store.reading(KEY)).toStrictEqual(
+            settledOn(new Date('2026-11-13T10:00:01.001Z'), STOPPED.out),
+        );
+    });
+
     test('a refusal of the subject itself replaces the shown answer', async () => {
         // Given - machines.list settled on running
         using _ = clock.run('2026-11-13T10:00:00Z');

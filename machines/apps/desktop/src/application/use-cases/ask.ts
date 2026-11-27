@@ -39,8 +39,8 @@ export function ask(client: EnginePort, entry: Entry, quiet: () => boolean): voi
         return;
     }
     // invariant: a re-ask over a settled answer holds its outs, since a watch's every out before its end is a fill in
-    // invariant: progress; so does a quiet watch the client reconnects over any answer shown, since its new stream
-    // invariant: starts again from its first, pending out.
+    // invariant: progress; so does a quiet watch the client reconnects over any answer shown, its connection lost or
+    // invariant: its handler broken, since its new stream starts again from its first, pending out.
     let holds = reading.kind === 'read' && reading.done;
     let last: Heard | undefined;
     entry.watch = client.watch(
@@ -65,6 +65,9 @@ export function ask(client: EnginePort, entry: Entry, quiet: () => boolean): voi
                         holds = quiet();
                     } else {
                         failed(entry, error, error.broke);
+                    }
+                    if (error.broke && entry.reading.kind === 'read') {
+                        holds ||= quiet();
                     }
                 }
             },
