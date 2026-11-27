@@ -558,7 +558,7 @@ const quotedTarget = 40
 // the last one found.
 func (k *checker) proseLinks(p *Page, pr *Prose) {
 	from, line, lost := 0, pr.Span.From, false
-	paragraphs(pr.Markdown, func(target string) {
+	paragraphs(pr.Markdown, &linking{lands: LandsOn(p.ID, k.holds), refused: func(target string) {
 		if !lost {
 			if i := strings.Index(pr.Markdown[from:], "]("+target); i >= 0 {
 				line += strings.Count(pr.Markdown[from:from+i], "\n")
@@ -572,7 +572,12 @@ func (k *checker) proseLinks(p *Page, pr *Prose) {
 			quoted = strings.ToValidUTF8(quoted[:quotedTarget], "") + "..."
 		}
 		k.add("S30", p.ID, "", At{Line: line, Col: 1}, fmt.Sprintf("link to %q is no page, anchor or http or https address: served as its words", quoted))
-	})
+	}})
+}
+
+func (k *checker) holds(id string) bool {
+	_, ok := k.byID[id]
+	return ok
 }
 
 func (k *checker) group(p *Page, h heldGroup) {

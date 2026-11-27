@@ -36,9 +36,10 @@ func (m *meter) runs(runs []Run) {
 		if m.spent() {
 			return
 		}
-		m.object(5)
+		m.object(6)
 		m.str(r.Text)
 		m.str(r.Link)
+		m.str(r.Anchor)
 	}
 }
 

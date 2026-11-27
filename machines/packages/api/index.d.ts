@@ -3812,6 +3812,7 @@ export type WikiParagraph = {
 };
 
 export type WikiRun = {
+    Anchor?: string;
     Code?: boolean;
     Kind?: 'anchor' | 'external' | 'page';
     Link?: string;

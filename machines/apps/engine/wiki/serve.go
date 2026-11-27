@@ -335,7 +335,7 @@ func (c Corpus) Serve(id string) (Served, error) {
 	p := &c.Pages[i]
 	reading := s.reading(p.ID)
 	out := Served{
-		Page: s.head(p), Paragraph: Paragraphs(p.Faces.Paragraph),
+		Page: s.head(p), Paragraph: Paragraphs(p.Faces.Paragraph, s.landsFrom(p.ID)),
 		Floor: s.floor(reading.Floor), Icons: map[string][]string{},
 	}
 	out.Lede = lede(out.Page, out.Paragraph)
@@ -468,6 +468,13 @@ func (s *server) index() {
 	}
 }
 
+func (s *server) landsFrom(page string) Lands {
+	return LandsOn(page, func(id string) bool {
+		_, ok := s.pages[id]
+		return ok
+	})
+}
+
 func (s *server) indexItem(page string, it Item) {
 	switch it := it.(type) {
 	case *Block:
@@ -542,7 +549,7 @@ func (s *server) afterParagraph(items []Item, paragraph string) []Item {
 func (s *server) item(p *Page, r Reading, it Item, grouped bool) ServedItem {
 	switch it := it.(type) {
 	case *Prose:
-		paras := Paragraphs(it.Markdown)
+		paras := Paragraphs(it.Markdown, s.landsFrom(p.ID))
 		first, more := firstSentenceOf(paras)
 		return ServedItem{Ranks: openRanks(), Max: DetailCard, Prose: &ServedProse{Paragraphs: paras, First: first, More: more}}
 	case *Group:

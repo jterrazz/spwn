@@ -1,11 +1,28 @@
 findings
+  blueprint/philosophy:4:1 S30 remark link to "./vision.md" is no page, anchor or http or https address: served as its words
+  blueprint/philosophy:5:1 S30 remark link to "./owner-words.md#why-spwn-exists" is no page, anchor or http or https address: served as its words
+  blueprint/philosophy:34:1 S30 remark link to "./owner-words.md#the-problem" is no page, anchor or http or https address: served as its words
   blueprint/unfinished:6:37 H4 hard "blueprint/nowhere" is no page
+  growth/positioning:5:1 S30 remark link to "../blueprint/vision.md#the-definition" is no page, anchor or http or https address: served as its words
+  growth/positioning:12:1 S30 remark link to "../blueprint/vision.md#what-changed" is no page, anchor or http or https address: served as its words
+  growth/positioning:14:1 S30 remark link to "../blueprint/vision.md#the-enemy-losing-..." is no page, anchor or http or https address: served as its words
   growth/positioning:60:1 S6 needs-you "growth/positioning" rests on this page's reading: you have not ruled
+  growth/positioning:64:1 S30 remark link to "./open-questions.md#positioning-audience..." is no page, anchor or http or https address: served as its words
   machines/decisions/035-a-port-is-a-right-with-an-audience:1:1 S8 ambient page "machines/decisions/035-a-port-is-a-right-with-an-audience" is prose only
+  machines/decisions/035-a-port-is-a-right-with-an-audience:6:1 S30 remark link to "018-two-port-classes.md" is no page, anchor or http or https address: served as its words
+  machines/decisions/035-a-port-is-a-right-with-an-audience:7:1 S30 remark link to "086-a-vm-reserves-a-packages-port-only-w..." is no page, anchor or http or https address: served as its words
+  machines/reference/ports:7:1 S30 remark link to "machinefiles.md" is no page, anchor or http or https address: served as its words
+  product/boundaries:5:1 S30 remark link to "../blueprint/owner-words.md#why-spwn-exi..." is no page, anchor or http or https address: served as its words
+  product/boundaries:23:1 S30 remark link to "../blueprint/vision.md#the-enemy-losing-..." is no page, anchor or http or https address: served as its words
   product/boundaries:70:1 S6 needs-you "no-computer" rests on this page's reading: you have not ruled
   product/boundaries:80:1 S6 needs-you "os-holds-no-facts" rests on this page's reading: you have not ruled
   product/boundaries:86:1 S6 needs-you "product/boundaries" rests on this page's reading: you have not ruled
   product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder:1:1 S8 ambient page "product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder" is prose only
+  product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder:5:1 S30 remark link to "./003-the-three-spaces-are-the-structure..." is no page, anchor or http or https address: served as its words
+  product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder:6:1 S30 remark link to "../../growth/decisions/007-spwn-is-the-a..." is no page, anchor or http or https address: served as its words
+  product/stack:5:1 S30 remark link to "../blueprint/owner-words.md#the-three-sp..." is no page, anchor or http or https address: served as its words
+  product/stack:7:1 S30 remark link to "./decisions/003-the-three-spaces-are-the..." is no page, anchor or http or https address: served as its words
+  product/stack:21:1 S30 remark link to "../blueprint/vision.md#the-method-climb-..." is no page, anchor or http or https address: served as its words
   product/stack:53:1 S6 needs-you "product/stack" rests on this page's reading: you have not ruled
   wiki.yaml:83:1 S21 ambient kind "alternative" has no icon: the dot stands in
   wiki.yaml:96:1 S21 ambient kind "part" has no icon: the dot stands in

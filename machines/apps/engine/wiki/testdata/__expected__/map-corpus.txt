@@ -1,4 +1,4 @@
-home "Wiki" "Every page of this Mac's wiki, by the seat that reads it." pages=8 seats=4 needs=5 on=3 hard=1 soft=10
+home "Wiki" "Every page of this Mac's wiki, by the seat that reads it." pages=8 seats=4 needs=5 on=3 hard=1 soft=27
 floor 0 "Intention" ["E0" "Intention"] "Why does this exist?"
 floor 1 "Produit" ["E1" "Produit"] "What do we build, and for whom?"
 floor 2 "Domaines" ["E2" "Domaines"] "What things does it handle, in which words?"

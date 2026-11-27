@@ -373,7 +373,7 @@ func (m *mapper) section(p *Page, si int, h *Heading, items []Item, parent strin
 			item = m.group(p, it)
 			words = append(words, item.Label)
 		case *Prose:
-			item = m.prose(it, "p"+strconv.Itoa(si)+"."+strconv.Itoa(k))
+			item = m.prose(p, it, "p"+strconv.Itoa(si)+"."+strconv.Itoa(k))
 			k++
 			if first == nil {
 				first = item.LineParts
@@ -430,8 +430,8 @@ func (m *mapper) group(p *Page, g *Group) MapNode {
 	return n
 }
 
-func (m *mapper) prose(pr *Prose, id string) MapNode {
-	paras := Paragraphs(pr.Markdown)
+func (m *mapper) prose(p *Page, pr *Prose, id string) MapNode {
+	paras := Paragraphs(pr.Markdown, m.server.landsFrom(p.ID))
 	first, _ := firstSentenceOf(paras)
 	var texts []string
 	for _, p := range paras {

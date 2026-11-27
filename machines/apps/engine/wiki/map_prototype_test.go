@@ -233,7 +233,11 @@ func TestTheMapIsTheGraphThePrototypeBuilt(t *testing.T) {
 		}
 	}
 	h := root.Home
-	if got := fmt.Sprint(h.Word, h.Line, h.Pages, h.Seats, h.Needs, h.NeedsPages, h.Hard, h.Soft); got != fmt.Sprint(proto.Home.Word, proto.Home.Line, proto.Home.Pages, proto.Home.Seats, proto.Home.Needs, proto.Home.NeedsPages, proto.Home.Hard, proto.Home.Soft) {
+	// value: a listed difference, accepted (2026-11-27): a prose link that
+	// lands on no page of the fixture corpus carries S30, and the prototype
+	// judged no link, so the head's soft count is the prototype's and those.
+	unlanded := len(ruled(c.Report, "S30"))
+	if got := fmt.Sprint(h.Word, h.Line, h.Pages, h.Seats, h.Needs, h.NeedsPages, h.Hard, h.Soft-unlanded); got != fmt.Sprint(proto.Home.Word, proto.Home.Line, proto.Home.Pages, proto.Home.Seats, proto.Home.Needs, proto.Home.NeedsPages, proto.Home.Hard, proto.Home.Soft) {
 		t.Errorf("home %s; the prototype's %+v", got, proto.Home)
 	}
 	for i, f := range proto.Floors {

@@ -228,14 +228,14 @@ func TestAProsesFirstSentenceEndsWhereItsTextEndsOne(t *testing.T) {
 		{"another abbreviation", "Read it, i.e. twice. Then.", "Read it, i.e. twice.", true},
 		{"an initial", "Ask J. Doe first. Then.", "Ask J. Doe first.", true},
 		{"a stop in code", "Run `make check. now` first. Then.", "Run `make check. now` first.", true},
-		{"a stop in a link's words", "See [the vision. here](./vision.md) twice. Then.", "See [the vision.](./vision.md)", true},
-		{"a link's target", "See [the vision](./a.b. c.md) twice. Then.", "See [the vision](./a.b. c.md) twice.", true},
+		{"a stop in a link's words", "See [the vision. here](./vision.md) twice. Then.", "See [the vision.](blueprint/vision)", true},
+		{"a link's target", "See [the vision](./a.b. c.md) twice. Then.", "See [the vision](blueprint/a.b. c) twice.", true},
 		{"a dot in a word", "Version 0.21 ships. Then.", "Version 0.21 ships.", true},
 		{"across paragraphs", "- a point with no stop\n- a second one. Then.", "a point with no stop a second one.", true},
 		{"strong", "A **bold claim. Here** then.", "A **bold claim.**", true},
 	} {
 		t.Run(c.name, func(t *testing.T) {
-			files := map[string][]byte{"wiki.yaml": []byte(tinySchema), "blueprint/home.md": []byte("# Home\n\nThe page.\n\n## Part\n\n" + c.prose + "\n")}
+			files := map[string][]byte{"wiki.yaml": []byte(tinySchema), "blueprint/home.md": []byte("# Home\n\nThe page.\n\n## Part\n\n" + c.prose + "\n"), "blueprint/vision.md": []byte("# Vision\n"), "blueprint/a.b. c.md": []byte("# A\n")}
 			corpus, err := readAll(files)
 			if err != nil {
 				t.Fatal(err)

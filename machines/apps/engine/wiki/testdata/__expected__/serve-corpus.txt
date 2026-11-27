@@ -1,10 +1,16 @@
-page blueprint/philosophy floor=0 Intention blocks=9 needs-you=0 verdict=1h10s
+page blueprint/philosophy floor=0 Intention blocks=9 needs-you=0 verdict=1h27s
   reading word words=106 seconds=28 "≈ 30 s" same=false
   reading line words=179 seconds=47 "≈ 45 s" same=false
   reading card words=437 seconds=114 "≈ 2 min" same=false
   reading full words=732 seconds=191 "≈ 3 min 15 s" same=false
-  paragraph "The seven convictions Spwn is built on, written as principles a newcomer can apply to a design choice; [the vision](./vision.md) holds the case they serve, and this page holds the rules. The owner confirmed the seven on 2026-11-21 ([his answer](./owner-words.md#why-spwn-exists))."
-  lede ranks=word,line,card,card first="The seven convictions Spwn is built on, written as principles a newcomer can apply to a design choice; [the vision](./vision.md) holds the case they serve, and this page holds the rules." more=true
+  paragraph "The seven convictions Spwn is built on, written as principles a newcomer can apply to a design choice; the vision holds the case they serve, and this page holds the rules. The owner confirmed the seven on 2026-11-21 (his answer)."
+  lede ranks=word,line,card,card first="The seven convictions Spwn is built on, written as principles a newcomer can apply to a design choice; the vision holds the case they serve, and this page holds the rules." more=true
+  finding remark S30 from=line link to "./vision.md" is no page, anchor or http or https address: served as its words
+  finding remark S30 from=line link to "./owner-words.md#why-spwn-exists" is no page, anchor or http or https address: served as its words
+  finding remark S30 from=line link to "./owner-words.md#the-problem" is no page, anchor or http or https address: served as its words
+  attention remark S30 at= from=line "Philosophy"
+  attention remark S30 at= from=line "Philosophy"
+  attention remark S30 at= from=line "Philosophy"
   section  "Top" icon=home rests=false
     block blueprint/philosophy#all ranks=word,card,full,full max=full table icon=table tier= ""
       table conviction in=blueprint/philosophy where="" columns=says,carried_in count=7 mirrors=
@@ -32,7 +38,7 @@ page blueprint/philosophy floor=0 Intention blocks=9 needs-you=0 verdict=1h10s
       field carried_in ""  refs=product/stack#wiki
       field broken_by "Shipping a built-in persona or style that overrides what you wrote, or letting one fact live in two places, so that an agent reads the stale copy." 
     prose p1.0 ranks=word,line,card,card max=card first="**Argument.**" more=true
-      item "**Argument.** What an agent cannot supply is what makes the work yours: your taste, your vision, your context from outside the screen. The owner's point is not to write down how he works but to bring his taste and his context while working at the high level ([the problem](./owner-words.md#the-problem), 2026-11-14)."
+      item "**Argument.** What an agent cannot supply is what makes the work yours: your taste, your vision, your context from outside the screen. The owner's point is not to write down how he works but to bring his taste and his context while working at the high level (the problem, 2026-11-14)."
       item "**Example.** An agent opening a repository reads your vision and your decisions first, not a generic instruction."
   section 2-delegating-is-a-craft-not-a-prompt "2. Delegating is a craft, not a prompt" icon=define rests=false
     block blueprint/philosophy#delegating ranks=word,line,line,card max=full conviction icon=conviction tier=quiet "Delegating is a craft, not a prompt."
@@ -83,15 +89,21 @@ page blueprint/philosophy floor=0 Intention blocks=9 needs-you=0 verdict=1h10s
     prose p7.0 ranks=word,line,card,card max=card first="**Example.**" more=true
       item "**Example.** A correction given once becomes a rule the next agent reads."
 
-page product/stack floor=1 Produit blocks=7 needs-you=1 verdict=1h10s
+page product/stack floor=1 Produit blocks=7 needs-you=1 verdict=1h27s
   reading word words=114 seconds=30 "≈ 30 s" same=false
   reading line words=157 seconds=41 "≈ 40 s" same=false
   reading card words=419 seconds=109 "≈ 1 min 45 s" same=false
   reading full words=419 seconds=109 "≈ 1 min 45 s" same=true
-  paragraph "Spwn's three spaces and what lives in each, for anyone deciding what a part of the app is for or where it goes: per space, what you let go of, what you keep, and whether it runs today. The structure is the owner's, decided on 2026-11-22 ([his words](../blueprint/owner-words.md#the-three-spaces-of-the-app)); the record is [ADR-003](./decisions/003-the-three-spaces-are-the-structure-of-the-app.md). It replaces the six-rung ladder of [ADR-002](./decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder.md)."
+  paragraph "Spwn's three spaces and what lives in each, for anyone deciding what a part of the app is for or where it goes: per space, what you let go of, what you keep, and whether it runs today. The structure is the owner's, decided on 2026-11-22 (his words); the record is ADR-003. It replaces the six-rung ladder of [ADR-002](product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder)."
   lede ranks=word,line,card,card first="Spwn's three spaces and what lives in each, for anyone deciding what a part of the app is for or where it goes:" more=true
   finding needs-you S6 from=word "product/stack" rests on this page's reading: you have not ruled
+  finding remark S30 from=line link to "../blueprint/owner-words.md#the-three-sp..." is no page, anchor or http or https address: served as its words
+  finding remark S30 from=line link to "./decisions/003-the-three-spaces-are-the..." is no page, anchor or http or https address: served as its words
+  finding remark S30 from=line link to "../blueprint/vision.md#the-method-climb-..." is no page, anchor or http or https address: served as its words
   attention needs-you S6 at= from=word "The stack"
+  attention remark S30 at= from=line "The stack"
+  attention remark S30 at= from=line "The stack"
+  attention remark S30 at= from=line "The stack"
   section  "Top" icon=home rests=false
   section the-three-spaces "The three spaces" icon=define rests=false
     prose p1.0 ranks=word,line,card,card max=card first="The layers of the Spwn app are three great concepts, and in the future three distinct spaces in its GUI." more=true
@@ -100,7 +112,7 @@ page product/stack floor=1 Produit blocks=7 needs-you=1 verdict=1h10s
       row "Machine" | "The environment: the fleet of machines, the premises, the access, the security, the documents" | "shipped"
       row "Agent" | "The staff: their personalities, roles, focus and responsibilities" | "shipped"
       row "OS" | "The flows: which project, which vision, which product, which system runs inside; it steers the flows, the system and the abstractions" | "being made"
-      plain "Each space is one step of [the method](../blueprint/vision.md#the-method-climb-by-abstraction): a piece of work handed to the stack, a decision kept by you. What you let go of and keep, space by space, in the parts that exist:"
+      plain "Each space is one step of the method: a piece of work handed to the stack, a decision kept by you. What you let go of and keep, space by space, in the parts that exist:"
     group parts ranks=word,line,card,card max=card define blocks=6 folded= mirrored-by=all from=line lead=""
       block product/stack#machines ranks=word,line,line,card max=full part icon=part tier=quiet "the file that describes it"
         field space "machine" 
@@ -140,8 +152,8 @@ page product/stack floor=1 Produit blocks=7 needs-you=1 verdict=1h10s
         row product/stack#specs space="os" lets_go="checking by hand" keeps="what done means" state="making"
         row product/stack#design space="os" lets_go="drawing each screen" keeps="your taste, as a system" state="making"
         row product/stack#os space="os" lets_go="holding it all together" keeps="the intention, and the last word" state="making"
-    prose p1.1 ranks=word,line,card,card max=card first="The column \"you keep\" is the part no space may take away; [the boundaries](./boundaries.md) say what each part refuses for that reason." more=false
-      plain "The column \"you keep\" is the part no space may take away; [the boundaries](./boundaries.md) say what each part refuses for that reason."
+    prose p1.1 ranks=word,line,card,card max=card first="The column \"you keep\" is the part no space may take away; [the boundaries](product/boundaries) say what each part refuses for that reason." more=false
+      plain "The column \"you keep\" is the part no space may take away; [the boundaries](product/boundaries) say what each part refuses for that reason."
   section how-the-spaces-stack "How the spaces stack" icon=define rests=false
     prose p2.0 ranks=word,line,card,card max=card first="A space leans on the ones before it and never needs the ones after." more=true
       plain "A space leans on the ones before it and never needs the ones after. Agents runs in machines Machines can build; in the OS space, Wiki is what agents read, Specs proves the work against what you and Wiki asked for, Design turns your taste into rules the work is held to, and the OS is the one place you steer from."
@@ -149,17 +161,21 @@ page product/stack floor=1 Produit blocks=7 needs-you=1 verdict=1h10s
     prose p3.0 ranks=word,line,card,card max=card first="One claim here is this page's reading, not the owner's word:" more=true
       plain "One claim here is this page's reading, not the owner's word: that a space leans only on the spaces before it (\"How the spaces stack\"). The placement of Wiki, Specs and Design in the OS space is his; the \"you let go of\" and \"you keep\" columns come from the brief he confirmed on 2026-11-21."
 
-page product/boundaries floor=1 Produit blocks=14 needs-you=3 verdict=1h10s
+page product/boundaries floor=1 Produit blocks=14 needs-you=3 verdict=1h27s
   reading word words=147 seconds=38 "≈ 40 s" same=false
   reading line words=260 seconds=68 "≈ 1 min 15 s" same=false
   reading card words=382 seconds=100 "≈ 1 min 45 s" same=false
   reading full words=484 seconds=126 "≈ 2 min" same=false
-  paragraph "What Spwn is not, and what each of its parts refuses to be, for anyone weighing a feature that sits near an edge. The owner confirmed the five boundaries of Spwn on 2026-11-21 ([his answer](../blueprint/owner-words.md#why-spwn-exists)); the record is [ADR-002](#one-stack), accepted."
+  paragraph "What Spwn is not, and what each of its parts refuses to be, for anyone weighing a feature that sits near an edge. The owner confirmed the five boundaries of Spwn on 2026-11-21 (his answer); the record is [ADR-002](#one-stack), accepted."
   lede ranks=word,line,card,card first="What Spwn is not, and what each of its parts refuses to be, for anyone weighing a feature that sits near an edge." more=true
   finding needs-you S6 from=word "product/boundaries" rests on this page's reading: you have not ruled
+  finding remark S30 from=line link to "../blueprint/owner-words.md#why-spwn-exi..." is no page, anchor or http or https address: served as its words
+  finding remark S30 from=line link to "../blueprint/vision.md#the-enemy-losing-..." is no page, anchor or http or https address: served as its words
   attention needs-you S6 at= from=word "Boundaries"
   attention needs-you S6 at=product/boundaries#no-computer from=word "no-computer"
   attention needs-you S6 at=product/boundaries#os-holds-no-facts from=word "os-holds-no-facts"
+  attention remark S30 at= from=line "Boundaries"
+  attention remark S30 at= from=line "Boundaries"
   section  "Top" icon=home rests=false
     block product/boundaries#one-stack ranks=line,card,full,full max=full decision icon=decision tier=lead "Spwn is one stack of six apps on one ladder."
       field adr "studio-os:home/spwn/wiki/product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder.md" 
@@ -181,8 +197,8 @@ page product/boundaries floor=1 Produit blocks=14 needs-you=3 verdict=1h10s
     block product/boundaries#not-a-method ranks=word,line,line,card max=full refusal icon=refusal tier=quiet "a method of work imposed"
       field refuses "a method of work imposed" 
       field because "it carries your taste and your context, not a way of working someone else chose" 
-    prose p1.0 ranks=word,line,card,card max=card first="Each line is the edge of the one enemy, [losing your thread](../blueprint/vision.md#the-enemy-losing-your-thread):" more=true
-      plain "Each line is the edge of the one enemy, [losing your thread](../blueprint/vision.md#the-enemy-losing-your-thread): a stack that replaced you, produced for its own sake, kept your context in someone else's place, locked you to one vendor or worked in someone else's style would be a stack you are not the author of."
+    prose p1.0 ranks=word,line,card,card max=card first="Each line is the edge of the one enemy, losing your thread:" more=true
+      plain "Each line is the edge of the one enemy, losing your thread: a stack that replaced you, produced for its own sake, kept your context in someone else's place, locked you to one vendor or worked in someone else's style would be a stack you are not the author of."
   section what-each-app-refuses "What each app refuses" icon=guard rests=false
     group machines-refuses ranks=word,line,card,card max=card guard blocks=2 folded=seat mirrored-by=machines from=line own-floor=3 lead=""
       block product/boundaries#no-running-agent ranks=word,line,line,card max=full refusal icon=refusal tier=quiet own-floor=3 "to know about a running agent: starting, watching, answering and merging agents is not its job"
@@ -225,19 +241,27 @@ page product/boundaries floor=1 Produit blocks=14 needs-you=3 verdict=1h10s
     prose p3.0 ranks=word,line,card,card max=card first="Two rows are this page's reading rather than the owner's word or a record:" more=true
       plain "Two rows are this page's reading rather than the owner's word or a record: Agents refusing to prepare a computer, and the OS refusing to hold facts of its own. Both follow from the spaces; the owner has not ruled on either."
 
-page growth/positioning floor=1 Produit blocks=7 needs-you=1 verdict=1h10s
+page growth/positioning floor=1 Produit blocks=7 needs-you=1 verdict=1h27s
   reading word words=84 seconds=22 "≈ 20 s" same=false
   reading line words=143 seconds=37 "≈ 35 s" same=false
   reading card words=342 seconds=89 "≈ 1 min 30 s" same=false
   reading full words=352 seconds=92 "≈ 1 min 30 s" same=false
-  paragraph "Where Spwn stands against what a person uses today instead, for anyone writing a comparison, a pitch or an answer to \"how is it different\": the category it refuses, the four alternatives and what each costs. What Spwn is, in one sentence, is [the vision](../blueprint/vision.md#the-definition)'s and is not restated here."
+  paragraph "Where Spwn stands against what a person uses today instead, for anyone writing a comparison, a pitch or an answer to \"how is it different\": the category it refuses, the four alternatives and what each costs. What Spwn is, in one sentence, is the vision's and is not restated here."
   lede ranks=word,line,card,card first="Where Spwn stands against what a person uses today instead, for anyone writing a comparison, a pitch or an answer to \"how is it different\":" more=true
   finding needs-you S6 from=word "growth/positioning" rests on this page's reading: you have not ruled
+  finding remark S30 from=line link to "../blueprint/vision.md#the-definition" is no page, anchor or http or https address: served as its words
+  finding remark S30 from=line link to "../blueprint/vision.md#what-changed" is no page, anchor or http or https address: served as its words
+  finding remark S30 from=line link to "../blueprint/vision.md#the-enemy-losing-..." is no page, anchor or http or https address: served as its words
+  finding remark S30 from=line link to "./open-questions.md#positioning-audience..." is no page, anchor or http or https address: served as its words
   attention needs-you S6 at= from=word "Positioning"
+  attention remark S30 at= from=line "Positioning"
+  attention remark S30 at= from=line "Positioning"
+  attention remark S30 at= from=line "Positioning"
+  attention remark S30 at= from=line "Positioning"
   section  "Top" icon=home rests=false
   section the-category-it-refuses "The category it refuses" icon=define rests=false
     prose p1.0 ranks=word,line,card,card max=card first="Spwn is not sold as an agent framework, an AI platform or a tool that makes more output." more=true
-      plain "Spwn is not sold as an agent framework, an AI platform or a tool that makes more output. Each of those is judged by how much it produces, and production is what became cheap ([what changed](../blueprint/vision.md#what-changed)). Spwn is judged by whether you still understand and own what was produced: the one enemy is [losing your thread](../blueprint/vision.md#the-enemy-losing-your-thread)."
+      plain "Spwn is not sold as an agent framework, an AI platform or a tool that makes more output. Each of those is judged by how much it produces, and production is what became cheap (what changed). Spwn is judged by whether you still understand and own what was produced: the one enemy is losing your thread."
     block growth/positioning#lead-with-the-thread ranks=word,line,line,card max=full rule icon=soft tier=quiet "A comparison never leads with speed, model quality or the number of integrations."
       field says "A comparison never leads with speed, model quality or the number of integrations." 
       field force "soft" 
@@ -271,22 +295,24 @@ page growth/positioning floor=1 Produit blocks=7 needs-you=1 verdict=1h10s
         row growth/positioning#managed-platform gives="someone else runs the agents" costs="your context, machines and credentials live in their place, worked in their method"
         row growth/positioning#unrelated-tools gives="each tool is good at its part" costs="each keeps its own copy of your context, and you are the integration between them"
     prose p2.0 ranks=word,line,card,card max=card first="Each costs either scale or authorship." more=true
-      plain "Each costs either scale or authorship. Spwn's answer is to keep both: the work goes to agents, the decisions stay with you, on your machines, from one place for each fact ([the stack](../product/stack.md))."
+      plain "Each costs either scale or authorship. Spwn's answer is to keep both: the work goes to agents, the decisions stay with you, on your machines, from one place for each fact ([the stack](product/stack))."
   section rests-on "Rests on" icon=rests rests=true
     prose p3.0 ranks=word,line,card,card max=card first="What is not settled:" more=true
-      plain "What is not settled: whether \"the category it refuses\" is said in public, and how, is a positioning call the owner has not made; it is on [open questions](./open-questions.md#positioning-audience-and-pricing). The four alternatives and their costs are this page's argument; the brief the owner confirmed on 2026-11-21 did not list them, so he has not ruled on them."
+      plain "What is not settled: whether \"the category it refuses\" is said in public, and how, is a positioning call the owner has not made; it is on open questions. The four alternatives and their costs are this page's argument; the brief the owner confirmed on 2026-11-21 did not list them, so he has not ruled on them."
 
-page machines/reference/ports floor=3 Architecture blocks=4 needs-you=0 verdict=1h10s
+page machines/reference/ports floor=3 Architecture blocks=4 needs-you=0 verdict=1h27s
   reading word words=77 seconds=20 "≈ 20 s" same=false
   reading line words=172 seconds=45 "≈ 45 s" same=false
   reading card words=194 seconds=51 "≈ 50 s" same=false
   reading full words=197 seconds=51 "≈ 50 s" same=false
   paragraph "`station ports` lists every TCP port that listens on a Mac or a VM, each in the class of who reaches it. Which ports a VM may open, and to whom, are its [rights](#right): a port that starts listening inside them is shared with their audience within seconds, one outside them is flagged and never shared."
   lede ranks=word,line,card,card first="`station ports` lists every TCP port that listens on a Mac or a VM, each in the class of who reaches it." more=true
+  finding remark S30 from=line link to "machinefiles.md" is no page, anchor or http or https address: served as its words
+  attention remark S30 at= from=line "Ports"
   section  "Top" icon=home rests=false
   section rights-and-audiences "Rights and audiences" icon=guard rests=false
-    prose p1.0 ranks=word,line,card,card max=card first="A VM's rights are the `ports` of its Machinefile ([Machinefiles](machinefiles.md)):" more=true
-      plain "A VM's rights are the `ports` of its Machinefile ([Machinefiles](machinefiles.md)): which ports it may open, and to whom."
+    prose p1.0 ranks=word,line,card,card max=card first="A VM's rights are the `ports` of its Machinefile (Machinefiles):" more=true
+      plain "A VM's rights are the `ports` of its Machinefile (Machinefiles): which ports it may open, and to whom."
     block machines/reference/ports#right ranks=word,line,card,card max=full term icon=term tier=normal "what a machine may open and to whom, its Machinefile's ports: open, to (its audience), except, audiences"
       field means "what a machine may open and to whom, its Machinefile's `ports`: `open`, `to` (its audience), `except`, `audiences`" 
     block machines/reference/ports#audience ranks=word,line,line,card max=full term icon=term tier=quiet "who a right, or the owner's ports share --to, shares a port with: local, private or public"
@@ -304,16 +330,20 @@ page machines/reference/ports floor=3 Architecture blocks=4 needs-you=0 verdict=
     prose p1.1 ranks=word,line,card,card max=card first="A row of a port names its label from the catalog's packages' `ports` (5173 `Vite`, 3000 `Node or Next`, 8081 `Expo`, 5432 `Postgres`) as a hint of what probably serves it, never a decision." more=false
       plain "A row of a port names its label from the catalog's packages' `ports` (5173 `Vite`, 3000 `Node or Next`, 8081 `Expo`, 5432 `Postgres`) as a hint of what probably serves it, never a decision."
 
-page product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder floor=1 Produit blocks=0 needs-you=0 verdict=1h10s
+page product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder floor=1 Produit blocks=0 needs-you=0 verdict=1h27s
   record ADR-002 "Spwn is one stack of six apps on one ladder"
   decision page=product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder ADR-002 status="Accepted" date=2026-11-21 "Spwn is one stack of six apps on one ladder."
   reading word words=44 seconds=11 "≈ 10 s" same=false
   reading line words=44 seconds=11 "≈ 10 s" same=false
   reading card words=63 seconds=16 "≈ 15 s" same=false
   reading full words=63 seconds=16 "≈ 15 s" same=true
-  paragraph "**Status:** Accepted **Date:** 2026-11-21 **Amended by:** [ADR-003](./003-the-three-spaces-are-the-structure-of-the-app.md) (the ladder) **Amends:** [growth ADR-007](../../growth/decisions/007-spwn-is-the-ai-stack-that-abstracts-everything-but-you.md)"
+  paragraph "**Status:** Accepted **Date:** 2026-11-21 **Amended by:** ADR-003 (the ladder) **Amends:** growth ADR-007"
   lede ranks=line,line,full,full first="" more=false
+  finding remark S30 from=line link to "./003-the-three-spaces-are-the-structure..." is no page, anchor or http or https address: served as its words
+  finding remark S30 from=line link to "../../growth/decisions/007-spwn-is-the-a..." is no page, anchor or http or https address: served as its words
   finding ambient S8 from=card page "product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder" is prose only
+  attention remark S30 at= from=line "ADR-002: Spwn is one stack of six apps on one ladder"
+  attention remark S30 at= from=line "ADR-002: Spwn is one stack of six apps on one ladder"
   attention ambient S8 at= from=card "ADR-002: Spwn is one stack of six apps on one ladder"
   section  "Top" icon=home rests=false
     prose p0.0 ranks=word,line,card,card max=card first="An agent leaves the status `Proposed`; only the owner writes `Accepted`." more=false
@@ -322,7 +352,7 @@ page product/decisions/002-spwn-is-one-stack-of-six-apps-on-one-ladder floor=1 P
     prose p1.0 ranks=word,line,card,card max=card first="Six apps, in this order on one ladder:" more=true
       plain "Six apps, in this order on one ladder: Machines, Agents, Wiki, Specs, Design, OS."
 
-page machines/decisions/035-a-port-is-a-right-with-an-audience floor=3 Architecture blocks=0 needs-you=0 verdict=1h10s
+page machines/decisions/035-a-port-is-a-right-with-an-audience floor=3 Architecture blocks=0 needs-you=0 verdict=1h27s
   record ADR-035 "A port is a right with an audience"
   decision page=machines/decisions/035-a-port-is-a-right-with-an-audience ADR-035 status="Accepted" date=2026-11-11 "A port is a right with an audience."
   reading word words=31 seconds=8 "≈ 10 s" same=false
@@ -331,16 +361,20 @@ page machines/decisions/035-a-port-is-a-right-with-an-audience floor=3 Architect
   reading full words=44 seconds=11 "≈ 10 s" same=true
   paragraph "**Status:** Accepted **Date:** 2026-11-11"
   lede ranks=line,line,full,full first="" more=false
+  finding remark S30 from=line link to "018-two-port-classes.md" is no page, anchor or http or https address: served as its words
+  finding remark S30 from=line link to "086-a-vm-reserves-a-packages-port-only-w..." is no page, anchor or http or https address: served as its words
   finding ambient S8 from=card page "machines/decisions/035-a-port-is-a-right-with-an-audience" is prose only
+  attention remark S30 at= from=line "ADR-035: A port is a right with an audience"
+  attention remark S30 at= from=line "ADR-035: A port is a right with an audience"
   attention ambient S8 at= from=card "ADR-035: A port is a right with an audience"
   section  "Top" icon=home rests=false
-    prose p0.0 ranks=word,line,card,card max=card first="Amends [ADR-018](018-two-port-classes.md)." more=true
-      plain "Amends [ADR-018](018-two-port-classes.md). Amended by [ADR-086](086-a-vm-reserves-a-packages-port-only-when-its-machinefile-installs-it.md)."
+    prose p0.0 ranks=word,line,card,card max=card first="Amends ADR-018." more=true
+      plain "Amends ADR-018. Amended by ADR-086."
   section decision "Decision" icon=define rests=false
     prose p1.0 ranks=word,line,card,card max=card first="A machine's ports are rights, never an inventory." more=false
       plain "A machine's ports are rights, never an inventory."
 
-page blueprint/unfinished floor=0 Intention blocks=1 needs-you=0 verdict=1h10s
+page blueprint/unfinished floor=0 Intention blocks=1 needs-you=0 verdict=1h27s
   reading word words=14 seconds=4 "≈ 5 s" same=false
   reading line words=29 seconds=8 "≈ 10 s" same=false
   reading card words=30 seconds=8 "≈ 10 s" same=false

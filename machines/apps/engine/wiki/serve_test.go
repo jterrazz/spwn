@@ -152,6 +152,8 @@ func runs(p wiki.Paragraph) string {
 			out = append(out, "**"+r.Text+"**")
 		case r.Code:
 			out = append(out, "`"+r.Text+"`")
+		case r.Anchor != "":
+			out = append(out, "["+r.Text+"]("+r.Link+"#"+r.Anchor+")")
 		case r.Link != "":
 			out = append(out, "["+r.Text+"]("+r.Link+")")
 		default:
@@ -263,14 +265,14 @@ func TestACorpusWithNoSchemaIsNotRead(t *testing.T) {
 }
 
 func TestProseIsReadAsParagraphsItemsAndRuns(t *testing.T) {
-	got := wiki.Paragraphs("One **strong** line\nthat wraps, with `code`.\n\n- an [item](./a.md)\n  that wraps\n1. a numbered one\n\n> a quote\n\n| a | b |\n|---|---|\n| 1 | 2 |\n")
+	got := wiki.Paragraphs("One **strong** line\nthat wraps, with `code`.\n\n- an [item](./machinefiles.md)\n  that wraps\n1. a numbered one\n\n> a quote\n\n| a | b |\n|---|---|\n| 1 | 2 |\n", homeLands)
 	lines := make([]string, 0, len(got))
 	for _, p := range got {
 		lines = append(lines, string(p.Form)+" "+runs(p))
 	}
 	want := []string{
 		`plain "One **strong** line that wraps, with ` + "`code`" + `."`,
-		`item "an [item](./a.md) that wraps"`,
+		`item "an [item](blueprint/machinefiles) that wraps"`,
 		`item "a numbered one"`,
 		`quote "a quote"`,
 		`head "a" | "b"`,

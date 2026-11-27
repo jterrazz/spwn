@@ -98,7 +98,7 @@ func TestARetiredTermWrittenHalfAMillionTimesIsSaidAHundredTimesAndCounted(t *te
 func TestAProseOfBracketsIsReadInLinearTime(t *testing.T) {
 	src := brackets()
 	var out []wiki.Paragraph
-	within(t, budgetBrackets, "1 MiB of brackets", func() { out = wiki.Paragraphs(src) })
+	within(t, budgetBrackets, "1 MiB of brackets", func() { out = wiki.Paragraphs(src, homeLands) })
 	if len(out) != 1 {
 		t.Errorf("one line of brackets gives %d paragraphs, want 1", len(out))
 	}
@@ -223,7 +223,7 @@ func BenchmarkTheWorstPages(b *testing.B) {
 	src := brackets()
 	b.Run("brackets", func(b *testing.B) {
 		for b.Loop() {
-			wiki.Paragraphs(src)
+			wiki.Paragraphs(src, homeLands)
 		}
 	})
 }

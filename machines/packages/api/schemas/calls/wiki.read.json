@@ -165,6 +165,9 @@
     "wiki.Run": {
       "additionalProperties": false,
       "properties": {
+        "Anchor": {
+          "type": "string"
+        },
         "Code": {
           "type": "boolean"
         },
