@@ -31,6 +31,9 @@ const (
 	BadOutput   fail.Code = "call.bad-output"
 	// value: a line a server cannot read as a request frame.
 	BadFrame fail.Code = "call.bad-frame"
+	// value: a call or a watch that panicked where it was served: it failed
+	// alone, and its server kept running.
+	Broke fail.Code = "broke"
 )
 
 type Progress interface {

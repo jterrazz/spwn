@@ -93,9 +93,9 @@ export function answered(entry: Entry, { at, out }: Heard, done: boolean): void 
     show(entry, { at, done, kind: 'read', out });
 }
 
-export function failed(entry: Entry, error: EngineError): void {
+export function failed(entry: Entry, error: EngineError, kept = false): void {
     const { reading } = entry;
-    if (reading.kind === 'read' && unread(error)) {
+    if (reading.kind === 'read' && (kept || unread(error))) {
         show(entry, { ...reading, at: entry.heardAt ?? reading.at, stale: error });
     } else {
         show(entry, { error, kind: 'failed' });

@@ -29,7 +29,8 @@ func TestTheWorldBuildArmsTheTripwireWithTheWorldsSecrets(t *testing.T) {
 	said := func() (said string) {
 		defer func() {
 			if r := recover(); r != nil {
-				said, _ = r.(string)
+				tripped, _ := r.(secret.Tripped)
+				said = string(tripped)
 			}
 		}()
 		_ = output.NewWriter(output.Stream{W: io.Discard}, output.Stream{W: io.Discard}, nil).Raw([]byte("token " + vault + "\n"))

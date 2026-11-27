@@ -8,9 +8,14 @@ import (
 	enginecalls "github.com/jterrazz/studio-station/apps/engine/engine/calls"
 	"github.com/jterrazz/studio-station/apps/engine/engine/process"
 	"io"
+	"path/filepath"
 	"slices"
 	"strconv"
 	"strings"
+	"time"
+
+	"github.com/jterrazz/studio-station/apps/engine/core/goes"
+	"github.com/jterrazz/studio-station/apps/engine/core/secret"
 
 	"github.com/jterrazz/studio-station/apps/engine/ports"
 
@@ -368,8 +373,27 @@ func (s served) Watch(ctx context.Context, target coremachine.Ref, name string, 
 	return s.r.ServeWatch(ctx, target, name, in, p)
 }
 
-func serveFrames(env kit.Env, d door) func(ctx context.Context, in io.Reader, out io.Writer) error {
+// invariant: a stream process, guest serve --stdio or engine attach, says
+// a break its calls recover in its machine's engine log, stamped as the
+// engine stamps its own: the side that runs it keeps none of its stderr
+// (unix.Engine.GuestExec returns none; sshstdio reads it only once the
+// stream died). A world's run keeps the world's sink, set as it opened.
+func (m machine) streamBreaks() func(line string) {
+	if m.world != nil {
+		return nil
+	}
+	at := engine.LogPath(m.paths.State)
+	return func(line string) {
+		_ = m.sys.FS.MkdirAll(filepath.Dir(at), 0o755)
+		_ = m.sys.FS.Append(at, []byte(m.sys.Clock.Now().UTC().Format(time.RFC3339)+" engine: "+line+"\n"), 0o644)
+	}
+}
+
+func serveFrames(env kit.Env, d door, breaks func(line string)) func(ctx context.Context, in io.Reader, out io.Writer) error {
 	return func(ctx context.Context, in io.Reader, out io.Writer) error {
+		if breaks != nil {
+			goes.Set(goes.Options{Log: breaks, Redact: secret.Kept})
+		}
 		if d.attached {
 			ctx = call.WithFar(ctx)
 		}
@@ -397,7 +421,7 @@ func (m machine) socketDoor() door {
 }
 
 func engineCommand(env kit.Env, m machine) *cobra.Command {
-	return engineNoun(env, m, engineRunCommand(env, m), engineattach.Command(engineattach.Deps{Serve: serveFrames(env, door{attached: true})}, env))
+	return engineNoun(env, m, engineRunCommand(env, m), engineattach.Command(engineattach.Deps{Serve: serveFrames(env, door{attached: true}, m.streamBreaks())}, env))
 }
 
 // value: a run that serves frames on its stdout: nothing else of it may write there.

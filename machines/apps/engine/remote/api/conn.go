@@ -110,11 +110,11 @@ type pending struct {
 
 func (c *Conn) forget(id string) {
 	c.mu.Lock()
+	defer c.mu.Unlock()
 	if p, ok := c.waiting[id]; ok {
 		close(p.quit)
 		delete(c.waiting, id)
 	}
-	c.mu.Unlock()
 }
 
 func (c *Conn) failure(err error) error {

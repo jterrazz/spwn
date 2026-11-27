@@ -393,12 +393,15 @@ func (g *session) serve(ctx context.Context, conn local.Conn, quit context.Cance
 }
 
 func (g *session) relay(ctx context.Context, op string, port int) message {
-	g.mu.Lock()
-	g.seq++
-	id := "g" + strconv.Itoa(g.seq)
 	ch := make(chan message, 1)
-	g.pending[id] = ch
-	g.mu.Unlock()
+	id := func() string {
+		g.mu.Lock()
+		defer g.mu.Unlock()
+		g.seq++
+		id := "g" + strconv.Itoa(g.seq)
+		g.pending[id] = ch
+		return id
+	}()
 	g.send(map[string]any{"v": 1, "type": "request", "id": id, "op": op, "port": port})
 	ctx, cancel := context.WithTimeout(ctx, relayBudget)
 	defer cancel()

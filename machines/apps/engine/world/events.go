@@ -63,6 +63,7 @@ func events() []event {
 		{"upstream-login", []string{"<user>", "<password>"}, upstreamLogin},
 		{"lockdown-cut", []string{"before-lock|before-key|after-key|never-ends|drops-after-print", "[<n>]"}, lockdownCut},
 		{"fault", []string{"<Contract>.<Method>", "[<n>]", "[times]"}, fault},
+		{"panic", []string{"<Contract>.<Method>", "[<n>]", "[times]"}, panicking},
 		{"hold", []string{"<Contract>.<Method>"}, hold},
 		{"unhold", []string{"[<mac>]", "[<vm>]"}, unhold},
 		{"upgrade", []string{"<machine>", "<version>"}, upgrade},
@@ -608,16 +609,20 @@ func unhold(w *World, args []string) error {
 	return fmt.Errorf("world unhold takes <mac> <vm>, or nothing, not %q", strings.Join(args, " "))
 }
 
-func fault(w *World, args []string) error {
+func fault(w *World, args []string) error { return scripted(w, "fault", args, false) }
+
+func panicking(w *World, args []string) error { return scripted(w, "panic", args, true) }
+
+func scripted(w *World, event string, args []string, panics bool) error {
 	call := args[0]
 	if contract, method, ok := strings.Cut(call, "."); !ok || contract == "" || method == "" {
-		return fmt.Errorf("world fault: %q is not <Contract>.<Method>", call)
+		return fmt.Errorf("world %s: %q is not <Contract>.<Method>", event, call)
 	}
-	f := Fault{Call: call}
+	f := Fault{Call: call, Panic: panics}
 	if len(args) > 1 {
 		n, err := strconv.Atoi(args[1])
 		if err != nil || n < 1 || (len(args) == 3 && args[2] != "times" && args[2] != "time") {
-			return fmt.Errorf("world fault %s takes [<n> times], not %q", call, strings.Join(args[1:], " "))
+			return fmt.Errorf("world %s %s takes [<n> times], not %q", event, call, strings.Join(args[1:], " "))
 		}
 		f.Times = n
 	}

@@ -208,20 +208,26 @@ func (s *Store) Since(epoch Epoch, rev uint64) (changed, gone []Key, ok bool) {
 	return slices.Sorted(maps.Keys(moved)), slices.Sorted(maps.Keys(left)), true
 }
 
+func (s *Store) locked(f func()) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	f()
+}
+
 func (s *Store) Watch(ctx context.Context) <-chan *Snapshot {
 	// invariant: latest-only: a watcher that does not read misses revisions,
 	// never blocks a writer; it is handed the current snapshot at once.
 	c := make(chan *Snapshot, 1)
-	s.mu.Lock()
-	c <- s.now
-	s.watchers[c] = struct{}{}
-	s.mu.Unlock()
+	s.locked(func() {
+		c <- s.now
+		s.watchers[c] = struct{}{}
+	})
 	go func() {
 		<-ctx.Done()
-		s.mu.Lock()
-		delete(s.watchers, c)
-		close(c)
-		s.mu.Unlock()
+		s.locked(func() {
+			delete(s.watchers, c)
+			close(c)
+		})
 	}()
 	return c
 }

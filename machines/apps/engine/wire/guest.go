@@ -83,6 +83,6 @@ func (m machine) ephemeral(root string) guest.Ephemeral {
 
 func guestCommand(env kit.Env, m machine) *cobra.Command {
 	cmd := guestcmd.Command(guestcmd.Deps{Guest: guestServer{m.guest(), m.kind}}, env)
-	cmd.AddCommand(guestserve.Command(guestserve.Deps{Serve: serveFrames(env, m.socketDoor())}, env))
+	cmd.AddCommand(guestserve.Command(guestserve.Deps{Serve: serveFrames(env, m.socketDoor(), m.streamBreaks())}, env))
 	return cmd
 }

@@ -5,6 +5,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/jterrazz/studio-station/apps/engine/core/goes"
 	"github.com/jterrazz/studio-station/apps/engine/core/secret"
 )
 
@@ -58,4 +59,15 @@ func TestASecretTripsInEachFormAJSONEncoderWritesIt(t *testing.T) {
 			t.Errorf("the trip said the secret: %q", said)
 		}
 	}
+}
+
+func TestATrippedValueIsNeverRecoveredByACallBoundary(t *testing.T) {
+	trip := secret.Tripped("tripwire: an answer carries a secret")
+	defer func() {
+		if got := recover(); got != trip {
+			t.Errorf("the boundary let %v through, want the tripped value", got)
+		}
+	}()
+	err := goes.Try("secret.test", func() error { panic(trip) })
+	t.Errorf("Try answered %v on a tripped value, want it panicked again", err)
 }

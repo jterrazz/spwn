@@ -7,5 +7,5 @@ import (
 )
 
 func main() {
-	os.Exit(wire.Run(os.Args[1:], os.Environ(), os.Stdin, os.Stdout, os.Stderr))
+	os.Exit(wire.Run(os.Args[1:], os.Environ(), os.Stdin, os.Stdout, os.Stderr, os.Exit))
 }

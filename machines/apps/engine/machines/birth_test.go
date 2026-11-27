@@ -51,7 +51,7 @@ func TestAVMBeingCreatedReadsCreatingWhileTheProcessThatRunsItsCreateRuns(t *tes
 		if got.State != c.state || (got.Birth != nil) != c.born {
 			t.Errorf("%s: %s with birth %v, want %s with birth %v", c.name, got.State, got.Birth != nil, c.state, c.born)
 		}
-		if !c.born && c.state == Stopped && got.Detail != HalfMade {
+		if !c.born && got.Detail != HalfMade {
 			t.Errorf("%s: detail %q, want %q", c.name, got.Detail, HalfMade)
 		}
 	}

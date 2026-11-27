@@ -14,12 +14,12 @@ import (
 // nothing, its rows saying why. Each read judges the VM's reservations
 // again (judgeLocked).
 func (d *Engine) loadRights(ctx context.Context, vm string) ports.Rights {
-	d.mu.Lock()
 	server := false
-	if v := d.vms[vm]; v != nil {
-		server = v.recordLocked().Lifetime == model.AlwaysOn
-	}
-	d.mu.Unlock()
+	d.locked(func() {
+		if v := d.vms[vm]; v != nil {
+			server = v.recordLocked().Lifetime == model.AlwaysOn
+		}
+	})
 	r := ports.RightsOf(nil, server)
 	if d.o.Rights != nil {
 		said, by, err := d.o.Rights(ctx, vm)
@@ -32,17 +32,17 @@ func (d *Engine) loadRights(ctx context.Context, vm string) ports.Rights {
 		r.By = by
 	}
 	mode := d.policy().HTTPS
-	d.mu.Lock()
-	d.rights[vm] = r
-	d.judgeLocked(ctx, vm, r, mode)
-	d.mu.Unlock()
+	d.locked(func() {
+		d.rights[vm] = r
+		d.judgeLocked(ctx, vm, r, mode)
+	})
 	return r
 }
 
 func (d *Engine) rightsOf(ctx context.Context, vm string) ports.Rights {
-	d.mu.Lock()
-	r, ok := d.rights[vm]
-	d.mu.Unlock()
+	var r ports.Rights
+	var ok bool
+	d.locked(func() { r, ok = d.rights[vm] })
 	if ok {
 		return r
 	}

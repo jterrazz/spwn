@@ -150,6 +150,12 @@ func Codes() map[fail.Code]Wording {
 		call.Unknown: func(e *fail.Error) (string, string) {
 			return "no call is named " + e.Subject, "run station --help"
 		},
+		call.Broke: func(e *fail.Error) (string, string) {
+			if log := e.Detail["log"]; log != "" {
+				return "the engine broke on " + e.Subject + "; it kept running", "its trace is in " + log
+			}
+			return "station broke on " + e.Subject + "; it kept running", "run it again"
+		},
 		call.BadFrame: func(e *fail.Error) (string, string) {
 			return "the request is not a " + e.Subject + " frame", "send one JSON object per line with v 2 and a call or a watch"
 		},

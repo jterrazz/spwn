@@ -19,7 +19,7 @@ func startEnv(home string) []string {
 
 func started(tb testing.TB, null *os.File, home string, args ...string) *wire.Program {
 	tb.Helper()
-	p, code := wire.Build(args, startEnv(home), null, null, null)
+	p, code := wire.Build(args, startEnv(home), null, null, null, func(code int) { tb.Fatalf("station exited %d", code) })
 	if p == nil {
 		tb.Fatalf("station built no tree: exit %d", code)
 	}

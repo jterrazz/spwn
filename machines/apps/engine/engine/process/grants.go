@@ -95,18 +95,18 @@ func (d *Engine) retryOn(ctx context.Context, vm string, programs []accounts.Pro
 	now := d.h.Now()
 	for _, p := range programs {
 		key := vm + " " + string(p)
-		d.mu.Lock()
-		if err == nil {
-			delete(d.retryFailed, key)
-			d.mu.Unlock()
-			continue
-		}
-		last, told := d.retryFailed[key]
-		retell := !told || now.Sub(last) >= retryRetell
-		if retell {
-			d.retryFailed[key] = now
-		}
-		d.mu.Unlock()
+		retell := false
+		d.locked(func() {
+			if err == nil {
+				delete(d.retryFailed, key)
+				return
+			}
+			last, told := d.retryFailed[key]
+			retell = !told || now.Sub(last) >= retryRetell
+			if retell {
+				d.retryFailed[key] = now
+			}
+		})
 		if retell {
 			d.notify(ctx, engine.Notification{Kind: engine.NoticeGrantRemovalFailed, Subject: vm + " grant", Text: "removing the grant of " + p.Label() + " failed: " + err.Error()})
 		}

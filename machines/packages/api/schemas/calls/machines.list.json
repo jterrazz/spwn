@@ -29,6 +29,7 @@
             "background.is-the-engine",
             "background.root-scope",
             "background.unknown",
+            "broke",
             "call.bad-frame",
             "call.bad-input",
             "call.bad-output",

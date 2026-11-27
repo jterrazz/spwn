@@ -52,6 +52,51 @@ describe('ask', () => {
         });
     });
 
+    test('a watch the engine broke on keeps its answer marked stale, and another coded refusal replaces it', async () => {
+        // Given - machines.list settled on running
+        using _ = clock.run('2026-11-13T10:00:00Z');
+        const { engine, store } = await settled();
+
+        // When - the next re-ask breaks, then the one after is refused for the subject
+        await later(store);
+        engine.answer('machines.list', {
+            error: { code: 'broke', message: 'the engine broke', type: 'internal' },
+        });
+        const broke = store.reading(KEY);
+        await later(store);
+        engine.answer('machines.list', {
+            error: { code: 'machines.not-found', message: 'no such machine', type: 'refused' },
+        });
+        const refused = store.reading(KEY);
+
+        // Then - the break left the answer shown with its code as the mark, the refusal replaced the answer
+        expect(broke.kind === 'read' ? [broke.out, broke.stale?.wire?.code] : []).toStrictEqual([
+            RUNNING.out,
+            'broke',
+        ]);
+        expect(refused.kind).toBe('failed');
+    });
+
+    test('a one-shot read the engine broke on over a shown answer is a failure, not a stale mark', async () => {
+        // Given - engine.read answered and shown
+        using _ = clock.run('2026-11-13T10:00:00Z');
+        const { engine, store } = await settled();
+        store.subscribe(ENGINE_READ, () => {});
+        await clock.advance(1);
+        engine.answer('engine.read', RUNNING);
+
+        // When - a reread of it breaks
+        await later(store);
+        engine.answer('engine.read', {
+            error: { code: 'broke', message: 'the engine broke', type: 'internal' },
+        });
+        await clock.advance(1);
+
+        // Then - the page draws the failure with its code
+        const read = store.reading('call engine.read {} {}');
+        expect(read.kind === 'failed' ? read.error.wire?.code : read.kind).toBe('broke');
+    });
+
     test('a dropped watch keeps its answer unmarked while it reconnects, a dropped read keeps it marked stale', async () => {
         // Given - machines.list settled on running, and engine.read answered beside it
         using _ = clock.run('2026-11-13T10:00:00Z');
@@ -93,6 +138,32 @@ describe('ask', () => {
         // Then - the watch was asked twice, the second stream's pending out never shown, and its last out shown whole
         expect(engine.asked('machines.list')).toBe(2);
         expect(meanwhile.kind === 'read' ? meanwhile.out : undefined).toStrictEqual(RUNNING.out);
+        expect(store.reading(KEY)).toStrictEqual(
+            settledOn(new Date('2026-11-13T10:00:01.001Z'), STOPPED.out),
+        );
+    });
+
+    test('a watch the engine broke on never draws the pending out of its reopened stream over its kept answer', async () => {
+        // Given - machines.list, a view the engine keeps, asked for the first time and answered pending then running
+        using _ = clock.run('2026-11-13T10:00:00Z');
+        const { engine, store } = await unsettled();
+        engine.answer('engine.state', ...KEEPS_MACHINES);
+        engine.answer('machines.list', PENDING, RUNNING);
+
+        // When - its handler breaks, the client opens it again, and the new stream answers pending first
+        engine.answer('machines.list', {
+            error: { code: 'broke', message: 'the engine broke', type: 'internal' },
+        });
+        await clock.advance(1000);
+        engine.answer('machines.list', PENDING);
+        const meanwhile = store.reading(KEY);
+        engine.answer('machines.list', STOPPED, DONE);
+
+        // Then - the running answer stayed shown with the break as its mark until the new stream's last out replaced it
+        expect(engine.asked('machines.list')).toBe(2);
+        expect(
+            meanwhile.kind === 'read' ? [meanwhile.out, meanwhile.stale?.wire?.code] : [],
+        ).toStrictEqual([RUNNING.out, 'broke']);
         expect(store.reading(KEY)).toStrictEqual(
             settledOn(new Date('2026-11-13T10:00:01.001Z'), STOPPED.out),
         );

@@ -27,6 +27,8 @@ var (
 	ErrScripted  = errors.New("the hypervisor refused to boot it, as the world scripted it")
 	ErrNoAddress = errors.New("the VM got no address, as the world scripted it")
 	ErrNoListing = errors.New("the hypervisor could not list its disks, as the world scripted it")
+	// value: a resize the world scripts to fail, its disk kept as cloned.
+	ErrResizeScripted = errors.New("the hypervisor refused to resize it, as the world scripted it")
 )
 
 type Hypervisor struct {
@@ -176,6 +178,9 @@ func (h *Hypervisor) Resize(_ context.Context, vm string, s machines.Size) error
 	v, ok := h.disk(vm)
 	if !ok {
 		return ErrNoDisk
+	}
+	if h.w.Fails("Hypervisor.Resize") {
+		return ErrResizeScripted
 	}
 	v.Size = s
 	return nil
@@ -467,24 +472,28 @@ func (r *run) VM() string  { return r.vm }
 func (r *run) PID() int    { return r.pid }
 func (r *run) Holder() int { return r.pid }
 
+func (r *run) readEnd() {
+	r.h.w.Lock()
+	defer r.h.w.Unlock()
+	v, ok := r.h.thisMac().VMs[r.vm]
+	switch {
+	case ok && v.PID == r.pid:
+	case ok && v.Ended != nil && r.h.w.Fails("Hypervisor.Ended"):
+		r.end, v.Ended = &machines.RunEnd{Reason: machines.Unknown, ExitCode: -1}, nil
+	case ok && v.Ended != nil:
+		end := *v.Ended
+		end.LastLines = machines.LastLines(console(v, machines.ConsoleWindow))
+		r.end, v.Ended = &end, nil
+	default:
+		r.end = &machines.RunEnd{Reason: machines.Unknown, ExitCode: -1}
+	}
+}
+
 func (r *run) Ended() <-chan machines.RunEnd {
 	r.once.Lock()
 	defer r.once.Unlock()
 	if r.end == nil {
-		r.h.w.Lock()
-		v, ok := r.h.thisMac().VMs[r.vm]
-		switch {
-		case ok && v.PID == r.pid:
-		case ok && v.Ended != nil && r.h.w.Fails("Hypervisor.Ended"):
-			r.end, v.Ended = &machines.RunEnd{Reason: machines.Unknown, ExitCode: -1}, nil
-		case ok && v.Ended != nil:
-			end := *v.Ended
-			end.LastLines = machines.LastLines(console(v, machines.ConsoleWindow))
-			r.end, v.Ended = &end, nil
-		default:
-			r.end = &machines.RunEnd{Reason: machines.Unknown, ExitCode: -1}
-		}
-		r.h.w.Unlock()
+		r.readEnd()
 	}
 	ch := make(chan machines.RunEnd, 1)
 	if r.end != nil {

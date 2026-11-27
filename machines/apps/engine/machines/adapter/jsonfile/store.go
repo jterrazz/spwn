@@ -223,8 +223,9 @@ func (s *Store) list(skipDamaged bool) ([]machines.Record, error) {
 	if err != nil || statErr != nil || stamps == nil {
 		return out, err
 	}
+	kept = &listing{gen: gen, dir: dir, files: stamps, out: copyRecords(out)}
 	s.mu.Lock()
-	s.listed[which] = &listing{gen: gen, dir: dir, files: stamps, out: copyRecords(out)}
+	s.listed[which] = kept
 	s.mu.Unlock()
 	return out, nil
 }

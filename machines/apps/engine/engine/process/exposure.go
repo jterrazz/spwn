@@ -84,14 +84,14 @@ func (d *Engine) hearReserved(ctx context.Context) {
 		l  ports.Listener
 	}
 	var now []found
-	d.mu.Lock()
-	for _, r := range d.reservations {
-		if l, ok := d.quiet[r.VM][r.GuestPort]; ok {
-			now = append(now, found{r.VM, l})
-			delete(d.quiet[r.VM], r.GuestPort)
+	d.locked(func() {
+		for _, r := range d.reservations {
+			if l, ok := d.quiet[r.VM][r.GuestPort]; ok {
+				now = append(now, found{r.VM, l})
+				delete(d.quiet[r.VM], r.GuestPort)
+			}
 		}
-	}
-	d.mu.Unlock()
+	})
 	for _, f := range now {
 		if heard := d.heardOf(f.vm); !slices.ContainsFunc(heard, func(h ports.Listener) bool { return h.Port == f.l.Port }) {
 			d.hear(f.vm, append(heard, f.l))
@@ -164,9 +164,8 @@ func (d *Engine) listeningLocked() []ports.Machine {
 // VM's own Overview counts its ports as its Mac's Ports page does.
 func (d *Engine) surveyed(ctx context.Context, vm string) ports.MacPorts {
 	out := d.macPorts(vm)
-	d.mu.Lock()
-	heard := d.listeningLocked()
-	d.mu.Unlock()
+	var heard []ports.Machine
+	d.locked(func() { heard = d.listeningLocked() })
 	if vm != "" {
 		heard = slices.DeleteFunc(heard, func(m ports.Machine) bool { return m.Ref.Name != vm })
 	}
@@ -182,36 +181,42 @@ func (d *Engine) surveyed(ctx context.Context, vm string) ports.MacPorts {
 // VMs' are read at the start, every exposureEvery and on every listener
 // change a guest reports; a port that turns red is told once, and again
 // only after it stopped being red.
+func (d *Engine) exposureDueLocked(now time.Time) ([]ports.Machine, bool) {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	if !d.reheardLocked() && !d.exposedAt.IsZero() && now.Sub(d.exposedAt) < exposureEvery {
+		return nil, false
+	}
+	d.exposedAt, d.scanned = now, maps.Clone(d.heard)
+	return d.listeningLocked(), true
+}
+
 func (d *Engine) watchExposure(ctx context.Context) {
 	if d.o.Listening == nil {
 		return
 	}
 	now := d.h.Now()
-	d.mu.Lock()
-	if !d.reheardLocked() && !d.exposedAt.IsZero() && now.Sub(d.exposedAt) < exposureEvery {
-		d.mu.Unlock()
+	vms, due := d.exposureDueLocked(now)
+	if !due {
 		return
 	}
-	d.exposedAt, d.scanned = now, maps.Clone(d.heard)
-	vms := d.listeningLocked()
-	d.mu.Unlock()
 	mine, _ := d.o.Listening(ctx)
 	var decl []ports.Declaration
 	if d.o.Declarations != nil {
 		decl, _ = d.o.Declarations(ctx)
 	}
 	found := ports.Exposed(ports.Survey(append([]ports.Machine{ports.MacOf(d.m.ThisMacName(), mine)}, vms...), decl))
-	d.mu.Lock()
-	was := d.red
-	d.red = make([]string, 0, len(found))
 	var fresh []string
-	for _, f := range found {
-		d.red = append(d.red, f.Subject)
-		if !slices.Contains(was, f.Subject) {
-			fresh = append(fresh, ports.Told(f))
+	d.locked(func() {
+		was := d.red
+		d.red = make([]string, 0, len(found))
+		for _, f := range found {
+			d.red = append(d.red, f.Subject)
+			if !slices.Contains(was, f.Subject) {
+				fresh = append(fresh, ports.Told(f))
+			}
 		}
-	}
-	d.mu.Unlock()
+	})
 	for _, text := range fresh {
 		d.tell(ctx, d.m.ThisMacName(), engine.Told{Kind: engine.EventExposed, Parts: []string{text}})
 	}

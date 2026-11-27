@@ -23,17 +23,19 @@ func (d *Engine) readLocalNetwork(ctx context.Context) {
 	}
 	now := d.h.Now()
 	read = approvals.Settled(read, now.Sub(d.started))
+	hello := read.Hello()
 	d.mu.Lock()
-	d.localNetwork, d.localNetworkAt = read.Hello(), now
+	d.localNetwork, d.localNetworkAt = hello, now
 	d.mu.Unlock()
 }
 
 // invariant: the engine reads the approval again when the family says it
 // is due (approvals.Due).
 func (d *Engine) rereadLocalNetwork(ctx context.Context) {
-	d.mu.Lock()
-	due := approvals.Due(approvals.StateOf(d.localNetwork), d.h.Now().Sub(d.localNetworkAt))
-	d.mu.Unlock()
+	due := false
+	d.locked(func() {
+		due = approvals.Due(approvals.StateOf(d.localNetwork), d.h.Now().Sub(d.localNetworkAt))
+	})
 	if due {
 		d.readLocalNetwork(ctx)
 	}

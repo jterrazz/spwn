@@ -60,6 +60,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/call/lanes"
 	corecontract "github.com/jterrazz/studio-station/apps/engine/core/contract"
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
+	"github.com/jterrazz/studio-station/apps/engine/core/goes"
 	coremachine "github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/devices"
 	devicesfake "github.com/jterrazz/studio-station/apps/engine/devices/adapter/fake"
@@ -216,7 +217,19 @@ func openWorld(vars map[string]string, look bool) (*worldRun, error) {
 	r := &worldRun{path: path, w: w, macs: map[string]*worldMac{}, held: held}
 	w.OnPause(r.pause)
 	w.OnUnhold(r.unheld)
+	goes.Set(goes.Options{Log: r.broke, Redact: secret.Kept, Clock: r.clock()})
 	return r, nil
+}
+
+// invariant: the world build's twin of the engine's start: a break its
+// engines recover is a line of This Mac's engine log, stamped by the
+// world's clock as the engine stamps its own, whichever Mac's engine broke,
+// since one process runs them all. No lock watch restarts a world's engine.
+func (r *worldRun) broke(line string) {
+	r.w.Lock()
+	defer r.w.Unlock()
+	m := r.w.Mac(r.w.ThisMac)
+	m.EngineLog = append(m.EngineLog, r.w.Now.UTC().Format(time.RFC3339)+" engine: "+line)
 }
 
 // value: the spec build's tripwire is armed: every frame, CLI write and
@@ -236,7 +249,7 @@ func armTripwire(w *world.World) {
 			}
 		}
 	}
-	secret.Arm(secrets, func(said string) { panic("tripwire: " + said) })
+	secret.Arm(secrets, func(said string) { panic(secret.Tripped("tripwire: " + said)) })
 }
 
 // invariant: a call held in a run that writes its world back writes it back
@@ -1257,11 +1270,13 @@ func (m *worldMac) answers() func(json.RawMessage) json.RawMessage {
 type worldDialer struct{ r *worldRun }
 
 func (d worldDialer) Dial(ctx context.Context, mac string) (remotecontract.Endpoint, error) {
-	d.r.w.Lock()
-	slice, ok := d.r.w.Macs[mac]
-	reach := ok && !slice.Offline && !slice.Locked && slice.Engine != nil && !d.r.w.Now.Before(slice.Back)
-	bare := reach && d.r.w.Fails("EndpointDialer.Dial")
-	d.r.w.Unlock()
+	reach, bare := func() (bool, bool) {
+		d.r.w.Lock()
+		defer d.r.w.Unlock()
+		slice, ok := d.r.w.Macs[mac]
+		reach := ok && !slice.Offline && !slice.Locked && slice.Engine != nil && !d.r.w.Now.Before(slice.Back)
+		return reach, reach && d.r.w.Fails("EndpointDialer.Dial")
+	}()
 	if !reach || d.r.far == nil {
 		return nil, fail.New(fail.Unreachable, call.Unreachable, mac, nil)
 	}
@@ -1756,31 +1771,39 @@ func (g worldGuest) Exec(ctx context.Context, cmd contract.GuestCommand) (contra
 	ctx, stop := context.WithCancel(ctx)
 	defer stop()
 	defer context.AfterFunc(asked, stop)()
-	g.r.w.Lock()
-	slice, ok := g.r.w.Macs[g.vm]
-	ok = ok && slice.Self != nil
-	bake := ""
-	if !ok {
-		slice, bake, ok = madeSlice(g.r.w, g.vm)
-	}
+	slice, bake, ok := func() (*world.Mac, string, bool) {
+		g.r.w.Lock()
+		defer g.r.w.Unlock()
+		slice, ok := g.r.w.Macs[g.vm]
+		ok = ok && slice.Self != nil
+		bake := ""
+		if !ok {
+			slice, bake, ok = madeSlice(g.r.w, g.vm)
+		}
+		return slice, bake, ok
+	}()
 	if bake != "" && g.r.far != nil {
-		g.r.w.Unlock()
 		if err := g.bakeSlice(ctx, bake); err != nil {
 			return contract.GuestResult{}, err
 		}
+	}
+	ok, err := func() (bool, error) {
 		g.r.w.Lock()
-	}
-	ok = ok && (cmd.Line != unix.Guest || !g.r.w.Fails("Guest.Serve"))
-	if ok && cmd.Line == "bash -s" && cmd.Stdin != nil {
-		script, err := io.ReadAll(cmd.Stdin)
-		if err != nil {
-			g.r.w.Unlock()
-			return contract.GuestResult{}, err
+		defer g.r.w.Unlock()
+		served := ok && (cmd.Line != unix.Guest || !g.r.w.Fails("Guest.Serve"))
+		if served && cmd.Line == "bash -s" && cmd.Stdin != nil {
+			script, err := io.ReadAll(cmd.Stdin)
+			if err != nil {
+				return false, err
+			}
+			copied(slice, script)
+			cmd.Stdin = bytes.NewReader(script)
 		}
-		copied(slice, script)
-		cmd.Stdin = bytes.NewReader(script)
+		return served, nil
+	}()
+	if err != nil {
+		return contract.GuestResult{}, err
 	}
-	g.r.w.Unlock()
 	if cmd.Line != unix.Guest || !ok || g.r.far == nil || cmd.Stdin == nil {
 		return g.Guest.Exec(ctx, cmd)
 	}
@@ -1794,7 +1817,7 @@ func (g worldGuest) Exec(ctx context.Context, cmd contract.GuestCommand) (contra
 	g.r.w.Lock()
 	version, lacks := cmp.Or(slice.Station, Version()), slices.Clone(slice.Lacks)
 	g.r.w.Unlock()
-	err := serve.Stream(ctx, cmd.Stdin, w, lacking{Calls: serve.Local(far.registry, far.profile, version), lacks: lacks}, func(err error) *fail.Error { return kit.Translate(err, "") })
+	err = serve.Stream(ctx, cmd.Stdin, w, lacking{Calls: serve.Local(far.registry, far.profile, version), lacks: lacks}, func(err error) *fail.Error { return kit.Translate(err, "") })
 	return contract.GuestResult{Stdout: out.String()}, err
 }
 

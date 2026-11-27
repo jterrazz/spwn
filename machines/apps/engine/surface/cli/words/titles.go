@@ -4,6 +4,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 	enginecalls "github.com/jterrazz/studio-station/apps/engine/engine/calls"
 )
@@ -48,6 +49,8 @@ func engineTitle(code fail.Code) (string, bool) {
 	// value: the titles of the engine's own refusals, written by hand: the
 	// window shows them as they are, with the glossary's words.
 	switch code {
+	case call.Broke:
+		return "Engine broke", true
 	case enginecalls.StartFailed:
 		return "Engine did not start", true
 	case enginecalls.VMStopped:

@@ -90,6 +90,7 @@ func importTable() map[string][]string {
 		"core/adapter/fake":          {"core/*", "world", std},
 		"core/contract/contracttest": {"core/*", "testing", std},
 		"core/fail":                  {"core/finding", std},
+		"core/goes":                  {"testing/synctest", std},
 	}
 }
 

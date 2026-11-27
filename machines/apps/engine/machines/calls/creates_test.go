@@ -41,10 +41,12 @@ func (*images) ImageKey(context.Context) (string, error) { return "", nil }
 
 // value: an engine that holds no VM and runs none; down, it does not
 // answer, as while it restarts; run, when set, is called at each VM's run;
-// starts, a start runs the VM and its guest answers.
+// starts, a start runs the VM and its guest answers; boots, a VM's run
+// answers once run returns.
 type idleEngine struct {
 	down   bool
 	starts bool
+	boots  bool
 	run    func()
 }
 
@@ -63,6 +65,9 @@ func (*idleEngine) VMs(context.Context) (map[string]machines.EngineVM, error) {
 func (e *idleEngine) Do(_ context.Context, action, _ string) error {
 	if action == engine.VMRun && e.run != nil {
 		e.run()
+	}
+	if e.boots && action == engine.VMRun {
+		return nil
 	}
 	if e.starts && (action == engine.VMStart || action == engine.VMReady) {
 		return nil
@@ -377,6 +382,36 @@ func TestABirthWhoseProcessEndedReadsHalfMadeAndHoldsNoMemory(t *testing.T) {
 		if err := b.m.CheckDelete("web"); err != nil {
 			t.Errorf("%s: a delete of half-made web: %v; want it let through", c.name, err)
 		}
+	}
+}
+
+func TestACreateCutByAPanicAfterItsBootReadsHalfMadeWhileItsVMRuns(t *testing.T) {
+	b := creating(t, true)
+	b.engine.boots = true
+	b.engine.run = func() {
+		b.w.Lock()
+		defer b.w.Unlock()
+		b.w.Mac("mac").VMs["web"].PID = 4321
+		b.w.Script = append(b.w.Script, world.Fault{Call: "Hypervisor.Address", Times: 1, Panic: true})
+	}
+	broke := func() (v any) {
+		defer func() { v = recover() }()
+		_, _ = b.m.Create(context.Background(), model.CreateRequest{Image: "base-ubuntu", Name: "web", Lifetime: model.Persistent}, nil, nil)
+		return nil
+	}()
+	if broke == nil {
+		t.Fatal("the create returned; want it cut by the address's panic")
+	}
+	rec, err := b.store.Get(context.Background(), "web")
+	if err != nil || rec.Birth == nil || rec.Birth.Step != model.BornAddress || rec.Owner != nil {
+		t.Fatalf("web's record keeps birth %+v, owner %+v (%v); want its birth at the address, no process making it", rec.Birth, rec.Owner, err)
+	}
+	vm, _ := readVM(t, b, "web")
+	if vm.State != model.Running || vm.Detail != model.HalfMade || vm.Birth != nil {
+		t.Errorf("web reads %s %q, birth %+v; want running, half made", vm.State, vm.Detail, vm.Birth)
+	}
+	if err := b.m.CheckDelete("web"); err != nil {
+		t.Errorf("a delete of half-made web: %v; want it let through", err)
 	}
 }
 
