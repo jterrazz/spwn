@@ -94,6 +94,18 @@ func LocalStateDir() string {
 	return UserDir()
 }
 
+// StateTree is the folder LocalStateDir and DataDir are under, as a Tree:
+// the project's root when a project is active, so a write there cannot
+// leave the project by a link it carries, else the user's own home,
+// made when missing.
+func StateTree() *Tree {
+	if root := ProjectRoot(); root != "" {
+		return Within(root)
+	}
+	_ = os.MkdirAll(UserDir(), 0o755)
+	return Within(UserDir())
+}
+
 // WorldsDir returns the worlds config directory.
 func WorldsDir() string {
 	return filepath.Join(DataDir(), WorldsSubDir)

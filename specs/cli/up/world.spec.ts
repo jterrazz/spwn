@@ -158,16 +158,48 @@ describe('world', () => {
         expect(result.containerIds).toStrictEqual([]);
     });
 
-    test('a workspace path that does not exist is refused and leaves no container', async () => {
-        // Given - worlds.neo mounting a host path that is not there
+    test('a workspace path outside the project is refused off a terminal, naming it and the way to allow it', async () => {
+        // Given - worlds.neo mounting a host path outside the project, no terminal and no answer kept
         await using result = await cli
             .fixture(directory('../__fixtures__/docker-pilot/'))
             .fixture(directory('./__fixtures__/bad-workspace/'))
             .exec('up');
 
-        // Then - the refusal names the path and nothing runs
+        // Then - the refusal names the path and what it would grant, before Docker, and nothing runs
+        expect(result.exitCode).toBe(1);
+        expect(result.stderr).toMatch(
+            '  ✗ Outside the project      outside.not-granted: spwn.yaml names a host path outside the project "{{workdir}}", and no answer grants it: "/no/such/workspace" (read-write mount at /workspaces/workspace in world "neo")\n    Run `spwn up` in a terminal to be asked once (a yes is kept), or `spwn up --yes` to allow these paths for this run only\n\n',
+        );
+        expect(result.containerIds).toStrictEqual([]);
+    });
+
+    test('a workspace whose text would rewrite the prompt is refused before anything is asked or kept', async () => {
+        // Given - worlds.neo naming a workspace whose name carries escapes and newlines that redraw the terminal
+        await using result = await cli
+            .fixture(directory('../__fixtures__/docker-pilot/'))
+            .fixture(directory('./__fixtures__/forged-workspace/'))
+            .exec('up neo --yes');
+
+        // Then - the refusal is coded and quotes the text, no grant is kept, and nothing runs
+        expect(result.exitCode).toBe(1);
+        expect(result.stderr).toMatch(
+            '  ✗ Project                  world "neo": spwn-yaml.control-character: workspace "x\\x1b[1A\\x1b[2K\\r    /Users/me/code/lib\\n      read-only mount at /workspaces/lib=../.." holds a control character: a name or a path of spwn.yaml holds none\n    Check spwn.yaml or pick an existing world name\n\n',
+        );
+        expect(result.file('spwn-home/grants.yaml').exists).toBe(false);
+        expect(result.containerIds).toStrictEqual([]);
+    });
+
+    test('a workspace path allowed by --yes that does not exist is refused and leaves no container', async () => {
+        // Given - worlds.neo mounting a host path that is not there, allowed for this run
+        await using result = await cli
+            .fixture(directory('../__fixtures__/docker-pilot/'))
+            .fixture(directory('./__fixtures__/bad-workspace/'))
+            .exec('up --yes');
+
+        // Then - the path allowed for this run is printed, the refusal names it, nothing runs and nothing is kept
         expect(result.exitCode).toBe(1);
         expect(result.stderr).toMatch(`
+              allowed for this run: "/no/such/workspace" (read-write mount at /workspaces/workspace in world "neo")
 
               ⬡ Waking neo
 
@@ -181,6 +213,7 @@ describe('world', () => {
                   Check that the -w path exists
 
         `);
+        expect(result.file('spwn-home/grants.yaml').exists).toBe(false);
         expect(result.containerIds).toStrictEqual([]);
     });
 });

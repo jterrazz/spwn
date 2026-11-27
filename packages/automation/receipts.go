@@ -3,12 +3,16 @@ package automation
 import (
 	"bufio"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"sync"
 	"time"
+
+	"spwn.sh/packages/platform"
 )
 
 const receiptTimeFormat = time.RFC3339Nano
@@ -188,6 +192,10 @@ type ReceiptWriter interface {
 // roughly six months of brisk-pace receipts on disk without
 // unbounded growth.
 type FileReceiptWriter struct {
+	// Root is the project's folder: every write and rename of the log
+	// goes through a root opened there, so a link the project carries
+	// on the way to Path is refused, never written through.
+	Root string
 	Path string
 	// RotateSize is the byte threshold that triggers rotation.
 	// Zero disables rotation (legacy behaviour). Set via
@@ -210,8 +218,9 @@ const (
 // early construction failures (e.g. directory missing) surface
 // there, not at New time, because the engine boot path constructs
 // receipts before knowing whether any will actually fire.
-func NewFileReceiptWriter(path string) *FileReceiptWriter {
+func NewFileReceiptWriter(root, path string) *FileReceiptWriter {
 	return &FileReceiptWriter{
+		Root:       root,
 		Path:       path,
 		RotateSize: DefaultRotateSize,
 		RotateKeep: DefaultRotateKeep,
@@ -230,44 +239,44 @@ func NewFileReceiptWriter(path string) *FileReceiptWriter {
 func (w *FileReceiptWriter) Write(r Receipt) error {
 	w.mu.Lock()
 	defer w.mu.Unlock()
-	if err := os.MkdirAll(filepath.Dir(w.Path), 0o755); err != nil {
+	if w.Root == "" {
+		return fmt.Errorf("receipt log %s: no project root to write it under", w.Path)
+	}
+	tree := platform.Within(w.Root)
+	defer tree.Close()
+	if err := tree.MkdirAll(filepath.Dir(w.Path), 0o755); err != nil {
 		return fmt.Errorf("receipt dir: %w", err)
 	}
 
 	if w.RotateSize > 0 {
-		if info, err := os.Stat(w.Path); err == nil && info.Size() >= w.RotateSize {
-			_ = w.rotateLocked()
+		if info, err := tree.Stat(w.Path); err == nil && info.Size() >= w.RotateSize {
+			_ = w.rotateLocked(tree)
 		}
 	}
 
-	f, err := os.OpenFile(w.Path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
-	if err != nil {
-		return fmt.Errorf("open receipt log: %w", err)
-	}
-	defer f.Close()
 	data, err := json.Marshal(r)
 	if err != nil {
 		return fmt.Errorf("encode receipt: %w", err)
 	}
-	if _, err := f.Write(append(data, '\n')); err != nil {
+	if err := tree.AppendFile(w.Path, append(data, '\n'), 0o644); err != nil {
 		return fmt.Errorf("append receipt: %w", err)
 	}
 	return nil
 }
 
-func (w *FileReceiptWriter) rotateLocked() error {
+func (w *FileReceiptWriter) rotateLocked(tree *platform.Tree) error {
 	keep := w.RotateKeep
 	if keep < 1 {
 		keep = 1
 	}
 	oldest := fmt.Sprintf("%s.%d", w.Path, keep)
-	_ = os.Remove(oldest)
+	_ = tree.Remove(oldest)
 	for i := keep - 1; i >= 1; i-- {
 		from := fmt.Sprintf("%s.%d", w.Path, i)
 		to := fmt.Sprintf("%s.%d", w.Path, i+1)
-		_ = os.Rename(from, to)
+		_ = tree.Rename(from, to)
 	}
-	if err := os.Rename(w.Path, w.Path+".1"); err != nil {
+	if err := tree.Rename(w.Path, w.Path+".1"); err != nil {
 		return fmt.Errorf("rotate %s: %w", w.Path, err)
 	}
 	return nil
@@ -300,13 +309,17 @@ func (w *MemoryReceiptWriter) Receipts() []Receipt {
 	return out
 }
 
-func ReadReceipts(path string) (rows []Receipt, unreadable int, err error) {
-	// invariant: a missing file is none; a line that is not a receipt, or is
-	// over maxReceiptLineBytes, is skipped and counted in unreadable, and the
-	// rest is kept, a last line with no trailing newline included.
-	f, err := os.Open(path)
+func ReadReceipts(root, path string) (rows []Receipt, unreadable int, err error) {
+	// invariant: path is read through the project root, never through a link
+	// out of it nor from anything but a regular file; a missing file is none;
+	// a line that is not a receipt, or is over maxReceiptLineBytes, is skipped
+	// and counted in unreadable, and the rest is kept, a last line with no
+	// trailing newline included.
+	tree := platform.Within(root)
+	f, err := tree.OpenFile(path, os.O_RDONLY, 0)
+	tree.Close()
 	if err != nil {
-		if os.IsNotExist(err) {
+		if errors.Is(err, fs.ErrNotExist) {
 			return nil, 0, nil
 		}
 		return nil, 0, err

@@ -189,7 +189,7 @@ func printEvent(e coreactivity.Event) {
 	fmt.Fprintf(os.Stdout, "  %s  %s  %s%s\n",
 		ui.Faint(ts),
 		color(string(e.Type)),
-		e.Phrase,
+		ui.Clean(e.Phrase),
 		meta,
 	)
 }

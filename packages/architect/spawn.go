@@ -1,6 +1,7 @@
 package architect
 
 import (
+	"cmp"
 	"context"
 	"fmt"
 	"io"
@@ -72,6 +73,19 @@ type SpawnOpts struct {
 	// never mentions /world/knowledge/). The CLI resolves any
 	// project-relative path to absolute before calling Spawn.
 	Knowledge string
+	// Recheck, when set, is called just before the container is made and
+	// again once it is started: an error refuses the world, the started
+	// container removed. The CLI resolves the project's declared host
+	// paths again there, since a world of the same project may rewrite
+	// the project's links while this one starts.
+	Recheck func() error
+}
+
+func (opts *SpawnOpts) recheck() error {
+	if opts.Recheck == nil {
+		return nil
+	}
+	return opts.Recheck()
 }
 
 func (opts *SpawnOpts) runtimeName() string {
@@ -91,6 +105,19 @@ func (opts *SpawnOpts) runtimeName() string {
 func (opts *SpawnOpts) Validate() error {
 	if opts.ConfigName == "" {
 		return fmt.Errorf("SpawnOpts.ConfigName is required")
+	}
+	if err := platform.CheckName("world", opts.ConfigName); err != nil {
+		return err
+	}
+	if opts.AgentName != "" {
+		if err := platform.CheckName("agent", opts.AgentName); err != nil {
+			return err
+		}
+	}
+	for _, spec := range opts.Agents {
+		if err := platform.CheckName("agent", spec.Name); err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -381,8 +408,11 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	}
 
 	worldStateDir := worldStateDirFor(id)
-	if err := os.MkdirAll(worldStateDir, 0o755); err != nil {
-		return nil, fmt.Errorf("create world-state dir %s: %w", worldStateDir, err)
+	state := platform.StateTree()
+	mkErr := state.MkdirAll(worldStateDir, 0o755)
+	state.Close()
+	if mkErr != nil {
+		return nil, fmt.Errorf("create world-state dir %s: %w", worldStateDir, mkErr)
 	}
 
 	if knowledgeMounted {
@@ -416,6 +446,10 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 		GroupAdd:    groupAdd,
 	}
 
+	if err := opts.recheck(); err != nil {
+		releaseImage()
+		return nil, err
+	}
 	containerID, err := a.backend.Create(ctx, containerCfg)
 	releaseImage()
 	if err != nil {
@@ -425,6 +459,10 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	if err := a.backend.Start(ctx, containerID); err != nil {
 		a.rollback(ctx, containerID)
 		return nil, fmt.Errorf("start container: %w", err)
+	}
+	if err := opts.recheck(); err != nil {
+		a.rollback(ctx, containerID)
+		return nil, err
 	}
 	opts.progress("container_created", id)
 
@@ -454,14 +492,22 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	}
 	opts.progress("tools_probed", fmt.Sprintf("%d verified", len(verifiedTools)))
 
-	runtimeSkills := collectRuntimeSkills(platform.ProjectRoot(), resolvedTools)
-	hookPool := loadRuntimeHooks(platform.ProjectRoot())
-	commandPool := loadRuntimeCommands(platform.ProjectRoot())
+	var project *platform.Tree
+	if root := platform.ProjectRoot(); root != "" {
+		project = platform.Within(root)
+		defer project.Close()
+	}
+	minds := platform.Within(cmp.Or(platform.ProjectRoot(), platform.UserDir()))
+	defer minds.Close()
+	runtimeSkills := collectRuntimeSkills(project, resolvedTools)
+	warnings = append(warnings, refusedToolSkills(resolvedTools)...)
+	hookPool := loadRuntimeHooks(project)
+	commandPool := loadRuntimeCommands(project)
 	compileInput := transpile.Input{
 		Deps:                  opts.Manifest.Deps,
 		VerifiedTools:         facultiesForRuntime(verifiedTools, opts.Manifest.Deps),
 		WorldID:               id,
-		Agents:                rosterCompileAgents(rosterAgents, hookPool, commandPool),
+		Agents:                rosterCompileAgents(minds, rosterAgents, hookPool, commandPool),
 		WorldKnowledgeMounted: knowledgeMounted,
 		Skills:                runtimeSkills,
 		Hooks:                 hookPool,

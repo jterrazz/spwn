@@ -1,10 +1,34 @@
 version: '2'
 run:
     modules-download-mode: readonly
+    # invariant: every exclusion path below is relative to this file, whichever module the run starts in.
+    relative-path-mode: cfg
 linters:
     enable:
         - depguard
+        - forbidigo
     settings:
+        forbidigo:
+            # invariant: a read or a write of a project goes through a root opened at its folder (packages/platform's
+            # Tree and FS), never a plain call that a name, a "..", an absolute path or a link of the declaration
+            # could direct outside it; the packages it binds are the scope rule of the exclusions below.
+            analyze-types: true
+            forbid:
+                - pattern: ^os\.(Open|OpenFile|ReadFile|ReadDir|Stat|Lstat|DirFS|Readlink|OpenRoot|OpenInRoot)$
+                  pkg: ^os$
+                  msg: a project is read through platform.Within or platform.FS, never a plain os read nor a root of its own
+                - pattern: ^ioutil\.(ReadFile|ReadDir)$
+                  pkg: ^io/ioutil$
+                  msg: a project is read through platform.Within or platform.FS, never a plain ioutil read
+                - pattern: ^filepath\.(Walk|WalkDir|Glob|EvalSymlinks)$
+                  pkg: ^path/filepath$
+                  msg: a project is walked through platform.Tree's WalkDir, never a plain filepath walk or link resolution
+                - pattern: ^syscall\.Open$
+                  pkg: ^syscall$
+                  msg: a project is read through platform.Within or platform.FS, never a raw open
+                - pattern: ^os\.(WriteFile|Create|MkdirAll|Mkdir|Rename|Remove|RemoveAll|Symlink|Chmod)$
+                  pkg: ^os$
+                  msg: a project is written through platform.Within or platform.StateTree, never a plain os write a link of it could direct outside
         depguard:
             # invariant: each rule denies a layer the imports of the layers above it.
             # L1 platform imports nothing; L2 activity, authentication, upgrade import L1;
@@ -106,6 +130,57 @@ linters:
             - linters:
                   - errcheck
               path: _test\.go
+            # invariant: forbidigo binds the packages that read a project: its loader, the transpiler's source, the
+            # dependency packages that read spwn.lock, spwn/tools/ and a tool's files, the architect, which reads
+            # spwn/skills/, spwn/hooks/, spwn/commands/ and the agents' Minds into a world, the automation engine, the agent
+            # package's agent.yaml, journal and session files, and the world-state store under .spwn/world-states.
+            - linters:
+                  - forbidigo
+              path-except: ^packages/(architect/|automation/|project/|transpile/source/|dependency/(refs/|lockfile\.go|internal/manifest/|internal/adapters/local/)|agent/(manifest\.go|internal/(manifest|journal|session)/)|world/runtimestate/)
+            # outside: not yet rooted: a Mind's journal is read plainly by the machines engine's agents.show and by Dream,
+            # its session files by no production caller; their writes go through platform.DataFiles.
+            - linters:
+                  - forbidigo
+              path: ^packages/agent/internal/(journal|session)/
+              source: os\.(ReadFile|ReadDir)\(
+            # outside: an fs automation watches the host folder the daemon resolved against the project
+            # (apps/cli/automation/daemon.go), one outside it only once the user granted it
+            # (apps/cli/cliproject/outside.go); the watcher lists names and times there, reading no file's bytes.
+            - linters:
+                  - forbidigo
+              path: ^packages/automation/(automation|fs_source)\.go$
+            # outside: a world's workspaces are host folders spwn up resolved against the project
+            # (apps/cli/world/project.go), one outside it only once the user granted it, or given by -w; each is
+            # stat'd before its bind.
+            - linters:
+                  - forbidigo
+              path: ^packages/architect/spawn\.go$
+              source: os\.Stat\(abs\)
+            # outside: a world's knowledge is the folder spwn up resolved against the project, one outside it only
+            # once the user granted it; it is stat'd before its bind.
+            - linters:
+                  - forbidigo
+              path: ^packages/architect/spawn\.go$
+              source: os\.Stat\(opts\.Knowledge\)
+            # outside: the gh cache is the user's own folder, made before each world mounts it.
+            - linters:
+                  - forbidigo
+              path: ^packages/architect/spawn\.go$
+              source: os\.MkdirAll\(ghCache
+            # outside: a test builds the project it reads, and reads it back to judge what the code read.
+            - linters:
+                  - forbidigo
+              path: _test\.go
+            # outside: the organization and teams files live in ~/.spwn, the user's own, never in a project; an agent's
+            # agent.yaml is read by team_agents.go, in scope, through platform.DataFiles.
+            - linters:
+                  - forbidigo
+              path: ^packages/project/(organization|team)\.go$
+            # outside: discovery searches upward from a folder for the spwn.yaml that makes a project, before there
+            # is a project folder to root a read at.
+            - linters:
+                  - forbidigo
+              path: ^packages/project/internal/discovery/
         paths:
             - third_party$
             - examples$

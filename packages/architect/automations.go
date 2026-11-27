@@ -64,10 +64,10 @@ func (d *AutomationDispatcher) Dispatch(ctx context.Context, req automation.Disp
 	}
 
 	if err := authentication.SyncCredentials(); err != nil {
-		fmt.Fprintf(os.Stderr, "spwn: automation: sync credentials before %s/%s: %v\n", req.World, req.Agent, err)
+		fmt.Fprintf(os.Stderr, "spwn: automation: sync credentials before %q/%q: %q\n", req.World, req.Agent, err)
 	}
 	if err := rt.SyncHostCredentials(platform.CredentialsDir()); err != nil {
-		fmt.Fprintf(os.Stderr, "spwn: automation: sync runtime credentials before %s/%s: %v\n", req.World, req.Agent, err)
+		fmt.Fprintf(os.Stderr, "spwn: automation: sync runtime credentials before %q/%q: %q\n", req.World, req.Agent, err)
 	}
 
 	cmd := rt.BuildCommand(runtimes.SpawnConfig{
@@ -211,7 +211,9 @@ func (r *CommandFileResolver) Resolve(ref string) (string, error) {
 		return "", fmt.Errorf("command name %q must be a kebab-case slug (^[a-z][a-z0-9-]*$)", name)
 	}
 	path := filepath.Join(r.ProjectRoot, "spwn", "commands", name+".md")
-	data, err := os.ReadFile(path)
+	project := platform.Within(r.ProjectRoot)
+	defer project.Close()
+	data, err := project.ReadFile(path)
 	if err != nil {
 		return "", fmt.Errorf("read %s: %w", path, err)
 	}
@@ -270,8 +272,8 @@ func (a *Architect) NewAutomationEngine(cfg AutomationEngineConfig) (*automation
 	eng, err := automation.New(automation.Config{
 		Clock:      clock,
 		Dispatcher: NewAutomationDispatcher(a),
-		Receipts:   automation.NewFileReceiptWriter(receiptsPath),
-		State:      automation.NewFileStateStore(statePath),
+		Receipts:   automation.NewFileReceiptWriter(cfg.ProjectRoot, receiptsPath),
+		State:      automation.NewFileStateStore(cfg.ProjectRoot, statePath),
 		FS:         cfg.FS,
 		Commands:   NewCommandFileResolver(cfg.ProjectRoot),
 	})

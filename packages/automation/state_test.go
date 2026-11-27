@@ -62,11 +62,11 @@ func TestFileStateStore_PersistsAcrossInstances(t *testing.T) {
 	path := filepath.Join(dir, "state.json")
 
 	scheduled := mustParse(t, "2026-05-01T06:00:00Z")
-	s1 := NewFileStateStore(path)
+	s1 := NewFileStateStore(dir, path)
 	must(t, s1.RecordFire("brain", "morning-brief", scheduled))
 
 	// Fresh store reading the same file (simulating an architect restart).
-	s2 := NewFileStateStore(path)
+	s2 := NewFileStateStore(dir, path)
 	got, ok := s2.LastFired("brain", "morning-brief")
 	if !ok {
 		t.Fatalf("second instance found no entry")
@@ -78,7 +78,7 @@ func TestFileStateStore_PersistsAcrossInstances(t *testing.T) {
 
 func TestFileStateStore_MissingFileEmptyState(t *testing.T) {
 	dir := t.TempDir()
-	s := NewFileStateStore(filepath.Join(dir, "absent.json"))
+	s := NewFileStateStore(dir, filepath.Join(dir, "absent.json"))
 	if _, ok := s.LastFired("brain", "x"); ok {
 		t.Errorf("missing file should report not-found, not crash")
 	}
@@ -90,7 +90,7 @@ func TestFileStateStore_AtomicReplace(t *testing.T) {
 	// would mean Rename failed silently.
 	dir := t.TempDir()
 	path := filepath.Join(dir, "state.json")
-	s := NewFileStateStore(path)
+	s := NewFileStateStore(dir, path)
 	must(t, s.RecordFire("brain", "x", mustParse(t, "2026-05-01T06:00:00Z")))
 
 	// No .tmp leftover: Rename succeeded.
@@ -110,7 +110,7 @@ func TestFileStateStore_CorruptFileTaintsStore(t *testing.T) {
 	if err := os.WriteFile(path, []byte("{not valid json"), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	s := NewFileStateStore(path)
+	s := NewFileStateStore(dir, path)
 
 	// LastFired returns not-found (engine treats this as first-boot).
 	if _, ok := s.LastFired("brain", "x"); ok {
@@ -142,7 +142,7 @@ func TestFileStateStore_LoadOnceCachesAcrossReads(t *testing.T) {
 	// file written AFTER load doesn't change behaviour.
 	dir := t.TempDir()
 	path := filepath.Join(dir, "state.json")
-	s := NewFileStateStore(path)
+	s := NewFileStateStore(dir, path)
 	must(t, s.RecordFire("brain", "x", mustParse(t, "2026-05-01T06:00:00Z")))
 
 	// Caller observes the value.
@@ -174,7 +174,7 @@ func TestFileStateStore_LegacyBareMapMigratedOnRead(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	s := NewFileStateStore(path)
+	s := NewFileStateStore(dir, path)
 	got, ok := s.LastFired("brain", "morning")
 	if !ok {
 		t.Fatal("legacy file should be readable")
@@ -205,7 +205,7 @@ func TestFileStateStore_FutureVersionTaintsStore(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	s := NewFileStateStore(path)
+	s := NewFileStateStore(dir, path)
 	if err := s.IsTainted(); err == nil {
 		t.Errorf("future-version file should taint the store")
 	}
@@ -223,7 +223,7 @@ func TestFileStateStore_ParentDirCreated(t *testing.T) {
 	dir := t.TempDir()
 	// Nested path that doesn't exist yet: RecordFire should mkdir it.
 	path := filepath.Join(dir, "deep", "nested", "state.json")
-	s := NewFileStateStore(path)
+	s := NewFileStateStore(dir, path)
 	if err := s.RecordFire("brain", "x", time.Now()); err != nil {
 		t.Fatalf("RecordFire on deep path: %v", err)
 	}

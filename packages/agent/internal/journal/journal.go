@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"spwn.sh/packages/activity"
+	"spwn.sh/packages/platform"
 )
 
 // Entry represents a parsed journal entry.
@@ -25,7 +26,9 @@ type Entry struct {
 // Append writes a new journal entry to the Mind's journal directory.
 func Append(mindPath, worldID string, exitCode int, duration time.Duration) error {
 	dir := filepath.Join(mindPath, "journal")
-	if err := os.MkdirAll(dir, 0755); err != nil {
+	files := platform.DataFiles()
+	defer files.Close()
+	if err := files.MkdirAll(dir, 0755); err != nil {
 		return fmt.Errorf("create journal dir: %w", err)
 	}
 
@@ -48,7 +51,7 @@ func Append(mindPath, worldID string, exitCode int, duration time.Duration) erro
 `, worldID, outcome, exitCode, formatDuration(duration), now.Add(-duration).Format(time.RFC3339), now.Format(time.RFC3339))
 
 	path := filepath.Join(dir, filename)
-	if err := os.WriteFile(path, []byte(content), 0644); err != nil {
+	if err := files.WriteFile(path, []byte(content), 0644); err != nil {
 		return err
 	}
 

@@ -9,9 +9,9 @@
 package deploy
 
 import (
+	"cmp"
 	"context"
 	"fmt"
-	"os"
 	"path/filepath"
 	"strings"
 
@@ -32,6 +32,8 @@ import (
 // tree entry under one of the two.
 func MaterialiseTree(ctx context.Context, be backend.Backend, containerID string, tree *transpile.Tree, worldStateDir string) error {
 	var firstErr error
+	state := platform.Within(worldStateDir)
+	defer state.Close()
 	tree.Walk(func(path string, content []byte) {
 		if firstErr != nil {
 			return
@@ -39,11 +41,11 @@ func MaterialiseTree(ctx context.Context, be backend.Backend, containerID string
 		switch {
 		case strings.HasPrefix(path, "world/"):
 			full := filepath.Join(worldStateDir, filepath.FromSlash(strings.TrimPrefix(path, "world/")))
-			if err := os.MkdirAll(filepath.Dir(full), 0o755); err != nil {
+			if err := state.MkdirAll(filepath.Dir(full), 0o755); err != nil {
 				firstErr = fmt.Errorf("mkdir %s: %w", filepath.Dir(full), err)
 				return
 			}
-			if err := os.WriteFile(full, content, 0o644); err != nil {
+			if err := state.WriteFile(full, content, 0o644); err != nil {
 				firstErr = fmt.Errorf("write %s: %w", full, err)
 				return
 			}
@@ -75,9 +77,11 @@ func MaterialiseTree(ctx context.Context, be backend.Backend, containerID string
 // A single chown here wouldn't catch those later writes.
 func SyncIn(ctx context.Context, be backend.Backend, containerID string, agentHomes map[string]string) error {
 	hostRoot := platform.AgentsDir()
+	minds := platform.Within(cmp.Or(platform.ProjectRoot(), platform.UserDir()))
+	defer minds.Close()
 	for agentName, containerHome := range agentHomes {
 		hostDir := filepath.Join(hostRoot, agentName)
-		if info, err := os.Stat(hostDir); err != nil || !info.IsDir() {
+		if info, err := minds.Stat(hostDir); err != nil || !info.IsDir() {
 			continue
 		}
 		if err := be.CopyDirTo(ctx, containerID, containerHome, hostDir); err != nil {

@@ -313,7 +313,11 @@ resumes at the next scheduled time.
 ```
 
 ```text
-spwn automation daemon
+spwn automation daemon [flags]
+```
+
+```text
+      --yes   Allow, for this run only, the watch folders outside the project that spwn.yaml names, printing each; never kept
 ```
 
 ## spwn down
@@ -524,6 +528,7 @@ spwn up [name] [flags]
   -n, --name string             Display name for the world
   -w, --workspace stringArray   Host directory to mount. Repeatable. Forms: "path", "name=path", "name=path:ro". Omit for ephemeral.
   -u, --world string            Explicit path to a YAML config file
+      --yes                     Allow, for this run only, the host paths outside the project that spwn.yaml mounts, printing each; never kept
 ```
 
 ## spwn upgrade

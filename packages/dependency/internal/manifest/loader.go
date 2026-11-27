@@ -1,11 +1,12 @@
 package manifest
 
 import (
+	"errors"
 	"fmt"
 	"io/fs"
-	"os"
 	"path"
 	"path/filepath"
+	"strings"
 
 	"gopkg.in/yaml.v3"
 )
@@ -97,6 +98,9 @@ func Parse(res Resolver, opts ParseOptions) (*Parsed, error) {
 
 	fileBytes := make(map[string][]byte, len(s.Files))
 	for imagePath, sourcePath := range s.Files {
+		if leavesTheFolder(sourcePath) {
+			return nil, fmt.Errorf("%s: files[%q]: source %q %w", s.Name, imagePath, sourcePath, ErrLeavesTheTool)
+		}
 		b, err := res.ReadFile(sourcePath)
 		if err != nil {
 			return nil, fmt.Errorf("%s: read file %q: %w", s.Name, sourcePath, err)
@@ -111,49 +115,34 @@ func Parse(res Resolver, opts ParseOptions) (*Parsed, error) {
 	}, nil
 }
 
-// DirResolver is a Resolver backed by a host filesystem directory.
-// Used by the project-local tool loader for spwn/tools/<name>/.
-type DirResolver struct {
-	Root string
+// ErrLeavesTheTool is the error of a `files:` source that names a path
+// outside the tool's folder: by "..", by an absolute path or by a NUL.
+// It is refused by its name alone, before anything is read.
+var ErrLeavesTheTool = errors.New("leaves the tool's folder")
+
+func leavesTheFolder(source string) bool {
+	return source != "" && (strings.ContainsRune(source, 0) || !filepath.IsLocal(filepath.FromSlash(source)))
 }
 
-// ReadFile reads <Root>/<rel> from disk.
-func (d DirResolver) ReadFile(rel string) ([]byte, error) {
-	return os.ReadFile(filepath.Join(d.Root, filepath.FromSlash(rel)))
-}
-
-// SkillsFS returns an os.DirFS rooted at <Root>/skills/ when that
-// directory exists and contains at least one entry.
-func (d DirResolver) SkillsFS() fs.FS {
-	skillsDir := filepath.Join(d.Root, "skills")
-	info, err := os.Stat(skillsDir)
-	if err != nil || !info.IsDir() {
-		return nil
-	}
-	entries, err := os.ReadDir(skillsDir)
-	if err != nil || len(entries) == 0 {
-		return nil
-	}
-	return os.DirFS(skillsDir)
-}
-
-// EmbedResolver is a Resolver backed by an embed.FS. Used by the
-// catalog loader so dependency manifests ship inside the spwn binary.
+// FSResolver is a Resolver backed by an fs.FS: the embedded catalog's,
+// so dependency manifests ship inside the spwn binary, or a project's
+// folder read through its root (platform.FS), for the tools under
+// spwn/tools/<name>/.
 //
 // Example:
 //
 //	//go:embed all:content
 //	var catalogFS embed.FS
 //
-//	res := EmbedResolver{
+//	res := FSResolver{
 //	    FS:         catalogFS,
 //	    Root:       "content/git/tools/git",  // manifest + files:
 //	    SkillsRoot: "content/git/skills",      // catalog-entry-level
 //	}
 //
-// Paths inside EmbedResolver always use forward slashes because
-// embed.FS normalises to POSIX regardless of host OS.
-type EmbedResolver struct {
+// Paths inside an FSResolver always use forward slashes, as fs.FS
+// names do on every host.
+type FSResolver struct {
 	FS   fs.FS
 	Root string
 
@@ -164,15 +153,15 @@ type EmbedResolver struct {
 	SkillsRoot string
 }
 
-// ReadFile reads <Root>/<rel> from the embedded filesystem.
-func (e EmbedResolver) ReadFile(rel string) ([]byte, error) {
+// ReadFile reads <Root>/<rel> from the FS.
+func (e FSResolver) ReadFile(rel string) ([]byte, error) {
 	return fs.ReadFile(e.FS, path.Join(e.Root, rel))
 }
 
 // SkillsFS returns an fs.Sub of the configured skills directory when
 // it exists and contains at least one entry. Uses SkillsRoot when
 // set, otherwise falls back to <Root>/skills.
-func (e EmbedResolver) SkillsFS() fs.FS {
+func (e FSResolver) SkillsFS() fs.FS {
 	skillsRoot := e.SkillsRoot
 	if skillsRoot == "" {
 		skillsRoot = path.Join(e.Root, "skills")

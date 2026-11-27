@@ -4,7 +4,9 @@
 package discovery
 
 import (
+	"errors"
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 )
@@ -13,10 +15,15 @@ import (
 // every spwn project.
 const ManifestFileName = "spwn.yaml"
 
+// ErrLink is the error of a spwn.yaml found as a link.
+var ErrLink = errors.New("is a link, which a project's manifest never is")
+
 // Find walks up from startPath searching for ManifestFileName. Returns
 // the absolute manifest path and the project root (the directory that
 // contains the manifest). The third return value reports whether
 // anything was found - the caller can decide whether that's an error.
+// A spwn.yaml that is a link is an error naming it: a project's manifest
+// is never reached through a link.
 func Find(startPath string) (manifestPath, root string, found bool, err error) {
 	abs, err := filepath.Abs(startPath)
 	if err != nil {
@@ -32,7 +39,9 @@ func Find(startPath string) (manifestPath, root string, found bool, err error) {
 	}
 	for {
 		candidate := filepath.Join(dir, ManifestFileName)
-		if fi, statErr := os.Stat(candidate); statErr == nil && !fi.IsDir() {
+		if fi, statErr := os.Lstat(candidate); statErr == nil && fi.Mode()&fs.ModeSymlink != 0 {
+			return "", "", false, &fs.PathError{Op: "find", Path: candidate, Err: ErrLink}
+		} else if statErr == nil && !fi.IsDir() {
 			return candidate, dir, true, nil
 		}
 		parent := filepath.Dir(dir)

@@ -24,9 +24,14 @@ func NewTable(headers ...string) *Table {
 	}
 }
 
-// AddRow adds a row to the table. The number of columns must match the headers.
+// AddRow adds a row to the table, each cell through Clean. The number of
+// columns must match the headers.
 func (t *Table) AddRow(cols ...string) {
-	t.rows = append(t.rows, cols)
+	row := make([]string, len(cols))
+	for i, c := range cols {
+		row[i] = Clean(c)
+	}
+	t.rows = append(t.rows, row)
 }
 
 var ansiPattern = regexp.MustCompile(`\x1b\[[0-9;]*m`)
@@ -56,9 +61,6 @@ func padVisible(s string, w int) string {
 }
 
 func statusDisplay(cell string) string {
-	if strings.HasPrefix(cell, "\x1b[") {
-		return cell
-	}
 	switch cell {
 	case "running", "connected":
 		return green.Sprint("● " + cell)
@@ -83,7 +85,7 @@ func (t *Table) Render() {
 				continue
 			}
 			w := visibleWidth(cell)
-			if t.headers[i] == "STATUS" && !strings.HasPrefix(cell, "\x1b[") {
+			if t.headers[i] == "STATUS" {
 				w += 2
 			}
 			if w > widths[i] {

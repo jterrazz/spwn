@@ -77,7 +77,9 @@ type Input struct {
 	Manifest *intmanifest.Manifest
 
 	// Tree is Root, read through a root no path of the declaration can
-	// leave; every rule reads the project through it. Nil: Run opens it.
+	// leave; every rule reads the project through it. Nil: Run and
+	// Lockfile open it, and a rule run alone opens its own and closes it
+	// when it returns.
 	Tree *platform.Tree
 
 	// AgentRefs are the deployable agents (referenced by some world).
@@ -370,6 +372,8 @@ func ruleAgentDirsExist(in Input) []Issue {
 }
 
 func ruleAgentStructure(in Input) []Issue {
+	tree, done := in.tree()
+	defer done()
 	required := []struct {
 		rel   string
 		isDir bool
@@ -388,7 +392,7 @@ func ruleAgentStructure(in Input) []Issue {
 		}
 		for _, r := range required {
 			full := filepath.Join(a.Path, r.rel)
-			info, err := in.tree().Stat(full)
+			info, err := tree.Stat(full)
 			if err != nil {
 				out = append(out, Issue{
 					Level: r.level, Path: relPath(in.Root, full),
@@ -486,13 +490,15 @@ func loadAgentYAML(t *platform.Tree, dir string) (*agentYAML, error) {
 }
 
 func ruleAgentYAMLParses(in Input) []Issue {
+	tree, done := in.tree()
+	defer done()
 	var out []Issue
 	for _, a := range in.AgentRefs {
 		if !a.Exists {
 			continue
 		}
 		yamlPath := filepath.Join(a.Path, "agent.yaml")
-		data, err := in.tree().ReadFile(yamlPath)
+		data, err := tree.ReadFile(yamlPath)
 		if err != nil {
 			if os.IsNotExist(err) {
 				continue
@@ -522,6 +528,8 @@ func ruleAgentYAMLParses(in Input) []Issue {
 }
 
 func ruleAgentYAMLLegacyKeys(in Input) []Issue {
+	tree, done := in.tree()
+	defer done()
 	var out []Issue
 	legacyKeys := []string{"tools", "skills", "hooks"}
 	for _, a := range in.AgentRefs {
@@ -529,7 +537,7 @@ func ruleAgentYAMLLegacyKeys(in Input) []Issue {
 			continue
 		}
 		yamlPath := filepath.Join(a.Path, "agent.yaml")
-		data, err := in.tree().ReadFile(yamlPath)
+		data, err := tree.ReadFile(yamlPath)
 		if err != nil {
 			continue
 		}
@@ -553,12 +561,14 @@ func ruleAgentYAMLLegacyKeys(in Input) []Issue {
 }
 
 func ruleAgentDescription(in Input) []Issue {
+	tree, done := in.tree()
+	defer done()
 	var out []Issue
 	for _, a := range in.AgentRefs {
 		if !a.Exists {
 			continue
 		}
-		parsed, err := loadAgentYAML(in.tree(), a.Path)
+		parsed, err := loadAgentYAML(tree, a.Path)
 		if err != nil {
 			continue
 		}
@@ -658,6 +668,8 @@ func ruleWorkspaceMounts(in Input) []Issue {
 }
 
 func rulePackVersionConflict(in Input) []Issue {
+	tree, done := in.tree()
+	defer done()
 	if in.Manifest == nil {
 		return nil
 	}
@@ -673,7 +685,7 @@ func rulePackVersionConflict(in Input) []Issue {
 			if a == nil || !a.Exists {
 				continue
 			}
-			parsed, err := loadAgentYAML(in.tree(), a.Path)
+			parsed, err := loadAgentYAML(tree, a.Path)
 			if err != nil {
 				continue
 			}
@@ -705,6 +717,8 @@ func rulePackVersionConflict(in Input) []Issue {
 }
 
 func ruleRuntimeBackendConflict(in Input) []Issue {
+	tree, done := in.tree()
+	defer done()
 	if in.Manifest == nil {
 		return nil
 	}
@@ -721,7 +735,7 @@ func ruleRuntimeBackendConflict(in Input) []Issue {
 			if a == nil || !a.Exists {
 				continue
 			}
-			parsed, err := loadAgentYAML(in.tree(), a.Path)
+			parsed, err := loadAgentYAML(tree, a.Path)
 			if err != nil || parsed.Runtime.Backend == "" {
 				continue
 			}
@@ -744,6 +758,8 @@ func ruleRuntimeBackendConflict(in Input) []Issue {
 }
 
 func rulePacksExist(in Input) []Issue {
+	tree, done := in.tree()
+	defer done()
 	if in.Manifest == nil {
 		return nil
 	}
@@ -777,7 +793,7 @@ func rulePacksExist(in Input) []Issue {
 			return []Issue{{
 				Level: LevelError, Path: location,
 				Message: fmt.Sprintf("dependency %q is invalid", raw),
-				Hint:    invalidRefHint(in.tree(), in.Root, raw),
+				Hint:    invalidRefHint(tree, in.Root, raw),
 			}}
 		}
 
@@ -822,7 +838,7 @@ func rulePacksExist(in Input) []Issue {
 		if !a.Exists {
 			continue
 		}
-		parsed, err := loadAgentYAML(in.tree(), a.Path)
+		parsed, err := loadAgentYAML(tree, a.Path)
 		if err != nil {
 			continue
 		}
@@ -835,10 +851,12 @@ func rulePacksExist(in Input) []Issue {
 }
 
 func ruleLockfileConsistent(in Input) []Issue {
+	tree, done := in.tree()
+	defer done()
 	if in.Manifest == nil {
 		return nil
 	}
-	lock, err := dependency.ReadLockfile(in.tree())
+	lock, err := dependency.ReadLockfile(tree)
 	if err != nil {
 		return []Issue{{
 			Level: LevelError, Path: dependency.LockFileName,
@@ -867,7 +885,7 @@ func ruleLockfileConsistent(in Input) []Issue {
 		if !a.Exists {
 			continue
 		}
-		parsed, err := loadAgentYAML(in.tree(), a.Path)
+		parsed, err := loadAgentYAML(tree, a.Path)
 		if err != nil {
 			continue
 		}
@@ -900,6 +918,8 @@ func ruleLockfileConsistent(in Input) []Issue {
 }
 
 func ruleRuntimeSupported(in Input) []Issue {
+	tree, done := in.tree()
+	defer done()
 	if len(in.SupportedRuntimes) == 0 {
 		return nil
 	}
@@ -916,7 +936,7 @@ func ruleRuntimeSupported(in Input) []Issue {
 		if !a.Exists {
 			continue
 		}
-		parsed, err := loadAgentYAML(in.tree(), a.Path)
+		parsed, err := loadAgentYAML(tree, a.Path)
 		if err != nil || parsed.Runtime.Backend == "" {
 			continue
 		}
@@ -933,13 +953,15 @@ func ruleRuntimeSupported(in Input) []Issue {
 }
 
 func ruleMarkdownImports(in Input) []Issue {
+	tree, done := in.tree()
+	defer done()
 	var out []Issue
 	for _, a := range in.AgentRefs {
 		if !a.Exists {
 			continue
 		}
 		entryPath := filepath.Join(a.Path, "AGENTS.md")
-		result, err := resolve.Walk(in.tree(), a.Path, entryPath)
+		result, err := resolve.Walk(tree, a.Path, entryPath)
 		if err != nil {
 			continue
 		}
@@ -974,10 +996,12 @@ func ruleMarkdownImports(in Input) []Issue {
 }
 
 func ruleSkillFrontmatter(in Input) []Issue {
+	tree, done := in.tree()
+	defer done()
 	var out []Issue
-	for _, path := range collectSkillFiles(in.tree(), in.Root) {
+	for _, path := range collectSkillFiles(tree, in.Root) {
 		rel := relPath(in.Root, path)
-		fm, err := ParseMarkdownFrontmatter(in.tree(), path)
+		fm, err := ParseMarkdownFrontmatter(tree, path)
 		if err != nil {
 			out = append(out, Issue{
 				Level: LevelError, Path: rel,
@@ -1058,6 +1082,8 @@ func ruleOrphanAgents(in Input) []Issue {
 }
 
 func ruleKnowledgePath(in Input) []Issue {
+	tree, done := in.tree()
+	defer done()
 	if in.Manifest == nil {
 		return nil
 	}
@@ -1078,16 +1104,16 @@ func ruleKnowledgePath(in Input) []Issue {
 		if !filepath.IsAbs(resolved) {
 			resolved = filepath.Join(in.Root, path)
 		}
-		if !in.tree().Holds(resolved) {
+		if !tree.Holds(resolved) {
 			out = append(out, Issue{
 				Level:   LevelError,
 				Path:    "spwn.yaml#worlds." + name + ".knowledge",
 				Message: fmt.Sprintf("knowledge path %q leaves the project", path),
-				Hint:    "keep the world's knowledge in a folder of the project, e.g. `knowledge: ./knowledge`",
+				Hint:    "keep the world's knowledge in a folder of the project, e.g. `knowledge: ./knowledge`; `spwn up` mounts this one only once you allow it, asked on a terminal",
 			})
 			continue
 		}
-		if !in.tree().IsDir(resolved) {
+		if !tree.IsDir(resolved) {
 			out = append(out, Issue{
 				Level:   LevelWarning,
 				Path:    "spwn.yaml#worlds." + name + ".knowledge",
@@ -1100,11 +1126,13 @@ func ruleKnowledgePath(in Input) []Issue {
 }
 
 func ruleHookEventsSupported(in Input) []Issue {
+	tree, done := in.tree()
+	defer done()
 	if len(in.HookEventsByRuntime) == 0 || in.Manifest == nil {
 		return nil
 	}
 	hooksDir := filepath.Join(in.Root, "spwn", "hooks")
-	entries, err := in.tree().ReadDir(hooksDir)
+	entries, err := tree.ReadDir(hooksDir)
 	if err != nil {
 		return nil
 	}
@@ -1117,7 +1145,7 @@ func ruleHookEventsSupported(in Input) []Issue {
 		if !a.Exists {
 			continue
 		}
-		y, ferr := loadAgentYAML(in.tree(), a.Path)
+		y, ferr := loadAgentYAML(tree, a.Path)
 		if ferr != nil || y == nil {
 			continue
 		}
@@ -1151,7 +1179,7 @@ func ruleHookEventsSupported(in Input) []Issue {
 		}
 		hookName := strings.TrimSuffix(e.Name(), ".yaml")
 		path := filepath.Join(hooksDir, e.Name())
-		data, rerr := in.tree().ReadFile(path)
+		data, rerr := tree.ReadFile(path)
 		if rerr != nil {
 			continue
 		}
@@ -1368,9 +1396,10 @@ func Lockfile(in Input) []Issue {
 	return ruleLockfileConsistent(in)
 }
 
-func (in Input) tree() *platform.Tree {
+func (in Input) tree() (*platform.Tree, func()) {
 	if in.Tree != nil {
-		return in.Tree
+		return in.Tree, func() {}
 	}
-	return platform.Within(in.Root)
+	t := platform.Within(in.Root)
+	return t, func() { _ = t.Close() }
 }

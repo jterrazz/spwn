@@ -6,6 +6,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/fatih/color"
+
 	"spwn.sh/apps/cli/ui"
 	"spwn.sh/packages/upgrade"
 )
@@ -84,17 +86,17 @@ func printUpgradeHint() {
 	fmt.Fprintln(w)
 	fmt.Fprintf(w, "  %s %s %s\n",
 		ui.Faint("┌─"),
-		ui.Yellow(ui.Strong("Update available")),
+		ui.StrongIn(color.FgYellow, "Update available"),
 		ui.Faint(strings.Repeat("─", topDashes)),
 	)
 	fmt.Fprintf(w, "  %s  Spwn %s is out  %s\n",
 		ui.Faint("│"),
-		ui.Green(ui.Strong(latest)),
+		ui.StrongIn(color.FgGreen, latest),
 		ui.Faint(fmt.Sprintf("(you're on %s)", current)),
 	)
 	fmt.Fprintf(w, "  %s  Run  %s\n",
 		ui.Faint("│"),
-		ui.Cyan(ui.Strong("spwn upgrade")),
+		ui.StrongIn(color.FgCyan, "spwn upgrade"),
 	)
 	fmt.Fprintf(w, "  %s%s\n",
 		ui.Faint("└"),

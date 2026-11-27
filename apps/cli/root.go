@@ -83,7 +83,7 @@ func Execute() error {
 		var displayed *ui.DisplayedError
 		var coded ExitCoder
 		if !errors.As(err, &displayed) && !errors.As(err, &coded) {
-			fmt.Fprintf(os.Stderr, "\n  %s %s\n\n", ui.Red("Error:"), err)
+			fmt.Fprintf(os.Stderr, "\n  %s %s\n\n", ui.Red("Error:"), ui.CleanError(err))
 		}
 	}
 	return err

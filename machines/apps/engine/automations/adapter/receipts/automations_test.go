@@ -43,7 +43,7 @@ func open(t *testing.T, declared []contracttest.Declared, ran []automations.Run)
 	if err := os.WriteFile(filepath.Join(project, "spwn.yaml"), []byte(body), 0o600); err != nil {
 		t.Fatal(err)
 	}
-	writer := automation.NewFileReceiptWriter(filepath.Join(project, ".spwn", "runs.jsonl"))
+	writer := automation.NewFileReceiptWriter(project, filepath.Join(project, ".spwn", "runs.jsonl"))
 	for _, r := range ran {
 		err := writer.Write(automation.Receipt{World: "brain", Automation: r.Name, Trigger: r.Trigger, Scheduled: r.Scheduled, Fired: r.At, Finished: r.At, DurationMS: r.DurationMS, OK: r.OK, Error: r.Error, Output: r.Output, Reason: r.Cause, Missed: r.Missed, EventPaths: make([]string, r.Paths)})
 		if err != nil {
@@ -77,7 +77,7 @@ func twoGroups(t *testing.T) string {
 	if err := os.WriteFile(filepath.Join(root, "spwn.yaml"), []byte(body), 0o600); err != nil {
 		t.Fatal(err)
 	}
-	writer := automation.NewFileReceiptWriter(filepath.Join(root, ".spwn", "runs.jsonl"))
+	writer := automation.NewFileReceiptWriter(root, filepath.Join(root, ".spwn", "runs.jsonl"))
 	at := time.Date(2026, time.May, 1, 6, 0, 0, 0, time.UTC)
 	for i, group := range []string{"a", "b", "b"} {
 		if err := writer.Write(automation.Receipt{World: group, Automation: "same", Trigger: "cron", Fired: at.Add(time.Duration(i) * time.Hour), OK: true, Reason: "on-time"}); err != nil {

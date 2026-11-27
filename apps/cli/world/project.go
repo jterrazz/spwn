@@ -8,6 +8,7 @@ import (
 
 	"spwn.sh/apps/cli/cliproject"
 	"spwn.sh/apps/cli/runtimeres"
+	"spwn.sh/packages/platform"
 	"spwn.sh/packages/project"
 	"spwn.sh/packages/transpile/source"
 	"spwn.sh/packages/world"
@@ -49,8 +50,16 @@ type projectWorld struct {
 	Project    *project.Project
 	Name       string
 	Agents     []string
-	Workspaces []string
-	Manifest   world.Manifest
+	Workspaces []world.Workspace
+	// Outside is each host path of Workspaces and Knowledge that leaves
+	// the project, which spwn up mounts only once it is granted.
+	Outside []cliproject.Reach
+	// DeclaredKnowledge and DeclaredWorkspaces are the host paths as
+	// spwn.yaml writes them with what each resolved to, resolved again
+	// just before the container is made.
+	DeclaredKnowledge  []cliproject.Declared
+	DeclaredWorkspaces []cliproject.Declared
+	Manifest           world.Manifest
 	// Knowledge is the absolute host path to bind into
 	// /world/knowledge/, resolved from the manifest's
 	// worlds.<name>.knowledge key relative to the project root.
@@ -92,9 +101,23 @@ func resolveProjectWorld(p *project.Project, name, backendOverride string) (*pro
 	if name == "" {
 		name = sortedWorldNames(p)[0]
 	}
+	if err := platform.CheckName("world", name); err != nil {
+		return nil, err
+	}
+	if err := cliproject.CheckText("world name", name); err != nil {
+		return nil, err
+	}
 	w, ok := p.Manifest.Worlds[name]
 	if !ok {
 		return nil, fmt.Errorf("world %q is not defined in spwn.yaml", name)
+	}
+	for _, aname := range w.Agents {
+		if err := platform.CheckName("agent", aname); err != nil {
+			return nil, fmt.Errorf("world %q: %w", name, err)
+		}
+		if err := cliproject.CheckText("agent name", aname); err != nil {
+			return nil, fmt.Errorf("world %q: %w", name, err)
+		}
 	}
 
 	pkgSet := map[string]struct{}{}
@@ -139,13 +162,61 @@ func resolveProjectWorld(p *project.Project, name, backendOverride string) (*pro
 
 	m := world.Manifest{Deps: pkgs, DepPolicies: policies}
 
+	var outside []cliproject.Reach
 	var knowledge string
+	var declaredKnowledge, declaredWorkspaces []cliproject.Declared
 	if kp := strings.TrimSpace(w.Knowledge); kp != "" {
-		if filepath.IsAbs(kp) {
-			knowledge = kp
-		} else {
-			knowledge = filepath.Join(p.Root, kp)
+		resolved, leaves, err := cliproject.ResolveHostPath(p.Root, "knowledge path", kp)
+		if err != nil {
+			return nil, fmt.Errorf("world %q: %w", name, err)
 		}
+		knowledge = resolved
+		declaredKnowledge = append(declaredKnowledge, cliproject.Declared{Text: kp, Resolved: resolved})
+		if leaves {
+			outside = append(outside, cliproject.Reach{Path: resolved, Access: "read-write", Grants: fmt.Sprintf("read-write mount at /world/knowledge in world %q", name), World: name})
+		}
+	}
+	var entries []world.Workspace
+	seen := map[string]bool{}
+	for i, raw := range w.Workspaces {
+		if err := cliproject.CheckText("workspace", raw); err != nil {
+			return nil, fmt.Errorf("world %q: %w", name, err)
+		}
+		parsed, err := parseWorkspaceFlags([]string{raw})
+		if err != nil {
+			return nil, fmt.Errorf("world %q: workspace #%d has empty path", name, i+1)
+		}
+		if len(parsed) == 0 {
+			continue
+		}
+		ws := parsed[0]
+		resolved, leaves, err := cliproject.ResolveHostPath(p.Root, "workspace path", ws.Path)
+		if err != nil {
+			return nil, fmt.Errorf("world %q: %w", name, err)
+		}
+		if !strings.Contains(raw, "=") {
+			lexical := ws.Path
+			if !filepath.IsAbs(lexical) {
+				lexical = filepath.Join(p.Root, lexical)
+			}
+			ws.Name = world.AutoWorkspaceName(lexical, i)
+		}
+		if err := project.ValidateWorkspaceName(ws.Name); err != nil {
+			return nil, fmt.Errorf("world %q: %w", name, err)
+		}
+		if seen[ws.Name] {
+			return nil, fmt.Errorf("world %q: duplicate workspace name %q", name, ws.Name)
+		}
+		seen[ws.Name] = true
+		access := "read-write"
+		if ws.ReadOnly {
+			access = "read-only"
+		}
+		if leaves {
+			outside = append(outside, cliproject.Reach{Path: resolved, Access: access, Grants: fmt.Sprintf("%s mount at /workspaces/%s in world %q", access, ws.Name, name), World: name})
+		}
+		entries = append(entries, world.Workspace{Name: ws.Name, Path: resolved, ReadOnly: ws.ReadOnly})
+		declaredWorkspaces = append(declaredWorkspaces, cliproject.Declared{Text: ws.Path, Resolved: resolved})
 	}
 
 	var runtimeName string
@@ -161,9 +232,13 @@ func resolveProjectWorld(p *project.Project, name, backendOverride string) (*pro
 		Project:    p,
 		Name:       name,
 		Agents:     append([]string(nil), w.Agents...),
-		Workspaces: append([]string(nil), w.Workspaces...),
+		Workspaces: entries,
+		Outside:    outside,
 		Manifest:   m,
 		Knowledge:  knowledge,
 		Runtime:    runtimeName,
+
+		DeclaredKnowledge:  declaredKnowledge,
+		DeclaredWorkspaces: declaredWorkspaces,
 	}, nil
 }

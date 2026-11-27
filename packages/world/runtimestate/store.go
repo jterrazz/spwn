@@ -38,6 +38,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"sync"
@@ -76,8 +77,21 @@ type File struct {
 type Store struct {
 	dir     string
 	backend backend.Backend
+	tree    func() *platform.Tree
+	written func() *platform.Tree
 
 	mu sync.Mutex
+}
+
+func stateTreeAsFound() *platform.Tree {
+	if root := platform.ProjectRoot(); root != "" {
+		return platform.Within(root)
+	}
+	return platform.Within(platform.UserDir())
+}
+
+func treeAbove(dir string) func() *platform.Tree {
+	return func() *platform.Tree { return platform.Within(filepath.Dir(dir)) }
 }
 
 // NewStore returns a production Store wired to the host Docker
@@ -90,20 +104,22 @@ func NewStore() (*Store, error) {
 	if err != nil {
 		return nil, fmt.Errorf("docker backend: %w", err)
 	}
-	return &Store{dir: filepath.Join(platform.LocalStateDir(), "world-states"), backend: docker}, nil
+	return &Store{dir: filepath.Join(platform.LocalStateDir(), "world-states"), backend: docker, tree: stateTreeAsFound, written: platform.StateTree}, nil
 }
 
-// NewStoreWith creates a Store from an explicit backend + root dir.
-// Used by tests and by callers that already hold a backend.
+// NewStoreWith creates a Store from an explicit backend + root dir,
+// read and written through a root at dir's parent. Used by tests and by
+// callers that already hold a backend.
 func NewStoreWith(b backend.Backend, dir string) (*Store, error) {
-	return &Store{dir: dir, backend: b}, nil
+	return &Store{dir: dir, backend: b, tree: treeAbove(dir), written: treeAbove(dir)}, nil
 }
 
-// NewStoreAt returns a Store rooted at dir with no backend. Suitable
-// for tests that only exercise mutable-state methods. Calls to List
-// and Get error with "no backend configured".
+// NewStoreAt returns a Store rooted at dir with no backend, read and
+// written through a root at dir's parent. Suitable for tests that only
+// exercise mutable-state methods. Calls to List and Get error with "no
+// backend configured".
 func NewStoreAt(dir string) (*Store, error) {
-	return &Store{dir: dir}, nil
+	return &Store{dir: dir, tree: treeAbove(dir), written: treeAbove(dir)}, nil
 }
 
 func testRunFilter() string { return os.Getenv(labels.TestRunEnv) }
@@ -246,7 +262,9 @@ func (s *Store) Save(worldID string, f File) error {
 func (s *Store) Delete(worldID string) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	if err := os.Remove(s.path(worldID)); err != nil && !os.IsNotExist(err) {
+	tree := s.tree()
+	defer tree.Close()
+	if err := tree.Remove(s.path(worldID)); err != nil && !errors.Is(err, fs.ErrNotExist) {
 		return err
 	}
 	return nil
@@ -372,9 +390,11 @@ func (s *Store) GC(liveIDs []string) error {
 	for _, id := range liveIDs {
 		live[id] = struct{}{}
 	}
-	entries, err := os.ReadDir(s.dir)
+	tree := s.tree()
+	defer tree.Close()
+	entries, err := tree.ReadDir(s.dir)
 	if err != nil {
-		if os.IsNotExist(err) {
+		if errors.Is(err, fs.ErrNotExist) {
 			return nil
 		}
 		return err
@@ -387,7 +407,7 @@ func (s *Store) GC(liveIDs []string) error {
 		if _, ok := live[id]; ok {
 			continue
 		}
-		_ = os.Remove(filepath.Join(s.dir, id, "runtime.json"))
+		_ = tree.Remove(filepath.Join(s.dir, id, "runtime.json"))
 	}
 	return nil
 }
@@ -397,9 +417,11 @@ func (s *Store) path(worldID string) string {
 }
 
 func (s *Store) loadLocked(worldID string) (File, error) {
-	data, err := os.ReadFile(s.path(worldID))
+	tree := s.tree()
+	defer tree.Close()
+	data, err := tree.ReadFile(s.path(worldID))
 	if err != nil {
-		if os.IsNotExist(err) {
+		if errors.Is(err, fs.ErrNotExist) {
 			return File{}, nil
 		}
 		return File{}, err
@@ -415,8 +437,9 @@ func (s *Store) loadLocked(worldID string) (File, error) {
 }
 
 func (s *Store) saveLocked(worldID string, f File) error {
-	worldDir := filepath.Join(s.dir, worldID)
-	if err := os.MkdirAll(worldDir, 0o755); err != nil {
+	tree := s.written()
+	defer tree.Close()
+	if err := tree.MkdirAll(filepath.Join(s.dir, worldID), 0o755); err != nil {
 		return err
 	}
 	data, err := json.MarshalIndent(f, "", "  ")
@@ -424,8 +447,8 @@ func (s *Store) saveLocked(worldID string, f File) error {
 		return err
 	}
 	tmp := s.path(worldID) + ".tmp"
-	if err := os.WriteFile(tmp, data, 0o644); err != nil {
+	if err := tree.WriteFile(tmp, data, 0o644); err != nil {
 		return err
 	}
-	return os.Rename(tmp, s.path(worldID))
+	return tree.Rename(tmp, s.path(worldID))
 }

@@ -10,6 +10,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"spwn.sh/apps/cli/ui"
 	"spwn.sh/packages/gate"
 )
 
@@ -46,7 +47,7 @@ var startCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		fmt.Fprintln(cmd.OutOrStdout(), "  ✓ gate running on 127.0.0.1:"+gate.HostPort)
+		fmt.Fprintln(cmd.OutOrStdout(), "  ✓ gate running on 127.0.0.1:"+ui.Clean(gate.HostPort))
 		return nil
 	},
 }
@@ -98,7 +99,7 @@ var statusCmd = &cobra.Command{
 		}
 		switch st {
 		case "running":
-			fmt.Fprintln(cmd.OutOrStdout(), "  ✓ running on 127.0.0.1:"+gate.HostPort)
+			fmt.Fprintln(cmd.OutOrStdout(), "  ✓ running on 127.0.0.1:"+ui.Clean(gate.HostPort))
 		case "stopped":
 			fmt.Fprintln(cmd.OutOrStdout(), "  · stopped (container exists)   ·  spwn gate start")
 		case "missing":

@@ -3,8 +3,9 @@
 //
 // One shared schema backs both catalog entries (built-in,
 // compiled into the spwn binary) and project-local tools under
-// spwn/tools/<name>/. Parse() takes a Resolver (DirResolver for
-// disk, EmbedResolver for go:embed) and ParseOptions, and returns
+// spwn/tools/<name>/. Parse() takes a Resolver (an FSResolver, over
+// the embedded catalog or a project read through its root) and
+// ParseOptions, and returns
 // a *Parsed that downstream layers (image, project, validate)
 // consume.
 //
@@ -14,7 +15,7 @@
 // resolves to something on disk. Lockfile owns the line-oriented
 // spwn.lock text format (plus a legacy-YAML fallback for migration).
 //
-// The package has zero spwn dependencies (only stdlib), so every
+// The package imports no spwn package but packages/platform, so every
 // upstream layer can import it. The built-in tool catalog
 // lives in the subpackage builtin, which embeds the generated copy of
 // /catalog and is linked by no engine package.

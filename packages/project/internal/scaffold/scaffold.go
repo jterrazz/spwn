@@ -8,8 +8,9 @@ package scaffold
 import (
 	"bytes"
 	"embed"
+	"errors"
 	"fmt"
-	"os"
+	"io/fs"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -18,6 +19,7 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"spwn.sh/packages/dependency"
+	"spwn.sh/packages/platform"
 	intmanifest "spwn.sh/packages/project/internal/manifest"
 )
 
@@ -43,12 +45,14 @@ func Init(dir string, opts Opts) error {
 	if err != nil {
 		return fmt.Errorf("resolve %s: %w", dir, err)
 	}
-	if info, statErr := os.Stat(absDir); statErr != nil || !info.IsDir() {
+	project := platform.Within(absDir)
+	defer project.Close()
+	if !project.IsDir(".") {
 		return fmt.Errorf("%s is not a directory", absDir)
 	}
 
 	manifestPath := filepath.Join(absDir, "spwn.yaml")
-	if _, statErr := os.Stat(manifestPath); statErr == nil && !opts.Force {
+	if _, statErr := project.Stat("spwn.yaml"); statErr == nil && !opts.Force {
 		return fmt.Errorf("spwn.yaml already exists at %s.\nUse --force to overwrite", manifestPath)
 	}
 
@@ -66,17 +70,17 @@ func Init(dir string, opts Opts) error {
 	}
 	sort.Strings(rels)
 	for _, rel := range rels {
-		dst := filepath.Join(absDir, filepath.FromSlash(rel))
-		if err := os.MkdirAll(filepath.Dir(dst), 0o755); err != nil {
+		dst := filepath.FromSlash(rel)
+		if err := project.MkdirAll(filepath.Dir(dst), 0o755); err != nil {
 			return fmt.Errorf("mkdir for %s: %w", rel, err)
 		}
-		if err := os.WriteFile(dst, files[rel], 0o644); err != nil {
+		if err := project.WriteFile(dst, files[rel], 0o644); err != nil {
 			return fmt.Errorf("write %s: %w", rel, err)
 		}
 	}
 
 	if !opts.NoGitignore {
-		if err := appendGitignore(absDir); err != nil {
+		if err := appendGitignore(project); err != nil {
 			return fmt.Errorf("update .gitignore: %w", err)
 		}
 	}
@@ -99,7 +103,7 @@ type AddWorldOpts struct {
 // name and options. Idempotent: a no-op if an entry with that name
 // already exists. Used by `spwn world create <name>`.
 func AddWorld(manifestPath, name string, opts AddWorldOpts) error {
-	data, err := os.ReadFile(manifestPath)
+	data, err := readManifest(manifestPath)
 	if err != nil {
 		return fmt.Errorf("read %s: %w", manifestPath, err)
 	}
@@ -151,14 +155,14 @@ func AddWorld(manifestPath, name string, opts AddWorldOpts) error {
 	if err != nil {
 		return fmt.Errorf("re-encode %s: %w", manifestPath, err)
 	}
-	return os.WriteFile(manifestPath, out, 0o644)
+	return writeManifest(manifestPath, out)
 }
 
 // RemoveWorld drops the named entry from spwn.yaml#worlds. Returns
 // an error wrapping ErrWorldNotFound if no such entry exists. Used
 // by `spwn world rm <name>`.
 func RemoveWorld(manifestPath, name string) error {
-	data, err := os.ReadFile(manifestPath)
+	data, err := readManifest(manifestPath)
 	if err != nil {
 		return fmt.Errorf("read %s: %w", manifestPath, err)
 	}
@@ -181,7 +185,7 @@ func RemoveWorld(manifestPath, name string) error {
 			if err != nil {
 				return fmt.Errorf("re-encode %s: %w", manifestPath, err)
 			}
-			return os.WriteFile(manifestPath, out, 0o644)
+			return writeManifest(manifestPath, out)
 		}
 	}
 	return ErrWorldNotFound
@@ -320,15 +324,26 @@ func Gitignore(existing []byte) []byte {
 	return out.Bytes()
 }
 
-func appendGitignore(root string) error {
-	path := filepath.Join(root, ".gitignore")
-	existing, err := os.ReadFile(path)
-	if err != nil && !os.IsNotExist(err) {
+func appendGitignore(project *platform.Tree) error {
+	existing, err := project.ReadFile(".gitignore")
+	if err != nil && !errors.Is(err, fs.ErrNotExist) {
 		return err
 	}
 	out := Gitignore(existing)
 	if bytes.Equal(out, existing) {
 		return nil
 	}
-	return os.WriteFile(path, out, 0o644)
+	return project.WriteFile(".gitignore", out, 0o644)
+}
+
+func readManifest(manifestPath string) ([]byte, error) {
+	project := platform.Within(filepath.Dir(manifestPath))
+	defer project.Close()
+	return project.ReadFile(filepath.Base(manifestPath))
+}
+
+func writeManifest(manifestPath string, data []byte) error {
+	project := platform.Within(filepath.Dir(manifestPath))
+	defer project.Close()
+	return project.WriteFile(filepath.Base(manifestPath), data, 0o644)
 }

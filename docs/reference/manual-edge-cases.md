@@ -409,7 +409,39 @@ kernel-block.
 
 ---
 
-## Total: 67 edge-case scenarios
+## K. The outside-path ask on a real terminal (68)
+
+### K68. A two-world `spwn up` whose first world prints a hostile file name before the second asks
+
+This one needs a person at a real terminal (Terminal.app or an xterm, not a pipe): it asks what the ask LOOKS like, which no byte assertion settles. It runs on a development VM's desktop or a test Mac, never on the owner's Mac or HOME.
+
+**Hypothesis:** the one ask of the run comes before any world starts, so nothing world `a` prints can redraw it; world `a`'s refused skill file name is printed escaped (`\x1b[...`), never as a live escape; a `y` typed before the ask does not answer it; a yes is kept only once `b` started.
+**Probe:**
+
+```bash
+export SPWN_HOME=$(mktemp -d) HOME=$(mktemp -d)
+cd "$(mktemp -d)" && mkdir outside && station project create site && cd site
+for a in a b; do
+  cp -R spwn/agents/neo "spwn/agents/$a"
+  printf 'name: %s\ndependencies:\n  - "spwn:unix"\n' "$a" > "spwn/agents/$a/agent.yaml"
+done
+printf '  - "tool/evil"\n' >> spwn/agents/a/agent.yaml
+mkdir -p spwn/tools/evil/skills
+printf 'name: evil\nversion: "0.1.0"\ninstall:\n  commands: ["true"]\n' > spwn/tools/evil/tool.yaml
+ln -s ../../../../../outside "spwn/tools/evil/skills/$(printf 'x\033[2J\033[1;1Hspwn.yaml names nothing outside. [y/N] y')"
+printf 'version: 1\nname: site\nworlds:\n  a:\n    agents: [a]\n    workspaces: [.]\n  b:\n    agents: [b]\n    workspaces: ["away=../outside"]\n' > spwn.yaml
+spwn up 2>/dev/null; echo "exit $?"
+sleep 5 & echo "type y and Enter now, before the ask"; wait
+spwn up; echo "exit $?"
+cat "$SPWN_HOME/grants.yaml"
+```
+
+**Pass criteria:** the first run, its stderr not a terminal, exits non-zero with `outside.not-granted` and starts nothing; in the second, the screen is never cleared; the ask (`spwn.yaml names host paths outside the project "<P>":`, the quoted `".../outside"` with `read-write mount at /workspaces/away in world "b"`, then `The world's agents run what this project gives them` and `[y/N]`) shows before world `a`'s first line; the `y` typed during the `sleep` does not answer it, so the prompt waits; answering `n` starts no world and writes no `grants.yaml`; answering `y` starts `a`, prints its warning with the file name escaped (`skill file x\x1b[2J...`), starts `b`, and `grants.yaml` then holds the outside path.
+**Failure:** the screen clears or the cursor jumps when `a` starts; an ask printed after `a`'s output; the early `y` answers it; `grants.yaml` written after a `n`, or before `b` started.
+
+---
+
+## Total: 68 edge-case scenarios
 
 ## Execution plan
 

@@ -48,7 +48,7 @@ func (w *buildProgressWriter) handleLine(line string) {
 	w.curTotal = total
 	w.curAction = action
 	w.startedAt = time.Now()
-	w.stepper.TreeSpin(formatStepText(cur, total, action, 0))
+	w.stepper.treeSpin(formatStepText(cur, total, action, 0))
 }
 
 func (w *buildProgressWriter) freezeCurrent() {
@@ -57,7 +57,7 @@ func (w *buildProgressWriter) freezeCurrent() {
 	}
 	elapsed := time.Since(w.startedAt)
 	text, detail := formatStepTextParts(w.curNum, w.curTotal, w.curAction, elapsed)
-	w.stepper.TreeLine(text, detail)
+	w.stepper.treeLine(text, detail)
 	w.haveCurrent = false
 }
 

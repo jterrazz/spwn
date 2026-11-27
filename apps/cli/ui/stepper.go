@@ -36,6 +36,7 @@ func New() *Stepper {
 // Start begins a new step with a spinner animation.
 func (s *Stepper) Start(msg string) {
 	s.stopSpinner()
+	msg = Clean(msg)
 
 	if !s.isTTY {
 		fmt.Fprintf(s.w, "  → %s\n", msg)
@@ -83,7 +84,7 @@ func (s *Stepper) UpdateLabel(msg string) {
 		return
 	}
 	s.mu.Lock()
-	s.label = msg
+	s.label = Clean(msg)
 	s.mu.Unlock()
 }
 
@@ -103,9 +104,9 @@ func (s *Stepper) Fail(label string, err error) {
 	s.stopSpinner()
 
 	if err != nil {
-		fmt.Fprintf(s.w, "  %s %-*s %s\n", cross(), labelWidth, red.Sprint(label), faint(err.Error()))
+		fmt.Fprintf(s.w, "  %s %-*s %s\n", cross(), labelWidth, Red(label), dim.Sprint(CleanError(err)))
 	} else {
-		fmt.Fprintf(s.w, "  %s %s\n", cross(), red.Sprint(label))
+		fmt.Fprintf(s.w, "  %s %s\n", cross(), Red(label))
 	}
 }
 
@@ -114,7 +115,7 @@ func (s *Stepper) Fail(label string, err error) {
 func (s *Stepper) FailHint(label string, err error, hint string) error {
 	s.Fail(label, err)
 	if hint != "" {
-		fmt.Fprintf(s.w, "  %s %s\n", " ", faint(hint))
+		fmt.Fprintf(s.w, "  %s %s\n", " ", dim.Sprint(CleanLines(hint)))
 	}
 	s.Blank()
 	return &DisplayedError{Err: err}
@@ -172,7 +173,7 @@ func (s *Stepper) Blank() {
 
 // Success prints a final green success message.
 func (s *Stepper) Success(msg string) {
-	fmt.Fprintf(s.w, "  %s %s\n", check(), green.Sprint(msg))
+	fmt.Fprintf(s.w, "  %s %s\n", check(), Green(msg))
 }
 
 // Warn prints a warning line with a yellow "!" prefix.
@@ -180,15 +181,15 @@ func (s *Stepper) Warn(label, detail string) {
 	s.stopSpinner()
 
 	if detail != "" {
-		fmt.Fprintf(s.w, "  %s %-*s %s\n", warn(), labelWidth, yellow.Sprint(label), faint(detail))
+		fmt.Fprintf(s.w, "  %s %-*s %s\n", warn(), labelWidth, Yellow(label), faint(detail))
 	} else {
-		fmt.Fprintf(s.w, "  %s %s\n", warn(), yellow.Sprint(label))
+		fmt.Fprintf(s.w, "  %s %s\n", warn(), Yellow(label))
 	}
 }
 
 // Info prints a label-value pair for summary output.
 func (s *Stepper) Info(label, value string) {
-	fmt.Fprintf(s.w, "  %-12s %s\n", strong(label), value)
+	fmt.Fprintf(s.w, "  %-12s %s\n", strong(label), Clean(value))
 }
 
 const (
@@ -204,7 +205,7 @@ const (
 // The first phase label breathes.
 func (s *Stepper) Hero(glyph, text string) {
 	s.stopSpinner()
-	fmt.Fprintf(s.w, "  %s %s\n", cyan.Sprint(glyph), strong(text))
+	fmt.Fprintf(s.w, "  %s %s\n", Cyan(glyph), strong(text))
 	s.Blank()
 }
 
@@ -228,6 +229,7 @@ func (s *Stepper) PhaseBreak() {
 // One-shot "    → <msg>" line, since there is no in-place animation.
 func (s *Stepper) SubStart(msg string) {
 	s.stopSpinner()
+	msg = Clean(msg)
 
 	if !s.isTTY {
 		fmt.Fprintf(s.w, "%s→ %s\n", subIndent, msg)
@@ -283,9 +285,9 @@ func (s *Stepper) SubFail(label string, err error) {
 	s.stopSpinner()
 
 	if err != nil {
-		fmt.Fprintf(s.w, "%s%s %-*s %s\n", subIndent, cross(), subLabelCols, red.Sprint(label), faint(err.Error()))
+		fmt.Fprintf(s.w, "%s%s %-*s %s\n", subIndent, cross(), subLabelCols, Red(label), dim.Sprint(CleanError(err)))
 	} else {
-		fmt.Fprintf(s.w, "%s%s %s\n", subIndent, cross(), red.Sprint(label))
+		fmt.Fprintf(s.w, "%s%s %s\n", subIndent, cross(), Red(label))
 	}
 }
 
@@ -296,7 +298,7 @@ func (s *Stepper) SubFail(label string, err error) {
 func (s *Stepper) SubFailHint(label string, err error, hint string) error {
 	s.SubFail(label, err)
 	if hint != "" {
-		fmt.Fprintf(s.w, "%s  %s\n", subIndent, faint(hint))
+		fmt.Fprintf(s.w, "%s  %s\n", subIndent, dim.Sprint(CleanLines(hint)))
 	}
 	s.Blank()
 	return &DisplayedError{Err: err}
@@ -308,6 +310,10 @@ func (s *Stepper) SubFailHint(label string, err error, hint string) error {
 // Used for the build sub-event stream: one line per docker Step
 // N/M, so scrollback preserves the whole install history.
 func (s *Stepper) TreeLine(text, detail string) {
+	s.treeLine(Clean(text), detail)
+}
+
+func (s *Stepper) treeLine(text, detail string) {
 	s.stopSpinner()
 	if detail != "" {
 		fmt.Fprintf(s.w, "%s%s %s %s\n", subIndent, faint("├"), text, faint(detail))
@@ -322,9 +328,13 @@ func (s *Stepper) TreeLine(text, detail string) {
 // Back to a TreeLine with a faint "..." detail so scrollback still
 // Shows the attempted step.
 func (s *Stepper) TreeSpin(text string) {
+	s.treeSpin(Clean(text))
+}
+
+func (s *Stepper) treeSpin(text string) {
 	s.stopSpinner()
 	if !s.isTTY {
-		s.TreeLine(text, "...")
+		s.treeLine(text, "...")
 		return
 	}
 	s.mu.Lock()

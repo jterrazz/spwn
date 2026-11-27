@@ -2,9 +2,9 @@ package agent
 
 import (
 	"fmt"
-	"os"
 
 	intmanifest "spwn.sh/packages/agent/internal/manifest"
+	"spwn.sh/packages/platform"
 )
 
 // Manifest is the parsed agent.yaml: composition + runtime config.
@@ -50,7 +50,10 @@ func LoadManifestPath(agentDir string) (*Manifest, error) {
 // SaveManifest writes the manifest to the given agent's agent.yaml.
 func SaveManifest(agentName string, m *Manifest) error {
 	dir := AgentDir(agentName)
-	if _, err := os.Stat(dir); err != nil {
+	files := platform.DataFiles()
+	_, err := files.Stat(dir)
+	files.Close()
+	if err != nil {
 		return fmt.Errorf("agent %q not found", agentName)
 	}
 	return intmanifest.Save(dir, m)

@@ -78,7 +78,7 @@ func receiptsOf(root string) ([]automation.Receipt, int, error) {
 	if root == "" {
 		return nil, 0, nil
 	}
-	return automation.ReadReceipts(filepath.Join(root, receiptsDir, receiptsFile))
+	return automation.ReadReceipts(root, filepath.Join(root, receiptsDir, receiptsFile))
 }
 
 func read(all []declared, rows []automation.Receipt) []automations.Automation {

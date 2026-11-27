@@ -42,15 +42,18 @@ func findRunningWorldByConfig(ctx context.Context, name string) *models.World {
 
 func acquireUpLock(worldName string) (func(), error) {
 	dir := platform.LocalStateDir()
-	if err := os.MkdirAll(dir, 0o755); err != nil {
+	state := platform.StateTree()
+	if err := state.MkdirAll(dir, 0o755); err != nil {
+		state.Close()
 		return nil, fmt.Errorf("%s: %w", dir, err)
 	}
 	lockPath := filepath.Join(dir, ".up."+worldName+".lock")
-	f, err := os.OpenFile(lockPath, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0o644)
+	f, err := state.OpenFile(lockPath, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0o644)
 	if err != nil {
+		state.Close()
 		return nil, fmt.Errorf("%s", lockPath)
 	}
 	_, _ = fmt.Fprintf(f, "pid=%d\n", os.Getpid())
 	f.Close()
-	return func() { _ = os.Remove(lockPath) }, nil
+	return func() { _ = state.Remove(lockPath); state.Close() }, nil
 }
