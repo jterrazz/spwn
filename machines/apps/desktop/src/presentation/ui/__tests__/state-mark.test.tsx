@@ -64,7 +64,8 @@ describe('StateMark', () => {
     });
 
     test('a word with no room is cut after its last whole word, and stays whole for the reader and as its title', async () => {
-        // Given - a failure said in a cell 120 px wide, and the same with the room it needs
+        // Given - a failure said in a cell 120 px wide, and the same with the room it needs, in the window's face
+        await document.fonts.load('13px "Geist Variable"');
         const narrow = await component.render(
             <div style={{ display: 'flex', width: 120 }}>
                 <StateMark fit="words" tone="bad" word="1 machine not created" />

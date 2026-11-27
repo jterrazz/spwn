@@ -75,7 +75,8 @@ describe('home-fleet', () => {
     test.each([844, 1184])(
         "a Mac's failure is said whole on its card and on its line, a page %i px wide",
         async (width) => {
-            // Given - Home over create-failed, macbook-pro's linux-2 not created
+            // Given - Home over create-failed, macbook-pro's linux-2 not created, in the window's face
+            await document.fonts.load('13px "Geist Variable"');
             const said: Said[] = [];
             await component
                 .viewport({ height: 900, width })
