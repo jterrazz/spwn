@@ -1,0 +1,107 @@
+/* value: the prototype's collapsed navigation (wiki-proto/spwn-wiki-proto-r1.html `.cbar` and its parts, `kbd`):
+   52 px high, 6 px between its parts, 28 px pills at most 280 wide, a 28 px home, 14 px icons. */
+.bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 52px;
+    padding: 0 14px;
+    overflow: hidden;
+    font-size: var(--text-body);
+    line-height: 20px;
+}
+
+.pill,
+.home {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: 7px;
+    max-width: 280px;
+    height: 28px;
+    padding: 0 11px 0 9px;
+    border: 0;
+    border-radius: 14px;
+    background: var(--s1);
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 6%);
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--t1);
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background 120ms var(--ease);
+}
+.pill > span:last-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.pill:hover,
+.home:hover {
+    background: var(--s2);
+}
+.home {
+    justify-content: center;
+    width: 28px;
+    padding: 0;
+}
+.pill > *:not(:last-child),
+.home svg {
+    color: var(--t3);
+}
+.pill svg,
+.home svg,
+.back svg {
+    flex: none;
+    width: 14px;
+    height: 14px;
+    stroke-width: 1.5;
+}
+
+.slash {
+    padding: 0 2px;
+    font-size: var(--text-meta);
+    color: var(--t4);
+}
+
+.back {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: 8px;
+    height: 28px;
+    margin-left: auto;
+    padding: 0 10px;
+    border: 0;
+    border-radius: 8px;
+    background: none;
+    font-size: var(--text-meta);
+    color: var(--t3);
+    white-space: nowrap;
+    cursor: pointer;
+}
+.back:hover {
+    background: var(--s1);
+    color: var(--t1);
+}
+.back kbd {
+    display: inline-grid;
+    place-items: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 5px;
+    background: var(--s3);
+    box-shadow: 0 1px 0 rgb(0 0 0 / 40%);
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    font-weight: 400;
+    line-height: 16px;
+    color: var(--t2);
+}
+
+.pill:focus-visible,
+.home:focus-visible,
+.back:focus-visible {
+    outline: 2px solid var(--t1);
+    outline-offset: 1px;
+}

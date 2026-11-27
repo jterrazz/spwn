@@ -1,0 +1,130 @@
+/* value: the prototype's strip (wiki-proto/spwn-wiki-proto-r1.html `.strip` and its parts): 112 px with its line,
+   78 with its title alone, padded 24 40, the meta row 12 px with 8 px between its parts, the title 22 / 28, the
+   line 14 / 21 under 900 px, Open a 32 px button with 7 px after its 14 px chevron. */
+.strip {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-content: start;
+    align-items: start;
+    gap: 4px 24px;
+    width: 100%;
+    height: 112px;
+    padding: 24px 40px 0;
+    font-size: var(--text-body);
+    line-height: 20px;
+    text-align: left;
+    color: var(--t1);
+    background: none;
+    border: 0;
+    border-radius: inherit;
+    cursor: pointer;
+    outline: none;
+}
+.strip[data-peek='title'] {
+    height: 78px;
+}
+.strip:focus-visible {
+    outline: none;
+}
+.strip:focus-visible .open {
+    box-shadow:
+        inset 0 0 0 1px rgb(255 255 255 / 6%),
+        0 0 0 2px var(--t1);
+}
+
+.text {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    font-size: var(--text-meta);
+    color: var(--t3);
+    white-space: nowrap;
+}
+.strip .icon > * {
+    color: var(--t3);
+}
+.icon {
+    display: inline-flex;
+    flex: none;
+}
+.part {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+.needs {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--you);
+}
+.mark {
+    flex: none;
+    width: 7px;
+    height: 7px;
+    border-radius: var(--radius-mark);
+    background: var(--you);
+    transform: rotate(45deg);
+}
+
+.title {
+    overflow: hidden;
+    font-size: 22px;
+    line-height: 28px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--t1);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+.line {
+    max-width: 900px;
+    overflow: hidden;
+    font-size: 14px;
+    line-height: 21px;
+    color: var(--t2);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.go {
+    display: flex;
+    align-self: center;
+    align-items: center;
+    gap: 10px;
+    font-size: 12.5px;
+    color: var(--t2);
+}
+.hint {
+    font-family: var(--font-mono);
+    font-size: var(--text-meta);
+    color: var(--t3);
+}
+.open {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    height: 32px;
+    padding: 0 14px 0 12px;
+    border-radius: 10px;
+    background: var(--s2);
+    color: var(--t1);
+    font-weight: 500;
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 6%);
+}
+.strip:hover .open {
+    background: var(--s3);
+}
+.open svg {
+    width: 14px;
+    height: 14px;
+    stroke-width: 1.5;
+}

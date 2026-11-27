@@ -1,0 +1,19 @@
+- group "The wiki":
+  - text: E0 · Intention E1 · Produit E3 · Architecture
+  - button "Vision"
+  - button "Produit, 4 wait for you" [expanded]:
+    - text: Produit 3 pages
+    - img "4 wait for you"
+    - text: close
+  - button "Technique"
+  - button "Croissance, 1 waits for you": Croissance
+  - button "Boundaries, 3 wait for you":
+    - text: E1 Produit
+    - img "3 wait for you"
+    - text: 3 Boundaries What Spwn is not, and what each of its parts refuses to be, for anyone weighing a feature that sits near an edge. 4 sections
+  - button "The stack, 1 waits for you":
+    - text: E1 Produit
+    - img "1 waits for you"
+    - text: "1 The stack Spwn's three spaces and what lives in each, for anyone deciding what a part of the app is for or where it goes: per space, what you let go of, what you keep, and whether it runs today. 3 sections"
+  - button "ADR-002": E1 Produit ADR-002 · Spwn is one stack of six apps on one ladder Spwn is one stack of six apps on one ladder. 2 sections
+  - paragraph: Produit, 3 pages

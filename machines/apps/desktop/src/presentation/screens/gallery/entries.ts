@@ -7,6 +7,7 @@ import { Bone } from '../../ui/bone';
 import { BONE_STORIES } from '../../ui/bone.stories';
 import { Button } from '../../ui/button';
 import { BUTTON_STORIES } from '../../ui/button.stories';
+import { CANVAS_STORIES, CanvasSample } from '../../ui/canvas/canvas.stories';
 import { Caption } from '../../ui/caption';
 import { CAPTION_STORIES } from '../../ui/caption.stories';
 import { Chart } from '../../ui/chart';
@@ -72,6 +73,14 @@ import { ROW_SKELETON_STORIES } from '../../ui/row-skeleton.stories';
 import { ROW_HEAD_STORIES, ROW_STORIES } from '../../ui/row.stories';
 import { SearchField } from '../../ui/search-field';
 import { SEARCH_FIELD_STORIES } from '../../ui/search-field.stories';
+import { CollapsedBar } from '../../ui/sheet-rise/collapsed-bar';
+import { OsSpaceScene } from '../../ui/sheet-rise/os-space';
+import {
+    COLLAPSED_BAR_STORIES,
+    OS_SPACE_STORIES,
+    STRIP_STORIES,
+} from '../../ui/sheet-rise/sheet-rise.stories';
+import { Strip } from '../../ui/sheet-rise/strip';
 import { StateMark } from '../../ui/state-mark';
 import { STATE_MARK_STORIES } from '../../ui/state-mark.stories';
 import { Switch } from '../../ui/switch';
@@ -176,6 +185,22 @@ export const ENTRIES: readonly Entry[] = [
         stories: ROW_HEAD_STORIES,
     }),
     entry('Facts', 'Containers', { Component: Facts, frame: 'block', stories: FACTS_STORIES }),
+    entry('Canvas', 'Containers', {
+        Component: CanvasSample,
+        frame: 'canvas',
+        stories: CANVAS_STORIES,
+    }),
+    entry('Strip', 'Containers', { Component: Strip, frame: 'block', stories: STRIP_STORIES }),
+    entry('CollapsedBar', 'Containers', {
+        Component: CollapsedBar,
+        frame: 'block',
+        stories: COLLAPSED_BAR_STORIES,
+    }),
+    entry('OsSpace', 'Containers', {
+        Component: OsSpaceScene,
+        frame: 'space',
+        stories: OS_SPACE_STORIES,
+    }),
     entry('FleetBoard', 'Containers', {
         Component: FleetBoard,
         frame: 'block',

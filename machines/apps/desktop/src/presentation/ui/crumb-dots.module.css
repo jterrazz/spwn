@@ -1,0 +1,47 @@
+/* value: the prototype's sibling dots (wiki-proto/spwn-wiki-proto-r1.html `.cbar .sib`): 13 × 22 buttons 1 px apart,
+   a 5 px dot, the current one a 12 px bar, one that waits for me a diamond in --you. */
+.dots {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: 1px;
+    margin: 0 4px 0 0;
+}
+.dot {
+    display: grid;
+    place-items: center;
+    width: 13px;
+    height: 22px;
+    padding: 0;
+    border: 0;
+    border-radius: 5px;
+    background: none;
+    cursor: pointer;
+}
+.dot::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--t4);
+    transition:
+        transform 160ms var(--ease),
+        background 160ms var(--ease);
+}
+.dot[data-on]::before {
+    width: 12px;
+    border-radius: 3px;
+    background: var(--t1);
+}
+.dot[data-you]::before {
+    border-radius: 1px;
+    background: var(--you);
+    transform: rotate(45deg);
+}
+.dot:hover::before {
+    background: var(--t1);
+}
+.dot:focus-visible {
+    outline: 2px solid var(--t1);
+    outline-offset: -2px;
+}

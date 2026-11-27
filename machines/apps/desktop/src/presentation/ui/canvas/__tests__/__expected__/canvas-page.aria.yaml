@@ -1,0 +1,24 @@
+- group "The wiki":
+  - text: E0 · Intention E1 · Produit E3 · Architecture
+  - button "Vision"
+  - button "Produit, 4 wait for you" [expanded]:
+    - text: Produit 3 pages
+    - img "4 wait for you"
+    - text: close
+  - button "Technique"
+  - button "Croissance, 1 waits for you"
+  - button "Boundaries, 3 wait for you" [expanded]:
+    - text: Boundaries
+    - img "3 wait for you"
+    - text: What Spwn is not, and what each of its parts refuses to be, for anyone weighing a feature that sits near an edge.
+  - button "Read Boundaries": Read
+  - button "The stack, 1 waits for you": The stack
+  - button "ADR-002"
+  - button "Top": Opening Top one-stack 1 block
+  - button "What Spwn is not": Section What Spwn is not not-a-replacement · not-vibe-coding · not-a-cloud-service · not-one-vendor · not-a-method 6 blocks
+  - button "What each app refuses, 2 wait for you":
+    - text: Section
+    - img "2 wait for you"
+    - text: 2 What each app refuses What Machines refuses · machines · no-model · no-security-in-instructions · no-computer · wiki-decides-nothing · os-holds-no-facts 8 blocks
+  - button "Rests on": "Section Rests on Two rows are this page's reading rather than the owner's word or a record: 1 block"
+  - paragraph: Boundaries
