@@ -123,8 +123,10 @@ func series(points []activity.Point) map[string][]int {
 	out["net-in"] = scaled(func(r activity.Rates) float64 { return r.NetIn })
 	out["net-out"] = scaled(func(r activity.Rates) float64 { return r.NetOut })
 	for _, x := range points {
+		// invariant: a point's MemTotal is the newest sample's, so after a
+		// VM's memory shrinks an older point's share is held at 100.
 		if x.MemTotal > 0 {
-			out["memory"] = append(out["memory"], int(100*int64(x.Memory.Mean)/x.MemTotal))
+			out["memory"] = append(out["memory"], int(min(100*int64(x.Memory.Mean)/x.MemTotal, 100)))
 			out["swap"] = append(out["swap"], int(100*int64(x.Swap.Mean)/x.MemTotal))
 		}
 	}
