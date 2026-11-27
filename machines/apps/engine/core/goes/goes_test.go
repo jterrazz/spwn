@@ -120,6 +120,42 @@ func newSet(r *record, c *fakeClock) *set {
 	return s
 }
 
+// invariant: runtime.NumGoroutine counts the whole process, and a goroutine
+// of another test starting or exiting moves it; a test counts only the
+// goroutines whose stack runs fn, read once the count is want or after a
+// bounded number of yields.
+
+func goroutinesIn(fn string, want int) int {
+	n := countGoroutinesIn(fn)
+	for range 1_000 {
+		if n == want {
+			return n
+		}
+		runtime.Gosched()
+		n = countGoroutinesIn(fn)
+	}
+	return n
+}
+
+func countGoroutinesIn(fn string) int {
+	buf := make([]byte, 1<<16)
+	for {
+		n := runtime.Stack(buf, true)
+		if n < len(buf) {
+			buf = buf[:n]
+			break
+		}
+		buf = make([]byte, 2*len(buf))
+	}
+	count := 0
+	for g := range strings.SplitSeq(string(buf), "\n\n") {
+		if strings.Contains(g, fn+"(") {
+			count++
+		}
+	}
+	return count
+}
+
 type tripped struct{}
 
 func (tripped) FatalBreak() {}
@@ -366,17 +402,16 @@ func TestKeepLeavesNoGoroutineOnCancel(t *testing.T) {
 		c := &fakeClock{block: true}
 		s := newSet(&record{}, c)
 		ctx, cancel := context.WithCancel(t.Context())
-		before := runtime.NumGoroutine()
 		var runs atomic.Int32
 		s.keep(ctx, "engine.exposure", func(context.Context) { runs.Add(1); panic(Script("x")) })
 		synctest.Wait()
-		if n := runtime.NumGoroutine(); n != before+1 {
-			t.Fatalf("goroutines while waiting = %d, want %d", n, before+1)
+		if n := goroutinesIn("goes.(*set).kept", 1); n != 1 {
+			t.Fatalf("goroutines keeping while waiting = %d, want 1", n)
 		}
 		cancel()
 		synctest.Wait()
-		if n := runtime.NumGoroutine(); n != before || runs.Load() != 1 {
-			t.Fatalf("goroutines after cancel = %d, want %d; runs %d", n, before, runs.Load())
+		if n := goroutinesIn("goes.(*set).kept", 0); n != 0 || runs.Load() != 1 {
+			t.Fatalf("goroutines keeping after cancel = %d, want 0; runs %d", n, runs.Load())
 		}
 	})
 }
@@ -554,13 +589,12 @@ func TestAThousandBrokenGoroutinesLeaveNone(t *testing.T) {
 	synctest.Test(t, func(t *testing.T) {
 		r := &record{}
 		s := newSet(r, nil)
-		before := runtime.NumGoroutine()
 		for range 1000 {
 			go s.once("lanes.job", func() { panic(Script("x")) }, false)
 		}
 		synctest.Wait()
-		if n := runtime.NumGoroutine(); n != before {
-			t.Fatalf("goroutines = %d, want %d", n, before)
+		if n := goroutinesIn("goes.(*set).once", 0); n != 0 {
+			t.Fatalf("goroutines in once = %d, want 0", n)
 		}
 		if n := s.breaks("lanes.job"); n != 1000 {
 			t.Fatalf("breaks = %d, want 1000", n)
