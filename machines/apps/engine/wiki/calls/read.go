@@ -27,10 +27,24 @@ type Deps struct {
 
 type cache struct {
 	// invariant: one corpus, the last read, kept by its signature; a read
-	// whose signature differs compiles the corpus anew and replaces it.
+	// whose signature differs compiles the corpus anew and replaces it, and
+	// a compile started later is never replaced by one started earlier.
 	mu        sync.Mutex
 	signature string
 	corpus    wiki.Corpus
+	started   int
+	stored    int
+	flight    *flight
+}
+
+// value: the one compile of a signature in progress, which every ask of
+// that signature waits for instead of compiling its own.
+type flight struct {
+	signature string
+	n         int
+	done      chan struct{}
+	corpus    wiki.Corpus
+	err       error
 }
 
 func All(d Deps) []call.Handler {
@@ -90,24 +104,59 @@ func (c *cache) read(ctx context.Context, corpus contract.Corpus) (wiki.Corpus, 
 	if err != nil {
 		return wiki.Corpus{}, err
 	}
-	c.mu.Lock()
-	if c.signature == signature {
-		defer c.mu.Unlock()
-		return c.corpus, nil
+	// invariant: one compile at a time per signature. The first ask of a
+	// signature the cache does not hold compiles it under its own context;
+	// every ask of it meanwhile waits for that compile and takes its corpus.
+	// A waiter abandoned stops waiting; a compile its asker abandoned ends
+	// with the context's error, and each waiter still asking runs it again.
+	for {
+		c.mu.Lock()
+		if c.signature == signature {
+			kept := c.corpus
+			c.mu.Unlock()
+			return kept, nil
+		}
+		f := c.flight
+		if f == nil || f.signature != signature {
+			c.started++
+			f = &flight{signature: signature, n: c.started, done: make(chan struct{})}
+			c.flight = f
+			c.mu.Unlock()
+			c.compile(ctx, corpus, f)
+			return f.corpus, f.err
+		}
+		c.mu.Unlock()
+		select {
+		case <-f.done:
+		case <-ctx.Done():
+			return wiki.Corpus{}, ctx.Err()
+		}
+		if abandoned(f.err) && ctx.Err() == nil {
+			continue
+		}
+		return f.corpus, f.err
 	}
-	c.mu.Unlock()
+}
+
+func (c *cache) compile(ctx context.Context, corpus contract.Corpus, f *flight) {
+	defer close(f.done)
 	files, err := corpus.Files(ctx)
-	if err != nil {
-		return wiki.Corpus{}, err
+	if err == nil {
+		f.corpus, err = wiki.Read(ctx, files)
 	}
-	read, err := wiki.Read(ctx, files)
-	if err != nil {
-		return wiki.Corpus{}, err
-	}
+	f.err = err
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	c.signature, c.corpus = signature, read
-	return read, nil
+	if c.flight == f {
+		c.flight = nil
+	}
+	if err == nil && f.n > c.stored {
+		c.signature, c.corpus, c.stored = f.signature, f.corpus, f.n
+	}
+}
+
+func abandoned(err error) bool {
+	return errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded)
 }
 
 func refusal(err error) error {

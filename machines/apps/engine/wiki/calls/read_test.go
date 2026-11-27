@@ -24,11 +24,71 @@ type counted struct {
 	files   map[string]string
 	reads   int
 	refusal error
+	// value: when set, a whole read says it began on entered, then waits
+	// for gate to close or for its ask to be abandoned; each signature read
+	// is said on asked.
+	gate    chan struct{}
+	entered chan struct{}
+	asked   chan struct{}
+}
+
+func gated() *counted {
+	return &counted{files: map[string]string{"wiki.yaml": yaml, "blueprint/a.md": "# A\n"}, gate: make(chan struct{}), entered: make(chan struct{}, 16), asked: make(chan struct{}, 16)}
+}
+
+// value: waits until n asks have read the corpus's signature, the step
+// before each joins the compile in progress or finds its corpus kept.
+func (c *counted) askedBy(n int) {
+	for range n {
+		<-c.asked
+	}
+}
+
+func TestEightAsksOfAColdCorpusCompileItOnce(t *testing.T) {
+	c := gated()
+	h := calls.All(calls.Deps{Corpus: c})[0]
+	var wg sync.WaitGroup
+	errs := make([]error, 8)
+	for i := range 8 {
+		wg.Go(func() { errs[i] = read(t, h, "blueprint/a") })
+	}
+	c.askedBy(8)
+	close(c.gate)
+	wg.Wait()
+	if err := errors.Join(errs...); err != nil || c.reads != 1 {
+		t.Fatalf("eight asks at once: %v, %d whole reads; want one read they all share", err, c.reads)
+	}
+}
+
+func TestAnAskAbandonedWhileOthersWaitLeavesThemTheirCorpus(t *testing.T) {
+	c := gated()
+	h := calls.All(calls.Deps{Corpus: c})[0]
+	ctx, cancel := context.WithCancel(context.Background())
+	first := make(chan error, 1)
+	go func() {
+		_, err := h.Invoke(ctx, localMac(), []byte(`{"Page":"blueprint/a"}`), nil)
+		first <- err
+	}()
+	<-c.entered
+	second := make(chan error, 1)
+	go func() { second <- read(t, h, "blueprint/a") }()
+	c.askedBy(2)
+	cancel()
+	if err := <-first; !errors.Is(err, context.Canceled) {
+		t.Fatalf("the abandoned ask ends with %v; want context.Canceled", err)
+	}
+	close(c.gate)
+	if err := <-second; err != nil || c.reads != 2 {
+		t.Fatalf("the ask still waiting: %v, %d whole reads; want its corpus, read again", err, c.reads)
+	}
 }
 
 func (c *counted) Signature(context.Context) (string, error) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
+	if c.asked != nil {
+		c.asked <- struct{}{}
+	}
 	if c.refusal != nil {
 		return "", c.refusal
 	}
@@ -41,10 +101,21 @@ func (c *counted) Signature(context.Context) (string, error) {
 
 func localMac() machine.Profile { return machine.Profile{Caps: machine.Capabilities{Engine: true}} }
 
-func (c *counted) Files(context.Context) (map[string]wiki.File, error) {
+func (c *counted) Files(ctx context.Context) (map[string]wiki.File, error) {
+	c.mu.Lock()
+	c.reads++
+	gate := c.gate
+	c.mu.Unlock()
+	if gate != nil {
+		c.entered <- struct{}{}
+		select {
+		case <-gate:
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		}
+	}
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	c.reads++
 	out := map[string]wiki.File{}
 	for p, body := range c.files {
 		out[p] = wiki.File{Size: int64(len(body)), Body: []byte(body)}
