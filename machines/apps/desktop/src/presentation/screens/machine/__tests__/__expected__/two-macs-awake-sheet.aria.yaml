@@ -30,9 +30,13 @@
   - text: of 994 GB Its machines 2machines 1 running, 1 stopped
   - region "Needs you, on this Mac":
     - heading "Needs you, on this Mac" [level=2]
-    - 'button "Needs you npm sign-in fails: The token is refused by registry.npmjs.org macbook-pro · Sign-ins"'
+    - 'button "Needs you npm sign-in fails: The token is refused by registry.npmjs.org macbook-pro · Sign-ins"':
+      - img "Needs you"
+      - text: "npm sign-in fails: The token is refused by registry.npmjs.org macbook-pro · Sign-ins"
     - button "Fix npm": Fix
-    - button "Needs you com.example.brain.x-snapshot is failing, last exit 2 macbook-pro · Background"
+    - button "Needs you com.example.brain.x-snapshot is failing, last exit 2 macbook-pro · Background":
+      - img "Needs you"
+      - text: com.example.brain.x-snapshot is failing, last exit 2 macbook-pro · Background
     - button "Remove com.example.brain.x-snapshot": Remove
   - region "Memory":
     - heading "Memory one square, one GB" [level=2]

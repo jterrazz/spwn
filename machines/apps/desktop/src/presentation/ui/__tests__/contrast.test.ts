@@ -1,30 +1,14 @@
-import { readdirSync, readFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import { mixed, ratio, rgbOf } from '../contrast';
 import type { Rgb } from '../contrast';
-import { BLUE_SHEETS, ORANGE_SHEETS } from './contrast.fixtures';
+import { BLUE_SHEETS, ORANGE_SHEETS, PRESENTATION, SHEETS } from './contrast.fixtures';
 
 const TOKENS = readFileSync(join(import.meta.dirname, '..', 'tokens.css'), 'utf8');
 
-const PRESENTATION = join(import.meta.dirname, '..', '..');
-
 const SCALES = ['text', 'radius', 'space', 'motion'] as const;
-
-type Sheet = { path: string; source: string };
-
-function sheetsUnder(dir: string): Sheet[] {
-    return readdirSync(dir, { withFileTypes: true }).flatMap((entry): Sheet[] => {
-        const path = join(dir, entry.name);
-        if (entry.isDirectory()) {
-            return sheetsUnder(path);
-        }
-        return path.endsWith('.css') ? [{ path, source: readFileSync(path, 'utf8') }] : [];
-    });
-}
-
-const SHEETS = sheetsUnder(PRESENTATION);
 
 const STYLES = SHEETS.map(({ source }) => source).join('\n');
 
@@ -198,11 +182,11 @@ describe('contrast', () => {
         expect(orange).toStrictEqual(ORANGE_SHEETS);
     });
 
-    test('blue is drawn by the style sheets of a busy mark, a progress line or a running step, and no other', () => {
+    test('blue is drawn by the style sheets of an act in progress, and no other', () => {
         // Given - every style sheet that draws --busy
         const blue = sheetsDrawing('busy');
 
-        // Then - the closed list: no focus, link, selection or identity is blue
+        // Then - the closed list of acts in progress: no chart, gauge, focus, link, selection or identity is blue
         expect(blue).toStrictEqual(BLUE_SHEETS);
     });
 
@@ -212,6 +196,24 @@ describe('contrast', () => {
 
         // Then - none remains
         expect(retired).toStrictEqual([]);
+    });
+
+    test('the focus ring stands off its element by one token, and a ring drawn inside is the only other offset', () => {
+        // Given - every outline offset a style sheet declares, and the token's own value
+        const offsets = SHEETS.flatMap(({ source }) =>
+            [...source.matchAll(/outline-offset:\s*(?<value>[^;]+);/gu)].map((found) =>
+                (found.groups?.value ?? '').trim(),
+            ),
+        );
+
+        // Then - each is the token or the inset of a ring a list would cut, and the token is 2 px
+        expect(
+            offsets.filter((value) => value !== 'var(--focus-offset)' && value !== '-2px'),
+        ).toStrictEqual([]);
+        expect(offsets.filter((value) => value === 'var(--focus-offset)').length).toBeGreaterThan(
+            0,
+        );
+        expect(tokenOf('focus-offset')).toBe('2px');
     });
 
     test('text on glass reads at 4.5:1 over each of the four surface steps', () => {

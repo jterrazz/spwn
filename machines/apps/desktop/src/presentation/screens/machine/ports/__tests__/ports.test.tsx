@@ -87,6 +87,52 @@ describe('ports', () => {
         await expect(result.tree).toMatch(file('./__expected__/two-macs-linux-1.aria.yaml'));
     });
 
+    test.each([1100, 1440])(
+        "a share's state mark sits by its port at %i px, clear of the switch of who reaches it",
+        async (width) => {
+            // Given - linux-1's Ports over two-macs, port 5173 shared and running
+            const rects: DOMRect[] = [];
+            await component
+                .viewport({ height: 900, width })
+                .render(portsOver('two-macs', 'linux-1'), async (visitor) => {
+                    // When - its row is drawn
+                    await visitor.see(within(region('Port 5173'), button('Stop sharing')));
+                    const row = document.querySelector('section[aria-label="Port 5173"]');
+                    const parts = [
+                        row?.querySelector('[role="img"]'),
+                        row?.querySelector('[role="group"][aria-label^="Who reaches"]'),
+                        [...(row?.querySelectorAll('span') ?? [])].find(
+                            (one) => one.textContent === ':5173',
+                        ),
+                        [...(row?.querySelectorAll('span') ?? [])].find(
+                            (one) => one.textContent === 'Vite',
+                        ),
+                    ];
+                    rects.push(
+                        ...parts.map((part) => part?.getBoundingClientRect() ?? new DOMRect()),
+                    );
+                });
+
+            // Then - the mark lies between the port and the name, and nowhere over the switch
+            const [
+                mark = new DOMRect(),
+                reach = new DOMRect(),
+                port = new DOMRect(),
+                name = new DOMRect(),
+            ] = rects;
+            expect(mark.width).toBeGreaterThan(0);
+            expect(reach.width).toBeGreaterThan(0);
+            const apart =
+                mark.right <= reach.left ||
+                mark.left >= reach.right ||
+                mark.bottom <= reach.top ||
+                mark.top >= reach.bottom;
+            expect(apart).toBe(true);
+            expect(mark.left).toBeGreaterThanOrEqual(port.right);
+            expect(mark.right).toBeLessThanOrEqual(name.left);
+        },
+    );
+
     test("a workspace's listeners that are not shared are listed apart, each with its Share", async () => {
         // Given - linux-1's Ports over stories, 3000 and 5173 shared, 4321 and 9229 listening
         const result = await component.render(portsOver('stories', 'linux-1'), async (visitor) => {

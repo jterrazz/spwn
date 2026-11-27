@@ -106,7 +106,8 @@
     --motion-press: scale(0.97);
     --motion-wait: 2.4s ease-in-out infinite;
 
-    --chrome-row: 52px;
+    --chrome-row: 48px;
+    --focus-offset: 2px;
 
     --row-height: 40px;
     --row-pad: var(--space-8);

@@ -89,7 +89,7 @@ function MacLine({ mac, onOpenMac }: { mac: FleetMac; onOpenMac: (name: string) 
             </span>
             <span />
             <span className={styles.state}>
-                <StateMark tone={mac.state.tone} word={mac.state.word} />
+                <StateMark fit="words" tone={mac.state.tone} word={mac.state.word} />
             </span>
             <span className={styles.figure}>{mac.cpu}</span>
             <Track
@@ -149,7 +149,7 @@ function MachineLine({ machine, measured, opened, onToggle, onOpen }: MachineLin
                 </span>
                 <span className={styles.what}>{machine.purpose}</span>
                 <span className={styles.state}>
-                    <StateMark tone={machine.state.tone} word={machine.state.word} />
+                    <StateMark fit="words" tone={machine.state.tone} word={machine.state.word} />
                 </span>
                 <span className={styles.figure}>{machine.cpu}</span>
                 <Track name={machine.name} segments={measured ? segmentOf(machine) : undefined} />

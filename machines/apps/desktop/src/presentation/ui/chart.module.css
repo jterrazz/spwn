@@ -52,9 +52,6 @@
 .bad {
     --c: var(--bad);
 }
-.new {
-    --c: var(--busy);
-}
 .mark.gap {
     height: 100%;
     background: none;

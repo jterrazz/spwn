@@ -1,3 +1,23 @@
+import { readdirSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
+export const PRESENTATION = join(import.meta.dirname, '..', '..');
+
+type Sheet = { path: string; source: string };
+
+function sheetsUnder(dir: string): Sheet[] {
+    return readdirSync(dir, { withFileTypes: true }).flatMap((entry): Sheet[] => {
+        const path = join(dir, entry.name);
+        if (entry.isDirectory()) {
+            return sheetsUnder(path);
+        }
+        return path.endsWith('.css') ? [{ path, source: readFileSync(path, 'utf8') }] : [];
+    });
+}
+
+// value: every style sheet of the window's presentation, read once with its path.
+export const SHEETS: readonly Sheet[] = sheetsUnder(PRESENTATION);
+
 // value: the closed list of the style sheets that draw the owner's orange, --you: a focus, a need, a warning or the
 // value: disk running out. A new sheet that draws it is a deliberate edit of this list.
 export const ORANGE_SHEETS: readonly string[] = [
@@ -31,12 +51,11 @@ export const ORANGE_SHEETS: readonly string[] = [
     'ui/value.module.css',
 ];
 
-// value: the closed list of the style sheets that draw blue, --busy: a busy mark, a progress line or a running step.
-// value: no focus, link, selection or identity is blue.
+// value: the closed list of the style sheets that draw blue, --busy: an act in progress, a busy mark, a progress
+// value: line or a running step. No chart, gauge, focus, link, selection or identity is blue.
 export const BLUE_SHEETS: readonly string[] = [
     'screens/core/core.module.css',
     'ui/bar.module.css',
-    'ui/chart.module.css',
     'ui/dot-strip.module.css',
     'ui/progress-line.module.css',
     'ui/state-mark.module.css',

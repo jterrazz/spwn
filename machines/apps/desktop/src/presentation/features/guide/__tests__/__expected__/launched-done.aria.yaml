@@ -26,7 +26,9 @@
   - text: of 994 GB · machines hold 120 GB
   - region "Needs you":
     - heading "Needs you 1" [level=2]
-    - button "Needs you com.example.brain.x-snapshot is failing, last exit 2 macbook-pro · Background"
+    - button "Needs you com.example.brain.x-snapshot is failing, last exit 2 macbook-pro · Background":
+      - img "Needs you"
+      - text: com.example.brain.x-snapshot is failing, last exit 2 macbook-pro · Background
     - button "Remove com.example.brain.x-snapshot": Remove
   - region "Machines":
     - heading "Machines 4" [level=2]

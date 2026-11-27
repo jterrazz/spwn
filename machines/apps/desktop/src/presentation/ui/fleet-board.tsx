@@ -30,10 +30,10 @@ const CARD_LOOKS = {
     warn: styles.ringWarn,
 };
 
-function Said({ state }: { state: FleetState }) {
+function Said({ state, fit }: { state: FleetState; fit?: 'words' | 'wrap' | undefined }) {
     return (
         <span className={styles.said}>
-            <StateMark tone={state.tone} word={state.word} />
+            <StateMark fit={fit} tone={state.tone} word={state.word} />
         </span>
     );
 }
@@ -61,7 +61,7 @@ function MacCard({
                 {mac.thisMac ? <Glow /> : null}
             </b>
             {mac.kind === undefined ? null : <small className={styles.kind}>{mac.kind}</small>}
-            <Said state={mac.state} />
+            <Said fit="wrap" state={mac.state} />
         </button>
     );
 }

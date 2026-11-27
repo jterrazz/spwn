@@ -175,7 +175,7 @@
 }
 .pin:focus-visible {
     outline: 2px solid var(--you);
-    outline-offset: 1px;
+    outline-offset: var(--focus-offset);
 }
 .pin > svg {
     width: 14px;
@@ -208,7 +208,7 @@
 }
 .release:focus-visible {
     outline: 2px solid var(--you);
-    outline-offset: 1px;
+    outline-offset: var(--focus-offset);
 }
 .releaseText {
     flex: 1;

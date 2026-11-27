@@ -47,7 +47,6 @@ const REMOVE_REREADS: readonly CallName[] = ['overview.read', 'background.list']
 const MOVE_REREADS: readonly CallName[] = ['overview.read', 'disk.read'];
 const START_REREADS: readonly CallName[] = ['engine.read', 'overview.read'];
 const UPGRADE_REREADS: readonly CallName[] = ['overview.read', 'machinefile.drift'];
-
 const LIFECYCLE_REREADS: readonly CallName[] = ['overview.read'];
 
 type Props = {
@@ -55,14 +54,15 @@ type Props = {
     primary: boolean;
     macs: readonly MachinesMacView[];
     onOpen: () => void;
+    named?: boolean;
 };
 
-function rowOf({ need, onOpen }: Props, gesture: ReactNode): RowProps {
+function rowOf({ need, onOpen, named = false }: Props, gesture: ReactNode): RowProps {
     return {
         link: gesture,
         onOpen,
         sentence: sentence([need.Machine, need.Noun]),
-        state: needState(need),
+        state: named ? { ...needState(need), said: 'name' } : needState(need),
         stateAt: 'start',
         title: need.Text,
     };

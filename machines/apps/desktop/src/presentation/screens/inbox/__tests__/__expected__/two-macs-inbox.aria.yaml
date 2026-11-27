@@ -9,25 +9,43 @@
     - button "mac-mini"
   - region "Needs you":
     - heading "Needs you a gesture is due" [level=2]
-    - 'button "Needs you npm sign-in fails: The token is refused by registry.npmjs.org macbook-pro · Sign-ins"'
+    - 'button "Needs you npm sign-in fails: The token is refused by registry.npmjs.org macbook-pro · Sign-ins"':
+      - img "Needs you"
+      - text: "npm sign-in fails: The token is refused by registry.npmjs.org macbook-pro · Sign-ins"
     - button "Fix npm": Fix
-    - button "Needs you com.example.brain.x-snapshot is failing, last exit 2 macbook-pro · Background"
+    - button "Needs you com.example.brain.x-snapshot is failing, last exit 2 macbook-pro · Background":
+      - img "Needs you"
+      - text: com.example.brain.x-snapshot is failing, last exit 2 macbook-pro · Background
     - button "Remove com.example.brain.x-snapshot": Remove
   - region "Upkeep":
     - heading "Upkeep 7" [level=2]
-    - button "Upkeep 1 mise update waiting macbook-pro · Apps"
+    - button "Upkeep 1 mise update waiting macbook-pro · Apps":
+      - img "Upkeep"
+      - text: 1 mise update waiting macbook-pro · Apps
     - button "Update mise": Update
-    - button "Upkeep 1 brew update waiting macbook-pro · Apps"
+    - button "Upkeep 1 brew update waiting macbook-pro · Apps":
+      - img "Upkeep"
+      - text: 1 brew update waiting macbook-pro · Apps
     - button "Update brew": Update
-    - 'button "Upkeep Firewall: off macbook-pro · Settings"'
+    - 'button "Upkeep Firewall: off macbook-pro · Settings"':
+      - img "Upkeep"
+      - text: "Firewall: off macbook-pro · Settings"
     - button "Open Firewall settings"
-    - button "Upkeep ~/.tart is misplaced macbook-pro · Disk"
+    - button "Upkeep ~/.tart is misplaced macbook-pro · Disk":
+      - img "Upkeep"
+      - text: ~/.tart is misplaced macbook-pro · Disk
     - button "Move ~/.tart": Move
-    - button "Upkeep com.bjango.istatmenus.installer is left over macbook-pro · Background"
+    - button "Upkeep com.bjango.istatmenus.installer is left over macbook-pro · Background":
+      - img "Upkeep"
+      - text: com.bjango.istatmenus.installer is left over macbook-pro · Background
     - button "Run in Terminal"
-    - button "Upkeep com.docker.socket is left over macbook-pro · Background"
+    - button "Upkeep com.docker.socket is left over macbook-pro · Background":
+      - img "Upkeep"
+      - text: com.docker.socket is left over macbook-pro · Background
     - button "Run in Terminal"
-    - button "Upkeep com.docker.vmnetd is left over macbook-pro · Background"
+    - button "Upkeep com.docker.vmnetd is left over macbook-pro · Background":
+      - img "Upkeep"
+      - text: com.docker.vmnetd is left over macbook-pro · Background
     - button "Run in Terminal"
   - region "History":
     - heading "History what happened, newest first" [level=2]

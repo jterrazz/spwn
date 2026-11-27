@@ -12,11 +12,10 @@ export const CHART_STORIES: readonly Story<ChartProps>[] = [
         props: { label: 'CPU of relay', size: 'row', values: [3, 4, 3, 5, 4, 3, 2, 3] },
     },
     {
-        name: 'activity, new',
+        name: 'activity',
         props: {
             label: 'Network',
             size: 'activity',
-            tone: 'new',
             values: Array.from({ length: 60 }, (_, index) => 20 + ((index * 37) % 60)),
         },
     },

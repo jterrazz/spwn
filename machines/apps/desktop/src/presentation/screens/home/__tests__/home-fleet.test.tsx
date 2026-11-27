@@ -4,8 +4,11 @@ import { describe, expect, test } from 'vitest';
 import { pageOver } from '../../../../composition/__tests__/page-over';
 import { recordingsOf } from '../../../../infrastructure/outbound/engine-replay/recordings';
 
+import '../../../ui/document.css';
+
 const recordingFor = await recordingsOf(
     'bare-mac',
+    'create-failed',
     'creating',
     'mini-offline',
     'standings',
@@ -54,7 +57,57 @@ const STORIES_CARDS = [
     'macbook-air · asleep',
 ];
 
+type Said = { text: string; cut: boolean; lines: number };
+
+function saidOf(word: Element | null | undefined): Said {
+    if (!(word instanceof HTMLElement)) {
+        return { cut: true, lines: 0, text: '' };
+    }
+    return {
+        cut: word.scrollWidth > word.clientWidth || word.title !== '',
+        lines: Math.round(word.getBoundingClientRect().height / 17),
+        text: word.textContent,
+    };
+}
+
 describe('home-fleet', () => {
+    // value: the page's width in the window at 1100 px with the column pinned (1100 - 256), and at 1440 (1440 - 256).
+    test.each([844, 1184])(
+        "a Mac's failure is said whole on its card and on its line, a page %i px wide",
+        async (width) => {
+            // Given - Home over create-failed, macbook-pro's linux-2 not created, in the window's face
+            await document.fonts.load('13px "Geist Variable"');
+            const said: Said[] = [];
+            await component
+                .viewport({ height: 900, width })
+                .render(homeOver('create-failed'), async (visitor) => {
+                    // When - the board is drawn
+                    await visitor.see(within(machines, button('macbook-pro')));
+                    await document.fonts.ready;
+                    const card = document.querySelector(
+                        '[aria-pressed][aria-label^="macbook-pro"]',
+                    );
+                    const line = [...document.querySelectorAll('button')]
+                        .find(
+                            (one) =>
+                                one.textContent === 'macbook-pro' &&
+                                !one.hasAttribute('aria-pressed'),
+                        )
+                        ?.closest('div');
+                    said.push(
+                        saidOf(card?.querySelector('[data-mark="bad"]:not([aria-hidden])')),
+                        saidOf(line?.querySelector('[data-mark="bad"]:not([aria-hidden])')),
+                    );
+                });
+
+            // Then - the card wraps the words onto two lines, the line holds them on one, neither cuts them
+            expect(said).toStrictEqual([
+                { cut: false, lines: 2, text: '1 machine not created' },
+                { cut: false, lines: 1, text: '1 machine not created' },
+            ]);
+        },
+    );
+
     test("a Mac chosen keeps its machines' lines alone, and chosen again shows the whole fleet", async () => {
         // Given - Home over stories: macbook-pro holds four machines, mac-mini three with infra down, macbook-air none and asleep
         const states: Board[] = [];

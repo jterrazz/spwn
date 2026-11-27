@@ -21,7 +21,7 @@
 }
 .title {
     margin: 0;
-    font-size: var(--text-body);
+    font-size: var(--text-section);
     font-weight: var(--weight-medium);
     display: flex;
     gap: var(--space-8);

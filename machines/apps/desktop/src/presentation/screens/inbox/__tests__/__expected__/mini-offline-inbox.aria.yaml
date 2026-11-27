@@ -12,9 +12,13 @@
     - paragraph: No need is listed.
   - region "Upkeep":
     - heading "Upkeep 2" [level=2]
-    - button "Upkeep 1 mise update waiting macbook-pro · Apps"
+    - button "Upkeep 1 mise update waiting macbook-pro · Apps":
+      - img "Upkeep"
+      - text: 1 mise update waiting macbook-pro · Apps
     - button "Update mise": Update
-    - button "Upkeep 1 brew update waiting macbook-pro · Apps"
+    - button "Upkeep 1 brew update waiting macbook-pro · Apps":
+      - img "Upkeep"
+      - text: 1 brew update waiting macbook-pro · Apps
     - button "Update brew": Update
   - region "History":
     - heading "History what happened, newest first" [level=2]

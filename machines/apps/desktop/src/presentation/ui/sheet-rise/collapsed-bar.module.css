@@ -103,5 +103,5 @@
 .home:focus-visible,
 .back:focus-visible {
     outline: 2px solid var(--t1);
-    outline-offset: 1px;
+    outline-offset: var(--focus-offset);
 }

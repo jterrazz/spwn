@@ -132,7 +132,6 @@ export function CheckLatency({ vm }: { vm: MachinesVM }) {
                                 `${clock(point.at) ?? point.at}${SEPARATOR}${millis(point.took)} ms`,
                         )}
                         size="activity"
-                        tone="new"
                         values={points.map((point) =>
                             tallest > 0 ? (point.took / tallest) * 100 : 0,
                         )}

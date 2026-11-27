@@ -27,7 +27,6 @@
 .centre .pop {
     width: auto;
     max-width: 100%;
-    border-radius: var(--radius-tile);
 }
 .pop:focus {
     outline: none;

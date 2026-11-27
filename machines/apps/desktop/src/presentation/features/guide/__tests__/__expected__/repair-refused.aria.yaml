@@ -30,7 +30,9 @@
     - button "Try again linux-2": Try again
     - text: "error vm_user \"root\" in preferences.json is not a VM user: a lowercase short name (a-z first, then up to 31 of a-z, 0-9, _, . and -, never a dot last), never admin or root."
     - button "Dismiss"
-    - button "Needs you com.example.brain.x-snapshot is failing, last exit 2 macbook-pro · Background"
+    - button "Needs you com.example.brain.x-snapshot is failing, last exit 2 macbook-pro · Background":
+      - img "Needs you"
+      - text: com.example.brain.x-snapshot is failing, last exit 2 macbook-pro · Background
     - button "Remove com.example.brain.x-snapshot": Remove
   - region "Machines":
     - heading "Machines 4" [level=2]
