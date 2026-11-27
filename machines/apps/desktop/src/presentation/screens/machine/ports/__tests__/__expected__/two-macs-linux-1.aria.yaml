@@ -21,8 +21,9 @@
   - region "Shared":
     - heading "Shared" [level=2]
     - region "Port 5173":
-      - text: :5173 Vite node https://macbook-pro.tail1234.ts.net:40001
+      - text: :5173
       - img "shared"
+      - text: Vite node https://macbook-pro.tail1234.ts.net:40001
       - group "Who reaches linux-1:5173":
         - button "Local"
         - button "Private" [pressed]
@@ -35,8 +36,9 @@
       - button "Hide QR code"
       - img "QR code of https://macbook-pro.tail1234.ts.net:40001"
     - region "Port 7000":
-      - text: :7000 server macbook-pro.tail1234.ts.net:40002
+      - text: :7000
       - img "shared"
+      - text: server macbook-pro.tail1234.ts.net:40002
       - group "Who reaches linux-1:7000":
         - button "Local"
         - button "Private" [pressed]

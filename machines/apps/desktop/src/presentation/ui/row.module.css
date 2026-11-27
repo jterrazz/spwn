@@ -64,8 +64,9 @@
 .trailPill {
     --column-trail: 132px;
 }
+/* invariant: a wide trail is at least 240 px and never narrower than its controls, so a switch or a button never runs back over the state mark or the name */
 .trailWide {
-    --column-trail: 240px;
+    --column-trail: minmax(240px, max-content);
 }
 .catalog {
     --column-name: minmax(140px, 184px);

@@ -21,8 +21,9 @@
   - region "Shared":
     - heading "Shared" [level=2]
     - region "Port 3000":
-      - text: :3000 Node or Next node https://macbook-pro.tail77a797.ts.net:443
+      - text: :3000
       - img "shared"
+      - text: Node or Next node https://macbook-pro.tail77a797.ts.net:443
       - group "Who reaches linux-1:3000":
         - button "Local"
         - button "Private"
@@ -34,8 +35,9 @@
       - text: ·
       - button "QR code"
     - region "Port 5173":
-      - text: :5173 Vite node https://macbook-pro.tail77a797.ts.net:40001
+      - text: :5173
       - img "shared"
+      - text: Vite node https://macbook-pro.tail77a797.ts.net:40001
       - group "Who reaches linux-1:5173":
         - button "Local"
         - button "Private" [pressed]

@@ -136,6 +136,7 @@ export function SharedRow({ share, target, onThisMac, compact = false }: SharedR
                 {...row}
                 {...(label === '' ? {} : { tag: share.process, tagLook: 'hint' as const })}
                 sentence={<Value>{shareAddressOf(share)}</Value>}
+                stateAt="start"
                 trail={
                     <span className={styles.trail}>
                         <Reach
