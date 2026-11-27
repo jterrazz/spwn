@@ -271,8 +271,7 @@ func Read(ctx context.Context, files map[string]File) (Corpus, error) {
 	if f.Size > MaxPageBytes {
 		return Corpus{}, fmt.Errorf("%s is %d bytes, %d at most", schemaFile, f.Size, MaxPageBytes)
 	}
-	yaml, inSchema := audible(string(f.Body))
-	schema, err := ReadSchema(schemaFile, []byte(yaml))
+	schema, inSchema, err := readSchema(schemaFile, f.Body)
 	if err != nil {
 		return Corpus{}, err
 	}

@@ -172,8 +172,17 @@ func FuzzRead(f *testing.F) {
 				return
 			}
 			for _, id := range []string{"blueprint/a", "blueprint/b", "product/stack"} {
-				if _, err := c.Serve(id); err != nil {
+				s, err := c.Serve(id)
+				if err != nil {
 					t.Errorf("%s is not served: %v", id, err)
+				}
+				if bad := holdsSilent(t, s); bad != "" {
+					t.Errorf("wiki.read %s serves %q", id, bad)
+				}
+			}
+			if m, err := c.Map(""); err == nil {
+				if bad := holdsSilent(t, m); bad != "" {
+					t.Errorf("wiki.map serves %q", bad)
 				}
 			}
 		})

@@ -3,6 +3,7 @@ package wiki
 import (
 	"errors"
 	"fmt"
+	"reflect"
 	"regexp"
 	"slices"
 	"strconv"
@@ -49,25 +50,42 @@ func (e *SchemaError) Error() string {
 }
 
 func ReadSchema(file string, body []byte) (Schema, error) {
+	s, _, err := readSchema(file, body)
+	return s, err
+}
+
+func readSchema(file string, body []byte) (Schema, int, error) {
 	// invariant: a pure function of its arguments, like Compile: wiki.yaml is
-	// read by the catalog's strict decoder, then judged here, the first
-	// refusal in the file's order returned with its line.
-	w, err := catalog.DecodeWiki(file, body)
+	// read by the catalog's strict decoder, every string it decoded passed
+	// through audibleAll, then judged here, the first refusal in the file's
+	// order returned with its line; it says how many characters it removed.
+	raw, inBytes := audible(string(body))
+	w, err := catalog.DecodeWiki(file, []byte(raw))
 	if err != nil {
-		var fe *catalog.FileError
-		if errors.As(err, &fe) {
-			line, says := fe.Line, fe.Problem
-			if m := decodeLine.FindStringSubmatch(says); m != nil {
-				line, _ = strconv.Atoi(m[1])
-				says = strings.Replace(says, m[0], "", 1)
-			}
-			if fe.Unknown != "" {
-				says = fmt.Sprintf("%q is no key wiki.yaml reads here", fe.Unknown)
-			}
-			return Schema{}, &SchemaError{File: file, Line: line, Says: says}
-		}
-		return Schema{}, &SchemaError{File: file, Says: strings.TrimPrefix(err.Error(), file+" ")}
+		return Schema{}, 0, schemaRefusal(file, err)
 	}
+	inStrings := audibleAll(reflect.ValueOf(&w))
+	s, err := judgeSchema(file, w)
+	return s, inBytes + inStrings, err
+}
+
+func schemaRefusal(file string, err error) error {
+	var fe *catalog.FileError
+	if errors.As(err, &fe) {
+		line, says := fe.Line, fe.Problem
+		if m := decodeLine.FindStringSubmatch(says); m != nil {
+			line, _ = strconv.Atoi(m[1])
+			says = strings.Replace(says, m[0], "", 1)
+		}
+		if fe.Unknown != "" {
+			says = fmt.Sprintf("%q is no key wiki.yaml reads here", fe.Unknown)
+		}
+		return &SchemaError{File: file, Line: line, Says: says}
+	}
+	return &SchemaError{File: file, Says: strings.TrimPrefix(err.Error(), file+" ")}
+}
+
+func judgeSchema(file string, w catalog.WikiFile) (Schema, error) {
 	refuse := func(line int, says string, args ...any) error {
 		return &SchemaError{File: file, Line: line, Says: fmt.Sprintf(says, args...)}
 	}

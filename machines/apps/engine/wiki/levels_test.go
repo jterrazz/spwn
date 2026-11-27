@@ -1,7 +1,7 @@
 package wiki_test
 
 import (
-	"encoding/json"
+	"reflect"
 	"slices"
 	"strconv"
 	"strings"
@@ -300,45 +300,95 @@ func noteSchema(word, line string) string {
 var silentText = "an " + string(rune(0x1b)) + "x escape, a " + string(rune(0x202e)) + " bidi override and a " + string(rune(0x2028)) + " separator, its \U0001F468" + string(rune(0x200d)) + "\U0001F469 kept."
 
 // value: whether a served answer holds a character that draws nothing or
-// reorders text, read back from its JSON so every string of it is seen.
-func holdsSilent(t *testing.T, answer any) string {
+// reorders text, walked by reflection through every field at any depth,
+// unexported and untagged ones too, so a field added later is seen.
+func holdsSilent(t testing.TB, answer any) string {
 	t.Helper()
-	data, err := json.Marshal(answer)
-	if err != nil {
-		t.Fatal(err)
+	silent := func(s string) bool {
+		return strings.ContainsFunc(s, func(r rune) bool {
+			return (r < 0x20 && r != '\n' && r != '\t') || (r >= 0x7f && r <= 0x9f) || (r >= 0x202a && r <= 0x202e) || (r >= 0x2066 && r <= 0x2069) || r == 0x2028 || r == 0x2029
+		})
 	}
-	var tree any
-	if err := json.Unmarshal(data, &tree); err != nil {
-		t.Fatal(err)
-	}
-	var walk func(v any) string
-	walk = func(v any) string {
-		switch v := v.(type) {
-		case string:
-			if strings.ContainsFunc(v, func(r rune) bool {
-				return (r < 0x20 && r != '\n' && r != '\t') || (r >= 0x7f && r <= 0x9f) || (r >= 0x202a && r <= 0x202e) || (r >= 0x2066 && r <= 0x2069) || r == 0x2028 || r == 0x2029
-			}) {
-				return v
+	var walk func(v reflect.Value) string
+	walk = func(v reflect.Value) string {
+		switch v.Kind() {
+		case reflect.String:
+			if silent(v.String()) {
+				return v.String()
 			}
-		case []any:
-			for _, e := range v {
-				if s := walk(e); s != "" {
+		case reflect.Pointer, reflect.Interface:
+			if !v.IsNil() {
+				return walk(v.Elem())
+			}
+		case reflect.Struct:
+			for i := range v.NumField() {
+				if s := walk(v.Field(i)); s != "" {
 					return s
 				}
 			}
-		case map[string]any:
-			for k, e := range v {
+		case reflect.Slice, reflect.Array:
+			for i := range v.Len() {
+				if s := walk(v.Index(i)); s != "" {
+					return s
+				}
+			}
+		case reflect.Map:
+			for _, k := range v.MapKeys() {
 				if s := walk(k); s != "" {
 					return s
 				}
-				if s := walk(e); s != "" {
+				if s := walk(v.MapIndex(k)); s != "" {
 					return s
 				}
 			}
+		default:
 		}
 		return ""
 	}
-	return walk(tree)
+	return walk(reflect.ValueOf(answer))
+}
+
+func TestAnEscapeWikiYamlDecodesIsRemovedLikeARawCharacter(t *testing.T) {
+	for _, tc := range []struct {
+		name, word, line string
+		removed          int
+	}{
+		{name: "a C0 control spelled \\x10 (FuzzServe's input)", word: `"0"`, line: `"\x10"`, removed: 1},
+		{name: "a bidi override spelled \\u202e", word: `"\` + `u202e{says}"`, line: `"{says}"`, removed: 1},
+		{name: "an escape spelled \\e", word: `"\e{says}"`, line: `"{says}\e"`, removed: 2},
+		{name: "a line separator spelled \\L", word: `"{says}"`, line: `"\L{says}"`, removed: 1},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			yaml := strings.Replace(strings.Replace(noteSchema("WORD", "LINE"), `"WORD"`, tc.word, 1), `"LINE"`, tc.line, 1)
+			corpus, err := readAll(map[string][]byte{"wiki.yaml": []byte(yaml), "blueprint/home.md": []byte("# Home\n\n<Note/>\n\n<Note id=\"a\" says=\"one.\" />\n")})
+			if err != nil {
+				t.Fatal(err)
+			}
+			s, err := corpus.Serve("blueprint/home")
+			if err != nil {
+				t.Fatal(err)
+			}
+			if bad := holdsSilent(t, s); bad != "" {
+				t.Errorf("wiki.read serves %q", bad)
+			}
+			m, err := corpus.Map("blueprint/home")
+			if err != nil {
+				t.Fatal(err)
+			}
+			if bad := holdsSilent(t, m); bad != "" {
+				t.Errorf("wiki.map serves %q", bad)
+			}
+			if bad := holdsSilent(t, corpus); bad != "" {
+				t.Errorf("the compiled corpus holds %q", bad)
+			}
+			want := wiki.Finding{Rule: "S32", Page: "wiki.yaml", Line: 1, Col: 1, Says: strconv.Itoa(tc.removed) + " characters that draw nothing or reorder text were removed"}
+			if !slices.ContainsFunc(corpus.Report.Findings, func(f wiki.Finding) bool {
+				return f.Rule == want.Rule && f.Page == want.Page && f.Says == want.Says
+			}) {
+				t.Errorf("no %+v in %+v", want, corpus.Report.Findings)
+			}
+		})
+	}
 }
 
 func FuzzServe(f *testing.F) {
@@ -349,6 +399,7 @@ func FuzzServe(f *testing.F) {
 	f.Add("000000000\n\n<Term id=\"00000\" means=\" \"/>", "", "")
 	f.Add("# Home\n\n<Note id=\"a\" says=\"one.\" then=\"two.\" />\n", "{says} {then} {says} {then} {says}", "{id}")
 	f.Add("# H"+silentText+"\n\nA [x](a"+silentText+"b).\n\n<Note id=\"a\" says=\""+silentText+"\" />\n", "{says}", "{says}")
+	f.Add("<Note/>", "0", "\x10")
 	f.Fuzz(func(t *testing.T, source, word, line string) {
 		corpus, err := readAll(map[string][]byte{"wiki.yaml": []byte(noteSchema(word, line)), "blueprint/home.md": []byte(source)})
 		if err != nil {

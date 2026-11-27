@@ -364,6 +364,9 @@ func FuzzMap(f *testing.F) {
 				t.Fatalf("open %q: %v", open, err)
 			}
 			needsHold(t, corpus, m)
+			if bad := holdsSilent(t, m); bad != "" {
+				t.Fatalf("open %q: wiki.map serves %q", open, bad)
+			}
 			ids := map[string]bool{}
 			for _, n := range m.Nodes {
 				if ids[n.ID] {
