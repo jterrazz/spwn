@@ -549,12 +549,7 @@ func (k *checker) reading(p *Page, weights map[*Block]*Weight, leads map[*Group]
 			case *Block:
 				r.Blocks = append(r.Blocks, entry(it))
 			case *Group:
-				g := BlockReading{Address: p.ID + "#" + it.ID, Kind: "group", Floor: k.floors[p.ID], Lead: leads[it]}
-				for _, s := range k.schema.Seats {
-					if slices.Contains(s.Reads, it.Intent) {
-						g.ReadBy = append(g.ReadBy, s.ID)
-					}
-				}
+				g := BlockReading{Address: p.ID + "#" + it.ID, Kind: "group", Floor: k.floors[p.ID], Lead: leads[it], ReadBy: k.readBy[it.Intent]}
 				r.Blocks = append(r.Blocks, g)
 				for _, inner := range it.Items {
 					if b, ok := inner.(*Block); ok {

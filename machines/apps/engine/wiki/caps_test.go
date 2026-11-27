@@ -326,6 +326,36 @@ func TestABlockOfATemplateAtItsCapHoldsFacesOfMaxFaceBytesAndAnIconOfAName(t *te
 	}
 }
 
+func TestTheGroupsOfOneIntentShareTheSeatsThatReadIt(t *testing.T) {
+	page := "# W\n\nThe page.\n\n" + strings.Repeat("<Group title=\"g\" intent=\"tell\">\n\n<Wide "+shortField+"=\"x\" />\n\n</Group>\n\n", 3)
+	c, err := readAll(filesAtCaps(t, page))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var shared []string
+	groups := 0
+	for _, r := range c.Report.Readings {
+		for _, b := range r.Blocks {
+			if b.Kind != "group" {
+				continue
+			}
+			groups++
+			if len(b.ReadBy) != wiki.MaxSeats {
+				t.Fatalf("a group is read by %d seats; want every seat, %d", len(b.ReadBy), wiki.MaxSeats)
+			}
+			if shared == nil {
+				shared = b.ReadBy
+			}
+			if &b.ReadBy[0] != &shared[0] {
+				t.Errorf("group %s holds its own list of seats; want the one its intent's groups share", b.Address)
+			}
+		}
+	}
+	if groups != 3 {
+		t.Errorf("%d groups read; want 3", groups)
+	}
+}
+
 func TestEachCapOfTheSchemaPassedIsOneHardFindingAndKeepsTheCap(t *testing.T) {
 	wide := padded("f01", wiki.MaxNameBytes)
 	for _, c := range []struct {

@@ -109,6 +109,9 @@ type checker struct {
 	queries   map[queryKey]map[string]*rowSet
 	inGroup   map[*Group][]held
 	kids      map[string][]string
+	// value: the seats that read each intent, in the schema's order, found
+	// once and shared by every group of that intent.
+	readBy map[Intent][]string
 	// value: the findings of each page's compile, then the check's own, and
 	// how many of the check's each page has of each rule.
 	compiled []Finding
@@ -154,7 +157,14 @@ func newChecker(schema Schema, pages []Page) *checker {
 		schema: schema, byID: map[string]*Page{}, blocks: map[string][]held{}, groups: map[string][]heldGroup{},
 		targets: map[string]target{}, floors: map[string]int{}, needsYou: map[string]bool{}, rows: map[*Block]*rowSet{},
 		kinds: map[scopeKey]*rowSet{}, queries: map[queryKey]map[string]*rowSet{}, inGroup: map[*Group][]held{},
-		said: map[ruleOn]int{},
+		said: map[ruleOn]int{}, readBy: map[Intent][]string{},
+	}
+	for _, s := range schema.Seats {
+		for _, in := range s.Reads {
+			if !slices.Contains(k.readBy[in], s.ID) {
+				k.readBy[in] = append(k.readBy[in], s.ID)
+			}
+		}
 	}
 	for i := range pages {
 		p := &pages[i]
