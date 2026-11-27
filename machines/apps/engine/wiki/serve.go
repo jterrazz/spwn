@@ -300,6 +300,10 @@ func Read(ctx context.Context, files map[string]File) (Corpus, error) {
 		if stopped := ctx.Err(); stopped != nil {
 			return Corpus{}, stopped
 		}
+		if len(file) > MaxPageIDBytes {
+			pages = append(pages, longPath(file, schema))
+			continue
+		}
 		id := file
 		if heard, _ := audible(file); owner[heard] != file {
 			id = file + "~" + pathMark(file)

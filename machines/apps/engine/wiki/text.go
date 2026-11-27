@@ -42,6 +42,13 @@ func audible(text string) (kept string, removed int) {
 	}, text), n
 }
 
+func Audible(text string) string {
+	// value: text as an answer may carry it, its silent characters removed: a
+	// path the folder could not read is named through it, like a page's id.
+	kept, _ := audible(text)
+	return kept
+}
+
 // invariant: a decoded value leaves audibleAll with every string it holds,
 // at any depth and as a map key too, passed through audible, so an escape
 // its decoder spelled is removed like a raw character; it says how many it

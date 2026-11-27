@@ -100,7 +100,18 @@ func (e *TooLarge) Error() string {
 // not read, and its one finding says so (H44).
 func tooLong(id string, size int64, schema Schema) Page {
 	p := Compile(id, "", schema)
-	p.Findings = []Finding{finding("H44", id, "", At{Line: 1, Col: 1}, fmt.Sprintf("%s.md is %d bytes, past the %d a page is compiled from: split it", id, size, MaxPageBytes))}
+	p.Findings = []Finding{finding("H44", p.ID, "", At{Line: 1, Col: 1}, fmt.Sprintf("%s.md is %d bytes, past the %d a page is compiled from: split it", p.ID, size, MaxPageBytes))}
+	return p
+}
+
+// value: a page whose path is past MaxPageIDBytes, compiled from nothing
+// under its path's first bytes and its pathMark, so two such pages stay two
+// and every id is MaxPageIDBytes at most; its one finding says so (H44).
+func longPath(file string, schema Schema) Page {
+	mark := "~" + pathMark(file)
+	kept, _ := clip(file, MaxPageIDBytes-len(mark))
+	p := Compile(kept+mark, "", schema)
+	p.Findings = []Finding{finding("H44", p.ID, "", At{Line: 1, Col: 1}, fmt.Sprintf("the page's path is %d bytes, past the %d a page id is: shorten it", len(file), MaxPageIDBytes))}
 	return p
 }
 

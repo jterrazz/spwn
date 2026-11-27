@@ -3,6 +3,7 @@ package wiki_test
 import (
 	"encoding/json"
 	"fmt"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -323,6 +324,64 @@ func TestABlockOfATemplateAtItsCapHoldsFacesOfMaxFaceBytesAndAnIconOfAName(t *te
 	}
 	if blocks != 2 {
 		t.Errorf("%d blocks compiled; want 2", blocks)
+	}
+}
+
+func TestAPagePastMaxPageIDBytesIsNotCompiledAndOneHardFindingSaysSo(t *testing.T) {
+	long := "product/" + strings.Repeat("l", wiki.MaxPageIDBytes)
+	files := filesAtCaps(t, "# W\n")
+	for _, end := range []string{"a", "b"} {
+		files[long+end+".md"] = []byte("# L\n\nThe page.\n\n<Wide " + shortField + "=\"x\" />\n")
+	}
+	c, err := readAll(files)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ids := map[string]bool{}
+	for _, p := range c.Pages {
+		if p.ID == worstID {
+			continue
+		}
+		ids[p.ID] = true
+		if len(p.ID) > wiki.MaxPageIDBytes || !strings.HasPrefix(p.ID, "product/l") {
+			t.Errorf("a long path is the page %q, %d bytes; want its first bytes within %d", p.ID, len(p.ID), wiki.MaxPageIDBytes)
+		}
+		if len(p.Sections) != 1 || len(p.Sections[0].Items) != 0 {
+			t.Errorf("page %q holds %+v; want nothing compiled", p.ID, p.Sections)
+		}
+		var said []string
+		for _, f := range c.Report.Findings {
+			if f.Page == p.ID && f.Hard {
+				said = append(said, f.Rule+" "+f.Says)
+			}
+		}
+		want := fmt.Sprintf("H44 the page's path is %d bytes, past the %d a page id is: shorten it", len(long)+1, wiki.MaxPageIDBytes)
+		if !slices.Contains(said, want) {
+			t.Errorf("page %q says %q; want %q", p.ID, said, want)
+		}
+	}
+	if len(ids) != 2 {
+		t.Errorf("two long paths are the pages %v; want two", ids)
+	}
+}
+
+func TestBlocksWithNoIDAreEachANodeOfTheMap(t *testing.T) {
+	c, err := readAll(filesAtCaps(t, "# W\n\nThe page.\n\n<Wide "+shortField+"=\"x\" />\n\n<Wide "+shortField+"=\"y\" />\n\n<Group title=\"g\" intent=\"tell\">\n\n<Wide "+shortField+"=\"z\" />\n\n</Group>\n"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	m, err := c.Map(worstID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	nodes := map[string]bool{}
+	for _, n := range m.Nodes {
+		if n.Kind == wiki.NodeBlock || n.Kind == wiki.NodeGroup {
+			nodes[n.ID] = true
+		}
+	}
+	if len(nodes) != 3 {
+		t.Errorf("two blocks and a group with no id are the nodes %v; want three", nodes)
 	}
 }
 

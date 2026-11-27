@@ -171,6 +171,19 @@ func TestTheMapAndTheReadOfAnUnchangedCorpusCompileItOnce(t *testing.T) {
 	}
 }
 
+func TestAnUnreadablePathIsNamedWithNoSilentCharacter(t *testing.T) {
+	refusal := &contract.Unreadable{Path: "blueprint/" + string(rune(0x202e)) + "secret\x1b.md", Err: errors.New("permission denied")}
+	for _, h := range calls.All(calls.Deps{Corpus: &counted{refusal: refusal}}) {
+		var e *fail.Error
+		if _, err := h.Invoke(context.Background(), localMac(), []byte(`{}`), nil); !errors.As(err, &e) {
+			t.Fatalf("%s: %v; want a coded refusal", h.Meta().Name, err)
+		}
+		if e.Subject != "blueprint/secret.md" || e.Detail["path"] != "blueprint/secret.md" {
+			t.Errorf("%s: the refusal names %q and %q; want the path with no silent character", h.Meta().Name, e.Subject, e.Detail["path"])
+		}
+	}
+}
+
 func TestEachWayACorpusFailsToReadIsCoded(t *testing.T) {
 	for _, c := range []struct {
 		refusal error

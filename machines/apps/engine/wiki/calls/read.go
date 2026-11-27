@@ -172,7 +172,8 @@ func refusal(err error) error {
 	case errors.As(err, &past):
 		return fail.New(fail.Refused, TooLarge, "", map[string]string{"pages": strconv.Itoa(wiki.MaxPages), "mib": strconv.Itoa(wiki.MaxCorpusBytes >> 20)})
 	case errors.As(err, &unread):
-		return fail.New(fail.Failed, Unreadable, unread.Path, map[string]string{"path": unread.Path})
+		heard := wiki.Audible(unread.Path)
+		return fail.New(fail.Failed, Unreadable, heard, map[string]string{"path": heard})
 	}
 	return fail.New(fail.Failed, Unreadable, err.Error(), nil)
 }

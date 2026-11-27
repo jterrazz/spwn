@@ -375,7 +375,7 @@ func (m *mapper) section(p *Page, si int, h *Heading, items []Item, parent strin
 	var kids []int
 	var words, first []string
 	k := 0
-	for _, it := range items {
+	for i, it := range items {
 		if m.meter.spent() {
 			m.out.Cut++
 			continue
@@ -398,12 +398,17 @@ func (m *mapper) section(p *Page, si int, h *Heading, items []Item, parent strin
 			continue
 		}
 		// invariant: a node is served once: an item whose id its page already
-		// holds, which the check finds, is left out of the graph.
-		if m.served["B:"+p.ID+":"+item.Ref] {
+		// holds, which the check finds, is left out of the graph; a block or a
+		// group with no id is a node of its own, named by its index.
+		node := "B:" + p.ID + ":" + item.Ref
+		if item.Ref == "" {
+			node = "B:" + p.ID + ":~" + strconv.Itoa(si) + "." + strconv.Itoa(i)
+		}
+		if m.served[node] {
 			continue
 		}
-		m.served["B:"+p.ID+":"+item.Ref] = true
-		item.ID, item.Depth, item.Parent, item.Band, item.Kids = "B:"+p.ID+":"+item.Ref, 4, &id, band, []string{}
+		m.served[node] = true
+		item.ID, item.Depth, item.Parent, item.Band, item.Kids = node, 4, &id, band, []string{}
 		if kid := m.add(item); kid >= 0 {
 			kids = append(kids, kid)
 		}
