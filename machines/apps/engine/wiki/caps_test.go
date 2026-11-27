@@ -131,6 +131,7 @@ func atCapsPages() []atCapsPage {
 		{"B4 groups each read by every seat", blocksFilling(func(i int) string {
 			return fmt.Sprintf("<Group id=\"g%d\" title=\"g\" intent=\"tell\">\n\n<Wide %s=\"x\" />\n\n</Group>\n\n", i, shortField)
 		})},
+		{"B5 blocks on a floor of their own", blocksFilling(func(int) string { return "<Wide " + shortField + "=\"x\" floor={4} />\n\n" })},
 		{"B6 blocks writing the kind's fields", blocksFilling(func(i int) string {
 			return fmt.Sprintf("<Wide id=\"b%d\" %s=\"x\" %s=%q />\n\n", i, shortField, field, value)
 		})},
@@ -203,6 +204,28 @@ func TestAPageUnderASchemaAtEveryCapIsReadServedAndMappedWithinItsCeilings(t *te
 				}
 			}
 		})
+	}
+}
+
+func invalidFaces() string {
+	return "# W\n\nThe page.\n\n" + strings.Repeat("<Wide "+shortField+"=\""+strings.Repeat("\xff", 48)+"\" />\n\n", 2000)
+}
+
+func TestFacesOfInvalidUTF8AreMeteredAtTheirJSONCost(t *testing.T) {
+	c, err := readAll(filesAtCaps(t, invalidFaces()))
+	if err != nil {
+		t.Fatal(err)
+	}
+	s, err := c.Serve(worstID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	body, err := json.Marshal(s)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(body) > wiki.MaxAnswerBytes+answerSlack || s.Cut == 0 {
+		t.Errorf("2,000 blocks of faces of invalid UTF-8 answer %d bytes, %d cut; want %d at most, some cut", len(body), s.Cut, wiki.MaxAnswerBytes+answerSlack)
 	}
 }
 

@@ -1,10 +1,14 @@
 package wiki
 
+import "unicode/utf8"
+
 // invariant: a meter counts down the bytes an answer may still take, as an
-// upper bound of what its JSON says: each string its bytes, six for each
-// byte JSON escapes, and each object its keys. It stops counting a string
-// once spent, so measuring a hostile item costs at most the budget; and
-// once spent it stays spent, so what is served is a prefix in reading order.
+// upper bound of what its JSON says: each string at its JSON cost, its bytes
+// and its quotes, six for each byte JSON escapes, six for each byte of
+// invalid UTF-8 (written as �) and for U+2028 and U+2029; and each
+// object its keys. It stops counting a string once spent, so measuring a
+// hostile entry costs at most the budget; and once spent it stays spent, so
+// what is served is a prefix in reading order.
 type meter struct{ left int }
 
 func newMeter() *meter { return &meter{left: MaxAnswerBytes} }
@@ -15,11 +19,30 @@ func (m *meter) object(keys int) { m.left -= 16 * keys }
 
 func (m *meter) str(s string) {
 	m.left -= len(s) + 2
-	for i := 0; i < len(s) && m.left >= 0; i++ {
-		if c := s[i]; c < 0x20 || c == '<' || c == '>' || c == '&' || c == '"' || c == '\\' {
-			m.left -= 5
+	for i := 0; i < len(s) && m.left >= 0; {
+		c := s[i]
+		if c < utf8.RuneSelf {
+			if c < 0x20 || c == '<' || c == '>' || c == '&' || c == '"' || c == '\\' {
+				m.left -= 5
+			}
+			i++
+			continue
 		}
+		r, size := utf8.DecodeRuneInString(s[i:])
+		switch {
+		case r == utf8.RuneError && size == 1:
+			m.left -= 5
+		case r == ' ' || r == ' ':
+			m.left -= 3
+		}
+		i += size
 	}
+}
+
+func (m *meter) floorHead(f *FloorHead) {
+	m.object(3)
+	m.str(f.Name)
+	m.str(f.Question)
 }
 
 func (m *meter) strs(list []string) {
@@ -63,6 +86,9 @@ func (m *meter) item(it ServedItem) {
 		m.object(14)
 		m.strs([]string{g.ID, g.Address, g.Title, g.MirroredBy, g.Lead})
 		m.strs(g.ReadBy)
+		if g.OwnFloor != nil {
+			m.floorHead(g.OwnFloor)
+		}
 		m.findings(g.Finding)
 	case it.Block != nil:
 		m.block(it.Block)
@@ -72,6 +98,9 @@ func (m *meter) item(it ServedItem) {
 func (m *meter) block(b *ServedBlock) {
 	m.object(22)
 	m.strs([]string{b.ID, b.Address, b.Kind, b.Title, b.Icon, b.Word, b.Line})
+	if b.OwnFloor != nil {
+		m.floorHead(b.OwnFloor)
+	}
 	for _, c := range b.Why {
 		m.object(2)
 		m.str(c.Name)

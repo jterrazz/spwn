@@ -380,6 +380,7 @@ func (c Corpus) Serve(id string) (Served, error) {
 	reading := s.reading(p.ID)
 	out := Served{Page: s.head(p), Floor: s.floor(reading.Floor), Icons: map[string][]string{}}
 	s.m.head(&out.Page)
+	s.m.floorHead(&out.Floor)
 	out.Paragraph = s.paragraphs(p.ID, p.Faces.Paragraph)
 	out.Lede = lede(out.Page, out.Paragraph)
 	s.m.runs(out.Lede.First)
