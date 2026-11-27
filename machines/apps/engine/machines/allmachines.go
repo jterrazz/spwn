@@ -1,6 +1,7 @@
 package machines
 
 import (
+	"encoding/json"
 	"slices"
 	"strings"
 	"time"
@@ -50,6 +51,21 @@ const (
 
 func (VMState) Enum() []string {
 	return []string{string(Running), string(Stopped), string(Suspended), string(Stale), string(Broken), string(Creating), string(UnknownState)}
+}
+
+func (s *VMState) UnmarshalJSON(data []byte) error {
+	// invariant: a state off the enum, empty included, as another Mac's
+	// broken or hostile binary may answer it, reads as unknown: a page
+	// draws it as a VM not seen, never as a word of its own.
+	var raw string
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	*s = VMState(raw)
+	if !slices.Contains(s.Enum(), raw) {
+		*s = UnknownState
+	}
+	return nil
 }
 
 func (s VMState) Word() string {
@@ -157,6 +173,22 @@ type VM struct {
 	// nothing has connected since, as the dial said it; empty when nothing
 	// failed.
 	GuestError string `json:",omitempty"`
+}
+
+func (vm *VM) UnmarshalJSON(data []byte) error {
+	// invariant: a VM answered with no state at all reads as unknown too,
+	// as one answered off the enum does: a binary of this release always
+	// writes the key.
+	if string(data) == "null" {
+		return nil
+	}
+	type answered VM
+	v := answered{State: UnknownState}
+	if err := json.Unmarshal(data, &v); err != nil {
+		return err
+	}
+	*vm = VM(v)
+	return nil
 }
 
 type KeptDrift struct {

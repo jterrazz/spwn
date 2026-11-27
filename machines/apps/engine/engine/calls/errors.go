@@ -9,20 +9,21 @@ import (
 )
 
 const (
-	VMStopped        fail.Code = "vm_stopped"
-	UnknownVM        fail.Code = "unknown_vm"
-	UnknownOp        fail.Code = "unknown_op"
-	UnknownPage      fail.Code = "unknown_page"
-	GuestAbsent      fail.Code = "guest_absent"
-	GuestTimeout     fail.Code = "guest_timeout"
-	LocalNetwork     fail.Code = "local_network"
-	IgnoredPort      fail.Code = "ignored_port"
-	NotAllowed       fail.Code = "not_allowed"
-	RangeFull        fail.Code = "range_full"
-	AwakeRange       fail.Code = "awake_range"
-	AwakeGuard       fail.Code = "awake_guard"
-	AwakeUnsupported fail.Code = "awake_unsupported"
-	Internal         fail.Code = "internal"
+	VMStopped           fail.Code = "vm_stopped"
+	UnknownVM           fail.Code = "unknown_vm"
+	UnknownOp           fail.Code = "unknown_op"
+	UnknownPage         fail.Code = "unknown_page"
+	GuestAbsent         fail.Code = "guest_absent"
+	GuestTimeout        fail.Code = "guest_timeout"
+	GuestOutputTooLarge fail.Code = "guest_output_too_large"
+	LocalNetwork        fail.Code = "local_network"
+	IgnoredPort         fail.Code = "ignored_port"
+	NotAllowed          fail.Code = "not_allowed"
+	RangeFull           fail.Code = "range_full"
+	AwakeRange          fail.Code = "awake_range"
+	AwakeGuard          fail.Code = "awake_guard"
+	AwakeUnsupported    fail.Code = "awake_unsupported"
+	Internal            fail.Code = "internal"
 )
 
 type NotInstalledError struct{}

@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"context"
+	"errors"
 	"io/fs"
 	"strings"
 	"testing"
@@ -48,6 +49,9 @@ func (s GuestSubject) dial(t *testing.T) contract.Guest {
 	return g
 }
 
+// value: what a command prints of n bytes, one line with no newline.
+func output(n int) string { return string(bytes.Repeat([]byte{'o'}, n)) }
+
 func Guest(t *testing.T, subject func(t *testing.T) GuestSubject) {
 	t.Run("a command's exit code, output and errors come back apart", func(t *testing.T) {
 		s := subject(t)
@@ -69,6 +73,42 @@ func Guest(t *testing.T, subject func(t *testing.T) GuestSubject) {
 		}
 		if out.String() != "out\n" || errs.String() != "err\n" {
 			t.Errorf("the writers got %q and %q, want out and err", out.String(), errs.String())
+		}
+	})
+	t.Run("an output of the most kept comes back whole", func(t *testing.T) {
+		s := subject(t)
+		most := output(contract.GuestOutputMost)
+		s.Program("loud", Answer{Stdout: most, Stderr: most})
+		got, err := s.dial(t).Exec(t.Context(), contract.GuestCommand{Line: "loud"})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if got.Stdout != most || got.Stderr != most {
+			t.Errorf("the command came back with %d and %d bytes, want %d each", len(got.Stdout), len(got.Stderr), contract.GuestOutputMost)
+		}
+	})
+	t.Run("an output past the most kept ends its command, kept up to the most, the VM named", func(t *testing.T) {
+		s := subject(t)
+		s.Program("louder", Answer{Stdout: output(contract.GuestOutputMost + 1)})
+		got, err := s.dial(t).Exec(t.Context(), contract.GuestCommand{Line: "louder"})
+		var over *contract.OutputTooLargeError
+		if !errors.As(err, &over) || over.VM != s.Target(t).VM {
+			t.Fatalf("Exec = %v; want the output too large, naming %s", err, s.Target(t).VM)
+		}
+		if len(got.Stdout) != contract.GuestOutputMost {
+			t.Errorf("the command came back with %d bytes, want the first %d", len(got.Stdout), contract.GuestOutputMost)
+		}
+	})
+	t.Run("an output past the most kept streams whole to the writer it is given", func(t *testing.T) {
+		s := subject(t)
+		past := output(contract.GuestOutputMost + 1)
+		s.Program("louder", Answer{Stdout: past})
+		var out bytes.Buffer
+		if _, err := s.dial(t).Exec(t.Context(), contract.GuestCommand{Line: "louder", Stdout: &out}); err != nil {
+			t.Fatal(err)
+		}
+		if out.Len() != len(past) {
+			t.Errorf("the writer got %d bytes, want %d", out.Len(), len(past))
 		}
 	})
 	t.Run("a secret reaches the command by its stdin, whole", func(t *testing.T) {

@@ -504,6 +504,11 @@
       "Detail": "call",
       "Tone": "plain"
     },
+    "call.too-large": {
+      "Word": "too large",
+      "Detail": "call",
+      "Tone": "plain"
+    },
     "call.unknown": {
       "Word": "unknown",
       "Detail": "call",
@@ -725,6 +730,10 @@
     },
     "guest_absent": {
       "Word": "Guest not connected",
+      "Tone": "plain"
+    },
+    "guest_output_too_large": {
+      "Word": "Command output too large",
       "Tone": "plain"
     },
     "guest_timeout": {

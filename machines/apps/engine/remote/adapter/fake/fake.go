@@ -31,6 +31,10 @@ type Mac struct {
 	// value: where that Mac keeps a gesture it runs on itself, as its
 	// serving keeps it; nil keeps none.
 	Kept call.Keeper
+	// value: what that Mac's binary sends in place of each answer it
+	// encoded, as a broken or hostile binary sends it; nil sends it as
+	// encoded.
+	Answers func(json.RawMessage) json.RawMessage
 }
 
 type Relay interface {
@@ -187,10 +191,14 @@ func (e endpoint) encoded(out any) (json.RawMessage, error) {
 	// invariant: what crosses from one Mac to the other is an answer: the
 	// world build's tripwire reads it as the serve loop reads a frame.
 	data, err := call.Encode(out, e.word())
-	if err == nil {
-		secret.Tripwire(data)
+	if err != nil {
+		return nil, err
 	}
-	return data, err
+	secret.Tripwire(data)
+	if e.m.Answers != nil {
+		data = e.m.Answers(data)
+	}
+	return data, nil
 }
 
 func (e endpoint) Close() error {

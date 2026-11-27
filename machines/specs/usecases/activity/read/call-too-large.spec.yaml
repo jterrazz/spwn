@@ -1,0 +1,15 @@
+description: 'a graph wider than 30 days is refused before any bucket is made'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | if .out then (.out | keys) else .error | {code, subject, message, hint} end'''
+      stdin: |
+          {"v":2,"id":"1","watch":"activity.read","in":{"graph":9223372036854775807}}
+          {"v":2,"id":"2","watch":"activity.read","in":{"graph":2592000000000001}}
+          {"v":2,"id":"3","watch":"activity.read","in":{"graph":2592000000000000,"quick":true}}
+      exit: 0
+      stdout: |
+          {"code":"call.too-large","subject":"activity.read","message":"activity.read takes a graph of 30 days at most","hint":"ask again with a graph of 30 days or less"}
+          {"code":"call.too-large","subject":"activity.read","message":"activity.read takes a graph of 30 days at most","hint":"ask again with a graph of 30 days or less"}
+          ["chart","findings","graph","last","rates","since","source","verdict","window"]

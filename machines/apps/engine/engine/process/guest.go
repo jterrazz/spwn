@@ -2,10 +2,12 @@ package process
 
 import (
 	"context"
+	"errors"
 	"net/netip"
 	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/engine"
+	"github.com/jterrazz/studio-station/apps/engine/machines/contract"
 
 	enginecalls "github.com/jterrazz/studio-station/apps/engine/engine/calls"
 )
@@ -42,7 +44,20 @@ func (d *Engine) GuestExec(ctx context.Context, vm, line, stdin string) (engine.
 	if client == nil {
 		return engine.GuestRan{}, fault(enginecalls.GuestAbsent, vm+"'s guest is not connected", "station machines start "+vm)
 	}
-	return client.Exec(ctx, line, stdin)
+	return pastMost(vm)(client.Exec(ctx, line, stdin))
+}
+
+// invariant: a command ended because its output passed the most a result
+// keeps is the engine's coded failure, its VM named; the output it printed
+// up to the most is still answered.
+func pastMost(vm string) func(engine.GuestRan, error) (engine.GuestRan, error) {
+	return func(ran engine.GuestRan, err error) (engine.GuestRan, error) {
+		var over *contract.OutputTooLargeError
+		if errors.As(err, &over) {
+			return ran, fault(enginecalls.GuestOutputTooLarge, over.Error(), "station machines "+vm)
+		}
+		return ran, err
+	}
 }
 
 func (d *Engine) GuestAttach(ctx context.Context, vm, line string) (Session, error) {

@@ -101,7 +101,7 @@ func (v *BuildVM) Run(ctx context.Context, as BuildLogin, line, stdin string) (e
 	if err != nil {
 		return engine.GuestRan{}, err
 	}
-	return g.Exec(ctx, line, stdin)
+	return pastMost(v.vm)(g.Exec(ctx, line, stdin))
 }
 
 func (v *BuildVM) Close() error {

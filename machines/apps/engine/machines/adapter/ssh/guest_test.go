@@ -46,6 +46,9 @@ type sshd struct {
 	heldOut string
 	began   chan struct{}
 	heard   chan string
+	// value: a line that prints one line without end, with no newline,
+	// until its session is closed.
+	flood string
 }
 
 func newHostKey(t *testing.T) ssh.Signer {
@@ -123,6 +126,14 @@ func (s *sshd) session(nc ssh.NewChannel) {
 		if line == s.held && line != "" {
 			s.hold(ch, reqs)
 			return
+		}
+		if line == s.flood && line != "" {
+			chunk := []byte(strings.Repeat("o", 64<<10))
+			for {
+				if _, err := ch.Write(chunk); err != nil {
+					return
+				}
+			}
 		}
 		code := s.run(line, ch)
 		status := make([]byte, 4)
@@ -365,6 +376,37 @@ func TestACommandEndedByItsContextAnswersTheOutputItWroteBefore(t *testing.T) {
 	res, err := g.Exec(ctx, contract.GuestCommand{Line: s.held})
 	if !errors.Is(err, context.Canceled) || res.Stdout != s.heldOut {
 		t.Errorf("Exec = %q, %v; want the line it printed and the context's end", res.Stdout, err)
+	}
+}
+
+func TestACommandPrintingOneLineWithoutEndIsEndedAtTheMostKept(t *testing.T) {
+	s := startSSHD(t, newHostKey(t))
+	s.flood = "yes"
+	g, err := dial(t).Dial(t.Context(), target(t, s, filepath.Join(t.TempDir(), "known_hosts", "dev")))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = g.Close() }()
+	type ran struct {
+		res contract.GuestResult
+		err error
+	}
+	got := make(chan ran, 1)
+	go func() {
+		res, err := g.Exec(t.Context(), contract.GuestCommand{Line: s.flood})
+		got <- ran{res, err}
+	}()
+	select {
+	case r := <-got:
+		var over *contract.OutputTooLargeError
+		if !errors.As(r.err, &over) || over.VM != "dev" {
+			t.Errorf("Exec = %v; want the output too large, naming dev", r.err)
+		}
+		if len(r.res.Stdout) != contract.GuestOutputMost {
+			t.Errorf("the command came back with %d bytes, want the first %d", len(r.res.Stdout), contract.GuestOutputMost)
+		}
+	case <-time.NewTimer(30 * time.Second).C:
+		t.Fatal("Exec never returned")
 	}
 }
 

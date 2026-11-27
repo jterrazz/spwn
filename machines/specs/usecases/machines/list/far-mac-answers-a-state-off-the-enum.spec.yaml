@@ -1,0 +1,17 @@
+description: 'a far Mac that answers its VMs in an empty state leaves the list drawn, each VM not seen'
+env: two-macs
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["mac-mini"].answers_vm_state = ""'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'machines --json | /usr/bin/jq -c ''[.macs[] | {name, reachable, vms: [.vms[] | [.name, .state]]}]'''
+      exit: 0
+      stdout: |
+          [{"name":"macbook-pro","reachable":true,"vms":[["api","stopped"],["linux-1","running"]]},{"name":"mac-mini","reachable":true,"vms":[["infra","unknown"]]}]
+    - command: 'machines'
+      exit: 0
+      stdout: |
+          ●	macbook-pro	Mac	macbook-pro	Engine running
+          ○	api	Workspace	macbook-pro	Stopped · persistent	4 CPU	8 GB
+          ●	linux-1	Workspace	macbook-pro	Running · ephemeral	4 CPU	8 GB
+          ●	mac-mini	Mac	mac-mini	Engine running
+          ?	infra	Server	mac-mini	Not seen · always on	8 CPU	24 GB
