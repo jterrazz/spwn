@@ -53,16 +53,19 @@ func layeredCorpus() map[string][]byte {
 	return files
 }
 
-// value: each large corpus's budget, at least five times its time measured
-// on the development VM at a load of 18 or less (2026-11-27): the read is
-// the compile and the check of every page; the map and the serve are of
-// the corpus once read, as the cache keeps it.
+// value: each large corpus's budget, five to ten times the median of ten
+// runs measured on the development VM at a load of 18 or less (2026-11-27):
+// the read of 500 pages 55 ms (69 ms through wiki.read cold), of 2,000
+// layered pages 18 ms; the map of 500 pages 29 ms with none open and with
+// one open (37 and 35 ms through wiki.map), of 2,000 pages 2 ms; the serve
+// of one page 0.5 ms (0.6 ms through wiki.read warm). The map and the serve
+// budgets hold the slower corpus, the 500 copied pages.
 const (
-	budgetReadCopied    = 2 * time.Second
-	budgetReadLayered   = 2 * time.Second
-	budgetMapLarge      = 500 * time.Millisecond
-	budgetServeLarge    = 50 * time.Millisecond
-	budgetMapOpenLarge  = 500 * time.Millisecond
+	budgetReadCopied    = 500 * time.Millisecond
+	budgetReadLayered   = 150 * time.Millisecond
+	budgetMapLarge      = 300 * time.Millisecond
+	budgetServeLarge    = 5 * time.Millisecond
+	budgetMapOpenLarge  = 300 * time.Millisecond
 	largeCorpusPages    = 500
 	layeredCorpusPages  = 2000
 	layeredCorpusOpened = "blueprint/l050-10"
