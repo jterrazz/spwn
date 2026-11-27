@@ -125,6 +125,7 @@ function Alarm({ found, name, go }: { found: Found; name: string; go: Go }) {
         <Needs
             go={go}
             macs={[found.mac]}
+            names="needs-you"
             needs={needsOf(overview.out.Summary.Needs ?? [], name)}
             on={name}
             title="Needs you, on its ports"

@@ -32,6 +32,7 @@ function CanWait({
         <Needs
             go={go}
             macs={macs}
+            names="can-wait"
             needs={needs}
             none="Nothing can wait."
             title={wordOf('OverviewUpkeep', 'can-wait').Word}
@@ -83,6 +84,7 @@ export function InboxPage({ macs, overview, go }: InboxProps) {
                 <Needs
                     go={go}
                     macs={macs}
+                    names="needs-you"
                     needs={needsYou(listed)}
                     none={none}
                     note="a gesture is due"

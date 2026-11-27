@@ -15,7 +15,12 @@ import {
     withNeeds,
 } from './need-gesture.fixtures';
 
-const recordingFor = await recordingsOf('engine-stopped', 'machinefile-differs', 'two-macs');
+const recordingFor = await recordingsOf(
+    'create-failed',
+    'engine-stopped',
+    'machinefile-differs',
+    'two-macs',
+);
 
 // value: each frame of a watch held this long, so a step is on screen before the next one replaces it.
 const PACE = { gestureFrame: 600 };
@@ -156,6 +161,28 @@ describe('NeedLine', () => {
 
         // Then - and only this button was drawn primary
         expect(bright).toStrictEqual(['Restart infra']);
+        expect(result.errors.text).toBe('');
+    });
+
+    test('a need in the section that names its state draws its mark alone, and a need in another state keeps its word', async () => {
+        // Given - Home over create-failed: linux-2 not created, and a background task that needs you
+        const said: { words: string[]; marks: string[] } = { marks: [], words: [] };
+        const result = await component.render(
+            pageOver(recordingFor('create-failed'), { page: 'home' }),
+            async (visitor) => {
+                // When - its Needs you section is drawn
+                await visitor.see(within(needs, button('Try again linux-2')));
+                const section = document.querySelector('section[aria-label="Needs you"]');
+                const states = [...(section?.querySelectorAll('[data-mark]') ?? [])];
+                said.words = states.map((one) => one.textContent).filter((word) => word !== '');
+                said.marks = states.flatMap((one) =>
+                    one.getAttribute('role') === 'img' ? [one.getAttribute('aria-label') ?? ''] : [],
+                );
+            },
+        );
+
+        // Then - the need that needs you draws its diamond named, the one not created keeps its word
+        expect(said).toStrictEqual({ marks: ['Needs you'], words: ['Not created'] });
         expect(result.errors.text).toBe('');
     });
 

@@ -80,6 +80,7 @@ function NeedsOf({ overview, mac, name, title, go }: NeedsOfProps) {
         <Needs
             go={go}
             macs={[mac]}
+            names="needs-you"
             needs={needsYou(overview.out.Summary.Needs ?? [])}
             note=""
             on={name}

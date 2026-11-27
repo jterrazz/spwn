@@ -28,7 +28,9 @@
     - heading "Needs you 2" [level=2]
     - 'button "Not created linux-2 was not created: it failed at boot linux-2 · Overview"'
     - button "Try again linux-2": Try again
-    - button "Needs you com.example.brain.x-snapshot is failing, last exit 2 macbook-pro · Background"
+    - button "Needs you com.example.brain.x-snapshot is failing, last exit 2 macbook-pro · Background":
+      - img "Needs you"
+      - text: com.example.brain.x-snapshot is failing, last exit 2 macbook-pro · Background
     - button "Remove com.example.brain.x-snapshot": Remove
   - region "Machines":
     - heading "Machines 4" [level=2]

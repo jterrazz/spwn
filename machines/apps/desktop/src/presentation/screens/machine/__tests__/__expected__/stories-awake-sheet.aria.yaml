@@ -34,7 +34,9 @@
   - region "Needs you, on this Mac":
     - heading "Needs you, on this Mac" [level=2]
     - button "Exposed port 5000 is reachable outside Tailscale macbook-pro · Ports"
-    - button "Needs you com.example.brain.x-snapshot is failing, last exit 2 macbook-pro · Background"
+    - button "Needs you com.example.brain.x-snapshot is failing, last exit 2 macbook-pro · Background":
+      - img "Needs you"
+      - text: com.example.brain.x-snapshot is failing, last exit 2 macbook-pro · Background
     - button "Remove com.example.brain.x-snapshot": Remove
   - region "Memory":
     - heading "Memory one square, one GB" [level=2]

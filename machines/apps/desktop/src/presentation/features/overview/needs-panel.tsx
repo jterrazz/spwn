@@ -1,4 +1,4 @@
-import type { MachinesMacView, OverviewNeed } from '@jterrazz/station-api';
+import type { MachinesMacView, OverviewNeed, OverviewUpkeep } from '@jterrazz/station-api';
 
 import type { Route } from '../../navigation/route';
 import { Panel } from '../../ui/index';
@@ -10,9 +10,11 @@ import pageStyles from '../../ui/page.module.css';
 
 type Go = (to: Route) => void;
 
+// value: `names` is the state the title says, so a row in that state draws its mark without the word.
 type NeedsProps = {
     needs: readonly OverviewNeed[];
     title: string;
+    names: OverviewUpkeep;
     macs: readonly MachinesMacView[];
     go: Go;
     none?: string;
@@ -29,7 +31,16 @@ function keyOf(need: OverviewNeed): string {
 // invariant: so every page that draws this panel holds it inside one.
 // invariant: a page whose bar leads with its own button asks the panel to stand back, so no need draws a second
 // invariant: primary on the screen.
-export function Needs({ needs, title, macs, go, none, note, standsBack = false }: NeedsProps) {
+export function Needs({
+    needs,
+    title,
+    names,
+    macs,
+    go,
+    none,
+    note,
+    standsBack = false,
+}: NeedsProps) {
     if (needs.length === 0 && none === undefined) {
         return null;
     }
@@ -43,6 +54,7 @@ export function Needs({ needs, title, macs, go, none, note, standsBack = false }
                     <NeedLine
                         key={keyOf(need)}
                         macs={macs}
+                        named={need.Mark === names}
                         need={need}
                         onOpen={() => {
                             go(routeOfNeed(need));

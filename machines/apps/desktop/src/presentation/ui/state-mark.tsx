@@ -101,7 +101,7 @@ export type StateMarkProps =
     | {
           tone: Tone;
           word: string;
-          said?: 'after' | 'before' | 'name';
+          said?: 'after' | 'before' | 'name' | undefined;
           fit?: 'words' | 'wrap' | undefined;
       };
 

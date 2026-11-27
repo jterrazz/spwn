@@ -9,7 +9,7 @@ import styles from './row.module.css';
 
 export type RowTemplate = 'catalog' | 'flow' | 'meters' | 'passwords';
 
-type RowState = { tone: Tone; word: string };
+type RowState = { tone: Tone; word: string; said?: 'name' | undefined };
 
 // value: a column given `null` is kept empty in this row, so a list whose rows differ still aligns; a column
 // value: left `undefined` is not a column of this list at all. A value given as a string is plain text with
@@ -105,7 +105,9 @@ function StateCell({ state, at }: { state: null | RowState | undefined; at: 'end
     }
     return (
         <div className={`${styles.state} ${at === 'end' ? styles.atEnd : ''}`}>
-            {state === null ? null : <StateMark tone={state.tone} word={state.word} />}
+            {state === null ? null : (
+                <StateMark said={state.said} tone={state.tone} word={state.word} />
+            )}
         </div>
     );
 }
