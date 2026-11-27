@@ -303,18 +303,27 @@ func (s Schema) seatOf(path string) string {
 
 // value: the icons the engine ships by name: one per engine kind, per intent
 // and per value a built-in icon Face renders (a rule's force, a component's
-// level, a link's right). Their grids are the window's to draw.
-func builtinIcons() []string {
-	out := slices.Collect(maps.Keys(builtinKinds()))
-	for _, i := range intents() {
-		out = append(out, string(i))
+// level, a link's right). Their grids are the window's to draw; the set is
+// built once, as each block naming an icon looks it up, and no caller
+// writes to it.
+var builtinIcons = sync.OnceValue(func() map[string]bool {
+	out := map[string]bool{}
+	for id := range builtinKinds() {
+		out[id] = true
 	}
-	out = append(out, "hard", "soft", "hardened", "allowed", "refused")
-	return append(out, levels()...)
-}
+	for _, i := range intents() {
+		out[string(i)] = true
+	}
+	for _, name := range append([]string{"hard", "soft", "hardened", "allowed", "refused"}, levels()...) {
+		out[name] = true
+	}
+	return out
+})
 
+// value: whether an icon is the engine's or the schema's: a set lookup, then
+// at most MaxIcons names compared.
 func (s Schema) iconExists(name string) bool {
-	return slices.Contains(builtinIcons(), name) || slices.ContainsFunc(s.Icons, func(i Icon) bool { return i.Name == name })
+	return builtinIcons()[name] || slices.ContainsFunc(s.Icons, func(i Icon) bool { return i.Name == name })
 }
 
 // value: the content kinds a corpus reads: the engine's and its own.

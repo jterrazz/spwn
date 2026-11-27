@@ -50,11 +50,11 @@ func (e *SchemaError) Error() string {
 }
 
 func ReadSchema(file string, body []byte) (Schema, error) {
-	s, _, err := readSchema(file, body)
+	s, _, _, err := readSchema(file, body)
 	return s, err
 }
 
-func readSchema(file string, body []byte) (Schema, int, error) {
+func readSchema(file string, body []byte) (Schema, int, []Finding, error) {
 	// invariant: a pure function of its arguments, like Compile: wiki.yaml is
 	// read by the catalog's strict decoder, every string it decoded passed
 	// through audibleAll, then judged here, the first refusal in the file's
@@ -62,11 +62,124 @@ func readSchema(file string, body []byte) (Schema, int, error) {
 	raw, inBytes := audible(string(body))
 	w, err := catalog.DecodeWiki(file, []byte(raw))
 	if err != nil {
-		return Schema{}, 0, schemaRefusal(file, err)
+		return Schema{}, 0, nil, schemaRefusal(file, err)
 	}
 	inStrings := audibleAll(reflect.ValueOf(&w))
+	capped := capSchema(file, &w)
 	s, err := judgeSchema(file, w)
-	return s, inBytes + inStrings, err
+	return s, inBytes + inStrings, capped, err
+}
+
+type capper struct {
+	file  string
+	said  map[string]bool
+	found []Finding
+}
+
+func (c *capper) over(line int, name, what string, limit int) {
+	if c.said[name] {
+		return
+	}
+	c.said[name] = true
+	c.found = append(c.found, finding("H44", c.file, "", At{Line: max(line, 1), Col: 1}, fmt.Sprintf("%s past %s, %d: the rest is not read", what, name, limit)))
+}
+
+func (c *capper) text(s *string, limit, line int, name, what string) {
+	if len(*s) <= limit {
+		return
+	}
+	c.over(line, name, what, limit)
+	*s, _ = clip(*s, limit)
+}
+
+func keep[T any](c *capper, list []T, limit, line int, name, what string) []T {
+	if len(list) <= limit {
+		return list
+	}
+	c.over(line, name, what, limit)
+	return list[:limit]
+}
+
+// invariant: wiki.yaml is held to the caps of limits.go before it is
+// judged, so no product of a schema's dimension and a page's grows past
+// them: a list past its cap keeps its first entries, a string its first
+// bytes, the rest is never read, and each cap passed is one hard H44 on the
+// schema that names it. A list of exactly the floors or of the content
+// kinds it may hold is judged as before.
+func capSchema(file string, w *catalog.WikiFile) []Finding {
+	c := &capper{file: file, said: map[string]bool{}}
+	name := func(s *string, line int) { c.text(s, MaxNameBytes, line, "MaxNameBytes", "a name") }
+	path := func(s *string, line int) { c.text(s, MaxPageIDBytes, line, "MaxPageIDBytes", "a path") }
+	for i := range w.Floors {
+		f := &w.Floors[i]
+		name(&f.ID, f.Line)
+		c.text(&f.Name, MaxFloorTextBytes, f.Line, "MaxFloorTextBytes", "a floor's name or question")
+		c.text(&f.Question, MaxFloorTextBytes, f.Line, "MaxFloorTextBytes", "a floor's name or question")
+	}
+	w.FloorOf = keep(c, w.FloorOf, MaxPaths, w.Lines["floor_of"], "MaxPaths", "floor_of's folders")
+	for i := range w.FloorOf {
+		path(&w.FloorOf[i].Path, w.FloorOf[i].Line)
+	}
+	w.Seats = keep(c, w.Seats, MaxSeats, w.Lines["seats"], "MaxSeats", "the seats")
+	paths := 0
+	for i := range w.Seats {
+		s := &w.Seats[i]
+		name(&s.ID, s.Line)
+		name(&s.Name, s.Line)
+		path(&s.Home, s.Line)
+		s.Path = keep(c, s.Path, MaxPaths-paths, s.Line, "MaxPaths", "the seats' folders")
+		paths += len(s.Path)
+		for j := range s.Path {
+			path(&s.Path[j], s.Line)
+		}
+		s.Reads = keep(c, s.Reads, len(intents()), s.Line, "the intents", "a seat's reads")
+	}
+	w.Repos = keep(c, w.Repos, MaxRepos, w.Lines["repos"], "MaxRepos", "the repositories")
+	for i := range w.Repos {
+		name(&w.Repos[i].Name, w.Repos[i].Line)
+		path(&w.Repos[i].Path, w.Repos[i].Line)
+	}
+	w.Mounts = keep(c, w.Mounts, MaxRepos, w.Lines["mounts"], "MaxRepos", "the mounts")
+	for i := range w.Mounts {
+		m := &w.Mounts[i]
+		name(&m.At, m.Line)
+		name(&m.Repo, m.Line)
+		path(&m.Path, m.Line)
+	}
+	for i := range w.Kinds {
+		k := &w.Kinds[i]
+		name(&k.ID, k.Line)
+		name(&k.Icon, k.Line)
+		name(&k.State, k.Line)
+		for lang, title := range k.Title {
+			if len(lang) > MaxNameBytes {
+				c.over(k.Line, "MaxNameBytes", "a name", MaxNameBytes)
+				delete(k.Title, lang)
+				continue
+			}
+			name(&title, k.Line)
+			k.Title[lang] = title
+		}
+		k.Fields = keep(c, k.Fields, MaxFields, k.Line, "MaxFields", "a kind's fields")
+		for j := range k.Fields {
+			f := &k.Fields[j]
+			name(&f.Name, f.Line)
+			name(&f.Type, f.Line)
+			name(&f.To, f.Line)
+			f.Values = keep(c, f.Values, MaxValues, f.Line, "MaxValues", "an enum's values")
+			for v := range f.Values {
+				name(&f.Values[v], f.Line)
+			}
+		}
+		for _, t := range []*string{&k.Faces.Word, &k.Faces.Line, &k.Faces.Icon} {
+			c.text(t, MaxTemplateBytes, k.Line, "MaxTemplateBytes", "a face template")
+		}
+	}
+	w.Icons = keep(c, w.Icons, MaxIcons, w.Lines["icons"], "MaxIcons", "the icons")
+	for i := range w.Icons {
+		name(&w.Icons[i].Name, w.Icons[i].Line)
+	}
+	return c.found
 }
 
 func schemaRefusal(file string, err error) error {

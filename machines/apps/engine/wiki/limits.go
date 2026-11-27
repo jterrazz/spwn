@@ -45,6 +45,39 @@ const (
 	MaxAnswerBytes = 4 << 20
 )
 
+// value: the caps wiki.yaml is held to before it is judged, each a product
+// of the schema and a page the check or a serve would otherwise multiply: a
+// list past its cap keeps its first entries, a string its first bytes on a
+// character's boundary, and one hard H44 on the schema names the cap. The
+// fixture's schema is far under each: its longest face template is 9 bytes,
+// its 4 seats hold 5 folders, its longest name is 11 bytes and its floors'
+// longest question 43.
+const (
+	// value: a face template of a kind, its word, line or icon: at least 256
+	// bytes, four times the fixture's longest at least.
+	MaxTemplateBytes = 256
+	MaxSeats         = 64
+	MaxFields        = 64
+	MaxIcons         = 512
+	// value: the folders of all seats together, and the folders floor_of
+	// names, each.
+	MaxPaths = 256
+	// value: a floor's name and its question.
+	MaxFloorTextBytes = 240
+	// value: an id or a name: a floor's, a seat's, a kind's and its icon,
+	// state and titles, a field's name, type and target, an enum's value, an
+	// icon's, a repository's and a mount's.
+	MaxNameBytes = 64
+	// value: the values of an enum field.
+	MaxValues = 64
+	// value: the repositories, and the mounts, each.
+	MaxRepos = 64
+	// value: a page's id, its file's path less `.md`; a folder or a page
+	// wiki.yaml names, and a repository's or a mount's path. A file whose
+	// path is longer is served as a page with no content and its one H44.
+	MaxPageIDBytes = 240
+)
+
 type File struct {
 	// value: a file of a corpus as its folder holds it: its size, and its
 	// bytes unless it is past MaxPageBytes, when it is never read.

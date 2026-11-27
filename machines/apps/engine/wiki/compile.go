@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 	"unicode"
+	"unicode/utf8"
 )
 
 // value: what the line before a line was, which decides whether a `<` there
@@ -446,7 +447,7 @@ func facesOf(kind Kind, b *Block) BlockFaces {
 	f := BlockFaces{Word: render(word, b), Line: render(kind.Faces.Line, b)}
 	switch {
 	case textOf(b.Props, "icon") != "":
-		f.Icon = textOf(b.Props, "icon")
+		f.Icon, _ = clip(textOf(b.Props, "icon"), MaxFaceBytes)
 	case kind.Faces.Icon != "":
 		f.Icon = render(kind.Faces.Icon, b)
 	case kind.Icon != "":
@@ -458,26 +459,47 @@ func facesOf(kind Kind, b *Block) BlockFaces {
 }
 
 // invariant: a Face template is filled from the block's own fields; a dotted
-// name (`{adr.number}`) reads outside the page and renders empty here.
+// name (`{adr.number}`) reads outside the page and renders empty here. A face
+// is at most MaxFaceBytes, cut on a character's boundary, and its render
+// stops writing there, so a template of MaxTemplateBytes naming one long
+// field many times costs a block MaxFaceBytes, never their product.
 func render(template string, b *Block) string {
 	var out strings.Builder
+	write := func(s string) bool {
+		if room := MaxFaceBytes + utf8.UTFMax - out.Len(); len(s) > room {
+			out.WriteString(s[:room])
+			return false
+		}
+		out.WriteString(s)
+		return true
+	}
+	done := func() string {
+		s, _ := clip(out.String(), MaxFaceBytes)
+		return s
+	}
 	for {
 		open := strings.IndexByte(template, '{')
 		if open < 0 {
-			out.WriteString(template)
-			return out.String()
+			write(template)
+			return done()
 		}
 		end := strings.IndexByte(template[open:], '}')
 		if end < 0 {
-			out.WriteString(template)
-			return out.String()
+			write(template)
+			return done()
 		}
-		out.WriteString(template[:open])
+		if !write(template[:open]) {
+			return done()
+		}
 		name := template[open+1 : open+end]
+		value := ""
 		if name == "id" {
-			out.WriteString(b.ID)
+			value = b.ID
 		} else if !strings.Contains(name, ".") {
-			out.WriteString(textOf(b.Props, name))
+			value = textOf(b.Props, name)
+		}
+		if !write(value) {
+			return done()
 		}
 		template = template[open+end+1:]
 	}
@@ -549,22 +571,37 @@ func nearest(tag string, names []string) string {
 func abs(n int) int { return max(n, -n) }
 
 // value: the edit distance of a and b, or limit when it is limit or more.
+// invariant: only the cells within limit of the diagonal are computed, any
+// other being limit or more, so one comparison costs len(a) times 2·limit,
+// never len(a) times len(b).
 func distance(a, b string, limit int, rows *[2][]int) int {
+	if abs(len(a)-len(b)) >= limit {
+		return limit
+	}
 	prev, cur := rows[0][:0], rows[1][:0]
 	for j := range len(b) + 1 {
 		prev = append(prev, j)
-		cur = append(cur, 0)
+		cur = append(cur, limit)
 	}
 	for i := 1; i <= len(a); i++ {
-		cur[0] = i
-		least := i
-		for j := 1; j <= len(b); j++ {
+		lo, hi := max(1, i-limit+1), min(len(b), i+limit-1)
+		least := limit
+		if lo == 1 {
+			cur[0] = i
+			least = i
+		} else {
+			cur[lo-1] = limit
+		}
+		for j := lo; j <= hi; j++ {
 			cost := 1
 			if a[i-1] == b[j-1] {
 				cost = 0
 			}
 			cur[j] = min(prev[j]+1, cur[j-1]+1, prev[j-1]+cost)
 			least = min(least, cur[j])
+		}
+		if hi < len(b) {
+			cur[hi+1] = limit
 		}
 		if least >= limit {
 			rows[0], rows[1] = prev, cur

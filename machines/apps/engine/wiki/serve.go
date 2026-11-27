@@ -277,7 +277,7 @@ func Read(ctx context.Context, files map[string]File) (Corpus, error) {
 	if f.Size > MaxPageBytes {
 		return Corpus{}, fmt.Errorf("%s is %d bytes, %d at most", schemaFile, f.Size, MaxPageBytes)
 	}
-	schema, inSchema, err := readSchema(schemaFile, f.Body)
+	schema, inSchema, collided, err := readSchema(schemaFile, f.Body)
 	if err != nil {
 		return Corpus{}, err
 	}
@@ -295,7 +295,6 @@ func Read(ctx context.Context, files map[string]File) (Corpus, error) {
 	slices.Sort(ids)
 	pages := make([]Page, 0, len(ids))
 	records := map[string]Record{}
-	var collided []Finding
 	owner := pageOwners(ids)
 	for _, file := range ids {
 		if stopped := ctx.Err(); stopped != nil {
