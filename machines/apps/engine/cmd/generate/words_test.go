@@ -118,8 +118,9 @@ func enumsOnTheWire(t *testing.T) map[string]bool {
 	return found
 }
 
-// value: the enums whose words are nouns a client says after a number it
-// holds, so no field of the wire carries them.
+// value: the enums no field of the wire carries: the engine serves a count as
+// a number, and a client that words it will have its nouns added when it
+// exists.
 func countedWithoutAField(name string) bool { return name == "PageNoun" }
 
 func TestEveryWordedEnumIsAClosedEnumOfTheWire(t *testing.T) {

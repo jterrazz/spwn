@@ -4538,7 +4538,7 @@ export type OverviewUpkeep = 'needs-you' | 'can-wait';
 
 export type OverviewVerb = 'review' | 'restart' | 'start' | 'try-again' | 'update' | 'remove' | 'delete' | 'upgrade' | 'wake' | 'move' | 'start-engine' | 'open-settings' | 'in-terminal' | 'fix';
 
-export type PageNoun = 'machine' | 'skill' | 'listener' | 'quiet-listener' | 'restart' | 'line' | 'package' | 'app' | 'setting' | 'password' | 'grant' | 'block' | 'wiki-page' | 'row' | 'wiki-seat' | 'wiki-section' | 'wiki-finding';
+export type PageNoun = 'machine' | 'skill' | 'listener' | 'quiet-listener' | 'restart' | 'line' | 'package' | 'app' | 'setting' | 'password' | 'grant' | 'block' | 'wiki-page';
 
 export type SettingsState = 'applied' | 'changed-since' | 'not-applied' | 'off-here' | 'not-for-this-machine' | 'reading' | 'checked';
 

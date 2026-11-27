@@ -19,12 +19,8 @@ const (
 	NounGrant         Noun = "grant"
 	NounBlock         Noun = "block"
 	NounWikiPage      Noun = "wiki-page"
-	NounRow           Noun = "row"
-	NounWikiSeat      Noun = "wiki-seat"
-	NounWikiSection   Noun = "wiki-section"
-	NounWikiFinding   Noun = "wiki-finding"
 )
 
 func (Noun) Enum() []string {
-	return []string{string(NounMachine), string(NounSkill), string(NounListener), string(NounQuietListener), string(NounRestart), string(NounLine), string(NounPackage), string(NounApp), string(NounSetting), string(NounPassword), string(NounGrant), string(NounBlock), string(NounWikiPage), string(NounRow), string(NounWikiSeat), string(NounWikiSection), string(NounWikiFinding)}
+	return []string{string(NounMachine), string(NounSkill), string(NounListener), string(NounQuietListener), string(NounRestart), string(NounLine), string(NounPackage), string(NounApp), string(NounSetting), string(NounPassword), string(NounGrant), string(NounBlock), string(NounWikiPage)}
 }

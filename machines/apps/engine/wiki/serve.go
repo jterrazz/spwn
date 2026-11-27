@@ -203,7 +203,7 @@ type ServedTable struct {
 	Where   string
 	Columns []string
 	Rows    []ServedRow
-	// value: how many rows it found, said with the noun row, and how many of
+	// value: how many rows it found, and how many of
 	// them are not served past MaxTableRows; and the group of the page whose
 	// blocks are its rows, drawn above it.
 	Count   int

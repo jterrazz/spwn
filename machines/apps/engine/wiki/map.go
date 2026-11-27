@@ -91,7 +91,7 @@ type MapNode struct {
 	// value: what it is drawn with: its label on a pill, a head and its
 	// accessible name; its title, kicker and line on a card, each served only
 	// when it says something the label does not; its icon; and Count, what it
-	// holds, said with its kind's noun: pages, sections, items or blocks.
+	// holds: pages, sections, items or blocks.
 	// A title, a kicker and a line are served as their parts in order, which
 	// the window joins with its separator; a label or a title cut to its
 	// first words is served as the words kept, with Cut true, and the window
