@@ -105,17 +105,26 @@ type ExecOut struct {
 	Stderr string `json:"stderr"`
 }
 
+type ActivityIn struct {
+	// value: the machine whose history is read, and what its reader reads
+	// of it (activity.Want): the window its graphs draw, the 24 h.
+	Machine string        `json:"machine"`
+	Graph   time.Duration `json:"graph,omitempty"`
+	History bool          `json:"history,omitempty"`
+}
+
 type Kept struct {
-	Machine string            `json:"machine"`
-	Last    activity.Reading  `json:"last"`
-	Fine    []activity.Sample `json:"fine"`
-	Coarse  []activity.Sample `json:"coarse"`
+	Last activity.Reading `json:"last"`
+	// value: the part of its tiers (ADR-107) the reader reads, each the
+	// buckets it holds of it.
+	Series activity.Series `json:"series"`
 }
 
 type ActivityOut struct {
-	// value: when the engine started: every window begins there.
-	Since    time.Time `json:"since"`
-	Machines []Kept    `json:"machines"`
+	// value: when the engine started: every window begins there; Kept none
+	// when it keeps nothing of the machine.
+	Since time.Time `json:"since"`
+	Kept  *Kept     `json:"kept,omitempty"`
 }
 
 type WatchIn struct {

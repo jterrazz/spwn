@@ -32,12 +32,19 @@ const mb = 1e6
 func (p Profile) Points(now time.Time, span, every time.Duration) []Sample {
 	// value: the points a profile gives every `every` over `span` up to now,
 	// oldest first, its counters accumulating each interval's share and rates.
+	return p.PointsTo(now, now, span, every)
+}
+
+func (p Profile) PointsTo(end, now time.Time, span, every time.Duration) []Sample {
+	// invariant: the profile's curve is the world's at now, wherever its
+	// points end: a bump `Ago` is that long before now, so the points of a
+	// span that ends before now read the curve where it is.
 	n := int(span / every)
 	out := make([]Sample, 0, n+1)
-	s := Sample{At: now.Add(-span), CPUTotal: 1_000_000}
+	s := Sample{At: end.Add(-span), CPUTotal: 1_000_000}
 	out = append(out, s)
 	for i := 1; i <= n; i++ {
-		at := now.Add(-span + time.Duration(i)*every)
+		at := end.Add(-span + time.Duration(i)*every)
 		seconds := every.Seconds()
 		in, outRate := p.rates(at, now)
 		s = Sample{At: at, CPUTotal: s.CPUTotal + uint64(seconds*1000), CPUBusy: s.CPUBusy + uint64(p.cpu(at, now)*seconds*10),

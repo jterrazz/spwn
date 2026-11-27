@@ -84,14 +84,21 @@ func measures(v View) []page.Item {
 	return out
 }
 
-func series(points []activity.Sample) map[string][]int {
+func series(points []activity.Point) map[string][]int {
+	// invariant: a rate's line is drawn from the points that measured one,
+	// a point that measured none (a gap) left out, never drawn as a zero.
 	out := map[string][]int{}
 	if len(points) < 2 {
 		return out
 	}
-	rates := make([]activity.Rates, 0, len(points)-1)
-	for i := 1; i < len(points); i++ {
-		rates = append(rates, activity.Between(points[i-1], points[i]))
+	rates := make([]activity.Rates, 0, len(points))
+	for _, x := range points {
+		if r := x.Rated; r != nil {
+			rates = append(rates, activity.Rates{CPU: r.CPU.Mean, DiskRead: r.DiskRead.Mean, DiskWrite: r.DiskWrite.Mean, NetIn: r.NetIn.Mean, NetOut: r.NetOut.Mean})
+		}
+	}
+	if len(rates) < 2 {
+		rates = nil
 	}
 	scaled := func(of func(activity.Rates) float64) []int {
 		top := 0.0
@@ -115,10 +122,12 @@ func series(points []activity.Sample) map[string][]int {
 	out["disk-write"] = scaled(func(r activity.Rates) float64 { return r.DiskWrite })
 	out["net-in"] = scaled(func(r activity.Rates) float64 { return r.NetIn })
 	out["net-out"] = scaled(func(r activity.Rates) float64 { return r.NetOut })
-	for _, x := range points[1:] {
+	for _, x := range points {
+		// invariant: a point's MemTotal is the newest sample's, so after a
+		// VM's memory shrinks an older point's share is held at 100.
 		if x.MemTotal > 0 {
-			out["memory"] = append(out["memory"], int(100*x.MemUsed/x.MemTotal))
-			out["swap"] = append(out["swap"], int(100*x.SwapUsed/x.MemTotal))
+			out["memory"] = append(out["memory"], int(min(100*int64(x.Memory.Mean)/x.MemTotal, 100)))
+			out["swap"] = append(out["swap"], int(100*int64(x.Swap.Mean)/x.MemTotal))
 		}
 	}
 	return out

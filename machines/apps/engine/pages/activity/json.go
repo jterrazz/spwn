@@ -81,10 +81,12 @@ type PointJSON struct {
 	MemUsed int64     `json:"memory_used_bytes"`
 	Swap    int64     `json:"swap_used_bytes"`
 	Free    int64     `json:"disk_free_bytes"`
-	Read    float64   `json:"read_bytes_per_s"`
-	Write   float64   `json:"write_bytes_per_s"`
-	In      float64   `json:"in_bytes_per_s"`
-	Out     float64   `json:"out_bytes_per_s"`
+	// invariant: null, with the CPU, at a point whose minute measured no
+	// rate: the first after a pause in the sampling or a reboot.
+	Read  *float64 `json:"read_bytes_per_s"`
+	Write *float64 `json:"write_bytes_per_s"`
+	In    *float64 `json:"in_bytes_per_s"`
+	Out   *float64 `json:"out_bytes_per_s"`
 }
 
 type HistoryJSON struct {
@@ -246,13 +248,14 @@ func body(v View) Body {
 	return b
 }
 
-func history(points []activity.Sample) *HistoryJSON {
-	h := &HistoryJSON{Step: int(activity.CoarseEvery.Seconds()), Points: []PointJSON{}}
-	for i, x := range points {
-		p := PointJSON{At: x.At.UTC(), MemUsed: x.MemUsed, Swap: x.SwapUsed, Free: x.DiskFree}
-		if i > 0 {
-			r := activity.Between(points[i-1], x)
-			p.CPU, p.Read, p.Write, p.In, p.Out = ptr(r.CPU), r.DiskRead, r.DiskWrite, r.NetIn, r.NetOut
+func history(points []activity.Point) *HistoryJSON {
+	// invariant: each point's rates are the means its own minute measured.
+	h := &HistoryJSON{Step: int(activity.Tiers[activity.T2].Every.Seconds()), Points: []PointJSON{}}
+	for _, x := range points {
+		p := PointJSON{At: x.At.UTC(), MemUsed: int64(x.Memory.Mean), Swap: int64(x.Swap.Mean), Free: x.DiskFree}
+		if x.Rated != nil {
+			r := x.Rated.Rounded()
+			p.CPU, p.Read, p.Write, p.In, p.Out = ptr(r.CPU.Mean), ptr(r.DiskRead.Mean), ptr(r.DiskWrite.Mean), ptr(r.NetIn.Mean), ptr(r.NetOut.Mean)
 		}
 		h.Points = append(h.Points, p)
 	}

@@ -2,7 +2,10 @@ package activity
 
 import (
 	"encoding/json"
+	"fmt"
+	"math"
 	"slices"
+	"strconv"
 	"sync"
 	"time"
 )
@@ -51,7 +54,7 @@ func (h *History) Of(machine string) (Kept, bool) {
 	if !ok {
 		return Kept{}, false
 	}
-	return Kept{Last: k.Last, Series: k.Series.clone(), Told: slices.Clone(k.Told)}, true
+	return Kept{Last: k.Last, Series: k.Series.Clone(), Told: slices.Clone(k.Told)}, true
 }
 
 func (h *History) Raise(machine string, broken []string) []string {
@@ -98,34 +101,191 @@ func (h *History) Take(kept map[string]Kept) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 	for name, k := range kept {
-		h.kept[name] = &Kept{Last: k.Last, Series: k.Series.clone(), Told: slices.Clone(k.Told)}
+		h.kept[name] = &Kept{Last: k.Last, Series: k.Series.Clone(), Told: slices.Clone(k.Told)}
 	}
 }
 
-func (s *Series) clone() Series {
-	return Series{fine: ring{points: slices.Clone(s.fine.points), next: s.fine.next}, coarse: ring{points: slices.Clone(s.coarse.points), next: s.coarse.next}}
+func (h *History) Read(machine string, read func(k *Kept)) bool {
+	// value: what the engine keeps of a machine, read in place: no copy of
+	// its tiers, for a reader that keeps nothing of it.
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	k, ok := h.kept[machine]
+	if ok {
+		read(k)
+	}
+	return ok
+}
+
+type Rollup [rollupLen]float64
+
+// value: the numbers of a Rollup, one bucket of a tier as it is written:
+// its newest sample's unix millisecond, the samples it counts, the seconds its
+// rates span, the least pressure they said (0 none, 1 normal, 2 warn, 3
+// critical); the CPU's mean and busiest share; the memory's and the swap's
+// sum and busiest, in bytes; then the mean and the busiest of the disk
+// read and write and the network in and out, in bytes a second; last the
+// milliseconds from its slot's start to its CPU's busiest sample. A share
+// or a rate is the float32 the tier holds, written in its shortest form.
+const rollupLen = 19
+
+type TierRollups struct {
+	Every time.Duration `json:"every"`
+	// value: the slots of a part's ring (Series.Part), none for a whole
+	// tier's.
+	Slots int `json:"slots,omitempty"`
+	// value: the tier's buckets, oldest first, the slots nothing was
+	// measured in left out.
+	Buckets []Rollup `json:"buckets"`
+	// invariant: T2's alone, one a bucket in the same order: what its
+	// newest sample read that no other tier keeps.
+	Gauges []Gauges `json:"gauges,omitempty"`
+}
+
+type Gauges struct {
+	Load     [3]float64 `json:"load"`
+	DiskFree int64      `json:"disk_free"`
+	Battery  *Battery   `json:"battery,omitempty"`
 }
 
 type seriesJSON struct {
-	Fine   []Sample `json:"fine"`
-	Coarse []Sample `json:"coarse"`
+	// value: the newest samples the series keeps whole, oldest first.
+	Recent []Sample      `json:"recent,omitempty"`
+	Tiers  []TierRollups `json:"tiers"`
+}
+
+func (g gauges) wire() Gauges { return Gauges{Load: g.loads(), DiskFree: g.free, Battery: g.charge()} }
+
+func (g Gauges) kept() gauges {
+	return gaugesOf(&Sample{Load: g.Load, DiskFree: g.DiskFree, Battery: g.Battery})
+}
+
+func (b *bucket) row() Rollup {
+	return Rollup{
+		float64(b.at), float64(b.n()), float64(b.span), float64(b.floor()),
+		float64(b.cpu.mean), float64(b.cpu.max),
+		float64(b.mem.sum), float64(b.mem.max), float64(b.swap.sum), float64(b.swap.max),
+		float64(b.diskRead.mean), float64(b.diskRead.max), float64(b.diskWrite.mean), float64(b.diskWrite.max),
+		float64(b.netIn.mean), float64(b.netIn.max), float64(b.netOut.mean), float64(b.netOut.max),
+		float64(b.peak()),
+	}
+}
+
+func (r Rollup) bucket() (bucket, error) {
+	// invariant: a row read is refused unless its time is after 1970 and
+	// its count and its floor are in their range: a count out of range
+	// would wrap into the floor's bits of the meta word.
+	if r[0] <= 0 || r[0] > math.MaxInt64 || r[1] < 0 || r[1] > maxCount || r[3] < 0 || r[3] > 3 {
+		return bucket{}, fmt.Errorf("activity: a bucket at %v of %v samples, its floor %v", r[0], r[1], r[3])
+	}
+	f := func(i int) float32 { return float32(r[i]) }
+	b := bucket{
+		at: int64(r[0]), span: f(2),
+		cpu: envelope{f(4), f(5)}, mem: gauge{int64(r[6]), int64(r[7])}, swap: gauge{int64(r[8]), int64(r[9])},
+		diskRead: envelope{f(10), f(11)}, diskWrite: envelope{f(12), f(13)}, netIn: envelope{f(14), f(15)}, netOut: envelope{f(16), f(17)},
+	}
+	b.count(int(r[1]), uint8(r[3]))
+	b.peaked(int64(r[18]))
+	return b, nil
+}
+
+// value: the fields of a Rollup a float32 holds; the others are integers.
+var rollupFloats = [rollupLen]bool{2: true, 4: true, 5: true, 10: true, 11: true, 12: true, 13: true, 14: true, 15: true, 16: true, 17: true}
+
+func (r Rollup) MarshalJSON() ([]byte, error) {
+	out := make([]byte, 0, 16*rollupLen)
+	out = append(out, '[')
+	for i, x := range r {
+		if i > 0 {
+			out = append(out, ',')
+		}
+		bits := 64
+		if rollupFloats[i] {
+			bits = 32
+		}
+		out = strconv.AppendFloat(out, x, 'f', -1, bits)
+	}
+	return append(out, ']'), nil
 }
 
 func (s Series) MarshalJSON() ([]byte, error) {
-	return json.Marshal(seriesJSON{Fine: s.Fine(), Coarse: s.Coarse()})
+	// invariant: the newest samples whole, then each tier's buckets, oldest
+	// first, the slots nothing was measured in left out.
+	out := seriesJSON{Tiers: []TierRollups{}}
+	for i := max(0, s.count-recentKept); i < s.count; i++ {
+		out.Recent = append(out.Recent, s.recent[i%recentKept])
+	}
+	for i, t := range Tiers {
+		tier := TierRollups{Every: t.Every, Buckets: []Rollup{}}
+		r := &s.rings[i]
+		if n := len(r.slots); n > 0 && n < int(t.Kept/t.Every) {
+			tier.Slots = n
+		}
+		if s.count > 0 {
+			for _, b := range s.within(i, time.UnixMilli(0), s.newest().At) {
+				tier.Buckets = append(tier.Buckets, b.row())
+				if r.gauges != nil {
+					tier.Gauges = append(tier.Gauges, r.gaugesAt(b.at).wire())
+				}
+			}
+		}
+		out.Tiers = append(out.Tiers, tier)
+	}
+	return json.Marshal(out)
 }
 
 func (s *Series) UnmarshalJSON(data []byte) error {
+	// invariant: a tier whose step is not one of Tiers is refused: the
+	// buckets of another step would not fall in their slots.
 	var in seriesJSON
 	if err := json.Unmarshal(data, &in); err != nil {
 		return err
 	}
 	*s = Series{}
-	for _, x := range in.Fine {
-		s.fine.add(x, FinePoints)
+	if len(in.Recent) == 0 {
+		return nil
 	}
-	for _, x := range in.Coarse {
-		s.coarse.add(x, CoarsePoints)
+	for _, x := range in.Recent {
+		s.push(x)
+	}
+	var slots [len(Tiers)]int
+	for i, t := range Tiers {
+		slots[i] = int(t.Kept / t.Every)
+	}
+	of := make([]int, len(in.Tiers))
+	var held [len(Tiers)]bool
+	for j, tier := range in.Tiers {
+		i := slices.IndexFunc(Tiers[:], func(t Tier) bool { return t.Every == tier.Every })
+		if i < 0 {
+			return fmt.Errorf("activity: no tier of %v", tier.Every)
+		}
+		if tier.Slots > 0 {
+			slots[i] = min(tier.Slots, slots[i])
+		}
+		of[j], held[i] = i, held[i] || len(tier.Buckets) > 0
+	}
+	for i := range Tiers {
+		if i != lazyTier || held[i] {
+			s.rings[i] = ringOf(i, slots[i])
+		}
+	}
+	for j, tier := range in.Tiers {
+		into := &s.rings[of[j]]
+		if len(tier.Gauges) > 0 && (into.gauges == nil || len(tier.Gauges) != len(tier.Buckets)) {
+			*s = Series{}
+			return fmt.Errorf("activity: %d gauges for %d buckets of %v", len(tier.Gauges), len(tier.Buckets), tier.Every)
+		}
+		for k, r := range tier.Buckets {
+			b, err := r.bucket()
+			if err != nil {
+				*s = Series{}
+				return fmt.Errorf("activity: a tier of %v: %w", tier.Every, err)
+			}
+			*into.of(b.at) = b
+			if len(tier.Gauges) > 0 {
+				into.gauges[into.index(b.at)] = tier.Gauges[k].kept()
+			}
+		}
 	}
 	return nil
 }

@@ -49,14 +49,18 @@ type Report struct {
 	Window time.Duration `json:"window"`
 	// value: the Meter did not answer in Budget: no value is known.
 	Silent bool `json:"silent,omitempty"`
-	// value: the coarse series, when the read asked for the history.
-	History []Sample `json:"history,omitempty"`
-	// value: the points of the window a screen's graphs draw, when the read
-	// asked for one.
-	Graph []Sample `json:"graph,omitempty"`
+	// value: the last 24 h, a point a minute of T2, when the read asked for
+	// the history (Series.History).
+	History []Point `json:"history,omitempty"`
+	// value: the points of the window a screen's graphs draw, one a bucket
+	// of its tier (TierOf), when the read asked for one.
+	Graph []Point `json:"graph,omitempty"`
 	// value: the window's CPU as its chart draws it (SPEC B5.3), when the
 	// read asked for a window.
 	Chart *Chart `json:"chart,omitempty"`
+	// value: the window's other measures in the same bars, when the read
+	// asked for a window.
+	Measures *Measures `json:"measures,omitempty"`
 	// invariant: never nil: SPEC §6.5's findings over the series read.
 	Findings []finding.Finding `json:"findings"`
 }
@@ -87,51 +91,4 @@ func VerdictOf(r Report) verdict.Verdict {
 		v.Line = LineKept
 	}
 	return v
-}
-
-func SeriesOf(fine, coarse []Sample) Series {
-	// value: the series a fine and a coarse window hold, oldest first, as
-	// the engine hands them over its API.
-	var s Series
-	for _, x := range fine {
-		s.fine.add(x, FinePoints)
-	}
-	for _, x := range coarse {
-		s.coarse.add(x, CoarsePoints)
-	}
-	return s
-}
-
-func Recent(s *Series, now time.Time) (Rates, time.Duration) {
-	// invariant: SPEC §6.2: the mean of the last RateWindow, from the 2 s
-	// points of an engine a surface watches: the newest no older than
-	// FineEvery and a second of jitter, its base the point nearest
-	// RateWindow before it, within FineEvery under and twice over (a sample
-	// a cadence skipped). Points a minute apart, or a newest gone stale, span
-	// no such window: no rate, and the reader samples twice itself.
-	fine := s.Fine()
-	if len(fine) < 2 {
-		return Rates{}, 0
-	}
-	newest := fine[len(fine)-1]
-	if now.Sub(newest.At) > FineEvery+time.Second {
-		return Rates{}, 0
-	}
-	var base *Sample
-	for i := len(fine) - 2; i >= 0; i-- {
-		gap := newest.At.Sub(fine[i].At)
-		if gap < RateWindow-FineEvery {
-			continue
-		}
-		if gap >= RateWindow+2*FineEvery {
-			break
-		}
-		if base == nil || (gap-RateWindow).Abs() < (newest.At.Sub(base.At)-RateWindow).Abs() {
-			base = &fine[i]
-		}
-	}
-	if base == nil {
-		return Rates{}, 0
-	}
-	return Between(*base, newest), newest.At.Sub(base.At)
 }

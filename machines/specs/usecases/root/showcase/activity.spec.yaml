@@ -11,9 +11,9 @@ runs:
           {"source":"engine","day":true,"peak":true,"peak_at":true,"vms":["linux-1","agent-7f"],"findings":0}
     - command: 'world advance 2m'
       exit: 0
-    - command: 'guest serve --stdio | /usr/bin/jq -c ''.out.history | {live: (.[-1].at > "2026-11-07T10:30:00Z"), ticks_per_s: ([range(1; length) as $i | (.[$i].cpu_total - .[$i - 1].cpu_total) / ((.[$i].at | fromdate) - (.[$i - 1].at | fromdate))] | max)}'''
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.out.history | {live: (.[-1].at > "2026-11-07T10:30:00Z"), minutes: length, gaps: (map(select(.rated == null)) | length), newest_a_gap: (.[-1].rated == null), cpu_within: ([.[] | .rated.cpu.max // empty] | min >= 0 and max <= 100)}'''
       stdin: |
           {"v":2,"id":"1","call":"activity.read","target":{"name":"macbook-pro"},"in":{"history":true}}
       exit: 0
       stdout: |
-          {"live":true,"ticks_per_s":1000}
+          {"live":true,"minutes":1439,"gaps":1,"newest_a_gap":true,"cpu_within":true}

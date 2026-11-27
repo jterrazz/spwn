@@ -351,11 +351,11 @@ func playMeterOf(p activity.Profile, s activity.Sample) *playMeter {
 	if s.Boot.IsZero() {
 		return &playMeter{Sample: s}
 	}
-	counted := p.Points(storyNow, storyNow.Sub(s.Boot).Truncate(activity.CoarseEvery), activity.CoarseEvery)
+	counted := p.Points(storyNow, storyNow.Sub(s.Boot).Truncate(activity.IdleEvery), activity.IdleEvery)
 	end := counted[len(counted)-1]
 	s.CPUBusy, s.CPUTotal, s.NetIn, s.NetOut = end.CPUBusy, end.CPUTotal, end.NetIn, end.NetOut
-	step := p.Points(storyNow, activity.FineEvery, activity.FineEvery)
-	every := uint64(activity.FineEvery / time.Second)
+	step := p.Points(storyNow, activity.WatchedEvery, activity.WatchedEvery)
+	every := uint64(activity.WatchedEvery / time.Second)
 	per := func(a, b uint64) uint64 { return (b - a) / every }
 	return &playMeter{Sample: s, PerSecond: &activity.Sample{
 		CPUBusy: per(step[0].CPUBusy, step[1].CPUBusy), CPUTotal: per(step[0].CPUTotal, step[1].CPUTotal),

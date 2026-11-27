@@ -74,13 +74,16 @@ func TestTheDaysChartIsFoldedFromTheHistoryItsEngineKeeps(t *testing.T) {
 	}
 	d := Deps{
 		Meter: processes{}, Name: "mac-mini", Kind: machine.Computer, Now: func() time.Time { return now },
-		Kept: func(context.Context, string) (activity.Kept, time.Time, bool, error) {
-			return activity.Kept{Series: activity.SeriesOf(nil, points)}, now.Add(-3 * time.Hour), true, nil
+		Kept: func(context.Context, string, activity.Want) (activity.Kept, time.Time, bool, error) {
+			return activity.Kept{Series: activity.SeriesOf(points)}, now.Add(-3 * time.Hour), true, nil
 		},
 	}
 	r := d.read(t.Context(), ReadIn{Graph: 24 * time.Hour})
 	if r.Chart == nil || len(r.Chart.Buckets) != 48 || r.Chart.Buckets[47].Points != 30 || r.Chart.Buckets[47].Mean != 30 {
 		t.Fatalf("the day's chart is %+v; want 48 bars, the last of 30 minutes at 30 %%", r.Chart)
+	}
+	if r.Measures == nil || len(r.Measures.Memory) != 48 || r.Measures.Every != 30*time.Minute {
+		t.Errorf("the day's measures are %+v; want 48 bars of 30 min, as its CPU", r.Measures)
 	}
 	if r.Chart.Buckets[0].Points != 0 {
 		t.Errorf("the day's first bar is %+v; want a gap: the engine kept 2 h", r.Chart.Buckets[0])

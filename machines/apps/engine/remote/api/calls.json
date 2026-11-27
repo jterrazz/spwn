@@ -479,6 +479,7 @@
       "name": "engine.activity",
       "schema": "station.engine.activity/v1",
       "where": "in-engine",
+      "in": "ActivityIn",
       "out": "ActivityOut",
       "own": true
     },

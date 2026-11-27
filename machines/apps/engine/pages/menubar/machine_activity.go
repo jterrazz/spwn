@@ -119,7 +119,7 @@ func (a activityOf) window(w activityWindow) page.Section {
 		s.Items = []page.Item{{Row: &cpu}, {Row: &net}}
 		return s
 	}
-	chart := activity.Fold(points, w.For, a.m.Now)
+	chart := activity.ChartOf(points, w.For, a.m.Now)
 	ends, at := a.ends(w), a.times(w, chart)
 	cpuChart := page.Chart{Kind: w.Kind, Window: w.Flag, Ends: ends, At: at, Series: []page.Series{{Key: RowCPU, Unit: "%", Points: means(chart)}}}
 	if i := peakOf(chart); i >= 0 {
@@ -129,20 +129,20 @@ func (a activityOf) window(w activityWindow) page.Section {
 			cpuChart.Anomaly = &page.Anomaly{From: from, To: to, Sentence: a.sentence(chart, from, to, i)}
 		}
 	}
-	sent, received := netFold(points, w.For, a.m.Now, chart.Every)
+	sent, received := netFold(activity.MeasuresOf(points, w.For, a.m.Now))
 	netChart := page.Chart{Kind: page.ChartMirror, Window: w.Flag, Ends: ends, At: at, Series: []page.Series{{Key: "sent", Unit: "MB/s", Points: sent}, {Key: "received", Unit: "MB/s", Points: received}}}
 	s.Items = []page.Item{{Row: &cpu}, {Chart: &cpuChart}, {Row: &net}, {Chart: &netChart}}
 	return s
 }
 
-// value: the points a window folds: the engine's 2 s points for the 6 min
-// it keeps them, its minutes for the hour and the day; none until read.
-func (a activityOf) points(w activityWindow) []activity.Sample {
+// value: the points a window folds: the engine's 6 min graph of its 1 s
+// tier, its minutes for the hour and the day; none until read.
+func (a activityOf) points(w activityWindow) []activity.Point {
 	r := a.m.Activity
 	if r == nil {
 		return nil
 	}
-	if w.For <= activity.FineEvery*activity.FinePoints && len(r.Graph) > 1 {
+	if w.For <= activity.LiveWindow && len(r.Graph) > 1 {
 		return r.Graph
 	}
 	return r.History
@@ -248,31 +248,17 @@ func (a activityOf) ends(w activityWindow) []string {
 	return []string{"yesterday " + a.clock(start), "now"}
 }
 
-// value: the network's rates sent and received in each bucket of the
-// window, their means in MB/s, oldest first.
-func netFold(points []activity.Sample, window time.Duration, now time.Time, every time.Duration) (sent, received []float64) {
-	n := max(int(window/every), 1)
-	start := now.Add(-time.Duration(n) * every)
-	sent, received = make([]float64, n), make([]float64, n)
-	count := make([]int, n)
-	for i := 1; i < len(points); i++ {
-		at := points[i].At
-		if at.Before(start) || !at.Before(start.Add(time.Duration(n)*every)) {
-			continue
+// value: the network's rates sent and received in each bar of the
+// window, the engine's means in MB/s, oldest first.
+func netFold(m activity.Measures) (sent, received []float64) {
+	mb := func(bars []activity.Bucket) []float64 {
+		out := make([]float64, len(bars))
+		for k, b := range bars {
+			out[k] = math.Round(b.Mean/MB*100) / 100
 		}
-		k := int(at.Sub(start) / every)
-		r := activity.Between(points[i-1], points[i])
-		sent[k] += r.NetOut / MB
-		received[k] += r.NetIn / MB
-		count[k]++
+		return out
 	}
-	for k := range sent {
-		if count[k] > 0 {
-			sent[k] = math.Round(sent[k]/float64(count[k])*100) / 100
-			received[k] = math.Round(received[k]/float64(count[k])*100) / 100
-		}
-	}
-	return sent, received
+	return mb(m.NetOut), mb(m.NetIn)
 }
 
 // value: the network now, received then sent, each labeled ("0.5", "0.5

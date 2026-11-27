@@ -177,11 +177,56 @@ export type ActivityChart = {
     peak_at?: string;
 };
 
+export type ActivityGauges = {
+    battery?: ActivityBattery;
+    disk_free: number;
+    load: number[];
+};
+
+export type ActivityMeasures = {
+    disk_read: ActivityBucket[] | null;
+    disk_write: ActivityBucket[] | null;
+    every: number;
+    memory: ActivityBucket[] | null;
+    net_in: ActivityBucket[] | null;
+    net_out: ActivityBucket[] | null;
+    swap: ActivityBucket[] | null;
+};
+
+export type ActivityPoint = {
+    at: string;
+    battery?: ActivityBattery;
+    cpus: number;
+    disk_free?: number;
+    load?: number[];
+    mem_total: number;
+    memory: ActivityRange;
+    pressure?: 'critical' | 'normal' | 'warn';
+    rated?: ActivityRated;
+    samples: number;
+    swap: ActivityRange;
+};
+
 export type ActivityProcess = {
     name: string;
     pid: number;
     value: number;
     vm?: string;
+};
+
+export type ActivityRange = {
+    max: number;
+    mean: number;
+};
+
+export type ActivityRated = {
+    cpu: ActivityRange;
+    cpu_max_at: string;
+    disk_read: ActivityRange;
+    disk_write: ActivityRange;
+    net_in: ActivityRange;
+    net_out: ActivityRange;
+    span: number;
 };
 
 export type ActivityRates = {
@@ -202,9 +247,10 @@ export type ActivityReading = {
 export type ActivityReport = {
     chart?: ActivityChart;
     findings: CoreFindingFinding[] | null;
-    graph?: ActivitySample[];
-    history?: ActivitySample[];
+    graph?: ActivityPoint[];
+    history?: ActivityPoint[];
     last: ActivityReading;
+    measures?: ActivityMeasures;
     rates: ActivityRates;
     silent?: boolean;
     since?: string;
@@ -232,6 +278,18 @@ export type ActivitySample = {
     pressure?: 'critical' | 'normal' | 'warn';
     swap_used: number;
     thermal: number;
+};
+
+export type ActivitySeries = {
+    recent?: ActivitySample[];
+    tiers: ActivityTierRollups[] | null;
+};
+
+export type ActivityTierRollups = {
+    buckets: number[][] | null;
+    every: number;
+    gauges?: ActivityGauges[];
+    slots?: number;
 };
 
 export type ActivityUsage = {
@@ -1364,8 +1422,14 @@ export type DoneFrame = {
     v: 2;
 };
 
+export type EngineActivityIn = {
+    graph?: number;
+    history?: boolean;
+    machine?: string;
+};
+
 export type EngineActivityOut = {
-    machines: EngineKept[] | null;
+    kept?: EngineKept;
     since: string;
 };
 
@@ -1449,10 +1513,8 @@ export type EngineKeepSettingsIn = {
 };
 
 export type EngineKept = {
-    coarse: ActivitySample[] | null;
-    fine: ActivitySample[] | null;
     last: ActivityReading;
-    machine: string;
+    series: ActivitySeries;
 };
 
 export type EngineLastSettingsOut = {
@@ -3809,7 +3871,7 @@ export type DiskMoveInput = DiskCallsMoveIn;
 export type DiskMoveOutput = DiskOutcome;
 export type DiskReadInput = DiskCallsReadIn;
 export type DiskReadOutput = DiskReading;
-export type EngineActivityInput = Record<string, never>;
+export type EngineActivityInput = EngineActivityIn;
 export type EngineActivityOutput = EngineActivityOut;
 export type EngineAwakeInput = Record<string, never>;
 export type EngineAwakeOutput = AwakeView;

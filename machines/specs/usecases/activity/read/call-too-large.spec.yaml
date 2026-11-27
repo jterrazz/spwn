@@ -12,4 +12,4 @@ runs:
       stdout: |
           {"code":"call.too-large","subject":"activity.read","message":"activity.read takes a graph of 30 days at most","hint":"ask again with a graph of 30 days or less"}
           {"code":"call.too-large","subject":"activity.read","message":"activity.read takes a graph of 30 days at most","hint":"ask again with a graph of 30 days or less"}
-          ["chart","findings","graph","last","rates","since","source","verdict","window"]
+          ["chart","findings","graph","last","measures","rates","since","source","verdict","window"]

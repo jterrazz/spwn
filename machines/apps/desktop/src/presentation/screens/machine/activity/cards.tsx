@@ -1,4 +1,10 @@
-import type { ActivityReport, ActivitySample } from '@jterrazz/station-api';
+import type {
+    ActivityPoint,
+    ActivityRange,
+    ActivityRated,
+    ActivityReport,
+    ActivitySample,
+} from '@jterrazz/station-api';
 import type { ReactNode } from 'react';
 
 import { chartedOf, cpuOf, marksOf, memoryOf, spanOf } from '../../../../domain/activity/measures';
@@ -16,7 +22,7 @@ type CardProps = {
     report: ActivityReport;
     span: Span;
     name: string;
-    history: readonly ActivitySample[] | undefined;
+    history: readonly ActivityPoint[] | undefined;
 };
 
 const MOST_BARS = 72;
@@ -79,10 +85,10 @@ function Kept({
     label,
     marksOf: drawn,
 }: {
-    history: readonly ActivitySample[] | undefined;
+    history: readonly ActivityPoint[] | undefined;
     span: Span;
     label: string;
-    marksOf: (samples: readonly ActivitySample[]) => Marks;
+    marksOf: (points: readonly ActivityPoint[]) => Marks;
 }) {
     const kept = keptOver(history ?? [], spanOf(span).ns);
     const marks = drawn(kept);
@@ -158,7 +164,7 @@ type FlowProps = CardProps & {
     title: string;
     rates: readonly [number, number];
     words: readonly [string, string];
-    counted: (sample: ActivitySample) => number;
+    counted: (rated: ActivityRated) => ActivityRange;
 };
 
 function Flow({ report, name, span, history, title, rates, words, counted }: FlowProps) {
@@ -174,7 +180,7 @@ function Flow({ report, name, span, history, title, rates, words, counted }: Flo
             <Kept
                 history={history}
                 label={`${title} ${words[0]} of ${name}, per sample`}
-                marksOf={(kept) => countedMarks(strided(kept, MOST_BARS + 1), counted)}
+                marksOf={(kept) => countedMarks(kept, MOST_BARS, counted)}
                 span={span}
             />
         </Card>
@@ -189,14 +195,14 @@ export function Cards(props: CardProps) {
             <Memory {...props} />
             <Flow
                 {...props}
-                counted={(sample) => sample.disk_read}
+                counted={(rated) => rated.disk_read}
                 rates={[report.rates.DiskRead, report.rates.DiskWrite]}
                 title="Disk"
                 words={['read', 'written']}
             />
             <Flow
                 {...props}
-                counted={(sample) => sample.net_in}
+                counted={(rated) => rated.net_in}
                 rates={[report.rates.NetIn, report.rates.NetOut]}
                 title="Network"
                 words={['in', 'out']}

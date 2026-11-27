@@ -1,7 +1,7 @@
 import type {
+    ActivityPoint,
     ActivityReadInput,
     ActivityReport,
-    ActivitySample,
     MachinesMacView,
     Target,
 } from '@jterrazz/station-api';
@@ -64,7 +64,7 @@ function useHeard(
     return useMemo(() => shownOf(last, key, of), [last, key, of]);
 }
 
-export function useHistory(found: Found): readonly ActivitySample[] | undefined {
+export function useHistory(found: Found): readonly ActivityPoint[] | undefined {
     const vm = found.vm?.Name;
     const input: ActivityReadInput =
         vm === undefined

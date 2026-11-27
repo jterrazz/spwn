@@ -180,22 +180,3 @@ func TestAServerBusyForTenMinutesNeedsALookAWorkspaceNever(t *testing.T) {
 		t.Errorf("workspace at 96 %% for 11 min: Findings() = %v; want none", got)
 	}
 }
-
-func TestTheHistoryKeepsSixMinutesFineAndADayCoarse(t *testing.T) {
-	s := series(2*time.Second, 3*60*60/2, func(int, *activity.Sample) {})
-	fine, coarse := s.Fine(), s.Coarse()
-
-	if len(fine) != activity.FinePoints || fine[len(fine)-1].At.Sub(fine[0].At) != 358*time.Second {
-		t.Errorf("Fine() holds %d points; want the last %d, 2 s apart", len(fine), activity.FinePoints)
-	}
-	if len(coarse) != 180 || coarse[1].At.Sub(coarse[0].At) != time.Minute {
-		t.Errorf("Coarse() holds %d points; want one a minute over 3 h", len(coarse))
-	}
-	day := series(time.Minute, 2000, func(int, *activity.Sample) {})
-	if got := day.Coarse(); len(got) != activity.CoarsePoints || got[0].At != start.Add(560*time.Minute) {
-		t.Errorf("Coarse() over 2000 min holds %d points from %v; want the last %d", len(got), got[0].At, activity.CoarsePoints)
-	}
-	if got := day.Fine(); len(got) != 7 {
-		t.Errorf("Fine() unwatched holds %d points; want only the minutes of the last 6 min", len(got))
-	}
-}

@@ -137,9 +137,9 @@ func (l *localCalls) Watch(ctx context.Context, _ coremachine.Ref, name string, 
 type awakeKeeper struct{ *awakecalls.Waker }
 
 // invariant: the history a Mac's engine keeps, asked over its socket.
-func engineKept(api engineAPI) func(ctx context.Context, name string) (activity.Kept, time.Time, bool, error) {
-	return func(ctx context.Context, name string) (activity.Kept, time.Time, bool, error) {
-		return keptOf(ctx, api, name)
+func engineKept(api engineAPI) func(ctx context.Context, name string, want activity.Want) (activity.Kept, time.Time, bool, error) {
+	return func(ctx context.Context, name string, want activity.Want) (activity.Kept, time.Time, bool, error) {
+		return keptOf(ctx, api, name, want)
 	}
 }
 
@@ -160,17 +160,15 @@ func engineRuns(api engineAPI) func(ctx context.Context) ([]activity.VMRun, erro
 	}
 }
 
-func keptOf(ctx context.Context, api engineAPI, name string) (activity.Kept, time.Time, bool, error) {
+func keptOf(ctx context.Context, api engineAPI, name string, want activity.Want) (activity.Kept, time.Time, bool, error) {
 	var out engine.ActivityOut
-	if err := api.do(ctx, engine.CallActivity, nil, &out); err != nil {
+	if err := api.do(ctx, engine.CallActivity, engine.ActivityIn{Machine: name, Graph: want.Graph, History: want.History}, &out); err != nil {
 		return activity.Kept{}, time.Time{}, false, err
 	}
-	for _, kept := range out.Machines {
-		if kept.Machine == name {
-			return activity.Kept{Last: kept.Last, Series: activity.SeriesOf(kept.Fine, kept.Coarse)}, out.Since, true, nil
-		}
+	if out.Kept == nil {
+		return activity.Kept{}, out.Since, false, nil
 	}
-	return activity.Kept{}, out.Since, false, nil
+	return activity.Kept{Last: out.Kept.Last, Series: out.Kept.Series}, out.Since, true, nil
 }
 
 // value: a sample composes its free space from the Disk family, and on a

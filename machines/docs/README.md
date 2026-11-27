@@ -152,5 +152,6 @@ The records of decisions this repository alone took go in [`decisions/`](decisio
 - [101 A change an older peer cannot ignore raises the state revision](decisions/101-a-change-an-older-peer-cannot-ignore-raises-the-state-revision.md) (Proposed)
 - [102 The spaces are a switch of their own, and the path starts at the section](decisions/102-the-spaces-are-a-switch-of-their-own-and-the-path-starts-at-the-section.md) (Proposed)
 - [103 A create applies its whole Machinefile](decisions/103-a-create-applies-its-whole-machinefile.md) (Proposed)
+- [107 Activity is sampled by who looks, kept in tiers of mean and max for 30 days, and streamed as points](decisions/107-activity-is-sampled-by-who-looks-kept-in-tiers-of-mean-and-max-for-30-days-and-streamed-as-points.md) (Proposed)
 
 A decision spanning several repositories is recorded by the corpus that spans them. What was left for later is `TODO.md` at the repository root.

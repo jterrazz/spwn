@@ -114,17 +114,34 @@ func (w *World) past(p activity.Profile, meter Meter, disk *Disk, started time.T
 	if disk != nil {
 		answer.DiskTotal, answer.DiskFree = disk.Total, disk.Free
 	}
-	from := now.Add(-activity.CoarseEvery * (activity.CoarsePoints - 1))
+	from := now.Add(-24*time.Hour + activity.IdleEvery)
 	for _, t := range []time.Time{started, answer.Boot} {
 		if t.After(from) {
 			from = t
 		}
 	}
-	span := func(every time.Duration, points int) time.Duration {
-		return min(max(now.Sub(from), 0), every*time.Duration(points-1)).Truncate(every)
+	span := func(end time.Time, every time.Duration, points int) time.Duration {
+		return min(max(end.Sub(from), 0), every*time.Duration(points-1)).Truncate(every)
 	}
-	coarse := aligned(p.Points(now, span(activity.CoarseEvery, activity.CoarsePoints), activity.CoarseEvery), answer)
-	fine := aligned(p.Points(now, span(activity.FineEvery, activity.FinePoints), activity.FineEvery), answer)
+	// invariant: the day unwatched, a sample each whole minute, up to the
+	// last before its last 6 min watched, one every 2 s, as the engine
+	// would have sampled them: the minutes read the profile's curve as it
+	// is at now, so a peak the profile puts 25 min ago is 25 min ago, and
+	// their counters run on into the first watched sample.
+	watched := aligned(p.Points(now, span(now, activity.WatchedEvery, 180), activity.WatchedEvery), answer)
+	points := watched
+	if len(watched) > 0 {
+		first := watched[0]
+		end := first.At.Truncate(activity.IdleEvery)
+		if gap := first.At.Sub(end); gap > 0 {
+			if bridge := aligned(p.PointsTo(first.At, now, gap, gap), first); len(bridge) == 2 {
+				minutes := aligned(p.PointsTo(end, now, span(end, activity.IdleEvery, 1440), activity.IdleEvery), bridge[0])
+				points = slices.Concat(minutes[:max(len(minutes)-1, 0)], watched)
+			}
+		} else {
+			points = append(aligned(p.PointsTo(end, now, span(end, activity.IdleEvery, 1440), activity.IdleEvery), first), watched[1:]...)
+		}
+	}
 	last := activity.Reading{Sample: answer, Top: activity.Busiest{CPU: activity.Ranked(meter.Top.CPU), Memory: activity.Ranked(meter.Top.Memory)}}
 	pids := make([]int, 0, len(runs))
 	for pid := range runs {
@@ -143,7 +160,7 @@ func (w *World) past(p activity.Profile, meter Meter, disk *Disk, started time.T
 			}
 		}
 	}
-	return activity.Kept{Last: last, Series: activity.SeriesOf(fine, coarse)}
+	return activity.Kept{Last: last, Series: activity.SeriesOf(points)}
 }
 
 func aligned(points []activity.Sample, answer activity.Sample) []activity.Sample {

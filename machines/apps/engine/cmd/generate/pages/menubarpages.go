@@ -70,7 +70,8 @@ func hourOfActivity() pageactivity.View {
 			DiskRead: read, DiskWritten: written, NetIn: in, NetOut: out, DiskFree: last.DiskFree, DiskTotal: last.DiskTotal,
 		})
 	}
-	v.Report.Graph = points
+	s := activity.SeriesOf(points)
+	v.Report.Graph = s.Graph(time.Hour, last.At)
 	v.Graph = time.Hour
 	return v
 }

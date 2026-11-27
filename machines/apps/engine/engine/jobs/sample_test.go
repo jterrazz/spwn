@@ -105,8 +105,8 @@ func TestAVMWhoseGuestIsSilentKeepsAGapInItsHistoryNeverZeros(t *testing.T) {
 	if kept.Last.Run == nil || kept.Last.Run.CPU != 0.18 {
 		t.Errorf("linux-1's last reading is %+v; want its process's usage on its Mac", kept.Last)
 	}
-	if fine, coarse := kept.Series.Fine(), kept.Series.Coarse(); len(fine)+len(coarse) != 0 {
-		t.Errorf("linux-1's history holds %d and %d points while its guest was silent; want none, a gap", len(fine), len(coarse))
+	if last, ok := kept.Series.Last(); ok {
+		t.Errorf("linux-1's history holds %+v while its guest was silent; want nothing, a gap", last)
 	}
 }
 
@@ -145,8 +145,8 @@ func TestAVMWhoseGuestConnectsAfterTheFirstTickGetsItsPointAtOnceNotAWindowLater
 		c.now = c.now.Add(time.Second)
 	}
 	kept, _ := h.Of("linux-1")
-	if got := len(kept.Series.Coarse()); got != 1 {
-		t.Errorf("linux-1 has %d coarse points 5 s after its guest connected; want 1, not a window's wait", got)
+	if got := len(kept.Series.History(c.now)); got != 1 {
+		t.Errorf("linux-1 has %d points 5 s after its guest connected; want 1, not a window's wait", got)
 	}
 }
 
